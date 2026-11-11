@@ -1,42 +1,38 @@
-<page "form usage" notebook>
+<!-- Usage › Binding › Repeat's to-do list:  a task list bound to its form, its tasks one row each -->
+a "task" is a thing:
+	its "title" is text
+	its "done" is yes or no
+a "task list" is a view:
+	its "title" is text
+	its "tasks" is a new list of tasks
+	to create it:
+		set its title to "Groceries"
+		add (a new task with title = "Milk", done = yes) to its tasks
+		add (a new task with title = "Eggs") to its tasks
+	to make another task: add (a new task) to its tasks
+	to draw it:
+		<form value={it} debug>
+			<field label="List">
+				<input name="title"/>
+			</field>
+			<repeat name="tasks">
+				<fields unstackable>
+					<field width="2">
+						<checkbox name="done" aria-label="Done"/>
+					</field>
+					<field width="14">
+						<input name="title" aria-label="Task"/>
+					</field>
+				</fields>
+			</repeat>
+			<button type="button" icon="plus" onClick={make another task}>Add a task</button>
+		</form>
+
+"form usage" is a notebook page
 	<header level="1">
 		Form
 		<header>A form displays a set of related user input fields in a structured way.</>
 	</>
-
-	<!-- Usage › Binding › Repeat's to-do list:  a task list bound to its form, its tasks one row each -->
-	<thing "task">
-		<property "title">text</>
-		<property "done">yes or no</>
-	</thing>
-	<view "task list">
-		<property "title">text</>
-		<property "tasks">a new list of tasks</>
-		<action "create it">
-			set its title to "Groceries"
-			add (a new task with title = "Milk", done = yes) to its tasks
-			add (a new task with title = "Eggs") to its tasks
-		</action>
-		<action "make another task">add (a new task) to its tasks</>
-		<draw>
-			<form value={it} debug>
-				<field label="List">
-					<input name="title"/>
-				</field>
-				<repeat name="tasks">
-					<fields unstackable>
-						<field width="2">
-							<checkbox name="done" aria-label="Done"/>
-						</field>
-						<field width="14">
-							<input name="title" aria-label="Task"/>
-						</field>
-					</fields>
-				</repeat>
-				<button type="button" icon="plus" onClick={make another task}>Add a task</button>
-			</form>
-		</draw>
-	</view>
 
 	<section>
 		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
@@ -380,4 +376,3 @@
 			```
 		</>
 	</>
-</page>

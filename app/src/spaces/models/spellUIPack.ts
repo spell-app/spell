@@ -5,7 +5,7 @@ import { es } from "spell/ui/components/components.es"
 import { SpellUIDefaults } from "./SpellUIDefaults"
 
 /**
- * Spell UI as a spellx drawing names its components, bare (epic `elemental-spell` P7, Q46):
+ * Spell UI as a drawing names its components, bare (epic `elemental-spell` P7, Q46):
  * `<button>` is `<ui-button>`, `<botón>` in a Spanish file `<es-boton>`.
  * - English:  every tag in Spell UI's catalog, without its `ui-`.
  * - Spanish:  each tag's Spanish name from Spell UI's dictionary, `es-` before it, as a Spanish page reads it;

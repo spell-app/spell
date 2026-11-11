@@ -1,4 +1,4 @@
-<page "dropdown usage" notebook>
+"dropdown usage" is a notebook page
 	<header level="1">
 		Dropdown
 		<header>A dropdown allows a user to select a value from a series of options.</>
@@ -156,4 +156,3 @@
 			```
 		</>
 	</>
-</page>

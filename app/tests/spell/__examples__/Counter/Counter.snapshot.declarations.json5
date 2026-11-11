@@ -9,13 +9,13 @@
     {
       "type": "Counter",
       "superType": "View",
-      "defined": "/Counter.spell:131-671"
+      "defined": "/Counter.spell:137-633"
     },
     {
       "property": "count",
       "of": "Counter",
       "datatype": "number",
-      "defined": "/Counter.spell:149-257"
+      "defined": "/Counter.spell:160-263"
     },
     {
       "syntax": "count up (of {thisArg:expression})?",
@@ -29,7 +29,7 @@
       "kind": "method",
       "name": "count up",
       "returns": "nothing",
-      "defined": "/Counter.spell:270-319"
+      "defined": "/Counter.spell:265-308"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -42,7 +42,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:325-478"
+      "defined": "/Counter.spell:311-459"
     },
     {
       "syntax": "test counting",
@@ -51,18 +51,18 @@
       "alias": "statement",
       "kind": "function",
       "name": "counting",
-      "defined": "/Counter.spell:490-662"
+      "defined": "/Counter.spell:462-633"
     },
     {
       "type": "CounterApp",
       "superType": "App",
-      "defined": "/Counter.spell:720-832"
+      "defined": "/Counter.spell:668-773"
     },
     {
       "property": "counter",
       "of": "CounterApp",
       "datatype": "Counter",
-      "defined": "/Counter.spell:735-768"
+      "defined": "/Counter.spell:691-717"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -75,7 +75,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:773-823"
+      "defined": "/Counter.spell:719-773"
     }
   ],
   "codeLines": [

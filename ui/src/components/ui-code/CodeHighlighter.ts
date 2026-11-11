@@ -1,7 +1,7 @@
 import { E, UI, UIT } from "spell/ui/core"
 import { CodeLines } from "./CodeLines"
 import type { CodeEngine } from "./CodeEngine"
-import type { Highlighted } from "./UICode.types"
+import type { Highlighted, HighlightOptions } from "./UICode.types"
 
 /****************
  * ### `CodeHighlighter`
@@ -9,6 +9,7 @@ import type { Highlighted } from "./UICode.types"
  * - `text`:  plain, escaped;  nothing loads.
  * - A language registered with `UI.code` (spell, an app's own):  its `highlight()` function (no highlight.js at all),
  *   or its highlight.js `grammar`;  a `load()`ed language is fetched once per name + variant.
+ *   - Its `draw()` instead, when it has one and the caller takes a drawing (`drawing`):  spell's bubbly look.
  * - Anything else:  highlight.js (`CodeEngine`, the lazy chunk), by name, or guessed when `language` is absent.
  * - Fails with a `render` `SourceError` for a language nobody knows (or a variant that won't load).
  * - STATIC and instance-free:  ONE engine and one cache of loaded languages per page, shared by every `<ui-code>`.
@@ -29,11 +30,14 @@ export class CodeHighlighter {
     return CodeHighlighter.engineLoader().then((module) => module.CodeEngine.instance)
   }
 
-  /** `code` as HTML, coloured as `language`, or as its best guess when `language` is absent. */
-  static async highlight(code: string, language?: string): Promise<Highlighted> {
+  /**
+   * `code` as HTML, coloured as `language`, or as its best guess when `language` is absent.
+   * - `drawing`:  a language's whole drawing, when it has one, over its coloured lines
+   */
+  static async highlight(code: string, language?: string, { drawing }: HighlightOptions = {}): Promise<Highlighted> {
     if (language?.toLowerCase() === UIT.TEXT) return { html: CodeLines.escape(code), detected: false }
     const registered = language ? UI.code.find(language) : undefined
-    if (registered) return CodeHighlighter.withRegistered(code, registered.language, registered.variant)
+    if (registered) return CodeHighlighter.withRegistered(code, registered.language, registered.variant, !!drawing)
     const engine = await CodeHighlighter.load()
     for (const extra of UI.code.detectable()) {
       engine.register(extra.name, extra.grammar!, { aliases: extra.aliases, detect: true })
@@ -56,10 +60,15 @@ export class CodeHighlighter {
   private static async withRegistered(
     code: string,
     language: E.CodeLanguage & { name: string },
-    variant: string | undefined
+    variant: string | undefined,
+    isDrawing: boolean
   ): Promise<Highlighted> {
     const name = variant ? `${language.name}/${variant}` : language.name
     const ready = language.load ? await CodeHighlighter.loadLanguage(name, language, variant) : language
+    if (isDrawing && ready.draw) {
+      const { html, styles } = await ready.draw(code)
+      return { html, styles, isDrawn: true, language: name, detected: false }
+    }
     if (ready.highlight)
       return { html: CodeLines.fromSpans(code, await ready.highlight(code)), language: name, detected: false }
     if (!ready.grammar) {

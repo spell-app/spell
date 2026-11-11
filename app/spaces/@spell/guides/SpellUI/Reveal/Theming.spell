@@ -1,4 +1,4 @@
-<page "reveal theming" notebook>
+"reveal theming" is a notebook page
 	<header level="1">
 		Reveal
 		<header>A reveal displays additional content in place of previous content when activated.</>
@@ -55,4 +55,3 @@
 			site.
 		</>
 	</>
-</page>

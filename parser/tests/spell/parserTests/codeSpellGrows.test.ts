@@ -4,7 +4,7 @@ import { SP } from "spell/parser/spell"
 import { parseSpellProject, runSpellFiles } from "spell/parser/spell/test"
 
 /**
- * What code spell learned so it can say all spellx can (epic `elemental-spell` P5):  each spellx tag has a twin line.
+ * What code spell learned so it could say all the tag form could (epic `elemental-spell` P5).
  * - aliases indented under their property (Q13)
  * - a worked-out value from a list of its own:  `- its "color" is one of red, black:` + its value lines (o1's color)
  * - slots:  `- it has slots "front" and "back"`, `- to draw its front:`, `draw its front` (Q55, Q56;  J6;  P27)

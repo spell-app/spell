@@ -71,17 +71,17 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "key-goes-bad-question":
     '"{name}" no puede ir en una dirección:  es una palabra de letras, dígitos, guiones y guiones bajos, p. ej. "api_key"',
   "key-goes-with-no-key":
-    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "- su clave es el secreto "CLAVE_RECETARIO""',
+    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "su clave es el secreto "CLAVE_RECETARIO""',
   "place-cant-announce":
-    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
+    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "se revisa cada 30 segundos" debajo',
   "change-not-saved":
-    '{what} no se guarda en un lugar, así que esto nunca se ejecutaría.  Di dónde se guarda, p. ej. "- se guarda en el recetario familiar";  o "cuando su título cambia:", para una de sus propiedades',
+    '{what} no se guarda en un lugar, así que esto nunca se ejecutaría.  Di dónde se guarda, p. ej. "se guarda en el recetario familiar";  o "cuando su título cambia:", para una de sus propiedades',
   "someone-else-needs-a-type":
-    'Di qué cambia:  esto va debajo de un tipo guardado, p. ej. "- cuando otra persona la cambia:" debajo de una receta',
+    'Di qué cambia:  esto va debajo de un tipo guardado, p. ej. "cuando otra persona la cambia:" debajo de una receta',
   "someone-else-alone":
     "Nadie más puede cambiar lo que se guarda aquí:  esto nunca se ejecutaría.  Hace falta un lugar que otras personas compartan",
   "someone-else-not-told":
-    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "- se revisa cada 30 segundos" debajo',
+    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "se revisa cada 30 segundos" debajo',
   "people-here-only-you":
     "Ningún lugar aquí sabe quién más está presente, así que esto siempre eres solo tú:  hace falta una sala",
   "operation-outside-place":
@@ -104,13 +104,13 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "no-save-step":
     '"{text}" no es un borrador:  un cambio se guarda al hacerlo, sin paso de guardar.  Para una pantalla con botón de cancelar:  "un borrador de ..."',
   "no-such-data-word":
-    'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "- vive en x", y luego "cada receta donde ..." los lee',
+    'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "vive en x", y luego "cada receta donde ..." los lee',
   "belongs-to-saved-needs-list":
     'Un {owner} los guarda, así que necesita una lista donde guardarlos:  agrega su "{items}" es una lista de {items}',
   "place-cloud-is":
     '{place} se guarda en el espacio propio de cada persona en el servidor de Encanto, su carpeta "{folder}":  hasta que inicie sesión, en su navegador',
   "place-cloud-name-it":
-    'Nombra el lugar primero, y luego di que se guarda ahí:  "recetario familiar se guarda en la nube", y luego "- vive en recetario familiar"',
+    'Nombra el lugar primero, y luego di que se guarda ahí:  "recetario familiar se guarda en la nube", y luego "vive en recetario familiar"',
   "atmosphere-public":
     "Todo lo que se guarda en esta {kind} es público:  cualquiera puede leerlo, y queda ahí para siempre.  No guardes nada privado aquí",
   "atmosphere-your-own":
@@ -158,9 +158,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "airtable-calls-count":
     "Cada página de 100 filas es una petición, y todos los que usan esta base comparten 5 por segundo.  El plan gratuito de Airtable además se detiene en 1.000 peticiones al mes, que revisar cada 30 segundos gasta en unas 8 horas",
   "airtable-no-id-column":
-    'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "- su id es su "id encanto"" debajo',
+    'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "su id es su "id encanto"" debajo',
   "airtable-needs-key":
-    'Airtable no responde a nadie sin una clave:  agrega "- su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
+    'Airtable no responde a nadie sin una clave:  agrega "su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
   "where-field-unknown":
     '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',
@@ -173,7 +173,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Un apóstrofo solo sigue a una palabra que acaba en "s", como en "the cards\' names":  escribe "{owner}\'s {property}"',
   "possessive-declaration-plural":
     'Escribe "{aType}\'s {property} is ...":  una declaración habla de uno solo, {aType}',
-  "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
+  "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
   "not-a-property-body-line":
     "Bajo una propiedad van solo sus reglas y sus frases:  esta línea funciona igual, pero escríbela después de la propiedad, no debajo",
@@ -192,11 +192,11 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Una línea sin sujeto, o con "su", habla de un tipo solo en su esquema, con sangría bajo p. ej. "una carta es una cosa donde:"',
   "inline-and-nested-body": "Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo",
   "not-an-element": "<{tag}> no es un elemento:  escribe la etiqueta propia de Spell UI, p. ej. <ui-form>",
-  /** A bare tag in a spellx drawing that no pack has (epic `elemental-spell` P7). */
-  "spellx-unknown-component":
+  /** A bare tag in a page's drawing that no pack has (epic `elemental-spell` P7). */
+  "page-unknown-component":
     "<{tag}> no es un componente de ningún paquete de aquí (buscado:  {packs}):  revisa su nombre, o añade su paquete a los paquetes del proyecto",
-  /** A control or handler tag inside an element in a spellx drawing (epic `elemental-spell` P7, C29). */
-  "spellx-tag-in-markup":
+  /** A control tag inside an element in a page's drawing (epic `elemental-spell` P7, C29). */
+  "page-tag-in-markup":
     "<{tag} ...> aún no puede ir dentro de un elemento:  escríbelo en una línea propia del dibujo, fuera del elemento",
   /** An attribute in a tag that can't be read:  the tag still ends at its own `>` (epic `notebook` I5). */
   "unreadable-attribute": 'No se puede leer "{text}" en <{tag}>:  revisa su nombre y sus comillas',
@@ -247,7 +247,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "searched-only":
     'Las cosas de "{thing}" solo se encuentran buscándolas, sin una lista de todas:  búscalas por lo que dice su "{field}"',
   "matching-needs-search":
-    'Las cosas de "{thing}" no se encuentran así:  solo un lugar que busca en todo cada cosa, "- busca en todo con ..."',
+    'Las cosas de "{thing}" no se encuentran así:  solo un lugar que busca en todo cada cosa, "busca en todo con ..."',
   "asked-by-only":
     'Las cosas de "{thing}" solo se piden por su {fields}, sin una lista de todas:  di cada uno, "donde su ... es ..."',
   "found-only-by-name":
@@ -288,11 +288,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "the-property-of-a-type": "{theProperty} de {aType}",
 
   ////////////////
-  // ## Spellx
+  // ## Páginas
   ////////////////
 
-  "spellx-unknown-word": '"{tag}" no es una palabra de spellx:  ¿querías decir "{suggestion}"?',
-  "spellx-unknown-word-here": '"{tag}" no es una palabra de spellx:  aquí, usa una de {words}',
   "ui-defaults-not-a-sample":
     '<ui-defaults> lleva etiquetas de muestra, una por componente, cada una con sus valores:  <es-boton apariencia="píldora"/>',
   "ui-defaults-not-written":
@@ -310,38 +308,24 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "<ui-defaults> toma sus valores de su source, o de las etiquetas de muestra que lleva dentro:  no de ambos",
   "ui-defaults-source-unknown":
     "no encuentro <ui-defaults> en {source}:  importa {project} en el archivo del proyecto, y compílalo antes",
-  "spellx-unknown-attribute": '{tag} no tiene "{attribute}":  ¿querías decir "{suggestion}"?',
-  "spellx-unknown-attribute-here": '{tag} no tiene "{attribute}":  lleva {attributes}',
-  "spellx-unexpected-closer": '"{closer}" no cierra nada:  quítalo',
-  "spellx-mismatched-closer": '"{closer}" no puede cerrar {open}:  escribe "</>"',
-  "spellx-unclosed-tag": '{tag} nunca se cierra:  termínalo con "</>"',
-  "spellx-one-line-tag":
-    '{tag} se cierra en su propia línea, "... />":  pon el código más largo entre "{open}" y "</>"',
-  "spellx-unclosed-head": '{tag} nunca termina:  ciérralo con ">", o con "/>" si nada va dentro',
-  "spellx-unclosed-comment": '"<!--" nunca se cierra:  termina el comentario con "-->"',
+  "page-unexpected-closer": '"{closer}" no cierra nada:  quítalo',
+  "page-mismatched-closer": '"{closer}" no puede cerrar {open}:  escribe "</>"',
+  "page-unclosed-tag": '{tag} nunca se cierra:  termínalo con "</>"',
+  "page-unclosed-head": '{tag} nunca termina:  ciérralo con ">", o con "/>" si nada va dentro',
+  "page-unclosed-comment": '"<!--" nunca se cierra:  termina el comentario con "-->"',
   "chain-outside-markup":
     '{tag} elige lo que muestra un elemento, así que va dentro de uno:  para elegir todo el dibujo, escribe "{if} ..." en una línea propia',
-  "spellx-otherwise-without-if": '{tag} necesita un "{if}" antes',
-  "spellx-otherwise-after-closed-if": '{tag} sigue el "{if}" de arriba, pero un "</>" lo cerró:  quita el "</>"',
-  "spellx-for-flag-first":
+  "page-otherwise-without-if": '{tag} necesita un "{if}" antes',
+  "page-otherwise-after-closed-if": '{tag} sigue el "{if}" de arriba, pero un "</>" lo cerró:  quita el "</>"',
+  "page-for-flag-first":
     'Mueve "{flag}" después de los atributos de {tag}:  escrito primero, se lee como parte de la lista',
-  "spellx-for-needs-as": '"{attribute}" en {tag} va en lo que rodea a sus elementos:  di cuál, con {as}="tarjetas"',
-  "spellx-for-table-needs-cells":
+  "page-for-needs-as": '"{attribute}" en {tag} va en lo que rodea a sus elementos:  di cuál, con {as}="tarjetas"',
+  "page-for-table-needs-cells":
     '{tag} dibuja una fila por elemento:  nombra sus columnas, <celda "Nombre">{su nombre}</celda>',
-  "spellx-missing-phrase": '{tag} necesita palabras después de su "{word}"',
-  "spellx-indented-less": "Esta línea tiene menos sangría que el resto de {tag}:  dale un paso más que {tag}",
-  "spellx-nested-template": '{tag} no puede ir dentro de {outer}:  cierra {outer} primero, con "</>"',
-  "spellx-outside-template": '{tag} va dentro de una plantilla, p. ej. "{template}"',
-  "spellx-misplaced-tag": "{tag} no puede ir aquí:  {where}",
-  "spellx-where-control": "va dentro de un dibujo;  una acción lo dice como una línea",
-  "spellx-where-member": "va entre los miembros de su plantilla, junto al dibujo",
-  "spellx-part-in-drawing": 'Una parte se dibuja en su propio {draw} junto al dibujo:  aquí, "{place}" la coloca',
-  "spellx-typed-body":
-    'una propiedad con tipo= se guarda, y empieza en un valor en la línea de su etiqueta:  <propiedad "{name}" tipo="número">0</>',
+  "page-missing-phrase": '{tag} necesita palabras después de su "{word}"',
+  "page-indented-less": "Esta línea tiene menos sangría que el resto de {tag}:  dale un paso más que {tag}",
   "say-json-file":
     'Un lugar que es un solo archivo tiene que decir qué guarda:  escribe "es un archivo json en", o "es un archivo csv en"',
-  "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
-  "spellx-old-note": "{tag} ahora es {new}:  una etiqueta para cada nota",
 
   ////////////////
   // ## Long forms

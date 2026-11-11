@@ -1,4 +1,4 @@
-<page "feed api" notebook>
+"feed api" is a notebook page
 	<header level="1">
 		Feed
 		<header>A feed presents user activity chronologically.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api family="ui-feed" only="states"></>
 		</>
 	</>
-</page>

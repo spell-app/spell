@@ -1,4 +1,4 @@
-<page "input api" notebook>
+"input api" is a notebook page
 	<header level="1">
 		Input
 		<header>An input is a field used to elicit a response from a user.</>
@@ -57,4 +57,3 @@
 			<ui-docs-api family="ui-input" only="states"></>
 		</>
 	</>
-</page>

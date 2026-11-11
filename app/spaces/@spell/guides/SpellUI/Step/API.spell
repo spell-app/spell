@@ -1,4 +1,4 @@
-<page "step api" notebook>
+"step api" is a notebook page
 	<header level="1">
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-step" only="texts"></>
 		</>
 	</>
-</page>

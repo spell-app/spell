@@ -23,7 +23,7 @@ core.heading("Step 1:  read the sign")
 /**
  * Here is all there is to the sign.  Read it line by line, as you would a recipe.
  * - It's an APP:  a program with a page of its own, the one on the right.
- * - Each line starting with a dash says one thing about it:  a PROPERTY, something it keeps, like its greeting.
+ * - Each line indented under it says one thing about it:  a PROPERTY, something it keeps, like its greeting.
  */
 export class HelloSign extends App {
   static elementTag = core.defineElement(this, "test-project", "App")

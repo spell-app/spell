@@ -432,10 +432,9 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  its warnings too (a page's `description-before-example`), which alone exit 0;  a project's editor pages (`*.editor.html`) too, against its types |
 | `spell watch [projects...]` | recompiles on every save and shows a live list of errors, until `q` or `Ctrl-C` |
 | `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does;  never in the frozen test projects |
-| `spell spellx convert [projects...]` | rewrites each plain `.spell` file in place as spellx, the same program in tags;  never in the frozen test projects |
 
 <details>
-<summary>Every option of compile, lint, watch, format and spellx convert</summary>
+<summary>Every option of compile, lint, watch and format</summary>
 
 | Option | What it does |
 | --- | --- |
@@ -444,12 +443,11 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
 | `spell lint --json` | the errors as a JSON list |
-| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`);  a page's old spellings (`<notebook>` => `<page notebook>`, a `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`);  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`);  a page's `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`;  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
 | `spell watch --check-only` | re-checks instead of recompiling:  writes nothing |
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
 | `spell format --check` | writes nothing, lists the files that would change, and exits 1 if any would |
-| `spell spellx convert --dry-run` | writes nothing, prints each `.spell` file instead |
 
 - The targets are `SP.TARGETS`:  `ts/solid`, `ts/lib`, `py`
   ([spell-parser's README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md)).
@@ -577,10 +575,10 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-app/spaces/@spell/examples/Solitaire/Card.spell:15
+app/spaces/@spell/examples/Solitaire/Card.spell:18
 
 Spell
-    <property "color" one-of="red, black">
+    its "color" is one of red, black
       red if it is a diamond or it is a heart
       black otherwise
 ```
@@ -1086,7 +1084,7 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell space projection list \| rebuild <space> [name]` | what a space projects into other spaces, by name:  into which space, which fields, which things;  `rebuild` writes one (or every one) again from nothing, through its view |
 | `spell space delete <space \| account> --yes` | deletes a space (its managers, or a Spell admin) or an account (its person, or a Spell admin) for good, the account's terms in every org ended;  the backups keep it a week |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
-| `spell content check [--bless]` | runs every check of the examples, notebooks and Spell guides in one go:  their compiled output, what each prints on every target, the spellx round trip, the notebooks, the examples' page;  `--bless` rewrites every snapshot among them, then you read the diff |
+| `spell content check [--bless]` | runs every check of the examples, notebooks and Spell guides in one go:  their compiled output, what each prints on every target, the notebooks, the examples' page;  `--bless` rewrites every snapshot among them, then you read the diff |
 | `spell content compare [--against <ref>] [--target <name>]` | compiles every test project and notebook here and at a commit (`HEAD` unless given), then lists each changed line of their code, errors and warnings, and how many files changed;  `--target py` compares the test projects' Python |
 | `spell content update [--json]` | lists what the parser and Spell UI learned since the examples were last brought up to date:  the commits under `parser/` and `ui/` by the epic they name, each epic's changelog entry, new components and attributes, new grammar;  `--done [--always <id> ...]` records the update's end, so the next one starts there |
 

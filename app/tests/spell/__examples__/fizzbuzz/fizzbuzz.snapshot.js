@@ -22,7 +22,6 @@ on("plain-number", (event) => {
   const { number } = event
   core.console.log(number)
 })
-
 // -----------
 core.heading("FizzBuzz")
 //////////////
@@ -44,4 +43,3 @@ export function playFizzbuzz() {
 }
 
 playFizzbuzz()
-

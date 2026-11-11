@@ -1,4 +1,4 @@
-<page "breadcrumb examples" notebook>
+"breadcrumb examples" is a notebook page
 	<header level="1">
 		Breadcrumb
 		<header>A breadcrumb is used to show hierarchy between content.</>
@@ -177,4 +177,3 @@
 			</example>
 		</>
 	</>
-</page>

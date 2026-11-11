@@ -1,17 +1,17 @@
 ✅ test marcar una
-  ▶️ Ejecutando   `poner la tarea a una nueva tarea con título = "Escribir las pruebas"`
+  ▶️ Ejecutando   `poner la tarea a una nueva tarea con título "Escribir las pruebas"`
   ✅ Como se esperaba, `la tarea está pendiente` es `sí`
   ▶️ Ejecutando   `poner la hecha de la tarea a sí`
   ✅ Como se esperaba, `la tarea está hecha` es `sí`
 ✅ test el filtro
   ▶️ Ejecutando   `poner la lista a una nueva agenda`
-  ▶️ Ejecutando   `agregar (una nueva tarea con título = "a", hecha = sí) a la lista`
-  ▶️ Ejecutando   `agregar (una nueva tarea con título = "b") a la lista`
+  ▶️ Ejecutando   `agregar (una nueva tarea con título "a", hecha = sí) a la lista`
+  ▶️ Ejecutando   `agregar (una nueva tarea con título "b") a la lista`
   ✅ Como se esperaba, `el largo de (tareas en la lista donde está pendiente)` es `1`
 ✅ test un orden arrastrado se guarda
   ▶️ Ejecutando   `poner las tareas a una nueva agenda`
-  ▶️ Ejecutando   `poner la primera a una nueva tarea con título = "primera"`
-  ▶️ Ejecutando   `poner la segunda a una nueva tarea con título = "segunda"`
+  ▶️ Ejecutando   `poner la primera a una nueva tarea con título "primera"`
+  ▶️ Ejecutando   `poner la segunda a una nueva tarea con título "segunda"`
   ▶️ Ejecutando   `agregar la segunda a las tareas`
   ▶️ Ejecutando   `agregar la primera a las tareas`
   ▶️ Ejecutando   `guardar el orden de las tareas`

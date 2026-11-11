@@ -1,4 +1,4 @@
-<page "progress examples" notebook>
+"progress examples" is a notebook page
 	<header level="1">
 		Progress
 		<header>A progress bar shows the progression of a task.</>
@@ -227,4 +227,3 @@
 			</example>
 		</>
 	</>
-</page>

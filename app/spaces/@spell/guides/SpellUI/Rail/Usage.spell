@@ -1,4 +1,4 @@
-<page "rail usage" notebook>
+"rail usage" is a notebook page
 	<header level="1">
 		Rail
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
@@ -81,4 +81,3 @@
 			  rail: its place beside the content goes.
 		</>
 	</>
-</page>

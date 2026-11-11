@@ -48,6 +48,13 @@
       "run": ["yarn", "tsx", "scripts/vscode-themes.ts"]
     },
     {
+      // the bubbly look's settings as plain values, for VS Code (epic `language` P49, for P51):  read off its sheet
+      "name": "bubbly values",
+      "outputs": ["app/src/app/components/spell-code/bubbly.values.json"],
+      "cwd": "app",
+      "run": ["yarn", "tsx", "scripts/bubbly-values.ts"]
+    },
+    {
       "name": "spell libraries",
       "outputs": ["app/spaces/@spell/library/**/*.lib.ts"],
       "cwd": "app",

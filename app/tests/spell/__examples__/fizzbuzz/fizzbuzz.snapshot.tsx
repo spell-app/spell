@@ -10,7 +10,6 @@ on<{ number: number }>("fizzbuzz", ({ number }) => core.console.log(number, "fiz
 on<{ number: number }>("fizz", ({ number }) => core.console.log(number, "fizz"))
 on<{ number: number }>("buzz", ({ number }) => core.console.log(number, "buzz"))
 on<{ number: number }>("plain-number", ({ number }) => core.console.log(number))
-
 // -----------
 core.heading("FizzBuzz")
 //////////////
@@ -32,4 +31,3 @@ export function playFizzbuzz() {
 }
 
 playFizzbuzz()
-

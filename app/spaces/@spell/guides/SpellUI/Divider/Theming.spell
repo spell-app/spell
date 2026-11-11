@@ -1,4 +1,4 @@
-<page "divider theming" notebook>
+"divider theming" is a notebook page
 	<header level="1">
 		Divider
 		<header>A divider visually segments content into groups.</>
@@ -48,4 +48,3 @@
 			tokens.
 		</>
 	</>
-</page>

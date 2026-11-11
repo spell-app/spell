@@ -157,8 +157,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
-   * An app's MENU BAR, above its drawing:  the menu its template names, `- its menu bar is "game menu"`
-   * (spellx's `menu-bar=`), as a toolbar of `<ui-action>`s (epic `elemental-spell` P10).
+   * An app's MENU BAR, above its drawing:  the menu its template names, `its menu bar is "game menu"`,
+   * as a toolbar of `<ui-action>`s (epic `elemental-spell` P10).
    * - None for a thing whose template names none.
    * - A program running elsewhere (Python, `core.remote`) draws its own too:  each action runs there.
    */

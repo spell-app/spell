@@ -1,4 +1,4 @@
-<page "detail examples" notebook>
+"detail examples" is a notebook page
 	<header level="1">
 		Detail
 		<header>A detail is a label's dimmer second value, such as a count.</>
@@ -32,4 +32,3 @@
 			</example>
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "feed theming" notebook>
+"feed theming" is a notebook page
 	<header level="1">
 		Feed
 		<header>A feed presents user activity chronologically.</>
@@ -81,4 +81,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

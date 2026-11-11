@@ -3,6 +3,6 @@
 // A site made from it lists its parts in its body, `- it has a film page at "/films/:film", named "Film"`,
 // `- it has a settings dialog`:  the site holds each page's address and name, never the page itself,
 // so a page moves to another address, or gets a name in another language, without its own file changing.
-a "site" is an app where:
-	// the address of the page it's showing:  "/" when it starts
-	- its "current address" is a text starting at "/"
+a "site" is an app
+	its "current address" is a text starting at "/"
+		// the address of the page it's showing:  "/" when it starts

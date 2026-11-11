@@ -81,7 +81,6 @@ export class Task extends View {
 export function testCheckingOneOff(...args) {
   return sendCall("test_checking_one_off", args)
 }
-
 // -----------
 //////////////////////////////////////////
 // ## Task List:  where the tasks are kept
@@ -130,18 +129,18 @@ export class BrowserTask extends Task {
   }
 
   // - it lives in browser storage
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 292, end: 319 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 273, end: 300 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in browser storage
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 292, end: 319 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 273, end: 300 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class BrowserKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 460, end: 501 }, readsFrom: ["browser_storage"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 392, end: 430 }, readsFrom: ["browser_storage"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(BrowserTask)
   }) }
@@ -179,18 +178,18 @@ export class ServerTask extends Task {
   }
 
   // - it lives in task files
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 460, end: 482 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 416, end: 438 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task files
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 460, end: 482 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 416, end: 438 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class ServerKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 621, end: 661 }, readsFrom: ["task_files"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 528, end: 565 }, readsFrom: ["task_files"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(ServerTask)
   }) }
@@ -229,18 +228,18 @@ export class SheetTask extends Task {
   }
 
   // - it lives in task sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 609, end: 631 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 569, end: 591 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 609, end: 631 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 569, end: 591 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class SheetKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 768, end: 807 }, readsFrom: ["task_sheet"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 679, end: 715 }, readsFrom: ["task_sheet"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SheetTask)
   }) }
@@ -275,7 +274,7 @@ export class SkyTask extends Task {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a sky task has an owner as text
-  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 630, end: 661 } }) }
+  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 489, end: 586 } }) }
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
@@ -286,19 +285,19 @@ export class SkyTask extends Task {
   }
 
   // - it lives in task sky
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 448, end: 468 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 418, end: 438 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in task sky
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 448, end: 468 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 418, end: 438 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class SkyKeeper extends TaskKeeper {
   /** only your own:  everyone's tasks are in their own accounts */
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 717, end: 855 }, readsFrom: ["task_sky"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 621, end: 683 }, readsFrom: ["task_sky"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SkyTask, { filter: { owner: core.currentPerson().id } })
   }) }
@@ -323,7 +322,7 @@ export let taskSky
 // ## Task List
 ///////////////
 // A to-do list:  add a task, check it off, filter the list, and edit the selected tasks together.
-// Its tasks are this project's own `<view "task">`;  this file holds their list, and the app.
+// Its tasks are this project's own `task`, in Task.spell;  this file holds their list, and the app.
 // Where they're kept is the person's pick, "Keep them in":  each place is a keeper in an API file of its own,
 // TaskList.browser.api.spell, TaskList.server.api.spell, TaskList.csv.api.spell and TaskList.atmosphere.api.spell, all doing what TaskList.api.spell says.
 
@@ -338,7 +337,7 @@ export class Checklist extends ViewableList {
 
   /** What it shows:  every task, the ones still to do, or the ones done */
   // - its "showing" is one of all, active or done
-  //   - it "is showing (showing)"
+  //   it "is showing (showing)"
   static Showings = ["all", "active", "done"]
   static { this.declareProp("showing", { oneOf: Checklist.Showings }) }
   get showing() { return this.getProp("showing") }
@@ -352,8 +351,8 @@ export class Checklist extends ViewableList {
     this.keepTheOrder()
   }
 
-  // each task, unless the filter hides it
   drawEachItem(item) {
+    // each task, unless the filter hides it
     if (this.isShowingShowing("active") && item.isDone) return undefined
     if (this.isShowingShowing("done") && item.isActive) return undefined
     return core.drawThing(item)
@@ -382,11 +381,9 @@ export class Checklist extends ViewableList {
 export function testTheFilter(...args) {
   return sendCall("test_the_filter", args)
 }
-
 export function testADraggedOrderIsKept(...args) {
   return sendCall("test_a_dragged_order_is_kept", args)
 }
-
 /** a task is in one checklist at a time */
 
 /////////////
@@ -397,7 +394,7 @@ export function testADraggedOrderIsKept(...args) {
 export class TaskList extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "checklist" is a new checklist
+  // "checklist" is a new checklist
   static { this.declareProp("checklist", { init: () => new Checklist(), early: true }) }
   get checklist() { return this.getProp("checklist") }
   set checklist(value) { this.setProp("checklist", value) }
@@ -558,18 +555,16 @@ export let taskList
 core.describeAction(TaskList, "showAll", { title: "All", icon: "list", selectedWhen: "showAllIsSelected" })
 core.describeAction(TaskList, "showToDo", { title: "To do", icon: "square outline", selectedWhen: "showToDoIsSelected" })
 core.describeAction(TaskList, "showDone", { title: "Done", icon: "check square outline", selectedWhen: "showDoneIsSelected" })
-core.describeAction(TaskList, "removeTheDoneTasks", { title: "Remove the done tasks", icon: "trash alternate outline" })
+core.describeAction(TaskList, "removeTheDoneTasks", { title: "Remove The Done Tasks", icon: "trash alternate outline" })
 
 // The toolbar's buttons, and the list's right click:  the same actions
-// - its "tasks menu" is a menu of "show all" , "show to do" , "show done" , "-" and "remove the done tasks"
+// - its "tasks menu" is a menu of "show all", "show to do", "show done", "-" and "remove the done tasks"
 core.describeMenu(TaskList, "tasksMenu", { items: ["showAll", "showToDo", "showDone", "-", "removeTheDoneTasks"] })
-
-// - its "show menu" is a menu of "show all" , "show to do" and "show done" titled "Show"
+// - its "show menu" is a menu of "show all", "show to do" and "show done" titled "Show"
 core.describeMenu(TaskList, "showMenu", { items: ["showAll", "showToDo", "showDone"], title: "Show" })
-
-// A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
-// - its "list menu" is a menu of "show menu" , "-" and "remove the done tasks"
+// - its "list menu" is a menu of "show menu", "-" and "remove the done tasks"
 core.describeMenu(TaskList, "listMenu", { items: ["showMenu", "-", "removeTheDoneTasks"] })
+// A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
 // -----------
 core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet.¬   - Each task is an element of its own inside the list, <task-list-checklist>:¬     <task-list-browser-task>, <task-list-server-task> or <task-list-sky-task>, for where it's kept.¬   - Its title's field fills the row by itself:  it's \`fluid\`, in a row of a \`<stack>\`. */¬¬/* done:  it fades */¬task-list-checklist > [done] {¬  opacity: 0.6;¬}¬`)
 // -----------

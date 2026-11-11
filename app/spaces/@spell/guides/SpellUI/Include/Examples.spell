@@ -1,4 +1,4 @@
-<page "include examples" notebook>
+"include examples" is a notebook page
 	<header level="1">
 		Include
 		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
@@ -52,4 +52,3 @@
 			</example>
 		</>
 	</>
-</page>

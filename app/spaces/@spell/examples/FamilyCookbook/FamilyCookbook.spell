@@ -1,6 +1,6 @@
 # Family Cookbook
-Your recipes, on cards, saved in the cloud:  sign in on your laptop and your phone, and both show the same ones.
-Where they're kept is in FamilyCookbook.api.spell, and only its first line knows.
+// Your recipes, on cards, saved in the cloud:  sign in on your laptop and your phone, and both show the same ones.
+// Where they're kept is in FamilyCookbook.api.spell, and only its first line knows.
 
 // Every notes box grows as you type
 <ui-defaults>
@@ -9,8 +9,8 @@ Where they're kept is in FamilyCookbook.api.spell, and only its first line knows
 
 ## A recipe:  a card you can read and change
 
-<extend "recipe">
-	<draw>
+a recipe
+	to draw it
 		<card>
 			<content>
 				<form value={it} class="recipe">
@@ -27,27 +27,23 @@ Where they're kept is in FamilyCookbook.api.spell, and only its first line knows
 				</form>
 			</content>
 		</card>
-	</draw>
-</extend>
-
 
 ## The box:  the card for a new recipe, then a card for each one you have
 
-<app "cookbook">
-	<property "search">text</>
-	<property "new recipe">a new recipe with servings = 4</>
-	<property "box menu">a menu of "undo"</>
+cookbook is an app
+	its "search" is text
+	"new recipe" is a new recipe with servings = 4
+	its "box menu" is a menu of "undo"
 
-	<property "matches" description="Newest first, by when each was saved">
+	its "matches" is
+		// Newest first, by when each was saved
 		return every recipe where its title includes the search, sorted by its created, newest first
-	</property>
 
-	<action "add the new recipe">
+	to add the new recipe
 		add the new recipe to the recipes
 		set its new recipe to a new recipe with servings = 4
-	</action>
 
-	<draw>
+	to draw it
 		<container>
 			<stack direction="horizontal" wrap align="end" justify="between">
 				<stack align="start">
@@ -94,5 +90,3 @@ Where they're kept is in FamilyCookbook.api.spell, and only its first line knows
 				</for>
 			</cards>
 		</container>
-	</draw>
-</app>

@@ -77,27 +77,7 @@ a shelf is an app:
 })
 
 describe("a property's value on the line below its name (T58)", () => {
-  test("spellx:  a list, between its tags", () => {
-    const { compiled, errors } = parsed(
-      `<spell-thing "habit">
-	<property "monday">yes or no</>
-	<property "tuesday">yes or no</>
-	<property "days">
-		[the monday, the tuesday]
-	</property>
-	<property "both">
-		its monday and its tuesday
-	</property>
-</spell-thing>
-`,
-      "/Habit.spell"
-    )
-    expect(errors).toEqual([])
-    expect(compiled).toContain("return [this.monday, this.tuesday]")
-    expect(compiled).toContain("return this.monday && this.tuesday")
-  })
-
-  test("code spell too;  after lines that are steps, the last line's value is returned (I47)", () => {
+  test("after lines that are steps, the last line's value is returned (I47)", () => {
     const { compiled, errors } = parsed(`a habit is a thing:
 	- its "monday" is yes or no
 	- its "days" is:
@@ -113,23 +93,20 @@ describe("a property's value on the line below its name (T58)", () => {
 })
 
 describe("an action with a description, called above it (T59, T60)", () => {
-  const STORE = (calls: string) => `<spell-thing "task">
-	<property "title">text</>
-</spell-thing>
-<spell-app "store">
-	<property "total">a number</>
+  const STORE = (calls: string) => `a "task" is a thing:
+	its "title" is text
+store is an app:
+	its "total" is a number
 
-	<when its total changes>
+	when its total changes:
 ${calls}
-	</>
 
-	<action "fill the checklist" description="The keeper's tasks, in the list">
+	// The keeper's tasks, in the list
+	to fill the checklist:
 		set its total to 1
-	</action>
-	<action "load the tasks" description="Every task">
+	// Every task
+	to load the tasks:
 		set its total to 2
-	</action>
-</spell-app>
 `
   test("is found", () => {
     const { compiled, errors } = parsed(STORE("\t\tfill the checklist"), "/Store.spell")
@@ -148,21 +125,17 @@ ${calls}
 describe("a line starting with an action's name, going on past it (I20)", () => {
   test("`add the new recipe to the recipes`, in the action `add the new recipe`", () => {
     const { compiled, errors } = parsed(
-      `<spell-thing "recipe">
-	<property "title">text</>
-</spell-thing>
-<spell-app "recipe box">
-	<property "recipes">a new list of recipes</>
-	<property "new recipe">a new recipe</>
+      `a "recipe" is a thing:
+	its "title" is text
+recipe box is an app:
+	its "recipes" is a new list of recipes
+	its "new recipe" is a new recipe
 
-	<action "add the new recipe">
+	to add the new recipe:
 		add the new recipe to the recipes
 		set its new recipe to a new recipe
-	</action>
-	<action "start it">
+	to start it:
 		add the new recipe
-	</action>
-</spell-app>
 `,
       "/RecipeBox.spell"
     )
@@ -173,20 +146,13 @@ describe("a line starting with an action's name, going on past it (I20)", () => 
 })
 
 describe("a `<for>` inside an element (I19)", () => {
-  const SHELF = (drawing: string) => `<spell-thing "film">
-	<spell>
-		- its "title" is text
-	</spell>
-	<draw><text>{its title}</text></draw>
-</spell-thing>
-<spell-view "shelf">
-	<spell>
-		- its "films" is a list of films
-	</spell>
-	<draw>
+  const SHELF = (drawing: string) => `a "film" is a thing:
+	its "title" is text
+	to draw it: <text>{its title}</text>
+a "shelf" is a view:
+	its "films" is a list of films
+	to draw it:
 ${drawing}
-	</draw>
-</spell-view>
 `
   test("draws its items among the element's other children", () => {
     const { compiled, errors } = parsed(
@@ -230,7 +196,7 @@ ${drawing}
 		</cards>`),
       "/Shelf.spell"
     )
-    expect(errors.join()).toMatch(/^14:\d+ /)
+    expect(errors.join()).toMatch(/^9:\d+ /)
   })
 
   test("its head is a phrase, whatever's in it:  quotes, parens, an apostrophe;  and it has a body (I93)", () => {
@@ -264,24 +230,17 @@ ${drawing}
 })
 
 describe("a drawing named like a list or a property (I94, I95)", () => {
-  const SHELF = (call: string, name: string) => `<spell-thing "film">
-	<spell>
-		- its "title" is text
-	</spell>
-	<draw><text>{its title}</text></draw>
-</spell-thing>
-<spell-view "shelf">
-	<spell>
-		- its "films" is a list of films
-		- its "found" is a list of films
-	</spell>
-	<draw>
+  const SHELF = (call: string, name: string) => `a "film" is a thing:
+	its "title" is text
+	to draw it: <text>{its title}</text>
+a "shelf" is a view:
+	its "films" is a list of films
+	its "found" is a list of films
+	to draw it:
 		<segment>{${call}}</segment>
-	</draw>
-	<draw "${name}">
-		<for its films as="cards" />
-	</draw>
-</spell-view>
+	to draw its ${name}:
+		for its films
+		show them in: <cards></cards>
 `
   test("a plural name, written above it, draws it:  not the shelf's items (I94)", () => {
     for (const name of ["results", "hours", "details"]) {
@@ -346,25 +305,21 @@ describe("a template's test runs its lines on its own thing (T86)", () => {
   test("a bare action, `the total` and `set the total` are the test's new calculator's, not the app's", () => {
     const { compiled, errors, warnings } = parsed(
       [
-        '<spell-app "calculator">',
-        '\t<property "input">text</>',
-        '\t<property "total" type="number"/>',
-        '\t<action "append (digit as text)">',
+        "calculator is an app:",
+        '\tits "input" is text',
+        '\tits "total" is a number',
+        "\tto append (digit as text):",
         "\t\tset the input to the input + the digit",
-        "\t</action>",
-        '\t<action "add the input">',
+        "\tto add the input:",
         "\t\tset the total to the total + (the input as a number)",
         "\t\tclear the input",
-        "\t</action>",
-        '\t<test "sums">',
+        "\tto test sums:",
         '\t\tappend "1"',
         '\t\tappend "7"',
         "\t\tadd the input",
         "\t\tthe total should be 17",
         "\t\tset the total to 0",
-        "\t\tits total should be 0",
-        "\t</test>",
-        "</spell-app>"
+        "\t\tits total should be 0"
       ].join("\n"),
       "/Calculator.spell"
     )
@@ -380,21 +335,16 @@ describe("a template's test runs its lines on its own thing (T86)", () => {
 })
 
 describe("a call given a member nobody declares steps aside (T90)", () => {
-  const GUIDE = (button: string) => `<spell-thing "film">
-	<property "title">text</>
-	<action "play it">
+  const GUIDE = (button: string) => `a "film" is a thing:
+	its "title" is text
+	to play it:
 		print its title
-	</action>
-</spell-thing>
-<spell-app "guide">
-	<property "playing">a film</>
-	<action "play the opening">
+guide is an app:
+	its "playing" is a film
+	to play the opening:
 		set its playing to the first film
-	</action>
-	<draw>
+	to draw it:
 		<button onClick={${button}}>Play</button>
-	</draw>
-</spell-app>
 `
   test("`play the opening of the guide` is the guide's action, not Film's `play` of a guide's `opening`", () => {
     const { compiled, errors, warnings } = parsed(GUIDE("play the opening of the guide"), "/Guide.spell")
@@ -411,17 +361,15 @@ describe("a call given a member nobody declares steps aside (T90)", () => {
 })
 
 describe("Spanish:  `ella` is `it`, and a list named `la lista` agrees as one (T89)", () => {
-  const AGENDA = (lines: string) => `<encanto-vista "tarea">
-	<propiedad "orden" tipo="número"/>
-</encanto-vista>
-<encanto-vista "agenda" plantilla="lista visible de tareas">
+  const AGENDA = (lines: string) => `una "tarea" es una vista:
+	su "orden" es un número
+una "agenda" es una lista visible de tareas:
 ${lines}
-</encanto-vista>
 `
   test("`para tarea y lugar en ella`, and with a comma, read as `en eso` does", () => {
     for (const loop of ["para tarea y lugar en ella", "para tarea, lugar en ella", "para tarea y lugar en él"]) {
       const { compiled, errors } = parsed(
-        AGENDA(`	<acción "guardar el orden">\n\t\t${loop}\n\t\t\tponer el orden de la tarea al lugar\n\t</acción>`),
+        AGENDA(`	para guardar el orden:\n\t\t${loop}\n\t\t\tponer el orden de la tarea al lugar`),
         "/Agenda.es.spell"
       )
       expect(errors).toEqual([])
@@ -430,10 +378,9 @@ ${lines}
   })
 
   const SORTED = (list: string, word: string) =>
-    AGENDA(`	<probar "el orden">
+    AGENDA(`	para probar el orden:
 		poner la lista a una nueva agenda
-		poner x a ${list} ${word} por su orden
-	</probar>`)
+		poner x a ${list} ${word} por su orden`)
 
   test("`la lista ordenada`:  the noun that names it says, not its items", () => {
     expect(parsed(SORTED("la lista", "ordenada"), "/Agenda.es.spell").warnings).toEqual([])

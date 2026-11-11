@@ -1,33 +1,26 @@
 # Picnic Letter
-The picnic's letter:  the same rules and details for everyone, then what's yours alone.
-Each part shows only what its reader may see:  your own shifts, your own invitations.
-
+// The picnic's letter:  the same rules and details for everyone, then what's yours alone.
+// Each part shows only what its reader may see:  your own shifts, your own invitations.
 
 ## A shift you signed up for
 
-<extend "listing">
-	<draw>
+a listing
+	to draw it
 		<label class="shift">{its shift}</label>
-	</draw>
-</extend>
-
 
 ## Your invitations' count, from your inbox
 
-<extend "message">
-	<draw>
+a message
+	to draw it
 		<text class="count">{its text}</text>
-	</draw>
-</extend>
-
 
 ## The letter
 
-<app "picnic letter">
-	<property "shifts">every listing where its person is them</>
-	<property "counts">every message where its thread is "invitations"</>
+picnic letter is an app
+	its "shifts" is every listing where its person is them
+	its "counts" is every message where its thread is "invitations"
 
-	<draw>
+	to draw it
 		<container class="letter">
 			<stack>
 				<header size="large">The Picnic:  your letter</header>
@@ -56,5 +49,3 @@ Each part shows only what its reader may see:  your own shifts, your own invitat
 				</segment>
 			</stack>
 		</container>
-	</draw>
-</app>

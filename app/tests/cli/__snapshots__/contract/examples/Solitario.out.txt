@@ -30,7 +30,7 @@
   ▶️ Ejecutando   `barajar el mazo`
   ✅ Como se esperaba, `el número de cartas en el mazo` es `52`
 ✅ test las pilas
-  ▶️ Ejecutando   `poner la reserva a una nueva pila con nombre = "reserva"`
+  ▶️ Ejecutando   `poner la reserva a una nueva pila con nombre "reserva"`
   ✅ Como se esperaba, `el color de la reserva` es `"ninguno"`
   ✅ Como se esperaba, `el valor de la reserva` es `0`
   ▶️ Ejecutando   `agregar (una nueva carta cuyo rango es dama, palo es espadas y dirección es arriba) a la reserva`
@@ -44,7 +44,7 @@
   ✅ Como se esperaba, `el número de cartas en la reserva` es `1`
   ✅ Como se esperaba, `el estado de los descartes` es `"descartes: 7♥↓"`
 ✅ test los movimientos
-  ▶️ Ejecutando   `poner la columna a una nueva columna con nombre = "C1"`
+  ▶️ Ejecutando   `poner la columna a una nueva columna con nombre "C1"`
   ▶️ Ejecutando   `poner el rey a una nueva carta cuyo rango es rey, palo es espadas y dirección es arriba`
   ▶️ Ejecutando   `poner la dama a una nueva carta cuyo rango es dama, palo es corazones y dirección es arriba`
   ▶️ Ejecutando   `poner la jota a una nueva carta cuyo rango es jota, palo es tréboles y dirección es arriba`
@@ -60,7 +60,7 @@
   ✅ Como se esperaba, `la columna puede soltar la dama` es `no`
   ▶️ Ejecutando   `poner el dos a una nueva carta cuyo rango es 2, palo es corazones y dirección es arriba`
   ▶️ Ejecutando   `poner el as a una nueva carta cuyo rango es as, palo es corazones y dirección es arriba`
-  ▶️ Ejecutando   `poner la columna a una nueva columna con nombre = "C2"`
+  ▶️ Ejecutando   `poner la columna a una nueva columna con nombre "C2"`
   ▶️ Ejecutando   `agregar el dos a la columna`
   ▶️ Ejecutando   `agregar el as a la columna`
   ✅ Como se esperaba, `la fundación puede tomar el dos` es `no`

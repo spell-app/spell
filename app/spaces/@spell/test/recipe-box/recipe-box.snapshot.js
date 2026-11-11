@@ -50,7 +50,7 @@ export class Recipe extends View {
 export class FamilyCookbook extends Place {}
 export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "in memory database" })
 
-core.describeAction(Recipe, "remove", { title: "remove it", undoneAs: "Remove Recipe" })
+core.describeAction(Recipe, "remove", { title: "Remove It", undoneAs: "Remove Recipe" })
 
 export class RecipeBox extends App {
   static elementTag = core.defineElement(this, "test-project", "App")

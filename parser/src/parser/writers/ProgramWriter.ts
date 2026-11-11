@@ -261,7 +261,8 @@ export abstract class ProgramWriter extends Writer {
     if (!text) return undefined
     // an outline line (`it` / `its` the type it's in) gets back the dash it was written with, which isn't matched
     const line = /^its?\b/.test(text) ? `- ${text}` : text
-    const rules = body.map((it) => it.replace(/\s+/g, " ").trim()).filter(Boolean)
+    // a comment in its body isn't one of its rules:  its first is its description (epic `language` P48)
+    const rules = body.map((it) => it.replace(/\s+/g, " ").trim()).filter((it) => it && !/^(\/\/|#)/.test(it))
     return [line, ...rules.map((it) => `  ${it}`)].join("\n")
   }
 

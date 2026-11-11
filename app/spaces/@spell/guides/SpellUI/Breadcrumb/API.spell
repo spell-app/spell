@@ -1,4 +1,4 @@
-<page "breadcrumb api" notebook>
+"breadcrumb api" is a notebook page
 	<header level="1">
 		Breadcrumb
 		<header>A breadcrumb is used to show hierarchy between content.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-breadcrumbs" only="texts"></>
 		</>
 	</>
-</page>

@@ -8,7 +8,7 @@ import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell
  * A SITE (epic `mockup` P1):  `galaxy guide is a site:`, spell's built-in `site` template, its pages at their
  * addresses, and the dialogs and sidebars any of them opens.
  * - The site holds each page's address and name;  a page holds only what it shows and does.
- * - Written three ways, compiling to the same class:  code spell, spellx's `<spell-site>`, and in Spanish.
+ * - Written in plain Spell, in English and in Spanish.
  */
 describe("a site", () => {
   beforeAll(registerTestComponentPack)
@@ -19,12 +19,6 @@ describe("a site", () => {
     expect(code).toContain("export class GalaxyGuide extends Site {")
     expect(code).toContain(SITE_CLASS)
     expect(code).toContain("export const galaxyGuide = new GalaxyGuide()")
-  })
-
-  test("written as spellx, `<spell-site>` with `<page>`, `<dialog>` and `<sidebar>`, it compiles the same", () => {
-    const { code, errors } = compiled(TAGS, "/Galaxy.spell")
-    expect(errors).toEqual([])
-    expect(code).toContain(SITE_CLASS)
   })
 
   test("a page says how far along it is, and where its thumbnail is (T14)", () => {
@@ -51,7 +45,7 @@ describe("a site", () => {
     expect(code).toContain('state: "new"')
   })
 
-  test("a page's tags, split at their commas, in code spell and spellx (P15)", () => {
+  test("a page's tags, split at their commas, (P15)", () => {
     const { code, errors } = compiled(
       [
         'a "films page" is a page where:',
@@ -64,65 +58,10 @@ describe("a site", () => {
     )
     expect(errors).toEqual([])
     expect(code).toContain('tags: ["Forms", "Inputs"]')
-    const spellx = compiled(
-      [
-        '<spell-page "films page"><draw><header>Films</header></draw></>',
-        '<spell-site "galaxy guide">',
-        '\t<page "films page" address="/films" tags="Forms, Inputs"/>',
-        "</>"
-      ],
-      "/Galaxy.spell"
-    )
-    expect(spellx.errors).toEqual([])
-    expect(spellx.code).toContain('tags: ["Forms", "Inputs"]')
-  })
-
-  test("in spellx, `state=` and `thumbnail=` say the same (T14)", () => {
-    const { code, errors } = compiled(
-      [
-        '<spell-page "films page"/>',
-        '<spell-site "galaxy guide">',
-        '\t<page "films page" address="/films" title="Films" state="old" thumbnail="snapshots/a.png"/>',
-        "</spell-site>"
-      ],
-      "/Galaxy.spell"
-    )
-    expect(errors).toEqual([])
-    expect(code).toContain('state: "old",')
-    expect(code).toContain('thumbnail: "snapshots/a.png"')
   })
 
   describe("a page's or view's own thumbnail (P16)", () => {
-    test("on its tag, self-closed or with stories:  it has no drawing, so its thumbnail draws", () => {
-      const { code, errors } = compiled(
-        [
-          '<spell-page "terms page" thumbnail="snapshots/t.jpg"/>',
-          '<spell-page "home page" thumbnail="snapshots/h.jpg">',
-          "\t<stories>",
-          '\t\t<story "S1" done>open it</story>',
-          "\t</stories>",
-          "</>",
-          '<spell-view "settings dialog" thumbnail="snapshots/s.jpg"/>'
-        ],
-        "/Pages.spell"
-      )
-      expect(errors).toEqual([])
-      expect(code).toMatch(/get thumbnail\(\) \{\s+return "snapshots\/t\.jpg"/)
-      expect(code).toMatch(/get thumbnail\(\) \{\s+return "snapshots\/h\.jpg"/)
-      expect(code).toMatch(/get thumbnail\(\) \{\s+return "snapshots\/s\.jpg"/)
-      expect(code).not.toMatch(/\bdraw\(\)/)
-    })
-
-    test("content of its own replaces it:  its body draws, with the thumbnail still known", () => {
-      const { code, errors } = compiled(
-        ['<spell-page "terms page" thumbnail="t.jpg">', "\t<text>Terms</text>", "</>"],
-        "/P.spell"
-      )
-      expect(errors).toEqual([])
-      expect(code).toMatch(/\bdraw\(\)/)
-    })
-
-    test("in code spell, a line of its body", () => {
+    test("a line of its body", () => {
       const { code, errors } = compiled(['a "terms page" is a page where:', '\t- its thumbnail is "t.jpg"'], "/P.spell")
       expect(errors).toEqual([])
       expect(code).toMatch(/get thumbnail\(\) \{\s+return "t\.jpg"/)
@@ -131,12 +70,11 @@ describe("a site", () => {
     test("a drawing places it:  `draw its thumbnail`, under what else it draws", () => {
       const { code, errors } = compiled(
         [
-          '<spell-page "home page" thumbnail="h.jpg">',
-          "\t<draw>",
+          "home page is a page:",
+          "\tto draw it:",
           "\t\t<button>Go</button>",
           "\t\tdraw its thumbnail",
-          "\t</draw>",
-          "</>"
+          '\tits thumbnail is "h.jpg"'
         ],
         "/P.spell"
       )
@@ -180,26 +118,6 @@ describe("a site", () => {
     expect(code).toContain("column: 3")
     expect(code).toContain('name: "add film dialog"')
     expect(code).toContain('color: "teal"')
-  })
-
-  test("in spellx, `row=`, `column=` and `color=` say the same, on a `<dialog>` under a `<page>` too (T31)", () => {
-    const { code, errors } = compiled(
-      [
-        '<spell-page "films page"/>',
-        '<spell-view "settings dialog"/>',
-        '<spell-site "galaxy guide">',
-        '\t<page "films page" address="/films" row="1" column="2" color="blue">',
-        '\t\t<dialog "settings dialog" row="1" column="3" color="teal"/>',
-        "\t</>",
-        "</spell-site>"
-      ],
-      "/Galaxy.spell"
-    )
-    expect(errors).toEqual([])
-    expect(code).toContain('color: "blue"')
-    expect(code).toContain("row: 1,")
-    expect(code).toContain('color: "teal"')
-    expect(code).toContain("static dialogs")
   })
 
   test("in Spanish:  `en la fila 2 columna 3`, `de color azul` (T31)", () => {
@@ -281,10 +199,9 @@ describe("a site", () => {
     test("a name with `&` or `?` is read without them, and goes by what's written", () => {
       const { code, errors } = compiled(
         [
-          '<spell-page "Boxes & Blades"/>',
-          '<spell-site "galaxy guide">',
-          '\t<page "Boxes & Blades" address="/boxes"/>',
-          "</>"
+          "Boxes Blades is a page",
+          "galaxy guide is a site:",
+          '\tit has a Boxes Blades at "/boxes" , named "Boxes & Blades"'
         ],
         "/G.spell"
       )
@@ -295,22 +212,13 @@ describe("a site", () => {
     })
 
     test("a page no file declares yet waits:  no error, listed under the class it will have", () => {
-      const { code, errors } = compiled(
-        ['<spell-site "galaxy guide">', '\t<page "My Inbox" address="/inbox/:box"/>', "</>"],
-        "/G.spell"
-      )
+      const { code, errors } = compiled(["galaxy guide is a site:", '\tit has a My Inbox at "/inbox/:box"'], "/G.spell")
       expect(errors).toEqual([])
       expect(code).toContain('name: "My Inbox"')
       expect(code).toContain('page: "MyInbox"')
     })
 
-    test("`live=` is the real page it stands for, in spellx and code spell", () => {
-      const spellx = compiled(
-        ['<spell-site "galaxy guide">', '\t<page "Films" address="/films" live="https://example.com/f"/>', "</>"],
-        "/G.spell"
-      )
-      expect(spellx.errors).toEqual([])
-      expect(spellx.code).toContain('live: "https://example.com/f"')
+    test("`live=` is the real page it stands for", () => {
       const code = compiled(
         ["galaxy guide is a site:", '\t- it has a films page at "/films", live "https://example.com/f"'],
         "/G.spell"
@@ -319,15 +227,14 @@ describe("a site", () => {
       expect(code.code).toContain('live: "https://example.com/f"')
     })
 
-    test("`<group>` is flat:  the lines after it are under it", () => {
+    test("a `group` line is flat:  the lines after it are under it", () => {
       const { code, errors } = compiled(
         [
-          '<spell-site "galaxy guide">',
-          '\t<group "Home"/>',
-          '\t<page "Home" address="/"/>',
-          '\t<group "My Stuff"/>',
-          '\t<page "My Inbox" address="/inbox"/>',
-          "</>"
+          "galaxy guide is a site:",
+          '\tgroup "Home"',
+          '\tit has a Home at "/"',
+          '\tgroup "My Stuff"',
+          '\tit has a My Inbox at "/inbox"'
         ],
         "/G.spell"
       )
@@ -340,9 +247,9 @@ describe("a site", () => {
       const project = parseSpellProject([
         {
           path: "/Site.site.spell",
-          contents: ['<spell-site "galaxy guide">', '\t<sidebar "System Notices" address="/n"/>', "</>"].join("\n")
+          contents: ["galaxy guide is a site:", "\tit has a System Notices sidebar"].join("\n")
         },
-        { path: "/notices.spell", contents: ['<spell-view "System Notices">', "\t<draw>x</draw>", "</>"].join("\n") }
+        { path: "/notices.spell", contents: ['a "System Notices" is a view:', "\tto draw it: x"].join("\n") }
       ])
       const [site] = project.files
       expect(site!.errors).toEqual([])
@@ -356,9 +263,9 @@ describe("a site", () => {
     expect(code).toContain('get settingsDialog() { return this.getProp("settingsDialog") }')
   })
 
-  test("`<sidebar>`, `<page>` and `<dialog>` outside a `<spell-site>` are markup:  Spell UI's", () => {
+  test("`<sidebar>`, `<page>` and `<dialog>` in a page are markup:  Spell UI's", () => {
     const { errors } = compiled(
-      ['<spell-notebook "side notes">', "\t<sidebar>", "\t\tNotes", "\t</>", "</>"],
+      ['"side notes" is a notebook page', "\t<sidebar>", "\t\tNotes", "\t</>"],
       "/Notes.spell"
     )
     // read as markup, a component the test's pack doesn't have:  not a site's part
@@ -492,23 +399,6 @@ describe("going to a site's pages", () => {
     expect(code).toContain('static errorPage = { name: "error page" }')
   })
 
-  test("as spellx, `<page>` with no address is its not found or error page", () => {
-    const { code, errors } = compiled(
-      [
-        '<spell-page "home page"/>',
-        '<spell-site "galaxy guide">',
-        '\t<page "home page" address="/"/>',
-        '\t<page "not found page"/>',
-        '\t<page "error page"/>',
-        "</>"
-      ],
-      "/Galaxy.spell"
-    )
-    expect(errors).toEqual([])
-    expect(code).toContain('static notFoundPage = { name: "not found page" }')
-    expect(code).toContain('static errorPage = { name: "error page" }')
-  })
-
   test("in Spanish:  `ir a la ...`, `mostrar el ...`, `tiene una página no encontrada`", () => {
     const { code, errors } = compiled(
       [
@@ -551,24 +441,6 @@ const CODE = [
   '\t\t- it has a film page at "/films/:film"',
   "\t- it has a settings dialog",
   "\t- it has a film sidebar"
-]
-
-/** The same, as spellx. */
-const TAGS = [
-  '<spell-thing "film">',
-  '\t<property "title" type="text"/>',
-  "</>",
-  '<spell-page "films page"/>',
-  '<spell-page "film page">',
-  '\t<property "film" type="film"/>',
-  "</>",
-  '<spell-site "galaxy guide" at="owen@spell/galaxy">',
-  '\t<page "films page" address="/films" title="Films">',
-  '\t\t<page "film page" address="/films/:film"/>',
-  "\t</>",
-  '\t<dialog "settings dialog"/>',
-  '\t<sidebar "film sidebar"/>',
-  "</>"
 ]
 
 /** A site in Spanish. */

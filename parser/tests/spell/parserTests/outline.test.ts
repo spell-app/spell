@@ -513,17 +513,6 @@ describe("outline style", () => {
       expect(spanish.declaredTypes("si el juego es una página de puntos")).toEqual([])
     })
 
-    test('in spellx, the scan:  `<spell-app "klondike" template="card game">`', () => {
-      const spellx = SP.spellParser.twinFor(SP.Language.default, "spellx")
-      const text = [
-        '<spell-app-template "card game">',
-        "</>",
-        '<spell-app "klondike" template="card game">',
-        "</>"
-      ].join("\n")
-      expect(spellx.declaredTypes(text)).toContain("klondike")
-    })
-
     test("in Spanish:  `puntuaciones altas es una página de puntos`", () => {
       const lines = [
         'una "página de puntos" es una página donde:',

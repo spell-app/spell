@@ -1,4 +1,4 @@
-<page "detail usage" notebook>
+"detail usage" is a notebook page
 	<header level="1">
 		Detail
 		<header>A detail is a label's dimmer second value, such as a count.</>
@@ -38,4 +38,3 @@
 			- With `link` it is a real `<a>`: **Tab** reaches it, **Enter** follows it.
 		</>
 	</>
-</page>

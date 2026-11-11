@@ -30,7 +30,7 @@ export class SpellLanguageFeatures {
   }
 
   /**
-   * Register everything with Monaco for `language`, e.g. both of spell's, `["spell", "spellx"]`.
+   * Register everything with Monaco for `language`, e.g. both of spell's, `["spell", "spell-page"]`.
    * - Once:  the editor and link openers aren't a language's, so a second call would open each file twice.
    * - Returns what unregisters it all.
    */

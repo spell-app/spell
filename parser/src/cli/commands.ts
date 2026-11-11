@@ -5,7 +5,6 @@
  * and `spell translate`, a project into another language (epic `spanish` P24):  its work behind the hook, as it
  * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
  * `translateTimes.ts`), the same way;
- * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12);
  * and `spell place sign-in` / `read-page`, a site behind its own sign-in (epic `mockup` P12, `placeSignIn.ts`);
  * and `spell place ingest` / `update`, a data source looked at and described (epic `data` P18):  its work is here, `placeIngest.ts`,
  * as it needs no project.
@@ -375,19 +374,6 @@ export default function languageCommands(spell: Command): void {
     .action((file: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeNerd")).placeNerd(file, command.optsWithGlobals()))
     )
-
-  // spellx, spell's tag-shaped form:  a file or project written as it (epic `elemental-spell` P12)
-  const spellx = spell.command("spellx").description("spellx, the tag-shaped form of a .spell file")
-
-  spellx
-    .command("convert")
-    .description(
-      "rewrite each plain .spell file in place as spellx, the same program in tags -- never in the test projects"
-    )
-    .argument("[projects...]", PROJECTS_ARG)
-    .option("--dry-run", "write nothing:  print each file instead")
-    .addHelpText("after", PROJECT_HELP)
-    .action((projects: string[], _options, command: Command) => language("spellxConvert", projects, command))
 }
 
 /**

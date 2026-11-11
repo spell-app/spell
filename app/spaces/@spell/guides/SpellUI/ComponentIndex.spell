@@ -1,4 +1,4 @@
-<page "component index" notebook>
+"component index" is a notebook page
 	<header level="1">
 		Components
 		<header>Every Spell UI component family, by topic.</>
@@ -11,4 +11,3 @@
 
 	<!-- Drawn from the site's own list:  a new component's page line adds its card here. -->
 	<ui-docs-index></>
-</page>

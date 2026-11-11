@@ -669,17 +669,36 @@ export type CodeSpan = {
 export type CodeHighlight = (code: string) => CodeSpan[] | Promise<CodeSpan[]>
 
 /**
+ * A whole drawing of some code, in place of its coloured lines:  spell's bubbly look.
+ * - `html`:  the drawing, its text escaped;  `<ui-code>` shows it as it is, no `.line` per line
+ * - `styles`:  the sheet its classes need, put in `<ui-code>`'s shadow root beside it
+ */
+export type CodeDrawing = {
+  /** the drawing, as HTML */
+  html: string
+  /** the CSS its classes need */
+  styles?: string
+}
+
+/** A drawer of our own:  `code` drawn whole (`CodeDrawing`). */
+export type CodeDraw = (code: string) => CodeDrawing | Promise<CodeDrawing>
+
+/**
  * A language `UI.code.register()` adds, one of:
  * - `grammar`:  a highlight.js language;  joins auto-detection when `detect`
  * - `highlight`:  a function of our own, e.g. spell's parser
  * - `load(variant)`:  either of the above, fetched on first use;  `variant` is what follows the `/` in
  *   `language="spell/es"` (`undefined` for plain `spell`)
+ * - and, with `highlight`, a `draw` of its own:  the code drawn whole (spell's bubbly look), which `<ui-code>` shows
+ *   instead of the coloured lines, unless it numbers or wraps its lines (`line-numbers`, `wrap`)
  */
 export type CodeLanguage = {
   /** a highlight.js language definition */
   grammar?: CodeGrammar
   /** a highlighter of our own */
   highlight?: CodeHighlight
+  /** a drawer of our own, shown instead of the coloured lines */
+  draw?: CodeDraw
   /** fetch the `grammar` or `highlight` on first use;  `variant` follows the `/` in the name */
   load?: (variant: string | undefined) => Promise<Omit<CodeLanguage, "load">>
   /** other names for it, e.g. `["sp"]` */

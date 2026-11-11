@@ -1,22 +1,21 @@
 # JSONPlaceholder
-A server for practice:  someone's todos to tick, add and remove, and posts with their comments.
-Every thing it shows is in JSONPlaceholder.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-with `<extend>`, so looking again at the server never touches a line of this.
-It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.
+// A server for practice:  someone's todos to tick, add and remove, and posts with their comments.
+// Every thing it shows is in JSONPlaceholder.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<extend>`, so looking again at the server never touches a line of this.
+// It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.
 
-<thing "jsonplaceholder page">
-	<spell>
-		- its "new todo" is a new todo with user id = 1
-	</spell>
-	<property "person" description="Whose todos and posts these are:  the first person it has">the jsonplaceholder user whose id is 1</property>
-	<property "todos" description="Theirs, from every todo">every todo where its user id is 1</property>
+a "jsonplaceholder page" is a thing
+	"new todo" is a new todo with user id = 1
+	its "person" is the jsonplaceholder user whose id is 1
+		// Whose todos and posts these are:  the first person it has
+	its "todos" is every todo where its user id is 1
+		// Theirs, from every todo
 
-	<action "add the new todo">
+	to add the new todo
 		add its new todo to the saved todos
 		set its new todo to a new todo with user id = 1
-	</action>
 
-	<draw>
+	to draw it
 		<stack spacing="xl">
 			<stack spacing="sm">
 				<header size="large">Practice, on JSONPlaceholder</header>
@@ -34,9 +33,8 @@ It answers each change as if it saved it, and keeps nothing:  what you add here 
 				From <link link="https://jsonplaceholder.typicode.com">JSONPlaceholder</link>, asked for as you look.
 			</text>
 		</stack>
-	</draw>
 
-	<draw "checklist">
+	to draw its checklist
 		<stack spacing="sm">
 			<form value={its new todo}>
 				<input name="title" placeholder="Water the plants" aria-label="Something to do" fluid action>
@@ -45,53 +43,46 @@ It answers each change as if it saved it, and keeps nothing:  what you add here 
 			</form>
 			{draw the todo list of it}
 		</stack>
-	</draw>
 
-	<draw "todo list">
-		<for todo in its todos loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
-	</draw>
+	to draw its todo list
+		for todo in its todos
+		while waiting: <loader visible inline text>{"Asking JSONPlaceholder"}</loader>
+		if that fails say "JSONPlaceholder can't be reached just now."
 
-	<draw "post list">
-		<for post in its person's posts loading="Asking JSONPlaceholder" failed="JSONPlaceholder can't be reached just now." />
-	</draw>
-</thing>
-
+	to draw its post list
+		for post in its person's posts
+		while waiting: <loader visible inline text>{"Asking JSONPlaceholder"}</loader>
+		if that fails say "JSONPlaceholder can't be reached just now."
 
 # A todo
-Ticked as it's done;  each tick, and each removal, goes to the server at once.
+// Ticked as it's done;  each tick, and each removal, goes to the server at once.
 
-<extend "todo">
-	<draw>
+a todo
+	to draw it
 		<form value={it}>
 			<stack direction="horizontal" align="center" justify="between" spacing="sm">
 				<ui-checkbox name="completed" label={its title} />
 				<button icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={remove it from the saved todos}/>
 			</stack>
 		</form>
-	</draw>
-</extend>
-
 
 # A post
-Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.
+// Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.
 
-<extend "post">
-	<draw>
+a post
+	to draw it
 		<header size="small">{its title}</header>
 		<text>{its body}</text>
-		<for comment in its comments loading="Asking for its comments" />
-	</draw>
-</extend>
+		for comment in its comments
+		while waiting: <loader visible inline text>{"Asking for its comments"}</loader>
 
-Each comment, as Spell UI draws one:  named in full, `<ui-comment>`, as `<comment>` is a comment in spellml.
+// Each comment, as Spell UI draws one:  named in full, `<ui-comment>`.
 
-<extend "comment">
-	<draw>
+a comment
+	to draw it
 		<ui-comment>
 			<content>
 				<author>{its email}</author>
 				<description>{its body}</description>
 			</content>
 		</ui-comment>
-	</draw>
-</extend>

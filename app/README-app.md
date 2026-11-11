@@ -64,7 +64,7 @@ Inside a framework's page is another matter:  Spell UI's `<ui-dropdown>` has bee
 | --- | --- | --- |
 | `<spell-viewer>` | runs a project, with an optional toolbar and a debug pane below it:  the Type Explorer, the Thing Explorer and the console;  a root of its own, so the page needs nothing around it | `project` or `src`:  what to run;  `editor`:  a `<spell-editor>` to take programs from;  `toolbar`;  `debug`:  the pane's first tab |
 | `<spell-editor>` | Monaco with tabs, editing a project on the page server;  it compiles as it opens, two seconds after typing stops and on Cmd+Enter, and hands what it compiled to its apps | `project`;  `file`:  the one to show first;  `app`:  a selector for the apps it feeds |
-| `<spell-code>` | Spell UI's `<ui-code>`, colouring Spell with Spell's own parser;  once it loads, every `<ui-code language="spell">` on the page is coloured too | `language`:  `spell` unless it says otherwise |
+| `<spell-code>` | Spell UI's `<ui-code>`, drawing Spell in the bubbly look from Spell's own parser:  each declaration on a band, what was typed in pills;  once it loads, every `<ui-code language="spell">` on the page is drawn so too | `language`:  `spell` unless it says otherwise;  `line-numbers` or `wrap`:  coloured lines instead |
 | `<spell-markdown>` | Spell UI's `<ui-markdown>`, drawn by spell-parser's own markdown engine, its Spell blocks coloured | `editable`:  Write and Preview tabs |
 
 Put them on a page either way:
@@ -301,16 +301,16 @@ Declare a template a `view`, and each of its things draws as a custom element of
 Here's the card, every line of it;  in an app named `solitaire`, it draws as `<solitaire-card>`:
 
 ```spell
-a "card" is a view:
-	- its "suit" is one of clubs, diamonds, hearts or spades
-	- its "color" is:
+a "card" is a view
+	its "suit" is one of clubs, diamonds, hearts or spades
+	its "color" is
 		red if its suit is diamonds or hearts
 		black otherwise
 
-	- its "rank" is one of ace, 2 ... 10, jack, queen, king
-	- it "is a face card" if its rank is jack, queen or king
-	- it "is a (rank)"
-	- it "is the (rank) of (suit)"
+	its "rank" is one of ace, 2 ... 10, jack, queen, king
+	it "is a face card" if its rank is jack, queen or king
+	it "is a (rank)"
+	it "is the (rank) of (suit)"
 ```
 
 Compiled to TypeScript, it's two classes:  the card, and the element that draws it.
@@ -445,13 +445,11 @@ A compile, in the order the Program panel's Output tab logs it:
 3. `executeCompiledApp()` runs it on the runtime, carrying things over when it's the project it ran last.
 4. The console ends "Example executed without errors.", or with the error.
 
-### A `.spell` file
+### A page file
 
-A `.spell` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
-- A template lives in ONE file, in one shape:  its other shape is a read-only view.
-  - The Program panel has it as a tab:  Code Spell on a tag-shaped file, Spellx on a plain one.
-  - VS Code's title bar has the same pair:  Show as Code Spell, Show as Spellx.
-- What the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
+A page file, a page written the way it reads (`"form usage" is a notebook page`, its body indented under it),
+opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
+- What a page can say is [Spell's page](https://github.com/spell-app/spell/blob/main/parser/README-spell.md#pages-written-as-they-read).
 
 ### The editor in Spell
 
@@ -493,11 +491,10 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   in the file's order (rank, suit, names, drawing), then those it inherits (two sided view).
   - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
   - Its built-in `id` last, folded.
-  - A type may lay its card out itself, in spellml:  Solitaire's card does, in
-    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), a `<property-editor "card">`.
+  - A type may lay its card out itself:  Solitaire's card does, in
+    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), `"card" is a property editor`.
     - Its own file, `<Type>.editor.spell`, or one for the project, `<Project>.editors.spell`:
       never compiled, read by the Inspector (`propertyEditorInSource()`).
-    - Or inline, a `<property-editor>` in the type's own tag.
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.
@@ -655,7 +652,6 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
   - JavaScript:  what the open file compiled to
   - TypeScript and Python:  the whole project as those targets write it, from the last compile
     (`SpellProject.codeFor()`, in spell-parser)
-  - the file's other shape:  Code Spell on a tag-shaped file, Spellx on a plain one
   - Sentence Tree:  the Spell tree of the cursor's line
   - Reference:  what you can use, your app's templates and Spell's, each with what it holds, searchable from the
     panel's header;  a click says what it is, and Show in Code for your own

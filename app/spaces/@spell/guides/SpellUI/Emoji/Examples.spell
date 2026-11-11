@@ -1,4 +1,4 @@
-<page "emoji examples" notebook>
+"emoji examples" is a notebook page
 	<header level="1">
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>
@@ -136,4 +136,3 @@
 			</example>
 		</>
 	</>
-</page>

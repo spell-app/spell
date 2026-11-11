@@ -21,7 +21,6 @@ const BLESS_SCRIPT = "spell:test:fixtures:bless"
  *   - `tsc` and pyright on that output
  *   - each one in another language than English (Solitario ...) runs its own spell tests
  *   - the command-line contract:  each one run on every target, what it prints against its snapshot
- *   - every example converted to spellx and back, and the hand-kept twins of the examples in their other form
  *   - every notebook compiled
  *   - README-examples' table and pictures
  * - `--bless`:  rewrite every snapshot among them, then read the diff (`git diff`):  the diff is the review.

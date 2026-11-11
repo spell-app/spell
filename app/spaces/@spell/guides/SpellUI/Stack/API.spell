@@ -1,4 +1,4 @@
-<page "stack api" notebook>
+"stack api" is a notebook page
 	<header level="1">
 		Stack
 		<header>A stack lays its children out in a column, or a row that wraps, evenly spaced.</>
@@ -29,4 +29,3 @@
 			<ui-docs-api family="ui-stack" only="states"></>
 		</>
 	</>
-</page>

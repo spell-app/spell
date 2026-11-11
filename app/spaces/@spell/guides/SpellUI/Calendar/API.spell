@@ -1,4 +1,4 @@
-<page "calendar api" notebook>
+"calendar api" is a notebook page
 	<header level="1">
 		Calendar
 		<header>A calendar lets a user pick a date, a time, or both.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-calendar" only="texts"></>
 		</>
 	</>
-</page>

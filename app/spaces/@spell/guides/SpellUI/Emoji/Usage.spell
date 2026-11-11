@@ -1,4 +1,4 @@
-<page "emoji usage" notebook>
+"emoji usage" is a notebook page
 	<header level="1">
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>
@@ -71,4 +71,3 @@
 			  element still show, through a bare `<slot>`.
 		</>
 	</>
-</page>

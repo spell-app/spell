@@ -1,4 +1,4 @@
-<page "audio examples" notebook>
+"audio examples" is a notebook page
 	<header level="1">
 		Audio
 		<header>An audio plays a sound file:  in the browser's own player, or unseen, when the page says.</>
@@ -37,4 +37,3 @@
 			</example>
 		</>
 	</>
-</page>

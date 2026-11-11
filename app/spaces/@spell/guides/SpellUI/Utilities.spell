@@ -1,4 +1,4 @@
-<page "utilities" notebook>
+"utilities" is a notebook page
 	<header level="1">
 		Utilities
 		<header>Token-driven layout, sizing, text, colour and visibility classes, on your markup and inside components.</>
@@ -288,4 +288,3 @@
 			</example>
 		</>
 	</>
-</page>

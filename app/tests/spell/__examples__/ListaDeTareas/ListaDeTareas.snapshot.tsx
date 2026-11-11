@@ -52,8 +52,8 @@ export class Tarea extends View {
     return
   }
 
-  // Un formulario propio, unido a ella:  marcar la casilla, o escribir un título, cambia la tarea;  su prioridad se muestra solo cuando no es normal
   @drawn draw() {
+    // Un formulario propio, unido a ella:  marcar la casilla, o escribir un título, cambia la tarea;  su prioridad se muestra solo cuando no es normal
     return (
       <es-formulario value={this}>
         <es-pila direccion="horizontal" separacion="sm">
@@ -68,9 +68,9 @@ export class Tarea extends View {
     )
   }
 
-  static draggable = true
-
   static selectable = true
+
+  static draggable = true
 
   get agenda() {
     return Agenda.ownerOf(this)!
@@ -101,7 +101,7 @@ core.useElement(Tarea, TareaElement)
 export function testMarcarUna() {
   return core.test("test marcar una", function testMarcarUna() {
     const it = new Tarea()
-    core.echoTestAction(`poner la tarea a una nueva tarea con título = "Escribir las pruebas"`)
+    core.echoTestAction(`poner la tarea a una nueva tarea con título "Escribir las pruebas"`)
     const tarea = new Tarea({ título: "Escribir las pruebas" })
     core.expect(tarea.estáPendiente, `la tarea está pendiente`, true, `sí`)
     core.echoTestAction(`poner la hecha de la tarea a sí`)
@@ -109,7 +109,6 @@ export function testMarcarUna() {
     core.expect(tarea.estáHecha, `la tarea está hecha`, true, `sí`)
   })
 }
-
 // -----------
 core.heading("Lista de tareas:  dónde se guardan las tareas")
 ///////////////////////////////////////////////////
@@ -159,11 +158,11 @@ export class TareaDelNavegador extends Tarea {
   }
 
   // vive en almacén del navegador
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 387, end: 416 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 357, end: 386 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en almacén del navegador
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 387, end: 416 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 357, end: 386 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
@@ -186,7 +185,7 @@ export class TareaDelNavegadorElement extends SpellElement<TareaDelNavegador> {
 core.useElement(TareaDelNavegador, TareaDelNavegadorElement)
 
 export class GuardiánDelNavegador extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 589, end: 639 }, readsFrom: ["almacén_del_navegador"] }) }
+  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.navegador.api.es.spell", start: 497, end: 547 }, readsFrom: ["almacén_del_navegador"] }) }
   get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
     return await core.savedThings(TareaDelNavegador)
   }) }
@@ -229,11 +228,11 @@ export class TareaDelServidor extends Tarea {
   }
 
   // vive en archivos de tareas
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 550, end: 576 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 501, end: 527 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en archivos de tareas
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 550, end: 576 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 501, end: 527 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
@@ -256,7 +255,7 @@ export class TareaDelServidorElement extends SpellElement<TareaDelServidor> {
 core.useElement(TareaDelServidor, TareaDelServidorElement)
 
 export class GuardiánDelServidor extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 747, end: 796 }, readsFrom: ["archivos_de_tareas"] }) }
+  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.servidor.api.es.spell", start: 636, end: 685 }, readsFrom: ["archivos_de_tareas"] }) }
   get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
     return await core.savedThings(TareaDelServidor)
   }) }
@@ -302,11 +301,11 @@ export class TareaDeLaHoja extends Tarea {
   }
 
   // vive en hoja de tareas
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 728, end: 750 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 689, end: 711 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en hoja de tareas
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 728, end: 750 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 689, end: 711 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
@@ -329,7 +328,7 @@ export class TareaDeLaHojaElement extends SpellElement<TareaDeLaHoja> {
 core.useElement(TareaDeLaHoja, TareaDeLaHojaElement)
 
 export class GuardiánDeLaHoja extends GuardiánDeTareas {
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 917, end: 964 }, readsFrom: ["hoja_de_tareas"] }) }
+  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.csv.api.es.spell", start: 816, end: 863 }, readsFrom: ["hoja_de_tareas"] }) }
   get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
     return await core.savedThings(TareaDeLaHoja)
   }) }
@@ -372,7 +371,7 @@ export class TareaDelCielo extends Tarea {
 
   /** de quién es:  la cuenta en la que está, que un registro no puede decir */
   // una tarea del cielo tiene un dueño como texto
-  @prop({ type: "text", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 730, end: 775 } })
+  @prop({ type: "text", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 581, end: 701 } })
   accessor dueño!: string
 
   static savedIn = {
@@ -382,11 +381,11 @@ export class TareaDelCielo extends Tarea {
   }
 
   // vive en cielo de tareas
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 531, end: 554 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 505, end: 528 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en cielo de tareas
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 531, end: 554 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 505, end: 528 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
@@ -411,7 +410,7 @@ core.useElement(TareaDelCielo, TareaDelCieloElement)
 
 export class GuardiánDelCielo extends GuardiánDeTareas {
   /** solo las tuyas:  las tareas de cada uno están en su propia cuenta */
-  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 932, end: 1017 }, readsFrom: ["cielo_de_tareas"] }) }
+  static { this.declareProp("tareasGuardadas", { declaredAt: { path: "/ListaDeTareas.atmosphere.api.es.spell", start: 753, end: 838 }, readsFrom: ["cielo_de_tareas"] }) }
   get tareasGuardadas() { return core.waitedValue(this, "tareasGuardadas", async () => {
     return await core.savedThings(TareaDelCielo, { filter: { dueño: core.currentPerson().id } })
   }) }
@@ -442,7 +441,7 @@ core.heading("Lista de tareas")
 // ## Lista de tareas
 /////////////////////
 // Una lista de cosas por hacer:  agrega una tarea, márcala, filtra la lista, y edita juntas las tareas seleccionadas.
-// Sus tareas son la `<vista "tarea">` de este proyecto;  este archivo tiene su lista, y la aplicación.
+// Sus tareas son la `tarea` de este proyecto, en Tarea.es.spell;  este archivo tiene su lista, y la aplicación.
 // Dónde se guardan lo elige la persona, "Guardarlas en":  cada lugar es un guardián en un archivo de API propio,
 // ListaDeTareas.navegador.api.es.spell, ListaDeTareas.servidor.api.es.spell, ListaDeTareas.csv.api.es.spell y ListaDeTareas.atmosphere.api.es.spell, todos haciendo lo que dice ListaDeTareas.api.es.spell.
 
@@ -460,7 +459,7 @@ export class Agenda extends ViewableList<Tarea> {
 
   /** Lo que muestra:  todas las tareas, las pendientes, o las hechas */
   // su "mostrando" es uno de todas, pendientes o hechas
-  //   - "está mostrando (mostrando)"
+  //   "está mostrando (mostrando)"
   static Mostrandos = ["todas", "pendientes", "hechas"] as const
   @prop({ oneOf: () => Agenda.Mostrandos })
   accessor mostrando!: Mostrando
@@ -473,15 +472,15 @@ export class Agenda extends ViewableList<Tarea> {
     this.guardarElOrden()
   }
 
-  // cada tarea, salvo que el filtro la oculte
   drawEachItem(item: Tarea) {
+    // cada tarea, salvo que el filtro la oculte
     if (this.estáMostrandoMostrando("pendientes") && item.estáHecha) return undefined
     if (this.estáMostrandoMostrando("hechas") && item.estáPendiente) return undefined
     return core.drawThing(item)
   }
 
-  // Sus tareas una debajo de otra;  vacía, una línea que lo dice
   @drawn draw() {
+    // Sus tareas una debajo de otra;  vacía, una línea que lo dice
     return (
       <es-pila separacion="xs">
         <es-texto color="grey" hidden={this.isEmpty ? undefined : true}>Nada por hacer</es-texto>
@@ -536,22 +535,21 @@ export function testElFiltro() {
     const it = new Agenda()
     core.echoTestAction(`poner la lista a una nueva agenda`)
     const lista = new Agenda()
-    core.echoTestAction(`agregar (una nueva tarea con título = "a", hecha = sí) a la lista`)
+    core.echoTestAction(`agregar (una nueva tarea con título "a", hecha = sí) a la lista`)
     lista.append(new Tarea({ título: "a", hecha: true }))
-    core.echoTestAction(`agregar (una nueva tarea con título = "b") a la lista`)
+    core.echoTestAction(`agregar (una nueva tarea con título "b") a la lista`)
     lista.append(new Tarea({ título: "b" }))
     core.expect(lista.filter((tarea) => tarea.estáPendiente).length, `el largo de (tareas en la lista donde está pendiente)`, 1, `1`)
   })
 }
-
 export function testUnOrdenArrastradoSeGuarda() {
   return core.test("test un orden arrastrado se guarda", function testUnOrdenArrastradoSeGuarda() {
     const it = new Agenda()
     core.echoTestAction(`poner las tareas a una nueva agenda`)
     const tareas = new Agenda()
-    core.echoTestAction(`poner la primera a una nueva tarea con título = "primera"`)
+    core.echoTestAction(`poner la primera a una nueva tarea con título "primera"`)
     const primera = new Tarea({ título: "primera" })
-    core.echoTestAction(`poner la segunda a una nueva tarea con título = "segunda"`)
+    core.echoTestAction(`poner la segunda a una nueva tarea con título "segunda"`)
     const segunda = new Tarea({ título: "segunda" })
     core.echoTestAction(`agregar la segunda a las tareas`)
     tareas.append(segunda)
@@ -564,7 +562,6 @@ export function testUnOrdenArrastradoSeGuarda() {
     core.expect(core.getItemAt(core.sortedBy(tareas, (item: Tarea) => item.orden), 0)?.título!, `el título de la primera tarea en (las tareas ordenadas por su orden)`, "segunda", `"segunda"`)
   })
 }
-
 /** una tarea está en una sola agenda a la vez */
 
 core.heading("La aplicación")
@@ -579,7 +576,7 @@ export type Almacén = (typeof ListaDeTareas.Almacenes)[number]
 export class ListaDeTareas extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // su "tareas" es una nueva agenda
+  // "tareas" es una nueva agenda
   @prop({ init: () => new Agenda(), early: true })
   accessor tareas!: Agenda
 
@@ -648,8 +645,8 @@ export class ListaDeTareas extends App {
     this.borrador = ""
   }
 
-  // El editor de propiedades edita todas las tareas seleccionadas a la vez:  una propiedad en la que no coinciden muestra Varios
   @drawn draw() {
+    // El editor de propiedades edita todas las tareas seleccionadas a la vez:  una propiedad en la que no coinciden muestra Varios
     return (
       <es-contenedor>
         <es-pila>
@@ -788,15 +785,13 @@ core.describeAction(ListaDeTareas, "mostrarHechas", { title: "Hechas", icon: "ch
 core.describeAction(ListaDeTareas, "quitarLasTareasHechas", { title: "Quitar las tareas hechas", icon: "trash alternate outline" })
 
 // Los botones de la barra de herramientas, y el clic derecho en la lista:  las mismas acciones
-// su "menú de tareas" es un menú de "mostrar todas" , "mostrar pendientes" , "mostrar hechas" , "-" y "quitar las tareas hechas"
+// su "menú de tareas" es un menú de "mostrar todas", "mostrar pendientes", "mostrar hechas", "-" y "quitar las tareas hechas"
 core.describeMenu(ListaDeTareas, "menúDeTareas", { items: ["mostrarTodas", "mostrarPendientes", "mostrarHechas", "-", "quitarLasTareasHechas"] })
-
-// su "menú mostrar" es un menú de "mostrar todas" , "mostrar pendientes" y "mostrar hechas" titulado "Mostrar"
+// su "menú mostrar" es un menú de "mostrar todas", "mostrar pendientes" y "mostrar hechas" titulado "Mostrar"
 core.describeMenu(ListaDeTareas, "menúMostrar", { items: ["mostrarTodas", "mostrarPendientes", "mostrarHechas"], title: "Mostrar" })
-
-// Un clic derecho en la lista:  qué tareas muestra, como un menú propio, y luego ordenar
-// su "menú de la lista" es un menú de "menú mostrar" , "-" y "quitar las tareas hechas"
+// su "menú de la lista" es un menú de "menú mostrar", "-" y "quitar las tareas hechas"
 core.describeMenu(ListaDeTareas, "menúDeLaLista", { items: ["menúMostrar", "-", "quitarLasTareasHechas"] })
+// Un clic derecho en la lista:  qué tareas muestra, como un menú propio, y luego ordenar
 // -----------
 core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet.¬   - Each task is an element of its own inside the list, <lista-de-tareas-agenda>:¬     <lista-de-tareas-tarea-del-navegador>, ...-del-servidor or ...-del-cielo, for where it's kept.¬   - Its title's field fills the row by itself:  it's \`fluid\`, in a row of a \`<stack>\`. */¬¬/* done:  it fades */¬lista-de-tareas-agenda > [hecha] {¬  opacity: 0.6;¬}¬`)
 // -----------

@@ -74,7 +74,13 @@ export class PropertyValueGetter extends SpellStatement<
     if (!match.groups.type.length && bodyParsed) match.priority = Priority.declaration
     // with a list of its own, `- its "color" is one of red, black:`, it's a declaration too:  it outranks the
     // stored property's line, `define_property_has`, which would read the line all but its colon (epic `elemental-spell` P5)
-    if (match.groups.specifier) match.priority = Priority.declaration
+    // -- with no colon, only when value lines are indented under it (T93);  else it's that stored property
+    if (match.groups.specifier) {
+      const colon = PropertyValueGetter.endsWithColon(match)
+      if (!colon && !PropertyValueGetter.hasValueLinesBelow(match)) return undefined
+      // no colon:  the same words as the stored property's, and it says more
+      match.priority = colon ? Priority.declaration : Priority.aboveDeclaration
+    }
     // a draft kept in a property, `- its "draft" is a draft of its recipe`:  the stored property's line would read
     // `a draft` as a type named `Draft`, which there's none of (epic `data` T135)
     if (this.getBody(match)?.datatype === DRAFT_DATATYPE) match.priority = Priority.aboveDeclaration
@@ -93,6 +99,28 @@ export class PropertyValueGetter extends SpellStatement<
     // a possessive misspelled, `a card' value is ...` (epic `language` T24)
     PossessiveProperty.refuseIfDeclarationMisspelled(match)
     return SpellStatement.refuseBuiltInType(match, match.groups.type, match.groups.property)
+  }
+
+  /** Does `match`'s line say its body follows, with a colon after its list of values? */
+  private static endsWithColon(match: P.Match): boolean {
+    const body = (match.data as { body?: P.Match }).body
+    const head = body ? match.tokens.filter((token) => !body.tokens.includes(token)) : match.tokens
+    return `${head.at(-1)?.value}` === ":"
+  }
+
+  /**
+   * Are value lines indented under the line being read (epic `language` T93), e.g. `red if it is a heart`?
+   * - A line of code starting with one of `match`'s values:  `red`, `black` (or `"red"`, quoted).
+   * - Anything else is a member's line, its alias (`it "is (color)"`, Spanish's `"está mostrando (mostrando)"`),
+   *   or comments alone, its description:  then it's a stored property.
+   */
+  private static hasValueLinesBelow(match: P.Match): boolean {
+    const block = SpellStatement.blockBelow()
+    const specifier = (match.groups as { specifier?: P.Match }).specifier
+    if (!block || !specifier) return false
+    const unquoted = (token: P.Token | undefined) => `${token?.value ?? ""}`.replace(/^["']|["']$/g, "")
+    const values = new Set(specifier.tokens.map(unquoted))
+    return SpellStatement.codeLinesOf(block).some(({ tokens }) => values.has(unquoted(tokens[0])))
   }
 
   /**

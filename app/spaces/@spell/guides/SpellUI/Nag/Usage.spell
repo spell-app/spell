@@ -1,4 +1,4 @@
-<page "nag usage" notebook>
+"nag usage" is a notebook page
 	<header level="1">
 		Nag
 		<header>A nag is a persistent message that stays until dismissed, and can remember the dismissal.</>
@@ -139,4 +139,3 @@
 			```
 		</>
 	</>
-</page>

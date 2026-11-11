@@ -1,4 +1,4 @@
-<page "tab api" notebook>
+"tab api" is a notebook page
 	<header level="1">
 		Tab
 		<header>A tab is a hidden section of content activated by a menu.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-tab" only="states"></>
 		</>
 	</>
-</page>

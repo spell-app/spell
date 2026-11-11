@@ -1,4 +1,4 @@
-<page "toast api" notebook>
+"toast api" is a notebook page
 	<header level="1">
 		Toast
 		<header>A toast allows users to receive a short, non-blocking notification.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-toast" only="texts"></>
 		</>
 	</>
-</page>

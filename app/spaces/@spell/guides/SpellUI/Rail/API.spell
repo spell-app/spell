@@ -1,4 +1,4 @@
-<page "rail api" notebook>
+"rail api" is a notebook page
 	<header level="1">
 		Rail
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
@@ -37,4 +37,3 @@
 			<ui-docs-api family="ui-rail" only="states"></>
 		</>
 	</>
-</page>

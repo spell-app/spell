@@ -1,4 +1,4 @@
-<page "slider examples" notebook>
+"slider examples" is a notebook page
 	<header level="1">
 		Slider
 		<header>A slider allows users to select values within a range.</>
@@ -242,4 +242,3 @@
 			</example>
 		</>
 	</>
-</page>

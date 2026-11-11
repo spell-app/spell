@@ -3,6 +3,6 @@
 // Un sitio hecho de él nombra sus partes en su cuerpo, `- tiene una página de película en "/peliculas/:pelicula"`,
 // `- tiene un diálogo de ajustes`:  el sitio guarda la dirección y el nombre de cada página, nunca la página,
 // así que una página cambia de dirección, o de nombre en otro idioma, sin que cambie su propio archivo.
-un "sitio" es una aplicación donde:
-	// la dirección de la página que muestra:  "/" al empezar
-	- su "dirección actual" es un texto empezando en "/"
+un "sitio" es una aplicación
+	su "dirección actual" es un texto empezando en "/"
+		// la dirección de la página que muestra:  "/" al empezar

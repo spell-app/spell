@@ -1,4 +1,4 @@
-<page "include api" notebook>
+"include api" is a notebook page
 	<header level="1">
 		Include
 		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
@@ -51,4 +51,3 @@
 			<ui-docs-api family="ui-include" only="texts"></>
 		</>
 	</>
-</page>

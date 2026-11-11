@@ -94,7 +94,7 @@ describe.skipIf(!SERVING)("a site in Run", { timeout: 180_000 }, () => {
   beforeAll(async () => {
     browser = await chromium.launch()
     context = await browser.newContext({ viewport: { width: 1300, height: 800 } })
-    await context.route(/\/api\/projects\/file\/|\.(spellml|spell)(\?.*)?$/, (route) => {
+    await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) => {
       const request = route.request()
       if (request.isNavigationRequest()) return route.continue()
       // a save goes nowhere, and every load is the small site afresh:  the editor holds what was changed

@@ -29,7 +29,7 @@ describe("SpellProject editing", () => {
     await project.updateText(game, gameText)
   })
 
-  test("`spellFiles` are its active spell imports (`.spell` or `.spellml`), in order -- and each `isActive`", () => {
+  test("`spellFiles` are its active spell imports, in order -- and each `isActive`", () => {
     // its cards, deck and piles, then its game
     expect(project.spellFiles.map((file) => file.filePath)).toEqual([
       "/Card.spell",
@@ -46,15 +46,16 @@ describe("SpellProject editing", () => {
     const parserOf = () => (game.scope?.parser as SP.SpellParser | undefined)?.form ?? "spell"
     const codeOf = () => P.JSWriter.instance.writeMatch(game.match!) as string
     const before = codeOf()
-    expect(game.form).toBe("spellx")
-    expect(parserOf(), "at first").toBe("spellx")
-    await project.updateText(game, 'a "marker" is a thing:\n\t- its "count" is a number\n')
+    // Solitaire is plain Spell since epic `language` P46:  typed into a page file (P47), and back
     expect(game.form).toBe("spell")
-    expect(parserOf(), "plain").toBe("spell")
-    expect(codeOf()).toContain("class Marker")
+    expect(parserOf(), "at first").toBe("spell")
+    await project.updateText(game, '"marker page" is a page\n\t# Marker\n')
+    expect(game.form).toBe("page")
+    expect(parserOf(), "a page").toBe("page")
+    expect(codeOf()).toContain("class MarkerPage")
     await project.updateText(game, gameText)
-    expect(game.form).toBe("spellx")
-    expect(parserOf(), "back").toBe("spellx")
+    expect(game.form).toBe("spell")
+    expect(parserOf(), "back").toBe("spell")
     expect(codeOf()).toBe(before)
   })
 

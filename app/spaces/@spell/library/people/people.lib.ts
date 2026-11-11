@@ -237,9 +237,10 @@ export class OrgRole extends Thing {
   @prop({ itemType: "Person", init: () => new List<Person>({ instanceType: "Person" }) })
   accessor eligiblePeople!: List<Person>
 
-  // Before Q28 (2026-11-06) what a role managed was what it "led".
   static v2RenamesLeads = "manages"
 }
+
+// Before Q28 (2026-11-06) what a role managed was what it "led".
 
 /**
  * Someone holding a role for a while:  a person, or a whole team ("the Events Team" manages a project).

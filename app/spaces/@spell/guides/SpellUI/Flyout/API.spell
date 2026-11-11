@@ -1,4 +1,4 @@
-<page "flyout api" notebook>
+"flyout api" is a notebook page
 	<header level="1">
 		Flyout
 		<header>A flyout is a modal that slides in from a side of the page.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-flyout" only="texts"></>
 		</>
 	</>
-</page>

@@ -15,8 +15,8 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 - [`Parser.parse(input, ruleName, scope)`](../parser/Parser.ts) tokenizes,
   then calls `scope.getRuleOrDie(ruleName).parse()`.
 - [`SpellParser.tokenize()`](SpellParser.ts) calls `Tokenizer.tokenize()`.
-  - Its `tokenizer` by the parser's `form`:  spell's own (`spellTokenizer`), or a `.spell` file's,
-    `SP.SpellxTokenizer`, for a whole file (the `"block"` rule) only;  see "Spellx", below.
+  - Its `tokenizer` by the parser's `form`:  spell's own (`spellTokenizer`), or a page file's,
+    `SP.PageTokenizer`, for a whole file (the `"block"` rule) only;  see "Pages", below.
   - For the `"block"` rule, it then calls [`breakIntoIndentedBlocks()`](../parser/tokenizer/Tokenizer.ts).
   - The result is ONE root `BlockToken`:  its lines (`LineToken`s), and nested blocks of the same kind.
   - indent ~== count of leading whitespace chars (tab === space === 1)
@@ -49,7 +49,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       [`SpellJSXContent.placeInFile()`](rules/JSX/SpellJSXContent.ts).
     - They hang them on the `JSXExpressionToken`, as `innerTokens`.
     - There `Tokenizer.forEachToken()` reaches them, and so does `moveTokens()`.
-  - Any other token holding tokens of its own lists them as `nested` (a spellx tag's head:  its name, values and
+  - Any other token holding tokens of its own lists them as `nested` (a page's tag head:  its name, values and
     phrase), and `forEachToken()` reaches those too.
 - A token's or match's two ends:
   - `end`:  where its TEXT stops
@@ -741,9 +741,9 @@ A kind that says so is saved in a file of its own.
   - `items.splice(0, match.length)`:  a header + its nested block is one item of length 2
 - [`BlockLine.parse()`](rules/BlockLine.ts), in order:
   1. a blank line => `blank_line`
-     - a spellx tag's line is read as its code-spell twin from here on (`SP.SpellxTwin`;  "Spellx", below),
-       and what the spellx tokenizer found wrong on it is the line's error
-  2. pop the trailing comments:  usually one;  a spellx description adds its own
+     - a page's head or tag line is read as its code-spell twin from here on (`SP.PageTwin`;  "Pages", below),
+       and what the page tokenizer found wrong on it is the line's error
+  2. pop the trailing comments:  usually one
   3. parse the rest as `"statement"`;  leftovers become a `parse_error`
      - a statement its rule REFUSED is a `parse_error` already, saying why (`SpellStatement.refuse()`):
        the line's error, never committed
@@ -859,6 +859,15 @@ A kind that says so is saved in a file of its own.
   - Editors show them as `DiagnosticSeverity.Warning` (`SpellLanguageService.diagnostics()`).
   - `spell compile` lists them after its errors, never counting them:  see "Language server".
 
+### What's indented under a line
+
+- While `BlockLine.parse()` reads a line's statement, `SpellStatement.below` is the block indented under it
+  (epic `language` P48):  so a line with no colon at its end can say whether it takes that block as its body.
+  - `reopen_type`:  `a pile`, with code under it, re-opens the type.
+  - `property_value_getter`:  `its "color" is one of red, black`, with value lines under it, is worked out (T93).
+  - Rules read it through `SpellStatement.blockBelow()` / `hasCodeBelow()`, which note that they did:
+    the line's `data.readsBelow`, so `BlockLine.reparseBody()` re-parses the line whole when its body changes.
+
 ## A property's list of values:  `- it is locked` (epic `language` P39)
 
 A property with a list of values keeps it on its record, `P.ScopeVariable.listedValues`, however it got one:
@@ -885,12 +894,12 @@ a line of the built-in types table, a built-in template, or a project's own `one
   In them, `it` / `its` mean that type, e.g.
 
   ```spell
-  a card is a thing where:
-  	- it has a name as text
-  	- its "suit" is one of clubs, diamonds, hearts or spades
-  	- it "is a (suit)" for its suits
-  	- its "color" is red if its suit is either diamonds or hearts otherwise it is black
-  	- it belongs to a pile
+  a card is a thing
+  	it has a name as text
+  	its "suit" is one of clubs, diamonds, hearts or spades
+  	it "is a (suit)" for its suits
+  	its "color" is red if its suit is either diamonds or hearts otherwise it is black
+  	it belongs to a pile
   ```
 
   - It compiles EXACTLY as the same lines in the sentence style do (`a card has a name as text` ...).
@@ -911,12 +920,12 @@ a line of the built-in types table, a built-in template, or a project's own `one
 - Re-opening a type (P11):  `a game:`, then a body, adds to a type declared elsewhere, in the same file or a later one.
   - Its rule:  [`reopen_type`](rules/classes/ReopenType.ts), a `TypeDeclaration` with no class of its own.
     Its body's lines compile beside it, as the sentence style's would.
-  - The colon stays required:  a lone `a game` is a fragment.
+  - Its colon may be left out when code is indented under it (epic `language` P48):  `a game`, then its lines.
+    A lone `a game`, nothing under it, is a fragment.
   - A type nobody declares is refused, saying how to declare it.
   - A type declared a SECOND time is refused, naming the first and saying to write `a game:` (issue I13).
-  - In a `.spell` file its tag is `<extend "game">`, its members inside (epic `data` T76):
-    so a place's fields can stay in one file, and what's drawn in another beside it.
     That's `TypeDeclaration.refuseTakenNames()`.
+  - So a place's fields can stay in one file, and what's drawn in another beside it (epic `data` T76).
 - `subject_it` / `subject_its`:  `it` / `its` as a line's SUBJECT.
   - Their class:  `SubjectRule`, in `types/`.
   - Each is a `SpellType` match for the type:
@@ -980,6 +989,16 @@ a line of the built-in types table, a built-in template, or a project's own `one
     - e.g. `one of ...`, `a number`, `yes or no`, `a list of people`
   - A declaration names them without quotes:  `Rule.declaredText()`.
     - `SubjectRule` also overrides it:  `card`, not `it`.
+- An ABILITY may be a word before the template, on the type's own line (epic `language` P48):
+  `a "card" is a draggable two sided view`, `a "pile" is a droppable viewable list of cards`.
+  - The same flag as `it is draggable` in its body:  `static draggable = true`, first among its body's statements
+    (`TypeDeclaration.abilitiesOf()`, which `Block.getAST()` asks for).
+  - `{ability:draggable_or_droppable}*`, so several:  `a clickable selectable thing`.
+  - Spanish's come after the template, as its adjectives do:  `una "carta" es una vista reversible arrastrable`,
+    `una "pila" es una lista visible soltable de cartas`.
+- A type's line may say its short name last (P48, Q6):  `a "playing card" is a thing, aka "card"`
+  (Spanish `, alias "carta"`);  a property's start and default too:  `its score is a number, starting at -1`,
+  `its direction is one of up or down, with default down` (Spanish `, empezando en`, `, por defecto`).
 - Bullets:  on ANY line, a starting `- ` is dropped before the statement is read.
   - That's `BlockLine.isBullet()`.
   - The `-` stays a token of the line's match, so editors see it.
@@ -1004,7 +1023,7 @@ a line of the built-in types table, a built-in template, or a project's own `one
   - An alias true for every one of the type says so:  `- it "can move" always`.
     - `always` / `never` are constants, read as its body.
 
-- What spellx can say, said in an outline too (epic `elemental-spell` P5:  each spellx tag has a code-spell twin):
+- More an outline can say (epic `elemental-spell` P5):
   - A TEST in a template's outline, `- to test card setup:`, tests the template.
     - `MethodDefinition.processSignature()` marks it `testOf`, not a method of the type.
     - It compiles as a test written at the top level does, exported, so the program runs it as it loads;
@@ -1014,6 +1033,14 @@ a line of the built-in types table, a built-in template, or a project's own `one
       Its scope is a `MethodScope` whose `thingName` is `it`;  the rules that write the thing read it while parsing.
   - An ACTION's description, indented under it:  `- shortcut meta+T`, `- enabled when ...`, `- selected when ...`,
     `- undoable as "..."`, `- icon "..."`, `- titled "..."` (P18 of epic `language`:  a fill-in makes a getter, `titleFrom`).
+    - Or on its head line, its name quoted (epic `language` P48, Q6):
+      `to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"`, and `undoable`.
+      Each is an [`action_modifier`](rules/methods/ActionModifier.ts), after `with`, a comma or `and` between;
+      `ActionDetail.detailsOf()` reads them first, then the body's lines.
+      Its declaration names it without its quotes (`ToDoSomething.getDeclaration()`).
+    - Its title, said nowhere, is its words in Initial Caps (P48):  `to auto play` is `Auto Play`, written into
+      `core.describeAction()`;  the core's own fallback, for an action or menu described with nothing, is the same
+      (`wordsOf()`, `initialCaps()` from `spell/util`).
     - Each is an [`action_detail`](rules/methods/ActionDetail.ts) line, taken only in a template's action's body:
       its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
     - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,
@@ -1216,9 +1243,10 @@ a line of the built-in types table, a built-in template, or a project's own `one
   - e.g. `return` + markup, or `draw_it`'s
   - As an inline body does (`SpellStatement.parseNestedBlock()`).
 
-## What spellx says, in code spell (epic `elemental-spell` P5)
+## Property bodies, slots and drawn lines (epic `elemental-spell` P5)
 
-Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  these are the lines P5 added.
+Lines a type's body says beyond its plain properties and actions:  P5 added them, so all of it could be said in
+plain Spell.
 
 - A property's own ALIASES, indented under it (Q13):  `- its "suit" is one of ...`, then `- it "is a (suit)"` under it.
   - `define_property_has`'s body (`{nested_statements}`) parses its lines in a `P.SubjectScope` of the type, as the
@@ -1230,9 +1258,13 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
 - A stored property's line said with `its` that stops short of its line isn't one (epic `data` I1):
   `- its "high cards" is cards in its cards where ...` reads `is cards` as well as a getter would, and outranks it.
   So `define_property_has` turns it down, and `property_value_getter` takes the whole line.
-- A worked-out value from a list of ITS OWN:  `- its "color" is one of red, black:`, then its value lines.
-  - `property_value_getter` with a `{specifier:outline_specifier_enum}` and a required `:`;  at `Priority.declaration`,
+- A worked-out value from a list of ITS OWN:  `its "color" is one of red, black`, then its value lines.
+  - `property_value_getter` with a `{specifier:outline_specifier_enum}`;  at `Priority.declaration`,
     so it beats `define_property_has`, which would read all but the colon.
+  - Its colon may be left out (epic `language` T93, P48):  then the line is worked out only when VALUE lines are
+    indented under it (`red if ...`, not a member's `it ...` line, not comments alone), and it outranks the stored
+    property's line, which reads the same words (`Priority.aboveDeclaration`).
+    - It asks `SpellStatement.blockBelow()` -- see "What's indented under a line", below.
   - Its list is declared as a stored property's (`DefinePropertyHas.declareEnumeration()`):  the class variable,
     the kind, the constants.  `static Colors = [...]`, then the getter.
   - Its BULLETED lines are its members, not its body:  `PropertyValueGetter.parseNestedBlock()` splits the block,
@@ -1255,9 +1287,8 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
     `Priority.specific`, over `draw_thing`;  a name that's the view's property, not a slot, is left to `draw_thing`.
     - In the view's element (its shadow root), what the page puts in it, `slot="front"`, replaces the drawing for
       that one element (P27);  unfilled, its own drawing shows, a sub-type's if it draws it again.
-  - FILLED from outside (P27):  `<card><text slot="front">Ace</text></card>`;  code spell's twin is the same markup,
-    `slot=` or spell's own `in=`.
-    - A spellx drawing's bare view, `<carta>`, names its children's slots as they compile (`SpellJSX.withSlotNames()`):
+  - FILLED from outside (P27):  `<card><text slot="front">Ace</text></card>`, by `slot=` or spell's own `in=`.
+    - A drawing's bare view, `<carta>`, names its children's slots as they compile (`SpellJSX.withSlotNames()`):
       a Spanish two sided view's `slot="frente"` fills its `front`.
   - A slot's markup carries its name as a CSS part (J6):  `part="front"`, added to any it says (`DrawIt.withPart()`).
 - A DRAWN LINE (Q14):  in a drawing, a line of markup, or a slot placed, IS the drawing.
@@ -1297,188 +1328,225 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
     `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` drawing both slots,
     back to back, its own `<css>` turning it over in 3D (a view type's style sheet, `static css`).
 
-## Spellx:  a third style of spell (epic `elemental-spell` P6, Q69)
 
-A `.spell` file is read by spell's own parser and rules, as sentences and the outline are:
-each tag line reads as its code-spell twin line, so it compiles to exactly what its twin `.spell` file does.
+## Pages:  `"button api" is a notebook page` (epic `language` P45, P47)
 
-- Which form a file is:  what it says (`SP.formOfText()`, `SpellFile.form`, `"spell"` or `"spellx"`;  epic `language` P40).
-  - Tags:  any line starting with `<` in the very first column, other than `<ui-defaults>`;  lines in a comment don't count.
-  - The old endings, `.spellml` and `.spellx`, are always tags.
-- A place's tag, `<web-server "x" address="...">`, at a file's top level only (`SP.SpellxPlaceWord`, the language's `places`):
-  its twin is its plain line, `x is a web server at "..." :`, and its body is plain Spell, as an `<action>`'s.
-  - An unknown word with `address=` there is a kind a library adds:  `<supabase-project>` reads `x is a supabase project at`.
-  - `SX.SpellxWriter` writes a place's line as its tag, by whichever entry's words it says;  none, and it stays in `<spell>`.
-  - A file whose shape changes as it's edited is parsed whole, in a new scope:
-    incremental parsing never carries lines from one shape to the other (`SpellProject.updatedContentsFor()`).
-  - Its parser is the language's, cloned for that form:  `SpellParser.twinFor(language, form)`.
-  - A spellx parser tokenizes a whole file (`"block"`) with [`SP.SpellxTokenizer`](SpellxTokenizer.ts),
+A PAGE FILE holds a page's head, a line of plain Spell, and its body indented under it:
+prose, `##` headings, markup, examples, and the few tags it draws with.
+Spell's own rules read it:  each tag line reads as its plain-Spell TWIN, so a page compiles to exactly what its twin
+would.
+
+- Spell has ONE written form since epic `language` P47.
+  The tag-shaped form before it (epic `elemental-spell` P6) is gone:  a file of tags no longer reads.
+- Everything outside a page is plain Spell, read as any plain file is:  each line at the file's left edge that
+  isn't a page's head.
+
+### Which form a file is
+
+- What it says (`SP.formOfText()`, `SpellFile.form`):  `"page"` when a line at its left edge, outside a comment, is a
+  page's head;  else `"spell"`.
+- A page file's parser is the language's, cloned for that form:  `SpellParser.twinFor(language, "page")`.
+  - It tokenizes a whole file (the `"block"` rule) with [`SP.PageTokenizer`](PageTokenizer.ts),
     and everything else (a line, an expression) with spell's own.
-    So code spell's tokenizer and speed are untouched.
-  - An app's widget defaults, `<ui-defaults>` at the file's top (the language's `defaultsTag`, epic `language` P29),
-    are markup:  the spellx tokenizer passes the line by, so the whole block is one element, as in code spell
-    (`ui_defaults`).
-- [`SpellxTokenizer`](SpellxTokenizer.ts):  spell's tokenizer, plus three tokens ([SpellxTokens.ts](SpellxTokens.ts)):
-  - a tag's head, `<property "suit" one-of="clubs, hearts">`, is ONE `SpellxTagToken`, its lines and all
-    - What it says is its `tag`:  category, kind (in English), name, attributes, phrase, `/>`.
-    - Its name's, values' and phrase's own spell tokens are `nested`, at their places in the file.
-  - a closer, `</>` or `</property>`:  a `SpellxCloserToken`
-  - a line of prose (a template's line that isn't a tag, Q12) or a note's text:  a `SpellxProseToken`, a comment
-    - a fenced code block in prose (` ``` ` or `~~~`):  every line of it prose, to its closing fence,
-      so a tag at a line's start there is shown, never read (`openFence`;  epic `language` T80)
-  - The rest is spell's own tokens:  a body's spell, a drawing's markup.
-  - So a tag line and its indented body are a line and its block, as an outline item and its body are:
-    `breakIntoIndentedBlocks()` needs nothing new.
-  - It keeps a stack of open tags, by indent, to check what it can see there:
-    a word spellx doesn't know (naming the closest, or the words that go there), a closer for another tag,
-    a tag never closed (one still open at the file's end too), an `<otherwise>` after a `</>` closed its `<if>`,
-    a body line indented less than its tag's.
-    - Each goes on its token (`SP.addSpellxError()`), never thrown;  `BlockLine` reports it on its line.
-  - Which tags are its own where:  every one at the top and among a template's members;  in a body, notes and
-    controls;  in a drawing, those and a placed slot;  in a menu, its actions (`isTagHere()`).
-  - SHORT TAGS (epic `language` P41):  at a file's top level a template's tag is its own word, `<page>`, `<thing>`,
-    `<extend>` (`topTemplateOr()`, `isShortTemplate`);  inside a site `<page>` is its part, in a drawing Spell UI's.
-    - The old spelling, with the language's prefix, `<spell-page>`, `<encanto-vista>`, `<spell-more-of>`, still reads
-      anywhere a template goes;  a short closer closes it, and the other way round.  Nothing writes it.
-    - Code that finds a template in text without parsing it asks `SP.spellxTemplateTagOf()` (`spellxTags.ts`,
-      the packs' words alone, so a page with no parser may import it by path).
-  - A NOTE is `<note>` (`<nota>`), and `<property-editor>`, `<stories>`:  prose kept, never run.
-    - In a drawing their words are markup:  `<comment>` is `<ui-comment>`, as `<button>` is `<ui-button>`;
-      `<note>` a project's own view.
-    - An old note word elsewhere (`<spell-description>`, `<spell-comment>`, a short `<description>` or `<comment>`
-      among a template's members) still reads as a note, with a warning naming `<note>` (`spellx-old-note`):
-      noted on the token (`SP.addSpellxWarning()`), and `BlockLine` notes it on its line (`SP.SpellWarnings.note()`);
-      a `<spell-description>` first in a tag, read as its docstring, passes its warning to the tag's line.
-  - A run of markup stops at a line a spellx tag starts (`nextElementStart()`, the parser tokenizer's hook):
-    else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
-  - A `<spell>` chunk (the bare prefix, `<encanto>` in Spanish;  epic `elemental-spell` P12) is code spell as written:
-    `breakIntoIndentedBlocks()` takes its tag line out and puts its body's lines in its place (`unwrapCode()`),
-    so they parse at the level the chunk is at:  a member among a template's, a function at the top.
-    Its closer stays, and compiles to nothing.
-    - An `<html>` block (epic `elemental-spell` P16) is unwrapped the same way:  its markup the drawing's own lines,
-      as written.  A view of the file's chunks keeps it whole (`unwrapsHtml`).
-  - A PAGE THAT DRAWS ITS BODY (P16;  epic `notebook` P1, P2):  any `<page>` with no `<draw>` of its own in its
-    block, flag or not (Q2 B).
-    - The tokenizer works it out ONCE, as it reads the head (`SP.isPageDrawingItsBody()`), and keeps it on the tag,
-      `SP.SpellxTag.drawsBody`:  everything after reads it there.
-      - It looks ahead in the page's block once (`hasDrawOfItsOwn()`):  a `<draw>` at its body's indent, not a slot
-        placed (`<draw "front" />`), not in fenced code or a comment.
-      - Read a line at a time (`tokenizeLine()`, the editor's colouring), it can't see the block:
-        then the `notebook` flag says.
-    - A page WITH a `<draw>` is read as before:  loose text a comment, the lines just above a member its docstring.
-    - `<notebook "x">` is the short spelling of `<page "x" notebook>`:  its word brings the flag (the words
-      table's `{ kind: "page", flag: "notebook" }`).  The flag only turns on the editor's in-place page.
-    - Its body is a drawing, so a line there that isn't spellx's is markup or markdown (prose).
-    - Its twin (`SpellxTwin.drawnPage()`), `counter notebook is a page :`, keeps its members, and makes the rest
-      its drawing, `- to draw it :`:  markup as written, each run of prose a `<markdown>` element (a new one at each
-      `##`), each run of markup lines joined into one implicit fragment;  `locked`, `- its lock is locked`.
-      - Its SECTIONS draw as the docs pages' do, sticky and foldable, so the program draws the docs look
-        (epic `notebook` P3, J1;  the words, `SpellxTwinWords.pageSection`):
-        - each `##` heading's run is a `<section label="..." sticky="stack" collapsible dividing level="2">`
-          the twin makes (`sectionFor()`), the rest of the run its `<markdown>` child, its heading only its label
-        - `gatherSections()` moves the markup after it inside, up to the next section, a line of code or a block;
-          markup lines run together are one line, split there
-        - each `<section label="...">` written at the top gets each of those attributes it doesn't say
-          (`withSectionLook()`)
-        - the twin's own tokens stand at the heading (`isSynthetic()`);  each child keeps its own, its source mark
-        - `SX.CodeSpellWriter` writes them out:  a heading's section as tags, a written one's added attributes after
-          its own
-      - So the page's element draws in its children, as an app's does (`Page.drawsInItsChildren`):
-        the editor's docs frame and its "On this page" list reach the sections.
-      - A drawing that's only prose is one `<markdown>` block, alone:  in a method, `markdown_description` leaves it to
-        the drawing's `markdown_block`.
-    - It starts by itself, as any app or page does (`SpellProject.startedByItself()`):  nothing is added to start it.
-  - A PAGE'S OWN VIEWS (epic `notebook` P2, Q1, Q6):  any page, drawing its body or not, may hold templates.
-    - `<view counter>`:  a view, or a thing (`<thing "task">`), is what a page holds by its short word (`tagWordAt()`,
-      `isShortTemplate`, `SHORT_TEMPLATE_KINDS`), Spanish's `<vista>` too:  `<page>` inside a page is Spell UI's `<ui-page>`;
-      in a drawing it's markup.
-    - The old spelling reads there too, `<spell-view "counter">`.
-    - `breakIntoIndentedBlocks()` lifts them to just before the page (`liftPageTemplates()`):
-      code spell declares a type only at a file's top level.
-      It's the page's own, named for it (epic `notebook` P10, Q11, reversing Q7's A):
-      `<view "counter">` in the film page is `a film-page-counter aka counter`, so two pages can each have a `counter`
-      and `<counter/>` finds the page's own (`SpellxTokenizer.nameForPage()`).
-      A view of the file's chunks keeps them where they're written (`liftsPageTemplates`).
-  - A TEMPLATE'S NAME, three ways (`readNamedHead()`):  quoted, `<view "one counter">`;  `name="..."`;  or bare,
-    one word first, `<view counter>` (epic `notebook` P2).
-    An attribute word the tag takes wins:  `<view locked>` is unnamed and locked.
-  - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
-    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
-  - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
-    `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
-    - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
-      `{its name}` in it is a hole, other contents follow it, and it's a child even on a tag closed with `/>`.
-    - Each language's spellings are listed:  `<encabezado "...">`, `<es-encabezado "...">`.
-      A word two languages spell alike but read differently is the language's own (`Language.quotedNameTags`).
+    So plain Spell's tokenizer and speed are untouched.
+- A file whose form changes as it's edited is parsed whole, in a new scope:
+  incremental parsing never carries lines from one form to the other (`SpellProject.updatedContentsFor()`).
+- A page alone in its file is named by its head (`SP.alonePageName()`).
 
-    | Tag | The quoted word is |
-    | --- | --- |
-    | `header`, `button`, `item`, `label`, `title`, `link`, `breadcrumb`, `checkbox`, `radio` | its contents |
-    | `tab`, `panel` | its `label` |
-    | `example` | its `name` |
-    | `tree-node` | its `label` |
-    | `cell` | its column (`data-column`) |
+### The head
 
-    | Left out | Why |
-    | --- | --- |
-    | `text`, `description` | often long, or text mixed with values |
-    | `td`, `th` | the web's own table tags |
-    | `segment`, `column`, `content`, `stack` | they hold layouts;  their short text is mostly in demos |
-    | `author`, `date` | common only in Spell UI's feed and comment demos |
-  - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
-    line, each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
-    - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`
-      puts each of its lines at its first line's indent, so they never make a block of their own.
-    - It ends the tags open deeper, as a `//` line does, but is never itself wrong where it sits.
-    - One never closed is `spellx-unclosed-comment`, on its first line.
-    - Inside markup it's the markup's own, a `P.JSXCommentToken` (below).
-  - A line's closer may have a comment after it, `<property "value">1</>   // ace = 1`:
-    the twin keeps it after its inline body, so it's the member's docstring, as on the twin line.
-- [`SpellxTwin`](SpellxTwin.ts), from `BlockLine.parse()`:  a tag's line, rewritten as its twin's tokens.
-  - The twin's words are the LANGUAGE's, in its words file (`spellx.twins`), with slots:
-    `its {name} is one of {one-of}`, `to {words} :`, `on {phrase} :`.
-  - A slot takes the tag's own tokens, so a name or phrase keeps its place in the file;
-    the twin's own words are new tokens at the tag's start, marked `synthetic`.
-  - Then the twin parses with the ordinary rules:  the SAME match, AST and code as the code-spell line.
-  - A tag body on the head's own line (`<action "go">print 1</>`) is the twin's inline body;
-    an indented one, its nested block.
-  - A property's `type=` is its stored type, its body the value it starts at:  `its {name} is {a type} {type} starting at`.
-  - A repeated `alias=` adds a line per alias in the property's body;  an action's details, a line each.
-  - A `description=`, or a leading `<note>` note, becomes trailing comments on the twin line:
-    `BlockLine` pops them all, and `Block.getDocComments()` makes them the docstring.
-  - Closers parse as `spellx_closer` ([SpellxCloser.ts](rules/statements/SpellxCloser.ts)), which compiles to nothing.
-  - A `<menu "game menu">` is ONE line, its `<action>`s quoted after it:
-    `its "game menu" is a menu of "deal" , "-" and "undo"` (`define_menu`), its block swallowed (P10).
-    A `<menu>` inside it is a sub-menu, quoted the same way;  its `title=` adds `titled "..."`, and
-    `for-each=` with `action=` reads as `its "x" is a menu of <list> , each running "..."` (epic `language` P19).
-    An app tag's `menu-bar=` is a line ending its body, `- its menu bar is "game menu"` (`menu_bar`).
-  - A tag spellx can't read yet is the line's error, `spellx-not-yet`, with its block.
-- A spellx DRAWING's markup (epic `elemental-spell` P7):
-  - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for the spellx tokenizer only), and a tag's
-    name may hold any letter (`<botón>`).
-  - A name with a dash is a pack's too, when it has one (`<tree-diagram>` is `<ui-tree-diagram>`);  else it's left as written.
-  - A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
-    its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
-    carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
-    imports Spell UI.
-  - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a handler inside an element,
-    `spellx-tag-in-markup` (C29).
-  - A `<for>` inside an element (epic `language` I19):  its text is read again as a drawing's own lines
-    (`SpellxTokenizer.tokenizeDrawingLines()`) and parsed in place, its loop drawn as one of the element's children
-    (`SpellJSX.parseLoop()`).
-    - Its head is a phrase to its `>`, as a chain tag's is (`SpellxTokenizer.matchJSXStartTag()`, epic `data` I93):
-      read as attributes, a quote, a paren or an apostrophe in it ended the head early, and its body never joined it.
-- COMMENTS INSIDE MARKUP, in either form (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
+- The page's quoted name, then `is a`, its flags, and `page`:  `"button api" is a notebook page`;
+  Spanish's `"api del botón" es una página cuaderno`.
+  - Each language's pattern is its `SP.PageWords.plainPage`, its groups `name` and `flags`.
+  - Its flags are bare words before `page`, in the language's words:  `notebook` and `locked`
+    (Spanish's `cuaderno`, `bloqueado` or `bloqueada`).
+    Any other word, and the line isn't a page's head.
+  - `notebook` only turns on the editor's in-place page;  `locked` adds `- its lock is locked` to the twin.
+- Only at a file's left edge;  another line there ends the page before it.
+- Its indentation closes it:  no closer, and none is missing.
+- A page's OWN VIEWS are plain Spell, written ABOVE its head in the same file:  `a "counter" is a view:` ...
+  - Named as written, as any type is:  `<counter/>` in the page finds it.
+  - Until P47 they were `<view>` tags inside the page, named for it.
+
+### Its tokens
+
+[`PageTokenizer`](PageTokenizer.ts) is spell's tokenizer, plus four tokens ([PageTokens.ts](PageTokens.ts)):
+- a page's head, or a tag its body draws with:  ONE `SP.PageTagToken`, its lines and all
+  - What it says is its `tag`:  category, kind (in English), name, attributes, phrase.
+  - Its name's, values' and phrase's own spell tokens are `nested`, at their places in the file.
+- a closer, `</>` or `</if>`:  a `SP.PageCloserToken`
+- a line of prose in a page's body:  a `SP.PageProseToken`, a comment as code spell writes it
+  - A fenced code block in prose (` ``` ` or `~~~`):  every line of it prose, to its closing fence,
+    so a tag at a line's start there is shown, never read (`openFence`;  epic `language` T80).
+- a comment on lines of its own, `<!-- ... -->`:  a `SP.PageCommentToken` a line (below)
+- The rest is spell's own tokens:  plain Spell, a drawing's markup, the spell in `{...}`.
+
+- So a tag line and its indented body are a line and its block, as an outline item and its body are:
+  `breakIntoIndentedBlocks()` needs nothing new.
+- Tags nest by indent;  a closer is checked, never needed to find where a body ends.
+  It keeps a stack of open tags to check what it can see:
+  - a closer that closes nothing, or closes another tag
+  - a tag never closed (one still open at the file's end too)
+  - an `<otherwise>` with no `<if>`, or after a `</>` closed its `<if>`
+  - a body line indented less than its tag's
+  - a `<for>` head's mistakes:  a flag before its attributes, a table with no cells
+  - Each goes on its token (`SP.addPageError()`, read back with `SP.pageErrorOf()`), never thrown, in the file's
+    language (the `page-*` messages);  `BlockLine` reports it on its line (`SP.PageTwin.errorsIn()`).
+- Which tags are its own where (`isTagHere()`):
+  - only in a page's body, or a drawing's lines (`tokenizeDrawingLines()`, below):  outside one, it's plain Spell
+  - a `<spell>` block only right in a page's body;  an `<html>` block anywhere in it
+  - a loop's slots, `<empty>`, `<loading>`, `<failed>`, only right inside its `<for>`
+  - inside a block of code, none:  it's that code's
+- A run of markup stops at a line a page's tag starts (`nextElementStart()`, the parser tokenizer's hook):
+  else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
+- Read a line at a time (`tokenizeLine()`, with the tags open before it):  the editor's colouring.
+
+### The tags a page's body draws with
+
+- An IF-CHAIN, `<if ...>`, `<otherwise if ...>`, `<otherwise>`:  `if ...`, `otherwise if ...`, `otherwise`.
+- A LOOP, `<for film in its films>`:  `for film in its films`.
+  - Its head is a phrase to its `>`:  a `>` inside quotes, parens or braces is the phrase's.
+  - Its attributes come after the phrase:  `title`, `loading`, `empty`, `hide-empty`, `failed`, `paging`,
+    `page-size`, `as`.
+    - Each is a line of code spell at the top of its body, a RIDER (`forLines()`):  `loading="Wait"` is
+      `while waiting :`, written under the loop after its body.
+    - Any other goes on what's around its items:  `<for films as="cards" columns="4" />`.
+  - Its slots, `<loading>`, `<empty>`, `<failed>`:  `while waiting :`, `if there are none :`, `if that fails :`.
+- An `<html>` block (epic `elemental-spell` P16):  markup as written, the drawing's own lines.
+  - `breakIntoIndentedBlocks()` takes its tag line out and puts its body's lines in its place (`unwrapCode()`).
+  - Its closer stays, and compiles to nothing.
+  - Its JSX is code spell's:  `<div>` the web's, never a pack's component (`SP.markCodeSpell()`, J83).
+  - A view of the file's chunks keeps it whole (`unwrapsHtml`).
+- A `<spell>` block (`<encanto>` in Spanish;  epic `elemental-spell` P12):  plain Spell as written,
+  unwrapped the same way, so its lines parse at the level the block is at.
+- A tag body on the head's own line, `<if it is done>✓</>`:  closed by the closer ending the line.
+  - A comment may follow that closer, as on any line of spell:  `<if it is done>✓</>   // done`.
+
+### The twin
+
+[`PageTwin`](PageTwin.ts), from `BlockLine.parse()`:  a page's head or tag line, rewritten as its twin's tokens.
+- The twin's words are the LANGUAGE's, in its words file (`language.words.page.twins`, `SP.PageTwinWords`),
+  with slots:  `{words} is a page :`, `if {phrase}`, `for {phrase}`.
+  - A slot takes the tag's own tokens, so a name or phrase keeps its place in the file.
+  - The twin's own words are new tokens at the tag's start, marked `synthetic` (`PageTwin.isSynthetic()`).
+- Then the twin parses with the ordinary rules:  the SAME match, AST and code as the code-spell line.
+- A tag body on the head's own line is the twin's inline body;  an indented one, its nested block.
+- Closers parse as `page_closer` ([PageCloser.ts](rules/statements/PageCloser.ts)), which compiles to nothing.
+- A PAGE'S HEAD (`drawnPage()`):  `counter notebook is a page :`, its body its drawing, `- to draw it :`, in order:
+  - markup as written, `<section>`, `<example "one counter">`
+  - each run of prose a `<markdown>` element, a new one at each `##`
+  - each run of markup lines joined into one implicit fragment (`joinMarkup()`);
+    a comment between them is skipped over, as blank text is
+  - its tags, as their twins
+  - Its SECTIONS draw as the docs pages' do, sticky and foldable, so the program draws the docs look
+    (epic `notebook` P3, J1;  the words, `SP.PageTwinWords.pageSection`):
+    - each `##` heading's run is a `<section label="..." sticky="stack" collapsible dividing level="2">`
+      the twin makes (`sectionFor()`), the rest of the run its `<markdown>` child, its heading only its label
+    - `gatherSections()` moves the markup after it inside, up to the next section, a line of code or a block;
+      markup lines run together are one line, split there
+    - each `<section label="...">` written at the top gets each of those attributes it doesn't say
+      (`withSectionLook()`)
+    - the twin's own tokens stand at the heading;  each child keeps its own, its source mark
+  - So the page's element draws in its children, as an app's does (`Page.drawsInItsChildren`):
+    the editor's docs frame and its "On this page" list reach the sections.
+  - A drawing that's only prose is one `<markdown>` block, alone:  in a method, `markdown_description` leaves it to
+    the drawing's `markdown_block`.
+  - It starts by itself, as any app or page does (`SpellProject.startedByItself()`):  nothing is added to start it.
+- A page's body only draws:  it declares nothing.
+- Spanish reads the same way, with its own twin words (`si {phrase}`, `para cada {phrase}`).
+
+### The scan before parsing
+
+- The pre-pass that finds every type and method a file declares (`declaredTypes`, `declaredMethods`) reads a page
+  file's SKELETON (`SP.PageTwin.skeletonOf()`):
+  - each page's head as its twin, `counter notebook is a page :`, its body left out
+  - every other line as written:  the plain Spell around the pages, its views too
+
+### A `<for>` inside an element, in a plain file too
+
+- Its text is read again as a drawing's own lines (`PageTokenizer.tokenizeDrawingLines()`), and parsed in place, its
+  loop drawn as one of the element's children (`SpellJSX.parseLoop()`;  epic `language` I19).
+- Its head is a phrase to its `>`, as a chain tag's is (`Tokenizer.phraseHeadTags`, `for` and `para`;  epic `data`
+  I93):  read as attributes, a quote, a paren or an apostrophe in it ended the head early, and its body never
+  joined it.
+- In a plain file (epic `language` P45) its lines are read through the page form's twin parser
+  (`SpellParser.twinFor(language, "page")`).
+  `BlockLine` twins a line that tokenizer read as a tag (a `SP.PageTagToken` or closer at its start), whatever the
+  scope's parser.
+
+### Comments
+
+- `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in a page file:  a `SP.PageCommentToken` per line,
+  each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
+  - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`
+    puts each of its lines at its first line's indent, so they never make a block of their own.
+  - It ends the tags open deeper, as a `//` line does, but is never itself wrong where it sits.
+  - One never closed is `page-unclosed-comment`, on its first line.
+- Inside markup it's the markup's own, a `P.JSXCommentToken`, in either form ("Markup in a drawing", below).
+
+### The chunk tree
+
+- A page file's CHUNK TREE is built from these same tokens, for the editor, the notebook and agents:
+  no rules, nothing compiled (epic `elemental-spell` J30).
+  - `PG.PageView.read(text)` makes a `PG.PageFile`;  its `.pages`, each page's head.
+  - It's the folder `spell/parser/page` (namespace `PG`;  its [AGENTS.md](../page/AGENTS.md)).
+- Its tests:  the parser folder's `tests/page/`;  the page form's own, [PlainPages.test.ts](../../tests/spell/PlainPages.test.ts).
+
+### What uses it
+
+- `spell translate` leaves page files out:  the translator writes plain Spell, line by line.
+- `spell place ingest` writes plain Spell only.
+
+## Markup in a drawing
+
+What a drawing's markup may say, a page's or a plain file's (epic `elemental-spell` P7;  plain Spell's since epic
+`language` P45, Q4 A).
+
+- `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for both of spell's tokenizers), and a tag's
+  name may hold any letter (`<botón>`, `<área-texto>`;  epic `language` P46, `Tokenizer.JSX_TAG_START`),
+  so Spanish names Spell UI's components bare too.
+- A name with a dash is a pack's too, when it has one (`<tree-diagram>` is `<ui-tree-diagram>`);  else it's left as written.
+- A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
+  its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
+  carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
+  imports Spell UI.
+  - In a page, a bare name nobody has is `page-unknown-component`;  a handler inside an element,
+    `page-tag-in-markup` (C29).
+  - In plain Spell a bare name nobody has is the web's own element, as written (`<div>`, `<p>`, `<br>`):
+    plain drawings wrote those before they took the shortcuts.
+  - Never in a page's `<spell>` or `<html>` block, code spell as written (J83):  there `<button>` is the web's.
+- A tag's head may be named by a quoted name after its word, `<example "one counter">`:
+  the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
+- A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
+  `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
+  - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
+    `{its name}` in it is a hole, other contents follow it, and it's a child even on a tag closed with `/>`.
+  - Each language's spellings are listed:  `<encabezado "...">`, `<es-encabezado "...">`.
+    A word two languages spell alike but read differently is the language's own (`Language.quotedNameTags`).
+
+  | Tag | The quoted word is |
+  | --- | --- |
+  | `header`, `button`, `item`, `label`, `title`, `link`, `breadcrumb`, `checkbox`, `radio` | its contents |
+  | `tab`, `panel` | its `label` |
+  | `example` | its `name` |
+  | `tree-node` | its `label` |
+  | `cell` | its column (`data-column`) |
+
+  | Left out | Why |
+  | --- | --- |
+  | `text`, `description` | often long, or text mixed with values |
+  | `td`, `th` | the web's own table tags |
+  | `segment`, `column`, `content`, `stack` | they hold layouts;  their short text is mostly in demos |
+  | `author`, `date` | common only in Spell UI's feed and comment demos |
+- COMMENTS INSIDE MARKUP (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to
   nothing.
   - Not in a raw-text tag (`<markdown>`, `<css>`):  their `<!--` and `//` are their text.
   - `//` inside a line stays text (`http://...`).
-  - Between an if-chain's branches, and between a notebook's runs of markup (`SpellxTwin.joinMarkup()`), a comment
+  - Between an if-chain's branches, and between a page's runs of markup (`PageTwin.joinMarkup()`), a comment
     is skipped over, as blank text is.
-  - So spellx's `<!-- -->` in markup and code spell's `//` line compile the same;  `SX.CodeSpellWriter` writes one
-    alone on its lines as `//` lines, `SX.SpellxWriter` a drawing's `//` lines as `<!-- -->`.
-- An IF-CHAIN INSIDE MARKUP, in either form (epic `elemental-spell`, Owen 2026-10-25):
+- An IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25):
   `<text><if it is done>✓<otherwise>{its title}</></text>`.
   - The JSX tokenizer reads it (`Tokenizer.chainTags`, every language's words, `SP.CHAIN_TAGS`):  each branch a
     `JSXElementToken` with its `chain` kind and its `phrase` (a `JSXExpressionToken`, as if written `{...}`);
@@ -1486,24 +1554,11 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - `SpellJSX` keeps every branch on the page, each branch hidden while it isn't the one (`childASTs()`):
     - the web's own elements, and each run of text and holes (in a `<span>` of its own):  `hidden="until-found"`
     - a custom element (`<ui-label>`):  plain `hidden`, which Spell UI hides by (its host has no box of its own)
-  - So it compiles the same from both forms:  code spell writes the same tags.
-  - At a drawing's top level an `<if>` still picks what the drawing returns, rebuilt as it changes:  spellx's tag
-    line, code spell's `if` lines.  A branch in no element is `chain-outside-markup`.
-  - Code spell's drawings are untouched;  so are a `<spell>` chunk's, in a spellx file (J83):  the tokenizer marks
-    its JSX as it unwraps the chunk (`SP.markCodeSpell()`), and `SpellJSX` reads a marked element, and everything
-    inside it, `{...}` too, as code spell.
-- The pre-pass that finds every type and method a file declares (`declaredTypes`, `declaredMethods`) reads a spellx
-  file's twin skeleton:  its template lines, then `\t- ` + each member's twin line (`SpellxTwin.skeletonOf()`).
-  - A `<spell>` chunk's lines are in it as written:  at the top, and among a template's members;
-    under a type written as code, its bulleted members.
-- The way back, a `.spell` file written as spellx, is `SX.SpellxWriter` (`spell spellx convert`, P12):
-  rule by rule over the parse, each declaration as the tag whose twin it is, the rest in `<spell>` chunks.
-- Spanish reads the same way, with its own twin words (`su {name} es uno de {one-of}`, `para {words} :`):
-  a `.es.spell` file is a Spanish code-spell file's twin, its words the language's.
-- Its tests:  each pair in `tests/spell/spellx/`, `X.spellml` beside the `X.spell` it means, compiles the same and has no
-  errors, in English and Spanish ([SpellxTwin.test.ts](../../tests/spell/SpellxTwin.test.ts)).
-- A file's CHUNK TREE (`SX.SpellxView`, `spell/parser/spellx`) is built from these same tokens, for the editor, the
-  notebook and agents:  no rules, nothing compiled (J30).
+  - At a drawing's top level an `<if>` still picks what the drawing returns, rebuilt as it changes:  a page's tag
+    line, plain Spell's `if` lines.  A branch in no element is `chain-outside-markup`.
+  - A page's `<spell>` block's drawings are plain Spell's (J83):  the tokenizer marks its JSX as it unwraps the
+    block (`SP.markCodeSpell()`), and `SpellJSX` reads a marked element, and everything inside it, `{...}` too, as
+    code spell.
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
 
@@ -1569,7 +1624,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       - e.g. `integer` is a `number`
     - their members, from `SP.BUILT_IN_TYPE_TABLE`
     - spell's built-in templates written in spell, e.g. `two sided view`:  each one's type and members, from its
-      compiled declarations (`SP.loadBuiltInTemplates()`;  "What spellx says, in code spell", above)
+      compiled declarations (`SP.loadBuiltInTemplates()`;  "Property bodies, slots and drawn lines", above)
       - NOT in a bare root (`SP.Language.bareRootScope()`), where they compile themselves
 - `MethodScope` adds args, plus `this` / `it` alias variables, of type `itDatatype`.
 - `SubjectScope` owns nothing, and names the type its lines are about:  see "Outline bodies".
@@ -1630,9 +1685,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       (`property_expression`, `P.TypeScope.knowsPropertyAhead()`).
   - Then every METHOD they define is made callable ahead of its definition (P22, `parser.stubDeclaredMethods()`).
     - So a line can call a method defined further down, or in a later file:  `play test-card` above `to play a card`.
-    - A spellx file is scanned as its skeleton, each tag's twin line WITH its `:`:
-      `<extend "square">` is `a square :`, re-opening the square, so its actions are known ahead too
-      (epic `language` T83).
+    - A page file is scanned as its skeleton, each page's head as its twin line WITH its `:`, its body left out
+      (`SP.PageTwin.skeletonOf()`;  "Pages", above).
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:
       - at a file's top:  `to ...`, and old source's `animation ...`
       - in a type's outline body:  `- to ...`, later parsed in a `P.SubjectScope` of that type
@@ -1643,15 +1697,15 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse.
     - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
   - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
-    - So an action can read `the X`, or `its X` (P17), above the line declaring it, or in a later file:
-      a `.spell` view's drawing above its `<property>` tags too, through the file's skeleton.
-    - `SpellParser.declaredProperties()` scans:  a body's `- it has a deck`, `- its "suit" is ...`, `- deck is a deck`;
+    - So an action can read `the X`, or `its X` (P17), above the line declaring it, or in a later file.
+    - `SpellParser.declaredProperties()` scans:  a body's `it has a deck`, `its "suit" is ...`, `deck is a deck`,
+      one tab in, bare or bulleted (`- its "suit" is ...`;  bare since epic `language` P46);
       a top line's `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
     - Only names, on the type (`P.TypeScope.propertiesAhead`, journaled):  the real declaration still records it.
     - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
       With `keepLastGood`, a name being typed doesn't count.
     - Not yet:  a member `belongs to` declares.
-  - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a `.spell` file whose only top-level thing is one page tag,
+  - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a file whose only top-level thing is one page's head,
     comments aside (`SP.alonePageName()`, read from its lines, before anything parses).
     - The project knows only its head (`SP.AlonePage`):  its name and its properties, declared in the project's scope.
       That's what a site's page lines and `go to the film page` read.
@@ -1798,7 +1852,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `SpellType` => `scopeType`
   - A statement which declares something it also uses records it on that match, e.g. `property_value_either`.
 - What waits is worked out for the whole project, before any of it is written (`P.WriterProject.findWaiting()`):
-  - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, spellx's `animated`) are retired:
+  - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, the old tag form's `animated`) are retired:
     each still reads, as an error over just the word, which `spell lint --fix` rewrites or takes out
     (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
   - It starts from what waits by itself (`core`'s calls in `P.CORE_CALLS_THAT_WAIT`, and old source's `wait for`),
@@ -1899,7 +1953,6 @@ sidebars any of them opens.
 - Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, on its class.
 - Its not found and error pages (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
   (`site_overlay`, by the wordings `site_not_found_page`, `site_error_page`):  `static notFoundPage`, `static errorPage`.
-  - spellx:  a `<page>` with no `address`, `<page "not found page"/>`.
 - Going between its pages (P2), naming the PAGE, never its address:
   - `go to the film page for this film`, `show the settings dialog` (`show_site_part`, a statement and an expression, for a
     handler):  `core.showSitePart("film page", film)`
@@ -1914,13 +1967,9 @@ sidebars any of them opens.
 - Running:  the template's class extends the core's hand-written `SiteBase` (`HAND_WRITTEN_BASES`, in
   `builtInTemplateFiles.ts`), which shows the page an address names;  a program with a site starts its site, not its first
   page (`SpellProject.startedByItself()`).
-- Its theme (epic `mockup` P8):  a property of its own, `<property "theme">"mockup"</property>` (`- its "theme" is
-  "mockup"`), no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
+- Its theme (epic `mockup` P8):  a property of its own, `its "theme" is "mockup"`, no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
   alone (`SiteHost.themeTokens()`, the editor's `RunSite`).
 - A page's stories (epic `mockup` P6) are the page's own, `<stories>` in its outline:  "Markdown" below.
-- Spellx:  `<site "galaxy guide" at="...">`, its `<page "film page" address="/films/:film" title="Film">`, `<dialog>` and
-  `<sidebar>`;  those three are spellx's only among a site's members (a page under a page too), and markup everywhere else
-  (`<sidebar>` is Spell UI's).
 
 ## Projects
 
@@ -1982,7 +2031,7 @@ sidebars any of them opens.
   - An old `project.json` is read too.
 - Compiled output is never one of a project's own files.
   - The server's index lists only spell, CSS and javascript files, and property editor pages:  see `isManifestFile()`.
-    - `.spell` (and the old `.spellml`, `.spellx`), `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
+    - `.spell`, `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
     - A property editors file, `Card.editor.spell` or `Solitaire.editors.spell` (`SP.isPropertyEditorsName()`,
       epic `editor` P25) lists as one of its own:  a text file, never compiled, which the Inspector reads.
     - So no other target's output, e.g. `<Project>.spell.py`, is ever listed.
@@ -2128,7 +2177,7 @@ sidebars any of them opens.
       - Unless a key already says, e.g. `type`.
     - `group`:  the group of its template's members a member is under (epic `debut` P26).
       - `Block.getAST()` hands each line the last group opened above it in its block:
-        a `- group "rank"` (spellx's `<group>`), or a heading, `## turning it over`.
+        a `- group "rank"`, or a heading, `## turning it over`.
       - Its first member's says its description too, `groupDescription: "Ace is low"`:
         the comment on the group's line, else the comment lines just above it.
       - The group's own line has no marker:  it would leave a line behind in the compiled code.
@@ -2350,8 +2399,17 @@ sidebars any of them opens.
   - So a statement's output doesn't depend on its depth.
 - A DECLARATION's docstring compiles as one `/** ... */`, in place of its `//` lines.
   - See `getDocComments()`, in [Block.ts](rules/Block.ts).
-  - The docstring:  the comment-only lines directly above it, else the comments on its own line
-    (one in code spell;  a spellx description's, one per line of it).
+  - Its description is the first line under it, when that's a comment (epic `language` P48):
+    `its "state" is`, then `// Its short name`, then its lines.
+    - Its body's first line:  `SpellStatement.parseNestedBlock()` marks the body `describes`, and its `getAST()`
+      leaves that line out, as it's written above the declaration.
+    - Else the first line of a block indented under it that no line took:  a line with its body on it
+      (`its "name" is its rank && "of" && its suit`), or one that takes none (`its "hint" is text`, `group "Names"`).
+      A block of comments alone under a line with an inline body is its description, never a second body
+      (`commitStatement()`).
+    - A group's description too (`groupOpenedBy()`), which its first member's declaration carries.
+  - Else, as before:  the comment-only lines directly above it, else the comments on its own line
+    (one in code spell).  So a file written before still compiles as it did.
   - It goes above the `SPELL: DECLARES` comment:  after any `/* SPELL: added rule ... */` notes the statement makes.
   - A `##` heading is part of it only if DIRECTLY above.
     One followed by a regular comment compiles as a `// ## heading` banner.
@@ -2493,8 +2551,7 @@ sidebars any of them opens.
   - a page's STORIES, `<stories>` in its outline (epic `mockup` P6):  `markdown_description` too, compiled to `static stories`
     - what the page must let people do, one `<story "S1" done>` tag each (epic `mockup` P17):  anything else in the
       block is refused;  nothing draws them
-    - spellx writes it `<stories>` (Spanish `<historias>`), a note whose twin is the `<stories>` block
-      (`SpellxTwin.withStoriesAsBlocks()`)
+    - Spanish writes it `<historias>`
     - two raw-text blocks on consecutive lines are read as one fragment, which no rule takes:  a blank line between
       a `<stories>` and a `<markdown>` keeps them apart
   - in a `<spell-viewer>` layout:  the app's `LayoutSpell`

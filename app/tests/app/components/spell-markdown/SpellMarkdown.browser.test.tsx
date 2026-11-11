@@ -86,15 +86,16 @@ describe("<spell-markdown>", () => {
     expect(body(host).querySelector("ui-label")!.textContent).toBe("kept")
   })
 
-  test("colours its spell blocks:  `<spell-code>`'s language, which its barrel registers", async () => {
+  test("draws its spell blocks bubbly:  `<spell-code>`'s language, which its barrel registers", async () => {
     const host = await markdown(md("```spell\na pile is a list of cards\n```"))
     const block = body(host).querySelector("ui-code")!
     expect(block.getAttribute("language")).toBe("spell")
     await customElements.whenDefined("ui-code")
     await new Promise<void>((resolve) => {
-      if (block.shadowRoot?.querySelector(".hljs-type")) return resolve()
+      if (block.shadowRoot?.querySelector(".drawing .bubbly")) return resolve()
       block.addEventListener("ui-coloured", () => resolve(), { once: true })
     })
-    expect(block.shadowRoot!.querySelector(".hljs-type")!.textContent).toBe("pile")
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    expect(block.shadowRoot!.querySelector(".drawing .bubbly-reference")!.textContent).toBe("pile")
   })
 })

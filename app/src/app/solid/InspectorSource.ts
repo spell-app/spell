@@ -1,9 +1,8 @@
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import type { SP } from "spell/parser/spell"
 // By path, not the barrel:  the template words alone, no parser
-import { spellxTemplateTagOf } from "spell/parser/spell/spellxTags"
 // By file:  the folder's barrel loads the language service
-import { endOfTag, SourceEdits } from "spell/app/lsp/SourceEdits"
+import { SourceEdits } from "spell/app/lsp/SourceEdits"
 
 /**
  * What a program's source says of what the Inspector shows:  its text read, with no parser and no DOM.
@@ -191,9 +190,46 @@ export function propertyCodePlace(place: SP.SpellDeclarationPlace, lines: readon
     }
     if (/\/>\s*$/.test(line) && place.endLine === place.line) return undefined
   }
+  // plain Spell (epic `language` P46):  its body only when its line opens one, `its "color" is one of red, black:`,
+  // or code is under it with no colon (P48);  else the Spell after its `is` on its line,
+  // `its "name" is its rank && "of" && its suit`;  a `one of` has none
+  if (opened < 0 && !/^\s*</.test(line.slice(place.column)) && !opensBody(place, lines)) {
+    if (PLAIN_ONE_OF.test(line.slice(place.column))) return undefined
+    const value = /"\s+(?:is|es)\s+/u.exec(line.slice(place.column))
+    if (!value) return undefined
+    const column = place.column + value.index + value[0].length
+    return {
+      path: place.path,
+      from: place.line + 1,
+      to: place.line + 1,
+      column: column + 1,
+      endColumn: line.trimEnd().length + 1
+    }
+  }
   if (place.endLine <= place.line) return undefined
   return codePlaceOf(place, lines)
 }
+
+/**
+ * Does the property at `place` open a body, its code:  a colon ending its line (`its "state" is:`), or code under it
+ * with none (epic `language` P48, `its "state" is`, then its lines)?
+ * - A comment under it is its description, not code;  under a `one of`, its members' lines (`it "is a (rank)"`) aren't
+ *   either:  only its value lines (`red if it is a heart`) make it worked out.
+ */
+function opensBody(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
+  const line = lines[place.line] ?? ""
+  if (line.trimEnd().endsWith(":")) return true
+  const under = lines.slice(place.line + 1, place.endLine + 1).map((it) => it.trim())
+  const code = under.filter((it) => it && !it.startsWith("//") && !it.startsWith("#"))
+  if (!PLAIN_ONE_OF.test(line.slice(place.column))) return code.length > 0
+  return code.some((it) => !MEMBER_LINE.test(it))
+}
+
+/** A member's line under a property, not its value:  `it "is a (rank)"`, `- it must ...`, Spanish's `"es un (rango)"`. */
+const MEMBER_LINE = /^(?:-\s+|it\b|its\b|su\b|sus\b|"|es\b|está\b)/u
+
+/** A plain property's list of values, after its words:  `is one of ace, 2 ... 10, jack`, `es uno de ...`. */
+const PLAIN_ONE_OF = /"\s+(?:is\s+one\s+of|es\s+un[oa]\s+de)\s+([^:\n]+?)\s*:?\s*$/u
 
 /** Where a tag that starts at `from` on `line` ends, its `>`, outside quotes:  -1 if not on that line. */
 function tagEndAfter(line: string, from: number): number {
@@ -209,7 +245,8 @@ function tagEndAfter(line: string, from: number): number {
 }
 
 /**
- * A property's values, as its `one-of` says them (`<property "rank" one-of="ace, 2 ... 10, jack, queen, king"/>`):
+ * A property's values, as its `one-of` says them (`<property "rank" one-of="ace, 2 ... 10, jack, queen, king"/>`),
+ * or its plain line (`its "rank" is one of ace, 2 ... 10, jack, queen, king`):
  * each as written (`2 ... 10` stays one), with where the list is in its file, to write it back (`oneOfWritten()`).
  * - `undefined`:  it has no `one-of` on its line.
  */
@@ -218,9 +255,10 @@ export function oneOfAt(
   lines: readonly string[]
 ): { values: string[]; line: number; from: number; to: number; isOr: boolean } | undefined {
   const line = lines[place.line] ?? ""
-  const found = /\bone-of="([^"]*)"/.exec(line.slice(place.column))
+  // its tag's `one-of="..."`, or plain Spell's `is one of ...` (epic `language` P46)
+  const found = /\bone-of="([^"]*)"/.exec(line.slice(place.column)) ?? PLAIN_ONE_OF.exec(line.slice(place.column))
   if (!found) return undefined
-  const from = place.column + found.index + found[0].indexOf('"') + 1
+  const from = place.column + found.index + found[0].lastIndexOf(found[1]!)
   const values = found[1]!
     .split(/\s*,\s*|\s+or\s+/)
     .map((value) => value.trim())
@@ -270,10 +308,21 @@ function hasCode(place: SP.SpellDeclarationPlace, lines: readonly string[]): boo
   return codeColumnOf(place, lines) !== undefined || place.endLine > place.line || place.kind !== "ability"
 }
 
-/** Is `place` an ability its type's tag says with a bare attribute, `<view "card" draggable>`? */
+/**
+ * Is `place` a bare ability, one with no condition:  its type's tag's attribute, `<view "card" draggable>`,
+ * its line in plain Spell, `it is draggable` (epic `language` P46), or its word on its type's line,
+ * `a "card" is a draggable two sided view` (P48)?
+ */
 function isOnTypeTag(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
-  return place.kind === "ability" && !!spellxTemplateTagOf(lines[place.line] ?? "")
+  if (place.kind !== "ability") return false
+  // said on its type's own line, a word before its template:  `draggable` (epic `language` P48)
+  if (!/\s/.test(place.name)) return true
+  const line = lines[place.line] ?? ""
+  return BARE_ABILITY_LINE.test(line)
 }
+
+/** A bare ability's own line, in plain Spell:  `it is draggable`, `es arrastrable`. */
+const BARE_ABILITY_LINE = /^\s*(?:-\s+)?(?:it\s+is|es|está)\s+\p{L}+\s*$/u
 
 /** A bare ability's word, as its attribute says it:  `it is draggable` => `draggable`. */
 function bareAbility(name: string): string {
@@ -313,7 +362,7 @@ function codeColumnOf(place: SP.SpellDeclarationPlace, lines: readonly string[])
   if (place.codeColumn !== undefined) return place.codeColumn
   const line = lines[place.line] ?? ""
   const colon = colonOutsideQuotes(line, place.column)
-  if (colon < 0 || spellxTemplateTagOf(line)) return undefined
+  if (colon < 0) return undefined
   const after = line.slice(colon + 1)
   return after.trim() && !/^\s*\/?>\s*$/.test(after) ? colon + 1 + (after.length - after.trimStart().length) : undefined
 }
@@ -344,45 +393,26 @@ function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]):
   }
   let last = place.endLine
   if (last > place.line && /^\s*<\//.test(lines[last] ?? "")) last--
+  // its body's first line, a comment, is its description, not its code (epic `language` P48)
+  const first = place.line + 1 < last && /^\s*\/\//.test(lines[place.line + 1] ?? "") ? place.line + 1 : place.line
   return last > place.line
-    ? { path: place.path, from: place.line + 2, to: last + 1 }
+    ? { path: place.path, from: first + 2, to: last + 1 }
     : { path: place.path, from: place.line + 1, to: place.line + 1 }
 }
 
 /**
  * The property editor a type was written with, its markup as written
  * (epic `debut` I86;  its own file, epic `editor` P25):
- * - first, in a property editors file (`editors`):
- *   `<property-editor "card">`'s lines, in `Card.editor.spell` or the project's `Solitaire.editors.spell`
- * - else inline, in the type's file:  `<property-editor>`'s lines inside `<view "card"> ... </view>`
+ * - in a property editors file (`editors`):  `"card" is a property editor`'s lines, in `Card.editor.spell` or the
+ *   project's `Solitaire.editors.spell`
  * - `""` if it has none.
  * - `typeNames`:  the thing's type's words, then those it inherits (`InspectorActions.typeWordsOf()`):
  *   its own type's first, so a type's own editor wins over the one it inherits.
- * - `sources`:  the program's spell files' text;  `editors`:  its property editors files' text.
- * - `words`:  the tag's words, every language's (`<property-editor>`, `<editor-de-propiedades>`;  epic `language` P41),
- *   and their old spellings (`<spell-property-editor>`;  epic `data` P31).
- * - Closed by its own words or `</>`.
  */
-export function propertyEditorInSource(
-  typeNames: readonly string[],
-  sources: readonly string[],
-  words: readonly string[],
-  editors: readonly string[] = []
-): string {
+export function propertyEditorInSource(typeNames: readonly string[], editors: readonly string[] = []): string {
   for (const name of typeNames) {
-    const own = editors.map((source) => namedEditorIn(source, name, words)).find((markup) => markup !== undefined)
+    const own = editors.map((source) => namedEditorIn(source, name)).find((markup) => markup !== undefined)
     if (own !== undefined) return own
-    for (const source of sources) {
-      for (const body of typeBodies(source, name)) {
-        for (const word of words) {
-          const opening = new RegExp(`<${escapeForRegExp(word)}\\s*>`, "i").exec(body)
-          if (!opening) continue
-          const from = opening.index + opening[0].length
-          const close = closingTagOf(body, word, from)
-          return dedent(body.slice(from, close?.index).split("\n")).trim()
-        }
-      }
-    }
   }
   return ""
 }
@@ -408,16 +438,25 @@ export function withClassNames(markup: string, names: ReadonlyMap<string, string
 }
 
 /**
- * The markup of the property editor for type `name` in a property editors file's `source`, by any of `words`:
- * `<property-editor "card">` ... `</property-editor>` (or `</>`;  the old `<spell-property-editor "card">` too);  `undefined` if it has none.
+ * A property editor's PLAIN HEAD after its quoted name, in every language (epic `language` P45):
+ * `"card" is a property editor`, `"carta" es un editor de propiedades`;  its markup is indented under it.
  */
-function namedEditorIn(source: string, name: string, words: readonly string[]): string | undefined {
-  for (const word of words) {
-    const opening = new RegExp(`<${escapeForRegExp(word)}\\s+"${escapeForRegExp(name)}"\\s*>`, "i").exec(source)
+const PLAIN_EDITOR_HEADS = ["is a property editor", "es un editor de propiedades"]
+
+/**
+ * The markup of the property editor for type `name` in a property editors file's `source`:
+ * - its plain head, `"card" is a property editor`, its markup the lines indented under it (epic `language` P45)
+ * - `undefined` if it has none.
+ */
+function namedEditorIn(source: string, name: string): string | undefined {
+  for (const head of PLAIN_EDITOR_HEADS) {
+    const said = head.split(" ").map(escapeForRegExp).join("[ \\t]+")
+    const opening = new RegExp(`^"${escapeForRegExp(name)}"[ \\t]+${said}[ \\t]*$`, "imu").exec(source)
     if (!opening) continue
-    const from = opening.index + opening[0].length
-    const close = closingTagOf(source, word, from)
-    return dedent(source.slice(from, close?.index).split("\n")).trim()
+    const lines = source.slice(opening.index + opening[0].length + 1).split("\n")
+    // its markup ends at the next line at the file's left edge
+    const end = lines.findIndex((line) => line.trim() && !/^[ \t]/.test(line))
+    return dedent(lines.slice(0, end < 0 ? undefined : end)).trim()
   }
   return undefined
 }
@@ -463,8 +502,8 @@ export type SourceFile = { path: string; text: string }
 
 /**
  * Where a new event `words` (`on double click`) goes in the first type of `typeNames` written in `files`, and its code:
- * - under an outline header for it (`a card:`):  `- on double click:` after its last line, at its rows' indent
- * - else inside its tag:  `<on double click>`, an empty line, `</on>`, just before the tag's end
+ * - under a plain line for it (`a "card" is a view:`, `a card:`):  `on double click:` after its last line, at its
+ *   rows' indent, bare as plain Spell writes a member (epic `language` P46)
  * - `at`:  its offset in the file's text, where `code` is inserted;
  *   `undefined` when the type isn't written in `files`.
  */
@@ -482,20 +521,14 @@ export function newEventIn(
   })
   // an outline header first, in any file:  its rows are where a type's events are listed
   for (const { file, lines, offsetOfLine, ranges } of read) {
-    const header = ranges.find(([first]) => !lines[first]!.trim().startsWith("<"))
+    const [header] = ranges
     if (!header) continue
     const [first, last] = header
-    const row = lines.slice(first + 1, last + 1).find((line) => /^\s*- /.test(line))
+    const row = lines.slice(first + 1, last + 1).find((line) => line.trim() && !line.trim().startsWith("//"))
     const indent = row ? /^\s*/.exec(row)![0] : `${/^\s*/.exec(lines[first]!)![0]}\t`
     let end = last
     while (end > first && !lines[end]!.trim()) end--
-    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${indent}- ${words}:` }
-  }
-  for (const { file, lines, offsetOfLine, ranges } of read) {
-    const tag = ranges[0]
-    if (!tag) continue
-    const indent = `${/^\s*/.exec(lines[tag[0]]!)![0]}\t`
-    return { path: file.path, at: offsetOfLine(tag[1]), code: `${indent}<${words}>\n${indent}\t\n${indent}</on>\n` }
+    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${indent}${words}:` }
   }
   return undefined
 }
@@ -507,19 +540,14 @@ function letters(text: string): string {
 
 /**
  * The 0-based line ranges, both ends in, where type `name` is written in `text`:
- * each template's tag for it, `<view "name"> ... </view>` (or the old `<spell-view>`), and each outline header for it
- * (`a card:`) with the lines under it.
+ * each plain line for it with the lines under it:  its declaration (`a "card" is a view:`, `solitaire is an app:`), or an outline header (`a card:`).
  */
 function typeLineRanges(text: string, name: string): [number, number][] {
   const ranges: [number, number][] = []
-  const lineOf = (offset: number) => text.slice(0, offset).split("\n").length - 1
-  for (const { start, word } of typeTagStarts(text, name)) {
-    const close = text.indexOf(`</${word}>`, start)
-    ranges.push([lineOf(start), lineOf(close < 0 ? text.length : close)])
-  }
   const lines = text.split("\n")
+  const named = `"?${escapeForRegExp(name)}"?`
   const header = new RegExp(
-    `^(\\s*)(?:an?|una?)\\s+"?${escapeForRegExp(name)}"?(?:\\s.*\\b(?:where|donde))?\\s*:\\s*$`,
+    `^(\\s*)(?:(?:an?|una?)\\s+)?${named}(?:\\s+(?:is|es)\\s+.+|\\s.*\\b(?:where|donde))?\\s*:\\s*$`,
     "i"
   )
   lines.forEach((line, index) => {
@@ -565,48 +593,6 @@ function sameWords(a: string, b: string): boolean {
 /** `text` with its RegExp specials escaped. */
 export function escapeForRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}
-
-/** The bodies of each `<view "name"> ... </view>` (any template's tag) in `source`. */
-function typeBodies(source: string, name: string): string[] {
-  return typeTagsIn(source, name).map((tag) => tag.body)
-}
-
-/** Each `<view "name"> ... </view>` (any template's tag) in `source`:  its head, then its body. */
-function typeTagsIn(source: string, name: string): { head: string; body: string }[] {
-  const found: { head: string; body: string }[] = []
-  for (const { start, word, headEnd } of typeTagStarts(source, name)) {
-    const end = endOfTag(source, headEnd)
-    if (end < 0) continue
-    const close = source.indexOf(`</${word}>`, end)
-    found.push({ head: source.slice(start, end), body: source.slice(end + 1, close < 0 ? undefined : close) })
-  }
-  return found
-}
-
-/**
- * Where each template's tag for type `name` opens in `text`, at a line's start:  `<view "card">`, `<thing "card">`.
- * - `start`:  its `<`;  `word`:  its tag as written, for its closer;  `headEnd`:  just past its quoted name.
- */
-function typeTagStarts(text: string, name: string): { start: number; word: string; headEnd: number }[] {
-  const opening = new RegExp(`^[ \\t]*<(\\p{L}[\\p{L}\\p{N}_-]*)\\s+"${escapeForRegExp(name)}"`, "gimu")
-  const found: { start: number; word: string; headEnd: number }[] = []
-  for (const match of text.matchAll(opening)) {
-    if (!spellxTemplateTagOf(match[0])) continue
-    found.push({ start: match.index + match[0].indexOf("<"), word: match[1]!, headEnd: match.index + match[0].length })
-  }
-  return found
-}
-
-/**
- * Where tag `name`, opened before `from`, closes:  `</on>`, `</>`, or its whole words, `</on score change>`
- * (epic `debut` P27);  `undefined` if it doesn't.
- */
-function closingTagOf(body: string, name: string, from: number): { index: number; length: number } | undefined {
-  const closing = new RegExp(`</(?:${escapeForRegExp(name)}(?:\\s[^>]*)?)?>`, "g")
-  closing.lastIndex = from
-  const found = closing.exec(body)
-  return found ? { index: found.index, length: found[0].length } : undefined
 }
 
 /** How far `line` is indented:  a tab counts as one, as a space does. */

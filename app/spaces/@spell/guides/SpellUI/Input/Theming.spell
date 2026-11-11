@@ -1,4 +1,4 @@
-<page "input theming" notebook>
+"input theming" is a notebook page
 	<header level="1">
 		Input
 		<header>An input is a field used to elicit a response from a user.</>
@@ -52,4 +52,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

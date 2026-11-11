@@ -3,7 +3,6 @@ import { createSignal, type Accessor } from "solid-js"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
-import { SX } from "spell/parser/spellx"
 import { editor } from "spell/app/app/editor"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { appTexts } from "spell/app/app/ui/AppTexts"
@@ -41,13 +40,11 @@ export class NotebookController {
     const contents = PrefStore.getAt(this.contentsKey)
     ;[this.contentsShown, this.setContentsShown] = createSignal(contents !== false)
     ;[this.contentsOpen, this.setContentsOpenSignal] = createSignal(PrefStore.getAt(this.contentsOpenKey) === true)
-    const view = PrefStore.getAt(this.viewKey) as CodeView | undefined
-    ;[this.codeView, this.setCodeViewSignal] = createSignal<CodeView>(CODE_VIEWS.includes(view!) ? view! : "spellx")
   }
 
   /**
    * `project`'s notebooks:  its `.spell` files holding a page with the `notebook` flag, in its order --
-   * `<page "x" notebook>`, `<notebook "x">`, `<cuaderno "x">` ...
+   * `"x" is a notebook page`, `"x" es una página cuaderno`;  in tags, `<page "x" notebook>`, `<notebook "x">` ...
    * - Read from the files' text (`NotebookPageCells.holdsNotebook()`), so the page shows as soon as the project's
    *   loaded;  `[]` until then.
    */
@@ -62,7 +59,7 @@ export class NotebookController {
 
   static notebooksIn(project: SP.SpellProject | undefined): SP.SpellFile[] {
     if (!project?.isLoaded) return []
-    return project.spellFiles.filter((file) => file.form === "spellx" && NotebookPageCells.holdsNotebook(file))
+    return project.spellFiles.filter((file) => file.form === "page" && NotebookPageCells.holdsNotebook(file))
   }
 
   ////////////////
@@ -133,42 +130,23 @@ export class NotebookController {
   }
 
   /**
-   * `example`'s code in `view`:  only what it DRAWS, never its `<example>` tags.
-   * - spellx:  its body as written;  spell:  its body's code spell twin (`SX.CodeSpellWriter.writeMarkup()`),
-   *   each bare name the tag the file's last parse chose (`SP.ComponentTags`), as the code-spell tab shows it.
-   * - A body that's one `<html>` block:  what's inside it, as written, in either view.
+   * `example`'s code:  only what it DRAWS, never its `<example>` tags, as written in the file.
+   * - One view:  the page is plain Spell, so there's no other form to show it in (epic `language` P45).
+   * - A body that's one `<html>` block:  what's inside it, as written.
    */
-  exampleCode(example: ExampleSpan, view = this.codeView()): string {
-    if (view === "spellx" || example.html) return example.body.code
-    const tags = SP.ComponentTags.of(this.file)
-    const { body } = example
-    // where a place in the body's code is in the file:  each line after the first lost its indent
-    const fileOffset = (offset: number) =>
-      body.span.start + offset + body.indent.length * (body.code.slice(0, offset).split("\n").length - 1)
-    return SX.CodeSpellWriter.writeMarkup(body.code, {
-      path: this.file.path,
-      componentTag: (word, start) => tags.componentTag(word, fileOffset(start))
-    })
+  exampleCode(example: ExampleSpan): string {
+    return example.body.code
   }
 
   /**
-   * The example written at `place` now has `code`, typed in its code editor, in the page's code view.
-   * - An edit in the spell view is written back as spellx (`SX.SpellxWriter.writeMarkup()`):
-   *   each tag a bare name gave is that name again.
+   * The example written at `place` now has `code`, typed in its code editor.
    * - Typed into the file as the code column types (`editor.typeInto()`), and drawn again once the typing pauses.
    */
   editExample(place: { line: number; column: number }, code: string) {
     const example = this.exampleAt(place)
-    if (!example) return
-    // an `<html>` block's markup is written as it is, in either view
-    const isSpell = this.codeView() === "spell" && !example.html
-    const tags = SP.ComponentTags.of(this.file)
-    const spellx = isSpell
-      ? SX.SpellxWriter.writeMarkup(code, { path: this.file.path, componentWord: (tag) => tags.wordFor(tag) })
-      : code
-    if (spellx === example.body.code) return
+    if (!example || code === example.body.code) return
     const before = this.file.contents ?? ""
-    const { edit } = SourceEdits.editBetween(before, NotebookPageCells.withCode(before, example.body, spellx))
+    const { edit } = SourceEdits.editBetween(before, NotebookPageCells.withCode(before, example.body, code))
     editor.typeInto(this.file, [edit], EXAMPLE_COMPILE_DELAY)
   }
 
@@ -238,20 +216,6 @@ export class NotebookController {
   // ## Modes
   ////////////////
 
-  /** Which view the page shows code in:  one switch for every example (`CODE_VIEWS`). */
-  readonly codeView: Accessor<CodeView>
-  private readonly setCodeViewSignal: (view: CodeView) => void
-
-  /** Show every example's code as `view`, and remember it for this notebook. */
-  setCodeView(view: CodeView) {
-    this.setCodeViewSignal(view)
-    try {
-      PrefStore.setAt(this.viewKey, view)
-    } catch (error) {
-      console.error("NotebookController:  couldn't remember the code view", error)
-    }
-  }
-
   /** Is "On this page" shown as a column?  Always, unless its Hide hid it:  remembered per notebook. */
   readonly contentsShown: Accessor<boolean>
   private readonly setContentsShown: (shown: boolean) => void
@@ -294,23 +258,7 @@ export class NotebookController {
   private get contentsKey(): string {
     return `spellEditor:notebook-contents:${this.file.path}`
   }
-
-  /** Where the code view is remembered:  per notebook. */
-  private get viewKey(): string {
-    return `spellEditor:notebook-view:${this.file.path}`
-  }
 }
-
-/**
- * The views a notebook shows its examples' code in (epic `elemental-spell` P16;  html dropped in P25):
- * - `spellx`:  as written, `<button>`, `<counter/>`
- * - `spell`:  the code spell it reads as, each bare name its element's tag, `<ui-button>`, `<counter-counter/>`
- *   (`NotebookController.exampleCode()`);  an edit there is written back as spellx (`editExample()`)
- */
-export const CODE_VIEWS = ["spellx", "spell"] as const
-
-/** One of `CODE_VIEWS`. */
-export type CodeView = (typeof CODE_VIEWS)[number]
 
 /** What the pane's header says of the edits (`NotebookController.status()`). */
 export type SaveStatus = "locked"

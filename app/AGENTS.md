@@ -105,7 +105,7 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
       - Their helpers:  [app/spaces/test](src/spaces/test/index.ts) (`loadFixtureProject()`, `compiledFixture()` ...).
       - `spell content check` runs every content check in one Vitest run (epic `content` P2):
         the snapshot tests, the Spanish projects' own tests, the command-line contract,
-        the spellx round trip and its twins, the notebooks, README-examples' table.
+        the notebooks, README-examples' table.
         - `spell content check --bless` rewrites every snapshot among them;  read the diff.
         - The list of tests is the folder's `spell:test:fixtures` (and `:bless`) yarn scripts, which it runs.
         - The snapshots are generated files:  `linguist-generated merge=binary` in [.gitattributes](.gitattributes),
@@ -288,7 +288,17 @@ The app's part of the page server's settings (its `package.json`'s `"pageServer"
 ## Writing an example
 
 Examples are what people and agents copy, so each one shows the current way (Owen, 2026-10-31, epic `data`).
-- Always the tag shape, with all of the latest language and UI features.
+- Always plain Spell, with all of the latest language and UI features (epic `language` P46, Q47;  Owen, 2026-11-11):
+  no tags for code.
+  - Each member bare on its line, no `- `;  it stays only under a worked-out property's body.
+  - Group names in Initial Caps (`group "Game Play"`);  a member made new without its `its`
+    (`"stock" is a new stock pile with name "stock"`);  text joined with `&&` (`its rank && "of" && its suit`).
+  - A handler's event on its own line, its steps under it.
+  - As the drawn-bubbly page writes it (epic `language` P48):  no colon before a body;  an ability on its type's
+    line (`a "card" is a draggable two sided view`);  a declaration's description the first comment inside it;
+    an action's title on its head line, only where it isn't its name in Initial Caps
+    (`to "say i knew it" with title "I knew it", icon "check"`).
+  - A drawing names Spell UI's components bare, `<text>`, `</>` closing any element.
   - No HTML.  Minimal CSS.
 - Separate concerns:  API, UI and custom widgets each in their own files.
 - Avoid custom widgets:  research what the `ui-*` widgets offer, and use those whenever possible.

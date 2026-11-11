@@ -1,4 +1,4 @@
-<page "panel examples" notebook>
+"panel examples" is a notebook page
 	<header level="1">
 		Panel
 		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
@@ -142,4 +142,3 @@
 			</example>
 		</>
 	</>
-</page>

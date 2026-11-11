@@ -14,10 +14,10 @@
       ],
       "kind": "function",
       "returns": "nothing",
-      "defined": "/FizzBuzz.spell:447-823"
+      "defined": "/FizzBuzz.spell:355-821"
     }
   ],
   "codeLines": [
-    36
+    35
   ]
 }

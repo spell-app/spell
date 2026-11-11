@@ -5,78 +5,59 @@
 // Its tickets are kept here too:  the picnic has 40, each attendee asks for as many as their row says, and a ticket
 // an organizer confirms lets its guest into the attendees' space, where the day's details are.
 // Your event's sheet names its own spaces on the next lines:  "picnic@rs" is the Rock Society's picnic.
-<data-folder "sign up sheet" address="picnic@rs/__private/signups">
-	- open to sign-ups from "picnic@rs/sheet"
-	- only its attendees add rows
-	- at most 2 rows for each shift
-	- at most 40 rows for each event
-	- each person asks for at most their "invitations" tickets
-	- confirmed tickets join "picnic@rs/__attendees"
-	- check it every 30 seconds
-</data-folder>
+sign up sheet is a data folder at "picnic@rs/__private/signups"
+	open to sign-ups from "picnic@rs/sheet"
+	only its attendees add rows
+	at most 2 rows for each shift
+	at most 40 rows for each event
+	each person asks for at most their "invitations" tickets
+	confirmed tickets join "picnic@rs/__attendees"
+	check it every 30 seconds
 
-// What everyone in the picnic sees:  who's on which shift, never an organizer's note.
-<spell>
-	the published sheet is a projection of the sign up sheet:
-		- into "picnic@rs/sheet"
-		- showing each row's person and shift
-		- published volunteers live at "volunteers"
-		- check it every 30 seconds
-</spell>
+the published sheet is a projection of the sign up sheet
+	// What everyone in the picnic sees:  who's on which shift, never an organizer's note.
+	into "picnic@rs/sheet"
+	showing each row's person and shift
+	published volunteers live at "volunteers"
+	check it every 30 seconds
 
-<thing "volunteer">
-	<spell>
-		- it lives in the sign up sheet
-	</spell>
-	<property "person">text</>
-	<property "shift">text</>
-	<property "note">text</>
-</thing>
+a "volunteer" is a thing
+	it lives in the sign up sheet
+	its "person" is text
+	its "shift" is text
+	its "note" is text
 
 // Who may sign up, and how many invitations each may ask for:  the organizers work it out from their standing and
 // their shifts ("work out the invitations", on the page).
-<thing "attendee">
-	<spell>
-		- it lives in the sign up sheet
-	</spell>
-	<property "person">text</>
-	<property "standing">text</>
-	<property "invitations" type="number" />
-</thing>
+an "attendee" is a thing
+	it lives in the sign up sheet
+	its "person" is text
+	its "standing" is text
+	its "invitations" is a number
 
-// A ticket someone asked for, for a guest:  an organizer confirms it.
-<thing "ticket">
-	<spell>
-		- it lives in the sign up sheet
-	</spell>
-	<property "person">text</>
-	<property "guest">text</>
-	<property "event">text</>
-	<property "status">text</>
-</thing>
+a "ticket" is a thing
+	// A ticket someone asked for, for a guest:  an organizer confirms it.
+	it lives in the sign up sheet
+	its "person" is text
+	its "guest" is text
+	its "event" is text
+	its "status" is text
 
-// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
-<data-folder "my inbox" address="@rs/__inbox">
-	- check it every 30 seconds
-</data-folder>
+my inbox is a data folder at "@rs/__inbox"
+	// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
+	check it every 30 seconds
 
-// A message in your inbox:  your invitations' count is one, in the conversation "invitations".
-<thing "message">
-	<spell>
-		- it lives in my inbox
-	</spell>
-	<property "text">text</>
-	<property "recipients">text</>
-	<property "thread">text</>
-	<property "page">text</>
-	<property "title">text</>
-	<property "line">text</>
-</thing>
+a "message" is a thing
+	// A message in your inbox:  your invitations' count is one, in the conversation "invitations".
+	it lives in my inbox
+	its "text" is text
+	its "recipients" is text
+	its "thread" is text
+	its "page" is text
+	its "title" is text
+	its "line" is text
 
-<thing "published volunteer">
-	<spell>
-		- it lives in the published sheet
-	</spell>
-	<property "person">text</>
-	<property "shift">text</>
-</thing>
+a "published volunteer" is a thing
+	it lives in the published sheet
+	its "person" is text
+	its "shift" is text

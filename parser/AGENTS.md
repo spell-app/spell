@@ -16,7 +16,7 @@ working in `parser/`, the kit's parser folder (its yarn workspace is still named
   - `core`:  the runtime compiled spell runs on
   - `py`:  Python's writers, and `spell_core`, a uv project
   - `spell`:  the language
-  - `spellx`:  spell's tag-shaped form, `.spell` files
+  - `page`:  the chunk tree a page file reads into
   - `cli`:  the language's `spell` commands
 - It may use the kit's own `src/`:  util's helpers (by name, `spell/util`) and the toolchain;
   and, in `cli` only, the kit's command line (`spell/cli`) and its server's command runs (`spell/server`, loaded only
@@ -48,7 +48,7 @@ working in `parser/`, the kit's parser folder (its yarn workspace is still named
     the kit's `spell-types` builds both into `dist-types/` (git-ignored), for the app's node program,
     which reads the other folders' declarations (the kit's AGENTS.md, "Imports across repos").
     - [tsconfig.json](tsconfig.json):  the browser-safe code, `parser`, `markdown`, `core`, `py`'s writers, `spell`
-      and `spellx`
+      and `page`
     - [tsconfig.node.json](tsconfig.node.json), what needs node:
       the cli, spell's `node/` and `test/`, the parser's test helpers, core's declarations writer, the scripts and
       configs
@@ -71,7 +71,7 @@ Each folder links to its own `AGENTS.md`:  read it before working there.
 | [core](src/core/AGENTS.md) | `spell/parser/core` | `SC` | the runtime compiled spell runs on |
 | [py](src/py/AGENTS.md) | `spell/parser/py` | `PY` | Python's writers (its TypeScript) and `spell_core` (`core/`, a uv project) |
 | [spell](src/spell/AGENTS.md) | `spell/parser/spell` | `SP` | the spell LANGUAGE on the parser, and `PARSING.md`;  its page for people is [README-spell.md](README-spell.md) |
-| [spellx](src/spellx/AGENTS.md) | `spell/parser/spellx` | `SX` | spellx, spell's tag-shaped form:  the chunk tree a `.spell` file reads into (spell's own parser reads and compiles it);  its page for people is [README-spellx.md](README-spellx.md) |
+| [page](src/page/AGENTS.md) | `spell/parser/page` | `PG` | the chunk tree a page file reads into, for the notebook editor and agents (spell's own parser reads and compiles it:  "Pages" in [PARSING.md](src/spell/PARSING.md)) |
 | [cli](src/cli/AGENTS.md) | `spell/parser/cli` | | the language's `spell` commands (`commands.ts`), and their types |
 
 - Outside `src/`, and never imported:
@@ -107,7 +107,7 @@ yarn format           # oxfmt, then ruff format;  format:check only checks
 yarn review           # the finishing pass:  ts, lint:fix, format, test
 ```
 
-- One folder's tests:  `yarn vp test run --project parser` (`parser`, `markdown`, `core`, `py`, `spell`, `spellx`,
+- One folder's tests:  `yarn vp test run --project parser` (`parser`, `markdown`, `core`, `py`, `spell`, `page`,
   `cli`).
 - A sub-folder's own scripts are the folder manifest's, prefixed with its name:
   - `markdown:spec:update`

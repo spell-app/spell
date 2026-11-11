@@ -1,4 +1,4 @@
-<page "comment theming" notebook>
+"comment theming" is a notebook page
 	<header level="1">
 		Comment
 		<header>A comment displays user feedback to site content.</>
@@ -116,4 +116,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

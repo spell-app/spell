@@ -1,4 +1,4 @@
-<page "content-parts api" notebook>
+"content-parts api" is a notebook page
 	<header level="1">
 		Content parts
 		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
@@ -44,4 +44,3 @@
 			<ui-docs-api family="ui-parts" only="states"></>
 		</>
 	</>
-</page>

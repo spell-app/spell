@@ -8,6 +8,11 @@ import { E, UI } from "spell/ui/core"
  *   - So once either is on a page, EVERY `<ui-code language="spell">` there is coloured,
  *     a `spell` block in any `<ui-markdown>` too.
  *   - Spell UI itself knows nothing of spell:  this is one more language a page registers (`UI.code.register()`).
+ * - DRAWN in the bubbly look (epic `language` P49):  each declaration's head on a band, what a person typed in
+ *   pills, its body in a bracket (`SP.BubblyLayout`, drawn by `BubblyHtml`, styled by `bubbly.css`).
+ *   - `<ui-code>` shows the drawing in place of its lines, with the sheet beside it in its shadow root.
+ *   - With `line-numbers` or `wrap`, the coloured lines instead:  a drawing has no lines to number.
+ *   - Its copy button still copies the code as written.
  * - Colours from spell's own parser (`SP.SpellHighlighter`), from source:
  *   a lazy chunk (the parser and spell's rules, ~130 kB gzipped), fetched the first time a page shows spell.
  *   - NOT in auto-detection:  too big to load on a guess.
@@ -64,9 +69,19 @@ const TRANSLATIONS: Record<string, () => Promise<Omit<E.CodeLanguage, "load">>> 
   es: () => highlighterFor("es")
 }
 
-/** The highlighter of language `lang`'s spell, from its pack:  `SP.SpellHighlighter` with its parser. */
+/**
+ * The highlighter of language `lang`'s spell, from its pack:  `SP.SpellHighlighter` with its parser,
+ * and its bubbly drawing (`SP.BubblyLayout`, `BubblyHtml`), with the look's sheet.
+ */
 async function highlighterFor(lang: string): Promise<Omit<E.CodeLanguage, "load">> {
-  const { SP } = await import("spell/parser/spell")
+  const [{ SP }, { BubblyHtml }, { default: styles }] = await Promise.all([
+    import("spell/parser/spell"),
+    import("./BubblyHtml"),
+    import("./bubbly.css?inline")
+  ])
   const { parser } = SP.Language.for(lang)
-  return { highlight: (code: string) => SP.SpellHighlighter.spans(code, parser) }
+  return {
+    highlight: (code: string) => SP.SpellHighlighter.spans(code, parser),
+    draw: (code: string) => ({ html: BubblyHtml.write(SP.BubblyLayout.of(code, parser)), styles })
+  }
 }

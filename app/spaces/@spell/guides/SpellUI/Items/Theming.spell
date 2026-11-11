@@ -1,4 +1,4 @@
-<page "items theming" notebook>
+"items theming" is a notebook page
 	<header level="1">
 		Items
 		<header>A group of items presents a set of site content for display, each an image beside its
@@ -73,4 +73,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

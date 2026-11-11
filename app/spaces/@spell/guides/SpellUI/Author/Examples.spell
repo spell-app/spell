@@ -1,4 +1,4 @@
-<page "author examples" notebook>
+"author examples" is a notebook page
 	<header level="1">
 		Author
 		<header>An author names who wrote a comment or did a feed event.</>
@@ -66,4 +66,3 @@
 			</example>
 		</>
 	</>
-</page>

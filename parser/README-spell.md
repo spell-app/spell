@@ -1,23 +1,23 @@
 # Spell:  what the language can say
 
 ```spell
-a "card" is a view:
-	- its "suit" is one of clubs, diamonds, hearts or spades
-	- its "color" is:
+a "card" is a view
+	its "suit" is one of clubs, diamonds, hearts or spades
+	its "color" is
 		red if its suit is diamonds or hearts
 		black otherwise
 
-	- its "rank" is one of ace, 2 ... 10, jack, queen, king
-	- it "is a face card" if its rank is jack, queen or king
-	- it "is a (rank)"
-	- it "is the (rank) of (suit)"
+	its "rank" is one of ace, 2 ... 10, jack, queen, king
+	it "is a face card" if its rank is jack, queen or king
+	it "is a (rank)"
+	it "is the (rank) of (suit)"
 ```
 
-_The card from [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md), in the outline style:  a name, then bullets of what's true of it.
+_The card from [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md), in the outline style:  a name, then a line for each thing that's true of it.
 It lints clean, and every output on this page is the compiler's own, from a real run._
 
 Ten lines, and the language is bigger than it was.
-Each quoted bullet teaches Spell new words, and from the next line on Spell reads them like its own:
+Each quoted line teaches Spell new words, and from the next line on Spell reads them like its own:
 
 ```sh
 spell parse --in ./solitaire 'the card is a new card whose rank is 7 and suit is hearts
@@ -39,7 +39,7 @@ core.console.log(card.isAFaceCard, !card.isARank(7), card.color)
 </details>
 
 The match tree names the rules that read those two aliases, `is_a_face_card` and `is_a_$rank`.
-Nobody wrote them:  the card's bullets made them, a moment before.
+Nobody wrote them:  the card's lines made them, a moment before.
 The `not` came free;  an alias that starts with `is` reads `is not` and `isn't` too.
 
 If you've grown a grammar for a parser generator, that's the part to notice.
@@ -108,21 +108,21 @@ a card "is a (rank)" for its ranks
 a card "is the (rank) of (suits)" for its ranks and its suits
 ```
 
-_Seven lines in the sentence style, the way the Solitaire example's card was written before it was an outline, and then spellx._
+_Seven lines in the sentence style, the way the Solitaire example's card was written before it was an outline._
 
 Compile both, and `diff` finds the same JavaScript, member for member, but for three things:
 - the outline's card is a `view`, so it extends `View` and gets an element of its own;
   the sentences' card is a plain `Thing`
-- each stored property's comment quotes the line that made it, bullet or sentence
+- each stored property's comment quotes the line that made it, outline or sentence
 - `(suits)`, with an `s`, makes `isTheRankOfSuits`, where `(suit)` makes `isTheRankOfSuit`
   (below, "Aliases become rules", says why that `s` matters)
 
-| The outline's bullet | The sentence | Both compile to |
+| The outline's line | The sentence | Both compile to |
 | --- | --- | --- |
-| `- its "suit" is one of clubs, diamonds, hearts or spades` | `cards have a suit as one of clubs, diamonds, hearts or spades` | `static Suits = [...]`, and a `suit` declared as one of them |
-| `- its "color" is:`, then one value a line | `the color of a card is red if its suit is either diamonds or hearts otherwise it is black` | `get color()`, worked out each time it's read |
-| `- it "is a face card" if its rank is jack, queen or king` | `a card "is a face card" if its rank is one of jack, queen or king` | `get isAFaceCard()` |
-| `- it "is a (rank)"` | `a card "is a (rank)" for its ranks` | `isARank(rank)` |
+| `its "suit" is one of clubs, diamonds, hearts or spades` | `cards have a suit as one of clubs, diamonds, hearts or spades` | `static Suits = [...]`, and a `suit` declared as one of them |
+| `its "color" is`, then one value a line | `the color of a card is red if its suit is either diamonds or hearts otherwise it is black` | `get color()`, worked out each time it's read |
+| `it "is a face card" if its rank is jack, queen or king` | `a card "is a face card" if its rank is one of jack, queen or king` | `get isAFaceCard()` |
+| `it "is a (rank)"` | `a card "is a (rank)" for its ranks` | `isARank(rank)` |
 
 - Inside a template's action, `the X` reads its property too:  `shuffle the stock` for `shuffle its stock`.
   - The rule of thumb:  `the X` is the thing you're in, `its X` is whatever `it` is now.
@@ -153,9 +153,40 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
   a sentence names both.
 - A file may mix the two:
   in [Solitaire's game](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spell), one block of plain Spell holds its play, `to play a card`, a sentence,
-  and what a pile does while a card is dragged over it, an outline under `a pile:`.
+  and what a pile does while a card is dragged over it, an outline under `a pile`.
 - That the two compile the same is a test's job, [outline.test.ts](tests/spell/parserTests/outline.test.ts),
   not a hope.
+
+## A line, and what's under it
+
+A line with lines indented under it needs no colon:  what's under it is its body.
+
+```spell
+a "card" is a draggable two sided view, aka "playing card"
+	its score is a number, starting at -1
+	its "direction" is one of up or down, with default down
+	its "state" is
+		// Its short name:  Q♠↓ is the queen of spades, face down
+		return its rank && its suit
+	to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"
+		undoable
+		print "dealt"
+```
+
+- `a "card" is a draggable two sided view`:  an ability is a word before the template.
+  `clickable`, `selectable` and `droppable` are the others;  `it is draggable` under it says the same.
+- A declaration's description is the first comment inside its body, `// Its short name`:
+  hovered in an editor, and written above it in the code, `/** Its short name ... */`.
+  - A line with no body takes one holding just the comment:  `its "hint" is text`, then `// Said beside the score`.
+  - A comment right above a declaration still describes it, when nothing under it does.
+- The line that declares a thing can say more about it, after a comma:
+  - a template's short name, `, aka "playing card"`
+  - a property's start, `, starting at -1`, and a list's first value, `, with default down`
+  - an action's title, icon, shortcuts and undo, its name in quotes:  `to "deal the cards" with title "Deal", ...`
+  - The lines that say the same under it still read.
+- A colon still reads where one is written:  `a game:`, `its "color" is one of red, black:`.
+- Spanish, the same lines its own way:  `una "carta" es una vista reversible arrastrable`, `, alias "carta"`,
+  `, empezando en -1`, `, por defecto abajo`, `para "repartir las cartas" con título "Repartir", icono "carta", atajo "meta+N"`.
 
 ## The whole language, module by module
 
@@ -216,9 +247,9 @@ and the JavaScript they become.
 | `solitaire is an app` | `export class Solitaire extends App`, its element `<solitaire-app>`, and `export const solitaire = new Solitaire()` |
 | `cards have a suit as one of clubs, diamonds, hearts or spades` | `static Suits = ["clubs", "diamonds", "hearts", "spades"]`, and the property |
 | `the color of a card is red if ... otherwise it is black` | `get color() { ... }` |
-| `- its "color" is one of red, black:` + its value lines below | `static Colors = ["red", "black"]`, then `get color() { ... }` |
+| `its "color" is one of red, black:` + its value lines below | `static Colors = ["red", "black"]`, then `get color() { ... }` |
 | `the value of a card is the position of its rank in card ranks` | `get value() { return spellPosition(positionOf(Card.Ranks, this.rank)) }` |
-| `- its "suit" is a card suit`, in a foundation's outline | `static { this.declareProp("suit", { oneOf: () => Card.Suits }) }` |
+| `its "suit" is a card suit`, in a foundation's outline | `static { this.declareProp("suit", { oneOf: () => Card.Suits }) }` |
 | `card suits`, `every card suit` | `Card.Suits` |
 | `a random card suit` | `core.randomItemOf(Card.Suits)` |
 
@@ -226,8 +257,9 @@ and the JavaScript they become.
 - After `a card is a thing`, "card" is a word every line knows, in every file of the project:
   each template a project declares is known before its first line is read, so a line may use one declared further down.
 - A stored property is declared with its choices;  a worked-out one is a getter, read when you ask for it.
-  - A worked-out one can have choices too:  `- its "color" is one of red, black:`, its value lines indented under it,
-    then its aliases, bulleted, under those.
+  - A worked-out one can have choices too:  `its "color" is one of red, black`, its value lines indented under it,
+    then its aliases under those, each bulleted with `- ` so it reads as an alias, not a value.
+    - With nothing but its aliases or a comment under it, it's stored:  its value lines make it worked out.
 - A property's choices are a kind of their own, named by the template, then the property:  a card's suits make `card suit`.
   - Another template's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
   - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for card rank in card ranks`.
@@ -243,14 +275,14 @@ That's where the card's `is_a_face_card` came from.
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
-  bullet["it #quot;is a (rank)#quot;<br/>a bullet of the card"] -->|parsing it adds| rule["the rule is_a_$rank<br/>to the project's scope"]
+  bullet["it #quot;is a (rank)#quot;<br/>a line of the card"] -->|parsing it adds| rule["the rule is_a_$rank<br/>to the project's scope"]
   rule -->|which reads| later["the card is not a 7<br/>on any later line"]
   later -->|compiled| js["!card.isARank(7)"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
 ```
 
-_A quoted bullet is parsed like any line, and parsing it adds a rule:
+_A quoted line is parsed like any other, and parsing it adds a rule:
 every later line can use the alias, in this project and in any project that imports it._
 
 | Spell | Reads, after it | JavaScript |
@@ -260,7 +292,7 @@ every later line can use the alias, in this project and in any project that impo
 | `a card "is the (rank) of (suits)" for its ranks and its suits` | `the card is the queen of spades` | `isTheRankOfSuits(rank, suit)` |
 
 - A blank in brackets is one alias per value of a list:  `(suit)` reads each suit, `(rank)` each rank.
-- An alias may sit indented under its property, `- it "is a (suit)"` under `- its "suit" is one of ...`:
+- An alias may sit indented under its property, `it "is a (suit)"` under `its "suit" is one of ...`:
   it reads as if written after it.
 - The blank reads the word in the form you wrote it:  `(suit)` reads `spade`, `(suits)` reads `spades`.
   So the card at the top of this page answers to `the card is the queen of spade`;
@@ -295,19 +327,19 @@ Its first line is how you call it, with each blank's type in brackets:
   A worked-out property's body does the same.
 
   ```spell
-  a bill is a thing:
-  	- it has an amount as a number
-  	- to double it:
+  a bill is a thing
+  	it has an amount as a number
+  	to double it
   		set twice to its amount * 2
   		twice + 1
-  	- its "doubled" is:
+  	its "doubled" is
   		double it
   ```
 
   - A value:  an expression (`twice + 1`, `"hey"`) or a call (`double it`).
     `doubled` gives back what `double it` does.
   - A last line that's a step stays a step:  `set`, `if`, `for each`, `print`, `return` ...
-  - It works the same in Spanish, and in a spellx `<action>` or `<property>`.
+  - It works the same in Spanish.
   - The edge:  an action ending in a call gives back what that call gives,
     so `to deal` ending `shuffle the deck` gives what shuffling gives.
   - Not a test's body, and not a drawing's:  a drawing's lines draw.
@@ -328,20 +360,20 @@ Its first line is how you call it, with each blank's type in brackets:
     - A `send` waits only if a handler of that event does.
 - Nothing says it, so nothing needs saying:  `animation`, `wait for` and `await` are retired, in English and Spanish.
   - Old source still reads, each one an error, and `spell lint --fix` rewrites it:
-    `- animation deal:` is `- to deal:`, `wait for: deal` is `deal`, and `<action "deal" animated>` is `<action "deal">`.
+    `animation deal:` is `to deal:`, and `wait for: deal` is `deal`.
   - `start process` and `process x is running` stay;  `start animation` is now `start process`.
   - The editor says which calls wait:  hover one.
 - A getter may wait too, with no new words:
 
   ```spell
-  a game is an app:
-  	- it has a score as a number
-  	- its "total" is:
+  a game is an app
+  	it has a score as a number
+  	its "total" is
   		pause for 1 sec
   		return the score + 1
-  	- to go it:
+  	to go it
   		print the total
-  	- to draw it:
+  	to draw it
   		<div>Total: {the total}</div>
   ```
 
@@ -357,8 +389,8 @@ Its first line is how you call it, with each blank's type in brackets:
 - To not wait, say so, in JavaScript, TypeScript and Python alike:
 
   ```spell
-  to deal in a burst:
-  	at the same time:
+  to deal in a burst
+  	at the same time
   		move the first card to the pile
   		move the second card to the pile
   	meanwhile load the scores
@@ -386,7 +418,7 @@ Its first line is how you call it, with each blank's type in brackets:
   - What the program calls itself never waits in that line, so a deal can't wait for itself.
     Nor does a drag's move, a `while`, or what a drawing reads:  a click never waits behind a slow load.
   - One that fails says so on the program's console, and the next one runs.
-  - Under an action, `- a new one replaces the last one` makes the newest win:  the running one stops at its next wait,
+  - Under an action, `a new one replaces the last one` makes the newest win:  the running one stops at its next wait,
     for a search as you type.
     Code can do the same with `core.cancelActions()`, which leaves what the action already wrote.
   - Each step of an action that waits shows as it happens.
@@ -396,31 +428,35 @@ Its first line is how you call it, with each blank's type in brackets:
 - An action of a template can DESCRIBE itself, in lines indented under it, before its steps:
 
   ```spell
-  	- to turn it over:
-  		- shortcut meta+T
-  		- enabled when it is face down
-  		- undoable as "Turn Card"
+  	to turn it over
+  		shortcut meta+T
+  		enabled when it is face down
+  		undoable as "Turn Card"
   		set its direction to up
   ```
 
   - `shortcut` (once per key), `enabled when`, `selected when`, `undoable`, `icon`, `titled` and `a new one replaces the last one` are the lines it may have;
     `meta` is command on a Mac, control elsewhere.
-  - `- titled "Compile and Run"` is its title in menus, key tooltips and the Inspector, where its words aren't it;
-    a fill-in follows the program, `- titled "Duplicate [the project name]…"`.
+  - Its title in menus, key tooltips and the Inspector is its words in Initial Caps:  `to turn it over` is Turn It Over.
+  - `titled "Compile and Run"` says another, where its words aren't it;
+    a fill-in follows the program, `titled "Duplicate [the project name]…"`.
+  - Or its head line says it, its name in quotes:
+    `to "compile and run" with title "Run", icon "play", shortcut "meta+R"`, and `undoable` too.
+    The same action, whichever way it's said.
     - In another language:  its words there come from the program's names dictionary in that language,
       `spell translate`'s, written into a words file of titles (`Editor.es.js`), which a host hands the core
       (`core.useTitles()`).
   - They're the template's data, kept beside the class:
-    `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,
+    `core.describeAction(Card, "turnOver", { title: "Turn It Over", shortcuts: ["meta+T"], ... })`,
     each condition a getter of its own, `turnOverIsEnabled`.
   - Its shortcut runs it while it's enabled, from the focused thing up to the app;
     run any way, an action `undoable as "Turn Card"` is one undo step, and the app's undo then reads `Undo Turn Card`.
   - A template's MENU lists its actions, and the app's own `undo` and `redo`, `"-"` a line between groups:
 
     ```spell
-    solitaire is an app where:
-    	- its "game" menu has actions "deal", "-", "undo" and "redo"
-    	- its menu bar is "game menu"
+    solitaire is an app
+    	its "game" menu has actions "deal", "-", "undo" and "redo"
+    	its menu bar is "game menu"
     ```
 
     - Its name is its words and `menu`, `game menu`;  its title, with no `titled`, is its words, `game`.
@@ -430,11 +466,11 @@ Its first line is how you call it, with each blank's type in brackets:
       a menu's own title comes last, `titled "File"`:
 
       ```spell
-      editor is an app where:
-      	- its "file" menu has actions "save" and "open" and menus "more examples", titled "File"
-      	- its "more examples" menu has its examples, each running "open (an example)"
-      	- its "bar" menu has menus "file" and "edit"
-      	- its menu bar is "bar menu"
+      editor is an app
+      	its "file" menu has actions "save" and "open" and menus "more examples", titled "File"
+      	its "more examples" menu has its examples, each running "open (an example)"
+      	its "bar" menu has menus "file" and "edit"
+      	its menu bar is "bar menu"
       ```
 
     - The same menus, said the older way, each item quoted by its full name, sub-menus among the actions:
@@ -468,9 +504,9 @@ A property can say what it measures, and Spell converts it.
 The kinds of measure are dimensions, and their units are written in Spell.
 
 ```spell
-a person is a thing:
-	- its "height" is a length in cm
-	- its "mass" is a weight in kg
+a person is a thing
+	its "height" is a length in cm
+	its "mass" is a weight in kg
 
 print the person's height in feet and inches
 print 2' 3 1/2" in cm
@@ -490,14 +526,14 @@ print 2' 3 1/2" in cm
   Their units are in the core's `dimensions/dimensions.spell`, and its Spanish twin.
 - A percent is a proportion, kept as its fraction:  `18%` (`18 percent`, Spanish `18 por ciento`) is `0.18`.
   - So `the bill * the tip` is the tip, with no `/ 100`, as a spreadsheet keeps a percent.
-  - `its "tip" is a percent` declares one (`<property "tip" type="percent">18%</>`);  `its tip in percent` is `18`.
+  - `its "tip" is a percent` declares one;  `its tip in percent` is `18`.
   - Shown with its % sign the reader's way:  `18%`, Spanish `18 %`;  `<input type="percent">` edits it as `18`.
 - A program declares its own the same way:
 
   ```spell
-  data size is a dimension:
-  	- its base is "byte", aka "B"
-  	- one "kilobyte", aka "KB", is 1000 B
+  data size is a dimension
+  	its base is "byte", aka "B"
+  	one "kilobyte", aka "KB", is 1000 B
   ```
 
   - Each unit is said in a unit named above it.
@@ -511,7 +547,7 @@ the card at the top draws as `<solitaire-card>`.
 A project's stylesheet reaches inside it too, so `.card .title` styles what the card draws.
 
 ```spell
-a "tableau" is a pile where:
+a "tableau" is a pile
 	<css>
 		::slotted(:not(:last-child)) {
 			height: 2.6rem;
@@ -540,29 +576,29 @@ export class Tableau extends Pile {
 - `draw each card in the deck` draws each in turn:  `core.drawItems(deck)`.
 - A thing has ONE drawing, its `to draw it`:  a card face down checks its own direction there,
   in the two sided view it's built on ([Solitaire's Card.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spell), below).
-  - In an outline, `- to "draw it":` takes markup as its body, no `return` needed;
-    `- to draw it:` unquoted takes a method's body, which returns it.
+  - In an outline, `to "draw it":` takes markup as its body, no `return` needed;
+    `to draw it:` unquoted takes a method's body, which returns it.
   - In that body, a line of markup IS what it draws, with no `return`:  the lines around it pick which,
     `if it is face up`, then markup, `otherwise`, then other markup.
   - Several such lines draw all of them, in order;  so does a loop, one each time round:
     `<ui-text>Scores</ui-text>`, then `for score in its scores` with `<ui-text>{the score}</ui-text>` under it.
 - A view can have SLOTS, named drawings it places:
-  - `- it has slots "front" and "back"` names them;  `- to draw its front:` draws one, `drawFront()`
-    (Spanish:  `- tiene las ranuras "frente" y "dorso"`)
+  - `it has slots "front" and "back"` names them;  `to draw its front:` draws one, `drawFront()`
+    (Spanish:  `tiene las ranuras "frente" y "dorso"`)
   - `draw its front` places it, on a line of its own or inside markup:  `<div>{draw its front}</div>`
   - the slot's drawing carries its name for CSS, `part="front"`, so a page can style it with `::part(front)`
   - where the view is drawn, a slot can be filled from outside, the web's way:
     `<solitaire-card><ui-text in="front">Ace</ui-text></solitaire-card>` (`in=` is Spell's word for `slot=`;
-    spellx's `<card><text slot="front">Ace</text></card>`)
+    with its bare name, `<card><text slot="front">Ace</text></card>`)
     - that card shows the filling in place of its front;  every other card draws its own
     - a placed slot compiles to the web's `<slot name="front">`, holding its own drawing
-  - the old `- it has parts ...` still reads, as an error naming `slots`;  `spell lint --fix` writes it
+  - the old `it has parts ...` still reads, as an error naming `slots`;  `spell lint --fix` writes it
 - `a card is a two sided view` gives the card a front and a back:
   - its direction, `down` or `up` (a new one starts face down), `it is face up`, `it is face down`
   - `turn it face up`, `turn it face down`, `turn it over`
   - a drawing of both its sides, back to back:  its front face up, its back face down, turning over in 3D as its
     direction changes (its own `<css>`;  `--spell-turn-perspective` sets how deep, `--spell-turn-time` how long)
-  - So the card says only `- to draw its front:` and `- to draw its back:`.
+  - So the card says only `to draw its front:` and `to draw its back:`.
     In Spanish:  `una carta es una vista reversible`, `para dibujar su frente`, `voltear la carta`.
   - A two sided view is written in Spell itself, and compiled once into the runtime's `TwoSidedView`:
     [TwoSidedView.spell](src/core/templates/TwoSidedView.spell).
@@ -605,8 +641,8 @@ A thing hears an event when its handler says so, and sends one with `send`:
 
 | Spell | JavaScript |
 | --- | --- |
-| `- on mouse down:` in a card's outline | `onMouseDown(event) { ... }`, a method of `Card` |
-| `- when flipped:` | `onFlipped(event) { ... }`:  `when` and `on` say the same |
+| `on mouse down:` in a card's outline | `onMouseDown(event) { ... }`, a method of `Card` |
+| `when flipped:` | `onFlipped(event) { ... }`:  `when` and `on` say the same |
 | `send flipped to the card with side = 1` | `send(card, "flipped", { side: 1 })` |
 | `send closing`, in a handler | `if ((await send(this, "closing", {}, this)).canceled) return` |
 | `trigger card-click` | `trigger("card-click")`:  to every `on card-click` in the program, the app's and pages' own too |
@@ -617,18 +653,18 @@ A thing hears an event when its handler says so, and sends one with `send`:
   - then the app
   - then the program's `on <event>` listeners
   - Nobody takes it:  it's dropped, silently.
-- A handler that runs takes the event:  a card's `- on mouse down:` runs, its pile's doesn't.
+- A handler that runs takes the event:  a card's `on mouse down:` runs, its pile's doesn't.
   - `pass event` (or `pass mouse down`) hands it on up the chain.
 - An event whose name is still happening (`closing`, `dropping`;  Spanish `cerrando`) can be cancelled.
   - `cancel event` in its handler, and the sender stops:  `send closing` returns from the step that sent it.
   - Its finished half, `closed`, is what happened, and can't be.
-- What comes with it is named in the handler:  `send flipped with side = 1` is read as `side` in `- when flipped:`.
+- What comes with it is named in the handler:  `send flipped with side = 1` is read as `side` in `when flipped:`.
   - `target`:  the thing whose handler is running;  `the original target`:  the thing it was sent to;
     `sender`:  the thing that sent it.
   - A card's press passed up to its pile:  in the pile's handler, `target` is the pile, `the original target` the card.
-- `- while the mouse is down:` holds while it's true, and is put back after:
+- `while the mouse is down:` holds while it's true, and is put back after:
   every property its steps set returns to what it was as the mouse goes up.
-  - `- while the mouse is over it:` likewise, as the mouse comes and goes.
+  - `while the mouse is over it:` likewise, as the mouse comes and goes.
 - The mouse and the keys can be read anywhere, a handler's step or not, as they are at that moment:
   - `the shift key is down`, `the meta key` (command on a Mac, control elsewhere), `the option key`,
     `the control key`
@@ -643,7 +679,7 @@ A thing hears an event when its handler says so, and sends one with `send`:
   `card click` and `card-click` name the same event, and `with card = 1` hands the listener a property
   ([README-parser](README-parser.md#one-line-six-stages) follows `fire event card click with card = 1` through every
   stage of the parse).
-- `- it sends "flipped" with side as a direction` says an event a template's things send, and what comes with it:
+- `it sends "flipped" with side as a direction` says an event a template's things send, and what comes with it:
   `core.describeEvent(Card, "flipped", { params: { side: "Direction" } })`.
 
 <details>
@@ -661,7 +697,7 @@ A thing hears an event when its handler says so, and sends one with `send`:
 | `key down` | a key pressed | the thing whose view has the focus, then up its chain;  else the app | no | `key`:  its name, `a`, `enter`, `arrowup` |
 | `a card is dragged over it`, `dragged out of it` | a drag comes onto a list's view, leaves it | the list | no | the card |
 | `a card is dropped on it` | the drop | the list | no | the card |
-| `created` | a thing is made | the new thing:  `- when created:` is its creation hook, not an event | no | |
+| `created` | a thing is made | the new thing:  `when created:` is its creation hook, not an event | no | |
 | one a template declares, `flipped` | `send flipped` | the thing it's sent to, then up its chain | when its name is still happening (`closing`) | what the template says (`side`) |
 | one the program triggers, `card-click` | `trigger card-click` | the app's and every page's own handler, then every `on card-click` | no | its `with` properties |
 
@@ -701,7 +737,7 @@ export function testCardSetup() {
 ```
 
 - Each check keeps its words, so a failure says in English what was wrong, as the alias edge above showed.
-- In a template's outline, `- to test card setup:` tests that template:  a test like any other, starting with a new
+- In a template's outline, `to test card setup:` tests that template:  a test like any other, starting with a new
   one of it as its `it`, `const it = new Card()`.
 - A program runs its own tests the first time it loads, and never on a hot reload:
   `if (!core.isCarryingOver) testCardSetup()`.
@@ -780,30 +816,24 @@ A SITE lists a program's pages, each at an address, and the dialogs and sidebars
 The pages never name their addresses:  the site does, so a page moves without its file changing.
 
 ```spell
-galaxy guide is a site at "owen@spell/galaxy":
-	- it has a films page at "/films", named "Films"
-		- it has a film page at "/films/:film"
-	- it has a settings dialog
-	- it has a person sidebar
-	- it has a not found page
+galaxy guide is a site at "owen@spell/galaxy"
+	it has a films page at "/films", named "Films"
+		it has a film page at "/films/:film"
+	it has a settings dialog
+	it has a person sidebar
+	it has a not found page
 ```
 
-- `:film` is the film page's own property (`- it has a film`):  the address fills it with that film.
-- The tag form is `<site>`, a tag per part inside it.
+- `:film` is the film page's own property (`it has a film`):  the address fills it with that film.
 - Every site lists a not found page and an error page.
 - A `:name` the page has no property for, or two pages at one address, is refused at its line.
-- A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own.
-  A page's name is then its title, `<page "My Inbox" address="/my-inbox"/>`, and `<group "Hardware"/>` heads the lines
-  after it:
+- A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own:
 
-```html
-<site "galaxy guide">
-	<group "Home"/>
-	<page "Home" address="/"/>
-	<sidebar "System Notices" address="/notices"/>
-	<group "My Stuff"/>
-	<page "My Inbox" address="/my-inbox" live="https://example.com/inbox"/>
-</site>
+```spell
+galaxy guide is a site
+	it has a home page at "/", named "Home"
+	it has a system notices sidebar
+	it has an inbox page at "/my-inbox", named "My Inbox", live "https://example.com/inbox"
 ```
 
 - A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
@@ -821,8 +851,8 @@ Every move names the page, never its address:
 
 A page says what it must let people do before it's laid out, first in its own declaration:
 
-```html
-<page "film page">
+```spell
+film page is a page
 	<stories>
 		<story "S1" done>read the film's opening crawl</story>
 		<story "S2" done>
@@ -834,12 +864,49 @@ A page says what it must let people do before it's laid out, first in its own de
 	</stories>
 ```
 
-- Nothing draws the stories:  they're kept with the page for good;  code Spell writes the same block.
+- Nothing draws the stories:  they're kept with the page for good.
 - A story is its words, then two blank lines and its description, if it has one;  `done` ticks it off.
 - In Spanish:  `<historias>` and `<historia "H1" hecha>`.
 - The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spell).
 - **Not yet:**  Python runs no site, and a page has no state
   (old, new, mocked, built).
+
+### Pages written as they read
+
+A PAGE FILE is a page written the way it reads:  its head, a line of Spell, and its body indented under it.
+The notebooks and Spell UI's guides are written this way.
+
+```spell
+a "counter" is a view:
+	its "count" is a number
+	to draw it:
+		<button onClick={add 1 to its count}>Clicked {its count} times</button>
+
+"counter guide" is a notebook page
+	A button that counts its clicks.
+
+	## Try it
+	<example "one counter">
+		<counter/>
+	</example>
+```
+
+- The head is the page's quoted name, its flags, then `page`:  `notebook` lets the editor edit it in place,
+  `locked` keeps it from being edited.
+  In Spanish:  `"guía del contador" es una página cuaderno`, flags `cuaderno` and `bloqueada`.
+- Its body draws, line by line:
+  - a line of prose is markdown
+  - a `##` heading starts a section, sticky and foldable, as the docs pages' are
+  - markup and `<example "...">` are drawn as written
+  - `<if ...>`, `<otherwise>` and `<for ...>` pick and repeat what's drawn;
+    a `<for>` takes `loading=`, `empty=` and `as=`, or `<loading>`, `<empty>` and `<failed>` inside it
+  - an `<html>` block is markup as written;  a `<spell>` block, plain Spell
+  - `<!-- ... -->` is a comment, anywhere
+- Its indentation ends it:  no closing tag.
+- The page's own views are plain Spell, above its head in the same file, named as written.
+- It compiles to exactly what the same page written as plain Spell would:  `counter guide is a page:`, its body its
+  drawing.
+- **The edge:**  `spell translate` leaves page files as they are.
 
 ## The compiler
 
@@ -863,7 +930,7 @@ Here's Solitaire's project file, its files in the order they run:
   `{ "path": "@spell/library/people", "active": true, "import": ["Person"] }`.
 - Other keys:  `"targets"` (the people library's is `["ts/lib"]`), `"listsStartAt"`, `"title"`, and `"packs"`:
   the component packs a `.spell` drawing names components from by their bare names, Spell UI's (`["spell-ui"]`)
-  unless it says more ([README-spellx.md](README-spellx.md)).
+  unless it says more.
 - A file's human language is in its name, not the project file:  `Carta.es.spell` is Spanish, `Card.spell` English.
 - A project file can start as `{}`, as the card's did:  the first compile lists the folder's files in it,
   and spell-app's spaces keeps that list in step with the folder, adding a new file and dropping a deleted one.
@@ -1104,6 +1171,11 @@ Two seams show when you work in this folder:
 And what IS here, though you might look elsewhere:
 - **The highlighter:**  `SP.SpellHighlighter.spans(text)` colours a snippet with no project,
   for `<ui-code language="spell">`.
+- **The bubbly look, as data:**  `SP.BubblyLayout.of(text)` lays a snippet out as Spell's pages draw it:
+  each declaration a head on a band with what was typed in pills, its body under it, a control line's steps in a
+  bracket.
+  - How each rule presents is ONE table, by rule name:  `SP.BubblyPresentation`.
+  - The app draws it (`<spell-code>`, every `<ui-code language="spell">`);  so will the code editors.
 - **Node-only helpers**, never in the entry (`spell/parser/spell/node/...`):
   the TypeScript check and its build, pyright, the syntax table.
 
@@ -1149,7 +1221,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | [builtinTypes.ts](src/spell/builtinTypes.ts) | the built-in types' members |
 | [SpellDeclarations.ts](src/spell/SpellDeclarations.ts), [SpellWords.ts](src/spell/SpellWords.ts) | what a project declares, and its words |
 | [SpellWarnings.ts](src/spell/SpellWarnings.ts) | warnings:  what a program should say, which never stops it compiling |
-| [highlight/](src/spell/highlight/) | `SpellHighlighter`:  colours a snippet with no project |
+| [highlight/](src/spell/highlight/) | `SpellHighlighter`:  colours a snippet with no project;  `BubblyLayout`, `BubblyPresentation`:  the bubbly look as data |
 | [node/](src/spell/node/) | node only:  the TypeScript check and build, pyright, the syntax table |
 | [test/](src/spell/test/) | test helpers:  `parseSpellProject()`, `runSpell()`, `unitTestModuleRules()` |
 | [spellSyntax.json](src/spell/spellSyntax.json) | GENERATED:  every rule, syntax and output |
@@ -1194,32 +1266,30 @@ These guides need a checkout with the epic folder beside it, and the page server
 A program says once where its data lives, and which types live there, then writes what it writes for things in memory.
 
 ```spell
-family cookbook is a web server at "https://api.example.com/v1":
-	- check it every 30 seconds
+family cookbook is a web server at "https://api.example.com/v1"
+	check it every 30 seconds
 
-a "recipe" is a thing:
-	- it lives in family cookbook
-	- its "title" is text
+a "recipe" is a thing
+	it lives in family cookbook
+	its "title" is text
 
-recipe box is an app:
-	- its "search" is text
-	- its "matches" is every recipe where its title includes the search, sorted by its title
-	- to draw it:
+recipe box is an app
+	its "search" is text
+	its "matches" is every recipe where its title includes the search, sorted by its title
+	to draw it
 		for recipe in the matches
 			draw the recipe
-		while waiting:
+		while waiting
 			<ui-loader/>
-		if there are none:
+		if there are none
 			<ui-text>No recipes yet.</ui-text>
-		if that fails:
+		if that fails
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
-- In a `.spell` drawing the same loop is one tag:
+- In a page, or inside an element of a drawing, the same loop is one tag:
   `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
-  with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
-- In a tag-shaped file the same line is a tag, `<web-server "family cookbook" address="https://...">`,
-  its lines inside as they are ([README-spellx](README-spellx.md)).
+  with a loader, Try again and the empty message by itself.
 - Moving the data changes the first line:
   - `a graphql server at`, `a data folder at`
   - `a json file at` (one JSON5 file of every collection's rows;  a bare `a file at` asks which kind), `a room at`

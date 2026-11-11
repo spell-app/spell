@@ -1,4 +1,4 @@
-<page "detail api" notebook>
+"detail api" is a notebook page
 	<header level="1">
 		Detail
 		<header>A detail is a label's dimmer second value, such as a count.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api tag="ui-detail" only="states"></>
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "meta usage" notebook>
+"meta usage" is a notebook page
 	<header level="1">
 		Meta
 		<header>A meta holds metadata about the content, such as a date or a category.</>
@@ -41,4 +41,3 @@
 			  datetime>` in a feed) for machines.
 		</>
 	</>
-</page>

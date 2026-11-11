@@ -25,19 +25,19 @@
     {
       "type": "Task",
       "superType": "View",
-      "defined": "/Task.spell:287-1716"
+      "defined": "/Task.spell:299-1616"
     },
     {
       "property": "title",
       "of": "Task",
       "datatype": "text",
-      "defined": "/Task.spell:323-370"
+      "defined": "/Task.spell:340-375"
     },
     {
       "property": "notes",
       "of": "Task",
       "datatype": "text",
-      "defined": "/Task.spell:375-434"
+      "defined": "/Task.spell:377-424"
     },
     {
       "property": "priority",
@@ -48,19 +48,19 @@
         "normal",
         "high"
       ],
-      "defined": "/Task.spell:439-487"
+      "defined": "/Task.spell:426-470"
     },
     {
       "property": "done",
       "of": "Task",
       "datatype": "choice",
-      "defined": "/Task.spell:493-519"
+      "defined": "/Task.spell:472-495"
     },
     {
       "property": "order",
       "of": "Task",
       "datatype": "number",
-      "defined": "/Task.spell:524-668"
+      "defined": "/Task.spell:497-629"
     },
     {
       "syntax": "{operator:is_or_is_not} done",
@@ -70,7 +70,7 @@
       "kind": "method",
       "name": "\"is done\"",
       "returns": "choice",
-      "defined": "/Task.spell:673-708"
+      "defined": "/Task.spell:631-662"
     },
     {
       "syntax": "{operator:is_or_is_not} active",
@@ -80,7 +80,7 @@
       "kind": "method",
       "name": "\"is active\"",
       "returns": "choice",
-      "defined": "/Task.spell:713-749"
+      "defined": "/Task.spell:664-696"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -94,7 +94,7 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/Task.spell:754-920"
+      "defined": "/Task.spell:698-722"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -107,7 +107,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Task.spell:926-1513"
+      "defined": "/Task.spell:852-1434"
     },
     {
       "syntax": "test checking one off",
@@ -116,19 +116,19 @@
       "alias": "statement",
       "kind": "function",
       "name": "checking one off",
-      "defined": "/Task.spell:1525-1707"
+      "defined": "/Task.spell:1437-1616"
     },
     {
       "type": "TaskKeeper",
       "superType": "Thing",
-      "defined": "/TaskList.api.spell:959-1272"
+      "defined": "/TaskList.api.spell:959-1234"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "TaskKeeper",
       "datatype": "list of tasks",
-      "defined": "/TaskList.api.spell:982-1104"
+      "defined": "/TaskList.api.spell:987-1097"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -148,7 +148,7 @@
         }
       ],
       "returns": "Task",
-      "defined": "/TaskList.api.spell:1109-1261"
+      "defined": "/TaskList.api.spell:1099-1234"
     },
     {
       "type": "BrowserTask",
@@ -158,7 +158,7 @@
         "placeType": "BrowserStorage",
         "collection": "browser_tasks"
       },
-      "defined": "/TaskList.browser.api.spell:241-401"
+      "defined": "/TaskList.browser.api.spell:245-353"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -172,19 +172,19 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/TaskList.browser.api.spell:331-390"
+      "defined": "/TaskList.browser.api.spell:302-353"
     },
     {
       "type": "BrowserKeeper",
       "superType": "TaskKeeper",
-      "defined": "/TaskList.browser.api.spell:411-664"
+      "defined": "/TaskList.browser.api.spell:355-571"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "BrowserKeeper",
       "datatype": "list of browser-tasks",
-      "defined": "/TaskList.browser.api.spell:460-501"
+      "defined": "/TaskList.browser.api.spell:392-430"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -204,7 +204,7 @@
         }
       ],
       "returns": "BrowserTask",
-      "defined": "/TaskList.browser.api.spell:506-653"
+      "defined": "/TaskList.browser.api.spell:432-571"
     },
     {
       "type": "BrowserStorage",
@@ -213,7 +213,7 @@
         "name": "browser_storage",
         "kind": "database on this device"
       },
-      "defined": "/TaskList.browser.api.spell:220-235"
+      "defined": "/TaskList.browser.api.spell:203-243"
     },
     {
       "type": "ServerTask",
@@ -223,7 +223,7 @@
         "placeType": "TaskFile",
         "collection": "server_tasks"
       },
-      "defined": "/TaskList.server.api.spell:410-563"
+      "defined": "/TaskList.server.api.spell:389-490"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -237,19 +237,19 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/TaskList.server.api.spell:494-552"
+      "defined": "/TaskList.server.api.spell:440-490"
     },
     {
       "type": "ServerKeeper",
       "superType": "TaskKeeper",
-      "defined": "/TaskList.server.api.spell:573-822"
+      "defined": "/TaskList.server.api.spell:492-704"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "ServerKeeper",
       "datatype": "list of server-tasks",
-      "defined": "/TaskList.server.api.spell:621-661"
+      "defined": "/TaskList.server.api.spell:528-565"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -269,7 +269,7 @@
         }
       ],
       "returns": "ServerTask",
-      "defined": "/TaskList.server.api.spell:666-811"
+      "defined": "/TaskList.server.api.spell:567-704"
     },
     {
       "type": "TaskFile",
@@ -282,7 +282,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/TaskList.server.api.spell:336-393"
+      "defined": "/TaskList.server.api.spell:322-387"
     },
     {
       "type": "SheetTask",
@@ -292,7 +292,7 @@
         "placeType": "TaskSheet",
         "collection": "sheet_tasks"
       },
-      "defined": "/TaskList.csv.api.spell:560-711"
+      "defined": "/TaskList.csv.api.spell:543-642"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -306,19 +306,19 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/TaskList.csv.api.spell:643-700"
+      "defined": "/TaskList.csv.api.spell:593-642"
     },
     {
       "type": "SheetKeeper",
       "superType": "TaskKeeper",
-      "defined": "/TaskList.csv.api.spell:721-966"
+      "defined": "/TaskList.csv.api.spell:644-852"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "SheetKeeper",
       "datatype": "list of sheet-tasks",
-      "defined": "/TaskList.csv.api.spell:768-807"
+      "defined": "/TaskList.csv.api.spell:679-715"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -338,7 +338,7 @@
         }
       ],
       "returns": "SheetTask",
-      "defined": "/TaskList.csv.api.spell:812-955"
+      "defined": "/TaskList.csv.api.spell:717-852"
     },
     {
       "type": "TaskSheet",
@@ -351,7 +351,7 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/TaskList.csv.api.spell:466-549"
+      "defined": "/TaskList.csv.api.spell:458-541"
     },
     {
       "type": "SkyTask",
@@ -361,7 +361,7 @@
         "placeType": "TaskSky",
         "collection": "sky_tasks"
       },
-      "defined": "/TaskList.atmosphere.api.spell:401-546"
+      "defined": "/TaskList.atmosphere.api.spell:394-487"
     },
     {
       "syntax": "throw {thisArg:expression} away",
@@ -375,26 +375,26 @@
       "kind": "method",
       "name": "throw it away",
       "returns": "nothing",
-      "defined": "/TaskList.atmosphere.api.spell:480-535"
+      "defined": "/TaskList.atmosphere.api.spell:440-487"
     },
     {
       "property": "owner",
       "of": "SkyTask",
       "group": "Kept in your atmosphere account",
       "datatype": "text",
-      "defined": "/TaskList.atmosphere.api.spell:630-661"
+      "defined": "/TaskList.atmosphere.api.spell:489-586"
     },
     {
       "type": "SkyKeeper",
       "superType": "TaskKeeper",
-      "defined": "/TaskList.atmosphere.api.spell:672-1010"
+      "defined": "/TaskList.atmosphere.api.spell:588-880"
     },
     {
       "property": "kept_tasks",
       "asWritten": "kept tasks",
       "of": "SkyKeeper",
       "datatype": "list of sky-tasks",
-      "defined": "/TaskList.atmosphere.api.spell:717-855"
+      "defined": "/TaskList.atmosphere.api.spell:621-683"
     },
     {
       "syntax": "keep a new task titled {callArgs:expression} (of {thisArg:expression})?",
@@ -414,7 +414,7 @@
         }
       ],
       "returns": "SkyTask",
-      "defined": "/TaskList.atmosphere.api.spell:860-999"
+      "defined": "/TaskList.atmosphere.api.spell:749-880"
     },
     {
       "type": "TaskSky",
@@ -430,13 +430,13 @@
           }
         }
       },
-      "defined": "/TaskList.atmosphere.api.spell:307-385"
+      "defined": "/TaskList.atmosphere.api.spell:294-392"
     },
     {
       "type": "Checklist",
       "superType": "ViewableList",
       "itemType": "Task",
-      "defined": "/TaskList.spell:581-2423"
+      "defined": "/TaskList.spell:602-2306"
     },
     {
       "property": "showing",
@@ -447,7 +447,7 @@
         "active",
         "done"
       ],
-      "defined": "/TaskList.spell:635-797"
+      "defined": "/TaskList.spell:645-788"
     },
     {
       "syntax": "{operator:is_or_is_not} showing (expression:all|alls|active|actives|done|dones)",
@@ -463,7 +463,7 @@
           "done"
         ]
       },
-      "defined": "/TaskList.spell:635-797"
+      "defined": "/TaskList.spell:763-788"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -476,7 +476,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/TaskList.spell:1300-1509"
+      "defined": "/TaskList.spell:1253-1457"
     },
     {
       "syntax": "keep the order (of {thisArg:expression})?",
@@ -490,7 +490,7 @@
       "kind": "method",
       "name": "keep the order",
       "returns": "nothing",
-      "defined": "/TaskList.spell:1520-1738"
+      "defined": "/TaskList.spell:1459-1660"
     },
     {
       "syntax": "test the filter",
@@ -499,7 +499,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the filter",
-      "defined": "/TaskList.spell:1752-1984"
+      "defined": "/TaskList.spell:1663-1890"
     },
     {
       "syntax": "test a dragged order is kept",
@@ -508,7 +508,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "a dragged order is kept",
-      "defined": "/TaskList.spell:1995-2414"
+      "defined": "/TaskList.spell:1892-2306"
     },
     {
       "property": "checklist",
@@ -516,37 +516,37 @@
       "group": "The checklist",
       "datatype": "Checklist",
       "exclusive": true,
-      "defined": "/TaskList.spell:2482-2513"
+      "defined": "/TaskList.spell:2307-2338"
     },
     {
       "type": "TaskList",
       "superType": "App",
-      "defined": "/TaskList.spell:2619-7955"
+      "defined": "/TaskList.spell:2473-7424"
     },
     {
       "property": "checklist",
       "of": "TaskList",
       "datatype": "Checklist",
-      "defined": "/TaskList.spell:2632-2669"
+      "defined": "/TaskList.spell:2494-2524"
     },
     {
       "property": "draft",
       "of": "TaskList",
       "datatype": "text",
-      "defined": "/TaskList.spell:2674-2766"
+      "defined": "/TaskList.spell:2526-2606"
     },
     {
       "property": "active_count",
       "asWritten": "active count",
       "of": "TaskList",
       "datatype": "number",
-      "defined": "/TaskList.spell:2771-2853"
+      "defined": "/TaskList.spell:2608-2687"
     },
     {
       "property": "storage",
       "classVariable": "Storages",
       "of": "TaskList",
-      "group": "keeping",
+      "group": "Keeping",
       "groupDescription": "Where the tasks are kept:  the person picks, and the app asks that keeper",
       "enumeration": [
         "browser",
@@ -554,14 +554,14 @@
         "csv",
         "atmosphere"
       ],
-      "defined": "/TaskList.spell:2967-3029"
+      "defined": "/TaskList.spell:2786-2970"
     },
     {
       "property": "keeper",
       "of": "TaskList",
-      "group": "keeping",
+      "group": "Keeping",
       "datatype": "TaskKeeper",
-      "defined": "/TaskList.spell:3169-3292"
+      "defined": "/TaskList.spell:2972-3083"
     },
     {
       "syntax": "fill the checklist (of {thisArg:expression})?",
@@ -572,12 +572,12 @@
         "statement",
         "expression"
       ],
-      "group": "keeping",
+      "group": "Keeping",
       "kind": "method",
       "name": "fill the checklist",
       "returns": "nothing",
       "waits": true,
-      "defined": "/TaskList.spell:3628-4250"
+      "defined": "/TaskList.spell:3409-4014"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -588,11 +588,11 @@
         "statement",
         "expression"
       ],
-      "group": "keeping",
+      "group": "Keeping",
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/TaskList.spell:4264-4500"
+      "defined": "/TaskList.spell:4017-4236"
     },
     {
       "syntax": "add the starting task {callArgs:expression} with priority {callArgs:expression} (of {thisArg:expression})?",
@@ -603,7 +603,7 @@
         "statement",
         "expression"
       ],
-      "group": "keeping",
+      "group": "Keeping",
       "kind": "method",
       "name": "add the starting task (title as text) with priority (level as text)",
       "params": [
@@ -617,7 +617,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/TaskList.spell:4514-4768"
+      "defined": "/TaskList.spell:4239-4485"
     },
     {
       "syntax": "add the draft (of {thisArg:expression})?",
@@ -628,11 +628,11 @@
         "statement",
         "expression"
       ],
-      "group": "keeping",
+      "group": "Keeping",
       "kind": "method",
       "name": "add the draft",
       "returns": "nothing",
-      "defined": "/TaskList.spell:4782-5136"
+      "defined": "/TaskList.spell:4488-4825"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -643,11 +643,11 @@
         "statement",
         "expression"
       ],
-      "group": "menus",
+      "group": "Menus",
       "groupDescription": "The toolbar's buttons, and the list's right click:  the same actions",
       "kind": "method",
       "name": "draw it",
-      "defined": "/TaskList.spell:6497-7946"
+      "defined": "/TaskList.spell:5980-7424"
     },
     {
       "syntax": "show all (of {thisArg:expression})?",
@@ -658,13 +658,13 @@
         "statement",
         "expression"
       ],
-      "group": "filter",
+      "group": "Filter",
       "groupDescription": "Which tasks the list shows:  the toolbar ticks the one it's showing",
       "kind": "method",
       "name": "show all",
       "returns": "nothing",
       "title": "All",
-      "defined": "/TaskList.spell:5251-5378"
+      "defined": "/TaskList.spell:4917-5047"
     },
     {
       "syntax": "show to do (of {thisArg:expression})?",
@@ -675,12 +675,12 @@
         "statement",
         "expression"
       ],
-      "group": "filter",
+      "group": "Filter",
       "kind": "method",
       "name": "show to do",
       "returns": "nothing",
       "title": "To do",
-      "defined": "/TaskList.spell:5383-5530"
+      "defined": "/TaskList.spell:5049-5199"
     },
     {
       "syntax": "show done (of {thisArg:expression})?",
@@ -691,12 +691,12 @@
         "statement",
         "expression"
       ],
-      "group": "filter",
+      "group": "Filter",
       "kind": "method",
       "name": "show done",
       "returns": "nothing",
       "title": "Done",
-      "defined": "/TaskList.spell:5535-5682"
+      "defined": "/TaskList.spell:5201-5351"
     },
     {
       "syntax": "remove the done tasks (of {thisArg:expression})?",
@@ -707,12 +707,11 @@
         "statement",
         "expression"
       ],
-      "group": "filter",
+      "group": "Filter",
       "kind": "method",
       "name": "remove the done tasks",
       "returns": "nothing",
-      "title": "Remove the done tasks",
-      "defined": "/TaskList.spell:5687-5897"
+      "defined": "/TaskList.spell:5353-5532"
     }
   ],
   "codeLines": [
@@ -727,56 +726,56 @@
     52,
     57,
     81,
-    111,
-    113,
-    119,
-    129,
-    132,
+    110,
+    112,
+    118,
+    128,
+    131,
+    152,
     153,
-    154,
-    159,
-    170,
-    179,
-    182,
+    158,
+    169,
+    178,
+    181,
+    202,
     203,
-    204,
-    209,
-    221,
-    235,
-    238,
+    208,
+    220,
+    234,
+    237,
+    258,
     259,
-    260,
-    265,
-    278,
-    293,
-    296,
-    301,
-    323,
-    325,
-    330,
-    342,
-    365,
-    370,
-    376,
-    393,
-    401,
-    412,
-    425,
-    447,
+    264,
+    277,
+    292,
+    295,
+    300,
+    322,
+    324,
+    329,
+    341,
+    364,
+    369,
+    375,
+    392,
+    400,
+    411,
+    423,
+    444,
+    451,
     454,
-    457,
-    463,
-    468,
-    473,
-    480,
-    494,
-    506,
-    513,
-    521,
-    532,
-    615,
-    616,
-    617,
-    618
+    460,
+    465,
+    470,
+    477,
+    491,
+    503,
+    510,
+    518,
+    529,
+    612,
+    613,
+    614,
+    615
   ]
 }

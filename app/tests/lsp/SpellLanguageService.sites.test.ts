@@ -10,23 +10,22 @@ import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 
 /**
  * The lines naming one of a site's parts (epic `mockup` P6, T13):  what renaming a page in the site editor changes
- * beyond the site's own list, in either of Spell's forms.
+ * beyond the site's own list.
  */
 describe("SpellLanguageService.sitePartUses()", () => {
   test("finds every `go to`, `show` and `the address of` naming the page, by the words that name it", async () => {
     const contents = [
-      'a "films page" is a page:',
-      "\t- to see the films:",
+      "films page is a page:",
+      "\tto see the films:",
       "\t\tgo to the films page",
-      'a "film page" is a page:',
-      "\t- it has a film as text",
-      "\t- to go back:",
+      "film page is a page:",
+      "\tit has a film as text",
+      "\tto go back:",
       "\t\tshow the films page",
-      '\t- its "link" is the address of the films page',
-
+      '\tits "link" is the address of the films page',
       "galaxy guide is a site:",
-      '\t- it has a films page at "/films"',
-      '\t- it has a film page at "/films/:film"'
+      '\tit has a films page at "/films"',
+      '\tit has a film page at "/films/:film"'
     ].join("\n")
     const project = await projectOf("Galaxy.spell", contents)
     const uses = LSP.SpellLanguageService.sitePartUses(project, "films page")
@@ -36,24 +35,6 @@ describe("SpellLanguageService.sitePartUses()", () => {
       "films page"
     ])
     expect(LSP.SpellLanguageService.sitePartUses(project, "film page")).toEqual([])
-  })
-
-  test("spellx:  the words' place is in the file as written", async () => {
-    const contents = [
-      '<spell-page "films page">',
-      "\t<on click>",
-      "\t\tgo to the planets page",
-      "\t</>",
-      "</>",
-      '<spell-page "planets page"/>',
-      '<spell-site "galaxy guide">',
-      '\t<page "films page" address="/films"/>',
-      '\t<page "planets page" address="/planets"/>',
-      "</>"
-    ].join("\n")
-    const project = await projectOf("Galaxy.spell", contents)
-    const uses = LSP.SpellLanguageService.sitePartUses(project, "planets page")
-    expect(uses.map(({ match }) => contents.slice(match.start, match.end))).toEqual(["planets page"])
   })
 })
 

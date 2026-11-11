@@ -13,7 +13,7 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { core } from "spell/parser/core"
 import { runSpellFiles } from "spell/parser/spell/test"
 
-// Spell UI, as a spellml drawing names its components:  `<header>` is `<ui-header>`
+// Spell UI, as a drawing names its components:  `<header>` is `<ui-header>`
 import "spell/app/spaces/models/spellUIPack"
 
 /** The example's folder. */

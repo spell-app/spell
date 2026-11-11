@@ -1,4 +1,4 @@
-<page "dimmer theming" notebook>
+"dimmer theming" is a notebook page
 	<header level="1">
 		Dimmer
 		<header>A dimmer hides distractions to focus attention on particular content.</>
@@ -55,4 +55,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

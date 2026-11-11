@@ -1,4 +1,4 @@
-<page "message api" notebook>
+"message api" is a notebook page
 	<header level="1">
 		Message
 		<header>A message displays information that explains nearby content.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-message" only="texts"></>
 		</>
 	</>
-</page>

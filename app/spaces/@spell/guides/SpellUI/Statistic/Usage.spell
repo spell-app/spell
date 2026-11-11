@@ -1,4 +1,4 @@
-<page "statistic usage" notebook>
+"statistic usage" is a notebook page
 	<header level="1">
 		Statistic
 		<header>A statistic emphasizes the current value of an attribute.</>
@@ -71,4 +71,3 @@
 			  neighbouring statistics go.
 		</>
 	</>
-</page>

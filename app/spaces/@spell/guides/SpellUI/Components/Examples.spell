@@ -1,4 +1,4 @@
-<page "components examples" notebook>
+"components examples" is a notebook page
 	<header level="1">
 		Components
 		<header>Components name a pack of another package's elements, which the root around them loads on demand, once per page.</>
@@ -29,4 +29,3 @@
 			</example>
 		</>
 	</>
-</page>

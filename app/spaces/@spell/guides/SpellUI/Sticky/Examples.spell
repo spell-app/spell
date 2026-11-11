@@ -1,4 +1,4 @@
-<page "sticky examples" notebook>
+"sticky examples" is a notebook page
 	<header level="1">
 		Sticky
 		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
@@ -247,4 +247,3 @@
 			</example>
 		</>
 	</>
-</page>

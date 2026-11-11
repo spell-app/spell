@@ -11,6 +11,7 @@ import { methods } from "./methods.parser"
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
 import { ActionDetail } from "./ActionDetail"
+import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
 import { MethodSignature } from "./MethodSignature"
@@ -709,6 +710,12 @@ methods.addRule(ToDoSomething, {
   ]
 })
 
+// its name quoted, and what it says about itself on its line (epic `language` P48, Q6):
+// `to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"`
+methods.addRule(ToDoSomething, {
+  syntax: `to {signature:quoted_method_signature} {modifiers:action_modifiers}? :? {statement_body}?`
+})
+
 methods.addRule(CreateAnimation, {
   syntax: `create? animation {signature:method_signature} :? {statement_body}?`,
   tests: [
@@ -1099,6 +1106,13 @@ methods.addRule(CreateHook, {
   ]
 })
 
+// what an action's head line says about it (epic `language` P48, Q6):  `with title "Deal", icon "card", shortcut "meta+N"`
+methods.addRule(ActionModifier, { syntax: "title {title:text}" })
+methods.addRule(ActionModifier, { syntax: "icon {icon:text}" })
+methods.addRule(ActionModifier, { syntax: "shortcut {keys:text}" })
+methods.addRule(ActionModifier, { syntax: "(undoable:undoable)" })
+methods.addRule(ActionModifiers, { syntax: "with [{action_modifier} (,|and)]" })
+
 // one keyboard shortcut, its keys joined by `+`, no spaces:  `meta+T` -- what `action_detail` reads after `shortcut`
 methods.addRule(ShortcutKeys)
 
@@ -1143,7 +1157,7 @@ methods.addRule(ActionDetail, {
             '    return this.direction === "up"',
             "  }",
             "}",
-            'core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T", "F2"], icon: "rotate", enabledWhen: "turnOverIsEnabled", selectedWhen: "turnOverIsSelected", undoneAs: "Turn Card" })'
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", shortcuts: ["meta+T", "F2"], icon: "rotate", enabledWhen: "turnOverIsEnabled", selectedWhen: "turnOverIsSelected", undoneAs: "Turn Card" })'
           ],
           ts: [
             "export type Direction = (typeof Card.Directions)[number]",
@@ -1166,7 +1180,7 @@ methods.addRule(ActionDetail, {
             '    return this.direction === "up"',
             "  }",
             "}",
-            'core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T", "F2"], icon: "rotate", enabledWhen: "turnOverIsEnabled", selectedWhen: "turnOverIsSelected", undoneAs: "Turn Card" })'
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", shortcuts: ["meta+T", "F2"], icon: "rotate", enabledWhen: "turnOverIsEnabled", selectedWhen: "turnOverIsSelected", undoneAs: "Turn Card" })'
           ]
         },
         {
@@ -1231,7 +1245,7 @@ methods.addRule(ActionDetail, {
             "    return `Duplicate ${this.name}…`",
             "  }",
             "}",
-            'core.describeAction(Game, "duplicate", { title: "duplicate it", titleFrom: "duplicateTitle" })'
+            'core.describeAction(Game, "duplicate", { title: "Duplicate It", titleFrom: "duplicateTitle" })'
           ],
           ts: [
             "export class Game extends Thing {",
@@ -1247,7 +1261,7 @@ methods.addRule(ActionDetail, {
             "    return `Duplicate ${this.name}…`",
             "  }",
             "}",
-            'core.describeAction(Game, "duplicate", { title: "duplicate it", titleFrom: "duplicateTitle" })'
+            'core.describeAction(Game, "duplicate", { title: "Duplicate It", titleFrom: "duplicateTitle" })'
           ]
         }
       ]

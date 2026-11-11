@@ -1,13 +1,12 @@
 # Inbox
-Your inbox in an org:  the messages people in it send you, and the pages its Managers send.
-Where it's kept is in Inbox.api.spell, and only its first line knows.
-A message lands in each inbox it's to, so deleting yours leaves theirs;  it can't be changed once it's sent.
-
+// Your inbox in an org:  the messages people in it send you, and the pages its Managers send.
+// Where it's kept is in Inbox.api.spell, and only its first line knows.
+// A message lands in each inbox it's to, so deleting yours leaves theirs;  it can't be changed once it's sent.
 
 ## A row for each:  who it's from, what it says, and its conversation
 
-<extend "message">
-	<draw>
+a message
+	to draw it
 		<segment class="message">
 			<stack spacing="sm">
 				<stack direction="horizontal" spacing="md" align="center" wrap>
@@ -22,14 +21,11 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 				<text class="page" color="grey">{its page}</text>
 			</stack>
 		</segment>
-	</draw>
-</extend>
-
 
 ## How you hear of it, by mail:  pick one
 
-<extend "mail choice">
-	<draw>
+a mail choice
+	to draw it
 		<form value={it} class="mail-choice">
 			<field label="Mail me" inline>
 				<select name="how">
@@ -39,48 +35,38 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 				</select>
 			</field>
 		</form>
-	</draw>
-</extend>
-
 
 ## A space you follow, and a button to stop
 
-<extend "subscription">
-	<draw>
+a subscription
+	to draw it
 		<stack class="subscription" direction="horizontal" spacing="md" align="center">
 			<text>{its space}</text>
 			<button class="unsubscribe" icon="close" size="mini" appearance="transparent" aria-label="Stop following it" title="Stop following it" onClick={remove it from the subscriptions}/>
 		</stack>
-	</draw>
-</extend>
-
 
 ## The page:  write one, then every message, newest first, each with a Reply
 
-<app "inbox page">
-	<property "new message">a new message</>
-	<property "new subscription">a new subscription</>
+inbox page is an app
+	"new message" is a new message
+	"new subscription" is a new subscription
 
-	<action "send it">
+	to send it
 		add the new message to the messages
 		set its new message to a new message
-	</action>
 
-	<action "reply to (who as text) in (conversation as text)">
+	to reply to (who as text) in (conversation as text)
 		set the recipients of the new message to who
 		set the thread of the new message to conversation
-	</action>
 
-	<action "choose how">
+	to choose how
 		add a new mail choice whose how is "digest" to the mail choices
-	</action>
 
-	<action "subscribe">
+	to subscribe
 		add the new subscription to the subscriptions
 		set its new subscription to a new subscription
-	</action>
 
-	<draw>
+	to draw it
 		<stack class="org-page" spacing="none">
 			<toolbar class="top-bar" appearance="text" aria-label="Inbox">
 				<text slot="title" size="large">Inbox</text>
@@ -149,5 +135,3 @@ A message lands in each inbox it's to, so deleting yours leaves theirs;  it can'
 				</stack>
 			</container>
 		</stack>
-	</draw>
-</app>

@@ -22,7 +22,7 @@ const saved = new Map<string, string>()
 /** A browser context whose saves go nowhere near the disk. */
 async function contextWithNoSaving(context: BrowserContext): Promise<void> {
   // the one route:  Playwright asks the last one added first, and a second could let a save through
-  await context.route(/\/api\/projects\/file\/|\.(spellml|spell)(\?.*)?$/, (route) => {
+  await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) => {
     const request = route.request()
     const { pathname } = new URL(request.url())
     if (request.method() !== "GET") {

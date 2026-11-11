@@ -1,4 +1,4 @@
-<page "select api" notebook>
+"select api" is a notebook page
 	<header level="1">
 		Select
 		<header>A select lets a user choose a value from a list, with the platform's own picker.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-select" only="states"></>
 		</>
 	</>
-</page>

@@ -134,7 +134,7 @@ describe("one at a time", () => {
     core.runAction(game, "fail")
     core.runAction(game, "hint")
     await settled()
-    expect(error).toHaveBeenCalledWith("fail failed", expect.any(Error))
+    expect(error).toHaveBeenCalledWith("Fail failed", expect.any(Error))
     expect(steps).toEqual(["hint"])
     error.mockRestore()
   })
@@ -146,7 +146,7 @@ describe("one at a time", () => {
       throw new Error("failed on purpose")
     }
     expect(core.runAction(game, "boom")).toBe(true)
-    expect(error).toHaveBeenCalledWith("boom failed", expect.any(Error))
+    expect(error).toHaveBeenCalledWith("Boom failed", expect.any(Error))
     expect(core.RUNTIME.actions.isBusy).toBe(false)
     error.mockRestore()
   })

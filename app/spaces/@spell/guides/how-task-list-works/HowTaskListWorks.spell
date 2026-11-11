@@ -12,14 +12,14 @@
 
 
 ## A task
-a "task" is a view where:
-	- its "title" is text
-	- its "done" is yes or no
-	- it "is done" if its done is yes
-	- it "is active" if its done is no
+a "task" is a view
+	its "title" is text
+	its "done" is yes or no
+	it "is done" if its done is yes
+	it "is active" if its done is no
 
-	// a form of its own, bound to the task:  ticking the box changes its "done"
-	- to draw it:
+	to draw it
+		// a form of its own, bound to the task:  ticking the box changes its "done"
 		return <ui-form value={it}>
 			<ui-stack direction="horizontal" spacing="sm">
 				<ui-checkbox name="done" aria-label="Done"/>
@@ -29,11 +29,11 @@ a "task" is a view where:
 
 
 ## The checklist:  the tasks, shown as its filter says
-a "checklist" is a viewable list of tasks where:
-	// what it shows:  every task, the ones still to do, or the ones done
-	- its "showing" is one of all, active or done
-	// each task in turn, unless the filter hides it:  "return nothing" draws nothing
-	- to draw each item:
+a "checklist" is a viewable list of tasks
+	its "showing" is one of all, active or done
+		// what it shows:  every task, the ones still to do, or the ones done
+	to draw each item
+		// each task in turn, unless the filter hides it:  "return nothing" draws nothing
 		if its showing is "active" and the task is done return nothing
 		if its showing is "done" and the task is active return nothing
 		return draw the task
@@ -42,12 +42,12 @@ a task belongs to one checklist
 
 
 ## The app
-task list is an app where:
-	- its "tasks" is a new checklist
-	// how many are left:  the tasks picked out with "where", counted
-	- its "active count" is the length of (tasks in its tasks where it is active)
+task list is an app
+	its "tasks" is a new checklist
+	its "active count" is the length of (tasks in its tasks where it is active)
+		// how many are left:  the tasks picked out with "where", counted
 
-	- to draw it:
+	to draw it
 		return <ui-container text>
 			<ui-menu appearance="secondary">
 				<ui-item kind="header">{its active count + " to do"}</ui-item>

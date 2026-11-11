@@ -1,4 +1,4 @@
-<page "textarea usage" notebook>
+"textarea usage" is a notebook page
 	<header level="1">
 		Textarea
 		<header>A textarea is a multi-line field used to elicit a longer response.</>
@@ -108,4 +108,3 @@
 			```
 		</>
 	</>
-</page>

@@ -291,6 +291,12 @@ and in the app's build folder, `app/` at the app folder's root.
       - Its family registers `spell` with the page's `UI.code` as it loads ([SpellLanguage](components/spell-code/SpellLanguage.ts)),
         so EVERY `<ui-code language="spell">` on the page is coloured, and every spell block of a markdown.
       - The colours are spell's parser's (`SP.SpellHighlighter`), from source:  a lazy chunk, on first use.
+      - Drawn in the bubbly look (epic `language` P49):  the parser's `SP.BubblyLayout`, as HTML by
+        [BubblyHtml](components/spell-code/BubblyHtml.ts), styled by [bubbly.css](components/spell-code/bubbly.css),
+        the look's ONE sheet;  `<ui-code>` shows a language's drawing (`CodeLanguage.draw`) unless it numbers or
+        wraps its lines.
+        - Its `--bubbly-` values for VS Code:  `bubbly.values.json`, `yarn tsx scripts/bubbly-values.ts`.
+        - The drawn-bubbly page in the epic repo:  `yarn tsx scripts/bubbly-page.ts`.
     - `<spell-markdown>` (`SpellMarkdown extends UIMarkdown`):  drawn by spell's engine (`spell/parser/markdown`), plain and
       `editable`, in `ui-*` elements ([MDEngine](components/spell-markdown/MDEngine.ts), a lazy chunk).
       - It overrides `UIMarkdown.loadEngine()`;  its barrel imports the families the engine draws with, and

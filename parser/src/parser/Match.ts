@@ -137,7 +137,11 @@ export class Match<
   /** Character offset where whatever follows us starts:  `end` plus trailing whitespace. */
   get next(): number | undefined {
     const { start, inputText } = this
-    return start === undefined ? undefined : start + inputText.length
+    if (start === undefined) return undefined
+    // ending in an indented block:  where its last line ends, as a block's text joins its lines with one newline more
+    // each (`P.BlockToken.length`)
+    const last = this.tokens.at(-1)
+    return last instanceof P.BlockToken ? last.next : start + inputText.length
   }
 
   /**

@@ -22,10 +22,11 @@ export type AnySpellFile = SpellFile | SpellJSFile | SpellCSSFile
 export type CompilableSpellFile = SpellFile | SpellCSSFile
 
 /**
- * The FORM a spell file is written in:  plain Spell, or spellx, its tag-shaped form:  both `Card.spell` (`formOfText()`).
- * - Both read by the same rules, to the same program:  see `SP.SpellParser.form`.
+ * The FORM a spell file is written in:  plain Spell, or a PAGE file, one holding a page's head,
+ * `"button api" is a notebook page`, its body indented under it (`formOfText()`).
+ * - Both read by the same rules, to the same program:  a page file through the page tokenizer (`SP.PageTokenizer`).
  */
-export type SpellForm = "spell" | "spellx"
+export type SpellForm = "spell" | "page"
 
 // ## SpellProject
 
@@ -57,52 +58,27 @@ export function isProjectFile(name: string): boolean {
 export const SPELL_SUFFIX = ".spell"
 
 /**
- * Ending of a tag-shaped file from before every file ended `.spell` (epic `language` P40;  Owen, 2026-11-09):
- * `Card.spellml`, `Carta.es.spellml`.
- * - Still read everywhere, always as tags, so nobody's own project breaks.
- * - NEVER written:  a new file is `.spell`, and what it says decides its shape (`formOfText()`).
+ * A page's head, at a file's left edge, in any language (epic `language` P45):
+ * `"button api" is a notebook page`, `"api del botón" es una página cuaderno`.
+ * - Each language's own is its `SP.PageWords.plainPage`;  this one only says a file has one.
  */
-export const SPELLML_SUFFIX = ".spellml"
+const PAGE_HEAD_LINE =
+  /^"[^"\n]+"[ \t]+(?:is[ \t]+an?[ \t]+(?:(?:notebook|locked)[ \t]+)*page|es[ \t]+una[ \t]+p[áa]gina(?:[ \t]+(?:cuaderno|bloqueado|bloqueada))*)[ \t]*(?:\/\/[^\n]*)?$/mu
 
 /**
- * The older ending of a tag-shaped file, `Card.spellx`:  still read as `.spellml` is, never written.
- * - Owen, 2026-10-27:  "support both for now".
+ * The form `text` is written in (epic `language` P40, P47):  `"page"` when it holds a page's head, else `"spell"`.
+ * - A page's head is a line at the file's left edge, `"button api" is a notebook page`;
+ *   lines inside a `/* ... *\/` or `<!-- ... -->` comment don't count.
+ * - The ONE check:  everything that tells the two apart asks it, or a file's `form`.
+ * - No text (a new file, one not loaded yet) is plain.
  */
-export const OLD_SPELLML_SUFFIX = ".spellx"
-
-/** The endings that say a file is tag-shaped by themselves:  `.spellml`, then the older `.spellx`. */
-export const SPELLML_SUFFIXES = [SPELLML_SUFFIX, OLD_SPELLML_SUFFIX] as const
-
-/**
- * Does `name` (a file's name or path) end in one of the old endings, `.spellml` or `.spellx`, in any language?
- * - Only about the NAME:  a file's shape is `formOfText()`'s to say.
- */
-export function isSpellmlName(name: string | undefined): boolean {
-  return !!name && SPELLML_SUFFIXES.some((suffix) => name.endsWith(suffix))
+export function formOfText(text: string | undefined): SpellForm {
+  return text && holdsPageHead(text) ? "page" : "spell"
 }
 
-/** A line with a tag's `<` in its very first column, but for the defaults block plain Spell can open with. */
-const TAG_LINE = /^<(?!\/?ui-defaults\b)/m
-
-/**
- * The shape file `name` is written in, from what it says (epic `language` P40):  `"spellx"` for tags, else `"spell"`.
- * - Tag-shaped:  any line starting with `<` in the very first column, other than `<ui-defaults>`.
- *   Plain Spell's top-level lines never start there.
- *   - Lines inside a `/* ... *\/` or `<!-- ... -->` comment don't count.
- *   - Right on all 593 of the built-in projects' and Owen's own files, when it was chosen.
- *   - Their first line alone was wrong on 69:  a tag file usually opens with a heading and some prose.
- * - The old endings, `.spellml` and `.spellx`, are always tag-shaped:  a file with only prose stays one.
- * - The ONE check:  everything that tells the two shapes apart asks it, or a file's `form`.
- * - No text (a new file, one not loaded yet) is plain:  deleting a file's last tag flips it, until one's back.
- */
-export function formOfText(text: string | undefined, name?: string): SpellForm {
-  if (isSpellmlName(name)) return "spellx"
-  return text && holdsTagLine(text) ? "spellx" : "spell"
-}
-
-/** Is any line of `text`, outside a comment, a tag's in its first column?  See `formOfText()`. */
-function holdsTagLine(text: string): boolean {
-  if (!TAG_LINE.test(text)) return false
+/** Is any line of `text`, outside a comment, a page's head?  See `formOfText()`. */
+function holdsPageHead(text: string): boolean {
+  if (!PAGE_HEAD_LINE.test(text)) return false
   let closer: string | undefined
   for (const line of text.split("\n")) {
     if (closer) {
@@ -114,31 +90,31 @@ function holdsTagLine(text: string): boolean {
       if (!line.includes(end)) closer = end
       continue
     }
-    if (TAG_LINE.test(line)) return true
+    if (PAGE_HEAD_LINE.test(line)) return true
   }
   return false
 }
 
 /**
  * Is `name` (a file's name or path) a spell SOURCE file's, in any language?
- * - `Card.spell`, `Carta.es.spell`, and the old endings:  `Card.spellml`, `Carta.es.spellml`, `Card.spellx`
+ * - `Card.spell`, `Carta.es.spell`
  * - NOT a project's built output, `Solitaire.spell.js`.
  * - NOT a property editors file, `Card.editor.spell` (`isPropertyEditorsName()`):  it's never compiled.
  */
 export function isSpellSourceName(name: string | undefined): boolean {
-  return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name)) && !isPropertyEditorsName(name)
+  return !!name && name.endsWith(SPELL_SUFFIX) && !isPropertyEditorsName(name)
 }
 
 /** The end of a property editors file's name:  `.editor.spell`, `.editors.spell`, `.editor.es.spell`, and the old endings. */
-const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell(?:ml|x)?$/
+const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell$/
 
 /**
  * Is `name` (a file's name or path) a PROPERTY EDITORS file's (epic `editor` P25, from `data`'s P31 Q28)?
  * - `Card.editor.spell`, one type's;  `Solitaire.editors.spell`, any of the project's types'
  * - In another language, its code before the ending:  `Carta.editor.es.spell`
- * - It holds `<spell-property-editor "card">` blocks (or the old short `<property-editor "card">`):
- *   each a type's layout for its Inspector card, as markup.
- * - One of a project's own files, which the editor opens and colours as spellml, and the Inspector reads;
+ * - It holds `"card" is a property editor` blocks, each a type's layout for its Inspector card, as markup
+ *   indented under its line (epic `language` J72).
+ * - One of a project's own files, which the editor opens and the Inspector reads;
  *   NEVER compiled, so it's no spell SOURCE file (`isSpellSourceName()`).
  * - Not the property editor PAGE, `Card.editor.html` (`EDITOR_PAGE_SUFFIX`):  that's a page of its own.
  */
@@ -257,7 +233,7 @@ export type ProjectManifestJSON5 = {
   /** Targets it compiles to, from its project file, e.g. `["ts/solid"]` -- `js/solid` always:  see `SP.TARGETS`. */
   targets?: string[]
   /**
-   * The component packs its spellx drawings name components from, by their bare names (`<button>`), first first,
+   * The component packs its drawings name components from, by their bare names (`<button>`), first first,
    * from its project file -- default:  Spell UI's, `["spell-ui"]` (`SP.ComponentPacks`, epic `elemental-spell` P7).
    */
   packs?: string[]
@@ -803,7 +779,7 @@ export type SpellWordsData = {
   /**
    * Each type's members by GROUP, in the order its file says them, by the type's class name (epic `debut` P26):
    * `{ Card: [{ name: "rank", description: "Ace is low ...", members: ["rank", "isARank", "value"] }, ...] }`.
-   * - A group:  a template's `- group "rank"` (spellx's `<group "rank" .../>`), or a heading over its members
+   * - A group:  a template's `- group "rank"`, or a heading over its members
    *   (`## turning it over`).
    * - Members by compiled name, as in `types`;  one under no group isn't listed.
    * - Left out when no type has any.
@@ -829,7 +805,7 @@ export type SpellWordsGroup = {
 export type MemberGroup = {
   /** Its name:  `rank`, or the heading's text. */
   name: string
-  /** The comment on a group's line:  its `description` in spellx. */
+  /** The comment on a group's line. */
   description?: string
 }
 

@@ -1,4 +1,4 @@
-<page "quote api" notebook>
+"quote api" is a notebook page
 	<header level="1">
 		Quote
 		<header>A quote holds someone else's words:  a block of its own, or a few words inside a sentence.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api family="ui-quote" only="states"></>
 		</>
 	</>
-</page>

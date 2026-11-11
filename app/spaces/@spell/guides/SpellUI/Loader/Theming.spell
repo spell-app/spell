@@ -1,4 +1,4 @@
-<page "loader theming" notebook>
+"loader theming" is a notebook page
 	<header level="1">
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>
@@ -52,4 +52,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

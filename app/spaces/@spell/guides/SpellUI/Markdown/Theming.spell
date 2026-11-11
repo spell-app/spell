@@ -1,4 +1,4 @@
-<page "markdown theming" notebook>
+"markdown theming" is a notebook page
 	<header level="1">
 		Markdown
 		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
@@ -58,4 +58,3 @@
 			strong ink.
 		</>
 	</>
-</page>

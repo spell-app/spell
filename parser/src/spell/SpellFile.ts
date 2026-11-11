@@ -85,12 +85,12 @@ export class SpellFile extends TextFile {
   }
 
   /**
-   * The shape we're written in, from what we say (`SP.formOfText()`):  `"spellx"` for tags, `"spell"` for plain Spell.
-   * - Both parse to the same program, by the same rules:  spellx through its own tokenizer (epic `elemental-spell` P6).
-   * - Not loaded yet, or empty:  plain, but for a file with one of the old endings.
+   * The shape we're written in, from what we say (`SP.formOfText()`):  `"page"` for a page file, `"spell"` for plain Spell.
+   * - Both parse to the same program, by the same rules:  a page file through its own tokenizer (`SP.PageTokenizer`).
+   * - Not loaded yet, or empty:  plain.
    */
   get form(): SP.SpellForm {
-    return SP.formOfText(this.contents, this.file)
+    return SP.formOfText(this.contents)
   }
 
   /** Pointer to our `SpellProject`. */
@@ -187,7 +187,7 @@ export class SpellFile extends TextFile {
       path: this.path,
       parser: SP.SpellParser.rootScope.parser!.clone({
         module: this.path,
-        ...(this.form === "spellx" ? { form: this.form } : {})
+        ...(this.form === "page" ? { form: this.form } : {})
       } as P.ParserProps),
       parentScope: SP.SpellParser.rootScope
     })

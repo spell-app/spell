@@ -92,7 +92,6 @@ const APP_TEXTS_ES: AppTextPack = {
   codePinnedLines: "Líneas fijas sobre el código",
   codeCompilerWords: "Detalles del compilador en la información",
   // la página de un cuaderno, `<NotebookPage>` (épica `elemental-spell` P16)
-  notebookPageCodeAs: "Ver el código como",
   notebookPageLock: "Bloquearlo:  mientras esté bloqueado no se guarda nada",
   notebookPageUnlock: "Desbloquearlo:  los cambios se guardan",
   notebookPageLocked: "Bloqueado:  los cambios no se guardan",
@@ -313,8 +312,6 @@ const APP_TEXTS_ES: AppTextPack = {
   outputTab: "Salida",
   typescriptTab: "TypeScript",
   pythonTab: "Python",
-  codeSpellTab: "Encanto en código",
-  spellxTab: "Encanto en etiquetas",
   inspector: "Inspector",
   inspectorInspect: "Inspeccionar la app",
   inspectorTip: "Selecciona una parte de la app con la mira, para ver qué es y cambiarla.",

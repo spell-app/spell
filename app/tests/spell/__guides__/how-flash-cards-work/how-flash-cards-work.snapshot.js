@@ -22,8 +22,8 @@ core.heading("A card:  a word on the front, what it means on the back")
 // - `turn it face up`, `turn it face down`, `turn it over`
 // - a drawing of both its sides, back to back, which shows its front face up and its back face down, and turns over in 3D
 
-// So the card only says what each side looks like:  its `<draw "front">` and its `<draw "back">`.
-// - `clickable` shows a pointer over it, and `<on click>` says what a click does.
+// So the card only says what each side looks like:  its `to draw its front` and its `to draw its back`.
+// - `clickable` shows a pointer over it, and `on click` says what a click does.
 // - Each side is a Spell UI `<segment>`:  a raised panel, blue for the word and green for what it means.
 
 export class FlashCard extends TwoSidedView {
@@ -72,7 +72,7 @@ core.heading("The quiz:  the deck, and the card showing")
 export class Quiz extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "deck" is a new deck
+  // "deck" is a new deck
   static { this.declareProp("deck", { init: () => new Deck(), early: true }) }
   get deck() { return this.getProp("deck") }
   set deck(value) { this.setProp("deck", value) }
@@ -127,7 +127,7 @@ core.heading("A check")
 
 export function testTurningACardOver() {
   return core.test("test turning a card over", function testTurningACardOver() {
-    core.echoTestAction(`set the card to a new flash card with word = "el gato", meaning = "the cat"`)
+    core.echoTestAction(`set the card to a new flash card with word "el gato", meaning = "the cat"`)
     const card = new FlashCard({ word: "el gato", meaning: "the cat" })
     core.expect(card.isFaceDirection("down"), `the card is face down`, true, `yes`)
     core.echoTestAction(`turn the card over`)
@@ -142,7 +142,7 @@ core.heading("Try it")
 ////////////
 // - Click the card on the right to turn it over, and "Next card" for another.
 // - Add a word:  copy one of the "add" lines above, and change both its words.
-// Click "Next card" until it comes up.
+//   Click "Next card" until it comes up.
 // - Make your own deck:  change all four lines to something you want to learn, in any language.
 
 // Where next:  Flash Cards, in the Examples, which keeps score:  "I knew it" and "I missed it" buttons,

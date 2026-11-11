@@ -268,10 +268,10 @@
       "types": "./parser/dist-types/src/spell/test/index.d.ts",
       "default": "./parser/src/spell/test/index.ts"
     },
-    "./parser/spellx": {
-      "spell-source": "./parser/src/spellx/index.ts",
-      "types": "./parser/dist-types/src/spellx/index.d.ts",
-      "default": "./parser/src/spellx/index.ts"
+    "./parser/page": {
+      "spell-source": "./parser/src/page/index.ts",
+      "types": "./parser/dist-types/src/page/index.d.ts",
+      "default": "./parser/src/page/index.ts"
     },
     "./parser/cli": {
       "spell-source": "./parser/src/cli/index.ts",

@@ -2,26 +2,16 @@ import { existsSync, readdirSync, readFileSync } from "fs"
 import { resolve } from "path"
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell/parser/parser"
-import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
-import { SX } from "spell/parser/spellx"
 import { SPACES } from "spell/app/spaces"
 import { fixtureFolder, fixtureImportScope, loadFixtureProject } from "spell/app/spaces/test"
 
-// Spell UI's pack:  a spellx drawing names its components bare (`<button>`)
+// Spell UI's pack:  a drawing names its components bare (`<button>`)
 import "spell/app/spaces"
 
 /**
- * Every page of the Spell UI site (`@spell/guides/SpellUI`, epic `notebook` P10) compiles cleanly, and means the same
- * in code spell:  written as code spell in memory (`SX.CodeSpellWriter`), it compiles to the same javascript.
- * - A notebook is only ever a `.spell` file (Owen, 2026-10-25:  "one file.  notebooks are only `.spell`"):
- *   its code spell is made here, never written beside it.
- * - Its bare names are written as the tags its own compile chose, as the editor's "Show as Code Spell" writes them:
- *   `<counter/>` is `<counter-counter/>`.
+ * Every page of the Spell UI site (`@spell/guides/SpellUI`, epic `notebook` P10) compiles cleanly.
  * - The whole project in ONE compile, in its project file's order, as the editor compiles it;  each file its own test.
- *   - Slow:  about 11 s to parse all 351 pages, until a page alone in its file compiles alone.
- * - Compared without comments and the `DECLARES` header, which carry line numbers.
  * - The site's own checks, below:  every page listed, every address unique, no tab bar left, every link somewhere real.
  */
 const SITE = SPACES.SPELL_UI_SITE_PROJECT
@@ -32,41 +22,17 @@ const COMPILE_MS = 300_000
 
 const FILES = loadFixtureProject(SITE)
 
-/** Each file parsed, and its code spell twin parsed, with the whole project. */
-type Compiled = { parsed: ParsedFile[]; twins: ParsedFile[] }
 type ParsedFile = ReturnType<typeof parseSpellProject>["files"][number]
 
-describe("every page of the Spell UI site means the same in code spell", () => {
-  let compiled: Compiled
+describe("every page of the Spell UI site compiles cleanly", () => {
+  let parsed: ParsedFile[]
 
   beforeAll(() => {
-    const parentScope = fixtureImportScope(SITE)
-    const parsed = parseSpellProject(FILES, { parentScope, projectPath: SITE }).files
-    // each element's tag, as the parse chose it, by where it starts in its file
-    const written = FILES.map(({ path, contents }, index) => {
-      const tags = new Map<number, string>()
-      const visit = (match: P.Match) => {
-        const [element] = match.matched
-        const data = match.data as { tagName?: string; children?: unknown[] }
-        if (element instanceof P.JSXElementToken && data.tagName) tags.set(element.start, data.tagName)
-        for (const inner of [...match.matched, ...(data.children ?? [])]) if (inner instanceof P.Match) visit(inner)
-      }
-      visit(parsed[index]!.match!)
-      const code = SX.CodeSpellWriter.write(contents, {
-        path,
-        componentTag: (word, start) => tags.get(start) ?? SP.ComponentPacks.tagFor(word, "en")
-      })
-      return { path: path.replace(/\.spellml$/, ".spell"), contents: code }
-    })
-    compiled = { parsed, twins: parseSpellProject(written, { parentScope, projectPath: SITE }).files }
+    parsed = parseSpellProject(FILES, { parentScope: fixtureImportScope(SITE), projectPath: SITE }).files
   }, COMPILE_MS)
 
   test.each(FILES.map(({ path }, index) => [path, index] as const))("%s", (path, index) => {
-    const parsed = compiled.parsed[index]!
-    expect({ path, errors: parsed.errors }).toEqual({ path, errors: [] })
-    const twin = compiled.twins[index]!
-    expect({ path: twin.path, errors: twin.errors }).toEqual({ path: twin.path, errors: [] })
-    expect(codeOf(twin.compiled)).toBe(codeOf(parsed.compiled))
+    expect({ path, errors: parsed[index]!.errors }).toEqual({ path, errors: [] })
   })
 })
 
@@ -96,21 +62,27 @@ function codeOf(compiled: string): string {
 const PAGES = FILES.filter(({ path }) => path !== SITE_FILE).map(({ path, contents }) => ({
   path,
   contents,
-  name: /^<page "([^"]+)" notebook>/.exec(contents)?.[1]
+  // its plain head (epic `language` P45):  `"button usage" is a notebook page`, its own views above it (P47)
+  name: /^"([^"]+)" is a notebook page\n/m.exec(contents)?.[1]
 }))
 
-/** Each line of the site file naming a page:  its name and address. */
+/** Each line of the site file naming a page:  its name and address, `- it has a button usage page at "/button"`. */
 const SITE_TEXT = readFileSync(resolve(FOLDER, SITE_FILE.slice(1)), "utf8")
-const SITE_PAGES = [...SITE_TEXT.matchAll(/<page "([^"]+) page"\s+address="([^"]+)"/g)].map(([, name, address]) => ({
-  name: name!,
-  address: address!
-}))
+const SITE_PAGES = [...SITE_TEXT.matchAll(/^\t+(?:- )?it has an? (.+?) page at "([^"]+)"/gm)].map(
+  ([, name, address]) => ({
+    name: name!,
+    address: address!
+  })
+)
 
 describe("the Spell UI site", () => {
-  test("every file is one page alone:  nothing before its tag, or after its end tag", () => {
+  test("every file is one page:  nothing after its body;  before its head, only its own views (epic `language` P47)", () => {
     for (const { path, contents, name } of PAGES) {
       expect({ path, name: !!name }).toEqual({ path, name: true })
-      expect({ path, ends: contents.trimEnd().endsWith("</page>") }).toEqual({ path, ends: true })
+      const lines = contents.split("\n")
+      const head = lines.findIndex((line) => /^"[^"]+" is a notebook page$/.test(line))
+      const outside = lines.slice(head + 1).filter((line) => line && !/^[ \t]/.test(line))
+      expect({ path, outside }).toEqual({ path, outside: [] })
     }
   })
 

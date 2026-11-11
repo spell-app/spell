@@ -9,7 +9,7 @@ import type { Core, MenuItem } from "spell/parser/core"
  *
  * - Keys:  `runShortcut()` hands a key to the program's core, which runs the first enabled action bound to it,
  *   from the focused thing up to the app (`core.runShortcut()`).
- * - Menus:  a template's `- its "game menu" is a menu of ...` (spellx's `<menu "GameMenu">`), found by name on a
+ * - Menus:  a template's `- its "game menu" is a menu of ...`, found by name on a
  *   thing or up its chain (`core.menuOf()`), drawn three ways:
  *   - as a toolbar or menu in a drawing, `<ui-toolbar menu="GameMenu" />`:  `fill()` puts its actions in
  *   - as a right click's menu, `context-menu="GameMenu"` on any element of a drawing:  `showContextMenu()`

@@ -1,4 +1,4 @@
-<page "statistic examples" notebook>
+"statistic examples" is a notebook page
 	<header level="1">
 		Statistic
 		<header>A statistic emphasizes the current value of an attribute.</>
@@ -218,4 +218,3 @@
 			</example>
 		</>
 	</>
-</page>

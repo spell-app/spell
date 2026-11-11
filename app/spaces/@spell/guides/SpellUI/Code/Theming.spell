@@ -1,4 +1,4 @@
-<page "code theming" notebook>
+"code theming" is a notebook page
 	<header level="1">
 		Code
 		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
@@ -57,4 +57,3 @@
 			follow the light or dark scheme.
 		</>
 	</>
-</page>

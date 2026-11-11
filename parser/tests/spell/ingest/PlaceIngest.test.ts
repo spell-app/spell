@@ -9,7 +9,6 @@ import { startRecipeServers, type RecipeServers } from "spell/server/test/recipe
 import { readThroughSpell } from "spell/parser/cli/placeIngest"
 import { PlaceIngest, descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceIngest"
 import { PoliteReader, READER_NAME } from "spell/parser/spell/ingest/PoliteReader"
-import { compiledSpellProject } from "spell/parser/spell/test"
 import {
   IngestStopped,
   type IngestFiles,
@@ -107,7 +106,6 @@ function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings>
   const { fetch, asked } = fakeFetch(routes)
   const disk = memoryFiles(start)
   const ingest = new PlaceIngest({
-    shape: "plain",
     fetch,
     ask: async () => undefined,
     files: disk.files,
@@ -119,28 +117,28 @@ function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings>
   return { ingest, asked, ...disk }
 }
 
-const STARS_SPELL = `stars is a web server at "${API}":
-	- its id is its "url"
-	- check it every 30 seconds
-	- it is read only
-	- it writes names like "hair_color"
-	- people live at "/people"
-	- planets live at "/planets"
+const STARS_SPELL = `stars is a web server at "${API}"
+	its id is its "url"
+	check it every 30 seconds
+	it is read only
+	it writes names like "hair_color"
+	people live at "/people"
+	planets live at "/planets"
 
-a "person" is a thing:
-	- it lives in stars
-	- its "name" is text
-	- its "height" is a number or "unknown"
-	- its "mass" is a number
-	- its "hair color" is text
-	- its "homeworld" is a planet
-	- its "films" is a list of text  // each an address
-	- its "created" is a date
+a "person" is a thing
+	it lives in stars
+	its "name" is text
+	its "height" is a number or "unknown"
+	its "mass" is a number
+	its "hair color" is text
+	its "homeworld" is a planet
+	its "films" is a list of text  // each an address
+	its "created" is a date
 
-a "planet" is a thing:
-	- it lives in stars
-	- its "name" is text
-	- its "population" is a number`
+a "planet" is a thing
+	it lives in stars
+	its "name" is text
+	its "population" is a number`
 
 describe("adding a source", () => {
   test("its description is written once beside it, what every collection shares in allCollections, and named in the project", async () => {
@@ -229,7 +227,7 @@ describe("adding a source", () => {
     }) as typeof globalThis.fetch
     const { ingest, descriptions } = ingestOf({}, { fetch })
     const { spell } = await ingest.add({ address: API, into: "/P.spell", name: "people place" })
-    expect(spell).toContain(`- it searches names with "search"`)
+    expect(spell).toContain(`it searches names with "search"`)
     expect(descriptions.get("/P.json5")!.collections.people!.searchedBy).toEqual({ param: "search", field: "name" })
     expect(asked).toContain(`${API}/people?search=luke`)
   })
@@ -245,9 +243,9 @@ describe("adding a source", () => {
     }
     const { ingest, descriptions } = ingestOf(routes)
     const { spell } = await ingest.add({ address: API, into: "/M.spell", name: "moves place" })
-    expect(spell).toContain(`- its rows are its "results"`)
-    expect(spell).toContain(`- its next page is its "next"`)
-    expect(spell).toContain(`- its id is its "url"`)
+    expect(spell).toContain(`its rows are its "results"`)
+    expect(spell).toContain(`its next page is its "next"`)
+    expect(spell).toContain(`its id is its "url"`)
     const moves = descriptions.get("/M.json5")!.collections.moves!
     expect(moves).toMatchObject({ rowsSeen: 3, rowsItSays: 900, paging: "next field" })
     expect(moves.readThrough).toEqual({ rows: 1 })
@@ -269,7 +267,7 @@ describe("adding a source", () => {
     }) as typeof globalThis.fetch
     const { ingest, descriptions } = ingestOf({}, { fetch })
     const { spell } = await ingest.add({ address: API, into: "/S.spell", name: "stars" })
-    expect(spell).toContain(`- people live at "/people/"`)
+    expect(spell).toContain(`people live at "/people/"`)
     const description = descriptions.get("/S.json5")!
     expect(description.collections.people!.at).toBe("/people/")
     expect(description.notes.join("\n")).toMatch(/answered from \/people\/, not \/people/)
@@ -323,11 +321,11 @@ describe("adding a source", () => {
       collections: ["wiki pages=/page/summary/{name}"],
       samples: ["Tatooine", "Hoth"]
     })
-    expect(spell).toContain(`- wiki pages are found at "/page/summary/{name}"`)
-    expect(spell).toContain(`- its id is its "title"`)
-    expect(spell).toContain(`- its "title" is text`)
-    expect(spell).toContain(`- its "kind" is text, stored as "type"`)
-    expect(spell).toContain(`- its "number" is a number, stored as "id"`)
+    expect(spell).toContain(`wiki pages are found at "/page/summary/{name}"`)
+    expect(spell).toContain(`its id is its "title"`)
+    expect(spell).toContain(`its "title" is text`)
+    expect(spell).toContain(`its "kind" is text, stored as "type"`)
+    expect(spell).toContain(`its "number" is a number, stored as "id"`)
     const pages = descriptions.get("/W.json5")!.collections.wiki_pages!
     expect(pages).toMatchObject({ samples: ["Tatooine", "Hoth"], readThrough: { rows: 1 } })
   })
@@ -360,14 +358,14 @@ describe("adding a source", () => {
       samples: ["authors=OL1A"],
       pictures: [`cover_i=${COVERS}`]
     })
-    expect(spell).toContain(`- books are searched at "/search.json"`)
-    expect(spell).toContain(`- it searches titles with "q"`)
+    expect(spell).toContain(`books are searched at "/search.json"`)
+    expect(spell).toContain(`it searches titles with "q"`)
     // what's said of lists is said of those that list:  authors are read one at a time
-    expect(spell).toContain(`- its rows are its "docs"`)
-    expect(spell).toContain(`- authors are found at "/authors/{name}.json"`)
-    expect(spell).toContain(`- its "authors" is a list of authors, stored as "author_key"`)
-    expect(spell).toContain(`- a book's "cover i" is a picture at "${COVERS}"`)
-    expect(spell).toContain(`- its "cover i" is text  // a picture's address`)
+    expect(spell).toContain(`its rows are its "docs"`)
+    expect(spell).toContain(`authors are found at "/authors/{name}.json"`)
+    expect(spell).toContain(`its "authors" is a list of authors, stored as "author_key"`)
+    expect(spell).toContain(`a book's "cover i" is a picture at "${COVERS}"`)
+    expect(spell).toContain(`its "cover i" is text  // a picture's address`)
     const { collections, about } = descriptions.get("/L.json5")!
     expect(collections.books).toMatchObject({ searchedOnly: true, searchedFor: "dune", readThrough: { rows: 2 } })
     expect(collections.authors).toMatchObject({ samples: ["OL1A"], readThrough: { rows: 1 } })
@@ -412,11 +410,11 @@ describe("adding a source", () => {
       samples: ["users=ryansolid"]
     })
     // each its own search, not one line for the place that names fields of both
-    expect(spell).not.toContain("- it searches")
-    expect(spell).toContain(`- users are found at "/users/{name}"`)
-    expect(spell).toContain(`- users are searched with "q" at "/search/users"`)
-    expect(spell).toContain(`- repositories are searched with "q" at "/search/repositories"`)
-    expect(spell).not.toContain(`- repositories are searched at`)
+    expect(spell).not.toContain("it searches")
+    expect(spell).toContain(`users are found at "/users/{name}"`)
+    expect(spell).toContain(`users are searched with "q" at "/search/users"`)
+    expect(spell).toContain(`repositories are searched with "q" at "/search/repositories"`)
+    expect(spell).not.toContain(`repositories are searched at`)
     const { collections } = descriptions.get("/G.json5")!
     expect(collections.repositories).toMatchObject({ searchedOnly: true, readThrough: { rows: 2 } })
     expect(collections.users).toMatchObject({ readThrough: { rows: 1 } })
@@ -455,13 +453,13 @@ describe("adding a source", () => {
       name: "weather",
       collections: ["forecasts=/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m,precipitation"]
     })
-    expect(spell).toContain(`- forecasts live at "/v1/forecast?hourly=temperature_2m,precipitation"`)
-    expect(spell).toContain(`- forecasts are asked for by their latitude and longitude`)
-    expect(spell).toContain(`- its "hours" is a list of hours, stored as "hourly"`)
-    expect(spell).toContain(`- its "temperature" is a temperature in °C, stored as "temperature_2m"`)
-    expect(spell).toContain(`- its "precipitation" is a length in mm`)
+    expect(spell).toContain(`forecasts live at "/v1/forecast?hourly=temperature_2m,precipitation"`)
+    expect(spell).toContain(`forecasts are asked for by their latitude and longitude`)
+    expect(spell).toContain(`its "hours" is a list of hours, stored as "hourly"`)
+    expect(spell).toContain(`its "temperature" is a temperature in °C, stored as "temperature_2m"`)
+    expect(spell).toContain(`its "precipitation" is a length in mm`)
     // a unit Spell has no dimension for is said beside it
-    expect(spell).toContain(`- its "relative humidity" is a number, stored as "relative_humidity_2m"  // in %`)
+    expect(spell).toContain(`its "relative humidity" is a number, stored as "relative_humidity_2m"  // in %`)
     expect(spell).not.toContain(`hourly units`)
     const { collections, spellCantSay } = descriptions.get("/W.json5")!
     expect(collections.forecasts).toMatchObject({
@@ -513,19 +511,17 @@ describe("adding a source", () => {
       collections: ["countries=/countries.json"]
     })
     // each code a thing's own, not a type of its own:  `EUR`, `fra`
-    expect(spell).toContain(`- its "currencies" is a list of currencies`)
-    expect(spell).toContain(`- its "languages" is a list of languages`)
-    expect(spell).toContain(`- its "native" is a list of natives`)
-    expect(spell).toMatch(
-      /a "currency" is a thing:\n\t- its "code" is text\n\t- its "name" is text\n\t- its "symbol" is text/
-    )
-    expect(spell).toMatch(/a "language" is a thing:\n\t- its "code" is text\n\t- its "name" is text/)
+    expect(spell).toContain(`its "currencies" is a list of currencies`)
+    expect(spell).toContain(`its "languages" is a list of languages`)
+    expect(spell).toContain(`its "native" is a list of natives`)
+    expect(spell).toMatch(/a "currency" is a thing\n\tits "code" is text\n\tits "name" is text\n\tits "symbol" is text/)
+    expect(spell).toMatch(/a "language" is a thing\n\tits "code" is text\n\tits "name" is text/)
     expect(spell).not.toMatch(/"EUR"|"fra" is|"nld" is/)
     // a thing's few fields, the same in every row, are its fields
-    expect(spell).toContain(`- its "lat" is a number`)
+    expect(spell).toContain(`its "lat" is a number`)
     // a code in digits stays text:  `004`, `+3`
-    expect(spell).toContain(`- its "ccn3" is text`)
-    expect(spell).toContain(`- its "root" is text`)
+    expect(spell).toContain(`its "ccn3" is text`)
+    expect(spell).toContain(`its "root" is text`)
     const { collections } = descriptions.get("/C.json5")!
     expect(collections.countries).toMatchObject({ paging: "none", readThrough: { rows: 3 } })
     expect(collections.countries!.fields.currencies).toMatchObject({ isListInside: true, isByCode: true })
@@ -560,15 +556,15 @@ describe("adding a source", () => {
     }
     const { ingest, descriptions } = ingestOf(routes)
     const { spell } = await ingest.add({ address: API, into: "/P.spell", name: "poke api" })
-    expect(spell).toContain(`- its lists give only each one's "name"`)
-    expect(spell).toContain(`- it gives up to 2000 at a time`)
-    expect(spell).toContain(`- its id is its "url"`)
-    expect(spell).toContain(`- its "number" is a number, stored as "id"`)
-    expect(spell).toContain(`- its "weight" is a number`)
-    expect(spell).toContain(`- its "types" is a list of pokemon types`)
-    expect(spell).toContain(`- its "kind" is a type, stored as "type"`)
-    expect(spell).toContain(`- its "hidden" is yes or no, stored as "is_hidden"`)
-    expect(spell).toContain(`- its "location area encounters" is text  // an address`)
+    expect(spell).toContain(`its lists give only each one's "name"`)
+    expect(spell).toContain(`it gives up to 2000 at a time`)
+    expect(spell).toContain(`its id is its "url"`)
+    expect(spell).toContain(`its "number" is a number, stored as "id"`)
+    expect(spell).toContain(`its "weight" is a number`)
+    expect(spell).toContain(`its "types" is a list of pokemon types`)
+    expect(spell).toContain(`its "kind" is a type, stored as "type"`)
+    expect(spell).toContain(`its "hidden" is yes or no, stored as "is_hidden"`)
+    expect(spell).toContain(`its "location area encounters" is text  // an address`)
     expect(spell).not.toMatch(/generation i/)
     const pokemon = descriptions.get("/P.json5")!.collections.pokemon!
     expect(pokemon).toMatchObject({ idField: "url", listsGive: ["name"] })
@@ -592,15 +588,15 @@ describe("adding a source", () => {
     const { ingest } = ingestOf(routes)
     const { spell } = await ingest.add({ address: API, into: "/P.spell", name: "poke api" })
     // one of its own collections stays a link;  the rest are each a poke api name, with no comment
-    expect(spell).toContain(`- its "kind" is a type, stored as "type"`)
-    expect(spell).toContain(`- its "stat" is a poke api name\n`)
-    expect(spell).toContain(`- its "color" is a poke api name\n`)
-    expect(spell).toContain(`- its "forms" is a list of poke api names\n`)
+    expect(spell).toContain(`its "kind" is a type, stored as "type"`)
+    expect(spell).toContain(`its "stat" is a poke api name\n`)
+    expect(spell).toContain(`its "color" is a poke api name\n`)
+    expect(spell).toContain(`its "forms" is a list of poke api names\n`)
     // a plain address inside a row says so, as one at the top does
-    expect(spell).toContain(`- its "chart" is text  // an address`)
+    expect(spell).toContain(`its "chart" is text  // an address`)
     // ONE type for the whole place
-    expect(spell.match(/^a "poke api name" is a thing:/gm)).toHaveLength(1)
-    expect(spell).toContain(`\t- its "name" is text\n\t- its "address" is text, stored as "url"  // never read`)
+    expect(spell.match(/^a "poke api name" is a thing$/gm)).toHaveLength(1)
+    expect(spell).toContain(`\tits "name" is text\n\tits "address" is text, stored as "url"  // never read`)
     // read through it, the pair is held whole:  its name, and its address still there
     const { core } = await import("spell/parser/core")
     const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
@@ -627,11 +623,11 @@ describe("adding a source", () => {
     const { ingest } = ingestOf(routes)
     const { spell, description } = await ingest.add({ address: API, into: "/S.spell", name: "ships place" })
     // its words find it, as the server spells it:  nothing to say
-    expect(spell).toContain(`- its "cost in credits" is a number\n`)
-    expect(spell).toContain(`- it writes names like "cost_in_credits"`)
-    expect(spell).toContain(`- its "parts" is a part`)
-    expect(spell).toContain(`a "part" is a thing:`)
-    expect(spell).toContain(`- its "width" is a number`)
+    expect(spell).toContain(`its "cost in credits" is a number\n`)
+    expect(spell).toContain(`it writes names like "cost_in_credits"`)
+    expect(spell).toContain(`its "parts" is a part`)
+    expect(spell).toContain(`a "part" is a thing`)
+    expect(spell).toContain(`its "width" is a number`)
     expect(spell).not.toMatch(/its "[^"\n]*\./)
     expect(description.spellCantSay.join("\n")).not.toMatch(/parts/)
   })
@@ -640,16 +636,16 @@ describe("adding a source", () => {
     const routes = { [API]: { dates: `${API}/dates` }, [`${API}/dates`]: [{ id: 1, name: "Opening night" }] }
     const { ingest } = ingestOf(routes)
     const { spell } = await ingest.add({ address: API, into: "/C.spell", name: "cast" })
-    expect(spell).toContain(`a "cast date" is a thing:`)
-    expect(spell).toContain(`- cast dates live at "/dates"`)
+    expect(spell).toContain(`a "cast date" is a thing`)
+    expect(spell).toContain(`cast dates live at "/dates"`)
   })
 
   test("`characters` are the program's own:  `character` is no type of Spell's (epic `language` Q17)", async () => {
     const routes = { [API]: { characters: `${API}/characters` }, [`${API}/characters`]: [{ id: 1, name: "Rey" }] }
     const { ingest } = ingestOf(routes)
     const { spell } = await ingest.add({ address: API, into: "/C.spell", name: "cast" })
-    expect(spell).toContain(`a "character" is a thing:`)
-    expect(spell).toContain(`- characters live at "/characters"`)
+    expect(spell).toContain(`a "character" is a thing`)
+    expect(spell).toContain(`characters live at "/characters"`)
   })
 
   test("a read that returns nothing writes nothing", async () => {
@@ -747,8 +743,8 @@ describe("an Excel workbook (epic `data` P38)", () => {
     expect(description.about).toMatchObject({ kind: "sheet", name: "recipes sheet" })
     expect(Object.keys(description.collections).sort()).toEqual(["recipes", "shelves"])
     expect(spell).toContain(`recipes sheet is a sheet at "https://box.test/recipes.xlsx"`)
-    expect(spell).toContain(`- its "servings" is a number`)
-    expect(spell).toContain(`- its "height" is a number`)
+    expect(spell).toContain(`its "servings" is a number`)
+    expect(spell).toContain(`its "height" is a number`)
   })
 })
 
@@ -783,8 +779,8 @@ describe("which file", () => {
     const { spell, wrote } = await ingest.add({ address: API, into: "/Stars.api.es.spell", name: "stars" })
     expect(wrote).toBe(true)
     console.log(spell)
-    expect(spell).toMatch(/^stars es un servidor web en "https:\/\/stars\.test\/api":/)
-    expect(spell).toContain(`- su "name" es texto`)
+    expect(spell).toMatch(/^stars es un servidor web en "https:\/\/stars\.test\/api"$/m)
+    expect(spell).toContain(`su "name" es texto`)
     // the English it wrote is what the description keeps
     expect(descriptions.get("/Stars.api.es.json5")!.spell[0]).toMatch(/is a web server at/)
     const first = texts.get("/Stars.api.es.spell")!
@@ -829,9 +825,9 @@ describe("the agent", () => {
     expect(prompts[0]).toContain("person-2")
     expect(prompts[0]).not.toContain("person-3")
     expect(spell).toContain(`galaxy is a web server`)
-    expect(spell).toContain(`- check it every hour`)
-    expect(spell).toContain(`- heroes live at "/people"`)
-    expect(spell).toContain(`- its "hair" is text, stored as "hair_color"`)
+    expect(spell).toContain(`check it every hour`)
+    expect(spell).toContain(`heroes live at "/people"`)
+    expect(spell).toContain(`its "hair" is text, stored as "hair_color"`)
     expect(spell).toContain(`a "planet" is a thing`)
     expect(spell).not.toMatch(/ghost|invented/)
     const description = descriptions.get("/A.json5")!
@@ -868,7 +864,7 @@ describe("a key", () => {
     const { ingest, asked, texts, descriptions } = ingestOf(echoing, { keyNamed: () => KEY, claude })
     const { description } = await ingest.add({ address: API, into: "/K.spell", name: "stuff", keySecret: "STUFF_KEY" })
     expect(asked[0]!.headers.get("authorization")).toBe(`Bearer ${KEY}`)
-    expect(texts.get("/K.spell")).toContain(`- its optional key is the secret "STUFF_KEY"`)
+    expect(texts.get("/K.spell")).toContain(`its optional key is the secret "STUFF_KEY"`)
     const written = [texts.get("/K.spell"), JSON.stringify(descriptions.get("/K.json5")), prompts.join("")].join("\n")
     expect(written).not.toContain(KEY)
     expect(description.about.keySecret).toBe("STUFF_KEY")
@@ -918,10 +914,10 @@ describe("GitHub's way (epic `data` P28)", () => {
   test("a key it answers without is taken when it's set;  a Link header pages;  what Spell can't read inside a row is left out", async () => {
     const { ingest, asked, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     const { spell, description } = await ingest.add(ASK)
-    expect(spell).toContain(`- its optional key is the secret "GH_KEY"`)
-    expect(spell).toContain(`- its next page is in its "Link" header`)
-    expect(spell).toContain(`a "user" is a thing:`)
-    expect(spell).toContain(`- a user's id is its "login"`)
+    expect(spell).toContain(`its optional key is the secret "GH_KEY"`)
+    expect(spell).toContain(`its next page is in its "Link" header`)
+    expect(spell).toContain(`a "user" is a thing`)
+    expect(spell).toContain(`a user's id is its "login"`)
     expect(spell).not.toMatch(/"\+1"|its "1"/)
     expect(description.notes.join("\n")).toMatch(/Left out reaction's "\+1"/)
     expect(description.spellCantSay.join("\n")).not.toMatch(/Link header/)
@@ -929,19 +925,19 @@ describe("GitHub's way (epic `data` P28)", () => {
     expect(asked.filter(({ headers }) => !headers.get("authorization")).length).toBe(1)
     expect(descriptions.get("/G.json5")!.about.keyIfSet).toBe(true)
     // 60 an hour with no key, two collections:  a check every 20 minutes keeps to a tenth of it
-    expect(spell).toContain(`- check it every 20 minutes`)
+    expect(spell).toContain(`check it every 20 minutes`)
     expect(description.canDo.limits).toMatch(/It allows 60 requests/)
   })
 
   test("a key that goes elsewhere (T73):  it's sent there, the line says so, and looking again keeps both", async () => {
     const { ingest, asked, texts, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     const { spell } = await ingest.add({ ...ASK, keyGoes: { header: "X-Api-Key" } })
-    expect(spell).toContain(`- its key goes in its "X-Api-Key" header`)
+    expect(spell).toContain(`its key goes in its "X-Api-Key" header`)
     expect(asked[0]!.headers.get("x-api-key")).toBe("k3y")
     expect(asked[0]!.headers.get("authorization")).toBeNull()
     expect(descriptions.get("/G.json5")!.about.keyGoes).toEqual({ header: "X-Api-Key" })
     await ingest.update("/G.spell")
-    expect(texts.get("/G.spell")).toContain(`- its key goes in its "X-Api-Key" header`)
+    expect(texts.get("/G.spell")).toContain(`its key goes in its "X-Api-Key" header`)
   })
 
   test("looking again leaves out what it left out before", async () => {
@@ -949,7 +945,7 @@ describe("GitHub's way (epic `data` P28)", () => {
     await ingest.add(ASK)
     const { spell } = await ingest.update("/G.spell")
     expect(spell).not.toMatch(/"\+1"|its "1"/)
-    expect(texts.get("/G.spell")).toContain(`- its next page is in its "Link" header`)
+    expect(texts.get("/G.spell")).toContain(`its next page is in its "Link" header`)
   })
 })
 
@@ -1046,13 +1042,9 @@ describe("looking again", () => {
     edit: (text: string) => string,
     changed: Record<string, unknown>,
     others: Record<string, string> = {},
-    {
-      olderTool = false,
-      before,
-      shape = "plain"
-    }: { olderTool?: boolean; before?: (written: PlaceDescription) => void; shape?: IngestSettings["shape"] } = {}
+    { olderTool = false, before }: { olderTool?: boolean; before?: (written: PlaceDescription) => void } = {}
   ) {
-    const added = ingestOf(STARS, { shape }, others)
+    const added = ingestOf(STARS, {}, others)
     await added.ingest.add({ address: API, into: "/Stars.spell", name: "stars" })
     const start = edit(added.texts.get("/Stars.spell")!)
     // what the description says it wrote, written the same way:  an older version of the tool
@@ -1061,7 +1053,6 @@ describe("looking again", () => {
     before?.(written)
     const { fetch } = fakeFetch({ ...STARS, ...changed })
     const ingest = new PlaceIngest({
-      shape,
       fetch,
       ask: async () => undefined,
       files: { ...added.files, read: added.files.read, otherSpellBeside: async () => Object.values(others) },
@@ -1081,17 +1072,17 @@ describe("looking again", () => {
   test("a file an older version wrote, in words it no longer writes:  put in today's, each line where it was", async () => {
     const older = (text: string) =>
       text
-        .replace(`\t- it writes names like "hair_color"\n`, `\t- a person's hair color is its "hair_color"\n`)
+        .replace(`\tit writes names like "hair_color"\n`, `\ta person's hair color is its "hair_color"\n`)
         .replace(
-          `- its "height" is a number or "unknown"`,
-          `- its "height" is a number  // written as text there;  "unknown" reads as nothing`
+          `its "height" is a number or "unknown"`,
+          `its "height" is a number  // written as text there;  "unknown" reads as nothing`
         )
     const { result, text } = await updated(older, {}, {}, { olderTool: true })
-    expect(text).toContain(`\t- its "height" is a number or "unknown"\n\t- its "mass" is a number\n`)
-    expect(text).toContain(`\t- planets live at "/planets"\n\t- it writes names like "hair_color"\n`)
+    expect(text).toContain(`\tits "height" is a number or "unknown"\n\tits "mass" is a number\n`)
+    expect(text).toContain(`\tplanets live at "/planets"\n\tit writes names like "hair_color"\n`)
     expect(text).not.toMatch(/written as text|hair color is its/)
     expect(result.couldntChange).toEqual([])
-    expect(result.changes.join("\n")).toMatch(/Removed, as its field finds it by its words:  - a person's hair color/)
+    expect(result.changes.join("\n")).toMatch(/Removed, as its field finds it by its words:  a person's hair color/)
   })
 
   test("a note fixed since is gone;  the agent's stay, as it isn't asked again (epic `data` I54)", async () => {
@@ -1129,58 +1120,26 @@ describe("looking again", () => {
     expect(description.agentNotes).toEqual(["It asks people to be gentle."])
   })
 
-  // epic `language` P40:  a new file is written in tags;  a look again merges into it, as into a plain one
-  describe("in tags", () => {
-    const TAGS = { shape: "tags" } as const
-
-    test("a new file is in tags, and compiles as the plain Spell does", async () => {
-      const { start } = await updated((same) => same, {}, {}, TAGS)
-      expect(start).toMatch(/^<web-server "stars" address="https:\/\/[^"]*">$/m)
-      expect(start).toContain('<thing "person">')
-      const plain = (await updated((same) => same, {})).start
-      const code = (contents: string) => compiledSpellProject([{ path: "/Stars.spell", contents }]).code
-      expect(code(start).replace(/declaredAt: \{[^}]*\}/g, "")).toBe(code(plain).replace(/declaredAt: \{[^}]*\}/g, ""))
-    })
-
-    test("nothing changed:  the file's as it was, to the byte", async () => {
-      const { result, start, text } = await updated((same) => same, {}, {}, TAGS)
-      expect(result.changes).toEqual([])
-      expect(result.couldntChange).toEqual([])
-      expect(text).toBe(start)
-    })
-
-    test("a new field, a field gone that nothing uses:  done, in tags", async () => {
-      const { mass: _mass, ...withoutMass } = LUKE
-      const { result, text } = await updated(
-        (same) => same,
-        {
-          [`${API}/people`]: [
-            { ...withoutMass, rank: "Jedi" },
-            { ...withoutMass, name: "Leia", url: `${API}/people/2`, rank: "General" }
-          ]
-        },
-        {},
-        TAGS
-      )
-      expect(result.changes.join("\n")).toMatch(/people has a new field, "rank"/)
-      expect(text).toContain('<property "rank">text</>')
-      expect(text).not.toContain('"mass"')
-      expect(text).toMatch(/^<web-server "stars"/m)
-    })
-
-    test("what a person wrote stays:  their tags and their lines", async () => {
-      const greet = '\t<action "greet">\n\t\tprint "hi"\n\t</action>\n'
-      const { result, text } = await updated(
-        (same) => same.replace('\t<property "name">text</>\n', '\t<property "name">text</>\n' + greet),
-        { [`${API}/people`]: [{ ...LUKE, rank: "Jedi" }, LEIA] },
-        {},
-        TAGS
-      )
-      expect(result.couldntChange).toEqual([])
-      expect(text).toContain('<action "greet">')
-      expect(text).toContain('print "hi"')
-      expect(text).toContain('<property "rank">text</>')
-    })
+  // epic `language` P46:  the tool wrote `- its "name" is text` before;  those lines are its own still
+  test("a file an older version bulleted:  its lines are the tool's, changed where they change", async () => {
+    const bulleted = (text: string) => text.replace(/^\t(?=\S)/gm, "\t- ")
+    const { mass: _mass, ...withoutMass } = LUKE
+    const { result, text } = await updated(
+      bulleted,
+      {
+        [`${API}/people`]: [
+          { ...withoutMass, rank: "Jedi" },
+          { ...withoutMass, name: "Leia", url: `${API}/people/2` }
+        ]
+      },
+      {},
+      { olderTool: true }
+    )
+    expect(result.couldntChange).toEqual([])
+    expect(text).toContain('\tits "rank" is text')
+    expect(text).not.toContain('"mass"')
+    // the lines it didn't change stay as they were written
+    expect(text).toContain('\t- its "name" is text')
   })
 
   test("nothing changed:  it says so, and the file's as it was", async () => {
@@ -1200,7 +1159,7 @@ describe("looking again", () => {
     })
     expect(result.changes.join("\n")).toMatch(/people has a new field, "rank"/)
     expect(result.changes.join("\n")).toMatch(/people's "mass" is gone/)
-    expect(text).toContain(`\t- its "rank" is text`)
+    expect(text).toContain(`\tits "rank" is text`)
     expect(text).not.toContain(`"mass"`)
     expect(result.couldntChange).toEqual([])
     expect(description.collections.people!.fields.rank).toBeDefined()
@@ -1212,7 +1171,7 @@ describe("looking again", () => {
     const { result, text } = await updated((same) => `${same}\n${program}`, {
       [`${API}/people`]: [withoutMass, { ...withoutMass, url: `${API}/people/2` }]
     })
-    expect(text).toContain(`\t- its "mass" is a number`)
+    expect(text).toContain(`\tits "mass" is a number`)
     expect(result.couldntChange.join("\n")).toMatch(/"mass" is used/)
   })
 
@@ -1223,7 +1182,7 @@ describe("looking again", () => {
       { [`${API}/people`]: [withoutMass, { ...withoutMass, url: `${API}/people/2` }] },
       { "/Other.spell": `print the mass of the first person\n` }
     )
-    expect(text).toContain(`\t- its "mass" is a number`)
+    expect(text).toContain(`\tits "mass" is a number`)
     expect(result.couldntChange.join("\n")).toMatch(/"mass" is used/)
   })
 
@@ -1231,8 +1190,8 @@ describe("looking again", () => {
     const { result, text } = await updated(
       (same) =>
         same
-          .replace(`\t- its "name" is text\n`, `\t- its "name" is text\n\t- to greet:\n\t\tprint "hi"\n`)
-          .replace(`\t- its "hair color" is text`, `\t- its "hair color" is one of blond or brown`),
+          .replace(`\tits "name" is text\n`, `\tits "name" is text\n\tto greet:\n\t\tprint "hi"\n`)
+          .replace(`\tits "hair color" is text`, `\tits "hair color" is one of blond or brown`),
       {
         [`${API}/people`]: [
           { ...LUKE, hair_color: 4 },
@@ -1252,10 +1211,10 @@ describe("looking again", () => {
       [`${API}/moons`]: [{ id: 1, name: "Endor" }],
       [`${API}/planets`]: undefined
     })
-    expect(text).toContain(`a "moon" is a thing:`)
-    expect(text).toContain(`\t- moons live at "/moons"`)
+    expect(text).toContain(`a "moon" is a thing`)
+    expect(text).toContain(`\tmoons live at "/moons"`)
     expect(result.changes.join("\n")).toMatch(/New collection:  moons/)
-    expect(text).toContain(`a "planet" is a thing:`)
+    expect(text).toContain(`a "planet" is a thing`)
     expect(result.couldntChange.join("\n")).toMatch(/"planets" is gone from the source/)
   })
 
@@ -1331,7 +1290,6 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
     const claude: ClaudeRunner = async () => "{}"
     return {
       ingest: new PlaceIngest({
-        shape: "plain",
         fetch: globalThis.fetch,
         ask: async () => undefined,
         files: disk.files,
@@ -1350,8 +1308,8 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
       name: "box"
     })
     expect(description.about).toMatchObject({ kind: "web server", address: servers.url })
-    expect(spell).toContain(`- recipes live at "/recipes"`)
-    expect(spell).toContain(`- its version is its "version"`)
+    expect(spell).toContain(`recipes live at "/recipes"`)
+    expect(spell).toContain(`its version is its "version"`)
     expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
   })
 
@@ -1363,7 +1321,7 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
       name: "box"
     })
     expect(description.about.kind).toBe("graphql server")
-    expect(spell).toContain(`a "recipe" is a thing:`)
+    expect(spell).toContain(`a "recipe" is a thing`)
     expect(description.canDo.write).toMatch(/addRecipe, changeRecipe, removeRecipe.*Never tried/)
     expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
   })
@@ -1372,8 +1330,8 @@ describe("the demo's real servers", { timeout: 20_000 }, () => {
     const { ingest } = real()
     const { description, spell } = await ingest.add({ address: `${servers.url}/recipes.csv`, into: "/C.spell" })
     expect(description.about).toMatchObject({ kind: "sheet", name: "recipes sheet" })
-    expect(spell).toContain(`- its id is its "id"`)
-    expect(spell).toContain(`- its "servings" is a number`)
+    expect(spell).toContain(`its id is its "id"`)
+    expect(spell).toContain(`its "servings" is a number`)
     expect(description.canDo.write).toMatch(/read only/)
     expect(description.collections.recipes!.readThrough!.rows).toBeGreaterThan(0)
   })

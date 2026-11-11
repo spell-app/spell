@@ -1,4 +1,4 @@
-<page "markdown examples" notebook>
+"markdown examples" is a notebook page
 	<header level="1">
 		Markdown
 		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
@@ -110,4 +110,3 @@
 			</example>
 		</>
 	</>
-</page>

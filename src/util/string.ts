@@ -33,6 +33,15 @@ export function camelCase(text: string) {
 /** Memo for `camelCase()`. */
 const CAMEL_CASE: Record<string, string> = Object.create(null)
 
+/**
+ * `text` with each word's first letter a capital, the rest as written:  `auto play` => `Auto Play`.
+ * - A word starts after a space:  `jean-luc's` stays `Jean-luc's`.
+ * - e.g. an action's default title, its name in Initial Caps (epic `language` P48).
+ */
+export function initialCaps(text: string) {
+  return text.replace(/(^|\s)(\p{Ll})/gu, (_, space: string, letter: string) => space + letter.toUpperCase())
+}
+
 ////////////////
 // ## Number words
 ////////////////

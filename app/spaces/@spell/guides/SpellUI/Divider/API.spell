@@ -1,4 +1,4 @@
-<page "divider api" notebook>
+"divider api" is a notebook page
 	<header level="1">
 		Divider
 		<header>A divider visually segments content into groups.</>
@@ -35,4 +35,3 @@
 			<ui-docs-api family="ui-divider" only="states"></>
 		</>
 	</>
-</page>

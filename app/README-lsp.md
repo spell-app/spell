@@ -1,16 +1,16 @@
 # The language server
 
 ```spell
-a "card" is a view:
-	- its "suit" is one of clubs, diamonds, hearts or spades
-	- its "color" is:
+a "card" is a view
+	its "suit" is one of clubs, diamonds, hearts or spades
+	its "color" is
 		red if its suit is diamonds or hearts
 		black otherwise
 
-	- its "rank" is one of ace, 2 ... 10, jack, queen, king
-	- it "is a face card" if its rank is jack, queen or king
-	- it "is a (rank)"
-	- it "is the (rank) of (suit)"
+	its "rank" is one of ace, 2 ... 10, jack, queen, king
+	it "is a face card" if its rank is jack, queen or king
+	it "is a (rank)"
+	it "is the (rank) of (suit)"
 ```
 
 Hover over `suit` on the fourth line, and this is what the language server sends back:
@@ -105,7 +105,7 @@ The line Spell can't read gets a quick fix, "Define `to deal the card face up`",
 which puts a method of that name above it:
 
 ```spell
-to deal the card face up:
+to deal the card face up
 	// TODO
 
 deal the card face up
@@ -375,7 +375,7 @@ A view's outline can hold its styles,
 as Solitaire's piles did before [its styles.css](spaces/@spell/examples/Solitaire/styles.css) took their layout over:
 
 ```spell
-a "stacked pile" is a pile where:
+a "stacked pile" is a pile
 	<css>
 		:host {
 			display: block;

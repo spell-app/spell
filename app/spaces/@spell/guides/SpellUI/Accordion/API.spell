@@ -1,4 +1,4 @@
-<page "accordion api" notebook>
+"accordion api" is a notebook page
 	<header level="1">
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-accordion" only="texts"></>
 		</>
 	</>
-</page>

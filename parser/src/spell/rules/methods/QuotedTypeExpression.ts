@@ -77,11 +77,12 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
    * - e.g. `- it "can move"` (epic page `outline-spell` I6)
    * - Refused, saying so:  it'd compile to an empty method, `get canMove() {}`, always `undefined`.
    * - A dangling `if` is fine:  its body may be the indented lines below.
+   * - So are code lines indented under it, with no colon (epic `language` P48):  `it "is real"`, then its lines.
    */
   private static isBodiless(match: P.MatchFor<QuotedTypeExpression>, tokens: P.Token[]): boolean {
     const lastOfSignature = match.groups.signature.tokens.at(-1)
     const after = tokens.slice(tokens.indexOf(lastOfSignature!) + 1)
-    return !after.join("").trim()
+    return !after.join("").trim() && !SpellStatement.hasCodeBelow()
   }
 
   /**

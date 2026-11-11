@@ -352,10 +352,10 @@ export type ParserMessages = Record<ParserMessageKey, string>
 
 /**
  * The language part of a spell file's name, before its `.spell`:  `es` in `Carta.es.spell`, `pt-BR` in `x.pt-BR.spell`.
- * - A markup file says it the same way:  `Carta.es.spell`, or the old `Carta.es.spell` (`SP.isSpellmlName()`).
+ * - A page file says it the same way:  `Carta.es.spell`.
  * - A path may follow with a range, as in declarations' `defined`:  `/Carta.es.spell:71-92`.
  */
-const FILE_LANGUAGE = /\.([a-z]{2}(?:-[A-Za-z]{2,4})?)\.spell(?:ml|x)?(?::[\d-]*)?$/
+const FILE_LANGUAGE = /\.([a-z]{2}(?:-[A-Za-z]{2,4})?)\.spell(?::[\d-]*)?$/
 
 /** A named placeholder in a message, `{type}` -- see `Language.parserMessage()`. */
 const PLACEHOLDER = /\{(\w+)\}/g
@@ -451,6 +451,11 @@ export type LanguageWords = {
    */
   itWords?: Set<string>
   /**
+   * Words that point back to what a line is about, e.g. English's `it`, `its`, `them`:  a reference to read,
+   * but Spell's own small word, so the bubbly look draws it plain, never bold (`SP.BubblyLayout`).
+   */
+  pronouns: Set<string>
+  /**
    * A verb with `it` fused onto its end, its verb captured, e.g. Spanish's `barajarla` => `barajar` (epic `spanish` J96).
    * - In a type's outline body, `- para barajarla:` is English's `- to shuffle it:`:  the receiver goes where `it` was.
    * - None:  the language writes `it` as a word of its own, `subject_it`.
@@ -495,59 +500,44 @@ export type LanguageWords = {
    */
   retiredRuleWords?: Record<string, Record<string, string>>
   /**
-   * Its words for spellx, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SpellxWords`.
-   * - None:  a spellx file in this language reads English's.
+   * The line saying a thing has an ability, by the ability's English name:  `it is draggable`, Spanish's `es arrastrable`.
+   * - What `DragAndDrop`'s warning for the old words (`can be dragged`) says to write.
    */
-  spellx?: SpellxWords
+  abilityLines?: Record<string, string>
+  /**
+   * Its words for a PAGE (epic `language` P47):  its head, `"button api" is a notebook page`, and the tags its body
+   * draws with -- see `PageWords`.
+   * - None:  a page in this language reads English's.
+   */
+  page?: PageWords
 }
 
 ////////////////
-// ## Spellx's words
+// ## A page's words
 ////////////////
 
 /**
- * A language's words for SPELLX, the tag-shaped form of a spell file (epic `elemental-spell`):  a CLOSED vocabulary.
+ * A language's words for a PAGE (epic `language` P47):  its plain head, and the tags its body draws with.
  * - Each table maps a word as a person writes it to what it means, named in English:
- *   Spanish's `{ propiedad: "property" }`.
- * - The spellx tokenizer (`SP.SpellxTokenizer`) knows no other words:
- *   one that's in none of these is an error naming the closest.
- * - Several spellings may mean one thing, e.g. `página` and `pagina`:  the first is the one a writer uses.
+ *   Spanish's `{ cuaderno: "notebook" }`.
+ * - The page tokenizer (`SP.PageTokenizer`) knows no other words.
+ * - Several spellings may mean one thing, e.g. `vacío` and `vacio`:  the first is the one a writer uses.
  */
-export type SpellxWords = {
+export type PageWords = {
   /**
    * The language's word for Spell:  `spell`, Spanish's `encanto`.
-   * - The block of code spell is the word alone, `<spell>`.
-   * - Before epic `language` P41, every template's tag began with it and a dash, `<spell-view>`:
-   *   those spellings still read, and nothing writes them.
+   * - A block of plain Spell in a page's body is the word alone, `<spell>`.
    */
   prefix: string
-  /**
-   * A template's word, `view` in `<view>`:  at a file's top level (epic `language` P41), and `<view>` inside a page.
-   * - The old spelling, after the prefix and its dash, `<spell-view>`, still reads anywhere a template goes.
-   * - A word may bring a FLAG too, a bare attribute it stands for (epic `notebook` P1):
-   *   `notebook` is `{ kind: "page", flag: "notebook" }`,
-   *   so `<notebook "x">` reads as `<page "x" notebook>`.
-   */
-  templates: Record<string, SpellxTemplateWord>
-  /** A tag that declares a member of its template:  `<property>`, `<alias>`, `<action>` ... */
-  declarations: Record<string, SpellxDeclarationKind>
-  /** The tags that say where a program's data lives, at a file's top level (epic `language` P40). */
-  places: SpellxPlaceWord[]
-  /**
-   * A tag holding prose about what it's in:  `<note>` (epic `language` P41), `<property-editor>`, `<stories>`.
-   * - In a drawing each is markup:  `<comment>` there is Spell UI's `<ui-comment>`, `<note>` a project's own view.
-   * - The old note words still read where a note goes, with a warning naming `<note>`:
-   *   `<spell-description>`, `<spell-comment>` (epic `data` P31, Q27), and `<description>`, `<comment>`.
-   * - The first word for `description` is the one a writer uses:  `note`.
-   */
-  notes: Record<string, SpellxNoteKind>
-  /** A tag whose head is a spell phrase, handling an event:  `on` in `<on mouse down>`. */
-  handlers: Record<string, SpellxHandlerKind>
+  /** The language's word for a page, `page`, `página`:  a page's head is a tag of that word. */
+  page: string
+  /** A page's flags, the bare words before its `page`, by their English names:  `notebook`, `locked`. */
+  flags: Record<string, string>
   /**
    * A tag whose head is a spell phrase, deciding what a drawing shows:  `if`, `otherwise if`, `for each` ...
    * - A word of several words is written with single spaces:  `otherwise if`, Spanish's `de lo contrario si`.
    */
-  controls: Record<string, SpellxControlKind>
+  controls: Record<string, PageControlKind>
   /** `<for>`'s own attributes, in this language, by their English names:  a head's phrase ends at the first. */
   forAttributes: Record<string, string>
   /** A bare `empty` or `loading` right after one of these is the phrase's:  `<for films where it is empty>`. */
@@ -555,34 +545,54 @@ export type SpellxWords = {
   /** Words that start a list of two words, `its films`:  any other first word, `films doubling`, is a flag out of place. */
   forListWords: string[]
   /**
-   * An attribute's name => its English name:  Spanish's `{ "uno-de": "one-of", frase: "alias" }`.
-   * - English's map each to itself, so every name a reader meets is in one table.
-   * - An event's attributes are its parameters, never checked here.
+   * A PAGE'S HEAD (epic `language` P45):  `"button api" is a notebook page`, Spanish's
+   * `"api del botón" es una página cuaderno`, its body indented under it.
+   * - Its groups:  `name`, the page's name;  `flags`, its bare words in the language's words, `notebook locked`.
    */
-  attributes: Record<string, string>
+  plainPage: RegExp
   /**
-   * Code spell's TWIN of each tag, in this language:  the line a spellx tag reads as (epic `elemental-spell` P6).
-   * - A spellx file is read by spell's own rules:  each tag line is made into its twin's tokens, which parse as code
-   *   spell's line would (`SP.SpellxTwin`).
-   * - None:  a spellx file in this language can't be read yet.
+   * The word a writer puts on a page's head to lock it, agreeing with the page's word (epic `language` J76):
+   * Spanish's `bloqueada`, for `una página bloqueada`.
+   * - Every word for `locked` still reads;  this is only what's written.
+   * - None:  `locked`.
    */
-  twins?: SpellxTwinWords
+  plainPageLocked?: string
+  /** The code-spell line each tag reads as (`SP.PageTwin`). */
+  twins: PageTwinWords
 }
 
 /**
- * A language's code-spell twin of each spellx tag:  how `SP.SpellxTwin` writes the line a tag reads as.
+ * A language's code-spell twin of a page's head and of each tag its body draws with:  how `SP.PageTwin` writes the
+ * line it reads as.
  * - Each is a line of code spell with SLOTS, its words separated by spaces;  a word that isn't a slot is the
- *   language's own, e.g. `its {name} is one of {one-of}`.
- * - The slots:
- *   - `{name}`:  the tag's name, quoted (`"suit"`);  `{words}`:  its name as words (`turn it over`)
- *   - `{<attribute>}`:  an attribute's value as spell, e.g. `{one-of}`;  `{quoted <attribute>}` quoted, as text
- *   - `{phrase}`:  a handler's or control's phrase
- *   - `{super}`:  the template it extends;  `{aka}`:  its short name
- *   - `{a <slot>}`:  the indefinite article agreeing with that slot's first word (`a card`, `an app`)
- *   - `{param}` / `{value}`:  an event's parameter, its name and its kind
+ *   language's own:  `{words}`, the page's name as words;  `{phrase}`, a control's phrase.
  */
-/** The words of what `<for>`'s attributes read as -- see `SP.SpellxTwin`. */
-export type SpellxForWords = {
+export type PageTwinWords = {
+  /** A page's line:  `{words} is a page :`. */
+  page: string
+  /** Its drawing:  `to draw it :`. */
+  draw: string
+  /**
+   * A page's `locked`:  a line in its body, `its lock is locked` (epic `notebook` P1).
+   * - Its value quoted:  a built-in member written by hand has no list of values for a bare word to name.
+   */
+  pageLocked: string
+  /**
+   * A section of a page, as its drawing writes it (epic `notebook` P3, J1):
+   * Spell UI's `<section>` in the language's words, sticky and foldable as the docs pages' sections are.
+   * - The twin wraps each `##` heading and what follows it in one, its `label` the heading.
+   * - A `<section label="...">` written at the page's top level gets its `defaults` too, each it doesn't say itself.
+   * - NOT a component of the parser's:  the words the language's component pack reads (`<es-seccion pegado>`).
+   */
+  pageSection: PageSectionWords
+  /** A control, by its kind:  `{ if: "if {phrase}", otherwise: "otherwise" }`. */
+  controls: Record<string, string>
+  /** What `SP.PageTwin` writes for `<for>`'s attributes:  a line of code spell each, in the loop's body. */
+  forTag: PageForWords
+}
+
+/** The words of what `<for>`'s attributes read as -- see `SP.PageTwin`. */
+export type PageForWords = {
   /** The rider for what shows while waiting. */
   waiting: string
   /** The rider for what shows when there are none. */
@@ -615,163 +625,8 @@ export type SpellxForWords = {
   nothingFound: string
 }
 
-/**
- * A tag saying where a program's data lives:  `<web-server "wikipedia" address="...">`, read as its plain line.
- * - Only at a file's top level:  inside a drawing, `<room/>` is still a project's own view.
- * - Its body is plain Spell, as an `<action>`'s is.
- * - The first entry for a tag whose `flag` is set (or that has none) reads it;
- *   the writer takes any entry whose words a plain line says, so an older line still becomes the tag.
- */
-export type SpellxPlaceWord = {
-  /** its word, `web-server` */
-  tag: string
-  /** the plain line it reads as, with `{words}` (its name) and `{quoted address}` */
-  line: string
-  /** the bare attribute this entry is for, by its English name:  `<atmosphere personal>` */
-  flag?: string
-  /** the plain line when no `address=` is given, for a kind that can do without */
-  bare?: string
-}
-
-export type SpellxTwinWords = {
-  /** A place a library adds, `<supabase-project "x" address="...">`:  `{words} is {a kind} {kind} at {quoted address} :`. */
-  placeOfKind: string
-  /** A template, named by a quoted name:  `{a name} {name} is {a super} {super} :`. */
-  template: string
-  /** A template with a short name too, `aka=`:  its name as words, `{a words} {words} aka {aka} is ...`. */
-  templateAka: string
-  /** A one-of-a-kind template, `<app>` or `<page>`:  `{words} is {a super} {super} :`. */
-  singleton: string
-  /** Adds to a type another file declares, `<extend "card">`:  `{a words} {words} :`, what `reopen_type` reads. */
-  extend: string
-  /** What each kind of template extends, when it names no `template=`:  `{ view: "view", "page template": "page" }`. */
-  supers: Record<string, string>
-  /** A property's twin, by what the tag holds. */
-  property: {
-    /** a list of values, `one-of=`, and nothing inside */
-    list: string
-    /** a list of values, and lines inside working out its value */
-    listBody: string
-    /** lines inside working out its value */
-    body: string
-    /** its value on the tag's own line:  `<property "deck">a new deck</>` */
-    value: string
-    /** its type, `type=`, and nothing inside:  `<property "count" type="number" />` */
-    typed: string
-    /** its type, and the value it starts at on the tag's own line:  `<property "count" type="number">0</>` */
-    typedValue: string
-    /** nothing but its name */
-    bare: string
-  }
-  /** One of a property's own aliases, `alias=`:  `it {quoted alias}`. */
-  propertyAlias: string
-  /** An alias tag:  `it {name}`, then its body. */
-  alias: string
-  /** An alias tag whose body is the indented lines:  `it {name} :`. */
-  aliasBlock: string
-  /** An action:  `to {words} :`. */
-  action: string
-  /** An action's details, by attribute:  `{ shortcut: "shortcut {shortcut}" }`. */
-  actionDetails: Record<string, string>
-  /** An action's details said with no value, by attribute:  `{ undoable: "undoable" }`, for a bare `undoable`. */
-  bareActionDetails: Record<string, string>
-  /** A test:  `to test {words} :`. */
-  test: string
-  /** An event its things send:  `it sends {name}`. */
-  event: string
-  /** The words before an event's parameters:  `with`. */
-  eventWith: string
-  /** One of an event's parameters:  `{param} as {a value} {value}`. */
-  eventParam: string
-  /** The word joining two of them:  `and`. */
-  eventAnd: string
-  /** A drawing:  `to draw it :`. */
-  draw: string
-  /** A slot's drawing:  `to draw its {words} :`. */
-  drawSlot: string
-  /** A slot placed in a drawing:  `draw its {words}`. */
-  placeSlot: string
-  /**
-   * A menu, its `<action>`s quoted after it (epic `elemental-spell` P10):
-   * `its {name} is a menu of`, then `"deal" , "-" and "undo"`.
-   */
-  menu: string
-  /** The words between a menu's items:  the last pair's, `and`. */
-  menuAnd: string
-  /** A menu's own title, its `title=`, after its items (epic `language` P19):  `titled {quoted title}`. */
-  menuTitled: string
-  /**
-   * A menu filled from a list, its `for-each=` and `action=` (Q21):
-   * `its {name} is a menu of {for-each} , each running {quoted action}`.
-   */
-  menuEach: string
-  /** An app's menu bar, its tag's `menu-bar=`:  a line ending its body, `its menu bar is {quoted menu-bar}`. */
-  menuBar: string
-  /**
-   * A group of a template's members, a heading over the members after it (epic `elemental-spell` P16):
-   * `group {name}`;  its `description=` a comment ending the line.
-   */
-  group: string
-  /**
-   * A page's `locked`:  a line in its body, `its lock is locked` (epic `notebook` P1).
-   * - Its value quoted:  a built-in member written by hand has no list of values for a bare word to name.
-   */
-  pageLocked: string
-  /**
-   * A page's or view's own `thumbnail=`:  a line in its body, `its thumbnail is {quoted thumbnail}` (epic `mockup` P16).
-   */
-  templateThumbnail: string
-  /**
-   * A section of a page that draws its body, as its drawing writes it (epic `notebook` P3, J1):
-   * Spell UI's `<section>` in the language's words, sticky and foldable as the docs pages' sections are.
-   * - The twin wraps each `##` heading and what follows it in one, its `label` the heading.
-   * - A `<section label="...">` written at the page's top level gets its `defaults` too, each it doesn't say itself.
-   * - NOT a component of the parser's:  the words the language's component pack reads (`<es-seccion pegado>`).
-   */
-  pageSection: SpellxPageSectionWords
-  /** A site that says where it lives, `at=` (epic `mockup` P1):  `{words} is {a super} {super} at {quoted at} :`. */
-  siteAt: string
-  /** A site in the cloud, a bare `cloud`:  `{words} is {a super} {super} in the cloud :`. */
-  siteCloud: string
-  /** One of a site's pages, `<page "film page" address="/films/:film">`:  `it has {a words} {words} at {quoted address}`. */
-  sitePage: string
-  /** ... with what the site calls it, `title=`:  `..., named {quoted title}`. */
-  sitePageTitled: string
-  /** What a page's `tab=` adds to its line:  what its tab says. */
-  sitePageTab: string
-  /** What a page's `tags=` adds to its line:  what it's filed under. */
-  sitePageTags: string
-  /** What a page's `state=` adds to its line. */
-  sitePageState: string
-  /** What a page's `thumbnail=` adds to its line. */
-  sitePageThumbnail: string
-  /** What a page's `live=` adds to its line:  the real page it stands for. */
-  sitePageLive: string
-  /** What a part's `row=` and `column=` add to its line:  its place in its section of the site editor's board. */
-  siteCardPlace: string
-  /** What a part's `color=` adds to its line. */
-  siteCardColor: string
-  /** A site's dialog or sidebar, `<dialog "settings dialog"/>`:  `it has {a words} {words}`. */
-  siteOverlay: string
-  /** A dialog or sidebar whose name doesn't say which it is, `<sidebar "System Notices"/>`:  the line that does. */
-  siteOverlayOf: { dialog: string; sidebar: string }
-  /** The words that say a part is a dialog or sidebar, as a regular expression's alternatives. */
-  siteOverlayWords: string
-  /**
-   * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
-   * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
-   */
-  viewFlags: Record<string, string>
-  /** A handler, by its kind:  `{ on: "on {phrase} :" }`. */
-  handlers: Record<string, string>
-  /** A control, by its kind:  `{ if: "if {phrase}", otherwise: "otherwise" }`. */
-  controls: Record<string, string>
-  /** What `SP.SpellxTwin` writes for `<for>`'s attributes:  a line of code spell each, in the loop's body. */
-  forTag: SpellxForWords
-}
-
-/** A page's section, in a language's words:  see `SpellxTwinWords.pageSection`. */
-export type SpellxPageSectionWords = {
+/** A page's section, in a language's words:  see `PageTwinWords.pageSection`. */
+export type PageSectionWords = {
   /** The section's tag, its bare component word:  `section`, `seccion`. */
   tag: string
   /** Its title's attribute:  `label`, `etiqueta`. */
@@ -782,60 +637,6 @@ export type SpellxPageSectionWords = {
    */
   defaults: Record<string, string | true>
 }
-
-/** What a spellx template tag makes:  `<view>` a view's template, `<app>` an app ... */
-export type SpellxTemplateKind =
-  | "view"
-  | "thing"
-  | "page"
-  | "app"
-  | "page template"
-  | "app template"
-  | "site"
-  | "extend"
-
-/**
- * A template word's meaning, in a language's `SpellxWords.templates`:
- * - its kind, e.g. `view`
- * - or its kind and the flag it brings (epic `notebook` P1):
- *   `{ kind: "page", flag: "notebook" }` for `<notebook>`
- * - Read it with `SP.spellxTemplateKind()` and `SP.spellxTemplateFlag()`.
- */
-export type SpellxTemplateWord = SpellxTemplateKind | { kind: SpellxTemplateKind; flag: string }
-
-/** The kind template word `word` makes, e.g. `page` for `{ kind: "page", flag: "notebook" }`;  none for none. */
-export function spellxTemplateKind(word: SpellxTemplateWord | undefined): SpellxTemplateKind | undefined {
-  return typeof word === "object" ? word.kind : word
-}
-
-/** The flag template word `word` brings, e.g. `notebook`;  none for a plain kind. */
-export function spellxTemplateFlag(word: SpellxTemplateWord | undefined): string | undefined {
-  return typeof word === "object" ? word.flag : undefined
-}
-
-/** What a spellx member tag declares. */
-export type SpellxDeclarationKind =
-  | "property"
-  | "alias"
-  | "action"
-  | "draw"
-  | "event"
-  | "test"
-  | "menu"
-  | "group"
-  // a site's parts, only in a `<site>` (epic `mockup` P1)
-  | "page"
-  | "dialog"
-  | "sidebar"
-
-/**
- * A spellx block of prose:  a member's long description, a comment among its lines,
- * or a template's own property editor (`<property-editor>`):  the Inspector's layout for its things, as markup.
- * - The property editor may live in a file of its own, `Card.editor.spell` (`SP.isPropertyEditorsName()`).
- * - Or a page's STORIES, `<stories>` (epic `mockup` P6):  what it must let people do, as `<story>` tags, its twin a
- *   `<stories>` block, compiled to its `static stories`.
- */
-export type SpellxNoteKind = "description" | "comment" | "property editor" | "stories"
 
 /**
  * The words a page or view's name is read by:  `Pinned Screens & Hardware` => `Pinned Screens Hardware`.
@@ -849,27 +650,8 @@ export function plainPartName(name: string): string {
     .trim()
 }
 
-/**
- * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);
- * or an ability, a tag of its own, `<clickable when it is face down/>` (epic `debut` P27, Q47) --
- * `items draggable` is a list's `<cards draggable when .../>`.
- */
-export type SpellxHandlerKind = "on" | "when" | "while" | SpellxAbilityKind
-
-/** An ability's tag:  `<draggable/>`, `<clickable when .../>`, a list's `<cards draggable when .../>`. */
-export type SpellxAbilityKind = "draggable" | "clickable" | "selectable" | "droppable" | "items draggable"
-
-/** The abilities' tag kinds, which need no words after them:  `<draggable/>`. */
-export const SPELLX_ABILITY_KINDS: readonly string[] = [
-  "draggable",
-  "clickable",
-  "selectable",
-  "droppable",
-  "items draggable"
-]
-
-/** A spellx control tag in a drawing:  an if-chain's branches (Q53), or a loop. */
-export type SpellxControlKind =
+/** A control tag in a page's drawing:  an if-chain's branches (Q53), or a loop. */
+export type PageControlKind =
   | "if"
   | "otherwise if"
   | "otherwise"

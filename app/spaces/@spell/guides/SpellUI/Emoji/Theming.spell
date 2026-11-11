@@ -1,4 +1,4 @@
-<page "emoji theming" notebook>
+"emoji theming" is a notebook page
 	<header level="1">
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>
@@ -57,4 +57,3 @@
 			sets: I1); to change the look, point `--ui-emoji-font-family` at another emoji font.
 		</>
 	</>
-</page>

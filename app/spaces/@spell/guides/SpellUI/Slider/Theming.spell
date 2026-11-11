@@ -1,4 +1,4 @@
-<page "slider theming" notebook>
+"slider theming" is a notebook page
 	<header level="1">
 		Slider
 		<header>A slider allows users to select values within a range.</>
@@ -46,4 +46,3 @@
 	<section label="Themes">
 		<markdown>The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes the colours a slider inherits.</>
 	</>
-</page>

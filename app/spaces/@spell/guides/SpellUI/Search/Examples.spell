@@ -1,4 +1,4 @@
-<page "search examples" notebook>
+"search examples" is a notebook page
 	<header level="1">
 		Search
 		<header>A search module allows a user to query for results from a selection of data.</>
@@ -198,4 +198,3 @@
 			</example>
 		</>
 	</>
-</page>

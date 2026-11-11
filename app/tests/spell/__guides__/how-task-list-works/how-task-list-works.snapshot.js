@@ -66,8 +66,8 @@ export class Checklist extends ViewableList {
   get showing() { return this.getProp("showing") }
   set showing(value) { this.setProp("showing", value) }
 
-  // each task in turn, unless the filter hides it:  "return nothing" draws nothing
   drawEachItem(item) {
+    // each task in turn, unless the filter hides it:  "return nothing" draws nothing
     if (this.showing === "active" && item.isDone) return undefined
     if (this.showing === "done" && item.isActive) return undefined
     return core.drawThing(item)

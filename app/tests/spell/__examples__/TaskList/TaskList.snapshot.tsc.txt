@@ -1,3 +1,3 @@
-609:78 TS2345 Argument of type '(item: Task) => number' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
-609:107 TS2345 Argument of type '(task: Task) => Checklist' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
-628:5 TS2322 Type 'string' is not assignable to type '"high" | "low" | "normal"'.
+606:78 TS2345 Argument of type '(item: Task) => number' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
+606:107 TS2345 Argument of type '(task: Task) => Checklist' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
+625:5 TS2322 Type 'string' is not assignable to type '"high" | "low" | "normal"'.

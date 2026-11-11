@@ -60,15 +60,22 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     let lineBodyMark: P.JournalMark | undefined
     let fromBody: string | undefined
     let bodyErrorsAt: number | undefined
+    // a rule read what's indented under the line, to say what the line is -- see `SpellStatement.below`
+    let readsBelow = false
     if (!(written instanceof P.LineToken)) {
       console.warn("BlockLine.parse(): got non-line", written)
       return undefined
     }
-    // a spellx tag line reads as its code-spell twin, with the body that takes (epic `elemental-spell` P6):
-    // only in a spellx file, so code spell's lines pay nothing for it
-    const spellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx"
-    const twin = spellx ? SP.SpellxTwin.of(scope, written, lines[1]) : undefined
-    if (spellx) errors.push(...SP.SpellxTwin.errorsIn(scope, written))
+    // a page's head or tag line reads as its code-spell twin, with the body that takes:  only in a page file, so
+    // plain Spell's lines pay nothing for it;  or a line the page tokenizer read in plain Spell, a `<for>` inside an
+    // element's lines (epic `language` P45)
+    const [head] = written.tokens
+    const isPage =
+      (scope.parser as SP.SpellParser | undefined)?.form === "page" ||
+      head instanceof SP.PageTagToken ||
+      head instanceof SP.PageCloserToken
+    const twin = isPage ? SP.PageTwin.of(scope, written, lines[1]) : undefined
+    if (isPage) errors.push(...SP.PageTwin.errorsIn(scope, written))
     const line = twin?.line ?? written
     const nextItem = twin ? twin.body : lines[1]
     if (twin?.swallowsNextItem) tokensMatched.push(lines[1]!)
@@ -101,15 +108,12 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       const start = 0
       let end = tokens.length
 
-      // pop the comment (a single token) off of the end if found -- or each of a spellx twin's, its description's
-      // lines (`SP.SpellxTwin`):  code spell's line has one at most
+      // pop the comment (a single token) off of the end if found
       const comments: P.Match[] = []
-      while (end > 0) {
-        const comment = scope.parser?.parse([tokens[end - 1]!], "comment", scope)
-        if (!comment) break
-        comments.unshift(comment)
+      const comment = end > 0 ? scope.parser?.parse([tokens[end - 1]!], "comment", scope) : undefined
+      if (comment) {
+        comments.push(comment)
         end -= 1
-        if (!(tokens[end] instanceof SP.SpellxProseToken)) break
       }
       // add comments BEFORE statement
       matched.push(...comments)
@@ -118,7 +122,19 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       const unparsed = tokens.slice(start, end)
       // an outline's bullet, e.g. `- it has a deck`:  kept as a token, never part of the statement
       if (BlockLine.isBullet(unparsed)) matched.push(unparsed.shift()!)
-      let statement = scope.parser?.parse(unparsed, "statement", scope)
+      // what's indented under it, for a line with no colon that takes it as its body (epic `language` P48)
+      const outerBelow = SpellStatement.below
+      const outerReadBelow = SpellStatement.readBelow
+      SpellStatement.below = nextItem instanceof P.BlockToken ? nextItem : undefined
+      SpellStatement.readBelow = false
+      let statement: P.Match | undefined
+      try {
+        statement = scope.parser?.parse(unparsed, "statement", scope)
+      } finally {
+        readsBelow = SpellStatement.readBelow
+        SpellStatement.below = outerBelow
+        SpellStatement.readBelow = outerReadBelow
+      }
       // a statement its rule refused, saying why -- see `SpellStatement.refuse()`:  an error, never committed
       if (statement?.is(ParseError)) {
         errors.push(statement)
@@ -189,12 +205,11 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       scope
     })
     if (errors.length) result.data.errors = errors
-    // what the spellx tokenizer warned of on the line, e.g. an old short note, `<property-editor>` (epic `data` P31)
-    if (spellx) for (const warning of SP.SpellxTwin.warningsIn(written)) SP.SpellWarnings.note(result, warning)
     if (lineStatement) result.data.statement = lineStatement
     if (bodyErrorsAt !== undefined) result.data.bodyErrorsAt = bodyErrorsAt
     if (lineBodyMark) result.data.bodyMark = lineBodyMark
     if (fromBody !== undefined) result.data.fromBody = fromBody
+    if (readsBelow) result.data.readsBelow = true
     return result
   }
 
@@ -239,6 +254,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
   reparseBody(line: P.MatchFor<this>, blockToken: P.BlockToken): P.Match | undefined {
     const { statement, bodyErrorsAt } = line.data
     if (!statement || !(statement.rule instanceof SpellStatement) || bodyErrorsAt === undefined) return undefined
+    // what the line IS depends on what's under it, e.g. a property worked out by the lines under it (P48)
+    if (line.data.readsBelow) return undefined
     const oldBody = statement.rule.getBody(statement)
     if (!oldBody?.is(Block) || line.tokens[1] !== oldBody.tokens[0]) return undefined
     if (statement.nestedScope === statement.scope || P.IncrementalParse.changesGlobalScope(oldBody)) return undefined

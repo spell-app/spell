@@ -1,22 +1,22 @@
 ## Una vista reversible:  una vista con un frente y un dorso, que se voltea en 3D
 // Integrada en spell (épica `elemental-spell` Q71):  compilada una vez, en el `TwoSidedView` del núcleo.
 // Una vista hecha de ella dice cómo se ve cada lado, con `para dibujar su frente:` y `para dibujar su dorso:`.
-una "vista reversible" es una vista donde:
-	- tiene las ranuras "frente" y "dorso"
-	// hacia dónde mira:  una nueva empieza boca abajo
-	- su "dirección" es abajo o arriba
-	- "está boca (dirección)"
-	- para voltearla boca arriba:
+una "vista reversible" es una vista
+	tiene las ranuras "frente" y "dorso"
+	su "dirección" es abajo o arriba
+		// hacia dónde mira:  una nueva empieza boca abajo
+	"está boca (dirección)"
+	para voltearla boca arriba
 		poner su dirección a arriba
-	- para voltearla boca abajo:
+	para voltearla boca abajo
 		poner su dirección a abajo
-	- para voltearla:
+	para voltearla
 		si está boca abajo
 			voltear eso boca arriba
 		de lo contrario
 			voltear eso boca abajo
-	// sus dos lados, espalda con espalda:  sus estilos muestran el que mira hacia arriba, y la voltean
-	- para dibujarla:
+	para dibujarla
+		// sus dos lados, espalda con espalda:  sus estilos muestran el que mira hacia arriba, y la voltean
 		dibujar su frente
 		dibujar su dorso
 	// Al voltearse:  la vista es la que gira, en 3D, y su dorso se dibuja ya girado media vuelta

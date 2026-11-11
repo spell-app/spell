@@ -1,4 +1,4 @@
-<page "sticky theming" notebook>
+"sticky theming" is a notebook page
 	<header level="1">
 		Sticky
 		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
@@ -59,4 +59,3 @@
 	<section label="Themes">
 		<markdown>A sticky has no look of its own, only whatever it holds.</>
 	</>
-</page>
