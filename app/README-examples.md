@@ -134,6 +134,8 @@ A new example is tested as soon as its folder is there:  no list to add it to.
   `yarn examples:readme calculator` takes only that example's pictures;
   `yarn examples:readme --thumbnails` only the home page's.
 - An app that draws nothing, FizzBuzz printing, gets no thumbnail:  its card shows its first letter.
+- An org app's thumbnail comes from the browser tests, which sign people in to a test org and fill it:
+  in Run, nobody is signed in, so its lists would be empty.
 - `yarn examples:readme --check` writes nothing:
   it fails while the table is out of date, or an example has no picture.
   spell-app's tests run it, so a new example fails `yarn test` until the page is made again.

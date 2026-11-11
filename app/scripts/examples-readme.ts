@@ -12,6 +12,8 @@
  *     server's root, the kit's):
  *     start it first, with `yarn start` or `spell app serve`.
  *   - A library has no app of its own (People, Games), so no picture.
+ *   - An org app's thumbnail is its picture from the browser tests, signed in to a test org full of data
+ *     (`ORG_APP_SHOTS`):  in the runner, nobody is signed in, so its lists are empty (epic `mockup` J78).
  * - Rewrites the table between the page's two marker comments, `<!-- examples:start -->` and `<!-- examples:end -->`;
  *   the rest of the page is written by hand (the kit's `spliceGenerated()` and `writeOrCheck()`).
  * - Options:
@@ -24,7 +26,9 @@
  *   check `git status` after.
  * - Plain node and `tsx`:  no `spell-app` imports, so it needs no alias hook.
  */
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs"
+import { execFileSync } from "node:child_process"
+import os from "node:os"
 import path from "node:path"
 
 import JSON5 from "json5"
@@ -71,6 +75,22 @@ const LEARNING_ORDER = [
   "Solitaire",
   "Solitario"
 ]
+
+/**
+ * The org apps' thumbnails:  each one's picture from the browser tests (`tests/spell/recipeBox.test.ts`), which sign
+ * people in to a test org and fill it, by the test's name for the picture.
+ * - Administración de la org has none:  the tests run only the English ones, so it keeps the runner's.
+ */
+const ORG_APP_SHOTS: Record<string, string> = {
+  OrgAdmin: "org-admin.png",
+  OrgEvents: "org-events-planning.png",
+  OrgFeed: "org-feed.png",
+  Inbox: "inbox.png",
+  OrgChat: "org-chat.png"
+}
+
+/** The browser tests' name for the org apps' tests, `-t`:  every test of a "built-in" org app. */
+const ORG_APP_TESTS = "built-in"
 
 /** The comments the table sits between. */
 const START = "<!-- examples:start -->"
@@ -230,6 +250,7 @@ async function takePictures(projects: Project[]): Promise<void> {
   const editor = (JSON.parse(readFileSync(editorFile, "utf8")) as { url: string }).url
   mkdirSync(path.join(ROOT, IMAGES), { recursive: true })
   // `BrowserPage` loads Playwright only here:  `--check` and `--no-pictures` need no browser
+  const orgShots = orgAppShots(projects)
   await BrowserPage.with(async (browser) => {
     for (const project of projects) {
       if (only.size && !only.has(project.name)) continue
@@ -241,6 +262,13 @@ async function takePictures(projects: Project[]): Promise<void> {
         await page.screenshot({ path: file })
         console.log(path.relative(process.cwd(), file))
         await page.close()
+      }
+      // an org app's:  its picture from the tests, signed in
+      const shot = orgShots && ORG_APP_SHOTS[project.name] && path.join(orgShots, ORG_APP_SHOTS[project.name]!)
+      if (shot && existsSync(shot)) {
+        await cutToThumbnail(browser, shot, thumbnailOf(project))
+        console.log(`${path.relative(process.cwd(), thumbnailOf(project))}  (signed in, from the tests)`)
+        continue
       }
       // its card's picture:  the app by itself, in the runner
       const runner = await BrowserPage.newPage(browser, { viewport: THUMBNAIL_WINDOW })
@@ -261,4 +289,41 @@ async function takePictures(projects: Project[]): Promise<void> {
       await runner.close()
     }
   })
+}
+
+/**
+ * Run the org apps' browser tests, which save a picture of each app signed in, into a scratch folder;  its path.
+ * - `undefined` when no org app is being pictured.
+ * - throws if the tests fail:  their pictures would be of a broken app
+ */
+function orgAppShots(projects: Project[]): string | undefined {
+  const wanted = projects.some((project) => ORG_APP_SHOTS[project.name] && (!only.size || only.has(project.name)))
+  if (!wanted) return undefined
+  const shots = mkdtempSync(path.join(os.tmpdir(), "org-app-shots-"))
+  console.log("the org apps' tests, for their pictures signed in ...")
+  execFileSync(
+    "yarn",
+    ["vp", "test", "run", "--project", "spell", "tests/spell/recipeBox.test.ts", "-t", ORG_APP_TESTS],
+    {
+      cwd: ROOT,
+      env: { ...process.env, SPELL_TEST_SHOTS: shots },
+      stdio: "ignore"
+    }
+  )
+  return shots
+}
+
+/** Cut the picture at `from` to a thumbnail's shape, its top, at `to`:  drawn on a page the thumbnail's size. */
+async function cutToThumbnail(
+  browser: Parameters<typeof BrowserPage.newPage>[0],
+  from: string,
+  to: string
+): Promise<void> {
+  const page = await BrowserPage.newPage(browser, { viewport: THUMBNAIL_WINDOW })
+  const picture = `data:image/png;base64,${readFileSync(from).toString("base64")}`
+  await page.setContent(
+    `<body style="margin:0"><img src="${picture}" style="width:100vw;height:100vh;object-fit:cover;object-position:top"></body>`
+  )
+  await page.screenshot({ path: to })
+  await page.close()
 }
