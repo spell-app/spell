@@ -193,8 +193,8 @@
       "dark": "calc(4px + 2px)"
     },
     "--bubbly-monaco-input-trim": {
-      "light": "-2px",
-      "dark": "-2px"
+      "light": "-1px",
+      "dark": "-1px"
     },
     "--bubbly-monaco-shapes-drop": {
       "light": "1px",
