@@ -227,8 +227,7 @@ export class BubblyLayout {
   ): BubblyBlock {
     this.scopes.push(new Set())
     try {
-      const partOfSpeech: BubblyPartOfSpeech =
-        row.headWhen && statement.groups[row.headWhen.group] ? row.headWhen.partOfSpeech : row.head!
+      const partOfSpeech: BubblyPartOfSpeech = row.head!
       return {
         kind: "block",
         rule: statement.rule.name ?? "",

@@ -59,7 +59,6 @@ export class BubblyPresentation {
     // an action's head:  everything after `to` is what a person typed, its parameters aside (Owen, 2026-11-11)
     to_do_something: {
       head: "action",
-      headWhen: { group: "asTest", partOfSpeech: "plain" },
       inputs: ["method_keyword"],
       typedAfterLead: true,
       params: METHOD_PARAMS
