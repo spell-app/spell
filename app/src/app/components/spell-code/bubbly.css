@@ -570,6 +570,11 @@
   --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 1px);
   /* how much lower a pill's top sits than an even pill's (negative:  higher):  its words sit high in their line */
   --bubbly-monaco-input-trim: -1px;
+  /* the paper between a body's lowest foot and the band on the line under it:  as between two bands on two lines */
+  --bubbly-monaco-foot-gap: 3px;
+  /* how far right of its band's round left end a body's rail and paper start, nearer its words;  0:  right at it.
+     Not a group's:  its rail stays at its band's end (Owen) */
+  --bubbly-monaco-rail-inset: 6px;
   /* how far every shape sits below where the code puts it:  the words sit that much higher in their bands and pills */
   --bubbly-monaco-shapes-drop: 1px;
   /* a band's height in the editor:  a little less than the page's, still centred on its line,
