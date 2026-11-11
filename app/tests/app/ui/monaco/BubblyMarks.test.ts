@@ -58,10 +58,10 @@ describe("BubblyMarks.of()", () => {
     const marks = marked()
     expect(wordsMarked(marks, "bubbly-quote-open").slice(0, 2)).toEqual(['"', '"'])
     const card = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-name"))!
-    expect(card.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-input", cursorStops: 1 })
-    expect(card.options.after).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-input", cursorStops: 2 })
+    expect(card.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-input bubbly-room-before", cursorStops: 1 })
+    expect(card.options.after).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-input bubbly-room-after", cursorStops: 2 })
     const open = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-quote-open"))!
-    expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-quote" })
+    expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-quote bubbly-room-before" })
   })
 
   test("a group's members written at its indent:  room before each of their lines, their bodies' too", () => {
