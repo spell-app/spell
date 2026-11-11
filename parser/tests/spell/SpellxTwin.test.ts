@@ -500,8 +500,9 @@ describe("spellx:  a third style of spell", () => {
       expect(code).toContain("  deal() {\n    this.play()")
     })
 
-    // J83:  a drawing in a chunk names the web's own elements, as code spell does
-    test("its drawings are code spell's:  <div> and <button> are the web's, inside a {...} too", () => {
+    // J83:  a drawing in a chunk names the web's own elements;
+    // plain Spell's own drawings take the shortcuts since epic `language` P45 (Q4 A):  its `<button>` is the pack's
+    test("its drawings are code spell's as written:  <div> and <button> are the web's, inside a {...} too", () => {
       const drawing = '<div><button>hi</button>{<label>x</label> if 1 is 1 otherwise ""}</div>'
       const spellx = compiledText([
         '<spell-view "box">',
@@ -515,7 +516,8 @@ describe("spellx:  a third style of spell", () => {
         path: "/test.spell"
       })
       expect(spellx.errors).toEqual([])
-      expect(spellx.code).toBe(spell.code)
+      expect(spellx.code).toBe(spell.code.replace('h("ui-button"', 'h("button"'))
+      expect(spell.code).toContain('h("ui-button"')
       expect(spellx.code).toContain('h("button"')
       expect(spellx.code).toContain('h("label"')
     })

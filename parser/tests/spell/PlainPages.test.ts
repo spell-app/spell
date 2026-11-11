@@ -49,6 +49,100 @@ describe("a page in plain spell", () => {
   })
 })
 
+/**
+ * A DRAWING IN PLAIN SPELL takes the tag form's shortcuts (epic `language` P45, Q4 A), through the same tables:
+ * - a Spell UI element by its bare name, `<text>` for `<ui-text>`;  a name nobody has stays the web's own, `<div>`
+ * - `</>` closing any element, at a line's end
+ * - a `<for>` with loading and empty parts inside another element
+ */
+describe("a drawing in plain spell takes the tag form's shortcuts", () => {
+  beforeAll(registerTestComponentPack)
+
+  test.each([
+    ["English", "/Shelf.spell", SHELF_TAGS, SHELF_PLAIN],
+    ["Spanish", "/Estante.es.spell", ESTANTE_TAGS, ESTANTE_PLAIN]
+  ])("%s:  compiles the same as its tag file", (_language, path, tags, plain) => {
+    const tagged = compiled(tags, path)
+    const written = compiled(plain, path)
+    expect(tagged.errors).toEqual([])
+    expect(written.errors).toEqual([])
+    expect(written.code).toBe(tagged.code)
+  })
+
+  test("bare names are the pack's, `</>` closes, and a `<for>` in an element draws its items", () => {
+    const { code } = compiled(SHELF_PLAIN, "/Shelf.spell")
+    expect(code).toContain('h("ui-segment",')
+    expect(code).toContain('h("ui-header", "Films")')
+    expect(code).toContain("core.drawRead(() => this.films, (film) => h(\"ui-text\", () => film.title), { waiting:")
+    expect(code).toContain('none: () => h("ui-text", "None")')
+  })
+
+  test("a name nobody has stays the web's own element:  no error", () => {
+    const { code, errors } = compiled('a "box" is a view where:\n\t- to draw it:\n\t\t<div><text>hi</></div>\n')
+    expect(errors).toEqual([])
+    expect(code).toContain('h("div", h("ui-text", "hi"))')
+  })
+})
+
+const SHELF_DRAWING = [
+  "\t\t<segment>",
+  "\t\t\t<header>Films</>",
+  '\t\t\t<for film in its films loading="Wait">',
+  "\t\t\t\t<text>{film's title}</text>",
+  "\t\t\t\t<empty>",
+  "\t\t\t\t\t<text>None</>",
+  "\t\t\t\t</empty>",
+  "\t\t\t</for>",
+  "\t\t</segment>"
+].join("\n")
+
+const SHELF_TAGS = `<thing "film">
+	<property "title">text</>
+</thing>
+<view "shelf">
+	<property "films">a list of films</>
+	<draw>
+${SHELF_DRAWING}
+	</draw>
+</view>
+`
+
+const SHELF_PLAIN = `a "film" is a thing where:
+	- its "title" is text
+a "shelf" is a view where:
+	- its "films" is a list of films
+	- to draw it:
+${SHELF_DRAWING.replaceAll("\n\t\t", "\n\t\t\t").replace(/^\t\t/, "\t\t\t")}
+`
+
+const ESTANTE_DRAWING = [
+  "\t\t<tarjetas>",
+  "\t\t\t<encabezado>Películas</>",
+  "\t\t\t<para película en sus películas>",
+  "\t\t\t\t<texto>{el título de la película}</texto>",
+  "\t\t\t</para>",
+  "\t\t</tarjetas>"
+].join("\n")
+
+const ESTANTE_TAGS = `<cosa "película">
+	<propiedad "título">texto</>
+</cosa>
+<vista "estante">
+	<propiedad "películas">una lista de películas</>
+	<dibujar>
+${ESTANTE_DRAWING}
+	</dibujar>
+</vista>
+`
+
+const ESTANTE_PLAIN = `una "película" es una cosa donde:
+	- su "título" es texto
+un "estante" es una vista donde:
+	- sus "películas" son una lista de películas
+	- para dibujarla:
+${ESTANTE_DRAWING.replaceAll("\n\t\t", "\n\t\t\t").replace(/^\t\t/, "\t\t\t")}
+`
+
 /** A page's body that draws itself:  a counter, prose, a section, an example. */
 const COUNTER = [
   "\t# A counter",

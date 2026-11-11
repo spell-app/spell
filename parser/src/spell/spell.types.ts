@@ -90,7 +90,7 @@ const TAG_LINE = /^<(?!\/?ui-defaults\b)/m
  * - Each language's own is its `SP.SpellxWords.plainPage`;  this one only says a file has one.
  */
 const PLAIN_PAGE_LINE =
-  /^"[^"\n]+"[ \t]+(?:is[ \t]+an?[ \t]+(?:notebook[ \t]+)?page|es[ \t]+una[ \t]+p[áa]gina(?:[ \t]+cuaderno)?)[ \t]*(?:\/\/[^\n]*)?$/mu
+  /^"[^"\n]+"[ \t]+(?:is[ \t]+an?[ \t]+(?:(?:notebook|locked)[ \t]+)*page|es[ \t]+una[ \t]+p[áa]gina(?:[ \t]+(?:cuaderno|bloqueado|bloqueada))*)[ \t]*(?:\/\/[^\n]*)?$/mu
 
 /**
  * The shape file `name` is written in, from what it says (epic `language` P40):  `"spellx"` for tags, else `"spell"`.

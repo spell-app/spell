@@ -191,6 +191,13 @@ export class CodeSpellWriter {
       for (const child of only.children ?? []) this.writeMarkup(child, indent)
       return
     }
+    // a page's stories, the block the twin made of its note (epic `mockup` P6):  its lines as written, a tab in
+    if (written.length === 1 && isStoriesBlock(only)) {
+      this.lines.push(`${indent}${bullet}<${only.tagName}>`)
+      for (const line of `${only.raw}`.split("\n")) this.lines.push(line ? `${indent}\t${line}` : "")
+      this.lines.push(`${indent}</${only.tagName}>`)
+      return
+    }
     // a drawing that's one section the twin made, alone
     if (written.length === 1 && only instanceof P.JSXElementToken && SP.SpellxTwin.isSynthetic(only)) {
       this.writeMarkup(only, indent)
@@ -360,6 +367,19 @@ export class CodeSpellWriter {
 /** Is `token` a line's comment, written as one of its own:  prose, or a line of a `<!-- ... -->` comment? */
 function isCommentLike(token: P.Token | undefined): boolean {
   return token instanceof SP.SpellxProseToken || token instanceof SP.SpellxCommentToken
+}
+
+/**
+ * Is `token` a page's stories block the twin made of its `<stories>` note (`SP.SpellxTwin`, epic `mockup` P6)?
+ * - Its text is the note's lines, not the file's:  written from it, never sliced from the file.
+ */
+function isStoriesBlock(token: P.Token | undefined): token is P.JSXElementToken {
+  return (
+    token instanceof P.JSXElementToken &&
+    token.tagName === "stories" &&
+    token.children?.[0] instanceof P.JSXTextToken &&
+    token.raw === token.children[0].raw
+  )
 }
 
 /** A `//` comment line, `indent` in:  `// text`, or `//` alone. */

@@ -301,25 +301,6 @@ export class SpellxTokenizer extends P.Tokenizer {
   }
 
   /**
-   * A markup tag's head at `start`, as spell's -- but a `<for ...>`'s is a PHRASE up to its `>`, as on a line of its
-   * own (epic `data` I93):  `<for every repository matching ("user:" + its login)>`.
-   * - Read as attributes, its quotes, parens and apostrophes ended the head early, so its body never joined it.
-   * - Its phrase and attributes are read again from its text, with its body (`SpellJSX.parseLoop()`):
-   *   the token holds none of its own.
-   */
-  matchJSXStartTag(text: string, start = 0, end = text.length) {
-    const at = this.eatWhitespace(text, start, end)
-    const tagName = text.slice(at).match(this.JSX_TAG_START)?.[1]
-    if (!tagName || this.words.controls[tagName.toLowerCase()] !== "for each")
-      return super.matchJSXStartTag(text, start, end)
-    const close = this.findPhraseEnd(text, at + 1 + tagName.length, end, { stop: ">" })
-    const element = new P.JSXElementToken({ tagName, start, raw: text.slice(start, Math.min(close + 1, end)) })
-    if (text[close] !== ">") element.record.error = "No end >"
-    else if (text[close - 1] === "/") element.record.isUnaryTag = true
-    return element
-  }
-
-  /**
    * Where markup's next element would start, for a run of them (`matchJSXElements()`):  never at a line a spellx tag
    * starts, e.g. `<if ...>` or `<for each ...>` after a drawing's `<toolbar />`, which is a tag of its own.
    */
@@ -577,13 +558,16 @@ export class SpellxTokenizer extends P.Tokenizer {
   private readPlainPageHead(text: string, start: number, end: number, lineEnd: number): SP.SpellxTagToken | undefined {
     const match = this.words.plainPage && new RegExp(this.words.plainPage.source, "iu").exec(text.slice(start, lineEnd))
     if (!match?.groups) return undefined
-    const { name, flag } = match.groups
+    const { name, flags = "" } = match.groups
     const headEnd = start + match[0].length
     const pageWord = keyFor(this.words.templates, "page")
+    // its flags, bare attributes by the language's words:  `notebook`, `locked`;  any other word, and it isn't one
     const attributes: SP.SpellxAttribute[] = []
-    if (flag) {
-      const at = start + match[0].indexOf(flag, name!.length + 2)
-      attributes.push({ name: SP.PAGE_DRAWS_BODY_FLAG, word: flag, start: at })
+    const flagsAt = start + match[0].indexOf(flags, name!.length + 2)
+    for (const flag of flags.matchAll(/[\p{L}-]+/gu)) {
+      const english = this.words.attributes[flag[0].toLowerCase()]
+      if (!english || !PLAIN_PAGE_FLAGS.has(english)) return undefined
+      attributes.push({ name: english, word: flag[0], start: flagsAt + flag.index })
     }
     const tag: SP.SpellxTag = {
       category: "template",
@@ -1342,6 +1326,9 @@ type Frame = TagWord & {
   /** Is it an if-chain, which an `<otherwise>` goes on with? */
   chain: boolean
 }
+
+/** The bare attributes a page's plain head may say, by their English names:  `"x" is a locked notebook page`. */
+const PLAIN_PAGE_FLAGS = new Set(["notebook", "locked"])
 
 /** A tag's head, read. */
 type Head = {

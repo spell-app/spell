@@ -107,9 +107,12 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     element: P.JSXElementToken | P.JSXFragmentToken,
     codeSpell: boolean
   ) {
-    // a spellx drawing's `<for ...>` inside an element:  read as on a line of its own, its children its body (I19)
     const isSpellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx" && !codeSpell
-    if (isSpellx && element instanceof P.JSXElementToken && SpellJSX.isSpellxLoop(scope, element)) {
+    // a drawing's shortcuts, plain Spell's too (epic `language` P45, Q4 A):  bare names, a `<for>` in an element;
+    // never in a tag file's `<spell>` chunk, code spell as written (J83)
+    const takesShortcuts = !codeSpell
+    // a drawing's `<for ...>` inside an element:  read as on a line of its own, its children its body (I19)
+    if (takesShortcuts && element instanceof P.JSXElementToken && SpellJSX.isSpellxLoop(scope, element)) {
       return SpellJSX.parseLoop(scope, match, element)
     }
     // `Scope.parse()` only accepts a `string` for `text`, but we have actual `Token`s here:
@@ -122,18 +125,19 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (!(element instanceof P.JSXElementToken)) return match
     if (element.chain) return SpellJSX.parseBranch(scope, match, element)
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
-    // a spellx drawing names components by their bare names:  `<button>` => `<ui-button>`
-    if (isSpellx && !element.attributes?.length && !element.children?.length) {
+    // a drawing names components by their bare names:  `<button>` => `<ui-button>`
+    if (takesShortcuts && !element.attributes?.length && !element.children?.length) {
       match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
       if (match.data.loopItem) return match
     }
-    if (isSpellx && match.data.tagName === element.tagName) {
+    if (takesShortcuts && match.data.tagName === element.tagName) {
       const tag = SpellJSX.componentTagFor(scope, element.tagName)
       const view = tag ? scope.getType(SP.typeName(element.tagName)) : undefined
       // one of the project's own views:  its children may fill its slots (`withSlotNames()`)
       if (view?.isA("View")) match.data.view = view
       if (tag) match.data.tagName = tag
-      else if (isBareComponentName(element.tagName)) {
+      // a bare name nobody has:  an error in a tag file;  in plain Spell, the web's own element, `<div>`
+      else if (isSpellx && isBareComponentName(element.tagName)) {
         const language = SP.Language.of(scope)
         const packs = SP.ComponentPacks.searched(SpellJSX.packsFor(scope))
         // a control or handler inside an element (`<segment><if ...>`):  spellx reads those on a drawing's own lines
@@ -358,7 +362,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    */
   private static parseLoop(scope: P.Scope, match: P.MatchFor<SpellJSX>, element: P.JSXElementToken) {
     const parser = scope.parser as SP.SpellParser
-    const tokenizer = parser.tokenizer as SP.SpellxTokenizer
+    // a plain file's drawing reads it as a tag file's does (epic `language` P45):  through its tag-form twin
+    const reader = parser.form === "spellx" ? parser : parser.twinFor(SP.Language.of(scope), "spellx")
+    const tokenizer = reader.tokenizer as SP.SpellxTokenizer
     const { raw = "", start, line = 0, ch = 0 } = element.record
     // its first line indented as it is in the file, the same way its later lines are
     const indent = /\n( ?)/.exec(raw)?.[1] ? " " : "\t"
@@ -369,7 +375,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     })
     let block: P.BlockToken | undefined = blocks[0]
     while (block?.tokens.length === 1 && block.tokens[0] instanceof P.BlockToken) block = block.tokens[0]
-    match.data.loop = block && parser.parse([block], "block", scope)
+    match.data.loop = block && reader.parse([block], "block", scope)
     if (!match.data.loop) match.data.error = parser.parse([element], "parse_error", scope)
     return match
   }

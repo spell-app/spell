@@ -57,6 +57,15 @@ export class Tokenizer {
   chainTags: Record<string, P.JSXChainKind> = {}
 
   /**
+   * JSX tags whose head is a PHRASE up to its `>`, not attributes:  spell's `<for every film where ...>`
+   * (epic `data` I93;  plain Spell's too since epic `language` P45).
+   * - Read as attributes, its quotes, parens and apostrophes ended the head early, so its body never joined it.
+   * - The token holds none of its own:  its reader reads its phrase and attributes again from its text.
+   * - None by default.
+   */
+  phraseHeadTags: string[] = []
+
+  /**
    * Does markup hold COMMENTS, never drawn (epic `elemental-spell`, Owen 2026-10-26)?  Each is a `JSXCommentToken`:
    * - `<!-- ... -->`, anywhere among an element's children, over as many lines as it takes
    * - a line of its own starting `//`, as a comment line is everywhere else in spell
@@ -579,6 +588,7 @@ export class Tokenizer {
     if (!tagMatch) return undefined
 
     let [matchText, tagName, endBit] = tagMatch
+    if (this.phraseHeadTags.includes(tagName.toLowerCase())) return this.matchJSXPhraseHead(text, start, end, tagName)
     nextStart += matchText.length
 
     const jsxElement = new P.JSXElementToken({ tagName, start })
@@ -694,6 +704,16 @@ export class Tokenizer {
       at = hole ? hole.next : stop
     }
     return { contents, next: this.eatWhitespace(text, value.next, end) }
+  }
+
+  /** A `phraseHeadTags` tag's head at `start`, `tagName` its name:  its text to its `>`, as ONE element token. */
+  private matchJSXPhraseHead(text: string, start: number, end: number, tagName: string): P.JSXElementToken {
+    const at = this.eatWhitespace(text, start, end)
+    const close = this.findPhraseEnd(text, at + 1 + tagName.length, end, { stop: ">" })
+    const element = new P.JSXElementToken({ tagName, start, raw: text.slice(start, Math.min(close + 1, end)) })
+    if (text[close] !== ">") element.record.error = "No end >"
+    else if (text[close - 1] === "/") element.record.isUnaryTag = true
+    return element
   }
 
   /**
@@ -1418,6 +1438,8 @@ export type TokenizerProps = {
   emptyEndTagCloses?: boolean
   /** See `Tokenizer.chainTags`. */
   chainTags?: Record<string, P.JSXChainKind>
+  /** See `Tokenizer.phraseHeadTags`. */
+  phraseHeadTags?: string[]
   /** See `Tokenizer.markupComments`. */
   markupComments?: boolean
 }

@@ -306,6 +306,7 @@ export const spanishWords: SP.LanguageWords = {
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar",
       bloqueado: "locked",
+      bloqueada: "locked",
       // retirada, pues esperar es lo normal:  un error, que `spell lint --fix` quita (épica `language` P13)
       animada: "animated",
       arrastrable: "draggable",
@@ -331,7 +332,7 @@ export const spanishWords: SP.LanguageWords = {
       color: "color"
     },
     // la cabecera llana de una página (épica `language` P45):  `"api del botón" es una página cuaderno`
-    plainPage: /^"(?<name>[^"\n]+)"[ \t]+es[ \t]+una[ \t]+p[áa]gina(?:[ \t]+(?<flag>cuaderno))?(?=[ \t]*(?:\/\/[^\n]*)?$)/imu,
+    plainPage: /^"(?<name>[^"\n]+)"[ \t]+es[ \t]+una[ \t]+p[áa]gina(?<flags>(?:[ \t]+[\p{L}-]+)*?)(?=[ \t]*(?:\/\/[^\n]*)?$)/imu,
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
     twins: {
       placeOfKind: "{words} es {a kind} {kind} en {quoted address} :",

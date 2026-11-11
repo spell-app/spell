@@ -86,6 +86,11 @@ export type SpellxTemplate = {
    * - `SP.SpellxTag.drawsBody`:  a page with no `<draw>` of its own (epic `notebook` P2)
    */
   drawsBody: boolean
+  /**
+   * written as a page's PLAIN HEAD, `"button api" is a notebook page` (epic `language` P45):
+   * its flags are words before `page`, and no closer ends it
+   */
+  plain?: true
   /** its members and prose, in order */
   children: SpellxNode[]
   /** from its `<` to its `>` */

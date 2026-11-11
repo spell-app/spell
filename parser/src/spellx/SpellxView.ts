@@ -175,6 +175,7 @@ export class SpellxView {
           nameSpan: this.textSpan(tag.name),
           attributes: tag.attributes.map((attribute) => this.attribute(attribute)),
           drawsBody: !!tag.drawsBody,
+          ...(tag.plain ? { plain: true } : {}),
           children: body ? this.nodesOf(body.tokens, tag.drawsBody ? "page body" : "template") : [],
           headSpan,
           span

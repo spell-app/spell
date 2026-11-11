@@ -65,8 +65,13 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       return undefined
     }
     // a spellx tag line reads as its code-spell twin, with the body that takes (epic `elemental-spell` P6):
-    // only in a spellx file, so code spell's lines pay nothing for it
-    const spellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx"
+    // only in a spellx file, so code spell's lines pay nothing for it;  or a line its tag-form tokenizer read in plain
+    // Spell, a `<for>` inside an element's lines (epic `language` P45)
+    const [head] = written.tokens
+    const spellx =
+      (scope.parser as SP.SpellParser | undefined)?.form === "spellx" ||
+      head instanceof SP.SpellxTagToken ||
+      head instanceof SP.SpellxCloserToken
     const twin = spellx ? SP.SpellxTwin.of(scope, written, lines[1]) : undefined
     if (spellx) errors.push(...SP.SpellxTwin.errorsIn(scope, written))
     const line = twin?.line ?? written

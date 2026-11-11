@@ -572,7 +572,7 @@ export type SpellxWords = {
    * `"api del botón" es una página cuaderno`, its body indented under it.
    * - Read at a file's top level as the page's tag, `<page "button api" notebook>`, is:
    *   its body is the same, and its indentation, not a closer, says where it ends.
-   * - Its groups:  `name`, the page's name;  `flag`, a template word bringing a flag (`notebook`), if written.
+   * - Its groups:  `name`, the page's name;  `flags`, its bare attributes in the language's words, `notebook locked`.
    * - None:  this language's pages are written only in tags.
    */
   plainPage?: RegExp

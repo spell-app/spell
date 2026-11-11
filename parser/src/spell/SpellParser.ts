@@ -85,6 +85,8 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // the web's own raw-text tags, their contents as written, as the web reads them (epic `elemental-spell` P24);
   // and data, whose `{` and `[` are JSON's, not spell's (`<json>` is `<ui-json>`, P31)
   rawTextTags: ["css", "json", "ui-json", "es-json", "markdown", "stories", "script", "style"],
+  // a drawing's markup, plain Spell's too (epic `language` P45, Q4 A):  `</>` closes any element, at a line's end
+  emptyEndTagCloses: true,
   // never drawn, so a block of its own:  a page's `<stories>` with its `<markdown>` on the next line (epic `mockup` T26)
   standAloneTags: ["stories"],
   // a notebook's example, named as spellx names its tags:  `<example "one counter">` (`example_block`, epic
@@ -113,6 +115,8 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // each branch's elements are hidden while it isn't the one (`SpellJSX`);  every language's words, as its
   // `spellx.controls` say them (`SpellParser.test.ts` checks)
   chainTags: CHAIN_TAGS,
+  // a `<for ...>`'s head is a phrase, every language's word (epic `data` I93;  plain Spell's too, epic `language` P45)
+  phraseHeadTags: ["for", "para"],
   // comments in markup, never drawn:  `<!-- ... -->`, and a line of its own starting `//`, in both forms (epic
   // `elemental-spell`, Owen 2026-10-26)
   markupComments: true
@@ -169,8 +173,6 @@ export class SpellParser extends P.Parser {
           new SP.SpellxTokenizer({
             ...this.tokenizerProps,
             language: this.language ?? SP.Language.default,
-            // a drawing's markup:  `</>` closes any element there (Q40, P7)
-            emptyEndTagCloses: true,
             spell: this.spellTokenizer
           })
       )
