@@ -11,7 +11,8 @@
  *     (`BubblyHtml`, from the parser's `SP.BubblyLayout`)
  *   - the drawn-bubbly page in the epic repo, and the analysis page's mock-ups:  a generated copy beside them
  *     (`scripts/bubbly-page.ts`)
- *   - Monaco (epic `language` P50):  these same names, its own rules in the marked section at the end
+ *   - Monaco (epic `language` P50):  these same names;  where the editor draws a piece differently, its rule
+ *     (`&.bubbly-monaco`) right after the page's, and what only the editor has in one section at the end
  *   - VS Code (P51), which can't load CSS:  its `--bubbly-` values as a table, `bubbly.values.json`
  *     (`scripts/bubbly-values.ts`)
  * - `bubbly-name`, the name a head defines (`"card"`), is Monaco's mark for what the page finds by its place
@@ -122,6 +123,51 @@
   margin: 10px 0 6px 0;
   max-width: 100%;
   overflow-x: auto;
+
+  /*
+   * In Monaco (epic `language` P50, `SpellBubbly`) the editor's box is a `.bubbly` too (`bubbly-monaco`),
+   * so every setting and rule here reaches it:
+   * - each piece of text is marked with its classes (`bubbly-piece` and the page's, `bubbly-reference` ...)
+   * - the shapes, a band, gutter, body and foot, a pill, are elements with the page's classes, in a layer behind the
+   *   text (`bubbly-layer`):  the code places them;  how they look is the page's rules
+   * - Where the editor draws a piece differently, its rule follows the page's:  `&.bubbly-monaco`.
+   *   NEVER padding, margin or a width on the text itself:  the caret would land off its letters.
+   *   Room is injected text of its own (`bubbly-room`).
+   */
+  &.bubbly-monaco {
+    /* an editor's line, as tall as its font size times this:  room for a band, with a little between two */
+    --bubbly-monaco-line-height: 1.65;
+    /* the editor's font size over the drawing's (`--bubbly-font-size`):  set by the code, the shapes drawn at it */
+    --bubbly-monaco-scale: 1;
+    /* room either side of a pill's words, as the page's gap and padding */
+    --bubbly-monaco-input-room: calc((var(--bubbly-gap) + 8px) * var(--bubbly-monaco-scale));
+    /* room outside a quoted input's marks, for the curly ones drawn wider than the file's own */
+    --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
+    /* ... before an opening one:  half that, so `its` sits close to its quote (Owen) */
+    --bubbly-monaco-quote-room-before: calc(var(--bubbly-quote-room) / 4 * var(--bubbly-monaco-scale));
+    /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
+    --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 1px);
+    /* how much lower a pill's top sits than an even pill's (negative:  higher):  its words sit high in their line */
+    --bubbly-monaco-input-trim: -1px;
+    /* the paper between a body's lowest foot and the band on the line under it:  as between two bands on two lines */
+    --bubbly-monaco-foot-gap: 3px;
+    /* how far every shape sits below where the code puts it:  the words sit that much higher in their bands and pills */
+    --bubbly-monaco-shapes-drop: 1px;
+    /* a band's height in the editor:  a little less than the page's, still centred on its line,
+       so a band, a pill or a block on the next line has a blank pixel more before it (Owen) */
+    --bubbly-monaco-band-height: calc(var(--bubbly-pill-height) - 1px);
+
+    /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
+    position: relative;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    max-width: none;
+    overflow: hidden;
+    font: inherit;
+    line-height: inherit;
+  }
 
   /****** a part of speech, on a block:  its hue ******/
   .bubbly-plain {
@@ -268,6 +314,34 @@
     width: calc(var(--bubbly-foot-width) - var(--bubbly-rail-corner));
   }
 
+  /* in the editor:  a block is shapes placed by the code, in the layer behind the text */
+  &.bubbly-monaco .bubbly-layer {
+    .bubbly-block {
+      position: absolute;
+      inset: 0 auto auto 0;
+      display: block;
+      width: 0;
+      height: 0;
+      margin: 0;
+    }
+    .bubbly-block > .bubbly-gutter {
+      width: calc(var(--bubbly-gutter) + var(--bubbly-gutter-reach));
+      /* on beside its foot:  the code stops it at the foot's top */
+      box-sizing: content-box;
+      padding-bottom: var(--bubbly-foot-height);
+    }
+    /* the foot starts where its rail curves into it, as on the page */
+    .bubbly-block > .bubbly-foot {
+      margin-left: var(--bubbly-rail-corner);
+    }
+    /* a group's rail:  over its parent's, just as wide, while the group lasts;  no paper or foot of its own (Owen) */
+    .bubbly-group > .bubbly-gutter {
+      width: var(--bubbly-gutter);
+      padding-bottom: 0;
+      border-radius: 0;
+    }
+  }
+
   /****** a declaration with no body:  its band alone, every corner round ******/
   .bubbly-pill {
     display: block;
@@ -286,6 +360,11 @@
     height: var(--bubbly-pill-height);
     box-sizing: border-box;
     white-space: nowrap;
+  }
+
+  /* in the editor:  a band a pixel shorter, on its line's middle */
+  &.bubbly-monaco .bubbly-layer .bubbly-block > :is(.bubbly-head, .bubbly-pill) {
+    height: var(--bubbly-monaco-band-height);
   }
 
   /****** a body's lines ******/
@@ -351,6 +430,12 @@
     white-space: nowrap;
   }
 
+  /* in the editor:  its white is a shape in the layer, its top come down to its words (Owen) */
+  &.bubbly-monaco .bubbly-layer .bubbly-input {
+    height: calc(var(--bubbly-input-height) - var(--bubbly-monaco-input-trim));
+    translate: 0 calc(-50% + var(--bubbly-monaco-input-trim) / 2);
+  }
+
   /* a QUOTED input's wrapper:  room either side of its input for its marks, as well as the usual gap */
   .bubbly-quoted {
     white-space: nowrap;
@@ -388,6 +473,43 @@
     content: close-quote;
     left: 100%;
     bottom: -10px;
+  }
+
+  /*
+   * in the editor:  what a person typed is its words alone, as text, its white a shape under it;
+   * the file's own `"` see-through over its token's colour, its curly mark drawn over it
+   */
+  &.bubbly-monaco {
+    .view-line :is(.bubbly-input, .bubbly-quote-mark) {
+      display: inline;
+      position: relative;
+      margin: 0;
+      padding: 0;
+      width: auto;
+      line-height: inherit;
+      background: none;
+      box-shadow: none;
+    }
+    .bubbly-quote-mark {
+      color: transparent;
+    }
+    .bubbly-quote-mark::after {
+      left: 50%;
+      right: auto;
+      bottom: auto;
+      top: 0;
+      line-height: inherit;
+      translate: -50% 0;
+      font-size: calc(var(--bubbly-quote-size) * var(--bubbly-monaco-scale));
+    }
+    .bubbly-quote-open::after {
+      content: "\201C";
+      top: -0.1em;
+    }
+    .bubbly-quote-close::after {
+      content: "\201D";
+      top: 0.25em;
+    }
   }
 
   /*
@@ -529,173 +651,62 @@
     border-radius: var(--bubbly-pill-radius);
     padding: 0 9px;
   }
+
+  /****** what only the editor has (epic `language` P50):  room injected in the text, the layer of shapes ******/
+  &.bubbly-monaco {
+    /* room, injected beside what a person typed */
+    .bubbly-room {
+      display: inline-block;
+    }
+    .bubbly-room-input {
+      width: var(--bubbly-monaco-input-room);
+    }
+    .bubbly-room-quote {
+      width: var(--bubbly-monaco-quote-room);
+    }
+    .bubbly-room-quote.bubbly-room-before {
+      width: var(--bubbly-monaco-quote-room-before);
+    }
+
+    /* the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size */
+    .bubbly-layer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .bubbly-shapes {
+      position: absolute;
+      inset: 0 auto auto 0;
+      transform-origin: 0 0;
+      transform: translate(
+          var(--bubbly-monaco-x, 0),
+          calc(var(--bubbly-monaco-y, 0px) + var(--bubbly-monaco-shapes-drop))
+        )
+        scale(var(--bubbly-monaco-scale));
+    }
+    .bubbly-layer :is(.bubbly-head, .bubbly-pill, .bubbly-gutter, .bubbly-body, .bubbly-foot, .bubbly-input) {
+      position: absolute;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    /* a band sits on its line's middle;  an input's own rule places it */
+    .bubbly-layer :is(.bubbly-head, .bubbly-pill) {
+      translate: 0 -50%;
+    }
+
+    /* the code's own layers over the shapes:  the editor sits above the layer, see-through */
+    .monaco-editor {
+      position: relative;
+    }
+  }
 }
 
 /* a mock-up's caption, above it */
 .bubbly-caption {
   margin: 22px 0 3px 0;
   font-weight: 600;
-}
-
-/****** Monaco's own rules (epic `language` P50):  what only the editor needs, on these same names ******/
-/*
- * Monaco (`SpellBubbly`) draws the look on the editor's text as it's typed, with this sheet's names:
- * - the editor's box is a `.bubbly` (`bubbly-monaco`), so every variable and rule above reaches it
- * - each piece of text is marked with its classes (`bubbly-piece` and the page's, `bubbly-reference` ...)
- * - the shapes, a band, gutter, body and foot, a pill, are elements with the page's classes, in a layer
- *   behind the text (`bubbly-layer`):  the code places them;  how they look is the rules above
- * - The rules here only fit those to an editor.  NEVER padding, margin or a width on the text itself:  the caret
- *   would land off its letters.  Room is injected text of its own (`bubbly-room`).
- */
-
-.bubbly.bubbly-monaco {
-  /* an editor's line, as tall as its font size times this:  room for a band, with a little between two */
-  --bubbly-monaco-line-height: 1.65;
-  /* the editor's font size over the drawing's (`--bubbly-font-size`):  set by the code, the shapes drawn at it */
-  --bubbly-monaco-scale: 1;
-  /* room either side of a pill's words, as the page's gap and padding */
-  --bubbly-monaco-input-room: calc((var(--bubbly-gap) + 8px) * var(--bubbly-monaco-scale));
-  /* room outside a quoted input's marks, for the curly ones drawn wider than the file's own */
-  --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
-  /* ... before an opening one:  half that, so `its` sits close to its quote (Owen) */
-  --bubbly-monaco-quote-room-before: calc(var(--bubbly-quote-room) / 4 * var(--bubbly-monaco-scale));
-  /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
-  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 1px);
-  /* how much lower a pill's top sits than an even pill's (negative:  higher):  its words sit high in their line */
-  --bubbly-monaco-input-trim: -1px;
-  /* the paper between a body's lowest foot and the band on the line under it:  as between two bands on two lines */
-  --bubbly-monaco-foot-gap: 3px;
-  /* how far every shape sits below where the code puts it:  the words sit that much higher in their bands and pills */
-  --bubbly-monaco-shapes-drop: 1px;
-  /* a band's height in the editor:  a little less than the page's, still centred on its line,
-     so a band, a pill or a block on the next line has a blank pixel more before it (Owen) */
-  --bubbly-monaco-band-height: calc(var(--bubbly-pill-height) - 1px);
-
-  /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
-  position: relative;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  max-width: none;
-  overflow: hidden;
-  font: inherit;
-  line-height: inherit;
-
-  /* what a person typed:  its words alone, as text;  its white pill is a shape under it */
-  .view-line :is(.bubbly-input, .bubbly-quote-mark) {
-    display: inline;
-    position: relative;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    line-height: inherit;
-    background: none;
-    box-shadow: none;
-  }
-
-  /* the file's own `"`:  see-through, its curly mark drawn over it */
-  .view-line .bubbly-quote-mark {
-    color: transparent;
-  }
-  .bubbly-quote-mark::after {
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    top: 0;
-    line-height: inherit;
-    translate: -50% 0;
-    font-size: calc(var(--bubbly-quote-size) * var(--bubbly-monaco-scale));
-  }
-  .view-line .bubbly-quote-open::after {
-    content: "\201C";
-    top: -0.1em;
-  }
-  .view-line .bubbly-quote-close::after {
-    content: "\201D";
-    top: 0.25em;
-  }
-
-  /* room, injected beside what a person typed */
-  .bubbly-room {
-    display: inline-block;
-  }
-  .bubbly-room-input {
-    width: var(--bubbly-monaco-input-room);
-  }
-  .bubbly-room-quote {
-    width: var(--bubbly-monaco-quote-room);
-  }
-  .bubbly-room-quote.bubbly-room-before {
-    width: var(--bubbly-monaco-quote-room-before);
-  }
-
-  /****** the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size ******/
-  .bubbly-layer {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .bubbly-shapes {
-    position: absolute;
-    inset: 0 auto auto 0;
-    transform-origin: 0 0;
-    transform: translate(
-        var(--bubbly-monaco-x, 0),
-        calc(var(--bubbly-monaco-y, 0px) + var(--bubbly-monaco-shapes-drop))
-      )
-      scale(var(--bubbly-monaco-scale));
-  }
-  /* a declaration:  its hue, and its shapes, placed by the code */
-  .bubbly-layer .bubbly-block {
-    position: absolute;
-    inset: 0 auto auto 0;
-    display: block;
-    width: 0;
-    height: 0;
-    margin: 0;
-  }
-  .bubbly-layer
-    :is(.bubbly-head, .bubbly-pill, .bubbly-gutter, .bubbly-body, .bubbly-foot, .bubbly-input) {
-    position: absolute;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  /* a band and a pill sit on their line's middle */
-  .bubbly-layer :is(.bubbly-head, .bubbly-pill, .bubbly-input) {
-    translate: 0 -50%;
-  }
-  /* a pill's top comes down to its words:  as much white over them as under them (Owen) */
-  .bubbly-layer .bubbly-block > :is(.bubbly-head, .bubbly-pill) {
-    height: var(--bubbly-monaco-band-height);
-  }
-  .bubbly-layer .bubbly-input {
-    height: calc(var(--bubbly-input-height) - var(--bubbly-monaco-input-trim));
-    translate: 0 calc(-50% + var(--bubbly-monaco-input-trim) / 2);
-  }
-  .bubbly-layer .bubbly-block > .bubbly-gutter {
-    width: calc(var(--bubbly-gutter) + var(--bubbly-gutter-reach));
-    /* on beside its foot:  the code stops it at the foot's top */
-    box-sizing: content-box;
-    padding-bottom: var(--bubbly-foot-height);
-  }
-  /* the foot starts where its rail curves into it, as on the page */
-  .bubbly-layer .bubbly-block > .bubbly-foot {
-    margin-left: var(--bubbly-rail-corner);
-  }
-  /* a group's rail:  over its parent's, just as wide, while the group lasts;  no paper or foot of its own (Owen) */
-  .bubbly-layer .bubbly-group > .bubbly-gutter {
-    width: var(--bubbly-gutter);
-    padding-bottom: 0;
-    border-radius: 0;
-  }
-
-  /* the code's own layers over the shapes:  the editor sits above the layer, see-through */
-  .monaco-editor {
-    position: relative;
-  }
 }
 
 /*

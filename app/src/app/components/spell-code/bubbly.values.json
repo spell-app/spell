@@ -164,14 +164,6 @@
       "light": "15deg",
       "dark": "15deg"
     },
-    "--bubbly-dot-color": {
-      "light": "#3a3a441a",
-      "dark": "#dedde61a"
-    },
-    "--bubbly-depth": {
-      "light": "1",
-      "dark": "1"
-    },
     "--bubbly-monaco-line-height": {
       "light": "1.65",
       "dark": "1.65"
@@ -211,6 +203,14 @@
     "--bubbly-monaco-band-height": {
       "light": "calc(24px - 1px)",
       "dark": "calc(24px - 1px)"
+    },
+    "--bubbly-dot-color": {
+      "light": "#3a3a441a",
+      "dark": "#dedde61a"
+    },
+    "--bubbly-depth": {
+      "light": "1",
+      "dark": "1"
     }
   },
   "parts": {
