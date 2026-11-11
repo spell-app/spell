@@ -1,58 +1,56 @@
 # Org Admin
-An org's Admin page:  who's in it, its teams and projects, who manages what and until when, who designs which pages,
-which apps its spaces may install, its event stages, and the log of every change.
-A toolbar with who's signed in, the sections down the side, and one section at a time beside them.
-Where they're kept is in OrgAdmin.api.spell, and only its first line knows.
-Each change goes through Spell's server, under the org's rules:  one you can't make says why, and changes nothing.
-
+// An org's Admin page:  who's in it, its teams and projects, who manages what and until when, who designs which pages,
+// which apps its spaces may install, its event stages, and the log of every change.
+// A toolbar with who's signed in, the sections down the side, and one section at a time beside them.
+// Where they're kept is in OrgAdmin.api.spell, and only its first line knows.
+// Each change goes through Spell's server, under the org's rules:  one you can't make says why, and changes nothing.
 
 ## The page:  a toolbar, the sections down the side, and the one picked
 
-<app "org admin">
-	<property "new member" description="Who to add, by their address:  ana@rs">a new member</>
-	<property "new team" description="A new standing team, by its name">a new team</>
-	<property "new project" description="A new project, under a team or, with none picked, the org itself">a new project</>
-	<property "new term">a new term</>
-	<property "new app">a new approved app</>
-	<property "new designer" description="Who designs which space's pages">a new designer</>
-	<property "new stage" description="A stage an event goes through:  its name changes the stage of that name, or adds one before the last">a new stage</>
+org admin is an app:
+	// Who to add, by their address:  ana@rs
+	"new member" is a new member
+	// A new standing team, by its name
+	"new team" is a new team
+	// A new project, under a team or, with none picked, the org itself
+	"new project" is a new project
+	"new term" is a new term
+	"new app" is a new approved app
+	// Who designs which space's pages
+	"new designer" is a new designer
+	// A stage an event goes through:  its name changes the stage of that name, or adds one before the last
+	"new stage" is a new stage
 
-	<action "add the new member">
+	to add the new member:
 		add the new member to the members
 		set its new member to a new member
-	</action>
 
-	<action "add the new team">
+	to add the new team:
 		add the new team to the teams
 		set its new team to a new team
-	</action>
 
-	<action "add the new project">
+	to add the new project:
 		add the new project to the projects
 		set its new project to a new project
-	</action>
 
-	<action "give the new term">
+	to give the new term:
 		add the new term to the terms
 		set its new term to a new term
-	</action>
 
-	<action "approve the new app">
+	to approve the new app:
 		add the new app to the approved apps
 		set its new app to a new approved app
-	</action>
 
-	<action "add the new designer">
+	to add the new designer:
 		add the new designer to the designers
 		set its new designer to a new designer
-	</action>
 
-	<action "add the new stage">
+	to add the new stage:
 		add the new stage to the stages
 		set its new stage to a new stage
-	</action>
 
-	<draw description="The section picked is in the page's address, so a reload comes back to it">
+	// The section picked is in the page's address, so a reload comes back to it
+	to draw it:
 		<stack class="org-admin" spacing="none">
 			<toolbar class="top-bar" appearance="text" aria-label="Org Admin">
 				<for org in every org profile>
@@ -73,9 +71,8 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 				<tab label="Log" icon="history" value="log">{draw the log section of it}</tab>
 			</tabs>
 		</stack>
-	</draw>
 
-	<draw "people section">
+	to draw its people section:
 		<stack class="people">
 			<header size="medium">People</header>
 			<form value={its new member} class="add">
@@ -92,9 +89,8 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 				<failed><text color="red">We can't read the org's people right now.</text></failed>
 			</for>
 		</stack>
-	</draw>
 
-	<draw "teams section">
+	to draw its teams section:
 		<stack class="teams">
 			<header size="medium">Teams</header>
 			<form value={its new team} class="add new-team">
@@ -126,9 +122,8 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 				<empty><text class="none" color="grey">No projects yet.</text></empty>
 			</for>
 		</stack>
-	</draw>
 
-	<draw "roles section">
+	to draw its roles section:
 		<stack class="roles">
 			<header size="medium">Who manages what</header>
 			<form value={its new term} class="add">
@@ -168,9 +163,8 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 				<empty><text class="none" color="grey">Nobody's been named yet.</text></empty>
 			</for>
 		</stack>
-	</draw>
 
-	<draw "designers section">
+	to draw its designers section:
 		<stack class="designers">
 			<header size="medium">Who designs what</header>
 			<text color="grey">They change a space's pages, whatever their role there;  its Managers publish them.</text>
@@ -202,9 +196,8 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 				<empty><text class="none" color="grey">Only each space's Managers, so far.</text></empty>
 			</for>
 		</stack>
-	</draw>
 
-	<draw "apps section">
+	to draw its apps section:
 		<stack class="apps">
 			<header size="medium">Approved apps</header>
 			<form value={its new app} class="add">
@@ -221,9 +214,8 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 				<empty><text class="none" color="grey">No apps approved yet.</text></empty>
 			</for>
 		</stack>
-	</draw>
 
-	<draw "stages section">
+	to draw its stages section:
 		<stack class="stages">
 			<header size="medium">Event stages</header>
 			<form value={its new stage} class="add">
@@ -248,9 +240,8 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 				<cell ""><button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Remove this stage" title="Remove this stage:  not while an event is in it, or another moves to it" onClick={remove stage from the stages}/></cell>
 			</for>
 		</stack>
-	</draw>
 
-	<draw "log section">
+	to draw its log section:
 		<stack class="log">
 			<header size="medium">Log</header>
 			<for change in every role change sorted by its at, newest first as="table" appearance="very-basic" unstackable loading="Reading the log">
@@ -262,5 +253,3 @@ Each change goes through Spell's server, under the org's rules:  one you can't m
 				<empty><text class="none" color="grey">Nothing's changed yet.</text></empty>
 			</for>
 		</stack>
-	</draw>
-</app>

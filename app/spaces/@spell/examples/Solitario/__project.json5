@@ -1,6 +1,6 @@
 {
   "title": "Solitario",
-  "description": "Solitaire's Spanish twin:  Klondike in spellml, in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has;  the card a reversible view, the game's moves its actions, drawn as its toolbar and its right-click menu",
+  "description": "Solitaire's Spanish twin:  Klondike in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has;  the card a reversible view, the game's moves its actions, drawn as its toolbar and its right-click menu",
   "imports": [
     {
       "path": "/Carta.es.spell",

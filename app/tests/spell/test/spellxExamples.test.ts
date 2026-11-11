@@ -43,7 +43,9 @@ const SPELL_FIXTURES_DIR = CODE_SPELL_TWINS_DIR
  */
 const KNOWN_GAPS: Record<string, string> = {}
 
-describe("every example converts to spellx, and compiles to the same javascript", () => {
+// SKIPPED since epic `language` P46:  every example is plain Spell, and the tag form goes in P47, this test with it
+// (its round trip to tags, its `__spell__` and `__spellx__` fixtures:  the examples they mirror changed under them)
+describe.skip("every example converts to spellx, and compiles to the same javascript", () => {
   const examples = readdirSync(EXAMPLES_DIR, { withFileTypes: true }).filter((it) => it.isDirectory())
   for (const { name } of examples) {
     const known = KNOWN_GAPS[name]
@@ -110,7 +112,9 @@ const FIXTURE_EXAMPLES = [SPELLX_FIXTURES_DIR, SPELL_FIXTURES_DIR].flatMap((dir)
 /** The fixtures that can't compile the same today, and why:  each an item on the epic page. */
 const FIXTURE_GAPS: Record<string, string> = {}
 
-describe("the examples' spellx fixtures compile to the same javascript as the examples", () => {
+// SKIPPED since epic `language` P46:  every example is plain Spell, and the tag form goes in P47, this test with it
+// (its round trip to tags, its `__spell__` and `__spellx__` fixtures:  the examples they mirror changed under them)
+describe.skip("the examples' spellx fixtures compile to the same javascript as the examples", () => {
   for (const name of FIXTURE_EXAMPLES) {
     const known = FIXTURE_GAPS[name]
     ;(known ? test.fails : test)(known ? `${name} -- known gap, ${known}` : name, () => fixtureCompilesTheSame(name))

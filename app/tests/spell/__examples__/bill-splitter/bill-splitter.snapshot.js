@@ -21,7 +21,6 @@ export function testMoney() {
     core.expect(writeAmountAsMoney(0), `write 0 as money`, "$0.00", `"$0.00"`)
   })
 }
-
 // -----------
 core.heading("A diner")
 /////////////
@@ -113,7 +112,7 @@ core.heading("The bill")
 export class BillSplitter extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "diners" is a new table
+  // "diners" is a new table
   static { this.declareProp("diners", { init: () => new Table(), early: true }) }
   get diners() { return this.getProp("diners") }
   set diners(value) { this.setProp("diners", value) }

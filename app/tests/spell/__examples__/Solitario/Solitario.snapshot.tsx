@@ -16,7 +16,7 @@ export class Carta extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "rango" es uno de as, 2 ... 10, jota, dama, rey
-  //   - "es un (rango)"
+  //   "es un (rango)"
   static Rangos = ["as", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jota", "dama", "rey"] as const
   @prop({ oneOf: () => Carta.Rangos })
   accessor rango!: Rango
@@ -37,7 +37,7 @@ export class Carta extends TwoSidedView {
   }
 
   // su "palo" es uno de tréboles, diamantes, corazones o espadas
-  //   - "es un (palo)"
+  //   "es un (palo)"
   static Palos = ["tréboles", "diamantes", "corazones", "espadas"] as const
   @prop({ oneOf: () => Carta.Palos })
   accessor palo!: Palo
@@ -45,7 +45,7 @@ export class Carta extends TwoSidedView {
     return this.palo === palo
   }
 
-  // su "color" es uno de rojo, negro :
+  // su "color" es uno de rojo, negro:
   //   rojo si es un diamante o es un corazón
   //   negro de lo contrario
   static Colores = ["rojo", "negro"]
@@ -62,7 +62,7 @@ export class Carta extends TwoSidedView {
   }
 
   get nombre() {
-    return `${this.rango} de ${this.palo}`
+    return core.joined(core.joined(this.rango, "de", " "), this.palo, " ")
   }
 
   esElRangoDePalo(rango: Rango, palo: Palo) {
@@ -107,7 +107,7 @@ export class Carta extends TwoSidedView {
 
   /** un clic la juega */
   async onClick(event: ClickEvent) {
-    return await this.jugar()
+    await this.jugar()
   }
 
   /** al empezar un arrastre, la última pista se va */
@@ -254,7 +254,6 @@ export function testLaPreparaciónDeLaCarta() {
     core.expect((new Carta({ rango: "rey", palo: "diamantes" })).imagen, `la imagen de una nueva carta cuyo rango es rey y palo es diamantes`, "🃎", `"🃎"`)
   })
 }
-
 // -----------
 core.heading("Un mazo")
 /////////////
@@ -383,7 +382,7 @@ core.useElement(Pila, PilaElement)
 export function testLasPilas() {
   return core.test("test las pilas", function testLasPilas() {
     const it = new Pila()
-    core.echoTestAction(`poner la reserva a una nueva pila con nombre = "reserva"`)
+    core.echoTestAction(`poner la reserva a una nueva pila con nombre "reserva"`)
     const reserva = new Pila({ name: "reserva" })
     core.expect(reserva.color, `el color de la reserva`, "ninguno", `"ninguno"`)
     core.expect(reserva.valor, `el valor de la reserva`, 0, `0`)
@@ -639,59 +638,59 @@ export class Solitario extends App {
     this.pista = ""
   }
 
-  // su "mazo" es un nuevo mazo
+  // "mazo" es un nuevo mazo
   @prop({ init: () => new Mazo(), early: true })
   accessor mazo!: Mazo
 
-  // su "reserva" es una nueva pila de reserva con nombre = "reserva"
+  // "reserva" es una nueva pila de reserva con nombre "reserva"
   @prop({ init: () => new PilaDeReserva({ name: "reserva" }), early: true })
   accessor reserva!: PilaDeReserva
 
-  // su "descartes" es una nueva pila de descartes con nombre = "descartes"
+  // "descartes" es una nueva pila de descartes con nombre "descartes"
   @prop({ init: () => new PilaDeDescartes({ name: "descartes" }), early: true })
   accessor descartes!: PilaDeDescartes
 
-  // su "tréboles" es una nueva fundación con nombre = "tréboles", palo = tréboles
+  // "tréboles" es una nueva fundación con nombre "tréboles", palo = tréboles
   @prop({ init: () => new Fundación({ name: "tréboles", palo: "tréboles" }), early: true })
   accessor tréboles!: Fundación
 
-  // su "diamantes" es una nueva fundación con nombre = "diamantes", palo = diamantes
+  // "diamantes" es una nueva fundación con nombre "diamantes", palo = diamantes
   @prop({ init: () => new Fundación({ name: "diamantes", palo: "diamantes" }), early: true })
   accessor diamantes!: Fundación
 
-  // su "corazones" es una nueva fundación con nombre = "corazones", palo = corazones
+  // "corazones" es una nueva fundación con nombre "corazones", palo = corazones
   @prop({ init: () => new Fundación({ name: "corazones", palo: "corazones" }), early: true })
   accessor corazones!: Fundación
 
-  // su "espadas" es una nueva fundación con nombre = "espadas", palo = espadas
+  // "espadas" es una nueva fundación con nombre "espadas", palo = espadas
   @prop({ init: () => new Fundación({ name: "espadas", palo: "espadas" }), early: true })
   accessor espadas!: Fundación
 
-  // su "C1" es una nueva columna con nombre = "C1"
+  // "C1" es una nueva columna con nombre "C1"
   @prop({ init: () => new Columna({ name: "C1" }), early: true })
   accessor C1!: Columna
 
-  // su "C2" es una nueva columna con nombre = "C2"
+  // "C2" es una nueva columna con nombre "C2"
   @prop({ init: () => new Columna({ name: "C2" }), early: true })
   accessor C2!: Columna
 
-  // su "C3" es una nueva columna con nombre = "C3"
+  // "C3" es una nueva columna con nombre "C3"
   @prop({ init: () => new Columna({ name: "C3" }), early: true })
   accessor C3!: Columna
 
-  // su "C4" es una nueva columna con nombre = "C4"
+  // "C4" es una nueva columna con nombre "C4"
   @prop({ init: () => new Columna({ name: "C4" }), early: true })
   accessor C4!: Columna
 
-  // su "C5" es una nueva columna con nombre = "C5"
+  // "C5" es una nueva columna con nombre "C5"
   @prop({ init: () => new Columna({ name: "C5" }), early: true })
   accessor C5!: Columna
 
-  // su "C6" es una nueva columna con nombre = "C6"
+  // "C6" es una nueva columna con nombre "C6"
   @prop({ init: () => new Columna({ name: "C6" }), early: true })
   accessor C6!: Columna
 
-  // su "C7" es una nueva columna con nombre = "C7"
+  // "C7" es una nueva columna con nombre "C7"
   @prop({ init: () => new Columna({ name: "C7" }), early: true })
   accessor C7!: Columna
 
@@ -780,7 +779,7 @@ export class Solitario extends App {
     await this.robarDeLaReserva()
   }
 
-  async empezarElJuego() {
+  async reiniciarElJuego() {
     this.puntuación = 0
     this.movimientos = 0
     this.pista = ""
@@ -890,8 +889,8 @@ export class SolitarioElement extends SpellElement<Solitario> {
     return this.currentThing?.voltearLaReserva()
   }
 
-  empezarElJuego() {
-    return this.currentThing?.empezarElJuego()
+  reiniciarElJuego() {
+    return this.currentThing?.reiniciarElJuego()
   }
 
   jugarSolo() {
@@ -908,21 +907,17 @@ export const solitario = new Solitario()
 // Una de cada, hecha con el solitario
 
 // Cada uno se detiene un momento, así el reparto se anima
-
 /** Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es */
 core.describeAction(Solitario, "voltearLaReserva", { title: "voltear la reserva", undoneAs: "Voltear carta" })
 
 // Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
-core.describeAction(Solitario, "empezarElJuego", { title: "Reiniciar", shortcuts: ["N"], undoneAs: "Reiniciar" })
-
+core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar", shortcuts: ["N"], undoneAs: "Reiniciar" })
 /** Juega cada carta que puede ir a algún lado, hasta que ninguna pueda */
 core.describeAction(Solitario, "jugarSolo", { title: "Jugar solo", shortcuts: ["A"], undoneAs: "Jugar solo" })
-
 /** Voltea una carta boca abajo de una columna, al azar, sobre los descartes */
 core.describeAction(Solitario, "hacerTrampa", { title: "Trampa", shortcuts: ["C"], undoneAs: "Trampa" })
-
-// su "menú del juego" es un menú de "jugar solo" , "hacer trampa" , "empezar el juego" , "deshacer" y "rehacer"
-core.describeMenu(Solitario, "menúDelJuego", { items: ["jugarSolo", "hacerTrampa", "empezarElJuego", "undo", "redo"] })
+// su "menú del juego" es un menú de "jugar solo", "hacer trampa", "reiniciar el juego", "deshacer" y "rehacer"
+core.describeMenu(Solitario, "menúDelJuego", { items: ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "undo", "redo"] })
 
 core.heading("Jugar una carta")
 /////////////////////
@@ -962,7 +957,7 @@ core.heading("Las pilas")
 export function testLosMovimientos() {
   return core.test("test los movimientos", function testLosMovimientos() {
     const it = new Columna()
-    core.echoTestAction(`poner la columna a una nueva columna con nombre = "C1"`)
+    core.echoTestAction(`poner la columna a una nueva columna con nombre "C1"`)
     let columna = new Columna({ name: "C1" })
     core.echoTestAction(`poner el rey a una nueva carta cuyo rango es rey, palo es espadas y dirección es arriba`)
     const rey = new Carta({
@@ -1011,7 +1006,7 @@ export function testLosMovimientos() {
       palo: "corazones",
       direction: "up"
     })
-    core.echoTestAction(`poner la columna a una nueva columna con nombre = "C2"`)
+    core.echoTestAction(`poner la columna a una nueva columna con nombre "C2"`)
     columna = new Columna({ name: "C2" })
     core.echoTestAction(`agregar el dos a la columna`)
     columna.append(dos)

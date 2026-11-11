@@ -7,17 +7,17 @@ core.heading("Family Cookbook:  your recipes, saved in the cloud")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 451, end: 473 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 417, end: 436 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 478, end: 511 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/FamilyCookbook.api.spell", start: 438, end: 464 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 517, end: 539 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/FamilyCookbook.api.spell", start: 466, end: 485 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
 
@@ -55,12 +55,12 @@ export class Recipe extends Thing {
   }
 
   // - it lives in family cookbook
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 412, end: 439 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 388, end: 415 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in family cookbook
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 412, end: 439 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/FamilyCookbook.api.spell", start: 388, end: 415 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -105,13 +105,13 @@ export class Cookbook extends App {
   get search() { return this.getProp("search") }
   set search(value) { this.setProp("search", value) }
 
-  // - its "new recipe" is a new recipe with servings = 4
+  // "new recipe" is a new recipe with servings = 4
   static { this.declareProp("newRecipe", { init: () => new Recipe({ servings: 4 }), early: true }) }
   get newRecipe() { return this.getProp("newRecipe") }
   set newRecipe(value) { this.setProp("newRecipe", value) }
 
   /** Newest first, by when each was saved */
-  static { this.declareProp("matches", { declaredAt: { path: "/FamilyCookbook.spell", start: 1211, end: 1377 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/FamilyCookbook.spell", start: 1216, end: 1328 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search)), (item) => core.descending(item.created))
   }, () => [this.search]) }

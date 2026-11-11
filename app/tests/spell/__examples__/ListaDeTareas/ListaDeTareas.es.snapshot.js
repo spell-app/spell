@@ -163,8 +163,8 @@ export const words = {
       { name: "La agenda", members: ["agenda"] }
     ],
     ListaDeTareas: [
-      { name: "guardado", description: "Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián", members: ["almacén", "guardián", "llenarLaAgenda", "create", "agregarLaTareaInicialTítuloConPrioridadNivel", "agregarElBorrador"] },
-      { name: "filtro", description: "Qué tareas muestra la lista:  la barra de herramientas marca la que muestra", members: ["mostrarTodas", "mostrarPendientes", "mostrarHechas", "quitarLasTareasHechas"] }
+      { name: "Guardado", description: "Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián", members: ["almacén", "guardián", "llenarLaAgenda", "create", "agregarLaTareaInicialTítuloConPrioridadNivel", "agregarElBorrador"] },
+      { name: "Filtro", description: "Qué tareas muestra la lista:  la barra de herramientas marca la que muestra", members: ["mostrarTodas", "mostrarPendientes", "mostrarHechas", "quitarLasTareasHechas"] }
     ]
   }
 }

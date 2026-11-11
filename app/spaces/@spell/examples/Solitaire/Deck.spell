@@ -1,20 +1,20 @@
 # A deck
-The 52 cards of a standard deck, ace of clubs first.
+// The 52 cards of a standard deck, ace of clubs first.
 
-<thing "deck" template="list of cards">
-	<action "create it" description="One of each card, ace of clubs first:  each starts face down, as every two sided view does">
+a "deck" is a list of cards:
+	// One of each card, ace of clubs first:  each starts face down, as every two sided view does
+	to create it:
 		for rank in card ranks
 			for suit in card suits
 				add a new card with rank = the rank, suit = the suit to the deck
-	</>
-	<property "state" description="Its cards' short names, top to bottom">
+	// Its cards' short names, top to bottom
+	its "state" is:
 		set card names to a new list of text
 		for card in the deck
 			add the state of the card to card names
 		return "deck: " + card names
-	</>
 
-	<test "a new deck">
+	to test a new deck:
 		the deck is a new deck
 		the number of cards in the deck should be 52
 		the number of (cards in the deck where it is a queen) should be 4
@@ -22,5 +22,3 @@ The 52 cards of a standard deck, ace of clubs first.
 		the deck's last card's name should be "king of spades"
 		shuffle the deck
 		the number of cards in the deck should be 52
-	</>
-</>

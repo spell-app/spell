@@ -109,7 +109,7 @@ describe("SpellProject's compile cache", () => {
     await project.compile()
     for (const name of ["Card.spell", "Solitaire.spell"]) {
       const file = project.spellFiles.find((it) => it.file === name)!
-      await project.updateText(file, `${file.contents}\n<!-- an edit -->\n`)
+      await project.updateText(file, `${file.contents}\n// an edit\n`)
       reopen(project)
       await project.compile()
       expect(project.compiledFrom).toBe("compile")

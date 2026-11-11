@@ -11,25 +11,25 @@
     {
       "type": "FlashCard",
       "superType": "TwoSidedView",
-      "defined": "/FlashCard.spell:189-1207"
+      "defined": "/FlashCard.spell:198-1147"
     },
     {
       "property": "word",
       "of": "FlashCard",
       "datatype": "text",
-      "defined": "/FlashCard.spell:246-312"
+      "defined": "/FlashCard.spell:287-305"
     },
     {
       "property": "meaning",
       "of": "FlashCard",
       "datatype": "text",
-      "defined": "/FlashCard.spell:317-382"
+      "defined": "/FlashCard.spell:338-359"
     },
     {
       "type": "Deck",
       "superType": "List",
       "itemType": "FlashCard",
-      "defined": "/FlashCard.spell:1217-1260"
+      "defined": "/FlashCard.spell:1171-1204"
     },
     {
       "syntax": "test turning a card over",
@@ -38,42 +38,42 @@
       "alias": "statement",
       "kind": "function",
       "name": "turning a card over",
-      "defined": "/FlashCard.spell:916-1198"
+      "defined": "/FlashCard.spell:867-1147"
     },
     {
       "type": "Quiz",
       "superType": "App",
-      "defined": "/FlashCards.spell:349-2360"
+      "defined": "/FlashCards.spell:355-2174"
     },
     {
       "property": "deck",
       "of": "Quiz",
       "datatype": "Deck",
-      "defined": "/FlashCards.spell:357-384"
+      "defined": "/FlashCards.spell:372-392"
     },
     {
       "property": "card",
       "of": "Quiz",
       "datatype": "FlashCard",
-      "defined": "/FlashCards.spell:389-449"
+      "defined": "/FlashCards.spell:415-441"
     },
     {
       "property": "known",
       "of": "Quiz",
       "datatype": "number",
-      "defined": "/FlashCards.spell:454-484"
+      "defined": "/FlashCards.spell:465-488"
     },
     {
       "property": "tried",
       "of": "Quiz",
       "datatype": "number",
-      "defined": "/FlashCards.spell:521-551"
+      "defined": "/FlashCards.spell:516-539"
     },
     {
       "property": "score",
       "of": "Quiz",
       "datatype": "text",
-      "defined": "/FlashCards.spell:592-723"
+      "defined": "/FlashCards.spell:565-659"
     },
     {
       "syntax": "deal a card (of {thisArg:expression})?",
@@ -84,11 +84,11 @@
         "statement",
         "expression"
       ],
-      "group": "playing",
+      "group": "Playing",
       "kind": "method",
       "name": "deal a card",
       "returns": "nothing",
-      "defined": "/FlashCards.spell:759-990"
+      "defined": "/FlashCards.spell:750-893"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -99,10 +99,10 @@
         "statement",
         "expression"
       ],
-      "group": "playing",
+      "group": "Playing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/FlashCards.spell:1598-2351"
+      "defined": "/FlashCards.spell:1524-2174"
     },
     {
       "syntax": "show the answer (of {thisArg:expression})?",
@@ -113,12 +113,12 @@
         "statement",
         "expression"
       ],
-      "group": "playing",
+      "group": "Playing",
       "kind": "method",
       "name": "show the answer",
       "returns": "nothing",
       "title": "Show the answer",
-      "defined": "/FlashCards.spell:1003-1088"
+      "defined": "/FlashCards.spell:895-979"
     },
     {
       "syntax": "say i knew {thisArg:expression}",
@@ -129,12 +129,12 @@
         "statement",
         "expression"
       ],
-      "group": "playing",
+      "group": "Playing",
       "kind": "method",
       "name": "say i knew it",
       "returns": "nothing",
       "title": "I knew it",
-      "defined": "/FlashCards.spell:1093-1283"
+      "defined": "/FlashCards.spell:1013-1159"
     },
     {
       "syntax": "say i missed {thisArg:expression}",
@@ -145,12 +145,12 @@
         "statement",
         "expression"
       ],
-      "group": "playing",
+      "group": "Playing",
       "kind": "method",
       "name": "say i missed it",
       "returns": "nothing",
       "title": "I missed it",
-      "defined": "/FlashCards.spell:1296-1415"
+      "defined": "/FlashCards.spell:1161-1278"
     },
     {
       "syntax": "start over (of {thisArg:expression})?",
@@ -161,12 +161,12 @@
         "statement",
         "expression"
       ],
-      "group": "playing",
+      "group": "Playing",
       "kind": "method",
       "name": "start over",
       "returns": "nothing",
       "title": "Start over",
-      "defined": "/FlashCards.spell:1428-1530"
+      "defined": "/FlashCards.spell:1280-1380"
     },
     {
       "syntax": "add {callArgs:expression} meaning {callArgs:expression}",
@@ -189,7 +189,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/FlashCards.spell:2430-2562"
+      "defined": "/FlashCards.spell:2228-2359"
     }
   ],
   "codeLines": [
@@ -198,18 +198,18 @@
     20,
     50,
     54,
-    81,
-    84,
-    90,
-    96,
-    102,
-    108,
-    114,
-    121,
-    179,
+    80,
+    83,
+    89,
+    95,
+    101,
+    107,
+    113,
+    120,
+    178,
+    180,
     181,
-    183,
-    185,
-    193
+    182,
+    189
   ]
 }

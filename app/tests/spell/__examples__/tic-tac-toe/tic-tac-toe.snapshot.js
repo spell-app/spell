@@ -74,7 +74,7 @@ export class Board extends List {
 export class TicTacToe extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "board" is a new board
+  // "board" is a new board
   static { this.declareProp("board", { init: () => new Board(), early: true }) }
   get board() { return this.getProp("board") }
   set board(value) { this.setProp("board", value) }

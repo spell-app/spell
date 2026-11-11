@@ -17,10 +17,10 @@ import { copyCodeSpellTwin, copyFixtureProject, fixtureFolder, lineOf, loadFixtu
 /** The Solitaire example's Card.spell:  the tests name its lines by what they say (`lineOf()`), as it changes. */
 const CARD_TEXT = readFileSync(fixtureFolder("@spell/examples/Solitaire", "Card.spell"), "utf8")
 /** Its line declaring the card's type. */
-const CARD_TYPE = '<view "card"'
+const CARD_TYPE = 'a "card" is a'
 /** Its line declaring the card's suit, whose node is `suit`. */
-const SUIT = '<property "suit" one-of'
-/** The card's short name, whose `description=` is its docstring. */
+const SUIT = 'its "suit" is one of'
+/** The card's short name, whose comment above it is its docstring. */
 const STATE_DESCRIPTION = "Its short name:  Q♠↓ is the queen of spades, face down"
 /** The `##` heading in the game's file that the card's moves are under, e.g. `play a card`:  their section. */
 const PLAYING_HEADING = "Playing a card"
@@ -102,7 +102,8 @@ describe("ScopeExplorer", () => {
     expect(details(card).line).toEqual([declared, outlineEnd(CARD_TEXT, declared)])
     expect(card.members.map(({ name, kind }) => `${kind} ${name}`)).toMatchSnapshot()
     const suit = card.members.find((member) => member.name === "suit")!
-    expect(details(suit).line).toBe(lineOf(CARD_TEXT, SUIT))
+    // its line, and its alias's under it
+    expect(details(suit).line).toEqual([lineOf(CARD_TEXT, SUIT), lineOf(CARD_TEXT, SUIT) + 1])
     // in its node's file, so no `uri` of its own
     expect(details(suit).uri).toBeUndefined()
     expect(find(tree, "suit").uri).toBe(cardUri)
@@ -303,7 +304,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   test("its types are from its sources:  docs and locations", () => {
     const suit = find(tree, "Card").members.find((member) => member.name === "suit")!
     expect(find(tree, "suit").uri).toMatch(/\/lib\/Card\.spell$/)
-    expect(explorer.details(app, suit.path)?.line).toBe(lineOf(CARD_TEXT, SUIT))
+    expect(explorer.details(app, suit.path)?.line).toEqual([lineOf(CARD_TEXT, SUIT), lineOf(CARD_TEXT, SUIT) + 1])
   })
 
   test("our types inherit from its OWN types, from its sources -- with their docs and locations", () => {
@@ -410,7 +411,7 @@ describe("ScopeExplorer scope packs", () => {
     expect(pack.entries[0]).toEqual({ path: "project:Solitaire" })
     expect(pack.entries.every((entry) => !("children" in entry) && !("members" in entry))).toBe(true)
     const suit = pack.entries.find((entry) => entry.path.endsWith("/property:suit"))!
-    expect(suit).toMatchObject({ line: lineOf(CARD_TEXT, SUIT) })
+    expect(suit).toMatchObject({ line: [lineOf(CARD_TEXT, SUIT), lineOf(CARD_TEXT, SUIT) + 1] })
     const state = pack.entries.find((entry) => entry.path.endsWith("/type:Card/property:state"))!
     expect(state.description).toBe(STATE_DESCRIPTION)
     // shown from its file and the compiled output, NOT kept in the pack

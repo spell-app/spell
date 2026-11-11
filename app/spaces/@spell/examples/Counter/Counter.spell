@@ -1,31 +1,28 @@
 # Counter
-A button that counts its clicks:  the smallest app there is.
+// A button that counts its clicks:  the smallest app there is.
 
 ## A counter
-Each counter is its own element on the page.
+// Each counter is its own element on the page.
 
-<view "counter">
-	<property "count" type="number" description="How many times it's been clicked:  a new counter starts at 0">0</property>
-	<action "count up">set the count to the count + 1</>
+a "counter" is a view:
+	// How many times it's been clicked:  a new counter starts at 0
+	its "count" is a number starting at 0
+	to count up: set the count to the count + 1
 
-	<draw description="A button saying how many times it's been clicked:  a click counts up">
+	// A button saying how many times it's been clicked:  a click counts up
+	to draw it:
 		<button onClick={count up}>Clicked {the count} times</button>
-	</draw>
 
-	<test "counting">
+	to test counting:
 		set the counter to a new counter
 		the counter's count should be 0
 		count up of the counter
 		count up of the counter
 		the counter's count should be 2
-	</test>
-</view>
 
 ## The app:  one counter, drawn
 
-<app "counter app">
-	<property "counter">a new counter</>
-	<draw>
+counter app is an app:
+	"counter" is a new counter
+	to draw it:
 		<container>{draw the counter}</container>
-	</draw>
-</app>

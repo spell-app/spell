@@ -2,15 +2,15 @@
 
 ```spell
 a "card" is a view:
-	- its "suit" is one of clubs, diamonds, hearts or spades
-	- its "color" is:
+	its "suit" is one of clubs, diamonds, hearts or spades
+	its "color" is:
 		red if its suit is diamonds or hearts
 		black otherwise
 
-	- its "rank" is one of ace, 2 ... 10, jack, queen, king
-	- it "is a face card" if its rank is jack, queen or king
-	- it "is a (rank)"
-	- it "is the (rank) of (suit)"
+	its "rank" is one of ace, 2 ... 10, jack, queen, king
+	it "is a face card" if its rank is jack, queen or king
+	it "is a (rank)"
+	it "is the (rank) of (suit)"
 ```
 
 _A playing card, in Spell's outline style:  a name, then what's true of it.  It compiles as written._

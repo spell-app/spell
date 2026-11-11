@@ -17,15 +17,15 @@ core.heading("One algorithm, two listeners")
 //////////////////////////////////
 // The example is split in two halves that never name each other:
 // - the ALGORITHM counts, and for each number sends an EVENT saying what it is:
-// `fizz`, `buzz`, `fizzbuzz`, or `plain number`, each carrying the number
+//   `fizz`, `buzz`, `fizzbuzz`, or `plain number`, each carrying the number
 // - a LISTENER hears those events and decides what to do with them
 
 // FizzBuzz has two listeners:
 // - the console, `Console.spell`, prints each one as a line
 // - the explainer, `Explainer.spell`, is a page that explains the game and its history,
-// and draws each number as a label as it arrives
-// - It's off in the project file, so the example runs as a plain program.
-// - Turn it on, and the same counting fills the page too:  the algorithm doesn't change at all.
+//   and draws each number as a label as it arrives
+//   - It's off in the project file, so the example runs as a plain program.
+//   - Turn it on, and the same counting fills the page too:  the algorithm doesn't change at all.
 
 // This guide has the algorithm and the console's listener, in one file.
 
@@ -49,9 +49,9 @@ core.heading("The algorithm")
 // The indented lines under it are how to do it.
 // - `for number from 1 to 20` says each number in turn:  this kind of line is called a LOOP.
 // - "divided by 15 is an integer" means 15 goes into it with nothing left over.
-// - 15 first, because a number that 15 goes into is one that 3 and 5 both go into.
+//   - 15 first, because a number that 15 goes into is one that 3 and 5 both go into.
 // - `trigger fizz with number = the number` sends the event to every listener, with the number.
-// The algorithm doesn't know, or care, who's listening.
+//   The algorithm doesn't know, or care, who's listening.
 
 export function playFizzbuzz() {
   core.getRange(1, 20).forEach((number) => {
@@ -83,9 +83,9 @@ core.heading("Try it")
 // - Play further:  change the 20 to 100, as the example does.
 // - Change the game:  make it "fizz" for sevens instead of threes.  Which TWO numbers need to change?
 // - Swap the order:  move the fizzbuzz line below the buzz line, and look at 15 again.
-// (Keep "if" on the first of the four lines, and "otherwise if" on the others.)
+//   (Keep "if" on the first of the four lines, and "otherwise if" on the others.)
 // - Change what's said, not what's counted:  make the fizz listener print "FIZZ!" instead.
-// The algorithm stays exactly as it is.
+//   The algorithm stays exactly as it is.
 
 core.heading("A check")
 /////////////

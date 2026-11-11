@@ -1,24 +1,22 @@
 # REST Countries
-Every country in the world, by region:  its flag, its capital, its money and its languages, and its name in another language.
-Every thing it shows is in RestCountries.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-with `<extend>`, so looking again at the server never touches a line of this.
-All 250 come in one request, with no paging:  picking a region only looks through them again.
+// Every country in the world, by region:  its flag, its capital, its money and its languages, and its name in another language.
+// Every thing it shows is in RestCountries.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<extend>`, so looking again at the server never touches a line of this.
+// All 250 come in one request, with no paging:  picking a region only looks through them again.
 
-<thing "rest countries page">
-	<spell>
-		- its "region" is text
-		- its "language" is text  // its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`
-		- to create it:
-			set its region to "Europe"
-			set its language to "fra"
-	</spell>
-	<property "countries" description="The region's, looked through here:  REST Countries sends every one at once">every country where its region is the region, sorted by its name's common</property>
+a "rest countries page" is a thing:
+	its "region" is text
+	its "language" is text  // its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`
+	to create it:
+		set its region to "Europe"
+		set its language to "fra"
+	// The region's, looked through here:  REST Countries sends every one at once
+	its "countries" is every country where its region is the region, sorted by its name's common
 
-	<action "pick region (region as text)">
+	to pick region (region as text):
 		set its region to region
-	</action>
 
-	<draw>
+	to draw it:
 		<stack spacing="xl">
 			<stack spacing="sm">
 				<form value={it}>
@@ -46,36 +44,30 @@ All 250 come in one request, with no paging:  picking a region only looks throug
 				From <link link="https://github.com/mledoze/countries">the data REST Countries serves</link>, every country in one request.
 			</text>
 		</stack>
-	</draw>
 
-	<draw "countries table" description="A row a country:  its flag and name, its name in the language picked, its capital, its money and its languages;  each of those keyed by a code, `EUR`, `fra`, a list of things with that code">
-		<for country in its countries as="table" appearance="very-basic" padding="compact" vertical-align="top" loading="Asking REST Countries" failed="REST Countries can't be reached just now.">
+	// A row a country:  its flag and name, its name in the language picked, its capital, its money and its languages;  each of those keyed by a code, `EUR`, `fra`, a list of things with that code
+	to draw its countries table:
+		for country in its countries
 			<cell "Flag" align="center"><text size="big">{its flag}</text></cell>
 			<cell "Country" header>{its name's common}</cell>
 			<cell "Its name there">{the common of the first translation in its translations where its code is the public servers' atlas's language}</cell>
 			<cell "Capital">{the first item of its capital}</cell>
 			<cell "Money"><stack spacing="none">{draw each currency in its currencies}</stack></cell>
 			<cell "Languages"><stack direction="horizontal" wrap spacing="xs">{draw each language in its languages}</stack></cell>
-		</for>
-	</draw>
-</thing>
-
+		while waiting: <loader visible inline text>{"Asking REST Countries"}</loader>
+		if that fails say "REST Countries can't be reached just now."
+		show them in: <table appearance="very-basic" padding="compact" vertical-align="top"><row></row></table>
 
 # Its money
-Its name, its symbol and its code:  `Euro`, `€`, `EUR`.
+// Its name, its symbol and its code:  `Euro`, `€`, `EUR`.
 
-<extend "currency">
-	<draw>
+a currency:
+	to draw it:
 		<text>{its name} ({its symbol}) <text color="grey">{its code}</text></text>
-	</draw>
-</extend>
-
 
 # A language
-Its name in English, keyed by its code:  `French`, `fra`.
+// Its name in English, keyed by its code:  `French`, `fra`.
 
-<extend "language">
-	<draw>
+a language:
+	to draw it:
 		<text>{its name}</text>
-	</draw>
-</extend>

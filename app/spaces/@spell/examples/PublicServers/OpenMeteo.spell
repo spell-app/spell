@@ -1,24 +1,24 @@
 # Open-Meteo
-The weather to come, hour by hour, today and tomorrow, for a few cities.
-Every thing it shows is in OpenMeteo.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-with `<extend>`, so looking again at the server never touches a line of this.
-Open-Meteo has no list of forecasts:  each is asked for by a latitude and a longitude, so the page always says both.
+// The weather to come, hour by hour, today and tomorrow, for a few cities.
+// Every thing it shows is in OpenMeteo.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<extend>`, so looking again at the server never touches a line of this.
+// Open-Meteo has no list of forecasts:  each is asked for by a latitude and a longitude, so the page always says both.
 
-<thing "open meteo page">
-	<spell>
-		- its "cities" is a list of cities
-		- its "city" is a city
-		- to create it:
-			add a new city with name = "Berlin", latitude = 52.52, longitude = 13.41 to its cities
-			add a new city with name = "New York", latitude = 40.71, longitude = -74.01 to its cities
-			add a new city with name = "Tokyo", latitude = 35.68, longitude = 139.69 to its cities
-			add a new city with name = "Buenos Aires", latitude = -34.6, longitude = -58.38 to its cities
-			set its city to the first item of its cities
-	</spell>
-	<property "forecasts" description="The city's, from Open-Meteo:  asked for by where it is, with no list of them all">every forecast where its latitude is the latitude of the city and its longitude is the longitude of the city</property>
-	<property "forecast" description="Its one forecast:  Open-Meteo answers with one, for the nearest place it has">the first item of its forecasts</property>
+an "open meteo page" is a thing:
+	its "cities" is a list of cities
+	its "city" is a city
+	to create it:
+		add a new city with name "Berlin", latitude = 52.52, longitude = 13.41 to its cities
+		add a new city with name "New York", latitude = 40.71, longitude = -74.01 to its cities
+		add a new city with name "Tokyo", latitude = 35.68, longitude = 139.69 to its cities
+		add a new city with name "Buenos Aires", latitude = -34.6, longitude = -58.38 to its cities
+		set its city to the first item of its cities
+	// The city's, from Open-Meteo:  asked for by where it is, with no list of them all
+	its "forecasts" is every forecast where its latitude is the latitude of the city and its longitude is the longitude of the city
+	// Its one forecast:  Open-Meteo answers with one, for the nearest place it has
+	its "forecast" is the first item of its forecasts
 
-	<draw>
+	to draw it:
 		<stack spacing="xl">
 			<stack spacing="sm">
 				<header size="large">The weather, from Open-Meteo</header>
@@ -31,54 +31,42 @@ Open-Meteo has no list of forecasts:  each is asked for by a latitude and a long
 				From <link link="https://open-meteo.com/en/docs">Open-Meteo's API</link>, asked for as you look;  each measure in your own units.
 			</text>
 		</stack>
-	</draw>
 
-	<draw "forecast table">
-		<if its forecast>
+	to draw its forecast table:
+		if its forecast
 			<stack spacing="sm">
 				<text color="grey">The next two days in {its forecast's timezone}, hour by hour.</text>
 				{draw the hour table of its forecast}
 			</stack>
-		</if>
 		while waiting:
 			<loader visible inline text>Asking Open-Meteo</loader>
 		if that fails:
 			<text>Open-Meteo can't be reached just now.</text>
-	</draw>
-</thing>
-
 
 # A city
-Where it is on Earth:  what its forecast is asked for by.
+// Where it is on Earth:  what its forecast is asked for by.
 
-<thing "city">
-	<spell>
-		- its "name" is text
-		- its "latitude" is a number
-		- its "longitude" is a number
-	</spell>
+a "city" is a thing:
+	its "name" is text
+	its "latitude" is a number
+	its "longitude" is a number
 
-	<action "pick it" description="The city the weather's for">
+	// The city the weather's for
+	to pick it:
 		set the city of the weather of the public servers to it
-	</action>
 
-	<draw>
+	to draw it:
 		<item active={it is the public servers' weather's city} onClick={pick it}>{its name}</item>
-	</draw>
-</thing>
-
 
 # Its hours
-A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.
+// A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.
 
-<extend "forecast">
-	<draw "hour table">
-		<for hour in its hours as="table" appearance="very-basic" padding="compact" collapsing unstackable>
+a forecast:
+	to draw its hour table:
+		for hour in its hours
 			<cell "Day"><if the hour of its time is 0>{its time}</if></cell>
 			<cell "Hour" align="right">{the hour of its time}:00</cell>
 			<cell "Temperature" align="right">{its temperature}</cell>
 			<cell "Rain" align="right">{its precipitation}</cell>
 			<cell "Wind" align="right">{its wind speed}</cell>
-		</for>
-	</draw>
-</extend>
+		show them in: <table appearance="very-basic" padding="compact" collapsing unstackable><row></row></table>

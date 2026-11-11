@@ -1,6 +1,6 @@
 # Statusphere
-Bluesky's example app, in Spell:  set your status, an emoji, and see everyone's as they arrive.
-Each status is a record in its owner's own atmosphere account, in the shape Statusphere's Lexicon says:  Status.spell.
+// Bluesky's example app, in Spell:  set your status, an emoji, and see everyone's as they arrive.
+// Each status is a record in its owner's own atmosphere account, in the shape Statusphere's Lexicon says:  Status.spell.
 
 // Every emoji to pick is a big, plain button
 <ui-defaults>
@@ -9,37 +9,35 @@ Each status is a record in its owner's own atmosphere account, in the shape Stat
 
 ## A status:  the emoji, who set it, and when
 
-<extend "status">
-	<property "who" description="Its owner's handle, once their account says so;  else the account itself">
+a status:
+	// Its owner's handle, once their account says so;  else the account itself
+	its "who" is:
 		set account to its owner
 		set person to the first person in everyone here where its id is account
 		if person is nothing
 			return account
 		return person's name
-	</property>
 
-	<draw>
+	to draw it:
 		<stack direction="horizontal" align="center">
 			<text size="big">{its status}</text>
 			<text>@{its who}</text>
 			<text color="grey" size="small">{its created at}</text>
 		</stack>
-	</draw>
-</extend>
-
 
 ## The app:  the emoji to pick, then everyone's statuses, newest first
 
-<app "statusphere">
-	<property "recent" description="Newest first:  by when each was set">
+statusphere is an app:
+	// Newest first:  by when each was set
+	its "recent" is:
 		return every status sorted by its created, newest first
-	</property>
 
-	<action "post (emoji as text)" description="Your status:  a new record in your own account, as Statusphere writes one">
+	// Your status:  a new record in your own account, as Statusphere writes one
+	to post (emoji as text):
 		add (a new status with status = emoji, created at = a new date) to the statuses
-	</action>
 
-	<draw description="One narrow column:  its title, the emoji to pick, then the statuses">
+	// One narrow column:  its title, the emoji to pick, then the statuses
+	to draw it:
 		<container text>
 			<stack align="start">
 				<header size="large">Statusphere</header>
@@ -65,5 +63,3 @@ Each status is a record in its owner's own atmosphere account, in the shape Stat
 				</empty>
 			</for>
 		</container>
-	</draw>
-</app>

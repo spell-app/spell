@@ -207,9 +207,10 @@ describe("SpellLanguageService, spellx", () => {
   test("Show as Code Spell:  the code spell it means, its drawings as written (`spell/compiled`)", () => {
     const code = service.compiled(tile, "spell")
     expect(code).toContain(`a "flip tile" is a view:\n`)
-    expect(code).toContain(`\t- its "side" is one of up, down\n\t\t- it "is showing (side)"\n`)
-    expect(code).toMatch(/\t- to draw its face:\n\t\t<text>face<\/(text)?>\n/)
-    expect(code).toContain("\t- on mouse down: flip it\n")
+    // each member bare (epic `language` P46)
+    expect(code).toContain(`\tits "side" is one of up, down\n\t\tit "is showing (side)"\n`)
+    expect(code).toMatch(/\tto draw its face:\n\t\t<text>face<\/(text)?>\n/)
+    expect(code).toContain("\ton mouse down: flip it\n")
   })
 
   /** 0-based position of `word` on the first line containing `line`. */

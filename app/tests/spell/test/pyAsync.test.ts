@@ -20,7 +20,7 @@ describe("Python on asyncio", () => {
   })
 
   test("a method that calls one that waits waits too, and awaits it", () => {
-    expect(cards).toContain("    async def start_a_new_game(self) -> None:")
+    expect(cards).toContain("    async def restart_the_game(self) -> None:")
     expect(cards).toContain("        await self.deal_the_cards()")
   })
 

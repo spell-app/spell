@@ -9,15 +9,15 @@ core.heading("Reviews:  kept on this device")
 
 export class Review extends Thing {
   // - its "film title" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 325, end: 352 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 313, end: 337 } })
   accessor filmTitle!: string
 
   // - its "stars" is a number
-  @prop({ type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 357, end: 387 } })
+  @prop({ type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 339, end: 362 } })
   accessor stars!: number
 
   // - its "words" is text
-  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 393, end: 415 } })
+  @prop({ type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 364, end: 383 } })
   accessor words!: string
 
   static savedIn = {
@@ -27,11 +27,11 @@ export class Review extends Thing {
   }
 
   // - it lives in galaxy reviews
-  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 287, end: 313 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 285, end: 311 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in galaxy reviews
-  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 287, end: 313 } })
+  @prop({ type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 285, end: 311 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -333,7 +333,7 @@ export class FilmPage extends Page {
   set film(value: Film) { this.setProp("film", value) }
 
   /** What's been said of it, on this device */
-  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spell", start: 2685, end: 2823 }, readsFrom: ["galaxy_reviews"] }) }
+  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spell", start: 2669, end: 2807 }, readsFrom: ["galaxy_reviews"] }) }
   get reviews() { return core.waitedValue(this, "reviews", async () => {
     const title = (await core.answerOf(this, "film"))?.title
     return await core.savedThings(Review, { filter: { filmTitle: title }, sort: [{ field: "created", descending: true }] })

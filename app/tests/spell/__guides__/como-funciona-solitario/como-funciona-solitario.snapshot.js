@@ -12,7 +12,7 @@ core.heading("Cómo funciona Solitario")
 // - PILAS de cartas, cada tipo con sus propias reglas sobre qué carta toma
 //
 // Esta guía tiene un tipo de carta y una regla:  una columna con un rey, y cuatro cartas para probar.
-// Está escrita en el estilo de esquema;  Solitario mismo es spellml, el mismo lenguaje en etiquetas.
+// Está escrita en el estilo de esquema, como Solitario mismo.
 // Abre Solitario, en los Ejemplos, para jugar el juego entero.  Solitaire es el mismo juego, en inglés.
 
 core.heading("Una carta")

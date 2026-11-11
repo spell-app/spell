@@ -11,8 +11,8 @@
 # Every page's top:  its title, and the settings
 
 a "page top" is a view:
-	- its "title" is a text
-	- to draw it:
+	its "title" is a text
+	to draw it:
 		<stack direction="horizontal" align="center" justify="between">
 			<header size="large">{its title}</header>
 			<button class="settings" appearance="basic" icon="cog" onClick={show the settings dialog}>Settings</button>
@@ -32,14 +32,14 @@ films page is a page:
 		</story>
 		<story "S3" done>open a film's page from its row</story>
 	</stories>
-	- to draw it:
+	to draw it:
 		draw (a new page top with title = "Films")
 		for film in every film
 			<cell "Episode">{film's episode id}</cell>
 			<cell "Title"><link class="film" link={the address of the film page for film}>{film's title}</link></cell>
 			<cell "Directed by">{film's director}</cell>
 			<cell "Released">{film's release date}</cell>
-		while waiting: <ui-loader visible inline text>{"Asking the galaxy for its films"}</ui-loader>
+		while waiting: <loader visible inline text>{"Asking the galaxy for its films"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
 film page is a page:
@@ -60,12 +60,12 @@ film page is a page:
 		</story>
 	</stories>
 	// The film the address names:  /films/:film
-	- its "film" is a film
+	its "film" is a film
 	// What's been said of it, on this device
-	- its "reviews" is:
+	its "reviews" is:
 		set title to its film's title
 		return every review where its film title is title, sorted by its created, newest first
-	- to draw it:
+	to draw it:
 		draw (a new page top with title = its film's title)
 		<text color="grey">Episode {its film's episode id} · directed by {its film's director} · released {its film's release date}</text>
 		<segment>
@@ -74,25 +74,25 @@ film page is a page:
 		<header size="small">Who's in it</header>
 		for person in its film's characters
 			<button class="person" appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 		<header size="small">Where it happens</header>
 		for planet in its film's planets
 			<link link={the address of the planet page for planet}>{planet's name}</link>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 		<header size="small">What they fly</header>
 		for starship in its film's starships
 			<link link={the address of the starship page for starship}>{starship's name}</link>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 		<header size="small">What they drive</header>
 		for vehicle in its film's vehicles
 			<link link={the address of the vehicle page for vehicle}>{vehicle's name}</link>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 		<stack direction="horizontal" align="center" justify="between">
@@ -103,7 +103,7 @@ film page is a page:
 			<segment class="review">
 				<text>{review's stars} of 5 · {review's words}</text>
 			</segment>
-		if there are none: <ui-text>{"No reviews yet:  be the first."}</ui-text>
+		if there are none: <text>{"No reviews yet:  be the first."}</text>
 
 
 # The people
@@ -114,14 +114,14 @@ people page is a page:
 		<story "S2" done>see each person's home planet and species at a glance</story>
 		<story "S3" done>open a person in the side panel without leaving the list</story>
 	</stories>
-	- to draw it:
+	to draw it:
 		draw (a new page top with title = "People")
 		for person in every character
 			<cell "Name"><link link={the address of the person page for person}>{person's name}</link></cell>
 			<cell "Born">{person's birth year}</cell>
 			<cell "Home">{person's homeworld's name}</cell>
 			<cell ""><button appearance="basic" size="small" onClick={show the person sidebar for person}>Glance</button></cell>
-		while waiting: <ui-loader visible inline text>{"Asking the galaxy for its people"}</ui-loader>
+		while waiting: <loader visible inline text>{"Asking the galaxy for its people"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
 person page is a page:
@@ -135,20 +135,20 @@ person page is a page:
 		</story>
 	</stories>
 	// The person the address names:  /people/:person
-	- its "person" is a character
-	- to draw it:
+	its "person" is a character
+	to draw it:
 		draw (a new page top with title = its person's name)
 		draw (a new person facts with person = its person)
 		<header size="small">Films</header>
 		for film in its person's films
 			<link link={the address of the film page for film}>{film's title}</link>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 // A person in a few lines:  the page and the sidebar both show them
 a "person facts" is a view:
-	- its "person" is a character
-	- to draw it:
+	its "person" is a character
+	to draw it:
 		<table appearance="definition" celled unstackable>
 			<row><cell>Born</cell><cell>{its person's birth year}</cell></row>
 			<row><cell>Height</cell><cell>{its person's height}</cell></row>
@@ -158,8 +158,8 @@ a "person facts" is a view:
 
 a "person sidebar" is a view:
 	// Whoever it's showing
-	- its "person" is a character
-	- to draw it:
+	its "person" is a character
+	to draw it:
 		<header size="medium">{its person's name}</header>
 		draw (a new person facts with person = its person)
 		<link class="whole-page" link={the address of the person page for its person}>Their whole page</link>
@@ -172,14 +172,14 @@ planets page is a page:
 		<story "S1" done>see every planet, with its climate and terrain</story>
 		<story "S2">sort the planets by how many people live there</story>
 	</stories>
-	- to draw it:
+	to draw it:
 		draw (a new page top with title = "Planets")
 		for planet in every planet
 			<cell "Name"><link link={the address of the planet page for planet}>{planet's name}</link></cell>
 			<cell "Climate">{planet's climate}</cell>
 			<cell "Terrain">{planet's terrain}</cell>
 			<cell "Population">{planet's population}</cell>
-		while waiting: <ui-loader visible inline text>{"Asking the galaxy for its planets"}</ui-loader>
+		while waiting: <loader visible inline text>{"Asking the galaxy for its planets"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
 planet page is a page:
@@ -188,20 +188,20 @@ planet page is a page:
 		<story "S2" done>see the films a planet appears in</story>
 	</stories>
 	// The planet the address names:  /planets/:planet
-	- its "planet" is a planet
-	- to draw it:
+	its "planet" is a planet
+	to draw it:
 		draw (a new page top with title = its planet's name)
 		<text color="grey">{its planet's climate} · {its planet's terrain} · {its planet's population} people</text>
 		<header size="small">Who's from here</header>
 		for person in its planet's residents
 			<button appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 		<header size="small">Seen in</header>
 		for film in its planet's films
 			<link link={the address of the film page for film}>{film's title}</link>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 
@@ -212,14 +212,14 @@ species list page is a page:
 		<story "S1" done>see every species, with its classification and language</story>
 		<story "S2">filter the species by how long they live</story>
 	</stories>
-	- to draw it:
+	to draw it:
 		draw (a new page top with title = "Species")
 		for one in every species
 			<cell "Name"><link link={the address of the species page for one}>{one's name}</link></cell>
 			<cell "Classification">{one's classification}</cell>
 			<cell "Language">{one's language}</cell>
 			<cell "Lives">{one's average lifespan}</cell>
-		while waiting: <ui-loader visible inline text>{"Asking the galaxy for its species"}</ui-loader>
+		while waiting: <loader visible inline text>{"Asking the galaxy for its species"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
 species page is a page:
@@ -228,14 +228,14 @@ species page is a page:
 		<story "S2">see a species' home world</story>
 	</stories>
 	// The species the address names:  /species/:species
-	- its "species" is a species
-	- to draw it:
+	its "species" is a species
+	to draw it:
 		draw (a new page top with title = its species's name)
 		<text color="grey">{its species's classification} · speaks {its species's language}</text>
 		<header size="small">Its people</header>
 		for person in its species's people
 			<button appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 
@@ -246,13 +246,13 @@ vehicles page is a page:
 		<story "S1" done>see every vehicle, with its class and crew</story>
 		<story "S2">sort the vehicles by speed</story>
 	</stories>
-	- to draw it:
+	to draw it:
 		draw (a new page top with title = "Vehicles")
 		for vehicle in every vehicle
 			<cell "Name"><link link={the address of the vehicle page for vehicle}>{vehicle's name}</link></cell>
 			<cell "Class">{vehicle's vehicle class}</cell>
 			<cell "Crew">{vehicle's crew}</cell>
-		while waiting: <ui-loader visible inline text>{"Asking the galaxy for its vehicles"}</ui-loader>
+		while waiting: <loader visible inline text>{"Asking the galaxy for its vehicles"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
 vehicle page is a page:
@@ -261,21 +261,21 @@ vehicle page is a page:
 		<story "S2" done>see the films it appears in</story>
 	</stories>
 	// The vehicle the address names:  /vehicles/:vehicle
-	- its "vehicle" is a vehicle
-	- to draw it:
+	its "vehicle" is a vehicle
+	to draw it:
 		draw (a new page top with title = its vehicle's name)
 		<text color="grey">{its vehicle's model} · {its vehicle's manufacturer}</text>
 		<header size="small">Piloted by</header>
 		for person in its vehicle's pilots
 			<button appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
-		if there are none: <ui-text>{"Nobody we know of."}</ui-text>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
+		if there are none: <text>{"Nobody we know of."}</text>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 		<header size="small">Seen in</header>
 		for film in its vehicle's films
 			<link link={the address of the film page for film}>{film's title}</link>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 starships page is a page:
@@ -288,13 +288,13 @@ starships page is a page:
 			- done when:  picking two starships shows their numbers in two columns
 		</story>
 	</stories>
-	- to draw it:
+	to draw it:
 		draw (a new page top with title = "Starships")
 		for starship in every starship
 			<cell "Name"><link link={the address of the starship page for starship}>{starship's name}</link></cell>
 			<cell "Class">{starship's starship class}</cell>
 			<cell "Hyperdrive">{starship's hyperdrive rating}</cell>
-		while waiting: <ui-loader visible inline text>{"Asking the galaxy for its starships"}</ui-loader>
+		while waiting: <loader visible inline text>{"Asking the galaxy for its starships"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
 starship page is a page:
@@ -303,15 +303,15 @@ starship page is a page:
 		<story "S2" done>see its length, crew and cost</story>
 	</stories>
 	// The starship the address names:  /starships/:starship
-	- its "starship" is a starship
-	- to draw it:
+	its "starship" is a starship
+	to draw it:
 		draw (a new page top with title = its starship's name)
 		<text color="grey">{its starship's length} m long · crew {its starship's crew} · {its starship's cost in credits} credits</text>
 		<header size="small">Piloted by</header>
 		for person in its starship's pilots
 			<button appearance="basic" size="small" onClick={show the person sidebar for person}>{person's name}</button>
-		while waiting: <ui-loader visible inline text>{"Following the links"}</ui-loader>
-		if there are none: <ui-text>{"Nobody we know of."}</ui-text>
+		while waiting: <loader visible inline text>{"Following the links"}</loader>
+		if there are none: <text>{"Nobody we know of."}</text>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 
@@ -329,7 +329,7 @@ reviews page is a page:
 		<story "S3" done>add or remove a review right in the table</story>
 		<story "S4" done>paste a block of reviews copied from a spreadsheet</story>
 	</stories>
-	- to draw it:
+	to draw it:
 		draw (a new page top with title = "Reviews")
 		<table editable celled rows={every review}/>
 
@@ -337,9 +337,9 @@ reviews page is a page:
 # The dialogs:  the settings, and a review of a film
 
 a "settings dialog" is a view:
-	- its "units" is metric or imperial
-	- its "crawl" is shown or hidden
-	- to draw it:
+	its "units" is metric or imperial
+	its "crawl" is shown or hidden
+	to draw it:
 		<header size="medium">Settings</header>
 		<form value={it}>
 			<field label="Lengths and weights in">
@@ -359,15 +359,15 @@ a "settings dialog" is a view:
 
 a "review dialog" is a view:
 	// The film it's a review of
-	- its "film" is a film
+	its "film" is a film
 	// The review being written:  saved when it's done
-	- its "draft" is a new review with stars = 5
-	- to save the review:
+	its "draft" is a new review with stars = 5
+	to save the review:
 		set the draft's film title to its film's title
 		add the draft to the reviews
 		set its draft to a new review with stars = 5
 		close the review dialog
-	- to draw it:
+	to draw it:
 		<header size="medium">Review {its film's title}</header>
 		<form value={its draft}>
 			<field label="Stars">
@@ -384,22 +384,22 @@ a "review dialog" is a view:
 
 galaxy guide is a site:
 	// The theme its pages wear:  a hand-drawn sketch, while it's a mockup
-	- its "theme" is "mockup"
-	- it has a films page at "/films", named "Films"
+	its "theme" is "mockup"
+	it has a films page at "/films", named "Films"
 		it has a film page at "/films/:film", named "Film"
-	- it has a people page at "/people", named "People"
+	it has a people page at "/people", named "People"
 		it has a person page at "/people/:person", named "Person"
-	- it has a planets page at "/planets", named "Planets"
+	it has a planets page at "/planets", named "Planets"
 		it has a planet page at "/planets/:planet", named "Planet"
-	- it has a species list page at "/species", named "Species"
+	it has a species list page at "/species", named "Species"
 		it has a species page at "/species/:species", named "Species"
-	- it has a vehicles page at "/vehicles", named "Vehicles"
+	it has a vehicles page at "/vehicles", named "Vehicles"
 		it has a vehicle page at "/vehicles/:vehicle", named "Vehicle"
-	- it has a starships page at "/starships", named "Starships"
+	it has a starships page at "/starships", named "Starships"
 		it has a starship page at "/starships/:starship", named "Starship"
-	- it has a reviews page at "/reviews", named "Reviews"
-	- it has a settings dialog
-	- it has a review dialog
-	- it has a person sidebar
-	- it has a not found page
-	- it has an error page
+	it has a reviews page at "/reviews", named "Reviews"
+	it has a settings dialog
+	it has a review dialog
+	it has a person sidebar
+	it has a not found page
+	it has an error page

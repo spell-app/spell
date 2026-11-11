@@ -16,7 +16,7 @@
  * - a PROPERTY EDITOR'S HEAD:  `<property-editor "card">` => `"card" is a property editor`, its closer gone.
  * - a SITE's file:  the whole file in plain Spell (`SX.CodeSpellWriter`):  a site is code (`x is a site:`).
  */
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import { join, relative, resolve } from "node:path"
 
 import { SP } from "spell/parser/spell"
@@ -86,10 +86,97 @@ function sitePlain(text: string, path: string): string {
   )
 }
 
+/** A code tag at a file's left edge (P46):  `<view "card">`, `<thing ...>`, `<action ...>` ... */
+const CODE_TAG = /^<(?!ui-defaults\b)\p{L}[^\n]*$/mu
+
+/** The ability words the twin writes last in a template's body, which P46 writes first:  `it is draggable`. */
+const ABILITY_LINE =
+  /^\t(it is|es|está) (draggable|droppable|selectable|clickable|arrastrable|soltable|seleccionable|cliqueable)$/u
+
+/**
+ * `text`, a code file written with tags, in plain Spell (P46):  the whole file through the plain writer,
+ * then the legal-today forms the writer can't know.
+ */
+function codePlain(text: string, path: string): string {
+  let plain = sitePlain(text, path)
+  plain = plain
+    // a member made new, without its:  `"stock" is a new stock pile`
+    .replace(/^(\t+)(?:its|su) ("[^"\n]+" (?:is|es) (?:a|an|un|una) (?:new|nuev[oa]) )/gmu, "$1$2")
+    // its first detail, when it's quoted text, without `=`:  `with name "stock"`
+    .replace(/(\b(?:new|nuev[oa]) [^\n]*?\b(?:with|con) )(\p{L}+) = (?=")/gu, "$1$2 ")
+    // a list's commas against the word before:  `"auto play", "cheat"`
+    .replaceAll('" , "', '", "')
+    // group names in Initial Caps:  `group "Game Play"`
+    .replace(
+      /^(\t*(?:- )?(?:group|grupo) ")([^"\n]+)"/gmu,
+      (_, head: string, name: string) => `${head}${initialCaps(name)}"`
+    )
+  return abilitiesFirst(plain)
+}
+
+/** `name` in Initial Caps, each word's first letter:  `game play` => `Game Play`. */
+function initialCaps(name: string): string {
+  return name.replace(/(^|\s)(\p{Ll})/gu, (_, space: string, letter: string) => space + letter.toUpperCase())
+}
+
+/** `text` with each template's ability lines (`it is draggable`), written last by the twin, first in its body. */
+function abilitiesFirst(text: string): string {
+  const lines = text.split("\n")
+  const out: string[] = []
+  let headAt = -1
+  for (const line of lines) {
+    if (/^\S/.test(line) && !line.startsWith("//") && !line.startsWith("#") && line.trimEnd().endsWith(":")) {
+      headAt = out.length
+    } else if (/^\S/.test(line)) headAt = -1
+    if (headAt >= 0 && ABILITY_LINE.test(line)) {
+      out.splice(headAt + 1, 0, line)
+      // a blank line it left behind, at the body's end
+      continue
+    }
+    out.push(line)
+  }
+  return out.join("\n").replace(/\n\n+(?=\n|$)/g, "\n")
+}
+
+/**
+ * `text`, a plain file, with each member's `- ` gone (P46):  under a declaration at the left edge that opens a body
+ *   with its `:` (a page's plain head has none:  its body is markup, where `- ` starts a list's item).
+ * - A member under a worked-out property's body keeps it, as the plain writer does.
+ */
+function withoutBullets(text: string): string {
+  const lines = text.split("\n")
+  const depthOf = (line: string) => /^\t*/.exec(line)![0].length
+  const isCode = (line: string) => !!line.trim() && !line.trim().startsWith("//")
+  let top = ""
+  return lines
+    .map((line, index) => {
+      if (/^\S/.test(line) && isCode(line)) top = line
+      const bullet = /^(\t+)- /.exec(line)
+      if (!bullet || !top.trimEnd().endsWith(":") || top.startsWith("<")) return line
+      const depth = bullet[1]!.length
+      let parent = index - 1
+      while (parent >= 0 && !(isCode(lines[parent]!) && depthOf(lines[parent]!) < depth)) parent--
+      const head = lines[parent]!.trim().replace(/^- /, "")
+      if (depth > 1 && !/^(its|su|sus)\s+"/u.test(head)) return line
+      if (depth > 1 && head.endsWith(":")) {
+        for (let at = parent + 1; at < lines.length; at++) {
+          const each = lines[at]!
+          if (isCode(each) && depthOf(each) <= depthOf(lines[parent]!)) break
+          if (isCode(each) && depthOf(each) === depth && !each.trim().startsWith("- ")) return line
+        }
+      }
+      return bullet[1] + line.slice(bullet[0].length)
+    })
+    .join("\n")
+}
+
 /** The new text of project file `path`, or `undefined` when it stays as it is. */
 function converted(text: string, path: string): string | undefined {
   if (SITE_TAG.test(text)) return sitePlain(text, path)
-  return withPlainHeads(text, path)
+  const heads = withPlainHeads(text, path)
+  if (CODE_TAG.test(heads ?? text)) return codePlain(heads ?? text, path)
+  const bare = withoutBullets(heads ?? text)
+  return bare !== text ? bare : heads
 }
 
 ////////////////
@@ -115,11 +202,16 @@ function filesOf(folder: string, at = folder): { path: string; contents: string 
 
 /** `compiled` without its comments and `DECLARES` headers, which carry line numbers. */
 function codeOf(compiled: string): string {
-  return compiled
-    .replace(/\/\*! SPELL: DECLARES[^]*?\*\/\n?/g, "")
-    .split("\n")
-    .filter((line) => line.trim() && !line.trim().startsWith("//"))
-    .join("\n")
+  return (
+    compiled
+      .replace(/\/\*! SPELL: DECLARES[^]*?\*\/\n?/g, "")
+      .split("\n")
+      .filter((line) => line.trim() && !line.trim().startsWith("//"))
+      // a test's step, echoed as written:  its words, not its code (P46)
+      .map((line) => line.replace(/declaredAt: \{[^}]*\}/g, "declaredAt"))
+      .map((line) => line.replace(/core\.echoTestAction\(`[^`]*`\)/, "core.echoTestAction(...)"))
+      .join("\n")
+  )
 }
 
 /** Project `folder`'s files parsed as one project, by their paths:  their code and errors. */
@@ -156,6 +248,17 @@ for (const folder of folders) {
     const b = now.get(path)
     return a && (!b || a.code !== b.code || b.errors > a.errors)
   })
+  if (args.includes("--diff")) {
+    const out = join(process.env.PLAIN_OUT ?? "/tmp", "plain-spell")
+    mkdirSync(out, { recursive: true })
+    for (const { path } of changed) {
+      const name = `${relative(SPACES, folder)}${path}`.replaceAll("/", "_")
+      writeFileSync(join(out, `${name}.spell`), after.find((it) => it.path === path)!.contents)
+      if (!differ.some((it) => it.path === path)) continue
+      writeFileSync(join(out, `${name}.old.js`), old.get(path)!.code)
+      writeFileSync(join(out, `${name}.new.js`), now.get(path)?.code ?? "")
+    }
+  }
   console.log(
     `${relative(SPACES, folder)}:  ${changed.length} file(s)${differ.length ? `, ${differ.length} compile differently:  ${differ.map((it) => it.path).join(", ")}` : ""}`
   )

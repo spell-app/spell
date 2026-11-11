@@ -8,12 +8,12 @@ core.heading("Administración de la org:  dónde se guardan los roles de una org
 /** La org misma, para el título de la página y como espacio que diseñar. */
 export class Perfil extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1109, end: 1151 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1056, end: 1098 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "espacio" es texto, guardado como "space"
-  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1156, end: 1200 } }) }
+  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1100, end: 1144 } }) }
   get espacio() { return this.getProp("espacio") }
   set espacio(value) { this.setProp("espacio", value) }
 
@@ -23,12 +23,12 @@ export class Perfil extends Thing {
     times: ["created", "modified"], select: ["nombre", "espacio"] }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1081, end: 1104 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1031, end: 1054 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1081, end: 1104 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1031, end: 1054 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
@@ -36,7 +36,7 @@ export class Perfil extends Thing {
 /** Un rol de la org, por su nombre. */
 export class Función extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1318, end: 1360 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1235, end: 1277 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
@@ -46,34 +46,34 @@ export class Función extends Thing {
     times: ["created", "modified"], select: ["nombre"] }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1290, end: 1313 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1210, end: 1233 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1290, end: 1313 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1210, end: 1233 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class Miembro extends Thing {
   // su "persona" es texto, guardado como "person"
-  static { this.declareProp("persona", { type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1442, end: 1487 } }) }
+  static { this.declareProp("persona", { type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1331, end: 1376 } }) }
   get persona() { return this.getProp("persona") }
   set persona(value) { this.setProp("persona", value) }
 
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1492, end: 1534 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1378, end: 1420 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "rol" es texto, guardado como "role"
-  static { this.declareProp("rol", { type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1539, end: 1578 } }) }
+  static { this.declareProp("rol", { type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1422, end: 1461 } }) }
   get rol() { return this.getProp("rol") }
   set rol(value) { this.setProp("rol", value) }
 
   // su "cargo" es texto, guardado como "roleName"
-  static { this.declareProp("cargo", { type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1583, end: 1628 } }) }
+  static { this.declareProp("cargo", { type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1463, end: 1508 } }) }
   get cargo() { return this.getProp("cargo") }
   set cargo(value) { this.setProp("cargo", value) }
 
@@ -84,24 +84,24 @@ export class Miembro extends Thing {
   }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1414, end: 1437 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1306, end: 1329 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1414, end: 1437 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1306, end: 1329 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class Equipo extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1709, end: 1751 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1561, end: 1603 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "espacio" es texto, guardado como "space"
-  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1756, end: 1800 } }) }
+  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1605, end: 1649 } }) }
   get espacio() { return this.getProp("espacio") }
   set espacio(value) { this.setProp("espacio", value) }
 
@@ -112,29 +112,29 @@ export class Equipo extends Thing {
   }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1681, end: 1704 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1536, end: 1559 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1681, end: 1704 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1536, end: 1559 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class Proyecto extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1883, end: 1925 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1704, end: 1746 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "equipo" es texto, guardado como "team"
-  static { this.declareProp("equipo", { type: "text", storedAs: "team", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1930, end: 1972 } }) }
+  static { this.declareProp("equipo", { type: "text", storedAs: "team", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1748, end: 1790 } }) }
   get equipo() { return this.getProp("equipo") }
   set equipo(value) { this.setProp("equipo", value) }
 
   // su "espacio" es texto, guardado como "space"
-  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1977, end: 2021 } }) }
+  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1792, end: 1836 } }) }
   get espacio() { return this.getProp("espacio") }
   set espacio(value) { this.setProp("espacio", value) }
 
@@ -145,54 +145,54 @@ export class Proyecto extends Thing {
   }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1855, end: 1878 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1679, end: 1702 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1855, end: 1878 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1679, end: 1702 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class Mandato extends Thing {
   // su "rol" es texto, guardado como "role"
-  static { this.declareProp("rol", { type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2103, end: 2142 } }) }
+  static { this.declareProp("rol", { type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1890, end: 1929 } }) }
   get rol() { return this.getProp("rol") }
   set rol(value) { this.setProp("rol", value) }
 
   // su "titular" es texto, guardado como "holder"
-  static { this.declareProp("titular", { type: "text", storedAs: "holder", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2147, end: 2192 } }) }
+  static { this.declareProp("titular", { type: "text", storedAs: "holder", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1931, end: 1976 } }) }
   get titular() { return this.getProp("titular") }
   set titular(value) { this.setProp("titular", value) }
 
   // su "ámbito" es texto, guardado como "manages"
-  static { this.declareProp("ámbito", { type: "text", storedAs: "manages", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2197, end: 2242 } }) }
+  static { this.declareProp("ámbito", { type: "text", storedAs: "manages", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1978, end: 2023 } }) }
   get ámbito() { return this.getProp("ámbito") }
   set ámbito(value) { this.setProp("ámbito", value) }
 
   // su "cargo" es texto, guardado como "roleName"
-  static { this.declareProp("cargo", { type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2247, end: 2292 } }) }
+  static { this.declareProp("cargo", { type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2025, end: 2070 } }) }
   get cargo() { return this.getProp("cargo") }
   set cargo(value) { this.setProp("cargo", value) }
 
   // su "nombre titular" es texto, guardado como "holderName"
-  static { this.declareProp("nombreTitular", { type: "text", storedAs: "holderName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2297, end: 2353 } }) }
+  static { this.declareProp("nombreTitular", { type: "text", storedAs: "holderName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2072, end: 2128 } }) }
   get nombreTitular() { return this.getProp("nombreTitular") }
   set nombreTitular(value) { this.setProp("nombreTitular", value) }
 
   // su "nombre ámbito" es texto, guardado como "managesName"
-  static { this.declareProp("nombreÁmbito", { type: "text", storedAs: "managesName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2358, end: 2414 } }) }
+  static { this.declareProp("nombreÁmbito", { type: "text", storedAs: "managesName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2130, end: 2186 } }) }
   get nombreÁmbito() { return this.getProp("nombreÁmbito") }
   set nombreÁmbito(value) { this.setProp("nombreÁmbito", value) }
 
   // su "inicio" es texto, guardado como "starts"
-  static { this.declareProp("inicio", { type: "text", storedAs: "starts", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2419, end: 2463 } }) }
+  static { this.declareProp("inicio", { type: "text", storedAs: "starts", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2188, end: 2232 } }) }
   get inicio() { return this.getProp("inicio") }
   set inicio(value) { this.setProp("inicio", value) }
 
   // su "fin" es texto, guardado como "ends"
-  static { this.declareProp("fin", { type: "text", storedAs: "ends", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2468, end: 2507 } }) }
+  static { this.declareProp("fin", { type: "text", storedAs: "ends", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2234, end: 2273 } }) }
   get fin() { return this.getProp("fin") }
   set fin(value) { this.setProp("fin", value) }
 
@@ -203,24 +203,24 @@ export class Mandato extends Thing {
   }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2075, end: 2098 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1865, end: 1888 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2075, end: 2098 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1865, end: 1888 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class Aprobación extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2592, end: 2634 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2331, end: 2373 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "versión" es texto, guardado como "version"
-  static { this.declareProp("versión", { type: "text", storedAs: "version", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2639, end: 2685 } }) }
+  static { this.declareProp("versión", { type: "text", storedAs: "version", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2375, end: 2421 } }) }
   get versión() { return this.getProp("versión") }
   set versión(value) { this.setProp("versión", value) }
 
@@ -231,12 +231,12 @@ export class Aprobación extends Thing {
   }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2564, end: 2587 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2306, end: 2329 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2564, end: 2587 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2306, end: 2329 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
@@ -244,17 +244,17 @@ export class Aprobación extends Thing {
 /** Quien diseña cambia las páginas y el código de un espacio, sea cual sea su rol allí:  un Manager las publica. */
 export class Diseñador extends Thing {
   // su "persona" es texto, guardado como "person"
-  static { this.declareProp("persona", { type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2882, end: 2927 } }) }
+  static { this.declareProp("persona", { type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2590, end: 2635 } }) }
   get persona() { return this.getProp("persona") }
   set persona(value) { this.setProp("persona", value) }
 
   // su "espacio" es texto, guardado como "space"
-  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2932, end: 2976 } }) }
+  static { this.declareProp("espacio", { type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2637, end: 2681 } }) }
   get espacio() { return this.getProp("espacio") }
   set espacio(value) { this.setProp("espacio", value) }
 
   // su "nombre persona" es texto, guardado como "personName"
-  static { this.declareProp("nombrePersona", { type: "text", storedAs: "personName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2981, end: 3037 } }) }
+  static { this.declareProp("nombrePersona", { type: "text", storedAs: "personName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2683, end: 2739 } }) }
   get nombrePersona() { return this.getProp("nombrePersona") }
   set nombrePersona(value) { this.setProp("nombrePersona", value) }
 
@@ -265,12 +265,12 @@ export class Diseñador extends Thing {
   }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2854, end: 2877 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2565, end: 2588 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2854, end: 2877 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2565, end: 2588 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
@@ -278,17 +278,17 @@ export class Diseñador extends Thing {
 /** Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers". */
 export class Etapa extends Thing {
   // su "nombre" es texto, guardado como "name"
-  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3207, end: 3249 } }) }
+  static { this.declareProp("nombre", { type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2882, end: 2924 } }) }
   get nombre() { return this.getProp("nombre") }
   set nombre(value) { this.setProp("nombre", value) }
 
   // su "siguiente" es texto, guardado como "movesTo"
-  static { this.declareProp("siguiente", { type: "text", storedAs: "movesTo", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3254, end: 3302 } }) }
+  static { this.declareProp("siguiente", { type: "text", storedAs: "movesTo", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2926, end: 2974 } }) }
   get siguiente() { return this.getProp("siguiente") }
   set siguiente(value) { this.setProp("siguiente", value) }
 
   // su "quién mueve" es texto, guardado como "movedBy"
-  static { this.declareProp("quiénMueve", { type: "text", storedAs: "movedBy", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3307, end: 3357 } }) }
+  static { this.declareProp("quiénMueve", { type: "text", storedAs: "movedBy", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2976, end: 3026 } }) }
   get quiénMueve() { return this.getProp("quiénMueve") }
   set quiénMueve(value) { this.setProp("quiénMueve", value) }
 
@@ -299,39 +299,39 @@ export class Etapa extends Thing {
   }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3179, end: 3202 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2857, end: 2880 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3179, end: 3202 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2857, end: 2880 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
 
 export class Cambio extends Thing {
   // su "cuándo" es texto, guardado como "at"
-  static { this.declareProp("cuándo", { type: "text", storedAs: "at", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3438, end: 3478 } }) }
+  static { this.declareProp("cuándo", { type: "text", storedAs: "at", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3079, end: 3119 } }) }
   get cuándo() { return this.getProp("cuándo") }
   set cuándo(value) { this.setProp("cuándo", value) }
 
   // su "quién" es texto, guardado como "who"
-  static { this.declareProp("quién", { type: "text", storedAs: "who", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3483, end: 3523 } }) }
+  static { this.declareProp("quién", { type: "text", storedAs: "who", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3121, end: 3161 } }) }
   get quién() { return this.getProp("quién") }
   set quién(value) { this.setProp("quién", value) }
 
   // su "hecho" es texto, guardado como "did"
-  static { this.declareProp("hecho", { type: "text", storedAs: "did", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3528, end: 3568 } }) }
+  static { this.declareProp("hecho", { type: "text", storedAs: "did", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3163, end: 3203 } }) }
   get hecho() { return this.getProp("hecho") }
   set hecho(value) { this.setProp("hecho", value) }
 
   // su "qué" es texto, guardado como "what"
-  static { this.declareProp("qué", { type: "text", storedAs: "what", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3573, end: 3612 } }) }
+  static { this.declareProp("qué", { type: "text", storedAs: "what", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3205, end: 3244 } }) }
   get qué() { return this.getProp("qué") }
   set qué(value) { this.setProp("qué", value) }
 
   // su "por qué" es texto, guardado como "why"
-  static { this.declareProp("porQué", { type: "text", storedAs: "why", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3617, end: 3659 } }) }
+  static { this.declareProp("porQué", { type: "text", storedAs: "why", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3246, end: 3288 } }) }
   get porQué() { return this.getProp("porQué") }
   set porQué(value) { this.setProp("porQué", value) }
 
@@ -341,12 +341,12 @@ export class Cambio extends Thing {
     times: ["created", "modified"], select: ["cuándo", "quién", "hecho", "qué", "porQué"] }
 
   // vive en roles de la org
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3410, end: 3433 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3054, end: 3077 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en roles de la org
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3410, end: 3433 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3054, end: 3077 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
@@ -395,41 +395,41 @@ export class AdministraciónDeLaOrg extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   /** A quién agregar, por su dirección:  ana@rs */
-  // su "miembro nuevo" es un nuevo miembro
+  // "miembro nuevo" es un nuevo miembro
   static { this.declareProp("miembroNuevo", { init: () => new Miembro(), early: true }) }
   get miembroNuevo() { return this.getProp("miembroNuevo") }
   set miembroNuevo(value) { this.setProp("miembroNuevo", value) }
 
   /** Un equipo permanente nuevo, por su nombre */
-  // su "equipo nuevo" es un nuevo equipo
+  // "equipo nuevo" es un nuevo equipo
   static { this.declareProp("equipoNuevo", { init: () => new Equipo(), early: true }) }
   get equipoNuevo() { return this.getProp("equipoNuevo") }
   set equipoNuevo(value) { this.setProp("equipoNuevo", value) }
 
   /** Un proyecto nuevo, bajo un equipo (por su carpeta) o, sin ninguno, la org misma */
-  // su "proyecto nuevo" es un nuevo proyecto
+  // "proyecto nuevo" es un nuevo proyecto
   static { this.declareProp("proyectoNuevo", { init: () => new Proyecto(), early: true }) }
   get proyectoNuevo() { return this.getProp("proyectoNuevo") }
   set proyectoNuevo(value) { this.setProp("proyectoNuevo", value) }
 
-  // su "mandato nuevo" es un nuevo mandato
+  // "mandato nuevo" es un nuevo mandato
   static { this.declareProp("mandatoNuevo", { init: () => new Mandato(), early: true }) }
   get mandatoNuevo() { return this.getProp("mandatoNuevo") }
   set mandatoNuevo(value) { this.setProp("mandatoNuevo", value) }
 
-  // su "aprobación nueva" es una nueva aprobación
+  // "aprobación nueva" es una nueva aprobación
   static { this.declareProp("aprobaciónNueva", { init: () => new Aprobación(), early: true }) }
   get aprobaciónNueva() { return this.getProp("aprobaciónNueva") }
   set aprobaciónNueva(value) { this.setProp("aprobaciónNueva", value) }
 
   /** Quién diseña las páginas de qué espacio:  ana@rs, picnic@rs */
-  // su "diseñador nuevo" es un nuevo diseñador
+  // "diseñador nuevo" es un nuevo diseñador
   static { this.declareProp("diseñadorNuevo", { init: () => new Diseñador(), early: true }) }
   get diseñadorNuevo() { return this.getProp("diseñadorNuevo") }
   set diseñadorNuevo(value) { this.setProp("diseñadorNuevo", value) }
 
   /** Una etapa por la que pasa un evento:  su nombre cambia la etapa de ese nombre, o agrega una antes de la última */
-  // su "etapa nueva" es una nueva etapa
+  // "etapa nueva" es una nueva etapa
   static { this.declareProp("etapaNueva", { init: () => new Etapa(), early: true }) }
   get etapaNueva() { return this.getProp("etapaNueva") }
   set etapaNueva(value) { this.setProp("etapaNueva", value) }

@@ -1,14 +1,15 @@
 # A Pokémon:  its card, its own page, and its family
-Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at PokéAPI again never touches a line of this.
+// Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at PokéAPI again never touches a line of this.
 
-<extend "pokemon">
-	<property "picture" description="Its big picture, the official artwork">
+a pokemon:
+	// Its big picture, the official artwork
+	its "picture" is:
 		return the front default of the official artwork of the other of its sprites
-	</property>
-	<property "sound" description="What it says:  its cry, a sound file">
+	// What it says:  its cry, a sound file
+	its "sound" is:
 		return the latest of its cries
-	</property>
-	<property "number tag" description="Its number as the games write it, four figures:  #0001">
+	// Its number as the games write it, four figures:  #0001
+	its "number tag" is:
 		if its number < 10
 			return "#000[its number]"
 		if its number < 100
@@ -16,16 +17,16 @@ Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at Po
 		if its number < 1000
 			return "#0[its number]"
 		return "#[its number]"
-	</property>
-	<property "evolutions" description="Its family, from the first:  its species' evolution chain">
+	// Its family, from the first:  its species' evolution chain
+	its "evolutions" is:
 		return the chain of the evolution chain of its species
-	</property>
-	<property "loved" description="Is it one of your favourites?">
+	// Is it one of your favourites?
+	its "loved" is:
 		set address to its id
 		return there is a favourite where its address is address
-	</property>
 
-	<action "open it" description="Its own page:  the page before it is kept, for Back">
+	// Its own page:  the page before it is kept, for Back
+	to open it:
 		if the pokedex's showing is it
 			return
 		if the pokedex's showing
@@ -35,21 +36,21 @@ Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at Po
 		set the pokedex's showing to it
 		load its sound  // so Hear it plays it at once
 		scroll to the top
-	</action>
 
-	<action "hear it" description="Its cry, from the start:  played by the click itself, so every browser lets it">
+	// Its cry, from the start:  played by the click itself, so every browser lets it
+	to hear it:
 		play its sound
-	</action>
 
-	<action "love it" description="Its heart:  keep it as a favourite, or let it go">
+	// Its heart:  keep it as a favourite, or let it go
+	to love it:
 		set address to its id
 		if there is a favourite where its address is address
 			remove saved favourites with the same address
 		otherwise
 			add (a new favourite with name = its name, address = address) to the favourites
-	</action>
 
-	<draw description="Its card:  a click anywhere on it opens its page">
+	// Its card:  a click anywhere on it opens its page
+	to draw it:
 		<card appearance="link raised" onClick={open it}>
 			<image appearance="circular" background="yellow" src={its picture} alt="" aspect-ratio="1" />
 			<content>
@@ -57,9 +58,8 @@ Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at Po
 				<meta>Number {its number}</meta>
 			</content>
 		</card>
-	</draw>
 
-	<draw "page">
+	to draw its page:
 		<stack direction="horizontal" wrap align="center">
 			<image appearance="circular" background="yellow" size="large" src={its picture} alt={its name} aspect-ratio="1" />
 			<stack fluid align="start">
@@ -79,13 +79,13 @@ Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at Po
 		draw its strengths
 		<header class="section" size="large">Evolutions</header>
 		draw its family
-	</draw>
 
-	<draw "family" description="Its evolutions in a row, from the first:  each one's own part, as each reads PokéAPI">
+	// Its evolutions in a row, from the first:  each one's own part, as each reads PokéAPI
+	to draw its family:
 		draw its evolutions
-	</draw>
 
-	<draw "evolution" description="Its place in its family:  a round picture, its name, number and kinds;  a click opens its page">
+	// Its place in its family:  a round picture, its name, number and kinds;  a click opens its page
+	to draw its evolution:
 		<card appearance="link" width="10em" onClick={open it}>
 			<image appearance="circular" background="yellow" aspect-ratio="1" size="small" align="center" src={its picture} alt="" />
 			<content align="center">
@@ -94,36 +94,34 @@ Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at Po
 				{draw its pills}
 			</content>
 		</card>
-	</draw>
 
-	<draw "pills" description="Its kinds, small:  a group of labels sizes them all">
-		<for its types as="labels" size="small" />
-	</draw>
+	// Its kinds, small:  a group of labels sizes them all
+	to draw its pills:
+		for its types
+		show them in: <labels size="small"></labels>
 
-	<draw "heart" description="Full and red when it's a favourite;  press it to change">
-		<if its loved>
+	// Full and red when it's a favourite;  press it to change
+	to draw its heart:
+		if its loved
 			<button color="red" appearance="circular" size="massive" icon="heart" onClick={love it} title="One of my favourites" aria-label="One of my favourites" />
-		<otherwise>
+		otherwise
 			<button appearance="circular" size="massive" icon="heart outline" onClick={love it} title="Keep it as a favourite" aria-label="Keep it as a favourite" />
-		</>
-	</draw>
 
-	<draw "kinds" description="Its kinds, big:  a group of labels sizes them all">
-		<for its types as="labels" size="huge" />
-	</draw>
+	// Its kinds, big:  a group of labels sizes them all
+	to draw its kinds:
+		for its types
+		show them in: <labels size="huge"></labels>
 
-	<draw "strengths" description="A bar for each of its six numbers:  255 is as strong as any Pokémon gets">
-		<for stat in its stats>
+	// A bar for each of its six numbers:  255 is as strong as any Pokémon gets
+	to draw its strengths:
+		for stat in its stats
 			<progress max-width="36em" value={stat's base stat} total="255" color="green" size="large" label={stat's word + ":  {value}"} />
-		</for>
-	</draw>
-</extend>
-
 
 # One of a Pokémon's six numbers
 
-<extend "stat">
-	<property "word" description="What it means, in plain words, by the name PokéAPI gives it">
+a stat:
+	// What it means, in plain words, by the name PokéAPI gives it
+	its "word" is:
 		set name to the name of its stat
 		if name is "hp"
 			return "Health"
@@ -136,18 +134,16 @@ Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at Po
 		if name is "special-defense"
 			return "Special defence"
 		return "Speed"
-	</property>
-</extend>
-
 
 # A kind of Pokémon:  fire, water, grass ...
 
-<extend "type">
-	<alias "is real" description="Two kinds no Pokémon is:  only in the games' code">
+a type:
+	// Two kinds no Pokémon is:  only in the games' code
+	it "is real":
 		return its name is not "unknown" and its name is not "shadow" and its name is not "stellar"
-	</alias>
 
-	<property "colour" description="Each kind's colour, as the games paint it">
+	// Each kind's colour, as the games paint it
+	its "colour" is:
 		if its name is "fire"
 			return "red"
 		if its name is "water" or its name is "ice"
@@ -171,38 +167,33 @@ Each adds to its type in PokeSpell.api.spell, with `<extend>`:  so looking at Po
 		if its name is "steel"
 			return "grey"
 		return "orange"
-	</property>
 
-	<action "pick it" description="See every Pokémon of this kind">
+	// See every Pokémon of this kind
+	to pick it:
 		set the pokedex's picked kind to it
 		set the pokedex's showing to nothing
-	</action>
 
-	<draw description="A big button:  press it to see every Pokémon of this kind">
+	// A big button:  press it to see every Pokémon of this kind
+	to draw it:
 		<button class="kind" color={its colour} size="large" font="title-caps" onClick={pick it}>{its name}</button>
-	</draw>
-</extend>
 
-<extend "pokemon type" description="One of a Pokémon's kinds:  a label of its colour">
-	<draw>
+// One of a Pokémon's kinds:  a label of its colour
+a pokemon type:
+	to draw it:
 		<label class="kind" color={its kind's colour} size="huge" font="title-caps">{its kind's name}</label>
-	</draw>
-</extend>
 
-<extend "type pokemon" description="One Pokémon of a kind">
-	<draw>
+// One Pokémon of a kind
+a type pokemon:
+	to draw it:
 		draw its pokemon
-	</draw>
-</extend>
-
 
 # A family:  how a Pokémon evolves
-PokéAPI keeps a family as a chain:  its first species, and the chains each one becomes, each with the chains it becomes.
-So a chain draws its species, then an arrow and the chains it becomes, side by side:
-Bulbasaur > Ivysaur > Venusaur is one row, and Eevee's eight evolutions sit together after its arrow.
+// PokéAPI keeps a family as a chain:  its first species, and the chains each one becomes, each with the chains it becomes.
+// So a chain draws its species, then an arrow and the chains it becomes, side by side:
+// Bulbasaur > Ivysaur > Venusaur is one row, and Eevee's eight evolutions sit together after its arrow.
 
-<extend "chain">
-	<draw>
+a chain:
+	to draw it:
 		<stack direction="horizontal" align="center" spacing="sm" stackable="34em">
 			{draw its species}
 			<if its evolves to is not empty>
@@ -212,28 +203,21 @@ Bulbasaur > Ivysaur > Venusaur is one row, and Eevee's eight evolutions sit toge
 				</stack>
 			</if>
 		</stack>
-	</draw>
 
-	<draw "branches" description="What it becomes:  one, or several side by side, wrapping when they don't fit">
-		<for its evolves to />
-	</draw>
-</extend>
+	// What it becomes:  one, or several side by side, wrapping when they don't fit
+	to draw its branches:
+		for its evolves to
 
-<extend "pokemon species">
-	<property "pokemon" description="The Pokémon it is, as the games show it first">
+a pokemon species:
+	// The Pokémon it is, as the games show it first
+	its "pokemon" is:
 		return the pokemon of the first item of its varieties
-	</property>
-	<draw>
+	to draw it:
 		draw the evolution of its pokemon
-	</draw>
-</extend>
-
 
 # A favourite:  kept on this device, it draws the Pokémon it's of
 
-<extend "favourite">
-	<property "pokemon">the pokemon whose id is its address</property>
-	<draw>
+a favourite:
+	its "pokemon" is the pokemon whose id is its address
+	to draw it:
 		draw its pokemon
-	</draw>
-</extend>

@@ -57,171 +57,171 @@
         "placeType": "PokeApi",
         "collection": "pokemon"
       },
-      "defined": "/PokeSpell.api.spell:1252-2258"
+      "defined": "/PokeSpell.api.spell:1205-2027"
     },
     {
       "property": "number",
       "of": "Pokemon",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:1308-1348"
+      "defined": "/PokeSpell.api.spell:1252-1292"
     },
     {
       "property": "name",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:1360-1381"
+      "defined": "/PokeSpell.api.spell:1294-1312"
     },
     {
       "property": "base_experience",
       "asWritten": "base experience",
       "of": "Pokemon",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:1386-1426"
+      "defined": "/PokeSpell.api.spell:1314-1347"
     },
     {
       "property": "height",
       "of": "Pokemon",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:1432-1463"
+      "defined": "/PokeSpell.api.spell:1349-1373"
     },
     {
       "property": "default",
       "of": "Pokemon",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:1481-1531"
+      "defined": "/PokeSpell.api.spell:1375-1425"
     },
     {
       "property": "order",
       "of": "Pokemon",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:1543-1573"
+      "defined": "/PokeSpell.api.spell:1427-1450"
     },
     {
       "property": "weight",
       "of": "Pokemon",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:1579-1610"
+      "defined": "/PokeSpell.api.spell:1452-1476"
     },
     {
       "property": "abilities",
       "of": "Pokemon",
       "datatype": "list of pokemon-abilities",
-      "defined": "/PokeSpell.api.spell:1616-1665"
+      "defined": "/PokeSpell.api.spell:1478-1524"
     },
     {
       "property": "past_abilities",
       "asWritten": "past abilities",
       "of": "Pokemon",
       "datatype": "list of past-abilities",
-      "defined": "/PokeSpell.api.spell:1670-1721"
+      "defined": "/PokeSpell.api.spell:1526-1574"
     },
     {
       "property": "forms",
       "of": "Pokemon",
       "datatype": "list of poke-api-names",
-      "defined": "/PokeSpell.api.spell:1726-1768"
+      "defined": "/PokeSpell.api.spell:1576-1615"
     },
     {
       "property": "game_indices",
       "asWritten": "game indices",
       "of": "Pokemon",
       "datatype": "list of game-indices",
-      "defined": "/PokeSpell.api.spell:1773-1820"
+      "defined": "/PokeSpell.api.spell:1617-1661"
     },
     {
       "property": "held_items",
       "asWritten": "held items",
       "of": "Pokemon",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:1825-1862"
+      "defined": "/PokeSpell.api.spell:1663-1697"
     },
     {
       "property": "location_area_encounters",
       "asWritten": "location area encounters",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:1867-1908"
+      "defined": "/PokeSpell.api.spell:1699-1737"
     },
     {
       "property": "moves",
       "of": "Pokemon",
       "datatype": "list of pokemon-moves",
-      "defined": "/PokeSpell.api.spell:1927-1968"
+      "defined": "/PokeSpell.api.spell:1754-1792"
     },
     {
       "property": "species",
       "of": "Pokemon",
       "datatype": "PokemonSpecies",
-      "defined": "/PokeSpell.api.spell:1973-2010"
+      "defined": "/PokeSpell.api.spell:1794-1828"
     },
     {
       "property": "sprites",
       "of": "Pokemon",
       "datatype": "Sprite",
-      "defined": "/PokeSpell.api.spell:2015-2047"
+      "defined": "/PokeSpell.api.spell:1830-1855"
     },
     {
       "property": "cries",
       "of": "Pokemon",
       "datatype": "Cry",
-      "defined": "/PokeSpell.api.spell:2053-2080"
+      "defined": "/PokeSpell.api.spell:1857-1877"
     },
     {
       "property": "stats",
       "of": "Pokemon",
       "datatype": "list of stats",
-      "defined": "/PokeSpell.api.spell:2086-2119"
+      "defined": "/PokeSpell.api.spell:1879-1909"
     },
     {
       "property": "past_stats",
       "asWritten": "past stats",
       "of": "Pokemon",
       "datatype": "list of past-stats",
-      "defined": "/PokeSpell.api.spell:2124-2167"
+      "defined": "/PokeSpell.api.spell:1911-1951"
     },
     {
       "property": "types",
       "of": "Pokemon",
       "datatype": "list of pokemon-types",
-      "defined": "/PokeSpell.api.spell:2172-2213"
+      "defined": "/PokeSpell.api.spell:1953-1991"
     },
     {
       "property": "past_types",
       "asWritten": "past types",
       "of": "Pokemon",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:2218-2255"
+      "defined": "/PokeSpell.api.spell:1993-2027"
     },
     {
       "property": "picture",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spell:196-347"
+      "defined": "/Pokemon.spell:233-329"
     },
     {
       "property": "sound",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spell:362-464"
+      "defined": "/Pokemon.spell:372-420"
     },
     {
       "property": "number_tag",
       "asWritten": "number tag",
       "of": "Pokemon",
       "datatype": "text",
-      "defined": "/Pokemon.spell:479-746"
+      "defined": "/Pokemon.spell:481-676"
     },
     {
       "property": "evolutions",
       "of": "Pokemon",
       "datatype": "Chain",
-      "defined": "/Pokemon.spell:761-913"
+      "defined": "/Pokemon.spell:740-817"
     },
     {
       "property": "loved",
       "of": "Pokemon",
       "datatype": "choice",
-      "defined": "/Pokemon.spell:928-1073"
+      "defined": "/Pokemon.spell:853-951"
     },
     {
       "syntax": "open {thisArg:expression}",
@@ -236,7 +236,7 @@
       "name": "open it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spell:1089-1511"
+      "defined": "/Pokemon.spell:1010-1359"
     },
     {
       "syntax": "hear {thisArg:expression}",
@@ -250,7 +250,7 @@
       "kind": "method",
       "name": "hear it",
       "returns": "nothing",
-      "defined": "/Pokemon.spell:1525-1653"
+      "defined": "/Pokemon.spell:1445-1473"
     },
     {
       "syntax": "love {thisArg:expression}",
@@ -265,7 +265,7 @@
       "name": "love it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spell:1667-1971"
+      "defined": "/Pokemon.spell:1529-1763"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -278,7 +278,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spell:1985-2340"
+      "defined": "/Pokemon.spell:1819-2116"
     },
     {
       "type": "PokemonSpecies",
@@ -288,189 +288,189 @@
         "placeType": "PokeApi",
         "collection": "pokemon_species"
       },
-      "defined": "/PokeSpell.api.spell:2269-3669"
+      "defined": "/PokeSpell.api.spell:2029-3198"
     },
     {
       "property": "number",
       "of": "PokemonSpecies",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:2333-2373"
+      "defined": "/PokeSpell.api.spell:2084-2124"
     },
     {
       "property": "name",
       "of": "PokemonSpecies",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:2385-2406"
+      "defined": "/PokeSpell.api.spell:2126-2144"
     },
     {
       "property": "order",
       "of": "PokemonSpecies",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:2411-2441"
+      "defined": "/PokeSpell.api.spell:2146-2169"
     },
     {
       "property": "gender_rate",
       "asWritten": "gender rate",
       "of": "PokemonSpecies",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:2447-2483"
+      "defined": "/PokeSpell.api.spell:2171-2200"
     },
     {
       "property": "capture_rate",
       "asWritten": "capture rate",
       "of": "PokemonSpecies",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:2489-2526"
+      "defined": "/PokeSpell.api.spell:2202-2232"
     },
     {
       "property": "base_happiness",
       "asWritten": "base happiness",
       "of": "PokemonSpecies",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:2532-2571"
+      "defined": "/PokeSpell.api.spell:2234-2266"
     },
     {
       "property": "baby",
       "of": "PokemonSpecies",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:2589-2633"
+      "defined": "/PokeSpell.api.spell:2268-2312"
     },
     {
       "property": "legendary",
       "of": "PokemonSpecies",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:2638-2692"
+      "defined": "/PokeSpell.api.spell:2314-2368"
     },
     {
       "property": "mythical",
       "of": "PokemonSpecies",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:2697-2749"
+      "defined": "/PokeSpell.api.spell:2370-2422"
     },
     {
       "property": "hatch_counter",
       "asWritten": "hatch counter",
       "of": "PokemonSpecies",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:2761-2799"
+      "defined": "/PokeSpell.api.spell:2424-2455"
     },
     {
       "property": "gender_differences",
       "asWritten": "gender differences",
       "of": "PokemonSpecies",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:2817-2890"
+      "defined": "/PokeSpell.api.spell:2457-2530"
     },
     {
       "property": "forms_switchable",
       "asWritten": "forms switchable",
       "of": "PokemonSpecies",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:2902-2940"
+      "defined": "/PokeSpell.api.spell:2532-2567"
     },
     {
       "property": "growth_rate",
       "asWritten": "growth rate",
       "of": "PokemonSpecies",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:2945-2984"
+      "defined": "/PokeSpell.api.spell:2569-2605"
     },
     {
       "property": "pokedex_numbers",
       "asWritten": "pokedex numbers",
       "of": "PokemonSpecies",
       "datatype": "list of pokedex-numbers",
-      "defined": "/PokeSpell.api.spell:2989-3042"
+      "defined": "/PokeSpell.api.spell:2607-2657"
     },
     {
       "property": "egg_groups",
       "asWritten": "egg groups",
       "of": "PokemonSpecies",
       "datatype": "list of poke-api-names",
-      "defined": "/PokeSpell.api.spell:3047-3094"
+      "defined": "/PokeSpell.api.spell:2659-2703"
     },
     {
       "property": "color",
       "of": "PokemonSpecies",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:3099-3132"
+      "defined": "/PokeSpell.api.spell:2705-2735"
     },
     {
       "property": "shape",
       "of": "PokemonSpecies",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:3137-3170"
+      "defined": "/PokeSpell.api.spell:2737-2767"
     },
     {
       "property": "evolves_from_species",
       "asWritten": "evolves from species",
       "of": "PokemonSpecies",
       "datatype": "PokemonSpecies",
-      "defined": "/PokeSpell.api.spell:3175-3225"
+      "defined": "/PokeSpell.api.spell:2769-2816"
     },
     {
       "property": "evolution_chain",
       "asWritten": "evolution chain",
       "of": "PokemonSpecies",
       "datatype": "EvolutionChain",
-      "defined": "/PokeSpell.api.spell:3230-3276"
+      "defined": "/PokeSpell.api.spell:2818-2861"
     },
     {
       "property": "habitat",
       "of": "PokemonSpecies",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:3281-3316"
+      "defined": "/PokeSpell.api.spell:2863-2895"
     },
     {
       "property": "generation",
       "of": "PokemonSpecies",
       "datatype": "Generation",
-      "defined": "/PokeSpell.api.spell:3321-3360"
+      "defined": "/PokeSpell.api.spell:2897-2929"
     },
     {
       "property": "names",
       "of": "PokemonSpecies",
       "datatype": "list of names",
-      "defined": "/PokeSpell.api.spell:3366-3399"
+      "defined": "/PokeSpell.api.spell:2931-2961"
     },
     {
       "property": "pal_park_encounters",
       "asWritten": "pal park encounters",
       "of": "PokemonSpecies",
       "datatype": "list of pal-park-encounters",
-      "defined": "/PokeSpell.api.spell:3404-3465"
+      "defined": "/PokeSpell.api.spell:2963-3021"
     },
     {
       "property": "form_descriptions",
       "asWritten": "form descriptions",
       "of": "PokemonSpecies",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:3470-3514"
+      "defined": "/PokeSpell.api.spell:3023-3064"
     },
     {
       "property": "flavor_text_entries",
       "asWritten": "flavor text entries",
       "of": "PokemonSpecies",
       "datatype": "list of flavor-text-entries",
-      "defined": "/PokeSpell.api.spell:3519-3580"
+      "defined": "/PokeSpell.api.spell:3066-3124"
     },
     {
       "property": "genera",
       "of": "PokemonSpecies",
       "datatype": "list of genera",
-      "defined": "/PokeSpell.api.spell:3585-3620"
+      "defined": "/PokeSpell.api.spell:3126-3158"
     },
     {
       "property": "varieties",
       "of": "PokemonSpecies",
       "datatype": "list of varieties",
-      "defined": "/PokeSpell.api.spell:3625-3666"
+      "defined": "/PokeSpell.api.spell:3160-3198"
     },
     {
       "property": "pokemon",
       "of": "PokemonSpecies",
       "datatype": "Pokemon",
-      "defined": "/Pokemon.spell:8012-8148"
+      "defined": "/Pokemon.spell:7476-7549"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -483,7 +483,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spell:8163-8205"
+      "defined": "/Pokemon.spell:7551-7598"
     },
     {
       "type": "Type",
@@ -493,71 +493,71 @@
         "placeType": "PokeApi",
         "collection": "types"
       },
-      "defined": "/PokeSpell.api.spell:3680-4183"
+      "defined": "/PokeSpell.api.spell:3200-3625"
     },
     {
       "property": "number",
       "of": "Type",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:3733-3773"
+      "defined": "/PokeSpell.api.spell:3244-3284"
     },
     {
       "property": "name",
       "of": "Type",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:3785-3806"
+      "defined": "/PokeSpell.api.spell:3286-3304"
     },
     {
       "property": "damage_relations",
       "asWritten": "damage relations",
       "of": "Type",
       "datatype": "DamageRelation",
-      "defined": "/PokeSpell.api.spell:3811-3857"
+      "defined": "/PokeSpell.api.spell:3306-3349"
     },
     {
       "property": "past_damage_relations",
       "asWritten": "past damage relations",
       "of": "Type",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:3862-3910"
+      "defined": "/PokeSpell.api.spell:3351-3396"
     },
     {
       "property": "game_indices",
       "asWritten": "game indices",
       "of": "Type",
       "datatype": "list of game-indices",
-      "defined": "/PokeSpell.api.spell:3915-3962"
+      "defined": "/PokeSpell.api.spell:3398-3442"
     },
     {
       "property": "generation",
       "of": "Type",
       "datatype": "Generation",
-      "defined": "/PokeSpell.api.spell:3967-4006"
+      "defined": "/PokeSpell.api.spell:3444-3476"
     },
     {
       "property": "move_damage_class",
       "asWritten": "move damage class",
       "of": "Type",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:4012-4057"
+      "defined": "/PokeSpell.api.spell:3478-3520"
     },
     {
       "property": "names",
       "of": "Type",
       "datatype": "list of names",
-      "defined": "/PokeSpell.api.spell:4062-4095"
+      "defined": "/PokeSpell.api.spell:3522-3552"
     },
     {
       "property": "pokemon",
       "of": "Type",
       "datatype": "list of type-pokemon",
-      "defined": "/PokeSpell.api.spell:4100-4142"
+      "defined": "/PokeSpell.api.spell:3554-3593"
     },
     {
       "property": "moves",
       "of": "Type",
       "datatype": "list of moves",
-      "defined": "/PokeSpell.api.spell:4147-4180"
+      "defined": "/PokeSpell.api.spell:3595-3625"
     },
     {
       "syntax": "{operator:is_or_is_not} real",
@@ -567,13 +567,13 @@
       "kind": "method",
       "name": "\"is real\"",
       "returns": "choice",
-      "defined": "/Pokemon.spell:5500-5675"
+      "defined": "/Pokemon.spell:5177-5284"
     },
     {
       "property": "colour",
       "of": "Type",
       "datatype": "text",
-      "defined": "/Pokemon.spell:5688-6394"
+      "defined": "/Pokemon.spell:5333-5980"
     },
     {
       "syntax": "pick {thisArg:expression}",
@@ -588,7 +588,7 @@
       "name": "pick it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Pokemon.spell:6410-6550"
+      "defined": "/Pokemon.spell:6018-6106"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -601,7 +601,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spell:6564-6753"
+      "defined": "/Pokemon.spell:6171-6293"
     },
     {
       "type": "Ability",
@@ -611,65 +611,65 @@
         "placeType": "PokeApi",
         "collection": "abilities"
       },
-      "defined": "/PokeSpell.api.spell:4194-4719"
+      "defined": "/PokeSpell.api.spell:3627-4065"
     },
     {
       "property": "number",
       "of": "Ability",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:4250-4290"
+      "defined": "/PokeSpell.api.spell:3675-3715"
     },
     {
       "property": "name",
       "of": "Ability",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:4302-4323"
+      "defined": "/PokeSpell.api.spell:3717-3735"
     },
     {
       "property": "main_series",
       "asWritten": "main series",
       "of": "Ability",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:4340-4398"
+      "defined": "/PokeSpell.api.spell:3737-3795"
     },
     {
       "property": "generation",
       "of": "Ability",
       "datatype": "Generation",
-      "defined": "/PokeSpell.api.spell:4410-4449"
+      "defined": "/PokeSpell.api.spell:3797-3829"
     },
     {
       "property": "names",
       "of": "Ability",
       "datatype": "list of names",
-      "defined": "/PokeSpell.api.spell:4455-4488"
+      "defined": "/PokeSpell.api.spell:3831-3861"
     },
     {
       "property": "effect_entries",
       "asWritten": "effect entries",
       "of": "Ability",
       "datatype": "list of effect-entries",
-      "defined": "/PokeSpell.api.spell:4493-4544"
+      "defined": "/PokeSpell.api.spell:3863-3911"
     },
     {
       "property": "effect_changes",
       "asWritten": "effect changes",
       "of": "Ability",
       "datatype": "list of effect-changes",
-      "defined": "/PokeSpell.api.spell:4549-4600"
+      "defined": "/PokeSpell.api.spell:3913-3961"
     },
     {
       "property": "flavor_text_entries",
       "asWritten": "flavor text entries",
       "of": "Ability",
       "datatype": "list of flavor-text-entries",
-      "defined": "/PokeSpell.api.spell:4605-4666"
+      "defined": "/PokeSpell.api.spell:3963-4021"
     },
     {
       "property": "pokemon",
       "of": "Ability",
       "datatype": "list of ability-pokemon",
-      "defined": "/PokeSpell.api.spell:4671-4716"
+      "defined": "/PokeSpell.api.spell:4023-4065"
     },
     {
       "type": "Move",
@@ -679,156 +679,156 @@
         "placeType": "PokeApi",
         "collection": "moves"
       },
-      "defined": "/PokeSpell.api.spell:4730-5815"
+      "defined": "/PokeSpell.api.spell:4067-4955"
     },
     {
       "property": "number",
       "of": "Move",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:4783-4823"
+      "defined": "/PokeSpell.api.spell:4111-4151"
     },
     {
       "property": "name",
       "of": "Move",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:4835-4856"
+      "defined": "/PokeSpell.api.spell:4153-4171"
     },
     {
       "property": "accuracy",
       "of": "Move",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:4861-4894"
+      "defined": "/PokeSpell.api.spell:4173-4199"
     },
     {
       "property": "pp",
       "of": "Move",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:4900-4927"
+      "defined": "/PokeSpell.api.spell:4201-4221"
     },
     {
       "property": "priority",
       "of": "Move",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:4933-4966"
+      "defined": "/PokeSpell.api.spell:4223-4249"
     },
     {
       "property": "power",
       "of": "Move",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:4972-5002"
+      "defined": "/PokeSpell.api.spell:4251-4274"
     },
     {
       "property": "contest_combos",
       "asWritten": "contest combos",
       "of": "Move",
       "datatype": "ContestCombo",
-      "defined": "/PokeSpell.api.spell:5008-5050"
+      "defined": "/PokeSpell.api.spell:4276-4315"
     },
     {
       "property": "contest_type",
       "asWritten": "contest type",
       "of": "Move",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:5055-5095"
+      "defined": "/PokeSpell.api.spell:4317-4354"
     },
     {
       "property": "contest_effect",
       "asWritten": "contest effect",
       "of": "Move",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:5100-5142"
+      "defined": "/PokeSpell.api.spell:4356-4395"
     },
     {
       "property": "damage_class",
       "asWritten": "damage class",
       "of": "Move",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:5147-5187"
+      "defined": "/PokeSpell.api.spell:4397-4434"
     },
     {
       "property": "effect_entries",
       "asWritten": "effect entries",
       "of": "Move",
       "datatype": "list of effect-entries",
-      "defined": "/PokeSpell.api.spell:5192-5243"
+      "defined": "/PokeSpell.api.spell:4436-4484"
     },
     {
       "property": "effect_changes",
       "asWritten": "effect changes",
       "of": "Move",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:5248-5289"
+      "defined": "/PokeSpell.api.spell:4486-4524"
     },
     {
       "property": "generation",
       "of": "Move",
       "datatype": "Generation",
-      "defined": "/PokeSpell.api.spell:5294-5333"
+      "defined": "/PokeSpell.api.spell:4526-4558"
     },
     {
       "property": "meta",
       "of": "Move",
       "datatype": "Meta",
-      "defined": "/PokeSpell.api.spell:5339-5366"
+      "defined": "/PokeSpell.api.spell:4560-4580"
     },
     {
       "property": "names",
       "of": "Move",
       "datatype": "list of names",
-      "defined": "/PokeSpell.api.spell:5372-5405"
+      "defined": "/PokeSpell.api.spell:4582-4612"
     },
     {
       "property": "past_values",
       "asWritten": "past values",
       "of": "Move",
       "datatype": "list of past-values",
-      "defined": "/PokeSpell.api.spell:5410-5455"
+      "defined": "/PokeSpell.api.spell:4614-4656"
     },
     {
       "property": "stat_changes",
       "asWritten": "stat changes",
       "of": "Move",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:5460-5499"
+      "defined": "/PokeSpell.api.spell:4658-4694"
     },
     {
       "property": "super_contest_effect",
       "asWritten": "super contest effect",
       "of": "Move",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:5504-5552"
+      "defined": "/PokeSpell.api.spell:4696-4741"
     },
     {
       "property": "target",
       "of": "Move",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:5557-5591"
+      "defined": "/PokeSpell.api.spell:4743-4774"
     },
     {
       "property": "kind",
       "of": "Move",
       "datatype": "Type",
-      "defined": "/PokeSpell.api.spell:5608-5646"
+      "defined": "/PokeSpell.api.spell:4776-4814"
     },
     {
       "property": "machines",
       "of": "Move",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:5658-5693"
+      "defined": "/PokeSpell.api.spell:4816-4848"
     },
     {
       "property": "flavor_text_entries",
       "asWritten": "flavor text entries",
       "of": "Move",
       "datatype": "list of flavor-text-entries",
-      "defined": "/PokeSpell.api.spell:5698-5759"
+      "defined": "/PokeSpell.api.spell:4850-4908"
     },
     {
       "property": "learned_by_pokemon",
       "asWritten": "learned by pokemon",
       "of": "Move",
       "datatype": "list of pokemon",
-      "defined": "/PokeSpell.api.spell:5764-5812"
+      "defined": "/PokeSpell.api.spell:4910-4955"
     },
     {
       "type": "EvolutionChain",
@@ -838,19 +838,19 @@
         "placeType": "PokeApi",
         "collection": "evolution_chains"
       },
-      "defined": "/PokeSpell.api.spell:5826-5975"
+      "defined": "/PokeSpell.api.spell:4957-5077"
     },
     {
       "property": "number",
       "of": "EvolutionChain",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:5890-5930"
+      "defined": "/PokeSpell.api.spell:5013-5053"
     },
     {
       "property": "chain",
       "of": "EvolutionChain",
       "datatype": "Chain",
-      "defined": "/PokeSpell.api.spell:5942-5971"
+      "defined": "/PokeSpell.api.spell:5055-5077"
     },
     {
       "type": "Generation",
@@ -860,423 +860,423 @@
         "placeType": "PokeApi",
         "collection": "generations"
       },
-      "defined": "/PokeSpell.api.spell:5986-6434"
+      "defined": "/PokeSpell.api.spell:5079-5460"
     },
     {
       "property": "number",
       "of": "Generation",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:6045-6085"
+      "defined": "/PokeSpell.api.spell:5129-5169"
     },
     {
       "property": "name",
       "of": "Generation",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:6097-6118"
+      "defined": "/PokeSpell.api.spell:5171-5189"
     },
     {
       "property": "abilities",
       "of": "Generation",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:6123-6159"
+      "defined": "/PokeSpell.api.spell:5191-5224"
     },
     {
       "property": "main_region",
       "asWritten": "main region",
       "of": "Generation",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:6164-6203"
+      "defined": "/PokeSpell.api.spell:5226-5262"
     },
     {
       "property": "moves",
       "of": "Generation",
       "datatype": "list of moves",
-      "defined": "/PokeSpell.api.spell:6208-6241"
+      "defined": "/PokeSpell.api.spell:5264-5294"
     },
     {
       "property": "names",
       "of": "Generation",
       "datatype": "list of names",
-      "defined": "/PokeSpell.api.spell:6246-6279"
+      "defined": "/PokeSpell.api.spell:5296-5326"
     },
     {
       "property": "pokemon_species",
       "asWritten": "pokemon species",
       "of": "Generation",
       "datatype": "list of pokemon-species",
-      "defined": "/PokeSpell.api.spell:6284-6337"
+      "defined": "/PokeSpell.api.spell:5328-5378"
     },
     {
       "property": "types",
       "of": "Generation",
       "datatype": "list of types",
-      "defined": "/PokeSpell.api.spell:6342-6375"
+      "defined": "/PokeSpell.api.spell:5380-5410"
     },
     {
       "property": "version_groups",
       "asWritten": "version groups",
       "of": "Generation",
       "datatype": "list of poke-api-names",
-      "defined": "/PokeSpell.api.spell:6380-6431"
+      "defined": "/PokeSpell.api.spell:5412-5460"
     },
     {
       "type": "PokemonAbility",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:6445-6616"
+      "defined": "/PokeSpell.api.spell:5462-5596"
     },
     {
       "property": "hidden",
       "of": "PokemonAbility",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:6484-6532"
+      "defined": "/PokeSpell.api.spell:5495-5543"
     },
     {
       "property": "slot",
       "of": "PokemonAbility",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:6544-6573"
+      "defined": "/PokeSpell.api.spell:5545-5567"
     },
     {
       "property": "ability",
       "of": "PokemonAbility",
       "datatype": "Ability",
-      "defined": "/PokeSpell.api.spell:6579-6612"
+      "defined": "/PokeSpell.api.spell:5569-5596"
     },
     {
       "type": "PastAbility",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:6627-6753"
+      "defined": "/PokeSpell.api.spell:5598-5713"
     },
     {
       "property": "generation",
       "of": "PastAbility",
       "datatype": "Generation",
-      "defined": "/PokeSpell.api.spell:6651-6690"
+      "defined": "/PokeSpell.api.spell:5628-5660"
     },
     {
       "property": "abilities",
       "of": "PastAbility",
       "datatype": "list of past-ability-abilities",
-      "defined": "/PokeSpell.api.spell:6696-6750"
+      "defined": "/PokeSpell.api.spell:5662-5713"
     },
     {
       "type": "PastAbilityAbility",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:6764-6901"
+      "defined": "/PokeSpell.api.spell:5715-5825"
     },
     {
       "property": "hidden",
       "of": "PastAbilityAbility",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:6808-6856"
+      "defined": "/PokeSpell.api.spell:5753-5801"
     },
     {
       "property": "slot",
       "of": "PastAbilityAbility",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:6868-6897"
+      "defined": "/PokeSpell.api.spell:5803-5825"
     },
     {
       "type": "GameIndex",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:6912-7013"
+      "defined": "/PokeSpell.api.spell:5827-5917"
     },
     {
       "property": "game_index",
       "asWritten": "game index",
       "of": "GameIndex",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:6934-6969"
+      "defined": "/PokeSpell.api.spell:5855-5883"
     },
     {
       "property": "version",
       "of": "GameIndex",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:6975-7010"
+      "defined": "/PokeSpell.api.spell:5885-5917"
     },
     {
       "type": "PokemonMove",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:7024-7149"
+      "defined": "/PokeSpell.api.spell:5919-6033"
     },
     {
       "property": "move",
       "of": "PokemonMove",
       "datatype": "Move",
-      "defined": "/PokeSpell.api.spell:7048-7075"
+      "defined": "/PokeSpell.api.spell:5949-5969"
     },
     {
       "property": "version_group_details",
       "asWritten": "version group details",
       "of": "PokemonMove",
       "datatype": "list of version-group-details",
-      "defined": "/PokeSpell.api.spell:7081-7146"
+      "defined": "/PokeSpell.api.spell:5971-6033"
     },
     {
       "type": "VersionGroupDetail",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:7160-7369"
+      "defined": "/PokeSpell.api.spell:6035-6216"
     },
     {
       "property": "level_learned_at",
       "asWritten": "level learned at",
       "of": "VersionGroupDetail",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:7192-7233"
+      "defined": "/PokeSpell.api.spell:6073-6107"
     },
     {
       "property": "version_group",
       "asWritten": "version group",
       "of": "VersionGroupDetail",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:7239-7280"
+      "defined": "/PokeSpell.api.spell:6109-6147"
     },
     {
       "property": "move_learn_method",
       "asWritten": "move learn method",
       "of": "VersionGroupDetail",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:7285-7330"
+      "defined": "/PokeSpell.api.spell:6149-6191"
     },
     {
       "property": "order",
       "of": "VersionGroupDetail",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:7335-7365"
+      "defined": "/PokeSpell.api.spell:6193-6216"
     },
     {
       "type": "Sprite",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:7380-7621"
+      "defined": "/PokeSpell.api.spell:6218-6435"
     },
     {
       "property": "other",
       "of": "Sprite",
       "datatype": "Other",
-      "defined": "/PokeSpell.api.spell:7398-7427"
+      "defined": "/PokeSpell.api.spell:6242-6265"
     },
     {
       "property": "back_shiny",
       "asWritten": "back shiny",
       "of": "Sprite",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:7433-7460"
+      "defined": "/PokeSpell.api.spell:6267-6291"
     },
     {
       "property": "front_shiny",
       "asWritten": "front shiny",
       "of": "Sprite",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:7479-7507"
+      "defined": "/PokeSpell.api.spell:6308-6333"
     },
     {
       "property": "back_default",
       "asWritten": "back default",
       "of": "Sprite",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:7526-7555"
+      "defined": "/PokeSpell.api.spell:6350-6376"
     },
     {
       "property": "front_default",
       "asWritten": "front default",
       "of": "Sprite",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:7574-7604"
+      "defined": "/PokeSpell.api.spell:6393-6420"
     },
     {
       "type": "Other",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:7632-7816"
+      "defined": "/PokeSpell.api.spell:6437-6594"
     },
     {
       "property": "home",
       "of": "Other",
       "datatype": "Home",
-      "defined": "/PokeSpell.api.spell:7649-7676"
+      "defined": "/PokeSpell.api.spell:6461-6481"
     },
     {
       "property": "showdown",
       "of": "Other",
       "datatype": "Showdown",
-      "defined": "/PokeSpell.api.spell:7682-7717"
+      "defined": "/PokeSpell.api.spell:6483-6511"
     },
     {
       "property": "dream_world",
       "asWritten": "dream world",
       "of": "Other",
       "datatype": "DreamWorld",
-      "defined": "/PokeSpell.api.spell:7723-7760"
+      "defined": "/PokeSpell.api.spell:6513-6547"
     },
     {
       "property": "official_artwork",
       "asWritten": "official artwork",
       "of": "Other",
       "datatype": "OfficialArtwork",
-      "defined": "/PokeSpell.api.spell:7765-7813"
+      "defined": "/PokeSpell.api.spell:6549-6594"
     },
     {
       "type": "Home",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:7827-7937"
+      "defined": "/PokeSpell.api.spell:6596-6702"
     },
     {
       "property": "front_shiny",
       "asWritten": "front shiny",
       "of": "Home",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:7843-7871"
+      "defined": "/PokeSpell.api.spell:6618-6643"
     },
     {
       "property": "front_default",
       "asWritten": "front default",
       "of": "Home",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:7890-7920"
+      "defined": "/PokeSpell.api.spell:6660-6687"
     },
     {
       "type": "Showdown",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:7948-8156"
+      "defined": "/PokeSpell.api.spell:6704-6898"
     },
     {
       "property": "back_shiny",
       "asWritten": "back shiny",
       "of": "Showdown",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:7968-7995"
+      "defined": "/PokeSpell.api.spell:6730-6754"
     },
     {
       "property": "front_shiny",
       "asWritten": "front shiny",
       "of": "Showdown",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:8014-8042"
+      "defined": "/PokeSpell.api.spell:6771-6796"
     },
     {
       "property": "back_default",
       "asWritten": "back default",
       "of": "Showdown",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:8061-8090"
+      "defined": "/PokeSpell.api.spell:6813-6839"
     },
     {
       "property": "front_default",
       "asWritten": "front default",
       "of": "Showdown",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:8109-8139"
+      "defined": "/PokeSpell.api.spell:6856-6883"
     },
     {
       "type": "DreamWorld",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:8167-8237"
+      "defined": "/PokeSpell.api.spell:6900-6971"
     },
     {
       "property": "front_default",
       "asWritten": "front default",
       "of": "DreamWorld",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:8190-8220"
+      "defined": "/PokeSpell.api.spell:6929-6956"
     },
     {
       "type": "OfficialArtwork",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:8248-8370"
+      "defined": "/PokeSpell.api.spell:6973-7092"
     },
     {
       "property": "front_shiny",
       "asWritten": "front shiny",
       "of": "OfficialArtwork",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:8276-8304"
+      "defined": "/PokeSpell.api.spell:7008-7033"
     },
     {
       "property": "front_default",
       "asWritten": "front default",
       "of": "OfficialArtwork",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:8323-8353"
+      "defined": "/PokeSpell.api.spell:7050-7077"
     },
     {
       "type": "Cry",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:8381-8478"
+      "defined": "/PokeSpell.api.spell:7094-7187"
     },
     {
       "property": "latest",
       "of": "Cry",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:8396-8419"
+      "defined": "/PokeSpell.api.spell:7115-7135"
     },
     {
       "property": "legacy",
       "of": "Cry",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:8438-8461"
+      "defined": "/PokeSpell.api.spell:7152-7172"
     },
     {
       "type": "Stat",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:8489-8617"
+      "defined": "/PokeSpell.api.spell:7189-7295"
     },
     {
       "property": "base_stat",
       "asWritten": "base stat",
       "of": "Stat",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:8505-8539"
+      "defined": "/PokeSpell.api.spell:7211-7238"
     },
     {
       "property": "effort",
       "of": "Stat",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:8545-8576"
+      "defined": "/PokeSpell.api.spell:7240-7264"
     },
     {
       "property": "stat",
       "of": "Stat",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:8582-8614"
+      "defined": "/PokeSpell.api.spell:7266-7295"
     },
     {
       "property": "word",
       "of": "Stat",
       "datatype": "text",
-      "defined": "/Pokemon.spell:5031-5411"
+      "defined": "/Pokemon.spell:4763-5066"
     },
     {
       "type": "PastStat",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:8628-8730"
+      "defined": "/PokeSpell.api.spell:7297-7388"
     },
     {
       "property": "generation",
       "of": "PastStat",
       "datatype": "Generation",
-      "defined": "/PokeSpell.api.spell:8649-8688"
+      "defined": "/PokeSpell.api.spell:7324-7356"
     },
     {
       "property": "stats",
       "of": "PastStat",
       "datatype": "list of stats",
-      "defined": "/PokeSpell.api.spell:8694-8727"
+      "defined": "/PokeSpell.api.spell:7358-7388"
     },
     {
       "type": "PokemonType",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:8741-8860"
+      "defined": "/PokeSpell.api.spell:7390-7482"
     },
     {
       "property": "slot",
       "of": "PokemonType",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:8765-8794"
+      "defined": "/PokeSpell.api.spell:7420-7442"
     },
     {
       "property": "kind",
       "of": "PokemonType",
       "datatype": "Type",
-      "defined": "/PokeSpell.api.spell:8812-8850"
+      "defined": "/PokeSpell.api.spell:7444-7482"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1289,188 +1289,188 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spell:6862-6972"
+      "defined": "/Pokemon.spell:6364-6479"
     },
     {
       "type": "PokedexNumber",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:8871-8978"
+      "defined": "/PokeSpell.api.spell:7484-7580"
     },
     {
       "property": "entry_number",
       "asWritten": "entry number",
       "of": "PokedexNumber",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:8897-8934"
+      "defined": "/PokeSpell.api.spell:7516-7546"
     },
     {
       "property": "pokedex",
       "of": "PokedexNumber",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:8940-8975"
+      "defined": "/PokeSpell.api.spell:7548-7580"
     },
     {
       "type": "Name",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:8989-9070"
+      "defined": "/PokeSpell.api.spell:7582-7657"
     },
     {
       "property": "name",
       "of": "Name",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:9005-9026"
+      "defined": "/PokeSpell.api.spell:7604-7622"
     },
     {
       "property": "language",
       "of": "Name",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:9031-9067"
+      "defined": "/PokeSpell.api.spell:7624-7657"
     },
     {
       "type": "PalParkEncounter",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:9081-9222"
+      "defined": "/PokeSpell.api.spell:7659-7778"
     },
     {
       "property": "base_score",
       "asWritten": "base score",
       "of": "PalParkEncounter",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:9111-9146"
+      "defined": "/PokeSpell.api.spell:7695-7723"
     },
     {
       "property": "rate",
       "of": "PalParkEncounter",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:9152-9181"
+      "defined": "/PokeSpell.api.spell:7725-7747"
     },
     {
       "property": "area",
       "of": "PalParkEncounter",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:9187-9219"
+      "defined": "/PokeSpell.api.spell:7749-7778"
     },
     {
       "type": "FlavorTextEntry",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:9233-9374"
+      "defined": "/PokeSpell.api.spell:7780-7909"
     },
     {
       "property": "flavor_text",
       "asWritten": "flavor text",
       "of": "FlavorTextEntry",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:9262-9290"
+      "defined": "/PokeSpell.api.spell:7815-7840"
     },
     {
       "property": "language",
       "of": "FlavorTextEntry",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:9295-9331"
+      "defined": "/PokeSpell.api.spell:7842-7875"
     },
     {
       "property": "version",
       "of": "FlavorTextEntry",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:9336-9371"
+      "defined": "/PokeSpell.api.spell:7877-7909"
     },
     {
       "type": "Genus",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:9385-9468"
+      "defined": "/PokeSpell.api.spell:7911-7988"
     },
     {
       "property": "genus",
       "of": "Genus",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:9402-9424"
+      "defined": "/PokeSpell.api.spell:7934-7953"
     },
     {
       "property": "language",
       "of": "Genus",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:9429-9465"
+      "defined": "/PokeSpell.api.spell:7955-7988"
     },
     {
       "type": "Variety",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:9479-9609"
+      "defined": "/PokeSpell.api.spell:7990-8093"
     },
     {
       "property": "default",
       "of": "Variety",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:9510-9560"
+      "defined": "/PokeSpell.api.spell:8015-8065"
     },
     {
       "property": "pokemon",
       "of": "Variety",
       "datatype": "Pokemon",
-      "defined": "/PokeSpell.api.spell:9572-9605"
+      "defined": "/PokeSpell.api.spell:8067-8093"
     },
     {
       "type": "DamageRelation",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:9620-9933"
+      "defined": "/PokeSpell.api.spell:8095-8378"
     },
     {
       "property": "no_damage_to",
       "asWritten": "no damage to",
       "of": "DamageRelation",
       "datatype": "list of types",
-      "defined": "/PokeSpell.api.spell:9647-9687"
+      "defined": "/PokeSpell.api.spell:8128-8165"
     },
     {
       "property": "half_damage_to",
       "asWritten": "half damage to",
       "of": "DamageRelation",
       "datatype": "list of types",
-      "defined": "/PokeSpell.api.spell:9692-9734"
+      "defined": "/PokeSpell.api.spell:8167-8206"
     },
     {
       "property": "double_damage_to",
       "asWritten": "double damage to",
       "of": "DamageRelation",
       "datatype": "list of types",
-      "defined": "/PokeSpell.api.spell:9739-9783"
+      "defined": "/PokeSpell.api.spell:8208-8249"
     },
     {
       "property": "no_damage_from",
       "asWritten": "no damage from",
       "of": "DamageRelation",
       "datatype": "list of types",
-      "defined": "/PokeSpell.api.spell:9788-9830"
+      "defined": "/PokeSpell.api.spell:8251-8290"
     },
     {
       "property": "half_damage_from",
       "asWritten": "half damage from",
       "of": "DamageRelation",
       "datatype": "list of types",
-      "defined": "/PokeSpell.api.spell:9835-9879"
+      "defined": "/PokeSpell.api.spell:8292-8333"
     },
     {
       "property": "double_damage_from",
       "asWritten": "double damage from",
       "of": "DamageRelation",
       "datatype": "list of types",
-      "defined": "/PokeSpell.api.spell:9884-9930"
+      "defined": "/PokeSpell.api.spell:8335-8378"
     },
     {
       "type": "TypePokemon",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:9944-10040"
+      "defined": "/PokeSpell.api.spell:8380-8460"
     },
     {
       "property": "slot",
       "of": "TypePokemon",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:9968-9997"
+      "defined": "/PokeSpell.api.spell:8410-8432"
     },
     {
       "property": "pokemon",
       "of": "TypePokemon",
       "datatype": "Pokemon",
-      "defined": "/PokeSpell.api.spell:10003-10036"
+      "defined": "/PokeSpell.api.spell:8434-8460"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1483,227 +1483,227 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spell:7054-7079"
+      "defined": "/Pokemon.spell:6523-6553"
     },
     {
       "type": "EffectEntry",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:10051-10176"
+      "defined": "/PokeSpell.api.spell:8462-8576"
     },
     {
       "property": "effect",
       "of": "EffectEntry",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:10075-10098"
+      "defined": "/PokeSpell.api.spell:8493-8513"
     },
     {
       "property": "short_effect",
       "asWritten": "short effect",
       "of": "EffectEntry",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:10103-10132"
+      "defined": "/PokeSpell.api.spell:8515-8541"
     },
     {
       "property": "language",
       "of": "EffectEntry",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:10137-10173"
+      "defined": "/PokeSpell.api.spell:8543-8576"
     },
     {
       "type": "EffectChange",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:10187-10312"
+      "defined": "/PokeSpell.api.spell:8578-8698"
     },
     {
       "property": "version_group",
       "asWritten": "version group",
       "of": "EffectChange",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:10212-10253"
+      "defined": "/PokeSpell.api.spell:8610-8648"
     },
     {
       "property": "effect_entries",
       "asWritten": "effect entries",
       "of": "EffectChange",
       "datatype": "list of effect-entries",
-      "defined": "/PokeSpell.api.spell:10258-10309"
+      "defined": "/PokeSpell.api.spell:8650-8698"
     },
     {
       "type": "AbilityPokemon",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:10323-10494"
+      "defined": "/PokeSpell.api.spell:8700-8834"
     },
     {
       "property": "hidden",
       "of": "AbilityPokemon",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:10362-10410"
+      "defined": "/PokeSpell.api.spell:8734-8782"
     },
     {
       "property": "slot",
       "of": "AbilityPokemon",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:10422-10451"
+      "defined": "/PokeSpell.api.spell:8784-8806"
     },
     {
       "property": "pokemon",
       "of": "AbilityPokemon",
       "datatype": "Pokemon",
-      "defined": "/PokeSpell.api.spell:10457-10490"
+      "defined": "/PokeSpell.api.spell:8808-8834"
     },
     {
       "type": "ContestCombo",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:10505-10600"
+      "defined": "/PokeSpell.api.spell:8836-8915"
     },
     {
       "property": "normal",
       "of": "ContestCombo",
       "datatype": "Normal",
-      "defined": "/PokeSpell.api.spell:10530-10561"
+      "defined": "/PokeSpell.api.spell:8867-8891"
     },
     {
       "property": "super",
       "of": "ContestCombo",
       "datatype": "Super",
-      "defined": "/PokeSpell.api.spell:10567-10596"
+      "defined": "/PokeSpell.api.spell:8893-8915"
     },
     {
       "type": "Normal",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:10611-10712"
+      "defined": "/PokeSpell.api.spell:8917-9012"
     },
     {
       "property": "use_before",
       "asWritten": "use before",
       "of": "Normal",
       "datatype": "list of moves",
-      "defined": "/PokeSpell.api.spell:10629-10667"
+      "defined": "/PokeSpell.api.spell:8941-8976"
     },
     {
       "property": "use_after",
       "asWritten": "use after",
       "of": "Normal",
       "datatype": "list of moves",
-      "defined": "/PokeSpell.api.spell:10672-10709"
+      "defined": "/PokeSpell.api.spell:8978-9012"
     },
     {
       "type": "Super",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:10723-10737"
+      "defined": "/PokeSpell.api.spell:9014-9034"
     },
     {
       "type": "Meta",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:10742-11082"
+      "defined": "/PokeSpell.api.spell:9036-9304"
     },
     {
       "property": "ailment",
       "of": "Meta",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:10758-10793"
+      "defined": "/PokeSpell.api.spell:9058-9090"
     },
     {
       "property": "category",
       "of": "Meta",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:10798-10834"
+      "defined": "/PokeSpell.api.spell:9092-9125"
     },
     {
       "property": "drain",
       "of": "Meta",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:10839-10869"
+      "defined": "/PokeSpell.api.spell:9127-9150"
     },
     {
       "property": "healing",
       "of": "Meta",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:10875-10907"
+      "defined": "/PokeSpell.api.spell:9152-9177"
     },
     {
       "property": "crit_rate",
       "asWritten": "crit rate",
       "of": "Meta",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:10913-10947"
+      "defined": "/PokeSpell.api.spell:9179-9206"
     },
     {
       "property": "ailment_chance",
       "asWritten": "ailment chance",
       "of": "Meta",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:10953-10992"
+      "defined": "/PokeSpell.api.spell:9208-9240"
     },
     {
       "property": "flinch_chance",
       "asWritten": "flinch chance",
       "of": "Meta",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:10998-11036"
+      "defined": "/PokeSpell.api.spell:9242-9273"
     },
     {
       "property": "stat_chance",
       "asWritten": "stat chance",
       "of": "Meta",
       "datatype": "number",
-      "defined": "/PokeSpell.api.spell:11042-11078"
+      "defined": "/PokeSpell.api.spell:9275-9304"
     },
     {
       "type": "PastValue",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:11093-11267"
+      "defined": "/PokeSpell.api.spell:9306-9452"
     },
     {
       "property": "effect_entries",
       "asWritten": "effect entries",
       "of": "PastValue",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:11115-11156"
+      "defined": "/PokeSpell.api.spell:9334-9372"
     },
     {
       "property": "kind",
       "of": "PastValue",
       "datatype": "Type",
-      "defined": "/PokeSpell.api.spell:11173-11211"
+      "defined": "/PokeSpell.api.spell:9374-9412"
     },
     {
       "property": "version_group",
       "asWritten": "version group",
       "of": "PastValue",
       "datatype": "PokeApiName",
-      "defined": "/PokeSpell.api.spell:11223-11264"
+      "defined": "/PokeSpell.api.spell:9414-9452"
     },
     {
       "type": "Chain",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:11278-11496"
+      "defined": "/PokeSpell.api.spell:9454-9638"
     },
     {
       "property": "baby",
       "of": "Chain",
       "datatype": "choice",
-      "defined": "/PokeSpell.api.spell:11307-11351"
+      "defined": "/PokeSpell.api.spell:9477-9521"
     },
     {
       "property": "species",
       "of": "Chain",
       "datatype": "PokemonSpecies",
-      "defined": "/PokeSpell.api.spell:11363-11400"
+      "defined": "/PokeSpell.api.spell:9523-9557"
     },
     {
       "property": "evolution_details",
       "asWritten": "evolution details",
       "of": "Chain",
       "datatype": "list of texts",
-      "defined": "/PokeSpell.api.spell:11405-11449"
+      "defined": "/PokeSpell.api.spell:9559-9600"
     },
     {
       "property": "evolves_to",
       "asWritten": "evolves to",
       "of": "Chain",
       "datatype": "list of chains",
-      "defined": "/PokeSpell.api.spell:11454-11493"
+      "defined": "/PokeSpell.api.spell:9602-9638"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1716,24 +1716,24 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spell:7463-7818"
+      "defined": "/Pokemon.spell:6918-7278"
     },
     {
       "type": "PokeApiName",
       "superType": "Thing",
-      "defined": "/PokeSpell.api.spell:11507-11667"
+      "defined": "/PokeSpell.api.spell:9640-9778"
     },
     {
       "property": "name",
       "of": "PokeApiName",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:11532-11553"
+      "defined": "/PokeSpell.api.spell:9671-9689"
     },
     {
       "property": "address",
       "of": "PokeApiName",
       "datatype": "text",
-      "defined": "/PokeSpell.api.spell:11570-11608"
+      "defined": "/PokeSpell.api.spell:9691-9729"
     },
     {
       "type": "PokeApi",
@@ -1768,7 +1768,7 @@
           }
         }
       },
-      "defined": "/PokeSpell.api.spell:695-1236"
+      "defined": "/PokeSpell.api.spell:682-1203"
     },
     {
       "type": "Favourite",
@@ -1778,25 +1778,25 @@
         "placeType": "MyFavourite",
         "collection": "favourites"
       },
-      "defined": "/Favourites.api.spell:250-406"
+      "defined": "/Favourites.api.spell:254-383"
     },
     {
       "property": "name",
       "of": "Favourite",
       "datatype": "text",
-      "defined": "/Favourites.api.spell:320-341"
+      "defined": "/Favourites.api.spell:308-326"
     },
     {
       "property": "address",
       "of": "Favourite",
       "datatype": "text",
-      "defined": "/Favourites.api.spell:346-370"
+      "defined": "/Favourites.api.spell:328-349"
     },
     {
       "property": "pokemon",
       "of": "Favourite",
       "datatype": "Pokemon",
-      "defined": "/Pokemon.spell:8316-8371"
+      "defined": "/Pokemon.spell:7681-7733"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1809,7 +1809,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Pokemon.spell:8384-8409"
+      "defined": "/Pokemon.spell:7735-7765"
     },
     {
       "type": "MyFavourite",
@@ -1818,12 +1818,12 @@
         "name": "my_favourites",
         "kind": "database on this device"
       },
-      "defined": "/Favourites.api.spell:231-244"
+      "defined": "/Favourites.api.spell:214-252"
     },
     {
       "type": "Guess",
       "superType": "Thing",
-      "defined": "/WhosThat.spell:198-2138"
+      "defined": "/WhosThat.spell:204-1980"
     },
     {
       "property": "hiding",
@@ -1835,32 +1835,32 @@
       "property": "choices",
       "of": "Guess",
       "datatype": "list of pokemon",
-      "defined": "/WhosThat.spell:257-295"
+      "defined": "/WhosThat.spell:254-288"
     },
     {
       "property": "guessed",
       "of": "Guess",
       "datatype": "Pokemon",
-      "defined": "/WhosThat.spell:300-326"
+      "defined": "/WhosThat.spell:290-316"
     },
     {
       "property": "found_out",
       "asWritten": "found out",
       "of": "Guess",
       "datatype": "choice",
-      "defined": "/WhosThat.spell:339-387"
+      "defined": "/WhosThat.spell:319-364"
     },
     {
       "property": "right",
       "of": "Guess",
       "datatype": "choice",
-      "defined": "/WhosThat.spell:400-443"
+      "defined": "/WhosThat.spell:366-406"
     },
     {
       "property": "look",
       "of": "Guess",
       "datatype": "text",
-      "defined": "/WhosThat.spell:456-585"
+      "defined": "/WhosThat.spell:448-524"
     },
     {
       "syntax": "play again (of {thisArg:expression})?",
@@ -1875,7 +1875,7 @@
       "name": "play again",
       "returns": "nothing",
       "waits": true,
-      "defined": "/WhosThat.spell:601-873"
+      "defined": "/WhosThat.spell:578-782"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1888,7 +1888,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/WhosThat.spell:887-1320"
+      "defined": "/WhosThat.spell:785-1213"
     },
     {
       "uiDefaults": {
@@ -1896,12 +1896,12 @@
           "appearance": "pill"
         }
       },
-      "defined": "/PokeSpell.spell:393-453"
+      "defined": "/PokeSpell.spell:402-462"
     },
     {
       "type": "Pokedex",
       "superType": "App",
-      "defined": "/PokeSpell.spell:461-4173"
+      "defined": "/PokeSpell.spell:464-4262"
     },
     {
       "property": "tab",
@@ -1913,32 +1913,32 @@
       "property": "search",
       "of": "Pokedex",
       "datatype": "text",
-      "defined": "/PokeSpell.spell:506-526"
+      "defined": "/PokeSpell.spell:503-523"
     },
     {
       "property": "showing",
       "of": "Pokedex",
       "datatype": "Pokemon",
-      "defined": "/PokeSpell.spell:531-557"
+      "defined": "/PokeSpell.spell:525-551"
     },
     {
       "property": "trail",
       "of": "Pokedex",
       "datatype": "list of pokemon",
-      "defined": "/PokeSpell.spell:562-598"
+      "defined": "/PokeSpell.spell:553-585"
     },
     {
       "property": "picked_kind",
       "asWritten": "picked kind",
       "of": "Pokedex",
       "datatype": "Type",
-      "defined": "/PokeSpell.spell:603-630"
+      "defined": "/PokeSpell.spell:587-614"
     },
     {
       "property": "game",
       "of": "Pokedex",
       "datatype": "Guess",
-      "defined": "/PokeSpell.spell:635-660"
+      "defined": "/PokeSpell.spell:616-637"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -1952,7 +1952,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/PokeSpell.spell:665-731"
+      "defined": "/PokeSpell.spell:639-703"
     },
     {
       "syntax": "go to {callArgs:expression} (of {thisArg:expression})?",
@@ -1973,7 +1973,7 @@
       ],
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spell:744-889"
+      "defined": "/PokeSpell.spell:706-844"
     },
     {
       "syntax": "go back (of {thisArg:expression})?",
@@ -1988,7 +1988,7 @@
       "name": "go back",
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spell:903-1089"
+      "defined": "/PokeSpell.spell:847-1026"
     },
     {
       "syntax": "surprise me (of {thisArg:expression})?",
@@ -2003,20 +2003,20 @@
       "name": "surprise me",
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spell:1103-1203"
+      "defined": "/PokeSpell.spell:1052-1112"
     },
     {
       "property": "kinds_to_pick",
       "asWritten": "kinds to pick",
       "of": "Pokedex",
       "datatype": "list of types",
-      "defined": "/PokeSpell.spell:1217-1270"
+      "defined": "/PokeSpell.spell:1115-1165"
     },
     {
       "property": "found",
       "of": "Pokedex",
       "datatype": "list of pokemon",
-      "defined": "/PokeSpell.spell:1284-1480"
+      "defined": "/PokeSpell.spell:1231-1351"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2029,7 +2029,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PokeSpell.spell:1496-2719"
+      "defined": "/PokeSpell.spell:1354-2582"
     }
   ],
   "codeLines": [

@@ -46,15 +46,16 @@ describe("SpellProject editing", () => {
     const parserOf = () => (game.scope?.parser as SP.SpellParser | undefined)?.form ?? "spell"
     const codeOf = () => P.JSWriter.instance.writeMatch(game.match!) as string
     const before = codeOf()
-    expect(game.form).toBe("spellx")
-    expect(parserOf(), "at first").toBe("spellx")
-    await project.updateText(game, 'a "marker" is a thing:\n\t- its "count" is a number\n')
+    // Solitaire is plain Spell since epic `language` P46:  typed into tags, and back
     expect(game.form).toBe("spell")
-    expect(parserOf(), "plain").toBe("spell")
+    expect(parserOf(), "at first").toBe("spell")
+    await project.updateText(game, '<thing "marker">\n\t<property "count">a number</>\n</thing>\n')
+    expect(game.form).toBe("spellx")
+    expect(parserOf(), "tags").toBe("spellx")
     expect(codeOf()).toContain("class Marker")
     await project.updateText(game, gameText)
-    expect(game.form).toBe("spellx")
-    expect(parserOf(), "back").toBe("spellx")
+    expect(game.form).toBe("spell")
+    expect(parserOf(), "back").toBe("spell")
     expect(codeOf()).toBe(before)
   })
 

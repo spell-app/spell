@@ -1,33 +1,36 @@
 # Bill Splitter
-Who owes what after a meal:  each person pays for what they ordered, and their share of the tip.
-Change a name, an amount or the tip, and every sum follows.
-A diner is this project's own, in `Diner.spell`, and how money is written is in `Money.spell`:
-this file holds the bill.
+// Who owes what after a meal:  each person pays for what they ordered, and their share of the tip.
+// Change a name, an amount or the tip, and every sum follows.
+// A diner is this project's own, in `Diner.spell`, and how money is written is in `Money.spell`:
+// this file holds the bill.
 
 ## The bill
 
-<app "bill splitter">
-	<property "diners">a new table</>
-	<property "percent" type="percent" description="The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18">18%</property>
-	<property "subtotal" description="What everyone ordered, added up">
+bill splitter is an app:
+	"diners" is a new table
+	// The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18
+	its "percent" is a percent starting at 18%
+	// What everyone ordered, added up
+	its "subtotal" is:
 		set added up to 0
 		for diner in the diners
 			set added up to added up + the diner's amount
 		return added up
-	</property>
-	<property "tip">the subtotal * the percent</>
-	<property "total">the subtotal + the tip</>
+	its "tip" is the subtotal * the percent
+	its "total" is the subtotal + the tip
 
-	<action "create it" description="Three diners to start with">
-		add (a new diner with name = "Ana", amount = 24) to the diners
-		add (a new diner with name = "Ben", amount = 18.5) to the diners
-		add (a new diner with name = "Cleo", amount = 31.25) to the diners
-	</action>
-	<action "add someone" icon="plus" description="An empty row, for the next person">
-		add (a new diner with name = "", amount = 0) to the diners
-	</action>
+	// Three diners to start with
+	to create it:
+		add (a new diner with name "Ana", amount = 24) to the diners
+		add (a new diner with name "Ben", amount = 18.5) to the diners
+		add (a new diner with name "Cleo", amount = 31.25) to the diners
+	// An empty row, for the next person
+	to add someone:
+		icon "plus"
+		add (a new diner with name "", amount = 0) to the diners
 
-	<draw description="The tip, the diners, then the sums">
+	// The tip, the diners, then the sums
+	to draw it:
 		<container text>
 			<stack>
 				<header level="2">Bill Splitter</header>
@@ -55,5 +58,3 @@ this file holds the bill.
 				</segment>
 			</stack>
 		</container>
-	</draw>
-</app>

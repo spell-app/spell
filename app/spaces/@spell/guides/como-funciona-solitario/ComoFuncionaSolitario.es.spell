@@ -7,27 +7,27 @@
 // - PILAS de cartas, cada tipo con sus propias reglas sobre qué carta toma
 //
 // Esta guía tiene un tipo de carta y una regla:  una columna con un rey, y cuatro cartas para probar.
-// Está escrita en el estilo de esquema;  Solitario mismo es spellml, el mismo lenguaje en etiquetas.
+// Está escrita en el estilo de esquema, como Solitario mismo.
 // Abre Solitario, en los Ejemplos, para jugar el juego entero.  Solitaire es el mismo juego, en inglés.
 
 
 ## Una carta
 // "uno de" enumera cada valor que puede tener una propiedad:  "2 ... 10" son todos los números entre ellos
 una "carta" es una vista donde:
-	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
-	- su "palo" es uno de tréboles, diamantes, corazones o espadas
+	su "rango" es uno de as, 2 ... 10, jota, dama, rey
+	su "palo" es uno de tréboles, diamantes, corazones o espadas
 
 	// el as es 1, el 2 es 2 ... el rey es 13:  su lugar en la lista de rangos
-	- su "valor" es la posición de su rango
-	- su "color" es:
+	su "valor" es la posición de su rango
+	su "color" es:
 		rojo si su palo es diamantes o corazones
 		negro de lo contrario
 
 	// p. ej. "dama de corazones"
-	- su "nombre" es su rango + " de " + su palo
+	su "nombre" es su rango + " de " + su palo
 
 	// un clic la juega en la columna
-	- para dibujarla:
+	para dibujarla:
 		devolver <es-boton apariencia="básico" color={su color} onClick={jugar eso}>{su nombre}</es-boton>
 
 
@@ -40,7 +40,7 @@ una carta pertenece a una pila
 // - "puede tomar una carta cuando" es una pregunta de sí o no que la pila contesta para cada carta
 // - "devolver" da la respuesta
 una "columna" es una pila donde:
-	- puede tomar una carta cuando:
+	puede tomar una carta cuando:
 		si está vacía
 			devolver el rango de la carta es rey
 		devolver el color de su última carta no es el color de la carta y el valor de su última carta es el valor de la carta + 1
@@ -48,11 +48,11 @@ una "columna" es una pila donde:
 
 ## La mesa:  una columna, y una mano de cartas para probar en ella
 mesa es una aplicación donde:
-	- su "columna" es una nueva columna
-	- su "mano" es una nueva pila
-	- su "mensaje" es texto
+	su "columna" es una nueva columna
+	su "mano" es una nueva pila
+	su "mensaje" es texto
 
-	- para dibujarla:
+	para dibujarla:
 		devolver <es-contenedor texto>
 			<es-encabezado tamano="pequeño">La columna</es-encabezado>
 			{dibujar su columna}

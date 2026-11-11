@@ -1,13 +1,11 @@
 # The console
-One of FizzBuzz's listeners:  it prints each number as it's counted, and the word it gets.
+// One of FizzBuzz's listeners:  it prints each number as it's counted, and the word it gets.
 
-<spell>
-	on fizzbuzz with number as a number:
-		print number, "fizzbuzz"
-	on fizz with number as a number:
-		print number, "fizz"
-	on buzz with number as a number:
-		print number, "buzz"
-	on plain number with number as a number:
-		print number
-</spell>
+on fizzbuzz with number as a number:
+	print number, "fizzbuzz"
+on fizz with number as a number:
+	print number, "fizz"
+on buzz with number as a number:
+	print number, "buzz"
+on plain number with number as a number:
+	print number

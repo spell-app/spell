@@ -9,25 +9,25 @@
 
 ## A habit:  its name, and a yes or no for each day of the week
 habit is an app where:
-	- its "name" is text
-	- its "monday" is yes or no
-	- its "tuesday" is yes or no
-	- its "wednesday" is yes or no
-	- its "thursday" is yes or no
-	- its "friday" is yes or no
-	- its "saturday" is yes or no
-	- its "sunday" is yes or no
+	its "name" is text
+	its "monday" is yes or no
+	its "tuesday" is yes or no
+	its "wednesday" is yes or no
+	its "thursday" is yes or no
+	its "friday" is yes or no
+	its "saturday" is yes or no
+	its "sunday" is yes or no
 
 	// its week as one LIST, Monday first:  [square brackets] put things in a list, in order
-	- its "days" is [its monday, its tuesday, its wednesday, its thursday, its friday, its saturday, its sunday]
+	its "days" is [its monday, its tuesday, its wednesday, its thursday, its friday, its saturday, its sunday]
 
 	// how many days this week it was done:  the days in the list that are yes
-	- its "count" is the number of days in its days where it is yes
+	its "count" is the number of days in its days where it is yes
 
 	// the most days in a row it was done
 	// - walk through the week, keeping two numbers:  the run so far, and the best run seen
 	// - a yes makes the run one longer;  a no starts it again from 0
-	- its "streak" is:
+	its "streak" is:
 		set run to 0
 		set best to 0
 		for day in its days
@@ -39,7 +39,7 @@ habit is an app where:
 		return best
 
 	// a checkbox per day, bound to the habit:  ticking one changes that day
-	- to draw it:
+	to draw it:
 		return <ui-container text>
 			<ui-segment>
 				<ui-stack>

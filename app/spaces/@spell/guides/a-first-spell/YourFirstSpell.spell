@@ -15,23 +15,23 @@
 ## Step 1:  read the sign
 // Here is all there is to the sign.  Read it line by line, as you would a recipe.
 // - It's an APP:  a program with a page of its own, the one on the right.
-// - Each line starting with a dash says one thing about it:  a PROPERTY, something it keeps, like its greeting.
+// - Each line indented under it says one thing about it:  a PROPERTY, something it keeps, like its greeting.
 hello sign is an app where:
-	- its "greeting" is text
-	- its "name" is text
-	- its "waves" is a number
+	its "greeting" is text
+	its "name" is text
+	its "waves" is a number
 	// two lines worked out from the three above:  they change whenever those do
-	- its "message" is its greeting + ", " + its name + "!"
-	- its "count" is its waves + " waves so far"
+	its "message" is its greeting + ", " + its name + "!"
+	its "count" is its waves + " waves so far"
 
 	// what the button does:  one more wave
-	- to wave back:
+	to wave back:
 		set its waves to its waves + 1
 
 	// what it looks like:  the greeting, a button, and the count
 	// - the parts in <angle brackets> are the page's pieces:  a heading, a button, a line of text
 	// - a part in {curly brackets} is filled in from the sign, so it changes when the sign does
-	- to draw it:
+	to draw it:
 		return <div class="Sign">
 			<h1>{its message}</h1>
 			<ui-button color="primary" onClick={wave back}>Wave back</ui-button>

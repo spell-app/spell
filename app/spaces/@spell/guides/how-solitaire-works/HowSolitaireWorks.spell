@@ -6,27 +6,27 @@
 // - PILES of cards, each kind with its own rules for what it will take
 //
 // This guide is one card type and one rule:  a column, with a king on it, and four cards to try.
-// It's written in the outline style;  Solitaire itself is spellml, the same language in tags.
+// It's written in the outline style, as Solitaire itself is.
 // Open Solitaire, in the Examples, to play the whole game.
 
 
 ## A card
 // "one of" lists every value a property can have:  "2 ... 10" means every number in between
 a "card" is a view where:
-	- its "rank" is one of ace, 2 ... 10, jack, queen, king
-	- its "suit" is one of clubs, diamonds, hearts or spades
+	its "rank" is one of ace, 2 ... 10, jack, queen, king
+	its "suit" is one of clubs, diamonds, hearts or spades
 
 	// ace is 1, 2 is 2 ... king is 13:  its place in the list of ranks
-	- its "value" is the position of its rank
-	- its "color" is:
+	its "value" is the position of its rank
+	its "color" is:
 		red if its suit is diamonds or hearts
 		black otherwise
 
 	// e.g. "queen of hearts"
-	- its "name" is its rank + " of " + its suit
+	its "name" is its rank + " of " + its suit
 
 	// a click tries it on the column
-	- to draw it:
+	to draw it:
 		return <ui-button appearance="basic" color={its color} onClick={try it}>{its name}</ui-button>
 
 
@@ -39,7 +39,7 @@ a card belongs to one pile
 // - "can take a card when" is a yes-or-no question the pile answers for each card
 // - "return" gives the answer:  the first line that returns, wins
 a "column" is a pile where:
-	- it can take a card when:
+	it can take a card when:
 		if it is empty
 			return the rank of the card is king
 		return the color of its last card is not the color of the card and the value of its last card is the value of the card + 1
@@ -47,11 +47,11 @@ a "column" is a pile where:
 
 ## The table:  a column, and a hand of cards to try on it
 table is an app where:
-	- its "column" is a new column
-	- its "hand" is a new pile
-	- its "message" is text
+	its "column" is a new column
+	its "hand" is a new pile
+	its "message" is text
 
-	- to draw it:
+	to draw it:
 		return <ui-container text>
 			<ui-header size="small">The column</ui-header>
 			{draw its column}

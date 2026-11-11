@@ -22,7 +22,7 @@ class Card(TwoSidedView):
     element_tag = "test-project-card"
 
     # - its "rank" is one of ace, 2 ... 10, jack, queen, king
-    #   - it "is a (rank)"
+    #   it "is a (rank)"
     RANKS = ("ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king")
     rank = prop(one_of=RANKS)
 
@@ -42,14 +42,14 @@ class Card(TwoSidedView):
         return not self.is_a_face_card
 
     # - its "suit" is one of clubs, diamonds, hearts or spades
-    #   - it "is a (suit)"
+    #   it "is a (suit)"
     SUITS = ("clubs", "diamonds", "hearts", "spades")
     suit = prop(one_of=SUITS)
 
     def is_a_suit(self, suit: Suit) -> bool:
         return self.suit == suit
 
-    # - its "color" is one of red, black :
+    # - its "color" is one of red, black:
     #   red if it is a diamond or it is a heart
     #   black otherwise
     COLORS = ("red", "black")
@@ -72,7 +72,7 @@ class Card(TwoSidedView):
 
     @property
     def name(self) -> str:
-        return f"{self.rank} of {self.suit}"
+        return core.joined(core.joined(self.rank, "of", " "), self.suit, " ")
 
     def is_the_rank_of_suit(self, rank: Rank, suit: Suit) -> bool:
         return self.rank == rank and self.suit == suit
@@ -126,9 +126,9 @@ class Card(TwoSidedView):
             return 5
         return 0
 
-    async def on_click(self, event: ClickEvent) -> bool | None:
+    async def on_click(self, event: ClickEvent) -> None:
         """a click plays it"""
-        return await self.play()
+        await self.play()
 
     def on_drag(self, event: DragSpellEvent) -> None:
         """a drag starting clears the last hint"""
@@ -360,7 +360,7 @@ class Pile(ViewableList):
 def test_piles() -> None:
     with core.test("test piles"):
         it = Pile()
-        core.echo_test_action("set the stock to a new pile with name = \"stock\"")
+        core.echo_test_action("set the stock to a new pile with name \"stock\"")
         stock = Pile(name="stock")
         core.expect(stock.color, "the stock's color", "none", "\"none\"")
         core.expect(stock.value, "the stock's value", 0, "0")
@@ -526,46 +526,46 @@ class Solitaire(App):
         """a card played:  the last hint goes"""
         self.hint = ""
 
-    # - its "deck" is a new deck
+    # "deck" is a new deck
     deck = prop(init=lambda: Deck(), early=True)
 
-    # - its "stock" is a new stock pile with name = "stock"
+    # "stock" is a new stock pile with name "stock"
     stock = prop(init=lambda: StockPile(name="stock"), early=True)
 
-    # - its "discards" is a new discard pile with name = "discards"
+    # "discards" is a new discard pile with name "discards"
     discards = prop(init=lambda: DiscardPile(name="discards"), early=True)
 
-    # - its "clubs" is a new foundation with name = "clubs", suit = clubs
+    # "clubs" is a new foundation with name "clubs", suit = clubs
     clubs = prop(init=lambda: Foundation(name="clubs", suit="clubs"), early=True)
 
-    # - its "diamonds" is a new foundation with name = "diamonds", suit = diamonds
+    # "diamonds" is a new foundation with name "diamonds", suit = diamonds
     diamonds = prop(init=lambda: Foundation(name="diamonds", suit="diamonds"), early=True)
 
-    # - its "hearts" is a new foundation with name = "hearts", suit = hearts
+    # "hearts" is a new foundation with name "hearts", suit = hearts
     hearts = prop(init=lambda: Foundation(name="hearts", suit="hearts"), early=True)
 
-    # - its "spades" is a new foundation with name = "spades", suit = spades
+    # "spades" is a new foundation with name "spades", suit = spades
     spades = prop(init=lambda: Foundation(name="spades", suit="spades"), early=True)
 
-    # - its "T1" is a new tableau with name = "T1"
+    # "T1" is a new tableau with name "T1"
     t1 = prop(init=lambda: Tableau(name="T1"), early=True)
 
-    # - its "T2" is a new tableau with name = "T2"
+    # "T2" is a new tableau with name "T2"
     t2 = prop(init=lambda: Tableau(name="T2"), early=True)
 
-    # - its "T3" is a new tableau with name = "T3"
+    # "T3" is a new tableau with name "T3"
     t3 = prop(init=lambda: Tableau(name="T3"), early=True)
 
-    # - its "T4" is a new tableau with name = "T4"
+    # "T4" is a new tableau with name "T4"
     t4 = prop(init=lambda: Tableau(name="T4"), early=True)
 
-    # - its "T5" is a new tableau with name = "T5"
+    # "T5" is a new tableau with name "T5"
     t5 = prop(init=lambda: Tableau(name="T5"), early=True)
 
-    # - its "T6" is a new tableau with name = "T6"
+    # "T6" is a new tableau with name "T6"
     t6 = prop(init=lambda: Tableau(name="T6"), early=True)
 
-    # - its "T7" is a new tableau with name = "T7"
+    # "T7" is a new tableau with name "T7"
     t7 = prop(init=lambda: Tableau(name="T7"), early=True)
 
     def create(self) -> None:
@@ -654,7 +654,7 @@ class Solitaire(App):
     async def turn_a_stock_card(self) -> None:
         await self.play_from_the_stock()
 
-    async def start_a_new_game(self) -> None:
+    async def restart_the_game(self) -> None:
         self.score = 0
         self.moves = 0
         self.hint = ""
@@ -713,21 +713,17 @@ solitaire = Solitaire()
 # One of each, made with the solitaire
 
 # Each pauses a moment, so a deal animates
-
 # A click on the empty stock:  one step to undo, where the deal's own turn isn't
 core.describe_action(Solitaire, "turn_a_stock_card", {"title": "turn a stock card", "undone_as": "Turn Card"})
 
 # Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-core.describe_action(Solitaire, "start_a_new_game", {"title": "Restart", "shortcuts": ["N"], "undone_as": "Restart"})
-
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["N"], "undone_as": "Restart"})
 # Play every card that can go somewhere, until none can
 core.describe_action(Solitaire, "auto_play", {"title": "Auto play", "shortcuts": ["A"], "undone_as": "Auto play"})
-
 # Turn up a face-down card from a tableau, at random, onto the discards
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
-
-# - its "game menu" is a menu of "auto play" , "cheat" , "start a new game" , "undo" and "redo"
-core.describe_menu(Solitaire, "game_menu", {"items": ["auto_play", "cheat", "start_a_new_game", "undo", "redo"]})
+# - its "game menu" is a menu of "auto play", "cheat", "restart the game", "undo" and "redo"
+core.describe_menu(Solitaire, "game_menu", {"items": ["auto_play", "cheat", "restart_the_game", "undo", "redo"]})
 
 ###################
 # ## Playing a card
@@ -762,7 +758,7 @@ core.describe_action(Card, "put_on_pile", {"title": "put a card on a pile", "und
 def test_the_moves() -> None:
     with core.test("test the moves"):
         it = Tableau()
-        core.echo_test_action("set the column to a new tableau with name = \"T1\"")
+        core.echo_test_action("set the column to a new tableau with name \"T1\"")
         column = Tableau(name="T1")
         core.echo_test_action(
             "set the king to a new card whose rank is king, suit is spades and direction is up",
@@ -811,7 +807,7 @@ def test_the_moves() -> None:
             "set the ace to a new card whose rank is ace, suit is hearts and direction is up",
         )
         ace = Card(rank="ace", suit="hearts", direction="up")
-        core.echo_test_action("set the column to a new tableau with name = \"T2\"")
+        core.echo_test_action("set the column to a new tableau with name \"T2\"")
         column = Tableau(name="T2")
         core.echo_test_action("add the two to the column")
         column.append(two)

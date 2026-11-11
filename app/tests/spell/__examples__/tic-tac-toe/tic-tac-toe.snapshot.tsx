@@ -70,7 +70,7 @@ export class Board extends List<Square> {
 export class TicTacToe extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "board" is a new board
+  // "board" is a new board
   @prop({ init: () => new Board(), early: true })
   accessor board!: Board
 

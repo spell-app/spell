@@ -1,44 +1,38 @@
 # Org Events
-An org's events, from someone's idea to a finished, quiet record.
-Anyone in the org proposes one;  the Events Team's Managers say yes;  its organizers move it on.
-Where they're kept is in OrgEvents.api.spell, and only its first line knows.
-A move you may not make says why, and changes nothing.
-
+// An org's events, from someone's idea to a finished, quiet record.
+// Anyone in the org proposes one;  the Events Team's Managers say yes;  its organizers move it on.
+// Where they're kept is in OrgEvents.api.spell, and only its first line knows.
+// A move you may not make says why, and changes nothing.
 
 ## A row for each event:  where it is, and a button to move it on
 
-<extend "event">
-	<draw>
+an event:
+	to draw it:
 		<stack class="event" direction="horizontal" spacing="md" align="center" wrap>
 			<text>{its name}</text>
 			<label size="tiny">{its stage name}</label>
 			<text color="grey">{its organizers}</text>
 			<button class="move" size="small" disabled={its onward is ""} title="Move it on to its next stage" onClick={set its stage to its onward}>Move on</button>
 		</stack>
-	</draw>
-</extend>
 
-<extend "event stage">
-	<draw>
+an event stage:
+	to draw it:
 		<stack class="stage" direction="horizontal" spacing="md" align="center" wrap>
 			<text>{its name}</text>
 			<text color="grey">{its moved by}</text>
 		</stack>
-	</draw>
-</extend>
-
 
 ## The page:  a form to propose one, the events, and the stages they go through
 
-<app "events page">
-	<property "new event" description="An event proposed:  its name, and its organizers' addresses, comma-separated">a new event</>
+events page is an app:
+	// An event proposed:  its name, and its organizers' addresses, comma-separated
+	"new event" is a new event
 
-	<action "propose the new event">
+	to propose the new event:
 		add the new event to the events
 		set its new event to a new event
-	</action>
 
-	<draw>
+	to draw it:
 		<stack class="org-page" spacing="none">
 			<toolbar class="top-bar" appearance="text" aria-label="Events">
 				<text slot="title" size="large">Events</text>
@@ -82,5 +76,3 @@ A move you may not make says why, and changes nothing.
 				</stack>
 			</container>
 		</stack>
-	</draw>
-</app>

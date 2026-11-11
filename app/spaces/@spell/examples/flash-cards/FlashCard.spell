@@ -1,38 +1,40 @@
 # A flash card
-A word on its front, what it means on its back.
-It's a two sided view, as Solitaire's cards are:  face up it shows the word, face down what it means.
-A click turns it over.
+// A word on its front, what it means on its back.
+// It's a two sided view, as Solitaire's cards are:  face up it shows the word, face down what it means.
+// A click turns it over.
 
-<view "flash card" template="two sided view" clickable>
-	<property "word" description="The Spanish word, on its front">text</>
-	<property "meaning" description="What it means, on its back">text</>
+a "flash card" is a two sided view:
+	it is clickable
+	// The Spanish word, on its front
+	its "word" is text
+	// What it means, on its back
+	its "meaning" is text
 
-	<on click description="A click turns it over">turn it over</on>
+	// A click turns it over
+	on click:
+		turn it over
 
-	<draw "front">
+	to draw its front:
 		<segment appearance="raised" color="blue" align="center" padding="lg">
 			<text size="small" color="grey" all-caps>Spanish</text>
 			<space/>
 			<text size="huge" bold>{its word}</text>
 		</segment>
-	</draw>
-	<draw "back">
+	to draw its back:
 		<segment appearance="raised" color="green" align="center" padding="lg">
 			<text size="small" color="grey" all-caps>What it means</text>
 			<space/>
 			<text size="huge" bold>{its meaning}</text>
 		</segment>
-	</draw>
 
-	<test "turning a card over">
-		set the card to a new flash card with word = "el gato", meaning = "the cat"
+	to test turning a card over:
+		set the card to a new flash card with word "el gato", meaning = "the cat"
 		turn the card face up
 		the card is face up should be yes
 		turn the card over
 		the card is face down should be yes
 		turn the card over
 		the card is face up should be yes
-	</test>
-</view>
 
-<thing "deck" template="list of flash cards" description="The cards to learn"/>
+// The cards to learn
+a "deck" is a list of flash cards

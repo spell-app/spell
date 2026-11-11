@@ -288,7 +288,13 @@ The app's part of the page server's settings (its `package.json`'s `"pageServer"
 ## Writing an example
 
 Examples are what people and agents copy, so each one shows the current way (Owen, 2026-10-31, epic `data`).
-- Always the tag shape, with all of the latest language and UI features.
+- Always plain Spell, with all of the latest language and UI features (epic `language` P46, Q47;  Owen, 2026-11-11):
+  no tags for code.
+  - Each member bare on its line, no `- `;  it stays only under a worked-out property's body.
+  - Group names in Initial Caps (`group "Game Play"`);  a member made new without its `its`
+    (`"stock" is a new stock pile with name "stock"`);  text joined with `&&` (`its rank && "of" && its suit`).
+  - A handler's event on its own line, its steps under it.
+  - A drawing names Spell UI's components bare, `<text>`, `</>` closing any element.
   - No HTML.  Minimal CSS.
 - Separate concerns:  API, UI and custom widgets each in their own files.
 - Avoid custom widgets:  research what the `ui-*` widgets offer, and use those whenever possible.

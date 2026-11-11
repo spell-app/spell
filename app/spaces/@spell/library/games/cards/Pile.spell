@@ -1,30 +1,31 @@
 # A pile of cards
-A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-Each pile is its own element around its cards' elements, `<games-pile>` around `<games-card>`s.
-A card dragged over it glows when it would take the card, by its own rules (`droppable`).
+// A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
+// Each pile is its own element around its cards' elements, `<games-pile>` around `<games-card>`s.
+// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
-<view "pile" template="viewable list of cards" droppable>
-	<property "name" description="What the game calls it, e.g. stock">text</>
-	<property "layout" one-of="stacked, vertical, horizontal or fanned"
-		description="How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css"
-	/>
-	<property "color" description="Its last card's:  what the next card goes on">
+a "pile" is a viewable list of cards:
+	it is droppable
+	// What the game calls it, e.g. stock
+	its "name" is text
+	// How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css
+	its "layout" is one of stacked, vertical, horizontal or fanned
+	// Its last card's:  what the next card goes on
+	its "color" is:
 		"none" if it is empty
 		the color of its last card otherwise
-	</property>
-	<property "value" description="Its last card's">
+	// Its last card's
+	its "value" is:
 		0 if it is empty
 		the value of its last card otherwise
-	</property>
-	<property "state" description="Its name, then its cards' short names:  stock: Q♠↑ 7♥↓">
+	// Its name, then its cards' short names:  stock: Q♠↑ 7♥↓
+	its "state" is:
 		set summary to (its name or "pile") + ":"
 		for card in the pile
 			set summary to summary + " " + the state of the card
 		return summary
-	</property>
 
-	<test "piles">
-		set the stock to a new pile with name = "stock"
+	to test piles:
+		set the stock to a new pile with name "stock"
 		the stock's color should be "none"
 		the stock's value should be 0
 		add (a new card whose rank is queen, suit is spades and direction is up) to the stock
@@ -34,16 +35,12 @@ A card dragged over it glows when it would take the card, by its own rules (`dro
 		the stock's state should be "stock: Q♠↑ 7♥↓"
 
 		// a card is in one pile at a time
-		set the discards to a new pile with name = "discards"
+		set the discards to a new pile with name "discards"
 		get the last card of the stock
 		add it to the discards
 		its pile is the discards should be yes
 		the number of cards in the stock should be 1
 		the discards' state should be "discards: 7♥↓"
-	</test>
-</view>
 
-<spell>
-	// a card is in one pile at a time:  putting it on another pile takes it off this one
-	a card belongs to one pile
-</spell>
+// a card is in one pile at a time:  putting it on another pile takes it off this one
+a card belongs to one pile

@@ -7,17 +7,17 @@ core.heading("Caja de recetas:  dónde se guardan las recetas")
 
 export class Receta extends Thing {
   // su "título" es texto
-  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 846, end: 871 } }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 823, end: 843 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
   // sus "porciones" es un número
-  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 890, end: 918 } }) }
+  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 845, end: 873 } }) }
   get porciones() { return this.getProp("porciones") }
   set porciones(value) { this.setProp("porciones", value) }
 
   // sus "notas" es texto
-  static { this.declareProp("notas", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 923, end: 943 } }) }
+  static { this.declareProp("notas", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 875, end: 895 } }) }
   get notas() { return this.getProp("notas") }
   set notas(value) { this.setProp("notas", value) }
 
@@ -78,12 +78,12 @@ export class Receta extends Thing {
   }
 
   // vive en recetario familiar
-  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 806, end: 832 } }) }
+  static { this.declareProp("creado", { type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 795, end: 821 } }) }
   get creado() { return this.getProp("creado") }
   set creado(value) { this.setProp("creado", value) }
 
   // vive en recetario familiar
-  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 806, end: 832 } }) }
+  static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 795, end: 821 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
 }
@@ -202,7 +202,7 @@ export class CajaDeRecetas extends App {
   get búsqueda() { return this.getProp("búsqueda") }
   set búsqueda(value) { this.setProp("búsqueda", value) }
 
-  // su "receta nueva" es una nueva receta con porciones = 4
+  // "receta nueva" es una nueva receta con porciones = 4
   static { this.declareProp("recetaNueva", { init: () => new Receta({ porciones: 4 }), early: true }) }
   get recetaNueva() { return this.getProp("recetaNueva") }
   set recetaNueva(value) { this.setProp("recetaNueva", value) }
@@ -235,7 +235,7 @@ export class CajaDeRecetas extends App {
   }
 
   /** Las más nuevas primero, por cuándo se guardó cada una */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 3837, end: 4047 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 3671, end: 3808 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => core.includes(receta.título, this.búsqueda)), (item) => core.descending(item.creado))
   }, () => [this.búsqueda]) }

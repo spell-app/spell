@@ -495,13 +495,11 @@ spell test @spell/examples/Solitaire 2>/dev/null
 
 ```text
 ✓ test card setup  (19 checks)
-✓ test jokers  (15 checks)
-✓ test a new deck  (6 checks)
-✓ test two jokers  (5 checks)
+✓ test a new deck  (5 checks)
 ✓ test piles  (8 checks)
 ✓ test the moves  (11 checks)
 
-6 passed
+4 passed
 ```
 
 </details>
@@ -579,10 +577,10 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-app/spaces/@spell/examples/Solitaire/Card.spell:15
+app/spaces/@spell/examples/Solitaire/Card.spell:19
 
 Spell
-    <property "color" one-of="red, black">
+    its "color" is one of red, black:
       red if it is a diamond or it is a heart
       black otherwise
 ```

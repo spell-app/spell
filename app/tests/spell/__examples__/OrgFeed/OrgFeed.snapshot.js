@@ -8,44 +8,44 @@ core.heading("Feed:  what's new across your org")
 /** A post, as its space has it:  who wrote it, what about, when, and where it's from. */
 export class Post extends Thing {
   // - its "text" is text
-  static { this.declareProp("text", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 657, end: 678 } }) }
+  static { this.declareProp("text", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 619, end: 637 } }) }
   get text() { return this.getProp("text") }
   set text(value) { this.setProp("text", value) }
 
   // - its "topic" is text
-  static { this.declareProp("topic", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 683, end: 705 } }) }
+  static { this.declareProp("topic", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 639, end: 658 } }) }
   get topic() { return this.getProp("topic") }
   set topic(value) { this.setProp("topic", value) }
 
   // - its "posted" is text
-  static { this.declareProp("posted", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 710, end: 733 } }) }
+  static { this.declareProp("posted", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 660, end: 680 } }) }
   get posted() { return this.getProp("posted") }
   set posted(value) { this.setProp("posted", value) }
 
   // - its "by" is text
-  static { this.declareProp("by", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 738, end: 757 } }) }
+  static { this.declareProp("by", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 682, end: 698 } }) }
   get by() { return this.getProp("by") }
   set by(value) { this.setProp("by", value) }
 
   // - its "space" is text
-  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 762, end: 784 } }) }
+  static { this.declareProp("space", { type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 700, end: 719 } }) }
   get space() { return this.getProp("space") }
   set space(value) { this.setProp("space", value) }
 
   /** How much of it you want:  2 more of it, 1 as it comes, 0 none */
-  static { this.declareProp("weight", { declaredAt: { path: "/OrgFeed.spell", start: 462, end: 674 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("weight", { declaredAt: { path: "/OrgFeed.spell", start: 528, end: 661 }, readsFrom: ["my_feed"] }) }
   get weight() {
     if (this.by === "ana@rs" && this.topic === "art") return 2
     if (this.by === "ana@rs" && this.topic === "politics") return 0
     return 1
   }
 
-  static { this.declareProp("isAFavourite", { declaredAt: { path: "/OrgFeed.spell", start: 689, end: 731 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("isAFavourite", { declaredAt: { path: "/OrgFeed.spell", start: 663, end: 701 }, readsFrom: ["my_feed"] }) }
   get isAFavourite() {
     return this.weight === 2
   }
 
-  static { this.declareProp("isOrdinary", { declaredAt: { path: "/OrgFeed.spell", start: 736, end: 775 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("isOrdinary", { declaredAt: { path: "/OrgFeed.spell", start: 703, end: 738 }, readsFrom: ["my_feed"] }) }
   get isOrdinary() {
     return this.weight === 1
   }
@@ -69,12 +69,12 @@ export class Post extends Thing {
     times: ["created", "modified"], select: ["text", "topic", "posted", "by", "space"] }
 
   // - it lives in my feed
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 626, end: 645 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 598, end: 617 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my feed
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 626, end: 645 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 598, end: 617 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }

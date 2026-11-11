@@ -8,17 +8,17 @@ core.heading("Reviews:  kept on this device")
 
 export class Review extends Thing {
   // - its "film title" is text
-  static { this.declareProp("filmTitle", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 325, end: 352 } }) }
+  static { this.declareProp("filmTitle", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 313, end: 337 } }) }
   get filmTitle() { return this.getProp("filmTitle") }
   set filmTitle(value) { this.setProp("filmTitle", value) }
 
   // - its "stars" is a number
-  static { this.declareProp("stars", { type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 357, end: 387 } }) }
+  static { this.declareProp("stars", { type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 339, end: 362 } }) }
   get stars() { return this.getProp("stars") }
   set stars(value) { this.setProp("stars", value) }
 
   // - its "words" is text
-  static { this.declareProp("words", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 393, end: 415 } }) }
+  static { this.declareProp("words", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 364, end: 383 } }) }
   get words() { return this.getProp("words") }
   set words(value) { this.setProp("words", value) }
 
@@ -29,12 +29,12 @@ export class Review extends Thing {
   }
 
   // - it lives in galaxy reviews
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 287, end: 313 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 285, end: 311 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in galaxy reviews
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 287, end: 313 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 285, end: 311 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -263,7 +263,7 @@ export class FilmPage extends Page {
   set film(value) { this.setProp("film", value) }
 
   /** What's been said of it, on this device */
-  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spell", start: 2685, end: 2823 }, readsFrom: ["galaxy_reviews"] }) }
+  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spell", start: 2669, end: 2807 }, readsFrom: ["galaxy_reviews"] }) }
   get reviews() { return core.waitedValue(this, "reviews", async () => {
     const title = (await core.answerOf(this, "film"))?.title
     return await core.savedThings(Review, { filter: { filmTitle: title }, sort: [{ field: "created", descending: true }] })

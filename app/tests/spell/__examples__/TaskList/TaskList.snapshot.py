@@ -83,9 +83,9 @@ class Task(View):
             ),
         )
 
-    draggable = True
-
     selectable = True
+
+    draggable = True
 
     @property
     def checklist(self) -> Checklist | None:
@@ -95,7 +95,7 @@ class Task(View):
 def test_checking_one_off() -> None:
     with core.test("test checking one off"):
         it = Task()
-        core.echo_test_action("set the task to a new task with title = \"Write the tests\"")
+        core.echo_test_action("set the task to a new task with title \"Write the tests\"")
         task = Task(title="Write the tests")
         core.expect(task.is_active, "the task is active", True, "yes")
         core.echo_test_action("set the task's done to yes")
@@ -356,7 +356,7 @@ task_sky = core.place(
 # ## Task List
 ##############
 # A to-do list:  add a task, check it off, filter the list, and edit the selected tasks together.
-# Its tasks are this project's own `<view "task">`;  this file holds their list, and the app.
+# Its tasks are this project's own `task`, in Task.spell;  this file holds their list, and the app.
 # Where they're kept is the person's pick, "Keep them in":  each place is a keeper in an API file of its own,
 # TaskList.browser.api.spell, TaskList.server.api.spell, TaskList.csv.api.spell and TaskList.atmosphere.api.spell, all doing what TaskList.api.spell says.
 
@@ -375,7 +375,7 @@ class Checklist(ViewableList):
 
     # What it shows:  every task, the ones still to do, or the ones done
     # - its "showing" is one of all, active or done
-    #   - it "is showing (showing)"
+    #   it "is showing (showing)"
     SHOWINGS = ("all", "active", "done")
     showing = prop(one_of=SHOWINGS)
 
@@ -409,12 +409,10 @@ class Checklist(ViewableList):
         for place, task in enumerate(self, 1):
             task.order = place
 
+    # on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
     reorder_items_after = 0
 
     exclusive = True
-
-
-# on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 
 
 def test_the_filter() -> None:
@@ -422,9 +420,9 @@ def test_the_filter() -> None:
         it = Checklist()
         core.echo_test_action("set the tasks to a new checklist")
         tasks = Checklist()
-        core.echo_test_action("add (a new task with title = \"a\", done = yes) to the tasks")
+        core.echo_test_action("add (a new task with title \"a\", done = yes) to the tasks")
         tasks.append(Task(title="a", done=True))
-        core.echo_test_action("add (a new task with title = \"b\") to the tasks")
+        core.echo_test_action("add (a new task with title \"b\") to the tasks")
         tasks.append(Task(title="b"))
         core.expect(
             len(tasks.filter(lambda task: task.is_active)),
@@ -439,9 +437,9 @@ def test_a_dragged_order_is_kept() -> None:
         it = Checklist()
         core.echo_test_action("set the tasks to a new checklist")
         tasks = Checklist()
-        core.echo_test_action("set the first to a new task with title = \"first\"")
+        core.echo_test_action("set the first to a new task with title \"first\"")
         first = Task(title="first")
-        core.echo_test_action("set the second to a new task with title = \"second\"")
+        core.echo_test_action("set the second to a new task with title \"second\"")
         second = Task(title="second")
         core.echo_test_action("add the second to the tasks")
         tasks.append(second)
@@ -473,7 +471,7 @@ Storage = Literal["browser", "server", "csv", "atmosphere"]
 class TaskList(App):
     element_tag = "test-project-app"
 
-    # - its "checklist" is a new checklist
+    # "checklist" is a new checklist
     checklist = prop(init=lambda: Checklist(), early=True)
 
     # The next task's title, as the new task's field holds it
@@ -670,14 +668,12 @@ core.describe_action(TaskList, "show_done", {"title": "Done", "icon": "check squ
 core.describe_action(TaskList, "remove_the_done_tasks", {"title": "Remove the done tasks", "icon": "trash alternate outline"})
 
 # The toolbar's buttons, and the list's right click:  the same actions
-# - its "tasks menu" is a menu of "show all" , "show to do" , "show done" , "-" and "remove the done tasks"
+# - its "tasks menu" is a menu of "show all", "show to do", "show done", "-" and "remove the done tasks"
 core.describe_menu(TaskList, "tasks_menu", {"items": ["show_all", "show_to_do", "show_done", "-", "remove_the_done_tasks"]})
-
-# - its "show menu" is a menu of "show all" , "show to do" and "show done" titled "Show"
+# - its "show menu" is a menu of "show all", "show to do" and "show done" titled "Show"
 core.describe_menu(TaskList, "show_menu", {"items": ["show_all", "show_to_do", "show_done"], "title": "Show"})
-
 # A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
-# - its "list menu" is a menu of "show menu" , "-" and "remove the done tasks"
+# - its "list menu" is a menu of "show menu", "-" and "remove the done tasks"
 core.describe_menu(TaskList, "list_menu", {"items": ["show_menu", "-", "remove_the_done_tasks"]})
 
 

@@ -137,6 +137,7 @@ class Week(ViewableList):
             h("slot"),
         )
 
+    # on the page, its habits can be dragged to another place
     reorder_items_after = 0
 
     exclusive = True
@@ -146,7 +147,7 @@ def test_streaks() -> None:
     with core.test("test streaks"):
         it = Habit()
         core.echo_test_action(
-            "set the habit to a new habit with name = \"Read\", monday = yes, tuesday = yes, thursday = yes",
+            "set the habit to a new habit with name \"Read\", monday = yes, tuesday = yes, thursday = yes",
         )
         habit = Habit(name="Read", monday=True, tuesday=True, thursday=True)
         core.expect(habit.count, "the habit's count", 3, "3")
@@ -161,8 +162,6 @@ def test_streaks() -> None:
 #############
 # The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
-# on the page, its habits can be dragged to another place
-
 # a habit is in one week
 
 ################
@@ -174,7 +173,7 @@ def test_streaks() -> None:
 class HabitTracker(App):
     element_tag = "test-project-app"
 
-    # - its "habits" is a new week
+    # "habits" is a new week
     habits = prop(init=lambda: Week(), early=True)
 
     # The next habit's name, as the new habit's field holds it

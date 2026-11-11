@@ -26,8 +26,8 @@ The names stay the author's, accents and all:  `esUnaFigura`, `dirección`, `cla
 
 The proof is a whole game.
 [Solitario](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitario/) is the Solitaire example
-written again in Spanish, file for file, cards and all, in spellx as Solitaire is, its tags Spanish too
-(`<vista "carta">`, `<propiedad "rango">`):
+written again in Spanish, file for file, cards and all, in plain Spell as Solitaire is, its words Spanish too
+(`una "carta" es una vista reversible`, `su "rango" es uno de as, 2 ... 10, jota, dama, rey`):
 it deals, plays and passes six tests, as Solitaire does, two of them its jokers'.
 A person wrote it;  `spell translate` writes a first draft of one for any English project
 (below, "Translating a project").
@@ -110,7 +110,7 @@ spell explain carta --in @spell/examples/Solitario
 ...Carta.es.spell:6
 plantilla Carta, subplantilla de TwoSidedView
 
-propiedades:  rango, valor, palo, color, símbolo, nombre, estado, imagen, pila
+propiedades:  rango, valor, palo, color, símbolo, nombre, estado, imagen, levantada, pila
 enumeraciones:  Rangos, Palos, Colores
 declarado en Carta.es.spell:6
 
@@ -222,7 +222,7 @@ _The Spanish file names the English type, `player`, and calls its English method
 | drawing | a Spanish view gets its tag from its Spanish names, `<solitario-carta>` |
 | the editor | its menus and panes, on a Spanish page;  colouring, completion and hover in each file's language |
 | translating | `spell translate <project> --to es`:  an English project written again in Spanish (below) |
-| Spell itself | its Spanish name is **Encanto**:  in a Spanish spellx file the template tags say so, `<vista "carta">` beside English `<view "card">`, and the words inside keep their accents, `<propiedad "palo">`, `<acción>` |
+| Spell itself | its Spanish name is **Encanto**:  a Spanish file says each line in Spanish, `una "carta" es una vista` beside English `a "card" is a view`, and the words keep their accents, `su "palo"`, `para voltearla` |
 
 ### A wrong article is a warning
 
@@ -357,9 +357,9 @@ Spanish (es):  complete, 21 modules
 Written in `.spell` files, Solitaire came out linted clean and passing its six tests, with no person in the loop,
 in under a minute:  about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
 
-A project in `.spell` comes back in tags:  `Carta.spell` gives `Carta.es.spell`, its tags in Spanish.
-The passes below work on the plain Spell each tag file means, then write the result back as tags.
-Prose between the tags is translated as a comment is, so `--no-ai` leaves it in English.
+Every translation comes back in plain Spell:  `Card.spell` gives `Carta.es.spell`, its words in Spanish.
+A file still written in tags is read as the plain Spell it means, and its translation is written plain too;
+prose between its tags becomes `//` comments, translated as a comment is, so `--no-ai` leaves it in English.
 
 It works in three passes:
 1. **Names:**  every name the project chose (types, properties, values, methods, texts, comments), with its gender.
@@ -386,16 +386,16 @@ spell translate @spell/examples/fizzbuzz --to es --no-ai --cold --out /tmp/fizzb
 
 ```text
 fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (3 files, ...)
-  127 of 127 lines translated
+  131 of 131 lines translated
   names:  /tmp/fizzbuzz-es/fizzbuzz.es.names.json5
   pre-calculated:  none (--cold)
-  passes:  names ..., lines ..., fix-ups ... (0 lines fixed in 0 rounds, 2 checks)
+  passes:  names ..., lines ..., fix-ups ... (0 lines fixed in 0 rounds, 1 check)
   claude -p:  0 calls:  fix-ups 0
   shape:  35 of 42 statements compile to the same program as the English
-  45 lines still need a person, marked // TODO: translate:
+  49 lines still need a person, marked // TODO: translate:
 ...
-    FizzBuzz.es.spell:9  phrases "play fizzbuzz"
-    FizzBuzz.es.spell:10  names "number"
+    FizzBuzz.es.spell:9  names "number"
+    FizzBuzz.es.spell:10  names "number", names "fizzbuzz"
 ...
   7 problems left:
 ...

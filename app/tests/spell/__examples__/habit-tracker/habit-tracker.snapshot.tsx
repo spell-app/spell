@@ -144,6 +144,7 @@ export class Week extends ViewableList<Habit> {
     )
   }
 
+  // on the page, its habits can be dragged to another place
   static reorderItemsAfter = 0
 
   static exclusive = true
@@ -163,7 +164,7 @@ core.useElement(Week, WeekElement)
 export function testStreaks() {
   return core.test("test streaks", function testStreaks() {
     const it = new Habit()
-    core.echoTestAction(`set the habit to a new habit with name = "Read", monday = yes, tuesday = yes, thursday = yes`)
+    core.echoTestAction(`set the habit to a new habit with name "Read", monday = yes, tuesday = yes, thursday = yes`)
     const habit = new Habit({
       name: "Read",
       monday: true,
@@ -184,8 +185,6 @@ core.heading("The week")
 //////////////
 // The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
-// on the page, its habits can be dragged to another place
-
 /** a habit is in one week */
 
 core.heading("The tracker")
@@ -198,7 +197,7 @@ core.heading("The tracker")
 export class HabitTracker extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "habits" is a new week
+  // "habits" is a new week
   @prop({ init: () => new Week(), early: true })
   accessor habits!: Week
 

@@ -1,23 +1,20 @@
 # GitHub
-Anyone on GitHub, a person or an organization, and any repository, found by what you type.
-Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
-with `<extend>`, so looking again at the server never touches a line of this.
-A page in a browser holds no key:  it may search 10 times a minute, so the field waits for you to stop typing.
+// Anyone on GitHub, a person or an organization, and any repository, found by what you type.
+// Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<extend>`, so looking again at the server never touches a line of this.
+// A page in a browser holds no key:  it may search 10 times a minute, so the field waits for you to stop typing.
 
-<thing "github page">
-	<spell>
-		- its "search" is text
-		- its "showing" is a user
-		- to create it:
-			set its search to "solid"
-	</spell>
+a "github page" is a thing:
+	its "search" is text
+	its "showing" is a user
+	to create it:
+		set its search to "solid"
 
-	<action "try (words as text)">
+	to try (words as text):
 		set its showing to nothing
 		set its search to words
-	</action>
 
-	<draw>
+	to draw it:
 		<stack spacing="xl">
 			<form value={it}>
 				<stack spacing="sm">
@@ -41,23 +38,23 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 				From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
 			</text>
 		</stack>
-	</draw>
 
-	<draw "issues" description="Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request">
+	// Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request
+	to draw its issues:
 		<stack spacing="sm">
 			<header size="medium">Solid's issues</header>
 			<for the first 6 issues where its pull request is nothing as="cards" columns="3" doubling stackable loading="Asking GitHub" empty="No open issues." />
 			<header size="medium">Solid's pull requests</header>
 			<for the first 6 issues where its pull request is not nothing as="cards" columns="3" doubling stackable loading="Asking GitHub" empty="No open pull requests." />
 		</stack>
-	</draw>
 
-	<draw "found" description="Someone's own page, while one is picked;  else what the search finds">
-		<if its showing>
+	// Someone's own page, while one is picked;  else what the search finds
+	to draw its found:
+		if its showing
 			draw the page of (the user whose id is the login of its showing)
 			while waiting:
 				<loader visible inline text>Asking GitHub</loader>
-		<otherwise>
+		otherwise
 			<stack spacing="xl">
 				<stack spacing="sm">
 					<header size="medium">People and organizations</header>
@@ -68,25 +65,21 @@ A page in a browser holds no key:  it may search 10 times a minute, so the field
 					<for every repository matching its search as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="No repository matches that." />
 				</stack>
 			</stack>
-		</>
-	</draw>
-</thing>
-
 
 # Someone on GitHub
-A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.
-A search gives only a little of each:  their page reads them whole, by their login.
+// A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.
+// A search gives only a little of each:  their page reads them whole, by their login.
 
-<extend "user">
-	<action "look at it" description="Their own page, in the GitHub tab">
+a user:
+	// Their own page, in the GitHub tab
+	to look at it:
 		set the showing of the github of the public servers to it
-	</action>
 
-	<action "look away from it" description="Put their page away again, with its Back button">
+	// Put their page away again, with its Back button
+	to look away from it:
 		set the showing of the github of the public servers to nothing
-	</action>
 
-	<draw>
+	to draw it:
 		<ui-card onClick={look at it}>
 			<content>
 				<stack direction="horizontal" align="center" spacing="sm">
@@ -100,9 +93,8 @@ A search gives only a little of each:  their page reads them whole, by their log
 				</stack>
 			</content>
 		</ui-card>
-	</draw>
 
-	<draw "page">
+	to draw its page:
 		<stack spacing="xl">
 			<stack direction="horizontal" align="center" spacing="sm">
 				<button icon="arrow left" appearance="basic" aria-label="Back" title="Back" onClick={look away from it} />
@@ -117,7 +109,7 @@ A search gives only a little of each:  their page reads them whole, by their log
 					<if its bio>
 						<text>{its bio}</text>
 					</if>
-					<!-- A search gives no counts:  only the record read by its login has them, and its date with them -->
+					// A search gives no counts:  only the record read by its login has them, and its date with them
 					<if its created at>
 						<text size="small" color="grey">{its public repos} public repositories · {its followers} followers</text>
 					</if>
@@ -128,15 +120,12 @@ A search gives only a little of each:  their page reads them whole, by their log
 				<for every repository matching ("user:" + its login + " sort:stars") as="cards" columns="3" doubling stackable paging="pages" loading="Asking GitHub" empty="Nothing public yet." />
 			</stack>
 		</stack>
-	</draw>
-</extend>
-
 
 # An issue
-GitHub lists a pull request among a repository's issues:  this page tells them apart by its "pull request".
+// GitHub lists a pull request among a repository's issues:  this page tells them apart by its "pull request".
 
-<extend "issue">
-	<draw>
+an issue:
+	to draw it:
 		<ui-card>
 			<content>
 				<header>
@@ -145,15 +134,12 @@ GitHub lists a pull request among a repository's issues:  this page tells them a
 				<meta>#{its number} · {its state}</meta>
 			</content>
 		</ui-card>
-	</draw>
-</extend>
-
 
 # A repository
-Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
+// Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
 
-<extend "repository">
-	<draw>
+a repository:
+	to draw it:
 		<ui-card>
 			<content>
 				<header>
@@ -163,6 +149,3 @@ Its name, what it's for, and how many people starred it;  its GitHub icon opens 
 				<description>{its description}</description>
 			</content>
 		</ui-card>
-	</draw>
-</extend>
-

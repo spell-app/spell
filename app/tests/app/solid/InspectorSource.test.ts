@@ -40,10 +40,10 @@ describe("eventsDeclared()", () => {
   test("a card:  its abilities, then its events, as written, each with its code", () => {
     expect(eventsInSource(["Card"], SOLITAIRE)).toEqual([
       { kind: "ability", words: "draggable", code: "" },
-      { kind: "ability", words: "clickable when", code: "it is face up or its pile is the solitaire's stock" },
+      { kind: "ability", words: "clickable when", code: "it is face up or its pile is solitaire's stock" },
       { kind: "event", words: "on click", code: "play it" },
-      { kind: "event", words: "when dragged", code: "clear the solitaire's hint" },
-      { kind: "event", words: "on drag cancelled", code: 'set the solitaire\'s hint to " -- Not there"' }
+      { kind: "event", words: "when dragged", code: "clear solitaire's hint" },
+      { kind: "event", words: "on drag cancelled", code: 'set solitaire\'s hint to " -- Not there"' }
     ])
   })
 
@@ -51,8 +51,8 @@ describe("eventsDeclared()", () => {
     const rows = eventsInSource(["Tableau", "Pile"], SOLITAIRE)
     expect(rows.map((row) => [row.kind, row.words])).toEqual([
       ["ability", "droppable"],
-      ["ability", "cards draggable when"],
-      ["ability", "droppable when"],
+      ["ability", "its cards are draggable when"],
+      ["ability", "it is droppable when"],
       ["event", "while card dragged over"],
       ["event", "on card dropped"]
     ])
@@ -215,7 +215,8 @@ describe("startingValues()", () => {
     ])
   })
 
-  test("a pile:  nothing it must be told", () => {
-    expect(startingIn(["Pile"], [card, pile, solitaire])).toEqual([])
+  // its layout is a one-of with no Spell, on one line in plain Spell (epic `language` P46):  the tag spanned two
+  test("a pile:  its layout, the first of its one-of", () => {
+    expect(startingIn(["Pile"], [card, pile, solitaire])).toEqual([{ words: "layout", value: "stacked" }])
   })
 })

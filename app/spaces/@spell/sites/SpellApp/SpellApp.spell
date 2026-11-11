@@ -9,7 +9,7 @@ home page is a page:
 		<story "S3" done>make a project, an example or a guide from its group's header</story>
 		<story "S4" done>bring back a project I exported</story>
 	</stories>
-	- to draw it:
+	to draw it:
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the new project dialog}>New Project</button>
 			<link link={"/edit/@spell/examples/Solitaire"}>The code editor</link>
@@ -20,23 +20,23 @@ home page is a page:
 			<link link={"/apps/@spell/examples/TaskList"}>A hosted app</link>
 		</stack>
 		draw its thumbnail
-	- its thumbnail is "snapshots/home.jpg"
+	its thumbnail is "snapshots/home.jpg"
 
 notebook page is a page:
 	<stories>
 		<story "S1" done>read a notebook, its words and its code in cells</story>
 	</stories>
 	// What the address names
-	- its "notebook" is text
-	- its thumbnail is "snapshots/notebook.jpg"
+	its "notebook" is text
+	its thumbnail is "snapshots/notebook.jpg"
 
 guide page is a page:
 	<stories>
 		<story "S1" done>read a guide in the editor, its words as the comments of its spell file</story>
 	</stories>
 	// What the address names
-	- its "guide" is text
-	- its thumbnail is "snapshots/guide.jpg"
+	its "guide" is text
+	its thumbnail is "snapshots/guide.jpg"
 
 code editor page is a page:
 	<stories>
@@ -48,8 +48,8 @@ code editor page is a page:
 		<story "S6" done>move between Run, Edit and, for a site, Site</story>
 	</stories>
 	// What the address names
-	- its "project" is text
-	- to draw it:
+	its "project" is text
+	to draw it:
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the inspector sidebar}>Inspector</button>
 			<button appearance="basic" onClick={show the palette sidebar}>Palette</button>
@@ -63,7 +63,7 @@ code editor page is a page:
 			<button appearance="basic" onClick={show the person dialog}>You</button>
 		</stack>
 		draw its thumbnail
-	- its thumbnail is "snapshots/edit.jpg"
+	its thumbnail is "snapshots/edit.jpg"
 
 running app page is a page:
 	<stories>
@@ -71,8 +71,8 @@ running app page is a page:
 		<story "S2" done>restart it</story>
 	</stories>
 	// What the address names
-	- its "project" is text
-	- its thumbnail is "snapshots/run.jpg"
+	its "project" is text
+	its thumbnail is "snapshots/run.jpg"
 
 site editor page is a page:
 	<stories>
@@ -83,101 +83,101 @@ site editor page is a page:
 		<story "S5" done>open a page's code from its card</story>
 	</stories>
 	// What the address names
-	- its "project" is text
-	- to draw it:
+	its "project" is text
+	to draw it:
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the site data sidebar}>Data</button>
 		</stack>
 		draw its thumbnail
-	- its thumbnail is "snapshots/site-pages.jpg"
+	its thumbnail is "snapshots/site-pages.jpg"
 
 theme editor page is a page:
 	<stories>
 		<story "S1" done>change a theme and see it on real pages</story>
 		<story "S2" done>save it by name, to pick from every theme menu</story>
 	</stories>
-	- its thumbnail is "snapshots/theme.jpg"
+	its thumbnail is "snapshots/theme.jpg"
 
 hosted app page is a page:
 	<stories>
 		<story "S1" done>use a program at its own address on Spell's cloud</story>
 	</stories>
 	// What the address names
-	- its "project" is text
-	- to draw it:
+	its "project" is text
+	to draw it:
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the sign-in dialog}>Sign In</button>
 		</stack>
 		draw its thumbnail
-	- its thumbnail is "snapshots/hosted-program.jpg"
+	its thumbnail is "snapshots/hosted-program.jpg"
 
 terms page is a page:
 	<stories>
 		<story "S1" done>read Spell's terms</story>
 	</stories>
-	- its thumbnail is "snapshots/terms.jpg"
+	its thumbnail is "snapshots/terms.jpg"
 
 an "inspector sidebar" is a view:
-	- its thumbnail is "snapshots/inspector.jpg"
+	its thumbnail is "snapshots/inspector.jpg"
 
 a "palette sidebar" is a view:
-	- its thumbnail is "snapshots/palette.jpg"
+	its thumbnail is "snapshots/palette.jpg"
 
 a "site data sidebar" is a view:
-	- its thumbnail is "snapshots/site-data.jpg"
+	its thumbnail is "snapshots/site-data.jpg"
 
 a "project settings dialog" is a view:
-	- its thumbnail is "snapshots/project-settings.jpg"
+	its thumbnail is "snapshots/project-settings.jpg"
 
 a "code settings dialog" is a view:
-	- its thumbnail is "snapshots/code-settings.jpg"
+	its thumbnail is "snapshots/code-settings.jpg"
 
 a "project versions dialog" is a view:
-	- its thumbnail is "snapshots/versions.jpg"
+	its thumbnail is "snapshots/versions.jpg"
 
 a "new file dialog" is a view:
-	- its thumbnail is "snapshots/new-file.jpg"
+	its thumbnail is "snapshots/new-file.jpg"
 
 a "new project dialog" is a view:
-	- its thumbnail is "snapshots/new-project.jpg"
+	its thumbnail is "snapshots/new-project.jpg"
 
 a "duplicate project dialog" is a view:
-	- its thumbnail is "snapshots/duplicate-project.jpg"
+	its thumbnail is "snapshots/duplicate-project.jpg"
 
 a "change this dialog" is a view:
-	- its thumbnail is "snapshots/change-this.jpg"
+	its thumbnail is "snapshots/change-this.jpg"
 
 a "publish clash dialog" is a view:
-	- its thumbnail is "snapshots/publish-clash.jpg"
+	its thumbnail is "snapshots/publish-clash.jpg"
 
 a "person dialog" is a view:
-	- its thumbnail is "snapshots/you.jpg"
+	its thumbnail is "snapshots/you.jpg"
 
 a "sign-in dialog" is a view:
-	- its thumbnail is "snapshots/sign-in.jpg"
+	its thumbnail is "snapshots/sign-in.jpg"
 
 spell app is a site:
-	- it has a home page at "/", named "Home", old , colored red
-	- it has a notebook page at "/edit/@spell/guides/SpellUI/:notebook*", named "Notebook", old , colored orange
-	- it has a guide page at "/edit/@spell/guides/:guide", named "Guide", old , colored yellow
-	- it has a code editor page at "/edit/:project*", named "Edit", old , colored olive
+	it has a home page at "/", named "Home", old , colored red
+	it has a notebook page at "/edit/@spell/guides/SpellUI/:notebook*", named "Notebook", old , colored orange
+	it has a guide page at "/edit/@spell/guides/:guide", named "Guide", old , colored yellow
+	it has a code editor page at "/edit/:project*", named "Edit", old , colored olive
 		it has a running app page at "/run/:project*", named "Run", old
-	- it has a site editor page at "/site/:project*", named "Site Editor", old , colored green
-	- it has a theme editor page at "/theme", named "Theme Editor", old , colored teal
-	- it has a hosted app page at "/apps/:project*", named "Hosted App", old , colored blue
+	it has a site editor page at "/site/:project*", named "Site Editor", old , colored green
+	it has a theme editor page at "/theme", named "Theme Editor", old , colored teal
+	it has a hosted app page at "/apps/:project*", named "Hosted App", old , colored blue
 		it has a terms page at "/terms", named "Terms", old
-	- it has an inspector sidebar
-	- it has a palette sidebar
-	- it has a site data sidebar
-	- it has a project settings dialog
-	- it has a code settings dialog
-	- it has a project versions dialog
-	- it has a new file dialog
-	- it has a new project dialog
-	- it has a duplicate project dialog
-	- it has a change this dialog
-	- it has a publish clash dialog
-	- it has a person dialog
-	- it has a sign-in dialog
-	- it has a not found page
-	- it has an error page
+	it has an inspector sidebar
+	it has a palette sidebar
+	it has a site data sidebar
+	it has a project settings dialog
+	it has a code settings dialog
+	it has a project versions dialog
+	it has a new file dialog
+	it has a new project dialog
+	it has a duplicate project dialog
+	it has a change this dialog
+	it has a publish clash dialog
+	it has a person dialog
+	it has a sign-in dialog
+	it has a not found page
+	it has an error page
