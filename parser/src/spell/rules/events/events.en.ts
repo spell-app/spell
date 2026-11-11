@@ -407,7 +407,7 @@ events.addRule(WhenThingChanges, {
 events.addRule(WhenSomeoneElseChanges, { syntax: "when someone else changes it :? {statement_body}?" })
 
 // `when flipped:`, the same as `on flipped:` (Q42:  `on` or `when`, either, for an event);
-// `when created` stays the creation hook, which wins on the same words (`priority`)
+// `when creating a deck` (and `when created`) stays the creation hook, which wins on the same words (`priority`)
 events.addRule(On, { syntax: "when {eventName:keyword} {props:with_props_arg}? :? {statement_body}?" })
 events.addRule(On, { syntax: "when {eventName:event_words} {props:with_props_arg}? :? {statement_body}?" })
 

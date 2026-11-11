@@ -509,7 +509,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   | The line that made the thing, `a new foundation with suit = clubs` | This one:  changes it there;  All:  read only, with a link to that line |
   | Not on that line yet | This one:  adds it there;  All:  read only, the code gives it no starting value |
   | The type sets it, `its "layout" is stacked` | This one:  writes nothing, it says to use All;  All:  changes it there |
-  | The type's default, `set its count to 0` in `to create it` | Changes it there, and every thing still holding the old one |
+  | The type's default, `set its count to 0` in `when creating a counter` | Changes it there, and every thing still holding the old one |
   | Code:  an expression, or `suit = the suit` in a loop | Writes nothing, and the card says so, with a link to the code |
   | Nothing in the source says:  the program set it | Writes nothing, and the card says so |
 
@@ -520,7 +520,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - A thing made in a loop has no line of its own, as a card a deck makes:  "This card" is there to play with,
     and says "Changes to this card can't be saved."
     It starts there when nothing can change for all of them, and on "All" otherwise;  a thing with its own line starts on "This".
-  - A type's `to create it` runs after the line that made the thing, so a value it sets can't be given by that line.
+  - A type's `when creating a ...` runs after the line that made the thing, so a value it sets can't be given by that line.
   - Each field shows where its value comes from, in `<ui-property-editor origins>`:  a dot and a reset when it's set here,
     a quieter label when it comes from somewhere else, read only and a link when it's code;  its label's tooltip says where.
 - Under its properties, its Events:  what it does when people touch it, in the program's own words,

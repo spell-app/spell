@@ -128,7 +128,7 @@ Names people choose keep their accents.
 | on (an event) / trigger / fire | `al` / `(disparar|lanzar)`;  an event's name may hold `en`, `de`, `del`, `sobre` between its words, ending at `con`:  `al clic en carta con una carta`, `disparar evento clic en carta con carta = eso` |
 | create a X | `crear (un|una) X` |
 | a new X with p = v | `(un nuevo|una nueva) X con p = v` |
-| to create it (what runs as it's made) | `para crearlo` (`crearla`, `crear eso`), or `para crear un mazo` -- the `create()` hook (`create_method`) |
+| when creating a deck (what runs as it's made) | `al crear un mazo`;  a one of a kind's, `al crearlo` (`crearla`) -- the `create()` hook (`create_hook`);  `para crearlo`, `para crear un mazo` still read (`create_method`) |
 | to shuffle it (`it` fused into the verb) | `- para barajarlo:` (`-la`, `-los`, `-las`):  its calls say `barajar el mazo` |
 | to draw it / to draw each item | `para dibujarlo` (`dibujarla`, `dibujar eso`) / `para dibujar cada elemento` -- meanings `draw` / `draw_each_item` (the `draw_method` word rule);  the item is `el elemento` |
 

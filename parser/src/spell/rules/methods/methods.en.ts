@@ -36,7 +36,8 @@ methods.addRule(Wording.specialize({ ruleName: "create_method", meanings: ["crea
   syntax: "(create:create it|create them)"
 })
 
-// the words of what runs as a thing is made, in its type's outline:  `- when created:` -- see `CreateHook`
+// the words of what runs as a thing is made, in its type's outline:  `- when created:`;
+// its verb before its type too, as before `it`:  `- when creating a deck:` -- see `CreateHook`
 methods.addRule(Wording.specialize({ ruleName: "create_hook_words", meanings: ["create"] }), {
   syntax: "(create:created|creating it)"
 })
@@ -1065,7 +1066,8 @@ methods.addRule(QuotedTypeExpression, {
   syntax: "{type:subject_implied} {signature:quoted_method_signature} if? :? {expression_body}?"
 })
 
-// what runs as a thing is made, in its type's outline:  `- when created (with ...):`, also `- when creating it:` (epic `spanish` P28)
+// what runs as a thing is made, in its type's outline:  `- when creating a task (with ...):` (epic `language`),
+// also `- when created:` and `- when creating it:` (epic `spanish` P28)
 methods.addRule(CreateHook, {
   syntax: "when {signature:method_signature} :? {statement_body}?",
   tests: [
@@ -1095,6 +1097,11 @@ methods.addRule(CreateHook, {
             "  }",
             "}"
           ]
+        ],
+        [
+          ["a task is a thing where:", "\t- when creating a task:", "\t\tprint 1"],
+          ["export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
+          ["@thing", "export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
         ],
         [
           ["a task is a thing where:", "\t- when creating it:", "\t\tprint 1"],

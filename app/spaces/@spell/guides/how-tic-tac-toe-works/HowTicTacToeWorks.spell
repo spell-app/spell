@@ -18,7 +18,7 @@ a "square" is a thing
 
 ## The game
 // The app:  its board, whose turn it is, and who won.
-// - `create it` runs as the game is made:  it puts nine empty squares on the board.
+// - `when creating it` runs as the game is made:  it puts nine empty squares on the board.
 // - Squares are counted 1 to 9, left to right, then down:  1 2 3 is the top row.
 
 tic tac toe is an app
@@ -31,7 +31,7 @@ tic tac toe is an app
 		the turn + " to play" if the winner is ""
 		the winner + " wins!" otherwise
 
-	to create it
+	when creating it
 		// Nine empty squares, made with the game
 		repeat 9 times
 			add a new square to tic tac toe's board

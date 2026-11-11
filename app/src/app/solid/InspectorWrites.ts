@@ -25,7 +25,7 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
  *   - "This one":  the line that made it, adding it there if the line doesn't say it
  *   - "All of them":  its type's default, and every thing still holding the old one
  * - A thing made in a loop has no line of its own, so "This one" writes nothing:  it's there to play with.
- * - A type whose `to create it` sets a property sets it AFTER what the line says (`Thing`'s constructor), so a line can't
+ * - A type whose `when creating a ...` sets a property sets it AFTER what the line says (`Thing`'s constructor), so a line can't
  *   change it:  "This one" writes nothing there, and says only "All of them" can.
  * - What a line says is the line's:  "All of them" can't reach it, so that field is read only there, with a way to the code.
  * - Code, or nothing to change:  nothing is written, and it answers why, for the Inspector to say.
@@ -335,7 +335,7 @@ export type NotWritten =
   | { reason: "playing" }
   // no type starts it, so all of them have nothing to change
   | { reason: "noStart" }
-  // its type's `to create it` sets it after the line that made this one:  only all of them can change it
+  // its type's `when creating a ...` sets it after the line that made this one:  only all of them can change it
   | { reason: "typeSets" }
   // nothing of it can change for all of them:  each one's values come from the code that makes it
   | { reason: "allFromCode" }

@@ -18,7 +18,6 @@ export const words = {
       búsqueda: "búsqueda",
       recetaNueva: "receta nueva",
       editando: "editando",
-      create: "crearla",
       coincidencias: "coincidencias",
       agregarLaRecetaNueva: "agregar la receta nueva"
     }

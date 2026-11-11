@@ -1901,7 +1901,7 @@
     {
       "type": "Pokedex",
       "superType": "App",
-      "defined": "/PokeSpell.spell:464-4256"
+      "defined": "/PokeSpell.spell:464-4260"
     },
     {
       "property": "tab",
@@ -1941,18 +1941,10 @@
       "defined": "/PokeSpell.spell:615-636"
     },
     {
-      "syntax": "create {thisArg:expression}",
-      "output": "create",
-      "rule": "method_call",
-      "of": "Pokedex",
-      "alias": [
-        "statement",
-        "expression"
-      ],
       "kind": "method",
-      "name": "create it",
+      "name": "creating it",
       "returns": "nothing",
-      "defined": "/PokeSpell.spell:638-701"
+      "defined": "/PokeSpell.spell:638-705"
     },
     {
       "syntax": "go to {callArgs:expression} (of {thisArg:expression})?",
@@ -1973,7 +1965,7 @@
       ],
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spell:704-841"
+      "defined": "/PokeSpell.spell:708-845"
     },
     {
       "syntax": "go back (of {thisArg:expression})?",
@@ -1988,7 +1980,7 @@
       "name": "go back",
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spell:844-1022"
+      "defined": "/PokeSpell.spell:848-1026"
     },
     {
       "syntax": "surprise me (of {thisArg:expression})?",
@@ -2003,20 +1995,20 @@
       "name": "surprise me",
       "returns": "nothing",
       "waits": true,
-      "defined": "/PokeSpell.spell:1025-1108"
+      "defined": "/PokeSpell.spell:1029-1112"
     },
     {
       "property": "kinds_to_pick",
       "asWritten": "kinds to pick",
       "of": "Pokedex",
       "datatype": "list of types",
-      "defined": "/PokeSpell.spell:1111-1161"
+      "defined": "/PokeSpell.spell:1115-1165"
     },
     {
       "property": "found",
       "of": "Pokedex",
       "datatype": "list of pokemon",
-      "defined": "/PokeSpell.spell:1164-1347"
+      "defined": "/PokeSpell.spell:1168-1351"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -2029,7 +2021,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PokeSpell.spell:1350-2577"
+      "defined": "/PokeSpell.spell:1354-2581"
     }
   ],
   "codeLines": [

@@ -92,7 +92,7 @@ lista de tareas es una aplicación
 			poner el guardián a un nuevo guardián del navegador
 		llenar la agenda
 
-	para crearla
+	al crearla
 		// Una lista de tareas nueva guarda sus tareas en este navegador, y las muestra todas
 		poner el mostrando de las tareas a todas
 		poner el almacén a navegador

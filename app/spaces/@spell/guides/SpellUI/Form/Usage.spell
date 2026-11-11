@@ -5,7 +5,7 @@ a "task" is a thing:
 a "task list" is a view:
 	its "title" is text
 	its "tasks" is a new list of tasks
-	to create it:
+	when creating a task list:
 		set its title to "Groceries"
 		add (a new task with title = "Milk", done = yes) to its tasks
 		add (a new task with title = "Eggs") to its tasks

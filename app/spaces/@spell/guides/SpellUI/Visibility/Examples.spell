@@ -3,7 +3,7 @@ an "endless list" is a view:
 	// How many of its twelve items show
 	its "shown" is a number
 	its "loading" is yes or no
-	to create it: set its shown to 3
+	when creating an endless list: set its shown to 3
 	// Three more items, after a moment's loading, until all twelve show
 	to load more:
 		if its shown >= 12 return

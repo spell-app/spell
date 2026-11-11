@@ -6,7 +6,7 @@
 
 a "met museum page" is a thing
 	its "search" is text
-	to create it
+	when creating a met museum page
 		set its search to "sunflowers"
 	its "found" is every artwork matching the search
 		// What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn

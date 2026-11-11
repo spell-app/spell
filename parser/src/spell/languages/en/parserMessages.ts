@@ -380,6 +380,8 @@ export const PARSER_MESSAGES = {
     '{things} are only found by name, with no list of them all:  read one at a time, "the {thing} whose id is ..."',
   "no-dotted-field":
     'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
+  /** A type's creation hook naming another type, `when creating a card` in a deck's outline:  `{aType}` is its own. */
+  "create-hook-names-another-type": 'Name the type this is in:  "when {verb} {aType}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
   /** A built-in type published:  `a thing is published as "..."` (epic `atmosphere` P10). */
   "cant-publish-built-in": "Can't publish {type}'s records:  it's built in, and every project shares it",

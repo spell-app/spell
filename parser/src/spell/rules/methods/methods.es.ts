@@ -44,7 +44,8 @@ methodsEs.addRule(Wording.specialize({ ruleName: "create_method", meanings: ["cr
   syntax: "(create:crearlo|crearla|crearlos|crearlas|crear (eso|ello))"
 })
 
-// the words of what runs as a thing is made, in its type's outline:  `- al crearla:` -- see `CreateHook`
+// the words of what runs as a thing is made, in its type's outline:  `- al crearla:`;
+// its verb before its type too:  `- al crear una baraja:` -- see `CreateHook`
 methodsEs.addRule(Wording.specialize({ ruleName: "create_hook_words", meanings: ["create"] }), {
   syntax: "(create:crearla|crearlo|crearlas|crearlos|crear (la|lo|las|los)?)"
 })
@@ -999,8 +1000,8 @@ methodsEs.addRule(QuotedTypeExpression, {
   syntax: "{type:subject_implied} {signature:quoted_method_signature} si? :? {expression_body}?"
 })
 
-// what runs as a thing is made, in its type's outline:  `- al crearla (con ...):`,
-// also `- al crear:` and `- al crear la:` (epic `spanish` P28)
+// what runs as a thing is made, in its type's outline:  `- al crear una tarea (con ...):` (epic `language`),
+// also `- al crearla:`, `- al crear:` and `- al crear la:` (epic `spanish` P28)
 methodsEs.addRule(CreateHook, {
   syntax: "al {signature:method_signature} :? {statement_body}?",
   tests: [
@@ -1030,6 +1031,11 @@ methodsEs.addRule(CreateHook, {
             "  }",
             "}"
           ]
+        ],
+        [
+          ["una tarea es una cosa donde:", "\t- al crear una tarea:", "\t\timprimir 1"],
+          ["export class Tarea extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
+          ["@thing", "export class Tarea extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
         ],
         [
           ["una tarea es una cosa donde:", "\t- al crear:", "\t\timprimir 1"],

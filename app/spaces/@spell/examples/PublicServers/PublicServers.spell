@@ -10,7 +10,7 @@ public servers is an app
 	"weather" is a new open meteo page
 	"museum" is a new met museum page
 	"atlas" is a new rest countries page
-	to create it
+	when creating it
 		set its tab to "github"
 
 	to draw it

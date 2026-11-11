@@ -35,7 +35,7 @@ solitario es una aplicación
 	"C5" es una nueva columna con nombre "C5"
 	"C6" es una nueva columna con nombre "C6"
 	"C7" es una nueva columna con nombre "C7"
-	para crearlo
+	al crearlo
 		// Cada carta del mazo a la reserva
 		para carta en el mazo
 			agregar eso a la reserva

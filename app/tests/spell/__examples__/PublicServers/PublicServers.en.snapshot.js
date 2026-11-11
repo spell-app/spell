@@ -316,7 +316,6 @@ export const words = {
     GithubPage: {
       search: "search",
       showing: "showing",
-      create: "create it",
       tryWords: "try (words as text)",
       draw: "draw it"
     },
@@ -433,7 +432,6 @@ export const words = {
     OpenLibraryPage: {
       search: "search",
       showing: "showing",
-      create: "create it",
       found: "found",
       draw: "draw it"
     },
@@ -510,7 +508,6 @@ export const words = {
     OpenMeteoPage: {
       cities: "cities",
       city: "city",
-      create: "create it",
       forecasts: "forecasts",
       forecast: "forecast",
       draw: "draw it"
@@ -607,7 +604,6 @@ export const words = {
     },
     MetMuseumPage: {
       search: "search",
-      create: "create it",
       found: "found",
       tryWords: "try (words as text)",
       draw: "draw it"
@@ -683,7 +679,6 @@ export const words = {
     RestCountriesPage: {
       region: "region",
       language: "language",
-      create: "create it",
       countries: "countries",
       pickRegionRegion: "pick region (region as text)",
       draw: "draw it"
@@ -695,7 +690,6 @@ export const words = {
       weather: "weather",
       museum: "museum",
       atlas: "atlas",
-      create: "create it",
       draw: "draw it"
     }
   }

@@ -143,7 +143,7 @@
     {
       "type": "HabitTracker",
       "superType": "App",
-      "defined": "/HabitTracker.spell:2879-3970"
+      "defined": "/HabitTracker.spell:2879-3974"
     },
     {
       "property": "habits",
@@ -158,18 +158,10 @@
       "defined": "/HabitTracker.spell:2928-3009"
     },
     {
-      "syntax": "create {thisArg:expression}",
-      "output": "create",
-      "rule": "method_call",
-      "of": "HabitTracker",
-      "alias": [
-        "statement",
-        "expression"
-      ],
       "kind": "method",
-      "name": "create it",
+      "name": "creating it",
       "returns": "nothing",
-      "defined": "/HabitTracker.spell:3012-3395"
+      "defined": "/HabitTracker.spell:3012-3399"
     },
     {
       "syntax": "add the draft (of {thisArg:expression})?",
@@ -183,7 +175,7 @@
       "kind": "method",
       "name": "add the draft",
       "returns": "nothing",
-      "defined": "/HabitTracker.spell:3398-3578"
+      "defined": "/HabitTracker.spell:3402-3582"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -196,7 +188,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HabitTracker.spell:3581-3970"
+      "defined": "/HabitTracker.spell:3585-3974"
     }
   ],
   "codeLines": [

@@ -82,7 +82,7 @@ caja de recetas es una aplicación
 		// La receta en su pantalla de edición, mientras haya una
 	su "menú de la caja" es un menú de "deshacer"
 
-	para crearla
+	al crearla
 		// Si todavía no hay nada guardado, unas cuantas para empezar
 		si no hay recetas
 			agregar (una nueva receta con título "Sopa de tomate", porciones = 4, notas = "Asa los tomates primero.") a las recetas

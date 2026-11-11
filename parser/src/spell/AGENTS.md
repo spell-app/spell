@@ -86,7 +86,7 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
   - `Translator`:  each line written again with its rule's twin in the other language's pack
     (the same class, registered in the same place), its slots filled with its children, translated the same way;
     it flags the lines whose word order may be wrong (`risky`);
-    a type's creation hook (`- when created:`) in the other language's own words, `- al crearla:`
+    a type's creation hook (`- when creating a task:`) in the other language's own words, `- al crear una tarea:`
   - `ShapeCheck`:  each translated line compiled beside its source line, names and texts aside (`shapeOf()`):
     a line that compiles to a different program "means something else"
   - `FixUps`:  each line that fails lint, a test or the shape check, or the writer couldn't write or flagged,

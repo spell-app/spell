@@ -58,7 +58,6 @@ export const words = {
       almacén: "almacén",
       guardián: "guardián",
       llenarLaAgenda: "llenar la agenda",
-      create: "crearla",
       agregarLaTareaInicialTítuloConPrioridadNivel: "agregar la tarea inicial (título como texto) con prioridad (nivel como texto)",
       agregarElBorrador: "agregar el borrador",
       mostrarTodas: "mostrar todas",
@@ -163,7 +162,7 @@ export const words = {
       { name: "La agenda", members: ["agenda"] }
     ],
     ListaDeTareas: [
-      { name: "Guardado", description: "Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián", members: ["almacén", "guardián", "llenarLaAgenda", "create", "agregarLaTareaInicialTítuloConPrioridadNivel", "agregarElBorrador"] },
+      { name: "Guardado", description: "Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián", members: ["almacén", "guardián", "llenarLaAgenda", "agregarLaTareaInicialTítuloConPrioridadNivel", "agregarElBorrador"] },
       { name: "Filtro", description: "Qué tareas muestra la lista:  la barra de herramientas marca la que muestra", members: ["mostrarTodas", "mostrarPendientes", "mostrarHechas", "quitarLasTareasHechas"] }
     ]
   }

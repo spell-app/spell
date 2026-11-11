@@ -119,7 +119,7 @@
     {
       "type": "CajaDeRecetas",
       "superType": "App",
-      "defined": "/CajaDeRecetas.es.spell:2899-6111"
+      "defined": "/CajaDeRecetas.es.spell:2899-6109"
     },
     {
       "property": "búsqueda",
@@ -141,25 +141,17 @@
       "defined": "/CajaDeRecetas.es.spell:3012-3099"
     },
     {
-      "syntax": "crear {thisArg:expression}?",
-      "output": "create",
-      "rule": "method_call",
-      "of": "CajaDeRecetas",
-      "alias": [
-        "statement",
-        "expression"
-      ],
       "kind": "method",
       "name": "crearla",
       "returns": "nothing",
       "waits": true,
-      "defined": "/CajaDeRecetas.es.spell:3149-3608"
+      "defined": "/CajaDeRecetas.es.spell:3149-3606"
     },
     {
       "property": "coincidencias",
       "of": "CajaDeRecetas",
       "datatype": "list of recetas",
-      "defined": "/CajaDeRecetas.es.spell:3611-3806"
+      "defined": "/CajaDeRecetas.es.spell:3609-3804"
     },
     {
       "syntax": "agregar la receta nueva ((de|del) {thisArg:expression})?",
@@ -173,7 +165,7 @@
       "kind": "method",
       "name": "agregar la receta nueva",
       "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spell:3809-3938"
+      "defined": "/CajaDeRecetas.es.spell:3807-3936"
     }
   ],
   "codeLines": [

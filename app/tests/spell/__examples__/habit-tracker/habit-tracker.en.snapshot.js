@@ -23,7 +23,6 @@ export const words = {
     HabitTracker: {
       habits: "habits",
       draft: "draft",
-      create: "create it",
       addTheDraft: "add the draft",
       draw: "draw it"
     }

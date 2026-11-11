@@ -4,7 +4,7 @@
 a "deck" is a list of cards
 	its "jokers" is yes or no
 		// No jokers, unless it's made `with jokers`
-	to create it
+	when creating a deck
 		// One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does
 		for rank in card ranks
 			for suit in card suits

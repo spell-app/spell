@@ -287,13 +287,13 @@ create a new task with title = "Shop"
 `
   const { file } = translatedWith(TODO_NAMES, source)
 
-  test("its hook in the other language's words, agreeing with the type:  `al crearla (con ...)`", () => {
-    expect(file.lines[2]).toBe("\t- al crearla (con título como texto, hecha como una opción):")
+  test("its hook in the other language's words, naming the type:  `al crear una tarea (con ...)`", () => {
+    expect(file.lines[2]).toBe("\t- al crear una tarea (con título como texto, hecha como una opción):")
     expect(file.lines[4]).toBe('crear una nueva tarea con título = "Compras"')
     expect(file.todo.size).toBe(0)
   })
 
-  test("Spanish to English too:  `al crearla` is `when created`", () => {
+  test("Spanish to English too:  `al crear una tarea` is `when creating a task`", () => {
     const spanishSource = file.lines.join("\n")
     const { files } = parseSpellProject([{ path: "/Tarea.es.spell", contents: spanishSource }])
     const back: NamesData = {
@@ -308,7 +308,18 @@ create a new task with title = "Shop"
       contents: spanishSource,
       match: files[0]!.match
     })
-    expect(english.lines[2]).toBe("\t- when created (with title as text, done as a choice):")
+    expect(english.lines[2]).toBe("\t- when creating a task (with title as text, done as a choice):")
+  })
+
+  test("a one of a kind's says `it`:  `when created` is `al crearla`, `al crearla` is `when creating it`", () => {
+    const app = "todo list is an app\n\twhen created:\n\t\tprint 1\n"
+    expect(translatedWith(TODO_NAMES, app).file.lines[1]).toBe("\tal crearla:")
+    const spanish = "agenda es una aplicación\n\tal crearla:\n\t\timprimir 1\n"
+    const { files } = parseSpellProject([{ path: "/Agenda.es.spell", contents: spanish }])
+    const names = new TranslationNames({ types: { agenda: { name: "todo list" } } }, { from: SPANISH, to: ENGLISH })
+    const translator = new Translator({ from: SPANISH, to: ENGLISH, names })
+    const english = translator.translateFile({ path: "/Agenda.es.spell", contents: spanish, match: files[0]!.match })
+    expect(english.lines[1]).toBe("\twhen creating it:")
   })
 
   test("and reads back as the same program", () => {

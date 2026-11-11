@@ -521,7 +521,7 @@
     {
       "type": "TaskList",
       "superType": "App",
-      "defined": "/TaskList.spell:2473-7424"
+      "defined": "/TaskList.spell:2473-7428"
     },
     {
       "property": "checklist",
@@ -580,19 +580,10 @@
       "defined": "/TaskList.spell:3409-4014"
     },
     {
-      "syntax": "create {thisArg:expression}",
-      "output": "create",
-      "rule": "method_call",
-      "of": "TaskList",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Keeping",
       "kind": "method",
-      "name": "create it",
+      "name": "creating it",
       "returns": "nothing",
-      "defined": "/TaskList.spell:4017-4236"
+      "defined": "/TaskList.spell:4017-4240"
     },
     {
       "syntax": "add the starting task {callArgs:expression} with priority {callArgs:expression} (of {thisArg:expression})?",
@@ -617,7 +608,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/TaskList.spell:4239-4485"
+      "defined": "/TaskList.spell:4243-4489"
     },
     {
       "syntax": "add the draft (of {thisArg:expression})?",
@@ -632,7 +623,7 @@
       "kind": "method",
       "name": "add the draft",
       "returns": "nothing",
-      "defined": "/TaskList.spell:4488-4825"
+      "defined": "/TaskList.spell:4492-4829"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -647,7 +638,7 @@
       "groupDescription": "The toolbar's buttons, and the list's right click:  the same actions",
       "kind": "method",
       "name": "draw it",
-      "defined": "/TaskList.spell:5980-7424"
+      "defined": "/TaskList.spell:5984-7428"
     },
     {
       "syntax": "show all (of {thisArg:expression})?",
@@ -664,7 +655,7 @@
       "name": "show all",
       "returns": "nothing",
       "title": "All",
-      "defined": "/TaskList.spell:4917-5047"
+      "defined": "/TaskList.spell:4921-5051"
     },
     {
       "syntax": "show to do (of {thisArg:expression})?",
@@ -680,7 +671,7 @@
       "name": "show to do",
       "returns": "nothing",
       "title": "To do",
-      "defined": "/TaskList.spell:5049-5199"
+      "defined": "/TaskList.spell:5053-5203"
     },
     {
       "syntax": "show done (of {thisArg:expression})?",
@@ -696,7 +687,7 @@
       "name": "show done",
       "returns": "nothing",
       "title": "Done",
-      "defined": "/TaskList.spell:5201-5351"
+      "defined": "/TaskList.spell:5205-5355"
     },
     {
       "syntax": "remove the done tasks (of {thisArg:expression})?",
@@ -711,7 +702,7 @@
       "kind": "method",
       "name": "remove the done tasks",
       "returns": "nothing",
-      "defined": "/TaskList.spell:5353-5532"
+      "defined": "/TaskList.spell:5357-5536"
     }
   ],
   "codeLines": [

@@ -6,7 +6,7 @@
 guide is an app
 	its "tab" is text
 	its "search" is text
-	to create it
+	when creating it
 		set its tab to "films"
 		set its search to ""
 	its "showing" is a thing

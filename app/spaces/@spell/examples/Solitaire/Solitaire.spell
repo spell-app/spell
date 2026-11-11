@@ -35,7 +35,7 @@ solitaire is an app
 	"T5" is a new tableau with name "T5"
 	"T6" is a new tableau with name "T6"
 	"T7" is a new tableau with name "T7"
-	to create it
+	when creating it
 		// Every card of the deck into the stock
 		for card in the deck
 			add it to the stock

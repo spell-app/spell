@@ -40,13 +40,13 @@
       "kind": "method",
       "name": "play it",
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spell:2618-2823"
+      "defined": "/HowTicTacToeWorks.spell:2629-2834"
     },
     {
       "type": "Board",
       "superType": "List",
       "itemType": "Square",
-      "defined": "/HowTicTacToeWorks.spell:3203-3479"
+      "defined": "/HowTicTacToeWorks.spell:3214-3490"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -59,50 +59,42 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowTicTacToeWorks.spell:3235-3479"
+      "defined": "/HowTicTacToeWorks.spell:3246-3490"
     },
     {
       "type": "TicTacToe",
       "superType": "App",
-      "defined": "/HowTicTacToeWorks.spell:998-2234"
+      "defined": "/HowTicTacToeWorks.spell:1005-2245"
     },
     {
       "property": "board",
       "of": "TicTacToe",
       "datatype": "Board",
-      "defined": "/HowTicTacToeWorks.spell:1021-1043"
+      "defined": "/HowTicTacToeWorks.spell:1028-1050"
     },
     {
       "property": "turn",
       "of": "TicTacToe",
       "datatype": "text",
-      "defined": "/HowTicTacToeWorks.spell:1045-1094"
+      "defined": "/HowTicTacToeWorks.spell:1052-1101"
     },
     {
       "property": "winner",
       "of": "TicTacToe",
       "datatype": "text",
-      "defined": "/HowTicTacToeWorks.spell:1096-1171"
+      "defined": "/HowTicTacToeWorks.spell:1103-1178"
     },
     {
       "property": "message",
       "of": "TicTacToe",
       "datatype": "text",
-      "defined": "/HowTicTacToeWorks.spell:1173-1267"
+      "defined": "/HowTicTacToeWorks.spell:1180-1274"
     },
     {
-      "syntax": "create {thisArg:expression}",
-      "output": "create",
-      "rule": "method_call",
-      "of": "TicTacToe",
-      "alias": [
-        "statement",
-        "expression"
-      ],
       "kind": "method",
-      "name": "create it",
+      "name": "creating it",
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spell:1270-1386"
+      "defined": "/HowTicTacToeWorks.spell:1277-1397"
     },
     {
       "syntax": "start a new game (of {thisArg:expression})?",
@@ -116,7 +108,7 @@
       "kind": "method",
       "name": "start a new game",
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spell:1388-1532"
+      "defined": "/HowTicTacToeWorks.spell:1399-1543"
     },
     {
       "syntax": "check the line from square {callArgs:expression} through {callArgs:expression} to {callArgs:expression} (of {thisArg:expression})?",
@@ -144,7 +136,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spell:1534-1857"
+      "defined": "/HowTicTacToeWorks.spell:1545-1868"
     },
     {
       "syntax": "check for a winner (of {thisArg:expression})?",
@@ -158,7 +150,7 @@
       "kind": "method",
       "name": "check for a winner",
       "returns": "nothing",
-      "defined": "/HowTicTacToeWorks.spell:1859-2052"
+      "defined": "/HowTicTacToeWorks.spell:1870-2063"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -171,7 +163,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowTicTacToeWorks.spell:2055-2234"
+      "defined": "/HowTicTacToeWorks.spell:2066-2245"
     },
     {
       "property": "board",
@@ -179,7 +171,7 @@
       "group": "The board:  nine squares, three a row",
       "datatype": "Board",
       "exclusive": true,
-      "defined": "/HowTicTacToeWorks.spell:3481-3510"
+      "defined": "/HowTicTacToeWorks.spell:3492-3521"
     },
     {
       "syntax": "test a row",
@@ -188,7 +180,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "a row",
-      "defined": "/HowTicTacToeWorks.spell:3695-3977"
+      "defined": "/HowTicTacToeWorks.spell:3706-3988"
     }
   ],
   "codeLines": [

@@ -2019,7 +2019,7 @@ export class Book extends Thing {
   set subtitle(value) { this.setProp("subtitle", value) }
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spell", start: 1924, end: 1969 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spell", start: 1946, end: 1991 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -2536,7 +2536,7 @@ export class OpenLibraryPage extends Thing {
   }
 
   /** What the search finds:  Open Library looks, by the title, and gives back the first hundred */
-  static { this.declareProp("found", { declaredAt: { path: "/OpenLibrary.spell", start: 521, end: 582 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/OpenLibrary.spell", start: 543, end: 604 }, readsFrom: ["open_library"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     return core.filter(await core.savedThings(Book, { search: { title: this.search } }, "looks through"), (book) => core.includes(book.title, this.search))
   }, () => [this.search]) }
@@ -3168,13 +3168,13 @@ export class OpenMeteoPage extends Thing {
   }
 
   /** The city's, from Open-Meteo:  asked for by where it is, with no list of them all */
-  static { this.declareProp("forecasts", { declaredAt: { path: "/OpenMeteo.spell", start: 925, end: 1052 }, readsFrom: ["open_meteo"] }) }
+  static { this.declareProp("forecasts", { declaredAt: { path: "/OpenMeteo.spell", start: 945, end: 1072 }, readsFrom: ["open_meteo"] }) }
   get forecasts() { return core.waitedValue(this, "forecasts", async () => {
     return await core.savedThings(Forecast, { filter: { latitude: this.city?.latitude, longitude: this.city?.longitude } })
   }, () => [this.city]) }
 
   /** Its one forecast:  Open-Meteo answers with one, for the nearest place it has */
-  static { this.declareProp("forecast", { declaredAt: { path: "/OpenMeteo.spell", start: 1140, end: 1189 }, readsFrom: ["open_meteo"] }) }
+  static { this.declareProp("forecast", { declaredAt: { path: "/OpenMeteo.spell", start: 1160, end: 1209 }, readsFrom: ["open_meteo"] }) }
   get forecast() {
     return core.getItemAt(this.forecasts, 0)
   }
@@ -3743,7 +3743,7 @@ export class MetMuseumPage extends Thing {
   }
 
   /** What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn */
-  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spell", start: 519, end: 567 }, readsFrom: ["met_museum"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spell", start: 538, end: 586 }, readsFrom: ["met_museum"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     return await core.savedThings(Artwork, { search: { "*": this.search } })
   }, () => [this.search]) }
@@ -4149,7 +4149,7 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 695, end: 787 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 718, end: 810 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
     return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item) => item.name?.common)
   }, () => [this.region]) }

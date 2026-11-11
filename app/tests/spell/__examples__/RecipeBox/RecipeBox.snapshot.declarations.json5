@@ -140,7 +140,7 @@
     {
       "type": "RecipeBox",
       "superType": "App",
-      "defined": "/RecipeBox.spell:2527-5333"
+      "defined": "/RecipeBox.spell:2527-5337"
     },
     {
       "property": "search",
@@ -162,25 +162,17 @@
       "defined": "/RecipeBox.spell:2619-2693"
     },
     {
-      "syntax": "create {thisArg:expression}",
-      "output": "create",
-      "rule": "method_call",
-      "of": "RecipeBox",
-      "alias": [
-        "statement",
-        "expression"
-      ],
       "kind": "method",
-      "name": "create it",
+      "name": "creating it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/RecipeBox.spell:2732-3140"
+      "defined": "/RecipeBox.spell:2732-3144"
     },
     {
       "property": "matches",
       "of": "RecipeBox",
       "datatype": "list of recipes",
-      "defined": "/RecipeBox.spell:3143-3296"
+      "defined": "/RecipeBox.spell:3147-3300"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -194,7 +186,7 @@
       "kind": "method",
       "name": "add the new recipe",
       "returns": "nothing",
-      "defined": "/RecipeBox.spell:3299-3411"
+      "defined": "/RecipeBox.spell:3303-3415"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -207,7 +199,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spell:3414-3929"
+      "defined": "/RecipeBox.spell:3418-3933"
     }
   ],
   "codeLines": [

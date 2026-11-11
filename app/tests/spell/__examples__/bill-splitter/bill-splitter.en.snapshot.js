@@ -17,7 +17,6 @@ export const words = {
       subtotal: "subtotal",
       tip: "tip",
       total: "total",
-      create: "create it",
       draw: "draw it",
       addSomeone: "add someone"
     }

@@ -222,7 +222,7 @@ export class RecipeBox extends App {
   }
 
   /** Newest first, by when each was saved */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3143, end: 3296 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3147, end: 3300 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search)), (item) => core.descending(item.created))
   }, () => [this.search]) }
