@@ -53,7 +53,7 @@ export class SpellMonaco {
     tabSize: 2,
     insertSpaces: false,
     detectIndentation: false,
-    fontFamily: "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
     fontSize: 16,
     lineNumbers: "off",
     minimap: { enabled: false },

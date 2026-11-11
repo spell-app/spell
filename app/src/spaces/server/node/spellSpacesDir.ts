@@ -24,6 +24,8 @@ const codeDir = resolve(spacesSrcDir, "..")
  */
 export const repoDir =
   basename(codeDir) === "src" ? dirname(codeDir) : join(dirname(dirname(codeDir)), basename(codeDir))
+/** Is this a checkout's source (`app/src/`), not the published `spell`'s build (`dist/app/`)? */
+export const isSourceCheckout = basename(codeDir) === "src"
 /**
  * The MAIN checkout's root, from this checkout's:  the one a worktree's git shares (`SRV.checkoutOf()`).
  * - found wherever the worktree's folder is

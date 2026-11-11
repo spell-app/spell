@@ -155,7 +155,23 @@ export class ProjectDrafts {
     await this.saveRecords(records)
   }
 
-  /** Delete your draft of `filePath`, back to what's published.  Nothing to delete:  nothing happens. */
+  /**
+   * Save `contents` straight to `filePath`'s public file, and drop your draft of it:  no draft at all
+   * (a built-in project's file in a checkout, epic `mockup` P20, r3:  so the edit shows in git).
+   * - Your draft goes too:  you were looking at its text when you saved, so nothing's lost,
+   *   and the old draft can't be served over the save.
+   * - throws 403 when you may not design its space (`mayDesign()`)
+   */
+  async saveToFile(filePath: string, contents: string): Promise<void> {
+    await this.roles.mayOrDie("design")
+    await fileUtils.saveTextFile(this.publicPath(filePath), contents)
+    await this.discard(filePath)
+  }
+
+  /**
+   * Delete your draft of `filePath`, back to what's published.  Nothing to delete:  nothing happens.
+   * - Your last draft gone:  your build goes too (`dropYourBuild()`).
+   */
   async discard(filePath: string): Promise<void> {
     const path = await this.draftPathOf(filePath)
     if (path) await fileUtils.deletePath(path)
@@ -163,7 +179,10 @@ export class ProjectDrafts {
     const mine = records[this.person]
     if (!mine || !(filePath in mine)) return
     delete mine[filePath]
-    if (!Object.keys(mine).length) delete records[this.person]
+    if (!Object.keys(mine).length) {
+      delete records[this.person]
+      await this.dropYourBuild()
+    }
     await this.saveRecords(records)
   }
 
@@ -190,6 +209,50 @@ export class ProjectDrafts {
   /** The files you have a draft of, from the project's folder, e.g. `["/Counter.spell"]`:  the index lists new ones. */
   async draftedFiles(): Promise<string[]> {
     return Object.keys((await this.records())[this.person] ?? {})
+  }
+
+  ////////////////
+  // ## Your build
+  ////////////////
+
+  /*
+   * YOUR BUILD (epic `mockup` P20, J86):  what the editor compiles from your drafts, never the project's shared build.
+   * - While you have drafts, what spell builds (`Solitaire.spell.js`, its words, maps) is saved here, beside your
+   *   drafts:  `__draft/__build.<person>/`, private as every draft is.
+   * - The file route serves it to you first;  everyone else gets the shared build, made from the published files.
+   * - Your last draft published or discarded:  it goes, and you're back on the shared build.
+   */
+
+  /** Do you have any draft of this project, so what spell builds for you is your own? */
+  async hasDrafts(): Promise<boolean> {
+    return (await this.draftedFiles()).length > 0
+  }
+
+  /** Save `contents` of built file `filePath` (`/Solitaire.spell.js`) into your build. */
+  async saveBuilt(filePath: string, contents: unknown): Promise<void> {
+    await this.roles.mayOrDie("design")
+    await fileUtils.saveFile(this.yourBuildPath(filePath), contents)
+  }
+
+  /** Path on disk of built file `filePath` in your build, or `undefined` when your build has none. */
+  async builtPathOf(filePath: string): Promise<string | undefined> {
+    const path = this.yourBuildPath(filePath)
+    return (await fileUtils.pathExists(path)) ? path : undefined
+  }
+
+  /** SIDE EFFECT:  your build is gone, if you had one. */
+  private async dropYourBuild(): Promise<void> {
+    const folder = this.privatePath(DRAFT_FOLDER, `${BUILD_FOLDER_PREFIX}${this.nameTag}`)
+    if (await fileUtils.pathExists(folder)) await fileUtils.deletePath(folder)
+  }
+
+  /** Where built file `filePath` goes in your build. */
+  private yourBuildPath(filePath: string): string {
+    return this.privatePath(
+      DRAFT_FOLDER,
+      `${BUILD_FOLDER_PREFIX}${this.nameTag}`,
+      ...filePath.replace(/^\/+/, "").split("/")
+    )
   }
 
   ////////////////
@@ -438,6 +501,8 @@ export const DRAFT_FOLDER = "__draft"
 export const VERSIONS_FOLDER = "versions"
 /** The versions kept for good, inside `versions/` (`keepForGood()`). */
 const KEPT_FILE = "__kept.json5"
+/** Your build's folder inside `__draft/`, before your name tag:  `__build.owen` (see "Your build"). */
+const BUILD_FOLDER_PREFIX = "__build."
 /** What's drafted, by file, inside `__draft/`. */
 const RECORDS_FILE = "__drafts.json5"
 

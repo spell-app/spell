@@ -22,12 +22,5 @@
     "StarWarsSite",
     "Statusphere"
   ],
-  "@spell/library": [
-    "OrgAdmin",
-    "OrgChat",
-    "OrgFeed",
-    "Inbox",
-    "OrgEvents",
-    "AdministracionDeLaOrg"
-  ]
+  "@spell/library": ["OrgAdmin", "OrgChat", "OrgFeed", "Inbox", "OrgEvents", "AdministracionDeLaOrg"]
 }

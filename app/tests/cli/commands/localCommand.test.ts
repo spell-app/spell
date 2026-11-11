@@ -878,6 +878,8 @@ describe("spell space local", () => {
       expect(file()).toContain("header_up Host localhost:3456")
       expect(file()).toContain(`header_up Origin "^https://test\\.spell\\.app$" "http://localhost:3456"`)
       expect(file().match(/header_up Origin/g)).toHaveLength(1)
+      // marked, so a save to a built-in through it stays a draft (epic `mockup` P20)
+      expect(file()).toContain("header_up x-spell-house-site 1")
       expect(file().split("\ntest.spell.app {")[0]).not.toContain("header_up")
     })
 

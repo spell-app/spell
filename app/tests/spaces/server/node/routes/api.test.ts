@@ -65,11 +65,17 @@ function freePort(): Promise<number> {
  * - Uses `node:http`, not `fetch`:  `path` goes on the wire exactly as given.
  *   `fetch` (WHATWG URL) resolves `%2e%2e` segments before sending, which would hide the path-traversal cases.
  */
-function request(method: string, path: string, body?: string, contentType?: string): Promise<Reply> {
+function request(
+  method: string,
+  path: string,
+  body?: string,
+  contentType?: string,
+  more: Record<string, string> = {}
+): Promise<Reply> {
   const { port } = new URL(baseUrl)
   return new Promise((resolve, reject) => {
     // `Content-Length` is explicit:  node sends a `DELETE` body unframed (no length, not chunked) otherwise
-    const headers: Record<string, string> = {}
+    const headers: Record<string, string> = { ...more }
     if (contentType) headers["content-type"] = contentType
     if (body !== undefined) headers["content-length"] = String(Buffer.byteLength(body))
     const outgoing = http.request({ host: "localhost", port, method, path, headers }, (incoming) => {
@@ -146,7 +152,8 @@ beforeAll(async () => {
   baseUrl = `http://localhost:${port}`
   server = spawn(process.execPath, ["--import", "tsx", "src/spaces/server/node/routes/cli.ts"], {
     cwd: repoDir,
-    env: { ...process.env, PORT: String(port), ...folders },
+    // a save to a built-in writes its file, as in a checkout (epic `mockup` P20)
+    env: { ...process.env, PORT: String(port), ...folders, SPELL_EDITS_BUILTINS: "1" },
     stdio: "ignore"
   })
   for (let tries = 0; tries < 200; tries++) {
@@ -465,6 +472,49 @@ describe("drafts, Publish and versions", () => {
     expect(readDraft("keep.spell")).toBeUndefined()
     await request("POST", `${SAVE}keep.spell`, "kept", "text/plain")
     expect(readDraft("keep.spell")).toBeUndefined()
+  })
+
+  it("a built-in's file, in a checkout, saves to the file itself, dropping your old draft;  through the house site, a draft", async () => {
+    const example = path.join(tempDir, "builtins/@spell/examples/Ex")
+    fs.mkdirSync(example, { recursive: true })
+    fs.writeFileSync(path.join(example, "project.json"), JSON.stringify({ imports: [] }))
+    fs.writeFileSync(path.join(example, "Ex.spell"), "one")
+    const save = "/api/projects/file/@spell/examples/Ex/Ex.spell"
+    const read = "/spaces/@spell/examples/Ex/Ex.spell"
+    // through the house-network site:  your draft, the file as it was
+    expect((await request("POST", save, "drafted", "text/plain", { "x-spell-house-site": "1" })).status).toBe(200)
+    expect(fs.readFileSync(path.join(example, "Ex.spell"), "utf8")).toBe("one")
+    expect((await request("GET", read)).text).toBe("drafted")
+    // from this Mac:  the file itself, and the old draft gone, so the read gives the save
+    expect((await request("POST", save, "two", "text/plain")).status).toBe(200)
+    expect(fs.readFileSync(path.join(example, "Ex.spell"), "utf8")).toBe("two")
+    expect(fs.readdirSync(path.join(example, "__draft")).filter((name) => name.endsWith(".spell"))).toEqual([])
+    expect((await request("GET", read)).text).toBe("two")
+  })
+
+  it("what spell builds while you have drafts is your build:  you read it, the shared build stays;  Discard drops it", async () => {
+    writeFixture("user/Mine/project.json", JSON.stringify({ imports: [] }))
+    writeFixture("user/Mine/Mine.spell", "published")
+    writeFixture("built/Mine/Mine.spell.js", "shared")
+    const files = "/spaces/owen@spell/Mine/"
+    const save = "/api/projects/file/owen@spell/Mine/"
+    // no drafts:  a build is the shared one
+    await request("POST", `${save}Mine.spell.js`, "shared again", "text/plain")
+    expect(readFixture("built/Mine/Mine.spell.js")).toBe("shared again")
+    // a draft:  what's built from it is yours
+    await request("POST", `${save}Mine.spell`, "my draft", "text/plain")
+    await request("POST", `${save}Mine.spell.js`, "mine", "text/plain")
+    expect(readFixture("built/Mine/Mine.spell.js")).toBe("shared again")
+    expect((await request("GET", `${files}Mine.spell.js`)).text).toBe("mine")
+    // the draft discarded:  back on the shared build
+    await request(
+      "POST",
+      "/api/projects/discard",
+      json({ projectId: "owen@spell/Mine", filePath: "/Mine.spell" }),
+      "application/json"
+    )
+    expect((await request("GET", `${files}Mine.spell.js`)).text).toBe("shared again")
+    expect(fs.existsSync(fixturePath("user/Mine/__draft/__build.owen"))).toBe(false)
   })
 
   it("a published file changed since your draft began:  Publish says so (409), and publishes only when told to anyway", async () => {
