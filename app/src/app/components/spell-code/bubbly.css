@@ -562,6 +562,8 @@
   --bubbly-monaco-input-room: calc((var(--bubbly-gap) + 8px) * var(--bubbly-monaco-scale));
   /* room outside a quoted input's marks, for the curly ones drawn wider than the file's own */
   --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
+  /* ... before an opening one:  half that, so `its` sits close to its quote (Owen) */
+  --bubbly-monaco-quote-room-before: calc(var(--bubbly-quote-room) / 4 * var(--bubbly-monaco-scale));
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
   --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 2px);
   /* how much lower a pill's top sits than an even pill's (negative:  higher):  its words sit high in their line */
@@ -623,6 +625,9 @@
   }
   .bubbly-room-quote {
     width: var(--bubbly-monaco-quote-room);
+  }
+  .bubbly-room-quote.bubbly-room-before {
+    width: var(--bubbly-monaco-quote-room-before);
   }
 
   /****** the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size ******/

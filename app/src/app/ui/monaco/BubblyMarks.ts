@@ -302,14 +302,14 @@ const ON_BAND = "bubbly-on-band"
 
 /**
  * Room either side of a pill's words (`input`), or outside a quoted one's marks (`quote`):
- * a no-break space, `bubbly-room-<kind>`, its width the sheet's.
+ * a no-break space, `bubbly-room-<kind> bubbly-room-<side>`, its width the sheet's.
  * - The caret stops only on the text's side of it:  beside the letter, never out past the room.
  *   Monaco's `InjectedTextCursorStops`:  `Right` (1) for room before the text, `Left` (2) for room after it.
  */
 function room(kind: "input" | "quote", side: "before" | "after"): monaco.editor.InjectedTextOptions {
   return {
     content: "\u00a0",
-    inlineClassName: `bubbly-room bubbly-room-${kind}`,
+    inlineClassName: `bubbly-room bubbly-room-${kind} bubbly-room-${side}`,
     cursorStops: side === "before" ? 1 : 2
   }
 }
