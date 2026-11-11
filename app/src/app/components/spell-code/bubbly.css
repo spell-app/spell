@@ -79,8 +79,6 @@
 
   /****** a body:  the gutter down its left, its white, the foot under it ******/
   --bubbly-gutter: 5px;
-  /* a group's rail starts this far left of its band (a negative length), so a member's band never hides it */
-  --bubbly-group-rail-outdent: -2px;
   /* the body's white corners where they meet the gutter:  the top one curves out of the band, the bottom into the foot */
   --bubbly-inner-top: 5px;
   --bubbly-block-inner-corner: 8px;
@@ -230,13 +228,6 @@
     /* reaches under the body's rounded left corners, so they curve into the band */
     width: calc(100% + var(--bubbly-block-inner-corner));
     background: var(--bubbly-pill);
-  }
-  /*
-   * a group's rail sticks out 2px left of its band, toward its parent's:
-   * a declaration inside it starts its band only 4px in, which hid all but a sliver of the group's rail
-   */
-  .bubbly-group > .bubbly-gutter {
-    margin-left: var(--bubbly-group-rail-outdent);
   }
   .bubbly-block > .bubbly-body {
     grid-row: 2;

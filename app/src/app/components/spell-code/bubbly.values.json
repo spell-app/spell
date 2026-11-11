@@ -100,10 +100,6 @@
       "light": "5px",
       "dark": "5px"
     },
-    "--bubbly-group-rail-outdent": {
-      "light": "-2px",
-      "dark": "-2px"
-    },
     "--bubbly-inner-top": {
       "light": "5px",
       "dark": "5px"
