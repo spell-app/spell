@@ -81,7 +81,7 @@ export class BubblyLayout {
   ) {
     this.pronouns = (parser.language ?? SP.Language.default).words.pronouns
     this.paint = Array.from({ length: text.length })
-    this.spans = SP.SpellHighlighter.spans(text, parser)
+    this.spans = SP.SpellHighlighter.spans(text, parser, parsed)
     let at = 0
     for (const line of text.split("\n")) {
       this.lineStarts.push(at)

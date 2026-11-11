@@ -264,6 +264,24 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(SP.BubblyLayout.of(edited, SP.spellParser, { within }), "phrase")).toEqual([])
   })
 
+  it("colours a handler's steps from its project's parse:  a member declared further down is a reference", () => {
+    const GAME = `a "pile" is a list of cards
+a "card" is a view
+
+solitaire is an app
+\tits "score" is a number
+\twhen its score changes
+\t\tset home to the number of cards in the clubs
+\t"clubs" is a new pile
+`
+    const file = parseSpellProject([{ path: "/Game.spell", contents: GAME }]).files[0]!
+    const within = { match: file.match, inputLines: GAME.split("\n") } as unknown as SP.SpellFile
+    const reads = (drawing: SP.BubblyDrawing) => piecesOf(drawing, "reference").filter((words) => words === "the clubs")
+    expect(reads(SP.BubblyLayout.of(GAME))).toEqual([])
+    expect(reads(SP.BubblyLayout.of(GAME, SP.spellParser, { within }))).toEqual(["the clubs"])
+    expect(piecesOf(SP.BubblyLayout.of(GAME, SP.spellParser, { within }), "first-mention")).toContain("home")
+  })
+
   it("never throws, whatever it's given", () => {
     for (const text of ["", "))) ((( '", "to to to\n\t\t\tis is", "<div>{</div>", "\n\n\t\n"]) {
       expect(() => SP.BubblyLayout.of(text)).not.toThrow()
