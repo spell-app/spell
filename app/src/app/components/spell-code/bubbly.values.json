@@ -184,6 +184,10 @@
       "light": "calc(15px / 2 * 1)",
       "dark": "calc(15px / 2 * 1)"
     },
+    "--bubbly-monaco-quote-room-before": {
+      "light": "calc(15px / 4 * 1)",
+      "dark": "calc(15px / 4 * 1)"
+    },
     "--bubbly-monaco-foot-room": {
       "light": "calc(4px + 2px)",
       "dark": "calc(4px + 2px)"
