@@ -92,7 +92,8 @@ export class BubblyLayout {
       if (seen.has(each)) return
       seen.add(each)
       if (each.rule.name === LINE_RULE) {
-        const statement = childrenOf(each)[0]
+        // a comment after the statement comes first in the line's match:  skip it
+        const statement = childrenOf(each).find((child) => child.rule.name !== COMMENT_RULE)
         if (statement?.start !== undefined) {
           const index = this.lineIndexOf(statement.start)
           if (!this.statements.has(index)) this.statements.set(index, statement)
@@ -501,8 +502,11 @@ type SourceLine = {
   children: SourceLine[]
 }
 
-/** The rule every line of a block matches:  its first child is the line's statement. */
+/** The rule every line of a block matches:  its first child past a trailing comment is the line's statement. */
 const LINE_RULE = "line"
+
+/** The rule of a comment at a line's end. */
+const COMMENT_RULE = "comment"
 
 /** The rule of a statement's body:  never walked into for a head's inputs. */
 const BLOCK_RULE = "block"
