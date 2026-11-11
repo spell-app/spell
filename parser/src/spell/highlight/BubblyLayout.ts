@@ -4,6 +4,7 @@ import { BubblyPresentation } from "./BubblyPresentation"
 import type {
   BubblyBlock,
   BubblyDrawing,
+  BubblyLayoutOptions,
   BubblyLine,
   BubblyNode,
   BubblyPartOfSpeech,
@@ -18,7 +19,7 @@ import type {
  * which are control lines (a bracket holding their steps), and what each stretch of a line is to a reader
  * (what a person typed, a reference, a value ...).
  * - `BubblyLayout.of(text, parser)`:  a `BubblyDrawing`, offsets into `text`.
- * - From the parser's own reading of the code, no project:
+ * - From the parser's own reading of the code, alone, or its project's (`within`):
  *   - its coloured spans (`SP.SpellHighlighter.spans()`):  references, values, marks, comments
  *   - its parse as a block:  each line's rule, which `SP.BubblyPresentation` says how to present
  *     (a band or not, which parts are inputs, a bracket for a control line)
@@ -29,9 +30,20 @@ import type {
  * - NEVER throws:  a parse that fails lays out every line as a step, coloured by its tokens.
  ****************/
 export class BubblyLayout {
-  /** `text` laid out in the bubbly look, read by `parser` (English's by default). */
-  static of(text: string, parser: SP.SpellParser = SP.spellParser): BubblyDrawing {
-    return new BubblyLayout(text, parser).drawing
+  /**
+   * `text` laid out in the bubbly look, read by `parser` (English's by default).
+   * - `within`:  the project file it's the text of:  its project's own parse of it is the one read, so it draws as the
+   *   compiler sees it (`card ranks` declared in another file), and nothing is parsed twice.
+   *   - Only while that parse is of this very text (`isParseOf()`):  else, as a file just edited, it reads alone.
+   */
+  static of(text: string, parser: SP.SpellParser = SP.spellParser, { within }: BubblyLayoutOptions = {}): BubblyDrawing {
+    const projects = within && BubblyLayout.isParseOf(within, text) ? within.match : undefined
+    return new BubblyLayout(text, parser, projects).drawing
+  }
+
+  /** Is `file`'s parse, in its project, of `text`, so its matches' offsets are `text`'s? */
+  static isParseOf(file: SP.SpellFile, text: string): boolean {
+    return !!file.match && file.inputLines?.join("\n") === text
   }
 
   /** The drawing. */
@@ -60,7 +72,8 @@ export class BubblyLayout {
 
   private constructor(
     private readonly text: string,
-    parser: SP.SpellParser
+    parser: SP.SpellParser,
+    parsed?: P.Match
   ) {
     this.pronouns = (parser.language ?? SP.Language.default).words.pronouns
     this.paint = Array.from({ length: text.length })
@@ -70,7 +83,7 @@ export class BubblyLayout {
       this.lineStarts.push(at)
       at += line.length + 1
     }
-    this.readParse(parser)
+    this.readParse(parser, parsed)
     this.drawing = { text, nodes: this.layout(this.treeOf(), { depth: 0, level: 0 }) }
   }
 
@@ -78,11 +91,14 @@ export class BubblyLayout {
   // ## The parse
   ////////////////
 
-  /** Each line's statement, and the overlays every line takes;  a parse that throws leaves both empty. */
-  private readParse(parser: SP.SpellParser) {
-    let match: P.Match | undefined
+  /**
+   * Each line's statement, and the overlays every line takes, from `parsed` (its project's parse) or a parse of its
+   * own;  a parse that throws leaves both empty.
+   */
+  private readParse(parser: SP.SpellParser, parsed?: P.Match) {
+    let match = parsed
     try {
-      match = parser.parse(this.text, "block")
+      match ??= parser.parse(this.text, "block")
     } catch {
       // the spans stand alone
     }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
 
 /** A card, as Solitaire's starts:  a type with an ability, a group, a list, a worked-out property, a test. */
 const CARD = `# A playing card
@@ -237,6 +238,28 @@ describe("SP.BubblyLayout", () => {
         expect([last.kind, commented.slice(last.start, last.end)]).toEqual(["comment", "// a note"])
       }
     }
+  })
+
+  it("reads a project's file from its project's own parse:  names from its other files, as the compiler sees them", () => {
+    const CARD_FILE = `a "card" is a view\n\tits "rank" is one of ace, king\n`
+    const DECK_FILE = `a "deck" is a list of cards\n\twhen creating a deck\n\t\tfor rank in card ranks\n\t\t\tadd rank to the deck\n`
+    const project = parseSpellProject([
+      { path: "/Card.spell", contents: CARD_FILE },
+      { path: "/Deck.spell", contents: DECK_FILE }
+    ])
+    const deck = project.files[1]!
+    const within = { match: deck.match, inputLines: DECK_FILE.split("\n") } as unknown as SP.SpellFile
+    const inProject = SP.BubblyLayout.of(DECK_FILE, SP.spellParser, { within })
+    expect(piecesOf(SP.BubblyLayout.of(DECK_FILE), "phrase")).toEqual([])
+    expect(piecesOf(inProject, "phrase")).toEqual(["card ranks"])
+    expect(blocksOf(inProject.nodes).map((block) => DECK_FILE.slice(block.head.start, block.head.end))).toEqual([
+      'a "deck" is a list of cards',
+      "when creating a deck"
+    ])
+    // a parse of other text (an edit it hasn't caught up with):  read alone
+    const edited = `${DECK_FILE}\n`
+    expect(SP.BubblyLayout.isParseOf(within, edited)).toBe(false)
+    expect(piecesOf(SP.BubblyLayout.of(edited, SP.spellParser, { within }), "phrase")).toEqual([])
   })
 
   it("never throws, whatever it's given", () => {

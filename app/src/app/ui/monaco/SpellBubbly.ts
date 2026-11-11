@@ -1,6 +1,7 @@
 import { SP } from "spell/parser/spell"
 import { codeLook } from "spell/app/app/ui/codePopups"
 import { monaco } from "./monaco"
+import { AppAddresses } from "./AppAddresses"
 import { BubblyMarks, indentColumns, type BubblyBlockShape, type BubblyShape } from "./BubblyMarks"
 
 import "spell/app/app/components/spell-code/bubbly.css"
@@ -10,7 +11,8 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * Spell in a Monaco editor drawn in the BUBBLY LOOK as it's typed (epic `language` P50), while its text stays
  * ordinary text to edit:  the look `<spell-code>` draws on a page, from the same layout and the same sheet.
  * - One per editor, made as each editor is (`watch()`, from `SpellMonaco.register()`).
- * - It lays the code out with the parser (`SP.BubblyLayout`, by `SP.BubblyPresentation`'s table), then:
+ * - It lays the code out with the parser (`SP.BubblyLayout`, by `SP.BubblyPresentation`'s table), from its project's
+ *   own parse of it when it's a project's file, then:
  *   - marks the text:  each piece's weight, slant and ink, room round what a person typed, a quoted input's curly
  *     marks (`BubblyMarks`, Monaco decorations)
  *   - draws the shapes UNDER the text, in a layer behind the editor (`bubbly-layer`):  each declaration's band,
@@ -164,7 +166,14 @@ export class SpellBubbly {
     const model = this.editor.getModel()
     if (!model) return
     try {
-      const drawing = SP.BubblyLayout.of(model.getValue(), parserFor(model))
+      // its project's parse of it, if it's a project's file:  what the compiler sees, names from other files too
+      const text = model.getValue()
+      const path = AppAddresses.pathOf(model.uri)
+      const within = path === undefined ? undefined : SP.SpellFile.registry.get(path)
+      const drawing = SP.BubblyLayout.of(text, parserFor(model), { within })
+      // the project hasn't parsed this text yet:  read alone for now, and again once it has
+      if (within && !SP.BubblyLayout.isParseOf(within, text) && this.parseWaits++ < PARSE_WAITS) this.relayoutSoon()
+      else this.parseWaits = 0
       this.laidOut = BubblyMarks.of(drawing)
       this.marks!.set(this.laidOut.marks)
     } catch (error) {
@@ -517,6 +526,9 @@ export class SpellBubbly {
 
   /** A redraw is waiting for the next frame. */
   private isRedrawQueued = false
+
+  /** How many times running it's laid out again, waiting for its project to parse its text. */
+  private parseWaits = 0
 }
 
 ////////////////
@@ -572,6 +584,9 @@ type View = {
 
 /** How long typing pauses before the code is laid out again:  the marks follow the text till then. */
 const RELAYOUT_MSEC = 300
+
+/** How many times it lays out again, `RELAYOUT_MSEC` apart, waiting for its project to parse what was typed. */
+const PARSE_WAITS = 20
 
 /** The classes that make an editor's box a drawing. */
 const BOX_CLASSES = ["bubbly", "bubbly-monaco"]
