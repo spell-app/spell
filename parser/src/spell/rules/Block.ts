@@ -122,10 +122,13 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
       }
     }
     const context: StatementsContext = { block: match, docs, docComments, isFileTopLevel }
+    // a declaration's body:  its first line, a comment, is the declaration's description, written above it (P48)
+    const description = match.data.describes ? Block.descriptionLineOf(match) : undefined
     match.matched.forEach((item, index) => {
       // `Block.parse()` only ever pushes `Match`es onto `matched`, each a `line` / nested `block` whose rule
       // returns a statement-shaped node -- not statically representable.
       if (!(item instanceof P.Match)) return
+      if (description && index === 0) return
       context.group = this.groupOpenedBy(match, index) ?? context.group
       const from = statements.length
       statements.push(...this.statementsFor(item, index, context))
@@ -133,7 +136,7 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
       // `if that fails:` in an action takes the line above it inside its `try`
       if (statement) (statement.rule as CatchesLineAbove).catchesLineAbove?.(statement, statements, from)
       if (statement && autoDeclared.has(statement)) statements.push(...autoDeclared.get(statement)!)
-      if (statement) statements.push(...Block.flatBodyStatements(statement))
+      if (statement) statements.push(...Block.headStatements(statement), ...Block.flatBodyStatements(statement))
     })
     statements.unshift(...(autoDeclared.get(undefined) ?? []))
     // a body giving back its last line's value -- see `SpellStatement.returnsLastLine()`
@@ -160,6 +163,16 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     if (this.isBannerHeading(item, block.matched[index + 1])) {
       statements.push(new P.ASTBannerComment(item, { value: this.commentText(this.commentOnlyLine(item)!) }))
       return statements
+    }
+    // a nested block no line took, under a declaration:  its first comment is that declaration's description (P48)
+    if (item.is(Block)) {
+      const taken = Block.descriptionLineOf(item)
+      const comment = taken && this.commentOnlyLine(taken)
+      if (comment && docComments.has(comment) && item.AST instanceof P.ASTStatementGroup) {
+        const rest = (item.AST.statements ?? []).filter((node) => node.match !== comment && node.match !== taken)
+        statements.push(new P.ASTStatementGroup(item, { statements: rest }))
+        return statements
+      }
     }
     const statement = this.statementOf(item)
     // an auto-declaring `set` says what it declared where its file declares it -- see `autoDeclarationAST()`
@@ -236,6 +249,16 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
       return false
     }
     return false
+  }
+
+  /**
+   * What `statement`'s head line says beyond its own code, first among its body's statements:
+   * e.g. a type's abilities, `a "card" is a draggable two sided view` (epic `language` P48) --
+   * see `TypeDeclaration.abilitiesOf()`.
+   * - Duck-typed:  `Block` can't import `TypeDeclaration` without a cycle.
+   */
+  private static headStatements(statement: P.Match): SP.HoistableStatement[] {
+    return (statement.rule as { abilitiesOf?(match: P.Match): SP.HoistableStatement[] }).abilitiesOf?.(statement) ?? []
   }
 
   /**
@@ -321,8 +344,16 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     block.matched.forEach((item, index) => {
       const statement = item instanceof P.Match ? this.statementOf(item) : undefined
       if (!statement || !statement.rule.getDeclaration(statement)) return
+      // the first comment under it, in its body or a block no line took (epic `language` P48)
+      const below = this.descriptionBelow(statement, block.matched[index + 1])
+      if (below) {
+        docs.set(statement, { lines: [this.commentText(below)], comments: [below] })
+        return
+      }
       const above: P.Match[] = []
-      for (let before = index - 1; before >= 0; before--) {
+      // a body's first line, its declaration's description, is never also a docstring of the line under it
+      const stop = block.data.describes ? 1 : 0
+      for (let before = index - 1; before >= stop; before--) {
         const comment = this.commentOnlyLine(block.matched[before])
         if (!comment) break
         if (this.isHeading(comment)) {
@@ -331,12 +362,42 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
         }
         above.unshift(comment)
       }
-      // its line's own comments:  code spell's one, or a spellx twin's description lines (`SP.SpellxTwin`)
+      // its line's own comment, `- group "rank"   // Ace is low`
       const onLine = (item as P.Match).matched.filter((it): it is P.Match => this.isComment(it))
       const comments = above.length ? above : onLine
       if (comments.length) docs.set(statement, { lines: comments.map((it) => this.commentText(it)), comments })
     })
     return docs
+  }
+
+  /**
+   * The comment that's `statement`'s description, as the first line under it (epic `language` P48) -- `undefined`
+   * if none:
+   * - its body's first line, a comment:  `its "state" is`, then `// Its short name`, then its lines
+   * - else the first line of the block indented under it that no line took, when that's a comment:
+   *   `its "hint" is text`, then `// Said beside the score`
+   * - A `#` heading is never one.
+   */
+  private descriptionBelow(statement: P.Match, next: P.Match | P.Token | undefined): P.Match | undefined {
+    const body = (statement.data as { body?: unknown }).body
+    if (body instanceof P.Match && body.is(Block)) {
+      return body.data.describes ? this.commentOnlyLine(Block.descriptionLineOf(body)) : undefined
+    }
+    if (!(next instanceof P.Match) || !next.is(Block)) return undefined
+    return this.commentOnlyLine(Block.descriptionLineOf(next))
+  }
+
+  /**
+   * The line of `block` that's a description (epic `language` P48):  its first, when that's only a comment,
+   * and not a `#` heading -- `undefined` otherwise.
+   */
+  static descriptionLineOf(block: P.Match): P.Match | undefined {
+    const [first] = block.matched
+    if (!(first instanceof P.Match) || first.matched.length !== 1) return undefined
+    const [only] = first.matched
+    const isComment = only instanceof P.Match && only.tokens.length === 1 && only.tokens[0] instanceof P.CommentToken
+    if (!isComment || (only.tokens[0] as P.CommentToken).commentSymbol.startsWith("#")) return undefined
+    return first
   }
 
   /**
@@ -374,8 +435,8 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
 
   /**
    * The group of members line `item` opens, if it opens one (epic `debut` P26):
-   * - a group's line, `- group "rank"`, its description the comment on its line (spellx's twin),
-   *   else the comment-only lines directly above it (code spell's:  `// Ace is low`, then `- group "rank"`)
+   * - a group's line, `- group "rank"`, its description the comment on its line,
+   *   else the comment-only lines directly above it (`// Ace is low`, then `- group "rank"`)
    * - a heading's, `## turning it over`
    * - The members below it are in it, up to the next:  `getAST()` hands it to their declarations,
    *   its description to the first of them only (`statementsFor()`).
@@ -389,6 +450,11 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const name = statement && (statement.rule as Partial<SP.GroupRule>).groupName?.(statement)
     if (name === undefined) return undefined
     let comments = item.matched.filter((it): it is P.Match => it instanceof P.Match && this.isComment(it))
+    // the first line under it, a comment (epic `language` P48):  `group "Names"`, then `// What a person ... calls it`
+    const next = block.matched[index + 1]
+    const below =
+      next instanceof P.Match && next.is(Block) ? this.commentOnlyLine(Block.descriptionLineOf(next)) : undefined
+    if (!comments.length && below) comments = [below]
     if (!comments.length) {
       for (let before = index - 1; before >= 0; before--) {
         const comment = this.commentOnlyLine(block.matched[before])
@@ -451,6 +517,16 @@ export type BlockMatchData = {
   bodyMark?: P.JournalMark
   /** On a `line` match:  what its statement's `mutateScopeFromBody()` recorded, if anything. */
   fromBody?: string
+  /**
+   * On a `line` match:  its statement's rule read the block under it to say what the line is (epic `language` P48),
+   * so an edit to that block re-parses the line whole -- see `SP.SpellStatement.below`.
+   */
+  readsBelow?: boolean
+  /**
+   * On a `block` match, a declaration's body:  its first line, a comment, is the declaration's description
+   * (epic `language` P48), so it compiles above the declaration, not here -- see `Block.getDocComments()`.
+   */
+  describes?: boolean
   /**
    * On a `block` match, a body that gives back its last line's value:  that line's value, a call or an expression.
    * - Set by `SpellStatement.parseNestedBlock()`;  `Block.getAST()` writes its `return` (epic `language` I47).

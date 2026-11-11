@@ -14,15 +14,15 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
 
 exports[`describeThing() > a property, with its compiled javascript 1`] = `
 "property color of Card
-Card.spell:15
+Card.spell:18
 
 Spell
-    <property "color" one-of="red, black">
+    its "color" is one of red, black
       red if it is a diamond or it is a heart
       black otherwise
 
 Compiled
-  // - its "color" is one of red, black :
+  // - its "color" is one of red, black
   //   red if it is a diamond or it is a heart
   //   black otherwise
   Card.Colors = ["red", "black"]
@@ -46,37 +46,41 @@ Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spad
             Colors (red, black)
 
 Spell
-  <view "card" template="two sided view" draggable>
-    <group "rank" description="Ace is low:  ace = 1 ... king = 13"/>
-    <property "rank" one-of="ace, 2 ... 10, jack, queen, king" alias="is a (rank)"/>
-    <property "value">the position of its rank</>
-    <alias "is a face card">if its rank is jack, queen or king</>
-    <alias "is a number card">if it is not a face card</>
+  a "card" is a draggable two sided view
+    group "Rank"
+      // Ace is low:  ace = 1 ... king = 13
+    its "rank" is one of ace, 2 ... 10, jack, queen, king
+      it "is a (rank)"
+    its "value" is the position of its rank
+    it "is a face card" if its rank is jack, queen or king
+    it "is a number card" if it is not a face card
   
-    <group "suit"/>
-    <property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a (suit)"/>
-    <property "color" one-of="red, black">
+    group "Suit"
+    its "suit" is one of clubs, diamonds, hearts or spades
+      it "is a (suit)"
+    its "color" is one of red, black
       red if it is a diamond or it is a heart
       black otherwise
-    </>
-    <property "symbol">
+    its "symbol" is
       "♣" if it is a club
       "♦" if it is a diamond
       "♥" if it is a heart
       "♠" otherwise
-    </>
   
-    <group "names" description="What a person, a test or the console calls it"/>
-    <property "name">its rank + " of " + its suit</>
-    <alias "is the (rank) of (suit)"/>
-    <property "state" description="Its short name:  Q♠↓ is the queen of spades, face down">
+    group "Names"
+      // What a person, test or console calls it
+    its "name" is its rank && "of" && its suit
+    it "is the (rank) of (suit)"
+    its "state" is
+      // Its short name:  Q♠↓ is the queen of spades, face down
       letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
       arrow is "↑" if it is face up otherwise "↓"
       return letter + its symbol + arrow
-    </>
   
-    <group "drawing" description="One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css"/>
-    <property "picture" description="Its face:  https://www.compart.com/en/unicode/block/U+1F0A0">
+    group "Drawing"
+      // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+    its "picture" is
+      // Its face:  https://www.compart.com/en/unicode/block/U+1F0A0
       set column to its value
       if it is a club
         return item column of ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
@@ -85,16 +89,14 @@ Spell
       if it is a heart
         return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
       return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
-    </>
-    <property "lifted" description="Pulled up out of its pile, over the piles above it, as the cheat does -- styles.css">yes or no</>
-    <draw "front">
+    its "lifted" is yes or no
+      // Over every card and pile around it while the cheat moves it -- styles.css
+    to draw its front
       <text color={its color}>{its picture}</text>
-    </>
-    <draw "back">
+    to draw its back
       <text color="blue">🂠</text>
-    </>
   
-    <test "card setup">
+    to test card setup
       get a new card whose rank is queen, suit is spades and direction is down
       its name should be "queen of spades"
       its color should be black
@@ -118,6 +120,5 @@ Spell
       the color of seven should be red
       the picture of seven should be "🂷"
       the picture of a new card whose rank is ace and suit is clubs should be "🃑"
-      the picture of a new card whose rank is king and suit is diamonds should be "🃎"
-    </>"
+      the picture of a new card whose rank is king and suit is diamonds should be "🃎""
 `;

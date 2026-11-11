@@ -1,4 +1,4 @@
-<page "section api" notebook>
+"section api" is a notebook page
 	<header level="1">
 		Section
 		<header>A section is a titled block of content that can close and keep its title in view.</>
@@ -57,4 +57,3 @@
 			<ui-docs-api family="ui-section" only="texts"></>
 		</>
 	</>
-</page>

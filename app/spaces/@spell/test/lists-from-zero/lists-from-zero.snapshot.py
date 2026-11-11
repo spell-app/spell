@@ -16,10 +16,11 @@ class Tile(Thing):
 
 
 class Rack(List):
+    """a new rack holds five tiles, A to E"""
+
     item_type = Tile
 
     def create(self) -> None:
-        """a new rack holds five tiles, A to E"""
         self.append(Tile(letter="A"))
         self.append(Tile(letter="B"))
         self.append(Tile(letter="C"))

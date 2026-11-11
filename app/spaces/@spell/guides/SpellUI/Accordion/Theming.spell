@@ -1,4 +1,4 @@
-<page "accordion theming" notebook>
+"accordion theming" is a notebook page
 	<header level="1">
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>
@@ -63,4 +63,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

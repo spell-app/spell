@@ -1,7 +1,6 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { SP } from "spell/parser/spell"
-import { SX } from "spell/parser/spellx"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
 
@@ -25,7 +24,6 @@ import {
   mergedSpell,
   placeLineAt,
   placesIn,
-  plainSpellOf,
   spellPartsFor,
   spellTextOf,
   type SpellLine,
@@ -76,9 +74,7 @@ const KINDS_TO_NAME = [...KINDS_IT_CAN_LOOK_AT]
  *   7. only then, the files:  a file is added to, never overwritten, and the same place isn't added twice;
  *      a `<Name>.es.spell` gets Spanish, its names as the source has them (`partsInLanguageOf()`, epic `data` T72)
  * - One server per Spell file, `<Name>.api.spell`;  its description goes beside it, `<Name>.api.json5`.
- * - A new file is written in tags (`<web-server "x" address="...">`, epic `language` P40;  `IngestSettings.shape`);
- *   a look again merges into a file in either shape:  a tag-shaped one as the plain Spell it means (`plainSpellOf()`),
- *   written back in tags only when something changed.
+ * - A file is written in plain Spell, each member bare (epic `language` P46);  a look again merges into it.
  *   - JSON5, so a person can read it, and the next look can too.
  *   - What every collection agrees on is written once, in `allCollections`;
  *     each collection keeps only what differs (`descriptionOnDisk()`).
@@ -147,10 +143,7 @@ export class PlaceIngest {
     noteKeepingACopy(description, existing)
     await this.finish(description)
     const spell = spellTextOf(partsInLanguageOf(file, spellPartsFor(description))).trimEnd()
-    // in tags, but under a plain file's own lines:  one file, one shape
-    const isPlain = existing.trim() ? SP.formOfText(existing, file) === "spell" : this.settings.shape === "plain"
-    const shown = isPlain ? spell : tagsOf(spell, file).trimEnd()
-    const text = existing.trim() ? `${existing.trimEnd()}\n\n${shown}\n` : `${shown}\n`
+    const text = existing.trim() ? `${existing.trimEnd()}\n\n${spell}\n` : `${spell}\n`
     const descriptionPath = descriptionPathFor(file)
     await files.write(file, text)
     await this.writeDescription(file, descriptionPath, description)
@@ -232,11 +225,7 @@ export class PlaceIngest {
     const before = partsInLanguageOf(file, writtenOf(spellPartsFor(old), old.spell))
     const after = partsInLanguageOf(file, spellPartsFor(description))
     const written = (await files.read(file)) ?? ""
-    // a tag-shaped file is merged as the plain Spell it means, and written back in tags:  what the tool wrote is plain
-    const isTagged = SP.formOfText(written, file) === "spellx"
-    const ours = [before.header, ...allLinesOf(before), ...(old.spell ?? [])]
-    const plain = isTagged ? plainSpellOf(written, file, ours) : undefined
-    const text = plain?.text ?? written
+    const text = written
     const others = await files.otherSpellBeside(file)
     const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
     const changes = [...saidChanges(old, description), ...merge.changed]
@@ -244,10 +233,7 @@ export class PlaceIngest {
     await this.readThroughIt(description, reader, keySecret)
     noteKeepingACopy(description, merge.text)
     await this.finish(description)
-    await files.write(
-      file,
-      !plain ? merge.text : merge.text === text ? written : tagsOf(merge.text, file, proseIn(plain, merge.text))
-    )
+    await files.write(file, merge.text)
     await this.writeDescription(file, descriptionPath, description)
     return {
       file,
@@ -629,7 +615,7 @@ function noteKeepingACopy(description: PlaceDescription, text: string): void {
   const onlyReads = /read only|offers none/i.test(description.canDo.write)
   if ((kind !== "web server" && kind !== "graphql server") || !onlyReads || KEEPS_A_COPY.test(text)) return
   description.notes.push(
-    "It only reads, so a program could keep what it read on this device, and open with it the next time:  add `- keep a copy on this device`."
+    "It only reads, so a program could keep what it read on this device, and open with it the next time:  add `keep a copy on this device`."
   )
 }
 
@@ -694,7 +680,9 @@ export function descriptionFromDisk({
   ...rest
 }: PlaceDescriptionOnDisk): PlaceDescription {
   const each = Object.entries(collections).map(([name, collection]) => [name, { ...allCollections, ...collection }])
-  return { ...rest, collections: Object.fromEntries(each) } as PlaceDescription
+  // the lines it wrote, each bare:  an older version bulleted them, `- its "url" is text` (epic `language` P46)
+  const spell = rest.spell?.map((line) => line.replace(/^(\t*)- /, "$1"))
+  return { ...rest, ...(spell ? { spell } : {}), collections: Object.fromEntries(each) } as PlaceDescription
 }
 
 /** The class a type's words compile to:  `life form` => `LifeForm`. */
@@ -815,7 +803,8 @@ function awayFromTypesBeside(description: PlaceDescription, others: readonly str
 function isUsed(words: string, text: string, others: readonly string[], own: ReadonlySet<string>): boolean {
   const pattern = new RegExp(`\\b${words.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i")
   const uses = (line: string) => pattern.test(line.replace(/\/\/.*$/, ""))
-  const hereUses = text.split("\n").some((line) => !own.has(line.trim()) && uses(line))
+  // a line an older version bulleted, `- its "mass" is a number`, is its own too (epic `language` P46)
+  const hereUses = text.split("\n").some((line) => !own.has(line.trim().replace(/^- /, "")) && uses(line))
   return hereUses || others.some((other) => other.split("\n").some(uses))
 }
 
@@ -988,7 +977,7 @@ function whatSpellCantSay({ about, collections, serverTakes }: PlaceDescription)
   }
   if (about.kind === "web server" && !serverTakes?.filters && !serverTakes?.sorts) {
     said.add(
-      "What it can filter or sort:  it answered as if it hadn't been asked, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `- it filters by cuisine` or `- it sorts by title`."
+      "What it can filter or sort:  it answered as if it hadn't been asked, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.  If it can, add `it filters by cuisine` or `it sorts by title`."
     )
   }
   return [...said]
@@ -1014,25 +1003,4 @@ function writtenOf(parts: SpellParts, written: readonly string[] | undefined): S
 /** SIDE EFFECT:  `description` says which session it was read as, by name, never its values. */
 function noteSignedIn(description: PlaceDescription, signedIn: string | undefined): void {
   if (signedIn) description.about.signedIn = signedIn
-}
-
-/** Every line the tool wrote, in `parts`, without its tab. */
-function allLinesOf(parts: SpellParts): string[] {
-  return [
-    ...parts.placeLines.map((line) => line.text),
-    ...parts.types.flatMap((type) => [type.header, ...type.lines.map((line) => line.text)])
-  ]
-}
-
-/** Plain Spell `text` in tags, for `file` (`SX.SpellxWriter`);  `proseLines`:  which of its lines are prose between tags. */
-function tagsOf(text: string, file: string, proseLines?: ReadonlySet<number>): string {
-  const [parsed] = parseSpellProject([{ path: `/${file.split("/").at(-1)!}`, contents: text }]).files
-  return SX.SpellxWriter.write({ text, match: parsed!.match!, scope: parsed!.match!.scope, proseLines })
-}
-
-/** Which lines of `merged` are `plain`'s prose, by their text:  a merge moves them. */
-function proseIn(plain: { text: string; proseLines: ReadonlySet<number> }, merged: string): Set<number> {
-  const lines = plain.text.split("\n")
-  const prose = new Set([...plain.proseLines].map((index) => lines[index]))
-  return new Set(merged.split("\n").flatMap((line, index) => (prose.has(line) ? [index] : [])))
 }

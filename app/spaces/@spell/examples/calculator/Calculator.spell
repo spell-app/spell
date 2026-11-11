@@ -1,45 +1,47 @@
 # Calculator
-A pocket calculator:  a number, an operator, another number, and the total as you type.
-Its keys are Spell UI's buttons, four a row, and each one runs one of the calculator's actions.
+// A pocket calculator:  a number, an operator, another number, and the total as you type.
+// Its keys are Spell UI's buttons, four a row, and each one runs one of the calculator's actions.
 
-<app "calculator">
-	<group "what it keeps" description="The sum being typed:  its left number, its operator and its right number"/>
-	<property "input" description="The number being typed, as text, so each key can add a digit on the end">text</>
-	<property "left">text</>
-	<property "operator">text</>
-	<property "right">text</>
-	<property "total" description="The sum so far, worked out each time it's read">
+calculator is an app
+	group "What It Keeps"
+		// The sum being typed:  its left number, its operator and its right number
+	its "input" is text
+		// The number being typed, as text, so each key can add a digit on the end
+	its "left" is text
+	its "operator" is text
+	its "right" is text
+	its "total" is
+		// The sum so far, worked out each time it's read
 		set left number to the left as a number
 		set right number to the right as a number
 		if the operator is "+" return left number + right number
 		if the operator is "–" return left number - right number
 		if the operator is "×" return left number times right number
 		return left number divided by right number
-	</property>
-	<property "sum" description="What the display's top line shows:  0 until a key's pressed">
+	its "sum" is
+		// What the display's top line shows:  0 until a key's pressed
 		set shown to "0" if the left is empty otherwise the left
 		return shown + " " + the operator + " " + the right
-	</property>
-	<property "output" description="The display's second line:  the total, once there's a right number">
+	its "output" is
+		// The display's second line:  the total, once there's a right number
 		"" if the right is empty
 		"= " + the total otherwise
-	</property>
 
-	<group "what its keys do"/>
-	<action "clear it">
+	group "What Its Keys Do"
+	to clear it
 		clear the input
 		clear the left
 		clear the operator
 		clear the right
-	</action>
-	<action "finish it" description="Equals:  the total becomes the left number, ready for the next operator">
+	to finish it
+		// Equals:  the total becomes the left number, ready for the next operator
 		if the right is empty return
 		set the left to the total as text
 		clear the operator
 		clear the right
 		clear the input
-	</action>
-	<action "press (digit as text)" description="A digit, or the decimal point:  onto the number being typed, the left one until there's an operator">
+	to press (digit as text)
+		// A digit, or the decimal point:  onto the number being typed, the left one until there's an operator
 		if the digit is "."
 			if the input is empty
 				set the input to "0."
@@ -51,16 +53,16 @@ Its keys are Spell UI's buttons, four a row, and each one runs one of the calcul
 			set the left to the input
 		otherwise
 			set the right to the input
-	</action>
-	<action "apply (key as text)" description="An operator:  after a whole sum, the total carries on as the next sum's left number">
+	to apply (key as text)
+		// An operator:  after a whole sum, the total carries on as the next sum's left number
 		if the right is not empty
 			finish it
 		set the operator to the key
 		clear the input
-	</action>
 
-	<group "drawing"/>
-	<draw description="The display, then the keypad, four keys a row:  C and 0 are two keys wide">
+	group "Drawing"
+	to draw it
+		// The display, then the keypad, four keys a row:  C and 0 are two keys wide
 		<container width="20em">
 			<card fluid>
 				<segment appearance="secondary" align="right">
@@ -95,9 +97,9 @@ Its keys are Spell UI's buttons, four a row, and each one runs one of the calcul
 				</content>
 			</card>
 		</container>
-	</draw>
 
-	<test "two sums in a row" description="12 + 5, then times 2:  the total carries on as the next sum's left number">
+	to test two sums in a row
+		// 12 + 5, then times 2:  the total carries on as the next sum's left number
 		press "1"
 		press "2"
 		apply "+"
@@ -109,5 +111,3 @@ Its keys are Spell UI's buttons, four a row, and each one runs one of the calcul
 		finish it
 		the left should be "34"
 		the output should be ""
-	</test>
-</app>

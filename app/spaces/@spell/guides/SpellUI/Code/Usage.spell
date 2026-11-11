@@ -1,4 +1,4 @@
-<page "code usage" notebook>
+"code usage" is a notebook page
 	<header level="1">
 		Code
 		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
@@ -87,4 +87,3 @@
 			  why.
 		</>
 	</>
-</page>

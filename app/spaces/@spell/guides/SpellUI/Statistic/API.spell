@@ -1,4 +1,4 @@
-<page "statistic api" notebook>
+"statistic api" is a notebook page
 	<header level="1">
 		Statistic
 		<header>A statistic emphasizes the current value of an attribute.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api family="ui-statistic" only="states"></>
 		</>
 	</>
-</page>

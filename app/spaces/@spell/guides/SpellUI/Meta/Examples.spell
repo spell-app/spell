@@ -1,4 +1,4 @@
-<page "meta examples" notebook>
+"meta examples" is a notebook page
 	<header level="1">
 		Meta
 		<header>A meta holds metadata about the content, such as a date or a category.</>
@@ -77,4 +77,3 @@
 			</example>
 		</>
 	</>
-</page>

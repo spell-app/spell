@@ -161,9 +161,9 @@ The other half of the import is classes.
 Here's the start of the card from [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md), in the outline style:
 
 ```spell
-a "card" is a view:
-	- its "suit" is one of clubs, diamonds, hearts or spades
-	- its "color" is:
+a "card" is a view
+	its "suit" is one of clubs, diamonds, hearts or spades
+	its "color" is
 		red if its suit is diamonds or hearts
 		black otherwise
 ```

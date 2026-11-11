@@ -8,6 +8,8 @@ import { SpellLanguage } from "spell/app/app/components/spell-code"
 /**
  * `<spell-code>`, and the `spell` language its family registers with the page's `UI.code`:
  * spell coloured by spell's own parser, in `<spell-code>` AND in any `<ui-code language="spell">`.
+ * - Drawn in the bubbly look by default (`SP.BubblyLayout`, `BubblyHtml`);  coloured lines with `wrap` or
+ *   `line-numbers`, which the colour tests ask for.
  * - The colours load lazily, from source (`SpellLanguage`):  the first test pays for spell's parser.
  */
 
@@ -49,6 +51,20 @@ function highlighted(target: EventTarget): Promise<Event> {
   })
 }
 
+/** The bubbly drawing, in place of the `<pre>`;  `null` for none. */
+function drawingOf(host: DOMCodeElement): HTMLElement | null {
+  return host.shadowRoot!.querySelector<HTMLElement>(".drawing")
+}
+
+/** A card, as Solitaire's starts. */
+const CARD = `<script type="text/plain">
+a "card" is a draggable two sided view
+\tits "rank" is one of ace, jack, queen, king
+\tits "state" is
+\t\tif it is a queen
+\t\t\treturn "Q"
+</script>`
+
 /** The `<code>`. */
 function codeOf(host: DOMCodeElement): HTMLElement {
   return host.shadowRoot!.querySelector<HTMLElement>("[part~=code]")!
@@ -56,12 +72,42 @@ function codeOf(host: DOMCodeElement): HTMLElement {
 
 describe("<spell-code>", () => {
   test("colours spell by default, with spell's own parser:  a heading, a type, a property", async () => {
-    const host = await code(`<spell-code>${PILES}</spell-code>`)
+    const host = await code(`<spell-code wrap>${PILES}</spell-code>`)
     expect(host.localName).toBe("spell-code")
     expect(codeOf(host).querySelector(".hljs-section")!.textContent).toBe("## Piles")
     expect(codeOf(host).querySelector(".hljs-type")!.textContent).toBe("pile")
     expect(codeOf(host).querySelector(".hljs-property")!.textContent).toBe("value")
     expect(codeOf(host).classList.contains("language-spell")).toBe(true)
+  })
+
+  test("draws spell in the bubbly look:  a band per declaration, pills for what was typed, a bracket for a control line", async () => {
+    const host = await code(`<spell-code copy>${CARD}</spell-code>`)
+    const drawing = drawingOf(host)!
+    expect(drawing.querySelector(".bubbly-block.bubbly-thing > .bubbly-head")!.textContent).toBe(
+      'a "card" is a draggable two sided view'
+    )
+    expect([...drawing.querySelectorAll(".bubbly-choice")].map((it) => it.textContent)).toEqual([
+      "ace",
+      "jack",
+      "queen",
+      "king"
+    ])
+    expect(drawing.querySelector(".bubbly-bracket")!.textContent).toBe('return "Q"')
+    expect(host.shadowRoot!.querySelector("style")!.textContent).toContain(".bubbly")
+    expect(host.shadowRoot!.querySelector<HTMLElement>("[part~=pre]")!.hidden).toBe(true)
+    // the copy button still copies the code as written
+    expect(host.content.trim()).toBe(CARD.replace(/<\/?script[^>]*>/g, "").trim())
+  })
+
+  test('draws a plain `<ui-code language="spell">` too, and Spanish with Spanish\'s parser', async () => {
+    const plain = await code(`<ui-code language="spell">${CARD}</ui-code>`)
+    expect(drawingOf(plain)!.querySelector(".bubbly-thing")).not.toBeNull()
+    const spanish = await code(`<spell-code language="spell/es">una "carta" es una vista reversible arrastrable
+\tsu "rango" es uno de as, jota</spell-code>`)
+    expect([...drawingOf(spanish)!.querySelectorAll(".bubbly-choice")].map((it) => it.textContent)).toEqual([
+      "as",
+      "jota"
+    ])
   })
 
   test("is a `<ui-code>` in every way:  another `language`, `copy`, its accessible name", async () => {
@@ -72,7 +118,7 @@ describe("<spell-code>", () => {
   })
 
   test('its family\'s `spell` colours a plain `<ui-code language="spell">` too', async () => {
-    const host = await code(`<ui-code language="spell">${PILES}</ui-code>`)
+    const host = await code(`<ui-code language="spell" wrap>${PILES}</ui-code>`)
     expect(codeOf(host).querySelector(".hljs-type")!.textContent).toBe("pile")
   })
 
@@ -82,7 +128,7 @@ una pila es una lista de cartas
 el valor de una pila es:
 \tdevolver 0
 </script>`
-    const host = await code(`<spell-code language="spell/es">${PILAS}</spell-code>`)
+    const host = await code(`<spell-code language="spell/es" wrap>${PILAS}</spell-code>`)
     const keywords = [...codeOf(host).querySelectorAll(".hljs-keyword")].map((it) => it.textContent)
     expect(keywords).toContain("devolver")
     expect(codeOf(host).querySelector(".hljs-type")!.textContent).toBe("pila")

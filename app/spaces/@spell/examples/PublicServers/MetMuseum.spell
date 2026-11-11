@@ -1,22 +1,20 @@
 # The Met Museum
-Artworks of the Metropolitan Museum of Art, found by what you type.
-Every thing it shows is in MetMuseum.api.spell, as `spell place ingest` wrote it;  the type below adds to its type there,
-with `<extend>`, so looking again at the server never touches a line of this.
-Its search answers only ids:  each artwork is read from its own address as it's drawn, a page at a time, and no others.
+// Artworks of the Metropolitan Museum of Art, found by what you type.
+// Every thing it shows is in MetMuseum.api.spell, as `spell place ingest` wrote it;  the type below adds to its type there,
+// with `<extend>`, so looking again at the server never touches a line of this.
+// Its search answers only ids:  each artwork is read from its own address as it's drawn, a page at a time, and no others.
 
-<thing "met museum page">
-	<spell>
-		- its "search" is text
-		- to create it:
-			set its search to "sunflowers"
-	</spell>
-	<property "found" description="What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn">every artwork matching the search</property>
+a "met museum page" is a thing
+	its "search" is text
+	to create it
+		set its search to "sunflowers"
+	its "found" is every artwork matching the search
+		// What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn
 
-	<action "try (words as text)">
+	to try (words as text)
 		set its search to words
-	</action>
 
-	<draw>
+	to draw it
 		<stack spacing="xl">
 			<form value={it} class="find">
 				<stack spacing="sm">
@@ -40,18 +38,15 @@ Its search answers only ids:  each artwork is read from its own address as it's 
 				From <link link="https://metmuseum.github.io">the Met Museum's API</link>, each artwork asked for as it's shown.  Press a picture to turn it over.
 			</text>
 		</stack>
-	</draw>
-</thing>
-
 
 # An artwork
-A card that turns over:  its picture on the front, what the Met knows of it on the back.
-Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
-Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.
+// A card that turns over:  its picture on the front, what the Met knows of it on the back.
+// Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
+// Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.
 
-<extend "artwork">
-	<draw>
-		<if its title and its primary image small>
+an artwork
+	to draw it
+		if its title and its primary image small
 			<shape class="artwork" direction="over" flip-on="click" aria-label={its title}>
 				<side>
 					<ui-card fluid>
@@ -64,12 +59,11 @@ Only what's in the public domain has a picture:  the rest show what the Met know
 				</side>
 				<side>{draw the about card of it}</side>
 			</shape>
-		<otherwise if its title>
+		otherwise if its title
 			draw its about card
-		</if>
-	</draw>
 
-	<draw "about card" description="What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture">
+	to draw its about card
+		// What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture
 		<ui-card fluid>
 			<content>
 				<header>{its title}</header>
@@ -84,5 +78,3 @@ Only what's in the public domain has a picture:  the rest show what the Met know
 				<link link={its object url} target="_blank">On the Met's own pages</link>
 			</extra>
 		</ui-card>
-	</draw>
-</extend>

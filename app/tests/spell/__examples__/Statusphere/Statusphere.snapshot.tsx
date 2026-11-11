@@ -7,20 +7,20 @@ import { E, SpellElement } from "@spell/elements"
  */
 export class Status extends Thing {
   // - its "status" is required text, with maximum length 1
-  @prop({ type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 262, end: 314 } })
+  @prop({ type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 257, end: 309 } })
   accessor status!: string
 
   // - its "created at" is a required date
-  @prop({ type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 318, end: 353 } })
+  @prop({ type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 311, end: 346 } })
   accessor createdAt!: Date
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a status has an owner as text
-  @prop({ type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 574, end: 603 } })
+  @prop({ type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 489, end: 584 } })
   accessor owner!: string
 
   /** Its owner's handle, once their account says so;  else the account itself */
-  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spell", start: 418, end: 686 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spell", start: 415, end: 670 }, readsFrom: ["status_board"] }) }
   @derived get who() {
     const account = this.owner
     const person = core.getItemAt(core.filter(core.peopleHere(), (person) => person.id === account), 0)
@@ -46,11 +46,11 @@ export class Status extends Thing {
     times: ["created", "modified"], select: ["status", "createdAt", "owner", "created"] }
 
   // a status is saved in the status board
-  @prop({ type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 468, end: 505 } })
+  @prop({ type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 450, end: 487 } })
   accessor created!: any /* spell: type unknown */
 
   // a status is saved in the status board
-  @prop({ type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 468, end: 505 } })
+  @prop({ type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 450, end: 487 } })
   accessor modified!: any /* spell: type unknown */
 }
 // -----------
@@ -93,7 +93,7 @@ export class Statusphere extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   /** Newest first:  by when each was set */
-  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spell", start: 1008, end: 1135 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spell", start: 965, end: 1079 }, readsFrom: ["status_board"] }) }
   get recent() { return core.waitedValue(this, "recent", async () => {
     return await core.savedThings(Status, { sort: [{ field: "created", descending: true }] })
   }) }

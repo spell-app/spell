@@ -1,4 +1,4 @@
-<page "button usage" notebook>
+"button usage" is a notebook page
 	<header level="1">
 		Button
 		<header>A button indicates a possible user action.</>
@@ -199,4 +199,3 @@
 			```
 		</>
 	</>
-</page>

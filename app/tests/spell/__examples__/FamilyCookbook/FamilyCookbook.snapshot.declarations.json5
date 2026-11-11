@@ -14,25 +14,25 @@
         "placeType": "FamilyCookbook",
         "collection": "recipes"
       },
-      "defined": "/FamilyCookbook.api.spell:382-542"
+      "defined": "/FamilyCookbook.api.spell:364-484"
     },
     {
       "property": "title",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/FamilyCookbook.api.spell:451-473"
+      "defined": "/FamilyCookbook.api.spell:416-435"
     },
     {
       "property": "servings",
       "of": "Recipe",
       "datatype": "number",
-      "defined": "/FamilyCookbook.api.spell:478-511"
+      "defined": "/FamilyCookbook.api.spell:437-463"
     },
     {
       "property": "notes",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/FamilyCookbook.api.spell:517-539"
+      "defined": "/FamilyCookbook.api.spell:465-484"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -45,7 +45,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/FamilyCookbook.spell:367-967"
+      "defined": "/FamilyCookbook.spell:364-968"
     },
     {
       "type": "FamilyCookbook",
@@ -55,7 +55,7 @@
         "kind": "the cloud",
         "at": "/api/places/spaces/personal/family-cookbook"
       },
-      "defined": "/FamilyCookbook.api.spell:334-371"
+      "defined": "/FamilyCookbook.api.spell:325-362"
     },
     {
       "uiDefaults": {
@@ -63,31 +63,31 @@
           "grow": true
         }
       },
-      "defined": "/FamilyCookbook.spell:251-300"
+      "defined": "/FamilyCookbook.spell:257-306"
     },
     {
       "type": "Cookbook",
       "superType": "App",
-      "defined": "/FamilyCookbook.spell:1070-3224"
+      "defined": "/FamilyCookbook.spell:1045-3135"
     },
     {
       "property": "search",
       "of": "Cookbook",
       "datatype": "text",
-      "defined": "/FamilyCookbook.spell:1082-1105"
+      "defined": "/FamilyCookbook.spell:1065-1085"
     },
     {
       "property": "new_recipe",
       "asWritten": "new recipe",
       "of": "Cookbook",
       "datatype": "Recipe",
-      "defined": "/FamilyCookbook.spell:1110-1163"
+      "defined": "/FamilyCookbook.spell:1087-1133"
     },
     {
       "property": "matches",
       "of": "Cookbook",
       "datatype": "list of recipes",
-      "defined": "/FamilyCookbook.spell:1211-1377"
+      "defined": "/FamilyCookbook.spell:1172-1325"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -101,7 +101,7 @@
       "kind": "method",
       "name": "add the new recipe",
       "returns": "nothing",
-      "defined": "/FamilyCookbook.spell:1393-1513"
+      "defined": "/FamilyCookbook.spell:1328-1440"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -114,7 +114,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/FamilyCookbook.spell:1527-3215"
+      "defined": "/FamilyCookbook.spell:1443-3135"
     }
   ],
   "codeLines": [

@@ -133,13 +133,11 @@ async function fixRetiredWords(
 }
 
 /**
- * With `--fix`:  put each HTML habit in `project`'s `.spell` files right -- only `file`'s, if given --
+ * With `--fix`:  put each HTML habit in `project`'s page files right -- only `file`'s, if given --
  * and write each changed file back (epic `elemental-spell` P8):
- * - a component written by its tag, where spellx names it bare, `<ui-button>Go</ui-button>` => `<button>Go</button>`
- * - an action's retired attribute, as spell waits by itself (epic `language` P13):
- *   `<action "deal" animated>` => `<action "deal">`
+ * - a component written by its tag, where a page names it bare, `<ui-button>Go</ui-button>` => `<button>Go</button>`
  * - Only a tag the file's packs give that bare name (`SP.ComponentPacks`):  `<solitaire-card>` stays.
- * - Not in a `<spell>` chunk:  code spell, where `<button>` is the web's (`SP.isCodeSpell()`, J83).
+ * - Not in a `<spell>` block:  code spell, where `<button>` is the web's (`SP.isCodeSpell()`, J83).
  * - Not in an `<html>` block:  the web's markup, drawn as written, `<ui-docs-api>` and all (epic `notebook` P8).
  * - A named closer is renamed with its tag;  a `</>` is left alone.
  * - Not a test project's files:  they stay frozen.
@@ -153,39 +151,23 @@ async function fixHtmlHabits(
 ): Promise<CLI.Problem[]> {
   await session.parse(project)
   const fixes: CLI.Problem[] = []
-  for (const spellFile of spellmlFiles(project, file)) {
+  for (const spellFile of pageFiles(project, file)) {
     const text = spellFile.contents!
     const { lang } = spellFile.language
     const edits: Fix[] = []
     // each `<html>` block's span:  what's inside one is the web's, as written
     const htmlBlocks: TextSpan[] = []
     P.Tokenizer.forEachToken(spellFile.match!.tokens, (token) => {
-      if (token instanceof SP.SpellxTagToken) {
-        for (const { name, word, start } of token.tag.attributes) {
-          if (name !== "animated") continue
-          // with the spaces before it
-          const before = /[ \t]*$/.exec(text.slice(0, start))![0].length
-          edits.push(
-            fix(
-              text,
-              { start: start - before, end: start + word.length },
-              "",
-              `fixed:  "${word}" isn't needed any more`
-            )
-          )
-        }
-        return
-      }
       if (!(token instanceof P.JSXElementToken)) return
       if (token.tagName === "html") htmlBlocks.push({ start: token.start, end: token.end })
       if (!token.tagName.includes("-")) return
       if (htmlBlocks.some((block) => token.start > block.start && token.start < block.end)) return
-      // a `<spell>` chunk is code spell, where a bare tag is the web's:  `<ui-button>` stays (J83)
+      // a `<spell>` block is code spell, where a bare tag is the web's:  `<ui-button>` stays (J83)
       if (SP.isCodeSpell(token)) return
       const { tagName } = token
       const bare = tagName.slice(tagName.indexOf("-") + 1)
       if (SP.ComponentPacks.tagFor(bare, lang) !== tagName) return
-      const message = `fixed:  <${tagName}> is <${bare}> in spellx`
+      const message = `fixed:  <${tagName}> is <${bare}> in a page`
       edits.push(fix(text, { start: token.start + 1, end: token.start + 1 + tagName.length }, bare, message))
       if (token.raw?.endsWith(`</${tagName}>`)) {
         edits.push(fix(text, { start: token.end - tagName.length - 1, end: token.end - 1 }, bare))
@@ -197,15 +179,10 @@ async function fixHtmlHabits(
 }
 
 /**
- * With `--fix`:  put each old spelling in `project`'s `.spell` pages right -- only `file`'s, if given --
+ * With `--fix`:  put each old habit in `project`'s pages right -- only `file`'s, if given --
  * and write each changed file back (epic `notebook` P8):
- * - a template word that brings a flag, written as the page's word and the flag:
- *   `<notebook "x" locked>` (or the old `<spell-notebook>`) => `<page "x" notebook locked>`, its named closer too;
- *   Spanish's `<cuaderno>` => `<página cuaderno>`
- * - a view written inside a page by its long word, `<spell-view "counter">` => `<view "counter">` (J2)
  * - a description written as a `<text>` just before its example, moved into the example's own `description`:
  *   see `descriptionsBeforeExamples()`
- * - A `</>` closer is left alone.
  * - Not a test project's files:  they stay frozen.
  * - SIDE EFFECT:  parses `project`, then hands it each file's new text.
  * - Returns what it fixed, each a problem saying so, where it was.
@@ -217,49 +194,10 @@ async function fixPageHabits(
 ): Promise<CLI.Problem[]> {
   await session.parse(project)
   const fixes: CLI.Problem[] = []
-  for (const spellFile of spellmlFiles(project, file)) {
+  for (const spellFile of pageFiles(project, file)) {
     const text = spellFile.contents!
-    const words = spellFile.language.words.spellx ?? SP.Language.default.words.spellx!
-    const pageWord = wordFor(words.templates, "page")
-    const descriptionWord = wordFor(words.attributes, "description")
+    const [descriptionWord] = DESCRIPTION_WORDS[spellFile.language.lang] ?? DESCRIPTION_WORDS.en!
     const edits: Fix[] = []
-    // each page's span, to find the views inside it
-    const pages: TextSpan[] = []
-    const views: SP.SpellxTagToken[] = []
-    P.Tokenizer.forEachToken(spellFile.match!.tokens, (token) => {
-      if (!(token instanceof SP.SpellxTagToken) || token.tag.category !== "template") return
-      const { word, kind } = token.tag
-      if (kind === "view" && word.startsWith(`${words.prefix}-`)) views.push(token)
-      if (kind !== "page") return
-      const closer = closerOf(text, token.start, word)
-      pages.push({ start: token.start, end: closer?.end ?? elementEnd(text, token.start) })
-      if (!pageWord || !token.tag.attributes.some((attribute) => attribute.fromTagWord)) return
-      // the flag's word as written is the template's, after its old prefix if it has one:  `notebook`, `cuaderno`
-      const flagWord = word.startsWith(`${words.prefix}-`) ? word.slice(words.prefix.length + 1) : word
-      // the page's short word (epic `language` P41):  `<page "x" notebook>`
-      const page = pageWord
-      const tag = SourceEdits.tagAt(text, token.start)!
-      edits.push(
-        fix(text, { start: token.start + 1, end: tag.nameEnd }, page, `fixed:  <${word}> is <${page} ${flagWord}>`),
-        fix(text, { start: tag.namedEnd, end: tag.namedEnd }, ` ${flagWord}`)
-      )
-      if (closer) edits.push(fix(text, closer, `</${page}>`))
-    })
-    for (const view of views) {
-      if (!pages.some((page) => view.start > page.start && view.start < page.end)) continue
-      const { word } = view.tag
-      const short = word.slice(words.prefix.length + 1)
-      edits.push(
-        fix(
-          text,
-          { start: view.start + 1, end: view.start + 1 + word.length },
-          short,
-          `fixed:  <${word}> is <${short}> in a page`
-        )
-      )
-      const closer = closerOf(text, view.start, word)
-      if (closer) edits.push(fix(text, closer, `</${short}>`))
-    }
     if (descriptionWord) {
       const message = `fixed:  the text before <${spellFile.language.words.exampleTag}> is its ${descriptionWord}`
       for (const { written, example, description } of descriptionsBeforeExamples(spellFile)) {
@@ -276,13 +214,13 @@ async function fixPageHabits(
 
 /**
  * The HTML habits in `project`'s `.spell` files that `--fix` can't put right -- only `file`'s, if given:
- * an element's `on-click=` (or any `on-...=`), which spellx handles in its template, with `<on click>...</>`.
- * - NOT a component's own event (`on-ui-closed=`):  it reaches only a listener on that element, never an `<on ...>`.
+ * an element's `on-click=` (or any `on-...=`), which Spell handles in its view, with `on click:`.
+ * - NOT a component's own event (`on-ui-closed=`):  it reaches only a listener on that element, never an `on ...:`.
  * - Each a problem, where it is;  read from the files as last parsed.
  */
 function htmlHabitsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Problem[] {
   const problems: CLI.Problem[] = []
-  for (const spellFile of spellmlFiles(project, file, "test projects too")) {
+  for (const spellFile of pageFiles(project, file, "test projects too")) {
     const text = spellFile.contents!
     P.Tokenizer.forEachToken(spellFile.match!.tokens, (token) => {
       if (!(token instanceof P.JSXElementToken)) return
@@ -293,7 +231,7 @@ function htmlHabitsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Proble
           project: project.projectId,
           path: spellFile.location.serverPath,
           ...lineAndColumnOf(text, attribute.start),
-          message: `${attribute.name}= is HTML's habit:  in spellx, handle it in the template, with <on ${event}>...</>`
+          message: `${attribute.name}= is HTML's habit:  in Spell, handle it in its view, with "on ${event}:"`
         })
       }
     })
@@ -309,7 +247,7 @@ function htmlHabitsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Proble
  */
 function pageHabitsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Problem[] {
   const problems: CLI.Problem[] = []
-  for (const spellFile of spellmlFiles(project, file, "test projects too")) {
+  for (const spellFile of pageFiles(project, file, "test projects too")) {
     const text = spellFile.contents!
     for (const { written } of descriptionsBeforeExamples(spellFile)) {
       problems.push({
@@ -342,11 +280,8 @@ function descriptionsBeforeExamples(
 ): { written: TextSpan; example: number; description: string }[] {
   const text = spellFile.contents!
   const { lang, words } = spellFile.language
-  const spellx = words.spellx ?? SP.Language.default.words.spellx!
   // its words for `description`:  `descripción` and `descripcion` in Spanish
-  const descriptionWords = new Set(
-    Object.keys(spellx.attributes).filter((word) => spellx.attributes[word] === "description")
-  )
+  const descriptionWords = new Set(DESCRIPTION_WORDS[lang] ?? DESCRIPTION_WORDS.en!)
   const found: { written: TextSpan; example: number; description: string }[] = []
   let before: P.JSXElementToken | undefined
   P.Tokenizer.forEachToken(spellFile.match!.tokens, (token) => {
@@ -404,37 +339,24 @@ async function writeFixes(project: SP.SpellProject, spellFile: SP.SpellFile, fix
 }
 
 /**
- * `project`'s `.spell` files that have parsed -- only `file`, if it is one.
+ * `project`'s page files that have parsed -- only `file`, if it is one.
  * - Not a test project's, which `--fix` never changes, unless `"test projects too"`:  a check reads them.
  */
-function spellmlFiles(project: SP.SpellProject, file?: SP.SpellFile, which?: "test projects too"): SP.SpellFile[] {
+function pageFiles(project: SP.SpellProject, file?: SP.SpellFile, which?: "test projects too"): SP.SpellFile[] {
   return (file ? [file] : project.spellFiles).filter(
     (spellFile) =>
-      spellFile.form === "spellx" &&
+      spellFile.form === "page" &&
       spellFile.match &&
       spellFile.contents !== undefined &&
       (which === "test projects too" || !CLI.isTestProject(spellFile.location.serverPath))
   )
 }
 
-/** The first word of `table` that means `meaning`:  `página` for Spanish's `page`. */
-function wordFor(table: Record<string, unknown>, meaning: string): string | undefined {
-  return Object.entries(table).find(([, value]) => value === meaning)?.[0]
-}
-
 /**
- * The span of the named closer of the template opening at `opening`, `</notebook>`:  none, for a `</>`.
- * - The first after it:  a template never holds another of its own word.
+ * An example's attribute for its description, `<example "x" description="...">`, by language:
+ * the first is the one `--fix` writes (Spanish's `descripcion` without its accent too).
  */
-function closerOf(text: string, opening: number, word: string): TextSpan | undefined {
-  const start = text.indexOf(`</${word}>`, opening)
-  return start < 0 ? undefined : { start, end: start + word.length + 3 }
-}
-
-/** Where the element opening at `opening` ends, its closer and all;  the text's end, when it can't tell. */
-function elementEnd(text: string, opening: number): number {
-  return SourceEdits.elementAt(text, opening)?.end ?? text.length
-}
+const DESCRIPTION_WORDS: Record<string, string[]> = { en: ["description"], es: ["descripción", "descripcion"] }
 
 /** 1-based line and column of offset `start` in `text`. */
 function lineAndColumnOf(text: string, start: number): { line: number; column: number } {

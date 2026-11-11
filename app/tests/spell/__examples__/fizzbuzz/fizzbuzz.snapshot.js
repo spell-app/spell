@@ -22,7 +22,6 @@ on("plain-number", (event) => {
   const { number } = event
   core.console.log(number)
 })
-
 // -----------
 core.heading("The explainer")
 ///////////////////
@@ -81,7 +80,7 @@ core.heading("The page")
 export class FizzbuzzExplainer extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  // - its "tally" is a new tally
+  // "tally" is a new tally
   static { this.declareProp("tally", { init: () => new Tally(), early: true }) }
   get tally() { return this.getProp("tally") }
   set tally(value) { this.setProp("tally", value) }
@@ -184,6 +183,5 @@ export function playFizzbuzz() {
 }
 
 playFizzbuzz()
-
 // -----------
 if (!core.isCarryingOver) fizzbuzzExplainer.start()

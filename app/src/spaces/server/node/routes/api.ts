@@ -47,7 +47,7 @@ export const compileCache = new SRV.DiskCache({
  * The code that decides what a project compiles to, for the compile cache's version:
  * - the parser folder:  the language, its writers, the core
  * - the kit's util, which the parser stands on
- * - spaces' models, which register Spell UI's names for spellx drawings (`spellUIPack.ts`),
+ * - spaces' models, which register Spell UI's names for drawings (`spellUIPack.ts`),
  *   and Spell UI's components and vocabularies those read
  * - More than it needs, on purpose:  a needless miss compiles again;  a missed change would serve stale output.
  */

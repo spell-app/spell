@@ -47,7 +47,7 @@ export class SpellUIDefaults {
   }
 
   /**
-   * The canonical tag `tag` stands for in `language`:  `ui-button` itself, `es-boton`, or bare as spellx writes it
+   * The canonical tag `tag` stands for in `language`:  `ui-button` itself, `es-boton`, or bare as a drawing writes it
    * (`button`, `botón`), or `ui-` and a bare word (`ui-botón`);  `undefined` for none of Spell UI's.
    */
   private static canonicalTagFor(tag: string, language: string): string | undefined {

@@ -2,23 +2,19 @@ import { beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
-/** A `.spell` view whose drawing is `drawing`, over a list of films;  what it compiles to, and what's wrong. */
+/** A view whose drawing is `drawing`, inside a `<segment>`, over a list of films;  what it compiles to, and what's wrong. */
 function compiled(drawing: string, path = "/Shelf.spell") {
   const contents = [
-    '<spell-thing "film">',
-    "\t<spell>",
-    '\t\t- its "title" is text',
-    "\t</spell>",
-    "\t<draw><text>{its title}</text></draw>",
-    "</spell-thing>",
-    '<spell-view "shelf">',
-    "\t<spell>",
-    '\t\t- its "films" is a list of films',
-    "\t</spell>",
-    "\t<draw>",
-    drawing,
-    "\t</draw>",
-    "</spell-view>"
+    'a "film" is a thing:',
+    '\tits "title" is text',
+    "\tto draw it: <text>{its title}</text>",
+    'a "shelf" is a view:',
+    '\tits "films" is a list of films',
+    "\tto draw it:",
+    // in plain Spell a `<for>` is read inside an element:  on a line of its own, a drawing says `for ...`
+    "\t\t<segment>",
+    drawing.replace(/^/gm, "\t"),
+    "\t\t</segment>"
   ].join("\n")
   const [file] = parseSpellProject([{ path, contents }]).files
   return { code: file!.compiled, errors: file!.errors }
@@ -123,23 +119,18 @@ describe("<for>", () => {
 
   test("Spanish:  para, its attributes and its slots", () => {
     const contents = [
-      '<encanto-cosa "película">',
-      "\t<encanto>",
-      '\t\t- su "título" es texto',
-      "\t</encanto>",
-      "\t<dibujar><texto>{su título}</texto></dibujar>",
-      "</encanto-cosa>",
-      '<encanto-vista "estante">',
-      "\t<encanto>",
-      '\t\t- sus "películas" es una lista de películas',
-      "\t</encanto>",
-      "\t<dibujar>",
-      '\t\t<para sus películas título="Las películas" como="tarjetas" columnas="4" cargando="Buscando..." vacío ocultar-vacío />',
-      "\t\t<para estrellas de 1 a 240>",
-      "\t\t\t<texto>{estrella}</texto>",
-      "\t\t</para>",
-      "\t</dibujar>",
-      "</encanto-vista>"
+      'una "película" es una cosa:',
+      '\tsu "título" es texto',
+      "\tpara dibujarla: <texto>{su título}</texto>",
+      'un "estante" es una vista:',
+      '\tsus "películas" es una lista de películas',
+      "\tpara dibujarlo:",
+      "\t\t<segmento>",
+      '\t\t\t<para sus películas título="Las películas" como="tarjetas" columnas="4" cargando="Buscando..." vacío ocultar-vacío />',
+      "\t\t\t<para estrellas de 1 a 240>",
+      "\t\t\t\t<texto>{estrella}</texto>",
+      "\t\t\t</para>",
+      "\t\t</segmento>"
     ].join("\n")
     const [file] = parseSpellProject([{ path: "/Estante.es.spell", contents }]).files
     expect(file!.errors).toEqual([])
@@ -162,29 +153,80 @@ describe("<for>", () => {
   })
 })
 
+describe("a <for> on a drawing's own line (epic `language` I73)", () => {
+  beforeAll(registerTestComponentPack)
+
+  /** A shelf whose drawing is `lines`, each on a line of its own. */
+  function drawn(...lines: string[]) {
+    const contents = [
+      'a "film" is a thing:',
+      '\tits "title" is text',
+      "\tto draw it: <text>{its title}</text>",
+      'a "shelf" is a view:',
+      '\tits "films" is a list of films',
+      "\tto draw it:",
+      ...lines.map((line) => `\t\t${line}`)
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/Shelf.spell", contents }]).files
+    return { code: file!.compiled, errors: file!.errors }
+  }
+
+  test("alone, with a body:  the drawing is the loop", () => {
+    const { code, errors } = drawn("<for film in its films>", "\t<text>{its title}</text>", "</for>")
+    expect(errors).toEqual([])
+    expect(code).toContain('return core.drawEach(this.films, (film) => h("ui-text", () => film.title))')
+  })
+
+  test("alone, drawing each itself", () => {
+    const { code, errors } = drawn("<for its films />")
+    expect(errors).toEqual([])
+    expect(code).toContain("return core.drawEach(this.films, (film) => core.drawThing(film))")
+  })
+
+  test("with riders:  a read, as `for its films` lines are", () => {
+    const { code, errors } = drawn('<for its films loading="Scanning..." />')
+    expect(errors).toEqual([])
+    expect(code).toContain("return core.drawRead(")
+    expect(code).toContain("Scanning...")
+  })
+
+  test("returned:  the loop", () => {
+    const { code, errors } = drawn("return <for its films />")
+    expect(errors).toEqual([])
+    expect(code).toContain("return core.drawEach(this.films, (film) => core.drawThing(film))")
+  })
+
+  test("in an if's branch:  that branch's loop", () => {
+    const { code, errors } = drawn("if its films is empty", "\t<text>none</text>", "otherwise", "\t<for its films />")
+    expect(errors).toEqual([])
+    expect(code).toContain("else return core.drawEach(this.films, (film) => core.drawThing(film))")
+  })
+
+  test("after a line that draws nothing", () => {
+    const { code, errors } = drawn("set its films to its films", "<for its films />")
+    expect(errors).toEqual([])
+    expect(code).toContain("return core.drawEach(this.films, (film) => core.drawThing(film))")
+  })
+})
+
 describe("<for>'s attributes and slots read as the drawing does", () => {
   beforeAll(registerTestComponentPack)
 
   test("its, in a title or a <failed>, is the drawing's, not the item's", () => {
     const contents = [
-      '<spell-thing "film">',
-      "\t<spell>",
-      '\t\t- its "title" is text',
-      "\t</spell>",
-      "\t<draw><text>{its title}</text></draw>",
-      "</spell-thing>",
-      '<spell-view "shelf">',
-      "\t<spell>",
-      '\t\t- its "films" is a list of films',
-      '\t\t- its "heading" is text',
-      "\t</spell>",
-      "\t<draw>",
-      "\t\t<for its films title={its heading}>",
-      "\t\t\t<text>{its title}</text>",
-      "\t\t\t<failed><text>{its heading}</text></failed>",
-      "\t\t</for>",
-      "\t</draw>",
-      "</spell-view>"
+      'a "film" is a thing:',
+      '\tits "title" is text',
+      "\tto draw it: <text>{its title}</text>",
+      'a "shelf" is a view:',
+      '\tits "films" is a list of films',
+      '\tits "heading" is text',
+      "\tto draw it:",
+      "\t\t<segment>",
+      "\t\t\t<for its films title={its heading}>",
+      "\t\t\t\t<text>{its title}</text>",
+      "\t\t\t\t<failed><text>{its heading}</text></failed>",
+      "\t\t\t</for>",
+      "\t\t</segment>"
     ].join("\n")
     const [file] = parseSpellProject([{ path: "/Shelf.spell", contents }]).files
     expect(file!.errors).toEqual([])

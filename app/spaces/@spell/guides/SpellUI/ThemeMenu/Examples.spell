@@ -1,4 +1,4 @@
-<page "theme-menu examples" notebook>
+"theme-menu examples" is a notebook page
 	<header level="1">
 		Theme Menu
 		<header>A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page.</>
@@ -53,4 +53,3 @@
 			</example>
 		</>
 	</>
-</page>

@@ -56,7 +56,7 @@ core.heading("The app:  one counter, drawn")
 export class CounterApp extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "counter" is a new counter
+  // "counter" is a new counter
   static { this.declareProp("counter", { init: () => new Counter(), early: true }) }
   get counter() { return this.getProp("counter") }
   set counter(value) { this.setProp("counter", value) }

@@ -1,4 +1,4 @@
-<page "list examples" notebook>
+"list examples" is a notebook page
 	<header level="1">
 		List
 		<header>A list is used to group related content.</>
@@ -814,4 +814,3 @@
 			</example>
 		</>
 	</>
-</page>

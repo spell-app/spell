@@ -113,6 +113,48 @@ export class SpellStatement<
     return !!match.groups[keyword.matchGroup ?? keyword.rule]
   }
 
+  ////////////////
+  // ## What's indented under the line (epic `language` P48)
+  ////////////////
+
+  /**
+   * The block indented under the line `BlockLine` is reading, while it reads that line's statement:
+   * so a line with no colon at its end can say it takes that block as its body (epic `language` P48).
+   * - e.g. `a pile` with lines under it re-opens the type;  alone, it's a fragment.
+   * - e.g. `its "color" is one of red, black` with value lines under it is worked out, not stored (T93).
+   * - Set by `BlockLine.parse()` around its statement's parse only:  `undefined` anywhere else.
+   * - A line whose statement read it is re-parsed whole when its body changes (`BlockLine.reparseBody()`):
+   *   `readBelow` says it did.
+   */
+  static below: P.BlockToken | undefined
+  /** Did a rule read `below` while the current line's statement parsed? */
+  static readBelow = false
+
+  /** The block indented under the line being read, if any -- see `below`. */
+  static blockBelow(): P.BlockToken | undefined {
+    SpellStatement.readBelow = true
+    return SpellStatement.below
+  }
+
+  /**
+   * Does the block under the line hold a line of CODE:  one that isn't only a comment?
+   * - `false` for a block of comments alone:  a line's description, not its body (epic `language` P48).
+   */
+  static hasCodeBelow(): boolean {
+    const block = SpellStatement.blockBelow()
+    return !!block && SpellStatement.codeLinesOf(block).length > 0
+  }
+
+  /** The lines of `block` holding code:  not blank, not only a comment;  its nested blocks left out. */
+  static codeLinesOf(block: P.BlockToken): P.LineToken[] {
+    return block.tokens.filter(
+      (token): token is P.LineToken =>
+        token instanceof P.LineToken &&
+        token.tokens.length > 0 &&
+        !(token.tokens.length === 1 && token.tokens[0] instanceof P.CommentToken)
+    )
+  }
+
   /**
    * A `parse_error` match in place of statement `match`, saying why spell won't take it,
    * e.g. a property declared on a built-in type.
@@ -304,6 +346,10 @@ export class SpellStatement<
       if (this.returnsLastLine(statement)) result = this.lastLineValue(statement, nestedBlock, result) ?? result
       // wrap output in braces -- or not, see `flatBody`
       if (result?.is(Block) && !this.flatBody) result.data.enclose = true
+      // a declaration's body starting with a comment:  that comment is its description (epic `language` P48)
+      if (result?.is(Block) && Block.descriptionLineOf(result) && statement.rule.getDeclaration(statement)) {
+        result.data.describes = true
+      }
     } else {
       // if parsing as anything else, we can only handle a single line
       if (nestedBlock.tokens.length > 1) return undefined
@@ -330,7 +376,7 @@ export class SpellStatement<
   /**
    * The ONE line of `nestedBlock`, as an expression, when `block` (that line parsed as statements) can't read it,
    * and our line takes a value (`inlineAs` is `expression`):  e.g. a property's list on the line below its name,
-   *   `its "days" is:` then `[the monday, the tuesday]` -- or spellx's `<property "days">` with the list under it.
+   *   `its "days" is:` then `[the monday, the tuesday]`.
    * - Only when the WHOLE line reads as one:  else `undefined`, and the block's error stands.
    */
   private oneLineValue(statement: P.Match, nestedBlock: P.BlockToken, block: P.Match | undefined): P.Match | undefined {
@@ -608,7 +654,12 @@ export function commitStatement(statement: P.Match, nextItem?: P.Token): Committ
 
   const committed: CommittedStatement = {}
   if (!(statement.rule instanceof SpellStatement)) return committed
-  if (nextItem instanceof P.BlockToken && statement.rule.takesNestedBody(statement)) {
+  // a line with its body on it, and only comments under it:  its description, not a second body (epic `language` P48)
+  const describedBelow =
+    nextItem instanceof P.BlockToken &&
+    !!statement.rule.getBody(statement) &&
+    SpellStatement.codeLinesOf(nextItem).length === 0
+  if (nextItem instanceof P.BlockToken && !describedBelow && statement.rule.takesNestedBody(statement)) {
     committed.bodyMark = statement.scope.parser?.journal?.mark()
     committed.body = statement.rule.parseNestedBlock(statement, nextItem)
   }

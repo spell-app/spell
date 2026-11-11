@@ -142,7 +142,6 @@ export function testStreaks(...args) {
 // The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
 // on the page, its habits can be dragged to another place
-
 /** a habit is in one week */
 
 /////////////////
@@ -153,7 +152,7 @@ export function testStreaks(...args) {
 export class HabitTracker extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "habits" is a new week
+  // "habits" is a new week
   static { this.declareProp("habits", { init: () => new Week(), early: true }) }
   get habits() { return this.getProp("habits") }
   set habits(value) { this.setProp("habits", value) }

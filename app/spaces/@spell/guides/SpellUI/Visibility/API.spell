@@ -1,4 +1,4 @@
-<page "visibility api" notebook>
+"visibility api" is a notebook page
 	<header level="1">
 		Visibility
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api family="ui-visibility" only="states"></>
 		</>
 	</>
-</page>

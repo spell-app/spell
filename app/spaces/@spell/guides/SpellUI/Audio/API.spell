@@ -1,4 +1,4 @@
-<page "audio api" notebook>
+"audio api" is a notebook page
 	<header level="1">
 		Audio
 		<header>An audio plays a sound file:  in the browser's own player, or unseen, when the page says.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api tag="ui-audio" only="states"></>
 		</>
 	</>
-</page>

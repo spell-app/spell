@@ -4,8 +4,8 @@ import { describeWarnings, parseSpellProject } from "spell/parser/spell/test"
 
 /**
  * Clicks and drags as events (epic `debut` P27, Q47):  every short form compiles to the same code as its long form,
- * in the outline and in tags.
- * - Each case is a card and a pile with ONE line (or tag) that differs:  the long form, then its short forms.
+ * in the outline.
+ * - Each case is a card and a pile with ONE line that differs:  the long form, then its short forms.
  */
 
 /** The outline every case's line sits in:  `{card}` and `{pile}` are where its line goes. */
@@ -16,17 +16,6 @@ const OUTLINE = [
   "{card}",
   "a pile is a viewable list of cards where:",
   "{pile}"
-].join("\n")
-
-/** The same in tags. */
-const TAGS = [
-  '<spell-view "card" template="two sided view">',
-  '\t<action "play it">print 1</>',
-  "{card}",
-  "</spell-view>",
-  '<spell-view "pile" template="viewable list of cards">',
-  "{pile}",
-  "</spell-view>"
 ].join("\n")
 
 /** Each case:  where its line goes, its long form, then the short forms that must compile the same. */
@@ -99,49 +88,6 @@ const OUTLINE_CASES: Array<{ title: string; at: "card" | "pile"; long: string; s
   }
 ]
 
-/** Tag cases:  the long form in the outline twin's words, or a long tag, then the short tags. */
-const TAG_CASES: Array<{ title: string; at: "card" | "pile"; long: string; short: string[] }> = [
-  {
-    title: "a one-line event, self-closing;  the colon optional",
-    at: "card",
-    long: "\t<on click>\n\t\tplay it\n\t</>",
-    short: [
-      "\t<on click play it/>",
-      "\t<on click: play it />",
-      "\t<when clicked play it/>",
-      "\t<on click>play it</on>",
-      "\t<on click>\n\t\tplay it\n\t</on click>"
-    ]
-  },
-  {
-    title: "an ability's own tag, its condition's colon optional",
-    at: "card",
-    long: "\t<clickable when it is face down/>",
-    short: [
-      "\t<clickable when: it is face down/>",
-      "\t<clickable when(it is face down)/>".replace("(", " ").replace(")", "")
-    ]
-  },
-  {
-    title: "a drop, the small words optional",
-    at: "pile",
-    long: "\t<when a card is dropped on it>\n\t\tprint 5\n\t</>",
-    short: ["\t<on card dropped print 5/>", "\t<when a card is dropped>print 5</>", "\t<on card dropped: print 5/>"]
-  },
-  {
-    title: "while, one line or nested",
-    at: "pile",
-    long: "\t<while a card is dragged over it>\n\t\tprint 4\n\t</>",
-    short: ["\t<while a card is dragged over: print 4/>", "\t<while card dragged over print 4/>"]
-  },
-  {
-    title: "a list's items draggable",
-    at: "pile",
-    long: "\t<cards draggable when the card is face up/>",
-    short: ["\t<cards draggable when: the card is face up/>"]
-  }
-]
-
 describe("clicks and drags as events:  each short form compiles as its long form (epic `debut` P27, Q47)", () => {
   describe("in the outline", () => {
     for (const { title, at, long, short } of OUTLINE_CASES) {
@@ -152,31 +98,10 @@ describe("clicks and drags as events:  each short form compiles as its long form
     }
   })
 
-  describe("in tags", () => {
-    for (const { title, at, long, short } of TAG_CASES) {
-      test(title, () => {
-        const expected = compile("/test.spell", TAGS, at, long)
-        for (const form of short) expect(compile("/test.spell", TAGS, at, form), form).toBe(expected)
-      })
-    }
-  })
-
   test("a list's cards' short form is its `can give up`, and makes its cards draggable", () => {
     const code = compile("/test.spell", OUTLINE, "pile", "\t- its cards are draggable when the card is face up")
     const long = compile("/test.spell", OUTLINE, "pile", "\t- it can give up a card when: the card is face up")
     expect(code).toBe(long.replace(/(canGiveUp\(card\) \{\n.*\n  \})/, "$1\n  static itemsDraggable = true"))
-  })
-
-  test("an ability's tag, the view's bare attribute and the outline's line are the same ability", () => {
-    const tag = compile("/test.spell", TAGS, "card", "\t<draggable/>")
-    const attribute = compile(
-      "/test.spell",
-      TAGS.replace('template="two sided view"', 'template="two sided view" draggable'),
-      "card",
-      ""
-    )
-    expect(attribute).toBe(tag)
-    expect(tag).toContain("static draggable = true")
   })
 
   test("the old words still compile, with a warning", () => {
@@ -190,18 +115,6 @@ describe("clicks and drags as events:  each short form compiles as its long form
       expect.stringContaining('Say "it is draggable":  "it can be dragged" stops working'),
       expect.stringContaining('Say "when:"')
     ])
-  })
-
-  test("a one-line tag's code on new lines is an error;  so is a closer naming another tag", () => {
-    const errors = errorsOf(
-      "/test.spell",
-      TAGS,
-      "card",
-      "\t<on drag print 1\n\t\tprint 2 />\n\t<on click>\n\t\tprint 3\n\t</on drag>"
-    )
-    const text = errors.join("\n").replace(/\\"/g, '"')
-    expect(text).toContain('put longer code between "<on drag>" and "</>"')
-    expect(text).toContain('"</on drag>" can\'t close <on>')
   })
 })
 

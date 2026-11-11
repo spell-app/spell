@@ -1,4 +1,4 @@
-<page "transition examples" notebook>
+"transition examples" is a notebook page
 	<header level="1">
 		Transition
 		<header>A transition is an animation used to show or hide content, or to draw attention to it.</>
@@ -372,4 +372,3 @@
 			</example>
 		</>
 	</>
-</page>

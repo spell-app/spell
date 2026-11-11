@@ -4,12 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 
 // the filter's rule, states and words:  their files, not `epic-section`'s barrel (which would define it here)
-import {
-  MARKED_SHOWS_AS,
-  StateFilter,
-  WITH_CLAUDE,
-  type ChipPick
-} from "spell/epic/components/epic-section/StateFilter"
+import { MARKED_SHOWS_AS, StateFilter, BLUE_BADGE, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
 import {
   CHIP,
   CHIP_CLICK_KEYS,
@@ -94,15 +89,20 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   /**
    * The ONE blue badge's count:  everything handed to Claude, whatever its kind -- the items marked in this pass, and
-   * the items with him (`WITH_CLAUDE`:  working on, or a Do this not started);  0, no badge (Owen, 2026-10-25:  "just need one blue badge for all things
+   * the items with him (working on, or a Do this not started), and a phase scheduled (`BLUE_BADGE`, I260);  0, no badge (Owen, 2026-10-25:  "just need one blue badge for all things
    * submitted, no matter the type";  a blue `progress` chip beside it before)
    */
   get markedCount(): number {
     const marked = Math.max(0, Number(this.marked ?? 0))
-    return WITH_CLAUDE.reduce((count, state) => count + (this.stateCounts.get(state) ?? 0), marked)
+    return BLUE_BADGE.reduce((count, state) => count + (this.stateCounts.get(state) ?? 0), marked)
   }
 
-  /** The chips drawn:  every state present but `progress`, which counts in the blue badge. */
+  /** The blue badge shows its items:  any blue state showing (`BLUE_BADGE`, the items marked in this pass with them). */
+  get blueShowing(): boolean {
+    return [MARKED_SHOWS_AS, ...BLUE_BADGE].some((state) => this.showing.has(state))
+  }
+
+  /** The chips drawn:  every state present but the blues (`BLUE_BADGE`), which count in the blue badge. */
   get chips(): readonly ChipState[] {
     const chips = StateFilter.chipStatesOf(this.present.map((it) => it.state))
     return this.present.filter((it) => chips.includes(it.state))
@@ -130,7 +130,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   class={[CHIP, MARKED]}
                   part={this.partForName("marked")}
                   data-state={MARKED_SHOWS_AS}
-                  aria-pressed={this.showing.has(MARKED_SHOWS_AS) ? "true" : "false"}
+                  aria-pressed={this.blueShowing ? "true" : "false"}
                   aria-label={words()}
                   title={words()}
                   onClick={(event: MouseEvent) => this.pick(MARKED_SHOWS_AS, event.altKey ? "only" : "click")}
@@ -150,8 +150,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   part={this.partForName("chip")}
                   data-state={state.state}
                   data-color={state.color}
-                  data-fill={"fill" in state ? state.fill : undefined}
-                  aria-pressed={this.showing.has(state.state) ? "true" : "false"}
+                  aria-pressed={this.pressedOf(state.state)}
                   aria-label={words()}
                   title={words()}
                   onClick={(event: MouseEvent) => this.pick(state.state, event.altKey ? "only" : "click")}
@@ -177,10 +176,27 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     return this.wordsFor(MARKED_SHOWS_AS, count, words)
   }
 
+  /**
+   * The states drawn MIXED:  `mixed`'s, of those present (the page's toolbar, while sections disagree about a colour;
+   * epic `epic-engine` I259).
+   */
+  get mixedStates(): ReadonlySet<string> {
+    const present = this.present.map((it) => it.state as string)
+    return new Set((this.mixed ?? "").split(/\s+/).filter((state) => present.includes(state)))
+  }
+
+  /** A chip's `aria-pressed`:  `mixed` while some of its sections show it, else whether it shows. */
+  private pressedOf(state: string): "true" | "false" | "mixed" {
+    if (this.mixedStates.has(state)) return "mixed"
+    return this.showing.has(state) ? "true" : "false"
+  }
+
   /** How many are in `state` (`words`), and what a click and an ⌥-click on its chip do. */
   private wordsFor(state: string, count: number, words: string): string {
     const present = this.present.map((it) => it.state as string)
-    const does = this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing], state)])
+    const does = this.mixedStates.has(state)
+      ? this.translationForKey("chipMixed")
+      : this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing], state)])
     return this.translationForKey("chipWords", { count, words, does, only: this.translationForKey("chipAltOnly") })
   }
 

@@ -78,9 +78,9 @@ export const words = {
       { name: "The checklist", members: ["checklist"] }
     ],
     TaskList: [
-      { name: "keeping", description: "Where the tasks are kept:  the person picks, and the app asks that keeper", members: ["storage", "keeper", "fillTheChecklist", "create", "addTheStartingTaskTitleWithPriorityLevel", "addTheDraft"] },
-      { name: "menus", description: "The toolbar's buttons, and the list's right click:  the same actions", members: ["draw"] },
-      { name: "filter", description: "Which tasks the list shows:  the toolbar ticks the one it's showing", members: ["showAll", "showToDo", "showDone", "removeTheDoneTasks"] }
+      { name: "Keeping", description: "Where the tasks are kept:  the person picks, and the app asks that keeper", members: ["storage", "keeper", "fillTheChecklist", "create", "addTheStartingTaskTitleWithPriorityLevel", "addTheDraft"] },
+      { name: "Menus", description: "The toolbar's buttons, and the list's right click:  the same actions", members: ["draw"] },
+      { name: "Filter", description: "Which tasks the list shows:  the toolbar ticks the one it's showing", members: ["showAll", "showToDo", "showDone", "removeTheDoneTasks"] }
     ]
   }
 }

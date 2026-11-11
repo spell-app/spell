@@ -1,4 +1,4 @@
-<page "feed examples" notebook>
+"feed examples" is a notebook page
 	<header level="1">
 		Feed
 		<header>A feed presents user activity chronologically.</>
@@ -465,4 +465,3 @@
 			</example>
 		</>
 	</>
-</page>

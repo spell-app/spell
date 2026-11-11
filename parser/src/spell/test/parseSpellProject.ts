@@ -168,7 +168,7 @@ function languagesOf(files: SpellSourceFile[]): SP.Language[] {
 function parserFor(projectScope: P.Scope, path: string, contents: string): SP.SpellParser {
   const parser = projectScope.parser as SP.SpellParser
   const lang = SP.Language.langOfFile(path)
-  const form = SP.formOfText(contents, path)
+  const form = SP.formOfText(contents)
   return parser.twinFor(lang ? SP.Language.for(lang) : (parser.language ?? SP.Language.default), form)
 }
 

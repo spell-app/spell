@@ -1,4 +1,4 @@
-<page "message usage" notebook>
+"message usage" is a notebook page
 	<header level="1">
 		Message
 		<header>A message displays information that explains nearby content.</>
@@ -115,4 +115,3 @@
 			```
 		</>
 	</>
-</page>

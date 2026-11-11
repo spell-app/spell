@@ -201,8 +201,6 @@ export const FILE_ICON = "file code"
 /** The icon of each kind of file, by its extension:  anything else is `FILE_ICON`. */
 const FILE_ICONS: Record<string, string> = {
   spell: "hat wizard",
-  spellml: "hat wizard",
-  spellx: "hat wizard",
   css: "css3 alternate",
   ts: "js",
   tsx: "js",

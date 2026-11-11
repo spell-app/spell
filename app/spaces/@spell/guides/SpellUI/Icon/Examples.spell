@@ -1,4 +1,4 @@
-<page "icon examples" notebook>
+"icon examples" is a notebook page
 	<header level="1">
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
@@ -273,4 +273,3 @@
 			</example>
 		</>
 	</>
-</page>

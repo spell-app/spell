@@ -16,15 +16,15 @@ core.heading("What it keeps")
 ///////////////////
 // ## What it keeps
 ///////////////////
-// Each `<property>` is one thing every adding machine keeps.
-// - `type="number"` makes the total a number, starting at 0.
+// Each `its "..." is` line is one thing every adding machine keeps.
+// - `is a number` makes the total a number, starting at 0.
 // - The number being typed is text, so each key can add a digit on the end.
 
 core.heading("What its keys do")
 //////////////////////
 // ## What its keys do
 //////////////////////
-// Each `<action>` is what one key does.
+// Each `to ...` is an action:  what one key does.
 // - A digit key's action takes the digit:  `press (digit as text)`, so `press "5"` puts a 5 on the end.
 // - "+" between two pieces of text joins them:  "1" + "2" is "12".
 // - `as a number` turns the text "12" into the number 12, so it can be added up.
@@ -149,9 +149,9 @@ core.heading("Try it")
 ////////////
 // - Click 1, 2, +, 5, + on the right:  the display shows 12, then 17.
 // - Add a 9 key:  copy the line with "5" in it, and change both 5s to 9s.
-// Then make the grid six columns:  `columns="6"`.
+//   Then make the grid six columns:  `columns="6"`.
 // - Make + into - :  in "add it up", change the + in "the total + typed" to a -,
-// then change the key's label.  The check above will turn red, because 12 take away 5 isn't 17.
+//   then change the key's label.  The check above will turn red, because 12 take away 5 isn't 17.
 
 // Where next:  the Calculator example, which keeps a left number, an operator and a right number,
 // so it can do all four sums.

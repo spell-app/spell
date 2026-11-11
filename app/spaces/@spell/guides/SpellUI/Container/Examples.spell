@@ -1,4 +1,4 @@
-<page "container examples" notebook>
+"container examples" is a notebook page
 	<header level="1">
 		Container
 		<header>A container limits content to a maximum width.</>
@@ -187,4 +187,3 @@
 			</example>
 		</>
 	</>
-</page>

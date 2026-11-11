@@ -9,7 +9,7 @@ import {
   type SpellProjectSummary,
   type SpellSourceFile
 } from "spell/parser/spell/test"
-import { loadCodeSpellTwin } from "spell/app/spaces/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * `P.IncrementalProject` MUST give exactly what a full parse gives:
@@ -32,8 +32,8 @@ const EDITS: Record<string, (lines: string[], index: number) => void> = {
 }
 
 describe("incremental parsing ~== full parse", () => {
-  // code spell's incremental parse, on the Solitaire example's code-spell twin (the example is spellx)
-  const files = loadCodeSpellTwin("@spell/examples/Solitaire")
+  // code spell's incremental parse, on the Solitaire example
+  const files = loadFixtureProject("@spell/examples/Solitaire")
   const original = summarize(parseSpellProject(files))
 
   test("item-by-item parse ~== full parse", () => {
@@ -187,7 +187,7 @@ describe("incremental parsing ~== full parse", () => {
 
     test("typing through broken states, then back, ends up ~== full parse", () => {
       const project = incrementalSpellProject(files, true)
-      const line = 'a "card" is a two sided view:'
+      const line = 'a "card" is a draggable two sided view'
       // delete the line's text one character at a time, then type it back in
       const steps = Array.from({ length: line.length }, (_, index) => line.slice(0, line.length - index - 1))
       expect(cardText).toContain(line)

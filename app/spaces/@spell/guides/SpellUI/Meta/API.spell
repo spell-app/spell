@@ -1,4 +1,4 @@
-<page "meta api" notebook>
+"meta api" is a notebook page
 	<header level="1">
 		Meta
 		<header>A meta holds metadata about the content, such as a date or a category.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api tag="ui-meta" only="states"></>
 		</>
 	</>
-</page>

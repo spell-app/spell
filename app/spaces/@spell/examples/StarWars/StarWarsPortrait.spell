@@ -1,36 +1,30 @@
 # A picture:  its own page on Wikipedia, if it has one, else an initial on a colour
-A widget of its own, as no `ui-image` falls back on anything:  an initial shows until a picture comes, and stays if none does.
-A species with no picture of its own takes the first of its people who has one:  Hutt, Jabba.
+// A widget of its own, as no `ui-image` falls back on anything:  an initial shows until a picture comes, and stays if none does.
+// A species with no picture of its own takes the first of its people who has one:  Hutt, Jabba.
 
-<thing "portrait">
-	<property "name" />
-	<property "hue" />
-	<property "shape" />
-	<spell>
-		- its "species" is a species
-	</spell>
-	<property "page">the wiki page whose id is its name</property>
-	<property "initial">the first letter of its name</property>
-	<property "picture">
+a "portrait" is a thing
+	it has a name
+	it has a hue
+	it has a shape
+	its "species" is a species
+	its "page" is the wiki page whose id is its name
+	its "initial" is the first letter of its name
+	its "picture" is
 		if its page and its page's fits and its page's thumbnail
 			return its page's thumbnail's source
 		if its species
 			return its species' picture
 		return ""
-	</property>
-	<draw>
+	to draw it
 		<segment class={"portrait " + its shape} style={"--hue: " + its hue} appearance="basic">
 			<header class="initial">{its initial}</header>
 			{draw its photo}
 		</segment>
-	</draw>
-	<draw "photo" description="Waiting for it, or if Wikipedia can't be reached, the initial stays">
-		<if its picture is not "">
+	to draw its photo
+		// Waiting for it, or if Wikipedia can't be reached, the initial stays
+		if its picture is not ""
 			<image src={its picture} alt="" crop="top" />
-		</if>
-		while waiting:
+		while waiting
 			<space />
-		if that fails:
+		if that fails
 			<space />
-	</draw>
-</thing>

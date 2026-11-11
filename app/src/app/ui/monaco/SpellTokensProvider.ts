@@ -8,44 +8,44 @@ import { monaco } from "./monaco"
  * Instant colouring for spell, line by line, from its TOKENS:  words, symbols, numbers, comments, text.
  * - Needs no parse, so it's there from the first keystroke;  colouring from the parse (semantic tokens) goes on top.
  * - Each spell line tokenizes on its own.
- * - Plain Spell by spell's own tokenizer;  a tag-shaped file by its `SP.SpellxTokenizer`,
- *   a provider of its own:  see `forSpellx()`.
- *   - A tag line colours as its code-spell twin does (`SP.SpellxTwin`):  `<property "rank" one-of="...">` reads as
- *     `its "rank" is one of ...`, so `"rank"` is a string and `ace` a word.
- *   - The tag's own words, which its twin never holds:  `property` a keyword, `one-of` an attribute name,
+ * - Plain Spell by spell's own tokenizer;  a page file by its `SP.PageTokenizer`, a provider of its own:
+ *   see `forPages()`.
+ *   - A page's head, `"button api" is a notebook page`:  its name a string, its flags attribute names,
+ *     its own words keywords.
+ *   - A page's tag line colours as its code-spell twin does (`SP.PageTwin`):  `<for film in its films>` reads as
+ *     `for film in its films`, so `film` is a word.
+ *   - The tag's own words, which its twin never holds:  `for` a keyword, `loading` an attribute name,
  *     and `<`, `>`, `/>`, `</>` punctuation.
- *   - A line of prose, or a note's, is a comment;  so is each line of a `<!-- ... -->` comment.
- *     - EXCEPT a `<property-editor>`'s lines:  markup as written, coloured as markup (`markupPieces()`).
- *     - A note's head alone on its line, `<note>`, colours as any tag does.
+ *   - A line of a page's prose is a comment;  so is each line of a `<!-- ... -->` comment.
  * - Blocks of another language are coloured as that language, by Monaco's own colouring (`EMBEDDED_BLOCKS`):
  *   - a type's `<css>` block as CSS -- see `LSP.SpellCSS`
  *   - a `<markdown>` block as markdown, in a drawing or a type's outline -- see spell's `markdown_block`
  * - Markup, `<ui-card>`, `<avatar src="...">`, as html, by Monaco's html colouring:  a drawing's lines, a notebook
  *   example's code (`markupTokens()`).
  * - The only state carried between lines is which block we're in, if any (`SPELL_LINE`, `CSS_LINE` ...),
- *   and in spellx, the tags open and whether a `<!-- ... -->` comment is (`SpellxLineState`).
+ *   and in a page file, the tags open and whether a `<!-- ... -->` comment is (`PageLineState`).
  * - A block's lines are each coloured on their own too,
  *   so a CSS comment or a fenced code block over several lines colours its first line only.
  * - NEVER throws:  a line the tokenizer chokes on just goes uncoloured.
  */
 export class SpellTokensProvider implements monaco.languages.TokensProvider {
   /**
-   * A spellx parser, when we colour spellx:  its tokenizer reads the lines, its twins colour the tags.
-   * - `undefined` for code spell.
-   * - NOT the project's:  colouring needs no project, so this one reads English's spellx words.
+   * A page parser, when we colour a page file:  its tokenizer reads the lines, its twins colour the tags.
+   * - `undefined` for plain Spell.
+   * - NOT the project's:  colouring needs no project, so this one reads English's page words.
    */
-  readonly spellx: SP.SpellParser | undefined
+  readonly pages: SP.SpellParser | undefined
 
-  constructor(spellx?: SP.SpellParser) {
-    this.spellx = spellx
+  constructor(pages?: SP.SpellParser) {
+    this.pages = pages
   }
 
   /**
-   * A provider for tag-shaped files (`SP.formOfText()`):  read by a spellx parser, English's.
+   * A provider for page files (`SP.formOfText()`):  read by a page parser, English's.
    * - CONSIDER:  each file's own language (`Carta.es.spell`):  a tokens provider is asked for lines, never a file.
    */
-  static forSpellx(): SpellTokensProvider {
-    const props = { module: "spellx colouring", form: "spellx" } as P.ParserProps
+  static forPages(): SpellTokensProvider {
+    const props = { module: "page colouring", form: "page" } as P.ParserProps
     return new SpellTokensProvider(SP.Language.default.parser.clone(props) as SP.SpellParser)
   }
 
@@ -81,7 +81,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   ]
 
   getInitialState(): monaco.languages.IState {
-    return this.spellx ? SpellxLineState.NONE_OPEN : SpellTokensProvider.SPELL_LINE
+    return this.pages ? PageLineState.NONE_OPEN : SpellTokensProvider.SPELL_LINE
   }
 
   /**
@@ -90,9 +90,9 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
    */
   tokenize(line: string, state: monaco.languages.IState): monaco.languages.ILineTokens {
     const { SPELL_LINE, EMBEDDED_BLOCKS } = SpellTokensProvider
-    // CONSIDER:  a spellx file goes back to no tags open after a `<css>` / `<markdown>` block;  none of the examples
-    // has one.  And a tag's head over several lines is read a line at a time (`SP.SpellxTokenizer.tokenizeLine()`).
-    const lineState = this.spellx ? SpellxLineState.NONE_OPEN : SPELL_LINE
+    // CONSIDER:  a page file goes back to no tags open after a `<css>` / `<markdown>` block;  none of the examples
+    // has one.  And a tag's head over several lines is read a line at a time (`SP.PageTokenizer.tokenizeLine()`).
+    const lineState = this.pages ? PageLineState.NONE_OPEN : SPELL_LINE
     const inside = EMBEDDED_BLOCKS.find((block) => block.state === state)
     if (inside) {
       if (inside.close.test(line)) return { tokens: this.tagTokens(line, inside.tag), endState: lineState }
@@ -100,28 +100,24 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
     }
     const opened = EMBEDDED_BLOCKS.find((block) => block.open.test(line))
     if (opened) return { tokens: this.tagTokens(line, opened.tag), endState: opened.state }
-    if (this.spellx) return this.spellxTokens(this.spellx, line, state as SpellxLineState)
+    if (this.pages) return this.pageTokens(this.pages, line, state as PageLineState)
     return { tokens: this.spellTokens(line), endState: SPELL_LINE }
   }
 
   /**
-   * Tokens of a line of spellx, read after the tags open in `state`, and the state with the tags open after it.
-   * - A tag's name, values and phrase colour as its twin's tokens;  its own words as `spellxTagPieces()` says.
+   * Tokens of a line of a page file, read after the tags open in `state`, and the state with the tags open after it.
+   * - A tag's name, values and phrase colour as its twin's tokens;  its own words as `tagPieces()` says.
    */
-  private spellxTokens(parser: SP.SpellParser, line: string, state: SpellxLineState): monaco.languages.ILineTokens {
+  private pageTokens(parser: SP.SpellParser, line: string, state: PageLineState): monaco.languages.ILineTokens {
     try {
-      const tokenizer = parser.tokenizer as SP.SpellxTokenizer
+      const tokenizer = parser.tokenizer as SP.PageTokenizer
       const { tokens, open, inComment } = tokenizer.tokenizeLine(line, state.open, state.inComment)
       const pieces: Piece[] = []
       for (const token of tokens) {
-        if (token instanceof SP.SpellxTagToken) pieces.push(...this.spellxTagPieces(parser, tokens, token))
-        else if (token instanceof SP.SpellxCloserToken)
+        if (token instanceof SP.PageTagToken) pieces.push(...this.tagPieces(parser, tokens, token))
+        else if (token instanceof SP.PageCloserToken)
           pieces.push({ start: token.start, end: token.end, scopes: "delimiter" })
-        else if (token instanceof SP.SpellxProseToken && token.isNoteHead)
-          pieces.push(...this.noteHeadPieces(line, token))
-        else if (token instanceof SP.SpellxProseToken && token.isMarkup)
-          pieces.push(...this.markupPieces(line, token.start, token.end))
-        else if (token instanceof SP.SpellxProseToken || token instanceof P.JSXCommentToken)
+        else if (token instanceof SP.PageProseToken || token instanceof P.JSXCommentToken)
           pieces.push({ start: token.start, end: token.end, scopes: "comment" })
         else if (token instanceof P.JSXToken) pieces.push(...this.markupPieces(line, token.start, token.end))
         else {
@@ -129,20 +125,21 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
           if (scopes) pieces.push({ start: token.start, end: token.end, scopes })
         }
       }
-      return { tokens: this.piecesToTokens(pieces), endState: new SpellxLineState(open, inComment) }
+      return { tokens: this.piecesToTokens(pieces), endState: new PageLineState(open, inComment) }
     } catch (error) {
-      console.warn("SpellTokensProvider.tokenize():  couldn't tokenize spellx", { line, error })
+      console.warn("SpellTokensProvider.tokenize():  couldn't tokenize a page", { line, error })
       return { tokens: [], endState: state }
     }
   }
 
   /**
-   * Pieces of a spellx tag's head, `tag`, on a line of `tokens`:
-   * - its name, values and phrase:  as its code-spell twin's tokens (`SP.SpellxTwin`), where the twin has them
+   * Pieces of a page's head or tag, `tag`, on a line of `tokens`:
+   * - its name, values and phrase:  as its code-spell twin's tokens (`SP.PageTwin`), where the twin has them
    * - its word:  `keyword`;  its attributes' names:  `attribute.name`
    * - `<`, `=`, quotes, `>` and `/>`:  `delimiter`, under the rest
    */
-  private spellxTagPieces(parser: SP.SpellParser, tokens: P.Token[], tag: SP.SpellxTagToken): Piece[] {
+  private tagPieces(parser: SP.SpellParser, tokens: P.Token[], tag: SP.PageTagToken): Piece[] {
+    if (tag.tag.category === "page") return this.headPieces(tag)
     const { word, name, attributes, phrase, selfClosing } = tag.tag
     const pieces: Piece[] = [{ start: tag.start, end: tag.end, scopes: "delimiter" }]
     const add = (start: number, end: number, scopes: string | undefined) => {
@@ -166,17 +163,33 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   }
 
   /**
-   * The tokens of the twin of a line of spellx `tokens` that are the line's own:  none of the twin's own words.
+   * Pieces of a page's head, `"card api" is a notebook page`:  it has no `<`, so no tag word at its start.
+   * - its quoted name:  `string`
+   * - its flags:  `attribute.name`, as a tag's attributes are
+   * - its own words around them, `is a` and `page`:  `keyword`, under the rest
+   */
+  private headPieces(head: SP.PageTagToken): Piece[] {
+    const { name, attributes } = head.tag
+    const pieces: Piece[] = [{ start: head.start, end: head.end, scopes: "keyword" }]
+    if (name?.quoted) pieces.push({ start: name.quoted.start, end: name.quoted.end, scopes: "string" })
+    for (const flag of attributes) {
+      pieces.push({ start: flag.start, end: flag.start + flag.word.length, scopes: "attribute.name" })
+    }
+    return pieces
+  }
+
+  /**
+   * The tokens of the twin of a page's line of `tokens` that are the line's own:  none of the twin's own words.
    * - None when it's no tag line, or its tag has no twin.
    */
   private twinTokens(parser: SP.SpellParser, tokens: P.Token[]): P.Token[] {
     const [root] = parser.tokenizer.breakIntoIndentedBlocks(tokens)
     const line = root && firstLineIn(root)
-    const twin = line && SP.SpellxTwin.lineOf(line, undefined, parser)
+    const twin = line && SP.PageTwin.lineOf(line, undefined, parser)
     if (!twin) return []
     const own: P.Token[] = []
     P.Tokenizer.forEachToken([twin.line, ...(twin.body ? [twin.body] : [])], (token) => {
-      if (!SP.SpellxTwin.isSynthetic(token) && !(token instanceof P.LineToken)) own.push(token)
+      if (!SP.PageTwin.isSynthetic(token) && !(token instanceof P.LineToken)) own.push(token)
     })
     return own
   }
@@ -242,23 +255,7 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
   }
 
   /**
-   * Pieces of a note's own head line, `<note>` or `<property-editor>` alone on its line:
-   * as any spellx tag's, its word a `keyword` between `delimiter`s.
-   */
-  private noteHeadPieces(line: string, head: SP.SpellxProseToken): Piece[] {
-    const pieces: Piece[] = [{ start: head.start, end: head.end, scopes: "delimiter" }]
-    const text = line.slice(head.start, head.end)
-    const word = /^<([^\s/>]+)/.exec(text)?.[1]
-    if (word) pieces.push({ start: head.start + 1, end: head.start + 1 + word.length, scopes: "keyword" })
-    // a property editors file's quoted type name, `<property-editor "card">` (`Card.editor.spell`)
-    const name = /"[^"]*"/.exec(text)
-    if (name)
-      pieces.push({ start: head.start + name.index, end: head.start + name.index + name[0].length, scopes: "string" })
-    return pieces
-  }
-
-  /**
-   * Pieces of markup from `start` to `end` of `line`:  a drawing's, or a `<property-editor>`'s lines,
+   * Pieces of markup from `start` to `end` of `line`:  a drawing's lines,
    * as `markupTokens()` colours them.
    */
   private markupPieces(line: string, start: number, end: number): Piece[] {
@@ -331,17 +328,17 @@ type EmbeddedBlock = {
 type Piece = { start: number; end: number; scopes: string }
 
 /**
- * State after a line of spellx:  the tags open after it, which the next line is read with, and whether it left a
+ * State after a line of a page file:  the tags open after it, which the next line is read with, and whether it left a
  * comment open (`<!--` with no `-->` yet).
  * - Two states are equal when the same tags are open, at the same indents, and both or neither are in a comment:
  *   so Monaco stops re-colouring the lines below an edit once they'd start the same as before.
  */
-class SpellxLineState implements monaco.languages.IState {
+class PageLineState implements monaco.languages.IState {
   /** No tag open:  a file's start. */
-  static NONE_OPEN = new SpellxLineState([])
+  static NONE_OPEN = new PageLineState([])
 
   constructor(
-    readonly open: readonly SP.SpellxOpenTag[],
+    readonly open: readonly SP.PageOpenTag[],
     /** Is a `<!-- ... -->` comment still open? */
     readonly inComment = false
   ) {}
@@ -352,7 +349,7 @@ class SpellxLineState implements monaco.languages.IState {
   }
 
   equals(other: monaco.languages.IState): boolean {
-    if (!(other instanceof SpellxLineState) || other.open.length !== this.open.length) return false
+    if (!(other instanceof PageLineState) || other.open.length !== this.open.length) return false
     if (other.inComment !== this.inComment) return false
     return this.open.every((tag, index) => {
       const theirs = other.open[index]!

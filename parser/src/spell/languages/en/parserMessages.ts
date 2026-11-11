@@ -106,22 +106,22 @@ export const PARSER_MESSAGES = {
     '"{name}" can\'t be asked in an address:  it\'s one word of letters, digits, dashes and underscores, e.g. "api_key"',
   /** A line says where a key goes, and no line names one. */
   "key-goes-with-no-key":
-    'This says where its key goes, and no line names one:  add "- its key is the secret "COOKBOOK_KEY""',
+    'This says where its key goes, and no line names one:  add "its key is the secret "COOKBOOK_KEY""',
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
-    "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- check it every 30 seconds\" under it",
+    "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"check it every 30 seconds\" under it",
   /** `when a recipe changes`, on a type in no place:  won't compile.  `{what}` is the type, with its article. */
   "change-not-saved":
-    '{what} isn\'t saved in a place, so this would never run.  Say where it\'s saved, e.g. "- it is saved in the family cookbook";  or "when its title changes:", for one of its properties',
+    '{what} isn\'t saved in a place, so this would never run.  Say where it\'s saved, e.g. "it is saved in the family cookbook";  or "when its title changes:", for one of its properties',
   /** `when someone else changes it` at a file's top:  won't compile. */
   "someone-else-needs-a-type":
-    'Say what changes:  this goes under a saved type, e.g. "- when someone else changes it:" under a recipe',
+    'Say what changes:  this goes under a saved type, e.g. "when someone else changes it:" under a recipe',
   /** `when someone else changes it`, on a kind of place only you use. */
   "someone-else-alone":
     "Nobody else can change what's kept here:  this would never run.  It takes a place other people share",
   /** `when someone else changes it`, on a place nothing tells about:  `{kind}`. */
   "someone-else-not-told":
-    "This {kind} can't announce what's changed, so this would never run:  add \"- check it every 30 seconds\" under it",
+    "This {kind} can't announce what's changed, so this would never run:  add \"check it every 30 seconds\" under it",
   /** `everyone here`, with no place that knows. */
   "people-here-only-you": "No place here knows who else is here, so this is only ever you:  that takes a room",
   /** `to publish a recipe is at "..."`, with no place above it. */
@@ -149,7 +149,7 @@ export const PARSER_MESSAGES = {
     '"{text}" isn\'t a draft:  a change is kept as it\'s made, with no save step.  For an Edit screen with a Cancel button:  "a draft of ..."',
   /** A word people bring from elsewhere:  `{word}`. */
   "no-such-data-word":
-    'Spell can\'t "{word}" that:  say where the data lives once, "x is a web server at ...", and "- it lives in x", then "every recipe where ..." reads it',
+    'Spell can\'t "{word}" that:  say where the data lives once, "x is a web server at ...", and "it lives in x", then "every recipe where ..." reads it',
   /** `belongs to one` a saved owner with no list of them. */
   "belongs-to-saved-needs-list":
     'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
@@ -158,7 +158,7 @@ export const PARSER_MESSAGES = {
     "{place} is kept in each person's own space on Spell's server, its folder \"{folder}\":  until they sign in, in their browser",
   /** A type's line saying the cloud, with no place line to name it. */
   "place-cloud-name-it":
-    'Name the place first, then say it\'s saved there:  "family cookbook is saved in the cloud", then "- it lives in family cookbook"',
+    'Name the place first, then say it\'s saved there:  "family cookbook is saved in the cloud", then "it lives in family cookbook"',
   /** An atmosphere account's line:  everything saved there is anyone's to read (epic `data` T9). */
   "atmosphere-public":
     "Everything saved in this {kind} is public:  anyone can read it, and it's there for good.  Don't keep anything private here",
@@ -230,10 +230,10 @@ export const PARSER_MESSAGES = {
     "Every page of 100 rows is one request, and everyone using this base shares 5 a second.  Airtable's free plan also stops at 1,000 requests a month, which checking every 30 seconds uses in about 8 hours",
   /** An Airtable with no id column (epic `data` I5). */
   "airtable-no-id-column":
-    'Airtable makes its own ids, so a new row sent again after a lost answer would be a second row:  add a text column for Spell\'s ids, and "- its id is its "spell id"" under this',
+    'Airtable makes its own ids, so a new row sent again after a lost answer would be a second row:  add a text column for Spell\'s ids, and "its id is its "spell id"" under this',
   /** An Airtable at a base, with no key named. */
   "airtable-needs-key":
-    'Airtable answers nobody without a key:  add "- its key is the secret "AIRTABLE_KEY"" under this, and keep the key on a server side',
+    'Airtable answers nobody without a key:  add "its key is the secret "AIRTABLE_KEY"" under this, and keep the key on a server side',
   /** Words that can never both be true. */
   "never-both": 'One thing can never be both of these at once, so this finds nothing:  did you mean "or"?',
   /** `where they are the cook`, of something with no `cook`. */
@@ -253,7 +253,7 @@ export const PARSER_MESSAGES = {
   /** `cards' color is ...`:  a declaration's owner plural, with no article (epic `language` T26). */
   "possessive-declaration-plural": 'Write "{aType}\'s {property} is ...":  a declaration names one {type}',
   /** A property's rule (`must ...`) above the property it's about. */
-  "rule-before-property": 'Declare "{name}" above its rule, e.g. "- it has a {name} as text"',
+  "rule-before-property": 'Declare "{name}" above its rule, e.g. "it has a {name} as text"',
   /** An outline's getter which is only a value, `- score is 0`:  `{type}` is `example-number` ... */
   "always-the-same": '{name} is always {value}:  to give it a type, write "{name} is {type}"',
   /** A line under a property, `- its "suit" is ...`, that is neither its rule nor its alias (epic `elemental-spell` P5). */
@@ -285,11 +285,11 @@ export const PARSER_MESSAGES = {
   "inline-and-nested-body": "Got both inline statement and nested block",
   /** A dotted tag, `<UI.Form>`. */
   "not-an-element": "<{tag}> isn't an element:  write Spell UI's own tag, e.g. <ui-form>",
-  /** A bare tag in a spellx drawing that no pack has (epic `elemental-spell` P7). */
-  "spellx-unknown-component":
+  /** A bare tag in a page's drawing that no pack has (epic `elemental-spell` P7). */
+  "page-unknown-component":
     "<{tag}> isn't a component any pack here has (searched:  {packs}):  check its name, or add its pack to the project's packs",
-  /** A control or handler tag inside an element in a spellx drawing (epic `elemental-spell` P7, C29). */
-  "spellx-tag-in-markup":
+  /** A control tag inside an element in a page's drawing (epic `elemental-spell` P7, C29). */
+  "page-tag-in-markup":
     "<{tag} ...> can't sit inside an element yet:  write it on a line of its own in the drawing, outside the element",
   /** An attribute in a tag that can't be read:  the tag still ends at its own `>` (epic `notebook` I5). */
   "unreadable-attribute": 'Can\'t read "{text}" in <{tag}>:  check its name and its quotes',
@@ -373,7 +373,7 @@ export const PARSER_MESSAGES = {
   "searched-only":
     '{things} are only found by a search, with no list of them all:  search them, "every {thing} where its {field} includes ..."',
   "matching-needs-search":
-    '{things} are found this way only in a place that searches all of each thing:  say so under it, "- it searches everything with ..."',
+    '{things} are found this way only in a place that searches all of each thing:  say so under it, "it searches everything with ..."',
   "asked-by-only":
     '{things} are only found by their {fields}, with no list of them all:  say each, "every {thing} where {saying}"',
   "found-only-by-name":
@@ -430,13 +430,9 @@ export const PARSER_MESSAGES = {
   "the-property-of-a-type": "the {property} of a {type}",
 
   ////////////////
-  // ## Spellx:  what spell says about a .spell file, as it reads it (epic `elemental-spell`)
+  // ## Pages:  what spell says about a page file, as it reads it (epic `language` P47)
   ////////////////
 
-  /** A tag word spellx doesn't know, with the closest it does:  `{tag}` is `<propety>`, `{suggestion}` `<property>`. */
-  "spellx-unknown-word": '"{tag}" isn\'t a spellx word:  did you mean "{suggestion}"?',
-  /** A tag word spellx doesn't know, nothing close:  `{words}` are the ones it could be here. */
-  "spellx-unknown-word-here": '"{tag}" isn\'t a spellx word:  here, use one of {words}',
   /** `<ui-defaults>` (`ui_defaults`, epic `language` P29):  a child that isn't a sample tag. */
   "ui-defaults-not-a-sample":
     '<ui-defaults> holds sample tags, one per widget, each with its defaults:  <ui-button appearance="pill"/>',
@@ -462,57 +458,33 @@ export const PARSER_MESSAGES = {
   /** `<ui-defaults source>` naming a file no imported project has, with defaults. */
   "ui-defaults-source-unknown":
     "can't find <ui-defaults> in {source}:  import {project} in the project file, and compile it first",
-  /** An attribute its tag doesn't take, with the closest it does. */
-  "spellx-unknown-attribute": '{tag} has no "{attribute}":  did you mean "{suggestion}"?',
-  /** An attribute its tag doesn't take, nothing close:  `{attributes}` are the ones it has. */
-  "spellx-unknown-attribute-here": '{tag} has no "{attribute}":  it takes {attributes}',
   /** A `</>` or `</word>` with nothing open to close. */
-  "spellx-unexpected-closer": '"{closer}" closes nothing:  remove it',
-  /** A named closer for another tag than the one open:  `{open}` is `<property>`. */
-  "spellx-mismatched-closer": '"{closer}" can\'t close {open}:  write "</>"',
+  "page-unexpected-closer": '"{closer}" closes nothing:  remove it',
+  /** A named closer for another tag than the one open:  `{open}` is `<if>`. */
+  "page-mismatched-closer": '"{closer}" can\'t close {open}:  write "</>"',
   /** A tag the file ends inside. */
-  "spellx-unclosed-tag": '{tag} is never closed:  end it with "</>"',
-  /** A handler's or ability's one-line tag, `<on drag ... />`, run on past its line (epic `debut` P27, Q47). */
-  "spellx-one-line-tag": '{tag} closes on its own line, "... />":  put longer code between "{open}" and "</>"',
-  /** A tag's head the file ends inside, `<property "suit"` with no `>`. */
-  "spellx-unclosed-head": '{tag} never ends:  close it with ">", or "/>" when nothing goes inside',
-  "spellx-unclosed-comment": '"<!--" is never closed:  end the comment with "-->"',
+  "page-unclosed-tag": '{tag} is never closed:  end it with "</>"',
+  /** A tag's head the file ends inside, `<for film in its films` with no `>`. */
+  "page-unclosed-head": '{tag} never ends:  close it with ">", or "/>" when nothing goes inside',
+  "page-unclosed-comment": '"<!--" is never closed:  end the comment with "-->"',
   /** An `<otherwise>` with no `<if>` before it. */
   /** An if-chain's branch in markup with no element around it (epic `elemental-spell`, Owen 2026-10-25). */
   "chain-outside-markup":
     '{tag} picks what an element shows, so it goes inside one:  to pick the whole drawing, write "{if} ..." on a line of its own',
-  "spellx-otherwise-without-if": '{tag} needs an "{if}" before it',
+  "page-otherwise-without-if": '{tag} needs an "{if}" before it',
   /** An `<otherwise>` after a `</>` that closed its `<if>` (Q53). */
-  "spellx-otherwise-after-closed-if":
+  "page-otherwise-after-closed-if":
     '{tag} goes on with the "{if}" above it, but a "</>" closed that:  remove the "</>"',
-  /** `<if>` or a handler with no phrase after its word:  `{word}` is `if`, `on` ... */
-  "spellx-for-flag-first": 'Move "{flag}" after the attributes of {tag}:  written first, it reads as part of the list',
-  "spellx-for-needs-as": '"{attribute}" on {tag} goes on what\'s around its items:  say which, with {as}="cards"',
-  "spellx-for-table-needs-cells": '{tag} draws a row for each item:  name its columns, <cell "Name">{its name}</cell>',
-  "spellx-missing-phrase": '{tag} needs words after its "{word}"',
+  /** `<if>` or `<for>` with no phrase after its word:  `{word}` is `if`, `for` ... */
+  "page-for-flag-first": 'Move "{flag}" after the attributes of {tag}:  written first, it reads as part of the list',
+  "page-for-needs-as": '"{attribute}" on {tag} goes on what\'s around its items:  say which, with {as}="cards"',
+  "page-for-table-needs-cells": '{tag} draws a row for each item:  name its columns, <cell "Name">{its name}</cell>',
+  "page-missing-phrase": '{tag} needs words after its "{word}"',
   /** A line of a body indented less than the body's first line (Q7). */
-  "spellx-indented-less": "This line is indented less than the rest of {tag}:  indent it one step more than {tag}",
-  /** A template inside another template. */
-  "spellx-nested-template": '{tag} can\'t go inside {outer}:  close {outer} first, with "</>"',
-  /** A member outside any template, e.g. `<property>` at the top of a file. */
-  "spellx-outside-template": '{tag} goes inside a template, e.g. "{template}"',
-  /** A tag that can't go where it is, e.g. `<if>` among a template's members, `<on ...>` in a drawing. */
-  "spellx-misplaced-tag": "{tag} can't go here:  {where}",
-  /** Where an `<if>` or a loop goes. */
-  "spellx-where-control": "it goes inside a drawing;  an action says it as a line",
-  /** Where a handler or a member goes. */
-  "spellx-where-member": "it goes among its template's members, beside the drawing",
-  /** A part defined (with a body) inside a drawing:  `{draw}` is `<draw "front">`. */
-  "spellx-part-in-drawing": 'A part is drawn in its own {draw} beside the drawing:  here, "{place}" places it',
+  "page-indented-less": "This line is indented less than the rest of {tag}:  indent it one step more than {tag}",
   /** `is a file at`:  what kind of file has to be said. */
   "say-json-file":
     'A place that\'s one file has to say what\'s in it:  write "is a json file at", or "is a csv file at"',
-  /** A tag spellx knows, but can't read yet:  `{tag}` is `<menu>`. */
-  "spellx-typed-body":
-    'a property with type= is stored, and starts at one value on its tag\'s line:  <property "{name}" type="number">0</>',
-  "spellx-not-yet": "{tag} can't be read yet:  it comes with a later version of spellx",
-  /** A note by an old word, `<spell-description>`, `<comment>`:  its one tag now, `<note>` (epic `language` P41). */
-  "spellx-old-note": "{tag} is now {new}:  one tag for every note",
 
   ////////////////
   // ## Long forms:  "Reads as", `SP.SpellStatement.getLongForm()`

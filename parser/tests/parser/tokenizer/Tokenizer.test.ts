@@ -1277,9 +1277,9 @@ describe("raw-text JSX tags (`rawTextTags`)", () => {
 
   // epic `elemental-spell` P24:  a notebook's `<markdown>` closes with `</>`, as its other tags do
   describe("`</>` where `emptyEndTagCloses` says so", () => {
-    const spellx = new Tokenizer({ rawTextTags: ["markdown"], emptyEndTagCloses: true })
+    const drawing = new Tokenizer({ rawTextTags: ["markdown"], emptyEndTagCloses: true })
     const textOf = (source: string) => {
-      const [element] = spellx.tokenize(source) as [JSXElementToken]
+      const [element] = drawing.tokenize(source) as [JSXElementToken]
       return [element.children?.[0]!.value, element.children?.at(-1)!.raw]
     }
 

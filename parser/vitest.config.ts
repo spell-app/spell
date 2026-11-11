@@ -31,7 +31,7 @@ export default defineConfig({
       },
       { extends: true, test: { name: "py", dir: "tests/py" } },
       { extends: true, test: { name: "spell", dir: "tests/spell" } },
-      { extends: true, test: { name: "spellx", dir: "tests/spellx" } },
+      { extends: true, test: { name: "page", dir: "tests/page" } },
       { extends: true, test: { name: "cli", dir: "tests/cli", environment: "node" } }
     ]
   }

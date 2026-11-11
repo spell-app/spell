@@ -8,17 +8,17 @@ core.heading("Reviews:  kept on this device")
 
 export class Review extends Thing {
   // - its "film title" is text
-  static { this.declareProp("filmTitle", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 325, end: 352 } }) }
+  static { this.declareProp("filmTitle", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 312, end: 336 } }) }
   get filmTitle() { return this.getProp("filmTitle") }
   set filmTitle(value) { this.setProp("filmTitle", value) }
 
   // - its "stars" is a number
-  static { this.declareProp("stars", { type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 357, end: 387 } }) }
+  static { this.declareProp("stars", { type: "number", declaredAt: { path: "/StarWarsReviews.api.spell", start: 338, end: 361 } }) }
   get stars() { return this.getProp("stars") }
   set stars(value) { this.setProp("stars", value) }
 
   // - its "words" is text
-  static { this.declareProp("words", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 393, end: 415 } }) }
+  static { this.declareProp("words", { type: "text", declaredAt: { path: "/StarWarsReviews.api.spell", start: 363, end: 382 } }) }
   get words() { return this.getProp("words") }
   set words(value) { this.setProp("words", value) }
 
@@ -29,12 +29,12 @@ export class Review extends Thing {
   }
 
   // - it lives in galaxy reviews
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 287, end: 313 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 284, end: 310 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in galaxy reviews
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 287, end: 313 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/StarWarsReviews.api.spell", start: 284, end: 310 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -47,7 +47,6 @@ export class GalaxyReview extends Place {}
 export const galaxyReviews = core.place(new GalaxyReview(), { name: "galaxy_reviews", kind: "database on this device" })
 
 // -----------
-//
 // The whole Star Wars example as a site (epic `mockup` P1), and its click-through mockup (P8):  each of its
 // collections, films, people, planets, species, vehicles and starships, as a list page and a page for one of them.
 // Each page says first what it must let people do, its jobs (epic `mockup` P6), plain lines or Agile stories,
@@ -57,7 +56,6 @@ export const galaxyReviews = core.place(new GalaxyReview(), { name: "galaxy_revi
 // It wears the Mockup theme, a hand-drawn sketch, so nobody takes it for the finished look.
 // Its people, planets and ships are read from swapi.py4e.com, as the Star Wars example's are;  its reviews are kept
 // on this device (StarWarsReviews.api.spell).
-//
 
 core.heading("Every page's top:  its title, and the settings")
 //# Every page's top:  its title, and the settings
@@ -235,7 +233,7 @@ export class ReviewDialog extends View {
 export class FilmsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "<story \"S1\" done>see every film, in the order they came out</story>\n<story \"S2\">\n  As a fan, I want to sort the films by when they're set, so that I can watch them in story order\n  - done when:  a switch flips the list between release and story order\n</story>\n<story \"S3\" done>open a film's page from its row</story>"
+  static stories = "<story \"S1\" done>see every film, in the order they came out</story>\n<story \"S2\">\n\tAs a fan, I want to sort the films by when they're set, so that I can watch them in story order\n\n\n\t- done when:  a switch flips the list between release and story order\n</story>\n<story \"S3\" done>open a film's page from its row</story>"
 
   draw() {
     return [
@@ -256,7 +254,7 @@ export const filmsPage = new FilmsPage()
 export class FilmPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "<story \"S1\" done>read the film's opening crawl</story>\n<story \"S2\" done>\n  As a fan, I want to see who's in a film, so that I can find their other films\n  - done when:  its people are listed, each a link to their page\n</story>\n<story \"S3\" done>see the planets, starships and vehicles it shows</story>\n<story \"S4\" done>\n  As a fan, I want to say what I thought of a film, so that I remember it\n  - done when:  \"Add a review\" asks for stars and words, and the film's page lists the reviews\n</story>"
+  static stories = "<story \"S1\" done>read the film's opening crawl</story>\n<story \"S2\" done>\n\tAs a fan, I want to see who's in a film, so that I can find their other films\n\n\n\t- done when:  its people are listed, each a link to their page\n</story>\n<story \"S3\" done>see the planets, starships and vehicles it shows</story>\n<story \"S4\" done>\n\tAs a fan, I want to say what I thought of a film, so that I remember it\n\n\n\t- done when:  \"Add a review\" asks for stars and words, and the film's page lists the reviews\n</story>"
 
   /** The film the address names:  /films/:film */
   // - its "film" is a film
@@ -265,7 +263,7 @@ export class FilmPage extends Page {
   set film(value) { this.setProp("film", value) }
 
   /** What's been said of it, on this device */
-  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spell", start: 2597, end: 2791 }, readsFrom: ["galaxy_reviews"] }) }
+  static { this.declareProp("reviews", { declaredAt: { path: "/StarWarsSite.spell", start: 2622, end: 2803 }, readsFrom: ["galaxy_reviews"] }) }
   get reviews() { return core.waitedValue(this, "reviews", async () => {
     const title = (await core.answerOf(this, "film"))?.title
     return await core.savedThings(Review, { filter: { filmTitle: title }, sort: [{ field: "created", descending: true }] })
@@ -350,7 +348,7 @@ export const peoplePage = new PeoplePage()
 export class PersonPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "<story \"S1\" done>see a person's height, birth year and home planet</story>\n<story \"S2\" done>\n  As a fan, I want to see every film a person is in, so that I can follow their story\n  - done when:  their films are listed in release order, each a link\n</story>"
+  static stories = "<story \"S1\" done>see a person's height, birth year and home planet</story>\n<story \"S2\" done>\n\tAs a fan, I want to see every film a person is in, so that I can follow their story\n\n\n\t- done when:  their films are listed in release order, each a link\n</story>"
 
   /** The person the address names:  /people/:person */
   // - its "person" is a character
@@ -551,7 +549,7 @@ export const vehiclePage = new VehiclePage()
 export class StarshipsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "<story \"S1\" done>see every starship, with its class and hyperdrive rating</story>\n<story \"S2\">\n  As a pilot, I want to compare two starships side by side, so that I can pick the faster one\n  - done when:  picking two starships shows their numbers in two columns\n</story>"
+  static stories = "<story \"S1\" done>see every starship, with its class and hyperdrive rating</story>\n<story \"S2\">\n\tAs a pilot, I want to compare two starships side by side, so that I can pick the faster one\n\n\n\t- done when:  picking two starships shows their numbers in two columns\n</story>"
 
   draw() {
     return [
@@ -613,7 +611,7 @@ core.heading("Every review, edited like a spreadsheet")
 export class ReviewsPage extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  static stories = "<story \"S1\" done>see every review written on this device, in one table</story>\n<story \"S2\" done>\n  As a fan, I want to fix a review's stars or words in place, so that I don't have to write it again\n  - done when:  a cell edits as a spreadsheet's does, and Enter keeps it\n</story>\n<story \"S3\" done>add or remove a review right in the table</story>\n<story \"S4\" done>paste a block of reviews copied from a spreadsheet</story>"
+  static stories = "<story \"S1\" done>see every review written on this device, in one table</story>\n<story \"S2\" done>\n\tAs a fan, I want to fix a review's stars or words in place, so that I don't have to write it again\n\n\n\t- done when:  a cell edits as a spreadsheet's does, and Enter keeps it\n</story>\n<story \"S3\" done>add or remove a review right in the table</story>\n<story \"S4\" done>paste a block of reviews copied from a spreadsheet</story>"
 
   static drawsWaiting = true
   draw() {
@@ -726,6 +724,5 @@ export class GalaxyGuide extends Site {
   }
 }
 export const galaxyGuide = new GalaxyGuide()
-
 // -----------
 if (!core.isCarryingOver) galaxyGuide.start()

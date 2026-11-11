@@ -35,7 +35,6 @@ import {
 import { P } from "spell/parser/parser"
 import { MD, type InlineNode } from "spell/parser/markdown"
 import { SP } from "spell/parser/spell"
-import { SX } from "spell/parser/spellx"
 import { LSP } from "spell/app/lsp"
 
 /**
@@ -467,8 +466,8 @@ export class SpellLanguageService {
    *   - a name where it's declared, e.g. `card` in `a card is a thing`, is a `declaration`
    * - JSX tag names are `type`s, attribute names `property`s.
    * - Nothing in a `<css>` block:  editors colour it as CSS themselves.
-   * - A `.spell` file (epic `elemental-spell` P8):  its tags' words and closers are `keyword`s, their attribute names
-   *   `property`s, a note's or a prose line's text a comment -- see `spellxSpans()`;
+   * - A page file (epic `language` P47):  its tags' words and closers are `keyword`s, their attribute names
+   *   `property`s, a prose line's text a comment -- see `pageSpans()`;
    *   a twin's own words, standing at a tag with no text of their own, are never coloured (C24).
    */
   highlightSpans(file: SP.SpellFile): LSP.HighlightSpan[] {
@@ -477,9 +476,9 @@ export class SpellLanguageService {
     // Kind of declaration each declared name's tokens are part of, by token start.
     const declared = new Map<number, P.DeclarationKind>()
     const spans: LSP.HighlightSpan[] = []
-    // a spellx file's own words, and where its prose lines start:  the twin's comments standing there are drawn by these
+    // a page file's own words, and where its prose lines start:  the twin's comments standing there are drawn by these
     const prose = new Set<number>()
-    if (file.form === "spellx") spans.push(...this.spellxSpans(file, prose))
+    if (file.form === "page") spans.push(...this.pageSpans(file, prose))
     SpellLanguageService.walk(file.match, (match, parent) => {
       const declaration = match.rule.getDeclaration(match)
       if (declaration) {
@@ -493,8 +492,8 @@ export class SpellLanguageService {
           spans.push(...this.jsxSpans(item))
           continue
         }
-        // spellx's prose and notes:  drawn from the file's own tokens, `spellxSpans()`
-        if (item instanceof SP.SpellxProseToken && prose.has(item.start)) continue
+        // a page's prose:  drawn from the file's own tokens, `pageSpans()`
+        if (item instanceof SP.PageProseToken && prose.has(item.start)) continue
         const kind = match.rule.highlightAs && this.refineKind(match.rule.highlightAs, item, match, parent, generated)
         if (!kind || !SpellLanguageService.isColourable(item)) continue
         const declaredKind = declared.get(item.start)
@@ -615,69 +614,45 @@ export class SpellLanguageService {
    * - None for a fragment, `<>...</>`:  it has no name.
    */
   /**
-   * A `.spell` file's own words, which its twin lines never hold (epic `elemental-spell` P8, C24):
-   * - a tag's `<word`, and its `>` or `/>`:  `keyword`
-   * - its attributes' names:  `property`  (their values, a quoted name and a phrase are the twin's, coloured by the parse)
-   * - a closer, `</>` or `</property>`:  `keyword`
-   * - a prose line's or a note's text:  a comment, its markdown styled as a docstring's
-   * - a note's tag and closer on its line:  `keyword`;  its head alone on its line too
-   * - a `<property-editor>`'s lines:  markup as written, coloured as a drawing's markup (`markupSpans()`)
+   * A page file's own words, from its tokens (epic `language` P47):
+   * - a page's head, `"x" is a notebook page`:  its words after its name `keyword`s
+   * - a tag's word and its `<`, `>` or `/>`:  `keyword`
+   * - its attributes' names:  `property`  (their values and a phrase are the twin's, coloured by the parse)
+   * - a closer, `</>` or `</if>`:  `keyword`
+   * - a prose line's text:  a comment, its markdown styled as a docstring's
    * - `prose`:  gets where each prose line starts, where the twin's own comments stand too
    */
-  private spellxSpans(file: SP.SpellFile, prose: Set<number>): LSP.HighlightSpan[] {
+  private pageSpans(file: SP.SpellFile, prose: Set<number>): LSP.HighlightSpan[] {
     const text = file.parseText
     const spans: LSP.HighlightSpan[] = []
     const keyword = (start: number, end: number) => {
       if (end > start) spans.push({ start, end, kind: "keyword" })
     }
     P.Tokenizer.forEachToken(file.match?.tokens ?? [], (token) => {
-      if (token instanceof SP.SpellxTagToken) {
+      if (token instanceof SP.PageTagToken) {
         const { tag } = token
+        if (tag.category === "page") {
+          keyword(tag.name?.quoted?.end ?? token.start, token.end)
+          return
+        }
         keyword(token.start, token.start + 1 + tag.word.length)
         for (const attribute of tag.attributes) {
           spans.push({ start: attribute.start, end: attribute.start + attribute.word.length, kind: "property" })
         }
         const close = tag.selfClosing ? "/>" : ">"
         if (token.raw?.endsWith(close)) keyword(token.end - close.length, token.end)
-      } else if (token instanceof SP.SpellxCloserToken) {
+      } else if (token instanceof SP.PageCloserToken) {
         keyword(token.start, token.end)
-      } else if (token instanceof SP.SpellxProseToken) {
+      } else if (token instanceof SP.PageProseToken) {
         prose.add(token.start)
-        if (token.isNoteHead) keyword(token.start, token.end)
-        else if (token.isMarkup) spans.push(...this.markupSpans(file, token))
-        else spans.push(...this.proseSpans(text, token))
+        spans.push(...this.proseSpans(text, token))
       }
     })
     return spans
   }
 
-  /**
-   * A line of a `<property-editor>`, markup as written:  its tags' names `type`s, attribute names `property`s,
-   * quoted values `string`s, as a drawing's markup colours (`jsxSpans()`).
-   * - Read by the file's own tokenizer, a line at a time:  a closer alone on its line, `</ui-property-group>`,
-   *   is no element there, so its name is found by hand.
-   */
-  private markupSpans(file: SP.SpellFile, token: SP.SpellxProseToken): LSP.HighlightSpan[] {
-    const line = token.value
-    const at = file.parseText.indexOf(line, token.start)
-    if (at < 0) return []
-    const closer = /^<\/([^\s>]+)>/.exec(line)
-    if (closer) return [{ start: at + 2, end: at + 2 + closer[1]!.length, kind: "type" }]
-    const spans: LSP.HighlightSpan[] = []
-    P.Tokenizer.forEachToken(file.language.parser.tokenize(line, "") ?? [], (piece) => {
-      const pieceSpans: LSP.HighlightSpan[] =
-        piece instanceof P.JSXToken
-          ? this.jsxSpans(piece)
-          : piece instanceof P.TextToken
-            ? [{ start: piece.start, end: piece.end, kind: "string" }]
-            : []
-      for (const span of pieceSpans) spans.push({ ...span, start: span.start + at, end: span.end + at })
-    })
-    return spans
-  }
-
-  /** A spellx prose line or note line:  its text a comment, a note's tag and closer around it `keyword`s. */
-  private proseSpans(text: string, token: SP.SpellxProseToken): LSP.HighlightSpan[] {
+  /** A page's prose line:  its text a comment. */
+  private proseSpans(text: string, token: SP.PageProseToken): LSP.HighlightSpan[] {
     const lineEnd = text.indexOf("\n", token.start)
     const line = text.slice(token.start, lineEnd < 0 ? undefined : lineEnd).trimEnd()
     const value = token.value
@@ -686,18 +661,8 @@ export class SpellLanguageService {
     const spans: LSP.HighlightSpan[] = []
     const textStart = token.start + at
     const textEnd = textStart + value.length
-    // `<description>` before it, `</>` after it, when they're on its line
-    if (at > 0 && line.startsWith("<"))
-      spans.push({ start: token.start, end: token.start + line.indexOf(">") + 1, kind: "keyword" })
     const comment = { value, start: textStart, commentSymbol: "", initialWhitespace: "" } as P.CommentToken
     spans.push(...SpellLanguageService.commentSpans(comment, { start: textStart, end: textEnd, kind: "comment" }))
-    const closer = line.slice(at + value.length).match(/<\/[^>]*>\s*$/)
-    if (closer)
-      spans.push({
-        start: token.start + line.length - closer[0].trimEnd().length,
-        end: token.start + line.length,
-        kind: "keyword"
-      })
     return spans
   }
 
@@ -705,7 +670,7 @@ export class SpellLanguageService {
     if (token instanceof P.JSXElementToken) {
       return [{ start: token.start + 1, end: token.start + 1 + token.tagName.length, kind: "type" }]
     }
-    // a fragment's `</>` has no name;  nor has spellx's, closing the element it ends (`emptyEndTagCloses`)
+    // a fragment's `</>` has no name;  nor has a drawing's, closing the element it ends (`emptyEndTagCloses`)
     if (token instanceof P.JSXEndTagToken && token.tagName && token.raw?.startsWith(`</${token.tagName}`)) {
       return [{ start: token.start + 2, end: token.start + 2 + token.tagName.length, kind: "type" }]
     }
@@ -1503,8 +1468,6 @@ export class SpellLanguageService {
    */
   compiled(file: SP.SpellFile, target: LSP.CompiledTarget = "js"): string {
     const { name, comment } = SpellLanguageService.COMPILED_TARGETS[target]
-    if (target === "spell") return this.codeSpellOf(file)
-    if (target === "spellx") return SpellLanguageService.spellxOf(file)
     if (!file.match) return `${comment} ${SP.SpellProject.sourceNameOf(file.path)} hasn't been parsed`
     const { writer } = SP.targetFor(name)
     return (
@@ -1521,43 +1484,7 @@ export class SpellLanguageService {
   static COMPILED_TARGETS: Record<LSP.CompiledTarget, { name: string; comment: string }> = {
     js: { name: SP.RUNNING_TARGET, comment: "//" },
     ts: { name: "ts/solid", comment: "//" },
-    py: { name: "py", comment: "#" },
-    spell: { name: "spell", comment: "//" },
-    spellx: { name: "spellx", comment: "//" }
-  }
-
-  /**
-   * The spellx `file` reads as:  a `.spell` file written as spellx (`SX.SpellxWriter.textOf()`, J95);
-   * a `.spell` file's own text.
-   * - NEVER throws:  a file that can't be written says so, as a comment.
-   */
-  static spellxOf(file: SP.SpellFile): string {
-    try {
-      return SX.SpellxWriter.textOf(file)
-    } catch (error) {
-      return `// ${SP.SpellProject.sourceNameOf(file.path)} couldn't be written as spellx:  ${(error as Error).message}`
-    }
-  }
-
-  /**
-   * The code spell `file` means:  a `.spell` file's, written from its tags' twins (`SX.CodeSpellWriter`, Q70);
-   * a `.spell` file's own text.
-   * - A drawing's bare component names as the parse took them (`<card>` => `<solitaire-card>`):
-   *   `SP.ComponentTags`, which the editor's code-spell tab and a notebook's Spell view read too (epic `notebook` P6).
-   * - NEVER throws:  a file that can't be written says so, as a comment.
-   */
-  codeSpellOf(file: SP.SpellFile): string {
-    const text = file.contents ?? ""
-    if (file.form !== "spellx") return text
-    try {
-      return SX.CodeSpellWriter.write(text, {
-        path: file.path,
-        language: file.language,
-        componentTag: SP.ComponentTags.of(file).componentTag
-      })
-    } catch (error) {
-      return `// ${SP.SpellProject.sourceNameOf(file.path)} couldn't be written as code spell:  ${(error as Error).message}`
-    }
+    py: { name: "py", comment: "#" }
   }
 
   /**
@@ -2215,13 +2142,13 @@ export class SpellLanguageService {
     if (!keywords.hasAccentFixes) return []
     const text = file.parseText
     const edits = new Map<number, TextEdit>()
-    if (file.form === "spellx") this.spellxAccentEdits(file, keywords, from, to, edits)
+    if (file.form === "page") this.pageAccentEdits(file, keywords, from, to, edits)
     SpellLanguageService.walk(file.match, (match) => {
       if (match.end === undefined || match.start === undefined || match.end < from || match.start > to) return
       for (const token of match.matched) {
         if (!(token instanceof P.WordToken) || token.start < from || token.end > to || edits.has(token.start)) continue
-        // a spellx twin's own word, standing at its tag:  not typed there (C24)
-        if (SP.SpellxTwin.isSynthetic(token)) continue
+        // a page twin's own word, standing at its tag:  not typed there (C24)
+        if (SP.PageTwin.isSynthetic(token)) continue
         const fixed = keywords.accentFixFor(match.rule, text.slice(token.start, token.end))
         if (fixed) edits.set(token.start, this.editFor(file, token.start, token.end, fixed))
       }
@@ -2230,13 +2157,13 @@ export class SpellLanguageService {
   }
 
   /**
-   * The accent fixes of a `.spell` file's own words from offset `from` to `to`, into `edits` (epic `elemental-spell`
+   * The accent fixes of a page file's own words from offset `from` to `to`, into `edits` (epic `elemental-spell`
    * P8, Q49):  a tag's word and its attributes' names, typed without their accents --
-   * `<accion "voltearla">` => `<acción "voltearla">`, `descripcion=` => `descripción=`.
-   * - Named closers too:  `</accion>` => `</acción>`.
-   * - `SpellKeywords.spellxAccentFixFor()` says which:  only the language's own spellx words, unambiguously.
+   * `<vacio>` => `<vacío>`, `titulo=` => `título=`.
+   * - Named closers too:  `</vacio>` => `</vacío>`.
+   * - `SpellKeywords.pageAccentFixFor()` says which:  only the language's own page words, unambiguously.
    */
-  private spellxAccentEdits(
+  private pageAccentEdits(
     file: SP.SpellFile,
     keywords: LSP.SpellKeywords,
     from: number,
@@ -2244,20 +2171,18 @@ export class SpellLanguageService {
     edits: Map<number, TextEdit>
   ) {
     const fix = (start: number, word: string) => {
-      const fixed = keywords.spellxAccentFixFor(word)
+      const fixed = keywords.pageAccentFixFor(word)
       if (fixed && start >= from && start + word.length <= to)
         edits.set(start, this.editFor(file, start, start + word.length, fixed))
     }
     P.Tokenizer.forEachToken(file.match?.tokens ?? [], (token) => {
       if (token.end < from || token.start > to) return
-      // a named closer:  `</accion>`
-      if (token instanceof SP.SpellxCloserToken && token.word) fix(token.start + 2, token.word)
-      if (!(token instanceof SP.SpellxTagToken)) return
+      // a named closer:  `</vacio>`
+      if (token instanceof SP.PageCloserToken && token.word) fix(token.start + 2, token.word)
+      if (!(token instanceof SP.PageTagToken)) return
       const { tag } = token
-      // a template's word follows its prefix:  `<encanto-pagina>`
-      const words = file.language.words.spellx
-      const prefix = words && tag.word.startsWith(`${words.prefix}-`) ? words.prefix.length + 1 : 0
-      fix(token.start + 1 + prefix, tag.word.slice(prefix))
+      // a page's head:  its flags, `bloqueada`;  its own word is the language's pattern's
+      if (tag.category !== "page") fix(token.start + 1, tag.word)
       for (const attribute of tag.attributes) fix(attribute.start, attribute.word)
     })
   }
@@ -2442,20 +2367,20 @@ export class SpellLanguageService {
   /** Is `offset` within `match`:  from its start, up to where the next token starts, or just after its text? */
   private containsOffset(match: P.Match, offset: number): boolean {
     const { end, next } = match
-    // a spellx twin's own words stand at its tag, with no text of their own (C24):  a match starts at its first real one
+    // a page twin's own words stand at its tag, with no text of their own (C24):  a match starts at its first real one
     const start = SpellLanguageService.realStartOf(match)
     if (start === undefined || start > offset) return false
     return (next !== undefined && offset < next) || (end !== undefined && offset <= end)
   }
 
   /**
-   * Where `match` starts in the file's text:  its first token that isn't a spellx twin's own word (C24).
+   * Where `match` starts in the file's text:  its first token that isn't a page twin's own word (C24).
    * - `undefined` for a match of twin words alone:  nothing of it is there to point at.
    */
   private static realStartOf(match: P.Match): number | undefined {
     const [first] = match.tokens
-    if (!first || !SP.SpellxTwin.isSynthetic(first)) return match.start
-    return match.tokens.find((token) => !SP.SpellxTwin.isSynthetic(token))?.start
+    if (!first || !SP.PageTwin.isSynthetic(first)) return match.start
+    return match.tokens.find((token) => !SP.PageTwin.isSynthetic(token))?.start
   }
 
   /** Is `item` a match of the rule named `ruleName`? */
@@ -2594,8 +2519,8 @@ export class SpellLanguageService {
 
   /** Is `token` one an editor should colour:  a word, symbol, number, string or comment -- NOT whitespace? */
   static isColourable(token: P.Token): boolean {
-    // a spellx twin's own words stand at its tag, with no text of their own (C24)
-    if (SP.SpellxTwin.isSynthetic(token)) return false
+    // a page twin's own words stand at its tag, with no text of their own (C24)
+    if (SP.PageTwin.isSynthetic(token)) return false
     return (
       token instanceof P.WordToken ||
       token instanceof P.SymbolToken ||

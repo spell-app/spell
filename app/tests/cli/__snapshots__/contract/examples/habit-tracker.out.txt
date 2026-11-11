@@ -1,5 +1,5 @@
 ✅ test streaks
-  ▶️ Executing   `set the habit to a new habit with name = "Read", monday = yes, tuesday = yes, thursday = yes`
+  ▶️ Executing   `set the habit to a new habit with name "Read", monday = yes, tuesday = yes, thursday = yes`
   ✅ As expected `the habit's count` is `3`
   ✅ As expected `the habit's streak` is `2`
   ▶️ Executing   `set the habit's wednesday to yes`

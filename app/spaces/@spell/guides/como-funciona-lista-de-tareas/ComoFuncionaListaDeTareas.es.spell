@@ -13,14 +13,14 @@
 
 
 ## Una tarea
-una "tarea" es una vista donde:
-	- su "título" es texto
-	- su "hecha" es sí o no
-	- "está hecha" si su hecha es sí
-	- "está pendiente" si su hecha es no
+una "tarea" es una vista
+	su "título" es texto
+	su "hecha" es sí o no
+	"está hecha" si su hecha es sí
+	"está pendiente" si su hecha es no
 
-	// un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"
-	- para dibujarla:
+	para dibujarla
+		// un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"
 		devolver <es-formulario value={eso}>
 			<es-pila direccion="horizontal" separacion="sm">
 				<es-casilla name="hecha" aria-label="Hecha"/>
@@ -30,11 +30,11 @@ una "tarea" es una vista donde:
 
 
 ## La agenda:  las tareas, mostradas según su filtro
-una "agenda" es una lista visible de tareas donde:
-	// lo que muestra:  todas las tareas, las pendientes, o las hechas
-	- su "mostrando" es una de todas, pendientes o hechas
-	// cada tarea, salvo que el filtro la oculte:  "devolver nada" no dibuja nada
-	- para dibujar cada elemento:
+una "agenda" es una lista visible de tareas
+	su "mostrando" es una de todas, pendientes o hechas
+		// lo que muestra:  todas las tareas, las pendientes, o las hechas
+	para dibujar cada elemento
+		// cada tarea, salvo que el filtro la oculte:  "devolver nada" no dibuja nada
 		si su mostrando es "pendientes" y la tarea está hecha devolver nada
 		si su mostrando es "hechas" y la tarea está pendiente devolver nada
 		devolver dibujar la tarea
@@ -43,12 +43,12 @@ una tarea pertenece a una agenda
 
 
 ## La aplicación
-lista de tareas es una aplicación donde:
-	- sus "tareas" es una nueva agenda
-	// cuántas quedan:  las tareas elegidas con "donde", contadas
-	- su "cuenta pendiente" es el largo de (tareas en sus tareas donde está pendiente)
+lista de tareas es una aplicación
+	sus "tareas" es una nueva agenda
+	su "cuenta pendiente" es el largo de (tareas en sus tareas donde está pendiente)
+		// cuántas quedan:  las tareas elegidas con "donde", contadas
 
-	- para dibujarla:
+	para dibujarla
 		devolver <es-contenedor texto>
 			<es-menu apariencia="secundario">
 				<es-elemento clase="encabezado">{su cuenta pendiente + " pendientes"}</es-elemento>

@@ -22,7 +22,7 @@
  * - Knows nothing of the page:
  *   the runner calls it from its keys and clicks, and Spell UI's `<ui-action>` draws what `menuOf()` gives.
  */
-import { CanceledError } from "spell/util"
+import { CanceledError, initialCaps } from "spell/util"
 
 import { core } from "./core"
 import { ActionQueue } from "./ActionQueue"
@@ -315,7 +315,7 @@ export const actingMethods = defineCoreModule({
 
   /**
    * The app's MENU BAR, ready to draw:  the menu its class names, `static menuBar = "game menu"`
-   * (`- its menu bar is "game menu"`, spellx's `menu-bar=`).  `undefined` when it names none.
+   * (`- its menu bar is "game menu"`).  `undefined` when it names none.
    */
   menuBarOf(app: object | undefined): MenuItem[] | undefined {
     const name = (app?.constructor as { menuBar?: unknown } | undefined)?.menuBar
@@ -486,9 +486,13 @@ function testOf(thing: object, getter: string | undefined): boolean | undefined 
   }
 }
 
-/** A method's name in words, for an action described with no title:  `startNewGame` => `start new game`. */
+/**
+ * A method's name in words, in Initial Caps, for an action or menu described with no title:
+ * `startNewGame` => `Start New Game` (epic `language` P48:  "the default title should be the action name in Initial Caps").
+ * - The compiler writes an action's default the same way, from its words as written (`MethodDefinition`).
+ */
 function wordsOf(name: string): string {
-  return name.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase()
+  return initialCaps(name.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase())
 }
 
 /**

@@ -13,16 +13,16 @@ import { parseSpellProject, registerTestComponentPack, runSpellFiles } from "spe
  * every branch stays on the page, each hidden while it isn't the one:  text `hidden="until-found"`, a Spell UI element
  * by its own `hidden`.
  * - So a flip keeps each element, the same DOM node with whatever it holds, and only `hidden` changes.
- * - The same tags in code spell and spellx:  the same program.
+ * - The same with a drawing's bare names (`<segment>`) and Spell UI's own (`<ui-segment>`):  the same program.
  * - Compiled, then run on `core`'s source, into a fake page (linkedom), as `drawing.test.ts` draws.
  */
 describe("an <if> inside markup", () => {
   /** A card whose drawing picks one of three things inside its segment. */
-  const SPELLX = [
-    '<spell-view "card">',
-    '\t<property "up">yes or no</>',
-    '\t<property "rank">a number</>',
-    "\t<draw>",
+  const BARE = [
+    'a "card" is a view:',
+    '\tits "up" is yes or no',
+    '\tits "rank" is a number',
+    "\tto draw it:",
     "\t\t<segment>",
     "\t\t\t<if its up is yes>",
     "\t\t\t\t<text>{its rank}</text>",
@@ -32,13 +32,9 @@ describe("an <if> inside markup", () => {
     "\t\t\t\t<button>down</button>",
     "\t\t\t</>",
     "\t\t</segment>",
-    "\t</draw>",
-    "</spell-view>",
-    "<spell>",
-    "\tset card to a new card with rank = 5",
-    "</spell>"
+    "set card to a new card with rank = 5"
   ]
-  /** The same card in code spell:  the same tags, inside its drawing. */
+  /** The same card with Spell UI's own tags. */
   const CODE_SPELL = [
     'a "card" is a view where:',
     '\t- its "up" is yes or no',
@@ -97,7 +93,7 @@ describe("an <if> inside markup", () => {
   }
 
   test("every branch is on the page;  the one whose phrase holds shows, the rest are hidden until found", () => {
-    drawnCard("/Card.spell", SPELLX)
+    drawnCard("/Card.spell", BARE)
     expect(shown()).toEqual(["ui-text hidden", "span hidden", "ui-button"])
     const [text, span] = [...element.firstElementChild!.children]
     // a Spell UI element by its own `hidden`;  text, in a span of its own, until found
@@ -107,7 +103,7 @@ describe("an <if> inside markup", () => {
   })
 
   test("a flip keeps every element, the same node with what it holds:  only `hidden` changes", () => {
-    const card = drawnCard("/Card.spell", SPELLX)
+    const card = drawnCard("/Card.spell", BARE)
     const segment = element.firstElementChild!
     const before = [...segment.children]
     ;(before[2] as HTMLElement & { held?: string }).held = "kept"
@@ -132,12 +128,12 @@ describe("an <if> inside markup", () => {
     expect((segment.children[2] as HTMLElement & { held?: string }).held).toBe("kept")
   })
 
-  test("code spell says it with the same tags, and draws the same", () => {
+  test("Spell UI's own tags draw the same", () => {
     drawnCard("/Card.spell", CODE_SPELL)
     expect(shown()).toEqual(["ui-text hidden", "span hidden", "ui-button"])
   })
 
-  test("both forms compile to the same program", () => {
+  test("both compile to the same program", () => {
     const code = (path: string, lines: string[]) => {
       const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
       expect(file!.errors).toEqual([])
@@ -147,6 +143,6 @@ describe("an <if> inside markup", () => {
         .filter((line) => line.trim() && !line.trim().startsWith("//"))
         .join("\n")
     }
-    expect(code("/Card.spellml", SPELLX)).toBe(code("/Card.spell", CODE_SPELL))
+    expect(code("/Card.spell", BARE)).toBe(code("/Card.spell", CODE_SPELL))
   })
 })

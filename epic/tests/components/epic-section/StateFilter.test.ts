@@ -107,3 +107,47 @@ describe("StateFilter.clickDoes()", () => {
     expect(StateFilter.clickDoes(["progress", "scheduled"], ["progress", "scheduled"], "scheduled")).toBe("stays")
   })
 })
+
+// epic `epic-engine` I259 (Owen, 2026-11-11:  the toolbar's grey went on, the Phases section's grey stayed off)
+describe("StateFilter's colours, for the page's toolbar", () => {
+  test("a state's colour:  its group's first state;  a phase's paused goes with the greys", () => {
+    expect(["handled", "quiet", "old", "paused"].map((state) => StateFilter.colorOf(state))).toEqual([
+      "old",
+      "old",
+      "old",
+      "old"
+    ])
+    expect(["scheduled", "updated", "attention"].map((state) => StateFilter.colorOf(state))).toEqual([
+      "progress",
+      "replied",
+      "attention"
+    ])
+  })
+
+  test("setting colours:  every state of a named colour on or off, whatever the section had;  the rest as they were", () => {
+    const colors = new Map([
+      ["old", true],
+      ["attention", false]
+    ])
+    expect(StateFilter.withColors(["attention", "updated", "paused", "old"], ["attention"], colors)).toEqual([
+      "paused",
+      "old"
+    ])
+    expect(StateFilter.withColors(["attention", "updated", "old"], ["updated"], colors)).toEqual(["updated", "old"])
+  })
+
+  test("where a colour stands across sections:  on, off, or mixed", () => {
+    const standing = StateFilter.colorStanding([
+      [
+        { state: "old", on: true },
+        { state: "open", on: true }
+      ],
+      [
+        { state: "paused", on: false },
+        { state: "old", on: true },
+        { state: "attention", on: false }
+      ]
+    ])
+    expect(Object.fromEntries(standing)).toEqual({ old: "mixed", open: "on", attention: "off" })
+  })
+})

@@ -1,7 +1,7 @@
 /**
  * Spaces' models:  project groups and lists, a project's file edits -- safe in a browser.
  * - `PROJECT_GROUPS`:  spell's project groups;  SIDE EFFECT:  loading this registers them with spell.
- * - `SPELL_UI_PACK`:  Spell UI, as a spellx drawing names its components bare;  SIDE EFFECT:  registers it with spell.
+ * - `SPELL_UI_PACK`:  Spell UI, as a drawing names its components bare;  SIDE EFFECT:  registers it with spell.
  * - `SpellProjectRoot`:  a group's list of projects, and its project create, copy, rename and delete.
  * - `ProjectFiles`:  a project's file create, copy, rename and delete (decision Q20), and its drafts, Publish and versions.
  * - `DraftJSON`, `PublishJSON` ...:  drafts and versions over the wire (epic `editor` P24).

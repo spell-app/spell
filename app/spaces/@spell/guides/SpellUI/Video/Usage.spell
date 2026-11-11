@@ -1,4 +1,4 @@
-<page "video usage" notebook>
+"video usage" is a notebook page
 	<header level="1">
 		Video
 		<header>A video plays a video file in the browser's own player.</>
@@ -36,4 +36,3 @@
 			- The browser's controls are keyboard-ready:  Tab to them, Space to play and pause.
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "site-tabs theming" notebook>
+"site-tabs theming" is a notebook page
 	<header level="1">
 		Site tabs
 		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
@@ -29,4 +29,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

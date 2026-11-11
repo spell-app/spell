@@ -1,4 +1,4 @@
-<page "popup usage" notebook>
+"popup usage" is a notebook page
 	<header level="1">
 		Popup
 		<header>A popup displays additional information on top of a page.</>
@@ -234,4 +234,3 @@
 			```
 		</>
 	</>
-</page>

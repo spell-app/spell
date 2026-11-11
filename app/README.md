@@ -7,14 +7,14 @@ _Task List in the Spell editor:  the program on the left, the app it makes on th
 The left half of that picture is the program.
 Here is what a task is, the seven lines at the top of its file, their descriptions left out:
 
-```html
-<view "task">
-	<property "title">text</>
-	<property "notes">text</>
-	<property "priority" one-of="low, normal or high" />
-	<property "done">yes or no</>
-	<alias "is done">if its done is yes</>
-	<alias "is active">if it is not done</>
+```spell
+a "task" is a draggable selectable view
+	its "title" is text
+	its "notes" is text
+	its "priority" is one of low, normal or high
+	its "done" is yes or no
+	it "is done" if its done is yes
+	it "is active" if it is not done
 ```
 
 Read them once, and you know what a task is in this app:
@@ -102,17 +102,17 @@ Even the people who own the spaces are written in Spell.
 This is what a person is, from [the people library](spaces/@spell/library/people/) the editor itself uses:
 
 ```spell
-a person is a thing:
-	- it is saved in its own file
-	- it has names as text
-	- it has a nickname as text
-	- its "emails" is a list of text
-	- its "dates" is a list of dated-events
-	- its "friend-lists" is a list of friend-lists
-	- its "notes" is a list of notes
+a person is a thing
+	it is saved in its own file
+	it has names as text
+	it has a nickname as text
+	its "emails" is a list of text
+	its "dates" is a list of dated-events
+	its "friend-lists" is a list of friend-lists
+	its "notes" is a list of notes
 ```
 
-That's an OUTLINE:  a heading, then what's true of it, as bullets.
+That's an OUTLINE:  a heading, then what's true of it, a line each.
 So is the task at the top of this page.
 The Calculator says the same kind of thing in sentences, and Spell reads both.
 
@@ -183,9 +183,8 @@ Each step in detail, with the code behind it:  [the editor's page](README-app.md
 
 All of this runs now, on your own machine.
 
-- **Write in sentences, in outlines, or in tags.**  The Calculator is sentences;  the person above is an outline;
-  Task List is spellx, Spell in tags, and so is [Solitaire](spaces/@spell/examples/Solitaire/),
-  a whole card game, its cards, deck and piles too.
+- **Write in sentences, or in outlines.**  The Calculator is sentences;  the person above is an outline;
+  so are Task List and [Solitaire](spaces/@spell/examples/Solitaire/), a whole card game, its cards, deck and piles too.
 - **See mistakes as you type.**  On a line Spell can't read at all, it offers to teach Spell the phrase:
   "Define `to <phrase>`".
   The same checker runs in VS Code and on the command line ([the language server](README-lsp.md)).
@@ -293,7 +292,7 @@ Bill Splitter, a form whose sums follow every keystroke;
 Flash Cards, a deck of Spanish words to quiz yourself on;
 Habit Tracker, a week of checkboxes for each habit;
 Task List, at the top of this page, and Lista de tareas, the same list in Spanish;
-and Klondike solitaire, written in spellx, every card a piece of the page of its own;
+and Klondike solitaire, every card a piece of the page of its own;
 and Solitario, the same game in Spanish.
 A library comes with them, of people, for your own projects to build on.
 

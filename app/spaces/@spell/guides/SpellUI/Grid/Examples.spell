@@ -1,4 +1,4 @@
-<page "grid examples" notebook>
+"grid examples" is a notebook page
 	<header level="1">
 		Grid
 		<header>A grid is used to harmonize negative space in a layout.</>
@@ -1679,4 +1679,3 @@
 			</example>
 		</>
 	</>
-</page>

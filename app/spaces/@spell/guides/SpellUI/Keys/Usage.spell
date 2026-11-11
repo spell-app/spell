@@ -1,4 +1,4 @@
-<page "keys usage" notebook>
+"keys usage" is a notebook page
 	<header level="1">
 		Keys
 		<header>Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.</>
@@ -31,4 +31,3 @@
 			"Control S" elsewhere.  The words are translated with the page's language.
 		</>
 	</>
-</page>

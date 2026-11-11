@@ -1,4 +1,4 @@
-<page "placeholder theming" notebook>
+"placeholder theming" is a notebook page
 	<header level="1">
 		Placeholder
 		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
@@ -62,4 +62,3 @@
 			shared tokens.
 		</>
 	</>
-</page>

@@ -9,39 +9,39 @@ core.heading("Feed:  what's new across your org")
 /** A post, as its space has it:  who wrote it, what about, when, and where it's from. */
 export class Post extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 657, end: 678 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 618, end: 636 } })
   accessor text!: string
 
   // - its "topic" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 683, end: 705 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 638, end: 657 } })
   accessor topic!: string
 
   // - its "posted" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 710, end: 733 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 659, end: 679 } })
   accessor posted!: string
 
   // - its "by" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 738, end: 757 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 681, end: 697 } })
   accessor by!: string
 
   // - its "space" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 762, end: 784 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgFeed.api.spell", start: 699, end: 718 } })
   accessor space!: string
 
   /** How much of it you want:  2 more of it, 1 as it comes, 0 none */
-  static { this.declareProp("weight", { declaredAt: { path: "/OrgFeed.spell", start: 462, end: 674 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("weight", { declaredAt: { path: "/OrgFeed.spell", start: 461, end: 660 }, readsFrom: ["my_feed"] }) }
   get weight() {
     if (this.by === "ana@rs" && this.topic === "art") return 2
     if (this.by === "ana@rs" && this.topic === "politics") return 0
     return 1
   }
 
-  static { this.declareProp("isAFavourite", { declaredAt: { path: "/OrgFeed.spell", start: 689, end: 731 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("isAFavourite", { declaredAt: { path: "/OrgFeed.spell", start: 662, end: 700 }, readsFrom: ["my_feed"] }) }
   get isAFavourite() {
     return this.weight === 2
   }
 
-  static { this.declareProp("isOrdinary", { declaredAt: { path: "/OrgFeed.spell", start: 736, end: 775 }, readsFrom: ["my_feed"] }) }
+  static { this.declareProp("isOrdinary", { declaredAt: { path: "/OrgFeed.spell", start: 702, end: 737 }, readsFrom: ["my_feed"] }) }
   get isOrdinary() {
     return this.weight === 1
   }
@@ -67,11 +67,11 @@ export class Post extends Thing {
     times: ["created", "modified"], select: ["text", "topic", "posted", "by", "space"] }
 
   // - it lives in my feed
-  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 626, end: 645 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 597, end: 616 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in my feed
-  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 626, end: 645 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgFeed.api.spell", start: 597, end: 616 } })
   accessor modified!: any /* spell: type unknown */
 }
 

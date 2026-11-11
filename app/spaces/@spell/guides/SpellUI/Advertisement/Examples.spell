@@ -1,4 +1,4 @@
-<page "advertisement examples" notebook>
+"advertisement examples" is a notebook page
 	<header level="1">
 		Advertisement
 		<header>An ad displays third-party promotional content.</>
@@ -132,4 +132,3 @@
 			</example>
 		</>
 	</>
-</page>

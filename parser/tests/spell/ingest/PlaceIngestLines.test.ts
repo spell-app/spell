@@ -83,7 +83,6 @@ function memoryFiles() {
 function ingestOn(fetch: typeof globalThis.fetch, disk = memoryFiles()) {
   return {
     ingest: new PlaceIngest({
-      shape: "plain",
       fetch,
       ask: async () => undefined,
       files: disk.files,
@@ -98,11 +97,11 @@ describe("what a server does when it's asked (T162)", () => {
   test("it writes each line it saw work:  filters, sorts, the fields it gives, a position, read only", async () => {
     const { ingest } = ingestOn(kitchenServer().fetch)
     const { spell, description } = await ingest.add({ address: API, into: "/K.spell", name: "kitchen" })
-    expect(spell).toContain(`- its next page is asked for with "limit" and "offset"`)
-    expect(spell).toContain(`- it filters by title, cuisine and servings`)
-    expect(spell).toContain(`- it sorts by title, cuisine and servings with "_sort"`)
-    expect(spell).toContain(`- it gives only the fields named in "fields"`)
-    expect(spell).toContain(`- it is read only`)
+    expect(spell).toContain(`its next page is asked for with "limit" and "offset"`)
+    expect(spell).toContain(`it filters by title, cuisine and servings`)
+    expect(spell).toContain(`it sorts by title, cuisine and servings with "_sort"`)
+    expect(spell).toContain(`it gives only the fields named in "fields"`)
+    expect(spell).toContain(`it is read only`)
     expect(description.spellCantSay.join("\n")).not.toMatch(/filter or sort|read only/)
     expect(description.collections.recipes!.readThrough!.rows).toBe(3)
   })
@@ -126,14 +125,14 @@ describe("what a server does when it's asked (T162)", () => {
   test("a server that only reads:  the report suggests keeping a copy, unless a person's line says so already (T126)", async () => {
     const { ingest, texts } = ingestOn(kitchenServer().fetch)
     const { description } = await ingest.add({ address: API, into: "/K.spell", name: "kitchen" })
-    expect(description.notes.join("\n")).toMatch(/add `- keep a copy on this device`/)
+    expect(description.notes.join("\n")).toMatch(/add `keep a copy on this device`/)
     texts.set(
       "/K.spell",
-      texts.get("/K.spell")!.replace("- it is read only", "- it is read only\n\t- keep a copy on this device")
+      texts.get("/K.spell")!.replace("it is read only", "it is read only\n\tkeep a copy on this device")
     )
     const again = await ingest.update("/K.spell")
     expect(again.description.notes.join("\n")).not.toMatch(/keep a copy/)
-    expect(texts.get("/K.spell")).toContain("- keep a copy on this device")
+    expect(texts.get("/K.spell")).toContain("keep a copy on this device")
   })
 })
 
@@ -141,9 +140,9 @@ describe("a server's own times (T57)", () => {
   test("its created and updated fields are Spell's, by their own names, and their lines stay", async () => {
     const { ingest } = ingestOn(kitchenServer().fetch)
     const { spell, description } = await ingest.add({ address: API, into: "/K.spell", name: "kitchen" })
-    expect(spell).toContain(`- a recipe's created is its "created at"`)
-    expect(spell).toContain(`- a recipe's modified is its "updated at"`)
-    expect(spell).toContain(`- its "created at" is a date`)
+    expect(spell).toContain(`a recipe's created is its "created at"`)
+    expect(spell).toContain(`a recipe's modified is its "updated at"`)
+    expect(spell).toContain(`its "created at" is a date`)
     expect(description.notes.join("\n")).not.toMatch(/No row read filled/)
   })
 
@@ -175,8 +174,8 @@ describe("a server's own times (T57)", () => {
     disk.texts.set("/K.spell", disk.texts.get("/K.spell")!.replace(/.*created is its.*\n/, ""))
     held.spell = held.spell.filter((line) => !/created is its/.test(line))
     const { changes } = await ingest.update("/K.spell")
-    expect(changes.join("\n")).toMatch(/Added:  - a recipe's created is its "created at"/)
-    expect(disk.texts.get("/K.spell")).toContain(`- a recipe's created is its "created at"`)
+    expect(changes.join("\n")).toMatch(/Added:  a recipe's created is its "created at"/)
+    expect(disk.texts.get("/K.spell")).toContain(`a recipe's created is its "created at"`)
   })
 })
 
@@ -190,7 +189,7 @@ describe("a place that moved (T77)", () => {
     const before = disk.texts.get("/K.spell")!
     const { fetch } = kitchenServer({ address: NEW_HOME })
     const { changes, description } = await ingestOn(fetch, disk).ingest.update("/K.spell", { movedTo: NEW_HOME })
-    expect(changes).toEqual([`Moved:  kitchen is a web server at "${NEW_HOME}":`])
+    expect(changes).toEqual([`Moved:  kitchen is a web server at "${NEW_HOME}"`])
     expect(disk.texts.get("/K.spell")).toBe(before.replace(API, NEW_HOME))
     expect(description.about.address).toBe(NEW_HOME)
     expect((descriptionFromDisk(disk.descriptions.get("/K.json5")!) as PlaceDescription).about.address).toBe(NEW_HOME)
@@ -200,7 +199,7 @@ describe("a place that moved (T77)", () => {
     const disk = memoryFiles()
     const { ingest } = ingestOn(kitchenServer().fetch, disk)
     await ingest.add({ address: API, into: "/K.spell", name: "kitchen" })
-    disk.texts.set("/K.spell", disk.texts.get("/K.spell")!.replace(`at "${API}":`, `from "${API}":`))
+    disk.texts.set("/K.spell", disk.texts.get("/K.spell")!.replace(`at "${API}"`, `from "${API}":`))
     const { couldntChange } = await ingestOn(kitchenServer({ address: NEW_HOME }).fetch, disk).ingest.update(
       "/K.spell",
       {

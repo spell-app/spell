@@ -5,7 +5,8 @@ import { SP } from "spell/parser/spell"
  * - The name in the code is always "my app":  a person names their project anything, a word spell may read otherwise,
  *   and renaming it changes nothing here.
  * - Browser-safe, with no server:  plain text, used by `SpellProjectRoot.createApp()` and the landing page's starters.
- * - English for now:  a Spanish one needs its own tags, `<es-...>`.
+ * - In plain Spell (epic `language` P46), its drawing's components by their bare names:  `<container>`.
+ * - English for now:  a Spanish one needs its own words.
  */
 export const STARTER_PROGRAMS = {
   /** Nothing in it yet:  what's added goes in its container. */
@@ -14,12 +15,10 @@ export const STARTER_PROGRAMS = {
     fileName: "MyApp.spell",
     contents: (title: string) => `# ${title}
 
-<app "my app">
-\t<draw>
-\t\t<ui-container>
-\t\t</ui-container>
-\t</draw>
-</app>
+my app is an app:
+\tto draw it:
+\t\t<container>
+\t\t</container>
 `
   },
   /** A button that counts its clicks. */
@@ -27,18 +26,18 @@ export const STARTER_PROGRAMS = {
     name: "counter",
     fileName: "Counter.spell",
     contents: (title: string) => `# ${title}
-A button that counts its clicks.
+// A button that counts its clicks.
 
-<app "my app">
-\t<property "count">a number</>
-\t<action "create it">set its count to 0</>
-\t<action "count up">set its count to its count + 1</>
-\t<draw>
-\t\t<ui-container>
-\t\t\t<ui-button onClick={count up}>Clicked {its count} times</ui-button>
-\t\t</ui-container>
-\t</draw>
-</app>
+my app is an app:
+\tits "count" is a number
+\tto create it:
+\t\tset its count to 0
+\tto count up:
+\t\tset its count to its count + 1
+\tto draw it:
+\t\t<container>
+\t\t\t<button onClick={count up}>Clicked {its count} times</button>
+\t\t</container>
 `
   },
   /** A little game:  roll a die, and see how far you get. */
@@ -46,26 +45,22 @@ A button that counts its clicks.
     name: "roll-a-six",
     fileName: "RollASix.spell",
     contents: (title: string) => `# ${title}
-A little game:  how many rolls does it take to roll a six?
+// A little game:  how many rolls does it take to roll a six?
 
-<app "my app">
-\t<property "roll">a number</>
-\t<property "rolls">a number</>
-\t<action "create it">
+my app is an app:
+\tits "roll" is a number
+\tits "rolls" is a number
+\tto create it:
 \t\tset its roll to 1
 \t\tset its rolls to 0
-\t</action>
-\t<action "roll the die">
+\tto roll the die:
 \t\tset its roll to a random number in [1, 2, 3, 4, 5, 6]
 \t\tset its rolls to its rolls + 1
-\t</action>
-\t<draw>
-\t\t<ui-container>
-\t\t\t<ui-button onClick={roll the die}>Roll</ui-button>
-\t\t\t<ui-text>You rolled {its roll}, in {its rolls} rolls</ui-text>
-\t\t</ui-container>
-\t</draw>
-</app>
+\tto draw it:
+\t\t<container>
+\t\t\t<button onClick={roll the die}>Roll</button>
+\t\t\t<text>You rolled {its roll}, in {its rolls} rolls</text>
+\t\t</container>
 `
   }
 } as const

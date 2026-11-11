@@ -499,24 +499,54 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
-   * The toolbar's state chips:  every section's filter (`DOMEpicSectionElement.stateFilter`) added up.
-   * - a state is on while every section having it shows it
+   * The toolbar's state chips:  every item section's filter (`DOMEpicSectionElement.stateFilter`) added up.
+   * - the counts are the items' (I157);  a colour ONLY the Phases section has gets a chip too, counting its phases
+   *   (epic `epic-engine` I261;  Owen, 2026-11-11:  "why is there no green bubble in the top set?")
+   * - a chip is ON while every section with a chip of its colour shows it, the Phases section too;  MIXED while some
+   *   do and some don't (`mixed`);  OFF while none does (epic `epic-engine` I259)
    * - read again on every layout change and section filter change, and after every mark (`followMarks`):
    *   a marked item leaves its state's count
    */
-  readonly filterChips = createMemo((): StateFilterEntry[] => {
+  readonly filterChips = createMemo((): (StateFilterEntry & { mixed: boolean })[] => {
     this.signals.layout.get()
     void this.filterTick
     if (isServer) return []
+    const hosts = this.filterHosts()
     const totals = new Map<string, StateFilterEntry>()
-    for (const section of this.filterHosts()) {
+    for (const section of hosts) {
       for (const entry of section.stateFilter ?? []) {
         const total = totals.get(entry.state)
-        if (total) totals.set(entry.state, { ...total, count: total.count + entry.count, on: total.on && entry.on })
+        if (total) totals.set(entry.state, { ...total, count: total.count + entry.count })
         else totals.set(entry.state, { ...entry })
       }
     }
-    return FILTER_STATES.flatMap((it) => totals.get(it.state) ?? [])
+    // a colour only the Phases section has (green, done lately):  a chip too, counting its phases (I261)
+    const itemColors = new Set([...totals.keys()].map((state) => StateFilter.colorOf(state)))
+    for (const section of hosts) {
+      if (section.stateFilter) continue
+      for (const pair of (section.chipCounts ?? "").split(/\s+/)) {
+        const [state, count] = pair.split(":")
+        if (!state || !Number(count) || StateFilter.inBlueBadge(state)) continue
+        const color = StateFilter.colorOf(state)
+        if (itemColors.has(color)) continue
+        const as = FILTER_STATES.find((it) => StateFilter.colorOf(it.state) === color)
+        if (!as) continue
+        const total = totals.get(as.state)
+        totals.set(as.state, {
+          state: as.state,
+          color: as.color,
+          count: (total?.count ?? 0) + Number(count),
+          on: true
+        })
+      }
+    }
+    const standing = StateFilter.colorStanding(hosts.map((section) => section.chipStates ?? []))
+    return FILTER_STATES.flatMap((it) => {
+      const total = totals.get(it.state)
+      if (!total) return []
+      const color = standing.get(StateFilter.colorOf(total.state))
+      return [{ ...total, on: color === "on", mixed: color === "mixed" }]
+    })
   })
 
   /**
@@ -962,7 +992,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The page's state filter, in the toolbar:  a chip per state the page's items are in, with how many
    * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3).
-   * - solid while EVERY section showing that state shows it
+   * - solid while EVERY section showing that state's colour shows it, the Phases section too;  half filled while only
+   *   some do (`mixed`, epic `epic-engine` I259)
    * - a click (`epic-state-changed`) filters every section at once, by the sections' own rule
    *   (`StateFilter.nextShown()`);  an ⌥-click, only its colour (I166)
    * - the items marked in this pass in its blue badge, left of the chips:  the blues' chip (P43, I242)
@@ -983,6 +1014,12 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     .filter((chip) => chip.on)
                     .map((chip) => chip.state)
                     .join(" ")
+            }
+            mixed={
+              chips()
+                .filter((chip) => chip.mixed)
+                .map((chip) => chip.state)
+                .join(" ") || undefined
             }
             marked={this.markedTotal() || undefined}
           />
@@ -1561,9 +1598,13 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   ////////////////
 
   /**
-   * A toolbar chip, clicked:  every section filtered at once, by the sections' own rule (`StateFilter.nextShown()`);
-   * ⌥-clicked (`how`, I166), only its state.
-   * - everything again:  each section's choice forgotten, so a state that comes later shows too
+   * A toolbar chip, clicked:  what shows next by the sections' own rule (`StateFilter.nextShown()`), a mixed colour
+   * counting as off, so its click turns it on everywhere;  ⌥-clicked (`how`, I166), only its colour.
+   * - then SETS each colour of the toolbar's chips in EVERY section, the Phases section too, on or off as the toolbar
+   *   has it, whatever each section chose (epic `epic-engine` I259;  Owen, 2026-11-11:  "turning the master ones on
+   *   and off don't always turn the per-section ones on and off, and I can't seem to reset them");  a colour the
+   *   toolbar has no chip for stays as each section has it
+   * - a section left showing every state:  its choice forgotten, so a state that comes later shows too
    */
   @E.untracked
   private pickState(state: string, how: ChipPick = "click") {
@@ -1575,8 +1616,22 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       state,
       how
     )
-    const states = next.length === present.length ? undefined : next
-    for (const section of this.filterHosts()) if (section.stateFilter) section.showStates?.(states)
+    const colors = new Map<string, boolean>()
+    for (const chip of present) {
+      const color = StateFilter.colorOf(chip)
+      colors.set(color, colors.get(color) === true || next.includes(chip))
+    }
+    for (const section of this.filterHosts()) {
+      const own = section.chipStates ?? []
+      if (!own.length) continue
+      const states = own.map((it) => it.state)
+      const shown = StateFilter.withColors(
+        states,
+        own.filter((it) => it.on).map((it) => it.state),
+        colors
+      )
+      section.showStates?.(shown.length === states.length ? undefined : shown)
+    }
   }
 
   /**
@@ -1757,6 +1812,7 @@ export interface EpicPage extends E.AttributeValues<EpicPageVocabulary> {}
  */
 type FilterHost = E.DOMElement & {
   readonly stateFilter?: readonly StateFilterEntry[]
+  readonly chipStates?: readonly { state: string; on: boolean }[]
   readonly markedCount?: number
   readonly chipCounts?: string
   showStates?(states: readonly string[] | undefined): void

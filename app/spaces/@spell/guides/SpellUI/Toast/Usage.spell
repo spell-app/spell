@@ -1,4 +1,4 @@
-<page "toast usage" notebook>
+"toast usage" is a notebook page
 	<header level="1">
 		Toast
 		<header>A toast allows users to receive a short, non-blocking notification.</>
@@ -140,4 +140,3 @@
 			```
 		</>
 	</>
-</page>

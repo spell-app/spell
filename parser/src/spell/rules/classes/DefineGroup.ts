@@ -7,13 +7,9 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 /**
  * `define_group` rule:  a GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).
  * - e.g. `- group "direction"   // Face up or face down`;  Spanish's `- grupo "dirección"`
- * - spellx's twin:  `<group "direction" description="Face up or face down"/>`.
  * - The members after it, up to the next group, are its members, as text sits under a heading:
  *   a member before any group is in none.
- *   - A spellx member written away from its group says so, `group="direction"`:  its twin opens that group again
- *     just above it, and the one it's among again below it (`SP.SpellxTwin`).
- * - What reads groups:  the notebook draws a group's members together, under its name and description;
- *   the property editor can, from the file's chunk tree (`SX.SpellxFile.groupsOf()`).
+ * - What reads groups:  the notebook draws a group's members together, under its name and description.
  *   - The declarations note each member's group, and the words file lists a type's members by group:
  *     the Inspector's bands (epic `debut` P26;  `SP.SpellWords`).
  * - Compiles to nothing:  a group says how a template is laid out for people, not what it does.

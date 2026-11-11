@@ -1,4 +1,4 @@
-<page "radio api" notebook>
+"radio api" is a notebook page
 	<header level="1">
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api tag="ui-radio" only="states"></>
 		</>
 	</>
-</page>

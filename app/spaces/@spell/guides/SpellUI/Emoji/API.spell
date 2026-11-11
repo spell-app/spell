@@ -1,4 +1,4 @@
-<page "emoji api" notebook>
+"emoji api" is a notebook page
 	<header level="1">
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>
@@ -28,4 +28,3 @@
 			<ui-docs-api family="ui-emoji" only="states"></>
 		</>
 	</>
-</page>

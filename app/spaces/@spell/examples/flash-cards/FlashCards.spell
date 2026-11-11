@@ -1,45 +1,49 @@
 # Flash Cards
-A deck of cards to learn from:  a Spanish word on the front, what it means on the back.
-Click the card, or Show the answer, to turn it over, then say whether you knew it:
-the score keeps count, and the next card comes up at random.
-The card is this project's own, in `FlashCard.spell`;  this file holds the quiz, and its words.
+// A deck of cards to learn from:  a Spanish word on the front, what it means on the back.
+// Click the card, or Show the answer, to turn it over, then say whether you knew it:
+// the score keeps count, and the next card comes up at random.
+// The card is this project's own, in `FlashCard.spell`;  this file holds the quiz, and its words.
 
-<app "quiz">
-	<property "deck">a new deck</>
-	<property "card" description="The card showing">a flash card</>
-	<property "known" type="number" description="How many you knew"/>
-	<property "tried" type="number" description="How many you've tried"/>
-	<property "score" description="Said in the toolbar">
+quiz is an app
+	"deck" is a new deck
+	its "card" is a flash card
+		// The card showing
+	its "known" is a number
+		// How many you knew
+	its "tried" is a number
+		// How many you've tried
+	its "score" is
+		// Said in the toolbar
 		"Nothing tried yet" if the tried is 0
 		"[known] of [tried] right" otherwise
-	</property>
 
-	<group "playing"/>
-	<action "deal a card" description="A card from the deck at random, word up:  never the one just shown">
+	group "Playing"
+	to deal a card
+		// A card from the deck at random, word up:  never the one just shown
 		set others to cards in the deck where it is not quiz's card
 		set the card to a random card in others
 		turn the card face up
-	</action>
-	<action "show the answer" title="Show the answer" shortcut="space">turn the card over</>
-	<action "say i knew it" title="I knew it" icon="check" shortcut="Y" description="Counted, then the next card">
+	to show the answer
+		shortcut space
+		turn the card over
+	to "say i knew it" with title "I knew it", icon "check"
+		// Counted, then the next card
+		shortcut Y
 		set the known to the known + 1
 		set the tried to the tried + 1
 		deal a card
-	</action>
-	<action "say i missed it" title="I missed it" icon="close" shortcut="N">
+	to "say i missed it" with title "I missed it", icon "close"
+		shortcut N
 		set the tried to the tried + 1
 		deal a card
-	</action>
-	<action "start over" title="Start over" icon="redo">
+	to "start over" with icon "redo"
 		clear the known
 		clear the tried
 		deal a card
-	</action>
-	<menu "quiz menu">
-		<action "start over"/>
-	</menu>
+	its "quiz menu" is a menu of "start over"
 
-	<draw description="The toolbar with the score, the card, then what you can do:  turn it over, or say how you did">
+	to draw it
+		// The toolbar with the score, the card, then what you can do:  turn it over, or say how you did
 		<container text>
 			<stack>
 				<toolbar menu="quiz menu" aria-label="Quiz" shrinkable>
@@ -57,27 +61,23 @@ The card is this project's own, in `FlashCard.spell`;  this file holds the quiz,
 				</stack>
 			</stack>
 		</container>
-	</draw>
-</app>
 
 ## The deck:  twelve Spanish words -- add your own
 
-<spell>
-	to add (word as text) meaning (meaning as text):
-		add (a new flash card with word = the word, meaning = the meaning) to quiz's deck
+to add (word as text) meaning (meaning as text)
+	add (a new flash card with word = the word, meaning = the meaning) to quiz's deck
 
-	add "el gato" meaning "the cat"
-	add "el perro" meaning "the dog"
-	add "la casa" meaning "the house"
-	add "el libro" meaning "the book"
-	add "la manzana" meaning "the apple"
-	add "el agua" meaning "the water"
-	add "la luna" meaning "the moon"
-	add "el sol" meaning "the sun"
-	add "la playa" meaning "the beach"
-	add "el tren" meaning "the train"
-	add "la llave" meaning "the key"
-	add "la mariposa" meaning "the butterfly"
+add "el gato" meaning "the cat"
+add "el perro" meaning "the dog"
+add "la casa" meaning "the house"
+add "el libro" meaning "the book"
+add "la manzana" meaning "the apple"
+add "el agua" meaning "the water"
+add "la luna" meaning "the moon"
+add "el sol" meaning "the sun"
+add "la playa" meaning "the beach"
+add "el tren" meaning "the train"
+add "la llave" meaning "the key"
+add "la mariposa" meaning "the butterfly"
 
-	start over
-</spell>
+start over

@@ -133,6 +133,13 @@ and in the app's build folder, `app/` at the app folder's root.
 - [The app's Monaco plumbing](ui/monaco/) (no UI).
   - Its language features call the SAME `LSP.SpellLanguageService`, in-process.
     So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
+  - It draws Spell in the bubbly look as it's typed (epic `language` P50):  [SpellBubbly](ui/monaco/SpellBubbly.ts),
+    from the parser's `SP.BubblyLayout`, marked by [BubblyMarks](ui/monaco/BubblyMarks.ts), styled by
+    [bubbly.css](components/spell-code/bubbly.css)'s marked Monaco section, the look's one sheet.
+    - The text stays ordinary text:  its pieces are decorations in the sheet's classes, room round a pill is injected
+      text, the shapes a layer behind the editor, the room under a declaration a view zone.
+    - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, `codePopups.ts`).
+    - Not in a `<CodeSlice>`, a diff, or a page file.
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:
@@ -291,6 +298,12 @@ and in the app's build folder, `app/` at the app folder's root.
       - Its family registers `spell` with the page's `UI.code` as it loads ([SpellLanguage](components/spell-code/SpellLanguage.ts)),
         so EVERY `<ui-code language="spell">` on the page is coloured, and every spell block of a markdown.
       - The colours are spell's parser's (`SP.SpellHighlighter`), from source:  a lazy chunk, on first use.
+      - Drawn in the bubbly look (epic `language` P49):  the parser's `SP.BubblyLayout`, as HTML by
+        [BubblyHtml](components/spell-code/BubblyHtml.ts), styled by [bubbly.css](components/spell-code/bubbly.css),
+        the look's ONE sheet;  `<ui-code>` shows a language's drawing (`CodeLanguage.draw`) unless it numbers or
+        wraps its lines.
+        - Its `--bubbly-` values for VS Code:  `bubbly.values.json`, `yarn tsx scripts/bubbly-values.ts`.
+        - The drawn-bubbly page in the epic repo:  `yarn tsx scripts/bubbly-page.ts`.
     - `<spell-markdown>` (`SpellMarkdown extends UIMarkdown`):  drawn by spell's engine (`spell/parser/markdown`), plain and
       `editable`, in `ui-*` elements ([MDEngine](components/spell-markdown/MDEngine.ts), a lazy chunk).
       - It overrides `UIMarkdown.loadEngine()`;  its barrel imports the families the engine draws with, and

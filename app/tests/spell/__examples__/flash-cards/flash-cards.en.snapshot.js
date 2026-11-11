@@ -22,7 +22,7 @@ export const words = {
   },
   groups: {
     Quiz: [
-      { name: "playing", members: ["dealACard", "draw", "showTheAnswer", "sayIKnew", "sayIMissed", "startOver"] }
+      { name: "Playing", members: ["dealACard", "draw", "showTheAnswer", "sayIKnew", "sayIMissed", "startOver"] }
     ]
   }
 }

@@ -18,8 +18,8 @@ core.heading("A square:  empty, or holding an X or an O")
 ///////////////////////////////////////////////
 // ## A square:  empty, or holding an X or an O
 ///////////////////////////////////////////////
-// A `<thing>` is a kind of thing the program keeps:  here, one square of the board.
-// Its `<alias>` is a phrase you can say of it:  `the square is empty`.
+// A `thing` is a kind of thing the program keeps:  here, one square of the board.
+// `it "is empty" if ...` is a phrase you can say of it:  `the square is empty`.
 
 export class Square extends Thing {
   // - its "mark" is text
@@ -68,7 +68,7 @@ export class Board extends List<Square> {
 export class TicTacToe extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "board" is a new board
+  // "board" is a new board
   @prop({ init: () => new Board(), early: true })
   accessor board!: Board
 
@@ -213,7 +213,7 @@ core.heading("Try it")
 ////////////
 // - Play a game on the right.  Win across the top, and the line above the board says so.
 // - Click ↻, above the game, for a fresh board.
-// Now win DOWN the left side:  squares 1, 4 and 7.  Nothing happens.
+//   Now win DOWN the left side:  squares 1, 4 and 7.  Nothing happens.
 
 // Your move:  teach it to win down.  In "check for a winner", add three lines like the others:
 

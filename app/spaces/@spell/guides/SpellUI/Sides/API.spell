@@ -1,4 +1,4 @@
-<page "sides api" notebook>
+"sides api" is a notebook page
 	<header level="1">
 		Sides
 		<header>Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-sides" only="texts"></>
 		</>
 	</>
-</page>

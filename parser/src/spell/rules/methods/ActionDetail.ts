@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import { ActionModifiers } from "./ActionModifier"
 import { MethodDefinition } from "./MethodDefinition"
 import type { MethodSignatureData } from "./methods.shared"
 
@@ -51,12 +52,22 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoa
   }
 
   /**
-   * What the lines of action `match`'s body describe, in order -- `undefined` if none do.
+   * What action `match` says about itself, in order -- `undefined` if it says nothing:
+   * its head line's modifiers (`with title "Deal"`, `action_modifier`), then the lines of its body.
    * - Reads ONLY matches:  pure, for `getAST()`.
    */
   static detailsOf(match: P.Match, body: P.Match | undefined): ActionDetails | undefined {
     const details: ActionDetails = { shortcuts: [] }
     let any = false
+    // what its head line says, `with title "Deal", shortcut "meta+N"` (epic `language` P48), before its body's lines
+    for (const modifier of ActionModifiers.modifiersIn(match.groups.modifiers as P.Match | undefined)) {
+      any = true
+      const { title, icon, keys, undoable } = modifier.groups as Record<string, P.Match | undefined>
+      if (keys) details.shortcuts.push(ActionDetail.textOf(keys))
+      if (undoable) details.undoable = true
+      if (icon) details.icon = ActionDetail.textOf(icon)
+      if (title) details.title = title
+    }
     for (const line of body?.matched ?? []) {
       const statement = line instanceof P.Match ? (line.data as { statement?: P.Match }).statement : undefined
       if (!statement?.is(ActionDetail)) continue

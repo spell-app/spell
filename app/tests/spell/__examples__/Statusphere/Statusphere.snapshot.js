@@ -6,23 +6,23 @@ import { core, Thing, App, Place, h } from "@spell/core"
  */
 export class Status extends Thing {
   // - its "status" is required text, with maximum length 1
-  static { this.declareProp("status", { type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 262, end: 314 } }) }
+  static { this.declareProp("status", { type: "text", rules: [{ type: "empty" }, { type: "maxLength", value: "1" }], declaredAt: { path: "/Status.spell", start: 257, end: 309 } }) }
   get status() { return this.getProp("status") }
   set status(value) { this.setProp("status", value) }
 
   // - its "created at" is a required date
-  static { this.declareProp("createdAt", { type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 318, end: 353 } }) }
+  static { this.declareProp("createdAt", { type: "date", rules: [{ type: "empty" }], declaredAt: { path: "/Status.spell", start: 311, end: 346 } }) }
   get createdAt() { return this.getProp("createdAt") }
   set createdAt(value) { this.setProp("createdAt", value) }
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a status has an owner as text
-  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 574, end: 603 } }) }
+  static { this.declareProp("owner", { type: "text", declaredAt: { path: "/Statusphere.api.spell", start: 489, end: 584 } }) }
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
   /** Its owner's handle, once their account says so;  else the account itself */
-  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spell", start: 418, end: 686 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("who", { declaredAt: { path: "/Statusphere.spell", start: 415, end: 670 }, readsFrom: ["status_board"] }) }
   get who() {
     const account = this.owner
     const person = core.getItemAt(core.filter(core.peopleHere(), (person) => person.id === account), 0)
@@ -46,12 +46,12 @@ export class Status extends Thing {
     times: ["created", "modified"], select: ["status", "createdAt", "owner", "created"] }
 
   // a status is saved in the status board
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 468, end: 505 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 450, end: 487 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // a status is saved in the status board
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 468, end: 505 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Statusphere.api.spell", start: 450, end: 487 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -95,7 +95,7 @@ export class Statusphere extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   /** Newest first:  by when each was set */
-  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spell", start: 1008, end: 1135 }, readsFrom: ["status_board"] }) }
+  static { this.declareProp("recent", { declaredAt: { path: "/Statusphere.spell", start: 965, end: 1079 }, readsFrom: ["status_board"] }) }
   get recent() { return core.waitedValue(this, "recent", async () => {
     return await core.savedThings(Status, { sort: [{ field: "created", descending: true }] })
   }) }

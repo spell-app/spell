@@ -14,33 +14,33 @@
 // A THING is anything your program is about:  a plant, a card, a task, a person.
 // You say what kind of thing it is once, and then you can make as many of them as you like.
 // A "view" can show itself on the page;  more on that in part 4.
-a "plant" is a view where:
+a "plant" is a view
 
 	## 2. Properties
 	// A PROPERTY is something a thing keeps:  a plant has a name, and so on.
 	// Each line says the property's name, in quotes, then what kind of value it holds:
 	// text, a number, or yes or no.
-	- its "name" is text
-	- its "days between waterings" is a number
-	- its "days since watered" is a number
+	its "name" is text
+	its "days between waterings" is a number
+	its "days since watered" is a number
 
 	## 3. Rules
 	// A RULE is a property the program works out for itself, from the others.
 	// You never set it:  it's always up to date, so when a plant is watered, it stops being thirsty.
-	- it "is thirsty" if its days since watered is greater than or equal to its days between waterings
-	- its "status" is:
+	it "is thirsty" if its days since watered is greater than or equal to its days between waterings
+	its "status" is
 		"needs water!" if it is thirsty
 		"fine for now" otherwise
 
-	// A rule can also be something the thing DOES, when asked:  an ACTION.
-	- to water it:
+	to water it
+		// A rule can also be something the thing DOES, when asked:  an ACTION.
 		set its days since watered to 0
 
 	## 4. Drawing
 	// DRAWING is how a thing shows itself on the page.
 	// The lines in <angle brackets> are the page's pieces;  {curly brackets} fill in a property.
 	// Because the page is drawn from the properties, it changes by itself whenever they do.
-	- to draw it:
+	to draw it
 		return <ui-segment color={"orange" if it is thirsty otherwise "green"}>
 			<h3>{its name}</h3>
 			<p>{its status}</p>
@@ -52,18 +52,18 @@ a "plant" is a view where:
 // A list of things can be a view too:  a viewable list draws each one in turn.
 a "windowsill" is a viewable list of plants
 
-// a plant sits on one windowsill
 a plant belongs to one windowsill
+	// a plant sits on one windowsill
 
-// the app:  the page on the right
-garden is an app where:
-	- its "sill" is a new windowsill
+garden is an app
+	// the app:  the page on the right
+	its "sill" is a new windowsill
 	// a day goes by:  every plant is one day drier
 	// (`the plant's days since watered` is `the days since watered of the plant`, said the other way)
-	- to wait a day:
+	to wait a day
 		for plant in its sill
 			set the plant's days since watered to the plant's days since watered + 1
-	- to draw it:
+	to draw it
 		return <div class="Garden">
 			<ui-button color="primary" onClick={wait a day}>A day goes by</ui-button>
 			{draw its sill}

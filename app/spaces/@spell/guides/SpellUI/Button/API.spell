@@ -1,4 +1,4 @@
-<page "button api" notebook>
+"button api" is a notebook page
 	<header level="1">
 		Button
 		<header>A button indicates a possible user action.</>
@@ -57,4 +57,3 @@
 			<ui-docs-api family="ui-button" only="texts"></>
 		</>
 	</>
-</page>

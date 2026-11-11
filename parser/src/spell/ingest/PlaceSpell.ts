@@ -1,5 +1,4 @@
 import { P } from "spell/parser/parser"
-import { SX } from "spell/parser/spellx"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
@@ -33,8 +32,8 @@ const USUAL_ID = "id"
 /** The line saying where a key goes. */
 function keyGoesLine(goes: KeyGoes): string {
   return "header" in goes
-    ? `- its key goes in its "${goes.header}" header`
-    : `- its key goes in the address as "${goes.inAddress}"`
+    ? `its key goes in its "${goes.header}" header`
+    : `its key goes in the address as "${goes.inAddress}"`
 }
 
 /** The most rows a list can say it has and still be read in one request, `it gives up to 2000 at a time`. */
@@ -99,52 +98,52 @@ export function spellPartsFor(
   const placeLines: SpellLine[] = []
   // a data folder's, a file's, a room's key is the server's run token:  no line of a program says it
   if (withKey && keySecret && KINDS_WITH_KEY_LINES.has(kind)) {
-    placeLines.push({ key: "key", text: `- its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
+    placeLines.push({ key: "key", text: `its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
     if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
   }
   const sameId = sameOfEvery(every, ({ idField }) => idField)
   const isSheet = kind === "sheet" || kind === "google sheet"
-  if (sameId && (isSheet || sameId !== USUAL_ID)) placeLines.push({ key: "id", text: `- its id is its "${sameId}"` })
+  if (sameId && (isSheet || sameId !== USUAL_ID)) placeLines.push({ key: "id", text: `its id is its "${sameId}"` })
   // what's said of lists is said of those that list:  one found by name is read a thing at a time
   const lists = every.filter(({ at }) => !isFoundByNameAt(at))
   const rowsAt = sameOfEvery(lists, (collection) => collection.rowsAt)
-  if (rowsAt) placeLines.push({ key: "rows", text: `- its rows are ${fieldInWords(rowsAt)}` })
+  if (rowsAt) placeLines.push({ key: "rows", text: `its rows are ${fieldInWords(rowsAt)}` })
   const nextAt = kind === "web server" ? sameOfEvery(lists, (collection) => collection.nextAt) : undefined
-  if (nextAt) placeLines.push({ key: "next", text: `- its next page is ${fieldInWords(nextAt)}` })
+  if (nextAt) placeLines.push({ key: "next", text: `its next page is ${fieldInWords(nextAt)}` })
   // every list that pages says its next page in its `Link` header, GitHub's way:  one with no pages asks nothing of it
   const paging = new Set(lists.map((collection) => collection.paging).filter((each) => each !== "none"))
   if (kind === "web server" && !nextAt && paging.size === 1 && paging.has("link header")) {
-    placeLines.push({ key: "next", text: `- its next page is in its "Link" header` })
+    placeLines.push({ key: "next", text: `its next page is in its "Link" header` })
   }
   // every list with more than a page can be asked for more at a time, and none is too big to read in one:
   // every name in one request
   const paged = every.filter(({ takesLimit }) => takesLimit !== undefined)
   const most = Math.max(...paged.map(({ rowsItSays }) => rowsItSays ?? Infinity))
   if (kind === "web server" && paged.length && paged.every(({ takesLimit }) => takesLimit) && most <= MOST_AT_A_TIME) {
-    placeLines.push({ key: "size", text: `- it gives up to ${Math.ceil(most / 1000) * 1000} at a time` })
+    placeLines.push({ key: "size", text: `it gives up to ${Math.ceil(most / 1000) * 1000} at a time` })
   }
   // every list gives only a little of each row:  what any of them gives, or its id when none gives more
   if (kind === "web server" && every.length && every.every(({ listsGive }) => listsGive)) {
     const given = [...new Set(every.flatMap(({ listsGive }) => listsGive!))]
     const fields = (given.length ? given : [sameId ?? USUAL_ID]).slice(0, 2).map((field) => `"${field}"`)
-    placeLines.push({ key: "lists", text: `- its lists give only each one's ${fields.join(" and ")}` })
+    placeLines.push({ key: "lists", text: `its lists give only each one's ${fields.join(" and ")}` })
   }
   if (every.length && every.every(({ fields }) => fields[VERSION_FIELD]?.type === "number")) {
-    placeLines.push({ key: "version", text: `- its version is its "${VERSION_FIELD}"` })
+    placeLines.push({ key: "version", text: `its version is its "${VERSION_FIELD}"` })
   }
   if (checkEverySeconds !== undefined) {
-    placeLines.push({ key: "check", text: `- check it ${checkEveryInWords(checkEverySeconds)}` })
+    placeLines.push({ key: "check", text: `check it ${checkEveryInWords(checkEverySeconds)}` })
   }
   // the pace its docs ask for:  the Met Museum's 80 a second
   if (mostPerSecond !== undefined) {
-    placeLines.push({ key: "pace", text: `- it takes up to ${mostPerSecond} requests a second` })
+    placeLines.push({ key: "pace", text: `it takes up to ${mostPerSecond} requests a second` })
   }
   // what it was seen to do when it was asked, and what it says of itself:  asked of it, not done here
   if (kind === "web server")
     placeLines.push(...linesOfWhatItTakes(serverTakes, every, canDo.write, !!nextAt || paging.size > 0))
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = kind === "web server" || kind === "graphql server" ? nameExampleOf(every) : undefined
-  if (namesLike) placeLines.push({ key: "names", text: `- it writes names like "${namesLike}"` })
+  if (namesLike) placeLines.push({ key: "names", text: `it writes names like "${namesLike}"` })
   // each collection its own search, when they don't share one:  GitHub's users and repositories
   const searchedApart = isSearchedApart(every)
   const searches = searchedApart ? undefined : searchLineOf(every)
@@ -167,22 +166,22 @@ export function spellPartsFor(
     if (!searchedThere) {
       placeLines.push({
         key: `at:${collection}`,
-        text: `- ${collectionWords(description)} ${where} "${description.at}"`
+        text: `${collectionWords(description)} ${where} "${description.at}"`
       })
     }
     if (searchedApart && description.searchedBy) {
       const at = searchAddressOf(description)
-      const line = `- ${collectionWords(description)} are searched with "${description.searchedBy.param}"${at ? ` at "${at}"` : ""}`
+      const line = `${collectionWords(description)} are searched with "${description.searchedBy.param}"${at ? ` at "${at}"` : ""}`
       placeLines.push({ key: `search:${collection}`, text: line })
     }
     if (!sameId && description.idField && description.idField !== USUAL_ID) {
-      const line = `- ${articled(description.type)}'s id is its "${description.idField}"`
+      const line = `${articled(description.type)}'s id is its "${description.idField}"`
       placeLines.push({ key: `id:${collection}`, text: line })
     }
     // asked for by a query:  `forecasts are asked for by their latitude and longitude`
     const asked = Object.keys(description.askedBy ?? {}).map((field) => description.fields[field]?.words ?? field)
     if (asked.length) {
-      const line = `- ${collectionWords(description)} are asked for by their ${wordsJoined(asked)}`
+      const line = `${collectionWords(description)} are asked for by their ${wordsJoined(asked)}`
       placeLines.push({ key: `asked:${collection}`, text: line })
     }
   }
@@ -190,14 +189,14 @@ export function spellPartsFor(
   for (const [collection, description] of shown) {
     for (const [field, about] of Object.entries(description.fields)) {
       if (!about.pictureAt || about.leftOut) continue
-      const line = `- ${articled(description.type)}'s "${about.words}" is a picture at "${about.pictureAt}"`
+      const line = `${articled(description.type)}'s "${about.words}" is a picture at "${about.pictureAt}"`
       placeLines.push({ key: `picture:${collection}:${field}`, text: line })
     }
   }
   // a list under each thing, at its own address:  `a post's comments live at "/posts/{id}/comments"`
   for (const [collection, description] of shown) {
     for (const [list, at] of listsUnderShown(description, collections)) {
-      const line = `- ${articled(description.type)}'s ${collectionWords(collections[list]!)} live at "${at}"`
+      const line = `${articled(description.type)}'s ${collectionWords(collections[list]!)} live at "${at}"`
       placeLines.push({ key: `under:${collection}:${list}`, text: line })
     }
   }
@@ -205,13 +204,13 @@ export function spellPartsFor(
   if (!isSheet) {
     for (const [collection, description] of shown) {
       for (const [time, field] of timeFieldsOf(description)) {
-        const text = `- ${articled(description.type)}'s ${time} is its "${field}"`
+        const text = `${articled(description.type)}'s ${time} is its "${field}"`
         placeLines.push({ key: `time:${collection}:${time}`, text })
       }
     }
   }
   return {
-    header: `${name} is ${articled(kind === "file" ? JSON_FILE_WORDS : kind)} at "${address}":`,
+    header: `${name} is ${articled(kind === "file" ? JSON_FILE_WORDS : kind)} at "${address}"`,
     placeLines,
     types: [
       ...shown.map(([collection, description]) => typeLines(collection, description, name, collections)),
@@ -289,15 +288,15 @@ function linesOfWhatItTakes(
   if (pagesWith && !hasPaging) {
     lines.push({
       key: "pages",
-      text: `- its next page is asked for with "${pagesWith.limit}" and "${pagesWith.offset}"`
+      text: `its next page is asked for with "${pagesWith.limit}" and "${pagesWith.offset}"`
     })
   }
-  if (filters) lines.push({ key: "filters", text: `- it filters by ${wordsOf(filters)}` })
+  if (filters) lines.push({ key: "filters", text: `it filters by ${wordsOf(filters)}` })
   if (sorts) {
-    lines.push({ key: "sorts", text: `- it sorts by ${wordsOf(sorts)}${sortedWith ? ` with "${sortedWith}"` : ""}` })
+    lines.push({ key: "sorts", text: `it sorts by ${wordsOf(sorts)}${sortedWith ? ` with "${sortedWith}"` : ""}` })
   }
-  if (fieldsNamedIn) lines.push({ key: "fields", text: `- it gives only the fields named in "${fieldsNamedIn}"` })
-  if (/read only/.test(write)) lines.push({ key: "read only", text: "- it is read only" })
+  if (fieldsNamedIn) lines.push({ key: "fields", text: `it gives only the fields named in "${fieldsNamedIn}"` })
+  if (/read only/.test(write)) lines.push({ key: "read only", text: "it is read only" })
   return lines
 }
 
@@ -401,11 +400,11 @@ function typesInside(
         return [
           {
             key: `inside:${words}:${about.words}`,
-            text: `- its "${about.words}" is ${what}${storedAsFor(name, about)}${commentFor(about, collections)}`
+            text: `its "${about.words}" is ${what}${storedAsFor(name, about)}${commentFor(about, collections)}`
           }
         ]
       })
-      const header = `${articled(words).replace(words, `"${words}"`)} is a thing:`
+      const header = `${articled(words).replace(words, `"${words}"`)} is a thing`
       types.set(words, { collection, header, lines, isInside: true, insideFields: inside })
       add(collection, words, inside)
     }
@@ -455,12 +454,12 @@ function namedLinkTypes(
   return [
     {
       collection: shown[0]![0],
-      header: `${articled(words).replace(words, `"${words}"`)} is a thing:`,
+      header: `${articled(words).replace(words, `"${words}"`)} is a thing`,
       lines: [
-        { key: `inside:${words}:name`, text: `- its "name" is text` },
+        { key: `inside:${words}:name`, text: `its "name" is text` },
         {
           key: `inside:${words}:address`,
-          text: `- its "address" is text, stored as "url"  // never read:  its collection wasn't asked for`
+          text: `its "address" is text, stored as "url"  // never read:  its collection wasn't asked for`
         }
       ],
       isInside: true,
@@ -496,22 +495,22 @@ function typeLines(
   place: string,
   collections: Readonly<Record<string, CollectionDescription>>
 ): TypeLines {
-  const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `- it lives in ${place}` }]
+  const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `it lives in ${place}` }]
   const own = new Set(Object.values(collections).map(({ type }) => type))
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
     const what = typeWordsFor(about, collections, description.type, own, place)
-    const line = `- its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
+    const line = `its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
   // each list it keeps under this one, read from there:  `its "comments" is a list of comments`
   for (const [list] of listsUnderShown(description, collections)) {
     const words = collectionWords(collections[list]!)
-    lines.push({ key: `under:${collection}:${list}`, text: `- its "${words}" is a list of ${words}` })
+    lines.push({ key: `under:${collection}:${list}`, text: `its "${words}" is a list of ${words}` })
   }
   return {
     collection,
-    header: `${articled(description.type).replace(description.type, `"${description.type}"`)} is a thing:`,
+    header: `${articled(description.type).replace(description.type, `"${description.type}"`)} is a thing`,
     lines
   }
 }
@@ -650,6 +649,14 @@ export function placesIn(text: string): Array<{ name: string; address: string }>
 /** A place's line, as far as saying which it is:  in either language. */
 const PLACE_LINE = /^([^\s"/][^"\n]*?) (?:is|es) (?:an?|una?) [^"\n]+? (?:at|from|en|desde) "([^"\n]+)"/gm
 
+/**
+ * The same header line, a colon at its end or not:  an older look wrote `a "person" is a thing:`, today's
+ * `a "person" is a thing` (epic `language` P48).
+ */
+function sameHeader(line: string, header: string): boolean {
+  return line.replace(/:\s*$/, "") === header.replace(/:\s*$/, "")
+}
+
 /** The same address, whatever ends it. */
 function sameAddress(a: string, b: string): boolean {
   return a.replace(/\/+$/, "") === b.replace(/\/+$/, "")
@@ -692,13 +699,13 @@ export function mergedSpell(
   const merge: SpellMerge = { text, changed: [], couldnt: [] }
   const lines = text.split("\n")
   const own = new Set(allLines(before).map((line) => line.text))
-  const placeAt = lines.findIndex((line) => line === before.header)
+  const placeAt = lines.findIndex((line) => sameHeader(line, before.header))
   if (placeAt < 0) {
     merge.couldnt.push(`The place's line isn't as it was written, so nothing under it was changed:  ${before.header}`)
     return merge
   }
   // it moved:  `spell place update --address`
-  if (after.header !== before.header) {
+  if (!sameHeader(after.header, before.header)) {
     lines[placeAt] = after.header
     merge.changed.push(`Moved:  ${after.header}`)
   }
@@ -718,7 +725,7 @@ export function mergedSpell(
       )
       continue
     }
-    const blockAt = lines.findIndex((line) => line === was.header)
+    const blockAt = lines.findIndex((line) => sameHeader(line, was.header))
     if (blockAt < 0) {
       merge.couldnt.push(`"${was.header}" isn't in the file as it was written, so its lines weren't changed.`)
       continue
@@ -737,18 +744,18 @@ export function mergedSpell(
   return merge
 }
 
-/** A line under a place an older version wrote, naming a field the server spells differently:  `- a person's hair color is its "hair_color"`. */
-const OLD_FIELD_NAME_LINE = /^- an? .+?'s "?.+?"? is its "[^"]+"$/
+/** A line under a place an older version wrote, naming a field the server spells differently:  `a person's hair color is its "hair_color"`. */
+const OLD_FIELD_NAME_LINE = /^(?:- )?an? .+?'s "?.+?"? is its "[^"]+"$/
 
 /**
  * SIDE EFFECT:  each line the tool wrote last time (`written`), in words it no longer writes, put in today's (epic `data` P23):
- * - a field's line, `- its "height" is a number  // written as text there`:  today's line for those words, in its type
- * - a line under the place naming a field's spelling there, `- a person's hair color is its "hair_color"`:  gone, as the
+ * - a field's line, `its "height" is a number  // written as text there`:  today's line for those words, in its type
+ * - a line under the place naming a field's spelling there, `a person's hair color is its "hair_color"`:  gone, as the
  *   field finds it by its words now, or says `stored as` on its own line
  * - A line a person changed isn't one it wrote, so it's never touched.
  */
 function inTodaysWords(lines: string[], written: readonly string[], after: SpellParts, merge: SpellMerge): void {
-  const wrote = new Set(written.map((line) => line.trim()))
+  const wrote = new Set(written.map((line) => line.trim().replace(/^- /, "")))
   const today = new Set(allLines(after).map(({ text }) => text))
   const blocks = new Map<string, Map<string, string>>([[after.header, new Map()]])
   for (const type of after.types) {
@@ -761,10 +768,10 @@ function inTodaysWords(lines: string[], written: readonly string[], after: Spell
       block = blocks.get(line)
       continue
     }
-    const text = line.trim()
+    const text = line.trim().replace(/^- /, "")
     if (!block || !wrote.has(text) || today.has(text)) continue
     const now = block.get(wordsIn(text) ?? "")
-    if (now && /^- its "/.test(text)) {
+    if (now && /^(?:- )?its "/.test(text)) {
       // today's line may be in already, added at the block's end as new:  it takes the old one's place
       const added = otherInBlock(lines, at, `\t${now}`)
       lines[at] = `\t${now}`
@@ -853,13 +860,16 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf }: Block
 
 /** The words a line is about:  a property's, or what a source's name maps to. */
 function wordsIn(line: string): string | undefined {
-  return /^- (?:its|su) "([^"]+)" (?:is|es) /.exec(line)?.[1] ?? /^- an? .+?'s "?(.+?)"? is its "/.exec(line)?.[1]
+  return (
+    /^(?:- )?(?:its|su) "([^"]+)" (?:is|es) /.exec(line)?.[1] ?? /^(?:- )?an? .+?'s "?(.+?)"? is its "/.exec(line)?.[1]
+  )
 }
 
 /** Where `text` is, in the block starting here:  `-1` when it isn't. */
 function lineAt(lines: readonly string[], blockAt: number, text: string): number {
   const end = endOfBlock(lines, blockAt)
-  for (let at = blockAt + 1; at < end; at++) if (lines[at] === `\t${text}`) return at
+  // a line an older version bulleted, `- its "url" is text`, is the same line (epic `language` P46)
+  for (let at = blockAt + 1; at < end; at++) if (lines[at]!.replace(/^\t- /, "\t") === `\t${text}`) return at
   return -1
 }
 
@@ -887,29 +897,29 @@ function allLines({ header, placeLines, types }: SpellParts): SpellLine[] {
 }
 
 /**
- * `- it searches names and titles with "search"`:  what every collection that searches searches by, when they share a parameter.
+ * `it searches names and titles with "search"`:  what every collection that searches searches by, when they share a parameter.
  * - `undefined` when none does, or they don't agree on the parameter.
  * - One that searches all of each thing says so, and where (epic `data` P34):
- *   `- it searches everything with "q" at "/v1.1/search"`.
+ *   `it searches everything with "q" at "/v1.1/search"`.
  */
 function searchLineOf(every: readonly CollectionDescription[]): string | undefined {
   // all of each thing, at its own address:  `it searches everything with "q" at "/v1.1/search"`
   const everything = every.find(({ searchedBy }) => searchedBy?.searchesEverything)?.searchedBy
   if (everything)
-    return `- it searches everything with "${everything.param}"${everything.at ? ` at "${everything.at}"` : ""}`
+    return `it searches everything with "${everything.param}"${everything.at ? ` at "${everything.at}"` : ""}`
   const seen = every.flatMap(({ searchedBy, fields }) =>
     searchedBy ? [{ param: searchedBy.param, words: fields[searchedBy.field]?.words ?? searchedBy.field }] : []
   )
   const params = new Set(seen.map(({ param }) => param))
   if (!seen.length || params.size > 1) return undefined
   const words = [...new Set(seen.map(({ words }) => pluralWords(words)))]
-  return `- it searches ${words.join(" and ")} with "${[...params][0]}"`
+  return `it searches ${words.join(" and ")} with "${[...params][0]}"`
 }
 
 /**
  * Do the collections that search each search their own way, at addresses of their own (epic `data` P41)?
  * - GitHub's:  its users at `/search/users`, its repositories at `/search/repositories`.
- * - Then each says its own:  `- users are searched with "q" at "/search/users"`, searching all of each.
+ * - Then each says its own:  `users are searched with "q" at "/search/users"`, searching all of each.
  * - One search, or several asking their lists with one parameter (SWAPI's `?search=`):  the place's line, as before.
  */
 export function isSearchedApart(every: readonly CollectionDescription[]): boolean {
@@ -927,40 +937,4 @@ function searchAddressOf(description: CollectionDescription): string | undefined
 /** `words`, more than one:  `name` => `names`, `class` => `classes`. */
 function pluralWords(words: string): string {
   return /(?:s|x|z|ch|sh)$/.test(words) ? `${words}es` : `${words}s`
-}
-
-/**
- * Tag-shaped `text` as the plain Spell a merge reads (`mergedSpell()`), its lines as the tool writes them
- * (epic `language` P40):
- * - `SX.CodeSpellWriter`'s plain Spell, its `:` against the words, as written
- * - a type with nothing in it, with the `:` it was written with
- * - a description it put on a line of its own, `// an address` above `- its "url" is text`, back on the line's end,
- *   where it was written, when that's one of the lines in `written`
- * - `proseLines`:  which of its lines are prose between tags, for the way back (`SX.SpellxWriter`)
- */
-export function plainSpellOf(
-  text: string,
-  path: string,
-  written: Iterable<string>
-): { text: string; proseLines: Set<number> } {
-  const known = new Set(written)
-  const plain = SX.CodeSpellWriter.writeWithProse(text, { path })
-  const lines = plain.text.split("\n").map((line) => line.replace(/ :$/, ":"))
-  const out: string[] = []
-  const prose = new Set<number>()
-  for (let at = 0; at < lines.length; at++) {
-    const comment = lines[at]!.match(/^(\t*)\/\/ (.*)$/)
-    const next = lines[at + 1]
-    const joined = comment && next?.startsWith(comment[1]!) ? `${next.trim()}  // ${comment[2]}` : undefined
-    if (joined && known.has(joined)) {
-      out.push(`${comment![1]}${joined}`)
-      at++
-      continue
-    }
-    if (plain.proseLines.has(at)) prose.add(out.length)
-    // a type with nothing in it yet, written with its `:`
-    const line = lines[at]!
-    out.push(!known.has(line.trim()) && known.has(`${line.trim()}:`) ? `${line}:` : line)
-  }
-  return { text: out.join("\n"), proseLines: prose }
 }

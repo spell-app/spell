@@ -326,7 +326,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /** What the project knows of `file`, if it's a page alone in itself:  by its text, before it parses. */
   headFor(file: SP.SpellFile): P.FileHead | undefined {
     const parser = this.scope?.parser as SP.SpellParser | undefined
-    const reader = parser?.twinFor(file.language, file.form) ?? SP.SpellParser.spellxReaderFor(file.language, file.form)
+    const reader = parser?.twinFor(file.language, file.form) ?? SP.SpellParser.headReaderFor(file.language, file.form)
     return reader.aloneHead(file.parseText, file.path)
   }
 
@@ -364,7 +364,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * Parse our active spell files from scratch into `scope`, in order, and hand each file its result.
    * - Each by its own language's rules:  a file in another language than our scope's parser reads
-   *   parses with its twin (`SP.SpellParser.twinFor()`);  so does a spellx file, `Card.spell`.
+   *   parses with its twin (`SP.SpellParser.twinFor()`);  so does a page file.
    * - Other files, e.g. `.css`, parse themselves.
    */
   parseImports(): void {

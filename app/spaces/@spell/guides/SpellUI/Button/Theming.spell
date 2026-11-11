@@ -1,4 +1,4 @@
-<page "button theming" notebook>
+"button theming" is a notebook page
 	<header level="1">
 		Button
 		<header>A button indicates a possible user action.</>
@@ -70,4 +70,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

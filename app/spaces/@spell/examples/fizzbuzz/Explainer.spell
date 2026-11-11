@@ -1,45 +1,45 @@
 # The explainer
-A page about FizzBuzz:  its results, drawn as the counting sends them, then how it works and where it comes from.
-It's FizzBuzz's second listener, beside the console:  one algorithm, two listeners.
-- The counting fills this page and the console at once.
-- Turn it off (its import's `active`) and the example runs as a plain program, printing to the console.
+// A page about FizzBuzz:  its results, drawn as the counting sends them, then how it works and where it comes from.
+// It's FizzBuzz's second listener, beside the console:  one algorithm, two listeners.
+// - The counting fills this page and the console at once.
+// - Turn it off (its import's `active`) and the example runs as a plain program, printing to the console.
 
 ## A result
-One number the counting sent, and the word it got.
+// One number the counting sent, and the word it got.
 
-<thing "result">
-	<property "number" type="number"/>
-	<property "word" description="fizz, buzz or fizzbuzz;  empty for a plain number">text</>
-	<property "label" description="What its label says:  its word, or the number itself">
+a "result" is a thing
+	its "number" is a number
+	its "word" is text
+		// fizz, buzz or fizzbuzz;  empty for a plain number
+	its "label" is
+		// What its label says:  its word, or the number itself
 		the number as text if the word is ""
 		the word otherwise
-	</property>
-	<property "color" description="Fizz blue, buzz green, both purple">
+	its "color" is
+		// Fizz blue, buzz green, both purple
 		"purple" if the word is "fizzbuzz"
 		"blue" if the word is "fizz"
 		"green" if the word is "buzz"
 		"grey" otherwise
-	</property>
-</thing>
 
-<thing "tally" template="list of results" description="Every result so far, a label each, in a row that wraps">
-	<draw>
-		<for result in it as="stack" direction="horizontal" wrap spacing="xs">
+a "tally" is a list of results
+	// Every result so far, a label each, in a row that wraps
+	to draw it
+		for result in it
 			<label color={the color of the result} appearance="basic">{the label of the result}</label>
-		</for>
-	</draw>
-</thing>
+		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 ## The page
 
-<page "fizzbuzz explainer">
-	<property "tally">a new tally</>
-	<property "fizzes">the number of (results in the tally where its word is "fizz")</>
-	<property "buzzes">the number of (results in the tally where its word is "buzz")</>
-	<property "fizzbuzzes">the number of (results in the tally where its word is "fizzbuzz")</>
-	<property "plain numbers">the number of (results in the tally where its word is "")</>
+fizzbuzz explainer is a page
+	"tally" is a new tally
+	its "fizzes" is the number of (results in the tally where its word is "fizz")
+	its "buzzes" is the number of (results in the tally where its word is "buzz")
+	its "fizzbuzzes" is the number of (results in the tally where its word is "fizzbuzz")
+	its "plain numbers" is the number of (results in the tally where its word is "")
 
-	<draw description="The results first, a count of each word and a label per number, then how it works and its roots">
+	to draw it
+		// The results first, a count of each word and a label per number, then how it works and its roots
 		<container text>
 			<stack>
 				<header level="1">FizzBuzz</header>
@@ -53,7 +53,7 @@ One number the counting sent, and the word it got.
 					{draw the tally}
 				</section>
 				<section label="How it works">
-					<!-- prettier-ignore -->
+					// prettier-ignore
 					<markdown>
 					Count from 1 to 100, and say a word in place of some of the numbers:
 
@@ -71,7 +71,7 @@ One number the counting sent, and the word it got.
 					</markdown>
 				</section>
 				<section label="Where it comes from">
-					<!-- prettier-ignore -->
+					// prettier-ignore
 					<markdown>
 					FizzBuzz began as a children's counting game in Britain, played to practise division:
 					players count in turn, and anyone who says a number instead of "fizz" or "buzz" is out.
@@ -84,18 +84,19 @@ One number the counting sent, and the word it got.
 				</section>
 			</stack>
 		</container>
-	</draw>
-</page>
 
 ## Listening
-The page listens itself:  each event the counting sends becomes a result in its tally.
+// The page listens itself:  each event the counting sends becomes a result in its tally.
 
-<extend "fizzbuzz explainer">
-	<action "show (word as text) for (number as a number)" description="One result more in the tally">
+a fizzbuzz explainer
+	to show (word as text) for (number as a number)
+		// One result more in the tally
 		add (a new result with number = number, word = word) to its tally
-	</action>
-	<on fizzbuzz with number as a number>show "fizzbuzz" for number</on>
-	<on fizz with number as a number>show "fizz" for number</on>
-	<on buzz with number as a number>show "buzz" for number</on>
-	<on plain number with number as a number>show "" for number</on>
-</extend>
+	on fizzbuzz with number as a number
+		show "fizzbuzz" for number
+	on fizz with number as a number
+		show "fizz" for number
+	on buzz with number as a number
+		show "buzz" for number
+	on plain number with number as a number
+		show "" for number

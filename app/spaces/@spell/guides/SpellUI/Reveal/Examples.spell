@@ -1,4 +1,4 @@
-<page "reveal examples" notebook>
+"reveal examples" is a notebook page
 	<header level="1">
 		Reveal
 		<header>A reveal displays additional content in place of previous content when activated.</>
@@ -164,4 +164,3 @@
 			</example>
 		</>
 	</>
-</page>

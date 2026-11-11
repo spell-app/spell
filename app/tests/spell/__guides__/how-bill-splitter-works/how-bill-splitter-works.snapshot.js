@@ -118,14 +118,14 @@ core.heading("Try it")
 ////////////
 // - On the right, change People to 4:  Each drops to $17.70 as you type.
 // - Change the tip to 20:  Tip, Total and Each all follow.
-// Nothing in this file says "when the tip changes, redo the total":  the rules are always up to date.
+//   Nothing in this file says "when the tip changes, redo the total":  the rules are always up to date.
 // - Add a line of your own, under "each":
-
-// ```spellml
-// <property "tip each">the tip / the people</>
-// ```
-
-// Then show it on the page, the way "Tip" is shown.
+//
+//   ```spell
+//   its "tip each" is the tip / the people
+//   ```
+//
+//   Then show it on the page, the way "Tip" is shown.
 
 // Where next:  Bill Splitter, in the Examples, where each diner is a thing of their own,
 // with their own row, their own amount and their own share of the tip.

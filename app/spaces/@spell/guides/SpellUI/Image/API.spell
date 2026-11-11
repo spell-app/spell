@@ -1,4 +1,4 @@
-<page "image api" notebook>
+"image api" is a notebook page
 	<header level="1">
 		Image
 		<header>An image is a graphic representation of something.</>
@@ -49,4 +49,3 @@
 			<ui-docs-api family="ui-image" only="texts"></>
 		</>
 	</>
-</page>

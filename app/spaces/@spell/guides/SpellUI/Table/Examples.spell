@@ -1,4 +1,4 @@
-<page "table examples" notebook>
+"table examples" is a notebook page
 	<header level="1">
 		Table
 		<header>A table displays a collection of data grouped into rows.</>
@@ -2665,4 +2665,3 @@
 			</example>
 		</>
 	</>
-</page>

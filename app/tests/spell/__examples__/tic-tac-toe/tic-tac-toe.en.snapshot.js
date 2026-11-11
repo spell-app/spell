@@ -28,7 +28,7 @@ export const words = {
   },
   groups: {
     TicTacToe: [
-      { name: "playing", members: ["checkTheLineFromSquareAThroughBToC", "checkForAWinner", "draw", "startANewGame"] }
+      { name: "Playing", members: ["checkTheLineFromSquareAThroughBToC", "checkForAWinner", "draw", "startANewGame"] }
     ],
     Square: [
       { name: "Playing a square", members: ["board"] }

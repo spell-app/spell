@@ -40,14 +40,16 @@ const DISABLED_ATTRIBUTE = "disabled"
  *   - `<h3 in="header">` => `h("h3", { slot: "header" })`, in `SpellJSXAttribute`
  *   - each language's words, in its word rules `spell_jsx_tag` and `spell_jsx_attribute`:
  *     `SPELL_TAG_WORDS`, `SPELL_ATTRIBUTE_WORDS`
- * - In a spellx file, a BARE name is a component's (epic `elemental-spell` P7, Q46):  `componentTagFor()`.
+ * - A BARE name is a component's (epic `elemental-spell` P7, Q46;  in plain Spell too since epic `language` P45, Q4 A):
+ *   `componentTagFor()`.
  *   - `<card>`:  one of the project's own views, `<solitaire-card>`;  else `<button>`:  a pack's, `<ui-button>`.
  *   - A view's slots can be filled there, `<card><text slot="front">Ace</text></card>`, each named as it compiles
  *     (P27):  see `withSlotNames()`.
- *   - No native HTML (Q46, C1):  `<div>` is an error unless a pack has it.
- *   - Except in a `<spell>` chunk, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
+ *   - No native HTML in a page (Q46, C1):  `<div>` is an error unless a pack has it;
+ *     in plain Spell it's the web's own, as written.
+ *   - Except in a page.s `<spell>` or `<html>` block, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
  * - AN IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):
- *   `<text><if it is done>✓<otherwise>{its title}</></text>`, the same in code spell and spellx.
+ *   `<text><if it is done>✓<otherwise>{its title}</></text>`, the same in a page and in plain Spell.
  *   - Every branch stays on the page, each one's elements hidden while it isn't the one:  a flip keeps the element
  *     (its DOM node, its state and focus), and changes only its `hidden`.
  *     - The web's own elements and text:  `hidden="until-found"`, so find-in-page still reaches them.
@@ -58,7 +60,7 @@ const DISABLED_ATTRIBUTE = "disabled"
  *     `() => !c1 && c2 ? undefined : "until-found"`.
  *   - The tokenizer reads the chain (`P.Tokenizer.chainTags`):  each branch a `JSXElementToken` with its `chain`
  *     and `phrase`, its siblings the next branches, ONE closer, `</>` or `</if>`, ending the last.
- *   - At a drawing's top level an `<if>` picks what to return, rebuilt as it changes:  spellx's own tag line, or
+ *   - At a drawing's top level an `<if>` picks what to return, rebuilt as it changes:  a page.s own tag line, or
  *     code spell's `if` lines.  A chain branch standing alone, in no element, is an error saying so.
  * - NOTE: rule name is `jsxElement`, kept distinct from class name `SpellJSX` (pre-existing convention).
  */
@@ -77,7 +79,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (!match) return undefined
     if (match.matched.length !== 1) throw new TypeError("Can only handle a single JSXElement at a time!")
     const [element] = match.matched as [P.JSXElementToken | P.JSXFragmentToken]
-    // an `<html>` block inside a spellx drawing's markup:  its markup as written, drawn in its place (P18)
+    // an `<html>` block inside a page drawing's markup:  its markup as written, drawn in its place (P18)
     if (SpellJSX.isHtmlBlock(element)) {
       match.data.htmlBlock = true
       codeSpellDepth++
@@ -90,7 +92,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       }
       return match
     }
-    // in a spellx file's `<spell>` chunk, it and everything inside it is code spell (J83)
+    // in a page's `<spell>` block, it and everything inside it is code spell (J83)
     const codeSpell = codeSpellDepth > 0 || SP.isCodeSpell(element)
     if (codeSpell) codeSpellDepth++
     try {
@@ -107,9 +109,12 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     element: P.JSXElementToken | P.JSXFragmentToken,
     codeSpell: boolean
   ) {
-    // a spellx drawing's `<for ...>` inside an element:  read as on a line of its own, its children its body (I19)
-    const isSpellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx" && !codeSpell
-    if (isSpellx && element instanceof P.JSXElementToken && SpellJSX.isSpellxLoop(scope, element)) {
+    const isPage = (scope.parser as SP.SpellParser | undefined)?.form === "page" && !codeSpell
+    // a drawing's shortcuts, plain Spell's too (epic `language` P45, Q4 A):  bare names, a `<for>` in an element;
+    // never in a page's `<spell>` or `<html>` block, code spell as written (J83)
+    const takesShortcuts = !codeSpell
+    // a drawing's `<for ...>` inside an element:  read as on a line of its own, its children its body (I19)
+    if (takesShortcuts && element instanceof P.JSXElementToken && SpellJSX.isLoop(scope, element)) {
       return SpellJSX.parseLoop(scope, match, element)
     }
     // `Scope.parse()` only accepts a `string` for `text`, but we have actual `Token`s here:
@@ -122,24 +127,25 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (!(element instanceof P.JSXElementToken)) return match
     if (element.chain) return SpellJSX.parseBranch(scope, match, element)
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
-    // a spellx drawing names components by their bare names:  `<button>` => `<ui-button>`
-    if (isSpellx && !element.attributes?.length && !element.children?.length) {
+    // a drawing names components by their bare names:  `<button>` => `<ui-button>`
+    if (takesShortcuts && !element.attributes?.length && !element.children?.length) {
       match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
       if (match.data.loopItem) return match
     }
-    if (isSpellx && match.data.tagName === element.tagName) {
+    if (takesShortcuts && match.data.tagName === element.tagName) {
       const tag = SpellJSX.componentTagFor(scope, element.tagName)
       const view = tag ? scope.getType(SP.typeName(element.tagName)) : undefined
       // one of the project's own views:  its children may fill its slots (`withSlotNames()`)
       if (view?.isA("View")) match.data.view = view
       if (tag) match.data.tagName = tag
-      else if (isBareComponentName(element.tagName)) {
+      // a bare name nobody has:  an error in a page;  in plain Spell, the web's own element, `<div>`
+      else if (isPage && isBareComponentName(element.tagName)) {
         const language = SP.Language.of(scope)
         const packs = SP.ComponentPacks.searched(SpellJSX.packsFor(scope))
-        // a control or handler inside an element (`<segment><if ...>`):  spellx reads those on a drawing's own lines
-        const message = SpellJSX.isSpellxPhraseWord(language, element.tagName)
-          ? language.parserMessage("spellx-tag-in-markup", { tag: element.tagName })
-          : language.parserMessage("spellx-unknown-component", { tag: element.tagName, packs })
+        // a control inside an element (`<segment><otherwise>`):  a page reads those on a drawing's own lines
+        const message = SpellJSX.isControlWord(language, element.tagName)
+          ? language.parserMessage("page-tag-in-markup", { tag: element.tagName })
+          : language.parserMessage("page-unknown-component", { tag: element.tagName, packs })
         match.data.error = SP.spellParser.createParseError(scope, [element], message)
         // still drawn, by the name it has:  a pack that isn't loaded here may have it
         match.data.error.data.drawnAnyway = true
@@ -296,14 +302,14 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
-   * Is `element` an `<html>` block inside a spellx drawing's markup (epic `elemental-spell` P18)?
+   * Is `element` an `<html>` block inside a page drawing's markup (epic `elemental-spell` P18)?
    * - `<section label="Image"><html><ui-avatar><img src="..."/></ui-avatar></html></section>`
    * - Its markup is the web's, as written:  `<img>`, `<span>`, `<ui-avatar>`, never a pack's bare name;  it draws in
    *   the block's place, the `<html>` tag itself drawing nothing.
-   * - A block on a drawing's own lines is the tokenizer's (`SP.SpellxTokenizer`, `unwrapsHtml`):
+   * - A block on a drawing's own lines is the tokenizer's (`SP.PageTokenizer`, `unwrapsHtml`):
    *   this is the one an element holds, which the tokenizer reads as that element's markup.
    * - The same in a `.spell` file, where its twin keeps it:  so the two compile the same.
-   * - Not in a spellx file's `<spell>` chunk, nor inside another block:  there `<html>` is the web's own tag.
+   * - Not in a page's `<spell>` block, nor inside another block:  there `<html>` is the web's own tag.
    */
   static isHtmlBlock(element: P.JSXElementToken | P.JSXFragmentToken): boolean {
     if (!(element instanceof P.JSXElementToken) || element.tagName !== HTML_BLOCK_TAG) return false
@@ -311,7 +317,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
-   * The tag of the component a spellx drawing names by bare `word` (`<button>`, `<card>`):
+   * The tag of the component a drawing names by bare `word` (`<button>`, `<card>`):
    * - the project's own view of that name first:  `card` => `solitaire-card`, as its element is named
    * - else the first of the project's packs that has it (`SP.ComponentPacks`):  `button` => `ui-button`,
    *   `botón` in a Spanish file => `es-boton`
@@ -330,35 +336,36 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
-   * Does `word` start one of spellx's control or handler tags in `language` (`if`, `otherwise`, `for`, `on` ...)?
+   * Does `word` start one of a page's control tags in `language` (`if`, `otherwise`, `for` ...)?
    * - Those are read on a drawing's own lines;  inside an element they'd be taken for components (C29).
    */
-  static isSpellxPhraseWord(language: SP.Language, word: string): boolean {
-    const spellx = language.words.spellx
-    const phrases = [...Object.keys(spellx?.controls ?? {}), ...Object.keys(spellx?.handlers ?? {})]
-    return phrases.some((phrase) => phrase.split(" ")[0] === word)
+  static isControlWord(language: SP.Language, word: string): boolean {
+    const controls = (language.words.page ?? SP.Language.default.words.page!).controls
+    return Object.keys(controls).some((phrase) => phrase.split(" ")[0] === word)
   }
 
   ////////////////
   // ## A `<for>` inside an element
   ////////////////
 
-  /** Is `element` spellx's `<for ...>`, its word the language's (`<for>`, `<para>`)? */
-  private static isSpellxLoop(scope: P.Scope, element: P.JSXElementToken): boolean {
-    const controls = SP.Language.of(scope).words.spellx?.controls ?? {}
+  /** Is `element` a `<for ...>`, its word the language's (`<for>`, `<para>`)? */
+  private static isLoop(scope: P.Scope, element: P.JSXElementToken): boolean {
+    const controls = (SP.Language.of(scope).words.page ?? SP.Language.default.words.page!).controls
     return controls[element.tagName.toLowerCase()] === "for each"
   }
 
   /**
-   * A `<for ...>` inside a spellx drawing's element (epic `language` I19):  `<cards>` holding a card, then a card each.
-   * - Its text is read again as a drawing's lines (`SpellxTokenizer.tokenizeDrawingLines()`), then parsed as they'd be
+   * A `<for ...>` inside a drawing's element (epic `language` I19):  `<cards>` holding a card, then a card each.
+   * - Its text is read again as a drawing's lines (`PageTokenizer.tokenizeDrawingLines()`), then parsed as they'd be
    *   on a line of their own:  its attributes riders, its `<empty>`, its children what it draws for each item.
    * - Its tokens are placed where its text sits in the file, so errors point at it.
    * - Its errors are its element's:  `parseErrorsIn()` reports them.
    */
   private static parseLoop(scope: P.Scope, match: P.MatchFor<SpellJSX>, element: P.JSXElementToken) {
     const parser = scope.parser as SP.SpellParser
-    const tokenizer = parser.tokenizer as SP.SpellxTokenizer
+    // a plain file's drawing reads it as a page does (epic `language` P45):  through its page-form twin
+    const reader = parser.form === "page" ? parser : parser.twinFor(SP.Language.of(scope), "page")
+    const tokenizer = reader.tokenizer as SP.PageTokenizer
     const { raw = "", start, line = 0, ch = 0 } = element.record
     // its first line indented as it is in the file, the same way its later lines are
     const indent = /\n( ?)/.exec(raw)?.[1] ? " " : "\t"
@@ -369,21 +376,22 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     })
     let block: P.BlockToken | undefined = blocks[0]
     while (block?.tokens.length === 1 && block.tokens[0] instanceof P.BlockToken) block = block.tokens[0]
-    match.data.loop = block && parser.parse([block], "block", scope)
+    match.data.loop = block && reader.parse([block], "block", scope)
     if (!match.data.loop) match.data.error = parser.parse([element], "parse_error", scope)
     return match
   }
 
   /**
-   * What a `<for>` inside an element draws, as one of its children:  `core.drawEach(...)`, or `core.drawRead(...)`
-   * with its riders -- gathered as a drawing's lines are (`DrawnLines`), in a `{...}` so it follows what it reads.
+   * What a `<for>` draws:  `core.drawEach(...)`, or `core.drawRead(...)` with its riders --
+   * gathered as a drawing's lines are (`DrawnLines`).
+   * - The value itself, so a `<for>` on a drawing's own line is the loop, as `for` lines are (epic `language` I73).
+   * - Inside an element, `childAST()` puts it in a `{...}`, so it follows what it reads.
    */
   private static loopAST(match: P.MatchFor<SpellJSX>, loop: P.Match): P.ASTExpression {
     const statements = (loop.AST as P.ASTStatementGroup | undefined)?.statements ?? []
     const gathered = DrawnLines.gather(statements as never) as P.ASTNode[]
     const drawing = gathered.filter((line): line is P.ASTReturnStatement => line instanceof P.ASTReturnStatement).at(-1)
-    const value = drawing?.value ?? new P.ASTNothingLiteral(match)
-    return new P.ASTJSXExpression(match, { expression: value as P.ASTExpression })
+    return (drawing?.value as P.ASTExpression | undefined) ?? new P.ASTNothingLiteral(match)
   }
 
   /** The packs `scope`'s project draws with:  its project file's `packs`, else `SP.ComponentPacks.DEFAULT`. */
@@ -421,13 +429,22 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         asts.push(...SpellJSX.hiddenUnless(child, shown, this.childASTs(child as P.MatchFor<this>)))
         continue
       }
-      const ast = P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST)
-      // `<film/>`, a loop's item beside other markup:  `draw the film`, in braces (epic `atmosphere` T48)
-      if (ast && child?.is(SpellJSX) && child.data.loopItem)
-        asts.push(new P.ASTJSXExpression(child, { expression: ast as unknown as P.ASTExpression }))
-      else if (ast) asts.push(ast)
+      const ast = SpellJSX.childAST(child)
+      if (ast) asts.push(ast)
     }
     return asts
+  }
+
+  /**
+   * `child`'s AST, as one of an element's children.
+   * - A value that isn't markup goes in braces:  a `<for>`'s loop (I19, I73), and `<film/>`, a loop's item beside
+   *   other markup, `draw the film` (epic `atmosphere` T48).
+   */
+  static childAST(child: P.Match | undefined): P.ASTJSXElementProps["children"][number] | undefined {
+    const ast = P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST)
+    if (ast && child?.is(SpellJSX) && (child.data.loopItem || child.data.loop))
+      return new P.ASTJSXExpression(child, { expression: ast as unknown as P.ASTExpression })
+    return ast
   }
 
   ////////////////
@@ -473,7 +490,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       else if (!open) {
         const language = SP.Language.of(scope)
         const token = child.matched[0] as P.JSXElementToken
-        const message = language.parserMessage("spellx-otherwise-without-if", {
+        const message = language.parserMessage("page-otherwise-without-if", {
           tag: `<${token.tagName}>`,
           if: SpellJSX.chainWord(language, "if")
         })
@@ -485,7 +502,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /** `language`'s first word for a chain branch of `kind`, e.g. `if`, Spanish `si`. */
   private static chainWord(language: SP.Language, kind: P.JSXChainKind): string {
-    const controls: Record<string, string> = language.words.spellx?.controls ?? {}
+    const controls: Record<string, string> = (language.words.page ?? SP.Language.default.words.page!).controls
     return Object.keys(controls).find((word) => controls[word] === kind) ?? kind
   }
 
@@ -592,7 +609,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 }
 
 /**
- * How many elements being parsed are code spell, outermost first:  > 0 inside a spellx file's `<spell>` chunk.
+ * How many elements being parsed are code spell, outermost first:  > 0 inside a page's `<spell>` or `<html>` block.
  * - An element's `{...}` is tokenized as it parses, so its elements aren't noted (`SP.markCodeSpell()`):
  *   they're read as their outer element is.
  */

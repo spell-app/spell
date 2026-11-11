@@ -58,7 +58,7 @@ describe.skipIf(!SERVING)("a type's property editor in its own file", () => {
     browser = await chromium.launch()
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
     // saves answered here:  the example on disk never changes
-    await context.route(/\/api\/projects\/file\/|\.(spellml|spell)(\?.*)?$/, (route) =>
+    await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) =>
       route.request().method() === "GET"
         ? route.continue()
         : route.fulfill({ status: 200, contentType: "application/json", body: "{}" })

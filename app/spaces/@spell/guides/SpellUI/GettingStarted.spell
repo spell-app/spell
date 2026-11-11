@@ -1,4 +1,4 @@
-<page "getting started" notebook>
+"getting started" is a notebook page
 	<header level="1">
 		Getting started
 		<header>Install the package, load the components, and use them from any framework.</>
@@ -174,4 +174,3 @@
 			lists what changed.
 		</>
 	</>
-</page>

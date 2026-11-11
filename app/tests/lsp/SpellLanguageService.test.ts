@@ -26,7 +26,7 @@ import { fixtureFolder, lineOf } from "spell/app/spaces/test"
  * in CODE spell (`copySolitaireAsCodeSpell()`),
  * so edits and `project.json` syncing never touch the repo, and its `@local/<folder>` project is ours alone.
  * - Code spell, as the editor's features here are code spell's:  appending a line, comments, formatting, quick fixes.
- *   The example itself is spellx;  its code-spell twin, the same program, is the spellx pair test's fixture.
+ *   A frozen copy of the example in the outline form, `tests/lsp/__solitaire__/`:  the example itself changes.
  * - The card, deck and piles are outlines;  Solitaire's play, `to play a card`, is a sentence.
  * - Lines are 1-based, as an editor shows them.
  * - The tests name a line of the example by what it says (`lineOf()`, `at()`), never by its number:
@@ -331,6 +331,25 @@ describe("SpellLanguageService", () => {
       })
     })
 
+    test("a head line's own words are keywords:  with title, icon, shortcut, undoable, starting at (epic `language` T105)", async () => {
+      const added = [
+        '\t- to "flip it" with title "Flip", icon "card", shortcut "meta+F", undoable:',
+        "\t\tset its rank to king",
+        '\t- its "flips" is a number starting at 0'
+      ]
+      await withCardText(`${cardText.trimEnd()}\n${added.join("\n")}\n`, () => {
+        const text = card.parseText
+        const from = text.indexOf(added[0]!)
+        const kinds = service
+          .highlightSpans(card)
+          .filter((span) => span.start >= from)
+          .map((span) => `${text.slice(span.start, span.end)}:${span.kind}`)
+        for (const word of ["with", "title", "icon", "shortcut", "undoable", "starting", "at"])
+          expect(kinds, word).toContain(`${word}:keyword`)
+        expect(errorsIn(service, card)).toEqual([])
+      })
+    })
+
     test("markdown in a comment:  bold / italic / link modifiers, code spans as strings", async () => {
       //                     0123456789012345678901234567890
       await withCardText(`// a **b** *c* \`d\` [e](f)\n${cardText}`, () => {
@@ -589,10 +608,11 @@ describe("SpellLanguageService", () => {
         await typed("set y t", (items) => expect(labels(items)).toContain("to"))
       })
 
-      test("`a thingy is a ` => types, and ONLY types", async () => {
+      test("`a thingy is a ` => types, else only an ability before one, or `list` and `viewable` (epic `language` P48)", async () => {
         await typed("a thingy is a ", (items) => {
           expect(labels(items)).toEqual(expect.arrayContaining(["card", "deck", "pile"]))
-          expect(items.every(({ kind }) => kind === CompletionItemKind.Class)).toBe(true)
+          const others = items.filter(({ kind }) => kind !== CompletionItemKind.Class).map(({ label }) => label)
+          expect(others.sort()).toEqual(["clickable", "draggable", "droppable", "list", "selectable", "viewable"])
         })
       })
 
@@ -997,17 +1017,6 @@ describe("SpellLanguageService", () => {
     expect(compiled).not.toContain("SPELL: DECLARES")
   })
 
-  // epic `elemental-spell` J95:  the other form is a view, never a second file
-  test("custom requests:  Show as Spellx, a .spell file written as spellx;  one that can't be says why", () => {
-    const spellx = service.compiled(card, "spellx")
-    expect(spellx).toMatch(/^<view "card"/m)
-    expect(spellx).toContain('\t<property "suit"')
-    const unparsed = Object.create(card, { match: { value: undefined } }) as SP.SpellFile
-    expect(service.compiled(unparsed, "spellx")).toBe(
-      "// Card.spell couldn't be written as spellx:  SpellxWriter.textOf():  Card.spell hasn't been parsed;  parse it first"
-    )
-  })
-
   test("custom requests:  a file that can't be compiled says why, naming its target", () => {
     const unparsed = Object.create(card, { match: { value: undefined } }) as SP.SpellFile
     expect(service.compiled(unparsed, "ts")).toBe("// Card.spell hasn't been parsed")
@@ -1333,11 +1342,11 @@ function describeSymbol({ name, kind, children }: DocumentSymbol): string {
   return `${name} (${kindName ?? kind})${nested}`
 }
 
-/** Solitaire's code-spell twin:  the spellx pair test's fixture, the same program as the example. */
-const SOLITAIRE_CODE_SPELL = resolve(environment.repoDir, "tests", "spell", "__spell__", "Solitaire")
+/** Solitaire in the outline form, frozen for these tests:  the same program as the example once was. */
+const SOLITAIRE_CODE_SPELL = resolve(environment.repoDir, "tests", "lsp", "__solitaire__")
 
 /**
- * Write the Solitaire example into `dir` as CODE spell:  its twin's `.spell` files, its styles,
+ * Write the Solitaire example into `dir` as CODE spell:  the frozen copy's `.spell` files, the example's styles,
  * and a project file listing them, in the example's order.
  * - SIDE EFFECT:  makes `dir`.
  */

@@ -3,8 +3,8 @@ import { describe, expect, test } from "vite-plus/test"
 import { SiteBoard } from "spell/app/app/pages/SiteBoard"
 import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 
-/** A site in spellx:  `lines`, indented as written, between its opening and closing tags. */
-const site = (...lines: string[]) => ['<spell-site "galaxy guide">', ...lines, "</>", ""].join("\n")
+/** A site in plain Spell:  `lines`, indented as written, under its head. */
+const site = (...lines: string[]) => ["galaxy guide is a site:", ...lines, ""].join("\n")
 
 /** The board of `text`. */
 const boardOf = (text: string) => SiteBoard.sectionsOf(SiteEdits.partsIn(text)!)
@@ -17,15 +17,13 @@ const placesIn = (text: string, section: number) =>
 const order = (text: string) => SiteEdits.allParts(SiteEdits.partsIn(text)!).map((part) => part.name)
 
 const FILMS = site(
-  '\t<page "films page" address="/films" color="blue">',
-  '\t\t<page "film page" address="/films/1" row="1" column="2"/>',
-  '\t\t<dialog "review dialog" row="1" column="3"/>',
-  '\t\t<page "crew page" address="/films/crew" row="2" column="2"/>',
-  "\t</>",
-  '\t<page "planets page" address="/planets" color="teal">',
-  '\t\t<page "planet page" address="/planets/1" row="1" column="2"/>',
-  "\t</>",
-  '\t<page "not found page"/>'
+  '\tit has a films page at "/films", colored blue',
+  '\t\tit has a film page at "/films/1", in row 1 column 2',
+  "\t\tit has a review dialog, in row 1 column 3",
+  '\t\tit has a crew page at "/films/crew", in row 2 column 2',
+  '\tit has a planets page at "/planets", colored teal',
+  '\t\tit has a planet page at "/planets/1", in row 1 column 2',
+  "\tit has a not found page"
 )
 
 describe("SiteBoard:  sections and cards", () => {
@@ -45,30 +43,27 @@ describe("SiteBoard:  sections and cards", () => {
 
   test("with no places:  cards follow each other, a page with pages starts a line, nothing is coloured", () => {
     const text = site(
-      '\t<page "films page" address="/films">',
-      '\t\t<page "one page" address="/one"/>',
-      '\t\t<page "two page" address="/two">',
-      '\t\t\t<page "three page" address="/three"/>',
-      "\t\t</>",
-      "\t</>"
+      '\tit has a films page at "/films"',
+      '\t\tit has a one page at "/one"',
+      '\t\tit has a two page at "/two"',
+      '\t\t\tit has a three page at "/three"'
     )
     expect(placesIn(text, 0)).toEqual(["films page 1:1", "one page 1:2", "two page 2:2", "three page 2:3"])
     expect(boardOf(text)[0]!.cards.every((card) => card.color === undefined)).toBe(true)
   })
 
   test("a line of cards with no places wraps at eight columns", () => {
-    const pages = Array.from({ length: 9 }, (_, index) => `\t\t<page "p${index} page" address="/p${index}"/>`)
-    const text = site('\t<page "films page" address="/films">', ...pages, "\t</>")
+    const pages = Array.from({ length: 9 }, (_, index) => `\t\tit has a p${index} page at "/p${index}"`)
+    const text = site('\tit has a films page at "/films"', ...pages)
     expect(placesIn(text, 0).at(-3)).toBe("p6 page 1:8")
     expect(placesIn(text, 0).at(-2)).toBe("p7 page 2:2")
   })
 
   test("a place another card took goes to the next free one", () => {
     const text = site(
-      '\t<page "films page" address="/films">',
-      '\t\t<page "one page" address="/one" row="1" column="2"/>',
-      '\t\t<page "two page" address="/two" row="1" column="2"/>',
-      "\t</>"
+      '\tit has a films page at "/films"',
+      '\t\tit has a one page at "/one", in row 1 column 2',
+      '\t\tit has a two page at "/two", in row 1 column 2'
     )
     expect(placesIn(text, 0)).toEqual(["films page 1:1", "one page 1:2", "two page 1:3"])
   })
@@ -118,19 +113,19 @@ describe("SiteBoard:  moving a card", () => {
     expect(placesIn(after, 1)).toEqual(["planets page 1:1", "film page 1:2", "planet page 1:3"])
   })
 
-  test("the last page out leaves its section closing on its own line", () => {
+  test("the last page out leaves its section's card on its own, its line as it was", () => {
     const after = SiteBoard.withCardDropped(FILMS, "planet page", { section: "films page", row: 3, column: 2 })
-    expect(after).toContain('<page "planets page" address="/planets" color="teal"/>')
+    expect(after).toContain('\tit has a planets page at "/planets", colored teal\n')
+    expect(SiteEdits.partNamed(after, "planets page").parts).toEqual([])
+    expect(placesIn(after, 1)).toEqual(["planets page 1:1"])
   })
 
   test("a page with pages goes with them", () => {
     const text = site(
-      '\t<page "films page" address="/films">',
-      '\t\t<page "one page" address="/one">',
-      '\t\t\t<page "two page" address="/two"/>',
-      "\t\t</>",
-      "\t</>",
-      '\t<page "planets page" address="/planets"/>'
+      '\tit has a films page at "/films"',
+      '\t\tit has a one page at "/one"',
+      '\t\t\tit has a two page at "/two"',
+      '\tit has a planets page at "/planets"'
     )
     const after = SiteBoard.withCardDropped(text, "one page", { section: "planets page", row: 1, column: 2 })
     expect(order(after)).toEqual(["films page", "planets page", "one page", "two page"])
@@ -168,46 +163,27 @@ describe("SiteBoard:  moving a card", () => {
 })
 
 describe("SiteEdits:  a card's place and colour", () => {
-  test("spellx:  read, and kept through a change", () => {
-    const part = SiteEdits.partNamed(FILMS, "film page")
-    expect([part.row, part.column]).toEqual([1, 2])
-    expect(SiteEdits.partNamed(FILMS, "films page").color).toBe("blue")
-    const after = SiteEdits.withPartChanged(FILMS, "film page", { title: "Film" })
-    expect(after).toContain('<page "film page" address="/films/1" row="1" column="2" title="Film"/>')
-  })
-
-  test("code spell:  read, written and kept", () => {
-    const text = [
-      "galaxy guide is a site:",
-      '\t- it has a films page at "/films", named "Films", colored blue',
-      '\t\t- it has a film page at "/films/1", in row 2 column 3',
-      "\t\t- it has a review dialog, in row 1 column 2",
-      ""
-    ].join("\n")
+  test("read, written, changed and taken out;  kept through another change", () => {
+    const text = site(
+      '\tit has a films page at "/films", named "Films", colored blue',
+      '\t\tit has a film page at "/films/1", in row 2 column 3',
+      "\t\tit has a review dialog, in row 1 column 2"
+    )
     expect(SiteEdits.partNamed(text, "films page").color).toBe("blue")
     expect(SiteEdits.partNamed(text, "film page").column).toBe(3)
     expect(SiteEdits.partNamed(text, "review dialog").row).toBe(1)
     const placed = SiteEdits.withPartPlaced(text, "review dialog", { row: 4, column: 5 })
-    expect(placed).toContain("\t\t- it has a review dialog, in row 4 column 5\n")
+    expect(placed).toContain("\t\tit has a review dialog, in row 4 column 5\n")
     const changed = SiteEdits.withPartChanged(text, "films page", { title: "All films" })
     expect(changed).toContain('at "/films", named "All films", colored blue\n')
-    expect(SiteEdits.withPartPlaced(text, "film page", undefined)).toContain('\t\t- it has a film page at "/films/1"\n')
-  })
-
-  test("spellx:  a place written, changed and taken out", () => {
-    const placed = SiteEdits.withPartPlaced(FILMS, "crew page", { row: 5, column: 6 })
-    expect(placed).toContain('<page "crew page" address="/films/crew" row="5" column="6"/>')
-    expect(SiteEdits.withPartPlaced(FILMS, "crew page", undefined)).toContain(
-      '<page "crew page" address="/films/crew"/>'
+    expect(SiteEdits.withPartChanged(text, "film page", { title: "Film" })).toContain(
+      '\t\tit has a film page at "/films/1", named "Film", in row 2 column 3\n'
     )
+    expect(SiteEdits.withPartPlaced(text, "film page", undefined)).toContain('\t\tit has a film page at "/films/1"\n')
   })
 
   test("a dialog can go under a page, a not found page can't", () => {
-    const text = site(
-      '\t<page "films page" address="/films"/>',
-      '\t<dialog "review dialog"/>',
-      '\t<page "not found page"/>'
-    )
+    const text = site('\tit has a films page at "/films"', "\tit has a review dialog", "\tit has a not found page")
     const moved = SiteEdits.withPartMoved(text, "review dialog", { where: "into", part: "films page" })
     expect(SiteEdits.partNamed(moved, "films page").parts[0]!.name).toBe("review dialog")
     expect(() => SiteEdits.withPartMoved(text, "not found page", { where: "into", part: "films page" })).toThrow(

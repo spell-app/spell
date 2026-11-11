@@ -6,15 +6,16 @@ import { CodeThemes } from "spell/app/app/ui/monaco/themes/CodeThemes"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
 import { SpellHeadings } from "./SpellHeadings"
+import { SpellBubbly } from "./SpellBubbly"
 import { SpellTokensProvider } from "./SpellTokensProvider"
 import { SpellModels } from "./SpellModels"
 import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
 
 /**
- * Spell in Monaco:  the `spell` and `spellx` languages and their features, and the options every `<MonacoEditor>`
+ * Spell in Monaco:  the `spell` and `spell-page` languages and their features, and the options every `<MonacoEditor>`
  * starts with.
- * - Two languages, one per form of spell, since each colours its lines with its own tokenizer (`SpellTokensProvider`):
- *   plain Spell, and spellx, its tag-shaped form, each file picked by what it says (`SP.formOfText()`).
+ * - Two languages, one per form of a spell file, since each colours its lines with its own tokenizer
+ *   (`SpellTokensProvider`):  plain Spell, and a page file, each file picked by what it says (`SP.formOfText()`).
  *   Everything else -- editing, the language features, headings -- is the same for both.
  * - `register()` once, before the first editor -- `<MonacoEditor>` and `models` both do.
  * - Language features come from `LSP.SpellLanguageService`, in-process -- see `SpellLanguageFeatures`.
@@ -23,16 +24,17 @@ import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
  * - The code's colours are the page's theme's, light or dark as the page is:  `CodeThemes`, which `register()`
  *   starts (epic `debut` P22).
  * - Heading comments -- `#`, `##` ... -- are bold by decoration:  see `SpellHeadings`.
+ * - Spell is drawn in the bubbly look as it's typed, unless the page's setting says not:  see `SpellBubbly`.
  */
 export class SpellMonaco {
   /** Language id for code spell, `Card.spell`. */
   static LANGUAGE = "spell"
 
-  /** Language id for spellx, spell's tag-shaped form, `Card.spell`. */
-  static SPELLX_LANGUAGE = "spellx"
+  /** Language id for a page file, `"button api" is a notebook page` (epic `language` P47):  `Button/API.spell`. */
+  static PAGE_LANGUAGE = "spell-page"
 
   /** Both of spell's languages:  what its features and headings are for. */
-  static LANGUAGES = [SpellMonaco.LANGUAGE, SpellMonaco.SPELLX_LANGUAGE]
+  static LANGUAGES = [SpellMonaco.LANGUAGE, SpellMonaco.PAGE_LANGUAGE]
 
   /**
    * Editor options every `<MonacoEditor>` starts with.
@@ -136,25 +138,22 @@ export class SpellMonaco {
     return SpellMonaco.register().models
   }
 
-  /** Register the `spell` and `spellx` languages and their features with Monaco, if we haven't yet. */
+  /** Register the `spell` and `spell-page` languages and their features with Monaco, if we haven't yet. */
   static register(): SpellMonacoParts {
     if (SpellMonaco.#registered) return SpellMonaco.#registered
-    const { LANGUAGE, SPELLX_LANGUAGE, LANGUAGES } = SpellMonaco
+    const { LANGUAGE, PAGE_LANGUAGE, LANGUAGES } = SpellMonaco
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
+    SpellBubbly.watch(LANGUAGES)
     monaco.languages.register({
       id: LANGUAGE,
       extensions: [SP.SPELL_SUFFIX],
       mimetypes: ["text/spell", "text/x-spell"]
     })
-    monaco.languages.register({
-      id: SPELLX_LANGUAGE,
-      extensions: [...SP.SPELLML_SUFFIXES],
-      mimetypes: ["text/x-spellx"]
-    })
+    monaco.languages.register({ id: PAGE_LANGUAGE, mimetypes: ["text/x-spell-page"] })
     const colourEach = () => {
       monaco.languages.setTokensProvider(LANGUAGE, new SpellTokensProvider())
-      monaco.languages.setTokensProvider(SPELLX_LANGUAGE, SpellTokensProvider.forSpellx())
+      monaco.languages.setTokensProvider(PAGE_LANGUAGE, SpellTokensProvider.forPages())
     }
     for (const language of LANGUAGES) monaco.languages.setLanguageConfiguration(language, SpellMonaco.CONFIGURATION)
     colourEach()
@@ -187,7 +186,7 @@ export class SpellMonaco {
   static languageForPath(path: string | undefined, text?: string): string {
     const extension = path?.match(/\.[^./]+$/)?.[0]
     if (SP.isSpellSourceName(extension)) {
-      return SP.formOfText(text, extension) === "spellx" ? SpellMonaco.SPELLX_LANGUAGE : SpellMonaco.LANGUAGE
+      return SP.formOfText(text) === "page" ? SpellMonaco.PAGE_LANGUAGE : SpellMonaco.LANGUAGE
     }
     if (extension === ".js" || extension === ".jsx") return "javascript"
     if (extension === ".css") return "css"

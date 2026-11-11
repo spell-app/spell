@@ -1,4 +1,4 @@
-<page "form api" notebook>
+"form api" is a notebook page
 	<header level="1">
 		Form
 		<header>A form displays a set of related user input fields in a structured way.</>
@@ -64,4 +64,3 @@
 			<ui-docs-api family="ui-form" only="texts"></>
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "comment examples" notebook>
+"comment examples" is a notebook page
 	<header level="1">
 		Comment
 		<header>A comment displays user feedback to site content.</>
@@ -651,4 +651,3 @@
 			</example>
 		</>
 	</>
-</page>

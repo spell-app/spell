@@ -388,9 +388,6 @@ function DraftEditorFrame(): JSX.Element {
  * Debug's panel under the code:  one pane of tabs (`<RunnerPane>`), as VS Code's runner panel has.
  * - Output:  what the program logged, and how compiling and running it went (`<ConsoleViewer>`).
  * - JavaScript:  the compiled code (`<OutputRoot>`);  TypeScript and Python:  the project as those targets write it.
- * - The file's other form, a read-only view (epic `elemental-spell` J95:  a template lives in ONE file):
- *   - Code Spell, on a `.spell` file:  the code spell it means (`SX.CodeSpellWriter`;  P8)
- *   - Spellx, on a `.spell` file:  it written as spellx (`SX.SpellxWriter`)
  * - Sentence:  the spell tree of the cursor's line (`<TreeRoot>`).
  * - Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), its search in this header.
  * - At the right, whatever tab shows:  Clear Console, on Output only, the Reference's search, and Close (`onClose`).
@@ -402,12 +399,10 @@ export function ProgramPanel(props: { onClose: () => void }) {
   const remembered = editorPrefs.get(TAB_PREF) as ProgramTabId
   const [filter, setFilter] = createSignal("")
   const [tab, setTab] = createSignal<ProgramTabId>(PROGRAM_TABS.includes(remembered) ? remembered : "output")
-  // which form the file is in:  its other form is the `spell` tab's view
-  const form = tracked(() => (editor.file instanceof SP.SpellFile ? editor.file.form : undefined))
   return (
     <RunnerPane
       class="ProgramPanel"
-      tabs={PROGRAM_TABS.map((id) => tabFor(id, form()))}
+      tabs={PROGRAM_TABS.map(tabFor)}
       pane={tab()}
       onPane={showTab}
       tools={
@@ -448,12 +443,6 @@ export function ProgramPanel(props: { onClose: () => void }) {
         </Match>
         <Match when={tab() === "python"}>
           <OutputEditor showError={editor.showError} target="py" />
-        </Match>
-        <Match when={tab() === "spell" && form() === "spellx"}>
-          <OutputEditor showError={editor.showError} target="spell" />
-        </Match>
-        <Match when={tab() === "spell"}>
-          <OutputEditor showError={editor.showError} target="spellx" />
         </Match>
         <Match when={tab() === "tree"}>
           <TreeRoot showToolbar={false} />
@@ -518,8 +507,8 @@ function appGrows(hidesCode: boolean): string {
   return hidesCode ? "first" : "2"
 }
 
-/** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
-const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree", "reference"] as const
+/** Tabs of `<ProgramPanel>`, in order. */
+const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "tree", "reference"] as const
 /** One of `<ProgramPanel>`'s tabs. */
 type ProgramTabId = (typeof PROGRAM_TABS)[number]
 /** Icon of each tab (Fomantic's names, else Font Awesome's), and its title's key. */
@@ -528,7 +517,6 @@ const TAB_LOOKS: Record<ProgramTabId, { icon: string; text: AppTextKey }> = {
   javascript: { icon: "js", text: "javascriptTab" },
   typescript: { icon: "code", text: "typescriptTab" },
   python: { icon: "python", text: "pythonTab" },
-  spell: { icon: "file alternate outline", text: "codeSpellTab" },
   tree: { icon: "tree", text: "treeTab" },
   reference: { icon: "book", text: "referenceTab" }
 }
@@ -537,13 +525,9 @@ const TAB_PREF = "programTab"
 // TODO:  drop the rename once every browser has opened the editor since epic `prefs-and-undo` P1
 editorPrefs.declare(TAB_PREF, { oneOf: PROGRAM_TABS }).rename("spellEditor.programTab", TAB_PREF)
 
-/**
- * Tab `id`, titled in the page's language.
- * - `spell`, the file's other form:  "Code Spell" on a tag-shaped file, "Spellx" on a plain one (`form`).
- */
-function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<ProgramTabId> {
-  const text = id === "spell" && form !== "spellx" ? "spellxTab" : TAB_LOOKS[id].text
-  return { id, icon: TAB_LOOKS[id].icon, title: appTexts.text(text) }
+/** Tab `id`, titled in the page's language. */
+function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
+  return { id, icon: TAB_LOOKS[id].icon, title: appTexts.text(TAB_LOOKS[id].text) }
 }
 
 /****************

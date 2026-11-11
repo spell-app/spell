@@ -94,6 +94,8 @@ export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|neve
       name:
         text
           .slice(from, end - match.start!)
+          // its first line's words:  its body under it, with no colon, isn't its name (epic `language` P48)
+          .split("\n")[0]!
           .replace(/\s*(when|cuando)?\s*:?\s*$/, "")
           .trim() || text.trim(),
       nameMatch: verb ?? item ?? match,

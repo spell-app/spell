@@ -10,7 +10,8 @@ import { TypeDeclaration } from "./TypeDeclaration"
  * - Its bullets compile as the same lines in the sentence style do (`flatBody`), so they add to the type's class,
  *   in the same file or a later one, as `a game has a score as a number` does.
  * - It compiles to nothing itself:  the type is declared once, where it's declared.
- * - The colon stays required (`where:`, `with:`, `:`, or `where`):  a lone `a game` is a fragment.
+ * - Its colon (`where:`, `with:`, `:`, or `where`) may be left out when lines are indented under it (epic `language`
+ *   P48):  `a game`, then its lines.  A lone `a game`, nothing under it, is a fragment.
  * - A type nobody declares is an error saying how to declare it, e.g. `a gmae:`.
  *
  * ```spell
@@ -22,10 +23,16 @@ import { TypeDeclaration } from "./TypeDeclaration"
  *     return "playing"
  * ```
  */
-export class ReopenType extends TypeDeclaration<"type|with_nested_statements|body?"> {
-  /** Only a type someone declares -- see `SpellStatement.refuseUnknownType()`. */
+export class ReopenType extends TypeDeclaration<"type|with_nested_statements?|body?"> {
+  /**
+   * Only a type someone declares -- see `SpellStatement.refuseUnknownType()`.
+   * - With no colon, only with code indented under it (`SpellStatement.hasCodeBelow()`).
+   */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    // no colon:  the whole line is just the type, `a pile`, with code under it
+    const bare = match && !match.groups.with_nested_statements
+    if (bare && (match.length !== tokens.length || !SpellStatement.hasCodeBelow())) return undefined
     return match && SpellStatement.refuseUnknownType(match, match.groups.type)
   }
 

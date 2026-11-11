@@ -48,17 +48,16 @@ export function webWordFor(scope: P.Scope, ruleName: string, written: string): s
 }
 
 /**
- * Is `tag`, as written in a drawing, one a spellx file reads as a COMPONENT's bare name (epic `elemental-spell` P7)?
+ * Is `tag`, as written in a drawing, one a drawing reads as a COMPONENT's bare name (epic `elemental-spell` P7)?
  * - Lowercase letters alone, accents too (`button`, `div`, `botón`), and not one of the web names spell's own words
  *   become (`slot`):  `SpellJSX.componentTagFor()` looks it up.
- * - Code spell writes such a tag as it is:  so a code-spell drawing that has one means something else in spellx
- *   (`SX.SpellxWriter` keeps it as code spell, J83).
+ * - One no pack has:  an error in a page;  in plain Spell, the web's own element.
  */
 export function isBareComponentName(tag: string): boolean {
   return BARE_NAME.test(tag) && !SPELL_JSX_MEANINGS.includes(tag)
 }
 
-/** A tag a spellx drawing may write bare, for a component:  letters alone, accents too (`button`, `botón`). */
+/** A tag a drawing may write bare, for a component:  letters alone, accents too (`button`, `botón`). */
 const BARE_NAME = /^\p{Ll}+$/u
 
 /** A name of letters alone, which might be one of spell's own JSX words. */
@@ -102,20 +101,21 @@ export type JSXMatchData = {
   condition?: P.Match
   /** (`jsxElement`) A chain branch inside an element, as it must be:  its element said so. */
   inMarkup?: boolean
-  /** (`jsxElement`) An `<html>` block inside a spellx drawing's markup:  its children alone (`SpellJSX.isHtmlBlock()`). */
+  /** (`jsxElement`) An `<html>` block inside a drawing's markup:  its children alone (`SpellJSX.isHtmlBlock()`). */
   htmlBlock?: boolean
   /** (`jsxElement`) A chain branch's error if it turns out to stand alone, outside any element. */
   aloneError?: P.Match
   /**
-   * (`jsxElement`) The project's own view a spellx drawing names bare, `<carta>`:
+   * (`jsxElement`) The project's own view a drawing names bare, `<carta>`:
    * its children's `slot="frente"` name its slots as they compile, `front` -- see `SpellJSX.withSlotNames()`.
    */
   view?: P.TypeScope
   /** `<film/>` in a loop over films:  the loop's item, drawn. */
   loopItem?: P.ScopeVariable
   /**
-   * (`jsxElement`) A `<for ...>` inside a spellx drawing's element (epic `language` I19):
-   * its lines, read as the drawing's own would be -- a `block` match, drawn in its place (`SpellJSX.parseLoop()`).
+   * (`jsxElement`) A `<for ...>` inside a drawing's element (epic `language` I19):
+   * its lines, read through a page's twin (`SP.PageTwin`) as the drawing's own would be --
+   * a `block` match, drawn in its place (`SpellJSX.parseLoop()`).
    */
   loop?: P.Match
 }
@@ -157,6 +157,6 @@ export const MARKDOWN_TAG = "markdown"
 
 /**
  * The tag of a page's STORIES (epic `mockup` P6):  what the page must let people do, `<story>` tags, in its outline.
- * - `markdown_description` reads it, as the type's `static stories`;  spellx writes it `<stories>`.
+ * - `markdown_description` reads it, as the type's `static stories`.
  */
 export const STORIES_TAG = "stories"

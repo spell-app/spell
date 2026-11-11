@@ -1,4 +1,4 @@
-<page "rail theming" notebook>
+"rail theming" is a notebook page
 	<header level="1">
 		Rail
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
@@ -61,4 +61,3 @@
 	<section label="Themes">
 		<markdown>A rail has no look of its own:  a theme changes what it holds.</>
 	</>
-</page>

@@ -55,7 +55,7 @@ export class Deck extends List {
 export function testTurningACardOver() {
   return core.test("test turning a card over", function testTurningACardOver() {
     const it = new FlashCard()
-    core.echoTestAction(`set the card to a new flash card with word = "el gato", meaning = "the cat"`)
+    core.echoTestAction(`set the card to a new flash card with word "el gato", meaning = "the cat"`)
     const card = new FlashCard({ word: "el gato", meaning: "the cat" })
     core.echoTestAction(`turn the card face up`)
     card.turnFaceUp()
@@ -68,7 +68,6 @@ export function testTurningACardOver() {
     core.expect(card.isFaceDirection("up"), `the card is face up`, true, `yes`)
   })
 }
-
 // -----------
 core.heading("Flash Cards")
 /////////////////
@@ -82,7 +81,7 @@ core.heading("Flash Cards")
 export class Quiz extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "deck" is a new deck
+  // "deck" is a new deck
   static { this.declareProp("deck", { init: () => new Deck(), early: true }) }
   get deck() { return this.getProp("deck") }
   set deck(value) { this.setProp("deck", value) }
@@ -177,14 +176,11 @@ export class Quiz extends App {
 }
 export const quiz = new Quiz()
 
-core.describeAction(Quiz, "showTheAnswer", { title: "Show the answer", shortcuts: ["space"] })
+core.describeAction(Quiz, "showTheAnswer", { title: "Show The Answer", shortcuts: ["space"] })
 /** Counted, then the next card */
 core.describeAction(Quiz, "sayIKnew", { title: "I knew it", shortcuts: ["Y"], icon: "check" })
-
 core.describeAction(Quiz, "sayIMissed", { title: "I missed it", shortcuts: ["N"], icon: "close" })
-
-core.describeAction(Quiz, "startOver", { title: "Start over", icon: "redo" })
-
+core.describeAction(Quiz, "startOver", { title: "Start Over", icon: "redo" })
 // - its "quiz menu" is a menu of "start over"
 core.describeMenu(Quiz, "quizMenu", { items: ["startOver"] })
 

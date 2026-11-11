@@ -1,6 +1,5 @@
 import { describe, test, expect, beforeAll } from "vite-plus/test"
 
-import { SP } from "spell/parser/spell"
 import { monaco } from "spell/app/app/ui/monaco/monaco"
 import { SpellMonaco } from "spell/app/app/ui/monaco/SpellMonaco"
 import { SpellTokensProvider } from "spell/app/app/ui/monaco/SpellTokensProvider"
@@ -59,12 +58,12 @@ describe("SpellTokensProvider", () => {
 })
 
 /**
- * A `.spell` file colours by its own tokenizer:  each tag line as its code-spell twin, its tag's own words around it.
- * - The lines are Solitaire's `Card` in spellx, the examples test's fixture (`tests/spell/__spellx__/`).
+ * A page file colours by its own tokenizer (`SP.PageTokenizer`, epic `language` P47):
+ * each tag line as its code-spell twin, its tag's own words around it;  its prose a comment.
  */
-describe("SpellTokensProvider.forSpellx()", () => {
+describe("SpellTokensProvider.forPages()", () => {
   const codeSpell = new SpellTokensProvider()
-  const spellx = SpellTokensProvider.forSpellx()
+  const pages = SpellTokensProvider.forPages()
   // Monaco loads a language's colouring on first use:  html's, for markup
   beforeAll(() => monaco.editor.colorize("", "html", {}))
 
@@ -81,156 +80,113 @@ describe("SpellTokensProvider.forSpellx()", () => {
     })
   }
 
+  /** The head every page below starts with. */
+  const HEAD = '"card api" is a notebook page'
+
   // epic `language` P40:  every file `.spell`, its language from what it says
-  test("a tag-shaped file is Monaco's spellx language, as the old endings are;  a plain file stays spell", () => {
-    const tags = '<spell-view "card">\n</spell-view>\n'
-    expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spell", tags)).toBe("spellx")
-    expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spellml")).toBe("spellx")
-    expect(SpellMonaco.languageForPath(`/@spell/examples/Solitaire/Card${SP.OLD_SPELLML_SUFFIX}`)).toBe("spellx")
-    expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spell", "a card is a thing")).toBe("spell")
-    expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spell")).toBe("spell")
+  test("a page file is Monaco's spell-page language;  a plain file stays spell", () => {
+    const path = "/@spell/guides/Card.spell"
+    expect(SpellMonaco.languageForPath(path, `${HEAD}\n\tA card.\n`)).toBe(SpellMonaco.PAGE_LANGUAGE)
+    expect(SpellMonaco.languageForPath(path, `a "counter" is a view:\n\n${HEAD}\n`)).toBe("spell-page")
+    expect(SpellMonaco.languageForPath(path, "a card is a thing")).toBe("spell")
+    expect(SpellMonaco.languageForPath(path)).toBe("spell")
   })
 
-  test("a tag line:  its word a keyword, its name a string, its values as its twin's words", () => {
-    const [, property] = colour(
-      ['<spell-view "card">', '\t<property "rank" one-of="ace, 2 ... 10, jack, queen, king" />'],
-      spellx
-    )
-    expect(property).toEqual([
-      '"<" delimiter',
-      '"property" keyword',
-      '"\\"rank\\"" string',
-      '"one-of" attribute.name',
-      '"=\\"" delimiter',
-      '"ace" identifier',
-      '"," operator',
-      '"2" number',
-      '"..." operator',
-      '"10" number',
-      '"," operator',
-      '"jack" identifier',
-      '"," operator',
-      '"queen" identifier',
-      '"," operator',
-      '"king" identifier',
-      '"\\" />" delimiter'
+  test("a page's head:  its name a string, its flags attribute names, its own words keywords;  its prose a comment", () => {
+    expect(colour([HEAD, "\tA card, face up or down.", "\t## Its rank"], pages)).toEqual([
+      ['"\\"card api\\"" string', '"is a" keyword', '"notebook" attribute.name', '"page" keyword'],
+      ['"A card, face up or down." comment'],
+      ['"## Its rank" comment']
     ])
   })
 
-  // epic `debut` I97
-  test("an animation's `animated` colours as an attribute's name, as `description` does", () => {
-    const [, action] = colour(['<spell-app "game">', '\t<action "deal" animated description="Deals">'], spellx)
-    expect(action).toContain('"animated" attribute.name')
-    expect(action).toContain('"description" attribute.name')
+  test("a tag line:  its word a keyword, its phrase as its twin's words, its attributes' names", () => {
+    const [, loop, card, closer] = colour(
+      [HEAD, '\t<for card in its cards loading="Wait">', "\t\t<card/>", "\t</for>"],
+      pages
+    )
+    expect(loop!.slice(0, 6)).toEqual([
+      '"<" delimiter',
+      '"for" keyword',
+      '"card" identifier',
+      '"in" identifier',
+      '"its" identifier',
+      '"cards" identifier'
+    ])
+    expect(loop).toContain('"loading" attribute.name')
+    expect(card).toEqual(['"<" delimiter.html', '"card" tag.html', '"/>" delimiter.html'])
+    expect(closer).toEqual(['"</for>" delimiter'])
   })
 
   test("a tag with its body on its line, and a comment after its closer", () => {
-    const [, alias] = colour(
-      ['<spell-view "card">', '\t<alias "is a face card">if its rank is jack</>\t// a face card'],
-      spellx
-    )
-    expect(alias).toEqual([
+    const [, done] = colour([HEAD, "\t<if it is done>✓</>\t// done"], pages)
+    expect(done).toEqual([
       '"<" delimiter',
-      '"alias" keyword',
-      '"\\"is a face card\\"" string',
-      '">" delimiter',
-      '"if" identifier',
-      '"its" identifier',
-      '"rank" identifier',
+      '"if" keyword',
+      '"it" identifier',
       '"is" identifier',
-      '"jack" identifier',
+      '"done" identifier',
+      '">" delimiter',
+      '"✓" operator',
       '"</>" delimiter',
-      '"// a face card" comment'
+      '"// done" comment'
     ])
   })
 
-  // Owen, 2026-10-26:  `<!-- ... -->` is a spellx comment, anywhere
+  // Owen, 2026-10-26:  `<!-- ... -->` is a page's comment, anywhere
   test("a `<!-- ... -->` comment is a comment, every line of it, and the line after it is a tag again", () => {
     const [, one, open, inside, close, after] = colour(
-      [
-        '<spell-view "card">',
-        "\t<!-- its rank -->",
-        "\t<!--",
-        '\t\t<property "rank"> is no tag here',
-        "\t-->",
-        '\t<alias "is red" />'
-      ],
-      spellx
+      [HEAD, "\t<!-- its rank -->", "\t<!--", "\t\t<if it is red> is no tag here", "\t-->", "\t<if it is red>"],
+      pages
     )
     expect(one).toEqual(['"<!-- its rank -->" comment'])
     expect(open).toEqual(['"<!--" comment'])
-    expect(inside).toEqual(['"<property \\"rank\\"> is no tag here" comment'])
+    expect(inside).toEqual(['"<if it is red> is no tag here" comment'])
     expect(close).toEqual(['"-->" comment'])
-    expect(after).toContain('"alias" keyword')
+    expect(after).toContain('"if" keyword')
   })
 
-  // epic `debut` I96, Owen:  "<property-editor> in Card.spell is not syntax coloring";  the prefix, epic `data` P31
-  test("a <spell-property-editor>'s lines colour as markup, its head as a tag;  a <spell-description>'s stay a comment", () => {
-    const [, head, group, property, groupCloser, closer, description, text] = colour(
+  test("a <spell> block's body is spell, an <if>'s markup, and the lines after a closer are tags again", () => {
+    const [, , body, close, , markup, , otherwise] = colour(
       [
-        '<spell-view "card">',
-        "\t<spell-property-editor>",
-        '\t\t<ui-property-group label="Card">',
-        '\t\t\t<ui-property name="rank" />',
-        "\t\t</ui-property-group>",
-        "\t</spell-property-editor>",
-        "\t<spell-description>",
-        "\t\tA playing card.",
-        "\t</spell-description>"
+        HEAD,
+        "\t<spell>",
+        "\t\tset its count to 0",
+        "\t</spell>",
+        "\t<if it is red>",
+        "\t\t<text>red</text>",
+        "\t</if>",
+        "\t<otherwise>"
       ],
-      spellx
-    )
-    expect(head).toEqual(['"<" delimiter', '"spell-property-editor" keyword', '">" delimiter'])
-    expect(group).toContain('"ui-property-group" tag.html')
-    expect(group).toContain('"label" attribute.name.html')
-    expect(group).toContain('"\\"Card\\"" attribute.value.html')
-    expect(property).toContain('"ui-property" tag.html')
-    expect(property).toContain('"\\"rank\\"" attribute.value.html')
-    expect(groupCloser).toContain('"ui-property-group" tag.html')
-    expect(closer).toEqual(['"</spell-property-editor>" delimiter'])
-    expect(description).toEqual(['"<" delimiter', '"spell-description" keyword', '">" delimiter'])
-    expect(text).toEqual(['"A playing card." comment'])
-  })
-
-  // epic `editor` P25:  a property editors file, `Card.editor.spell`, colours as the inline note did
-  test('a property editors file:  each `<property-editor "card">` a tag, its name a string, its lines markup', () => {
-    const [, , head, property, closer] = colour(
-      [
-        "# A card's property editor",
-        "",
-        '<property-editor "card">',
-        '\t<ui-property name="rank" />',
-        "</property-editor>"
-      ],
-      spellx
-    )
-    expect(head).toEqual(['"<" delimiter', '"property-editor" keyword', '"\\"card\\"" string', '">" delimiter'])
-    expect(property).toContain('"ui-property" tag.html')
-    expect(property).toContain('"\\"rank\\"" attribute.value.html')
-    expect(closer).toEqual(['"</property-editor>" delimiter'])
-  })
-
-  test("a tag's body is spell, and the lines after its closer are tags again", () => {
-    const [, , body, close, after] = colour(
-      [
-        '<spell-view "card">',
-        '\t<property "color">',
-        "\t\tred if its suit is diamonds",
-        "\t</property>",
-        '\t<alias "is red" />'
-      ],
-      spellx
+      pages
     )
     expect(body).toEqual([
-      '"red" identifier',
-      '"if" identifier',
+      '"set" identifier',
       '"its" identifier',
-      '"suit" identifier',
-      '"is" identifier',
-      '"diamonds" identifier'
+      '"count" identifier',
+      '"to" identifier',
+      '"0" number'
     ])
-    expect(close).toEqual(['"</property>" delimiter'])
-    expect(after).toContain('"alias" keyword')
+    expect(close).toEqual(['"</spell>" delimiter'])
+    expect(markup).toContain('"text" tag.html')
+    expect(otherwise).toEqual(['"<" delimiter', '"otherwise" keyword', '">" delimiter'])
+  })
+
+  // epic `editor` P25, plain since epic `language` P45:  a property editors file, `Card.editor.spell`
+  test('a property editors file:  `"card" is a property editor` a line of spell, its lines markup', () => {
+    const [, , head, property] = colour(
+      ["# A card's property editor", "", '"card" is a property editor', '\t<ui-property name="rank" />'],
+      codeSpell
+    )
+    expect(head).toEqual([
+      '"\\"card\\"" string',
+      '"is" identifier',
+      '"a" identifier',
+      '"property" identifier',
+      '"editor" identifier'
+    ])
+    expect(property).toContain('"ui-property" tag.html')
+    expect(property).toContain('"\\"rank\\"" attribute.value.html')
   })
 
   test("a .spell file's colours don't change", () => {

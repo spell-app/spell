@@ -8,7 +8,7 @@ import "spell/parser/parser/rulex"
 
 /**
  * The words of an if-chain's tags in markup, every language's:  `<if ...>`, `<otherwise if ...>`, `<otherwise>`
- * -- each language's `spellx.controls` but `for each`.
+ * -- each language's `page.controls` but `for each`.
  */
 export const CHAIN_TAGS: Record<string, P.JSXChainKind> = {
   if: "if",
@@ -85,9 +85,11 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // the web's own raw-text tags, their contents as written, as the web reads them (epic `elemental-spell` P24);
   // and data, whose `{` and `[` are JSON's, not spell's (`<json>` is `<ui-json>`, P31)
   rawTextTags: ["css", "json", "ui-json", "es-json", "markdown", "stories", "script", "style"],
+  // a drawing's markup, plain Spell's too (epic `language` P45, Q4 A):  `</>` closes any element, at a line's end
+  emptyEndTagCloses: true,
   // never drawn, so a block of its own:  a page's `<stories>` with its `<markdown>` on the next line (epic `mockup` T26)
   standAloneTags: ["stories"],
-  // a notebook's example, named as spellx names its tags:  `<example "one counter">` (`example_block`, epic
+  // a notebook's example, named by a quoted name after its word:  `<example "one counter">` (`example_block`, epic
   // `elemental-spell` P16);  and a tree diagram's node, by its label:  `<tree-node "If">` (P32);  each language's word
   quotedNameTags: {
     example: "name",
@@ -111,8 +113,10 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   },
   // an if-chain inside markup, `<text><if it is done>✓</></text>` (epic `elemental-spell`, Owen 2026-10-25):
   // each branch's elements are hidden while it isn't the one (`SpellJSX`);  every language's words, as its
-  // `spellx.controls` say them (`SpellParser.test.ts` checks)
+  // `page.controls` say them (`SpellParser.test.ts` checks)
   chainTags: CHAIN_TAGS,
+  // a `<for ...>`'s head is a phrase, every language's word (epic `data` I93;  plain Spell's too, epic `language` P45)
+  phraseHeadTags: ["for", "para"],
   // comments in markup, never drawn:  `<!-- ... -->`, and a line of its own starting `//`, in both forms (epic
   // `elemental-spell`, Owen 2026-10-26)
   markupComments: true
@@ -162,15 +166,13 @@ export class SpellParser extends P.Parser {
    * whitespace policy) since block structure is significant.
    */
   get tokenizer(): P.Tokenizer {
-    if (this.form === "spellx") {
+    if (this.form === "page") {
       return this.derived(
-        "spellxTokenizer",
+        "pageTokenizer",
         () =>
-          new SP.SpellxTokenizer({
+          new SP.PageTokenizer({
             ...this.tokenizerProps,
             language: this.language ?? SP.Language.default,
-            // a drawing's markup:  `</>` closes any element there (Q40, P7)
-            emptyEndTagCloses: true,
             spell: this.spellTokenizer
           })
       )
@@ -178,7 +180,7 @@ export class SpellParser extends P.Parser {
     return this.spellTokenizer
   }
 
-  /** Spell's own tokenizer, for code spell -- and inside a spellx file's tags (`SP.SpellxTokenizer.spell`). */
+  /** Spell's own tokenizer, for code spell -- and inside a page's tags (`SP.PageTokenizer.spell`). */
   get spellTokenizer(): P.Tokenizer {
     return this.derived("tokenizer", () => new P.Tokenizer(this.tokenizerProps))
   }
@@ -191,15 +193,15 @@ export class SpellParser extends P.Parser {
   }
 
   /**
-   * Which FORM of spell we read:  plain Spell, or spellx, its tag-shaped form (`SP.formOfText()`).
-   * - Only our tokenizer differs:  a spellx file's tags are tokens of their own (`SP.SpellxTokenizer`), and each tag
-   *   line reads as its code-spell twin (`SP.SpellxTwin`), parsed by the same rules (epic `elemental-spell` P6).
-   * - A project's spellx files parse with its twin of that form (`twinFor()`).
+   * Which FORM of spell we read:  plain Spell, or a page file (`SP.formOfText()`).
+   * - Only our tokenizer differs:  a page's head and tags are tokens of their own (`SP.PageTokenizer`), and each
+   *   reads as its code-spell twin (`SP.PageTwin`), parsed by the same rules.
+   * - A project's page files parse with its twin of that form (`twinFor()`).
    */
   declare form: SP.SpellForm | undefined
 
   /**
-   * The component packs a spellx drawing names components from, by their bare names (`<button>`):
+   * The component packs a drawing names components from, by their bare names (`<button>`):
    * its project file's `packs`, set on the project's parser and its twins (`SP.ComponentPacks`;  P7).
    * - `undefined`:  `SP.ComponentPacks.DEFAULT`.
    */
@@ -319,7 +321,7 @@ export class SpellParser extends P.Parser {
 
   /**
    * This project parser's twin reading `language` in `form`, for a file written so -- us, for our own.
-   * - `form`:  `spellx` for a spellx file, `Card.spell` (epic `elemental-spell` P6):  the same rules, its own tokenizer.
+   * - `form`:  `page` for a page file (epic `language` P47):  the same rules, its own tokenizer.
    * - So one project can mix languages (epic `spanish` P19):  `Carta.es.spell` beside `Card.spell`.
    * - The twin has `language`'s own rules, plus every rule our project added, ours and our imports':
    *   - the ones there already, copied from each layer between us and our language's parser
@@ -337,7 +339,7 @@ export class SpellParser extends P.Parser {
     if (existing) return existing
     const twin = language.parser.clone({
       module: this.module,
-      ...(form === "spellx" ? { form } : {}),
+      ...(form === "page" ? { form } : {}),
       ...(this.packs ? { packs: this.packs } : {})
     } as P.ParserProps)
     for (const layer of this.layersOver(this.language.parser).reverse()) {
@@ -382,7 +384,7 @@ export class SpellParser extends P.Parser {
     return layer === base ? layers : [this]
   }
 
-  /** Our copy for a page alone in its file:  our form too, so its tags still read. */
+  /** Our copy for a page alone in its file:  our form too, so its page still reads. */
   cloneForAloneFile(): this {
     const clone = this.clone({ module: this.module })
     clone.form = this.form
@@ -392,27 +394,21 @@ export class SpellParser extends P.Parser {
   /**
    * A parser to read `aloneHead()` with, before a project has a scope:  its head is words, and needs nothing of one.
    */
-  static spellxReaderFor(language: SP.Language, form: SP.SpellForm = "spell"): SpellParser {
+  static headReaderFor(language: SP.Language, form: SP.SpellForm = "spell"): SpellParser {
     return SP.Language.rootScopeFor([language]).parser!.clone({ module: "head", form } as P.ParserProps) as SpellParser
   }
 
   /**
    * What the project knows of page file `text` at `path`, when the page is alone in it;  `undefined` when it isn't.
-   * - Alone:  a spellx file whose only top-level thing is one page tag, comments aside (epic `notebook` P10, Q11).
-   *   A view or a thing written inside the page belongs to it.
+   * - Alone:  a page file whose only top-level thing is one page's head, comments aside (epic `notebook` P10, Q11).
    * - Read from the file's lines, before anything parses:  351 pages in about 4 ms.
    * - Any other file is simply not alone:  no error, and it compiles as it always has.
    */
   aloneHead(text: string, path: string): P.FileHead | undefined {
-    if (this.form !== "spellx") return undefined
+    if (this.form !== "page") return undefined
     const name = SP.alonePageName(text, this.language ?? SP.Language.default)
     if (!name) return undefined
-    return new SP.AlonePage(
-      this,
-      SP.plainPartName(name),
-      SP.alonePageProperties(text, this.language ?? SP.Language.default),
-      path
-    )
+    return new SP.AlonePage(this, SP.plainPartName(name), path)
   }
 
   /** A clone of us, as `P.Parser.clone()`, but none of our twins:  a family is one project's (`twinFor()`). */
@@ -446,11 +442,11 @@ export class SpellParser extends P.Parser {
   /**
    * Tokenize `input`, then re-group into indented blocks when `ruleName` is `"block"`.
    * - Why:  spell's significant-whitespace block structure isn't just a flat token stream.
-   * - A spellx parser's tokenizer reads only a whole file, a `"block"`:  any other text it parses is spell, e.g. a
-   *   quoted alias, `"is a (suit)"`, read again as its words -- so it's tokenized as spell (`spellTokenizer`).
+   * - A page parser's tokenizer reads only a whole file, a `"block"`:  any other text it parses is spell, e.g. a
+   *   `{...}` hole, read again -- so it's tokenized as spell (`spellTokenizer`).
    */
   tokenize(input: string, ruleName: string) {
-    if (this.form === "spellx" && ruleName !== "block" && typeof input === "string") {
+    if (this.form === "page" && ruleName !== "block" && typeof input === "string") {
       return this.spellTokenizer.tokenize(input)
     }
     const tokens = super.tokenize(input)
@@ -476,7 +472,7 @@ export class SpellParser extends P.Parser {
    * - The kind of a property's values too, e.g. `card suit` (epic `spanish` P22):  see `declaredPropertyKinds()`.
    */
   declaredTypes(text: string, scope?: P.Scope): string[] {
-    if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
+    if (this.form === "page") text = SP.PageTwin.skeletonOf(text, this)
     const types = [...text.matchAll(this.declarations.typeDeclaration)].map(
       ([, type, words, created, onlyOne]) =>
         type ??
@@ -527,7 +523,7 @@ export class SpellParser extends P.Parser {
    * `pokedex` for `pokedex is an app`, `card-game`'s `klondike` -- see `stubDeclaredVariables()`.
    */
   private declaredOneOfAKinds(text: string, scope: P.Scope): string[] {
-    if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
+    if (this.form === "page") text = SP.PageTwin.skeletonOf(text, this)
     const apps = [...text.matchAll(this.declarations.typeDeclaration)].flatMap(([, , , , onlyOne]) =>
       onlyOne
         ? [
@@ -688,14 +684,14 @@ export class SpellParser extends P.Parser {
   /**
    * Call `visit` with each line of `text` a declaration may be on, and the type it's about:
    * - a line at a file's top:  `subject` the type it declares or re-opens, if any, and no `bullet`
-   * - a line in that type's outline body, one tab in:  its text after the `-` as `bullet`
-   * - A spellx file reads as its code-spell skeleton.
+   * - a line in that type's outline body, one tab in:  its text, after its `-` if it has one, as `bullet`
+   * - A page file reads as its code-spell skeleton (`SP.PageTwin.skeletonOf()`).
    */
   private eachDeclarationLine(
     text: string,
     visit: (subject: string, line: string, bullet: string | undefined) => void
   ): void {
-    if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
+    if (this.form === "page") text = SP.PageTwin.skeletonOf(text, this)
     const onlyOnes = new Set(this.oneOfAKindsIn(text))
     let subject = ""
     for (const line of text.split("\n")) {
@@ -706,7 +702,8 @@ export class SpellParser extends P.Parser {
         visit(subject, line, undefined)
         continue
       }
-      const bullet = /^(?:\t| {2,4})-[ \t]+(.*)$/.exec(line)?.[1]
+      // a member one tab in, bulleted or bare (epic `language` P46):  `- its "suit" is ...`, `its "suit" is ...`
+      const bullet = /^(?:\t| {2,4})(?:-[ \t]+)?(?![ \t]|\/\/)(.+)$/.exec(line)?.[1]
       if (bullet) visit(subject, line, bullet)
     }
   }

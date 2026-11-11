@@ -86,8 +86,8 @@ export const APP_TEXTS = {
   codeParameterHints: "Parameter hints",
   codePinnedLines: "Pinned lines above the code",
   codeCompilerWords: "Compiler details in hover",
+  codeBubbly: "Bubbly look",
   // a notebook's page, `<NotebookPage>` (epic `elemental-spell` P16)
-  notebookPageCodeAs: "Show code as",
   notebookPageLock: "Lock it:  nothing is saved while it's locked",
   notebookPageUnlock: "Unlock it:  changes are saved",
   notebookPageLocked: "Locked:  changes aren't saved",
@@ -487,9 +487,6 @@ export const APP_TEXTS = {
   typescriptTab: "TypeScript",
   pythonTab: "Python",
   // a .spell file's code spell, the text it reads as (epic `elemental-spell` P8)
-  codeSpellTab: "Code Spell",
-  // a .spell file as spellx:  a view, never a second file (epic `elemental-spell` J95)
-  spellxTab: "Spellx",
   inspector: "Inspector",
   inspectorInspect: "Inspect app",
   inspectorTip: "Select a part of the app with the crosshairs, to see what it is and change it.",

@@ -9,24 +9,24 @@ import { compiledSpellProject, registerTestComponentPack } from "spell/parser/sp
  * Source maps (epic `elemental-spell` P14):  each line of compiled javascript back to the spell line it came from.
  * - Marks made as the code is written, then taken out again (`P.SourceMarks`):
  *   the code must be EXACTLY what it is with no map.
- * - Every mapped line points at its statement's line, in `.spell` and `.spellml` files alike.
+ * - Every mapped line points at its statement's line.
  */
 describe("P.SourceMarks.stamped()", () => {
   const map = (parts: P.SpellPlaceEntry[]) =>
-    JSON.stringify({ version: 3, sources: ["Card.spellml"], names: [], mappings: "", x_spellPlaces: parts })
+    JSON.stringify({ version: 3, sources: ["Card.spell"], names: [], mappings: "", x_spellPlaces: parts })
 
   test("a tag with props:  its place first among them", () => {
     expect(P.SourceMarks.stamped('h("b", { a: 1 })', map([[0, 5, "h", 0, 12, 4]]))).toBe(
-      'h("b", { "data-spell-at": "Card.spellml:12:4", a: 1 })'
+      'h("b", { "data-spell-at": "Card.spell:12:4", a: 1 })'
     )
   })
 
   test("a tag with none:  props of its own, before its children", () => {
     expect(P.SourceMarks.stamped('h("b", "words")', map([[0, 5, "h", 0, 1, 2]]))).toBe(
-      'h("b", { "data-spell-at": "Card.spellml:1:2" }, "words")'
+      'h("b", { "data-spell-at": "Card.spell:1:2" }, "words")'
     )
     expect(P.SourceMarks.stamped('h("b")', map([[0, 5, "h", 0, 1, 2]]))).toBe(
-      'h("b", { "data-spell-at": "Card.spellml:1:2" })'
+      'h("b", { "data-spell-at": "Card.spell:1:2" })'
     )
   })
 
@@ -43,7 +43,7 @@ describe("P.SourceMarks.stamped()", () => {
     const made = new Function(`${stamped};  return a`)() as Set<unknown>
     expect(made).toBeInstanceOf(Set)
     expect(Object.keys(made)).toEqual([])
-    expect(P.SourceMarks.placeOfThing(made)).toEqual({ path: "Card.spellml", line: 3, column: 1 })
+    expect(P.SourceMarks.placeOfThing(made)).toEqual({ path: "Card.spell", line: 3, column: 1 })
   })
 
   test("no map, or one with no parts:  the code as it is", () => {
@@ -55,7 +55,7 @@ describe("P.SourceMarks.stamped()", () => {
 describe("source maps", () => {
   beforeAll(registerTestComponentPack)
 
-  const pairs = readdirSync(new URL("./spellx/", import.meta.url)).filter((name) => SP.isSpellSourceName(name))
+  const pairs = readdirSync(new URL("./sourceMaps/", import.meta.url)).filter((name) => SP.isSpellSourceName(name))
 
   test.each(pairs)("%s:  the same code with a map as without one", (name) => {
     const files = [fixture(name)]
@@ -109,9 +109,9 @@ describe("source maps", () => {
   })
 })
 
-/** A pair fixture as a project's file. */
+/** A fixture of `sourceMaps/` as a project's file. */
 function fixture(name: string) {
-  return { path: `/${name}`, contents: readFileSync(new URL(`./spellx/${name}`, import.meta.url), "utf8") }
+  return { path: `/${name}`, contents: readFileSync(new URL(`./sourceMaps/${name}`, import.meta.url), "utf8") }
 }
 
 /** Each generated line's first mapping:  its line, source and source line, all from 0 -- `mappings` decoded. */

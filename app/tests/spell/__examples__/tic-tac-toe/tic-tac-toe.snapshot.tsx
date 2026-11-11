@@ -70,7 +70,7 @@ export class Board extends List<Square> {
 export class TicTacToe extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "board" is a new board
+  // "board" is a new board
   @prop({ init: () => new Board(), early: true })
   accessor board!: Board
 
@@ -180,7 +180,7 @@ core.useElement(TicTacToe, TicTacToeElement)
 export const ticTacToe = new TicTacToe()
 
 /** An empty board, X to play */
-core.describeAction(TicTacToe, "startANewGame", { title: "start a new game", shortcuts: ["N"] })
+core.describeAction(TicTacToe, "startANewGame", { title: "Start A New Game", shortcuts: ["N"] })
 
 core.heading("The board")
 ///////////////

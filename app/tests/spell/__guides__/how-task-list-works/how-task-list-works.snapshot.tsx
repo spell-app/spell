@@ -81,8 +81,8 @@ export class Checklist extends ViewableList<Task> {
   @prop({ oneOf: () => Checklist.Showings })
   accessor showing!: Showing
 
-  // each task in turn, unless the filter hides it:  "return nothing" draws nothing
   drawEachItem(item: Task) {
+    // each task in turn, unless the filter hides it:  "return nothing" draws nothing
     if (this.showing === "active" && item.isDone) return undefined
     if (this.showing === "done" && item.isActive) return undefined
     return core.drawThing(item)

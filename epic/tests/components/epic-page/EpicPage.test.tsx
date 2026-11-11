@@ -857,6 +857,58 @@ describe("<epic-page> toolbar", () => {
     expect(pageChips(host)).toEqual(["open+2", "recent-1"])
   })
 
+  // epic `epic-engine` I259 (Owen, 2026-11-11:  "I just turned the 'master' grey button *on* and the Phases grey section
+  // didn't go on")
+  test("a toolbar chip SETS its colour in every section, the Phases section too;  sections that disagree draw it mixed", async () => {
+    const host = await render(
+      `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +
+        `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="One" status="done"><p>Did.</p></epic-phase>` +
+        `<epic-phase id="p2" title="Two" status="todo"><p>Do.</p></epic-phase></epic-section>` +
+        `<epic-section id="decisions" kind="questions"><epic-item id="q1" title="Q" status="open" state="open"></epic-item>` +
+        `<epic-item id="q2" title="Q" status="done" state="old"></epic-item></epic-section></epic-page>`
+    )
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "old+1"]))
+    const phases = host.querySelector<E.DOMElement & { chipStates: { state: string; on: boolean }[] }>("#phases")!
+    const grey = () => phases.chipStates.find((it) => it.state === "old")
+    await vi.waitFor(() => expect(grey()).toEqual({ state: "old", on: true }))
+    // the Phases section's own grey off:  the toolbar's grey is mixed, not on
+    await pickPageState(phases, "old")
+    expect(grey()).toEqual({ state: "old", on: false })
+    expect(chipsOf(host).map((chip) => chip.getAttribute("aria-pressed"))).toEqual(["true", "mixed"])
+    // a click on the mixed chip shows grey in EVERY section
+    await pickPageState(host, "old")
+    expect(pageChips(host)).toEqual(["open+1", "old+1"])
+    expect(phases.chipStates).toEqual([
+      { state: "scheduled", on: true },
+      { state: "old", on: true }
+    ])
+    // and off again:  every section's grey off, the Phases section's too;  its other colours as they were
+    await pickPageState(host, "old")
+    expect(pageChips(host)).toEqual(["open+1", "old-1"])
+    expect(phases.chipStates).toEqual([
+      { state: "scheduled", on: true },
+      { state: "old", on: false }
+    ])
+  })
+
+  // epic `epic-engine` I261 (Owen, 2026-11-11:  "why is there no green bubble in the top set?")
+  test("a colour only the Phases section has gets a toolbar chip, counting its phases;  it sets the Phases section's", async () => {
+    const hourAgo = new Date(Date.now() - 60 * 60_000).toISOString()
+    const host = await render(
+      `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +
+        `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="One" status="done" done-at="${hourAgo}"><p>Did.</p></epic-phase>` +
+        `<epic-phase id="p2" title="Two" status="done"><p>Did.</p></epic-phase></epic-section>` +
+        `<epic-section id="decisions" kind="questions"><epic-item id="q1" title="Q" status="open" state="open"></epic-item>` +
+        `<epic-item id="q2" title="Q" status="done" state="old"></epic-item></epic-section></epic-page>`
+    )
+    // green:  the one phase done lately;  grey:  the items' count alone, as before
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "recent+1", "old+1"]))
+    const phases = host.querySelector<E.DOMElement & { chipStates: { state: string; on: boolean }[] }>("#phases")!
+    await pickPageState(host, "recent")
+    expect(pageChips(host)).toEqual(["open+1", "recent-1", "old+1"])
+    expect(phases.chipStates.find((it) => it.state === "recent")).toEqual({ state: "recent", on: false })
+  })
+
   test("collapse-all folds every block, item and card on the page;  a section's folds only what's inside it, and stays open", async () => {
     const host = await render(
       `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +
@@ -1039,9 +1091,10 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(status().title).toBe("Claude is writing this phase's plan")
     expect(p2.matches(":state(working)")).toBe(true)
     expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".icon.working > svg")).toBeNull()
+    // the Phases section's one blue badge:  p2 under way, p3 scheduled (I260);  the toolbar's counts only p2
     expect(markedBadge(phases)).toEqual([
-      "1",
-      "1 with Claude (under way, being worked on, or marked in this pass):  hide these\n⌥-click:  show only these"
+      "2",
+      "2 to do:  under way, scheduled, or marked in this pass:  hide these\n⌥-click:  show only these"
     ])
     expect(rail().running).toBe(1)
     await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
@@ -1054,7 +1107,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     await vi.waitFor(() => expect(status().querySelector(".icon.working > svg")).toBeNull())
-    expect(markedBadge(phases)).toBeNull()
+    expect(markedBadge(phases)?.[0]).toBe("2")
   })
 
   // Owen, 2026-10-29, on a red circle beside a plan he had accepted:  "dot next to P13 -- shouldn't be red?"
@@ -1638,8 +1691,9 @@ describe("<epic-page> stages", () => {
     )
     // the step label says the stage, not a phase
     expect(step(host)?.words).toBe("OVERVIEW")
+    // the 4 items, and the done phase:  grey, a colour no item has (I261)
     await vi.waitFor(() =>
-      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(4)
+      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(5)
     )
   })
 

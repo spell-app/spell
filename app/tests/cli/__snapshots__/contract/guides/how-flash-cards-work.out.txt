@@ -1,5 +1,5 @@
 ✅ test turning a card over
-  ▶️ Executing   `set the card to a new flash card with word = "el gato", meaning = "the cat"`
+  ▶️ Executing   `set the card to a new flash card with word "el gato", meaning = "the cat"`
   ✅ As expected `the card is face down` is `yes`
   ▶️ Executing   `turn the card over`
   ✅ As expected `the card is face up` is `yes`

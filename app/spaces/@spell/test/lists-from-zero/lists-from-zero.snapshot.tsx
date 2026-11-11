@@ -11,11 +11,11 @@ export class Tile extends Thing {
   accessor letter!: string
 }
 
+/** a new rack holds five tiles, A to E */
 @thing
 export class Rack extends List<Tile> {
   static instanceType = Tile
 
-  /** a new rack holds five tiles, A to E */
   create() {
     this.append(new Tile({ letter: "A" }))
     this.append(new Tile({ letter: "B" }))

@@ -15,7 +15,7 @@
       ],
       "kind": "function",
       "returns": "nothing",
-      "defined": "/HowFizzBuzzWorks.spell:2202-2577"
+      "defined": "/HowFizzBuzzWorks.spell:2239-2609"
     },
     {
       "syntax": "test the rule",
@@ -24,7 +24,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the rule",
-      "defined": "/HowFizzBuzzWorks.spell:3562-3669"
+      "defined": "/HowFizzBuzzWorks.spell:3610-3715"
     }
   ],
   "codeLines": [

@@ -120,8 +120,9 @@ describe("expectedAfter()", () => {
 
     test("`a deck is a` => a type", () => {
       // once per `create_type` syntax which reads `a deck is a` -- with an outline body or without;
-      // completion keeps one item per label (`SpellLanguageService.completions()`)
-      expect(new Set(describeAll(expected("a deck is a").own))).toEqual(new Set(["{superType:type}"]))
+      // completion keeps one item per label (`SpellLanguageService.completions()`);  or an ability first,
+      // `a deck is a draggable list of cards` (epic `language` P48)
+      expect(new Set(describeAll(expected("a deck is a").own))).toContain("{superType:type}")
     })
 
     test("`if c` => `then` or `:`, and operators only as continuations", () => {

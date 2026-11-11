@@ -1,4 +1,4 @@
-<page "value usage" notebook>
+"value usage" is a notebook page
 	<header level="1">
 		Value
 		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>
@@ -39,4 +39,3 @@
 			- An icon inside a value is decorative: the number and the label carry the meaning.
 		</>
 	</>
-</page>

@@ -60,13 +60,13 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 - **It is:**  a `P.Tokenizer` subclass, plus rules:  `spell/parser/parser`
 - **Use it when:**  reading any language or format of our own:  tags, a file format, a mini-language.
-  - The tokenizer is meant to be subclassed:  `MarkdownTokenizer`, `RulexTokenizer` and `SpellxTokenizer` each are,
+  - The tokenizer is meant to be subclassed:  `MarkdownTokenizer`, `RulexTokenizer` and `PageTokenizer` each are,
     in about 40 lines;  the rules then read the tokens, with completion, hover and errors for free.
   - Who already does:  `spell map uses Tokenizer`
   - NOT for our JavaScript and TypeScript:  they have ONE reader, "Our TypeScript, read" below (epic `coherence` P26).
 - **Flag:**  `text\[pos\]|charAt\(pos|while \(pos < `  -- a new file walking text by index
 - **Score:**  `\b(const|let) (char|c|ch)\b(: string)? = (this\.)?(text|source|subject|line|input)(\[|\.charAt\()|\(\(char = (this\.)?\w+\.charAt\(|return this\.subject\.charAt`
-  · home `parser/src/parser/tokenizer/` · not `parser/src/spell/SpellxTokenizer.ts`
+  · home `parser/src/parser/tokenizer/` · not `parser/src/spell/PageTokenizer.ts`
 - **Copies:**
   - `parser/src/markdown/inlines/InlineParser.ts`:  markdown's inlines, by regex, beside `MarkdownTokenizer`
   - `parser/src/spell/rules/JSX/MarkdownBlock.ts`:  its own fence and code-span scanner
@@ -124,7 +124,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 - **It is:**  `P.Tokenizer`'s two scans:  `findPhraseEnd(text, start, end, { stop, lineEnds })`, the first `>` or `:`
   outside strings and brackets;  `findMatchingDelimiter("{", "}", ...)`, where a brace closes:  `spell/parser/parser`
-- **Use it when:**  finding where a tag's phrase, a line's body colon or a hole ends, in spell or spellx text.
+- **Use it when:**  finding where a tag's phrase, a line's body colon or a hole ends, in spell text or a page's.
   - Strings are skipped as the tokenizer reads them (spell's:  only `"`), so a quoted `}` or `>` never ends one.
 - **Flag:**  `inString|let depth = 0` in a new scan of spell text
 - **Copies:**  `--`  (epic `coherence` P16 moved spellx's tokenizer, view and writer onto them)

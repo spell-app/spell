@@ -1,4 +1,4 @@
-<page "rating examples" notebook>
+"rating examples" is a notebook page
 	<header level="1">
 		Rating
 		<header>A rating indicates user interest in content.</>
@@ -162,4 +162,3 @@
 			</example>
 		</>
 	</>
-</page>

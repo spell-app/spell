@@ -1,20 +1,20 @@
 # Un mazo
-Las 52 cartas de una baraja estándar, el as de tréboles primero.
+// Las 52 cartas de una baraja estándar, el as de tréboles primero.
 
-<cosa "mazo" plantilla="lista de cartas">
-	<acción "crearlo" descripción="Una carta de cada, el as de tréboles primero:  cada una empieza boca abajo, como toda vista reversible">
+un "mazo" es una lista de cartas
+	para crearlo
+		// Una carta de cada, el as de tréboles primero:  cada una empieza boca abajo, como toda vista reversible
 		para rango en rangos de carta
 			para palo en palos de carta
 				agregar una nueva carta con rango = el rango, palo = el palo al mazo
-	</acción>
-	<propiedad "estado" descripción="Los nombres cortos de sus cartas, de arriba abajo">
+	su "estado" es
+		// Los nombres cortos de sus cartas, de arriba abajo
 		poner nombres a una nueva lista de texto
 		para carta en el mazo
 			agregar el estado de la carta a nombres
 		devolver "mazo: " + nombres
-	</propiedad>
 
-	<probar "la creación del mazo">
+	para probar la creación del mazo
 		el mazo es un nuevo mazo
 		el número de cartas en el mazo debería ser 52
 		el número de (cartas en el mazo donde es una dama) debería ser 4
@@ -22,5 +22,3 @@ Las 52 cartas de una baraja estándar, el as de tréboles primero.
 		el nombre de la última carta del mazo debería ser "rey de espadas"
 		barajar el mazo
 		el número de cartas en el mazo debería ser 52
-	</probar>
-</cosa>

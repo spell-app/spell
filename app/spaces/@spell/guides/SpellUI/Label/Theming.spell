@@ -1,4 +1,4 @@
-<page "label theming" notebook>
+"label theming" is a notebook page
 	<header level="1">
 		Label
 		<header>A label displays content classification.</>
@@ -52,4 +52,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

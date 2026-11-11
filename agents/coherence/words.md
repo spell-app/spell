@@ -287,7 +287,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
     read where people edit them, their snapshots beside the tests.
   - "Test project" is any of the three;  a test names one by its group and name (`TestProjectName`):
     `fizzbuzz` is the fixture, `@spell/examples/fizzbuzz` the example.
-- **Not:**  fixture for an example, a Spell guide, or the hand-kept spellx twins (those are "twins").
+- **Not:**  fixture for an example, or a Spell guide.
   - The helpers that read any test project keep their old names for now (`compiledFixture()`,
     `loadFixtureProject()`, `PYTHON_FIXTURES`):  a rename of their own.
 - **Decided:**  epic `content` P2 (T3).

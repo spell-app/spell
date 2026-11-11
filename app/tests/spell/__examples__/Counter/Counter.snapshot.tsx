@@ -74,7 +74,7 @@ core.heading("The app:  one counter, drawn")
 export class CounterApp extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // - its "counter" is a new counter
+  // "counter" is a new counter
   @prop({ init: () => new Counter(), early: true })
   accessor counter!: Counter
 

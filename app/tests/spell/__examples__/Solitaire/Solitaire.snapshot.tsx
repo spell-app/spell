@@ -16,7 +16,7 @@ export class Card extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "rank" is one of ace, 2 ... 10, jack, queen, king
-  //   - it "is a (rank)"
+  //   it "is a (rank)"
   static Ranks = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"] as const
   @prop({ oneOf: () => Card.Ranks })
   accessor rank!: Rank
@@ -37,7 +37,7 @@ export class Card extends TwoSidedView {
   }
 
   // - its "suit" is one of clubs, diamonds, hearts or spades
-  //   - it "is a (suit)"
+  //   it "is a (suit)"
   static Suits = ["clubs", "diamonds", "hearts", "spades"] as const
   @prop({ oneOf: () => Card.Suits })
   accessor suit!: Suit
@@ -45,7 +45,7 @@ export class Card extends TwoSidedView {
     return this.suit === suit
   }
 
-  // - its "color" is one of red, black :
+  // - its "color" is one of red, black
   //   red if it is a diamond or it is a heart
   //   black otherwise
   static Colors = ["red", "black"]
@@ -62,7 +62,7 @@ export class Card extends TwoSidedView {
   }
 
   get name() {
-    return `${this.rank} of ${this.suit}`
+    return core.joined(core.joined(this.rank, "of", " "), this.suit, " ")
   }
 
   isTheRankOfSuit(rank: Rank, suit: Suit) {
@@ -107,7 +107,7 @@ export class Card extends TwoSidedView {
 
   /** a click plays it */
   async onClick(event: ClickEvent) {
-    return await this.play()
+    await this.play()
   }
 
   /** a drag starting clears the last hint */
@@ -218,7 +218,7 @@ export class CardElement extends SpellElement<Card> {
 core.useElement(Card, CardElement)
 // Ace is low:  ace = 1 ... king = 13
 
-// What a person, a test or the console calls it
+// What a person, test or console calls it
 
 // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
@@ -258,7 +258,6 @@ export function testCardSetup() {
     core.expect((new Card({ rank: "king", suit: "diamonds" })).picture, `the picture of a new card whose rank is king and suit is diamonds`, "🃎", `"🃎"`)
   })
 }
-
 // -----------
 core.heading("A deck")
 ////////////
@@ -290,8 +289,8 @@ export function testANewDeck() {
     const deck = new Deck()
     core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
     core.expect(deck.filter((card) => card.isARank("queen")).length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
-    core.expect(deck.firstItem?.state!, `the deck's first card's state`, "A♣↓", `"A♣↓"`)
-    core.expect(deck.lastItem?.name!, `the deck's last card's name`, "king of spades", `"king of spades"`)
+    core.expect(deck.firstItem?.state!, `deck's first card's state`, "A♣↓", `"A♣↓"`)
+    core.expect(deck.lastItem?.name!, `deck's last card's name`, "king of spades", `"king of spades"`)
     core.echoTestAction(`shuffle the deck`)
     deck.randomize()
     core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
@@ -387,10 +386,10 @@ core.useElement(Pile, PileElement)
 export function testPiles() {
   return core.test("test piles", function testPiles() {
     const it = new Pile()
-    core.echoTestAction(`set the stock to a new pile with name = "stock"`)
+    core.echoTestAction(`set the stock to a new pile with name "stock"`)
     const stock = new Pile({ name: "stock" })
-    core.expect(stock.color, `the stock's color`, "none", `"none"`)
-    core.expect(stock.value, `the stock's value`, 0, `0`)
+    core.expect(stock.color, `stock's color`, "none", `"none"`)
+    core.expect(stock.value, `stock's value`, 0, `0`)
     core.echoTestAction(`add (a new card whose rank is queen, suit is spades and direction is up) to the stock`)
     stock.append(new Card({
       rank: "queen",
@@ -403,9 +402,9 @@ export function testPiles() {
       suit: "hearts",
       direction: "down"
     }))
-    core.expect(stock.color, `the stock's color`, "red", `red`)
-    core.expect(stock.value, `the stock's value`, 7, `7`)
-    core.expect(stock.state, `the stock's state`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
+    core.expect(stock.color, `stock's color`, "red", `red`)
+    core.expect(stock.value, `stock's value`, 7, `7`)
+    core.expect(stock.state, `stock's state`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
 
     /** a card is in one pile at a time */
     const discards = new Pile({ name: "discards" })
@@ -445,8 +444,8 @@ export class StockPile extends Pile {
     return false
   }
 
-  // A light grey card, face down
   drawItsPlaceholder() {
+    // A light grey card, face down
     return <ui-text part="placeholder">🂠</ui-text>
   }
 
@@ -537,8 +536,8 @@ export class Foundation extends Pile {
     return false
   }
 
-  // A light grey ace of its suit, face up
   drawItsPlaceholder() {
+    // A light grey ace of its suit, face up
     return <ui-text part="placeholder">{(new Card({ rank: "ace", suit: this.suit })).picture}</ui-text>
   }
 
@@ -647,59 +646,59 @@ export class Solitaire extends App {
     this.hint = ""
   }
 
-  // - its "deck" is a new deck
+  // "deck" is a new deck
   @prop({ init: () => new Deck(), early: true })
   accessor deck!: Deck
 
-  // - its "stock" is a new stock pile with name = "stock"
+  // "stock" is a new stock pile with name "stock"
   @prop({ init: () => new StockPile({ name: "stock" }), early: true })
   accessor stock!: StockPile
 
-  // - its "discards" is a new discard pile with name = "discards"
+  // "discards" is a new discard pile with name "discards"
   @prop({ init: () => new DiscardPile({ name: "discards" }), early: true })
   accessor discards!: DiscardPile
 
-  // - its "clubs" is a new foundation with name = "clubs", suit = clubs
+  // "clubs" is a new foundation with name "clubs", suit = clubs
   @prop({ init: () => new Foundation({ name: "clubs", suit: "clubs" }), early: true })
   accessor clubs!: Foundation
 
-  // - its "diamonds" is a new foundation with name = "diamonds", suit = diamonds
+  // "diamonds" is a new foundation with name "diamonds", suit = diamonds
   @prop({ init: () => new Foundation({ name: "diamonds", suit: "diamonds" }), early: true })
   accessor diamonds!: Foundation
 
-  // - its "hearts" is a new foundation with name = "hearts", suit = hearts
+  // "hearts" is a new foundation with name "hearts", suit = hearts
   @prop({ init: () => new Foundation({ name: "hearts", suit: "hearts" }), early: true })
   accessor hearts!: Foundation
 
-  // - its "spades" is a new foundation with name = "spades", suit = spades
+  // "spades" is a new foundation with name "spades", suit = spades
   @prop({ init: () => new Foundation({ name: "spades", suit: "spades" }), early: true })
   accessor spades!: Foundation
 
-  // - its "T1" is a new tableau with name = "T1"
+  // "T1" is a new tableau with name "T1"
   @prop({ init: () => new Tableau({ name: "T1" }), early: true })
   accessor T1!: Tableau
 
-  // - its "T2" is a new tableau with name = "T2"
+  // "T2" is a new tableau with name "T2"
   @prop({ init: () => new Tableau({ name: "T2" }), early: true })
   accessor T2!: Tableau
 
-  // - its "T3" is a new tableau with name = "T3"
+  // "T3" is a new tableau with name "T3"
   @prop({ init: () => new Tableau({ name: "T3" }), early: true })
   accessor T3!: Tableau
 
-  // - its "T4" is a new tableau with name = "T4"
+  // "T4" is a new tableau with name "T4"
   @prop({ init: () => new Tableau({ name: "T4" }), early: true })
   accessor T4!: Tableau
 
-  // - its "T5" is a new tableau with name = "T5"
+  // "T5" is a new tableau with name "T5"
   @prop({ init: () => new Tableau({ name: "T5" }), early: true })
   accessor T5!: Tableau
 
-  // - its "T6" is a new tableau with name = "T6"
+  // "T6" is a new tableau with name "T6"
   @prop({ init: () => new Tableau({ name: "T6" }), early: true })
   accessor T6!: Tableau
 
-  // - its "T7" is a new tableau with name = "T7"
+  // "T7" is a new tableau with name "T7"
   @prop({ init: () => new Tableau({ name: "T7" }), early: true })
   accessor T7!: Tableau
 
@@ -782,7 +781,7 @@ export class Solitaire extends App {
     await this.playFromTheStock()
   }
 
-  async startANewGame() {
+  async restartTheGame() {
     this.score = 0
     this.moves = 0
     this.hint = ""
@@ -892,8 +891,8 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     return this.currentThing?.turnAStockCard()
   }
 
-  startANewGame() {
-    return this.currentThing?.startANewGame()
+  restartTheGame() {
+    return this.currentThing?.restartTheGame()
   }
 
   autoPlay() {
@@ -910,21 +909,17 @@ export const solitaire = new Solitaire()
 // One of each, made with the solitaire
 
 // Each pauses a moment, so a deal animates
-
 /** A click on the empty stock:  one step to undo, where the deal's own turn isn't */
-core.describeAction(Solitaire, "turnAStockCard", { title: "turn a stock card", undoneAs: "Turn Card" })
+core.describeAction(Solitaire, "turnAStockCard", { title: "Turn A Stock Card", undoneAs: "Turn Card" })
 
 // Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-core.describeAction(Solitaire, "startANewGame", { title: "Restart", shortcuts: ["N"], undoneAs: "Restart" })
-
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["N"], undoneAs: "Restart The Game" })
 /** Play every card that can go somewhere, until none can */
-core.describeAction(Solitaire, "autoPlay", { title: "Auto play", shortcuts: ["A"], undoneAs: "Auto play" })
-
+core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], undoneAs: "Auto Play" })
 /** Turn up a face-down card from a tableau, at random, onto the discards */
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
-
-// - its "game menu" is a menu of "auto play" , "cheat" , "start a new game" , "undo" and "redo"
-core.describeMenu(Solitaire, "gameMenu", { items: ["autoPlay", "cheat", "startANewGame", "undo", "redo"] })
+// - its "game menu" is a menu of "auto play", "cheat", "restart the game", "undo" and "redo"
+core.describeMenu(Solitaire, "gameMenu", { items: ["autoPlay", "cheat", "restartTheGame", "undo", "redo"] })
 
 core.heading("Playing a card")
 ////////////////////
@@ -936,13 +931,13 @@ core.heading("Playing a card")
  * the card, and every card on it, onto the first pile that takes it;  it says whether it moved
  * - the stock's card turns over onto the discards instead
  */
-core.describeAction(Card, "play", { title: "play a card", undoneAs: "Play Card" })
+core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
 
 /**
  * the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
  * - the pile it left turns its new last card up;  the move counts, and scores
  */
-core.describeAction(Card, "putOnPile", { title: "put a card on a pile", undoneAs: "Move Card" })
+core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
 
 // each card's events, and when it may be clicked:  the Inspector lists them, as written here
 // only a card face up, or the stock's, can be clicked:  the others show no pointer
@@ -964,7 +959,7 @@ core.heading("The piles")
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {
     const it = new Tableau()
-    core.echoTestAction(`set the column to a new tableau with name = "T1"`)
+    core.echoTestAction(`set the column to a new tableau with name "T1"`)
     let column = new Tableau({ name: "T1" })
     core.echoTestAction(`set the king to a new card whose rank is king, suit is spades and direction is up`)
     const king = new Card({
@@ -1013,7 +1008,7 @@ export function testTheMoves() {
       suit: "hearts",
       direction: "up"
     })
-    core.echoTestAction(`set the column to a new tableau with name = "T2"`)
+    core.echoTestAction(`set the column to a new tableau with name "T2"`)
     column = new Tableau({ name: "T2" })
     core.echoTestAction(`add the two to the column`)
     column.append(two)

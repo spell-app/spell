@@ -1,4 +1,4 @@
-import { kebabCase, proto } from "spell/util"
+import { initialCaps, kebabCase, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Wording } from "spell/parser/spell/rules/expressions"
@@ -653,7 +653,8 @@ export class MethodDefinition<
    * a getter for each condition, then the description, after the class -- none when it says nothing.
    * - e.g. `- enabled when it is face down` => `get turnOverIsEnabled() { return this.isFaceDown }`
    * - then `core.describeAction(Card, "turnOver", { title: "turn it over", enabledWhen: "turnOverIsEnabled" })`
-   * - Its title is its words as written, `turn it over`, unless it says one:  `- titled "Turn Over"`
+   * - Its title is its words as written in Initial Caps, `Turn It Over` (epic `language` P48), unless it says one:
+   *   `titled "Turn Over"`, or on its head line, `to "turn it over" with title "Turn Over"`
    *   (a fill-in:  a getter, `turnOverTitle`, and `titleFrom`, so it follows the program).
    * - Pure:  reads only matches.
    */
@@ -663,7 +664,9 @@ export class MethodDefinition<
     const details = ActionDetail.detailsOf(action, this.getBody(match))
     if (!details) return []
     const signature = (action.groups as { signature?: P.Match }).signature
-    const description: Record<string, P.ASTDescriptionValue> = { title: `${signature?.inputText ?? ""}`.trimEnd() }
+    // its title by default:  its words as written, in Initial Caps -- `auto play` is `Auto Play` (epic `language` P48)
+    const words = `${signature?.inputText ?? ""}`.trim().replace(/^"(.*)"$/, "$1")
+    const description: Record<string, P.ASTDescriptionValue> = { title: initialCaps(words) }
     if (details.shortcuts.length) description.shortcuts = details.shortcuts
     if (details.icon) description.icon = details.icon
     const statements: P.ASTStatement[] = []

@@ -104,7 +104,7 @@ describe("InspectorActions.run()", () => {
     realCore.resetRuntime()
     const error = vi.spyOn(realCore.console, "error").mockImplementation(() => {})
     void InspectorActions.run(realCore, card, InspectorActions.of(card, coreFor([]), WORDS)[0]!)
-    expect(error).toHaveBeenCalledWith("play failed", expect.any(Error))
+    expect(error).toHaveBeenCalledWith("Play failed", expect.any(Error))
     error.mockRestore()
   })
 })

@@ -54,20 +54,6 @@
         "enablement": "editorLangId == spell"
       },
       {
-        "command": "spell.showCodeSpell",
-        "title": "Show as Code Spell",
-        "category": "Spell",
-        "icon": "$(symbol-text)",
-        "enablement": "editorLangId == spell && spell.tagShaped"
-      },
-      {
-        "command": "spell.showSpellx",
-        "title": "Show as Spellx",
-        "category": "Spell",
-        "icon": "$(symbol-text)",
-        "enablement": "editorLangId == spell"
-      },
-      {
         "command": "spell.showLineTree",
         "title": "Show Tree for This Line",
         "category": "Spell",
@@ -149,13 +135,7 @@
         "extensions": [
           ".spell",
           ".en.spell",
-          ".es.spell",
-          ".spellml",
-          ".en.spellml",
-          ".es.spellml",
-          ".spellx",
-          ".en.spellx",
-          ".es.spellx"
+          ".es.spell"
         ],
         "configuration": "./language-configuration.json"
       }
@@ -169,16 +149,6 @@
         }
       ],
       "editor/title": [
-        {
-          "command": "spell.showCodeSpell",
-          "when": "editorLangId == spell && spell.tagShaped",
-          "group": "navigation@0"
-        },
-        {
-          "command": "spell.showSpellx",
-          "when": "editorLangId == spell && !spell.tagShaped",
-          "group": "navigation@0"
-        },
         {
           "command": "spell.showCompiledTypeScript",
           "when": "editorLangId == spell",

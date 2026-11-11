@@ -86,8 +86,8 @@
             </ui-accordion>
             <p>
               The Phases section's (<code>phases</code>, epic <code>epic-engine</code> I170): a phase's states, in your
-              order. Red needs you, orange changed since you looked, the one under way in the blue badge, a dotted blue
-              outline scheduled, green done lately, grey done before.
+              order. Red needs you, orange changed since you looked, green done lately, grey done before; the ones under
+              way and the ones scheduled together in the ONE blue badge (epic <code>epic-engine</code> I260).
             </p>
 <epic-state-filter phases counts="attention:1 updated:2 progress:1 scheduled:4 recent:2 old:40" shown="attention updated scheduled progress"></epic-state-filter>
             <ui-accordion class="spell-code" appearance="styled">
@@ -96,6 +96,22 @@
                 <ui-code language="html"
                   ><script type="text/plain">
                     <epic-state-filter phases counts="attention:1 updated:2 progress:1 scheduled:4 recent:2 old:40" shown="attention updated scheduled progress"></epic-state-filter>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <p>
+              The page's toolbar, while its sections disagree about a colour (<code>mixed</code>, epic
+              <code>epic-engine</code> I259): that chip has a pale fill, here the grey, shown in some sections and hidden in
+              others. A click shows it in every section, the Phases section too.
+            </p>
+<epic-state-filter counts="attention:1 open:4 old:12" shown="attention open" mixed="old"></epic-state-filter>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The mixed example · 1 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-state-filter counts="attention:1 open:4 old:12" shown="attention open" mixed="old"></epic-state-filter>
                   </script></ui-code
                 >
               </ui-content>
@@ -120,7 +136,7 @@
                 </thead>
                 <tbody>
                   <tr><td><code>&lt;epic-section&gt;</code>'s title</td><td>one</td><td>An item section's filter.</td></tr>
-                  <tr><td><code>&lt;epic-page&gt;</code>'s toolbar</td><td>one</td><td>Every section filtered at once.</td></tr>
+                  <tr><td><code>&lt;epic-page&gt;</code>'s toolbar</td><td>one</td><td>Every section filtered at once, the Phases section too:  a click SETS its colour in each.</td></tr>
                   <tr><td>a docs page's <code>&lt;ui-section&gt;</code>, <code>slot="actions"</code></td><td>one</td><td>The Epics page's lists (<code>.spell-item-filter</code>).</td></tr>
                 </tbody>
               </table>
@@ -137,8 +153,9 @@
                 </thead>
                 <tbody>
                   <tr><td><code>counts</code></td><td>How many items are in each state: <code>attention:2 open:5</code>. A chip per state with any, in the filter's order: progress, attention, replied, open, recent, old.</td></tr>
-                  <tr><td><code>phases</code></td><td>The Phases section's chips (epic <code>epic-engine</code> I170): <code>counts</code> names a phase's states, in your order: attention (red), updated (orange), progress (blue, in the badge), scheduled (a dotted blue outline), recent (green), old (grey), each with its own words.</td></tr>
+                  <tr><td><code>phases</code></td><td>The Phases section's chips (epic <code>epic-engine</code> I170): <code>counts</code> names a phase's states, in your order: attention (red), updated (orange), progress and scheduled (blue, both in the one badge, I260), recent (green), old (grey), each with its own words.</td></tr>
                   <tr><td><code>shown</code></td><td>The states showing. No attribute: every state; <code>""</code>: none.</td></tr>
+                  <tr><td><code>mixed</code></td><td>The states drawn mixed (epic <code>epic-engine</code> I259): the page's toolbar, while some sections show that colour and some hide it. A pale fill, <code>aria-pressed="mixed"</code>; a click shows it everywhere.</td></tr>
                   <tr><td><code>marked</code></td><td>How many items you marked in this pass, not applied yet (epic <code>epic-engine</code> P43): the blue badge, left of the chips, drawn whatever <code>shown</code> says. Left out of <code>counts</code>. None or 0: no badge.</td></tr>
                 </tbody>
               </table>

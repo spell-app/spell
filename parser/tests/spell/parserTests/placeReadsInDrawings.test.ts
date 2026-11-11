@@ -23,14 +23,10 @@ a "review" is a thing:
 
 /** What a view whose drawing is `drawing`, with a list of films, compiles to. */
 function compiled(drawing: string) {
-  const contents = `<spell-view "shelf">
-	<spell>
-		- its "films" is a list of films
-	</spell>
-	<draw>
-		${drawing}
-	</draw>
-</spell-view>`
+  const contents = `a "shelf" is a view:
+	its "films" is a list of films
+	to draw it:
+		${drawing}`
   const made = parseSpellProject([
     { path: "/Reviews.spell", contents: REVIEWS },
     { path: "/Shelf.spell", contents }
@@ -77,27 +73,35 @@ describe("a read of a place, right in a drawing", () => {
   })
 
   describe("in a loop", () => {
+    // in plain Spell a `<for>` is read inside an element
     const reviewsOfFilm = "every review where its film title is the title of film"
 
-    test("the loop's function stays a plain one", () => {
-      const { code } = compiled(`<for film in its films><table rows={${reviewsOfFilm}}/></for>`)
+    test('the loop\'s function stays a plain one;  in an element, the loop is a child value with its own "…"', () => {
+      const { code } = compiled(`<segment><for film in its films><table rows={${reviewsOfFilm}}/></for></segment>`)
       expect(code).toContain("core.drawEach(this.films, (film) => ")
+      expect(code).toContain("() => core.whileWaiting(() => core.drawEach(this.films")
+      expect(code).not.toContain("static drawsWaiting")
+    })
+
+    test("on a line of its own, the whole drawing is held until its answer, as `for` lines are (epic `language` I73)", () => {
+      const { code } = compiled(`<for film in its films><table rows={${reviewsOfFilm}}/></for>`)
+      expect(code).toContain("return core.drawEach(this.films, (film) => ")
       expect(code).toContain("static drawsWaiting = true")
     })
 
     test("a read naming the loop's item is a value per item", () => {
-      const { code } = compiled(`<for film in its films><table rows={${reviewsOfFilm}}/></for>`)
+      const { code } = compiled(`<segment><for film in its films><table rows={${reviewsOfFilm}}/></for></segment>`)
       expect(code).toContain(`core.waitedValue(core.waitedValueKeyFor(this, film), "${reviewsOfFilm}"`)
     })
 
     test("a read that doesn't name it is one value for the whole drawing", () => {
-      const { code } = compiled(`<for film in its films><table rows={every review}/></for>`)
+      const { code } = compiled(`<segment><for film in its films><table rows={every review}/></for></segment>`)
       expect(code).toContain('core.waitedValue(this, "every review"')
     })
 
     test("over a read of a place too:  its items' function stays plain", () => {
       const { code } = compiled(
-        `<for review in every review><text>{the number of reviews where its film title is the film title of review}</text></for>`
+        `<segment><for review in every review><text>{the number of reviews where its film title is the film title of review}</text></for>`
       )
       expect(code).toContain("core.drawRead(async () => await core.savedThings(Review, {}, ")
       expect(code).toContain(', (review) => h("ui-text"')

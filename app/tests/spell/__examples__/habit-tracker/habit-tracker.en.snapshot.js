@@ -30,8 +30,8 @@ export const words = {
   },
   groups: {
     Habit: [
-      { name: "days", description: "A yes or no for each day of the week", members: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] },
-      { name: "totals", description: "Worked out from its days, again as each one is ticked", members: ["days", "count", "streak", "draw"] },
+      { name: "Days", description: "A yes or no for each day of the week", members: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] },
+      { name: "Totals", description: "Worked out from its days, again as each one is ticked", members: ["days", "count", "streak", "draw"] },
       { name: "The week", members: ["week"] }
     ]
   }

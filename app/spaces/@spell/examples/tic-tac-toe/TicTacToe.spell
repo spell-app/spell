@@ -1,42 +1,44 @@
 # Tic-Tac-Toe
-Two players take turns, X then O, putting their mark in an empty square.
-Three in a row, across, down or corner to corner, wins;  nine marks and no row is a draw.
-A square is this project's own, in `Square.spell`;
-this file holds the game, its board, and what a click on a square does.
+// Two players take turns, X then O, putting their mark in an empty square.
+// Three in a row, across, down or corner to corner, wins;  nine marks and no row is a draw.
+// A square is this project's own, in `Square.spell`;
+// this file holds the game, its board, and what a click on a square does.
 
-<app "tic tac toe">
-	<property "board">a new board</>
-	<property "turn" description="Whose turn it is:  X or O">text</>
-	<property "winner" description="Who won:  X, O, nobody for a draw, or empty while the game goes on">text</>
-	<alias "is over">if its winner is not ""</>
-	<property "message" description="What the line above the board says">
+tic tac toe is an app
+	"board" is a new board
+	its "turn" is text
+		// Whose turn it is:  X or O
+	its "winner" is text
+		// Who won:  X, O, nobody for a draw, or empty while the game goes on
+	it "is over" if its winner is not ""
+	its "message" is
+		// What the line above the board says
 		its turn + " to play" if its winner is ""
 		"A draw" if its winner is "nobody"
 		its winner + " wins!" otherwise
-	</property>
 
-	<action "create it" description="Nine squares, made with the game">
+	to create it
+		// Nine squares, made with the game
 		// inside the loop `it` is the count:  so the board is the game's, by name
 		repeat 9 times
 			add a new square to tic tac toe's board
-	</action>
 
-	<group "playing"/>
-	<action "start a new game" shortcut="N" description="An empty board, X to play">
+	group "Playing"
+	to start a new game
+		// An empty board, X to play
+		shortcut N
 		for square in its board
 			clear the square's mark
 		set its turn to "X"
 		clear its winner
-	</action>
-	<spell>
+	to check the line from square (a as a number) through (b as a number) to (c as a number)
 		// the same mark in all three squares wins
-		- to check the line from square (a as a number) through (b as a number) to (c as a number):
-			set mark to the mark of square a of its board
-			if mark is "" return
-			if the mark of square b of its board is mark and the mark of square c of its board is mark
-				set its winner to mark
-	</spell>
-	<action "check for a winner" description="Three in a row:  each row, each column, and the two diagonals;  a full board with none is a draw">
+		set mark to the mark of square a of its board
+		if mark is "" return
+		if the mark of square b of its board is mark and the mark of square c of its board is mark
+			set its winner to mark
+	to check for a winner
+		// Three in a row:  each row, each column, and the two diagonals;  a full board with none is a draw
 		check the line from square 1 through 2 to 3
 		check the line from square 4 through 5 to 6
 		check the line from square 7 through 8 to 9
@@ -47,9 +49,9 @@ this file holds the game, its board, and what a click on a square does.
 		check the line from square 3 through 5 to 7
 		if its winner is "" and its board has no squares where it is empty
 			set its winner to "nobody"
-	</action>
 
-	<draw description="The message, the board three squares a row, then a button for a new game">
+	to draw it
+		// The message, the board three squares a row, then a button for a new game
 		<container width="22em">
 			<card fluid>
 				<content>
@@ -61,56 +63,47 @@ this file holds the game, its board, and what a click on a square does.
 				</content>
 			</card>
 		</container>
-	</draw>
-</app>
 
 ## The board
-Nine squares, three a row:  square 1 top left, square 9 bottom right.
-It draws each square as a big button, its mark in the mark's color;  a click plays it.
+// Nine squares, three a row:  square 1 top left, square 9 bottom right.
+// It draws each square as a big button, its mark in the mark's color;  a click plays it.
 
-<thing "board" template="list of squares">
-	<draw>
-		<for square in it as="grid" columns="3" spacing="compact">
+a "board" is a list of squares
+	to draw it
+		for square in it
 			<column>
 				<button fluid size="massive" appearance="basic" color={the color of the square} onClick={play the square}>
 					{the label of the square}
 				</button>
 			</column>
-		</for>
-	</draw>
-</thing>
+		show them in: <grid columns="3" spacing="compact"></grid>
 
 ## Playing a square
-What a click on a square does, added to this project's square:  `<extend>` adds to a type another file declares.
+// What a click on a square does, added to this project's square:  `<extend>` adds to a type another file declares.
 
-<extend "square">
-	<action "play it" description="The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn">
+a square
+	to play it
+		// The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn
 		if tic tac toe is over or it is not empty return
 		set its mark to tic tac toe's turn
 		check for a winner
 		set tic tac toe's turn to "O" if tic tac toe's turn is "X" otherwise "X"
-	</action>
-</extend>
 
-<spell>
+a square belongs to one board
 	// a square is on one board
-	a square belongs to one board
-</spell>
 
 ## Start, and a test
 
-<spell>
-	start a new game
+start a new game
 
-	to test three in a row
-		start a new game
-		play square 1 of tic tac toe's board
-		play square 4 of tic tac toe's board
-		play square 2 of tic tac toe's board
-		play square 5 of tic tac toe's board
-		play square 3 of tic tac toe's board
-		tic tac toe's winner should be "X"
-		tic tac toe's message should be "X wins!"
-		the color of square 1 of tic tac toe's board should be "blue"
-		start a new game
-</spell>
+to test three in a row
+	start a new game
+	play square 1 of tic tac toe's board
+	play square 4 of tic tac toe's board
+	play square 2 of tic tac toe's board
+	play square 5 of tic tac toe's board
+	play square 3 of tic tac toe's board
+	tic tac toe's winner should be "X"
+	tic tac toe's message should be "X wins!"
+	the color of square 1 of tic tac toe's board should be "blue"
+	start a new game

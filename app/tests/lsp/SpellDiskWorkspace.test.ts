@@ -68,7 +68,7 @@ describe("SpellDiskWorkspace:  a built-in template's source", () => {
     const [where] = service.definition(cards, position)
     expect(where?.uri).toMatch(/\/core\/templates\/TwoSidedView\.spell$/)
     const template = readFileSync(fileURLToPath(where!.uri), "utf8").split("\n")
-    expect(template[where!.range.start.line]).toContain("to turn it over:")
+    expect(template[where!.range.start.line]).toContain("to turn it over")
     expect(JSON.stringify(service.hover(cards, position)?.contents)).toContain("TwoSidedView.spell:")
   })
 

@@ -1,4 +1,4 @@
-<page "image usage" notebook>
+"image usage" is a notebook page
 	<header level="1">
 		Image
 		<header>An image is a graphic representation of something.</>
@@ -45,4 +45,3 @@
 			  images, without the group layout.
 		</>
 	</>
-</page>

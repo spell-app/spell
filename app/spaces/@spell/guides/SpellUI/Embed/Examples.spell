@@ -1,4 +1,4 @@
-<page "embed examples" notebook>
+"embed examples" is a notebook page
 	<header level="1">
 		Embed
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
@@ -64,4 +64,3 @@
 			</example>
 		</>
 	</>
-</page>

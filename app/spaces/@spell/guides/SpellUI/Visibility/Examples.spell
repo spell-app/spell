@@ -1,44 +1,43 @@
-<page "visibility examples" notebook>
+<!-- Examples › Infinite Scroll's list:  three more items each time its bottom comes into view, up to twelve -->
+an "endless list" is a view:
+	// How many of its twelve items show
+	its "shown" is a number
+	its "loading" is yes or no
+	to create it: set its shown to 3
+	// Three more items, after a moment's loading, until all twelve show
+	to load more:
+		if its shown >= 12 return
+		set its loading to yes
+		pause for 0.5 seconds
+		set its shown to its shown + 3
+		set its loading to no
+	to draw it:
+		<visibility once="false" on-ui-bottom-in-view={load more}>
+			<segment>
+				<header level="3" align="center">Infinite Scroll Example</header>
+				<list divided spacing="lg">
+					<item>Item 1</item>
+					<item>Item 2</item>
+					<item>Item 3</item>
+					<item visible={its shown >= 4}>Item 4</item>
+					<item visible={its shown >= 5}>Item 5</item>
+					<item visible={its shown >= 6}>Item 6</item>
+					<item visible={its shown >= 7}>Item 7</item>
+					<item visible={its shown >= 8}>Item 8</item>
+					<item visible={its shown >= 9}>Item 9</item>
+					<item visible={its shown >= 10}>Item 10</item>
+					<item visible={its shown >= 11}>Item 11</item>
+					<item visible={its shown >= 12}>Item 12</item>
+				</list>
+				<loader inline align="center" size="small" visible={its loading}/>
+			</segment>
+		</visibility>
+
+"visibility examples" is a notebook page
 	<header level="1">
 		Visibility
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
 	</>
-
-	<!-- Examples › Infinite Scroll's list:  three more items each time its bottom comes into view, up to twelve -->
-	<view "endless list">
-		<property "shown" description="How many of its twelve items show">a number</>
-		<property "loading">yes or no</>
-		<action "create it">set its shown to 3</>
-		<action "load more" description="Three more items, after a moment's loading, until all twelve show">
-			if its shown >= 12 return
-			set its loading to yes
-			pause for 0.5 seconds
-			set its shown to its shown + 3
-			set its loading to no
-		</action>
-		<draw>
-			<visibility once="false" on-ui-bottom-in-view={load more}>
-				<segment>
-					<header level="3" align="center">Infinite Scroll Example</header>
-					<list divided spacing="lg">
-						<item>Item 1</item>
-						<item>Item 2</item>
-						<item>Item 3</item>
-						<item visible={its shown >= 4}>Item 4</item>
-						<item visible={its shown >= 5}>Item 5</item>
-						<item visible={its shown >= 6}>Item 6</item>
-						<item visible={its shown >= 7}>Item 7</item>
-						<item visible={its shown >= 8}>Item 8</item>
-						<item visible={its shown >= 9}>Item 9</item>
-						<item visible={its shown >= 10}>Item 10</item>
-						<item visible={its shown >= 11}>Item 11</item>
-						<item visible={its shown >= 12}>Item 12</item>
-					</list>
-					<loader inline align="center" size="small" visible={its loading}/>
-				</segment>
-			</visibility>
-		</draw>
-	</view>
 
 	<section>
 		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
@@ -394,4 +393,3 @@
 			</example>
 		</>
 	</>
-</page>

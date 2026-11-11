@@ -2,7 +2,7 @@ import { withoutAccents } from "spell/util"
 import { SP } from "spell/parser/spell"
 
 /**
- * A few of Spell UI's components, as spellx names them bare (`<text>`, `<botón>`), for spell-parser's own tests:
+ * A few of Spell UI's components, as a drawing names them bare (`<text>`, `<botón>`), for spell-parser's own tests:
  * spell-parser never imports Spell UI, so spell-app registers the real pack (`SP.ComponentPacks`, epic
  * `elemental-spell` P7).
  * - English:  the tag without its `ui-`;  Spanish:  Spell UI's Spanish names, `es-` before them.

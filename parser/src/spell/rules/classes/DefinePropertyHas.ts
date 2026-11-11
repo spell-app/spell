@@ -403,6 +403,11 @@ export class DefinePropertyHas extends SpellStatement<
       const name = P.pluralize(upperFirst(property.value))
       statements.push(new P.ASTStaticDefinition(match, { type: typeAST, name, value: specifier }))
       check.addProp("oneOf", new P.ASTPropertyExpression(match, { object: typeAST, property: name }))
+      // where it starts, on its line:  `one of up or down, with default down` (epic `language` P48)
+      const { start, word } = (match.groups.specifier?.groups ?? {}) as { start?: P.Match; word?: P.Match }
+      initializer = word
+        ? new P.ASTStringLiteral(word, { value: JSON.stringify(`${word.value}`) })
+        : (start?.AST as P.ASTExpression | undefined)
     }
     // instance specifier:  a default, made once per instance -- a list's says what it holds, for saving
     else if (specifier instanceof P.ASTNewInstanceExpression) {
@@ -464,7 +469,11 @@ export class DefinePropertyHas extends SpellStatement<
     )
     // what its body says besides its rules, e.g. its aliases (epic `elemental-spell` Q13):  compiled after it,
     // as if written after its line, each with its `SPELL: DECLARES` comment, so an importer reads them too
-    for (const line of (this.getBody(match)?.matched ?? []) as P.Match[]) {
+    const body = this.getBody(match)
+    // its body's first line, when that's its description, is written above it (epic `language` P48)
+    const description = body?.data.describes ? SP.Block.descriptionLineOf(body) : undefined
+    for (const line of (body?.matched ?? []) as P.Match[]) {
+      if (line === description) continue
       const statement = (line.data as { statement?: P.Match }).statement
       if (statement?.is(PropertyBodyMust)) continue
       const declares = statement && SP.SpellDeclarations.commentFor(statement)

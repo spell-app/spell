@@ -1,4 +1,4 @@
-<page "comment api" notebook>
+"comment api" is a notebook page
 	<header level="1">
 		Comment
 		<header>A comment displays user feedback to site content.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api family="ui-comment" only="states"></>
 		</>
 	</>
-</page>

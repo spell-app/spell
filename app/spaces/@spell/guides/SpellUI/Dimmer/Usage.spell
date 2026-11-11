@@ -1,4 +1,4 @@
-<page "dimmer usage" notebook>
+"dimmer usage" is a notebook page
 	<header level="1">
 		Dimmer
 		<header>A dimmer hides distractions to focus attention on particular content.</>
@@ -125,4 +125,3 @@
 			```
 		</>
 	</>
-</page>

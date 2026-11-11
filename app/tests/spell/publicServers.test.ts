@@ -52,9 +52,9 @@ function answerAsRecorded(): Array<{ url: string; key: string | null }> {
   return asked
 }
 
-/** `api`, a file in tags (epic `language` P40), with plain Spell `lines` after it, in a `<spell>` block. */
+/** `api`, a plain Spell file (epic `language` P46), with Spell `lines` after it, at the file's top level. */
 function withSpell(api: string, ...lines: string[]): string {
-  return `${api}\n<spell>\n${lines.map((line) => `\t${line}`).join("\n")}\n</spell>\n`
+  return `${api}\n${lines.join("\n")}\n`
 }
 
 /** The example's types, compiled and run. */
@@ -383,7 +383,7 @@ describe("The Met Museum, through its Spell", () => {
         { path: "/MetMuseum.api.spell", contents: withSpell(lines, 'set found to every artwork matching "sun"') }
       ])
     expect(reads(api)).not.toThrow()
-    expect(reads(api.replace(/\t- it searches everything with .*\n/, ""))).toThrow(
+    expect(reads(api.replace(/\tit searches everything with .*\n/, ""))).toThrow(
       /artworks are found this way only in a place that searches all of each thing/
     )
   })

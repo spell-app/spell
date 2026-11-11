@@ -16,6 +16,7 @@ import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
 import { ActionDetail } from "./ActionDetail"
+import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
 import { MethodSignature } from "./MethodSignature"
@@ -670,6 +671,12 @@ methodsEs.addRule(ToDoSomething, {
   ]
 })
 
+// its name quoted, and what it says about itself on its line (epic `language` P48, Q6):
+// `para "repartir las cartas" con título "Repartir", icono "carta", atajo "meta+N"`
+methodsEs.addRule(ToDoSomething, {
+  syntax: `para {signature:quoted_method_signature} {modifiers:action_modifiers}? :? {statement_body}?`
+})
+
 methodsEs.addRule(CreateAnimation, {
   syntax: `crear? (animación|animacion) {signature:method_signature} :? {statement_body}?`,
   tests: [
@@ -1039,6 +1046,13 @@ methodsEs.addRule(CreateHook, {
   ]
 })
 
+// what an action's head line says about it (epic `language` P48, Q6):  `con título "Repartir", icono "carta", atajo "meta+N"`
+methodsEs.addRule(ActionModifier, { syntax: "título {title:text}" })
+methodsEs.addRule(ActionModifier, { syntax: "icono {icon:text}" })
+methodsEs.addRule(ActionModifier, { syntax: "atajo {keys:text}" })
+methodsEs.addRule(ActionModifier, { syntax: "(undoable:deshacible)" })
+methodsEs.addRule(ActionModifiers, { syntax: "con [{action_modifier} (,|y)]" })
+
 // one keyboard shortcut, its keys joined by `+`, no spaces:  `meta+T` -- what `action_detail` reads after `atajo`
 methodsEs.addRule(ShortcutKeys)
 
@@ -1075,7 +1089,7 @@ methodsEs.addRule(ActionDetail, {
             '    return this.dirección === "abajo"',
             "  }",
             "}",
-            'core.describeAction(Carta, "voltear", { title: "voltearla", shortcuts: ["meta+T"], enabledWhen: "voltearIsEnabled", undoneAs: "Voltear carta" })'
+            'core.describeAction(Carta, "voltear", { title: "Voltearla", shortcuts: ["meta+T"], enabledWhen: "voltearIsEnabled", undoneAs: "Voltear carta" })'
           ],
           ts: [
             "export type Dirección = (typeof Carta.Direcciones)[number]",
@@ -1094,7 +1108,7 @@ methodsEs.addRule(ActionDetail, {
             '    return this.dirección === "abajo"',
             "  }",
             "}",
-            'core.describeAction(Carta, "voltear", { title: "voltearla", shortcuts: ["meta+T"], enabledWhen: "voltearIsEnabled", undoneAs: "Voltear carta" })'
+            'core.describeAction(Carta, "voltear", { title: "Voltearla", shortcuts: ["meta+T"], enabledWhen: "voltearIsEnabled", undoneAs: "Voltear carta" })'
           ]
         }
       ]
@@ -1149,7 +1163,7 @@ methodsEs.addRule(ActionDetail, {
             "    return `Duplicar ${this.nombre}…`",
             "  }",
             "}",
-            'core.describeAction(Juego, "duplicar", { title: "duplicarlo", titleFrom: "duplicarTitle" })'
+            'core.describeAction(Juego, "duplicar", { title: "Duplicarlo", titleFrom: "duplicarTitle" })'
           ],
           ts: [
             "export class Juego extends Thing {",
@@ -1165,7 +1179,7 @@ methodsEs.addRule(ActionDetail, {
             "    return `Duplicar ${this.nombre}…`",
             "  }",
             "}",
-            'core.describeAction(Juego, "duplicar", { title: "duplicarlo", titleFrom: "duplicarTitle" })'
+            'core.describeAction(Juego, "duplicar", { title: "Duplicarlo", titleFrom: "duplicarTitle" })'
           ]
         }
       ]

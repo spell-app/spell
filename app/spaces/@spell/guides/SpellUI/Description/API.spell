@@ -1,4 +1,4 @@
-<page "description api" notebook>
+"description api" is a notebook page
 	<header level="1">
 		Description
 		<header>A description is the text of a card, item, modal, list item, step or comment.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api tag="ui-description" only="states"></>
 		</>
 	</>
-</page>

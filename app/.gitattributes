@@ -24,6 +24,9 @@ app/docs/__data/search.json5                                  linguist-generated
 # epic `debut` P22);  its `package.json` lists them, and stays hand-kept
 vscode/themes/*.json                                          linguist-generated merge=binary
 
+# the bubbly look's settings as plain values, for VS Code (`yarn tsx scripts/bubbly-values.ts`, epic `language` P49)
+src/app/components/spell-code/bubbly.values.json              linguist-generated merge=binary
+
 # vendored Fomantic build
 app/static/semantic-ui-css/**                                 linguist-vendored -diff
 

@@ -1,6 +1,6 @@
 # Recipe Box
-Your recipes, on cards:  find one, add one, change one as you type or on its Edit screen, remove one and undo it.
-Where they're kept is in RecipeBox.api.spell, and only its first line knows.
+// Your recipes, on cards:  find one, add one, change one as you type or on its Edit screen, remove one and undo it.
+// Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 
 // Every notes box grows as you type
 <ui-defaults>
@@ -9,12 +9,12 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 
 ## A recipe:  a card you can read and change
 
-<extend "recipe">
-	<action "edit it" description="Its Edit screen:  nothing changes until Save">
+a recipe
+	to edit it
+		// Its Edit screen:  nothing changes until Save
 		set the editing of the recipe box to it
-	</action>
 
-	<draw>
+	to draw it
 		<card>
 			<content>
 				<form value={it} class="recipe">
@@ -32,27 +32,26 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 				</form>
 			</content>
 		</card>
-	</draw>
-</extend>
-
 
 ## Its Edit screen:  a form over a draft, so nothing changes until Save
 
-<view "recipe editor">
-	<property "recipe" type="recipe" description="The recipe being changed"/>
-	<property "draft" description="A copy to change:  the recipe stays as it was until Save">a draft of its recipe</property>
+a "recipe editor" is a view
+	its "recipe" is a recipe
+		// The recipe being changed
+	its "draft" is a draft of its recipe
+		// A copy to change:  the recipe stays as it was until Save
 
-	<action "save it" description="Every changed field, sent together">
+	to save it
+		// Every changed field, sent together
 		save its draft
 		set the editing of the recipe box to nothing
-	</action>
 
-	<action "cancel it" description="Forget the copy:  the recipe never changed">
+	to cancel it
+		// Forget the copy:  the recipe never changed
 		discard its draft
 		set the editing of the recipe box to nothing
-	</action>
 
-	<draw>
+	to draw it
 		<card class="editor">
 			<content>
 				<form value={its draft}>
@@ -73,35 +72,32 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 				<button class="cancel" size="small" onClick={cancel it}>Cancel</button>
 			</extra>
 		</card>
-	</draw>
-</view>
-
 
 ## The box:  the card for a new recipe, then a card for each one you have
 
-<app "recipe box">
-	<property "search">text</>
-	<property "new recipe">a new recipe with servings = 4</>
-	<property "editing" type="recipe" description="The recipe on its Edit screen, while one is"/>
-	<property "box menu">a menu of "undo"</>
+recipe box is an app
+	its "search" is text
+	"new recipe" is a new recipe with servings = 4
+	its "editing" is a recipe
+		// The recipe on its Edit screen, while one is
+	its "box menu" is a menu of "undo"
 
-	<action "create it" description="With nothing kept yet, a few to start from">
+	to create it
+		// With nothing kept yet, a few to start from
 		if there are no recipes
-			add (a new recipe with title = "Tomato soup", servings = 4, notes = "Roast the tomatoes first.") to the recipes
-			add (a new recipe with title = "Dal", servings = 6, notes = "Add the spices last.") to the recipes
-			add (a new recipe with title = "Pizza Margherita", servings = 2, notes = "A very hot oven.") to the recipes
-	</action>
+			add (a new recipe with title "Tomato soup", servings = 4, notes = "Roast the tomatoes first.") to the recipes
+			add (a new recipe with title "Dal", servings = 6, notes = "Add the spices last.") to the recipes
+			add (a new recipe with title "Pizza Margherita", servings = 2, notes = "A very hot oven.") to the recipes
 
-	<property "matches" description="Newest first, by when each was saved">
+	its "matches" is
+		// Newest first, by when each was saved
 		return every recipe where its title includes the search, sorted by its created, newest first
-	</property>
 
-	<action "add the new recipe">
+	to add the new recipe
 		add the new recipe to the recipes
 		set its new recipe to a new recipe with servings = 4
-	</action>
 
-	<draw>
+	to draw it
 		<container>
 			<stack direction="horizontal" wrap align="end" justify="between">
 				<stack align="start">
@@ -117,12 +113,12 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 			</stack>
 			{draw the screen of it}
 		</container>
-	</draw>
 
-	<draw "screen" description="Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one">
-		<if its editing>
+	to draw its screen
+		// Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
+		if its editing
 			draw (a new recipe editor with recipe = its editing)
-		<otherwise>
+		otherwise
 			<cards columns="3" doubling stackable>
 				<card class="new">
 					<content>
@@ -155,6 +151,3 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 					</failed>
 				</for>
 			</cards>
-		</>
-	</draw>
-</app>

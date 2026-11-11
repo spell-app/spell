@@ -23,19 +23,19 @@
         "placeType": "AdminRole",
         "collection": "org_profiles"
       },
-      "defined": "/OrgAdmin.api.spell:606-727"
+      "defined": "/OrgAdmin.api.spell:517-677"
     },
     {
       "property": "name",
       "of": "OrgProfile",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:676-697"
+      "defined": "/OrgAdmin.api.spell:638-656"
     },
     {
       "property": "space",
       "of": "OrgProfile",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:702-724"
+      "defined": "/OrgAdmin.api.spell:658-677"
     },
     {
       "type": "Member",
@@ -45,32 +45,32 @@
         "placeType": "AdminRole",
         "collection": "members"
       },
-      "defined": "/OrgAdmin.api.spell:738-912"
+      "defined": "/OrgAdmin.api.spell:679-812"
     },
     {
       "property": "person",
       "of": "Member",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:803-826"
+      "defined": "/OrgAdmin.api.spell:727-747"
     },
     {
       "property": "name",
       "of": "Member",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:831-852"
+      "defined": "/OrgAdmin.api.spell:749-767"
     },
     {
       "property": "role",
       "of": "Member",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:857-878"
+      "defined": "/OrgAdmin.api.spell:769-787"
     },
     {
       "property": "role_name",
       "asWritten": "role name",
       "of": "Member",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:883-909"
+      "defined": "/OrgAdmin.api.spell:789-812"
     },
     {
       "type": "Team",
@@ -80,19 +80,19 @@
         "placeType": "AdminRole",
         "collection": "teams"
       },
-      "defined": "/OrgAdmin.api.spell:923-1037"
+      "defined": "/OrgAdmin.api.spell:814-899"
     },
     {
       "property": "name",
       "of": "Team",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:986-1007"
+      "defined": "/OrgAdmin.api.spell:860-878"
     },
     {
       "property": "space",
       "of": "Team",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1012-1034"
+      "defined": "/OrgAdmin.api.spell:880-899"
     },
     {
       "type": "Project",
@@ -102,25 +102,25 @@
         "placeType": "AdminRole",
         "collection": "projects"
       },
-      "defined": "/OrgAdmin.api.spell:1048-1191"
+      "defined": "/OrgAdmin.api.spell:901-1009"
     },
     {
       "property": "name",
       "of": "Project",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1114-1135"
+      "defined": "/OrgAdmin.api.spell:950-968"
     },
     {
       "property": "team",
       "of": "Project",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1140-1161"
+      "defined": "/OrgAdmin.api.spell:970-988"
     },
     {
       "property": "space",
       "of": "Project",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1166-1188"
+      "defined": "/OrgAdmin.api.spell:990-1009"
     },
     {
       "type": "OrgRole",
@@ -130,19 +130,19 @@
         "placeType": "AdminRole",
         "collection": "org_roles"
       },
-      "defined": "/OrgAdmin.api.spell:1202-1322"
+      "defined": "/OrgAdmin.api.spell:1011-1103"
     },
     {
       "property": "name",
       "of": "OrgRole",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1269-1290"
+      "defined": "/OrgAdmin.api.spell:1062-1080"
     },
     {
       "property": "manages",
       "of": "OrgRole",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1295-1319"
+      "defined": "/OrgAdmin.api.spell:1082-1103"
     },
     {
       "type": "Term",
@@ -152,58 +152,58 @@
         "placeType": "AdminRole",
         "collection": "terms"
       },
-      "defined": "/OrgAdmin.api.spell:1333-1629"
+      "defined": "/OrgAdmin.api.spell:1105-1336"
     },
     {
       "property": "role",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1396-1417"
+      "defined": "/OrgAdmin.api.spell:1151-1169"
     },
     {
       "property": "holder",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1422-1445"
+      "defined": "/OrgAdmin.api.spell:1171-1191"
     },
     {
       "property": "manages",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1450-1474"
+      "defined": "/OrgAdmin.api.spell:1193-1214"
     },
     {
       "property": "role_name",
       "asWritten": "role name",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1479-1505"
+      "defined": "/OrgAdmin.api.spell:1216-1239"
     },
     {
       "property": "holder_name",
       "asWritten": "holder name",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1510-1538"
+      "defined": "/OrgAdmin.api.spell:1241-1266"
     },
     {
       "property": "manages_name",
       "asWritten": "manages name",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1543-1572"
+      "defined": "/OrgAdmin.api.spell:1268-1294"
     },
     {
       "property": "starts",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1577-1600"
+      "defined": "/OrgAdmin.api.spell:1296-1316"
     },
     {
       "property": "ends",
       "of": "Term",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1605-1626"
+      "defined": "/OrgAdmin.api.spell:1318-1336"
     },
     {
       "type": "ApprovedApp",
@@ -213,19 +213,19 @@
         "placeType": "AdminRole",
         "collection": "approved_apps"
       },
-      "defined": "/OrgAdmin.api.spell:1640-1764"
+      "defined": "/OrgAdmin.api.spell:1338-1434"
     },
     {
       "property": "name",
       "of": "ApprovedApp",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1711-1732"
+      "defined": "/OrgAdmin.api.spell:1393-1411"
     },
     {
       "property": "version",
       "of": "ApprovedApp",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1737-1761"
+      "defined": "/OrgAdmin.api.spell:1413-1434"
     },
     {
       "type": "Designer",
@@ -235,26 +235,26 @@
         "placeType": "AdminRole",
         "collection": "designers"
       },
-      "defined": "/OrgAdmin.api.spell:1879-2032"
+      "defined": "/OrgAdmin.api.spell:1436-1659"
     },
     {
       "property": "person",
       "of": "Designer",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1946-1969"
+      "defined": "/OrgAdmin.api.spell:1591-1611"
     },
     {
       "property": "space",
       "of": "Designer",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:1974-1996"
+      "defined": "/OrgAdmin.api.spell:1613-1632"
     },
     {
       "property": "person_name",
       "asWritten": "person name",
       "of": "Designer",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2001-2029"
+      "defined": "/OrgAdmin.api.spell:1634-1659"
     },
     {
       "type": "Stage",
@@ -264,27 +264,27 @@
         "placeType": "AdminRole",
         "collection": "stages"
       },
-      "defined": "/OrgAdmin.api.spell:2176-2324"
+      "defined": "/OrgAdmin.api.spell:1661-1908"
     },
     {
       "property": "name",
       "of": "Stage",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2240-2261"
+      "defined": "/OrgAdmin.api.spell:1842-1860"
     },
     {
       "property": "moves_to",
       "asWritten": "moves to",
       "of": "Stage",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2266-2291"
+      "defined": "/OrgAdmin.api.spell:1862-1884"
     },
     {
       "property": "moved_by",
       "asWritten": "moved by",
       "of": "Stage",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2296-2321"
+      "defined": "/OrgAdmin.api.spell:1886-1908"
     },
     {
       "type": "RoleChange",
@@ -294,37 +294,37 @@
         "placeType": "AdminRole",
         "collection": "role_changes"
       },
-      "defined": "/OrgAdmin.api.spell:2335-2528"
+      "defined": "/OrgAdmin.api.spell:1910-2056"
     },
     {
       "property": "at",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2405-2424"
+      "defined": "/OrgAdmin.api.spell:1963-1979"
     },
     {
       "property": "who",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2429-2449"
+      "defined": "/OrgAdmin.api.spell:1981-1998"
     },
     {
       "property": "did",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2454-2474"
+      "defined": "/OrgAdmin.api.spell:2000-2017"
     },
     {
       "property": "what",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2479-2500"
+      "defined": "/OrgAdmin.api.spell:2019-2037"
     },
     {
       "property": "why",
       "of": "RoleChange",
       "datatype": "text",
-      "defined": "/OrgAdmin.api.spell:2505-2525"
+      "defined": "/OrgAdmin.api.spell:2039-2056"
     },
     {
       "type": "AdminRole",
@@ -342,61 +342,61 @@
           }
         }
       },
-      "defined": "/OrgAdmin.api.spell:420-523"
+      "defined": "/OrgAdmin.api.spell:406-515"
     },
     {
       "type": "OrgAdmin",
       "superType": "App",
-      "defined": "/OrgAdmin.spell:582-13189"
+      "defined": "/OrgAdmin.spell:590-12901"
     },
     {
       "property": "new_member",
       "asWritten": "new member",
       "of": "OrgAdmin",
       "datatype": "Member",
-      "defined": "/OrgAdmin.spell:595-682"
+      "defined": "/OrgAdmin.spell:611-682"
     },
     {
       "property": "new_team",
       "asWritten": "new team",
       "of": "OrgAdmin",
       "datatype": "Team",
-      "defined": "/OrgAdmin.spell:687-765"
+      "defined": "/OrgAdmin.spell:684-746"
     },
     {
       "property": "new_project",
       "asWritten": "new project",
       "of": "OrgAdmin",
       "datatype": "Project",
-      "defined": "/OrgAdmin.spell:770-886"
+      "defined": "/OrgAdmin.spell:748-848"
     },
     {
       "property": "new_term",
       "asWritten": "new term",
       "of": "OrgAdmin",
       "datatype": "Term",
-      "defined": "/OrgAdmin.spell:891-922"
+      "defined": "/OrgAdmin.spell:850-874"
     },
     {
       "property": "new_app",
       "asWritten": "new app",
       "of": "OrgAdmin",
       "datatype": "ApprovedApp",
-      "defined": "/OrgAdmin.spell:927-965"
+      "defined": "/OrgAdmin.spell:876-907"
     },
     {
       "property": "new_designer",
       "asWritten": "new designer",
       "of": "OrgAdmin",
       "datatype": "Designer",
-      "defined": "/OrgAdmin.spell:970-1055"
+      "defined": "/OrgAdmin.spell:909-978"
     },
     {
       "property": "new_stage",
       "asWritten": "new stage",
       "of": "OrgAdmin",
       "datatype": "Stage",
-      "defined": "/OrgAdmin.spell:1060-1208"
+      "defined": "/OrgAdmin.spell:980-1112"
     },
     {
       "syntax": "add the new member (of {thisArg:expression})?",
@@ -410,7 +410,7 @@
       "kind": "method",
       "name": "add the new member",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spell:1214-1316"
+      "defined": "/OrgAdmin.spell:1115-1209"
     },
     {
       "syntax": "add the new team (of {thisArg:expression})?",
@@ -424,7 +424,7 @@
       "kind": "method",
       "name": "add the new team",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spell:1330-1422"
+      "defined": "/OrgAdmin.spell:1212-1296"
     },
     {
       "syntax": "add the new project (of {thisArg:expression})?",
@@ -438,7 +438,7 @@
       "kind": "method",
       "name": "add the new project",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spell:1436-1543"
+      "defined": "/OrgAdmin.spell:1299-1398"
     },
     {
       "syntax": "give the new term (of {thisArg:expression})?",
@@ -452,7 +452,7 @@
       "kind": "method",
       "name": "give the new term",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spell:1557-1650"
+      "defined": "/OrgAdmin.spell:1401-1486"
     },
     {
       "syntax": "approve the new app (of {thisArg:expression})?",
@@ -466,7 +466,7 @@
       "kind": "method",
       "name": "approve the new app",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spell:1664-1773"
+      "defined": "/OrgAdmin.spell:1489-1590"
     },
     {
       "syntax": "add the new designer (of {thisArg:expression})?",
@@ -480,7 +480,7 @@
       "kind": "method",
       "name": "add the new designer",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spell:1787-1899"
+      "defined": "/OrgAdmin.spell:1593-1697"
     },
     {
       "syntax": "add the new stage (of {thisArg:expression})?",
@@ -494,7 +494,7 @@
       "kind": "method",
       "name": "add the new stage",
       "returns": "nothing",
-      "defined": "/OrgAdmin.spell:1913-2010"
+      "defined": "/OrgAdmin.spell:1700-1789"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -507,7 +507,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgAdmin.spell:2024-3360"
+      "defined": "/OrgAdmin.spell:1792-3123"
     }
   ],
   "codeLines": [

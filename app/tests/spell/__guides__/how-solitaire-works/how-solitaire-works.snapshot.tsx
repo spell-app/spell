@@ -12,7 +12,7 @@ core.heading("How Solitaire works")
 // - PILES of cards, each kind with its own rules for what it will take
 //
 // This guide is one card type and one rule:  a column, with a king on it, and four cards to try.
-// It's written in the outline style;  Solitaire itself is spellml, the same language in tags.
+// It's written in the outline style, as Solitaire itself is.
 // Open Solitaire, in the Examples, to play the whole game.
 
 core.heading("A card")

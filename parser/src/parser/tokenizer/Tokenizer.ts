@@ -38,9 +38,9 @@ export class Tokenizer {
   quotedNameTags: Record<string, string> = {}
 
   /**
-   * Does `</>` close the innermost open JSX element, as in a spellx drawing (`<text>{its rank}</>`;  epic
+   * Does `</>` close the innermost open JSX element, as in a drawing (`<text>{its rank}</>`;  epic
    * `elemental-spell` P7, Q40)?
-   * - Off by default:  in code spell, `</>` only ends a fragment, `<>...</>`.
+   * - Off by default:  then `</>` only ends a fragment, `<>...</>`.
    */
   emptyEndTagCloses = false
 
@@ -55,6 +55,15 @@ export class Tokenizer {
    * - None by default:  `<if>` is then an element like any other.
    */
   chainTags: Record<string, P.JSXChainKind> = {}
+
+  /**
+   * JSX tags whose head is a PHRASE up to its `>`, not attributes:  spell's `<for every film where ...>`
+   * (epic `data` I93;  plain Spell's too since epic `language` P45).
+   * - Read as attributes, its quotes, parens and apostrophes ended the head early, so its body never joined it.
+   * - The token holds none of its own:  its reader reads its phrase and attributes again from its text.
+   * - None by default.
+   */
+  phraseHeadTags: string[] = []
 
   /**
    * Does markup hold COMMENTS, never drawn (epic `elemental-spell`, Owen 2026-10-26)?  Each is a `JSXCommentToken`:
@@ -164,7 +173,7 @@ export class Tokenizer {
    * - `BlockToken` lines / blocks
    * - JSX element attributes + children, a fragment's children, attribute values, expression `contents` when it's a token
    * - JSX expression `innerTokens`, once a rule has parsed its `{...}` contents
-   * - any other token's `nested` ones, e.g. a spellx tag's
+   * - any other token's `nested` ones, e.g. a page's tag's (`SP.PageTagToken`)
    */
   static forEachToken(tokens: P.Token[], callback: (token: P.Token) => void) {
     tokens.forEach(visit)
@@ -436,9 +445,11 @@ export class Tokenizer {
    * Regex matching JSX opening tag head: `<TagName` plus either self-close `/>`, plain `>`, or trailing
    * whitespace before attributes.
    * - Capture groups: tag name, then end bit (`/>`, `>` or whitespace).
+   * - Its name in any language's letters, `<botón>`, `<área-texto>` (epic `language` P46):
+   *   plain Spell names Spell UI's components bare, in Spanish too.
    */
   get JSX_TAG_START() {
-    return /^<([A-Za-z][\w-.]*)(\s*\/>|\s*>|\s+)/
+    return /^<(\p{L}[\p{L}\p{N}_.-]*)(\s*\/>|\s*>|\s+)/u
   }
   /** Regex matching the end of a JSX tag after attributes -- optional whitespace then `/>` or `>`. */
   get JSX_TAG_START_END() {
@@ -496,7 +507,7 @@ export class Tokenizer {
    * Where an element right after one ending at `from` would start -- see `matchJSXElements()`:
    * past spaces, and past ONE newline when the line after it is indented at least `indent`.
    * - `end` when there's no room for one:  `matchJSXElement()` then matches nothing.
-   * - A subclass may end a run sooner:  spellx stops at a line its own tag starts (`SP.SpellxTokenizer`).
+   * - A subclass may end a run sooner:  a page stops at a line one of its tags starts (`SP.PageTokenizer`).
    */
   protected nextElementStart(text: string, from: number, end: number, indent: number): number {
     let at = this.eatWhitespace(text, from, end)
@@ -579,6 +590,7 @@ export class Tokenizer {
     if (!tagMatch) return undefined
 
     let [matchText, tagName, endBit] = tagMatch
+    if (this.phraseHeadTags.includes(tagName.toLowerCase())) return this.matchJSXPhraseHead(text, start, end, tagName)
     nextStart += matchText.length
 
     const jsxElement = new P.JSXElementToken({ tagName, start })
@@ -694,6 +706,16 @@ export class Tokenizer {
       at = hole ? hole.next : stop
     }
     return { contents, next: this.eatWhitespace(text, value.next, end) }
+  }
+
+  /** A `phraseHeadTags` tag's head at `start`, `tagName` its name:  its text to its `>`, as ONE element token. */
+  private matchJSXPhraseHead(text: string, start: number, end: number, tagName: string): P.JSXElementToken {
+    const at = this.eatWhitespace(text, start, end)
+    const close = this.findPhraseEnd(text, at + 1 + tagName.length, end, { stop: ">" })
+    const element = new P.JSXElementToken({ tagName, start, raw: text.slice(start, Math.min(close + 1, end)) })
+    if (text[close] !== ">") element.record.error = "No end >"
+    else if (text[close - 1] === "/") element.record.isUnaryTag = true
+    return element
   }
 
   /**
@@ -817,13 +839,13 @@ export class Tokenizer {
    * - So what's written after it stays inside its element, and one mistake is one error (epic `notebook` I5).
    * - `undefined` at the end of the text, and at an end tag that closes something:
    *   - one some open element is waiting for, `</example>`, or `</>`
-   *   - one on a line of its own, which may be a spellx tag's, `</draw>`, outside the markup this reads
+   *   - one on a line of its own, which may be a page's tag's, `</if>`, outside the markup this reads
    */
   private matchUnreadableJSX(text: string, start: number, end: number): P.JSXUnreadableToken | undefined {
     const offset = text.slice(start, end).search(/\S/)
     if (offset === -1) return undefined
     const at = start + offset
-    const endTag = /^<\/([\w.-]*)>/.exec(text.slice(at, end))
+    const endTag = /^<\/([\p{L}\p{N}_.-]*)>/u.exec(text.slice(at, end))
     const startsItsLine = /^[ \t]*$/.test(text.slice(text.lastIndexOf("\n", at - 1) + 1, at))
     if (endTag && (endTag[1] === "" || startsItsLine || this.openJSXTags.includes(endTag[1]!))) return undefined
     const newline = text.indexOf("\n", at)
@@ -898,7 +920,7 @@ export class Tokenizer {
 
     const nextStart = this.eatWhitespace(text, start, end)
     const named = `</${endTagName}>`
-    // `</>` closes any element where `emptyEndTagCloses` says so:  a spellx drawing's
+    // `</>` closes any element where `emptyEndTagCloses` says so:  a drawing's
     const endTag =
       this.emptyEndTagCloses && endTagName && this.matchStringAtHead("</>", text, nextStart, end) ? "</>" : named
     if (!this.matchStringAtHead(endTag, text, nextStart, end)) return undefined
@@ -1348,7 +1370,7 @@ export class Tokenizer {
    * - A string is skipped as `matchText()` reads one:  this tokenizer's `quoteSymbols` (spell's:  only `"`, as an
    *   apostrophe is its possessive), escapes too.
    * - `(`, `{` and `[` nest:  a `stop` inside them is the phrase's, `(more than 2 > 1)`.
-   * - `lineEnds`:  a line break outside them ends it too, as spellx's tags do.
+   * - `lineEnds`:  a line break outside them ends it too, as a page's tags do.
    * - Brackets that close are the other scan:  `findMatchingDelimiter()`.
    */
   findPhraseEnd(text: string, start: number, end: number, { stop, lineEnds = false }: PhraseEndOptions): number {
@@ -1418,6 +1440,8 @@ export type TokenizerProps = {
   emptyEndTagCloses?: boolean
   /** See `Tokenizer.chainTags`. */
   chainTags?: Record<string, P.JSXChainKind>
+  /** See `Tokenizer.phraseHeadTags`. */
+  phraseHeadTags?: string[]
   /** See `Tokenizer.markupComments`. */
   markupComments?: boolean
 }

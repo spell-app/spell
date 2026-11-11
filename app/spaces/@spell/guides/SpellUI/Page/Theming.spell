@@ -1,4 +1,4 @@
-<page "page theming" notebook>
+"page theming" is a notebook page
 	<header level="1">
 		Page
 		<header>A page frames a whole window:  a header, navigation, the main content, a side column and a footer.</>
@@ -41,4 +41,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

@@ -55,7 +55,7 @@ export class DrawSlotOf extends SpellStatement<"slot|thing|possessive_mark?"> {
 
 /**
  * `draw_slot` rule:  PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56;  P27).
- * - e.g. `draw its front`, Spanish's `dibujar su frente`;  spellx's `<draw "front" />`.
+ * - e.g. `draw its front`, Spanish's `dibujar su frente`.
  * - Compiles to the web's own slot, holding the slot's drawing (`to draw its front:`, `draw_it`):
  *   `<slot name="front">{this.drawFront()}</slot>`.
  *   - In the view's element (its shadow root), what the page puts in it with `slot="front"` takes the drawing's

@@ -1,4 +1,4 @@
-<page "rating theming" notebook>
+"rating theming" is a notebook page
 	<header level="1">
 		Rating
 		<header>A rating indicates user interest in content.</>
@@ -51,4 +51,3 @@
 			inherits.
 		</>
 	</>
-</page>

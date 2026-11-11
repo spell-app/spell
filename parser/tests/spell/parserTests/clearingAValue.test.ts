@@ -17,26 +17,23 @@ const FILES = [
   {
     path: "/Game.spell",
     contents: [
-      '<spell-thing "board" template="list of squares"/>',
-      '<spell-app "game">',
-      '\t<property "board">a new board</>',
-      '\t<action "start it">',
+      'a "board" is a list of squares',
+      "game is an app:",
+      '\tits "board" is a new board',
+      "\tto start it:",
       "\t\tfor square in its board",
       "\t\t\tclear the mark of the square",
       "\t\t\tclear the square's count",
-      "\t\t\tclear the square's lit",
-      "\t</action>",
-      "</spell-app>"
+      "\t\t\tclear the square's lit"
     ].join("\n")
   },
   {
     path: "/Square.spell",
     contents: [
-      '<spell-thing "square">',
-      '\t<property "mark">text</>',
-      '\t<property "count">number</>',
-      '\t<property "lit">yes or no</>',
-      "</spell-thing>"
+      'a "square" is a thing:',
+      '\tits "mark" is text',
+      '\tits "count" is number',
+      '\tits "lit" is yes or no'
     ].join("\n")
   }
 ]
@@ -55,14 +52,12 @@ const BOARD_BELOW = [
   {
     path: "/Game.spell",
     contents: [
-      '<spell-app "game">',
-      '\t<property "board">a new board</>',
-      '\t<action "start it">',
+      "game is an app:",
+      '\tits "board" is a new board',
+      "\tto start it:",
       "\t\tfor square in its board",
       "\t\t\tclear the square's mark",
-      "\t</action>",
-      "</spell-app>",
-      '<spell-thing "board" template="list of squares"/>'
+      'a "board" is a list of squares'
     ].join("\n")
   }
 ]

@@ -68,7 +68,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
   beforeAll(async () => {
     browser = await chromium.launch()
     const context = await browser.newContext({ viewport: { width: 1400, height: 860 } })
-    await context.route(/\/api\/projects\/file\/|\.(spellml|spell)(\?.*)?$/, (route) => {
+    await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) => {
       const request = route.request()
       if (request.isNavigationRequest() || request.method() === "GET") return route.continue()
       return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })

@@ -4,10 +4,8 @@ import { SiteEdits } from "./SiteEdits"
  * ### `PageStories`
  * A page's STORIES, read from its file and written back (epic `mockup` P6, P17):  what the page must let people do,
  * kept with it for good, through the mockup and into the real site.
- * - Written in the page's own declaration, first in its body, one `<story>` tag each:
- *   - spellx:  `<stories>` ... `</stories>`, in Spanish `<historias>` ... `</>`
- *   - code spell:  `<stories>` ... `</stories>`
- *   - both compile to the page's `static stories`;  the running page draws nothing for them.
+ * - Written in the page's own declaration, first in its body, one `<story>` tag each:  `<stories>` ... `</stories>`,
+ *   which compiles to the page's `static stories`;  the running page draws nothing for them.
  * - A story is one piece of text:  its words, then two blank lines and its description, if it has one.
  * - `<story "S1" done>`:  each numbered when it's first written, the number staying with it as stories move.
  * - Plain text in, text out, as `SiteEdits` is:  it loads no parser, so it's tested in node;
@@ -29,7 +27,7 @@ export class PageStories {
 
   /**
    * `text` with page `name`'s stories `stories`:  its block written, replaced, or taken out when `stories` is empty.
-   * - A page written `<spell-page "x"/>` opens up to hold them;  `a "x" is a page` gains its `:`.
+   * - A page written `a "x" is a page` gains its `:`.
    * - `language`:  whose words a new block is written in;  a block already there keeps its own.
    * - throws `TypeError` when `text` doesn't declare the page
    */
@@ -41,21 +39,16 @@ export class PageStories {
       )
     }
     const head = text.slice(declared.start, text.indexOf("\n", declared.start) + 1 || declared.end)
-    const form = head.startsWith("<") ? "spellx" : "code"
     const block = PageStories.blockIn(text, declared)
-    const words = PageStories.wordsFor(form, language, block?.tag)
+    const words = PageStories.wordsFor(language, block)
     const written = stories.length ? PageStories.blockText(words, stories) : ""
     if (block) return text.slice(0, block.span.start) + written + text.slice(block.span.end)
     if (!written) return text
     const headEnd = declared.start + head.length
     const firstLine = head.replace(/\r?\n$/, "")
-    if (form === "spellx" && /\/>\s*$/.test(firstLine)) {
-      const opened = firstLine.replace(/\s*\/>\s*$/, ">")
-      return text.slice(0, declared.start) + `${opened}\n${written}</>\n` + text.slice(headEnd)
-    }
-    const withColon = form === "code" && !firstLine.trimEnd().endsWith(":") ? `${firstLine.trimEnd()}:` : firstLine
+    const withColon = firstLine.trimEnd().endsWith(":") ? firstLine : `${firstLine.trimEnd()}:`
     // code spell reads two raw-text blocks on lines next to each other as one:  a blank line before a `<markdown>`
-    const apart = form === "code" && /^[ \t]+<(?:markdown|stories)>/.test(text.slice(headEnd)) ? "\n" : ""
+    const apart = /^[ \t]+<(?:markdown|stories)>/.test(text.slice(headEnd)) ? "\n" : ""
     return text.slice(0, declared.start) + `${withColon}\n${written}${apart}` + text.slice(headEnd)
   }
 
@@ -101,14 +94,17 @@ export class PageStories {
     }))
   }
 
-  /** How a block is written, for `form`:  its tag, its closer, a story's tag and what says it's done. */
-  private static wordsFor(form: "spellx" | "code", language: "en" | "es", tag: string | undefined): BlockWords {
-    const isSpanish = tag ? /historias/.test(tag) : language === "es"
-    // the short words, `<stories>`, `<historias>` (epic `language` P41)
-    const opener = tag ?? (isSpanish && form === "spellx" ? "historias" : "stories")
+  /**
+   * How a block is written:  its tag, its closer, a story's tag and what says it's done.
+   * - A block already there keeps its own words:  Spanish when its stories are `<historia>`s
+   *   (its tag is `<stories>` in either language), or it's an older `<historias>`.
+   */
+  private static wordsFor(language: "en" | "es", block: StoriesBlock | undefined): BlockWords {
+    const isSpanish = block ? /historias/.test(block.tag) || /<historia\b/.test(block.inside) : language === "es"
+    const opener = block?.tag ?? "stories"
     return {
       opener,
-      closer: isSpanish && form === "spellx" ? "</>" : `</${opener}>`,
+      closer: `</${opener}>`,
       story: isSpanish ? "historia" : "story",
       done: isSpanish ? "hecha" : "done",
       idLetter: isSpanish ? "H" : "S"

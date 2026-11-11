@@ -1,23 +1,22 @@
 # Feed
-What's new across your org:  every post in every space of it you may read.
-Where it's read from is in OrgFeed.api.spell, and only its first line knows.
-What you see more of, and none of, is the ranking below:  it's yours to change, in your own copy of this program.
-
+// What's new across your org:  every post in every space of it you may read.
+// Where it's read from is in OrgFeed.api.spell, and only its first line knows.
+// What you see more of, and none of, is the ranking below:  it's yours to change, in your own copy of this program.
 
 ## The ranking:  how much of each post you want
 // 2:  more of it, at the top;  1:  as it comes;  0:  none of it.
 // Bo's own:  more of Ana's art, none of her politics.
 
-<extend "post">
-	<property "weight" description="How much of it you want:  2 more of it, 1 as it comes, 0 none">
+a post
+	its "weight" is
+		// How much of it you want:  2 more of it, 1 as it comes, 0 none
 		2 if its by is "ana@rs" and its topic is "art"
 		0 if its by is "ana@rs" and its topic is "politics"
 		1 otherwise
-	</property>
-	<alias "is a favourite">if its weight is 2</>
-	<alias "is ordinary">if its weight is 1</>
+	it "is a favourite" if its weight is 2
+	it "is ordinary" if its weight is 1
 
-	<draw>
+	to draw it
 		<segment class="post">
 			<stack spacing="xs">
 				<stack direction="horizontal" spacing="md" align="center" wrap>
@@ -28,14 +27,11 @@ What you see more of, and none of, is the ranking below:  it's yours to change, 
 				<text class="text">{its text}</text>
 			</stack>
 		</segment>
-	</draw>
-</extend>
-
 
 ## The page:  your favourites first, then the rest, newest first
 
-<app "feed page">
-	<draw>
+feed page is an app
+	to draw it
 		<stack class="org-page" spacing="none">
 			<toolbar class="top-bar" appearance="text" aria-label="Feed">
 				<text slot="title" size="large">Feed</text>
@@ -71,5 +67,3 @@ What you see more of, and none of, is the ranking below:  it's yours to change, 
 				</stack>
 			</container>
 		</stack>
-	</draw>
-</app>

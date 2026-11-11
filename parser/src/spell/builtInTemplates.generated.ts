@@ -12,19 +12,19 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
         {
           type: "TwoSidedView",
           superType: "View",
-          defined: "/TwoSidedView.spell:281-2054"
+          defined: "/TwoSidedView.spell:281-2031"
         },
         {
           of: "TwoSidedView",
           slots: ["front", "back"],
-          defined: "/TwoSidedView.spell:320-351"
+          defined: "/TwoSidedView.spell:311-342"
         },
         {
           property: "direction",
           classVariable: "Directions",
           of: "TwoSidedView",
           enumeration: ["down", "up"],
-          defined: "/TwoSidedView.spell:407-436"
+          defined: "/TwoSidedView.spell:344-426"
         },
         {
           syntax: "{operator:is_or_is_not} face (expression:down|downs|up|ups)",
@@ -36,7 +36,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           values: {
             direction: ["down", "up"]
           },
-          defined: "/TwoSidedView.spell:440-464"
+          defined: "/TwoSidedView.spell:428-452"
         },
         {
           syntax: "turn {thisArg:expression} face up",
@@ -47,7 +47,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "turn it face up",
           returns: "nothing",
-          defined: "/TwoSidedView.spell:468-513"
+          defined: "/TwoSidedView.spell:454-498"
         },
         {
           syntax: "turn {thisArg:expression} face down",
@@ -58,7 +58,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "turn it face down",
           returns: "nothing",
-          defined: "/TwoSidedView.spell:517-566"
+          defined: "/TwoSidedView.spell:500-548"
         },
         {
           syntax: "turn {thisArg:expression} over",
@@ -69,7 +69,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "turn it over",
           returns: "nothing",
-          defined: "/TwoSidedView.spell:570-659"
+          defined: "/TwoSidedView.spell:550-638"
         },
         {
           syntax: "draw {thisArg:expression}",
@@ -79,7 +79,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "draw it",
-          defined: "/TwoSidedView.spell:755-799"
+          defined: "/TwoSidedView.spell:640-776"
         }
       ],
       codeLines: [9, 12, 15, 21, 25, 29, 33, 39]
@@ -93,12 +93,12 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           type: "TwoSidedView",
           superType: "View",
           gender: "feminine",
-          defined: "/TwoSidedView.es.spell:300-2211"
+          defined: "/TwoSidedView.es.spell:300-2188"
         },
         {
           of: "TwoSidedView",
           slots: ["frente", "dorso"],
-          defined: "/TwoSidedView.es.spell:346-382",
+          defined: "/TwoSidedView.es.spell:337-373",
           slotOutputs: {
             frente: "front",
             dorso: "back"
@@ -109,7 +109,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           classVariable: "Direcciones",
           of: "TwoSidedView",
           enumeration: ["abajo", "arriba"],
-          defined: "/TwoSidedView.es.spell:438-470",
+          defined: "/TwoSidedView.es.spell:375-460",
           output: "direction",
           enumerationOutputs: {
             abajo: "down",
@@ -126,7 +126,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           values: {
             direction: ["abajo", "arriba"]
           },
-          defined: "/TwoSidedView.es.spell:474-497",
+          defined: "/TwoSidedView.es.spell:462-485",
           valueOutputs: {
             direction: {
               abajo: "down",
@@ -143,7 +143,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "voltearla boca arriba",
           returns: "nothing",
-          defined: "/TwoSidedView.es.spell:501-558"
+          defined: "/TwoSidedView.es.spell:487-543"
         },
         {
           syntax: "voltear {thisArg:expression}? boca abajo",
@@ -154,7 +154,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "voltearla boca abajo",
           returns: "nothing",
-          defined: "/TwoSidedView.es.spell:562-617"
+          defined: "/TwoSidedView.es.spell:545-599"
         },
         {
           syntax: "voltear {thisArg:expression}?",
@@ -165,7 +165,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "voltearla",
           returns: "nothing",
-          defined: "/TwoSidedView.es.spell:621-728"
+          defined: "/TwoSidedView.es.spell:601-707"
         }
       ],
       codeLines: [9, 12, 15, 21, 25, 29, 33]
@@ -179,14 +179,14 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
         {
           type: "Site",
           superType: "App",
-          defined: "/Site.spell:498-636"
+          defined: "/Site.spell:498-628"
         },
         {
           property: "current_address",
           asWritten: "current address",
           of: "Site",
           datatype: "text",
-          defined: "/Site.spell:589-636"
+          defined: "/Site.spell:518-628"
         }
       ],
       codeLines: [10, 14]
@@ -200,14 +200,14 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           type: "Site",
           superType: "App",
           gender: "masculine",
-          defined: "/Site.es.spell:537-685"
+          defined: "/Site.es.spell:537-677"
         },
         {
           property: "dirección_actual",
           asWritten: "dirección actual",
           of: "Site",
           datatype: "text",
-          defined: "/Site.es.spell:635-685",
+          defined: "/Site.es.spell:567-677",
           output: "current_address"
         }
       ],

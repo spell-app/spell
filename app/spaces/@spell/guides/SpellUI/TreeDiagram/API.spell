@@ -1,4 +1,4 @@
-<page "tree-diagram api" notebook>
+"tree-diagram api" is a notebook page
 	<header level="1">
 		Tree diagram
 		<header>A tree diagram draws a tree:  a box for each node, a line to each of its children.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api family="ui-tree-diagram" only="texts"></>
 		</>
 	</>
-</page>

@@ -11,7 +11,6 @@ on<{ number: number }>("fizzbuzz", ({ number }) => core.console.log(number, "fiz
 on<{ number: number }>("fizz", ({ number }) => core.console.log(number, "fizz"))
 on<{ number: number }>("buzz", ({ number }) => core.console.log(number, "buzz"))
 on<{ number: number }>("plain-number", ({ number }) => core.console.log(number))
-
 // -----------
 core.heading("The explainer")
 ///////////////////
@@ -68,7 +67,7 @@ core.heading("The page")
 export class FizzbuzzExplainer extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
-  // - its "tally" is a new tally
+  // "tally" is a new tally
   @prop({ init: () => new Tally(), early: true })
   accessor tally!: Tally
 
@@ -205,7 +204,6 @@ export function playFizzbuzz() {
 }
 
 playFizzbuzz()
-
 // -----------
 if (!core.isCarryingOver) fizzbuzzExplainer.start()
 

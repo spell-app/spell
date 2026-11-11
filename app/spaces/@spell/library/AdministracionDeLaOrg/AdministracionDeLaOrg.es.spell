@@ -1,58 +1,56 @@
 # Administración de la org
-La página de administración de una org:  quién está, sus equipos y proyectos, quién dirige qué y hasta cuándo, qué
-aplicaciones pueden instalar sus espacios, las etapas de sus eventos y el registro de cada cambio.
-Una barra con quién ha iniciado sesión, las secciones a un lado, y una sección cada vez junto a ellas.
-Dónde se guardan está en AdministracionDeLaOrg.api.es.spell, y solo su primera línea lo sabe.
-Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que no puedes hacer dice por qué, y no cambia nada.
-
+// La página de administración de una org:  quién está, sus equipos y proyectos, quién dirige qué y hasta cuándo, qué
+// aplicaciones pueden instalar sus espacios, las etapas de sus eventos y el registro de cada cambio.
+// Una barra con quién ha iniciado sesión, las secciones a un lado, y una sección cada vez junto a ellas.
+// Dónde se guardan está en AdministracionDeLaOrg.api.es.spell, y solo su primera línea lo sabe.
+// Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que no puedes hacer dice por qué, y no cambia nada.
 
 ## La página:  una barra arriba, las secciones al lado, y la elegida
 
-<aplicación "administración de la org">
-	<propiedad "miembro nuevo" descripción="A quién agregar, por su dirección:  ana@rs">un nuevo miembro</>
-	<propiedad "equipo nuevo" descripción="Un equipo permanente nuevo, por su nombre">un nuevo equipo</>
-	<propiedad "proyecto nuevo" descripción="Un proyecto nuevo, bajo un equipo (por su carpeta) o, sin ninguno, la org misma">un nuevo proyecto</>
-	<propiedad "mandato nuevo">un nuevo mandato</>
-	<propiedad "aprobación nueva">una nueva aprobación</>
-	<propiedad "diseñador nuevo" descripción="Quién diseña las páginas de qué espacio:  ana@rs, picnic@rs">un nuevo diseñador</>
-	<propiedad "etapa nueva" descripción="Una etapa por la que pasa un evento:  su nombre cambia la etapa de ese nombre, o agrega una antes de la última">una nueva etapa</>
+administración de la org es una aplicación
+	"miembro nuevo" es un nuevo miembro
+		// A quién agregar, por su dirección:  ana@rs
+	"equipo nuevo" es un nuevo equipo
+		// Un equipo permanente nuevo, por su nombre
+	"proyecto nuevo" es un nuevo proyecto
+		// Un proyecto nuevo, bajo un equipo (por su carpeta) o, sin ninguno, la org misma
+	"mandato nuevo" es un nuevo mandato
+	"aprobación nueva" es una nueva aprobación
+	"diseñador nuevo" es un nuevo diseñador
+		// Quién diseña las páginas de qué espacio:  ana@rs, picnic@rs
+	"etapa nueva" es una nueva etapa
+		// Una etapa por la que pasa un evento:  su nombre cambia la etapa de ese nombre, o agrega una antes de la última
 
-	<acción "agregar el miembro nuevo">
+	para agregar el miembro nuevo
 		agregar el miembro nuevo a los miembros
 		fijar su miembro nuevo a un nuevo miembro
-	</acción>
 
-	<acción "agregar el equipo nuevo">
+	para agregar el equipo nuevo
 		agregar el equipo nuevo a los equipos
 		fijar su equipo nuevo a un nuevo equipo
-	</acción>
 
-	<acción "agregar el proyecto nuevo">
+	para agregar el proyecto nuevo
 		agregar el proyecto nuevo a los proyectos
 		fijar su proyecto nuevo a un nuevo proyecto
-	</acción>
 
-	<acción "dar el mandato nuevo">
+	para dar el mandato nuevo
 		agregar el mandato nuevo a los mandatos
 		fijar su mandato nuevo a un nuevo mandato
-	</acción>
 
-	<acción "aprobar la aprobación nueva">
+	para aprobar la aprobación nueva
 		agregar la aprobación nueva a las aprobaciones
 		fijar su aprobación nueva a una nueva aprobación
-	</acción>
 
-	<acción "agregar el diseñador nuevo">
+	para agregar el diseñador nuevo
 		agregar el diseñador nuevo a los diseñadores
 		fijar su diseñador nuevo a un nuevo diseñador
-	</acción>
 
-	<acción "agregar la etapa nueva">
+	para agregar la etapa nueva
 		agregar la etapa nueva a las etapas
 		fijar su etapa nueva a una nueva etapa
-	</acción>
 
-	<dibujar descripción="La sección elegida queda en la dirección de la página, y al recargar vuelve a ella">
+	para dibujar eso
+		// La sección elegida queda en la dirección de la página, y al recargar vuelve a ella
 		<ui-stack class="org-admin" spacing="none">
 			<ui-toolbar class="top-bar" appearance="text" aria-label="Administración de la org">
 				<para org en los perfiles>
@@ -73,9 +71,8 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 				<ui-tab label="Registro" icon="history" value="registro">{dibujar su sección registro}</ui-tab>
 			</ui-tabs>
 		</ui-stack>
-	</dibujar>
 
-	<dibujar "sección personas">
+	para dibujar su sección personas
 		<ui-stack class="people">
 			<ui-header size="medium">Personas</ui-header>
 			<ui-form value={su miembro nuevo} class="add">
@@ -92,9 +89,8 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 				<fallo><ui-text color="red">No podemos leer a la gente de la org ahora mismo.</ui-text></fallo>
 			</para>
 		</ui-stack>
-	</dibujar>
 
-	<dibujar "sección equipos">
+	para dibujar su sección equipos
 		<ui-stack class="teams">
 			<ui-header size="medium">Equipos</ui-header>
 			<ui-form value={su equipo nuevo} class="add new-team">
@@ -126,9 +122,8 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 				<vacío><ui-text class="none" color="grey">Ningún proyecto todavía.</ui-text></vacío>
 			</para>
 		</ui-stack>
-	</dibujar>
 
-	<dibujar "sección roles">
+	para dibujar su sección roles
 		<ui-stack class="roles">
 			<ui-header size="medium">Quién dirige qué</ui-header>
 			<ui-form value={su mandato nuevo} class="add">
@@ -168,9 +163,8 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 				<vacío><ui-text class="none" color="grey">Nadie nombrado todavía.</ui-text></vacío>
 			</para>
 		</ui-stack>
-	</dibujar>
 
-	<dibujar "sección diseñadores">
+	para dibujar su sección diseñadores
 		<ui-stack class="designers">
 			<ui-header size="medium">Quién diseña qué</ui-header>
 			<ui-text color="grey">Cambian las páginas de un espacio, sea cual sea su rol allí;  sus Managers las publican.</ui-text>
@@ -202,9 +196,8 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 				<vacío><ui-text class="none" color="grey">Solo los Managers de cada espacio, por ahora.</ui-text></vacío>
 			</para>
 		</ui-stack>
-	</dibujar>
 
-	<dibujar "sección aplicaciones">
+	para dibujar su sección aplicaciones
 		<ui-stack class="apps">
 			<ui-header size="medium">Aplicaciones aprobadas</ui-header>
 			<ui-form value={su aprobación nueva} class="add">
@@ -221,9 +214,8 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 				<vacío><ui-text class="none" color="grey">Ninguna aplicación aprobada todavía.</ui-text></vacío>
 			</para>
 		</ui-stack>
-	</dibujar>
 
-	<dibujar "sección etapas">
+	para dibujar su sección etapas
 		<ui-stack class="stages">
 			<ui-header size="medium">Etapas de los eventos</ui-header>
 			<ui-form value={su etapa nueva} class="add">
@@ -248,9 +240,8 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 				<celda ""><ui-button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Quitar esta etapa" title="Quitar esta etapa:  no mientras haya un evento en ella, o otra lleve a ella" onClick={quitar etapa de las etapas}/></celda>
 			</para>
 		</ui-stack>
-	</dibujar>
 
-	<dibujar "sección registro">
+	para dibujar su sección registro
 		<ui-stack class="log">
 			<ui-header size="medium">Registro</ui-header>
 			<para cambio en los cambios ordenados por su cuándo, de más reciente a más antiguo as="tabla" appearance="very-basic" unstackable cargando="Leyendo el registro">
@@ -262,5 +253,3 @@ Cada cambio pasa por el servidor de Encanto, con las reglas de la org:  uno que 
 				<vacío><ui-text class="none" color="grey">Nada ha cambiado todavía.</ui-text></vacío>
 			</para>
 		</ui-stack>
-	</dibujar>
-</aplicación>

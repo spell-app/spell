@@ -80,27 +80,27 @@ export class SpellKeywords {
   private accentedWords?: Map<string, string>
 
   /**
-   * The accented word to write for `word`, one of the language's SPELLX words typed without its accent
-   * (epic `elemental-spell` P8, Q49):  `accion` => `acción`, `descripcion` => `descripción`;  `undefined` for none.
-   * - A tag's word (`<accion>`, `<pagina>`'s `pagina`) or an attribute's (`uno-de`, `descripcion=`):
-   *   every table of `SP.SpellxWords`.
+   * The accented word to write for `word`, one of the language's PAGE words typed without its accent
+   * (epic `elemental-spell` P8, Q49;  epic `language` P47):  `vacio` => `vacío`, `titulo` => `título`;
+   * `undefined` for none.
+   * - A tag's word (`<vacio>`) or an attribute's (`titulo=`), or a page's flag:  every table of `SP.PageWords`.
    * - Only when it's UNAMBIGUOUS:  one accented spelling has `word`'s letters, and means what `word` does when the table
-   *   has `word` too (`pagina`, the plain spelling of `página`).
+   *   has `word` too (`vacio`, the plain spelling of `vacío`).
    */
-  spellxAccentFixFor(word: string): string | undefined {
-    this.spellxAccents ??= SpellKeywords.spellxAccentsOf(this.language)
-    return this.spellxAccents.get(word)
+  pageAccentFixFor(word: string): string | undefined {
+    this.pageAccents ??= SpellKeywords.pageAccentsOf(this.language)
+    return this.pageAccents.get(word)
   }
-  /** `spellxAccentFixFor()`'s fixes, worked out on first use. */
-  private spellxAccents?: Map<string, string>
+  /** `pageAccentFixFor()`'s fixes, worked out on first use. */
+  private pageAccents?: Map<string, string>
 
-  /** Every spellx word of `language` written with an accent, by its spelling without:  see `spellxAccentFixFor()`. */
-  private static spellxAccentsOf(language: SP.Language): Map<string, string> {
-    const words = language.words.spellx
+  /** Every page word of `language` written with an accent, by its spelling without:  see `pageAccentFixFor()`. */
+  private static pageAccentsOf(language: SP.Language): Map<string, string> {
+    const words = language.words.page
     const fixes = new Map<string, string>()
     if (!words) return fixes
-    const { templates, declarations, notes, handlers, controls, attributes } = words
-    for (const table of [templates, declarations, notes, handlers, controls, attributes] as Record<string, string>[]) {
+    const { controls, forAttributes, flags } = words
+    for (const table of [controls, forAttributes, flags] as Record<string, string>[]) {
       const ambiguous = new Set<string>()
       for (const [spelling, meaning] of Object.entries(table)) {
         const plain = withoutAccents(spelling, KEEP_LETTERS)

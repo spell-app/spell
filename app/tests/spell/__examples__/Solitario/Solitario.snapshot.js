@@ -12,7 +12,7 @@ export class Carta extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "rango" es uno de as, 2 ... 10, jota, dama, rey
-  //   - "es un (rango)"
+  //   "es un (rango)"
   static Rangos = ["as", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jota", "dama", "rey"]
   static { this.declareProp("rango", { oneOf: Carta.Rangos }) }
   get rango() { return this.getProp("rango") }
@@ -34,7 +34,7 @@ export class Carta extends TwoSidedView {
   }
 
   // su "palo" es uno de tréboles, diamantes, corazones o espadas
-  //   - "es un (palo)"
+  //   "es un (palo)"
   static Palos = ["tréboles", "diamantes", "corazones", "espadas"]
   static { this.declareProp("palo", { oneOf: Carta.Palos }) }
   get palo() { return this.getProp("palo") }
@@ -43,7 +43,7 @@ export class Carta extends TwoSidedView {
     return this.palo === palo
   }
 
-  // su "color" es uno de rojo, negro :
+  // su "color" es uno de rojo, negro
   //   rojo si es un diamante o es un corazón
   //   negro de lo contrario
   static Colores = ["rojo", "negro"]
@@ -60,7 +60,7 @@ export class Carta extends TwoSidedView {
   }
 
   get nombre() {
-    return `${this.rango} de ${this.palo}`
+    return core.joined(core.joined(this.rango, "de", " "), this.palo, " ")
   }
 
   esElRangoDePalo(rango, palo) {
@@ -106,7 +106,7 @@ export class Carta extends TwoSidedView {
 
   /** un clic la juega */
   async onClick(event) {
-    return await this.jugar()
+    await this.jugar()
   }
 
   /** al empezar un arrastre, la última pista se va */
@@ -194,7 +194,6 @@ export function testLaPreparaciónDeLaCarta() {
     core.expect((new Carta({ rango: "rey", palo: "diamantes" })).imagen, `la imagen de una nueva carta cuyo rango es rey y palo es diamantes`, "🃎", `"🃎"`)
   })
 }
-
 // -----------
 core.heading("Un mazo")
 /////////////
@@ -295,7 +294,7 @@ export class Pila extends ViewableList {
 export function testLasPilas() {
   return core.test("test las pilas", function testLasPilas() {
     const it = new Pila()
-    core.echoTestAction(`poner la reserva a una nueva pila con nombre = "reserva"`)
+    core.echoTestAction(`poner la reserva a una nueva pila con nombre "reserva"`)
     const reserva = new Pila({ name: "reserva" })
     core.expect(reserva.color, `el color de la reserva`, "ninguno", `"ninguno"`)
     core.expect(reserva.valor, `el valor de la reserva`, 0, `0`)
@@ -349,8 +348,8 @@ export class PilaDeReserva extends Pila {
     return false
   }
 
-  // Una carta gris claro, boca abajo
   drawItsPlaceholder() {
+    // Una carta gris claro, boca abajo
     return h("es-texto", { part: "marcador" }, "🂠")
   }
 
@@ -396,8 +395,8 @@ export class Fundación extends Pila {
     return false
   }
 
-  // Un as gris claro de su palo, boca arriba
   drawItsPlaceholder() {
+    // Un as gris claro de su palo, boca arriba
     return h("es-texto", { part: "marcador" }, () => (new Carta({ rango: "as", palo: this.palo })).imagen)
   }
 
@@ -464,72 +463,72 @@ export class Solitario extends App {
     this.pista = ""
   }
 
-  // su "mazo" es un nuevo mazo
+  // "mazo" es un nuevo mazo
   static { this.declareProp("mazo", { init: () => new Mazo(), early: true }) }
   get mazo() { return this.getProp("mazo") }
   set mazo(value) { this.setProp("mazo", value) }
 
-  // su "reserva" es una nueva pila de reserva con nombre = "reserva"
+  // "reserva" es una nueva pila de reserva con nombre "reserva"
   static { this.declareProp("reserva", { init: () => new PilaDeReserva({ name: "reserva" }), early: true }) }
   get reserva() { return this.getProp("reserva") }
   set reserva(value) { this.setProp("reserva", value) }
 
-  // su "descartes" es una nueva pila de descartes con nombre = "descartes"
+  // "descartes" es una nueva pila de descartes con nombre "descartes"
   static { this.declareProp("descartes", { init: () => new PilaDeDescartes({ name: "descartes" }), early: true }) }
   get descartes() { return this.getProp("descartes") }
   set descartes(value) { this.setProp("descartes", value) }
 
-  // su "tréboles" es una nueva fundación con nombre = "tréboles", palo = tréboles
+  // "tréboles" es una nueva fundación con nombre "tréboles", palo = tréboles
   static { this.declareProp("tréboles", { init: () => new Fundación({ name: "tréboles", palo: "tréboles" }), early: true }) }
   get tréboles() { return this.getProp("tréboles") }
   set tréboles(value) { this.setProp("tréboles", value) }
 
-  // su "diamantes" es una nueva fundación con nombre = "diamantes", palo = diamantes
+  // "diamantes" es una nueva fundación con nombre "diamantes", palo = diamantes
   static { this.declareProp("diamantes", { init: () => new Fundación({ name: "diamantes", palo: "diamantes" }), early: true }) }
   get diamantes() { return this.getProp("diamantes") }
   set diamantes(value) { this.setProp("diamantes", value) }
 
-  // su "corazones" es una nueva fundación con nombre = "corazones", palo = corazones
+  // "corazones" es una nueva fundación con nombre "corazones", palo = corazones
   static { this.declareProp("corazones", { init: () => new Fundación({ name: "corazones", palo: "corazones" }), early: true }) }
   get corazones() { return this.getProp("corazones") }
   set corazones(value) { this.setProp("corazones", value) }
 
-  // su "espadas" es una nueva fundación con nombre = "espadas", palo = espadas
+  // "espadas" es una nueva fundación con nombre "espadas", palo = espadas
   static { this.declareProp("espadas", { init: () => new Fundación({ name: "espadas", palo: "espadas" }), early: true }) }
   get espadas() { return this.getProp("espadas") }
   set espadas(value) { this.setProp("espadas", value) }
 
-  // su "C1" es una nueva columna con nombre = "C1"
+  // "C1" es una nueva columna con nombre "C1"
   static { this.declareProp("C1", { init: () => new Columna({ name: "C1" }), early: true }) }
   get C1() { return this.getProp("C1") }
   set C1(value) { this.setProp("C1", value) }
 
-  // su "C2" es una nueva columna con nombre = "C2"
+  // "C2" es una nueva columna con nombre "C2"
   static { this.declareProp("C2", { init: () => new Columna({ name: "C2" }), early: true }) }
   get C2() { return this.getProp("C2") }
   set C2(value) { this.setProp("C2", value) }
 
-  // su "C3" es una nueva columna con nombre = "C3"
+  // "C3" es una nueva columna con nombre "C3"
   static { this.declareProp("C3", { init: () => new Columna({ name: "C3" }), early: true }) }
   get C3() { return this.getProp("C3") }
   set C3(value) { this.setProp("C3", value) }
 
-  // su "C4" es una nueva columna con nombre = "C4"
+  // "C4" es una nueva columna con nombre "C4"
   static { this.declareProp("C4", { init: () => new Columna({ name: "C4" }), early: true }) }
   get C4() { return this.getProp("C4") }
   set C4(value) { this.setProp("C4", value) }
 
-  // su "C5" es una nueva columna con nombre = "C5"
+  // "C5" es una nueva columna con nombre "C5"
   static { this.declareProp("C5", { init: () => new Columna({ name: "C5" }), early: true }) }
   get C5() { return this.getProp("C5") }
   set C5(value) { this.setProp("C5", value) }
 
-  // su "C6" es una nueva columna con nombre = "C6"
+  // "C6" es una nueva columna con nombre "C6"
   static { this.declareProp("C6", { init: () => new Columna({ name: "C6" }), early: true }) }
   get C6() { return this.getProp("C6") }
   set C6(value) { this.setProp("C6", value) }
 
-  // su "C7" es una nueva columna con nombre = "C7"
+  // "C7" es una nueva columna con nombre "C7"
   static { this.declareProp("C7", { init: () => new Columna({ name: "C7" }), early: true }) }
   get C7() { return this.getProp("C7") }
   set C7(value) { this.setProp("C7", value) }
@@ -581,8 +580,8 @@ export class Solitario extends App {
     await this.robarDeLaReserva()
   }
 
-  // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra el menú del juego
   draw() {
+    // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra el menú del juego
     return h("es-contenedor",
       h("es-barra-herramientas", { class: "GameBar", menu: "menú del juego", "aria-label": "Juego", encogible: true },
         h("es-texto", { class: "GameTitle", slot: "titulo", tamano: "grande" }, "Solitario Encanto"),
@@ -617,7 +616,7 @@ export class Solitario extends App {
     await this.robarDeLaReserva()
   }
 
-  async empezarElJuego() {
+  async reiniciarElJuego() {
     this.puntuación = 0
     this.movimientos = 0
     this.pista = ""
@@ -676,21 +675,17 @@ export const solitario = new Solitario()
 // Una de cada, hecha con el solitario
 
 // Cada uno se detiene un momento, así el reparto se anima
-
 /** Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es */
-core.describeAction(Solitario, "voltearLaReserva", { title: "voltear la reserva", undoneAs: "Voltear carta" })
+core.describeAction(Solitario, "voltearLaReserva", { title: "Voltear La Reserva", undoneAs: "Voltear carta" })
 
 // Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
-core.describeAction(Solitario, "empezarElJuego", { title: "Reiniciar", shortcuts: ["N"], undoneAs: "Reiniciar" })
-
+core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar", shortcuts: ["N"], undoneAs: "Reiniciar" })
 /** Juega cada carta que puede ir a algún lado, hasta que ninguna pueda */
 core.describeAction(Solitario, "jugarSolo", { title: "Jugar solo", shortcuts: ["A"], undoneAs: "Jugar solo" })
-
 /** Voltea una carta boca abajo de una columna, al azar, sobre los descartes */
 core.describeAction(Solitario, "hacerTrampa", { title: "Trampa", shortcuts: ["C"], undoneAs: "Trampa" })
-
-// su "menú del juego" es un menú de "jugar solo" , "hacer trampa" , "empezar el juego" , "deshacer" y "rehacer"
-core.describeMenu(Solitario, "menúDelJuego", { items: ["jugarSolo", "hacerTrampa", "empezarElJuego", "undo", "redo"] })
+// su "menú del juego" es un menú de "jugar solo", "hacer trampa", "reiniciar el juego", "deshacer" y "rehacer"
+core.describeMenu(Solitario, "menúDelJuego", { items: ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "undo", "redo"] })
 
 core.heading("Jugar una carta")
 /////////////////////
@@ -702,13 +697,13 @@ core.heading("Jugar una carta")
  * la carta, y cada carta sobre ella, a la primera pila que la tome;  dice si se movió
  * - la carta de la reserva se voltea sobre los descartes en su lugar
  */
-core.describeAction(Carta, "jugar", { title: "jugar una carta", undoneAs: "Jugar carta" })
+core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar carta" })
 
 /**
  * la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
  * - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
  */
-core.describeAction(Carta, "ponerEnPila", { title: "poner una carta en una pila", undoneAs: "Mover carta" })
+core.describeAction(Carta, "ponerEnPila", { title: "Poner Una Carta En Una Pila", undoneAs: "Mover carta" })
 
 // los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
 // solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero
@@ -730,7 +725,7 @@ core.heading("Las pilas")
 export function testLosMovimientos() {
   return core.test("test los movimientos", function testLosMovimientos() {
     const it = new Columna()
-    core.echoTestAction(`poner la columna a una nueva columna con nombre = "C1"`)
+    core.echoTestAction(`poner la columna a una nueva columna con nombre "C1"`)
     let columna = new Columna({ name: "C1" })
     core.echoTestAction(`poner el rey a una nueva carta cuyo rango es rey, palo es espadas y dirección es arriba`)
     const rey = new Carta({
@@ -779,7 +774,7 @@ export function testLosMovimientos() {
       palo: "corazones",
       direction: "up"
     })
-    core.echoTestAction(`poner la columna a una nueva columna con nombre = "C2"`)
+    core.echoTestAction(`poner la columna a una nueva columna con nombre "C2"`)
     columna = new Columna({ name: "C2" })
     core.echoTestAction(`agregar el dos a la columna`)
     columna.append(dos)

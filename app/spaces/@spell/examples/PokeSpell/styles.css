@@ -1,7 +1,7 @@
 /* File styles.css:  PokéSpell's theme, and Who's that Pokémon's shadow.
    - The theme:  a bright sky (a night sky in dark mode), round friendly letters, white cards with round corners.
      Spell UI's own tokens, so every card, header and button follows.
-   - Every other look is an attribute, in the spellml files:
+   - Every other look is an attribute, in the .spell files:
      - the logo and a Pokémon's name:  `size="poster"`, `font="heavy"`, the logo's `shadow="yellow"`
      - each picture's sunny circle:  `background="yellow"`
      - how wide the search, a strength bar and a card in a family are:  `width`, `min-width`, `max-width`

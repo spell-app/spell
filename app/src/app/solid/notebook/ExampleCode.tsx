@@ -1,20 +1,18 @@
-import { For, Loading, Show, createEffect, createSignal } from "solid-js"
+import { Loading, Show, createEffect, createSignal } from "solid-js"
 import type { monaco } from "spell/app/app/ui/monaco"
 
-import { appTexts } from "spell/app/app/ui/AppTexts"
 import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
-import type { CodeView, NotebookController } from "./NotebookController"
+import type { NotebookController } from "./NotebookController"
 
 /****************
  * ### `<ExampleCode>`
  * An example's code, in its code pane, which its `</>` button rolls open under its result.
  * - The pane is `<spell-example>`'s `source` slot.
- * - It shows the page's code view, with a small switch for it at the pane's top right.
+ * - Its code as written:  the page is plain Spell, so there's one view of it (epic `language` P45).
  * - The example is the one written at `place`, where its `<spell-example>` is marked as written
  *   (`NotebookController.exampleAt()`).
- * - Flipping the switch here flips every example's:  remembered per notebook.
- * - ALWAYS editable, in spellx or spell (turned back into spellx:  `NotebookController.editExample()`).
+ * - ALWAYS editable (`NotebookController.editExample()`).
  *   - Typed into the file as the code column types, and the example draws again once the typing pauses.
  *   - Locked, a try-out:  never saved, put back by the editor's Reset.
  * - Made once per example and MOVED into its example each time the program draws it again (`<NotebookPage>`):
@@ -31,17 +29,13 @@ export function ExampleCode(props: {
   // and for that moment `place` may find none, which would tear down the editor to no end (epic `notebook` I6)
   let lastExample: ReturnType<NotebookController["exampleAt"]>
   const example = () => (lastExample = controller.exampleAt(props.place) ?? lastExample)
-  const view = () => controller.codeView()
   return (
     <div class="NotebookExampleCode" {...{ [EDITOR_OWN]: "" }} onClick={(event) => event.stopPropagation()}>
-      <div class="NotebookExampleBar">
-        <CodeViewSwitch controller={controller} size="tiny" />
-      </div>
       <Show when={example()}>
         {(shown) => (
           <CellEditor
             code={controller.exampleCode(shown())}
-            language={LANGUAGES[view()]}
+            language={EXAMPLE_LANGUAGE}
             readOnly={false}
             flush
             onChange={(code) => controller.editExample(props.place, code)}
@@ -50,33 +44,6 @@ export function ExampleCode(props: {
         )}
       </Show>
     </div>
-  )
-}
-
-/** The switch between the code views, spellx / spell:  each example's, flipping them all. */
-export function CodeViewSwitch(props: { controller: NotebookController; size?: "tiny" | "small" }) {
-  return (
-    <ui-menu
-      size={props.size ?? "small"}
-      appearance="segmented link header"
-      class="NotebookViewSwitch"
-      aria-label={appTexts.text("notebookPageCodeAs")}
-    >
-      <For each={VIEWS}>
-        {(view) => (
-          <ui-item
-            selected={props.controller.codeView() === view}
-            title={`${appTexts.text("notebookPageCodeAs")} ${view}`}
-            onClick={(event: MouseEvent) => {
-              event.stopPropagation()
-              props.controller.setCodeView(view)
-            }}
-          >
-            {view}
-          </ui-item>
-        )}
-      </For>
-    </ui-menu>
   )
 }
 
@@ -133,11 +100,8 @@ export function CellEditor(props: {
   )
 }
 
-/** The views, in the switch's order. */
-const VIEWS: readonly CodeView[] = ["spellx", "spell"]
-
-/** Monaco's language for each code view. */
-const LANGUAGES: Record<CodeView, string> = { spellx: "spellx", spell: "spell" }
+/** Monaco's language for an example's markup:  a page's, which reads bare names and `</>` (the `spell-page` colours, epic `language` P47). */
+const EXAMPLE_LANGUAGE = "spell-page"
 
 /** Height of a line in a cell's editor, px. */
 const LINE_HEIGHT = 20
