@@ -563,6 +563,13 @@
   --bubbly-monaco-input-room: calc((var(--bubbly-gap) + 8px) * var(--bubbly-monaco-scale));
   /* room outside a quoted input's marks, for the curly ones drawn wider than the file's own */
   --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
+  /* the paper between a body's gutter and the bands in it, so none starts on the gutter */
+  --bubbly-monaco-body-gap: 2px;
+  /* a declaration nested under a member (`it "is a (suit)"`):  a little less room before its words than a band's,
+     so its band stands further off its parent's gutter, its words where they are */
+  --bubbly-monaco-nested-pad-left: 9px;
+  /* room before each line of a group's member:  its band starts past the group's rail, its words as far past that */
+  --bubbly-monaco-push-room: calc((var(--bubbly-gutter) + var(--bubbly-monaco-body-gap)) * var(--bubbly-monaco-scale));
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
   --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 5px);
 
@@ -620,6 +627,9 @@
   }
   .bubbly-room-quote {
     width: var(--bubbly-monaco-quote-room);
+  }
+  .bubbly-room-push {
+    width: var(--bubbly-monaco-push-room);
   }
 
   /****** the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size ******/
