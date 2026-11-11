@@ -6,7 +6,7 @@ import type { monaco } from "spell/app/app/solid/monaco"
 import { ErrorBoundary, tracked } from "spell/app/app/solid"
 import { addCodeEditorKeys } from "spell/app/app/pages/editorHotkeys"
 import { CodeSettings, CodeSettingsPanel } from "./CodeSettings"
-import { FileTabs } from "./FileTabs"
+import { FileTabs, YourDraftNote } from "./FileTabs"
 import { LazyMonaco } from "./LazyMonaco"
 import { PageLoading } from "./PageLoading"
 
@@ -23,6 +23,7 @@ export function InputRoot(props: InputRootProps) {
     <div class="InputRoot">
       <Show when={props.showToolbar ?? true}>
         <FileTabs />
+        <YourDraftNote />
       </Show>
       <InputEditor showError={editor.showError} />
     </div>

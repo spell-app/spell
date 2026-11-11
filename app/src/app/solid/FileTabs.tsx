@@ -25,15 +25,10 @@ import "./FileTabs.css"
  * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
  * - More than eight files:  the ones opened lately, and a button listing every file (its `max-visible`),
  *   the same ones after a reload, per project (its `remember`).
- * - The file showing is your draft:  a note under the tabs says so, with Discard beside it (epic `mockup` P20).
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
   const drafted = tracked(() => editor.draftedFiles ?? [])
-  const showsDraft = () => {
-    const { path } = state()
-    return !!path && drafted().includes(path)
-  }
   const [piece, setPiece] = createSignal<LayoutPiece>()
   const [bar, setBar] = createSignal<FileTabBar>()
   let isGone = false
@@ -87,16 +82,6 @@ export function FileTabs() {
   return (
     <div class="FileTabs" onContextMenu={openMenu}>
       {piece()?.draw(bar()) as JSX.Element}
-      <Show when={showsDraft()}>
-        <div class="YourDraft" title={appTexts.text("yourDraftTip")}>
-          <ui-label size="small" color="yellow" appearance="basic">
-            {appTexts.text("yourDraft")}
-          </ui-label>
-          <ui-button size="mini" appearance="basic" onClick={() => void editor.discardChanges()}>
-            {appTexts.text("discard")}
-          </ui-button>
-        </div>
-      </Show>
       <Show when={menuAt()}>
         {(where) => (
           <ui-popup
@@ -116,6 +101,32 @@ export function FileTabs() {
         )}
       </Show>
     </div>
+  )
+}
+
+/****************
+ * ### `<YourDraftNote>`
+ * "Your draft", with Discard beside it, under the file tabs while the file showing is your draft (epic `mockup` P20).
+ * - A sibling of `<FileTabs>`, never inside it:  the tabs' box is the bar's height, and clips what's below.
+ ****************/
+export function YourDraftNote() {
+  const state = trackProjectFiles()
+  const drafted = tracked(() => editor.draftedFiles ?? [])
+  const showsDraft = () => {
+    const { path } = state()
+    return !!path && drafted().includes(path)
+  }
+  return (
+    <Show when={showsDraft()}>
+      <div class="YourDraft" title={appTexts.text("yourDraftTip")}>
+        <ui-label size="small" color="yellow" appearance="basic">
+          {appTexts.text("yourDraft")}
+        </ui-label>
+        <ui-button size="mini" appearance="basic" onClick={() => void editor.discardChanges()}>
+          {appTexts.text("discard")}
+        </ui-button>
+      </div>
+    </Show>
   )
 }
 
