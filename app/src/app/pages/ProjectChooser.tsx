@@ -389,7 +389,9 @@ function movedOnto(projects: readonly CardProject[], from: string, onto: string)
 function saveHomeOrder(group: string, names: string[]): void {
   setHomeOrder({ ...homeOrder(), [group]: names })
   const change: SPACES.HomeOrderChange = { group, names }
-  void $fetch({ url: SPACES.HOME_ORDER_URL, contents: change, requestFormat: KnownFormat.json }).catch((error) => editor.showError(error))
+  void $fetch({ url: SPACES.HOME_ORDER_URL, contents: change, requestFormat: KnownFormat.json }).catch((error) =>
+    editor.showError(error)
+  )
 }
 
 /** One run of a group's cards, under its quiet line:  a category's, or a language's. */

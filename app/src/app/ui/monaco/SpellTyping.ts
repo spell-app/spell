@@ -69,7 +69,12 @@ export class SpellTyping {
     const column = text.length + 1
     const range = { startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: column }
     const end = column + indent.length
-    const caret = { selectionStartLineNumber: line, selectionStartColumn: end, positionLineNumber: line, positionColumn: end }
+    const caret = {
+      selectionStartLineNumber: line,
+      selectionStartColumn: end,
+      positionLineNumber: line,
+      positionColumn: end
+    }
     // HACK: `isAutoWhitespaceEdit` isn't in Monaco's typed API:  it marks the edit as auto-indent, which it trims
     const edit = { range, text: indent, isAutoWhitespaceEdit: true } as monaco.editor.IIdentifiedSingleEditOperation
     editor.executeEdits(SPELL_TYPING, [edit], [caret as monaco.Selection])

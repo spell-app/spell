@@ -19,6 +19,7 @@ import { SP } from "spell/parser/spell"
 import { hasProjectFile, projectFileFor } from "spell/parser/spell/node/projectFile"
 import { SPACES } from "spell/app/spaces"
 import { declaresSite } from "spell/app/spaces/models/siteFiles"
+import { HOUSE_SITE_HEADER } from "spell/app/spaces/models/spaceNames"
 
 import * as fileUtils from "./file-utils"
 import * as responseUtils from "./response-utils"
@@ -631,12 +632,14 @@ export const request_getFile = async (request: Request, response: Response) => {
     return responseUtils.sendError(response, 404, new Error(`${location.path} not found`))
   }
   try {
-    const draft = isDraftable(location)
-      ? await (await draftsFor(request, location.projectId)).read(location.filePath!)
-      : undefined
+    const drafts =
+      isDraftable(location) || isBuiltFile(location) ? await draftsFor(request, location.projectId) : undefined
+    const draft = isDraftable(location) ? await drafts!.read(location.filePath!) : undefined
     // its own type, by its extension:  a `.js` draft still imports as a script
     if (draft !== undefined) return response.type(extname(location.serverPath) || "txt").send(draft)
-    await responseUtils.sendFile(response, fileOrOldName(location.serverPath), { dotfiles: "allow" })
+    // what spell built from your drafts is yours, never the shared build (`ProjectDrafts`, "Your build")
+    const yourBuilt = isBuiltFile(location) ? await drafts!.builtPathOf(location.filePath!) : undefined
+    await responseUtils.sendFile(response, yourBuilt ?? fileOrOldName(location.serverPath), { dotfiles: "allow" })
   } catch (error) {
     // Can't send an error body once the file has started streaming -- the client sees a truncated response.
     if (response.headersSent) return
@@ -669,14 +672,61 @@ export const request_saveFile = respondWithJSON(async (request) => {
   if (location.filePath && ProjectDrafts.isPrivatePath(location.filePath)) {
     throw new SRV.HttpError(400, `${location.path}:  a project's private folders are written by Publish alone`)
   }
+  if (isBuiltFile(location)) {
+    // built from your drafts:  your build, never the shared one (`ProjectDrafts`, "Your build")
+    const drafts = await draftsFor(request, location.projectId)
+    if (await drafts.hasDrafts()) {
+      await drafts.saveBuilt(location.filePath!, request.body)
+      return true
+    }
+  }
   if (!isDraftable(location) || typeof request.body !== "string") {
     await mayChangeOrDie(request, location.projectId, "save")
     return await saveFile(location.projectId, location.filePath!, request.body)
   }
+  const drafts = await draftsFor(request, location.projectId)
+  // a built-in's file, in a checkout:  the file itself, so the edit shows in git (epic `mockup` P20, r3)
+  if (
+    savesInPlace(location.projectId, {
+      editsBuiltins: environment.editsBuiltins,
+      viaHouseSite: isViaHouseSite(request)
+    })
+  ) {
+    await drafts.saveToFile(location.filePath!, request.body)
+    return true
+  }
   // a page or its source is your draft:  a designer's (T47), whatever your role in its space
-  await (await draftsFor(request, location.projectId)).save(location.filePath!, request.body)
+  await drafts.save(location.filePath!, request.body)
   return true
 })
+
+/**
+ * Does a save to project `projectId`'s own file write the file itself, not your draft (epic `mockup` P20, r3)?
+ * - Only a built-in project's (`@spell/examples/...`, `@spell/library/...`), never a frozen test project's
+ *   (`@spell/test/...`)
+ * - only where `editsBuiltins` (`environment.editsBuiltins`:  the built-ins are this checkout's own source)
+ * - never `viaHouseSite`:  a save from elsewhere on the house network stays a draft (`isViaHouseSite()`)
+ */
+export function savesInPlace(
+  projectId: string,
+  { editsBuiltins, viaHouseSite }: { editsBuiltins: boolean; viaHouseSite: boolean }
+): boolean {
+  if (!editsBuiltins || viaHouseSite) return false
+  return projectId.startsWith(BUILT_IN_SPACE) && !projectId.startsWith(FROZEN_TEST_PROJECTS)
+}
+
+/**
+ * Did `request` come through the house-network site's Caddy, which marks what it passes on to the editor
+ * (`HOUSE_SITE_HEADER`, `LocalSiteServer`'s `editorSite()`)?
+ */
+export function isViaHouseSite(request: Request): boolean {
+  return !!request.headers[HOUSE_SITE_HEADER]
+}
+
+/** Where the built-in projects are:  `@spell/examples/Solitaire` ... */
+const BUILT_IN_SPACE = "@spell/"
+/** The frozen test projects, which a save never writes in place. */
+const FROZEN_TEST_PROJECTS = "@spell/test/"
 
 /**
  * Is file `location` saved as your DRAFT (`ProjectDrafts`, epic `editor` P24), not straight to its public file?

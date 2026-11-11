@@ -19,6 +19,7 @@ import { setTimeout as sleep } from "timers/promises"
 import { SRV } from "spell/server"
 import type { ReportedServer } from "spell/server/page"
 import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
+import { HOUSE_SITE_HEADER } from "spell/app/spaces/models/spaceNames"
 import environment from "spell/app/spaces/server/node/environment"
 import { PeopleStore } from "spell/app/spaces/server/node/people/PeopleStore"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
@@ -899,6 +900,8 @@ function caddyProxyTo(port: number, settings: string[] = []): string[] {
  *   - `Host`:  the dev server's own, which it answers (no name of ours in its settings)
  *   - `Origin`:  this address's alone becomes the dev server's, so what checks a write's origin needs no new rule
  *     - NEVER every `Origin`:  a page on any other site, posting here, would then pass as this machine's own
+ * - Each request it passes on is marked (`HOUSE_SITE_HEADER`), so a save to a built-in stays a draft
+ *   (`savesInPlace()`):  only this Mac's own editor writes the checkout's files.
  * - Never passed on to this machine's person, from elsewhere on the network:
  *   - `/api/changes`:  a request into one of this machine's Claude sessions
  *   - saving a theme into Spell UI's source
@@ -928,7 +931,8 @@ function editorSite({ name, port }: CaddyEditorSite, tls: string, cloudName: str
     `\trespond @themeSaves "${REFUSED_ANSWER}" 403`,
     ...caddyProxyTo(port, [
       `\t\theader_up Host localhost:${port}`,
-      `\t\theader_up Origin "^https://${name.replaceAll(".", "\\.")}$" "http://localhost:${port}"`
+      `\t\theader_up Origin "^https://${name.replaceAll(".", "\\.")}$" "http://localhost:${port}"`,
+      `\t\theader_up ${HOUSE_SITE_HEADER} 1`
     ]),
     `\thandle_errors {`,
     `\t\trespond "Spell's editor isn't running on this Mac:  it starts with the page server (spell server start)." 502`,

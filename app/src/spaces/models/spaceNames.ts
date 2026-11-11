@@ -127,3 +127,11 @@ export const INBOX_SUBSCRIPTIONS = "subscriptions"
 export function isSpaceName(name: string): boolean {
   return (SPACE_NAMES as readonly string[]).includes(name)
 }
+
+/**
+ * The header the house-network site's Caddy adds to each request it passes on to the editor (epic `mockup` P20):
+ * lower case, as node reads it.
+ * - So the API tells a save from elsewhere on the network, which stays a draft, from this Mac's own
+ *   (`project-utils`' `savesInPlace()`).
+ */
+export const HOUSE_SITE_HEADER = "x-spell-house-site"

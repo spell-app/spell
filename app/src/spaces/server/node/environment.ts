@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "path"
 // in plain node, so that import names its `.ts`.
 // The one finder of a package's folder (epic `coherence` P29)
 import { packageFolderFor } from "spell/toolchain/sourceNames"
-import { repoDir, spellSpacesDir } from "./spellSpacesDir.ts"
+import { isSourceCheckout, repoDir, spellSpacesDir } from "./spellSpacesDir.ts"
 
 /**
  * Where the app's build folder (`app/`) and the `@spell` space's projects (`spaces/`) are:
@@ -175,6 +175,17 @@ const environment = {
    * `EditorServer` sets it when the house site gives the editor an address, so Caddy is the one way in.
    */
   editorThisMachineOnly: !!process.env.SPELL_EDITOR_THIS_MACHINE_ONLY,
+  /**
+   * Whether saving a built-in project's file (`@spell/examples/Solitaire/Solitaire.spell`) writes the file itself,
+   * not your draft of it (epic `mockup` P20, r3):  so an edit to an example shows in git.
+   * - On by default where the built-ins are this checkout's own source, as the kit's page server serves them;
+   *   off in the published `spell`, and wherever `SPELL_BUILTINS_DIR` moves them (tests).
+   * - `SPELL_EDITS_BUILTINS`:  `1` turns it on, `0` off.
+   * - Never through the house-network site:  its saves stay drafts (`project-utils`' `savesInPlace()`).
+   */
+  editsBuiltins: process.env.SPELL_EDITS_BUILTINS
+    ? process.env.SPELL_EDITS_BUILTINS === "1"
+    : isSourceCheckout && !process.env.SPELL_BUILTINS_DIR,
   srcDir,
   packagesDir,
   repoDir,

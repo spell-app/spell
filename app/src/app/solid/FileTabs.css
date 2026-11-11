@@ -11,3 +11,11 @@
   border-start-start-radius: var(--spell-pane-radius, 0);
   border-start-end-radius: var(--spell-pane-radius, 0);
 }
+
+/* "Your draft", with Discard beside it, under the tabs while the file showing is your draft (epic `mockup` P20) */
+.YourDraft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+}
