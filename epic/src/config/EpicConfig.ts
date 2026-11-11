@@ -1100,6 +1100,53 @@ export class EpicConfig {
   }
 
   /**
+   * The install command to suggest for the repo at `main` (`epic init`'s question;  epic `epic-engine` P71), and
+   * where it came from.
+   * - the repo's own docs first (`INSTALL_DOCS`:  README.md, AGENTS.md, CONTRIBUTING):  the first whole command in a
+   *   code span or a code block's line that starts with the lock file's command (`uv sync --all-packages
+   *   --all-extras`, for `uv sync`), its `$ ` prompt and a trailing `# comment` left off
+   * - else the lock file's own (`installCommandOf()`), from that file;  `""` and no source with none
+   * - never adds a flag:  `--all-extras` can pull in heavy packages, so it's only used when the docs say so
+   *   (harbor's README did:  plain `uv sync` left out its development tools)
+   * - NEVER throws:  a doc that won't read is skipped
+   */
+  static installSuggestionOf(main: string): InstallSuggestion {
+    const lock = EpicConfig.INSTALLERS.find(([file]) => existsSync(join(main, file)))
+    if (!lock) return { command: "", source: "" }
+    const [lockFile, base] = lock
+    for (const doc of EpicConfig.INSTALL_DOCS) {
+      const command = EpicConfig.commandIn(readOrEmpty(join(main, doc)), base)
+      if (command) return { command, source: doc }
+    }
+    return { command: base, source: lockFile }
+  }
+
+  /** The first command in Markdown `text` (a code span, or a code block's line) starting with words `base`. */
+  private static commandIn(text: string, base: string): string | undefined {
+    const candidates: string[] = []
+    let inBlock = false
+    for (const line of text.split("\n")) {
+      if (/^\s*(```|~~~)/.test(line)) {
+        inBlock = !inBlock
+        continue
+      }
+      if (inBlock) candidates.push(line)
+      else for (const [, span] of line.matchAll(/`([^`]+)`/g)) candidates.push(span)
+    }
+    for (const candidate of candidates) {
+      const command = candidate
+        .replace(/^\s*[$>]\s+/, "")
+        .replace(/\s+#.*$/, "")
+        .trim()
+      if (command === base || command.startsWith(`${base} `)) return command.replace(/\s+/g, " ")
+    }
+    return undefined
+  }
+
+  /** The repo's own docs `installSuggestionOf()` reads, at its root, in order. */
+  private static readonly INSTALL_DOCS = ["README.md", "AGENTS.md", "CONTRIBUTING.md", "CONTRIBUTING"]
+
+  /**
    * The settings in config text `text` (from `file`, for messages):  each key left out from the repo itself
    * (`defaultsFor()`).
    * - `main`:  the repo's main checkout;  default the one `file` is in, `<main>/.epic/config.json5`
@@ -1211,6 +1258,12 @@ export type RepoCheckout = {
 
 /** One of `EpicConfig.peers`:  a repo beside this one (`spell-brand`), and its MAIN checkout, absolute. */
 export type EpicPeer = { name: string; main: string }
+
+/**
+ * The install command `epic init` suggests (`EpicConfig.installSuggestionOf()`), and where it came from:
+ * a doc (`README.md`), the lock file (`uv.lock`), or `""` for none.
+ */
+export type InstallSuggestion = { command: string; source: string }
 
 /**
  * `EpicSettings.oldLayout`:  how a repo that ABSORBED its child repos (repo-split's P20 · One Repo) meets an epic

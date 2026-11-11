@@ -481,6 +481,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           address in the config (`contentRemote`);  a later person's clones it where the epic folder is missing
           (`Shared.clone()`, plain git);  `--remote <address>`, `--no-remote`;  without `gh`, or logged out, it
           says how to get it and does the rest
+        - the install command a new worktree runs (epic `epic-engine` P71:  harbor's `uv.lock` gave `uv sync`, which
+          left out its development tools):  asked in a terminal (`installChoice()`), suggesting
+          `EpicConfig.installSuggestionOf()`'s, the first whole command in the repo's README.md, AGENTS.md or
+          CONTRIBUTING starting with the lock file's (`uv sync --all-packages --all-extras`), else the lock file's;
+          never a flag made up;  `--install` answers it;  a config naming one keeps it, asking nothing;  one that leaves
+          it out gets the answer written in;  the summary names it and its source
+        - the plugin's lines:  installed or `updated`, a Claude Code session open already needs `/reload-plugins`
+          before `/epic`;  a new one has it
         - the ONE command to start (epic `epic-friend` P13), `npx spell@next epic init` (the kit's `spell epic`,
           `runSpellEpic()`):  first the epic plugin when Claude Code doesn't have it (`pluginStep()`,
           `PluginInstall.isInstalled()`;  `--no-plugin`), after the name the person's colour (`colorStep()`:  asked
@@ -576,6 +584,15 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         (`sawHooks()`), so a session whose hooks aren't loaded (started before a fix) is known too
       - refused:  `handoff` exits 1, saying why, the fix, and `epic window launch <name>`
         - `launch --move` starts a NEW session in the epic's window instead, and says why
+        - the epic skill's "2. Session":  a refused handoff runs `epic window launch <name>`, never `epic open` (it
+          would show the page in the window being left;  epic `epic-engine` P71)
+      - asked EARLIER too (epic `epic-engine` P71):  `epic window hooks [--again <command>]` (`Window.hooksCommand()`,
+        on the same `moveProblem()`), which `/epic`, `/isolate` and `/unpark` run before they make or enter a worktree
+        - unmarked:  exits 1, "Nothing was made", and `fixFor()`'s words:  "type /reload-plugins, then <command> again
+          (or start a new session)";  typed again, the prompt hook marks the session, so it passes
+        - why:  a session started before the plugin was installed ran `/epic`;  with no worktree hook, Claude Code made
+          its own worktree (`worktree-<name>`, from `origin/main`), and only the move noticed
+        - under Codex (`EpicHome.agent()`), or with no Claude Code session id:  stands down, exit 0
       - the plugin's names:  `epic` from its manifest, `spell` from the repo's root marketplace (`pluginNames()`);
         the fix it names is `epic plugin install`
       - `missedMove()`:  a move's record still waiting when the session's next prompt comes

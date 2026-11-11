@@ -185,6 +185,8 @@
  * - `stay <name>` / `stay --end`:  title and tint this session's window for worktree `<name>` it stays in / put back
  * - `should-stay [--epic] [--json]`:  should this session stay in its window when it isolates, or move?
  *   Prints `recommend stay|window`, then a `- <reason>` line each
+ * - `hooks [--again <command>]`:  do this session's hooks run (`hooksCommand()`, epic `epic-engine` P71)?  The skills
+ *   ask before they make or enter a worktree;  exits 1 with the fix when they don't, 0 under Codex
  * - No window (the extension isn't installed, or the window wasn't reloaded since):  exits 1, saying so.
  */
 import { spawnSync } from "node:child_process"
@@ -205,6 +207,7 @@ import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 import { Editor } from "spell/epic/config/Editor.ts"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { EpicHome } from "spell/epic/config/EpicHome.ts"
 import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
 import { SessionMoves } from "spell/epic/command/SessionMoves.ts"
 import { WorktreeGuard } from "spell/epic/command/WorktreeGuard.ts"
@@ -916,10 +919,44 @@ export class Window {
    * - the move is the plugin's end-of-turn hook's (`hooks/handoff.mjs`):  `SessionMoves.hookProblem()` says when
    *   Claude Code won't run it, from its plugin lists and this session's own mark (its prompt hook ran)
    */
-  static moveProblem(sessionId) {
+  static moveProblem(sessionId, again) {
     const moves = new SessionMoves()
     const problem = moves.hookProblem(sessionId)
-    return problem ? { problem, fix: moves.fixFor(problem) } : null
+    return problem ? { problem, fix: moves.fixFor(problem, again) } : null
+  }
+
+  /**
+   * `hooks [--again <command>]`:  whether this session's hooks run, BEFORE a skill makes or enters a worktree
+   * (epic `epic-engine` P71);  returns the exit code.
+   * - the same check a move makes (`moveProblem()`, so `SessionMoves.hookProblem()` stays the ONE check):  Claude
+   *   Code's plugin lists, and this session's mark (its prompt hook ran)
+   * - they run:  says so, exits 0
+   * - they don't:  the problem, "Nothing was made", and its fix (`--again`:  the command to type again after
+   *   `/reload-plugins`, `/epic seo`), exits 1
+   * - stands down, exit 0, with a line saying so:  under Codex (`EpicHome.agent()`:  it has no prompt hook, so no
+   *   mark), or with no Claude Code session id
+   * - why:  a session started before the plugin was installed ran `/epic`, and Claude Code made its OWN worktree (the
+   *   worktree hook didn't run either);  only the move to the new window noticed, after the worktree was made
+   * - `env`:  where to look;  default this process's (a test passes its own)
+   */
+  static hooksCommand({ again, env = process.env, print = console.log } = {}) {
+    if (EpicHome.agent(env).name === "codex") {
+      print("Codex runs no prompt hook, so there's no mark to check:  nothing to do, go on")
+      return 0
+    }
+    const sessionId = env.CLAUDE_CODE_SESSION_ID
+    if (!SESSION_ID.test(sessionId ?? "")) {
+      print("no Claude Code session ($CLAUDE_CODE_SESSION_ID isn't set):  nothing to check, go on")
+      return 0
+    }
+    const refused = Window.moveProblem(sessionId, again)
+    if (!refused) {
+      print("this session's hooks run")
+      return 0
+    }
+    print(`${refused.problem[0].toUpperCase()}${refused.problem.slice(1)}.`)
+    print(`Nothing was made.  Fix:  ${refused.fix}.`)
+    return 1
   }
 
   /**
@@ -1135,6 +1172,7 @@ export class Window {
       return 0
     }
     if (command === "move") return Window.moveCommand({ dryRun: flags.dryRun === true })
+    if (command === "hooks") return Window.hooksCommand({ again: stringFlag(flags.again) })
     const bare = ["which", "should-stay", "reload", "color"].includes(command) || (command === "stay" && flags.end)
     if (!COMMANDS.includes(command) || (!bare && !target)) {
       console.error(USAGE)
@@ -1333,6 +1371,7 @@ const COMMANDS = [
   "handoff",
   "resume",
   "should-stay",
+  "hooks",
   "color",
   "stay"
 ]
@@ -1375,7 +1414,9 @@ const USAGE = `usage:  epic window <command>
   resume <record> [--title <title>]...
                                the move itself (the Stop hook runs it)
   should-stay [--epic] [--json]
-                               stay in this window when isolating, or move?  recommend stay|window, and why`
+                               stay in this window when isolating, or move?  recommend stay|window, and why
+  hooks [--again <command>]    do this session's hooks run?  checked before a worktree is made;  exits 1 with the
+                               fix (/reload-plugins, then <command> again) when they don't;  Codex:  nothing to check`
 
 /**
  * What a worktree command says first, on stderr (epic `epic-engine` P26, request r20):

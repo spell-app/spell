@@ -23,7 +23,7 @@ import type { SyncReport } from "./SharedSync"
 
 /****************
  * ### `RepoInit`
- * `epic init [--local] [--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote]
+ * `epic init [--local] [--name <name>] [--color <colour>] [--install <command>] [--content-repo <name> | --remote <address> | --no-remote]
  * [--public] [--host github|gitlab] [--protected-base] [--no-plugin] [--no-server] [--dry-run] [--json]`:
  * set a repo up for epics (epic `epic-eject` P9), from any folder of its main checkout or a worktree of it;  the ONE
  * command a new repo, and each teammate joining it, runs (epic `epic-friend` P13:  `npx spell@next epic init`).
@@ -35,7 +35,9 @@ import type { SyncReport } from "./SharedSync"
  *    - the epic folder `../<repo>.epics`
  *    - the base branch from git
  *    - worktrees in `../<repo>.worktrees`
- *    - the install command its lock file names (none without one)
+ *    - the install command a new worktree runs (`installChoice()`, epic `epic-engine` P71):  asked in a terminal,
+ *      suggesting the one the repo's README.md, AGENTS.md or CONTRIBUTING names for its lock file's tool, else the
+ *      lock file's own (`EpicConfig.installSuggestionOf()`);  `--install` answers it;  a config naming one keeps it
  *    - window names from the repo's name;  the window files in the epic folder's `windows/` (git-ignored there)
  *    - where the code is hosted (`codeHost`):  `--host`, the config's, the `origin` remote's address, or asked in a
  *      terminal when that address doesn't say (`codeHostChoice()`)
@@ -172,6 +174,7 @@ export class RepoInit {
       dryRun,
       name: stringFlag(flags.name),
       color,
+      install: stringFlag(flags.install),
       remote,
       contentRepo,
       visibility: flags.public === true ? "public" : undefined,
@@ -193,6 +196,7 @@ export class RepoInit {
       visibility: answers.visibility,
       noRemote,
       color: answers.color,
+      install: answers.install,
       cloned: answers.cloned,
       codeHost: answers.codeHost,
       protectedBase: flags.protectedBase === true,
@@ -233,6 +237,7 @@ export class RepoInit {
    *   - a teammate joining, the team's plans not here yet:  cloned FIRST, quietly, so the taken colours are known
    *     (`cloned`;  `init()` reports it)
    * - the epic repo's name and private or public, only when `init()` will make it on the code host (`willMakeRepo()`)
+   * - which command gets a new worktree ready (`installChoice()`), unless the config names one;  `install` answers it
    * - no terminal (`ask` off):  nothing asked;  the plan says what the flags and the suggestions come to
    * - SIDE EFFECT:  the clone, for a teammate joining (not `dryRun`)
    */
@@ -242,6 +247,7 @@ export class RepoInit {
     local = false,
     name,
     color,
+    install,
     remote,
     contentRepo,
     visibility,
@@ -284,6 +290,7 @@ export class RepoInit {
       answers.contentRepo ??= ask ? await CLI.ask(REPO_QUESTION, { suggestion }) : suggestion
       answers.visibility ??= ask ? await RepoInit.askVisibility(codeHost.words) : "private"
     }
+    answers.install = await RepoInit.installChoice({ main, install, ask })
     const stays = noRemote || (isLocal && !contentRepo && !remote && !settings.contentRemote && !repoPlan)
     answers.plan = {
       name: person,
@@ -293,9 +300,50 @@ export class RepoInit {
         : stays
           ? "none:  the plans stay on this machine"
           : remote || address || undefined,
+      install: answers.install,
       ...(isLocal && { local: true })
     }
     return answers
+  }
+
+  /**
+   * Which command gets a new worktree ready in the repo at `main` (epic `epic-engine` P71), and where it came from.
+   * - the config names one already (`installCommand` written in it):  that one, asking nothing
+   * - `install` (`--install`):  that one
+   * - else asked in a terminal (`CLI.ask()`), suggesting `EpicConfig.installSuggestionOf()`'s:  the repo's docs', else
+   *   its lock file's;  no terminal (`ask` off), the suggestion
+   * - why:  harbor's `uv.lock` gave plain `uv sync`, which leaves out its development tools;  its README said
+   *   `uv sync --all-packages --all-extras`
+   */
+  static async installChoice({
+    main,
+    install,
+    ask
+  }: {
+    main: string
+    install?: string
+    ask: boolean
+  }): Promise<InstallChoice> {
+    const written = RepoInit.writtenInstall(main)
+    if (written !== undefined) return { command: written, source: EpicConfig.FILE }
+    if (install !== undefined) return { command: install.trim(), source: "--install" }
+    const suggestion = EpicConfig.installSuggestionOf(main)
+    if (!ask) return suggestion
+    const answer = (await CLI.ask(INSTALL_QUESTION, { suggestion: suggestion.command })).trim()
+    return answer === suggestion.command ? suggestion : { command: answer, source: "your answer" }
+  }
+
+  /** The install command the config at `main` writes out, or `undefined` when it has no config or leaves it out. */
+  static writtenInstall(main: string): string | undefined {
+    const file = join(main, EpicConfig.FILE)
+    if (!existsSync(file)) return undefined
+    try {
+      const written = EpicConfig.parse(readFileSync(file, "utf8"), file) as Record<string, unknown> | null
+      const command = written?.installCommand
+      return typeof command === "string" ? command : undefined
+    } catch {
+      return undefined
+    }
   }
 
   /**
@@ -354,6 +402,7 @@ export class RepoInit {
     noRemote = false,
     ask = false,
     color,
+    install,
     plugin = false,
     server = false,
     commit = false,
@@ -374,7 +423,14 @@ export class RepoInit {
     const hosted = codeHost ?? (await RepoInit.codeHostChoice({ main, ask: false }))
     const withHost = { ...found, codeHost: hosted.kind }
     const protection = RepoInit.protectionStep({ main, configFile, hadConfig, settings: withHost, protectedBase })
-    const settings = { ...withHost, baseBranchProtected: protection.on, localSetup: local }
+    // the install command:  the answer, else the config's, else the suggestion (`installChoice()`, asking nothing)
+    const installing = install ?? (await RepoInit.installChoice({ main, ask: false }))
+    const settings = {
+      ...withHost,
+      baseBranchProtected: protection.on,
+      localSetup: local,
+      ...(!hadConfig && { installCommand: installing.command, installOnCreate: Boolean(installing.command) })
+    }
     if (!hadConfig && !dryRun) {
       mkdirSync(dirname(configFile), { recursive: true })
       writeFileSync(configFile, RepoInit.configText(settings))
@@ -384,6 +440,15 @@ export class RepoInit {
       RepoInit.keepProtected(configFile)
     if (hadConfig && !dryRun && (hosted.source === "flag" || hosted.source === "asked"))
       RepoInit.keepCodeHost(configFile, hosted.kind)
+    // a config that left it out:  the answer written into it
+    if (hadConfig && installing.source !== EpicConfig.FILE) {
+      settings.installCommand = installing.command
+      settings.installOnCreate = Boolean(installing.command)
+      if (!dryRun) {
+        RepoInit.keepValue(configFile, "installCommand", installing.command)
+        RepoInit.keepValue(configFile, "installOnCreate", Boolean(installing.command))
+      }
+    }
     const content = join(main, settings.contentFolder)
     const folders = settings.sharedFolders
     const report: InitReport = {
@@ -397,6 +462,7 @@ export class RepoInit {
       gitignore: { file: join(main, ".gitignore"), action: "ok" },
       protection,
       codeHost: hosted,
+      install: installing,
       person: RepoInit.personStep({ dryRun, name }),
       ...(pluginReport && { plugin: pluginReport })
     }
@@ -897,7 +963,7 @@ export class RepoInit {
       const changes = installer.install().changes
       const notes = changes.filter((change) => EDITOR_NOTE.test(change))
       if (installed && changes.length === notes.length) return { action: "already", ...(notes.length && { notes }) }
-      return { action: "installed", changes: changes.length, ...(notes.length && { notes }) }
+      return { action: installed ? "updated" : "installed", changes: changes.length, ...(notes.length && { notes }) }
     } catch (error) {
       return { action: "failed", error: (error as Error).message }
     }
@@ -1435,6 +1501,7 @@ export class RepoInit {
           : remote.action === "skipped" || remote.action === "kept local"
             ? "none:  the plans stay on this machine"
             : remote.address,
+      install: report.install,
       ...(report.local && { local: true })
     }
   }
@@ -1443,13 +1510,25 @@ export class RepoInit {
    * The summary under the questions:  `> Your name  :  owenoak`, the values bold, the colour in its colour;  local mode
    * says so first.
    */
-  static summaryLines({ name, color, sharedRepo, local }: Plan): string[] {
+  static summaryLines({ name, color, sharedRepo, install, local }: Plan): string[] {
     return [
       ...(local ? [`> Setup:  ${chalk.bold(LOCAL_SETUP)}`] : []),
       ...(name ? [`> Your name  :  ${chalk.bold(name)}`] : []),
       ...(color ? [`> Your colour:  ${RepoInit.colored(color, color)}`] : []),
-      ...(sharedRepo ? [`> Epic repo:  ${chalk.bold(sharedRepo)}`] : [])
+      ...(sharedRepo ? [`> Epic repo:  ${chalk.bold(sharedRepo)}`] : []),
+      ...(install && (install.command || install.source)
+        ? [`> Install command:  ${RepoInit.installWords(install)}`]
+        : [])
     ]
+  }
+
+  /**
+   * What the summary says of the install command:  `uv sync --all-extras  (from README.md)`, or none;
+   * nothing at all for a repo with nothing to install and nobody choosing (`summaryLines()`).
+   */
+  static installWords({ command, source }: InstallChoice): string {
+    if (!command) return `${chalk.bold("none")}  (nothing to install;  installCommand in ${EpicConfig.FILE})`
+    return `${chalk.bold(command)}${source ? `  (from ${source})` : ""}`
   }
 
   /** `text` bold, in `color`:  a Spell UI colour name's terminal hex, or a CSS hex;  else bold alone. */
@@ -1467,7 +1546,12 @@ export class RepoInit {
         case "would install":
           return ["> would install epic for Claude Code (epic plugin install)"]
         case "installed":
-          return [`> installed epic for Claude Code:  /reload-plugins in a running session`]
+        case "updated":
+          return [
+            `> ${plugin.action} epic for Claude Code`,
+            "> a Claude Code session already open doesn't have it yet:  type /reload-plugins there before /epic;  " +
+              "a new session has it"
+          ]
         default:
           /* case "failed" */ return [
             `> couldn't install epic for Claude Code:  ${plugin.error}`,
@@ -1900,6 +1984,8 @@ export type InitReport = {
   protection: ProtectionReport
   /** where the code is hosted, and how that's known (`codeHostChoice()`) */
   codeHost: CodeHostReport
+  /** the command a new worktree runs, and where it came from (`installChoice()`) */
+  install?: InstallChoice
   /** the name this machine's person goes by:  `kept` now, kept `already`, `would keep` (a dry run), or `none` */
   person: { name: string | undefined; action: "kept" | "already" | "would keep" | "none" }
   /** the epic plugin (`pluginStep()`);  none with `--no-plugin` */
@@ -1965,7 +2051,10 @@ export type CodeHostReport = {
 export type ChangedFilesInput = Pick<InitReport, "main"> & Partial<Pick<InitReport, "dryRun" | "config" | "gitignore">>
 
 /** What `epic init`'s questions came to (`RepoInit.questions()`):  `init()`'s answers, and the summary. */
-export type Answers = Pick<InitOptions, "name" | "color" | "contentRepo" | "visibility" | "cloned" | "codeHost"> & {
+export type Answers = Pick<
+  InitOptions,
+  "name" | "color" | "contentRepo" | "visibility" | "cloned" | "codeHost" | "install"
+> & {
   /** what the summary under the questions says */
   plan: Plan
 }
@@ -1978,15 +2067,26 @@ export type Plan = {
   color?: string
   /** the epic repo:  `owner/name, private` to make, the address to join, or none */
   sharedRepo?: string
+  /** the command a new worktree runs, and where it came from */
+  install?: InstallChoice
   /** set up locally:  nothing in the repo */
   local?: boolean
 }
+
+/**
+ * The install command `epic init` settled on (`RepoInit.installChoice()`), and where it came from:  a doc
+ * (`README.md`), the lock file (`uv.lock`), `--install`, `your answer`, or the config (`.epic/config.json5`);
+ * `""` for none.
+ */
+export type InstallChoice = { command: string; source: string }
 
 /** What `RepoInit.questions()` takes:  `run()`'s flags, and whether to ask. */
 export type QuestionOptions = Pick<
   InitOptions,
   "name" | "color" | "remote" | "contentRepo" | "visibility" | "noRemote" | "say" | "local"
 > & {
+  /** the install command (`--install`):  none, asked */
+  install?: string
   /** ask in a terminal:  off for `--json` and `--dry-run` */
   ask: boolean
   /** only say what it would do:  nothing cloned */
@@ -1997,7 +2097,8 @@ export type QuestionOptions = Pick<
 
 /** What `epic init` did about the epic plugin:  `installed` (and how many `changes`), `already`, ... */
 export type PluginReport = {
-  action: "installed" | "already" | "would install" | "failed"
+  /** `updated`:  it was installed, and the install changed it (a newer copy) */
+  action: "installed" | "updated" | "already" | "would install" | "failed"
   /** what `PluginInstall.install()` changed */
   changes?: number
   /** its lines about the editor's extension (`PluginInstall`'s step 7):  installed, or why not */
@@ -2149,6 +2250,8 @@ export type InitOptions = {
   ask?: boolean
   /** their colour (`--color`):  a Spell UI colour name, or a CSS colour;  none:  asked when `ask` */
   color?: string
+  /** the install command a new worktree runs (`questions()`);  none:  the config's, else the suggestion */
+  install?: InstallChoice
   /** install the epic plugin when Claude Code doesn't have it (`--no-plugin` turns it off);  default `false` */
   plugin?: boolean
   /** start the epic server, serving the repo, last (`--no-server` turns it off);  default `false` */
@@ -2177,6 +2280,9 @@ export type RemoteStepOptions = Pick<InitOptions, "remote" | "contentRepo" | "vi
   /** local mode:  nothing made on the code host unless `contentRepo` */
   local?: boolean
 }
+
+/** What `epic init` asks, in a terminal, unless the config names an install command (`installChoice()`). */
+const INSTALL_QUESTION = "Which command gets a new worktree ready?"
 
 /** What `epic init` asks, in a terminal, when no name is kept. */
 const NAME_QUESTION = "What do you want to be called?"

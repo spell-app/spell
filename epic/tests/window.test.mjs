@@ -988,6 +988,42 @@ test("launch --move:  can't move (the hook won't run):  a NEW session in the epi
   }
 })
 
+test("hooks (P71):  unmarked exits 1 with the fix, before any worktree;  marked passes;  Codex and no session stand down", async () => {
+  const lines = []
+  const print = (line) => lines.push(line)
+  const env = { CLAUDECODE: "1", CLAUDE_CODE_SESSION_ID: SESSION }
+  // this session's prompt hook never marked it:  the skills stop here, nothing made
+  assert.equal(Window.hooksCommand({ env, print, again: "/epic epic-test" }), 1)
+  assert.match(lines[0], /^This session's hooks haven't run:  its prompt hook never marked it \(it started before/)
+  assert.equal(
+    lines[1],
+    "Nothing was made.  Fix:  type /reload-plugins, then /epic epic-test again (or start a new session)."
+  )
+  // the same through the command line, with no --again
+  const saved = { agent: process.env.SPELL_EPIC_AGENT, codex: process.env.CODEX_THREAD_ID }
+  delete process.env.SPELL_EPIC_AGENT
+  delete process.env.CODEX_THREAD_ID
+  try {
+    const { code, out } = await mainWith(["hooks"])
+    assert.equal(code, 1)
+    assert.match(out, /Fix:  type \/reload-plugins, then the same command again \(or start a new session\)\.$/)
+    // typed again after /reload-plugins:  the prompt hook marked it, so it passes
+    sawHooks(SESSION)
+    assert.deepEqual(await mainWith(["hooks"]), { code: 0, out: "this session's hooks run", err: "" })
+  } finally {
+    if (saved.agent !== undefined) process.env.SPELL_EPIC_AGENT = saved.agent
+    if (saved.codex !== undefined) process.env.CODEX_THREAD_ID = saved.codex
+  }
+  // Codex:  no prompt hook, no mark to read
+  lines.length = 0
+  assert.equal(Window.hooksCommand({ env: { CODEX_THREAD_ID: "019a-thread" }, print }), 0)
+  assert.match(lines[0], /^Codex runs no prompt hook/)
+  // no Claude Code session id:  nothing to check
+  lines.length = 0
+  assert.equal(Window.hooksCommand({ env: { CLAUDECODE: "1" }, print }), 0)
+  assert.match(lines[0], /^no Claude Code session/)
+})
+
 test("a move promised, never made:  the next worktree command says so, and clears the record", async () => {
   const name = `test-missed-${process.pid}`
   const to = join(repo, "workspaces", "ongoing", `${name}.code-workspace`)

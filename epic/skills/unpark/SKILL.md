@@ -63,6 +63,10 @@ and print `epic window open <name>` for the person, if they want its window.
     - The option it recommends first, with "(Recommended)"
       ([the isolate skill](../isolate/SKILL.md), "Start", step 2b).
   - "Open new window":
+    0. before entering:  `epic window hooks --again "/unpark <name>"`, as [the isolate skill](../isolate/SKILL.md)'s
+       "Start", step 0:  exit 1, STOP, nothing entered or opened, and pass on its fix (`/reload-plugins`, then
+       `/unpark <name>` again)
+       - In Codex:  skip it:  no prompt hook, nothing to check.
     1. not yet in the worktree:  `EnterWorktree` with `name: "<name>"`
        - never its `path`:  outside `.claude/worktrees/`, Claude Code asks the person every time (epic `epic-engine` P16)
     2. both from the worktree's root, as [the isolate skill](../isolate/SKILL.md)'s "Start", steps 4-5:
@@ -70,7 +74,7 @@ and print `epic window open <name>` for the person, if they want its window.
        - then `epic window handoff <name>`
        - The session moves there when this turn ends.
   - "Stay in this window":  step 1, then `epic window stay <name>` (the window titled `⎇ <name>`, tinted).
-- Same:  `EnterWorktree` with `name: "<name>"` if not in it yet, and go on.
+- Same:  `EnterWorktree` with `name: "<name>"` if not in it yet (after the hooks check, step 0 above), and go on.
   - In Codex:  `cd "$(epic worktree path <name>)"` if not there yet.
 
 ## 4. Resume

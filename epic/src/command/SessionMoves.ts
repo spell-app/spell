@@ -86,7 +86,7 @@ export class SessionMoves {
     if (sessionId && !existsSync(join(this.seen, sessionId)))
       return (
         "this session's hooks haven't run:  its prompt hook never marked it " +
-        "(it started before the plugin was fixed, or runs an old copy of it)"
+        "(it started before the plugin was installed or updated, or runs an old copy of it)"
       )
     return null
   }
@@ -141,10 +141,12 @@ export class SessionMoves {
   /**
    * What fixes `problem` (`hookProblem()`'s), in one line:  `epic plugin install` (`PluginInstall`), which puts Claude
    * Code's lists right, or a new session.
+   * - this session unmarked:  `/reload-plugins`, then `again` typed again (default "the same command"):  that prompt
+   *   runs the prompt hook, which marks the session, so the second try passes (epic `epic-engine` P71)
    */
-  fixFor(problem: string): string {
+  fixFor(problem: string, again = "the same command"): string {
     if (problem.startsWith("this session's hooks"))
-      return "type /reload-plugins, or start a new session;  until then this session can't move"
+      return `type /reload-plugins, then ${again} again (or start a new session)`
     if (problem.includes("turned off")) return "turn it back on (`/plugin`), then /reload-plugins"
     return "run `epic plugin install` (it puts Claude Code's plugin lists right), then /reload-plugins"
   }

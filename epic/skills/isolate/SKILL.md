@@ -39,6 +39,13 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
 ## Start:  `/isolate <name>`
 
 0. Checks and rename, BEFORE anything else.
+   - FIRST, this session's hooks:  `epic window hooks --again "/isolate <name>"` (epic `epic-engine` P71).
+     - In Codex:  skip it:  Codex has no prompt hook (the command says so, and exits 0).
+     - Exit 1:  the session started before the plugin was installed or updated, so its worktree hook won't run, and
+       `EnterWorktree` would make Claude Code's own worktree (the wrong branch and folder, from `origin/main`).
+       - STOP:  nothing made, renamed or opened.  Pass on its two lines:  `/reload-plugins`, then `/isolate <name>`
+         again (or a new session).
+       - Typed again after the reload, the prompt hook marks the session, so the check passes.
    - A typed `/isolate <name>` got them already, from the repo's `UserPromptSubmit` hook:
      it renamed the session after it, or blocked the prompt.
      - The hook:  [prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs);  read its header.

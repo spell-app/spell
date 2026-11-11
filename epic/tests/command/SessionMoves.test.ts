@@ -121,7 +121,12 @@ describe("hookProblem():  will the end-of-turn hook run?", () => {
     pluginListsAt(engine)
     const problem = moves().hookProblem(SESSION)!
     expect(problem).toMatch(/this session's hooks haven't run/)
-    expect(moves().fixFor(problem)).toMatch(/\/reload-plugins/)
+    expect(problem).toMatch(/started before the plugin was installed or updated/)
+    // P71:  the fix names the command to type again, after the reload marks the session
+    expect(moves().fixFor(problem)).toBe("type /reload-plugins, then the same command again (or start a new session)")
+    expect(moves().fixFor(problem, "/epic epic-test")).toBe(
+      "type /reload-plugins, then /epic epic-test again (or start a new session)"
+    )
     // the mark ages out once a month has gone by, at the next mark
     moves().sawHooks(SESSION)
     const old = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000)

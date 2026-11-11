@@ -779,6 +779,17 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     },
     {
+      name: "hooks",
+      usage: "[--again <command>]",
+      description:
+        "do this session's hooks run?  The skills ask before a worktree is made:  exits 1 with the fix " +
+        "(/reload-plugins, then <command> again) when they don't;  under Codex, nothing to check",
+      example: 'epic window hooks --again "/epic seo"',
+      flags: {
+        "--again <command>": "the command the fix says to type again (default:  the same command)"
+      }
+    },
+    {
       name: "color",
       usage: "[<look>]",
       description: "give this window a look, Tomorrow Night Blue's in a hue;  no look:  list them",
@@ -1407,6 +1418,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   init: {
     "--name <name>": "the name you go by on the epics (else asked, or git's)",
     "--color <colour>": "the colour of your words:  a free Spell UI colour name (else asked), or a CSS colour",
+    "--install <command>":
+      "what a new worktree runs to get ready (else asked, suggesting what the repo's README names, or its lock " +
+      "file's);  a config naming one keeps it",
     "--content-repo <name>": "the epic repo's name on GitHub (else asked, or <repo>.epics)",
     "--remote <address>": "use this epic repo, made already",
     "--no-remote": "make no epic repo:  the plans stay on this machine",

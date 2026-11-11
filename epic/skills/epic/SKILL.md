@@ -126,6 +126,18 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     - In Codex:  propose it in the chat;  the person types another if they like.
 - Checks and rename, BEFORE anything else:
   as [the isolate skill](../isolate/SKILL.md)'s "Start", step 0.
+  - FIRST of all, for every form that makes or enters a worktree (a new epic, `resume`, `request`):
+    `epic window hooks --again "<the command typed>"` (epic `epic-engine` P71).
+    - In Codex:  skip it:  Codex has no prompt hook (the command stands down, exit 0).
+    - Exit 1:  this session's hooks don't run (it started before the plugin was installed or updated).
+      STOP, changing nothing:  no rename, no prompt file, no worktree, no `epic create`, no window, no `epic open`.
+      - Reply with its two lines:  the problem, then "Nothing was made.  Fix:  type /reload-plugins, then
+        /epic <name> again (or start a new session)".
+      - Why:  without the hooks, `EnterWorktree` made Claude Code's own worktree (branch `worktree-<name>`, in
+        `.claude/worktrees/`, from `origin/main`), and only the move to the new window noticed.
+      - Typed again after `/reload-plugins`, the prompt hook marks the session, and the check passes.
+    - Not "From another worktree" (it makes no worktree from this session:  `launch --move` refuses a move by itself
+      and starts a new session), nor `review`, `future`, `phase`, `start`, `tidy`, `color`.
   - ANOTHER REPO's epic (`epic list --json` gives it a `repo`;  epic `epic-engine` I47):
     NOT this window's, whatever the command (`/epic <name>`, `resume`, `request`).
     - No rename, no `EnterWorktree`, no worktree `<name>` here:  the `WorktreeCreate` hook refuses one.
@@ -286,7 +298,15 @@ All in the FIRST turn, in this order, then the turn ends.
        Plan again from its prompt ("3. Plan");  explore only what the doc doesn't say.
 4. Isolate "Start", steps 4-5:  the worktree's own window, then `handoff <name> --prompt continue`.
    - Name alone, no plan yet:  no `--prompt`.
-5. `epic open <name> --review`, AFTER the handoff.
+   - The handoff REFUSED ("this session can't move", exit 1:  the plugin's lists went wrong after the hooks check
+     passed;  epic `epic-engine` P71):  NO `epic open` here, ever.
+     - It would show the epic page in THIS window, the one being left.
+     - Instead `epic window launch <name>` (`--prompt continue`, or none for a name alone):  a NEW session in the
+       epic's window, which shows the page there, as a launched session does ("Launched").
+     - Then skip steps 5 and 6.  The reply:  the handoff's `fix:` line, and that this tab can be closed once the new
+       session is up.
+     - In Codex:  no handoff, so never refused.
+5. `epic open <name> --review`, AFTER an ACCEPTED handoff (step 4).
    - It shows in the right side bar's Review tab (the checkbox icon) of the window the session moves to,
      once it has:  one tab, reloaded on every later `open`.
    - Needs spell-epic's VS Code extension ([its README](${CLAUDE_PLUGIN_ROOT}/README-vscode.md)).
@@ -1207,6 +1227,9 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
 - It works in the epic's checkout, in a window the person picks, from where the epic page says it stopped.
 - The epic page is the memory:  read it, don't redo it.
 
+0. First, "1. Name"'s hooks check:  `epic window hooks --again "/epic resume <name>"`;  exit 1, STOP, change nothing,
+   and give its fix.
+   - In Codex:  skip it.
 0. In ANOTHER epic's window (the prompt hook's note says so;  epic `epic-engine` r15:  "this should open the epic in
    a new window!"):  never resumed here.
    - "From another worktree", steps 4-5, with `--prompt "/epic resume <name>"`:  a launch, or a fresh session's move.
@@ -1437,7 +1460,9 @@ A REQUEST is something the person asked for in another session, sent here instea
 - It reaches this session one of three ways:
   - a message from the sender:  "New request r3 for epic `<epic>` ...":  the same steps
   - a NEW session in the epic's window, `/epic request <epic> r3` typed in, when the epic's session wasn't running
-    - first `EnterWorktree` with `name: "<epic>"`, as "Launched" does, only when `pwd` isn't in it already
+    - first "1. Name"'s hooks check, `epic window hooks --again "/epic request <epic> r3"`:  exit 1, STOP, give its fix
+      - In Codex:  skip it.
+    - then `EnterWorktree` with `name: "<epic>"`, as "Launched" does, only when `pwd` isn't in it already
       - In Codex:  `cd "$(epic worktree path <epic>)"`.
   - the sender IS this epic's session:  it follows these steps itself
 - The prompt hook titled the session `🚧 <epic>`, so later requests reach it.

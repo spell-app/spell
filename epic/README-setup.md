@@ -122,12 +122,19 @@ A teammate joining has the team's plans cloned before the colour question, so th
   - Picking public asks again, in one line, with no suggested:  no, or Enter, makes it private, and says so.
   - `--public` answers it and asks nothing;  with no terminal to ask in, it's private unless you say `--public`.
   - A public repo gets a line of its own at the end, saying so.
+- **Which command gets a new worktree ready?**  What every new worktree runs before you work in it.
+  It suggests the command your `README.md`, `AGENTS.md` or `CONTRIBUTING` names for your lock file's tool, whole
+  (`uv sync --all-packages --all-extras`), else the lock file's own (`uv sync`):  [below](#the-install-command).
+  `--install "<command>"` answers it;  a config that names one already keeps it, and isn't asked.
 - **Commit and push .epic/config.json5 and .gitignore on main?**  Asked last, after the files;  suggesting yes,
   and with no terminal to ask in, yes.  It pushes to the branch's upstream, else `origin`.
   `--no-commit` leaves them for you.
 
 Then, in order, each step under a bold heading, the files in a gray table, a gray line before each slow step:
 1. Installs the epic plugin for Claude Code, when it isn't there yet:  once per machine.
+   - A Claude Code session open already doesn't have it yet, nor a newer copy:  type `/reload-plugins` there before
+     `/epic`.  A new session has it.
+   - `/epic` in a session that hasn't reloaded stops before it makes anything, and says the same.
    - Its skills and hooks, a bare `/epic`, and `epic` on your terminal's `PATH`
      ([README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says what each step does).
    - Installed for the machine, its hooks run in every repo, not just yours:
@@ -187,8 +194,26 @@ dry run:  nothing changed
 
 </details>
 
+### The install command
+
+What every new worktree runs to get ready, `installCommand` in `.epic/config.json5`.
+- `epic init` asks for it, suggesting:
+  - the command your `README.md`, `AGENTS.md` or `CONTRIBUTING` names, when one starts with your lock file's
+    (a `uv sync --all-packages --all-extras` line, in a code block or a code span):  it's taken whole
+  - else the lock file's own (the table below)
+- It never makes up flags:  `--all-extras` can pull in heavy packages, so it's used only when your docs say so.
+- `--install "<command>"` answers it;  with no terminal to ask in, the suggestion is taken.
+- The summary under the questions names it, and where it came from:
+
+  ```text
+  > Install command:  uv sync --all-packages --all-extras  (from README.md)
+  ```
+
+- Change it later in `.epic/config.json5` (`installCommand`), the same file with `--local`, kept out of git there.
+  `epic init` run again keeps what the file names, and doesn't ask.
+
 <details>
-<summary>The install command it picks, by lock file</summary>
+<summary>The install command it suggests, by lock file</summary>
 
 The first match wins;  no match leaves `installCommand` empty, and nothing is installed.
 

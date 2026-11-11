@@ -663,7 +663,7 @@ export class EpicProgram {
           "links and their .gitignore lines, your name and colour, then the epic server;  safe to run again"
       )
       .usage(
-        "[--local] [--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] " +
+        "[--local] [--name <name>] [--color <colour>] [--install <command>] [--content-repo <name> | --remote <address> | --no-remote] " +
           "[--public] [--host github|gitlab] [--protected-base] [--no-plugin] [--no-commit] [--no-server] [--dry-run] " +
           "[--json]"
       )
@@ -1166,8 +1166,10 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
   the plugin           epic, installed for Claude Code when it isn't yet (epic plugin install):  the machine's,
                        once;  --no-plugin skips it
   .epic/config.json5   written for this repo:  epic folder ../<repo>.epics, worktrees ../<repo>.worktrees,
-                       the base branch from git, the install command its lock file names (none without one),
-                       window names from the repo's;  a file already there is kept
+                       the base branch from git, the install command (asked:  "Which command gets a new
+                       worktree ready?", suggesting the one README.md, AGENTS.md or CONTRIBUTING names for
+                       the lock file's tool, else the lock file's own;  --install answers it), window names
+                       from the repo's;  a file already there is kept, an install command it names too
   ../<repo>.epics      the epic repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
                        cloned instead, when the config names the team's (contentRemote) and it isn't here
   the epic repo        the epic repo on GitHub or GitLab, so the team shares the plans:  asks what to call it
@@ -1207,6 +1209,11 @@ it found so.
 remote's address;  for an address that doesn't say (git.acme.com), epic init asks in a terminal, and with no
 terminal stays on GitHub and says so.
 
+--install <command> is what a new worktree runs to get ready (installCommand in the config):  "" for nothing.
+Without it, epic init asks in a terminal, suggesting what the repo's docs say (a "uv sync --all-extras" line),
+else what its lock file names (uv.lock:  uv sync), and takes the suggestion anywhere else;  it never adds a flag.
+A config naming one keeps it, asking nothing.  Change it later in .epic/config.json5.
+
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
 without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that
 anywhere else.
@@ -1215,6 +1222,7 @@ Examples:
   npx spell@next epic init        the same, before anything is installed
   epic init --dry-run
   epic init --name Ana --color green
+  epic init --install "uv sync --all-packages --all-extras"
   epic init --content-repo my-app.epics
   epic init --remote git@github.com:my-team/my-app.epics.git
   epic init --local --no-remote

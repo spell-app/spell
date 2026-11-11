@@ -216,10 +216,12 @@ describe("epic init:  one command (epic-friend P13)", () => {
     const init = new RepoInit({ main: app, plugin: plugin.make, hub: stubHub().make })
     const report = await init.init({ plugin: true })
     expect(report.plugin).toEqual({ action: "installed", changes: 3 })
-    expect(said(report).slice(1, 4)).toEqual([
+    expect(said(report).slice(1, 5)).toEqual([
       "",
       "Checking the epic plugin:",
-      "> installed epic for Claude Code:  /reload-plugins in a running session"
+      "> installed epic for Claude Code",
+      "> a Claude Code session already open doesn't have it yet:  type /reload-plugins there before /epic;  " +
+        "a new session has it"
     ])
     const again = await init.init({ plugin: true })
     expect(again.plugin).toEqual({ action: "already" })
@@ -782,6 +784,98 @@ describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P6
   })
 })
 
+describe("epic init:  first epic at work (epic-engine P71)", () => {
+  test("the plugin updated, not only installed:  an open session needs /reload-plugins before /epic, a new one has it", async () => {
+    const app = codeRepo("plugin-update")
+    const report = await new RepoInit({ main: app, plugin: stubPlugin({ installed: true, updates: true }).make }).init({
+      plugin: true,
+      noRemote: true
+    })
+    expect(report.plugin).toEqual({ action: "updated", changes: 3 })
+    expect(said(report)).toEqual(
+      expect.arrayContaining([
+        "> updated epic for Claude Code",
+        "> a Claude Code session already open doesn't have it yet:  type /reload-plugins there before /epic;  " +
+          "a new session has it"
+      ])
+    )
+  })
+
+  test("the install command suggested:  the README's whole uv sync line, never a flag made up;  else the lock file's", () => {
+    const app = codeRepo("suggest")
+    expect(EpicConfig.installSuggestionOf(app)).toEqual({ command: "", source: "" })
+    writeFileSync(join(app, "uv.lock"), "")
+    expect(EpicConfig.installSuggestionOf(app)).toEqual({ command: "uv sync", source: "uv.lock" })
+    // a code span in AGENTS.md
+    writeFileSync(join(app, "AGENTS.md"), "Set up with `uv sync --all-packages`, then `uv run pytest`.\n")
+    expect(EpicConfig.installSuggestionOf(app)).toEqual({ command: "uv sync --all-packages", source: "AGENTS.md" })
+    // a code block's line in the README wins:  read first;  its prompt and comment left off
+    writeFileSync(
+      join(app, "README.md"),
+      "# suggest\n\n```sh\n$ uv sync --all-packages --all-extras   # dev tools too\nuv run ruff check .\n```\n"
+    )
+    expect(EpicConfig.installSuggestionOf(app)).toEqual({
+      command: "uv sync --all-packages --all-extras",
+      source: "README.md"
+    })
+    // another tool's line, or a longer word:  not it
+    writeFileSync(join(app, "README.md"), "`uv syncer` and `pip install -e .`\n")
+    writeFileSync(join(app, "AGENTS.md"), "")
+    expect(EpicConfig.installSuggestionOf(app)).toEqual({ command: "uv sync", source: "uv.lock" })
+  })
+
+  test("no terminal takes the suggestion:  the README's, written in the config, the summary naming it and its source", async () => {
+    const app = codeRepo("harbor-like")
+    writeFileSync(join(app, "uv.lock"), "")
+    writeFileSync(join(app, "README.md"), "# harbor\n\n```\nuv sync --all-packages --all-extras\n```\n")
+    const lines = await printed(() => offline(app).run(["--name", "Bo", "--no-remote", "--no-server", "--no-commit"]))
+    expect(lines).toContain("> Install command:  uv sync --all-packages --all-extras  (from README.md)")
+    const config = new EpicConfig(app)
+    expect(config.installCommand).toBe("uv sync --all-packages --all-extras")
+    expect(config.installOnCreate).toBe(true)
+  })
+
+  test("without the README's line:  uv sync, from uv.lock;  --install answers it", async () => {
+    const plain = codeRepo("uv-plain")
+    writeFileSync(join(plain, "uv.lock"), "")
+    const lines = await printed(() => offline(plain).run(["--name", "Bo", "--no-remote", "--no-server", "--no-commit"]))
+    expect(lines).toContain("> Install command:  uv sync  (from uv.lock)")
+    expect(new EpicConfig(plain).installCommand).toBe("uv sync")
+    const flagged = codeRepo("uv-flag")
+    writeFileSync(join(flagged, "uv.lock"), "")
+    const args = ["--name", "Bo", "--install", "uv sync --frozen", "--no-remote", "--no-server", "--no-commit"]
+    expect(await printed(() => offline(flagged).run(args))).toContain(
+      "> Install command:  uv sync --frozen  (from --install)"
+    )
+    expect(new EpicConfig(flagged).installCommand).toBe("uv sync --frozen")
+  })
+
+  test("a config naming one already:  kept, not asked again, --install or not;  one leaving it out gets it written", async () => {
+    const app = codeRepo("named")
+    writeFileSync(join(app, "uv.lock"), "")
+    await printed(() => offline(app).run(["--name", "Bo", "--install", "make setup", "--no-remote", "--no-server"]))
+    writeFileSync(join(app, "README.md"), "`uv sync --all-extras`\n")
+    const args = ["--install", "uv sync", "--no-remote", "--no-server", "--no-commit"]
+    const again = await printed(() => offline(app).run(args))
+    expect(again).toContain("> Install command:  make setup  (from .epic/config.json5)")
+    expect(new EpicConfig(app).installCommand).toBe("make setup")
+    expect(await RepoInit.installChoice({ main: app, ask: true })).toEqual({
+      command: "make setup",
+      source: ".epic/config.json5"
+    })
+    // an older config without the key:  the suggestion written into it, its other lines kept
+    const older = codeRepo("older")
+    writeFileSync(join(older, "uv.lock"), "")
+    writeFileSync(join(older, "README.md"), "`uv sync --all-extras`\n")
+    mkdirSync(join(older, ".epic"))
+    writeFileSync(join(older, EpicConfig.FILE), '{\n  // mine\n  "baseBranch": "main"\n}\n')
+    const report = await offline(older).init({ name: "Bo", noRemote: true })
+    expect(report.install).toEqual({ command: "uv sync --all-extras", source: "README.md" })
+    expect(readFileSync(join(older, EpicConfig.FILE), "utf8")).toMatch(/\/\/ mine/)
+    expect(new EpicConfig(older).installCommand).toBe("uv sync --all-extras")
+  })
+})
+
 /** The branch an earlier `epic init` put its two files on, for a base branch that takes only pull requests. */
 const SETUP = "epic-setup"
 
@@ -790,7 +884,11 @@ const SETUP = "epic-setup"
  * A stand-in for the epic plugin's installer, installed or not:  what `RepoInit` asks of `PluginInstall`.
  * - `fails`:  its install throws, with those words
  */
-function stubPlugin({ installed = false, fails }: { installed?: boolean; fails?: string } = {}) {
+function stubPlugin({
+  installed = false,
+  fails,
+  updates = false
+}: { installed?: boolean; fails?: string; updates?: boolean } = {}) {
   const calls: string[] = []
   return {
     calls,
@@ -800,7 +898,7 @@ function stubPlugin({ installed = false, fails }: { installed?: boolean; fails?:
       install: () => {
         calls.push("install")
         if (fails) throw new Error(fails)
-        const changes = installed ? [] : ["a", "b", "c"]
+        const changes = installed && !updates ? [] : ["a", "b", "c"]
         installed = true
         return { plugin: "epic@spell", version: "1.0.0", from: "/kit/epic", dryRun: false, changes }
       }
