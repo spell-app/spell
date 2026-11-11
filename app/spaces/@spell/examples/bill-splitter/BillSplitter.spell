@@ -32,7 +32,7 @@ this file holds the bill.
 			<stack>
 				<header level="2">Bill Splitter</header>
 				<form value={it}>
-					<stack direction="horizontal" spacing="sm">
+					<stack direction="horizontal" spacing="sm" wrap>
 						<text bold>Tip</text>
 						<input name="percent" type="percent" min="0" step="1" aria-label="Tip percent"/>
 						<buttons size="small" appearance="basic">
@@ -47,7 +47,7 @@ this file holds the bill.
 					<button appearance="basic" icon="plus" onClick={add someone}>Add someone</button>
 				</stack>
 				<segment>
-					<statistics widths="3" size="small">
+					<statistics widths="3" size="small" stackable stack-with="page">
 						<statistic value={write the subtotal as money} label="Ordered"/>
 						<statistic value={write the tip as money} label="Tip"/>
 						<statistic value={write the total as money} label="Total" color="green"/>

@@ -42,7 +42,7 @@ The card is this project's own, in `FlashCard.spell`;  this file holds the quiz,
 	<draw description="The toolbar with the score, the card, then what you can do:  turn it over, or say how you did">
 		<container text>
 			<stack>
-				<toolbar menu="quiz menu" aria-label="Quiz">
+				<toolbar menu="quiz menu" aria-label="Quiz" shrinkable>
 					<text slot="title" size="large">Flash Cards</text>
 					<text slot="right">{the score}</text>
 				</toolbar>

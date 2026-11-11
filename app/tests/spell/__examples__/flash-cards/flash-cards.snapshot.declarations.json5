@@ -43,7 +43,7 @@
     {
       "type": "Quiz",
       "superType": "App",
-      "defined": "/FlashCards.spell:349-2360"
+      "defined": "/FlashCards.spell:349-2371"
     },
     {
       "property": "deck",
@@ -102,7 +102,7 @@
       "group": "playing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/FlashCards.spell:1598-2351"
+      "defined": "/FlashCards.spell:1598-2362"
     },
     {
       "syntax": "show the answer (of {thisArg:expression})?",
@@ -189,7 +189,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/FlashCards.spell:2430-2562"
+      "defined": "/FlashCards.spell:2441-2573"
     }
   ],
   "codeLines": [

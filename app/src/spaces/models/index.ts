@@ -7,6 +7,7 @@
  * - `DraftJSON`, `PublishJSON` ...:  drafts and versions over the wire (epic `editor` P24).
  * - `TypeSchemas`:  a spell type's properties, from its project's declarations, for a property editor.
  * - `SPACE_NAMES`:  spaces' own `__` names, never a project's file.
+ * - `inHomeOrder()`:  the editor's home page's order of each group's cards, `HOME_ORDER` (epic `mockup` P19).
  * - `SpaceStorage`:  where spaces' files are kept (a type;  the disk's is `spell/app/spaces/server/node/storage/DiskStorage`).
  * - `PersonView`, `MeAnswer` ...:  what the app and the server say about people (types, epic `people-and-orgs` P9).
  * - NOTE: nothing here may touch `node:*`, `process` or the disk:  the editor imports it.
@@ -20,6 +21,7 @@ export * from "./TypeSchemas"
 export * from "./ProjectFiles"
 export * from "./drafts"
 export * from "./starterProjects"
+export * from "./homeOrder"
 export type * from "./SpaceStorage"
 export type * from "./people"
 export type * from "./changes"

@@ -1,0 +1,98 @@
+# The explainer
+// A page about FizzBuzz:  its results, drawn as the counting sends them, then how it works and where it comes from.
+// It's FizzBuzz's second listener, beside the console:  one algorithm, two listeners.
+// - The counting fills this page and the console at once.
+// - Turn it off (its import's `active`) and the example runs as a plain program, printing to the console.
+
+## A result
+// One number the counting sent, and the word it got.
+
+a "result" is a thing:
+	- its "number" is a number
+	// fizz, buzz or fizzbuzz;  empty for a plain number
+	- its "word" is text
+	// What its label says:  its word, or the number itself
+	- its "label" is:
+		the number as text if the word is ""
+		the word otherwise
+	// Fizz blue, buzz green, both purple
+	- its "color" is:
+		"purple" if the word is "fizzbuzz"
+		"blue" if the word is "fizz"
+		"green" if the word is "buzz"
+		"grey" otherwise
+
+// Every result so far, a label each, in a row that wraps
+a "tally" is a list of results:
+	- to draw it:
+		for result in it
+			<ui-label color={the color of the result} appearance="basic">{the label of the result}</ui-label>
+		show them in: <ui-stack direction="horizontal" wrap spacing="xs"></ui-stack>
+
+## The page
+
+fizzbuzz explainer is a page:
+	- its "tally" is a new tally
+	- its "fizzes" is the number of (results in the tally where its word is "fizz")
+	- its "buzzes" is the number of (results in the tally where its word is "buzz")
+	- its "fizzbuzzes" is the number of (results in the tally where its word is "fizzbuzz")
+	- its "plain numbers" is the number of (results in the tally where its word is "")
+
+	// The results first, a count of each word and a label per number, then how it works and its roots
+	- to draw it:
+		<ui-container text>
+			<ui-stack>
+				<ui-header level="1">FizzBuzz</ui-header>
+				<ui-section label="The results">
+					<ui-statistics widths="4" size="mini">
+						<ui-statistic value={the fizzes} label="fizz" color="blue"/>
+						<ui-statistic value={the buzzes} label="buzz" color="green"/>
+						<ui-statistic value={the fizzbuzzes} label="fizzbuzz" color="purple"/>
+						<ui-statistic value={the plain numbers} label="plain numbers"/>
+					</ui-statistics>
+					{draw the tally}
+				</ui-section>
+				<ui-section label="How it works">
+					// prettier-ignore
+					<markdown>
+					Count from 1 to 100, and say a word in place of some of the numbers:
+
+					- a number 3 goes into exactly:  **fizz**
+					- a number 5 goes into exactly:  **buzz**
+					- a number both go into, which is any number 15 goes into:  **fizzbuzz**
+					- every other number:  the number itself
+
+					The order of the checks matters:  15 is checked first, because 15 is a fizz and a buzz too.
+
+					This example's counting doesn't print anything.
+					It sends an event for each number, `fizz`, `buzz`, `fizzbuzz` or `plain number`, carrying the number,
+					and whoever is listening decides what to do with it:
+					the console prints a line, and this page adds a label.
+					</markdown>
+				</ui-section>
+				<ui-section label="Where it comes from">
+					// prettier-ignore
+					<markdown>
+					FizzBuzz began as a children's counting game in Britain, played to practise division:
+					players count in turn, and anyone who says a number instead of "fizz" or "buzz" is out.
+
+					It became famous among programmers in early 2007, as a test of whether someone can write code at all.
+					Imran Ghory suggested it as a quick screen for job interviews,
+					and Jeff Atwood's post "Why Can't Programmers.. Program?" spread the idea widely.
+					Since then it has been written in nearly every programming language.
+					</markdown>
+				</ui-section>
+			</ui-stack>
+		</ui-container>
+
+## Listening
+// The page listens itself:  each event the counting sends becomes a result in its tally.
+
+a fizzbuzz explainer:
+	// One result more in the tally
+	- to show (word as text) for (number as a number):
+		add (a new result with number = number, word = word) to its tally
+	- on fizzbuzz with number as a number: show "fizzbuzz" for number
+	- on fizz with number as a number: show "fizz" for number
+	- on buzz with number as a number: show "buzz" for number
+	- on plain number with number as a number: show "" for number

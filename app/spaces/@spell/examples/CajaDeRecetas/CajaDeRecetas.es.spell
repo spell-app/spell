@@ -109,7 +109,7 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 					<texto color="gris">Todo lo que escribes se guarda al instante.</texto>
 				</pila>
 				<barra-herramientas class="undo" menu="menú de la caja" aria-label="Recetas"/>
-				<formulario value={eso} class="find">
+				<formulario value={eso} class="find" fluido>
 					<campo etiqueta="Buscar">
 						<entrada name="búsqueda" class="search" icono="search"/>
 					</campo>
@@ -123,7 +123,7 @@ Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea 
 		<si su editando>
 			dibujar (un nuevo editor de receta con receta = su editando)
 		<de lo contrario>
-			<tarjetas columnas="3" duplicable>
+			<tarjetas columnas="3" duplicable apilable>
 				<tarjeta class="new">
 					<contenido>
 						<formulario value={su receta nueva}>

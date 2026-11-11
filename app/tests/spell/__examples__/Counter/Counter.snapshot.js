@@ -28,6 +28,8 @@ export class Counter extends View {
   /** A button saying how many times it's been clicked:  a click counts up */
   draw() {
     return h("ui-button", {
+      size: "huge",
+      color: "primary",
       onClick: core.pressed(this, () => this.countUp()),
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, "Clicked ", () => this.count, " times")
@@ -60,7 +62,7 @@ export class CounterApp extends App {
   set counter(value) { this.setProp("counter", value) }
 
   draw() {
-    return h("ui-container", () => core.drawThing(this.counter))
+    return h("ui-container", h("ui-stack", { align: "center" }, () => core.drawThing(this.counter)))
   }
 }
 export const counterApp = new CounterApp()

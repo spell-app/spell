@@ -35,7 +35,7 @@ bill splitter is an app:
 			<ui-stack>
 				<ui-header level="2">Bill Splitter</ui-header>
 				<ui-form value={it}>
-					<ui-stack direction="horizontal" spacing="sm">
+					<ui-stack direction="horizontal" spacing="sm" wrap>
 						<ui-text bold>Tip</ui-text>
 						<ui-input name="percent" type="percent" min="0" step="1" aria-label="Tip percent"/>
 						<ui-buttons size="small" appearance="basic">
@@ -50,7 +50,7 @@ bill splitter is an app:
 					<ui-button appearance="basic" icon="plus" onClick={add someone}>Add someone</ui-button>
 				</ui-stack>
 				<ui-segment>
-					<ui-statistics widths="3" size="small">
+					<ui-statistics widths="3" size="small" stackable stack-with="page">
 						<ui-statistic value={write the subtotal as money} label="Ordered"/>
 						<ui-statistic value={write the tip as money} label="Tip"/>
 						<ui-statistic value={write the total as money} label="Total" color="green"/>

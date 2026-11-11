@@ -118,7 +118,7 @@ export class Cookbook extends App {
             <ui-text color="grey">{"Everything you type is saved as you go:  in the cloud, once you sign in."}</ui-text>
           </ui-stack>
           <ui-toolbar class="undo" menu="box menu" aria-label="Recipes" />
-          <ui-form class="find" value={this}>
+          <ui-form class="find" value={this} fluid={true}>
             <ui-field label="Search">
               <ui-input class="search" name="search" icon="search" />
             </ui-field>

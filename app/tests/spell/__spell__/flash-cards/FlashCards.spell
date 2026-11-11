@@ -53,7 +53,7 @@ quiz is an app:
 	- to draw it:
 		<ui-container text>
 			<ui-stack>
-				<ui-toolbar menu="quiz menu" aria-label="Quiz">
+				<ui-toolbar menu="quiz menu" aria-label="Quiz" shrinkable>
 					<ui-text slot="title" size="large">Flash Cards</ui-text>
 					<ui-text slot="right">{the score}</ui-text>
 				</ui-toolbar>

@@ -64,9 +64,16 @@ export class Diner extends View {
   draw() {
     return h("ui-form", { value: this },
       h("ui-stack", { direction: "horizontal", spacing: "sm" },
-        h("ui-input", { name: "name", placeholder: "Name", "aria-label": "Name" }),
-        h("ui-input", { name: "amount", type: "number", min: "0", step: "0.01", "aria-label": "Amount", label: "$" }),
-        h("ui-space", { fluid: true }),
+        h("ui-input", { name: "name", placeholder: "Name", "aria-label": "Name", fluid: true }),
+        h("ui-input", {
+          name: "amount",
+          type: "number",
+          min: "0",
+          step: "0.01",
+          placeholder: "Amount",
+          "aria-label": "Amount",
+          fluid: true
+        }),
         h("ui-text", { bold: true }, () => writeAmountAsMoney(this.share)),
         h("ui-button", {
           icon: "close",
@@ -152,7 +159,7 @@ export class BillSplitter extends App {
       h("ui-stack",
         h("ui-header", { level: "2" }, "Bill Splitter"),
         h("ui-form", { value: this },
-          h("ui-stack", { direction: "horizontal", spacing: "sm" },
+          h("ui-stack", { direction: "horizontal", spacing: "sm", wrap: true },
             h("ui-text", { bold: true }, "Tip"),
             h("ui-input", { name: "percent", type: "percent", min: "0", step: "1", "aria-label": "Tip percent" }),
             h("ui-buttons", { size: "small", appearance: "basic" },
@@ -181,7 +188,7 @@ export class BillSplitter extends App {
           }, "Add someone")
         ),
         h("ui-segment",
-          h("ui-statistics", { widths: "3", size: "small" },
+          h("ui-statistics", { widths: "3", size: "small", stackable: true, "stack-with": "page" },
             h("ui-statistic", { value: () => writeAmountAsMoney(this.subtotal), label: "Ordered" }),
             h("ui-statistic", { value: () => writeAmountAsMoney(this.tip), label: "Tip" }),
             h("ui-statistic", { value: () => writeAmountAsMoney(this.total), label: "Total", color: "green" })

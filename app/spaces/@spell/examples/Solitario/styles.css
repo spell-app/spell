@@ -145,21 +145,37 @@ solitario-app {
   font-size: 0.75em;
 }
 
-/* A narrow window, a phone's:  the toolbar loses its title, so the score and buttons fit on one line
-   (its buttons fold to their icons, or their first letters, by themselves:  it's shrinkable) */
+/* A narrow window, a phone's:  the felt's edge thinner, so the seven columns get the width;
+   the toolbar loses its title and keys (a phone has no keyboard), and the score goes on a line of its own,
+   below the buttons, so every button keeps its name */
 @media (width < 36rem) {
-  .GameBar::part(title) {
-    display: none;
+  solitario-app {
+    padding: 16px 12px;
   }
-  .GameBar > *::part(item) {
-    padding-inline: 0.55em;
+  .GameBar::part(toolbar) {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.75rem;
   }
-  .GameBar > [slot] {
-    font-size: 0.8em;
-    white-space: nowrap;
-  }
+  .GameBar::part(title),
   [slot="titulo"] {
     display: none;
+  }
+  .GameBar::part(right) {
+    flex: 1 0 100%;
+    justify-content: center;
+  }
+  .GameBar > *::part(item) {
+    padding-inline: 0.65em;
+  }
+  .GameBar > :not([slot]):nth-of-type(4)::part(item) {
+    margin-left: 0.5em;
+  }
+  .GameBar > *::part(shortcut) {
+    display: none;
+  }
+  .GameBar > [slot] {
+    white-space: nowrap;
   }
 }
 

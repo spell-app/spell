@@ -19,6 +19,7 @@ import * as themesRoutes from "spell/app/spaces/server/node/themes/themesRoutes"
 import * as prefsRoutes from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import * as changesRoutes from "spell/app/spaces/server/node/changes/changesRoutes"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import * as homeOrderRoutes from "spell/app/spaces/server/node/projects/homeOrderRoutes"
 import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
 import { ProjectBuild } from "./ProjectBuild"
 
@@ -133,6 +134,10 @@ api.get("/changes", changesRoutes.request_getChange)
 // Save into Spell UI, a Spell admin's -- see `themesRoutes.ts` (epic `debut` P25)
 api.get("/themes/spell-ui", themesRoutes.request_canSaveIntoSpellUi)
 api.post("/themes/spell-ui", themesRoutes.request_saveIntoSpellUi)
+
+// The home page's order of cards, dragged in dev -- see `homeOrderRoutes.ts` (epic `mockup` P19)
+api.get("/home/order", homeOrderRoutes.request_mayReorder)
+api.post("/home/order", homeOrderRoutes.request_saveHomeOrder)
 
 ////////////////
 // ## Preferences

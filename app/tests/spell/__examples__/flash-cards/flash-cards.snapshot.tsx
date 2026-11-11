@@ -148,7 +148,7 @@ export class Quiz extends App {
     return (
       <ui-container text={true}>
         <ui-stack>
-          <ui-toolbar menu="quiz menu" aria-label="Quiz">
+          <ui-toolbar menu="quiz menu" aria-label="Quiz" shrinkable={true}>
             <ui-text slot="title" size="large">Flash Cards</ui-text>
             <ui-text slot="right">{this.score}</ui-text>
           </ui-toolbar>

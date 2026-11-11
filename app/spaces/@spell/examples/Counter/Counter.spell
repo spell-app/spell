@@ -9,7 +9,7 @@ Each counter is its own element on the page.
 	<action "count up">set the count to the count + 1</>
 
 	<draw description="A button saying how many times it's been clicked:  a click counts up">
-		<button onClick={count up}>Clicked {the count} times</button>
+		<button size="huge" color="primary" onClick={count up}>Clicked {the count} times</button>
 	</draw>
 
 	<test "counting">
@@ -26,6 +26,8 @@ Each counter is its own element on the page.
 <app "counter app">
 	<property "counter">a new counter</>
 	<draw>
-		<container>{draw the counter}</container>
+		<container>
+			<stack align="center">{draw the counter}</stack>
+		</container>
 	</draw>
 </app>

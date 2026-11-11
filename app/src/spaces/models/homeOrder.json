@@ -1,0 +1,33 @@
+{
+  "@spell/examples": [
+    "fizzbuzz",
+    "Counter",
+    "calculator",
+    "tic-tac-toe",
+    "bill-splitter",
+    "flash-cards",
+    "habit-tracker",
+    "TaskList",
+    "ListaDeTareas",
+    "Solitaire",
+    "Solitario",
+    "CajaDeRecetas",
+    "FamilyCookbook",
+    "PicnicLetter",
+    "PokeSpell",
+    "PublicServers",
+    "RecipeBox",
+    "SignUpSheet",
+    "StarWars",
+    "StarWarsSite",
+    "Statusphere"
+  ],
+  "@spell/library": [
+    "OrgAdmin",
+    "OrgChat",
+    "OrgFeed",
+    "Inbox",
+    "OrgEvents",
+    "AdministracionDeLaOrg"
+  ]
+}

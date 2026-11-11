@@ -109,7 +109,7 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 					<text color="grey">Everything you type is saved as you go.</text>
 				</stack>
 				<toolbar class="undo" menu="box menu" aria-label="Recipes"/>
-				<form value={it} class="find">
+				<form value={it} class="find" fluid>
 					<field label="Search">
 						<input name="search" class="search" icon="search"/>
 					</field>
@@ -123,7 +123,7 @@ Where they're kept is in RecipeBox.api.spell, and only its first line knows.
 		<if its editing>
 			draw (a new recipe editor with recipe = its editing)
 		<otherwise>
-			<cards columns="3" doubling>
+			<cards columns="3" doubling stackable>
 				<card class="new">
 					<content>
 						<form value={its new recipe}>

@@ -39,7 +39,7 @@
     {
       "type": "Diner",
       "superType": "View",
-      "defined": "/Diner.spell:236-1173"
+      "defined": "/Diner.spell:236-1177"
     },
     {
       "property": "name",
@@ -90,13 +90,13 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Diner.spell:677-1164"
+      "defined": "/Diner.spell:677-1168"
     },
     {
       "type": "Table",
       "superType": "ViewableList",
       "itemType": "Diner",
-      "defined": "/Diner.spell:1183-1352"
+      "defined": "/Diner.spell:1187-1356"
     },
     {
       "property": "table",
@@ -104,12 +104,12 @@
       "group": "A diner",
       "datatype": "Table",
       "exclusive": true,
-      "defined": "/Diner.spell:1401-1429"
+      "defined": "/Diner.spell:1405-1433"
     },
     {
       "type": "BillSplitter",
       "superType": "App",
-      "defined": "/BillSplitter.spell:314-2315"
+      "defined": "/BillSplitter.spell:314-2348"
     },
     {
       "property": "diners",
@@ -170,7 +170,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spell:1229-2306"
+      "defined": "/BillSplitter.spell:1229-2339"
     },
     {
       "syntax": "add someone (of {thisArg:expression})?",
@@ -197,16 +197,16 @@
     53,
     58,
     63,
-    87,
-    99,
-    112,
-    115,
-    121,
-    127,
-    133,
-    137,
-    142,
+    94,
+    106,
+    119,
+    122,
+    128,
+    134,
+    140,
+    144,
     149,
-    200
+    156,
+    207
   ]
 }

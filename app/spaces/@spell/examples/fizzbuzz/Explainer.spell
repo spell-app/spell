@@ -1,8 +1,8 @@
 # The explainer
-A page about FizzBuzz:  how it works, where it comes from, and its results, drawn as the counting sends them.
+A page about FizzBuzz:  its results, drawn as the counting sends them, then how it works and where it comes from.
 It's FizzBuzz's second listener, beside the console:  one algorithm, two listeners.
-- It's off in the project file, so the example runs as a plain program, printing to the console.
-- Turn it on (its import's `active`) and the same counting fills this page too.
+- The counting fills this page and the console at once.
+- Turn it off (its import's `active`) and the example runs as a plain program, printing to the console.
 
 ## A result
 One number the counting sent, and the word it got.
@@ -39,10 +39,19 @@ One number the counting sent, and the word it got.
 	<property "fizzbuzzes">the number of (results in the tally where its word is "fizzbuzz")</>
 	<property "plain numbers">the number of (results in the tally where its word is "")</>
 
-	<draw description="How it works, its roots, then the results with a count of each word">
+	<draw description="The results first, a count of each word and a label per number, then how it works and its roots">
 		<container text>
 			<stack>
 				<header level="1">FizzBuzz</header>
+				<section label="The results">
+					<statistics widths="4" size="mini">
+						<statistic value={the fizzes} label="fizz" color="blue"/>
+						<statistic value={the buzzes} label="buzz" color="green"/>
+						<statistic value={the fizzbuzzes} label="fizzbuzz" color="purple"/>
+						<statistic value={the plain numbers} label="plain numbers"/>
+					</statistics>
+					{draw the tally}
+				</section>
 				<section label="How it works">
 					<!-- prettier-ignore -->
 					<markdown>
@@ -72,15 +81,6 @@ One number the counting sent, and the word it got.
 					and Jeff Atwood's post "Why Can't Programmers.. Program?" spread the idea widely.
 					Since then it has been written in nearly every programming language.
 					</markdown>
-				</section>
-				<section label="The results">
-					<statistics widths="4" size="mini">
-						<statistic value={the fizzes} label="fizz" color="blue"/>
-						<statistic value={the buzzes} label="buzz" color="green"/>
-						<statistic value={the fizzbuzzes} label="fizzbuzz" color="purple"/>
-						<statistic value={the plain numbers} label="plain numbers"/>
-					</statistics>
-					{draw the tally}
 				</section>
 			</stack>
 		</container>

@@ -14,9 +14,8 @@ typing a name or an amount changes the diner, and every sum follows.
 	<draw description="Their name, their amount, what they owe, and a button to take them off">
 		<form value={it}>
 			<stack direction="horizontal" spacing="sm">
-				<input name="name" placeholder="Name" aria-label="Name"/>
-				<input name="amount" type="number" min="0" step="0.01" aria-label="Amount" label="$"/>
-				<space fluid/>
+				<input name="name" placeholder="Name" aria-label="Name" fluid/>
+				<input name="amount" type="number" min="0" step="0.01" placeholder="Amount" aria-label="Amount" fluid/>
 				<text bold>{write the share as money}</text>
 				<button icon="close" appearance="basic" aria-label="Remove" onClick={remove it}/>
 			</stack>

@@ -55,7 +55,7 @@ Where they're kept is in FamilyCookbook.api.spell, and only its first line knows
 					<text color="grey">Everything you type is saved as you go:  in the cloud, once you sign in.</text>
 				</stack>
 				<toolbar class="undo" menu="box menu" aria-label="Recipes"/>
-				<form value={it} class="find">
+				<form value={it} class="find" fluid>
 					<field label="Search">
 						<input name="search" class="search" icon="search"/>
 					</field>

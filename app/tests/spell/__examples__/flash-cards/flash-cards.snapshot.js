@@ -122,7 +122,7 @@ export class Quiz extends App {
   draw() {
     return h("ui-container", { text: true },
       h("ui-stack",
-        h("ui-toolbar", { menu: "quiz menu", "aria-label": "Quiz" },
+        h("ui-toolbar", { menu: "quiz menu", "aria-label": "Quiz", shrinkable: true },
           h("ui-text", { slot: "title", size: "large" }, "Flash Cards"),
           h("ui-text", { slot: "right" }, () => this.score)
         ),

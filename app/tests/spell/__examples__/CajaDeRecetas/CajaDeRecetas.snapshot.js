@@ -253,7 +253,7 @@ export class CajaDeRecetas extends App {
           h("es-texto", { color: "gris" }, "Todo lo que escribes se guarda al instante.")
         ),
         h("es-barra-herramientas", { class: "undo", menu: "menú de la caja", "aria-label": "Recetas" }),
-        h("es-formulario", { class: "find", value: this },
+        h("es-formulario", { class: "find", value: this, fluido: true },
           h("es-campo", { etiqueta: "Buscar" },
             h("es-entrada", { class: "search", name: "búsqueda", icono: "search" })
           )
@@ -267,7 +267,7 @@ export class CajaDeRecetas extends App {
   drawPantalla() {
     if (this.editando) return core.drawThing(new EditorDeReceta({ receta: this.editando }))
     else {
-      return h("es-tarjetas", { columnas: "3", duplicable: true, part: "pantalla" },
+      return h("es-tarjetas", { columnas: "3", duplicable: true, apilable: true, part: "pantalla" },
         h("es-tarjeta", { class: "new" },
           h("es-contenido",
             h("es-formulario", { "prop:value": () => this.recetaNueva },
