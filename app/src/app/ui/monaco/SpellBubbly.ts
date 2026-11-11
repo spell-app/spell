@@ -388,7 +388,7 @@ export class SpellBubbly {
 
   /**
    * A view zone under each line that ends declarations with a body:  room for their feet,
-   * and the gap from the lowest to the band on the next line (`--bubbly-monaco-foot-gap`);  if they've moved.
+   * and the gap from the lowest to the band on the next line (`--bubbly-line-gap`);  if they've moved.
    */
   private updateZones(laidOut: BubblyMarks, view: View) {
     const room = new Map<number, number>()
@@ -445,7 +445,8 @@ export class SpellBubbly {
 
   /**
    * The sheet's sizes, in the editor's pixels, read off the page once (and again when the font changes):
-   * a probe in the editor's box, sized by each `--bubbly-` variable.
+   * a probe in the editor's box, sized by each `--bubbly-` setting;  and the room injected beside an input, as wide as
+   * its own rule makes it.
    */
   private measures(): Measures {
     if (this.measured) return this.measured
@@ -458,22 +459,30 @@ export class SpellBubbly {
       probe.style.width = `var(${variable})`
       return probe.getBoundingClientRect().width
     }
+    /** How wide the room injected with `classes` is:  its own rule's width, at the editor's scale. */
+    const roomWidth = (classes: string) => {
+      const room = Object.assign(document.createElement("span"), { className: `bubbly-room ${classes}` })
+      probe.append(room)
+      const width = room.getBoundingClientRect().width
+      room.remove()
+      return width
+    }
     const scale = fontSize / (length("--bubbly-font-size") || fontSize)
     container.style.setProperty("--bubbly-monaco-scale", String(scale))
     const ratio = Number.parseFloat(getComputedStyle(container).getPropertyValue("--bubbly-monaco-line-height")) || 1.5
     this.measured = {
       scale,
       lineHeight: Math.round(fontSize * ratio),
-      inputRoom: length("--bubbly-monaco-input-room"),
-      quoteRoom: length("--bubbly-monaco-quote-room"),
+      inputRoom: roomWidth("bubbly-room-input"),
+      quoteRoom: roomWidth("bubbly-room-quote"),
       padLeft: length("--bubbly-pill-pad-left") * scale,
       padRight: length("--bubbly-pill-pad-right") * scale,
       endInset: length("--bubbly-end-inset") * scale,
       gutter: length("--bubbly-gutter") * scale,
-      pillHeight: length("--bubbly-monaco-band-height") * scale,
+      pillHeight: length("--bubbly-pill-height") * scale,
       footHeight: length("--bubbly-foot-height") * scale,
-      footRoom: length("--bubbly-monaco-foot-room") * scale,
-      footGap: length("--bubbly-monaco-foot-gap") * scale
+      footRoom: (length("--bubbly-foot-height") + length("--bubbly-body-pad-bottom")) * scale,
+      footGap: length("--bubbly-line-gap") * scale
     }
     probe.remove()
     return this.measured

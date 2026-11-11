@@ -69,16 +69,16 @@
       "dark": "18px"
     },
     "--bubbly-line-gap": {
-      "light": "4px",
-      "dark": "4px"
+      "light": "3px",
+      "dark": "3px"
     },
     "--bubbly-gap-height": {
       "light": "8px",
       "dark": "8px"
     },
     "--bubbly-pill-height": {
-      "light": "24px",
-      "dark": "24px"
+      "light": "23px",
+      "dark": "23px"
     },
     "--bubbly-pill-radius": {
       "light": "12px",
@@ -89,8 +89,8 @@
       "dark": "0px"
     },
     "--bubbly-pill-text-line": {
-      "light": "calc( 24px - 2 * max(0px, -1 * 0px) )",
-      "dark": "calc( 24px - 2 * max(0px, -1 * 0px) )"
+      "light": "calc( 23px - 2 * max(0px, -1 * 0px) )",
+      "dark": "calc( 23px - 2 * max(0px, -1 * 0px) )"
     },
     "--bubbly-line-inset": {
       "light": "8px",
@@ -128,6 +128,10 @@
       "light": "4px",
       "dark": "4px"
     },
+    "--bubbly-body-pad-bottom": {
+      "light": "1px",
+      "dark": "1px"
+    },
     "--bubbly-rail-corner": {
       "light": "calc(4px + 8px)",
       "dark": "calc(4px + 8px)"
@@ -135,6 +139,14 @@
     "--bubbly-gap": {
       "light": "2px",
       "dark": "2px"
+    },
+    "--bubbly-input-pad": {
+      "light": "8px",
+      "dark": "8px"
+    },
+    "--bubbly-input-pad-top": {
+      "light": "1px",
+      "dark": "1px"
     },
     "--bubbly-end-inset": {
       "light": "2px",
@@ -172,37 +184,9 @@
       "light": "1",
       "dark": "1"
     },
-    "--bubbly-monaco-input-room": {
-      "light": "calc((2px + 8px) * 1)",
-      "dark": "calc((2px + 8px) * 1)"
-    },
-    "--bubbly-monaco-quote-room": {
-      "light": "calc(15px / 2 * 1)",
-      "dark": "calc(15px / 2 * 1)"
-    },
-    "--bubbly-monaco-quote-room-before": {
-      "light": "calc(15px / 4 * 1)",
-      "dark": "calc(15px / 4 * 1)"
-    },
-    "--bubbly-monaco-foot-room": {
-      "light": "calc(4px + 1px)",
-      "dark": "calc(4px + 1px)"
-    },
-    "--bubbly-monaco-input-trim": {
-      "light": "-1px",
-      "dark": "-1px"
-    },
-    "--bubbly-monaco-foot-gap": {
-      "light": "3px",
-      "dark": "3px"
-    },
     "--bubbly-monaco-shapes-drop": {
       "light": "1px",
       "dark": "1px"
-    },
-    "--bubbly-monaco-band-height": {
-      "light": "calc(24px - 1px)",
-      "dark": "calc(24px - 1px)"
     },
     "--bubbly-dot-color": {
       "light": "#3a3a441a",
