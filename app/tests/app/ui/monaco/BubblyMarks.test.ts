@@ -70,7 +70,7 @@ describe("BubblyMarks.of()", () => {
     expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-quote bubbly-room-before" })
   })
 
-  test("its shapes:  a band per declaration and per control line with steps, pills on what was typed", () => {
+  test("its shapes:  a band per declaration, pills on what was typed, a bracket down a control line's steps", () => {
     expect(shapesOf(marked())).toEqual([
       'thing:  a "card" is a draggable two sided view',
       '  input:  card" is a draggable two sided view',
@@ -84,8 +84,8 @@ describe("BubblyMarks.of()", () => {
       "      input:  king",
       "    action:  to draw its front",
       "      input:  draw its front",
-      "      control:  if it is face up",
-      '        input:  blue">{its rank}</text>'
+      "      bracket:  if it is face up",
+      '      input:  blue">{its rank}</text>'
     ])
   })
 })
@@ -123,7 +123,7 @@ describe("bubbly.css", () => {
       for (const each of mark.options.inlineClassName?.split(" ") ?? []) classes.add(each)
     for (const each of ["bubbly-room-input", "bubbly-room-quote", "bubbly-layer", "bubbly-shapes", "bubbly-head"])
       classes.add(each)
-    for (const each of ["bubbly-pill", "bubbly-gutter", "bubbly-body", "bubbly-foot", "bubbly-control"])
+    for (const each of ["bubbly-pill", "bubbly-gutter", "bubbly-body", "bubbly-foot", "bubbly-bracket"])
       classes.add(each)
     for (const each of classes) expect(sheet, each).toContain(`.${each}`)
   })

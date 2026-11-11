@@ -80,7 +80,7 @@ describe("<spell-code>", () => {
     expect(codeOf(host).classList.contains("language-spell")).toBe(true)
   })
 
-  test("draws spell in the bubbly look:  a band per declaration, pills for what was typed, a block for a control line", async () => {
+  test("draws spell in the bubbly look:  a band per declaration, pills for what was typed, a bracket for a control line", async () => {
     const host = await code(`<spell-code copy>${CARD}</spell-code>`)
     const drawing = drawingOf(host)!
     expect(drawing.querySelector(".bubbly-block.bubbly-thing > .bubbly-head")!.textContent).toBe(
@@ -92,7 +92,7 @@ describe("<spell-code>", () => {
       "queen",
       "king"
     ])
-    expect(drawing.querySelector(".bubbly-block.bubbly-control > .bubbly-body")!.textContent).toBe('return "Q"')
+    expect(drawing.querySelector(".bubbly-bracket")!.textContent).toBe('return "Q"')
     expect(host.shadowRoot!.querySelector("style")!.textContent).toContain(".bubbly")
     expect(host.shadowRoot!.querySelector<HTMLElement>("[part~=pre]")!.hidden).toBe(true)
     // the copy button still copies the code as written
