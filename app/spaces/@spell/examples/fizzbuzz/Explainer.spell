@@ -32,7 +32,7 @@ One number the counting sent, and the word it got.
 
 ## The page
 
-<page "fizzbuzz explainer">
+"fizzbuzz explainer" is a page
 	<property "tally">a new tally</>
 	<property "fizzes">the number of (results in the tally where its word is "fizz")</>
 	<property "buzzes">the number of (results in the tally where its word is "buzz")</>
@@ -85,7 +85,6 @@ One number the counting sent, and the word it got.
 			</stack>
 		</container>
 	</draw>
-</page>
 
 ## Listening
 The page listens itself:  each event the counting sends becomes a result in its tally.

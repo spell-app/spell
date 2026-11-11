@@ -1,17 +1,15 @@
-<!--
-  Spell's own app as a site:  a page per screen, each with a thumbnail of how it looks today.
-  What opens over a page is a dialog or a sidebar, opened from the buttons above its thumbnail.
-  Most addresses name a project, so they aren't in the navigation:  Home links to one of each.
--->
+// Spell's own app as a site:  a page per screen, each with a thumbnail of how it looks today.
+// What opens over a page is a dialog or a sidebar, opened from the buttons above its thumbnail.
+// Most addresses name a project, so they aren't in the navigation:  Home links to one of each.
 
-<page "home page" thumbnail="snapshots/home.jpg">
+home page is a page:
 	<stories>
 		<story "S1" done>open an example, a guide, a notebook or one of my projects from its card</story>
 		<story "S2" done>start from a blank app, a small starter or Solitaire</story>
 		<story "S3" done>make a project, an example or a guide from its group's header</story>
 		<story "S4" done>bring back a project I exported</story>
 	</stories>
-	<draw>
+	- to draw it:
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the new project dialog}>New Project</button>
 			<link link={"/edit/@spell/examples/Solitaire"}>The code editor</link>
@@ -22,24 +20,25 @@
 			<link link={"/apps/@spell/examples/TaskList"}>A hosted app</link>
 		</stack>
 		draw its thumbnail
-	</draw>
-</>
+	- its thumbnail is "snapshots/home.jpg"
 
-<page "notebook page" thumbnail="snapshots/notebook.jpg">
+notebook page is a page:
 	<stories>
 		<story "S1" done>read a notebook, its words and its code in cells</story>
 	</stories>
-	<property "notebook" description="What the address names">text</property>
-</>
+	// What the address names
+	- its "notebook" is text
+	- its thumbnail is "snapshots/notebook.jpg"
 
-<page "guide page" thumbnail="snapshots/guide.jpg">
+guide page is a page:
 	<stories>
 		<story "S1" done>read a guide in the editor, its words as the comments of its spell file</story>
 	</stories>
-	<property "guide" description="What the address names">text</property>
-</>
+	// What the address names
+	- its "guide" is text
+	- its thumbnail is "snapshots/guide.jpg"
 
-<page "code editor page" thumbnail="snapshots/edit.jpg">
+code editor page is a page:
 	<stories>
 		<story "S1" done>change the code in its file tabs, with the running app beside it</story>
 		<story "S2" done>see the program's output, its compiled code and what I can use, in the Program panel under the code</story>
@@ -48,8 +47,9 @@
 		<story "S5" done>undo, save, discard my changes and publish a draft</story>
 		<story "S6" done>move between Run, Edit and, for a site, Site</story>
 	</stories>
-	<property "project" description="What the address names">text</property>
-	<draw>
+	// What the address names
+	- its "project" is text
+	- to draw it:
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the inspector sidebar}>Inspector</button>
 			<button appearance="basic" onClick={show the palette sidebar}>Palette</button>
@@ -63,18 +63,18 @@
 			<button appearance="basic" onClick={show the person dialog}>You</button>
 		</stack>
 		draw its thumbnail
-	</draw>
-</>
+	- its thumbnail is "snapshots/edit.jpg"
 
-<page "running app page" thumbnail="snapshots/run.jpg">
+running app page is a page:
 	<stories>
 		<story "S1" done>use the program by itself, with no code showing</story>
 		<story "S2" done>restart it</story>
 	</stories>
-	<property "project" description="What the address names">text</property>
-</>
+	// What the address names
+	- its "project" is text
+	- its thumbnail is "snapshots/run.jpg"
 
-<page "site editor page" thumbnail="snapshots/site-pages.jpg">
+site editor page is a page:
 	<stories>
 		<story "S1" done>see a site's pages as a tree and a board of cards</story>
 		<story "S2" done>drag a row to move a page, with its pages</story>
@@ -82,92 +82,102 @@
 		<story "S4" done>write what a page must let people do, as stories</story>
 		<story "S5" done>open a page's code from its card</story>
 	</stories>
-	<property "project" description="What the address names">text</property>
-	<draw>
+	// What the address names
+	- its "project" is text
+	- to draw it:
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the site data sidebar}>Data</button>
 		</stack>
 		draw its thumbnail
-	</draw>
-</>
+	- its thumbnail is "snapshots/site-pages.jpg"
 
-<page "theme editor page" thumbnail="snapshots/theme.jpg">
+theme editor page is a page:
 	<stories>
 		<story "S1" done>change a theme and see it on real pages</story>
 		<story "S2" done>save it by name, to pick from every theme menu</story>
 	</stories>
-</>
+	- its thumbnail is "snapshots/theme.jpg"
 
-<page "hosted app page" thumbnail="snapshots/hosted-program.jpg">
+hosted app page is a page:
 	<stories>
 		<story "S1" done>use a program at its own address on Spell's cloud</story>
 	</stories>
-	<property "project" description="What the address names">text</property>
-	<draw>
+	// What the address names
+	- its "project" is text
+	- to draw it:
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the sign-in dialog}>Sign In</button>
 		</stack>
 		draw its thumbnail
-	</draw>
-</>
+	- its thumbnail is "snapshots/hosted-program.jpg"
 
-<page "terms page" thumbnail="snapshots/terms.jpg">
+terms page is a page:
 	<stories>
 		<story "S1" done>read Spell's terms</story>
 	</stories>
-</>
+	- its thumbnail is "snapshots/terms.jpg"
 
-<view "inspector sidebar" thumbnail="snapshots/inspector.jpg"/>
+an "inspector sidebar" is a view:
+	- its thumbnail is "snapshots/inspector.jpg"
 
-<view "palette sidebar" thumbnail="snapshots/palette.jpg"/>
+a "palette sidebar" is a view:
+	- its thumbnail is "snapshots/palette.jpg"
 
-<view "site data sidebar" thumbnail="snapshots/site-data.jpg"/>
+a "site data sidebar" is a view:
+	- its thumbnail is "snapshots/site-data.jpg"
 
-<view "project settings dialog" thumbnail="snapshots/project-settings.jpg"/>
+a "project settings dialog" is a view:
+	- its thumbnail is "snapshots/project-settings.jpg"
 
-<view "code settings dialog" thumbnail="snapshots/code-settings.jpg"/>
+a "code settings dialog" is a view:
+	- its thumbnail is "snapshots/code-settings.jpg"
 
-<view "project versions dialog" thumbnail="snapshots/versions.jpg"/>
+a "project versions dialog" is a view:
+	- its thumbnail is "snapshots/versions.jpg"
 
-<view "new file dialog" thumbnail="snapshots/new-file.jpg"/>
+a "new file dialog" is a view:
+	- its thumbnail is "snapshots/new-file.jpg"
 
-<view "new project dialog" thumbnail="snapshots/new-project.jpg"/>
+a "new project dialog" is a view:
+	- its thumbnail is "snapshots/new-project.jpg"
 
-<view "duplicate project dialog" thumbnail="snapshots/duplicate-project.jpg"/>
+a "duplicate project dialog" is a view:
+	- its thumbnail is "snapshots/duplicate-project.jpg"
 
-<view "change this dialog" thumbnail="snapshots/change-this.jpg"/>
+a "change this dialog" is a view:
+	- its thumbnail is "snapshots/change-this.jpg"
 
-<view "publish clash dialog" thumbnail="snapshots/publish-clash.jpg"/>
+a "publish clash dialog" is a view:
+	- its thumbnail is "snapshots/publish-clash.jpg"
 
-<view "person dialog" thumbnail="snapshots/you.jpg"/>
+a "person dialog" is a view:
+	- its thumbnail is "snapshots/you.jpg"
 
-<view "sign-in dialog" thumbnail="snapshots/sign-in.jpg"/>
+a "sign-in dialog" is a view:
+	- its thumbnail is "snapshots/sign-in.jpg"
 
-<site "spell app">
-	<page "home page" address="/" title="Home" state="old" color="red"/>
-	<page "notebook page" address="/edit/@spell/guides/SpellUI/:notebook*" title="Notebook" state="old" color="orange"/>
-	<page "guide page" address="/edit/@spell/guides/:guide" title="Guide" state="old" color="yellow"/>
-	<page "code editor page" address="/edit/:project*" title="Edit" state="old" color="olive">
-		<page "running app page" address="/run/:project*" title="Run" state="old"/>
-	</>
-	<page "site editor page" address="/site/:project*" title="Site Editor" state="old" color="green"/>
-	<page "theme editor page" address="/theme" title="Theme Editor" state="old" color="teal"/>
-	<page "hosted app page" address="/apps/:project*" title="Hosted App" state="old" color="blue">
-		<page "terms page" address="/terms" title="Terms" state="old"/>
-	</>
-	<sidebar "inspector sidebar"/>
-	<sidebar "palette sidebar"/>
-	<sidebar "site data sidebar"/>
-	<dialog "project settings dialog"/>
-	<dialog "code settings dialog"/>
-	<dialog "project versions dialog"/>
-	<dialog "new file dialog"/>
-	<dialog "new project dialog"/>
-	<dialog "duplicate project dialog"/>
-	<dialog "change this dialog"/>
-	<dialog "publish clash dialog"/>
-	<dialog "person dialog"/>
-	<dialog "sign-in dialog"/>
-	<page "not found page"/>
-	<page "error page"/>
-</>
+spell app is a site:
+	- it has a home page at "/", named "Home", old , colored red
+	- it has a notebook page at "/edit/@spell/guides/SpellUI/:notebook*", named "Notebook", old , colored orange
+	- it has a guide page at "/edit/@spell/guides/:guide", named "Guide", old , colored yellow
+	- it has a code editor page at "/edit/:project*", named "Edit", old , colored olive
+		it has a running app page at "/run/:project*", named "Run", old
+	- it has a site editor page at "/site/:project*", named "Site Editor", old , colored green
+	- it has a theme editor page at "/theme", named "Theme Editor", old , colored teal
+	- it has a hosted app page at "/apps/:project*", named "Hosted App", old , colored blue
+		it has a terms page at "/terms", named "Terms", old
+	- it has an inspector sidebar
+	- it has a palette sidebar
+	- it has a site data sidebar
+	- it has a project settings dialog
+	- it has a code settings dialog
+	- it has a project versions dialog
+	- it has a new file dialog
+	- it has a new project dialog
+	- it has a duplicate project dialog
+	- it has a change this dialog
+	- it has a publish clash dialog
+	- it has a person dialog
+	- it has a sign-in dialog
+	- it has a not found page
+	- it has an error page

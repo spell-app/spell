@@ -86,12 +86,16 @@ export class SiteEdits {
    * - `language`:  whose words it's written in.
    */
   static stubFor(part: SitePart, language: "en" | "es" = "en"): string {
-    const prefix = language === "es" ? "encanto" : "spell"
-    const kind = part.kind === "page" ? (language === "es" ? "página" : "page") : language === "es" ? "vista" : "view"
     const title = part.title ?? part.name
     const quoted = JSON.stringify(part.name)
     const heading = escapeTagText(title)
-    if (part.kind === "page") return `<${prefix}-${kind} ${quoted}>\n\t<header size="large">${heading}</header>\n</>\n`
+    // a page in plain Spell (epic `language` P45):  its plain head, its body what it draws
+    if (part.kind === "page") {
+      const head = language === "es" ? `${quoted} es una página` : `${quoted} is a page`
+      return `${head}\n\t<header size="large">${heading}</header>\n`
+    }
+    const prefix = language === "es" ? "encanto" : "spell"
+    const kind = language === "es" ? "vista" : "view"
     return `<${prefix}-${kind} ${quoted}>\n\t<draw>\n\t\t<header size="medium">${heading}</header>\n\t</draw>\n</>\n`
   }
 
@@ -657,16 +661,18 @@ function withDeclarationRenamed(text: string, name: string, newName: string): st
   const declared = declarationOf(text, name)
   if (!declared) return text
   const line = text.slice(declared.start, text.indexOf("\n", declared.start) + 1 || text.length)
-  return (
-    text.slice(0, declared.start) + line.replace(`"${name}"`, `"${newName}"`) + text.slice(declared.start + line.length)
-  )
+  // its name quoted, or bare at its line's start:  `films page is a page:`
+  const renamed = line.includes(`"${name}"`)
+    ? line.replace(`"${name}"`, `"${newName}"`)
+    : line.replace(name, newName)
+  return text.slice(0, declared.start) + renamed + text.slice(declared.start + line.length)
 }
 
 /** Where page `name`'s own declaration is written, with its body:  none for a page another project declares. */
 function declarationOf(text: string, name: string): TextSpan | undefined {
   const quoted = JSON.stringify(name)
   const lines = linesOf(text)
-  const starts = DECLARATION_WORDS.map((words) => words.replace("{name}", quoted))
+  const starts = DECLARATION_WORDS.map((words) => words.replace("{name}", quoted).replace("{bare}", name))
   const at = lines.findIndex((line) => starts.some((start) => line.text.startsWith(start)))
   if (at < 0) return undefined
   const first = lines[at]!
@@ -801,7 +807,14 @@ const DECLARATION_WORDS = [
   "<encanto-página {name}",
   "<encanto-vista {name}",
   "a {name} is a page",
-  "a {name} is a view"
+  "a {name} is a view",
+  // a page's plain head (epic `language` P45)
+  "{name} is a page",
+  "{name} is a notebook page",
+  "{name} es una página",
+  // a page as code spell writes one, by its bare name:  `films page is a page:`
+  "{bare} is a page",
+  "{bare} es una página"
 ]
 
 /** `text` safe between a tag's start and end. */

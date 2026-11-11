@@ -253,7 +253,9 @@ describe("SiteEdits", () => {
       expect(SiteEdits.fileNameFor("Home", ["home.spell"])).toBe("home-2.spell")
       expect(SiteEdits.fileNameFor("Películas", [], "es")).toBe("peliculas.es.spell")
       const page = SiteEdits.partNamed(ROUTING, "My Inbox")
-      expect(SiteEdits.stubFor(page)).toBe('<spell-page "My Inbox">\n\t<header size="large">My Inbox</header>\n</>\n')
+      // a page in plain Spell (epic `language` P45)
+      expect(SiteEdits.stubFor(page)).toBe('"My Inbox" is a page\n\t<header size="large">My Inbox</header>\n')
+      expect(SiteEdits.stubFor(page, "es")).toBe('"My Inbox" es una página\n\t<header size="large">My Inbox</header>\n')
       const sidebar = SiteEdits.partNamed(ROUTING, "System Notices")
       expect(SiteEdits.stubFor(sidebar)).toContain('<spell-view "System Notices">\n\t<draw>')
     })
@@ -261,6 +263,11 @@ describe("SiteEdits", () => {
     test("a declaration is found in any file:  a page or a view", () => {
       const view = '<spell-view "System Notices">\n\t<draw>\n\t</draw>\n</>\n'
       expect(SiteEdits.declarationOf(view, "System Notices")).toEqual({ start: 0, end: view.length })
+      // a page's plain head (epic `language` P45), and a page as code spell writes it, by its bare name
+      const plain = '"my inbox" is a notebook page\n\t# Inbox\n\n'
+      expect(SiteEdits.declarationOf(`${plain}x`, "my inbox")).toEqual({ start: 0, end: plain.length })
+      const code = "films page is a page:\n\t- to draw it:\n\t\t<text>Films</text>\n"
+      expect(SiteEdits.declarationOf(code, "films page")).toEqual({ start: 0, end: code.length })
     })
   })
 

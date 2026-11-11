@@ -76,8 +76,13 @@ function withPlainHeads(text: string, path: string): string | undefined {
 
 /** `text`, a site's file, written in plain Spell:  the whole file is code. */
 function sitePlain(text: string, path: string): string {
-  // the writer spaces each comma as a word;  a page's details read `at "/", named "Home"`
-  return SX.CodeSpellWriter.write(text, { path }).replace(/^(\t+(?:- )?it has .*)$/gm, (line) => line.replaceAll('" , ', '", '))
+  return (
+    SX.CodeSpellWriter.write(text, { path })
+      // the writer spaces each comma as a word;  a page's details read `at "/", named "Home"`
+      .replace(/^(\t+(?:- )?it has .*)$/gm, (line) => line.replaceAll('" , ', '", '))
+      // a `<!-- ... -->` comment's own lines, `//` alone, at its first and last:  gone
+      .replace(/^\/\/\n((?:\/\/ .*\n)+)\/\/\n/gm, "$1")
+  )
 }
 
 /** The new text of project file `path`, or `undefined` when it stays as it is. */
