@@ -662,9 +662,7 @@ function withDeclarationRenamed(text: string, name: string, newName: string): st
   if (!declared) return text
   const line = text.slice(declared.start, text.indexOf("\n", declared.start) + 1 || text.length)
   // its name quoted, or bare at its line's start:  `films page is a page:`
-  const renamed = line.includes(`"${name}"`)
-    ? line.replace(`"${name}"`, `"${newName}"`)
-    : line.replace(name, newName)
+  const renamed = line.includes(`"${name}"`) ? line.replace(`"${name}"`, `"${newName}"`) : line.replace(name, newName)
   return text.slice(0, declared.start) + renamed + text.slice(declared.start + line.length)
 }
 

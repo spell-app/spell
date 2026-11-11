@@ -34,7 +34,8 @@ const BUILT_INS = ["@spell/guides", "@spell/sites", "@spell/examples", "@spell/l
 const PAGE_TAG =
   /^<(page|notebook|spell-page|spell-notebook|página|pagina|cuaderno|encanto-página|encanto-pagina|encanto-cuaderno)[ \t]+"([^"\n]+)"([ \t]+(?:notebook|cuaderno))?[ \t]*>[ \t]*$/u
 /** A property editor's tag at a file's left edge, and its name. */
-const EDITOR_TAG = /^<(?:spell-)?(?:property-editor|editor-de-propiedades|encanto-editor-de-propiedades)[ \t]+"([^"\n]+)"[ \t]*>[ \t]*$/u
+const EDITOR_TAG =
+  /^<(?:spell-)?(?:property-editor|editor-de-propiedades|encanto-editor-de-propiedades)[ \t]+"([^"\n]+)"[ \t]*>[ \t]*$/u
 /** A site's tag at a file's left edge:  the whole file is code, written plain. */
 const SITE_TAG = /^<(?:spell-|encanto-)?(?:site|sitio)\b/mu
 
@@ -125,7 +126,10 @@ function codeOf(compiled: string): string {
 function compile(folder: string, files: { path: string; contents: string }[]) {
   const projectName = relative(SPACES, folder)
   const sources = files.filter(({ path }) => SP.isSpellSourceName(path))
-  const parentScope = importScopeIn(folder, sources.map(({ path }) => path))
+  const parentScope = importScopeIn(
+    folder,
+    sources.map(({ path }) => path)
+  )
   const parsed = parseSpellProject(sources, { parentScope, projectPath: projectName }).files
   return new Map(parsed.map((file) => [file.path, { code: codeOf(file.compiled), errors: file.errors.length }]))
 }

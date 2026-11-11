@@ -13,7 +13,7 @@ exports[`Solitaire project > compiled output + errors 1`] = `
 
 /*! SPELL: DECLARES {
   type: "Card", superType: "TwoSidedView",
-  defined: "/Card.spell:325-3323",
+  defined: "/Card.spell:325-3313",
 } */
 export class Card extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
@@ -159,10 +159,10 @@ export class Card extends TwoSidedView {
     return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(column))
   }
 
-  /** Pulled up out of its pile, over the piles above it, as the cheat does -- styles.css */
+  /** Over every card and pile around it while the cheat moves it -- styles.css */
   /*! SPELL: DECLARES {
     property: "lifted", of: "Card", group: "drawing", datatype: "choice",
-    defined: "/Card.spell:2185-2311",
+    defined: "/Card.spell:2185-2301",
   } */
   // - its "lifted" is yes or no
   static { this.declareProp("lifted", { type: "choice" }) }
@@ -188,7 +188,7 @@ export class Card extends TwoSidedView {
 /*! SPELL: DECLARES {
   syntax: "test card setup", output: "test_card_setup", rule: "method_call", alias: "statement",
   kind: "function", name: "card setup",
-  defined: "/Card.spell:2436-3318",
+  defined: "/Card.spell:2426-3308",
 } */
 export function testCardSetup() {
   return core.test("test card setup", function testCardSetup() {
@@ -432,14 +432,14 @@ Object.defineProperty(Card.prototype, "pile", {
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 /*! SPELL: DECLARES {
   type: "StockPile", superType: "Pile",
-  defined: "/Solitaire.spell:9243-9749",
+  defined: "/Solitaire.spell:9240-9746",
 } */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   /*! SPELL: DECLARES {
     property: "layout", of: "StockPile",
-    defined: "/Solitaire.spell:9396-9422",
+    defined: "/Solitaire.spell:9393-9419",
   } */
   get layout() {
     return "stacked"
@@ -467,14 +467,14 @@ export class StockPile extends Pile {
 /** Where the stock's cards go as they're turned over */
 /*! SPELL: DECLARES {
   type: "DiscardPile", superType: "Pile",
-  defined: "/Solitaire.spell:9755-10020",
+  defined: "/Solitaire.spell:9752-10017",
 } */
 export class DiscardPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   /*! SPELL: DECLARES {
     property: "layout", of: "DiscardPile",
-    defined: "/Solitaire.spell:9858-9884",
+    defined: "/Solitaire.spell:9855-9881",
   } */
   get layout() {
     return "stacked"
@@ -494,14 +494,14 @@ export class DiscardPile extends Pile {
 /** Where a suit is built up, ace to king, one card at a time */
 /*! SPELL: DECLARES {
   type: "Foundation", superType: "Pile",
-  defined: "/Solitaire.spell:10026-10670",
+  defined: "/Solitaire.spell:10023-10667",
 } */
 export class Foundation extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   /*! SPELL: DECLARES {
     property: "layout", of: "Foundation",
-    defined: "/Solitaire.spell:10135-10161",
+    defined: "/Solitaire.spell:10132-10158",
   } */
   get layout() {
     return "stacked"
@@ -509,7 +509,7 @@ export class Foundation extends Pile {
 
   /*! SPELL: DECLARES {
     property: "suit", of: "Foundation", datatype: "CardSuit",
-    defined: "/Solitaire.spell:10166-10194",
+    defined: "/Solitaire.spell:10163-10191",
   } */
   // - its "suit" is a card suit
   static { this.declareProp("suit", { oneOf: () => Card.Suits }) }
@@ -536,14 +536,14 @@ export class Foundation extends Pile {
 /** A column, built down from king to ace, red and black in turn */
 /*! SPELL: DECLARES {
   type: "Tableau", superType: "Pile",
-  defined: "/Solitaire.spell:10676-12664",
+  defined: "/Solitaire.spell:10673-12661",
 } */
 export class Tableau extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   /*! SPELL: DECLARES {
     property: "layout", of: "Tableau",
-    defined: "/Solitaire.spell:10785-10812",
+    defined: "/Solitaire.spell:10782-10809",
   } */
   get layout() {
     return "vertical"
@@ -565,7 +565,7 @@ export class Tableau extends Pile {
 
 /*! SPELL: DECLARES {
   type: "Solitaire", superType: "App",
-  defined: "/Solitaire.spell:300-6647",
+  defined: "/Solitaire.spell:300-6644",
 } */
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -815,7 +815,7 @@ export class Solitaire extends App {
   /*! SPELL: DECLARES {
     syntax: "draw {thisArg:expression}", output: "draw", rule: "method_call", of: "Solitaire",
     alias: ["statement", "expression"], group: "game", kind: "method", name: "draw it",
-    defined: "/Solitaire.spell:5780-6642",
+    defined: "/Solitaire.spell:5777-6639",
   } */
   draw() {
     return h("ui-container",
@@ -898,13 +898,12 @@ export class Solitaire extends App {
     if (core.isEmpty(remainingPiles)) return
     const pile = core.randomItemOf(remainingPiles)
     const card = pile?.filter((card) => card.isFaceDirection("down"))?.randomItem()
-    // up out of its pile, then over, then down onto the discards
+    // over every card around it, then turned face up as it moves onto the discards
     card.lifted = true
-    await core.pauseFor(300, "msec")
     card?.turnFaceUp()
-    await core.pauseFor(30, "ticks")
-    card.lifted = false
     this.discards.append(card)
+    await core.pauseFor(300, "msec")
+    card.lifted = false
   }
 }
 export const solitaire = new Solitaire()
@@ -946,7 +945,7 @@ core.describeAction(Solitaire, "autoPlay", { title: "Auto play", shortcuts: ["A"
   syntax: "cheat {thisArg:expression}?", output: "cheat", rule: "method_call", of: "Solitaire",
   alias: ["statement", "expression"], group: "game", kind: "method", name: "cheat",
   returns: "nothing", waits: true, title: "Cheat",
-  defined: "/Solitaire.spell:4990-5634",
+  defined: "/Solitaire.spell:4990-5631",
 } */
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
 
@@ -967,7 +966,7 @@ core.heading("Playing a card")
   syntax: "play {thisArg:expression}", output: "play", rule: "method_call", of: "Card",
   alias: ["statement", "expression"], group: "Playing a card", kind: "method", name: "play a card",
   waits: true,
-  defined: "/Solitaire.spell:6931-7200",
+  defined: "/Solitaire.spell:6928-7197",
 } */
 Card.prototype.play = async function () {
   if (this.pile === solitaire.stock) {
@@ -989,7 +988,7 @@ core.describeAction(Card, "play", { title: "play a card", undoneAs: "Play Card" 
   rule: "method_call", of: "Card", alias: ["statement", "expression"], group: "Playing a card",
   kind: "method", name: "put a card on a pile", params: [{ name: "pile", datatype: "Pile" }],
   returns: "choice", waits: true,
-  defined: "/Solitaire.spell:7403-7980",
+  defined: "/Solitaire.spell:7400-7977",
 } */
 Card.prototype.putOnPile = async function (pile) {
   const startPile = this.pile
@@ -1014,7 +1013,7 @@ core.describeAction(Card, "putOnPile", { title: "put a card on a pile", undoneAs
   alias: ["statement", "expression"], group: "Playing a card", kind: "method",
   name: "count the points for a card on a pile", params: [{ name: "pile", datatype: "Pile" }],
   returns: "number",
-  defined: "/Solitaire.spell:8064-8209",
+  defined: "/Solitaire.spell:8061-8206",
 } */
 Card.prototype.countThePointsForCardOnPile = function (pile) {
   if (pile instanceof Foundation) return 10
@@ -1070,7 +1069,7 @@ core.heading("The piles")
 /*! SPELL: DECLARES {
   syntax: "test the moves", output: "test_the_moves", rule: "method_call", alias: "statement",
   kind: "function", name: "the moves",
-  defined: "/Solitaire.spell:11153-12659",
+  defined: "/Solitaire.spell:11150-12656",
 } */
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {

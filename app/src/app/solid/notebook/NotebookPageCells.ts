@@ -163,7 +163,10 @@ export class NotebookPageCells {
     if (model.notebook.plain) {
       const said = model.notebook.attributes.find((attribute) => attribute.name === LOCKED)
       // with the space after it in English, before it in Spanish
-      const gone = model.language === "en" ? { start: said?.span.start ?? 0, end: (said?.span.end ?? 0) + 1 } : said && { start: said.span.start - 1, end: said.span.end }
+      const gone =
+        model.language === "en"
+          ? { start: said?.span.start ?? 0, end: (said?.span.end ?? 0) + 1 }
+          : said && { start: said.span.start - 1, end: said.span.end }
       if (said && !locked) return [SourceEdits.replacing(text, gone!, "")]
       if (said || !locked) return []
       // first of its flags in English, `a locked notebook page`;  after the page's word in Spanish, `una página bloqueada`

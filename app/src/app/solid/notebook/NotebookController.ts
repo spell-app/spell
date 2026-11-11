@@ -216,7 +216,6 @@ export class NotebookController {
   // ## Modes
   ////////////////
 
-
   /** Is "On this page" shown as a column?  Always, unless its Hide hid it:  remembered per notebook. */
   readonly contentsShown: Accessor<boolean>
   private readonly setContentsShown: (shown: boolean) => void
@@ -259,7 +258,6 @@ export class NotebookController {
   private get contentsKey(): string {
     return `spellEditor:notebook-contents:${this.file.path}`
   }
-
 }
 
 /** What the pane's header says of the edits (`NotebookController.status()`). */

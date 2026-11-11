@@ -203,11 +203,12 @@ describe("SpellLanguageService, spellx", () => {
     }
   })
 
-  test("Show as Code Spell:  the code spell it means, its drawings' components by their tags (`spell/compiled`)", () => {
+  // its drawings as written:  plain Spell reads the shortcuts too (epic `language` P45)
+  test("Show as Code Spell:  the code spell it means, its drawings as written (`spell/compiled`)", () => {
     const code = service.compiled(tile, "spell")
     expect(code).toContain(`a "flip tile" is a view:\n`)
     expect(code).toContain(`\t- its "side" is one of up, down\n\t\t- it "is showing (side)"\n`)
-    expect(code).toContain("\t- to draw its face:\n\t\t<ui-text>face</ui-text>\n")
+    expect(code).toMatch(/\t- to draw its face:\n\t\t<text>face<\/(text)?>\n/)
     expect(code).toContain("\t- on mouse down: flip it\n")
   })
 
