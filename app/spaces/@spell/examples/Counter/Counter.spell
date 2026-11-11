@@ -11,7 +11,7 @@ a "counter" is a view
 
 	to draw it
 		// A button saying how many times it's been clicked:  a click counts up
-		<button onClick={count up}>Clicked {the count} times</button>
+		<button size="huge" color="primary" onClick={count up}>Clicked {the count} times</button>
 
 	to test counting
 		set the counter to a new counter
@@ -25,4 +25,6 @@ a "counter" is a view
 counter app is an app
 	"counter" is a new counter
 	to draw it
-		<container>{draw the counter}</container>
+		<container>
+			<stack align="center">{draw the counter}</stack>
+		</container>

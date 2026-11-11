@@ -235,7 +235,7 @@ export class RecipeBox extends App {
             <ui-text color="grey">Everything you type is saved as you go.</ui-text>
           </ui-stack>
           <ui-toolbar class="undo" menu="box menu" aria-label="Recipes" />
-          <ui-form class="find" value={this}>
+          <ui-form class="find" value={this} fluid={true}>
             <ui-field label="Search">
               <ui-input class="search" name="search" icon="search" />
             </ui-field>
@@ -251,7 +251,7 @@ export class RecipeBox extends App {
     if (this.editing) return core.drawThing(new RecipeEditor({ recipe: this.editing }))
     else {
       return (
-        <ui-cards columns="3" doubling={true} part="screen">
+        <ui-cards columns="3" doubling={true} stackable={true} part="screen">
           <ui-card class="new">
             <ui-content>
               <ui-form prop:value={this.newRecipe}>

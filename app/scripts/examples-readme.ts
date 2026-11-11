@@ -6,7 +6,8 @@
  *   - Its name:  its project file's `title`, else its folder's name, `lists-from-zero` => `Lists From Zero`.
  * - Takes two pictures of each project with an app (every one but a library that says `"onHome": false`):
  *   - open in the editor, its spell beside it running, into `docs/images/examples/`:  the README table's
- *   - its app running by itself, in the runner, into its own folder as `__thumbnail.png`:
+ *   - its app running by itself, in the runner at a phone's width, its top 16 by 9, into its own folder as
+ *     `__thumbnail.png`:
  *     its card's, on the editor's home page (`SPACES.PROJECT_THUMBNAIL`, epic `mockup` P18)
  *   - Headless Playwright, at the address the kit's editor answers on (`.spell-server.editor.json`, at the page
  *     server's root, the kit's):
@@ -55,26 +56,26 @@ const GROUPS = ["examples", "library"] as const
 /** Each project's picture of its app running alone, in its folder:  spaces' `PROJECT_THUMBNAIL`. */
 const PROJECT_THUMBNAIL = "__thumbnail.png"
 
-/** The window the thumbnails are taken in:  16 by 9, as a card's banner, and narrow, so a small app fills more of it. */
-const THUMBNAIL_WINDOW = { width: 720, height: 405 }
+/**
+ * The window the thumbnails are taken in:  a phone's, so each app is in its phone layout (Owen, epic `mockup` P19:
+ * "put the examples in phone mode and take a screenshot of the tops of the apps").
+ * - Twice the pixels, so the card's picture is sharp.
+ */
+const THUMBNAIL_WINDOW = { width: 390, height: 844 }
+
+/** A card's banner, wide by high:  16 by 9.  A thumbnail is the top of its app, cut to it. */
+const THUMBNAIL_SHAPE = 9 / 16
+
+/** How many pixels a thumbnail has per point:  2, a phone's screen. */
+const THUMBNAIL_SCALE = 2
 
 /**
- * The examples in the order a newcomer should open them;  one not listed comes after these, by name.
- * - Add a new example here where it fits.
+ * Each group's order:  the editor's home page's, ONE list (spaces' `homeOrder.json`, epic `mockup` P19).
+ * - Dragging a card on the home page, in dev, changes it;  a project it doesn't list comes after, by name.
  */
-const LEARNING_ORDER = [
-  "fizzbuzz",
-  "Counter",
-  "calculator",
-  "tic-tac-toe",
-  "bill-splitter",
-  "flash-cards",
-  "habit-tracker",
-  "TaskList",
-  "ListaDeTareas",
-  "Solitaire",
-  "Solitario"
-]
+const HOME_ORDER = JSON5.parse(
+  readFileSync(path.join(ROOT, "src", "spaces", "models", "homeOrder.json"), "utf8")
+) as Record<string, string[]>
 
 /**
  * The org apps' thumbnails:  each one's picture from the browser tests (`tests/spell/recipeBox.test.ts`), which sign
@@ -144,18 +145,19 @@ function readProjects(): Project[] {
     const names = readdirSync(path.join(SPACE, group), { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
-      .toSorted(byLearningOrder)
+      .toSorted(inHomeOrder(group))
     return names.map((name) => projectFor(group, name))
   })
 }
 
-/** Sort:  `LEARNING_ORDER` first, in its order, then the rest by name. */
-function byLearningOrder(a: string, b: string): number {
+/** Sort `group`'s folder names:  the home page's order first, then the rest by name. */
+function inHomeOrder(group: string): (a: string, b: string) => number {
+  const listed = HOME_ORDER[`@spell/${group}`] ?? []
   const rank = (name: string) => {
-    const index = LEARNING_ORDER.indexOf(name)
-    return index === -1 ? LEARNING_ORDER.length : index
+    const index = listed.indexOf(name)
+    return index === -1 ? listed.length : index
   }
-  return rank(a) - rank(b) || a.localeCompare(b)
+  return (a, b) => rank(a) - rank(b) || a.localeCompare(b)
 }
 
 /** What the table says of project `name` in `group`, from its folder. */
@@ -271,7 +273,10 @@ async function takePictures(projects: Project[]): Promise<void> {
         continue
       }
       // its card's picture:  the app by itself, in the runner
-      const runner = await BrowserPage.newPage(browser, { viewport: THUMBNAIL_WINDOW })
+      const runner = await BrowserPage.newPage(browser, {
+        viewport: THUMBNAIL_WINDOW,
+        context: { deviceScaleFactor: THUMBNAIL_SCALE }
+      })
       // the runner keeps a connection open, so it never goes quiet:  its load, then the settle
       await runner.goto(new URL(`run/${project.address}`, editor).href, { waitUntil: "load" })
       await runner.waitForTimeout(SETTLE_MS)
@@ -280,7 +285,12 @@ async function takePictures(projects: Project[]): Promise<void> {
       // its elements draw in their shadow roots, so ask whether it put any element on the page at all
       const drawsSomething = await app.evaluate((element) => !!element.querySelector("#spell-app-root > *"))
       if (drawsSomething) {
-        await app.screenshot({ path: thumbnailOf(project) })
+        // its top, cut to the card's shape
+        const box = (await app.boundingBox())!
+        await runner.screenshot({
+          path: thumbnailOf(project),
+          clip: { x: box.x, y: box.y, width: box.width, height: box.width * THUMBNAIL_SHAPE }
+        })
         console.log(path.relative(process.cwd(), thumbnailOf(project)))
       } else {
         rmSync(thumbnailOf(project), { force: true })
@@ -319,7 +329,9 @@ async function cutToThumbnail(
   from: string,
   to: string
 ): Promise<void> {
-  const page = await BrowserPage.newPage(browser, { viewport: THUMBNAIL_WINDOW })
+  // the test's picture is a wide window's:  drawn at a phone's width, its top cut to the card's shape
+  const size = { width: THUMBNAIL_WINDOW.width, height: Math.round(THUMBNAIL_WINDOW.width * THUMBNAIL_SHAPE) }
+  const page = await BrowserPage.newPage(browser, { viewport: size, context: { deviceScaleFactor: THUMBNAIL_SCALE } })
   const picture = `data:image/png;base64,${readFileSync(from).toString("base64")}`
   await page.setContent(
     `<body style="margin:0"><img src="${picture}" style="width:100vw;height:100vh;object-fit:cover;object-position:top"></body>`

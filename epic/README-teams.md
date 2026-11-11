@@ -144,7 +144,7 @@ epic plugin install --codex
   - as a session starts, two notices:  its worktree is behind `main`, or the last sync stopped on a conflict
 - It links each of the plugin's skills into `~/.agents/skills/` (`$SPELL_EPIC_AGENTS_HOME` moves `~/.agents`), where the Codex CLI finds your own skills in every repo:
   the same files Claude Code reads, so an edit to one shows in both at once.
-- It writes the plugin's three reviewers, the designer, coherence and the plan check, as Codex custom agents in `~/.codex/agents/`:
+- It writes the plugin's two reviewers, the designer and coherence, as Codex custom agents in `~/.codex/agents/`:
   generated from Claude Code's agent files, so edit those and run it again.
 - Your own hooks, skills and agents stay;  run again, it changes nothing.
 - The Codex desktop app can add the plugin itself instead:  `epic/.codex-plugin/plugin.json` names the same skills and

@@ -105,7 +105,7 @@ export class SessionMoves {
     const { plugin, marketplace } = this.pluginNames()
     const key = `${plugin}@${marketplace}`
     try {
-      const settings = ClaudeHome.settings(this.home)
+      const settings = readJson(join(this.home, "settings.json"))
       if (settings?.enabledPlugins?.[key] === false) return `the plugin ${key} is turned off (enabledPlugins)`
       const listed = settings?.extraKnownMarketplaces?.[marketplace]?.source?.path
       if (listed && !existsSync(listed))

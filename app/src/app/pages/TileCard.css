@@ -36,6 +36,14 @@
     outline: var(--ui-focus-width, 2px) solid var(--ui-primary-color, var(--ui-focus-color));
     outline-offset: 1px;
   }
+  /* dragged among its row (the home page, in dev):  the one moving faint, where it would land marked */
+  &.dragging {
+    opacity: 0.4;
+  }
+  &.drop-here {
+    outline: var(--ui-focus-width, 2px) dashed var(--ui-primary-color, var(--ui-focus-color));
+    outline-offset: 2px;
+  }
   &.empty {
     color: var(--ui-text-muted);
     border-style: dashed;

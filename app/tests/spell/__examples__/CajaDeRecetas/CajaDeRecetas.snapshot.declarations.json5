@@ -119,7 +119,7 @@
     {
       "type": "CajaDeRecetas",
       "superType": "App",
-      "defined": "/CajaDeRecetas.es.spell:2899-6109"
+      "defined": "/CajaDeRecetas.es.spell:2899-6125"
     },
     {
       "property": "búsqueda",

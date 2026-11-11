@@ -10,6 +10,7 @@ import "./TileCard.css"
  *   (`<SiteEditorPage>`, epic `mockup` P4):  ONE card, drawn the same way in both.
  * - It's a link when it has an `href` (a project:  a middle click opens a tab), else a button.
  * - What a click does is its owner's:  `onClick`, `onDblClick`.
+ * - `drag`:  its owner's drag and drop, to move it among its row (the home page, in dev);  none:  a link drags as usual.
  * - `banner`:  its picture (or its tile) across its top, the text under it:  the home page's rows of examples,
  *   each a picture of its app running (epic `mockup` P18).
  ****************/
@@ -34,7 +35,17 @@ export function TileCard(props: TileCardProps) {
       </span>
     </>
   )
-  const classes = () => ["TileCard", "card", props.class, { selected: !!props.selected, banner: !!props.banner }]
+  const classes = () => [
+    "TileCard",
+    "card",
+    props.class,
+    {
+      selected: !!props.selected,
+      banner: !!props.banner,
+      dragging: !!props.drag?.dragging,
+      "drop-here": !!props.drag?.dropHere
+    }
+  ]
   return (
     <Show
       when={props.href}
@@ -42,6 +53,12 @@ export function TileCard(props: TileCardProps) {
         <button
           type="button"
           class={classes()}
+          draggable={props.drag ? "true" : undefined}
+          onDragStart={(event) => props.drag?.onStart(event)}
+          onDragOver={(event) => props.drag?.onOver(event)}
+          onDragLeave={(event) => props.drag?.onLeave(event)}
+          onDrop={(event) => props.drag?.onDrop(event)}
+          onDragEnd={(event) => props.drag?.onEnd(event)}
           aria-pressed={props.selected === undefined ? undefined : props.selected ? "true" : "false"}
           onClick={(event) => props.onClick?.(event)}
           onDblClick={(event) => props.onDblClick?.(event)}
@@ -52,6 +69,12 @@ export function TileCard(props: TileCardProps) {
     >
       <a
         class={classes()}
+        draggable={props.drag ? "true" : undefined}
+        onDragStart={(event) => props.drag?.onStart(event)}
+        onDragOver={(event) => props.drag?.onOver(event)}
+        onDragLeave={(event) => props.drag?.onLeave(event)}
+        onDrop={(event) => props.drag?.onDrop(event)}
+        onDragEnd={(event) => props.drag?.onEnd(event)}
         href={props.href}
         onClick={(event) => props.onClick?.(event)}
         onDblClick={(event) => props.onDblClick?.(event)}
@@ -81,6 +104,8 @@ export type TileCardProps = {
   picture?: string
   /** Its picture (or tile) across its top, big, the text under it;  default:  small, beside the text. */
   banner?: boolean
+  /** Dragging it among its row:  its owner's handlers, and how it shows now. */
+  drag?: TileCardDrag
   /** A link's address;  none:  it's a button. */
   href?: string
   /** It's the one picked. */
@@ -91,6 +116,24 @@ export type TileCardProps = {
   onClick?: (event: MouseEvent) => void
   /** A double click on it. */
   onDblClick?: (event: MouseEvent) => void
+}
+
+/** `<TileCard>`'s drag and drop:  its owner does the moving, the card shows it. */
+export type TileCardDrag = {
+  /** It's the card being dragged:  drawn faint. */
+  dragging: boolean
+  /** A dragged card would drop before it:  marked on its leading edge. */
+  dropHere: boolean
+  /** Its drag starts. */
+  onStart: (event: DragEvent) => void
+  /** A drag is over it:  call `preventDefault()` to take the drop. */
+  onOver: (event: DragEvent) => void
+  /** A drag left it. */
+  onLeave: (event: DragEvent) => void
+  /** Something was dropped on it. */
+  onDrop: (event: DragEvent) => void
+  /** Its own drag ended, dropped or not. */
+  onEnd: (event: DragEvent) => void
 }
 
 /** A card that holds no project or page:  "Loading...", "No examples yet!". */

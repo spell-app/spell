@@ -1,6 +1,7 @@
-import { For, Show, onSettled } from "solid-js"
+import { For, Show, createSignal, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { $fetch, KnownFormat } from "spell/util"
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
 import { appTexts } from "spell/app/app/ui/AppTexts"
@@ -19,7 +20,7 @@ import {
   type ProjectRootState
 } from "spell/app/app/solid"
 import { siteEditorUrlFor } from "./pages.types"
-import { EmptyCard, TileCard } from "./TileCard"
+import { EmptyCard, TileCard, type TileCardDrag } from "./TileCard"
 
 import "./ProjectChooser.css"
 
@@ -87,7 +88,9 @@ export function ProjectChooser() {
  * beside a few lines of the Task List.
  ****************/
 function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
-  const firstExample = () => props.examples.projects[0]?.path
+  // the first in the home page's order, FizzBuzz
+  const firstExample = () =>
+    SPACES.inHomeOrder(SPACES.SpellProjectRoot.examples.path, props.examples.projects, homeOrder())[0]?.path
   // the first guide the home page shows a card for:  a project may stay off it (`"onHome": false`)
   const firstGuide = () => props.guides.projects.find((project) => project.onHome !== false)?.path
   return (
@@ -211,12 +214,53 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
  *   in `SPACES.EXAMPLE_CATEGORIES`' order (epic `mockup` P18);  those with none after them.
  * - Projects written in another language (Solitario, ListaDeTareas) come last, under a quiet line naming it,
  *   "En Español" (Owen, 2026-10-27):  each project's language is its files' (`SP.ProjectListEntry`).
+ * - In the editor's order of each group, `SPACES.HOME_ORDER` (epic `mockup` P19);  one it doesn't list, last.
+ *   - In dev, where the server says it may (`mayReorder`), a card is dragged among its run to reorder it:
+ *     the group's new order is saved into that list at once (`saveHomeOrder()`).
  ****************/
 export function ProjectCards(props: ProjectCardsProps) {
   const root = trackProjectRoot(() => props.projectRoot)
   // the page of a group's sites lists every site;  the home page's rows skip a project that says `"onHome": false`
   const listed = () =>
-    root().projects.filter((project) => (props.sitesOnly ? project.isSite : project.onHome !== false))
+    SPACES.inHomeOrder(
+      props.projectRoot.path,
+      root().projects.filter((project) => (props.sitesOnly ? project.isSite : project.onHome !== false)),
+      homeOrder()
+    )
+  onSettled(() => askMayReorder())
+  // a card's drag among its run:  in dev, where the server lets this page reorder, never on a page of sites
+  const dragFor = (project: CardProject, section: CardSection): TileCardDrag | undefined => {
+    if (!mayReorder() || props.sitesOnly) return undefined
+    // a drag from this run, onto another card of it
+    const takes = () =>
+      !!dragged() && dragged() !== project.path && section.projects.some((each) => each.path === dragged())
+    return {
+      dragging: dragged() === project.path,
+      dropHere: dropOn() === project.path,
+      onStart: (event) => {
+        event.dataTransfer?.setData("text/plain", project.path)
+        if (event.dataTransfer) event.dataTransfer.effectAllowed = "move"
+        setDragged(project.path)
+      },
+      onOver: (event) => {
+        if (!takes()) return
+        event.preventDefault()
+        setDropOn(project.path)
+      },
+      onLeave: () => {
+        if (dropOn() === project.path) setDropOn(undefined)
+      },
+      onDrop: (event) => {
+        event.preventDefault()
+        if (takes()) saveHomeOrder(props.projectRoot.path, movedOnto(listed(), dragged()!, project.path))
+        setDropOn(undefined)
+      },
+      onEnd: () => {
+        setDragged(undefined)
+        setDropOn(undefined)
+      }
+    }
+  }
   // a row with pictures of its apps shows each big, across its card's top;  one without one, its letter as big
   const banner = () => listed().some((project) => project.hasThumbnail)
   return (
@@ -253,6 +297,7 @@ export function ProjectCards(props: ProjectCardsProps) {
                         useRunner={props.useRunner}
                         sitesOnly={props.sitesOnly}
                         banner={banner()}
+                        drag={dragFor(project, section)}
                       />
                     )}
                   </For>
@@ -268,10 +313,11 @@ export function ProjectCards(props: ProjectCardsProps) {
 
 /** One project's card:  its tile, its title, the first phrase of its description;  a click opens it. */
 function ProjectCard(props: {
-  project: ProjectRootState["projects"][number]
+  project: CardProject
   useRunner?: boolean
   sitesOnly?: boolean
   banner?: boolean
+  drag?: TileCardDrag
 }) {
   const project = () => props.project
   return (
@@ -280,6 +326,7 @@ function ProjectCard(props: {
       line={firstPhrase(project().description)}
       hueFrom={project().path}
       banner={props.banner}
+      drag={props.drag}
       picture={
         project().hasThumbnail ? SP.SpellUrls.fileUrl(`${project().path}/${SPACES.PROJECT_THUMBNAIL}`) : undefined
       }
@@ -291,6 +338,58 @@ function ProjectCard(props: {
       }}
     />
   )
+}
+
+/** One project, as a group's card shows it. */
+type CardProject = ProjectRootState["projects"][number]
+
+////////////////
+// ## The home page's order:  dragged in dev
+////////////////
+
+/** Each group's order on the home page:  as saved (`SPACES.HOME_ORDER`), then as dragged since. */
+const [homeOrder, setHomeOrder] = createSignal<Readonly<Record<string, readonly string[]>>>(SPACES.HOME_ORDER)
+
+/** May this page drag cards to reorder them?  Only once the server has said so (`askMayReorder()`). */
+const [mayReorder, setMayReorder] = createSignal(false)
+
+/** The card being dragged, by its project's address;  the card it would drop on. */
+const [dragged, setDragged] = createSignal<string>()
+const [dropOn, setDropOn] = createSignal<string>()
+
+/** Asked once already? */
+let askedMayReorder = false
+
+/**
+ * Ask the server, once, whether this page may reorder the cards:  only in dev.
+ * - NEVER throws:  where it may not (the house-network site, a build), it's refused, and the cards just don't drag.
+ */
+function askMayReorder(): void {
+  if (askedMayReorder || !import.meta.env?.DEV) return
+  askedMayReorder = true
+  $fetch<SPACES.HomeOrderAnswer>({ url: SPACES.HOME_ORDER_URL, format: KnownFormat.json })
+    .then((answer) => setMayReorder(answer.mayReorder))
+    .catch(() => setMayReorder(false))
+}
+
+/**
+ * `projects`' folder names with `from` moved onto `onto`'s place:  before it when dragged up the row, after it when
+ * dragged down, as a list's drag reads.
+ */
+function movedOnto(projects: readonly CardProject[], from: string, onto: string): string[] {
+  const paths = projects.map((project) => project.path)
+  const fromIndex = paths.indexOf(from)
+  const without = paths.filter((path) => path !== from)
+  const ontoIndex = without.indexOf(onto)
+  without.splice(fromIndex <= ontoIndex ? ontoIndex + 1 : ontoIndex, 0, from)
+  return without.map(SPACES.folderNameOf)
+}
+
+/** Show group `group` in the order `names` at once, and save it into the editor's list;  a failure is shown. */
+function saveHomeOrder(group: string, names: string[]): void {
+  setHomeOrder({ ...homeOrder(), [group]: names })
+  const change: SPACES.HomeOrderChange = { group, names }
+  void $fetch({ url: SPACES.HOME_ORDER_URL, contents: change, requestFormat: KnownFormat.json }).catch((error) => editor.showError(error))
 }
 
 /** One run of a group's cards, under its quiet line:  a category's, or a language's. */

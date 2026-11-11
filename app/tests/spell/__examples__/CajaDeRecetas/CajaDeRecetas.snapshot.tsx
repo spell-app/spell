@@ -234,7 +234,7 @@ export class CajaDeRecetas extends App {
             <es-texto color="gris">Todo lo que escribes se guarda al instante.</es-texto>
           </es-pila>
           <es-barra-herramientas class="undo" menu="menú de la caja" aria-label="Recetas" />
-          <es-formulario class="find" value={this}>
+          <es-formulario class="find" value={this} fluido={true}>
             <es-campo etiqueta="Buscar">
               <es-entrada class="search" name="búsqueda" icono="search" />
             </es-campo>
@@ -250,7 +250,7 @@ export class CajaDeRecetas extends App {
     if (this.editando) return core.drawThing(new EditorDeReceta({ receta: this.editando }))
     else {
       return (
-        <es-tarjetas columnas="3" duplicable={true} part="pantalla">
+        <es-tarjetas columnas="3" duplicable={true} apilable={true} part="pantalla">
           <es-tarjeta class="new">
             <es-contenido>
               <es-formulario prop:value={this.recetaNueva}>

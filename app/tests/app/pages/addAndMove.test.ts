@@ -533,7 +533,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
   test("a page that draws, its whole drawing in its shadow root, says nothing of dragging (T77)", async () => {
     const other = await browser.newContext({ viewport: { width: 1440, height: 800 } })
-    // FizzBuzz with its Explainer turned on, as a person would in its project file;  nothing saved
+    // FizzBuzz with its Explainer on, as its project file has it since epic `mockup` P19;  nothing saved
     await other.route(/\/api\/projects\/index\//, async (route) => {
       const response = await route.fetch()
       const index = (await response.json()) as { imports?: { path: string; active: boolean }[] }
