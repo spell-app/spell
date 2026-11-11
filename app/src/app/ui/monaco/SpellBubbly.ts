@@ -15,8 +15,8 @@ import "spell/app/app/components/spell-code/bubbly.css"
  *   project when it's a project's file, then:
  *   - marks the text:  each piece's weight, slant and ink, room round what a person typed, a quoted input's curly
  *     marks (`BubblyMarks`, Monaco decorations)
- *   - draws the shapes UNDER the text, in a layer behind the editor (`bubbly-layer`):  each block's band,
- *     gutter, body and foot (a declaration's, a control line's), a pill under each input;  placed from where Monaco draws each
+ *   - draws the shapes UNDER the text, in a layer behind the editor (`bubbly-layer`):  each declaration's band,
+ *     gutter, body and foot, a pill under each input, a control line's bracket;  placed from where Monaco draws each
  *     line and letter, and drawn again as it scrolls, folds or is edited
  *   - leaves room under each declaration's last line for its foot:  a view zone
  * - Every look is the sheet's, `bubbly.css`:  the editor's box is a `.bubbly` too, and its own rules are the sheet's
@@ -247,7 +247,9 @@ export class SpellBubbly {
       const range = view.ranges[shape.place]
       if (shape.kind !== "block" || !range) continue
       const isPartOfParent = shape.isGroup && !!parent
-      const left = isPartOfParent ? view.lefts.get(parent)! : this.wordsX(range.startLineNumber) - view.measures.padLeft
+      const left = isPartOfParent
+        ? view.lefts.get(parent)!
+        : this.wordsX(range.startLineNumber) - view.measures.padLeft
       view.lefts.set(shape, left)
       if (isPartOfParent) view.groupHues.set(shape, this.hueOf(parent, view))
       this.placeBands(shape.inside, view, shape)
@@ -311,7 +313,8 @@ export class SpellBubbly {
         const block = this.drawBlock(shape, range, view)
         if (block) elements.push(block)
       } else if (range.startLineNumber >= view.first && range.startLineNumber <= view.last) {
-        const element = this.drawInput(shape.isChoice, range, view)
+        const element =
+          shape.kind === "input" ? this.drawInput(shape.isChoice, range, view) : this.drawBracket(range, view)
         if (element) elements.push(element)
       }
     }
@@ -377,6 +380,19 @@ export class SpellBubbly {
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
     const pill = element(isChoice ? "bubbly-input bubbly-choice" : "bubbly-input")
     return place(pill, { left, top, width: right - left }, measures.scale)
+  }
+
+  /** A control line's bracket:  down from its line, halfway between it and its steps, to its last step. */
+  private drawBracket(range: monaco.Range, view: View): HTMLElement {
+    const { editor } = this
+    const model = editor.getModel()!
+    const headLine = range.startLineNumber
+    let stepLine = headLine + 1
+    while (stepLine < range.endLineNumber && !model.getLineContent(stepLine).trim()) stepLine++
+    const left = (this.wordsX(headLine) + this.wordsX(stepLine)) / 2
+    const top = editor.getTopForLineNumber(headLine) + view.lineHeight
+    const bottom = editor.getTopForLineNumber(range.endLineNumber) + view.lineHeight
+    return place(element("bubbly-bracket"), { left, top, height: bottom - top }, view.measures.scale)
   }
 
   ////////////////

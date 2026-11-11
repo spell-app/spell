@@ -74,7 +74,7 @@ export class BubblyPresentation {
     drag_and_drop: { head: "plain" },
 
     ////////////////
-    // ## Control lines:  with steps under them, a light grey block holding them
+    // ## Control lines:  their steps in a bracket (how they're finally drawn is P52's)
     ////////////////
 
     if: { isControl: true },

@@ -48,10 +48,6 @@
       "light": "#d4930d",
       "dark": "#d4930d"
     },
-    "--bubbly-control": {
-      "light": "#b9bcc3",
-      "dark": "#b9bcc3"
-    },
     "--bubbly-font-size": {
       "light": "16px",
       "dark": "16px"
@@ -164,6 +160,10 @@
       "light": "15deg",
       "dark": "15deg"
     },
+    "--bubbly-bracket-width": {
+      "light": "2px",
+      "dark": "2px"
+    },
     "--bubbly-dot-color": {
       "light": "#3a3a444d",
       "dark": "#dedde64d"
@@ -272,20 +272,6 @@
       "--bubbly-input": {
         "light": "#ffffffcc",
         "dark": "#383841cc"
-      }
-    },
-    "control": {
-      "--bubbly-hue": {
-        "light": "#b9bcc3",
-        "dark": "#b9bcc3"
-      },
-      "--bubbly-pill": {
-        "light": "#f1f2f3",
-        "dark": "#515259"
-      },
-      "--bubbly-input": {
-        "light": "#ffffffcc",
-        "dark": "#3f3e47cc"
       }
     }
   }

@@ -16,13 +16,13 @@ import type {
 /****************
  * ### `BubblyLayout`
  * Some Spell laid out in the BUBBLY LOOK, as data:  which lines are declarations (a head on a band, a body under it),
- * which are control lines (a light grey block holding their steps), and what each stretch of a line is to a reader
+ * which are control lines (a bracket holding their steps), and what each stretch of a line is to a reader
  * (what a person typed, a reference, a value ...).
  * - `BubblyLayout.of(text, parser)`:  a `BubblyDrawing`, offsets into `text`.
  * - From the parser's own reading of the code, alone, or as part of its project (`within`):
  *   - its coloured spans (`SP.SpellHighlighter.spans()`):  references, values, marks, comments
  *   - its parse as a block:  each line's rule, which `SP.BubblyPresentation` says how to present
- *     (a band or not, which parts are inputs, a block for a control line)
+ *     (a band or not, which parts are inputs, a bracket for a control line)
  *   - its indent:  what's under what, so a line that doesn't parse still sits where it should
  * - Another language's Spell lays out with its own parser (`SP.Language.for("es").parser`):  the table is by rule
  *   name, the same in every language;  only its pronouns (`its`, `su`) are its own words.
@@ -86,37 +86,15 @@ export class BubblyLayout {
   // ## The parse
   ////////////////
 
-  /**
-   * Each line's statement, and the overlays every line takes;  a parse that throws leaves both empty.
-   * - With `scope` (a project file's, `within`), read twice, alone and as part of its project, line by line the
-   *   project's reading unless it couldn't parse the line:  its own declarations read only alone, as the project
-   *   holds them already (`a "deck"` would be a second deck), and what names another file's things only within it.
-   */
+  /** Each line's statement, and the overlays every line takes;  a parse that throws leaves both empty. */
   private readParse(parser: SP.SpellParser, scope?: P.Scope) {
-    const alone = this.reading(() => parser.parse(this.text, "block"))
-    const within = scope && this.reading(() => scope.parser!.parse(this.text, "block", scope))
-    const lines = new Set([...alone.statements.keys(), ...(within?.statements.keys() ?? [])])
-    for (const index of lines) {
-      const projects = within?.statements.get(index)
-      const reading = projects && projects.rule.name !== PARSE_ERROR_RULE ? within! : alone
-      const statement = reading.statements.get(index)
-      if (statement) this.statements.set(index, statement)
-      for (const overlay of reading.overlays) if (this.lineIndexOf(overlay.start) === index) this.overlays.push(overlay)
-    }
-    this.overlays.sort((a, b) => a.order - b.order)
-  }
-
-  /** What one parse says:  each line's statement, and the overlays its rules ask for. */
-  private reading(parse: () => P.Match | undefined): { statements: Map<number, P.Match>; overlays: Overlay[] } {
-    const statements = new Map<number, P.Match>()
-    const overlays: Overlay[] = []
     let match: P.Match | undefined
     try {
-      match = parse()
+      match = scope ? scope.parser!.parse(this.text, "block", scope) : parser.parse(this.text, "block")
     } catch {
       // the spans stand alone
     }
-    if (!match) return { statements, overlays }
+    if (!match) return
     const seen = new Set<P.Match>()
     const walk = (each: P.Match) => {
       if (seen.has(each)) return
@@ -126,38 +104,36 @@ export class BubblyLayout {
         const statement = childrenOf(each).find((child) => child.rule.name !== COMMENT_RULE)
         if (statement?.start !== undefined) {
           const index = this.lineIndexOf(statement.start)
-          if (!statements.has(index)) statements.set(index, statement)
+          if (!this.statements.has(index)) this.statements.set(index, statement)
         }
       }
-      overlays.push(...this.overlaysOf(each))
+      this.overlaysOf(each)
       for (const child of childrenOf(each)) walk(child)
     }
     walk(match)
-    return { statements, overlays }
+    this.overlays.sort((a, b) => a.order - b.order)
   }
 
   /** The overlays `match`'s row asks for, if it has one. */
-  private overlaysOf(match: P.Match): Overlay[] {
+  private overlaysOf(match: P.Match) {
     const row = BubblyPresentation.for(match.rule)
-    if (!row || match.start === undefined || match.end === undefined) return []
-    const overlays: Overlay[] = []
+    if (!row || match.start === undefined || match.end === undefined) return
     const { start, end } = match
     if (row.takesArticle) {
       const reference = this.spans.find(
         (span) => span.start >= start && span.end <= end && REFERENCE_KINDS.has(span.kind)
       )
       if (reference && this.isSpellsOwnWords(start, reference.start))
-        overlays.push({ start, end: reference.end, kind: "reference", order: 0 })
+        this.overlays.push({ start, end: reference.end, kind: "reference", order: 0 })
     }
-    if (row.isValue) overlays.push({ start, end, kind: "value", order: 1 })
+    if (row.isValue) this.overlays.push({ start, end, kind: "value", order: 1 })
     if (row.isQuantity) {
       const number = this.spans.find((span) => span.start >= start && span.end <= end && span.kind === NUMBER)
-      if (number) overlays.push({ start: number.start, end, kind: "quantity", order: 2 })
+      if (number) this.overlays.push({ start: number.start, end, kind: "quantity", order: 2 })
     }
-    if (row.isPhrase) overlays.push({ start, end, kind: "phrase", order: 3 })
+    if (row.isPhrase) this.overlays.push({ start, end, kind: "phrase", order: 3 })
     for (const plain of descendantsNamed(match, row.plain))
-      overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 4 })
-    return overlays
+      this.overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 4 })
   }
 
   /** Is `text` from `start` to `end` only Spell's own words (keywords) and spaces? */
@@ -207,7 +183,7 @@ export class BubblyLayout {
   }
 
   ////////////////
-  // ## The tree into blocks and lines
+  // ## The tree into blocks, brackets and lines
   ////////////////
 
   /**
@@ -239,7 +215,12 @@ export class BubblyLayout {
         continue
       }
       if (statement && row?.isControl && line.children.length) {
-        nodes.push(this.control(line, statement, level, inSteps))
+        nodes.push({
+          kind: "bracket",
+          rule: statement.rule.name ?? "",
+          head: this.lineOf(line, { depth }),
+          body: this.layout(line.children, { depth: 0, level, inSteps })
+        })
         continue
       }
       nodes.push(this.lineOf(line, { depth }))
@@ -270,23 +251,6 @@ export class BubblyLayout {
       }
     } finally {
       this.scopes.pop()
-    }
-  }
-
-  /**
-   * A control line with steps under it (`if`, `for each`):  a block in the light grey of control lines,
-   * its line plain on its band, its steps its body.
-   * - No scope of its own:  a name it introduces (a loop's `card`) is the enclosing declaration's.
-   */
-  private control(line: SourceLine, statement: P.Match, level: number, inSteps: boolean): BubblyBlock {
-    return {
-      kind: "block",
-      rule: statement.rule.name ?? "",
-      partOfSpeech: "control",
-      isGroup: false,
-      level,
-      head: this.lineOf(line, { depth: 0 }),
-      body: this.layout(line.children, { depth: 0, level: level + 1, inSteps })
     }
   }
 
@@ -570,9 +534,6 @@ type SourceLine = {
 
 /** The rule every line of a block matches:  its first child past a trailing comment is the line's statement. */
 const LINE_RULE = "line"
-
-/** The rule of a line that didn't parse. */
-const PARSE_ERROR_RULE = "parse_error"
 
 /** The rule of a comment at a line's end. */
 const COMMENT_RULE = "comment"
