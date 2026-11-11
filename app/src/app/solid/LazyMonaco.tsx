@@ -61,7 +61,11 @@ function loadMonaco(): Promise<typeof import("spell/app/app/solid/monaco")> {
       void editor.showFileAt(path, selection)
       return true
     })
-    Object.assign(globalThis, { SpellMonaco: module.SpellMonaco, monaco: module.monaco })
+    Object.assign(globalThis, {
+      SpellMonaco: module.SpellMonaco,
+      SpellBubbly: module.SpellBubbly,
+      monaco: module.monaco
+    })
     return module
   })
   return loading

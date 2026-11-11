@@ -19,6 +19,14 @@ export class BubblyHtml {
   static write(drawing: SP.BubblyDrawing, { sections }: BubblyHtmlOptions = {}): string {
     return `<div class="bubbly">${new BubblyWriter(drawing.text, sections).nodes(drawing.nodes)}</div>`
   }
+
+  /**
+   * A piece's classes in the sheet, e.g. `bubbly-reference bubbly-use` for a `reference`;  `""` for plain `words`.
+   * - Monaco draws its pieces in the same classes (`BubblyMonaco`, epic `language` P50).
+   */
+  static classesFor(kind: SP.BubblyPieceKind): string {
+    return PIECE_CLASSES[kind]
+  }
 }
 
 /** How `BubblyHtml.write()` draws. */
@@ -106,7 +114,7 @@ class BubblyWriter {
           ? `<span class="bubbly-quoted"><span class="bubbly-input">${QUOTE_OPEN}${escape(words.slice(1, -1))}${QUOTE_CLOSE}</span></span>`
           : `<span class="bubbly-input">${escape(words)}</span>`
       default:
-        return `<span class="${PIECE_CLASSES[piece.kind]}">${escape(words)}</span>`
+        return `<span class="${BubblyHtml.classesFor(piece.kind)}">${escape(words)}</span>`
     }
   }
 
@@ -142,11 +150,11 @@ const MAX_INDENT = 4
 const QUOTE_OPEN = `<span class="bubbly-quote-mark bubbly-quote-open">"</span>`
 const QUOTE_CLOSE = `<span class="bubbly-quote-mark bubbly-quote-close">"</span>`
 
-/** Each piece's classes, but those drawn their own way (`words`, `heading`, `input`). */
+/** Each piece's classes:  `words` has none;  `heading` and `input` are drawn their own way, around these. */
 const PIECE_CLASSES: Record<SP.BubblyPieceKind, string> = {
   words: "",
-  heading: "",
-  input: "",
+  heading: "bubbly-heading",
+  input: "bubbly-input",
   mark: "bubbly-mark",
   comment: "bubbly-comment",
   "heading-mark": "bubbly-mark",

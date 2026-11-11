@@ -6,6 +6,7 @@ import { CodeThemes } from "spell/app/app/ui/monaco/themes/CodeThemes"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
 import { SpellHeadings } from "./SpellHeadings"
+import { SpellBubbly } from "./SpellBubbly"
 import { SpellTokensProvider } from "./SpellTokensProvider"
 import { SpellModels } from "./SpellModels"
 import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
@@ -23,6 +24,7 @@ import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
  * - The code's colours are the page's theme's, light or dark as the page is:  `CodeThemes`, which `register()`
  *   starts (epic `debut` P22).
  * - Heading comments -- `#`, `##` ... -- are bold by decoration:  see `SpellHeadings`.
+ * - Spell is drawn in the bubbly look as it's typed, unless the page's setting says not:  see `SpellBubbly`.
  */
 export class SpellMonaco {
   /** Language id for code spell, `Card.spell`. */
@@ -142,6 +144,7 @@ export class SpellMonaco {
     const { LANGUAGE, PAGE_LANGUAGE, LANGUAGES } = SpellMonaco
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
+    SpellBubbly.watch(LANGUAGES)
     monaco.languages.register({
       id: LANGUAGE,
       extensions: [SP.SPELL_SUFFIX],
