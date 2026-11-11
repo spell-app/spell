@@ -120,6 +120,10 @@
       "light": "4px",
       "dark": "4px"
     },
+    "--bubbly-rail-corner": {
+      "light": "calc(4px + 8px)",
+      "dark": "calc(4px + 8px)"
+    },
     "--bubbly-gap": {
       "light": "2px",
       "dark": "2px"
