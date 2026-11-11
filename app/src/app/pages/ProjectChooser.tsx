@@ -27,9 +27,10 @@ import "./ProjectChooser.css"
  * ### `<ProjectChooser>`
  * The landing page:  a hero line over cards for the examples, the library's apps, the guides and your own projects.
  * - Laid out as the facelift boards' home (epic `debut` P4):  a hero with the first example a click away,
- *   then a grid of cards per group, each card a project's title and the first phrase of its description.
- * - No empty columns:  a group with nothing in it says so in one quiet card;  "create" buttons sit in their
- *   group's header.
+ *   then a grid of cards per group:  each card a picture of its app (else its letter), its title,
+ *   and the first phrase of its description (`<ProjectCards>`).
+ * - No empty columns:  a group with nothing in it says so in one quiet card;
+ *   "create" buttons sit in their group's header.
  * - In dev, also the editor's own pieces (`@spell/editor`, epic `editor` P22).
  * - Not the test fixtures (`@spell/test`, epic `mockup` P18):  they're test data, opened from the project menu.
  * - A guide opens in the editor, as an example does:  its prose is the comments in its spell file (epic `debut` Q18).

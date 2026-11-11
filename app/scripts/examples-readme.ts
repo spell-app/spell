@@ -5,9 +5,9 @@
  *   - What each shows:  its project file's `description`, else the first comment of its first spell file.
  *   - Its name:  its project file's `title`, else its folder's name, `lists-from-zero` => `Lists From Zero`.
  * - Takes two pictures of each project with an app (every one but a library that says `"onHome": false`):
- *   - open in the editor, its spell beside it running, into `docs/images/examples/`:  the table's
- *   - its app running by itself, in the runner, into its own folder as `__thumbnail.png`:  its card's on the editor's
- *     home page (`SPACES.PROJECT_THUMBNAIL`, epic `mockup` P18)
+ *   - open in the editor, its spell beside it running, into `docs/images/examples/`:  the README table's
+ *   - its app running by itself, in the runner, into its own folder as `__thumbnail.png`:
+ *     its card's, on the editor's home page (`SPACES.PROJECT_THUMBNAIL`, epic `mockup` P18)
  *   - Headless Playwright, at the address the kit's editor answers on (`.spell-server.editor.json`, at the page
  *     server's root, the kit's):
  *     start it first, with `yarn start` or `spell app serve`.

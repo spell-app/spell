@@ -495,13 +495,11 @@ spell test @spell/examples/Solitaire 2>/dev/null
 
 ```text
 ✓ test card setup  (19 checks)
-✓ test jokers  (15 checks)
-✓ test a new deck  (6 checks)
-✓ test two jokers  (5 checks)
+✓ test a new deck  (5 checks)
 ✓ test piles  (8 checks)
 ✓ test the moves  (11 checks)
 
-6 passed
+4 passed
 ```
 
 </details>
@@ -1104,7 +1102,7 @@ owen@spell       Projects       ...
 @spell/examples  Examples       ... projects
 @spell/guides    Guides         ... projects
 @spell/sites     Sites          1 project
-@spell/library   Libraries      1 project
+@spell/library   Libraries      ... projects
 @spell/editor    The editor     ... projects
 @spell/test      Test fixtures  ... projects
 ```
