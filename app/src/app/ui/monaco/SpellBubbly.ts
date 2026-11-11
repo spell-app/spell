@@ -273,12 +273,21 @@ export class SpellBubbly {
       const range = inner.kind === "block" ? view.ranges[inner.place] : undefined
       if (inner.kind !== "block" || !range || !inner.hasBody) continue
       if (range.endLineNumber !== lastLine || range.endLineNumber <= range.startLineNumber) continue
-      const railsApart = view.lefts.get(inner)! - (view.lefts.get(shape)! + measures.gutter)
+      const railsApart = this.railX(inner, view) - (this.railX(shape, view) + measures.gutter)
       drop = this.footDrop(inner, view) + measures.footHeight + Math.max(0, railsApart)
       break
     }
     view.footDrops.set(shape, drop)
     return drop
+  }
+
+  /**
+   * Where `shape`'s rail starts:  a little right of its band's round left end (`--bubbly-monaco-rail-inset`),
+   * closer to its body's words;  a group's right at it, as its members' bands are spaced from it.
+   */
+  private railX(shape: BubblyBlockShape, view: View): number {
+    const left = view.lefts.get(shape)!
+    return shape.isGroup ? left : left + view.measures.railInset
   }
 
   /** The elements of `shapes`, those inside each in its own. */
@@ -331,7 +340,7 @@ export class SpellBubbly {
       const lastBottom = lastTop + lineHeight
       const footTop = lastBottom + measures.footRoom - measures.footHeight + this.footDrop(shape, view)
       const height = footTop - bodyTop
-      const gutter = left
+      const gutter = this.railX(shape, view)
       block.append(
         place(element("bubbly-gutter"), { left: gutter, top: bodyTop, height }, measures.scale),
         place(
@@ -466,6 +475,7 @@ export class SpellBubbly {
       padRight: length("--bubbly-pill-pad-right") * scale,
       endInset: length("--bubbly-end-inset") * scale,
       gutter: length("--bubbly-gutter") * scale,
+      railInset: length("--bubbly-monaco-rail-inset") * scale,
       pillHeight: length("--bubbly-monaco-band-height") * scale,
       footHeight: length("--bubbly-foot-height") * scale,
       footRoom: length("--bubbly-monaco-foot-room") * scale
@@ -526,6 +536,8 @@ type Measures = {
   endInset: number
   /** the gutter's width */
   gutter: number
+  /** how far right of its band's left end a body's rail starts, but a group's */
+  railInset: number
   /** a band's height */
   pillHeight: number
   /** a foot's height, and the room each foot takes under its body */
