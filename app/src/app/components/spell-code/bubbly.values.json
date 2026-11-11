@@ -191,6 +191,10 @@
     "--bubbly-monaco-input-trim": {
       "light": "-2px",
       "dark": "-2px"
+    },
+    "--bubbly-monaco-shapes-drop": {
+      "light": "1px",
+      "dark": "1px"
     }
   },
   "parts": {
