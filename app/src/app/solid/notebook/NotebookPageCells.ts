@@ -158,7 +158,23 @@ export class NotebookPageCells {
    * added or taken off as the Inspector sets any attribute (`SourceEdits.settingAttribute()`).
    */
   static lockEdits(text: string, model: NotebookPageModel, locked: boolean) {
-    return SourceEdits.settingAttribute(text, model.notebook.headSpan.start, model.lockWord ?? LOCKED, locked)
+    const word = model.lockWord ?? LOCKED
+    // a plain head (epic `language` P45):  its flag is a word of its line, `"x" is a locked notebook page`
+    if (model.notebook.plain) {
+      const said = model.notebook.attributes.find((attribute) => attribute.name === LOCKED)
+      // with the space after it in English, before it in Spanish
+      const gone = model.language === "en" ? { start: said?.span.start ?? 0, end: (said?.span.end ?? 0) + 1 } : said && { start: said.span.start - 1, end: said.span.end }
+      if (said && !locked) return [SourceEdits.replacing(text, gone!, "")]
+      if (said || !locked) return []
+      // first of its flags in English, `a locked notebook page`;  after the page's word in Spanish, `una página bloqueada`
+      const first = model.notebook.attributes[0]
+      const at =
+        model.language === "en"
+          ? (first?.span.start ?? text.lastIndexOf(" page", model.notebook.headSpan.end) + 1)
+          : model.notebook.headSpan.end
+      return [SourceEdits.replacing(text, { start: at, end: at }, model.language === "en" ? `${word} ` : ` ${word}`)]
+    }
+    return SourceEdits.settingAttribute(text, model.notebook.headSpan.start, word, locked)
   }
 
   ////////////////

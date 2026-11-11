@@ -408,10 +408,28 @@ export function withClassNames(markup: string, names: ReadonlyMap<string, string
 }
 
 /**
- * The markup of the property editor for type `name` in a property editors file's `source`, by any of `words`:
- * `<property-editor "card">` ... `</property-editor>` (or `</>`;  the old `<spell-property-editor "card">` too);  `undefined` if it has none.
+ * A property editor's PLAIN HEAD after its quoted name, in every language (epic `language` P45):
+ * `"card" is a property editor`, `"carta" es un editor de propiedades`;  its markup is indented under it.
+ */
+const PLAIN_EDITOR_HEADS = ["is a property editor", "es un editor de propiedades"]
+
+/**
+ * The markup of the property editor for type `name` in a property editors file's `source`:
+ * - its plain head, `"card" is a property editor`, its markup the lines indented under it (epic `language` P45)
+ * - by any of `words`, its tag:  `<property-editor "card">` ... `</property-editor>` (or `</>`;
+ *   the old `<spell-property-editor "card">` too)
+ * - `undefined` if it has none.
  */
 function namedEditorIn(source: string, name: string, words: readonly string[]): string | undefined {
+  for (const head of PLAIN_EDITOR_HEADS) {
+    const said = head.split(" ").map(escapeForRegExp).join("[ \\t]+")
+    const opening = new RegExp(`^"${escapeForRegExp(name)}"[ \\t]+${said}[ \\t]*$`, "imu").exec(source)
+    if (!opening) continue
+    const lines = source.slice(opening.index + opening[0].length + 1).split("\n")
+    // its markup ends at the next line at the file's left edge
+    const end = lines.findIndex((line) => line.trim() && !/^[ \t]/.test(line))
+    return dedent(lines.slice(0, end < 0 ? undefined : end)).trim()
+  }
   for (const word of words) {
     const opening = new RegExp(`<${escapeForRegExp(word)}\\s+"${escapeForRegExp(name)}"\\s*>`, "i").exec(source)
     if (!opening) continue

@@ -52,6 +52,8 @@ describe("every page of the Spell UI site means the same in code spell", () => {
         for (const inner of [...match.matched, ...(data.children ?? [])]) if (inner instanceof P.Match) visit(inner)
       }
       visit(parsed[index]!.match!)
+      // a file in plain Spell already, the site's own (epic `language` P45):  as it is
+      if (SP.formOfText(contents, path) !== "spellx") return { path, contents }
       const code = SX.CodeSpellWriter.write(contents, {
         path,
         componentTag: (word, start) => tags.get(start) ?? SP.ComponentPacks.tagFor(word, "en")
@@ -96,21 +98,23 @@ function codeOf(compiled: string): string {
 const PAGES = FILES.filter(({ path }) => path !== SITE_FILE).map(({ path, contents }) => ({
   path,
   contents,
-  name: /^<page "([^"]+)" notebook>/.exec(contents)?.[1]
+  // its plain head (epic `language` P45):  `"button usage" is a notebook page`
+  name: /^"([^"]+)" is a notebook page\n/.exec(contents)?.[1]
 }))
 
-/** Each line of the site file naming a page:  its name and address. */
+/** Each line of the site file naming a page:  its name and address, `- it has a button usage page at "/button"`. */
 const SITE_TEXT = readFileSync(resolve(FOLDER, SITE_FILE.slice(1)), "utf8")
-const SITE_PAGES = [...SITE_TEXT.matchAll(/<page "([^"]+) page"\s+address="([^"]+)"/g)].map(([, name, address]) => ({
+const SITE_PAGES = [...SITE_TEXT.matchAll(/^\t+(?:- )?it has an? (.+?) page at "([^"]+)"/gm)].map(([, name, address]) => ({
   name: name!,
   address: address!
 }))
 
 describe("the Spell UI site", () => {
-  test("every file is one page alone:  nothing before its tag, or after its end tag", () => {
+  test("every file is one page alone:  nothing before its head, or after its body", () => {
     for (const { path, contents, name } of PAGES) {
       expect({ path, name: !!name }).toEqual({ path, name: true })
-      expect({ path, ends: contents.trimEnd().endsWith("</page>") }).toEqual({ path, ends: true })
+      const outside = contents.split("\n").slice(1).filter((line) => line && !/^[ \t]/.test(line))
+      expect({ path, outside }).toEqual({ path, outside: [] })
     }
   })
 

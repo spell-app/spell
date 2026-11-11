@@ -244,12 +244,3 @@
 .NotebookExampleCode .monaco-editor .margin {
   background-color: transparent;
 }
-
-/* beside the code, never over it:  its own column */
-.NotebookExampleBar {
-  grid-column: 2;
-  grid-row: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}

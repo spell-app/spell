@@ -1,10 +1,9 @@
 import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
-import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import type { SP } from "spell/parser/spell"
 // Import directly:  the test barrel holds node-only helpers
-import { compiledSpellProject, parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
+import { compiledSpellProject } from "spell/parser/spell/test/parseSpellProject"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import type { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
@@ -61,9 +60,9 @@ const testEditor = vi.hoisted(() => ({
   compileApp: async () => runProgram(testEditor.file!.contents)
 }))
 
-/** A counter notebook:  a title, a view of its own, two sections each holding an example. */
+/** A counter notebook, in plain Spell (epic `language` P45):  a title, a view of its own, two sections each holding an example. */
 const COUNTER = [
-  '<spell-notebook "counter notebook">',
+  '"counter notebook" is a notebook page',
   "\t# A counter",
   "\tA button that counts its clicks.",
   "",
@@ -84,7 +83,6 @@ const COUNTER = [
   "\t\t<counter/>",
   "\t\t<counter/>",
   "\t</example>",
-  "</spell-notebook>",
   ""
 ].join("\n")
 
@@ -160,7 +158,7 @@ describe("<NotebookPage>", () => {
     const { file, controller } = await mounted()
     const steps = testEditor.steps
     controller.setLocked(true)
-    expect(file.contents.split("\n")[0]).toBe('<spell-notebook "counter notebook" locked>')
+    expect(file.contents.split("\n")[0]).toBe('"counter notebook" is a locked notebook page')
     expect(testEditor.steps).toBe(steps + 1)
     await until(() => file.saves === 1)
     expect(controller.isLocked()).toBe(true)
@@ -181,24 +179,13 @@ describe("<NotebookPage>", () => {
     }
   })
 
-  test("the Spell view:  each bare name its tag, as the file's parse chose it;  an edit there saved as spellx (P6)", async () => {
+  // one view of an example's code since epic `language` P45:  the page is plain Spell, as written
+  test("an example's code as written;  an edit saved as typed", async () => {
     const { mount, file, controller } = await mounted()
-    const [parsed] = parseSpellProject([{ path: file.path, contents: file.contents }]).files
-    Object.assign(file, { match: parsed!.match, scope: parsed!.scope })
     await until(() => editorsIn(mount).length === 2)
     const place = placeOf(mount.querySelector("spell-example")!)
-    expect(controller.exampleCode(controller.exampleAt(place)!, "spell")).toBe(
-      "<test-project-counter-notebook-counter/>"
-    )
-    controller.setCodeView("spell")
-    // a signal's write is staged until the flush, as the switch's click is long before the typing
-    flush()
-    try {
-      controller.editExample(place, "<test-project-counter-notebook-counter/>\n<ui-button>Go</ui-button>")
-    } finally {
-      controller.setCodeView("spellx")
-      flush()
-    }
+    expect(controller.exampleCode(controller.exampleAt(place)!)).toBe("<counter/>")
+    controller.editExample(place, "<counter/>\n<button>Go</button>")
     expect(file.contents).toContain('\t<example "one counter">\n\t\t<counter/>\n\t\t<button>Go</button>\n\t</example>')
   })
 

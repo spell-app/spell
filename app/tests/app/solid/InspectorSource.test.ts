@@ -150,6 +150,25 @@ describe("eventsDeclared()", () => {
     expect(propertyEditorInSource(["carta"], [], WORDS, [carta])).toBe('<ui-property name="palo" />')
   })
 
+  test('a plain head, `"card" is a property editor`:  its markup the lines under it (epic `language` P45)', () => {
+    const editors = [
+      '"pile" is a property editor',
+      '\t<ui-property name="cards" />',
+      "",
+      '"card" is a property editor',
+      '\t<ui-property-group label="Card">',
+      '\t\t<ui-property name="rank" />',
+      "\t</ui-property-group>",
+      ""
+    ].join("\n")
+    expect(propertyEditorInSource(["pile"], [], WORDS, [editors])).toBe('<ui-property name="cards" />')
+    expect(propertyEditorInSource(["card"], [], WORDS, [editors])).toBe(
+      '<ui-property-group label="Card">\n\t<ui-property name="rank" />\n</ui-property-group>'
+    )
+    const carta = '"carta" es un editor de propiedades\n\t<ui-property name="palo" />\n'
+    expect(propertyEditorInSource(["carta"], [], WORDS, [carta])).toBe('<ui-property name="palo" />')
+  })
+
   test("inline in the type's spellml still:  the prefixed tag (epic `data` P31), the old short one, Spanish's;  none:  empty", () => {
     const inline = (word: string, name: string) =>
       `<spell-view "${name}">\n\t<${word}>\n\t\t<ui-property name="palo" />\n\t</>\n</spell-view>`

@@ -87,7 +87,6 @@ export const APP_TEXTS = {
   codePinnedLines: "Pinned lines above the code",
   codeCompilerWords: "Compiler details in hover",
   // a notebook's page, `<NotebookPage>` (epic `elemental-spell` P16)
-  notebookPageCodeAs: "Show code as",
   notebookPageLock: "Lock it:  nothing is saved while it's locked",
   notebookPageUnlock: "Unlock it:  changes are saved",
   notebookPageLocked: "Locked:  changes aren't saved",
