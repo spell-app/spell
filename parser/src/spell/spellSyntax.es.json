@@ -4910,7 +4910,7 @@
                   "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static css = css`\n    .red { color: crimson }\n  `\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n  @E.protoMerged static elementSetup = {\n    styleSheets: { \"syntax-block-card\": Card.css }\n  } satisfies Partial<E.ElementSetup>\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    css = \"\\n  .red { color: crimson }\\n\""
+                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    css = \"\"\".red { color: crimson }\n    \"\"\""
                 }
               }
             }

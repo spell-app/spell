@@ -1,4 +1,4 @@
-import { elementTagFor } from "spell/util"
+import { dedent, elementTagFor } from "spell/util"
 
 import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
@@ -1063,6 +1063,21 @@ export class PyBaseWriter extends P.ProgramWriter {
    */
   ASTTemplateString(node: P.ASTTemplateString): string {
     return this.fString(node.parts.map((part) => (typeof part === "string" ? unescaped(part) : { value: part })))
+  }
+
+  /**
+   * A view type's style sheet, javascript's `` css`...` ``:  its text as the tag hands it back, its shared indent taken off,
+   * in triple quotes, `css = """:host { ... }"""`.
+   * - Its tabs indent as spaces:  its lines sit in the class's block, and Python's lint refuses tabs after spaces.
+   * - Any other tag, or a sheet with a value in it:  as text with values in it, `ASTTemplateString()`.
+   */
+  ASTTaggedTemplate(node: P.ASTTaggedTemplate): string {
+    if (node.tag !== "css" || node.parts.some((part) => typeof part !== "string")) return this.ASTTemplateString(node)
+    const sheet = dedent(node.parts.join(""))
+      .replace(/^\t+/gm, (tabs) => "  ".repeat(tabs.length))
+      .replace(/\\/g, "\\\\")
+      .replace(/"""/g, '\\"\\"\\"')
+    return `"""${sheet}\n"""`
   }
 
   /** Spell source quoted in a test's line, e.g. `` `the rank of the card` ``:  plain text, or an f-string. */

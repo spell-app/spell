@@ -7,7 +7,7 @@
 from typing import Any, Literal
 
 from spell_core.apps import View
-from spell_core.drawing import Element, h
+from spell_core.drawing import h
 from spell_core.things import prop
 
 Direction = Literal["down", "up"]
@@ -41,12 +41,44 @@ class TwoSidedView(View):
         else:
             self.turn_face_down()
 
-    def draw(self) -> Element:
-        """its front when it's face up, its back when it's face down"""
-        if self.is_face_direction("down"):
-            return h("slot", {"name": "back"}, self.draw_back())
-        else:
-            return h("slot", {"name": "front"}, self.draw_front())
+    def draw(self) -> list:
+        """both its sides, back to back:  its styles show the one it's turned to, and turn it over"""
+        return [
+            h("slot", {"name": "front"}, self.draw_front()),
+            h("slot", {"name": "back"}, self.draw_back()),
+        ]
+
+    # Turning over:  the view is what turns, in 3D, and its back is drawn already turned half round
+    # - face up it's square on;  face down it's turned half round (180°), so its back faces you
+    # - each side hides while it faces away, so you see the front, then the back come round
+    # - both sides share one place, so the view is as big as its bigger side;  each is a box of its own, so it can turn
+    # - a view that's drawn already turned shows that side at once:  only a change turns it
+    # - how deep the turn looks, and how long it takes:  `--spell-turn-perspective` and `--spell-turn-time`,
+    #   e.g. Solitaire's one-letter cards turn at 3em
+    css = """:host {
+      display: inline-grid;
+      transform-style: preserve-3d;
+      transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(0deg);
+      transition: transform var(--spell-turn-time, 0.3s) ease-in-out;
+    }
+    :host(:not([direction="up"])) {
+      transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
+    }
+    [part~="front"],
+    [part~="back"] {
+      display: block;
+      grid-area: 1 / 1;
+      backface-visibility: hidden;
+    }
+    [part~="back"] {
+      transform: rotateY(180deg);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      :host {
+        transition: none;
+      }
+    }
+    """
 
     def draw_front(self) -> Any:
         """Its front:  nothing, until a view made from it draws it, `to draw its front:`."""

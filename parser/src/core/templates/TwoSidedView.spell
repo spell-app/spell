@@ -1,4 +1,4 @@
-## A two sided view:  a view with a front and a back, showing one at a time
+## A two sided view:  a view with a front and a back, which turns over in 3D
 // Built into spell (epic `elemental-spell` Q71):  compiled once, into the core's `TwoSidedView`.
 // A view made from it says what each side looks like, with `to draw its front:` and `to draw its back:`.
 a "two sided view" is a view where:
@@ -15,9 +15,39 @@ a "two sided view" is a view where:
 			turn it face up
 		otherwise
 			turn it face down
-	// its front when it's face up, its back when it's face down
+	// both its sides, back to back:  its styles show the one it's turned to, and turn it over
 	- to draw it:
-		if it is face down
-			draw its back
-		otherwise
-			draw its front
+		draw its front
+		draw its back
+	// Turning over:  the view is what turns, in 3D, and its back is drawn already turned half round
+	// - face up it's square on;  face down it's turned half round (180°), so its back faces you
+	// - each side hides while it faces away, so you see the front, then the back come round
+	// - both sides share one place, so the view is as big as its bigger side;  each is a box of its own, so it can turn
+	// - a view that's drawn already turned shows that side at once:  only a change turns it
+	// - how deep the turn looks, and how long it takes:  `--spell-turn-perspective` and `--spell-turn-time`,
+	//   e.g. Solitaire's one-letter cards turn at 3em
+	<css>
+		:host {
+			display: inline-grid;
+			transform-style: preserve-3d;
+			transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(0deg);
+			transition: transform var(--spell-turn-time, 0.3s) ease-in-out;
+		}
+		:host(:not([direction="up"])) {
+			transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
+		}
+		[part~="front"],
+		[part~="back"] {
+			display: block;
+			grid-area: 1 / 1;
+			backface-visibility: hidden;
+		}
+		[part~="back"] {
+			transform: rotateY(180deg);
+		}
+		@media (prefers-reduced-motion: reduce) {
+			:host {
+				transition: none;
+			}
+		}
+	</css>

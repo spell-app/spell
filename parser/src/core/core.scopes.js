@@ -293,7 +293,7 @@
       description: "Whether what's changed on the page is saved:  `unlocked` (the default) or `locked`.\n- On a locked page every edit is a try-out:  the editor saves it for nobody, its own author included.\n- Say it on its tag, `<spell-page \"guide\" locked>`, or in its body, `- it is locked` or `- its lock is locked`."
     },
     {
-      path: "type:TwoSidedView", line: [4, 23],
+      path: "type:TwoSidedView", line: [4, 53],
       super: "type:View",
       uri: "templates/TwoSidedView.spell"
     },

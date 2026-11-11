@@ -4,6 +4,7 @@ import h from "@solidjs/h"
 
 import { prop } from "spell/util"
 import type { Drawing } from "spell/parser/core/drawing"
+import { css } from "spell/parser/core/elements"
 
 // Import directly to avoid circular import
 import { View } from "./View"
@@ -41,11 +42,46 @@ export class TwoSidedView extends View {
     else this.turnFaceDown()
   }
 
-  /** its front when it's face up, its back when it's face down */
+  /** both its sides, back to back:  its styles show the one it's turned to, and turn it over */
   draw() {
-    if (this.isFaceDirection("down")) return h("slot", { name: "back" }, () => this.drawBack()) as unknown as Drawing
-    else return h("slot", { name: "front" }, () => this.drawFront()) as unknown as Drawing
+    return [
+      h("slot", { name: "front" }, () => this.drawFront()) as unknown as Drawing,
+      h("slot", { name: "back" }, () => this.drawBack()) as unknown as Drawing
+    ]
   }
+
+  // Turning over:  the view is what turns, in 3D, and its back is drawn already turned half round
+  // - face up it's square on;  face down it's turned half round (180°), so its back faces you
+  // - each side hides while it faces away, so you see the front, then the back come round
+  // - both sides share one place, so the view is as big as its bigger side;  each is a box of its own, so it can turn
+  // - a view that's drawn already turned shows that side at once:  only a change turns it
+  // - how deep the turn looks, and how long it takes:  `--spell-turn-perspective` and `--spell-turn-time`,
+  //   e.g. Solitaire's one-letter cards turn at 3em
+  static css = css`
+    :host {
+      display: inline-grid;
+      transform-style: preserve-3d;
+      transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(0deg);
+      transition: transform var(--spell-turn-time, 0.3s) ease-in-out;
+    }
+    :host(:not([direction="up"])) {
+      transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
+    }
+    [part~="front"],
+    [part~="back"] {
+      display: block;
+      grid-area: 1 / 1;
+      backface-visibility: hidden;
+    }
+    [part~="back"] {
+      transform: rotateY(180deg);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      :host {
+        transition: none;
+      }
+    }
+  `
 
   /** Its front:  nothing, until a view made from it draws it, `to draw its front:`. */
   drawFront(): Drawing {

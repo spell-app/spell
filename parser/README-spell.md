@@ -560,7 +560,8 @@ export class Tableau extends Pile {
 - `a card is a two sided view` gives the card a front and a back:
   - its direction, `down` or `up` (a new one starts face down), `it is face up`, `it is face down`
   - `turn it face up`, `turn it face down`, `turn it over`
-  - a drawing that shows its front face up and its back face down
+  - a drawing of both its sides, back to back:  its front face up, its back face down, turning over in 3D as its
+    direction changes (its own `<css>`;  `--spell-turn-perspective` sets how deep, `--spell-turn-time` how long)
   - So the card says only `- to draw its front:` and `- to draw its back:`.
     In Spanish:  `una carta es una vista reversible`, `para dibujar su frente`, `voltear la carta`.
   - A two sided view is written in Spell itself, and compiled once into the runtime's `TwoSidedView`:

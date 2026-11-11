@@ -1,4 +1,4 @@
-## Una vista reversible:  una vista con un frente y un dorso, que muestra uno a la vez
+## Una vista reversible:  una vista con un frente y un dorso, que se voltea en 3D
 // Integrada en spell (épica `elemental-spell` Q71):  compilada una vez, en el `TwoSidedView` del núcleo.
 // Una vista hecha de ella dice cómo se ve cada lado, con `para dibujar su frente:` y `para dibujar su dorso:`.
 una "vista reversible" es una vista donde:
@@ -15,9 +15,39 @@ una "vista reversible" es una vista donde:
 			voltear eso boca arriba
 		de lo contrario
 			voltear eso boca abajo
-	// su frente cuando está boca arriba, su dorso cuando está boca abajo
+	// sus dos lados, espalda con espalda:  sus estilos muestran el que mira hacia arriba, y la voltean
 	- para dibujarla:
-		si está boca abajo
-			dibujar su dorso
-		de lo contrario
-			dibujar su frente
+		dibujar su frente
+		dibujar su dorso
+	// Al voltearse:  la vista es la que gira, en 3D, y su dorso se dibuja ya girado media vuelta
+	// - boca arriba se ve de frente;  boca abajo está girada media vuelta (180°), así que su dorso mira hacia ti
+	// - cada lado se oculta mientras mira hacia atrás, así que ves el frente, y luego el dorso que da la vuelta
+	// - los dos lados comparten un lugar, así que la vista es tan grande como su lado mayor;  cada uno es una caja propia, para poder girar
+	// - una vista que se dibuja ya girada muestra ese lado al instante:  solo un cambio la voltea
+	// - qué tan profundo se ve el giro, y cuánto tarda:  `--spell-turn-perspective` y `--spell-turn-time`,
+	//   p. ej. las cartas de una letra del Solitario giran a 3em
+	<css>
+		:host {
+			display: inline-grid;
+			transform-style: preserve-3d;
+			transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(0deg);
+			transition: transform var(--spell-turn-time, 0.3s) ease-in-out;
+		}
+		:host(:not([direction="up"])) {
+			transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
+		}
+		[part~="front"],
+		[part~="back"] {
+			display: block;
+			grid-area: 1 / 1;
+			backface-visibility: hidden;
+		}
+		[part~="back"] {
+			transform: rotateY(180deg);
+		}
+		@media (prefers-reduced-motion: reduce) {
+			:host {
+				transition: none;
+			}
+		}
+	</css>

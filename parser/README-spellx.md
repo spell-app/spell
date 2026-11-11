@@ -178,7 +178,7 @@ The other form is a read-only view, written when you ask for it:
 The showcases are written this way:  [Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spell)
 and [Task List](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/TaskList/TaskList.spell),
 in the editor's examples.
-- Their card is a two sided view, drawing only its `<draw "front">` and `<draw "back">`;
+- Their card is a two sided view, drawing only its `<draw "front">` and `<draw "back">`, which the template turns over in 3D;
   their filter, a toolbar of actions with `selected-when=`;  their game's moves, keys and a right-click menu.
 - Each file's code-spell twin is kept beside the tests, and a test checks the two compile the same.
 

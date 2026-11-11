@@ -1294,7 +1294,8 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
     - NOT its values as constants:  a root's constants are every program's, so a Spanish file sets a direction by
       the template's words (`voltearla boca arriba`), not `poner su dirección a arriba`.
   - A two sided view's:  its slots front and back, `its "direction" is down or up` (a new one starts face down, J36),
-    `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` picking a slot.
+    `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` drawing both slots,
+    back to back, its own `<css>` turning it over in 3D (a view type's style sheet, `static css`).
 
 ## Spellx:  a third style of spell (epic `elemental-spell` P6, Q69)
 

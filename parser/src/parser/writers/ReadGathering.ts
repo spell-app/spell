@@ -38,6 +38,9 @@ const SOMEONE_ELSE_HANDLER = "on_someone_else_change"
 /** What a list that draws its own way calls for each item. */
 const DRAW_EACH_ITEM = "draw_each_item"
 
+/** A slot's own drawing, by its name:  `drawFront` for a two sided view's front. */
+const SLOT_DRAWING = /^draw[A-Z]/
+
 /** How deep to look through getters for what a value is. */
 const MAX_LOOK = 8
 
@@ -302,7 +305,11 @@ export class ReadGathering {
     }
   }
 
-  /** The draws of `typeName` and the types below it. */
+  /**
+   * The draws of `typeName` and the types below it.
+   * - Its draw inherited from outside the project, a built-in template's (a two sided view draws both its sides):
+   *   every slot it and the types above it draw, `drawFront()`, `drawBack()`, as that draw can't be read here.
+   */
   private drawsOf(typeName: string): GatheredBody[] {
     const draws = this.bodies.get("draw") ?? []
     const own = draws.filter((body) => this.project.isSubclassOf(body.typeName, typeName))
@@ -312,7 +319,13 @@ export class ReadGathering {
       const inherited = draws.filter((body) => body.typeName === type)
       if (inherited.length) return inherited
     }
-    return []
+    const slots: GatheredBody[] = []
+    for (let type: string | undefined = typeName; type; type = this.project.superTypes.get(type)) {
+      for (const [name, bodies] of this.bodies) {
+        if (SLOT_DRAWING.test(name)) slots.push(...bodies.filter((body) => body.typeName === type))
+      }
+    }
+    return slots
   }
 
   /** What `body` reads, once. */

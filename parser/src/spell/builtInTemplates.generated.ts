@@ -12,19 +12,19 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
         {
           type: "TwoSidedView",
           superType: "View",
-          defined: "/TwoSidedView.spell:280-803"
+          defined: "/TwoSidedView.spell:281-2054"
         },
         {
           of: "TwoSidedView",
           slots: ["front", "back"],
-          defined: "/TwoSidedView.spell:319-350"
+          defined: "/TwoSidedView.spell:320-351"
         },
         {
           property: "direction",
           classVariable: "Directions",
           of: "TwoSidedView",
           enumeration: ["down", "up"],
-          defined: "/TwoSidedView.spell:406-435"
+          defined: "/TwoSidedView.spell:407-436"
         },
         {
           syntax: "{operator:is_or_is_not} face (expression:down|downs|up|ups)",
@@ -36,7 +36,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           values: {
             direction: ["down", "up"]
           },
-          defined: "/TwoSidedView.spell:439-463"
+          defined: "/TwoSidedView.spell:440-464"
         },
         {
           syntax: "turn {thisArg:expression} face up",
@@ -47,7 +47,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "turn it face up",
           returns: "nothing",
-          defined: "/TwoSidedView.spell:467-512"
+          defined: "/TwoSidedView.spell:468-513"
         },
         {
           syntax: "turn {thisArg:expression} face down",
@@ -58,7 +58,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "turn it face down",
           returns: "nothing",
-          defined: "/TwoSidedView.spell:516-565"
+          defined: "/TwoSidedView.spell:517-566"
         },
         {
           syntax: "turn {thisArg:expression} over",
@@ -69,7 +69,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "turn it over",
           returns: "nothing",
-          defined: "/TwoSidedView.spell:569-658"
+          defined: "/TwoSidedView.spell:570-659"
         },
         {
           syntax: "draw {thisArg:expression}",
@@ -79,7 +79,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "draw it",
-          defined: "/TwoSidedView.spell:724-803"
+          defined: "/TwoSidedView.spell:755-799"
         }
       ],
       codeLines: [9, 12, 15, 21, 25, 29, 33, 39]
@@ -93,12 +93,12 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           type: "TwoSidedView",
           superType: "View",
           gender: "feminine",
-          defined: "/TwoSidedView.es.spell:305-903"
+          defined: "/TwoSidedView.es.spell:300-2211"
         },
         {
           of: "TwoSidedView",
           slots: ["frente", "dorso"],
-          defined: "/TwoSidedView.es.spell:351-387",
+          defined: "/TwoSidedView.es.spell:346-382",
           slotOutputs: {
             frente: "front",
             dorso: "back"
@@ -109,7 +109,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           classVariable: "Direcciones",
           of: "TwoSidedView",
           enumeration: ["abajo", "arriba"],
-          defined: "/TwoSidedView.es.spell:443-475",
+          defined: "/TwoSidedView.es.spell:438-470",
           output: "direction",
           enumerationOutputs: {
             abajo: "down",
@@ -126,7 +126,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           values: {
             direction: ["abajo", "arriba"]
           },
-          defined: "/TwoSidedView.es.spell:479-502",
+          defined: "/TwoSidedView.es.spell:474-497",
           valueOutputs: {
             direction: {
               abajo: "down",
@@ -143,7 +143,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "voltearla boca arriba",
           returns: "nothing",
-          defined: "/TwoSidedView.es.spell:506-563"
+          defined: "/TwoSidedView.es.spell:501-558"
         },
         {
           syntax: "voltear {thisArg:expression}? boca abajo",
@@ -154,7 +154,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "voltearla boca abajo",
           returns: "nothing",
-          defined: "/TwoSidedView.es.spell:567-622"
+          defined: "/TwoSidedView.es.spell:562-617"
         },
         {
           syntax: "voltear {thisArg:expression}?",
@@ -165,7 +165,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           kind: "method",
           name: "voltearla",
           returns: "nothing",
-          defined: "/TwoSidedView.es.spell:626-733"
+          defined: "/TwoSidedView.es.spell:621-728"
         }
       ],
       codeLines: [9, 12, 15, 21, 25, 29, 33]
