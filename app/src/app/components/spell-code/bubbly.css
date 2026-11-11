@@ -570,6 +570,9 @@
   --bubbly-monaco-input-trim: -2px;
   /* how far every shape sits below where the code puts it:  the words sit that much higher in their bands and pills */
   --bubbly-monaco-shapes-drop: 1px;
+  /* a band's height in the editor:  a little less than the page's, still centred on its line,
+     so a band, a pill or a block on the next line has a blank pixel more before it (Owen) */
+  --bubbly-monaco-band-height: calc(var(--bubbly-pill-height) - 1px);
 
   /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
   position: relative;
@@ -641,7 +644,10 @@
     position: absolute;
     inset: 0 auto auto 0;
     transform-origin: 0 0;
-    transform: translate(var(--bubbly-monaco-x, 0), calc(var(--bubbly-monaco-y, 0px) + var(--bubbly-monaco-shapes-drop)))
+    transform: translate(
+        var(--bubbly-monaco-x, 0),
+        calc(var(--bubbly-monaco-y, 0px) + var(--bubbly-monaco-shapes-drop))
+      )
       scale(var(--bubbly-monaco-scale));
   }
   /* a declaration:  its hue, and its shapes, placed by the code */
@@ -665,6 +671,9 @@
     translate: 0 -50%;
   }
   /* a pill's top comes down to its words:  as much white over them as under them (Owen) */
+  .bubbly-layer .bubbly-block > :is(.bubbly-head, .bubbly-pill) {
+    height: var(--bubbly-monaco-band-height);
+  }
   .bubbly-layer .bubbly-input {
     height: calc(var(--bubbly-input-height) - var(--bubbly-monaco-input-trim));
     translate: 0 calc(-50% + var(--bubbly-monaco-input-trim) / 2);

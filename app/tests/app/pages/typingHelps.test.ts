@@ -66,10 +66,34 @@ describe.skipIf(!SERVING)("typing Spell in the code editor", { timeout: 180_000 
       const { lineNumber, column } = (window as unknown as CodeGlobals).editor.shownCodeEditor.getPosition()
       return { line: lineNumber, column }
     })
-  /** Where the caret is drawn, across, once it's drawn. */
-  const caretX = async () => {
-    await page.waitForTimeout(150)
-    return page.evaluate(() => document.querySelector(".InputEditor .cursors-layer .cursor")!.getBoundingClientRect().x)
+  /**
+   * Where the caret is drawn, across, every time it moves while `action` runs, and where it ends:
+   * so a test sees a caret drawn in one place and then jumping to another.
+   */
+  const caretDrawn = async (action: () => Promise<void>) => {
+    // every frame, where the caret is drawn, when that's not where it was
+    await page.evaluate(() => {
+      const record = window as unknown as { caretXs: number[]; caretX?: number; isRecording?: boolean }
+      const caretX = () => document.querySelector(".InputEditor .cursors-layer .cursor")?.getBoundingClientRect().x
+      record.caretXs = []
+      record.caretX = caretX()
+      if (record.isRecording) return
+      record.isRecording = true
+      const tick = () => {
+        const x = caretX()
+        if (x !== undefined && x !== record.caretX) record.caretXs.push((record.caretX = x))
+        requestAnimationFrame(tick)
+      }
+      tick()
+    })
+    await action()
+    await page.waitForTimeout(400)
+    const moves = await page.evaluate(() => (window as unknown as { caretXs: number[] }).caretXs)
+    await page.waitForSelector(".InputEditor .cursors-layer .cursor")
+    const final = await page.evaluate(
+      () => document.querySelector(".InputEditor .cursors-layer .cursor")!.getBoundingClientRect().x
+    )
+    return { moves, final }
   }
 
   beforeAll(async () => {
@@ -99,21 +123,42 @@ describe.skipIf(!SERVING)("typing Spell in the code editor", { timeout: 180_000 
       const words = its.getBoundingClientRect()
       return { line, wordsX: words.x, y: words.y + words.height / 2 }
     })
+    /** Do `action`:  the caret drawn once, `at` its letter (or `between` two places), never somewhere first. */
+    const drawsOnce = async (action: () => Promise<void>, column: number, between = [at.wordsX, at.wordsX]) => {
+      const { moves, final } = await caretDrawn(action)
+      expect(moves.length).toBeLessThanOrEqual(1)
+      expect(await caret()).toEqual({ line: at.line, column })
+      expect(final).toBeGreaterThan(between[0]! - 2)
+      expect(final).toBeLessThan(between[1]! + 2)
+    }
+    /** Somewhere else on the line, so a click there moves the caret. */
+    const away = () => page.mouse.click(at.wordsX + 200, at.y)
     // on its first letter, and just left of it, in the room:  the caret by the letter
     for (const x of [at.wordsX + 1, at.wordsX - 4]) {
-      await page.mouse.click(x, at.y)
-      expect(await caret()).toEqual({ line: at.line, column: 2 })
-      expect(Math.abs((await caretX()) - at.wordsX)).toBeLessThan(2)
+      await away()
+      await drawsOnce(() => page.mouse.click(x, at.y), 2)
     }
     await page.keyboard.press("End")
-    await page.keyboard.press("Home")
-    expect(await caret()).toEqual({ line: at.line, column: 2 })
-    expect(Math.abs((await caretX()) - at.wordsX)).toBeLessThan(2)
+    await drawsOnce(() => page.keyboard.press("Home"), 2)
+    await drawsOnce(() => page.keyboard.press("ArrowRight"), 3, [at.wordsX + 2, at.wordsX + 12])
+    await drawsOnce(() => page.keyboard.press("ArrowLeft"), 2)
+    await page.keyboard.press("ArrowUp")
+    await drawsOnce(() => page.keyboard.press("ArrowDown"), 2)
     await page.keyboard.press("Shift+End")
+    await page.waitForSelector(".InputEditor .selected-text")
     const selected = await page.evaluate(
       () => document.querySelector(".InputEditor .selected-text")!.getBoundingClientRect().x
     )
     expect(Math.abs(selected - at.wordsX)).toBeLessThan(2)
+    await drawsOnce(() => page.keyboard.press("Home"), 2)
+    // a letter typed before the first:  drawn at once right after it, by the room;
+    // `xits` is no member, so once it's laid out again the room goes, and the line with it
+    const typed = await caretDrawn(() => page.keyboard.type("x"))
+    expect(typed.moves[0]).toBeGreaterThan(at.wordsX + 2)
+    expect(typed.moves[0]).toBeLessThan(at.wordsX + 12)
+    const undone = await caretDrawn(undo)
+    expect(Math.abs(undone.final - at.wordsX)).toBeLessThan(2)
+    expect(await caret()).toEqual({ line: at.line, column: 2 })
   })
 
   test("a letter on the blank line inside the card's body takes its indent;  `group ` opens quotes", async () => {

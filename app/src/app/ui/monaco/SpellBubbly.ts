@@ -78,14 +78,6 @@ export class SpellBubbly {
       this.follow()
       redrawSoon()
     })
-    editor.onDidChangeCursorPosition((event) => {
-      if (CARET_MOVED_BY.includes(event.source)) this.besideTheLetter(event.position)
-    })
-    // a click where the caret is already moves it nowhere, but may draw it off its letter
-    editor.onMouseUp(() => {
-      const position = editor.getPosition()
-      if (position) this.besideTheLetter(position)
-    })
     editor.onDidLayoutChange(redrawSoon)
     editor.onDidContentSizeChange(redrawSoon)
     editor.onDidChangeHiddenAreas(redrawSoon)
@@ -361,36 +353,6 @@ export class SpellBubbly {
   }
 
   ////////////////
-  // ## The caret beside its letter
-  ////////////////
-
-  /**
-   * A click or a key left the caret where room is injected before a letter:  draw it after the room, by the letter.
-   * - Monaco puts the caret where the room lets it, stepping with the arrow keys;
-   *   but a click left of the room, or Home on a line whose words are pushed, draws it BEFORE the room,
-   *   a room's width off its letter, though it's the same place in the text.
-   * - So it steps the caret right and back, as the arrow keys would:  the same place, drawn by the letter.
-   */
-  private besideTheLetter({ lineNumber, column }: monaco.IPosition) {
-    if (!this.isDrawing || this.isNudging) return
-    const { editor } = this
-    const selections = editor.getSelections() ?? []
-    if (selections.length !== 1 || !selections[0]!.isEmpty()) return
-    if (column >= editor.getModel()!.getLineMaxColumn(lineNumber)) return
-    const isRoomBefore = (editor.getLineDecorations(lineNumber) ?? []).some(
-      (mark) => mark.options.before?.cursorStops === CURSOR_STOPS_RIGHT && mark.range.startColumn === column
-    )
-    if (!isRoomBefore) return
-    this.isNudging = true
-    try {
-      editor.trigger(NUDGE, "cursorRight", null)
-      editor.trigger(NUDGE, "cursorLeft", null)
-    } finally {
-      this.isNudging = false
-    }
-  }
-
-  ////////////////
   // ## Room under each declaration
   ////////////////
 
@@ -481,7 +443,7 @@ export class SpellBubbly {
       padRight: length("--bubbly-pill-pad-right") * scale,
       endInset: length("--bubbly-end-inset") * scale,
       gutter: length("--bubbly-gutter") * scale,
-      pillHeight: length("--bubbly-pill-height") * scale,
+      pillHeight: length("--bubbly-monaco-band-height") * scale,
       footHeight: length("--bubbly-foot-height") * scale,
       footRoom: length("--bubbly-monaco-foot-room") * scale
     }
@@ -518,9 +480,6 @@ export class SpellBubbly {
 
   /** A redraw is waiting for the next frame. */
   private isRedrawQueued = false
-
-  /** It's stepping the caret beside its letter:  `besideTheLetter()`. */
-  private isNudging = false
 }
 
 ////////////////
@@ -571,15 +530,6 @@ const RELAYOUT_MSEC = 300
 
 /** The least paper between a group's rail and its members' bands, in the drawing's pixels. */
 const GROUP_RAIL_GAP = 2
-
-/** What moves the caret where it's drawn off its letter:  a click or a key. */
-const CARET_MOVED_BY = ["mouse", "keyboard"]
-
-/** Monaco's `InjectedTextCursorStops.Right`:  room the caret stops after, never before. */
-const CURSOR_STOPS_RIGHT = 1
-
-/** The source of its own caret steps. */
-const NUDGE = "spell-bubbly"
 
 /** The classes that make an editor's box a drawing. */
 const BOX_CLASSES = ["bubbly", "bubbly-monaco"]
