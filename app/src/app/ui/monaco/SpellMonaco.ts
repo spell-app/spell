@@ -54,7 +54,7 @@ export class SpellMonaco {
     insertSpaces: false,
     detectIndentation: false,
     fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
-    fontSize: 16,
+    fontSize: 15,
     lineNumbers: "off",
     minimap: { enabled: false },
     // no band across the current line, in any theme (Owen:  "Lose the line highlight in monaco in all themes")

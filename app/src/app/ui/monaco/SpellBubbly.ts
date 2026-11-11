@@ -174,7 +174,7 @@ export class SpellBubbly {
       // the project hasn't parsed this text yet:  read alone for now, and again once it has
       if (within && !SP.BubblyLayout.isParseOf(within, text) && this.parseWaits++ < PARSE_WAITS) this.relayoutSoon()
       else this.parseWaits = 0
-      this.laidOut = BubblyMarks.of(drawing)
+      this.laidOut = BubblyMarks.of(drawing, model.getOptions().tabSize)
       this.marks!.set(this.laidOut.marks)
     } catch (error) {
       console.error("SpellBubbly.relayout():  couldn't lay the code out", error)

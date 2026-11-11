@@ -29,8 +29,8 @@
       "dark": "650"
     },
     "--bubbly-semibold": {
-      "light": "600",
-      "dark": "600"
+      "light": "650",
+      "dark": "650"
     },
     "--bubbly-plain": {
       "light": "#8a8f99",
@@ -97,16 +97,20 @@
       "dark": "8px"
     },
     "--bubbly-pill-pad-left": {
-      "light": "6.6px",
-      "dark": "6.6px"
+      "light": "0px",
+      "dark": "0px"
     },
     "--bubbly-pill-pad-right": {
-      "light": "10px",
-      "dark": "10px"
+      "light": "16px",
+      "dark": "16px"
+    },
+    "--bubbly-pill-left-shift": {
+      "light": "8.5px",
+      "dark": "8.5px"
     },
     "--bubbly-gutter": {
-      "light": "4px",
-      "dark": "4px"
+      "light": "3px",
+      "dark": "3px"
     },
     "--bubbly-inner-top": {
       "light": "12px",
@@ -121,20 +125,20 @@
       "dark": "8px"
     },
     "--bubbly-foot-width": {
-      "light": "13px",
-      "dark": "13px"
+      "light": "calc(3px * 5)",
+      "dark": "calc(3px * 5)"
     },
     "--bubbly-foot-height": {
-      "light": "4px",
-      "dark": "4px"
+      "light": "3px",
+      "dark": "3px"
     },
     "--bubbly-body-pad-bottom": {
       "light": "1px",
       "dark": "1px"
     },
     "--bubbly-rail-corner": {
-      "light": "calc(4px + 8px)",
-      "dark": "calc(4px + 8px)"
+      "light": "calc(3px + 8px)",
+      "dark": "calc(3px + 8px)"
     },
     "--bubbly-gap": {
       "light": "2px",
@@ -189,8 +193,8 @@
       "dark": "1px"
     },
     "--bubbly-dot-color": {
-      "light": "#3a3a441a",
-      "dark": "#dedde61a"
+      "light": "#3a3a4466",
+      "dark": "#dedde666"
     },
     "--bubbly-depth": {
       "light": "1",
