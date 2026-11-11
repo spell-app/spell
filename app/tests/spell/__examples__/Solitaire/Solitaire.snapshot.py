@@ -1014,8 +1014,10 @@ solitaire-app {
     flex: 1 0 100%;
     justify-content: center;
   }
+  /* small enough that "Restart The Game" fits beside the others */
   .GameBar > *::part(item) {
-    padding-inline: 0.65em;
+    padding-inline: 0.6em;
+    font-size: 0.85em;
   }
   .GameBar > :not([slot]):nth-of-type(4)::part(item) {
     margin-left: 0.5em;
