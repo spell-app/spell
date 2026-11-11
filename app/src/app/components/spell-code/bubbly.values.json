@@ -105,8 +105,12 @@
       "dark": "4px"
     },
     "--bubbly-inner-top": {
-      "light": "5px",
-      "dark": "5px"
+      "light": "12px",
+      "dark": "12px"
+    },
+    "--bubbly-gutter-reach": {
+      "light": "max(12px, 8px)",
+      "dark": "max(12px, 8px)"
     },
     "--bubbly-block-inner-corner": {
       "light": "8px",

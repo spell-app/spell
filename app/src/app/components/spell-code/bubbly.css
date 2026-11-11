@@ -82,7 +82,9 @@
   /****** a body:  the gutter down its left, its white, the foot under it ******/
   --bubbly-gutter: 4px;
   /* the body's white corners where they meet the gutter:  the top one curves out of the band, the bottom into the foot */
-  --bubbly-inner-top: 5px;
+  --bubbly-inner-top: var(--bubbly-pill-radius);
+  /* how far a rail reaches under its body, to fill behind the body's round corners */
+  --bubbly-gutter-reach: max(var(--bubbly-inner-top), var(--bubbly-block-inner-corner));
   --bubbly-block-inner-corner: 8px;
   --bubbly-foot-width: 13px;
   --bubbly-foot-height: 4px;
@@ -229,7 +231,7 @@
     grid-row: 2;
     grid-column: 1;
     /* reaches under the body's rounded left corners, so they curve into the band */
-    width: calc(100% + var(--bubbly-block-inner-corner));
+    width: calc(100% + var(--bubbly-gutter-reach));
     background: var(--bubbly-pill);
   }
   .bubbly-block > .bubbly-body {
@@ -679,7 +681,7 @@
     translate: 0 calc(-50% + var(--bubbly-monaco-input-trim) / 2);
   }
   .bubbly-layer .bubbly-block > .bubbly-gutter {
-    width: calc(var(--bubbly-gutter) + var(--bubbly-block-inner-corner));
+    width: calc(var(--bubbly-gutter) + var(--bubbly-gutter-reach));
     /* on beside its foot:  the code stops it at the foot's top */
     box-sizing: content-box;
     padding-bottom: var(--bubbly-foot-height);
