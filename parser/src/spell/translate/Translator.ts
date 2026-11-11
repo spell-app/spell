@@ -569,24 +569,40 @@ class FileWriting {
   }
 
   /**
-   * What runs as a thing is made, `- when created (with title as text):`, in the other language's words for it:
-   * `- al crearla (con título como texto):` (epic `spanish` P28).
-   * - Its words are the other language's `create_hook_words`, the one agreeing with the type:
-   *   `crearla` for a `tarea`, `crearlo` for a `mazo`;  never the dictionary's, as they're no name a person chose.
+   * What runs as a thing is made, `- when creating a task (with title as text):`, in the other language's words:
+   * `- al crear una tarea (con título como texto):` (epic `spanish` P28;  naming its type, epic `language`).
+   * - Its verb is the other language's `create_hook_words` form that takes `it` after (`creating it`, `crear la`):
+   *   see `hookVerb()`;  never the dictionary's, as it's no name a person chose.
+   *   Then its type, through the dictionary, its article agreeing.
+   * - A one of a kind's says `it` instead (`CreateHook.isOneOfAKind()`):  `when creating it`,
+   *   or `al crearlo`, fused where the language fuses its `it`, agreeing with the type.
+   * - Whatever form the source wrote (`when created`, `al crearla`):  every one writes these.
    * - Its `(with ...)` written as any named arguments are, its names through the dictionary.
    */
   writeCreateHook(match: P.Match, context: WriteContext): Piece[] {
     const { to, names } = this.translator
     const twin = this.translator.twinsOf(match.rule)[0]
     const words = to.parser.rules.create_hook_words
+    const article = to.parser.rules.indefinite_article
     const lead = twin instanceof P.Sequence && twin.rules[0] ? literalAlternatives(twin.rules[0])[0] : undefined
-    if (!lead || !words) throw this.cant(match)
-    const forms = literalAlternatives(words).filter((form) => !/\s/.test(form))
+    const forms = words ? literalAlternatives(words) : []
+    const verb = hookVerb(forms)
     const typeName = typeOf(match.scope)
-    const gender = typeName ? names.type(typeName)?.gender : undefined
-    const ending = gender === "feminine" ? /a$/ : gender === "masculine" ? /o$/ : undefined
-    const hookWords = (ending && forms.find((form) => ending.test(form))) ?? forms[0] ?? literalAlternatives(words)[0]!
-    const pieces: Piece[] = [{ text: lead }, { text: hookWords }]
+    const type = typeName ? names.type(typeName) : undefined
+    if (!lead || !verb || !article || !type) throw this.cant(match)
+    const pieces: Piece[] = [{ text: lead }]
+    if (CreateHook.isOneOfAKind(match.scope)) {
+      const ending = type.gender === "feminine" ? /a$/ : type.gender === "masculine" ? /o$/ : undefined
+      const fused = to.words.fusedIt && ending ? forms.find((form) => !/\s/.test(form) && ending.test(form)) : undefined
+      pieces.push({ text: fused ?? forms.find((form) => /\s/.test(form)) ?? verb })
+    } else {
+      const articles = literalAlternatives(article)
+      pieces.push(
+        { text: verb },
+        { text: articles[0]!, agree: articles },
+        { text: type.name, noun: true, gender: type.gender }
+      )
+    }
     const props = findMatch(match, (each) => each.rule instanceof WithPropsArg)
     if (props) pieces.push({ text: "(" }, ...this.write(props, { ...context, slot: "props" }), { text: ")" })
     if (/:\s*$/.test(this.sourceText(match))) pieces.push({ text: ":" })
@@ -831,7 +847,8 @@ class TemplateWriting {
   writeDelimiter(delimiter: P.Rule, ours: string | undefined): Piece[] {
     const theirs = literalAlternatives(delimiter)
     const { to } = this.writing.translator
-    const word = ours && CONJUNCTIONS[to.lang]?.[ours.toLowerCase()]
+    // An Oxford comma (`, or`) is the conjunction alone:  their language may not write one
+    const word = ours && CONJUNCTIONS[to.lang]?.[ours.replace(/^,\s*/, "").toLowerCase()]
     if (word && theirs.includes(word)) return [{ text: word }]
     const ourAlternatives = this.ourDelimiterAlternatives()
     const at = ours ? ourAlternatives.indexOf(ours) : 0
@@ -1320,7 +1337,13 @@ function literalAlternatives(rule: P.Rule): string[] {
         .join(" ")
     ]
   if (rule instanceof P.Choice) return rule.rules.flatMap(literalAlternatives)
-  if (rule instanceof P.Sequence) return [rule.rules.map((each) => literalAlternatives(each)[0] ?? "").join(" ")]
+  if (rule instanceof P.Sequence)
+    return [
+      rule.rules
+        .filter((each) => !each.optional)
+        .map((each) => literalAlternatives(each)[0] ?? "")
+        .join(" ")
+    ]
   return []
 }
 
@@ -1658,10 +1681,22 @@ function phraseIn(declaration: P.Match): string | undefined {
   return text?.replace(/^"|"$/g, "")
 }
 
+/**
+ * The verb of a creation hook's `forms`, the one its type follows:  `creating` of `creating it`;
+ * `crear`, the stem of `crearla`.
+ */
+function hookVerb(forms: string[]): string | undefined {
+  const spaced = forms.find((form) => /\s/.test(form))
+  if (spaced) return spaced.split(/\s+/)[0]
+  const stems = forms.filter((form) => forms.some((other) => other !== form && other.startsWith(form)))
+  return stems.sort((a, b) => a.length - b.length)[0]
+}
+
 /** The type `scope` is in, in words (`stock pile`), if it's a type's body or method. */
 function typeOf(scope: P.Scope | undefined): string | undefined {
+  const words = (name: string | undefined) => name?.replace(/(?<=\p{Ll})(?=\p{Lu})/gu, " ").toLowerCase()
   for (let each = scope; each; each = each.parentScope) {
-    if (each instanceof P.TypeScope) return each.name?.replace(/(?<=\p{Ll})(?=\p{Lu})/gu, " ").toLowerCase()
+    if (each instanceof P.TypeScope) return words(each.name)
   }
-  return P.SubjectScope.of(scope)?.subjectType?.name?.toLowerCase()
+  return words(P.SubjectScope.of(scope)?.subjectType?.name)
 }

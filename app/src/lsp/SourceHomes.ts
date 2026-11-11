@@ -6,7 +6,7 @@ import { SourceEdits, type TextSpan } from "./SourceEdits"
  * - A drawn element's attribute or text:  on its tag, at the place the compiler marked on it.
  * - A thing's property, asked for one of two places:
  *   - the line that made it, `a new foundation with suit = clubs` (`ofMaking()`)
- *   - its type's default, the `set its count to 0` of its `to create it` (`ofDefault()`)
+ *   - its type's default, the `set its count to 0` of its `when creating a counter` (`ofDefault()`)
  * - It reads the parse, not the words, so it works the same in both shapes and every language.
  * - It loads no language service and no code editor, and changes nothing:  `SourceEdits` makes the edit.
  * - Literals are numbers, text, `yes` / `no` and one word of an enumeration;  anything else is code.
@@ -138,7 +138,7 @@ export class SourceHomes {
     return (property?.groups as { value?: P.Match } | undefined)?.value
   }
 
-  /** The value `type`'s `to create it` sets property `name` to, if it does. */
+  /** The value `type`'s creation hook (`when creating a counter`) sets property `name` to, if it does. */
   private static valueInCreate(root: P.Match, type: string, name: string): P.Match | undefined {
     const create = findMatch(root, (match) => isCreateOf(match, type))
     if (!create) return undefined
@@ -223,7 +223,7 @@ export type HomeFile = {
  * Where a value lives in one file's text.
  * - `written`:  there, as a literal:  an edit changes it in place
  * - `notWritten`:  an attribute not on its tag yet:  an edit adds it
- * - `default`:  its type's default, in `to create it`:  an edit changes it there, and what still holds the old one
+ * - `default`:  its type's default, in its creation hook:  an edit changes it there, and what still holds the old one
  * - `expression`:  code:  a link to it, never rewritten
  */
 export type FieldHome =
@@ -289,7 +289,7 @@ function findMatch(root: P.Match, test: (match: P.Match) => boolean): P.Match | 
   return undefined
 }
 
-/** Is `match` the `to create it` of the type named `type`? */
+/** Is `match` the creation hook (`when creating a counter`, `to create it`) of the type named `type`? */
 function isCreateOf(match: P.Match, type: string): boolean {
   const method = (match.data as { scopeMethod?: P.ScopeMethod } | undefined)?.scopeMethod
   if (method?.name !== CREATE) return false

@@ -1047,8 +1047,8 @@ a line of the built-in types table, a built-in template, or a project's own `one
       after the class, a getter per condition and `core.describeAction(...)` (`P.ASTTypeDescription`).
     - `shortcut_keys` reads a key as typed, its tokens joined up to the first space:  `meta+shift+Z`.
   - A HANDLER, `- on mouse down:`, is a method of the template's things, `on_mouse_down`, `it` the thing (`On`).
-    - `- when flipped:` is the same (`On`'s `when` registrations);  `- when created:` stays the creation hook,
-      which wins on the same words by its `priority`.
+    - `- when flipped:` is the same (`On`'s `when` registrations);  `- when creating a deck:` (and `- when created:`)
+      stays the creation hook, which wins on the same words by its `priority`.
     - Inside one, the handler's `event` argument is a variable of kind `argument`:
       that's how `pass event`, `cancel event`, `target`, `sender` and `the original target`
       know they're in a handler (`inHandler()`), and refuse to parse elsewhere.
@@ -1222,8 +1222,13 @@ a line of the built-in types table, a built-in template, or a project's own `one
   - `draw` (the `draw_method` word rule) or `create` (`create_method`):  what runs as a thing is made.
   - English's words are the hooks' names already, `- to create it:`;
     Spanish's `- para crearlo:` and `para crear un mazo:` are `create()` too.
-  - Or a type's outline says it with words of their own, [`create_hook`](rules/methods/CreateHook.ts) (epic `spanish` P28):
-    `- when created (with title as text):`, `- al crearla (con título como texto):`.
+  - Or a type's outline says it with words of their own, [`create_hook`](rules/methods/CreateHook.ts) (epic `spanish` P28),
+    naming its type (epic `language`):  `- when creating a task (with title as text):`,
+    `- al crear una tarea (con título como texto):`.
+    - Another type there is refused, naming the one to write:  `when creating a card` in a deck's outline.
+    - A one of a kind's says `it`, as there's only ever one:  `- when creating it:`, `- al crearlo:`.
+    - The older forms still read:  `- when created:`, `- al crearla:`;  the translator writes the new ones.
+    - Every built-in project says it so;  `to create it` still reads, as any method does.
     - Core hands `create()` the props the thing was made with, so its `(with ...)` reads them;
       a caller just makes one, `create a new task with title = "Shop"`.
     - Spanish's `al ...` is also an event's handler:  the hook takes only its own words, `create_hook_words`,

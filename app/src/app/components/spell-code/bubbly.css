@@ -28,6 +28,8 @@
   --bubbly-bold-ink: light-dark(#1f1f26, #f6f5fb);
   /* marks (`<`, `:`, `,`) and comments:  faint on the paper;  on a band, faint on its colour */
   --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 32%, var(--bubbly-paper));
+  /* a note at the end of a head, on its band */
+  --bubbly-band-comment: color-mix(in srgb, var(--bubbly-ink) 55%, transparent);
   /* a name's first mention, a name a head defines, a list's value */
   --bubbly-bold: 650;
   /* every later use of a name, and what's declared elsewhere:  lighter than a first mention */
@@ -78,12 +80,14 @@
   --bubbly-pill-pad-right: 10px;
 
   /****** a body:  the gutter down its left, its white, the foot under it ******/
-  --bubbly-gutter: 5px;
+  --bubbly-gutter: 4px;
   /* the body's white corners where they meet the gutter:  the top one curves out of the band, the bottom into the foot */
   --bubbly-inner-top: 5px;
   --bubbly-block-inner-corner: 8px;
-  --bubbly-foot-width: 26px;
-  --bubbly-foot-height: 6px;
+  --bubbly-foot-width: 13px;
+  --bubbly-foot-height: 4px;
+  /* the outside of the corner where a rail turns into its foot:  the body's inner corner, a rail's width out */
+  --bubbly-rail-corner: calc(var(--bubbly-gutter) + var(--bubbly-block-inner-corner));
 
   /****** inputs:  what a person typed, white on its band ******/
   /* room either side of an input, between it and the words or marks beside it */
@@ -190,10 +194,9 @@
    */
   .bubbly-quantity,
   .bubbly-phrase {
-    --bubbly-dot-gap: 3px;
-    background: linear-gradient(to right, color-mix(in srgb, var(--bubbly-ink) 30%, transparent) 1px, transparent 1px)
-      left bottom / calc(1px + var(--bubbly-dot-gap)) 1px repeat-x;
-    padding-bottom: 2px;
+    --bubbly-dot-color: color-mix(in srgb, var(--bubbly-ink) 30%, transparent);
+    background: linear-gradient(to right, var(--bubbly-dot-color) 1px, transparent 1px) left bottom / 4px 1px repeat-x;
+    padding-bottom: 1px;
   }
 
   /*
@@ -244,8 +247,21 @@
     width: var(--bubbly-foot-width);
     height: var(--bubbly-foot-height);
     background: var(--bubbly-pill);
-    border-radius: 0 calc(var(--bubbly-foot-height) / 2) calc(var(--bubbly-foot-height) / 2)
-      calc(var(--bubbly-foot-height) / 2);
+    border-radius: 0 calc(var(--bubbly-foot-height) / 2) calc(var(--bubbly-foot-height) / 2) 0;
+  }
+
+  /*
+   * the corner where a body's rail turns into its foot:  as thick round the corner as down the rail and along the foot
+   * - the rail runs on beside the foot, its bottom-left curved round the body's inner corner, a rail's width out;
+   *   the foot starts where that curve ends, so its right end stays where it was
+   */
+  .bubbly-block > .bubbly-gutter {
+    grid-row: 2 / span 2;
+    border-bottom-left-radius: var(--bubbly-rail-corner);
+  }
+  .bubbly-block > .bubbly-foot {
+    margin-left: var(--bubbly-rail-corner);
+    width: calc(var(--bubbly-foot-width) - var(--bubbly-rail-corner));
   }
 
   /****** a declaration with no body:  its band alone, every corner round ******/
@@ -303,6 +319,12 @@
   .bubbly-comment {
     color: var(--bubbly-faint);
     font-style: italic;
+  }
+
+  /* a note at the end of a head, on its band:  darker than a mark there, so it reads on the band's colour */
+  :is(.bubbly-head, .bubbly-pill) .bubbly-comment,
+  .bubbly-comment.bubbly-on-band {
+    color: var(--bubbly-band-comment);
   }
 
   /* a `#` heading */
@@ -386,6 +408,23 @@
     /* a quoted input at the end keeps room for its closing mark, and a little more:  the round end curves in under it */
     > .bubbly-quoted:last-child {
       margin-right: 19px;
+    }
+  }
+
+  /*
+   * a band that STARTS with a white input (`"deck" is a new deck`):  the input as near the round end as its mark allows,
+   * not a word's padding plus a gap
+   */
+  :is(.bubbly-head, .bubbly-pill).bubbly-starts-input {
+    padding-left: var(--bubbly-end-inset);
+
+    > .bubbly-input:first-child {
+      margin-left: 0;
+    }
+
+    /* a quoted input at the start keeps just its opening mark's room */
+    > .bubbly-quoted:first-child {
+      margin-left: var(--bubbly-quote-room);
     }
   }
 
@@ -524,7 +563,7 @@
   /* room outside a quoted input's marks, for the curly ones drawn wider than the file's own */
   --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
-  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 3px);
+  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 5px);
 
   /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
   position: relative;
@@ -620,6 +659,13 @@
   }
   .bubbly-layer .bubbly-block > .bubbly-gutter {
     width: calc(var(--bubbly-gutter) + var(--bubbly-block-inner-corner));
+    /* on beside its foot:  the code stops it at the foot's top */
+    box-sizing: content-box;
+    padding-bottom: var(--bubbly-foot-height);
+  }
+  /* the foot starts where its rail curves into it, as on the page */
+  .bubbly-layer .bubbly-block > .bubbly-foot {
+    margin-left: var(--bubbly-rail-corner);
   }
   .bubbly-layer .bubbly-bracket {
     width: 0;

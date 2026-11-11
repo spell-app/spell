@@ -2,7 +2,7 @@
 // Las 52 cartas de una baraja estándar, el as de tréboles primero.
 
 un "mazo" es una lista de cartas
-	para crearlo
+	al crear un mazo
 		// Una carta de cada, el as de tréboles primero:  cada una empieza boca abajo, como toda vista reversible
 		para rango en rangos de carta
 			para palo en palos de carta

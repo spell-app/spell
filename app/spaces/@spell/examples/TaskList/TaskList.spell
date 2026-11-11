@@ -92,7 +92,7 @@ task list is an app
 		add the starting task "Drag tasks to reorder them" with priority low
 		set the done of the first task in the checklist to yes
 
-	to create it
+	when creating it
 		// A new task list keeps its tasks in this browser, and shows every one
 		set the showing of the checklist to all
 		set the storage to browser

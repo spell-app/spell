@@ -23,7 +23,6 @@ export const words = {
       putOnPile: "put a card on a pile"
     },
     Deck: {
-      create: "create it",
       state: "state"
     },
     Pile: {
@@ -64,7 +63,6 @@ export const words = {
       T5: "T5",
       T6: "T6",
       T7: "T7",
-      create: "create it",
       resetTheStock: "reset the stock",
       playFromTheStock: "play from the stock",
       dealTheCards: "deal the cards",
@@ -85,7 +83,7 @@ export const words = {
       { name: "A pile of cards", members: ["pile"] }
     ],
     Solitaire: [
-      { name: "Piles", description: "One of each, made with the solitaire", members: ["stock", "discards", "clubs", "diamonds", "hearts", "spades", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "create"] },
+      { name: "Piles", description: "One of each, made with the solitaire", members: ["stock", "discards", "clubs", "diamonds", "hearts", "spades", "T1", "T2", "T3", "T4", "T5", "T6", "T7"] },
       { name: "Dealing", description: "Each pauses a moment, so a deal animates", members: ["resetTheStock", "playFromTheStock", "dealTheCards", "turnAStockCard"] },
       { name: "Game Play", description: "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three", members: ["draw", "restartTheGame", "autoPlay", "cheat"] }
     ]

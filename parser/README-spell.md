@@ -697,7 +697,7 @@ A thing hears an event when its handler says so, and sends one with `send`:
 | `key down` | a key pressed | the thing whose view has the focus, then up its chain;  else the app | no | `key`:  its name, `a`, `enter`, `arrowup` |
 | `a card is dragged over it`, `dragged out of it` | a drag comes onto a list's view, leaves it | the list | no | the card |
 | `a card is dropped on it` | the drop | the list | no | the card |
-| `created` | a thing is made | the new thing:  `when created:` is its creation hook, not an event | no | |
+| `created` | a thing is made | the new thing:  `when creating a card:` is its creation hook, not an event | no | |
 | one a template declares, `flipped` | `send flipped` | the thing it's sent to, then up its chain | when its name is still happening (`closing`) | what the template says (`side`) |
 | one the program triggers, `card-click` | `trigger card-click` | the app's and every page's own handler, then every `on card-click` | no | its `with` properties |
 

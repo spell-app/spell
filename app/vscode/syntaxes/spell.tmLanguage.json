@@ -267,7 +267,7 @@
         },
         {
           "name": "keyword.other.spell",
-          "match": "(?<=,|,\\s)(deshacible|etiquetada|etiquetado|miniatura|thumbnail|coloured|shortcut|titulado|undoable|colored|llamada|llamado|pestaña|tagged|titled|título|alias|atajo|hasta|icono|named|title|until|icon|live|with|aka|que|tab|es|is)(?![\\p{L}\\p{M}\\d_-])"
+          "match": "(?<=,|,\\s)(deshacible|etiquetada|etiquetado|miniatura|thumbnail|coloured|shortcut|titulado|undoable|colored|llamada|llamado|pestaña|tagged|titled|título|alias|atajo|hasta|icono|named|title|until|icon|live|with|aka|and|nor|que|tab|es|is|ni|or|e|o|u|y)(?![\\p{L}\\p{M}\\d_-])"
         },
         {
           "name": "keyword.operator.word.spell",

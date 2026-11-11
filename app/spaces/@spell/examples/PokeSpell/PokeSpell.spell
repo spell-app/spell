@@ -15,7 +15,7 @@ pokedex is an app
 	"trail" is a new list of pokemon
 	its "picked kind" is a type
 	"game" is a new guess
-	to create it
+	when creating it
 		set its tab to "everyone"
 		set its search to ""
 

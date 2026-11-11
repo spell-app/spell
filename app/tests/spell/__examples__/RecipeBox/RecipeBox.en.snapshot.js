@@ -20,7 +20,6 @@ export const words = {
       search: "search",
       newRecipe: "new recipe",
       editing: "editing",
-      create: "create it",
       matches: "matches",
       addTheNewRecipe: "add the new recipe",
       draw: "draw it"

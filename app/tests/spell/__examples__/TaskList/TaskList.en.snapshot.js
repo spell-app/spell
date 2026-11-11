@@ -60,7 +60,6 @@ export const words = {
       storage: "storage",
       keeper: "keeper",
       fillTheChecklist: "fill the checklist",
-      create: "create it",
       addTheStartingTaskTitleWithPriorityLevel: "add the starting task (title as text) with priority (level as text)",
       addTheDraft: "add the draft",
       draw: "draw it",
@@ -78,7 +77,7 @@ export const words = {
       { name: "The checklist", members: ["checklist"] }
     ],
     TaskList: [
-      { name: "Keeping", description: "Where the tasks are kept:  the person picks, and the app asks that keeper", members: ["storage", "keeper", "fillTheChecklist", "create", "addTheStartingTaskTitleWithPriorityLevel", "addTheDraft"] },
+      { name: "Keeping", description: "Where the tasks are kept:  the person picks, and the app asks that keeper", members: ["storage", "keeper", "fillTheChecklist", "addTheStartingTaskTitleWithPriorityLevel", "addTheDraft"] },
       { name: "Menus", description: "The toolbar's buttons, and the list's right click:  the same actions", members: ["draw"] },
       { name: "Filter", description: "Which tasks the list shows:  the toolbar ticks the one it's showing", members: ["showAll", "showToDo", "showDone", "removeTheDoneTasks"] }
     ]

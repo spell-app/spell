@@ -95,7 +95,7 @@ habit tracker is an app
 	its "draft" is text
 		// The next habit's name, as the new habit's field holds it
 
-	to create it
+	when creating it
 		// A new tracker starts with three habits, a few days ticked
 		add (a new habit with name "Read", monday = yes, tuesday = yes, wednesday = yes, friday = yes) to the habits
 		add (a new habit with name "Walk", tuesday = yes, wednesday = yes, thursday = yes, friday = yes) to the habits

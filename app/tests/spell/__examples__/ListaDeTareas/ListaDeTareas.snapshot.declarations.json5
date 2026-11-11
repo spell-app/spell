@@ -509,7 +509,7 @@
     {
       "type": "ListaDeTareas",
       "superType": "App",
-      "defined": "/ListaDeTareas.es.spell:2779-8442"
+      "defined": "/ListaDeTareas.es.spell:2779-8440"
     },
     {
       "property": "tareas",
@@ -568,19 +568,10 @@
       "defined": "/ListaDeTareas.es.spell:3480-4153"
     },
     {
-      "syntax": "crear {thisArg:expression}?",
-      "output": "create",
-      "rule": "method_call",
-      "of": "ListaDeTareas",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Guardado",
       "kind": "method",
       "name": "crearla",
       "returns": "nothing",
-      "defined": "/ListaDeTareas.es.spell:4545-4792"
+      "defined": "/ListaDeTareas.es.spell:4545-4790"
     },
     {
       "syntax": "agregar la tarea inicial {callArgs:expression} con prioridad {callArgs:expression} ((de|del) {thisArg:expression})?",
@@ -605,7 +596,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/ListaDeTareas.es.spell:4795-5064"
+      "defined": "/ListaDeTareas.es.spell:4793-5062"
     },
     {
       "syntax": "agregar el borrador ((de|del) {thisArg:expression})?",
@@ -620,7 +611,7 @@
       "kind": "method",
       "name": "agregar el borrador",
       "returns": "nothing",
-      "defined": "/ListaDeTareas.es.spell:5067-5420"
+      "defined": "/ListaDeTareas.es.spell:5065-5418"
     },
     {
       "syntax": "mostrar todas ((de|del) {thisArg:expression})?",
@@ -637,7 +628,7 @@
       "name": "mostrar todas",
       "returns": "nothing",
       "title": "Todas",
-      "defined": "/ListaDeTareas.es.spell:5520-5671"
+      "defined": "/ListaDeTareas.es.spell:5518-5669"
     },
     {
       "syntax": "mostrar pendientes ((de|del) {thisArg:expression})?",
@@ -653,7 +644,7 @@
       "name": "mostrar pendientes",
       "returns": "nothing",
       "title": "Pendientes",
-      "defined": "/ListaDeTareas.es.spell:5673-5854"
+      "defined": "/ListaDeTareas.es.spell:5671-5852"
     },
     {
       "syntax": "mostrar hechas ((de|del) {thisArg:expression})?",
@@ -669,7 +660,7 @@
       "name": "mostrar hechas",
       "returns": "nothing",
       "title": "Hechas",
-      "defined": "/ListaDeTareas.es.spell:5856-6027"
+      "defined": "/ListaDeTareas.es.spell:5854-6025"
     },
     {
       "syntax": "quitar las tareas hechas ((de|del) {thisArg:expression})?",
@@ -685,7 +676,7 @@
       "name": "quitar las tareas hechas",
       "returns": "nothing",
       "title": "Quitar las tareas hechas",
-      "defined": "/ListaDeTareas.es.spell:6029-6238"
+      "defined": "/ListaDeTareas.es.spell:6027-6236"
     }
   ],
   "codeLines": [

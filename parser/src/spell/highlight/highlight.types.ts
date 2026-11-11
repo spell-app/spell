@@ -136,12 +136,18 @@ export type BubblyDrawing = {
 export type BubblyRulePresentation = {
   /** a DECLARATION:  its line is a head, on a band of this part of speech */
   head?: BubblyPartOfSpeech
-  /** ... but this part of speech when its match has this group (`to test card setup`:  `asTest`, plain) */
-  headWhen?: { group: string; partOfSpeech: BubblyPartOfSpeech }
   /** a group:  its body holds the declarations after it, up to the next group */
   isGroup?: boolean
   /** its child rules that are a person's words, each a pill (`quoted_member`:  `its "rank"`) */
   inputs?: readonly string[]
+  /**
+   * an action's head:  everything after its first word (`to`, `para`), to the end of its last input, is what a
+   * person typed, ONE pill:  `to <test a new deck>`, `to <draw its front>`, `to <draw it>`
+   * - but for the parameters it introduces, `params`, bold between its pills:  `to <move> (a card) <to> (a pile)`
+   */
+  typedAfterLead?: boolean
+  /** its child rules that are the parameters it introduces, `(a card)`, with the brackets round them */
+  params?: readonly string[]
   /** its child rules whose items are each a pill of their own, bold (`identifier_list`:  `is one of ace, jack`) */
   choices?: readonly string[]
   /** its child rules drawn as a step, even in a head (`it "is a face card" if <its rank is jack>`) */

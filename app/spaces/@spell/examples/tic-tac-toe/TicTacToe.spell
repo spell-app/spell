@@ -17,7 +17,7 @@ tic tac toe is an app
 		"A draw" if its winner is "nobody"
 		its winner + " wins!" otherwise
 
-	to create it
+	when creating it
 		// Nine squares, made with the game
 		// inside the loop `it` is the count:  so the board is the game's, by name
 		repeat 9 times

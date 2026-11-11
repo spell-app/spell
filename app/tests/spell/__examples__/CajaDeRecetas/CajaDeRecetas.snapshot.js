@@ -235,7 +235,7 @@ export class CajaDeRecetas extends App {
   }
 
   /** Las más nuevas primero, por cuándo se guardó cada una */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 3611, end: 3806 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 3609, end: 3804 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => core.includes(receta.título, this.búsqueda)), (item) => core.descending(item.creado))
   }, () => [this.búsqueda]) }

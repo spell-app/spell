@@ -7,7 +7,7 @@
 an "open meteo page" is a thing
 	its "cities" is a list of cities
 	its "city" is a city
-	to create it
+	when creating an open meteo page
 		add a new city with name "Berlin", latitude = 52.52, longitude = 13.41 to its cities
 		add a new city with name "New York", latitude = 40.71, longitude = -74.01 to its cities
 		add a new city with name "Tokyo", latitude = 35.68, longitude = 139.69 to its cities

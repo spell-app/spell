@@ -19,7 +19,6 @@ export const words = {
       winner: "winner",
       isOver: "is over",
       message: "message",
-      create: "create it",
       checkTheLineFromSquareAThroughBToC: "check the line from square (a as a number) through (b as a number) to (c as a number)",
       checkForAWinner: "check for a winner",
       draw: "draw it",

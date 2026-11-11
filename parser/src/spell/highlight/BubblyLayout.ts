@@ -92,7 +92,8 @@ export class BubblyLayout {
       if (seen.has(each)) return
       seen.add(each)
       if (each.rule.name === LINE_RULE) {
-        const statement = childrenOf(each)[0]
+        // a comment after the statement comes first in the line's match:  skip it
+        const statement = childrenOf(each).find((child) => child.rule.name !== COMMENT_RULE)
         if (statement?.start !== undefined) {
           const index = this.lineIndexOf(statement.start)
           if (!this.statements.has(index)) this.statements.set(index, statement)
@@ -141,7 +142,11 @@ export class BubblyLayout {
   // ## Lines into a tree, by indent
   ////////////////
 
-  /** The text's lines, nested by indent:  a blank line sits where the next line does. */
+  /**
+   * The text's lines, nested by indent:  a blank line sits where the next line does.
+   * - EXCEPT a blank line with an indent of its own (the caret on a new line in a body):  it sits at that indent,
+   *   so it's part of the block above it, and the block's foot goes under it (Owen, 2026-11-11)
+   */
   private treeOf(): SourceLine[] {
     const lines: SourceLine[] = this.text.split("\n").map((raw, index) => {
       const lineStart = this.lineStarts[index]!
@@ -150,9 +155,9 @@ export class BubblyLayout {
       return {
         index,
         start: lineStart + indent,
-        end: lineStart + words.trimEnd().length,
+        end: lineStart + (words.trim() ? words.trimEnd().length : indent),
         width: indent,
-        isBlank: !words.trim(),
+        isBlank: !words.trim() && !indent,
         children: []
       }
     })
@@ -226,8 +231,7 @@ export class BubblyLayout {
   ): BubblyBlock {
     this.scopes.push(new Set())
     try {
-      const partOfSpeech: BubblyPartOfSpeech =
-        row.headWhen && statement.groups[row.headWhen.group] ? row.headWhen.partOfSpeech : row.head!
+      const partOfSpeech: BubblyPartOfSpeech = row.head!
       return {
         kind: "block",
         rule: statement.rule.name ?? "",
@@ -310,10 +314,53 @@ export class BubblyLayout {
   }
 
   /** A head's inputs and choices, over what its spans said. */
-  private paintHead({ statement, row }: Head) {
+  private paintHead(head: Head) {
+    const { statement, row } = head
     for (const input of descendantsNamed(statement, row.inputs)) this.paintRange(input.start!, input.end!, "input")
+    if (row.typedAfterLead) this.paintTyped(head)
     for (const list of descendantsNamed(statement, row.choices))
       for (const item of childrenOf(list)) this.paintChoice(item.start!, item.end!)
+  }
+
+  /**
+   * An action head's words after its first, to the end of its last input, as ONE pill (`typedAfterLead`):
+   * each stretch between its parameters, its own spaces at either end left out.
+   */
+  private paintTyped({ statement, row, partOfSpeech }: Head) {
+    const { text } = this
+    const lead = /^\S+\s*/.exec(text.slice(statement.start!, statement.end!))
+    if (!lead) return
+    const inputs = descendantsNamed(statement, row.inputs)
+    // a test's words are all its name:  nothing in it is a parameter
+    const params =
+      partOfSpeech === "action" ? descendantsNamed(statement, row.params).map((param) => this.bracketed(param)) : []
+    const end = Math.max(...[...inputs, ...params].map((each) => each.end!), 0)
+    let from = statement.start! + lead[0].length
+    for (const param of [...params.filter((each) => each.start < end), { start: end, end }].sort(
+      (a, b) => a.start - b.start
+    )) {
+      const words = text.slice(from, param.start)
+      const trimmed = words.trim()
+      if (trimmed) {
+        const at = from + words.indexOf(trimmed)
+        this.paintRange(at, at + trimmed.length, "input")
+      }
+      from = Math.max(from, param.end)
+    }
+  }
+
+  /** `param`'s stretch, with the brackets round it if it has them:  `(a card)`. */
+  private bracketed(param: P.Match): { start: number; end: number } {
+    const { text } = this
+    let start = param.start!
+    let end = param.end!
+    while (start > 0 && text[start - 1] === " ") start--
+    if (text[start - 1] === "(") start--
+    else start = param.start!
+    let after = end
+    while (text[after] === " ") after++
+    if (text[after] === ")") end = after + 1
+    return { start, end }
   }
 
   /** One of a list's values, a pill of its own:  its words, not the `,` or `or` its item may hold. */
@@ -452,14 +499,17 @@ type SourceLine = {
   end: number
   /** its indent's width, in characters */
   width: number
-  /** nothing but spaces */
+  /** nothing on it, not even an indent:  it sits where the next line does */
   isBlank: boolean
   /** the lines under it */
   children: SourceLine[]
 }
 
-/** The rule every line of a block matches:  its first child is the line's statement. */
+/** The rule every line of a block matches:  its first child past a trailing comment is the line's statement. */
 const LINE_RULE = "line"
+
+/** The rule of a comment at a line's end. */
+const COMMENT_RULE = "comment"
 
 /** The rule of a statement's body:  never walked into for a head's inputs. */
 const BLOCK_RULE = "block"

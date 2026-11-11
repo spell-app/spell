@@ -82,7 +82,7 @@ recipe box is an app
 		// The recipe on its Edit screen, while one is
 	its "box menu" is a menu of "undo"
 
-	to create it
+	when creating it
 		// With nothing kept yet, a few to start from
 		if there are no recipes
 			add (a new recipe with title "Tomato soup", servings = 4, notes = "Roast the tomatoes first.") to the recipes

@@ -7,7 +7,7 @@
 a "github page" is a thing
 	its "search" is text
 	its "showing" is a user
-	to create it
+	when creating a github page
 		set its search to "solid"
 
 	to try (words as text)

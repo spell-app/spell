@@ -7,7 +7,7 @@
 an "open library page" is a thing
 	its "search" is text
 	its "showing" is a book
-	to create it
+	when creating an open library page
 		set its search to "dune"
 	its "found" is every book where its title includes the search
 		// What the search finds:  Open Library looks, by the title, and gives back the first hundred

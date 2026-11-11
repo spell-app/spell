@@ -15,15 +15,17 @@ import type { monaco } from "./monaco"
  *     caret off the letters
  *   - one mark spanning each shape, holding nothing but its place:  Monaco moves it as the text is edited,
  *     so the shapes follow typing before the look is laid out again (`SpellBubbly`)
+ *   - room before each line of a group's member, so its words move past the group's rail with its band
+ *     (`pushes`, below)
  * - Shapes are a declaration's band, gutter, body and foot, a pill under what a person typed, a control line's
  *   bracket:  `SpellBubbly` places them from where Monaco draws each line and letter.
  * - Which rule presents which way is `SP.BubblyPresentation`'s, read by the layout:  nothing here decides it.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
  ****************/
 export class BubblyMarks {
-  /** `drawing`'s marks and shapes. */
-  static of(drawing: SP.BubblyDrawing): BubblyMarks {
-    return new BubblyMarks(drawing)
+  /** `drawing`'s marks and shapes;  `tabSize`:  how many columns a tab in its text takes, as the editor shows it. */
+  static of(drawing: SP.BubblyDrawing, tabSize = 4): BubblyMarks {
+    return new BubblyMarks(drawing, tabSize)
   }
 
   /** The decorations to set, in order:  a shape names its place by an index into them. */
@@ -32,16 +34,38 @@ export class BubblyMarks {
   /** The shapes at the top of the drawing, each holding those inside it. */
   readonly shapes: BubblyShape[] = []
 
+  /**
+   * The marks of the room that PUSHES a line's words right, by their index:  one per push, at the line's first word.
+   * - A group's members are written at its own indent, so their bands are drawn past its rail (`SpellBubbly`),
+   *   as far past it as the group is past its parent's:  one indent step.
+   *   So each line of a member, its body's too, gets room (`bubbly-room-push`) as wide as that step,
+   *   and its words keep their usual room inside its band (Owen, 2026-11-11).
+   *   - The step:  the group's indent less its parent's, in no-break spaces, so it's the font's own width;
+   *     a group at the top level has no parent's rail, so a tab's
+   * - Only a member written at the group's indent, or less:  one written deeper is past the rail already.
+   * - A group inside a group's member is pushed with it, and its own members once more.
+   * - `SpellBubbly` counts their columns on each line, to know where its words are drawn.
+   */
+  readonly pushes: number[] = []
+
   /** Where each line starts in the drawing's text. */
   private readonly lineStarts: number[] = []
 
-  private constructor(private readonly drawing: SP.BubblyDrawing) {
+  /** The drawing's lines. */
+  private readonly lines: string[]
+
+  private constructor(
+    private readonly drawing: SP.BubblyDrawing,
+    private readonly tabSize: number
+  ) {
+    this.lines = drawing.text.split("\n")
     let at = 0
-    for (const line of drawing.text.split("\n")) {
+    for (const line of this.lines) {
       this.lineStarts.push(at)
       at += line.length + 1
     }
     this.nodes(drawing.nodes, this.shapes)
+    this.pushMembers(this.shapes)
   }
 
   ////////////////
@@ -101,6 +125,7 @@ export class BubblyMarks {
       else if (kind === "quote-close")
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: room("quote", "after") })
       else if (kind === "input" || kind === "choice") this.input(stretch, into)
+      else if (kind === "comment" && head.band) this.mark(start, end, `${BubblyHtml.classesFor(kind)} ${ON_BAND}`)
       else this.mark(start, end, BubblyHtml.classesFor(kind))
     }
   }
@@ -113,6 +138,45 @@ export class BubblyMarks {
       after: room("input", "after")
     })
     into.push({ kind: "input", place, isChoice: kind === "choice", isQuoted })
+  }
+
+  ////////////////
+  // ## A group's members, past its rail
+  ////////////////
+
+  /** Push the lines of each group's members in `shapes`, those inside them too;  `parent`:  the block they're in. */
+  private pushMembers(shapes: BubblyShape[], parent?: BubblyBlockShape) {
+    for (const shape of shapes) {
+      if (shape.kind !== "block") continue
+      if (shape.isGroup && shape.hasBody) {
+        const groupIndent = this.indentOf(shape)
+        const step = parent ? groupIndent - this.indentOf(parent) : this.tabSize
+        for (const member of shape.inside) {
+          if (member.kind !== "block" || step <= 0 || this.indentOf(member) > groupIndent) continue
+          const { startLineNumber, endLineNumber } = this.marks[member.place]!.range
+          for (let line = startLineNumber; line <= endLineNumber; line++) this.push(line, step)
+        }
+      }
+      this.pushMembers(shape.inside, shape.hasBody ? shape : parent)
+    }
+  }
+
+  /**
+   * Room `columns` wide before `line`'s first word, if it has one:  empty, so it's put before any other room there.
+   * - Monaco keeps a line's marks in order of where they start, then where they end.
+   */
+  private push(line: number, columns: number) {
+    const text = this.lines[line - 1] ?? ""
+    const column = /^[ \t]*/.exec(text)![0].length + 1
+    if (column > text.length) return
+    const range = { startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: column }
+    const before = { ...PUSH_ROOM, content: "\u00a0".repeat(columns) }
+    this.pushes.push(this.marks.push({ range, options: { before, showIfCollapsed: true } }) - 1)
+  }
+
+  /** How many columns the indent of `block`'s head takes, a tab `tabSize`. */
+  private indentOf(block: BubblyBlockShape): number {
+    return indentColumns(this.lines[this.marks[block.place]!.range.startLineNumber - 1] ?? "", this.tabSize)
   }
 
   ////////////////
@@ -233,6 +297,9 @@ const NAME = "bubbly-name"
 /** A quoted input's own `"`:  see-through, its curly mark drawn over it. */
 const QUOTE_MARK = "bubbly-quote-mark"
 
+/** A comment at the end of a head, on its band:  the page's is inside the band's element, the editor's isn't. */
+const ON_BAND = "bubbly-on-band"
+
 /**
  * Room either side of a pill's words (`input`), or outside a quoted one's marks (`quote`):
  * a no-break space, `bubbly-room-<kind>`, its width the sheet's.
@@ -245,6 +312,28 @@ function room(kind: "input" | "quote", side: "before" | "after"): monaco.editor.
     inlineClassName: `bubbly-room bubbly-room-${kind}`,
     cursorStops: side === "before" ? 1 : 2
   }
+}
+
+/**
+ * Room pushing a group member's line past the group's rail (`bubbly-room-push`):
+ * no-break spaces, as many as the indent step (`BubblyMarks.push()`).
+ * - The caret stops only after it, beside the first letter.
+ */
+const PUSH_ROOM: monaco.editor.InjectedTextOptions = {
+  content: "\u00a0",
+  inlineClassName: "bubbly-room bubbly-room-push",
+  cursorStops: 1
+}
+
+/** How many columns `text`'s indent takes, a tab `tabSize`. */
+export function indentColumns(text: string, tabSize: number): number {
+  let columns = 0
+  for (const char of text) {
+    if (char === "\t") columns += tabSize - (columns % tabSize)
+    else if (char === " ") columns++
+    else break
+  }
+  return columns
 }
 
 /** Where a node ends:  its last line's end. */

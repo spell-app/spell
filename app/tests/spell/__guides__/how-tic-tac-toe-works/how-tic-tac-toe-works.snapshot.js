@@ -47,7 +47,7 @@ core.heading("The game")
 // ## The game
 //////////////
 // The app:  its board, whose turn it is, and who won.
-// - `create it` runs as the game is made:  it puts nine empty squares on the board.
+// - `when creating it` runs as the game is made:  it puts nine empty squares on the board.
 // - Squares are counted 1 to 9, left to right, then down:  1 2 3 is the top row.
 
 export class Board extends List {

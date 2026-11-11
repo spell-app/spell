@@ -109,7 +109,7 @@
     {
       "type": "BillSplitter",
       "superType": "App",
-      "defined": "/BillSplitter.spell:320-2227"
+      "defined": "/BillSplitter.spell:320-2231"
     },
     {
       "property": "diners",
@@ -146,18 +146,10 @@
       "defined": "/BillSplitter.spell:707-744"
     },
     {
-      "syntax": "create {thisArg:expression}",
-      "output": "create",
-      "rule": "method_call",
-      "of": "BillSplitter",
-      "alias": [
-        "statement",
-        "expression"
-      ],
       "kind": "method",
-      "name": "create it",
+      "name": "creating it",
       "returns": "nothing",
-      "defined": "/BillSplitter.spell:747-986"
+      "defined": "/BillSplitter.spell:747-990"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -170,7 +162,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spell:1122-2227"
+      "defined": "/BillSplitter.spell:1126-2231"
     },
     {
       "syntax": "add someone (of {thisArg:expression})?",
@@ -184,7 +176,7 @@
       "kind": "method",
       "name": "add someone",
       "returns": "nothing",
-      "defined": "/BillSplitter.spell:988-1119"
+      "defined": "/BillSplitter.spell:992-1123"
     }
   ],
   "codeLines": [

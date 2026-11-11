@@ -186,6 +186,19 @@ describe("SourceHomes", () => {
     expect(text).toBe(code.replace("set its count to 0", "set its count to 7"))
   })
 
+  test("its creation hook names its type:  `when creating a counter`", () => {
+    const code = [
+      `a "counter" is a view`,
+      `\tits "count" is a number`,
+      `\twhen creating a counter`,
+      `\t\tset its count to 0`,
+      ``
+    ]
+    const { home, text } = edited("/Counter.spell", code.join("\n"), "Counter", "count", 7)
+    expect(home.kind).toBe("default")
+    expect(text).toBe(code.join("\n").replace("set its count to 0", "set its count to 7"))
+  })
+
   test("a Spanish file keeps its words", () => {
     const code = [
       `un "contador" es una vista donde:`,

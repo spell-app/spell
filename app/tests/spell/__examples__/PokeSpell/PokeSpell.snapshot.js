@@ -1779,13 +1779,13 @@ export class Pokedex extends App {
     await core.randomItemOf(await core.savedThings(Pokemon))?.open()
   }
 
-  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spell", start: 1111, end: 1161 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("kindsToPick", { declaredAt: { path: "/PokeSpell.spell", start: 1115, end: 1165 }, readsFrom: ["poke_api"] }) }
   get kindsToPick() { return core.waitedValue(this, "kindsToPick", async () => {
     return core.filter(await core.savedThings(Type, {}, "looks through"), (type) => type.isReal)
   }) }
 
   /** Pokémon names are all small letters:  so the search is too */
-  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spell", start: 1164, end: 1347 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/PokeSpell.spell", start: 1168, end: 1351 }, readsFrom: ["poke_api"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const lookingFor = this.search.toLocaleLowerCase()
     return core.filter(await core.savedThings(Pokemon, {}, "looks through"), (pokemon) => core.includes(pokemon.name, lookingFor))

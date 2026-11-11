@@ -72,7 +72,7 @@ export class TranslationNames {
     for (const statement of statements) {
       if (statement.type) types.add(wordsOfTypeName(statement.type))
       if (statement.property) names.add(unquote(statement.property))
-      // a hook nothing calls by its words (`- when created:`, no `output`) is written in the other language's own
+      // a hook nothing calls by its words (`- when creating a task:`, no `output`) is written in the other language's own
       if (statement.name && statement.output && (statement.kind === "method" || statement.kind === "function")) {
         phrases.add(unquote(statement.name))
       }

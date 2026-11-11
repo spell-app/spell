@@ -23,7 +23,6 @@ export const words = {
       ponerEnPila: "poner una carta en una pila"
     },
     Mazo: {
-      create: "crearlo",
       estado: "estado"
     },
     Pila: {
@@ -64,7 +63,6 @@ export const words = {
       C5: "C5",
       C6: "C6",
       C7: "C7",
-      create: "crearlo",
       rehacerLaReserva: "rehacer la reserva",
       robarDeLaReserva: "robar de la reserva",
       repartirLasCartas: "repartir las cartas",
@@ -172,7 +170,7 @@ export const words = {
       { name: "Una pila de cartas", members: ["pila"] }
     ],
     Solitario: [
-      { name: "Pilas", description: "Una de cada, hecha con el solitario", members: ["reserva", "descartes", "tréboles", "diamantes", "corazones", "espadas", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "create"] },
+      { name: "Pilas", description: "Una de cada, hecha con el solitario", members: ["reserva", "descartes", "tréboles", "diamantes", "corazones", "espadas", "C1", "C2", "C3", "C4", "C5", "C6", "C7"] },
       { name: "Repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "repartirLasCartas", "voltearLaReserva"] },
       { name: "Juego", description: "Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres", members: ["reiniciarElJuego", "jugarSolo", "hacerTrampa"] }
     ]

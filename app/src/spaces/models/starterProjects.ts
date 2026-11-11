@@ -30,7 +30,7 @@ my app is an app:
 
 my app is an app:
 \tits "count" is a number
-\tto create it:
+\twhen creating it:
 \t\tset its count to 0
 \tto count up:
 \t\tset its count to its count + 1
@@ -50,7 +50,7 @@ my app is an app:
 my app is an app:
 \tits "roll" is a number
 \tits "rolls" is a number
-\tto create it:
+\twhen creating it:
 \t\tset its roll to 1
 \t\tset its rolls to 0
 \tto roll the die:

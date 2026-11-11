@@ -20,6 +20,10 @@
       "light": "#c0c0c3",
       "dark": "#5a5961"
     },
+    "--bubbly-band-comment": {
+      "light": "#3a3a448c",
+      "dark": "#dedde68c"
+    },
     "--bubbly-bold": {
       "light": "650",
       "dark": "650"
@@ -97,8 +101,8 @@
       "dark": "10px"
     },
     "--bubbly-gutter": {
-      "light": "5px",
-      "dark": "5px"
+      "light": "4px",
+      "dark": "4px"
     },
     "--bubbly-inner-top": {
       "light": "5px",
@@ -109,12 +113,16 @@
       "dark": "8px"
     },
     "--bubbly-foot-width": {
-      "light": "26px",
-      "dark": "26px"
+      "light": "13px",
+      "dark": "13px"
     },
     "--bubbly-foot-height": {
-      "light": "6px",
-      "dark": "6px"
+      "light": "4px",
+      "dark": "4px"
+    },
+    "--bubbly-rail-corner": {
+      "light": "calc(4px + 8px)",
+      "dark": "calc(4px + 8px)"
     },
     "--bubbly-gap": {
       "light": "2px",
@@ -152,9 +160,9 @@
       "light": "2px",
       "dark": "2px"
     },
-    "--bubbly-dot-gap": {
-      "light": "3px",
-      "dark": "3px"
+    "--bubbly-dot-color": {
+      "light": "#3a3a444d",
+      "dark": "#dedde64d"
     },
     "--bubbly-depth": {
       "light": "1",
@@ -177,8 +185,8 @@
       "dark": "calc(15px / 2 * 1)"
     },
     "--bubbly-monaco-foot-room": {
-      "light": "calc(6px + 3px)",
-      "dark": "calc(6px + 3px)"
+      "light": "calc(4px + 5px)",
+      "dark": "calc(4px + 5px)"
     }
   },
   "parts": {

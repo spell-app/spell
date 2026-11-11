@@ -83,7 +83,7 @@ export class Thing extends Eventful(Observable) {
   /**
    * Called once per instance, after constructor props are assigned -- override in a subclass to set up initial state.
    * - `props`:  what it was made with, `new Task({ title })`, for a hook that takes them,
-   *   `- when created (with title as text):` (epic `spanish` P28).
+   *   `- when creating a task (with title as text):` (epic `spanish` P28).
    * - Exactly once, whichever runs it.
    * - NOTE: runs from THIS constructor, before any subclass field initializer:
    *   a plain field set here is clobbered by its initializer.

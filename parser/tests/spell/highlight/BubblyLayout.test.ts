@@ -62,6 +62,16 @@ describe("SP.BubblyLayout", () => {
     ])
   })
 
+  it("keeps an empty line indented into a body in that body, so its foot goes under it (the caret on a new line)", () => {
+    const text = CARD.replace("\t\treturn column\n", "\t\treturn column\n\t\t\n")
+    const picture = blocksOf(SP.BubblyLayout.of(text).nodes).find((block) => block.rule === "property_value_getter")!
+    const last = picture.body.at(-1)!
+    expect(last.kind).toBe("line")
+    expect(last.kind === "line" && text.slice(0, last.start).split("\n").length).toBe(
+      text.slice(0, text.indexOf("\t\treturn column\n")).split("\n").length + 1
+    )
+  })
+
   it("puts a group's members in its body, up to the next group;  its description first", () => {
     const [, rank] = blocksOf(drawing.nodes)
     expect(rank!.isGroup).toBe(true)
@@ -78,10 +88,55 @@ describe("SP.BubblyLayout", () => {
       '"is a face card"',
       '"Drawing"',
       '"picture"',
-      "front",
+      "draw its front",
       '"blue"'
     ])
     expect(piecesOf(drawing, "choice")).toEqual(["ace", "2 ... 10", "jack", "queen", "king"])
+  })
+
+  it("draws everything after an action's `to` as what a person typed, its parameters aside", () => {
+    const heads = (text: string, parser?: SP.SpellParser) => {
+      const laidOut = SP.BubblyLayout.of(text, parser)
+      return blocksOf(laidOut.nodes)
+        .slice(1)
+        .map((block) => block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`))
+    }
+    const deck = [
+      'a "deck" is a list of cards',
+      "\tto test a new deck",
+      "\t\tprint 1",
+      "\tto draw it",
+      "\t\t<text>deck</text>",
+      "\tto move (a card) to (a pile)",
+      "\t\tprint 1"
+    ].join("\n")
+    expect(heads(deck)).toEqual([
+      ["words:to ", "input:test a new deck"],
+      ["words:to ", "input:draw it"],
+      [
+        "words:to ",
+        "input:move",
+        "words: (a ",
+        "first-mention:card",
+        "words:) ",
+        "input:to",
+        "words: (a ",
+        "first-mention:pile",
+        "words:)"
+      ]
+    ])
+  })
+
+  it("draws a type's creation hook as an action:  `when creating` Spell's words, its type bold", () => {
+    const deck = ['a "card" is a thing', 'a "deck" is a list of cards', "\twhen creating a deck", "\t\tprint 1"].join(
+      "\n"
+    )
+    const hook = blocksOf(SP.BubblyLayout.of(deck).nodes).find((block) => block.rule === "create_hook")!
+    expect(hook.partOfSpeech).toBe("action")
+    expect(hook.head.pieces.map((piece) => `${piece.kind}:${deck.slice(piece.start, piece.end)}`)).toEqual([
+      "words:when creating a ",
+      "first-mention:deck"
+    ])
   })
 
   it("draws references bold, a name's first mention apart from its later uses, and pronouns plain", () => {
@@ -127,6 +182,41 @@ describe("SP.BubblyLayout", () => {
     expect(blocksOf(spanish.nodes).map((block) => block.partOfSpeech)).toEqual(["thing", "plain", "property"])
     expect(piecesOf(spanish, "choice")).toEqual(["as", "2 ... 10", "jota", "dama", "rey"])
     expect(piecesOf(spanish, "reference")).not.toContain("su")
+  })
+
+  it("draws a declaration with a comment after it as it draws it without, the comment faint at the band's end", () => {
+    const withComments = (text: string, parser?: SP.SpellParser) => {
+      const heads = new Set(blocksOf(SP.BubblyLayout.of(text, parser).nodes).map((block) => block.head.end))
+      let at = 0
+      return text
+        .split("\n")
+        .map((line) => {
+          const end = at + line.length
+          at = end + 1
+          return heads.has(end) ? `${line}    // a note` : line
+        })
+        .join("\n")
+    }
+    const CARTA = `una "carta" es una vista reversible arrastrable
+\tgrupo "Rango"
+\tsu "rango" es uno de as, 2 ... 10, jota, dama, rey
+\tpara mover (una carta)
+\t\tdevolver 1
+`
+    for (const [text, parser] of [
+      [CARD, undefined],
+      [CARTA, SP.Language.for("es").parser]
+    ] as const) {
+      const commented = withComments(text, parser)
+      expect(commented).toContain("// a note")
+      const blocks = blocksOf(SP.BubblyLayout.of(commented, parser).nodes)
+      const shapeOf = (block: SP.BubblyBlock) => [block.rule, block.partOfSpeech, block.level, block.body.length]
+      expect(blocks.map(shapeOf)).toEqual(blocksOf(SP.BubblyLayout.of(text, parser).nodes).map(shapeOf))
+      for (const block of blocks) {
+        const last = block.head.pieces.at(-1)!
+        expect([last.kind, commented.slice(last.start, last.end)]).toEqual(["comment", "// a note"])
+      }
+    }
   })
 
   it("never throws, whatever it's given", () => {

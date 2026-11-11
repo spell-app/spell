@@ -318,7 +318,6 @@ export const words = {
       trail: "trail",
       pickedKind: "picked kind",
       game: "game",
-      create: "create it",
       goToWhere: "go to (where as text)",
       goBack: "go back",
       surpriseMe: "surprise me",

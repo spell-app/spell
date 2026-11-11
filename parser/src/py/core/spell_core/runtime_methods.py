@@ -130,7 +130,7 @@ class RuntimeMethods:
         """Run `coroutine` to its end now, its pauses not waiting:  a thing's `create()` that waits.
 
         - As javascript's constructor runs `create()`:  at once, nothing waiting for the pauses in it.
-          e.g. a deck's `to create it:` turning each card face down, a pause each:
+          e.g. a deck's `when creating a deck` turning each card face down, a pause each:
           every card is face down as soon as the deck is made, as in javascript.
         - Python's `__init__()` can't wait, and a pause there would hold up making the thing:
           the deck's 52 turns, 50 msec each.

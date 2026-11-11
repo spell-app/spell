@@ -28,7 +28,6 @@ import { RealPath } from "spell/server/RealPath"
  *     (`transcripts()`, `transcriptOf()`);  a worktree's folder may be a link to its main checkout's
  *     (`SessionFolders.link()`)
  *   - `session-titles/<id>`:  a title waiting for that session's next prompt (`titlesFolder()`)
- *   - `settings.json`:  its settings, the plugins turned on among them (`settings()`, `isPluginEnabled()`)
  * - Reading ONE transcript:  `Transcript`, beside this.
  * - STATIC:  Claude Code's folder is the machine's;  each takes `home` (default `home()`), so a test reads a fixture.
  * - Its position:  node's own modules, and the kit's `RealPath` by its own name, so plain `node` loads it (the hooks,
@@ -48,32 +47,6 @@ export class ClaudeHome {
   /** Where a title waits for its session's next prompt:  `<home>/session-titles/<id>`. */
   static titlesFolder(home = ClaudeHome.home()): string {
     return join(home, "session-titles")
-  }
-
-  /**
-   * Claude Code's own settings, `<home>/settings.json`, as written;  `undefined` when there's none.
-   * - read only:  epic changes it through `epic plugin install` alone (`PluginInstall`)
-   * - throws on a file that won't parse:  a caller that must never fail catches it (`isPluginEnabled()`)
-   */
-  static settings(home = ClaudeHome.home()): ClaudeSettings | undefined {
-    const file = join(home, "settings.json")
-    return existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as ClaudeSettings) : undefined
-  }
-
-  /**
-   * Is plugin `name` turned on in Claude Code's settings (`enabledPlugins`), from any marketplace?
-   * - `superpowers` matches `superpowers@claude-plugins-official` and `superpowers@superpowers-marketplace` alike
-   * - only the person's own settings:  a plugin a project's `.claude/settings.json` turns on, or a session's
-   *   `--plugin-dir`, isn't seen
-   * - NEVER throws:  settings that won't read turn nothing on
-   */
-  static isPluginEnabled(name: string, home = ClaudeHome.home()): boolean {
-    try {
-      const enabled = ClaudeHome.settings(home)?.enabledPlugins ?? {}
-      return Object.entries(enabled).some(([key, on]) => on === true && key.split("@")[0] === name)
-    } catch {
-      return false
-    }
   }
 
   /**
@@ -157,16 +130,6 @@ export class ClaudeHome {
     }
     return newest?.path
   }
-}
-
-/**
- * Claude Code's `settings.json` (`ClaudeHome.settings()`):  only the fields epic reads;  the file has more.
- */
-export type ClaudeSettings = {
-  /** each plugin, `<plugin>@<marketplace>`, turned on (`true`) or off */
-  enabledPlugins?: Record<string, boolean>
-  /** marketplaces added by hand:  each one's `source`, a folder for a local one */
-  extraKnownMarketplaces?: Record<string, { source?: { path?: string } }>
 }
 
 /** `ClaudeHome.liveSessions()`'s options. */

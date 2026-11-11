@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vite-plus/test"
-import { describeWarnings, unitTestModuleRules } from "spell/parser/spell/test"
+import { describeWarnings, parseSpellProject, unitTestModuleRules } from "spell/parser/spell/test"
 import { P } from "spell/parser/parser"
 import { spellParser } from "spell/parser/spell"
 import { core } from "spell/parser/core"
@@ -101,6 +101,42 @@ describe("testing spell module methods", () => {
         "to flip (a card): print the card"
       ]
       expect(warningsIn(lines, "typed-parameters")).toEqual([])
+    })
+  })
+
+  describe("what runs as a thing is made names its type:  `when creating a deck` (epic `language`)", () => {
+    function compiled(path: string, lines: string[]) {
+      return parseSpellProject([{ path, contents: lines.join("\n") }]).files[0]!
+    }
+
+    test("its own type, inline too, `(with ...)` kept:  the type's `create()`", () => {
+      const file = compiled("/Deck.spell", [
+        'a "deck" is a view:',
+        "\twhen creating a deck (with title as text): print the title"
+      ])
+      expect(file.errors).toEqual([])
+      expect(file.compiled).toContain("create(props = {}) {")
+    })
+
+    test("another type is refused, saying which to write", () => {
+      const file = compiled("/Deck.spell", [
+        'a "card" is a thing',
+        'a "deck" is a view:',
+        "\twhen creating a card: print 1"
+      ])
+      expect(file.errors).toEqual(['3:1 Name the type this is in:  "when creating a deck"'])
+    })
+
+    test("Spanish's:  `al crear un mazo`, and its refusal", () => {
+      const own = compiled("/Mazo.es.spell", ['un "mazo" es una vista:', "\tal crear un mazo: imprimir 1"])
+      expect(own.errors).toEqual([])
+      expect(own.compiled).toContain("create() {")
+      const other = compiled("/Mazo.es.spell", [
+        'una "tarea" es una cosa',
+        'un "mazo" es una vista:',
+        "\tal crear una tarea: imprimir 1"
+      ])
+      expect(other.errors).toEqual(['3:1 Nombra el tipo en el que está:  "al crear un mazo"'])
     })
   })
 })

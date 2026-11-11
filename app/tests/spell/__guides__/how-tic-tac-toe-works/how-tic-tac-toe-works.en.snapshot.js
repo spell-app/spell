@@ -16,7 +16,6 @@ export const words = {
       turn: "turn",
       winner: "winner",
       message: "message",
-      create: "create it",
       startANewGame: "start a new game",
       checkTheLineFromSquareAThroughBToC: "check the line from square (a as a number) through (b as a number) to (c as a number)",
       checkForAWinner: "check for a winner",

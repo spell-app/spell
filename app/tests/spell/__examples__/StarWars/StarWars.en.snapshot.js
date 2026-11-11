@@ -221,7 +221,6 @@ export const words = {
     Guide: {
       tab: "tab",
       search: "search",
-      create: "create it",
       showing: "showing",
       trail: "trail",
       playing: "playing",
