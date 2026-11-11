@@ -4,8 +4,8 @@ import type { SP } from "spell/parser/spell"
  * ### `BubblyHtml`
  * A `SP.BubblyDrawing` as HTML, in the classes of the bubbly look's ONE sheet, `bubbly.css` beside it.
  * - `<div class="bubbly">`:  each declaration a `bubbly-block` (its head on a band, a gutter, its body, a foot),
- *   or a `bubbly-pill` when it has no body;  each line a `<p class="bubbly-line">`;  a control line's steps in a
- *   `bubbly-bracket`.
+ *   or a `bubbly-pill` when it has no body;  each line a `<p class="bubbly-line">`;  a control line with steps
+ *   under it is a block too, `bubbly-control`.
  * - Every character of the code is in it, but the indents:  a copied line copies its words, quote marks too
  *   (drawn outside their pill, the file's own `"` kept transparent).
  * - `sections`:  each declaration wrapped in a `<ui-section class="bubbly-section" id="...">`, a block a docs
@@ -59,8 +59,6 @@ class BubblyWriter {
         return `<div class="bubbly-gap"></div>`
       case "line":
         return this.line(node)
-      case "bracket":
-        return `${this.line(node.head)}<div class="bubbly-bracket">${this.nodes(node.body)}</div>`
       case "block":
         return this.block(node)
     }

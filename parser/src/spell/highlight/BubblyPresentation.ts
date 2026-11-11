@@ -74,7 +74,7 @@ export class BubblyPresentation {
     drag_and_drop: { head: "plain" },
 
     ////////////////
-    // ## Control lines:  their steps in a bracket (how they're finally drawn is P52's)
+    // ## Control lines:  with steps under them, a light grey block holding them
     ////////////////
 
     if: { isControl: true },
@@ -95,6 +95,8 @@ export class BubblyPresentation {
     // a phrase a project declares, called whole:  `it is a diamond`, `seven is a number card`
     quoted_property: { isPhrase: true },
     method_postfix: { isPhrase: true },
+    // a name of several words read as one:  `card ranks`, the values a type's list can take
+    kind_values: { isPhrase: true },
     // a number and its unit:  `pause for 300 msec`
     pause: { isQuantity: true },
     // yes and no

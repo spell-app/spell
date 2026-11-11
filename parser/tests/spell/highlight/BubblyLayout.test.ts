@@ -2,6 +2,7 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
 
 /** A card, as Solitaire's starts:  a type with an ability, a group, a list, a worked-out property, a test. */
 const CARD = `# A playing card
@@ -40,16 +41,14 @@ function piecesOf(drawing: SP.BubblyDrawing, kind: SP.BubblyPieceKind): string[]
 
 /** Every block in `nodes`, depth first. */
 function blocksOf(nodes: SP.BubblyNode[]): SP.BubblyBlock[] {
-  return nodes.flatMap((node) =>
-    node.kind === "block" ? [node, ...blocksOf(node.body)] : node.kind === "bracket" ? blocksOf(node.body) : []
-  )
+  return nodes.flatMap((node) => (node.kind === "block" ? [node, ...blocksOf(node.body)] : []))
 }
 
 describe("SP.BubblyLayout", () => {
   const drawing = SP.BubblyLayout.of(CARD)
   const words = (block: SP.BubblyBlock) => CARD.slice(block.head.start, block.head.end)
 
-  it("makes each declaration a block on a band of its part of speech;  one with no body a pill", () => {
+  it("makes each declaration a block on a band of its part of speech, and each control line with steps;  one with no body a pill", () => {
     const blocks = blocksOf(drawing.nodes)
     expect(blocks.map((block) => [words(block), block.partOfSpeech, block.level, block.body.length > 0])).toEqual([
       ['a "card" is a draggable two sided view', "thing", 0, true],
@@ -58,6 +57,7 @@ describe("SP.BubblyLayout", () => {
       ['it "is a face card" if its rank is jack, queen or king', "property", 2, false],
       ['group "Drawing"', "plain", 1, true],
       ['its "picture" is', "property", 2, true],
+      ["if it is a face card", "control", 3, true],
       ["to draw its front", "action", 2, true]
     ])
   })
@@ -174,11 +174,13 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(drawing, "mark")).toEqual(expect.arrayContaining(["<", "=", ">{", "}</", ">"]))
   })
 
-  it("holds a control line's steps in a bracket", () => {
+  it("makes a control line with steps a block of its own, its line plain on its band", () => {
     const picture = blocksOf(drawing.nodes).find((block) => words(block) === 'its "picture" is')!
-    const bracket = picture.body.find((node) => node.kind === "bracket")
-    expect(bracket?.kind === "bracket" && CARD.slice(bracket.head.start, bracket.head.end)).toBe("if it is a face card")
-    expect(bracket?.kind === "bracket" && bracket.body).toHaveLength(1)
+    const control = picture.body.find((node) => node.kind === "block")
+    expect(control?.kind === "block" && control.partOfSpeech).toBe("control")
+    expect(control?.kind === "block" && words(control)).toBe("if it is a face card")
+    expect(control?.kind === "block" && control.body).toHaveLength(1)
+    expect(control?.kind === "block" && control.head.pieces.some((piece) => piece.kind === "input")).toBe(false)
   })
 
   it("covers every word of each line, in order, never overlapping", () => {
@@ -237,6 +239,35 @@ describe("SP.BubblyLayout", () => {
         expect([last.kind, commented.slice(last.start, last.end)]).toEqual(["comment", "// a note"])
       }
     }
+  })
+
+  it("reads a project's file as part of its project:  names from its other files, and the project unchanged", () => {
+    const CARD_FILE = `a "card" is a view\n\tits "rank" is one of ace, king\n`
+    const DECK_FILE = `a "deck" is a list of cards\n\twhen creating a deck\n\t\tfor rank in card ranks\n\t\t\tadd rank to the deck\n`
+    const project = parseSpellProject([
+      { path: "/Card.spell", contents: CARD_FILE },
+      { path: "/Deck.spell", contents: DECK_FILE }
+    ])
+    const deck = project.files[1]!
+    const within = { scope: deck.scope, file: "Deck.spell", path: "/Deck.spell" } as unknown as SP.SpellFile
+    const typesBefore = project.scope.types.get().length
+    const rulesBefore = project.scope.parser!.rules ? Object.keys(project.scope.parser!.rules).length : 0
+    const alone = SP.BubblyLayout.of(DECK_FILE)
+    const inProject = SP.BubblyLayout.of(DECK_FILE, SP.spellParser, { within })
+    expect(piecesOf(alone, "phrase")).toEqual([])
+    expect(piecesOf(inProject, "phrase")).toEqual(["card ranks"])
+    // its own declarations still read, as alone:  the project holds them already
+    const blocks = (drawing: SP.BubblyDrawing) =>
+      blocksOf(drawing.nodes).map(
+        (block) => `${block.partOfSpeech}:${DECK_FILE.slice(block.head.start, block.head.end)}`
+      )
+    expect(blocks(inProject)).toEqual([
+      'thing:a "deck" is a list of cards',
+      "action:when creating a deck",
+      "control:for rank in card ranks"
+    ])
+    expect(project.scope.types.get()).toHaveLength(typesBefore)
+    expect(project.scope.parser!.rules ? Object.keys(project.scope.parser!.rules).length : 0).toBe(rulesBefore)
   })
 
   it("never throws, whatever it's given", () => {
