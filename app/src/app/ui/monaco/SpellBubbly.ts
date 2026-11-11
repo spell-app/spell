@@ -1,7 +1,7 @@
 import { SP } from "spell/parser/spell"
 import { codeLook } from "spell/app/app/ui/codePopups"
 import { monaco } from "./monaco"
-import { BubblyMarks, type BubblyBlockShape, type BubblyShape } from "./BubblyMarks"
+import { BubblyMarks, indentColumns, type BubblyBlockShape, type BubblyShape } from "./BubblyMarks"
 
 import "spell/app/app/components/spell-code/bubbly.css"
 
@@ -12,7 +12,7 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * - One per editor, made as each editor is (`watch()`, from `SpellMonaco.register()`).
  * - It lays the code out with the parser (`SP.BubblyLayout`, by `SP.BubblyPresentation`'s table), then:
  *   - marks the text:  each piece's weight, slant and ink, room round what a person typed, a quoted input's curly
- *     marks (`BubblyMarks`, Monaco decorations)
+ *     marks, room pushing a group's members past its rail (`BubblyMarks`, Monaco decorations)
  *   - draws the shapes UNDER the text, in a layer behind the editor (`bubbly-layer`):  each declaration's band,
  *     gutter, body and foot, a pill under each input, a control line's bracket;  placed from where Monaco draws each
  *     line and letter, and drawn again as it scrolls, folds or is edited
@@ -77,6 +77,14 @@ export class SpellBubbly {
     editor.onDidScrollChange(() => {
       this.follow()
       redrawSoon()
+    })
+    editor.onDidChangeCursorPosition((event) => {
+      if (CARET_MOVED_BY.includes(event.source)) this.besideTheLetter(event.position)
+    })
+    // a click where the caret is already moves it nowhere, but may draw it off its letter
+    editor.onMouseUp(() => {
+      const position = editor.getPosition()
+      if (position) this.besideTheLetter(position)
     })
     editor.onDidLayoutChange(redrawSoon)
     editor.onDidContentSizeChange(redrawSoon)
@@ -165,7 +173,7 @@ export class SpellBubbly {
     if (!model) return
     try {
       const drawing = SP.BubblyLayout.of(model.getValue(), parserFor(model))
-      this.laidOut = BubblyMarks.of(drawing)
+      this.laidOut = BubblyMarks.of(drawing, model.getOptions().tabSize)
       this.marks!.set(this.laidOut.marks)
     } catch (error) {
       console.error("SpellBubbly.relayout():  couldn't lay the code out", error)
@@ -214,6 +222,7 @@ export class SpellBubbly {
     if (!visible.length) return shapes.replaceChildren()
     const view: View = {
       ranges,
+      pushes: this.pushesByLine(laidOut, ranges),
       first: visible[0]!.startLineNumber,
       last: visible.at(-1)!.endLineNumber,
       measures: this.measures(),
@@ -268,7 +277,7 @@ export class SpellBubbly {
     const headTop = editor.getTopForLineNumber(headLine)
     const lastTop = editor.getTopForLineNumber(lastLine)
     const hasBody = shape.hasBody && lastTop > headTop
-    const left = Math.max(this.lineStartX(headLine) - measures.padLeft, floor)
+    const left = Math.max(this.wordsX(headLine, view) - measures.padLeft, floor)
     if (headLine >= view.first) {
       const ends = shape.ends
       const lineEnd = this.xOf(headLine, editor.getModel()!.getLineMaxColumn(headLine))
@@ -327,7 +336,7 @@ export class SpellBubbly {
     const headLine = range.startLineNumber
     let stepLine = headLine + 1
     while (stepLine < range.endLineNumber && !model.getLineContent(stepLine).trim()) stepLine++
-    const left = (this.lineStartX(headLine) + this.lineStartX(stepLine)) / 2
+    const left = (this.wordsX(headLine, view) + this.wordsX(stepLine, view)) / 2
     const top = editor.getTopForLineNumber(headLine) + view.lineHeight
     const bottom = editor.getTopForLineNumber(range.endLineNumber) + view.lineHeight
     return place(element("bubbly-bracket"), { left, top, height: bottom - top }, view.measures.scale)
@@ -349,6 +358,36 @@ export class SpellBubbly {
     }
     count(shape.inside)
     return feet
+  }
+
+  ////////////////
+  // ## The caret beside its letter
+  ////////////////
+
+  /**
+   * A click or a key left the caret where room is injected before a letter:  draw it after the room, by the letter.
+   * - Monaco puts the caret where the room lets it, stepping with the arrow keys;
+   *   but a click left of the room, or Home on a line whose words are pushed, draws it BEFORE the room,
+   *   a room's width off its letter, though it's the same place in the text.
+   * - So it steps the caret right and back, as the arrow keys would:  the same place, drawn by the letter.
+   */
+  private besideTheLetter({ lineNumber, column }: monaco.IPosition) {
+    if (!this.isDrawing || this.isNudging) return
+    const { editor } = this
+    const selections = editor.getSelections() ?? []
+    if (selections.length !== 1 || !selections[0]!.isEmpty()) return
+    if (column >= editor.getModel()!.getLineMaxColumn(lineNumber)) return
+    const isRoomBefore = (editor.getLineDecorations(lineNumber) ?? []).some(
+      (mark) => mark.options.before?.cursorStops === CURSOR_STOPS_RIGHT && mark.range.startColumn === column
+    )
+    if (!isRoomBefore) return
+    this.isNudging = true
+    try {
+      editor.trigger(NUDGE, "cursorRight", null)
+      editor.trigger(NUDGE, "cursorLeft", null)
+    } finally {
+      this.isNudging = false
+    }
   }
 
   ////////////////
@@ -393,21 +432,26 @@ export class SpellBubbly {
   }
 
   /**
-   * Where `line`'s words start, past its indent:  from its tabs and spaces, so it's known for a line Monaco hasn't
-   * drawn (a declaration whose head is scrolled away).
+   * Where `line`'s words are drawn, past its indent and the room pushing it, if it's a group's member:
+   * from its tabs and spaces, so it's known for a line Monaco hasn't drawn (a declaration whose head is scrolled away).
    */
-  private lineStartX(line: number): number {
+  private wordsX(line: number, view: View): number {
     const { editor } = this
     const model = editor.getModel()!
-    const { tabSize } = model.getOptions()
     const { spaceWidth } = editor.getOption(monaco.editor.EditorOption.fontInfo)
-    let columns = 0
-    for (const char of model.getLineContent(line)) {
-      if (char === "\t") columns += tabSize - (columns % tabSize)
-      else if (char === " ") columns++
-      else break
+    const columns = indentColumns(model.getLineContent(line), model.getOptions().tabSize)
+    return (columns + (view.pushes.get(line) ?? 0)) * spaceWidth
+  }
+
+  /** How many columns of room push each line's words right, by line, as Monaco has the marks now. */
+  private pushesByLine(laidOut: BubblyMarks, ranges: monaco.Range[]): Map<number, number> {
+    const pushes = new Map<number, number>()
+    for (const index of laidOut.pushes) {
+      const line = ranges[index]?.startLineNumber
+      const columns = laidOut.marks[index]!.options.before?.content.length ?? 0
+      if (line) pushes.set(line, (pushes.get(line) ?? 0) + columns)
     }
-    return columns * spaceWidth
+    return pushes
   }
 
   /**
@@ -474,6 +518,9 @@ export class SpellBubbly {
 
   /** A redraw is waiting for the next frame. */
   private isRedrawQueued = false
+
+  /** It's stepping the caret beside its letter:  `besideTheLetter()`. */
+  private isNudging = false
 }
 
 ////////////////
@@ -508,6 +555,8 @@ type Measures = {
 type View = {
   /** each mark's range now, by index */
   ranges: monaco.Range[]
+  /** how many columns of room push each line's words right, by line:  `BubblyMarks.pushes` */
+  pushes: Map<number, number>
   /** the first and last lines shown */
   first: number
   last: number
@@ -522,6 +571,15 @@ const RELAYOUT_MSEC = 300
 
 /** The least paper between a group's rail and its members' bands, in the drawing's pixels. */
 const GROUP_RAIL_GAP = 2
+
+/** What moves the caret where it's drawn off its letter:  a click or a key. */
+const CARET_MOVED_BY = ["mouse", "keyboard"]
+
+/** Monaco's `InjectedTextCursorStops.Right`:  room the caret stops after, never before. */
+const CURSOR_STOPS_RIGHT = 1
+
+/** The source of its own caret steps. */
+const NUDGE = "spell-bubbly"
 
 /** The classes that make an editor's box a drawing. */
 const BOX_CLASSES = ["bubbly", "bubbly-monaco"]
