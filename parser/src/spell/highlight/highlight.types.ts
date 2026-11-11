@@ -8,12 +8,17 @@
  * - Types only:  nothing here runs.
  */
 
+import type { SP } from "spell/parser/spell"
+
 ////////////////
 // ## The drawing
 ////////////////
 
-/** A part of speech, which colours a declaration's band:  things purple, actions green, properties amber. */
-export type BubblyPartOfSpeech = "thing" | "action" | "property" | "plain"
+/**
+ * A part of speech, which colours a block's band:  things purple, actions green, properties amber;
+ * a control line (`if`, `for each`) a very light grey.
+ */
+export type BubblyPartOfSpeech = "thing" | "action" | "property" | "plain" | "control"
 
 /**
  * What a stretch of a line is, to a reader:
@@ -74,9 +79,12 @@ export type BubblyLine = {
 }
 
 /**
- * A DECLARATION:  its head on a band in its part of speech's colour, its body under it in a bracket.
+ * A DECLARATION, or a CONTROL LINE with steps under it:  its head on a band in its part of speech's colour,
+ * its body under it, a rail down its left and a foot under it.
  * - No body:  a band alone (a pill).
  * - A group's body holds the declarations after it, up to the next group.
+ * - A control line (`if`, `for each`, `repeat`) is a `control` block, its line plain on its band (Owen, 2026-11-11:
+ *   "I really want some bubbly action and footers in the for and if");  one with no steps under it stays a line.
  */
 export type BubblyBlock = {
   kind: "block"
@@ -94,17 +102,6 @@ export type BubblyBlock = {
   body: BubblyNode[]
 }
 
-/** A CONTROL LINE (`if`, `for each`, `repeat`):  its line, then a simple bracket holding its steps. */
-export type BubblyBracket = {
-  kind: "bracket"
-  /** the rule its line matched */
-  rule: string
-  /** its line */
-  head: BubblyLine
-  /** its steps */
-  body: BubblyNode[]
-}
-
 /** A blank line. */
 export type BubblyGap = {
   kind: "gap"
@@ -113,7 +110,7 @@ export type BubblyGap = {
 }
 
 /** Anything a drawing or a body holds. */
-export type BubblyNode = BubblyBlock | BubblyBracket | BubblyLine | BubblyGap
+export type BubblyNode = BubblyBlock | BubblyLine | BubblyGap
 
 /** Some Spell, laid out in the bubbly look:  `nodes` hold offsets into `text`. */
 export type BubblyDrawing = {
@@ -164,4 +161,10 @@ export type BubblyRulePresentation = {
   isValue?: boolean
   /** a reference that takes the words before it:  `the color` of seven, `a new card` */
   takesArticle?: boolean
+}
+
+/** How `SP.BubblyLayout.of()` reads its text. */
+export type BubblyLayoutOptions = {
+  /** the project file it's the text of:  its project's parse of it is read, when it's of this text */
+  within?: SP.SpellFile
 }

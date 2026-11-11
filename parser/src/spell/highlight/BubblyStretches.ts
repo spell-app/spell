@@ -33,10 +33,6 @@ export class BubblyStretches {
           case "line":
             stretches.push(...BubblyStretches.ofLine(drawing.text, node))
             break
-          case "bracket":
-            stretches.push(...BubblyStretches.ofLine(drawing.text, node.head))
-            walk(node.body)
-            break
           case "block":
             stretches.push(...BubblyStretches.ofLine(drawing.text, node.head, { band: node.partOfSpeech }))
             walk(node.body)
