@@ -176,8 +176,7 @@ para jugar una carta
 
 // la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
 // - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
-para poner una carta en una pila
-	deshacible como "Mover carta"
+para poner una carta en una pila, deshacible como "Mover carta"
 	poner pila inicial a la pila de la carta
 	si pila inicial no puede soltar la carta devolver no
 	si pila no puede tomar la carta devolver no

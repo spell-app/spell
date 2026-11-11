@@ -77,7 +77,7 @@ methods.addRule(QuotedSignatureWords, {
 methods.addRule(QuotedMethodSignature)
 
 methods.addRule(ToDoSomething, {
-  syntax: `to (asTest:test)? {signature:method_signature} :? {statement_body}?`,
+  syntax: `to (asTest:test)? {signature:method_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
   tests: [
     {
       title: "a template's test, in its outline:  a test as any other, its `it` a new one (epic `elemental-spell` Q21)",
@@ -1118,7 +1118,10 @@ methods.addRule(ActionModifier, { syntax: "title {title:text}" })
 methods.addRule(ActionModifier, { syntax: "icon {icon:text}" })
 methods.addRule(ActionModifier, { syntax: "shortcut {keys:text}" })
 methods.addRule(ActionModifier, { syntax: "(undoable:undoable)" })
+methods.addRule(ActionModifier, { syntax: "undoable as {undoneAs:text}" })
 methods.addRule(ActionModifiers, { syntax: "with [{action_modifier} (,|and)]" })
+// ... or after a comma, its name quoted or not (Owen):  `to put a card on a pile, undoable as "Move Card"`
+methods.addRule(ActionModifiers, { syntax: ", [{action_modifier} (,|and)]" })
 
 // one keyboard shortcut, its keys joined by `+`, no spaces:  `meta+T` -- what `action_detail` reads after `shortcut`
 methods.addRule(ShortcutKeys)

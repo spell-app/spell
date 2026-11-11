@@ -1034,8 +1034,10 @@ a line of the built-in types table, a built-in template, or a project's own `one
   - An ACTION's description, indented under it:  `- shortcut meta+T`, `- enabled when ...`, `- selected when ...`,
     `- undoable as "..."`, `- icon "..."`, `- titled "..."` (P18 of epic `language`:  a fill-in makes a getter, `titleFrom`).
     - Or on its head line, its name quoted (epic `language` P48, Q6):
-      `to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"`, and `undoable`.
-      Each is an [`action_modifier`](rules/methods/ActionModifier.ts), after `with`, a comma or `and` between;
+      `to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"`, and `undoable` or `undoable as "..."`.
+      Each is an [`action_modifier`](rules/methods/ActionModifier.ts), after `with`, a comma or `and` between.
+      - Or after a comma, its name quoted or not (Owen):  `to put a card on a pile, undoable as "Move Card"`.
+        Not `with` after a name unquoted:  its words would read `with` as one of its own.
       `ActionDetail.detailsOf()` reads them first, then the body's lines.
       Its declaration names it without its quotes (`ToDoSomething.getDeclaration()`).
     - Its title, said nowhere, is its words in Initial Caps (P48):  `to auto play` is `Auto Play`, written into

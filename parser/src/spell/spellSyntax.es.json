@@ -9776,7 +9776,7 @@
           "purpose": "Defines a new method/statement: e.g. `to foo the bar`, `to create a card`, `to create (a card)`, `to notify (message)`.",
           "syntaxes": [
             {
-              "syntax": "para (asTest:probar)? {signature:method_signature} :? {statement_body}?",
+              "syntax": "para (asTest:probar)? {signature:method_signature} {modifiers:action_modifiers}? :? {statement_body}?",
               "example": "para empezar el juego",
               "outputs": {
                 "js": {
@@ -10072,7 +10072,7 @@
           "ruleNames": ["action_modifier"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionModifier.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "One thing an action's HEAD line says about it, after `with` (epic `language` P48, Q6): `to \"deal the cards\" with title \"Deal\", icon \"card\", shortcut \"meta+N\"`.",
           "syntaxes": [
             {
@@ -10086,6 +10086,9 @@
             },
             {
               "syntax": "(undoable:deshacible)"
+            },
+            {
+              "syntax": "deshacible como {undoneAs:text}"
             }
           ],
           "aliases": []
@@ -10095,11 +10098,14 @@
           "ruleNames": ["action_modifiers"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionModifier.ts",
-          "line": 24,
+          "line": 26,
           "purpose": "The things an action's head line says, after its quoted name -- see `action_modifier`.",
           "syntaxes": [
             {
               "syntax": "con [{action_modifier} (,|y)]"
+            },
+            {
+              "syntax": ", [{action_modifier} (,|y)]"
             }
           ],
           "aliases": []

@@ -88,7 +88,7 @@ methodsEs.addRule(QuotedSignatureWords, {
 methodsEs.addRule(QuotedMethodSignature)
 
 methodsEs.addRule(ToDoSomething, {
-  syntax: `para (asTest:probar)? {signature:method_signature} :? {statement_body}?`,
+  syntax: `para (asTest:probar)? {signature:method_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
   tests: [
     {
       title: "inline method signatures & variables",
@@ -1057,7 +1057,10 @@ methodsEs.addRule(ActionModifier, { syntax: "título {title:text}" })
 methodsEs.addRule(ActionModifier, { syntax: "icono {icon:text}" })
 methodsEs.addRule(ActionModifier, { syntax: "atajo {keys:text}" })
 methodsEs.addRule(ActionModifier, { syntax: "(undoable:deshacible)" })
+methodsEs.addRule(ActionModifier, { syntax: "deshacible como {undoneAs:text}" })
 methodsEs.addRule(ActionModifiers, { syntax: "con [{action_modifier} (,|y)]" })
+// ... o tras una coma:  `para poner una carta en una pila, deshacible como "Mover carta"`
+methodsEs.addRule(ActionModifiers, { syntax: ", [{action_modifier} (,|y)]" })
 
 // one keyboard shortcut, its keys joined by `+`, no spaces:  `meta+T` -- what `action_detail` reads after `atajo`
 methodsEs.addRule(ShortcutKeys)
