@@ -223,14 +223,17 @@ export class SpellBubbly {
     shapes.replaceChildren(...this.drawAll(laidOut.shapes, view))
   }
 
-  /** The elements of `shapes`, those inside each in its own. */
-  private drawAll(shapes: BubblyShape[], view: View): HTMLElement[] {
+  /**
+   * The elements of `shapes`, those inside each in its own.
+   * - `floor`:  the left-most a band may start, so a group's members never cover its rail (below)
+   */
+  private drawAll(shapes: BubblyShape[], view: View, floor = -Infinity): HTMLElement[] {
     const elements: HTMLElement[] = []
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (!range) continue
       if (shape.kind === "block") {
-        const block = this.drawBlock(shape, range, view)
+        const block = this.drawBlock(shape, range, view, floor)
         if (block) elements.push(block)
       } else if (range.startLineNumber >= view.first && range.startLineNumber <= view.last) {
         const element =
@@ -245,7 +248,7 @@ export class SpellBubbly {
    * A declaration:  its band (on its head's line, if shown), its gutter, body and foot (if it has a body that isn't
    * folded away), then what's inside it;  `undefined` when none of it is in view.
    */
-  private drawBlock(shape: BubblyBlockShape, range: monaco.Range, view: View): HTMLElement | undefined {
+  private drawBlock(shape: BubblyBlockShape, range: monaco.Range, view: View, floor: number): HTMLElement | undefined {
     const { editor } = this
     const { measures, lineHeight } = view
     const headLine = range.startLineNumber
@@ -257,7 +260,7 @@ export class SpellBubbly {
     const headTop = editor.getTopForLineNumber(headLine)
     const lastTop = editor.getTopForLineNumber(lastLine)
     const hasBody = shape.hasBody && lastTop > headTop
-    const left = this.lineStartX(headLine) - measures.padLeft
+    const left = Math.max(this.lineStartX(headLine) - measures.padLeft, floor)
     if (headLine >= view.first) {
       const ends = shape.ends
       const lineEnd = this.xOf(headLine, editor.getModel()!.getLineMaxColumn(headLine))
@@ -285,7 +288,10 @@ export class SpellBubbly {
         place(element("bubbly-foot"), { left: gutter, top: footTop }, measures.scale)
       )
     }
-    block.append(...this.drawAll(shape.inside, view))
+    // A group's members are written at its own indent, so their bands would start on its rail:
+    // they start just past it instead, their words where they are (Owen, 2026-11-11)
+    const insideFloor = shape.isGroup && hasBody ? left + measures.gutter + GROUP_RAIL_GAP * measures.scale : floor
+    block.append(...this.drawAll(shape.inside, view, insideFloor))
     return block
   }
 
@@ -500,6 +506,9 @@ type View = {
 
 /** How long typing pauses before the code is laid out again:  the marks follow the text till then. */
 const RELAYOUT_MSEC = 300
+
+/** The paper between a group's rail and its members' bands, in the drawing's pixels. */
+const GROUP_RAIL_GAP = 2
 
 /** The classes that make an editor's box a drawing. */
 const BOX_CLASSES = ["bubbly", "bubbly-monaco"]
