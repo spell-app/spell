@@ -355,8 +355,14 @@ export const APP_TEXTS = {
   homeQuoteNote: "Four lines, one working list.",
   homeExamplesLine: "Open one, change it, make it yours.",
   homeGuidesLine: "Your idea, your pace.",
+  homeLibraryLine:
+    "Apps for an org:  its Admin page, chat, feed, inbox and events.  Open one, change it, give it to your own org.",
+  "category.first-steps": "First steps",
+  "category.games": "Games",
+  "category.everyday": "Everyday apps",
+  "category.web-data": "Data from the web",
+  "category.sites": "Sites",
   homeProjectsLine: "What you've made, and where to start the next one.",
-  homeFixturesLine: "The frozen apps the tests run against.",
   editorPieceBroken:
     "The editor's {piece} doesn't compile, so the editor runs the last one that did.  Fix it and publish again:  {problem}",
   draftEditorTitle: "The editor, from your drafts of its pieces",

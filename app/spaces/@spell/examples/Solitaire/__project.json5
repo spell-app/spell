@@ -1,6 +1,7 @@
 {
   "title": "Solitaire",
   "description": "Klondike solitaire:  its own cards, deck and piles, each its own element;  the card a two sided view, the game's moves its actions, each with its title and key, drawn as its toolbar and its right-click menu;  `pause for` animates the deal",
+  "category": "games",
   "imports": [
     {
       "path": "/Card.spell",

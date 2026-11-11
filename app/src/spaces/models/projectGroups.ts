@@ -26,11 +26,37 @@ export const HOME_ORG = "spell"
 export const SPELL_UI_SITE_PROJECT = "@spell/guides/SpellUI"
 
 /**
- * A project of a group's list, as the home page reads it:  `SP.ProjectListEntry`, and `"onHome": false` when its
- * project file says so (epic `notebook` P10).
- * - Only a project that stays off the home page has it:  the Guides row and the Hero's first-guide button skip it.
+ * A project of a group's list, as the home page reads it:  `SP.ProjectListEntry`, and what only the home page needs.
  */
-export type ProjectListEntryWithHome = SP.ProjectListEntry & { onHome?: false }
+export type ProjectListEntryWithHome = SP.ProjectListEntry & {
+  /**
+   * `false` when its project file says so (epic `notebook` P10):
+   * the home page's rows and the Hero's first-guide button skip it.
+   */
+  onHome?: false
+  /** Its project file's `category`, which row of the examples it's in (epic `mockup` P18). */
+  category?: string
+  /** It has a picture of its app running, `PROJECT_THUMBNAIL` in its folder, for its card (epic `mockup` P18). */
+  hasThumbnail?: true
+}
+
+/**
+ * A project's picture of its app running by itself, for its card on the home page:  `__thumbnail.png`, in its folder.
+ * - Taken by the app folder's `yarn examples:readme` (epic `mockup` P18);  no file, no picture:  its letter instead.
+ * - A `.png` is never in a project's file list, so the editor doesn't show it.
+ */
+export const PROJECT_THUMBNAIL = "__thumbnail.png"
+
+/**
+ * The home page's rows of examples, in order, by each project file's `category` (epic `mockup` P18).
+ * - Their titles are the editor's texts, `category.<id>`:  "First steps", "Games" ...
+ * - A project with none, or one not here, comes after them.
+ * - The org apps have no category:  they're the library's, its own row.
+ */
+export const EXAMPLE_CATEGORIES = ["first-steps", "games", "everyday", "web-data", "sites"] as const
+
+/** One of `EXAMPLE_CATEGORIES`. */
+export type ExampleCategory = (typeof EXAMPLE_CATEGORIES)[number]
 
 /**
  * Spell's project GROUPS:  where projects live, each a list the editor shows (`SpellProjectRoot`).

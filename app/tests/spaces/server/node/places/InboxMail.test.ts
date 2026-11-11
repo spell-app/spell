@@ -136,7 +136,7 @@ describe("how each person hears of their inbox", () => {
     const [mailed] = await mailsTo("ana@example.com")
     expect(mailed!.subject).toBe("bo@rs wrote to you")
     expect(mailed!.text).toContain("Can you bring chairs?")
-    expect(mailed!.text).toContain(`${ADDRESS}/apps/@spell/examples/Inbox`)
+    expect(mailed!.text).toContain(`${ADDRESS}/apps/@spell/library/Inbox`)
     expect(mailed!.text).toMatch(/Stop these mails:  https:\/\/spell\.test\/api\/mail\/stop\?/)
     // the sender hears nothing of their own copy
     expect(await mailsTo("bo@example.com")).toEqual([])

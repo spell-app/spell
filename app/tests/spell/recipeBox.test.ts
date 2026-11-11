@@ -68,6 +68,9 @@ type Program = {
 /** The built-in examples:  what people run, in the editor. */
 const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
+/** The built-in library:  the org apps (Org Admin, Inbox ...;  epic `mockup` P18). */
+const LIBRARY = resolve(__dirname, "../../spaces/@spell/library")
+
 /** The lines a program starts with, up to its first type. */
 const PLACE_LINES = /^[\s\S]*?(?=^(?:a|an|una) ")/m
 
@@ -1285,16 +1288,18 @@ start the box
    * - `path`:  the API file, `RecipeBox/RecipeBox.api.spell`;  the drawing is the same name, no `.api`.
    */
   const shipped = (path: string): Program => {
+    // an example's, else the library's:  the org apps
+    const group = existsSync(join(EXAMPLES, path)) ? EXAMPLES : LIBRARY
     const drawing = path.replace(/\.api(\.\w\w)?\.spell$/, "$1.spell")
     const styles = path.replace(/\.api(\.\w\w)?\.spell$/, ".css")
     return {
       path: `/${path.split("/")[1]}`,
-      source: readFileSync(join(EXAMPLES, path), "utf8"),
+      source: readFileSync(join(group, path), "utf8"),
       field: "",
       more: [
-        { path: `/${drawing.split("/")[1]}`, contents: readFileSync(join(EXAMPLES, drawing), "utf8") },
-        ...(existsSync(join(EXAMPLES, styles))
-          ? [{ path: `/${styles.split("/")[1]}`, contents: readFileSync(join(EXAMPLES, styles), "utf8") }]
+        { path: `/${drawing.split("/")[1]}`, contents: readFileSync(join(group, drawing), "utf8") },
+        ...(existsSync(join(group, styles))
+          ? [{ path: `/${styles.split("/")[1]}`, contents: readFileSync(join(group, styles), "utf8") }]
           : [])
       ]
     }

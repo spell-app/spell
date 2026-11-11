@@ -21,7 +21,7 @@ import type { ArrivedMessage, PersonInbox } from "./PersonInbox"
 export const MAIL_STOP_PATH = "/api/mail/stop"
 
 /** Where a mail's link opens the person's inbox:  the built-in inbox program, as the cloud serves it. */
-export const INBOX_PAGE_PATH = "/apps/@spell/examples/Inbox"
+export const INBOX_PAGE_PATH = "/apps/@spell/library/Inbox"
 
 /** The hour of the day, on the server's clock, from which a day's digest goes:  the round looks each hour. */
 export const DIGEST_HOUR = 7

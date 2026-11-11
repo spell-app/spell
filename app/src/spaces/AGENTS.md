@@ -19,7 +19,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its folders:
   - [@spell/](../../spaces/@spell/):  the `@spell` space's built-in projects, committed (see "Projects" below)
     - `examples/`:  the `@spell/examples` group (fizzbuzz, calculator ...)
-    - `library/`:  the `@spell/library` group (people)
+    - `library/`:  the `@spell/library` group:  the libraries others import (people, games), and the org apps (OrgAdmin, Inbox, OrgFeed, OrgChat, OrgEvents;  epic `mockup` P18)
       - `people/`, the people library (P7):  people, orgs and what they keep
       - compiled to `people.lib.ts` (the `ts/lib` target):
         the app, the people store and the spell command import it
@@ -262,7 +262,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a paired space's folder with a hand-made `__members/`, which doesn't count there
       - a real Space whose list isn't Spell's
       - It changes nothing, and exits 1 when anything differs.
-  - THE ADMIN PAGE (epic `atmosphere` P25):  the built-in program `@spell/examples/OrgAdmin`, plain Spell, reading
+  - THE ADMIN PAGE (epic `atmosphere` P25):  the built-in program `@spell/library/OrgAdmin`, plain Spell, reading
     and writing the org's roles as a place, `admin roles is a data folder at "@rs/__admin/roles"`
     ([OrgRolesPlace.ts](server/node/people/OrgRolesPlace.ts), opened by `SpaceFolders` at that address).
     - Its collections, each a program type's plural:  `members`, `teams`, `projects`, `org_roles`, `org_profiles` (the org itself, for its title and as a space to design), `terms`,
@@ -273,7 +273,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Its event stages (T50, J153):  the Board and the Admins add, change and remove the org's event stages there
       (`OrgEvents.setProgram()`);  a new one goes in before the last, and one an event is in, or another moves to,
       can't be removed.
-    - In Spanish too:  `@spell/examples/AdministracionDeLaOrg` (T46, J114), the same place, each field `guardado como`
+    - In Spanish too:  `@spell/library/AdministracionDeLaOrg` (T46, J114), the same place, each field `guardado como`
       its English name.
     - Each row added or removed is ONE change through `OrgRoles`, so its rules hold and it's logged;  a person added
       joins the org (`"join"`), a term removed ends.
@@ -293,7 +293,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       P33's feed leaves it off too.
     - Kept in the Admin space beside the roles, `@rs/__admin/events.json5`:  `{ program?, events }`;  the program the
       Board's and the Admins' to change (`setProgram()`), every move in the org's log (`"event"`, its stage the name).
-    - Its page:  the built-in program `@spell/examples/OrgEvents`, reading the same place as the Admin page at
+    - Its page:  the built-in program `@spell/library/OrgEvents`, reading the same place as the Admin page at
       `@rs/__admin/events`, its collections `events` (an insert proposes, an update of `stage` moves) and
       `event_stages`.
   - THE DESIGN RIGHT (epic `atmosphere` T47, J117):  who changes a space's PROGRAM, its projects' pages and source,
@@ -339,7 +339,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Spell sends too, with nobody behind it (`PersonInbox.sendAsSpell()`):  an invitation's pointer (P31).
     - `@rs/__inbox`, the org's address with no person, is whoever's asking's own (`SpaceFolders`;  the kit's
       `PERSON_INBOX_ADDRESS`, never read direct):  one program, each person's inbox, the built-in
-      `@spell/examples/Inbox`.
+      `@spell/library/Inbox`.
     - Two more collections only she writes (epic `atmosphere` P30):  `mail_choices` (`INBOX_MAIL`), how she hears of
       it by mail, the first one counting;  `subscriptions` (`INBOX_SUBSCRIPTIONS`), each a shared space of the org
       she follows, `{ space: "events_team@rs" }`, a private one refused.
@@ -362,7 +362,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A PERSON'S FEED in the org ([PersonFeed.ts](server/node/places/PersonFeed.ts), epic `atmosphere` P33):
     `bo@rs/__feed`, what's new across every space of the org he may read, put together each time he asks.
     - `@rs/__feed`, the org's address with no person, is whoever's asking's own (`SpaceFolders`;  the kit's
-      `PERSON_FEED_ADDRESS`, never read direct):  one program, each person's feed, the built-in `@spell/examples/OrgFeed`.
+      `PERSON_FEED_ADDRESS`, never read direct):  one program, each person's feed, the built-in `@spell/library/OrgFeed`.
     - Every space's `posts` (`FEED_POSTS`), each read through its own place AS HIM:  its read check, takedowns and
       public settings hold, and a space he can't read is left out;  every inbox left out, and a quiet event's spaces
       (`OrgEvents.isQuietAt()`).
@@ -649,7 +649,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Only someone who may read the space joins.
     - A program names one by its Spell address:  `team chat is a room at "events_team@rs/messages"`, the page server's
       room of that space's `messages`, signed in by a Spell account as a data folder is (epic `atmosphere` P36).
-  - CHAT THREADS (epic `atmosphere` P36):  a live room of a space's `messages`, the built-in `@spell/examples/OrgChat`.
+  - CHAT THREADS (epic `atmosphere` P36):  a live room of a space's `messages`, the built-in `@spell/library/OrgChat`.
     - Every team, project and event has two, with nothing to set up:  an open thread in its shared space
       (`events_team@rs/messages`), everyone in the org writing there, and its organizers' in its private one
       (`events_team@rs/__private/messages`), only its Managers.

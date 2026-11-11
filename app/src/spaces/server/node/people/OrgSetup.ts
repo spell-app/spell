@@ -17,7 +17,7 @@ const ORG_ID = /^[a-z][a-z0-9_]*$/
 const ORG_PAGES = ["OrgAdmin", "Inbox", "OrgFeed", "OrgChat"]
 
 /** Where the built-in programs are, by name. */
-const PAGE_GROUP = "@spell/examples"
+const PAGE_GROUP = "@spell/library"
 
 /** How the built-in programs name the org they're written for:  its address, and its name in their comments. */
 const SAMPLE_ORG = /@rs\b/g

@@ -1,6 +1,7 @@
 {
   "title": "Flash Cards",
   "description": "A deck of Spanish words to quiz yourself on:  each card a two sided view that turns over on a click, you say whether you knew it, and a toolbar keeps the score",
+  "category": "games",
   "imports": [{
     "path": "/FlashCard.spell",
     "active": true

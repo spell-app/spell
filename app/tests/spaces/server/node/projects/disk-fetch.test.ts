@@ -65,7 +65,9 @@ describe("diskFetch", () => {
     expect(await diskFetch({ url: SP.SpellUrls.listUrl("@spell/examples") })).toContainEqual({
       path: solitaire,
       title: "Solitaire",
-      description: expect.stringMatching(/^Klondike solitaire/)
+      description: expect.stringMatching(/^Klondike solitaire/),
+      category: "games",
+      hasThumbnail: true
     })
   })
 

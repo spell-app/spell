@@ -92,11 +92,11 @@ The groups, and where each one's folder is:
 | Group | In the editor | Its folder | What's in it |
 | --- | --- | --- | --- |
 | `owen@spell` | Projects | `spell.spaces/@spell/owen@/`, beside the kit's folder, in no repo | your own projects:  where `spell app create` makes one |
-| `@spell/examples` | Examples | [spaces/@spell/examples/](spaces/@spell/examples/), committed | the eleven example apps ([README-examples.md](README-examples.md)) |
-| `@spell/library` | Libraries | [spaces/@spell/library/](spaces/@spell/library/), committed | projects other projects import:  people |
+| `@spell/examples` | Examples | [spaces/@spell/examples/](spaces/@spell/examples/), committed | the twenty-one example apps, in rows by each project file's `category` on the home page ([README-examples.md](README-examples.md)) |
+| `@spell/library` | Libraries | [spaces/@spell/library/](spaces/@spell/library/), committed | projects other projects import (people, games), and the six apps every org runs on, which each new org copies (Org Admin, Inbox ...);  its own row on the home page |
 | `@spell/guides` | Guides | [spaces/@spell/guides/](spaces/@spell/guides/), committed | twelve guides, each a Spell program that reads as prose:  a first walkthrough, A tour of Spell, and how each example works ([README-examples.md](README-examples.md#guides--programs-that-read-as-prose)) |
 | `@spell/sites` | Sites | [spaces/@spell/sites/](spaces/@spell/sites/), committed | sites of Spell's own, mapped page by page:  SpellApp, the editor's own screens |
-| `@spell/test` | Test fixtures, listed only in dev | [spaces/@spell/test/](spaces/@spell/test/), committed and frozen | the 7 projects the tests in [tests/spell/](tests/spell/) compile and compare against snapshots;  the examples and the guides are tested as they are |
+| `@spell/test` | Test fixtures, never on the home page | [spaces/@spell/test/](spaces/@spell/test/), committed and frozen | the 7 projects the tests in [tests/spell/](tests/spell/) compile and compare against snapshots;  the examples and the guides are tested as they are |
 
 - `spell projects` lists them, with how many projects each holds ([README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app)).
 - A project in no group still runs:  `spell` makes up a group for it on the spot, `@local/<folder>`,

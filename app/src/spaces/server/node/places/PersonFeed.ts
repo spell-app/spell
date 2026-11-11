@@ -55,7 +55,7 @@ export const FEED_SPACE_FIELD = "space"
  * - Only what CHANGED, the second time:  its version is each space's own, so `changesSince()` asks each space what
  *   changed since then (`FolderPlace.changesSince()`), and a space gone from his feed has its posts removed.
  * - Read only:  a post is written in its own space.
- * - Node only;  knows nothing of pages:  its page is the built-in program `@spell/examples/OrgFeed`.
+ * - Node only;  knows nothing of pages:  its page is the built-in program `@spell/library/OrgFeed`.
  * - Left out:  a feed for millions, worked out on a server ahead of time;  this one is for communities of hundreds.
  ****************/
 export class PersonFeed implements Place {

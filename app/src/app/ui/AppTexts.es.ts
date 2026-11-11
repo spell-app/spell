@@ -440,8 +440,14 @@ const APP_TEXTS_ES: AppTextPack = {
   homeQuoteNote: "Cuatro líneas, una lista que funciona.",
   homeExamplesLine: "Abre uno, cámbialo, hazlo tuyo.",
   homeGuidesLine: "Tu idea, a tu ritmo.",
+  homeLibraryLine:
+    "Aplicaciones para una org:  su página de administración, chat, novedades, bandeja de entrada y eventos.  Abre una, cámbiala, dásela a tu propia org.",
+  "category.first-steps": "Primeros pasos",
+  "category.games": "Juegos",
+  "category.everyday": "Aplicaciones de todos los días",
+  "category.web-data": "Datos de la web",
+  "category.sites": "Sitios",
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
-  homeFixturesLine: "Las aplicaciones congeladas con las que corren las pruebas.",
   editorPieceBroken:
     "La pieza {piece} del editor no compila, así que el editor usa la última que sí compiló.  Arréglala y publícala de nuevo:  {problem}",
   draftEditorTitle: "El editor, con tus borradores de sus piezas",

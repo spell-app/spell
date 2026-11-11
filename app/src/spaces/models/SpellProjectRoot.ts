@@ -55,7 +55,10 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   static get editorPieces(): SpellProjectRoot {
     return new SpellProjectRoot("@spell/editor")
   }
-  /** Singleton `@spell/library` root -- projects others import, e.g. `@spell/library/people` in a project file. */
+  /**
+   * Singleton `@spell/library` root -- projects others import, e.g. `@spell/library/people` in a project file,
+   * and the org apps (`@spell/library/OrgAdmin` ...;  epic `mockup` P18), each org's pages copied from them.
+   */
   static get library(): SpellProjectRoot {
     return new SpellProjectRoot("@spell/library")
   }

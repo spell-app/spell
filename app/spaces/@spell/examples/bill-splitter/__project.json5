@@ -1,6 +1,7 @@
 {
   "title": "Bill Splitter",
   "description": "Who owes what after a meal:  a row of Spell UI's fields per person and what each ordered, a tip shared out the same way, and sums that follow every keystroke",
+  "category": "first-steps",
   "imports": [{
     "path": "/Money.spell",
     "active": true

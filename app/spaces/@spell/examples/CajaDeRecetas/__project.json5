@@ -1,6 +1,7 @@
 {
   "title": "Caja de recetas",
   "description": "Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea de su archivo de API, CajaDeRecetas.api.es.spell",
+  "category": "everyday",
   "imports": [
     {
       "path": "/CajaDeRecetas.api.es.spell",

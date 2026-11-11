@@ -9,7 +9,7 @@
     "spell": "from",
     "python": "from_",
     "kind": "property",
-    "where": "@spell/examples/Inbox"
+    "where": "@spell/library/Inbox"
   },
   {
     "spell": "list",

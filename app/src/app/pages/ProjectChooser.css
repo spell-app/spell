@@ -188,8 +188,8 @@
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 12px;
   }
-  /* the line over projects written in another language, "En Español":  quiet, across the grid */
-  .language {
+  /* the line over a run of cards, a category's ("Games") or a language's ("En Español"):  quiet, across the grid */
+  .subhead {
     grid-column: 1 / -1;
     margin: 12px 0 0;
     font-size: 0.85em;

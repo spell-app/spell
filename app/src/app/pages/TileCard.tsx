@@ -10,6 +10,8 @@ import "./TileCard.css"
  *   (`<SiteEditorPage>`, epic `mockup` P4):  ONE card, drawn the same way in both.
  * - It's a link when it has an `href` (a project:  a middle click opens a tab), else a button.
  * - What a click does is its owner's:  `onClick`, `onDblClick`.
+ * - `banner`:  its picture (or its tile) across its top, the text under it:  the home page's rows of examples,
+ *   each a picture of its app running (epic `mockup` P18).
  ****************/
 export function TileCard(props: TileCardProps) {
   const contents = () => (
@@ -32,7 +34,7 @@ export function TileCard(props: TileCardProps) {
       </span>
     </>
   )
-  const classes = () => ["TileCard", "card", props.class, { selected: !!props.selected }]
+  const classes = () => ["TileCard", "card", props.class, { selected: !!props.selected, banner: !!props.banner }]
   return (
     <Show
       when={props.href}
@@ -77,6 +79,8 @@ export type TileCardProps = {
   hueFrom: string
   /** A picture in place of its tile:  a page's screenshot. */
   picture?: string
+  /** Its picture (or tile) across its top, big, the text under it;  default:  small, beside the text. */
+  banner?: boolean
   /** A link's address;  none:  it's a button. */
   href?: string
   /** It's the one picked. */
