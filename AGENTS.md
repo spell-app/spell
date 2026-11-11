@@ -431,7 +431,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - A worktree's window holds no main checkout (above), so each file is the worktree's alone.
     - Before 2026-10-22 it hid the main root's files beside a `.spell-main` marker:  that hid them in the Explorer
       only, never in Quick Open.
-  - `search.exclude` in [spell-app's VS Code settings](app/.vscode/settings.json)
+  - `search.exclude` in [the kit's VS Code settings](.vscode/settings.json), which every window reads:
+    its first folder is the kit's root (epic `epic-engine` P73)
     keeps generated files, icons and screenshots out of Quick Open and Find.
 
 ### Entering one
