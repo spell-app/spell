@@ -64,7 +64,7 @@ Inside a framework's page is another matter:  Spell UI's `<ui-dropdown>` has bee
 | --- | --- | --- |
 | `<spell-viewer>` | runs a project, with an optional toolbar and a debug pane below it:  the Type Explorer, the Thing Explorer and the console;  a root of its own, so the page needs nothing around it | `project` or `src`:  what to run;  `editor`:  a `<spell-editor>` to take programs from;  `toolbar`;  `debug`:  the pane's first tab |
 | `<spell-editor>` | Monaco with tabs, editing a project on the page server;  it compiles as it opens, two seconds after typing stops and on Cmd+Enter, and hands what it compiled to its apps | `project`;  `file`:  the one to show first;  `app`:  a selector for the apps it feeds |
-| `<spell-code>` | Spell UI's `<ui-code>`, colouring Spell with Spell's own parser;  once it loads, every `<ui-code language="spell">` on the page is coloured too | `language`:  `spell` unless it says otherwise |
+| `<spell-code>` | Spell UI's `<ui-code>`, drawing Spell in the bubbly look from Spell's own parser:  each declaration on a band, what was typed in pills;  once it loads, every `<ui-code language="spell">` on the page is drawn so too | `language`:  `spell` unless it says otherwise;  `line-numbers` or `wrap`:  coloured lines instead |
 | `<spell-markdown>` | Spell UI's `<ui-markdown>`, drawn by spell-parser's own markdown engine, its Spell blocks coloured | `editable`:  Write and Preview tabs |
 
 Put them on a page either way:

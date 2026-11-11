@@ -141,7 +141,7 @@ function mix(a: RGBA, shareA: number, b: RGBA, shareB: number): RGBA {
 /** `#rgb`, `#rrggbb`, `#rrggbbaa` as a colour. */
 function parseHex(text: string): RGBA {
   let digits = text.slice(1)
-  if (digits.length <= 4) digits = [...digits].map((digit) => digit + digit).join("")
+  if (digits.length <= 4) digits = digits.replace(/./g, "$&$&")
   const byte = (index: number) => Number.parseInt(digits.slice(index * 2, index * 2 + 2), 16)
   return [byte(0), byte(1), byte(2), digits.length === 8 ? byte(3) / 255 : 1]
 }

@@ -112,9 +112,14 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     into a file in plain Spell, each member bare (since epic `language` P46;  in tags from P40 till then).
   - Everything else is handed in (`IngestSettings`):  `fetch`, `ClaudeRunner`, files, the question, the read through the Spell.
   - Imported by path, never through the barrel:  `spell/parser/spell/ingest/PlaceIngest`.
-- `highlight/`:  `SpellHighlighter`.
-  - It colours a snippet without a project, for `<ui-code language="spell">`.
-  - Call it as `SP.SpellHighlighter.spans(text)`.
+- `highlight/`:  `SpellHighlighter`, `BubblyLayout`, `BubblyPresentation`.
+  - `SpellHighlighter` colours a snippet without a project, for `<ui-code language="spell">`.
+    Call it as `SP.SpellHighlighter.spans(text)`.
+  - `BubblyLayout` lays a snippet out in the bubbly look, as data (epic `language` P49):
+    `SP.BubblyLayout.of(text, parser)`, from the highlighter's spans, the parse and the indent.
+    - Each rule's presentation is ONE table, by rule name (or a built rule's `importableAs`):
+      `SP.BubblyPresentation`.  A new declaration or control rule gets a row there.
+    - Read by the app's `BubblyHtml`, and by Monaco's and VS Code's drawings (P50, P51).
   - The app's `<spell-code>` colours pages with it, from source, in a lazy chunk
     ([SpellLanguage](../../../app/src/app/components/spell-code/SpellLanguage.ts)):
     nothing to regenerate after a grammar change.

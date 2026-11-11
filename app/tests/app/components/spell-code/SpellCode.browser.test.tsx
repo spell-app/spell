@@ -94,7 +94,7 @@ describe("<spell-code>", () => {
     ])
     expect(drawing.querySelector(".bubbly-bracket")!.textContent).toBe('return "Q"')
     expect(host.shadowRoot!.querySelector("style")!.textContent).toContain(".bubbly")
-    expect(host.shadowRoot!.querySelector("[part~=pre]")!.hidden).toBe(true)
+    expect(host.shadowRoot!.querySelector<HTMLElement>("[part~=pre]")!.hidden).toBe(true)
     // the copy button still copies the code as written
     expect(host.content.trim()).toBe(CARD.replace(/<\/?script[^>]*>/g, "").trim())
   })

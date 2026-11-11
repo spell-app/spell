@@ -1171,6 +1171,11 @@ Two seams show when you work in this folder:
 And what IS here, though you might look elsewhere:
 - **The highlighter:**  `SP.SpellHighlighter.spans(text)` colours a snippet with no project,
   for `<ui-code language="spell">`.
+- **The bubbly look, as data:**  `SP.BubblyLayout.of(text)` lays a snippet out as Spell's pages draw it:
+  each declaration a head on a band with what was typed in pills, its body under it, a control line's steps in a
+  bracket.
+  - How each rule presents is ONE table, by rule name:  `SP.BubblyPresentation`.
+  - The app draws it (`<spell-code>`, every `<ui-code language="spell">`);  so will the code editors.
 - **Node-only helpers**, never in the entry (`spell/parser/spell/node/...`):
   the TypeScript check and its build, pyright, the syntax table.
 
@@ -1216,7 +1221,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | [builtinTypes.ts](src/spell/builtinTypes.ts) | the built-in types' members |
 | [SpellDeclarations.ts](src/spell/SpellDeclarations.ts), [SpellWords.ts](src/spell/SpellWords.ts) | what a project declares, and its words |
 | [SpellWarnings.ts](src/spell/SpellWarnings.ts) | warnings:  what a program should say, which never stops it compiling |
-| [highlight/](src/spell/highlight/) | `SpellHighlighter`:  colours a snippet with no project |
+| [highlight/](src/spell/highlight/) | `SpellHighlighter`:  colours a snippet with no project;  `BubblyLayout`, `BubblyPresentation`:  the bubbly look as data |
 | [node/](src/spell/node/) | node only:  the TypeScript check and build, pyright, the syntax table |
 | [test/](src/spell/test/) | test helpers:  `parseSpellProject()`, `runSpell()`, `unitTestModuleRules()` |
 | [spellSyntax.json](src/spell/spellSyntax.json) | GENERATED:  every rule, syntax and output |

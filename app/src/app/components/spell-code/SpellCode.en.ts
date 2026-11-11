@@ -10,7 +10,7 @@ import type { E } from "spell/ui/core"
 
 /****************
  * ### `<spell-code>`
- * A block of spell, coloured by spell's own parser:  `<ui-code>` with `language="spell"` by default.
+ * A block of spell, drawn in the bubbly look by spell's own parser:  `<ui-code>` with `language="spell"` by default.
  ****************/
 export const spellCodeVocabulary = {
   tag: "spell-code",
@@ -19,9 +19,10 @@ export const spellCodeVocabulary = {
   skeleton: "5 line paragraph",
   noun: "code",
   description:
-    "Spell code shows a block of spell coloured by spell's own parser:  `<ui-code>`, its language `spell` unless " +
-    'it says otherwise.  Loading it registers spell with the page\'s `UI.code`, so every `<ui-code language="spell">` ' +
-    "on the page, and every spell block of a markdown, is coloured too.",
+    "Spell code shows a block of spell drawn in the bubbly look by spell's own parser:  each declaration on a band, " +
+    "what was typed in pills.  It's a `<ui-code>`, its language `spell` unless it says otherwise;  with " +
+    "`line-numbers` or `wrap`, coloured lines instead.  Loading it registers spell with the page's `UI.code`, so " +
+    'every `<ui-code language="spell">` on the page, and every spell block of a markdown, is drawn so too.',
   attributes: [
     {
       name: "language",
