@@ -219,7 +219,6 @@ export class SpellBubbly {
     const view: View = {
       ranges,
       lefts: new Map(),
-      partsOfParents: new Set(),
       footDrops: new Map(),
       first: 0,
       last: 0,
@@ -242,25 +241,19 @@ export class SpellBubbly {
   /**
    * Where the band of each block in `shapes` starts, those inside each too, into `view.lefts`:
    * from its words, its lines drawn or not;  `parent`:  the block they're in.
-   * - A group is drawn as part of its parent (Owen, 2026-11-11):  its band, grey, starts where its parent's does;
-   *   its grey rail covers its parent's while it lasts, and it has no paper or foot of its own;
-   *   its members are drawn as the parent's other lines are.
+   * - A group starts where its parent does (Owen, 2026-11-11):  its grey band grows out of its parent's rail, its
+   *   rail over its parent's while it lasts, then its foot;  its members are drawn as the parent's other lines are.
    */
   private placeBands(shapes: BubblyShape[], view: View, parent?: BubblyBlockShape) {
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (shape.kind !== "block" || !range) continue
-      const isPartOfParent = shape.isGroup && !!parent
-      const left = isPartOfParent ? view.lefts.get(parent)! : this.wordsX(range.startLineNumber) - view.measures.padLeft
+      // a group starts where its parent does:  its rail on its parent's
+      const left =
+        shape.isGroup && parent ? view.lefts.get(parent)! : this.wordsX(range.startLineNumber) - view.measures.padLeft
       view.lefts.set(shape, left)
-      if (isPartOfParent) view.partsOfParents.add(shape)
       this.placeBands(shape.inside, view, shape)
     }
-  }
-
-  /** Is `shape` a group drawn as part of its parent:  its band, and its rail over its parent's? */
-  private isPartOfParent(shape: BubblyBlockShape, view: View): boolean {
-    return view.partsOfParents.has(shape)
   }
 
   /**
@@ -284,12 +277,11 @@ export class SpellBubbly {
     return drop
   }
 
-  /** The block inside `shape`, through any group, that ends on `lastLine` with a foot of its own. */
+  /** The block inside `shape` that ends on `lastLine` with a foot of its own, a group's too. */
   private innerFoot(shape: BubblyBlockShape, lastLine: number, view: View): BubblyBlockShape | undefined {
     for (const inner of shape.inside) {
       const range = inner.kind === "block" ? view.ranges[inner.place] : undefined
       if (inner.kind !== "block" || !range || range.endLineNumber !== lastLine) continue
-      if (this.isPartOfParent(inner, view)) return this.innerFoot(inner, lastLine, view)
       if (inner.hasBody && range.endLineNumber > range.startLineNumber) return inner
     }
     return undefined
@@ -332,8 +324,6 @@ export class SpellBubbly {
     const headTop = editor.getTopForLineNumber(headLine)
     const lastTop = editor.getTopForLineNumber(lastLine)
     const hasBody = shape.hasBody && lastTop > headTop
-    // a group drawn as part of its parent:  its band, and its rail over its parent's down to its last line
-    const isPartOfParent = this.isPartOfParent(shape, view)
     const left = view.lefts.get(shape)!
     if (headLine >= view.first) {
       const ends = shape.ends
@@ -346,11 +336,7 @@ export class SpellBubbly {
       if (ends.endsWithInput) band.classList.add("bubbly-ends-input")
       block.append(place(band, { left, top: headTop + lineHeight / 2, width: right - left }, measures.scale))
     }
-    if (hasBody && isPartOfParent) {
-      const bodyTop = headTop + (lineHeight + measures.pillHeight) / 2
-      const height = lastTop + lineHeight - bodyTop
-      block.append(place(element("bubbly-gutter"), { left, top: bodyTop, height }, measures.scale))
-    } else if (hasBody) {
+    if (hasBody) {
       const bodyTop = headTop + (lineHeight + measures.pillHeight) / 2
       const lastBottom = lastTop + lineHeight
       const footTop = lastBottom + measures.footRoom - measures.footHeight + this.footDrop(shape, view)
@@ -396,9 +382,7 @@ export class SpellBubbly {
       for (const shape of shapes) {
         if (shape.kind !== "block") continue
         const range = view.ranges[shape.place]
-        // a group drawn as part of its parent has no foot:  its parent's, or its last member's, marks its end
-        const hasFoot = !this.isPartOfParent(shape, view)
-        if (range && hasFoot && shape.hasBody && range.endLineNumber > range.startLineNumber) {
+        if (range && shape.hasBody && range.endLineNumber > range.startLineNumber) {
           // its lowest foot's bottom, then the gap to the band on the next line, whose top is down its line a little
           const { footRoom, footGap, pillHeight } = view.measures
           const footBottom = footRoom + this.footDrop(shape, view)
@@ -558,8 +542,6 @@ type View = {
   ranges: monaco.Range[]
   /** where each block's band starts:  `placeBands()` */
   lefts: Map<BubblyBlockShape, number>
-  /** the groups drawn as part of their parent:  `placeBands()` */
-  partsOfParents: Set<BubblyBlockShape>
   /** how much lower each block's foot goes than one right under its last line, once worked out:  `footDrop()` */
   footDrops: Map<BubblyBlockShape, number>
   /** the first and last lines shown */
