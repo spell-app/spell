@@ -274,5 +274,8 @@ export const englishWords: SP.LanguageWords = {
       /^(?!(?:an?|its?|the)[ \t])((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}[\p{L}\p{M}\d_-]+)[ \t]+is[ \t]+an?[ \t].*[ \t](?:at|from)[ \t]+["'][^"']*["'][ \t]*:?[ \t]*$/iu,
     /** A line re-opening a type, its name captured:  `a solitaire:`, `a card where:`, `a pile` (its colon left out, P48). */
     reopenedType: /^an?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:(?:where[ \t]*)?:)?[ \t]*$/iu
-  }
+  },
+
+  /** `it`, `its`, `them`:  drawn plain in the bubbly look, never bold (`SP.BubblyLayout`). */
+  pronouns: new Set(["it", "its", "them", "they", "their"])
 }

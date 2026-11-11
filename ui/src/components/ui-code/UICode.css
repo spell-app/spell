@@ -4,6 +4,8 @@
  *   `<div class="ui [numbered] [wrapping] code" part="box">`
  *     `[<button class="copy" part="copy">`, an icon`]`
  *     `<pre part="pre"><code class="hljs language-x" part="code">` + one `<span class="line">` per line
+ *   - a language that draws its code whole (spell's bubbly look):  `<div class="drawing">` and its `<style>` instead,
+ *     the box `.drawn`, its `<pre>` hidden
  *   - the line spans hold highlight.js's `hljs-*` spans (or spell's, which use the same names)
  *   - before them, the source parts:  `<ui-loader part="loader">` while loading, `<ui-message part="error">`
  * - Line numbers are a CSS counter per `.line` (`counter-reset` on the `<pre>` sets the start).
@@ -81,6 +83,26 @@
   .ui.code .line {
     display: block;
     min-height: 1lh;
+  }
+
+  /* a language's whole drawing (spell's bubbly look):  it brings its own box, so the code's box steps back */
+  .ui.code.drawn {
+    border: none;
+    background: none;
+  }
+
+  .ui.code .drawing {
+    overflow-x: auto;
+    border-radius: inherit;
+  }
+
+  .ui.code .drawing:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: -2px;
+  }
+
+  .ui.code .drawing > * {
+    margin: 0;
   }
 }
 

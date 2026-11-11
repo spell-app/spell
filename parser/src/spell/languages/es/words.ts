@@ -258,6 +258,8 @@ export const spanishWords: SP.LanguageWords = {
    * - The first one is how a translation writes `it`.
    */
   itWords: new Set(["eso", "ello", "ella", "él"]),
+  /** `eso`, `su`, `ellos`:  drawn plain in the bubbly look, never bold (`SP.BubblyLayout`). */
+  pronouns: new Set(["eso", "ello", "ella", "él", "su", "sus", "ellos", "ellas", "lo", "la", "los", "las"]),
 
   /**
    * A verb with `it` fused onto its end:  `barajarla`, `dibujarlo`, `voltearlas` => `barajar`, `dibujar`, `voltear`.

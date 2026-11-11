@@ -451,6 +451,11 @@ export type LanguageWords = {
    */
   itWords?: Set<string>
   /**
+   * Words that point back to what a line is about, e.g. English's `it`, `its`, `them`:  a reference to read,
+   * but Spell's own small word, so the bubbly look draws it plain, never bold (`SP.BubblyLayout`).
+   */
+  pronouns: Set<string>
+  /**
    * A verb with `it` fused onto its end, its verb captured, e.g. Spanish's `barajarla` => `barajar` (epic `spanish` J96).
    * - In a type's outline body, `- para barajarla:` is English's `- to shuffle it:`:  the receiver goes where `it` was.
    * - None:  the language writes `it` as a word of its own, `subject_it`.

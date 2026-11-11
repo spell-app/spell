@@ -43,6 +43,8 @@ export class DOMCodeElement extends E.DOMLoadableElement<UICode> {
  *   - no `language`:  guessed among the detect set
  *   - `text`:  none
  *   - a language `UI.code` knows (a page's own, e.g. spell's):  its own highlighter
+ *   - one that draws its code whole (`CodeLanguage.draw`, spell's bubbly look):  that drawing, in place of the
+ *     `<pre>`, with the sheet it hands over;  unless `line-numbers` or `wrap` asks for lines
  * - The code shows plain until the colours arrive.
  *   An unknown language stays plain, with a `render` `ui-error` (no message:  the code is still there).
  * - `line-numbers` (from `start`) and `wrap` are CSS:  counters, and a hanging indent per `.line`.
@@ -70,12 +72,20 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   /** Highlights started;  only the latest one's result is shown. */
   private ticket = 0
 
-  /** The lines as HTML:  coloured once the colours for THIS text arrive, escaped plain text until then. */
+  /** The lines as HTML:  coloured once the colours for THIS text arrive, escaped plain text until then (or drawn). */
   @E.derived
   get lines(): string[] {
     const text = this.textToShow
     const highlighted = this.highlighted
-    return CodeLines.split(highlighted?.code === text ? highlighted.html : CodeLines.escape(text))
+    return CodeLines.split(
+      highlighted?.code === text && !highlighted.isDrawn ? highlighted.html : CodeLines.escape(text)
+    )
+  }
+
+  /** The language's whole drawing of THIS text (`CodeLanguage.draw`), in place of the lines;  `undefined` for none. */
+  get drawing(): { html: string; styles?: string } | undefined {
+    const highlighted = this.highlighted
+    return highlighted?.isDrawn && highlighted.code === this.textToShow ? highlighted : undefined
   }
 
   /** `<code>`'s HTML:  a `.line` span per line. */
@@ -108,9 +118,14 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   }
 
   /** Highlight whenever the text, `language` or `UI.code`'s languages change, once the text has loaded. */
-  @E.onChange("textToShow", "language", "loadStatus", "languageCount")
+  @E.onChange("textToShow", "language", "loadStatus", "languageCount", "isDrawable")
   protected onCodeChanged(code: string, language: string | undefined, loadStatus: E.SourceStatus) {
     if (loadStatus === "loaded") void this.highlight(code, language || undefined)
+  }
+
+  /** May its language draw it whole?  Not when it numbers or wraps its lines:  a drawing has none. */
+  protected get isDrawable(): boolean {
+    return !this.lineNumbers && !this.wrap
   }
 
   /** Colour `code` as `language`;  `ui-coloured` when done, a `render` `ui-error` (code left plain) when not. */
@@ -119,7 +134,7 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
     const ticket = ++this.ticket
     try {
       await UI.load()
-      const result = await CodeHighlighter.highlight(code, language)
+      const result = await CodeHighlighter.highlight(code, language, { drawing: this.isDrawable })
       if (ticket !== this.ticket) return
       this.highlighted = { ...result, code }
       this.send("ui-coloured", { language: result.language, detected: result.detected })
@@ -165,9 +180,16 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   // ## Rendering
   ////////////////
 
+  /** The code's name, for a keyboard that scrolls it:  "`<language>` code". */
+  private get codeLabel(): string {
+    return this.shownLanguage
+      ? this.translationForKey("codeLabel", { language: this.shownLanguage })
+      : this.translationForKey("codeLabelPlain")
+  }
+
   protected renderContent(): JSX.Element {
     return (
-      <div class={this.rootClass} part={this.partForName("box")}>
+      <div class={this.drawing ? `${this.rootClass} ${DRAWN_CLASS}` : this.rootClass} part={this.partForName("box")}>
         <Show when={this.copy}>
           <button
             type="button"
@@ -180,14 +202,19 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
             {this.copyGlyph.svg}
           </button>
         </Show>
+        <Show when={this.drawing}>
+          {(drawing) => (
+            <>
+              <style>{drawing().styles ?? ""}</style>
+              <div class={DRAWING_CLASS} tabindex="0" aria-label={this.codeLabel} innerHTML={drawing().html} />
+            </>
+          )}
+        </Show>
         <pre
+          hidden={!!this.drawing}
           part={this.partForName("pre")}
           tabindex="0"
-          aria-label={
-            this.shownLanguage
-              ? this.translationForKey("codeLabel", { language: this.shownLanguage })
-              : this.translationForKey("codeLabelPlain")
-          }
+          aria-label={this.codeLabel}
           style={{ "counter-reset": `${LINE_COUNTER} ${(this.start ?? 1) - 1}` }}
         >
           <code part={this.partForName("code")} class={this.codeClass} innerHTML={this.markup} />
@@ -208,6 +235,12 @@ const LINE_COUNTER = "line"
 
 /** highlight.js's class on `<code>`. */
 const HLJS_CLASS = "hljs"
+
+/** Class on the box while it shows a language's drawing. */
+const DRAWN_CLASS = "drawn"
+
+/** Class of a language's drawing, in place of the `<pre>`. */
+const DRAWING_CLASS = "drawing"
 
 /** Class of the copy button. */
 const COPY_CLASS = "copy"

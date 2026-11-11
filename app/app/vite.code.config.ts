@@ -39,6 +39,9 @@ export default defineConfig({
     // `vite.solid.config.ts` emptied it
     emptyOutDir: false,
     sourcemap: true,
+    // the CSS minify reads `cssTarget`, not `css.lightningcss.targets`:  Vite's default lowers `light-dark()` into
+    // `--lightningcss-light` variables a shadow root never gets (the bubbly look's sheet;  Spell UI's `vite.config.ts`)
+    cssTarget: ["chrome125", "safari26", "firefox147"],
     rolldownOptions: {
       input: {
         "spell-code": "../src/app/components/spell-code/index.ts",

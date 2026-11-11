@@ -1,0 +1,222 @@
+{
+  "settings": {
+    "--bubbly-paper-dark": {
+      "light": "#1c1b22",
+      "dark": "#1c1b22"
+    },
+    "--bubbly-paper": {
+      "light": "#ffffff",
+      "dark": "#1c1b22"
+    },
+    "--bubbly-ink": {
+      "light": "#3a3a44",
+      "dark": "#dedde6"
+    },
+    "--bubbly-bold-ink": {
+      "light": "#1f1f26",
+      "dark": "#f6f5fb"
+    },
+    "--bubbly-faint": {
+      "light": "#c0c0c3",
+      "dark": "#5a5961"
+    },
+    "--bubbly-bold": {
+      "light": "650",
+      "dark": "650"
+    },
+    "--bubbly-semibold": {
+      "light": "600",
+      "dark": "600"
+    },
+    "--bubbly-plain": {
+      "light": "#8a8f99",
+      "dark": "#8a8f99"
+    },
+    "--bubbly-thing": {
+      "light": "#7c5cd6",
+      "dark": "#7c5cd6"
+    },
+    "--bubbly-action": {
+      "light": "#2f9e5b",
+      "dark": "#2f9e5b"
+    },
+    "--bubbly-property": {
+      "light": "#d4930d",
+      "dark": "#d4930d"
+    },
+    "--bubbly-font-size": {
+      "light": "16px",
+      "dark": "16px"
+    },
+    "--bubbly-line-height": {
+      "light": "24px",
+      "dark": "24px"
+    },
+    "--bubbly-input-height": {
+      "light": "20px",
+      "dark": "20px"
+    },
+    "--bubbly-indent": {
+      "light": "18px",
+      "dark": "18px"
+    },
+    "--bubbly-line-gap": {
+      "light": "4px",
+      "dark": "4px"
+    },
+    "--bubbly-gap-height": {
+      "light": "8px",
+      "dark": "8px"
+    },
+    "--bubbly-pill-height": {
+      "light": "24px",
+      "dark": "24px"
+    },
+    "--bubbly-pill-radius": {
+      "light": "12px",
+      "dark": "12px"
+    },
+    "--bubbly-pill-nudge": {
+      "light": "0px",
+      "dark": "0px"
+    },
+    "--bubbly-pill-text-line": {
+      "light": "calc( 24px - 2 * max(0px, -1 * 0px) )",
+      "dark": "calc( 24px - 2 * max(0px, -1 * 0px) )"
+    },
+    "--bubbly-line-inset": {
+      "light": "8px",
+      "dark": "8px"
+    },
+    "--bubbly-pill-pad-left": {
+      "light": "12px",
+      "dark": "12px"
+    },
+    "--bubbly-pill-pad-right": {
+      "light": "10px",
+      "dark": "10px"
+    },
+    "--bubbly-gutter": {
+      "light": "5px",
+      "dark": "5px"
+    },
+    "--bubbly-inner-top": {
+      "light": "5px",
+      "dark": "5px"
+    },
+    "--bubbly-block-inner-corner": {
+      "light": "8px",
+      "dark": "8px"
+    },
+    "--bubbly-foot-width": {
+      "light": "26px",
+      "dark": "26px"
+    },
+    "--bubbly-foot-height": {
+      "light": "6px",
+      "dark": "6px"
+    },
+    "--bubbly-gap": {
+      "light": "2px",
+      "dark": "2px"
+    },
+    "--bubbly-end-inset": {
+      "light": "2px",
+      "dark": "2px"
+    },
+    "--bubbly-input-opacity": {
+      "light": "80%",
+      "dark": "80%"
+    },
+    "--bubbly-input-dark": {
+      "light": "#2b2a33",
+      "dark": "#2b2a33"
+    },
+    "--bubbly-quote-font": {
+      "light": "\"Times New Roman\", Times, serif",
+      "dark": "\"Times New Roman\", Times, serif"
+    },
+    "--bubbly-quote-size": {
+      "light": "26px",
+      "dark": "26px"
+    },
+    "--bubbly-quote-room": {
+      "light": "15px",
+      "dark": "15px"
+    },
+    "--bubbly-quote-rotation": {
+      "light": "15deg",
+      "dark": "15deg"
+    },
+    "--bubbly-bracket-width": {
+      "light": "2px",
+      "dark": "2px"
+    },
+    "--bubbly-dot-gap": {
+      "light": "3px",
+      "dark": "3px"
+    },
+    "--bubbly-depth": {
+      "light": "1",
+      "dark": "1"
+    }
+  },
+  "parts": {
+    "thing": {
+      "--bubbly-hue": {
+        "light": "#7c5cd6",
+        "dark": "#7c5cd6"
+      },
+      "--bubbly-pill": {
+        "light": "#e5def7",
+        "dark": "#3d315f"
+      },
+      "--bubbly-input": {
+        "light": "#ffffffcc",
+        "dark": "#36314acc"
+      }
+    },
+    "action": {
+      "--bubbly-hue": {
+        "light": "#2f9e5b",
+        "dark": "#2f9e5b"
+      },
+      "--bubbly-pill": {
+        "light": "#d5ecde",
+        "dark": "#224835"
+      },
+      "--bubbly-input": {
+        "light": "#ffffffcc",
+        "dark": "#2c3a39cc"
+      }
+    },
+    "property": {
+      "--bubbly-hue": {
+        "light": "#d4930d",
+        "dark": "#d4930d"
+      },
+      "--bubbly-pill": {
+        "light": "#f6e9cf",
+        "dark": "#5b441b"
+      },
+      "--bubbly-input": {
+        "light": "#ffffffcc",
+        "dark": "#43392ecc"
+      }
+    },
+    "plain": {
+      "--bubbly-hue": {
+        "light": "#8a8f99",
+        "dark": "#8a8f99"
+      },
+      "--bubbly-pill": {
+        "light": "#e8e9eb",
+        "dark": "#41424a"
+      },
+      "--bubbly-input": {
+        "light": "#ffffffcc",
+        "dark": "#383841cc"
+      }
+    }
+  }
+}
