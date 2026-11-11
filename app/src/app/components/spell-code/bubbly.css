@@ -565,9 +565,6 @@
   --bubbly-monaco-input-trim: -1px;
   /* the paper between a body's lowest foot and the band on the line under it:  as between two bands on two lines */
   --bubbly-monaco-foot-gap: 3px;
-  /* how far right of its band's round left end a body's rail and paper start, nearer its words;  0:  right at it.
-     Not a group's:  its rail stays at its band's end (Owen) */
-  --bubbly-monaco-rail-inset: 6px;
   /* how far every shape sits below where the code puts it:  the words sit that much higher in their bands and pills */
   --bubbly-monaco-shapes-drop: 1px;
   /* a band's height in the editor:  a little less than the page's, still centred on its line,
@@ -687,6 +684,12 @@
   /* the foot starts where its rail curves into it, as on the page */
   .bubbly-layer .bubbly-block > .bubbly-foot {
     margin-left: var(--bubbly-rail-corner);
+  }
+  /* a group's rail:  over its parent's, just as wide, while the group lasts;  no paper or foot of its own (Owen) */
+  .bubbly-layer .bubbly-group > .bubbly-gutter {
+    width: var(--bubbly-gutter);
+    padding-bottom: 0;
+    border-radius: 0;
   }
 
   /* the code's own layers over the shapes:  the editor sits above the layer, see-through */
