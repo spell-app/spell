@@ -44,38 +44,38 @@ describe("<epic-state-filter>", () => {
     await expectAccessible(host)
   })
 
-  // epic `epic-engine` I157, recoloured in I170 (Owen, 2026-10-29:  "this doesn't match our other colors")
-  test("a phase's states (`phases`):  Owen's order and colours, scheduled dotted, working in the blue badge", async () => {
+  // epic `epic-engine` I157, recoloured in I170 (Owen, 2026-10-29:  "this doesn't match our other colors");  ONE blue
+  // badge in I260 (Owen, 2026-11-11:  "These should just be one set, confusing to have 2 blues")
+  test("a phase's states (`phases`):  Owen's order and colours;  under way AND scheduled in the one blue badge", async () => {
     const host = await ElementFixture.render(
       `<epic-state-filter phases counts="old:40 recent:2 scheduled:5 progress:1 updated:3 attention:1" ` +
         `shown="attention updated scheduled progress"></epic-state-filter>`
     )
-    expect(chips(host)).toEqual(["scheduled:5+", "attention:1+", "updated:3+", "recent:2", "old:40"])
-    const looks = ["scheduled", "attention", "updated", "recent", "old"].map(
-      (state) =>
-        `${chip(host, state).dataset.color}${chip(host, state).dataset.fill ? ` ${chip(host, state).dataset.fill}` : ""}`
-    )
-    expect(looks).toEqual(["blue dotted", "red", "orange", "green", "grey"])
-    // working counts in the one blue badge, as an item's `progress`
+    expect(chips(host)).toEqual(["attention:1+", "updated:3+", "recent:2", "old:40"])
+    const looks = ["attention", "updated", "recent", "old"].map((state) => chip(host, state).dataset.color)
+    expect(looks).toEqual(["red", "orange", "green", "grey"])
+    // working and scheduled count in the one blue badge, pressed while they show
     const badge = host.shadowRoot!.querySelector<HTMLElement>(".marked")!
-    expect([badge.textContent, badge.title]).toEqual([
-      "1",
-      "1 with Claude (under way, being worked on, or marked in this pass):  hide these\n⌥-click:  show only these"
+    expect([badge.textContent, badge.title, badge.getAttribute("aria-pressed")]).toEqual([
+      "6",
+      "6 to do:  under way, scheduled, or marked in this pass:  hide these\n⌥-click:  show only these",
+      "true"
     ])
     expect(chip(host, "attention").title).toBe("1 need you:  a choice open:  hide these\n⌥-click:  show only these")
     expect(chip(host, "updated").title).toBe("3 changed since you looked:  hide these\n⌥-click:  show only these")
-    expect(chip(host, "scheduled").title).toBe("5 scheduled, not running yet:  hide these\n⌥-click:  show only these")
     expect(chip(host, "recent").title).toBe("2 done in the last 3 days:  show these too\n⌥-click:  show only these")
     expect(chip(host, "old").title).toBe("40 done a while ago:  show these too\n⌥-click:  show only these")
-    // the dotted chip, shown:  filled blue as every chip that's on, its outline dotted, its count white (Owen,
-    // 2026-10-29:  "blue dotted ring but not filled in is confusing.  Looks like it is turned off")
-    const dotted = getComputedStyle(chip(host, "scheduled"))
-    expect([dotted.borderTopStyle, dotted.backgroundColor === "rgba(0, 0, 0, 0)", dotted.color]).toEqual([
-      "dotted",
-      false,
-      "rgb(255, 255, 255)"
-    ])
-    // without `phases`, the same names are an item's:  its own words, no dotted chip
+    // only scheduled phases, none under way:  the badge still counts them, and its click toggles them
+    const scheduled = await ElementFixture.render(
+      `<epic-state-filter phases counts="scheduled:4 old:2" shown="old"></epic-state-filter>`
+    )
+    const blue = scheduled.shadowRoot!.querySelector<HTMLElement>(".marked")!
+    expect([blue.textContent, blue.getAttribute("aria-pressed")]).toEqual(["4", "false"])
+    const picks: unknown[] = []
+    scheduled.addEventListener("epic-state-changed", (event) => picks.push((event as CustomEvent).detail.shown))
+    blue.click()
+    expect(picks).toEqual([["scheduled", "old", "handled", "quiet"]])
+    // without `phases`, the same names are an item's:  its own words
     const items = await ElementFixture.render(`<epic-state-filter counts="attention:1 recent:2"></epic-state-filter>`)
     expect(chip(items, "attention").title).toBe("1 needs attention:  hide these\n⌥-click:  show only these")
     await expectAccessible(host)

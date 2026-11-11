@@ -85,6 +85,16 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
   }
 
   /**
+   * Its chips, the Phases section's too:  each state it draws a chip for, and whether it shows;  none, `[]`.
+   * - what the page's toolbar SETS by colour, and reads back to draw each of its chips on, off or mixed
+   *   (epic `epic-engine` I259)
+   * - read untracked, as `stateFilter`
+   */
+  get chipStates(): readonly { state: string; on: boolean }[] {
+    return this.section?.chipStates() ?? []
+  }
+
+  /**
    * How many of its items Owen marked in this pass (epic `epic-engine` P43), and the Phases section's phases with
    * Claude (I147):  the page's toolbar adds them up.
    * - the phases drawn blue (`progress`, I170) too:  its own filter counts them in its blue badge, and the toolbar's
@@ -1186,6 +1196,13 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     if (states) saved[id] = [...states]
     else delete saved[id]
     EpicSection.save(FILTER_KEY, saved)
+  }
+
+  /** Its chips' states and whether each shows, the Phases section's too (`DOMEpicSectionElement.chipStates`). */
+  @E.untracked
+  chipStates(): { state: string; on: boolean }[] {
+    const showing = this.showing()
+    return this.present().map((it) => ({ state: it.state as string, on: showing.has(it.state) }))
   }
 
   /**

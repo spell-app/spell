@@ -360,7 +360,8 @@ element takes its colour from this table, never a colour that means something el
   - red: a choice in it is open
   - orange: its plan waits for your Accept; or changed since you looked (new updates, not Seen, under 3 days old)
   - blue: under way, or Claude at work on it (counted in the blue badge)
-  - DOTTED blue: scheduled, still to do
+  - DOTTED blue: scheduled, still to do (its circle dotted;  counted in the same blue badge, no chip of its own:
+    epic `epic-engine` I260)
   - green: done in the last 3 days (`done-at`)
   - grey: done longer ago
 
