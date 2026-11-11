@@ -33,10 +33,6 @@ En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede a
 	</propiedad>
 
 	<grupo "dibujo" descripción="Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css"/>
-	<dibujar descripción="Sus dos lados, uno sobre el otro:  styles.css muestra el que mira hacia arriba, y la gira al voltearse">
-		<dibujar "frente" />
-		<dibujar "dorso" />
-	</dibujar>
 	<propiedad "imagen" descripción="Su cara:  https://www.compart.com/en/unicode/block/U+1F0A0">
 		poner lugar a su valor
 		si es un trébol

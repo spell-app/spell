@@ -8,7 +8,7 @@ core.heading("How Flash Cards work")
 // The Flash Cards example is a deck of Spanish words to learn:
 // the word on the front, what it means on the back.  Click the card to turn it over.
 // Two ideas do the work:
-// - a card is a TWO SIDED VIEW:  it knows which way up it is, and draws only that side
+// - a card is a TWO SIDED VIEW:  it knows which way up it is, and turns over in 3D to show that side
 // - the quiz deals the next card at random from the deck
 
 // This guide keeps those two, and leaves out the score.  Open Flash Cards, in the Examples, for the whole quiz.
@@ -21,7 +21,7 @@ core.heading("A card:  a word on the front, what it means on the back")
 // It brings, with no code of its own:
 // - which way it faces, up or down, and `it is face up`, `it is face down`
 // - `turn it face up`, `turn it face down`, `turn it over`
-// - a drawing that shows its front face up, and its back face down
+// - a drawing of both its sides, back to back, which shows its front face up and its back face down, and turns over in 3D
 
 // So the card only says what each side looks like:  its `<draw "front">` and its `<draw "back">`.
 // - `clickable` shows a pointer over it, and `<on click>` says what a click does.

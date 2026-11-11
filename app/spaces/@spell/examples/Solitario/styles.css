@@ -224,29 +224,22 @@ solitario-carta {
 }
 
 /****************
- * Turning over:  a card draws both its sides (Carta.es.spell), back to back, and turns over in 3D
- * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
- *   Its back side is drawn already turned half round, so it faces you when the card does.
- * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.
+ * Turning over:  a two sided view's own (Carta.es.spell), both its sides back to back, the card turning in 3D
+ * - Here, only how deep the turn looks, for a card one letter wide:  3em.
+ * - 0.3s, the template's own time:  the game pauses that long after turning the stock's card (Solitario.es.spell), so it turns
+ *   over before it moves.
  * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
  *   card that cut its own content would draw flat, and its sides couldn't turn with it.
- * - A card that's drawn already turned shows that side at once:  only a change turns it.
- * - 0.3s:  the game pauses that long after turning the stock's card (Solitario.es.spell), so it turns over before it moves.
  ****************/
 
 [disposición] > *,
 solitario-carta {
-  /* its sides turn with it, in 3D */
-  transform-style: preserve-3d;
+  --spell-turn-perspective: 3em;
+  /* its sides turn with it, in 3D:  nothing cut */
   overflow: visible;
-  transform: perspective(3em) rotateY(0deg);
-  transition: transform 0.3s ease-in-out;
-}
-[disposición] > :not([direction="up"]) {
-  transform: perspective(3em) rotateY(180deg);
 }
 /* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;
-   an <es-texto> draws no box of its own, so it's given one */
+   a <es-texto> draws no box of its own, so it's given one */
 solitario-carta::part(front),
 solitario-carta::part(back),
 [disposición] > *::part(front),
@@ -260,11 +253,6 @@ solitario-carta::part(back),
   background: #fff;
   background-clip: content-box;
   border-radius: 0.035em;
-  backface-visibility: hidden;
-}
-solitario-carta::part(back),
-[disposición] > *::part(back) {
-  transform: rotateY(180deg);
 }
 /* Pulled up out of its pile (the card's "levantada"), as the cheat does:  a card's height and a little above the pile's top,
    over every card and pile it passes */

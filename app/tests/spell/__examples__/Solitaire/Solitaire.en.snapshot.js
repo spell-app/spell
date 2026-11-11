@@ -15,7 +15,6 @@ export const words = {
       name: "name",
       isTheRankOfSuit: "is the (rank) of (suit)",
       state: "state",
-      draw: "draw it",
       picture: "picture",
       lifted: "lifted",
       countThePointsForCardOnPile: "count the points for a card on a pile",
@@ -81,7 +80,7 @@ export const words = {
       { name: "rank", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "value", "isAFaceCard", "isANumberCard"] },
       { name: "suit", members: ["suit", "color", "symbol"] },
       { name: "names", description: "What a person, a test or the console calls it", members: ["name", "isTheRankOfSuit", "state"] },
-      { name: "drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["draw", "picture", "lifted"] },
+      { name: "drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["picture", "lifted"] },
       { name: "Playing a card", members: ["countThePointsForCardOnPile", "play", "putOnPile"] },
       { name: "A pile of cards", members: ["pile"] }
     ],

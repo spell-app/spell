@@ -87,26 +87,18 @@
 }
 
 /****************
- * Turning over:  a card draws both its sides (Card.spell), back to back, and turns over in 3D
- * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
- *   Its back side is drawn already turned half round, so it faces you when the card does.
- * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.
+ * Turning over:  a two sided view's own (Card.spell), both its sides back to back, the card turning in 3D
+ * - Here, only how deep the turn looks, for a card one letter wide:  3em.
+ * - 0.3s, the template's own time:  a game can pause that long after turning a card, so it turns over before it moves.
  * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
  *   card that cut its own content would draw flat, and its sides couldn't turn with it.
- * - A card that's drawn already turned shows that side at once:  only a change turns it.
- * - 0.3s:  a game can pause that long after turning a card, so it turns over before it moves.
  ****************/
 
 [layout] > *,
 :is(games-card, games-joker) {
-  /* its sides turn with it, in 3D */
-  transform-style: preserve-3d;
+  --spell-turn-perspective: 3em;
+  /* its sides turn with it, in 3D:  nothing cut */
   overflow: visible;
-  transform: perspective(3em) rotateY(0deg);
-  transition: transform 0.3s ease-in-out;
-}
-[layout] > :not([direction="up"]) {
-  transform: perspective(3em) rotateY(180deg);
 }
 /* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;
    a <ui-text> draws no box of its own, so it's given one */
@@ -123,11 +115,6 @@
   background: #fff;
   background-clip: content-box;
   border-radius: 0.035em;
-  backface-visibility: hidden;
-}
-:is(games-card, games-joker)::part(back),
-[layout] > *::part(back) {
-  transform: rotateY(180deg);
 }
 @media (prefers-reduced-motion: reduce) {
   [layout] > * {

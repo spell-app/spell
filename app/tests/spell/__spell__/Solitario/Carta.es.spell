@@ -36,10 +36,6 @@ una "carta" es una vista reversible:
 
 	// Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
 	- grupo "dibujo"
-	// Sus dos lados, uno sobre el otro:  styles.css muestra el que mira hacia arriba, y la gira al voltearse
-	- para dibujar eso:
-		dibujar su frente
-		dibujar su dorso
 	// Su cara:  https://www.compart.com/en/unicode/block/U+1F0A0
 	- su "imagen" es:
 		poner lugar a su valor

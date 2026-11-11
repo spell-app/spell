@@ -84,13 +84,6 @@ class Card(TwoSidedView):
         arrow = "↑" if self.is_face_direction("up") else "↓"
         return f"{letter}{self.symbol}{arrow}"
 
-    def draw(self) -> list:
-        """Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns"""
-        return [
-            h("slot", {"name": "front"}, self.draw_front()),
-            h("slot", {"name": "back"}, self.draw_back()),
-        ]
-
     @property
     def picture(self) -> str | None:
         """Its face:  https://www.compart.com/en/unicode/block/U+1F0A0"""
@@ -1087,26 +1080,19 @@ solitaire-card {
 }
 
 /****************
- * Turning over:  a card draws both its sides (Card.spell), back to back, and turns over in 3D
- * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
- *   Its back side is drawn already turned half round, so it faces you when the card does.
- * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.
+ * Turning over:  a two sided view's own (Card.spell), both its sides back to back, the card turning in 3D
+ * - Here, only how deep the turn looks, for a card one letter wide:  3em.
+ * - 0.3s, the template's own time:  the game pauses that long after turning the stock's card (Solitaire.spell), so it turns
+ *   over before it moves.
  * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
  *   card that cut its own content would draw flat, and its sides couldn't turn with it.
- * - A card that's drawn already turned shows that side at once:  only a change turns it.
- * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spell), so it turns over before it moves.
  ****************/
 
 [layout] > *,
 solitaire-card {
-  /* its sides turn with it, in 3D */
-  transform-style: preserve-3d;
+  --spell-turn-perspective: 3em;
+  /* its sides turn with it, in 3D:  nothing cut */
   overflow: visible;
-  transform: perspective(3em) rotateY(0deg);
-  transition: transform 0.3s ease-in-out;
-}
-[layout] > :not([direction="up"]) {
-  transform: perspective(3em) rotateY(180deg);
 }
 /* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;
    a <ui-text> draws no box of its own, so it's given one */
@@ -1123,11 +1109,6 @@ solitaire-card::part(back),
   background: #fff;
   background-clip: content-box;
   border-radius: 0.035em;
-  backface-visibility: hidden;
-}
-solitaire-card::part(back),
-[layout] > *::part(back) {
-  transform: rotateY(180deg);
 }
 /* Pulled up out of its pile (the card's "lifted"), as the cheat does:  a card's height and a little above the pile's top,
    over every card and pile it passes */

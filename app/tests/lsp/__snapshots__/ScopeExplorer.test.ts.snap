@@ -44,8 +44,8 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "property name",
   "method is the (rank) of (suit)",
   "property state",
-  "method draw it",
   "property picture",
+  "property lifted",
   "property pile",
   "method play a card",
   "method put a card on a pile",
@@ -126,13 +126,9 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
-    file Jokers.spell
-      type Joker (is a Card)
-      function test jokers
     file Deck.spell
       type Deck (is a List)
       function test a new deck
-      function test two jokers
     file Pile.spell
       type Pile (is a ViewableList)
       function test piles
@@ -213,13 +209,9 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
-    file Jokers.spell
-      type Joker (is a Card)
-      function test jokers
     file Deck.spell
       type Deck (is a List)
       function test a new deck
-      function test two jokers
     file Pile.spell
       type Pile (is a ViewableList)
       function test piles
