@@ -3568,7 +3568,7 @@
           "purpose": "List of identifiers and/or numbers, e.g. `clubs or hearts`, `jack, queen, king`.",
           "syntaxes": [
             {
-              "syntax": "[({number_range}|{known_variable}|{constant}|{number}) (,|o|u|y|e|ni)]",
+              "syntax": "[({number_range}|{known_variable}|{constant}|{number}) ((,)? (o|u|y|e|ni)|,)]",
               "example": "up o down",
               "outputs": {
                 "js": {

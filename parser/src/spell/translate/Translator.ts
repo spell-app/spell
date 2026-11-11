@@ -831,7 +831,8 @@ class TemplateWriting {
   writeDelimiter(delimiter: P.Rule, ours: string | undefined): Piece[] {
     const theirs = literalAlternatives(delimiter)
     const { to } = this.writing.translator
-    const word = ours && CONJUNCTIONS[to.lang]?.[ours.toLowerCase()]
+    // An Oxford comma (`, or`) is the conjunction alone:  their language may not write one
+    const word = ours && CONJUNCTIONS[to.lang]?.[ours.replace(/^,\s*/, "").toLowerCase()]
     if (word && theirs.includes(word)) return [{ text: word }]
     const ourAlternatives = this.ourDelimiterAlternatives()
     const at = ours ? ourAlternatives.indexOf(ours) : 0
@@ -1320,7 +1321,13 @@ function literalAlternatives(rule: P.Rule): string[] {
         .join(" ")
     ]
   if (rule instanceof P.Choice) return rule.rules.flatMap(literalAlternatives)
-  if (rule instanceof P.Sequence) return [rule.rules.map((each) => literalAlternatives(each)[0] ?? "").join(" ")]
+  if (rule instanceof P.Sequence)
+    return [
+      rule.rules
+        .filter((each) => !each.optional)
+        .map((each) => literalAlternatives(each)[0] ?? "")
+        .join(" ")
+    ]
   return []
 }
 

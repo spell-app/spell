@@ -87,7 +87,7 @@ lists.addRule(Wording.specialize({ ruleName: "before_or_after", meanings: ["befo
 })
 
 lists.addRule(IdentifierList, {
-  syntax: "[({number_range}|{known_variable}|{constant}|{number}) (,|or|and|nor)]",
+  syntax: "[({number_range}|{known_variable}|{constant}|{number}) ((,)? (or|and|nor)|,)]",
   tests: [
     {
       tests: [
@@ -96,7 +96,9 @@ lists.addRule(IdentifierList, {
         ["back nor forth", '["back", "forth"]'],
         ["clubs, diamonds, hearts, spades", '["clubs", "diamonds", "hearts", "spades"]'],
         ["ace, 2, 3, 4, jack, queen or king", '["ace", 2, 3, 4, "jack", "queen", "king"]'],
-        ["ace, 2 ... 5, jack, queen or king", '["ace", 2, 3, 4, 5, "jack", "queen", "king"]']
+        ["ace, 2 ... 5, jack, queen or king", '["ace", 2, 3, 4, 5, "jack", "queen", "king"]'],
+        ["red, black, or blue", '["red", "black", "blue"]'],
+        ["up, down, and sideways", '["up", "down", "sideways"]']
       ]
     }
   ]
