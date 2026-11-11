@@ -37,8 +37,10 @@ export class SpellHighlighter {
   /**
    * The coloured stretches of `text`, in order, never overlapping.
    * - `parser`:  the language's, so its words colour as theirs do -- English's by default.
+   * - `parsed`:  a parse of `text` already made, its project's (`SP.BubblyLayout`'s `within`), read instead of
+   *   parsing it alone:  what names another file's things, or a member declared further down, colours as it should.
    */
-  static spans(text: string, parser: SP.SpellParser = SP.spellParser): SpellHighlightSpan[] {
+  static spans(text: string, parser: SP.SpellParser = SP.spellParser, parsed?: P.Match): SpellHighlightSpan[] {
     const byStart = new Map<number, SpellHighlightSpan>()
     try {
       P.Tokenizer.forEachToken(parser.tokenize(text, "") ?? [], (token) => {
@@ -50,7 +52,7 @@ export class SpellHighlighter {
       return []
     }
     try {
-      const match = parser.parse(text, "block")
+      const match = parsed ?? parser.parse(text, "block")
       if (match) SpellHighlighter.walk(match, byStart, new Set())
     } catch {
       // a parse that throws:  the token colours stand
