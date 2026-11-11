@@ -1466,6 +1466,10 @@ would.
 
 - Its text is read again as a drawing's own lines (`PageTokenizer.tokenizeDrawingLines()`), and parsed in place, its
   loop drawn as one of the element's children (`SpellJSX.parseLoop()`;  epic `language` I19).
+- Its AST is the loop itself, `core.drawEach(...)` or `core.drawRead(...)`;  an element's children put it in braces
+  (`SpellJSX.childAST()`).
+  So a `<for>` on a drawing's own line, or after `return`, is the drawing's loop, as `for` lines are
+  (epic `language` I73).
 - Its head is a phrase to its `>`, as a chain tag's is (`Tokenizer.phraseHeadTags`, `for` and `para`;  epic `data`
   I93):  read as attributes, a quote, a paren or an apostrophe in it ended the head early, and its body never
   joined it.
