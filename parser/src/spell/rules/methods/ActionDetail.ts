@@ -53,7 +53,7 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoa
 
   /**
    * What action `match` says about itself, in order -- `undefined` if it says nothing:
-   * its head line's modifiers (`with title "Deal"`, `action_modifier`), then the lines of its body.
+   * its head line's modifiers (`with title "Deal"`, `, undoable as "Move Card"`, `action_modifier`), then the lines of its body.
    * - Reads ONLY matches:  pure, for `getAST()`.
    */
   static detailsOf(match: P.Match, body: P.Match | undefined): ActionDetails | undefined {
@@ -62,9 +62,10 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoa
     // what its head line says, `with title "Deal", shortcut "meta+N"` (epic `language` P48), before its body's lines
     for (const modifier of ActionModifiers.modifiersIn(match.groups.modifiers as P.Match | undefined)) {
       any = true
-      const { title, icon, keys, undoable } = modifier.groups as Record<string, P.Match | undefined>
+      const { title, icon, keys, undoable, undoneAs } = modifier.groups as Record<string, P.Match | undefined>
       if (keys) details.shortcuts.push(ActionDetail.textOf(keys))
       if (undoable) details.undoable = true
+      if (undoneAs) details.undoneAs = ActionDetail.textOf(undoneAs)
       if (icon) details.icon = ActionDetail.textOf(icon)
       if (title) details.title = title
     }

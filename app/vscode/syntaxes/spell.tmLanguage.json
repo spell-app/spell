@@ -263,7 +263,7 @@
         },
         {
           "name": "keyword.other.spell",
-          "match": "(?<![\\p{L}\\p{M}\\d_-])(cada\\s+uno\\s+ejecutando|para\\s+cada\\s+pestaña|asked\\s+for\\s+with|con\\s+deshacible|contando\\s+desde|counting\\s+from|devuelta\\s+como|guardada\\s+como|guardado\\s+como|ordenadas\\s+por|ordenados\\s+por|with\\s+shortcut|with\\s+undoable|con\\s+longitud|each\\s+running|empezando\\s+en|for\\s+each\\s+tab|ordenada\\s+por|ordenado\\s+por|sent\\s+back\\s+as|with\\s+default|pedidos\\s+con|por\\s+defecto|starting\\s+at|con\\s+título|en\\s+la\\s+fila|which\\s+must|with\\s+title|con\\s+atajo|con\\s+icono|hasta\\s+que|sorted\\s+by|stored\\s+as|with\\s+icon|de\\s+color|en\\s+vivo|in\\s+row|up\\s+to)(?![\\p{L}\\p{M}\\d_-])"
+          "match": "(?<![\\p{L}\\p{M}\\d_-])(cada\\s+uno\\s+ejecutando|con\\s+deshacible\\s+como|para\\s+cada\\s+pestaña|with\\s+undoable\\s+as|deshacible\\s+como|asked\\s+for\\s+with|con\\s+deshacible|contando\\s+desde|counting\\s+from|devuelta\\s+como|guardada\\s+como|guardado\\s+como|ordenadas\\s+por|ordenados\\s+por|with\\s+shortcut|with\\s+undoable|con\\s+longitud|each\\s+running|empezando\\s+en|for\\s+each\\s+tab|ordenada\\s+por|ordenado\\s+por|sent\\s+back\\s+as|with\\s+default|pedidos\\s+con|por\\s+defecto|starting\\s+at|undoable\\s+as|con\\s+título|en\\s+la\\s+fila|which\\s+must|with\\s+title|con\\s+atajo|con\\s+icono|hasta\\s+que|sorted\\s+by|stored\\s+as|with\\s+icon|de\\s+color|en\\s+vivo|in\\s+row|up\\s+to)(?![\\p{L}\\p{M}\\d_-])"
         },
         {
           "name": "keyword.other.spell",

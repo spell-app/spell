@@ -8,9 +8,10 @@ import { P } from "spell/parser/parser"
  *   - `icon "card"`:  `icon "card"`
  *   - `shortcut "meta+N"`:  `shortcut meta+N`, its keys quoted, as a comma follows them
  *   - `undoable`:  `undoable`
+ *   - `undoable as "Move Card"`:  `undoable as "Move Card"`
  * - Matched only:  its action's definition reads them with its body's lines (`ActionDetail.detailsOf()`).
  */
-export class ActionModifier extends P.Sequence<"title?|icon?|keys?|undoable?"> {
+export class ActionModifier extends P.Sequence<"title?|icon?|keys?|undoable?|undoneAs?"> {
   /** Compiles to nothing:  the action's description gathers it. */
   compile(): string {
     return ""
@@ -20,6 +21,7 @@ export class ActionModifier extends P.Sequence<"title?|icon?|keys?|undoable?"> {
 /**
  * `action_modifiers` rule:  the things an action's head line says, after its quoted name -- see `action_modifier`.
  * - `with title "Deal", icon "card"`:  `with`, then one or more, each after a comma or `and`.
+ * - Or a comma first, instead of `with`, its name quoted or not (Owen):  `to put a card on a pile, undoable as "Move Card"`.
  */
 export class ActionModifiers extends P.Sequence {
   /** Compiles to nothing:  the action's description gathers them. */

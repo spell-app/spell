@@ -125,6 +125,26 @@ describe("SP.BubblyLayout", () => {
         "words:)"
       ]
     ])
+    // what its head line says about it, after its words:  Spell's words plain, a quoted name a pill of its own
+    const pile = [
+      'a "pile" is a list of cards',
+      '\tto put a card on a pile, undoable as "Move Card"',
+      "\t\tprint 1",
+      '\tto "deal the cards" with title "Deal", undoable',
+      "\t\tprint 1"
+    ].join("\n")
+    expect(heads(pile)).toEqual([
+      [
+        "words:to ",
+        "input:put a card on",
+        "words: a ",
+        "first-mention:pile",
+        "mark:,",
+        "words: undoable as ",
+        'input:"Move Card"'
+      ],
+      ["words:to ", 'input:"deal the cards"', "words: with title ", 'input:"Deal"', "mark:,", "words: undoable"]
+    ])
   })
 
   it("draws a type's creation hook as an action:  `when creating` Spell's words, its type bold", () => {

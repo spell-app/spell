@@ -366,6 +366,11 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "action_modifier",
       "action_modifier",
       "action_modifier",
+      "action_modifier",
+    ],
+    "action_modifiers": [
+      "action_modifiers",
+      "action_modifiers",
     ],
     "as_a_type": [
       "as_a_type",
@@ -1357,8 +1362,8 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "absolute_value · math · 1",
     "account_included · places · 1",
     "action_detail · methods · 8",
-    "action_modifier · methods · 4",
-    "action_modifiers · methods · 1",
+    "action_modifier · methods · 5",
+    "action_modifiers · methods · 2",
     "add_new_thing · lists · 1",
     "alert · UI · 1",
     "and · expressions · 1",

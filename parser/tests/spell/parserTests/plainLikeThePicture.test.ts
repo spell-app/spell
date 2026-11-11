@@ -234,6 +234,49 @@ describe("plain Spell like the picture", () => {
       )
     })
 
+    test("an action's undo name, after a comma, its name not quoted (Owen)", () => {
+      sameProgram(
+        [
+          "a game is a thing",
+          '\tits "score" is a number',
+          '\tto put a card on a pile, undoable as "Move Card"',
+          "\t\tset its score to 0"
+        ],
+        [
+          "a game is a thing",
+          '\tits "score" is a number',
+          "\tto put a card on a pile:",
+          '\t\tundoable as "Move Card"',
+          "\t\tset its score to 0"
+        ]
+      )
+    })
+
+    test("an action's undo name in Spanish, and with a title first", () => {
+      sameProgram(
+        [
+          "un juego es una cosa",
+          '\tsu "puntos" es un número',
+          '\tpara repartir las cartas, deshacible como "Repartir"',
+          "\t\tponer sus puntos a 0",
+          '\tpara "barajar" con título "Barajar", deshacible como "Barajar cartas"',
+          "\t\tponer sus puntos a 1"
+        ],
+        [
+          "un juego es una cosa",
+          '\tsu "puntos" es un número',
+          "\tpara repartir las cartas:",
+          '\t\tdeshacible como "Repartir"',
+          "\t\tponer sus puntos a 0",
+          "\tpara barajar:",
+          '\t\ttitulada "Barajar"',
+          '\t\tdeshacible como "Barajar cartas"',
+          "\t\tponer sus puntos a 1"
+        ],
+        "/Juego.es.spell"
+      )
+    })
+
     test("a type's short name, a property's start", () => {
       sameProgram(
         ['a "playing card" is a thing, aka "card"', "\tits score is a number, starting at -1"],

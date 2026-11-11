@@ -176,8 +176,7 @@ to play a card
 
 // the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
 // - the pile it left turns its new last card up;  the move counts, and scores
-to put a card on a pile
-	undoable as "Move Card"
+to put a card on a pile, undoable as "Move Card"
 	set start pile to card's pile
 	if start pile cannot give up the card return no
 	if pile cannot take the card return no
