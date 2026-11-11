@@ -324,11 +324,9 @@
       box-sizing: content-box;
       padding-bottom: var(--bubbly-foot-height);
     }
-    /* a group's rail:  over its parent's, just as wide, while the group lasts;  no paper or foot of its own (Owen) */
-    .bubbly-group > .bubbly-gutter {
-      width: var(--bubbly-gutter);
-      padding-bottom: 0;
-      border-radius: 0;
+    /* a group starts on its parent's rail, so its band grows out of it:  its top-left square (Owen) */
+    .bubbly-group > .bubbly-head {
+      border-top-left-radius: 0;
     }
   }
 
