@@ -1,4 +1,4 @@
-<page "table theming" notebook>
+"table theming" is a notebook page
 	<header level="1">
 		Table
 		<header>A table displays a collection of data grouped into rows.</>
@@ -76,4 +76,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

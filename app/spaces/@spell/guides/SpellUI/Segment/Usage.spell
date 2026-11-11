@@ -1,4 +1,4 @@
-<page "segment usage" notebook>
+"segment usage" is a notebook page
 	<header level="1">
 		Segment
 		<header>A segment is used to create a grouping of related content.</>
@@ -69,4 +69,3 @@
 			  the segment's box, colours and `inverted` look go.
 		</>
 	</>
-</page>

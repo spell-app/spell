@@ -1,4 +1,4 @@
-<page "icon theming" notebook>
+"icon theming" is a notebook page
 	<header level="1">
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
@@ -49,4 +49,3 @@
 			pack (Usage tab).
 		</>
 	</>
-</page>

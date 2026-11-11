@@ -1,4 +1,4 @@
-<page "step usage" notebook>
+"step usage" is a notebook page
 	<header level="1">
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
@@ -83,4 +83,3 @@
 			  (a slotted icon too) and the check go.
 		</>
 	</>
-</page>

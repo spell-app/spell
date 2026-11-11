@@ -1,4 +1,4 @@
-<page "flyout usage" notebook>
+"flyout usage" is a notebook page
 	<header level="1">
 		Flyout
 		<header>A flyout is a modal that slides in from a side of the page.</>
@@ -149,4 +149,3 @@
 			```
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "include theming" notebook>
+"include theming" is a notebook page
 	<header level="1">
 		Include
 		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
@@ -45,4 +45,3 @@
 			included markup follow the site's theme like any others.
 		</>
 	</>
-</page>

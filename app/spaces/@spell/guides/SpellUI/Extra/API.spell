@@ -1,4 +1,4 @@
-<page "extra api" notebook>
+"extra api" is a notebook page
 	<header level="1">
 		Extra
 		<header>Extra content is set apart from the main content, such as a card's footer.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api tag="ui-extra" only="states"></>
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "modal api" notebook>
+"modal api" is a notebook page
 	<header level="1">
 		Modal
 		<header>A modal displays content that temporarily blocks interactions with the main view of a
@@ -51,4 +51,3 @@
 			<ui-docs-api family="ui-modal" only="texts"></>
 		</>
 	</>
-</page>

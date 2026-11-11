@@ -1,4 +1,4 @@
-<page "rating api" notebook>
+"rating api" is a notebook page
 	<header level="1">
 		Rating
 		<header>A rating indicates user interest in content.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api family="ui-rating" only="texts"></>
 		</>
 	</>
-</page>

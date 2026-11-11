@@ -1,4 +1,4 @@
-<page "loader examples" notebook>
+"loader examples" is a notebook page
 	<header level="1">
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>
@@ -230,4 +230,3 @@
 			</example>
 		</>
 	</>
-</page>

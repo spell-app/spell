@@ -1,4 +1,4 @@
-<page "example api" notebook>
+"example api" is a notebook page
 	<header level="1">
 		Example
 		<header>An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-example" only="texts"></>
 		</>
 	</>
-</page>

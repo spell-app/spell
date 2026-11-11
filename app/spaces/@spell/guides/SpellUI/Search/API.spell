@@ -1,4 +1,4 @@
-<page "search api" notebook>
+"search api" is a notebook page
 	<header level="1">
 		Search
 		<header>A search module allows a user to query for results from a selection of data.</>
@@ -57,4 +57,3 @@
 			<ui-docs-api family="ui-search" only="texts"></>
 		</>
 	</>
-</page>

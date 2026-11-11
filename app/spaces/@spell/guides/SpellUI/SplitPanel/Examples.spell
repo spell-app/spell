@@ -1,4 +1,4 @@
-<page "split-panel examples" notebook>
+"split-panel examples" is a notebook page
 	<header level="1">
 		Split Panel
 		<header>A split panel lays its children out side by side or one above the other, with bars to resize them.</>
@@ -64,4 +64,3 @@
 			</example>
 		</>
 	</>
-</page>

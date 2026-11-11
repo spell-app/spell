@@ -1,4 +1,4 @@
-<page "kitchen sink" notebook>
+"kitchen sink" is a notebook page
 	<header level="1">
 		Kitchen Sink
 		<header>Every component family's main example on one page, live: pick a theme and see it everywhere at once.</>
@@ -2129,5 +2129,3 @@
 			</example>
 		</>
 	</>
-
-</page>

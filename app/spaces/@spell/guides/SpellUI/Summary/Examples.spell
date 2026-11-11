@@ -1,4 +1,4 @@
-<page "summary examples" notebook>
+"summary examples" is a notebook page
 	<header level="1">
 		Summary
 		<header>A summary is a feed event's main line:  who did what, and when.</>
@@ -33,4 +33,3 @@
 			</example>
 		</>
 	</>
-</page>

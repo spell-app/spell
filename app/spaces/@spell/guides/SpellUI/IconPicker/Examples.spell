@@ -1,4 +1,4 @@
-<page "icon-picker examples" notebook>
+"icon-picker examples" is a notebook page
 	<header level="1">
 		Icon Picker
 		<header>An icon picker lets people choose an icon by searching for it and clicking its glyph.</>
@@ -77,4 +77,3 @@
 			</example>
 		</>
 	</>
-</page>

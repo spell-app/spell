@@ -1,4 +1,4 @@
-<page "slider api" notebook>
+"slider api" is a notebook page
 	<header level="1">
 		Slider
 		<header>A slider allows users to select values within a range.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-slider" only="texts"></>
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "label examples" notebook>
+"label examples" is a notebook page
 	<header level="1">
 		Label
 		<header>A label displays content classification.</>
@@ -662,4 +662,3 @@
 			</example>
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "loader api" notebook>
+"loader api" is a notebook page
 	<header level="1">
 		Loader
 		<header>A loader alerts a user to wait for an activity to complete.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api family="ui-loader" only="texts"></>
 		</>
 	</>
-</page>

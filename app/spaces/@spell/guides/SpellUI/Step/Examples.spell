@@ -1,4 +1,4 @@
-<page "step examples" notebook>
+"step examples" is a notebook page
 	<header level="1">
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
@@ -899,4 +899,3 @@
 			</example>
 		</>
 	</>
-</page>

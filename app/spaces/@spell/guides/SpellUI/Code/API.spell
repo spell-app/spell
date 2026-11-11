@@ -1,4 +1,4 @@
-<page "code api" notebook>
+"code api" is a notebook page
 	<header level="1">
 		Code
 		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
@@ -44,4 +44,3 @@
 			<ui-docs-api family="ui-code" only="texts"></>
 		</>
 	</>
-</page>

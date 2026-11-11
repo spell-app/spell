@@ -1,4 +1,4 @@
-<page "theme bench" notebook>
+"theme bench" is a notebook page
 	<header level="1">
 		Theme bench
 		<header>The theme editor, full width:  Spell's real pages side by side in the theme being made, its big choices and every token, live.</>
@@ -6,4 +6,3 @@
 	<html>
 		<ui-docs-theme-bench></>
 	</>
-</page>

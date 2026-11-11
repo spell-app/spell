@@ -1,4 +1,4 @@
-<page "dimmer api" notebook>
+"dimmer api" is a notebook page
 	<header level="1">
 		Dimmer
 		<header>A dimmer hides distractions to focus attention on particular content.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-dimmer" only="texts"></>
 		</>
 	</>
-</page>

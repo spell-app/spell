@@ -1,4 +1,4 @@
-<page "sidebar usage" notebook>
+"sidebar usage" is a notebook page
 	<header level="1">
 		Sidebar
 		<header>A sidebar hides additional content beside a page.</>
@@ -144,4 +144,3 @@
 			```
 		</>
 	</>
-</page>

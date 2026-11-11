@@ -1,4 +1,4 @@
-<page "breadcrumb usage" notebook>
+"breadcrumb usage" is a notebook page
 	<header level="1">
 		Breadcrumb
 		<header>A breadcrumb is used to show hierarchy between content.</>
@@ -60,4 +60,3 @@
 			  links stay; the dividers between them, the `<nav>` around them and its "Breadcrumb" name go.
 		</>
 	</>
-</page>

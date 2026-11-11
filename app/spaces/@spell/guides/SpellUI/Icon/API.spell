@@ -1,4 +1,4 @@
-<page "icon api" notebook>
+"icon api" is a notebook page
 	<header level="1">
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
@@ -42,4 +42,3 @@
 			<ui-docs-api family="ui-icon" only="states"></>
 		</>
 	</>
-</page>

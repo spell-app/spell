@@ -1,4 +1,4 @@
-<page "container theming" notebook>
+"container theming" is a notebook page
 	<header level="1">
 		Container
 		<header>A container limits content to a maximum width.</>
@@ -47,4 +47,3 @@
 	<section label="Themes">
 		<markdown>A container has no look of its own:  the theme in the header changes the type inside it.</>
 	</>
-</page>

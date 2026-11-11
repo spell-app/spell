@@ -1,4 +1,4 @@
-<page "date api" notebook>
+"date api" is a notebook page
 	<header level="1">
 		Date
 		<header>A date says when something happened, inline and small inside a feed event.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api tag="ui-date" only="states"></>
 		</>
 	</>
-</page>

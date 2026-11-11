@@ -1,4 +1,4 @@
-<page "reveal api" notebook>
+"reveal api" is a notebook page
 	<header level="1">
 		Reveal
 		<header>A reveal displays additional content in place of previous content when activated.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api family="ui-reveal" only="states"></>
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "quote usage" notebook>
+"quote usage" is a notebook page
 	<header level="1">
 		Quote
 		<header>A quote holds someone else's words:  a block of its own, or a few words inside a sentence.</>
@@ -29,4 +29,3 @@
 			A block quote is a real `<blockquote>`, and an inline one a real `<q>`:  screen readers announce them as quotations.
 		</>
 	</>
-</page>

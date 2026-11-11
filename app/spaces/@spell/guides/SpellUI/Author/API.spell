@@ -1,4 +1,4 @@
-<page "author api" notebook>
+"author api" is a notebook page
 	<header level="1">
 		Author
 		<header>An author names who wrote a comment or did a feed event.</>
@@ -36,4 +36,3 @@
 			<ui-docs-api tag="ui-author" only="states"></>
 		</>
 	</>
-</page>

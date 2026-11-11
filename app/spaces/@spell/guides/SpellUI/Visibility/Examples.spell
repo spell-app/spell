@@ -1,4 +1,4 @@
-<page "visibility examples" notebook>
+"visibility examples" is a notebook page
 	<header level="1">
 		Visibility
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
@@ -394,4 +394,3 @@
 			</example>
 		</>
 	</>
-</page>

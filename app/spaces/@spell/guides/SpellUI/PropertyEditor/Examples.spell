@@ -1,4 +1,4 @@
-<page "property-editor examples" notebook>
+"property-editor examples" is a notebook page
 	<header level="1">
 		Property Editor
 		<header>A property editor draws a form from a schema:  one field per property, in groups that open and close, for one thing or many.</>
@@ -102,4 +102,3 @@
 			</example>
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "root examples" notebook>
+"root examples" is a notebook page
 	<header level="1">
 		Root
 		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
@@ -120,4 +120,3 @@
 			</example>
 		</>
 	</>
-</page>

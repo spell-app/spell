@@ -1,4 +1,4 @@
-<page "statistic theming" notebook>
+"statistic theming" is a notebook page
 	<header level="1">
 		Statistic
 		<header>A statistic emphasizes the current value of an attribute.</>
@@ -52,4 +52,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "icon usage" notebook>
+"icon usage" is a notebook page
 	<header level="1">
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
@@ -66,4 +66,3 @@
 			  glyph, its box (size, colour, ring), the `role` and the `label` go.
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "menu examples" notebook>
+"menu examples" is a notebook page
 	<header level="1">
 		Menu
 		<header>A menu displays grouped navigation actions.</>
@@ -1294,4 +1294,3 @@
 			</example>
 		</>
 	</>
-</page>

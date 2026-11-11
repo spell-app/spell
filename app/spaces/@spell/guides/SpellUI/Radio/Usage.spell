@@ -1,4 +1,4 @@
-<page "radio usage" notebook>
+"radio usage" is a notebook page
 	<header level="1">
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
@@ -135,4 +135,3 @@
 			```
 		</>
 	</>
-</page>

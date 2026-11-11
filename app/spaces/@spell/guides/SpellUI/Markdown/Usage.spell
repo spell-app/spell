@@ -1,4 +1,4 @@
-<page "markdown usage" notebook>
+"markdown usage" is a notebook page
 	<header level="1">
 		Markdown
 		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
@@ -91,4 +91,3 @@
 			  why.
 		</>
 	</>
-</page>

@@ -1,4 +1,4 @@
-<page "segment theming" notebook>
+"segment theming" is a notebook page
 	<header level="1">
 		Segment
 		<header>A segment is used to create a grouping of related content.</>
@@ -50,4 +50,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

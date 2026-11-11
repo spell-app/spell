@@ -1,4 +1,4 @@
-<page "placeholder usage" notebook>
+"placeholder usage" is a notebook page
 	<header level="1">
 		Placeholder
 		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
@@ -60,4 +60,3 @@
 			  placeholder's own box and look.
 		</>
 	</>
-</page>

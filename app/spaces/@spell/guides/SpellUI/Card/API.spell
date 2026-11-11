@@ -1,4 +1,4 @@
-<page "card api" notebook>
+"card api" is a notebook page
 	<header level="1">
 		Card
 		<header>A card displays site content in a manner similar to a playing card.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-card" only="texts"></>
 		</>
 	</>
-</page>

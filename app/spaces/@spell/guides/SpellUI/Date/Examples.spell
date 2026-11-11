@@ -1,4 +1,4 @@
-<page "date examples" notebook>
+"date examples" is a notebook page
 	<header level="1">
 		Date
 		<header>A date says when something happened, inline and small inside a feed event.</>
@@ -48,4 +48,3 @@
 			</example>
 		</>
 	</>
-</page>

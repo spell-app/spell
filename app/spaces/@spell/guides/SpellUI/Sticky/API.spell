@@ -1,4 +1,4 @@
-<page "sticky api" notebook>
+"sticky api" is a notebook page
 	<header level="1">
 		Sticky
 		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api family="ui-sticky" only="states"></>
 		</>
 	</>
-</page>

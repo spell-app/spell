@@ -1,4 +1,4 @@
-<page "textarea api" notebook>
+"textarea api" is a notebook page
 	<header level="1">
 		Textarea
 		<header>A textarea is a multi-line field used to elicit a longer response.</>
@@ -43,4 +43,3 @@
 			<ui-docs-api tag="ui-textarea" only="states"></>
 		</>
 	</>
-</page>

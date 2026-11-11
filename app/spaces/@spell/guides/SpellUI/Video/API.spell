@@ -1,4 +1,4 @@
-<page "video api" notebook>
+"video api" is a notebook page
 	<header level="1">
 		Video
 		<header>A video plays a video file in the browser's own player.</>
@@ -50,4 +50,3 @@
 			<ui-docs-api family="ui-video" only="texts"></>
 		</>
 	</>
-</page>

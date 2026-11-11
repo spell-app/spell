@@ -1,4 +1,4 @@
-<page "calendar examples" notebook>
+"calendar examples" is a notebook page
 	<header level="1">
 		Calendar
 		<header>A calendar lets a user pick a date, a time, or both.</>
@@ -257,4 +257,3 @@
 	<section label="Highlighting specific Days">
 		<message size="small" class="site-not-ported">Event Dates (days marked with their own style and a tooltip, <text code>eventDates</>) can't be set yet (plan issue I68).</>
 	</>
-</page>

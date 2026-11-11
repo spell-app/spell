@@ -1,4 +1,4 @@
-<page "popup theming" notebook>
+"popup theming" is a notebook page
 	<header level="1">
 		Popup
 		<header>A popup displays additional information on top of a page.</>
@@ -58,4 +58,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

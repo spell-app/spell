@@ -1,4 +1,4 @@
-<page "modal theming" notebook>
+"modal theming" is a notebook page
 	<header level="1">
 		Modal
 		<header>A modal displays content that temporarily blocks interactions with the main view of a
@@ -73,4 +73,3 @@
 			each restyling this component through its tokens.
 		</>
 	</>
-</page>

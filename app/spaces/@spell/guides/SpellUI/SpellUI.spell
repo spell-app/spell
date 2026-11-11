@@ -1,500 +1,397 @@
-<!--
-  Spell UI's component pages as one site (epic `notebook` P10).
-  Each component has a folder of notebooks, and each notebook is one page here:  this file says where each one is,
-  and what the side navigation calls it.  A component's Usage page is its address, and its other pages are under it.
--->
-<site "spell ui">
-	<!-- the docs that aren't one component's:  each page one file at the top of the project, beside the components' folders -->
-	<page "home page" address="/" title="Spell UI" thumbnail="snapshots/home.jpg"/>
-	<page "getting started page" address="/getting-started" title="Getting started" thumbnail="snapshots/getting-started.jpg"/>
-	<page "grammar page" address="/grammar" title="Grammar" thumbnail="snapshots/grammar.jpg"/>
-	<page "theming page" address="/theming" title="Theming" thumbnail="snapshots/theming.jpg"/>
-	<page "icons page" address="/icons" title="Icons" thumbnail="snapshots/icons.jpg"/>
-	<page "utilities page" address="/utilities" title="Utilities" thumbnail="snapshots/utilities.jpg"/>
-	<page "component index page" address="/components" title="Components" thumbnail="snapshots/components.jpg"/>
-	<page "kitchen sink page" address="/kitchen-sink" title="Kitchen Sink" thumbnail="snapshots/kitchen-sink.jpg"/>
-	<page "theme bench page" address="/theme-bench" title="Theme bench" thumbnail="snapshots/theme-bench.jpg"/>
-	<page "accordion usage page" address="/accordion" title="Accordion" tab="Usage" tags="Containers, Navigation, Data display, Modules" thumbnail="snapshots/accordion.jpg">
-		<page "accordion examples page" address="/accordion/examples" title="Examples" thumbnail="snapshots/accordion-examples.jpg"/>
-		<page "accordion api page" address="/accordion/api" title="API" thumbnail="snapshots/accordion-api.jpg"/>
-		<page "accordion theming page" address="/accordion/theming" title="Theming" thumbnail="snapshots/accordion-theming.jpg"/>
-	</>
-	<page "action usage page" address="/action" title="Action" tab="Usage" tags="Menus, Controls, Buttons" thumbnail="snapshots/action.jpg">
-		<page "action examples page" address="/action/examples" title="Examples" thumbnail="snapshots/action-examples.jpg"/>
-		<page "action api page" address="/action/api" title="API" thumbnail="snapshots/action-api.jpg"/>
-		<page "action theming page" address="/action/theming" title="Theming" thumbnail="snapshots/action-theming.jpg"/>
-	</>
-	<page "actions usage page" address="/actions" title="Actions" tab="Usage" tags="Buttons, Dialogs, Content parts" thumbnail="snapshots/actions.jpg">
-		<page "actions examples page" address="/actions/examples" title="Examples" thumbnail="snapshots/actions-examples.jpg"/>
-		<page "actions api page" address="/actions/api" title="API" thumbnail="snapshots/actions-api.jpg"/>
-	</>
-	<page "advertisement usage page" address="/advertisement" title="Advertisement" tab="Usage" tags="Layout, Media, Views" thumbnail="snapshots/advertisement.jpg">
-		<page "advertisement examples page" address="/advertisement/examples" title="Examples" thumbnail="snapshots/advertisement-examples.jpg"/>
-		<page "advertisement api page" address="/advertisement/api" title="API" thumbnail="snapshots/advertisement-api.jpg"/>
-		<page "advertisement theming page" address="/advertisement/theming" title="Theming" thumbnail="snapshots/advertisement-theming.jpg"/>
-	</>
-	<page "audio usage page" address="/audio" title="Audio" tab="Usage" tags="Media, Elements" thumbnail="snapshots/audio.jpg">
-		<page "audio examples page" address="/audio/examples" title="Examples" thumbnail="snapshots/audio-examples.jpg"/>
-		<page "audio api page" address="/audio/api" title="API" thumbnail="snapshots/audio-api.jpg"/>
-	</>
-	<page "author usage page" address="/author" title="Author" tab="Usage" tags="Social, Content parts" thumbnail="snapshots/author.jpg">
-		<page "author examples page" address="/author/examples" title="Examples" thumbnail="snapshots/author-examples.jpg"/>
-		<page "author api page" address="/author/api" title="API" thumbnail="snapshots/author-api.jpg"/>
-	</>
-	<page "avatar usage page" address="/avatar" title="Avatar" tab="Usage" tags="Images, Social, Content parts" thumbnail="snapshots/avatar.jpg">
-		<page "avatar examples page" address="/avatar/examples" title="Examples" thumbnail="snapshots/avatar-examples.jpg"/>
-		<page "avatar api page" address="/avatar/api" title="API" thumbnail="snapshots/avatar-api.jpg"/>
-	</>
-	<page "breadcrumb usage page" address="/breadcrumb" title="Breadcrumb" tab="Usage" tags="Basic, Navigation, Collections" thumbnail="snapshots/breadcrumb.jpg">
-		<page "breadcrumb examples page" address="/breadcrumb/examples" title="Examples" thumbnail="snapshots/breadcrumb-examples.jpg"/>
-		<page "breadcrumb api page" address="/breadcrumb/api" title="API" thumbnail="snapshots/breadcrumb-api.jpg"/>
-		<page "breadcrumb theming page" address="/breadcrumb/theming" title="Theming" thumbnail="snapshots/breadcrumb-theming.jpg"/>
-	</>
-	<page "button usage page" address="/button" title="Button" tab="Usage" tags="Basic, Layout, Forms, Controls, Buttons, Elements" thumbnail="snapshots/button.jpg">
-		<page "button examples page" address="/button/examples" title="Examples" thumbnail="snapshots/button-examples.jpg"/>
-		<page "button api page" address="/button/api" title="API" thumbnail="snapshots/button-api.jpg"/>
-		<page "button theming page" address="/button/theming" title="Theming" thumbnail="snapshots/button-theming.jpg"/>
-	</>
-	<page "calendar usage page" address="/calendar" title="Calendar" tab="Usage" tags="Forms, Inputs, Controls, Date & time, Modules" thumbnail="snapshots/calendar.jpg">
-		<page "calendar examples page" address="/calendar/examples" title="Examples" thumbnail="snapshots/calendar-examples.jpg"/>
-		<page "calendar api page" address="/calendar/api" title="API" thumbnail="snapshots/calendar-api.jpg"/>
-		<page "calendar theming page" address="/calendar/theming" title="Theming" thumbnail="snapshots/calendar-theming.jpg"/>
-	</>
-	<page "card usage page" address="/card" title="Card" tab="Usage" tags="Layout, Containers, Data display, Lists, Cards, Views" thumbnail="snapshots/card.jpg">
-		<page "card examples page" address="/card/examples" title="Examples" thumbnail="snapshots/card-examples.jpg"/>
-		<page "card api page" address="/card/api" title="API" thumbnail="snapshots/card-api.jpg"/>
-		<page "card theming page" address="/card/theming" title="Theming" thumbnail="snapshots/card-theming.jpg"/>
-	</>
-	<page "checkbox usage page" address="/checkbox" title="Checkbox" tab="Usage" tags="Basic, Forms, Inputs, Controls, Selection, Modules" thumbnail="snapshots/checkbox.jpg">
-		<page "checkbox examples page" address="/checkbox/examples" title="Examples" thumbnail="snapshots/checkbox-examples.jpg"/>
-		<page "checkbox api page" address="/checkbox/api" title="API" thumbnail="snapshots/checkbox-api.jpg"/>
-		<page "checkbox theming page" address="/checkbox/theming" title="Theming" thumbnail="snapshots/checkbox-theming.jpg"/>
-	</>
-	<page "code usage page" address="/code" title="Code" tab="Usage" tags="Text, Typography, Data display" thumbnail="snapshots/code.jpg">
-		<page "code examples page" address="/code/examples" title="Examples" thumbnail="snapshots/code-examples.jpg"/>
-		<page "code api page" address="/code/api" title="API" thumbnail="snapshots/code-api.jpg"/>
-		<page "code theming page" address="/code/theming" title="Theming" thumbnail="snapshots/code-theming.jpg"/>
-	</>
-	<page "comment usage page" address="/comment" title="Comment" tab="Usage" tags="Data display, Lists, Social, Content parts, Views" thumbnail="snapshots/comment.jpg">
-		<page "comment examples page" address="/comment/examples" title="Examples" thumbnail="snapshots/comment-examples.jpg"/>
-		<page "comment api page" address="/comment/api" title="API" thumbnail="snapshots/comment-api.jpg"/>
-		<page "comment theming page" address="/comment/theming" title="Theming" thumbnail="snapshots/comment-theming.jpg"/>
-	</>
-	<page "components usage page" address="/ui-components" title="Components element" tab="Usage" tags="Loading, Modules" thumbnail="snapshots/ui-components.jpg">
-		<page "components examples page" address="/ui-components/examples" title="Examples" thumbnail="snapshots/ui-components-examples.jpg"/>
-		<page "components api page" address="/ui-components/api" title="API" thumbnail="snapshots/ui-components-api.jpg"/>
-		<page "components theming page" address="/ui-components/theming" title="Theming" thumbnail="snapshots/ui-components-theming.jpg"/>
-	</>
-	<page "container usage page" address="/container" title="Container" tab="Usage" tags="Basic, Layout, Containers, Elements" thumbnail="snapshots/container.jpg">
-		<page "container examples page" address="/container/examples" title="Examples" thumbnail="snapshots/container-examples.jpg"/>
-		<page "container api page" address="/container/api" title="API" thumbnail="snapshots/container-api.jpg"/>
-		<page "container theming page" address="/container/theming" title="Theming" thumbnail="snapshots/container-theming.jpg"/>
-	</>
-	<page "content usage page" address="/content" title="Content" tab="Usage" tags="Containers, Cards, Content parts" thumbnail="snapshots/content.jpg">
-		<page "content examples page" address="/content/examples" title="Examples" thumbnail="snapshots/content-examples.jpg"/>
-		<page "content api page" address="/content/api" title="API" thumbnail="snapshots/content-api.jpg"/>
-	</>
-	<page "content-parts usage page" address="/content-parts" title="Content parts" tab="Usage" tags="Basic, Text, Typography, Content parts, Elements" thumbnail="snapshots/content-parts.jpg">
-		<page "content-parts examples page" address="/content-parts/examples" title="Examples" thumbnail="snapshots/content-parts-examples.jpg"/>
-		<page "content-parts api page" address="/content-parts/api" title="API" thumbnail="snapshots/content-parts-api.jpg"/>
-		<page "content-parts theming page" address="/content-parts/theming" title="Theming" thumbnail="snapshots/content-parts-theming.jpg"/>
-	</>
-	<page "date usage page" address="/date" title="Date" tab="Usage" tags="Date & time, Social, Content parts" thumbnail="snapshots/date.jpg">
-		<page "date examples page" address="/date/examples" title="Examples" thumbnail="snapshots/date-examples.jpg"/>
-		<page "date api page" address="/date/api" title="API" thumbnail="snapshots/date-api.jpg"/>
-	</>
-	<page "description usage page" address="/description" title="Description" tab="Usage" tags="Text, Content parts" thumbnail="snapshots/description.jpg">
-		<page "description examples page" address="/description/examples" title="Examples" thumbnail="snapshots/description-examples.jpg"/>
-		<page "description api page" address="/description/api" title="API" thumbnail="snapshots/description-api.jpg"/>
-	</>
-	<page "detail usage page" address="/detail" title="Detail" tab="Usage" tags="Text, Content parts" thumbnail="snapshots/detail.jpg">
-		<page "detail examples page" address="/detail/examples" title="Examples" thumbnail="snapshots/detail-examples.jpg"/>
-		<page "detail api page" address="/detail/api" title="API" thumbnail="snapshots/detail-api.jpg"/>
-	</>
-	<page "diagram usage page" address="/diagram" title="Diagram" tab="Usage" tags="Data display, Images, Views" thumbnail="snapshots/diagram.jpg">
-		<page "diagram examples page" address="/diagram/examples" title="Examples" thumbnail="snapshots/diagram-examples.jpg"/>
-		<page "diagram api page" address="/diagram/api" title="API" thumbnail="snapshots/diagram-api.jpg"/>
-		<page "diagram theming page" address="/diagram/theming" title="Theming" thumbnail="snapshots/diagram-theming.jpg"/>
-	</>
-	<page "dimension usage page" address="/dimension" title="Dimension" tab="Usage" tags="Text, Typography" thumbnail="snapshots/dimension.jpg">
-		<page "dimension examples page" address="/dimension/examples" title="Examples" thumbnail="snapshots/dimension-examples.jpg"/>
-		<page "dimension api page" address="/dimension/api" title="API" thumbnail="snapshots/dimension-api.jpg"/>
-	</>
-	<page "dimmer usage page" address="/dimmer" title="Dimmer" tab="Usage" tags="Feedback, Overlays, Loading, Modules" thumbnail="snapshots/dimmer.jpg">
-		<page "dimmer examples page" address="/dimmer/examples" title="Examples" thumbnail="snapshots/dimmer-examples.jpg"/>
-		<page "dimmer api page" address="/dimmer/api" title="API" thumbnail="snapshots/dimmer-api.jpg"/>
-		<page "dimmer theming page" address="/dimmer/theming" title="Theming" thumbnail="snapshots/dimmer-theming.jpg"/>
-	</>
-	<page "divider usage page" address="/divider" title="Divider" tab="Usage" tags="Basic, Layout, Typography, Elements" thumbnail="snapshots/divider.jpg">
-		<page "divider examples page" address="/divider/examples" title="Examples" thumbnail="snapshots/divider-examples.jpg"/>
-		<page "divider api page" address="/divider/api" title="API" thumbnail="snapshots/divider-api.jpg"/>
-		<page "divider theming page" address="/divider/theming" title="Theming" thumbnail="snapshots/divider-theming.jpg"/>
-	</>
-	<page "dropdown usage page" address="/dropdown" title="Dropdown" tab="Usage" tags="Basic, Menus, Forms, Inputs, Controls, Selection, Modules" thumbnail="snapshots/dropdown.jpg">
-		<page "dropdown examples page" address="/dropdown/examples" title="Examples" thumbnail="snapshots/dropdown-examples.jpg"/>
-		<page "dropdown api page" address="/dropdown/api" title="API" thumbnail="snapshots/dropdown-api.jpg"/>
-		<page "dropdown theming page" address="/dropdown/theming" title="Theming" thumbnail="snapshots/dropdown-theming.jpg"/>
-	</>
-	<page "embed usage page" address="/embed" title="Embed" tab="Usage" tags="Media, Modules" thumbnail="snapshots/embed.jpg">
-		<page "embed examples page" address="/embed/examples" title="Examples" thumbnail="snapshots/embed-examples.jpg"/>
-		<page "embed api page" address="/embed/api" title="API" thumbnail="snapshots/embed-api.jpg"/>
-		<page "embed theming page" address="/embed/theming" title="Theming" thumbnail="snapshots/embed-theming.jpg"/>
-	</>
-	<page "emoji usage page" address="/emoji" title="Emoji" tab="Usage" tags="Text, Media, Icons, Elements" thumbnail="snapshots/emoji.jpg">
-		<page "emoji examples page" address="/emoji/examples" title="Examples" thumbnail="snapshots/emoji-examples.jpg"/>
-		<page "emoji api page" address="/emoji/api" title="API" thumbnail="snapshots/emoji-api.jpg"/>
-		<page "emoji theming page" address="/emoji/theming" title="Theming" thumbnail="snapshots/emoji-theming.jpg"/>
-	</>
-	<page "example usage page" address="/example" title="Example" tab="Usage" tags="Data display, Documentation" thumbnail="snapshots/example.jpg">
-		<page "example examples page" address="/example/examples" title="Examples" thumbnail="snapshots/example-examples.jpg"/>
-		<page "example api page" address="/example/api" title="API" thumbnail="snapshots/example-api.jpg"/>
-		<page "example theming page" address="/example/theming" title="Theming" thumbnail="snapshots/example-theming.jpg"/>
-	</>
-	<page "extra usage page" address="/extra" title="Extra" tab="Usage" tags="Cards, Content parts" thumbnail="snapshots/extra.jpg">
-		<page "extra examples page" address="/extra/examples" title="Examples" thumbnail="snapshots/extra-examples.jpg"/>
-		<page "extra api page" address="/extra/api" title="API" thumbnail="snapshots/extra-api.jpg"/>
-	</>
-	<page "feed usage page" address="/feed" title="Feed" tab="Usage" tags="Data display, Lists, Social, Content parts, Views" thumbnail="snapshots/feed.jpg">
-		<page "feed examples page" address="/feed/examples" title="Examples" thumbnail="snapshots/feed-examples.jpg"/>
-		<page "feed api page" address="/feed/api" title="API" thumbnail="snapshots/feed-api.jpg"/>
-		<page "feed theming page" address="/feed/theming" title="Theming" thumbnail="snapshots/feed-theming.jpg"/>
-	</>
-	<page "flag usage page" address="/flag" title="Flag" tab="Usage" tags="Images, Icons, Elements" thumbnail="snapshots/flag.jpg">
-		<page "flag examples page" address="/flag/examples" title="Examples" thumbnail="snapshots/flag-examples.jpg"/>
-		<page "flag api page" address="/flag/api" title="API" thumbnail="snapshots/flag-api.jpg"/>
-		<page "flag theming page" address="/flag/theming" title="Theming" thumbnail="snapshots/flag-theming.jpg"/>
-	</>
-	<page "flyout usage page" address="/flyout" title="Flyout" tab="Usage" tags="Containers, Overlays, Dialogs, Modules" thumbnail="snapshots/flyout.jpg">
-		<page "flyout examples page" address="/flyout/examples" title="Examples" thumbnail="snapshots/flyout-examples.jpg"/>
-		<page "flyout api page" address="/flyout/api" title="API" thumbnail="snapshots/flyout-api.jpg"/>
-		<page "flyout theming page" address="/flyout/theming" title="Theming" thumbnail="snapshots/flyout-theming.jpg"/>
-	</>
-	<page "form usage page" address="/form" title="Form" tab="Usage" tags="Basic, Layout, Forms, Inputs, Lists, Collections" thumbnail="snapshots/form.jpg">
-		<page "form examples page" address="/form/examples" title="Examples" thumbnail="snapshots/form-examples.jpg"/>
-		<page "form api page" address="/form/api" title="API" thumbnail="snapshots/form-api.jpg"/>
-		<page "form theming page" address="/form/theming" title="Theming" thumbnail="snapshots/form-theming.jpg"/>
-	</>
-	<page "grid usage page" address="/grid" title="Grid" tab="Usage" tags="Basic, Layout, Collections" thumbnail="snapshots/grid.jpg">
-		<page "grid examples page" address="/grid/examples" title="Examples" thumbnail="snapshots/grid-examples.jpg"/>
-		<page "grid api page" address="/grid/api" title="API" thumbnail="snapshots/grid-api.jpg"/>
-		<page "grid theming page" address="/grid/theming" title="Theming" thumbnail="snapshots/grid-theming.jpg"/>
-	</>
-	<page "icon usage page" address="/icon" title="Icon" tab="Usage" tags="Basic, Images, Icons, Elements" thumbnail="snapshots/icon.jpg">
-		<page "icon examples page" address="/icon/examples" title="Examples" thumbnail="snapshots/icon-examples.jpg"/>
-		<page "icon api page" address="/icon/api" title="API" thumbnail="snapshots/icon-api.jpg"/>
-		<page "icon theming page" address="/icon/theming" title="Theming" thumbnail="snapshots/icon-theming.jpg"/>
-	</>
-	<page "icon-picker usage page" address="/icon-picker" title="Icon Picker" tab="Usage" tags="Forms, Inputs, Controls, Selection, Icons" thumbnail="snapshots/icon-picker.jpg">
-		<page "icon-picker examples page" address="/icon-picker/examples" title="Examples" thumbnail="snapshots/icon-picker-examples.jpg"/>
-		<page "icon-picker api page" address="/icon-picker/api" title="API" thumbnail="snapshots/icon-picker-api.jpg"/>
-		<page "icon-picker theming page" address="/icon-picker/theming" title="Theming" thumbnail="snapshots/icon-picker-theming.jpg"/>
-	</>
-	<page "image usage page" address="/image" title="Image" tab="Usage" tags="Basic, Layout, Media, Images, Elements" thumbnail="snapshots/image.jpg">
-		<page "image examples page" address="/image/examples" title="Examples" thumbnail="snapshots/image-examples.jpg"/>
-		<page "image api page" address="/image/api" title="API" thumbnail="snapshots/image-api.jpg"/>
-		<page "image theming page" address="/image/theming" title="Theming" thumbnail="snapshots/image-theming.jpg"/>
-	</>
-	<page "include usage page" address="/include" title="Include" tab="Usage" tags="Layout, Containers, Modules" thumbnail="snapshots/include.jpg">
-		<page "include examples page" address="/include/examples" title="Examples" thumbnail="snapshots/include-examples.jpg"/>
-		<page "include api page" address="/include/api" title="API" thumbnail="snapshots/include-api.jpg"/>
-		<page "include theming page" address="/include/theming" title="Theming" thumbnail="snapshots/include-theming.jpg"/>
-	</>
-	<page "input usage page" address="/input" title="Input" tab="Usage" tags="Basic, Forms, Inputs, Controls, Text, Elements" thumbnail="snapshots/input.jpg">
-		<page "input examples page" address="/input/examples" title="Examples" thumbnail="snapshots/input-examples.jpg"/>
-		<page "input api page" address="/input/api" title="API" thumbnail="snapshots/input-api.jpg"/>
-		<page "input theming page" address="/input/theming" title="Theming" thumbnail="snapshots/input-theming.jpg"/>
-	</>
-	<page "item usage page" address="/item" title="Item" tab="Usage" tags="Data display, Lists, Content parts, Views" thumbnail="snapshots/item.jpg">
-		<page "item examples page" address="/item/examples" title="Examples" thumbnail="snapshots/item-examples.jpg"/>
-		<page "item api page" address="/item/api" title="API" thumbnail="snapshots/item-api.jpg"/>
-		<page "item theming page" address="/item/theming" title="Theming" thumbnail="snapshots/item-theming.jpg"/>
-	</>
-	<page "items usage page" address="/items" title="Items" tab="Usage" tags="Data display, Lists, Views" thumbnail="snapshots/items.jpg">
-		<page "items examples page" address="/items/examples" title="Examples" thumbnail="snapshots/items-examples.jpg"/>
-		<page "items api page" address="/items/api" title="API" thumbnail="snapshots/items-api.jpg"/>
-		<page "items theming page" address="/items/theming" title="Theming" thumbnail="snapshots/items-theming.jpg"/>
-	</>
-	<page "json usage page" address="/json" title="JSON data" tab="Usage" tags="Data display, Modules" thumbnail="snapshots/json.jpg">
-		<page "json examples page" address="/json/examples" title="Examples" thumbnail="snapshots/json-examples.jpg"/>
-		<page "json api page" address="/json/api" title="API" thumbnail="snapshots/json-api.jpg"/>
-	</>
-	<page "keys usage page" address="/keys" title="Keys" tab="Usage" tags="Text, Typography" thumbnail="snapshots/keys.jpg">
-		<page "keys examples page" address="/keys/examples" title="Examples" thumbnail="snapshots/keys-examples.jpg"/>
-		<page "keys api page" address="/keys/api" title="API" thumbnail="snapshots/keys-api.jpg"/>
-	</>
-	<page "label usage page" address="/label" title="Label" tab="Usage" tags="Basic, Text, Lists, Status, Elements" thumbnail="snapshots/label.jpg">
-		<page "label examples page" address="/label/examples" title="Examples" thumbnail="snapshots/label-examples.jpg"/>
-		<page "label api page" address="/label/api" title="API" thumbnail="snapshots/label-api.jpg"/>
-		<page "label theming page" address="/label/theming" title="Theming" thumbnail="snapshots/label-theming.jpg"/>
-	</>
-	<page "list usage page" address="/list" title="List" tab="Usage" tags="Basic, Typography, Data display, Lists, Elements" thumbnail="snapshots/list.jpg">
-		<page "list examples page" address="/list/examples" title="Examples" thumbnail="snapshots/list-examples.jpg"/>
-		<page "list api page" address="/list/api" title="API" thumbnail="snapshots/list-api.jpg"/>
-		<page "list theming page" address="/list/theming" title="Theming" thumbnail="snapshots/list-theming.jpg"/>
-	</>
-	<page "loader usage page" address="/loader" title="Loader" tab="Usage" tags="Feedback, Loading, Progress, Elements" thumbnail="snapshots/loader.jpg">
-		<page "loader examples page" address="/loader/examples" title="Examples" thumbnail="snapshots/loader-examples.jpg"/>
-		<page "loader api page" address="/loader/api" title="API" thumbnail="snapshots/loader-api.jpg"/>
-		<page "loader theming page" address="/loader/theming" title="Theming" thumbnail="snapshots/loader-theming.jpg"/>
-	</>
-	<page "markdown usage page" address="/markdown" title="Markdown" tab="Usage" tags="Text, Typography, Data display" thumbnail="snapshots/markdown.jpg">
-		<page "markdown examples page" address="/markdown/examples" title="Examples" thumbnail="snapshots/markdown-examples.jpg"/>
-		<page "markdown api page" address="/markdown/api" title="API" thumbnail="snapshots/markdown-api.jpg"/>
-		<page "markdown theming page" address="/markdown/theming" title="Theming" thumbnail="snapshots/markdown-theming.jpg"/>
-	</>
-	<page "menu usage page" address="/menu" title="Menu" tab="Usage" tags="Basic, Navigation, Menus, Collections" thumbnail="snapshots/menu.jpg">
-		<page "menu examples page" address="/menu/examples" title="Examples" thumbnail="snapshots/menu-examples.jpg"/>
-		<page "menu api page" address="/menu/api" title="API" thumbnail="snapshots/menu-api.jpg"/>
-		<page "menu theming page" address="/menu/theming" title="Theming" thumbnail="snapshots/menu-theming.jpg"/>
-	</>
-	<page "message usage page" address="/message" title="Message" tab="Usage" tags="Feedback, Messages, Notifications, Status, Collections" thumbnail="snapshots/message.jpg">
-		<page "message examples page" address="/message/examples" title="Examples" thumbnail="snapshots/message-examples.jpg"/>
-		<page "message api page" address="/message/api" title="API" thumbnail="snapshots/message-api.jpg"/>
-		<page "message theming page" address="/message/theming" title="Theming" thumbnail="snapshots/message-theming.jpg"/>
-	</>
-	<page "meta usage page" address="/meta" title="Meta" tab="Usage" tags="Text, Content parts" thumbnail="snapshots/meta.jpg">
-		<page "meta examples page" address="/meta/examples" title="Examples" thumbnail="snapshots/meta-examples.jpg"/>
-		<page "meta api page" address="/meta/api" title="API" thumbnail="snapshots/meta-api.jpg"/>
-	</>
-	<page "modal usage page" address="/modal" title="Modal" tab="Usage" tags="Overlays, Dialogs, Popups, Modules" thumbnail="snapshots/modal.jpg">
-		<page "modal examples page" address="/modal/examples" title="Examples" thumbnail="snapshots/modal-examples.jpg"/>
-		<page "modal api page" address="/modal/api" title="API" thumbnail="snapshots/modal-api.jpg"/>
-		<page "modal theming page" address="/modal/theming" title="Theming" thumbnail="snapshots/modal-theming.jpg"/>
-	</>
-	<page "nag usage page" address="/nag" title="Nag" tab="Usage" tags="Messages, Notifications, Overlays, Modules" thumbnail="snapshots/nag.jpg">
-		<page "nag examples page" address="/nag/examples" title="Examples" thumbnail="snapshots/nag-examples.jpg"/>
-		<page "nag api page" address="/nag/api" title="API" thumbnail="snapshots/nag-api.jpg"/>
-		<page "nag theming page" address="/nag/theming" title="Theming" thumbnail="snapshots/nag-theming.jpg"/>
-	</>
-	<page "page usage page" address="/page" title="Page" tab="Usage" tags="Layout, Containers, Navigation" thumbnail="snapshots/page.jpg">
-		<page "page examples page" address="/page/examples" title="Examples" thumbnail="snapshots/page-examples.jpg"/>
-		<page "page api page" address="/page/api" title="API" thumbnail="snapshots/page-api.jpg"/>
-		<page "page theming page" address="/page/theming" title="Theming" thumbnail="snapshots/page-theming.jpg"/>
-	</>
-	<page "panel usage page" address="/panel" title="Panel" tab="Usage" tags="Layout, Containers" thumbnail="snapshots/panel.jpg">
-		<page "panel examples page" address="/panel/examples" title="Examples" thumbnail="snapshots/panel-examples.jpg"/>
-		<page "panel api page" address="/panel/api" title="API" thumbnail="snapshots/panel-api.jpg"/>
-		<page "panel theming page" address="/panel/theming" title="Theming" thumbnail="snapshots/panel-theming.jpg"/>
-	</>
-	<page "placeholder usage page" address="/placeholder" title="Placeholder" tab="Usage" tags="Images, Feedback, Loading, Content parts, Elements" thumbnail="snapshots/placeholder.jpg">
-		<page "placeholder examples page" address="/placeholder/examples" title="Examples" thumbnail="snapshots/placeholder-examples.jpg"/>
-		<page "placeholder api page" address="/placeholder/api" title="API" thumbnail="snapshots/placeholder-api.jpg"/>
-		<page "placeholder theming page" address="/placeholder/theming" title="Theming" thumbnail="snapshots/placeholder-theming.jpg"/>
-	</>
-	<page "popup usage page" address="/popup" title="Popup" tab="Usage" tags="Feedback, Overlays, Popups, Modules" thumbnail="snapshots/popup.jpg">
-		<page "popup examples page" address="/popup/examples" title="Examples" thumbnail="snapshots/popup-examples.jpg"/>
-		<page "popup api page" address="/popup/api" title="API" thumbnail="snapshots/popup-api.jpg"/>
-		<page "popup theming page" address="/popup/theming" title="Theming" thumbnail="snapshots/popup-theming.jpg"/>
-	</>
-	<page "progress usage page" address="/progress" title="Progress" tab="Usage" tags="Feedback, Loading, Progress, Status, Modules" thumbnail="snapshots/progress.jpg">
-		<page "progress examples page" address="/progress/examples" title="Examples" thumbnail="snapshots/progress-examples.jpg"/>
-		<page "progress api page" address="/progress/api" title="API" thumbnail="snapshots/progress-api.jpg"/>
-		<page "progress theming page" address="/progress/theming" title="Theming" thumbnail="snapshots/progress-theming.jpg"/>
-	</>
-	<page "property-editor usage page" address="/property-editor" title="Property Editor" tab="Usage" tags="Layout, Forms, Inputs, Collections" thumbnail="snapshots/property-editor.jpg">
-		<page "property-editor examples page" address="/property-editor/examples" title="Examples" thumbnail="snapshots/property-editor-examples.jpg"/>
-		<page "property-editor api page" address="/property-editor/api" title="API" thumbnail="snapshots/property-editor-api.jpg"/>
-	</>
-	<page "quote usage page" address="/quote" title="Quote" tab="Usage" tags="Text, Typography" thumbnail="snapshots/quote.jpg">
-		<page "quote examples page" address="/quote/examples" title="Examples" thumbnail="snapshots/quote-examples.jpg"/>
-		<page "quote api page" address="/quote/api" title="API" thumbnail="snapshots/quote-api.jpg"/>
-	</>
-	<page "radio usage page" address="/radio" title="Radio" tab="Usage" tags="Forms, Inputs, Controls, Selection, Modules" thumbnail="snapshots/radio.jpg">
-		<page "radio examples page" address="/radio/examples" title="Examples" thumbnail="snapshots/radio-examples.jpg"/>
-		<page "radio api page" address="/radio/api" title="API" thumbnail="snapshots/radio-api.jpg"/>
-		<page "radio theming page" address="/radio/theming" title="Theming" thumbnail="snapshots/radio-theming.jpg"/>
-	</>
-	<page "rail usage page" address="/rail" title="Rail" tab="Usage" tags="Layout, Containers, Elements" thumbnail="snapshots/rail.jpg">
-		<page "rail examples page" address="/rail/examples" title="Examples" thumbnail="snapshots/rail-examples.jpg"/>
-		<page "rail api page" address="/rail/api" title="API" thumbnail="snapshots/rail-api.jpg"/>
-		<page "rail theming page" address="/rail/theming" title="Theming" thumbnail="snapshots/rail-theming.jpg"/>
-	</>
-	<page "rating usage page" address="/rating" title="Rating" tab="Usage" tags="Forms, Inputs, Controls, Feedback, Modules" thumbnail="snapshots/rating.jpg">
-		<page "rating examples page" address="/rating/examples" title="Examples" thumbnail="snapshots/rating-examples.jpg"/>
-		<page "rating api page" address="/rating/api" title="API" thumbnail="snapshots/rating-api.jpg"/>
-		<page "rating theming page" address="/rating/theming" title="Theming" thumbnail="snapshots/rating-theming.jpg"/>
-	</>
-	<page "reveal usage page" address="/reveal" title="Reveal" tab="Usage" tags="Media, Images, Animation, Elements" thumbnail="snapshots/reveal.jpg">
-		<page "reveal examples page" address="/reveal/examples" title="Examples" thumbnail="snapshots/reveal-examples.jpg"/>
-		<page "reveal api page" address="/reveal/api" title="API" thumbnail="snapshots/reveal-api.jpg"/>
-		<page "reveal theming page" address="/reveal/theming" title="Theming" thumbnail="snapshots/reveal-theming.jpg"/>
-	</>
-	<page "root usage page" address="/root" title="Root" tab="Usage" tags="Basic, Layout, Containers, Loading" thumbnail="snapshots/root.jpg">
-		<page "root examples page" address="/root/examples" title="Examples" thumbnail="snapshots/root-examples.jpg"/>
-		<page "root api page" address="/root/api" title="API" thumbnail="snapshots/root-api.jpg"/>
-		<page "root theming page" address="/root/theming" title="Theming" thumbnail="snapshots/root-theming.jpg"/>
-	</>
-	<page "search usage page" address="/search" title="Search" tab="Usage" tags="Navigation, Forms, Inputs, Selection, Modules" thumbnail="snapshots/search.jpg">
-		<page "search examples page" address="/search/examples" title="Examples" thumbnail="snapshots/search-examples.jpg"/>
-		<page "search api page" address="/search/api" title="API" thumbnail="snapshots/search-api.jpg"/>
-		<page "search theming page" address="/search/theming" title="Theming" thumbnail="snapshots/search-theming.jpg"/>
-	</>
-	<page "section usage page" address="/section" title="Section" tab="Usage" tags="Layout, Containers" thumbnail="snapshots/section.jpg">
-		<page "section examples page" address="/section/examples" title="Examples" thumbnail="snapshots/section-examples.jpg"/>
-		<page "section api page" address="/section/api" title="API" thumbnail="snapshots/section-api.jpg"/>
-		<page "section theming page" address="/section/theming" title="Theming" thumbnail="snapshots/section-theming.jpg"/>
-	</>
-	<page "segment usage page" address="/segment" title="Segment" tab="Usage" tags="Basic, Layout, Containers, Elements" thumbnail="snapshots/segment.jpg">
-		<page "segment examples page" address="/segment/examples" title="Examples" thumbnail="snapshots/segment-examples.jpg"/>
-		<page "segment api page" address="/segment/api" title="API" thumbnail="snapshots/segment-api.jpg"/>
-		<page "segment theming page" address="/segment/theming" title="Theming" thumbnail="snapshots/segment-theming.jpg"/>
-	</>
-	<page "select usage page" address="/select" title="Select" tab="Usage" tags="Forms, Inputs, Controls, Selection, Modules" thumbnail="snapshots/select.jpg">
-		<page "select examples page" address="/select/examples" title="Examples" thumbnail="snapshots/select-examples.jpg"/>
-		<page "select api page" address="/select/api" title="API" thumbnail="snapshots/select-api.jpg"/>
-		<page "select theming page" address="/select/theming" title="Theming" thumbnail="snapshots/select-theming.jpg"/>
-	</>
-	<page "shape usage page" address="/shape" title="Shape" tab="Usage" tags="Media, Animation, Content parts, Modules" thumbnail="snapshots/shape.jpg">
-		<page "shape examples page" address="/shape/examples" title="Examples" thumbnail="snapshots/shape-examples.jpg"/>
-		<page "shape api page" address="/shape/api" title="API" thumbnail="snapshots/shape-api.jpg"/>
-		<page "shape theming page" address="/shape/theming" title="Theming" thumbnail="snapshots/shape-theming.jpg"/>
-	</>
-	<page "sidebar usage page" address="/sidebar" title="Sidebar" tab="Usage" tags="Layout, Navigation, Menus, Overlays, Modules" thumbnail="snapshots/sidebar.jpg">
-		<page "sidebar examples page" address="/sidebar/examples" title="Examples" thumbnail="snapshots/sidebar-examples.jpg"/>
-		<page "sidebar api page" address="/sidebar/api" title="API" thumbnail="snapshots/sidebar-api.jpg"/>
-		<page "sidebar theming page" address="/sidebar/theming" title="Theming" thumbnail="snapshots/sidebar-theming.jpg"/>
-	</>
-	<page "sides usage page" address="/sides" title="Sides" tab="Usage" tags="Forms, Inputs, Controls" thumbnail="snapshots/sides.jpg">
-		<page "sides examples page" address="/sides/examples" title="Examples" thumbnail="snapshots/sides-examples.jpg"/>
-		<page "sides api page" address="/sides/api" title="API" thumbnail="snapshots/sides-api.jpg"/>
-		<page "sides theming page" address="/sides/theming" title="Theming" thumbnail="snapshots/sides-theming.jpg"/>
-	</>
-	<page "site-nav usage page" address="/site-nav" title="Site nav" tab="Usage" tags="Navigation, Lists" thumbnail="snapshots/site-nav.jpg">
-		<page "site-nav examples page" address="/site-nav/examples" title="Examples" thumbnail="snapshots/site-nav-examples.jpg"/>
-		<page "site-nav api page" address="/site-nav/api" title="API" thumbnail="snapshots/site-nav-api.jpg"/>
-		<page "site-nav theming page" address="/site-nav/theming" title="Theming" thumbnail="snapshots/site-nav-theming.jpg"/>
-	</>
-	<page "site-tabs usage page" address="/site-tabs" title="Site tabs" tab="Usage" tags="Navigation, Menus" thumbnail="snapshots/site-tabs.jpg">
-		<page "site-tabs examples page" address="/site-tabs/examples" title="Examples" thumbnail="snapshots/site-tabs-examples.jpg"/>
-		<page "site-tabs api page" address="/site-tabs/api" title="API" thumbnail="snapshots/site-tabs-api.jpg"/>
-		<page "site-tabs theming page" address="/site-tabs/theming" title="Theming" thumbnail="snapshots/site-tabs-theming.jpg"/>
-	</>
-	<page "slider usage page" address="/slider" title="Slider" tab="Usage" tags="Forms, Inputs, Controls, Modules" thumbnail="snapshots/slider.jpg">
-		<page "slider examples page" address="/slider/examples" title="Examples" thumbnail="snapshots/slider-examples.jpg"/>
-		<page "slider api page" address="/slider/api" title="API" thumbnail="snapshots/slider-api.jpg"/>
-		<page "slider theming page" address="/slider/theming" title="Theming" thumbnail="snapshots/slider-theming.jpg"/>
-	</>
-	<page "space usage page" address="/space" title="Space" tab="Usage" tags="Basic, Layout" thumbnail="snapshots/space.jpg">
-		<page "space examples page" address="/space/examples" title="Examples" thumbnail="snapshots/space-examples.jpg"/>
-		<page "space api page" address="/space/api" title="API" thumbnail="snapshots/space-api.jpg"/>
-	</>
-	<page "split-panel usage page" address="/split-panel" title="Split Panel" tab="Usage" tags="Layout, Containers" thumbnail="snapshots/split-panel.jpg">
-		<page "split-panel examples page" address="/split-panel/examples" title="Examples" thumbnail="snapshots/split-panel-examples.jpg"/>
-		<page "split-panel api page" address="/split-panel/api" title="API" thumbnail="snapshots/split-panel-api.jpg"/>
-		<page "split-panel theming page" address="/split-panel/theming" title="Theming" thumbnail="snapshots/split-panel-theming.jpg"/>
-	</>
-	<page "stack usage page" address="/stack" title="Stack" tab="Usage" tags="Basic, Layout" thumbnail="snapshots/stack.jpg">
-		<page "stack examples page" address="/stack/examples" title="Examples" thumbnail="snapshots/stack-examples.jpg"/>
-		<page "stack api page" address="/stack/api" title="API" thumbnail="snapshots/stack-api.jpg"/>
-	</>
-	<page "statistic usage page" address="/statistic" title="Statistic" tab="Usage" tags="Layout, Text, Data display, Views" thumbnail="snapshots/statistic.jpg">
-		<page "statistic examples page" address="/statistic/examples" title="Examples" thumbnail="snapshots/statistic-examples.jpg"/>
-		<page "statistic api page" address="/statistic/api" title="API" thumbnail="snapshots/statistic-api.jpg"/>
-		<page "statistic theming page" address="/statistic/theming" title="Theming" thumbnail="snapshots/statistic-theming.jpg"/>
-	</>
-	<page "step usage page" address="/step" title="Step" tab="Usage" tags="Navigation, Progress, Status, Content parts, Elements" thumbnail="snapshots/step.jpg">
-		<page "step examples page" address="/step/examples" title="Examples" thumbnail="snapshots/step-examples.jpg"/>
-		<page "step api page" address="/step/api" title="API" thumbnail="snapshots/step-api.jpg"/>
-		<page "step theming page" address="/step/theming" title="Theming" thumbnail="snapshots/step-theming.jpg"/>
-	</>
-	<page "sticky usage page" address="/sticky" title="Sticky" tab="Usage" tags="Layout, Navigation, Modules" thumbnail="snapshots/sticky.jpg">
-		<page "sticky examples page" address="/sticky/examples" title="Examples" thumbnail="snapshots/sticky-examples.jpg"/>
-		<page "sticky api page" address="/sticky/api" title="API" thumbnail="snapshots/sticky-api.jpg"/>
-		<page "sticky theming page" address="/sticky/theming" title="Theming" thumbnail="snapshots/sticky-theming.jpg"/>
-	</>
-	<page "summary usage page" address="/summary" title="Summary" tab="Usage" tags="Social, Content parts" thumbnail="snapshots/summary.jpg">
-		<page "summary examples page" address="/summary/examples" title="Examples" thumbnail="snapshots/summary-examples.jpg"/>
-		<page "summary api page" address="/summary/api" title="API" thumbnail="snapshots/summary-api.jpg"/>
-	</>
-	<page "tab usage page" address="/tab" title="Tab" tab="Usage" tags="Containers, Navigation, Menus, Content parts, Modules" thumbnail="snapshots/tab.jpg">
-		<page "tab examples page" address="/tab/examples" title="Examples" thumbnail="snapshots/tab-examples.jpg"/>
-		<page "tab api page" address="/tab/api" title="API" thumbnail="snapshots/tab-api.jpg"/>
-		<page "tab theming page" address="/tab/theming" title="Theming" thumbnail="snapshots/tab-theming.jpg"/>
-	</>
-	<page "table usage page" address="/table" title="Table" tab="Usage" tags="Basic, Data display, Tables, Collections" thumbnail="snapshots/table.jpg">
-		<page "table examples page" address="/table/examples" title="Examples" thumbnail="snapshots/table-examples.jpg"/>
-		<page "table api page" address="/table/api" title="API" thumbnail="snapshots/table-api.jpg"/>
-		<page "table theming page" address="/table/theming" title="Theming" thumbnail="snapshots/table-theming.jpg"/>
-	</>
-	<page "table-of-contents usage page" address="/table-of-contents" title="Table of contents" tab="Usage" tags="Navigation, Documentation" thumbnail="snapshots/table-of-contents.jpg">
-		<page "table-of-contents examples page" address="/table-of-contents/examples" title="Examples" thumbnail="snapshots/table-of-contents-examples.jpg"/>
-		<page "table-of-contents api page" address="/table-of-contents/api" title="API" thumbnail="snapshots/table-of-contents-api.jpg"/>
-		<page "table-of-contents theming page" address="/table-of-contents/theming" title="Theming" thumbnail="snapshots/table-of-contents-theming.jpg"/>
-	</>
-	<page "terms usage page" address="/terms" title="Terms" tab="Usage" tags="Text, Data display, Collections" thumbnail="snapshots/terms.jpg">
-		<page "terms examples page" address="/terms/examples" title="Examples" thumbnail="snapshots/terms-examples.jpg"/>
-		<page "terms api page" address="/terms/api" title="API" thumbnail="snapshots/terms-api.jpg"/>
-	</>
-	<page "text usage page" address="/text" title="Text" tab="Usage" tags="Basic, Navigation, Text, Typography, Elements" thumbnail="snapshots/text.jpg">
-		<page "text examples page" address="/text/examples" title="Examples" thumbnail="snapshots/text-examples.jpg"/>
-		<page "text api page" address="/text/api" title="API" thumbnail="snapshots/text-api.jpg"/>
-		<page "text theming page" address="/text/theming" title="Theming" thumbnail="snapshots/text-theming.jpg"/>
-	</>
-	<page "textarea usage page" address="/textarea" title="Textarea" tab="Usage" tags="Forms, Inputs, Text, Elements" thumbnail="snapshots/textarea.jpg">
-		<page "textarea examples page" address="/textarea/examples" title="Examples" thumbnail="snapshots/textarea-examples.jpg"/>
-		<page "textarea api page" address="/textarea/api" title="API" thumbnail="snapshots/textarea-api.jpg"/>
-		<page "textarea theming page" address="/textarea/theming" title="Theming" thumbnail="snapshots/textarea-theming.jpg"/>
-	</>
-	<page "theme-editor usage page" address="/theme-editor" title="Theme Editor" tab="Usage" tags="Forms, Controls, Typography, Media" thumbnail="snapshots/theme-editor.jpg">
-		<page "theme-editor examples page" address="/theme-editor/examples" title="Examples" thumbnail="snapshots/theme-editor-examples.jpg"/>
-		<page "theme-editor api page" address="/theme-editor/api" title="API" thumbnail="snapshots/theme-editor-api.jpg"/>
-		<page "theme-editor theming page" address="/theme-editor/theming" title="Theming" thumbnail="snapshots/theme-editor-theming.jpg"/>
-	</>
-	<page "theme-menu usage page" address="/theme-menu" title="Theme Menu" tab="Usage" tags="Menus, Controls, Selection" thumbnail="snapshots/theme-menu.jpg">
-		<page "theme-menu examples page" address="/theme-menu/examples" title="Examples" thumbnail="snapshots/theme-menu-examples.jpg"/>
-		<page "theme-menu api page" address="/theme-menu/api" title="API" thumbnail="snapshots/theme-menu-api.jpg"/>
-		<page "theme-menu theming page" address="/theme-menu/theming" title="Theming" thumbnail="snapshots/theme-menu-theming.jpg"/>
-	</>
-	<page "title usage page" address="/title" title="Title" tab="Usage" tags="Containers, Typography, Content parts" thumbnail="snapshots/title.jpg">
-		<page "title examples page" address="/title/examples" title="Examples" thumbnail="snapshots/title-examples.jpg"/>
-		<page "title api page" address="/title/api" title="API" thumbnail="snapshots/title-api.jpg"/>
-	</>
-	<page "toast usage page" address="/toast" title="Toast" tab="Usage" tags="Feedback, Messages, Notifications, Overlays, Modules" thumbnail="snapshots/toast.jpg">
-		<page "toast examples page" address="/toast/examples" title="Examples" thumbnail="snapshots/toast-examples.jpg"/>
-		<page "toast api page" address="/toast/api" title="API" thumbnail="snapshots/toast-api.jpg"/>
-		<page "toast theming page" address="/toast/theming" title="Theming" thumbnail="snapshots/toast-theming.jpg"/>
-	</>
-	<page "toolbar usage page" address="/toolbar" title="Toolbar" tab="Usage" tags="Navigation, Menus, Collections" thumbnail="snapshots/toolbar.jpg">
-		<page "toolbar examples page" address="/toolbar/examples" title="Examples" thumbnail="snapshots/toolbar-examples.jpg"/>
-		<page "toolbar api page" address="/toolbar/api" title="API" thumbnail="snapshots/toolbar-api.jpg"/>
-		<page "toolbar theming page" address="/toolbar/theming" title="Theming" thumbnail="snapshots/toolbar-theming.jpg"/>
-	</>
-	<page "transition usage page" address="/transition" title="Transition" tab="Usage" tags="Animation, Modules" thumbnail="snapshots/transition.jpg">
-		<page "transition examples page" address="/transition/examples" title="Examples" thumbnail="snapshots/transition-examples.jpg"/>
-		<page "transition api page" address="/transition/api" title="API" thumbnail="snapshots/transition-api.jpg"/>
-		<page "transition theming page" address="/transition/theming" title="Theming" thumbnail="snapshots/transition-theming.jpg"/>
-	</>
-	<page "tree usage page" address="/tree" title="Tree" tab="Usage" tags="Navigation, Lists" thumbnail="snapshots/tree.jpg">
-		<page "tree examples page" address="/tree/examples" title="Examples" thumbnail="snapshots/tree-examples.jpg"/>
-		<page "tree api page" address="/tree/api" title="API" thumbnail="snapshots/tree-api.jpg"/>
-		<page "tree theming page" address="/tree/theming" title="Theming" thumbnail="snapshots/tree-theming.jpg"/>
-	</>
-	<page "tree-diagram usage page" address="/tree-diagram" title="Tree diagram" tab="Usage" tags="Images, Data display, Views" thumbnail="snapshots/tree-diagram.jpg">
-		<page "tree-diagram examples page" address="/tree-diagram/examples" title="Examples" thumbnail="snapshots/tree-diagram-examples.jpg"/>
-		<page "tree-diagram api page" address="/tree-diagram/api" title="API" thumbnail="snapshots/tree-diagram-api.jpg"/>
-		<page "tree-diagram theming page" address="/tree-diagram/theming" title="Theming" thumbnail="snapshots/tree-diagram-theming.jpg"/>
-	</>
-	<page "value usage page" address="/value" title="Value" tab="Usage" tags="Data display, Content parts" thumbnail="snapshots/value.jpg">
-		<page "value examples page" address="/value/examples" title="Examples" thumbnail="snapshots/value-examples.jpg"/>
-		<page "value api page" address="/value/api" title="API" thumbnail="snapshots/value-api.jpg"/>
-	</>
-	<page "video usage page" address="/video" title="Video" tab="Usage" tags="Media, Elements" thumbnail="snapshots/video.jpg">
-		<page "video examples page" address="/video/examples" title="Examples" thumbnail="snapshots/video-examples.jpg"/>
-		<page "video api page" address="/video/api" title="API" thumbnail="snapshots/video-api.jpg"/>
-	</>
-	<page "visibility usage page" address="/visibility" title="Visibility" tab="Usage" tags="Media, Animation, Modules" thumbnail="snapshots/visibility.jpg">
-		<page "visibility examples page" address="/visibility/examples" title="Examples" thumbnail="snapshots/visibility-examples.jpg"/>
-		<page "visibility api page" address="/visibility/api" title="API" thumbnail="snapshots/visibility-api.jpg"/>
-		<page "visibility theming page" address="/visibility/theming" title="Theming" thumbnail="snapshots/visibility-theming.jpg"/>
-	</>
-	<page "zoom usage page" address="/zoom" title="Zoom" tab="Usage" tags="Media, Images, Overlays" thumbnail="snapshots/zoom.jpg">
-		<page "zoom examples page" address="/zoom/examples" title="Examples" thumbnail="snapshots/zoom-examples.jpg"/>
-		<page "zoom api page" address="/zoom/api" title="API" thumbnail="snapshots/zoom-api.jpg"/>
-		<page "zoom theming page" address="/zoom/theming" title="Theming" thumbnail="snapshots/zoom-theming.jpg"/>
-	</>
-	<!-- the docs site's own:  its settings, and the syntax of the language a component page shows -->
-	<dialog "settings dialog"/>
-	<sidebar "syntax sidebar"/>
-	<page "not found page"/>
-	<page "error page"/>
-</>
+// Spell UI's component pages as one site (epic `notebook` P10).
+// Each component has a folder of notebooks, and each notebook is one page here:  this file says where each one is,
+// and what the side navigation calls it.  A component's Usage page is its address, and its other pages are under it.
+spell ui is a site:
+	// the docs that aren't one component's:  each page one file at the top of the project, beside the components' folders
+	- it has a home page at "/", named "Spell UI", thumbnail "snapshots/home.jpg"
+	- it has a getting started page at "/getting-started", named "Getting started", thumbnail "snapshots/getting-started.jpg"
+	- it has a grammar page at "/grammar", named "Grammar", thumbnail "snapshots/grammar.jpg"
+	- it has a theming page at "/theming", named "Theming", thumbnail "snapshots/theming.jpg"
+	- it has an icons page at "/icons", named "Icons", thumbnail "snapshots/icons.jpg"
+	- it has a utilities page at "/utilities", named "Utilities", thumbnail "snapshots/utilities.jpg"
+	- it has a component index page at "/components", named "Components", thumbnail "snapshots/components.jpg"
+	- it has a kitchen sink page at "/kitchen-sink", named "Kitchen Sink", thumbnail "snapshots/kitchen-sink.jpg"
+	- it has a theme bench page at "/theme-bench", named "Theme bench", thumbnail "snapshots/theme-bench.jpg"
+	- it has an accordion usage page at "/accordion", named "Accordion", tab "Usage", tagged "Containers, Navigation, Data display, Modules", thumbnail "snapshots/accordion.jpg"
+		it has an accordion examples page at "/accordion/examples", named "Examples", thumbnail "snapshots/accordion-examples.jpg"
+		it has an accordion api page at "/accordion/api", named "API", thumbnail "snapshots/accordion-api.jpg"
+		it has an accordion theming page at "/accordion/theming", named "Theming", thumbnail "snapshots/accordion-theming.jpg"
+	- it has an action usage page at "/action", named "Action", tab "Usage", tagged "Menus, Controls, Buttons", thumbnail "snapshots/action.jpg"
+		it has an action examples page at "/action/examples", named "Examples", thumbnail "snapshots/action-examples.jpg"
+		it has an action api page at "/action/api", named "API", thumbnail "snapshots/action-api.jpg"
+		it has an action theming page at "/action/theming", named "Theming", thumbnail "snapshots/action-theming.jpg"
+	- it has an actions usage page at "/actions", named "Actions", tab "Usage", tagged "Buttons, Dialogs, Content parts", thumbnail "snapshots/actions.jpg"
+		it has an actions examples page at "/actions/examples", named "Examples", thumbnail "snapshots/actions-examples.jpg"
+		it has an actions api page at "/actions/api", named "API", thumbnail "snapshots/actions-api.jpg"
+	- it has an advertisement usage page at "/advertisement", named "Advertisement", tab "Usage", tagged "Layout, Media, Views", thumbnail "snapshots/advertisement.jpg"
+		it has an advertisement examples page at "/advertisement/examples", named "Examples", thumbnail "snapshots/advertisement-examples.jpg"
+		it has an advertisement api page at "/advertisement/api", named "API", thumbnail "snapshots/advertisement-api.jpg"
+		it has an advertisement theming page at "/advertisement/theming", named "Theming", thumbnail "snapshots/advertisement-theming.jpg"
+	- it has an audio usage page at "/audio", named "Audio", tab "Usage", tagged "Media, Elements", thumbnail "snapshots/audio.jpg"
+		it has an audio examples page at "/audio/examples", named "Examples", thumbnail "snapshots/audio-examples.jpg"
+		it has an audio api page at "/audio/api", named "API", thumbnail "snapshots/audio-api.jpg"
+	- it has an author usage page at "/author", named "Author", tab "Usage", tagged "Social, Content parts", thumbnail "snapshots/author.jpg"
+		it has an author examples page at "/author/examples", named "Examples", thumbnail "snapshots/author-examples.jpg"
+		it has an author api page at "/author/api", named "API", thumbnail "snapshots/author-api.jpg"
+	- it has an avatar usage page at "/avatar", named "Avatar", tab "Usage", tagged "Images, Social, Content parts", thumbnail "snapshots/avatar.jpg"
+		it has an avatar examples page at "/avatar/examples", named "Examples", thumbnail "snapshots/avatar-examples.jpg"
+		it has an avatar api page at "/avatar/api", named "API", thumbnail "snapshots/avatar-api.jpg"
+	- it has a breadcrumb usage page at "/breadcrumb", named "Breadcrumb", tab "Usage", tagged "Basic, Navigation, Collections", thumbnail "snapshots/breadcrumb.jpg"
+		it has a breadcrumb examples page at "/breadcrumb/examples", named "Examples", thumbnail "snapshots/breadcrumb-examples.jpg"
+		it has a breadcrumb api page at "/breadcrumb/api", named "API", thumbnail "snapshots/breadcrumb-api.jpg"
+		it has a breadcrumb theming page at "/breadcrumb/theming", named "Theming", thumbnail "snapshots/breadcrumb-theming.jpg"
+	- it has a button usage page at "/button", named "Button", tab "Usage", tagged "Basic, Layout, Forms, Controls, Buttons, Elements", thumbnail "snapshots/button.jpg"
+		it has a button examples page at "/button/examples", named "Examples", thumbnail "snapshots/button-examples.jpg"
+		it has a button api page at "/button/api", named "API", thumbnail "snapshots/button-api.jpg"
+		it has a button theming page at "/button/theming", named "Theming", thumbnail "snapshots/button-theming.jpg"
+	- it has a calendar usage page at "/calendar", named "Calendar", tab "Usage", tagged "Forms, Inputs, Controls, Date & time, Modules", thumbnail "snapshots/calendar.jpg"
+		it has a calendar examples page at "/calendar/examples", named "Examples", thumbnail "snapshots/calendar-examples.jpg"
+		it has a calendar api page at "/calendar/api", named "API", thumbnail "snapshots/calendar-api.jpg"
+		it has a calendar theming page at "/calendar/theming", named "Theming", thumbnail "snapshots/calendar-theming.jpg"
+	- it has a card usage page at "/card", named "Card", tab "Usage", tagged "Layout, Containers, Data display, Lists, Cards, Views", thumbnail "snapshots/card.jpg"
+		it has a card examples page at "/card/examples", named "Examples", thumbnail "snapshots/card-examples.jpg"
+		it has a card api page at "/card/api", named "API", thumbnail "snapshots/card-api.jpg"
+		it has a card theming page at "/card/theming", named "Theming", thumbnail "snapshots/card-theming.jpg"
+	- it has a checkbox usage page at "/checkbox", named "Checkbox", tab "Usage", tagged "Basic, Forms, Inputs, Controls, Selection, Modules", thumbnail "snapshots/checkbox.jpg"
+		it has a checkbox examples page at "/checkbox/examples", named "Examples", thumbnail "snapshots/checkbox-examples.jpg"
+		it has a checkbox api page at "/checkbox/api", named "API", thumbnail "snapshots/checkbox-api.jpg"
+		it has a checkbox theming page at "/checkbox/theming", named "Theming", thumbnail "snapshots/checkbox-theming.jpg"
+	- it has a code usage page at "/code", named "Code", tab "Usage", tagged "Text, Typography, Data display", thumbnail "snapshots/code.jpg"
+		it has a code examples page at "/code/examples", named "Examples", thumbnail "snapshots/code-examples.jpg"
+		it has a code api page at "/code/api", named "API", thumbnail "snapshots/code-api.jpg"
+		it has a code theming page at "/code/theming", named "Theming", thumbnail "snapshots/code-theming.jpg"
+	- it has a comment usage page at "/comment", named "Comment", tab "Usage", tagged "Data display, Lists, Social, Content parts, Views", thumbnail "snapshots/comment.jpg"
+		it has a comment examples page at "/comment/examples", named "Examples", thumbnail "snapshots/comment-examples.jpg"
+		it has a comment api page at "/comment/api", named "API", thumbnail "snapshots/comment-api.jpg"
+		it has a comment theming page at "/comment/theming", named "Theming", thumbnail "snapshots/comment-theming.jpg"
+	- it has a components usage page at "/ui-components", named "Components element", tab "Usage", tagged "Loading, Modules", thumbnail "snapshots/ui-components.jpg"
+		it has a components examples page at "/ui-components/examples", named "Examples", thumbnail "snapshots/ui-components-examples.jpg"
+		it has a components api page at "/ui-components/api", named "API", thumbnail "snapshots/ui-components-api.jpg"
+		it has a components theming page at "/ui-components/theming", named "Theming", thumbnail "snapshots/ui-components-theming.jpg"
+	- it has a container usage page at "/container", named "Container", tab "Usage", tagged "Basic, Layout, Containers, Elements", thumbnail "snapshots/container.jpg"
+		it has a container examples page at "/container/examples", named "Examples", thumbnail "snapshots/container-examples.jpg"
+		it has a container api page at "/container/api", named "API", thumbnail "snapshots/container-api.jpg"
+		it has a container theming page at "/container/theming", named "Theming", thumbnail "snapshots/container-theming.jpg"
+	- it has a content usage page at "/content", named "Content", tab "Usage", tagged "Containers, Cards, Content parts", thumbnail "snapshots/content.jpg"
+		it has a content examples page at "/content/examples", named "Examples", thumbnail "snapshots/content-examples.jpg"
+		it has a content api page at "/content/api", named "API", thumbnail "snapshots/content-api.jpg"
+	- it has a content-parts usage page at "/content-parts", named "Content parts", tab "Usage", tagged "Basic, Text, Typography, Content parts, Elements", thumbnail "snapshots/content-parts.jpg"
+		it has a content-parts examples page at "/content-parts/examples", named "Examples", thumbnail "snapshots/content-parts-examples.jpg"
+		it has a content-parts api page at "/content-parts/api", named "API", thumbnail "snapshots/content-parts-api.jpg"
+		it has a content-parts theming page at "/content-parts/theming", named "Theming", thumbnail "snapshots/content-parts-theming.jpg"
+	- it has a date usage page at "/date", named "Date", tab "Usage", tagged "Date & time, Social, Content parts", thumbnail "snapshots/date.jpg"
+		it has a date examples page at "/date/examples", named "Examples", thumbnail "snapshots/date-examples.jpg"
+		it has a date api page at "/date/api", named "API", thumbnail "snapshots/date-api.jpg"
+	- it has a description usage page at "/description", named "Description", tab "Usage", tagged "Text, Content parts", thumbnail "snapshots/description.jpg"
+		it has a description examples page at "/description/examples", named "Examples", thumbnail "snapshots/description-examples.jpg"
+		it has a description api page at "/description/api", named "API", thumbnail "snapshots/description-api.jpg"
+	- it has a detail usage page at "/detail", named "Detail", tab "Usage", tagged "Text, Content parts", thumbnail "snapshots/detail.jpg"
+		it has a detail examples page at "/detail/examples", named "Examples", thumbnail "snapshots/detail-examples.jpg"
+		it has a detail api page at "/detail/api", named "API", thumbnail "snapshots/detail-api.jpg"
+	- it has a diagram usage page at "/diagram", named "Diagram", tab "Usage", tagged "Data display, Images, Views", thumbnail "snapshots/diagram.jpg"
+		it has a diagram examples page at "/diagram/examples", named "Examples", thumbnail "snapshots/diagram-examples.jpg"
+		it has a diagram api page at "/diagram/api", named "API", thumbnail "snapshots/diagram-api.jpg"
+		it has a diagram theming page at "/diagram/theming", named "Theming", thumbnail "snapshots/diagram-theming.jpg"
+	- it has a dimension usage page at "/dimension", named "Dimension", tab "Usage", tagged "Text, Typography", thumbnail "snapshots/dimension.jpg"
+		it has a dimension examples page at "/dimension/examples", named "Examples", thumbnail "snapshots/dimension-examples.jpg"
+		it has a dimension api page at "/dimension/api", named "API", thumbnail "snapshots/dimension-api.jpg"
+	- it has a dimmer usage page at "/dimmer", named "Dimmer", tab "Usage", tagged "Feedback, Overlays, Loading, Modules", thumbnail "snapshots/dimmer.jpg"
+		it has a dimmer examples page at "/dimmer/examples", named "Examples", thumbnail "snapshots/dimmer-examples.jpg"
+		it has a dimmer api page at "/dimmer/api", named "API", thumbnail "snapshots/dimmer-api.jpg"
+		it has a dimmer theming page at "/dimmer/theming", named "Theming", thumbnail "snapshots/dimmer-theming.jpg"
+	- it has a divider usage page at "/divider", named "Divider", tab "Usage", tagged "Basic, Layout, Typography, Elements", thumbnail "snapshots/divider.jpg"
+		it has a divider examples page at "/divider/examples", named "Examples", thumbnail "snapshots/divider-examples.jpg"
+		it has a divider api page at "/divider/api", named "API", thumbnail "snapshots/divider-api.jpg"
+		it has a divider theming page at "/divider/theming", named "Theming", thumbnail "snapshots/divider-theming.jpg"
+	- it has a dropdown usage page at "/dropdown", named "Dropdown", tab "Usage", tagged "Basic, Menus, Forms, Inputs, Controls, Selection, Modules", thumbnail "snapshots/dropdown.jpg"
+		it has a dropdown examples page at "/dropdown/examples", named "Examples", thumbnail "snapshots/dropdown-examples.jpg"
+		it has a dropdown api page at "/dropdown/api", named "API", thumbnail "snapshots/dropdown-api.jpg"
+		it has a dropdown theming page at "/dropdown/theming", named "Theming", thumbnail "snapshots/dropdown-theming.jpg"
+	- it has an embed usage page at "/embed", named "Embed", tab "Usage", tagged "Media, Modules", thumbnail "snapshots/embed.jpg"
+		it has an embed examples page at "/embed/examples", named "Examples", thumbnail "snapshots/embed-examples.jpg"
+		it has an embed api page at "/embed/api", named "API", thumbnail "snapshots/embed-api.jpg"
+		it has an embed theming page at "/embed/theming", named "Theming", thumbnail "snapshots/embed-theming.jpg"
+	- it has an emoji usage page at "/emoji", named "Emoji", tab "Usage", tagged "Text, Media, Icons, Elements", thumbnail "snapshots/emoji.jpg"
+		it has an emoji examples page at "/emoji/examples", named "Examples", thumbnail "snapshots/emoji-examples.jpg"
+		it has an emoji api page at "/emoji/api", named "API", thumbnail "snapshots/emoji-api.jpg"
+		it has an emoji theming page at "/emoji/theming", named "Theming", thumbnail "snapshots/emoji-theming.jpg"
+	- it has an example usage page at "/example", named "Example", tab "Usage", tagged "Data display, Documentation", thumbnail "snapshots/example.jpg"
+		it has an example examples page at "/example/examples", named "Examples", thumbnail "snapshots/example-examples.jpg"
+		it has an example api page at "/example/api", named "API", thumbnail "snapshots/example-api.jpg"
+		it has an example theming page at "/example/theming", named "Theming", thumbnail "snapshots/example-theming.jpg"
+	- it has an extra usage page at "/extra", named "Extra", tab "Usage", tagged "Cards, Content parts", thumbnail "snapshots/extra.jpg"
+		it has an extra examples page at "/extra/examples", named "Examples", thumbnail "snapshots/extra-examples.jpg"
+		it has an extra api page at "/extra/api", named "API", thumbnail "snapshots/extra-api.jpg"
+	- it has a feed usage page at "/feed", named "Feed", tab "Usage", tagged "Data display, Lists, Social, Content parts, Views", thumbnail "snapshots/feed.jpg"
+		it has a feed examples page at "/feed/examples", named "Examples", thumbnail "snapshots/feed-examples.jpg"
+		it has a feed api page at "/feed/api", named "API", thumbnail "snapshots/feed-api.jpg"
+		it has a feed theming page at "/feed/theming", named "Theming", thumbnail "snapshots/feed-theming.jpg"
+	- it has a flag usage page at "/flag", named "Flag", tab "Usage", tagged "Images, Icons, Elements", thumbnail "snapshots/flag.jpg"
+		it has a flag examples page at "/flag/examples", named "Examples", thumbnail "snapshots/flag-examples.jpg"
+		it has a flag api page at "/flag/api", named "API", thumbnail "snapshots/flag-api.jpg"
+		it has a flag theming page at "/flag/theming", named "Theming", thumbnail "snapshots/flag-theming.jpg"
+	- it has a flyout usage page at "/flyout", named "Flyout", tab "Usage", tagged "Containers, Overlays, Dialogs, Modules", thumbnail "snapshots/flyout.jpg"
+		it has a flyout examples page at "/flyout/examples", named "Examples", thumbnail "snapshots/flyout-examples.jpg"
+		it has a flyout api page at "/flyout/api", named "API", thumbnail "snapshots/flyout-api.jpg"
+		it has a flyout theming page at "/flyout/theming", named "Theming", thumbnail "snapshots/flyout-theming.jpg"
+	- it has a form usage page at "/form", named "Form", tab "Usage", tagged "Basic, Layout, Forms, Inputs, Lists, Collections", thumbnail "snapshots/form.jpg"
+		it has a form examples page at "/form/examples", named "Examples", thumbnail "snapshots/form-examples.jpg"
+		it has a form api page at "/form/api", named "API", thumbnail "snapshots/form-api.jpg"
+		it has a form theming page at "/form/theming", named "Theming", thumbnail "snapshots/form-theming.jpg"
+	- it has a grid usage page at "/grid", named "Grid", tab "Usage", tagged "Basic, Layout, Collections", thumbnail "snapshots/grid.jpg"
+		it has a grid examples page at "/grid/examples", named "Examples", thumbnail "snapshots/grid-examples.jpg"
+		it has a grid api page at "/grid/api", named "API", thumbnail "snapshots/grid-api.jpg"
+		it has a grid theming page at "/grid/theming", named "Theming", thumbnail "snapshots/grid-theming.jpg"
+	- it has an icon usage page at "/icon", named "Icon", tab "Usage", tagged "Basic, Images, Icons, Elements", thumbnail "snapshots/icon.jpg"
+		it has an icon examples page at "/icon/examples", named "Examples", thumbnail "snapshots/icon-examples.jpg"
+		it has an icon api page at "/icon/api", named "API", thumbnail "snapshots/icon-api.jpg"
+		it has an icon theming page at "/icon/theming", named "Theming", thumbnail "snapshots/icon-theming.jpg"
+	- it has an icon-picker usage page at "/icon-picker", named "Icon Picker", tab "Usage", tagged "Forms, Inputs, Controls, Selection, Icons", thumbnail "snapshots/icon-picker.jpg"
+		it has an icon-picker examples page at "/icon-picker/examples", named "Examples", thumbnail "snapshots/icon-picker-examples.jpg"
+		it has an icon-picker api page at "/icon-picker/api", named "API", thumbnail "snapshots/icon-picker-api.jpg"
+		it has an icon-picker theming page at "/icon-picker/theming", named "Theming", thumbnail "snapshots/icon-picker-theming.jpg"
+	- it has an image usage page at "/image", named "Image", tab "Usage", tagged "Basic, Layout, Media, Images, Elements", thumbnail "snapshots/image.jpg"
+		it has an image examples page at "/image/examples", named "Examples", thumbnail "snapshots/image-examples.jpg"
+		it has an image api page at "/image/api", named "API", thumbnail "snapshots/image-api.jpg"
+		it has an image theming page at "/image/theming", named "Theming", thumbnail "snapshots/image-theming.jpg"
+	- it has an include usage page at "/include", named "Include", tab "Usage", tagged "Layout, Containers, Modules", thumbnail "snapshots/include.jpg"
+		it has an include examples page at "/include/examples", named "Examples", thumbnail "snapshots/include-examples.jpg"
+		it has an include api page at "/include/api", named "API", thumbnail "snapshots/include-api.jpg"
+		it has an include theming page at "/include/theming", named "Theming", thumbnail "snapshots/include-theming.jpg"
+	- it has an input usage page at "/input", named "Input", tab "Usage", tagged "Basic, Forms, Inputs, Controls, Text, Elements", thumbnail "snapshots/input.jpg"
+		it has an input examples page at "/input/examples", named "Examples", thumbnail "snapshots/input-examples.jpg"
+		it has an input api page at "/input/api", named "API", thumbnail "snapshots/input-api.jpg"
+		it has an input theming page at "/input/theming", named "Theming", thumbnail "snapshots/input-theming.jpg"
+	- it has an item usage page at "/item", named "Item", tab "Usage", tagged "Data display, Lists, Content parts, Views", thumbnail "snapshots/item.jpg"
+		it has an item examples page at "/item/examples", named "Examples", thumbnail "snapshots/item-examples.jpg"
+		it has an item api page at "/item/api", named "API", thumbnail "snapshots/item-api.jpg"
+		it has an item theming page at "/item/theming", named "Theming", thumbnail "snapshots/item-theming.jpg"
+	- it has an items usage page at "/items", named "Items", tab "Usage", tagged "Data display, Lists, Views", thumbnail "snapshots/items.jpg"
+		it has an items examples page at "/items/examples", named "Examples", thumbnail "snapshots/items-examples.jpg"
+		it has an items api page at "/items/api", named "API", thumbnail "snapshots/items-api.jpg"
+		it has an items theming page at "/items/theming", named "Theming", thumbnail "snapshots/items-theming.jpg"
+	- it has a json usage page at "/json", named "JSON data", tab "Usage", tagged "Data display, Modules", thumbnail "snapshots/json.jpg"
+		it has a json examples page at "/json/examples", named "Examples", thumbnail "snapshots/json-examples.jpg"
+		it has a json api page at "/json/api", named "API", thumbnail "snapshots/json-api.jpg"
+	- it has a keys usage page at "/keys", named "Keys", tab "Usage", tagged "Text, Typography", thumbnail "snapshots/keys.jpg"
+		it has a keys examples page at "/keys/examples", named "Examples", thumbnail "snapshots/keys-examples.jpg"
+		it has a keys api page at "/keys/api", named "API", thumbnail "snapshots/keys-api.jpg"
+	- it has a label usage page at "/label", named "Label", tab "Usage", tagged "Basic, Text, Lists, Status, Elements", thumbnail "snapshots/label.jpg"
+		it has a label examples page at "/label/examples", named "Examples", thumbnail "snapshots/label-examples.jpg"
+		it has a label api page at "/label/api", named "API", thumbnail "snapshots/label-api.jpg"
+		it has a label theming page at "/label/theming", named "Theming", thumbnail "snapshots/label-theming.jpg"
+	- it has a list usage page at "/list", named "List", tab "Usage", tagged "Basic, Typography, Data display, Lists, Elements", thumbnail "snapshots/list.jpg"
+		it has a list examples page at "/list/examples", named "Examples", thumbnail "snapshots/list-examples.jpg"
+		it has a list api page at "/list/api", named "API", thumbnail "snapshots/list-api.jpg"
+		it has a list theming page at "/list/theming", named "Theming", thumbnail "snapshots/list-theming.jpg"
+	- it has a loader usage page at "/loader", named "Loader", tab "Usage", tagged "Feedback, Loading, Progress, Elements", thumbnail "snapshots/loader.jpg"
+		it has a loader examples page at "/loader/examples", named "Examples", thumbnail "snapshots/loader-examples.jpg"
+		it has a loader api page at "/loader/api", named "API", thumbnail "snapshots/loader-api.jpg"
+		it has a loader theming page at "/loader/theming", named "Theming", thumbnail "snapshots/loader-theming.jpg"
+	- it has a markdown usage page at "/markdown", named "Markdown", tab "Usage", tagged "Text, Typography, Data display", thumbnail "snapshots/markdown.jpg"
+		it has a markdown examples page at "/markdown/examples", named "Examples", thumbnail "snapshots/markdown-examples.jpg"
+		it has a markdown api page at "/markdown/api", named "API", thumbnail "snapshots/markdown-api.jpg"
+		it has a markdown theming page at "/markdown/theming", named "Theming", thumbnail "snapshots/markdown-theming.jpg"
+	- it has a menu usage page at "/menu", named "Menu", tab "Usage", tagged "Basic, Navigation, Menus, Collections", thumbnail "snapshots/menu.jpg"
+		it has a menu examples page at "/menu/examples", named "Examples", thumbnail "snapshots/menu-examples.jpg"
+		it has a menu api page at "/menu/api", named "API", thumbnail "snapshots/menu-api.jpg"
+		it has a menu theming page at "/menu/theming", named "Theming", thumbnail "snapshots/menu-theming.jpg"
+	- it has a message usage page at "/message", named "Message", tab "Usage", tagged "Feedback, Messages, Notifications, Status, Collections", thumbnail "snapshots/message.jpg"
+		it has a message examples page at "/message/examples", named "Examples", thumbnail "snapshots/message-examples.jpg"
+		it has a message api page at "/message/api", named "API", thumbnail "snapshots/message-api.jpg"
+		it has a message theming page at "/message/theming", named "Theming", thumbnail "snapshots/message-theming.jpg"
+	- it has a meta usage page at "/meta", named "Meta", tab "Usage", tagged "Text, Content parts", thumbnail "snapshots/meta.jpg"
+		it has a meta examples page at "/meta/examples", named "Examples", thumbnail "snapshots/meta-examples.jpg"
+		it has a meta api page at "/meta/api", named "API", thumbnail "snapshots/meta-api.jpg"
+	- it has a modal usage page at "/modal", named "Modal", tab "Usage", tagged "Overlays, Dialogs, Popups, Modules", thumbnail "snapshots/modal.jpg"
+		it has a modal examples page at "/modal/examples", named "Examples", thumbnail "snapshots/modal-examples.jpg"
+		it has a modal api page at "/modal/api", named "API", thumbnail "snapshots/modal-api.jpg"
+		it has a modal theming page at "/modal/theming", named "Theming", thumbnail "snapshots/modal-theming.jpg"
+	- it has a nag usage page at "/nag", named "Nag", tab "Usage", tagged "Messages, Notifications, Overlays, Modules", thumbnail "snapshots/nag.jpg"
+		it has a nag examples page at "/nag/examples", named "Examples", thumbnail "snapshots/nag-examples.jpg"
+		it has a nag api page at "/nag/api", named "API", thumbnail "snapshots/nag-api.jpg"
+		it has a nag theming page at "/nag/theming", named "Theming", thumbnail "snapshots/nag-theming.jpg"
+	- it has a page usage page at "/page", named "Page", tab "Usage", tagged "Layout, Containers, Navigation", thumbnail "snapshots/page.jpg"
+		it has a page examples page at "/page/examples", named "Examples", thumbnail "snapshots/page-examples.jpg"
+		it has a page api page at "/page/api", named "API", thumbnail "snapshots/page-api.jpg"
+		it has a page theming page at "/page/theming", named "Theming", thumbnail "snapshots/page-theming.jpg"
+	- it has a panel usage page at "/panel", named "Panel", tab "Usage", tagged "Layout, Containers", thumbnail "snapshots/panel.jpg"
+		it has a panel examples page at "/panel/examples", named "Examples", thumbnail "snapshots/panel-examples.jpg"
+		it has a panel api page at "/panel/api", named "API", thumbnail "snapshots/panel-api.jpg"
+		it has a panel theming page at "/panel/theming", named "Theming", thumbnail "snapshots/panel-theming.jpg"
+	- it has a placeholder usage page at "/placeholder", named "Placeholder", tab "Usage", tagged "Images, Feedback, Loading, Content parts, Elements", thumbnail "snapshots/placeholder.jpg"
+		it has a placeholder examples page at "/placeholder/examples", named "Examples", thumbnail "snapshots/placeholder-examples.jpg"
+		it has a placeholder api page at "/placeholder/api", named "API", thumbnail "snapshots/placeholder-api.jpg"
+		it has a placeholder theming page at "/placeholder/theming", named "Theming", thumbnail "snapshots/placeholder-theming.jpg"
+	- it has a popup usage page at "/popup", named "Popup", tab "Usage", tagged "Feedback, Overlays, Popups, Modules", thumbnail "snapshots/popup.jpg"
+		it has a popup examples page at "/popup/examples", named "Examples", thumbnail "snapshots/popup-examples.jpg"
+		it has a popup api page at "/popup/api", named "API", thumbnail "snapshots/popup-api.jpg"
+		it has a popup theming page at "/popup/theming", named "Theming", thumbnail "snapshots/popup-theming.jpg"
+	- it has a progress usage page at "/progress", named "Progress", tab "Usage", tagged "Feedback, Loading, Progress, Status, Modules", thumbnail "snapshots/progress.jpg"
+		it has a progress examples page at "/progress/examples", named "Examples", thumbnail "snapshots/progress-examples.jpg"
+		it has a progress api page at "/progress/api", named "API", thumbnail "snapshots/progress-api.jpg"
+		it has a progress theming page at "/progress/theming", named "Theming", thumbnail "snapshots/progress-theming.jpg"
+	- it has a property-editor usage page at "/property-editor", named "Property Editor", tab "Usage", tagged "Layout, Forms, Inputs, Collections", thumbnail "snapshots/property-editor.jpg"
+		it has a property-editor examples page at "/property-editor/examples", named "Examples", thumbnail "snapshots/property-editor-examples.jpg"
+		it has a property-editor api page at "/property-editor/api", named "API", thumbnail "snapshots/property-editor-api.jpg"
+	- it has a quote usage page at "/quote", named "Quote", tab "Usage", tagged "Text, Typography", thumbnail "snapshots/quote.jpg"
+		it has a quote examples page at "/quote/examples", named "Examples", thumbnail "snapshots/quote-examples.jpg"
+		it has a quote api page at "/quote/api", named "API", thumbnail "snapshots/quote-api.jpg"
+	- it has a radio usage page at "/radio", named "Radio", tab "Usage", tagged "Forms, Inputs, Controls, Selection, Modules", thumbnail "snapshots/radio.jpg"
+		it has a radio examples page at "/radio/examples", named "Examples", thumbnail "snapshots/radio-examples.jpg"
+		it has a radio api page at "/radio/api", named "API", thumbnail "snapshots/radio-api.jpg"
+		it has a radio theming page at "/radio/theming", named "Theming", thumbnail "snapshots/radio-theming.jpg"
+	- it has a rail usage page at "/rail", named "Rail", tab "Usage", tagged "Layout, Containers, Elements", thumbnail "snapshots/rail.jpg"
+		it has a rail examples page at "/rail/examples", named "Examples", thumbnail "snapshots/rail-examples.jpg"
+		it has a rail api page at "/rail/api", named "API", thumbnail "snapshots/rail-api.jpg"
+		it has a rail theming page at "/rail/theming", named "Theming", thumbnail "snapshots/rail-theming.jpg"
+	- it has a rating usage page at "/rating", named "Rating", tab "Usage", tagged "Forms, Inputs, Controls, Feedback, Modules", thumbnail "snapshots/rating.jpg"
+		it has a rating examples page at "/rating/examples", named "Examples", thumbnail "snapshots/rating-examples.jpg"
+		it has a rating api page at "/rating/api", named "API", thumbnail "snapshots/rating-api.jpg"
+		it has a rating theming page at "/rating/theming", named "Theming", thumbnail "snapshots/rating-theming.jpg"
+	- it has a reveal usage page at "/reveal", named "Reveal", tab "Usage", tagged "Media, Images, Animation, Elements", thumbnail "snapshots/reveal.jpg"
+		it has a reveal examples page at "/reveal/examples", named "Examples", thumbnail "snapshots/reveal-examples.jpg"
+		it has a reveal api page at "/reveal/api", named "API", thumbnail "snapshots/reveal-api.jpg"
+		it has a reveal theming page at "/reveal/theming", named "Theming", thumbnail "snapshots/reveal-theming.jpg"
+	- it has a root usage page at "/root", named "Root", tab "Usage", tagged "Basic, Layout, Containers, Loading", thumbnail "snapshots/root.jpg"
+		it has a root examples page at "/root/examples", named "Examples", thumbnail "snapshots/root-examples.jpg"
+		it has a root api page at "/root/api", named "API", thumbnail "snapshots/root-api.jpg"
+		it has a root theming page at "/root/theming", named "Theming", thumbnail "snapshots/root-theming.jpg"
+	- it has a search usage page at "/search", named "Search", tab "Usage", tagged "Navigation, Forms, Inputs, Selection, Modules", thumbnail "snapshots/search.jpg"
+		it has a search examples page at "/search/examples", named "Examples", thumbnail "snapshots/search-examples.jpg"
+		it has a search api page at "/search/api", named "API", thumbnail "snapshots/search-api.jpg"
+		it has a search theming page at "/search/theming", named "Theming", thumbnail "snapshots/search-theming.jpg"
+	- it has a section usage page at "/section", named "Section", tab "Usage", tagged "Layout, Containers", thumbnail "snapshots/section.jpg"
+		it has a section examples page at "/section/examples", named "Examples", thumbnail "snapshots/section-examples.jpg"
+		it has a section api page at "/section/api", named "API", thumbnail "snapshots/section-api.jpg"
+		it has a section theming page at "/section/theming", named "Theming", thumbnail "snapshots/section-theming.jpg"
+	- it has a segment usage page at "/segment", named "Segment", tab "Usage", tagged "Basic, Layout, Containers, Elements", thumbnail "snapshots/segment.jpg"
+		it has a segment examples page at "/segment/examples", named "Examples", thumbnail "snapshots/segment-examples.jpg"
+		it has a segment api page at "/segment/api", named "API", thumbnail "snapshots/segment-api.jpg"
+		it has a segment theming page at "/segment/theming", named "Theming", thumbnail "snapshots/segment-theming.jpg"
+	- it has a select usage page at "/select", named "Select", tab "Usage", tagged "Forms, Inputs, Controls, Selection, Modules", thumbnail "snapshots/select.jpg"
+		it has a select examples page at "/select/examples", named "Examples", thumbnail "snapshots/select-examples.jpg"
+		it has a select api page at "/select/api", named "API", thumbnail "snapshots/select-api.jpg"
+		it has a select theming page at "/select/theming", named "Theming", thumbnail "snapshots/select-theming.jpg"
+	- it has a shape usage page at "/shape", named "Shape", tab "Usage", tagged "Media, Animation, Content parts, Modules", thumbnail "snapshots/shape.jpg"
+		it has a shape examples page at "/shape/examples", named "Examples", thumbnail "snapshots/shape-examples.jpg"
+		it has a shape api page at "/shape/api", named "API", thumbnail "snapshots/shape-api.jpg"
+		it has a shape theming page at "/shape/theming", named "Theming", thumbnail "snapshots/shape-theming.jpg"
+	- it has a sidebar usage page at "/sidebar", named "Sidebar", tab "Usage", tagged "Layout, Navigation, Menus, Overlays, Modules", thumbnail "snapshots/sidebar.jpg"
+		it has a sidebar examples page at "/sidebar/examples", named "Examples", thumbnail "snapshots/sidebar-examples.jpg"
+		it has a sidebar api page at "/sidebar/api", named "API", thumbnail "snapshots/sidebar-api.jpg"
+		it has a sidebar theming page at "/sidebar/theming", named "Theming", thumbnail "snapshots/sidebar-theming.jpg"
+	- it has a sides usage page at "/sides", named "Sides", tab "Usage", tagged "Forms, Inputs, Controls", thumbnail "snapshots/sides.jpg"
+		it has a sides examples page at "/sides/examples", named "Examples", thumbnail "snapshots/sides-examples.jpg"
+		it has a sides api page at "/sides/api", named "API", thumbnail "snapshots/sides-api.jpg"
+		it has a sides theming page at "/sides/theming", named "Theming", thumbnail "snapshots/sides-theming.jpg"
+	- it has a site-nav usage page at "/site-nav", named "Site nav", tab "Usage", tagged "Navigation, Lists", thumbnail "snapshots/site-nav.jpg"
+		it has a site-nav examples page at "/site-nav/examples", named "Examples", thumbnail "snapshots/site-nav-examples.jpg"
+		it has a site-nav api page at "/site-nav/api", named "API", thumbnail "snapshots/site-nav-api.jpg"
+		it has a site-nav theming page at "/site-nav/theming", named "Theming", thumbnail "snapshots/site-nav-theming.jpg"
+	- it has a site-tabs usage page at "/site-tabs", named "Site tabs", tab "Usage", tagged "Navigation, Menus", thumbnail "snapshots/site-tabs.jpg"
+		it has a site-tabs examples page at "/site-tabs/examples", named "Examples", thumbnail "snapshots/site-tabs-examples.jpg"
+		it has a site-tabs api page at "/site-tabs/api", named "API", thumbnail "snapshots/site-tabs-api.jpg"
+		it has a site-tabs theming page at "/site-tabs/theming", named "Theming", thumbnail "snapshots/site-tabs-theming.jpg"
+	- it has a slider usage page at "/slider", named "Slider", tab "Usage", tagged "Forms, Inputs, Controls, Modules", thumbnail "snapshots/slider.jpg"
+		it has a slider examples page at "/slider/examples", named "Examples", thumbnail "snapshots/slider-examples.jpg"
+		it has a slider api page at "/slider/api", named "API", thumbnail "snapshots/slider-api.jpg"
+		it has a slider theming page at "/slider/theming", named "Theming", thumbnail "snapshots/slider-theming.jpg"
+	- it has a space usage page at "/space", named "Space", tab "Usage", tagged "Basic, Layout", thumbnail "snapshots/space.jpg"
+		it has a space examples page at "/space/examples", named "Examples", thumbnail "snapshots/space-examples.jpg"
+		it has a space api page at "/space/api", named "API", thumbnail "snapshots/space-api.jpg"
+	- it has a split-panel usage page at "/split-panel", named "Split Panel", tab "Usage", tagged "Layout, Containers", thumbnail "snapshots/split-panel.jpg"
+		it has a split-panel examples page at "/split-panel/examples", named "Examples", thumbnail "snapshots/split-panel-examples.jpg"
+		it has a split-panel api page at "/split-panel/api", named "API", thumbnail "snapshots/split-panel-api.jpg"
+		it has a split-panel theming page at "/split-panel/theming", named "Theming", thumbnail "snapshots/split-panel-theming.jpg"
+	- it has a stack usage page at "/stack", named "Stack", tab "Usage", tagged "Basic, Layout", thumbnail "snapshots/stack.jpg"
+		it has a stack examples page at "/stack/examples", named "Examples", thumbnail "snapshots/stack-examples.jpg"
+		it has a stack api page at "/stack/api", named "API", thumbnail "snapshots/stack-api.jpg"
+	- it has a statistic usage page at "/statistic", named "Statistic", tab "Usage", tagged "Layout, Text, Data display, Views", thumbnail "snapshots/statistic.jpg"
+		it has a statistic examples page at "/statistic/examples", named "Examples", thumbnail "snapshots/statistic-examples.jpg"
+		it has a statistic api page at "/statistic/api", named "API", thumbnail "snapshots/statistic-api.jpg"
+		it has a statistic theming page at "/statistic/theming", named "Theming", thumbnail "snapshots/statistic-theming.jpg"
+	- it has a step usage page at "/step", named "Step", tab "Usage", tagged "Navigation, Progress, Status, Content parts, Elements", thumbnail "snapshots/step.jpg"
+		it has a step examples page at "/step/examples", named "Examples", thumbnail "snapshots/step-examples.jpg"
+		it has a step api page at "/step/api", named "API", thumbnail "snapshots/step-api.jpg"
+		it has a step theming page at "/step/theming", named "Theming", thumbnail "snapshots/step-theming.jpg"
+	- it has a sticky usage page at "/sticky", named "Sticky", tab "Usage", tagged "Layout, Navigation, Modules", thumbnail "snapshots/sticky.jpg"
+		it has a sticky examples page at "/sticky/examples", named "Examples", thumbnail "snapshots/sticky-examples.jpg"
+		it has a sticky api page at "/sticky/api", named "API", thumbnail "snapshots/sticky-api.jpg"
+		it has a sticky theming page at "/sticky/theming", named "Theming", thumbnail "snapshots/sticky-theming.jpg"
+	- it has a summary usage page at "/summary", named "Summary", tab "Usage", tagged "Social, Content parts", thumbnail "snapshots/summary.jpg"
+		it has a summary examples page at "/summary/examples", named "Examples", thumbnail "snapshots/summary-examples.jpg"
+		it has a summary api page at "/summary/api", named "API", thumbnail "snapshots/summary-api.jpg"
+	- it has a tab usage page at "/tab", named "Tab", tab "Usage", tagged "Containers, Navigation, Menus, Content parts, Modules", thumbnail "snapshots/tab.jpg"
+		it has a tab examples page at "/tab/examples", named "Examples", thumbnail "snapshots/tab-examples.jpg"
+		it has a tab api page at "/tab/api", named "API", thumbnail "snapshots/tab-api.jpg"
+		it has a tab theming page at "/tab/theming", named "Theming", thumbnail "snapshots/tab-theming.jpg"
+	- it has a table usage page at "/table", named "Table", tab "Usage", tagged "Basic, Data display, Tables, Collections", thumbnail "snapshots/table.jpg"
+		it has a table examples page at "/table/examples", named "Examples", thumbnail "snapshots/table-examples.jpg"
+		it has a table api page at "/table/api", named "API", thumbnail "snapshots/table-api.jpg"
+		it has a table theming page at "/table/theming", named "Theming", thumbnail "snapshots/table-theming.jpg"
+	- it has a table-of-contents usage page at "/table-of-contents", named "Table of contents", tab "Usage", tagged "Navigation, Documentation", thumbnail "snapshots/table-of-contents.jpg"
+		it has a table-of-contents examples page at "/table-of-contents/examples", named "Examples", thumbnail "snapshots/table-of-contents-examples.jpg"
+		it has a table-of-contents api page at "/table-of-contents/api", named "API", thumbnail "snapshots/table-of-contents-api.jpg"
+		it has a table-of-contents theming page at "/table-of-contents/theming", named "Theming", thumbnail "snapshots/table-of-contents-theming.jpg"
+	- it has a terms usage page at "/terms", named "Terms", tab "Usage", tagged "Text, Data display, Collections", thumbnail "snapshots/terms.jpg"
+		it has a terms examples page at "/terms/examples", named "Examples", thumbnail "snapshots/terms-examples.jpg"
+		it has a terms api page at "/terms/api", named "API", thumbnail "snapshots/terms-api.jpg"
+	- it has a text usage page at "/text", named "Text", tab "Usage", tagged "Basic, Navigation, Text, Typography, Elements", thumbnail "snapshots/text.jpg"
+		it has a text examples page at "/text/examples", named "Examples", thumbnail "snapshots/text-examples.jpg"
+		it has a text api page at "/text/api", named "API", thumbnail "snapshots/text-api.jpg"
+		it has a text theming page at "/text/theming", named "Theming", thumbnail "snapshots/text-theming.jpg"
+	- it has a textarea usage page at "/textarea", named "Textarea", tab "Usage", tagged "Forms, Inputs, Text, Elements", thumbnail "snapshots/textarea.jpg"
+		it has a textarea examples page at "/textarea/examples", named "Examples", thumbnail "snapshots/textarea-examples.jpg"
+		it has a textarea api page at "/textarea/api", named "API", thumbnail "snapshots/textarea-api.jpg"
+		it has a textarea theming page at "/textarea/theming", named "Theming", thumbnail "snapshots/textarea-theming.jpg"
+	- it has a theme-editor usage page at "/theme-editor", named "Theme Editor", tab "Usage", tagged "Forms, Controls, Typography, Media", thumbnail "snapshots/theme-editor.jpg"
+		it has a theme-editor examples page at "/theme-editor/examples", named "Examples", thumbnail "snapshots/theme-editor-examples.jpg"
+		it has a theme-editor api page at "/theme-editor/api", named "API", thumbnail "snapshots/theme-editor-api.jpg"
+		it has a theme-editor theming page at "/theme-editor/theming", named "Theming", thumbnail "snapshots/theme-editor-theming.jpg"
+	- it has a theme-menu usage page at "/theme-menu", named "Theme Menu", tab "Usage", tagged "Menus, Controls, Selection", thumbnail "snapshots/theme-menu.jpg"
+		it has a theme-menu examples page at "/theme-menu/examples", named "Examples", thumbnail "snapshots/theme-menu-examples.jpg"
+		it has a theme-menu api page at "/theme-menu/api", named "API", thumbnail "snapshots/theme-menu-api.jpg"
+		it has a theme-menu theming page at "/theme-menu/theming", named "Theming", thumbnail "snapshots/theme-menu-theming.jpg"
+	- it has a title usage page at "/title", named "Title", tab "Usage", tagged "Containers, Typography, Content parts", thumbnail "snapshots/title.jpg"
+		it has a title examples page at "/title/examples", named "Examples", thumbnail "snapshots/title-examples.jpg"
+		it has a title api page at "/title/api", named "API", thumbnail "snapshots/title-api.jpg"
+	- it has a toast usage page at "/toast", named "Toast", tab "Usage", tagged "Feedback, Messages, Notifications, Overlays, Modules", thumbnail "snapshots/toast.jpg"
+		it has a toast examples page at "/toast/examples", named "Examples", thumbnail "snapshots/toast-examples.jpg"
+		it has a toast api page at "/toast/api", named "API", thumbnail "snapshots/toast-api.jpg"
+		it has a toast theming page at "/toast/theming", named "Theming", thumbnail "snapshots/toast-theming.jpg"
+	- it has a toolbar usage page at "/toolbar", named "Toolbar", tab "Usage", tagged "Navigation, Menus, Collections", thumbnail "snapshots/toolbar.jpg"
+		it has a toolbar examples page at "/toolbar/examples", named "Examples", thumbnail "snapshots/toolbar-examples.jpg"
+		it has a toolbar api page at "/toolbar/api", named "API", thumbnail "snapshots/toolbar-api.jpg"
+		it has a toolbar theming page at "/toolbar/theming", named "Theming", thumbnail "snapshots/toolbar-theming.jpg"
+	- it has a transition usage page at "/transition", named "Transition", tab "Usage", tagged "Animation, Modules", thumbnail "snapshots/transition.jpg"
+		it has a transition examples page at "/transition/examples", named "Examples", thumbnail "snapshots/transition-examples.jpg"
+		it has a transition api page at "/transition/api", named "API", thumbnail "snapshots/transition-api.jpg"
+		it has a transition theming page at "/transition/theming", named "Theming", thumbnail "snapshots/transition-theming.jpg"
+	- it has a tree usage page at "/tree", named "Tree", tab "Usage", tagged "Navigation, Lists", thumbnail "snapshots/tree.jpg"
+		it has a tree examples page at "/tree/examples", named "Examples", thumbnail "snapshots/tree-examples.jpg"
+		it has a tree api page at "/tree/api", named "API", thumbnail "snapshots/tree-api.jpg"
+		it has a tree theming page at "/tree/theming", named "Theming", thumbnail "snapshots/tree-theming.jpg"
+	- it has a tree-diagram usage page at "/tree-diagram", named "Tree diagram", tab "Usage", tagged "Images, Data display, Views", thumbnail "snapshots/tree-diagram.jpg"
+		it has a tree-diagram examples page at "/tree-diagram/examples", named "Examples", thumbnail "snapshots/tree-diagram-examples.jpg"
+		it has a tree-diagram api page at "/tree-diagram/api", named "API", thumbnail "snapshots/tree-diagram-api.jpg"
+		it has a tree-diagram theming page at "/tree-diagram/theming", named "Theming", thumbnail "snapshots/tree-diagram-theming.jpg"
+	- it has a value usage page at "/value", named "Value", tab "Usage", tagged "Data display, Content parts", thumbnail "snapshots/value.jpg"
+		it has a value examples page at "/value/examples", named "Examples", thumbnail "snapshots/value-examples.jpg"
+		it has a value api page at "/value/api", named "API", thumbnail "snapshots/value-api.jpg"
+	- it has a video usage page at "/video", named "Video", tab "Usage", tagged "Media, Elements", thumbnail "snapshots/video.jpg"
+		it has a video examples page at "/video/examples", named "Examples", thumbnail "snapshots/video-examples.jpg"
+		it has a video api page at "/video/api", named "API", thumbnail "snapshots/video-api.jpg"
+	- it has a visibility usage page at "/visibility", named "Visibility", tab "Usage", tagged "Media, Animation, Modules", thumbnail "snapshots/visibility.jpg"
+		it has a visibility examples page at "/visibility/examples", named "Examples", thumbnail "snapshots/visibility-examples.jpg"
+		it has a visibility api page at "/visibility/api", named "API", thumbnail "snapshots/visibility-api.jpg"
+		it has a visibility theming page at "/visibility/theming", named "Theming", thumbnail "snapshots/visibility-theming.jpg"
+	- it has a zoom usage page at "/zoom", named "Zoom", tab "Usage", tagged "Media, Images, Overlays", thumbnail "snapshots/zoom.jpg"
+		it has a zoom examples page at "/zoom/examples", named "Examples", thumbnail "snapshots/zoom-examples.jpg"
+		it has a zoom api page at "/zoom/api", named "API", thumbnail "snapshots/zoom-api.jpg"
+		it has a zoom theming page at "/zoom/theming", named "Theming", thumbnail "snapshots/zoom-theming.jpg"
+	// the docs site's own:  its settings, and the syntax of the language a component page shows
+	- it has a settings dialog
+	- it has a syntax sidebar
+	- it has a not found page
+	- it has an error page

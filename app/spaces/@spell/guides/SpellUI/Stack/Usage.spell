@@ -1,4 +1,4 @@
-<page "stack usage" notebook>
+"stack usage" is a notebook page
 	<header level="1">
 		Stack
 		<header>A stack lays its children out in a column, or a row that wraps, evenly spaced.</>
@@ -33,4 +33,3 @@
 			`justify` and `align` only move things on screen, so keep the order the reading order.
 		</>
 	</>
-</page>
