@@ -2,7 +2,7 @@ import type * as vscode from "vscode"
 
 /**
  * A stand-in for VS Code's `vscode` module, for the extension's unit tests:
- * only what `ElementsHelp` uses, as tiny classes and records.
+ * only what `ElementsHelp` and `BubblyDecorations` use, as tiny classes and records.
  * - The tests run it as `vscode` (`vitest.config.ts`, beside this folder:  an alias);
  *   their TYPES stay VS Code's own (`@types/vscode`).
  * - `vscode` exists only inside VS Code:  no package to import, so it's this or a whole VS Code
@@ -55,6 +55,14 @@ export class MarkdownString {
 /** VS Code's own numbers. */
 export enum CompletionItemKind {
   Value = 11
+}
+
+/** How a decoration grows as text is typed at its edges:  VS Code's own numbers. */
+export enum DecorationRangeBehavior {
+  OpenOpen = 0,
+  ClosedClosed = 1,
+  OpenClosed = 2,
+  ClosedOpen = 3
 }
 
 /** VS Code's own numbers. */

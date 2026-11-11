@@ -5857,6 +5857,21 @@
                   "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_implied} grupo {group:text} ((con|,) color|, de color) {color:site_card_color}",
+              "example": "una \"portada\" es una página\nguía galáctica es un sitio en la nube:\n\tgrupo \"Inicio\", color rojo\n\ttiene una portada en \"/\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\",\n    group: \"Inicio\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "ts": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\",\n    group: \"Inicio\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "py": {
+                  "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [{\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\", \"group\": \"Inicio\"}]\n    lives_at = \"cloud\"\n\nguía_galáctica = GuíaGaláctica()"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

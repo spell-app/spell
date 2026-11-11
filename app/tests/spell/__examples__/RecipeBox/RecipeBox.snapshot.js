@@ -240,7 +240,7 @@ export class RecipeBox extends App {
           h("ui-text", { color: "grey" }, "Everything you type is saved as you go.")
         ),
         h("ui-toolbar", { class: "undo", menu: "box menu", "aria-label": "Recipes" }),
-        h("ui-form", { class: "find", value: this },
+        h("ui-form", { class: "find", value: this, fluid: true },
           h("ui-field", { label: "Search" }, h("ui-input", { class: "search", name: "search", icon: "search" }))
         )
       ),
@@ -252,7 +252,7 @@ export class RecipeBox extends App {
     // Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
     if (this.editing) return core.drawThing(new RecipeEditor({ recipe: this.editing }))
     else {
-      return h("ui-cards", { columns: "3", doubling: true, part: "screen" },
+      return h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "screen" },
         h("ui-card", { class: "new" },
           h("ui-content",
             h("ui-form", { "prop:value": () => this.newRecipe },

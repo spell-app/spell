@@ -881,10 +881,10 @@ describe("spell space local", () => {
       expect(file().split("\ntest.spell.app {")[0]).not.toContain("header_up")
     })
 
-    test("requests into a Claude session, test routes and themes saved into Spell UI are refused there", () => {
+    test("requests into a Claude session, test routes, themes saved into Spell UI and the home page's order are refused there", () => {
       world = setUp()
       expect(file()).toContain(
-        "@refused path /api/changes /api/changes/* /api/test /api/missing /api/not-authorized /api/error"
+        "@refused path /api/changes /api/changes/* /api/home/order /api/test /api/missing /api/not-authorized /api/error"
       )
       expect(file()).toContain("path /api/themes/*\n\t\tnot method GET HEAD")
       expect(file()).toContain(`respond @refused "`)

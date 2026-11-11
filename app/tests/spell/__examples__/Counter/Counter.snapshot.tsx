@@ -28,7 +28,7 @@ export class Counter extends View {
   /** A button saying how many times it's been clicked:  a click counts up */
   @drawn draw() {
     return (
-      <ui-button onClick={core.pressed(this, () => this.countUp())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+      <ui-button size="huge" color="primary" onClick={core.pressed(this, () => this.countUp())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         {"Clicked "}
         {this.count}
         {" times"}
@@ -79,7 +79,11 @@ export class CounterApp extends App {
   accessor counter!: Counter
 
   @drawn draw() {
-    return <ui-container>{core.drawThing(this.counter)}</ui-container>
+    return (
+      <ui-container>
+        <ui-stack align="center">{core.drawThing(this.counter)}</ui-stack>
+      </ui-container>
+    )
   }
 }
 

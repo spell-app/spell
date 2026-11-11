@@ -917,7 +917,8 @@ function editorSite({ name, port }: CaddyEditorSite, tls: string, cloudName: str
           `\tredir @cloudPages https://${cloudName}{uri}`
         ]
       : []),
-    `\t# For this machine alone:  requests into its Claude sessions, the API's test routes, themes saved into Spell UI.`,
+    `\t# For this machine alone:  requests into its Claude sessions, the API's test routes, themes saved into Spell UI,`,
+    `\t# the home page's order of cards.`,
     `\t@refused path ${REFUSED_FOR_THE_EDITOR}`,
     `\t@themeSaves {`,
     `\t\tpath /api/themes/*`,
@@ -941,7 +942,8 @@ function editorSite({ name, port }: CaddyEditorSite, tls: string, cloudName: str
 const CLOUD_PAGES = "^(/apps/@.*|/@[A-Za-z0-9_-]+/?)$"
 
 /** What's refused at the editor's address:  see `editorSite()`. */
-const REFUSED_FOR_THE_EDITOR = "/api/changes /api/changes/* /api/test /api/missing /api/not-authorized /api/error"
+const REFUSED_FOR_THE_EDITOR =
+  "/api/changes /api/changes/* /api/home/order /api/test /api/missing /api/not-authorized /api/error"
 
 /** The answer to what's refused there. */
 const REFUSED_ANSWER = "This is only for this Mac, not this address."

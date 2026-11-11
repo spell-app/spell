@@ -9,7 +9,7 @@
     {
       "type": "Counter",
       "superType": "View",
-      "defined": "/Counter.spell:137-633"
+      "defined": "/Counter.spell:137-661"
     },
     {
       "property": "count",
@@ -42,7 +42,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:311-459"
+      "defined": "/Counter.spell:311-487"
     },
     {
       "syntax": "test counting",
@@ -51,18 +51,18 @@
       "alias": "statement",
       "kind": "function",
       "name": "counting",
-      "defined": "/Counter.spell:462-633"
+      "defined": "/Counter.spell:490-661"
     },
     {
       "type": "CounterApp",
       "superType": "App",
-      "defined": "/Counter.spell:668-773"
+      "defined": "/Counter.spell:696-838"
     },
     {
       "property": "counter",
       "of": "CounterApp",
       "datatype": "Counter",
-      "defined": "/Counter.spell:691-717"
+      "defined": "/Counter.spell:719-745"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -75,7 +75,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:719-773"
+      "defined": "/Counter.spell:747-838"
     }
   ],
   "codeLines": [
@@ -83,9 +83,9 @@
     18,
     23,
     28,
-    36,
-    53,
-    56,
-    61
+    38,
+    55,
+    58,
+    63
   ]
 }

@@ -480,7 +480,7 @@ function codePartsIn(text: string, start: number): SitePart[] {
     const heading = CODE_GROUP.exec(line.text)
     if (heading) {
       open.length = 0
-      group = groupPart(heading[1]!, line)
+      group = groupPart(heading[1]!, line, heading[2] ?? heading[3])
       top.push(group)
       continue
     }
@@ -631,8 +631,12 @@ function articleOf(name: string): string {
   return /^[aeiou]/i.test(name) ? "an" : "a"
 }
 
-/** A site's group line:  `group "Hardware"`, bulleted by an older writer, `- group "Hardware"`. */
-const CODE_GROUP = /^[ \t]+(?:- )?group "([^"]+)"\s*$/
+/**
+ * A site's group line:  `group "Hardware"`;  bulleted by an older writer, `- group "Hardware"`.
+ * - Its section's colour after it, in any of the language's forms (epic `language` T112):
+ *   `, color yellow`, `with color yellow`, `, colored yellow`
+ */
+const CODE_GROUP = /^[ \t]+(?:- )?group "([^"]+)"(?:(?:,| with) colou?r (\w+)|, colou?red (\w+))?\s*$/
 
 /**
  * A site's part line:  `it has a films page at "/films", named "Films"`, `it has a settings dialog`;

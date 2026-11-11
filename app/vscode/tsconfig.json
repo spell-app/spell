@@ -2,7 +2,8 @@
   // The TypeScript settings every repo shares.
   // - The extension imports its own files, its own packages (`vscode`, `vscode-languageclient`),
   //   and the kit's elements help (`spell/element-tools/jsx-help/...`, read here as the kit's declarations).
-  // - Never spell-app's:  it runs a checkout's language server as a process.
+  // - Never spell-app's code:  it runs a checkout's language server as a process.
+  //   - Only the bubbly look's table of values, `bubbly.values.json`, bundled in (`BubblyDecorations`).
   // - Its tests too (`tests/`, run as `vscode` by `vitest.config.ts`):  their `vscode` is VS Code's own types.
   "extends": "spell/toolchain/tsconfig.base.json",
   "compilerOptions": {

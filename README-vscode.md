@@ -319,6 +319,13 @@ A page file (`"form usage" is a notebook page`) gets all of it too:
   - Each failed check is an error on its own line in the editor, e.g. under
     `it is the queen of spades should be yes` when it's `no`.
     An edit to the file clears them;  the next test run shows them again.
+- **The bubbly look**, on by default:  references bold, marks and comments faint, comments in italics,
+  and a pill in its declaration's colour round what you typed (`"card"`, `ace`), as Spell's own editor draws it.
+  - Its colours and weights are the look's own sheet's, light or dark as your theme is.
+  - It's drawn over VS Code's editor, so typing, find and the caret work as ever.
+  - What VS Code can't draw is left out:  a declaration's band and the bracket down its body,
+    the gaps between declarations, and curly quote marks.
+  - `spell.bubblyLook` turns it off.
 - **`spell.compileOnSave`**, off by default:  compile the project on every save,
   to `<Project>.spell.js` in the build folder (`build/` at the repo's root),
   so anything running that file picks the change up.  Run Project doesn't need it.
@@ -357,6 +364,7 @@ The edges:
 | Setting | Default | What it does |
 | --- | --- | --- |
 | `spell.parserRoot` | empty | the spell-app checkout whose language server to run:  spell-app itself, the kit folder holding it, or any folder inside one;  empty:  the window's own |
+| `spell.bubblyLook` | `true` | draw Spell files in the bubbly look:  weights, faint marks, a pill round what you typed;  off:  the language server's colours alone |
 | `spell.compileOnSave` | `false` | compile the project on save, so a running app picks it up |
 
 The settings it sets for you:
@@ -588,6 +596,7 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
 | Spell's file | What's in it |
 | --- | --- |
 | [extension.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/extension.ts) | starts the language server, and the TS, JS and PY views |
+| [BubblyDecorations.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/BubblyDecorations.ts) | the bubbly look, as decorations on VS Code's own editor:  the language server's layout (`spell/bubbly`), in the look's values (`bubbly.values.json`, bundled in) |
 | [ElementsHelp.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/ElementsHelp.ts) | custom elements' slot, part and dashed-attribute help in `.tsx` and `.jsx` files:  shows what the kit's `JsxElementHelp` finds |
 | [spellAppRoot.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/spellAppRoot.ts) | which checkout to run:  plain node, no `vscode`, so a script can check it |
 | [RunnerPanel.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/RunnerPanel.ts) | Run Project's panel |

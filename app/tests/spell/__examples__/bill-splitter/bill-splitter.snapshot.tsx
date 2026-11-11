@@ -63,9 +63,8 @@ export class Diner extends View {
     return (
       <ui-form value={this}>
         <ui-stack direction="horizontal" spacing="sm">
-          <ui-input name="name" placeholder="Name" aria-label="Name" />
-          <ui-input name="amount" type="number" min="0" step="0.01" aria-label="Amount" label="$" />
-          <ui-space fluid={true} />
+          <ui-input name="name" placeholder="Name" aria-label="Name" fluid={true} />
+          <ui-input name="amount" type="number" min="0" step="0.01" placeholder="Amount" aria-label="Amount" fluid={true} />
           <ui-text bold={true}>{writeAmountAsMoney(this.share)}</ui-text>
           <ui-button icon="close" appearance="basic" aria-label="Remove" onClick={core.pressed(this, () => this.remove())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
         </ui-stack>
@@ -179,7 +178,7 @@ export class BillSplitter extends App {
         <ui-stack>
           <ui-header level="2">Bill Splitter</ui-header>
           <ui-form value={this}>
-            <ui-stack direction="horizontal" spacing="sm">
+            <ui-stack direction="horizontal" spacing="sm" wrap={true}>
               <ui-text bold={true}>Tip</ui-text>
               <ui-input name="percent" type="percent" min="0" step="1" aria-label="Tip percent" />
               <ui-buttons size="small" appearance="basic">
@@ -202,7 +201,7 @@ export class BillSplitter extends App {
             </ui-button>
           </ui-stack>
           <ui-segment>
-            <ui-statistics widths="3" size="small">
+            <ui-statistics widths="3" size="small" stackable={true} stack-with="page">
               <ui-statistic value={writeAmountAsMoney(this.subtotal)} label="Ordered" />
               <ui-statistic value={writeAmountAsMoney(this.tip)} label="Tip" />
               <ui-statistic value={writeAmountAsMoney(this.total)} label="Total" color="green" />

@@ -2,6 +2,7 @@
  * VS Code extension for spell:  runs the spell parser's language server, and shows the code a file compiles to:
  *   javascript, TypeScript or Python, from the editor's title bar.
  * - And runs a project, in a panel beside it -- see `RunnerPanel`.
+ * - And draws spell in as much of the bubbly look as VS Code allows, on by default -- see `BubblyDecorations`.
  * - And, in `.tsx` / `.jsx` files, custom elements' slot, part and dashed-attribute help -- see `ElementsHelp`;
  *   and Spell UI's and Spell Brand's HTML and CSS data, from `package.json` (`contributes.html.customData` ...).
  * - The spell LANGUAGE only:  the docs and Review tabs, "Open Epic...", the window bridge and the handoff are
@@ -24,6 +25,7 @@ import {
   type ServerOptions
 } from "vscode-languageclient/node"
 
+import { BubblyDecorations } from "./BubblyDecorations"
 import { ElementsHelp } from "./ElementsHelp"
 import { RunnerPanel } from "./RunnerPanel"
 import { findSpellApp } from "./spellAppRoot"
@@ -144,6 +146,7 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     vscode.commands.registerCommand("spell.showCompiledPython", () => showCompiled("py"))
   )
   await client.start()
+  BubblyDecorations.register(context, client)
 }
 
 /** Stop the language server. */

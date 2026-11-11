@@ -5,4 +5,4 @@
   ▶️ Executing   `count up of the counter`
   ✅ As expected `the counter's count` is `2`
 
-<div id="spell-app-root"><test-project-app><ui-container><test-project-counter><ui-button style="cursor:var(--ui-control-cursor,pointer);user-select:none">Clicked 0 times</ui-button></test-project-counter></ui-container></test-project-app></div>
+<div id="spell-app-root"><test-project-app><ui-container><ui-stack align="center"><test-project-counter><ui-button color="primary" size="huge" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Clicked 0 times</ui-button></test-project-counter></ui-stack></ui-container></test-project-app></div>

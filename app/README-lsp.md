@@ -344,6 +344,7 @@ The extension's compiled views and its Run Project panel ask the server for more
 | `spell/scopeDetails` `{ uri, path }` | one node's details, fetched when it's shown |
 | `spell/setDescription` `{ uri, line \| file, text }` | an edit making `text` the docstring of what's declared on that line:  sent back for the editor to apply, so it can be undone |
 | `spell/lineTree` `{ uri, line }` | one line's Spell tree, as `<ui-tree-diagram>` draws it |
+| `spell/bubbly` `{ uri }` | the file in the bubbly look, stretch by stretch:  each one's range and what it is (a reference, a mark, what a person typed ...), the part of speech of the band it's on, the name a head defines;  VS Code's decorations draw from it, as the app's Monaco editor draws from the same layout.  `[]` for a page file |
 | `spell/testDiagnostics` `{ uri, tests }` | how the project's tests went, from the runner's Run Tests, as each of its files' errors:  every failed check under its own line, `it is the queen of spades should be yes`;  the extension shows them in a set of their own, `spell tests` |
 
 - "Cleanly" means no parse errors in any of the project's files:  a line that doesn't parse still compiles,

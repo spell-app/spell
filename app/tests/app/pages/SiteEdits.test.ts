@@ -202,6 +202,37 @@ describe("SiteEdits", () => {
       expect(renamed).toContain('\tit has a "Home" at "/"\n')
     })
 
+    test("a group's colour (T112):  read in each of its forms, its cards take it, and a rename keeps it", () => {
+      const colored = [
+        "galaxy guide is a site:",
+        '\tgroup "Home", color red',
+        '\tit has a "Home" at "/"',
+        '\tgroup "My Stuff" with color orange',
+        '\tit has a "My Inbox" at "/inbox"',
+        '\tgroup "Teams", colored purple',
+        '\tit has a "Roster" at "/roster"',
+        ""
+      ].join("\n")
+      const parts = SiteEdits.partsIn(colored)!
+      expect(parts.map((part) => [part.title, part.color])).toEqual([
+        ["Home", "red"],
+        ["My Stuff", "orange"],
+        ["Teams", "purple"]
+      ])
+      expect(SiteBoard.sectionsOf(parts).map((section) => section.cards.map((card) => card.color))).toEqual([
+        ["red", "red"],
+        ["orange", "orange"],
+        ["purple", "purple"]
+      ])
+      const renamed = SiteEdits.withPartRenamed(colored, SiteEdits.groupKey("My Stuff"), "Mine")
+      expect(renamed).toContain('\tgroup "Mine" with color orange\n')
+      const moved = SiteEdits.withPartMoved(colored, SiteEdits.groupKey("Teams"), {
+        where: "before",
+        part: SiteEdits.groupKey("Home")
+      })
+      expect(SiteEdits.partsIn(moved)!.map((part) => [part.title, part.color])[0]).toEqual(["Teams", "purple"])
+    })
+
     test("a page added lists only its line:  it's made when it's first opened", () => {
       const added = SiteEdits.withPageAdded(ROUTING, "Help", "/help", { listOnly: true })
       // a title, so its name is quoted

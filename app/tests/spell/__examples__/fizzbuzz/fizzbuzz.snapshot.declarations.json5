@@ -1,9 +1,133 @@
 {
   "spellVersion": "0.8.0",
   "provides": [
+    "Result",
+    "Tally",
+    "FizzbuzzExplainer",
     "play_fizzbuzz"
   ],
   "statements": [
+    {
+      "type": "Result",
+      "superType": "Thing",
+      "defined": "/Explainer.spell:454-885"
+    },
+    {
+      "property": "number",
+      "of": "Result",
+      "datatype": "number",
+      "defined": "/Explainer.spell:477-501"
+    },
+    {
+      "property": "word",
+      "of": "Result",
+      "datatype": "text",
+      "defined": "/Explainer.spell:503-576"
+    },
+    {
+      "property": "label",
+      "of": "Result",
+      "datatype": "text",
+      "defined": "/Explainer.spell:578-710"
+    },
+    {
+      "property": "color",
+      "of": "Result",
+      "datatype": "text",
+      "defined": "/Explainer.spell:712-885"
+    },
+    {
+      "type": "Tally",
+      "superType": "List",
+      "itemType": "Result",
+      "defined": "/Explainer.spell:887-1175"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Tally",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Explainer.spell:978-1175"
+    },
+    {
+      "type": "FizzbuzzExplainer",
+      "superType": "Page",
+      "defined": "/Explainer.spell:1190-3593"
+    },
+    {
+      "property": "tally",
+      "of": "FizzbuzzExplainer",
+      "datatype": "Tally",
+      "defined": "/Explainer.spell:1220-1242"
+    },
+    {
+      "property": "fizzes",
+      "of": "FizzbuzzExplainer",
+      "datatype": "number",
+      "defined": "/Explainer.spell:1244-1321"
+    },
+    {
+      "property": "buzzes",
+      "of": "FizzbuzzExplainer",
+      "datatype": "number",
+      "defined": "/Explainer.spell:1323-1400"
+    },
+    {
+      "property": "fizzbuzzes",
+      "of": "FizzbuzzExplainer",
+      "datatype": "number",
+      "defined": "/Explainer.spell:1402-1487"
+    },
+    {
+      "property": "plain_numbers",
+      "asWritten": "plain numbers",
+      "of": "FizzbuzzExplainer",
+      "datatype": "number",
+      "defined": "/Explainer.spell:1489-1569"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "FizzbuzzExplainer",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Explainer.spell:1572-3593"
+    },
+    {
+      "syntax": "show {callArgs:expression} for {callArgs:expression} (of {thisArg:expression})?",
+      "output": "show_$word_for_$number",
+      "rule": "method_call",
+      "of": "FizzbuzzExplainer",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "show (word as text) for (number as a number)",
+      "params": [
+        {
+          "name": "word",
+          "datatype": "text"
+        },
+        {
+          "name": "number",
+          "datatype": "number"
+        }
+      ],
+      "returns": "nothing",
+      "defined": "/Explainer.spell:3721-3870"
+    },
     {
       "syntax": "play fizzbuzz",
       "output": "play_fizzbuzz",
@@ -14,10 +138,25 @@
       ],
       "kind": "function",
       "returns": "nothing",
-      "defined": "/FizzBuzz.spell:355-821"
+      "defined": "/FizzBuzz.spell:318-784"
     }
   ],
   "codeLines": [
-    35
+    40,
+    41,
+    47,
+    53,
+    59,
+    68,
+    71,
+    79,
+    82,
+    87,
+    91,
+    95,
+    99,
+    104,
+    132,
+    175
   ]
 }

@@ -1,4 +1,4 @@
-import type { SP } from "spell/parser/spell"
+import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import type { monaco } from "./monaco"
 
@@ -84,44 +84,31 @@ export class BubblyMarks {
       inside: []
     }
     into.push(shape)
-    this.line(block.head, shape.inside, { isHead: true })
+    this.line(block.head, shape.inside, { band: block.partOfSpeech })
     this.nodes(block.body, shape.inside)
   }
 
-  /** A line's pieces:  their classes, and a pill under each input. */
-  private line(line: SP.BubblyLine, into: BubblyShape[], { isHead = false } = {}) {
-    let isFirstQuoted = isHead
-    for (const piece of line.pieces) {
-      const { start, end, kind } = piece
-      if (kind === "input" || kind === "choice") {
-        const isQuoted = this.isQuoted(piece)
-        this.input(piece, into, { isQuoted, isName: isQuoted && isFirstQuoted })
-        if (isQuoted) isFirstQuoted = false
-      } else if (kind === "heading") {
-        // its `#`s faint, its words bold, as `BubblyHtml` draws them
-        const marks = /^#+/.exec(this.drawing.text.slice(start, end))?.[0].length ?? 0
-        this.mark(start, start + marks, "bubbly-mark")
-        this.mark(start + marks, end, BubblyHtml.classesFor("heading"))
-      } else {
-        this.mark(start, end, BubblyHtml.classesFor(kind))
-      }
+  /**
+   * A line's stretches (`SP.BubblyStretches`, as VS Code's are):  their classes, and a pill under each input;
+   * `band`:  it's a declaration's head, on a band of this part of speech.
+   * a quoted one's own `"` marks see-through, the curly ones drawn over them, room outside them too.
+   */
+  private line(line: SP.BubblyLine, into: BubblyShape[], head: { band?: SP.BubblyPartOfSpeech } = {}) {
+    for (const stretch of SP.BubblyStretches.ofLine(this.drawing.text, line, head)) {
+      const { start, end, kind } = stretch
+      if (kind === "quote-open")
+        this.mark(start, end, `${QUOTE_MARK} bubbly-quote-open`, { before: room("quote", "before") })
+      else if (kind === "quote-close")
+        this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: room("quote", "after") })
+      else if (kind === "input" || kind === "choice") this.input(stretch, into)
+      else this.mark(start, end, BubblyHtml.classesFor(kind))
     }
   }
 
-  /**
-   * What a person typed:  its words with room either side, a pill under them;
-   * a quoted one's own `"` marks see-through, the curly ones drawn over them, room outside them too.
-   */
-  private input(piece: SP.BubblyPiece, into: BubblyShape[], { isQuoted, isName }: InputPlace) {
-    const { start, end, kind } = piece
-    const words = isQuoted ? { start: start + 1, end: end - 1 } : { start, end }
-    if (isQuoted) {
-      this.mark(start, start + 1, `${QUOTE_MARK} bubbly-quote-open`, { before: room("quote", "before") })
-      this.mark(end - 1, end, `${QUOTE_MARK} bubbly-quote-close`, { after: room("quote", "after") })
-    }
-    if (words.end <= words.start) return
-    const classes = [BubblyHtml.classesFor(kind), ...(isName ? [NAME] : [])].join(" ")
-    const place = this.mark(words.start, words.end, classes, {
+  /** What a person typed:  its words with room either side, a pill under them. */
+  private input({ start, end, kind, isQuoted = false, isName }: SP.BubblyStretch, into: BubblyShape[]) {
+    const classes = [BubblyHtml.classesFor(kind as SP.BubblyPieceKind), ...(isName ? [NAME] : [])].join(" ")
+    const place = this.mark(start, end, classes, {
       before: room("input", "before"),
       after: room("input", "after")
     })
@@ -174,12 +161,6 @@ export class BubblyMarks {
   // ## Helpers
   ////////////////
 
-  /** Is `piece` a quoted input, `"card"`? */
-  private isQuoted(piece: SP.BubblyPiece): boolean {
-    const words = this.drawing.text.slice(piece.start, piece.end)
-    return piece.kind === "input" && words.length > 1 && words.startsWith('"') && words.endsWith('"')
-  }
-
   /** Does a head start or end with a pill, `"card"` or `ace`? */
   private endsOf(head: SP.BubblyLine): BubblyBlockShape["ends"] {
     const pieces = head.pieces.filter((piece) => this.drawing.text.slice(piece.start, piece.end).trim())
@@ -188,7 +169,7 @@ export class BubblyMarks {
     return {
       startsWithInput: isPill(pieces[0]),
       endsWithInput: isPill(last),
-      endsQuoted: !!last && isPill(last) && this.isQuoted(last)
+      endsQuoted: !!last && isPill(last) && SP.BubblyStretches.isQuoted(this.drawing.text, last)
     }
   }
 }
@@ -239,9 +220,6 @@ export type BubblyBracketShape = {
   /** the mark from its line's first letter to its last step's end */
   place: number
 }
-
-/** Where `BubblyMarks.input()` is. */
-type InputPlace = { isQuoted: boolean; isName: boolean }
 
 /** Room injected before or after a mark. */
 type Rooms = { before?: monaco.editor.InjectedTextOptions; after?: monaco.editor.InjectedTextOptions }
