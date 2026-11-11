@@ -57,6 +57,7 @@ const TOP_TAG = /^<([\p{L}\p{N}-]+)[ \t]+"([^"]*)"/u
  * The name of the one page alone in spellx file `text`:  `undefined` when it isn't just one page, comments aside.
  * - Read from the lines at the file's left edge:  everything inside a page is indented.
  * - Its opening tag says the language's word for a page (`page`, `notebook`, Spanish's), or its old spelling (`spell-page`).
+ * - Or its plain head does, `"button api" is a notebook page` (epic `language` P45):  its indentation closes it.
  */
 export function alonePageName(text: string, language: SP.Language): string | undefined {
   const words = language.words.spellx
@@ -83,6 +84,12 @@ export function alonePageName(text: string, language: SP.Language): string | und
     if (line.startsWith("</")) {
       if (!name || !opened) return undefined
       opened = false
+      continue
+    }
+    const plain = words.plainPage && new RegExp(words.plainPage.source, "iu").exec(line)
+    if (plain?.groups) {
+      if (name) return undefined
+      name = plain.groups.name!
       continue
     }
     const tag = TOP_TAG.exec(line)

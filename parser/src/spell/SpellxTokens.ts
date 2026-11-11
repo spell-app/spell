@@ -66,6 +66,11 @@ export type SpellxTag = {
    *   Everything after reads it here:  the tokenizer, `SP.SpellxTwin`, the chunk view, the code-spell writer.
    */
   drawsBody?: boolean
+  /**
+   * Was it written as a page's PLAIN HEAD, `"button api" is a notebook page` (epic `language` P45)?
+   * - Then no closer ends it:  its indentation does, as plain Spell's.
+   */
+  plain?: boolean
 }
 
 /**

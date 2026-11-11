@@ -265,6 +265,11 @@ export class SpellxTokenizer extends P.Tokenizer {
         !this.frames.some((frame) => frame.category === "note" && this.isWordFor(closer.word!, frame))
       if (closer && !isProse) return this.closeTag(closer, indent)
     }
+    // a page's plain head, `"button api" is a notebook page` (epic `language` P45):  its tag, at the file's left edge
+    if (indent === 0 && text[start] === '"') {
+      const page = this.readPlainPageHead(text, start, end, lineEnd)
+      if (page) return page
+    }
     if (text[start] === "<" && WORD_START.test(text[start + 1] ?? "")) {
       // an app's widget defaults, at the top (epic `language` P29):  markup, read as code spell reads it
       if (!this.frames.length && this.isDefaultsTag(text, start)) return undefined
@@ -559,6 +564,46 @@ export class SpellxTokenizer extends P.Tokenizer {
     else if (!head.selfClosing && closerAtEnd) this.inlineCloser = { start: closerAtEnd.start, tag: token }
     else if (!head.selfClosing) this.open(word, indent, token)
     return withErrors(token, errors)
+  }
+
+  /**
+   * Read a page's PLAIN HEAD at `start`, `"button api" is a notebook page` (epic `language` P45), as its tag:
+   * `<page "button api" notebook>`, the same token.
+   * - Only at a file's left edge;  `undefined` when the line isn't one (`SP.SpellxWords.plainPage`).
+   * - Its body is the same as the tag's, and its indentation says where it ends:  no closer, none missing
+   *   (`SP.SpellxTag.plain`).
+   * - A `notebook` written before `page` is the tag's flag, as `<notebook>` brings it.
+   */
+  private readPlainPageHead(text: string, start: number, end: number, lineEnd: number): SP.SpellxTagToken | undefined {
+    const match = this.words.plainPage && new RegExp(this.words.plainPage.source, "iu").exec(text.slice(start, lineEnd))
+    if (!match?.groups) return undefined
+    const { name, flag } = match.groups
+    const headEnd = start + match[0].length
+    const pageWord = keyFor(this.words.templates, "page")
+    const attributes: SP.SpellxAttribute[] = []
+    if (flag) {
+      const at = start + match[0].indexOf(flag, name!.length + 2)
+      attributes.push({ name: SP.PAGE_DRAWS_BODY_FLAG, word: flag, start: at })
+    }
+    const tag: SP.SpellxTag = {
+      category: "template",
+      kind: "page",
+      word: pageWord,
+      name: this.textAt(text, start + 1, start + 1 + name!.length, true),
+      attributes,
+      selfClosing: false,
+      plain: true
+    }
+    let word: TagWord = { category: "template", kind: "page", word: pageWord, wordEnd: headEnd, isShortTemplate: true }
+    if (SP.isPageDrawingItsBody(tag, this.hasDrawOfItsOwn(text, headEnd, end, 0))) {
+      tag.drawsBody = true
+      word = { ...word, drawsBody: true }
+    }
+    this.closeSiblings(0)
+    const raw = text.slice(start, headEnd)
+    const token = new SP.SpellxTagToken({ start, raw, value: raw, tag })
+    this.open({ ...word, plain: true }, 0, token)
+    return token
   }
 
   /**
@@ -1025,6 +1070,8 @@ export class SpellxTokenizer extends P.Tokenizer {
 
   /** The error for `frame`, a tag never closed. */
   private unclosed(frame: Frame): string[] {
+    // a page's plain head is closed by its indentation (epic `language` P45)
+    if (frame.plain) return []
     return [this.message("spellx-unclosed-tag", { tag: `<${frame.word}>` })]
   }
 
@@ -1249,6 +1296,8 @@ type TagWord = {
   flag?: string
   /** Does its body draw, as a page's drawing (`SP.SpellxTag.drawsBody`)?  Worked out once, as its head is read. */
   drawsBody?: boolean
+  /** Is it a page's plain head, `"x" is a notebook page`, which its indentation closes (epic `language` P45)? */
+  plain?: boolean
 }
 
 /**

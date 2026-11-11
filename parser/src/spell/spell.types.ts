@@ -85,8 +85,18 @@ export function isSpellmlName(name: string | undefined): boolean {
 const TAG_LINE = /^<(?!\/?ui-defaults\b)/m
 
 /**
+ * A page's plain head, at a file's left edge, in any language (epic `language` P45):
+ * `"button api" is a notebook page`, `"api del botón" es una página cuaderno`.
+ * - Each language's own is its `SP.SpellxWords.plainPage`;  this one only says a file has one.
+ */
+const PLAIN_PAGE_LINE =
+  /^"[^"\n]+"[ \t]+(?:is[ \t]+an?[ \t]+(?:notebook[ \t]+)?page|es[ \t]+una[ \t]+p[áa]gina(?:[ \t]+cuaderno)?)[ \t]*(?:\/\/[^\n]*)?$/mu
+
+/**
  * The shape file `name` is written in, from what it says (epic `language` P40):  `"spellx"` for tags, else `"spell"`.
  * - Tag-shaped:  any line starting with `<` in the very first column, other than `<ui-defaults>`.
+ *   - A page's plain head reads the same way (epic `language` P45):  `"button api" is a notebook page`,
+ *     its body a page's, as its tag's is.
  *   Plain Spell's top-level lines never start there.
  *   - Lines inside a `/* ... *\/` or `<!-- ... -->` comment don't count.
  *   - Right on all 593 of the built-in projects' and Owen's own files, when it was chosen.
@@ -102,7 +112,7 @@ export function formOfText(text: string | undefined, name?: string): SpellForm {
 
 /** Is any line of `text`, outside a comment, a tag's in its first column?  See `formOfText()`. */
 function holdsTagLine(text: string): boolean {
-  if (!TAG_LINE.test(text)) return false
+  if (!TAG_LINE.test(text) && !PLAIN_PAGE_LINE.test(text)) return false
   let closer: string | undefined
   for (const line of text.split("\n")) {
     if (closer) {
@@ -114,7 +124,7 @@ function holdsTagLine(text: string): boolean {
       if (!line.includes(end)) closer = end
       continue
     }
-    if (TAG_LINE.test(line)) return true
+    if (TAG_LINE.test(line) || PLAIN_PAGE_LINE.test(line)) return true
   }
   return false
 }

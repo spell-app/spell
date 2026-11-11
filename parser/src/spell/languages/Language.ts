@@ -567,6 +567,15 @@ export type SpellxWords = {
    * - None:  a spellx file in this language can't be read yet.
    */
   twins?: SpellxTwinWords
+  /**
+   * A PAGE'S PLAIN HEAD (epic `language` P45):  `"button api" is a notebook page`, Spanish's
+   * `"api del botón" es una página cuaderno`, its body indented under it.
+   * - Read at a file's top level as the page's tag, `<page "button api" notebook>`, is:
+   *   its body is the same, and its indentation, not a closer, says where it ends.
+   * - Its groups:  `name`, the page's name;  `flag`, a template word bringing a flag (`notebook`), if written.
+   * - None:  this language's pages are written only in tags.
+   */
+  plainPage?: RegExp
 }
 
 /**

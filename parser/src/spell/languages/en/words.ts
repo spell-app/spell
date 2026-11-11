@@ -302,6 +302,8 @@ export const englishWords: SP.LanguageWords = {
       column: "column",
       color: "color"
     },
+    // a page's plain head (epic `language` P45):  `"button api" is a notebook page`, read as its tag
+    plainPage: /^"(?<name>[^"\n]+)"[ \t]+is[ \t]+an?[ \t]+(?:(?<flag>notebook)[ \t]+)?page(?=[ \t]*(?:\/\/[^\n]*)?$)/imu,
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
     twins: {
       placeOfKind: "{words} is {a kind} {kind} at {quoted address} :",
