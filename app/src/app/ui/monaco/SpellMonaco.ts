@@ -7,6 +7,7 @@ import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
 import { SpellHeadings } from "./SpellHeadings"
 import { SpellBubbly } from "./SpellBubbly"
+import { SpellTyping } from "./SpellTyping"
 import { SpellTokensProvider } from "./SpellTokensProvider"
 import { SpellModels } from "./SpellModels"
 import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
@@ -25,6 +26,7 @@ import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
  *   starts (epic `debut` P22).
  * - Heading comments -- `#`, `##` ... -- are bold by decoration:  see `SpellHeadings`.
  * - Spell is drawn in the bubbly look as it's typed, unless the page's setting says not:  see `SpellBubbly`.
+ * - Typing on a blank line takes its block's indent, and `group ` opens a name's quotes:  see `SpellTyping`.
  */
 export class SpellMonaco {
   /** Language id for code spell, `Card.spell`. */
@@ -145,6 +147,7 @@ export class SpellMonaco {
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
     SpellBubbly.watch(LANGUAGES)
+    monaco.editor.onDidCreateEditor((editor) => new SpellTyping(editor, { indents: LANGUAGES, quotes: [LANGUAGE] }))
     monaco.languages.register({
       id: LANGUAGE,
       extensions: [SP.SPELL_SUFFIX],

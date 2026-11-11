@@ -140,6 +140,9 @@ and in the app's build folder, `app/` at the app folder's root.
       text, the shapes a layer behind the editor, the room under a declaration a view zone.
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, `codePopups.ts`).
     - Not in a `<CodeSlice>`, a diff, or a page file.
+  - Two helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
+    - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
+    - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:
