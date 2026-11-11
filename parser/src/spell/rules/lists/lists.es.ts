@@ -142,7 +142,7 @@ listsEs.addRule(Wording.specialize({ ruleName: "before_or_after", meanings: ["be
 })
 
 listsEs.addRule(IdentifierList, {
-  syntax: "[({number_range}|{known_variable}|{constant}|{number}) (,|o|u|y|e|ni)]",
+  syntax: "[({number_range}|{known_variable}|{constant}|{number}) ((,)? (o|u|y|e|ni)|,)]",
   tests: [
     {
       tests: [
@@ -151,7 +151,8 @@ listsEs.addRule(IdentifierList, {
         ["back ni forth", '["back", "forth"]'],
         ["clubs, diamonds, hearts, spades", '["clubs", "diamonds", "hearts", "spades"]'],
         ["ace, 2, 3, 4, jack, queen o king", '["ace", 2, 3, 4, "jack", "queen", "king"]'],
-        ["ace, 2 ... 5, jack, queen o king", '["ace", 2, 3, 4, 5, "jack", "queen", "king"]']
+        ["ace, 2 ... 5, jack, queen o king", '["ace", 2, 3, 4, 5, "jack", "queen", "king"]'],
+        ["rojo, negro, o azul", '["rojo", "negro", "azul"]']
       ]
     }
   ]

@@ -389,6 +389,23 @@
     }
   }
 
+  /*
+   * a band that STARTS with a white input (`"deck" is a new deck`):  the input as near the round end as its mark allows,
+   * not a word's padding plus a gap
+   */
+  :is(.bubbly-head, .bubbly-pill).bubbly-starts-input {
+    padding-left: var(--bubbly-end-inset);
+
+    > .bubbly-input:first-child {
+      margin-left: 0;
+    }
+
+    /* a quoted input at the start keeps just its opening mark's room */
+    > .bubbly-quoted:first-child {
+      margin-left: var(--bubbly-quote-room);
+    }
+  }
+
   /****** marks and tags ******/
 
   /* `<`, `>`, `="`, `{`, `}`, `:` and `,` */
