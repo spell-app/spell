@@ -1320,6 +1320,11 @@ export class Window {
         return 0
       }
       if (command === "launch") {
+        const refusal = launchRefusal(process.cwd())
+        if (refusal) {
+          console.error(refusal)
+          return 1
+        }
         const pkg = flags.pkg ?? DEFAULT_WINDOW
         const color = stringFlag(flags.color) ?? null
         const prompt = stringFlag(flags.prompt) ?? `/epic ${name}`
@@ -1793,6 +1798,23 @@ export function claudeSessions(processes, hostPid) {
   return [...processes]
     .filter(([, { ppid, command }]) => ppid === hostPid && /(^|[\\/])claude(\.exe)?$/i.test(command))
     .map(([pid]) => pid)
+}
+
+/**
+ * Why `launch` won't run from folder `cwd`, else `undefined` (epic `epic-engine` I255).
+ * - `cwd` is in a git repo `epic init` never set up:  `launch` would make the worktree, window and session in the
+ *   engine's own checkout instead, the fallback the window script takes for its root (2026-11-10:  a test run made
+ *   `test-epic` in the kit)
+ * - outside any git repo:  nothing to refuse, the root stands
+ * - `/isolate` still works in such a repo:  the worktree hook makes Claude Code's plain worktree there
+ */
+export function launchRefusal(cwd) {
+  const checkout = checkoutOf(cwd)
+  if (!checkout || EpicConfig.ofSetUp(cwd)) return undefined
+  return [
+    `epic window launch:  ${checkout.main} isn't set up for epics, so nothing was made`,
+    "  fix:  run `epic init` there first;  for a plain worktree, `/isolate <name>` works without it"
+  ].join("\n")
 }
 
 /**
