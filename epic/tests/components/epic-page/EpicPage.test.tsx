@@ -891,6 +891,24 @@ describe("<epic-page> toolbar", () => {
     ])
   })
 
+  // epic `epic-engine` I261 (Owen, 2026-11-11:  "why is there no green bubble in the top set?")
+  test("a colour only the Phases section has gets a toolbar chip, counting its phases;  it sets the Phases section's", async () => {
+    const hourAgo = new Date(Date.now() - 60 * 60_000).toISOString()
+    const host = await render(
+      `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +
+        `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="One" status="done" done-at="${hourAgo}"><p>Did.</p></epic-phase>` +
+        `<epic-phase id="p2" title="Two" status="done"><p>Did.</p></epic-phase></epic-section>` +
+        `<epic-section id="decisions" kind="questions"><epic-item id="q1" title="Q" status="open" state="open"></epic-item>` +
+        `<epic-item id="q2" title="Q" status="done" state="old"></epic-item></epic-section></epic-page>`
+    )
+    // green:  the one phase done lately;  grey:  the items' count alone, as before
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "recent+1", "old+1"]))
+    const phases = host.querySelector<E.DOMElement & { chipStates: { state: string; on: boolean }[] }>("#phases")!
+    await pickPageState(host, "recent")
+    expect(pageChips(host)).toEqual(["open+1", "recent-1", "old+1"])
+    expect(phases.chipStates.find((it) => it.state === "recent")).toEqual({ state: "recent", on: false })
+  })
+
   test("collapse-all folds every block, item and card on the page;  a section's folds only what's inside it, and stays open", async () => {
     const host = await render(
       `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +
@@ -1673,8 +1691,9 @@ describe("<epic-page> stages", () => {
     )
     // the step label says the stage, not a phase
     expect(step(host)?.words).toBe("OVERVIEW")
+    // the 4 items, and the done phase:  grey, a colour no item has (I261)
     await vi.waitFor(() =>
-      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(4)
+      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(5)
     )
   })
 
