@@ -1463,7 +1463,8 @@ export class SpellLanguageService {
 
   /**
    * `spell/bubbly`:  `file` in the BUBBLY LOOK, stretch by stretch, for VS Code's decorations (epic `language` P51).
-   * - Laid out as Monaco lays it out (`SP.BubblyLayout`, in the file's own language), and cut into the same stretches
+   * - Laid out as Monaco lays it out (`SP.BubblyLayout`, in the file's own language, as part of its project),
+   *   and cut into the same stretches
    *   (`SP.BubblyStretches`).
    * - `[]` for a page file, which isn't drawn bubbly, and for a blank one.
    * - NEVER throws:  a layout that fails is `[]`, logged.
@@ -1472,7 +1473,7 @@ export class SpellLanguageService {
     const text = file.contents ?? ""
     if (!text.trim() || file.form === "page") return []
     try {
-      const drawing = SP.BubblyLayout.of(text, file.language.parser)
+      const drawing = SP.BubblyLayout.of(text, file.language.parser, { within: file })
       return SP.BubblyStretches.of(drawing).map(({ start, end, ...stretch }) => ({
         range: { start: this.positionAt(file, start), end: this.positionAt(file, end) },
         ...stretch

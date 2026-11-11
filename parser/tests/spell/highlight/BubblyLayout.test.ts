@@ -2,6 +2,7 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
 
 /** A card, as Solitaire's starts:  a type with an ability, a group, a list, a worked-out property, a test. */
 const CARD = `# A playing card
@@ -237,6 +238,25 @@ describe("SP.BubblyLayout", () => {
         expect([last.kind, commented.slice(last.start, last.end)]).toEqual(["comment", "// a note"])
       }
     }
+  })
+
+  it("reads a project's file as part of its project:  names from its other files, and the project unchanged", () => {
+    const CARD_FILE = `a "card" is a view\n\tits "rank" is one of ace, king\n`
+    const DECK_FILE = `a "deck" is a list of cards\n\twhen creating a deck\n\t\tfor rank in card ranks\n\t\t\tadd rank to the deck\n`
+    const project = parseSpellProject([
+      { path: "/Card.spell", contents: CARD_FILE },
+      { path: "/Deck.spell", contents: DECK_FILE }
+    ])
+    const deck = project.files[1]!
+    const within = { scope: deck.scope, file: "Deck.spell", path: "/Deck.spell" } as unknown as SP.SpellFile
+    const typesBefore = project.scope.types.get().length
+    const rulesBefore = project.scope.parser!.rules ? Object.keys(project.scope.parser!.rules).length : 0
+    const alone = SP.BubblyLayout.of(DECK_FILE)
+    const inProject = SP.BubblyLayout.of(DECK_FILE, SP.spellParser, { within })
+    expect(piecesOf(alone, "phrase")).toEqual([])
+    expect(piecesOf(inProject, "phrase")).toEqual(["card ranks"])
+    expect(project.scope.types.get()).toHaveLength(typesBefore)
+    expect(project.scope.parser!.rules ? Object.keys(project.scope.parser!.rules).length : 0).toBe(rulesBefore)
   })
 
   it("never throws, whatever it's given", () => {
