@@ -35,12 +35,13 @@ export class BubblyMarks {
   readonly shapes: BubblyShape[] = []
 
   /**
-   * The marks of the room that PUSHES a line's words right, by their index:  one per push, at the line's first word.
+   * The marks of the room that PUSHES a line's words right, by their index:  one per push, before its last indent.
    * - A group's members are written at its own indent, so their bands are drawn past its rail (`SpellBubbly`),
    *   as far past it as the group is past its parent's:  one indent step.
-   *   So each line of a member, its body's too, gets room (`bubbly-room-push`) as wide as that step,
+   *   So a member's head, and each declaration's inside it, gets room (`bubbly-room-push`) as wide as that step,
    *   and its words keep their usual room inside its band (Owen, 2026-11-11).
-   *   - The step:  the group's indent less its parent's, in no-break spaces, so it's the font's own width;
+   *   - Its plain lines don't:  they stay under its words (`pushHeads()`).
+   *   - The step:  the group's indent less its parent's, in spaces, so it's the font's own width;
    *     a group at the top level has no parent's rail, so a tab's
    * - Only a member written at the group's indent, or less:  one written deeper is past the rail already.
    * - A group inside a group's member is pushed with it, and its own members once more.
@@ -144,7 +145,13 @@ export class BubblyMarks {
   // ## A group's members, past its rail
   ////////////////
 
-  /** Push the lines of each group's members in `shapes`, those inside them too;  `parent`:  the block they're in. */
+  /**
+   * Push the head of each group's member in `shapes`, and of each declaration inside it, those in deeper groups too;
+   * `parent`:  the block they're in.
+   * - Heads only:  a member's plain lines (a value's lines, steps, comments) stay where they're written,
+   *   under its words, not a step further in (Owen, 2026-11-11:  "text inside the block is too far to the right").
+   * - A declaration inside a member is pushed too, or its band would start on the member's rail.
+   */
   private pushMembers(shapes: BubblyShape[], parent?: BubblyBlockShape) {
     for (const shape of shapes) {
       if (shape.kind !== "block") continue
@@ -153,24 +160,37 @@ export class BubblyMarks {
         const step = parent ? groupIndent - this.indentOf(parent) : this.tabSize
         for (const member of shape.inside) {
           if (member.kind !== "block" || step <= 0 || this.indentOf(member) > groupIndent) continue
-          const { startLineNumber, endLineNumber } = this.marks[member.place]!.range
-          for (let line = startLineNumber; line <= endLineNumber; line++) this.push(line, step)
+          this.pushHeads(member, step)
         }
       }
       this.pushMembers(shape.inside, shape.hasBody ? shape : parent)
     }
   }
 
+  /** Push `block`'s head, and those of the declarations inside it, by `columns`. */
+  private pushHeads(block: BubblyBlockShape, columns: number) {
+    this.push(this.marks[block.place]!.range.startLineNumber, columns)
+    for (const inside of block.inside) if (inside.kind === "block") this.pushHeads(inside, columns)
+  }
+
   /**
-   * Room `columns` wide before `line`'s first word, if it has one:  empty, so it's put before any other room there.
-   * - Monaco keeps a line's marks in order of where they start, then where they end.
+   * Room `columns` wide before the last tab or space of `line`'s indent, or before its first word if it has none.
+   * - Before the indent's last character, not the word:  the word's first letter is then one place in the text,
+   *   drawn right after that tab, so a click, Home or a typed letter puts the caret by it.
+   *   Room right before the word would be two places on screen for one in the text, and Monaco may draw the caret
+   *   at either:  a room's width off its letter.
+   * - Plain spaces:  whitespace, so Home skips it as it skips the indent.
+   * - Monaco counts it in the line's columns, so the tab after it still reaches the next tab stop.
    */
   private push(line: number, columns: number) {
     const text = this.lines[line - 1] ?? ""
     const column = /^[ \t]*/.exec(text)![0].length + 1
     if (column > text.length) return
-    const range = { startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: column }
-    const before = { ...PUSH_ROOM, content: "\u00a0".repeat(columns) }
+    const before = { ...PUSH_ROOM, content: " ".repeat(columns) }
+    const range =
+      column > 1
+        ? { startLineNumber: line, startColumn: column - 1, endLineNumber: line, endColumn: column }
+        : { startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: column }
     this.pushes.push(this.marks.push({ range, options: { before, showIfCollapsed: true } }) - 1)
   }
 
@@ -316,11 +336,11 @@ function room(kind: "input" | "quote", side: "before" | "after"): monaco.editor.
 
 /**
  * Room pushing a group member's line past the group's rail (`bubbly-room-push`):
- * no-break spaces, as many as the indent step (`BubblyMarks.push()`).
- * - The caret stops only after it, beside the first letter.
+ * spaces, as many as the indent step (`BubblyMarks.push()`).
+ * - The caret stops after it, by the tab or word it's before.
  */
 const PUSH_ROOM: monaco.editor.InjectedTextOptions = {
-  content: "\u00a0",
+  content: " ",
   inlineClassName: "bubbly-room bubbly-room-push",
   cursorStops: 1
 }

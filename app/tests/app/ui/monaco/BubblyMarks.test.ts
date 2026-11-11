@@ -58,13 +58,19 @@ describe("BubblyMarks.of()", () => {
     const marks = marked()
     expect(wordsMarked(marks, "bubbly-quote-open").slice(0, 2)).toEqual(['"', '"'])
     const card = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-name"))!
-    expect(card.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-input bubbly-room-before", cursorStops: 1 })
-    expect(card.options.after).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-input bubbly-room-after", cursorStops: 2 })
+    expect(card.options.before).toMatchObject({
+      inlineClassName: "bubbly-room bubbly-room-input bubbly-room-before",
+      cursorStops: 1
+    })
+    expect(card.options.after).toMatchObject({
+      inlineClassName: "bubbly-room bubbly-room-input bubbly-room-after",
+      cursorStops: 2
+    })
     const open = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-quote-open"))!
     expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-quote bubbly-room-before" })
   })
 
-  test("a group's members written at its indent:  room before each of their lines, their bodies' too", () => {
+  test("a group's members written at its indent:  room before their heads, and the declarations' in them", () => {
     const text = [
       `a "card" is a view`,
       `\tgroup "Suit"`,
@@ -74,6 +80,9 @@ describe("BubblyMarks.of()", () => {
       `\tgroup "Names"`,
       `\t\t// what a person reads`,
       `\tits "name" is its suit`,
+      `\tits "symbol" is`,
+      `\t\t"♥" if it is a heart`,
+      `\t\t"♠" otherwise`,
       `\tgroup "Inner"`,
       `\tit "is red" if it is a heart`,
       ``
@@ -81,16 +90,13 @@ describe("BubblyMarks.of()", () => {
     const marks = BubblyMarks.of(SP.BubblyLayout.of(text), 3)
     const pushed = marks.pushes.map((index) => {
       const { range, options } = marks.marks[index]!
-      expect(range.startColumn).toBe(range.endColumn)
-      expect(options).toMatchObject({
-        showIfCollapsed: true,
-        before: { inlineClassName: "bubbly-room bubbly-room-push" }
-      })
-      return `${range.startLineNumber}:${range.startColumn} ${options.before!.content.length}`
+      expect(options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-push", cursorStops: 1 })
+      expect(options.before!.content).toMatch(/^ +$/)
+      return `${range.startLineNumber}:${range.startColumn}-${range.endColumn} ${options.before!.content.length}`
     })
-    // one indent step each, a tab of 3:  a choice under a member too;
-    // not the blank line, nor a comment written deeper, nor the next group, a member's peer
-    expect(pushed.toSorted()).toEqual(["10:2 3", "3:2 3", "4:3 3", "8:2 3"])
+    // before the indent's last tab, one indent step each (a tab of 3):  a choice under a member too;
+    // not a value's lines, nor the blank line, nor a comment written deeper, nor the next group, a member's peer
+    expect(pushed.toSorted()).toEqual(["13:1-2 3", "3:1-2 3", "4:2-3 3", "8:1-2 3", "9:1-2 3"])
   })
 
   test("its shapes:  a band per declaration, pills on what was typed, a bracket down a control line's steps", () => {

@@ -199,6 +199,10 @@
     "--bubbly-monaco-shapes-drop": {
       "light": "1px",
       "dark": "1px"
+    },
+    "--bubbly-monaco-band-height": {
+      "light": "calc(24px - 1px)",
+      "dark": "calc(24px - 1px)"
     }
   },
   "parts": {
