@@ -18,39 +18,38 @@
 // - `clickable` shows a pointer over it, and `on click` says what a click does.
 // - Each side is a Spell UI `<segment>`:  a raised panel, blue for the word and green for what it means.
 
-a "flash card" is a two sided view:
-	it is clickable
+a "flash card" is a clickable two sided view
 	its "word" is text
 	its "meaning" is text
 
-	on click:
+	on click
 		turn it over
 
-	to draw its front:
+	to draw its front
 		<segment appearance="raised" color="blue" align="center" padding="lg">
 			<text size="huge" bold>{its word}</text>
 		</segment>
-	to draw its back:
+	to draw its back
 		<segment appearance="raised" color="green" align="center" padding="lg">
 			<text size="huge" bold>{its meaning}</text>
 		</segment>
 
-// The cards to learn
 a "deck" is a list of flash cards
+	// The cards to learn
 
 ## The quiz:  the deck, and the card showing
 // `deal a card` picks a card at random, never the one showing now, and turns it word up.
 
-quiz is an app:
+quiz is an app
 	"deck" is a new deck
 	its "card" is a flash card
 
-	to deal a card:
+	to deal a card
 		set others to cards in the deck where it is not quiz's card
 		set the card to a random card in others
 		turn the card face up
 
-	to draw it:
+	to draw it
 		<container text>
 			<stack>
 				{draw the card}
@@ -62,7 +61,7 @@ quiz is an app:
 
 ## The deck:  four words to start -- add your own
 
-to add (word as text) meaning (meaning as text):
+to add (word as text) meaning (meaning as text)
 	add (a new flash card with word = the word, meaning = the meaning) to quiz's deck
 
 add "el gato" meaning "the cat"

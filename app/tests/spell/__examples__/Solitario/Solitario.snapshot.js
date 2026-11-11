@@ -43,7 +43,7 @@ export class Carta extends TwoSidedView {
     return this.palo === palo
   }
 
-  // su "color" es uno de rojo, negro:
+  // su "color" es uno de rojo, negro
   //   rojo si es un diamante o es un corazón
   //   negro de lo contrario
   static Colores = ["rojo", "negro"]
@@ -348,8 +348,8 @@ export class PilaDeReserva extends Pila {
     return false
   }
 
-  // Una carta gris claro, boca abajo
   drawItsPlaceholder() {
+    // Una carta gris claro, boca abajo
     return h("es-texto", { part: "marcador" }, "🂠")
   }
 
@@ -395,8 +395,8 @@ export class Fundación extends Pila {
     return false
   }
 
-  // Un as gris claro de su palo, boca arriba
   drawItsPlaceholder() {
+    // Un as gris claro de su palo, boca arriba
     return h("es-texto", { part: "marcador" }, () => (new Carta({ rango: "as", palo: this.palo })).imagen)
   }
 
@@ -580,8 +580,8 @@ export class Solitario extends App {
     await this.robarDeLaReserva()
   }
 
-  // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra el menú del juego
   draw() {
+    // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra el menú del juego
     return h("es-contenedor",
       h("es-barra-herramientas", { class: "GameBar", menu: "menú del juego", "aria-label": "Juego", encogible: true },
         h("es-texto", { class: "GameTitle", slot: "titulo", tamano: "grande" }, "Solitario Encanto"),
@@ -676,7 +676,7 @@ export const solitario = new Solitario()
 
 // Cada uno se detiene un momento, así el reparto se anima
 /** Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es */
-core.describeAction(Solitario, "voltearLaReserva", { title: "voltear la reserva", undoneAs: "Voltear carta" })
+core.describeAction(Solitario, "voltearLaReserva", { title: "Voltear La Reserva", undoneAs: "Voltear carta" })
 
 // Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
 core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar", shortcuts: ["N"], undoneAs: "Reiniciar" })
@@ -697,13 +697,13 @@ core.heading("Jugar una carta")
  * la carta, y cada carta sobre ella, a la primera pila que la tome;  dice si se movió
  * - la carta de la reserva se voltea sobre los descartes en su lugar
  */
-core.describeAction(Carta, "jugar", { title: "jugar una carta", undoneAs: "Jugar carta" })
+core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar carta" })
 
 /**
  * la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
  * - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
  */
-core.describeAction(Carta, "ponerEnPila", { title: "poner una carta en una pila", undoneAs: "Mover carta" })
+core.describeAction(Carta, "ponerEnPila", { title: "Poner Una Carta En Una Pila", undoneAs: "Mover carta" })
 
 // los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
 // solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero

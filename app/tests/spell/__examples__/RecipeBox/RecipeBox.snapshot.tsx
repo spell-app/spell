@@ -8,15 +8,15 @@ core.heading("Recipe Box:  where the recipes are kept")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1152, end: 1171 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1151, end: 1170 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1173, end: 1199 } })
+  @prop({ type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1172, end: 1198 } })
   accessor servings!: number
 
   // - its "notes" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1201, end: 1220 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1200, end: 1219 } })
   accessor notes!: string
 
   /** Its Edit screen:  nothing changes until Save */
@@ -53,11 +53,11 @@ export class Recipe extends Thing {
   }
 
   // - it lives in family cookbook
-  @prop({ type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1123, end: 1150 } })
+  @prop({ type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1122, end: 1149 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in family cookbook
-  @prop({ type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1123, end: 1150 } })
+  @prop({ type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1122, end: 1149 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -216,7 +216,7 @@ export class RecipeBox extends App {
   }
 
   /** Newest first, by when each was saved */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3186, end: 3298 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3143, end: 3296 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => core.includes(recipe.title, this.search)), (item: Recipe) => core.descending(item.created))
   }, () => [this.search]) }
@@ -246,8 +246,8 @@ export class RecipeBox extends App {
     )
   }
 
-  // Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
   drawScreen() {
+    // Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
     if (this.editing) return core.drawThing(new RecipeEditor({ recipe: this.editing }))
     else {
       return (

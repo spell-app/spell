@@ -54,7 +54,7 @@ export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
   unclearNumbers: ","
 })
 
-core.describeAction(Receta, "quitarEso", { title: "quitar eso", undoneAs: "Quitar receta" })
+core.describeAction(Receta, "quitarEso", { title: "Quitar Eso", undoneAs: "Quitar receta" })
 
 export class CajaDeRecetas extends App {
   static elementTag = core.defineElement(this, "test-project", "App")

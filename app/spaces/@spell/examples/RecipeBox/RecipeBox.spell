@@ -9,12 +9,12 @@
 
 ## A recipe:  a card you can read and change
 
-a recipe:
-	// Its Edit screen:  nothing changes until Save
-	to edit it:
+a recipe
+	to edit it
+		// Its Edit screen:  nothing changes until Save
 		set the editing of the recipe box to it
 
-	to draw it:
+	to draw it
 		<card>
 			<content>
 				<form value={it} class="recipe">
@@ -35,23 +35,23 @@ a recipe:
 
 ## Its Edit screen:  a form over a draft, so nothing changes until Save
 
-a "recipe editor" is a view:
-	// The recipe being changed
+a "recipe editor" is a view
 	its "recipe" is a recipe
-	// A copy to change:  the recipe stays as it was until Save
+		// The recipe being changed
 	its "draft" is a draft of its recipe
+		// A copy to change:  the recipe stays as it was until Save
 
-	// Every changed field, sent together
-	to save it:
+	to save it
+		// Every changed field, sent together
 		save its draft
 		set the editing of the recipe box to nothing
 
-	// Forget the copy:  the recipe never changed
-	to cancel it:
+	to cancel it
+		// Forget the copy:  the recipe never changed
 		discard its draft
 		set the editing of the recipe box to nothing
 
-	to draw it:
+	to draw it
 		<card class="editor">
 			<content>
 				<form value={its draft}>
@@ -75,29 +75,29 @@ a "recipe editor" is a view:
 
 ## The box:  the card for a new recipe, then a card for each one you have
 
-recipe box is an app:
+recipe box is an app
 	its "search" is text
 	"new recipe" is a new recipe with servings = 4
-	// The recipe on its Edit screen, while one is
 	its "editing" is a recipe
+		// The recipe on its Edit screen, while one is
 	its "box menu" is a menu of "undo"
 
-	// With nothing kept yet, a few to start from
-	to create it:
+	to create it
+		// With nothing kept yet, a few to start from
 		if there are no recipes
 			add (a new recipe with title "Tomato soup", servings = 4, notes = "Roast the tomatoes first.") to the recipes
 			add (a new recipe with title "Dal", servings = 6, notes = "Add the spices last.") to the recipes
 			add (a new recipe with title "Pizza Margherita", servings = 2, notes = "A very hot oven.") to the recipes
 
-	// Newest first, by when each was saved
-	its "matches" is:
+	its "matches" is
+		// Newest first, by when each was saved
 		return every recipe where its title includes the search, sorted by its created, newest first
 
-	to add the new recipe:
+	to add the new recipe
 		add the new recipe to the recipes
 		set its new recipe to a new recipe with servings = 4
 
-	to draw it:
+	to draw it
 		<container>
 			<stack direction="horizontal" wrap align="end" justify="between">
 				<stack align="start">
@@ -114,8 +114,8 @@ recipe box is an app:
 			{draw the screen of it}
 		</container>
 
-	// Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
-	to draw its screen:
+	to draw its screen
+		// Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
 		if its editing
 			draw (a new recipe editor with recipe = its editing)
 		otherwise

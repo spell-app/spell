@@ -4,18 +4,18 @@
 // with `<extend>`, so looking again at the server never touches a line of this.
 // It answers each change as if it saved it, and keeps nothing:  what you add here is gone when it's asked again.
 
-a "jsonplaceholder page" is a thing:
+a "jsonplaceholder page" is a thing
 	"new todo" is a new todo with user id = 1
-	// Whose todos and posts these are:  the first person it has
 	its "person" is the jsonplaceholder user whose id is 1
-	// Theirs, from every todo
+		// Whose todos and posts these are:  the first person it has
 	its "todos" is every todo where its user id is 1
+		// Theirs, from every todo
 
-	to add the new todo:
+	to add the new todo
 		add its new todo to the saved todos
 		set its new todo to a new todo with user id = 1
 
-	to draw it:
+	to draw it
 		<stack spacing="xl">
 			<stack spacing="sm">
 				<header size="large">Practice, on JSONPlaceholder</header>
@@ -34,7 +34,7 @@ a "jsonplaceholder page" is a thing:
 			</text>
 		</stack>
 
-	to draw its checklist:
+	to draw its checklist
 		<stack spacing="sm">
 			<form value={its new todo}>
 				<input name="title" placeholder="Water the plants" aria-label="Something to do" fluid action>
@@ -44,12 +44,12 @@ a "jsonplaceholder page" is a thing:
 			{draw the todo list of it}
 		</stack>
 
-	to draw its todo list:
+	to draw its todo list
 		for todo in its todos
 		while waiting: <loader visible inline text>{"Asking JSONPlaceholder"}</loader>
 		if that fails say "JSONPlaceholder can't be reached just now."
 
-	to draw its post list:
+	to draw its post list
 		for post in its person's posts
 		while waiting: <loader visible inline text>{"Asking JSONPlaceholder"}</loader>
 		if that fails say "JSONPlaceholder can't be reached just now."
@@ -57,8 +57,8 @@ a "jsonplaceholder page" is a thing:
 # A todo
 // Ticked as it's done;  each tick, and each removal, goes to the server at once.
 
-a todo:
-	to draw it:
+a todo
+	to draw it
 		<form value={it}>
 			<stack direction="horizontal" align="center" justify="between" spacing="sm">
 				<ui-checkbox name="completed" label={its title} />
@@ -69,8 +69,8 @@ a todo:
 # A post
 // Its title, what it says, and its comments:  read from the post's own address, the first time it's drawn.
 
-a post:
-	to draw it:
+a post
+	to draw it
 		<header size="small">{its title}</header>
 		<text>{its body}</text>
 		for comment in its comments
@@ -78,8 +78,8 @@ a post:
 
 // Each comment, as Spell UI draws one:  named in full, `<ui-comment>`.
 
-a comment:
-	to draw it:
+a comment
+	to draw it
 		<ui-comment>
 			<content>
 				<author>{its email}</author>

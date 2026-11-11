@@ -4,21 +4,21 @@
 // with `<extend>`, so looking again at the server never touches a line of this.
 // Open-Meteo has no list of forecasts:  each is asked for by a latitude and a longitude, so the page always says both.
 
-an "open meteo page" is a thing:
+an "open meteo page" is a thing
 	its "cities" is a list of cities
 	its "city" is a city
-	to create it:
+	to create it
 		add a new city with name "Berlin", latitude = 52.52, longitude = 13.41 to its cities
 		add a new city with name "New York", latitude = 40.71, longitude = -74.01 to its cities
 		add a new city with name "Tokyo", latitude = 35.68, longitude = 139.69 to its cities
 		add a new city with name "Buenos Aires", latitude = -34.6, longitude = -58.38 to its cities
 		set its city to the first item of its cities
-	// The city's, from Open-Meteo:  asked for by where it is, with no list of them all
 	its "forecasts" is every forecast where its latitude is the latitude of the city and its longitude is the longitude of the city
-	// Its one forecast:  Open-Meteo answers with one, for the nearest place it has
+		// The city's, from Open-Meteo:  asked for by where it is, with no list of them all
 	its "forecast" is the first item of its forecasts
+		// Its one forecast:  Open-Meteo answers with one, for the nearest place it has
 
-	to draw it:
+	to draw it
 		<stack spacing="xl">
 			<stack spacing="sm">
 				<header size="large">The weather, from Open-Meteo</header>
@@ -32,37 +32,37 @@ an "open meteo page" is a thing:
 			</text>
 		</stack>
 
-	to draw its forecast table:
+	to draw its forecast table
 		if its forecast
 			<stack spacing="sm">
 				<text color="grey">The next two days in {its forecast's timezone}, hour by hour.</text>
 				{draw the hour table of its forecast}
 			</stack>
-		while waiting:
+		while waiting
 			<loader visible inline text>Asking Open-Meteo</loader>
-		if that fails:
+		if that fails
 			<text>Open-Meteo can't be reached just now.</text>
 
 # A city
 // Where it is on Earth:  what its forecast is asked for by.
 
-a "city" is a thing:
+a "city" is a thing
 	its "name" is text
 	its "latitude" is a number
 	its "longitude" is a number
 
-	// The city the weather's for
-	to pick it:
+	to pick it
+		// The city the weather's for
 		set the city of the weather of the public servers to it
 
-	to draw it:
+	to draw it
 		<item active={it is the public servers' weather's city} onClick={pick it}>{its name}</item>
 
 # Its hours
 // A row an hour:  the day at midnight, the hour, and each measure, in the units the reader's region reads, °F and inches in the US.
 
-a forecast:
-	to draw its hour table:
+a forecast
+	to draw its hour table
 		for hour in its hours
 			<cell "Day"><if the hour of its time is 0>{its time}</if></cell>
 			<cell "Hour" align="right">{the hour of its time}:00</cell>

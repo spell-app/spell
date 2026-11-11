@@ -12,46 +12,46 @@
 
 ## A card
 // "one of" lists every value a property can have:  "2 ... 10" means every number in between
-a "card" is a view where:
+a "card" is a view
 	its "rank" is one of ace, 2 ... 10, jack, queen, king
 	its "suit" is one of clubs, diamonds, hearts or spades
 
-	// ace is 1, 2 is 2 ... king is 13:  its place in the list of ranks
 	its "value" is the position of its rank
-	its "color" is:
+		// ace is 1, 2 is 2 ... king is 13:  its place in the list of ranks
+	its "color" is
 		red if its suit is diamonds or hearts
 		black otherwise
 
-	// e.g. "queen of hearts"
 	its "name" is its rank + " of " + its suit
+		// e.g. "queen of hearts"
 
-	// a click tries it on the column
-	to draw it:
+	to draw it
+		// a click tries it on the column
 		return <ui-button appearance="basic" color={its color} onClick={try it}>{its name}</ui-button>
 
 
 ## A pile, and a column
 a "pile" is a viewable list of cards
-// a card is in one pile at a time:  putting it on another takes it off this one
 a card belongs to one pile
+	// a card is in one pile at a time:  putting it on another takes it off this one
 
 // The rule that makes it Solitaire:  a column takes a card one lower than its last, in the other color.
 // - "can take a card when" is a yes-or-no question the pile answers for each card
 // - "return" gives the answer:  the first line that returns, wins
-a "column" is a pile where:
-	it can take a card when:
+a "column" is a pile
+	it can take a card when
 		if it is empty
 			return the rank of the card is king
 		return the color of its last card is not the color of the card and the value of its last card is the value of the card + 1
 
 
 ## The table:  a column, and a hand of cards to try on it
-table is an app where:
+table is an app
 	its "column" is a new column
 	its "hand" is a new pile
 	its "message" is text
 
-	to draw it:
+	to draw it
 		return <ui-container text>
 			<ui-header size="small">The column</ui-header>
 			{draw its column}
@@ -62,7 +62,7 @@ table is an app where:
 
 // onto the column, if it takes the card;  the message says what happened
 // - "table's column" is "the column of table":  either reads the table's property
-to try (a card):
+to try (a card)
 	if table's column can take the card
 		add the card to table's column
 		set table's message to "The " + the card's name + " goes on."

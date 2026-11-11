@@ -9,23 +9,23 @@ core.heading("Chat:  every thread you can read, live")
 /** A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`. */
 export class Message extends Thing {
   // - its "text" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1000, end: 1018 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 999, end: 1017 } })
   accessor text!: string
 
   // - its "by" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1020, end: 1036 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1019, end: 1035 } })
   accessor by!: string
 
   // - its "sent" is a date
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1038, end: 1058 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1037, end: 1057 } })
   accessor sent!: Date
 
   // - its "thread" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1060, end: 1080 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1059, end: 1079 } })
   accessor thread!: string
 
   /** The first two letters of who sent it, for the circle beside their name */
-  static { this.declareProp("initials", { declaredAt: { path: "/OrgChat.spell", start: 553, end: 612 }, readsFrom: ["chat"] }) }
+  static { this.declareProp("initials", { declaredAt: { path: "/OrgChat.spell", start: 477, end: 536 }, readsFrom: ["chat"] }) }
   get initials() {
     return core.rangeStartingAt(this.by.toLocaleUpperCase(), 0, 2)
   }
@@ -53,38 +53,38 @@ export class Message extends Thing {
   }
 
   // - it lives in chat
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 982, end: 998 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 981, end: 997 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in chat
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 982, end: 998 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 981, end: 997 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 /** A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it. */
 export class Thread extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1241, end: 1259 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1240, end: 1258 } })
   accessor name!: string
 
   // - its "side" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1261, end: 1279 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1260, end: 1278 } })
   accessor side!: string
 
   // - its "topic" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1281, end: 1300 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1280, end: 1299 } })
   accessor topic!: string
 
   // - its "link" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1302, end: 1320 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1301, end: 1319 } })
   accessor link!: string
 
   // - its "current" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/OrgChat.api.spell", start: 1322, end: 1348 } })
+  @prop({ type: "choice", declaredAt: { path: "/OrgChat.api.spell", start: 1321, end: 1347 } })
   accessor current!: boolean
 
   /** Its icon:  a lock on the private ones */
-  static { this.declareProp("mark", { declaredAt: { path: "/OrgChat.spell", start: 1374, end: 1444 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("mark", { declaredAt: { path: "/OrgChat.spell", start: 1330, end: 1442 }, readsFrom: ["my_threads"] }) }
   get mark() {
     if (this.side === "private") return "lock"
     return "hashtag"
@@ -96,11 +96,11 @@ export class Thread extends Thing {
     times: ["created", "modified"], select: ["name", "side", "topic", "link", "current"] }
 
   // - it lives in my threads
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1217, end: 1239 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1216, end: 1238 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in my threads
-  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1217, end: 1239 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1216, end: 1238 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -152,7 +152,7 @@ export class ChatPage extends App {
   @prop({ init: () => new Message(), early: true })
   accessor newMessage!: Message
 
-  static { this.declareProp("picked", { declaredAt: { path: "/OrgChat.spell", start: 1612, end: 1678 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("picked", { declaredAt: { path: "/OrgChat.spell", start: 1609, end: 1675 }, readsFrom: ["my_threads"] }) }
   get picked() { return core.waitedValue(this, "picked", async () => {
     return core.getItemAt(core.filter(await core.savedThings(Thread), (thread: Thread) => thread.current), 0)
   }) }
@@ -163,14 +163,14 @@ export class ChatPage extends App {
   accessor drawerOpen!: boolean
 
   /** The picked thread's name:  nothing until one is picked, as when signed out */
-  static { this.declareProp("threadName", { declaredAt: { path: "/OrgChat.spell", start: 1840, end: 1915 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("threadName", { declaredAt: { path: "/OrgChat.spell", start: 1759, end: 1913 }, readsFrom: ["my_threads"] }) }
   get threadName() {
     if (this.picked) return this.picked.name
     return ""
   }
 
   /** What the box says, until something is typed */
-  static { this.declareProp("boxWords", { declaredAt: { path: "/OrgChat.spell", start: 1965, end: 2012 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("boxWords", { declaredAt: { path: "/OrgChat.spell", start: 1915, end: 1962 }, readsFrom: ["my_threads"] }) }
   get boxWords() {
     return `Message ${this.threadName}`
   }

@@ -8,19 +8,19 @@
     {
       "type": "AddingMachine",
       "superType": "App",
-      "defined": "/HowCalculatorWorks.spell:1440-2788"
+      "defined": "/HowCalculatorWorks.spell:1440-2787"
     },
     {
       "property": "total",
       "of": "AddingMachine",
       "datatype": "number",
-      "defined": "/HowCalculatorWorks.spell:1467-1490"
+      "defined": "/HowCalculatorWorks.spell:1466-1489"
     },
     {
       "property": "input",
       "of": "AddingMachine",
       "datatype": "text",
-      "defined": "/HowCalculatorWorks.spell:1519-1538"
+      "defined": "/HowCalculatorWorks.spell:1491-1538"
     },
     {
       "syntax": "press {callArgs:expression} (of {thisArg:expression})?",
@@ -40,7 +40,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/HowCalculatorWorks.spell:1608-1674"
+      "defined": "/HowCalculatorWorks.spell:1541-1674"
     },
     {
       "syntax": "add {thisArg:expression} up",
@@ -54,7 +54,7 @@
       "kind": "method",
       "name": "add it up",
       "returns": "nothing",
-      "defined": "/HowCalculatorWorks.spell:1766-1902"
+      "defined": "/HowCalculatorWorks.spell:1676-1902"
     },
     {
       "syntax": "clear {thisArg:expression}",
@@ -68,7 +68,7 @@
       "kind": "method",
       "name": "clear it",
       "returns": "nothing",
-      "defined": "/HowCalculatorWorks.spell:1936-1984"
+      "defined": "/HowCalculatorWorks.spell:1904-1984"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -81,7 +81,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowCalculatorWorks.spell:1987-2661"
+      "defined": "/HowCalculatorWorks.spell:1987-2660"
     },
     {
       "syntax": "test adding up",
@@ -90,7 +90,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "adding up",
-      "defined": "/HowCalculatorWorks.spell:2685-2788"
+      "defined": "/HowCalculatorWorks.spell:2663-2787"
     }
   ],
   "codeLines": [

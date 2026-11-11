@@ -9,8 +9,8 @@
 
 ## A recipe:  a card you can read and change
 
-a recipe:
-	to draw it:
+a recipe
+	to draw it
 		<card>
 			<content>
 				<form value={it} class="recipe">
@@ -30,20 +30,20 @@ a recipe:
 
 ## The box:  the card for a new recipe, then a card for each one you have
 
-cookbook is an app:
+cookbook is an app
 	its "search" is text
 	"new recipe" is a new recipe with servings = 4
 	its "box menu" is a menu of "undo"
 
-	// Newest first, by when each was saved
-	its "matches" is:
+	its "matches" is
+		// Newest first, by when each was saved
 		return every recipe where its title includes the search, sorted by its created, newest first
 
-	to add the new recipe:
+	to add the new recipe
 		add the new recipe to the recipes
 		set its new recipe to a new recipe with servings = 4
 
-	to draw it:
+	to draw it
 		<container>
 			<stack direction="horizontal" wrap align="end" justify="between">
 				<stack align="start">

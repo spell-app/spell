@@ -52,8 +52,8 @@ export class Carta extends View {
     return `${this.rango} de ${this.palo}`
   }
 
-  // un clic la juega en la columna
   @drawn draw() {
+    // un clic la juega en la columna
     return (
       <es-boton apariencia="básico" color={this.color} onClick={core.pressed(this, () => this.jugar())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         {this.nombre}

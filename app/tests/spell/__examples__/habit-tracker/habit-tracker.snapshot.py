@@ -137,7 +137,6 @@ class Week(ViewableList):
             h("slot"),
         )
 
-    # on the page, its habits can be dragged to another place
     reorder_items_after = 0
 
     exclusive = True
@@ -162,6 +161,7 @@ def test_streaks() -> None:
 #############
 # The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
+# on the page, its habits can be dragged to another place
 # a habit is in one week
 
 ################

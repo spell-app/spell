@@ -3,7 +3,7 @@
 // Kept in this browser:  change the next line to keep them somewhere else, and nothing else changes.
 galaxy reviews is stored on this device
 
-a "review" is a thing:
+a "review" is a thing
 	it lives in galaxy reviews
 	its "film title" is text
 	its "stars" is a number

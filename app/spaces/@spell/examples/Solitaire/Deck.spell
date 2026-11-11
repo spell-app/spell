@@ -1,24 +1,24 @@
 # A deck
 // The 52 cards of a standard deck, ace of clubs first.
 
-a "deck" is a list of cards:
-	// One of each card, ace of clubs first:  each starts face down, as every two sided view does
-	to create it:
+a "deck" is a list of cards
+	to create it
+		// One of each card, ace of clubs first:  each starts face down, as every two sided view does
 		for rank in card ranks
 			for suit in card suits
 				add a new card with rank = the rank, suit = the suit to the deck
-	// Its cards' short names, top to bottom
-	its "state" is:
+	its "state" is
+		// Its cards' short names, top to bottom
 		set card names to a new list of text
 		for card in the deck
 			add the state of the card to card names
 		return "deck: " + card names
 
-	to test a new deck:
+	to test a new deck
 		the deck is a new deck
 		the number of cards in the deck should be 52
 		the number of (cards in the deck where it is a queen) should be 4
-		the deck's first card's state should be "A♣↓"
-		the deck's last card's name should be "king of spades"
+		deck's first card's state should be "A♣↓"
+		deck's last card's name should be "king of spades"
 		shuffle the deck
 		the number of cards in the deck should be 52

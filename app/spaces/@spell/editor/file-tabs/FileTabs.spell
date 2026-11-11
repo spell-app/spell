@@ -7,7 +7,7 @@
 // A right click on a tab shows that file, and its menu:  Duplicate, Rename, Delete.
 // The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 
-a "file" is a thing:
+a "file" is a thing
 	its "name" is text
 	its "icon" is text
 	its "path" is text
@@ -17,25 +17,19 @@ a "file" is a thing:
 		it "is (place)"
 	to show it
 
-a "file list" is a viewable list of files:
-	to draw each item:
+a "file list" is a viewable list of files
+	to draw each item
 		return <ui-item icon={the icon of the file} selected={the file is chosen} onClick={show the file}>{the name of the file}<if the file is changed><span class="NotSaved"/></if><if the file is drafted><span class="Drafted"/></if></ui-item>
 
-a "file tab bar" is a view:
+a "file tab bar" is a view
 	"files" is a new file list
-	// The code pane's ⋯, the editor's own
 	its "more" is a thing
-	// What this project's open tabs are kept under, the editor's own
+		// The code pane's ⋯, the editor's own
 	its "remember as" is text
-	to duplicate file:
-		titled "Duplicate File"
-		icon "clone outline"
-	to rename file:
-		titled "Rename File"
-		icon "edit outline"
-	to delete file:
-		titled "Delete File"
-		icon "trash alternate outline"
+		// What this project's open tabs are kept under, the editor's own
+	to "duplicate file" with icon "clone outline"
+	to "rename file" with icon "edit outline"
+	to "delete file" with icon "trash alternate outline"
 	its "tab menu" is a menu of "duplicate file", "rename file" and "delete file"
 	<css>
 		/* the dot on a tab whose file isn't saved:  the theme's warning hue */
@@ -62,7 +56,7 @@ a "file tab bar" is a view:
 			display: none;
 		}
 	</css>
-	to draw it:
+	to draw it
 		<ui-panel appearance="pane" label="Files">
 			<ui-toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first max-visible remember={its remember as} label="Files">
 				{draw each file in its files}

@@ -10,13 +10,13 @@
     {
       "type": "Habit",
       "superType": "View",
-      "defined": "/HabitTracker.spell:332-2293"
+      "defined": "/HabitTracker.spell:332-2294"
     },
     {
       "property": "name",
       "of": "Habit",
       "datatype": "text",
-      "defined": "/HabitTracker.spell:354-372"
+      "defined": "/HabitTracker.spell:353-371"
     },
     {
       "property": "monday",
@@ -74,21 +74,21 @@
       "group": "Totals",
       "groupDescription": "Worked out from its days, again as each one is ticked",
       "datatype": "list of choices",
-      "defined": "/HabitTracker.spell:741-850"
+      "defined": "/HabitTracker.spell:703-851"
     },
     {
       "property": "count",
       "of": "Habit",
       "group": "Totals",
       "datatype": "number",
-      "defined": "/HabitTracker.spell:892-953"
+      "defined": "/HabitTracker.spell:853-914"
     },
     {
       "property": "streak",
       "of": "Habit",
       "group": "Totals",
       "datatype": "number",
-      "defined": "/HabitTracker.spell:994-1182"
+      "defined": "/HabitTracker.spell:957-1184"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -102,13 +102,13 @@
       "group": "Totals",
       "kind": "method",
       "name": "draw it",
-      "defined": "/HabitTracker.spell:1273-2048"
+      "defined": "/HabitTracker.spell:1187-2050"
     },
     {
       "type": "Week",
       "superType": "ViewableList",
       "itemType": "Habit",
-      "defined": "/HabitTracker.spell:2398-2759"
+      "defined": "/HabitTracker.spell:2399-2760"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -121,7 +121,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HabitTracker.spell:2610-2759"
+      "defined": "/HabitTracker.spell:2539-2760"
     },
     {
       "syntax": "test streaks",
@@ -130,7 +130,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "streaks",
-      "defined": "/HabitTracker.spell:2051-2293"
+      "defined": "/HabitTracker.spell:2053-2294"
     },
     {
       "property": "week",
@@ -138,24 +138,24 @@
       "group": "The week",
       "datatype": "Week",
       "exclusive": true,
-      "defined": "/HabitTracker.spell:2786-2813"
+      "defined": "/HabitTracker.spell:2761-2788"
     },
     {
       "type": "HabitTracker",
       "superType": "App",
-      "defined": "/HabitTracker.spell:2877-3969"
+      "defined": "/HabitTracker.spell:2879-3970"
     },
     {
       "property": "habits",
       "of": "HabitTracker",
       "datatype": "Week",
-      "defined": "/HabitTracker.spell:2903-2925"
+      "defined": "/HabitTracker.spell:2904-2926"
     },
     {
       "property": "draft",
       "of": "HabitTracker",
       "datatype": "text",
-      "defined": "/HabitTracker.spell:2988-3007"
+      "defined": "/HabitTracker.spell:2928-3009"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -169,7 +169,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/HabitTracker.spell:3072-3393"
+      "defined": "/HabitTracker.spell:3012-3395"
     },
     {
       "syntax": "add the draft (of {thisArg:expression})?",
@@ -183,7 +183,7 @@
       "kind": "method",
       "name": "add the draft",
       "returns": "nothing",
-      "defined": "/HabitTracker.spell:3457-3576"
+      "defined": "/HabitTracker.spell:3398-3578"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -196,7 +196,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HabitTracker.spell:3579-3969"
+      "defined": "/HabitTracker.spell:3581-3970"
     }
   ],
   "codeLines": [
@@ -215,7 +215,7 @@
     83,
     117,
     122,
-    137,
+    136,
     162,
     169,
     172,

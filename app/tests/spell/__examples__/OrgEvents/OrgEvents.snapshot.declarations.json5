@@ -15,51 +15,51 @@
         "placeType": "OrgEvent",
         "collection": "events"
       },
-      "defined": "/OrgEvents.api.spell:510-722"
+      "defined": "/OrgEvents.api.spell:509-720"
     },
     {
       "property": "name",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:558-576"
+      "defined": "/OrgEvents.api.spell:556-574"
     },
     {
       "property": "organizers",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:578-602"
+      "defined": "/OrgEvents.api.spell:576-600"
     },
     {
       "property": "proposed",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:604-626"
+      "defined": "/OrgEvents.api.spell:602-624"
     },
     {
       "property": "stage",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:628-647"
+      "defined": "/OrgEvents.api.spell:626-645"
     },
     {
       "property": "stage_name",
       "asWritten": "stage name",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:649-673"
+      "defined": "/OrgEvents.api.spell:647-671"
     },
     {
       "property": "onward",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:675-695"
+      "defined": "/OrgEvents.api.spell:673-693"
     },
     {
       "property": "onward_name",
       "asWritten": "onward name",
       "of": "Event",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:697-722"
+      "defined": "/OrgEvents.api.spell:695-720"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -72,7 +72,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgEvents.spell:399-778"
+      "defined": "/OrgEvents.spell:398-776"
     },
     {
       "type": "EventStage",
@@ -82,27 +82,27 @@
         "placeType": "OrgEvent",
         "collection": "event_stages"
       },
-      "defined": "/OrgEvents.api.spell:724-844"
+      "defined": "/OrgEvents.api.spell:722-841"
     },
     {
       "property": "name",
       "of": "EventStage",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:778-796"
+      "defined": "/OrgEvents.api.spell:775-793"
     },
     {
       "property": "moves_to",
       "asWritten": "moves to",
       "of": "EventStage",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:798-820"
+      "defined": "/OrgEvents.api.spell:795-817"
     },
     {
       "property": "moved_by",
       "asWritten": "moved by",
       "of": "EventStage",
       "datatype": "text",
-      "defined": "/OrgEvents.api.spell:822-844"
+      "defined": "/OrgEvents.api.spell:819-841"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -115,7 +115,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgEvents.spell:797-970"
+      "defined": "/OrgEvents.spell:794-966"
     },
     {
       "type": "OrgEvent",
@@ -128,19 +128,19 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/OrgEvents.api.spell:429-508"
+      "defined": "/OrgEvents.api.spell:429-507"
     },
     {
       "type": "EventsPage",
       "superType": "App",
-      "defined": "/OrgEvents.spell:1053-3009"
+      "defined": "/OrgEvents.spell:1049-3003"
     },
     {
       "property": "new_event",
       "asWritten": "new event",
       "of": "EventsPage",
       "datatype": "Event",
-      "defined": "/OrgEvents.spell:1158-1184"
+      "defined": "/OrgEvents.spell:1072-1180"
     },
     {
       "syntax": "propose the new event (of {thisArg:expression})?",
@@ -154,7 +154,7 @@
       "kind": "method",
       "name": "propose the new event",
       "returns": "nothing",
-      "defined": "/OrgEvents.spell:1187-1281"
+      "defined": "/OrgEvents.spell:1183-1276"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -167,7 +167,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgEvents.spell:1284-3009"
+      "defined": "/OrgEvents.spell:1279-3003"
     }
   ],
   "codeLines": [

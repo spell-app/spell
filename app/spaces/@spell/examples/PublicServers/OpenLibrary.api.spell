@@ -10,7 +10,7 @@
 // Each book's authors are their ids, each read from the author's own record when something reads it;
 // its cover is a picture on another server, covers.openlibrary.org, its address built from the book's cover id.
 
-open library is a web server at "https://openlibrary.org":
+open library is a web server at "https://openlibrary.org"
 	its id is its "key"
 	its rows are its "docs"
 	check it every 30 seconds
@@ -22,7 +22,7 @@ open library is a web server at "https://openlibrary.org":
 	a book's "cover i" is a picture at "https://covers.openlibrary.org/b/id/{id}-M.jpg"
 	a book's editions live at "{id}/editions.json"
 
-a "book" is a thing:
+a "book" is a thing
 	it lives in open library
 	its "authors" is a list of authors, stored as "author_key"
 	its "author name" is a list of text
@@ -47,7 +47,7 @@ a "book" is a thing:
 	its "title" is text
 	its "subtitle" is text
 
-an "author" is a thing:
+an "author" is a thing
 	it lives in open library
 	its "links" is a list of links
 	its "kind" is a kind, stored as "type"
@@ -67,7 +67,7 @@ an "author" is a thing:
 	its "created" is a created
 	its "last modified" is a last modified
 
-an "edition" is a thing:
+an "edition" is a thing
 	it lives in open library
 	its "kind" is a kind, stored as "type"
 	its "title" is text
@@ -88,15 +88,15 @@ an "edition" is a thing:
 	its "created" is a created
 	its "last modified" is a last modified
 
-a "link" is a thing:
+a "link" is a thing
 	its "title" is text
 	its "url" is text  // an address
 	its "kind" is a kind, stored as "type"
 
-a "kind" is a thing:
+a "kind" is a thing
 	its "key" is text
 
-a "remote id" is a thing:
+a "remote id" is a thing
 	its "viaf" is a number
 	its "wikidata" is text
 	its "isni" is a number
@@ -114,20 +114,20 @@ a "remote id" is a thing:
 	its "project gutenberg" is a number
 	its "opac sbn" is text
 
-a "created" is a thing:
+a "created" is a thing
 	its "kind" is text, stored as "type"
 	its "value" is a date
 
-a "last modified" is a thing:
+a "last modified" is a thing
 	its "kind" is text, stored as "type"
 	its "value" is a date
 
-an "edition author" is a thing:
+an "edition author" is a thing
 	its "key" is text
 
-a "note" is a thing:
+a "note" is a thing
 	its "kind" is text, stored as "type"
 	its "value" is text
 
-a "work" is a thing:
+a "work" is a thing
 	its "key" is text

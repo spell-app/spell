@@ -7,16 +7,16 @@
 // 2:  more of it, at the top;  1:  as it comes;  0:  none of it.
 // Bo's own:  more of Ana's art, none of her politics.
 
-a post:
-	// How much of it you want:  2 more of it, 1 as it comes, 0 none
-	its "weight" is:
+a post
+	its "weight" is
+		// How much of it you want:  2 more of it, 1 as it comes, 0 none
 		2 if its by is "ana@rs" and its topic is "art"
 		0 if its by is "ana@rs" and its topic is "politics"
 		1 otherwise
 	it "is a favourite" if its weight is 2
 	it "is ordinary" if its weight is 1
 
-	to draw it:
+	to draw it
 		<segment class="post">
 			<stack spacing="xs">
 				<stack direction="horizontal" spacing="md" align="center" wrap>
@@ -30,8 +30,8 @@ a post:
 
 ## The page:  your favourites first, then the rest, newest first
 
-feed page is an app:
-	to draw it:
+feed page is an app
+	to draw it
 		<stack class="org-page" spacing="none">
 			<toolbar class="top-bar" appearance="text" aria-label="Feed">
 				<text slot="title" size="large">Feed</text>

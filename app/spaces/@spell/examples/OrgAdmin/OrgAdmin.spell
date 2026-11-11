@@ -7,50 +7,50 @@
 
 ## The page:  a toolbar, the sections down the side, and the one picked
 
-org admin is an app:
-	// Who to add, by their address:  ana@rs
+org admin is an app
 	"new member" is a new member
-	// A new standing team, by its name
+		// Who to add, by their address:  ana@rs
 	"new team" is a new team
-	// A new project, under a team or, with none picked, the org itself
+		// A new standing team, by its name
 	"new project" is a new project
+		// A new project, under a team or, with none picked, the org itself
 	"new term" is a new term
 	"new app" is a new approved app
-	// Who designs which space's pages
 	"new designer" is a new designer
-	// A stage an event goes through:  its name changes the stage of that name, or adds one before the last
+		// Who designs which space's pages
 	"new stage" is a new stage
+		// A stage an event goes through:  its name changes the stage of that name, or adds one before the last
 
-	to add the new member:
+	to add the new member
 		add the new member to the members
 		set its new member to a new member
 
-	to add the new team:
+	to add the new team
 		add the new team to the teams
 		set its new team to a new team
 
-	to add the new project:
+	to add the new project
 		add the new project to the projects
 		set its new project to a new project
 
-	to give the new term:
+	to give the new term
 		add the new term to the terms
 		set its new term to a new term
 
-	to approve the new app:
+	to approve the new app
 		add the new app to the approved apps
 		set its new app to a new approved app
 
-	to add the new designer:
+	to add the new designer
 		add the new designer to the designers
 		set its new designer to a new designer
 
-	to add the new stage:
+	to add the new stage
 		add the new stage to the stages
 		set its new stage to a new stage
 
-	// The section picked is in the page's address, so a reload comes back to it
-	to draw it:
+	to draw it
+		// The section picked is in the page's address, so a reload comes back to it
 		<stack class="org-admin" spacing="none">
 			<toolbar class="top-bar" appearance="text" aria-label="Org Admin">
 				<for org in every org profile>
@@ -72,7 +72,7 @@ org admin is an app:
 			</tabs>
 		</stack>
 
-	to draw its people section:
+	to draw its people section
 		<stack class="people">
 			<header size="medium">People</header>
 			<form value={its new member} class="add">
@@ -90,7 +90,7 @@ org admin is an app:
 			</for>
 		</stack>
 
-	to draw its teams section:
+	to draw its teams section
 		<stack class="teams">
 			<header size="medium">Teams</header>
 			<form value={its new team} class="add new-team">
@@ -123,7 +123,7 @@ org admin is an app:
 			</for>
 		</stack>
 
-	to draw its roles section:
+	to draw its roles section
 		<stack class="roles">
 			<header size="medium">Who manages what</header>
 			<form value={its new term} class="add">
@@ -164,7 +164,7 @@ org admin is an app:
 			</for>
 		</stack>
 
-	to draw its designers section:
+	to draw its designers section
 		<stack class="designers">
 			<header size="medium">Who designs what</header>
 			<text color="grey">They change a space's pages, whatever their role there;  its Managers publish them.</text>
@@ -197,7 +197,7 @@ org admin is an app:
 			</for>
 		</stack>
 
-	to draw its apps section:
+	to draw its apps section
 		<stack class="apps">
 			<header size="medium">Approved apps</header>
 			<form value={its new app} class="add">
@@ -215,7 +215,7 @@ org admin is an app:
 			</for>
 		</stack>
 
-	to draw its stages section:
+	to draw its stages section
 		<stack class="stages">
 			<header size="medium">Event stages</header>
 			<form value={its new stage} class="add">
@@ -241,7 +241,7 @@ org admin is an app:
 			</for>
 		</stack>
 
-	to draw its log section:
+	to draw its log section
 		<stack class="log">
 			<header size="medium">Log</header>
 			<for change in every role change sorted by its at, newest first as="table" appearance="very-basic" unstackable loading="Reading the log">

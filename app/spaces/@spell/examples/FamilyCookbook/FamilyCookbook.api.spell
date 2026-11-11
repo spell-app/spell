@@ -4,7 +4,7 @@
 // What's drawn and done with them is in FamilyCookbook.spell.
 family cookbook is saved in the cloud
 
-a "recipe" is a thing:
+a "recipe" is a thing
 	it lives in family cookbook
 	its "title" is text
 	its "servings" is a number

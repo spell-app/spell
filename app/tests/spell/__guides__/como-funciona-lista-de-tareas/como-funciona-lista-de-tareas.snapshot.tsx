@@ -38,8 +38,8 @@ export class Tarea extends View {
     return !this.hecha
   }
 
-  // un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"
   @drawn draw() {
+    // un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"
     return (
       <es-formulario value={this}>
         <es-pila direccion="horizontal" separacion="sm">
@@ -83,8 +83,8 @@ export class Agenda extends ViewableList<Tarea> {
   @prop({ oneOf: () => Agenda.Mostrandos })
   accessor mostrando!: Mostrando
 
-  // cada tarea, salvo que el filtro la oculte:  "devolver nada" no dibuja nada
   drawEachItem(item: Tarea) {
+    // cada tarea, salvo que el filtro la oculte:  "devolver nada" no dibuja nada
     if (this.mostrando === "pendientes" && item.estáHecha) return undefined
     if (this.mostrando === "hechas" && item.estáPendiente) return undefined
     return core.drawThing(item)

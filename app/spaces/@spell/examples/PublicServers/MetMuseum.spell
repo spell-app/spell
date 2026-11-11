@@ -4,17 +4,17 @@
 // with `<extend>`, so looking again at the server never touches a line of this.
 // Its search answers only ids:  each artwork is read from its own address as it's drawn, a page at a time, and no others.
 
-a "met museum page" is a thing:
+a "met museum page" is a thing
 	its "search" is text
-	to create it:
+	to create it
 		set its search to "sunflowers"
-	// What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn
 	its "found" is every artwork matching the search
+		// What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn
 
-	to try (words as text):
+	to try (words as text)
 		set its search to words
 
-	to draw it:
+	to draw it
 		<stack spacing="xl">
 			<form value={it} class="find">
 				<stack spacing="sm">
@@ -44,8 +44,8 @@ a "met museum page" is a thing:
 // Each is read from its own address the first time it's drawn;  one the Met won't give is left out.
 // Only what's in the public domain has a picture:  the rest show what the Met knows of them, with nothing to turn over.
 
-an artwork:
-	to draw it:
+an artwork
+	to draw it
 		if its title and its primary image small
 			<shape class="artwork" direction="over" flip-on="click" aria-label={its title}>
 				<side>
@@ -62,8 +62,8 @@ an artwork:
 		otherwise if its title
 			draw its about card
 
-	// What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture
-	to draw its about card:
+	to draw its about card
+		// What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture
 		<ui-card fluid>
 			<content>
 				<header>{its title}</header>

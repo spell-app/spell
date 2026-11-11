@@ -227,11 +227,11 @@ export class QuizElement extends SpellElement<Quiz> {
 core.useElement(Quiz, QuizElement)
 export const quiz = new Quiz()
 
-core.describeAction(Quiz, "showTheAnswer", { title: "Show the answer", shortcuts: ["space"] })
+core.describeAction(Quiz, "showTheAnswer", { title: "Show The Answer", shortcuts: ["space"] })
 /** Counted, then the next card */
 core.describeAction(Quiz, "sayIKnew", { title: "I knew it", shortcuts: ["Y"], icon: "check" })
 core.describeAction(Quiz, "sayIMissed", { title: "I missed it", shortcuts: ["N"], icon: "close" })
-core.describeAction(Quiz, "startOver", { title: "Start over", icon: "redo" })
+core.describeAction(Quiz, "startOver", { title: "Start Over", icon: "redo" })
 // - its "quiz menu" is a menu of "start over"
 core.describeMenu(Quiz, "quizMenu", { items: ["startOver"] })
 

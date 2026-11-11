@@ -197,7 +197,7 @@ export class BillSplitter extends App {
 export const billSplitter = new BillSplitter()
 
 /** An empty row, for the next person */
-core.describeAction(BillSplitter, "addSomeone", { title: "add someone", icon: "plus" })
+core.describeAction(BillSplitter, "addSomeone", { title: "Add Someone", icon: "plus" })
 // -----------
 if (!core.isCarryingOver) billSplitter.start()
 // -----------

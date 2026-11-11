@@ -5,7 +5,7 @@
 // Its tickets are kept here too:  the picnic has 40, each attendee asks for as many as their row says, and a ticket
 // an organizer confirms lets its guest into the attendees' space, where the day's details are.
 // Your event's sheet names its own spaces on the next lines:  "picnic@rs" is the Rock Society's picnic.
-sign up sheet is a data folder at "picnic@rs/__private/signups":
+sign up sheet is a data folder at "picnic@rs/__private/signups"
 	open to sign-ups from "picnic@rs/sheet"
 	only its attendees add rows
 	at most 2 rows for each shift
@@ -14,14 +14,14 @@ sign up sheet is a data folder at "picnic@rs/__private/signups":
 	confirmed tickets join "picnic@rs/__attendees"
 	check it every 30 seconds
 
-// What everyone in the picnic sees:  who's on which shift, never an organizer's note.
-the published sheet is a projection of the sign up sheet:
+the published sheet is a projection of the sign up sheet
+	// What everyone in the picnic sees:  who's on which shift, never an organizer's note.
 	into "picnic@rs/sheet"
 	showing each row's person and shift
 	published volunteers live at "volunteers"
 	check it every 30 seconds
 
-a "volunteer" is a thing:
+a "volunteer" is a thing
 	it lives in the sign up sheet
 	its "person" is text
 	its "shift" is text
@@ -29,26 +29,26 @@ a "volunteer" is a thing:
 
 // Who may sign up, and how many invitations each may ask for:  the organizers work it out from their standing and
 // their shifts ("work out the invitations", on the page).
-an "attendee" is a thing:
+an "attendee" is a thing
 	it lives in the sign up sheet
 	its "person" is text
 	its "standing" is text
 	its "invitations" is a number
 
-// A ticket someone asked for, for a guest:  an organizer confirms it.
-a "ticket" is a thing:
+a "ticket" is a thing
+	// A ticket someone asked for, for a guest:  an organizer confirms it.
 	it lives in the sign up sheet
 	its "person" is text
 	its "guest" is text
 	its "event" is text
 	its "status" is text
 
-// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
-my inbox is a data folder at "@rs/__inbox":
+my inbox is a data folder at "@rs/__inbox"
+	// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.
 	check it every 30 seconds
 
-// A message in your inbox:  your invitations' count is one, in the conversation "invitations".
-a "message" is a thing:
+a "message" is a thing
+	// A message in your inbox:  your invitations' count is one, in the conversation "invitations".
 	it lives in my inbox
 	its "text" is text
 	its "recipients" is text
@@ -57,7 +57,7 @@ a "message" is a thing:
 	its "title" is text
 	its "line" is text
 
-a "published volunteer" is a thing:
+a "published volunteer" is a thing
 	it lives in the published sheet
 	its "person" is text
 	its "shift" is text

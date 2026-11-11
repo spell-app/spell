@@ -50,8 +50,8 @@ export class Carta extends View {
     return `${this.rango} de ${this.palo}`
   }
 
-  // un clic la juega en la columna
   draw() {
+    // un clic la juega en la columna
     return h("es-boton", {
       apariencia: "básico",
       color: () => this.color,

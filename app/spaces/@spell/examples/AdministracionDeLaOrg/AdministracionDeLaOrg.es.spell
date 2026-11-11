@@ -7,50 +7,50 @@
 
 ## La página:  una barra arriba, las secciones al lado, y la elegida
 
-administración de la org es una aplicación:
-	// A quién agregar, por su dirección:  ana@rs
+administración de la org es una aplicación
 	"miembro nuevo" es un nuevo miembro
-	// Un equipo permanente nuevo, por su nombre
+		// A quién agregar, por su dirección:  ana@rs
 	"equipo nuevo" es un nuevo equipo
-	// Un proyecto nuevo, bajo un equipo (por su carpeta) o, sin ninguno, la org misma
+		// Un equipo permanente nuevo, por su nombre
 	"proyecto nuevo" es un nuevo proyecto
+		// Un proyecto nuevo, bajo un equipo (por su carpeta) o, sin ninguno, la org misma
 	"mandato nuevo" es un nuevo mandato
 	"aprobación nueva" es una nueva aprobación
-	// Quién diseña las páginas de qué espacio:  ana@rs, picnic@rs
 	"diseñador nuevo" es un nuevo diseñador
-	// Una etapa por la que pasa un evento:  su nombre cambia la etapa de ese nombre, o agrega una antes de la última
+		// Quién diseña las páginas de qué espacio:  ana@rs, picnic@rs
 	"etapa nueva" es una nueva etapa
+		// Una etapa por la que pasa un evento:  su nombre cambia la etapa de ese nombre, o agrega una antes de la última
 
-	para agregar el miembro nuevo:
+	para agregar el miembro nuevo
 		agregar el miembro nuevo a los miembros
 		fijar su miembro nuevo a un nuevo miembro
 
-	para agregar el equipo nuevo:
+	para agregar el equipo nuevo
 		agregar el equipo nuevo a los equipos
 		fijar su equipo nuevo a un nuevo equipo
 
-	para agregar el proyecto nuevo:
+	para agregar el proyecto nuevo
 		agregar el proyecto nuevo a los proyectos
 		fijar su proyecto nuevo a un nuevo proyecto
 
-	para dar el mandato nuevo:
+	para dar el mandato nuevo
 		agregar el mandato nuevo a los mandatos
 		fijar su mandato nuevo a un nuevo mandato
 
-	para aprobar la aprobación nueva:
+	para aprobar la aprobación nueva
 		agregar la aprobación nueva a las aprobaciones
 		fijar su aprobación nueva a una nueva aprobación
 
-	para agregar el diseñador nuevo:
+	para agregar el diseñador nuevo
 		agregar el diseñador nuevo a los diseñadores
 		fijar su diseñador nuevo a un nuevo diseñador
 
-	para agregar la etapa nueva:
+	para agregar la etapa nueva
 		agregar la etapa nueva a las etapas
 		fijar su etapa nueva a una nueva etapa
 
-	// La sección elegida queda en la dirección de la página, y al recargar vuelve a ella
-	para dibujar eso:
+	para dibujar eso
+		// La sección elegida queda en la dirección de la página, y al recargar vuelve a ella
 		<ui-stack class="org-admin" spacing="none">
 			<ui-toolbar class="top-bar" appearance="text" aria-label="Administración de la org">
 				<para org en los perfiles>
@@ -72,7 +72,7 @@ administración de la org es una aplicación:
 			</ui-tabs>
 		</ui-stack>
 
-	para dibujar su sección personas:
+	para dibujar su sección personas
 		<ui-stack class="people">
 			<ui-header size="medium">Personas</ui-header>
 			<ui-form value={su miembro nuevo} class="add">
@@ -90,7 +90,7 @@ administración de la org es una aplicación:
 			</para>
 		</ui-stack>
 
-	para dibujar su sección equipos:
+	para dibujar su sección equipos
 		<ui-stack class="teams">
 			<ui-header size="medium">Equipos</ui-header>
 			<ui-form value={su equipo nuevo} class="add new-team">
@@ -123,7 +123,7 @@ administración de la org es una aplicación:
 			</para>
 		</ui-stack>
 
-	para dibujar su sección roles:
+	para dibujar su sección roles
 		<ui-stack class="roles">
 			<ui-header size="medium">Quién dirige qué</ui-header>
 			<ui-form value={su mandato nuevo} class="add">
@@ -164,7 +164,7 @@ administración de la org es una aplicación:
 			</para>
 		</ui-stack>
 
-	para dibujar su sección diseñadores:
+	para dibujar su sección diseñadores
 		<ui-stack class="designers">
 			<ui-header size="medium">Quién diseña qué</ui-header>
 			<ui-text color="grey">Cambian las páginas de un espacio, sea cual sea su rol allí;  sus Managers las publican.</ui-text>
@@ -197,7 +197,7 @@ administración de la org es una aplicación:
 			</para>
 		</ui-stack>
 
-	para dibujar su sección aplicaciones:
+	para dibujar su sección aplicaciones
 		<ui-stack class="apps">
 			<ui-header size="medium">Aplicaciones aprobadas</ui-header>
 			<ui-form value={su aprobación nueva} class="add">
@@ -215,7 +215,7 @@ administración de la org es una aplicación:
 			</para>
 		</ui-stack>
 
-	para dibujar su sección etapas:
+	para dibujar su sección etapas
 		<ui-stack class="stages">
 			<ui-header size="medium">Etapas de los eventos</ui-header>
 			<ui-form value={su etapa nueva} class="add">
@@ -241,7 +241,7 @@ administración de la org es una aplicación:
 			</para>
 		</ui-stack>
 
-	para dibujar su sección registro:
+	para dibujar su sección registro
 		<ui-stack class="log">
 			<ui-header size="medium">Registro</ui-header>
 			<para cambio en los cambios ordenados por su cuándo, de más reciente a más antiguo as="tabla" appearance="very-basic" unstackable cargando="Leyendo el registro">

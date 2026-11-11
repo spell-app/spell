@@ -6,12 +6,12 @@
 
 ## The bill
 
-bill splitter is an app:
+bill splitter is an app
 	"diners" is a new table
-	// The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18
 	its "percent" is a percent starting at 18%
-	// What everyone ordered, added up
-	its "subtotal" is:
+		// The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18
+	its "subtotal" is
+		// What everyone ordered, added up
 		set added up to 0
 		for diner in the diners
 			set added up to added up + the diner's amount
@@ -19,18 +19,17 @@ bill splitter is an app:
 	its "tip" is the subtotal * the percent
 	its "total" is the subtotal + the tip
 
-	// Three diners to start with
-	to create it:
+	to create it
+		// Three diners to start with
 		add (a new diner with name "Ana", amount = 24) to the diners
 		add (a new diner with name "Ben", amount = 18.5) to the diners
 		add (a new diner with name "Cleo", amount = 31.25) to the diners
-	// An empty row, for the next person
-	to add someone:
-		icon "plus"
+	to "add someone" with icon "plus"
+		// An empty row, for the next person
 		add (a new diner with name "", amount = 0) to the diners
 
-	// The tip, the diners, then the sums
-	to draw it:
+	to draw it
+		// The tip, the diners, then the sums
 		<container text>
 			<stack>
 				<header level="2">Bill Splitter</header>

@@ -3,10 +3,10 @@
 // say what a field links to, and reading it follows the link, `the name of its homeworld`.
 // Each type below adds to its type there, with `<extend>`:  so looking again at the server never touches a line of this.
 
-guide is an app:
+guide is an app
 	its "tab" is text
 	its "search" is text
-	to create it:
+	to create it
 		set its tab to "films"
 		set its search to ""
 	its "showing" is a thing
@@ -14,8 +14,8 @@ guide is an app:
 	its "playing" is a film
 	its "jumping" is yes or no
 
-	// Whatever's found:  the film, character, planet, ship or anything else with that in its name
-	its "found" is:
+	its "found" is
+		// Whatever's found:  the film, character, planet, ship or anything else with that in its name
 		set matches to a new list of things
 		for film in every film where its title includes the guide's search
 			add the film to matches
@@ -31,7 +31,7 @@ guide is an app:
 			add the one to matches
 		return matches
 
-	to go back:
+	to go back
 		if its trail is empty
 			set its showing to nothing
 			return
@@ -39,25 +39,25 @@ guide is an app:
 		remove the last item of its trail
 		scroll to the top
 
-	to go to (where as text):
+	to go to (where as text)
 		set its tab to where
 		set its search to ""
 		set its showing to nothing
 		clear its trail
 		scroll to the top
 
-	to play the opening:
+	to play the opening
 		set its playing to the first film
 
-	// A jump to light speed, and wherever it lands
-	to punch it:
+	to punch it
+		// A jump to light speed, and wherever it lands
 		set its jumping to yes
 		set landing to a random character in (every character)
 		pause for 2600 msec
 		open landing
 		set its jumping to no
 
-	to draw it:
+	to draw it
 		if its jumping
 			draw (a new jump)
 		<stack direction="horizontal" wrap align="end" justify="between">
@@ -86,8 +86,8 @@ guide is an app:
 		if its playing
 			draw the crawl of its playing
 
-	// Each tab's list says nothing of how long it is:  a long one draws what fits, and more as you scroll
-	to draw its shelf:
+	to draw its shelf
+		// Each tab's list says nothing of how long it is:  a long one draws what fits, and more as you scroll
 		if its showing and its search is ""
 			draw its showing's page
 		otherwise if its search is not ""
@@ -139,15 +139,15 @@ guide is an app:
 // It's on `a thing`, not a base type of the program's own:  each type below is simply `a thing`.
 // Spell has no mixins yet (epic `mixins`), and a thing here shares by HOLDING a card, and drawing it.
 
-to open (a thing):
+to open (a thing)
 	if the guide's showing
 		add the guide's showing to the guide's trail
 	set the guide's search to ""
 	set the guide's showing to it
 	scroll to the top
 
-// A number for people to read:  with none, nothing, so its row doesn't show
-to measure (amount as a number) in (unit as text):
+to measure (amount as a number) in (unit as text)
+	// A number for people to read:  with none, nothing, so its row doesn't show
 	if amount is nothing
 		return ""
 	return amount with commas + " " + unit
@@ -155,20 +155,20 @@ to measure (amount as a number) in (unit as text):
 # A card:  a picture, a name, what kind, and a click anywhere on it opens the thing
 // Every type holds one of these, with its own words.
 
-a "card" is a thing:
+a "card" is a thing
 	it has a label
 	it has a kind
 	it has a shape
-	// What colour a picture's background is:  from its name, unless it says
 	it has a colour
-	its "hue" is:
+		// What colour a picture's background is:  from its name, unless it says
+	its "hue" is
 		if its colour is not nothing
 			return its colour
 		return the length of its label * 47
 	its "subject" is a thing
 	its "species" is a species
 
-	to draw it:
+	to draw it
 		<ui-card onClick={open its subject}>
 			{draw its portrait}
 			<content>
@@ -177,10 +177,10 @@ a "card" is a thing:
 			</content>
 		</ui-card>
 
-	to draw its portrait:
+	to draw its portrait
 		draw (a new portrait with name = its label, hue = its hue, shape = its shape, species = its species)
 
-	to draw its top:
+	to draw its top
 		<button appearance="transparent" icon="arrow left" onClick={go back}>Back</button>
 		<stack class="hero" direction="horizontal" wrap align="start">
 			{draw its portrait}
@@ -194,59 +194,59 @@ a "card" is a thing:
 # What Wikipedia says of it, and where to read the rest
 // Not every name has a page, and a name may be someone else's:  Zolan is a medicine.
 
-a wiki page:
-	its "fits" is:
+a wiki page
+	its "fits" is
 		if its title includes "List of"
 			return no
 		return its about includes "star wars" or its about includes "fictional" or its about includes " film "
 
-a "wiki note" is a thing:
+a "wiki note" is a thing
 	it has a name
 	its "page" is the wiki page whose id is its name
-	to draw it:
+	to draw it
 		draw its words
-		while waiting:
+		while waiting
 			<text color="grey">Asking Wikipedia</text>
-		if that fails:
+		if that fails
 			<text color="grey">Wikipedia can't be reached just now.</text>
-	to draw its words:
+	to draw its words
 		if its page and its page's fits
 			<text paragraph>{its page's summary} <link link={the page of the desktop of the content urls of its page} target="_blank">Read the rest on Wikipedia</link></text>
 
 # A page's parts
 // A table of what's known, leaving out what isn't;  a list under its heading, or nothing if it's empty.
 
-a "fact" is a thing:
+a "fact" is a thing
 	it has a label
 	it has a value
 	its "date" is a date
-	// What a server writes when nothing's known isn't worth a row
-	it "is known":
+	it "is known"
+		// What a server writes when nothing's known isn't worth a row
 		if its date
 			return yes
 		if its value is nothing or its value is ""
 			return no
 		return its value is not "unknown" and its value is not "n/a" and its value is not "none"
-	to draw it:
+	to draw it
 		<row>
 			<cell header>{its label}</cell>
 			<cell>{its value}{its date}</cell>
 		</row>
 
-a "fact table" is a thing:
+a "fact table" is a thing
 	its "facts" is a list of facts
 	its "shown" is the facts in its facts where it is known
-	to draw it:
+	to draw it
 		if its shown is not empty
 			<table class="facts" appearance="very-basic" inverted unstackable>
 				{draw each fact in its shown}
 			</table>
 
-a "section" is a thing:
+a "section" is a thing
 	it has a heading
 	its "things" is a list of things
 	its "single" is a thing
-	to draw it:
+	to draw it
 		if its single
 			<header class="section" size="small" font="all-caps">{its heading}</header>
 			<cards columns="4" doubling>{draw its single}</cards>
@@ -257,51 +257,51 @@ a "section" is a thing:
 
 # A film
 
-a film:
+a film
 	"card" is a new card with label = its title, kind = "Episode " + its episode id, subject = it
-	to play it:
+	to play it
 		set the guide's playing to it
-	to end it:
+	to end it
 		set the guide's playing to nothing
 
-	to draw it:
+	to draw it
 		draw its card
 
-	its "facts" is:
+	its "facts" is
 		set known to a new list of facts
 		add (a new fact with label "Directed by", value = its director) to known
 		add (a new fact with label "Produced by", value = its producer) to known
 		add (a new fact with label "Released", date = its release date) to known
 		return known
 
-	to draw its page:
+	to draw its page
 		draw the top of its card
 		<button class="play-opening" font="all-caps" onClick={play it}>Play the opening</button>
 		draw (a new fact table with facts = its facts)
 		draw its links
-		while waiting:
+		while waiting
 			<loader visible inline text>Following the links</loader>
 
-	to draw its links:
+	to draw its links
 		draw (a new section with heading "Who's in it", things = its characters)
 		draw (a new section with heading "Where it happens", things = its planets)
 		draw (a new section with heading "What they fly", things = its starships)
 
 # A character
 
-a character:
+a character
 	"card" is a new card with label = its name, kind = "Born " + its birth year, subject = it
 	its "page" is the wiki page whose id is its name
-	// Their own picture on Wikipedia, or nothing
-	its "picture" is:
+	its "picture" is
+		// Their own picture on Wikipedia, or nothing
 		if its page and its page's fits and its page's thumbnail
 			return its page's thumbnail's source
 		return ""
 
-	to draw it:
+	to draw it
 		draw its card
 
-	its "facts" is:
+	its "facts" is
 		set known to a new list of facts
 		add (a new fact with label "Height", value = "[its height]") to known
 		add (a new fact with label "Mass", value = "[its mass]") to known
@@ -310,14 +310,14 @@ a character:
 		add (a new fact with label "Eyes", value = its eye color) to known
 		return known
 
-	to draw its page:
+	to draw its page
 		draw the top of its card
 		draw (a new fact table with facts = its facts)
 		draw its links
-		while waiting:
+		while waiting
 			<loader visible inline text>Following the links</loader>
 
-	to draw its links:
+	to draw its links
 		draw (a new section with heading "Home", single = its homeworld)
 		draw (a new section with heading "Films", things = its films)
 		draw (a new section with heading "What they are", things = its species)
@@ -326,10 +326,10 @@ a character:
 
 # A planet
 
-a planet:
+a planet
 	"card" is a new card with label = its name, kind = its climate, shape = "world", colour = its hue, subject = it
-	// What colour a world is, from its weather
-	its "hue" is:
+	its "hue" is
+		// What colour a world is, from its weather
 		if its climate includes "frozen"
 			return 200
 		if its climate includes "arid"
@@ -340,10 +340,10 @@ a planet:
 			return 130 + the length of its name * 9
 		return 280
 
-	to draw it:
+	to draw it
 		draw its card
 
-	its "facts" is:
+	its "facts" is
 		set known to a new list of facts
 		add (a new fact with label "Climate", value = its climate) to known
 		add (a new fact with label "Terrain", value = its terrain) to known
@@ -353,33 +353,33 @@ a planet:
 		add (a new fact with label "A year", value = measure its orbital period in "days") to known
 		return known
 
-	to draw its page:
+	to draw its page
 		draw the top of its card
 		draw (a new fact table with facts = its facts)
 		draw its links
-		while waiting:
+		while waiting
 			<loader visible inline text>Following the links</loader>
 
-	to draw its links:
+	to draw its links
 		draw (a new section with heading "Who's from here", things = its residents)
 		draw (a new section with heading "Seen in", things = its films)
 
 # A ship, and a vehicle:  much the same to look at
 // Their pages share `to draw a craft`'s words, handed what differs.
 
-a "craft page" is a thing:
+a "craft page" is a thing
 	it has a model
 	it has a maker
 	its "length" is a length in m
 	it has a crew
 	it has a passengers
 	it has a cost
-	// How long it is, in something you can picture:  an X-wing is 12.5 metres
-	its "x-wings long" is:
+	its "x-wings long" is
+		// How long it is, in something you can picture:  an X-wing is 12.5 metres
 		if its length is nothing
 			return nothing
 		return round (its length / 12.5)
-	its "facts" is:
+	its "facts" is
 		set known to a new list of facts
 		add (a new fact with label "Model", value = its model) to known
 		add (a new fact with label "Made by", value = its maker) to known
@@ -389,67 +389,67 @@ a "craft page" is a thing:
 		add (a new fact with label "Passengers", value = measure its passengers in "people") to known
 		add (a new fact with label "Costs", value = measure its cost in "credits") to known
 		return known
-	to draw it:
+	to draw it
 		draw (a new fact table with facts = its facts)
 
-a starship:
+a starship
 	"card" is a new card with label = its name, kind = its starship class, subject = it
-	to draw it:
+	to draw it
 		draw its card
-	to draw its page:
+	to draw its page
 		draw the top of its card
 		draw (a new craft page with model = its model, maker = its manufacturer, length = its length, crew = its crew, passengers = its passengers, cost = its cost in credits)
 		draw its links
-		while waiting:
+		while waiting
 			<loader visible inline text>Following the links</loader>
-	to draw its links:
+	to draw its links
 		draw (a new section with heading "Who flew it", things = its pilots)
 		draw (a new section with heading "Seen in", things = its films)
 
-a vehicle:
+a vehicle
 	"card" is a new card with label = its name, kind = its vehicle class, subject = it
-	to draw it:
+	to draw it
 		draw its card
-	to draw its page:
+	to draw its page
 		draw the top of its card
 		draw (a new craft page with model = its model, maker = its manufacturer, length = its length, crew = its crew, passengers = its passengers, cost = its cost in credits)
 		draw its links
-		while waiting:
+		while waiting
 			<loader visible inline text>Following the links</loader>
-	to draw its links:
+	to draw its links
 		draw (a new section with heading "Who flew it", things = its pilots)
 		draw (a new section with heading "Seen in", things = its films)
 
 # A species
 // A species with no picture takes the first of its people who has one.
 
-a species:
+a species
 	"card" is a new card with label = its name, kind = its classification, subject = it, species = it
-	// Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing
-	its "picture" is:
+	its "picture" is
+		// Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing
 		set everyone to every character
 		set found to ""
 		for character in its people
 			if found is ""
 				set found to the character's picture
 		return found
-	to draw it:
+	to draw it
 		draw its card
 
-	its "facts" is:
+	its "facts" is
 		set known to a new list of facts
 		add (a new fact with label "Language", value = its language) to known
 		add (a new fact with label "Lives for", value = its average lifespan) to known
 		return known
 
-	to draw its page:
+	to draw its page
 		draw the top of its card
 		draw (a new fact table with facts = its facts)
 		draw its links
-		while waiting:
+		while waiting
 			<loader visible inline text>Following the links</loader>
 
-	to draw its links:
+	to draw its links
 		draw (a new section with heading "Home", single = its homeworld)
 		draw (a new section with heading "Who's one", things = its people)
 

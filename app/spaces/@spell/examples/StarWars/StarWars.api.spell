@@ -11,7 +11,7 @@
 // It's asked for as it runs, and kept only on the device of whoever's looking, until 5am;
 // the page says where it comes from.
 
-star wars is a web server at "https://swapi.py4e.com/api":
+star wars is a web server at "https://swapi.py4e.com/api"
 	its id is its "url"
 	its rows are its "results"
 	its next page is its "next"
@@ -26,7 +26,7 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	vehicles live at "/vehicles/"
 	starships live at "/starships/"
 
-a "character" is a thing:
+a "character" is a thing
 	it lives in star wars
 	its "name" is text
 	its "height" is a length in cm or "unknown"
@@ -44,7 +44,7 @@ a "character" is a thing:
 	its "created" is a date
 	its "edited" is a date
 
-a "planet" is a thing:
+a "planet" is a thing
 	it lives in star wars
 	its "name" is text
 	its "rotation period" is a number or "unknown"
@@ -60,7 +60,7 @@ a "planet" is a thing:
 	its "created" is a date
 	its "edited" is a date
 
-a "film" is a thing:
+a "film" is a thing
 	it lives in star wars
 	its "title" is text
 	its "episode id" is a number
@@ -76,7 +76,7 @@ a "film" is a thing:
 	its "created" is a date
 	its "edited" is a date
 
-a "species" is a thing:
+a "species" is a thing
 	it lives in star wars
 	its "name" is text
 	its "classification" is text
@@ -93,7 +93,7 @@ a "species" is a thing:
 	its "created" is a date
 	its "edited" is a date
 
-a "vehicle" is a thing:
+a "vehicle" is a thing
 	it lives in star wars
 	its "name" is text
 	its "model" is text
@@ -111,7 +111,7 @@ a "vehicle" is a thing:
 	its "created" is a date
 	its "edited" is a date
 
-a "starship" is a thing:
+a "starship" is a thing
 	it lives in star wars
 	its "name" is text
 	its "model" is text

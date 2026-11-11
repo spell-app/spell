@@ -8,15 +8,15 @@ core.heading("Caja de recetas:  dónde se guardan las recetas")
 
 export class Receta extends Thing {
   // su "título" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 823, end: 843 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 822, end: 842 } })
   accessor título!: string
 
   // sus "porciones" es un número
-  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 845, end: 873 } })
+  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 844, end: 872 } })
   accessor porciones!: number
 
   // sus "notas" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 875, end: 895 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 874, end: 894 } })
   accessor notas!: string
 
   /** Su pantalla de edición:  nada cambia hasta Guardar */
@@ -53,11 +53,11 @@ export class Receta extends Thing {
   }
 
   // vive en recetario familiar
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 795, end: 821 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 794, end: 820 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en recetario familiar
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 795, end: 821 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 794, end: 820 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
@@ -215,7 +215,7 @@ export class CajaDeRecetas extends App {
   }
 
   /** Las más nuevas primero, por cuándo se guardó cada una */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 3671, end: 3808 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 3611, end: 3806 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => core.includes(receta.título, this.búsqueda)), (item: Receta) => core.descending(item.creado))
   }, () => [this.búsqueda]) }
@@ -245,8 +245,8 @@ export class CajaDeRecetas extends App {
     )
   }
 
-  // Su pantalla de edición, mientras se cambia una receta;  si no, las tarjetas:  su propio dibujo, para que su `si` elija solo una
   drawPantalla() {
+    // Su pantalla de edición, mientras se cambia una receta;  si no, las tarjetas:  su propio dibujo, para que su `si` elija solo una
     if (this.editando) return core.drawThing(new EditorDeReceta({ receta: this.editando }))
     else {
       return (

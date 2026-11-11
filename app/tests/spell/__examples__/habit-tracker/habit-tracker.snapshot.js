@@ -129,7 +129,6 @@ export class Week extends ViewableList {
     )
   }
 
-  // on the page, its habits can be dragged to another place
   static reorderItemsAfter = 0
 
   static exclusive = true
@@ -159,6 +158,7 @@ core.heading("The week")
 //////////////
 // The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
+// on the page, its habits can be dragged to another place
 /** a habit is in one week */
 
 core.heading("The tracker")

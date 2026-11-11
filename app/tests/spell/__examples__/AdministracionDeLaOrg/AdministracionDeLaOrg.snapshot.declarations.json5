@@ -27,19 +27,19 @@
         "placeType": "RolDeLaOrg",
         "collection": "perfiles"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1005-1144"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:931-1143"
     },
     {
       "property": "nombre",
       "of": "Perfil",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1056-1098"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1055-1097"
     },
     {
       "property": "espacio",
       "of": "Perfil",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1100-1144"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1099-1143"
     },
     {
       "type": "Función",
@@ -50,13 +50,13 @@
         "placeType": "RolDeLaOrg",
         "collection": "funciones"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1182-1277"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1145-1276"
     },
     {
       "property": "nombre",
       "of": "Función",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1235-1277"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1234-1276"
     },
     {
       "type": "Miembro",
@@ -67,31 +67,31 @@
         "placeType": "RolDeLaOrg",
         "collection": "miembros"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1279-1508"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1278-1506"
     },
     {
       "property": "persona",
       "of": "Miembro",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1331-1376"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1329-1374"
     },
     {
       "property": "nombre",
       "of": "Miembro",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1378-1420"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1376-1418"
     },
     {
       "property": "rol",
       "of": "Miembro",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1422-1461"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1420-1459"
     },
     {
       "property": "cargo",
       "of": "Miembro",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1463-1508"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1461-1506"
     },
     {
       "type": "Equipo",
@@ -102,19 +102,19 @@
         "placeType": "RolDeLaOrg",
         "collection": "equipos"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1510-1649"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1508-1646"
     },
     {
       "property": "nombre",
       "of": "Equipo",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1561-1603"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1558-1600"
     },
     {
       "property": "espacio",
       "of": "Equipo",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1605-1649"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1602-1646"
     },
     {
       "type": "Proyecto",
@@ -125,25 +125,25 @@
         "placeType": "RolDeLaOrg",
         "collection": "proyectos"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1651-1836"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1648-1832"
     },
     {
       "property": "nombre",
       "of": "Proyecto",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1704-1746"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1700-1742"
     },
     {
       "property": "equipo",
       "of": "Proyecto",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1748-1790"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1744-1786"
     },
     {
       "property": "espacio",
       "of": "Proyecto",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1792-1836"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1788-1832"
     },
     {
       "type": "Mandato",
@@ -154,57 +154,57 @@
         "placeType": "RolDeLaOrg",
         "collection": "mandatos"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1838-2273"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1834-2268"
     },
     {
       "property": "rol",
       "of": "Mandato",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1890-1929"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1885-1924"
     },
     {
       "property": "titular",
       "of": "Mandato",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1931-1976"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1926-1971"
     },
     {
       "property": "ámbito",
       "of": "Mandato",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:1978-2023"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:1973-2018"
     },
     {
       "property": "cargo",
       "of": "Mandato",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2025-2070"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2020-2065"
     },
     {
       "property": "nombre_titular",
       "asWritten": "nombre titular",
       "of": "Mandato",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2072-2128"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2067-2123"
     },
     {
       "property": "nombre_ámbito",
       "asWritten": "nombre ámbito",
       "of": "Mandato",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2130-2186"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2125-2181"
     },
     {
       "property": "inicio",
       "of": "Mandato",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2188-2232"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2183-2227"
     },
     {
       "property": "fin",
       "of": "Mandato",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2234-2273"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2229-2268"
     },
     {
       "type": "Aprobación",
@@ -215,19 +215,19 @@
         "placeType": "RolDeLaOrg",
         "collection": "aprobaciones"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2275-2421"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2270-2415"
     },
     {
       "property": "nombre",
       "of": "Aprobación",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2331-2373"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2325-2367"
     },
     {
       "property": "versión",
       "of": "Aprobación",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2375-2421"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2369-2415"
     },
     {
       "type": "Diseñador",
@@ -238,26 +238,26 @@
         "placeType": "RolDeLaOrg",
         "collection": "diseñadores"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2536-2739"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2417-2733"
     },
     {
       "property": "persona",
       "of": "Diseñador",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2590-2635"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2584-2629"
     },
     {
       "property": "espacio",
       "of": "Diseñador",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2637-2681"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2631-2675"
     },
     {
       "property": "nombre_persona",
       "asWritten": "nombre persona",
       "of": "Diseñador",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2683-2739"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2677-2733"
     },
     {
       "type": "Etapa",
@@ -268,26 +268,26 @@
         "placeType": "RolDeLaOrg",
         "collection": "etapas"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2831-3026"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2735-3020"
     },
     {
       "property": "nombre",
       "of": "Etapa",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2882-2924"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2876-2918"
     },
     {
       "property": "siguiente",
       "of": "Etapa",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2926-2974"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2920-2968"
     },
     {
       "property": "quién_mueve",
       "asWritten": "quién mueve",
       "of": "Etapa",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:2976-3026"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:2970-3020"
     },
     {
       "type": "Cambio",
@@ -298,38 +298,38 @@
         "placeType": "RolDeLaOrg",
         "collection": "cambios"
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:3028-3288"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3022-3281"
     },
     {
       "property": "cuándo",
       "of": "Cambio",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:3079-3119"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3072-3112"
     },
     {
       "property": "quién",
       "of": "Cambio",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:3121-3161"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3114-3154"
     },
     {
       "property": "hecho",
       "of": "Cambio",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:3163-3203"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3156-3196"
     },
     {
       "property": "qué",
       "of": "Cambio",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:3205-3244"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3198-3237"
     },
     {
       "property": "por_qué",
       "asWritten": "por qué",
       "of": "Cambio",
       "datatype": "text",
-      "defined": "/AdministracionDeLaOrg.api.es.spell:3246-3288"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:3239-3281"
     },
     {
       "type": "RolDeLaOrg",
@@ -374,61 +374,61 @@
           }
         }
       },
-      "defined": "/AdministracionDeLaOrg.api.es.spell:482-930"
+      "defined": "/AdministracionDeLaOrg.api.es.spell:482-929"
     },
     {
       "type": "AdministraciónDeLaOrg",
       "superType": "App",
-      "defined": "/AdministracionDeLaOrg.es.spell:652-14551"
+      "defined": "/AdministracionDeLaOrg.es.spell:652-14541"
     },
     {
       "property": "miembro_nuevo",
       "asWritten": "miembro nuevo",
       "of": "AdministraciónDeLaOrg",
       "datatype": "Miembro",
-      "defined": "/AdministracionDeLaOrg.es.spell:744-779"
+      "defined": "/AdministracionDeLaOrg.es.spell:696-779"
     },
     {
       "property": "equipo_nuevo",
       "asWritten": "equipo nuevo",
       "of": "AdministraciónDeLaOrg",
       "datatype": "Equipo",
-      "defined": "/AdministracionDeLaOrg.es.spell:827-860"
+      "defined": "/AdministracionDeLaOrg.es.spell:781-861"
     },
     {
       "property": "proyecto_nuevo",
       "asWritten": "proyecto nuevo",
       "of": "AdministraciónDeLaOrg",
       "datatype": "Proyecto",
-      "defined": "/AdministracionDeLaOrg.es.spell:946-983"
+      "defined": "/AdministracionDeLaOrg.es.spell:863-985"
     },
     {
       "property": "mandato_nuevo",
       "asWritten": "mandato nuevo",
       "of": "AdministraciónDeLaOrg",
       "datatype": "Mandato",
-      "defined": "/AdministracionDeLaOrg.es.spell:985-1020"
+      "defined": "/AdministracionDeLaOrg.es.spell:987-1022"
     },
     {
       "property": "aprobación_nueva",
       "asWritten": "aprobación nueva",
       "of": "AdministraciónDeLaOrg",
       "datatype": "Aprobación",
-      "defined": "/AdministracionDeLaOrg.es.spell:1022-1064"
+      "defined": "/AdministracionDeLaOrg.es.spell:1024-1066"
     },
     {
       "property": "diseñador_nuevo",
       "asWritten": "diseñador nuevo",
       "of": "AdministraciónDeLaOrg",
       "datatype": "Diseñador",
-      "defined": "/AdministracionDeLaOrg.es.spell:1130-1169"
+      "defined": "/AdministracionDeLaOrg.es.spell:1068-1172"
     },
     {
       "property": "etapa_nueva",
       "asWritten": "etapa nueva",
       "of": "AdministraciónDeLaOrg",
       "datatype": "Etapa",
-      "defined": "/AdministracionDeLaOrg.es.spell:1286-1318"
+      "defined": "/AdministracionDeLaOrg.es.spell:1174-1322"
     },
     {
       "syntax": "agregar el miembro nuevo ((de|del) {thisArg:expression})?",
@@ -442,7 +442,7 @@
       "kind": "method",
       "name": "agregar el miembro nuevo",
       "returns": "nothing",
-      "defined": "/AdministracionDeLaOrg.es.spell:1321-1437"
+      "defined": "/AdministracionDeLaOrg.es.spell:1325-1440"
     },
     {
       "syntax": "agregar el equipo nuevo ((de|del) {thisArg:expression})?",
@@ -456,7 +456,7 @@
       "kind": "method",
       "name": "agregar el equipo nuevo",
       "returns": "nothing",
-      "defined": "/AdministracionDeLaOrg.es.spell:1440-1551"
+      "defined": "/AdministracionDeLaOrg.es.spell:1443-1553"
     },
     {
       "syntax": "agregar el proyecto nuevo ((de|del) {thisArg:expression})?",
@@ -470,7 +470,7 @@
       "kind": "method",
       "name": "agregar el proyecto nuevo",
       "returns": "nothing",
-      "defined": "/AdministracionDeLaOrg.es.spell:1554-1675"
+      "defined": "/AdministracionDeLaOrg.es.spell:1556-1676"
     },
     {
       "syntax": "dar el mandato nuevo ((de|del) {thisArg:expression})?",
@@ -484,7 +484,7 @@
       "kind": "method",
       "name": "dar el mandato nuevo",
       "returns": "nothing",
-      "defined": "/AdministracionDeLaOrg.es.spell:1678-1790"
+      "defined": "/AdministracionDeLaOrg.es.spell:1679-1790"
     },
     {
       "syntax": "aprobar la aprobación nueva ((de|del) {thisArg:expression})?",
@@ -498,7 +498,7 @@
       "kind": "method",
       "name": "aprobar la aprobación nueva",
       "returns": "nothing",
-      "defined": "/AdministracionDeLaOrg.es.spell:1793-1926"
+      "defined": "/AdministracionDeLaOrg.es.spell:1793-1925"
     },
     {
       "syntax": "agregar el diseñador nuevo ((de|del) {thisArg:expression})?",
@@ -512,7 +512,7 @@
       "kind": "method",
       "name": "agregar el diseñador nuevo",
       "returns": "nothing",
-      "defined": "/AdministracionDeLaOrg.es.spell:1929-2056"
+      "defined": "/AdministracionDeLaOrg.es.spell:1928-2054"
     },
     {
       "syntax": "agregar la etapa nueva ((de|del) {thisArg:expression})?",
@@ -526,7 +526,7 @@
       "kind": "method",
       "name": "agregar la etapa nueva",
       "returns": "nothing",
-      "defined": "/AdministracionDeLaOrg.es.spell:2059-2166"
+      "defined": "/AdministracionDeLaOrg.es.spell:2057-2163"
     }
   ],
   "codeLines": [

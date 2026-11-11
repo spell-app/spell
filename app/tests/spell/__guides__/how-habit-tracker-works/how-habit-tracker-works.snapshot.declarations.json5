@@ -8,73 +8,73 @@
     {
       "type": "Habit",
       "superType": "App",
-      "defined": "/HowHabitTrackerWorks.spell:484-2321"
+      "defined": "/HowHabitTrackerWorks.spell:484-2315"
     },
     {
       "property": "name",
       "of": "Habit",
       "datatype": "text",
-      "defined": "/HowHabitTrackerWorks.spell:508-526"
+      "defined": "/HowHabitTrackerWorks.spell:501-519"
     },
     {
       "property": "monday",
       "of": "Habit",
       "datatype": "choice",
-      "defined": "/HowHabitTrackerWorks.spell:528-553"
+      "defined": "/HowHabitTrackerWorks.spell:521-546"
     },
     {
       "property": "tuesday",
       "of": "Habit",
       "datatype": "choice",
-      "defined": "/HowHabitTrackerWorks.spell:555-581"
+      "defined": "/HowHabitTrackerWorks.spell:548-574"
     },
     {
       "property": "wednesday",
       "of": "Habit",
       "datatype": "choice",
-      "defined": "/HowHabitTrackerWorks.spell:583-611"
+      "defined": "/HowHabitTrackerWorks.spell:576-604"
     },
     {
       "property": "thursday",
       "of": "Habit",
       "datatype": "choice",
-      "defined": "/HowHabitTrackerWorks.spell:613-640"
+      "defined": "/HowHabitTrackerWorks.spell:606-633"
     },
     {
       "property": "friday",
       "of": "Habit",
       "datatype": "choice",
-      "defined": "/HowHabitTrackerWorks.spell:642-667"
+      "defined": "/HowHabitTrackerWorks.spell:635-660"
     },
     {
       "property": "saturday",
       "of": "Habit",
       "datatype": "choice",
-      "defined": "/HowHabitTrackerWorks.spell:669-696"
+      "defined": "/HowHabitTrackerWorks.spell:662-689"
     },
     {
       "property": "sunday",
       "of": "Habit",
       "datatype": "choice",
-      "defined": "/HowHabitTrackerWorks.spell:698-723"
+      "defined": "/HowHabitTrackerWorks.spell:691-716"
     },
     {
       "property": "days",
       "of": "Habit",
       "datatype": "list of choices",
-      "defined": "/HowHabitTrackerWorks.spell:816-922"
+      "defined": "/HowHabitTrackerWorks.spell:719-825"
     },
     {
       "property": "count",
       "of": "Habit",
       "datatype": "number",
-      "defined": "/HowHabitTrackerWorks.spell:1001-1062"
+      "defined": "/HowHabitTrackerWorks.spell:919-980"
     },
     {
       "property": "streak",
       "of": "Habit",
       "datatype": "number",
-      "defined": "/HowHabitTrackerWorks.spell:1260-1448"
+      "defined": "/HowHabitTrackerWorks.spell:1255-1442"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -87,7 +87,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowHabitTrackerWorks.spell:1525-2321"
+      "defined": "/HowHabitTrackerWorks.spell:1445-2315"
     },
     {
       "syntax": "test streaks",
@@ -96,7 +96,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "streaks",
-      "defined": "/HowHabitTrackerWorks.spell:2561-2809"
+      "defined": "/HowHabitTrackerWorks.spell:2555-2803"
     }
   ],
   "codeLines": [

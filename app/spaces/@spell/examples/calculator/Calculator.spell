@@ -2,46 +2,46 @@
 // A pocket calculator:  a number, an operator, another number, and the total as you type.
 // Its keys are Spell UI's buttons, four a row, and each one runs one of the calculator's actions.
 
-calculator is an app:
-	// The sum being typed:  its left number, its operator and its right number
+calculator is an app
 	group "What It Keeps"
-	// The number being typed, as text, so each key can add a digit on the end
+		// The sum being typed:  its left number, its operator and its right number
 	its "input" is text
+		// The number being typed, as text, so each key can add a digit on the end
 	its "left" is text
 	its "operator" is text
 	its "right" is text
-	// The sum so far, worked out each time it's read
-	its "total" is:
+	its "total" is
+		// The sum so far, worked out each time it's read
 		set left number to the left as a number
 		set right number to the right as a number
 		if the operator is "+" return left number + right number
 		if the operator is "–" return left number - right number
 		if the operator is "×" return left number times right number
 		return left number divided by right number
-	// What the display's top line shows:  0 until a key's pressed
-	its "sum" is:
+	its "sum" is
+		// What the display's top line shows:  0 until a key's pressed
 		set shown to "0" if the left is empty otherwise the left
 		return shown + " " + the operator + " " + the right
-	// The display's second line:  the total, once there's a right number
-	its "output" is:
+	its "output" is
+		// The display's second line:  the total, once there's a right number
 		"" if the right is empty
 		"= " + the total otherwise
 
 	group "What Its Keys Do"
-	to clear it:
+	to clear it
 		clear the input
 		clear the left
 		clear the operator
 		clear the right
-	// Equals:  the total becomes the left number, ready for the next operator
-	to finish it:
+	to finish it
+		// Equals:  the total becomes the left number, ready for the next operator
 		if the right is empty return
 		set the left to the total as text
 		clear the operator
 		clear the right
 		clear the input
-	// A digit, or the decimal point:  onto the number being typed, the left one until there's an operator
-	to press (digit as text):
+	to press (digit as text)
+		// A digit, or the decimal point:  onto the number being typed, the left one until there's an operator
 		if the digit is "."
 			if the input is empty
 				set the input to "0."
@@ -53,16 +53,16 @@ calculator is an app:
 			set the left to the input
 		otherwise
 			set the right to the input
-	// An operator:  after a whole sum, the total carries on as the next sum's left number
-	to apply (key as text):
+	to apply (key as text)
+		// An operator:  after a whole sum, the total carries on as the next sum's left number
 		if the right is not empty
 			finish it
 		set the operator to the key
 		clear the input
 
 	group "Drawing"
-	// The display, then the keypad, four keys a row:  C and 0 are two keys wide
-	to draw it:
+	to draw it
+		// The display, then the keypad, four keys a row:  C and 0 are two keys wide
 		<container width="20em">
 			<card fluid>
 				<segment appearance="secondary" align="right">
@@ -98,8 +98,8 @@ calculator is an app:
 			</card>
 		</container>
 
-	// 12 + 5, then times 2:  the total carries on as the next sum's left number
-	to test two sums in a row:
+	to test two sums in a row
+		// 12 + 5, then times 2:  the total carries on as the next sum's left number
 		press "1"
 		press "2"
 		apply "+"

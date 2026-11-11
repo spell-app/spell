@@ -3,20 +3,20 @@
 // Each diner is its own element on the page, a row of Spell UI's fields bound to it:
 // typing a name or an amount changes the diner, and every sum follows.
 
-a "diner" is a view:
+a "diner" is a view
 	its "name" is text
-	// What they ordered, before the tip
 	its "amount" is a number
-	// Their share of the tip:  the same part of it as their part of the bill
+		// What they ordered, before the tip
 	its "tip" is the amount * bill splitter's percent
-	// What they owe
+		// Their share of the tip:  the same part of it as their part of the bill
 	its "share" is the amount + the tip
+		// What they owe
 
-	// Takes them off the bill
 	to remove it: remove it from bill splitter's diners
+		// Takes them off the bill
 
-	// Their name, their amount, what they owe, and a button to take them off
-	to draw it:
+	to draw it
+		// Their name, their amount, what they owe, and a button to take them off
 		<form value={it}>
 			<stack direction="horizontal" spacing="sm">
 				<input name="name" placeholder="Name" aria-label="Name"/>
@@ -27,10 +27,10 @@ a "diner" is a view:
 			</stack>
 		</form>
 
-// The diners, one a row
-a "table" is a viewable list of diners:
-	to draw its placeholder:
+a "table" is a viewable list of diners
+	// The diners, one a row
+	to draw its placeholder
 		<text color="grey">Nobody yet:  add someone</text>
 
-// a diner sits at one table
 a diner belongs to one table
+	// a diner sits at one table

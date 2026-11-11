@@ -6,11 +6,11 @@
 
 ## A row for each message:  who sent it, when, and what it says
 
-a message:
-	// The first two letters of who sent it, for the circle beside their name
+a message
 	its "initials" is first 2 letters in (its by as upper case)
+		// The first two letters of who sent it, for the circle beside their name
 
-	to draw it:
+	to draw it
 		<stack class="message" direction="horizontal" spacing="md" align="start">
 			<text class="avatar">{its initials}</text>
 			<stack spacing="none">
@@ -25,39 +25,39 @@ a message:
 
 ## A thread in the list:  a lock on the private ones
 
-a thread:
-	// Its icon:  a lock on the private ones
-	its "mark" is:
+a thread
+	its "mark" is
+		// Its icon:  a lock on the private ones
 		"lock" if its side is "private"
 		"hashtag" otherwise
 
 ## The page:  the toolbar, the threads down the side, and the one picked, oldest first, with a box to write in
 
-chat page is an app:
+chat page is an app
 	"new message" is a new message
 	its "picked" is the first thread in every thread where its current
-	// A phone only:  the threads, open in a drawer
 	its "drawer open" is yes or no
-	// The picked thread's name:  nothing until one is picked, as when signed out
-	its "thread name" is:
+		// A phone only:  the threads, open in a drawer
+	its "thread name" is
+		// The picked thread's name:  nothing until one is picked, as when signed out
 		the name of its picked if its picked
 		"" otherwise
-	// What the box says, until something is typed
 	its "box words" is "Message " + its thread name
+		// What the box says, until something is typed
 
-	to open the drawer:
+	to open the drawer
 		set its drawer open to yes
 
-	to close the drawer:
+	to close the drawer
 		set its drawer open to no
 
-	to send it:
+	to send it
 		set the sent of the new message to a new date
 		set the thread of the new message to the topic of its picked
 		add the new message to the messages
 		set its new message to a new message
 
-	to draw it:
+	to draw it
 		<stack class="org-chat" spacing="none">
 			<toolbar class="top-bar" appearance="text" aria-label="Chat">
 				<button slot="icon" class="show-threads" icon="bars" appearance="transparent" aria-label="Show the threads" title="Show the threads" onClick={open the drawer}/>
@@ -93,7 +93,7 @@ chat page is an app:
 			<flyout class="threads-drawer" visible={its drawer open} position="left" width="thin" on-ui-closed={close the drawer}>{draw the thread list of it}</flyout>
 		</stack>
 
-	to draw its thread list:
+	to draw its thread list
 		<menu class="threads" direction="vertical" appearance="secondary" fluid aria-label="Threads">
 			<for thread in every thread sorted by its name a-z loading="Finding your threads">
 				<item link={its link} selected={its current} icon={its mark}>{its name}</item>

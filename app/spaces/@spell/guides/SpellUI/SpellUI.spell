@@ -1,9 +1,9 @@
 // Spell UI's component pages as one site (epic `notebook` P10).
 // Each component has a folder of notebooks, and each notebook is one page here:  this file says where each one is,
 // and what the side navigation calls it.  A component's Usage page is its address, and its other pages are under it.
-spell ui is a site:
-	// the docs that aren't one component's:  each page one file at the top of the project, beside the components' folders
+spell ui is a site
 	it has a home page at "/", named "Spell UI", thumbnail "snapshots/home.jpg"
+		// the docs that aren't one component's:  each page one file at the top of the project, beside the components' folders
 	it has a getting started page at "/getting-started", named "Getting started", thumbnail "snapshots/getting-started.jpg"
 	it has a grammar page at "/grammar", named "Grammar", thumbnail "snapshots/grammar.jpg"
 	it has a theming page at "/theming", named "Theming", thumbnail "snapshots/theming.jpg"
@@ -390,8 +390,8 @@ spell ui is a site:
 		it has a zoom examples page at "/zoom/examples", named "Examples", thumbnail "snapshots/zoom-examples.jpg"
 		it has a zoom api page at "/zoom/api", named "API", thumbnail "snapshots/zoom-api.jpg"
 		it has a zoom theming page at "/zoom/theming", named "Theming", thumbnail "snapshots/zoom-theming.jpg"
-	// the docs site's own:  its settings, and the syntax of the language a component page shows
 	it has a settings dialog
+		// the docs site's own:  its settings, and the syntax of the language a component page shows
 	it has a syntax sidebar
 	it has a not found page
 	it has an error page

@@ -4,16 +4,16 @@
 ## A counter
 // Each counter is its own element on the page.
 
-a "counter" is a view:
-	// How many times it's been clicked:  a new counter starts at 0
+a "counter" is a view
 	its "count" is a number starting at 0
+		// How many times it's been clicked:  a new counter starts at 0
 	to count up: set the count to the count + 1
 
-	// A button saying how many times it's been clicked:  a click counts up
-	to draw it:
+	to draw it
+		// A button saying how many times it's been clicked:  a click counts up
 		<button onClick={count up}>Clicked {the count} times</button>
 
-	to test counting:
+	to test counting
 		set the counter to a new counter
 		the counter's count should be 0
 		count up of the counter
@@ -22,7 +22,7 @@ a "counter" is a view:
 
 ## The app:  one counter, drawn
 
-counter app is an app:
+counter app is an app
 	"counter" is a new counter
-	to draw it:
+	to draw it
 		<container>{draw the counter}</container>

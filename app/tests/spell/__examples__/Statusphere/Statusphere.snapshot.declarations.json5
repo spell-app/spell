@@ -14,7 +14,7 @@
         "placeType": "StatusBoard",
         "collection": "statuses"
       },
-      "defined": "/Status.spell:189-347"
+      "defined": "/Status.spell:189-346"
     },
     {
       "property": "status",
@@ -29,7 +29,7 @@
           "value": "1"
         }
       ],
-      "defined": "/Status.spell:258-310"
+      "defined": "/Status.spell:257-309"
     },
     {
       "property": "created_at",
@@ -41,19 +41,19 @@
           "type": "empty"
         }
       ],
-      "defined": "/Status.spell:312-347"
+      "defined": "/Status.spell:311-346"
     },
     {
       "property": "owner",
       "of": "Status",
       "group": "Statusphere:  where the statuses are kept",
       "datatype": "text",
-      "defined": "/Statusphere.api.spell:555-584"
+      "defined": "/Statusphere.api.spell:489-584"
     },
     {
       "property": "who",
       "of": "Status",
-      "defined": "/Statusphere.spell:493-671"
+      "defined": "/Statusphere.spell:415-670"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -66,7 +66,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Statusphere.spell:674-870"
+      "defined": "/Statusphere.spell:673-868"
     },
     {
       "type": "StatusBoard",
@@ -82,7 +82,7 @@
           }
         }
       },
-      "defined": "/Statusphere.api.spell:320-449"
+      "defined": "/Statusphere.api.spell:320-448"
     },
     {
       "uiDefaults": {
@@ -96,13 +96,13 @@
     {
       "type": "Statusphere",
       "superType": "App",
-      "defined": "/Statusphere.spell:944-2168"
+      "defined": "/Statusphere.spell:942-2165"
     },
     {
       "property": "recent",
       "of": "Statusphere",
       "datatype": "list of statuses",
-      "defined": "/Statusphere.spell:1008-1082"
+      "defined": "/Statusphere.spell:965-1079"
     },
     {
       "syntax": "post {callArgs:expression} (of {thisArg:expression})?",
@@ -122,7 +122,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Statusphere.spell:1163-1269"
+      "defined": "/Statusphere.spell:1082-1266"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -135,7 +135,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Statusphere.spell:1344-2168"
+      "defined": "/Statusphere.spell:1269-2165"
     }
   ],
   "codeLines": [

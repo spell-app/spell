@@ -49,7 +49,7 @@ class Card(TwoSidedView):
     def is_a_suit(self, suit: Suit) -> bool:
         return self.suit == suit
 
-    # - its "color" is one of red, black:
+    # - its "color" is one of red, black
     #   red if it is a diamond or it is a heart
     #   black otherwise
     COLORS = ("red", "black")
@@ -179,7 +179,7 @@ class Card(TwoSidedView):
 
 # Ace is low:  ace = 1 ... king = 13
 
-# What a person, a test or the console calls it
+# What a person, test or console calls it
 
 # One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
@@ -279,13 +279,13 @@ def test_a_new_deck() -> None:
         )
         core.expect(
             getattr(deck.first_item, "state", None),
-            "the deck's first card's state",
+            "deck's first card's state",
             "A♣↓",
             "\"A♣↓\"",
         )
         core.expect(
             getattr(deck.last_item, "name", None),
-            "the deck's last card's name",
+            "deck's last card's name",
             "king of spades",
             "\"king of spades\"",
         )
@@ -362,8 +362,8 @@ def test_piles() -> None:
         it = Pile()
         core.echo_test_action("set the stock to a new pile with name \"stock\"")
         stock = Pile(name="stock")
-        core.expect(stock.color, "the stock's color", "none", "\"none\"")
-        core.expect(stock.value, "the stock's value", 0, "0")
+        core.expect(stock.color, "stock's color", "none", "\"none\"")
+        core.expect(stock.value, "stock's value", 0, "0")
         core.echo_test_action(
             "add (a new card whose rank is queen, suit is spades and direction is up) to the stock",
         )
@@ -372,9 +372,9 @@ def test_piles() -> None:
             "add (a new card whose rank is 7, suit is hearts and direction is down) to the stock",
         )
         stock.append(Card(rank=7, suit="hearts", direction="down"))
-        core.expect(stock.color, "the stock's color", "red", "red")
-        core.expect(stock.value, "the stock's value", 7, "7")
-        core.expect(stock.state, "the stock's state", "stock: Q♠↑ 7♥↓", "\"stock: Q♠↑ 7♥↓\"")
+        core.expect(stock.color, "stock's color", "red", "red")
+        core.expect(stock.value, "stock's value", 7, "7")
+        core.expect(stock.state, "stock's state", "stock: Q♠↑ 7♥↓", "\"stock: Q♠↑ 7♥↓\"")
 
         # a card is in one pile at a time
         discards = Pile(name="discards")
@@ -421,9 +421,8 @@ class StockPile(Pile):
     def can_give_up(self, card: Card) -> bool:
         return False
 
-    # A light grey card, face down
-
     def draw_its_placeholder(self) -> Element:
+        # A light grey card, face down
         return h("ui-text", {"part": "placeholder"}, "🂠")
 
     async def on_click(self, event: ClickEvent) -> None:
@@ -464,9 +463,8 @@ class Foundation(Pile):
     def can_give_up(self, card: Card) -> bool:
         return False
 
-    # A light grey ace of its suit, face up
-
     def draw_its_placeholder(self) -> Element:
+        # A light grey ace of its suit, face up
         return h("ui-text", {"part": "placeholder"}, Card(rank="ace", suit=self.suit).picture)
 
     def can_take(self, card: Card) -> bool:
@@ -714,12 +712,12 @@ solitaire = Solitaire()
 
 # Each pauses a moment, so a deal animates
 # A click on the empty stock:  one step to undo, where the deal's own turn isn't
-core.describe_action(Solitaire, "turn_a_stock_card", {"title": "turn a stock card", "undone_as": "Turn Card"})
+core.describe_action(Solitaire, "turn_a_stock_card", {"title": "Turn A Stock Card", "undone_as": "Turn Card"})
 
 # Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["N"], "undone_as": "Restart"})
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["N"], "undone_as": "Restart The Game"})
 # Play every card that can go somewhere, until none can
-core.describe_action(Solitaire, "auto_play", {"title": "Auto play", "shortcuts": ["A"], "undone_as": "Auto play"})
+core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
 # Turn up a face-down card from a tableau, at random, onto the discards
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
 # - its "game menu" is a menu of "auto play", "cheat", "restart the game", "undo" and "redo"
@@ -732,11 +730,11 @@ core.describe_menu(Solitaire, "game_menu", {"items": ["auto_play", "cheat", "res
 
 # the card, and every card on it, onto the first pile that takes it;  it says whether it moved
 # - the stock's card turns over onto the discards instead
-core.describe_action(Card, "play", {"title": "play a card", "undone_as": "Play Card"})
+core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
 
 # the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
 # - the pile it left turns its new last card up;  the move counts, and scores
-core.describe_action(Card, "put_on_pile", {"title": "put a card on a pile", "undone_as": "Move Card"})
+core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "undone_as": "Move Card"})
 
 # each card's events, and when it may be clicked:  the Inspector lists them, as written here
 # only a card face up, or the stock's, can be clicked:  the others show no pointer

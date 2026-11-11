@@ -25,26 +25,26 @@
 // - `onClick` says what a key does when it's clicked:  one of the actions above.
 // - The display shows the number being typed, or the total when nothing is.
 
-adding machine is an app:
+adding machine is an app
 	its "total" is a number
-	// The number being typed
 	its "input" is text
+		// The number being typed
 
-	// A digit key:  that digit, on the end of the number being typed
-	to press (digit as text):
+	to press (digit as text)
+		// A digit key:  that digit, on the end of the number being typed
 		set the input to the input + the digit
-	// The + key:  the number typed, added to the total, then a fresh start for the next one
-	to add it up:
+	to add it up
+		// The + key:  the number typed, added to the total, then a fresh start for the next one
 		if the input is empty return
 		set typed to the input as a number
 		set the total to the total + typed
 		clear the input
-	// The C key:  back to nothing
-	to clear it:
+	to clear it
+		// The C key:  back to nothing
 		clear the total
 		clear the input
 
-	to draw it:
+	to draw it
 		<stack align="center">
 			<card>
 				<segment appearance="secondary" align="right">
@@ -62,8 +62,8 @@ adding machine is an app:
 			</card>
 		</stack>
 
-	// 12 and 5 make 17
-	to test adding up:
+	to test adding up
+		// 12 and 5 make 17
 		press "1"
 		press "2"
 		add it up

@@ -5,131 +5,77 @@
 // What each item does is still the editor's own:  `<AppBarMenus>` in `MenuBar.tsx` fills them in, by name,
 // and so are the titles that follow the editor's state (Undo's, New Example's, Duplicate's, More Examples').
 
-app menus is an app:
-	// The file differs from where it started
+app menus is an app
 	its "can discard" is yes or no
-	// AutoSave is on
+		// The file differs from where it started
 	its "auto saving" is yes or no
-	// The project has a draft to publish
+		// AutoSave is on
 	its "can publish" is yes or no
-	// The page is in Run, not Edit
+		// The project has a draft to publish
 	its "running" is yes or no
-	// The code shows, in Edit
+		// The page is in Run, not Edit
 	its "code showing" is yes or no
-	// The Program panel shows under the code, in Edit
+		// The code shows, in Edit
 	its "program panel showing" is yes or no
-	// The Inspector shows
+		// The Program panel shows under the code, in Edit
 	its "inspector open" is yes or no
-	// The code shows its line numbers
+		// The Inspector shows
 	its "line numbers showing" is yes or no
-	// A click in the app picks what it clicks
+		// The code shows its line numbers
 	its "inspecting" is yes or no
-	// The project is a site, with pages at addresses:  View › Site edits it
+		// A click in the app picks what it clicks
 	its "site ready" is yes or no
+		// The project is a site, with pages at addresses:  View › Site edits it
 
-	to more examples:
-		icon "folder open outline"
-	to new file:
-		titled "New File"
-		icon "file outline"
+	to "more examples" with icon "folder open outline"
+	to "new file" with icon "file outline"
 		shortcut meta+N
-	to new example:
-		icon "file code outline"
-	to save:
-		titled "Save"
-		icon "save outline"
+	to "new example" with icon "file code outline"
+	to "save" with icon "save outline"
 		shortcut meta+S
-	to discard changes:
-		titled "Discard Changes"
-		icon "undo"
+	to "discard changes" with icon "undo"
 		shortcut shift+meta+R
 		enabled when its can discard is yes
-	to publish:
-		titled "Publish"
-		icon "paper plane outline"
+	to "publish" with icon "paper plane outline"
 		enabled when its can publish is yes
-	to versions:
-		titled "Versions"
-		icon "history"
-	to duplicate project:
-		icon "clone outline"
-	to project settings:
-		titled "Project Settings"
-		icon "cog"
-	to auto save:
-		titled "AutoSave"
-		icon "sync alternate"
+	to "versions" with icon "history"
+	to "duplicate project" with icon "clone outline"
+	to "project settings" with icon "cog"
+	to "auto save" with title "AutoSave", icon "sync alternate"
 		selected when its auto saving is yes
-	to export project:
-		titled "Export…"
-		icon "download"
-	to import project:
-		titled "Import…"
-		icon "upload"
-	to home:
-		titled "Home"
-		icon "home"
+	to "export project" with title "Export…", icon "download"
+	to "import project" with title "Import…", icon "upload"
+	to "home" with icon "home"
 
-	to undo:
-		icon "undo"
-	to redo:
-		icon "redo"
+	to "undo" with icon "undo"
+	to "redo" with icon "redo"
 	to part actions
-	to find:
-		titled "Find"
-		icon "search"
-	to code settings:
-		titled "Code Editor Settings…"
-		icon "sliders horizontal"
+	to "find" with icon "search"
+	to "code settings" with title "Code Editor Settings…", icon "sliders horizontal"
 
-	to run mode:
-		titled "Run"
-		icon "eye"
+	to "run mode" with title "Run", icon "eye"
 		selected when its running is yes
-	to edit mode:
-		titled "Edit"
-		icon "pencil alternate"
+	to "edit mode" with title "Edit", icon "pencil alternate"
 		selected when its running is no
-	to site view:
-		titled "Site"
-		icon "sitemap"
+	to "site view" with title "Site", icon "sitemap"
 		enabled when its site ready is yes
-	to show code:
-		titled "Code"
-		icon "code"
+	to "show code" with title "Code", icon "code"
 		selected when its code showing is yes
-	to show program panel:
-		titled "Program Panel"
-		icon "terminal"
+	to "show program panel" with title "Program Panel", icon "terminal"
 		selected when its program panel showing is yes
-	to show inspector:
-		titled "Inspector"
-		icon "info circle"
+	to "show inspector" with title "Inspector", icon "info circle"
 		selected when its inspector open is yes
-	to inspector cards:
-		icon "list"
-	to show line numbers:
-		titled "Line Numbers"
-		icon "list ol"
+	to "inspector cards" with icon "list"
+	to "show line numbers" with title "Line Numbers", icon "list ol"
 		selected when its line numbers showing is yes
 
-	to compile and run:
-		titled "Compile and Run"
-		icon "play"
-	to restart:
-		titled "Restart"
-		icon "redo alternate"
-	to inspect app:
-		titled "Inspect App"
-		icon "crosshairs"
+	to "compile and run" with icon "play"
+	to "restart" with icon "redo alternate"
+	to "inspect app" with icon "crosshairs"
 		enabled when its inspecting is no
-	to stop inspecting:
-		titled "Stop Inspecting"
-		icon "stop circle outline"
+	to "stop inspecting" with icon "stop circle outline"
 		enabled when its inspecting is yes
-	to clear console:
-		titled "Clear Console"
-		icon "ban"
+	to "clear console" with icon "ban"
 
 	its "file menu" is a menu of "more examples", "-", "new file", "new example", "-", "save", "discard changes", "publish", "versions", "duplicate project", "-", "project settings", "auto save", "-", "export project", "import project", "-" and "home" titled "File"
 

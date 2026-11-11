@@ -68,9 +68,9 @@ export class Task extends View {
     )
   }
 
-  static selectable = true
-
   static draggable = true
+
+  static selectable = true
 
   get checklist() {
     return Checklist.ownerOf(this)!
@@ -157,11 +157,11 @@ export class BrowserTask extends Task {
   }
 
   // - it lives in browser storage
-  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 274, end: 301 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 273, end: 300 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in browser storage
-  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 274, end: 301 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.browser.api.spell", start: 273, end: 300 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -184,7 +184,7 @@ export class BrowserTaskElement extends SpellElement<BrowserTask> {
 core.useElement(BrowserTask, BrowserTaskElement)
 
 export class BrowserKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 395, end: 433 }, readsFrom: ["browser_storage"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.browser.api.spell", start: 392, end: 430 }, readsFrom: ["browser_storage"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(BrowserTask)
   }) }
@@ -223,11 +223,11 @@ export class ServerTask extends Task {
   }
 
   // - it lives in task files
-  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 418, end: 440 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 416, end: 438 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in task files
-  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 418, end: 440 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.server.api.spell", start: 416, end: 438 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -250,7 +250,7 @@ export class ServerTaskElement extends SpellElement<ServerTask> {
 core.useElement(ServerTask, ServerTaskElement)
 
 export class ServerKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 532, end: 569 }, readsFrom: ["task_files"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.server.api.spell", start: 528, end: 565 }, readsFrom: ["task_files"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(ServerTask)
   }) }
@@ -295,11 +295,11 @@ export class SheetTask extends Task {
   }
 
   // - it lives in task sheet
-  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 571, end: 593 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 569, end: 591 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in task sheet
-  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 571, end: 593 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.csv.api.spell", start: 569, end: 591 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -322,7 +322,7 @@ export class SheetTaskElement extends SpellElement<SheetTask> {
 core.useElement(SheetTask, SheetTaskElement)
 
 export class SheetKeeper extends TaskKeeper {
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 683, end: 719 }, readsFrom: ["task_sheet"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.csv.api.spell", start: 679, end: 715 }, readsFrom: ["task_sheet"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SheetTask)
   }) }
@@ -364,7 +364,7 @@ export class SkyTask extends Task {
 
   /** whose it is:  the account it's in, which a record can't claim */
   // a sky task has an owner as text
-  @prop({ type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 557, end: 588 } })
+  @prop({ type: "text", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 489, end: 586 } })
   accessor owner!: string
 
   static savedIn = {
@@ -374,11 +374,11 @@ export class SkyTask extends Task {
   }
 
   // - it lives in task sky
-  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 420, end: 440 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 418, end: 438 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in task sky
-  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 420, end: 440 } })
+  @prop({ type: "date", declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 418, end: 438 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -403,7 +403,7 @@ core.useElement(SkyTask, SkyTaskElement)
 
 export class SkyKeeper extends TaskKeeper {
   /** only your own:  everyone's tasks are in their own accounts */
-  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 687, end: 749 }, readsFrom: ["task_sky"] }) }
+  static { this.declareProp("keptTasks", { declaredAt: { path: "/TaskList.atmosphere.api.spell", start: 621, end: 683 }, readsFrom: ["task_sky"] }) }
   get keptTasks() { return core.waitedValue(this, "keptTasks", async () => {
     return await core.savedThings(SkyTask, { filter: { owner: core.currentPerson().id } })
   }) }
@@ -464,8 +464,8 @@ export class Checklist extends ViewableList<Task> {
     this.keepTheOrder()
   }
 
-  // each task, unless the filter hides it
   drawEachItem(item: Task) {
+    // each task, unless the filter hides it
     if (this.isShowingShowing("active") && item.isDone) return undefined
     if (this.isShowingShowing("done") && item.isActive) return undefined
     return core.drawThing(item)
@@ -486,7 +486,6 @@ export class Checklist extends ViewableList<Task> {
     this.forEach(withSpellPositions((task, place) => (task.order = place)))
   }
 
-  // on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
   static reorderItemsAfter = 0
 
   static exclusive = true
@@ -520,6 +519,8 @@ export class ChecklistElement extends SpellElement<Checklist> {
   }
 }
 core.useElement(Checklist, ChecklistElement)
+
+// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 
 export function testTheFilter() {
   return core.test("test the filter", function testTheFilter() {
@@ -771,16 +772,16 @@ export const taskList = new TaskList()
 core.describeAction(TaskList, "showAll", { title: "All", icon: "list", selectedWhen: "showAllIsSelected" })
 core.describeAction(TaskList, "showToDo", { title: "To do", icon: "square outline", selectedWhen: "showToDoIsSelected" })
 core.describeAction(TaskList, "showDone", { title: "Done", icon: "check square outline", selectedWhen: "showDoneIsSelected" })
-core.describeAction(TaskList, "removeTheDoneTasks", { title: "Remove the done tasks", icon: "trash alternate outline" })
+core.describeAction(TaskList, "removeTheDoneTasks", { title: "Remove The Done Tasks", icon: "trash alternate outline" })
 
 // The toolbar's buttons, and the list's right click:  the same actions
 // - its "tasks menu" is a menu of "show all", "show to do", "show done", "-" and "remove the done tasks"
 core.describeMenu(TaskList, "tasksMenu", { items: ["showAll", "showToDo", "showDone", "-", "removeTheDoneTasks"] })
 // - its "show menu" is a menu of "show all", "show to do" and "show done" titled "Show"
 core.describeMenu(TaskList, "showMenu", { items: ["showAll", "showToDo", "showDone"], title: "Show" })
-// A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
 // - its "list menu" is a menu of "show menu", "-" and "remove the done tasks"
 core.describeMenu(TaskList, "listMenu", { items: ["showMenu", "-", "removeTheDoneTasks"] })
+// A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
 // -----------
 core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet.¬   - Each task is an element of its own inside the list, <task-list-checklist>:¬     <task-list-browser-task>, <task-list-server-task> or <task-list-sky-task>, for where it's kept.¬   - Its title's field fills the row by itself:  it's \`fluid\`, in a row of a \`<stack>\`. */¬¬/* done:  it fades */¬task-list-checklist > [done] {¬  opacity: 0.6;¬}¬`)
 // -----------

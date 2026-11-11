@@ -79,7 +79,7 @@ export const words = {
     Card: [
       { name: "Rank", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "value", "isAFaceCard", "isANumberCard"] },
       { name: "Suit", members: ["suit", "color", "symbol"] },
-      { name: "Names", description: "What a person, a test or the console calls it", members: ["name", "isTheRankOfSuit", "state"] },
+      { name: "Names", description: "What a person, test or console calls it", members: ["name", "isTheRankOfSuit", "state"] },
       { name: "Drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["picture", "lifted"] },
       { name: "Playing a card", members: ["countThePointsForCardOnPile", "play", "putOnPile"] },
       { name: "A pile of cards", members: ["pile"] }
@@ -87,7 +87,7 @@ export const words = {
     Solitaire: [
       { name: "Piles", description: "One of each, made with the solitaire", members: ["stock", "discards", "clubs", "diamonds", "hearts", "spades", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "create"] },
       { name: "Dealing", description: "Each pauses a moment, so a deal animates", members: ["resetTheStock", "playFromTheStock", "dealTheCards", "turnAStockCard"] },
-      { name: "Game", description: "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three", members: ["draw", "restartTheGame", "autoPlay", "cheat"] }
+      { name: "Game Play", description: "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three", members: ["draw", "restartTheGame", "autoPlay", "cheat"] }
     ]
   }
 }

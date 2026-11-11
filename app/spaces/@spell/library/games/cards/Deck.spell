@@ -1,25 +1,25 @@
 # A deck
 // The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if you ask.
 
-a "deck" is a list of cards:
-	// No jokers, unless it's made `with jokers`
+a "deck" is a list of cards
 	its "jokers" is yes or no
-	// One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does
-	to create it:
+		// No jokers, unless it's made `with jokers`
+	to create it
+		// One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does
 		for rank in card ranks
 			for suit in card suits
 				add a new card with rank = the rank, suit = the suit to the deck
 		if its jokers is yes
 			add a new joker with color = red to the deck
 			add a new joker with color = black to the deck
-	// Its cards' short names, top to bottom
-	its "state" is:
+	its "state" is
+		// Its cards' short names, top to bottom
 		set card names to a new list of text
 		for card in the deck
 			add the state of the card to card names
 		return "deck: " + card names
 
-	to test a new deck:
+	to test a new deck
 		the deck is a new deck
 		the number of cards in the deck should be 52
 		the number of (cards in the deck where it is a queen) should be 4
@@ -29,7 +29,7 @@ a "deck" is a list of cards:
 		shuffle the deck
 		the number of cards in the deck should be 52
 
-	to test two jokers:
+	to test two jokers
 		the deck is a new deck with jokers
 		the number of cards in the deck should be 54
 		set wild cards to the cards in the deck where it is a joker

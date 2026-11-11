@@ -25,13 +25,13 @@
 // `on fizz with number as a number:` runs each time a `fizz` event is sent, with the number it carries.
 // The listener comes first, so it's listening before the counting starts.
 
-on fizzbuzz with number as a number:
+on fizzbuzz with number as a number
 	print number, "fizzbuzz"
-on fizz with number as a number:
+on fizz with number as a number
 	print number, "fizz"
-on buzz with number as a number:
+on buzz with number as a number
 	print number, "buzz"
-on plain number with number as a number:
+on plain number with number as a number
 	print number
 
 ## The algorithm

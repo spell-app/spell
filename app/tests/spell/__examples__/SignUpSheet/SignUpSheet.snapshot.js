@@ -7,17 +7,17 @@ core.heading("Sign-Up Sheet:  where a picnic's sign-ups are kept")
 
 export class Volunteer extends Thing {
   // - its "person" is text
-  static { this.declareProp("person", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1351, end: 1371 } }) }
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1349, end: 1369 } }) }
   get person() { return this.getProp("person") }
   set person(value) { this.setProp("person", value) }
 
   // - its "shift" is text
-  static { this.declareProp("shift", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1373, end: 1392 } }) }
+  static { this.declareProp("shift", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1371, end: 1390 } }) }
   get shift() { return this.getProp("shift") }
   set shift(value) { this.setProp("shift", value) }
 
   // - its "note" is text
-  static { this.declareProp("note", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1394, end: 1412 } }) }
+  static { this.declareProp("note", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1392, end: 1410 } }) }
   get note() { return this.getProp("note") }
   set note(value) { this.setProp("note", value) }
 
@@ -43,12 +43,12 @@ export class Volunteer extends Thing {
   }
 
   // - it lives in the sign up sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1320, end: 1349 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1318, end: 1347 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in the sign up sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1320, end: 1349 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1318, end: 1347 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -59,17 +59,17 @@ export class Volunteer extends Thing {
  */
 export class Attendee extends Thing {
   // - its "person" is text
-  static { this.declareProp("person", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1646, end: 1666 } }) }
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1643, end: 1663 } }) }
   get person() { return this.getProp("person") }
   set person(value) { this.setProp("person", value) }
 
   // - its "standing" is text
-  static { this.declareProp("standing", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1668, end: 1690 } }) }
+  static { this.declareProp("standing", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1665, end: 1687 } }) }
   get standing() { return this.getProp("standing") }
   set standing(value) { this.setProp("standing", value) }
 
   // - its "invitations" is a number
-  static { this.declareProp("invitations", { type: "number", declaredAt: { path: "/SignUpSheet.api.spell", start: 1692, end: 1721 } }) }
+  static { this.declareProp("invitations", { type: "number", declaredAt: { path: "/SignUpSheet.api.spell", start: 1689, end: 1718 } }) }
   get invitations() { return this.getProp("invitations") }
   set invitations(value) { this.setProp("invitations", value) }
 
@@ -98,12 +98,12 @@ export class Attendee extends Thing {
   }
 
   // - it lives in the sign up sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1615, end: 1644 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1612, end: 1641 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in the sign up sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1615, end: 1644 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1612, end: 1641 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -111,22 +111,22 @@ export class Attendee extends Thing {
 /** A ticket someone asked for, for a guest:  an organizer confirms it. */
 export class Ticket extends Thing {
   // - its "person" is text
-  static { this.declareProp("person", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1849, end: 1869 } }) }
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1846, end: 1866 } }) }
   get person() { return this.getProp("person") }
   set person(value) { this.setProp("person", value) }
 
   // - its "guest" is text
-  static { this.declareProp("guest", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1871, end: 1890 } }) }
+  static { this.declareProp("guest", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1868, end: 1887 } }) }
   get guest() { return this.getProp("guest") }
   set guest(value) { this.setProp("guest", value) }
 
   // - its "event" is text
-  static { this.declareProp("event", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1892, end: 1911 } }) }
+  static { this.declareProp("event", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1889, end: 1908 } }) }
   get event() { return this.getProp("event") }
   set event(value) { this.setProp("event", value) }
 
   // - its "status" is text
-  static { this.declareProp("status", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1913, end: 1933 } }) }
+  static { this.declareProp("status", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 1910, end: 1930 } }) }
   get status() { return this.getProp("status") }
   set status(value) { this.setProp("status", value) }
 
@@ -153,12 +153,12 @@ export class Ticket extends Thing {
   }
 
   // - it lives in the sign up sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1818, end: 1847 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1815, end: 1844 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in the sign up sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1818, end: 1847 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 1815, end: 1844 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -166,32 +166,32 @@ export class Ticket extends Thing {
 /** A message in your inbox:  your invitations' count is one, in the conversation "invitations". */
 export class Message extends Thing {
   // - its "text" is text
-  static { this.declareProp("text", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2239, end: 2257 } }) }
+  static { this.declareProp("text", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2236, end: 2254 } }) }
   get text() { return this.getProp("text") }
   set text(value) { this.setProp("text", value) }
 
   // - its "recipients" is text
-  static { this.declareProp("recipients", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2259, end: 2283 } }) }
+  static { this.declareProp("recipients", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2256, end: 2280 } }) }
   get recipients() { return this.getProp("recipients") }
   set recipients(value) { this.setProp("recipients", value) }
 
   // - its "thread" is text
-  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2285, end: 2305 } }) }
+  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2282, end: 2302 } }) }
   get thread() { return this.getProp("thread") }
   set thread(value) { this.setProp("thread", value) }
 
   // - its "page" is text
-  static { this.declareProp("page", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2307, end: 2325 } }) }
+  static { this.declareProp("page", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2304, end: 2322 } }) }
   get page() { return this.getProp("page") }
   set page(value) { this.setProp("page", value) }
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2327, end: 2346 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2324, end: 2343 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "line" is text
-  static { this.declareProp("line", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2348, end: 2366 } }) }
+  static { this.declareProp("line", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2345, end: 2363 } }) }
   get line() { return this.getProp("line") }
   set line(value) { this.setProp("line", value) }
 
@@ -206,24 +206,24 @@ export class Message extends Thing {
   }
 
   // - it lives in my inbox
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2217, end: 2237 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2214, end: 2234 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my inbox
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2217, end: 2237 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2214, end: 2234 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class PublishedVolunteer extends Thing {
   // - its "person" is text
-  static { this.declareProp("person", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2438, end: 2458 } }) }
+  static { this.declareProp("person", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2434, end: 2454 } }) }
   get person() { return this.getProp("person") }
   set person(value) { this.setProp("person", value) }
 
   // - its "shift" is text
-  static { this.declareProp("shift", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2460, end: 2479 } }) }
+  static { this.declareProp("shift", { type: "text", declaredAt: { path: "/SignUpSheet.api.spell", start: 2456, end: 2475 } }) }
   get shift() { return this.getProp("shift") }
   set shift(value) { this.setProp("shift", value) }
 
@@ -240,12 +240,12 @@ export class PublishedVolunteer extends Thing {
     times: ["created", "modified"], select: ["person", "shift"] }
 
   // - it lives in the published sheet
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2405, end: 2436 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2401, end: 2432 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in the published sheet
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2405, end: 2436 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/SignUpSheet.api.spell", start: 2401, end: 2432 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -330,7 +330,7 @@ export class SignUpPage extends App {
   get newTicket() { return this.getProp("newTicket") }
   set newTicket(value) { this.setProp("newTicket", value) }
 
-  static { this.declareProp("counts", { declaredAt: { path: "/SignUpSheet.spell", start: 2098, end: 2161 }, readsFrom: ["my_inbox"] }) }
+  static { this.declareProp("counts", { declaredAt: { path: "/SignUpSheet.spell", start: 2087, end: 2150 }, readsFrom: ["my_inbox"] }) }
   get counts() { return core.waitedValue(this, "counts", async () => {
     return await core.savedThings(Message, { filter: { thread: "invitations" } })
   }) }

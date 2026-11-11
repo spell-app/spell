@@ -83,9 +83,9 @@ class Task(View):
             ),
         )
 
-    selectable = True
-
     draggable = True
+
+    selectable = True
 
     @property
     def checklist(self) -> Checklist | None:
@@ -386,9 +386,8 @@ class Checklist(ViewableList):
         """a drop has moved its tasks:  each keeps its new place"""
         self.keep_the_order()
 
-    # each task, unless the filter hides it
-
     def draw_each_item(self, item: Task) -> Any:
+        # each task, unless the filter hides it
         if self.is_showing_showing("active") and item.is_done:
             return None
         if self.is_showing_showing("done") and item.is_active:
@@ -409,10 +408,12 @@ class Checklist(ViewableList):
         for place, task in enumerate(self, 1):
             task.order = place
 
-    # on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
     reorder_items_after = 0
 
     exclusive = True
+
+
+# on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 
 
 def test_the_filter() -> None:
@@ -665,16 +666,16 @@ task_list = TaskList()
 core.describe_action(TaskList, "show_all", {"title": "All", "icon": "list", "selected_when": "show_all_is_selected"})
 core.describe_action(TaskList, "show_to_do", {"title": "To do", "icon": "square outline", "selected_when": "show_to_do_is_selected"})
 core.describe_action(TaskList, "show_done", {"title": "Done", "icon": "check square outline", "selected_when": "show_done_is_selected"})
-core.describe_action(TaskList, "remove_the_done_tasks", {"title": "Remove the done tasks", "icon": "trash alternate outline"})
+core.describe_action(TaskList, "remove_the_done_tasks", {"title": "Remove The Done Tasks", "icon": "trash alternate outline"})
 
 # The toolbar's buttons, and the list's right click:  the same actions
 # - its "tasks menu" is a menu of "show all", "show to do", "show done", "-" and "remove the done tasks"
 core.describe_menu(TaskList, "tasks_menu", {"items": ["show_all", "show_to_do", "show_done", "-", "remove_the_done_tasks"]})
 # - its "show menu" is a menu of "show all", "show to do" and "show done" titled "Show"
 core.describe_menu(TaskList, "show_menu", {"items": ["show_all", "show_to_do", "show_done"], "title": "Show"})
-# A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
 # - its "list menu" is a menu of "show menu", "-" and "remove the done tasks"
 core.describe_menu(TaskList, "list_menu", {"items": ["show_menu", "-", "remove_the_done_tasks"]})
+# A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
 
 
 # -----------

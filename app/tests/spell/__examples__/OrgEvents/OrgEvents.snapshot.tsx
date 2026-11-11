@@ -8,31 +8,31 @@ core.heading("Org Events:  an org's events, from an idea to a quiet record")
 
 export class Event extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 558, end: 576 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 556, end: 574 } })
   accessor name!: string
 
   // - its "organizers" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 578, end: 602 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 576, end: 600 } })
   accessor organizers!: string
 
   // - its "proposed" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 604, end: 626 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 602, end: 624 } })
   accessor proposed!: string
 
   // - its "stage" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 628, end: 647 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 626, end: 645 } })
   accessor stage!: string
 
   // - its "stage name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 649, end: 673 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 647, end: 671 } })
   accessor stageName!: string
 
   // - its "onward" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 675, end: 695 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 673, end: 693 } })
   accessor onward!: string
 
   // - its "onward name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 697, end: 722 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 695, end: 720 } })
   accessor onwardName!: string
 
   @drawn draw() {
@@ -55,25 +55,25 @@ export class Event extends Thing {
   }
 
   // - it lives in org events
-  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 534, end: 556 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 532, end: 554 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in org events
-  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 534, end: 556 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 532, end: 554 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class EventStage extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 778, end: 796 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 775, end: 793 } })
   accessor name!: string
 
   // - its "moves to" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 798, end: 820 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 795, end: 817 } })
   accessor movesTo!: string
 
   // - its "moved by" is text
-  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 822, end: 844 } })
+  @prop({ type: "text", declaredAt: { path: "/OrgEvents.api.spell", start: 819, end: 841 } })
   accessor movedBy!: string
 
   @drawn draw() {
@@ -91,11 +91,11 @@ export class EventStage extends Thing {
     times: ["created", "modified"], select: ["name", "movedBy"] }
 
   // - it lives in org events
-  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 754, end: 776 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 751, end: 773 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in org events
-  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 754, end: 776 } })
+  @prop({ type: "date", declaredAt: { path: "/OrgEvents.api.spell", start: 751, end: 773 } })
   accessor modified!: any /* spell: type unknown */
 }
 

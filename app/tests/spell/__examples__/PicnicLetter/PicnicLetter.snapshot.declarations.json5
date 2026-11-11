@@ -16,19 +16,19 @@
         "placeType": "PublishedSheet",
         "collection": "listings"
       },
-      "defined": "/PicnicLetter.api.spell:565-664"
+      "defined": "/PicnicLetter.api.spell:565-663"
     },
     {
       "property": "person",
       "of": "Listing",
       "datatype": "text",
-      "defined": "/PicnicLetter.api.spell:623-643"
+      "defined": "/PicnicLetter.api.spell:622-642"
     },
     {
       "property": "shift",
       "of": "Listing",
       "datatype": "text",
-      "defined": "/PicnicLetter.api.spell:645-664"
+      "defined": "/PicnicLetter.api.spell:644-663"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -41,7 +41,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PicnicLetter.spell:239-293"
+      "defined": "/PicnicLetter.spell:238-291"
     },
     {
       "type": "Message",
@@ -51,19 +51,19 @@
         "placeType": "MyInbox",
         "collection": "messages"
       },
-      "defined": "/PicnicLetter.api.spell:827-914"
+      "defined": "/PicnicLetter.api.spell:826-912"
     },
     {
       "property": "text",
       "of": "Message",
       "datatype": "text",
-      "defined": "/PicnicLetter.api.spell:874-892"
+      "defined": "/PicnicLetter.api.spell:872-890"
     },
     {
       "property": "thread",
       "of": "Message",
       "datatype": "text",
-      "defined": "/PicnicLetter.api.spell:894-914"
+      "defined": "/PicnicLetter.api.spell:892-912"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -76,7 +76,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PicnicLetter.spell:352-403"
+      "defined": "/PicnicLetter.spell:349-399"
     },
     {
       "type": "PublishedSheet",
@@ -94,7 +94,7 @@
           }
         }
       },
-      "defined": "/PicnicLetter.api.spell:451-563"
+      "defined": "/PicnicLetter.api.spell:358-563"
     },
     {
       "type": "MyInbox",
@@ -107,24 +107,24 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/PicnicLetter.api.spell:755-825"
+      "defined": "/PicnicLetter.api.spell:665-824"
     },
     {
       "type": "PicnicLetter",
       "superType": "App",
-      "defined": "/PicnicLetter.spell:420-1884"
+      "defined": "/PicnicLetter.spell:416-1878"
     },
     {
       "property": "shifts",
       "of": "PicnicLetter",
       "datatype": "list of listings",
-      "defined": "/PicnicLetter.spell:446-500"
+      "defined": "/PicnicLetter.spell:441-495"
     },
     {
       "property": "counts",
       "of": "PicnicLetter",
       "datatype": "list of messages",
-      "defined": "/PicnicLetter.spell:502-565"
+      "defined": "/PicnicLetter.spell:497-560"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -137,7 +137,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/PicnicLetter.spell:568-1884"
+      "defined": "/PicnicLetter.spell:563-1878"
     }
   ],
   "codeLines": [

@@ -16,49 +16,49 @@
       "group": "What It Keeps",
       "groupDescription": "The sum being typed:  its left number, its operator and its right number",
       "datatype": "text",
-      "defined": "/Calculator.spell:403-422"
+      "defined": "/Calculator.spell:327-423"
     },
     {
       "property": "left",
       "of": "Calculator",
       "group": "What It Keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:424-442"
+      "defined": "/Calculator.spell:425-443"
     },
     {
       "property": "operator",
       "of": "Calculator",
       "group": "What It Keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:444-466"
+      "defined": "/Calculator.spell:445-467"
     },
     {
       "property": "right",
       "of": "Calculator",
       "group": "What It Keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:468-487"
+      "defined": "/Calculator.spell:469-488"
     },
     {
       "property": "total",
       "of": "Calculator",
       "group": "What It Keeps",
       "datatype": "number",
-      "defined": "/Calculator.spell:540-867"
+      "defined": "/Calculator.spell:490-868"
     },
     {
       "property": "sum",
       "of": "Calculator",
       "group": "What It Keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:933-1059"
+      "defined": "/Calculator.spell:870-1060"
     },
     {
       "property": "output",
       "of": "Calculator",
       "group": "What It Keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:1132-1204"
+      "defined": "/Calculator.spell:1062-1205"
     },
     {
       "syntax": "clear {thisArg:expression}",
@@ -73,7 +73,7 @@
       "kind": "method",
       "name": "clear it",
       "returns": "nothing",
-      "defined": "/Calculator.spell:1233-1319"
+      "defined": "/Calculator.spell:1234-1319"
     },
     {
       "syntax": "finish {thisArg:expression}",
@@ -88,7 +88,7 @@
       "kind": "method",
       "name": "finish it",
       "returns": "nothing",
-      "defined": "/Calculator.spell:1397-1534"
+      "defined": "/Calculator.spell:1321-1534"
     },
     {
       "syntax": "press {callArgs:expression} (of {thisArg:expression})?",
@@ -109,7 +109,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Calculator.spell:1640-1974"
+      "defined": "/Calculator.spell:1536-1974"
     },
     {
       "syntax": "apply {callArgs:expression} (of {thisArg:expression})?",
@@ -130,7 +130,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Calculator.spell:2064-2176"
+      "defined": "/Calculator.spell:1976-2176"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -144,7 +144,7 @@
       "group": "Drawing",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Calculator.spell:2274-3893"
+      "defined": "/Calculator.spell:2196-3893"
     },
     {
       "syntax": "test two sums in a row",
@@ -153,7 +153,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "two sums in a row",
-      "defined": "/Calculator.spell:3974-4196"
+      "defined": "/Calculator.spell:3896-4196"
     }
   ],
   "codeLines": [

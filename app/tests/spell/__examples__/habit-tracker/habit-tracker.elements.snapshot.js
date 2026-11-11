@@ -127,7 +127,6 @@ export class Week extends ViewableList {
     )
   }
 
-  // on the page, its habits can be dragged to another place
   static reorderItemsAfter = 0
 
   static exclusive = true
@@ -142,6 +141,7 @@ export function testStreaks(...args) {
 //////////////
 // The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
+// on the page, its habits can be dragged to another place
 /** a habit is in one week */
 
 /////////////////

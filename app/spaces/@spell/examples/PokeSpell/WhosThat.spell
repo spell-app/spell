@@ -2,27 +2,27 @@
 // A Pokémon hides in its shadow:  pick its name from four, and it steps into the light.
 // Only the first 151, from the very first games:  their names are the ones most kids know.
 
-a "guess" is a thing:
+a "guess" is a thing
 	its "hiding" is a pokemon
 	"choices" is a new list of pokemon
 	its "guessed" is a pokemon
 
 	its "found out" is its guessed is not nothing
 	its "right" is its guessed is its hiding
-	// In the shadow, until you've guessed
-	its "look" is:
+	its "look" is
+		// In the shadow, until you've guessed
 		if its found out
 			return "shadow found"
 		return "shadow"
 
-	// Four from the first 151, and one of them hides
-	to play again:
+	to play again
+		// Four from the first 151, and one of them hides
 		set first ones to first 151 pokemon of (every pokemon)
 		set its choices to 4 random pokemon in first ones
 		set its hiding to a random pokemon in its choices
 		set its guessed to nothing
 
-	to draw it:
+	to draw it
 		if its hiding
 			<segment class={its look} align="center">
 				<image class="art" align="center" src={its hiding's picture} alt="A Pokémon, hiding" />
@@ -34,7 +34,7 @@ a "guess" is a thing:
 				<button color="yellow" size="massive" appearance="pill raised" onClick={play again}>Let's play!</button>
 			</segment>
 
-	to draw its answer:
+	to draw its answer
 		if its found out
 			if its right
 				<header class="said" size="huge" align="center" font="title-caps">Yes!  It's {its hiding's name}!</header>
@@ -48,6 +48,6 @@ a "guess" is a thing:
 				{draw its choice buttons}
 			</stack>
 
-	to draw its choice buttons:
+	to draw its choice buttons
 		for choice in its choices
 			<button color="yellow" size="huge" appearance="pill raised" font="title-caps" onClick={set its guessed to choice}>{choice's name}</button>

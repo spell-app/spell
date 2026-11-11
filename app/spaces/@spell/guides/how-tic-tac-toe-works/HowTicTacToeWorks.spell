@@ -12,7 +12,7 @@
 // A `<thing>` is a kind of thing the program keeps:  here, one square of the board.
 // Its `<alias>` is a phrase you can say of it:  `the square is empty`.
 
-a "square" is a thing:
+a "square" is a thing
 	its "mark" is text
 	it "is empty" if its mark is ""
 
@@ -21,39 +21,39 @@ a "square" is a thing:
 // - `create it` runs as the game is made:  it puts nine empty squares on the board.
 // - Squares are counted 1 to 9, left to right, then down:  1 2 3 is the top row.
 
-tic tac toe is an app:
+tic tac toe is an app
 	"board" is a new board
-	// Whose turn it is:  X or O
 	its "turn" is text
-	// Who won:  X or O, or empty while the game goes on
+		// Whose turn it is:  X or O
 	its "winner" is text
-	its "message" is:
+		// Who won:  X or O, or empty while the game goes on
+	its "message" is
 		the turn + " to play" if the winner is ""
 		the winner + " wins!" otherwise
 
-	// Nine empty squares, made with the game
-	to create it:
+	to create it
+		// Nine empty squares, made with the game
 		repeat 9 times
 			add a new square to tic tac toe's board
-	// An empty board, X to play
-	to start a new game:
+	to start a new game
+		// An empty board, X to play
 		for square in the board
 			clear the square's mark
 		set the turn to "X"
 		clear the winner
-	// the same mark in all three squares wins
-	to check the line from square (a as a number) through (b as a number) to (c as a number):
+	to check the line from square (a as a number) through (b as a number) to (c as a number)
+		// the same mark in all three squares wins
 		set mark to the mark of square a of its board
 		if mark is "" return
 		if the mark of square b of its board is mark and the mark of square c of its board is mark
 			set its winner to mark
-	// Only the three rows, for now
-	to check for a winner:
+	to check for a winner
+		// Only the three rows, for now
 		check the line from square 1 through 2 to 3
 		check the line from square 4 through 5 to 6
 		check the line from square 7 through 8 to 9
 
-	to draw it:
+	to draw it
 		<stack align="center">
 			<card>
 				<content>
@@ -69,8 +69,8 @@ tic tac toe is an app:
 // `<extend "square">` adds this action to the square, declared above:
 // it's here, after the game, because it needs the game's turn;  the board, below, draws a button that calls it.
 
-a square:
-	to play it:
+a square
+	to play it
 		if tic tac toe's winner is not "" or it is not empty return
 		set its mark to tic tac toe's turn
 		check for a winner
@@ -82,8 +82,8 @@ a square:
 // - each column holds a big button, and a click plays its square
 // - the space after `or` is a no-break space, one that doesn't vanish:  an empty square keeps its height
 
-a "board" is a list of squares:
-	to draw it:
+a "board" is a list of squares
+	to draw it
 		for square in it
 			<column>
 				<button fluid size="massive" appearance="basic" onClick={play the square}>
@@ -92,8 +92,8 @@ a "board" is a list of squares:
 			</column>
 		show them in: <grid columns="3" spacing="compact"></grid>
 
-// a square is on one board
 a square belongs to one board
+	// a square is on one board
 
 ## Start, and a check:  X wins across the top
 // The check plays a whole game, X in squares 1, 2 and 3, then clears the board for you.

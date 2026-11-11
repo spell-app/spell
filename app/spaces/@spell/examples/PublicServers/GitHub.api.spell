@@ -11,7 +11,7 @@
 // Its searches have a limit of their own:  10 a minute without a key, 30 with one.
 // People and organizations are both users here:  their "kind" says which.
 
-github is a web server at "https://api.github.com":
+github is a web server at "https://api.github.com"
 	its optional key is the secret "GITHUB_TOKEN"
 	its next page is in its "Link" header
 	it gives up to 100 at a time, asked for with "per_page"
@@ -24,7 +24,7 @@ github is a web server at "https://api.github.com":
 	users are searched with "q" at "/search/users"
 	repositories are searched with "q" at "/search/repositories"
 
-an "issue" is a thing:
+an "issue" is a thing
 	it lives in github
 	its "url" is an issue
 	its "repository url" is text  // an address
@@ -56,7 +56,7 @@ an "issue" is a thing:
 	its "pull request" is a pull request
 	its "assignee" is an assignee
 
-a "contributor" is a thing:
+a "contributor" is a thing
 	it lives in github
 	its "login" is text
 	its "node id" is text
@@ -78,7 +78,7 @@ a "contributor" is a thing:
 	its "site admin" is yes or no
 	its "contributions" is a number
 
-a "user" is a thing:
+a "user" is a thing
 	it lives in github
 	its "login" is text
 	its "number" is a number, stored as "id"
@@ -113,7 +113,7 @@ a "user" is a thing:
 	its "updated at" is a date
 	its "bio" is text
 
-an "issue user" is a thing:
+an "issue user" is a thing
 	its "login" is text
 	its "number" is a number, stored as "id"
 	its "node id" is text
@@ -134,7 +134,7 @@ an "issue user" is a thing:
 	its "user view type" is text
 	its "site admin" is yes or no
 
-a "label" is a thing:
+a "label" is a thing
 	its "number" is a number, stored as "id"
 	its "node id" is text
 	its "url" is text  // an address
@@ -143,18 +143,18 @@ a "label" is a thing:
 	its "default" is yes or no
 	its "description" is text
 
-a "sub issues summary" is a thing:
+a "sub issues summary" is a thing
 	its "total" is a number
 	its "completed" is a number
 	its "percent completed" is a number
 
-an "issue dependencies summary" is a thing:
+an "issue dependencies summary" is a thing
 	its "blocked by" is a number
 	its "total blocked by" is a number
 	its "blocking" is a number
 	its "total blocking" is a number
 
-a "reaction" is a thing:
+a "reaction" is a thing
 	its "url" is text  // an address
 	its "total count" is a number
 	its "laugh" is a number
@@ -164,7 +164,7 @@ a "reaction" is a thing:
 	its "rocket" is a number
 	its "eyes" is a number
 
-a "performed via github app" is a thing:
+a "performed via github app" is a thing
 	its "number" is a number, stored as "id"
 	its "client id" is text
 	its "slug" is text
@@ -179,7 +179,7 @@ a "performed via github app" is a thing:
 	its "permissions" is a permission
 	its "events" is a list of text
 
-an "owner" is a thing:
+an "owner" is a thing
 	its "login" is text
 	its "number" is a number, stored as "id"
 	its "node id" is text
@@ -200,7 +200,7 @@ an "owner" is a thing:
 	its "user view type" is text
 	its "site admin" is yes or no
 
-a "permission" is a thing:
+a "permission" is a thing
 	its "actions" is text
 	its "administration" is text
 	its "checks" is text
@@ -216,13 +216,13 @@ a "permission" is a thing:
 	its "workflows" is text
 	its "repository creation" is text
 
-a "pull request" is a thing:
+a "pull request" is a thing
 	its "url" is text  // an address
 	its "html url" is text  // an address
 	its "diff url" is text  // an address
 	its "patch url" is text  // an address
 
-a "repository" is a thing:
+a "repository" is a thing
 	it lives in github
 	its "node id" is text
 	its "name" is text
@@ -306,7 +306,7 @@ a "repository" is a thing:
 	its "permissions" is a permission
 	its "score" is a number
 
-an "assignee" is a thing:
+an "assignee" is a thing
 	its "login" is text
 	its "number" is a number, stored as "id"
 	its "node id" is text
@@ -327,7 +327,7 @@ an "assignee" is a thing:
 	its "user view type" is text
 	its "site admin" is yes or no
 
-a "license" is a thing:
+a "license" is a thing
 	its "key" is text
 	its "name" is text
 	its "spdx id" is text

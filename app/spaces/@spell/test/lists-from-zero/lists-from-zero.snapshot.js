@@ -12,10 +12,10 @@ export class Tile extends Thing {
   set letter(value) { this.setProp("letter", value) }
 }
 
+/** a new rack holds five tiles, A to E */
 export class Rack extends List {
   static instanceType = Tile
 
-  /** a new rack holds five tiles, A to E */
   create() {
     this.append(new Tile({ letter: "A" }))
     this.append(new Tile({ letter: "B" }))

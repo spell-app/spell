@@ -8,37 +8,37 @@
     {
       "type": "HelloSign",
       "superType": "App",
-      "defined": "/YourFirstSpell.spell:938-1725"
+      "defined": "/YourFirstSpell.spell:938-1718"
     },
     {
       "property": "greeting",
       "of": "HelloSign",
       "datatype": "text",
-      "defined": "/YourFirstSpell.spell:967-989"
+      "defined": "/YourFirstSpell.spell:960-982"
     },
     {
       "property": "name",
       "of": "HelloSign",
       "datatype": "text",
-      "defined": "/YourFirstSpell.spell:991-1009"
+      "defined": "/YourFirstSpell.spell:984-1002"
     },
     {
       "property": "waves",
       "of": "HelloSign",
       "datatype": "number",
-      "defined": "/YourFirstSpell.spell:1011-1034"
+      "defined": "/YourFirstSpell.spell:1004-1027"
     },
     {
       "property": "message",
       "of": "HelloSign",
       "datatype": "text",
-      "defined": "/YourFirstSpell.spell:1114-1167"
+      "defined": "/YourFirstSpell.spell:1029-1082"
     },
     {
       "property": "count",
       "of": "HelloSign",
       "datatype": "text",
-      "defined": "/YourFirstSpell.spell:1169-1211"
+      "defined": "/YourFirstSpell.spell:1163-1205"
     },
     {
       "syntax": "wave back (of {thisArg:expression})?",
@@ -52,7 +52,7 @@
       "kind": "method",
       "name": "wave back",
       "returns": "nothing",
-      "defined": "/YourFirstSpell.spell:1255-1301"
+      "defined": "/YourFirstSpell.spell:1208-1295"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -65,7 +65,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/YourFirstSpell.spell:1557-1725"
+      "defined": "/YourFirstSpell.spell:1551-1718"
     },
     {
       "syntax": "test waving back",
@@ -74,7 +74,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "waving back",
-      "defined": "/YourFirstSpell.spell:3682-3839"
+      "defined": "/YourFirstSpell.spell:3675-3832"
     }
   ],
   "codeLines": [

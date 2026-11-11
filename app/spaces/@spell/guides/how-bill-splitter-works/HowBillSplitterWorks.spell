@@ -13,7 +13,7 @@
 // - `round` drops anything smaller than a cent.
 // - The last two lines add a 0 when the cents are under ten, so 3.07 doesn't show as $3.7.
 
-to write (amount as a number) as money:
+to write (amount as a number) as money
 	set cents to round (amount * 100)
 	set dollars to (cents / 100) as an integer
 	set left over to cents - dollars * 100
@@ -30,18 +30,18 @@ to write (amount as a number) as money:
 // `<form value={it}>` binds the form to the bill:  each box's `name` is the property it changes.
 // The sums show as Spell UI's `<statistic>`s:  a big value, its label under it.
 
-bill is an app:
+bill is an app
 	its "amount" is a number starting at 60
 	its "percent" is a percent starting at 18%
 	its "people" is a number starting at 3
 
 	its "tip" is the amount * the percent
 	its "total" is the amount + the tip
-	its "each" is:
+	its "each" is
 		0 if the people < 1
 		the total / the people otherwise
 
-	to draw it:
+	to draw it
 		<container text>
 			<segment>
 				<form value={it}>

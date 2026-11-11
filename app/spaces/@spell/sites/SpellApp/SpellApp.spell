@@ -2,14 +2,14 @@
 // What opens over a page is a dialog or a sidebar, opened from the buttons above its thumbnail.
 // Most addresses name a project, so they aren't in the navigation:  Home links to one of each.
 
-home page is a page:
+home page is a page
 	<stories>
 		<story "S1" done>open an example, a guide, a notebook or one of my projects from its card</story>
 		<story "S2" done>start from a blank app, a small starter or Solitaire</story>
 		<story "S3" done>make a project, an example or a guide from its group's header</story>
 		<story "S4" done>bring back a project I exported</story>
 	</stories>
-	to draw it:
+	to draw it
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the new project dialog}>New Project</button>
 			<link link={"/edit/@spell/examples/Solitaire"}>The code editor</link>
@@ -22,23 +22,23 @@ home page is a page:
 		draw its thumbnail
 	its thumbnail is "snapshots/home.jpg"
 
-notebook page is a page:
+notebook page is a page
 	<stories>
 		<story "S1" done>read a notebook, its words and its code in cells</story>
 	</stories>
-	// What the address names
 	its "notebook" is text
+		// What the address names
 	its thumbnail is "snapshots/notebook.jpg"
 
-guide page is a page:
+guide page is a page
 	<stories>
 		<story "S1" done>read a guide in the editor, its words as the comments of its spell file</story>
 	</stories>
-	// What the address names
 	its "guide" is text
+		// What the address names
 	its thumbnail is "snapshots/guide.jpg"
 
-code editor page is a page:
+code editor page is a page
 	<stories>
 		<story "S1" done>change the code in its file tabs, with the running app beside it</story>
 		<story "S2" done>see the program's output, its compiled code and what I can use, in the Program panel under the code</story>
@@ -47,9 +47,9 @@ code editor page is a page:
 		<story "S5" done>undo, save, discard my changes and publish a draft</story>
 		<story "S6" done>move between Run, Edit and, for a site, Site</story>
 	</stories>
-	// What the address names
 	its "project" is text
-	to draw it:
+		// What the address names
+	to draw it
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the inspector sidebar}>Inspector</button>
 			<button appearance="basic" onClick={show the palette sidebar}>Palette</button>
@@ -65,16 +65,16 @@ code editor page is a page:
 		draw its thumbnail
 	its thumbnail is "snapshots/edit.jpg"
 
-running app page is a page:
+running app page is a page
 	<stories>
 		<story "S1" done>use the program by itself, with no code showing</story>
 		<story "S2" done>restart it</story>
 	</stories>
-	// What the address names
 	its "project" is text
+		// What the address names
 	its thumbnail is "snapshots/run.jpg"
 
-site editor page is a page:
+site editor page is a page
 	<stories>
 		<story "S1" done>see a site's pages as a tree and a board of cards</story>
 		<story "S2" done>drag a row to move a page, with its pages</story>
@@ -82,81 +82,81 @@ site editor page is a page:
 		<story "S4" done>write what a page must let people do, as stories</story>
 		<story "S5" done>open a page's code from its card</story>
 	</stories>
-	// What the address names
 	its "project" is text
-	to draw it:
+		// What the address names
+	to draw it
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the site data sidebar}>Data</button>
 		</stack>
 		draw its thumbnail
 	its thumbnail is "snapshots/site-pages.jpg"
 
-theme editor page is a page:
+theme editor page is a page
 	<stories>
 		<story "S1" done>change a theme and see it on real pages</story>
 		<story "S2" done>save it by name, to pick from every theme menu</story>
 	</stories>
 	its thumbnail is "snapshots/theme.jpg"
 
-hosted app page is a page:
+hosted app page is a page
 	<stories>
 		<story "S1" done>use a program at its own address on Spell's cloud</story>
 	</stories>
-	// What the address names
 	its "project" is text
-	to draw it:
+		// What the address names
+	to draw it
 		<stack direction="horizontal" wrap spacing="s">
 			<button appearance="basic" onClick={show the sign-in dialog}>Sign In</button>
 		</stack>
 		draw its thumbnail
 	its thumbnail is "snapshots/hosted-program.jpg"
 
-terms page is a page:
+terms page is a page
 	<stories>
 		<story "S1" done>read Spell's terms</story>
 	</stories>
 	its thumbnail is "snapshots/terms.jpg"
 
-an "inspector sidebar" is a view:
+an "inspector sidebar" is a view
 	its thumbnail is "snapshots/inspector.jpg"
 
-a "palette sidebar" is a view:
+a "palette sidebar" is a view
 	its thumbnail is "snapshots/palette.jpg"
 
-a "site data sidebar" is a view:
+a "site data sidebar" is a view
 	its thumbnail is "snapshots/site-data.jpg"
 
-a "project settings dialog" is a view:
+a "project settings dialog" is a view
 	its thumbnail is "snapshots/project-settings.jpg"
 
-a "code settings dialog" is a view:
+a "code settings dialog" is a view
 	its thumbnail is "snapshots/code-settings.jpg"
 
-a "project versions dialog" is a view:
+a "project versions dialog" is a view
 	its thumbnail is "snapshots/versions.jpg"
 
-a "new file dialog" is a view:
+a "new file dialog" is a view
 	its thumbnail is "snapshots/new-file.jpg"
 
-a "new project dialog" is a view:
+a "new project dialog" is a view
 	its thumbnail is "snapshots/new-project.jpg"
 
-a "duplicate project dialog" is a view:
+a "duplicate project dialog" is a view
 	its thumbnail is "snapshots/duplicate-project.jpg"
 
-a "change this dialog" is a view:
+a "change this dialog" is a view
 	its thumbnail is "snapshots/change-this.jpg"
 
-a "publish clash dialog" is a view:
+a "publish clash dialog" is a view
 	its thumbnail is "snapshots/publish-clash.jpg"
 
-a "person dialog" is a view:
+a "person dialog" is a view
 	its thumbnail is "snapshots/you.jpg"
 
-a "sign-in dialog" is a view:
+a "sign-in dialog" is a view
 	its thumbnail is "snapshots/sign-in.jpg"
 
-spell app is a site:
+spell app is a site
 	it has a home page at "/", named "Home", old, colored red
 	it has a notebook page at "/edit/@spell/guides/SpellUI/:notebook*", named "Notebook", old, colored orange
 	it has a guide page at "/edit/@spell/guides/:guide", named "Guide", old, colored yellow

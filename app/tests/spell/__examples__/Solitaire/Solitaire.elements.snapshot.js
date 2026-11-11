@@ -42,7 +42,7 @@ export class Card extends TwoSidedView {
     return this.suit === suit
   }
 
-  // - its "color" is one of red, black:
+  // - its "color" is one of red, black
   //   red if it is a diamond or it is a heart
   //   black otherwise
   static Colors = ["red", "black"]
@@ -157,7 +157,7 @@ export class Card extends TwoSidedView {
 }
 // Ace is low:  ace = 1 ... king = 13
 
-// What a person, a test or the console calls it
+// What a person, test or console calls it
 
 // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
@@ -277,8 +277,8 @@ export class StockPile extends Pile {
     return false
   }
 
-  // A light grey card, face down
   drawItsPlaceholder() {
+    // A light grey card, face down
     return h("ui-text", { part: "placeholder" }, "🂠")
   }
 
@@ -324,8 +324,8 @@ export class Foundation extends Pile {
     return false
   }
 
-  // A light grey ace of its suit, face up
   drawItsPlaceholder() {
+    // A light grey ace of its suit, face up
     return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
   }
 
@@ -605,12 +605,12 @@ export let solitaire
 
 // Each pauses a moment, so a deal animates
 /** A click on the empty stock:  one step to undo, where the deal's own turn isn't */
-core.describeAction(Solitaire, "turnAStockCard", { title: "turn a stock card", undoneAs: "Turn Card" })
+core.describeAction(Solitaire, "turnAStockCard", { title: "Turn A Stock Card", undoneAs: "Turn Card" })
 
 // Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["N"], undoneAs: "Restart" })
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["N"], undoneAs: "Restart The Game" })
 /** Play every card that can go somewhere, until none can */
-core.describeAction(Solitaire, "autoPlay", { title: "Auto play", shortcuts: ["A"], undoneAs: "Auto play" })
+core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], undoneAs: "Auto Play" })
 /** Turn up a face-down card from a tableau, at random, onto the discards */
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
 // - its "game menu" is a menu of "auto play", "cheat", "restart the game", "undo" and "redo"
@@ -625,13 +625,13 @@ core.describeMenu(Solitaire, "gameMenu", { items: ["autoPlay", "cheat", "restart
  * the card, and every card on it, onto the first pile that takes it;  it says whether it moved
  * - the stock's card turns over onto the discards instead
  */
-core.describeAction(Card, "play", { title: "play a card", undoneAs: "Play Card" })
+core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
 
 /**
  * the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
  * - the pile it left turns its new last card up;  the move counts, and scores
  */
-core.describeAction(Card, "putOnPile", { title: "put a card on a pile", undoneAs: "Move Card" })
+core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
 
 // each card's events, and when it may be clicked:  the Inspector lists them, as written here
 // only a card face up, or the stock's, can be clicked:  the others show no pointer

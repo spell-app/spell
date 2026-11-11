@@ -3,11 +3,11 @@
 // Sending a message is adding it to your messages:  Spell writes a copy into each inbox it's to,
 // so deleting yours leaves theirs.  A message can't be changed once it's sent.
 // Your org's inbox page names its own org on the next line.
-my inbox is a data folder at "@rs/__inbox":
+my inbox is a data folder at "@rs/__inbox"
 	check it every 30 seconds
 
-// A message, or a page a Manager sent:  its title and line, worked out again when you open it.
-a "message" is a thing:
+a "message" is a thing
+	// A message, or a page a Manager sent:  its title and line, worked out again when you open it.
 	it lives in my inbox
 	its "text" is text
 	its "recipients" is text
@@ -20,11 +20,11 @@ a "message" is a thing:
 
 // How you hear of your inbox by mail:  one mail per message, a daily digest, or none.  The first one counts;
 // with none, a daily digest.  Every mail has a link that stops it.
-a "mail choice" is a thing:
+a "mail choice" is a thing
 	it lives in my inbox
 	its "how" is text
 
-// A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update.
-a "subscription" is a thing:
+a "subscription" is a thing
+	// A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update.
 	it lives in my inbox
 	its "space" is text

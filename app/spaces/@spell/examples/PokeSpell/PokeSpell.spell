@@ -8,25 +8,25 @@
 	<ui-button appearance="pill"/>
 </ui-defaults>
 
-pokedex is an app:
+pokedex is an app
 	its "tab" is text
 	its "search" is text
 	its "showing" is a pokemon
 	"trail" is a new list of pokemon
 	its "picked kind" is a type
 	"game" is a new guess
-	to create it:
+	to create it
 		set its tab to "everyone"
 		set its search to ""
 
-	to go to (where as text):
+	to go to (where as text)
 		set its tab to where
 		set its search to ""
 		set its showing to nothing
 		clear its trail
 		scroll to the top
 
-	to go back:
+	to go back
 		if its trail is empty
 			set its showing to nothing
 			return
@@ -34,18 +34,18 @@ pokedex is an app:
 		remove the last item of its trail
 		scroll to the top
 
-	// Any Pokémon at all
-	to surprise me:
+	to surprise me
+		// Any Pokémon at all
 		open (a random pokemon in (every pokemon))
 
 	its "kinds to pick" is every type where it is real
 
-	// Pokémon names are all small letters:  so the search is too
-	its "found" is:
+	its "found" is
+		// Pokémon names are all small letters:  so the search is too
 		set looking for to its search as lower case
 		return every pokemon where its name includes looking for
 
-	to draw it:
+	to draw it
 		<stack direction="horizontal" wrap align="center" justify="between">
 			<button appearance="tertiary" color="red" padding="none" size="poster" font="heavy" shadow="yellow" onClick={go to "everyone"}>PokéSpell</button>
 			<form value={it} fluid min-width="16em" max-width="26em">
@@ -67,8 +67,8 @@ pokedex is an app:
 			Pokémon belongs to Nintendo, Game Freak and Creatures.
 		</text>
 
-	// What shows under the tabs:  only the tab that's open reads anything
-	to draw its shelf:
+	to draw its shelf
+		// What shows under the tabs:  only the tab that's open reads anything
 		if its showing and its search is ""
 			<button appearance="basic" icon="arrow left" size="large" onClick={go back}>Back</button>
 			draw its showing's page
@@ -92,8 +92,8 @@ pokedex is an app:
 			show them in pages
 			show them in: <cards columns="4" doubling></cards>
 
-	// A button for every kind, and the Pokémon of the one you pick
-	to draw its kinds:
+	to draw its kinds
+		// A button for every kind, and the Pokémon of the one you pick
 		<stack direction="horizontal" wrap justify="center">
 			{draw its kind buttons}
 		</stack>
@@ -106,7 +106,7 @@ pokedex is an app:
 		otherwise
 			<header size="small" align="center">Pick a kind, and see who's that kind.</header>
 
-	to draw its kind buttons:
+	to draw its kind buttons
 		for its kinds to pick
 
 # Start it

@@ -7,39 +7,39 @@
 ## A result
 // One number the counting sent, and the word it got.
 
-a "result" is a thing:
+a "result" is a thing
 	its "number" is a number
-	// fizz, buzz or fizzbuzz;  empty for a plain number
 	its "word" is text
-	// What its label says:  its word, or the number itself
-	its "label" is:
+		// fizz, buzz or fizzbuzz;  empty for a plain number
+	its "label" is
+		// What its label says:  its word, or the number itself
 		the number as text if the word is ""
 		the word otherwise
-	// Fizz blue, buzz green, both purple
-	its "color" is:
+	its "color" is
+		// Fizz blue, buzz green, both purple
 		"purple" if the word is "fizzbuzz"
 		"blue" if the word is "fizz"
 		"green" if the word is "buzz"
 		"grey" otherwise
 
-// Every result so far, a label each, in a row that wraps
-a "tally" is a list of results:
-	to draw it:
+a "tally" is a list of results
+	// Every result so far, a label each, in a row that wraps
+	to draw it
 		for result in it
 			<label color={the color of the result} appearance="basic">{the label of the result}</label>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
 ## The page
 
-fizzbuzz explainer is a page:
+fizzbuzz explainer is a page
 	"tally" is a new tally
 	its "fizzes" is the number of (results in the tally where its word is "fizz")
 	its "buzzes" is the number of (results in the tally where its word is "buzz")
 	its "fizzbuzzes" is the number of (results in the tally where its word is "fizzbuzz")
 	its "plain numbers" is the number of (results in the tally where its word is "")
 
-	// How it works, its roots, then the results with a count of each word
-	to draw it:
+	to draw it
+		// How it works, its roots, then the results with a count of each word
 		<container text>
 			<stack>
 				<header level="1">FizzBuzz</header>
@@ -88,15 +88,15 @@ fizzbuzz explainer is a page:
 ## Listening
 // The page listens itself:  each event the counting sends becomes a result in its tally.
 
-a fizzbuzz explainer:
-	// One result more in the tally
-	to show (word as text) for (number as a number):
+a fizzbuzz explainer
+	to show (word as text) for (number as a number)
+		// One result more in the tally
 		add (a new result with number = number, word = word) to its tally
-	on fizzbuzz with number as a number:
+	on fizzbuzz with number as a number
 		show "fizzbuzz" for number
-	on fizz with number as a number:
+	on fizz with number as a number
 		show "fizz" for number
-	on buzz with number as a number:
+	on buzz with number as a number
 		show "buzz" for number
-	on plain number with number as a number:
+	on plain number with number as a number
 		show "" for number

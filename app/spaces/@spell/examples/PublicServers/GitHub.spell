@@ -4,17 +4,17 @@
 // with `<extend>`, so looking again at the server never touches a line of this.
 // A page in a browser holds no key:  it may search 10 times a minute, so the field waits for you to stop typing.
 
-a "github page" is a thing:
+a "github page" is a thing
 	its "search" is text
 	its "showing" is a user
-	to create it:
+	to create it
 		set its search to "solid"
 
-	to try (words as text):
+	to try (words as text)
 		set its showing to nothing
 		set its search to words
 
-	to draw it:
+	to draw it
 		<stack spacing="xl">
 			<form value={it}>
 				<stack spacing="sm">
@@ -39,8 +39,8 @@ a "github page" is a thing:
 			</text>
 		</stack>
 
-	// Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request
-	to draw its issues:
+	to draw its issues
+		// Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request
 		<stack spacing="sm">
 			<header size="medium">Solid's issues</header>
 			<for the first 6 issues where its pull request is nothing as="cards" columns="3" doubling stackable loading="Asking GitHub" empty="No open issues." />
@@ -48,11 +48,11 @@ a "github page" is a thing:
 			<for the first 6 issues where its pull request is not nothing as="cards" columns="3" doubling stackable loading="Asking GitHub" empty="No open pull requests." />
 		</stack>
 
-	// Someone's own page, while one is picked;  else what the search finds
-	to draw its found:
+	to draw its found
+		// Someone's own page, while one is picked;  else what the search finds
 		if its showing
 			draw the page of (the user whose id is the login of its showing)
-			while waiting:
+			while waiting
 				<loader visible inline text>Asking GitHub</loader>
 		otherwise
 			<stack spacing="xl">
@@ -70,16 +70,16 @@ a "github page" is a thing:
 // A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.
 // A search gives only a little of each:  their page reads them whole, by their login.
 
-a user:
-	// Their own page, in the GitHub tab
-	to look at it:
+a user
+	to look at it
+		// Their own page, in the GitHub tab
 		set the showing of the github of the public servers to it
 
-	// Put their page away again, with its Back button
-	to look away from it:
+	to look away from it
+		// Put their page away again, with its Back button
 		set the showing of the github of the public servers to nothing
 
-	to draw it:
+	to draw it
 		<ui-card onClick={look at it}>
 			<content>
 				<stack direction="horizontal" align="center" spacing="sm">
@@ -94,7 +94,7 @@ a user:
 			</content>
 		</ui-card>
 
-	to draw its page:
+	to draw its page
 		<stack spacing="xl">
 			<stack direction="horizontal" align="center" spacing="sm">
 				<button icon="arrow left" appearance="basic" aria-label="Back" title="Back" onClick={look away from it} />
@@ -124,8 +124,8 @@ a user:
 # An issue
 // GitHub lists a pull request among a repository's issues:  this page tells them apart by its "pull request".
 
-an issue:
-	to draw it:
+an issue
+	to draw it
 		<ui-card>
 			<content>
 				<header>
@@ -138,8 +138,8 @@ an issue:
 # A repository
 // Its name, what it's for, and how many people starred it;  its GitHub icon opens it on GitHub, in a new window.
 
-a repository:
-	to draw it:
+a repository
+	to draw it
 		<ui-card>
 			<content>
 				<header>

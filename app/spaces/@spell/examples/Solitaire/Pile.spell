@@ -3,36 +3,35 @@
 // Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
 // A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
-a "pile" is a viewable list of cards:
-	it is droppable
-	// What the game calls it, e.g. stock
+a "pile" is a droppable viewable list of cards
 	its "name" is text
-	// How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css
+		// What the game calls it, e.g. stock
 	its "layout" is one of stacked, vertical, horizontal or fanned
-	// Its last card's:  what the next card goes on
-	its "color" is:
+		// How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css
+	its "color" is
+		// Its last card's:  what the next card goes on
 		"none" if it is empty
 		the color of its last card otherwise
-	// Its last card's
-	its "value" is:
+	its "value" is
+		// Its last card's
 		0 if it is empty
 		the value of its last card otherwise
-	// Its name, then its cards' short names:  stock: Q♠↑ 7♥↓
-	its "state" is:
+	its "state" is
+		// Its name, then its cards' short names:  stock: Q♠↑ 7♥↓
 		set summary to (its name or "pile") + ":"
 		for card in the pile
 			set summary to summary + " " + the state of the card
 		return summary
 
-	to test piles:
+	to test piles
 		set the stock to a new pile with name "stock"
-		the stock's color should be "none"
-		the stock's value should be 0
+		stock's color should be "none"
+		stock's value should be 0
 		add (a new card whose rank is queen, suit is spades and direction is up) to the stock
 		add (a new card whose rank is 7, suit is hearts and direction is down) to the stock
-		the stock's color should be red
-		the stock's value should be 7
-		the stock's state should be "stock: Q♠↑ 7♥↓"
+		stock's color should be red
+		stock's value should be 7
+		stock's state should be "stock: Q♠↑ 7♥↓"
 
 		// a card is in one pile at a time
 		set the discards to a new pile with name "discards"
@@ -42,5 +41,5 @@ a "pile" is a viewable list of cards:
 		the number of cards in the stock should be 1
 		the discards' state should be "discards: 7♥↓"
 
-// a card is in one pile at a time:  putting it on another pile takes it off this one
 a card belongs to one pile
+	// a card is in one pile at a time:  putting it on another pile takes it off this one

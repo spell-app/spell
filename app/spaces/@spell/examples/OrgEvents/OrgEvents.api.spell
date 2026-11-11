@@ -3,10 +3,10 @@
 // its two spaces, and its organizers its Managers;  they move it on from there.
 // The stages are the org's to change, kept beside its events in its Admin space.
 // Your org's events page names its own org on the next line:  "@rs" is the Rock Society's.
-org events is a data folder at "@rs/__admin/events":
+org events is a data folder at "@rs/__admin/events"
 	check it every 30 seconds
 
-an "event" is a thing:
+an "event" is a thing
 	it lives in org events
 	its "name" is text
 	its "organizers" is text
@@ -16,7 +16,7 @@ an "event" is a thing:
 	its "onward" is text
 	its "onward name" is text
 
-an "event stage" is a thing:
+an "event stage" is a thing
 	it lives in org events
 	its "name" is text
 	its "moves to" is text

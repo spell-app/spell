@@ -8,27 +8,27 @@ core.heading("Chat:  every thread you can read, live")
 /** A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`. */
 export class Message extends Thing {
   // - its "text" is text
-  static { this.declareProp("text", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1000, end: 1018 } }) }
+  static { this.declareProp("text", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 999, end: 1017 } }) }
   get text() { return this.getProp("text") }
   set text(value) { this.setProp("text", value) }
 
   // - its "by" is text
-  static { this.declareProp("by", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1020, end: 1036 } }) }
+  static { this.declareProp("by", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1019, end: 1035 } }) }
   get by() { return this.getProp("by") }
   set by(value) { this.setProp("by", value) }
 
   // - its "sent" is a date
-  static { this.declareProp("sent", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1038, end: 1058 } }) }
+  static { this.declareProp("sent", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1037, end: 1057 } }) }
   get sent() { return this.getProp("sent") }
   set sent(value) { this.setProp("sent", value) }
 
   // - its "thread" is text
-  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1060, end: 1080 } }) }
+  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1059, end: 1079 } }) }
   get thread() { return this.getProp("thread") }
   set thread(value) { this.setProp("thread", value) }
 
   /** The first two letters of who sent it, for the circle beside their name */
-  static { this.declareProp("initials", { declaredAt: { path: "/OrgChat.spell", start: 553, end: 612 }, readsFrom: ["chat"] }) }
+  static { this.declareProp("initials", { declaredAt: { path: "/OrgChat.spell", start: 477, end: 536 }, readsFrom: ["chat"] }) }
   get initials() {
     return core.rangeStartingAt(this.by.toLocaleUpperCase(), 0, 2)
   }
@@ -65,12 +65,12 @@ export class Message extends Thing {
   }
 
   // - it lives in chat
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 982, end: 998 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 981, end: 997 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in chat
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 982, end: 998 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 981, end: 997 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -78,32 +78,32 @@ export class Message extends Thing {
 /** A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it. */
 export class Thread extends Thing {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1241, end: 1259 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1240, end: 1258 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "side" is text
-  static { this.declareProp("side", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1261, end: 1279 } }) }
+  static { this.declareProp("side", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1260, end: 1278 } }) }
   get side() { return this.getProp("side") }
   set side(value) { this.setProp("side", value) }
 
   // - its "topic" is text
-  static { this.declareProp("topic", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1281, end: 1300 } }) }
+  static { this.declareProp("topic", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1280, end: 1299 } }) }
   get topic() { return this.getProp("topic") }
   set topic(value) { this.setProp("topic", value) }
 
   // - its "link" is text
-  static { this.declareProp("link", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1302, end: 1320 } }) }
+  static { this.declareProp("link", { type: "text", declaredAt: { path: "/OrgChat.api.spell", start: 1301, end: 1319 } }) }
   get link() { return this.getProp("link") }
   set link(value) { this.setProp("link", value) }
 
   // - its "current" is yes or no
-  static { this.declareProp("current", { type: "choice", declaredAt: { path: "/OrgChat.api.spell", start: 1322, end: 1348 } }) }
+  static { this.declareProp("current", { type: "choice", declaredAt: { path: "/OrgChat.api.spell", start: 1321, end: 1347 } }) }
   get current() { return this.getProp("current") }
   set current(value) { this.setProp("current", value) }
 
   /** Its icon:  a lock on the private ones */
-  static { this.declareProp("mark", { declaredAt: { path: "/OrgChat.spell", start: 1374, end: 1444 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("mark", { declaredAt: { path: "/OrgChat.spell", start: 1330, end: 1442 }, readsFrom: ["my_threads"] }) }
   get mark() {
     if (this.side === "private") return "lock"
     return "hashtag"
@@ -115,12 +115,12 @@ export class Thread extends Thing {
     times: ["created", "modified"], select: ["name", "side", "topic", "link", "current"] }
 
   // - it lives in my threads
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1217, end: 1239 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1216, end: 1238 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my threads
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1217, end: 1239 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/OrgChat.api.spell", start: 1216, end: 1238 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -174,7 +174,7 @@ export class ChatPage extends App {
   get newMessage() { return this.getProp("newMessage") }
   set newMessage(value) { this.setProp("newMessage", value) }
 
-  static { this.declareProp("picked", { declaredAt: { path: "/OrgChat.spell", start: 1612, end: 1678 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("picked", { declaredAt: { path: "/OrgChat.spell", start: 1609, end: 1675 }, readsFrom: ["my_threads"] }) }
   get picked() { return core.waitedValue(this, "picked", async () => {
     return core.getItemAt(core.filter(await core.savedThings(Thread), (thread) => thread.current), 0)
   }) }
@@ -186,14 +186,14 @@ export class ChatPage extends App {
   set drawerOpen(value) { this.setProp("drawerOpen", value) }
 
   /** The picked thread's name:  nothing until one is picked, as when signed out */
-  static { this.declareProp("threadName", { declaredAt: { path: "/OrgChat.spell", start: 1840, end: 1915 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("threadName", { declaredAt: { path: "/OrgChat.spell", start: 1759, end: 1913 }, readsFrom: ["my_threads"] }) }
   get threadName() {
     if (this.picked) return this.picked.name
     return ""
   }
 
   /** What the box says, until something is typed */
-  static { this.declareProp("boxWords", { declaredAt: { path: "/OrgChat.spell", start: 1965, end: 2012 }, readsFrom: ["my_threads"] }) }
+  static { this.declareProp("boxWords", { declaredAt: { path: "/OrgChat.spell", start: 1915, end: 1962 }, readsFrom: ["my_threads"] }) }
   get boxWords() {
     return `Message ${this.threadName}`
   }

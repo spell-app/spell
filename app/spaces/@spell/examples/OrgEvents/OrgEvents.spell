@@ -6,8 +6,8 @@
 
 ## A row for each event:  where it is, and a button to move it on
 
-an event:
-	to draw it:
+an event
+	to draw it
 		<stack class="event" direction="horizontal" spacing="md" align="center" wrap>
 			<text>{its name}</text>
 			<label size="tiny">{its stage name}</label>
@@ -15,8 +15,8 @@ an event:
 			<button class="move" size="small" disabled={its onward is ""} title="Move it on to its next stage" onClick={set its stage to its onward}>Move on</button>
 		</stack>
 
-an event stage:
-	to draw it:
+an event stage
+	to draw it
 		<stack class="stage" direction="horizontal" spacing="md" align="center" wrap>
 			<text>{its name}</text>
 			<text color="grey">{its moved by}</text>
@@ -24,15 +24,15 @@ an event stage:
 
 ## The page:  a form to propose one, the events, and the stages they go through
 
-events page is an app:
-	// An event proposed:  its name, and its organizers' addresses, comma-separated
+events page is an app
 	"new event" is a new event
+		// An event proposed:  its name, and its organizers' addresses, comma-separated
 
-	to propose the new event:
+	to propose the new event
 		add the new event to the events
 		set its new event to a new event
 
-	to draw it:
+	to draw it
 		<stack class="org-page" spacing="none">
 			<toolbar class="top-bar" appearance="text" aria-label="Events">
 				<text slot="title" size="large">Events</text>

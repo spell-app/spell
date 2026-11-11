@@ -3,7 +3,7 @@
 // hasta cuándo.  Cada cambio pasa por el servidor de Encanto, con las reglas de la org, y queda en el registro:
 // tampoco desde esta página puede un Project Manager quitar a un Team Manager.
 // La página de tu org nombra su propia org en la línea siguiente:  "@rs" es la de la Rock Society.
-roles de la org es una carpeta de datos en "@rs/__admin/roles":
+roles de la org es una carpeta de datos en "@rs/__admin/roles"
 	se revisa cada 30 segundos
 	los perfiles están en "org_profiles"
 	las funciones están en "org_roles"
@@ -16,36 +16,36 @@ roles de la org es una carpeta de datos en "@rs/__admin/roles":
 	las etapas están en "event_stages"
 	los cambios están en "role_changes"
 
-// La org misma, para el título de la página y como espacio que diseñar.
-un "perfil" es una cosa:
+un "perfil" es una cosa
+	// La org misma, para el título de la página y como espacio que diseñar.
 	vive en roles de la org
 	su "nombre" es texto, guardado como "name"
 	su "espacio" es texto, guardado como "space"
 
-// Un rol de la org, por su nombre.
-una "función" es una cosa:
+una "función" es una cosa
+	// Un rol de la org, por su nombre.
 	vive en roles de la org
 	su "nombre" es texto, guardado como "name"
 
-un "miembro" es una cosa:
+un "miembro" es una cosa
 	vive en roles de la org
 	su "persona" es texto, guardado como "person"
 	su "nombre" es texto, guardado como "name"
 	su "rol" es texto, guardado como "role"
 	su "cargo" es texto, guardado como "roleName"
 
-un "equipo" es una cosa:
+un "equipo" es una cosa
 	vive en roles de la org
 	su "nombre" es texto, guardado como "name"
 	su "espacio" es texto, guardado como "space"
 
-un "proyecto" es una cosa:
+un "proyecto" es una cosa
 	vive en roles de la org
 	su "nombre" es texto, guardado como "name"
 	su "equipo" es texto, guardado como "team"
 	su "espacio" es texto, guardado como "space"
 
-un "mandato" es una cosa:
+un "mandato" es una cosa
 	vive en roles de la org
 	su "rol" es texto, guardado como "role"
 	su "titular" es texto, guardado como "holder"
@@ -56,26 +56,26 @@ un "mandato" es una cosa:
 	su "inicio" es texto, guardado como "starts"
 	su "fin" es texto, guardado como "ends"
 
-una "aprobación" es una cosa:
+una "aprobación" es una cosa
 	vive en roles de la org
 	su "nombre" es texto, guardado como "name"
 	su "versión" es texto, guardado como "version"
 
-// Quien diseña cambia las páginas y el código de un espacio, sea cual sea su rol allí:  un Manager las publica.
-un "diseñador" es una cosa:
+un "diseñador" es una cosa
+	// Quien diseña cambia las páginas y el código de un espacio, sea cual sea su rol allí:  un Manager las publica.
 	vive en roles de la org
 	su "persona" es texto, guardado como "person"
 	su "espacio" es texto, guardado como "space"
 	su "nombre persona" es texto, guardado como "personName"
 
-// Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers".
-una "etapa" es una cosa:
+una "etapa" es una cosa
+	// Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers".
 	vive en roles de la org
 	su "nombre" es texto, guardado como "name"
 	su "siguiente" es texto, guardado como "movesTo"
 	su "quién mueve" es texto, guardado como "movedBy"
 
-un "cambio" es una cosa:
+un "cambio" es una cosa
 	vive en roles de la org
 	su "cuándo" es texto, guardado como "at"
 	su "quién" es texto, guardado como "who"

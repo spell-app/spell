@@ -1,7 +1,7 @@
 # Money
 // An amount as dollars and cents:  12.5 is "$12.50".
 
-to write (amount as a number) as money:
+to write (amount as a number) as money
 	set cents to round (amount * 100)
 	set dollars to (cents / 100) as an integer
 	set left over to cents - dollars * 100

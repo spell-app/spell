@@ -9,7 +9,7 @@
 // It asks for 80 requests a second at most, in its docs:  a program keeps to that.
 // Its search pages by "limit" and "offset", up to 500 at a time;  its list of every id takes neither, and comes whole.
 
-met museum is a web server at "https://collectionapi.metmuseum.org/public/collection":
+met museum is a web server at "https://collectionapi.metmuseum.org/public/collection"
 	its id is its "objectID"
 	its rows are its "objectIDs"
 	its lists give only each one's "objectID"
@@ -20,7 +20,7 @@ met museum is a web server at "https://collectionapi.metmuseum.org/public/collec
 	it searches everything with "q" at "/v1.1/search"
 	artworks live at "/v1/objects"
 
-an "artwork" is a thing:
+an "artwork" is a thing
 	it lives in met museum
 	its "highlight" is yes or no, stored as "isHighlight"
 	its "accession number" is text
@@ -79,7 +79,7 @@ an "artwork" is a thing:
 	its "timeline work" is yes or no, stored as "isTimelineWork"
 	its "gallery number" is a number
 
-a "constituent" is a thing:
+a "constituent" is a thing
 	its "constituent id" is a number, stored as "constituentID"
 	its "role" is text
 	its "name" is text
@@ -87,18 +87,18 @@ a "constituent" is a thing:
 	its "constituent wikidata url" is text  // an address
 	its "gender" is text
 
-a "measurement" is a thing:
+a "measurement" is a thing
 	its "element name" is text
 	its "element description" is text
 	its "element measurements" is an element measurement
 
-an "element measurement" is a thing:
+an "element measurement" is a thing
 	its "diameter" is a number
 	its "height" is a number
 	its "width" is a number
 	its "depth" is a number
 
-a "tag" is a thing:
+a "tag" is a thing
 	its "term" is text
 	its "aat url" is text  // an address
 	its "wikidata url" is text  // an address

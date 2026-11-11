@@ -3,10 +3,9 @@
 // Es una vista reversible:  boca arriba muestra su imagen, boca abajo el dorso que comparten todas las cartas.
 // En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
 
-una "carta" es una vista reversible:
-	es arrastrable
-	// El as es bajo:  as = 1 ... rey = 13
+una "carta" es una vista reversible arrastrable
 	grupo "Rango"
+		// El as es bajo:  as = 1 ... rey = 13
 	su "rango" es uno de as, 2 ... 10, jota, dama, rey
 		"es un (rango)"
 	su "valor" es la posición de su rango
@@ -16,29 +15,29 @@ una "carta" es una vista reversible:
 	grupo "Palo"
 	su "palo" es uno de tréboles, diamantes, corazones o espadas
 		"es un (palo)"
-	su "color" es uno de rojo, negro:
+	su "color" es uno de rojo, negro
 		rojo si es un diamante o es un corazón
 		negro de lo contrario
-	su "símbolo" es:
+	su "símbolo" es
 		"♣" si es un trébol
 		"♦" si es un diamante
 		"♥" si es un corazón
 		"♠" de lo contrario
 
-	// Cómo la llama una persona, una prueba o la consola
 	grupo "Nombres"
+		// Cómo la llama una persona, una prueba o la consola
 	su "nombre" es su rango && "de" && su palo
 	"es el (rango) de (palo)"
-	// Su nombre corto:  D♠↓ es la dama de espadas, boca abajo
-	su "estado" es:
+	su "estado" es
+		// Su nombre corto:  D♠↓ es la dama de espadas, boca abajo
 		letra es 10 si su valor es 10 de lo contrario la primera letra de su rango como mayúsculas
 		flecha es "↑" si está boca arriba de lo contrario "↓"
 		devolver letra + su símbolo + flecha
 
-	// Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
 	grupo "Dibujo"
-	// Su cara:  https://www.compart.com/en/unicode/block/U+1F0A0
-	su "imagen" es:
+		// Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
+	su "imagen" es
+		// Su cara:  https://www.compart.com/en/unicode/block/U+1F0A0
 		poner lugar a su valor
 		si es un trébol
 			devolver el elemento lugar de ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
@@ -47,14 +46,14 @@ una "carta" es una vista reversible:
 		si es un corazón
 			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
-	// Por encima de las cartas y pilas de su alrededor mientras la trampa la mueve -- styles.css
 	su "levantada" es sí o no
-	para dibujar su frente:
+		// Por encima de las cartas y pilas de su alrededor mientras la trampa la mueve -- styles.css
+	para dibujar su frente
 		<texto color={su color}>{su imagen}</texto>
-	para dibujar su dorso:
+	para dibujar su dorso
 		<texto color="azul">🂠</texto>
 
-	para probar la preparación de la carta:
+	para probar la preparación de la carta
 		obtener una nueva carta cuyo rango es dama y palo es espadas
 		su nombre debería ser "dama de espadas"
 		su color debería ser negro

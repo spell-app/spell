@@ -10,9 +10,9 @@
 
 # Every page's top:  its title, and the settings
 
-a "page top" is a view:
+a "page top" is a view
 	its "title" is a text
-	to draw it:
+	to draw it
 		<stack direction="horizontal" align="center" justify="between">
 			<header size="large">{its title}</header>
 			<button class="settings" appearance="basic" icon="cog" onClick={show the settings dialog}>Settings</button>
@@ -21,7 +21,7 @@ a "page top" is a view:
 
 # The films
 
-films page is a page:
+films page is a page
 	<stories>
 		<story "S1" done>see every film, in the order they came out</story>
 		<story "S2">
@@ -32,7 +32,7 @@ films page is a page:
 		</story>
 		<story "S3" done>open a film's page from its row</story>
 	</stories>
-	to draw it:
+	to draw it
 		draw (a new page top with title = "Films")
 		for film in every film
 			<cell "Episode">{film's episode id}</cell>
@@ -42,7 +42,7 @@ films page is a page:
 		while waiting: <loader visible inline text>{"Asking the galaxy for its films"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
-film page is a page:
+film page is a page
 	<stories>
 		<story "S1" done>read the film's opening crawl</story>
 		<story "S2" done>
@@ -59,13 +59,13 @@ film page is a page:
 			- done when:  "Add a review" asks for stars and words, and the film's page lists the reviews
 		</story>
 	</stories>
-	// The film the address names:  /films/:film
 	its "film" is a film
-	// What's been said of it, on this device
-	its "reviews" is:
+		// The film the address names:  /films/:film
+	its "reviews" is
+		// What's been said of it, on this device
 		set title to its film's title
 		return every review where its film title is title, sorted by its created, newest first
-	to draw it:
+	to draw it
 		draw (a new page top with title = its film's title)
 		<text color="grey">Episode {its film's episode id} · directed by {its film's director} · released {its film's release date}</text>
 		<segment>
@@ -108,13 +108,13 @@ film page is a page:
 
 # The people
 
-people page is a page:
+people page is a page
 	<stories>
 		<story "S1">find a person by name as I type</story>
 		<story "S2" done>see each person's home planet and species at a glance</story>
 		<story "S3" done>open a person in the side panel without leaving the list</story>
 	</stories>
-	to draw it:
+	to draw it
 		draw (a new page top with title = "People")
 		for person in every character
 			<cell "Name"><link link={the address of the person page for person}>{person's name}</link></cell>
@@ -124,7 +124,7 @@ people page is a page:
 		while waiting: <loader visible inline text>{"Asking the galaxy for its people"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
-person page is a page:
+person page is a page
 	<stories>
 		<story "S1" done>see a person's height, birth year and home planet</story>
 		<story "S2" done>
@@ -134,9 +134,9 @@ person page is a page:
 			- done when:  their films are listed in release order, each a link
 		</story>
 	</stories>
-	// The person the address names:  /people/:person
 	its "person" is a character
-	to draw it:
+		// The person the address names:  /people/:person
+	to draw it
 		draw (a new page top with title = its person's name)
 		draw (a new person facts with person = its person)
 		<header size="small">Films</header>
@@ -145,10 +145,10 @@ person page is a page:
 		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
-// A person in a few lines:  the page and the sidebar both show them
-a "person facts" is a view:
+a "person facts" is a view
+	// A person in a few lines:  the page and the sidebar both show them
 	its "person" is a character
-	to draw it:
+	to draw it
 		<table appearance="definition" celled unstackable>
 			<row><cell>Born</cell><cell>{its person's birth year}</cell></row>
 			<row><cell>Height</cell><cell>{its person's height}</cell></row>
@@ -156,10 +156,10 @@ a "person facts" is a view:
 			<row><cell>Home</cell><cell><link link={the address of the planet page for (its person's homeworld)}>{its person's homeworld's name}</link></cell></row>
 		</table>
 
-a "person sidebar" is a view:
-	// Whoever it's showing
+a "person sidebar" is a view
 	its "person" is a character
-	to draw it:
+		// Whoever it's showing
+	to draw it
 		<header size="medium">{its person's name}</header>
 		draw (a new person facts with person = its person)
 		<link class="whole-page" link={the address of the person page for its person}>Their whole page</link>
@@ -167,12 +167,12 @@ a "person sidebar" is a view:
 
 # The planets
 
-planets page is a page:
+planets page is a page
 	<stories>
 		<story "S1" done>see every planet, with its climate and terrain</story>
 		<story "S2">sort the planets by how many people live there</story>
 	</stories>
-	to draw it:
+	to draw it
 		draw (a new page top with title = "Planets")
 		for planet in every planet
 			<cell "Name"><link link={the address of the planet page for planet}>{planet's name}</link></cell>
@@ -182,14 +182,14 @@ planets page is a page:
 		while waiting: <loader visible inline text>{"Asking the galaxy for its planets"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
-planet page is a page:
+planet page is a page
 	<stories>
 		<story "S1" done>see who comes from a planet</story>
 		<story "S2" done>see the films a planet appears in</story>
 	</stories>
-	// The planet the address names:  /planets/:planet
 	its "planet" is a planet
-	to draw it:
+		// The planet the address names:  /planets/:planet
+	to draw it
 		draw (a new page top with title = its planet's name)
 		<text color="grey">{its planet's climate} · {its planet's terrain} · {its planet's population} people</text>
 		<header size="small">Who's from here</header>
@@ -207,12 +207,12 @@ planet page is a page:
 
 # The species
 
-species list page is a page:
+species list page is a page
 	<stories>
 		<story "S1" done>see every species, with its classification and language</story>
 		<story "S2">filter the species by how long they live</story>
 	</stories>
-	to draw it:
+	to draw it
 		draw (a new page top with title = "Species")
 		for one in every species
 			<cell "Name"><link link={the address of the species page for one}>{one's name}</link></cell>
@@ -222,14 +222,14 @@ species list page is a page:
 		while waiting: <loader visible inline text>{"Asking the galaxy for its species"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
-species page is a page:
+species page is a page
 	<stories>
 		<story "S1" done>see the people of a species</story>
 		<story "S2">see a species' home world</story>
 	</stories>
-	// The species the address names:  /species/:species
 	its "species" is a species
-	to draw it:
+		// The species the address names:  /species/:species
+	to draw it
 		draw (a new page top with title = its species's name)
 		<text color="grey">{its species's classification} · speaks {its species's language}</text>
 		<header size="small">Its people</header>
@@ -241,12 +241,12 @@ species page is a page:
 
 # The vehicles and starships
 
-vehicles page is a page:
+vehicles page is a page
 	<stories>
 		<story "S1" done>see every vehicle, with its class and crew</story>
 		<story "S2">sort the vehicles by speed</story>
 	</stories>
-	to draw it:
+	to draw it
 		draw (a new page top with title = "Vehicles")
 		for vehicle in every vehicle
 			<cell "Name"><link link={the address of the vehicle page for vehicle}>{vehicle's name}</link></cell>
@@ -255,14 +255,14 @@ vehicles page is a page:
 		while waiting: <loader visible inline text>{"Asking the galaxy for its vehicles"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
-vehicle page is a page:
+vehicle page is a page
 	<stories>
 		<story "S1" done>see who has piloted a vehicle</story>
 		<story "S2" done>see the films it appears in</story>
 	</stories>
-	// The vehicle the address names:  /vehicles/:vehicle
 	its "vehicle" is a vehicle
-	to draw it:
+		// The vehicle the address names:  /vehicles/:vehicle
+	to draw it
 		draw (a new page top with title = its vehicle's name)
 		<text color="grey">{its vehicle's model} · {its vehicle's manufacturer}</text>
 		<header size="small">Piloted by</header>
@@ -278,7 +278,7 @@ vehicle page is a page:
 		while waiting: <loader visible inline text>{"Following the links"}</loader>
 		show them in: <stack direction="horizontal" wrap spacing="xs"></stack>
 
-starships page is a page:
+starships page is a page
 	<stories>
 		<story "S1" done>see every starship, with its class and hyperdrive rating</story>
 		<story "S2">
@@ -288,7 +288,7 @@ starships page is a page:
 			- done when:  picking two starships shows their numbers in two columns
 		</story>
 	</stories>
-	to draw it:
+	to draw it
 		draw (a new page top with title = "Starships")
 		for starship in every starship
 			<cell "Name"><link link={the address of the starship page for starship}>{starship's name}</link></cell>
@@ -297,14 +297,14 @@ starships page is a page:
 		while waiting: <loader visible inline text>{"Asking the galaxy for its starships"}</loader>
 		show them in: <table celled selectable><row></row></table>
 
-starship page is a page:
+starship page is a page
 	<stories>
 		<story "S1" done>see a starship's pilots</story>
 		<story "S2" done>see its length, crew and cost</story>
 	</stories>
-	// The starship the address names:  /starships/:starship
 	its "starship" is a starship
-	to draw it:
+		// The starship the address names:  /starships/:starship
+	to draw it
 		draw (a new page top with title = its starship's name)
 		<text color="grey">{its starship's length} m long · crew {its starship's crew} · {its starship's cost in credits} credits</text>
 		<header size="small">Piloted by</header>
@@ -317,7 +317,7 @@ starship page is a page:
 
 # Every review, edited like a spreadsheet
 
-reviews page is a page:
+reviews page is a page
 	<stories>
 		<story "S1" done>see every review written on this device, in one table</story>
 		<story "S2" done>
@@ -329,17 +329,17 @@ reviews page is a page:
 		<story "S3" done>add or remove a review right in the table</story>
 		<story "S4" done>paste a block of reviews copied from a spreadsheet</story>
 	</stories>
-	to draw it:
+	to draw it
 		draw (a new page top with title = "Reviews")
 		<table editable celled rows={every review}/>
 
 
 # The dialogs:  the settings, and a review of a film
 
-a "settings dialog" is a view:
+a "settings dialog" is a view
 	its "units" is metric or imperial
 	its "crawl" is shown or hidden
-	to draw it:
+	to draw it
 		<header size="medium">Settings</header>
 		<form value={it}>
 			<field label="Lengths and weights in">
@@ -357,17 +357,17 @@ a "settings dialog" is a view:
 		</form>
 		<button class="done" color="primary" onClick={close the settings dialog}>Done</button>
 
-a "review dialog" is a view:
-	// The film it's a review of
+a "review dialog" is a view
 	its "film" is a film
-	// The review being written:  saved when it's done
+		// The film it's a review of
 	its "draft" is a new review with stars = 5
-	to save the review:
+		// The review being written:  saved when it's done
+	to save the review
 		set the draft's film title to its film's title
 		add the draft to the reviews
 		set its draft to a new review with stars = 5
 		close the review dialog
-	to draw it:
+	to draw it
 		<header size="medium">Review {its film's title}</header>
 		<form value={its draft}>
 			<field label="Stars">
@@ -382,9 +382,9 @@ a "review dialog" is a view:
 
 # The site:  where each page is, its dialogs and sidebars, and the theme it wears
 
-galaxy guide is a site:
-	// The theme its pages wear:  a hand-drawn sketch, while it's a mockup
+galaxy guide is a site
 	its "theme" is "mockup"
+		// The theme its pages wear:  a hand-drawn sketch, while it's a mockup
 	it has a films page at "/films", named "Films"
 		it has a film page at "/films/:film", named "Film"
 	it has a people page at "/people", named "People"

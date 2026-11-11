@@ -25,7 +25,7 @@
         }
       ],
       "returns": "text",
-      "defined": "/Money.spell:63-320"
+      "defined": "/Money.spell:63-319"
     },
     {
       "syntax": "test money",
@@ -34,36 +34,36 @@
       "alias": "statement",
       "kind": "function",
       "name": "money",
-      "defined": "/Money.spell:322-450"
+      "defined": "/Money.spell:321-449"
     },
     {
       "type": "Diner",
       "superType": "View",
-      "defined": "/Diner.spell:245-1097"
+      "defined": "/Diner.spell:245-1100"
     },
     {
       "property": "name",
       "of": "Diner",
       "datatype": "text",
-      "defined": "/Diner.spell:267-285"
+      "defined": "/Diner.spell:266-284"
     },
     {
       "property": "amount",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/Diner.spell:325-349"
+      "defined": "/Diner.spell:286-349"
     },
     {
       "property": "tip",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/Diner.spell:426-475"
+      "defined": "/Diner.spell:351-400"
     },
     {
       "property": "share",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/Diner.spell:495-530"
+      "defined": "/Diner.spell:478-513"
     },
     {
       "syntax": "remove {thisArg:expression}",
@@ -77,7 +77,7 @@
       "kind": "method",
       "name": "remove it",
       "returns": "nothing",
-      "defined": "/Diner.spell:561-612"
+      "defined": "/Diner.spell:535-586"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -90,13 +90,13 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Diner.spell:690-1097"
+      "defined": "/Diner.spell:618-1100"
     },
     {
       "type": "Table",
       "superType": "ViewableList",
       "itemType": "Diner",
-      "defined": "/Diner.spell:1124-1242"
+      "defined": "/Diner.spell:1102-1244"
     },
     {
       "property": "table",
@@ -104,18 +104,18 @@
       "group": "A diner",
       "datatype": "Table",
       "exclusive": true,
-      "defined": "/Diner.spell:1273-1301"
+      "defined": "/Diner.spell:1246-1274"
     },
     {
       "type": "BillSplitter",
       "superType": "App",
-      "defined": "/BillSplitter.spell:320-2189"
+      "defined": "/BillSplitter.spell:320-2194"
     },
     {
       "property": "diners",
       "of": "BillSplitter",
       "datatype": "Table",
-      "defined": "/BillSplitter.spell:346-369"
+      "defined": "/BillSplitter.spell:345-368"
     },
     {
       "property": "percent",
@@ -125,13 +125,13 @@
         "dimension": "Proportion",
         "unit": "fraction"
       },
-      "defined": "/BillSplitter.spell:453-495"
+      "defined": "/BillSplitter.spell:370-495"
     },
     {
       "property": "subtotal",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:533-664"
+      "defined": "/BillSplitter.spell:497-664"
     },
     {
       "property": "tip",
@@ -157,7 +157,7 @@
       "kind": "method",
       "name": "create it",
       "returns": "nothing",
-      "defined": "/BillSplitter.spell:778-986"
+      "defined": "/BillSplitter.spell:747-986"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -170,7 +170,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spell:1156-2189"
+      "defined": "/BillSplitter.spell:1122-2194"
     },
     {
       "syntax": "add someone (of {thisArg:expression})?",
@@ -184,7 +184,7 @@
       "kind": "method",
       "name": "add someone",
       "returns": "nothing",
-      "defined": "/BillSplitter.spell:1026-1114"
+      "defined": "/BillSplitter.spell:988-1119"
     }
   ],
   "codeLines": [

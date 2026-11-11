@@ -2,29 +2,29 @@
 // A widget of its own, as no `ui-image` falls back on anything:  an initial shows until a picture comes, and stays if none does.
 // A species with no picture of its own takes the first of its people who has one:  Hutt, Jabba.
 
-a "portrait" is a thing:
+a "portrait" is a thing
 	it has a name
 	it has a hue
 	it has a shape
 	its "species" is a species
 	its "page" is the wiki page whose id is its name
 	its "initial" is the first letter of its name
-	its "picture" is:
+	its "picture" is
 		if its page and its page's fits and its page's thumbnail
 			return its page's thumbnail's source
 		if its species
 			return its species' picture
 		return ""
-	to draw it:
+	to draw it
 		<segment class={"portrait " + its shape} style={"--hue: " + its hue} appearance="basic">
 			<header class="initial">{its initial}</header>
 			{draw its photo}
 		</segment>
-	// Waiting for it, or if Wikipedia can't be reached, the initial stays
-	to draw its photo:
+	to draw its photo
+		// Waiting for it, or if Wikipedia can't be reached, the initial stays
 		if its picture is not ""
 			<image src={its picture} alt="" crop="top" />
-		while waiting:
+		while waiting
 			<space />
-		if that fails:
+		if that fails
 			<space />

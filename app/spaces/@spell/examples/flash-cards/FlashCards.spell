@@ -4,53 +4,46 @@
 // the score keeps count, and the next card comes up at random.
 // The card is this project's own, in `FlashCard.spell`;  this file holds the quiz, and its words.
 
-quiz is an app:
+quiz is an app
 	"deck" is a new deck
-	// The card showing
 	its "card" is a flash card
-	// How many you knew
+		// The card showing
 	its "known" is a number
-	// How many you've tried
+		// How many you knew
 	its "tried" is a number
-	// Said in the toolbar
-	its "score" is:
+		// How many you've tried
+	its "score" is
+		// Said in the toolbar
 		"Nothing tried yet" if the tried is 0
 		"[known] of [tried] right" otherwise
 
 	group "Playing"
-	// A card from the deck at random, word up:  never the one just shown
-	to deal a card:
+	to deal a card
+		// A card from the deck at random, word up:  never the one just shown
 		set others to cards in the deck where it is not quiz's card
 		set the card to a random card in others
 		turn the card face up
-	to show the answer:
-		titled "Show the answer"
+	to show the answer
 		shortcut space
 		turn the card over
-	// Counted, then the next card
-	to say i knew it:
-		titled "I knew it"
-		icon "check"
+	to "say i knew it" with title "I knew it", icon "check"
+		// Counted, then the next card
 		shortcut Y
 		set the known to the known + 1
 		set the tried to the tried + 1
 		deal a card
-	to say i missed it:
-		titled "I missed it"
-		icon "close"
+	to "say i missed it" with title "I missed it", icon "close"
 		shortcut N
 		set the tried to the tried + 1
 		deal a card
-	to start over:
-		titled "Start over"
-		icon "redo"
+	to "start over" with icon "redo"
 		clear the known
 		clear the tried
 		deal a card
 	its "quiz menu" is a menu of "start over"
 
-	// The toolbar with the score, the card, then what you can do:  turn it over, or say how you did
-	to draw it:
+	to draw it
+		// The toolbar with the score, the card, then what you can do:  turn it over, or say how you did
 		<container text>
 			<stack>
 				<toolbar menu="quiz menu" aria-label="Quiz">
@@ -71,7 +64,7 @@ quiz is an app:
 
 ## The deck:  twelve Spanish words -- add your own
 
-to add (word as text) meaning (meaning as text):
+to add (word as text) meaning (meaning as text)
 	add (a new flash card with word = the word, meaning = the meaning) to quiz's deck
 
 add "el gato" meaning "the cat"

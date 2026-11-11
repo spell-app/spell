@@ -8,7 +8,7 @@
 // Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spell.
 recetario familiar se guarda en este dispositivo
 
-una "receta" es una cosa:
+una "receta" es una cosa
 	vive en recetario familiar
 	su "título" es texto
 	sus "porciones" es un número

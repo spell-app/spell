@@ -4,25 +4,25 @@
 // The app takes every change of size (`grows`, its place across):  dragging the code's bar sizes the code, the app gives or takes the room, and the Inspector keeps its width.
 // The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
 
-editor layout is an app:
-	// The file tabs and the code
+editor layout is an app
 	its "code" is a thing
-	// The program's output and compiled code, under the code
+		// The file tabs and the code
 	its "program panel" is a thing
-	// The running program
+		// The program's output and compiled code, under the code
 	its "app" is a thing
-	// The Inspector, while it's open
+		// The running program
 	its "inspector" is a thing
-	// The sizes across, as they were last dragged
+		// The Inspector, while it's open
 	its "columns" is text
-	// The sizes of the code and the Program panel
+		// The sizes across, as they were last dragged
 	its "code rows" is text
-	// The app's place across, which takes every change of size:  2 after the code, first without it
+		// The sizes of the code and the Program panel
 	its "grows" is text
+		// The app's place across, which takes every change of size:  2 after the code, first without it
 	its "mode" is one of edit or run
 		it "is (mode)"
 
-	to draw it:
+	to draw it
 		<ui-split-panel class="EditorColumns" columns={its columns} grows={its grows} resizable>
 			<ui-split-panel class="EditorCode" rows={its code rows} resizable hidden={it is run}>
 				{draw its code}

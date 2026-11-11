@@ -4,24 +4,22 @@
 // A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
 // a drag moves it, the selected ones with it (`draggable`).
 
-a "task" is a view:
-	it is selectable
-	it is draggable
-	// What to do
+a "task" is a draggable selectable view
 	its "title" is text
-	// Anything else about it
+		// What to do
 	its "notes" is text
+		// Anything else about it
 	its "priority" is one of low, normal or high
 	its "done" is yes or no
-	// Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back
 	its "order" is number
+		// Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back
 	it "is done" if its done is yes
 	it "is active" if it is not done
-	// Gone from where it's kept:  a task kept nowhere has nothing to do;  each kind of kept task says how, in its keeper's file
 	to throw it away: return
+		// Gone from where it's kept:  a task kept nowhere has nothing to do;  each kind of kept task says how, in its keeper's file
 
-	// A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal
-	to draw it:
+	to draw it
+		// A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal
 		<form value={it}>
 			<stack direction="horizontal" spacing="sm">
 				<icon name="grip vertical" color="grey" aria-label="Drag"/>
@@ -33,7 +31,7 @@ a "task" is a view:
 			</stack>
 		</form>
 
-	to test checking one off:
+	to test checking one off
 		set the task to a new task with title "Write the tests"
 		the task is active should be yes
 		set the task's done to yes

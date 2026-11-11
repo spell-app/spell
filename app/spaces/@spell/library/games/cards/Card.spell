@@ -3,10 +3,9 @@
 // It's a two sided view:  face up it shows its picture, face down the back every card shares.
 // On the page each card is its own element, `<games-card>`:  people may drag it (`draggable`), when its pile lets it go.
 
-a "card" is a two sided view:
-	it is draggable
-	// Ace is low:  ace = 1 ... king = 13
+a "card" is a draggable two sided view
 	group "Rank"
+		// Ace is low:  ace = 1 ... king = 13
 	its "rank" is one of ace, 2 ... 10, jack, queen, king
 		it "is a (rank)"
 	its "value" is the position of its rank
@@ -16,29 +15,29 @@ a "card" is a two sided view:
 	group "Suit"
 	its "suit" is one of clubs, diamonds, hearts or spades
 		it "is a (suit)"
-	its "color" is one of red, black:
+	its "color" is one of red, black
 		red if it is a diamond or it is a heart
 		black otherwise
-	its "symbol" is:
+	its "symbol" is
 		"♣" if it is a club
 		"♦" if it is a diamond
 		"♥" if it is a heart
 		"♠" otherwise
 
-	// What a person, a test or the console calls it
 	group "Names"
+		// What a person, a test or the console calls it
 	its "name" is its rank + " of " + its suit
 	it "is the (rank) of (suit)"
-	// Its short name:  Q♠↓ is the queen of spades, face down
-	its "state" is:
+	its "state" is
+		// Its short name:  Q♠↓ is the queen of spades, face down
 		letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
 		arrow is "↑" if it is face up otherwise "↓"
 		return letter + its symbol + arrow
 
-	// One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 	group "Drawing"
-	// Its face:  https://www.compart.com/en/unicode/block/U+1F0A0
-	its "picture" is:
+		// One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+	its "picture" is
+		// Its face:  https://www.compart.com/en/unicode/block/U+1F0A0
 		set column to its value
 		if it is a club
 			return item column of ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
@@ -47,12 +46,12 @@ a "card" is a two sided view:
 		if it is a heart
 			return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
-	to draw its front:
+	to draw its front
 		<text color={its color}>{its picture}</text>
-	to draw its back:
+	to draw its back
 		<text color="blue">🂠</text>
 
-	to test card setup:
+	to test card setup
 		get a new card whose rank is queen, suit is spades and direction is down
 		its name should be "queen of spades"
 		its color should be black

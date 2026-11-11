@@ -4,23 +4,23 @@
 
 ## A shift you signed up for
 
-a listing:
-	to draw it:
+a listing
+	to draw it
 		<label class="shift">{its shift}</label>
 
 ## Your invitations' count, from your inbox
 
-a message:
-	to draw it:
+a message
+	to draw it
 		<text class="count">{its text}</text>
 
 ## The letter
 
-picnic letter is an app:
+picnic letter is an app
 	its "shifts" is every listing where its person is them
 	its "counts" is every message where its thread is "invitations"
 
-	to draw it:
+	to draw it
 		<container class="letter">
 			<stack>
 				<header size="large">The Picnic:  your letter</header>

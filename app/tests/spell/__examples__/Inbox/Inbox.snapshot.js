@@ -8,42 +8,42 @@ core.heading("Inbox:  where your messages are kept")
 /** A message, or a page a Manager sent:  its title and line, worked out again when you open it. */
 export class Message extends Thing {
   // - its "text" is text
-  static { this.declareProp("text", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 598, end: 616 } }) }
+  static { this.declareProp("text", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 597, end: 615 } }) }
   get text() { return this.getProp("text") }
   set text(value) { this.setProp("text", value) }
 
   // - its "recipients" is text
-  static { this.declareProp("recipients", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 618, end: 642 } }) }
+  static { this.declareProp("recipients", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 617, end: 641 } }) }
   get recipients() { return this.getProp("recipients") }
   set recipients(value) { this.setProp("recipients", value) }
 
   // - its "from" is text
-  static { this.declareProp("from", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 644, end: 662 } }) }
+  static { this.declareProp("from", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 643, end: 661 } }) }
   get from() { return this.getProp("from") }
   set from(value) { this.setProp("from", value) }
 
   // - its "thread" is text
-  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 664, end: 684 } }) }
+  static { this.declareProp("thread", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 663, end: 683 } }) }
   get thread() { return this.getProp("thread") }
   set thread(value) { this.setProp("thread", value) }
 
   // - its "sent" is text
-  static { this.declareProp("sent", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 686, end: 704 } }) }
+  static { this.declareProp("sent", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 685, end: 703 } }) }
   get sent() { return this.getProp("sent") }
   set sent(value) { this.setProp("sent", value) }
 
   // - its "page" is text
-  static { this.declareProp("page", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 706, end: 724 } }) }
+  static { this.declareProp("page", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 705, end: 723 } }) }
   get page() { return this.getProp("page") }
   set page(value) { this.setProp("page", value) }
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 726, end: 745 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 725, end: 744 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "line" is text
-  static { this.declareProp("line", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 747, end: 765 } }) }
+  static { this.declareProp("line", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 746, end: 764 } }) }
   get line() { return this.getProp("line") }
   set line(value) { this.setProp("line", value) }
 
@@ -80,12 +80,12 @@ export class Message extends Thing {
   }
 
   // - it lives in my inbox
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 576, end: 596 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 575, end: 595 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my inbox
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 576, end: 596 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 575, end: 595 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -96,7 +96,7 @@ export class Message extends Thing {
  */
 export class MailChoice extends Thing {
   // - its "how" is text
-  static { this.declareProp("how", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 996, end: 1013 } }) }
+  static { this.declareProp("how", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 994, end: 1011 } }) }
   get how() { return this.getProp("how") }
   set how(value) { this.setProp("how", value) }
 
@@ -118,12 +118,12 @@ export class MailChoice extends Thing {
     times: ["created", "modified"], select: ["how"] }
 
   // - it lives in my inbox
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 974, end: 994 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 972, end: 992 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my inbox
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 974, end: 994 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 972, end: 992 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -131,7 +131,7 @@ export class MailChoice extends Thing {
 /** A shared space of the org you follow, as "events_team@rs":  what's new there reaches your inbox as an update. */
 export class Subscription extends Thing {
   // - its "space" is text
-  static { this.declareProp("space", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1180, end: 1199 } }) }
+  static { this.declareProp("space", { type: "text", declaredAt: { path: "/Inbox.api.spell", start: 1178, end: 1197 } }) }
   get space() { return this.getProp("space") }
   set space(value) { this.setProp("space", value) }
 
@@ -158,12 +158,12 @@ export class Subscription extends Thing {
   }
 
   // - it lives in my inbox
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1158, end: 1178 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1156, end: 1176 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in my inbox
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1158, end: 1178 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/Inbox.api.spell", start: 1156, end: 1176 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }

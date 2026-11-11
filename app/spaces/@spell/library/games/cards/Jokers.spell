@@ -4,27 +4,27 @@
 // - Everything else it gets from `card`:  it turns over, draws both its sides and drags as any card does.
 // - A deck holds its two only when it's made `with jokers`.
 
-a "joker" is a card:
-	// A joker comes red or black
+a "joker" is a card
 	group "What's Different"
+		// A joker comes red or black
 	its "color" is one of red or black
 	it "is the (color) joker"
 
-	// A card's own, written again for a joker
 	group "What It Changes"
-	its "value" is:
+		// A card's own, written again for a joker
+	its "value" is
 		53 if it is the red joker
 		54 otherwise
-	its "picture" is:
+	its "picture" is
 		return "🃟"
 	its "name" is its color + " joker"
-	// Its short name:  *R↑ is the red joker, face up
-	its "state" is:
+	its "state" is
+		// Its short name:  *R↑ is the red joker, face up
 		letter is (the first letter of its color) as upper case
 		arrow is "↑" if it is face up otherwise "↓"
 		return "*" + letter + arrow
 
-	to test jokers:
+	to test jokers
 		get a new joker whose color is red and direction is up
 		it is a card should be yes
 		it is a joker should be yes

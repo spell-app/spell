@@ -7,40 +7,40 @@
 ## The checklist
 // The tasks, each its own element inside it:  `<task-list-checklist>`, around its `<task-list-task>`s.
 
-a "checklist" is a viewable list of tasks:
-	// What it shows:  every task, the ones still to do, or the ones done
+a "checklist" is a viewable list of tasks
 	its "showing" is one of all, active or done
+		// What it shows:  every task, the ones still to do, or the ones done
 		it "is showing (showing)"
 
-	// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 	its items can be reordered immediately
-	// a drop has moved its tasks:  each keeps its new place
-	when a task is dropped on it:
+		// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
+	when a task is dropped on it
+		// a drop has moved its tasks:  each keeps its new place
 		keep the order
-	// each task, unless the filter hides it
-	to draw each item:
+	to draw each item
+		// each task, unless the filter hides it
 		if it is showing active and the task is done return nothing
 		if it is showing done and the task is active return nothing
 		return draw the task
-	// Its tasks one under the other;  while it's empty, a line saying so
-	to draw it:
+	to draw it
+		// Its tasks one under the other;  while it's empty, a line saying so
 		<stack spacing="xs">
 			<if it is empty>
 				<text color="grey">Nothing to do</text>
 			</if>
 			<children/>
 		</stack>
-	// Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time
-	to keep the order:
+	to keep the order
+		// Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time
 		for task, place in it
 			set the order of task to place
 
-	to test the filter:
+	to test the filter
 		set the tasks to a new checklist
 		add (a new task with title "a", done = yes) to the tasks
 		add (a new task with title "b") to the tasks
 		the length of (tasks in the tasks where it is active) should be 1
-	to test a dragged order is kept:
+	to test a dragged order is kept
 		set the tasks to a new checklist
 		set the first to a new task with title "first"
 		set the second to a new task with title "second"
@@ -50,26 +50,26 @@ a "checklist" is a viewable list of tasks:
 		the order of the second should be 1
 		the order of the first should be 2
 		the title of the first task in (the tasks sorted by its order) should be "second"
-// a task is in one checklist at a time
 a task belongs to one checklist
+	// a task is in one checklist at a time
 
 ## The app
 // Its toolbar, the new task's field, then the list beside the property editor.
 
-task list is an app:
+task list is an app
 	"checklist" is a new checklist
-	// The next task's title, as the new task's field holds it
 	its "draft" is text
+		// The next task's title, as the new task's field holds it
 	its "active count" is the length of (tasks in the checklist where it is active)
 
-	// Where the tasks are kept:  the person picks, and the app asks that keeper
 	group "Keeping"
-	// Where the tasks are kept:  this browser, a JSON file on the server, a CSV file on the server, or your atmosphere account
+		// Where the tasks are kept:  the person picks, and the app asks that keeper
 	its "storage" is one of browser, server, csv or atmosphere
-	// Who keeps them, for where they're kept:  one of the keepers in the API files
+		// Where the tasks are kept:  this browser, a JSON file on the server, a CSV file on the server, or your atmosphere account
 	its "keeper" is a task keeper
+		// Who keeps them, for where they're kept:  one of the keepers in the API files
 
-	when its storage changes:
+	when its storage changes
 		if the storage is server
 			set the keeper to a new server keeper
 		otherwise if the storage is csv
@@ -80,8 +80,8 @@ task list is an app:
 			set the keeper to a new browser keeper
 		fill the checklist
 
-	// The keeper's tasks, in the list;  a keeper with none starts with a few
-	to fill the checklist:
+	to fill the checklist
+		// The keeper's tasks, in the list;  a keeper with none starts with a few
 		clear the checklist
 		for task in (the kept tasks of the keeper) sorted by its order
 			add it to the checklist
@@ -92,21 +92,21 @@ task list is an app:
 		add the starting task "Drag tasks to reorder them" with priority low
 		set the done of the first task in the checklist to yes
 
-	// A new task list keeps its tasks in this browser, and shows every one
-	to create it:
+	to create it
+		// A new task list keeps its tasks in this browser, and shows every one
 		set the showing of the checklist to all
 		set the storage to browser
 		set the keeper to a new browser keeper
 		fill the checklist
 
-	to add the starting task (title as text) with priority (level as text):
+	to add the starting task (title as text) with priority (level as text)
 		set task to keep a new task titled title of the keeper
 		set the priority of task to level
 		add task to the checklist
 		set the order of task to the length of the checklist
 
-	// The draft, as a new task at the end of the list;  the field empties
-	to add the draft:
+	to add the draft
+		// The draft, as a new task at the end of the list;  the field empties
 		if the draft is "" return
 		set title to the draft
 		set task to keep a new task titled title of the keeper
@@ -115,39 +115,31 @@ task list is an app:
 		set the order of task to the length of the checklist
 		clear the draft
 
-	// Which tasks the list shows:  the toolbar ticks the one it's showing
 	group "Filter"
-	to show all:
-		titled "All"
-		icon "list"
+		// Which tasks the list shows:  the toolbar ticks the one it's showing
+	to "show all" with title "All", icon "list"
 		selected when the checklist is showing all
 		set the showing of the checklist to all
-	to show to do:
-		titled "To do"
-		icon "square outline"
+	to "show to do" with title "To do", icon "square outline"
 		selected when the checklist is showing active
 		set the showing of the checklist to active
-	to show done:
-		titled "Done"
-		icon "check square outline"
+	to "show done" with title "Done", icon "check square outline"
 		selected when the checklist is showing done
 		set the showing of the checklist to done
-	to remove the done tasks:
-		titled "Remove the done tasks"
-		icon "trash alternate outline"
+	to "remove the done tasks" with icon "trash alternate outline"
 		for task in (tasks in the checklist where it is done)
 			throw the task away
 			remove the task from the checklist
 
-	// The toolbar's buttons, and the list's right click:  the same actions
 	group "Menus"
+		// The toolbar's buttons, and the list's right click:  the same actions
 	its "tasks menu" is a menu of "show all", "show to do", "show done", "-" and "remove the done tasks"
 	its "show menu" is a menu of "show all", "show to do" and "show done" titled "Show"
-	// A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
 	its "list menu" is a menu of "show menu", "-" and "remove the done tasks"
+		// A right click on the list:  which tasks it shows, as a menu of its own, then tidying up
 
-	// The property editor edits every selected task at once:  a property they disagree on shows Mixed
-	to draw it:
+	to draw it
+		// The property editor edits every selected task at once:  a property they disagree on shows Mixed
 		<container>
 			<stack>
 				<toolbar menu="tasks menu" aria-label="Tasks">

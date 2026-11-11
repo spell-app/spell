@@ -6,11 +6,11 @@
 // Its name, a yes or no for each day of the week, and what they add up to.
 // Each habit is its own element on the page, `<habit-tracker-habit>`.
 
-a "habit" is a view:
+a "habit" is a view
 	its "name" is text
 
-	// A yes or no for each day of the week
 	group "Days"
+		// A yes or no for each day of the week
 	its "monday" is yes or no
 	its "tuesday" is yes or no
 	its "wednesday" is yes or no
@@ -19,15 +19,15 @@ a "habit" is a view:
 	its "saturday" is yes or no
 	its "sunday" is yes or no
 
-	// Worked out from its days, again as each one is ticked
 	group "Totals"
-	// Its week as one list, Monday first
-	its "days" is:
+		// Worked out from its days, again as each one is ticked
+	its "days" is
+		// Its week as one list, Monday first
 		[the monday, the tuesday, the wednesday, the thursday, the friday, the saturday, the sunday]
-	// How many days this week it was done
 	its "count" is the number of days in the days where it is yes
-	// The most days in a row it was done
-	its "streak" is:
+		// How many days this week it was done
+	its "streak" is
+		// The most days in a row it was done
 		set run to 0
 		set best to 0
 		for day in the days
@@ -38,8 +38,8 @@ a "habit" is a view:
 				set run to 0
 		return best
 
-	// A form of its own, bound to it:  ticking a day, or typing a name, changes the habit
-	to draw it:
+	to draw it
+		// A form of its own, bound to it:  ticking a day, or typing a name, changes the habit
 		<segment>
 			<form value={it}>
 				<stack spacing="sm">
@@ -63,7 +63,7 @@ a "habit" is a view:
 			</form>
 		</segment>
 
-	to test streaks:
+	to test streaks
 		set the habit to a new habit with name "Read", monday = yes, tuesday = yes, thursday = yes
 		the habit's count should be 3
 		the habit's streak should be 2
@@ -73,41 +73,41 @@ a "habit" is a view:
 ## The week
 // The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
-a "week" is a viewable list of habits:
-	// on the page, its habits can be dragged to another place
+a "week" is a viewable list of habits
 	its items can be reordered immediately
-	// Its habits one under the other;  while it's empty, a line saying so
-	to draw it:
+		// on the page, its habits can be dragged to another place
+	to draw it
+		// Its habits one under the other;  while it's empty, a line saying so
 		<stack spacing="sm">
 			<if it is empty>
 				<text color="grey">No habits yet:  add one above</text>
 			</if>
 			<children/>
 		</stack>
-// a habit is in one week
 a habit belongs to one week
+	// a habit is in one week
 
 ## The tracker
 // The new habit's field, then a habit a row.
 
-habit tracker is an app:
+habit tracker is an app
 	"habits" is a new week
-	// The next habit's name, as the new habit's field holds it
 	its "draft" is text
+		// The next habit's name, as the new habit's field holds it
 
-	// A new tracker starts with three habits, a few days ticked
-	to create it:
+	to create it
+		// A new tracker starts with three habits, a few days ticked
 		add (a new habit with name "Read", monday = yes, tuesday = yes, wednesday = yes, friday = yes) to the habits
 		add (a new habit with name "Walk", tuesday = yes, wednesday = yes, thursday = yes, friday = yes) to the habits
 		add (a new habit with name "Stretch", monday = yes, saturday = yes) to the habits
 
-	// The draft, as a new habit at the end;  the field empties
-	to add the draft:
+	to add the draft
+		// The draft, as a new habit at the end;  the field empties
 		if the draft is "" return
 		add (a new habit with name = the draft) to the habits
 		clear the draft
 
-	to draw it:
+	to draw it
 		<container text>
 			<stack>
 				<header level="2">This week</header>

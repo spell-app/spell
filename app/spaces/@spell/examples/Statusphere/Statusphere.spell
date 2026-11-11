@@ -9,16 +9,16 @@
 
 ## A status:  the emoji, who set it, and when
 
-a status:
-	// Its owner's handle, once their account says so;  else the account itself
-	its "who" is:
+a status
+	its "who" is
+		// Its owner's handle, once their account says so;  else the account itself
 		set account to its owner
 		set person to the first person in everyone here where its id is account
 		if person is nothing
 			return account
 		return person's name
 
-	to draw it:
+	to draw it
 		<stack direction="horizontal" align="center">
 			<text size="big">{its status}</text>
 			<text>@{its who}</text>
@@ -27,17 +27,17 @@ a status:
 
 ## The app:  the emoji to pick, then everyone's statuses, newest first
 
-statusphere is an app:
-	// Newest first:  by when each was set
-	its "recent" is:
+statusphere is an app
+	its "recent" is
+		// Newest first:  by when each was set
 		return every status sorted by its created, newest first
 
-	// Your status:  a new record in your own account, as Statusphere writes one
-	to post (emoji as text):
+	to post (emoji as text)
+		// Your status:  a new record in your own account, as Statusphere writes one
 		add (a new status with status = emoji, created at = a new date) to the statuses
 
-	// One narrow column:  its title, the emoji to pick, then the statuses
-	to draw it:
+	to draw it
+		// One narrow column:  its title, the emoji to pick, then the statuses
 		<container text>
 			<stack align="start">
 				<header size="large">Statusphere</header>

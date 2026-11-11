@@ -16,37 +16,37 @@
         "placeType": "Chat",
         "collection": "messages"
       },
-      "defined": "/OrgChat.api.spell:957-1080"
+      "defined": "/OrgChat.api.spell:846-1079"
     },
     {
       "property": "text",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1000-1018"
+      "defined": "/OrgChat.api.spell:999-1017"
     },
     {
       "property": "by",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1020-1036"
+      "defined": "/OrgChat.api.spell:1019-1035"
     },
     {
       "property": "sent",
       "of": "Message",
       "datatype": "date",
-      "defined": "/OrgChat.api.spell:1038-1058"
+      "defined": "/OrgChat.api.spell:1037-1057"
     },
     {
       "property": "thread",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1060-1080"
+      "defined": "/OrgChat.api.spell:1059-1079"
     },
     {
       "property": "initials",
       "of": "Message",
       "datatype": "text",
-      "defined": "/OrgChat.spell:553-612"
+      "defined": "/OrgChat.spell:477-536"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -59,7 +59,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgChat.spell:615-1265"
+      "defined": "/OrgChat.spell:615-1264"
     },
     {
       "type": "Thread",
@@ -69,43 +69,43 @@
         "placeType": "MyThread",
         "collection": "threads"
       },
-      "defined": "/OrgChat.api.spell:1193-1348"
+      "defined": "/OrgChat.api.spell:1081-1347"
     },
     {
       "property": "name",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1241-1259"
+      "defined": "/OrgChat.api.spell:1240-1258"
     },
     {
       "property": "side",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1261-1279"
+      "defined": "/OrgChat.api.spell:1260-1278"
     },
     {
       "property": "topic",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1281-1300"
+      "defined": "/OrgChat.api.spell:1280-1299"
     },
     {
       "property": "link",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.api.spell:1302-1320"
+      "defined": "/OrgChat.api.spell:1301-1319"
     },
     {
       "property": "current",
       "of": "Thread",
       "datatype": "choice",
-      "defined": "/OrgChat.api.spell:1322-1348"
+      "defined": "/OrgChat.api.spell:1321-1347"
     },
     {
       "property": "mark",
       "of": "Thread",
       "datatype": "text",
-      "defined": "/OrgChat.spell:1374-1444"
+      "defined": "/OrgChat.spell:1330-1442"
     },
     {
       "type": "Chat",
@@ -128,46 +128,46 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/OrgChat.api.spell:771-845"
+      "defined": "/OrgChat.api.spell:771-844"
     },
     {
       "type": "ChatPage",
       "superType": "App",
-      "defined": "/OrgChat.spell:1558-4730"
+      "defined": "/OrgChat.spell:1556-4724"
     },
     {
       "property": "new_message",
       "asWritten": "new message",
       "of": "ChatPage",
       "datatype": "Message",
-      "defined": "/OrgChat.spell:1580-1610"
+      "defined": "/OrgChat.spell:1577-1607"
     },
     {
       "property": "picked",
       "of": "ChatPage",
       "datatype": "Thread",
-      "defined": "/OrgChat.spell:1612-1678"
+      "defined": "/OrgChat.spell:1609-1675"
     },
     {
       "property": "drawer_open",
       "asWritten": "drawer open",
       "of": "ChatPage",
       "datatype": "choice",
-      "defined": "/OrgChat.spell:1729-1759"
+      "defined": "/OrgChat.spell:1677-1757"
     },
     {
       "property": "thread_name",
       "asWritten": "thread name",
       "of": "ChatPage",
       "datatype": "text",
-      "defined": "/OrgChat.spell:1840-1915"
+      "defined": "/OrgChat.spell:1759-1913"
     },
     {
       "property": "box_words",
       "asWritten": "box words",
       "of": "ChatPage",
       "datatype": "text",
-      "defined": "/OrgChat.spell:1965-2012"
+      "defined": "/OrgChat.spell:1915-1962"
     },
     {
       "syntax": "open the drawer (of {thisArg:expression})?",
@@ -181,7 +181,7 @@
       "kind": "method",
       "name": "open the drawer",
       "returns": "nothing",
-      "defined": "/OrgChat.spell:2015-2063"
+      "defined": "/OrgChat.spell:2014-2061"
     },
     {
       "syntax": "close the drawer (of {thisArg:expression})?",
@@ -195,7 +195,7 @@
       "kind": "method",
       "name": "close the drawer",
       "returns": "nothing",
-      "defined": "/OrgChat.spell:2066-2114"
+      "defined": "/OrgChat.spell:2064-2111"
     },
     {
       "syntax": "send {thisArg:expression}",
@@ -210,7 +210,7 @@
       "name": "send it",
       "returns": "nothing",
       "waits": true,
-      "defined": "/OrgChat.spell:2117-2316"
+      "defined": "/OrgChat.spell:2114-2312"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -223,7 +223,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgChat.spell:2319-4251"
+      "defined": "/OrgChat.spell:2315-4246"
     }
   ],
   "codeLines": [

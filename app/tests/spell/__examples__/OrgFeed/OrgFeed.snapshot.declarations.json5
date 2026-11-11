@@ -14,43 +14,43 @@
         "placeType": "MyFeed",
         "collection": "posts"
       },
-      "defined": "/OrgFeed.api.spell:576-719"
+      "defined": "/OrgFeed.api.spell:489-718"
     },
     {
       "property": "text",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:619-637"
+      "defined": "/OrgFeed.api.spell:618-636"
     },
     {
       "property": "topic",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:639-658"
+      "defined": "/OrgFeed.api.spell:638-657"
     },
     {
       "property": "posted",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:660-680"
+      "defined": "/OrgFeed.api.spell:659-679"
     },
     {
       "property": "by",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:682-698"
+      "defined": "/OrgFeed.api.spell:681-697"
     },
     {
       "property": "space",
       "of": "Post",
       "datatype": "text",
-      "defined": "/OrgFeed.api.spell:700-719"
+      "defined": "/OrgFeed.api.spell:699-718"
     },
     {
       "property": "weight",
       "of": "Post",
       "datatype": "number",
-      "defined": "/OrgFeed.spell:528-661"
+      "defined": "/OrgFeed.spell:461-660"
     },
     {
       "syntax": "{operator:is_or_is_not_a} favourite",
@@ -60,7 +60,7 @@
       "kind": "method",
       "name": "\"is a favourite\"",
       "returns": "choice",
-      "defined": "/OrgFeed.spell:663-701"
+      "defined": "/OrgFeed.spell:662-700"
     },
     {
       "syntax": "{operator:is_or_is_not} ordinary",
@@ -70,7 +70,7 @@
       "kind": "method",
       "name": "\"is ordinary\"",
       "returns": "choice",
-      "defined": "/OrgFeed.spell:703-738"
+      "defined": "/OrgFeed.spell:702-737"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -83,7 +83,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgFeed.spell:741-1105"
+      "defined": "/OrgFeed.spell:740-1103"
     },
     {
       "type": "MyFeed",
@@ -96,12 +96,12 @@
           "checkedEvery": 30
         }
       },
-      "defined": "/OrgFeed.api.spell:392-488"
+      "defined": "/OrgFeed.api.spell:392-487"
     },
     {
       "type": "FeedPage",
       "superType": "App",
-      "defined": "/OrgFeed.spell:1173-2541"
+      "defined": "/OrgFeed.spell:1171-2537"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -114,7 +114,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/OrgFeed.spell:1195-2541"
+      "defined": "/OrgFeed.spell:1192-2537"
     }
   ],
   "codeLines": [

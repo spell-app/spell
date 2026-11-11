@@ -10,19 +10,19 @@
     {
       "type": "Task",
       "superType": "View",
-      "defined": "/HowTaskListWorks.spell:748-1170"
+      "defined": "/HowTaskListWorks.spell:748-1163"
     },
     {
       "property": "title",
       "of": "Task",
       "datatype": "text",
-      "defined": "/HowTaskListWorks.spell:775-794"
+      "defined": "/HowTaskListWorks.spell:768-787"
     },
     {
       "property": "done",
       "of": "Task",
       "datatype": "choice",
-      "defined": "/HowTaskListWorks.spell:796-819"
+      "defined": "/HowTaskListWorks.spell:789-812"
     },
     {
       "syntax": "{operator:is_or_is_not} done",
@@ -32,7 +32,7 @@
       "kind": "method",
       "name": "\"is done\"",
       "returns": "choice",
-      "defined": "/HowTaskListWorks.spell:821-852"
+      "defined": "/HowTaskListWorks.spell:814-845"
     },
     {
       "syntax": "{operator:is_or_is_not} active",
@@ -42,7 +42,7 @@
       "kind": "method",
       "name": "\"is active\"",
       "returns": "choice",
-      "defined": "/HowTaskListWorks.spell:854-886"
+      "defined": "/HowTaskListWorks.spell:847-879"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -55,13 +55,13 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowTaskListWorks.spell:967-1170"
+      "defined": "/HowTaskListWorks.spell:882-1163"
     },
     {
       "type": "Checklist",
       "superType": "ViewableList",
       "itemType": "Task",
-      "defined": "/HowTaskListWorks.spell:1228-1648"
+      "defined": "/HowTaskListWorks.spell:1221-1635"
     },
     {
       "property": "showing",
@@ -72,7 +72,7 @@
         "active",
         "done"
       ],
-      "defined": "/HowTaskListWorks.spell:1349-1392"
+      "defined": "/HowTaskListWorks.spell:1264-1379"
     },
     {
       "property": "checklist",
@@ -80,25 +80,25 @@
       "group": "The checklist:  the tasks, shown as its filter says",
       "datatype": "Checklist",
       "exclusive": true,
-      "defined": "/HowTaskListWorks.spell:1650-1681"
+      "defined": "/HowTaskListWorks.spell:1637-1668"
     },
     {
       "type": "TaskList",
       "superType": "App",
-      "defined": "/HowTaskListWorks.spell:1695-2466"
+      "defined": "/HowTaskListWorks.spell:1682-2446"
     },
     {
       "property": "tasks",
       "of": "TaskList",
       "datatype": "Checklist",
-      "defined": "/HowTaskListWorks.spell:1723-1753"
+      "defined": "/HowTaskListWorks.spell:1703-1733"
     },
     {
       "property": "active_count",
       "asWritten": "active count",
       "of": "TaskList",
       "datatype": "number",
-      "defined": "/HowTaskListWorks.spell:1822-1897"
+      "defined": "/HowTaskListWorks.spell:1735-1810"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -111,7 +111,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowTaskListWorks.spell:1900-2466"
+      "defined": "/HowTaskListWorks.spell:1881-2446"
     },
     {
       "syntax": "test counting the tasks to do",
@@ -120,7 +120,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "counting the tasks to do",
-      "defined": "/HowTaskListWorks.spell:2835-3072"
+      "defined": "/HowTaskListWorks.spell:2815-3052"
     }
   ],
   "codeLines": [

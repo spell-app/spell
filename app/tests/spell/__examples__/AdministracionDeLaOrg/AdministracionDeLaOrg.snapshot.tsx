@@ -9,11 +9,11 @@ core.heading("Administración de la org:  dónde se guardan los roles de una org
 /** La org misma, para el título de la página y como espacio que diseñar. */
 export class Perfil extends Thing {
   // su "nombre" es texto, guardado como "name"
-  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1056, end: 1098 } })
+  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1055, end: 1097 } })
   accessor nombre!: string
 
   // su "espacio" es texto, guardado como "space"
-  @prop({ type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1100, end: 1144 } })
+  @prop({ type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1099, end: 1143 } })
   accessor espacio!: string
 
   static savedIn = {
@@ -22,18 +22,18 @@ export class Perfil extends Thing {
     times: ["created", "modified"], select: ["nombre", "espacio"] }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1031, end: 1054 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1030, end: 1053 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1031, end: 1054 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1030, end: 1053 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 /** Un rol de la org, por su nombre. */
 export class Función extends Thing {
   // su "nombre" es texto, guardado como "name"
-  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1235, end: 1277 } })
+  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1234, end: 1276 } })
   accessor nombre!: string
 
   static savedIn = {
@@ -42,29 +42,29 @@ export class Función extends Thing {
     times: ["created", "modified"], select: ["nombre"] }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1210, end: 1233 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1209, end: 1232 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1210, end: 1233 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1209, end: 1232 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 export class Miembro extends Thing {
   // su "persona" es texto, guardado como "person"
-  @prop({ type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1331, end: 1376 } })
+  @prop({ type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1329, end: 1374 } })
   accessor persona!: string
 
   // su "nombre" es texto, guardado como "name"
-  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1378, end: 1420 } })
+  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1376, end: 1418 } })
   accessor nombre!: string
 
   // su "rol" es texto, guardado como "role"
-  @prop({ type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1422, end: 1461 } })
+  @prop({ type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1420, end: 1459 } })
   accessor rol!: string
 
   // su "cargo" es texto, guardado como "roleName"
-  @prop({ type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1463, end: 1508 } })
+  @prop({ type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1461, end: 1506 } })
   accessor cargo!: string
 
   static savedIn = {
@@ -74,21 +74,21 @@ export class Miembro extends Thing {
   }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1306, end: 1329 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1304, end: 1327 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1306, end: 1329 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1304, end: 1327 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 export class Equipo extends Thing {
   // su "nombre" es texto, guardado como "name"
-  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1561, end: 1603 } })
+  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1558, end: 1600 } })
   accessor nombre!: string
 
   // su "espacio" es texto, guardado como "space"
-  @prop({ type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1605, end: 1649 } })
+  @prop({ type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1602, end: 1646 } })
   accessor espacio!: string
 
   static savedIn = {
@@ -98,25 +98,25 @@ export class Equipo extends Thing {
   }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1536, end: 1559 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1533, end: 1556 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1536, end: 1559 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1533, end: 1556 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 export class Proyecto extends Thing {
   // su "nombre" es texto, guardado como "name"
-  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1704, end: 1746 } })
+  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1700, end: 1742 } })
   accessor nombre!: string
 
   // su "equipo" es texto, guardado como "team"
-  @prop({ type: "text", storedAs: "team", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1748, end: 1790 } })
+  @prop({ type: "text", storedAs: "team", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1744, end: 1786 } })
   accessor equipo!: string
 
   // su "espacio" es texto, guardado como "space"
-  @prop({ type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1792, end: 1836 } })
+  @prop({ type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1788, end: 1832 } })
   accessor espacio!: string
 
   static savedIn = {
@@ -126,45 +126,45 @@ export class Proyecto extends Thing {
   }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1679, end: 1702 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1675, end: 1698 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1679, end: 1702 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1675, end: 1698 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 export class Mandato extends Thing {
   // su "rol" es texto, guardado como "role"
-  @prop({ type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1890, end: 1929 } })
+  @prop({ type: "text", storedAs: "role", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1885, end: 1924 } })
   accessor rol!: string
 
   // su "titular" es texto, guardado como "holder"
-  @prop({ type: "text", storedAs: "holder", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1931, end: 1976 } })
+  @prop({ type: "text", storedAs: "holder", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1926, end: 1971 } })
   accessor titular!: string
 
   // su "ámbito" es texto, guardado como "manages"
-  @prop({ type: "text", storedAs: "manages", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1978, end: 2023 } })
+  @prop({ type: "text", storedAs: "manages", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1973, end: 2018 } })
   accessor ámbito!: string
 
   // su "cargo" es texto, guardado como "roleName"
-  @prop({ type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2025, end: 2070 } })
+  @prop({ type: "text", storedAs: "roleName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2020, end: 2065 } })
   accessor cargo!: string
 
   // su "nombre titular" es texto, guardado como "holderName"
-  @prop({ type: "text", storedAs: "holderName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2072, end: 2128 } })
+  @prop({ type: "text", storedAs: "holderName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2067, end: 2123 } })
   accessor nombreTitular!: string
 
   // su "nombre ámbito" es texto, guardado como "managesName"
-  @prop({ type: "text", storedAs: "managesName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2130, end: 2186 } })
+  @prop({ type: "text", storedAs: "managesName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2125, end: 2181 } })
   accessor nombreÁmbito!: string
 
   // su "inicio" es texto, guardado como "starts"
-  @prop({ type: "text", storedAs: "starts", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2188, end: 2232 } })
+  @prop({ type: "text", storedAs: "starts", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2183, end: 2227 } })
   accessor inicio!: string
 
   // su "fin" es texto, guardado como "ends"
-  @prop({ type: "text", storedAs: "ends", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2234, end: 2273 } })
+  @prop({ type: "text", storedAs: "ends", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2229, end: 2268 } })
   accessor fin!: string
 
   static savedIn = {
@@ -174,21 +174,21 @@ export class Mandato extends Thing {
   }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1865, end: 1888 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1860, end: 1883 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1865, end: 1888 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 1860, end: 1883 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 export class Aprobación extends Thing {
   // su "nombre" es texto, guardado como "name"
-  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2331, end: 2373 } })
+  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2325, end: 2367 } })
   accessor nombre!: string
 
   // su "versión" es texto, guardado como "version"
-  @prop({ type: "text", storedAs: "version", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2375, end: 2421 } })
+  @prop({ type: "text", storedAs: "version", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2369, end: 2415 } })
   accessor versión!: string
 
   static savedIn = {
@@ -198,26 +198,26 @@ export class Aprobación extends Thing {
   }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2306, end: 2329 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2300, end: 2323 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2306, end: 2329 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2300, end: 2323 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 /** Quien diseña cambia las páginas y el código de un espacio, sea cual sea su rol allí:  un Manager las publica. */
 export class Diseñador extends Thing {
   // su "persona" es texto, guardado como "person"
-  @prop({ type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2590, end: 2635 } })
+  @prop({ type: "text", storedAs: "person", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2584, end: 2629 } })
   accessor persona!: string
 
   // su "espacio" es texto, guardado como "space"
-  @prop({ type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2637, end: 2681 } })
+  @prop({ type: "text", storedAs: "space", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2631, end: 2675 } })
   accessor espacio!: string
 
   // su "nombre persona" es texto, guardado como "personName"
-  @prop({ type: "text", storedAs: "personName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2683, end: 2739 } })
+  @prop({ type: "text", storedAs: "personName", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2677, end: 2733 } })
   accessor nombrePersona!: string
 
   static savedIn = {
@@ -227,26 +227,26 @@ export class Diseñador extends Thing {
   }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2565, end: 2588 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2559, end: 2582 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2565, end: 2588 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2559, end: 2582 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 /** Las etapas de un evento, en orden:  a cada una la mueve "the team" o "its organizers". */
 export class Etapa extends Thing {
   // su "nombre" es texto, guardado como "name"
-  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2882, end: 2924 } })
+  @prop({ type: "text", storedAs: "name", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2876, end: 2918 } })
   accessor nombre!: string
 
   // su "siguiente" es texto, guardado como "movesTo"
-  @prop({ type: "text", storedAs: "movesTo", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2926, end: 2974 } })
+  @prop({ type: "text", storedAs: "movesTo", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2920, end: 2968 } })
   accessor siguiente!: string
 
   // su "quién mueve" es texto, guardado como "movedBy"
-  @prop({ type: "text", storedAs: "movedBy", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2976, end: 3026 } })
+  @prop({ type: "text", storedAs: "movedBy", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2970, end: 3020 } })
   accessor quiénMueve!: string
 
   static savedIn = {
@@ -256,33 +256,33 @@ export class Etapa extends Thing {
   }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2857, end: 2880 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2851, end: 2874 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2857, end: 2880 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 2851, end: 2874 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
 export class Cambio extends Thing {
   // su "cuándo" es texto, guardado como "at"
-  @prop({ type: "text", storedAs: "at", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3079, end: 3119 } })
+  @prop({ type: "text", storedAs: "at", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3072, end: 3112 } })
   accessor cuándo!: string
 
   // su "quién" es texto, guardado como "who"
-  @prop({ type: "text", storedAs: "who", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3121, end: 3161 } })
+  @prop({ type: "text", storedAs: "who", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3114, end: 3154 } })
   accessor quién!: string
 
   // su "hecho" es texto, guardado como "did"
-  @prop({ type: "text", storedAs: "did", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3163, end: 3203 } })
+  @prop({ type: "text", storedAs: "did", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3156, end: 3196 } })
   accessor hecho!: string
 
   // su "qué" es texto, guardado como "what"
-  @prop({ type: "text", storedAs: "what", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3205, end: 3244 } })
+  @prop({ type: "text", storedAs: "what", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3198, end: 3237 } })
   accessor qué!: string
 
   // su "por qué" es texto, guardado como "why"
-  @prop({ type: "text", storedAs: "why", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3246, end: 3288 } })
+  @prop({ type: "text", storedAs: "why", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3239, end: 3281 } })
   accessor porQué!: string
 
   static savedIn = {
@@ -291,11 +291,11 @@ export class Cambio extends Thing {
     times: ["created", "modified"], select: ["cuándo", "quién", "hecho", "qué", "porQué"] }
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3054, end: 3077 } })
+  @prop({ type: "date", storedAs: "created", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3047, end: 3070 } })
   accessor creado!: any /* spell: type unknown */
 
   // vive en roles de la org
-  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3054, end: 3077 } })
+  @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/AdministracionDeLaOrg.api.es.spell", start: 3047, end: 3070 } })
   accessor modificado!: any /* spell: type unknown */
 }
 
@@ -410,8 +410,8 @@ export class AdministraciónDeLaOrg extends App {
     this.etapaNueva = new Etapa()
   }
 
-  // La sección elegida queda en la dirección de la página, y al recargar vuelve a ella
   @drawn draw() {
+    // La sección elegida queda en la dirección de la página, y al recargar vuelve a ella
     return (
       <ui-stack class="org-admin" spacing="none">
         <ui-toolbar class="top-bar" appearance="text" aria-label="Administración de la org">

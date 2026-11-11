@@ -11,7 +11,7 @@
     {
       "type": "Card",
       "superType": "View",
-      "defined": "/HowSolitaireWorks.spell:729-1269"
+      "defined": "/HowSolitaireWorks.spell:729-1263"
     },
     {
       "property": "rank",
@@ -32,7 +32,7 @@
         "queen",
         "king"
       ],
-      "defined": "/HowSolitaireWorks.spell:756-809"
+      "defined": "/HowSolitaireWorks.spell:749-802"
     },
     {
       "property": "suit",
@@ -44,36 +44,36 @@
         "hearts",
         "spades"
       ],
-      "defined": "/HowSolitaireWorks.spell:811-865"
+      "defined": "/HowSolitaireWorks.spell:804-858"
     },
     {
       "property": "value",
       "of": "Card",
       "datatype": "number",
-      "defined": "/HowSolitaireWorks.spell:937-976"
+      "defined": "/HowSolitaireWorks.spell:861-900"
     },
     {
       "property": "color",
       "of": "Card",
-      "defined": "/HowSolitaireWorks.spell:978-1051"
+      "defined": "/HowSolitaireWorks.spell:972-1044"
     },
     {
       "constants": [
         "red"
       ],
-      "defined": "/HowSolitaireWorks.spell:996-1033"
+      "defined": "/HowSolitaireWorks.spell:989-1026"
     },
     {
       "constants": [
         "black"
       ],
-      "defined": "/HowSolitaireWorks.spell:1036-1051"
+      "defined": "/HowSolitaireWorks.spell:1029-1044"
     },
     {
       "property": "name",
       "of": "Card",
       "datatype": "text",
-      "defined": "/HowSolitaireWorks.spell:1081-1123"
+      "defined": "/HowSolitaireWorks.spell:1047-1089"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -86,7 +86,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowSolitaireWorks.spell:1161-1269"
+      "defined": "/HowSolitaireWorks.spell:1120-1263"
     },
     {
       "syntax": "try {thisArg:expression}",
@@ -101,13 +101,13 @@
       "kind": "method",
       "name": "try (a card)",
       "returns": "nothing",
-      "defined": "/HowSolitaireWorks.spell:2536-2775"
+      "defined": "/HowSolitaireWorks.spell:2515-2753"
     },
     {
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/HowSolitaireWorks.spell:1296-1332"
+      "defined": "/HowSolitaireWorks.spell:1290-1326"
     },
     {
       "property": "pile",
@@ -115,35 +115,35 @@
       "group": "A pile, and a column",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/HowSolitaireWorks.spell:1414-1440"
+      "defined": "/HowSolitaireWorks.spell:1327-1353"
     },
     {
       "type": "Column",
       "superType": "Pile",
-      "defined": "/HowSolitaireWorks.spell:1697-1931"
+      "defined": "/HowSolitaireWorks.spell:1692-1918"
     },
     {
       "type": "Table",
       "superType": "App",
-      "defined": "/HowSolitaireWorks.spell:1992-2377"
+      "defined": "/HowSolitaireWorks.spell:1979-2356"
     },
     {
       "property": "column",
       "of": "Table",
       "datatype": "Column",
-      "defined": "/HowSolitaireWorks.spell:2016-2044"
+      "defined": "/HowSolitaireWorks.spell:1996-2024"
     },
     {
       "property": "hand",
       "of": "Table",
       "datatype": "Pile",
-      "defined": "/HowSolitaireWorks.spell:2046-2070"
+      "defined": "/HowSolitaireWorks.spell:2026-2050"
     },
     {
       "property": "message",
       "of": "Table",
       "datatype": "text",
-      "defined": "/HowSolitaireWorks.spell:2072-2093"
+      "defined": "/HowSolitaireWorks.spell:2052-2073"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -156,7 +156,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/HowSolitaireWorks.spell:2096-2377"
+      "defined": "/HowSolitaireWorks.spell:2076-2356"
     },
     {
       "syntax": "test the column",
@@ -165,7 +165,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the column",
-      "defined": "/HowSolitaireWorks.spell:3186-3537"
+      "defined": "/HowSolitaireWorks.spell:3164-3515"
     }
   ],
   "codeLines": [

@@ -7,19 +7,19 @@
 // Your org is named on the next two lines:  "@rs/__thread" is whichever thread the page shows, picked from the list
 // down its side, and "@rs/__threads" is that list, every thread of RS you can read.
 chat is a room at "@rs/__thread"
-my threads is a data folder at "@rs/__threads":
+my threads is a data folder at "@rs/__threads"
 	check it every 30 seconds
 
-// A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`.
-a "message" is a thing:
+a "message" is a thing
+	// A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`.
 	it lives in chat
 	its "text" is text
 	its "by" is text
 	its "sent" is a date
 	its "thread" is text
 
-// A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it.
-a "thread" is a thing:
+a "thread" is a thing
+	// A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it.
 	it lives in my threads
 	its "name" is text
 	its "side" is text

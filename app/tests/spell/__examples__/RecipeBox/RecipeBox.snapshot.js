@@ -7,17 +7,17 @@ core.heading("Recipe Box:  where the recipes are kept")
 
 export class Recipe extends Thing {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1152, end: 1171 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1151, end: 1170 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1173, end: 1199 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 1172, end: 1198 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1201, end: 1220 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1200, end: 1219 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
 
@@ -71,12 +71,12 @@ export class Recipe extends Thing {
   }
 
   // - it lives in family cookbook
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1123, end: 1150 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1122, end: 1149 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in family cookbook
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1123, end: 1150 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1122, end: 1149 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -222,7 +222,7 @@ export class RecipeBox extends App {
   }
 
   /** Newest first, by when each was saved */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3186, end: 3298 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3143, end: 3296 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search)), (item) => core.descending(item.created))
   }, () => [this.search]) }
@@ -248,8 +248,8 @@ export class RecipeBox extends App {
     )
   }
 
-  // Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
   drawScreen() {
+    // Its Edit screen, while a recipe is being changed;  else the cards:  its own drawing, so its `if` picks just one
     if (this.editing) return core.drawThing(new RecipeEditor({ recipe: this.editing }))
     else {
       return h("ui-cards", { columns: "3", doubling: true, part: "screen" },

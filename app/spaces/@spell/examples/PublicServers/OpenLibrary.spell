@@ -4,15 +4,15 @@
 // with `<extend>`, so looking again at the server never touches a line of this.
 // Open Library has no list of every book, only a search:  so the page always searches, for what's typed.
 
-an "open library page" is a thing:
+an "open library page" is a thing
 	its "search" is text
 	its "showing" is a book
-	to create it:
+	to create it
 		set its search to "dune"
-	// What the search finds:  Open Library looks, by the title, and gives back the first hundred
 	its "found" is every book where its title includes the search
+		// What the search finds:  Open Library looks, by the title, and gives back the first hundred
 
-	to draw it:
+	to draw it
 		<stack spacing="xl">
 			<form value={it}>
 				<stack direction="horizontal" wrap align="center" justify="between" spacing="sm">
@@ -26,14 +26,14 @@ an "open library page" is a thing:
 			</text>
 		</stack>
 
-	// A book's own page, while one is open;  else what the search finds
-	to draw its shelf:
+	to draw its shelf
+		// A book's own page, while one is open;  else what the search finds
 		if its showing
 			draw its showing's page
 		otherwise
 			draw the book list of it
 
-	to draw its book list:
+	to draw its book list
 		for its found
 		while waiting: <loader visible inline text>{"Asking Open Library"}</loader>
 		if there are none: <text>{"No book is called that."}</text>
@@ -44,19 +44,19 @@ an "open library page" is a thing:
 # A book
 // Its cover, its title and who wrote it:  on its card, every name the search gave;  on its own page, its first author, read from their own record.
 
-a book:
-	// Who wrote it first:  read from Open Library's record of them, by their id
+a book
 	its "writer" is the first item of its authors
+		// Who wrote it first:  read from Open Library's record of them, by their id
 
-	// Its own page, on the library's tab
-	to open it:
+	to open it
+		// Its own page, on the library's tab
 		set the showing of the library of the public servers to it
 
-	// Back to what the search found
-	to close it:
+	to close it
+		// Back to what the search found
 		set the showing of the library of the public servers to nothing
 
-	to draw it:
+	to draw it
 		<ui-card class="book" onClick={open it}>
 			<image src={its cover i} alt="" aspect-ratio="2:3" crop />
 			<content>
@@ -65,7 +65,7 @@ a book:
 			</content>
 		</ui-card>
 
-	to draw its page:
+	to draw its page
 		<stack spacing="xl">
 			<stack direction="horizontal" align="center" spacing="sm">
 				<button icon="arrow left" appearance="basic" aria-label="Back" title="Back" onClick={close it} />
@@ -84,19 +84,19 @@ a book:
 			</stack>
 		</stack>
 
-	to draw its writing:
+	to draw its writing
 		if its writer
 			draw the card of its writer
-		while waiting:
+		while waiting
 			<loader visible inline text>Asking Open Library who wrote it</loader>
-		if that fails:
+		if that fails
 			<text>Open Library can't say who wrote it just now.</text>
 
 # An edition
 // One printing of a book:  read from the book's own list of editions, when its page is open.
 
-an edition:
-	to draw it:
+an edition
+	to draw it
 		<ui-card>
 			<content>
 				<header>{its title}</header>
@@ -106,8 +106,8 @@ an edition:
 
 # Who wrote it
 
-an author:
-	to draw its card:
+an author
+	to draw its card
 		<ui-card>
 			<content>
 				<header>{its name}</header>

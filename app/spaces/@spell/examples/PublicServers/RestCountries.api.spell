@@ -8,11 +8,11 @@
 // Its money, its languages and its names come keyed by a code, `"EUR": { ... }`, `"fra": "French"`:
 // each is a list of things, each with its code, `the first translation in its translations where its code is "fra"`.
 
-rest countries is a web server at "https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0":
+rest countries is a web server at "https://cdn.jsdelivr.net/gh/mledoze/countries@5.1.0"
 	check it every 30 seconds
 	countries live at "/countries.json"
 
-a "country" is a thing:
+a "country" is a thing
 	it lives in rest countries
 	its "name" is a name
 	its "tld" is a list of text
@@ -39,42 +39,42 @@ a "country" is a thing:
 	its "flag" is text
 	its "demonyms" is a demonym
 
-a "name" is a thing:
+a "name" is a thing
 	its "common" is text
 	its "official" is text
 	its "native" is a list of natives
 
-a "native" is a thing:
+a "native" is a thing
 	its "code" is text
 	its "official" is text
 	its "common" is text
 
-a "currency" is a thing:
+a "currency" is a thing
 	its "code" is text
 	its "name" is text
 	its "symbol" is text
 
-an "idd" is a thing:
+an "idd" is a thing
 	its "root" is text
 	its "suffixes" is a list of text
 
-a "language" is a thing:
+a "language" is a thing
 	its "code" is text
 	its "name" is text
 
-a "translation" is a thing:
+a "translation" is a thing
 	its "code" is text
 	its "official" is text
 	its "common" is text
 
-a "demonym" is a thing:
+a "demonym" is a thing
 	its "eng" is an eng
 	its "fra" is a fra
 
-an "eng" is a thing:
+an "eng" is a thing
 	its "f" is text
 	its "m" is text
 
-a "fra" is a thing:
+a "fra" is a thing
 	its "f" is text
 	its "m" is text

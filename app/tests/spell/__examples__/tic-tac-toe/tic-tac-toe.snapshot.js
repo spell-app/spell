@@ -157,7 +157,7 @@ export class TicTacToe extends App {
 export const ticTacToe = new TicTacToe()
 
 /** An empty board, X to play */
-core.describeAction(TicTacToe, "startANewGame", { title: "start a new game", shortcuts: ["N"] })
+core.describeAction(TicTacToe, "startANewGame", { title: "Start A New Game", shortcuts: ["N"] })
 
 core.heading("The board")
 ///////////////

@@ -19,126 +19,126 @@ core.heading("GitHub:  a repository's issues, the people who wrote it, anyone by
 
 export class Issue extends Thing {
   // - its "url" is an issue
-  static { this.declareProp("url", { type: "Issue", link: true, declaredAt: { path: "/GitHub.api.spell", start: 1723, end: 1744 } }) }
+  static { this.declareProp("url", { type: "Issue", link: true, declaredAt: { path: "/GitHub.api.spell", start: 1721, end: 1742 } }) }
   get url(): Issue { return core.linked(this, "url", Issue) as Issue }
   set url(value: Issue) { this.setProp("url", value) }
 
   /** an address */
   // - its "repository url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1746, end: 1774 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1744, end: 1772 } })
   accessor repositoryUrl!: string
 
   /** an address */
   // - its "labels url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1791, end: 1815 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1789, end: 1813 } })
   accessor labelsUrl!: string
 
   /** an address */
   // - its "comments url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1832, end: 1858 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1830, end: 1856 } })
   accessor commentsUrl!: string
 
   /** an address */
   // - its "events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1875, end: 1899 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1873, end: 1897 } })
   accessor eventsUrl!: string
 
   /** an address */
   // - its "html url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1916, end: 1938 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1914, end: 1936 } })
   accessor htmlUrl!: string
 
   // - its "node id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1955, end: 1976 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1953, end: 1974 } })
   accessor nodeId!: string
 
   // - its "number" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 1978, end: 2002 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 1976, end: 2000 } })
   accessor number!: number
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2004, end: 2023 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2002, end: 2021 } })
   accessor title!: string
 
   // - its "user" is an issue user
-  @prop({ type: "IssueUser", declaredAt: { path: "/GitHub.api.spell", start: 2025, end: 2052 } })
+  @prop({ type: "IssueUser", declaredAt: { path: "/GitHub.api.spell", start: 2023, end: 2050 } })
   accessor user!: IssueUser
 
   // - its "labels" is a list of labels
-  @prop({ itemType: "Label", init: () => new List<Label>({ instanceType: "Label" }), declaredAt: { path: "/GitHub.api.spell", start: 2054, end: 2086 } })
+  @prop({ itemType: "Label", init: () => new List<Label>({ instanceType: "Label" }), declaredAt: { path: "/GitHub.api.spell", start: 2052, end: 2084 } })
   accessor labels!: List<Label>
 
   // - its "state" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2088, end: 2107 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2086, end: 2105 } })
   accessor state!: string
 
   // - its "locked" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2109, end: 2134 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2107, end: 2132 } })
   accessor locked!: boolean
 
   // - its "assignees" is a list of assignees
-  @prop({ itemType: "Assignee", init: () => new List<Assignee>({ instanceType: "Assignee" }), declaredAt: { path: "/GitHub.api.spell", start: 2136, end: 2174 } })
+  @prop({ itemType: "Assignee", init: () => new List<Assignee>({ instanceType: "Assignee" }), declaredAt: { path: "/GitHub.api.spell", start: 2134, end: 2172 } })
   accessor assignees!: List<Assignee>
 
   // - its "comments" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 2176, end: 2202 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 2174, end: 2200 } })
   accessor comments!: number
 
   // - its "created at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2204, end: 2230 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2202, end: 2228 } })
   accessor createdAt!: Date
 
   // - its "updated at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2232, end: 2258 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2230, end: 2256 } })
   accessor updatedAt!: Date
 
   // - its "author association" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2260, end: 2292 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2258, end: 2290 } })
   accessor authorAssociation!: string
 
   // - its "issue field values" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/GitHub.api.spell", start: 2294, end: 2336 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/GitHub.api.spell", start: 2292, end: 2334 } })
   accessor issueFieldValues!: List<string>
 
   // - its "sub issues summary" is a sub issues summary
-  @prop({ type: "SubIssuesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2338, end: 2386 } })
+  @prop({ type: "SubIssuesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2336, end: 2384 } })
   accessor subIssuesSummary!: SubIssuesSummary
 
   // - its "issue dependencies summary" is an issue dependencies summary
-  @prop({ type: "IssueDependenciesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2388, end: 2453 } })
+  @prop({ type: "IssueDependenciesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2386, end: 2451 } })
   accessor issueDependenciesSummary!: IssueDependenciesSummary
 
   // - its "body" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2455, end: 2473 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2453, end: 2471 } })
   accessor body!: string
 
   // - its "reactions" is a reaction
-  @prop({ type: "Reaction", declaredAt: { path: "/GitHub.api.spell", start: 2475, end: 2504 } })
+  @prop({ type: "Reaction", declaredAt: { path: "/GitHub.api.spell", start: 2473, end: 2502 } })
   accessor reactions!: Reaction
 
   /** an address */
   // - its "timeline url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2506, end: 2532 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2504, end: 2530 } })
   accessor timelineUrl!: string
 
   // - its "performed via github app" is a performed via github app
-  @prop({ type: "PerformedViaGithubApp", declaredAt: { path: "/GitHub.api.spell", start: 2549, end: 2609 } })
+  @prop({ type: "PerformedViaGithubApp", declaredAt: { path: "/GitHub.api.spell", start: 2547, end: 2607 } })
   accessor performedViaGithubApp!: PerformedViaGithubApp
 
   // - its "state reason" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2611, end: 2637 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2609, end: 2635 } })
   accessor stateReason!: string
 
   // - its "draft" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2639, end: 2663 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2637, end: 2661 } })
   accessor draft!: boolean
 
   // - its "pull request" is a pull request
-  @prop({ type: "PullRequest", declaredAt: { path: "/GitHub.api.spell", start: 2665, end: 2701 } })
+  @prop({ type: "PullRequest", declaredAt: { path: "/GitHub.api.spell", start: 2663, end: 2699 } })
   accessor pullRequest!: PullRequest
 
   // - its "assignee" is an assignee
-  @prop({ type: "Assignee", declaredAt: { path: "/GitHub.api.spell", start: 2703, end: 2732 } })
+  @prop({ type: "Assignee", declaredAt: { path: "/GitHub.api.spell", start: 2701, end: 2730 } })
   accessor assignee!: Assignee
 
   @drawn draw() {
@@ -163,101 +163,101 @@ export class Issue extends Thing {
     times: ["created", "modified"], select: ["htmlUrl", "number", "title", "state", "comments", "createdAt", "body", "pullRequest"] }
 
   // - it lives in github
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1703, end: 1721 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1701, end: 1719 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in github
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1703, end: 1721 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1701, end: 1719 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Contributor extends Thing {
   // - its "login" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2783, end: 2802 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2780, end: 2799 } })
   accessor login!: string
 
   // - its "node id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2804, end: 2825 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2801, end: 2822 } })
   accessor nodeId!: string
 
   /** an address */
   // - its "avatar url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2827, end: 2851 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2824, end: 2848 } })
   accessor avatarUrl!: string
 
   // - its "gravatar id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2868, end: 2893 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2865, end: 2890 } })
   accessor gravatarId!: string
 
   /** an address */
   // - its "url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2895, end: 2912 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2892, end: 2909 } })
   accessor url!: string
 
   /** an address */
   // - its "html url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2929, end: 2951 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2926, end: 2948 } })
   accessor htmlUrl!: string
 
   /** an address */
   // - its "followers url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2968, end: 2995 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2965, end: 2992 } })
   accessor followersUrl!: string
 
   /** an address */
   // - its "following url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3012, end: 3039 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3009, end: 3036 } })
   accessor followingUrl!: string
 
   /** an address */
   // - its "gists url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3056, end: 3079 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3053, end: 3076 } })
   accessor gistsUrl!: string
 
   /** an address */
   // - its "starred url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3096, end: 3121 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3093, end: 3118 } })
   accessor starredUrl!: string
 
   /** an address */
   // - its "subscriptions url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3138, end: 3169 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3135, end: 3166 } })
   accessor subscriptionsUrl!: string
 
   /** an address */
   // - its "organizations url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3186, end: 3217 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3183, end: 3214 } })
   accessor organizationsUrl!: string
 
   /** an address */
   // - its "repos url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3234, end: 3257 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3231, end: 3254 } })
   accessor reposUrl!: string
 
   /** an address */
   // - its "events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3274, end: 3298 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3271, end: 3295 } })
   accessor eventsUrl!: string
 
   /** an address */
   // - its "received events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3315, end: 3348 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3312, end: 3345 } })
   accessor receivedEventsUrl!: string
 
   // - its "kind" is text, stored as "type"
-  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 3365, end: 3401 } })
+  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 3362, end: 3398 } })
   accessor kind!: string
 
   // - its "user view type" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3403, end: 3431 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3400, end: 3428 } })
   accessor userViewType!: string
 
   // - its "site admin" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 3433, end: 3462 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 3430, end: 3459 } })
   accessor siteAdmin!: boolean
 
   // - its "contributions" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 3464, end: 3495 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 3461, end: 3492 } })
   accessor contributions!: number
 
   static savedIn = {
@@ -266,154 +266,154 @@ export class Contributor extends Thing {
     times: ["created", "modified"], select: ["login", "avatarUrl", "htmlUrl", "kind"] }
 
   // - it lives in github
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2763, end: 2781 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2760, end: 2778 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in github
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2763, end: 2781 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2760, end: 2778 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class User extends Thing {
   // - its "login" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3539, end: 3558 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3535, end: 3554 } })
   accessor login!: string
 
   // - its "number" is a number, stored as "id"
-  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/GitHub.api.spell", start: 3560, end: 3600 } })
+  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/GitHub.api.spell", start: 3556, end: 3596 } })
   accessor number!: number
 
   // - its "node id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3602, end: 3623 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3598, end: 3619 } })
   accessor nodeId!: string
 
   /** an address */
   // - its "avatar url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3625, end: 3649 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3621, end: 3645 } })
   accessor avatarUrl!: string
 
   // - its "gravatar id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3666, end: 3691 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3662, end: 3687 } })
   accessor gravatarId!: string
 
   /** an address */
   // - its "url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3693, end: 3710 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3689, end: 3706 } })
   accessor url!: string
 
   /** an address */
   // - its "html url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3727, end: 3749 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3723, end: 3745 } })
   accessor htmlUrl!: string
 
   /** an address */
   // - its "followers url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3766, end: 3793 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3762, end: 3789 } })
   accessor followersUrl!: string
 
   /** an address */
   // - its "following url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3810, end: 3837 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3806, end: 3833 } })
   accessor followingUrl!: string
 
   /** an address */
   // - its "gists url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3854, end: 3877 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3850, end: 3873 } })
   accessor gistsUrl!: string
 
   /** an address */
   // - its "starred url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3894, end: 3919 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3890, end: 3915 } })
   accessor starredUrl!: string
 
   /** an address */
   // - its "subscriptions url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3936, end: 3967 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3932, end: 3963 } })
   accessor subscriptionsUrl!: string
 
   /** an address */
   // - its "organizations url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3984, end: 4015 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3980, end: 4011 } })
   accessor organizationsUrl!: string
 
   /** an address */
   // - its "repos url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4032, end: 4055 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4028, end: 4051 } })
   accessor reposUrl!: string
 
   /** an address */
   // - its "events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4072, end: 4096 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4068, end: 4092 } })
   accessor eventsUrl!: string
 
   /** an address */
   // - its "received events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4113, end: 4146 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4109, end: 4142 } })
   accessor receivedEventsUrl!: string
 
   // - its "kind" is text, stored as "type"
-  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 4163, end: 4199 } })
+  @prop({ type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 4159, end: 4195 } })
   accessor kind!: string
 
   // - its "user view type" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4201, end: 4229 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4197, end: 4225 } })
   accessor userViewType!: string
 
   // - its "site admin" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 4231, end: 4260 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 4227, end: 4256 } })
   accessor siteAdmin!: boolean
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4262, end: 4280 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4258, end: 4276 } })
   accessor name!: string
 
   // - its "company" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4282, end: 4303 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4278, end: 4299 } })
   accessor company!: string
 
   /** an address */
   // - its "blog" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4305, end: 4323 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4301, end: 4319 } })
   accessor blog!: string
 
   // - its "location" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4340, end: 4362 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4336, end: 4358 } })
   accessor location!: string
 
   // - its "email" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4364, end: 4383 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4360, end: 4379 } })
   accessor email!: string
 
   // - its "twitter username" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4385, end: 4415 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4381, end: 4411 } })
   accessor twitterUsername!: string
 
   // - its "public repos" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4417, end: 4447 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4413, end: 4443 } })
   accessor publicRepos!: number
 
   // - its "public gists" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4449, end: 4479 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4445, end: 4475 } })
   accessor publicGists!: number
 
   // - its "followers" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4481, end: 4508 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4477, end: 4504 } })
   accessor followers!: number
 
   // - its "following" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4510, end: 4537 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4506, end: 4533 } })
   accessor following!: number
 
   // - its "created at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4539, end: 4565 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4535, end: 4561 } })
   accessor createdAt!: Date
 
   // - its "updated at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4567, end: 4593 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4563, end: 4589 } })
   accessor updatedAt!: Date
 
   // - its "bio" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4595, end: 4612 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4591, end: 4608 } })
   accessor bio!: string
 
   /** Their own page, in the GitHub tab */
@@ -491,11 +491,11 @@ export class User extends Thing {
     times: ["created", "modified"], select: ["login", "number", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "createdAt", "bio"] }
 
   // - it lives in github
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3519, end: 3537 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3515, end: 3533 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in github
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3519, end: 3537 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3515, end: 3533 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -915,368 +915,368 @@ export class PullRequest extends Thing {
 
 export class Repository extends Thing {
   // - its "node id" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 7931, end: 7952 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 7917, end: 7938 } })
   accessor nodeId!: string
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 7954, end: 7972 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 7940, end: 7958 } })
   accessor name!: string
 
   // - its "full name" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 7974, end: 7997 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 7960, end: 7983 } })
   accessor fullName!: string
 
   // - its "private" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 7999, end: 8025 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 7985, end: 8011 } })
   accessor private!: boolean
 
   // - its "owner" is an owner
-  @prop({ type: "Owner", declaredAt: { path: "/GitHub.api.spell", start: 8027, end: 8050 } })
+  @prop({ type: "Owner", declaredAt: { path: "/GitHub.api.spell", start: 8013, end: 8036 } })
   accessor owner!: Owner
 
   /** an address */
   // - its "html url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8052, end: 8074 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8038, end: 8060 } })
   accessor htmlUrl!: string
 
   // - its "description" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8091, end: 8116 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8077, end: 8102 } })
   accessor description!: string
 
   // - its "fork" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 8118, end: 8141 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 8104, end: 8127 } })
   accessor fork!: boolean
 
   /** an address */
   // - its "url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8143, end: 8160 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8129, end: 8146 } })
   accessor url!: string
 
   /** an address */
   // - its "forks url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8177, end: 8200 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8163, end: 8186 } })
   accessor forksUrl!: string
 
   /** an address */
   // - its "keys url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8217, end: 8239 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8203, end: 8225 } })
   accessor keysUrl!: string
 
   /** an address */
   // - its "collaborators url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8256, end: 8287 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8242, end: 8273 } })
   accessor collaboratorsUrl!: string
 
   /** an address */
   // - its "teams url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8304, end: 8327 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8290, end: 8313 } })
   accessor teamsUrl!: string
 
   /** an address */
   // - its "hooks url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8344, end: 8367 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8330, end: 8353 } })
   accessor hooksUrl!: string
 
   /** an address */
   // - its "issue events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8384, end: 8414 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8370, end: 8400 } })
   accessor issueEventsUrl!: string
 
   /** an address */
   // - its "events url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8431, end: 8455 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8417, end: 8441 } })
   accessor eventsUrl!: string
 
   /** an address */
   // - its "assignees url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8472, end: 8499 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8458, end: 8485 } })
   accessor assigneesUrl!: string
 
   /** an address */
   // - its "branches url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8516, end: 8542 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8502, end: 8528 } })
   accessor branchesUrl!: string
 
   /** an address */
   // - its "tags url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8559, end: 8581 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8545, end: 8567 } })
   accessor tagsUrl!: string
 
   /** an address */
   // - its "blobs url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8598, end: 8621 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8584, end: 8607 } })
   accessor blobsUrl!: string
 
   /** an address */
   // - its "git tags url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8638, end: 8664 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8624, end: 8650 } })
   accessor gitTagsUrl!: string
 
   /** an address */
   // - its "git refs url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8681, end: 8707 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8667, end: 8693 } })
   accessor gitRefsUrl!: string
 
   /** an address */
   // - its "trees url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8724, end: 8747 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8710, end: 8733 } })
   accessor treesUrl!: string
 
   /** an address */
   // - its "statuses url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8764, end: 8790 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8750, end: 8776 } })
   accessor statusesUrl!: string
 
   /** an address */
   // - its "languages url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8807, end: 8834 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8793, end: 8820 } })
   accessor languagesUrl!: string
 
   /** an address */
   // - its "stargazers url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8851, end: 8879 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8837, end: 8865 } })
   accessor stargazersUrl!: string
 
   /** an address */
   // - its "contributors url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8896, end: 8926 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8882, end: 8912 } })
   accessor contributorsUrl!: string
 
   /** an address */
   // - its "subscribers url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8943, end: 8972 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8929, end: 8958 } })
   accessor subscribersUrl!: string
 
   /** an address */
   // - its "subscription url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8989, end: 9019 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8975, end: 9005 } })
   accessor subscriptionUrl!: string
 
   /** an address */
   // - its "commits url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9036, end: 9061 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9022, end: 9047 } })
   accessor commitsUrl!: string
 
   /** an address */
   // - its "git commits url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9078, end: 9107 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9064, end: 9093 } })
   accessor gitCommitsUrl!: string
 
   /** an address */
   // - its "comments url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9124, end: 9150 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9110, end: 9136 } })
   accessor commentsUrl!: string
 
   /** an address */
   // - its "issue comment url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9167, end: 9198 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9153, end: 9184 } })
   accessor issueCommentUrl!: string
 
   /** an address */
   // - its "contents url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9215, end: 9241 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9201, end: 9227 } })
   accessor contentsUrl!: string
 
   /** an address */
   // - its "compare url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9258, end: 9283 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9244, end: 9269 } })
   accessor compareUrl!: string
 
   /** an address */
   // - its "merges url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9300, end: 9324 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9286, end: 9310 } })
   accessor mergesUrl!: string
 
   /** an address */
   // - its "archive url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9341, end: 9366 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9327, end: 9352 } })
   accessor archiveUrl!: string
 
   /** an address */
   // - its "downloads url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9383, end: 9410 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9369, end: 9396 } })
   accessor downloadsUrl!: string
 
   /** an address */
   // - its "issues url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9427, end: 9451 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9413, end: 9437 } })
   accessor issuesUrl!: string
 
   /** an address */
   // - its "pulls url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9468, end: 9491 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9454, end: 9477 } })
   accessor pullsUrl!: string
 
   /** an address */
   // - its "milestones url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9508, end: 9536 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9494, end: 9522 } })
   accessor milestonesUrl!: string
 
   /** an address */
   // - its "notifications url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9553, end: 9584 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9539, end: 9570 } })
   accessor notificationsUrl!: string
 
   /** an address */
   // - its "labels url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9601, end: 9625 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9587, end: 9611 } })
   accessor labelsUrl!: string
 
   /** an address */
   // - its "releases url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9642, end: 9668 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9628, end: 9654 } })
   accessor releasesUrl!: string
 
   /** an address */
   // - its "deployments url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9685, end: 9714 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9671, end: 9700 } })
   accessor deploymentsUrl!: string
 
   // - its "created at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9731, end: 9757 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9717, end: 9743 } })
   accessor createdAt!: Date
 
   // - its "updated at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9759, end: 9785 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9745, end: 9771 } })
   accessor updatedAt!: Date
 
   // - its "pushed at" is a date
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9787, end: 9812 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9773, end: 9798 } })
   accessor pushedAt!: Date
 
   // - its "git url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9814, end: 9835 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9800, end: 9821 } })
   accessor gitUrl!: string
 
   // - its "ssh url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9837, end: 9858 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9823, end: 9844 } })
   accessor sshUrl!: string
 
   /** an address */
   // - its "clone url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9860, end: 9883 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9846, end: 9869 } })
   accessor cloneUrl!: string
 
   /** an address */
   // - its "svn url" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9900, end: 9921 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9886, end: 9907 } })
   accessor svnUrl!: string
 
   // - its "homepage" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9938, end: 9960 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9924, end: 9946 } })
   accessor homepage!: string
 
   // - its "size" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 9962, end: 9984 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 9948, end: 9970 } })
   accessor size!: number
 
   // - its "stargazers count" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 9986, end: 10020 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 9972, end: 10006 } })
   accessor stargazersCount!: number
 
   // - its "watchers count" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10022, end: 10054 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10008, end: 10040 } })
   accessor watchersCount!: number
 
   // - its "language" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10056, end: 10078 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10042, end: 10064 } })
   accessor language!: string
 
   // - its "issues" is yes or no, stored as "has_issues"
-  @prop({ type: "choice", storedAs: "has_issues", declaredAt: { path: "/GitHub.api.spell", start: 10080, end: 10129 } })
+  @prop({ type: "choice", storedAs: "has_issues", declaredAt: { path: "/GitHub.api.spell", start: 10066, end: 10115 } })
   accessor issues!: boolean
 
   // - its "projects" is yes or no, stored as "has_projects"
-  @prop({ type: "choice", storedAs: "has_projects", declaredAt: { path: "/GitHub.api.spell", start: 10131, end: 10184 } })
+  @prop({ type: "choice", storedAs: "has_projects", declaredAt: { path: "/GitHub.api.spell", start: 10117, end: 10170 } })
   accessor projects!: boolean
 
   // - its "downloads" is yes or no, stored as "has_downloads"
-  @prop({ type: "choice", storedAs: "has_downloads", declaredAt: { path: "/GitHub.api.spell", start: 10186, end: 10241 } })
+  @prop({ type: "choice", storedAs: "has_downloads", declaredAt: { path: "/GitHub.api.spell", start: 10172, end: 10227 } })
   accessor downloads!: boolean
 
   // - its "wiki" is yes or no, stored as "has_wiki"
-  @prop({ type: "choice", storedAs: "has_wiki", declaredAt: { path: "/GitHub.api.spell", start: 10243, end: 10288 } })
+  @prop({ type: "choice", storedAs: "has_wiki", declaredAt: { path: "/GitHub.api.spell", start: 10229, end: 10274 } })
   accessor wiki!: boolean
 
   // - its "pages" is yes or no, stored as "has_pages"
-  @prop({ type: "choice", storedAs: "has_pages", declaredAt: { path: "/GitHub.api.spell", start: 10290, end: 10337 } })
+  @prop({ type: "choice", storedAs: "has_pages", declaredAt: { path: "/GitHub.api.spell", start: 10276, end: 10323 } })
   accessor pages!: boolean
 
   // - its "discussions" is yes or no, stored as "has_discussions"
-  @prop({ type: "choice", storedAs: "has_discussions", declaredAt: { path: "/GitHub.api.spell", start: 10339, end: 10398 } })
+  @prop({ type: "choice", storedAs: "has_discussions", declaredAt: { path: "/GitHub.api.spell", start: 10325, end: 10384 } })
   accessor discussions!: boolean
 
   // - its "forks count" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10400, end: 10429 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10386, end: 10415 } })
   accessor forksCount!: number
 
   // - its "archived" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10431, end: 10458 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10417, end: 10444 } })
   accessor archived!: boolean
 
   // - its "disabled" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10460, end: 10487 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10446, end: 10473 } })
   accessor disabled!: boolean
 
   // - its "open issues count" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10489, end: 10524 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10475, end: 10510 } })
   accessor openIssuesCount!: number
 
   // - its "license" is a license
-  @prop({ type: "License", declaredAt: { path: "/GitHub.api.spell", start: 10526, end: 10552 } })
+  @prop({ type: "License", declaredAt: { path: "/GitHub.api.spell", start: 10512, end: 10538 } })
   accessor license!: License
 
   // - its "allow forking" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10554, end: 10586 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10540, end: 10572 } })
   accessor allowForking!: boolean
 
   // - its "template" is yes or no, stored as "is_template"
-  @prop({ type: "choice", storedAs: "is_template", declaredAt: { path: "/GitHub.api.spell", start: 10588, end: 10640 } })
+  @prop({ type: "choice", storedAs: "is_template", declaredAt: { path: "/GitHub.api.spell", start: 10574, end: 10626 } })
   accessor template!: boolean
 
   // - its "web commit signoff required" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10642, end: 10688 } })
+  @prop({ type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10628, end: 10674 } })
   accessor webCommitSignoffRequired!: boolean
 
   // - its "pull requests" is yes or no, stored as "has_pull_requests"
-  @prop({ type: "choice", storedAs: "has_pull_requests", declaredAt: { path: "/GitHub.api.spell", start: 10690, end: 10753 } })
+  @prop({ type: "choice", storedAs: "has_pull_requests", declaredAt: { path: "/GitHub.api.spell", start: 10676, end: 10739 } })
   accessor pullRequests!: boolean
 
   // - its "pull request creation policy" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10755, end: 10797 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10741, end: 10783 } })
   accessor pullRequestCreationPolicy!: string
 
   // - its "topics" is a list of users
-  static { this.declareProp("topics", { itemType: "User", init: () => new List<User>({ instanceType: "User" }), declaredAt: { path: "/GitHub.api.spell", start: 10799, end: 10830 } }) }
+  static { this.declareProp("topics", { itemType: "User", init: () => new List<User>({ instanceType: "User" }), declaredAt: { path: "/GitHub.api.spell", start: 10785, end: 10816 } }) }
   get topics(): List<User> { return core.linked(this, "topics", User) as List<User> }
   set topics(value: List<User>) { this.setProp("topics", value) }
 
   // - its "visibility" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10832, end: 10856 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10818, end: 10842 } })
   accessor visibility!: string
 
   // - its "forks" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10858, end: 10881 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10844, end: 10867 } })
   accessor forks!: number
 
   // - its "open issues" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10883, end: 10912 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10869, end: 10898 } })
   accessor openIssues!: number
 
   // - its "watchers" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10914, end: 10940 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10900, end: 10926 } })
   accessor watchers!: number
 
   // - its "default branch" is text
-  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10942, end: 10970 } })
+  @prop({ type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10928, end: 10956 } })
   accessor defaultBranch!: string
 
   // - its "permissions" is a permission
-  @prop({ type: "Permission", declaredAt: { path: "/GitHub.api.spell", start: 10972, end: 11005 } })
+  @prop({ type: "Permission", declaredAt: { path: "/GitHub.api.spell", start: 10958, end: 10991 } })
   accessor permissions!: Permission
 
   // - its "score" is a number
-  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11007, end: 11030 } })
+  @prop({ type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10993, end: 11016 } })
   accessor score!: number
 
   @drawn draw() {
@@ -1306,11 +1306,11 @@ export class Repository extends Thing {
     times: ["created", "modified"], select: ["name", "fullName", "htmlUrl", "description", "createdAt", "stargazersCount", "language"] }
 
   // - it lives in github
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 7911, end: 7929 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 7897, end: 7915 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in github
-  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 7911, end: 7929 } })
+  @prop({ type: "date", declaredAt: { path: "/GitHub.api.spell", start: 7897, end: 7915 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -1532,8 +1532,8 @@ export class GithubPage extends Thing {
     )
   }
 
-  // Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request
   drawIssues() {
+    // Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request
     return (
       <ui-stack spacing="sm" part="issues">
         <ui-header size="medium">Solid's issues</ui-header>
@@ -1552,8 +1552,8 @@ export class GithubPage extends Thing {
     )
   }
 
-  // Someone's own page, while one is picked;  else what the search finds
   drawFound() {
+    // Someone's own page, while one is picked;  else what the search finds
     if (this.showing) return core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login!)).drawPage(), undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">Asking GitHub</ui-loader> })
     else {
       return (
@@ -1619,99 +1619,99 @@ core.heading("Open Library:  books by what they're called, who wrote them, and t
 
 export class Book extends Thing {
   // - its "authors" is a list of authors, stored as "author_key"
-  static { this.declareProp("authors", { itemType: "Author", storedAs: "author_key", init: () => new List<Author>({ instanceType: "Author" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1596, end: 1654 } }) }
+  static { this.declareProp("authors", { itemType: "Author", storedAs: "author_key", init: () => new List<Author>({ instanceType: "Author" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1594, end: 1652 } }) }
   get authors(): List<Author> { return core.linked(this, "authors", Author) as List<Author> }
   set authors(value: List<Author>) { this.setProp("authors", value) }
 
   // - its "author name" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1656, end: 1691 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1654, end: 1689 } })
   accessor authorName!: List<string>
 
   // - its "cover edition" is an edition, stored as "cover_edition_key"
-  static { this.declareProp("coverEdition", { type: "Edition", storedAs: "cover_edition_key", link: true, declaredAt: { path: "/OpenLibrary.api.spell", start: 1693, end: 1757 } }) }
+  static { this.declareProp("coverEdition", { type: "Edition", storedAs: "cover_edition_key", link: true, declaredAt: { path: "/OpenLibrary.api.spell", start: 1691, end: 1755 } }) }
   get coverEdition(): Edition { return core.linked(this, "coverEdition", Edition) as Edition }
   set coverEdition(value: Edition) { this.setProp("coverEdition", value) }
 
   // - its "cover height" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1759, end: 1789 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1757, end: 1787 } })
   accessor coverHeight!: number
 
   /** a picture's address */
   // - its "cover i" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 1791, end: 1812 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 1789, end: 1810 } })
   accessor coverI!: string
 
   // - its "cover width" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1838, end: 1867 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1836, end: 1865 } })
   accessor coverWidth!: number
 
   // - its "ebook access" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 1869, end: 1895 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 1867, end: 1893 } })
   accessor ebookAccess!: string
 
   // - its "edition count" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1897, end: 1928 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1895, end: 1926 } })
   accessor editionCount!: number
 
   // - its "first publish year" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1930, end: 1966 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1928, end: 1964 } })
   accessor firstPublishYear!: number
 
   // - its "fulltext" is yes or no, stored as "has_fulltext"
-  @prop({ type: "choice", storedAs: "has_fulltext", declaredAt: { path: "/OpenLibrary.api.spell", start: 1968, end: 2021 } })
+  @prop({ type: "choice", storedAs: "has_fulltext", declaredAt: { path: "/OpenLibrary.api.spell", start: 1966, end: 2019 } })
   accessor fulltext!: boolean
 
   // - its "ia" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2023, end: 2049 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2021, end: 2047 } })
   accessor ia!: List<string>
 
   // - its "ia collection" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2051, end: 2088 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2049, end: 2086 } })
   accessor iaCollection!: List<string>
 
   // - its "language" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2090, end: 2122 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2088, end: 2120 } })
   accessor language!: List<string>
 
   // - its "lending edition s" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2124, end: 2155 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2122, end: 2153 } })
   accessor lendingEditionS!: string
 
   // - its "lending identifier s" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2157, end: 2191 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2155, end: 2189 } })
   accessor lendingIdentifierS!: string
 
   // - its "public scan b" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/OpenLibrary.api.spell", start: 2193, end: 2225 } })
+  @prop({ type: "choice", declaredAt: { path: "/OpenLibrary.api.spell", start: 2191, end: 2223 } })
   accessor publicScanB!: boolean
 
   // - its "editions" is a list of editions
-  static { this.declareProp("editions", { itemType: "Edition", init: () => new List<Edition>({ instanceType: "Edition" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2227, end: 2263 } }) }
+  static { this.declareProp("editions", { itemType: "Edition", init: () => new List<Edition>({ instanceType: "Edition" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2225, end: 2261 } }) }
   get editions(): List<Edition> { return core.linked(this, "editions", Edition) as List<Edition> }
   set editions(value: List<Edition>) { this.setProp("editions", value) }
 
   // - its "series key" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2265, end: 2299 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2263, end: 2297 } })
   accessor seriesKey!: List<string>
 
   // - its "series name" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2301, end: 2336 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2299, end: 2334 } })
   accessor seriesName!: List<string>
 
   // - its "series position" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2338, end: 2377 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2336, end: 2375 } })
   accessor seriesPosition!: List<string>
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2379, end: 2398 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2377, end: 2396 } })
   accessor title!: string
 
   // - its "subtitle" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2400, end: 2422 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2398, end: 2420 } })
   accessor subtitle!: string
 
   /** Who wrote it first:  read from Open Library's record of them, by their id */
-  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spell", start: 2006, end: 2051 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spell", start: 1924, end: 1969 }, readsFrom: ["open_library"] }) }
   get writer() {
     return core.getItemAt(this.authors, 0)
   }
@@ -1779,81 +1779,81 @@ export class Book extends Thing {
     times: ["created", "modified"], select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "language", "editions", "title"] }
 
   // - it lives in open library
-  @prop({ type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 1570, end: 1594 } })
+  @prop({ type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 1568, end: 1592 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in open library
-  @prop({ type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 1570, end: 1594 } })
+  @prop({ type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 1568, end: 1592 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Author extends Thing {
   // - its "links" is a list of links
-  @prop({ itemType: "Link", init: () => new List<Link>({ instanceType: "Link" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2475, end: 2505 } })
+  @prop({ itemType: "Link", init: () => new List<Link>({ instanceType: "Link" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2472, end: 2502 } })
   accessor links!: List<Link>
 
   // - its "kind" is a kind, stored as "type"
-  @prop({ type: "Kind", storedAs: "type", declaredAt: { path: "/OpenLibrary.api.spell", start: 2507, end: 2545 } })
+  @prop({ type: "Kind", storedAs: "type", declaredAt: { path: "/OpenLibrary.api.spell", start: 2504, end: 2542 } })
   accessor kind!: Kind
 
   // - its "key" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2547, end: 2564 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2544, end: 2561 } })
   accessor key!: string
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2566, end: 2584 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2563, end: 2581 } })
   accessor name!: string
 
   // - its "source records" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2586, end: 2624 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2583, end: 2621 } })
   accessor sourceRecords!: List<string>
 
   // - its "birth date" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2626, end: 2650 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2623, end: 2647 } })
   accessor birthDate!: string
 
   // - its "bio" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2652, end: 2669 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2649, end: 2666 } })
   accessor bio!: string
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2671, end: 2690 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2668, end: 2687 } })
   accessor title!: string
 
   // - its "alternate names" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2692, end: 2731 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2689, end: 2728 } })
   accessor alternateNames!: List<string>
 
   // - its "remote ids" is a remote id
-  @prop({ type: "RemoteId", declaredAt: { path: "/OpenLibrary.api.spell", start: 2733, end: 2764 } })
+  @prop({ type: "RemoteId", declaredAt: { path: "/OpenLibrary.api.spell", start: 2730, end: 2761 } })
   accessor remoteIds!: RemoteId
 
   // - its "photos" is a list of numbers
-  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2766, end: 2799 } })
+  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2763, end: 2796 } })
   accessor photos!: List<number>
 
   // - its "death date" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2801, end: 2825 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2798, end: 2822 } })
   accessor deathDate!: string
 
   // - its "personal name" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2827, end: 2854 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2824, end: 2851 } })
   accessor personalName!: string
 
   // - its "latest revision" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 2856, end: 2889 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 2853, end: 2886 } })
   accessor latestRevision!: number
 
   // - its "revision" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 2891, end: 2917 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 2888, end: 2914 } })
   accessor revision!: number
 
   // - its "created" is a created
-  @prop({ type: "Created", declaredAt: { path: "/OpenLibrary.api.spell", start: 2919, end: 2945 } })
+  @prop({ type: "Created", declaredAt: { path: "/OpenLibrary.api.spell", start: 2916, end: 2942 } })
   accessor created!: Created
 
   // - its "last modified" is a last modified
-  @prop({ type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 2947, end: 2985 } })
+  @prop({ type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 2944, end: 2982 } })
   accessor lastModified!: LastModified
 
   drawCard() {
@@ -1874,81 +1874,81 @@ export class Author extends Thing {
     times: ["modified"], select: ["kind", "name", "birthDate", "bio", "title"] }
 
   // - it lives in open library
-  @prop({ type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 2449, end: 2473 } })
+  @prop({ type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 2446, end: 2470 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Edition extends Thing {
   // - its "kind" is a kind, stored as "type"
-  @prop({ type: "Kind", storedAs: "type", declaredAt: { path: "/OpenLibrary.api.spell", start: 3039, end: 3077 } })
+  @prop({ type: "Kind", storedAs: "type", declaredAt: { path: "/OpenLibrary.api.spell", start: 3035, end: 3073 } })
   accessor kind!: Kind
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3079, end: 3098 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3075, end: 3094 } })
   accessor title!: string
 
   // - its "authors" is a list of edition authors
-  @prop({ itemType: "EditionAuthor", init: () => new List<EditionAuthor>({ instanceType: "EditionAuthor" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3100, end: 3142 } })
+  @prop({ itemType: "EditionAuthor", init: () => new List<EditionAuthor>({ instanceType: "EditionAuthor" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3096, end: 3138 } })
   accessor authors!: List<EditionAuthor>
 
   // - its "publish date" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3144, end: 3170 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3140, end: 3166 } })
   accessor publishDate!: string
 
   // - its "source records" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3172, end: 3210 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3168, end: 3206 } })
   accessor sourceRecords!: List<string>
 
   // - its "number of pages" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3212, end: 3245 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3208, end: 3241 } })
   accessor numberOfPages!: number
 
   // - its "publishers" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3247, end: 3281 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3243, end: 3277 } })
   accessor publishers!: List<string>
 
   // - its "physical format" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3283, end: 3312 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3279, end: 3308 } })
   accessor physicalFormat!: string
 
   // - its "notes" is a note
-  @prop({ type: "Note", declaredAt: { path: "/OpenLibrary.api.spell", start: 3314, end: 3335 } })
+  @prop({ type: "Note", declaredAt: { path: "/OpenLibrary.api.spell", start: 3310, end: 3331 } })
   accessor notes!: Note
 
   // - its "full title" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3337, end: 3361 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3333, end: 3357 } })
   accessor fullTitle!: string
 
   // - its "covers" is a list of numbers
-  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3363, end: 3396 } })
+  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3359, end: 3392 } })
   accessor covers!: List<number>
 
   // - its "works" is a list of works
-  @prop({ itemType: "Work", init: () => new List<Work>({ instanceType: "Work" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3398, end: 3428 } })
+  @prop({ itemType: "Work", init: () => new List<Work>({ instanceType: "Work" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3394, end: 3424 } })
   accessor works!: List<Work>
 
   // - its "key" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3430, end: 3447 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3426, end: 3443 } })
   accessor key!: string
 
   // - its "local id" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3449, end: 3481 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3445, end: 3477 } })
   accessor localId!: List<string>
 
   // - its "latest revision" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3483, end: 3516 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3479, end: 3512 } })
   accessor latestRevision!: number
 
   // - its "revision" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3518, end: 3544 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3514, end: 3540 } })
   accessor revision!: number
 
   // - its "created" is a created
-  @prop({ type: "Created", declaredAt: { path: "/OpenLibrary.api.spell", start: 3546, end: 3572 } })
+  @prop({ type: "Created", declaredAt: { path: "/OpenLibrary.api.spell", start: 3542, end: 3568 } })
   accessor created!: Created
 
   // - its "last modified" is a last modified
-  @prop({ type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 3574, end: 3612 } })
+  @prop({ type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 3570, end: 3608 } })
   accessor lastModified!: LastModified
 
   @drawn draw() {
@@ -1968,7 +1968,7 @@ export class Edition extends Thing {
     times: ["modified"], select: ["kind", "title", "authors", "publishDate", "publishers"] }
 
   // - it lives in open library
-  @prop({ type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 3013, end: 3037 } })
+  @prop({ type: "date", declaredAt: { path: "/OpenLibrary.api.spell", start: 3009, end: 3033 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -2149,7 +2149,7 @@ export class OpenLibraryPage extends Thing {
   }
 
   /** What the search finds:  Open Library looks, by the title, and gives back the first hundred */
-  static { this.declareProp("found", { declaredAt: { path: "/OpenLibrary.spell", start: 618, end: 679 }, readsFrom: ["open_library"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/OpenLibrary.spell", start: 521, end: 582 }, readsFrom: ["open_library"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     return core.filter(await core.savedThings(Book, { search: { title: this.search } }, "looks through"), (book: Book) => core.includes(book.title, this.search))
   }, () => [this.search]) }
@@ -2173,8 +2173,8 @@ export class OpenLibraryPage extends Thing {
     )
   }
 
-  // A book's own page, while one is open;  else what the search finds
   drawShelf() {
+    // A book's own page, while one is open;  else what the search finds
     if (this.showing) return this.showing.drawPage()
     else return this.drawBookList()
   }
@@ -2220,19 +2220,19 @@ core.heading("JSONPlaceholder:  posts and their comments, people, and their todo
 
 export class Post extends Thing {
   // - its "user id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1271, end: 1296 } })
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1269, end: 1294 } })
   accessor userId!: number
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1298, end: 1317 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1296, end: 1315 } })
   accessor title!: string
 
   // - its "body" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1319, end: 1337 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1317, end: 1335 } })
   accessor body!: string
 
   // - its "comments" is a list of comments
-  static { this.declareProp("comments", { itemType: "Comment", init: () => new List<Comment>({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1339, end: 1375 } }) }
+  static { this.declareProp("comments", { itemType: "Comment", init: () => new List<Comment>({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1337, end: 1373 } }) }
   get comments(): List<Comment> { return core.linked(this, "comments", Comment) as List<Comment> }
   set comments(value: List<Comment>) { this.setProp("comments", value) }
 
@@ -2250,29 +2250,29 @@ export class Post extends Thing {
     times: ["created", "modified"], select: ["userId", "title", "body", "comments"] }
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1242, end: 1269 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1240, end: 1267 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1242, end: 1269 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1240, end: 1267 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Comment extends Thing {
   // - its "post id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1431, end: 1456 } })
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1428, end: 1453 } })
   accessor postId!: number
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1458, end: 1476 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1455, end: 1473 } })
   accessor name!: string
 
   // - its "email" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1478, end: 1497 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1475, end: 1494 } })
   accessor email!: string
 
   // - its "body" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1499, end: 1517 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1496, end: 1514 } })
   accessor body!: string
 
   @drawn draw() {
@@ -2292,50 +2292,50 @@ export class Comment extends Thing {
     times: ["created", "modified"], select: ["name", "email", "body"] }
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1402, end: 1429 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1399, end: 1426 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1402, end: 1429 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1399, end: 1426 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class JsonplaceholderUser extends Thing {
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1586, end: 1604 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1582, end: 1600 } })
   accessor name!: string
 
   // - its "username" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1606, end: 1628 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1602, end: 1624 } })
   accessor username!: string
 
   // - its "email" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1630, end: 1649 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1626, end: 1645 } })
   accessor email!: string
 
   // - its "address" is an address
-  @prop({ type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1651, end: 1678 } })
+  @prop({ type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1647, end: 1674 } })
   accessor address!: Address
 
   // - its "phone" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1680, end: 1699 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1676, end: 1695 } })
   accessor phone!: string
 
   // - its "website" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1701, end: 1722 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1697, end: 1718 } })
   accessor website!: string
 
   // - its "company" is a company
-  @prop({ type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1724, end: 1750 } })
+  @prop({ type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1720, end: 1746 } })
   accessor company!: Company
 
   // - its "posts" is a list of posts
-  static { this.declareProp("posts", { itemType: "Post", init: () => new List<Post>({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1752, end: 1782 } }) }
+  static { this.declareProp("posts", { itemType: "Post", init: () => new List<Post>({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1748, end: 1778 } }) }
   get posts(): List<Post> { return core.linked(this, "posts", Post) as List<Post> }
   set posts(value: List<Post>) { this.setProp("posts", value) }
 
   // - its "todos" is a list of todos
-  static { this.declareProp("todos", { itemType: "Todo", init: () => new List<Todo>({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1784, end: 1814 } }) }
+  static { this.declareProp("todos", { itemType: "Todo", init: () => new List<Todo>({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1780, end: 1810 } }) }
   get todos(): List<Todo> { return core.linked(this, "todos", Todo) as List<Todo> }
   set todos(value: List<Todo>) { this.setProp("todos", value) }
 
@@ -2345,25 +2345,25 @@ export class JsonplaceholderUser extends Thing {
     times: ["created", "modified"], select: ["name", "email", "posts", "todos"] }
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1557, end: 1584 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1553, end: 1580 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1557, end: 1584 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1553, end: 1580 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Todo extends Thing {
   // - its "user id" is a number
-  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1867, end: 1892 } })
+  @prop({ type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1862, end: 1887 } })
   accessor userId!: number
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1894, end: 1913 } })
+  @prop({ type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1889, end: 1908 } })
   accessor title!: string
 
   // - its "completed" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1915, end: 1943 } })
+  @prop({ type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1910, end: 1938 } })
   accessor completed!: boolean
 
   @drawn draw() {
@@ -2384,11 +2384,11 @@ export class Todo extends Thing {
   }
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1838, end: 1865 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1833, end: 1860 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in jsonplaceholder
-  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1838, end: 1865 } })
+  @prop({ type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1833, end: 1860 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -2471,13 +2471,13 @@ export class JsonplaceholderPage extends Thing {
   set newTodo(value: Todo) { this.setProp("newTodo", value) }
 
   /** Whose todos and posts these are:  the first person it has */
-  static { this.declareProp("person", { declaredAt: { path: "/JSONPlaceholder.spell", start: 588, end: 642 }, readsFrom: ["jsonplaceholder"] }) }
+  static { this.declareProp("person", { declaredAt: { path: "/JSONPlaceholder.spell", start: 525, end: 579 }, readsFrom: ["jsonplaceholder"] }) }
   get person() { return core.waitedValue(this, "person", async () => {
     return await core.savedThingWithId(JsonplaceholderUser, 1)
   }) }
 
   /** Theirs, from every todo */
-  static { this.declareProp("todos", { declaredAt: { path: "/JSONPlaceholder.spell", start: 672, end: 720 }, readsFrom: ["jsonplaceholder"] }) }
+  static { this.declareProp("todos", { declaredAt: { path: "/JSONPlaceholder.spell", start: 644, end: 692 }, readsFrom: ["jsonplaceholder"] }) }
   get todos() { return core.waitedValue(this, "todos", async () => {
     return await core.savedThings(Todo, { filter: { userId: 1 } })
   }) }
@@ -2567,35 +2567,35 @@ core.heading("Open-Meteo:  the weather to come, hour by hour, for anywhere on Ea
 
 export class Forecast extends Thing {
   // - its "latitude" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1322, end: 1348 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1320, end: 1346 } })
   accessor latitude!: number
 
   // - its "longitude" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1350, end: 1377 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1348, end: 1375 } })
   accessor longitude!: number
 
   // - its "generationtime ms" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1379, end: 1414 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1377, end: 1412 } })
   accessor generationtimeMs!: number
 
   // - its "utc offset seconds" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1416, end: 1452 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1414, end: 1450 } })
   accessor utcOffsetSeconds!: number
 
   // - its "timezone" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenMeteo.api.spell", start: 1454, end: 1476 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenMeteo.api.spell", start: 1452, end: 1474 } })
   accessor timezone!: string
 
   // - its "timezone abbreviation" is text
-  @prop({ type: "text", declaredAt: { path: "/OpenMeteo.api.spell", start: 1478, end: 1513 } })
+  @prop({ type: "text", declaredAt: { path: "/OpenMeteo.api.spell", start: 1476, end: 1511 } })
   accessor timezoneAbbreviation!: string
 
   // - its "elevation" is a number
-  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1515, end: 1542 } })
+  @prop({ type: "number", declaredAt: { path: "/OpenMeteo.api.spell", start: 1513, end: 1540 } })
   accessor elevation!: number
 
   // - its "hours" is a list of hours, stored as "hourly"
-  @prop({ itemType: "Hour", storedAs: "hourly", init: () => new List<Hour>({ instanceType: "Hour" }), declaredAt: { path: "/OpenMeteo.api.spell", start: 1544, end: 1594 } })
+  @prop({ itemType: "Hour", storedAs: "hourly", init: () => new List<Hour>({ instanceType: "Hour" }), declaredAt: { path: "/OpenMeteo.api.spell", start: 1542, end: 1592 } })
   accessor hours!: List<Hour>
 
   drawHourTable() {
@@ -2624,11 +2624,11 @@ export class Forecast extends Thing {
     times: ["created", "modified"], select: ["latitude", "longitude", "timezone", "hours"] }
 
   // - it lives in open meteo
-  @prop({ type: "date", declaredAt: { path: "/OpenMeteo.api.spell", start: 1298, end: 1320 } })
+  @prop({ type: "date", declaredAt: { path: "/OpenMeteo.api.spell", start: 1296, end: 1318 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in open meteo
-  @prop({ type: "date", declaredAt: { path: "/OpenMeteo.api.spell", start: 1298, end: 1320 } })
+  @prop({ type: "date", declaredAt: { path: "/OpenMeteo.api.spell", start: 1296, end: 1318 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -2705,13 +2705,13 @@ export class OpenMeteoPage extends Thing {
   }
 
   /** The city's, from Open-Meteo:  asked for by where it is, with no list of them all */
-  static { this.declareProp("forecasts", { declaredAt: { path: "/OpenMeteo.spell", start: 1012, end: 1139 }, readsFrom: ["open_meteo"] }) }
+  static { this.declareProp("forecasts", { declaredAt: { path: "/OpenMeteo.spell", start: 925, end: 1052 }, readsFrom: ["open_meteo"] }) }
   get forecasts() { return core.waitedValue(this, "forecasts", async () => {
     return await core.savedThings(Forecast, { filter: { latitude: this.city?.latitude, longitude: this.city?.longitude } })
   }, () => [this.city]) }
 
   /** Its one forecast:  Open-Meteo answers with one, for the nearest place it has */
-  static { this.declareProp("forecast", { declaredAt: { path: "/OpenMeteo.spell", start: 1222, end: 1271 }, readsFrom: ["open_meteo"] }) }
+  static { this.declareProp("forecast", { declaredAt: { path: "/OpenMeteo.spell", start: 1140, end: 1189 }, readsFrom: ["open_meteo"] }) }
   get forecast() {
     return core.getItemAt(this.forecasts, 0)
   }
@@ -2807,233 +2807,233 @@ core.heading("The Met Museum:  every artwork in its collection, and a search of 
 
 export class Artwork extends Thing {
   // - its "highlight" is yes or no, stored as "isHighlight"
-  @prop({ type: "choice", storedAs: "isHighlight", declaredAt: { path: "/MetMuseum.api.spell", start: 1519, end: 1572 } })
+  @prop({ type: "choice", storedAs: "isHighlight", declaredAt: { path: "/MetMuseum.api.spell", start: 1517, end: 1570 } })
   accessor highlight!: boolean
 
   // - its "accession number" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1574, end: 1604 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1572, end: 1602 } })
   accessor accessionNumber!: string
 
   // - its "accession year" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 1606, end: 1638 } })
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 1604, end: 1636 } })
   accessor accessionYear!: number
 
   // - its "public domain" is yes or no, stored as "isPublicDomain"
-  @prop({ type: "choice", storedAs: "isPublicDomain", declaredAt: { path: "/MetMuseum.api.spell", start: 1640, end: 1700 } })
+  @prop({ type: "choice", storedAs: "isPublicDomain", declaredAt: { path: "/MetMuseum.api.spell", start: 1638, end: 1698 } })
   accessor publicDomain!: boolean
 
   /** an address */
   // - its "primary image" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1702, end: 1729 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1700, end: 1727 } })
   accessor primaryImage!: string
 
   /** an address */
   // - its "primary image small" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1746, end: 1779 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1744, end: 1777 } })
   accessor primaryImageSmall!: string
 
   // - its "additional images" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/MetMuseum.api.spell", start: 1796, end: 1837 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/MetMuseum.api.spell", start: 1794, end: 1835 } })
   accessor additionalImages!: List<string>
 
   // - its "constituents" is a list of constituents
-  @prop({ itemType: "Constituent", init: () => new List<Constituent>({ instanceType: "Constituent" }), declaredAt: { path: "/MetMuseum.api.spell", start: 1839, end: 1883 } })
+  @prop({ itemType: "Constituent", init: () => new List<Constituent>({ instanceType: "Constituent" }), declaredAt: { path: "/MetMuseum.api.spell", start: 1837, end: 1881 } })
   accessor constituents!: List<Constituent>
 
   // - its "department" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1885, end: 1909 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1883, end: 1907 } })
   accessor department!: string
 
   // - its "object name" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1911, end: 1936 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1909, end: 1934 } })
   accessor objectName!: string
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1938, end: 1957 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1936, end: 1955 } })
   accessor title!: string
 
   // - its "culture" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1959, end: 1980 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1957, end: 1978 } })
   accessor culture!: string
 
   // - its "period" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1982, end: 2002 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 1980, end: 2000 } })
   accessor period!: string
 
   // - its "dynasty" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2004, end: 2025 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2002, end: 2023 } })
   accessor dynasty!: string
 
   // - its "reign" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2027, end: 2046 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2025, end: 2044 } })
   accessor reign!: string
 
   // - its "portfolio" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2048, end: 2071 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2046, end: 2069 } })
   accessor portfolio!: string
 
   // - its "artist role" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2073, end: 2098 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2071, end: 2096 } })
   accessor artistRole!: string
 
   // - its "artist prefix" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2100, end: 2127 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2098, end: 2125 } })
   accessor artistPrefix!: string
 
   // - its "artist display name" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2129, end: 2162 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2127, end: 2160 } })
   accessor artistDisplayName!: string
 
   // - its "artist display bio" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2164, end: 2196 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2162, end: 2194 } })
   accessor artistDisplayBio!: string
 
   // - its "artist suffix" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2198, end: 2225 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2196, end: 2223 } })
   accessor artistSuffix!: string
 
   // - its "artist alpha sort" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2227, end: 2258 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2225, end: 2256 } })
   accessor artistAlphaSort!: string
 
   // - its "artist nationality" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2260, end: 2292 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2258, end: 2290 } })
   accessor artistNationality!: string
 
   // - its "artist begin date" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2294, end: 2329 } })
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2292, end: 2327 } })
   accessor artistBeginDate!: number
 
   // - its "artist end date" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2331, end: 2364 } })
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2329, end: 2362 } })
   accessor artistEndDate!: number
 
   // - its "artist gender" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2366, end: 2393 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2364, end: 2391 } })
   accessor artistGender!: string
 
   /** an address */
   // - its "artist wikidata url" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2395, end: 2428 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2393, end: 2426 } })
   accessor artistWikidataUrl!: string
 
   /** an address */
   // - its "artist ulan url" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2445, end: 2474 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2443, end: 2472 } })
   accessor artistUlanUrl!: string
 
   // - its "object date" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2491, end: 2516 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2489, end: 2514 } })
   accessor objectDate!: string
 
   // - its "object begin date" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2518, end: 2553 } })
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2516, end: 2551 } })
   accessor objectBeginDate!: number
 
   // - its "object end date" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2555, end: 2588 } })
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 2553, end: 2586 } })
   accessor objectEndDate!: number
 
   // - its "medium" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2590, end: 2610 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2588, end: 2608 } })
   accessor medium!: string
 
   // - its "dimensions" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2612, end: 2636 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2610, end: 2634 } })
   accessor dimensions!: string
 
   // - its "measurements" is a list of measurements
-  @prop({ itemType: "Measurement", init: () => new List<Measurement>({ instanceType: "Measurement" }), declaredAt: { path: "/MetMuseum.api.spell", start: 2638, end: 2682 } })
+  @prop({ itemType: "Measurement", init: () => new List<Measurement>({ instanceType: "Measurement" }), declaredAt: { path: "/MetMuseum.api.spell", start: 2636, end: 2680 } })
   accessor measurements!: List<Measurement>
 
   // - its "credit line" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2684, end: 2709 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2682, end: 2707 } })
   accessor creditLine!: string
 
   // - its "geography type" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2711, end: 2739 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2709, end: 2737 } })
   accessor geographyType!: string
 
   // - its "city" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2741, end: 2759 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2739, end: 2757 } })
   accessor city!: string
 
   // - its "state" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2761, end: 2780 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2759, end: 2778 } })
   accessor state!: string
 
   // - its "county" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2782, end: 2802 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2780, end: 2800 } })
   accessor county!: string
 
   // - its "country" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2804, end: 2825 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2802, end: 2823 } })
   accessor country!: string
 
   // - its "region" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2827, end: 2847 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2825, end: 2845 } })
   accessor region!: string
 
   // - its "subregion" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2849, end: 2872 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2847, end: 2870 } })
   accessor subregion!: string
 
   // - its "locale" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2874, end: 2894 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2872, end: 2892 } })
   accessor locale!: string
 
   // - its "locus" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2896, end: 2915 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2894, end: 2913 } })
   accessor locus!: string
 
   // - its "excavation" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2917, end: 2941 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2915, end: 2939 } })
   accessor excavation!: string
 
   // - its "river" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2943, end: 2962 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2941, end: 2960 } })
   accessor river!: string
 
   // - its "classification" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2964, end: 2992 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2962, end: 2990 } })
   accessor classification!: string
 
   // - its "rights and reproduction" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2994, end: 3031 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 2992, end: 3029 } })
   accessor rightsAndReproduction!: string
 
   // - its "link resource" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 3033, end: 3060 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 3031, end: 3058 } })
   accessor linkResource!: string
 
   // - its "metadata date" is a date
-  @prop({ type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 3062, end: 3091 } })
+  @prop({ type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 3060, end: 3089 } })
   accessor metadataDate!: Date
 
   // - its "repository" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 3093, end: 3117 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 3091, end: 3115 } })
   accessor repository!: string
 
   /** an address */
   // - its "object url" is text, stored as "objectURL"
-  @prop({ type: "text", storedAs: "objectURL", declaredAt: { path: "/MetMuseum.api.spell", start: 3119, end: 3166 } })
+  @prop({ type: "text", storedAs: "objectURL", declaredAt: { path: "/MetMuseum.api.spell", start: 3117, end: 3164 } })
   accessor objectUrl!: string
 
   // - its "tags" is a list of tags
-  @prop({ itemType: "Tag", init: () => new List<Tag>({ instanceType: "Tag" }), declaredAt: { path: "/MetMuseum.api.spell", start: 3183, end: 3211 } })
+  @prop({ itemType: "Tag", init: () => new List<Tag>({ instanceType: "Tag" }), declaredAt: { path: "/MetMuseum.api.spell", start: 3181, end: 3209 } })
   accessor tags!: List<Tag>
 
   /** an address */
   // - its "object wikidata url" is text
-  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 3213, end: 3246 } })
+  @prop({ type: "text", declaredAt: { path: "/MetMuseum.api.spell", start: 3211, end: 3244 } })
   accessor objectWikidataUrl!: string
 
   // - its "timeline work" is yes or no, stored as "isTimelineWork"
-  @prop({ type: "choice", storedAs: "isTimelineWork", declaredAt: { path: "/MetMuseum.api.spell", start: 3263, end: 3323 } })
+  @prop({ type: "choice", storedAs: "isTimelineWork", declaredAt: { path: "/MetMuseum.api.spell", start: 3261, end: 3321 } })
   accessor timelineWork!: boolean
 
   // - its "gallery number" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 3325, end: 3357 } })
+  @prop({ type: "number", declaredAt: { path: "/MetMuseum.api.spell", start: 3323, end: 3355 } })
   accessor galleryNumber!: number
 
   @drawn draw() {
@@ -3055,8 +3055,8 @@ export class Artwork extends Thing {
     } else if (this.title) return <slot name="about_card">{this.drawAboutCard()}</slot>
   }
 
-  // What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture
   drawAboutCard() {
+    // What the Met knows of it:  the back of a picture's card, or the whole card of one with no picture
     return (
       <ui-card fluid={true} part="about_card">
         <ui-content>
@@ -3081,11 +3081,11 @@ export class Artwork extends Thing {
     times: ["created", "modified"], select: ["primaryImageSmall", "department", "title", "artistDisplayName", "objectDate", "medium", "dimensions", "creditLine", "city", "state", "region", "objectUrl"] }
 
   // - it lives in met museum
-  @prop({ type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 1495, end: 1517 } })
+  @prop({ type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 1493, end: 1515 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in met museum
-  @prop({ type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 1495, end: 1517 } })
+  @prop({ type: "date", declaredAt: { path: "/MetMuseum.api.spell", start: 1493, end: 1515 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -3206,7 +3206,7 @@ export class MetMuseumPage extends Thing {
   }
 
   /** What the Met finds for the search, looking at all of each artwork:  ids only, each read as it's drawn */
-  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spell", start: 627, end: 675 }, readsFrom: ["met_museum"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/MetMuseum.spell", start: 519, end: 567 }, readsFrom: ["met_museum"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     return await core.savedThings(Artwork, { search: { "*": this.search } })
   }, () => [this.search]) }
@@ -3288,99 +3288,99 @@ core.heading("REST Countries:  every country in the world, its flag, its capital
 
 export class Country extends Thing {
   // - its "name" is a name
-  @prop({ type: "Name", declaredAt: { path: "/RestCountries.api.spell", start: 1132, end: 1152 } })
+  @prop({ type: "Name", declaredAt: { path: "/RestCountries.api.spell", start: 1130, end: 1150 } })
   accessor name!: Name
 
   // - its "tld" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1154, end: 1181 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1152, end: 1179 } })
   accessor tld!: List<string>
 
   // - its "cca2" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1183, end: 1201 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1181, end: 1199 } })
   accessor cca2!: string
 
   // - its "ccn3" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1203, end: 1221 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1201, end: 1219 } })
   accessor ccn3!: string
 
   // - its "cca3" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1223, end: 1241 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1221, end: 1239 } })
   accessor cca3!: string
 
   // - its "cioc" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1243, end: 1261 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1241, end: 1259 } })
   accessor cioc!: string
 
   // - its "independent" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1263, end: 1293 } })
+  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1261, end: 1291 } })
   accessor independent!: boolean
 
   // - its "status" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1295, end: 1315 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1293, end: 1313 } })
   accessor status!: string
 
   // - its "un member" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1317, end: 1345 } })
+  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1315, end: 1343 } })
   accessor unMember!: boolean
 
   // - its "un regional group" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1347, end: 1378 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1345, end: 1376 } })
   accessor unRegionalGroup!: string
 
   // - its "currencies" is a list of currencies
-  @prop({ itemType: "Currency", init: () => new List<Currency>({ instanceType: "Currency" }), declaredAt: { path: "/RestCountries.api.spell", start: 1380, end: 1420 } })
+  @prop({ itemType: "Currency", init: () => new List<Currency>({ instanceType: "Currency" }), declaredAt: { path: "/RestCountries.api.spell", start: 1378, end: 1418 } })
   accessor currencies!: List<Currency>
 
   // - its "idd" is an idd
-  @prop({ type: "Idd", declaredAt: { path: "/RestCountries.api.spell", start: 1422, end: 1441 } })
+  @prop({ type: "Idd", declaredAt: { path: "/RestCountries.api.spell", start: 1420, end: 1439 } })
   accessor idd!: Idd
 
   // - its "capital" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1443, end: 1474 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1441, end: 1472 } })
   accessor capital!: List<string>
 
   // - its "alt spellings" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1476, end: 1513 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1474, end: 1511 } })
   accessor altSpellings!: List<string>
 
   // - its "region" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1515, end: 1535 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1513, end: 1533 } })
   accessor region!: string
 
   // - its "subregion" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1537, end: 1560 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1535, end: 1558 } })
   accessor subregion!: string
 
   // - its "languages" is a list of languages
-  @prop({ itemType: "Language", init: () => new List<Language>({ instanceType: "Language" }), declaredAt: { path: "/RestCountries.api.spell", start: 1562, end: 1600 } })
+  @prop({ itemType: "Language", init: () => new List<Language>({ instanceType: "Language" }), declaredAt: { path: "/RestCountries.api.spell", start: 1560, end: 1598 } })
   accessor languages!: List<Language>
 
   // - its "translations" is a list of translations
-  @prop({ itemType: "Translation", init: () => new List<Translation>({ instanceType: "Translation" }), declaredAt: { path: "/RestCountries.api.spell", start: 1602, end: 1646 } })
+  @prop({ itemType: "Translation", init: () => new List<Translation>({ instanceType: "Translation" }), declaredAt: { path: "/RestCountries.api.spell", start: 1600, end: 1644 } })
   accessor translations!: List<Translation>
 
   // - its "latlng" is a list of numbers
-  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/RestCountries.api.spell", start: 1648, end: 1681 } })
+  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/RestCountries.api.spell", start: 1646, end: 1679 } })
   accessor latlng!: List<number>
 
   // - its "landlocked" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1683, end: 1712 } })
+  @prop({ type: "choice", declaredAt: { path: "/RestCountries.api.spell", start: 1681, end: 1710 } })
   accessor landlocked!: boolean
 
   // - its "borders" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1714, end: 1745 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/RestCountries.api.spell", start: 1712, end: 1743 } })
   accessor borders!: List<string>
 
   // - its "area" is a number
-  @prop({ type: "number", declaredAt: { path: "/RestCountries.api.spell", start: 1747, end: 1769 } })
+  @prop({ type: "number", declaredAt: { path: "/RestCountries.api.spell", start: 1745, end: 1767 } })
   accessor area!: number
 
   // - its "flag" is text
-  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1771, end: 1789 } })
+  @prop({ type: "text", declaredAt: { path: "/RestCountries.api.spell", start: 1769, end: 1787 } })
   accessor flag!: string
 
   // - its "demonyms" is a demonym
-  @prop({ type: "Demonym", declaredAt: { path: "/RestCountries.api.spell", start: 1791, end: 1818 } })
+  @prop({ type: "Demonym", declaredAt: { path: "/RestCountries.api.spell", start: 1789, end: 1816 } })
   accessor demonyms!: Demonym
 
   static savedIn = {
@@ -3389,11 +3389,11 @@ export class Country extends Thing {
     times: ["created", "modified"], select: ["name", "currencies", "capital", "region", "languages", "translations", "flag"] }
 
   // - it lives in rest countries
-  @prop({ type: "date", declaredAt: { path: "/RestCountries.api.spell", start: 1104, end: 1130 } })
+  @prop({ type: "date", declaredAt: { path: "/RestCountries.api.spell", start: 1102, end: 1128 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in rest countries
-  @prop({ type: "date", declaredAt: { path: "/RestCountries.api.spell", start: 1104, end: 1130 } })
+  @prop({ type: "date", declaredAt: { path: "/RestCountries.api.spell", start: 1102, end: 1128 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -3555,7 +3555,7 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 776, end: 868 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 695, end: 787 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
     return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item: Country) => item.name?.common)
   }, () => [this.region]) }
@@ -3610,8 +3610,8 @@ export class RestCountriesPage extends Thing {
     )
   }
 
-  // A row a country:  its flag and name, its name in the language picked, its capital, its money and its languages;  each of those keyed by a code, `EUR`, `fra`, a list of things with that code
   drawCountriesTable() {
+    // A row a country:  its flag and name, its name in the language picked, its capital, its money and its languages;  each of those keyed by a code, `EUR`, `fra`, a list of things with that code
     return core.drawRead(() => this.countries, (country: Country) => <>
       <ui-cell data-column="Flag" align="center">
         <ui-text size="big">{country.flag}</ui-text>
@@ -3710,8 +3710,8 @@ export class PublicServer extends App {
     )
   }
 
-  // The tab's page:  its own drawing, so its `if` picks just one, and only that one asks its server
   drawServer() {
+    // The tab's page:  its own drawing, so its `if` picks just one, and only that one asks its server
     if (this.tab === "github") return core.drawThing(this.github)
     else if (this.tab === "library") return core.drawThing(this.library)
     else if (this.tab === "jsonplaceholder") return core.drawThing(new JsonplaceholderPage())
