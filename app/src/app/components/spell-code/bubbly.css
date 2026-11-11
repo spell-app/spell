@@ -563,7 +563,7 @@
   /* room outside a quoted input's marks, for the curly ones drawn wider than the file's own */
   --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
-  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 5px);
+  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 2px);
 
   /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
   position: relative;
