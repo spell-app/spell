@@ -85,7 +85,7 @@
   --bubbly-inner-top: 5px;
   --bubbly-block-inner-corner: 8px;
   --bubbly-foot-width: 26px;
-  --bubbly-foot-height: 4px;
+  --bubbly-foot-height: 6px;
 
   /****** inputs:  what a person typed, white on its band ******/
   /* room either side of an input, between it and the words or marks beside it */
@@ -549,7 +549,7 @@
   /* room outside a quoted input's marks, for the curly ones drawn wider than the file's own */
   --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
-  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 5px);
+  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 3px);
 
   /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
   position: relative;
