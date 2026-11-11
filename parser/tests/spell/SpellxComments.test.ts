@@ -69,7 +69,7 @@ describe("spellx comments, `<!-- ... -->`", () => {
   })
 
   test("written as code spell:  a `//` line for each of its lines", () => {
-    expect(SX.CodeSpellWriter.write(SPELLX.join("\n"), { path: "/Card.spell" })).toBe(`${SPELL.join("\n")}\n`)
+    expect(SX.CodeSpellWriter.write(SPELLX.join("\n"), { shortcuts: "spelled out", path: "/Card.spell" })).toBe(`${SPELL.join("\n")}\n`)
   })
 
   test("and back:  a drawing's `//` lines as `<!-- -->`, a member's as its description", () => {

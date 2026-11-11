@@ -61,7 +61,7 @@ describe("a spellx page that draws its body", () => {
   })
 
   test("written as code spell, in memory, it compiles to the same program", () => {
-    const written = SX.CodeSpellWriter.write(COUNTER, {
+    const written = SX.CodeSpellWriter.write(COUNTER, { shortcuts: "spelled out",
       path: "/Counter.spell",
       // the project's own views, as the editor reads them off the parse
       componentTag: (word) =>
@@ -161,7 +161,7 @@ describe("a spellx page that draws its body", () => {
     })
 
     test("written as code spell and back as spellx, it keeps its flag", () => {
-      const written = SX.CodeSpellWriter.write(COUNTER, { path: "/Counter.spell" })
+      const written = SX.CodeSpellWriter.write(COUNTER, { shortcuts: "spelled out", path: "/Counter.spell" })
       const [file] = parseSpellProject([{ path: "/Counter.spell", contents: written }]).files
       const back = SX.SpellxWriter.write({ text: written, match: file!.match!, scope: file!.scope! })
       expect(back).toContain('<page "counter notebook" notebook>')
@@ -173,7 +173,7 @@ describe("a spellx page that draws its body", () => {
   describe("written as code spell and back, its drawing is its own body again", () => {
     /** `text` as code spell, its own views' tags as the editor reads them, then back as spellx. */
     const thereAndBack = (text: string, counterTag = "test-project-counter-notebook-counter") => {
-      const written = SX.CodeSpellWriter.write(text, {
+      const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out",
         path: "/Counter.spell",
         componentTag: (word) => (word === "counter" ? counterTag : SP.ComponentPacks.tagFor(word, "en"))
       })
@@ -579,7 +579,7 @@ describe("a spellx page that draws its body", () => {
     expect(code).toContain('h("ui-button", { color: "primary" }, "Go"),')
     expect(code).toContain('h("div", { class: "note" }, "hi"),')
     expect(code).toContain('h("spell-example", { name: "a button" }, h("ui-button", "Go"))')
-    const written = SX.CodeSpellWriter.write(text, { path: "/Raw.spell" })
+    const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out", path: "/Raw.spell" })
     expect(written).toContain('\t\t<ui-button color="primary">Go</ui-button>\n\t\t<div class="note">hi</div>\n')
     expect(compiled(written, "/Raw.spell").code).toBe(code)
     // a cell of its own in the chunk tree
@@ -620,7 +620,7 @@ describe("a spellx page that draws its body", () => {
       ].join("\n")
     )
     expect(code).not.toContain('h("html"')
-    const written = SX.CodeSpellWriter.write(text, { path: "/Avatar.spell" })
+    const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out", path: "/Avatar.spell" })
     expect(compiled(written, "/Avatar.spell").code).toBe(code)
   })
 
@@ -658,7 +658,7 @@ describe("a spellx page that draws its body", () => {
     expect(errors).toEqual([])
     expect(code).toContain('h("script", { type: "application/json" }, "{\\"days\\": [1, 3, 5]}\\n[x]")')
     expect(code).toContain('h("style", ":root { --brand: red; }")')
-    const written = SX.CodeSpellWriter.write(text, { path: "/Script.spell" })
+    const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out", path: "/Script.spell" })
     expect(compiled(written, "/Script.spell").code).toBe(code)
   })
 
@@ -688,7 +688,7 @@ describe("a spellx page that draws its body", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const written = SX.CodeSpellWriter.write(text, { path: "/Inline.spell" })
+    const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out", path: "/Inline.spell" })
     expect(written).toContain("<ui-segment><ui-text>B</ui-text> <ui-text>C</ui-text></ui-segment>")
     expect(compiled(written, "/Inline.spell").code).toBe(compiled(text, "/Inline.spellml").code)
   })
@@ -789,7 +789,7 @@ describe("a spellx page that draws its body", () => {
     })
 
     test("written as code spell, each section is written out, and compiles to the same program", () => {
-      const written = SX.CodeSpellWriter.write(PAGE, { path: "/Button.spell" })
+      const written = SX.CodeSpellWriter.write(PAGE, { shortcuts: "spelled out", path: "/Button.spell" })
       expect(written).toContain(
         [
           '\t\t<ui-section label="Using it" sticky="stack" collapsible dividing level="2">',
@@ -823,7 +823,7 @@ describe("a spellx page that draws its body", () => {
       const look = 'pegado: "apilado", plegable: true, divisorio: true, nivel: "2"'
       expect(code).toContain(`h("es-seccion", { etiqueta: "Úsalo", ${look} },\n        h("ui-markdown", "Escríbelo`)
       expect(code).toContain(`h("es-seccion", { etiqueta: "Eventos", ${look} },\n        h("ui-markdown", "Un clic.")`)
-      const written = SX.CodeSpellWriter.write(text, { path: "/Boton.es.spell" })
+      const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out", path: "/Boton.es.spell" })
       expect(compiled(written, "/Boton.es.spell").code).toBe(code)
     })
 
@@ -832,7 +832,7 @@ describe("a spellx page that draws its body", () => {
       const { code, errors } = compiled(text, "/Odd.spell")
       expect(errors).toEqual([])
       expect(code).toContain("label: () => `The “[x]” bit`")
-      const written = SX.CodeSpellWriter.write(text, { path: "/Odd.spell" })
+      const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out", path: "/Odd.spell" })
       expect(compiled(written, "/Odd.spell").code).toBe(code)
     })
 
@@ -843,7 +843,7 @@ describe("a spellx page that draws its body", () => {
       expect(code).toContain(
         `return h("ui-section", { label: "Us", ${LOOK} },\n      h("ui-markdown", "We make things.")`
       )
-      const written = SX.CodeSpellWriter.write(text, { path: "/About.spell" })
+      const written = SX.CodeSpellWriter.write(text, { shortcuts: "spelled out", path: "/About.spell" })
       expect(compiled(written, "/About.spell").code).toBe(code)
     })
   })

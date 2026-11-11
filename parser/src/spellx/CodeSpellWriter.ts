@@ -13,9 +13,11 @@ import { SP } from "spell/parser/spell"
  *   - closers:  nothing, as code spell's indentation already says where a body ends
  * - Not a step in the compile:  a `.spell` file compiles from its own parse (Q70);
  *   this is what it MEANS, in the form people already read.
- * - A drawing's markup as code spell writes it:
- *   a bare component name as its tag (`<text>` => `<ui-text>`, through `componentTag`),
- *   each `</>` naming what it closes.
+ * - A drawing's markup as written (epic `language` P45):  plain Spell reads the tag form's shortcuts too, so
+ *   `<text>` and `</>` stay as they are.
+ *   - `shortcuts: "spelled out"`, for a writer that means to go back to tags (`spell translate`):
+ *     a bare component name as its tag (`<text>` => `<ui-text>`, through `componentTag`), each `</>` naming what it
+ *     closes.
  * - The sections of a page that draws its body, as its twin draws them (epic `notebook` P3, J1):
  *   - a `##` heading's `<ui-section>`, written out round what it holds
  *   - a written section's added look, after its own attributes
@@ -42,11 +44,14 @@ export class CodeSpellWriter {
   static writeWithProse(text: string, options: CodeSpellWriteOptions = {}): { text: string; proseLines: Set<number> } {
     const language = options.language ?? SP.Language.forFile(options.path)
     const parser = language.parser.clone({ module: "code spell writer", form: "spellx" } as P.ParserProps)
-    const componentTag =
-      options.componentTag ?? ((word: string) => SP.ComponentPacks.tagFor(word, language.lang, options.packs))
+    // its shortcuts as written, unless it's asked to spell them out:  no tag stands for a bare name then
+    const spellsOut = options.shortcuts === "spelled out"
+    const componentTag = !spellsOut
+      ? () => undefined
+      : (options.componentTag ?? ((word: string) => SP.ComponentPacks.tagFor(word, language.lang, options.packs)))
     // the language's example word is a block of Spell's own too (`<example>`, `<ejemplo>`):  never `<ui-example>`
     const blocks = new Set([...SPELL_BLOCK_TAGS, language.words.exampleTag])
-    const writer = new CodeSpellWriter(parser as SP.SpellParser, text, componentTag, blocks)
+    const writer = new CodeSpellWriter(parser as SP.SpellParser, text, componentTag, blocks, spellsOut)
     const { tokenizer } = writer.parser
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     writer.writeItems(root?.tokens ?? [], 0, "file")
@@ -128,7 +133,9 @@ export class CodeSpellWriter {
     /** the tag a bare component name stands for, if any */
     readonly componentTag: (word: string, start: number) => string | undefined,
     /** Spell's own block words in a drawing, written as they are (`SPELL_BLOCK_TAGS`, the language's example word) */
-    readonly blocks: ReadonlySet<string>
+    readonly blocks: ReadonlySet<string>,
+    /** does it spell the shortcuts out:  each `</>` naming what it closes (`CodeSpellWriteOptions.shortcuts`)? */
+    readonly spellsOut: boolean
   ) {}
 
   /** Write `items`, a block's lines and blocks, `depth` tabs in;  `where` says whether a tag there is bulleted. */
@@ -158,7 +165,12 @@ export class CodeSpellWriter {
       // a `<for>`'s riders:  under the loop, after its body, as code spell writes them (`show them in: ...`)
       const riders = twin.body?.tokens.slice(0, twin.riders ?? 0) ?? []
       if (twin.body) this.writeItems(twin.body.tokens.slice(riders.length), depth + 1, inner)
-      if (riders.length) this.writeItems(riders, depth, inner)
+      if (riders.length) {
+        this.writeItems(riders, depth, inner)
+        // a blank line after them:  markup on the next line would join the last rider's, as one run of markup
+        const next = items.slice(index + 1).find((each) => !isCloserLine(each))
+        if (next instanceof P.LineToken && next.tokens.some((token) => token instanceof P.JSXToken)) this.lines.push("")
+      }
     }
   }
 
@@ -194,7 +206,7 @@ export class CodeSpellWriter {
     // a page's stories, the block the twin made of its note (epic `mockup` P6):  its lines as written, a tab in
     if (written.length === 1 && isStoriesBlock(only)) {
       this.lines.push(`${indent}${bullet}<${only.tagName}>`)
-      for (const line of `${only.raw}`.split("\n")) this.lines.push(line ? `${indent}\t${line}` : "")
+      for (const line of this.storiesLinesOf(only)) this.lines.push(line ? `${indent}\t${line}` : "")
       this.lines.push(`${indent}</${only.tagName}>`)
       return
     }
@@ -210,6 +222,19 @@ export class CodeSpellWriter {
     this.lines.push(
       `${indent}${bullet}${markup !== undefined ? CodeSpellWriter.colonOf(words) + markup : CodeSpellWriter.colonOf(CodeSpellWriter.textOf(written))}`
     )
+  }
+
+  /**
+   * A page's stories block's lines, as the file has them:  its blank lines kept, each line less the first one's indent.
+   * - From the file's text, from its first story's line to its last's:  the block's own text is the twin's.
+   */
+  private storiesLinesOf(stories: P.JSXElementToken): string[] {
+    // its text starts at its first story;  its end tag stands where its last story ends
+    const [text, endTag] = stories.children ?? []
+    const from = this.text.lastIndexOf("\n", text!.start - 1) + 1
+    const lines = this.text.slice(from, endTag!.start).split("\n")
+    const indent = /^[ \t]*/.exec(lines[0]!)![0]
+    return lines.map((line) => (line.startsWith(indent) ? line.slice(indent.length) : line.trimStart()).trimEnd())
   }
 
   /**
@@ -273,7 +298,7 @@ export class CodeSpellWriter {
         edits.push({ start: after, end: after, text: CodeSpellWriter.attributesOf(added) })
       }
       const closer = token.isUnaryTag ? undefined : token.raw?.match(/<\/[^>]*>$/)?.[0]
-      if (closer && closer !== `</${name}>`) {
+      if (this.spellsOut && closer && closer !== `</${name}>`) {
         edits.push({ start: token.end - closer.length, end: token.end, text: `</${name}>` })
       }
     })
@@ -364,6 +389,11 @@ export class CodeSpellWriter {
   }
 }
 
+/** Is `item` a line holding only a closer, `</for>`, which code spell writes as nothing? */
+function isCloserLine(item: P.Token): boolean {
+  return item instanceof P.LineToken && item.tokens.every((token) => token instanceof SP.SpellxCloserToken)
+}
+
 /** Is `token` a line's comment, written as one of its own:  prose, or a line of a `<!-- ... -->` comment? */
 function isCommentLike(token: P.Token | undefined): boolean {
   return token instanceof SP.SpellxProseToken || token instanceof SP.SpellxCommentToken
@@ -418,4 +448,11 @@ export type CodeSpellWriteOptions = {
    * - `start`:  where its element starts in the file, to find its match by
    */
   componentTag?: (word: string, start: number) => string | undefined
+  /**
+   * The drawing's shortcuts (epic `language` P45):
+   * - `"kept"`, the default:  as written, `<text>`, `</>`, which plain Spell reads too
+   * - `"spelled out"`:  each bare name its tag, each `</>` naming what it closes, `<ui-text>...</ui-text>`;
+   *   for a writer that goes back to tags by the names (`spell translate`)
+   */
+  shortcuts?: "kept" | "spelled out"
 }
