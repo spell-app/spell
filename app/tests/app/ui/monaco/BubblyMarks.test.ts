@@ -128,9 +128,18 @@ describe("bubbly.css", () => {
     for (const each of classes) expect(sheet, each).toContain(`.${each}`)
   })
 
-  test("Monaco's own rules are one marked section, at its end", () => {
-    const marker = "Monaco's own rules (epic `language` P50)"
+  test("the editor's rules sit beside the page's, never doubled;  what only the editor has, one section at its end", () => {
+    // each difference right after its page rule, inside `.bubbly`
+    expect(sheet).not.toContain(".bubbly.bubbly-monaco")
+    expect(sheet).not.toContain(".view-line .bubbly-quote-mark")
+    const quoteMark = sheet.indexOf(".bubbly-quote-close::after {")
+    expect(sheet.indexOf("&.bubbly-monaco {", quoteMark)).toBeLessThan(
+      sheet.indexOf(":is(.bubbly-head, .bubbly-pill).bubbly-ends-input")
+    )
+    // what has no page twin:  one marked section, the last in `.bubbly`
+    const marker = "what only the editor has (epic `language` P50)"
     expect(sheet.split(marker)).toHaveLength(2)
-    expect(sheet.indexOf(marker)).toBeGreaterThan(sheet.indexOf(".bubbly-caption"))
+    expect(sheet.indexOf(marker)).toBeGreaterThan(sheet.indexOf(".bubbly-taghead {"))
+    expect(sheet.indexOf(marker)).toBeLessThan(sheet.indexOf(".bubbly-caption"))
   })
 })
