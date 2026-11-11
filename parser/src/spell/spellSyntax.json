@@ -5874,6 +5874,21 @@
                   "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color}",
+              "example": "a \"films page\" is a page\ngalaxy guide is a site in the cloud:\n\tgroup \"Films\", color blue\n\tit has a films page at \"/films\"",
+              "outputs": {
+                "js": {
+                  "code": "export class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    group: \"Films\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "ts": {
+                  "code": "export class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    group: \"Films\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "py": {
+                  "code": "class FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [{\"name\": \"films page\", \"page\": \"FilmsPage\", \"address\": \"/films\", \"group\": \"Films\"}]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

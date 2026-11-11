@@ -15,7 +15,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - Compiles to nothing:  a group says how a template is laid out for people, not what it does.
  * - Only in a template's outline:  `{type:subject_implied}` is the template its line is in.
  */
-export class DefineGroup extends SpellStatement<"type|group"> {
+export class DefineGroup extends SpellStatement<"type|group|color?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 
