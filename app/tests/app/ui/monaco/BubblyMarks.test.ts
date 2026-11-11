@@ -70,6 +70,23 @@ describe("BubblyMarks.of()", () => {
     expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-quote bubbly-room-before" })
   })
 
+  test("room before each head line's words:  before its indent's last tab, or its first word at the top level", () => {
+    const lines = CARD.split("\n")
+    const heads = marked()
+      .marks.filter((mark) => mark.options.before?.inlineClassName === "bubbly-room bubbly-room-head")
+      .map(({ range, options }) => {
+        expect(options.before!.content).toBe("    ")
+        return `${lines[range.startLineNumber - 1]!.trim()} @${range.startColumn}-${range.endColumn}`
+      })
+    expect(heads).toEqual([
+      'a "card" is a draggable two sided view @1-1',
+      'group "Rank" @1-2',
+      'its "rank" is one of ace, jack, queen, king @1-2',
+      "to draw its front @1-2",
+      "if it is face up @2-3"
+    ])
+  })
+
   test("its shapes:  a band per declaration and per control line with steps, pills on what was typed", () => {
     expect(shapesOf(marked())).toEqual([
       'thing:  a "card" is a draggable two sided view',

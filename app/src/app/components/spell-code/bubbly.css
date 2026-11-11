@@ -81,6 +81,8 @@
   /* every band's words start this far in from its round end, at any level */
   --bubbly-pill-pad-left: 6.6px;
   --bubbly-pill-pad-right: 10px;
+  /* in the editor, a head line's words this much further in than the lines under it, its band where it was (Owen) */
+  --bubbly-head-left-shift: 12px;
 
   /****** a body:  the gutter down its left, its white, the foot under it ******/
   --bubbly-gutter: 4px;
@@ -646,6 +648,10 @@
     /* outside a quoted input's marks:  half the page's, as the file's own `"` takes room of its own */
     .bubbly-room-quote {
       width: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
+    }
+    /* before a head line's words:  further into their band than the lines under it */
+    .bubbly-room-head {
+      width: calc(var(--bubbly-head-left-shift) * var(--bubbly-monaco-scale));
     }
     /* ... before an opening one:  half that again, so `its` sits close to its quote (Owen) */
     .bubbly-room-quote.bubbly-room-before {

@@ -22,8 +22,8 @@ import type { monaco } from "./monaco"
  ****************/
 export class BubblyMarks {
   /** `drawing`'s marks and shapes. */
-  static of(drawing: SP.BubblyDrawing): BubblyMarks {
-    return new BubblyMarks(drawing)
+  static of(drawing: SP.BubblyDrawing, tabSize = 4): BubblyMarks {
+    return new BubblyMarks(drawing, tabSize)
   }
 
   /** The decorations to set, in order:  a shape names its place by an index into them. */
@@ -35,7 +35,14 @@ export class BubblyMarks {
   /** Where each line starts in the drawing's text. */
   private readonly lineStarts: number[] = []
 
-  private constructor(private readonly drawing: SP.BubblyDrawing) {
+  /**
+   * `tabSize`:  how many columns a tab takes, as the editor shows it:  the room before a head's last tab is that many
+   * characters, so the tab after it still takes its whole width (Monaco counts injected text in a line's columns)
+   */
+  private constructor(
+    private readonly drawing: SP.BubblyDrawing,
+    private readonly tabSize: number
+  ) {
     let at = 0
     for (const line of drawing.text.split("\n")) {
       this.lineStarts.push(at)
@@ -77,8 +84,25 @@ export class BubblyMarks {
       inside: []
     }
     into.push(shape)
+    this.headRoom(block.head.start)
     this.line(block.head, shape.inside, { band: block.partOfSpeech })
     this.nodes(block.body, shape.inside)
+  }
+
+  /**
+   * Room before a head line's words (`bubbly-room-head`), so they sit further into their band than the lines under it;
+   * its band stays where it was, as `SpellBubbly` places it from the words' indent, not this room (Owen, 2026-11-11).
+   * - Before the indent's last tab, not the first word:  the word's first letter is then one place on screen, right
+   *   after that tab, so a click, Home or a typed letter puts the caret by it.
+   * - A head at the top level has no indent:  its room goes before its first word, where the caret may be drawn on
+   *   either side of it.
+   */
+  private headRoom(start: number) {
+    const { line, column } = this.positionAt(start)
+    const range = { startLineNumber: line, startColumn: Math.max(1, column - 1), endLineNumber: line, endColumn: column }
+    // plain spaces:  whitespace, so Home skips it as it skips the indent
+    const before = { ...HEAD_ROOM, content: " ".repeat(this.tabSize) }
+    this.marks.push({ range, options: { before, showIfCollapsed: true } })
   }
 
   /**
@@ -235,6 +259,16 @@ function room(kind: "input" | "quote", side: "before" | "after"): monaco.editor.
     inlineClassName: `bubbly-room bubbly-room-${kind} bubbly-room-${side}`,
     cursorStops: side === "before" ? 1 : 2
   }
+}
+
+/**
+ * Room before a head line's words:  `bubbly-room-head`, its width the sheet's (`--bubbly-head-left-shift`).
+ * - The caret stops only after it, by the tab or the word it's before.
+ */
+const HEAD_ROOM: monaco.editor.InjectedTextOptions = {
+  content: " ",
+  inlineClassName: "bubbly-room bubbly-room-head",
+  cursorStops: 1
 }
 
 /** How many columns `text`'s indent takes, a tab `tabSize`. */

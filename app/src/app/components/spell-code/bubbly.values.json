@@ -104,6 +104,10 @@
       "light": "10px",
       "dark": "10px"
     },
+    "--bubbly-head-left-shift": {
+      "light": "12px",
+      "dark": "12px"
+    },
     "--bubbly-gutter": {
       "light": "4px",
       "dark": "4px"
