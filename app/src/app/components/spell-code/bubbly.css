@@ -564,8 +564,8 @@
   --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
   --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 2px);
-  /* how much lower a pill's top sits than an even pill's:  its words sit low in their line */
-  --bubbly-monaco-input-trim: 2px;
+  /* how much lower a pill's top sits than an even pill's (negative:  higher):  its words sit high in their line */
+  --bubbly-monaco-input-trim: -2px;
 
   /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
   position: relative;
