@@ -201,6 +201,15 @@
     );
   }
 
+  /* a group:  its parent's hue, 10% darker (Owen) */
+  .bubbly-group {
+    --bubbly-hue: inherit;
+    --bubbly-pill: light-dark(
+      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 90%, black),
+      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
+    );
+  }
+
   /* marks on a band:  faint on its colour */
   .bubbly-head,
   .bubbly-pill,
