@@ -111,8 +111,18 @@
   // - `copy`:  main's file, put in each checkout that doesn't track it yet, git-excluded there;  once the branch merges
   //   main it tracks the file, and the patch does nothing there.  `run`:  a command, run once in each checkout.
   "checkoutPatches": [
-    // The kit's VS Code settings, so a save formats with oxfmt in every window (epic `epic-engine` P73).
-    { "id": "vscode-settings", "copy": ".vscode/settings.json" },
-    { "id": "vscode-extensions", "copy": ".vscode/extensions.json" }
+    // epic `epic-engine` P73
+    {
+      "id": "vscode-settings",
+      "date": "2026-11-11",
+      "why": "the kit's VS Code settings, so a save formats with oxfmt in every window",
+      "copy": ".vscode/settings.json"
+    },
+    {
+      "id": "vscode-extensions",
+      "date": "2026-11-11",
+      "why": "the kit's extension recommendations:  Oxc in, Prettier and ESLint unwanted",
+      "copy": ".vscode/extensions.json"
+    }
   ]
 }
