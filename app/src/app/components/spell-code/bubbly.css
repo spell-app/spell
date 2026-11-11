@@ -565,7 +565,7 @@
   /* ... before an opening one:  half that, so `its` sits close to its quote (Owen) */
   --bubbly-monaco-quote-room-before: calc(var(--bubbly-quote-room) / 4 * var(--bubbly-monaco-scale));
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
-  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 2px);
+  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 1px);
   /* how much lower a pill's top sits than an even pill's (negative:  higher):  its words sit high in their line */
   --bubbly-monaco-input-trim: -1px;
   /* how far every shape sits below where the code puts it:  the words sit that much higher in their bands and pills */
