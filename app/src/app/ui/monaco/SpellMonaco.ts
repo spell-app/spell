@@ -59,6 +59,9 @@ export class SpellMonaco {
     minimap: { enabled: false },
     // no band across the current line, in any theme (Owen:  "Lose the line highlight in monaco in all themes")
     renderLineHighlight: "none",
+    // no marks on every other `it` and `its` the caret's word matches (Owen:  "distracting, turn it off")
+    occurrencesHighlight: "off",
+    selectionHighlight: false,
     scrollBeyondLastLine: false,
     overviewRulerBorder: false,
     hideCursorInOverviewRuler: true,
