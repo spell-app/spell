@@ -3,14 +3,7 @@ import type { monaco } from "./monaco"
 
 /****************
  * ### `SpellTyping`
- * Three helps as a person types Spell in a Monaco editor (epic `language` P50), so what they see is what they type.
- * - The caret snaps into the body a blank line is drawn in:
- *   clicking or arrowing onto a blank line inside a body writes that body's indent (the next line's, as below),
- *   the caret after it, so it shows where typing goes (Owen, 2026-11-11:  tab stops).
- *   - Backspace there takes one indent off, the caret out a level:  it doesn't snap back in till the caret leaves.
- *   - Left without typing, the line gets back what it had.
- *   - No undo step of its own:  the indent is part of the edit before it.
- *   - Written as Monaco's own auto-indent is, so its `trimAutoWhitespace` takes it out at the next edit too.
+ * Two helps as a person types Spell in a Monaco editor (epic `language` P50), so what they see is what they type.
  * - A blank line takes its block's indent at its first letter:
  *   typing on an empty line between two lines of a body writes the next line's indent first,
  *   so the line lands in the body the bubbly look draws it in, not at the top level outside it.
@@ -32,76 +25,11 @@ export class SpellTyping {
     private readonly languages: SpellTypingLanguages
   ) {
     editor.onDidChangeModelContent((event) => this.typed(event))
-    editor.onDidChangeCursorPosition((event) => this.moved(event))
   }
-
-  ////////////////
-  // ## The caret snaps into its body
-  ////////////////
-
-  /**
-   * The caret moved:  onto a blank line inside a body, by a click or a key, write that body's indent before it;
-   * off a line it snapped on, give that line back what it had.
-   */
-  private moved(event: monaco.editor.ICursorPositionChangedEvent) {
-    const line = event.position.lineNumber
-    const cameFrom = this.caretLine
-    this.caretLine = line
-    if (this.isHelping || line === cameFrom || !MOVED_BY.includes(event.source)) return
-    const { snapped } = this
-    this.snapped = undefined
-    this.help(() => {
-      if (snapped) this.unsnap(snapped)
-      if (event.reason === CURSOR_MOVED_EXPLICITLY) this.snap(line)
-    })
-  }
-
-  /** Write the indent of the body `line` is drawn in before the caret, if it's a blank line in one;  remember it. */
-  private snap(line: number) {
-    const { editor } = this
-    const model = editor.getModel()
-    const selections = editor.getSelections() ?? []
-    if (!model || selections.length !== 1 || !selections[0]!.isEmpty() || editor.getRawOptions().readOnly) return
-    if (!this.languages.indents.includes(model.getLanguageId()) || editor.getPosition()?.lineNumber !== line) return
-    const text = model.getLineContent(line)
-    const indent = SpellTyping.indentToSnap(model.getLinesContent(), line - 1)
-    if (!indent) return
-    const column = text.length + 1
-    const range = { startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: column }
-    const end = column + indent.length
-    const caret = { selectionStartLineNumber: line, selectionStartColumn: end, positionLineNumber: line, positionColumn: end }
-    // HACK: `isAutoWhitespaceEdit` isn't in Monaco's typed API:  it marks the edit as auto-indent, which it trims
-    const edit = { range, text: indent, isAutoWhitespaceEdit: true } as monaco.editor.IIdentifiedSingleEditOperation
-    editor.executeEdits(SPELL_TYPING, [edit], [caret as monaco.Selection])
-    this.snapped = { line, before: text }
-  }
-
-  /** Give the line the caret snapped on back what it had, if it's still nothing but its indent. */
-  private unsnap({ line, before }: Snapped) {
-    const model = this.editor.getModel()
-    if (!model || line > model.getLineCount()) return
-    const text = model.getLineContent(line)
-    if (text === before || text.trim()) return
-    const range = { startLineNumber: line, startColumn: 1, endLineNumber: line, endColumn: text.length + 1 }
-    this.editor.executeEdits(SPELL_TYPING, [{ range, text: before }])
-  }
-
-  /** The line the caret was last on. */
-  private caretLine = 0
-
-  /** The line the caret last snapped on, and what it had before, till the caret leaves it or it's edited. */
-  private snapped: Snapped | undefined
-
-  ////////////////
-  // ## What was typed
-  ////////////////
 
   /** What one keystroke wrote:  indent its line, or open a name's quotes, after it's in. */
   private typed(event: monaco.editor.IModelContentChangedEvent) {
-    if (this.isHelping) return
-    // something typed on the line the caret snapped on:  it's the person's now (Backspace alone leaves it ours)
-    if (this.snapped && this.editor.getModel()?.getLineContent(this.snapped.line).trim()) this.snapped = undefined
-    if (event.isUndoing || event.isRedoing || event.isFlush || event.changes.length !== 1) return
+    if (this.isHelping || event.isUndoing || event.isRedoing || event.isFlush || event.changes.length !== 1) return
     const change = event.changes[0]!
     const model = this.editor.getModel()
     if (!model || change.rangeLength !== 0 || !/^.$/su.test(change.text)) return
@@ -188,17 +116,9 @@ export class SpellTyping {
     const before = text.slice(0, column)
     const typed = text.slice(column)
     if (!/^[ \t]*$/.test(before) || !/^\S$/u.test(typed)) return ""
-    return indentStillToWrite(lines, index, before)
-  }
-
-  /**
-   * The indent to write on blank line `lines[index]` as the caret lands on it, so it's in the body it's drawn in:
-   * the next non-blank line's, less the tabs and spaces it has already.
-   * - `""` when the line isn't blank, or is already that far in, or is drawn at the top level.
-   */
-  static indentToSnap(lines: readonly string[], index: number): string {
-    const text = lines[index] ?? ""
-    return /^[ \t]*$/.test(text) ? indentStillToWrite(lines, index, text) : ""
+    const next = lines.slice(index + 1).find((line) => line.trim())
+    const indent = next ? indentOf(next) : ""
+    return indent.length > before.length && indent.startsWith(before) ? indent.slice(before.length) : ""
   }
 
   /**
@@ -267,25 +187,6 @@ type TokenizedModel = monaco.editor.ITextModel & { tokenization?: { forceTokeniz
 
 /** The source of the edits it makes, for Monaco's undo and the editor's listeners. */
 const SPELL_TYPING = "spell-typing"
-
-/** What moves the caret onto a line it snaps on:  a click or a key, never code (`"api"`) nor its own edits. */
-const MOVED_BY = ["mouse", "keyboard"]
-
-/** Monaco's `CursorChangeReason.Explicit`:  a move, not an edit's (`NotSet`) nor an undo's. */
-const CURSOR_MOVED_EXPLICITLY = 3
-
-/** A line the caret snapped on, and what it had before. */
-type Snapped = { line: number; before: string }
-
-/**
- * What's still to write of the next non-blank line's indent after `before`, the start of `lines[index]`:
- * `""` when `before` isn't the start of it, or is all of it.
- */
-function indentStillToWrite(lines: readonly string[], index: number, before: string): string {
-  const next = lines.slice(index + 1).find((line) => line.trim())
-  const indent = next ? indentOf(next) : ""
-  return indent.length > before.length && indent.startsWith(before) ? indent.slice(before.length) : ""
-}
 
 /** `line`'s indent:  its leading tabs and spaces. */
 function indentOf(line: string): string {

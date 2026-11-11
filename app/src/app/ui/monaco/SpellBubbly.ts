@@ -12,7 +12,7 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * - One per editor, made as each editor is (`watch()`, from `SpellMonaco.register()`).
  * - It lays the code out with the parser (`SP.BubblyLayout`, by `SP.BubblyPresentation`'s table), then:
  *   - marks the text:  each piece's weight, slant and ink, room round what a person typed, a quoted input's curly
- *     marks, room pushing a group's members past its rail (`BubblyMarks`, Monaco decorations)
+ *     marks (`BubblyMarks`, Monaco decorations)
  *   - draws the shapes UNDER the text, in a layer behind the editor (`bubbly-layer`):  each declaration's band,
  *     gutter, body and foot, a pill under each input, a control line's bracket;  placed from where Monaco draws each
  *     line and letter, and drawn again as it scrolls, folds or is edited
@@ -77,14 +77,6 @@ export class SpellBubbly {
     editor.onDidScrollChange(() => {
       this.follow()
       redrawSoon()
-    })
-    editor.onDidChangeCursorPosition((event) => {
-      if (CARET_MOVED_BY.includes(event.source)) this.besideTheLetter(event.position)
-    })
-    // a click where the caret is already moves it nowhere, but may draw it off its letter
-    editor.onMouseUp(() => {
-      const position = editor.getPosition()
-      if (position) this.besideTheLetter(position)
     })
     editor.onDidLayoutChange(redrawSoon)
     editor.onDidContentSizeChange(redrawSoon)
@@ -222,24 +214,26 @@ export class SpellBubbly {
     if (!visible.length) return shapes.replaceChildren()
     const view: View = {
       ranges,
-      pushes: pushesByLine(laidOut, ranges),
       first: visible[0]!.startLineNumber,
       last: visible.at(-1)!.endLineNumber,
       measures: this.measures(),
       lineHeight: editor.getOption(monaco.editor.EditorOption.lineHeight),
       width: editor.getLayoutInfo().contentWidth + editor.getScrollWidth()
     }
-    shapes.replaceChildren(...this.drawAll(laidOut.shapes, view, TOP_LEVEL))
+    shapes.replaceChildren(...this.drawAll(laidOut.shapes, view))
   }
 
-  /** The elements of `shapes`, those inside each in its own, `where` they are. */
-  private drawAll(shapes: BubblyShape[], view: View, where: Where): HTMLElement[] {
+  /**
+   * The elements of `shapes`, those inside each in its own.
+   * - `floor`:  the left-most a band may start, so a group's members never cover its rail (below)
+   */
+  private drawAll(shapes: BubblyShape[], view: View, floor = -Infinity): HTMLElement[] {
     const elements: HTMLElement[] = []
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (!range) continue
       if (shape.kind === "block") {
-        const block = this.drawBlock(shape, range, view, where)
+        const block = this.drawBlock(shape, range, view, floor)
         if (block) elements.push(block)
       } else if (range.startLineNumber >= view.first && range.startLineNumber <= view.last) {
         const element =
@@ -254,7 +248,7 @@ export class SpellBubbly {
    * A declaration:  its band (on its head's line, if shown), its gutter, body and foot (if it has a body that isn't
    * folded away), then what's inside it;  `undefined` when none of it is in view.
    */
-  private drawBlock(shape: BubblyBlockShape, range: monaco.Range, view: View, where: Where): HTMLElement | undefined {
+  private drawBlock(shape: BubblyBlockShape, range: monaco.Range, view: View, floor: number): HTMLElement | undefined {
     const { editor } = this
     const { measures, lineHeight } = view
     const headLine = range.startLineNumber
@@ -266,11 +260,7 @@ export class SpellBubbly {
     const headTop = editor.getTopForLineNumber(headLine)
     const lastTop = editor.getTopForLineNumber(lastLine)
     const hasBody = shape.hasBody && lastTop > headTop
-    const padLeft = where.isUnderMember ? measures.nestedPadLeft : measures.padLeft
-    // A group in a body, and each of its members, starts right at its floor, its words where they are:
-    // the card's rail, the group's and its members' bands evenly apart (Owen, 2026-11-11)
-    const isAtFloor = (shape.isGroup || where.isInGroup) && Number.isFinite(where.floor)
-    const left = isAtFloor ? where.floor : Math.max(this.wordsX(headLine, view) - padLeft, where.floor)
+    const left = Math.max(this.lineStartX(headLine) - measures.padLeft, floor)
     if (headLine >= view.first) {
       const ends = shape.ends
       const lineEnd = this.xOf(headLine, editor.getModel()!.getLineMaxColumn(headLine))
@@ -298,15 +288,10 @@ export class SpellBubbly {
         place(element("bubbly-foot"), { left: gutter, top: footTop }, measures.scale)
       )
     }
-    // What's in its body starts a little past its gutter, never on it (Owen, 2026-11-11):
-    // a group's members are pushed there, words and all (`BubblyMarks.pushes`);  a nested declaration's band starts
-    // there if its indent would put it on the gutter, its words where they are
-    const inside: Where = {
-      floor: hasBody ? left + measures.gutter + measures.bodyGap : where.floor,
-      isUnderMember: !shape.isGroup && where !== TOP_LEVEL,
-      isInGroup: shape.isGroup
-    }
-    block.append(...this.drawAll(shape.inside, view, inside))
+    // A group's members are written at its own indent, so their bands would start on its rail:
+    // they start just past it instead, their words where they are (Owen, 2026-11-11)
+    const insideFloor = shape.isGroup && hasBody ? left + measures.gutter + GROUP_RAIL_GAP * measures.scale : floor
+    block.append(...this.drawAll(shape.inside, view, insideFloor))
     return block
   }
 
@@ -329,7 +314,7 @@ export class SpellBubbly {
     const headLine = range.startLineNumber
     let stepLine = headLine + 1
     while (stepLine < range.endLineNumber && !model.getLineContent(stepLine).trim()) stepLine++
-    const left = (this.wordsX(headLine, view) + this.wordsX(stepLine, view)) / 2
+    const left = (this.lineStartX(headLine) + this.lineStartX(stepLine)) / 2
     const top = editor.getTopForLineNumber(headLine) + view.lineHeight
     const bottom = editor.getTopForLineNumber(range.endLineNumber) + view.lineHeight
     return place(element("bubbly-bracket"), { left, top, height: bottom - top }, view.measures.scale)
@@ -351,36 +336,6 @@ export class SpellBubbly {
     }
     count(shape.inside)
     return feet
-  }
-
-  ////////////////
-  // ## The caret beside its letter
-  ////////////////
-
-  /**
-   * A click or a key left the caret where room is injected before a letter:  draw it after the room, by the letter.
-   * - Monaco puts the caret where the room is meant to let it, stepping with the arrow keys;
-   *   but a click left of the room, or Home on a line whose words are pushed, draws it BEFORE the room,
-   *   a room's width off its letter, though it's the same place in the text.
-   * - So it steps the caret right and back, as the arrow keys would:  the same place, drawn by the letter.
-   */
-  private besideTheLetter({ lineNumber, column }: monaco.IPosition) {
-    if (!this.isDrawing || this.isNudging) return
-    const { editor } = this
-    const selections = editor.getSelections() ?? []
-    if (selections.length !== 1 || !selections[0]!.isEmpty()) return
-    if (column >= editor.getModel()!.getLineMaxColumn(lineNumber)) return
-    const isRoomBefore = (editor.getLineDecorations(lineNumber) ?? []).some(
-      (mark) => mark.options.before?.cursorStops === CURSOR_STOPS_RIGHT && mark.range.startColumn === column
-    )
-    if (!isRoomBefore) return
-    this.isNudging = true
-    try {
-      editor.trigger(NUDGE, "cursorRight", null)
-      editor.trigger(NUDGE, "cursorLeft", null)
-    } finally {
-      this.isNudging = false
-    }
   }
 
   ////////////////
@@ -424,11 +379,6 @@ export class SpellBubbly {
     return Math.max(0, this.editor.getOffsetForColumn(line, column))
   }
 
-  /** Where `line`'s words are drawn:  past its indent, and the room pushing it, if it's a group's member. */
-  private wordsX(line: number, view: View): number {
-    return this.lineStartX(line) + (view.pushes.get(line) ?? 0) * view.measures.pushRoom
-  }
-
   /**
    * Where `line`'s words start, past its indent:  from its tabs and spaces, so it's known for a line Monaco hasn't
    * drawn (a declaration whose head is scrolled away).
@@ -470,11 +420,8 @@ export class SpellBubbly {
       lineHeight: Math.round(fontSize * ratio),
       inputRoom: length("--bubbly-monaco-input-room"),
       quoteRoom: length("--bubbly-monaco-quote-room"),
-      pushRoom: length("--bubbly-monaco-push-room"),
-      bodyGap: length("--bubbly-monaco-body-gap") * scale,
       padLeft: length("--bubbly-pill-pad-left") * scale,
       padRight: length("--bubbly-pill-pad-right") * scale,
-      nestedPadLeft: length("--bubbly-monaco-nested-pad-left") * scale,
       endInset: length("--bubbly-end-inset") * scale,
       gutter: length("--bubbly-gutter") * scale,
       pillHeight: length("--bubbly-pill-height") * scale,
@@ -514,9 +461,6 @@ export class SpellBubbly {
 
   /** A redraw is waiting for the next frame. */
   private isRedrawQueued = false
-
-  /** It's stepping the caret beside its letter:  `besideTheLetter()`. */
-  private isNudging = false
 }
 
 ////////////////
@@ -533,15 +477,9 @@ type Measures = {
   inputRoom: number
   /** the room outside a quoted input's marks */
   quoteRoom: number
-  /** the room pushing a group's member past its rail */
-  pushRoom: number
-  /** the paper between a body's gutter and the bands in it */
-  bodyGap: number
   /** a band's room before its words, and after them */
   padLeft: number
   padRight: number
-  /** the room before a nested declaration's words, under a member:  a little less, so it stands off its gutter */
-  nestedPadLeft: number
   /** a band's room after a pill it ends with */
   endInset: number
   /** the gutter's width */
@@ -557,8 +495,6 @@ type Measures = {
 type View = {
   /** each mark's range now, by index */
   ranges: monaco.Range[]
-  /** how many rooms push each line's words right, by line:  `BubblyMarks.pushes` */
-  pushes: Map<number, number>
   /** the first and last lines shown */
   first: number
   last: number
@@ -568,30 +504,11 @@ type View = {
   width: number
 }
 
-/** Where a declaration is drawn:  inside which body. */
-type Where = {
-  /** the left-most its band may start, so it never covers the gutter of the body it's in */
-  floor: number
-  /** it's in the body of a type's member (`it "is a (suit)"`, under `its "suit"`), not a type's or a group's */
-  isUnderMember: boolean
-  /** it's one of a group's members */
-  isInGroup: boolean
-}
-
-/** At the top level:  no body around it. */
-const TOP_LEVEL: Where = { floor: -Infinity, isUnderMember: false, isInGroup: false }
-
 /** How long typing pauses before the code is laid out again:  the marks follow the text till then. */
 const RELAYOUT_MSEC = 300
 
-/** What moves the caret where it's drawn off its letter:  a click or a key. */
-const CARET_MOVED_BY = ["mouse", "keyboard"]
-
-/** Monaco's `InjectedTextCursorStops.Right`:  room the caret stops after, never before. */
-const CURSOR_STOPS_RIGHT = 1
-
-/** The source of its own caret steps. */
-const NUDGE = "spell-bubbly"
+/** The paper between a group's rail and its members' bands, in the drawing's pixels. */
+const GROUP_RAIL_GAP = 2
 
 /** The classes that make an editor's box a drawing. */
 const BOX_CLASSES = ["bubbly", "bubbly-monaco"]
@@ -608,16 +525,6 @@ function element(classes: string): HTMLElement {
 function place(shape: HTMLElement, at: Partial<Record<"left" | "top" | "width" | "height", number>>, scale: number) {
   for (const [side, value] of Object.entries(at)) shape.style.setProperty(side, `${value / scale}px`)
   return shape
-}
-
-/** How many rooms push each line's words right, by line, as Monaco has the marks now. */
-function pushesByLine(laidOut: BubblyMarks, ranges: monaco.Range[]): Map<number, number> {
-  const pushes = new Map<number, number>()
-  for (const index of laidOut.pushes) {
-    const line = ranges[index]?.startLineNumber
-    if (line) pushes.set(line, (pushes.get(line) ?? 0) + 1)
-  }
-  return pushes
 }
 
 /** The parser that reads `model`'s Spell:  its file's language (`Carta.es.spell`), else English. */

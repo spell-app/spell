@@ -15,8 +15,6 @@ import type { monaco } from "./monaco"
  *     caret off the letters
  *   - one mark spanning each shape, holding nothing but its place:  Monaco moves it as the text is edited,
  *     so the shapes follow typing before the look is laid out again (`SpellBubbly`)
- *   - room before each line of a group's member, so its words move past the group's rail with its band
- *     (`pushes`, below)
  * - Shapes are a declaration's band, gutter, body and foot, a pill under what a person typed, a control line's
  *   bracket:  `SpellBubbly` places them from where Monaco draws each line and letter.
  * - Which rule presents which way is `SP.BubblyPresentation`'s, read by the layout:  nothing here decides it.
@@ -34,32 +32,16 @@ export class BubblyMarks {
   /** The shapes at the top of the drawing, each holding those inside it. */
   readonly shapes: BubblyShape[] = []
 
-  /**
-   * The marks of the room that PUSHES a line's words right, by their index:  one per push, at the line's first word.
-   * - A group's members are written at its own indent, so their bands would start on its rail:
-   *   each line of a member, its body's too, gets a push (`bubbly-room-push`), as wide as the rail and the paper past it,
-   *   so its band starts just past the rail with its usual room before its words (Owen, 2026-11-11).
-   * - Only a member written at the group's indent, or less:  one written deeper is past the rail already.
-   * - A group inside a group's member is pushed with it, and its own members once more.
-   * - `SpellBubbly` counts them on each line, to know where its words are drawn.
-   */
-  readonly pushes: number[] = []
-
   /** Where each line starts in the drawing's text. */
   private readonly lineStarts: number[] = []
 
-  /** The drawing's lines. */
-  private readonly lines: string[]
-
   private constructor(private readonly drawing: SP.BubblyDrawing) {
-    this.lines = drawing.text.split("\n")
     let at = 0
-    for (const line of this.lines) {
+    for (const line of drawing.text.split("\n")) {
       this.lineStarts.push(at)
       at += line.length + 1
     }
     this.nodes(drawing.nodes, this.shapes)
-    this.pushMembers(this.shapes)
   }
 
   ////////////////
@@ -132,44 +114,6 @@ export class BubblyMarks {
       after: room("input", "after")
     })
     into.push({ kind: "input", place, isChoice: kind === "choice", isQuoted })
-  }
-
-  ////////////////
-  // ## A group's members, past its rail
-  ////////////////
-
-  /** Push the lines of each group's members in `shapes`, those inside them too:  see `pushes`. */
-  private pushMembers(shapes: BubblyShape[]) {
-    for (const shape of shapes) {
-      if (shape.kind !== "block") continue
-      if (shape.isGroup && shape.hasBody) {
-        const groupIndent = this.indentOf(this.marks[shape.place]!.range.startLineNumber)
-        for (const member of shape.inside) {
-          if (member.kind !== "block") continue
-          const { startLineNumber, endLineNumber } = this.marks[member.place]!.range
-          if (this.indentOf(startLineNumber) > groupIndent) continue
-          for (let line = startLineNumber; line <= endLineNumber; line++) this.push(line)
-        }
-      }
-      this.pushMembers(shape.inside)
-    }
-  }
-
-  /**
-   * Room before `line`'s first word, if it has one:  empty, so it's put before any other room there.
-   * - Monaco keeps a line's marks in order of where they start, then where they end.
-   */
-  private push(line: number) {
-    const text = this.lines[line - 1] ?? ""
-    const column = indentLength(text) + 1
-    if (column > text.length) return
-    const range = { startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: column }
-    this.pushes.push(this.marks.push({ range, options: { before: PUSH_ROOM, showIfCollapsed: true } }) - 1)
-  }
-
-  /** How long `line`'s indent is, in tabs and spaces. */
-  private indentOf(line: number): number {
-    return indentLength(this.lines[line - 1] ?? "")
   }
 
   ////////////////
@@ -305,21 +249,6 @@ function room(kind: "input" | "quote", side: "before" | "after"): monaco.editor.
     inlineClassName: `bubbly-room bubbly-room-${kind}`,
     cursorStops: side === "before" ? 1 : 2
   }
-}
-
-/**
- * Room pushing a group member's line past the group's rail:  `bubbly-room-push`, its width the sheet's.
- * - The caret stops only after it, beside the first letter.
- */
-const PUSH_ROOM: monaco.editor.InjectedTextOptions = {
-  content: "\u00a0",
-  inlineClassName: "bubbly-room bubbly-room-push",
-  cursorStops: 1
-}
-
-/** How many tabs and spaces `text` starts with. */
-function indentLength(text: string): number {
-  return /^[ \t]*/.exec(text)![0].length
 }
 
 /** Where a node ends:  its last line's end. */

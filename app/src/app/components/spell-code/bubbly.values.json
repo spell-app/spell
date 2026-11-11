@@ -184,18 +184,6 @@
       "light": "calc(15px / 2 * 1)",
       "dark": "calc(15px / 2 * 1)"
     },
-    "--bubbly-monaco-body-gap": {
-      "light": "2px",
-      "dark": "2px"
-    },
-    "--bubbly-monaco-nested-pad-left": {
-      "light": "9px",
-      "dark": "9px"
-    },
-    "--bubbly-monaco-push-room": {
-      "light": "calc((4px + 2px) * 1)",
-      "dark": "calc((4px + 2px) * 1)"
-    },
     "--bubbly-monaco-foot-room": {
       "light": "calc(4px + 5px)",
       "dark": "calc(4px + 5px)"

@@ -64,31 +64,6 @@ describe("BubblyMarks.of()", () => {
     expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-quote" })
   })
 
-  test("a group's members written at its indent:  room before each of their lines, their bodies' too", () => {
-    const text = [
-      `a "card" is a view`,
-      `\tgroup "Suit"`,
-      `\tits "suit" is one of clubs, hearts`,
-      `\t\tit "is a (suit)"`,
-      ``,
-      `\tgroup "Names"`,
-      `\t\t// what a person reads`,
-      `\tits "name" is its suit`,
-      `\tgroup "Inner"`,
-      `\tit "is red" if it is a heart`,
-      ``
-    ].join("\n")
-    const marks = marked(text)
-    const pushed = marks.pushes.map((index) => {
-      const { range, options } = marks.marks[index]!
-      expect(range.startColumn).toBe(range.endColumn)
-      expect(options).toMatchObject({ showIfCollapsed: true, before: { inlineClassName: "bubbly-room bubbly-room-push" } })
-      return `${range.startLineNumber}:${range.startColumn}`
-    })
-    // a choice under a member too;  not the blank line, nor a comment written deeper, nor the next group, a member's peer
-    expect(pushed.toSorted()).toEqual(["10:2", "3:2", "4:3", "8:2"])
-  })
-
   test("its shapes:  a band per declaration, pills on what was typed, a bracket down a control line's steps", () => {
     expect(shapesOf(marked())).toEqual([
       'thing:  a "card" is a draggable two sided view',
