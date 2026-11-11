@@ -79,7 +79,7 @@
    */
   --bubbly-line-inset: 8px;
   /* every band's words start this far in from its round end, at any level */
-  --bubbly-pill-pad-left: 12px;
+  --bubbly-pill-pad-left: 6.6px;
   --bubbly-pill-pad-right: 10px;
 
   /****** a body:  the gutter down its left, its white, the foot under it ******/
@@ -205,7 +205,7 @@
   .bubbly-group {
     --bubbly-hue: inherit;
     --bubbly-pill: light-dark(
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 90%, black),
+      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
       color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
     );
   }
@@ -332,10 +332,6 @@
       /* on beside its foot:  the code stops it at the foot's top */
       box-sizing: content-box;
       padding-bottom: var(--bubbly-foot-height);
-    }
-    /* a group starts on its parent's rail, so its band grows out of it:  its top-left square (Owen) */
-    .bubbly-group > .bubbly-head {
-      border-top-left-radius: 0;
     }
   }
 
