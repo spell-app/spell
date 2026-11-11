@@ -7,14 +7,14 @@ _Task List in the Spell editor:  the program on the left, the app it makes on th
 The left half of that picture is the program.
 Here is what a task is, the seven lines at the top of its file, their descriptions left out:
 
-```html
-<view "task">
-	<property "title">text</>
-	<property "notes">text</>
-	<property "priority" one-of="low, normal or high" />
-	<property "done">yes or no</>
-	<alias "is done">if its done is yes</>
-	<alias "is active">if it is not done</>
+```spell
+a "task" is a draggable selectable view
+	its "title" is text
+	its "notes" is text
+	its "priority" is one of low, normal or high
+	its "done" is yes or no
+	it "is done" if its done is yes
+	it "is active" if it is not done
 ```
 
 Read them once, and you know what a task is in this app:
