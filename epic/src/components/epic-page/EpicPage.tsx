@@ -500,7 +500,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /**
    * The toolbar's state chips:  every item section's filter (`DOMEpicSectionElement.stateFilter`) added up.
-   * - the counts are the items' alone:  the Phases section's are its own (I157)
+   * - the counts are the items' (I157);  a colour ONLY the Phases section has gets a chip too, counting its phases
+   *   (epic `epic-engine` I261;  Owen, 2026-11-11:  "why is there no green bubble in the top set?")
    * - a chip is ON while every section with a chip of its colour shows it, the Phases section too;  MIXED while some
    *   do and some don't (`mixed`);  OFF while none does (epic `epic-engine` I259)
    * - read again on every layout change and section filter change, and after every mark (`followMarks`):
@@ -517,6 +518,26 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         const total = totals.get(entry.state)
         if (total) totals.set(entry.state, { ...total, count: total.count + entry.count })
         else totals.set(entry.state, { ...entry })
+      }
+    }
+    // a colour only the Phases section has (green, done lately):  a chip too, counting its phases (I261)
+    const itemColors = new Set([...totals.keys()].map((state) => StateFilter.colorOf(state)))
+    for (const section of hosts) {
+      if (section.stateFilter) continue
+      for (const pair of (section.chipCounts ?? "").split(/\s+/)) {
+        const [state, count] = pair.split(":")
+        if (!state || !Number(count) || StateFilter.inBlueBadge(state)) continue
+        const color = StateFilter.colorOf(state)
+        if (itemColors.has(color)) continue
+        const as = FILTER_STATES.find((it) => StateFilter.colorOf(it.state) === color)
+        if (!as) continue
+        const total = totals.get(as.state)
+        totals.set(as.state, {
+          state: as.state,
+          color: as.color,
+          count: (total?.count ?? 0) + Number(count),
+          on: true
+        })
       }
     }
     const standing = StateFilter.colorStanding(hosts.map((section) => section.chipStates ?? []))
