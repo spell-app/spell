@@ -1,7 +1,6 @@
 import { SP } from "spell/parser/spell"
 import { codeLook } from "spell/app/app/ui/codePopups"
 import { monaco } from "./monaco"
-import { AppAddresses } from "./AppAddresses"
 import { BubblyMarks, indentColumns, type BubblyBlockShape, type BubblyShape } from "./BubblyMarks"
 
 import "spell/app/app/components/spell-code/bubbly.css"
@@ -11,8 +10,7 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * Spell in a Monaco editor drawn in the BUBBLY LOOK as it's typed (epic `language` P50), while its text stays
  * ordinary text to edit:  the look `<spell-code>` draws on a page, from the same layout and the same sheet.
  * - One per editor, made as each editor is (`watch()`, from `SpellMonaco.register()`).
- * - It lays the code out with the parser (`SP.BubblyLayout`, by `SP.BubblyPresentation`'s table), as part of its
- *   project when it's a project's file, then:
+ * - It lays the code out with the parser (`SP.BubblyLayout`, by `SP.BubblyPresentation`'s table), then:
  *   - marks the text:  each piece's weight, slant and ink, room round what a person typed, a quoted input's curly
  *     marks (`BubblyMarks`, Monaco decorations)
  *   - draws the shapes UNDER the text, in a layer behind the editor (`bubbly-layer`):  each declaration's band,
@@ -166,10 +164,7 @@ export class SpellBubbly {
     const model = this.editor.getModel()
     if (!model) return
     try {
-      // as part of its project, if it's a project's file:  names declared in its other files then read
-      const path = AppAddresses.pathOf(model.uri)
-      const within = path === undefined ? undefined : SP.SpellFile.registry.get(path)
-      const drawing = SP.BubblyLayout.of(model.getValue(), parserFor(model), { within })
+      const drawing = SP.BubblyLayout.of(model.getValue(), parserFor(model))
       this.laidOut = BubblyMarks.of(drawing)
       this.marks!.set(this.laidOut.marks)
     } catch (error) {

@@ -4,7 +4,6 @@ import { BubblyPresentation } from "./BubblyPresentation"
 import type {
   BubblyBlock,
   BubblyDrawing,
-  BubblyLayoutOptions,
   BubblyLine,
   BubblyNode,
   BubblyPartOfSpeech,
@@ -19,7 +18,7 @@ import type {
  * which are control lines (a bracket holding their steps), and what each stretch of a line is to a reader
  * (what a person typed, a reference, a value ...).
  * - `BubblyLayout.of(text, parser)`:  a `BubblyDrawing`, offsets into `text`.
- * - From the parser's own reading of the code, alone, or as part of its project (`within`):
+ * - From the parser's own reading of the code, no project:
  *   - its coloured spans (`SP.SpellHighlighter.spans()`):  references, values, marks, comments
  *   - its parse as a block:  each line's rule, which `SP.BubblyPresentation` says how to present
  *     (a band or not, which parts are inputs, a bracket for a control line)
@@ -30,15 +29,9 @@ import type {
  * - NEVER throws:  a parse that fails lays out every line as a step, coloured by its tokens.
  ****************/
 export class BubblyLayout {
-  /**
-   * `text` laid out in the bubbly look, read by `parser` (English's by default).
-   * - `within`:  the project file it's the text of, so it reads as part of its project
-   *   (`for rank in card ranks`, `card ranks` declared in another file);  alone, it couldn't parse.
-   *   - Read in a scope of its own under the project's (`layoutScopeFor()`):  laying it out never changes the project.
-   *   - A file not parsed yet in its project reads alone.
-   */
-  static of(text: string, parser: SP.SpellParser = SP.spellParser, { within }: BubblyLayoutOptions = {}): BubblyDrawing {
-    return new BubblyLayout(text, parser, within && layoutScopeFor(within)).drawing
+  /** `text` laid out in the bubbly look, read by `parser` (English's by default). */
+  static of(text: string, parser: SP.SpellParser = SP.spellParser): BubblyDrawing {
+    return new BubblyLayout(text, parser).drawing
   }
 
   /** The drawing. */
@@ -67,8 +60,7 @@ export class BubblyLayout {
 
   private constructor(
     private readonly text: string,
-    parser: SP.SpellParser,
-    scope?: P.Scope
+    parser: SP.SpellParser
   ) {
     this.pronouns = (parser.language ?? SP.Language.default).words.pronouns
     this.paint = Array.from({ length: text.length })
@@ -78,7 +70,7 @@ export class BubblyLayout {
       this.lineStarts.push(at)
       at += line.length + 1
     }
-    this.readParse(parser, scope)
+    this.readParse(parser)
     this.drawing = { text, nodes: this.layout(this.treeOf(), { depth: 0, level: 0 }) }
   }
 
@@ -87,10 +79,10 @@ export class BubblyLayout {
   ////////////////
 
   /** Each line's statement, and the overlays every line takes;  a parse that throws leaves both empty. */
-  private readParse(parser: SP.SpellParser, scope?: P.Scope) {
+  private readParse(parser: SP.SpellParser) {
     let match: P.Match | undefined
     try {
-      match = scope ? scope.parser!.parse(this.text, "block", scope) : parser.parse(this.text, "block")
+      match = parser.parse(this.text, "block")
     } catch {
       // the spans stand alone
     }
@@ -484,25 +476,6 @@ export class BubblyLayout {
 ////////////////
 // ## Types and helpers
 ////////////////
-
-/**
- * A scope to read `file`'s text in, as part of its project, that the layout's parse can't change:
- * under the project's scope, so the project's types, constants and phrases are found there,
- * but its own (and the phrases it registers, on a clone of the file's parser) kept to itself.
- * - `undefined` when `file` hasn't been parsed in a project yet.
- */
-function layoutScopeFor(file: SP.SpellFile): P.Scope | undefined {
-  const fileScope = file.scope
-  const projectScope = fileScope?.parentScope
-  const parser = fileScope?.parser as SP.SpellParser | undefined
-  if (!projectScope?.types || !parser) return undefined
-  return new P.ProjectScope({
-    name: file.file,
-    path: file.path,
-    parser: parser.clone({ module: file.path } as P.ParserProps),
-    parentScope: projectScope
-  })
-}
 
 /** A piece's kind, or a variable not yet told first mention from use. */
 type Paint = BubblyPieceKind | "variable"

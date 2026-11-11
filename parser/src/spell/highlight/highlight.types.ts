@@ -8,8 +8,6 @@
  * - Types only:  nothing here runs.
  */
 
-import type { SP } from "spell/parser/spell"
-
 ////////////////
 // ## The drawing
 ////////////////
@@ -166,10 +164,4 @@ export type BubblyRulePresentation = {
   isValue?: boolean
   /** a reference that takes the words before it:  `the color` of seven, `a new card` */
   takesArticle?: boolean
-}
-
-/** How `SP.BubblyLayout.of()` reads its text. */
-export type BubblyLayoutOptions = {
-  /** the project file it's the text of:  read as part of its project */
-  within?: SP.SpellFile
 }
