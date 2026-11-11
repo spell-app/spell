@@ -127,16 +127,14 @@ describe("SpellLanguageService, the X reading a property (epic `language`, P5)",
     expect(service.rename(file, at('- its "color"', "color"), "shade")).toBeNull()
   })
 
-  test("a spellml action:  hover, F12 and colour on the X are the property's;  rename keeps its quotes", async () => {
+  test("an action in a view:  hover, F12 and colour on the X are the property's;  rename keeps its quotes", async () => {
     const tiles = resolve(dir, "Tiles")
     mkdirSync(tiles)
-    const source = `<spell-view "tile" template="view">
-	<property "score">a number</>
-	<action "bump it">
+    const source = `a "tile" is a view:
+	its "score" is a number
+	to bump it:
 		set v to the score
 		set w to its score
-	</action>
-</spell-view>
 `
     writeFileSync(resolve(tiles, "Tile.spell"), source)
     writeFileSync(resolve(tiles, SP.PROJECT_FILE), `{ imports: [{ path: "/Tile.spell", active: true }] }\n`)
@@ -166,7 +164,7 @@ describe("SpellLanguageService, the X reading a property (epic `language`, P5)",
       text[range.start.line] = row.slice(0, range.start.character) + newText + row.slice(range.end.character)
     }
     expect(text.slice(1, 5).join("\n")).toBe(
-      '\t<property "points">a number</>\n\t<action "bump it">\n\t\tset v to the points\n\t\tset w to its points'
+      '\tits "points" is a number\n\tto bump it:\n\t\tset v to the points\n\t\tset w to its points'
     )
   })
 

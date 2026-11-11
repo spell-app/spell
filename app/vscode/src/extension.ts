@@ -27,7 +27,6 @@ import {
 import { ElementsHelp } from "./ElementsHelp"
 import { RunnerPanel } from "./RunnerPanel"
 import { findSpellApp } from "./spellAppRoot"
-import { formOfText } from "spell/parser/spell/spell.types"
 
 /**
  * A spell-app checkout's language server, from its root:  `tsx` runs it there, reading the root's `tsconfig.json`.
@@ -49,14 +48,10 @@ const COMPILED_SCHEME = "spell-compiled"
 const COMPILED_TARGETS = {
   js: { language: "javascript", comment: "//" },
   ts: { language: "typescript", comment: "//" },
-  py: { language: "python", comment: "#" },
-  // a `.spell` file's code spell, "Show as Code Spell" (epic `elemental-spell` P8)
-  spell: { language: "spell", comment: "//" },
-  // a `.spell` file as spellx, "Show as Spellx":  a view, never a second file (J95)
-  spellx: { language: "spell", comment: "//" }
+  py: { language: "python", comment: "#" }
 } as const
 
-/** A short name for a target:  `js`, `ts`, `py`, `spell` or `spellx` -- see `COMPILED_TARGETS`. */
+/** A short name for a target:  `js`, `ts` or `py` -- see `COMPILED_TARGETS`. */
 type CompiledTarget = keyof typeof COMPILED_TARGETS
 
 /** How long to wait after the last edit before refreshing an open compiled view, in msec. */
@@ -146,21 +141,9 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     vscode.workspace.onDidChangeTextDocument(({ document }) => compiled.sourceChanged(document.uri)),
     vscode.commands.registerCommand("spell.showCompiled", () => showCompiled("js")),
     vscode.commands.registerCommand("spell.showCompiledTypeScript", () => showCompiled("ts")),
-    vscode.commands.registerCommand("spell.showCompiledPython", () => showCompiled("py")),
-    vscode.commands.registerCommand("spell.showCodeSpell", () => showCompiled("spell")),
-    vscode.commands.registerCommand("spell.showSpellx", () => showCompiled("spellx")),
-    vscode.window.onDidChangeActiveTextEditor(noteShape),
-    vscode.workspace.onDidChangeTextDocument(noteShape)
+    vscode.commands.registerCommand("spell.showCompiledPython", () => showCompiled("py"))
   )
-  noteShape()
   await client.start()
-}
-
-/** Tell the title bar's "Show as" buttons the active file's shape:  one language colours both (`spell.tagShaped`). */
-function noteShape(): void {
-  const document = vscode.window.activeTextEditor?.document
-  const tagShaped = RunnerPanel.isSpellDocument(document) && formOfText(document.getText(), document.fileName) === "spellx"
-  void vscode.commands.executeCommand("setContext", "spell.tagShaped", tagShaped)
 }
 
 /** Stop the language server. */
@@ -197,8 +180,7 @@ async function showCompiled(target: CompiledTarget): Promise<void> {
 /****************
  * ### `CompiledProvider`
  * Read-only documents holding the code a spell file compiles to, from the server's `spell/compiled` request.
- * - One per target:  javascript, TypeScript, Python;  and a spell file's other form, code spell or spellx
- *   (`COMPILED_TARGETS`).
+ * - One per target:  javascript, TypeScript, Python (`COMPILED_TARGETS`).
  * - The document's URI ends with its target, and carries the spell file's URI in its query -- see `uriFor()`.
  * - Refreshes each open one a moment after its spell file changes.
  ****************/

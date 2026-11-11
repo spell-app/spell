@@ -156,7 +156,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     browser = await chromium.launch()
     context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
     // the one route:  a save never reaches the disk
-    await context.route(/\/api\/projects\/file\/|\.(spellml|spell)(\?.*)?$/, (route) => {
+    await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) => {
       const request = route.request()
       if (request.isNavigationRequest()) return route.continue()
       const file = new URL(request.url()).pathname.split("/").at(-1)!

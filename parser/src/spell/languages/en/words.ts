@@ -146,94 +146,20 @@ export const englishWords: SP.LanguageWords = {
     check_process: { animation: "process" }
   },
 
-  /**
-   * Spellx's words, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SP.SpellxWords`.
-   * - Template tags carry the prefix, `<spell-view>`;  everything inside them is a short word, `<property>` (Q37).
-   */
-  spellx: {
+  /** The line saying a thing has an ability:  what `DragAndDrop`'s warning for the old words says to write. */
+  abilityLines: {
+    draggable: "it is draggable",
+    droppable: "it is droppable",
+    selectable: "it is selectable",
+    clickable: "it is clickable"
+  },
+
+  /** A page's words (epic `language` P47):  its head, `"button api" is a notebook page`, and its body's tags. */
+  page: {
     prefix: "spell",
-    templates: {
-      view: "view",
-      thing: "thing",
-      page: "page",
-      app: "app",
-      "page-template": "page template",
-      "app-template": "app template",
-      // `<page notebook>` (epic `notebook` P1):
-      // a page that draws its body, its prose, examples and its own templates
-      notebook: { kind: "page", flag: "notebook" },
-      // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
-      site: "site",
-      // adds to a type another file declares:  its fields in a place's file, its drawing in this one
-      // (epic `data` T76;  `<extend>` since epic `language` P41, r12)
-      extend: "extend",
-      // its old word, still read
-      "more-of": "extend"
-    },
-    declarations: {
-      property: "property",
-      alias: "alias",
-      action: "action",
-      draw: "draw",
-      event: "event",
-      test: "test",
-      menu: "menu",
-      // a heading over the members after it (epic `elemental-spell` P16)
-      group: "group",
-      // a site's parts (epic `mockup` P1):  only in a `<site>`, markup anywhere else (`<sidebar>` is Spell UI's)
-      page: "page",
-      dialog: "dialog",
-      sidebar: "sidebar"
-    },
-    // where a program's data lives, each read as its plain line (epic `language` P40):  at a file's top level, no prefix
-    places: [
-      { tag: "web-server", line: "{words} is a web server at {quoted address} :" },
-      { tag: "graphql-server", line: "{words} is a graphql server at {quoted address} :" },
-      { tag: "data-folder", line: "{words} is a data folder at personal {quoted address} :", flag: "personal" },
-      { tag: "data-folder", line: "{words} is a data folder at {quoted address} :" },
-      { tag: "json-file", line: "{words} is a json file at {quoted address} :" },
-      { tag: "room", line: "{words} is a room at {quoted address} :" },
-      { tag: "sheet", line: "{words} is a sheet at {quoted address} :" },
-      { tag: "sheet", line: "{words} is a spreadsheet at {quoted address} :" },
-      { tag: "csv-file", line: "{words} is a csv file at {quoted address} :" },
-      { tag: "excel-file", line: "{words} is an excel file at {quoted address} :" },
-      { tag: "google-sheet", line: "{words} is a google sheet at {quoted address} :" },
-      { tag: "airtable", line: "{words} is an airtable at {quoted address} :" },
-      {
-        tag: "atmosphere",
-        line: "{words} is a personal atmosphere account at {quoted address} :",
-        flag: "personal",
-        bare: "{words} is a personal atmosphere account :"
-      },
-      { tag: "atmosphere", line: "{words} is an atmosphere space at {quoted address} :", flag: "space" },
-      { tag: "atmosphere", line: "{words} is an atmosphere account at {quoted address} :" },
-      { tag: "device-storage", line: "{words} is stored on this device :" },
-      { tag: "device-storage", line: "{words} is a database on this device :" },
-      { tag: "window-storage", line: "{words} is stored on this device , for each tab :" },
-      { tag: "memory-storage", line: "{words} is stored in memory :" },
-      { tag: "memory-storage", line: "{words} is an in memory database :" }
-    ],
-    // prose kept, never run (epic `debut` I86):  `<note>`, ONE tag for every note (epic `language` P41)
-    // - a template's own property editor, as markup, `<property-editor>`:  what the Inspector shows for its things
-    // - a page's stories, `<stories>` (epic `mockup` P6):  what it must let people do
-    // - the old words still read, with a warning naming `<note>`:  `<spell-description>`, `<spell-comment>`, `<comment>`
-    notes: {
-      note: "description",
-      description: "description",
-      comment: "comment",
-      "property-editor": "property editor",
-      stories: "stories"
-    },
-    handlers: {
-      on: "on",
-      when: "when",
-      while: "while",
-      // an ability's own tag (epic `debut` P27, Q47):  `<clickable when it is face down/>`
-      draggable: "draggable",
-      clickable: "clickable",
-      selectable: "selectable",
-      droppable: "droppable"
-    },
+    page: "page",
+    // its flags:  a page that draws in place, editable (epic `notebook` P1), and one locked against edits
+    flags: { notebook: "notebook", locked: "locked" },
     controls: {
       if: "if",
       "otherwise if": "otherwise if",
@@ -258,141 +184,17 @@ export const englishWords: SP.LanguageWords = {
     },
     forFlagsNotAfter: ["is", "are", "not", "isn't", "aren't"],
     forListWords: ["its", "every", "all", "the", "my", "their", "these", "those"],
-    attributes: {
-      name: "name",
-      aka: "aka",
-      template: "template",
-      "one-of": "one-of",
-      // a place's (epic `language` P40):  `<web-server "x" address="...">`, `<atmosphere personal>`, `<atmosphere space>`
-      personal: "personal",
-      space: "space",
-      type: "type",
-      alias: "alias",
-      description: "description",
-      shortcut: "shortcut",
-      "enabled-when": "enabled-when",
-      "selected-when": "selected-when",
-      undoable: "undoable",
-      icon: "icon",
-      title: "title",
-      // a menu filled from a list (epic `language` P19, Q21):  `<menu "more examples" for-each={...} action="...">`
-      "for-each": "for-each",
-      action: "action",
-      "menu-bar": "menu-bar",
-      locked: "locked",
-      // a page that draws its body, and the editor shows in place, editable (epic `notebook` P1)
-      notebook: "notebook",
-      // retired, as waiting is the default:  an error, which `spell lint --fix` takes out (epic `language` P13)
-      animated: "animated",
-      draggable: "draggable",
-      droppable: "droppable",
-      selectable: "selectable",
-      clickable: "clickable",
-      group: "group",
-      // a site's, and its pages' (epic `mockup` P1):  `<site "x" at="...">`, `<page "x" address="/x">`
-      at: "at",
-      cloud: "cloud",
-      address: "address",
-      state: "state",
-      tab: "tab",
-      tags: "tags",
-      thumbnail: "thumbnail",
-      live: "live",
-      row: "row",
-      column: "column",
-      color: "color"
-    },
-    // a page's plain head (epic `language` P45):  `"button api" is a notebook page`, read as its tag
     plainPage:
       /^"(?<name>[^"\n]+)"[ \t]+is[ \t]+an?[ \t]+(?<flags>(?:[\p{L}-]+[ \t]+)*?)page(?=[ \t]*(?:\/\/[^\n]*)?$)/imu,
-    // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
+    // the line each reads as -- see `SP.PageTwinWords`
     twins: {
-      placeOfKind: "{words} is {a kind} {kind} at {quoted address} :",
-      template: "{a name} {name} is {a super} {super} :",
-      templateAka: "{a words} {words} aka {aka} is {a super} {super} :",
-      singleton: "{words} is {a super} {super} :",
-      extend: "{a words} {words} :",
-      supers: {
-        view: "view",
-        thing: "thing",
-        page: "page",
-        app: "app",
-        "page template": "page",
-        "app template": "app",
-        site: "site"
-      },
-      property: {
-        list: "its {name} is one of {one-of}",
-        listBody: "its {name} is one of {one-of} :",
-        body: "its {name} is :",
-        value: "its {name} is",
-        typed: "its {name} is {a type} {type}",
-        typedValue: "its {name} is {a type} {type} starting at",
-        bare: "it has {a words} {words}"
-      },
-      propertyAlias: "it {quoted alias}",
-      alias: "it {name}",
-      aliasBlock: "it {name} :",
-      action: "to {words} :",
-      actionDetails: {
-        shortcut: "shortcut {shortcut}",
-        "enabled-when": "enabled when {enabled-when}",
-        "selected-when": "selected when {selected-when}",
-        undoable: "undoable as {quoted undoable}",
-        icon: "icon {quoted icon}",
-        title: "titled {quoted title}"
-      },
-      bareActionDetails: { undoable: "undoable" },
-      test: "to test {words} :",
-      event: "it sends {name}",
-      eventWith: "with",
-      eventParam: "{param} as {a value} {value}",
-      eventAnd: "and",
+      page: "{words} is a page :",
       draw: "to draw it :",
-      drawSlot: "to draw its {words} :",
-      placeSlot: "draw its {words}",
-      menu: "its {name} is a menu of",
-      menuAnd: "and",
-      menuTitled: "titled {quoted title}",
-      menuEach: "its {name} is a menu of {for-each} , each running {quoted action}",
-      menuBar: "its menu bar is {quoted menu-bar}",
-      group: "group {name}",
       pageLocked: "its lock is locked",
-      templateThumbnail: "its thumbnail is {quoted thumbnail}",
       pageSection: {
         tag: "section",
         label: "label",
         defaults: { sticky: "stack", collapsible: true, dividing: true, level: "2" }
-      },
-      siteAt: "{words} is {a super} {super} at {quoted at} :",
-      siteCloud: "{words} is {a super} {super} in the cloud :",
-      sitePage: "it has {a words} {words} at {quoted address}",
-      sitePageTitled: "it has {a words} {words} at {quoted address} , named {quoted title}",
-      sitePageTab: ", tab {quoted tab}",
-      sitePageTags: ", tagged {quoted tags}",
-      sitePageState: ", {state}",
-      sitePageThumbnail: ", thumbnail {quoted thumbnail}",
-      sitePageLive: ", live {quoted live}",
-      siteCardPlace: ", in row {row} column {column}",
-      siteCardColor: ", colored {color}",
-      siteOverlay: "it has {a words} {words}",
-      siteOverlayOf: { dialog: "it has {a words} {words} dialog", sidebar: "it has {a words} {words} sidebar" },
-      siteOverlayWords: "dialog|modal|sidebar|flyout",
-      viewFlags: {
-        draggable: "it is draggable",
-        droppable: "it is droppable",
-        selectable: "it is selectable",
-        clickable: "it is clickable"
-      },
-      handlers: {
-        on: "on {phrase} :",
-        when: "when {phrase} :",
-        while: "while {phrase} :",
-        draggable: "it is draggable {phrase} :",
-        clickable: "it is clickable {phrase} :",
-        selectable: "it is selectable {phrase} :",
-        droppable: "it is droppable {phrase} :",
-        "items draggable": "its {items} are draggable {phrase} :"
       },
       controls: {
         if: "if {phrase}",

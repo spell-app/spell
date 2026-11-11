@@ -4,44 +4,47 @@ import { SiteBoard } from "spell/app/app/pages/SiteBoard"
 import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 
 /**
- * A new page, made where a running site's address had none (epic `mockup` P2):  declared beside the site, and listed
- * in it, in either of Spell's forms.
+ * A site's program, changed by what a person did (epic `mockup` P2, P4):  a site in plain Spell, its part lines bare,
+ * or bulleted as an older writer wrote them.
  */
 describe("SiteEdits", () => {
   test("a part's thumbnail is read, and kept when its line is rewritten;  a line without one gets none (P16)", () => {
-    const spellx =
-      '<spell-site "s">\n\t<page "a page" address="/a" thumbnail="x.jpg"/>\n\t<page "b page" address="/b"/>\n</>\n'
-    expect(SiteEdits.partsIn(spellx)![0]).toMatchObject({ thumbnail: "x.jpg" })
-    const moved = SiteEdits.withPartPlaced(spellx, "a page", { row: 1, column: 2 })
-    expect(moved).toContain('thumbnail="x.jpg"')
-    expect(SiteEdits.withPartPlaced(spellx, "b page", { row: 1, column: 2 })).toContain(
-      '<page "b page" address="/b" row="1" column="2"/>'
-    )
-    const code = 'a "s" is a site:\n\t- it has a "a page" at "/a", thumbnail "x.jpg"\n'
+    const code = 's is a site:\n\tit has a "home page" at "/a", thumbnail "x.jpg"\n\tit has a b page at "/b"\n'
     expect(SiteEdits.partsIn(code)![0]).toMatchObject({ thumbnail: "x.jpg" })
-    expect(SiteEdits.withPartPlaced(code, "a page", { row: 1, column: 2 })).toContain(', thumbnail "x.jpg"')
+    expect(SiteEdits.withPartPlaced(code, "home page", { row: 1, column: 2 })).toContain(
+      '\tit has a "home page" at "/a", thumbnail "x.jpg", in row 1 column 2\n'
+    )
+    expect(SiteEdits.withPartPlaced(code, "b page", { row: 1, column: 2 })).toContain(
+      '\tit has a b page at "/b", in row 1 column 2\n'
+    )
   })
 
   test("a page's or view's own thumbnail is found in the file declaring it (P16)", () => {
-    expect(SiteEdits.thumbnailOf('<spell-page "a page" thumbnail="x.jpg"/>\n', "a page")).toBe("x.jpg")
-    expect(SiteEdits.thumbnailOf('<spell-view "b dialog" thumbnail="y.jpg">\n</>\n', "b dialog")).toBe("y.jpg")
+    expect(SiteEdits.thumbnailOf('"a page" is a page\n\tits thumbnail is "x.jpg"\n', "a page")).toBe("x.jpg")
+    expect(SiteEdits.thumbnailOf('films page is a page:\n\tits thumbnail is "v.jpg"\n', "films page")).toBe("v.jpg")
     expect(
-      SiteEdits.thumbnailOf('<spell-page "button usage" notebook thumbnail="z.jpg">\n</>\n', "button usage page")
+      SiteEdits.thumbnailOf('a "b dialog" is a view:\n\tits thumbnail is "y.jpg"\n\tto draw it:\n', "b dialog")
+    ).toBe("y.jpg")
+    expect(
+      SiteEdits.thumbnailOf('"button usage" is a notebook page\n\tits thumbnail is "z.jpg"\n', "button usage page")
     ).toBe("z.jpg")
+    // a line an older writer bulleted
     expect(SiteEdits.thumbnailOf('a "c page" is a page where:\n\t- its thumbnail is "w.jpg"\n', "c page")).toBe("w.jpg")
     expect(
-      SiteEdits.thumbnailOf('<spell-page "a page"/>\n<spell-page "other" thumbnail="x.jpg"/>\n', "a page")
+      SiteEdits.thumbnailOf('"a page" is a page\n\t# A\n"other" is a page\n\tits thumbnail is "x.jpg"\n', "a page")
     ).toBeUndefined()
   })
 
-  test("a part's tags and tab are read, and kept when its line is rewritten (P15)", () => {
-    const spellx = '<spell-site "s">\n\t<page "a page" address="/a" tab="Usage" tags="Forms, Inputs"/>\n</>\n'
-    expect(SiteEdits.partsIn(spellx)![0]).toMatchObject({ tab: "Usage", tags: "Forms, Inputs" })
-    expect(SiteEdits.withPartPlaced(spellx, "a page", { row: 1, column: 2 })).toContain('tags="Forms, Inputs"')
-    const code = 's is a site:\n\t- it has a page at "/a", tab "Usage", tagged "Forms, Inputs", old\n'
-    expect(SiteEdits.partsIn(code)![0]).toMatchObject({ tab: "Usage", tags: "Forms, Inputs", state: "old" })
-    expect(SiteEdits.withPartPlaced(code, "page", { row: 1, column: 2 })).toContain(
-      '- it has a page at "/a", tab "Usage", tagged "Forms, Inputs", old, in row 1 column 2'
+  test("a part's tags and tab are read, and kept when its line is rewritten;  a bulleted line keeps its bullet (P15)", () => {
+    const bare = 's is a site:\n\tit has a page at "/a", tab "Usage", tagged "Forms, Inputs"\n'
+    expect(SiteEdits.partsIn(bare)![0]).toMatchObject({ tab: "Usage", tags: "Forms, Inputs" })
+    expect(SiteEdits.withPartPlaced(bare, "page", { row: 1, column: 2 })).toContain(
+      '\tit has a page at "/a", tab "Usage", tagged "Forms, Inputs", in row 1 column 2\n'
+    )
+    const bulleted = 's is a site:\n\t- it has a page at "/a", tab "Usage", tagged "Forms, Inputs", old\n'
+    expect(SiteEdits.partsIn(bulleted)![0]).toMatchObject({ tab: "Usage", tags: "Forms, Inputs", state: "old" })
+    expect(SiteEdits.withPartPlaced(bulleted, "page", { row: 1, column: 2 })).toContain(
+      '\t- it has a page at "/a", tab "Usage", tagged "Forms, Inputs", old, in row 1 column 2\n'
     )
   })
 
@@ -53,35 +56,11 @@ describe("SiteEdits", () => {
     expect(SiteEdits.pageNameFor("/about", ["about page", "about page 2"])).toBe("about page 3")
   })
 
-  test("spellx:  declared before `<spell-site>`, listed last in it", () => {
+  test("a new page:  `a ... is a page` before the site, `it has a ...` last in it", () => {
     const text = [
-      '<spell-page "films page"/>',
-      "",
-      '<spell-site "galaxy guide">',
-      '\t<page "films page" address="/films"/>',
-      "</>",
-      ""
-    ].join("\n")
-    expect(SiteEdits.withPageAdded(text, "tatooine page", "/planets/tatooine")).toBe(
-      [
-        '<spell-page "films page"/>',
-        "",
-        '<page "tatooine page"/>',
-        "",
-        '<spell-site "galaxy guide">',
-        '\t<page "films page" address="/films"/>',
-        '\t<page "tatooine page" address="/planets/tatooine"/>',
-        "</>",
-        ""
-      ].join("\n")
-    )
-  })
-
-  test("code spell:  `a ... is a page` before the site, `- it has a ...` last in it", () => {
-    const text = [
-      'a "films page" is a page',
+      "films page is a page",
       "galaxy guide is a site:",
-      '\t- it has a films page at "/films"',
+      '\tit has a films page at "/films"',
       "",
       "to wander:",
       "\tprint 1",
@@ -89,17 +68,24 @@ describe("SiteEdits", () => {
     ].join("\n")
     expect(SiteEdits.withPageAdded(text, "about page", "/about")).toBe(
       [
-        'a "films page" is a page',
+        "films page is a page",
         'a "about page" is a page',
         "galaxy guide is a site:",
-        '\t- it has a films page at "/films"',
-        '\t- it has an about page at "/about"',
+        '\tit has a films page at "/films"',
+        '\tit has an about page at "/about"',
         "",
         "to wander:",
         "\tprint 1",
         ""
       ].join("\n")
     )
+  })
+
+  test("a new page in a site an older writer bulleted:  its line bare", () => {
+    const text = 'galaxy guide is a site:\n\t- it has a films page at "/films"\n'
+    const added = SiteEdits.withPageAdded(text, "about page", "/about")
+    expect(added).toContain('\t- it has a films page at "/films"\n\tit has an about page at "/about"\n')
+    expect(SiteEdits.partsIn(added)!.map((part) => part.name)).toEqual(["films page", "about page"])
   })
 
   test("a file with no site says so", () => {
@@ -111,40 +97,23 @@ describe("SiteEdits", () => {
   // ## The site editor's changes (epic `mockup` P4)
   ////////////////
 
-  /** A spellx site:  two pages declared here, one under the other, and a dialog. */
-  const SPELLX = [
-    '<spell-page "films page"/>',
-    "",
-    '<spell-page "film page">',
-    '\t<property "film" type="film"/>',
-    "</>",
-    "",
-    '<spell-site "galaxy guide">',
-    '\t<page "films page" address="/films" title="Films">',
-    '\t\t<page "film page" address="/films/:film" title="Film"/>',
-    "\t</>",
-    "\t<!-- what opens over any page -->",
-    '\t<dialog "settings dialog"/>',
-    "</>",
-    ""
-  ].join("\n")
-
-  /** The same site, in code spell. */
+  /** A site in plain Spell:  two pages declared here, one under the other, and a dialog. */
   const CODE = [
-    'a "films page" is a page',
-    'a "film page" is a page:',
-    "\t- it has a film",
+    "films page is a page:",
+    "\tto draw it:",
+    "\t\t<header>Films</header>",
+    "film page is a page:",
+    "\tits film is a film",
     "galaxy guide is a site:",
-    '\t- it has a films page at "/films", named "Films"',
-    '\t\t- it has a film page at "/films/:film", named "Film"',
-    "\t- it has a settings dialog",
+    '\tit has a films page at "/films", named "Films"',
+    '\t\tit has a film page at "/films/:film", named "Film"',
+    "\t// what opens over any page",
+    "\tit has a settings dialog",
     ""
   ].join("\n")
 
-  test.each([
-    ["spellx", SPELLX],
-    ["code spell", CODE]
-  ])("%s:  reads the parts, nested, with their addresses and titles", (_form, text) => {
+  test("reads the parts, nested, with their addresses and titles", () => {
+    const text = CODE
     const parts = SiteEdits.partsIn(text)!
     expect(parts.map((part) => [part.kind, part.name, part.address, part.title])).toEqual([
       ["page", "films page", "/films", "Films"],
@@ -156,42 +125,39 @@ describe("SiteEdits", () => {
     expect(SiteEdits.partsIn("a card is a thing")).toBeUndefined()
   })
 
-  test("spellx:  a page's address and title changed, a title taken out", () => {
-    const changed = SiteEdits.withPartChanged(SPELLX, "film page", { address: "/movies/:film", title: "" })
-    expect(changed).toContain('\t\t<page "film page" address="/movies/:film"/>')
-    expect(() => SiteEdits.withPartChanged(SPELLX, "film page", { address: "/films" })).toThrow(/is at \/films/)
-    expect(() => SiteEdits.withPartChanged(SPELLX, "film page", { address: "films" })).toThrow(/starts with "\/"/)
+  test("a page's address and title changed, a title taken out", () => {
+    expect(SiteEdits.withPartChanged(CODE, "films page", { title: "Movies" })).toContain(
+      '\tit has a films page at "/films", named "Movies"\n'
+    )
+    const changed = SiteEdits.withPartChanged(CODE, "film page", { address: "/movies/:film", title: "" })
+    expect(changed).toContain('\t\tit has a film page at "/movies/:film"\n')
+    expect(() => SiteEdits.withPartChanged(CODE, "film page", { address: "/films" })).toThrow(/is at \/films/)
+    expect(() => SiteEdits.withPartChanged(CODE, "film page", { address: "films" })).toThrow(/starts with "\/"/)
   })
 
-  test("code spell:  a page's address and title changed", () => {
-    const changed = SiteEdits.withPartChanged(CODE, "films page", { title: "Movies" })
-    expect(changed).toContain('\t- it has a films page at "/films", named "Movies"\n')
-  })
-
-  test.each([
-    ["spellx", SPELLX, '<spell-page "movie page">', '<page "movie page" address="/films/:film"'],
-    ["code spell", CODE, 'a "movie page" is a page:', '- it has a movie page at "/films/:film"']
-  ])("%s:  a page renamed, in the site and its declaration", (_form, text, declared, listed) => {
-    const renamed = SiteEdits.withPartRenamed(text, "film page", "movie page")
-    expect(renamed).toContain(declared)
-    expect(renamed).toContain(listed)
-    expect(() => SiteEdits.withPartRenamed(text, "film page", "films page")).toThrow(/has a "films page" already/)
-    expect(() => SiteEdits.withPartRenamed(text, "film page", 'a "quoted" name')).toThrow(/isn't a name/)
-    expect(SiteEdits.withPartRenamed(text, "film page", "Boxes & Blades")).toContain("Boxes & Blades")
+  test("a page renamed, in the site and its declaration", () => {
+    const renamed = SiteEdits.withPartRenamed(CODE, "film page", "movie page")
+    expect(renamed).toContain("movie page is a page:\n")
+    expect(renamed).toContain('\t\tit has a movie page at "/films/:film"')
+    expect(() => SiteEdits.withPartRenamed(CODE, "film page", "films page")).toThrow(/has a "films page" already/)
+    expect(() => SiteEdits.withPartRenamed(CODE, "film page", 'a "quoted" name')).toThrow(/isn't a name/)
+    // a name that can't be bare is quoted, in the site and its declaration
+    const titled = SiteEdits.withPartRenamed(CODE, "film page", "Boxes & Blades")
+    expect(titled).toContain('\t\tit has a "Boxes & Blades" at "/films/:film"')
+    expect(titled).toContain('"Boxes & Blades" is a page:\n')
+    expect(SiteEdits.partNamed(titled, "Boxes & Blades").address).toBe("/films/:film")
   })
 
   describe("a site of its routing alone (P17)", () => {
     const ROUTING = [
-      '<spell-site "galaxy guide">',
-      '\t<group "Home" color="red"/>',
-      '\t<page "Home" address="/"/>',
-      '\t<sidebar "System Notices" address="/notices"/>',
-      '\t<group "My Stuff"/>',
-      '\t<page "My Inbox" address="/inbox"/>',
-      '\t<page "My Team" address="/team">',
-      '\t\t<page "Roster" address="/team/roster"/>',
-      "\t</>",
-      "</>",
+      "galaxy guide is a site:",
+      '\tgroup "Home"',
+      '\tit has a "Home" at "/"',
+      '\tit has a "notices sidebar"',
+      '\tgroup "My Stuff"',
+      '\tit has a "My Inbox" at "/inbox"',
+      '\tit has a "My Team" at "/team"',
+      '\t\tit has a "Roster" at "/team/roster"',
       ""
     ].join("\n")
 
@@ -207,8 +173,10 @@ describe("SiteEdits", () => {
         ["group", SiteEdits.groupKey("Home"), "Home"],
         ["group", SiteEdits.groupKey("My Stuff"), "My Stuff"]
       ])
-      expect(parts[0]!.color).toBe("red")
-      expect(parts[0]!.parts.map((part) => part.name)).toEqual(["Home", "System Notices"])
+      expect(parts[0]!.parts.map((part) => [part.kind, part.name])).toEqual([
+        ["page", "Home"],
+        ["sidebar", "notices sidebar"]
+      ])
       expect(parts[1]!.parts.map((part) => part.name)).toEqual(["My Inbox", "My Team"])
       expect(SiteBoard.sectionsOf(parts).map((section) => section.cards.length)).toEqual([3, 4])
     })
@@ -218,7 +186,7 @@ describe("SiteEdits", () => {
       expect(SiteEdits.partsIn(into)![0]!.parts.map((part) => part.name)).toEqual([
         "My Inbox",
         "Home",
-        "System Notices"
+        "notices sidebar"
       ])
       const swapped = SiteEdits.withPartMoved(ROUTING, SiteEdits.groupKey("My Stuff"), {
         where: "before",
@@ -230,19 +198,21 @@ describe("SiteEdits", () => {
 
     test("a group renamed:  only its own line", () => {
       const renamed = SiteEdits.withPartRenamed(ROUTING, SiteEdits.groupKey("Home"), "Start")
-      expect(renamed).toContain('<group "Start" color="red"/>')
-      expect(renamed).toContain('<page "Home" address="/"/>')
+      expect(renamed).toContain('\tgroup "Start"\n')
+      expect(renamed).toContain('\tit has a "Home" at "/"\n')
     })
 
     test("a page added lists only its line:  it's made when it's first opened", () => {
       const added = SiteEdits.withPageAdded(ROUTING, "Help", "/help", { listOnly: true })
-      expect(added).toContain('\t<page "Help" address="/help"/>\n</>')
-      expect(added).not.toContain("<spell-page")
+      // a title, so its name is quoted
+      expect(added.endsWith('\t\tit has a "Roster" at "/team/roster"\n\tit has a "Help" at "/help"\n')).toBe(true)
+      expect(added).not.toContain("is a page")
+      expect(SiteEdits.partNamed(added, "Help").address).toBe("/help")
     })
 
     test("a live link is written, read back and taken out;  only a web address", () => {
       const live = SiteEdits.withPartChanged(ROUTING, "Home", { live: "https://example.com/" })
-      expect(live).toContain('<page "Home" address="/" live="https://example.com/"/>')
+      expect(live).toContain('\tit has a "Home" at "/", live "https://example.com/"\n')
       expect(SiteEdits.partNamed(live, "Home").live).toBe("https://example.com/")
       expect(SiteEdits.withPartChanged(live, "Home", { live: "" })).toBe(ROUTING)
       expect(() => SiteEdits.withPartChanged(ROUTING, "Home", { live: "javascript:alert(1)" })).toThrow(/https/)
@@ -256,14 +226,21 @@ describe("SiteEdits", () => {
       // a page in plain Spell (epic `language` P45)
       expect(SiteEdits.stubFor(page)).toBe('"My Inbox" is a page\n\t<header size="large">My Inbox</header>\n')
       expect(SiteEdits.stubFor(page, "es")).toBe('"My Inbox" es una página\n\t<header size="large">My Inbox</header>\n')
-      const sidebar = SiteEdits.partNamed(ROUTING, "System Notices")
-      expect(SiteEdits.stubFor(sidebar)).toContain('<spell-view "System Notices">\n\t<draw>')
+      const sidebar = SiteEdits.partNamed(ROUTING, "notices sidebar")
+      expect(SiteEdits.stubFor(sidebar)).toBe(
+        'a "notices sidebar" is a view:\n\tto draw it:\n\t\t<header size="medium">notices sidebar</header>\n'
+      )
+      expect(SiteEdits.stubFor(sidebar, "es")).toBe(
+        'una "notices sidebar" es una vista:\n\tpara dibujarla:\n\t\t<header size="medium">notices sidebar</header>\n'
+      )
     })
 
     test("a declaration is found in any file:  a page or a view", () => {
-      const view = '<spell-view "System Notices">\n\t<draw>\n\t</draw>\n</>\n'
-      expect(SiteEdits.declarationOf(view, "System Notices")).toEqual({ start: 0, end: view.length })
-      // a page's plain head (epic `language` P45), and a page as code spell writes it, by its bare name
+      const view = 'a "notices sidebar" is a view:\n\tto draw it:\n\t\t<header>Notices</header>\n'
+      expect(SiteEdits.declarationOf(view, "notices sidebar")).toEqual({ start: 0, end: view.length })
+      const spanish = 'una "avisos" es una vista:\n\tpara dibujarla:\n\t\t<header>Avisos</header>\n'
+      expect(SiteEdits.declarationOf(spanish, "avisos")).toEqual({ start: 0, end: spanish.length })
+      // a page's plain head (epic `language` P45), and a page by its bare name
       const plain = '"my inbox" is a notebook page\n\t# Inbox\n\n'
       expect(SiteEdits.declarationOf(`${plain}x`, "my inbox")).toEqual({ start: 0, end: plain.length })
       const code = "films page is a page:\n\t- to draw it:\n\t\t<text>Films</text>\n"
@@ -271,10 +248,8 @@ describe("SiteEdits", () => {
     })
   })
 
-  test.each([
-    ["spellx", SPELLX],
-    ["code spell", CODE]
-  ])("%s:  a page taken out with its declaration;  one with pages under it, with them", (_form, text) => {
+  test("a page taken out with its declaration;  one with pages under it, with them", () => {
+    const text = CODE
     const removed = SiteEdits.withPartRemoved(text, "film page")
     expect(removed).not.toContain("film page")
     expect(removed).not.toContain('film"')
@@ -284,10 +259,8 @@ describe("SiteEdits", () => {
     expect(all).not.toMatch(/films? page/)
   })
 
-  test.each([
-    ["spellx", SPELLX],
-    ["code spell", CODE]
-  ])("%s:  a part moved before or after another, at its depth", (_form, text) => {
+  test("a part moved before or after another, at its depth", () => {
+    const text = CODE
     const moved = SiteEdits.withPartMoved(text, "settings dialog", { where: "before", part: "films page" })
     expect(SiteEdits.partsIn(moved)!.map((part) => part.name)).toEqual(["settings dialog", "films page"])
     const out = SiteEdits.withPartMoved(text, "film page", { where: "after", part: "settings dialog" })
@@ -299,10 +272,8 @@ describe("SiteEdits", () => {
     )
   })
 
-  test.each([
-    ["spellx", SPELLX],
-    ["code spell", CODE]
-  ])("%s:  after a page goes below its own pages too", (_form, text) => {
+  test("after a page goes below its own pages too", () => {
+    const text = CODE
     const moved = SiteEdits.withPartMoved(text, "settings dialog", { where: "before", part: "films page" })
     const back = SiteEdits.withPartMoved(moved, "settings dialog", { where: "after", part: "films page" })
     expect(SiteEdits.partsIn(back)!.map((part) => part.name)).toEqual(["films page", "settings dialog"])
@@ -312,10 +283,8 @@ describe("SiteEdits", () => {
     )
   })
 
-  test.each([
-    ["spellx", SPELLX],
-    ["code spell", CODE]
-  ])("%s:  a page moved into another, as its first page, keeping its address, and back out", (_form, text) => {
+  test("a page moved into another, as its first page, keeping its address, and back out", () => {
+    const text = CODE
     const added = SiteEdits.withPageAdded(text, "about page", "/about")
     const inside = SiteEdits.withPartMoved(added, "about page", { where: "into", part: "films page" })
     const films = SiteEdits.partNamed(inside, "films page")
@@ -326,10 +295,8 @@ describe("SiteEdits", () => {
     expect(out).toBe(added)
   })
 
-  test.each([
-    ["spellx", SPELLX],
-    ["code spell", CODE]
-  ])("%s:  a page moved into one with no pages yet, and the one it left", (_form, text) => {
+  test("a page moved into one with no pages yet, and the one it left", () => {
+    const text = CODE
     const added = SiteEdits.withPageAdded(text, "about page", "/about")
     const moved = SiteEdits.withPartMoved(added, "films page", { where: "into", part: "about page" })
     const about = SiteEdits.partNamed(moved, "about page")
@@ -341,30 +308,15 @@ describe("SiteEdits", () => {
     expect(SiteEdits.partNamed(left, "about page").parts.map((part) => part.name)).toEqual(["film page"])
   })
 
-  test("spellx:  a page that closes itself opens to hold one;  one left with none closes itself again", () => {
-    const added = SiteEdits.withPageAdded(SPELLX, "about page", "/about")
-    const left = SiteEdits.withPartMoved(added, "film page", { where: "into", part: "about page" })
-    expect(left).toContain(
-      [
-        '\t<page "about page" address="/about">',
-        '\t\t<page "film page" address="/films/:film" title="Film"/>',
-        "\t</>"
-      ].join("\n")
-    )
-    expect(left).toContain('\t<page "films page" address="/films" title="Films"/>\n')
-  })
-
-  test.each([
-    ["spellx", SPELLX],
-    ["code spell", CODE]
-  ])("%s:  what can't go inside what", (_form, text) => {
+  test("what can't go inside what", () => {
+    const text = CODE
     const into = (name: string, part: string) => SiteEdits.withPartMoved(text, name, { where: "into", part })
     expect(() => into("films page", "films page")).toThrow(/inside itself/)
     expect(() => into("films page", "film page")).toThrow(/one of its own pages/)
     expect(() => into("film page", "settings dialog")).toThrow(/only a page with an address/)
   })
 
-  test("code spell:  a file ending without a line break", () => {
+  test("a file ending without a line break", () => {
     const text = CODE.trimEnd()
     const moved = SiteEdits.withPartMoved(text, "settings dialog", { where: "before", part: "films page" })
     expect(SiteEdits.partsIn(moved)!.map((part) => part.name)).toEqual(["settings dialog", "films page"])

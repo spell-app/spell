@@ -1,5 +1,5 @@
-import type { SP } from "spell/parser/spell"
-import { SX } from "spell/parser/spellx"
+import { SP } from "spell/parser/spell"
+import { PG } from "spell/parser/page"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan } from "spell/app/lsp/SourceEdits"
 
@@ -9,19 +9,18 @@ import { SourceEdits, dedented, indentAt, indented, replaceSpan, type TextSpan }
  * - A notebook is any page with the `notebook` flag:  the editor shows it in place, editable.
  * - Moving, adding and deleting cells is the editor's drag and drop (`PartEdits`, epic `notebook` P5):
  *   a run of prose is found for it by `proseAt()`.
- * - The cells come from the file's chunk tree (`SX.SpellxView`):  what's inside its notebook, in order.
- *   The notebook:  `"x" is a notebook page` (epic `language` P45);  in tags, `<page "x" notebook>`, `<notebook "x">`.
+ * - The cells come from the file's chunk tree (`PG.PageView`):  what's inside its notebook, in order.
+ *   The notebook:  `"x" is a notebook page` (epic `language` P45).
  *   - `prose`:  a run of markdown;  a new cell at each `##` heading, which starts a section of the page
  *   - `heading`:  the page's title or a section's start, written as a tag rather than markdown (either works):
  *     - the title:  a top-level `<header level="1">`, its sub header (a `<header>` inside it) the line under it
  *     - a section:  a top-level `<section label="...">`, this cell its opening tag;
  *       what's inside it, cells of their own, in its section of the page
- *   - `template`:  one of its own templates, `<view "counter">`
  *   - `drawing`:  an element drawn in place, `<example "one counter">`, `<section>`;  the examples in it, in order
  *     - an example's description is its own `description="..."`, as `<ui-example>` takes it (epic `notebook` P6):
  *       the text before it is just text
  *   - `html`:  an `<html>` block, drawn as written
- *   - `member`:  anything else it declares (`<property>` ...), shown as code
+ *   - `member`:  anything else in it, an `<if>` or a `<for>` drawn on its own lines, shown as code
  * - No ids are written into the file:  a cell is found by its place among the others.
  * - Every edit returns the file's NEW TEXT, changing only what it's about:  the rest stays byte for byte.
  * - A cell's code is shown without its indent (`indent`), which an edit puts back on every line.
@@ -34,27 +33,24 @@ export class NotebookPageCells {
    * - NEVER throws.
    */
   static of(text: string, path?: string): NotebookPageModel | undefined {
-    const file = SX.SpellxView.read(text, { path })
-    const notebook = file.templates.find((template) => NotebookPageCells.isNotebook(template))
+    const file = PG.PageView.read(text, { path })
+    const notebook = file.pages.find((page) => NotebookPageCells.isNotebook(page))
     if (!notebook) return undefined
     const cells = notebook.children.flatMap((node) => NotebookPageCells.cellsFor(text, node, "top"))
     const locked = notebook.attributes.some((attribute) => attribute.name === "locked")
-    // the file's language's word for `locked`, `bloqueado`;  on a plain head, the one agreeing with its page's word,
-    // `una página bloqueada` (epic `language` J76)
-    const spellx = file.language.words.spellx
-    const words = spellx?.attributes ?? {}
-    const lockWord =
-      (notebook.plain ? spellx?.plainPageLocked : undefined) ??
-      Object.entries(words).find(([, english]) => english === "locked")?.[0]
+    // the file's language's word for `locked`, the one agreeing with its page's word, `una página bloqueada`
+    // (epic `language` J76)
+    const words = file.language.words.page ?? SP.Language.default.words.page!
+    const lockWord = words.plainPageLocked ?? Object.entries(words.flags).find(([, english]) => english === LOCKED)?.[0]
     return { name: notebook.name ?? "", locked, lockWord, notebook, cells, language: file.language.lang }
   }
 
   /**
-   * Is `template` a notebook:  a page with the `notebook` flag, however it's spelled (epic `notebook` P1)?
-   * - The editor's own test:  the language only asks whether a page draws its body (`SX.SpellxTemplate.drawsBody`).
+   * Is `page` a notebook:  a page with the `notebook` flag, however it's spelled (epic `notebook` P1)?
+   * - The editor's own test:  to the language every page draws its body.
    */
-  static isNotebook(template: SX.SpellxTemplate): boolean {
-    return template.type === "page" && template.attributes.some((attribute) => attribute.name === NOTEBOOK_FLAG)
+  static isNotebook(page: PG.PageHead): boolean {
+    return page.attributes.some((attribute) => attribute.name === NOTEBOOK_FLAG)
   }
 
   /**
@@ -72,7 +68,7 @@ export class NotebookPageCells {
   }
 
   /**
-   * Does `file`, a `.spell` file, hold a LOCKED page, `<spell-page "x" locked>`, a notebook or not?
+   * Does `file`, a `.spell` file, hold a LOCKED page, `"x" is a locked page`, a notebook or not?
    * - What the editor asks before keeping or saving a file (`editor.isLocked()`, epic `notebook` P3).
    * - Read and kept as `holdsNotebook()` is.
    */
@@ -83,8 +79,8 @@ export class NotebookPageCells {
   /**
    * The run of prose drawn as ONE part, written at `offset` in `text`:
    * its whole span, for the editor's drag and drop (`PartEdits`, epic `notebook` P5).
-   * - In a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not.
-   * - What the page draws of its prose, each marked where its first line is written (`SP.SpellxTwin`):
+   * - In any page, a notebook or not.
+   * - What the page draws of its prose, each marked where its first line is written (`SP.PageTwin`):
    *   - a `<markdown>` block:  a run of prose, to its last line with text
    *   - a `##` heading's section:  the heading, its prose, and what follows it
    *     up to the next section or a line of code, as the twin gathers it
@@ -93,7 +89,7 @@ export class NotebookPageCells {
    * - NEVER throws.
    */
   static proseAt(text: string, offset: number, path?: string): TextSpan | undefined {
-    const pages = SX.SpellxView.read(text, { path }).templates.filter((template) => template.drawsBody)
+    const { pages } = PG.PageView.read(text, { path })
     const page = pages.find((each) => each.span.start < offset && offset < each.span.end)
     if (!page) return undefined
     const cells = page.children.flatMap((node) => NotebookPageCells.cellsFor(text, node, "top"))
@@ -112,22 +108,22 @@ export class NotebookPageCells {
   }
 
   /**
-   * Does `file`, a tag-shaped file, hold a page that draws its body (`SX.SpellxTemplate.drawsBody`), a notebook or not?
+   * Does `file` hold a page, a notebook or not:  a page file (`SP.SpellFile.form`)?
    * - What the palette asks before offering a page's own row, a new view (epic `notebook` P5).
    * - Read and kept as `holdsNotebook()` is.
    */
   static holdsDrawnPage(file: SP.AnySpellFile): boolean {
-    return "form" in file && file.form === "spellx" && NotebookPageCells.pagesIn(file).drawsBody
+    return "form" in file && file.form === "page" && NotebookPageCells.pagesIn(file).hasPage
   }
 
   /**
-   * Where the first page in `text` that draws its body opens, its `<`.
-   * - What's added with nothing selected goes last in it (`PartEdits`).
+   * Where the first page in `text` starts, its head's `"`.
+   * - What's added with nothing selected goes last in it (`PartEdits`);  a view of its own, just above it.
    * - `undefined` when it has none.
    * - NEVER throws.
    */
   static drawnPageIn(text: string, path?: string): number | undefined {
-    return SX.SpellxView.read(text, { path }).templates.find((template) => template.drawsBody)?.span.start
+    return PG.PageView.read(text, { path }).pages[0]?.span.start
   }
 
   /** What `file`'s pages say, read from its chunk tree once for each text it has.  NEVER throws. */
@@ -135,13 +131,13 @@ export class NotebookPageCells {
     const contents = file.contents ?? ""
     const known = PAGES_READ.get(file)
     if (known?.contents === contents) return known
-    const pages = SX.SpellxView.read(contents, { path: file.path }).templates.filter((each) => each.type === "page")
+    const { pages } = PG.PageView.read(contents, { path: file.path })
     const notebook = pages.find(NotebookPageCells.isNotebook)
     const read = {
       contents,
       notebook: notebook && (notebook.name ?? ""),
       isLocked: pages.some((page) => page.attributes.some((attribute) => attribute.name === LOCKED)),
-      drawsBody: pages.some((page) => page.drawsBody)
+      hasPage: pages.length > 0
     }
     PAGES_READ.set(file, read)
     return read
@@ -158,30 +154,25 @@ export class NotebookPageCells {
 
   /**
    * The edits that lock the notebook in `text` (`locked`) or unlock it:
-   * its tag's `locked`, in the file's language (`bloqueado`),
-   * added or taken off as the Inspector sets any attribute (`SourceEdits.settingAttribute()`).
+   * its head's `locked`, in the file's language (`bloqueada`), a word of its line:  `"x" is a locked notebook page`.
    */
   static lockEdits(text: string, model: NotebookPageModel, locked: boolean) {
     const word = model.lockWord ?? LOCKED
-    // a plain head (epic `language` P45):  its flag is a word of its line, `"x" is a locked notebook page`
-    if (model.notebook.plain) {
-      const said = model.notebook.attributes.find((attribute) => attribute.name === LOCKED)
-      // with the space after it in English, before it in Spanish
-      const gone =
-        model.language === "en"
-          ? { start: said?.span.start ?? 0, end: (said?.span.end ?? 0) + 1 }
-          : said && { start: said.span.start - 1, end: said.span.end }
-      if (said && !locked) return [SourceEdits.replacing(text, gone!, "")]
-      if (said || !locked) return []
-      // first of its flags in English, `a locked notebook page`;  after the page's word in Spanish, `una página bloqueada`
-      const first = model.notebook.attributes[0]
-      const at =
-        model.language === "en"
-          ? (first?.span.start ?? text.lastIndexOf(" page", model.notebook.headSpan.end) + 1)
-          : model.notebook.headSpan.end
-      return [SourceEdits.replacing(text, { start: at, end: at }, model.language === "en" ? `${word} ` : ` ${word}`)]
-    }
-    return SourceEdits.settingAttribute(text, model.notebook.headSpan.start, word, locked)
+    const said = model.notebook.attributes.find((attribute) => attribute.name === LOCKED)
+    // with the space after it in English, before it in Spanish
+    const gone =
+      model.language === "en"
+        ? { start: said?.span.start ?? 0, end: (said?.span.end ?? 0) + 1 }
+        : said && { start: said.span.start - 1, end: said.span.end }
+    if (said && !locked) return [SourceEdits.replacing(text, gone!, "")]
+    if (said || !locked) return []
+    // first of its flags in English, `a locked notebook page`;  after the page's word in Spanish, `una página bloqueada`
+    const first = model.notebook.attributes[0]
+    const at =
+      model.language === "en"
+        ? (first?.span.start ?? text.lastIndexOf(" page", model.notebook.headSpan.end) + 1)
+        : model.notebook.headSpan.end
+    return [SourceEdits.replacing(text, { start: at, end: at }, model.language === "en" ? `${word} ` : ` ${word}`)]
   }
 
   ////////////////
@@ -193,10 +184,8 @@ export class NotebookPageCells {
    * - A top-level `<header level="1">` is the page's title.
    * - A top-level `<section label>` is a section, its children cells after it.
    */
-  private static cellsFor(text: string, node: SX.SpellxNode, place: "top" | "section"): PageCell[] {
+  private static cellsFor(text: string, node: PG.PageNode, place: "top" | "section"): PageCell[] {
     if (node.kind === "prose") return NotebookPageCells.proseCells(text, node.span)
-    if (node.kind === "template")
-      return [cellOf(text, "template", node.span, { name: node.name ?? "", groups: groupsOf(node) })]
     if (node.kind === "element") {
       const title = place === "top" ? titleOf(node) : undefined
       if (title) return [cellOf(text, "heading", node.span, title)]
@@ -213,13 +202,13 @@ export class NotebookPageCells {
       const start = node.span.start + lead
       return [NotebookPageCells.proseCell(text, { start, end: start + trimmed.length })]
     }
-    if (node.kind === "declaration" && (node.type as string) === "html") return [cellOf(text, "html", node.span)]
+    if (node.kind === "block" && node.type === "html") return [cellOf(text, "html", node.span)]
     if (node.kind !== "code" || node.lines.length) return [cellOf(text, "member", node.span)]
     return []
   }
 
   /** The prose cells of the run of markdown at `span`:  a new one at each `##` heading. */
-  private static proseCells(text: string, span: SX.SpellxSpan): PageCell[] {
+  private static proseCells(text: string, span: PG.PageSpan): PageCell[] {
     const cells: PageCell[] = []
     let start = span.start
     let at = span.start
@@ -237,7 +226,7 @@ export class NotebookPageCells {
   }
 
   /** The prose cell at `span`:  its markdown, and its heading if it starts a section. */
-  private static proseCell(text: string, span: SX.SpellxSpan): PageCell {
+  private static proseCell(text: string, span: PG.PageSpan): PageCell {
     const cell = cellOf(text, "prose", span)
     const heading = HEADING.exec(cell.code.split("\n")[0] ?? "")
     if (heading) cell.heading = heading[1]!.trim()
@@ -250,10 +239,10 @@ export class NotebookPageCells {
   }
 
   /** The drawing cell for element `node`:  the examples in it, however deep, in order. */
-  private static drawingCell(text: string, node: SX.SpellxElement): PageCell {
+  private static drawingCell(text: string, node: PG.PageElement): PageCell {
     const cell = cellOf(text, "drawing", node.span, { name: nameOf(node) })
     const examples: ExampleSpan[] = []
-    const visit = (element: SX.SpellxNode) => {
+    const visit = (element: PG.PageNode) => {
       if (element.kind !== "element") return
       if (EXAMPLE_TAGS.has(element.name)) examples.push(NotebookPageCells.exampleOf(text, element))
       else element.children.forEach(visit)
@@ -268,7 +257,7 @@ export class NotebookPageCells {
    * - A body that's one `<html>` block (J144) is what's INSIDE it, marked `html`:
    *   the block's own tags are how the file marks web markup, not part of what the example draws (P18).
    */
-  private static exampleOf(text: string, node: SX.SpellxElement): ExampleSpan {
+  private static exampleOf(text: string, node: PG.PageElement): ExampleSpan {
     const shown = node.children.filter((child) => child.kind !== "text" || child.text.trim())
     const [first] = shown
     const last = shown.at(-1)
@@ -289,7 +278,7 @@ export class NotebookPageCells {
   }
 
   /** What's inside element `node`, from its first line's text to its last's:  `undefined` when it's empty. */
-  private static insideOf(text: string, node: SX.SpellxElement): SX.SpellxSpan | undefined {
+  private static insideOf(text: string, node: PG.PageElement): PG.PageSpan | undefined {
     if (node.selfClosing) return undefined
     const closer = text.lastIndexOf("</", node.span.end)
     if (closer < node.headSpan.end) return undefined
@@ -312,8 +301,8 @@ export type NotebookPageModel = {
   locked: boolean
   /** the language's word for `locked`, when it's another's */
   lockWord?: string
-  /** its tag, from the chunk tree */
-  notebook: SX.SpellxTemplate
+  /** its head, from the chunk tree */
+  notebook: PG.PageHead
   /** its cells, in order */
   cells: PageCell[]
   /** the file's language, `en` */
@@ -327,14 +316,14 @@ export type CodeSpan = {
   /** the indent its first line sits at, put back on an edit */
   indent: string
   /** where it is in the file */
-  span: SX.SpellxSpan
+  span: PG.PageSpan
 }
 
 /** One cell of a notebook's page. */
 export type PageCell = CodeSpan & {
   /** what it is:  see `NotebookPageCells` */
-  kind: "prose" | "heading" | "template" | "drawing" | "html" | "member"
-  /** a template's or an example's name */
+  kind: "prose" | "heading" | "drawing" | "html" | "member"
+  /** an example's name */
   name?: string
   /** a `##` heading, or a `<section label>`'s label:  it starts a section */
   heading?: string
@@ -343,22 +332,17 @@ export type PageCell = CodeSpan & {
   /** the line under the title:  the text after a `#` title, or its `<header>`'s sub header */
   lead?: string
   /** a section written as a tag:  the whole of it, what's inside too (this cell's span is its opening tag) */
-  block?: SX.SpellxSpan
+  block?: PG.PageSpan
   /** a drawing cell's examples, in order */
   examples?: ExampleSpan[]
-  /** a template's groups, each with its members' names:  none when it has none */
-  groups?: CellGroup[]
 }
-
-/** A group of a template's members, as its cell lists it:  its name, its description and its members' names. */
-export type CellGroup = { name: string; description: string | undefined; members: string[] }
 
 /** An example in a drawing cell:  its name, and its body's code. */
 export type ExampleSpan = {
   /** its name, `one counter` */
   name: string
   /** where the whole `<example>` is */
-  span: SX.SpellxSpan
+  span: PG.PageSpan
   /** what's inside it;  a lone `<html>` block's:  what's inside that */
   body: CodeSpan
   /** is its body a lone `<html>` block's markup?  Shown as written, in every view */
@@ -370,28 +354,9 @@ export type ExampleSpan = {
 ////////////////
 
 /** A cell of `kind` at `span` in `text`, its code without its indent. */
-function cellOf(text: string, kind: PageCell["kind"], span: SX.SpellxSpan, more: Partial<PageCell> = {}): PageCell {
+function cellOf(text: string, kind: PageCell["kind"], span: PG.PageSpan, more: Partial<PageCell> = {}): PageCell {
   const indent = indentAt(text, span.start)
   return { kind, span, indent, code: dedented(text.slice(span.start, span.end), indent), ...more }
-}
-
-/**
- * Template `node`'s groups (`SX.SpellxFile.groupsOf()`):
- * each named one, its description, its members' names or phrases.
- * - `undefined` when it has none.
- */
-function groupsOf(node: SX.SpellxTemplate): CellGroup[] | undefined {
-  const groups = SX.SpellxFile.groupsOf(node).filter((group) => group.name !== undefined)
-  if (!groups.length) return undefined
-  return groups.map(({ name, group, members }) => ({
-    name: name!,
-    description: group?.attributes.find((attribute) => attribute.name === "description")?.value,
-    members: members.map((member) => {
-      if (member.kind === "handler") return `${member.word} ${member.phrase}`
-      if (member.kind === "declaration") return member.name ?? member.word
-      return member.kind === "note" ? member.word : member.kind
-    })
-  }))
 }
 
 /** Where the text from `start` to `at` ends, less its trailing blank lines. */
@@ -400,7 +365,7 @@ function trimmedEnd(text: string, start: number, at: number): number {
 }
 
 /** An element's name, `name="..."` or its quoted name. */
-function nameOf(node: SX.SpellxElement): string {
+function nameOf(node: PG.PageElement): string {
   return node.attributes.find((attribute) => attribute.name === "name")?.value ?? ""
 }
 
@@ -408,7 +373,7 @@ function nameOf(node: SX.SpellxElement): string {
  * Element `node` as the page's title:  a `<header level="1">`, its text and its sub header's.
  * - `undefined` when it isn't one, or has no text.
  */
-function titleOf(node: SX.SpellxElement): Pick<PageCell, "title" | "lead"> | undefined {
+function titleOf(node: PG.PageElement): Pick<PageCell, "title" | "lead"> | undefined {
   if (!HEADER_TAGS.has(node.name) || attributeOf(node, LEVEL_WORDS) !== "1") return undefined
   const title = textOf(node.children)
   if (!title) return undefined
@@ -418,13 +383,13 @@ function titleOf(node: SX.SpellxElement): Pick<PageCell, "title" | "lead"> | und
 }
 
 /** Element `node`'s label, when it's a `<section label="...">`;  else `undefined`. */
-function sectionLabelOf(node: SX.SpellxElement): string | undefined {
+function sectionLabelOf(node: PG.PageElement): string | undefined {
   if (!SECTION_TAGS.has(node.name)) return undefined
   return attributeOf(node, LABEL_WORDS)?.trim() || undefined
 }
 
 /** The text of `nodes`' own text nodes, its line breaks and their indents one space:  not the elements among them. */
-function textOf(nodes: SX.SpellxNode[]): string {
+function textOf(nodes: PG.PageNode[]): string {
   return nodes
     .map((node) => (node.kind === "text" ? node.text : " "))
     .join("")
@@ -433,7 +398,7 @@ function textOf(nodes: SX.SpellxNode[]): string {
 }
 
 /** The value of element `node`'s attribute named one of `names` (its words in each language). */
-function attributeOf(node: SX.SpellxElement, names: ReadonlySet<string>): string | undefined {
+function attributeOf(node: PG.PageElement, names: ReadonlySet<string>): string | undefined {
   return node.attributes.find((attribute) => names.has(attribute.name))?.value
 }
 
@@ -474,9 +439,9 @@ const PAGES_READ = new WeakMap<SP.AnySpellFile, PagesRead>()
  * What a file's pages say:
  * - its notebook's name (`undefined` for none)
  * - whether any page is locked
- * - whether any draws its body
+ * - whether it holds any page
  */
-type PagesRead = { contents: string; notebook: string | undefined; isLocked: boolean; drawsBody: boolean }
+type PagesRead = { contents: string; notebook: string | undefined; isLocked: boolean; hasPage: boolean }
 
-/** The word that locks a notebook, `locked`;  a Spanish file's own, `bloqueado` (`bloqueada` on a plain head;  `lockWord`). */
+/** The word that locks a notebook, by its English name, `locked`;  a Spanish file's own is `bloqueada` (`lockWord`). */
 const LOCKED = "locked"

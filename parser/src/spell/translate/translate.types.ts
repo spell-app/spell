@@ -85,13 +85,6 @@ export type SourceFile = {
   contents: string
   /** Its parse, `block` rule. */
   match: P.Match | undefined
-  /**
-   * The tag file this is the plain form of, when it is (`SX.CodeSpellWriter`):  its translation is written plain
-   *   (epic `language` P46), under the tag file's name.
-   * - `path`:  its own path in the project, `/Card.spell`
-   * - `proseLines`:  which of `contents`' lines were prose between its tags, by index
-   */
-  tagFile?: { path: string; proseLines: ReadonlySet<number> }
 }
 
 /** One file, translated:  one line for each of its source's lines. */

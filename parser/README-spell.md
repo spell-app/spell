@@ -108,7 +108,7 @@ a card "is a (rank)" for its ranks
 a card "is the (rank) of (suits)" for its ranks and its suits
 ```
 
-_Seven lines in the sentence style, the way the Solitaire example's card was written before it was an outline, and then spellx._
+_Seven lines in the sentence style, the way the Solitaire example's card was written before it was an outline._
 
 Compile both, and `diff` finds the same JavaScript, member for member, but for three things:
 - the outline's card is a `view`, so it extends `View` and gets an element of its own;
@@ -296,18 +296,18 @@ Its first line is how you call it, with each blank's type in brackets:
 
   ```spell
   a bill is a thing:
-  	- it has an amount as a number
-  	- to double it:
+  	it has an amount as a number
+  	to double it:
   		set twice to its amount * 2
   		twice + 1
-  	- its "doubled" is:
+  	its "doubled" is:
   		double it
   ```
 
   - A value:  an expression (`twice + 1`, `"hey"`) or a call (`double it`).
     `doubled` gives back what `double it` does.
   - A last line that's a step stays a step:  `set`, `if`, `for each`, `print`, `return` ...
-  - It works the same in Spanish, and in a spellx `<action>` or `<property>`.
+  - It works the same in Spanish.
   - The edge:  an action ending in a call gives back what that call gives,
     so `to deal` ending `shuffle the deck` gives what shuffling gives.
   - Not a test's body, and not a drawing's:  a drawing's lines draw.
@@ -328,20 +328,20 @@ Its first line is how you call it, with each blank's type in brackets:
     - A `send` waits only if a handler of that event does.
 - Nothing says it, so nothing needs saying:  `animation`, `wait for` and `await` are retired, in English and Spanish.
   - Old source still reads, each one an error, and `spell lint --fix` rewrites it:
-    `animation deal:` is `to deal:`, `wait for: deal` is `deal`, and `<action "deal" animated>` is `<action "deal">`.
+    `animation deal:` is `to deal:`, and `wait for: deal` is `deal`.
   - `start process` and `process x is running` stay;  `start animation` is now `start process`.
   - The editor says which calls wait:  hover one.
 - A getter may wait too, with no new words:
 
   ```spell
   a game is an app:
-  	- it has a score as a number
-  	- its "total" is:
+  	it has a score as a number
+  	its "total" is:
   		pause for 1 sec
   		return the score + 1
-  	- to go it:
+  	to go it:
   		print the total
-  	- to draw it:
+  	to draw it:
   		<div>Total: {the total}</div>
   ```
 
@@ -396,10 +396,10 @@ Its first line is how you call it, with each blank's type in brackets:
 - An action of a template can DESCRIBE itself, in lines indented under it, before its steps:
 
   ```spell
-  	- to turn it over:
-  		- shortcut meta+T
-  		- enabled when it is face down
-  		- undoable as "Turn Card"
+  	to turn it over:
+  		shortcut meta+T
+  		enabled when it is face down
+  		undoable as "Turn Card"
   		set its direction to up
   ```
 
@@ -418,9 +418,9 @@ Its first line is how you call it, with each blank's type in brackets:
   - A template's MENU lists its actions, and the app's own `undo` and `redo`, `"-"` a line between groups:
 
     ```spell
-    solitaire is an app where:
-    	- its "game" menu has actions "deal", "-", "undo" and "redo"
-    	- its menu bar is "game menu"
+    solitaire is an app:
+    	its "game" menu has actions "deal", "-", "undo" and "redo"
+    	its menu bar is "game menu"
     ```
 
     - Its name is its words and `menu`, `game menu`;  its title, with no `titled`, is its words, `game`.
@@ -430,11 +430,11 @@ Its first line is how you call it, with each blank's type in brackets:
       a menu's own title comes last, `titled "File"`:
 
       ```spell
-      editor is an app where:
-      	- its "file" menu has actions "save" and "open" and menus "more examples", titled "File"
-      	- its "more examples" menu has its examples, each running "open (an example)"
-      	- its "bar" menu has menus "file" and "edit"
-      	- its menu bar is "bar menu"
+      editor is an app:
+      	its "file" menu has actions "save" and "open" and menus "more examples", titled "File"
+      	its "more examples" menu has its examples, each running "open (an example)"
+      	its "bar" menu has menus "file" and "edit"
+      	its menu bar is "bar menu"
       ```
 
     - The same menus, said the older way, each item quoted by its full name, sub-menus among the actions:
@@ -490,14 +490,14 @@ print 2' 3 1/2" in cm
   Their units are in the core's `dimensions/dimensions.spell`, and its Spanish twin.
 - A percent is a proportion, kept as its fraction:  `18%` (`18 percent`, Spanish `18 por ciento`) is `0.18`.
   - So `the bill * the tip` is the tip, with no `/ 100`, as a spreadsheet keeps a percent.
-  - `its "tip" is a percent` declares one (`<property "tip" type="percent">18%</>`);  `its tip in percent` is `18`.
+  - `its "tip" is a percent` declares one;  `its tip in percent` is `18`.
   - Shown with its % sign the reader's way:  `18%`, Spanish `18 %`;  `<input type="percent">` edits it as `18`.
 - A program declares its own the same way:
 
   ```spell
   data size is a dimension:
-  	- its base is "byte", aka "B"
-  	- one "kilobyte", aka "KB", is 1000 B
+  	its base is "byte", aka "B"
+  	one "kilobyte", aka "KB", is 1000 B
   ```
 
   - Each unit is said in a unit named above it.
@@ -553,7 +553,7 @@ export class Tableau extends Pile {
   - the slot's drawing carries its name for CSS, `part="front"`, so a page can style it with `::part(front)`
   - where the view is drawn, a slot can be filled from outside, the web's way:
     `<solitaire-card><ui-text in="front">Ace</ui-text></solitaire-card>` (`in=` is Spell's word for `slot=`;
-    spellx's `<card><text slot="front">Ace</text></card>`)
+    with its bare name, `<card><text slot="front">Ace</text></card>`)
     - that card shows the filling in place of its front;  every other card draws its own
     - a placed slot compiles to the web's `<slot name="front">`, holding its own drawing
   - the old `it has parts ...` still reads, as an error naming `slots`;  `spell lint --fix` writes it
@@ -782,28 +782,22 @@ The pages never name their addresses:  the site does, so a page moves without it
 ```spell
 galaxy guide is a site at "owen@spell/galaxy":
 	it has a films page at "/films", named "Films"
-		- it has a film page at "/films/:film"
+		it has a film page at "/films/:film"
 	it has a settings dialog
 	it has a person sidebar
 	it has a not found page
 ```
 
 - `:film` is the film page's own property (`it has a film`):  the address fills it with that film.
-- The tag form is `<site>`, a tag per part inside it.
 - Every site lists a not found page and an error page.
 - A `:name` the page has no property for, or two pages at one address, is refused at its line.
-- A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own.
-  A page's name is then its title, `<page "My Inbox" address="/my-inbox"/>`, and `<group "Hardware"/>` heads the lines
-  after it:
+- A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own:
 
-```html
-<site "galaxy guide">
-	<group "Home"/>
-	<page "Home" address="/"/>
-	<sidebar "System Notices" address="/notices"/>
-	<group "My Stuff"/>
-	<page "My Inbox" address="/my-inbox" live="https://example.com/inbox"/>
-</site>
+```spell
+galaxy guide is a site:
+	it has a home page at "/", named "Home"
+	it has a system notices sidebar
+	it has an inbox page at "/my-inbox", named "My Inbox", live "https://example.com/inbox"
 ```
 
 - A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
@@ -821,8 +815,8 @@ Every move names the page, never its address:
 
 A page says what it must let people do before it's laid out, first in its own declaration:
 
-```html
-<page "film page">
+```spell
+film page is a page:
 	<stories>
 		<story "S1" done>read the film's opening crawl</story>
 		<story "S2" done>
@@ -834,12 +828,49 @@ A page says what it must let people do before it's laid out, first in its own de
 	</stories>
 ```
 
-- Nothing draws the stories:  they're kept with the page for good;  code Spell writes the same block.
+- Nothing draws the stories:  they're kept with the page for good.
 - A story is its words, then two blank lines and its description, if it has one;  `done` ticks it off.
 - In Spanish:  `<historias>` and `<historia "H1" hecha>`.
 - The example:  [Star Wars Site](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/StarWarsSite/StarWarsSite.spell).
 - **Not yet:**  Python runs no site, and a page has no state
   (old, new, mocked, built).
+
+### Pages written as they read
+
+A PAGE FILE is a page written the way it reads:  its head, a line of Spell, and its body indented under it.
+The notebooks and Spell UI's guides are written this way.
+
+```spell
+a "counter" is a view:
+	its "count" is a number
+	to draw it:
+		<button onClick={add 1 to its count}>Clicked {its count} times</button>
+
+"counter guide" is a notebook page
+	A button that counts its clicks.
+
+	## Try it
+	<example "one counter">
+		<counter/>
+	</example>
+```
+
+- The head is the page's quoted name, its flags, then `page`:  `notebook` lets the editor edit it in place,
+  `locked` keeps it from being edited.
+  In Spanish:  `"guía del contador" es una página cuaderno`, flags `cuaderno` and `bloqueada`.
+- Its body draws, line by line:
+  - a line of prose is markdown
+  - a `##` heading starts a section, sticky and foldable, as the docs pages' are
+  - markup and `<example "...">` are drawn as written
+  - `<if ...>`, `<otherwise>` and `<for ...>` pick and repeat what's drawn;
+    a `<for>` takes `loading=`, `empty=` and `as=`, or `<loading>`, `<empty>` and `<failed>` inside it
+  - an `<html>` block is markup as written;  a `<spell>` block, plain Spell
+  - `<!-- ... -->` is a comment, anywhere
+- Its indentation ends it:  no closing tag.
+- The page's own views are plain Spell, above its head in the same file, named as written.
+- It compiles to exactly what the same page written as plain Spell would:  `counter guide is a page:`, its body its
+  drawing.
+- **The edge:**  `spell translate` leaves page files as they are.
 
 ## The compiler
 
@@ -863,7 +894,7 @@ Here's Solitaire's project file, its files in the order they run:
   `{ "path": "@spell/library/people", "active": true, "import": ["Person"] }`.
 - Other keys:  `"targets"` (the people library's is `["ts/lib"]`), `"listsStartAt"`, `"title"`, and `"packs"`:
   the component packs a `.spell` drawing names components from by their bare names, Spell UI's (`["spell-ui"]`)
-  unless it says more ([README-spellx.md](README-spellx.md)).
+  unless it says more.
 - A file's human language is in its name, not the project file:  `Carta.es.spell` is Spanish, `Card.spell` English.
 - A project file can start as `{}`, as the card's did:  the first compile lists the folder's files in it,
   and spell-app's spaces keeps that list in step with the folder, adding a new file and dropping a deleted one.
@@ -1215,11 +1246,9 @@ recipe box is an app:
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
-- In a `.spell` drawing the same loop is one tag:
+- In a page, or inside an element of a drawing, the same loop is one tag:
   `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
-  with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
-- In a tag-shaped file the same line is a tag, `<web-server "family cookbook" address="https://...">`,
-  its lines inside as they are ([README-spellx](README-spellx.md)).
+  with a loader, Try again and the empty message by itself.
 - Moving the data changes the first line:
   - `a graphql server at`, `a data folder at`
   - `a json file at` (one JSON5 file of every collection's rows;  a bare `a file at` asks which kind), `a room at`

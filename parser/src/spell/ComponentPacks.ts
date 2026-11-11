@@ -1,8 +1,9 @@
 /**
- * The component packs a spellx drawing names its components from, by their BARE names (epic `elemental-spell` P7, Q46):
+ * The component packs a drawing names its components from, by their BARE names (epic `elemental-spell` P7, Q46):
  * `<button>` is a pack's button, `ui-button`;  `<botón>` in a Spanish file, its Spanish tag, `es-boton`.
- * - spellx has no native HTML (Q46, C1):  every tag in a drawing is a spell word, one of the project's own views, or a
- *   pack's component.
+ * - A page has no native HTML (Q46, C1):  every tag in its drawings is a spell word, one of the project's own views,
+ *   or a pack's component.
+ *   - In plain Spell, a bare name no pack has is the web's own element.
  * - Registered by whoever can read a pack's names:  spell-parser never imports Spell UI, so spell-app registers it,
  *   from Spell UI's catalog and dictionaries (`spell/app/spaces`, as it registers spell's project groups).
  * - Which packs a project draws with:  its project file's `packs` (`ProjectManifestJSON5.packs`), else `DEFAULT`;
@@ -70,7 +71,7 @@ export class ComponentPacks {
 }
 
 /**
- * A pack of components, as spellx looks names up in it -- see `ComponentPacks`.
+ * A pack of components, as a drawing looks names up in it -- see `ComponentPacks`.
  * - e.g. Spell UI's:  `{ name: "spell-ui", tagFor: (word, lang) => ... }`
  */
 export type ComponentPack = {
@@ -87,7 +88,7 @@ export type ComponentPack = {
    * (`ComponentPacks.readDefault()`):
    * `({ tag: "es-boton", attribute: "apariencia", value: "píldora" }, "es")` =>
    * `{ tag: "ui-button", attribute: "appearance", value: "pill" }`.
-   * - Its tag as a page writes it (`ui-button`, `es-boton`), or bare as spellx does (`button`, `botón`).
+   * - Its tag as a page writes it (`ui-button`, `es-boton`), or bare as a drawing does (`button`, `botón`).
    * - Left out:  the pack can't check defaults, and each is taken as written.
    */
   readDefault?(sample: DefaultSample, language: string): DefaultReading

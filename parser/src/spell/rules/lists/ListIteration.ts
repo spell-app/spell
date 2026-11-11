@@ -101,7 +101,7 @@ export class ListIterationNamedForList extends SpellStatement<"list|body?"> {
   /**
    * Only what reads as a list:  one plural word, or words after a word that starts a list, `its films`.
    * - So Spanish's `para mover cartas :` is still a method.
-   * - With no body (spellx's `<for its types />`, each item drawing itself):  its item is named here,
+   * - With no body (a page's `<for its types />`, each item drawing itself):  its item is named here,
    *   as no body asks for its scope (epic `data` P24).
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {

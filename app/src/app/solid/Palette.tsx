@@ -29,7 +29,7 @@ import "./Palette.css"
  * - What's offered is what has a `snippet`:  a new component is offered by saying what it adds.
  * - First, This app:  the app's own views, each added as `{draw a new card}` (`Palette.ownViews`, epic `editor` P19).
  *   - On a page that draws its body, a notebook among them, it's This page, with a row of its own first:
- *     a new view, kept in the page (`addNewView()`, epic `notebook` P5).
+ *     a new view, in plain Spell above the page (`addNewView()`, epic `notebook` P5;  `language` P47).
  *   - What else a page adds (an example, a section, text) are the components' own rows.
  * - In a page that draws its body, Spell UI's tags are written by their bare names, as a notebook writes them:
  *   `<example>`, `<section>`.
@@ -104,13 +104,17 @@ export class Palette {
     return !!file && NotebookPageCells.holdsDrawnPage(file)
   }
 
-  /** Add a new view of the open page's own, last in its body:  `<view "new view">`, drawn later by its name. */
+  /**
+   * Add a new view of the open page's own, in plain Spell just above its head:  `a "new view" is a view:`,
+   * drawn later by its name (epic `language` P47).
+   */
   static addNewView(): void {
     const file = editor.file
     const opening = file && NotebookPageCells.drawnPageIn(file.contents ?? "", file.path)
     if (!file || opening === undefined) return
     const title = appTexts.text("partStepAdd", { part: appTexts.text("paletteNewView") })
-    PartEdits.add([NEW_VIEWS[languageOf(file)] ?? NEW_VIEWS.en!], title, { file, opening, where: "inside" })
+    const whole = { start: opening, end: opening }
+    PartEdits.add([NEW_VIEWS[languageOf(file)] ?? NEW_VIEWS.en!], title, { file, opening, where: "before", whole })
   }
 
   /**
@@ -172,8 +176,8 @@ const TAG_WITH_PREFIX = /<(\/?)[a-z]+-([a-z][\w-]*)/g
 
 /** A new view of a page's own, in each language a page is written in:  `Palette.addNewView()`. */
 const NEW_VIEWS: Record<string, string> = {
-  en: '<view "new view">\n\t<draw><text>A new view</text></draw>\n</view>',
-  es: '<vista "nueva vista">\n\t<dibujar><texto>Una vista nueva</texto></dibujar>\n</vista>'
+  en: 'a "new view" is a view:\n\tto draw it: <text>A new view</text>',
+  es: 'una "nueva vista" es una vista:\n\tpara dibujarla: <texto>Una vista nueva</texto>'
 }
 
 /** The preference that remembers whether it's kept open. */

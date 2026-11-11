@@ -10,20 +10,20 @@ import { SpellJSX } from "./SpellJSX"
  * `example_block` rule:  an EXAMPLE on a page, in a drawing (epic `elemental-spell` P16):
  * a title, then its live result, drawn by the editor app's `<spell-example>`.
  *
- * ```spellx
+ * ```spell
  * <example "one counter">
  * 	<counter/>
  * </example>
  * ```
  *
  * - Its word is the language's (`exampleTag`):  `<example>`, Spanish's `<ejemplo>`.
- * - Named as spellx names its tags, by a quoted name after its word:
+ * - Named by a quoted name after its word:
  *   the tokenizer reads that as `name="..."` (`P.Tokenizer.quotedNameTags`).
  *   `name="one counter"` works too.
- * - The same in code spell and spellx:  so a plain page and its tag-shaped twin compile the same.
- * - What's inside is drawn as any drawing's markup is:  `<counter/>` is the project's view in a spellx file.
+ * - The same in a plain drawing and a page.
+ * - What's inside is drawn as any drawing's markup is:  `<counter/>` is the project's view, named bare.
  * - Compiles to `h("spell-example", { name: "one counter" }, ...)`:  the result alone.
- *   - Its code isn't compiled in:  the editor shows it from the file (the app's `NotebookPage`), in spellx or html.
+ *   - Its code isn't compiled in:  the editor shows it from the file (the app's `NotebookPage`), in Spell or html.
  *   - A page with no `<spell-example>` defined (a `<spell-viewer>` elsewhere) shows the result as it is.
  *   - In javascript, a part of its own (`drawnApart`, epic `notebook` P4):
  *     so an edit to one example draws that one again, not the page.

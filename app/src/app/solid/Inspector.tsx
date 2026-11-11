@@ -894,28 +894,18 @@ export class Inspector {
 
   /**
    * The property editor `thing`'s type was written with, its markup (epic `debut` I86):
-   * its `<spell-property-editor>` (or the old short `<property-editor>`), else the one of a type it inherits;
+   * its `"card" is a property editor`, else the one of a type it inherits;
    * `""` if none, and the Inspector draws its bands.
-   * - Its own file first, `Card.editor.spell` or `Solitaire.editors.spell` (epic `editor` P25),
-   *   then inline in the type's spellml.
+   * - In its own file, `Card.editor.spell` or `Solitaire.editors.spell` (epic `editor` P25).
    * - Read from the program's files as they are now, so an edit shows once the app runs again.
    * - A built-in template's property, named in the program's language (`name="dirección"`):
    *   named as its class names it, so it's bound to the thing (`withClassNames()`;  epic `language` T73).
    */
   static ownEditorOf(thing: object): string {
     const project = editor.project
-    const sources = project?.spellFiles.map((file) => file.contents ?? "") ?? []
     const editors =
       project?.files.filter((file) => SP.isPropertyEditorsName(file.path)).map((file) => file.contents ?? "") ?? []
-    const words = [...SP.Language.all.values()].flatMap((language) => {
-      const spellx = language.words.spellx
-      const shortWords = Object.entries(spellx?.notes ?? {})
-        .filter(([, kind]) => kind === "property editor")
-        .map(([word]) => word)
-      // its tag, `<property-editor>` (epic `language` P41);  then its old spelling, `<spell-property-editor>` (epic `data` P31)
-      return [...shortWords, ...shortWords.map((word) => `${spellx!.prefix}-${word}`)]
-    })
-    const markup = propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words, editors)
+    const markup = propertyEditorInSource(InspectorActions.typeWordsOf(thing), editors)
     const root = Inspector.programRoot
     if (!markup || !root) return markup
     const said = ClassSchemas.templateWordsOf(thing.constructor, root)

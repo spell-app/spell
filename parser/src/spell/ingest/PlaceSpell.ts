@@ -1,5 +1,4 @@
 import { P } from "spell/parser/parser"
-import { SX } from "spell/parser/spellx"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
@@ -930,40 +929,4 @@ function searchAddressOf(description: CollectionDescription): string | undefined
 /** `words`, more than one:  `name` => `names`, `class` => `classes`. */
 function pluralWords(words: string): string {
   return /(?:s|x|z|ch|sh)$/.test(words) ? `${words}es` : `${words}s`
-}
-
-/**
- * Tag-shaped `text` as the plain Spell a merge reads (`mergedSpell()`), its lines as the tool writes them
- * (epic `language` P40):
- * - `SX.CodeSpellWriter`'s plain Spell, its `:` against the words, as written
- * - a type with nothing in it, with the `:` it was written with
- * - a description it put on a line of its own, `// an address` above `its "url" is text`, back on the line's end,
- *   where it was written, when that's one of the lines in `written`
- * - `proseLines`:  which of its lines are prose between tags, for the way back (`SX.SpellxWriter`)
- */
-export function plainSpellOf(
-  text: string,
-  path: string,
-  written: Iterable<string>
-): { text: string; proseLines: Set<number> } {
-  const known = new Set(written)
-  const plain = SX.CodeSpellWriter.writeWithProse(text, { path })
-  const lines = plain.text.split("\n").map((line) => line.replace(/ :$/, ":"))
-  const out: string[] = []
-  const prose = new Set<number>()
-  for (let at = 0; at < lines.length; at++) {
-    const comment = lines[at]!.match(/^(\t*)\/\/ (.*)$/)
-    const next = lines[at + 1]
-    const joined = comment && next?.startsWith(comment[1]!) ? `${next.trim()}  // ${comment[2]}` : undefined
-    if (joined && known.has(joined)) {
-      out.push(`${comment![1]}${joined}`)
-      at++
-      continue
-    }
-    if (plain.proseLines.has(at)) prose.add(out.length)
-    // a type with nothing in it yet, written with its `:`
-    const line = lines[at]!
-    out.push(!known.has(line.trim()) && known.has(`${line.trim()}:`) ? `${line}:` : line)
-  }
-  return { text: out.join("\n"), proseLines: prose }
 }

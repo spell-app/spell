@@ -7,8 +7,6 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 
 import { CLI } from "spell/cli"
 import type { SRV } from "spell/server"
-import { SP } from "spell/parser/spell"
-import { SX } from "spell/parser/spellx"
 import { parseSpellProject } from "spell/parser/spell/test"
 import { translateProject, translationOf, type TranslateSource } from "spell/parser/cli/translateProject"
 import type { TranslateOptions } from "spell/parser/cli"
@@ -613,53 +611,6 @@ function translate(
   return translateProject(source, options, run, { glossaryFile: join(folder, "glossary.json5"), openRun })
 }
 
-describe("a tag file (language I68)", () => {
-  const options = () => ({ to: "es", out: join(folder, "Cartas"), ai: false })
-  const glossary = () => ({ glossaryFile: join(folder, "glossary.json5") })
-  const names = () => JSON.stringify({ ...NAMES, phrases: {} })
-  beforeEach(() => {
-    mkdirSync(join(folder, "Cartas"), { recursive: true })
-    writeFileSync(join(folder, "Cartas", "Cards.es.names.json5"), names())
-  })
-
-  // epic `language` P46:  a translation is written plain, a tag file's too
-  test("comes back as plain Spell in the other language, its prose as comments, and the project file names it", async () => {
-    const source = { ...tagSource(), checker: tagChecker() }
-    await translateProject(source, options(), fakeClaude().run, glossary())
-    const out = join(folder, "Cartas")
-    expect(readdirSync(out)).toContain("Carta.es.spell")
-    expect(readdirSync(out)).not.toContain("Card.spell")
-    const plain = readFileSync(join(out, "Carta.es.spell"), "utf8")
-    expect(plain).not.toContain('<cosa "carta">')
-    expect(plain).toMatch(/^una "carta" es una cosa/m)
-    expect(plain).toContain("# The card\n// A card has a color and a label.\n")
-    expect(JSON5.parse(readFileSync(join(out, "__project.json5"), "utf8")).imports).toEqual([
-      { path: "/Carta.es.spell", active: true }
-    ])
-  })
-
-  test("with no checker to parse it:  written plain all the same", async () => {
-    await translateProject(tagSource(), options(), fakeClaude().run, glossary())
-    expect(readdirSync(join(folder, "Cartas"))).toContain("Carta.es.spell")
-    expect(readFileSync(join(folder, "Cartas", "Carta.es.spell"), "utf8")).not.toMatch(/^<\w/m)
-  })
-
-  test("--update reads a tag translation back as its plain lines:  nothing to write again", async () => {
-    const run = () =>
-      translateProject({ ...tagSource(), checker: tagChecker() }, options(), fakeClaude().run, glossary())
-    await run()
-    vi.mocked(CLI.out).mockClear()
-    await translateProject(
-      { ...tagSource(), checker: tagChecker() },
-      { ...options(), update: true },
-      fakeClaude().run,
-      glossary()
-    )
-    expect(printed().join("\n")).toMatch(/\b0 of \d+ lines translated/)
-    expect(readdirSync(join(folder, "Cartas"))).toContain("Carta.es.spell")
-  })
-})
-
 /** One step of a fake run:  a row's answer, given;  or the effort picked on the page. */
 type RunStep = SRV.RunRowAnswer | { effort: string }
 
@@ -733,46 +684,6 @@ function fakeRun(
       return shown.rows
     }
   }
-}
-
-/** `CARD`'s shape as a tag file, with prose between its tags. */
-const CARD_TAGS = `# The card
-A card has a color and a label.
-
-<spell-thing "card">
-	<property "color" one-of="red or black" />
-	<property "label">its color + " joker"</>
-</spell-thing>
-`
-
-/**
- * A project of `CARD_TAGS` handed over as spell-app does:  the plain Spell it means, parsed, naming its tag file.
- * - `checker`:  what each check says, over the shape checker `translate()` gives it
- */
-function tagSource(): TranslateSource {
-  const { text: contents, proseLines } = SX.CodeSpellWriter.writeWithProse(CARD_TAGS, { path: "/Card.spell" })
-  const { files } = parseSpellProject([{ path: "/Card.spell", contents }])
-  mkdirSync(join(folder, "Cards"), { recursive: true })
-  writeFileSync(
-    join(folder, "Cards", "__project.json5"),
-    JSON.stringify({ imports: [{ path: "/Card.spell", active: true }] })
-  )
-  return {
-    projectName: "Cards",
-    folder: join(folder, "Cards"),
-    files: [{ path: "/Card.spell", contents, match: files[0]!.match, tagFile: { path: "/Card.spell", proseLines } }]
-  }
-}
-
-/** A checker for a tag project:  no problems, the plain translation parsed while it's there;  then `afterTags`. */
-function tagChecker(afterTags: LineProblem[] = []): TranslateSource["checker"] {
-  return (out) => () =>
-    Promise.resolve(
-      // plain until it's written as tags, a line starting `<` (`SP.formOfText()`)
-      SP.formOfText(readFileSync(join(out, "Carta.es.spell"), "utf8")) === "spell"
-        ? { problems: [], files: parsedIn(out) }
-        : { problems: afterTags }
-    )
 }
 
 /** The translation's file in `out`, parsed in a project of its own. */

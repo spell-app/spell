@@ -59,7 +59,7 @@ export class NotebookController {
 
   static notebooksIn(project: SP.SpellProject | undefined): SP.SpellFile[] {
     if (!project?.isLoaded) return []
-    return project.spellFiles.filter((file) => file.form === "spellx" && NotebookPageCells.holdsNotebook(file))
+    return project.spellFiles.filter((file) => file.form === "page" && NotebookPageCells.holdsNotebook(file))
   }
 
   ////////////////

@@ -28,8 +28,8 @@
  *   - `<Project>.<lang>.names.json5`:  its names dictionary, for a person to review (`TranslationNames`)
  *   - `<Project>.<lang>.translated.json5`:  what each source line was when it was last translated, a hash per line,
  *     so `--update` re-translates only the lines changed since;  and each fix-up, so it's never asked for again
- * - A TAG FILE (`.spell`, language I68):  the passes work on the plain Spell it means (`SourceFile.tagFile`),
- *   and the translation is written plain (epic `language` P46):  `Card.spell` => `Carta.es.spell`, in plain Spell.
+ * - A PAGE FILE (`"button api" is a notebook page`) isn't translated:  the app hands over its plain files only
+ *   (epic `language` P47).
  * - Loaded only when it runs (`commands.ts` imports the hook's work dynamically):  it loads all of spell.
  */
 import { createHash } from "node:crypto"
@@ -41,7 +41,6 @@ import { keepingCommentsIn, readJSON5File } from "spell/util/node/json5"
 import { CLI } from "spell/cli"
 import type { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { SX } from "spell/parser/spellx"
 import type { TranslateOptions } from "spell/parser/cli"
 import { claudeRunnerFor, type ChosenRunner } from "spell/parser/cli/claudeRunners"
 import {
@@ -456,11 +455,7 @@ function linePlan(
   const recorded = record?.files[file.path]
   const outPath = recorded && join(outFolder, recorded.output)
   if (!recorded || !outPath || !existsSync(outPath)) return { lines, changed: sourceLines.length }
-  // a tag file's translation, read back as the plain lines it was written from
-  const text = readFileSync(outPath, "utf8")
-  const written = (
-    SP.formOfText(text, outPath) === "spellx" ? SX.CodeSpellWriter.write(text, { path: outPath }) : text
-  ).split("\n")
+  const written = readFileSync(outPath, "utf8").split("\n")
   if (written.length !== recorded.lines.length) return { lines, changed: sourceLines.length }
   const hashes = sourceLines.map(hashOf)
   for (const [now, then] of commonRun(hashes, recorded.lines)) lines[now] = written[then]
@@ -825,9 +820,7 @@ function writeManifest(
   const manifestPath = join(source.folder, SP.PROJECT_FILE)
   if (!existsSync(manifestPath)) return
   const manifest = readJSON5File<ProjectManifest>(manifestPath)
-  const renamed = new Map<string, string>(
-    outputs.map((output) => [output.file.tagFile?.path ?? output.file.path, output.path])
-  )
+  const renamed = new Map<string, string>(outputs.map((output) => [output.file.path, output.path]))
   for (const imported of source.imports ?? []) {
     if (imported.translatedPath) renamed.set(imported.path, imported.translatedPath)
   }

@@ -480,9 +480,6 @@ export const APP_TEXTS = {
   typescriptTab: "TypeScript",
   pythonTab: "Python",
   // a .spell file's code spell, the text it reads as (epic `elemental-spell` P8)
-  codeSpellTab: "Code Spell",
-  // a .spell file as spellx:  a view, never a second file (epic `elemental-spell` J95)
-  spellxTab: "Spellx",
   inspector: "Inspector",
   inspectorInspect: "Inspect app",
   inspectorTip: "Select a part of the app with the crosshairs, to see what it is and change it.",

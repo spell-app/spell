@@ -147,75 +147,25 @@ export const spanishWords: SP.LanguageWords = {
     check_process: { animación: "proceso", animacion: "proceso" }
   },
 
+  /** La línea que dice que una cosa tiene una capacidad:  lo que el aviso de `DragAndDrop` dice que se escriba. */
+  abilityLines: {
+    draggable: "es arrastrable",
+    droppable: "es soltable",
+    selectable: "es seleccionable",
+    clickable: "es pulsable"
+  },
+
   /**
-   * Spellx's words in Spanish (epic `elemental-spell`):  see `SP.SpellxWords`.
-   * - Spell is `encanto` in Spanish (Q36):  `<vista>`.
-   * - With their accents (Q49);  each also without, as a person may type it, which the editor upgrades.
-   * - A template's short name is `alias` here, as in Spanish spell's `una cuenta bancaria alias cuenta`;
-   *   what English calls an alias is a `frase` (J7).
+   * Las palabras de una página en español (épica `language` P47):  su cabecera, `"api del botón" es una página cuaderno`,
+   * y las etiquetas de su cuerpo.
+   * - Spell es `encanto` en español (Q36):  `<encanto>`.
+   * - Con sus acentos (Q49);  cada una también sin ellos, como se puede escribir.
    */
-  spellx: {
+  page: {
     prefix: "encanto",
-    templates: {
-      vista: "view",
-      // añade a un tipo que declara otro archivo (épica `language` P41):  `<extender "carta">`;  su palabra antigua aún se lee
-      extender: "extend",
-      "más-de": "extend",
-      "mas-de": "extend",
-      cosa: "thing",
-      página: "page",
-      pagina: "page",
-      aplicación: "app",
-      aplicacion: "app",
-      "plantilla-de-página": "page template",
-      "plantilla-de-pagina": "page template",
-      "plantilla-de-aplicación": "app template",
-      "plantilla-de-aplicacion": "app template",
-      // una página que dibuja su cuerpo:  `<página cuaderno>` (épica `notebook` P1)
-      cuaderno: { kind: "page", flag: "notebook" },
-      // páginas entre las que la gente se mueve por su dirección (épica `mockup` P1)
-      sitio: "site"
-    },
-    declarations: {
-      propiedad: "property",
-      frase: "alias",
-      acción: "action",
-      accion: "action",
-      dibujar: "draw",
-      evento: "event",
-      probar: "test",
-      menú: "menu",
-      menu: "menu",
-      grupo: "group",
-      // las partes de un sitio (épica `mockup` P1):  solo en un `<sitio>`
-      página: "page",
-      pagina: "page",
-      diálogo: "dialog",
-      dialogo: "dialog",
-      panel: "sidebar"
-    },
-    // prosa que se guarda y nunca corre:  `<nota>` (épica `language` P41);  `<editor-de-propiedades>`, `<historias>`
-    // - las palabras antiguas aún se leen, con un aviso que nombra `<nota>`:  `<encanto-descripción>`, `<comentario>`
-    notes: {
-      nota: "description",
-      descripción: "description",
-      descripcion: "description",
-      comentario: "comment",
-      "editor-de-propiedades": "property editor",
-      // las historias de una página (épica `mockup` P6):  `<historias>`
-      historias: "stories"
-    },
-    handlers: {
-      al: "on",
-      cuando: "when",
-      mientras: "while",
-      // la etiqueta propia de una capacidad (épica `debut` P27, Q47):  `<pulsable cuando está boca abajo/>`
-      arrastrable: "draggable",
-      arrastrables: "items draggable",
-      pulsable: "clickable",
-      seleccionable: "selectable",
-      soltable: "droppable"
-    },
+    page: "página",
+    // sus marcas:  una página que se dibuja en su sitio, editable (épica `notebook` P1), y una bloqueada
+    flags: { cuaderno: "notebook", bloqueado: "locked", bloqueada: "locked" },
     controls: {
       si: "if",
       "si no si": "otherwise if",
@@ -248,184 +198,21 @@ export const spanishWords: SP.LanguageWords = {
     },
     forFlagsNotAfter: ["es", "son", "está", "esta", "están", "estan", "no"],
     forListWords: ["sus", "su", "cada", "toda", "todas", "todos", "los", "las", "mis", "estos", "estas"],
-    // dónde viven los datos de un programa, cada una leída como su línea (epic `language` P40)
-    places: [
-      { tag: "servidor-web", line: "{words} es un servidor web en {quoted address} :" },
-      { tag: "servidor-graphql", line: "{words} es un servidor graphql en {quoted address} :" },
-      {
-        tag: "carpeta-de-datos",
-        line: "{words} es una carpeta de datos personal en {quoted address} :",
-        flag: "personal"
-      },
-      { tag: "carpeta-de-datos", line: "{words} es una carpeta de datos en {quoted address} :" },
-      { tag: "archivo-json", line: "{words} es un archivo json en {quoted address} :" },
-      { tag: "sala", line: "{words} es una sala en {quoted address} :" },
-      { tag: "hoja", line: "{words} es una hoja en {quoted address} :" },
-      { tag: "hoja", line: "{words} es una hoja de cálculo en {quoted address} :" },
-      { tag: "archivo-csv", line: "{words} es un archivo csv en {quoted address} :" },
-      { tag: "archivo-de-excel", line: "{words} es un archivo de excel en {quoted address} :" },
-      { tag: "hoja-de-google", line: "{words} es una hoja de google en {quoted address} :" },
-      { tag: "airtable", line: "{words} es un airtable en {quoted address} :" },
-      {
-        tag: "atmosphere",
-        line: "{words} es una cuenta personal de atmosphere en {quoted address} :",
-        flag: "personal",
-        bare: "{words} es una cuenta personal de atmosphere :"
-      },
-      { tag: "atmosphere", line: "{words} es un espacio de atmosphere en {quoted address} :", flag: "space" },
-      { tag: "atmosphere", line: "{words} es una cuenta de atmosphere en {quoted address} :" },
-      { tag: "almacenamiento-del-dispositivo", line: "{words} se guarda en este dispositivo :" },
-      { tag: "almacenamiento-del-dispositivo", line: "{words} es una base de datos en este dispositivo :" },
-      { tag: "almacenamiento-de-ventana", line: "{words} se guarda en este dispositivo , para cada pestaña :" },
-      { tag: "almacenamiento-en-memoria", line: "{words} se guarda en memoria :" },
-      { tag: "almacenamiento-en-memoria", line: "{words} es una base de datos en memoria :" }
-    ],
-    attributes: {
-      nombre: "name",
-      alias: "aka",
-      plantilla: "template",
-      "uno-de": "one-of",
-      personal: "personal",
-      espacio: "space",
-      tipo: "type",
-      frase: "alias",
-      descripción: "description",
-      descripcion: "description",
-      atajo: "shortcut",
-      "activa-cuando": "enabled-when",
-      "elegida-cuando": "selected-when",
-      "seleccionada-cuando": "selected-when",
-      deshacible: "undoable",
-      icono: "icon",
-      título: "title",
-      titulo: "title",
-      // un menú lleno de una lista (épica `language` P19, Q21):  `<menú "más ejemplos" para-cada={...} acción="...">`
-      "para-cada": "for-each",
-      acción: "action",
-      accion: "action",
-      "barra-de-menú": "menu-bar",
-      "barra-de-menu": "menu-bar",
-      bloqueado: "locked",
-      bloqueada: "locked",
-      // retirada, pues esperar es lo normal:  un error, que `spell lint --fix` quita (épica `language` P13)
-      animada: "animated",
-      arrastrable: "draggable",
-      soltable: "droppable",
-      seleccionable: "selectable",
-      pulsable: "clickable",
-      // una página que dibuja su cuerpo, y el editor muestra en su sitio, editable (épica `notebook` P1)
-      cuaderno: "notebook",
-      grupo: "group",
-      // de un sitio y sus páginas (épica `mockup` P1)
-      en: "at",
-      nube: "cloud",
-      dirección: "address",
-      direccion: "address",
-      estado: "state",
-      pestaña: "tab",
-      pestana: "tab",
-      etiquetas: "tags",
-      miniatura: "thumbnail",
-      "en-vivo": "live",
-      fila: "row",
-      columna: "column",
-      color: "color"
-    },
-    // la cabecera llana de una página (épica `language` P45):  `"api del botón" es una página cuaderno`
+    // la cabecera de una página (épica `language` P45):  `"api del botón" es una página cuaderno`
     plainPage:
       /^"(?<name>[^"\n]+)"[ \t]+es[ \t]+una[ \t]+p[áa]gina(?<flags>(?:[ \t]+[\p{L}-]+)*?)(?=[ \t]*(?:\/\/[^\n]*)?$)/imu,
     // y su candado, en femenino como `página`:  `"x" es una página bloqueada` (épica `language` J76)
     plainPageLocked: "bloqueada",
-    // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
+    // la línea que se lee por cada una -- ver `SP.PageTwinWords`
     twins: {
-      placeOfKind: "{words} es {a kind} {kind} en {quoted address} :",
-      template: "{a name} {name} es {a super} {super} :",
-      templateAka: "{a words} {words} alias {aka} es {a super} {super} :",
-      extend: "{a words} {words} :",
-      singleton: "{words} es {a super} {super} :",
-      supers: {
-        view: "vista",
-        thing: "cosa",
-        page: "página",
-        app: "aplicación",
-        "page template": "página",
-        "app template": "aplicación",
-        site: "sitio"
-      },
-      property: {
-        list: "su {name} es uno de {one-of}",
-        listBody: "su {name} es uno de {one-of} :",
-        body: "su {name} es :",
-        value: "su {name} es",
-        typed: "su {name} es {a type} {type}",
-        typedValue: "su {name} es {a type} {type} empezando en",
-        bare: "tiene {a words} {words}"
-      },
-      // el sujeto de una frase queda implícito, como en el esquema:  `- "es un (palo)"`
-      propertyAlias: "{quoted alias}",
-      alias: "{name}",
-      aliasBlock: "{name} :",
-      action: "para {words} :",
-      actionDetails: {
-        shortcut: "atajo {shortcut}",
-        "enabled-when": "activa cuando {enabled-when}",
-        "selected-when": "seleccionada cuando {selected-when}",
-        undoable: "deshacible como {quoted undoable}",
-        icon: "icono {quoted icon}",
-        title: "titulada {quoted title}"
-      },
-      bareActionDetails: { undoable: "deshacible" },
-      test: "para probar {words} :",
-      event: "envía {name}",
-      eventWith: "con",
-      eventParam: "{param} como {a value} {value}",
-      eventAnd: "y",
+      page: "{words} es una página :",
       draw: "para dibujar eso :",
-      drawSlot: "para dibujar su {words} :",
-      placeSlot: "dibujar su {words}",
-      menu: "su {name} es un menú de",
-      menuAnd: "y",
-      menuTitled: "titulado {quoted title}",
-      menuEach: "su {name} es un menú de {for-each} , cada uno ejecutando {quoted action}",
-      menuBar: "su barra de menú es {quoted menu-bar}",
-      group: "grupo {name}",
       pageLocked: "su candado es bloqueado",
-      templateThumbnail: "su miniatura es {quoted thumbnail}",
       // Spell UI's Spanish words for `<ui-section label sticky="stack" collapsible dividing level>`
       pageSection: {
         tag: "seccion",
         label: "etiqueta",
         defaults: { pegado: "apilado", plegable: true, divisorio: true, nivel: "2" }
-      },
-      siteAt: "{words} es {a super} {super} en {quoted at} :",
-      siteCloud: "{words} es {a super} {super} en la nube :",
-      sitePage: "tiene {a words} {words} en {quoted address}",
-      sitePageTitled: "tiene {a words} {words} en {quoted address} , llamada {quoted title}",
-      sitePageTab: ", pestaña {quoted tab}",
-      sitePageTags: ", etiquetada {quoted tags}",
-      sitePageState: ", {state}",
-      sitePageThumbnail: ", miniatura {quoted thumbnail}",
-      sitePageLive: ", en vivo {quoted live}",
-      siteCardPlace: ", en la fila {row} columna {column}",
-      siteCardColor: ", de color {color}",
-      siteOverlay: "tiene {a words} {words}",
-      siteOverlayOf: { dialog: "tiene un diálogo {words}", sidebar: "tiene un panel {words}" },
-      siteOverlayWords: "diálogo|dialogo|modal|panel|lateral",
-      viewFlags: {
-        draggable: "es arrastrable",
-        droppable: "es soltable",
-        selectable: "es seleccionable",
-        clickable: "es pulsable"
-      },
-      handlers: {
-        on: "al {phrase} :",
-        when: "cuando {phrase} :",
-        while: "mientras {phrase} :",
-        draggable: "es arrastrable {phrase} :",
-        clickable: "es pulsable {phrase} :",
-        selectable: "es seleccionable {phrase} :",
-        droppable: "es soltable {phrase} :",
-        "items draggable": "sus {items} son arrastrables {phrase} :"
       },
       controls: {
         if: "si {phrase}",

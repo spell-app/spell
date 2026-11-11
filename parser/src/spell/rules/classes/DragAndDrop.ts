@@ -66,7 +66,7 @@ export class DragAndDrop extends SpellStatement<"type|what|is?|body?"> {
     if (this.bodySpec && flag === "droppable") return undefined
     if (this.oldWords) {
       const language = SP.Language.of(scope)
-      const line = language.words.spellx?.twins?.viewFlags[flag]
+      const line = (language.words.abilityLines ?? SP.Language.default.words.abilityLines)?.[flag]
       if (line)
         SP.SpellWarnings.note(match, language.parserMessage("say-is-able", { line, old: match.inputText.trim() }))
     }

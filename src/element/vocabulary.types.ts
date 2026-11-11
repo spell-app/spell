@@ -339,7 +339,7 @@ export type ComponentVocabulary = {
    */
   icon?: string
   /**
-   * What the editor's palette adds to a program, as Spell's tag-shaped form writes it:  `<ui-button>Click me</ui-button>`.
+   * What the editor's palette adds to a program, as a drawing writes it:  `<ui-button>Click me</ui-button>`.
    * - None:  it isn't offered there:  a part of another tag, or a tool for people writing code.
    */
   snippet?: string

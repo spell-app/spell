@@ -257,7 +257,7 @@ and `spell` on your `PATH` ([README/cli.md](README/cli.md#setting-it-up), "Setti
    - Install it again after a change you want in every window.
    - Then reload each window ("Developer:  Reload Window"):  a window keeps running the copy it started with.
 4. From the Marketplace, Oxc at least (the table below):  `code --install-extension oxc.oxc-vscode`.
-5. Open the kit, `code ~/www/spell`, and any `.spell` or `.spellml` file in it:
+5. Open the kit, `code ~/www/spell`, and any `.spell` file in it:
    `app/spaces/@spell/examples/Solitaire/Solitaire.spell`, say.
    With epics, every window opens from a window file instead ([below](#windows-and-worktrees)).
 
@@ -282,16 +282,16 @@ spell-app marks both unwanted, and pins its formatter to Oxc for each language.
 ## What it does for a `.spell` file
 
 The colours start in the grammar inside the `.vsix`;  everything else comes from your checkout, as it is on disk.
-A `.spell` file in Spell's tag shape gets all of it too, plus one view of its own:
-[its page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md) says what the tags mean.
+A page file (`"form usage" is a notebook page`) gets all of it too:
+[Spell's page](https://github.com/spell-app/spell/blob/main/parser/README-spell.md#pages-written-as-they-read) says what a page can say.
 
 - **Colours.**  Spell's grammar,
   with the `<css>` and `<markdown>` blocks inside a template coloured as CSS and Markdown.
   - Comments are Markdown:  `#` headings and `**bold**` come out bold;  `*italic*`, links and `~~struck~~` too.
   - A `` css`...` `` template in a JavaScript or TypeScript file is coloured as CSS:
     that's how compiled Spell writes a view's style sheet.
-  - `.spell` and `.spellml` files indent with tabs.
-  - A tag-shaped file's tag heads (`<property "suit">`) are coloured as the Spell they read as.
+  - `.spell` files indent with tabs.
+  - A page's tags (`<if ...>`, `<for ...>`) are coloured as the Spell they read as.
 - **Spell's themes, as VS Code colour themes:**  one for each of Spell's themes, light and dark, 18 in all
   ("Spell Matrix Dark", "Spell Light" ...):  Code › Settings › Theme › Color Theme (⌘K ⌘T).
   - Each wears the theme's surfaces, accent and code colours, the side bar, tabs and status bar too:
@@ -303,8 +303,6 @@ A `.spell` file in Spell's tag shape gets all of it too, plus one view of its ow
     JavaScript is the target the editor runs, TypeScript is `ts/solid`, Python is `py`.
   - Each view's tab ends in its language, `Card.spell.ts`, so all three can be open at once.
   - A file outside any Spell project gets a one-line comment saying so.
-- **Show as Code Spell**, first in a tag-shaped file's title bar:  the same file written as plain Spell,
-  beside it and read-only.
 - **▶ Run Project:**  the project, running in a panel beside its code ("Run Solitaire").
   - It's the runner Spell's editor uses in the browser,
     so a game in progress survives your change:  only the panel's Restart starts afresh.
@@ -348,14 +346,13 @@ The edges:
 
 | Command | Title | Where |
 | --- | --- | --- |
-| `spell.showCodeSpell` | Show as Code Spell | the editor's title bar, first, in a tag-shaped file only |
 | `spell.showCompiledTypeScript` | Show Compiled TypeScript | the editor's title bar, first in a `.spell` file |
 | `spell.showCompiled` | Show Compiled JavaScript | the title bar |
 | `spell.showCompiledPython` | Show Compiled Python | the title bar |
 | `spell.runProject` | Run Project | the title bar, last (▶) |
 | `spell.showLineTree` | Show Tree for This Line | the right-click menu:  nothing behind it yet |
 
-- Every one is in the command palette's "Spell" category, and works only in a `.spell` or `.spellml` file.
+- Every one is in the command palette's "Spell" category, and works only in a `.spell` file.
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -366,13 +363,13 @@ The settings it sets for you:
 
 | Setting | Value |
 | --- | --- |
-| `[spell]` and `[spellx]` `editor.insertSpaces`, `editor.detectIndentation` | both `false`:  tabs, always |
-| `[spell]` and `[spellx]` `editor.formatOnType` | `true`:  a Spanish word gets its accents as you type it (`accion` => `acción`) |
+| `[spell]` `editor.insertSpaces`, `editor.detectIndentation` | both `false`:  tabs, always |
+| `[spell]` `editor.formatOnType` | `true`:  a Spanish word gets its accents as you type it (`accion` => `acción`) |
 | `editor.semanticTokenColorCustomizations` | the Markdown in comments:  headings 1 to 4 and bold in bold, italic, links underlined, strikethrough |
 | `editor.tokenColorCustomizations` | a `#` heading comment in bold from the grammar too |
 
 - Its id is `spell-language` (publisher `spell-app`), shown as "Spell".
-- It starts on a window's first `.spell`, `.spellml`, `.tsx` or `.jsx` file (`activationEvents`);
+- It starts on a window's first `.spell`, `.tsx` or `.jsx` file (`activationEvents`);
   the language server waits for the first `.spell` file.
 - It hands VS Code the HTML and CSS data (`contributes.html.customData`, `contributes.css.customData`),
   copies in its `out/data/`.

@@ -16,10 +16,9 @@ import { SiteScreenshots, siteFolderFor, siteScreenshots, sizeIn } from "spell/a
  * a person's is a window they use.
  */
 
-const SITE = `<spell-site "old site">
-	<page "racks page" address="/racks" title="Racks"/>
-	<page "notes page" address="/notes" title="Notes" thumbnail="snapshots/old.jpg"/>
-</>
+const SITE = `old site is a site:
+	it has a racks page at "/racks", named "Racks"
+	it has a notes page at "/notes", named "Notes", thumbnail "snapshots/old.jpg"
 `
 
 let site: FakeSignedInSite
@@ -76,12 +75,12 @@ describe("what a Save does", () => {
   test("points a page at its picture, a new page added first", () => {
     const shots = new SiteScreenshots(project)
     shots.pointPageAt({ picture: "snapshots/racks.jpg", pageName: "racks page" })
-    expect(siteText()).toContain(`<page "racks page" address="/racks" title="Racks" thumbnail="snapshots/racks.jpg"/>`)
+    expect(siteText()).toContain(`\tit has a racks page at "/racks", named "Racks", thumbnail "snapshots/racks.jpg"\n`)
     shots.pointPageAt({ picture: "snapshots/matrix.jpg", pageName: "matrix page", newAt: "/matrix" })
-    expect(siteText()).toContain(`<page "matrix page"/>`)
-    expect(siteText()).toContain(`<page "matrix page" address="/matrix" thumbnail="snapshots/matrix.jpg"/>`)
+    expect(siteText()).toContain(`a "matrix page" is a page\n`)
+    expect(siteText()).toContain(`\tit has a matrix page at "/matrix", thumbnail "snapshots/matrix.jpg"\n`)
     shots.pointPageAt({ picture: "snapshots/matrix.jpg", pageName: "matrix page", live: "https://example.com/matrix" })
-    expect(siteText()).toContain(`live="https://example.com/matrix"/>`)
+    expect(siteText()).toContain(`, live "https://example.com/matrix"\n`)
   })
 })
 
@@ -134,7 +133,7 @@ describe("walking the site", () => {
     )
     expect(viewport).toEqual({ width: 800, height: 600 })
     expect(existsSync(join(project, "snapshots/racks.jpg"))).toBe(true)
-    expect(siteText()).toContain(`thumbnail="snapshots/racks.jpg"`)
+    expect(siteText()).toContain(`thumbnail "snapshots/racks.jpg"`)
     expect(cornerRed).toBeGreaterThan(200)
     expect(isBarHiddenAfter).toBe(false)
   }, 90_000)

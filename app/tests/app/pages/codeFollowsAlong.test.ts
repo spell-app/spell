@@ -20,7 +20,7 @@ const SHOTS = process.env.SHOTS
 
 /** A browser context whose saves go nowhere near the disk. */
 async function contextWithNoSaving(context: BrowserContext): Promise<void> {
-  await context.route(/\/api\/projects\/file\/|\.(spellml|spell)(\?.*)?$/, (route) =>
+  await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) =>
     route.request().method() === "GET"
       ? route.continue()
       : route.fulfill({ status: 200, contentType: "application/json", body: "{}" })

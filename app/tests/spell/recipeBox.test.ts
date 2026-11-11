@@ -31,7 +31,7 @@ import { PeopleStore, orgFile } from "spell/app/spaces/server/node/people/People
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
-// Spell UI, as a spellml drawing names its components:  `<card>` is `<ui-card>`
+// Spell UI, as a drawing names its components:  `<card>` is `<ui-card>`
 import "spell/app/spaces/models/spellUIPack"
 
 /** `yarn build:element`'s output. */
@@ -68,18 +68,12 @@ type Program = {
 /** The built-in examples:  what people run, in the editor. */
 const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
-/**
- * The lines a program starts with, up to its first type:  in tags, its first template (epic `language` P40),
- * by its short word (epic `language` P41) or its old prefixed one.
- */
-const PLACE_LINES =
-  /^[\s\S]*?(?=^(?:a|an|una) "|^<(?:(?:spell|encanto)-)?(?:view|thing|page|app|extend|vista|cosa|página|aplicación|extender)\b)/m
+/** The lines a program starts with, up to its first type. */
+const PLACE_LINES = /^[\s\S]*?(?=^(?:a|an|una) ")/m
 
-/** `program` with its place's lines replaced;  in a file in tags, as a `<spell>` block. */
+/** `program` with its place's lines replaced. */
 function withPlace(program: Program, lines: string): Program {
-  const isTagged = SP.formOfText(program.source, program.path) === "spellx"
-  const said = isTagged ? `<spell>\n${lines.replace(/^/gm, "\t")}\n</spell>` : lines
-  return { ...program, source: program.source.replace(PLACE_LINES, `${said}\n\n`) }
+  return { ...program, source: program.source.replace(PLACE_LINES, `${lines}\n\n`) }
 }
 
 /** What each back-end's lines say:  all that differs. */

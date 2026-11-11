@@ -64,7 +64,7 @@ describe.skipIf(!SERVING)("live edit everywhere", { timeout: 240_000 }, () => {
     browser = await chromium.launch()
     context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
     // saves never reach the disk;  the library's compiled code, once changed, is answered from here
-    await context.route(/\/api\/projects\/file\/|\.(spellml|spell|spell\.js)(\?.*)?$/, (route) => {
+    await context.route(/\/api\/projects\/file\/|\.(spell|spell\.js)(\?.*)?$/, (route) => {
       const request = route.request()
       if (request.isNavigationRequest()) return route.continue()
       if (request.method() !== "GET") return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })

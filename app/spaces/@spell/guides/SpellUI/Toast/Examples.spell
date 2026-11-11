@@ -1,19 +1,17 @@
+<!-- Interaction › Access created toast:  a toast, waited for until it's gone, then another -->
+a "gone in a second" is a view:
+	// A toast that goes after a second;  once it's gone, a toast saying so
+	to show the toasts:
+		notify "I'll be gone in a second" for 1 second and wait
+		notify "The first toast is gone"
+	to draw it:
+		<button onClick={show the toasts}>Show, then close it after a second</button>
+
 "toast examples" is a notebook page
 	<header level="1">
 		Toast
 		<header>A toast allows users to receive a short, non-blocking notification.</>
 	</>
-
-	<!-- Interaction › Access created toast:  a toast, waited for until it's gone, then another -->
-	<view "gone in a second">
-		<action "show the toasts" description="A toast that goes after a second;  once it's gone, a toast saying so">
-			notify "I'll be gone in a second" for 1 second and wait
-			notify "The first toast is gone"
-		</action>
-		<draw>
-			<button onClick={show the toasts}>Show, then close it after a second</button>
-		</draw>
-	</view>
 
 	<section>
 		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">

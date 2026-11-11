@@ -5,7 +5,7 @@ import { parseSpellProject, summarize } from "spell/parser/spell/test"
 import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
- * Whole-project parse of the Solitaire example, `@spell/examples/Solitaire`, written in spellx.
+ * Whole-project parse of the Solitaire example, `@spell/examples/Solitaire`.
  * - Snapshot pins compiled output + errors (and warnings), so parser changes that alter output show up in review.
  * - Benchmark only runs with `BENCH=1`:
  *   `BENCH=1 yarn vp test run tests/spell/SpellProject.test.ts --reporter=verbose --silent=false`

@@ -358,8 +358,8 @@ Written in `.spell` files, Solitaire came out linted clean and passing its six t
 in under a minute:  about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
 
 Every translation comes back in plain Spell:  `Card.spell` gives `Carta.es.spell`, its words in Spanish.
-A file still written in tags is read as the plain Spell it means, and its translation is written plain too;
-prose between its tags becomes `//` comments, translated as a comment is, so `--no-ai` leaves it in English.
+A page file (`"button api" is a notebook page`) is left out:  the translator writes plain Spell a line at a time,
+and a page's body is prose and markup.
 
 It works in three passes:
 1. **Names:**  every name the project chose (types, properties, values, methods, texts, comments), with its gender.

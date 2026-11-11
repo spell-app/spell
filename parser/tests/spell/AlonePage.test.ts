@@ -10,25 +10,14 @@ import { registerTestComponentPack } from "spell/parser/spell/test"
  * - What the editor does with them is `SpellProject.pagesInPlay`'s, tested with a running editor.
  */
 
-const FILM = [
-  '<spell-page "film page">',
-  '\t<property "film">text</>',
-  "\t<view counter>",
-  "\t\t<draw><text>Counted</text></draw>",
-  "\t</view>",
-  "\t# Film",
-  "\t<counter/>",
-  "</spell-page>",
-  ""
-].join("\n")
+const FILM = ['"film page" is a notebook page', "\t# Film", "\t<text>Counted</text>", ""].join("\n")
 
 const OTHER = FILM.replace('"film page"', '"other page"').replace("# Film", "# Other")
 
 const SITE = [
-  '<spell-site "guide">',
-  '\t<page "film page" address="/films/:film" title="Film"/>',
-  '\t<page "other page" address="/other" title="Other"/>',
-  "</>",
+  "guide is a site:",
+  '\tit has a film page at "/films" , named "Film"',
+  '\tit has an other page at "/other" , named "Other"',
   ""
 ].join("\n")
 
@@ -42,7 +31,7 @@ function projectOf(files: Record<string, string>, parsesAlone?: (path: string) =
     parser: root.parser!.clone({ module: "Guide" }),
     parentScope: root
   })
-  const twin = (scope.parser as SP.SpellParser).twinFor(language, "spellx")
+  const twin = (scope.parser as SP.SpellParser).twinFor(language, "page")
   const project = new P.IncrementalProject({
     scope,
     keepLastGood: true,
@@ -66,18 +55,18 @@ function errorsIn(parse: P.IncrementalParse | undefined): string[] {
 
 describe("what counts as alone", () => {
   const head = (text: string) => SP.Language.rootScopeFor([SP.Language.forFile("/x.spell")]).parser as SP.SpellParser
-  const alone = (text: string) => !!head(text).twinFor(SP.Language.forFile("/x.spell"), "spellx").aloneHead(text, "/x")
+  const alone = (text: string) => !!head(text).twinFor(SP.Language.forFile("/x.spell"), "page").aloneHead(text, "/x")
 
-  test("one page, a comment before it, its views inside", () => expect(alone(`<!-- notes -->\n${FILM}`)).toBe(true))
-  test("a page in `.spell` is not", () => {
+  test("one page, a comment before it", () => expect(alone(`<!-- notes -->\n${FILM}`)).toBe(true))
+  test("read by a plain parser, it is not", () => {
     const parser = head(FILM)
     expect(parser.aloneHead(FILM, "/x")).toBeUndefined()
   })
   test("two pages in a file are not", () => expect(alone(`${FILM}${OTHER}`)).toBe(false))
   test("a thing after the page's end is not", () =>
-    expect(alone(`${FILM}<spell-thing "task">\n\t<property "title">text</>\n</spell-thing>\n`)).toBe(false))
-  test("a view at the top is not", () =>
-    expect(alone("<spell-view counter>\n\t<draw>hi</draw>\n</spell-view>\n")).toBe(false))
+    expect(alone(`${FILM}a "task" is a thing:\n\tits "title" is text\n`)).toBe(false))
+  test("a view of its own above it is not", () =>
+    expect(alone(`a "counter" is a view:\n\tto draw it: <text>hi</text>\n${FILM}`)).toBe(false))
 })
 
 describe("a project of pages alone", () => {
@@ -97,15 +86,6 @@ describe("a project of pages alone", () => {
     expect(errorsIn(project.getFile("/Site.spell")).join()).toContain("nope")
   })
 
-  test("two pages each have a `counter`, their own, named for the page", () => {
-    const { project } = projectOf(FILES)
-    const code = (path: string) => String(P.JSWriter.instance.writeMatch(project.getFile(path)!.match))
-    expect(code("/Film.spell")).toContain("class FilmPageCounter extends View")
-    expect(code("/Film.spell")).toContain('h("guide-film-page-counter")')
-    expect(code("/Other.spell")).toContain("class OtherPageCounter extends View")
-    expect(errorsIn(project.getFile("/Film.spell"))).toEqual([])
-  })
-
   test("a page is parsed when it's wanted", () => {
     const { project } = projectOf(FILES, (path) => path === "/Film.spell")
     expect(project.getFile("/Other.spell")).toBeUndefined()
@@ -122,17 +102,10 @@ describe("a project of pages alone", () => {
     expect(project.getFile("/Site.spell")!.match).toBe(site)
   })
 
-  test("a change of the page's name or a property re-reads the rest", () => {
+  test("a change of the page's name re-reads the rest", () => {
     const { project } = projectOf(FILES)
     const changed = project.update("/Other.spell", OTHER.replace('"other page"', '"another page"'))
     expect(changed).toContain(project.getFile("/Site.spell"))
-  })
-
-  test("a page's own view can't take another page's name", () => {
-    const clashing = FILM.replace("<view counter>", '<view "other">').replace("\t<counter/>\n", "")
-    const name = '<spell-page "film page other">\n\t# Hi\n</spell-page>\n'
-    const { project } = projectOf({ ...FILES, "/Film.spell": clashing, "/Clash.spell": name })
-    expect(errorsIn(project.getFile("/Film.spell")).join()).toContain("view")
   })
 
   test("a file that stops being alone starts over", () => {

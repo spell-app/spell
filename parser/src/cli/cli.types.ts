@@ -31,7 +31,6 @@ export type LanguageCommands = {
   explain(word: string[], options: ExplainOptions): Promise<number>
   translate(project: string[], options: TranslateOptions): Promise<number>
   translateTime(projects: string[], options: TranslateTimeOptions): Promise<number>
-  spellxConvert(projects: string[], options: SpellxConvertOptions): Promise<number>
 }
 
 /** One of the language's commands, by name:  `compile`, `lint` ... */
@@ -204,14 +203,6 @@ export type SpeedtestOptions = GlobalOptions & {
  */
 export type FormatOptions = GlobalOptions & {
   check?: boolean
-}
-
-/**
- * `spell spellx convert` flags.
- * - `dryRun`:  write nothing:  print each `.spell` file instead
- */
-export type SpellxConvertOptions = GlobalOptions & {
-  dryRun?: boolean
 }
 
 /**

@@ -2831,7 +2831,7 @@
           "ruleNames": ["declare_event"],
           "internal": false,
           "file": "src/spell/rules/events/DeclareEvent.ts",
-          "line": 20,
+          "line": 19,
           "purpose": "Says an event a template's things SEND, and what comes with it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -4922,7 +4922,7 @@
           "ruleNames": ["markdown_description"],
           "internal": false,
           "file": "src/spell/rules/classes/MarkdownDescription.ts",
-          "line": 50,
+          "line": 49,
           "purpose": "A type's description, as markdown, in its outline (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -5840,7 +5840,7 @@
           "ruleNames": ["define_group"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineGroup.ts",
-          "line": 22,
+          "line": 18,
           "purpose": "A GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).",
           "syntaxes": [
             {
@@ -5866,7 +5866,7 @@
           "ruleNames": ["define_menu"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineMenu.ts",
-          "line": 34,
+          "line": 33,
           "purpose": "A template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).",
           "syntaxes": [
             {
@@ -5919,7 +5919,7 @@
           "ruleNames": ["menu_bar"],
           "internal": false,
           "file": "src/spell/rules/classes/MenuBar.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Which of an app's menus is its MENU BAR (epic `elemental-spell` P10, Q34).",
           "syntaxes": [
             {
@@ -9170,12 +9170,12 @@
           "aliases": ["statement"]
         },
         {
-          "className": "SpellxCloser",
-          "ruleNames": ["spellx_closer"],
+          "className": "PageCloser",
+          "ruleNames": ["page_closer"],
           "internal": false,
-          "file": "src/spell/rules/statements/SpellxCloser.ts",
+          "file": "src/spell/rules/statements/PageCloser.ts",
           "line": 14,
-          "purpose": "A spellx closer on its own line, `</>` or `</property>` (epic `elemental-spell` P6).",
+          "purpose": "A closer on its own line in a page's body, `</>` or `</if>` (epic `language` P47).",
           "syntaxes": [],
           "aliases": ["statement"]
         }

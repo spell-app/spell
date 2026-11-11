@@ -10,7 +10,6 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * `define_menu` rule:  a template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).
  * - e.g. `- its "game menu" is a menu of "deal", "-", "undo" and "redo"`;
  *   Spanish's `- su "menú del juego" es un menú de "repartir", "-", "deshacer" y "rehacer"`
- * - spellx's twin:  `<menu "game menu">` holding `<action "deal" />` ... (`SpellxTwin.menu()`).
  * - Each item names one of the template's actions as it's written (`to deal:` is `"deal"`), or the app's own `undo`
  *   and `redo` (`SP.LanguageWords.appActions`:  Spanish's `deshacer`, `rehacer`);  `"-"` is a line between groups.
  * - Compiles to the menu on the class, which a toolbar, the app's menu bar and a `context-menu=` draw by its name:

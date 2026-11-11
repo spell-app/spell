@@ -4,7 +4,7 @@ import { parseSpellProject } from "spell/parser/spell/test"
 
 /**
  * A property's change as an event (epic `debut` P30, Q47):  `- when its score changes:` is the thing's handler of
- * `score-change`, `onScoreChange()`, in every form, in the outline and in tags, in English and Spanish.
+ * `score-change`, `onScoreChange()`, in every form, in English and Spanish.
  * - Each case is a game with ONE line (or tag) that differs:  the long form, then the short forms that must compile
  *   the same.
  */
@@ -16,16 +16,6 @@ const OUTLINE = [
   '\t- its "high score" is a number',
   '\t- its "hint" is text',
   "{line}"
-].join("\n")
-
-/** The same in tags. */
-const TAGS = [
-  '<spell-thing "game">',
-  '\t<property "score">a number</>',
-  '\t<property "high score">a number</>',
-  '\t<property "hint">text</>',
-  "{line}",
-  "</spell-thing>"
 ].join("\n")
 
 /** The same in Spanish. */
@@ -55,19 +45,6 @@ describe("a property's change", () => {
     expect(compile("/test.spell", OUTLINE, "\t- when its high score changes: print 1")).toContain(
       "onHighScoreChange(event) {"
     )
-  })
-
-  test("in tags:  one line, or its code between, closed by </>, </when> or its words", () => {
-    const long = compile("/test.spell", TAGS, "\t<when its score changes>\n\t\tprint its score\n\t</>")
-    expect(long).toContain("onScoreChange(event) {")
-    for (const form of [
-      "\t<on score change print its score/>",
-      "\t<on score change: print its score/>",
-      "\t<when score changes>print its score</when>",
-      "\t<on its score change>\n\t\tprint its score\n\t</on its score change>"
-    ]) {
-      expect(compile("/test.spell", TAGS, form), form).toBe(long)
-    }
   })
 
   test("in Spanish:  `cuando (su) puntuación cambia`, `al cambiar (su) puntuación`", () => {

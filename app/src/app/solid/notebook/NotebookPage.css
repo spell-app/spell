@@ -221,7 +221,7 @@
 
 /*
  * an example's code, in its code pane:  its text on the pane's own shade, as the code of a component page's example
- * - its switch (spellx / spell) small, over the pane's top right
+ * - its switch small, over the pane's top right
  */
 .NotebookExampleCode {
   display: grid;

@@ -192,11 +192,11 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Una línea sin sujeto, o con "su", habla de un tipo solo en su esquema, con sangría bajo p. ej. "una carta es una cosa donde:"',
   "inline-and-nested-body": "Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo",
   "not-an-element": "<{tag}> no es un elemento:  escribe la etiqueta propia de Spell UI, p. ej. <ui-form>",
-  /** A bare tag in a spellx drawing that no pack has (epic `elemental-spell` P7). */
-  "spellx-unknown-component":
+  /** A bare tag in a page's drawing that no pack has (epic `elemental-spell` P7). */
+  "page-unknown-component":
     "<{tag}> no es un componente de ningún paquete de aquí (buscado:  {packs}):  revisa su nombre, o añade su paquete a los paquetes del proyecto",
-  /** A control or handler tag inside an element in a spellx drawing (epic `elemental-spell` P7, C29). */
-  "spellx-tag-in-markup":
+  /** A control tag inside an element in a page's drawing (epic `elemental-spell` P7, C29). */
+  "page-tag-in-markup":
     "<{tag} ...> aún no puede ir dentro de un elemento:  escríbelo en una línea propia del dibujo, fuera del elemento",
   /** An attribute in a tag that can't be read:  the tag still ends at its own `>` (epic `notebook` I5). */
   "unreadable-attribute": 'No se puede leer "{text}" en <{tag}>:  revisa su nombre y sus comillas',
@@ -288,11 +288,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "the-property-of-a-type": "{theProperty} de {aType}",
 
   ////////////////
-  // ## Spellx
+  // ## Páginas
   ////////////////
 
-  "spellx-unknown-word": '"{tag}" no es una palabra de spellx:  ¿querías decir "{suggestion}"?',
-  "spellx-unknown-word-here": '"{tag}" no es una palabra de spellx:  aquí, usa una de {words}',
   "ui-defaults-not-a-sample":
     '<ui-defaults> lleva etiquetas de muestra, una por componente, cada una con sus valores:  <es-boton apariencia="píldora"/>',
   "ui-defaults-not-written":
@@ -310,38 +308,24 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "<ui-defaults> toma sus valores de su source, o de las etiquetas de muestra que lleva dentro:  no de ambos",
   "ui-defaults-source-unknown":
     "no encuentro <ui-defaults> en {source}:  importa {project} en el archivo del proyecto, y compílalo antes",
-  "spellx-unknown-attribute": '{tag} no tiene "{attribute}":  ¿querías decir "{suggestion}"?',
-  "spellx-unknown-attribute-here": '{tag} no tiene "{attribute}":  lleva {attributes}',
-  "spellx-unexpected-closer": '"{closer}" no cierra nada:  quítalo',
-  "spellx-mismatched-closer": '"{closer}" no puede cerrar {open}:  escribe "</>"',
-  "spellx-unclosed-tag": '{tag} nunca se cierra:  termínalo con "</>"',
-  "spellx-one-line-tag":
-    '{tag} se cierra en su propia línea, "... />":  pon el código más largo entre "{open}" y "</>"',
-  "spellx-unclosed-head": '{tag} nunca termina:  ciérralo con ">", o con "/>" si nada va dentro',
-  "spellx-unclosed-comment": '"<!--" nunca se cierra:  termina el comentario con "-->"',
+  "page-unexpected-closer": '"{closer}" no cierra nada:  quítalo',
+  "page-mismatched-closer": '"{closer}" no puede cerrar {open}:  escribe "</>"',
+  "page-unclosed-tag": '{tag} nunca se cierra:  termínalo con "</>"',
+  "page-unclosed-head": '{tag} nunca termina:  ciérralo con ">", o con "/>" si nada va dentro',
+  "page-unclosed-comment": '"<!--" nunca se cierra:  termina el comentario con "-->"',
   "chain-outside-markup":
     '{tag} elige lo que muestra un elemento, así que va dentro de uno:  para elegir todo el dibujo, escribe "{if} ..." en una línea propia',
-  "spellx-otherwise-without-if": '{tag} necesita un "{if}" antes',
-  "spellx-otherwise-after-closed-if": '{tag} sigue el "{if}" de arriba, pero un "</>" lo cerró:  quita el "</>"',
-  "spellx-for-flag-first":
+  "page-otherwise-without-if": '{tag} necesita un "{if}" antes',
+  "page-otherwise-after-closed-if": '{tag} sigue el "{if}" de arriba, pero un "</>" lo cerró:  quita el "</>"',
+  "page-for-flag-first":
     'Mueve "{flag}" después de los atributos de {tag}:  escrito primero, se lee como parte de la lista',
-  "spellx-for-needs-as": '"{attribute}" en {tag} va en lo que rodea a sus elementos:  di cuál, con {as}="tarjetas"',
-  "spellx-for-table-needs-cells":
+  "page-for-needs-as": '"{attribute}" en {tag} va en lo que rodea a sus elementos:  di cuál, con {as}="tarjetas"',
+  "page-for-table-needs-cells":
     '{tag} dibuja una fila por elemento:  nombra sus columnas, <celda "Nombre">{su nombre}</celda>',
-  "spellx-missing-phrase": '{tag} necesita palabras después de su "{word}"',
-  "spellx-indented-less": "Esta línea tiene menos sangría que el resto de {tag}:  dale un paso más que {tag}",
-  "spellx-nested-template": '{tag} no puede ir dentro de {outer}:  cierra {outer} primero, con "</>"',
-  "spellx-outside-template": '{tag} va dentro de una plantilla, p. ej. "{template}"',
-  "spellx-misplaced-tag": "{tag} no puede ir aquí:  {where}",
-  "spellx-where-control": "va dentro de un dibujo;  una acción lo dice como una línea",
-  "spellx-where-member": "va entre los miembros de su plantilla, junto al dibujo",
-  "spellx-part-in-drawing": 'Una parte se dibuja en su propio {draw} junto al dibujo:  aquí, "{place}" la coloca',
-  "spellx-typed-body":
-    'una propiedad con tipo= se guarda, y empieza en un valor en la línea de su etiqueta:  <propiedad "{name}" tipo="número">0</>',
+  "page-missing-phrase": '{tag} necesita palabras después de su "{word}"',
+  "page-indented-less": "Esta línea tiene menos sangría que el resto de {tag}:  dale un paso más que {tag}",
   "say-json-file":
     'Un lugar que es un solo archivo tiene que decir qué guarda:  escribe "es un archivo json en", o "es un archivo csv en"',
-  "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
-  "spellx-old-note": "{tag} ahora es {new}:  una etiqueta para cada nota",
 
   ////////////////
   // ## Long forms

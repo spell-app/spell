@@ -4,11 +4,12 @@ import { PageStories } from "spell/app/app/pages/PageStories"
 
 /**
  * A page's stories (epic `mockup` P6, P17):  what it must let people do, `<story>` tags in its own declaration,
- * read and written back in either of Spell's forms.
+ * read and written back.
  */
 describe("PageStories", () => {
-  const SPELLX = [
-    '<spell-page "film page">',
+  /** Two plain pages:  one with its stories, one with none. */
+  const PAGES = [
+    "film page is a page:",
     "\t<stories>",
     '\t\t<story "S1">see a film\'s opening crawl</story>',
     '\t\t<story "S2" done>',
@@ -18,10 +19,9 @@ describe("PageStories", () => {
     "\t\t\tDone when its people are listed, each a link",
     "\t\t</story>",
     "\t</stories>",
-    '\t<property "film" type="film"/>',
-    "</>",
+    "\tits film is a film",
     "",
-    '<spell-page "films page"/>',
+    "films page is a page",
     ""
   ].join("\n")
 
@@ -33,52 +33,54 @@ describe("PageStories", () => {
   }
 
   test("reads a page's stories:  its number, whether it's done, its one piece of text", () => {
-    expect(PageStories.of(SPELLX, "film page")).toEqual([FIRST, SECOND])
+    expect(PageStories.of(PAGES, "film page")).toEqual([FIRST, SECOND])
   })
 
   test("no stories yet;  no such page here", () => {
-    expect(PageStories.of(SPELLX, "films page")).toEqual([])
-    expect(PageStories.of(SPELLX, "planet page")).toBeUndefined()
+    expect(PageStories.of(PAGES, "films page")).toEqual([])
+    expect(PageStories.of(PAGES, "planet page")).toBeUndefined()
   })
 
   test("writes them back as it read them", () => {
-    expect(PageStories.withStories(SPELLX, "film page", [FIRST, SECOND])).toBe(SPELLX)
+    expect(PageStories.withStories(PAGES, "film page", [FIRST, SECOND])).toBe(PAGES)
   })
 
   test("ticks one off, and takes the block out when none are left", () => {
-    const ticked = PageStories.withStories(SPELLX, "film page", [{ ...FIRST, done: true }, SECOND])
+    const ticked = PageStories.withStories(PAGES, "film page", [{ ...FIRST, done: true }, SECOND])
     expect(ticked).toContain('<story "S1" done>')
-    expect(PageStories.withStories(SPELLX, "film page", [])).not.toContain("<stories>")
+    expect(PageStories.withStories(PAGES, "film page", [])).not.toContain("<stories>")
   })
 
   test("a story just added is numbered after the highest, and keeps its number as stories move", () => {
-    const text = PageStories.withStories(SPELLX, "film page", [SECOND, PageStories.newStory(""), FIRST])
+    const text = PageStories.withStories(PAGES, "film page", [SECOND, PageStories.newStory(""), FIRST])
     expect(PageStories.of(text, "film page")).toEqual([SECOND, { id: "S3", text: "", done: false }, FIRST])
   })
 
   test("what would close its tag is kept safe, and comes back as typed", () => {
     const story = { id: "S1", text: "a </story> and a </> in it", done: false }
-    const text = PageStories.withStories(SPELLX, "films page", [story])
+    const text = PageStories.withStories(PAGES, "films page", [story])
     expect(PageStories.of(text, "films page")).toEqual([story])
   })
 
-  test("opens up a self-closing page to hold its first story", () => {
-    const text = PageStories.withStories(SPELLX, "films page", [PageStories.newStory("see every film")])
-    expect(text).toContain(
-      '<spell-page "films page">\n\t<stories>\n\t\t<story "S1">see every film</story>\n\t</stories>\n</>\n'
-    )
+  test("a page with no body yet gains its `:` to hold its first story", () => {
+    const text = PageStories.withStories(PAGES, "films page", [PageStories.newStory("see every film")])
+    expect(text).toContain('films page is a page:\n\t<stories>\n\t\t<story "S1">see every film</story>\n\t</stories>\n')
     expect(PageStories.of(text, "films page")).toEqual([{ id: "S1", text: "see every film", done: false }])
   })
 
-  test("Spanish:  its own tags, in a block that's new or already there", () => {
-    const es = '<encanto-página "películas"/>\n'
+  test("Spanish:  its own story tags, in a block that's new or already there", () => {
+    const es = '"películas" es una página\n'
     const text = PageStories.withStories(es, "películas", [{ text: "verlas", done: true }], "es")
-    expect(text).toContain('\t<historias>\n\t\t<historia "H1" hecha>verlas</historia>\n\t</>\n')
+    expect(text).toBe(
+      '"películas" es una página:\n\t<stories>\n\t\t<historia "H1" hecha>verlas</historia>\n\t</stories>\n'
+    )
     expect(PageStories.of(text, "películas")).toEqual([{ id: "H1", text: "verlas", done: true }])
+    const again = PageStories.withStories(text, "películas", [{ id: "H1", text: "verlas", done: false }])
+    expect(again).toContain('\t\t<historia "H1">verlas</historia>\n')
   })
 
-  test("code spell:  a `<stories>` block first in the page's outline, its `:` added", () => {
-    const code = ['a "films page" is a page', "", "galaxy guide is a site:", '\t- it has a films page at "/films"', ""]
+  test("a `<stories>` block first in the page's outline, its `:` added", () => {
+    const code = ['a "films page" is a page', "", "galaxy guide is a site:", '\tit has a films page at "/films"', ""]
     const text = PageStories.withStories(code.join("\n"), "films page", [PageStories.newStory("see every film")])
     expect(text.split("\n").slice(0, 4)).toEqual([
       'a "films page" is a page:',
@@ -89,7 +91,7 @@ describe("PageStories", () => {
     expect(PageStories.of(text, "films page")).toEqual([{ id: "S1", text: "see every film", done: false }])
   })
 
-  test("code spell:  a blank line keeps the stories apart from a `<markdown>` under them", () => {
+  test("a blank line keeps the stories apart from a `<markdown>` under them", () => {
     const code = 'a "films page" is a page:\n\t<markdown>\n\t\tEvery film.\n\t</markdown>\n'
     expect(PageStories.withStories(code, "films page", [PageStories.newStory("see every film")])).toBe(
       'a "films page" is a page:\n\t<stories>\n\t\t<story "S1">see every film</story>\n\t</stories>\n\n\t<markdown>\n\t\tEvery film.\n\t</markdown>\n'
@@ -97,6 +99,6 @@ describe("PageStories", () => {
   })
 
   test("a page this file doesn't declare:  its stories are written where it is", () => {
-    expect(() => PageStories.withStories(SPELLX, "planet page", [])).toThrow(TypeError)
+    expect(() => PageStories.withStories(PAGES, "planet page", [])).toThrow(TypeError)
   })
 })

@@ -2,12 +2,12 @@ import { describe, test, expect } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { loadCodeSpellTwin } from "spell/app/spaces/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * `P.ParseJournal` MUST take back everything parsing changes in shared state, and put it all back again.
  * - Parses the Solitaire files into a journaled project, rewinds to before them, then replays:
- *   as code spell, their twins (`loadCodeSpellTwin()`), so each file parses as a plain `FileScope`'s block.
+ *   as code spell, their twins (`loadFixtureProject()`), so each file parses as a plain `FileScope`'s block.
  */
 describe("ParseJournal", () => {
   test("rewind undoes a whole project's parse, replay redoes it", () => {
@@ -20,13 +20,13 @@ describe("ParseJournal", () => {
       parser,
       parentScope: rootScope
     })
-    const fileScopes = loadCodeSpellTwin("@spell/examples/Solitaire").map(
+    const fileScopes = loadFixtureProject("@spell/examples/Solitaire").map(
       ({ path }) => new P.FileScope({ name: path, path, parentScope: projectScope })
     )
 
     const before = describeState(parser, projectScope, fileScopes)
     const mark = parser.journal.mark()
-    loadCodeSpellTwin("@spell/examples/Solitaire").forEach(({ contents }, index) =>
+    loadFixtureProject("@spell/examples/Solitaire").forEach(({ contents }, index) =>
       fileScopes[index]!.parse(contents, "block")
     )
     const parsed = describeState(parser, projectScope, fileScopes)
@@ -51,7 +51,7 @@ describe("ParseJournal", () => {
     const projectScope = new P.ProjectScope({ name: "decl", path: "/decl", parser, parentScope: rootScope })
     const fileScope = new P.FileScope({ name: "/Card.spell", path: "/Card.spell", parentScope: projectScope })
     const mark = parser.journal.mark()
-    fileScope.parse(loadCodeSpellTwin("@spell/examples/Solitaire")[0]!.contents, "block")
+    fileScope.parse(loadFixtureProject("@spell/examples/Solitaire")[0]!.contents, "block")
 
     const card = projectScope.types.get("Card")
     expect(card?.declaredBy?.rule.name).toBe("create_type")

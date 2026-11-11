@@ -7,7 +7,6 @@ import { loadFixtureProject } from "spell/app/spaces/test"
 /**
  * The OUTLINE style (epic page `outline-spell`) on whole files:  the Solitaire example's cards, deck and piles
  * (not its game, `Solitaire.spell`, which starts an app).
- * - Written in spellx since the showcase (epic `elemental-spell`):  each tag reads as its outline twin.
  * - The style itself, line by line:  spell-parser's own `outline.test.ts`.
  */
 describe("outline style", () => {

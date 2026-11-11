@@ -47,7 +47,7 @@ describe("eventsDeclared()", () => {
     ])
   })
 
-  test("a tableau:  a tag's bare abilities first (Owen), then its own conditions, then what it inherits from a pile;  each event's lines under it", () => {
+  test("a tableau:  its bare abilities first (Owen), then its own conditions, then what it inherits from a pile;  each event's lines under it", () => {
     const rows = eventsInSource(["Tableau", "Pile"], SOLITAIRE)
     expect(rows.map((row) => [row.kind, row.words])).toEqual([
       ["ability", "droppable"],
@@ -62,21 +62,18 @@ describe("eventsDeclared()", () => {
     expect(rows[4]!.code).toBe("put the card on it")
   })
 
-  test("a tag's event:  `<on click>`, its words before its attributes, its code between", () => {
+  test("an event:  `on click:`, its code under it", () => {
     expect(eventsInSource(["StockPile"], SOLITAIRE).filter((row) => row.kind === "event")).toEqual([
       { kind: "event", words: "on click", code: "turn a stock card" }
     ])
   })
 
-  test("the short forms:  an ability's condition in its own words, a tag's too, `when` for an event", () => {
+  test("the short forms:  an ability's condition in its own words, `when` for an event", () => {
     const source = `
-<spell-view "card">
-	<clickable when it is face down />
-	<spell>
-		- draggable when it is face up
-		- when clicked: play it
-	</spell>
-</spell-view>`
+a "card" is a view:
+	- clickable when it is face down
+	- draggable when it is face up
+	- when clicked: play it`
     expect(eventsInSource(["Card"], [source])).toEqual([
       { kind: "ability", words: "clickable when", code: "it is face down" },
       { kind: "ability", words: "draggable when", code: "it is face up" },
@@ -91,42 +88,34 @@ describe("eventsDeclared()", () => {
     ])
   })
 
-  test("a property's change (epic `debut` P30):  every form, outline and tag, `</>` and `</on ...>` closing", () => {
+  test("a property's change (epic `debut` P30):  every form, its code on its line or under it", () => {
     const source = `
-<spell-app "game">
-	<when its score changes>
+game is an app:
+	- when its score changes:
 		if its score is 520
 			show "You won!"
-	</>
-	<on hint change: print its hint/>
-	<on best change>print 1</on best change>
-	<spell>
-		- when the level changes: print its level
-		- on round change print its round
-	</spell>
-</spell-app>`
+	- on hint change: print its hint
+	- when the level changes: print its level
+	- on round change print its round`
     expect(eventsInSource(["Game"], [source])).toEqual([
       { kind: "event", words: "when its score changes", code: 'if its score is 520\n\tshow "You won!"' },
       { kind: "event", words: "on hint change", code: "print its hint" },
-      { kind: "event", words: "on best change", code: "print 1" },
       { kind: "event", words: "when the level changes", code: "print its level" },
       { kind: "event", words: "on round change", code: "print its round" }
     ])
   })
 
-  const WORDS = ["spell-property-editor", "encanto-editor-de-propiedades", "property-editor", "editor-de-propiedades"]
-
-  test("a type's own `<spell-property-editor>`, in its own file (epic `editor` P25):  Solitaire's card", () => {
-    const markup = propertyEditorInSource(["card", "two sided view"], [card], WORDS, [cardEditor])
+  test("a type's own property editor, in its own file (epic `editor` P25):  Solitaire's card", () => {
+    const markup = propertyEditorInSource(["card", "two sided view"], [cardEditor])
     expect(markup).toMatch(/^<ui-property-group label="Card" columns="2">/)
     expect(markup).toContain('<ui-property name="suit" label="Suit" as="buttons" width="16" />')
-    expect(markup).not.toContain("property-editor")
-    // Card.spell holds none of its own any more
-    expect(propertyEditorInSource(["card"], [card], WORDS)).toBe("")
+    expect(markup).not.toContain("property editor")
+    // none of its own:  empty
+    expect(propertyEditorInSource(["card"])).toBe("")
   })
 
   test("Solitario's card editor:  a built-in template's property, by its Spanish name, named as its class names it (epic `language` T73)", () => {
-    const markup = propertyEditorInSource(["carta", "two sided view"], [], WORDS, [cartaEditor])
+    const markup = propertyEditorInSource(["carta", "two sided view"], [cartaEditor])
     expect(markup).toContain('<ui-property name="dirección" label="Cara" as="buttons" />')
     const bound = withClassNames(markup, new Map([["dirección", "direction"]]))
     expect(bound).toContain('<ui-property name="direction" label="Cara" as="buttons" />')
@@ -137,20 +126,7 @@ describe("eventsDeclared()", () => {
     )
   })
 
-  test('a project\'s editors file:  one `<spell-property-editor "name">` per type, before any inline one', () => {
-    const editors = [
-      '<property-editor "pile">\n\t<ui-property name="cards" />\n</property-editor>',
-      '<spell-property-editor "card">\n\t<ui-property name="rank" />\n</>'
-    ].join("\n\n")
-    expect(propertyEditorInSource(["card"], [card], WORDS, [editors])).toBe('<ui-property name="rank" />')
-    expect(propertyEditorInSource(["pile"], [pile], WORDS, [editors])).toBe('<ui-property name="cards" />')
-    expect(propertyEditorInSource(["deck"], [], WORDS, [editors])).toBe("")
-    // Spanish's, in `Carta.editor.es.spell`
-    const carta = '<encanto-editor-de-propiedades "carta">\n\t<ui-property name="palo" />\n</>'
-    expect(propertyEditorInSource(["carta"], [], WORDS, [carta])).toBe('<ui-property name="palo" />')
-  })
-
-  test('a plain head, `"card" is a property editor`:  its markup the lines under it (epic `language` P45)', () => {
+  test('a project\'s editors file:  `"card" is a property editor`, its markup the lines under it (epic `language` P45)', () => {
     const editors = [
       '"pile" is a property editor',
       '\t<ui-property name="cards" />',
@@ -161,21 +137,15 @@ describe("eventsDeclared()", () => {
       "\t</ui-property-group>",
       ""
     ].join("\n")
-    expect(propertyEditorInSource(["pile"], [], WORDS, [editors])).toBe('<ui-property name="cards" />')
-    expect(propertyEditorInSource(["card"], [], WORDS, [editors])).toBe(
+    expect(propertyEditorInSource(["pile"], [editors])).toBe('<ui-property name="cards" />')
+    expect(propertyEditorInSource(["card"], [editors])).toBe(
       '<ui-property-group label="Card">\n\t<ui-property name="rank" />\n</ui-property-group>'
     )
+    expect(propertyEditorInSource(["deck"], [editors])).toBe("")
+    // a type's own editor wins over the one it inherits
+    expect(propertyEditorInSource(["deck", "pile"], [editors])).toBe('<ui-property name="cards" />')
     const carta = '"carta" es un editor de propiedades\n\t<ui-property name="palo" />\n'
-    expect(propertyEditorInSource(["carta"], [], WORDS, [carta])).toBe('<ui-property name="palo" />')
-  })
-
-  test("inline in the type's spellml still:  the prefixed tag (epic `data` P31), the old short one, Spanish's;  none:  empty", () => {
-    const inline = (word: string, name: string) =>
-      `<spell-view "${name}">\n\t<${word}>\n\t\t<ui-property name="palo" />\n\t</>\n</spell-view>`
-    for (const word of WORDS) {
-      expect(propertyEditorInSource(["carta"], [inline(word, "carta")], WORDS)).toBe('<ui-property name="palo" />')
-    }
-    expect(propertyEditorInSource(["pile"], [pile], WORDS)).toBe("")
+    expect(propertyEditorInSource(["carta"], [carta])).toBe('<ui-property name="palo" />')
   })
 
   test("an action's `enabled when`, in its own words;  none:  empty", () => {

@@ -26,12 +26,11 @@ describe("ui_defaults", () => {
   })
 
   test("a Spanish block, in Spell UI's Spanish words, compiles to its English ones", () => {
-    // a tag-shaped file reads a tag of any letters, `<botón>`;  plain Spell's markup, ASCII ones
-    // - a file holding only this block is plain (`SP.formOfText()`), so the old ending keeps it tag-shaped here
+    // a tag of any letters, `<botón>` (plain Spell's markup since epic `language` P46)
     for (const [path, tag] of [
       ["/Tema.es.spell", "es-boton"],
-      ["/Tema.es.spellml", "botón"],
-      ["/Tema.es.spellml", "ui-botón"]
+      ["/Tema.es.spell", "botón"],
+      ["/Tema.es.spell", "ui-botón"]
     ]) {
       const { code, errors } = compiled(
         path!,
@@ -42,7 +41,7 @@ describe("ui_defaults", () => {
     }
   })
 
-  test("a block at a spellml file's top level is markup, as in code spell", () => {
+  test("a block at a file's top level is markup", () => {
     const { code, errors } = compiled(
       "/Theme.spell",
       ["<ui-defaults>", '\t<ui-button appearance="pill"/>', "</ui-defaults>"].join("\n")

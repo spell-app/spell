@@ -6,7 +6,7 @@
  */
 import { statements } from "./statements.parser"
 import { DoNothing } from "./DoNothing"
-import { SpellxCloser } from "./SpellxCloser"
+import { PageCloser } from "./PageCloser"
 
 statements.addRule(DoNothing, {
   syntax: "do nothing",
@@ -18,5 +18,5 @@ statements.addRule(DoNothing, {
   ]
 })
 
-// a spellx file's closers (epic `elemental-spell` P6):  no words, so no syntax
-statements.addRule(SpellxCloser)
+// a page's closers, `</if>` (epic `language` P47):  no words, so no syntax
+statements.addRule(PageCloser)

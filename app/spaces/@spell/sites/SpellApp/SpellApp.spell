@@ -157,14 +157,14 @@ a "sign-in dialog" is a view:
 	its thumbnail is "snapshots/sign-in.jpg"
 
 spell app is a site:
-	it has a home page at "/", named "Home", old , colored red
-	it has a notebook page at "/edit/@spell/guides/SpellUI/:notebook*", named "Notebook", old , colored orange
-	it has a guide page at "/edit/@spell/guides/:guide", named "Guide", old , colored yellow
-	it has a code editor page at "/edit/:project*", named "Edit", old , colored olive
+	it has a home page at "/", named "Home", old, colored red
+	it has a notebook page at "/edit/@spell/guides/SpellUI/:notebook*", named "Notebook", old, colored orange
+	it has a guide page at "/edit/@spell/guides/:guide", named "Guide", old, colored yellow
+	it has a code editor page at "/edit/:project*", named "Edit", old, colored olive
 		it has a running app page at "/run/:project*", named "Run", old
-	it has a site editor page at "/site/:project*", named "Site Editor", old , colored green
-	it has a theme editor page at "/theme", named "Theme Editor", old , colored teal
-	it has a hosted app page at "/apps/:project*", named "Hosted App", old , colored blue
+	it has a site editor page at "/site/:project*", named "Site Editor", old, colored green
+	it has a theme editor page at "/theme", named "Theme Editor", old, colored teal
+	it has a hosted app page at "/apps/:project*", named "Hosted App", old, colored blue
 		it has a terms page at "/terms", named "Terms", old
 	it has an inspector sidebar
 	it has a palette sidebar

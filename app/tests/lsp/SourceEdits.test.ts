@@ -34,11 +34,11 @@ describe("SourceEdits", () => {
     )
   })
 
-  test("a template tag's quoted name is its name's:  never read as attributes, a new one goes after it (notebook P6)", () => {
-    const text = `<spell-page "locked notebook" notebook>\n</spell-page>`
-    expect(SourceEdits.tagAt(text, 0)!.attributes.map((each) => each.name)).toEqual(["notebook"])
-    expect(SourceEdits.applied(text, SourceEdits.settingAttribute(text, 0, "locked", true))).toBe(
-      `<spell-page "locked notebook" locked notebook>\n</spell-page>`
+  test("a tag's quoted word is its own:  never read as attributes, a new one goes after it", () => {
+    const text = `<example "one counter" hidden>\n</example>`
+    expect(SourceEdits.tagAt(text, 0)!.attributes.map((each) => each.name)).toEqual(["hidden"])
+    expect(SourceEdits.applied(text, SourceEdits.settingAttribute(text, 0, "open", true))).toBe(
+      `<example "one counter" open hidden>\n</example>`
     )
   })
 
@@ -80,21 +80,19 @@ function edited(path: string, contents: string, type: string, name: string, valu
 
 describe("SourceHomes", () => {
   const CARD = [
-    `<spell-view "card">`,
-    `\t<property "count" one-of="1, 2"/>`,
-    `\t<property "title">a text</>`,
-    `\t<property "suit" one-of="clubs, hearts"/>`,
-    `\t<property "score">a number</>`,
-    `\t<action "create it">`,
+    `a "card" is a view:`,
+    `\t- its "count" is one of 1, 2`,
+    `\t- its "title" is a text`,
+    `\t- its "suit" is one of clubs, hearts`,
+    `\t- its "score" is a number`,
+    `\t- to create it:`,
     `\t\tset its count to 2`,
     `\t\tset its title to "hi"`,
     `\t\tset its suit to clubs`,
     `\t\tset its score to the count + 1`,
-    `\t</action>`,
-    `</spell-view>`,
-    `<spell-app "solo">`,
-    `\t<property "first">a new card with title = "x", count = 1</>`,
-    `</spell-app>`,
+    ``,
+    `solo is an app:`,
+    `\t- its "first" is a new card with title = "x", count = 1`,
     ``
   ].join("\n")
 
@@ -143,10 +141,10 @@ describe("SourceHomes", () => {
       const home = SourceHomes.ofMaking(parsed.files[0]!, contents.indexOf("a new card"), name) as FileHome
       return SourceEdits.applied(contents, [SourceEdits.replacing(contents, home.removal!, "")])
     }
-    expect(removed(CARD, "count")).toContain(`a new card with title = "x"</>`)
-    expect(removed(CARD, "title")).toContain(`a new card with count = 1</>`)
+    expect(removed(CARD, "count")).toContain(`a new card with title = "x"\n`)
+    expect(removed(CARD, "title")).toContain(`a new card with count = 1\n`)
     const one = CARD.replace(`title = "x", count = 1`, `count = 1`)
-    expect(removed(one, "count")).toContain(`a new card</>`)
+    expect(removed(one, "count")).toContain(`a new card\n`)
   })
 
   test("yes and no are literals, in the file's language", () => {
@@ -164,29 +162,14 @@ describe("SourceHomes", () => {
   })
 
   // epic `language` T87:  the rewritten Counter says its start in its property, not in a `to create it`
-  test("a typed property's start, `<property type=...>0</>` or `a number starting at 0`, in place", () => {
-    const tags = [
-      `<spell-view "counter">`,
-      `\t<property "count" type="number" description="How many:  starts at 0">0</property>`,
-      `</spell-view>`,
-      ``
-    ].join("\n")
-    const fromTags = edited("/Counter.spell", tags, "Counter", "count", 5)
-    expect(fromTags.home.kind).toBe("default")
-    expect(fromTags.text).toBe(tags.replace(">0</property>", ">5</property>"))
-
+  test("a typed property's start, `a number starting at 0`, in place", () => {
     const code = [`a "counter" is a view where:`, `\t- its "count" is a number starting at 0`, ``].join("\n")
     const fromCode = edited("/Counter.spell", code, "Counter", "count", 7)
     expect(fromCode.home.kind).toBe("default")
     expect(fromCode.text).toBe(code.replace("starting at 0", "starting at 7"))
 
     // a range in its choices is no start:  `2 ... 10` doesn't make 2 every card's rank (I65)
-    const ranks = [
-      `<spell-thing "card">`,
-      `\t<property "rank" one-of="ace, 2 ... 10, jack, queen, king"/>`,
-      `</spell-thing>`,
-      ``
-    ]
+    const ranks = [`a "card" is a thing:`, `\t- its "rank" is one of ace, 2 ... 10, jack, queen, king`, ``]
     expect(edited("/Card.spell", ranks.join("\n"), "Card", "rank", "jack").home.kind).not.toBe("default")
   })
 
@@ -257,9 +240,9 @@ describe("SourceEdits, on whole elements", () => {
   })
 
   test("Spell's own closer closes what's open", () => {
-    const text = '<property "x">a thing</> <after/>'
+    const text = "<if it is done>✓</> <after/>"
     const element = SourceEdits.elementAt(text, 0)!
-    expect(text.slice(element.start, element.end)).toBe('<property "x">a thing</>')
+    expect(text.slice(element.start, element.end)).toBe("<if it is done>✓</>")
   })
 
   test("written beside an element, it takes that element's indent, on its own line", () => {
@@ -297,6 +280,17 @@ describe("SourceEdits, on whole elements", () => {
     )
     expect(text).toContain("\t\t<ui-divider>\n\t\t\t<ui-label>New</ui-label>\n\t\t</ui-divider>")
     expect(text.startsWith("<ui-label", start)).toBe(true)
+  })
+
+  test("inside a page's head, it goes last in the page's body (epic `language` P47)", () => {
+    const page = ['"button api" is a notebook page', "\t## Buttons", "\t<ui-button>Go</ui-button>", "", "start it", ""]
+    const text = page.join("\n")
+    const written = SourceEdits.written(text, { opening: 0, where: "inside" }, "<ui-label>New</ui-label>")
+    expect(written.text).toBe(text.replace("Go</ui-button>\n", "Go</ui-button>\n\t<ui-label>New</ui-label>\n"))
+    expect(written.text.startsWith("<ui-label", written.start)).toBe(true)
+    // a run of prose:  a blank line before it
+    const prose = SourceEdits.written(text, { opening: 0, where: "inside" }, "More words.")
+    expect(prose.text).toContain("Go</ui-button>\n\n\tMore words.\n")
   })
 
   test("a file indented with spaces gets spaces", () => {

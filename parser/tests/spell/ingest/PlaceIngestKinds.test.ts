@@ -36,7 +36,6 @@ function memoryFiles() {
 function realIngest(more: Partial<IngestSettings> = {}) {
   const disk = memoryFiles()
   const ingest = new PlaceIngest({
-    shape: "plain",
     fetch: globalThis.fetch,
     ask: async () => undefined,
     files: disk.files,

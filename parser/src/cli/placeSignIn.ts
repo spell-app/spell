@@ -124,7 +124,7 @@ export async function placeReadPage(address: string, options: PlaceReadPageOptio
 
 /** Where the samples of `collection` go, beside the place's file `into`:  `Racks.api.spell` => `Racks.racks.samples.json`. */
 export function samplesFileFor(into: string, collection: string): string {
-  const stem = into.replace(/(?:\.api)?\.(?:spell|spellml)$/, "")
+  const stem = into.replace(/(?:\.api)?\.spell$/, "")
   return `${stem}.${collection.replace(/\W+/g, "-")}.samples.json`
 }
 

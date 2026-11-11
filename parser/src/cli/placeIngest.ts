@@ -139,7 +139,7 @@ async function ingestFor(ai: boolean, usesSession: boolean): Promise<PlaceIngest
 
 /** Does the description beside `file` say it's read signed in?  So only then are the sessions loaded. */
 function describesSession(file: string): boolean {
-  const description = file.replace(/\.(?:spell|spellml)$/, ".json5")
+  const description = file.replace(/\.spell$/, ".json5")
   return existsSync(description) && /["']?signedIn["']?\s*:/.test(readFileSync(description, "utf8"))
 }
 

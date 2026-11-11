@@ -536,7 +536,7 @@ export default function appCommands(spell: Command): void {
 
   content
     .command("check")
-    .description("run every content check:  snapshots, every target's run, spellx, notebooks, README-examples")
+    .description("run every content check:  snapshots, every target's run, notebooks, README-examples")
     .option("--bless", "rewrite every content snapshot instead, then read the diff")
     .action((_options, command: Command) => contentCheckCommand(command.optsWithGlobals()))
 

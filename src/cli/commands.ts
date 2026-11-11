@@ -17,10 +17,6 @@
  *   checked, then published under the tag `next` unless told otherwise (epic `repo-split` P19, P22)
  * - `spell rename imports [--dry-run] [repos...]`:  the import rename of epic `repo-split` P20 (`spell-ui/x` =>
  *   `spell/ui/x` ...), kept for branches open when it landed
- * - `spell rename spellml [--dry-run] [checkouts...]`:  Spell's tag-shaped files, `.spellml` and `.spellx` => `.spell`
- *   (epic `language` P40):  moved with `git mv`, and every mention but the record's;  kept for branches open when it landed
- * - `spell rename tags [--dry-run] [checkouts...]`:  Spell's tags written short, `<spell-page>` => `<page>`,
- *   `<spell-more-of>` => `<extend>`, every note `<note>` (epic `language` P41);  kept for branches open when it landed
  * - `spell rename branches [--dry-run]`:  an epic's old child-repo branches carried into the merged folders, rewritten
  *   as P20's history was (`tools/one-repo/one-repo.ts --step carry-on`)
  * - `spell epic <args>`:  the epic tool (`epic`), wherever it is:  `npx spell@next epic init` sets a repo up for epics
@@ -287,38 +283,6 @@ export default function kitCommands(spell: Command): void {
       CLI.runCommand(async () => {
         const { renameImportsCommand } = await import("spell/cli/commands/renameImports")
         renameImportsCommand(CLI.findCheckout(CLI.KIT_MARKER), { ...options, repos })
-        return CLI.EXIT.OK
-      })
-    )
-
-  rename
-    .command("spellml")
-    .description(
-      "Spell's tag-shaped files, .spellml and .spellx => .spell:  each moved with git mv, and each mention (P40)"
-    )
-    .argument("[checkouts...]", "the checkouts to rename in;  none:  this kit")
-    .option("--dry-run", "only report what it would change")
-    .option("--json", "print each checkout's report as JSON")
-    .action((checkouts: string[], options: CLI.RenameOptions) =>
-      CLI.runCommand(async () => {
-        const { renameSpellmlCommand } = await import("spell/cli/commands/renameSpellml")
-        renameSpellmlCommand(CLI.findCheckout(CLI.KIT_MARKER), { ...options, checkouts })
-        return CLI.EXIT.OK
-      })
-    )
-
-  rename
-    .command("tags")
-    .description(
-      "Spell's tags written short:  <spell-page> => <page>, <spell-more-of> => <extend>, notes => <note> (P41)"
-    )
-    .argument("[checkouts...]", "the checkouts to rename in;  none:  this kit")
-    .option("--dry-run", "only report what it would change")
-    .option("--json", "print each checkout's report as JSON")
-    .action((checkouts: string[], options: CLI.RenameOptions) =>
-      CLI.runCommand(async () => {
-        const { renameTagsCommand } = await import("spell/cli/commands/renameTags")
-        renameTagsCommand(CLI.findCheckout(CLI.KIT_MARKER), { ...options, checkouts })
         return CLI.EXIT.OK
       })
     )

@@ -104,7 +104,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     browser = await chromium.launch()
     context = await browser.newContext({ viewport: { width: 1440, height: 800 } })
     // the one route:  Playwright asks the last one added first, and a second could let a save through
-    await context.route(/\/api\/projects\/file\/|\.(spellml|spell)(\?.*)?$/, (route) => {
+    await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) => {
       const request = route.request()
       // Show in Code puts the file's name in the page's address:  a reload is the page, not the file
       if (request.isNavigationRequest()) return route.continue()

@@ -58,8 +58,8 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
   - And the spell syntax table (see "Parser rules"):
     - `spellSyntax`
     - `writeSpellSyntax`, the script behind `yarn spell:gen:syntax`
-  - And spell's built-in templates written in spell, compiled once (epic `elemental-spell` Q71;  "What spellx says, in
-    code spell" in [PARSING.md](PARSING.md)):
+  - And spell's built-in templates written in spell, compiled once (epic `elemental-spell` Q71;  "Property bodies,
+    slots and drawn lines" in [PARSING.md](PARSING.md)):
     - `builtInTemplateFiles`:  what they compile to, each one's class (the JavaScript and Python cores) and every
       language's declarations, `builtInTemplates.generated.ts`
     - `writeBuiltInTemplates`, the script behind `yarn core:gen:templates`
@@ -109,8 +109,7 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
   - `PlaceIngest` runs the steps;  `PlaceLook`, a look per kind of place (`PlaceLookOthers`, those of a room, a data folder or a file, an Airtable, an atmosphere account);
     `PlaceInLanguage` hands what it wrote to the `Translator`, for a file in another language;  `PoliteReader`, everything it sends, which can't write;
     `PlaceShape`, what rows show;  `PlaceReading`, what the agent reads in samples;  `PlaceSpell`, the Spell, and merging a later look,
-    into a file in either shape (a new one is written in plain Spell since epic `language` P46, each member bare;
-    in tags from P40 till then).
+    into a file in plain Spell, each member bare (since epic `language` P46;  in tags from P40 till then).
   - Everything else is handed in (`IngestSettings`):  `fetch`, `ClaudeRunner`, files, the question, the read through the Spell.
   - Imported by path, never through the barrel:  `spell/parser/spell/ingest/PlaceIngest`.
 - `highlight/`:  `SpellHighlighter`.

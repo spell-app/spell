@@ -271,7 +271,7 @@ function titleOf(name: string): string {
 }
 
 /**
- * Each role's TextMate scopes:  Spell's grammars' (`spell.tmLanguage.json`, `spellx.tmLanguage.json`), then the
+ * Each role's TextMate scopes:  Spell's grammar's (`spell.tmLanguage.json`), then the
  * common ones TypeScript's, CSS's, HTML's and JSON's grammars use.
  */
 const SCOPES: Readonly<Record<CodeThemeRole, string[]>> = {

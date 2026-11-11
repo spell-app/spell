@@ -2,7 +2,6 @@ import { beforeAll, describe, test, expect } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
-import { SX } from "spell/parser/spellx"
 
 /**
  * Spanish that rewriting the examples in epic `language` P30 found wrong, each worked around there (P31).
@@ -11,16 +10,13 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
   beforeAll(registerTestComponentPack)
 
   // T52
-  test("`<soltable cuando>` reads as `- soltable cuando:`, as English's `<droppable when>` does", () => {
+  test("`es soltable cuando:` reads as English's `it is droppable when:` does", () => {
     const { code, errors } = compiledText([
-      '<encanto-vista "carta">',
-      '\t<propiedad "valor">1</>',
-      "</encanto-vista>",
-      '<encanto-vista "pila" plantilla="lista visible de cartas">',
-      "\t<soltable cuando>",
-      "\t\tdevolver el valor de la carta es 1",
-      "\t</>",
-      "</encanto-vista>"
+      'una "carta" es una vista:',
+      '\tsu "valor" es 1',
+      'una "pila" es una lista visible de cartas:',
+      "\tes soltable cuando:",
+      "\t\tdevolver el valor de la carta es 1"
     ])
     expect(errors).toEqual([])
     expect(code).toContain("static droppable = true")
@@ -41,16 +37,12 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
   // T54
   test("an item of a list of texts is text in Spanish too:  its TypeScript type is `string`", () => {
     const { ts, errors } = compiledText([
-      '<encanto-vista "carta">',
-      '\t<propiedad "imagen">',
+      'una "carta" es una vista:',
+      '\tsu "imagen" es:',
       '\t\tdevolver el elemento 1 de ["🂡", "🂢"]',
-      "\t</>",
-      "</encanto-vista>",
-      '<encanto-vista "comodín" plantilla="carta">',
-      '\t<propiedad "imagen">',
-      '\t\tdevolver "🃟"',
-      "\t</>",
-      "</encanto-vista>"
+      'un "comodín" es una carta:',
+      '\tsu "imagen" es:',
+      '\t\tdevolver "🃟"'
     ])
     expect(errors).toEqual([])
     expect(ts).not.toContain("Texte")
@@ -102,18 +94,12 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
   test.each(["before", "after"])(
     "`una lista de tareas` is a list of tasks, with an app of that name %s it",
     (where) => {
-      const keeper = [
-        '<encanto-cosa "guardián">',
-        '\t<propiedad "tareas guardadas">una lista de tareas</>',
-        "</encanto-cosa>"
-      ]
+      const keeper = ['un "guardián" es una cosa:', '\tsu "tareas guardadas" es una lista de tareas']
       const rest = [
-        '<encanto-cosa "tarea">',
-        '\t<propiedad "título">texto</>',
-        "</encanto-cosa>",
-        '<encanto-aplicación "lista de tareas">',
-        '\t<propiedad "nombre">texto</>',
-        "</encanto-aplicación>"
+        'una "tarea" es una cosa:',
+        '\tsu "título" es texto',
+        "lista de tareas es una aplicación:",
+        '\tsu "nombre" es texto'
       ]
       const { code, errors } = compiledText(where === "before" ? [...rest, ...keeper] : [...keeper, ...rest])
       expect(errors).toEqual([])
@@ -123,19 +109,15 @@ describe("Spanish, from the examples (epic `language` P31)", () => {
   )
 
   // T64
-  test("a drawing Show as Code Spell writes, `para dibujar eso:`, compiles as its spellml does:  `eso` is the thing", () => {
-    const spellml = [
-      '<encanto-vista "tarea">',
-      '\t<propiedad "título">texto</>',
-      "\t<dibujar>",
+  test("a drawing's `para dibujar eso:`:  `eso` is the thing", () => {
+    const codeSpell = [
+      'una "tarea" es una vista:',
+      '\tsu "título" es texto',
+      "\tpara dibujar eso:",
       "\t\t<formulario value={eso}>",
       "\t\t\t<texto>{su título}</texto>",
-      "\t\t</formulario>",
-      "\t</dibujar>",
-      "</encanto-vista>"
-    ]
-    const codeSpell = SX.CodeSpellWriter.write(spellml.join("\n"), { path: "/prueba.es.spell" })
-    expect(codeSpell).toContain("\tpara dibujar eso:")
+      "\t\t</formulario>"
+    ].join("\n")
     const written = compiledText(codeSpell.split("\n"), { path: "/prueba.es.spell" })
     expect(written.errors).toEqual([])
     expect(written.code).toContain('h("formulario", { value: this }')

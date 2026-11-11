@@ -5,7 +5,7 @@ import { compiledSpellProject, parseSpellProject, registerTestComponentPack } fr
 
 /**
  * An action's own title, apart from its name (epic `language` P18, the editor's r4):
- * `- titled "Compile and Run"`, spellx's `title=`, a fill-in that follows the program,
+ * `- titled "Compile and Run"`, a fill-in that follows the program,
  * and its words in another language, from the program's names dictionary there (Q20).
  */
 describe("an action's title", () => {
@@ -39,25 +39,6 @@ describe("an action's title", () => {
     const [file] = parseSpellProject([{ path: "/Editor.es.spell", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('{ title: "Código" }')
-  })
-
-  test("spellx:  `title=`, in both languages", () => {
-    const english = [
-      '<spell-app "editor">',
-      '\t<action "compile and run" title="Compile and Run">print 1</action>',
-      "</spell-app>"
-    ].join("\n")
-    const [file] = parseSpellProject([{ path: "/Editor.spell", contents: english }]).files
-    expect(file!.errors).toEqual([])
-    expect(file!.compiled).toContain('{ title: "Compile and Run" }')
-    const spanish = [
-      '<encanto-aplicación "editor">',
-      '\t<acción "compilar" título="Código">imprimir 1</acción>',
-      "</encanto-aplicación>"
-    ].join("\n")
-    const [file2] = parseSpellProject([{ path: "/Editor.es.spell", contents: spanish }]).files
-    expect(file2!.errors).toEqual([])
-    expect(file2!.compiled).toContain('{ title: "Código" }')
   })
 
   test("another language's words file:  each title's words there, from the names dictionary's texts", () => {

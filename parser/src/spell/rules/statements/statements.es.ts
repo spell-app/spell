@@ -8,7 +8,7 @@
 import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { DoNothing } from "./DoNothing"
-import { SpellxCloser } from "./SpellxCloser"
+import { PageCloser } from "./PageCloser"
 
 /** Spanish's `statements` rules. */
 export const statementsEs = new SpellParser({ module: "statements" })
@@ -23,4 +23,4 @@ statementsEs.addRule(DoNothing, {
   ]
 })
 
-statementsEs.addRule(SpellxCloser)
+statementsEs.addRule(PageCloser)

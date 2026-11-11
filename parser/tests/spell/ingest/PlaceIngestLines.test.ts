@@ -83,7 +83,6 @@ function memoryFiles() {
 function ingestOn(fetch: typeof globalThis.fetch, disk = memoryFiles()) {
   return {
     ingest: new PlaceIngest({
-      shape: "plain",
       fetch,
       ask: async () => undefined,
       files: disk.files,

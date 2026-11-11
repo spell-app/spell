@@ -105,7 +105,7 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
       - Their helpers:  [app/spaces/test](src/spaces/test/index.ts) (`loadFixtureProject()`, `compiledFixture()` ...).
       - `spell content check` runs every content check in one Vitest run (epic `content` P2):
         the snapshot tests, the Spanish projects' own tests, the command-line contract,
-        the spellx round trip and its twins, the notebooks, README-examples' table.
+        the notebooks, README-examples' table.
         - `spell content check --bless` rewrites every snapshot among them;  read the diff.
         - The list of tests is the folder's `spell:test:fixtures` (and `:bless`) yarn scripts, which it runs.
         - The snapshots are generated files:  `linguist-generated merge=binary` in [.gitattributes](.gitattributes),

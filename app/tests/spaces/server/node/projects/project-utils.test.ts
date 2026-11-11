@@ -405,25 +405,10 @@ describe("project-utils", () => {
   test("deleting a file takes its import out of the project file, the rest in their order", async () => {
     const projectId = project("Pruned")
     const folder = resolve(workspace, "Pruned")
-    writeFileSync(resolve(folder, "First.spell"), '<spell-thing "first">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "First.spell"), 'a "first" is a thing\n')
     await projectUtils.getIndex(projectId)
     await projectUtils.deleteFile(projectId, "/Pruned.spell")
     expect((await projectUtils.loadProjectFile(projectId)).imports).toEqual([{ path: "/First.spell", active: true }])
-  })
-
-  // epic `repo-split` P21, Owen 2026-10-27:  ".spell", and "support both for now"
-  test("an old .spell file still lists, as a .spell file does", async () => {
-    const projectId = project("OldTags")
-    const folder = resolve(workspace, "OldTags")
-    writeFileSync(resolve(folder, `Card${SP.OLD_SPELLML_SUFFIX}`), '<spell-thing "card">\n</spell-thing>\n')
-    writeFileSync(resolve(folder, "Deck.spell"), '<spell-thing "deck">\n</spell-thing>\n')
-
-    const index = await projectUtils.getIndex(projectId)
-    expect(index.imports.map((it) => it.path)).toEqual([
-      "/OldTags.spell",
-      `/Card${SP.OLD_SPELLML_SUFFIX}`,
-      "/Deck.spell"
-    ])
   })
 
   // the bug of 2026-10-22:  a project copied to a folder of another name read its old words file as spell

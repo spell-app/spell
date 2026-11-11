@@ -100,8 +100,8 @@ export function CellEditor(props: {
   )
 }
 
-/** Monaco's language for an example's markup:  a page's, which reads bare names and `</>` (`spellx`'s colours). */
-const EXAMPLE_LANGUAGE = "spellx"
+/** Monaco's language for an example's markup:  a page's, which reads bare names and `</>` (the `spell-page` colours, epic `language` P47). */
+const EXAMPLE_LANGUAGE = "spell-page"
 
 /** Height of a line in a cell's editor, px. */
 const LINE_HEIGHT = 20

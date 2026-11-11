@@ -59,7 +59,7 @@ export class SourceEdits {
   /**
    * The tag opening at `opening` in `text`, read as written:  its name, attributes and where each one is.
    * - Reads both shapes alike, and any language:  it only looks at the shape of a tag.
-   * - A template tag's quoted name, `<page "counter notebook">`, is its name's, never its attributes:
+   * - A tag's quoted word, `<example "one counter">`, is its name's, never its attributes:
    *   a new attribute goes after it (`namedEnd`).
    * - `undefined` when no tag opens there.
    */
@@ -172,6 +172,8 @@ export class SourceEdits {
    * - throws `TypeError` when no element opens at `place.opening`, or `place` is inside a run of prose.
    */
   static written(text: string, place: ElementPlace, code: string): { text: string; start: number } {
+    if (place.where === "inside" && !place.whole && isPageHeadAt(text, place.opening))
+      return SourceEdits.writtenInPage(text, place.opening, code)
     const element = place.whole ? undefined : SourceEdits.elementAt(text, place.opening)
     // what it's written beside:  the element, or the run of prose
     const beside = place.whole ?? element
@@ -212,6 +214,27 @@ export class SourceEdits {
       text: replaceSpan(text, { start: beside.end, end: beside.end }, block),
       start: beside.end + 1 + gap.length + indent.length
     }
+  }
+
+  /**
+   * `text` with `code` written last in the body of the page whose head starts at `opening`,
+   * `"button api" is a notebook page` (epic `language` P47):  one step in, after its last line.
+   * - Its body is the lines indented under its head, up to the next line at the file's left edge.
+   */
+  private static writtenInPage(text: string, opening: number, code: string): { text: string; start: number } {
+    let end = text.indexOf("\n", opening)
+    if (end < 0) end = text.length
+    for (let at = end + 1; at < text.length;) {
+      const lineEnd = text.indexOf("\n", at) < 0 ? text.length : text.indexOf("\n", at)
+      const line = text.slice(at, lineEnd)
+      if (line.trim() && !/^\s/.test(line)) break
+      if (line.trim()) end = lineEnd
+      at = lineEnd + 1
+    }
+    const inner = indentStep(text)
+    const gap = isProse(code) ? "\n" : ""
+    const block = `\n${gap}${inner}${indented(code, inner)}`
+    return { text: replaceSpan(text, { start: end, end }, block), start: end + 1 + gap.length + inner.length }
   }
 
   /** The element at `span`, as code with no indent of its own, to write somewhere else. */
@@ -321,6 +344,11 @@ export type WrittenElement = TextSpan & {
   bodyEnd?: number
 }
 
+/** Does a page's head start at `offset`, at its line's left edge:  `"button api" is a notebook page`? */
+function isPageHeadAt(text: string, offset: number): boolean {
+  return text[offset] === '"' && (offset === 0 || text[offset - 1] === "\n")
+}
+
 /** Where to write something, beside or inside the element opening at `opening`. */
 export type ElementPlace = {
   /** offset of that element's `<`;  of a run of prose's first character */
@@ -344,7 +372,7 @@ export type WrittenTag = {
   start: number
   /** offset just past its name */
   nameEnd: number
-  /** offset just past its name and its quoted name, if it has one (`<page "x"`):  where a new attribute goes */
+  /** offset just past its name and its quoted name, if it has one (`<example "x"`):  where a new attribute goes */
   namedEnd: number
   /** offset just past its `>` */
   end: number
@@ -418,8 +446,10 @@ function wholeLinesOf(text: string, span: TextSpan): TextSpan {
 /**
  * What goes with the element at `span` when it's taken out:
  * - its whole lines (`wholeLinesOf()`)
- * - and a blank line round them, when one's before them and another after, or its block's closing tag:
- *   no gap left twice as wide, nor one left before a closer
+ * - and a blank line round them, when one's before them and another after, or its block's end:
+ *   no gap left twice as wide, nor one left at a block's end
+ *   - a block's end:  its closing tag, a line indented less than it (a page's body ends at the next line at the
+ *     file's left edge, with no closer), or the file's end
  */
 function removedOf(text: string, span: TextSpan): TextSpan {
   const lines = wholeLinesOf(text, span)
@@ -430,7 +460,9 @@ function removedOf(text: string, span: TextSpan): TextSpan {
   const after = text.slice(lines.end)
   const blankAfter = /^[ \t]*\n/.exec(after)
   if (blankAfter) return { start: lines.start, end: lines.end + blankAfter[0].length }
-  return /^[ \t]*<\//.test(after) ? { start: lines.start - blankBefore[1]!.length, end: lines.end } : lines
+  const isBlockEnd =
+    !after.trim() || /^[ \t]*<\//.test(after) || /^[ \t]*/.exec(after)![0].length < indentAt(text, lines.start).length
+  return isBlockEnd ? { start: lines.start - blankBefore[1]!.length, end: lines.end } : lines
 }
 
 /** Is `code` a run of prose, not a tag:  it starts with words, not `<` or `{`;  nothing's none. */

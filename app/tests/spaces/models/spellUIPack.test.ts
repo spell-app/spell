@@ -7,7 +7,7 @@ import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
 import { es } from "spell/ui/components/components.es"
 import { SPACES } from "spell/app/spaces"
 
-/** Spell UI, as a spellx drawing names its components bare (epic `elemental-spell` P7, Q46). */
+/** Spell UI, as a drawing names its components bare (epic `elemental-spell` P7, Q46). */
 describe("SPELL_UI_PACK", () => {
   test("English:  a catalog tag without its ui-", () => {
     expect(SPACES.SPELL_UI_PACK.tagFor("button", "en")).toBe("ui-button")
@@ -21,8 +21,8 @@ describe("SPELL_UI_PACK", () => {
     expect(SPACES.SPELL_UI_PACK.tagFor("texto", "es")).toBe("es-texto")
   })
 
-  test("loading spaces registers it:  a spellx drawing's <button> compiles to ui-button", () => {
-    const contents = ['<spell-view "card">', "\t<draw>", "\t\t<button>Go</>", "\t</draw>", "</spell-view>"].join("\n")
+  test("loading spaces registers it:  a drawing's <button> compiles to ui-button", () => {
+    const contents = ['a "card" is a view:', "\tto draw it:", "\t\t<button>Go</>"].join("\n")
     const [file] = parseSpellProject([{ path: "/card.spell", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('h("ui-button", "Go")')
@@ -32,14 +32,12 @@ describe("SPELL_UI_PACK", () => {
     expect(SPACES.SPELL_UI_PACK.tagFor("json", "en")).toBe("ui-json")
     expect(SPACES.SPELL_UI_PACK.tagFor("json", "es")).toBe("es-json")
     const contents = [
-      '<spell-view "card">',
-      "\t<draw>",
+      'a "card" is a view:',
+      "\tto draw it:",
       "\t\t<json>",
       '\t\t\t{ "label": "[not a fill-in]", "children": [{ "label": "x" }] }',
       "\t\t</>",
-      '\t\t<json source="/data.json"/>',
-      "\t</draw>",
-      "</spell-view>"
+      '\t\t<json source="/data.json"/>'
     ].join("\n")
     const [file] = parseSpellProject([{ path: "/card.spell", contents }]).files
     expect(file!.errors).toEqual([])
@@ -53,15 +51,13 @@ describe("SPELL_UI_PACK", () => {
     expect(SPACES.SPELL_UI_PACK.tagFor("nodo-arbol", "es")).toBe("es-nodo-arbol")
     expect(SPACES.SPELL_UI_PACK.tagFor("nodo-árbol", "es")).toBe("es-nodo-arbol")
     const contents = [
-      '<spell-view "card">',
-      "\t<draw>",
+      'a "card" is a view:',
+      "\tto draw it:",
       "\t\t<tree-diagram>",
       '\t\t\t<tree-node "If" edge-label="body">',
       '\t\t\t\t<tree-node "Print"/>',
       "\t\t\t</tree-node>",
-      "\t\t</tree-diagram>",
-      "\t</draw>",
-      "</spell-view>"
+      "\t\t</tree-diagram>"
     ].join("\n")
     const [file] = parseSpellProject([{ path: "/card.spell", contents }]).files
     expect(file!.errors).toEqual([])
@@ -72,31 +68,22 @@ describe("SPELL_UI_PACK", () => {
   test("<space/> is ui-space (<espacio/> in Spanish):  a drawing's line break (P28)", () => {
     expect(SPACES.SPELL_UI_PACK.tagFor("space", "en")).toBe("ui-space")
     expect(SPACES.SPELL_UI_PACK.tagFor("espacio", "es")).toBe("es-espacio")
-    const contents = [
-      '<spell-view "card">',
-      "\t<draw>",
-      "\t\t<button>Go</>",
-      "\t\t<space fluid/>",
-      "\t</draw>",
-      "</spell-view>"
-    ].join("\n")
+    const contents = ['a "card" is a view:', "\tto draw it:", "\t\t<button>Go</>", "\t\t<space fluid/>"].join("\n")
     const [file] = parseSpellProject([{ path: "/card.spell", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('h("ui-space"')
   })
 
-  test("<comment> in a drawing is ui-comment (epic `data` P31, I60):  spellml's own note is <spell-comment>", () => {
+  test("<comment> in a drawing is ui-comment (epic `data` P31, I60):  a page has no notes", () => {
     expect(SPACES.SPELL_UI_PACK.tagFor("comment", "en")).toBe("ui-comment")
     const contents = [
-      '<spell-view "post">',
-      "\t<draw>",
+      'a "post" is a view:',
+      "\tto draw it:",
       "\t\t<comment>",
       "\t\t\t<content>",
       "\t\t\t\t<description>hello</description>",
       "\t\t\t</content>",
-      "\t\t</comment>",
-      "\t</draw>",
-      "</spell-view>"
+      "\t\t</comment>"
     ].join("\n")
     const [file] = parseSpellProject([{ path: "/post.spell", contents }]).files
     expect(file!.errors).toEqual([])
@@ -106,18 +93,17 @@ describe("SPELL_UI_PACK", () => {
 })
 
 /**
- * spellml's controls and handlers keep their short words, `<if>`, `<for each>`, `<on>` (epic `data` P31, Q27):
+ * A page's control tags keep their short words, `<if>`, `<for each>` (epic `data` P31, Q27):
  * so no Spell UI element may take one as its short name, or a drawing could never draw it.
- * - The notes are spellml's with the prefix, `<spell-comment>`:  their short words are Spell UI's.
  */
-describe("no Spell UI element's short name is a spellx control's or handler's word", () => {
+describe("no Spell UI element's short name is a page's control word", () => {
   test.each([
     ["en", Object.keys(ROOT_CATALOG).map((tag) => tag.replace(/^ui-/, ""))],
     ["es", Object.values(es.tags ?? {})]
   ])("%s", (lang, names) => {
-    const spellx = SP.Language.for(lang).words.spellx!
-    expect(spellx.prefix).toBe(lang === "es" ? "encanto" : "spell")
-    const words = [...Object.keys(spellx.controls), ...Object.keys(spellx.handlers)]
+    const page = SP.Language.for(lang).words.page!
+    expect(page.prefix).toBe(lang === "es" ? "encanto" : "spell")
+    const words = Object.keys(page.controls)
     const firstWords = new Set(words.map((word) => withoutAccents(word.split(" ")[0]!)))
     expect(names.length).toBeGreaterThan(50)
     expect(names.filter((name) => firstWords.has(withoutAccents(name)))).toEqual([])

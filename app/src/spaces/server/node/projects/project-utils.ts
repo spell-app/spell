@@ -362,7 +362,7 @@ function isFolderOutsideProject(projectFolder: string, relativePath: string): bo
  *   `__init__.js` or `__helpers__.spell` still list.
  * - Lists property editor pages (`SP.EDITOR_PAGE_SUFFIX`, `Card.editor.html`):  the editor opens them as text.
  */
-const manifestExtensions = [SP.SPELL_SUFFIX, ...SP.SPELLML_SUFFIXES, ".css", ".js", ".jsx", SP.EDITOR_PAGE_SUFFIX]
+const manifestExtensions = [SP.SPELL_SUFFIX, ".css", ".js", ".jsx", SP.EDITOR_PAGE_SUFFIX]
 export function isManifestFile(name: string, projectName = "") {
   if (SPACES.isSpaceName(name)) return false
   if (GENERATED_SUFFIXES.some((suffix) => name.endsWith(suffix))) return false
@@ -676,7 +676,7 @@ export const request_saveFile = respondWithJSON(async (request) => {
 
 /**
  * Is file `location` saved as your DRAFT (`ProjectDrafts`, epic `editor` P24), not straight to its public file?
- * - A project's own file a person edits (`isManifestFile()`):  its spell, spellml, css, scripts.
+ * - A project's own file a person edits (`isManifestFile()`):  its spell, css, scripts.
  * - Never what spell builds, nor any other file (a `.txt`, a data file):  those are written as they are.
  */
 export function isDraftable(location: SP.SpellLocation): boolean {

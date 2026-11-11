@@ -331,7 +331,7 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
         }
         above.unshift(comment)
       }
-      // its line's own comments:  code spell's one, or a spellx twin's description lines (`SP.SpellxTwin`)
+      // its line's own comment, `- group "rank"   // Ace is low`
       const onLine = (item as P.Match).matched.filter((it): it is P.Match => this.isComment(it))
       const comments = above.length ? above : onLine
       if (comments.length) docs.set(statement, { lines: comments.map((it) => this.commentText(it)), comments })
@@ -374,8 +374,8 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
 
   /**
    * The group of members line `item` opens, if it opens one (epic `debut` P26):
-   * - a group's line, `- group "rank"`, its description the comment on its line (spellx's twin),
-   *   else the comment-only lines directly above it (code spell's:  `// Ace is low`, then `- group "rank"`)
+   * - a group's line, `- group "rank"`, its description the comment on its line,
+   *   else the comment-only lines directly above it (`// Ace is low`, then `- group "rank"`)
    * - a heading's, `## turning it over`
    * - The members below it are in it, up to the next:  `getAST()` hands it to their declarations,
    *   its description to the first of them only (`statementsFor()`).

@@ -129,31 +129,4 @@ describe("menus of menus", () => {
     expect(code).toContain('title: "Archivo"')
     expect(code).toContain("each: ")
   })
-
-  test("spellx:  a <menu> inside a <menu>, title=, for-each= and action=", () => {
-    const { code, errors } = compiled(
-      "/Editor.spell",
-      [
-        '<spell-app "editor">',
-        "\t<spell>",
-        '\t\t- its "examples" is a list of text',
-        "\t</spell>",
-        '\t<action "open (a text)">print 1</action>',
-        '\t<action "save">print 2</action>',
-        '\t<menu "file menu" title="File">',
-        '\t\t<action "save" />',
-        '\t\t<menu "more examples" />',
-        "\t</menu>",
-        '\t<menu "more examples" for-each={its examples} action="open (a text)" />',
-        '\t<menu "menu bar">',
-        '\t\t<menu "file menu" />',
-        "\t</menu>",
-        "</spell-app>"
-      ].join("\n")
-    )
-    expect(errors).toEqual([])
-    expect(code).toContain('core.describeMenu(Editor, "fileMenu", { items: ["save", "moreExamples"], title: "File" })')
-    expect(code).toContain('each: "moreExamplesItems", action: "openText"')
-    expect(code).toContain('core.describeMenu(Editor, "menuBar", { items: ["fileMenu"] })')
-  })
 })

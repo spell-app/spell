@@ -315,7 +315,7 @@ export const actingMethods = defineCoreModule({
 
   /**
    * The app's MENU BAR, ready to draw:  the menu its class names, `static menuBar = "game menu"`
-   * (`- its menu bar is "game menu"`, spellx's `menu-bar=`).  `undefined` when it names none.
+   * (`- its menu bar is "game menu"`).  `undefined` when it names none.
    */
   menuBarOf(app: object | undefined): MenuItem[] | undefined {
     const name = (app?.constructor as { menuBar?: unknown } | undefined)?.menuBar

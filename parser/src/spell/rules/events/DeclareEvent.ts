@@ -10,7 +10,6 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * `declare_event` rule:  says an event a template's things SEND, and what comes with it (epic `elemental-spell` P5).
  * - e.g. `- it sends "flipped" with a side as a direction`, in a two sided view's outline
  * - e.g. `a card sends "card flipped" with a side`, the sentence style
- * - Spellx's `<event "flipped" side="direction" />` says the same (J3).
  * - Its name in quotes, as a name being taught is:  several words are one event, dashed, `card-flipped`,
  *   the event `send card flipped` sends.
  * - Sending it stays as it was:  `send flipped with side = its direction` (`trigger`).

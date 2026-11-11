@@ -9,7 +9,7 @@ import {
   type SpellProjectSummary,
   type SpellSourceFile
 } from "spell/parser/spell/test"
-import { loadCodeSpellTwin } from "spell/app/spaces/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * `P.IncrementalProject` MUST give exactly what a full parse gives:
@@ -32,8 +32,8 @@ const EDITS: Record<string, (lines: string[], index: number) => void> = {
 }
 
 describe("incremental parsing ~== full parse", () => {
-  // code spell's incremental parse, on the Solitaire example's code-spell twin (the example is spellx)
-  const files = loadCodeSpellTwin("@spell/examples/Solitaire")
+  // code spell's incremental parse, on the Solitaire example
+  const files = loadFixtureProject("@spell/examples/Solitaire")
   const original = summarize(parseSpellProject(files))
 
   test("item-by-item parse ~== full parse", () => {

@@ -8,10 +8,10 @@ import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCell
 
 /**
  * A counter notebook, written in markdown:  its `#` title, its `##` sections and their text.
- * - Its counter is some other project's:  so it has no template cell of its own.
+ * - Its counter is some other project's:  so it declares no view of its own.
  */
 const COUNTER = [
-  '<spell-notebook "counter notebook">',
+  '"counter notebook" is a notebook page',
   "\t# Counter",
   "\tA button that counts its clicks.",
   "",
@@ -30,23 +30,25 @@ const COUNTER = [
   "\t\t</example>",
   '\t\t<text color="grey">Click either one.</text>',
   "\t</section>",
-  "</spell-notebook>",
   ""
 ].join("\n")
 
-/** A notebook with a view of its own:  its title and sections written as tags, a view, and text after a drawing. */
+/**
+ * A notebook with a view of its own, in plain Spell above its head:
+ * its title and sections written as tags, and text after a drawing.
+ */
 const TAGGED = [
-  '<spell-page "counter notebook" notebook>',
+  'a "counter" is a view:',
+  '\t- its "count" is a number starting at 0',
+  "\t- to count up: set its count to its count + 1",
+  "\t- to draw it:",
+  "\t\t<button onClick={count up}>Clicked {its count} times</button>",
+  "",
+  '"counter notebook" is a notebook page',
   '\t<header level="1">',
   "\t\tCounter",
   "\t\t<header>A button that counts its clicks.</header>",
   "\t</header>",
-  "",
-  '\t<view "counter">',
-  '\t\t<property "count" type="number">0</property>',
-  '\t\t<action "count up">set its count to its count + 1</>',
-  "\t\t<draw><button onClick={count up}>Clicked {its count} times</button></draw>",
-  "\t</view>",
   "",
   '\t<section label="Counter">',
   '\t\t<example "One counter" description="A counter starts at 0, and adds one each time it\'s clicked.">',
@@ -61,27 +63,14 @@ const TAGGED = [
   "\t\t</example>",
   '\t\t<text color="grey">Click either one.</text>',
   "\t</section>",
-  "</spell-page>",
   ""
 ].join("\n")
 
-/** Detail's Examples page, as committed in the Spell UI site:  a real page, written as tags. */
+/** Detail's Examples page, as committed in the Spell UI site:  a real page, its title and sections written as tags. */
 const SITE_PAGE = readFileSync(
   new URL("../../../../spaces/@spell/guides/SpellUI/Detail/Examples.spell", import.meta.url),
   "utf8"
 )
-
-/** A notebook with a template of its own, a card:  for the template cell's edits and groups. */
-const CARDS = [
-  '<spell-notebook "cards">',
-  '\t<spell-view "card">',
-  '\t\t<group "direction" description="Face up or face down"/>',
-  '\t\t<property "direction" one-of="up, down"/>',
-  '\t\t<action "turn it over">set its direction to up</>',
-  "\t</spell-view>",
-  "</spell-notebook>",
-  ""
-].join("\n")
 
 /**
  * A notebook's page's cells, and the edits it makes (epic `elemental-spell` P16):  every edit changes only what it's
@@ -107,9 +96,9 @@ describe("NotebookPageCells", () => {
   })
 
   test("an edit changes only its cell's span, its indent put back on every line", () => {
-    const [template] = NotebookPageCells.of(CARDS, "/Cards.spell")!.cells
-    const edited = NotebookPageCells.withCode(CARDS, template!, template!.code.replace("to up", "to down"))
-    expect(edited).toBe(CARDS.replace("to up", "to down"))
+    const run = model.cells[1]!
+    const edited = NotebookPageCells.withCode(COUNTER, run, run.code.replace("starts at 0", "starts at zero"))
+    expect(edited).toBe(COUNTER.replace("starts at 0", "starts at zero"))
     const example = model.cells[2]!.examples![0]!
     expect(NotebookPageCells.withCode(COUNTER, example.body, "<counter/>\n<counter/>")).toBe(
       COUNTER.replace(
@@ -121,7 +110,7 @@ describe("NotebookPageCells", () => {
 
   test("an example that's one `<html>` block:  its body is what's inside the block, and an edit lands there (P18)", () => {
     const text = [
-      '<spell-notebook "avatar examples">',
+      '"avatar examples" is a notebook page',
       '\t<example description="A comment\'s avatar.">',
       "\t\t<html>",
       "\t\t\t<ui-comment>",
@@ -129,7 +118,6 @@ describe("NotebookPageCells", () => {
       "\t\t\t</ui-comment>",
       "\t\t</html>",
       "\t</example>",
-      "</spell-notebook>",
       ""
     ].join("\n")
     const [example] = NotebookPageCells.of(text, "/Examples.spell")!.cells[0]!.examples!
@@ -139,9 +127,9 @@ describe("NotebookPageCells", () => {
     expect(edited).toBe(text.replace('<ui-avatar src="elliot.jpg"></ui-avatar>', "<code>hi</code>"))
   })
 
-  test("lock, and unlock:  the Inspector's attribute edit, after the quoted name, and back as it was (P6)", () => {
+  test("lock, and unlock:  a word of its head, first of its flags, and back as it was (P6)", () => {
     const locked = SourceEdits.applied(COUNTER, NotebookPageCells.lockEdits(COUNTER, model, true))
-    expect(locked.split("\n")[0]).toBe('<spell-notebook "counter notebook" locked>')
+    expect(locked.split("\n")[0]).toBe('"counter notebook" is a locked notebook page')
     const relocked = NotebookPageCells.of(locked, "/Counter.spell")!
     expect(relocked.locked).toBe(true)
     expect(SourceEdits.applied(locked, NotebookPageCells.lockEdits(locked, relocked, false))).toBe(COUNTER)
@@ -149,14 +137,13 @@ describe("NotebookPageCells", () => {
     expect(SourceEdits.applied(locked, NotebookPageCells.lockEdits(locked, relocked, true))).toBe(locked)
   })
 
-  test('written as tags:  the title\'s `<header level="1">`, each `<section label>`;  a `<text>` is just a drawing (P6)', () => {
+  test('written as tags:  the title\'s `<header level="1">`, each `<section label>`;  a `<text>` is just a drawing;  its own view no cell (P6)', () => {
     const tagged = NotebookPageCells.of(TAGGED, "/Counter.spell")!
     const cells = tagged.cells.map(({ kind, heading, title, lead, name }) =>
       Object.fromEntries(Object.entries({ kind, heading, title, lead, name }).filter(([, v]) => v))
     )
     expect(cells).toEqual([
       { kind: "heading", title: "Counter", lead: "A button that counts its clicks." },
-      { kind: "template", name: "counter" },
       { kind: "heading", heading: "Counter" },
       { kind: "drawing", name: "One counter" },
       { kind: "heading", heading: "Several counters" },
@@ -165,7 +152,7 @@ describe("NotebookPageCells", () => {
       { kind: "drawing" }
     ])
     // a section's cell is its opening tag;  `block`, the section whole
-    const several = tagged.cells[4]!
+    const several = tagged.cells[3]!
     expect(several.code).toBe('<section label="Several counters">')
     expect(TAGGED.slice(several.block!.start, several.block!.end)).toMatch(/^<section[^]*<\/section>$/)
   })
@@ -181,21 +168,6 @@ describe("NotebookPageCells", () => {
     expect(sections.map((cell) => cell.heading)).toEqual(["Owners", "Variations"])
     expect(sections[0]!.code).toBe('<section label="Owners">')
     expect(SITE_PAGE.slice(sections[1]!.block!.start, sections[1]!.block!.end)).toMatch(/^<section[^]*<\/>$/)
-  })
-
-  test("a template's groups:  each one's members together, under its name and description", () => {
-    const [template] = NotebookPageCells.of(CARDS, "/Cards.spell")!.cells
-    expect(template!.groups).toEqual([
-      { name: "direction", description: "Face up or face down", members: ["direction", "turn it over"] }
-    ])
-  })
-
-  test("in Spanish, locked is bloqueado", () => {
-    const text = '<encanto-cuaderno "cuaderno">\n\t# Hola\n</encanto-cuaderno>\n'
-    const spanish = NotebookPageCells.of(text, "/Cuaderno.es.spell")!
-    expect(SourceEdits.applied(text, NotebookPageCells.lockEdits(text, spanish, true)).split("\n")[0]).toBe(
-      '<encanto-cuaderno "cuaderno" bloqueado>'
-    )
   })
 
   // epic `language` J76:  the lock agrees with `página`;  both words still read
@@ -216,17 +188,17 @@ describe("NotebookPageCells", () => {
     expect(NotebookPageCells.holdsNotebook(file)).toBe(true)
     expect(NotebookPageCells.notebookNameIn(file)).toBe("counter notebook")
     expect(NotebookPageCells.holdsLockedPage(file)).toBe(false)
-    file.contents = COUNTER.replace('"counter notebook">', '"counter notebook" locked>')
+    file.contents = COUNTER.replace("is a notebook page", "is a locked notebook page")
     expect(NotebookPageCells.holdsLockedPage(file)).toBe(true)
     // any page, notebook or not:  the lock is every page's (epic `notebook` P1)
-    file.contents = '<spell-page "home" locked>\n\t<draw><text>Hi</text></draw>\n</spell-page>\n'
+    file.contents = '"home" is a locked page\n\t<text>Hi</text>\n'
     expect(NotebookPageCells.holdsNotebook(file)).toBe(false)
     expect(NotebookPageCells.notebookNameIn(file)).toBe("")
     expect(NotebookPageCells.holdsLockedPage(file)).toBe(true)
     // Spanish's word for it
     const spanish = {
       path: "/Cuaderno.es.spell",
-      contents: '<encanto-cuaderno "cuaderno" bloqueado>\n\t# Hola\n</encanto-cuaderno>\n'
+      contents: '"cuaderno" es una página cuaderno bloqueada\n\t# Hola\n'
     }
     expect(NotebookPageCells.holdsLockedPage(spanish as unknown as SP.SpellFile)).toBe(true)
   })
@@ -273,7 +245,7 @@ describe("NotebookPageCells.proseAt(), moved by SourceEdits", () => {
     )
   })
 
-  test("a ## section moved up, past another:  whole, with what it gathers;  no blank line left before the closer", () => {
+  test("a ## section moved up, past another:  whole, with what it gathers;  no blank line left at the end", () => {
     const several = prose(COUNTER, "## Several counters")
     const counter = prose(COUNTER, "## Counter")
     const { text, starts } = SourceEdits.moved(COUNTER, [several], {
@@ -283,7 +255,7 @@ describe("NotebookPageCells.proseAt(), moved by SourceEdits", () => {
     })
     const severalText = COUNTER.slice(several.start, several.end)
     const counterText = COUNTER.slice(counter.start, counter.end)
-    expect(text).toBe(COUNTER.slice(0, counter.start) + severalText + "\n\n\t" + counterText + "\n</spell-notebook>\n")
+    expect(text).toBe(COUNTER.slice(0, counter.start) + severalText + "\n\n\t" + counterText + "\n")
     expect(text.startsWith("## Several counters", starts[0]!)).toBe(true)
   })
 

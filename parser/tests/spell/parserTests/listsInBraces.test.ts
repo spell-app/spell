@@ -10,15 +10,11 @@ import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell
  * - What it shows is the core's:  `listShown.browser.test.tsx`, in the app folder's tests.
  */
 
-const SHELF = `<spell-view "shelf">
-	<spell>
-		- its "names" is a list of text
-		- its "title" is text
-	</spell>
-	<draw>
-		<text title={its names}>{its names} · {its title}</text>
-	</draw>
-</spell-view>`
+const SHELF = `a "shelf" is a view:
+	its "names" is a list of text
+	its "title" is text
+	to draw it:
+		<text title={its names}>{its names} · {its title}</text>`
 
 /** The shelf, written by `writer`. */
 function written(writer: P.ProgramWriter) {

@@ -12,7 +12,7 @@ import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 import { installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { scopesFromPacks } from "spell/app/lsp/ScopesSource"
 import { compiledSpellProject } from "spell/parser/spell/test"
-import { copyCodeSpellTwin, copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell/app/spaces/test"
+import { copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell/app/spaces/test"
 
 /** The Solitaire example's Card.spell:  the tests name its lines by what they say (`lineOf()`), as it changes. */
 const CARD_TEXT = readFileSync(fixtureFolder("@spell/examples/Solitaire", "Card.spell"), "utf8")
@@ -38,8 +38,8 @@ describe("ScopeExplorer of a project with sub-folders", () => {
   beforeAll(async () => {
     for (const name of ["Button", "Divider"]) mkdirSync(resolve(folder, name), { recursive: true })
     writeFileSync(resolve(folder, SP.PROJECT_FILE), JSON.stringify({ imports: [] }))
-    writeFileSync(resolve(folder, "Button/Usage.spell"), '<spell-thing "button usage">\n</spell-thing>\n')
-    writeFileSync(resolve(folder, "Divider/Usage.spell"), '<spell-thing "divider usage">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "Button/Usage.spell"), 'a "button usage" is a thing\n')
+    writeFileSync(resolve(folder, "Divider/Usage.spell"), 'a "divider usage" is a thing\n')
     await workspace.update(uriOf("Button/Usage.spell"), readFileSync(resolve(folder, "Button/Usage.spell"), "utf8"))
     project = workspace.fileFor(uriOf("Button/Usage.spell"))!.project as SP.SpellProject
   })
@@ -139,7 +139,7 @@ describe("ScopeExplorer", () => {
     }
   })
 
-  // known gap, epic `elemental-spell` I9:  a spellx declaration's source stops before its tag's `/>`
+  // known gap, epic `elemental-spell` I9 (found on the tag form;  still failing on the plain example since epic `language` P47)
   test.fails("a declaration's details:  its docstring, spell source and compiled javascript", () => {
     expect(find(tree, "suit").path).toBe("project:Solitaire/file:Card.spell/type:Card/property:suit")
     // its `description=`:  its docstring
@@ -184,7 +184,7 @@ describe("ScopeExplorer", () => {
 
 /**
  * `descriptionEdits()`, which rewrites a declaration's docstring:  the comment lines above it, in CODE spell.
- * - On a small project of its own, written here:  the examples are spellx, whose docstrings are `description=`.
+ * - On a small project of its own, written here.
  */
 describe("ScopeExplorer `descriptionEdits()`", () => {
   /** Its one file:  a heading docstring on the suit, a comment docstring on the jokers, and no `#` file heading. */
@@ -320,7 +320,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   test("once tracked, the imported project's files changing on disk show next time -- as the server does", async () => {
     await disk.track(lib)
     const cardPath = resolve(workspace, "lib", "Card.spell")
-    writeFileSync(cardPath, `${readFileSync(cardPath, "utf8")}\n<spell>\n\tcards have a weight as a number\n</spell>\n`)
+    writeFileSync(cardPath, `${readFileSync(cardPath, "utf8")}\ncards have a weight as a number\n`)
     await disk.diskChanged(pathToFileURL(cardPath).href, "changed")
     const card = find(explorer.tree(app), "Card")
     expect(card.members.map((member) => member.name)).toContain("weight")
@@ -557,8 +557,7 @@ describe("ScopeExplorer built-in types", () => {
 /** The scope tree of a project written in Spanish:  a temp copy of the Solitario example. */
 describe("ScopeExplorer in Spanish", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scopes-es-"))
-  // as code spell:  the example is spellx, its code-spell twin the same program
-  copyCodeSpellTwin("@spell/examples/Solitario", resolve(dir, "Solitario"))
+  copyFixtureProject("@spell/examples/Solitario", resolve(dir, "Solitario"))
   const cartaPath = resolve(dir, "Solitario/Carta.es.spell")
   const cartaUri = pathToFileURL(cartaPath).href
   const workspace = new SpellDiskWorkspace()

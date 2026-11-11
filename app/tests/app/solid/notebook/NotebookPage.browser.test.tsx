@@ -10,7 +10,7 @@ import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 
-// Spell UI's pack:  a spellx drawing names its components bare (`<button>`)
+// Spell UI's pack:  a page's drawing names its components bare (`<button>`)
 import "spell/app/spaces"
 // Solid follows the program's things, as in the editor:  an edit draws again what changed
 import "spell/app/app/solid/cellsBridge"
@@ -60,18 +60,20 @@ const testEditor = vi.hoisted(() => ({
   compileApp: async () => runProgram(testEditor.file!.contents)
 }))
 
-/** A counter notebook, in plain Spell (epic `language` P45):  a title, a view of its own, two sections each holding an example. */
+/**
+ * A counter notebook, a page file (epic `language` P47):  a view of its own, in plain Spell above its head;
+ * then the page, a title and two sections each holding an example.
+ */
 const COUNTER = [
+  'a "counter" is a view:',
+  '\t- its "count" is a number starting at 0',
+  "\t- to count up: set its count to its count + 1",
+  "\t- to draw it:",
+  "\t\t<button onClick={count up}>Clicked {its count} times</button>",
+  "",
   '"counter notebook" is a notebook page',
   "\t# A counter",
   "\tA button that counts its clicks.",
-  "",
-  '\t<spell-view "counter">',
-  '\t\t<property "count">a number</>',
-  '\t\t<action "create it">set its count to 0</>',
-  '\t\t<action "count up">set its count to its count + 1</>',
-  "\t\t<draw><button onClick={count up}>Clicked {its count} times</button></draw>",
-  "\t</spell-view>",
   "",
   "\t## Try it",
   '\t<example "one counter">',
@@ -158,7 +160,7 @@ describe("<NotebookPage>", () => {
     const { file, controller } = await mounted()
     const steps = testEditor.steps
     controller.setLocked(true)
-    expect(file.contents.split("\n")[0]).toBe('"counter notebook" is a locked notebook page')
+    expect(file.contents).toContain('\n"counter notebook" is a locked notebook page\n')
     expect(testEditor.steps).toBe(steps + 1)
     await until(() => file.saves === 1)
     expect(controller.isLocked()).toBe(true)
@@ -218,7 +220,7 @@ describe("<NotebookPage>", () => {
 })
 
 /** A notebook file, standing in for the editor's `SP.SpellFile`:  its text, and how many times it's saved. */
-type TestFile = { path: string; form: "spellx"; contents: string; match: unknown; saves: number; save(): Promise<void> }
+type TestFile = { path: string; form: "page"; contents: string; match: unknown; saves: number; save(): Promise<void> }
 
 /**
  * The Counter's page:  the app area (`program`) with its scroller and mount point, the program drawn there, and the
@@ -227,7 +229,7 @@ type TestFile = { path: string; form: "spellx"; contents: string; match: unknown
 async function mounted(options: { width?: number } = {}) {
   const file: TestFile = {
     path: "/Counter.spell",
-    form: "spellx",
+    form: "page",
     contents: COUNTER,
     match: undefined,
     saves: 0,

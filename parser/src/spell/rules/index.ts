@@ -103,7 +103,7 @@ export { Block, BlockLine }
 export type { JSXMatchData }
 /**
  * Export so editors can offer spell's own JSX tags, e.g. `<children/>` -- see `SPELL_TAG_NAMES`;
- * and so the spellx converter can tell a component's bare name -- see `isBareComponentName()`.
+ * and so others can tell a component's bare name -- see `isBareComponentName()`.
  */
 export { SPELL_TAG_NAMES, isBareComponentName }
 

@@ -162,8 +162,7 @@ function fileRowFor(
   const name = location.file ?? path
   const folder = location.folder?.replace(/^\/|\/$/g, "") ?? ""
   if (!folder) return { path, name, folder, nameInFolder: name, isDirty }
-  const spellEnding = [SP.SPELL_SUFFIX, ...SP.SPELLML_SUFFIXES].find((suffix) => name.endsWith(suffix))
-  const nameInFolder = spellEnding ? name.slice(0, -spellEnding.length) : name
+  const nameInFolder = name.endsWith(SP.SPELL_SUFFIX) ? name.slice(0, -SP.SPELL_SUFFIX.length) : name
   return { path, name: `${folder}/${nameInFolder}`, folder, nameInFolder, isDirty }
 }
 

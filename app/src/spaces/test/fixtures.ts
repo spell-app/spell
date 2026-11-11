@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "fs"
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from "fs"
 import JSON5 from "json5"
 import { basename, resolve } from "path"
 
@@ -8,7 +8,7 @@ import { SP } from "spell/parser/spell"
 import { parseSpellProject, type SpellSourceFile } from "spell/parser/spell/test"
 import environment from "spell/app/spaces/server/node/environment"
 
-// Spell UI's pack, as every compile has it:  an example written in spellx names its components bare (`<button>`)
+// Spell UI's pack, as every compile has it:  an example's drawing names its components bare (`<button>`)
 import "spell/app/spaces/models/spellUIPack"
 
 /*
@@ -335,7 +335,7 @@ export function fixtureImports(projectName: TestProjectName): Record<string, Tes
 function projectImportsIn(folder: string): Record<string, TestProjectName> {
   const imported: Record<string, TestProjectName> = {}
   for (const { path, active } of readProjectFile(folder).imports) {
-    if (active === false || /\.(spell|spellml|spellx|css)$/.test(path)) continue
+    if (active === false || /\.(spell|css)$/.test(path)) continue
     const projectId = SP.SpellProject.projectIdForImport(path)
     const group = projectId.split("/").slice(0, -1).join("/")
     const projectName = group === FIXTURES_GROUP ? bareNameOf(projectId) : projectId
@@ -406,45 +406,6 @@ export function loadFixtureProject(projectName: TestProjectName): SpellSourceFil
   return readProjectFile(projectDir)
     .imports.filter(({ path, active }) => active !== false && SP.isSpellSourceName(path))
     .map(({ path }) => ({ path, contents: readFileSync(resolve(projectDir, `.${path}`), "utf8") }))
-}
-
-/**
- * The code-spell twins of the showcase examples' spellx files, kept beside the tests:  `tests/spell/__spell__/<Example>/`.
- * - Each is the same program as the example's `.spell` file:  `spellxExamples.test.ts` checks it.
- */
-export const CODE_SPELL_TWINS_DIR = resolve(environment.repoDir, "tests", "spell", "__spell__")
-
-/**
- * `loadFixtureProject()`, each `.spell` file as its code-spell twin (`CODE_SPELL_TWINS_DIR`):  `/Card.spell` =>
- * `/Card.spell`, the same program written as code spell.
- * - For a test of code spell itself (its parse, its journal, its edits) on a whole example written in spellx,
- *   e.g. `loadCodeSpellTwin("@spell/examples/Solitaire")`.
- */
-export function loadCodeSpellTwin(projectName: TestProjectName): SpellSourceFile[] {
-  return loadFixtureProject(projectName).map((file) => {
-    if (SP.formOfText(file.contents, file.path) !== "spellx") return file
-    const path = file.path.replace(/(ml|x)$/, "")
-    return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, bareNameOf(projectName), `.${path}`), "utf8") }
-  })
-}
-
-/**
- * Write test project `projectName` into folder `dir` as CODE spell:  `copyFixtureProject()`,
- * each `.spell` file as its code-spell twin (`loadCodeSpellTwin()`), the project file listing the twins.
- * - For a test of code spell itself on a whole example written in spellx (the language server's, on Solitario).
- * - SIDE EFFECT:  makes `dir`.
- */
-export function copyCodeSpellTwin(projectName: TestProjectName, dir: string): void {
-  copyFixtureProject(projectName, dir)
-  for (const { path, contents } of loadCodeSpellTwin(projectName)) writeFileSync(resolve(dir, `.${path}`), contents)
-  const projectFile = resolve(dir, basename(projectFileFor(fixtureFolder(projectName))))
-  const project = readProjectFile(dir)
-  const imports = project.imports.map((it) => {
-    if (!SP.isSpellmlName(it.path)) return it
-    rmSync(resolve(dir, `.${it.path}`), { force: true })
-    return { ...it, path: it.path.replace(/(ml|x)$/, "") }
-  })
-  writeFileSync(projectFile, JSON.stringify({ ...project, imports }, undefined, 2))
 }
 
 /**

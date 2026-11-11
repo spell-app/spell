@@ -29,7 +29,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       and its projects' create, copy, rename and delete
     - [ProjectFiles.ts](models/ProjectFiles.ts):  a project's FILE create, copy, rename and delete
     - [spaceNames.ts](models/spaceNames.ts):  spaces' own `__` names, `SPACE_NAMES`
-    - [spellUIPack.ts](models/spellUIPack.ts):  Spell UI as a spellx drawing names its components bare
+    - [spellUIPack.ts](models/spellUIPack.ts):  Spell UI as a drawing names its components bare
       (`<button>` => `<ui-button>`), registered with spell as the barrel loads (`SP.ComponentPacks`, epic
       `elemental-spell` P7);  `<spell-viewer>` doesn't load it:  it never compiles
       - and an app's widget defaults, `<ui-defaults>`, in Spell UI's own names:

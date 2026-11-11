@@ -11,19 +11,13 @@ import { parseSpellProject, registerTestComponentPack, runSpellFiles } from "spe
  *   a type that's further down the project has to be declared before that.
  */
 
-const SHELF = `<spell-app "shelf">
-	<spell>
-		- its "page" is a new book page
-	</spell>
-</spell-app>`
+const SHELF = `shelf is an app:
+	its "page" is a new book page`
 
-const BOOK_PAGE = `<spell-thing "book page">
-	<spell>
-		- its "title" is text
-		- to create it:
-			set its title to "Dune"
-	</spell>
-</spell-thing>`
+const BOOK_PAGE = `a "book page" is a thing:
+	its "title" is text
+	to create it:
+		set its title to "Dune"`
 
 const FILES = [
   { path: "/Shelf.spell", contents: SHELF },

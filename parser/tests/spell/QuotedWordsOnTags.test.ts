@@ -2,7 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { SX } from "spell/parser/spellx"
+import { PG } from "spell/parser/page"
 
 /**
  * A tag's quoted word (epic `language` P38):  `<header "Hardware"/>` ~== `<header>Hardware</header>`.
@@ -50,9 +50,8 @@ describe("a tag's quoted word", () => {
   })
 
   test("the editor's view of a tag keeps the word in its head", () => {
-    const text =
-      '<spell-view "notes">\n\t<draw>\n\t\t<header "Hardware" size="large">more</header>\n\t</draw>\n</spell-view>\n'
-    const file = SX.SpellxView.read(text, { path: "Notes.spell" })
+    const text = '"notes" is a page\n\t<header "Hardware" size="large">more</header>\n'
+    const file = PG.PageView.read(text, { path: "Notes.spell" })
     const header = [...file.walk()]
       .map(({ node }) => node)
       .find((node) => node.kind === "element" && node.name === "header")

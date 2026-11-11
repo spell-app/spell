@@ -1025,7 +1025,7 @@ export class EditorStore extends Observable {
    *   locking or unlocking is a page's own step, which saves itself (`NotebookController.setLocked()`).
    */
   isLocked(file: SP.AnySpellFile): boolean {
-    return file instanceof SP.SpellFile && file.form === "spellx" && NotebookPageCells.holdsLockedPage(file)
+    return file instanceof SP.SpellFile && file.form === "page" && NotebookPageCells.holdsLockedPage(file)
   }
 
   /**

@@ -112,7 +112,6 @@ describe("SpellDeclarations, inline", () => {
 /**
  * `SpellDeclarations.importScope()` -- a project parses against another's declarations, NOT its sources.
  * - Solitaire split in two:  a library (`Card`, `Deck`, `Pile`, the card library's) and an app (`Solitaire.spell`).
- *   - All spellx:  a library written in tags, imported by its declarations as a code-spell one is.
  * - A method with typed parameters:  `PILES`, a library of its own, as the card library has none.
  */
 describe("SpellDeclarations.importScope()", () => {

@@ -330,7 +330,7 @@ export class SpellStatement<
   /**
    * The ONE line of `nestedBlock`, as an expression, when `block` (that line parsed as statements) can't read it,
    * and our line takes a value (`inlineAs` is `expression`):  e.g. a property's list on the line below its name,
-   *   `its "days" is:` then `[the monday, the tuesday]` -- or spellx's `<property "days">` with the list under it.
+   *   `its "days" is:` then `[the monday, the tuesday]`.
    * - Only when the WHOLE line reads as one:  else `undefined`, and the block's error stands.
    */
   private oneLineValue(statement: P.Match, nestedBlock: P.BlockToken, block: P.Match | undefined): P.Match | undefined {
