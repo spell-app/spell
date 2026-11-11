@@ -36,6 +36,15 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   prints (epic `epic-friend` P11).
   - Its last topic, `claude-only-tools`, is the plain way to do each step that leans on a tool only Claude Code has.
   - A change to a step here that any agent takes changes it there too:  ONE copy of each step's words for the others.
+- With superpowers installed (obra/superpowers, MIT;  epic `epic-engine` P72):  in an epic, the epic page is the design
+  and the plan, `/epic` makes the worktree (and runs the repo's own install), and `/epic done` finishes.
+  - So NO brainstorming, writing-plans, executing-plans, subagent-driven-development, using-git-worktrees or
+    finishing-a-development-branch:  no design doc or plan file in the repo, no `npm install` in the worktree, no
+    merge or worktree removal by git.
+  - DO use test-driven-development (where the repo wants tests first), systematic-debugging (for an issue found, filed
+    as `#I` too) and verification-before-completion (before a phase closes).
+  - The words in full:  [guide.md](guide.md)'s `superpowers` topic, which the session-start hook also says in an epic's
+    worktree when superpowers is turned on (`Superpowers`).
 - Rules for the doc (sections, ids, markers, prose):  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md).
   Read it first.
   - It's spell-epic's, with every template:  `epic pages template epics/plan-doc.md` prints its path.
@@ -630,10 +639,23 @@ than just being able to move on").
    - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record todos, issues and decisions in the epic page as you find them".
-4. A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
-   ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
-   - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
-   - Its fixes go in the phase's Done;  what it asks about waits on the person, as calm issues.
+4. The reviews before the phase closes.
+   - A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
+     ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
+     - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
+     - Its fixes go in the phase's Done;  what it asks about waits on the person, as calm issues.
+   - Every phase:  the PLAN CHECK (epic `epic-engine` P72;  the idea borrowed from superpowers' spec review, MIT):
+     a `plan-check` agent, named and listed `<name>-p<N>-check`, given the epic, the phase and the phase's diff
+     (its commits, or `git diff <base>` when not committed yet).
+     - In Codex:  its custom agent `plan-check` (`epic plugin install --codex`), else follow its agent file's steps yourself.
+     - It reads the accepted build plan, and returns two lists:  what the plan said that wasn't built, and what was
+       built that the plan didn't say.  It changes nothing.
+     - Each miss:  built now if small, else `add <name>#I "..." --calm` (red, no `--calm`, only when it drops or changes
+       what the person asked for).  A change made on purpose, already said in an Update block or an item:  no issue.
+     - One more kind of review beside the designer and coherence:  coherence asks "is this the one way we do it?",
+       the designer "does it look right?", the plan check "did we build what was agreed?".
+     - Its agent file:  [plan-check-agent.md](${CLAUDE_PLUGIN_ROOT}/plan-check/plan-check-agent.md).
+     - Left out only for a phase with no accepted plan ("just do it", bedtime mode), in one line.
 5. Close the phase:  `epic phase <name>#P<N> done --done "<ul><li>...</li></ul>"`.
    - It drops that phase's UPDATE markers, writes its Done field, and brings the doc forward.
    - It writes how long Claude worked on it, `took` (epic `epic-engine` P41):  its own agents' time from their
@@ -646,6 +668,12 @@ than just being able to move on").
      while the reply below goes out.
    - Done:  what was BUILT, ordered by what the person asks about first:
      where to see it, what changed in how they work, what's rough or not yet tried by hand.
+   - PROOF before done (epic `epic-engine` P72;  borrowed from superpowers' verification-before-completion, MIT):
+     the Done list's last bullet names each check run and what it printed, never "tests pass" alone.
+     - `Checked:  yarn test, 1128 passed / 65 files (was 1130:  two tests merged);  yarn lint, 0 errors;
+       epic skills check, no problems`
+     - a check that was already failing before the phase:  said so, by name
+     - a check not run:  said so, and why
    - Commit messages, so the doc can list them (its phase's and items' "Commits"):
      - a phase:  `P<n>:  <Name> -- <summary>`
        - `P4 + P5:` for two;  `WIP P3:` for a parked part

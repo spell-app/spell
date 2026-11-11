@@ -169,6 +169,9 @@ export class SpellLanguageServer {
     connection.onRequest("spell/compiled", ({ uri, target }: LSP.CompiledParams) =>
       this.answer(uri, null, (file) => service.compiled(file, target))
     )
+    connection.onRequest("spell/bubbly", ({ uri }: { uri: string }) =>
+      this.answer(uri, [], (file) => service.bubbly(file))
+    )
     connection.onRequest("spell/lineTree", ({ uri, line }: { uri: string; line: number }) =>
       this.answer(uri, null, (file) => service.lineTree(file, line))
     )

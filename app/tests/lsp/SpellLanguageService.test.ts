@@ -350,6 +350,32 @@ describe("SpellLanguageService", () => {
       })
     })
 
+    test("the bubbly look, stretch by stretch, for VS Code's decorations (`spell/bubbly`, epic `language` P51)", () => {
+      const stretches = service.bubbly(card)
+      const lines = card.parseText.split("\n")
+      const words = ({ range }: LSP.BubblyRange) =>
+        lines[range.start.line]!.slice(range.start.character, range.end.character)
+      const name = stretches.find((stretch) => stretch.isName)!
+      expect(words(name)).toBe("card")
+      expect(name).toMatchObject({ kind: "input", partOfSpeech: "thing", isQuoted: true })
+      // its words alone, inside its quotes
+      const { start, end } = CARD_NAME
+      expect(name.range).toEqual({
+        start: { line: start.line, character: start.character + 1 },
+        end: { line: end.line, character: end.character - 1 }
+      })
+      // its quote marks apart, faint
+      const marks = stretches.filter((stretch) => stretch.range.start.line === name.range.start.line)
+      expect(marks.map((stretch) => stretch.kind)).toEqual(expect.arrayContaining(["quote-open", "quote-close"]))
+      // every stretch on one line, in order, never overlapping
+      for (const [index, stretch] of stretches.entries()) {
+        expect(stretch.range.start.line).toBe(stretch.range.end.line)
+        const before = stretches[index - 1]
+        if (before?.range.end.line === stretch.range.start.line)
+          expect(before.range.end.character).toBeLessThanOrEqual(stretch.range.start.character)
+      }
+    })
+
     test("markdown in a comment:  bold / italic / link modifiers, code spans as strings", async () => {
       //                     0123456789012345678901234567890
       await withCardText(`// a **b** *c* \`d\` [e](f)\n${cardText}`, () => {
