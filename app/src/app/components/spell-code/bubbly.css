@@ -103,7 +103,7 @@
   --bubbly-input-dark: #2b2a33;
   /* a quoted input's marks, just outside its white:  Times' bold curly quotes, which every machine has */
   --bubbly-quote-font: "Times New Roman", Times, serif;
-  --bubbly-quote-size: 26px;
+  --bubbly-quote-size: 20px;
   --bubbly-quote-room: 15px;
   /* the quote marks lean to match the band */
   --bubbly-quote-rotation: 15deg;
@@ -198,7 +198,7 @@
    */
   .bubbly-quantity,
   .bubbly-phrase {
-    --bubbly-dot-color: color-mix(in srgb, var(--bubbly-ink) 30%, transparent);
+    --bubbly-dot-color: color-mix(in srgb, var(--bubbly-ink) 10%, transparent);
     background: linear-gradient(to right, var(--bubbly-dot-color) 1px, transparent 1px) left bottom / 4px 1px repeat-x;
     padding-bottom: 1px;
   }
