@@ -564,6 +564,8 @@
   --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
   --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 2px);
+  /* how much lower a pill's top sits than an even pill's:  its words sit low in their line */
+  --bubbly-monaco-input-trim: 2px;
 
   /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
   position: relative;
@@ -654,8 +656,10 @@
   .bubbly-layer :is(.bubbly-head, .bubbly-pill, .bubbly-input) {
     translate: 0 -50%;
   }
+  /* a pill's top comes down to its words:  as much white over them as under them (Owen) */
   .bubbly-layer .bubbly-input {
-    height: var(--bubbly-input-height);
+    height: calc(var(--bubbly-input-height) - var(--bubbly-monaco-input-trim));
+    translate: 0 calc(-50% + var(--bubbly-monaco-input-trim) / 2);
   }
   .bubbly-layer .bubbly-block > .bubbly-gutter {
     width: calc(var(--bubbly-gutter) + var(--bubbly-block-inner-corner));

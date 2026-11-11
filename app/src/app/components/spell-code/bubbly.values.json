@@ -187,6 +187,10 @@
     "--bubbly-monaco-foot-room": {
       "light": "calc(4px + 2px)",
       "dark": "calc(4px + 2px)"
+    },
+    "--bubbly-monaco-input-trim": {
+      "light": "2px",
+      "dark": "2px"
     }
   },
   "parts": {
