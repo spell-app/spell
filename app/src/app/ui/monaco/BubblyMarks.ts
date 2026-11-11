@@ -262,7 +262,7 @@ function room(kind: "input" | "quote", side: "before" | "after"): monaco.editor.
 }
 
 /**
- * Room before a head line's words:  `bubbly-room-head`, its width the sheet's (`--bubbly-head-left-shift`).
+ * Room before a head line's words:  `bubbly-room-head`, its width the sheet's (`--bubbly-pill-left-shift`).
  * - The caret stops only after it, by the tab or the word it's before.
  */
 const HEAD_ROOM: monaco.editor.InjectedTextOptions = {
