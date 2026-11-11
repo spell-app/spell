@@ -640,6 +640,16 @@
   color: var(--bubbly-ink);
 }
 
+/* brackets in the ink too, not Monaco's colour for each pair:  the page draws them as words */
+.bubbly-monaco .view-line span[class*="bracket-highlighting-"] {
+  color: var(--bubbly-ink);
+}
+
+/* no indent guides:  a control line's bracket, and each body's gutter, show what's under what */
+.bubbly-monaco .view-overlays .core-guide {
+  display: none;
+}
+
 /* the probe the code measures the sheet's sizes with */
 .bubbly-monaco-probe {
   position: absolute;
