@@ -62,6 +62,16 @@ describe("SP.BubblyLayout", () => {
     ])
   })
 
+  it("keeps an empty line indented into a body in that body, so its foot goes under it (the caret on a new line)", () => {
+    const text = CARD.replace("\t\treturn column\n", "\t\treturn column\n\t\t\n")
+    const picture = blocksOf(SP.BubblyLayout.of(text).nodes).find((block) => block.rule === "property_value_getter")!
+    const last = picture.body.at(-1)!
+    expect(last.kind).toBe("line")
+    expect(last.kind === "line" && text.slice(0, last.start).split("\n").length).toBe(
+      text.slice(0, text.indexOf("\t\treturn column\n")).split("\n").length + 1
+    )
+  })
+
   it("puts a group's members in its body, up to the next group;  its description first", () => {
     const [, rank] = blocksOf(drawing.nodes)
     expect(rank!.isGroup).toBe(true)

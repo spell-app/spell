@@ -142,7 +142,11 @@ export class BubblyLayout {
   // ## Lines into a tree, by indent
   ////////////////
 
-  /** The text's lines, nested by indent:  a blank line sits where the next line does. */
+  /**
+   * The text's lines, nested by indent:  a blank line sits where the next line does.
+   * - EXCEPT a blank line with an indent of its own (the caret on a new line in a body):  it sits at that indent,
+   *   so it's part of the block above it, and the block's foot goes under it (Owen, 2026-11-11)
+   */
   private treeOf(): SourceLine[] {
     const lines: SourceLine[] = this.text.split("\n").map((raw, index) => {
       const lineStart = this.lineStarts[index]!
@@ -151,9 +155,9 @@ export class BubblyLayout {
       return {
         index,
         start: lineStart + indent,
-        end: lineStart + words.trimEnd().length,
+        end: lineStart + (words.trim() ? words.trimEnd().length : indent),
         width: indent,
-        isBlank: !words.trim(),
+        isBlank: !words.trim() && !indent,
         children: []
       }
     })
@@ -495,7 +499,7 @@ type SourceLine = {
   end: number
   /** its indent's width, in characters */
   width: number
-  /** nothing but spaces */
+  /** nothing on it, not even an indent:  it sits where the next line does */
   isBlank: boolean
   /** the lines under it */
   children: SourceLine[]
