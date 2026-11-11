@@ -48,6 +48,24 @@ describe("SpellTyping.indentToAdd()", () => {
   })
 })
 
+describe("SpellTyping.indentToSnap()", () => {
+  test("a blank line inside a body:  the next line's indent, as the caret lands on it", () => {
+    expect(SpellTyping.indentToSnap(CARD, 7)).toBe("\t")
+    expect(SpellTyping.indentToSnap(cardWith(5, ""), 5)).toBe("\t\t")
+  })
+
+  test("only what the line's tabs don't have yet;  none once it's that far in", () => {
+    expect(SpellTyping.indentToSnap(cardWith(5, "\t"), 5)).toBe("\t")
+    expect(SpellTyping.indentToSnap(cardWith(5, "\t\t"), 5)).toBe("")
+  })
+
+  test("none on a line with words, nor before the top level, nor at the file's end", () => {
+    expect(SpellTyping.indentToSnap(CARD, 2)).toBe("")
+    expect(SpellTyping.indentToSnap(CARD, 11)).toBe("")
+    expect(SpellTyping.indentToSnap([...CARD, ""], 13)).toBe("")
+  })
+})
+
 describe("SpellTyping.opensQuotes()", () => {
   test("a member's words, one level in under a type", () => {
     expect(SpellTyping.opensQuotes(cardWith(7, "\tgroup "), 7, "en")).toBe(true)
