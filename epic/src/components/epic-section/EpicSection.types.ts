@@ -394,6 +394,13 @@ export const FILTER_TEXTS = [
   },
   { key: "chipStays", text: "nothing else to show", description: "A state chip's click, the only colour there is." },
   {
+    key: "chipMixed",
+    text: "shown in some sections, hidden in others:  show them in every section",
+    description:
+      "The page toolbar's chip while sections disagree about its colour (`mixed`, epic `epic-engine` I259):  a click " +
+      "shows it in every section."
+  },
+  {
     key: "stateProgress",
     text: "Claude is working on it",
     description: "A state chip's words:  `progress` (blue)."

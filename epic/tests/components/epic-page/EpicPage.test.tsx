@@ -857,6 +857,40 @@ describe("<epic-page> toolbar", () => {
     expect(pageChips(host)).toEqual(["open+2", "recent-1"])
   })
 
+  // epic `epic-engine` I259 (Owen, 2026-11-11:  "I just turned the 'master' grey button *on* and the Phases grey section
+  // didn't go on")
+  test("a toolbar chip SETS its colour in every section, the Phases section too;  sections that disagree draw it mixed", async () => {
+    const host = await render(
+      `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +
+        `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="One" status="done"><p>Did.</p></epic-phase>` +
+        `<epic-phase id="p2" title="Two" status="todo"><p>Do.</p></epic-phase></epic-section>` +
+        `<epic-section id="decisions" kind="questions"><epic-item id="q1" title="Q" status="open" state="open"></epic-item>` +
+        `<epic-item id="q2" title="Q" status="done" state="old"></epic-item></epic-section></epic-page>`
+    )
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "old+1"]))
+    const phases = host.querySelector<E.DOMElement & { chipStates: { state: string; on: boolean }[] }>("#phases")!
+    const grey = () => phases.chipStates.find((it) => it.state === "old")
+    await vi.waitFor(() => expect(grey()).toEqual({ state: "old", on: true }))
+    // the Phases section's own grey off:  the toolbar's grey is mixed, not on
+    await pickPageState(phases, "old")
+    expect(grey()).toEqual({ state: "old", on: false })
+    expect(chipsOf(host).map((chip) => chip.getAttribute("aria-pressed"))).toEqual(["true", "mixed"])
+    // a click on the mixed chip shows grey in EVERY section
+    await pickPageState(host, "old")
+    expect(pageChips(host)).toEqual(["open+1", "old+1"])
+    expect(phases.chipStates).toEqual([
+      { state: "scheduled", on: true },
+      { state: "old", on: true }
+    ])
+    // and off again:  every section's grey off, the Phases section's too;  its other colours as they were
+    await pickPageState(host, "old")
+    expect(pageChips(host)).toEqual(["open+1", "old-1"])
+    expect(phases.chipStates).toEqual([
+      { state: "scheduled", on: true },
+      { state: "old", on: false }
+    ])
+  })
+
   test("collapse-all folds every block, item and card on the page;  a section's folds only what's inside it, and stays open", async () => {
     const host = await render(
       `<epic-page epic="demo" title="Demo"><epic-overview id="overview"><p slot="summary">Two.</p></epic-overview>` +

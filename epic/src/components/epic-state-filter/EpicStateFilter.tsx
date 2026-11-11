@@ -151,7 +151,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   data-state={state.state}
                   data-color={state.color}
                   data-fill={"fill" in state ? state.fill : undefined}
-                  aria-pressed={this.showing.has(state.state) ? "true" : "false"}
+                  aria-pressed={this.pressedOf(state.state)}
                   aria-label={words()}
                   title={words()}
                   onClick={(event: MouseEvent) => this.pick(state.state, event.altKey ? "only" : "click")}
@@ -177,10 +177,27 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     return this.wordsFor(MARKED_SHOWS_AS, count, words)
   }
 
+  /**
+   * The states drawn MIXED:  `mixed`'s, of those present (the page's toolbar, while sections disagree about a colour;
+   * epic `epic-engine` I259).
+   */
+  get mixedStates(): ReadonlySet<string> {
+    const present = this.present.map((it) => it.state as string)
+    return new Set((this.mixed ?? "").split(/\s+/).filter((state) => present.includes(state)))
+  }
+
+  /** A chip's `aria-pressed`:  `mixed` while some of its sections show it, else whether it shows. */
+  private pressedOf(state: string): "true" | "false" | "mixed" {
+    if (this.mixedStates.has(state)) return "mixed"
+    return this.showing.has(state) ? "true" : "false"
+  }
+
   /** How many are in `state` (`words`), and what a click and an ⌥-click on its chip do. */
   private wordsFor(state: string, count: number, words: string): string {
     const present = this.present.map((it) => it.state as string)
-    const does = this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing], state)])
+    const does = this.mixedStates.has(state)
+      ? this.translationForKey("chipMixed")
+      : this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing], state)])
     return this.translationForKey("chipWords", { count, words, does, only: this.translationForKey("chipAltOnly") })
   }
 

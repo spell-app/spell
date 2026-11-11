@@ -36,6 +36,45 @@ export class StateFilter {
     return next.length ? next : StateFilter.groupAfter(present, group)
   }
 
+  /**
+   * The key of `state`'s colour:  its group's first state (`STATE_GROUPS`), else `state` itself.
+   * - a phase's own grey, `paused`, goes with the greys (`PHASE_COLORS`):  the page's toolbar sets it with them
+   */
+  static colorOf(state: string): string {
+    return STATE_GROUPS.find((states) => states.includes(state))?.[0] ?? PHASE_COLORS[state] ?? state
+  }
+
+  /**
+   * What one section shows once the page's toolbar SETS colours (epic `epic-engine` I259;  Owen, 2026-11-11:  turning
+   * the toolbar's grey on left the Phases section's grey off):  each state of `present` whose colour `colors` names,
+   * shown or hidden as it says, whatever the section had;  the others as `shown` has them.
+   * - in `present`'s order
+   */
+  static withColors(
+    present: readonly string[],
+    shown: readonly string[],
+    colors: ReadonlyMap<string, boolean>
+  ): string[] {
+    return present.filter((state) => colors.get(StateFilter.colorOf(state)) ?? shown.includes(state))
+  }
+
+  /**
+   * Where each colour stands across several sections' chips (`sections`, each its states and whether they show):
+   * `on` while every one of them shows it, `off` while none does, else `mixed`.
+   */
+  static colorStanding(sections: readonly (readonly { state: string; on: boolean }[])[]): Map<string, ColorStanding> {
+    const standing = new Map<string, ColorStanding>()
+    for (const chips of sections) {
+      for (const { state, on } of chips) {
+        const color = StateFilter.colorOf(state)
+        const was = standing.get(color)
+        const now = on ? "on" : "off"
+        standing.set(color, was === undefined || was === now ? now : "mixed")
+      }
+    }
+    return standing
+  }
+
   /** The states of `present` with a chip of their own:  all but what Claude is on (`WITH_CLAUDE`, the blue badge). */
   static chipStatesOf(present: readonly string[]): string[] {
     return present.filter((state) => !StateFilter.isWithClaude(state))
@@ -100,6 +139,12 @@ const STATE_GROUPS: readonly (readonly string[])[] = [
   ["old", "handled", "quiet"]
 ]
 
+/**
+ * A phase's states that take another's colour on the page's toolbar (`StateFilter.colorOf()`), though the Phases
+ * section gives them a chip of their own:  `paused` is grey (epic `epic-engine` I221), with `old`.
+ */
+const PHASE_COLORS: Readonly<Record<string, string>> = { paused: "old" }
+
 /** The state an item marked in this pass filters as:  it counts in the blue badge, so it goes with the blues. */
 export const MARKED_SHOWS_AS = "progress"
 
@@ -111,6 +156,9 @@ export const WITH_CLAUDE = ["progress", "handed"] as const
 
 /** How a chip was picked:  a plain click (`nextShown()`'s rule), or an ⌥-click (`only` its state). */
 export type ChipPick = "click" | "only"
+
+/** Where a colour stands across sections (`StateFilter.colorStanding()`):  every one shows it, none, or some. */
+export type ColorStanding = "on" | "off" | "mixed"
 
 /** What a chip's click does (`StateFilter.clickDoes()`). */
 export type ChipClick = "all" | "also" | "hide" | "next" | "stays"

@@ -6739,6 +6739,11 @@
           "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown (`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue badge), grey paused (held by you), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
         },
         {
+          "name": "mixed",
+          "kind": "string",
+          "description": "The states drawn MIXED, space-separated (epic `epic-engine` I259):  an epic page's toolbar, while some of its sections show that colour and some hide it.  A pale fill, `aria-pressed=\"mixed\"`;  a click shows it in every section, as its tooltip says.  None:  each chip solid or outlined, by `shown`."
+        },
+        {
           "name": "shown",
           "kind": "string",
           "description": "The states showing, space-separated;  no attribute:  every state shows;  `\"\"`, none (the owner's choice left none of these)."
@@ -6759,7 +6764,7 @@
         },
         {
           "name": "chip",
-          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed`."
+          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed` (`mixed` too, `mixed`)."
         },
         {
           "name": "marked",
@@ -6812,6 +6817,11 @@
           "key": "chipStays",
           "text": "nothing else to show",
           "description": "A state chip's click, the only colour there is."
+        },
+        {
+          "key": "chipMixed",
+          "text": "shown in some sections, hidden in others:  show them in every section",
+          "description": "The page toolbar's chip while sections disagree about its colour (`mixed`, epic `epic-engine` I259):  a click shows it in every section."
         },
         {
           "key": "stateProgress",

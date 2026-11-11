@@ -83,6 +83,13 @@
     color: var(--_chip-on);
   }
   /*
+   * shown in some sections, hidden in others (the page's toolbar, `mixed`;  epic `epic-engine` I259):  a pale fill of
+   * its colour, between solid (shown) and outlined (hidden);  the dotted chip's look is its own, below
+   */
+  .chip[aria-pressed="mixed"] {
+    background: color-mix(in oklab, var(--_chip) 35%, transparent);
+  }
+  /*
    * a phase scheduled, not running (epic `epic-engine` I170;  Owen, 2026-10-29:  "scheduled not running - blue dotted
    * outline"):  its DOTTED outline in blue;  shown, FILLED blue as every chip that's on, its dots a lighter blue on
    *   the fill (Owen, 2026-10-29:  "blue dotted ring but not filled in is confusing.  Looks like it is turned off");

@@ -55,6 +55,14 @@ export const epicStateFilterVocabulary = {
         "words."
     },
     {
+      name: "mixed",
+      kind: "string",
+      description:
+        "The states drawn MIXED, space-separated (epic `epic-engine` I259):  an epic page's toolbar, while some of its " +
+        'sections show that colour and some hide it.  A pale fill, `aria-pressed="mixed"`;  a click shows it in every ' +
+        "section, as its tooltip says.  None:  each chip solid or outlined, by `shown`."
+    },
+    {
       name: "shown",
       kind: "string",
       description:
@@ -77,7 +85,7 @@ export const epicStateFilterVocabulary = {
     {
       name: "chip",
       description:
-        "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed`."
+        "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed` (`mixed` too, `mixed`)."
     },
     { name: "marked", description: "The blue badge of the items marked in this pass (`marked`):  not a button." }
   ],
