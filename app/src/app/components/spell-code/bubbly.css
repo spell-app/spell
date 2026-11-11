@@ -86,6 +86,8 @@
   --bubbly-block-inner-corner: 8px;
   --bubbly-foot-width: 26px;
   --bubbly-foot-height: 4px;
+  /* the outside of the corner where a rail turns into its foot:  the body's inner corner, a rail's width out */
+  --bubbly-rail-corner: calc(var(--bubbly-gutter) + var(--bubbly-block-inner-corner));
 
   /****** inputs:  what a person typed, white on its band ******/
   /* room either side of an input, between it and the words or marks beside it */
@@ -246,8 +248,21 @@
     width: var(--bubbly-foot-width);
     height: var(--bubbly-foot-height);
     background: var(--bubbly-pill);
-    /* its bottom-left as round as its height allows:  the gutter above it is square */
-    border-radius: 0 calc(var(--bubbly-foot-height) / 2) calc(var(--bubbly-foot-height) / 2) var(--bubbly-foot-height);
+    border-radius: 0 calc(var(--bubbly-foot-height) / 2) calc(var(--bubbly-foot-height) / 2) 0;
+  }
+
+  /*
+   * the corner where a body's rail turns into its foot:  as thick round the corner as down the rail and along the foot
+   * - the rail runs on beside the foot, its bottom-left curved round the body's inner corner, a rail's width out;
+   *   the foot starts where that curve ends, so its right end stays where it was
+   */
+  .bubbly-block > .bubbly-gutter {
+    grid-row: 2 / span 2;
+    border-bottom-left-radius: var(--bubbly-rail-corner);
+  }
+  .bubbly-block > .bubbly-foot {
+    margin-left: var(--bubbly-rail-corner);
+    width: calc(var(--bubbly-foot-width) - var(--bubbly-rail-corner));
   }
 
   /****** a declaration with no body:  its band alone, every corner round ******/
@@ -645,6 +660,9 @@
   }
   .bubbly-layer .bubbly-block > .bubbly-gutter {
     width: calc(var(--bubbly-gutter) + var(--bubbly-block-inner-corner));
+    /* on beside its foot:  the code stops it at the foot's top */
+    box-sizing: content-box;
+    padding-bottom: var(--bubbly-foot-height);
   }
   .bubbly-layer .bubbly-bracket {
     width: 0;
