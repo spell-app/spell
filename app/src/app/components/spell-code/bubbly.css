@@ -107,6 +107,8 @@
   --bubbly-input-pad-top: 1px;
   /* where a band ends with an input:  the input as far from that round end as from the band's top and bottom */
   --bubbly-end-inset: 2px;
+  /* an input's ends:  round, its height or more makes a full half-circle */
+  --bubbly-input-radius: var(--bubbly-input-height);
   /* an input is a little see-through:  its band's colour shows through */
   --bubbly-input-opacity: 80%;
   --bubbly-input-dark: #2b2a33;
@@ -413,7 +415,7 @@
     margin: 0 var(--bubbly-gap);
     padding: var(--bubbly-input-pad-top) var(--bubbly-input-pad) 0 var(--bubbly-input-pad);
     line-height: var(--bubbly-input-height);
-    border-radius: var(--bubbly-input-height);
+    border-radius: var(--bubbly-input-radius);
     color: var(--bubbly-ink);
     background: var(--bubbly-input);
     /* an inset edge, top and left:  a shadow inside it, so it takes no room */
@@ -631,6 +633,36 @@
     background: var(--bubbly-pill);
     border-radius: var(--bubbly-pill-radius);
     padding: 0 9px;
+  }
+
+  /****** HTML drawn bubbly (`BubblyMarkup`):  the same shapes, their corners cut, not rounded ******/
+  &.bubbly-html {
+    /* how far each corner is cut:  a band's, a value's white, the body's inner corners and the rail's turn */
+    --bubbly-pill-radius: 7px;
+    --bubbly-input-radius: 5px;
+    --bubbly-block-inner-corner: 5px;
+    /* a band's words clear of its cut left corner */
+    --bubbly-pill-pad-left: 6px;
+
+    :is(.bubbly-head, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body, .bubbly-input) {
+      corner-shape: bevel;
+    }
+
+    /* a tag's name:  bold, as a name a head defines */
+    .bubbly-tag-name {
+      font-weight: var(--bubbly-bold);
+      color: var(--bubbly-bold-ink);
+    }
+
+    /* the rail stops at the end tag's band, which starts at the rail's left edge */
+    .bubbly-block > .bubbly-gutter {
+      grid-row: 2;
+      border-bottom-left-radius: 0;
+    }
+    .bubbly-block > .bubbly-foot.bubbly-closer {
+      margin-left: 0;
+      border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) var(--bubbly-pill-radius);
+    }
   }
 
   /****** what only the editor has (epic `language` P50):  room injected in the text, the layer of shapes ******/

@@ -156,6 +156,10 @@
       "light": "2px",
       "dark": "2px"
     },
+    "--bubbly-input-radius": {
+      "light": "20px",
+      "dark": "20px"
+    },
     "--bubbly-input-opacity": {
       "light": "80%",
       "dark": "80%"
