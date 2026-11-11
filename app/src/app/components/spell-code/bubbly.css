@@ -567,7 +567,7 @@
   /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
   --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 2px);
   /* how much lower a pill's top sits than an even pill's (negative:  higher):  its words sit high in their line */
-  --bubbly-monaco-input-trim: -2px;
+  --bubbly-monaco-input-trim: -1px;
   /* how far every shape sits below where the code puts it:  the words sit that much higher in their bands and pills */
   --bubbly-monaco-shapes-drop: 1px;
   /* a band's height in the editor:  a little less than the page's, still centred on its line,
