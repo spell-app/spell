@@ -10,6 +10,7 @@ import {
   codeHover,
   hoverDetailFor,
   monacoOptionsFor,
+  showBubbly,
   type CodePopupChoices
 } from "spell/app/app/ui/codePopups"
 import type { monaco } from "spell/app/app/solid/monaco"
@@ -20,7 +21,7 @@ import "./CodeSettings.css"
 /****************
  * ### `CodeSettings`
  * The code editor's settings, for its popups:  hover info, suggestions, their details, parameter hints,
- * pinned lines and the compiler's words in the hover.
+ * pinned lines and the compiler's words in the hover;  and its look, bubbly or not (epic `language` P50).
  * - Changed in the code pane's "..." menu, "Settings…", which shows `<CodeSettingsPanel>` over the code.
  * - Each change applies at once to every Monaco editor on the page, and the browser remembers it
  *   (`spellEditor:codeHover` ...).
@@ -50,6 +51,7 @@ export class CodeSettings {
     setChoices(chosen)
     editorPrefs.set(PREFS[key], value)
     for (const each of monacoApi?.editor.getEditors() ?? []) CodeSettings.applyTo(each)
+    showBubbly(chosen.bubbly)
   }
 
   /**
@@ -59,6 +61,7 @@ export class CodeSettings {
   static follow(api: typeof monaco): void {
     if (monacoApi) return
     monacoApi = api
+    showBubbly(chosen.bubbly)
     for (const each of api.editor.getEditors()) CodeSettings.setUp(each)
     api.editor.onDidCreateEditor((each) => CodeSettings.setUp(each))
   }
@@ -84,7 +87,8 @@ const PREFS = {
   suggestDetails: "codeSuggestDetails",
   parameterHints: "codeParameterHints",
   pinnedLines: "codePinnedLines",
-  compilerWords: "codeCompilerWords"
+  compilerWords: "codeCompilerWords",
+  bubbly: "codeBubbly"
 } as const satisfies Record<keyof CodePopupChoices, string>
 
 editorPrefs
@@ -94,6 +98,7 @@ editorPrefs
   .declare(PREFS.parameterHints, { type: "choice", default: CODE_POPUP_DEFAULTS.parameterHints })
   .declare(PREFS.pinnedLines, { type: "choice", default: CODE_POPUP_DEFAULTS.pinnedLines })
   .declare(PREFS.compilerWords, { type: "choice", default: CODE_POPUP_DEFAULTS.compilerWords })
+  .declare(PREFS.bubbly, { type: "choice", default: CODE_POPUP_DEFAULTS.bubbly })
 
 /** What's chosen, as remembered:  read now, outside Solid's schedule (`choices()` is the reactive copy). */
 let chosen: CodePopupChoices = {
@@ -102,7 +107,8 @@ let chosen: CodePopupChoices = {
   suggestDetails: editorPrefs.get(PREFS.suggestDetails) as boolean,
   parameterHints: editorPrefs.get(PREFS.parameterHints) as boolean,
   pinnedLines: editorPrefs.get(PREFS.pinnedLines) as boolean,
-  compilerWords: editorPrefs.get(PREFS.compilerWords) as boolean
+  compilerWords: editorPrefs.get(PREFS.compilerWords) as boolean,
+  bubbly: editorPrefs.get(PREFS.bubbly) as boolean
 }
 const [choices, setChoices] = createSignal(chosen)
 const [isShowing, setShowing] = createSignal(false)
@@ -215,7 +221,8 @@ const TOGGLES = [
   { name: "suggestDetails", label: "codeSuggestDetails" },
   { name: "parameterHints", label: "codeParameterHints" },
   { name: "pinnedLines", label: "codePinnedLines" },
-  { name: "compilerWords", label: "codeCompilerWords" }
+  { name: "compilerWords", label: "codeCompilerWords" },
+  { name: "bubbly", label: "codeBubbly" }
 ] as const satisfies { name: keyof CodePopupChoices; label: AppTextKey }[]
 
 /** Each hover mode's label. */

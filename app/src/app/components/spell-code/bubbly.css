@@ -14,6 +14,7 @@
  *   - Monaco (epic `language` P50):  these same names, its own rules in the marked section at the end
  *   - VS Code (P51), which can't load CSS:  its `--bubbly-` values as a table, `bubbly.values.json`
  *     (`scripts/bubbly-values.ts`)
+ * - `bubbly-name`, the name a head defines (`"card"`), is Monaco's mark for what the page finds by its place
  * - Classes the drawing writes that no rule here styles, kept as hooks to tune:
  *   - `bubbly-level-<n>` on a block or pill:  how deep it sits, 0 at the top of a file;  a group counts as a level
  *   - `bubbly-group`, `bubbly-first-mention`, `bubbly-constant`, `bubbly-value`, `bubbly-starts-input`
@@ -166,6 +167,7 @@
    */
   .bubbly-reference,
   :is(.bubbly-head, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input,
+  .bubbly-input.bubbly-name,
   .bubbly-input.bubbly-choice {
     font-weight: var(--bubbly-bold);
     color: var(--bubbly-bold-ink);
@@ -502,3 +504,155 @@
 }
 
 /****** Monaco's own rules (epic `language` P50):  what only the editor needs, on these same names ******/
+/*
+ * Monaco (`SpellBubbly`) draws the look on the editor's text as it's typed, with this sheet's names:
+ * - the editor's box is a `.bubbly` (`bubbly-monaco`), so every variable and rule above reaches it
+ * - each piece of text is marked with its classes (`bubbly-piece` and the page's, `bubbly-reference` ...)
+ * - the shapes, a band, gutter, body and foot, a pill, a bracket, are elements with the page's classes, in a layer
+ *   behind the text (`bubbly-layer`):  the code places them;  how they look is the rules above
+ * - The rules here only fit those to an editor.  NEVER padding, margin or a width on the text itself:  the caret
+ *   would land off its letters.  Room is injected text of its own (`bubbly-room`).
+ */
+
+.bubbly.bubbly-monaco {
+  /* an editor's line, as tall as its font size times this:  room for a band, with a little between two */
+  --bubbly-monaco-line-height: 1.65;
+  /* the editor's font size over the drawing's (`--bubbly-font-size`):  set by the code, the shapes drawn at it */
+  --bubbly-monaco-scale: 1;
+  /* room either side of a pill's words, as the page's gap and padding */
+  --bubbly-monaco-input-room: calc((var(--bubbly-gap) + 8px) * var(--bubbly-monaco-scale));
+  /* room outside a quoted input's marks, for the curly ones drawn wider than the file's own */
+  --bubbly-monaco-quote-room: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
+  /* the room each foot takes under a body:  the body's padding under its last line, then the foot */
+  --bubbly-monaco-foot-room: calc(var(--bubbly-foot-height) + 3px);
+
+  /* the drawing's box is the editor's:  its paper behind the code, but no border, padding, margin or font of its own */
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  max-width: none;
+  overflow: hidden;
+  font: inherit;
+  line-height: inherit;
+
+  /* what a person typed:  its words alone, as text;  its white pill is a shape under it */
+  .view-line :is(.bubbly-input, .bubbly-quote-mark) {
+    display: inline;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    line-height: inherit;
+    background: none;
+    box-shadow: none;
+  }
+
+  /* the file's own `"`:  see-through, its curly mark drawn over it */
+  .view-line .bubbly-quote-mark {
+    color: transparent;
+  }
+  .view-line .bubbly-quote-mark::after {
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    top: 0;
+    line-height: inherit;
+    translate: -50% 0;
+    font-size: calc(var(--bubbly-quote-size) * var(--bubbly-monaco-scale));
+  }
+  .view-line .bubbly-quote-open::after {
+    content: "\201C";
+    top: -0.1em;
+  }
+  .view-line .bubbly-quote-close::after {
+    content: "\201D";
+    top: 0.25em;
+  }
+
+  /* room, injected beside what a person typed */
+  .bubbly-room {
+    display: inline-block;
+  }
+  .bubbly-room-input {
+    width: var(--bubbly-monaco-input-room);
+  }
+  .bubbly-room-quote {
+    width: var(--bubbly-monaco-quote-room);
+  }
+
+  /****** the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size ******/
+  .bubbly-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .bubbly-shapes {
+    position: absolute;
+    inset: 0 auto auto 0;
+    transform-origin: 0 0;
+    transform: translate(var(--bubbly-monaco-x, 0), var(--bubbly-monaco-y, 0)) scale(var(--bubbly-monaco-scale));
+  }
+  /* a declaration:  its hue, and its shapes, placed by the code */
+  .bubbly-layer .bubbly-block {
+    position: absolute;
+    inset: 0 auto auto 0;
+    display: block;
+    width: 0;
+    height: 0;
+    margin: 0;
+  }
+  .bubbly-layer
+    :is(.bubbly-head, .bubbly-pill, .bubbly-gutter, .bubbly-body, .bubbly-foot, .bubbly-input, .bubbly-bracket) {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  /* a band and a pill sit on their line's middle */
+  .bubbly-layer :is(.bubbly-head, .bubbly-pill, .bubbly-input) {
+    translate: 0 -50%;
+  }
+  .bubbly-layer .bubbly-input {
+    height: var(--bubbly-input-height);
+  }
+  .bubbly-layer .bubbly-block > .bubbly-gutter {
+    width: calc(var(--bubbly-gutter) + var(--bubbly-block-inner-corner));
+  }
+  .bubbly-layer .bubbly-bracket {
+    width: 0;
+    translate: calc(-1 * var(--bubbly-bracket-width) / 2) 0;
+  }
+
+  /* the code's own layers over the shapes:  the editor sits above the layer, see-through */
+  .monaco-editor {
+    position: relative;
+  }
+}
+
+/*
+ * each piece of text in the look's ink, over its token's colour (`.mtk5`), as the page draws it
+ * - as strong as a token's colour and an element's, no stronger, so a piece's own rule above still wins
+ */
+:where(.bubbly-monaco .view-line) span.bubbly-piece {
+  color: var(--bubbly-ink);
+}
+
+/* brackets in the ink too, not Monaco's colour for each pair:  the page draws them as words */
+.bubbly-monaco .view-line span[class*="bracket-highlighting-"] {
+  color: var(--bubbly-ink);
+}
+
+/* no indent guides:  a control line's bracket, and each body's gutter, show what's under what */
+.bubbly-monaco .view-overlays .core-guide {
+  display: none;
+}
+
+/* the probe the code measures the sheet's sizes with */
+.bubbly-monaco-probe {
+  position: absolute;
+  visibility: hidden;
+  height: 0;
+}

@@ -3,7 +3,8 @@ import type { monaco } from "spell/app/app/ui/monaco"
 
 /**
  * The code editor's popups:  which of Monaco's show by themselves, and when (Owen, epic `debut`:
- * "vscode popup with details about what you are typing is annoying when I'm trying to look at code").
+ * "vscode popup with details about what you are typing is annoying when I'm trying to look at code");
+ * and its look:  Spell drawn bubbly, or not (epic `language` P50).
  * - The choices, their defaults, and what each one means to Monaco:  nothing else.
  * - By default nothing shows by itself as you type (Owen, epic `editor` P4).
  * - Every Monaco editor starts on the defaults (`SpellMonaco.OPTIONS`), `<spell-editor>`'s too.
@@ -35,16 +36,22 @@ export type CodePopupChoices = {
   pinnedLines: boolean
   /** Show the compiler's words in the hover:  what it matches, what it compiles to, the compiled code? */
   compilerWords: boolean
+  /** Draw Spell in the bubbly look as it's typed (`SpellBubbly`)?  On unless someone turns it off (Owen, Q50). */
+  bubbly: boolean
 }
 
-/** The choices until someone changes them:  hover only with ⌥ held, suggestions only on Ctrl+Space, the rest off. */
+/**
+ * The choices until someone changes them:  hover only with ⌥ held, suggestions only on Ctrl+Space, the rest off,
+ * but the bubbly look, on.
+ */
 export const CODE_POPUP_DEFAULTS: CodePopupChoices = {
   hover: "withAlt",
   suggest: "onCtrlSpace",
   suggestDetails: false,
   parameterHints: false,
   pinnedLines: false,
-  compilerWords: false
+  compilerWords: false,
+  bubbly: true
 }
 
 /** Monaco's `hover.enabled` for each hover mode. */
@@ -88,6 +95,23 @@ export function hoverDetailFor(choices: CodePopupChoices): LSP.HoverDetail {
  * - An object, since a hover provider is registered once and has no editor to ask.
  */
 export const codeHover: { detail: LSP.HoverDetail } = { detail: hoverDetailFor(CODE_POPUP_DEFAULTS) }
+
+/**
+ * Is the code drawn in the bubbly look now, one for the page;  and who hears it change.
+ * - `SpellBubbly` reads it for each editor, and follows it;  `CodeSettings` changes it (`showBubbly()`).
+ * - An object, as `codeHover` is:  Monaco is a lazy chunk, and this file is read before it loads.
+ */
+export const codeLook: { isBubbly: boolean; followers: Set<() => void> } = {
+  isBubbly: CODE_POPUP_DEFAULTS.bubbly,
+  followers: new Set()
+}
+
+/** Draw the code bubbly, or not, in every editor on the page:  tells `codeLook`'s followers when it changes. */
+export function showBubbly(isBubbly: boolean): void {
+  if (codeLook.isBubbly === isBubbly) return
+  codeLook.isBubbly = isBubbly
+  for (const follower of codeLook.followers) follower()
+}
 
 /** The class on an editor's container that hides the docs pane beside its suggestions. */
 export const SUGGEST_DETAILS_HIDDEN = "suggest-details-hidden"

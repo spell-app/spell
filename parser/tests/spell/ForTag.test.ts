@@ -153,6 +153,62 @@ describe("<for>", () => {
   })
 })
 
+describe("a <for> on a drawing's own line (epic `language` I73)", () => {
+  beforeAll(registerTestComponentPack)
+
+  /** A shelf whose drawing is `lines`, each on a line of its own. */
+  function drawn(...lines: string[]) {
+    const contents = [
+      'a "film" is a thing:',
+      '\tits "title" is text',
+      "\tto draw it: <text>{its title}</text>",
+      'a "shelf" is a view:',
+      '\tits "films" is a list of films',
+      "\tto draw it:",
+      ...lines.map((line) => `\t\t${line}`)
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/Shelf.spell", contents }]).files
+    return { code: file!.compiled, errors: file!.errors }
+  }
+
+  test("alone, with a body:  the drawing is the loop", () => {
+    const { code, errors } = drawn("<for film in its films>", "\t<text>{its title}</text>", "</for>")
+    expect(errors).toEqual([])
+    expect(code).toContain('return core.drawEach(this.films, (film) => h("ui-text", () => film.title))')
+  })
+
+  test("alone, drawing each itself", () => {
+    const { code, errors } = drawn("<for its films />")
+    expect(errors).toEqual([])
+    expect(code).toContain("return core.drawEach(this.films, (film) => core.drawThing(film))")
+  })
+
+  test("with riders:  a read, as `for its films` lines are", () => {
+    const { code, errors } = drawn('<for its films loading="Scanning..." />')
+    expect(errors).toEqual([])
+    expect(code).toContain("return core.drawRead(")
+    expect(code).toContain("Scanning...")
+  })
+
+  test("returned:  the loop", () => {
+    const { code, errors } = drawn("return <for its films />")
+    expect(errors).toEqual([])
+    expect(code).toContain("return core.drawEach(this.films, (film) => core.drawThing(film))")
+  })
+
+  test("in an if's branch:  that branch's loop", () => {
+    const { code, errors } = drawn("if its films is empty", "\t<text>none</text>", "otherwise", "\t<for its films />")
+    expect(errors).toEqual([])
+    expect(code).toContain("else return core.drawEach(this.films, (film) => core.drawThing(film))")
+  })
+
+  test("after a line that draws nothing", () => {
+    const { code, errors } = drawn("set its films to its films", "<for its films />")
+    expect(errors).toEqual([])
+    expect(code).toContain("return core.drawEach(this.films, (film) => core.drawThing(film))")
+  })
+})
+
 describe("<for>'s attributes and slots read as the drawing does", () => {
   beforeAll(registerTestComponentPack)
 

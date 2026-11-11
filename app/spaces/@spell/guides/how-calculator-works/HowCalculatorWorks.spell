@@ -8,12 +8,12 @@
 // Open Calculator, in the Examples, to see the whole thing with every key.
 
 ## What it keeps
-// Each `<property>` is one thing every adding machine keeps.
-// - `type="number"` makes the total a number, starting at 0.
+// Each `its "..." is` line is one thing every adding machine keeps.
+// - `is a number` makes the total a number, starting at 0.
 // - The number being typed is text, so each key can add a digit on the end.
 
 ## What its keys do
-// Each `<action>` is what one key does.
+// Each `to ...` is an action:  what one key does.
 // - A digit key's action takes the digit:  `press (digit as text)`, so `press "5"` puts a 5 on the end.
 // - "+" between two pieces of text joins them:  "1" + "2" is "12".
 // - `as a number` turns the text "12" into the number 12, so it can be added up.

@@ -2,7 +2,7 @@ import { createMemo } from "solid-js"
 
 import type { SP } from "spell/parser/spell"
 
-import { monaco, SpellMonaco } from "spell/app/app/ui/monaco"
+import { monaco, SpellBubbly, SpellMonaco } from "spell/app/app/ui/monaco"
 import { MonacoEditor } from "./MonacoEditor"
 
 import "./CodeSlice.css"
@@ -23,6 +23,8 @@ import "./CodeSlice.css"
  *   sits past the field's left edge, and a wrapped line starts under its own first word (`showWithoutIndent()`).
  * - `focus`:  puts the cursor at the end of its lines, once made, e.g. for a handler just added.
  * - The one place a part of a file is shown alone:  the notebook's cells could use it too.
+ * - Never drawn bubbly (`SpellBubbly.leaveOut()`):  its few lines are laid out as a whole file's would be,
+ *   so a declaration would be cut off at its edges.
  * - HACK:  hides the other lines with Monaco's `setHiddenAreas()`, which its folding uses, but its typings leave out.
  ****************/
 export function CodeSlice(props: CodeSliceProps) {
@@ -37,6 +39,7 @@ export function CodeSlice(props: CodeSliceProps) {
 
 /** Show only `props`' lines in `editor`, as they move with the file, and keep `element` as tall as they are. */
 function showOnly(editor: monaco.editor.IStandaloneCodeEditor, element: HTMLElement, props: CodeSliceProps): void {
+  SpellBubbly.leaveOut(editor)
   const model = editor.getModel()!
   const lines = editor.createDecorationsCollection([
     {

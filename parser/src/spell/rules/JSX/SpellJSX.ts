@@ -382,15 +382,16 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
-   * What a `<for>` inside an element draws, as one of its children:  `core.drawEach(...)`, or `core.drawRead(...)`
-   * with its riders -- gathered as a drawing's lines are (`DrawnLines`), in a `{...}` so it follows what it reads.
+   * What a `<for>` draws:  `core.drawEach(...)`, or `core.drawRead(...)` with its riders --
+   * gathered as a drawing's lines are (`DrawnLines`).
+   * - The value itself, so a `<for>` on a drawing's own line is the loop, as `for` lines are (epic `language` I73).
+   * - Inside an element, `childAST()` puts it in a `{...}`, so it follows what it reads.
    */
   private static loopAST(match: P.MatchFor<SpellJSX>, loop: P.Match): P.ASTExpression {
     const statements = (loop.AST as P.ASTStatementGroup | undefined)?.statements ?? []
     const gathered = DrawnLines.gather(statements as never) as P.ASTNode[]
     const drawing = gathered.filter((line): line is P.ASTReturnStatement => line instanceof P.ASTReturnStatement).at(-1)
-    const value = drawing?.value ?? new P.ASTNothingLiteral(match)
-    return new P.ASTJSXExpression(match, { expression: value as P.ASTExpression })
+    return (drawing?.value as P.ASTExpression | undefined) ?? new P.ASTNothingLiteral(match)
   }
 
   /** The packs `scope`'s project draws with:  its project file's `packs`, else `SP.ComponentPacks.DEFAULT`. */
@@ -428,13 +429,22 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         asts.push(...SpellJSX.hiddenUnless(child, shown, this.childASTs(child as P.MatchFor<this>)))
         continue
       }
-      const ast = P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST)
-      // `<film/>`, a loop's item beside other markup:  `draw the film`, in braces (epic `atmosphere` T48)
-      if (ast && child?.is(SpellJSX) && child.data.loopItem)
-        asts.push(new P.ASTJSXExpression(child, { expression: ast as unknown as P.ASTExpression }))
-      else if (ast) asts.push(ast)
+      const ast = SpellJSX.childAST(child)
+      if (ast) asts.push(ast)
     }
     return asts
+  }
+
+  /**
+   * `child`'s AST, as one of an element's children.
+   * - A value that isn't markup goes in braces:  a `<for>`'s loop (I19, I73), and `<film/>`, a loop's item beside
+   *   other markup, `draw the film` (epic `atmosphere` T48).
+   */
+  static childAST(child: P.Match | undefined): P.ASTJSXElementProps["children"][number] | undefined {
+    const ast = P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST)
+    if (ast && child?.is(SpellJSX) && (child.data.loopItem || child.data.loop))
+      return new P.ASTJSXExpression(child, { expression: ast as unknown as P.ASTExpression })
+    return ast
   }
 
   ////////////////

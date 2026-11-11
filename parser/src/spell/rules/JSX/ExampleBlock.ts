@@ -55,10 +55,7 @@ export class ExampleBlock extends P.TokenType<never, JSXMatchData> {
   /** `h("spell-example", { name }, ...children)`, drawn apart:  `core.drawPart(this, () => ...)`. */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
     const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST)).filter(Boolean)
-    const children =
-      match.data.children
-        ?.map((child) => P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST))
-        .filter(Boolean) ?? []
+    const children = match.data.children?.flatMap((child) => SpellJSX.childAST(child) ?? []) ?? []
     const error = ExampleBlock.firstErrorIn(match)
     return new P.ASTJSXElement(match, {
       tagName: EXAMPLE_ELEMENT,

@@ -9,8 +9,8 @@
 // Three down, or corner to corner, doesn't win yet.  Adding those is your move, at the end.
 
 ## A square:  empty, or holding an X or an O
-// A `<thing>` is a kind of thing the program keeps:  here, one square of the board.
-// Its `<alias>` is a phrase you can say of it:  `the square is empty`.
+// A `thing` is a kind of thing the program keeps:  here, one square of the board.
+// `it "is empty" if ...` is a phrase you can say of it:  `the square is empty`.
 
 a "square" is a thing
 	its "mark" is text

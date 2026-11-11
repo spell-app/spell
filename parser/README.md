@@ -524,14 +524,16 @@ The language's own commands are this folder's (above):  the command line finds t
 
 A project can be written in Spanish, and compile to the same targets:
 the second box on the left of the picture above.
-Each file's name says its language, `Carta.es.spell`, and it reads the way an English one does, its tags too:
+Each file's name says its language, `Carta.es.spell`, and it reads the way an English one does:
 
-```html
-<vista "carta" plantilla="vista reversible" arrastrable>
-	<grupo "rango" descripción="El as es bajo:  as = 1 ... rey = 13"/>
-	<propiedad "rango" uno-de="as, 2 ... 10, jota, dama, rey" frase="es un (rango)"/>
-	<propiedad "valor">la posición de su rango</>
-	<frase "es una figura">si su rango es jota, dama o rey</>
+```spell
+una "carta" es una vista reversible arrastrable
+	grupo "Rango"
+		// El as es bajo:  as = 1 ... rey = 13
+	su "rango" es uno de as, 2 ... 10, jota, dama, rey
+		"es un (rango)"
+	su "valor" es la posición de su rango
+	"es una figura" si su rango es jota, dama o rey
 ```
 
 _The top of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),

@@ -331,6 +331,25 @@ describe("SpellLanguageService", () => {
       })
     })
 
+    test("a head line's own words are keywords:  with title, icon, shortcut, undoable, starting at (epic `language` T105)", async () => {
+      const added = [
+        '\t- to "flip it" with title "Flip", icon "card", shortcut "meta+F", undoable:',
+        "\t\tset its rank to king",
+        '\t- its "flips" is a number starting at 0'
+      ]
+      await withCardText(`${cardText.trimEnd()}\n${added.join("\n")}\n`, () => {
+        const text = card.parseText
+        const from = text.indexOf(added[0]!)
+        const kinds = service
+          .highlightSpans(card)
+          .filter((span) => span.start >= from)
+          .map((span) => `${text.slice(span.start, span.end)}:${span.kind}`)
+        for (const word of ["with", "title", "icon", "shortcut", "undoable", "starting", "at"])
+          expect(kinds, word).toContain(`${word}:keyword`)
+        expect(errorsIn(service, card)).toEqual([])
+      })
+    })
+
     test("markdown in a comment:  bold / italic / link modifiers, code spans as strings", async () => {
       //                     0123456789012345678901234567890
       await withCardText(`// a **b** *c* \`d\` [e](f)\n${cardText}`, () => {

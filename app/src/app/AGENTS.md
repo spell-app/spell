@@ -133,6 +133,13 @@ and in the app's build folder, `app/` at the app folder's root.
 - [The app's Monaco plumbing](ui/monaco/) (no UI).
   - Its language features call the SAME `LSP.SpellLanguageService`, in-process.
     So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
+  - It draws Spell in the bubbly look as it's typed (epic `language` P50):  [SpellBubbly](ui/monaco/SpellBubbly.ts),
+    from the parser's `SP.BubblyLayout`, marked by [BubblyMarks](ui/monaco/BubblyMarks.ts), styled by
+    [bubbly.css](components/spell-code/bubbly.css)'s marked Monaco section, the look's one sheet.
+    - The text stays ordinary text:  its pieces are decorations in the sheet's classes, room round a pill is injected
+      text, the shapes a layer behind the editor, the room under a declaration a view zone.
+    - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, `codePopups.ts`).
+    - Not in a `<CodeSlice>`, a diff, or a page file.
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:

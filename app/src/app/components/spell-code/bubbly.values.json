@@ -159,6 +159,26 @@
     "--bubbly-depth": {
       "light": "1",
       "dark": "1"
+    },
+    "--bubbly-monaco-line-height": {
+      "light": "1.65",
+      "dark": "1.65"
+    },
+    "--bubbly-monaco-scale": {
+      "light": "1",
+      "dark": "1"
+    },
+    "--bubbly-monaco-input-room": {
+      "light": "calc((2px + 8px) * 1)",
+      "dark": "calc((2px + 8px) * 1)"
+    },
+    "--bubbly-monaco-quote-room": {
+      "light": "calc(15px / 2 * 1)",
+      "dark": "calc(15px / 2 * 1)"
+    },
+    "--bubbly-monaco-foot-room": {
+      "light": "calc(6px + 3px)",
+      "dark": "calc(6px + 3px)"
     }
   },
   "parts": {

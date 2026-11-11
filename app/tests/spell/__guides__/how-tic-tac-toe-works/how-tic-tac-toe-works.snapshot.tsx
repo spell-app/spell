@@ -18,8 +18,8 @@ core.heading("A square:  empty, or holding an X or an O")
 ///////////////////////////////////////////////
 // ## A square:  empty, or holding an X or an O
 ///////////////////////////////////////////////
-// A `<thing>` is a kind of thing the program keeps:  here, one square of the board.
-// Its `<alias>` is a phrase you can say of it:  `the square is empty`.
+// A `thing` is a kind of thing the program keeps:  here, one square of the board.
+// `it "is empty" if ...` is a phrase you can say of it:  `the square is empty`.
 
 export class Square extends Thing {
   // - its "mark" is text

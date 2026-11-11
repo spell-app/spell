@@ -76,10 +76,17 @@ describe("a read of a place, right in a drawing", () => {
     // in plain Spell a `<for>` is read inside an element
     const reviewsOfFilm = "every review where its film title is the title of film"
 
-    test("the loop's function stays a plain one", () => {
+    test('the loop\'s function stays a plain one;  in an element, the loop is a child value with its own "…"', () => {
       const { code } = compiled(`<segment><for film in its films><table rows={${reviewsOfFilm}}/></for></segment>`)
       expect(code).toContain("core.drawEach(this.films, (film) => ")
-      // CONSIDER:  `static drawsWaiting = true`, as a loop on a line of its own had (epic `language` P47 I)
+      expect(code).toContain("() => core.whileWaiting(() => core.drawEach(this.films")
+      expect(code).not.toContain("static drawsWaiting")
+    })
+
+    test("on a line of its own, the whole drawing is held until its answer, as `for` lines are (epic `language` I73)", () => {
+      const { code } = compiled(`<for film in its films><table rows={${reviewsOfFilm}}/></for>`)
+      expect(code).toContain("return core.drawEach(this.films, (film) => ")
+      expect(code).toContain("static drawsWaiting = true")
     })
 
     test("a read naming the loop's item is a value per item", () => {
