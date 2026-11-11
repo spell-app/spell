@@ -50,7 +50,7 @@ export class SpellMonaco {
    */
   static OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
     automaticLayout: true,
-    tabSize: 5,
+    tabSize: 2,
     insertSpaces: false,
     detectIndentation: false,
     fontFamily: "Lato, Arial, sans-serif",
