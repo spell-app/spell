@@ -211,6 +211,7 @@ export class SpellBubbly {
       ranges,
       pushes: this.pushesByLine(laidOut, ranges),
       lefts: new Map(),
+      groupMembers: new Set(),
       footDrops: new Map(),
       first: 0,
       last: 0,
@@ -253,6 +254,7 @@ export class SpellBubbly {
         parentLeft === undefined ? 0 : left - parentLeft - measures.gutter
       )
       const insideFloor = shape.isGroup && hasBody ? left + measures.gutter + railGap : floor
+      if (shape.isGroup) for (const member of shape.inside) if (member.kind === "block") view.groupMembers.add(member)
       this.placeBands(shape.inside, view, insideFloor, hasBody ? left : parentLeft)
     }
   }
@@ -283,11 +285,14 @@ export class SpellBubbly {
 
   /**
    * Where `shape`'s rail starts:  a little right of its band's round left end (`--bubbly-monaco-rail-inset`),
-   * closer to its body's words;  a group's right at it, as its members' bands are spaced from it.
+   * closer to its body's words.
+   * - Right at it for a group, as its members' bands are spaced from it;
+   *   and for a group's member, whose band was pushed out already (Owen, 2026-11-11:  `when creating it` in a group
+   *   had its rail float off its band)
    */
   private railX(shape: BubblyBlockShape, view: View): number {
     const left = view.lefts.get(shape)!
-    return shape.isGroup ? left : left + view.measures.railInset
+    return shape.isGroup || view.groupMembers.has(shape) ? left : left + view.measures.railInset
   }
 
   /** The elements of `shapes`, those inside each in its own. */
@@ -559,6 +564,8 @@ type View = {
   pushes: Map<number, number>
   /** where each block's band starts:  `placeBands()` */
   lefts: Map<BubblyBlockShape, number>
+  /** the blocks that are a group's members:  their rails start at their bands' ends (`railX()`) */
+  groupMembers: Set<BubblyBlockShape>
   /** how much lower each block's foot goes than one right under its last line, once worked out:  `footDrop()` */
   footDrops: Map<BubblyBlockShape, number>
   /** the first and last lines shown */
