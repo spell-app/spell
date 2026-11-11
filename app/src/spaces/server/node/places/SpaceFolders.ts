@@ -185,7 +185,7 @@ const CONNECTED_MS = 2 * 60_000
  *   (`PersonInbox`, one per inbox, `inboxAt()`):  a message added to her own inbox's `messages` is sent, a copy written
  *   into each inbox it's to, through the ONE retry queue (Q19 A);  she, the Board and the Admins read it.
  *   - `@rs/__inbox`, with no person, is whoever's asking's own:  one program reads each person's (the built-in
- *     `@spell/examples/Inbox`).
+ *     `@spell/library/Inbox`).
  * - AN ORG'S ROLES (epic `atmosphere` P25):  `@rs/__admin/roles` is no folder but the org's roles as a place
  *   (`OrgRolesPlace`), what its Admin page reads and writes;  each write one change through `OrgRoles`, its rules held.
  * - LIVE ROOMS (epic `atmosphere` T38):  a space's own folder, one collection at a time, shared live

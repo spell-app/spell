@@ -25,21 +25,19 @@ import "./ProjectChooser.css"
 
 /****************
  * ### `<ProjectChooser>`
- * The landing page:  a hero line over cards for the examples, the guides and your own projects.
+ * The landing page:  a hero line over cards for the examples, the library's apps, the guides and your own projects.
  * - Laid out as the facelift boards' home (epic `debut` P4):  a hero with the first example a click away,
  *   then a grid of cards per group, each card a project's title and the first phrase of its description.
  * - No empty columns:  a group with nothing in it says so in one quiet card;  "create" buttons sit in their
  *   group's header.
- * - In dev, also the editor's own pieces (`@spell/editor`, epic `editor` P22) and the test fixtures (`@spell/test`) -- open one to look at it, edit it, then
- *   `spell content check --bless`.  No "create" for those:  copy a project into `spaces/@spell/test/`.
+ * - In dev, also the editor's own pieces (`@spell/editor`, epic `editor` P22).
+ * - Not the test fixtures (`@spell/test`, epic `mockup` P18):  they're test data, opened from the project menu.
  * - A guide opens in the editor, as an example does:  its prose is the comments in its spell file (epic `debut` Q18).
  * - Every route the others don't take (`routes.tsx`).
  * - Its look follows the editor's theme:  the hero and cards are tokens (`ProjectChooser.css`).
  ****************/
 export function ProjectChooser() {
-  const { projects, examples, guides, fixtures, editorPieces } = SPACES.SpellProjectRoot
-  // a dev-only root is there in every build -- just not listed outside dev
-  const showFixtures = !!import.meta.env?.DEV || !fixtures.devOnly
+  const { projects, examples, library, guides, editorPieces } = SPACES.SpellProjectRoot
   const exampleList = trackProjectRoot(() => examples)
   const guideList = trackProjectRoot(() => guides)
   // the browser's tab:  plain "Spell" here, a project's name on the editor's pages (`<AppMark>`)
@@ -59,6 +57,7 @@ export function ProjectChooser() {
           line={appTexts.text("homeExamplesLine")}
           create={<Actions.createExample button appearance="basic" size="small" />}
         />
+        <ProjectCards id="library" projectRoot={library} line={appTexts.text("homeLibraryLine")} hideWhenNone />
         <ProjectCards
           id="guides"
           projectRoot={guides}
@@ -72,9 +71,7 @@ export function ProjectChooser() {
           line={appTexts.text("homeProjectsLine")}
           create={<Actions.createProject button appearance="basic" size="small" />}
         />
-        <Show when={showFixtures}>
-          <ProjectCards id="fixtures" projectRoot={fixtures} line={appTexts.text("homeFixturesLine")} small />
-        </Show>
+        {/* a dev-only root is there in every build -- just not listed outside dev */}
         <Show when={!!import.meta.env?.DEV || !editorPieces.devOnly}>
           <ProjectCards id="editor" projectRoot={editorPieces} line={appTexts.text("homeEditorLine")} small />
         </Show>
@@ -204,9 +201,13 @@ function StartCard(props: { name: string; line: string; start: () => void }) {
 /****************
  * ### `<ProjectCards>`
  * One group of the landing page:  its title and line, its "create" button, then a card per project.
- * - A card:  a coloured tile with the project's initial, its title, and the first phrase of its description.
+ * - A card:  a picture of its app running (its `__thumbnail.png`, epic `mockup` P18), else a coloured tile with the
+ *   project's initial;  then its title, and the first phrase of its description.
+ *   - In a row with any pictures, each card's picture (or tile) is a banner across its top.
  * - Clicking one opens it in the editor (`useRunner`:  in the runner).
  * - Nothing in it:  one quiet card saying so (`empty`, else "No examples yet!").
+ * - Its projects with a category (the examples:  "First steps", "Games" ...) come under a quiet line per category,
+ *   in `SPACES.EXAMPLE_CATEGORIES`' order (epic `mockup` P18);  those with none after them.
  * - Projects written in another language (Solitario, ListaDeTareas) come last, under a quiet line naming it,
  *   "En Español" (Owen, 2026-10-27):  each project's language is its files' (`SP.ProjectListEntry`).
  ****************/
@@ -215,6 +216,8 @@ export function ProjectCards(props: ProjectCardsProps) {
   // the page of a group's sites lists every site;  the home page's rows skip a project that says `"onHome": false`
   const listed = () =>
     root().projects.filter((project) => (props.sitesOnly ? project.isSite : project.onHome !== false))
+  // a row with pictures of its apps shows each big, across its card's top;  one without one, its letter as big
+  const banner = () => listed().some((project) => project.hasThumbnail)
   return (
     <Show when={!props.hideWhenNone || listed().length > 0}>
       <section id={props.id} class={["ProjectCards", { small: !!props.small }]}>
@@ -234,19 +237,22 @@ export function ProjectCards(props: ProjectCardsProps) {
             }
           >
             <For
-              each={listed().filter((project) => !project.language)}
+              each={sectionsOf(listed())}
               fallback={<EmptyCard>{props.empty ?? appTexts.text("nothingInGroup", root().words)}</EmptyCard>}
             >
-              {(project) => <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />}
-            </For>
-            {/* those written in another language:  after the rest, under a quiet line naming it */}
-            <For each={languagesIn(listed())}>
-              {(language) => (
+              {(section) => (
                 <>
-                  <h3 class="language">{languageTitle(language)}</h3>
-                  <For each={listed().filter((project) => project.language === language)}>
+                  <Show when={section.title}>
+                    <h3 class="subhead">{section.title}</h3>
+                  </Show>
+                  <For each={section.projects}>
                     {(project) => (
-                      <ProjectCard project={project} useRunner={props.useRunner} sitesOnly={props.sitesOnly} />
+                      <ProjectCard
+                        project={project}
+                        useRunner={props.useRunner}
+                        sitesOnly={props.sitesOnly}
+                        banner={banner()}
+                      />
                     )}
                   </For>
                 </>
@@ -264,6 +270,7 @@ function ProjectCard(props: {
   project: ProjectRootState["projects"][number]
   useRunner?: boolean
   sitesOnly?: boolean
+  banner?: boolean
 }) {
   const project = () => props.project
   return (
@@ -271,6 +278,10 @@ function ProjectCard(props: {
       title={project().name}
       line={firstPhrase(project().description)}
       hueFrom={project().path}
+      banner={props.banner}
+      picture={
+        project().hasThumbnail ? SP.SpellUrls.fileUrl(`${project().path}/${SPACES.PROJECT_THUMBNAIL}`) : undefined
+      }
       href={props.sitesOnly ? siteEditorUrlFor(project().path) : project().path}
       onClick={(event) => {
         event.preventDefault()
@@ -279,6 +290,38 @@ function ProjectCard(props: {
       }}
     />
   )
+}
+
+/** One run of a group's cards, under its quiet line:  a category's, or a language's. */
+type CardSection = {
+  /** Its line:  "Games", "En Español";  none for those with no category. */
+  title?: string
+  /** Its projects, in the group's order. */
+  projects: ProjectRootState["projects"]
+}
+
+/**
+ * `projects` in the runs the home page shows them in:
+ * - those in English with a category, a run per category, in `SPACES.EXAMPLE_CATEGORIES`' order
+ * - then those in English with none, with no line
+ * - then those in another language, a run per language
+ * - Runs with nothing in them are left out.
+ */
+function sectionsOf(projects: ProjectRootState["projects"]): CardSection[] {
+  const english = projects.filter((project) => !project.language)
+  const categories: readonly string[] = SPACES.EXAMPLE_CATEGORIES
+  const sections: CardSection[] = [
+    ...SPACES.EXAMPLE_CATEGORIES.map((category) => ({
+      title: appTexts.text(`category.${category}`),
+      projects: english.filter((project) => project.category === category)
+    })),
+    { projects: english.filter((project) => !categories.includes(project.category ?? "")) },
+    ...languagesIn(projects).map((language) => ({
+      title: languageTitle(language),
+      projects: projects.filter((project) => project.language === language)
+    }))
+  ]
+  return sections.filter((section) => section.projects.length > 0)
 }
 
 /** The languages other than English that `projects` are written in, in the order they come. */

@@ -20,7 +20,7 @@ import { BY_SPELL, type OrgRoles, type RoleWhy } from "./OrgRoles"
  *   (P33 asks the same).
  * - The PROGRAM is the org's to change (`setProgram()`, the Board and the Admins), kept in its Admin space beside the
  *   events, `@rs/__admin/events.json5`;  every move is logged in the org's log.
- * - Node only;  knows nothing of pages:  its page is the built-in program `@spell/examples/OrgEvents`, which reads it
+ * - Node only;  knows nothing of pages:  its page is the built-in program `@spell/library/OrgEvents`, which reads it
  *   through `OrgRolesPlace` at `@rs/__admin/events`.
  ****************/
 export class OrgEvents {

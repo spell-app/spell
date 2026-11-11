@@ -66,6 +66,32 @@
     object-fit: cover;
     object-position: top;
   }
+  /* a banner:  its picture (or tile) across its top, the text under it */
+  &.banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+
+    .tile,
+    .picture {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      border-radius: 0;
+      border-bottom: 1px solid var(--spell-pane-border-color);
+    }
+    .tile {
+      font-size: 40px;
+    }
+    .picture {
+      object-position: top center;
+    }
+    .text {
+      padding: 12px 14px 14px;
+    }
+  }
   .text {
     display: flex;
     flex-direction: column;

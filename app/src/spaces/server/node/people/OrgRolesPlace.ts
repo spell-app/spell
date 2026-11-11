@@ -105,7 +105,7 @@ const TERM_ID_SEPARATOR = "~"
  * - Who READS it:  anyone in the org, and its Board and Admins;  anyone else reads none of it (`mayRead()`).
  * - Its refusals are `PlaceError`s:  `OrgRoles`' 403 a `"refused"`, `"role"`;  404 `"not found"`;  any other,
  *   `"refused"`, `"place"`, each with `OrgRoles`' own words.
- * - Node only;  knows nothing of pages:  the Admin page is the built-in program `@spell/examples/OrgAdmin`.
+ * - Node only;  knows nothing of pages:  the Admin page is the built-in program `@spell/library/OrgAdmin`.
  ****************/
 export class OrgRolesPlace implements Place {
   /** Its org's id:  `rs`. */

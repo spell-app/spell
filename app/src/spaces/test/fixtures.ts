@@ -21,6 +21,7 @@ import "spell/app/spaces/models/spellUIPack"
  *     never edited to follow anything;  each by its bare name, e.g. `fizzbuzz`
  *   - every built-in EXAMPLE, `@spell/examples` (`EXAMPLE_PROJECTS`):  tested in place, as they are;
  *     their snapshots are tests' own, in `EXAMPLE_SNAPSHOTS_DIR`
+ *     - and the library's apps, `@spell/library` (the Org apps, epic `mockup` P18), the same way
  *   - every built-in Spell guide, `@spell/guides` (`GUIDE_PROJECTS`):  the same, their snapshots in `GUIDE_SNAPSHOTS_DIR`
  * - A test project's NAME (`TestProjectName`) says its group:
  *   `fizzbuzz` is the fixture, `@spell/examples/fizzbuzz` the example of the same name.
@@ -54,11 +55,14 @@ export const FIXTURES_GROUP = "@spell/test"
 /** The examples' group, `@spell/examples`:  where `EXAMPLE_PROJECTS` are read from. */
 export const EXAMPLES_GROUP = "@spell/examples"
 
+/** The library's group, `@spell/library`:  its apps are tested with `EXAMPLE_PROJECTS`. */
+export const LIBRARY_GROUP = "@spell/library"
+
 /** The Spell guides' group, `@spell/guides`:  where `GUIDE_PROJECTS` are read from. */
 export const GUIDES_GROUP = "@spell/guides"
 
-/** Every group a test project is in, or one imports:  the fixtures', the examples', the Spell guides'. */
-const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP]
+/** Every group a test project is in, or one imports:  the fixtures', the examples', the library's, the Spell guides'. */
+const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, LIBRARY_GROUP, GUIDES_GROUP]
 
 /**
  * Every built-in example, by its name with its group:  `@spell/examples/Solitaire` (epic `spanish` P21).
@@ -68,8 +72,13 @@ const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP]
  *   them, so a new example is tested as soon as its folder is there.
  *   - A change to one changes its snapshots:  `spell content check --bless`, then read the diff.
  * - Their snapshots are tests', never beside the example:  `EXAMPLE_SNAPSHOTS_DIR`.
+ * - With the library's apps, `@spell/library/OrgAdmin` ...:  each of its projects on the home page.
+ *   - Its libraries with no app of their own say `"onHome": false` (People, Games):  others' tests import them.
  */
-export const EXAMPLE_PROJECTS = new Set(projectsIn(EXAMPLES_GROUP))
+export const EXAMPLE_PROJECTS = new Set([
+  ...projectsIn(EXAMPLES_GROUP),
+  ...projectsIn(LIBRARY_GROUP).filter(isOnTheHomePage)
+])
 
 /**
  * Folder of the snapshots of `EXAMPLE_PROJECTS`:  `tests/spell/__examples__/<name>/`, at spell-app's root.
@@ -96,6 +105,7 @@ export const GUIDE_SNAPSHOTS_DIR = resolve(environment.repoDir, "tests", "spell"
 /** Where each group's snapshots are, but the fixtures':  theirs are beside them. */
 const SNAPSHOT_DIRS: Record<string, string> = {
   [EXAMPLES_GROUP]: EXAMPLE_SNAPSHOTS_DIR,
+  [LIBRARY_GROUP]: EXAMPLE_SNAPSHOTS_DIR,
   [GUIDES_GROUP]: GUIDE_SNAPSHOTS_DIR
 }
 

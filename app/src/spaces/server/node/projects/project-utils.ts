@@ -259,22 +259,26 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
   return Promise.all(
     projectNames.map(async (projectName) => {
       const path = `${domain.projectRoot}/${projectName}`
-      const { title, description, onHome, imports } = await loadProjectFile(path).catch(() => ({
+      const { title, description, onHome, category, imports } = await loadProjectFile(path).catch(() => ({
         title: undefined,
         description: undefined,
         onHome: undefined,
+        category: undefined,
         imports: []
       }))
       const files = imports.map((each) => each.path)
       const language = languageOf(files)
       const isSite = await holdsSite(resolve(domain.serverPath, projectName), files)
+      const hasThumbnail = await fileUtils.pathExists(resolve(domain.serverPath, projectName, SPACES.PROJECT_THUMBNAIL))
       return {
         path,
         ...(title && { title }),
         ...(description && { description }),
         ...(language && { language }),
         ...(isSite && { isSite }),
-        ...(onHome === false && { onHome })
+        ...(onHome === false && { onHome }),
+        ...(category && { category }),
+        ...(hasThumbnail && { hasThumbnail })
       }
     })
   )

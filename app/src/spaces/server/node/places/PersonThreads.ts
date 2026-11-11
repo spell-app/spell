@@ -52,7 +52,7 @@ const ID_JOIN = "~"
  *   - An ad-hoc thread's messages are in the org's own room, naming it in their `thread`:  its row's `thread` is that
  *     room, its `topic` its own id.
  * - Read only, and sorted by nothing:  the page sorts.
- * - Node only;  knows nothing of pages:  its page is the built-in program `@spell/examples/OrgChat`.
+ * - Node only;  knows nothing of pages:  its page is the built-in program `@spell/library/OrgChat`.
  ****************/
 export class PersonThreads implements Place {
   /** Its org's id:  `rs`. */
