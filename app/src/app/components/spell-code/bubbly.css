@@ -246,8 +246,8 @@
     width: var(--bubbly-foot-width);
     height: var(--bubbly-foot-height);
     background: var(--bubbly-pill);
-    border-radius: 0 calc(var(--bubbly-foot-height) / 2) calc(var(--bubbly-foot-height) / 2)
-      calc(var(--bubbly-foot-height) / 2);
+    /* its bottom-left as round as its height allows:  the gutter above it is square */
+    border-radius: 0 calc(var(--bubbly-foot-height) / 2) calc(var(--bubbly-foot-height) / 2) var(--bubbly-foot-height);
   }
 
   /****** a declaration with no body:  its band alone, every corner round ******/
