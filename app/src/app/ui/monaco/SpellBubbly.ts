@@ -385,8 +385,8 @@ export class SpellBubbly {
   ////////////////
 
   /**
-   * A view zone under each line that ends declarations with a body, as tall as their feet, the lowest's bottom:
-   * if they've moved.
+   * A view zone under each line that ends declarations with a body:  room for their feet,
+   * and the gap from the lowest to the band on the next line (`--bubbly-monaco-foot-gap`);  if they've moved.
    */
   private updateZones(laidOut: BubblyMarks, view: View) {
     const room = new Map<number, number>()
@@ -395,7 +395,10 @@ export class SpellBubbly {
         if (shape.kind !== "block") continue
         const range = view.ranges[shape.place]
         if (range && shape.hasBody && range.endLineNumber > range.startLineNumber) {
-          const below = view.measures.footRoom + this.footDrop(shape, view)
+          // its lowest foot's bottom, then the gap to the band on the next line, whose top is down its line a little
+          const { footRoom, footGap, pillHeight } = view.measures
+          const footBottom = footRoom + this.footDrop(shape, view)
+          const below = Math.max(footBottom, footBottom + footGap - (view.lineHeight - pillHeight) / 2)
           room.set(range.endLineNumber, Math.max(room.get(range.endLineNumber) ?? 0, below))
         }
         measure(shape.inside)
@@ -478,7 +481,8 @@ export class SpellBubbly {
       railInset: length("--bubbly-monaco-rail-inset") * scale,
       pillHeight: length("--bubbly-monaco-band-height") * scale,
       footHeight: length("--bubbly-foot-height") * scale,
-      footRoom: length("--bubbly-monaco-foot-room") * scale
+      footRoom: length("--bubbly-monaco-foot-room") * scale,
+      footGap: length("--bubbly-monaco-foot-gap") * scale
     }
     probe.remove()
     return this.measured
@@ -543,6 +547,8 @@ type Measures = {
   /** a foot's height, and the room each foot takes under its body */
   footHeight: number
   footRoom: number
+  /** the paper between a body's lowest foot and the band on the line under it */
+  footGap: number
 }
 
 /** What a redraw knows. */

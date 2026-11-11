@@ -200,6 +200,10 @@
       "light": "-1px",
       "dark": "-1px"
     },
+    "--bubbly-monaco-foot-gap": {
+      "light": "3px",
+      "dark": "3px"
+    },
     "--bubbly-monaco-rail-inset": {
       "light": "6px",
       "dark": "6px"
