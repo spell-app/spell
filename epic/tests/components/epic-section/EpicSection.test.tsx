@@ -319,6 +319,12 @@ function chip(host: Element, state: string): HTMLButtonElement {
   return chipButtons(host).find((button) => button.dataset.state === state)!
 }
 
+/** `host`'s blue badge (its `<epic-state-filter>`'s):  the blues' chip. */
+function blueBadge(host: Element): HTMLButtonElement {
+  const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')
+  return filter!.shadowRoot!.querySelector<HTMLButtonElement>("button.marked")!
+}
+
 /** `host`'s state chips, as drawn:  `state` => pressed. */
 function chips(host: Element): Record<string, boolean> {
   return Object.fromEntries(
@@ -742,8 +748,8 @@ describe("<epic-section kind=phases> state chips", () => {
   }
 
   // epic `epic-engine` I170 (Owen, 2026-10-29:  "The order, one chip per phase:  red, orange, blue (working), dotted
-  // blue, green, grey")
-  test("a chip per state, the first that holds:  red, orange, blue (badge), dotted blue, green, grey;  axe", async () => {
+  // blue, green, grey");  scheduled in the blue badge since I260 (Owen, 2026-11-11:  "confusing to have 2 blues")
+  test("a chip per state, the first that holds:  red, orange, green, grey;  under way and scheduled in the blue badge;  axe", async () => {
     const hourAgo = minutesAgo(60)
     const weekAgo = minutesAgo(7 * 24 * 60)
     const host = await render(
@@ -774,12 +780,10 @@ describe("<epic-section kind=phases> state chips", () => {
       waiting: true,
       updated: true,
       paused: true,
-      scheduled: true,
       recent: true,
       old: true
     })
     expect(chipButtons(host).map((button) => `${button.dataset.state}:${button.textContent}`)).toEqual([
-      "scheduled:3",
       "attention:1",
       "waiting:2",
       "updated:2",
@@ -787,12 +791,17 @@ describe("<epic-section kind=phases> state chips", () => {
       "recent:2",
       "old:2"
     ])
-    expect(
-      chipButtons(host).map((button) => [button.dataset.color, button.dataset.fill ?? ""].join(" ").trim())
-    ).toEqual(["blue dotted", "red", "orange", "orange", "grey", "green", "grey"])
-    // the one under way in the filter's blue badge;  the toolbar's Phases badges:  3 red, 1 blue
+    expect(chipButtons(host).map((button) => button.dataset.color)).toEqual([
+      "red",
+      "orange",
+      "orange",
+      "grey",
+      "green",
+      "grey"
+    ])
+    // the one under way and the 3 scheduled in the filter's blue badge;  the toolbar's Phases badges:  3 red, 1 blue
     const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!
-    expect(filter.shadowRoot!.querySelector(".marked")!.textContent).toBe("1")
+    expect(filter.shadowRoot!.querySelector(".marked")!.textContent).toBe("4")
     const entry = (host as FoldHost & { contentsEntry?: { count?: unknown } }).contentsEntry
     expect(entry?.count).toMatchObject({ attention: 3, running: 1 })
     // each phase's status circle the colour of its chip
@@ -812,8 +821,6 @@ describe("<epic-section kind=phases> state chips", () => {
     const colorOf = (state: string) => getComputedStyle(chip(host, state)).borderTopColor
     expect(getComputedStyle(circle("p6")).color).toBe(colorOf("waiting"))
     expect(getComputedStyle(circle("p9")).color).toBe(colorOf("updated"))
-    // the scheduled chip is filled, its dots lighter:  the circle wears its fill
-    expect(getComputedStyle(circle("p12")).color).toBe(getComputedStyle(chip(host, "scheduled")).backgroundColor)
     expect(getComputedStyle(circle("p1")).color).toBe(colorOf("recent"))
     expect(getComputedStyle(circle("p2")).color).toBe(colorOf("old"))
     // scheduled:  a dotted circle, as its chip's outline
@@ -822,16 +829,16 @@ describe("<epic-section kind=phases> state chips", () => {
     const docs = await render(
       `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="Doc Review" status="todo" plan="waiting"></epic-phase></epic-section>`
     )
-    expect(chips(docs)).toEqual({ scheduled: true })
+    expect(chips(docs)).toEqual({})
     await expectAccessible(host)
   })
 
   test("Owen's rule filters the phases:  only scheduled hides the rest, says so, marks them, and is remembered", async () => {
     const host = await render(phases([`status="done"`, `status="done"`, `status="todo"`, `status="todo" changes="1"`]))
-    altClick(chip(host, "scheduled"))
+    altClick(blueBadge(host))
     await ElementFixture.tick()
     await ElementFixture.tick()
-    expect(chips(host)).toEqual({ updated: false, scheduled: true, old: false })
+    expect(chips(host)).toEqual({ updated: false, old: false })
     expect(shownPhases(host)).toEqual(["p3"])
     expect(hiddenNote(host).textContent).toBe("3 hidden · show all")
     expect(Array.from(host.querySelectorAll("[data-epic-filtered]"), (phase) => phase.id)).toEqual(["p1", "p2", "p4"])
@@ -865,7 +872,7 @@ describe("<epic-section kind=phases> state chips", () => {
       `status="todo"`
     ]
     const host = await render(phases(specs, [1]))
-    altClick(chip(host, "scheduled"))
+    altClick(blueBadge(host))
     await ElementFixture.tick()
     await ElementFixture.tick()
     expect(shownPhases(host)).toEqual(["p1", "p42", "p43"])

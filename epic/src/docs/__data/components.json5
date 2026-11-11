@@ -6736,7 +6736,7 @@
         {
           "name": "phases",
           "kind": "boolean",
-          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown (`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue badge), grey paused (held by you), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
+          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown (`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, grey paused (held by you), green done in the last 3 days, grey done before, each with its own words;  under way and scheduled count in the ONE blue badge (epic `epic-engine` I260)."
         },
         {
           "name": "mixed",
@@ -6764,7 +6764,7 @@
         },
         {
           "name": "chip",
-          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed` (`mixed` too, `mixed`)."
+          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed` (`mixed` too, `mixed`)."
         },
         {
           "name": "marked",
@@ -6880,8 +6880,8 @@
         },
         {
           "key": "markedPhaseWords",
-          "text": "with Claude (under way, being worked on, or marked in this pass)",
-          "description": "The Phases section's blue badge:  its phases under way or being worked on (`progress`), and the ones marked in this pass (epic `epic-engine` I170)."
+          "text": "to do:  under way, scheduled, or marked in this pass",
+          "description": "The Phases section's ONE blue badge:  its phases under way or being worked on (`progress`), scheduled (`scheduled`, epic `epic-engine` I260), and the ones marked in this pass (I170)."
         },
         {
           "key": "phaseAttention",

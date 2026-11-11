@@ -325,7 +325,7 @@ export const TEST_ID = /^m\d+$/
 export const FILTER_STATES = [
   { state: "progress", color: "blue", words: "stateProgress" },
   { state: "handed", color: "blue", words: "stateHanded" },
-  { state: "scheduled", color: "blue", fill: "dotted", words: "stateScheduled" },
+  { state: "scheduled", color: "blue", words: "stateScheduled" },
   { state: "attention", color: "red", words: "stateAttention" },
   { state: "replied", color: "orange", words: "stateReplied" },
   { state: "requested", color: "light-orange", words: "stateRequested" },
@@ -350,7 +350,7 @@ export const FILTER_STATES = [
  */
 export const PHASE_FILTER_STATES = [
   { state: "progress", color: "blue", words: "phaseProgress" },
-  { state: "scheduled", color: "blue", fill: "dotted", words: "phaseScheduled" },
+  { state: "scheduled", color: "blue", words: "phaseScheduled" },
   { state: "attention", color: "red", words: "phaseAttention" },
   { state: "waiting", color: "orange", words: "phaseWaiting" },
   { state: "updated", color: "orange", words: "phaseUpdated" },
@@ -441,10 +441,10 @@ export const FILTER_TEXTS = [
   { key: "stateOld", text: "no longer relevant", description: "A state chip's words:  `old` (grey)." },
   {
     key: "markedPhaseWords",
-    text: "with Claude (under way, being worked on, or marked in this pass)",
+    text: "to do:  under way, scheduled, or marked in this pass",
     description:
-      "The Phases section's blue badge:  its phases under way or being worked on (`progress`), and the ones marked " +
-      "in this pass (epic `epic-engine` I170)."
+      "The Phases section's ONE blue badge:  its phases under way or being worked on (`progress`), scheduled " +
+      "(`scheduled`, epic `epic-engine` I260), and the ones marked in this pass (I170)."
   },
   {
     key: "phaseAttention",

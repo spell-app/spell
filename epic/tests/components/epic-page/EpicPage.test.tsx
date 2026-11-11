@@ -1073,9 +1073,10 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(status().title).toBe("Claude is writing this phase's plan")
     expect(p2.matches(":state(working)")).toBe(true)
     expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".icon.working > svg")).toBeNull()
+    // the Phases section's one blue badge:  p2 under way, p3 scheduled (I260);  the toolbar's counts only p2
     expect(markedBadge(phases)).toEqual([
-      "1",
-      "1 with Claude (under way, being worked on, or marked in this pass):  hide these\n⌥-click:  show only these"
+      "2",
+      "2 to do:  under way, scheduled, or marked in this pass:  hide these\n⌥-click:  show only these"
     ])
     expect(rail().running).toBe(1)
     await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
@@ -1088,7 +1089,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     await vi.waitFor(() => expect(status().querySelector(".icon.working > svg")).toBeNull())
-    expect(markedBadge(phases)).toBeNull()
+    expect(markedBadge(phases)?.[0]).toBe("2")
   })
 
   // Owen, 2026-10-29, on a red circle beside a plan he had accepted:  "dot next to P13 -- shouldn't be red?"

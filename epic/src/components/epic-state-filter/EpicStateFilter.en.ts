@@ -50,9 +50,9 @@ export const epicStateFilterVocabulary = {
       kind: "boolean",
       description:
         "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown " +
-        "(`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue " +
-        "badge), grey paused (held by you), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own " +
-        "words."
+        "(`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, grey paused (held by you), green " +
+        "done in the last 3 days, grey done before, each with its own words;  under way and scheduled count in the ONE " +
+        "blue badge (epic `epic-engine` I260)."
     },
     {
       name: "mixed",
@@ -84,8 +84,7 @@ export const epicStateFilterVocabulary = {
     { name: "base", description: "The group of chips." },
     {
       name: "chip",
-      description:
-        "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed` (`mixed` too, `mixed`)."
+      description: "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed` (`mixed` too, `mixed`)."
     },
     { name: "marked", description: "The blue badge of the items marked in this pass (`marked`):  not a button." }
   ],

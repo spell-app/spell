@@ -4,7 +4,7 @@
  * and the page's (`<epic-page>`'s toolbar, which filters every section at once).
  * - Pure:  states in, states out;  no DOM, no Solid.
  * - States of one colour go together (`STATE_GROUPS`):  a click on any of them turns them all on or off.
- * - What Claude is on (`WITH_CLAUDE`, blue) has no chip of its own:  the blue badge is its chip, and an item marked in
+ * - The blues (`BLUE_BADGE`:  what Claude is on, a phase scheduled) have no chip of their own:  the blue badge is its chip, and an item marked in
  *   this pass counts in that badge, so it hides and shows with the blues (`MARKED_SHOWS_AS`).
  *   Every owner filters by this one rule:  `<epic-state-filter>`, `<epic-section>`, the page's toolbar, Focus mode.
  * - The docs runtime's lists (the Epics list page) filter by the `shown` the chip element sends:  this rule too.
@@ -75,9 +75,9 @@ export class StateFilter {
     return standing
   }
 
-  /** The states of `present` with a chip of their own:  all but what Claude is on (`WITH_CLAUDE`, the blue badge). */
+  /** The states of `present` with a chip of their own:  all but the blues (`BLUE_BADGE`), which the blue badge counts. */
   static chipStatesOf(present: readonly string[]): string[] {
-    return present.filter((state) => !StateFilter.isWithClaude(state))
+    return present.filter((state) => !StateFilter.inBlueBadge(state))
   }
 
   /** Does the filter hide an item (or phase) in `state` while `shown` shows? */
@@ -85,9 +85,9 @@ export class StateFilter {
     return "has" in shown ? !shown.has(state) : !shown.includes(state)
   }
 
-  /** Is `state` with Claude (`WITH_CLAUDE`):  no chip of its own, counted in the blue badge? */
-  static isWithClaude(state: string): boolean {
-    return (WITH_CLAUDE as readonly string[]).includes(state)
+  /** Is `state` a blue (`BLUE_BADGE`):  no chip of its own, counted in the blue badge? */
+  static inBlueBadge(state: string): boolean {
+    return (BLUE_BADGE as readonly string[]).includes(state)
   }
 
   /** The states of `present` that go with `clicked`:  its group's, or `clicked` alone. */
@@ -149,10 +149,12 @@ const PHASE_COLORS: Readonly<Record<string, string>> = { paused: "old" }
 export const MARKED_SHOWS_AS = "progress"
 
 /**
- * The states with Claude (blue):  what it's working on, and a Do this it hasn't started (`handed`, epic `epic-engine` P63).
- * - no chip of their own:  they count in the blue badge (`<epic-state-filter>`'s `markedCount`), the blues' chip
+ * The blues, ONE badge for all (`<epic-state-filter>`'s `markedCount`), no chip of their own:
+ * - with Claude:  what it's working on, and a Do this it hasn't started (`handed`, epic `epic-engine` P63)
+ * - a phase scheduled, still to do (epic `epic-engine` I260;  Owen, 2026-11-11, on a solid blue 2 beside a dotted
+ *   blue 2:  "These should just be one set, confusing to have 2 blues";  a dotted chip of its own before)
  */
-export const WITH_CLAUDE = ["progress", "handed"] as const
+export const BLUE_BADGE = ["progress", "handed", "scheduled"] as const
 
 /** How a chip was picked:  a plain click (`nextShown()`'s rule), or an ⌥-click (`only` its state). */
 export type ChipPick = "click" | "only"
