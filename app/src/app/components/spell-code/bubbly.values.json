@@ -113,8 +113,8 @@
       "dark": "8px"
     },
     "--bubbly-foot-width": {
-      "light": "26px",
-      "dark": "26px"
+      "light": "13px",
+      "dark": "13px"
     },
     "--bubbly-foot-height": {
       "light": "4px",

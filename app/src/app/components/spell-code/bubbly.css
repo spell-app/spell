@@ -84,7 +84,7 @@
   /* the body's white corners where they meet the gutter:  the top one curves out of the band, the bottom into the foot */
   --bubbly-inner-top: 5px;
   --bubbly-block-inner-corner: 8px;
-  --bubbly-foot-width: 26px;
+  --bubbly-foot-width: 13px;
   --bubbly-foot-height: 4px;
   /* the outside of the corner where a rail turns into its foot:  the body's inner corner, a rail's width out */
   --bubbly-rail-corner: calc(var(--bubbly-gutter) + var(--bubbly-block-inner-corner));
@@ -662,6 +662,10 @@
     /* on beside its foot:  the code stops it at the foot's top */
     box-sizing: content-box;
     padding-bottom: var(--bubbly-foot-height);
+  }
+  /* the foot starts where its rail curves into it, as on the page */
+  .bubbly-layer .bubbly-block > .bubbly-foot {
+    margin-left: var(--bubbly-rail-corner);
   }
   .bubbly-layer .bubbly-bracket {
     width: 0;

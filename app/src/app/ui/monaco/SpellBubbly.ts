@@ -226,14 +226,16 @@ export class SpellBubbly {
   /**
    * The elements of `shapes`, those inside each in its own.
    * - `floor`:  the left-most a band may start, so a group's members never cover its rail (below)
+   * - `parentLeft`:  where the band of the block they're in starts, so a group keeps its members as far from its
+   *   rail as it is from its parent's
    */
-  private drawAll(shapes: BubblyShape[], view: View, floor = -Infinity): HTMLElement[] {
+  private drawAll(shapes: BubblyShape[], view: View, floor = -Infinity, parentLeft?: number): HTMLElement[] {
     const elements: HTMLElement[] = []
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (!range) continue
       if (shape.kind === "block") {
-        const block = this.drawBlock(shape, range, view, floor)
+        const block = this.drawBlock(shape, range, view, floor, parentLeft)
         if (block) elements.push(block)
       } else if (range.startLineNumber >= view.first && range.startLineNumber <= view.last) {
         const element =
@@ -248,7 +250,13 @@ export class SpellBubbly {
    * A declaration:  its band (on its head's line, if shown), its gutter, body and foot (if it has a body that isn't
    * folded away), then what's inside it;  `undefined` when none of it is in view.
    */
-  private drawBlock(shape: BubblyBlockShape, range: monaco.Range, view: View, floor: number): HTMLElement | undefined {
+  private drawBlock(
+    shape: BubblyBlockShape,
+    range: monaco.Range,
+    view: View,
+    floor: number,
+    parentLeft: number | undefined
+  ): HTMLElement | undefined {
     const { editor } = this
     const { measures, lineHeight } = view
     const headLine = range.startLineNumber
@@ -290,8 +298,13 @@ export class SpellBubbly {
     }
     // A group's members are written at its own indent, so their bands would start on its rail:
     // they start just past it instead, their words where they are (Owen, 2026-11-11)
-    const insideFloor = shape.isGroup && hasBody ? left + measures.gutter + GROUP_RAIL_GAP * measures.scale : floor
-    block.append(...this.drawAll(shape.inside, view, insideFloor))
+    // ... as far past it as the group is past its own parent's rail:  the rails evenly spaced
+    const railGap = Math.max(
+      GROUP_RAIL_GAP * measures.scale,
+      parentLeft === undefined ? 0 : left - parentLeft - measures.gutter
+    )
+    const insideFloor = shape.isGroup && hasBody ? left + measures.gutter + railGap : floor
+    block.append(...this.drawAll(shape.inside, view, insideFloor, hasBody ? left : parentLeft))
     return block
   }
 
@@ -507,7 +520,7 @@ type View = {
 /** How long typing pauses before the code is laid out again:  the marks follow the text till then. */
 const RELAYOUT_MSEC = 300
 
-/** The paper between a group's rail and its members' bands, in the drawing's pixels. */
+/** The least paper between a group's rail and its members' bands, in the drawing's pixels. */
 const GROUP_RAIL_GAP = 2
 
 /** The classes that make an editor's box a drawing. */
