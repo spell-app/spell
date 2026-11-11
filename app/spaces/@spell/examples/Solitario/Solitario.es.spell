@@ -115,13 +115,12 @@ Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pi
 		si pilas restantes está vacía devolver
 		poner la pila a una pila al azar de pilas restantes
 		poner la carta a una carta al azar de (las cartas en la pila donde la carta está boca abajo)
-		// arriba, fuera de su pila, luego se voltea, luego baja a los descartes
+		// por encima de las cartas de su alrededor, luego se voltea mientras pasa a los descartes
 		poner la levantada de la carta a sí
-		pausar 300 mseg
 		voltear la carta boca arriba
-		pausar 30 tics
-		poner la levantada de la carta a no
 		agregar la carta a los descartes
+		pausar 300 mseg
+		poner la levantada de la carta a no
 	</acción>
 	<menú "menú del juego">
 		<acción "jugar solo"/>

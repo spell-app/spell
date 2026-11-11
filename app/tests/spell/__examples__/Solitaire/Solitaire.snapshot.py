@@ -108,7 +108,7 @@ class Card(TwoSidedView):
             position(column),
         )
 
-    # Pulled up out of its pile, over the piles above it, as the cheat does -- styles.css
+    # Over every card and pile around it while the cheat moves it -- styles.css
     # - its "lifted" is yes or no
     lifted = prop(type="choice")
 
@@ -700,13 +700,12 @@ class Solitaire(App):
             return
         pile = core.random_item_of(remaining_piles)
         card = pile.filter(lambda card: card.is_face_direction("down")).random_item()
-        # up out of its pile, then over, then down onto the discards
+        # over every card around it, then turned face up as it moves onto the discards
         card.lifted = True
-        await core.pause_for(300, "msec")
         card.turn_face_up()
-        await core.pause_for(30, "ticks")
-        card.lifted = False
         self.discards.append(card)
+        await core.pause_for(300, "msec")
+        card.lifted = False
 
 
 solitaire = Solitaire()
@@ -1110,8 +1109,7 @@ solitaire-card::part(back),
   background-clip: content-box;
   border-radius: 0.035em;
 }
-/* Pulled up out of its pile (the card's "lifted"), as the cheat does:  a card's height and a little above the pile's top,
-   over every card and pile it passes */
+/* Over every card and pile around it (the card's "lifted"), while the cheat turns it and moves it onto the discards */
 [layout] > * {
   transition:
     transform 0.3s ease-in-out,
@@ -1119,7 +1117,15 @@ solitaire-card::part(back),
 }
 [layout] > [lifted] {
   z-index: 5;
-  translate: 0 calc(-1 * (var(--index) * var(--card-step-down) + 1.08) * var(--card-width) * var(--card-height) * 1em);
+}
+/*
+ * ... and turns face up as it goes:  moving it to the discards draws it there already face up, so its turn starts
+ * from face down (\\`@starting-style\\`)
+ */
+[layout] > [lifted][direction="up"] {
+  @starting-style {
+    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

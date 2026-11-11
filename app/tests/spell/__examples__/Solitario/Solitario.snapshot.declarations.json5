@@ -22,7 +22,7 @@
       "type": "Carta",
       "superType": "TwoSidedView",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:368-3573"
+      "defined": "/Carta.es.spell:368-3571"
     },
     {
       "property": "rango",
@@ -211,7 +211,7 @@
       "of": "Carta",
       "group": "dibujo",
       "datatype": "choice",
-      "defined": "/Carta.es.spell:2356-2493"
+      "defined": "/Carta.es.spell:2356-2491"
     },
     {
       "syntax": "contar los puntos (de|del) {thisArg:expression} en {callArgs:expression}",
@@ -232,7 +232,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:8992-9158"
+      "defined": "/Solitario.es.spell:8993-9159"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -241,7 +241,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "la preparación de la carta",
-      "defined": "/Carta.es.spell:2641-3562"
+      "defined": "/Carta.es.spell:2639-3560"
     },
     {
       "type": "Mazo",
@@ -343,56 +343,56 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10361-10911"
+      "defined": "/Solitario.es.spell:10362-10912"
     },
     {
       "property": "disposición",
       "of": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:10527-10559"
+      "defined": "/Solitario.es.spell:10528-10560"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10922-11226"
+      "defined": "/Solitario.es.spell:10923-11227"
     },
     {
       "property": "disposición",
       "of": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:11031-11063"
+      "defined": "/Solitario.es.spell:11032-11064"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11237-11909"
+      "defined": "/Solitario.es.spell:11238-11910"
     },
     {
       "property": "disposición",
       "of": "Fundación",
-      "defined": "/Solitario.es.spell:11346-11378"
+      "defined": "/Solitario.es.spell:11347-11379"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:11383-11417"
+      "defined": "/Solitario.es.spell:11384-11418"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11920-14051"
+      "defined": "/Solitario.es.spell:11921-14052"
     },
     {
       "property": "disposición",
       "of": "Columna",
-      "defined": "/Solitario.es.spell:12041-12074"
+      "defined": "/Solitario.es.spell:12042-12075"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:320-7420"
+      "defined": "/Solitario.es.spell:320-7421"
     },
     {
       "property": "puntuación",
@@ -639,7 +639,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Trampa",
-      "defined": "/Solitario.es.spell:5524-6220"
+      "defined": "/Solitario.es.spell:5524-6221"
     },
     {
       "syntax": "jugar {thisArg:expression}",
@@ -654,7 +654,7 @@
       "kind": "method",
       "name": "jugar una carta",
       "waits": true,
-      "defined": "/Solitario.es.spell:7741-8039"
+      "defined": "/Solitario.es.spell:7742-8040"
     },
     {
       "syntax": "poner {thisArg:expression} en {callArgs:expression}",
@@ -676,7 +676,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitario.es.spell:8250-8902"
+      "defined": "/Solitario.es.spell:8251-8903"
     },
     {
       "syntax": "probar los movimientos",
@@ -685,7 +685,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:12430-14040"
+      "defined": "/Solitario.es.spell:12431-14041"
     }
   ],
   "codeLines": [
@@ -749,12 +749,12 @@
     542,
     552,
     562,
-    681,
-    684,
-    687,
-    690,
-    705,
-    711,
-    730
+    680,
+    683,
+    686,
+    689,
+    704,
+    710,
+    729
   ]
 }

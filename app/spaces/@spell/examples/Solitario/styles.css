@@ -254,8 +254,7 @@ solitario-carta::part(back),
   background-clip: content-box;
   border-radius: 0.035em;
 }
-/* Pulled up out of its pile (the card's "levantada"), as the cheat does:  a card's height and a little above the pile's top,
-   over every card and pile it passes */
+/* Over every card and pile around it (the card's "levantada"), while the cheat turns it and moves it onto the discards */
 [disposición] > * {
   transition:
     transform 0.3s ease-in-out,
@@ -263,7 +262,15 @@ solitario-carta::part(back),
 }
 [disposición] > [levantada] {
   z-index: 5;
-  translate: 0 calc(-1 * (var(--index) * var(--card-step-down) + 1.08) * var(--card-width) * var(--card-height) * 1em);
+}
+/*
+ * ... and turns face up as it goes:  moving it to the discards draws it there already face up, so its turn starts
+ * from face down (`@starting-style`)
+ */
+[disposición] > [levantada][direction="up"] {
+  @starting-style {
+    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

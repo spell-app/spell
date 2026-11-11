@@ -115,13 +115,12 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		if remaining piles is empty return
 		set the pile to a random pile in remaining piles
 		set the card to a random card in (the cards in the pile where the card is face down)
-		// up out of its pile, then over, then down onto the discards
+		// over every card around it, then turned face up as it moves onto the discards
 		set the lifted of the card to yes
-		pause for 300 msec
 		turn the card face up
-		pause for 30 ticks
-		set the lifted of the card to no
 		add the card to the discards
+		pause for 300 msec
+		set the lifted of the card to no
 	</>
 	<menu "game menu">
 		<action "auto play"/>
