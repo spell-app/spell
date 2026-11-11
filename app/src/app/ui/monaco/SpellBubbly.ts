@@ -206,37 +206,89 @@ export class SpellBubbly {
     const { editor, laidOut, shapes } = this
     if (!laidOut || !shapes) return
     const ranges = this.marks!.getRanges()
-    this.updateZones(laidOut, ranges)
+    // across first:  where each band starts, and so how far below its last line each foot goes
+    const view: View = {
+      ranges,
+      pushes: this.pushesByLine(laidOut, ranges),
+      lefts: new Map(),
+      footDrops: new Map(),
+      first: 0,
+      last: 0,
+      measures: this.measures(),
+      lineHeight: editor.getOption(monaco.editor.EditorOption.lineHeight),
+      width: editor.getLayoutInfo().contentWidth + editor.getScrollWidth()
+    }
+    this.placeBands(laidOut.shapes, view)
+    this.updateZones(laidOut, view)
     // its lines drawn as they are now, zones and all, before we ask where
     editor.render()
     this.follow()
     const visible = editor.getVisibleRanges()
     if (!visible.length) return shapes.replaceChildren()
-    const view: View = {
-      ranges,
-      pushes: this.pushesByLine(laidOut, ranges),
-      first: visible[0]!.startLineNumber,
-      last: visible.at(-1)!.endLineNumber,
-      measures: this.measures(),
-      lineHeight: editor.getOption(monaco.editor.EditorOption.lineHeight),
-      width: editor.getLayoutInfo().contentWidth + editor.getScrollWidth()
-    }
+    view.first = visible[0]!.startLineNumber
+    view.last = visible.at(-1)!.endLineNumber
     shapes.replaceChildren(...this.drawAll(laidOut.shapes, view))
   }
 
   /**
-   * The elements of `shapes`, those inside each in its own.
+   * Where the band of each block in `shapes` starts, those inside each too, into `view.lefts`:
+   * from its words, its lines drawn or not.
    * - `floor`:  the left-most a band may start, so a group's members never cover its rail (below)
    * - `parentLeft`:  where the band of the block they're in starts, so a group keeps its members as far from its
    *   rail as it is from its parent's
    */
-  private drawAll(shapes: BubblyShape[], view: View, floor = -Infinity, parentLeft?: number): HTMLElement[] {
+  private placeBands(shapes: BubblyShape[], view: View, floor = -Infinity, parentLeft?: number) {
+    const { measures } = view
+    for (const shape of shapes) {
+      const range = view.ranges[shape.place]
+      if (shape.kind !== "block" || !range) continue
+      const left = Math.max(this.wordsX(range.startLineNumber, view) - measures.padLeft, floor)
+      view.lefts.set(shape, left)
+      const hasBody = shape.hasBody && range.endLineNumber > range.startLineNumber
+      // A group's members are written at its own indent, so their bands would start on its rail:
+      // they start just past it instead, their words where they are (Owen, 2026-11-11)
+      // ... as far past it as the group is past its own parent's rail:  the rails evenly spaced
+      const railGap = Math.max(
+        GROUP_RAIL_GAP * measures.scale,
+        parentLeft === undefined ? 0 : left - parentLeft - measures.gutter
+      )
+      const insideFloor = shape.isGroup && hasBody ? left + measures.gutter + railGap : floor
+      this.placeBands(shape.inside, view, insideFloor, hasBody ? left : parentLeft)
+    }
+  }
+
+  /**
+   * How much lower `shape`'s foot goes than a foot right under its last line:  0 unless a block in it ends there too.
+   * - Then that block's foot goes first, and this one under it,
+   *   as far below it as this one's rail is left of that one's (Owen, 2026-11-11:
+   *   the feet as far apart down as the rails across).
+   */
+  private footDrop(shape: BubblyBlockShape, view: View): number {
+    const known = view.footDrops.get(shape)
+    if (known !== undefined) return known
+    const { measures } = view
+    const lastLine = view.ranges[shape.place]!.endLineNumber
+    let drop = 0
+    for (const inner of shape.inside) {
+      const range = inner.kind === "block" ? view.ranges[inner.place] : undefined
+      if (inner.kind !== "block" || !range || !inner.hasBody) continue
+      if (range.endLineNumber !== lastLine || range.endLineNumber <= range.startLineNumber) continue
+      const railsApart = view.lefts.get(inner)! - (view.lefts.get(shape)! + measures.gutter)
+      drop = this.footDrop(inner, view) + measures.footHeight + Math.max(0, railsApart)
+      break
+    }
+    view.footDrops.set(shape, drop)
+    return drop
+  }
+
+  /** The elements of `shapes`, those inside each in its own. */
+  private drawAll(shapes: BubblyShape[], view: View): HTMLElement[] {
     const elements: HTMLElement[] = []
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (!range) continue
       if (shape.kind === "block") {
-        const block = this.drawBlock(shape, range, view, floor, parentLeft)
+        const block = this.drawBlock(shape, range, view)
         if (block) elements.push(block)
       } else if (range.startLineNumber >= view.first && range.startLineNumber <= view.last) {
         const element =
@@ -251,25 +303,18 @@ export class SpellBubbly {
    * A declaration:  its band (on its head's line, if shown), its gutter, body and foot (if it has a body that isn't
    * folded away), then what's inside it;  `undefined` when none of it is in view.
    */
-  private drawBlock(
-    shape: BubblyBlockShape,
-    range: monaco.Range,
-    view: View,
-    floor: number,
-    parentLeft: number | undefined
-  ): HTMLElement | undefined {
+  private drawBlock(shape: BubblyBlockShape, range: monaco.Range, view: View): HTMLElement | undefined {
     const { editor } = this
     const { measures, lineHeight } = view
     const headLine = range.startLineNumber
     const lastLine = range.endLineNumber
-    const feet = this.feetUnder(shape, view)
     if (lastLine < view.first - 1 || headLine > view.last) return undefined
     const block = element(`bubbly-block bubbly-${shape.partOfSpeech}${shape.isGroup ? " bubbly-group" : ""}`)
     block.classList.add(`bubbly-level-${shape.level}`)
     const headTop = editor.getTopForLineNumber(headLine)
     const lastTop = editor.getTopForLineNumber(lastLine)
     const hasBody = shape.hasBody && lastTop > headTop
-    const left = Math.max(this.wordsX(headLine, view) - measures.padLeft, floor)
+    const left = view.lefts.get(shape)!
     if (headLine >= view.first) {
       const ends = shape.ends
       const lineEnd = this.xOf(headLine, editor.getModel()!.getLineMaxColumn(headLine))
@@ -284,7 +329,7 @@ export class SpellBubbly {
     if (hasBody) {
       const bodyTop = headTop + (lineHeight + measures.pillHeight) / 2
       const lastBottom = lastTop + lineHeight
-      const footTop = lastBottom + (feet + 1) * measures.footRoom - measures.footHeight
+      const footTop = lastBottom + measures.footRoom - measures.footHeight + this.footDrop(shape, view)
       const height = footTop - bodyTop
       const gutter = left
       block.append(
@@ -297,15 +342,7 @@ export class SpellBubbly {
         place(element("bubbly-foot"), { left: gutter, top: footTop }, measures.scale)
       )
     }
-    // A group's members are written at its own indent, so their bands would start on its rail:
-    // they start just past it instead, their words where they are (Owen, 2026-11-11)
-    // ... as far past it as the group is past its own parent's rail:  the rails evenly spaced
-    const railGap = Math.max(
-      GROUP_RAIL_GAP * measures.scale,
-      parentLeft === undefined ? 0 : left - parentLeft - measures.gutter
-    )
-    const insideFloor = shape.isGroup && hasBody ? left + measures.gutter + railGap : floor
-    block.append(...this.drawAll(shape.inside, view, insideFloor, hasBody ? left : parentLeft))
+    block.append(...this.drawAll(shape.inside, view))
     return block
   }
 
@@ -334,43 +371,29 @@ export class SpellBubbly {
     return place(element("bubbly-bracket"), { left, top, height: bottom - top }, view.measures.scale)
   }
 
-  /**
-   * How many declarations inside `shape` end on its last line, with a foot of their own:  their feet go first,
-   * under its last line, then its own.
-   */
-  private feetUnder(shape: BubblyBlockShape, view: View): number {
-    const lastLine = view.ranges[shape.place]!.endLineNumber
-    let feet = 0
-    const count = (inside: BubblyShape[]) => {
-      for (const each of inside) {
-        if (each.kind !== "block") continue
-        if (each.hasBody && view.ranges[each.place]?.endLineNumber === lastLine) feet++
-        count(each.inside)
-      }
-    }
-    count(shape.inside)
-    return feet
-  }
-
   ////////////////
   // ## Room under each declaration
   ////////////////
 
-  /** A view zone under each line that ends declarations with a body, as tall as their feet:  if they've moved. */
-  private updateZones(laidOut: BubblyMarks, ranges: monaco.Range[]) {
-    const feet = new Map<number, number>()
-    const count = (shapes: BubblyShape[]) => {
+  /**
+   * A view zone under each line that ends declarations with a body, as tall as their feet, the lowest's bottom:
+   * if they've moved.
+   */
+  private updateZones(laidOut: BubblyMarks, view: View) {
+    const room = new Map<number, number>()
+    const measure = (shapes: BubblyShape[]) => {
       for (const shape of shapes) {
         if (shape.kind !== "block") continue
-        const range = ranges[shape.place]
-        if (range && shape.hasBody && range.endLineNumber > range.startLineNumber)
-          feet.set(range.endLineNumber, (feet.get(range.endLineNumber) ?? 0) + 1)
-        count(shape.inside)
+        const range = view.ranges[shape.place]
+        if (range && shape.hasBody && range.endLineNumber > range.startLineNumber) {
+          const below = view.measures.footRoom + this.footDrop(shape, view)
+          room.set(range.endLineNumber, Math.max(room.get(range.endLineNumber) ?? 0, below))
+        }
+        measure(shape.inside)
       }
     }
-    count(laidOut.shapes)
-    const { footRoom, scale } = this.measures()
-    this.setZones([...feet].map(([line, count]) => ({ afterLineNumber: line, heightInPx: count * footRoom * scale })))
+    measure(laidOut.shapes)
+    this.setZones([...room].map(([line, height]) => ({ afterLineNumber: line, heightInPx: Math.round(height) })))
   }
 
   /** Make the view zones `zones`, unless they're the ones there now. */
@@ -516,6 +539,10 @@ type View = {
   ranges: monaco.Range[]
   /** how many columns of room push each line's words right, by line:  `BubblyMarks.pushes` */
   pushes: Map<number, number>
+  /** where each block's band starts:  `placeBands()` */
+  lefts: Map<BubblyBlockShape, number>
+  /** how much lower each block's foot goes than one right under its last line, once worked out:  `footDrop()` */
+  footDrops: Map<BubblyBlockShape, number>
   /** the first and last lines shown */
   first: number
   last: number
