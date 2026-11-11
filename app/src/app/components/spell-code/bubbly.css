@@ -80,12 +80,12 @@
   --bubbly-pill-pad-right: 10px;
 
   /****** a body:  the gutter down its left, its white, the foot under it ******/
-  --bubbly-gutter: 5px;
+  --bubbly-gutter: 4px;
   /* the body's white corners where they meet the gutter:  the top one curves out of the band, the bottom into the foot */
   --bubbly-inner-top: 5px;
   --bubbly-block-inner-corner: 8px;
   --bubbly-foot-width: 26px;
-  --bubbly-foot-height: 6px;
+  --bubbly-foot-height: 4px;
 
   /****** inputs:  what a person typed, white on its band ******/
   /* room either side of an input, between it and the words or marks beside it */

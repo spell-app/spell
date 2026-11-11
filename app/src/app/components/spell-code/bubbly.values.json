@@ -101,8 +101,8 @@
       "dark": "10px"
     },
     "--bubbly-gutter": {
-      "light": "5px",
-      "dark": "5px"
+      "light": "4px",
+      "dark": "4px"
     },
     "--bubbly-inner-top": {
       "light": "5px",
@@ -117,8 +117,8 @@
       "dark": "26px"
     },
     "--bubbly-foot-height": {
-      "light": "6px",
-      "dark": "6px"
+      "light": "4px",
+      "dark": "4px"
     },
     "--bubbly-gap": {
       "light": "2px",
