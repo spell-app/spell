@@ -59,21 +59,21 @@ describe("BubblyMarks.of()", () => {
     expect(wordsMarked(marks, "bubbly-quote-open").slice(0, 2)).toEqual(['"', '"'])
     const card = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-name"))!
     expect(card.options.before).toMatchObject({
-      inlineClassName: "bubbly-room bubbly-room-input bubbly-room-before",
+      inlineClassName: "bubbly-spacer bubbly-input-spacer bubbly-spacer-before",
       cursorStops: 1
     })
     expect(card.options.after).toMatchObject({
-      inlineClassName: "bubbly-room bubbly-room-input bubbly-room-after",
+      inlineClassName: "bubbly-spacer bubbly-input-spacer bubbly-spacer-after",
       cursorStops: 2
     })
     const open = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-quote-open"))!
-    expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-room bubbly-room-quote bubbly-room-before" })
+    expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-spacer bubbly-quote-spacer bubbly-spacer-before" })
   })
 
   test("room before each head line's words:  before its indent's last tab, or its first word at the top level", () => {
     const lines = CARD.split("\n")
     const heads = marked()
-      .marks.filter((mark) => mark.options.before?.inlineClassName === "bubbly-room bubbly-room-head")
+      .marks.filter((mark) => mark.options.before?.inlineClassName === "bubbly-spacer bubbly-head-spacer")
       .map(({ range, options }) => {
         expect(options.before!.content).toBe("    ")
         return `${lines[range.startLineNumber - 1]!.trim()} @${range.startColumn}-${range.endColumn}`
@@ -138,7 +138,7 @@ describe("bubbly.css", () => {
     const classes = new Set<string>()
     for (const mark of marked().marks)
       for (const each of mark.options.inlineClassName?.split(" ") ?? []) classes.add(each)
-    for (const each of ["bubbly-room-input", "bubbly-room-quote", "bubbly-layer", "bubbly-shapes", "bubbly-head"])
+    for (const each of ["bubbly-input-spacer", "bubbly-quote-spacer", "bubbly-layer", "bubbly-shapes", "bubbly-head"])
       classes.add(each)
     for (const each of ["bubbly-pill", "bubbly-gutter", "bubbly-body", "bubbly-foot", "bubbly-control"])
       classes.add(each)

@@ -144,7 +144,7 @@
    *   text (`bubbly-layer`):  the code places them;  how they look is the page's rules
    * - Where the editor draws a piece differently, its rule follows the page's:  `&.bubbly-monaco`.
    *   NEVER padding, margin or a width on the text itself:  the caret would land off its letters.
-   *   Room is injected text of its own (`bubbly-room`).
+   *   Space round it is injected text of its own (`bubbly-spacer`).
    */
   &.bubbly-monaco {
     /* an editor's line, as tall as its font size times this:  room for a band, with a little between two */
@@ -665,29 +665,29 @@
     }
   }
 
-  /****** what only the editor has (epic `language` P50):  room injected in the text, the layer of shapes ******/
+  /****** what only the editor has (epic `language` P50):  spacers injected in the text, the layer of shapes ******/
   &.bubbly-monaco {
     /*
-     * room, injected beside what a person typed:  where the page has its margin and padding
+     * spacers, injected beside what a person typed:  where the page has its margin and padding
      * - the code measures each, for its shapes (`SpellBubbly.measures()`)
      */
-    .bubbly-room {
+    .bubbly-spacer {
       display: inline-block;
     }
     /* either side of an input's words:  its gap and its white, as on the page */
-    .bubbly-room-input {
+    .bubbly-input-spacer {
       width: calc((var(--bubbly-gap) + var(--bubbly-input-pad)) * var(--bubbly-monaco-scale));
     }
     /* outside a quoted input's marks:  half the page's, as the file's own `"` takes room of its own */
-    .bubbly-room-quote {
+    .bubbly-quote-spacer {
       width: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
     }
     /* before a head line's words:  further into their band than the lines under it */
-    .bubbly-room-head {
+    .bubbly-head-spacer {
       width: calc(var(--bubbly-pill-left-shift) * var(--bubbly-monaco-scale));
     }
-    /* ... before an opening one:  half that again, so `its` sits close to its quote (Owen) */
-    .bubbly-room-quote.bubbly-room-before {
+    /* ... before an opening one:  none, so `its` sits close to its quote (Owen) */
+    .bubbly-quote-spacer.bubbly-spacer-before {
       width: 0;
     }
 

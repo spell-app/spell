@@ -330,7 +330,7 @@ export class SpellBubbly {
       const lineEnd = this.xOf(headLine, editor.getModel()!.getLineMaxColumn(headLine))
       const right = !ends.endsWithInput
         ? lineEnd + measures.padRight
-        : lineEnd + (ends.endsQuoted ? measures.quoteRoom : measures.inputRoom) + measures.endInset
+        : lineEnd + (ends.endsQuoted ? measures.quoteSpacer : measures.inputSpacer) + measures.endInset
       const band = element(hasBody ? "bubbly-head" : "bubbly-pill")
       if (ends.startsWithInput) band.classList.add("bubbly-starts-input")
       if (ends.endsWithInput) band.classList.add("bubbly-ends-input")
@@ -362,7 +362,7 @@ export class SpellBubbly {
     const line = range.startLineNumber
     if (range.endLineNumber !== line) return undefined
     const left = this.xOf(line, range.startColumn)
-    const right = this.xOf(line, range.endColumn) + measures.inputRoom
+    const right = this.xOf(line, range.endColumn) + measures.inputSpacer
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
     const pill = element(isChoice ? "bubbly-input bubbly-choice" : "bubbly-input")
     return place(pill, { left, top, width: right - left }, measures.scale)
@@ -429,7 +429,7 @@ export class SpellBubbly {
 
   /**
    * The sheet's sizes, in the editor's pixels, read off the page once (and again when the font changes):
-   * a probe in the editor's box, sized by each `--bubbly-` setting;  and the room injected beside an input, as wide as
+   * a probe in the editor's box, sized by each `--bubbly-` setting;  and the spacer injected beside an input, as wide as
    * its own rule makes it.
    */
   private measures(): Measures {
@@ -443,12 +443,12 @@ export class SpellBubbly {
       probe.style.width = `var(${variable})`
       return probe.getBoundingClientRect().width
     }
-    /** How wide the room injected with `classes` is:  its own rule's width, at the editor's scale. */
-    const roomWidth = (classes: string) => {
-      const room = Object.assign(document.createElement("span"), { className: `bubbly-room ${classes}` })
-      probe.append(room)
-      const width = room.getBoundingClientRect().width
-      room.remove()
+    /** How wide the spacer injected with `classes` is:  its own rule's width, at the editor's scale. */
+    const spacerWidth = (classes: string) => {
+      const spacer = Object.assign(document.createElement("span"), { className: `bubbly-spacer ${classes}` })
+      probe.append(spacer)
+      const width = spacer.getBoundingClientRect().width
+      spacer.remove()
       return width
     }
     const scale = fontSize / (length("--bubbly-font-size") || fontSize)
@@ -457,8 +457,8 @@ export class SpellBubbly {
     this.measured = {
       scale,
       lineHeight: Math.round(fontSize * ratio),
-      inputRoom: roomWidth("bubbly-room-input"),
-      quoteRoom: roomWidth("bubbly-room-quote"),
+      inputSpacer: spacerWidth("bubbly-input-spacer"),
+      quoteSpacer: spacerWidth("bubbly-quote-spacer"),
       padLeft: length("--bubbly-pill-pad-left") * scale,
       padRight: length("--bubbly-pill-pad-right") * scale,
       endInset: length("--bubbly-end-inset") * scale,
@@ -516,10 +516,10 @@ type Measures = {
   scale: number
   /** the editor's line height while drawing:  its font size times `--bubbly-monaco-line-height` */
   lineHeight: number
-  /** the room either side of a pill's words */
-  inputRoom: number
-  /** the room outside a quoted input's marks */
-  quoteRoom: number
+  /** the spacer either side of a pill's words */
+  inputSpacer: number
+  /** the spacer outside a quoted input's marks */
+  quoteSpacer: number
   /** a band's room before its words, and after them */
   padLeft: number
   padRight: number
