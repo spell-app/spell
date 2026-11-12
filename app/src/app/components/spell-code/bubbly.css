@@ -102,6 +102,8 @@
   /****** inputs:  what a person typed, white on its band ******/
   /* room either side of an input, between it and the words or marks beside it */
   --bubbly-input-gap: 2px;
+  /* an HTML tag's bracket this close to the point of its band or pill it sits in */
+  --bubbly-bracket-pad: 3px;
   /* an input's white either side of its words, and over them */
   --bubbly-input-pad: 8px;
   --bubbly-input-pad-top: 1px;
@@ -642,6 +644,63 @@
     padding: 0 9px;
   }
 
+  /*
+   * an HTML tag's text, wherever a tag is drawn:  an HTML file (on a page, `BubblyMarkup`;  in the editor) and a Spell
+   * file's drawing in the editor (`MarkupMarks`)
+   */
+  /*
+   * a tag's `<` and `>` drawn as math's angle brackets, `⟨` `⟩`, steeper, at a heavy weight
+   * - the file's own characters kept, unseen and no width, so a copied line copies them
+   */
+  .bubbly-angle {
+    font-size: 0;
+  }
+  .bubbly-angle::before {
+    position: relative;
+    font-size: var(--bubbly-font-size);
+    font-weight: 800;
+    /* line up > point with the pill corner. */
+    top: -0.25px;
+  }
+  .bubbly-angle-open::before {
+    content: "\27E8";
+    margin-right: 3px;
+  }
+  .bubbly-angle-close::before {
+    content: "\27E9";
+    margin-left: 3px;
+    left: -1px;
+  }
+  /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
+  .bubbly-slash {
+    display: inline-block;
+    transform: scaleY(0.85);
+  }
+  /* its bracket close beside it */
+  .bubbly-angle-open:has(+ .bubbly-slash)::before {
+    margin-right: 0.5px;
+  }
+
+  /* an attribute's `=` a pixel clear of its name */
+  .bubbly-equals {
+    margin-left: 2px;
+  }
+
+  /* a tag's name and its attributes' a little faded;  the name bold, but an end tag's */
+  .bubbly-tag-name,
+  .bubbly-attribute-name {
+    opacity: 0.75;
+  }
+  .bubbly-tag-name {
+    font-weight: 650;
+  }
+  .bubbly-tag-end .bubbly-tag-name {
+    font-weight: 400;
+  }
+  .bubbly-attribute-name {
+    margin-left: 0.33em;
+  }
+
   /****** HTML drawn bubbly (`BubblyMarkup`):  the same shapes, their corners cut, not rounded ******/
   &.bubbly-html {
     /* how far each corner is cut:  a band's, the body's inner corners and the gutter's turn;  a value's white stays round */
@@ -661,8 +720,6 @@
     /* a pointed end:  its corners, across and down, which meet at the middle of the band */
     --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope))
       calc(var(--bubbly-pill-height) / 2);
-    /* a tag's bracket this close to the point it sits in */
-    --bubbly-bracket-pad: 3px;
     --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
     /* a block's end tag:  a shorter band than its start tag's */
     --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 2px);
@@ -675,44 +732,6 @@
 
     :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body) {
       corner-shape: bevel;
-    }
-
-    /*
-     * a tag's `<` and `>` drawn as math's angle brackets, `⟨` `⟩`, steeper, at a heavy weight
-     * - the file's own characters kept, unseen and no width, so a copied line copies them
-     */
-    .bubbly-angle {
-      font-size: 0;
-    }
-    .bubbly-angle::before {
-      position: relative;
-      font-size: var(--bubbly-font-size);
-      font-weight: 800;
-      /* line up > point with the pill corner. */
-      top: -0.25px;
-    }
-    .bubbly-angle-open::before {
-      content: "\27E8";
-      margin-right: 3px;
-    }
-    .bubbly-angle-close::before {
-      content: "\27E9";
-      margin-left: 3px;
-      left: -1px;
-    }
-    /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
-    .bubbly-slash {
-      display: inline-block;
-      transform: scaleY(0.85);
-    }
-    /* its bracket close beside it */
-    .bubbly-angle-open:has(+ .bubbly-slash)::before {
-      margin-right: 0.5px;
-    }
-
-    /* an attribute's `=` a pixel clear of its name */
-    .bubbly-equals {
-      margin-left: 2px;
     }
 
     /* the closing mark sits low and narrow:  less room after it than before the opening one */
@@ -739,21 +758,6 @@
       corner-shape: bevel;
       vertical-align: top;
       white-space: nowrap;
-    }
-
-    /* a tag's name and its attributes' a little faded;  the name bold, but an end tag's */
-    .bubbly-tag-name,
-    .bubbly-attribute-name {
-      opacity: 0.75;
-    }
-    .bubbly-tag-name {
-      font-weight: 650;
-    }
-    .bubbly-tag-end .bubbly-tag-name {
-      font-weight: 400;
-    }
-    .bubbly-attribute-name {
-      margin-left: 0.33em;
     }
 
     /*
@@ -1085,14 +1089,12 @@
   }
 
   /*
-   * an HTML file in the editor (`MarkupMarks`):  the drawn-bubbly page's HTML, on the editor's lines
-   * - the box is a `.bubbly-html` too, so the HTML settings and rules above reach it;
-   *   these undo what's the page's alone, and draw the brackets over the file's own
+   * HTML's tags in the editor (`MarkupMarks`):  an HTML file's, and a Spell file's drawing's
+   * - the text:  the brackets drawn over the file's own, spacers where the page has room
+   * - the shapes:  in an HTML file the editor's box is a `.bubbly-html`;  in a Spell file they're drawn in a box of
+   *   HTML's in the layer (`bubbly-html-shapes`), so HTML's settings and rules reach them either way
    */
-  &.bubbly-monaco.bubbly-html {
-    /* the box is the editor's, not the page's column of rows */
-    display: block;
-
+  &.bubbly-monaco {
     /*
      * a tag's `<` and `>`:  the file's own keep their width, see-through, the page's `⟨` `⟩` drawn over them,
      * the open one at its left, the close one at its right
@@ -1136,15 +1138,7 @@
       font-weight: 400;
     }
 
-    /* spacers:  where the page has a tag's margin and padding, a line's inset */
-    /* before a block's start tag:  its words as far into its band as the page's */
-    .bubbly-head-spacer {
-      width: calc((var(--bubbly-pill-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
-    }
-    /* before a line of text:  in from the tags beside it, as on the page */
-    .bubbly-line-spacer {
-      width: calc((var(--bubbly-line-inset) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
-    }
+    /* spacers:  where the page has a tag's margin and padding */
     /* either side of a tag in a line:  its pill's room, and the gap outside it */
     .bubbly-tag-spacer {
       width: calc((var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
@@ -1161,9 +1155,38 @@
       width: calc(2px * var(--bubbly-monaco-scale));
     }
 
-    /* the rail stops at the end tag's band:  none beside it */
-    .bubbly-layer .bubbly-block > .bubbly-gutter {
+    /* a Spell file's drawing's tags' box of HTML's:  in the layer, nothing of a drawing's box but its settings */
+    .bubbly-layer .bubbly-html-shapes {
+      position: absolute;
+      inset: 0 auto auto 0;
+      display: block;
+      width: 0;
+      height: 0;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      background: none;
+      overflow: visible;
+    }
+    /* an HTML block's rail stops at its end tag's band:  none beside it */
+    :is(&.bubbly-html .bubbly-layer, .bubbly-html-shapes) .bubbly-block > .bubbly-gutter {
       padding-bottom: 0;
+    }
+  }
+
+  /* an HTML file in the editor:  the box is a `.bubbly-html` too;  these undo what's the page's alone */
+  &.bubbly-monaco.bubbly-html {
+    /* the box is the editor's, not the page's column of rows */
+    display: block;
+
+    /* spacers:  where the page has a line's inset */
+    /* before a block's start tag:  its words as far into its band as the page's */
+    .bubbly-head-spacer {
+      width: calc((var(--bubbly-pill-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+    }
+    /* before a line of text:  in from the tags beside it, as on the page */
+    .bubbly-line-spacer {
+      width: calc((var(--bubbly-line-inset) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
     }
   }
 }

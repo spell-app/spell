@@ -20,13 +20,18 @@
 export class BubblyMarkup {
   /** `source`, an HTML file or fragment, drawn bubbly. */
   static write(source: string): string {
-    const nodes = treeOf(tokensOf(source))
+    const nodes = treeOf(tokensOf(source, 0, source.length))
     return `<div class="bubbly bubbly-html">${new MarkupWriter(source).nodes(nodes)}</div>`
   }
 
-  /** `source`, an HTML file or fragment, read as its elements, text and comments, each with where it is in `source`. */
-  static treeOf(source: string): MarkupNode[] {
-    return treeOf(tokensOf(source))
+  /**
+   * `source`, an HTML file or fragment, read as its elements, text and comments, each with where it is in `source`;
+   * from `from` to `to` only, when given:  a Spell drawing's lines, in its file.
+   * - Spell's own forms too:  `</>` closes the element it's in, a tag's name may be any word (`<botón>`),
+   *   a quoted word on a tag (`<header "Hardware">`) is a value with no name, a `{…}` value is Spell's
+   */
+  static treeOf(source: string, from = 0, to = source.length): MarkupNode[] {
+    return treeOf(tokensOf(source, from, to))
   }
 
   /**
@@ -83,9 +88,12 @@ const MAX_INDENT = 4
  * where each is in the source, for the editor's marks.
  */
 export type MarkupAttribute = {
+  /** none for a tag's quoted word, `<header "Hardware">` */
   name: string
   value?: string
   isQuoted: boolean
+  /** a Spell expression, `{its color}`:  no pill */
+  isExpression?: boolean
   /** where its name starts */
   nameStart: number
   /** where its `=` is, if it has a value */
@@ -125,16 +133,16 @@ export type MarkupElement = {
 /** An element and what's inside it, or a piece of text, a comment or a doctype, each from where it starts to its end. */
 export type MarkupNode = { kind: "text" | "comment" | "doctype"; start: number; end: number } | MarkupElement
 
-/** `source`'s tokens. */
-function tokensOf(source: string): Token[] {
+/** `source`'s tokens, from `from` to `to`. */
+function tokensOf(source: string, from: number, to: number): Token[] {
   const tokens: Token[] = []
-  let at = 0
+  let at = from
   const text = (end: number) => {
     if (end > at) tokens.push({ kind: "text", start: at, end })
   }
-  while (at < source.length) {
+  while (at < to) {
     const next = source.indexOf("<", at)
-    if (next < 0) break
+    if (next < 0 || next >= to) break
     text(next)
     at = next
     if (source.startsWith("<!--", at)) {
@@ -150,13 +158,14 @@ function tokensOf(source: string): Token[] {
       at = end
       continue
     }
-    const endTag = /^<\/([A-Za-z][\w:-]*)\s*>/.exec(source.slice(at))
+    // `</>`:  Spell's, closing the element it's in
+    const endTag = /^<\/(\p{L}[\p{L}\d_:-]*)?\s*>/u.exec(source.slice(at, to))
     if (endTag) {
-      tokens.push({ kind: "end", start: at, end: at + endTag[0].length, tag: endTag[1]!.toLowerCase() })
+      tokens.push({ kind: "end", start: at, end: at + endTag[0].length, tag: (endTag[1] ?? "").toLowerCase() })
       at += endTag[0].length
       continue
     }
-    const startTag = /^<([A-Za-z][\w:-]*)/.exec(source.slice(at))
+    const startTag = /^<(\p{L}[\p{L}\d_:-]*)/u.exec(source.slice(at, to))
     if (!startTag) {
       // a `<` that starts no tag:  text
       at++
@@ -173,12 +182,16 @@ function tokensOf(source: string): Token[] {
       at = stop
     }
   }
-  if (at < source.length) tokens.push({ kind: "text", start: at, end: source.length })
+  if (at < to) tokens.push({ kind: "text", start: at, end: to })
   return tokens
 }
 
-/** One attribute, or a start tag's end:  `/>` or `>` (1), a name (2), a value in `"` (3), `'` (4) or neither (5). */
-const ATTRIBUTE_PATTERN = /\s*(?:(\/?>)|([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?|\/)/.source
+/**
+ * One attribute, or a start tag's end:  `/>` or `>` (1), a tag's quoted word (2), a name (3),
+ * a value in `"` (4), `'` (5), a Spell `{…}` (6) or neither (7).
+ */
+const ATTRIBUTE_PATTERN =
+  /\s*(?:(\/?>)|"([^"]*)"|([^\s=/>"]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|(\{[^}]*\})|([^\s>]+)))?|\/)/.source
 
 /** A start tag's attributes, from `at` just past its name, to its `>`. */
 function attributesFrom(
@@ -191,13 +204,27 @@ function attributesFrom(
   pattern.lastIndex = at
   for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
     if (match[1]) return { attributes, end: pattern.lastIndex, selfClosing: match[1] === "/>" }
-    if (!match[2]) continue
-    const [nameStart, nameEnd] = match.indices![2]!
-    const valueAt = match.indices![3] ?? match.indices![4] ?? match.indices![5]
+    const indices = match.indices!
+    if (match[2] !== undefined) {
+      const [start, end] = indices[2]!
+      attributes.push({
+        name: "",
+        value: match[2],
+        isQuoted: true,
+        nameStart: start - 1,
+        valueStart: start,
+        valueEnd: end
+      })
+      continue
+    }
+    if (!match[3]) continue
+    const [nameStart, nameEnd] = indices[3]!
+    const valueAt = indices[4] ?? indices[5] ?? indices[6] ?? indices[7]
     attributes.push({
-      name: match[2],
-      value: match[3] ?? match[4] ?? match[5],
-      isQuoted: match[5] === undefined,
+      name: match[3],
+      value: match[4] ?? match[5] ?? match[6] ?? match[7],
+      isQuoted: match[4] !== undefined || match[5] !== undefined,
+      ...(match[6] !== undefined ? { isExpression: true } : {}),
       nameStart,
       ...(valueAt ? { equalsAt: source.indexOf("=", nameEnd), valueStart: valueAt[0], valueEnd: valueAt[1] } : {})
     })
@@ -223,7 +250,8 @@ function treeOf(tokens: Token[]): MarkupNode[] {
       add(element)
       if (!token.selfClosing && !VOID.has(token.tag)) open.push(element)
     } else if (token.kind === "end") {
-      const index = open.findLastIndex((element) => element.tag === token.tag)
+      // `</>` closes the element it's in
+      const index = token.tag ? open.findLastIndex((element) => element.tag === token.tag) : open.length - 1
       if (index < 0) continue
       const element = open[index]!
       element.close = token
@@ -303,11 +331,12 @@ class MarkupWriter {
   /** A start tag on its band:  `<` faint, its name, each value a white pill. */
   private startTag(tag: MarkupStartTag): string {
     const attributes = tag.attributes
-      .map(({ name, value, isQuoted }) =>
-        value === undefined
-          ? ` <span class="bubbly-attribute-name">${escape(name)}</span>`
-          : ` <span class="bubbly-attribute-name">${escape(name)}</span><span class="bubbly-mark bubbly-equals">=</span>${valueOf(value, isQuoted)}`
-      )
+      .map(({ name, value, isQuoted, isExpression }) => {
+        const named = ` <span class="bubbly-attribute-name">${escape(name)}</span>`
+        if (value === undefined) return named
+        const shown = isExpression ? escape(value) : valueOf(value, isQuoted)
+        return name ? `${named}<span class="bubbly-mark bubbly-equals">=</span>${shown}` : ` ${shown}`
+      })
       .join("")
     return `<span class="bubbly-mark">${ANGLE_OPEN}</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? `${SLASH}${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
   }

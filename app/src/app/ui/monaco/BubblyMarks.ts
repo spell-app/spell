@@ -1,6 +1,7 @@
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import type { monaco } from "./monaco"
+import { MarkupMarks, type MarkupShape } from "./MarkupMarks"
 import { TextMarks, spacer } from "./TextMarks"
 
 /****************
@@ -29,7 +30,10 @@ export class BubblyMarks extends TextMarks {
   }
 
   /** The shapes at the top of the drawing, each holding those inside it. */
-  readonly shapes: BubblyShape[] = []
+  readonly shapes: Array<BubblyShape | MarkupShape> = []
+
+  /** A drawing's tags, `<text color="blue">`:  drawn as HTML is (`MarkupMarks`), so Spell's marks leave them alone. */
+  private readonly tags: Array<{ start: number; end: number }> = []
 
   /**
    * `tabSize`:  how many columns a tab takes, as the editor shows it:  the spacer before a head's last tab is that many
@@ -48,8 +52,13 @@ export class BubblyMarks extends TextMarks {
   ////////////////
 
   /** Mark `nodes`, adding their shapes to `into`. */
-  private nodes(nodes: SP.BubblyNode[], into: BubblyShape[]) {
-    for (const node of nodes) {
+  private nodes(nodes: SP.BubblyNode[], into: Array<BubblyShape | MarkupShape>) {
+    for (let index = 0; index < nodes.length; index++) {
+      const node = nodes[index]!
+      if (node.kind === "line" && this.drawing.text[node.start] === "<") {
+        index = this.markup(nodes, index, into)
+        continue
+      }
       switch (node.kind) {
         case "gap":
           break
@@ -63,8 +72,24 @@ export class BubblyMarks extends TextMarks {
     }
   }
 
+  /**
+   * A drawing's lines, from `nodes[first]`, the first that starts with a tag, to the last line before the next block:
+   * its tags drawn as HTML is, in pills, bands and blocks (`MarkupMarks.within()`), the rest as Spell;
+   * returns the index of its last line.
+   */
+  private markup(nodes: SP.BubblyNode[], first: number, into: Array<BubblyShape | MarkupShape>): number {
+    let last = first
+    while (nodes[last + 1] && nodes[last + 1]!.kind !== "block") last++
+    const lines = nodes.slice(first, last + 1).filter((node): node is SP.BubblyLine => node.kind === "line")
+    const tags = MarkupMarks.within(this.drawing.text, lines[0]!.start, lines.at(-1)!.end, this.marks)
+    this.tags.push(...tags.tags)
+    into.push(...tags.shapes)
+    for (const line of lines) this.line(line, into)
+    return last
+  }
+
   /** A declaration:  its band, the pills on it, and what's under it. */
-  private block(block: SP.BubblyBlock, into: BubblyShape[]) {
+  private block(block: SP.BubblyBlock, into: Array<BubblyShape | MarkupShape>) {
     const shape: BubblyBlockShape = {
       kind: "block",
       place: this.place(block.head.start, endOf(block)),
@@ -107,9 +132,15 @@ export class BubblyMarks extends TextMarks {
    * `band`:  it's a declaration's head, on a band of this part of speech.
    * a quoted one's own `"` marks see-through, the curly ones drawn over them, spacers outside them too.
    */
-  private line(line: SP.BubblyLine, into: BubblyShape[], head: { band?: SP.BubblyPartOfSpeech } = {}) {
+  private line(
+    line: SP.BubblyLine,
+    into: Array<BubblyShape | MarkupShape>,
+    head: { band?: SP.BubblyPartOfSpeech } = {}
+  ) {
     for (const stretch of SP.BubblyStretches.ofLine(this.drawing.text, line, head)) {
       const { start, end, kind } = stretch
+      // a drawing's tag:  HTML's marks
+      if (this.tags.some((tag) => start >= tag.start && end <= tag.end)) continue
       if (kind === "quote-open")
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-open`, { before: spacer("quote", "before") })
       else if (kind === "quote-close")
@@ -121,7 +152,10 @@ export class BubblyMarks extends TextMarks {
   }
 
   /** What a person typed:  its words with a spacer either side, a pill under them. */
-  private input({ start, end, kind, isQuoted = false, isName }: SP.BubblyStretch, into: BubblyShape[]) {
+  private input(
+    { start, end, kind, isQuoted = false, isName }: SP.BubblyStretch,
+    into: Array<BubblyShape | MarkupShape>
+  ) {
     const classes = [BubblyHtml.classesFor(kind as SP.BubblyPieceKind), ...(isName ? [NAME] : [])].join(" ")
     const place = this.mark(start, end, classes, {
       before: spacer("input", "before"),
@@ -172,8 +206,8 @@ export type BubblyBlockShape = {
   hasBody: boolean
   /** whether its head starts or ends with a pill, and a quoted one */
   ends: { startsWithInput: boolean; endsWithInput: boolean; endsQuoted: boolean }
-  /** the pills on its head and its lines, and the blocks in its body */
-  inside: BubblyShape[]
+  /** the pills on its head and its lines, and the blocks in its body;  a drawing's tags too */
+  inside: Array<BubblyShape | MarkupShape>
 }
 
 /** A pill under what a person typed (`bubbly-input`), or one of a list's values (`bubbly-choice`). */

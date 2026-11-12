@@ -6,6 +6,7 @@ import {
   type MarkupPartOfSpeech,
   type MarkupStartTag
 } from "spell/app/app/components/spell-code/BubblyMarkup"
+import type { monaco } from "./monaco"
 import { TextMarks, spacer, type Spacers } from "./TextMarks"
 import type { BubblyInputShape } from "./BubblyMarks"
 
@@ -30,15 +31,34 @@ import type { BubblyInputShape } from "./BubblyMarks"
 export class MarkupMarks extends TextMarks {
   /** `source`'s marks and shapes:  an HTML file or fragment. */
   static of(source: string): MarkupMarks {
-    return new MarkupMarks(source)
+    return new MarkupMarks(source, { from: 0, to: source.length, isInSpell: false })
+  }
+
+  /**
+   * The tags of a Spell drawing's lines, from `from` to `to` in `text`, its file:  marked into `marks`, Spell's;
+   * the lines themselves are Spell's to mark, at their own indent.
+   */
+  static within(text: string, from: number, to: number, marks: monaco.editor.IModelDeltaDecoration[]): MarkupMarks {
+    return new MarkupMarks(text, { from, to, isInSpell: true }, marks)
   }
 
   /** The shapes at the top of the drawing, each holding those inside it. */
   readonly shapes: MarkupShape[] = []
 
-  private constructor(source: string) {
-    super(source)
-    this.nodes(BubblyMarkup.treeOf(source), this.shapes)
+  /** Where each tag is:  a Spell drawing leaves them to these marks.  Not a `{…}` value in one:  that's Spell. */
+  readonly tags: Array<{ start: number; end: number }> = []
+
+  /** Lines of Spell, whose own marks are Spell's:  no spacers before them or a block's start tag. */
+  private readonly isInSpell: boolean
+
+  private constructor(
+    source: string,
+    { from, to, isInSpell }: { from: number; to: number; isInSpell: boolean },
+    marks?: monaco.editor.IModelDeltaDecoration[]
+  ) {
+    super(source, marks)
+    this.isInSpell = isInSpell
+    this.nodes(BubblyMarkup.treeOf(source, from, to), this.shapes)
   }
 
   ////////////////
@@ -50,7 +70,7 @@ export class MarkupMarks extends TextMarks {
     for (const node of nodes) {
       if (node.kind === "element") this.element(node, into)
       else if (node.kind === "doctype") this.doctype(node, into)
-      else this.lines(node, node.kind === "comment" ? COMMENT : "")
+      else if (!this.isInSpell) this.lines(node, node.kind === "comment" ? COMMENT : "")
     }
   }
 
@@ -84,7 +104,8 @@ export class MarkupMarks extends TextMarks {
       inside: []
     }
     into.push(block)
-    if (this.startsLine(open.start)) this.mark(open.start, open.start + 1, "", { before: spacer("head", "before") })
+    if (!this.isInSpell && this.startsLine(open.start))
+      this.mark(open.start, open.start + 1, "", { before: spacer("head", "before") })
     this.startTag(open, block.inside)
     this.nodes(element.children, block.inside)
     if (footStartsLine) {
@@ -102,6 +123,7 @@ export class MarkupMarks extends TextMarks {
       side: "start",
       isAlone: true
     })
+    this.tags.push({ start: node.start, end: node.end })
     this.mark(node.start, node.start + 1, ANGLE_OPEN)
     this.mark(node.end - 1, node.end, ANGLE_CLOSE)
   }
@@ -158,15 +180,24 @@ export class MarkupMarks extends TextMarks {
   /** A start tag's pieces:  its brackets, name and attributes;  a pill under each value, into `into`. */
   private startTag(tag: MarkupStartTag, into: MarkupShape[]) {
     const { start, end } = tag
+    let from = start
     this.mark(start, start + 1, ANGLE_OPEN)
     this.mark(start + 1, start + 1 + tag.tag.length, TAG_NAME)
     for (const attribute of tag.attributes) {
-      const nameEnd = attribute.nameStart + attribute.name.length
-      this.mark(attribute.nameStart, nameEnd, ATTRIBUTE_NAME, { before: spacer("attribute", "before") })
-      if (attribute.equalsAt === undefined || attribute.equalsAt < 0) continue
-      this.mark(attribute.equalsAt, attribute.equalsAt + 1, EQUALS, { before: spacer("equals", "before") })
-      this.value(attribute.valueStart!, attribute.valueEnd!, attribute.isQuoted, into)
+      if (attribute.name) {
+        const nameEnd = attribute.nameStart + attribute.name.length
+        this.mark(attribute.nameStart, nameEnd, ATTRIBUTE_NAME, { before: spacer("attribute", "before") })
+      }
+      if (attribute.equalsAt !== undefined && attribute.equalsAt >= 0)
+        this.mark(attribute.equalsAt, attribute.equalsAt + 1, EQUALS, { before: spacer("equals", "before") })
+      if (attribute.valueStart === undefined) continue
+      // a `{…}` value is Spell's to mark:  not the tag's
+      if (attribute.isExpression) {
+        this.tags.push({ start: from, end: attribute.valueStart })
+        from = attribute.valueEnd!
+      } else this.value(attribute.valueStart, attribute.valueEnd!, attribute.isQuoted, into)
     }
+    this.tags.push({ start: from, end })
     if (tag.selfClosing) this.mark(end - 2, end - 1, SLASH)
     this.mark(end - 1, end, ANGLE_CLOSE)
   }
@@ -174,6 +205,7 @@ export class MarkupMarks extends TextMarks {
   /** An end tag's pieces;  `"block"`:  a block's, its name faint as its marks are, as the page draws it. */
   private endTag(tag: MarkupEndTag, place: "block" | "inline") {
     const { start, end } = tag
+    this.tags.push({ start, end })
     this.mark(start, start + 1, ANGLE_OPEN)
     this.mark(start + 1, start + 2, SLASH)
     this.mark(start + 2, start + 2 + tag.tag.length, place === "block" ? `${MARK} ${END_NAME}` : END_NAME)

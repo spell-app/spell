@@ -310,12 +310,14 @@ export class SpellBubbly {
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (!range) continue
-      if (shape.kind === "block" || shape.kind === "markup-block") {
-        const block =
-          shape.kind === "block" ? this.drawBlock(shape, range, view) : this.drawMarkupBlock(shape, range, view)
+      if (shape.kind === "block") {
+        const block = this.drawBlock(shape, range, view)
         if (block) elements.push(block)
+      } else if (shape.kind === "markup-block") {
+        const block = this.drawMarkupBlock(shape, range, view)
+        if (block) elements.push(this.asHtml(block))
       } else if (range.startLineNumber < view.first || range.startLineNumber > view.last) continue
-      else if (shape.kind === "tag") elements.push(this.drawTag(shape, range, view))
+      else if (shape.kind === "tag") elements.push(this.asHtml(this.drawTag(shape, range, view)))
       else {
         const element = this.drawInput(shape.isChoice, range, view)
         if (element) elements.push(element)
@@ -439,6 +441,17 @@ export class SpellBubbly {
     return place(element(classes), { left, top, width: right - left }, measures.scale)
   }
 
+  /**
+   * `shape`, an HTML shape, as the sheet draws HTML:  in a Spell file, a drawing's tags, in a box of HTML's
+   * (`bubbly-html`) so its settings and rules reach them;  in an HTML file the editor's box is one already.
+   */
+  private asHtml(shape: HTMLElement): HTMLElement {
+    if (this.isMarkup) return shape
+    const box = element(HTML_BOX)
+    box.append(shape)
+    return box
+  }
+
   /** A pill under the words in `range`:  from the room before them to the end of the room after. */
   private drawInput(isChoice: boolean, range: monaco.Range, view: View): HTMLElement | undefined {
     const { measures, lineHeight } = view
@@ -522,10 +535,15 @@ export class SpellBubbly {
     const { fontSize } = editor.getOption(monaco.editor.EditorOption.fontInfo)
     const probe = element("bubbly-monaco-probe")
     container.append(probe)
-    const length = (variable: string) => {
-      probe.style.width = `var(${variable})`
-      return probe.getBoundingClientRect().width
+    const length = (variable: string, from = probe) => {
+      from.style.width = `var(${variable})`
+      return from.getBoundingClientRect().width
     }
+    // HTML's settings, as a Spell file's drawing's tags read them:  in a box of HTML's
+    const htmlBox = element(`${HTML_BOX} bubbly-monaco-probe`)
+    const htmlProbe = element("bubbly-monaco-probe")
+    htmlBox.append(htmlProbe)
+    container.append(htmlBox)
     /** How wide the spacer injected with `classes` is:  its own rule's width, at the editor's scale. */
     const spacerWidth = (classes: string) => {
       const spacer = Object.assign(document.createElement("span"), { className: `bubbly-spacer ${classes}` })
@@ -544,8 +562,8 @@ export class SpellBubbly {
       quoteSpacer: spacerWidth("bubbly-quote-spacer"),
       tagSpacer: spacerWidth("bubbly-tag-spacer"),
       touchSpacer: spacerWidth("bubbly-touch-spacer"),
-      bracketPad: length("--bubbly-bracket-pad") * scale,
-      footPillHeight: length("--bubbly-foot-pill-height") * scale,
+      bracketPad: length("--bubbly-bracket-pad", htmlProbe) * scale,
+      footPillHeight: length("--bubbly-foot-pill-height", htmlProbe) * scale,
       padLeft: length("--bubbly-pill-pad-left") * scale,
       padRight: length("--bubbly-pill-pad-right") * scale,
       endInset: length("--bubbly-end-inset") * scale,
@@ -556,6 +574,7 @@ export class SpellBubbly {
       footGap: length("--bubbly-line-gap") * scale
     }
     probe.remove()
+    htmlBox.remove()
     return this.measured
   }
 
@@ -664,6 +683,9 @@ const BOX_CLASSES = ["bubbly", "bubbly-monaco"]
 
 /** ... and an HTML file's:  the sheet's HTML settings and rules reach it. */
 const MARKUP_CLASS = "bubbly-html"
+
+/** The box a Spell file's drawing's tags are drawn in, in the layer:  HTML's settings and rules reach them there. */
+const HTML_BOX = "bubbly bubbly-html bubbly-html-shapes"
 
 /** Is `model` an HTML file, drawn as HTML?  By its name, as its language is plain text. */
 function isMarkupFile(model: monaco.editor.ITextModel): boolean {

@@ -9,14 +9,18 @@ import type { monaco } from "./monaco"
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
  ****************/
 export class TextMarks {
-  /** The decorations to set, in order:  a shape names its place by an index into them. */
-  readonly marks: monaco.editor.IModelDeltaDecoration[] = []
-
   /** Where each line starts in `text`. */
   private readonly lineStarts: number[] = []
 
-  /** `text`:  what the marks are on. */
-  protected constructor(protected readonly text: string) {
+  /**
+   * `text`:  what the marks are on
+   * `marks`:  the decorations to set, in order, a shape naming its place by an index into them;
+   *   another drawing's, to add to its own (a Spell drawing's tags, `MarkupMarks.within()`)
+   */
+  protected constructor(
+    protected readonly text: string,
+    readonly marks: monaco.editor.IModelDeltaDecoration[] = []
+  ) {
     let at = 0
     for (const line of text.split("\n")) {
       this.lineStarts.push(at)
