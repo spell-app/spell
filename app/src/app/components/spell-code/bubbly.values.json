@@ -203,6 +203,10 @@
     "--bubbly-depth": {
       "light": "1",
       "dark": "1"
+    },
+    "--bubbly-block-outer-corner": {
+      "light": "calc((12px + 8px) / 2)",
+      "dark": "calc((12px + 8px) / 2)"
     }
   },
   "parts": {
