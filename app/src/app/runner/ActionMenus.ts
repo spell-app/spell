@@ -57,7 +57,7 @@ export class ActionMenus {
    * Show the menu named by the nearest `context-menu=` on `event`'s path, from `thing` up its chain, where the
    * person right-clicked:  true if there was one.
    * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window.
-   * - SIDE EFFECT:  the browser's own menu doesn't show;
+   * - SIDE EFFECT:  the browser's own menu doesn't show, there or on the menu itself;
    *   the menu goes when an action runs, at Escape, or at a press anywhere else.
    */
   static showContextMenu(event: MouseEvent, stopAt: Element, thing: object | undefined, core: Core): boolean {
@@ -90,6 +90,8 @@ export class ActionMenus {
       (click) => click.composedPath().some((at) => (at as Element).localName === ACTION_TAG) && close()
     )
     popup.addEventListener("ui-closing", close)
+    // a right click on the menu itself:  never the browser's own menu over it
+    popup.addEventListener("contextmenu", (click) => click.preventDefault())
     return true
   }
 

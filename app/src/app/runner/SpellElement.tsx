@@ -388,12 +388,14 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /**
    * A press on a draggable thing:  a drag, if it moves -- see `Dragging`.
    * - Not one in a control inside it, e.g. a task's title field or checkbox:  that press is the control's.
+   * - Not a Control-click on a Mac:  that's a right click, its menu's (`contextmenu`), never a drag as well.
    * - In a list people may reorder (`its items can be reordered`), what's carried stays where it is, dimmed:
    *   our thing, or every selected one if it's selected -- see `carriedElements()`.
    */
   @E.on("pointerdown")
   protected onPointerDown(event: PointerEvent) {
     if (!this.isDraggable || event.button !== 0 || this.isInAControl(event)) return
+    if (event.ctrlKey && IS_MAC) return
     const onDrop = (target: HTMLElement | undefined) => this.dropOn(target)
     const onCancel = () => this.sendToThing("drag-cancelled")
     if (!SpellElement.reorders(this.ownerList)) return void new Dragging(this.domElement, event, { onDrop, onCancel })
@@ -884,14 +886,13 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const { core } = this.entry ?? {}
     if (!core?.input || LISTENING_CORES.has(core)) return
     LISTENING_CORES.add(core)
-    const isMac = /mac/i.test(navigator.platform || navigator.userAgent)
-    core.input.listen(window, { isMac })
+    core.input.listen(window, { isMac: IS_MAC })
     if (event instanceof KeyboardEvent || event instanceof MouseEvent) core.input.set({ shiftKey: event.shiftKey })
     core.input.onStillDown = (thing) => void core.send?.(thing, "mouse-still-down")?.catch(() => {})
     window.addEventListener("keydown", (key) => {
       const focused = SpellElement.focusedThing()
       // an action's shortcut takes the key first (epic `elemental-spell` P10, Q35 B)
-      if (ActionMenus.runShortcut(core, focused, key, isMac)) return
+      if (ActionMenus.runShortcut(core, focused, key, IS_MAC)) return
       void core.send?.(focused, "key-down", { key: key.key.toLowerCase() })?.catch(() => {})
     })
   }
@@ -1769,6 +1770,9 @@ Dragging.addDropRule({
     return !!component && component.takesDrag()
   }
 })
+
+/** Is this page's system a Mac:  its meta key is Command, and a Control-click is a right click. */
+const IS_MAC = typeof navigator !== "undefined" && /mac/i.test(navigator.platform || navigator.userAgent)
 
 /** What a press in starts no drag:  it's the control's, e.g. typing in a task's title. */
 const CONTROL_SELECTOR = "input, textarea, select, button, [contenteditable]:not([contenteditable=false])"

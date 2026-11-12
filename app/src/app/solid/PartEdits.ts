@@ -1,5 +1,6 @@
 import { setDebugGlobal } from "spell/util"
 import { Dragging } from "spell/util/Dragging"
+import { beforeNextPaint } from "spell/util/timing"
 
 import { SP } from "spell/parser/spell"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
@@ -85,7 +86,9 @@ export class PartEdits {
       if (!clipboard) return appTexts.text("partNothingCopied")
       return PartEdits.placeForNew() ? undefined : appTexts.text("partNoDrawing")
     }
-    const elements = Inspector.allSelected.flatMap((part) => part.element ?? [])
+    const elements = PartEdits.menuPart
+      ? [PartEdits.menuPart]
+      : Inspector.allSelected.flatMap((part) => part.element ?? [])
     if (!elements.length) return appTexts.text("partNothingSelected")
     if (action !== "copy" && elements.some(isTheApp)) return appTexts.text("partIsApp")
     for (const element of elements) {
@@ -97,7 +100,7 @@ export class PartEdits {
 
   /** Why what's selected can't be shown in the code, in words;  `undefined` if it can. */
   static get whyNoCode(): string | undefined {
-    const element = Inspector.allSelected.at(-1)?.element
+    const element = PartEdits.menuPart ?? Inspector.allSelected.at(-1)?.element
     return element && Inspector.writtenPlaceOf(element) ? undefined : appTexts.text("partNotWritten")
   }
 
@@ -199,7 +202,7 @@ export class PartEdits {
    * inside its one outer tag if that's all it has.
    */
   static placeForNew(): FilePlace | undefined {
-    const selected = Inspector.allSelected.at(-1)?.element
+    const selected = PartEdits.menuPart ?? Inspector.allSelected.at(-1)?.element
     const written = selected && PartEdits.writtenOf(selected)
     if (written && !("reason" in written)) {
       return {
@@ -390,8 +393,7 @@ export class PartEdits {
       if (isRunningApp() || shiftKey) return
       event.preventDefault()
       event.stopPropagation()
-      if (!Inspector.isSelected(element)) Inspector.select(element)
-      PartEdits.onMenu?.(clientX, clientY)
+      PartEdits.openMenu(element, clientX, clientY)
     })
   }
 
@@ -445,6 +447,7 @@ export class PartEdits {
    * Listen on `area`, in Edit, while it's the app's:  answers how to stop.
    * - A press on what's selected drags it, inspecting or not.
    * - A right click on a part selects it, if it isn't, and opens the part menu;  on the background, the app itself.
+   *   The browser's own menu never shows there:  `preventDefault()` comes first, before any other work.
    * - In Run the program has every right click;  with Shift held, the browser does, for its Inspect Element.
    * - The Menu key and Shift+F10 open the menu on what's selected.
    */
@@ -464,12 +467,12 @@ export class PartEdits {
       "contextmenu",
       (event) => {
         if (isRunningApp() || event.shiftKey) return
-        const part = partAt(event) ?? Inspector.partsIn(area)[0]?.element
-        if (!part) return
+        // first, before anything else:  the browser's own menu never shows over the app in Edit,
+        // nor the program's (`context-menu=`), even when there's no part to show ours for
         event.preventDefault()
         event.stopPropagation()
-        if (!Inspector.isSelected(part)) Inspector.select(part)
-        PartEdits.onMenu?.(event.clientX, event.clientY)
+        const part = partAt(event) ?? Inspector.partsIn(area)[0]?.element
+        if (part) PartEdits.openMenu(part, event.clientX, event.clientY)
       },
       options
     )
@@ -491,6 +494,38 @@ export class PartEdits {
 
   /** Told to open the part menu at a place:  `<PartMenu>`. */
   static onMenu: ((x: number, y: number) => void) | undefined
+
+  /**
+   * Open the part menu at (`x`, `y`) for `element`, selecting it if it isn't:  a right click on it, or on its row.
+   * - The menu first, the selection once the menu is on the screen:
+   *   selecting draws the Inspector's card for it, which can take half a second
+   *   (a button's card starts a code editor for its `onClick`).
+   * - Meanwhile the menu greys its items for `element` (`menuPart`),
+   *   and a click on one selects it first (`selectMenuPart()`).
+   */
+  static openMenu(element: Element, x: number, y: number): void {
+    if (Inspector.isSelected(element)) PartEdits.menuPart = undefined
+    else {
+      PartEdits.menuPart = element
+      beforeNextPaint(() => beforeNextPaint(() => PartEdits.selectMenuPart()))
+    }
+    PartEdits.onMenu?.(x, y)
+  }
+
+  /**
+   * Select the part the menu was opened for, if that's still to do (`openMenu()`).
+   * - Answers whether it did:  a reader of the selection right after must `flush()` first.
+   */
+  static selectMenuPart(): boolean {
+    const element = PartEdits.menuPart
+    PartEdits.menuPart = undefined
+    if (!element || Inspector.isSelected(element)) return false
+    Inspector.select(element)
+    return true
+  }
+
+  /** The part the menu is open for, not selected yet:  `openMenu()`. */
+  private static menuPart: Element | undefined
 }
 
 ////////////////
