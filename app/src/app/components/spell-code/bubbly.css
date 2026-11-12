@@ -301,12 +301,10 @@
     border-radius: var(--bubbly-inner-top) 0 0 var(--bubbly-block-inner-corner);
     padding: 2px 14px var(--bubbly-body-pad-bottom) calc(var(--bubbly-line-inset) + 4px);
   }
-  .bubbly-block > .bubbly-foot {
+  .bubbly-block > .bubbly-tag-end {
     grid-row: 3;
     grid-column: 1 / -1;
     justify-self: start;
-    width: var(--bubbly-foot-width);
-    height: var(--bubbly-foot-height);
     background: var(--bubbly-pill);
     border-radius: 0 calc(var(--bubbly-foot-height) / 2) calc(var(--bubbly-foot-height) / 2) 0;
   }
@@ -320,7 +318,7 @@
     grid-row: 2 / span 2;
     border-bottom-left-radius: var(--bubbly-gutter-corner);
   }
-  .bubbly-block > .bubbly-foot {
+  .bubbly-block > .bubbly-tag-end {
     margin-left: var(--bubbly-gutter-corner);
     width: calc(var(--bubbly-foot-width) - var(--bubbly-gutter-corner));
   }
@@ -351,7 +349,7 @@
   }
 
   /* every band, with a body or not:  one line exactly its setting tall (an input would push it a pixel taller) */
-  .bubbly-block > :is(.bubbly-head-pill, .bubbly-foot-pill),
+  .bubbly-block > :is(.bubbly-head-pill, .bubbly-tag-end),
   .bubbly-pill {
     background: var(--bubbly-pill);
     padding: max(0px, 2 * var(--bubbly-pill-nudge)) var(--bubbly-pill-pad-right) max(0px, -2 * var(--bubbly-pill-nudge))
@@ -646,7 +644,7 @@
   &.bubbly-html {
     /* how far each corner is cut:  a band's, the body's inner corners and the gutter's turn;  a value's white stays round */
     --bubbly-pill-radius: 15px;
-    --bubbly-block-inner-corner: 5px;
+    --bubbly-block-inner-corner: 15px;
     /* the body's top corner, under its band:  the same as its bottom one */
     --bubbly-inner-top: var(--bubbly-block-inner-corner);
     /* a block's outer corners, its start tag's top-left and its end tag's bottom-left:  between a band's and its body's */
@@ -675,18 +673,6 @@
 
     :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body) {
       corner-shape: bevel;
-    }
-
-    /*
-     * a value's white at the top of its band's line, a pixel down:  so it doesn't make the line taller, which would
-     * push the band's words down from its middle
-     */
-    .bubbly-input {
-      vertical-align: top;
-      top: 1px;
-      /* its words a pixel up as well, as high in their white as a band's are in it:  the pixel moved below them */
-      padding-top: calc(var(--bubbly-input-pad-top) - 1px);
-      padding-bottom: 1px;
     }
 
     /*
@@ -725,7 +711,7 @@
 
     /* an attribute's `=` a pixel clear of its name */
     .bubbly-equals {
-      margin-left: 3px;
+      margin-left: 2px;
     }
 
     /* the closing mark sits low and narrow:  less room after it than before the opening one */
@@ -754,17 +740,18 @@
       white-space: nowrap;
     }
 
-    .bubbly-head-pill {
-      padding-left: 2px;
+    .bubbly-tag-name {
+      font-weight: 650;
+      opacity: 0.75;
     }
-
-    .bubbly-tag-name,
-    .bubbly-attribute-name {
+    .bubbly-tag-end .bubbly-tag-name {
+      font-weight: 400;
       opacity: 0.75;
     }
 
     .bubbly-attribute-name {
       margin-left: 0.33em;
+      opacity: 0.75;
     }
 
     /*
@@ -841,12 +828,11 @@
     }
 
     /* a block's end tag:  shorter, its point at the same slant, its words a pixel up as a band's are */
-    .bubbly-block > .bubbly-foot.bubbly-foot-pill {
+    .bubbly-block > .bubbly-tag-end {
       --bubbly-foot-corner: calc(var(--bubbly-foot-pill-height) / 2 * var(--bubbly-tag-slope))
         calc(var(--bubbly-foot-pill-height) / 2);
       height: var(--bubbly-foot-pill-height);
-      /* its words 3px further left than a start tag's, its band ending as far after them */
-      padding-left: 4px;
+      padding-left: 7px;
       line-height: calc(var(--bubbly-foot-pill-height) + 2 * var(--bubbly-pill-nudge));
       border-top-right-radius: var(--bubbly-foot-corner);
       border-bottom-right-radius: var(--bubbly-foot-corner);
@@ -856,7 +842,7 @@
       /* the body's paper, not a margin:  its gutter runs on down beside it into its own end tag */
       padding-bottom: calc(var(--bubbly-foot-pill-gap) - var(--bubbly-line-gap) / 2);
     }
-  }
+  } /* END bubbly-html */
 
   /****** what only the editor has (epic `language` P50):  spacers injected in the text, the layer of shapes ******/
   &.bubbly-monaco {
