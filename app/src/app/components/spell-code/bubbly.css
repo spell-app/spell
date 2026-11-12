@@ -649,7 +649,7 @@
     /* a band's words a pixel up, so the point of a tag's `<` meets the point its corners cut to */
     --bubbly-pill-nudge: -1px;
     /* how much wider than tall each half of a tag's `❮` is, in the system font:  a band's pointed ends are cut at its slant */
-    --bubbly-tag-slope: 0.62;
+    --bubbly-tag-slope: 0.77;
     /* a pointed end:  its corners, across and down, which meet at the middle of the band */
     --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope)) calc(var(--bubbly-pill-height) / 2);
     /* a tag's bracket this close to the point it sits in */

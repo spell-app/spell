@@ -209,12 +209,12 @@
       "dark": "calc((12px + 8px) / 2)"
     },
     "--bubbly-tag-slope": {
-      "light": "0.62",
-      "dark": "0.62"
+      "light": "0.77",
+      "dark": "0.77"
     },
     "--bubbly-tag-corner": {
-      "light": "calc(23px / 2 * 0.62) calc(23px / 2)",
-      "dark": "calc(23px / 2 * 0.62) calc(23px / 2)"
+      "light": "calc(23px / 2 * 0.77) calc(23px / 2)",
+      "dark": "calc(23px / 2 * 0.77) calc(23px / 2)"
     },
     "--bubbly-tag-pad": {
       "light": "1.5px",
@@ -229,8 +229,8 @@
       "dark": "4px"
     },
     "--bubbly-foot-corner": {
-      "light": "calc(calc(23px - 4px) / 2 * 0.62) calc(calc(23px - 4px) / 2)",
-      "dark": "calc(calc(23px - 4px) / 2 * 0.62) calc(calc(23px - 4px) / 2)"
+      "light": "calc(calc(23px - 4px) / 2 * 0.77) calc(calc(23px - 4px) / 2)",
+      "dark": "calc(calc(23px - 4px) / 2 * 0.77) calc(calc(23px - 4px) / 2)"
     }
   },
   "parts": {
