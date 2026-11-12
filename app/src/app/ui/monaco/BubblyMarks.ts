@@ -118,7 +118,7 @@ export class BubblyMarks {
       else if (kind === "quote-close")
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: spacer("quote", "after") })
       else if (kind === "input" || kind === "choice") this.input(stretch, into)
-      else if (kind === "comment" && head.band) this.mark(start, end, `${BubblyHtml.classesFor(kind)} ${ON_BAND}`)
+      else if (kind === "comment" && head.band) this.mark(start, end, `${BubblyHtml.classesFor(kind)} ${BAND_COMMENT}`)
       else this.mark(start, end, BubblyHtml.classesFor(kind))
     }
   }
@@ -245,7 +245,7 @@ const NAME = "bubbly-name"
 const QUOTE_MARK = "bubbly-quote-mark"
 
 /** A comment at the end of a head, on its band:  the page's is inside the band's element, the editor's isn't. */
-const ON_BAND = "bubbly-on-band"
+const BAND_COMMENT = "bubbly-band-comment"
 
 /**
  * A spacer either side of a pill's words (`input`), or outside a quoted one's marks (`quote`):

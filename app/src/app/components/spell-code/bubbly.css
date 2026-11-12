@@ -216,9 +216,9 @@
   }
 
   /* marks on a band:  faint on its colour */
-  .bubbly-head,
+  .bubbly-head-pill,
   .bubbly-pill,
-  .bubbly-closer {
+  .bubbly-foot-pill {
     --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
   }
 
@@ -229,7 +229,7 @@
    * (`a "card"`, `group "Rank"`), and each value a list declares (`is one of ace, 2 ... 10, jack`)
    */
   .bubbly-reference,
-  :is(.bubbly-head, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input,
+  :is(.bubbly-head-pill, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input,
   .bubbly-input.bubbly-name,
   .bubbly-input.bubbly-choice {
     font-weight: var(--bubbly-bold);
@@ -277,7 +277,7 @@
     width: max-content;
     margin: var(--bubbly-line-gap) 0;
   }
-  .bubbly-block > .bubbly-head {
+  .bubbly-block > .bubbly-head-pill {
     grid-row: 1;
     grid-column: 1 / -1;
     justify-self: start;
@@ -349,7 +349,7 @@
   }
 
   /* every band, with a body or not:  one line exactly its setting tall (an input would push it a pixel taller) */
-  .bubbly-block > :is(.bubbly-head, .bubbly-closer),
+  .bubbly-block > :is(.bubbly-head-pill, .bubbly-foot-pill),
   .bubbly-pill {
     background: var(--bubbly-pill);
     padding: max(0px, 2 * var(--bubbly-pill-nudge)) var(--bubbly-pill-pad-right) max(0px, -2 * var(--bubbly-pill-nudge))
@@ -390,8 +390,8 @@
   }
 
   /* a note at the end of a head, on its band:  darker than a mark there, so it reads on the band's colour */
-  :is(.bubbly-head, .bubbly-pill) .bubbly-comment,
-  .bubbly-comment.bubbly-on-band {
+  :is(.bubbly-head-pill, .bubbly-pill) .bubbly-comment,
+  .bubbly-comment.bubbly-band-comment {
     color: var(--bubbly-band-comment);
   }
 
@@ -499,7 +499,7 @@
    * a band that ENDS with a white input:  the input sits as far from the round end as from the band's top and bottom;
    * a band ending in Spell's own words (`solitaire is an app`) keeps its usual padding
    */
-  :is(.bubbly-head, .bubbly-pill).bubbly-ends-input {
+  :is(.bubbly-head-pill, .bubbly-pill).bubbly-ends-input {
     padding-right: var(--bubbly-end-inset);
 
     > .bubbly-input:last-child {
@@ -516,7 +516,7 @@
    * a band that STARTS with a white input (`"deck" is a new deck`):  the input as near the round end as its mark allows,
    * not a word's padding plus a gap
    */
-  :is(.bubbly-head, .bubbly-pill).bubbly-starts-input {
+  :is(.bubbly-head-pill, .bubbly-pill).bubbly-starts-input {
     padding-left: var(--bubbly-end-inset);
 
     > .bubbly-input:first-child {
@@ -608,7 +608,7 @@
   /****** the analysis page's mock-ups only (`spellml-or-plain.html`):  the tag form, which the code no longer draws ******/
 
   /* a tag's closer, `</>` or `</property>`, as a tab of the band */
-  .bubbly-block > .bubbly-foot.bubbly-closer {
+  .bubbly-block > .bubbly-foot.bubbly-foot-pill {
     width: auto;
     border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) var(--bubbly-pill-radius);
   }
@@ -644,7 +644,7 @@
     /* a band's words clear of its cut left corner */
     --bubbly-pill-pad-left: 6px;
 
-    :is(.bubbly-head, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body, .bubbly-input) {
+    :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body, .bubbly-input) {
       corner-shape: bevel;
     }
 
@@ -659,7 +659,7 @@
       grid-row: 2;
       border-bottom-left-radius: 0;
     }
-    .bubbly-block > .bubbly-foot.bubbly-closer {
+    .bubbly-block > .bubbly-foot.bubbly-foot-pill {
       margin-left: 0;
       border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) var(--bubbly-pill-radius);
     }
@@ -708,7 +708,7 @@
         )
         scale(var(--bubbly-monaco-scale));
     }
-    .bubbly-layer :is(.bubbly-head, .bubbly-pill, .bubbly-gutter, .bubbly-body, .bubbly-foot, .bubbly-input) {
+    .bubbly-layer :is(.bubbly-head-pill, .bubbly-pill, .bubbly-gutter, .bubbly-body, .bubbly-foot, .bubbly-input) {
       position: absolute;
       padding: 0;
       box-sizing: border-box;
@@ -718,7 +718,7 @@
       margin: 0;
     }
     /* a band sits on its line's middle;  an input's own rule places it */
-    .bubbly-layer :is(.bubbly-head, .bubbly-pill) {
+    .bubbly-layer :is(.bubbly-head-pill, .bubbly-pill) {
       translate: 0 -50%;
     }
 

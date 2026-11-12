@@ -331,7 +331,7 @@ export class SpellBubbly {
       const right = !ends.endsWithInput
         ? lineEnd + measures.padRight
         : lineEnd + (ends.endsQuoted ? measures.quoteSpacer : measures.inputSpacer) + measures.endInset
-      const band = element(hasBody ? "bubbly-head" : "bubbly-pill")
+      const band = element(hasBody ? "bubbly-head-pill" : "bubbly-pill")
       if (ends.startsWithInput) band.classList.add("bubbly-starts-input")
       if (ends.endsWithInput) band.classList.add("bubbly-ends-input")
       block.append(place(band, { left, top: headTop + lineHeight / 2, width: right - left }, measures.scale))

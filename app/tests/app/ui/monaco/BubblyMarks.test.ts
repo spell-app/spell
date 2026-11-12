@@ -138,7 +138,7 @@ describe("bubbly.css", () => {
     const classes = new Set<string>()
     for (const mark of marked().marks)
       for (const each of mark.options.inlineClassName?.split(" ") ?? []) classes.add(each)
-    for (const each of ["bubbly-input-spacer", "bubbly-quote-spacer", "bubbly-layer", "bubbly-shapes", "bubbly-head"])
+    for (const each of ["bubbly-input-spacer", "bubbly-quote-spacer", "bubbly-layer", "bubbly-shapes", "bubbly-head-pill"])
       classes.add(each)
     for (const each of ["bubbly-pill", "bubbly-gutter", "bubbly-body", "bubbly-foot", "bubbly-control"])
       classes.add(each)
@@ -151,7 +151,7 @@ describe("bubbly.css", () => {
     expect(sheet).not.toContain(".view-line .bubbly-quote-mark")
     const quoteMark = sheet.indexOf(".bubbly-quote-close::after {")
     expect(sheet.indexOf("&.bubbly-monaco {", quoteMark)).toBeLessThan(
-      sheet.indexOf(":is(.bubbly-head, .bubbly-pill).bubbly-ends-input")
+      sheet.indexOf(":is(.bubbly-head-pill, .bubbly-pill).bubbly-ends-input")
     )
     // what has no page twin:  one marked section, the last in `.bubbly`
     const marker = "what only the editor has (epic `language` P50)"

@@ -3,7 +3,7 @@
  * HTML source drawn in the bubbly look, as HTML in the classes of the look's ONE sheet, `bubbly.css` beside it
  * (epic `language`, Owen 2026-11-11):  the same shapes as Spell's, their corners cut (`bubbly-html`).
  * - Each element with children on lines of their own is a `bubbly-block`:
- *   its start tag the band, its children the body, its end tag a band of its own under the rail (`bubbly-closer`).
+ *   its start tag the band, its children the body, its end tag a band of its own under the rail (`bubbly-foot-pill`).
  * - An element on one line, or with nothing inside, is a `bubbly-pill`:  start tag, what's inside, end tag.
  * - An attribute's value is a white pill on its band (`bubbly-input`);  `<`, `=` and `>` are faint marks.
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
@@ -214,10 +214,10 @@ class MarkupWriter {
     if (!inside.length || !insideText.includes("\n"))
       return `<p class="bubbly-pill ${kind}">${this.startTag(element.open)}${this.inline(element.children)}${this.endTag(element.close)}</p>`
     return (
-      `<div class="bubbly-block ${kind}"><p class="bubbly-head">${this.startTag(element.open)}</p>` +
+      `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill">${this.startTag(element.open)}</p>` +
       `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>` +
       (element.close
-        ? `<p class="bubbly-foot bubbly-closer">${this.endTag(element.close)}</p>`
+        ? `<p class="bubbly-foot bubbly-foot-pill">${this.endTag(element.close)}</p>`
         : `<div class="bubbly-foot"></div>`) +
       `</div>`
     )
