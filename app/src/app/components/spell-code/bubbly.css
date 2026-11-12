@@ -649,7 +649,7 @@
     /* a band's words a pixel up, so the point of a tag's `<` meets the point its corners cut to */
     --bubbly-pill-nudge: -1px;
     /* how much wider than tall each half of a `<` is, in the system font:  a tag pill's ends are cut at its slant */
-    --bubbly-tag-slope: 1.9;
+    --bubbly-tag-slope: 2.6;
     /* a band's words clear of its cut left corner */
     --bubbly-pill-pad-left: 6px;
 
@@ -687,6 +687,9 @@
       margin: 0 var(--bubbly-input-gap);
       background: var(--bubbly-pill);
       border-radius: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope)) / calc(var(--bubbly-pill-height) / 2);
+      /* wide enough for both cuts whole:  a narrower one would shrink them, its ends square */
+      min-width: calc(var(--bubbly-pill-height) * var(--bubbly-tag-slope));
+      text-align: center;
       corner-shape: bevel;
       vertical-align: middle;
       white-space: nowrap;
