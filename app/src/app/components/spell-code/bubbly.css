@@ -648,8 +648,8 @@
     --bubbly-block-outer-corner: calc((var(--bubbly-pill-radius) + var(--bubbly-block-inner-corner)) / 2);
     /* a band's words a pixel up, so the point of a tag's `<` meets the point its corners cut to */
     --bubbly-pill-nudge: -1px;
-    /* how much wider than tall each half of a `<` is, in the system font:  a tag pill's ends are cut at its slant */
-    --bubbly-tag-slope: 2.6;
+    /* how much wider than tall each half of a tag's `❮` is, in the system font:  a tag pill's ends are cut at its slant */
+    --bubbly-tag-slope: 0.78;
     /* a band's words clear of its cut left corner */
     --bubbly-pill-pad-left: 6px;
 
@@ -667,6 +667,23 @@
       /* its words a pixel up as well, as high in their white as a band's are in it:  the pixel moved below them */
       padding-top: calc(var(--bubbly-input-pad-top) - 1px);
       padding-bottom: 1px;
+    }
+
+    /*
+     * a tag's `<` and `>` drawn as heavy angle brackets, `❮` `❯`, steeper and a little smaller
+     * - the file's own characters kept, unseen and no width, so a copied line copies them
+     */
+    .bubbly-angle {
+      font-size: 0;
+    }
+    .bubbly-angle::before {
+      font-size: calc(var(--bubbly-font-size) * 0.8);
+    }
+    .bubbly-angle-open::before {
+      content: "\276E";
+    }
+    .bubbly-angle-close::before {
+      content: "\276F";
     }
 
     /* a band's first quoted value isn't a name it defines, as in Spell:  at the plain weight */

@@ -6,7 +6,7 @@
  *   its start tag the band, its children the body, its end tag a band of its own under the rail (`bubbly-foot-pill`).
  * - An element on one line, or with nothing inside, is a `bubbly-pill`:  start tag, what's inside, end tag.
  * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
- *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks.
+ *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `❮` `❯`.
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
  * - Text, a `<style>`'s or `<script>`'s lines, a comment:  plain lines in their element's body.
  * - Its own small reader, not a full HTML parser:  enough for hand-written pages, the drawn-bubbly page's examples.
@@ -261,7 +261,7 @@ class MarkupWriter {
           : ` ${escape(name)}<span class="bubbly-mark">=</span>${valueOf(value, isQuoted)}`
       )
       .join("")
-    return `<span class="bubbly-mark">&lt;</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? "/&gt;" : "&gt;"}</span>`
+    return `<span class="bubbly-mark">${ANGLE_OPEN}</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? `/${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
   }
 
   /**
@@ -272,8 +272,8 @@ class MarkupWriter {
     if (!tag) return ""
     const name = `<span class="bubbly-tag-name">${tag.tag}</span>`
     return place === "block"
-      ? `<span class="bubbly-mark">&lt;/${name}&gt;</span>`
-      : `<span class="bubbly-mark">&lt;/</span>${name}<span class="bubbly-mark">&gt;</span>`
+      ? `<span class="bubbly-mark">${ANGLE_OPEN}/${name}${ANGLE_CLOSE}</span>`
+      : `<span class="bubbly-mark">${ANGLE_OPEN}/</span>${name}<span class="bubbly-mark">${ANGLE_CLOSE}</span>`
   }
 
   /** Text on lines of its own:  each line in its body, its indent kept past the text's own;  blank lines a gap. */
@@ -318,7 +318,7 @@ class MarkupWriter {
 
 /** `<!doctype html>`:  its `<` and `>` faint. */
 function marks(text: string): string {
-  return `<span class="bubbly-mark">&lt;</span>${escape(text.slice(1, -1))}<span class="bubbly-mark">&gt;</span>`
+  return `<span class="bubbly-mark">${ANGLE_OPEN}</span>${escape(text.slice(1, -1))}<span class="bubbly-mark">${ANGLE_CLOSE}</span>`
 }
 
 /** A value's white pill;  a quoted one's own `"` kept, see-through, its curly marks drawn just outside it, as Spell's. */
@@ -328,6 +328,13 @@ function valueOf(value: string, isQuoted: boolean): string {
     ? `<span class="bubbly-quoted"><span class="bubbly-input">${QUOTE_OPEN}${words}${QUOTE_CLOSE}</span></span>`
     : `<span class="bubbly-input">${words}</span>`
 }
+
+/**
+ * A tag's `<` and `>`, drawn as heavy angle brackets, `❮` `❯`:  steeper, nearer the slant its pill's ends are cut at
+ * (Owen).  The file's own `<` and `>` are kept, unseen, so a copied line copies them (`bubbly-angle`).
+ */
+const ANGLE_OPEN = `<span class="bubbly-angle bubbly-angle-open">&lt;</span>`
+const ANGLE_CLOSE = `<span class="bubbly-angle bubbly-angle-close">&gt;</span>`
 
 /** A quoted value's marks:  the file's own `"`, kept for copying, its curly mark drawn by the sheet. */
 const QUOTE_OPEN = `<span class="bubbly-quote-mark bubbly-quote-open">"</span>`
