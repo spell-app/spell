@@ -69,7 +69,9 @@ export class SpellBubbly {
     private readonly editor: monaco.editor.ICodeEditor,
     private readonly languages: readonly string[]
   ) {
-    const later = () => this.refresh()
+    // in a microtask, never in the middle of Monaco's own work:  Monaco gives a new editor its model inside
+    // `create()`, before whoever made it can say to leave it out (`<CodeSlice>`'s `leaveOut()`)
+    const later = () => this.refreshSoon()
     const redrawSoon = () => this.redrawSoon()
     codeLook.followers.add(later)
     editor.onDidChangeModel(later)
@@ -95,7 +97,7 @@ export class SpellBubbly {
       clearTimeout(this.relayoutTimer)
     })
     // its model comes after it's made:  `create()` sets it once its container's in the page
-    queueMicrotask(later)
+    later()
   }
 
   ////////////////
@@ -110,6 +112,16 @@ export class SpellBubbly {
       if (!this.isDrawing) this.start()
       this.relayout()
     } else if (this.isDrawing) this.stop()
+  }
+
+  /** `refresh()` in a microtask, once however many ask first. */
+  private refreshSoon() {
+    if (this.isRefreshQueued) return
+    this.isRefreshQueued = true
+    queueMicrotask(() => {
+      this.isRefreshQueued = false
+      this.refresh()
+    })
   }
 
   /** Should it draw now? */
@@ -613,6 +625,9 @@ export class SpellBubbly {
 
   /** The wait before laying out again. */
   private relayoutTimer: ReturnType<typeof setTimeout> | undefined
+
+  /** A `refresh()` is waiting for its microtask. */
+  private isRefreshQueued = false
 
   /** A redraw is waiting for the next frame. */
   private isRedrawQueued = false
