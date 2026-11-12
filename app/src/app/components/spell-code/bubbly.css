@@ -769,10 +769,10 @@
     }
 
     /* a start tag and its end tag with nothing between:  their points touch */
-    .bubbly-tag-pill:has(+ .bubbly-tag-pill) {
+    .bubbly-tags-touch:has(+ .bubbly-tags-touch) {
       margin-right: 0;
     }
-    .bubbly-tag-pill + .bubbly-tag-pill {
+    .bubbly-tags-touch + .bubbly-tags-touch {
       margin-left: 0;
     }
     /* a line that starts with a tag:  its pill where a band would start, left of the body's lines as a band is */

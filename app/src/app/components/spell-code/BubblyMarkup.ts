@@ -246,8 +246,10 @@ class MarkupWriter {
 
   /** An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill of its own. */
   private tagPills(element: Extract<MarkupNode, { kind: "element" }>): string {
-    const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
     const inside = this.inline(element.children)
+    // nothing between its tags:  their points touch
+    const touching = inside ? "" : " bubbly-tags-touch"
+    const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}${touching}`
     const close = element.close ? `<span class="${kind}">${this.endTag(element.close)}</span>` : ""
     return `<span class="${kind}">${this.startTag(element.open)}</span>${inside}${close}`
   }
