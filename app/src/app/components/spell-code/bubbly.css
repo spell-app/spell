@@ -664,6 +664,9 @@
     .bubbly-input {
       vertical-align: top;
       top: 1px;
+      /* its words a pixel up as well, as high in their white as a band's are in it:  the pixel moved below them */
+      padding-top: calc(var(--bubbly-input-pad-top) - 1px);
+      padding-bottom: 1px;
     }
 
     /* a band's first quoted value isn't a name it defines, as in Spell:  at the plain weight */
