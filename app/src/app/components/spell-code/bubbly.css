@@ -79,8 +79,8 @@
    * this far left of its body's lines, so its words line up with the lines around it
    */
   --bubbly-line-inset: 18px; /* NON-MONACO */
-  /* every band's words start this far in from its round end, at any level */
-  --bubbly-pill-pad-left: 12px;
+  /* every band's words start this far in from its round end, at any level;  its round end this far left of its line */
+  --bubbly-pill-pad-left: 3px;
   --bubbly-pill-pad-right: 16px;
   /* in the editor, a head line's words this much further in than the lines under it, its band where it was (Owen) */
   --bubbly-pill-left-shift: 8.5px;
@@ -730,7 +730,7 @@
     /* a block's band's words clear of its cut top-left corner */
     --bubbly-pill-pad-left: 6px;
 
-    :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body) {
+    :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-tag-end, .bubbly-gutter, .bubbly-body) {
       corner-shape: bevel;
     }
 
@@ -1121,9 +1121,15 @@
      * a tag's marks:  as dark as the page's on a band, which mixes its faint ink with the band's colour;
      * the text knows no band, so a little darker than the paper's faint ink instead
      */
-    --bubbly-band-mark: color-mix(in srgb, var(--bubbly-ink) 42%, var(--bubbly-paper));
+    --bubbly-band-mark: color-mix(in srgb, var(--bubbly-ink) 32%, var(--bubbly-paper));
+    /* ... an end tag's fainter still */
+    --bubbly-end-mark: color-mix(in srgb, var(--bubbly-ink) 22%, var(--bubbly-paper));
     .view-line .bubbly-mark {
       color: var(--bubbly-band-mark);
+    }
+    .view-line .bubbly-mark.bubbly-tag-end,
+    .view-line .bubbly-angle.bubbly-tag-end::before {
+      color: var(--bubbly-end-mark);
     }
     /* ... but a bracket's own character, under the one drawn over it */
     .view-line .bubbly-mark.bubbly-angle {

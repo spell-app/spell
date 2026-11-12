@@ -216,10 +216,11 @@ export class MarkupMarks extends TextMarks {
   private endTag(tag: MarkupEndTag, place: "block" | "inline") {
     const { start, end } = tag
     this.tags.push({ start, end })
-    this.mark(start, start + 1, ANGLE_OPEN)
-    this.mark(start + 1, start + 2, SLASH)
+    // every piece an end tag's (`bubbly-tag-end`):  its marks fainter than a start tag's
+    this.mark(start, start + 1, `${ANGLE_OPEN} ${END}`)
+    this.mark(start + 1, start + 2, `${SLASH} ${END}`)
     this.mark(start + 2, start + 2 + tag.tag.length, place === "block" ? `${MARK} ${END_NAME}` : END_NAME)
-    this.mark(end - 1, end, ANGLE_CLOSE)
+    this.mark(end - 1, end, `${ANGLE_CLOSE} ${END}`)
   }
 
   /** An attribute's value:  its words with a spacer either side, a pill under them;  a quoted one's marks outside. */
@@ -310,8 +311,9 @@ const SLASH = `${MARK} bubbly-slash`
 const TAG_NAME = "bubbly-tag-name"
 const ATTRIBUTE_NAME = "bubbly-attribute-name"
 
-/** An end tag's name:  not bold, as the page draws it (its `.bubbly-tag-end` holds it there). */
-const END_NAME = `${TAG_NAME} bubbly-tag-end`
+/** An end tag's pieces:  its marks fainter, its name not bold, as the page draws it (its `.bubbly-tag-end` holds them). */
+const END = "bubbly-tag-end"
+const END_NAME = `${TAG_NAME} ${END}`
 
 /** An attribute's `=`. */
 const EQUALS = `${MARK} bubbly-equals`

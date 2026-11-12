@@ -97,8 +97,8 @@
       "dark": "18px"
     },
     "--bubbly-pill-pad-left": {
-      "light": "12px",
-      "dark": "12px"
+      "light": "3px",
+      "dark": "3px"
     },
     "--bubbly-pill-pad-right": {
       "light": "16px",
@@ -143,6 +143,10 @@
     "--bubbly-input-gap": {
       "light": "2px",
       "dark": "2px"
+    },
+    "--bubbly-bracket-pad": {
+      "light": "3px",
+      "dark": "3px"
     },
     "--bubbly-input-pad": {
       "light": "8px",
@@ -220,10 +224,6 @@
       "light": "calc(23px / 2 * 0.62) calc(23px / 2)",
       "dark": "calc(23px / 2 * 0.62) calc(23px / 2)"
     },
-    "--bubbly-bracket-pad": {
-      "light": "3px",
-      "dark": "3px"
-    },
     "--bubbly-foot-pill-height": {
       "light": "calc(23px - 2px)",
       "dark": "calc(23px - 2px)"
@@ -253,16 +253,20 @@
       "dark": "calc( round( nearest, ( 1px + 3px + max(0px, 3px - calc((calc(25px / 0.9375) - 23px) / 2)) ) * 0.9375, 1px ) / 0.9375 - 1px - 3px )"
     },
     "--bubbly-head-words": {
-      "light": "calc(12px + 8.5px)",
-      "dark": "calc(12px + 8.5px)"
+      "light": "calc(3px + 8.5px)",
+      "dark": "calc(3px + 8.5px)"
     },
     "--bubbly-quote-char": {
       "light": "7.33px",
       "dark": "7.33px"
     },
     "--bubbly-band-mark": {
-      "light": "#acacb0",
-      "dark": "#6d6c74"
+      "light": "#c0c0c3",
+      "dark": "#5a5961"
+    },
+    "--bubbly-end-mark": {
+      "light": "#d4d4d6",
+      "dark": "#47464d"
     }
   },
   "parts": {

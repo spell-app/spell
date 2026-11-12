@@ -141,6 +141,15 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return this.direction === VERTICAL
   }
 
+  /**
+   * It's what a popup holds, a right click's menu:  `:state(in-popup)`.
+   * - The popup is its frame, so it draws none of its own (no border, fill, shadow or blur) and no line between items.
+   */
+  @E.cssState("in-popup")
+  get isInPopup(): boolean {
+    return this.isConnected && !!this.domElement.closest(POPUP_TAG)
+  }
+
   /** The owning menu's component, when this is a sub-menu:  only menus own `menu` parts. */
   get parentMenu(): UIMenu | undefined {
     return this.context.ownerComponent<UIMenu>()
@@ -986,6 +995,9 @@ export interface UIMenu extends E.AttributeValues<typeof menuVocabulary> {}
 ////////////////
 // ## Constants
 ////////////////
+
+/** The tag whose box a menu inside it takes as its frame:  `isInPopup`. */
+const POPUP_TAG = "ui-popup"
 
 /** Selector of a selected item DOM element:  the menubar's first tab stop. */
 const SELECTED_STATE = ":state(selected)"

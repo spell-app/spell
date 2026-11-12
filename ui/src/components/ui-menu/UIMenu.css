@@ -1303,6 +1303,14 @@
     --_ui-menu-divider: transparent;
   }
 
+  /* ## In a popup (a right click's menu):  the popup is its frame, so none of its own, and no line between items */
+  :host(:state(in-popup)) .ui.menu {
+    --_ui-menu-divider: transparent;
+    --_ui-menu-background: transparent;
+    --_ui-menu-border: 0;
+    box-shadow: none;
+  }
+
   /* ## Wrapping:  items wrap;  dividers on the start edge so every line starts clean. */
   .ui.wrapping.menu {
     --_ui-menu-divider-side: left;
