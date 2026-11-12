@@ -663,13 +663,13 @@
       calc(var(--bubbly-pill-height) / 2);
     /* a tag's bracket this close to the point it sits in */
     --bubbly-bracket-pad: 3px;
+    --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
     /* a block's end tag:  a shorter band than its start tag's */
     --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 4px);
     /* between a block's end tag and the end tag or band above it:  as far apart as nested gutters */
     --bubbly-foot-pill-gap: 4px;
     /* a quoted value's marks snug beside it:  less room outside them than Spell's */
     --bubbly-quote-margin: 11px;
-    --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
     /* a block's band's words clear of its cut top-left corner */
     --bubbly-pill-pad-left: 6px;
 
@@ -703,7 +703,6 @@
     /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
     .bubbly-slash {
       display: inline-block;
-      position: relative;
       transform: scaleY(0.85);
     }
     /* its bracket close beside it */
@@ -742,18 +741,19 @@
       white-space: nowrap;
     }
 
+    /* a tag's name and its attributes' a little faded;  the name bold, but an end tag's */
+    .bubbly-tag-name,
+    .bubbly-attribute-name {
+      opacity: 0.75;
+    }
     .bubbly-tag-name {
       font-weight: 650;
-      opacity: 0.75;
     }
     .bubbly-tag-end .bubbly-tag-name {
       font-weight: 400;
-      opacity: 0.75;
     }
-
     .bubbly-attribute-name {
       margin-left: 0.33em;
-      opacity: 0.75;
     }
 
     /*
@@ -800,11 +800,6 @@
       grid-row: 2;
       border-bottom-left-radius: 0;
     }
-    .bubbly-block > .bubbly-foot.bubbly-foot-pill {
-      margin-left: 0;
-      border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) 0;
-      border-bottom-left-radius: var(--bubbly-block-outer-cut);
-    }
     /* the body's inner corners, where it meets its band and its end tag:  at the same slant */
     .bubbly-block > .bubbly-body {
       border-top-left-radius: calc(var(--bubbly-inner-top) * var(--bubbly-tag-slope)) var(--bubbly-inner-top);
@@ -812,32 +807,39 @@
         var(--bubbly-block-inner-corner);
     }
 
-    /* a block's outer corners, top-left and bottom-left */
-    .bubbly-block > .bubbly-head-pill {
-      border-top-left-radius: var(--bubbly-block-outer-cut);
-    }
-
-    /* every band's ends where a bracket sits:  pointed, at the bracket's slant, the bracket close in the point */
-    .bubbly-pill {
-      border-radius: 0;
+    /*
+     * every band's ends where a bracket sits:  pointed, at the bracket's slant, the bracket close in the point;
+     * a block's start tag's left end its outer corner, over the rail
+     */
+    :is(.bubbly-pill, .bubbly-block > .bubbly-head-pill) {
       border-top-left-radius: var(--bubbly-tag-corner);
-      border-bottom-left-radius: var(--bubbly-tag-corner);
-      padding-left: var(--bubbly-bracket-pad);
-    }
-    :is(.bubbly-pill, .bubbly-block > .bubbly-head-pill, .bubbly-block > .bubbly-foot.bubbly-foot-pill) {
       border-top-right-radius: var(--bubbly-tag-corner);
       border-bottom-right-radius: var(--bubbly-tag-corner);
+      border-bottom-left-radius: var(--bubbly-tag-corner);
+    }
+    .bubbly-pill {
+      padding-left: var(--bubbly-bracket-pad);
+    }
+    .bubbly-block > .bubbly-head-pill {
+      border-top-left-radius: var(--bubbly-block-outer-cut);
+      border-bottom-left-radius: 0;
     }
 
-    /* a block's end tag:  shorter, its point at the same slant, its words a pixel up as a band's are */
+    /*
+     * a block's end tag:  shorter, from the rail's left edge, its outer corner as its start tag's, its point at the
+     * same slant, its words a pixel up as a band's are
+     */
     .bubbly-block > .bubbly-tag-end {
-      --bubbly-foot-corner: calc(var(--bubbly-foot-pill-height) / 2 * var(--bubbly-tag-slope))
-        calc(var(--bubbly-foot-pill-height) / 2);
+      width: auto;
       height: var(--bubbly-foot-pill-height);
+      margin-left: 0;
       padding-left: 7px;
       line-height: calc(var(--bubbly-foot-pill-height) + 2 * var(--bubbly-pill-nudge));
-      border-top-right-radius: var(--bubbly-foot-corner);
-      border-bottom-right-radius: var(--bubbly-foot-corner);
+      border-top-left-radius: 0;
+      /* a start tag's corners, which the browser shrinks to fit its shorter height, the outer one with them */
+      border-top-right-radius: var(--bubbly-tag-corner);
+      border-bottom-right-radius: var(--bubbly-tag-corner);
+      border-bottom-left-radius: var(--bubbly-block-outer-cut);
     }
     /* an end tag right under another's, or under a band:  as far below it as their gutters are apart */
     .bubbly-block > .bubbly-body:has(> :is(.bubbly-block, .bubbly-pill, .bubbly-tag-line):last-child) {
