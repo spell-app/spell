@@ -65,7 +65,9 @@ for (const { files, lang } of DRAWINGS.filter((drawing) => drawing.lang)) {
 
 // HTML, drawn the same way with its corners cut (`BubblyMarkup`):  files from the app folder's root
 for (const { files } of DRAWINGS.filter((drawing) => drawing.html)) {
-  drawn.set(files[0]!, BubblyMarkup.write(readFileSync(resolve(files[0]!), "utf8")))
+  // its `<style>` left out:  page CSS, noise beside the markup (Owen)
+  const html = readFileSync(resolve(files[0]!), "utf8").replace(/[ \t]*<style\b[\s\S]*?<\/style>[ \t]*\n?/gi, "")
+  drawn.set(files[0]!, BubblyMarkup.write(html))
 }
 
 const sections = DRAWINGS.map(
