@@ -699,8 +699,8 @@
     .bubbly-angle-open::before {
       content: "\276E";
       margin-right: 3px;
-      /* a pixel in from its point, toward the name, drawn only:  the band keeps its size */
-      left: 1px;
+      /* in from its point, toward the name, drawn only:  the band keeps its size;  as far from it as `❯` is from its own */
+      left: 0.5px;
     }
     .bubbly-angle-close::before {
       content: "\276F";
