@@ -211,6 +211,14 @@
     "--bubbly-tag-slope": {
       "light": "0.62",
       "dark": "0.62"
+    },
+    "--bubbly-tag-corner": {
+      "light": "calc(23px / 2 * 0.62) calc(23px / 2)",
+      "dark": "calc(23px / 2 * 0.62) calc(23px / 2)"
+    },
+    "--bubbly-tag-pad": {
+      "light": "1.5px",
+      "dark": "1.5px"
     }
   },
   "parts": {
