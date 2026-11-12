@@ -647,7 +647,8 @@
     /* a block's outer corners, its start tag's top-left and its end tag's bottom-left:  between a band's and its body's */
     --bubbly-block-outer-corner: calc((var(--bubbly-pill-radius) + var(--bubbly-block-inner-corner)) / 2);
     /* ... cut at the slant of the bands' pointed ends, across and down (`--bubbly-tag-slope`, below) */
-    --bubbly-block-outer-cut: calc(var(--bubbly-block-outer-corner) * var(--bubbly-tag-slope)) var(--bubbly-block-outer-corner);
+    --bubbly-block-outer-cut: calc(var(--bubbly-block-outer-corner) * var(--bubbly-tag-slope))
+      var(--bubbly-block-outer-corner);
     /* a band's words a pixel up, so the point of a tag's `<` meets the point its corners cut to */
     --bubbly-pill-nudge: -1px;
     /* how much wider than tall each half of a tag's `❮` is, in the system font:  a band's pointed ends are cut at its slant */
@@ -699,8 +700,6 @@
     .bubbly-angle-open::before {
       content: "\276E";
       margin-right: 3px;
-      /* in from its point, toward the name, drawn only:  the band keeps its size;  as far from it as `❯` is from its own */
-      left: 0.5px;
     }
     .bubbly-angle-close::before {
       content: "\276F";
@@ -830,6 +829,8 @@
       --bubbly-foot-corner: calc(var(--bubbly-foot-pill-height) / 2 * var(--bubbly-tag-slope))
         calc(var(--bubbly-foot-pill-height) / 2);
       height: var(--bubbly-foot-pill-height);
+      /* its words 4px further left than a start tag's, its band ending as far after them */
+      padding-left: calc(var(--bubbly-pill-pad-left) - 4px);
       line-height: calc(var(--bubbly-foot-pill-height) + 2 * var(--bubbly-pill-nudge));
       border-top-right-radius: var(--bubbly-foot-corner);
       border-bottom-right-radius: var(--bubbly-foot-corner);
