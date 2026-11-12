@@ -807,6 +807,13 @@
       border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) 0;
       border-bottom-left-radius: var(--bubbly-block-outer-cut);
     }
+    /* the body's inner corners, where it meets its band and its end tag:  at the same slant */
+    .bubbly-block > .bubbly-body {
+      border-top-left-radius: calc(var(--bubbly-inner-top) * var(--bubbly-tag-slope)) var(--bubbly-inner-top);
+      border-bottom-left-radius: calc(var(--bubbly-block-inner-corner) * var(--bubbly-tag-slope))
+        var(--bubbly-block-inner-corner);
+    }
+
     /* a block's outer corners, top-left and bottom-left */
     .bubbly-block > .bubbly-head-pill {
       border-top-left-radius: var(--bubbly-block-outer-cut);
