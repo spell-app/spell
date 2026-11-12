@@ -692,7 +692,11 @@
     }
     .bubbly-block > .bubbly-foot.bubbly-foot-pill {
       margin-left: 0;
-      border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) var(--bubbly-pill-radius);
+      border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) var(--bubbly-block-inner-corner);
+    }
+    /* a block's outer corners, top-left and bottom-left:  the size of its body's inner ones */
+    .bubbly-block > .bubbly-head-pill {
+      border-top-left-radius: var(--bubbly-block-inner-corner);
     }
   }
 
