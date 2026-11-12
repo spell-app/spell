@@ -261,7 +261,7 @@ class MarkupWriter {
           : ` ${escape(name)}<span class="bubbly-mark">=</span>${valueOf(value, isQuoted)}`
       )
       .join("")
-    return `<span class="bubbly-mark">${ANGLE_OPEN}</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? `/${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
+    return `<span class="bubbly-mark">${ANGLE_OPEN}</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? `${SLASH}${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
   }
 
   /**
@@ -272,8 +272,8 @@ class MarkupWriter {
     if (!tag) return ""
     const name = `<span class="bubbly-tag-name">${tag.tag}</span>`
     return place === "block"
-      ? `<span class="bubbly-mark">${ANGLE_OPEN}/${name}${ANGLE_CLOSE}</span>`
-      : `<span class="bubbly-mark">${ANGLE_OPEN}/</span>${name}<span class="bubbly-mark">${ANGLE_CLOSE}</span>`
+      ? `<span class="bubbly-mark">${ANGLE_OPEN}${SLASH}${name}${ANGLE_CLOSE}</span>`
+      : `<span class="bubbly-mark">${ANGLE_OPEN}${SLASH}</span>${name}<span class="bubbly-mark">${ANGLE_CLOSE}</span>`
   }
 
   /** Text on lines of its own:  each line in its body, its indent kept past the text's own;  blank lines a gap. */
@@ -335,6 +335,9 @@ function valueOf(value: string, isQuoted: boolean): string {
  */
 const ANGLE_OPEN = `<span class="bubbly-angle bubbly-angle-open">&lt;</span>`
 const ANGLE_CLOSE = `<span class="bubbly-angle bubbly-angle-close">&gt;</span>`
+
+/** The `/` of an end tag, `</h2>`, and of `<br />`:  heavy, as the brackets beside it are. */
+const SLASH = `<span class="bubbly-slash">/</span>`
 
 /** A quoted value's marks:  the file's own `"`, kept for copying, its curly mark drawn by the sheet. */
 const QUOTE_OPEN = `<span class="bubbly-quote-mark bubbly-quote-open">"</span>`

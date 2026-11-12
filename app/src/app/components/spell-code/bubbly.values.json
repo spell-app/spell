@@ -209,8 +209,8 @@
       "dark": "calc((12px + 8px) / 2)"
     },
     "--bubbly-tag-slope": {
-      "light": "0.78",
-      "dark": "0.78"
+      "light": "0.62",
+      "dark": "0.62"
     }
   },
   "parts": {

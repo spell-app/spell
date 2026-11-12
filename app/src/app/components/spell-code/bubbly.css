@@ -649,7 +649,7 @@
     /* a band's words a pixel up, so the point of a tag's `<` meets the point its corners cut to */
     --bubbly-pill-nudge: -1px;
     /* how much wider than tall each half of a tag's `❮` is, in the system font:  a tag pill's ends are cut at its slant */
-    --bubbly-tag-slope: 0.78;
+    --bubbly-tag-slope: 0.62;
     /* a band's words clear of its cut left corner */
     --bubbly-pill-pad-left: 6px;
 
@@ -670,20 +670,27 @@
     }
 
     /*
-     * a tag's `<` and `>` drawn as heavy angle brackets, `❮` `❯`, steeper and a little smaller
+     * a tag's `<` and `>` drawn as heavy angle brackets, `❮` `❯`, steeper
      * - the file's own characters kept, unseen and no width, so a copied line copies them
      */
     .bubbly-angle {
       font-size: 0;
     }
     .bubbly-angle::before {
-      font-size: calc(var(--bubbly-font-size) * 0.8);
+      font-size: var(--bubbly-font-size);
     }
     .bubbly-angle-open::before {
       content: "\276E";
+      margin-right: 3px;
     }
     .bubbly-angle-close::before {
       content: "\276F";
+      margin-left: 3px;
+    }
+    /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
+    .bubbly-slash {
+      font-weight: 800;
+      margin-right: 2px;
     }
 
     /* a band's first quoted value isn't a name it defines, as in Spell:  at the plain weight */
@@ -700,13 +707,14 @@
       display: inline-block;
       height: var(--bubbly-pill-height);
       line-height: var(--bubbly-pill-text-line);
-      padding: 0 var(--bubbly-pill-pad-left);
       margin: 0 var(--bubbly-input-gap);
       background: var(--bubbly-pill);
       border-radius: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope)) / calc(var(--bubbly-pill-height) / 2);
       /* wide enough for both cuts whole:  a narrower one would shrink them, its ends square */
       min-width: calc(var(--bubbly-pill-height) * var(--bubbly-tag-slope));
       text-align: center;
+      /* its brackets close to its points */
+      padding-inline: 1.5px;
       corner-shape: bevel;
       vertical-align: middle;
       white-space: nowrap;
