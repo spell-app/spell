@@ -228,9 +228,9 @@
       "light": "calc(23px - 4px)",
       "dark": "calc(23px - 4px)"
     },
-    "--bubbly-foot-pill-gap": {
-      "light": "4px",
-      "dark": "4px"
+    "--bubbly-html-row": {
+      "light": "25px",
+      "dark": "25px"
     },
     "--bubbly-page-scale": {
       "light": "0.9375",

@@ -666,8 +666,8 @@
     --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
     /* a block's end tag:  a shorter band than its start tag's */
     --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 4px);
-    /* between a block's end tag and the end tag or band above it:  as far apart as nested gutters */
-    --bubbly-foot-pill-gap: 4px;
+    /* a row:  the editor's line, 15px times `--bubbly-monaco-line-height` (1.65), rounded */
+    --bubbly-html-row: 25px;
     /* a quoted value's marks snug beside it:  less room outside them than Spell's */
     --bubbly-quote-margin: 11px;
     /* a block's band's words clear of its cut top-left corner */
@@ -757,9 +757,9 @@
     }
 
     /*
-     * the gaps between, as Spell's declarations in their sections:  half `--bubbly-line-gap` above and below each
-     * band, block and line of tags, so two of them are a whole gap apart, and a plain line and a band half of one
-     * - a column, so those margins add up rather than collapse into one
+     * ROWS, as the editor's lines:  every line, band, line of tags and end tag one row, `--bubbly-html-row` tall,
+     * its band in the middle (Owen)
+     * - a column, so nothing's margins collapse into another's
      */
     &,
     .bubbly-body {
@@ -767,14 +767,32 @@
       flex-direction: column;
       align-items: flex-start;
     }
-    .bubbly-block,
-    p:is(.bubbly-pill, .bubbly-tag-line) {
-      margin-block: calc(var(--bubbly-line-gap) / 2);
+    .bubbly-line,
+    .bubbly-gap {
+      height: var(--bubbly-html-row);
+      line-height: var(--bubbly-html-row);
     }
-    /* a line of tags:  as tall as a band */
-    .bubbly-tag-line {
-      height: var(--bubbly-pill-height);
-      line-height: var(--bubbly-pill-height);
+    .bubbly-block {
+      margin-block: 0;
+    }
+    /* a line of tags' pills in the middle of its row */
+    .bubbly-tag-line > .bubbly-tag-pill {
+      translate: 0 calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+    }
+    p.bubbly-pill,
+    .bubbly-block > .bubbly-head-pill {
+      margin-block: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2) 0;
+    }
+    p.bubbly-pill {
+      margin-bottom: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+    }
+    /* a body's first row right under its start tag's;  its end tag in the middle of the row under its last one */
+    .bubbly-block > .bubbly-body {
+      padding-top: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+      padding-bottom: calc((var(--bubbly-html-row) - var(--bubbly-foot-pill-height)) / 2);
+    }
+    .bubbly-block > .bubbly-tag-end {
+      margin-bottom: calc((var(--bubbly-html-row) - var(--bubbly-foot-pill-height)) / 2);
     }
 
     /* a start tag and its end tag with nothing between:  their points touch */
@@ -840,11 +858,6 @@
       border-top-right-radius: var(--bubbly-tag-corner);
       border-bottom-right-radius: var(--bubbly-tag-corner);
       border-bottom-left-radius: var(--bubbly-block-outer-cut);
-    }
-    /* an end tag right under another's, or under a band:  as far below it as their gutters are apart */
-    .bubbly-block > .bubbly-body:has(> :is(.bubbly-block, .bubbly-pill, .bubbly-tag-line):last-child) {
-      /* the body's paper, not a margin:  its gutter runs on down beside it into its own end tag */
-      padding-bottom: calc(var(--bubbly-foot-pill-gap) - var(--bubbly-line-gap) / 2);
     }
   } /* END bubbly-html */
 
