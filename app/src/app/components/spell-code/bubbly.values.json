@@ -208,6 +208,10 @@
       "light": "calc((12px + 8px) / 2)",
       "dark": "calc((12px + 8px) / 2)"
     },
+    "--bubbly-block-outer-cut": {
+      "light": "calc(calc((12px + 8px) / 2) * 0.77) calc((12px + 8px) / 2)",
+      "dark": "calc(calc((12px + 8px) / 2) * 0.77) calc((12px + 8px) / 2)"
+    },
     "--bubbly-tag-slope": {
       "light": "0.77",
       "dark": "0.77"
