@@ -689,8 +689,15 @@
     }
     /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
     .bubbly-slash {
+      display: inline-block;
       font-weight: 800;
       margin-right: 2px;
+      /* shorter, about as tall as its bracket */
+      transform: scaleY(0.75);
+    }
+    /* its bracket close beside it */
+    .bubbly-angle-open:has(+ .bubbly-slash)::before {
+      margin-right: 0.5px;
     }
 
     /* a band's first quoted value isn't a name it defines, as in Spell:  at the plain weight */
