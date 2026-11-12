@@ -1,0 +1,98 @@
+import { describe, expect, test } from "vite-plus/test"
+
+import { MarkupMarks, type MarkupShape } from "spell/app/app/ui/monaco/MarkupMarks"
+
+/** A page, as the drawn-bubbly page's examples are. */
+const PAGE = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>A demo</title>
+  </head>
+  <body>
+    <h2>Two <code>x</code></h2>
+    <spell-viewer id="a"></spell-viewer>
+  </body>
+</html>
+`
+
+/** The text each mark whose classes include `classes` covers, in order. */
+function textMarked(marks: MarkupMarks, classes: string): string[] {
+  const lines = PAGE.split("\n")
+  return marks.marks
+    .filter((mark) => mark.options.inlineClassName?.split(" ").includes(classes))
+    .map(({ range }) => lines[range.startLineNumber - 1]!.slice(range.startColumn - 1, range.endColumn - 1))
+}
+
+/** Every shape, those inside a block too, as `kind:  its first line's text` lines. */
+function shapesOf(marks: MarkupMarks): string[] {
+  const lines = PAGE.split("\n")
+  const out: string[] = []
+  const walk = (shapes: MarkupShape[], depth: number) => {
+    for (const shape of shapes) {
+      const { range } = marks.marks[shape.place]!
+      const text = lines[range.startLineNumber - 1]!.slice(range.startColumn - 1).trim()
+      const what =
+        shape.kind === "markup-block"
+          ? `block ${shape.partOfSpeech}${shape.foot === undefined ? "" : " +foot"}`
+          : shape.kind === "tag"
+            ? `${shape.isAlone ? "band" : "pill"} ${shape.side} ${shape.spaced ?? ""}`.trim()
+            : "input"
+      out.push(`${"  ".repeat(depth)}${what}:  ${text.slice(0, 24)}`)
+      if (shape.kind === "markup-block") walk(shape.inside, depth + 1)
+    }
+  }
+  walk(marks.shapes, 0)
+  return out
+}
+
+describe("MarkupMarks", () => {
+  test("blocks for elements on lines of their own, bands for tags alone, pills for tags in a line", () => {
+    expect(shapesOf(MarkupMarks.of(PAGE))).toEqual([
+      "band start:  <!doctype html>",
+      'block thing +foot:  <html lang="en">',
+      '  input:  en">',
+      "  block plain +foot:  <head>",
+      '    band start:  <meta charset="UTF-8" />',
+      '    input:  UTF-8" />',
+      "    pill start none:  <title>A demo</title>",
+      "    pill end gap:  </title>",
+      "  block thing +foot:  <body>",
+      "    pill start none:  <h2>Two <code>x</code></",
+      "    pill start gap:  <code>x</code></h2>",
+      "    pill end gap:  </code></h2>",
+      "    pill end gap:  </h2>",
+      '    pill start none:  <spell-viewer id="a"></s',
+      '    input:  a"></spell-viewer>',
+      "    pill end touch:  </spell-viewer>"
+    ])
+  })
+
+  test("a tag's brackets, names and values marked as the page draws them", () => {
+    const marks = MarkupMarks.of(PAGE)
+    expect(textMarked(marks, "bubbly-angle-open").slice(0, 3)).toEqual(["<", "<", "<"])
+    expect(textMarked(marks, "bubbly-tag-name").slice(0, 4)).toEqual(["html", "head", "meta", "title"])
+    expect(textMarked(marks, "bubbly-attribute-name")).toEqual(["lang", "charset", "id"])
+    expect(textMarked(marks, "bubbly-input")).toEqual(["en", "UTF-8", "a"])
+    expect(textMarked(marks, "bubbly-slash")).toContain("/")
+  })
+
+  test("a block's end tag's name faint, as its marks are;  a tag in a line's not", () => {
+    const marks = MarkupMarks.of(PAGE)
+    const faintNames = marks.marks
+      .filter((mark) =>
+        /bubbly-mark .*bubbly-tag-name|bubbly-tag-name .*bubbly-mark/.test(mark.options.inlineClassName ?? "")
+      )
+      .map(({ range }) => PAGE.split("\n")[range.startLineNumber - 1]!.trim())
+    expect(faintNames).toEqual(["</head>", "</body>", "</html>"])
+  })
+
+  test("a spacer before each line of text, none before one that starts with a tag", () => {
+    const text = `<div>\n  some words\n  <b>bold</b>\n</div>\n`
+    const marks = MarkupMarks.of(text)
+    const lineSpacers = marks.marks.filter((mark) =>
+      mark.options.before?.inlineClassName?.includes("bubbly-line-spacer")
+    )
+    expect(lineSpacers.map(({ range }) => range.startLineNumber)).toEqual([2])
+  })
+})

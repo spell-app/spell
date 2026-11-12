@@ -259,6 +259,10 @@
     "--bubbly-quote-char": {
       "light": "7.33px",
       "dark": "7.33px"
+    },
+    "--bubbly-band-mark": {
+      "light": "#acacb0",
+      "dark": "#6d6c74"
     }
   },
   "parts": {

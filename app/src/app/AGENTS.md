@@ -140,6 +140,9 @@ and in the app's build folder, `app/` at the app folder's root.
       text, the shapes a layer behind the editor, the room under a declaration a view zone.
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, `codePopups.ts`).
     - Not in a `<CodeSlice>`, a diff, or a page file.
+    - An HTML file (a property editor page, `Card.editor.html`) is drawn as the drawn-bubbly page draws HTML:
+      [MarkupMarks](ui/monaco/MarkupMarks.ts), from the page's own reading of it (`BubblyMarkup`), the box a
+      `.bubbly-html` too;  both kinds of marks are made by [TextMarks](ui/monaco/TextMarks.ts).
   - Three helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
     - the caret snaps into the body a blank line is drawn in:  clicked or arrowed onto, the line gets that body's
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level

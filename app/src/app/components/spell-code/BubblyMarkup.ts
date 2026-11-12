@@ -13,6 +13,7 @@
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
  * - Text, a `<style>`'s or `<script>`'s lines, a comment:  plain lines in their element's body.
  * - Its own small reader, not a full HTML parser:  enough for hand-written pages, the drawn-bubbly page's examples.
+ *   The editor draws HTML from the same reading (`treeOf()`, Monaco's `MarkupMarks`).
  * - Strings, not DOM, as `BubblyHtml`:  the page's script runs in node.
  * - STATIC and instance-free:  HTML source in, its drawing out.
  ****************/
@@ -21,6 +22,11 @@ export class BubblyMarkup {
   static write(source: string): string {
     const nodes = treeOf(tokensOf(source))
     return `<div class="bubbly bubbly-html">${new MarkupWriter(source).nodes(nodes)}</div>`
+  }
+
+  /** `source`, an HTML file or fragment, read as its elements, text and comments, each with where it is in `source`. */
+  static treeOf(source: string): MarkupNode[] {
+    return treeOf(tokensOf(source))
   }
 
   /**
@@ -72,29 +78,52 @@ const MAX_INDENT = 4
 // ## Reading
 ////////////////
 
-/** One attribute of a start tag:  its name, and its value without its quotes (none for `disabled`). */
-type Attribute = { name: string; value?: string; isQuoted: boolean }
+/**
+ * One attribute of a start tag:  its name, and its value without its quotes (none for `disabled`);
+ * where each is in the source, for the editor's marks.
+ */
+export type MarkupAttribute = {
+  name: string
+  value?: string
+  isQuoted: boolean
+  /** where its name starts */
+  nameStart: number
+  /** where its `=` is, if it has a value */
+  equalsAt?: number
+  /** where its value starts and ends, inside its quotes */
+  valueStart?: number
+  valueEnd?: number
+}
+
+/** A start tag, `<div class="x">`:  from its `<` to just past its `>`. */
+export type MarkupStartTag = {
+  kind: "start"
+  start: number
+  end: number
+  tag: string
+  attributes: MarkupAttribute[]
+  selfClosing: boolean
+}
+
+/** An end tag, `</div>`:  from its `<` to just past its `>`. */
+export type MarkupEndTag = { kind: "end"; start: number; end: number; tag: string }
 
 /** One piece of the source, in order. */
-type Token =
-  | { kind: "text"; start: number; end: number }
-  | { kind: "comment"; start: number; end: number }
-  | { kind: "doctype"; start: number; end: number }
-  | { kind: "start"; start: number; end: number; tag: string; attributes: Attribute[]; selfClosing: boolean }
-  | { kind: "end"; start: number; end: number; tag: string }
+type Token = { kind: "text" | "comment" | "doctype"; start: number; end: number } | MarkupStartTag | MarkupEndTag
 
-/** An element and what's inside it, or a piece of text or a comment. */
-type MarkupNode =
-  | { kind: "text" | "comment" | "doctype"; start: number; end: number }
-  | {
-      kind: "element"
-      start: number
-      end: number
-      tag: string
-      open: Extract<Token, { kind: "start" }>
-      close?: Extract<Token, { kind: "end" }>
-      children: MarkupNode[]
-    }
+/** An element:  its tags, and what's inside it;  from its start tag's `<` to its end tag's `>`, or its start tag's. */
+export type MarkupElement = {
+  kind: "element"
+  start: number
+  end: number
+  tag: string
+  open: MarkupStartTag
+  close?: MarkupEndTag
+  children: MarkupNode[]
+}
+
+/** An element and what's inside it, or a piece of text, a comment or a doctype, each from where it starts to its end. */
+export type MarkupNode = { kind: "text" | "comment" | "doctype"; start: number; end: number } | MarkupElement
 
 /** `source`'s tokens. */
 function tokensOf(source: string): Token[] {
@@ -148,15 +177,30 @@ function tokensOf(source: string): Token[] {
   return tokens
 }
 
+/** One attribute, or a start tag's end:  `/>` or `>` (1), a name (2), a value in `"` (3), `'` (4) or neither (5). */
+const ATTRIBUTE_PATTERN = /\s*(?:(\/?>)|([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?|\/)/.source
+
 /** A start tag's attributes, from `at` just past its name, to its `>`. */
-function attributesFrom(source: string, at: number): { attributes: Attribute[]; end: number; selfClosing: boolean } {
-  const attributes: Attribute[] = []
-  const pattern = /\s*(?:(\/?>)|([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?|\/)/y
+function attributesFrom(
+  source: string,
+  at: number
+): { attributes: MarkupAttribute[]; end: number; selfClosing: boolean } {
+  const attributes: MarkupAttribute[] = []
+  // `d`:  where each part is, for the editor's marks
+  const pattern = new RegExp(ATTRIBUTE_PATTERN, "dy")
   pattern.lastIndex = at
   for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
     if (match[1]) return { attributes, end: pattern.lastIndex, selfClosing: match[1] === "/>" }
-    if (match[2])
-      attributes.push({ name: match[2], value: match[3] ?? match[4] ?? match[5], isQuoted: match[5] === undefined })
+    if (!match[2]) continue
+    const [nameStart, nameEnd] = match.indices![2]!
+    const valueAt = match.indices![3] ?? match.indices![4] ?? match.indices![5]
+    attributes.push({
+      name: match[2],
+      value: match[3] ?? match[4] ?? match[5],
+      isQuoted: match[5] === undefined,
+      nameStart,
+      ...(valueAt ? { equalsAt: source.indexOf("=", nameEnd), valueStart: valueAt[0], valueEnd: valueAt[1] } : {})
+    })
   }
   return { attributes, end: source.length, selfClosing: false }
 }
@@ -164,11 +208,11 @@ function attributesFrom(source: string, at: number): { attributes: Attribute[]; 
 /** `tokens` as a tree:  an end tag closes the nearest open element of its name;  one that closes nothing is dropped. */
 function treeOf(tokens: Token[]): MarkupNode[] {
   const root: MarkupNode[] = []
-  const open: Extract<MarkupNode, { kind: "element" }>[] = []
+  const open: MarkupElement[] = []
   const add = (node: MarkupNode) => (open.at(-1)?.children ?? root).push(node)
   for (const token of tokens) {
     if (token.kind === "start") {
-      const element: Extract<MarkupNode, { kind: "element" }> = {
+      const element: MarkupElement = {
         kind: "element",
         start: token.start,
         end: token.end,
@@ -212,7 +256,7 @@ class MarkupWriter {
   }
 
   /** An element:  a block when what's inside it is on lines of its own, else a band. */
-  private element(element: Extract<MarkupNode, { kind: "element" }>): string {
+  private element(element: MarkupElement): string {
     const kind = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
     const inside = element.children.filter((child) => child.kind !== "text" || this.slice(child).trim())
     const insideText = element.close ? this.source.slice(element.open.end, element.close.start) : ""
@@ -247,7 +291,7 @@ class MarkupWriter {
   }
 
   /** An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill of its own. */
-  private tagPills(element: Extract<MarkupNode, { kind: "element" }>): string {
+  private tagPills(element: MarkupElement): string {
     const inside = this.inline(element.children)
     // nothing between its tags:  their points touch
     const touching = inside ? "" : " bubbly-tags-touch"
@@ -257,7 +301,7 @@ class MarkupWriter {
   }
 
   /** A start tag on its band:  `<` faint, its name, each value a white pill. */
-  private startTag(tag: Extract<Token, { kind: "start" }>): string {
+  private startTag(tag: MarkupStartTag): string {
     const attributes = tag.attributes
       .map(({ name, value, isQuoted }) =>
         value === undefined
@@ -272,7 +316,7 @@ class MarkupWriter {
    * An end tag:  `</` and `>` faint, its name in the ink;  none, nothing.
    * - `"block"`:  a block's, on its foot under the gutter, its name faint too:  the gutter already shows where it ends
    */
-  private endTag(tag: Extract<Token, { kind: "end" }> | undefined, place: "block" | "inline" = "inline"): string {
+  private endTag(tag: MarkupEndTag | undefined, place: "block" | "inline" = "inline"): string {
     if (!tag) return ""
     const name = `<span class="bubbly-tag-name">${tag.tag}</span>`
     return place === "block"

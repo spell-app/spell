@@ -3,6 +3,7 @@ import { codeLook } from "spell/app/app/ui/codePopups"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
 import { BubblyMarks, indentColumns, type BubblyBlockShape, type BubblyShape } from "./BubblyMarks"
+import { MarkupMarks, type MarkupBlockShape, type MarkupShape, type MarkupTagShape } from "./MarkupMarks"
 
 import "spell/app/app/components/spell-code/bubbly.css"
 
@@ -26,6 +27,8 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * - Drawn when:
  *   - the page's setting says so (`codeLook`, on by default:  `CodeSettings`' "Bubbly look")
  *   - its model is Spell, not a page file (`SP.formOfText()`);  a notebook example's code is drawn, as it's Spell
+ *   - or it's an HTML file (`.html`):  drawn as the drawn-bubbly page draws HTML (`MarkupMarks`), the box a
+ *     `.bubbly-html` too, so the sheet's HTML settings reach it
  *   - it isn't one side of a diff, whose lines must line up, nor left out (`leaveOut()`:  `<CodeSlice>`)
  * - NEVER throws:  a layout that fails leaves the code as Monaco colours it, and logs why.
  ****************/
@@ -60,7 +63,7 @@ export class SpellBubbly {
   isDrawing = false
 
   /** The marks and shapes it last laid out. */
-  laidOut: BubblyMarks | undefined
+  laidOut: BubblyMarks | MarkupMarks | undefined
 
   private constructor(
     private readonly editor: monaco.editor.ICodeEditor,
@@ -102,6 +105,8 @@ export class SpellBubbly {
   /** Start or stop drawing, as the setting, the model and its text say;  lay it out again if drawing. */
   refresh(): void {
     if (this.shouldDraw()) {
+      // from Spell to HTML or back:  its box's classes and the sheet's sizes change
+      if (this.isDrawing && this.isMarkup !== isMarkupFile(this.editor.getModel()!)) this.stop()
       if (!this.isDrawing) this.start()
       this.relayout()
     } else if (this.isDrawing) this.stop()
@@ -113,6 +118,7 @@ export class SpellBubbly {
     const model = editor.getModel()
     if (!codeLook.isBubbly || this.isLeftOut || !model || editor.getOption(monaco.editor.EditorOption.inDiffEditor))
       return false
+    if (isMarkupFile(model)) return true
     return this.languages.includes(model.getLanguageId()) && SP.formOfText(model.getValue()) !== "page"
   }
 
@@ -120,9 +126,10 @@ export class SpellBubbly {
   private start() {
     const { editor } = this
     this.isDrawing = true
+    this.isMarkup = isMarkupFile(editor.getModel()!)
     this.marks ??= editor.createDecorationsCollection()
     const container = editor.getContainerDomNode()
-    container.classList.add(...BOX_CLASSES)
+    container.classList.add(...BOX_CLASSES, ...(this.isMarkup ? [MARKUP_CLASS] : []))
     this.lineHeightBefore = editor.getRawOptions().lineHeight ?? 0
     this.measured = undefined
     const measures = this.measures()
@@ -143,7 +150,7 @@ export class SpellBubbly {
     this.setZones([])
     this.layer?.remove()
     this.layer = this.shapes = undefined
-    editor.getContainerDomNode().classList.remove(...BOX_CLASSES)
+    editor.getContainerDomNode().classList.remove(...BOX_CLASSES, MARKUP_CLASS)
     editor.updateOptions({ lineHeight: this.lineHeightBefore })
   }
 
@@ -166,6 +173,11 @@ export class SpellBubbly {
     const model = this.editor.getModel()
     if (!model) return
     try {
+      if (this.isMarkup) {
+        this.laidOut = MarkupMarks.of(model.getValue())
+        this.marks!.set(this.laidOut.marks)
+        return this.redraw()
+      }
       // its project's parse of it, if it's a project's file:  what the compiler sees, names from other files too
       const text = model.getValue()
       const path = AppAddresses.pathOf(model.uri)
@@ -244,7 +256,7 @@ export class SpellBubbly {
    * - A group starts where its parent does (Owen, 2026-11-11):  its grey band grows out of its parent's rail, its
    *   rail over its parent's while it lasts, then its foot;  its members are drawn as the parent's other lines are.
    */
-  private placeBands(shapes: BubblyShape[], view: View, parent?: BubblyBlockShape) {
+  private placeBands(shapes: Shape[], view: View, parent?: BubblyBlockShape) {
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (shape.kind !== "block" || !range) continue
@@ -293,15 +305,18 @@ export class SpellBubbly {
   }
 
   /** The elements of `shapes`, those inside each in its own. */
-  private drawAll(shapes: BubblyShape[], view: View): HTMLElement[] {
+  private drawAll(shapes: Shape[], view: View): HTMLElement[] {
     const elements: HTMLElement[] = []
     for (const shape of shapes) {
       const range = view.ranges[shape.place]
       if (!range) continue
-      if (shape.kind === "block") {
-        const block = this.drawBlock(shape, range, view)
+      if (shape.kind === "block" || shape.kind === "markup-block") {
+        const block =
+          shape.kind === "block" ? this.drawBlock(shape, range, view) : this.drawMarkupBlock(shape, range, view)
         if (block) elements.push(block)
-      } else if (range.startLineNumber >= view.first && range.startLineNumber <= view.last) {
+      } else if (range.startLineNumber < view.first || range.startLineNumber > view.last) continue
+      else if (shape.kind === "tag") elements.push(this.drawTag(shape, range, view))
+      else {
         const element = this.drawInput(shape.isChoice, range, view)
         if (element) elements.push(element)
       }
@@ -356,6 +371,74 @@ export class SpellBubbly {
     return block
   }
 
+  /**
+   * An HTML element with what's inside it on lines of its own:  its start tag's band, its gutter and body down to its
+   * end tag's band (when that starts its line), then what's inside it;  `undefined` when none of it is in view.
+   * - Its band starts a bracket's room left of its `<`, at its line's indent:  its words clear of the cut corner by
+   *   the spacer before the `<` (`bubbly-head-spacer`).
+   */
+  private drawMarkupBlock(shape: MarkupBlockShape, range: monaco.Range, view: View): HTMLElement | undefined {
+    const { editor } = this
+    const { measures, lineHeight } = view
+    const headLine = range.startLineNumber
+    const lastLine = range.endLineNumber
+    if (lastLine < view.first - 1 || headLine > view.last) return undefined
+    const block = element(`bubbly-block bubbly-${shape.partOfSpeech}`)
+    const left = this.wordsX(headLine) - measures.bracketPad
+    const headTop = editor.getTopForLineNumber(headLine)
+    if (headLine >= view.first) {
+      const head = view.ranges[shape.head]
+      const endColumn =
+        head && head.endLineNumber === headLine ? head.endColumn : editor.getModel()!.getLineMaxColumn(headLine)
+      const right = this.xOf(headLine, endColumn) + measures.bracketPad
+      const band = element("bubbly-head-pill bubbly-tag-start")
+      block.append(place(band, { left, top: headTop + lineHeight / 2, width: right - left }, measures.scale))
+    }
+    const foot = shape.foot === undefined ? undefined : view.ranges[shape.foot]
+    const lastTop = editor.getTopForLineNumber(lastLine)
+    const bodyTop = headTop + (lineHeight + measures.pillHeight) / 2
+    const bodyBottom = foot
+      ? lastTop + (lineHeight - measures.footPillHeight) / 2
+      : lastTop + (lineHeight + measures.pillHeight) / 2
+    if (bodyBottom > bodyTop) {
+      const height = bodyBottom - bodyTop
+      block.append(
+        place(element("bubbly-gutter"), { left, top: bodyTop, height }, measures.scale),
+        place(
+          element("bubbly-body"),
+          { left: left + measures.gutter, top: bodyTop, height, width: view.width - left },
+          measures.scale
+        )
+      )
+    }
+    if (foot && lastLine >= view.first && lastLine <= view.last) {
+      const right = this.xOf(lastLine, foot.endColumn) + measures.bracketPad
+      const band = element("bubbly-foot-pill bubbly-tag-end")
+      block.append(place(band, { left, top: bodyBottom, width: right - left }, measures.scale))
+    }
+    block.append(...this.drawAll(shape.inside, view))
+    return block
+  }
+
+  /**
+   * An HTML tag:  a band by itself when it's alone on its line, else a small pill in it;
+   * from a bracket's room before its `<`, past the room injected before it, to a bracket's room after its `>`.
+   */
+  private drawTag(shape: MarkupTagShape, range: monaco.Range, view: View): HTMLElement {
+    const { measures, lineHeight } = view
+    const line = range.startLineNumber
+    const spacer = shape.spaced === "gap" ? measures.tagSpacer : shape.spaced === "touch" ? measures.touchSpacer : 0
+    const left = this.xOf(line, range.startColumn) + spacer - measures.bracketPad
+    const endColumn = range.endLineNumber === line ? range.endColumn : this.editor.getModel()!.getLineMaxColumn(line)
+    const right = this.xOf(line, endColumn) + measures.bracketPad
+    const kind = `bubbly-${shape.partOfSpeech}`
+    const classes = shape.isAlone
+      ? `bubbly-pill bubbly-tag-start ${kind}`
+      : `bubbly-tag-pill bubbly-tag-${shape.side} ${kind}`
+    const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
+    return place(element(classes), { left, top, width: right - left }, measures.scale)
+  }
+
   /** A pill under the words in `range`:  from the room before them to the end of the room after. */
   private drawInput(isChoice: boolean, range: monaco.Range, view: View): HTMLElement | undefined {
     const { measures, lineHeight } = view
@@ -376,9 +459,9 @@ export class SpellBubbly {
    * A view zone under each line that ends declarations with a body:  room for their feet,
    * and the gap from the lowest to the band on the next line (`--bubbly-line-gap`);  if they've moved.
    */
-  private updateZones(laidOut: BubblyMarks, view: View) {
+  private updateZones(laidOut: BubblyMarks | MarkupMarks, view: View) {
     const room = new Map<number, number>()
-    const measure = (shapes: BubblyShape[]) => {
+    const measure = (shapes: Shape[]) => {
       for (const shape of shapes) {
         if (shape.kind !== "block") continue
         const range = view.ranges[shape.place]
@@ -459,6 +542,10 @@ export class SpellBubbly {
       lineHeight: Math.round(fontSize * ratio),
       inputSpacer: spacerWidth("bubbly-input-spacer"),
       quoteSpacer: spacerWidth("bubbly-quote-spacer"),
+      tagSpacer: spacerWidth("bubbly-tag-spacer"),
+      touchSpacer: spacerWidth("bubbly-touch-spacer"),
+      bracketPad: length("--bubbly-bracket-pad") * scale,
+      footPillHeight: length("--bubbly-foot-pill-height") * scale,
       padLeft: length("--bubbly-pill-pad-left") * scale,
       padRight: length("--bubbly-pill-pad-right") * scale,
       endInset: length("--bubbly-end-inset") * scale,
@@ -478,6 +565,9 @@ export class SpellBubbly {
 
   /** Never drawn:  `leaveOut()`. */
   private isLeftOut = false
+
+  /** Drawing an HTML file, not Spell. */
+  private isMarkup = false
 
   /** The editor's decorations:  the marks. */
   private marks: monaco.editor.IEditorDecorationsCollection | undefined
@@ -520,6 +610,13 @@ type Measures = {
   inputSpacer: number
   /** the spacer outside a quoted input's marks */
   quoteSpacer: number
+  /** HTML:  the spacer either side of a tag in a line, and between an empty element's tags */
+  tagSpacer: number
+  touchSpacer: number
+  /** HTML:  a tag's bracket this far in from its band's end */
+  bracketPad: number
+  /** HTML:  a block's end tag's band's height */
+  footPillHeight: number
   /** a band's room before its words, and after them */
   padLeft: number
   padRight: number
@@ -535,6 +632,9 @@ type Measures = {
   /** the paper between a body's lowest foot and the band on the line under it */
   footGap: number
 }
+
+/** A shape it draws:  Spell's, or HTML's. */
+type Shape = BubblyShape | MarkupShape
 
 /** What a redraw knows. */
 type View = {
@@ -561,6 +661,14 @@ const PARSE_WAITS = 20
 
 /** The classes that make an editor's box a drawing. */
 const BOX_CLASSES = ["bubbly", "bubbly-monaco"]
+
+/** ... and an HTML file's:  the sheet's HTML settings and rules reach it. */
+const MARKUP_CLASS = "bubbly-html"
+
+/** Is `model` an HTML file, drawn as HTML?  By its name, as its language is plain text. */
+function isMarkupFile(model: monaco.editor.ITextModel): boolean {
+  return /\.html?$/i.test(model.uri.path)
+}
 
 /** A shape's element, its classes `classes`. */
 function element(classes: string): HTMLElement {

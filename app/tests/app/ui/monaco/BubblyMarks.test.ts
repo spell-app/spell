@@ -67,7 +67,9 @@ describe("BubblyMarks.of()", () => {
       cursorStops: 2
     })
     const open = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-quote-open"))!
-    expect(open.options.before).toMatchObject({ inlineClassName: "bubbly-spacer bubbly-quote-spacer bubbly-spacer-before" })
+    expect(open.options.before).toMatchObject({
+      inlineClassName: "bubbly-spacer bubbly-quote-spacer bubbly-spacer-before"
+    })
   })
 
   test("room before each head line's words:  before its indent's last tab, or its first word at the top level", () => {
@@ -138,7 +140,13 @@ describe("bubbly.css", () => {
     const classes = new Set<string>()
     for (const mark of marked().marks)
       for (const each of mark.options.inlineClassName?.split(" ") ?? []) classes.add(each)
-    for (const each of ["bubbly-input-spacer", "bubbly-quote-spacer", "bubbly-layer", "bubbly-shapes", "bubbly-head-pill"])
+    for (const each of [
+      "bubbly-input-spacer",
+      "bubbly-quote-spacer",
+      "bubbly-layer",
+      "bubbly-shapes",
+      "bubbly-head-pill"
+    ])
       classes.add(each)
     for (const each of ["bubbly-pill", "bubbly-gutter", "bubbly-body", "bubbly-foot", "bubbly-control"])
       classes.add(each)

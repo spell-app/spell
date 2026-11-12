@@ -1,6 +1,7 @@
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import type { monaco } from "./monaco"
+import { TextMarks, spacer } from "./TextMarks"
 
 /****************
  * ### `BubblyMarks`
@@ -19,21 +20,16 @@ import type { monaco } from "./monaco"
  *   typed:  `SpellBubbly` places them from where Monaco draws each line and letter.
  * - Which rule presents which way is `SP.BubblyPresentation`'s, read by the layout:  nothing here decides it.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
+ * - Its marks are made as every drawing's are:  `TextMarks`.
  ****************/
-export class BubblyMarks {
+export class BubblyMarks extends TextMarks {
   /** `drawing`'s marks and shapes. */
   static of(drawing: SP.BubblyDrawing, tabSize = 4): BubblyMarks {
     return new BubblyMarks(drawing, tabSize)
   }
 
-  /** The decorations to set, in order:  a shape names its place by an index into them. */
-  readonly marks: monaco.editor.IModelDeltaDecoration[] = []
-
   /** The shapes at the top of the drawing, each holding those inside it. */
   readonly shapes: BubblyShape[] = []
-
-  /** Where each line starts in the drawing's text. */
-  private readonly lineStarts: number[] = []
 
   /**
    * `tabSize`:  how many columns a tab takes, as the editor shows it:  the spacer before a head's last tab is that many
@@ -43,11 +39,7 @@ export class BubblyMarks {
     private readonly drawing: SP.BubblyDrawing,
     private readonly tabSize: number
   ) {
-    let at = 0
-    for (const line of drawing.text.split("\n")) {
-      this.lineStarts.push(at)
-      at += line.length + 1
-    }
+    super(drawing.text)
     this.nodes(drawing.nodes, this.shapes)
   }
 
@@ -99,7 +91,12 @@ export class BubblyMarks {
    */
   private headSpacer(start: number) {
     const { line, column } = this.positionAt(start)
-    const range = { startLineNumber: line, startColumn: Math.max(1, column - 1), endLineNumber: line, endColumn: column }
+    const range = {
+      startLineNumber: line,
+      startColumn: Math.max(1, column - 1),
+      endLineNumber: line,
+      endColumn: column
+    }
     // plain spaces:  whitespace, so Home skips it as it skips the indent
     const before = { ...HEAD_SPACER, content: " ".repeat(this.tabSize) }
     this.marks.push({ range, options: { before, showIfCollapsed: true } })
@@ -131,48 +128,6 @@ export class BubblyMarks {
       after: spacer("input", "after")
     })
     into.push({ kind: "input", place, isChoice: kind === "choice", isQuoted })
-  }
-
-  ////////////////
-  // ## Marks
-  ////////////////
-
-  /**
-   * Mark the text from `start` to `end` with `classes` (every piece is a `bubbly-piece`), and spacers `before` /
-   * `after` it;  returns the mark's index.
-   */
-  private mark(start: number, end: number, classes: string, spacers: Spacers = {}): number {
-    if (end <= start) return -1
-    const options: monaco.editor.IModelDecorationOptions = {
-      inlineClassName: classes ? `${PIECE} ${classes}` : PIECE,
-      ...(spacers.before ? { before: spacers.before } : {}),
-      ...(spacers.after ? { after: spacers.after } : {})
-    }
-    return this.marks.push({ range: this.range(start, end), options }) - 1
-  }
-
-  /** A mark holding a shape's place from `start` to `end`, and nothing else;  returns its index. */
-  private place(start: number, end: number): number {
-    return this.marks.push({ range: this.range(start, end), options: {} }) - 1
-  }
-
-  /** Monaco's range from offset `start` to `end`. */
-  private range(start: number, end: number): monaco.IRange {
-    const from = this.positionAt(start)
-    const to = this.positionAt(end)
-    return { startLineNumber: from.line, startColumn: from.column, endLineNumber: to.line, endColumn: to.column }
-  }
-
-  /** Offset `offset`'s line and column, 1-based. */
-  private positionAt(offset: number): { line: number; column: number } {
-    let low = 0
-    let high = this.lineStarts.length - 1
-    while (low < high) {
-      const middle = (low + high + 1) >> 1
-      if (this.lineStarts[middle]! <= offset) low = middle
-      else high = middle - 1
-    }
-    return { line: low + 1, column: offset - this.lineStarts[low]! + 1 }
   }
 
   ////////////////
@@ -232,12 +187,6 @@ export type BubblyInputShape = {
   isQuoted: boolean
 }
 
-/** Spacers injected before or after a mark. */
-type Spacers = { before?: monaco.editor.InjectedTextOptions; after?: monaco.editor.InjectedTextOptions }
-
-/** The class on every piece of text the look draws:  its ink, under any token's colour. */
-const PIECE = "bubbly-piece"
-
 /** The class of the name a head defines, `"card"` in `a "card" is a view`:  bold. */
 const NAME = "bubbly-name"
 
@@ -246,20 +195,6 @@ const QUOTE_MARK = "bubbly-quote-mark"
 
 /** A comment at the end of a head, on its band:  the page's is inside the band's element, the editor's isn't. */
 const BAND_COMMENT = "bubbly-band-comment"
-
-/**
- * A spacer either side of a pill's words (`input`), or outside a quoted one's marks (`quote`):
- * a no-break space, `bubbly-<kind>-spacer bubbly-spacer-<side>`, its width the sheet's.
- * - The caret stops only on the text's side of it:  beside the letter, never out past the spacer.
- *   Monaco's `InjectedTextCursorStops`:  `Right` (1) for a spacer before the text, `Left` (2) for a spacer after it.
- */
-function spacer(kind: "input" | "quote", side: "before" | "after"): monaco.editor.InjectedTextOptions {
-  return {
-    content: "\u00a0",
-    inlineClassName: `bubbly-spacer bubbly-${kind}-spacer bubbly-spacer-${side}`,
-    cursorStops: side === "before" ? 1 : 2
-  }
-}
 
 /**
  * A spacer before a head line's words:  `bubbly-head-spacer`, its width the sheet's (`--bubbly-pill-left-shift`).

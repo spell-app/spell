@@ -1054,23 +1054,116 @@
         )
         scale(var(--bubbly-monaco-scale));
     }
-    .bubbly-layer :is(.bubbly-head-pill, .bubbly-pill, .bubbly-gutter, .bubbly-body, .bubbly-foot, .bubbly-input) {
+    .bubbly-layer
+      :is(
+        .bubbly-head-pill,
+        .bubbly-pill,
+        .bubbly-gutter,
+        .bubbly-body,
+        .bubbly-foot,
+        .bubbly-input,
+        .bubbly-tag-pill,
+        .bubbly-tag-end
+      ) {
       position: absolute;
       padding: 0;
       box-sizing: border-box;
     }
     /* placed by the code:  not the page's room round a pill or an input */
-    .bubbly-layer :is(.bubbly-pill, .bubbly-input) {
+    .bubbly-layer :is(.bubbly-pill, .bubbly-input, .bubbly-tag-pill) {
       margin: 0;
     }
     /* a band sits on its line's middle;  an input's own rule places it */
-    .bubbly-layer :is(.bubbly-head-pill, .bubbly-pill) {
+    .bubbly-layer :is(.bubbly-head-pill, .bubbly-pill, .bubbly-tag-pill) {
       translate: 0 -50%;
     }
 
     /* the code's own layers over the shapes:  the editor sits above the layer, see-through */
     .monaco-editor {
       position: relative;
+    }
+  }
+
+  /*
+   * an HTML file in the editor (`MarkupMarks`):  the drawn-bubbly page's HTML, on the editor's lines
+   * - the box is a `.bubbly-html` too, so the HTML settings and rules above reach it;
+   *   these undo what's the page's alone, and draw the brackets over the file's own
+   */
+  &.bubbly-monaco.bubbly-html {
+    /* the box is the editor's, not the page's column of rows */
+    display: block;
+
+    /*
+     * a tag's `<` and `>`:  the file's own keep their width, see-through, the page's `⟨` `⟩` drawn over them,
+     * the open one at its left, the close one at its right
+     */
+    .view-line .bubbly-angle {
+      position: relative;
+      font-size: inherit;
+      color: transparent;
+    }
+    .view-line .bubbly-angle::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      color: var(--bubbly-band-mark);
+      font-size: calc(var(--bubbly-font-size) * var(--bubbly-monaco-scale));
+      line-height: normal;
+    }
+    .view-line .bubbly-angle-close::before {
+      left: auto;
+      right: 0;
+    }
+    /*
+     * a tag's marks:  as dark as the page's on a band, which mixes its faint ink with the band's colour;
+     * the text knows no band, so a little darker than the paper's faint ink instead
+     */
+    --bubbly-band-mark: color-mix(in srgb, var(--bubbly-ink) 42%, var(--bubbly-paper));
+    .view-line .bubbly-mark {
+      color: var(--bubbly-band-mark);
+    }
+    /* ... but a bracket's own character, under the one drawn over it */
+    .view-line .bubbly-mark.bubbly-angle {
+      color: transparent;
+    }
+    /* no room on the text itself:  the caret would land off its letters;  spacers instead, below */
+    .view-line :is(.bubbly-equals, .bubbly-attribute-name) {
+      margin: 0;
+    }
+    /* an end tag's name not bold, as the page's */
+    .view-line .bubbly-tag-name.bubbly-tag-end {
+      font-weight: 400;
+    }
+
+    /* spacers:  where the page has a tag's margin and padding, a line's inset */
+    /* before a block's start tag:  its words as far into its band as the page's */
+    .bubbly-head-spacer {
+      width: calc((var(--bubbly-pill-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+    }
+    /* before a line of text:  in from the tags beside it, as on the page */
+    .bubbly-line-spacer {
+      width: calc((var(--bubbly-line-inset) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+    }
+    /* either side of a tag in a line:  its pill's room, and the gap outside it */
+    .bubbly-tag-spacer {
+      width: calc((var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+    }
+    /* between an empty element's tags:  their points touch */
+    .bubbly-touch-spacer {
+      width: calc(var(--bubbly-bracket-pad) * var(--bubbly-monaco-scale));
+    }
+    /* before an attribute's name, and its `=`:  the page's margins */
+    .bubbly-attribute-spacer {
+      width: 0.33em;
+    }
+    .bubbly-equals-spacer {
+      width: calc(2px * var(--bubbly-monaco-scale));
+    }
+
+    /* the rail stops at the end tag's band:  none beside it */
+    .bubbly-layer .bubbly-block > .bubbly-gutter {
+      padding-bottom: 0;
     }
   }
 }
