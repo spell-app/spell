@@ -176,7 +176,7 @@
       "light": "18px",
       "dark": "18px"
     },
-    "--bubbly-quote-room": {
+    "--bubbly-quote-margin": {
       "light": "15px",
       "dark": "15px"
     },

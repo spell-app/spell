@@ -115,7 +115,7 @@
   /* a quoted input's marks, just outside its white:  Times' bold curly quotes, which every machine has */
   --bubbly-quote-font: "Times New Roman", Times, serif;
   --bubbly-quote-size: 18px;
-  --bubbly-quote-room: 15px;
+  --bubbly-quote-margin: 15px;
   /* the quote marks lean to match the band */
   --bubbly-quote-rotation: 15deg;
   /* the marks a quoted input's `"` draw:  open-quote and close-quote, at any depth */
@@ -436,7 +436,7 @@
   /* a QUOTED input's wrapper:  room either side of its input for its marks, as well as the usual gap */
   .bubbly-quoted {
     white-space: nowrap;
-    margin: 0 calc(var(--bubbly-gap) + var(--bubbly-quote-room));
+    margin: 0 calc(var(--bubbly-gap) + var(--bubbly-quote-margin));
   }
 
   /* a QUOTED input:  its words in its white, its marks just outside it, on its band */
@@ -525,7 +525,7 @@
 
     /* a quoted input at the start keeps just its opening mark's room */
     > .bubbly-quoted:first-child {
-      margin-left: var(--bubbly-quote-room);
+      margin-left: var(--bubbly-quote-margin);
     }
   }
 
@@ -680,7 +680,7 @@
     }
     /* outside a quoted input's marks:  half the page's, as the file's own `"` takes room of its own */
     .bubbly-quote-spacer {
-      width: calc(var(--bubbly-quote-room) / 2 * var(--bubbly-monaco-scale));
+      width: calc(var(--bubbly-quote-margin) / 2 * var(--bubbly-monaco-scale));
     }
     /* before a head line's words:  further into their band than the lines under it */
     .bubbly-head-spacer {
