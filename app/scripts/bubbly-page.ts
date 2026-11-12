@@ -94,7 +94,7 @@ writeFileSync(
     <!-- the look:  a generated copy of the app's bubbly.css, its one home -->
     <link rel="stylesheet" href="bubbly.css" />
   </head>
-  <body class="spell-doc-page spell-details-page">
+  <body class="spell-doc-page spell-details-page bubbly-math-angles">
     <ui-root>
       <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
       <spell-site-header></spell-site-header>
