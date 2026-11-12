@@ -264,10 +264,10 @@ class MarkupWriter {
     return `<span class="bubbly-mark">&lt;</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? "/&gt;" : "&gt;"}</span>`
   }
 
-  /** An end tag:  `</` and `>` faint, its name bold;  none, nothing. */
+  /** An end tag:  faint, its name too;  none, nothing. */
   private endTag(tag: Extract<Token, { kind: "end" }> | undefined): string {
     if (!tag) return ""
-    return `<span class="bubbly-mark">&lt;/</span><span class="bubbly-tag-name">${tag.tag}</span><span class="bubbly-mark">&gt;</span>`
+    return `<span class="bubbly-mark">&lt;/<span class="bubbly-tag-name">${tag.tag}</span>&gt;</span>`
   }
 
   /** Text on lines of its own:  each line in its body, its indent kept past the text's own;  blank lines a gap. */
