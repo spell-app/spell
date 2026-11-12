@@ -48,6 +48,9 @@ export class MarkupMarks extends TextMarks {
   /** Where each tag is:  a Spell drawing leaves them to these marks.  Not a `{…}` value in one:  that's Spell. */
   readonly tags: Array<{ start: number; end: number }> = []
 
+  /** The room injected after each tag in a line, by where it ends:  a tag right after it starts past it too. */
+  private readonly roomAfter = new Map<number, TagRoom>()
+
   /** Lines of Spell, whose own marks are Spell's:  no spacers before them or a block's start tag. */
   private readonly isInSpell: boolean
 
@@ -143,17 +146,24 @@ export class MarkupMarks extends TextMarks {
     { partOfSpeech, side, touch = false }: { partOfSpeech: MarkupPartOfSpeech; side: "start" | "end"; touch?: boolean },
     into: MarkupShape[]
   ) {
-    const spaced: MarkupTagShape["spaced"] = this.startsLine(tag.start)
-      ? "none"
-      : touch && side === "end"
-        ? "touch"
-        : "gap"
     const spacers: Spacers = {}
-    if (spaced !== "none") spacers.before = spacer(spaced === "touch" ? "touch" : "tag", "before")
-    if (!this.endsLine(tag.end)) spacers.after = spacer(touch && side === "start" ? "touch" : "tag", "after")
+    // the room before it:  the tag's it follows right on, then its own
+    const room: TagRoom[] = []
+    const behind = this.roomAfter.get(tag.start)
+    if (behind) room.push(behind)
+    if (!this.startsLine(tag.start)) {
+      const before: TagRoom = touch && side === "end" ? "touch" : "tag"
+      spacers.before = spacer(before, "before")
+      room.push(before)
+    }
+    if (!this.endsLine(tag.end)) {
+      const after: TagRoom = touch && side === "start" ? "touch" : "tag"
+      spacers.after = spacer(after, "after")
+      this.roomAfter.set(tag.end, after)
+    }
     // the room either side, and the pill's place:  the whole tag
     const place = this.mark(tag.start, tag.end, "", spacers)
-    into.push({ kind: "tag", place, partOfSpeech, side, isAlone: false, spaced })
+    into.push({ kind: "tag", place, partOfSpeech, side, isAlone: false, room })
     if (tag.kind === "start") this.startTag(tag, into)
     else this.endTag(tag, "inline")
   }
@@ -277,9 +287,16 @@ export type MarkupTagShape = {
   side: "start" | "end"
   /** alone on its line:  a band */
   isAlone: boolean
-  /** the room injected before it:  none at its line's start, less when its point touches the tag before it */
-  spaced?: "none" | "gap" | "touch"
+  /**
+   * the room injected where it starts, each spacer's kind:  the tag's it follows right on (`<p><b>`), then its own;
+   * none at its line's start, less where its point touches its element's other tag
+   * - Monaco places a column before the room injected there:  the pill starts past it
+   */
+  room?: TagRoom[]
 }
+
+/** A spacer beside a tag in a line:  room for its pill and the gap outside it, or only its pill's where points touch. */
+export type TagRoom = "tag" | "touch"
 
 /** A tag's `<` and `>`, drawn as `⟨` `⟩` over the file's own, faint. */
 const MARK = "bubbly-mark"

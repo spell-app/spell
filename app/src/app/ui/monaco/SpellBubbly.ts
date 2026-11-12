@@ -424,13 +424,17 @@ export class SpellBubbly {
 
   /**
    * An HTML tag:  a band by itself when it's alone on its line, else a small pill in it;
-   * from a bracket's room before its `<`, past the room injected before it, to a bracket's room after its `>`.
+   * from a bracket's room before its `<` to a bracket's room after its `>`.
+   * - Monaco's place for a column is before the room injected there:  the pill starts past that room.
    */
   private drawTag(shape: MarkupTagShape, range: monaco.Range, view: View): HTMLElement {
     const { measures, lineHeight } = view
     const line = range.startLineNumber
-    const spacer = shape.spaced === "gap" ? measures.tagSpacer : shape.spaced === "touch" ? measures.touchSpacer : 0
-    const left = this.xOf(line, range.startColumn) + spacer - measures.bracketPad
+    const room = (shape.room ?? []).reduce(
+      (sum, kind) => sum + measures[kind === "tag" ? "tagSpacer" : "touchSpacer"],
+      0
+    )
+    const left = this.xOf(line, range.startColumn) + room - measures.bracketPad
     const endColumn = range.endLineNumber === line ? range.endColumn : this.editor.getModel()!.getLineMaxColumn(line)
     const right = this.xOf(line, endColumn) + measures.bracketPad
     const kind = `bubbly-${shape.partOfSpeech}`

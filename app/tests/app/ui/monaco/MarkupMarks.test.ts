@@ -36,7 +36,7 @@ function shapesOf(marks: MarkupMarks): string[] {
         shape.kind === "markup-block"
           ? `block ${shape.partOfSpeech}${shape.foot === undefined ? "" : " +foot"}`
           : shape.kind === "tag"
-            ? `${shape.isAlone ? "band" : "pill"} ${shape.side} ${shape.spaced ?? ""}`.trim()
+            ? `${shape.isAlone ? "band" : "pill"} ${shape.side} ${shape.room?.join("+") ?? ""}`.trim()
             : "input"
       out.push(`${"  ".repeat(depth)}${what}:  ${text.slice(0, 24)}`)
       if (shape.kind === "markup-block") walk(shape.inside, depth + 1)
@@ -55,16 +55,16 @@ describe("MarkupMarks", () => {
       "  block plain +foot:  <head>",
       '    band start:  <meta charset="UTF-8" />',
       '    input:  UTF-8" />',
-      "    pill start none:  <title>A demo</title>",
-      "    pill end gap:  </title>",
+      "    pill start:  <title>A demo</title>",
+      "    pill end tag:  </title>",
       "  block thing +foot:  <body>",
-      "    pill start none:  <h2>Two <code>x</code></",
-      "    pill start gap:  <code>x</code></h2>",
-      "    pill end gap:  </code></h2>",
-      "    pill end gap:  </h2>",
-      '    pill start none:  <spell-viewer id="a"></s',
+      "    pill start:  <h2>Two <code>x</code></",
+      "    pill start tag:  <code>x</code></h2>",
+      "    pill end tag:  </code></h2>",
+      "    pill end tag+tag:  </h2>",
+      '    pill start:  <spell-viewer id="a"></s',
       '    input:  a"></spell-viewer>',
-      "    pill end touch:  </spell-viewer>"
+      "    pill end touch+touch:  </spell-viewer>"
     ])
   })
 
