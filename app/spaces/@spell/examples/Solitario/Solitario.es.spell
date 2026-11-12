@@ -22,19 +22,19 @@ solitario es una aplicación
 
 	grupo "Pilas"
 		// Una de cada, hecha con el solitario
-	"reserva" es una nueva pila de reserva con nombre "reserva"
-	"descartes" es una nueva pila de descartes con nombre "descartes"
-	"tréboles" es una nueva fundación con nombre "tréboles", palo = tréboles
-	"diamantes" es una nueva fundación con nombre "diamantes", palo = diamantes
-	"corazones" es una nueva fundación con nombre "corazones", palo = corazones
-	"espadas" es una nueva fundación con nombre "espadas", palo = espadas
-	"C1" es una nueva columna con nombre "C1"
-	"C2" es una nueva columna con nombre "C2"
-	"C3" es una nueva columna con nombre "C3"
-	"C4" es una nueva columna con nombre "C4"
-	"C5" es una nueva columna con nombre "C5"
-	"C6" es una nueva columna con nombre "C6"
-	"C7" es una nueva columna con nombre "C7"
+	"reserva" es una nueva pila de reserva
+	"descartes" es una nueva pila de descartes
+	"tréboles" es una nueva fundación con palo = tréboles
+	"diamantes" es una nueva fundación con palo = diamantes
+	"corazones" es una nueva fundación con palo = corazones
+	"espadas" es una nueva fundación con palo = espadas
+	"C1" es una nueva columna
+	"C2" es una nueva columna
+	"C3" es una nueva columna
+	"C4" es una nueva columna
+	"C5" es una nueva columna
+	"C6" es una nueva columna
+	"C7" es una nueva columna
 	al crearlo
 		// Cada carta del mazo a la reserva
 		para carta en el mazo
@@ -143,20 +143,20 @@ solitario es una aplicación
 				<texto slot="derecha">Movimientos: {los movimientos}  ·  Puntos: {la puntuación}{la pista}</texto>
 			</barra-herramientas>
 			<cuadricula class="Board" columnas="7" context-menu="menú del juego">
-				{dibujar la reserva}
-				{dibujar los descartes}
+				<pila-de-reserva "reserva"/>
+				<pila-de-descartes "descartes"/>
 				<columna/>
-				{dibujar los tréboles}
-				{dibujar los diamantes}
-				{dibujar los corazones}
-				{dibujar las espadas}
-				{dibujar la C1}
-				{dibujar la C2}
-				{dibujar la C3}
-				{dibujar la C4}
-				{dibujar la C5}
-				{dibujar la C6}
-				{dibujar la C7}
+				<fundación "tréboles"/>
+				<fundación "diamantes"/>
+				<fundación "corazones"/>
+				<fundación "espadas"/>
+				<columna "C1"/>
+				<columna "C2"/>
+				<columna "C3"/>
+				<columna "C4"/>
+				<columna "C5"/>
+				<columna "C6"/>
+				<columna "C7"/>
 			</cuadricula>
 		</contenedor>
 
@@ -266,7 +266,7 @@ una "columna" es una pila
 		devolver su color no es el color de la carta y su valor es el valor de la carta + 1
 
 	para probar los movimientos
-		poner la columna a una nueva columna con nombre "C1"
+		poner la columna a una nueva columna con id "C1"
 		poner el rey a una nueva carta cuyo rango es rey, palo es espadas y dirección es arriba
 		poner la dama a una nueva carta cuyo rango es dama, palo es corazones y dirección es arriba
 		poner la jota a una nueva carta cuyo rango es jota, palo es tréboles y dirección es arriba
@@ -283,10 +283,10 @@ una "columna" es una pila
 		la columna puede soltar la dama debería ser no
 
 		// una fundación toma su palo, el as primero, luego uno más alto:  cada una la última carta de su pila
-		poner la fundación a una nueva fundación con nombre "corazones", palo = corazones
+		poner la fundación a una nueva fundación con palo = corazones
 		poner el dos a una nueva carta cuyo rango es 2, palo es corazones y dirección es arriba
 		poner el as a una nueva carta cuyo rango es as, palo es corazones y dirección es arriba
-		poner la columna a una nueva columna con nombre "C2"
+		poner la columna a una nueva columna con id "C2"
 		agregar el dos a la columna
 		agregar el as a la columna
 		la fundación puede tomar el dos debería ser no

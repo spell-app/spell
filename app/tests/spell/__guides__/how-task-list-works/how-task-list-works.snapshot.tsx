@@ -115,7 +115,7 @@ export class TaskList extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // - its "tasks" is a new checklist
-  @prop({ init: () => new Checklist(), early: true })
+  @prop({ init: () => new Checklist({ id: "tasks" }), early: true })
   accessor tasks!: Checklist
 
   /** how many are left:  the tasks picked out with "where", counted */

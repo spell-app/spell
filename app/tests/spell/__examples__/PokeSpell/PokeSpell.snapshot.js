@@ -1747,7 +1747,7 @@ export class Pokedex extends App {
   set pickedKind(value) { this.setProp("pickedKind", value) }
 
   // "game" is a new guess
-  static { this.declareProp("game", { init: () => new Guess(), early: true }) }
+  static { this.declareProp("game", { init: () => new Guess({ id: "game" }), early: true }) }
   get game() { return this.getProp("game") }
   set game(value) { this.setProp("game", value) }
 

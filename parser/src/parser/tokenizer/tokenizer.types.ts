@@ -28,15 +28,21 @@ export type TokenProps<ValueType = any> = {
 export type TokenMatcher<T = P.Token> = (text: string, start?: number, end?: number) => T | undefined
 
 /**
- * Policy for automatically removing whitespace from the token stream.
- * - REFACTOR: idiomatic TS enum string pattern?
- */
-/**
  * In `Tokenizer.quotedNameTags`:  this tag's quoted word is its contents, not an attribute.
  * - `<header "Hardware"/>` ~== `<header>Hardware</header>`.
  */
 export const QUOTED_CONTENTS = "#contents"
 
+/**
+ * The name of a tag's kept quoted word, `"T1"` in `<tableau "T1"/>`:  see `Tokenizer.keepsQuotedWords`.
+ * - Never an attribute's name as written:  the tag's rule says what the word is.
+ */
+export const QUOTED_WORD = "#word"
+
+/**
+ * Policy for automatically removing whitespace from the token stream.
+ * - REFACTOR: idiomatic TS enum string pattern?
+ */
 export const WhitespacePolicy = {
   ALL: "ALL", // Leave ALL whitespace
   NONE: "NONE", // Remove ALL whitespace

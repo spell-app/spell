@@ -1528,6 +1528,19 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Never in a page's `<spell>` or `<html>` block, code spell as written (J83):  there `<button>` is the web's.
 - A tag's head may be named by a quoted name after its word, `<example "one counter">`:
   the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
+- A VIEW'S QUOTED WORD is its `id` (Owen, 2026-11-12):  `<tableau "T1"/>` ~== `<tableau id="T1"/>`, the tableau
+  whose name, or chosen id, is T1 (`core.thingNamed()`).
+  - The tokenizer keeps a quoted word on any tag it doesn't list below (`Tokenizer.keepsQuotedWords`,
+    `JSXElementToken.quotedWord`):  only the tag's parse knows the project's views (`SpellJSX.attributesOf()`).
+  - On a tag that's no view it's unreadable, as before.
+  - A view declared further down is a stub as the drawing parses:  it's taken as a view once its line says so,
+    when it compiles (`laterView`, `SpellJSX.isLaterView()`).  A line a scan found that never parsed counts as one,
+    as an editor's parse keeps what it last compiled.
+    With a quoted word, such a type wins over a pack's component of its name:
+    Solitario's `<columna "C1"/>` is its column, `<columna/>` the grid's.
+  - Any language's tags alike:  it's the tag being a view that counts.
+  - A member made new takes its name as its thing's `id` (`DefinePropertyHas.withMemberId()`):
+    `"T1" is a new tableau` is `new Tableau({ id: "T1" })`, so the drawing names it with no `with name "T1"`.
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
   - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
@@ -1716,6 +1729,9 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
       With `keepLastGood`, a name being typed doesn't count.
     - Not yet:  a member `belongs to` declares.
+  - An edit which changes a type's line, `a "tableau" is a pile`, re-parses the whole project too
+    (`parser.changesTypeKinds()`):  a drawing above it decided by it whether `<tableau "T1"/>` is a view.
+    With `keepLastGood`, only a type line added or deleted counts.
   - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a file whose only top-level thing is one page's head,
     comments aside (`SP.alonePageName()`, read from its lines, before anything parses).
     - The project knows only its head (`SP.AlonePage`):  its name and its properties, declared in the project's scope.

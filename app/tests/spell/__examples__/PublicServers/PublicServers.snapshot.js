@@ -4275,27 +4275,27 @@ export class PublicServer extends App {
   set tab(value) { this.setProp("tab", value) }
 
   // "github" is a new github page
-  static { this.declareProp("github", { init: () => new GithubPage(), early: true }) }
+  static { this.declareProp("github", { init: () => new GithubPage({ id: "github" }), early: true }) }
   get github() { return this.getProp("github") }
   set github(value) { this.setProp("github", value) }
 
   // "library" is a new open library page
-  static { this.declareProp("library", { init: () => new OpenLibraryPage(), early: true }) }
+  static { this.declareProp("library", { init: () => new OpenLibraryPage({ id: "library" }), early: true }) }
   get library() { return this.getProp("library") }
   set library(value) { this.setProp("library", value) }
 
   // "weather" is a new open meteo page
-  static { this.declareProp("weather", { init: () => new OpenMeteoPage(), early: true }) }
+  static { this.declareProp("weather", { init: () => new OpenMeteoPage({ id: "weather" }), early: true }) }
   get weather() { return this.getProp("weather") }
   set weather(value) { this.setProp("weather", value) }
 
   // "museum" is a new met museum page
-  static { this.declareProp("museum", { init: () => new MetMuseumPage(), early: true }) }
+  static { this.declareProp("museum", { init: () => new MetMuseumPage({ id: "museum" }), early: true }) }
   get museum() { return this.getProp("museum") }
   set museum(value) { this.setProp("museum", value) }
 
   // "atlas" is a new rest countries page
-  static { this.declareProp("atlas", { init: () => new RestCountriesPage(), early: true }) }
+  static { this.declareProp("atlas", { init: () => new RestCountriesPage({ id: "atlas" }), early: true }) }
   get atlas() { return this.getProp("atlas") }
   set atlas(value) { this.setProp("atlas", value) }
 

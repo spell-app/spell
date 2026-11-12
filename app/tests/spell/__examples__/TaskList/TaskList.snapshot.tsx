@@ -569,7 +569,7 @@ export class TaskList extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "checklist" is a new checklist
-  @prop({ init: () => new Checklist(), early: true })
+  @prop({ init: () => new Checklist({ id: "checklist" }), early: true })
   accessor checklist!: Checklist
 
   /** The next task's title, as the new task's field holds it */

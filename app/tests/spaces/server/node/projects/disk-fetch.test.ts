@@ -45,11 +45,11 @@ describe("diskFetch", () => {
       expect(file.match, file.path).toBeDefined()
       expect(describeParseErrors(file.match)).toEqual(reference.files[index]!.errors)
       // its elements' tags say its project's name, `Solitaire`;  the reference's, `test-project`
-      // an app's names its element's own word too:  `this, "Solitaire", "App"`
-      const compiled = String(P.JSWriter.instance.writeMatch(file.match)).replaceAll(
-        'this, "Solitaire"',
-        'this, "test-project"'
-      )
+      // an app's names its element's own word too:  `this, "Solitaire", "App"`;
+      // and a drawing's own tags, `<tableau "T1"/>`, are `solitaire-tableau`
+      const compiled = String(P.JSWriter.instance.writeMatch(file.match))
+        .replaceAll('this, "Solitaire"', 'this, "test-project"')
+        .replaceAll('h("solitaire-', 'h("test-project-')
       expect(compiled).toEqual(reference.files[index]!.compiled)
     })
   })

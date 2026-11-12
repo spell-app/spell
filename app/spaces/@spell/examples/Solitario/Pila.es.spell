@@ -4,8 +4,6 @@
 // Una carta arrastrada sobre ella brilla cuando la tomaría, según sus propias reglas (`soltable`).
 
 una "pila" es una lista visible soltable de cartas
-	su "nombre" es texto
-		// Cómo la llama el juego, p. ej. reserva
 	su "disposición" es uno de apilada, vertical, horizontal o abanico
 		// Cómo están sus cartas:  una sobre otra, hacia abajo en una columna, a lo largo de una fila, o en abanico, como se sostiene una mano -- styles.css
 	su "color" es
@@ -17,14 +15,14 @@ una "pila" es una lista visible soltable de cartas
 		0 si está vacía
 		el valor de su última carta de lo contrario
 	su "estado" es
-		// Su nombre, luego los nombres cortos de sus cartas:  reserva: D♠↑ 7♥↓
-		poner resumen a (su nombre o "pila") + ":"
+		// Su id, luego los nombres cortos de sus cartas:  reserva: D♠↑ 7♥↓
+		poner resumen a su id + ":"
 		para carta en la pila
 			poner resumen a resumen + " " + el estado de la carta
 		devolver resumen
 
 	para probar las pilas
-		poner la reserva a una nueva pila con nombre "reserva"
+		poner la reserva a una nueva pila con id "reserva"
 		el color de la reserva debería ser "ninguno"
 		el valor de la reserva debería ser 0
 		agregar (una nueva carta cuyo rango es dama, palo es espadas y dirección es arriba) a la reserva
@@ -34,7 +32,7 @@ una "pila" es una lista visible soltable de cartas
 		el estado de la reserva debería ser "reserva: D♠↑ 7♥↓"
 
 		// una carta está en una sola pila a la vez
-		poner los descartes a una nueva pila con nombre "descartes"
+		poner los descartes a una nueva pila con id "descartes"
 		obtener la última carta de la reserva
 		agregar eso a los descartes
 		su pila es los descartes debería ser sí

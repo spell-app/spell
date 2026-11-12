@@ -38,7 +38,7 @@ from contextvars import ContextVar
 from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 
 from spell_core.events import Eventful
-from spell_core.kinds import is_same
+from spell_core.kinds import MADE_ID_KEY, is_same
 from spell_core.prop_rules import PropRule
 
 if TYPE_CHECKING:
@@ -294,8 +294,26 @@ class ThingIdProp(Prop):
         super().__init__("text", None, None, None)
 
     def first_value(self, instance: "SpellObject") -> object:
-        """A new id for `instance`:  see `new_thing_id()`."""
-        return new_thing_id(instance)
+        """A new id for `instance`:  see `new_thing_id()`.
+
+        - Kept as made up, so `has_chosen_id()` can tell it from one the program chose.
+        """
+        made = new_thing_id(instance)
+        instance.__dict__[MADE_ID_KEY] = made
+        return made
+
+
+def has_chosen_id(thing: object) -> bool:
+    """Did the program choose `thing`'s id, or load it, rather than one being made up for it (`new_thing_id()`)?
+
+    - e.g. `Tableau(id="T1")`, as `"T1" is a new tableau` compiles:  the same id every run.
+    - Reads no id:  a thing whose id is never read still has none.
+    - The twin of the JavaScript core's `hasChosenId()`.
+    """
+    if not isinstance(thing, SpellObject):
+        return False
+    chosen = thing.__dict__.get("_props", {}).get("id")
+    return chosen is not None and thing.__dict__.get(MADE_ID_KEY) != chosen
 
 
 def new_thing_id(thing: object) -> str:
@@ -329,6 +347,10 @@ class ThingRegistry:
     def class_named(self, name: str) -> "type[SpellObject] | None":
         """The class called `name`, exactly as written (`"Card"`), if one has been defined."""
         return self._classes.get(name)
+
+    def class_drawn_as(self, tag: str) -> "type[SpellObject] | None":
+        """The view class whose element is `<tag>`, `Tableau` for `solitaire-tableau`, if one has been defined."""
+        return next((cls for cls in self._classes.values() if getattr(cls, "element_tag", None) == tag), None)
 
 
 # The one registry:  `core.things`.

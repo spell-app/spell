@@ -688,6 +688,23 @@ describe("outline style", () => {
       expect(t1).toMatchObject({ name: "T1" })
     })
 
+    test("a thing's takes its member's name as its id, unless its line gives one:  `tableau T1` finds it", () => {
+      const lines = [
+        "game is an app",
+        '\t"T1" is a new tableau',
+        '\t"T2" is a new tableau with id "second"',
+        '\t"stock" is a new tableau with name "pile"',
+        "a tableau is a thing"
+      ]
+      const code = compile(lines)
+      expect(code).toContain('init: () => new Tableau({ id: "T1" }), early: true')
+      expect(code).toContain('init: () => new Tableau({ id: "second" }), early: true')
+      expect(code).toContain('init: () => new Tableau({ id: "stock", name: "pile" }), early: true')
+      const run = runSpell([...lines, "set found to tableau T1", "set same to game's T1"], { registered: true })
+      const { found, same } = run("found, same") as Record<string, unknown>
+      expect(found).toBe(same)
+    })
+
     test("a thing's is made with it:  `every pile` finds them before anything reads them;  a list's isn't", () => {
       const lines = [
         "a game is an app where:",
@@ -699,7 +716,7 @@ describe("outline style", () => {
       const run = runSpell([...lines, "set game to a new game", "set piles to every pile"], { registered: true })
       const { piles } = run("piles") as { piles: { items: { name: string }[] } }
       expect(piles.items.map(({ name }) => name)).toEqual(["clubs", "hearts"])
-      expect(compile(lines)).toContain('init: () => new Pile({ name: "clubs" }), early: true')
+      expect(compile(lines)).toContain('init: () => new Pile({ id: "clubs", name: "clubs" }), early: true')
       expect(compile(lines)).not.toMatch(/new List\(.*early/)
     })
   })

@@ -26,7 +26,6 @@ export const words = {
       state: "state"
     },
     Pile: {
-      name: "name",
       layout: "layout",
       color: "color",
       value: "value",

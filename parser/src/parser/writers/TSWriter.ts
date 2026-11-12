@@ -893,7 +893,8 @@ export class TSWriter extends JSWriter {
     if (project === undefined) return undefined
     const typeName = this.typeNameOf(node.type.name)
     const name = this.elementClassName(typeName)
-    const tag = elementTagFor(project, elementNameOf(node) ?? typeName)
+    // the type's own name, not the class's (`STOCK_PILE`, a naming map's):  as a drawing names its tag, `<stock-pile>`
+    const tag = elementTagFor(project, elementNameOf(node) ?? node.type.name)
     this.elementTags.set(name, tag)
     const words = wordsOf(typeName)
     const attributes = this.elementAttributes(node)
@@ -1062,6 +1063,7 @@ export class TSWriter extends JSWriter {
     "followParent",
     "fontStates",
     "formIsDisabled",
+    "foundById",
     "gliding",
     "handedThing",
     "handlerFor",

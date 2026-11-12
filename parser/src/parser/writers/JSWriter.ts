@@ -16,6 +16,7 @@ import {
   PRESS_ATTRIBUTES,
   topLevelOf,
   unwrapped,
+  withElementName,
   withUsedCoreClasses
 } from "./jsShapes"
 import { Naming } from "./Naming"
@@ -52,6 +53,8 @@ export const DRAWS_WAITING = "static drawsWaiting = true"
 /** Core's method for each kind of `P.ASTTypeDescription`. */
 /** The static saying where a type is saved. */
 const SAVED_IN = "savedIn"
+/** A view class's static naming its element's tag:  `static elementTag = core.defineElement(this, "Solitaire")`. */
+const ELEMENT_TAG = "elementTag"
 
 /** `core`'s call a place's line compiles to. */
 const PLACE_CALL = "place"
@@ -1514,6 +1517,9 @@ export class JSWriter extends ProgramWriter {
    */
   private staticValue(node: P.ASTStaticDefinition): string {
     const written = this.bare(node.value)
+    // a view class written under another name (`STOCK_PILE`):  its tag still the type's, as a drawing names it
+    if (node.name === ELEMENT_TAG && node.typeName && this.typeNameOf(node.typeName) !== node.typeName)
+      return withElementName(written, node.typeName)
     if (node.name !== SAVED_IN) return written
     const select = this.reads?.selectFor(node.typeName)
     const closing = /\s*\}$/.exec(written)

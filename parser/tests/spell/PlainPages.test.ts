@@ -234,6 +234,25 @@ describe("a drawing in plain spell takes a page's shortcuts", () => {
     expect(errors).toEqual([])
   })
 
+  test('a view\'s quoted word is its id:  `<tableau "T1"/>` ~== `<tableau id="T1"/>`, the view declared above or below', () => {
+    const game = (types: string, below = "") =>
+      `${types}game is an app\n\t"T1" is a new tableau\n\tto draw it\n\t\t<tableau "T1"/>\n${below}`
+    const types = 'a "pile" is a viewable list of numbers\na "tableau" is a pile\n'
+    for (const text of [game(types), game("", types)]) {
+      const { code, errors } = compiled(text, "/Game.spell")
+      expect(errors).toEqual([])
+      expect(code).toContain('h("test-project-tableau", { id: "T1" })')
+    }
+  })
+
+  test("a quoted word on a tag that's no view is unreadable, as before", () => {
+    const below = 'a "note" is a thing\n'
+    for (const tag of ["div", "note"]) {
+      const { errors } = compiled(`a "box" is a view\n\tto draw it\n\t\t<${tag} "x"/>\n${below}`, "/Box.spell")
+      expect(errors).toEqual([expect.stringContaining(`Can't read "x" in <${tag}>`)])
+    }
+  })
+
   test("a name nobody has stays the web's own element:  no error", () => {
     const { code, errors } = compiled('a "box" is a view where:\n\t- to draw it:\n\t\t<div><text>hi</></div>\n')
     expect(errors).toEqual([])

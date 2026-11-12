@@ -312,10 +312,6 @@ class Pile(ViewableList):
     item_type = Card
     element_tag = "test-project-pile"
 
-    # What the game calls it, e.g. stock
-    # - its "name" is text
-    name = prop(type="text")
-
     # How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css
     # - its "layout" is one of stacked, vertical, horizontal or fanned
     LAYOUTS = ("stacked", "vertical", "horizontal", "fanned")
@@ -337,8 +333,8 @@ class Pile(ViewableList):
 
     @property
     def state(self) -> str:
-        """Its name, then its cards' short names:  stock: Q♠↑ 7♥↓"""
-        summary = f"{self.name or "pile"}:"
+        """Its id, then its cards' short names:  stock: Q♠↑ 7♥↓"""
+        summary = f"{self.id}:"
         for card in self:
             summary = f"{summary} {card.state}"
         return summary
@@ -360,8 +356,8 @@ class Pile(ViewableList):
 def test_piles() -> None:
     with core.test("test piles"):
         it = Pile()
-        core.echo_test_action("set the stock to a new pile with name \"stock\"")
-        stock = Pile(name="stock")
+        core.echo_test_action("set the stock to a new pile with id \"stock\"")
+        stock = Pile(id="stock")
         core.expect(stock.color, "stock's color", "none", "\"none\"")
         core.expect(stock.value, "stock's value", 0, "0")
         core.echo_test_action(
@@ -377,7 +373,7 @@ def test_piles() -> None:
         core.expect(stock.state, "stock's state", "stock: Q♠↑ 7♥↓", "\"stock: Q♠↑ 7♥↓\"")
 
         # a card is in one pile at a time
-        discards = Pile(name="discards")
+        discards = Pile(id="discards")
         core.echo_test_action("get the last card of the stock")
         it_2 = stock.last_item
         core.echo_test_action("add it to the discards")
@@ -525,46 +521,46 @@ class Solitaire(App):
         self.hint = ""
 
     # "deck" is a new deck
-    deck = prop(init=lambda: Deck(), early=True)
+    deck = prop(init=lambda: Deck(id="deck"), early=True)
 
-    # "stock" is a new stock pile with name "stock"
-    stock = prop(init=lambda: StockPile(name="stock"), early=True)
+    # "stock" is a new stock pile
+    stock = prop(init=lambda: StockPile(id="stock"), early=True)
 
-    # "discards" is a new discard pile with name "discards"
-    discards = prop(init=lambda: DiscardPile(name="discards"), early=True)
+    # "discards" is a new discard pile
+    discards = prop(init=lambda: DiscardPile(id="discards"), early=True)
 
-    # "clubs" is a new foundation with name "clubs", suit = clubs
-    clubs = prop(init=lambda: Foundation(name="clubs", suit="clubs"), early=True)
+    # "clubs" is a new foundation with suit = clubs
+    clubs = prop(init=lambda: Foundation(id="clubs", suit="clubs"), early=True)
 
-    # "diamonds" is a new foundation with name "diamonds", suit = diamonds
-    diamonds = prop(init=lambda: Foundation(name="diamonds", suit="diamonds"), early=True)
+    # "diamonds" is a new foundation with suit = diamonds
+    diamonds = prop(init=lambda: Foundation(id="diamonds", suit="diamonds"), early=True)
 
-    # "hearts" is a new foundation with name "hearts", suit = hearts
-    hearts = prop(init=lambda: Foundation(name="hearts", suit="hearts"), early=True)
+    # "hearts" is a new foundation with suit = hearts
+    hearts = prop(init=lambda: Foundation(id="hearts", suit="hearts"), early=True)
 
-    # "spades" is a new foundation with name "spades", suit = spades
-    spades = prop(init=lambda: Foundation(name="spades", suit="spades"), early=True)
+    # "spades" is a new foundation with suit = spades
+    spades = prop(init=lambda: Foundation(id="spades", suit="spades"), early=True)
 
-    # "T1" is a new tableau with name "T1"
-    t1 = prop(init=lambda: Tableau(name="T1"), early=True)
+    # "T1" is a new tableau
+    t1 = prop(init=lambda: Tableau(id="T1"), early=True)
 
-    # "T2" is a new tableau with name "T2"
-    t2 = prop(init=lambda: Tableau(name="T2"), early=True)
+    # "T2" is a new tableau
+    t2 = prop(init=lambda: Tableau(id="T2"), early=True)
 
-    # "T3" is a new tableau with name "T3"
-    t3 = prop(init=lambda: Tableau(name="T3"), early=True)
+    # "T3" is a new tableau
+    t3 = prop(init=lambda: Tableau(id="T3"), early=True)
 
-    # "T4" is a new tableau with name "T4"
-    t4 = prop(init=lambda: Tableau(name="T4"), early=True)
+    # "T4" is a new tableau
+    t4 = prop(init=lambda: Tableau(id="T4"), early=True)
 
-    # "T5" is a new tableau with name "T5"
-    t5 = prop(init=lambda: Tableau(name="T5"), early=True)
+    # "T5" is a new tableau
+    t5 = prop(init=lambda: Tableau(id="T5"), early=True)
 
-    # "T6" is a new tableau with name "T6"
-    t6 = prop(init=lambda: Tableau(name="T6"), early=True)
+    # "T6" is a new tableau
+    t6 = prop(init=lambda: Tableau(id="T6"), early=True)
 
-    # "T7" is a new tableau with name "T7"
-    t7 = prop(init=lambda: Tableau(name="T7"), early=True)
+    # "T7" is a new tableau
+    t7 = prop(init=lambda: Tableau(id="T7"), early=True)
 
     def create(self) -> None:
         """Every card of the deck into the stock"""
@@ -632,20 +628,20 @@ class Solitaire(App):
             h(
                 "ui-grid",
                 {"class": "Board", "columns": "7", "context-menu": "game menu"},
-                core.draw_thing(self.stock),
-                core.draw_thing(self.discards),
+                h("test-project-stock-pile", {"id": "stock"}),
+                h("test-project-discard-pile", {"id": "discards"}),
                 h("ui-column"),
-                core.draw_thing(self.clubs),
-                core.draw_thing(self.diamonds),
-                core.draw_thing(self.hearts),
-                core.draw_thing(self.spades),
-                core.draw_thing(self.t1),
-                core.draw_thing(self.t2),
-                core.draw_thing(self.t3),
-                core.draw_thing(self.t4),
-                core.draw_thing(self.t5),
-                core.draw_thing(self.t6),
-                core.draw_thing(self.t7),
+                h("test-project-foundation", {"id": "clubs"}),
+                h("test-project-foundation", {"id": "diamonds"}),
+                h("test-project-foundation", {"id": "hearts"}),
+                h("test-project-foundation", {"id": "spades"}),
+                h("test-project-tableau", {"id": "T1"}),
+                h("test-project-tableau", {"id": "T2"}),
+                h("test-project-tableau", {"id": "T3"}),
+                h("test-project-tableau", {"id": "T4"}),
+                h("test-project-tableau", {"id": "T5"}),
+                h("test-project-tableau", {"id": "T6"}),
+                h("test-project-tableau", {"id": "T7"}),
             ),
         )
 
@@ -756,8 +752,8 @@ core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "und
 def test_the_moves() -> None:
     with core.test("test the moves"):
         it = Tableau()
-        core.echo_test_action("set the column to a new tableau with name \"T1\"")
-        column = Tableau(name="T1")
+        core.echo_test_action("set the column to a new tableau with id \"T1\"")
+        column = Tableau(id="T1")
         core.echo_test_action(
             "set the king to a new card whose rank is king, suit is spades and direction is up",
         )
@@ -796,7 +792,7 @@ def test_the_moves() -> None:
         )
 
         # a foundation takes its suit, ace first, then one higher:  each the last card of its pile
-        foundation = Foundation(name="hearts", suit="hearts")
+        foundation = Foundation(suit="hearts")
         core.echo_test_action(
             "set the two to a new card whose rank is 2, suit is hearts and direction is up",
         )
@@ -805,8 +801,8 @@ def test_the_moves() -> None:
             "set the ace to a new card whose rank is ace, suit is hearts and direction is up",
         )
         ace = Card(rank="ace", suit="hearts", direction="up")
-        core.echo_test_action("set the column to a new tableau with name \"T2\"")
-        column = Tableau(name="T2")
+        core.echo_test_action("set the column to a new tableau with id \"T2\"")
+        column = Tableau(id="T2")
         core.echo_test_action("add the two to the column")
         column.append(two)
         core.echo_test_action("add the ace to the column")

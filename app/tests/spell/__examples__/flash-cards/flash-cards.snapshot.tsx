@@ -111,7 +111,7 @@ export class Quiz extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "deck" is a new deck
-  @prop({ init: () => new Deck(), early: true })
+  @prop({ init: () => new Deck({ id: "deck" }), early: true })
   accessor deck!: Deck
 
   /** The card showing */

@@ -20,7 +20,7 @@ import re
 from collections.abc import Iterable, Mapping
 
 from spell_core.js_text import js_string
-from spell_core.things import Thing
+from spell_core.things import Thing, program_core
 
 # Elements HTML never closes:  `<br>`, not `<br></br>`.  linkedom's list.
 VOID_ELEMENTS = frozenset({
@@ -113,6 +113,8 @@ def h(tag: str, props: Mapping[str, object] | object = None, *children: object) 
       - `True` is the attribute with no value (`hidden`);  `False` and `None` leave it out
       - a number is written as JavaScript writes it:  `3.0` is `3`
       - `"class"`:  its names split on spaces and written once each, single-spaced, as the page keeps them
+    - A view's own tag with an `id` and nothing in it, `h("solitaire-tableau", {"id": "T1"})`:  the thing that id names,
+      drawn as `core.draw_thing()` draws it (`core.draw_by_id()`), as the page's element finds and draws it
     - `children`:  elements, text, numbers (as JavaScript writes them), lists of them, all in order:
       - a function is called for its value
       - `None` shows nothing;  `True` and `False` show `true` and `false`, as Solid's `h()` does
@@ -125,6 +127,10 @@ def h(tag: str, props: Mapping[str, object] | object = None, *children: object) 
         written = attribute_value(name, value)
         if written is not None:
             attributes[name] = written
+    if not children and "id" in attributes:
+        drawn = program_core().draw_by_id(tag, attributes)
+        if drawn is not None:
+            return drawn
     return Element(tag, attributes, drawn_children(children))
 
 

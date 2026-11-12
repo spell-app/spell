@@ -105,12 +105,12 @@ export class Table extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // - its "column" is a new column
-  static { this.declareProp("column", { init: () => new Column(), early: true }) }
+  static { this.declareProp("column", { init: () => new Column({ id: "column" }), early: true }) }
   get column() { return this.getProp("column") }
   set column(value) { this.setProp("column", value) }
 
   // - its "hand" is a new pile
-  static { this.declareProp("hand", { init: () => new Pile(), early: true }) }
+  static { this.declareProp("hand", { init: () => new Pile({ id: "hand" }), early: true }) }
   get hand() { return this.getProp("hand") }
   set hand(value) { this.setProp("hand", value) }
 

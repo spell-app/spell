@@ -201,12 +201,6 @@ export class Pile extends ViewableList {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
-  /** What the game calls it, e.g. stock */
-  // - its "name" is text
-  static { this.declareProp("name", { type: "text" }) }
-  get name() { return this.getProp("name") }
-  set name(value) { this.setProp("name", value) }
-
   /** How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css */
   // - its "layout" is one of stacked, vertical, horizontal or fanned
   static Layouts = ["stacked", "vertical", "horizontal", "fanned"]
@@ -226,9 +220,9 @@ export class Pile extends ViewableList {
     return this.lastItem.value
   }
 
-  /** Its name, then its cards' short names:  stock: Q♠↑ 7♥↓ */
+  /** Its id, then its cards' short names:  stock: Q♠↑ 7♥↓ */
   get state() {
-    let summary = `${this.name || "pile"}:`
+    let summary = `${this.id}:`
     this.forEach((card) => (summary = `${summary} ${card.state}`))
     return summary
   }
@@ -393,72 +387,72 @@ export class Solitaire extends App {
   }
 
   // "deck" is a new deck
-  static { this.declareProp("deck", { init: () => new Deck(), early: true }) }
+  static { this.declareProp("deck", { init: () => new Deck({ id: "deck" }), early: true }) }
   get deck() { return this.getProp("deck") }
   set deck(value) { this.setProp("deck", value) }
 
-  // "stock" is a new stock pile with name "stock"
-  static { this.declareProp("stock", { init: () => new StockPile({ name: "stock" }), early: true }) }
+  // "stock" is a new stock pile
+  static { this.declareProp("stock", { init: () => new StockPile({ id: "stock" }), early: true }) }
   get stock() { return this.getProp("stock") }
   set stock(value) { this.setProp("stock", value) }
 
-  // "discards" is a new discard pile with name "discards"
-  static { this.declareProp("discards", { init: () => new DiscardPile({ name: "discards" }), early: true }) }
+  // "discards" is a new discard pile
+  static { this.declareProp("discards", { init: () => new DiscardPile({ id: "discards" }), early: true }) }
   get discards() { return this.getProp("discards") }
   set discards(value) { this.setProp("discards", value) }
 
-  // "clubs" is a new foundation with name "clubs", suit = clubs
-  static { this.declareProp("clubs", { init: () => new Foundation({ name: "clubs", suit: "clubs" }), early: true }) }
+  // "clubs" is a new foundation with suit = clubs
+  static { this.declareProp("clubs", { init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true }) }
   get clubs() { return this.getProp("clubs") }
   set clubs(value) { this.setProp("clubs", value) }
 
-  // "diamonds" is a new foundation with name "diamonds", suit = diamonds
-  static { this.declareProp("diamonds", { init: () => new Foundation({ name: "diamonds", suit: "diamonds" }), early: true }) }
+  // "diamonds" is a new foundation with suit = diamonds
+  static { this.declareProp("diamonds", { init: () => new Foundation({ id: "diamonds", suit: "diamonds" }), early: true }) }
   get diamonds() { return this.getProp("diamonds") }
   set diamonds(value) { this.setProp("diamonds", value) }
 
-  // "hearts" is a new foundation with name "hearts", suit = hearts
-  static { this.declareProp("hearts", { init: () => new Foundation({ name: "hearts", suit: "hearts" }), early: true }) }
+  // "hearts" is a new foundation with suit = hearts
+  static { this.declareProp("hearts", { init: () => new Foundation({ id: "hearts", suit: "hearts" }), early: true }) }
   get hearts() { return this.getProp("hearts") }
   set hearts(value) { this.setProp("hearts", value) }
 
-  // "spades" is a new foundation with name "spades", suit = spades
-  static { this.declareProp("spades", { init: () => new Foundation({ name: "spades", suit: "spades" }), early: true }) }
+  // "spades" is a new foundation with suit = spades
+  static { this.declareProp("spades", { init: () => new Foundation({ id: "spades", suit: "spades" }), early: true }) }
   get spades() { return this.getProp("spades") }
   set spades(value) { this.setProp("spades", value) }
 
-  // "T1" is a new tableau with name "T1"
-  static { this.declareProp("T1", { init: () => new Tableau({ name: "T1" }), early: true }) }
+  // "T1" is a new tableau
+  static { this.declareProp("T1", { init: () => new Tableau({ id: "T1" }), early: true }) }
   get T1() { return this.getProp("T1") }
   set T1(value) { this.setProp("T1", value) }
 
-  // "T2" is a new tableau with name "T2"
-  static { this.declareProp("T2", { init: () => new Tableau({ name: "T2" }), early: true }) }
+  // "T2" is a new tableau
+  static { this.declareProp("T2", { init: () => new Tableau({ id: "T2" }), early: true }) }
   get T2() { return this.getProp("T2") }
   set T2(value) { this.setProp("T2", value) }
 
-  // "T3" is a new tableau with name "T3"
-  static { this.declareProp("T3", { init: () => new Tableau({ name: "T3" }), early: true }) }
+  // "T3" is a new tableau
+  static { this.declareProp("T3", { init: () => new Tableau({ id: "T3" }), early: true }) }
   get T3() { return this.getProp("T3") }
   set T3(value) { this.setProp("T3", value) }
 
-  // "T4" is a new tableau with name "T4"
-  static { this.declareProp("T4", { init: () => new Tableau({ name: "T4" }), early: true }) }
+  // "T4" is a new tableau
+  static { this.declareProp("T4", { init: () => new Tableau({ id: "T4" }), early: true }) }
   get T4() { return this.getProp("T4") }
   set T4(value) { this.setProp("T4", value) }
 
-  // "T5" is a new tableau with name "T5"
-  static { this.declareProp("T5", { init: () => new Tableau({ name: "T5" }), early: true }) }
+  // "T5" is a new tableau
+  static { this.declareProp("T5", { init: () => new Tableau({ id: "T5" }), early: true }) }
   get T5() { return this.getProp("T5") }
   set T5(value) { this.setProp("T5", value) }
 
-  // "T6" is a new tableau with name "T6"
-  static { this.declareProp("T6", { init: () => new Tableau({ name: "T6" }), early: true }) }
+  // "T6" is a new tableau
+  static { this.declareProp("T6", { init: () => new Tableau({ id: "T6" }), early: true }) }
   get T6() { return this.getProp("T6") }
   set T6(value) { this.setProp("T6", value) }
 
-  // "T7" is a new tableau with name "T7"
-  static { this.declareProp("T7", { init: () => new Tableau({ name: "T7" }), early: true }) }
+  // "T7" is a new tableau
+  static { this.declareProp("T7", { init: () => new Tableau({ id: "T7" }), early: true }) }
   get T7() { return this.getProp("T7") }
   set T7(value) { this.setProp("T7", value) }
 
@@ -523,20 +517,20 @@ export class Solitaire extends App {
         )
       ),
       h("ui-grid", { class: "Board", columns: "7", "context-menu": "game menu" },
-        () => core.drawThing(this.stock),
-        () => core.drawThing(this.discards),
+        h("test-project-stock-pile", { id: "stock" }),
+        h("test-project-discard-pile", { id: "discards" }),
         h("ui-column"),
-        () => core.drawThing(this.clubs),
-        () => core.drawThing(this.diamonds),
-        () => core.drawThing(this.hearts),
-        () => core.drawThing(this.spades),
-        () => core.drawThing(this.T1),
-        () => core.drawThing(this.T2),
-        () => core.drawThing(this.T3),
-        () => core.drawThing(this.T4),
-        () => core.drawThing(this.T5),
-        () => core.drawThing(this.T6),
-        () => core.drawThing(this.T7)
+        h("test-project-foundation", { id: "clubs" }),
+        h("test-project-foundation", { id: "diamonds" }),
+        h("test-project-foundation", { id: "hearts" }),
+        h("test-project-foundation", { id: "spades" }),
+        h("test-project-tableau", { id: "T1" }),
+        h("test-project-tableau", { id: "T2" }),
+        h("test-project-tableau", { id: "T3" }),
+        h("test-project-tableau", { id: "T4" }),
+        h("test-project-tableau", { id: "T5" }),
+        h("test-project-tableau", { id: "T6" }),
+        h("test-project-tableau", { id: "T7" })
       )
     )
   }

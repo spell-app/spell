@@ -141,7 +141,7 @@ export class BillSplitter extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "diners" is a new table
-  @prop({ init: () => new Table(), early: true })
+  @prop({ init: () => new Table({ id: "diners" }), early: true })
   accessor diners!: Table
 
   /** The tip, as a part of what was ordered:  kept as its fraction, so 18% is 0.18 */

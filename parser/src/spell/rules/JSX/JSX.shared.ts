@@ -110,6 +110,11 @@ export type JSXMatchData = {
    * its children's `slot="frente"` name its slots as they compile, `front` -- see `SpellJSX.withSlotNames()`.
    */
   view?: P.TypeScope
+  /**
+   * (`jsxElement`) A type a drawing names bare that's declared further down, `<tableau>` above `a "tableau" is a pile`,
+   * and the tag its element would have:  a view only if its line says so, read when it compiles (`SpellJSX.viewOf()`).
+   */
+  laterView?: { type: P.TypeScope; tag: string }
   /** `<film/>` in a loop over films:  the loop's item, drawn. */
   loopItem?: P.ScopeVariable
   /**

@@ -189,6 +189,8 @@ async function fakeDom() {
   await fakeElements()
   process.once("beforeExit", () => {
     core.flush()
+    drawTagsByIdIn(page.document.body)
+    core.flush()
     withShadowsInPlace(page.document.body)
     // without Solid's empty markers, `<!---->`:  javascript's `h()` writes none, so both targets print the same
     const drawn = withSortedAttributes(page.document.body.innerHTML.replaceAll("<!---->", ""))
@@ -223,24 +225,70 @@ function readsEmptyComments(proto: object) {
  * - Just enough of app's `SpellElement`, which needs Spell UI, which can't load here:
  *   its `thing` drawn in its shadow root (`core.drawOwn()`);  a viewable list's items are its children,
  *   shown in its drawing's `<slot>` (`core.drawThing()` puts them there).
- * - No attributes, no layout:  just the drawing.
+ * - A tag the drawing writes itself draws the thing its `id` names, as `SpellElement`'s does (`core.thingFor()`):
+ *   `<tableau "T1"/>`, drawn as `<solitaire-tableau id="T1">`, draws the tableau T1 (`drawTagsByIdIn()`).
+ * - No other attributes, no layout:  just the drawing.
  * - Its events are handled in its shadow root, as Solid delegates them per render root.
  */
 async function fakeElements() {
   const { insert, registerDelegatedRoot } = await import("@solidjs/web")
-  core.elementDefiner = (tag) => {
+  const { createRoot } = await import("solid-js")
+  core.elementDefiner = (tag, Class) => {
     if (customElements.get(tag)) return
     customElements.define(
       tag,
-      class extends HTMLElement {
+      class extends HTMLElement implements FakeElement {
+        /** Has it been handed its thing, or found it? */
+        private isDrawn = false
+
         /** Draw `thing`, as the program hands it:  `draw the card`. */
         set thing(thing: unknown) {
+          this.isDrawn = true
           const root = this.shadowRoot ?? this.attachShadow({ mode: "open" })
           registerDelegatedRoot(root as unknown as Element)
           insert(root as unknown as Element, () => core.drawOwn(thing))
         }
+
+        /** Never handed a thing:  draw the one its `id` names, if any. */
+        drawById(): void {
+          if (this.isDrawn) return
+          const found = core.thingFor(Class, this.getAttribute("id") ?? undefined)
+          if (!found) return
+          // in a root of its own:  no drawing is under way to own it
+          createRoot(() => {
+            this.thing = found
+            // a viewable list's items are its children, as `core.drawThing()` puts them
+            if ("items" in found) insert(this as unknown as Element, () => core.drawItems(found))
+          })
+        }
       }
     )
+  }
+}
+
+/** One of the fake page's view elements -- see `fakeElements()`. */
+type FakeElement = HTMLElement & { drawById(): void }
+
+/**
+ * SIDE EFFECT:  each view tag the drawing wrote itself under `root`, `<solitaire-tableau id="T1">`, drawn by its `id`
+ * -- see `fakeElements()`.
+ * - Its shadow roots too.
+ * - Swapped for a new element of its tag first:  the fake page never makes a CLONED element its class's,
+ *   and Solid's templates clone their fixed markup.  A browser does, as the clone goes on the page.
+ */
+function drawTagsByIdIn(root: ParentNode) {
+  for (const element of [...root.querySelectorAll("*")]) {
+    if (element.shadowRoot) drawTagsByIdIn(element.shadowRoot)
+    const Defined = customElements.get(element.localName)
+    if (!Defined || !element.hasAttribute("id")) continue
+    let drawn = element as FakeElement
+    if (!(element instanceof Defined)) {
+      drawn = document.createElement(element.localName) as FakeElement
+      for (const { name, value } of [...element.attributes]) drawn.setAttribute(name, value)
+      drawn.append(...element.childNodes)
+      element.replaceWith(drawn)
+    }
+    drawn.drawById()
   }
 }
 

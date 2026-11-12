@@ -23,15 +23,18 @@
  *     the people store searches its people and orgs, `Person#owen`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel, and by `spell/parser/core/model`, for its side effect.
  *   - The model has no drawing, so no `elementIdFor()`:  it says so if it's called there.
+ * - A thing with no name goes by the id the program chose for it (`hasChosenId()`):  `"T1" is a new tableau` is
+ *   `new Tableau({ id: "T1" })`, found as `Tableau#T1`, drawn by `<tableau "T1"/>` (Owen, 2026-11-12).
  */
 
-import { untrackCells } from "spell/util"
+import { peekProp, untrackCells } from "spell/util"
 
 import { programThings, core } from "./core"
 import { defineCoreModule } from "./core.types"
 import { nameTableColumns } from "./ui"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
+import { hasChosenId } from "./classes/ids"
 
 /** `core`'s methods for thing references. */
 export const referencesMethods = defineCoreModule({
@@ -91,6 +94,9 @@ export const referencesMethods = defineCoreModule({
    * - Its `name` property, as text:  a card's worked-out name counts too, e.g. `queen-of-spades`.
    * - Two with the same name:  the first made wins.
    *   The compiler warns where spell names one that two things share (P19).
+   * - No thing with that name:  one whose CHOSEN id it is (`hasChosenId()`), e.g. `"T1" is a new tableau`,
+   *   made as `new Tableau({ id: "T1" })` (Owen, 2026-11-12).  A name still wins over an id.
+   *   - A made-up id never counts:  it's new each run, so nothing names it.
    * - No thing with that name:  a top-level thing of `Class` that the program keeps under that name,
    *   e.g. `thingNamed(Game, "game")` for `set the game to a new game`.
    * - Tracked, as `thingForReference()`.
@@ -99,6 +105,9 @@ export const referencesMethods = defineCoreModule({
     const things = thingsSearched()
     for (const thing of things.all()) {
       if (thing instanceof Class && nameOf(thing) === name) return thing
+    }
+    for (const thing of things.all()) {
+      if (thing instanceof Class && chosenIdOf(thing) === name) return thing
     }
     const kept = things.exported?.[name]
     return kept instanceof Class ? kept : undefined
@@ -140,6 +149,7 @@ export const referencesMethods = defineCoreModule({
   /**
    * The reference that finds `thing` again, e.g. `Tableau#T1` -- `undefined` if no reference does.
    * - Its class's name, then its name:  `Tableau#T1`, `Card#queen-of-spades`.
+   *   A thing with no name goes by the id the program chose for it, `Tableau#T1` for `new Tableau({ id: "T1" })`.
    *   A thing with no name of its own goes by the top-level name the program keeps it under:  `Game#game`.
    * - A name it shares with an earlier thing, or no name at all:  its place instead, e.g. `Tableau#3`.
    * - None for what isn't the program's thing:  a scratch list, a thing a test made, a number.
@@ -149,7 +159,7 @@ export const referencesMethods = defineCoreModule({
     if (!thing || typeof thing !== "object") return undefined
     const things = thingsSearched()
     const Class = thing.constructor as abstract new (...args: never[]) => unknown
-    const name = nameOf(thing) ?? topLevelNameOf(things, thing)
+    const name = nameOf(thing) ?? chosenIdOf(thing) ?? topLevelNameOf(things, thing)
     if (name && !PLACE.test(name) && core.thingNamed(Class, name) === thing) return `${Class.name}#${name}`
     const place = things
       .all()
@@ -161,6 +171,7 @@ export const referencesMethods = defineCoreModule({
   /**
    * The `id` an element the program draws for `thing` takes:  its name, e.g. `queen-of-spades` (J43) --
    * `undefined` for a thing with no name.
+   * - A thing with no name:  the id the program chose for it, `T1` for `new Tableau({ id: "T1" })`.
    * - So the browser's inspector says which thing an element draws:  `<solitaire-card id="queen-of-spades">`.
    * - Two of the program's views with one name, e.g. a game with two decks:
    *   the first made is `queen-of-spades`, the second `queen-of-spades-2`, the third `-3`.
@@ -246,9 +257,23 @@ function earlierNamed(thing: object, name: string): number {
   return count
 }
 
-/** `thing`'s name as an id's text, a dash for each run of spaces:  `discard-pile` -- `undefined` if it has none. */
+/**
+ * `thing`'s name as an id's text, a dash for each run of spaces:  `discard-pile` -- `undefined` if it has none.
+ * - No name:  the id the program chose for it, `T1` (`chosenIdOf()`).
+ */
 function idNameOf(thing: object): string | undefined {
-  return nameOf(thing)?.trim().replace(/\s+/g, "-") || undefined
+  return (nameOf(thing) ?? chosenIdOf(thing))?.trim().replace(/\s+/g, "-") || undefined
+}
+
+/**
+ * The id the program chose for `thing`, `T1` for `new Tableau({ id: "T1" })` -- `undefined` for a made-up one, or none.
+ * - Reads no id:  a thing whose id was never read isn't given one (`hasChosenId()`).
+ * - Not tracked:  a chosen id is set as the thing is made, and kept.
+ */
+function chosenIdOf(thing: object): string | undefined {
+  if (!hasChosenId(thing)) return undefined
+  const id = peekProp<unknown>(thing, "id")
+  return id === undefined || id === null || id === "" ? undefined : `${id as string | number}`
 }
 
 /** `thing`'s name, as text -- `undefined` if it has none, or reading it throws. */

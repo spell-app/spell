@@ -22,19 +22,19 @@ solitaire is an app
 
 	group "Piles"
 		// One of each, made with the solitaire
-	"stock" is a new stock pile with name "stock"
-	"discards" is a new discard pile with name "discards"
-	"clubs" is a new foundation with name "clubs", suit = clubs
-	"diamonds" is a new foundation with name "diamonds", suit = diamonds
-	"hearts" is a new foundation with name "hearts", suit = hearts
-	"spades" is a new foundation with name "spades", suit = spades
-	"T1" is a new tableau with name "T1"
-	"T2" is a new tableau with name "T2"
-	"T3" is a new tableau with name "T3"
-	"T4" is a new tableau with name "T4"
-	"T5" is a new tableau with name "T5"
-	"T6" is a new tableau with name "T6"
-	"T7" is a new tableau with name "T7"
+	"stock" is a new stock pile
+	"discards" is a new discard pile
+	"clubs" is a new foundation with suit = clubs
+	"diamonds" is a new foundation with suit = diamonds
+	"hearts" is a new foundation with suit = hearts
+	"spades" is a new foundation with suit = spades
+	"T1" is a new tableau
+	"T2" is a new tableau
+	"T3" is a new tableau
+	"T4" is a new tableau
+	"T5" is a new tableau
+	"T6" is a new tableau
+	"T7" is a new tableau
 	when creating it
 		// Every card of the deck into the stock
 		for card in the deck
@@ -143,20 +143,20 @@ solitaire is an app
 				<text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</text>
 			</toolbar>
 			<grid class="Board" columns="7" context-menu="game menu">
-				{draw the stock}
-				{draw the discards}
+				<stock-pile "stock"/>
+				<discard-pile "discards"/>
 				<column/>
-				{draw the clubs}
-				{draw the diamonds}
-				{draw the hearts}
-				{draw the spades}
-				{draw the T1}
-				{draw the T2}
-				{draw the T3}
-				{draw the T4}
-				{draw the T5}
-				{draw the T6}
-				{draw the T7}
+				<foundation "clubs"/>
+				<foundation "diamonds"/>
+				<foundation "hearts"/>
+				<foundation "spades"/>
+				<tableau "T1"/>
+				<tableau "T2"/>
+				<tableau "T3"/>
+				<tableau "T4"/>
+				<tableau "T5"/>
+				<tableau "T6"/>
+				<tableau "T7"/>
 			</grid>
 		</container>
 
@@ -266,7 +266,7 @@ a "tableau" is a pile
 		return its color is not the color of the card and its value is the value of the card + 1
 
 	to test the moves
-		set the column to a new tableau with name "T1"
+		set the column to a new tableau with id "T1"
 		set the king to a new card whose rank is king, suit is spades and direction is up
 		set the queen to a new card whose rank is queen, suit is hearts and direction is up
 		set the jack to a new card whose rank is jack, suit is clubs and direction is up
@@ -283,10 +283,10 @@ a "tableau" is a pile
 		the column can give up the queen should be no
 
 		// a foundation takes its suit, ace first, then one higher:  each the last card of its pile
-		set the foundation to a new foundation with name "hearts", suit = hearts
+		set the foundation to a new foundation with suit = hearts
 		set the two to a new card whose rank is 2, suit is hearts and direction is up
 		set the ace to a new card whose rank is ace, suit is hearts and direction is up
-		set the column to a new tableau with name "T2"
+		set the column to a new tableau with id "T2"
 		add the two to the column
 		add the ace to the column
 		the foundation can take the two should be no

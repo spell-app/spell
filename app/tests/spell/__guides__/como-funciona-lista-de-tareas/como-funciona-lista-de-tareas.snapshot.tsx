@@ -117,7 +117,7 @@ export class ListaDeTareas extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // sus "tareas" es una nueva agenda
-  @prop({ init: () => new Agenda(), early: true })
+  @prop({ init: () => new Agenda({ id: "tareas" }), early: true })
   accessor tareas!: Agenda
 
   /** cuántas quedan:  las tareas elegidas con "donde", contadas */

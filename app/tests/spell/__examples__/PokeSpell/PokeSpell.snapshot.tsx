@@ -1484,7 +1484,7 @@ export class Pokedex extends App {
   set pickedKind(value: Type) { this.setProp("pickedKind", value) }
 
   // "game" is a new guess
-  @prop({ init: () => new Guess(), early: true })
+  @prop({ init: () => new Guess({ id: "game" }), early: true })
   accessor game!: Guess
 
   create() {

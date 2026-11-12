@@ -85,6 +85,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - by its name:  `Tableau#T1`
   - by its place:  `Tableau#1`, the first tableau made
   - A name finds a sub-type's thing too:  `Pile#T1` is the tableau T1.
+  - A thing with no name goes by the id the program CHOSE for it (`hasChosenId()`), after every name:
+    `"T1" is a new tableau` is `new Tableau({ id: "T1" })`, found as `Tableau#T1` (Owen, 2026-11-12).
+    A made-up id never counts.
   - A place counts the type's own things, in the order they were made.
   - Where they show up:
     - a view element's attribute:  `pile="Tableau#T1"`

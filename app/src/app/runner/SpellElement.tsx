@@ -220,14 +220,32 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    * - Digits are a place:  `<solitaire-tableau id="1">` is the first tableau.
    * - With no `id`, in a layout:  its one thing of our type exactly.
    * - The program asked is the one that defined our tag last.
+   *   - None of that class's:  the class of that name the program's things are of (`core.thingForReference()`),
+   *     when another copy of the program loaded its classes again after the one that runs.
    * - `undefined` if there's none (yet).
    * - Tracked:  found as soon as the program makes it.  See `core.thingFor()`.
+   * - Found by its `id`, it's kept:  while our id and our tag's program stay the same, it isn't looked for again
+   *   (`foundById`), so what draws it no longer follows every thing the program makes.
+   *   Its drawing may make things itself (a foundation's placeholder, `a new card whose rank is ace`):
+   *   followed, that drew it again, which made another, for ever.
    */
   get boundThing(): object | undefined {
     const { entry, idName } = this
     if (!idName && !this.isInLayout) return undefined
-    return entry?.core.thingFor(entry.Class, idName)
+    if (!entry) return undefined
+    const kept = this.foundById
+    if (idName && kept?.idName === idName && kept.entry === entry) return kept.thing
+    const found =
+      entry.core.thingFor(entry.Class, idName) ??
+      // our tag defined last by another copy of the program (its classes loaded again):
+      // the thing of the class the program's things are of, by its name, as a reference finds it
+      (idName ? entry.core.thingForReference(`${entry.Class.name}#${idName}`) : undefined)
+    if (idName && found) this.foundById = { idName, entry, thing: found }
+    return found
   }
+
+  /** The thing our `id` found last, and the id and tag's program it was found by -- see `boundThing`. */
+  private foundById: { idName: string; entry: SpellElementEntry; thing: object } | undefined
 
   /**
    * Our thing's drawing -- nothing before our tag's runtime is known.

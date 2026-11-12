@@ -17,6 +17,10 @@ const FORM_TAG = "ui-form"
 const VALUE_ATTRIBUTE = "value"
 /** A disabled form's fields can't change anything. */
 const DISABLED_ATTRIBUTE = "disabled"
+/** What a project's own view is built on:  the core's classes drawn as elements of their own -- see `isDrawnType()`. */
+const DRAWN_BASE_TYPES = ["View", "ViewableList"]
+/** What a view's quoted word is, `<tableau "T1"/>`:  the id of the thing it draws -- see `attributesOf()`. */
+const VIEW_ID_ATTRIBUTE = "id"
 
 /**
  * `jsxElement` rule:  match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.
@@ -45,6 +49,9 @@ const DISABLED_ATTRIBUTE = "disabled"
  *   - `<card>`:  one of the project's own views, `<solitaire-card>`;  else `<button>`:  a pack's, `<ui-button>`.
  *   - A view's slots can be filled there, `<card><text slot="front">Ace</text></card>`, each named as it compiles
  *     (P27):  see `withSlotNames()`.
+ *   - A view's quoted word is its `id`, `<tableau "T1"/>` ~== `<tableau id="T1"/>` (Owen, 2026-11-12):
+ *     it draws the thing whose name, or chosen id, is T1 -- see `attributesOf()`.
+ *     A view declared further down is found as it compiles (`laterView`).
  *   - No native HTML in a page (Q46, C1):  `<div>` is an error unless a pack has it;
  *     in plain Spell it's the web's own, as written.
  *   - Except in a page.s `<spell>` or `<html>` block, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
@@ -128,18 +135,23 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (element.chain) return SpellJSX.parseBranch(scope, match, element)
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     // a drawing names components by their bare names:  `<button>` => `<ui-button>`
-    if (takesShortcuts && !element.attributes?.length && !element.children?.length) {
+    if (takesShortcuts && !element.attributes?.length && !element.children?.length && !element.quotedWord) {
       match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
       if (match.data.loopItem) return match
     }
     if (takesShortcuts && match.data.tagName === element.tagName) {
-      const tag = SpellJSX.componentTagFor(scope, element.tagName)
+      // a quoted word names a thing, so a type declared further down wins over a pack's component of that name:
+      // `<columna "C1"/>` is Solitario's column, `<columna/>` the grid's
+      const later = element.quotedWord ? SpellJSX.laterViewFor(scope, element.tagName) : undefined
+      const tag = later ? undefined : SpellJSX.componentTagFor(scope, element.tagName)
       const view = tag ? scope.getType(SP.typeName(element.tagName)) : undefined
       // one of the project's own views:  its children may fill its slots (`withSlotNames()`)
-      if (view?.isA("View")) match.data.view = view
+      if (view && SpellJSX.isDrawnType(view)) match.data.view = view
       if (tag) match.data.tagName = tag
+      // a type declared further down, still a stub:  a view once its line says so, when it compiles (`viewOf()`)
+      else match.data.laterView = later ?? SpellJSX.laterViewFor(scope, element.tagName)
       // a bare name nobody has:  an error in a page;  in plain Spell, the web's own element, `<div>`
-      else if (isPage && isBareComponentName(element.tagName)) {
+      if (!tag && !match.data.laterView && isPage && isBareComponentName(element.tagName)) {
         const language = SP.Language.of(scope)
         const packs = SP.ComponentPacks.searched(SpellJSX.packsFor(scope))
         // a control inside an element (`<segment><otherwise>`):  a page reads those on a drawing's own lines
@@ -151,16 +163,41 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         match.data.error.data.drawnAnyway = true
       }
     }
-    match.data.attributes = element.attributes?.map((attr) => scope.parser?.parse(attr, "jsxAttribute", scope))
+    match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
+      scope.parser?.parse(attr, "jsxAttribute", scope)
+    )
     SpellJSX.warnAboutListedValues(scope, match, element)
     SpellJSX.refuseFormOfReadOnlyPlace(scope, match)
     // a dotted tag, `<UI.Form>`:  the writer writes the error where the element would be, this reports it
     if (P.ASTJSXElement.tagError(match.data.tagName)) {
       const message = SP.Language.of(scope).parserMessage("not-an-element", { tag: element.tagName })
-      match.data.error = SP.spellParser.createParseError(scope, [element], message)
+      // a type declared further down, `<fundación "tréboles"/>`:  its view's tag is fine, its own word isn't
+      const { laterView } = match.data
+      if (laterView) SP.SpellWarnings.refuseIf(match, message, () => !SpellJSX.isLaterView(laterView.type))
+      else match.data.error = SP.spellParser.createParseError(scope, [element], message)
     }
     SpellJSX.noteUnreadable(scope, match, element)
     return match
+  }
+
+  /**
+   * `element`'s attributes, and its quoted word as what it means:  on one of the project's own views, its `id`
+   * (Owen, 2026-11-12).
+   * - `<tableau "T1"/>` ~== `<tableau id="T1"/>`:  the view's element draws the tableau whose name, or chosen id, is T1
+   *   (`core.thingFor()`).
+   * - Any language's tags alike:  it's the tag being a view that counts, not its word.
+   * - After its other attributes, so each of those keeps its place (`warnAboutListedValues()`).
+   * - On any other tag the word means nothing:  `noteUnreadable()` says so.
+   */
+  private static attributesOf(
+    match: P.MatchFor<SpellJSX>,
+    element: P.JSXElementToken
+  ): P.JSXAttributeToken[] | undefined {
+    const { quotedWord } = element
+    if (!quotedWord || !(match.data.view || match.data.laterView)) return element.attributes
+    const { start, value, raw } = quotedWord.record
+    const id = new P.JSXAttributeToken({ name: VIEW_ID_ATTRIBUTE, start, value, raw })
+    return [...(element.attributes ?? []), id]
   }
 
   /**
@@ -173,7 +210,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const texts = element.attributes?.filter((attribute) => attribute.value instanceof P.TextToken)
     if (!texts?.length) return
     const view = scope.getType(SP.typeName(element.tagName))
-    if (!view?.isA("View")) return
+    if (!view || !SpellJSX.isDrawnType(view)) return
     for (const attribute of texts) {
       const member = view.getMember(attribute.name)
       const text = attribute.value as P.TextToken
@@ -199,15 +236,62 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (value) refuseWriteIfReadOnly(match, scope.getType(value.datatype))
   }
 
-  /** SIDE EFFECT:  an element whose tag holds something it couldn't read says so -- see `parseErrorsIn()`. */
+  /**
+   * SIDE EFFECT:  an element whose tag holds something it couldn't read says so -- see `parseErrorsIn()`.
+   * - A quoted word on a tag that isn't one of the project's views too:  only a view takes one, as its `id`.
+   */
   static noteUnreadable(scope: P.Scope, match: P.Match, element: P.JSXElementToken): void {
-    if (!element.unreadable) return
+    const { view, laterView } = match.data as JSXMatchData
+    const word = element.quotedWord?.value
+    const text = element.unreadable ?? (view || !word ? undefined : textOf(word))
+    if (!text) return
     const message = SP.Language.of(scope).parserMessage("unreadable-attribute", {
-      text: element.unreadable,
+      text,
       tag: element.tagName
     })
+    // a type declared further down:  its quoted word is unreadable only if its line doesn't make it a view
+    if (laterView && !element.unreadable) {
+      return SP.SpellWarnings.refuseIf(match, message, () => !SpellJSX.isLaterView(laterView.type))
+    }
     const { data } = match as P.Match<P.MatchGroups, { error?: P.Match }>
     data.error = SP.spellParser.createParseError(scope, [element], message)
+  }
+
+  /**
+   * The project's view `match` draws, if it's one:  as `parse()` found it, or a type declared further down,
+   * whose line has said what it is by the time it compiles (`laterView`).
+   */
+  private static viewOf(match: P.MatchFor<SpellJSX>): P.TypeScope | undefined {
+    const { view, laterView } = match.data
+    return view ?? (laterView && SpellJSX.isLaterView(laterView.type) ? laterView.type : undefined)
+  }
+
+  /**
+   * Is `type`, declared further down than the drawing naming it, one of the project's views, as it compiles?
+   * - Its line has parsed:  as `isDrawnType()` says.
+   * - Its line never parsed (broken, or taken into a tag above it left open), yet a scan found it (`stubDeclaredTypes()`):
+   *   a view, as when it last parsed.
+   *   - So a full parse draws what an editor's parse of the same text draws:
+   *     there the drawing keeps what it was compiled to before the line broke (`P.IncrementalProject`).
+   * - A type only mentioned, never declared (a stub with a `declaredBy`), is no view.
+   */
+  private static isLaterView(type: P.TypeScope): boolean {
+    return type.stub ? !type.declaredBy : SpellJSX.isDrawnType(type)
+  }
+
+  /**
+   * A type `word` names that's declared further down the project, still a stub as this line parses:
+   * `<tableau "T1"/>` above `a "tableau" is a pile` -- `undefined` for anything else.
+   * - With the tag its element would have:  its name alone says that, as `componentTagFor()` spells it.
+   * - Whether it's a view is known only once its line has parsed, so `viewOf()` asks when it compiles,
+   *   as a value kind declared further down is read (`DefinePropertyHas`).
+   */
+  private static laterViewFor(scope: P.Scope, word: string): JSXMatchData["laterView"] {
+    if (!word.includes("-") && !isBareComponentName(word)) return undefined
+    const type = scope.getType(SP.typeName(word))
+    const project = projectScopeOf(scope)
+    if (!type?.stub || !project?.name) return undefined
+    return { type, tag: elementTagFor(project.name, type.name) }
   }
 
   /**
@@ -227,13 +311,18 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     // a chain branch alone, in no element (an error), or an `<html>` block:  its children, drawn as they are
     if (match.data.chain || match.data.htmlBlock)
       return new P.ASTJSXFragment(match, { children: this.childASTs(match) })
-    const tagName = match.data.tagName ?? (match.matched[0] as P.JSXElementToken).tagName
-    const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
+    const view = SpellJSX.viewOf(match)
+    const { laterView } = match.data
+    const tagName =
+      laterView && view ? laterView.tag : (match.data.tagName ?? (match.matched[0] as P.JSXElementToken).tagName)
+    let attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
+    // a later type that's no view after all:  its quoted word, last, is no id (`noteUnreadable()` says so)
+    if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
     const children = this.childASTs(match)
     return new P.ASTJSXElement(match, {
       tagName,
       attrs: SpellJSX.clickableAttrs(match, SpellJSX.withMeasure(match, tagName, attrs)),
-      children: match.data.view ? SpellJSX.withSlotNames(match.data.view, children) : children
+      children: view ? SpellJSX.withSlotNames(view, children) : children
     })
   }
 
@@ -327,12 +416,20 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   static componentTagFor(scope: P.Scope, word: string): string | undefined {
     // a view of several words is named with dashes:  `<task-list/>`, a page's own (epic `notebook` P10)
     const type = word.includes("-") || isBareComponentName(word) ? scope.getType(SP.typeName(word)) : undefined
-    if (type?.isA("View")) {
+    if (type && SpellJSX.isDrawnType(type)) {
       const project = projectScopeOf(scope)
       if (project?.name) return elementTagFor(project.name, type.name)
     }
     if (!isBareComponentName(word) && !word.includes("-")) return undefined
     return SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
+  }
+
+  /**
+   * Is `type` one of the project's own views, drawn as an element of its own (`<solitaire-card>`)?
+   * - A view, or a viewable list:  a pile is drawn as `<solitaire-tableau>`, around its cards' elements.
+   */
+  static isDrawnType(type: P.TypeScope): boolean {
+    return DRAWN_BASE_TYPES.some((base) => type.isA(base))
   }
 
   /**
@@ -633,3 +730,8 @@ const CLICKABLE_STYLE = "cursor:var(--ui-control-cursor,pointer);user-select:non
 
 /** Spell UI's element that shows one measure:  `<ui-dimension value={its height}>`. */
 const MEASURE_TAG = "ui-dimension"
+
+/** A quoted word's text, without its quotes:  `T1` for `"T1"`. */
+function textOf(word: P.JSXAttributeValue): string {
+  return word instanceof P.TextToken ? word.innerText : `${word.raw ?? ""}`.trim()
+}

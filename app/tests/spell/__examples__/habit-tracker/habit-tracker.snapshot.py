@@ -174,7 +174,7 @@ class HabitTracker(App):
     element_tag = "test-project-app"
 
     # "habits" is a new week
-    habits = prop(init=lambda: Week(), early=True)
+    habits = prop(init=lambda: Week(id="habits"), early=True)
 
     # The next habit's name, as the new habit's field holds it
     # - its "draft" is text

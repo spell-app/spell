@@ -168,7 +168,7 @@ describe("a project mixing languages", () => {
       "una pila es una lista de cartas"
     ].join("\n")
     const { code } = compiledSpellProject([{ path: "/Juego.es.spell", contents }])
-    expect(code).toContain('new Pila({ name: "reserva" })')
+    expect(code).toContain('new Pila({ id: "reserva", name: "reserva" })')
   })
 
   test("a quoted type name of several words keeps its number (J96):  `pila de descartes`", () => {

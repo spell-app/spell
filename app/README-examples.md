@@ -709,14 +709,15 @@ solitaire is an app
 
 	group "Piles"
 		// One of each, made with the solitaire
-	"stock" is a new stock pile with name "stock"
-	"discards" is a new discard pile with name "discards"
-	"clubs" is a new foundation with name "clubs", suit = clubs
+	"stock" is a new stock pile
+	"discards" is a new discard pile
+	"clubs" is a new foundation with suit = clubs
 ```
 
 - The same sentences as the Calculator's, under the solitaire's line, without "a solitaire" at the start of every line
   ([the language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md)).
-- `"deck" is a new deck` makes its deck as the solitaire is made:  each pile too, with its name.
+- `"deck" is a new deck` makes its deck as the solitaire is made:  each pile too, its name its `id`.
+  The board draws each by it, `<stock-pile "stock"/>`, `<tableau "T1"/>`.
 - `group` lines and `##` lines are headings:  for a person to read, which the editor shows in bold.
 - [Card.spell](spaces/@spell/examples/Solitaire/Card.spell) says what its suits, ranks and colors are:
   `suit = clubs` reads one, and a foundation draws its suit's ace, by the card's `picture`.

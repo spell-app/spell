@@ -311,11 +311,6 @@ export class Pile extends ViewableList<Card> {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
-  /** What the game calls it, e.g. stock */
-  // - its "name" is text
-  @prop({ type: "text" })
-  accessor name!: string
-
   /** How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css */
   // - its "layout" is one of stacked, vertical, horizontal or fanned
   static Layouts = ["stacked", "vertical", "horizontal", "fanned"] as const
@@ -334,9 +329,9 @@ export class Pile extends ViewableList<Card> {
     return this.lastItem!.value
   }
 
-  /** Its name, then its cards' short names:  stock: Q♠↑ 7♥↓ */
+  /** Its id, then its cards' short names:  stock: Q♠↑ 7♥↓ */
   @derived get state() {
-    let summary = `${this.name || "pile"}:`
+    let summary = `${this.id}:`
     this.forEach((card) => (summary = `${summary} ${card.state}`))
     return summary
   }
@@ -369,7 +364,6 @@ export interface Pile {
  */
 export class PileElement extends SpellElement<Pile> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-pile", "pile", [
-    { name: "name", kind: "string", description: "Its name." },
     { name: "layout", kind: "string", description: "Its layout." }
   ])
 
@@ -386,8 +380,8 @@ core.useElement(Pile, PileElement)
 export function testPiles() {
   return core.test("test piles", function testPiles() {
     const it = new Pile()
-    core.echoTestAction(`set the stock to a new pile with name "stock"`)
-    const stock = new Pile({ name: "stock" })
+    core.echoTestAction(`set the stock to a new pile with id "stock"`)
+    const stock = new Pile({ id: "stock" })
     core.expect(stock.color, `stock's color`, "none", `"none"`)
     core.expect(stock.value, `stock's value`, 0, `0`)
     core.echoTestAction(`add (a new card whose rank is queen, suit is spades and direction is up) to the stock`)
@@ -407,7 +401,7 @@ export function testPiles() {
     core.expect(stock.state, `stock's state`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
 
     /** a card is in one pile at a time */
-    const discards = new Pile({ name: "discards" })
+    const discards = new Pile({ id: "discards" })
     core.echoTestAction(`get the last card of the stock`)
     const it2 = stock.lastItem
     core.echoTestAction(`add it to the discards`)
@@ -647,59 +641,59 @@ export class Solitaire extends App {
   }
 
   // "deck" is a new deck
-  @prop({ init: () => new Deck(), early: true })
+  @prop({ init: () => new Deck({ id: "deck" }), early: true })
   accessor deck!: Deck
 
-  // "stock" is a new stock pile with name "stock"
-  @prop({ init: () => new StockPile({ name: "stock" }), early: true })
+  // "stock" is a new stock pile
+  @prop({ init: () => new StockPile({ id: "stock" }), early: true })
   accessor stock!: StockPile
 
-  // "discards" is a new discard pile with name "discards"
-  @prop({ init: () => new DiscardPile({ name: "discards" }), early: true })
+  // "discards" is a new discard pile
+  @prop({ init: () => new DiscardPile({ id: "discards" }), early: true })
   accessor discards!: DiscardPile
 
-  // "clubs" is a new foundation with name "clubs", suit = clubs
-  @prop({ init: () => new Foundation({ name: "clubs", suit: "clubs" }), early: true })
+  // "clubs" is a new foundation with suit = clubs
+  @prop({ init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true })
   accessor clubs!: Foundation
 
-  // "diamonds" is a new foundation with name "diamonds", suit = diamonds
-  @prop({ init: () => new Foundation({ name: "diamonds", suit: "diamonds" }), early: true })
+  // "diamonds" is a new foundation with suit = diamonds
+  @prop({ init: () => new Foundation({ id: "diamonds", suit: "diamonds" }), early: true })
   accessor diamonds!: Foundation
 
-  // "hearts" is a new foundation with name "hearts", suit = hearts
-  @prop({ init: () => new Foundation({ name: "hearts", suit: "hearts" }), early: true })
+  // "hearts" is a new foundation with suit = hearts
+  @prop({ init: () => new Foundation({ id: "hearts", suit: "hearts" }), early: true })
   accessor hearts!: Foundation
 
-  // "spades" is a new foundation with name "spades", suit = spades
-  @prop({ init: () => new Foundation({ name: "spades", suit: "spades" }), early: true })
+  // "spades" is a new foundation with suit = spades
+  @prop({ init: () => new Foundation({ id: "spades", suit: "spades" }), early: true })
   accessor spades!: Foundation
 
-  // "T1" is a new tableau with name "T1"
-  @prop({ init: () => new Tableau({ name: "T1" }), early: true })
+  // "T1" is a new tableau
+  @prop({ init: () => new Tableau({ id: "T1" }), early: true })
   accessor T1!: Tableau
 
-  // "T2" is a new tableau with name "T2"
-  @prop({ init: () => new Tableau({ name: "T2" }), early: true })
+  // "T2" is a new tableau
+  @prop({ init: () => new Tableau({ id: "T2" }), early: true })
   accessor T2!: Tableau
 
-  // "T3" is a new tableau with name "T3"
-  @prop({ init: () => new Tableau({ name: "T3" }), early: true })
+  // "T3" is a new tableau
+  @prop({ init: () => new Tableau({ id: "T3" }), early: true })
   accessor T3!: Tableau
 
-  // "T4" is a new tableau with name "T4"
-  @prop({ init: () => new Tableau({ name: "T4" }), early: true })
+  // "T4" is a new tableau
+  @prop({ init: () => new Tableau({ id: "T4" }), early: true })
   accessor T4!: Tableau
 
-  // "T5" is a new tableau with name "T5"
-  @prop({ init: () => new Tableau({ name: "T5" }), early: true })
+  // "T5" is a new tableau
+  @prop({ init: () => new Tableau({ id: "T5" }), early: true })
   accessor T5!: Tableau
 
-  // "T6" is a new tableau with name "T6"
-  @prop({ init: () => new Tableau({ name: "T6" }), early: true })
+  // "T6" is a new tableau
+  @prop({ init: () => new Tableau({ id: "T6" }), early: true })
   accessor T6!: Tableau
 
-  // "T7" is a new tableau with name "T7"
-  @prop({ init: () => new Tableau({ name: "T7" }), early: true })
+  // "T7" is a new tableau
+  @prop({ init: () => new Tableau({ id: "T7" }), early: true })
   accessor T7!: Tableau
 
   /** Every card of the deck into the stock */
@@ -758,20 +752,20 @@ export class Solitaire extends App {
           <ui-text slot="right">Moves: {this.moves}{"  ·  Score: "}{this.score}{this.hint}</ui-text>
         </ui-toolbar>
         <ui-grid class="Board" columns="7" context-menu="game menu">
-          {core.drawThing(this.stock)}
-          {core.drawThing(this.discards)}
+          <test-project-stock-pile id="stock" />
+          <test-project-discard-pile id="discards" />
           <ui-column />
-          {core.drawThing(this.clubs)}
-          {core.drawThing(this.diamonds)}
-          {core.drawThing(this.hearts)}
-          {core.drawThing(this.spades)}
-          {core.drawThing(this.T1)}
-          {core.drawThing(this.T2)}
-          {core.drawThing(this.T3)}
-          {core.drawThing(this.T4)}
-          {core.drawThing(this.T5)}
-          {core.drawThing(this.T6)}
-          {core.drawThing(this.T7)}
+          <test-project-foundation id="clubs" />
+          <test-project-foundation id="diamonds" />
+          <test-project-foundation id="hearts" />
+          <test-project-foundation id="spades" />
+          <test-project-tableau id="T1" />
+          <test-project-tableau id="T2" />
+          <test-project-tableau id="T3" />
+          <test-project-tableau id="T4" />
+          <test-project-tableau id="T5" />
+          <test-project-tableau id="T6" />
+          <test-project-tableau id="T7" />
         </ui-grid>
       </ui-container>
     )
@@ -959,8 +953,8 @@ core.heading("The piles")
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {
     const it = new Tableau()
-    core.echoTestAction(`set the column to a new tableau with name "T1"`)
-    let column = new Tableau({ name: "T1" })
+    core.echoTestAction(`set the column to a new tableau with id "T1"`)
+    let column = new Tableau({ id: "T1" })
     core.echoTestAction(`set the king to a new card whose rank is king, suit is spades and direction is up`)
     const king = new Card({
       rank: "king",
@@ -995,7 +989,7 @@ export function testTheMoves() {
     core.expect(core.canGiveUp(column, queen), `the column can give up the queen`, false, `no`)
 
     /** a foundation takes its suit, ace first, then one higher:  each the last card of its pile */
-    const foundation = new Foundation({ name: "hearts", suit: "hearts" })
+    const foundation = new Foundation({ suit: "hearts" })
     core.echoTestAction(`set the two to a new card whose rank is 2, suit is hearts and direction is up`)
     const two = new Card({
       rank: 2,
@@ -1008,8 +1002,8 @@ export function testTheMoves() {
       suit: "hearts",
       direction: "up"
     })
-    core.echoTestAction(`set the column to a new tableau with name "T2"`)
-    column = new Tableau({ name: "T2" })
+    core.echoTestAction(`set the column to a new tableau with id "T2"`)
+    column = new Tableau({ id: "T2" })
     core.echoTestAction(`add the two to the column`)
     column.append(two)
     core.echoTestAction(`add the ace to the column`)

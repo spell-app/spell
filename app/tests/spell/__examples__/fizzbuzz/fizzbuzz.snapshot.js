@@ -81,7 +81,7 @@ export class FizzbuzzExplainer extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
   // "tally" is a new tally
-  static { this.declareProp("tally", { init: () => new Tally(), early: true }) }
+  static { this.declareProp("tally", { init: () => new Tally({ id: "tally" }), early: true }) }
   get tally() { return this.getProp("tally") }
   set tally(value) { this.setProp("tally", value) }
 

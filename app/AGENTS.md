@@ -291,8 +291,9 @@ Examples are what people and agents copy, so each one shows the current way (Owe
 - Always plain Spell, with all of the latest language and UI features (epic `language` P46, Q47;  Owen, 2026-11-11):
   no tags for code.
   - Each member bare on its line, no `- `;  it stays only under a worked-out property's body.
-  - Group names in Initial Caps (`group "Game Play"`);  a member made new without its `its`
-    (`"stock" is a new stock pile with name "stock"`);  text joined with `&&` (`its rank && "of" && its suit`).
+  - Group names in Initial Caps (`group "Game Play"`);  a member made new without its `its`, its name its thing's
+    `id` (`"stock" is a new stock pile`, drawn as `<stock-pile "stock"/>`;  Owen, 2026-11-12);
+    text joined with `&&` (`its rank && "of" && its suit`).
   - A handler's event on its own line, its steps under it.
   - As the drawn-bubbly page writes it (epic `language` P48):  no colon before a body;  an ability on its type's
     line (`a "card" is a draggable two sided view`);  a declaration's description the first comment inside it;

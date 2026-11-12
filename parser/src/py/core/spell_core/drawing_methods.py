@@ -88,6 +88,22 @@ class DrawingMethods:
         items = self.draw_items(drawable) if isinstance(drawable, ViewableList) else None
         return element_of(tag, self.draw_own(drawable), items or [])
 
+    def draw_by_id(self, tag: str, attributes: dict[str, str]) -> Element | None:
+        """A view tag the drawing wrote itself, `<tableau "T1"/>`:  the thing its `id` names, drawn, with `attributes`.
+
+        - As the page's element finds it, by its `id` (`thing_called()`):  a name, a chosen id, or a place.
+        - `None` when `tag` is no view's, or its id names nothing:  then it's a plain element.
+        """
+        from spell_core.things import things
+
+        cls = things.class_drawn_as(tag)
+        found = self.thing_called(cls, attributes["id"]) if cls is not None else None
+        drawn = self.draw_thing(found) if found is not None else None
+        if not isinstance(drawn, Element):
+            return None
+        drawn.attributes.update(attributes)
+        return drawn
+
     def element_tag_of(self, drawable: object = None) -> str | None:
         """Tag of `drawable`'s element, e.g. `solitaire-card` -- `None` if its class has none.
 

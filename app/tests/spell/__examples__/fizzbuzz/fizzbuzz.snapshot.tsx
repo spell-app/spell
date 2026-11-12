@@ -68,7 +68,7 @@ export class FizzbuzzExplainer extends Page {
   static elementTag = core.defineElement(this, "test-project")
 
   // "tally" is a new tally
-  @prop({ init: () => new Tally(), early: true })
+  @prop({ init: () => new Tally({ id: "tally" }), early: true })
   accessor tally!: Tally
 
   @derived get fizzes() {
