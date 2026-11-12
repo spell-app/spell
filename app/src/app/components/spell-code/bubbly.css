@@ -80,7 +80,7 @@
    */
   --bubbly-line-inset: 18px; /* NON-MONACO */
   /* every band's words start this far in from its round end, at any level */
-  --bubbly-pill-pad-left: 0px;
+  --bubbly-pill-pad-left: 12px;
   --bubbly-pill-pad-right: 16px;
   /* in the editor, a head line's words this much further in than the lines under it, its band where it was (Owen) */
   --bubbly-pill-left-shift: 8.5px;
@@ -115,7 +115,7 @@
   /* a quoted input's marks, just outside its white:  Times' bold curly quotes, which every machine has */
   --bubbly-quote-font: "Times New Roman", Times, serif;
   --bubbly-quote-size: 18px;
-  --bubbly-quote-margin: 15px;
+  --bubbly-quote-margin: 12px;
   /* the quote marks lean to match the band */
   --bubbly-quote-rotation: 15deg;
   /* the marks a quoted input's `"` draw:  open-quote and close-quote, at any depth */

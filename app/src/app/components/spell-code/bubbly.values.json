@@ -97,8 +97,8 @@
       "dark": "18px"
     },
     "--bubbly-pill-pad-left": {
-      "light": "0px",
-      "dark": "0px"
+      "light": "12px",
+      "dark": "12px"
     },
     "--bubbly-pill-pad-right": {
       "light": "16px",
@@ -177,8 +177,8 @@
       "dark": "18px"
     },
     "--bubbly-quote-margin": {
-      "light": "15px",
-      "dark": "15px"
+      "light": "12px",
+      "dark": "12px"
     },
     "--bubbly-quote-rotation": {
       "light": "15deg",
