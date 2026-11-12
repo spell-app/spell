@@ -219,6 +219,18 @@
     "--bubbly-tag-pad": {
       "light": "1.5px",
       "dark": "1.5px"
+    },
+    "--bubbly-foot-pill-height": {
+      "light": "calc(23px - 4px)",
+      "dark": "calc(23px - 4px)"
+    },
+    "--bubbly-foot-pill-gap": {
+      "light": "4px",
+      "dark": "4px"
+    },
+    "--bubbly-foot-corner": {
+      "light": "calc(calc(23px - 4px) / 2 * 0.62) calc(calc(23px - 4px) / 2)",
+      "dark": "calc(calc(23px - 4px) / 2 * 0.62) calc(calc(23px - 4px) / 2)"
     }
   },
   "parts": {
