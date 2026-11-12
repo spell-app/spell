@@ -8,7 +8,7 @@
  *   the paper, its end tag a pill of its own.
  * - An element with no end tag (`<meta …>`, `<br />`) is a band by itself, `bubbly-pill`.
  * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
- *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `⟨` `⟩`.
+ *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `❮` `❯`.
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
  * - Text, a `<style>`'s or `<script>`'s lines, a comment:  plain lines in their element's body.
  * - Its own small reader, not a full HTML parser:  enough for hand-written pages, the drawn-bubbly page's examples.
@@ -332,7 +332,7 @@ function valueOf(value: string, isQuoted: boolean): string {
 }
 
 /**
- * A tag's `<` and `>`, drawn as math's angle brackets, `⟨` `⟩`:  steeper, nearer the slant its pill's ends are cut at
+ * A tag's `<` and `>`, drawn as heavy angle brackets, `❮` `❯`:  steeper, nearer the slant its pill's ends are cut at
  * (Owen).  The file's own `<` and `>` are kept, unseen, so a copied line copies them (`bubbly-angle`).
  */
 const ANGLE_OPEN = `<span class="bubbly-angle bubbly-angle-open">&lt;</span>`
