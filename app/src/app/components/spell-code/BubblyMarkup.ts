@@ -217,7 +217,7 @@ class MarkupWriter {
     const insideText = element.close ? this.source.slice(element.open.end, element.close.start) : ""
     // no end tag (`<meta …>`, `<br />`):  one band;  else a line of tags, each its own pill
     if (!inside.length && !element.close) return `<p class="bubbly-pill ${kind}">${this.startTag(element.open)}</p>`
-    if (!insideText.includes("\n")) return `<p class="bubbly-line">${this.inline([element])}</p>`
+    if (!insideText.includes("\n")) return `<p class="bubbly-line bubbly-tag-line">${this.inline([element])}</p>`
     return (
       `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill">${this.startTag(element.open)}</p>` +
       `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>` +

@@ -656,7 +656,7 @@
     --bubbly-tag-pad: 1.5px;
     /* a block's end tag:  a shorter band than its start tag's */
     --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 4px);
-    /* between nested blocks' end tags:  as far apart as their gutters */
+    /* between a block's end tag and the end tag or band above it:  as far apart as nested gutters */
     --bubbly-foot-pill-gap: 4px;
     /* a quoted value's marks snug beside it:  less room outside them than Spell's */
     --bubbly-quote-margin: 11px;
@@ -747,7 +747,7 @@
       /* its brackets close to its points */
       padding-inline: var(--bubbly-tag-pad);
       corner-shape: bevel;
-      vertical-align: middle;
+      vertical-align: top;
       white-space: nowrap;
     }
     /*
@@ -763,11 +763,11 @@
       align-items: flex-start;
     }
     .bubbly-block,
-    p:is(.bubbly-pill, .bubbly-line:has(> .bubbly-tag-pill)):not(#bubbly-none) {
+    p:is(.bubbly-pill, .bubbly-tag-line):not(#bubbly-none) {
       margin-block: calc(var(--bubbly-line-gap) / 2);
     }
     /* a line of tags:  as tall as a band */
-    .bubbly-line:has(> .bubbly-tag-pill) {
+    .bubbly-tag-line {
       height: var(--bubbly-pill-height);
       line-height: var(--bubbly-pill-height);
     }
@@ -826,8 +826,8 @@
       border-top-right-radius: var(--bubbly-foot-corner);
       border-bottom-right-radius: var(--bubbly-foot-corner);
     }
-    /* an end tag right under another's:  as far below it as their gutters are apart */
-    .bubbly-block > .bubbly-body:has(> .bubbly-block:last-child) {
+    /* an end tag right under another's, or under a band:  as far below it as their gutters are apart */
+    .bubbly-block > .bubbly-body:has(> :is(.bubbly-block, .bubbly-pill, .bubbly-tag-line):last-child) {
       /* the body's paper, not a margin:  its gutter runs on down beside it into its own end tag */
       padding-bottom: calc(var(--bubbly-foot-pill-gap) - var(--bubbly-line-gap) / 2);
     }
