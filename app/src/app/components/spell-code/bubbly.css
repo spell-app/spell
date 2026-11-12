@@ -706,6 +706,21 @@
       margin-left: 3px;
       left: -1px;
     }
+    /*
+     * SWITCH:  `bubbly-math-angles` on the drawing, or anything around it, draws math's thinner angle brackets,
+     * `⟨` `⟩`, instead, the pointed ends cut at their slant
+     */
+    .bubbly-math-angles &,
+    &.bubbly-math-angles {
+      --bubbly-tag-slope: 0.62;
+
+      .bubbly-angle-open::before {
+        content: "\27E8";
+      }
+      .bubbly-angle-close::before {
+        content: "\27E9";
+      }
+    }
     /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
     .bubbly-slash {
       display: inline-block;
