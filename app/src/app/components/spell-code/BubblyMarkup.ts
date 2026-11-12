@@ -220,7 +220,7 @@ class MarkupWriter {
       `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill">${this.startTag(element.open)}</p>` +
       `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>` +
       (element.close
-        ? `<p class="bubbly-foot bubbly-foot-pill">${this.endTag(element.close)}</p>`
+        ? `<p class="bubbly-foot bubbly-foot-pill">${this.endTag(element.close, "block")}</p>`
         : `<div class="bubbly-foot"></div>`) +
       `</div>`
     )
@@ -264,10 +264,16 @@ class MarkupWriter {
     return `<span class="bubbly-mark">&lt;</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? "/&gt;" : "&gt;"}</span>`
   }
 
-  /** An end tag:  faint, its name too;  none, nothing. */
-  private endTag(tag: Extract<Token, { kind: "end" }> | undefined): string {
+  /**
+   * An end tag:  `</` and `>` faint, its name in the ink;  none, nothing.
+   * - `"block"`:  a block's, on its foot under the gutter, its name faint too:  the gutter already shows where it ends
+   */
+  private endTag(tag: Extract<Token, { kind: "end" }> | undefined, place: "block" | "inline" = "inline"): string {
     if (!tag) return ""
-    return `<span class="bubbly-mark">&lt;/<span class="bubbly-tag-name">${tag.tag}</span>&gt;</span>`
+    const name = `<span class="bubbly-tag-name">${tag.tag}</span>`
+    return place === "block"
+      ? `<span class="bubbly-mark">&lt;/${name}&gt;</span>`
+      : `<span class="bubbly-mark">&lt;/</span>${name}<span class="bubbly-mark">&gt;</span>`
   }
 
   /** Text on lines of its own:  each line in its body, its indent kept past the text's own;  blank lines a gap. */
