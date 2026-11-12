@@ -692,8 +692,8 @@
       display: inline-block;
       font-weight: 800;
       margin-right: 2px;
-      /* shorter, about as tall as its bracket */
-      transform: scaleY(0.75);
+      /* shorter, a little taller than its bracket */
+      transform: scaleY(0.85);
     }
     /* its bracket close beside it */
     .bubbly-angle-open:has(+ .bubbly-slash)::before {
