@@ -829,8 +829,8 @@
       --bubbly-foot-corner: calc(var(--bubbly-foot-pill-height) / 2 * var(--bubbly-tag-slope))
         calc(var(--bubbly-foot-pill-height) / 2);
       height: var(--bubbly-foot-pill-height);
-      /* its words 4px further left than a start tag's, its band ending as far after them */
-      padding-left: calc(var(--bubbly-pill-pad-left) - 4px);
+      /* its words 3px further left than a start tag's, its band ending as far after them */
+      padding-left: calc(var(--bubbly-pill-pad-left) - 3px);
       line-height: calc(var(--bubbly-foot-pill-height) + 2 * var(--bubbly-pill-nudge));
       border-top-right-radius: var(--bubbly-foot-corner);
       border-bottom-right-radius: var(--bubbly-foot-corner);
