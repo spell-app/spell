@@ -7,6 +7,7 @@
  * - An element on one line is a line of its own:  its start tag a small pill (`bubbly-tag-pill`), what's inside it on
  *   the paper, its end tag a pill of its own.
  * - An element with no end tag (`<meta …>`, `<br />`) is a band by itself, `bubbly-pill`.
+ * - Whatever holds a start tag is a `bubbly-tag-start` too, an end tag's a `bubbly-tag-end`:  hooks to style them by.
  * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
  *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `❮` `❯`.
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
@@ -216,13 +217,14 @@ class MarkupWriter {
     const inside = element.children.filter((child) => child.kind !== "text" || this.slice(child).trim())
     const insideText = element.close ? this.source.slice(element.open.end, element.close.start) : ""
     // no end tag (`<meta …>`, `<br />`):  one band;  else a line of tags, each its own pill
-    if (!inside.length && !element.close) return `<p class="bubbly-pill ${kind}">${this.startTag(element.open)}</p>`
+    if (!inside.length && !element.close)
+      return `<p class="bubbly-pill bubbly-tag-start ${kind}">${this.startTag(element.open)}</p>`
     if (!insideText.includes("\n")) return `<p class="bubbly-line bubbly-tag-line">${this.inline([element])}</p>`
     return (
-      `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill">${this.startTag(element.open)}</p>` +
+      `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill bubbly-tag-start">${this.startTag(element.open)}</p>` +
       `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>` +
       (element.close
-        ? `<p class="bubbly-foot bubbly-foot-pill">${this.endTag(element.close, "block")}</p>`
+        ? `<p class="bubbly-foot bubbly-foot-pill bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
         : `<div class="bubbly-foot"></div>`) +
       `</div>`
     )
@@ -250,8 +252,8 @@ class MarkupWriter {
     // nothing between its tags:  their points touch
     const touching = inside ? "" : " bubbly-tags-touch"
     const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}${touching}`
-    const close = element.close ? `<span class="${kind}">${this.endTag(element.close)}</span>` : ""
-    return `<span class="${kind}">${this.startTag(element.open)}</span>${inside}${close}`
+    const close = element.close ? `<span class="${kind} bubbly-tag-end">${this.endTag(element.close)}</span>` : ""
+    return `<span class="${kind} bubbly-tag-start">${this.startTag(element.open)}</span>${inside}${close}`
   }
 
   /** A start tag on its band:  `<` faint, its name, each value a white pill. */
