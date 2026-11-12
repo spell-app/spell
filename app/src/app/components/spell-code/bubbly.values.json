@@ -93,8 +93,8 @@
       "dark": "calc( 23px - 2 * max(0px, -1 * 0px) )"
     },
     "--bubbly-line-inset": {
-      "light": "8px",
-      "dark": "8px"
+      "light": "18px",
+      "dark": "18px"
     },
     "--bubbly-pill-pad-left": {
       "light": "0px",
@@ -136,11 +136,11 @@
       "light": "1px",
       "dark": "1px"
     },
-    "--bubbly-rail-corner": {
+    "--bubbly-gutter-corner": {
       "light": "calc(3px + 8px)",
       "dark": "calc(3px + 8px)"
     },
-    "--bubbly-gap": {
+    "--bubbly-input-gap": {
       "light": "2px",
       "dark": "2px"
     },
