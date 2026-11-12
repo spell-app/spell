@@ -692,9 +692,9 @@
       font-size: 0;
     }
     .bubbly-angle::before {
-      font-size: var(--bubbly-font-size);
-      /* its point level with the point of the band's end:  the glyph sits a pixel above the words' middle */
       position: relative;
+      font-size: var(--bubbly-font-size);
+      /* line up > point with the pill corner. */
       top: 0.65px;
     }
     .bubbly-angle-open::before {
