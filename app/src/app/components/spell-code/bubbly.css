@@ -654,6 +654,8 @@
     --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope)) calc(var(--bubbly-pill-height) / 2);
     /* a tag's bracket this close to the point it sits in */
     --bubbly-tag-pad: 1.5px;
+    /* a quoted value's marks snug beside it:  less room outside them than Spell's */
+    --bubbly-quote-margin: 11px;
     --bubbly-pill-pad-right: var(--bubbly-tag-pad);
     /* a block's band's words clear of its cut top-left corner */
     --bubbly-pill-pad-left: 6px;
@@ -706,6 +708,16 @@
     /* its bracket close beside it */
     .bubbly-angle-open:has(+ .bubbly-slash)::before {
       margin-right: 0.5px;
+    }
+
+    /* an attribute's `=` a pixel clear of its name */
+    .bubbly-equals {
+      margin-left: 1px;
+    }
+
+    /* the closing mark sits low and narrow:  less room after it than before the opening one */
+    .bubbly-quoted {
+      margin-right: calc(var(--bubbly-input-gap) + var(--bubbly-quote-margin) - 4px);
     }
 
     /* a band's first quoted value isn't a name it defines, as in Spell:  at the plain weight */

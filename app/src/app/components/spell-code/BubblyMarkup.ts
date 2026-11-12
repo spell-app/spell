@@ -4,7 +4,9 @@
  * (epic `language`, Owen 2026-11-11):  the same shapes as Spell's, their corners cut (`bubbly-html`).
  * - Each element with children on lines of their own is a `bubbly-block`:
  *   its start tag the band, its children the body, its end tag a band of its own under the rail (`bubbly-foot-pill`).
- * - An element on one line, or with nothing inside, is a `bubbly-pill`:  start tag, what's inside, end tag.
+ * - An element on one line is a line of its own:  its start tag a small pill (`bubbly-tag-pill`), what's inside it on
+ *   the paper, its end tag a pill of its own.
+ * - An element with no end tag (`<meta …>`, `<br />`) is a band by itself, `bubbly-pill`.
  * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
  *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `❮` `❯`.
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
@@ -213,8 +215,8 @@ class MarkupWriter {
     const kind = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
     const inside = element.children.filter((child) => child.kind !== "text" || this.slice(child).trim())
     const insideText = element.close ? this.source.slice(element.open.end, element.close.start) : ""
-    if (!inside.length)
-      return `<p class="bubbly-pill ${kind}">${this.startTag(element.open)}${this.endTag(element.close)}</p>`
+    // no end tag (`<meta …>`, `<br />`):  one band;  else a line of tags, each its own pill
+    if (!inside.length && !element.close) return `<p class="bubbly-pill ${kind}">${this.startTag(element.open)}</p>`
     if (!insideText.includes("\n")) return `<p class="bubbly-line">${this.inline([element])}</p>`
     return (
       `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill">${this.startTag(element.open)}</p>` +
@@ -242,12 +244,10 @@ class MarkupWriter {
       .join("")
   }
 
-  /** An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill;  with nothing inside, one pill. */
+  /** An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill of its own. */
   private tagPills(element: Extract<MarkupNode, { kind: "element" }>): string {
     const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
     const inside = this.inline(element.children)
-    if (!inside.trim())
-      return `<span class="${kind}">${this.startTag(element.open)}${this.endTag(element.close)}</span>`
     const close = element.close ? `<span class="${kind}">${this.endTag(element.close)}</span>` : ""
     return `<span class="${kind}">${this.startTag(element.open)}</span>${inside}${close}`
   }
@@ -258,7 +258,7 @@ class MarkupWriter {
       .map(({ name, value, isQuoted }) =>
         value === undefined
           ? ` ${escape(name)}`
-          : ` ${escape(name)}<span class="bubbly-mark">=</span>${valueOf(value, isQuoted)}`
+          : ` ${escape(name)}<span class="bubbly-mark bubbly-equals">=</span>${valueOf(value, isQuoted)}`
       )
       .join("")
     return `<span class="bubbly-mark">${ANGLE_OPEN}</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? `${SLASH}${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
