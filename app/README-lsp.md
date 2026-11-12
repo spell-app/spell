@@ -232,6 +232,8 @@ The service is a set of readers over that record.
 
 - It hosts the same `SpellProject` and `SpellFile` objects the compiler and the browser editor use,
   and every edit goes through `project.updateText()`, which re-parses only what the edit changed.
+  - The browser editor's typing takes the text at once and parses once the typing pauses (`project.takeText()`),
+    so no keystroke waits on a parse.
 - The outline comes from each rule's `getDeclaration()`;  the colours from each rule's `highlightAs`.
 - Go to definition and Find references read the scope record a word resolved to while parsing,
   and where that record was declared.

@@ -2251,11 +2251,16 @@ sidebars any of them opens.
       - `@spell/project/<projectId>` => that project's compiled JS, fetched and linked the same way, afresh each run
     - The app, parser and forms NEVER load `core` themselves.
 - ALL files parse first, then ALL compile, so lazy compile-time lookups see the whole project.
-- The editor calls `project.updateText(file, text)` on every keystroke
-  (`onInputChanged`, in [the app's editor](../../../app/src/app/editor.ts)).
-  - That calls `updatedContentsFor(file)`.
-  - `project.incremental.update()` re-parses what changed right away, and hands changed files their new match.
-  - If that couldn't cope, `updateText()` parses from scratch straight away.
+- The editor's code editor calls `project.takeText(file, text)` on every keystroke, and parses once the typing pauses
+  (`project.parseWaitingText()`, 200 msec after the last key:  `SpellModels`, in
+  [the app's Monaco folder](../../../app/src/app/ui/monaco/)).
+  - So no keystroke waits on a parse:  a parse of Solitaire's game took 50 msec a key (2026-11-12).
+  - What needs the new parse sooner asks for it:  the language features, a click or focus elsewhere, `compile()`, `parse()`.
+  - Everything else calls `project.updateText(file, text)`, which takes the text and parses it at once
+    (`onInputChanged`, in [the app's editor](../../../app/src/app/editor.ts);  the language server).
+  - Either way it calls `updatedContentsFor(file)`.
+  - `project.incremental.update()` re-parses what changed, and hands changed files their new match.
+  - If that couldn't cope, it parses from scratch straight away.
   - After 2s:  it compiles, saves `<Project>.spell.js` and runs it.
 - A crash while parsing (a rule threw, NOT an error in the spell) is left in `project.parseError`.
 - `SpellProject`'s parse task list keeps its scope + `incremental` while they're good.
@@ -2505,7 +2510,7 @@ sidebars any of them opens.
   - by VS Code, over stdio
   - IN-PROCESS, by the app's Monaco editor ([the app's Monaco folder](../../../app/src/app/ui/monaco/))
     - its `SpellModels` keep one Monaco model per file in step with `file.contents`.
-      Edits go through `updateText()`.
+      Edits go through `takeText()`, parsed once the typing pauses (`parseWaitingText()`).
     - its `SpellLanguageFeatures` call the service, and convert its answers with `LspToMonaco`
   - The app shows one project at a time.
     `<spell-editor>`s on a page show one each, all in one Monaco:

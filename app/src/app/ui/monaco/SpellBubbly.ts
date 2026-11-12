@@ -182,6 +182,8 @@ export class SpellBubbly {
       const text = model.getValue()
       const path = AppAddresses.pathOf(model.uri)
       const within = path === undefined ? undefined : SP.SpellFile.registry.get(path)
+      // typed and not parsed yet (`SpellModels`):  parsed now, so it lays out the project's parse, not a reading of its own
+      if (within?.project.isTextWaiting) void within.project.parseWaitingText().catch(() => undefined)
       const drawing = SP.BubblyLayout.of(text, parserFor(model), { within })
       // the project hasn't parsed this text yet:  read alone for now, and again once it has
       if (within && !SP.BubblyLayout.isParseOf(within, text) && this.parseWaits++ < PARSE_WAITS) this.relayoutSoon()

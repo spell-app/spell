@@ -10,9 +10,11 @@ import { SpellMonaco } from "./SpellMonaco"
 /**
  * One Monaco model per file the editor works with, each a VIEW of its file's `contents`.
  * - `SpellFile` / `SpellProject` stay the source of truth:  this never parses, and stores nothing about parses.
- * - Model => file:  every edit, typed or from a rename, goes into `file.contents`,
- *   and re-parses as little as possible via `project.updateText()`, then `onEdit`.
- *   All at once, so a hover right after sees the new parse.
+ * - Model => file:  every edit, typed or from a rename, goes into `file.contents` at once, then `onEdit`.
+ *   - Its parse waits till the typing pauses (`PARSE_WAIT`), so no keystroke waits on it:
+ *     `project.takeText()`, then `project.parseWaitingText()`, re-parsing as little as possible.
+ *   - Whatever must see the new parse sooner asks for it, `parseNow()`:  the language features (a hover, a completion),
+ *     a click or a focus anywhere on the page (the side bar edits from the parse);  a compile does itself.
  * - File => model:  a change from outside, e.g. load or reload, replaces the model's text (and its undo).
  * - Parse => markers:  whenever a spell file's `match` changes -- even from an edit to ANOTHER file --
  *   its diagnostics become the model's markers, and `onDidParse` fires, e.g. for fresh semantic colouring.
@@ -39,6 +41,12 @@ export class SpellModels {
    * - By path:  what `saveAfterEdit()` is handed may be a fresh object for the same file.
    */
   #toSave = new Set<string>()
+  /** Projects with text typed and not parsed yet -- see `parseSoon()`. */
+  #waiting = new Set<SP.SpellProject>()
+  /** What `parsed()` resolves, at the next `parseNow()`. */
+  #parsedWaiters: (() => void)[] = []
+  /** Timer of a pending `parseSoon()`. */
+  #parseTimer: ReturnType<typeof setTimeout> | undefined
   /** Fires when any spell file's parse changes. */
   #onDidParse = new monaco.Emitter<void>()
   /** Subscribe to parse changes, e.g. to ask for semantic colouring again. */
@@ -47,7 +55,53 @@ export class SpellModels {
   constructor(service: LSP.SpellLanguageService, onEdit: (file: SP.AnySpellFile) => void) {
     this.service = service
     this.onEdit = onEdit
+    // a click or a focus elsewhere acts on the parse, e.g. the side bar's edits:  it mustn't be one keystroke behind
+    const parseNow = () => this.parseNow()
+    globalThis.document?.addEventListener("pointerdown", parseNow, { capture: true })
+    globalThis.document?.addEventListener("focusin", parseNow, { capture: true })
   }
+
+  /**
+   * Parse the text typed and not parsed yet, now, in every project with some waiting -- see `project.takeText()`.
+   * - The incremental parse is done when it returns;  a parse from scratch, if that couldn't cope, comes later.
+   * - NEVER throws:  a parse error shows on its line, as ever.
+   */
+  parseNow(): void {
+    clearTimeout(this.#parseTimer)
+    const projects = this.#waiting
+    this.#waiting = new Set()
+    for (const project of projects) {
+      project
+        .parseWaitingText()
+        .catch((error: unknown) => console.error("SpellModels.parseNow():  couldn't parse", error))
+    }
+    const waiters = this.#parsedWaiters
+    this.#parsedWaiters = []
+    waiters.forEach((resolve) => resolve())
+  }
+
+  /**
+   * Resolves once the text typed so far is parsed, when the typing pauses:  at once if none is waiting.
+   * - For what can wait, e.g. the semantic colouring, so it doesn't parse on every keystroke.
+   */
+  parsed(): Promise<void> {
+    if (!this.#waiting.size) return Promise.resolve()
+    return new Promise((resolve) => this.#parsedWaiters.push(resolve))
+  }
+
+  /** Parse `project`'s waiting text once the typing pauses for `PARSE_WAIT` msec. */
+  private parseSoon(project: SP.SpellProject): void {
+    this.#waiting.add(project)
+    clearTimeout(this.#parseTimer)
+    this.#parseTimer = setTimeout(() => this.parseNow(), SpellModels.PARSE_WAIT)
+  }
+
+  /**
+   * How long the typing must pause before what's typed is parsed, in msec.
+   * - Under `SpellBubbly`'s wait to lay the code out again (300 msec), so it lays out the new parse.
+   * - People type a key every 100 to 250 msec:  a parse of a big file took 50 msec a key (Solitaire, 2026-11-12).
+   */
+  static PARSE_WAIT = 200
 
   /**
    * Model for `file`, made if need be -- along with one for every spell file its project parses.
@@ -159,7 +213,7 @@ export class SpellModels {
   }
 
   /**
-   * `model` was edited:  its text goes into `file`, which re-parses.
+   * `model` was edited:  its text goes into `file`, which re-parses once the typing pauses (`parseSoon()`).
    * - Ignores `contentsChanged()` putting `file`'s own text in, which leaves them equal.
    */
   private modelEdited(file: SP.AnySpellFile, model: monaco.editor.ITextModel): void {
@@ -167,8 +221,10 @@ export class SpellModels {
     if (text === file.contents) return
     this.followShape(file, model)
     file.isDirty = true
-    if (file instanceof SP.SpellFile) void file.project.updateText(file, text)
-    else {
+    if (file instanceof SP.SpellFile) {
+      file.project.takeText(file, text)
+      this.parseSoon(file.project)
+    } else {
       file.contents = text
       file.project.updatedContentsFor(file)
     }
