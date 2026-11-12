@@ -646,11 +646,24 @@
     --bubbly-inner-top: var(--bubbly-block-inner-corner);
     /* a block's outer corners, its start tag's top-left and its end tag's bottom-left:  between a band's and its body's */
     --bubbly-block-outer-corner: calc((var(--bubbly-pill-radius) + var(--bubbly-block-inner-corner)) / 2);
+    /* a band's words a pixel up, so the point of a tag's `<` meets the point its corners cut to */
+    --bubbly-pill-nudge: -1px;
+    /* how much wider than tall each half of a `<` is, in the system font:  a tag pill's ends are cut at its slant */
+    --bubbly-tag-slope: 1.9;
     /* a band's words clear of its cut left corner */
     --bubbly-pill-pad-left: 6px;
 
     :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body) {
       corner-shape: bevel;
+    }
+
+    /*
+     * a value's white at the top of its band's line, a pixel down:  so it doesn't make the line taller, which would
+     * push the band's words down from its middle
+     */
+    .bubbly-input {
+      vertical-align: top;
+      top: 1px;
     }
 
     /* a band's first quoted value isn't a name it defines, as in Spell:  at the plain weight */
@@ -670,7 +683,7 @@
       padding: 0 var(--bubbly-pill-pad-left);
       margin: 0 var(--bubbly-input-gap);
       background: var(--bubbly-pill);
-      border-radius: var(--bubbly-pill-radius);
+      border-radius: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope)) / calc(var(--bubbly-pill-height) / 2);
       corner-shape: bevel;
       vertical-align: middle;
       white-space: nowrap;

@@ -207,6 +207,10 @@
     "--bubbly-block-outer-corner": {
       "light": "calc((12px + 8px) / 2)",
       "dark": "calc((12px + 8px) / 2)"
+    },
+    "--bubbly-tag-slope": {
+      "light": "1.9",
+      "dark": "1.9"
     }
   },
   "parts": {
