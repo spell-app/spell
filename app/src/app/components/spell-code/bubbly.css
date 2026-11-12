@@ -301,10 +301,12 @@
     border-radius: var(--bubbly-inner-top) 0 0 var(--bubbly-block-inner-corner);
     padding: 2px 14px var(--bubbly-body-pad-bottom) calc(var(--bubbly-line-inset) + 4px);
   }
-  .bubbly-block > .bubbly-tag-end {
+  .bubbly-block > .bubbly-foot {
     grid-row: 3;
     grid-column: 1 / -1;
     justify-self: start;
+    width: var(--bubbly-foot-width);
+    height: var(--bubbly-foot-height);
     background: var(--bubbly-pill);
     border-radius: 0 calc(var(--bubbly-foot-height) / 2) calc(var(--bubbly-foot-height) / 2) 0;
   }
@@ -318,7 +320,7 @@
     grid-row: 2 / span 2;
     border-bottom-left-radius: var(--bubbly-gutter-corner);
   }
-  .bubbly-block > .bubbly-tag-end {
+  .bubbly-block > .bubbly-foot {
     margin-left: var(--bubbly-gutter-corner);
     width: calc(var(--bubbly-foot-width) - var(--bubbly-gutter-corner));
   }
@@ -843,6 +845,156 @@
       padding-bottom: calc(var(--bubbly-foot-pill-gap) - var(--bubbly-line-gap) / 2);
     }
   } /* END bubbly-html */
+
+  /****** Spell on a page, laid out as the editor lays it out:  the same rows, indents and gaps (Owen) ******/
+  /*
+   * The editor (`SpellBubbly`) draws on its lines:  every line one row tall, a band in the middle of its row, each
+   * level a tab further in, the room under a declaration a view zone.  A page draws the same:
+   * - at the editor's size:  `zoom`, the editor's font size over the drawing's
+   * - in the editor's rows:  every line, band and blank line one row, `--bubbly-row` (the editor's line height)
+   * - each level one tab further in, `--bubbly-tab`;  a head's words a spacer further (`--bubbly-pill-left-shift`)
+   * - under a declaration with a body:  its body's paper, its foot, then the rest of the gap to the next band
+   * - in the drawing's own units:  the editor's pixels over `--bubbly-page-scale`
+   */
+  &:not(.bubbly-monaco, .bubbly-html) {
+    /* the editor's font size (`SpellMonaco.OPTIONS`, 15px) over the drawing's (`--bubbly-font-size`) */
+    --bubbly-page-scale: 0.9375;
+    /* the editor's line:  15px times `--bubbly-monaco-line-height` (1.65), rounded as Monaco rounds it */
+    --bubbly-row: calc(25px / var(--bubbly-page-scale));
+    /* a tab:  two spaces of the system font, at the editor's size */
+    --bubbly-tab: calc(7.97px / var(--bubbly-page-scale));
+    /* a band's row, above and below it */
+    --bubbly-band-margin: calc((var(--bubbly-row) - var(--bubbly-pill-height)) / 2);
+    /*
+     * under a declaration's foot, before the next row:  so a foot and the band under it are `--bubbly-line-gap` apart,
+     * the room under it whole editor pixels, as Monaco rounds a view zone
+     */
+    --bubbly-after-foot: calc(
+      round(
+          nearest,
+          (
+              var(--bubbly-body-pad-bottom) + var(--bubbly-foot-height) +
+                max(0px, var(--bubbly-line-gap) - var(--bubbly-band-margin))
+            ) *
+            var(--bubbly-page-scale),
+          1px
+        ) /
+        var(--bubbly-page-scale) - var(--bubbly-body-pad-bottom) - var(--bubbly-foot-height)
+    );
+    /* a head's words, in from its band's left end */
+    --bubbly-head-words: calc(var(--bubbly-pill-pad-left) + var(--bubbly-pill-left-shift));
+
+    zoom: var(--bubbly-page-scale);
+    line-height: var(--bubbly-row);
+    /*
+     * the editor's letters:  the system font tracks 16px text tighter than 15px, and `zoom` draws 16px text smaller;
+     * this much more room between letters makes them the editor's, measured over long lines to 0.1px
+     */
+    letter-spacing: 0.0618px;
+
+    .bubbly-line,
+    .bubbly-gap {
+      height: var(--bubbly-row);
+    }
+
+    /* each declaration a row, its band in the middle, then what's under it */
+    ui-section.bubbly-section {
+      padding: var(--bubbly-band-margin) 0;
+    }
+    ui-section.bubbly-section:has(> .bubbly-block) {
+      padding-bottom: var(--bubbly-after-foot);
+    }
+    /* a body's first row right under its head's */
+    .bubbly-block > .bubbly-body {
+      padding-top: var(--bubbly-band-margin);
+      padding-left: 0;
+    }
+    /*
+     * a body ending with a declaration with a body:  that one's foot, then this one's, as far below it as their rails
+     * are apart across;  a group's rail is its parent's, so none
+     */
+    .bubbly-block > .bubbly-body:has(> ui-section:last-child > .bubbly-block) {
+      padding-bottom: calc(var(--bubbly-tab) - var(--bubbly-gutter));
+      > ui-section:last-child {
+        padding-bottom: 0;
+      }
+    }
+    .bubbly-block > .bubbly-body:has(> ui-section:last-child > .bubbly-block.bubbly-group) {
+      padding-bottom: 0;
+    }
+
+    /*
+     * across:  a line in a body a tab past its head's band's words, less the spacer;  a declaration in it a tab past
+     * its band, a group at its band;  one at the top of a file its words a spacer past the file's lines
+     */
+    .bubbly-body > .bubbly-line {
+      padding-left: calc(
+        var(--bubbly-pill-pad-left) + var(--bubbly-tab) * (1 + var(--bubbly-depth, 0)) - var(--bubbly-gutter)
+      );
+    }
+    /* a group's own lines (its description) are under its `group` line, a tab further in than its members */
+    .bubbly-group > .bubbly-body > .bubbly-line {
+      padding-left: calc(
+        var(--bubbly-pill-pad-left) + var(--bubbly-tab) * (2 + var(--bubbly-depth, 0)) - var(--bubbly-gutter)
+      );
+    }
+    /* a tag's name in the plain hue, as the editor colours it:  its text isn't inside its block's element there */
+    .bubbly-tag {
+      --bubbly-hue: var(--bubbly-plain);
+    }
+    /* every space as the file has it, as the editor shows it */
+    :is(.bubbly-line, .bubbly-head-pill, .bubbly-pill) {
+      white-space: pre;
+    }
+    > :is(ui-section.bubbly-section, .bubbly-block, .bubbly-pill) {
+      margin-left: calc(-1 * var(--bubbly-pill-pad-left));
+    }
+    .bubbly-body > :is(ui-section.bubbly-section, .bubbly-block, .bubbly-pill) {
+      margin-left: calc(var(--bubbly-tab) - var(--bubbly-gutter));
+    }
+    .bubbly-body > ui-section.bubbly-section:has(> .bubbly-group) {
+      margin-left: calc(-1 * var(--bubbly-gutter));
+    }
+    :is(.bubbly-head-pill, .bubbly-pill) {
+      padding-left: var(--bubbly-head-words);
+    }
+    .bubbly-group > .bubbly-head-pill {
+      padding-left: calc(var(--bubbly-head-words) + var(--bubbly-tab));
+    }
+
+    /*
+     * what a person typed, as the editor marks it:  its white from the spacer before its words to the one after
+     * (`--bubbly-input-gap` and `--bubbly-input-pad` both inside it);  a quoted one's own `"` either side of its
+     * white, taking its width, its curly mark over it;  half `--bubbly-quote-margin` after the closing one
+     */
+    .bubbly-input {
+      margin: 0;
+      padding-inline: calc(var(--bubbly-input-gap) + var(--bubbly-input-pad));
+    }
+    .bubbly-quoted,
+    :is(.bubbly-head-pill, .bubbly-pill).bubbly-starts-input > .bubbly-quoted:first-child {
+      margin: 0 calc(var(--bubbly-quote-margin) / 2) 0 0;
+    }
+    :is(.bubbly-head-pill, .bubbly-pill).bubbly-ends-input > .bubbly-quoted:last-child {
+      margin-right: calc(var(--bubbly-quote-margin) / 2);
+    }
+    .bubbly-quoted::before,
+    .bubbly-quoted::after {
+      content: '"';
+      color: transparent;
+    }
+    /* each curly mark over its `"`, as the editor centres it:  `--bubbly-quote-char` is a `"`'s width */
+    --bubbly-quote-char: 7.33px;
+    .bubbly-quote-open::after {
+      right: auto;
+      left: calc(var(--bubbly-quote-char) / -2);
+      translate: -50% 1.07px;
+    }
+    .bubbly-quote-close::after {
+      left: calc(100% + var(--bubbly-quote-char) / 2);
+      translate: -50% -2.13px;
+    }
+  }
 
   /****** what only the editor has (epic `language` P50):  spacers injected in the text, the layer of shapes ******/
   &.bubbly-monaco {

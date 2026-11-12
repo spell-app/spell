@@ -235,6 +235,34 @@
     "--bubbly-foot-corner": {
       "light": "calc(calc(23px - 4px) / 2 * 0.62) calc(calc(23px - 4px) / 2)",
       "dark": "calc(calc(23px - 4px) / 2 * 0.62) calc(calc(23px - 4px) / 2)"
+    },
+    "--bubbly-page-scale": {
+      "light": "0.9375",
+      "dark": "0.9375"
+    },
+    "--bubbly-row": {
+      "light": "calc(25px / 0.9375)",
+      "dark": "calc(25px / 0.9375)"
+    },
+    "--bubbly-tab": {
+      "light": "calc(7.97px / 0.9375)",
+      "dark": "calc(7.97px / 0.9375)"
+    },
+    "--bubbly-band-margin": {
+      "light": "calc((calc(25px / 0.9375) - 23px) / 2)",
+      "dark": "calc((calc(25px / 0.9375) - 23px) / 2)"
+    },
+    "--bubbly-after-foot": {
+      "light": "calc( round( nearest, ( 1px + 3px + max(0px, 3px - calc((calc(25px / 0.9375) - 23px) / 2)) ) * 0.9375, 1px ) / 0.9375 - 1px - 3px )",
+      "dark": "calc( round( nearest, ( 1px + 3px + max(0px, 3px - calc((calc(25px / 0.9375) - 23px) / 2)) ) * 0.9375, 1px ) / 0.9375 - 1px - 3px )"
+    },
+    "--bubbly-head-words": {
+      "light": "calc(12px + 8.5px)",
+      "dark": "calc(12px + 8.5px)"
+    },
+    "--bubbly-quote-char": {
+      "light": "7.33px",
+      "dark": "7.33px"
     }
   },
   "parts": {
