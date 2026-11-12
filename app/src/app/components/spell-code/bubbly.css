@@ -651,7 +651,8 @@
     /* how much wider than tall each half of a tag's `❮` is, in the system font:  a band's pointed ends are cut at its slant */
     --bubbly-tag-slope: 0.77;
     /* a pointed end:  its corners, across and down, which meet at the middle of the band */
-    --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope)) calc(var(--bubbly-pill-height) / 2);
+    --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope))
+      calc(var(--bubbly-pill-height) / 2);
     /* a tag's bracket this close to the point it sits in */
     --bubbly-tag-pad: 1.5px;
     /* a block's end tag:  a shorter band than its start tag's */
@@ -691,15 +692,19 @@
       font-size: var(--bubbly-font-size);
       /* its point level with the point of the band's end:  the glyph sits a pixel above the words' middle */
       position: relative;
-      top: 1px;
+      top: 0.65px;
     }
     .bubbly-angle-open::before {
       content: "\276E";
       margin-right: 3px;
+      /* a pixel further into its point, drawn only:  the band keeps its size */
+      left: -1px;
     }
     .bubbly-angle-close::before {
       content: "\276F";
       margin-left: 3px;
+      /* a pixel further into its point, drawn only:  the band keeps its size */
+      left: 1px;
     }
     /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
     .bubbly-slash {
