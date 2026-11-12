@@ -683,6 +683,9 @@
     }
     .bubbly-angle::before {
       font-size: var(--bubbly-font-size);
+      /* its point level with the point of the band's end:  the glyph sits a pixel above the words' middle */
+      position: relative;
+      top: 1px;
     }
     .bubbly-angle-open::before {
       content: "\276E";
@@ -786,7 +789,7 @@
       border-bottom-left-radius: var(--bubbly-tag-corner);
       padding-left: var(--bubbly-tag-pad);
     }
-    :is(.bubbly-pill, .bubbly-block > .bubbly-head-pill, .bubbly-block > .bubbly-foot-pill) {
+    :is(.bubbly-pill, .bubbly-block > .bubbly-head-pill, .bubbly-block > .bubbly-foot.bubbly-foot-pill) {
       border-top-right-radius: var(--bubbly-tag-corner);
       border-bottom-right-radius: var(--bubbly-tag-corner);
     }
