@@ -646,8 +646,6 @@
     --bubbly-inner-top: var(--bubbly-block-inner-corner);
     /* a block's outer corners, its start tag's top-left and its end tag's bottom-left:  between a band's and its body's */
     --bubbly-block-outer-corner: calc((var(--bubbly-pill-radius) + var(--bubbly-block-inner-corner)) / 2);
-    /* ... cut at a bracket's slant, across and down (`--bubbly-tag-slope`, below) */
-    --bubbly-block-outer-cut: calc(var(--bubbly-block-outer-corner) * var(--bubbly-tag-slope)) var(--bubbly-block-outer-corner);
     /* a band's words a pixel up, so the point of a tag's `<` meets the point its corners cut to */
     --bubbly-pill-nudge: -1px;
     /* how much wider than tall each half of a tag's `❮` is, in the system font:  a band's pointed ends are cut at its slant */
@@ -800,12 +798,11 @@
     }
     .bubbly-block > .bubbly-foot.bubbly-foot-pill {
       margin-left: 0;
-      border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) 0;
-      border-bottom-left-radius: var(--bubbly-block-outer-cut);
+      border-radius: 0 var(--bubbly-pill-radius) var(--bubbly-pill-radius) var(--bubbly-block-outer-corner);
     }
     /* a block's outer corners, top-left and bottom-left */
     .bubbly-block > .bubbly-head-pill {
-      border-top-left-radius: var(--bubbly-block-outer-cut);
+      border-top-left-radius: var(--bubbly-block-outer-corner);
     }
 
     /* every band's ends where a bracket sits:  pointed, at the bracket's slant, the bracket close in the point */
