@@ -709,10 +709,7 @@
     /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
     .bubbly-slash {
       display: inline-block;
-      font-weight: 800;
       position: relative;
-      left: 1px;
-      margin-right: 2px;
       transform: scaleY(0.85);
     }
     /* its bracket close beside it */
@@ -756,6 +753,15 @@
       vertical-align: top;
       white-space: nowrap;
     }
+
+    .bubbly-head-pill {
+      padding-left: 2px;
+    }
+
+    .bubbly-tag-name {
+      opacity: 0.5;
+    }
+
     /*
      * the gaps between, as Spell's declarations in their sections:  half `--bubbly-line-gap` above and below each
      * band, block and line of tags, so two of them are a whole gap apart, and a plain line and a band half of one
