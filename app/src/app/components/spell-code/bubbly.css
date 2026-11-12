@@ -697,14 +697,14 @@
     .bubbly-angle-open::before {
       content: "\276E";
       margin-right: 3px;
-      /* a pixel further into its point, drawn only:  the band keeps its size */
-      left: -1px;
+      /* a pixel in from its point, toward the name, drawn only:  the band keeps its size */
+      left: 1px;
     }
     .bubbly-angle-close::before {
       content: "\276F";
       margin-left: 3px;
-      /* a pixel further into its point, drawn only:  the band keeps its size */
-      left: 1px;
+      /* a pixel in from its point, toward the name, drawn only:  the band keeps its size */
+      left: -1px;
     }
     /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
     .bubbly-slash {
