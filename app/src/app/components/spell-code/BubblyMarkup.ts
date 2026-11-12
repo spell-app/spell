@@ -259,8 +259,8 @@ class MarkupWriter {
     const attributes = tag.attributes
       .map(({ name, value, isQuoted }) =>
         value === undefined
-          ? ` ${escape(name)}`
-          : ` ${escape(name)}<span class="bubbly-mark bubbly-equals">=</span>${valueOf(value, isQuoted)}`
+          ? ` <span class="bubbly-attribute-name">${escape(name)}</span>`
+          : ` <span class="bubbly-attribute-name">${escape(name)}</span><span class="bubbly-mark bubbly-equals">=</span>${valueOf(value, isQuoted)}`
       )
       .join("")
     return `<span class="bubbly-mark">${ANGLE_OPEN}</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? `${SLASH}${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
