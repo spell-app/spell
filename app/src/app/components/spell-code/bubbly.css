@@ -651,20 +651,20 @@
       var(--bubbly-block-outer-corner);
     /* a band's words a pixel up, so the point of a tag's `<` meets the point its corners cut to */
     --bubbly-pill-nudge: -1px;
-    /* how much wider than tall each half of a tag's `❮` is, in the system font:  a band's pointed ends are cut at its slant */
-    --bubbly-tag-slope: 0.77;
+    /* how much wider than tall each half of a tag's `⟨` is, in the system font:  a band's pointed ends are cut at its slant */
+    --bubbly-tag-slope: 0.62;
     /* a pointed end:  its corners, across and down, which meet at the middle of the band */
     --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope))
       calc(var(--bubbly-pill-height) / 2);
     /* a tag's bracket this close to the point it sits in */
-    --bubbly-tag-pad: 1.5px;
+    --bubbly-bracket-pad: 3px;
     /* a block's end tag:  a shorter band than its start tag's */
     --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 4px);
     /* between a block's end tag and the end tag or band above it:  as far apart as nested gutters */
     --bubbly-foot-pill-gap: 4px;
     /* a quoted value's marks snug beside it:  less room outside them than Spell's */
     --bubbly-quote-margin: 11px;
-    --bubbly-pill-pad-right: var(--bubbly-tag-pad);
+    --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
     /* a block's band's words clear of its cut top-left corner */
     --bubbly-pill-pad-left: 6px;
 
@@ -685,7 +685,7 @@
     }
 
     /*
-     * a tag's `<` and `>` drawn as heavy angle brackets, `❮` `❯`, steeper
+     * a tag's `<` and `>` drawn as math's angle brackets, `⟨` `⟩`, steeper, at a heavy weight
      * - the file's own characters kept, unseen and no width, so a copied line copies them
      */
     .bubbly-angle {
@@ -694,32 +694,18 @@
     .bubbly-angle::before {
       position: relative;
       font-size: var(--bubbly-font-size);
+      font-weight: 800;
       /* line up > point with the pill corner. */
-      top: 0.65px;
+      top: -0.25px;
     }
     .bubbly-angle-open::before {
-      content: "\276E";
+      content: "\27E8";
       margin-right: 3px;
     }
     .bubbly-angle-close::before {
-      content: "\276F";
+      content: "\27E9";
       margin-left: 3px;
       left: -1px;
-    }
-    /*
-     * SWITCH:  `bubbly-math-angles` on the drawing, or anything around it, draws math's thinner angle brackets,
-     * `⟨` `⟩`, instead, the pointed ends cut at their slant
-     */
-    .bubbly-math-angles &,
-    &.bubbly-math-angles {
-      --bubbly-tag-slope: 0.62;
-
-      .bubbly-angle-open::before {
-        content: "\27E8";
-      }
-      .bubbly-angle-close::before {
-        content: "\27E9";
-      }
     }
     /* an end tag's `/`:  as heavy as its brackets, a little room before the name */
     .bubbly-slash {
@@ -734,18 +720,12 @@
 
     /* an attribute's `=` a pixel clear of its name */
     .bubbly-equals {
-      margin-left: 2px;
+      margin-left: 3px;
     }
 
     /* the closing mark sits low and narrow:  less room after it than before the opening one */
     .bubbly-quoted {
-      margin-right: calc(var(--bubbly-input-gap) + var(--bubbly-quote-margin) - 4px);
-    }
-
-    /* a band's first quoted value isn't a name it defines, as in Spell:  at the plain weight */
-    :is(.bubbly-head-pill, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input {
-      font-weight: inherit;
-      color: var(--bubbly-ink);
+      margin-right: calc(var(--bubbly-input-gap) + var(--bubbly-quote-margin) - 2px);
     }
 
     /*
@@ -763,7 +743,7 @@
       min-width: calc(var(--bubbly-pill-height) * var(--bubbly-tag-slope));
       text-align: center;
       /* its brackets close to its points */
-      padding-inline: var(--bubbly-tag-pad);
+      padding-inline: var(--bubbly-bracket-pad);
       corner-shape: bevel;
       vertical-align: top;
       white-space: nowrap;
@@ -773,8 +753,13 @@
       padding-left: 2px;
     }
 
-    .bubbly-tag-name {
-      opacity: 0.5;
+    .bubbly-tag-name,
+    .bubbly-attribute-name {
+      opacity: 0.75;
+    }
+
+    .bubbly-attribute-name {
+      margin-left: 0.33em;
     }
 
     /*
@@ -845,7 +830,7 @@
       border-radius: 0;
       border-top-left-radius: var(--bubbly-tag-corner);
       border-bottom-left-radius: var(--bubbly-tag-corner);
-      padding-left: var(--bubbly-tag-pad);
+      padding-left: var(--bubbly-bracket-pad);
     }
     :is(.bubbly-pill, .bubbly-block > .bubbly-head-pill, .bubbly-block > .bubbly-foot.bubbly-foot-pill) {
       border-top-right-radius: var(--bubbly-tag-corner);
@@ -858,7 +843,7 @@
         calc(var(--bubbly-foot-pill-height) / 2);
       height: var(--bubbly-foot-pill-height);
       /* its words 3px further left than a start tag's, its band ending as far after them */
-      padding-left: calc(var(--bubbly-pill-pad-left) - 3px);
+      padding-left: 4px;
       line-height: calc(var(--bubbly-foot-pill-height) + 2 * var(--bubbly-pill-nudge));
       border-top-right-radius: var(--bubbly-foot-corner);
       border-bottom-right-radius: var(--bubbly-foot-corner);
