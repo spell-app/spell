@@ -190,6 +190,7 @@
   &,
   .bubbly-block,
   .bubbly-pill,
+  .bubbly-tag-pill,
   .bubbly-taghead {
     /* how much of its hue a band takes over the paper, light then dark */
     --bubbly-pill: light-dark(
@@ -218,6 +219,7 @@
   /* marks on a band:  faint on its colour */
   .bubbly-head-pill,
   .bubbly-pill,
+  .bubbly-tag-pill,
   .bubbly-foot-pill {
     --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 30%, var(--bubbly-pill));
   }
@@ -637,21 +639,37 @@
 
   /****** HTML drawn bubbly (`BubblyMarkup`):  the same shapes, their corners cut, not rounded ******/
   &.bubbly-html {
-    /* how far each corner is cut:  a band's, a value's white, the body's inner corners and the rail's turn */
+    /* how far each corner is cut:  a band's, the body's inner corners and the gutter's turn;  a value's white stays round */
     --bubbly-pill-radius: 15px;
-    --bubbly-input-radius: 5px;
     --bubbly-block-inner-corner: 5px;
     /* a band's words clear of its cut left corner */
     --bubbly-pill-pad-left: 6px;
 
-    :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body, .bubbly-input) {
+    :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-gutter, .bubbly-body) {
       corner-shape: bevel;
     }
 
-    /* a tag's name:  bold, as a name a head defines */
-    .bubbly-tag-name {
-      font-weight: var(--bubbly-bold);
-      color: var(--bubbly-bold-ink);
+    /* a band's first quoted value isn't a name it defines, as in Spell:  at the plain weight */
+    :is(.bubbly-head-pill, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input {
+      font-weight: inherit;
+      color: var(--bubbly-ink);
+    }
+
+    /*
+     * a tag in a line of text (`<h2>Two at once</h2>`):  a small pill of its own, the words between them on the paper
+     * - as tall as a band, its corners cut the same, but no further from the words beside it than a white pill is
+     */
+    .bubbly-tag-pill {
+      display: inline-block;
+      height: var(--bubbly-pill-height);
+      line-height: var(--bubbly-pill-text-line);
+      padding: 0 var(--bubbly-pill-pad-left);
+      margin: 0 var(--bubbly-input-gap);
+      background: var(--bubbly-pill);
+      border-radius: var(--bubbly-pill-radius);
+      corner-shape: bevel;
+      vertical-align: middle;
+      white-space: nowrap;
     }
 
     /* the rail stops at the end tag's band, which starts at the rail's left edge */

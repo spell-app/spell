@@ -5,7 +5,8 @@
  * - Each element with children on lines of their own is a `bubbly-block`:
  *   its start tag the band, its children the body, its end tag a band of its own under the rail (`bubbly-foot-pill`).
  * - An element on one line, or with nothing inside, is a `bubbly-pill`:  start tag, what's inside, end tag.
- * - An attribute's value is a white pill on its band (`bubbly-input`);  `<`, `=` and `>` are faint marks.
+ * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
+ *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks.
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
  * - Text, a `<style>`'s or `<script>`'s lines, a comment:  plain lines in their element's body.
  * - Its own small reader, not a full HTML parser:  enough for hand-written pages, the drawn-bubbly page's examples.
@@ -69,7 +70,7 @@ const MAX_INDENT = 4
 ////////////////
 
 /** One attribute of a start tag:  its name, and its value without its quotes (none for `disabled`). */
-type Attribute = { name: string; value?: string }
+type Attribute = { name: string; value?: string; isQuoted: boolean }
 
 /** One piece of the source, in order. */
 type Token =
@@ -151,7 +152,8 @@ function attributesFrom(source: string, at: number): { attributes: Attribute[]; 
   pattern.lastIndex = at
   for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
     if (match[1]) return { attributes, end: pattern.lastIndex, selfClosing: match[1] === "/>" }
-    if (match[2]) attributes.push({ name: match[2], value: match[3] ?? match[4] ?? match[5] })
+    if (match[2])
+      attributes.push({ name: match[2], value: match[3] ?? match[4] ?? match[5], isQuoted: match[5] === undefined })
   }
   return { attributes, end: source.length, selfClosing: false }
 }
@@ -211,8 +213,9 @@ class MarkupWriter {
     const kind = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
     const inside = element.children.filter((child) => child.kind !== "text" || this.slice(child).trim())
     const insideText = element.close ? this.source.slice(element.open.end, element.close.start) : ""
-    if (!inside.length || !insideText.includes("\n"))
-      return `<p class="bubbly-pill ${kind}">${this.startTag(element.open)}${this.inline(element.children)}${this.endTag(element.close)}</p>`
+    if (!inside.length)
+      return `<p class="bubbly-pill ${kind}">${this.startTag(element.open)}${this.endTag(element.close)}</p>`
+    if (!insideText.includes("\n")) return `<p class="bubbly-line">${this.inline([element])}</p>`
     return (
       `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill">${this.startTag(element.open)}</p>` +
       `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>` +
@@ -223,12 +226,15 @@ class MarkupWriter {
     )
   }
 
-  /** What's inside a one-line element, on its band:  text as it is, an element's tags as words. */
+  /**
+   * A one-line element's pieces, on the paper:  each tag a small pill of its own (`bubbly-tag-pill`), what's between
+   * them plain, as the text it is
+   */
   private inline(nodes: MarkupNode[]): string {
     return nodes
       .map((node) =>
         node.kind === "element"
-          ? `${this.startTag(node.open)}${this.inline(node.children)}${this.endTag(node.close)}`
+          ? this.tagPills(node)
           : node.kind === "comment"
             ? `<span class="bubbly-comment">${escape(this.slice(node))}</span>`
             : escape(this.slice(node).replace(/\s+/g, " "))
@@ -236,13 +242,23 @@ class MarkupWriter {
       .join("")
   }
 
-  /** A start tag on its band:  `<` faint, its name bold, each value a white pill. */
+  /** An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill;  with nothing inside, one pill. */
+  private tagPills(element: Extract<MarkupNode, { kind: "element" }>): string {
+    const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
+    const inside = this.inline(element.children)
+    if (!inside.trim())
+      return `<span class="${kind}">${this.startTag(element.open)}${this.endTag(element.close)}</span>`
+    const close = element.close ? `<span class="${kind}">${this.endTag(element.close)}</span>` : ""
+    return `<span class="${kind}">${this.startTag(element.open)}</span>${inside}${close}`
+  }
+
+  /** A start tag on its band:  `<` faint, its name, each value a white pill. */
   private startTag(tag: Extract<Token, { kind: "start" }>): string {
     const attributes = tag.attributes
-      .map(({ name, value }) =>
+      .map(({ name, value, isQuoted }) =>
         value === undefined
           ? ` ${escape(name)}`
-          : ` ${escape(name)}<span class="bubbly-mark">=</span><span class="bubbly-input">${escape(value) || "&nbsp;"}</span>`
+          : ` ${escape(name)}<span class="bubbly-mark">=</span>${valueOf(value, isQuoted)}`
       )
       .join("")
     return `<span class="bubbly-mark">&lt;</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? "/&gt;" : "&gt;"}</span>`
@@ -298,6 +314,18 @@ class MarkupWriter {
 function marks(text: string): string {
   return `<span class="bubbly-mark">&lt;</span>${escape(text.slice(1, -1))}<span class="bubbly-mark">&gt;</span>`
 }
+
+/** A value's white pill;  a quoted one's own `"` kept, see-through, its curly marks drawn just outside it, as Spell's. */
+function valueOf(value: string, isQuoted: boolean): string {
+  const words = escape(value) || "&nbsp;"
+  return isQuoted
+    ? `<span class="bubbly-quoted"><span class="bubbly-input">${QUOTE_OPEN}${words}${QUOTE_CLOSE}</span></span>`
+    : `<span class="bubbly-input">${words}</span>`
+}
+
+/** A quoted value's marks:  the file's own `"`, kept for copying, its curly mark drawn by the sheet. */
+const QUOTE_OPEN = `<span class="bubbly-quote-mark bubbly-quote-open">"</span>`
+const QUOTE_CLOSE = `<span class="bubbly-quote-mark bubbly-quote-close">"</span>`
 
 /** How many columns `line`'s indent takes, a tab 2. */
 function indentOf(line: string): number {
