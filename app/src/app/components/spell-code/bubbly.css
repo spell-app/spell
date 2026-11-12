@@ -768,6 +768,13 @@
       line-height: var(--bubbly-pill-height);
     }
 
+    /* a start tag and its end tag with nothing between:  their points touch */
+    .bubbly-tag-pill:has(+ .bubbly-tag-pill) {
+      margin-right: 0;
+    }
+    .bubbly-tag-pill + .bubbly-tag-pill {
+      margin-left: 0;
+    }
     /* a line that starts with a tag:  its pill where a band would start, left of the body's lines as a band is */
     .bubbly-line > .bubbly-tag-pill:first-child {
       margin-left: calc(-1 * var(--bubbly-line-inset));
