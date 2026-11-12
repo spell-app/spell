@@ -665,7 +665,7 @@
     --bubbly-bracket-pad: 3px;
     --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
     /* a block's end tag:  a shorter band than its start tag's */
-    --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 4px);
+    --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 2px);
     /* a row:  the editor's line, 15px times `--bubbly-monaco-line-height` (1.65), rounded */
     --bubbly-html-row: 25px;
     /* a quoted value's marks snug beside it:  less room outside them than Spell's */

@@ -225,8 +225,8 @@
       "dark": "3px"
     },
     "--bubbly-foot-pill-height": {
-      "light": "calc(23px - 4px)",
-      "dark": "calc(23px - 4px)"
+      "light": "calc(23px - 2px)",
+      "dark": "calc(23px - 2px)"
     },
     "--bubbly-html-row": {
       "light": "25px",
