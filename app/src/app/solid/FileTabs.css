@@ -14,6 +14,7 @@
 
 /* "Your draft", with Discard beside it, under the tabs while the file showing is your draft (epic `mockup` P20) */
 .YourDraft {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 8px;
