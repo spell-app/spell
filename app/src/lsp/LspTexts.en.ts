@@ -44,6 +44,11 @@ export const LSP_TEXTS = {
   statement: "statement",
   next: "next",
   spellWordFor: "spell's word for <{tag}>",
+  actionTag: 'a button for one of the program\'s actions:  <action "auto play"/>',
+  contextMenuTag: "the right-click menu of the element it's in",
+  dividerTag: "a line between a context menu's groups",
+  actionOf: "action of {type}",
+  appAction: "the app's own action",
   typeNamed: "template {name}",
   propertyOf: "property of {types}",
 

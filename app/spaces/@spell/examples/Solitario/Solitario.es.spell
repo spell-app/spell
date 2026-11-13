@@ -145,8 +145,8 @@ solitario es una aplicación
 					<acción "reiniciar el juego"/>
 				</botones>
 				<botones class="GameButtons" slot="centro">
-					<acción "deshacer" icon-only/>
-					<acción "rehacer" icon-only/>
+					<acción "deshacer" solo-icono/>
+					<acción "rehacer" solo-icono/>
 				</botones>
 				<texto slot="derecha">Movimientos: {los movimientos}  ·  Puntos: {la puntuación}{la pista}</texto>
 			</barra-herramientas>

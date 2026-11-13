@@ -32,9 +32,8 @@
  * - The Edit menu's titles are in the program's language:  the core's messages `undo`, `undo-step` ...
  * - Built on the kit's generic `UndoStack`.
  * - Imports only `spell/util` and the core's own `core.ts`:  `Thing.ts` and `List.ts` import it, under the model too.
- * - The spell that declares an action waits for epic `elemental-spell`.
- *   - Its P10 (Actions and Menus) may take `declareAction()` over,
- *     calling `UndoHistory.run()` itself (decision Q21).
+ * - Compiled spell declares one through `core.describeAction()`:  `undoable as "Turn Card"` (`described.ts`).
+ * - Python's core has the same history, `undoing.py`:  both play `undoing.expected.json5` (epic `language` P54).
  */
 import { schemaOf, UndoStack, type UndoRecord } from "spell/util"
 
@@ -55,6 +54,18 @@ export type ActionInfo = {
    * - `"clears history"`:  every step is forgotten once it's done, e.g. a new game
    */
   cantBeUndone?: CantBeUndone
+}
+
+/**
+ * What the Edit menu shows of an undo history:  what `App`'s `canUndo`, `undoTitle` ... read.
+ * - A running program's own `UndoHistory`;  or, on a page drawing a program that runs elsewhere (Python's),
+ *   what that program last said of its own (`core.remote.history`, `page.ts`).
+ */
+export type ShownHistory = {
+  readonly canUndo: boolean
+  readonly canRedo: boolean
+  readonly undoTitle: string
+  readonly redoTitle: string
 }
 
 /** The most steps a run keeps:  the oldest go past it. */

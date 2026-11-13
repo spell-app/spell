@@ -95,13 +95,19 @@ class ThingMethods:
         - An `"$type"` no class has:  a plain dict, its `"$type"` kept.  NEVER throws for one.
         - JSON with ids, a `StateWriter`'s (`state.py`):  a thing mentioned twice comes back as one.
           Without them, JSON keeps no identity:  a card in two places comes back as two cards.
+        - SIDE EFFECT:  the run's undo history is forgotten:  the program's document changed (`undoing.py`).
         - throws `json.JSONDecodeError` for text that isn't JSON.
         """
+        self.RUNTIME.history.clear()
         return StateMirror().read(json.loads(data) if isinstance(data, str) else data)
 
-    # from `TypeMethods`, which `Core` mixes in beside us
     if TYPE_CHECKING:
+        from spell_core.runtime_methods import SpellRuntime
 
+        # the running program:  `RuntimeMethods`'s, which `Core` mixes in beside us
+        RUNTIME: SpellRuntime
+
+        # from `TypeMethods`, which `Core` mixes in beside us
         def is_of_type(self, thing: object, type_name: str) -> bool: ...
 
 

@@ -39,6 +39,13 @@ import { Thing } from "./classes/Thing"
 /** Key a thing's id goes under:  `{ "$type": "Card", "$id": "3", ... }`, or `{ "$id": "3" }` alone, to mention it. */
 export const ID_KEY = "$id"
 
+/**
+ * Key an app's undo history goes under, as its Edit menu shows it:  `{ "$history": { "can_undo": true, ... } }`.
+ * - Python's `StateWriter` writes it on its app (epic `language` P54);  a page reads it itself (`page.ts`).
+ * - A mirror reads past it:  it's no prop of the app.
+ */
+export const HISTORY_KEY = "$history"
+
 /** A thing or a list:  what has an id in a state. */
 type SpellObject = Thing | List
 
@@ -134,7 +141,7 @@ export class StateMirror {
     const type = state[TYPE_KEY]
     const Class = typeof type === "string" ? programThings()?.classNamed(type) : undefined
     if (!Class) return Object.fromEntries(Object.entries(state).map(([key, value]) => [key, this.read(value)]))
-    const { [TYPE_KEY]: _type, [ID_KEY]: _id, [ITEMS_KEY]: items, ...named } = state
+    const { [TYPE_KEY]: _type, [ID_KEY]: _id, [ITEMS_KEY]: items, [HISTORY_KEY]: _history, ...named } = state
     const fields = Object.fromEntries(
       Object.entries(named).map(([key, value]) => [setterNamed(Class.prototype, this.nameOf(key)), value])
     )

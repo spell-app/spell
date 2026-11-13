@@ -461,9 +461,15 @@ class SpellObject:
         self._note_property_change(name, was, value)
 
     def _note_property_change(self, name: str, was: object, value: object) -> None:
-        """Tell the core a property changed, once we're made:  starting values are no change."""
+        """Tell the core a property changed, once we're made:  starting values are no change.
+
+        - An undoable action running:  the run's undo history records it (`UndoHistory.note_setting()`).
+        - Then the property's `when <property> changes` handler hears of it.
+        """
         if self.__dict__.get("_is_made"):
-            program_core().note_property_change(self, name, was, value)
+            the_core = program_core()
+            the_core.RUNTIME.history.note_setting(self, name, was, value)
+            the_core.note_property_change(self, name, was, value)
 
     def __getattr__(self, name: str) -> Any:
         """A name we don't declare:  spell reads a property nobody set or declared as nothing, `None`.

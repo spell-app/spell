@@ -499,7 +499,9 @@ export class ReadGathering {
     const value = attribute(node, "value")
     const isForm = node.tagName === FORM_TAG
     const inner: WalkAt = isForm && value ? { ...at, form: this.typeOf(value, at, 0).type ?? UNKNOWN_FORM } : at
-    const isOurs = !node.tagName || !node.tagName.includes("-") || UI_TAG.test(node.tagName)
+    // one of the project's own views, by its element's name or bare (`<tableau "T1"/>`):  it draws a thing
+    const ownType = this.ownElementType(node)
+    const isOurs = !ownType && (!node.tagName || !node.tagName.includes("-") || UI_TAG.test(node.tagName))
 
     for (const attr of node.attrs ?? []) {
       if (!(attr instanceof P.ASTJSXAttribute) || !attr.value) continue
@@ -508,7 +510,7 @@ export class ReadGathering {
       else if (!(isForm && attr.name === "value")) this.noteHandedOver(node, attr, isOurs, at)
       this.visit(attr.value, facts, inner)
     }
-    if (!isOurs) this.noteOwnElement(node, facts)
+    if (ownType) this.noteOwnElement(ownType, node, facts)
     this.visit(node.children, facts, inner)
   }
 
@@ -533,10 +535,17 @@ export class ReadGathering {
     if (isOurs || !this.ownElementType(node)) this.widen(handed, { kind: "element reads it", match: attr.match })
   }
 
-  /** SIDE EFFECT:  a tag named for one of the project's types, `<solitaire-card>`, draws that type. */
-  private noteOwnElement(node: P.ASTJSXElement, facts: BodyFacts): void {
-    const type = this.ownElementType(node)
-    if (type) facts.drawn.add(type)
+  /**
+   * SIDE EFFECT:  a tag named for one of the project's types, `<solitaire-card>` or `<tableau "T1"/>`, draws that type:
+   * a list's items too, as `draw` does;  its `id` names the thing it draws, a member made new under that name
+   * (`"T1" is a new tableau`), so that member is read.
+   */
+  private noteOwnElement(type: string, node: P.ASTJSXElement, facts: BodyFacts): void {
+    facts.drawn.add(type)
+    const holds = this.project.itemTypeOf(type)
+    if (holds) facts.drawn.add(holds)
+    const id = attribute(node, "id")
+    if (id instanceof P.ASTStringLiteral) facts.names.add(id.value)
   }
 
   /** The project's type a tag's last words name:  `<solitaire-card>` is a `Card`. */

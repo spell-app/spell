@@ -15,6 +15,10 @@ mirror.read(writer.patch())                 # or only what changed since:  the s
 - The same JSON as `to_json()`, plus:
   - an `"$id"` on each thing and spell list, after its `"$type"`:  every key of our own starts with `$` (J3)
   - its plain fields, after its properties:  what it was made with and doesn't declare, e.g. a foundation's `symbol`
+  - an app's undo history, as its Edit menu shows it, last:  `"$history": {"can_undo": true, "undo_title": ...}`
+    - so a page's Undo and Redo enable and retitle as the program's history changes (`undoing.py`);
+      the app is in the next patch each time it does
+    - a mirror reads past it:  a page reads it itself (`page.ts`)
 - The first mention of a thing is whole;  each later one is `{"$id": "3"}` alone:
   so a card in two places is one card, read back.
 - Each `StateWriter` gives a thing its id the first time it writes it, and keeps it:
@@ -35,6 +39,7 @@ mirror.read(writer.patch())                 # or only what changed since:  the s
 from contextlib import nullcontext
 from typing import Any
 
+from spell_core.apps import App
 from spell_core.kinds import is_same
 from spell_core.lists import List
 from spell_core.things import (
@@ -44,12 +49,15 @@ from spell_core.things import (
     Prop,
     SpellObject,
     note_change,
+    program_core,
     things,
     without_create,
 )
 
 # The key a thing's id goes under:  `{"$type": "Card", "$id": "3", ...}`, or `{"$id": "3"}` alone, to mention it.
 ID_KEY = "$id"
+# The key an app's undo history goes under, as its Edit menu shows it:  see the module's docs.
+HISTORY_KEY = "$history"
 
 
 class StateWriter:
@@ -132,7 +140,13 @@ class StateWriter:
             json.setdefault(name, self._write(field, written))
         if isinstance(thing, List):
             json[ITEMS_KEY] = [self._write(item, written) for item in thing._items]
+        if isinstance(thing, App):
+            json[HISTORY_KEY] = program_core().RUNTIME.history.shown()
         return json
+
+
+# The keys of our own a mirror reads past, as no property of the thing
+OUR_KEYS = (TYPE_KEY, ID_KEY, ITEMS_KEY, HISTORY_KEY)
 
 
 class StateMirror:
@@ -171,7 +185,7 @@ class StateMirror:
         cls = things.class_named(type_name) if isinstance(type_name, str) else None
         if cls is None:
             return {key: self._read(field) for key, field in value.items()}
-        fields = {key: field for key, field in value.items() if key not in (TYPE_KEY, ID_KEY, ITEMS_KEY)}
+        fields = {key: field for key, field in value.items() if key not in OUR_KEYS}
         known = self._by_id.get(the_id) if isinstance(the_id, str) else None
         made = known if isinstance(known, cls) else None
         if made is None:

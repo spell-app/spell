@@ -1,4 +1,4 @@
-import { proto } from "spell/util"
+import { proto, withoutAccents } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Through the folder:  read only when parsing, once the folder has loaded
@@ -28,6 +28,12 @@ import { SpellJSX } from "./SpellJSX"
  * - Every other attribute goes to the button, and wins over what the action gives:
  *   `<action "restart the game" icon="refresh"/>` keeps its own icon.
  *   - `icon-only`, the tag's own:  the button shows only its icon, its title its name for a screen reader.
+ *     Spanish's `solo-icono` (`SP.LanguageWords.iconOnlyAttribute`).
+ *   - In another language than English, Spell UI's names in that language, as its `ui-*` tags take them
+ *     (epic `language` P53):  `<acción "deshacer" solo-icono tamano="pequeno"/>` draws the same button as
+ *     `<action "undo" icon-only size="small"/>`.
+ *     They're read through the component pack's dictionary as the program compiles (`SP.ComponentPacks.readAttribute()`),
+ *     since the core draws Spell UI's English `<ui-button>`;  one it doesn't know (`class`, `aria-label`) stays as written.
  *   - Children, if any, are its text instead of the title.
  * - Compiles to `core.drawAction(this, "autoPlay", { ... })` in javascript and TypeScript,
  *   `core.draw_action(self, "auto_play", {...})` in Python (`P.ASTJSXElement.action`).
@@ -54,6 +60,7 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
       (child) => parser?.parse(child, "jsxChild", scope) || parser?.parse(child, "parse_error", scope)
     )
     match.data.attributes = element.attributes?.map((attribute) => parser?.parse(attribute, "jsxAttribute", scope))
+    match.data.readings = ActionButton.readingsOf(scope, element)
     const { value } = element.quotedWord
     const words = (value instanceof P.TextToken ? value.innerText : `${value?.raw ?? ""}`).trim()
     const types = ActionButton.typesFor(scope)
@@ -70,9 +77,101 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
 
   /** `core.drawAction(this, "autoPlay", props, ...children)`:  a `ui-button`'s element, marked with its action. */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
-    const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST)).filter(Boolean)
+    const { readings } = match.data
+    const attrs = match.data.attributes
+      ?.map((attr, index) => {
+        const reading = readings?.[index]
+        if (!attr || !reading) return P.asAST<P.ASTJSXAttribute>(attr?.AST)
+        const { attribute: name, value } = reading
+        const valueAST =
+          typeof value === "boolean"
+            ? new P.ASTBooleanLiteral(attr, { value })
+            : new P.ASTStringLiteral(attr, { value: `${value}`, quote: '"', raw: JSON.stringify(`${value}`) })
+        return new P.ASTJSXAttribute(attr, { name, value: valueAST })
+      })
+      .filter(Boolean)
     const children = match.data.children?.flatMap((child) => SpellJSX.childAST(child) ?? []) ?? []
     return new P.ASTJSXElement(match, { tagName: BUTTON_TAG, attrs, children, action: match.data.action })
+  }
+
+  /**
+   * Every action `<action "...">` may name in `scope`, for the editor's completions (epic `language` P53):
+   * the drawing's own type's first, then the app's own (`undo`, `redo`;  Spanish's `deshacer`, `rehacer`),
+   * then every other type's the program knows.
+   * - Each as its quoted word is written:  `auto play`, `restart the game`, `jugar solo`.
+   * - An action is a method of the program's own that takes nothing and gives nothing back (`isAction()`):
+   *   not a question, a drawing (`to draw it`), a creation hook or a test, nor one the program imports (the core's).
+   */
+  static actionsIn(scope: P.Scope): ActionWords[] {
+    const actions = new Map<string, ActionWords>()
+    const add = (action: ActionWords) => {
+      if (!actions.has(action.words)) actions.set(action.words, action)
+    }
+    const types = ActionButton.typesFor(scope)
+    const own = ActionButton.ownTypeOf(scope)
+    const methodsOf = (from: readonly P.TypeScope[], kind: ActionWords["kind"]) => {
+      for (const method of from.flatMap((type) => type.chain()).flatMap((type) => type.methods.get())) {
+        if (!ActionButton.isAction(method)) continue
+        const words = (method.asWritten ?? method.name.replace(/_/g, " ")).replace(/"/g, "")
+        add({ words, kind, of: method.of })
+      }
+    }
+    if (own) methodsOf([own], "own")
+    for (const words of Object.keys(SP.Language.of(scope).words.appActions)) add({ words, kind: "app" })
+    methodsOf(
+      types.filter((type) => type !== own),
+      "other"
+    )
+    return [...actions.values()]
+  }
+
+  /**
+   * Is `method` one a button may run:  the program's own, taking nothing and giving nothing back?
+   * - Not a question (`it "is a face card" if ...`, a `choice`), a drawing, a creation hook or a test.
+   */
+  private static isAction(method: P.ScopeMethod): boolean {
+    if (!method.declaredBy || method.params.length || method.kind === "static") return false
+    if (method.returns && method.returns !== "nothing") return false
+    return !NOT_ACTIONS.test(method.name)
+  }
+
+  /**
+   * Each of `element`'s attributes in the component pack's own names, where the language isn't English
+   * (epic `language` P53):  `solo-icono` => `icon-only`, `tamano="grande"` => `size="large"`.
+   * - By attribute, in order:  `undefined` for one that stays as written (`class`, `{...}` values, English).
+   * - Read once, while parsing:  `getAST()` is pure.
+   */
+  private static readingsOf(
+    scope: P.Scope,
+    element: P.JSXElementToken
+  ): Array<SP.AttributeReading | undefined> | undefined {
+    const language = SP.Language.of(scope)
+    if (language === SP.Language.default || !element.attributes?.length) return undefined
+    const iconOnly = withoutAccents(language.words.iconOnlyAttribute)
+    const packs = SpellJSX.packsFor(scope)
+    const readings = element.attributes.map((attribute) => {
+      if (!(attribute instanceof P.JSXAttributeToken)) return undefined
+      const { name, value } = attribute
+      if (withoutAccents(name) === iconOnly && value === undefined) return { attribute: ICON_ONLY, value: true }
+      // a `{...}` value is code, which stays as written
+      if (value !== undefined && !(value instanceof P.TextToken)) return undefined
+      const written = value?.innerText ?? true
+      const read = SP.ComponentPacks.readAttribute(
+        { tag: BUTTON_TAG, attribute: name, value: written },
+        language.lang,
+        packs
+      )
+      return read && (read.attribute !== name || read.value !== written) ? read : undefined
+    })
+    return readings.some(Boolean) ? readings : undefined
+  }
+
+  /** The type whose drawing `scope` is in:  its method's thing's (`a solitaire` / `to draw it`), else the nearest type. */
+  private static ownTypeOf(scope: P.Scope): P.TypeScope | undefined {
+    const thing = P.MethodScope.thingTypeOf(scope)
+    if (thing) return thing
+    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) if (at instanceof P.TypeScope) return at
+    return undefined
   }
 
   /**
@@ -80,13 +179,10 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
    * the program knows, as any of them may be up its thing's chain when it draws (a card's game, the app).
    */
   private static typesFor(scope: P.Scope): P.TypeScope[] {
-    const own: P.TypeScope[] = []
+    const own = ActionButton.ownTypeOf(scope)
     const others: P.TypeScope[] = []
-    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) {
-      if (at instanceof P.TypeScope && !own.length) own.push(at)
-      for (const type of at.types?.get() ?? []) others.push(type)
-    }
-    return [...new Set([...own, ...others])]
+    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) others.push(...(at.types?.get() ?? []))
+    return [...new Set(own ? [own, ...others] : others)]
   }
 
   /** The method of the first of `types` written as `words`, its name as compiled code names it:  `auto_play`. */
@@ -103,7 +199,25 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
 type ActionButtonData = JSXMatchData & {
   /** The action's method, as spell names it:  `auto_play`, `undo`. */
   action?: string
+  /** Its attributes in Spell UI's own names, by attribute, for a language other than English -- see `readingsOf()`. */
+  readings?: Array<SP.AttributeReading | undefined>
 }
+
+/** One action `<action "...">` may name, as the editor offers it -- see `ActionButton.actionsIn()`. */
+export type ActionWords = {
+  /** its quoted word, as written:  `auto play`, `restart the game`, `deshacer` */
+  words: string
+  /** whose:  the drawing's own type's, the app's own (`undo`, `redo`), or another type's */
+  kind: "own" | "app" | "other"
+  /** the type it's a method of, as declared:  `Solitaire`;  none for the app's own */
+  of?: string
+}
+
+/** `<action>`'s own attribute, in the core's names:  the button shows only its icon (`core.drawAction()`). */
+const ICON_ONLY = "icon-only"
+
+/** Methods no button runs:  a type's drawings (`draw`, `draw_its_placeholder` ...), creation hooks and tests. */
+const NOT_ACTIONS = /^(draw|create|test)(_|$)/
 
 /** What an action's button is:  Spell UI's, which the core draws (`core.drawAction()`). */
 const BUTTON_TAG = "ui-button"

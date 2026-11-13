@@ -13,7 +13,7 @@ import { SpellUIDefaults } from "./SpellUIDefaults"
  * - SIDE EFFECT:  loading this registers it with spell as `"spell-ui"` (`SP.ComponentPacks`), the pack every
  *   project draws with unless its project file says otherwise:  spell-parser never imports Spell UI.
  * - It reads an app's widget defaults too, `<ui-defaults>`, into Spell UI's own names (`SpellUIDefaults`, epic
- *   `language` P29).
+ *   `language` P29);  and the Spanish attributes on an `<acción>`'s button (P53).
  * - Loaded by spaces' barrel, as every program that compiles a project loads it;  NOT by `<spell-viewer>`, which runs
  *   built code and never compiles a drawing.
  */
@@ -22,7 +22,8 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
   tagFor(word, language) {
     return tagsFor(language).get(withoutAccents(word))
   },
-  readDefault: (sample, language) => SpellUIDefaults.read(sample, language)
+  readDefault: (sample, language) => SpellUIDefaults.read(sample, language),
+  readAttribute: (sample, language) => SpellUIDefaults.readAttribute(sample, language)
 }
 
 /** Each language's bare names => tags, made the first time it's asked for. */

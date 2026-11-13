@@ -7,6 +7,7 @@
 - Processes are names with a flag, "!" (running alone) or a count:  `start exclusive process deal the cards`.
 - A thing's `create()` that waits runs at once, its pauses not waiting:  `run_at_once()`.
 - What a person starts runs one at a time:  `core.RUNTIME.actions` (`action_queue.py`).
+- What its undoable actions changed, to undo and redo:  `core.RUNTIME.history` (`undoing.py`).
 """
 
 import asyncio
@@ -16,6 +17,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 from spell_core.action_queue import ActionQueue
 from spell_core.events import Eventful, Handler, SpellEvent, _call, all_ended, run_beside
+from spell_core.undoing import UndoAction, UndoHistory
 
 if TYPE_CHECKING:
     from spell_core.console import SpellConsole
@@ -24,11 +26,13 @@ if TYPE_CHECKING:
 class SpellRuntime(Eventful):
     """The running program:  its events (`core.on()`, `core.trigger()`) and its state, e.g. its processes."""
 
-    def __init__(self) -> None:
-        """A program with no handlers yet, and nothing in its state."""
+    def __init__(self, history: UndoHistory | None = None) -> None:
+        """A program with no handlers yet, nothing in its state, and `history`, else a new one, empty."""
         self.state: dict[str, Any] = {}
         # what a person starts, one at a time
         self.actions = ActionQueue()
+        # what its undoable actions changed, to undo and redo
+        self.history = history or UndoHistory()
         # the program's first app:  the last stop up an event's chain, before its own listeners (`core.send()`)
         self.app: object | None = None
         # the program's pages, in the order they were made:  each hears what `core.trigger()` sends
@@ -53,6 +57,8 @@ class RuntimeMethods:
     }
 
     console: "SpellConsole"
+    # The core's messages in the program's language:  `MessageMethods`'s
+    message: Callable[..., str]
     # Sends what's changed:  `SendingMethods`'s
     send_waiting_changes: Callable[[], None]
 
@@ -66,9 +72,25 @@ class RuntimeMethods:
     RUNTIME: SpellRuntime
 
     def reset_runtime(self) -> None:
-        """Start the program again:  no handlers, no processes, no one told of a pause."""
-        self.RUNTIME = SpellRuntime()
+        """Start the program again:  no handlers, no processes, no one told of a pause, nothing to undo.
+
+        - Its undo history titles its steps in the program's language (`message()`),
+          and puts the app in the page's next patch as it changes (`history_changed()`).
+        """
+        self.RUNTIME = SpellRuntime(UndoHistory(title_for=self._undo_title, on_change=self._history_changed))
         self.before_pause: list[Callable[[], Awaitable[None] | None]] = []
+
+    def _undo_title(self, action: UndoAction, step: str | None) -> str:
+        """The Edit menu's title for undoing or redoing `step`, in the program's language:  `Undo Turn Card`."""
+        return self.message(f"{action}-step", step=step) if step else self.message(action)
+
+    def _history_changed(self) -> None:
+        """SIDE EFFECT:  the running app is in the page's next patch:  what its Undo and Redo show changed."""
+        from spell_core.things import SpellObject, note_change  # things sit above the runtime
+
+        app = self.RUNTIME.app
+        if isinstance(app, SpellObject):
+            note_change(app)
 
     async def pause_for(self, number: float, units: str = "seconds") -> None:
         """Wait `number` `units` without stopping the program's other work:  `pause for 50 msec`.

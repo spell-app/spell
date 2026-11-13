@@ -64,6 +64,26 @@ export class ComponentPacks {
     return reading
   }
 
+  /**
+   * `sample`, an attribute written in `language` on one of a pack's tags, in the pack's own (English) names,
+   * from the first of `packNames` that can read it (epic `language` P53):
+   * `({ tag: "ui-button", attribute: "tamano", value: "grande" }, "es")` => `{ attribute: "size", value: "large" }`.
+   * - What `<acción>` draws its button with:  a Spanish program writes Spell UI's Spanish names on it,
+   *   which compile to the English ones its `<ui-button>` reads.
+   * - `undefined` when no pack registered reads it:  the attribute is then taken as written.
+   */
+  static readAttribute(
+    sample: DefaultSample,
+    language: string,
+    packNames: readonly string[] = this.DEFAULT
+  ): AttributeReading | undefined {
+    for (const name of packNames) {
+      const read = this.packs.get(name)?.readAttribute?.(sample, language)
+      if (read) return read
+    }
+    return undefined
+  }
+
   /** `packNames` as an error says what it searched, e.g. `spell-ui`, or `spell-ui (not loaded)`. */
   static searched(packNames: readonly string[] = this.DEFAULT): string {
     return packNames.map((name) => (this.packs.has(name) ? name : `${name} (not loaded)`)).join(", ")
@@ -92,6 +112,21 @@ export type ComponentPack = {
    * - Left out:  the pack can't check defaults, and each is taken as written.
    */
   readDefault?(sample: DefaultSample, language: string): DefaultReading
+  /**
+   * One attribute, as written in `language` on one of the pack's tags, in the pack's own names
+   * (`ComponentPacks.readAttribute()`):  `undefined` for one it doesn't know, which is taken as written.
+   * - Unlike `readDefault()`, it checks nothing:  any attribute the tag takes, content ones too (`icono`).
+   * - Left out:  the pack can't read attributes, and each is taken as written.
+   */
+  readAttribute?(sample: DefaultSample, language: string): AttributeReading | undefined
+}
+
+/** An attribute in a pack's own names, as `ComponentPacks.readAttribute()` reads it:  `size="large"`, `basic`. */
+export type AttributeReading = {
+  /** its name:  `size`, `basic` */
+  attribute: string
+  /** its value:  text, a number, or `true` for one written bare */
+  value: string | number | boolean
 }
 
 /** One attribute of an app's widget defaults, as written:  `<ui-button appearance="pill"/>`'s `appearance`. */

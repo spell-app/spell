@@ -47,6 +47,32 @@ export class SpellUIDefaults {
   }
 
   /**
+   * One attribute, written in `language` on one of Spell UI's tags, in Spell UI's own names, checking nothing
+   * (the pack's `readAttribute()`, epic `language` P53):  what `<acción>` draws its `<ui-button>` with.
+   * - `({ tag: "ui-button", attribute: "tamano", value: "grande" }, "es")` => `{ attribute: "size", value: "large" }`
+   * - A look's word written bare, as a switch:  `basico` => `{ attribute: "basic", value: true }`,
+   *   which the tag takes for its `appearance` (a `multiple` attribute's words only).
+   * - `undefined` for a tag or attribute Spell UI doesn't know (`class`, `aria-label`):  taken as written.
+   */
+  static readAttribute(sample: SP.DefaultSample, language: string): SP.AttributeReading | undefined {
+    const tag = SpellUIDefaults.canonicalTagFor(sample.tag, language)
+    if (!tag) return undefined
+    const localized = SpellUIDefaults.localizedFor(tag, language)
+    const english = SpellUIDefaults.registry.localizedFor(tag)!
+    const spec = localized.attributes.get(sample.attribute) ?? english.attributes.get(sample.attribute)
+    if (spec) return { attribute: spec.name, value: SpellUIDefaults.canonicalValue(localized, spec.name, sample.value) }
+    if (sample.value !== true) return undefined
+    // a look's word written bare (`appearance`'s, a `multiple`):  the tag's switch of that name
+    const word = withoutAccents(sample.attribute)
+    for (const [attribute, words] of localized.values) {
+      if (english.attributes.get(attribute)?.kind !== "multiple") continue
+      for (const [written, canonical] of words)
+        if (withoutAccents(written) === word) return { attribute: canonical, value: true }
+    }
+    return undefined
+  }
+
+  /**
    * The canonical tag `tag` stands for in `language`:  `ui-button` itself, `es-boton`, or bare as a drawing writes it
    * (`button`, `botón`), or `ui-` and a bare word (`ui-botón`);  `undefined` for none of Spell UI's.
    */

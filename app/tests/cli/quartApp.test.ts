@@ -131,16 +131,31 @@ describe("a Python spell app, in a real browser", () => {
     // naming the card by reference, its name (epic `python-target` P27):  the card's `its rank + " of " + its suit`
     const reference = `Card#${turned.rank} of ${turned.suit}`
     expect(page.sent).toEqual([{ call: "on_click", on: reference, args: [{ type: "click" }] }])
-    // then its move:  the pile it joined, and the pile it left
-    expect(patches[1]!.map((thing) => thing["$type"])).toEqual(["DiscardPile", "StockPile"])
-    const [joined] = patches[1]!
+    // then its move:  the pile it joined, and the pile it left;  and the app, now with a step to undo (epic `language` P54)
+    expect(patches[1]!.map((thing) => thing["$type"])).toEqual(["DiscardPile", "StockPile", "Solitaire"])
+    const [joined, , solitaire] = patches[1]!
     expect(joined!["$items"].at(-1)).toEqual({ $id: cardId })
+    expect(solitaire!["$history"]).toEqual(expect.objectContaining({ can_undo: true, undo_title: "Undo Play Card" }))
+
+    // the toolbar's Undo, live:  it lights up for the move, and takes it back in Python
+    const undo = page.page.locator('.GameButtons ui-button[icon="undo"]')
+    const redo = page.page.locator('.GameButtons ui-button[icon="redo"]')
+    await expect.poll(() => undo.getAttribute("aria-label")).toBe("Undo Play Card")
+    expect(await undo.getAttribute("disabled")).toBeNull()
+    await undo.click()
+    await expect.poll(() => page.page.locator(DISCARDS).count()).toBe(discards)
+    await expect.poll(() => redo.getAttribute("aria-label")).toBe("Redo Play Card")
+    expect(await undo.getAttribute("disabled")).not.toBeNull()
+    await redo.click()
+    await expect.poll(() => page.page.locator(DISCARDS).count()).toBe(discards + 1)
 
     // the console shows each frame, both ways, its badge first:  the state, the click up, the two patches down
     const frames = page.logged.filter((line) => /^%c(SENDING  >|RECEIVED <)%c/.test(line))
     expect(frames[0]).toMatch(/^%cRECEIVED <%c {2}state: {2}solitaire/)
     expect(frames).toContainEqual(expect.stringMatching(`^%cSENDING  >%c  call on_click\\(\\) on ${reference}`))
-    expect(frames).toContainEqual(expect.stringMatching(`^%cRECEIVED <%c  patch:  DiscardPile #\\d+, StockPile #`))
+    expect(frames).toContainEqual(
+      expect.stringMatching(`^%cRECEIVED <%c  patch:  DiscardPile #\\d+, StockPile #\\d+, Solitaire #`)
+    )
 
     // each patch a small part of the whole state
     const size = (frame: unknown) => JSON.stringify(frame).length
