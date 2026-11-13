@@ -426,8 +426,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    */
   @E.on("dragstart")
   protected onDragStart(event: DragEvent) {
-    // ours, not a card's within us:  the events bubble
-    if (event.target !== this.domElement) return
+    // ours, not a card's within us:  the events bubble;  nor a drag inside our drawing, which reaches us retargeted
+    if (event.composedPath()[0] !== this.domElement) return
     this.isDragging = true
     this.sendToThing("drag")
     const drag = Dragging.current
@@ -436,7 +436,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   @E.on("dragend")
   protected onDragEnd(event: DragEvent) {
-    if (event.target !== this.domElement) return
+    if (event.composedPath()[0] !== this.domElement) return
     this.isDragging = false
     for (const element of this.domElement.parentElement?.children ?? []) {
       const component = SpellElement.componentOf(element)

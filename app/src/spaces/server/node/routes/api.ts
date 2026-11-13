@@ -101,6 +101,7 @@ api.delete("/projects/remove/project", projectUtils.request_deleteApp)
 // working with project files:  each route's contract is on its `projectUtils.request_*` handler
 api.post("/projects/create/file", projectUtils.request_createFile)
 api.post("/projects/rename/file", projectUtils.request_renameFile)
+api.post("/projects/reorder/files", projectUtils.request_reorderFiles)
 api.delete("/projects/remove/file", projectUtils.request_deleteFile)
 
 // a project's index, and saving one of its files:  see `projectUtils.request_getIndex` / `request_saveFile`

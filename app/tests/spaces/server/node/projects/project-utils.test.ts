@@ -344,6 +344,22 @@ describe("project-utils", () => {
       expect(existsSync(resolve(folder, "Keep/Two.spell"))).toBe(true)
     })
 
+    test("reordering puts the files named first, in that order, the rest after in theirs", async () => {
+      const projectId = project("Reordered")
+      const folder = resolve(workspace, "Reordered")
+      write(folder, "A.spell")
+      write(folder, "B.spell")
+      write(folder, "C.spell")
+      await projectUtils.getIndex(projectId)
+      const order = async () => (await projectUtils.loadProjectFile(projectId)).imports.map((it) => it.path)
+      expect(await order()).toEqual(["/Reordered.spell", "/A.spell", "/B.spell", "/C.spell"])
+
+      await projectUtils.reorderFiles(projectId, ["/C.spell", "A.spell", "/Missing.spell"])
+      expect(await order()).toEqual(["/C.spell", "/A.spell", "/Reordered.spell", "/B.spell"])
+      // the order holds on the next read of the project
+      expect((await projectUtils.getIndex(projectId)).imports.map((it) => it.path)).toEqual(await order())
+    })
+
     test("deleting a folder's last file removes the folder, and its parents left empty;  never the project's", async () => {
       const projectId = project("Emptied")
       const folder = resolve(workspace, "Emptied")

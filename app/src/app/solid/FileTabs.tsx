@@ -1,6 +1,8 @@
 import { Show, createEffect, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { Dragging } from "spell/util/Dragging"
+
 import { editor } from "spell/app/app/editor"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
 import fileTabs from "spell/app/spaces/@spell/editor/file-tabs/FileTabs.spell"
@@ -23,6 +25,8 @@ import "./FileTabs.css"
  * - the bar's ⋯ (`<CodeMoreMenu>`)
  * - what a tab's right-click menu's items do, and are called:  its items and their order are the Spell's `tab menu`
  * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
+ * - A tab dragged along the row moves its file there:  the project's file order, saved in its project file
+ *   (`editor.moveFile()`;  Owen, epic `mockup`).
  * - More than eight files:  the ones opened lately, and a button listing every file (its `max-visible`),
  *   the same ones after a reload, per project (its `remember`).
  ****************/
@@ -66,21 +70,66 @@ export function FileTabs() {
     }
   )
 
+  /** The tab `event` happened on, and its file. */
+  const tabOf = (event: Event) => {
+    const tab = event.composedPath().find((at) => (at as Element).localName === "ui-item") as HTMLElement | undefined
+    if (!tab?.parentElement) return undefined
+    // by its place among the TABS:  the bar's ⋯ (a `<ui-dropdown>`) sits among them too (epic `editor` T50)
+    const tabs = [...tab.parentElement.children].filter((each) => each.localName === "ui-item") as HTMLElement[]
+    const files = bar()?.files.getValues() ?? []
+    const file = files[tabs.indexOf(tab)]
+    return file && { tab, tabs, files, file }
+  }
+
+  // a tab dragged along the row:  its file moves to where it's dropped
+  const startDrag = (event: PointerEvent) => {
+    const pressed = event.button === 0 && tabOf(event)
+    if (!pressed) return
+    const { tab, tabs, files, file } = pressed
+    const from = tabs.indexOf(tab)
+    let target: { tab: HTMLElement; file: TabFile } | undefined
+    const mark = (next: typeof target) => {
+      target?.tab.removeAttribute(DROP_MARK)
+      target = next
+      if (target) target.tab.setAttribute(DROP_MARK, tabs.indexOf(target.tab) > from ? "after" : "before")
+    }
+    new Dragging(tab, event, {
+      carried: [tab],
+      follows: false,
+      placing: (x) => {
+        tab.setAttribute(DRAGGED, "")
+        // the tab under the pointer, among those showing (the ones over the row's limit aren't drawn)
+        const over = tabs.findIndex((each) => {
+          // a `<ui-item>` draws in its shadow, its own box empty
+          const box = (each.shadowRoot?.querySelector("[part~='item']") ?? each).getBoundingClientRect()
+          return box.width > 0 && x >= box.left && x < box.right
+        })
+        mark(over < 0 || over === from ? undefined : { tab: tabs[over], file: files[over] })
+      },
+      onDrop: () => {
+        const landed = target
+        mark(undefined)
+        tab.removeAttribute(DRAGGED)
+        if (landed) void editor.moveFile(file.path, landed.file.path)
+      },
+      onCancel: () => {
+        mark(undefined)
+        tab.removeAttribute(DRAGGED)
+      }
+    })
+  }
+
   // a right click on a tab:  that file shown, and what can be done to it
   const [menuAt, setMenuAt] = createSignal<{ x: number; y: number }>()
   const openMenu = (event: MouseEvent) => {
-    const tab = event.composedPath().find((at) => (at as Element).localName === "ui-item") as Element | undefined
-    if (!tab?.parentElement) return
-    // by its place among the TABS:  the bar's ⋯ (a `<ui-dropdown>`) sits among them too (epic `editor` T50)
-    const tabs = [...tab.parentElement.children].filter((each) => each.localName === "ui-item")
-    const file = bar()?.files.getValues()[tabs.indexOf(tab)]
+    const file = tabOf(event)?.file
     if (!file) return
     event.preventDefault()
     editor.showEditor(file.path)
     setMenuAt({ x: event.clientX, y: event.clientY })
   }
   return (
-    <div class="FileTabs" onContextMenu={openMenu}>
+    <div class="FileTabs" onContextMenu={openMenu} onPointerDown={startDrag}>
       {piece()?.draw(bar()) as JSX.Element}
       <Show when={menuAt()}>
         {(where) => (
@@ -167,3 +216,8 @@ type FileTabBar = {
   more: { draw: () => JSX.Element }
   rememberAs: string
 }
+
+/** On a tab being dragged. */
+const DRAGGED = "dragged"
+/** On the tab a dragged one would land beside:  `before` or `after` it. */
+const DROP_MARK = "drop"

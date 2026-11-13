@@ -1074,6 +1074,37 @@ export const renameFile = async (projectId: string, filePath: string, newFilePat
   return true
 }
 
+/**
+ * Put project `projectId`'s files in the order `filePaths` gives (`/Card.spell` ...):  its file's `imports`, so its tabs.
+ * - Those named come first, in that order;  every other import after them, in the order it had.
+ * - A path that isn't one of its imports is skipped.
+ */
+export const reorderFiles = async (projectId: string, filePaths: string[]) => {
+  const importsFile = await loadProjectFile(projectId)
+  const placeOf = (importPath: string) =>
+    filePaths.findIndex(
+      (filePath) =>
+        filePath === importPath || isImportOf(projectId, importPath, SP.SpellLocation.getFileLocation(projectId, filePath))
+    )
+  const named = importsFile.imports.filter(({ path }) => placeOf(path) >= 0)
+  named.sort((one, other) => placeOf(one.path) - placeOf(other.path))
+  const others = importsFile.imports.filter(({ path }) => placeOf(path) < 0)
+  await saveProjectFile(projectId, { ...importsFile, imports: [...named, ...others] })
+}
+
+/**
+ * `POST /api/projects/reorder/files` -- put a project's files in a new order (its tabs, dragged).
+ * - Client sends body:  `{ projectId, filePaths }`, see `reorderFiles()`.
+ * - Returns:  updated `ProjectIndexJSON`.
+ * - Failure:  403 if you may not.
+ */
+export const request_reorderFiles = respondWithJSON(async (request) => {
+  const { projectId, filePaths } = request.body
+  await mayChangeOrDie(request, projectId, "reorder")
+  await reorderFiles(projectId, filePaths ?? [])
+  return await getIndex(projectId, { person: personOf(request) })
+})
+
 /** Is `importPath`, from project `projectId`'s file, an import of its file at `location`?  Another project's never is. */
 function isImportOf(projectId: string, importPath: string, location: SP.SpellLocation): boolean {
   if (SP.SpellLocation.isAddress(importPath)) return false

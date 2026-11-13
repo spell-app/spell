@@ -502,8 +502,9 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Keep `file`'s edit at once, while AutoSave is on (`isAutoSaving`):
-   * on in the preview, whose visitors never press Save, and off locally.
+   * Keep `file`'s edit while AutoSave is on (`isAutoSaving`):  on unless a person turned it off (Owen, epic `mockup`).
+   * - Once typing pauses for `KEEP_DELAY_MS`, so a server isn't sent every key;  the static build keeps it at once.
+   * - Leaving the page keeps what's waiting (`keepWaitingEdits()`).
    * - Saved through `LoadableFile.fetch`:  in the static build, that keeps it in the browser (`StaticFiles`).
    * - Off:  it waits for Save.
    * - A locked page's file is never kept (`isLocked()`).
@@ -511,6 +512,26 @@ export class EditorStore extends Observable {
    */
   keepEdit(file: SP.AnySpellFile): void {
     if (!editor.isAutoSaving || editor.isLocked(file)) return
+    clearTimeout(waitingKeeps.get(file))
+    if (isStaticBuild) return editor.keepNow(file)
+    waitingKeeps.set(
+      file,
+      setTimeout(() => editor.keepNow(file), KEEP_DELAY_MS)
+    )
+  }
+
+  /** Keep every edit still waiting for typing to pause (`keepEdit()`), e.g. as the page goes.  NEVER throws. */
+  keepWaitingEdits(): void {
+    for (const [file, waiting] of waitingKeeps) {
+      clearTimeout(waiting)
+      editor.keepNow(file)
+    }
+  }
+
+  /** Keep `file` now, if it still has changes.  NEVER throws:  a failure is logged. */
+  private keepNow(file: SP.AnySpellFile): void {
+    waitingKeeps.delete(file)
+    if (!file.isDirty) return
     void file
       .save(undefined)
       ?.then(() => editor.refreshDrafts())
@@ -519,7 +540,7 @@ export class EditorStore extends Observable {
 
   /**
    * Is each edit kept as it's made?  File › AutoSave;  remembered.
-   * - On in the preview, off locally, until a person says.
+   * - On until a person turns it off.
    */
   @prop({ type: "choice", init: () => editorPrefs.get(AUTO_SAVE_PREF) === true })
   accessor isAutoSaving!: boolean
@@ -1328,6 +1349,25 @@ export class EditorStore extends Observable {
       editor.showError(e)
     }
   }
+  /**
+   * Move the file at `path` (a tab, dragged) to where the file at `toPath` is, among current `project`'s files:
+   * dragged right, it goes after that file;  left, before it.  The new order is saved in its project file.
+   * - Shows what went wrong;  NEVER throws.
+   */
+  async moveFile(path: string, toPath: string): Promise<void> {
+    const project = editor.project
+    if (!project || isStaticBuild || path === toPath) return
+    try {
+      const imports = [...project.imports]
+      const from = imports.findIndex((each) => each.path === path)
+      const to = imports.findIndex((each) => each.path === toPath)
+      if (from < 0 || to < 0) return
+      imports.splice(to, 0, ...imports.splice(from, 1))
+      await new SPACES.ProjectFiles(project).reorder(imports.map(({ location }) => location.filePath!))
+    } catch (e) {
+      editor.showError(e)
+    }
+  }
   /** Delete current `file` (after asking), then show next import or `project`. */
   async deleteFile(): Promise<void> {
     editor.clearCompileAppSoon()
@@ -1712,7 +1752,16 @@ const NEW_PROJECT_NAME = "untitled"
 
 /** The name a new file starts with, in the dialog that asks for it. */
 const NEW_FILE_NAME = "Untitled.spell"
-editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: isStaticBuild })
+editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: true })
+
+/** How long typing pauses before AutoSave keeps an edit (`keepEdit()`), in milliseconds. */
+const KEEP_DELAY_MS = 800
+
+/** Each file's edit waiting for typing to pause, before AutoSave keeps it. */
+const waitingKeeps = new Map<SP.AnySpellFile, ReturnType<typeof setTimeout>>()
+
+// leaving the page keeps what's still waiting
+if (typeof window !== "undefined") window.addEventListener("pagehide", () => editor.keepWaitingEdits())
 
 /** Where each file started, for Discard Changes. */
 const startingPoints = new StartingPoints()

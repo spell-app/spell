@@ -40,6 +40,7 @@ const RIGHT_FOR = {
   design: "canDesign",
   create: "canCreate",
   rename: "canManage",
+  reorder: "canManage",
   delete: "canManage",
   publish: "canPublish"
 } as const satisfies Record<string, keyof Omit<SpaceRoleRights, "things">>
@@ -53,6 +54,7 @@ const CHANGE_WORDS: Record<ProjectFileChange, string> = {
   design: "change its pages",
   create: "make a page",
   rename: "rename a file",
+  reorder: "reorder its files",
   delete: "delete a file",
   publish: "publish its pages"
 }

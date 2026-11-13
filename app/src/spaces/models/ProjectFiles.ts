@@ -122,6 +122,27 @@ export class ProjectFiles {
   }
 
   /**
+   * Put the project's files in the order `filePaths` gives (`/Card.spell` ...):  its project file's `imports`, so its tabs.
+   * - Those not named keep their order, after them.
+   * - throws if the server says no
+   */
+  async reorder(filePaths: string[]): Promise<void> {
+    const { project } = this
+    const die = getDier(project, "reordering files", { projectId: project.projectId, filePaths })
+    await project.loadOrDie(die)
+    try {
+      project.contents = await LoadableFile.fetch<SP.ProjectManifestJSON5>({
+        url: `/api/projects/reorder/files`,
+        contents: { projectId: project.projectId, filePaths },
+        requestFormat: ProjectFiles.REQUEST_FORMAT_JSON,
+        format: "json"
+      })
+    } catch (e) {
+      die("Server error reordering files", e)
+    }
+  }
+
+  /**
    * Delete a file from the project.
    * - Returns `true` once it's gone.
    * - throws for the project's last file, a file that isn't there, or when the server says no

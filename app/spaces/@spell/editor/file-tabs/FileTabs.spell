@@ -2,7 +2,7 @@
 // Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
 // Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
 // With more files than fit the bar's limit, only the ones opened lately are tabs;  the ▾ beside them lists every file.
-// A click shows that file.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a ring.
+// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a ring.
 // The bar's ⋯ is at its right, which compiled code to show beside the code.
 // A right click on a tab shows that file, and its menu:  Duplicate, Rename, Delete.
 // The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
@@ -50,6 +50,16 @@ a "file tab bar" is a view
 			box-sizing: border-box;
 			border-radius: 50%;
 			border: 1.5px solid var(--ui-primary, var(--ui-blue, #2185d0));
+		}
+		/* a tab being dragged along the row:  dimmed;  a line where it would land, before or after the tab under it */
+		ui-item[dragged]::part(item) {
+			opacity: 0.5;
+		}
+		ui-item[drop="before"]::part(item) {
+			box-shadow: inset 2px 0 0 var(--ui-primary);
+		}
+		ui-item[drop="after"]::part(item) {
+			box-shadow: inset -2px 0 0 var(--ui-primary);
 		}
 		.NotSaved[hidden],
 		.Drafted[hidden] {
