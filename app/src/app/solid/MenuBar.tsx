@@ -198,35 +198,6 @@ function Divider(): JSX.Element {
 }
 
 /****************
- * ### `<DraftPill>`
- * "Draft | Publish", beside the project's name, only while you have drafts of the project (epic `editor` I44):
- * - one labeled button, its badge "Draft";  its click is File › Publish's (`editor.publish()`)
- * - gone after Publish or Discard Changes, and never in the public preview (`editor.canPublish`)
- ****************/
-function DraftPill(): JSX.Element {
-  const hasDrafts = tracked(() => editor.canPublish)
-  return (
-    <Show when={hasDrafts()}>
-      <ui-button
-        class="DraftPill"
-        size="mini"
-        appearance="basic circular"
-        icon={PUBLISH_ICON}
-        badge={appTexts.text("draft")}
-        labeled="left"
-        title={appTexts.text("draftTip")}
-        onClick={() => void editor.publish()}
-      >
-        <span class="DraftPillText">{appTexts.text("publish")}</span>
-      </ui-button>
-    </Show>
-  )
-}
-
-/** The Publish action's icon, as `AppMenus.spell` gives it. */
-const PUBLISH_ICON = "paper plane outline"
-
-/****************
  * ### `<SpellBarMenu>`
  * The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them
  * (Owen, 2026-11-06:  "Change the Spell menu in the editor to show the Examples menu").
@@ -344,7 +315,6 @@ export function ProjectBarMenu(): JSX.Element {
           {appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
         </SubMenuRow>
       </BarMenu>
-      <DraftPill />
     </>
   )
 }

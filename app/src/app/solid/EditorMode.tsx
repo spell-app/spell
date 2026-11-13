@@ -1,4 +1,4 @@
-import { For, Show, createSignal } from "solid-js"
+import { Show, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { editor } from "spell/app/app/editor"
@@ -7,6 +7,7 @@ import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
 import { on } from "./on"
+import { tracked } from "./tracked"
 
 /****************
  * ### `EditorMode`
@@ -125,7 +126,9 @@ export function toggleCode() {
  * Site only for a project that declares a site (`EditorMode.hasSite`);
  * then, in Edit, Inspect app (`inspect`), then the code's icon, which shows the code or closes it
  * (Owen:  "it should be part of the run|edit group";  "the "inspect" button to be between "Edit" and "Code"").
- * - Neither icon is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on.
+ * - Right of Edit, while you have drafts of the project:  "Draft" Publish (`<PublishDraft>`;  Owen:  "move it into
+ *   the run/edit bar, to the right of edit").
+ * - None of those is ever chosen, so the thumb stays on the mode:  each icon's `aria-pressed` says whether it's on.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
  * - `inspect`:  Inspect app's item (`<InspectAppButton item>`), handed in so this file needs nothing of the Inspector's.
  * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
@@ -142,21 +145,16 @@ export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JS
         aria-label={appTexts.text("modes")}
         ref={on<{ item: Element }>("ui-choosing", (event) => {
           // a toggle (Inspect app, the code's icon) is pressed, never chosen:  the thumb stays on the mode
-          if (event.detail.item.hasAttribute("aria-pressed")) event.preventDefault()
+          const item = event.detail.item
+          if (item.hasAttribute("aria-pressed") || item.classList.contains("PublishDraft")) event.preventDefault()
         })}
       >
-        <For each={MODES.filter((mode) => mode !== "site" || EditorMode.hasSite)}>
-          {(mode) => (
-            <ui-item
-              icon={MODE_LOOKS[mode].icon}
-              selected={props.current === mode}
-              title={appTexts.text(MODE_LOOKS[mode].text)}
-              onClick={() => EditorMode.show(mode)}
-            >
-              <span class="ModeText">{appTexts.text(MODE_LOOKS[mode].text)}</span>
-            </ui-item>
-          )}
-        </For>
+        <ModeTab mode="run" current={props.current} />
+        <ModeTab mode="edit" current={props.current} />
+        <PublishDraft />
+        <Show when={EditorMode.hasSite}>
+          <ModeTab mode="site" current={props.current} />
+        </Show>
         <Show when={props.current === "edit"}>
           {props.inspect}
           <ui-item
@@ -172,3 +170,46 @@ export function ModeButtons(props: { current: Mode; inspect?: JSX.Element }): JS
     </ui-item>
   )
 }
+
+/** One mode's tab in `<ModeButtons>`:  chosen while the page is in `mode`. */
+function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
+  const look = () => MODE_LOOKS[props.mode]
+  return (
+    <ui-item
+      icon={look().icon}
+      selected={props.current === props.mode}
+      title={appTexts.text(look().text)}
+      onClick={() => EditorMode.show(props.mode)}
+    >
+      <span class="ModeText">{appTexts.text(look().text)}</span>
+    </ui-item>
+  )
+}
+
+/****************
+ * ### `<PublishDraft>`
+ * "Draft" Publish, right of Edit in `<ModeButtons>`, only while you have drafts of the project (epic `editor` I44):
+ * - its click is File › Publish's (`editor.publish()`);  its words the size of the modes'
+ * - gone after Publish or Discard Changes, and never in the public preview (`editor.canPublish`)
+ ****************/
+function PublishDraft(): JSX.Element {
+  const hasDrafts = tracked(() => editor.canPublish)
+  return (
+    <Show when={hasDrafts()}>
+      <ui-item
+        class="PublishDraft"
+        icon={PUBLISH_ICON}
+        title={appTexts.text("draftTip")}
+        onClick={() => void editor.publish()}
+      >
+        <ui-label size="mini" color="yellow">
+          {appTexts.text("draft")}
+        </ui-label>
+        <span class="ModeText">{appTexts.text("publish")}</span>
+      </ui-item>
+    </Show>
+  )
+}
+
+/** The Publish action's icon, as `AppMenus.spell` gives it. */
+const PUBLISH_ICON = "paper plane outline"

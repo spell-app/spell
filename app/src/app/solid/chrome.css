@@ -303,3 +303,8 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     padding-inline: 0;
   }
 }
+
+/* `<PublishDraft>`:  "Draft" Publish, right of Edit in the modes' group;  its words the modes' size */
+ui-menu.ModeTabs ui-item.PublishDraft ui-label {
+  align-self: center;
+}
