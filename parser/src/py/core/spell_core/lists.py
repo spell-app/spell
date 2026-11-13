@@ -633,11 +633,14 @@ class List(SpellObject, MutableSequence[Any]):
         - An item going out, no longer anywhere in `next_items`, has no owner.
         - An item coming in is ours, THEN leaves the list of our family that held it.
         - SIDE EFFECT:  the list it left changes too.
+        - SIDE EFFECT:  an undoable action running, its step records the change (`UndoHistory.note_items()`).
         """
         family = self._family
         previous = self._items
         self._items = next_items
         note_change(self)
+        # an undoable action running:  the run's undo history records it
+        program_core().RUNTIME.history.note_items(self, previous, next_items)
         if family is None:
             return
         kept = {id(item) for item in next_items}

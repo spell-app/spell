@@ -233,7 +233,13 @@ class Loader:
 
         - Nothing saved under `ref`:  `None`, with a warning on the program's console.
         - Typed `Any`, as `core.from_json()`:  the caller knows what it saved, `Person`.
+        - SIDE EFFECT:  the run's undo history is forgotten:  the program's document changed (`undoing.py`).
         """
+        program_core().RUNTIME.history.clear()
+        return self._load_entry(ref)
+
+    def _load_entry(self, ref: str) -> Any:
+        """The thing saved under `ref`, as `load()`, leaving the undo history alone:  what a reference reads through."""
         known = self._loaded.get(ref)
         if known is not None:
             return known
@@ -255,8 +261,8 @@ class Loader:
         ref = json[REF_KEY]
         where = json.get(IN_KEY)
         if ref not in self._loaded and ref not in self._inside and isinstance(where, str):
-            self.load(where)
-        return self.load(ref)
+            self._load_entry(where)
+        return self._load_entry(ref)
 
     def _index(self, json: object) -> None:
         """Note each thing written whole inside `json` (an entry), by its key, for a reference to find."""

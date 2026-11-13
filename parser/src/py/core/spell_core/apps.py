@@ -17,6 +17,7 @@ game.start()   # drawn on the page:  `core.page.body_html()` writes it
 
 from typing import Any
 
+from spell_core.described import describe_action
 from spell_core.drawing import h
 from spell_core.lists import List
 from spell_core.things import Thing, program_core, prop
@@ -60,6 +61,70 @@ class App(View):
     def start(self) -> None:
         """SIDE EFFECT:  mount our drawing on the page, into `core.app_element()`:  see `start_drawing()`."""
         start_drawing(self)
+
+    ################
+    # ## Undo and redo
+    ################
+
+    def undo(self) -> bool:
+        """Undo the newest step:  what the program's last undoable action changed, put back.
+
+        - False with nothing to undo, or while an undoable action still runs.
+        - The run's history, `core.RUNTIME.history`:  see `undoing.py`.
+        """
+        return program_core().RUNTIME.history.undo()
+
+    def redo(self) -> bool:
+        """Redo the step undone last;  false with none."""
+        return program_core().RUNTIME.history.redo()
+
+    @property
+    def can_undo(self) -> bool:
+        """Is there a step to undo?  A page drawing us hears of each change (`"$history"`, `state.py`)."""
+        return program_core().RUNTIME.history.can_undo
+
+    @property
+    def can_redo(self) -> bool:
+        """Is there a step to redo?"""
+        return program_core().RUNTIME.history.can_redo
+
+    @property
+    def undo_title(self) -> str:
+        """The Edit menu's undo item, in the program's language:  `Undo Turn Card`, or `Undo` with nothing to undo."""
+        return program_core().RUNTIME.history.undo_title
+
+    @property
+    def redo_title(self) -> str:
+        """The Edit menu's redo item:  `Redo Turn Card`, or `Redo`."""
+        return program_core().RUNTIME.history.redo_title
+
+
+# `undo` and `redo` are the app's own ACTIONS, as the JavaScript core's `App` describes them:  a menu or `<action>`
+# names them, and draws them with their live titles, greyed out with nothing to undo
+describe_action(
+    App,
+    "undo",
+    {
+        "title": "undo",
+        "title_from": "undo_title",
+        "icon": "undo",
+        "shortcuts": ["meta+Z"],
+        "enabled_when": "can_undo",
+        "refused_while_busy": True,
+    },
+)
+describe_action(
+    App,
+    "redo",
+    {
+        "title": "redo",
+        "title_from": "redo_title",
+        "icon": "redo",
+        "shortcuts": ["meta+shift+Z"],
+        "enabled_when": "can_redo",
+        "refused_while_busy": True,
+    },
+)
 
 
 class Page(View):

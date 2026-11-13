@@ -275,6 +275,33 @@ describe("the core contract:  a game's patches give its whole state, click by cl
 })
 
 /**
+ * A Python game's page:  its drawing half, and those of the projects it imports, written as modules into `folder`.
+ * - `projects`:  for `CLI.runCode()`, each imported project's module by its id
+ * - `modules`:  the page's lines that import them, the game's as `program`
+ * - `moduleNames`:  what `startPage()` is given, in order, as written in the page
+ */
+function pageModules(name: string, folder: string) {
+  const elements = join(folder, `${bareNameOf(name)}.elements.mjs`)
+  writeFileSync(elements, compiledFixture(name, PY.ElementsWriter.instance))
+  const projects: Record<string, string> = {}
+  const modules = [`import * as program from ${JSON.stringify(pathToFileURL(elements).href)}`]
+  for (const [module, fixture] of Object.entries(fixtureImports(name))) {
+    const file = join(folder, `${moduleNameOf(fixture)}.elements.mjs`)
+    writeFileSync(file, compiledFixture(fixture, PY.ElementsWriter.instance))
+    projects[decodeURI(module.slice(SP.SPELL_PROJECT_MODULE.length))] = pathToFileURL(file).href
+    modules.push(`import * as ${moduleNameOf(fixture)} from ${JSON.stringify(module)}`)
+  }
+  const moduleNames = [...Object.values(fixtureImports(name)).map(moduleNameOf), "program"].join(", ")
+  return { projects, modules, moduleNames }
+}
+
+/** The page's script lines that find an element through the shadow roots:  `found(document, selector)`. */
+const FOUND = [
+  "const found = (root, selector) => root.querySelector(selector) ??",
+  "  [...root.querySelectorAll('*')].map((it) => it.shadowRoot && found(it.shadowRoot, selector)).find(Boolean)"
+]
+
+/**
  * A page draws a Python program as javascript draws it (epic `python-target` P19):
  * each game run on the `py` target, seeded, its state (`--state`) drawn in the fake page by its drawing half,
  * `<Project>.elements.spell.js` (`PY.ElementsWriter`), started by `@spell/core`'s `startPage()`.
@@ -301,26 +328,14 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
           expect(ran.status, `${name}:\n${ran.stderr}`).toBe(0)
           const state = ran.stdout.trimEnd().split("\n").at(-1)!
 
-          // the page:  its drawing half, and those of the projects it imports, as modules beside it
-          const elements = join(folder, `${bareNameOf(name)}.elements.mjs`)
-          writeFileSync(elements, compiledFixture(name, PY.ElementsWriter.instance))
-          const projects: Record<string, string> = {}
-          const modules = [`import * as program from ${JSON.stringify(pathToFileURL(elements).href)}`]
-          for (const [module, fixture] of Object.entries(fixtureImports(name))) {
-            const file = join(folder, `${moduleNameOf(fixture)}.elements.mjs`)
-            writeFileSync(file, compiledFixture(fixture, PY.ElementsWriter.instance))
-            projects[decodeURI(module.slice(SP.SPELL_PROJECT_MODULE.length))] = pathToFileURL(file).href
-            modules.push(`import * as ${moduleNameOf(fixture)} from ${JSON.stringify(module)}`)
-          }
-          const imported = Object.values(fixtureImports(name)).map(moduleNameOf)
+          const { projects, modules, moduleNames } = pageModules(name, folder)
           const page = [
             'import { core, startPage } from "@spell/core"',
             ...modules,
             "const sent = []",
-            `startPage({ modules: [${[...imported, "program"].join(", ")}], state: ${state}, send: (message) => sent.push(message) })`,
+            `startPage({ modules: [${moduleNames}], state: ${state}, send: (message) => sent.push(message) })`,
             // the toolbar's Auto Play:  in the solitaire's drawing, as each view draws in its own shadow root
-            "const found = (root, selector) => root.querySelector(selector) ??",
-            "  [...root.querySelectorAll('*')].map((it) => it.shadowRoot && found(it.shadowRoot, selector)).find(Boolean)",
+            ...FOUND,
             // its button, `<action \"auto play\"/>`, clicked:  the core runs its action (`core.drawAction()`)
             "found(document, 'ui-button[title^=\"Auto Play\"]')?.click()",
             "await new Promise((resolve) => setTimeout(resolve, 10))",
@@ -349,6 +364,74 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
           })
           expect(session.status, `${name}'s session:\n${session.stderr}`).toBe(0)
           expect(JSON.parse(session.stdout.trimEnd().split("\n").at(-1)!)).toBeInstanceOf(Array)
+        } finally {
+          rmSync(folder, { recursive: true, force: true })
+        }
+      },
+      60_000
+    )
+  }
+})
+
+/**
+ * A page's Undo and Redo follow a Python game's history (epic `language` P54):
+ * each game run as its page runs it (`spell_core.page`), a stock card turned (one step, `Turn Card`), then undone;
+ * its page, given the state and each patch, shows the toolbar's Undo and Redo after each.
+ */
+describe("the core contract:  a page's Undo and Redo follow a Python game's history", () => {
+  for (const name of GAMES) {
+    test(
+      name,
+      async () => {
+        const folder = mkdtempSync(join(tmpdir(), "spell-undo-"))
+        try {
+          await importedProjects(name, "py", folder)
+          const program = join(folder, `${bareNameOf(name)}.spell.py`)
+          writeFileSync(program, compiledFixture(name, "py"))
+          const run = ["run", "--quiet", "--project", SPELL_CORE, "python", "-m"]
+          const app = { on: "Solitaire#1", args: [] }
+          const messages = [
+            { call: "turn_a_stock_card", ...app },
+            { call: "undo", ...app }
+          ]
+          const session = spawnSync("uv", [...run, "spell_core.page", program, "--seed", "1", "--no-pauses"], {
+            encoding: "utf8",
+            input: messages.map((message) => `${JSON.stringify(message)}\n`).join("")
+          })
+          expect(session.status, `${name}'s session:\n${session.stderr}`).toBe(0)
+          // the program's own lines first, then the state, then a patch for each message
+          const [state, ...patches] = session.stdout
+            .trimEnd()
+            .split("\n")
+            .slice(-1 - messages.length)
+
+          const { projects, modules, moduleNames } = pageModules(name, folder)
+          const page = [
+            'import { startPage } from "@spell/core"',
+            ...modules,
+            ...FOUND,
+            `const page = startPage({ modules: [${moduleNames}], state: ${state}, send: () => {} })`,
+            "const shown = async () => {",
+            "  await new Promise((resolve) => setTimeout(resolve, 10))",
+            "  return ['undo', 'redo'].map((icon) => found(document, `ui-button[icon=\"${icon}\"]`))",
+            "    .map((button) => `${button.getAttribute('aria-label')}${button.hasAttribute('disabled') ? ' (disabled)' : ''}`)",
+            "}",
+            "const seen = [await shown()]",
+            ...patches.map((patch) => `page.receive(${patch});  seen.push(await shown())`),
+            "console.log(JSON.stringify(seen))"
+          ].join("\n")
+          const { exitCode, output, stdout } = await CLI.runCode("run", `${bareNameOf(name)}UndoPage`, page, {
+            projects,
+            capture: true,
+            dom: true
+          })
+          expect(exitCode, `${name}'s page:\n${output}`).toBe(CLI.EXIT.OK)
+          const seen = stdout.split("\n").find((line) => line.startsWith("[["))
+          expect(JSON.parse(seen!)).toEqual([
+            ["Undo (disabled)", "Redo (disabled)"],
+            ["Undo Turn Card", "Redo (disabled)"],
+            ["Undo (disabled)", "Redo Turn Card"]
+          ])
         } finally {
           rmSync(folder, { recursive: true, force: true })
         }

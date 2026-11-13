@@ -17,6 +17,7 @@ import { dedent, elementTagFor, schemaOf, type Schema } from "spell/util"
 
 import { core, programThings, recordingSettings } from "./core"
 import { defineCoreModule } from "./core.types"
+import type { ShownHistory } from "./undoing"
 import { App } from "./classes/App"
 import { View } from "./classes/View"
 import { ViewableList } from "./classes/ViewableList"
@@ -391,6 +392,12 @@ export type RemoteProgram = {
   set(owner: object, property: string, value: unknown): void
   /** Send event `name` to the program's handlers, e.g. `card-drop`, with `details`:  `{ card, pile }`. */
   trigger(name: string, details: Record<string, unknown>): void
+  /**
+   * Its undo history, as it last said:  what the app's Undo and Redo show (epic `language` P54).
+   * - Live:  a drawing that reads it redraws as the program's history changes.
+   * - `undefined` until it says.
+   */
+  readonly history?: ShownHistory
 }
 
 /** The `while` handlers running, by owner and method:  what puts back what each set (`core.startWhile()`). */

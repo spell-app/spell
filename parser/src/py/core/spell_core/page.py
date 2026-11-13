@@ -9,6 +9,7 @@ session.handle({"trigger": "card-click", "details": {"card": {"$id": "12"}}})
 
 - `python -m spell_core.page Solitaire.spell.py --seed 1` talks to a page over stdin and stdout, a JSON line each:
   it writes the state first, then reads each message, writing what it changed.
+  - Each message is run to its end on one asyncio loop:  a function that waits (`async def`) is awaited.
 - The page draws with the program's drawing half in javascript, `<Project>.elements.spell.js`, from the state it's sent;
   see `startPage()` in the JavaScript core's `page.ts`.
 - What it sends, each thing in it by its id (`{"$id": "3"}`), or by a reference (`"Card#queen-of-spades"`, P27):
@@ -27,6 +28,7 @@ session.handle({"trigger": "card-click", "details": {"card": {"$id": "12"}}})
 """
 
 import argparse
+import asyncio
 import inspect
 import json
 import re
@@ -87,6 +89,7 @@ class PageSession:
         """Run `message` through the program's queue (`ActionQueue`), not waiting for it:  it may wait its turn.
 
         - `ended`:  called once it has run, with what it failed with, if it failed.  Not if it was dropped.
+        - One described `refused_while_busy` (the app's `undo` and `redo`) is dropped while an action runs.
         """
         thing = message.get("target", message.get("on"))
         if thing is None and message.get("details"):
@@ -94,6 +97,9 @@ class PageSession:
         name = message.get("trigger", message.get("call", ""))
         held = self.read(thing) if thing is not None else None
         description = core.actions_of(type(held)).get(name) or {} if held is not None else {}
+        # never waits its turn:  dropped while an action runs, e.g. the app's `undo`, as the JavaScript core's
+        if description.get("refused_while_busy") and core.RUNTIME.actions.is_busy:
+            return
         core.RUNTIME.actions.enter(
             held,
             name,
@@ -186,9 +192,15 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     session = PageSession(run_program(args.program, seed=args.seed, pauses=not args.no_pauses))
     print(json.dumps(session.state(), ensure_ascii=False), flush=True)
-    for line in sys.stdin:
-        if line.strip():
-            print(json.dumps(session.handle(json.loads(line)), ensure_ascii=False), flush=True)
+
+    async def answer_each_line() -> None:
+        # one loop for every message:  a function that waits is awaited, and what it starts goes on beside the next
+        for line in sys.stdin:
+            if line.strip():
+                patch = await session.handle_async(json.loads(line))
+                print(json.dumps(patch, ensure_ascii=False), flush=True)
+
+    asyncio.run(answer_each_line())
 
 
 if __name__ == "__main__":

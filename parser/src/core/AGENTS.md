@@ -497,8 +497,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - ⌘Z and ⇧⌘Z go through the page's Spell UI keyboard registry, while the app has the focus or nothing does.
   - `listenForUndoKeys()`, in [ui.ts](ui.ts), started by `core.mountApp()`.
   - A text field and a modal keep their own.
-- The compiler writes no `declareAction()` yet:  its spell waits for epic `elemental-spell`.
-  - Its P10 (Actions and Menus) may take it over, by calling `UndoHistory.run()` (decision Q21).
+- The compiler writes no `declareAction()`:  `describeAction()` declares an action described `undoneAs` itself
+  (`undoable as "Turn Card"`).
+- Python's core has the same history, `undoing.py` (epic `language` P54):
+  - its app's `can_undo`, `undo_title` ... go to the page on the app, `"$history"` (`StateWriter`);
+    the page's `App` reads them from `core.remote.history` (`page.ts`), so `<action "undo"/>` and the menus follow it
+  - its Undo and Redo, and ⌘Z, run there:  the app's `undo` action, a call of the program's
+  - both cores play the moves in `undoing.expected.json5` (below)
+  - NOT ported:  `cantBeUndone` and props declared `undoable: false`, which compiled spell never writes
 
 ## Sending events
 
@@ -523,13 +529,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## The Python core
 
 - Its Python twin, `spell_core`, is in the py folder ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).
-  - The five files both cores read stay in the JavaScript core:
-    its method list here, the four expected files with its tests (`tests/core/`):
+  - The six files both cores read stay in the JavaScript core:
+    its method list here, the five expected files with its tests (`tests/core/`):
     - [core.declarations.json5](core.declarations.json5)
     - [messages.expected.json5](../../tests/core/messages.expected.json5)
     - [seededRandom.expected.json5](../../tests/core/seededRandom.expected.json5)
     - [stateById.expected.json5](../../tests/core/stateById.expected.json5)
     - [savedById.expected.json5](../../tests/core/savedById.expected.json5)
+    - [undoing.expected.json5](../../tests/core/undoing.expected.json5):  a game's moves, undone and redone
 
 ## Decorators
 

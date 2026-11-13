@@ -21,15 +21,20 @@
  *   - each thing by reference (epic `python-target` P27), else by its id, `{ "$id": "3" }`
  * - The state names properties as Python does:  read as javascript names them (`javascriptName()`).
  * - `receive()` reads what comes back, a state or a patch, into the same things:  what they draw follows.
+ *   - The app's undo history too (`"$history"`):  its Undo and Redo enable and retitle as the program's history
+ *     changes (`REMOTE.history`, epic `language` P54).
  * - The app the state holds starts, drawn into the page as `App.start()` draws it.
  * - ONE page at a time:  the messages go to the last one started.
  */
+import { Cell } from "spell/util"
+
 import { core, whileReading } from "./core"
 import type { RemoteProgram } from "./elements"
 import { App } from "./classes/App"
 import { List } from "./classes/List"
 import { Thing } from "./classes/Thing"
-import { ID_KEY, StateMirror } from "./state"
+import { HISTORY_KEY, ID_KEY, StateMirror } from "./state"
+import type { ShownHistory } from "./undoing"
 
 /** What a page sends:  a call, or an event -- see the file's docs. */
 export type PageMessage =
@@ -63,10 +68,39 @@ export function startPage({ modules, state, send }: PageSpec): StartedPage {
   core.remote = REMOTE
   for (const module of modules) core.things.addClasses(module)
   const things = whileReading(() => mirror.read(state)) as Record<string, unknown>
+  history = undefined
+  noteHistory(state)
   for (const module of modules) (module.adopt as ((state: unknown) => void) | undefined)?.(things)
   const app = Object.values(things).find((value) => value instanceof App) as App | undefined
   app?.start()
-  return { mirror, receive: (next: unknown) => void whileReading(() => mirror.read(next)) }
+  const receive = (next: unknown) => {
+    whileReading(() => mirror.read(next))
+    noteHistory(next)
+  }
+  return { mirror, receive }
+}
+
+/** The program's undo history, as its last state or patch said:  `REMOTE.history`. */
+let history: ShownHistory | undefined
+
+/** Told each time `history` changes:  what reads `REMOTE.history` redraws. */
+const historyChanged = new Cell()
+
+/**
+ * SIDE EFFECT:  keep the app's undo history `frame` holds, if it holds one (`"$history"`), as `REMOTE.history`.
+ * - The app is at the frame's top:  one of a state's things by name, or of a patch's things.
+ * - Python's names, `can_undo`, read as javascript's, `canUndo`.
+ */
+function noteHistory(frame: unknown): void {
+  const things = Array.isArray(frame) ? frame : typeof frame === "object" && frame ? Object.values(frame) : []
+  const app = things.find((thing) => typeof thing === "object" && thing && HISTORY_KEY in thing) as
+    | Record<string, Record<string, unknown>>
+    | undefined
+  if (!app) return
+  history = Object.fromEntries(
+    Object.entries(app[HISTORY_KEY]!).map(([name, value]) => [javascriptName(name), value])
+  ) as ShownHistory
+  historyChanged.changed()
 }
 
 /**
@@ -77,6 +111,7 @@ export function startPage({ modules, state, send }: PageSpec): StartedPage {
  *     `{ "call": "start_while", "on": "Pile#...", "args": ["while_card_dragged_over", "Card#..."] }`
  * - A property the page set on a thing, e.g. a form's:  `set_prop`, naming the property.
  * - An event, e.g. `card-drop`:  `sendTrigger()`.
+ * - Its undo history, as it last said:  `history`, live (`noteHistory()`).
  */
 const REMOTE: RemoteProgram = {
   run: (owner, method, args) => sendCall(snakeCase(method), args, owner as Thing),
@@ -88,7 +123,11 @@ const REMOTE: RemoteProgram = {
     if (!current?.mirror.idOf(owner as Thing)) return
     sendCall("set_prop", [snakeCase(property), value], owner as Thing)
   },
-  trigger: (name, details) => sendTrigger(name, details)
+  trigger: (name, details) => sendTrigger(name, details),
+  get history() {
+    historyChanged.read()
+    return history
+  }
 }
 
 /**

@@ -1,4 +1,6 @@
+import { readFileSync } from "fs"
 import { parseHTML } from "linkedom"
+import { resolve } from "path"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { observe } from "spell/util"
@@ -8,6 +10,8 @@ import { listenForUndoKeys } from "spell/parser/core/ui"
 /**
  * Undo and redo in a running program (`undoing.ts`):  a card game, written the way compiled spell writes it,
  * its actions declared by hand (the compiler writes no `declareAction()` yet).
+ * - `undoing.expected.json5`, beside this file, holds a game's moves and what each leaves:
+ *   Python's core plays the same game, and reads the same file (`test_undoing.py`), so the two cores agree.
  */
 
 ////////////////
@@ -208,6 +212,49 @@ describe("undoable actions", () => {
     core.useMessages({ "undo-step": "Deshacer {step}", redo: "Rehacer" })
     cards[0].turnOver()
     expect([game.undoTitle, game.redoTitle]).toEqual(["Deshacer Turn Card", "Rehacer"])
+  })
+})
+
+////////////////
+// ## The moves both cores play
+////////////////
+
+/** One move of `undoing.expected.json5`, and what it leaves. */
+type ExpectedMove = {
+  do: "turn" | "deal" | "undo" | "redo" | "write"
+  card?: string
+  count?: number
+  after: Record<string, unknown>
+}
+
+const EXPECTED = JSON.parse(readFileSync(resolve(import.meta.dirname, "undoing.expected.json5"), "utf8")) as {
+  moves: ExpectedMove[]
+}
+
+describe("the moves both cores play (`undoing.expected.json5`)", () => {
+  test("each leaves the steps, the Edit menu and the cards as the file says", async () => {
+    const byRank = (rank: string | undefined) => cards.find((card) => card.rank === rank)!
+    for (const move of EXPECTED.moves) {
+      let returned: boolean | undefined
+      if (move.do === "turn") byRank(move.card).turnOver()
+      else if (move.do === "deal") await game.deal(move.count!)
+      else if (move.do === "undo") returned = game.undo()
+      else if (move.do === "redo") returned = game.redo()
+      else /* if (move.do === "write") */ byRank(move.card).faceUp = !byRank(move.card).faceUp
+      const after = {
+        ...(returned === undefined ? {} : { returned }),
+        steps: core.RUNTIME.history.steps.map((step) => step.title),
+        canUndo: game.canUndo,
+        canRedo: game.canRedo,
+        undoTitle: game.undoTitle,
+        redoTitle: game.redoTitle,
+        stock: game.stock.items.map((card) => card.rank),
+        waste: game.waste.items.map((card) => card.rank),
+        faceUp: cards.map((card) => card.faceUp),
+        moves: game.moves
+      }
+      expect(after, `after ${move.do} ${move.card ?? move.count ?? ""}`).toEqual(move.after)
+    }
   })
 })
 

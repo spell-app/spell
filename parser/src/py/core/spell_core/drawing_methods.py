@@ -25,7 +25,7 @@ game.start()                      # the game is drawn on `core.page`, when the p
 """
 
 from collections.abc import Callable, Iterator
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from spell_core.described import DescribedMethods
 from spell_core.drawing import Element, Page, drawn_children, h
@@ -221,6 +221,7 @@ class DrawingMethods:
           disabled while it isn't enabled.
         - `props`:  the tag's other attributes, each winning over what the action gives;
           `icon-only` its own, no text, its title its `aria-label`.
+        - The app's own `undo` and `redo` too:  their titles and whether they're enabled follow its history (`apps.py`).
         - An action nobody up the chain has:  a disabled button of its name.
         """
         given = dict(props or {})
@@ -232,10 +233,6 @@ class DrawingMethods:
             title = live_title if isinstance(live_title, str) else description.get("title") or _words_of(name)
             enabled_when = description.get("enabled_when")
             is_enabled = bool(getattr(holder, enabled_when)) if enabled_when else True
-        elif name in APP_ACTIONS:
-            # the app's own `undo` and `redo`:  Python keeps no history yet, so there's never a step to take
-            description = APP_ACTIONS[name]
-            title, is_enabled = self.message(name), False
         else:
             return h(BUTTON_TAG, {"disabled": True, **given}, *(children or (name,)))
         shortcut = (description.get("shortcuts") or [None])[0]
@@ -276,13 +273,6 @@ CONTEXT_MENU_TAG = "spell-context-menu"
 
 # `<action>`'s own attribute:  its button shows only its icon
 ICON_ONLY = "icon-only"
-
-
-# The app's own actions, as the JavaScript core's `App` describes them:  its `undo` and `redo`
-APP_ACTIONS: dict[str, dict[str, Any]] = {
-    "undo": {"icon": "undo", "shortcuts": ["meta+Z"]},
-    "redo": {"icon": "redo", "shortcuts": ["meta+shift+Z"]},
-}
 
 
 def _keys_of(shortcut: str) -> str:

@@ -9,13 +9,15 @@ core.actions_of(Card)["turn_over"]["shortcuts"]  # ["meta+T"]
 - Each action's description:  its title, shortcuts, when it's enabled or selected (a getter's name), its undo's name.
 - Each event a template sends, with its parameters.
 - Each menu of a template's actions:  its items' method names, `-` a line between groups (P10).
-- Nothing runs from them yet:  the event and actions phases read them.
+- An action described `undone_as` is ONE undo step:  `describe_action()` makes it so (`undoing.declare_action()`).
 - Kept per class, and inherited:  a joker has a card's actions, and may describe one again.
 - A class's facts, not one run's:  kept beside the class, whichever `core` describes it.
 """
 
 from typing import Any
 from weakref import WeakKeyDictionary
+
+from spell_core.undoing import declare_action
 
 # Each class's own action descriptions, by method name
 _ACTIONS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictionary()
@@ -35,8 +37,9 @@ class DescribedMethods:
 
         - What compiled spell writes after the class, for an action with any of its description's lines.
         - Again for the same name, e.g. a sub-class's:  the new description, whole.
+        - `"undone_as"`:  ONE undo step, through the run's history (`undoing.declare_action()`).
         """
-        _ACTIONS.setdefault(cls, {})[name] = description
+        describe_action(cls, name, description)
 
     def describe_event(self, cls: type, name: str, description: dict[str, Any]) -> None:
         """Describe an event class `cls`'s things send, e.g. `flipped` with its `side`."""
@@ -57,6 +60,14 @@ class DescribedMethods:
     def menus_of(self, cls: type) -> dict[str, dict[str, Any]]:
         """Every menu class `cls` describes, its own and its super-classes', by name:  its own win."""
         return _described_by(_MENUS, cls)
+
+
+def describe_action(cls: type, name: str, description: dict[str, Any]) -> None:
+    """`core.describe_action()`, which needs no core:  so a built-in class describes its own, e.g. `App`'s `undo`."""
+    _ACTIONS.setdefault(cls, {})[name] = description
+    undone_as = description.get("undone_as")
+    if undone_as is not None and callable(getattr(cls, name, None)):
+        declare_action(cls, name, undone_as)
 
 
 def _described_by(store: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]", cls: type) -> dict[str, dict[str, Any]]:
