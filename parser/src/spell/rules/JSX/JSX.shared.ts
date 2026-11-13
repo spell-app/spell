@@ -15,11 +15,24 @@ import { Wording } from "spell/parser/spell/rules/expressions"
 export const SPELL_TAG_NAMES = new Map([["children", "slot"]])
 
 /**
- * The word rule holding spell's own JSX TAG words, each meaning the web's tag it becomes (epic `spanish`).
- * - English `((slot:children)|slot)`, Spanish `((slot:hijos)|slot)`:  `<children/>` / `<hijos/>` => `<slot/>`.
- * - Renamed as the element is parsed (`SpellJSX`), so both writers write the web's.
+ * The word rule holding spell's own JSX TAG words, each meaning the web's tag it becomes (epic `spanish`),
+ * or spell's own tag (`action`).
+ * - English `((slot:children)|slot|(action:action))`, Spanish `((slot:hijos)|slot|(action:acción))`.
+ * - `<children/>` / `<hijos/>` => `<slot/>`:  renamed as the element is parsed (`SpellJSX`), so both writers write the web's.
+ * - `<action "auto play"/>` / `<acción "jugar solo"/>`:  a button for one of the program's actions
+ *   (`action_button`, epic `language`;  Owen, 2026-11-13).
+ * - `<context-menu>` / `<menú-contextual>`:  the right-click menu of the element it's in (`context_menu_block`).
  */
 export const SPELL_TAG_WORDS = "spell_jsx_tag"
+
+/** What a tag word means when it's spell's ACTION tag, `<action "auto play"/>`:  see `action_button`. */
+export const ACTION_TAG_MEANING = "action"
+
+/** What a tag word means when it's spell's CONTEXT MENU, `<context-menu>` inside an element:  see `context_menu_block`. */
+export const CONTEXT_MENU_TAG_MEANING = "context_menu"
+
+/** What a tag word means when it's a context menu's DIVIDER, `<divider/>` inside a `<context-menu>`. */
+export const DIVIDER_TAG_MEANING = "divider"
 
 /**
  * The word rule holding spell's own JSX ATTRIBUTE words, each meaning the web's attribute it becomes.
@@ -37,15 +50,38 @@ export const SPELL_ATTRIBUTE_WORDS = "spell_jsx_attribute"
 export const SPELL_JSX_MEANINGS = ["slot"]
 
 /**
+ * What spell's own JSX TAG words may mean:  the web's names they become (`SPELL_JSX_MEANINGS`), and spell's own tags.
+ * - Spell's own tags are read by their rules;  anywhere else a tag keeps its word, `<divider/>` Spell UI's divider.
+ */
+export const SPELL_TAG_MEANINGS = [
+  ...SPELL_JSX_MEANINGS,
+  ACTION_TAG_MEANING,
+  CONTEXT_MENU_TAG_MEANING,
+  DIVIDER_TAG_MEANING
+]
+
+/**
  * The web's name for `written`, a tag or attribute name, if word rule `ruleName` (`SPELL_TAG_WORDS` ...) holds it --
  * `written` itself if not, e.g. `slot` for `children` in English, `div` for `div`.
- * - Only a plain word is looked up:  `ui-button`, `on-click` and `UI.Form` never are.
+ * - Only words of letters are looked up, alone or joined by dashes (`context-menu`):  `UI.Form`, `h3` never are.
  */
 export function webWordFor(scope: P.Scope, ruleName: string, written: string): string {
   if (!PLAIN_WORD.test(written)) return written
   const rule = scope.parser?.rules[ruleName] as Wording | undefined
-  return rule?.meanings?.find((meaning) => Wording.reads(scope, ruleName, written, meaning)) ?? written
+  if (!rule) return written
+  // each word read once per word rule:  a drawing names the same few tags over and over
+  let read = WORDS_READ.get(rule)
+  if (!read) WORDS_READ.set(rule, (read = new Map()))
+  let word = read.get(written)
+  if (word === undefined) {
+    word = rule.meanings?.find((meaning) => Wording.reads(scope, ruleName, written, meaning)) ?? written
+    read.set(written, word)
+  }
+  return word
 }
+
+/** What each word rule read each word as, by the rule:  rules never change once registered. */
+const WORDS_READ = new WeakMap<P.Rule, Map<string, string>>()
 
 /**
  * Is `tag`, as written in a drawing, one a drawing reads as a COMPONENT's bare name (epic `elemental-spell` P7)?
@@ -60,8 +96,8 @@ export function isBareComponentName(tag: string): boolean {
 /** A tag a drawing may write bare, for a component:  letters alone, accents too (`button`, `botón`). */
 const BARE_NAME = /^\p{Ll}+$/u
 
-/** A name of letters alone, which might be one of spell's own JSX words. */
-const PLAIN_WORD = /^\p{L}+$/u
+/** A name of letters alone, or words of letters joined by dashes, which might be one of spell's own JSX words. */
+const PLAIN_WORD = /^\p{L}+(-\p{L}+)*$/u
 
 /**
  * What JSX rules (`jsxElement`, `jsxAttribute`, `jsxExpression`) stash on their matches.

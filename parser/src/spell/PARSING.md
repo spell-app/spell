@@ -1562,6 +1562,29 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   | `td`, `th` | the web's own table tags |
   | `segment`, `column`, `content`, `stack` | they hold layouts;  their short text is mostly in demos |
   | `author`, `date` | common only in Spell UI's feed and comment demos |
+- AN ACTION'S BUTTON, `<action "auto play"/>` (`action_button`, [ActionButton.ts](rules/JSX/ActionButton.ts);
+  Owen, 2026-11-13):  a `<ui-button>` for ONE of the program's actions, named by its quoted word as it's declared.
+  - Its word is a tag word (`spell_jsx_tag`, meaning `action`):  Spanish's `<acción "jugar solo"/>`.
+    Only with a quoted word:  a bare `<action>` is Spell UI's `<ui-action>`, as before.
+  - The action is the drawing's type's (or a super-type's), else any type's the program knows, as any may be up the
+    thing's chain when it draws;  the app's `undo` and `redo` by their words (`appActions`).
+    Found nowhere once the whole program has parsed:  refused, `unknown-action` (`SpellWarnings.refuseIf()`).
+  - Compiles to `core.drawAction(this, "autoPlay", { ...its other attributes }, ...its children)`
+    (`P.ASTJSXElement.action`);  TypeScript writes the same call, in braces inside its parent's JSX;
+    Python `core.draw_action(self, "auto_play", {...})`.
+  - The core gives the button the action's title (its text), icon, key tip (`Auto Play (A)`) and disabled, LIVE,
+    and a click runs it as a menu item's does (`core.actionOf()`, `core.runAction()`).
+    What the tag says wins;  `icon-only` is its own:  no text, the title its `aria-label`.
+- A RIGHT-CLICK MENU WRITTEN IN A DRAWING, `<context-menu>` inside the element whose right click shows it
+  (`context_menu_block`, [ContextMenuBlock.ts](rules/JSX/ContextMenuBlock.ts);  Owen, 2026-11-13):
+  - Its words are tag words too (`context_menu`, `divider`):  Spanish's `<menú-contextual>`, `<divisor/>`.
+    A tag word may hold dashes, so the word rule reads `context-menu` whole;  each word is read once per rule
+    (`webWordFor()`'s cache).
+  - It holds only `<action "name"/>` items (read as an action's button is, so named and refused the same way) and
+    `<divider/>`s;  anything else is `context-menu-item`.  No sub-menus yet.
+  - Compiles to `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`:  a hidden `<spell-context-menu>`, which
+    the app's `ActionMenus.showContextMenu()` finds on the right click's path, before a `context-menu="name"`.
+  - A `<divider/>` anywhere else keeps its word:  Spell UI's divider.
 - COMMENTS INSIDE MARKUP (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to

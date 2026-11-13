@@ -1659,14 +1659,28 @@ export class JSWriter extends ProgramWriter {
     return `core.drawPart(this, () => ${this.jsxElement(node)})`
   }
 
-  /** `node` as Solid's `h()` call -- see `ASTJSXElement()`. */
+  /**
+   * `node` as Solid's `h()` call -- see `ASTJSXElement()`.
+   * - A button for one of the program's actions (`action`, `<action "auto play"/>`) asks the core for it:
+   *   `core.drawAction(this, "autoPlay", { class: "Play" })`, its props and children as an element's.
+   * - So does a right-click menu (`contextMenu`, `<context-menu>`):  `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`.
+   */
   private jsxElement(node: P.ASTJSXElement): string {
     const tag = node.tagName
     const tagError = P.ASTJSXElement.tagError(tag)
     if (tagError) return `null ${this.write(new P.ASTParseError(node.match, { value: tagError }))}`
-    this.coreImports.add("h")
+    if (node.contextMenu) return `core.drawContextMenu(this, ${this.menuItemNames(node.contextMenu)})`
     const props = this.jsxProps(node)
-    const head = `h(${JSON.stringify(tag)}${P.SourceMarks.markDrawn(node)}${props ? `, ${props}` : ""}`
+    let head: string
+    if (node.action) {
+      const name = this.quoted(this.nameOf(node.action, "method"))
+      // its children come after its props:  none, `{}`
+      const given = props || (node.childValues.length ? "{}" : "")
+      head = `core.drawAction(this, ${name}${P.SourceMarks.markDrawn(node)}${given ? `, ${given}` : ""}`
+    } else {
+      this.coreImports.add("h")
+      head = `h(${JSON.stringify(tag)}${P.SourceMarks.markDrawn(node)}${props ? `, ${props}` : ""}`
+    }
     const children = node.childValues.map((child) => String(this.write(child)))
     if (!children.length) return `${head})`
     const inline = children.join(", ")
@@ -1676,6 +1690,11 @@ export class JSWriter extends ProgramWriter {
     const isFlat = children.length === 1 || !node.childValues.some((child) => child instanceof P.ASTJSXElement)
     if (fits && isFlat) return `${head}, ${inline})`
     return `${head},\n${jsText.indented(children.join(",\n"))}\n)`
+  }
+
+  /** A context menu's items, by the names this target gives them:  `["autoPlay", "-", "undo"]`. */
+  protected menuItemNames(items: readonly string[]): string {
+    return `[${items.map((item) => this.quoted(item === "-" ? item : this.nameOf(item, "method"))).join(", ")}]`
   }
 
   /**

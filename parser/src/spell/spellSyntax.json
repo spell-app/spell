@@ -1712,7 +1712,7 @@
               "syntax": "(error page|failure page)"
             },
             {
-              "syntax": "((slot:children)|slot)"
+              "syntax": "((slot:children)|slot|(action:action)|(context_menu:context-menu)|(divider:divider))"
             },
             {
               "syntax": "((slot:in)|slot)"
@@ -8700,11 +8700,61 @@
           "aliases": ["jsxChild", "expression"]
         },
         {
+          "className": "ActionButton",
+          "ruleNames": ["action_button"],
+          "internal": false,
+          "file": "src/spell/rules/JSX/ActionButton.ts",
+          "line": 39,
+          "purpose": "A button for ONE of the program's actions, in a drawing, named by its quoted word.",
+          "syntaxes": [
+            {
+              "example": "<action \"auto play\"/>",
+              "outputs": {
+                "js": {
+                  "code": "core.drawAction(this, \"autoPlay\")"
+                },
+                "ts": {
+                  "code": "core.drawAction(this, \"autoPlay\")"
+                },
+                "py": {
+                  "code": "core.draw_action(self, \"auto_play\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["jsxChild", "expression"]
+        },
+        {
+          "className": "ContextMenuBlock",
+          "ruleNames": ["context_menu_block"],
+          "internal": false,
+          "file": "src/spell/rules/JSX/ContextMenuBlock.ts",
+          "line": 41,
+          "purpose": "The right-click menu of the element it's in, written inside it, in a drawing.",
+          "syntaxes": [
+            {
+              "example": "<context-menu>\n\t<action \"auto play\"/>\n\t<divider/>\n\t<action \"undo\"/>\n</>",
+              "outputs": {
+                "js": {
+                  "code": "core.drawContextMenu(this, [\"autoPlay\", \"-\", \"undo\"])"
+                },
+                "ts": {
+                  "code": "core.drawContextMenu(this, [\"autoPlay\", \"-\", \"undo\"])"
+                },
+                "py": {
+                  "code": "core.draw_context_menu(self, [\"auto_play\", \"-\", \"undo\"])"
+                }
+              }
+            }
+          ],
+          "aliases": ["jsxChild", "expression"]
+        },
+        {
           "className": "SpellJSX",
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 74,
+          "line": 76,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

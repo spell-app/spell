@@ -6,7 +6,9 @@ import { DrawIt, DrawnLines } from "spell/parser/spell/rules/classes"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
 import { ParseError } from "spell/parser/spell/rules/ParseError"
 import { refuseWriteIfReadOnly } from "spell/parser/spell/rules/places/places.shared"
-import { isBareComponentName, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import { isBareComponentName, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import { ActionButton } from "./ActionButton"
+import { ContextMenuBlock } from "./ContextMenuBlock"
 import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSXContent } from "./SpellJSXContent"
@@ -133,7 +135,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     // a fragment (`jsxFragment`) has no tag and no attributes
     if (!(element instanceof P.JSXElementToken)) return match
     if (element.chain) return SpellJSX.parseBranch(scope, match, element)
-    match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
+    const webTag = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
+    // the web's tag for spell's word (`<children/>`);  spell's own tags keep their word where their rules didn't take
+    // them:  `<action>` with no quoted word, a `<divider/>` outside a context menu
+    match.data.tagName = SPELL_JSX_MEANINGS.includes(webTag) ? webTag : element.tagName
     // a drawing names components by their bare names:  `<button>` => `<ui-button>`
     if (takesShortcuts && !element.attributes?.length && !element.children?.length && !element.quotedWord) {
       match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
@@ -682,7 +687,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     function visit(match: P.Match) {
       if (match.rule.name === "block") return
       const below: Array<P.Match | P.Token | undefined> = [...match.matched]
-      if (match.is(SpellJSX) || match.is(ExampleBlock)) {
+      if (match.is(SpellJSX) || match.is(ExampleBlock) || match.is(ActionButton) || match.is(ContextMenuBlock)) {
         if (match.data.error) errors.push(match.data.error)
         if (match.is(SpellJSX) && match.data.aloneError && !match.data.inMarkup) errors.push(match.data.aloneError)
         if (match.is(SpellJSX) && match.data.condition) below.push(match.data.condition)

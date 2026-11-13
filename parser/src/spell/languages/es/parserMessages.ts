@@ -200,6 +200,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "<{tag} ...> aún no puede ir dentro de un elemento:  escríbelo en una línea propia del dibujo, fuera del elemento",
   /** An attribute in a tag that can't be read:  the tag still ends at its own `>` (epic `notebook` I5). */
   "unreadable-attribute": 'No se puede leer "{text}" en <{tag}>:  revisa su nombre y sus comillas',
+  "unknown-action":
+    '<{tag} "{action}"> no nombra ninguna acción de aquí:  escribe el nombre de una acción tal como se declara, p. ej. "para {action}"',
+  "context-menu-item":
+    '<{tag}> solo tiene sus elementos:  <acción "nombre"/> para una acción, <divisor/> para una línea entre grupos',
   "markdown-hole":
     'No entiendo "{{hole}}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave',
 

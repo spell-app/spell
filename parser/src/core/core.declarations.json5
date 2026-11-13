@@ -1704,6 +1704,44 @@
     },
     {
       "kind": "method",
+      "name": "drawAction",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "props"
+        },
+        {
+          "name": "...children"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "A button for ONE of the program's actions, `name` (`autoPlay`), on `thing` or up its chain (`core.actionOf()`): what `<action \"auto play\"/>` draws (epic `language`, Owen 2026-11-13)."
+    },
+    {
+      "kind": "method",
+      "name": "drawContextMenu",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "names"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "The right-click menu of the element around it, written in a drawing (`<context-menu>`, epic `language`): a hidden `<spell-context-menu>`, which draws nothing."
+    },
+    {
+      "kind": "method",
       "name": "drawAgain",
       "of": "core",
       "module": "drawing",
@@ -3023,6 +3061,36 @@
         }
       ],
       "description": "Menu `name` (`game menu`, `gameMenu` or `GameMenu`) for `thing`:  the first of `thing`, then up its chain to the app (Q41:  a card's context menu may be its game's), that has it.  Its items ready to draw (`MenuItem`), each on the thing that has the menu;  `undefined` if none has it."
+    },
+    {
+      "kind": "method",
+      "name": "actionOf",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Action `name` (`autoPlay`) for `thing`, ready to draw:  the first of `thing`, then up its chain to the app, that has a method of that name -- `undefined` if none has."
+    },
+    {
+      "kind": "method",
+      "name": "menuItemsOf",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "names"
+        }
+      ],
+      "description": "The items of a menu written in a drawing, `<context-menu>` (epic `language`), ready to draw: each of `names` an action found from `thing` up its chain (`actionOf()`), `-` a line between groups."
     },
     {
       "kind": "method",

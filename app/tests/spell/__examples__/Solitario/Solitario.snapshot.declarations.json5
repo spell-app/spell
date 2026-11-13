@@ -232,7 +232,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:8154-8404"
+      "defined": "/Solitario.es.spell:8472-8722"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -328,56 +328,56 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:9580-10039"
+      "defined": "/Solitario.es.spell:9898-10357"
     },
     {
       "property": "disposición",
       "of": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:9725-9752"
+      "defined": "/Solitario.es.spell:10043-10070"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10041-10298"
+      "defined": "/Solitario.es.spell:10359-10616"
     },
     {
       "property": "disposición",
       "of": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:10131-10158"
+      "defined": "/Solitario.es.spell:10449-10476"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10300-10891"
+      "defined": "/Solitario.es.spell:10618-11209"
     },
     {
       "property": "disposición",
       "of": "Fundación",
-      "defined": "/Solitario.es.spell:10390-10417"
+      "defined": "/Solitario.es.spell:10708-10735"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:10419-10448"
+      "defined": "/Solitario.es.spell:10737-10766"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10893-12956"
+      "defined": "/Solitario.es.spell:11211-13274"
     },
     {
       "property": "disposición",
       "of": "Columna",
-      "defined": "/Solitario.es.spell:10995-11023"
+      "defined": "/Solitario.es.spell:11313-11341"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:316-6721"
+      "defined": "/Solitario.es.spell:316-7039"
     },
     {
       "property": "puntuación",
@@ -630,7 +630,7 @@
       "kind": "method",
       "name": "jugar una carta",
       "waits": true,
-      "defined": "/Solitario.es.spell:7018-7307"
+      "defined": "/Solitario.es.spell:7336-7625"
     },
     {
       "syntax": "poner {thisArg:expression} en {callArgs:expression}",
@@ -652,7 +652,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitario.es.spell:7515-8152"
+      "defined": "/Solitario.es.spell:7833-8470"
     },
     {
       "syntax": "probar los movimientos",
@@ -661,7 +661,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:11379-12956"
+      "defined": "/Solitario.es.spell:11697-13274"
     }
   ],
   "codeLines": [
@@ -724,12 +724,12 @@
     535,
     545,
     555,
-    672,
-    675,
-    677,
-    679,
-    693,
-    699,
-    718
+    682,
+    685,
+    687,
+    689,
+    701,
+    707,
+    726
   ]
 }

@@ -26,11 +26,12 @@ import h from "@solidjs/h"
 import { createComponent, insert, render, type JSX } from "@solidjs/web"
 import { Errored, createMemo, createRoot, getOwner, onCleanup, runWithOwner } from "solid-js"
 
-import { Cell } from "spell/util"
+import { Cell, initialCaps } from "spell/util"
 import { untrackCells } from "spell/util/reactive"
 
 import { core } from "./core"
 import { defineCoreModule, type PartEdit } from "./core.types"
+import type { MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
@@ -148,6 +149,57 @@ export const drawingMethods = defineCoreModule({
     if (type && thing) partsOfType(type).add(part)
     letGoOfPartWithThisDrawing(part)
     return part.drawing
+  },
+
+  /**
+   * A button for ONE of the program's actions, `name` (`autoPlay`), on `thing` or up its chain (`core.actionOf()`):
+   * what `<action "auto play"/>` draws (epic `language`, Owen 2026-11-13).
+   * - A `<ui-button>`, which the action gives, LIVE, as a menu's item reads it:
+   *   - its text, the action's title (`Undo Turn Card`);  `children`, when the tag has any, instead
+   *   - its icon
+   *   - its tooltip, the title and its key, `Auto Play (A)`, `Undo (⌘Z)` on a Mac, `Undo (Ctrl+Z)` elsewhere:
+   *     only for an action with a key;  the page says which (`core.input.isMac`)
+   *   - disabled while the action isn't enabled
+   * - A click runs it through the core, as a menu item's does (`core.runAction()`):  one at a time, one undo step.
+   * - `props`:  the tag's other attributes, each winning over what the action gives
+   *   (`<action "restart the game" icon="refresh"/>`), plus the tag's own:
+   *   - `icon-only`:  no text, its title its name for a screen reader and its tooltip (`aria-label`)
+   * - An action nobody up the chain has:  a disabled button of its name, and a warning;  the compiler said so already.
+   * - Knows nothing of Spell UI but its tag:  the page draws it.
+   */
+  drawAction(thing: unknown, name: string, props: Record<string, unknown> = {}, ...children: unknown[]): Drawing {
+    const { [ICON_ONLY]: iconOnly, ...given } = props
+    const action = core.actionOf(thing as object | undefined, name)
+    if (!action) {
+      console.warn(`<action>:  nothing here has an action \`${name}\``)
+      return h(BUTTON_TAG, { disabled: true, ...given }, ...(children.length ? children : [name])) as unknown as Drawing
+    }
+    const tip = () =>
+      action.shortcut ? `${action.title} (${keysOf(action.shortcut, !!core.input?.isMac)})` : undefined
+    const own: Record<string, unknown> = {
+      icon: action.icon,
+      title: tip,
+      disabled: () => !action.isEnabled,
+      onClick: () => action.run("click")
+    }
+    if (iconOnly) own["aria-label"] = () => action.title
+    const text = iconOnly || children.length ? children : [() => action.title]
+    return h(BUTTON_TAG, { ...own, ...given }, ...text) as unknown as Drawing
+  },
+
+  /**
+   * The right-click menu of the element around it, written in a drawing (`<context-menu>`, epic `language`):
+   * a hidden `<spell-context-menu>`, which draws nothing.
+   * - `names`:  its items, each an action's method (`autoPlay`), `-` a line between groups.
+   * - The page's right click on the element around it finds it, and shows its items (the app's `ActionMenus`):
+   *   its `menuItems()` gives them, each found from `thing` up its chain as the menu shows (`core.menuItemsOf()`),
+   *   so they read their titles and enabled live, and run through the core.
+   */
+  drawContextMenu(thing: unknown, names: readonly string[]): Drawing {
+    const remember = (element: HTMLElement & ContextMenuElement) => {
+      element.menuItems = () => core.menuItemsOf(thing as object | undefined, names)
+    }
+    return h(CONTEXT_MENU_TAG, { hidden: true, ref: remember }) as unknown as Drawing
   },
 
   /**
@@ -658,6 +710,49 @@ type DrawsEachItem = {
 }
 
 /** A viewable list's own `drawEachItem()`:  `drawItems()` adds no boundary around it. */
+/** What `<action>` draws:  Spell UI's button, which the page defines. */
+const BUTTON_TAG = "ui-button"
+
+/** What `<context-menu>` draws where it is:  an element that draws nothing, holding its menu (`drawContextMenu()`). */
+const CONTEXT_MENU_TAG = "spell-context-menu"
+
+/**
+ * A context menu's element, as the page finds it:  its `menuItems()` gives its items, ready to draw.
+ * - `ActionMenus.showContextMenu()`, the app's, reads it.
+ */
+export type ContextMenuElement = { menuItems?: () => MenuItem[] }
+
+/** `<action>`'s own attribute:  its button shows only its icon. */
+const ICON_ONLY = "icon-only"
+
+/** The key names a Mac shows as symbols, in a key tip. */
+const MAC_KEYS: Record<string, string> = {
+  meta: "⌘",
+  mod: "⌘",
+  command: "⌘",
+  shift: "⇧",
+  option: "⌥",
+  alt: "⌥",
+  control: "⌃"
+}
+
+/**
+ * A spell shortcut as a key tip shows it:  `meta+shift+Z` is `⇧⌘Z` on a Mac, `Ctrl+Shift+Z` elsewhere;  `A` is `A`.
+ * - `meta` is command on a Mac, control elsewhere, as `core.runShortcut()` reads it.
+ */
+function keysOf(shortcut: string, isMac: boolean): string {
+  const parts = shortcut.split("+").map((part) => part.trim())
+  const key = parts.pop() ?? ""
+  const shown = key.length === 1 ? key.toUpperCase() : key
+  if (isMac) {
+    const order = ["control", "option", "alt", "shift", "meta", "mod", "command"]
+    const symbols = parts.map((part) => part.toLowerCase()).sort((a, b) => order.indexOf(a) - order.indexOf(b))
+    return `${symbols.map((part) => MAC_KEYS[part] ?? part).join("")}${shown}`
+  }
+  const names = parts.map((part) => (/^(meta|mod|control)$/i.test(part) ? "Ctrl" : initialCaps(part.toLowerCase())))
+  return [...names, shown].join("+")
+}
+
 const DEFAULT_DRAW_EACH_ITEM = ViewableList.prototype.drawEachItem
 
 /** The DOM event a drawing that failed sends -- the same name as Spell UI's. */

@@ -55,6 +55,11 @@ export class InputState {
   private press: { x: number; y: number; stopTimer?: () => void } | undefined
   /** Called as the mouse becomes still down, with what's under it:  the page sends `mouse still down` there. */
   onStillDown: ((thing: object | undefined) => void) | undefined
+  /**
+   * Is the page on a Mac, whose meta key is command:  as `listen()` was told.
+   * - False until a page listens:  so a program run outside one (`spell run`, a test) says its keys the same everywhere.
+   */
+  isMac = false
 
   get metaKey() {
     return this.read().metaKey
@@ -118,6 +123,7 @@ export class InputState {
    * - Returns what stops listening.
    */
   listen(target: EventTarget, { isMac = false }: { isMac?: boolean } = {}): () => void {
+    this.isMac = isMac
     const keys = (event: Event) => this.noteKeys(event as KeyboardEvent, isMac)
     const mouse = (event: Event) => this.noteMouse(event as MouseEvent, isMac)
     const reset = () => this.reset()

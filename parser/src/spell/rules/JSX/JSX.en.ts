@@ -8,7 +8,9 @@ import { P } from "spell/parser/parser"
 import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { JSX } from "./JSX.parser"
-import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { ActionButton } from "./ActionButton"
+import { ContextMenuBlock } from "./ContextMenuBlock"
 import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSX } from "./SpellJSX"
@@ -21,8 +23,9 @@ import { SpellJSXText } from "./SpellJSXText"
 
 // spell's own tag words, each meaning the web's tag:  `<children/>` => `<slot/>`
 // - the web's own `slot` too:  a word rule needs two forms
-JSX.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_JSX_MEANINGS }), {
-  syntax: "((slot:children)|slot)"
+// - and spell's own action tag, `<action "auto play"/>` (`action_button`), its `<context-menu>` and the `<divider/>` in it (`context_menu_block`)
+JSX.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_TAG_MEANINGS }), {
+  syntax: "((slot:children)|slot|(action:action)|(context_menu:context-menu)|(divider:divider))"
 })
 
 // spell's own attribute words, each meaning the web's attribute:  `<h3 in="header">` => `<h3 slot="header">`
@@ -145,6 +148,44 @@ JSX.addRule(ExampleBlock, {
             "))"
           ],
           ['<spell-example name="two">', "  <ui-text>A</ui-text>", "  <ui-text>B</ui-text>", "</spell-example>"]
+        ]
+      ]
+    }
+  ]
+})
+
+JSX.addRule(ActionButton, {
+  tests: [
+    {
+      title: "A button for one of the program's actions:  its name quoted after its word",
+      compileAs: "expression",
+      tests: [
+        ['<action "auto play"/>', 'core.drawAction(this, "autoPlay")'],
+        [
+          '<action "undo" icon-only basic size="small" class="Undo"/>',
+          'core.drawAction(this, "undo", { class: "Undo", "icon-only": true, basic: true, size: "small" })'
+        ],
+        ['<action "restart the game" icon="refresh"/>', 'core.drawAction(this, "restartTheGame", { icon: "refresh" })'],
+        ['<action "redo">Again</action>', 'core.drawAction(this, "redo", {}, "Again")']
+      ]
+    }
+  ]
+})
+
+JSX.addRule(ContextMenuBlock, {
+  tests: [
+    {
+      title: "A right-click menu written in the element whose right click shows it:  its actions and dividers",
+      compileAs: "expression",
+      tests: [
+        [
+          ["<context-menu>", '\t<action "auto play"/>', "\t<divider/>", '\t<action "undo"/>', "</>"],
+          'core.drawContextMenu(this, ["autoPlay", "-", "undo"])'
+        ],
+        [
+          ["<grid>", '\t<context-menu><action "undo"/></context-menu>', "</grid>"],
+          'h("grid", core.drawContextMenu(this, ["undo"]))',
+          '<grid>{core.drawContextMenu(this, ["undo"])}</grid>'
         ]
       ]
     }

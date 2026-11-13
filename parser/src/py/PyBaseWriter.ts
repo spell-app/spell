@@ -1119,6 +1119,8 @@ export class PyBaseWriter extends P.ProgramWriter {
    * - It makes HTML text, as Python has no page (Q2).
    * - A value the page would track (`() => value` in javascript) is just the value:  the HTML is made once.
    * - A handler, `on_click=...`, is kept, for a page that can call back one day;  `h()` leaves it out of the HTML.
+   * - A button for one of the program's actions (`<action "auto play"/>`) is the core's:
+   *   `core.draw_action(self, "auto_play", {"class": "Play"})`, from the action's title, icon, key and enabled.
    */
   ASTJSXElement(node: P.ASTJSXElement): string {
     const attrs = (node.attrs ?? [])
@@ -1131,6 +1133,17 @@ export class PyBaseWriter extends P.ProgramWriter {
       .sort((a, b) => Number(b.startsWith('"class"')) - Number(a.startsWith('"class"')))
     const props = attrs.length ? [pyText.call("", attrs, ["{", "}"])] : []
     const children = node.childValues.map((child) => this.bare(child))
+    // a right-click menu, `<context-menu>`:  the core's hidden element, as javascript's
+    if (node.contextMenu) {
+      const items = node.contextMenu.map((item) => this.quoted(item === "-" ? item : this.nameOf(item, "method")))
+      return pyText.call("core.draw_context_menu", ["self", pyText.call("", items, ["[", "]"])])
+    }
+    // a button for one of the program's actions, `<action "auto play"/>`:  the core draws it, from the action
+    if (node.action) {
+      const name = this.quoted(this.nameOf(node.action, "method"))
+      const given = props.length ? props : children.length ? ["{}"] : []
+      return pyText.call("core.draw_action", ["self", name, ...given, ...children])
+    }
     return pyText.call("h", [this.quoted(node.tagName), ...props, ...children])
   }
 

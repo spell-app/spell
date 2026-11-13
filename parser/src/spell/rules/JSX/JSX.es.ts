@@ -15,7 +15,9 @@ import { P } from "spell/parser/parser"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { Wording } from "spell/parser/spell/rules/expressions"
 
-import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { ActionButton } from "./ActionButton"
+import { ContextMenuBlock } from "./ContextMenuBlock"
 import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSX } from "./SpellJSX"
@@ -31,8 +33,9 @@ export const JSXEs = new SpellParser({ module: "JSX" })
 
 // spell's own tag words, each meaning the web's tag:  `<hijos/>` => `<slot/>`
 // - the web's own `slot` too:  a word rule needs two forms
-JSXEs.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_JSX_MEANINGS }), {
-  syntax: "((slot:hijos)|slot)"
+// - and spell's own action tag, `<acción "jugar solo"/>` (`action_button`), its `<menú-contextual>` and the `<divisor/>` in it (`context_menu_block`)
+JSXEs.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_TAG_MEANINGS }), {
+  syntax: "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor))"
 })
 
 // spell's own attribute words, each meaning the web's attribute:  `<h3 en="header">` => `<h3 slot="header">`
@@ -128,6 +131,47 @@ JSXEs.addRule(ExampleBlock, {
           ['<ejemplo "un contador">', "\t<ui-button>Contar</ui-button>", "</ejemplo>"],
           'core.drawPart(this, () => h("spell-example", { name: "un contador" }, h("ui-button", "Contar")))',
           ['<spell-example name="un contador">', "  <ui-button>Contar</ui-button>", "</spell-example>"]
+        ]
+      ]
+    }
+  ]
+})
+
+JSXEs.addRule(ActionButton, {
+  tests: [
+    {
+      title: "Un botón para una de las acciones del programa:  su nombre entre comillas tras su palabra",
+      compileAs: "expression",
+      tests: [
+        ['<acción "jugar solo"/>', 'core.drawAction(this, "jugarSolo")'],
+        [
+          '<acción "deshacer" icon-only basic size="small" class="Undo"/>',
+          'core.drawAction(this, "undo", { class: "Undo", "icon-only": true, basic: true, size: "small" })'
+        ],
+        [
+          '<acción "reiniciar el juego" icon="refresh"/>',
+          'core.drawAction(this, "reiniciarElJuego", { icon: "refresh" })'
+        ],
+        ['<acción "rehacer">Again</acción>', 'core.drawAction(this, "redo", {}, "Again")']
+      ]
+    }
+  ]
+})
+
+JSXEs.addRule(ContextMenuBlock, {
+  tests: [
+    {
+      title: "Un menú contextual escrito en el elemento cuyo clic derecho lo muestra:  sus acciones y divisores",
+      compileAs: "expression",
+      tests: [
+        [
+          ["<menú-contextual>", '\t<acción "jugar solo"/>', "\t<divisor/>", '\t<acción "deshacer"/>', "</>"],
+          'core.drawContextMenu(this, ["jugarSolo", "-", "undo"])'
+        ],
+        [
+          ["<grid>", '\t<menú-contextual><acción "deshacer"/></menú-contextual>', "</grid>"],
+          'h("grid", core.drawContextMenu(this, ["undo"]))',
+          '<grid>{core.drawContextMenu(this, ["undo"])}</grid>'
         ]
       ]
     }

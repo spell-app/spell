@@ -300,6 +300,10 @@ Examples are what people and agents copy, so each one shows the current way (Owe
     an action's title on its head line, only where it isn't its name in Initial Caps
     (`to "say i knew it" with title "I knew it", icon "check"`).
   - A drawing names Spell UI's components bare, `<text>`, `</>` closing any element.
+  - An action's button is `<action "auto play"/>`, its title, icon, key and enabled the action's (Owen, 2026-11-13):
+    never a toolbar filled from a menu (`menu="game menu"`), nor CSS making a menu look like buttons.
+  - A right-click menu is written inside its element, `<context-menu>` holding `<action "...">`s and `<divider/>`s:
+    never a template's menu (`its "game menu" is a menu of ...`) named by `context-menu="game menu"`.
   - No HTML.  Minimal CSS.
 - Separate concerns:  API, UI and custom widgets each in their own files.
 - Avoid custom widgets:  research what the `ui-*` widgets offer, and use those whenever possible.

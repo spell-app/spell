@@ -420,14 +420,14 @@ Object.defineProperty(Card.prototype, "pile", {
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 /*! SPELL: DECLARES {
   type: "StockPile", superType: "Pile",
-  defined: "/Solitaire.spell:8497-8927",
+  defined: "/Solitaire.spell:8808-9238",
 } */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   /*! SPELL: DECLARES {
     property: "layout", of: "StockPile",
-    defined: "/Solitaire.spell:8627-8650",
+    defined: "/Solitaire.spell:8938-8961",
   } */
   get layout() {
     return "stacked"
@@ -455,14 +455,14 @@ export class StockPile extends Pile {
 /** Where the stock's cards go as they're turned over */
 /*! SPELL: DECLARES {
   type: "DiscardPile", superType: "Pile",
-  defined: "/Solitaire.spell:8929-9156",
+  defined: "/Solitaire.spell:9240-9467",
 } */
 export class DiscardPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   /*! SPELL: DECLARES {
     property: "layout", of: "DiscardPile",
-    defined: "/Solitaire.spell:9011-9034",
+    defined: "/Solitaire.spell:9322-9345",
   } */
   get layout() {
     return "stacked"
@@ -482,14 +482,14 @@ export class DiscardPile extends Pile {
 /** Where a suit is built up, ace to king, one card at a time */
 /*! SPELL: DECLARES {
   type: "Foundation", superType: "Pile",
-  defined: "/Solitaire.spell:9158-9741",
+  defined: "/Solitaire.spell:9469-10052",
 } */
 export class Foundation extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   /*! SPELL: DECLARES {
     property: "layout", of: "Foundation",
-    defined: "/Solitaire.spell:9246-9269",
+    defined: "/Solitaire.spell:9557-9580",
   } */
   get layout() {
     return "stacked"
@@ -497,7 +497,7 @@ export class Foundation extends Pile {
 
   /*! SPELL: DECLARES {
     property: "suit", of: "Foundation", datatype: "CardSuit",
-    defined: "/Solitaire.spell:9271-9296",
+    defined: "/Solitaire.spell:9582-9607",
   } */
   // - its "suit" is a card suit
   static { this.declareProp("suit", { oneOf: () => Card.Suits }) }
@@ -524,14 +524,14 @@ export class Foundation extends Pile {
 /** A column, built down from king to ace, red and black in turn */
 /*! SPELL: DECLARES {
   type: "Tableau", superType: "Pile",
-  defined: "/Solitaire.spell:9743-11679",
+  defined: "/Solitaire.spell:10054-11990",
 } */
 export class Tableau extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   /*! SPELL: DECLARES {
     property: "layout", of: "Tableau",
-    defined: "/Solitaire.spell:9831-9855",
+    defined: "/Solitaire.spell:10142-10166",
   } */
   get layout() {
     return "vertical"
@@ -553,7 +553,7 @@ export class Tableau extends Pile {
 
 /*! SPELL: DECLARES {
   type: "Solitaire", superType: "App",
-  defined: "/Solitaire.spell:303-6016",
+  defined: "/Solitaire.spell:303-6327",
 } */
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -797,16 +797,25 @@ export class Solitaire extends App {
     await this.playFromTheStock()
   }
 
-  /** Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu */
+  /** Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows its moves */
   /*! SPELL: DECLARES {
     syntax: "draw {thisArg:expression}", output: "draw", rule: "method_call", of: "Solitaire",
     alias: ["statement", "expression"], group: "Game Play", kind: "method", name: "draw it",
-    defined: "/Solitaire.spell:5113-6016",
+    defined: "/Solitaire.spell:5023-6327",
   } */
   draw() {
     return h("ui-container",
-      h("ui-toolbar", { class: "GameBar", menu: "game menu", "aria-label": "Game", shrinkable: true },
+      h("ui-toolbar", { class: "GameBar", "aria-label": "Game" },
         h("ui-text", { class: "GameTitle", slot: "title", size: "large" }, "Spell Solitaire"),
+        h("ui-buttons", { class: "GameButtons", slot: "center" },
+          core.drawAction(this, "autoPlay"),
+          core.drawAction(this, "cheat"),
+          core.drawAction(this, "restartTheGame")
+        ),
+        h("ui-buttons", { class: "GameButtons", slot: "center" },
+          core.drawAction(this, "undo", { "icon-only": true }),
+          core.drawAction(this, "redo", { "icon-only": true })
+        ),
         h("ui-text", { slot: "right" },
           "Moves: ",
           () => this.moves,
@@ -815,7 +824,8 @@ export class Solitaire extends App {
           () => this.hint
         )
       ),
-      h("ui-grid", { class: "Board", columns: "7", "context-menu": "game menu" },
+      h("ui-grid", { class: "Board", columns: "7" },
+        core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"]),
         h("test-project-stock-pile", { id: "stock" }),
         h("test-project-discard-pile", { id: "discards" }),
         h("ui-column"),
@@ -931,8 +941,6 @@ core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"
   defined: "/Solitaire.spell:4408-5020",
 } */
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
-// - its "game menu" is a menu of "auto play", "cheat", "restart the game", "undo" and "redo"
-core.describeMenu(Solitaire, "gameMenu", { items: ["autoPlay", "cheat", "restartTheGame", "undo", "redo"] })
 
 core.heading("Playing a card")
 ////////////////////
@@ -948,7 +956,7 @@ core.heading("Playing a card")
   syntax: "play {thisArg:expression}", output: "play", rule: "method_call", of: "Card",
   alias: ["statement", "expression"], group: "Playing a card", kind: "method", name: "play a card",
   waits: true,
-  defined: "/Solitaire.spell:6288-6540",
+  defined: "/Solitaire.spell:6599-6851",
 } */
 Card.prototype.play = async function () {
   if (this.pile === solitaire.stock) {
@@ -970,7 +978,7 @@ core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" 
   rule: "method_call", of: "Card", alias: ["statement", "expression"], group: "Playing a card",
   kind: "method", name: "put a card on a pile", params: [{ name: "pile", datatype: "Pile" }],
   returns: "choice", waits: true,
-  defined: "/Solitaire.spell:6740-7282",
+  defined: "/Solitaire.spell:7051-7593",
 } */
 Card.prototype.putOnPile = async function (pile) {
   const startPile = this.pile
@@ -995,7 +1003,7 @@ core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs
   alias: ["statement", "expression"], group: "Playing a card", kind: "method",
   name: "count the points for a card on a pile", params: [{ name: "pile", datatype: "Pile" }],
   returns: "number",
-  defined: "/Solitaire.spell:7284-7499",
+  defined: "/Solitaire.spell:7595-7810",
 } */
 Card.prototype.countThePointsForCardOnPile = function (pile) {
   if (pile instanceof Foundation) return 10
@@ -1051,7 +1059,7 @@ core.heading("The piles")
 /*! SPELL: DECLARES {
   syntax: "test the moves", output: "test_the_moves", rule: "method_call", alias: "statement",
   kind: "function", name: "the moves",
-  defined: "/Solitaire.spell:10199-11679",
+  defined: "/Solitaire.spell:10510-11990",
 } */
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {

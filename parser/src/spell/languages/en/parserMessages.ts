@@ -293,6 +293,12 @@ export const PARSER_MESSAGES = {
     "<{tag} ...> can't sit inside an element yet:  write it on a line of its own in the drawing, outside the element",
   /** An attribute in a tag that can't be read:  the tag still ends at its own `>` (epic `notebook` I5). */
   "unreadable-attribute": 'Can\'t read "{text}" in <{tag}>:  check its name and its quotes',
+  /** `<action "...">` naming no action of the drawing's thing, up its chain, or anywhere in the program (epic `language`). */
+  "unknown-action":
+    '<{tag} "{action}"> names no action here:  write an action\'s name as it\'s declared, e.g. "to {action}"',
+  /** Something in a `<context-menu>` that isn't one of its items (epic `language`). */
+  "context-menu-item":
+    '<{tag}> holds only its items:  <action "name"/> for an action, <divider/> for a line between groups',
   /** A `{...}` in a `<markdown>` block that isn't spell. */
   "markdown-hole":
     'Don\'t understand "{{hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace',

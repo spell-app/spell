@@ -604,16 +604,29 @@ class Solitaire(App):
         await self.play_from_the_stock()
 
     def draw(self) -> Element:
-        """Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu"""
+        """Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows its moves"""
         return h(
             "ui-container",
             h(
                 "ui-toolbar",
-                {"class": "GameBar", "menu": "game menu", "aria-label": "Game", "shrinkable": True},
+                {"class": "GameBar", "aria-label": "Game"},
                 h(
                     "ui-text",
                     {"class": "GameTitle", "slot": "title", "size": "large"},
                     "Spell Solitaire",
+                ),
+                h(
+                    "ui-buttons",
+                    {"class": "GameButtons", "slot": "center"},
+                    core.draw_action(self, "auto_play"),
+                    core.draw_action(self, "cheat"),
+                    core.draw_action(self, "restart_the_game"),
+                ),
+                h(
+                    "ui-buttons",
+                    {"class": "GameButtons", "slot": "center"},
+                    core.draw_action(self, "undo", {"icon-only": True}),
+                    core.draw_action(self, "redo", {"icon-only": True}),
                 ),
                 h(
                     "ui-text",
@@ -627,7 +640,11 @@ class Solitaire(App):
             ),
             h(
                 "ui-grid",
-                {"class": "Board", "columns": "7", "context-menu": "game menu"},
+                {"class": "Board", "columns": "7"},
+                core.draw_context_menu(
+                    self,
+                    ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
+                ),
                 h("test-project-stock-pile", {"id": "stock"}),
                 h("test-project-discard-pile", {"id": "discards"}),
                 h("ui-column"),
@@ -716,8 +733,6 @@ core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortc
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
 # Turn up a face-down card from a tableau, at random, onto the discards
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
-# - its "game menu" is a menu of "auto play", "cheat", "restart the game", "undo" and "redo"
-core.describe_menu(Solitaire, "game_menu", {"items": ["auto_play", "cheat", "restart_the_game", "undo", "redo"]})
 
 ###################
 # ## Playing a card
@@ -908,12 +923,9 @@ solitaire-app {
 }
 
 /****************
- * The toolbar:  its buttons in the middle, each a button of its own, with no frame around them
+ * The toolbar:  the game's name, its buttons in the middle in two pills, its score
  ****************/
 
-.GameBar {
-  --ui-menu-divider: transparent;
-}
 /* the game's name, in the heavy type of Spell's loading screen */
 .GameTitle {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
@@ -929,70 +941,28 @@ solitaire-app {
 .GameBar::part(right) {
   justify-content: flex-end;
 }
-.GameBar::part(menu) {
+.GameBar::part(center) {
   flex: 0 1 auto;
-  /* it would scroll, which would cut the pills' shadow */
-  overflow: visible;
-  min-width: 0;
-  gap: 0;
-  border: 0;
-  box-shadow: none;
-  background: transparent;
-  /* one shadow around each whole pill, with none falling across its buttons */
+  gap: 1em;
+}
+/* each pill:  white on the felt, with one shadow around it */
+.GameButtons {
+  --ui-button-radius: 99em;
+  /* square where its buttons meet, so the line between them is straight */
+  --ui-button-group-item-radius: 0;
+  --ui-button-background: Canvas;
+  --ui-button-color: CanvasText;
+  --ui-button-font-weight: 500;
+  margin: 0;
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
 }
-/* two pills, auto play | cheat | restart and undo | redo:  each button shares its edge with the next */
-.GameBar > *::part(item) {
-  padding: 0.55em 1em;
-  margin-left: -1px;
-  border: 0;
-  border-radius: 0;
-  background: Canvas;
-  font-weight: 500;
-  box-shadow: inset 0 0 0 1px var(--ui-border-color);
-  transition: background-color 120ms ease-out;
-}
-.GameBar > :not([slot]):nth-of-type(1)::part(item),
-.GameBar > :not([slot]):nth-of-type(4)::part(item) {
-  border-start-start-radius: 99em;
-  border-end-start-radius: 99em;
-}
-.GameBar > :not([slot]):nth-of-type(3)::part(item),
-.GameBar > :not([slot]):nth-of-type(5)::part(item) {
-  border-start-end-radius: 99em;
-  border-end-end-radius: 99em;
-}
-.GameBar > :not([slot]):nth-of-type(4)::part(item) {
-  margin-left: 1em;
-}
-.GameBar > *::part(item):hover {
-  background: color-mix(in srgb, Canvas 92%, CanvasText);
-}
-.GameBar > *::part(item):active {
-  background: color-mix(in srgb, Canvas 84%, CanvasText);
-}
-/* undo and redo:  just their icons, their names kept for a screen reader */
-.GameBar > :not([slot]):nth-of-type(n + 4)::part(title) {
-  font-size: 0;
-}
-.GameBar > :not([slot]):nth-of-type(n + 4)::part(icon) {
-  margin: 0;
-}
-.GameBar > :not([slot]):nth-of-type(n + 4)::part(shortcut) {
-  display: none;
-}
-/* its key, a small key cap */
-.GameBar > *::part(shortcut) {
-  margin-inline-start: 0.6em;
-  padding: 0.1em 0.45em;
-  border-radius: var(--ui-radius-s);
-  background: color-mix(in oklch, currentColor 8%, transparent);
-  font-size: 0.75em;
+/* a faint line between a pill's buttons */
+.GameButtons > * + *::part(button) {
+  box-shadow: -1px 0 0 var(--ui-border-color);
 }
 
 /* A narrow window, a phone's:  the felt's edge thinner, so the seven columns get the width;
-   the toolbar loses its title and keys (a phone has no keyboard), and the score goes on a line of its own,
-   below the buttons, so every button keeps its name */
+   the toolbar loses its title, and the score goes on a line of its own, below the buttons, so every button keeps its name */
 @media (width < 36rem) {
   solitaire-app {
     padding: 16px 12px;
@@ -1006,18 +976,15 @@ solitaire-app {
   [slot="title"] {
     display: none;
   }
+  .GameBar::part(center) {
+    gap: 0.5em;
+  }
+  .GameButtons {
+    --ui-button-padding-inline: 0.65em;
+  }
   .GameBar::part(right) {
     flex: 1 0 100%;
     justify-content: center;
-  }
-  .GameBar > *::part(item) {
-    padding-inline: 0.65em;
-  }
-  .GameBar > :not([slot]):nth-of-type(4)::part(item) {
-    margin-left: 0.5em;
-  }
-  .GameBar > *::part(shortcut) {
-    display: none;
   }
   .GameBar > [slot] {
     white-space: nowrap;
