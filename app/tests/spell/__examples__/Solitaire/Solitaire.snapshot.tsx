@@ -743,12 +743,11 @@ export class Solitaire extends App {
     await this.playFromTheStock()
   }
 
-  /** Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows its moves */
   @drawn draw() {
     return (
-      <ui-container>
+      <>
         <ui-toolbar class="GameBar" aria-label="Game">
-          <ui-text class="GameTitle" slot="title" size="large">Spell Solitaire</ui-text>
+          <ui-text class="GameTitle" slot="title" size="large">Solitaire</ui-text>
           <ui-buttons class="GameButtons" slot="center">
             {core.drawAction(this, "autoPlay")}
             {core.drawAction(this, "cheat")}
@@ -760,24 +759,26 @@ export class Solitaire extends App {
           </ui-buttons>
           <ui-text slot="right">Moves: {this.moves}{"  ·  Score: "}{this.score}{this.hint}</ui-text>
         </ui-toolbar>
-        <ui-grid class="Board" columns="7">
-          {core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])}
-          <test-project-stock-pile id="stock" />
-          <test-project-discard-pile id="discards" />
-          <ui-column />
-          <test-project-foundation id="clubs" />
-          <test-project-foundation id="diamonds" />
-          <test-project-foundation id="hearts" />
-          <test-project-foundation id="spades" />
-          <test-project-tableau id="T1" />
-          <test-project-tableau id="T2" />
-          <test-project-tableau id="T3" />
-          <test-project-tableau id="T4" />
-          <test-project-tableau id="T5" />
-          <test-project-tableau id="T6" />
-          <test-project-tableau id="T7" />
-        </ui-grid>
-      </ui-container>
+        <ui-container>
+          <ui-grid class="Board" columns="7">
+            {core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])}
+            <test-project-stock-pile id="stock" />
+            <test-project-discard-pile id="discards" />
+            <ui-column />
+            <test-project-foundation id="clubs" />
+            <test-project-foundation id="diamonds" />
+            <test-project-foundation id="hearts" />
+            <test-project-foundation id="spades" />
+            <test-project-tableau id="T1" />
+            <test-project-tableau id="T2" />
+            <test-project-tableau id="T3" />
+            <test-project-tableau id="T4" />
+            <test-project-tableau id="T5" />
+            <test-project-tableau id="T6" />
+            <test-project-tableau id="T7" />
+          </ui-grid>
+        </ui-container>
+      </>
     )
   }
 

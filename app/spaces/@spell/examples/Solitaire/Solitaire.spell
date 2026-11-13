@@ -134,22 +134,20 @@ solitaire is an app
 		set the lifted of the card to no
 
 	to draw it
-		// Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows its moves
+		<toolbar class="GameBar" aria-label="Game">
+			<text class="GameTitle" slot="title" size="large">Solitaire</text>
+			<buttons class="GameButtons" slot="center">
+				<action "auto play"/>
+				<action "cheat"/>
+				<action "restart the game"/>
+			</buttons>
+			<buttons class="GameButtons" slot="center">
+				<action "undo" icon-only/>
+				<action "redo" icon-only/>
+			</buttons>
+			<text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</text>
+		</toolbar>
 		<container>
-			// its actions as buttons, in two pills:  each its title, its key in its tooltip;  undo and redo just their icons
-			<toolbar class="GameBar" aria-label="Game">
-				<text class="GameTitle" slot="title" size="large">Spell Solitaire</text>
-				<buttons class="GameButtons" slot="center">
-					<action "auto play"/>
-					<action "cheat"/>
-					<action "restart the game"/>
-				</buttons>
-				<buttons class="GameButtons" slot="center">
-					<action "undo" icon-only/>
-					<action "redo" icon-only/>
-				</buttons>
-				<text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</text>
-			</toolbar>
 			<grid class="Board" columns="7">
 				<context-menu>
 					<action "auto play"/>

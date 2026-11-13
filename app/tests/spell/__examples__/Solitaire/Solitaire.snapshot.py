@@ -604,17 +604,11 @@ class Solitaire(App):
         await self.play_from_the_stock()
 
     def draw(self) -> Element:
-        """Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows its moves"""
-        return h(
-            "ui-container",
+        return [
             h(
                 "ui-toolbar",
                 {"class": "GameBar", "aria-label": "Game"},
-                h(
-                    "ui-text",
-                    {"class": "GameTitle", "slot": "title", "size": "large"},
-                    "Spell Solitaire",
-                ),
+                h("ui-text", {"class": "GameTitle", "slot": "title", "size": "large"}, "Solitaire"),
                 h(
                     "ui-buttons",
                     {"class": "GameButtons", "slot": "center"},
@@ -639,28 +633,31 @@ class Solitaire(App):
                 ),
             ),
             h(
-                "ui-grid",
-                {"class": "Board", "columns": "7"},
-                core.draw_context_menu(
-                    self,
-                    ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
+                "ui-container",
+                h(
+                    "ui-grid",
+                    {"class": "Board", "columns": "7"},
+                    core.draw_context_menu(
+                        self,
+                        ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
+                    ),
+                    h("test-project-stock-pile", {"id": "stock"}),
+                    h("test-project-discard-pile", {"id": "discards"}),
+                    h("ui-column"),
+                    h("test-project-foundation", {"id": "clubs"}),
+                    h("test-project-foundation", {"id": "diamonds"}),
+                    h("test-project-foundation", {"id": "hearts"}),
+                    h("test-project-foundation", {"id": "spades"}),
+                    h("test-project-tableau", {"id": "T1"}),
+                    h("test-project-tableau", {"id": "T2"}),
+                    h("test-project-tableau", {"id": "T3"}),
+                    h("test-project-tableau", {"id": "T4"}),
+                    h("test-project-tableau", {"id": "T5"}),
+                    h("test-project-tableau", {"id": "T6"}),
+                    h("test-project-tableau", {"id": "T7"}),
                 ),
-                h("test-project-stock-pile", {"id": "stock"}),
-                h("test-project-discard-pile", {"id": "discards"}),
-                h("ui-column"),
-                h("test-project-foundation", {"id": "clubs"}),
-                h("test-project-foundation", {"id": "diamonds"}),
-                h("test-project-foundation", {"id": "hearts"}),
-                h("test-project-foundation", {"id": "spades"}),
-                h("test-project-tableau", {"id": "T1"}),
-                h("test-project-tableau", {"id": "T2"}),
-                h("test-project-tableau", {"id": "T3"}),
-                h("test-project-tableau", {"id": "T4"}),
-                h("test-project-tableau", {"id": "T5"}),
-                h("test-project-tableau", {"id": "T6"}),
-                h("test-project-tableau", {"id": "T7"}),
             ),
-        )
+        ]
 
     async def turn_a_stock_card(self) -> None:
         await self.play_from_the_stock()

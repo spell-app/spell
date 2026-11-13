@@ -503,11 +503,10 @@ export class Solitaire extends App {
     await this.playFromTheStock()
   }
 
-  /** Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows its moves */
   draw() {
-    return h("ui-container",
+    return [
       h("ui-toolbar", { class: "GameBar", "aria-label": "Game" },
-        h("ui-text", { class: "GameTitle", slot: "title", size: "large" }, "Spell Solitaire"),
+        h("ui-text", { class: "GameTitle", slot: "title", size: "large" }, "Solitaire"),
         h("ui-buttons", { class: "GameButtons", slot: "center" },
           core.drawAction(this, "autoPlay"),
           core.drawAction(this, "cheat"),
@@ -525,24 +524,26 @@ export class Solitaire extends App {
           () => this.hint
         )
       ),
-      h("ui-grid", { class: "Board", columns: "7" },
-        core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"]),
-        h("test-project-stock-pile", { id: "stock" }),
-        h("test-project-discard-pile", { id: "discards" }),
-        h("ui-column"),
-        h("test-project-foundation", { id: "clubs" }),
-        h("test-project-foundation", { id: "diamonds" }),
-        h("test-project-foundation", { id: "hearts" }),
-        h("test-project-foundation", { id: "spades" }),
-        h("test-project-tableau", { id: "T1" }),
-        h("test-project-tableau", { id: "T2" }),
-        h("test-project-tableau", { id: "T3" }),
-        h("test-project-tableau", { id: "T4" }),
-        h("test-project-tableau", { id: "T5" }),
-        h("test-project-tableau", { id: "T6" }),
-        h("test-project-tableau", { id: "T7" })
+      h("ui-container",
+        h("ui-grid", { class: "Board", columns: "7" },
+          core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"]),
+          h("test-project-stock-pile", { id: "stock" }),
+          h("test-project-discard-pile", { id: "discards" }),
+          h("ui-column"),
+          h("test-project-foundation", { id: "clubs" }),
+          h("test-project-foundation", { id: "diamonds" }),
+          h("test-project-foundation", { id: "hearts" }),
+          h("test-project-foundation", { id: "spades" }),
+          h("test-project-tableau", { id: "T1" }),
+          h("test-project-tableau", { id: "T2" }),
+          h("test-project-tableau", { id: "T3" }),
+          h("test-project-tableau", { id: "T4" }),
+          h("test-project-tableau", { id: "T5" }),
+          h("test-project-tableau", { id: "T6" }),
+          h("test-project-tableau", { id: "T7" })
+        )
       )
-    )
+    ]
   }
 
   async turnAStockCard() {
