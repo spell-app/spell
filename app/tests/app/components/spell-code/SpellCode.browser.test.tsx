@@ -83,7 +83,7 @@ describe("<spell-code>", () => {
   test("draws spell in the bubbly look:  a band per declaration, pills for what was typed, a block for a control line", async () => {
     const host = await code(`<spell-code copy>${CARD}</spell-code>`)
     const drawing = drawingOf(host)!
-    expect(drawing.querySelector(".bubbly-block.bubbly-thing > .bubbly-head")!.textContent).toBe(
+    expect(drawing.querySelector(".bubbly-block.bubbly-thing > .bubbly-head-pill")!.textContent).toBe(
       'a "card" is a draggable two sided view'
     )
     expect([...drawing.querySelectorAll(".bubbly-choice")].map((it) => it.textContent)).toEqual([

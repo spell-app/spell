@@ -237,6 +237,13 @@ export class JSXElementToken extends JSXToken<never, JSXElementTokenProps> {
   get quotedContents() {
     return this.record.quotedContents
   }
+  /**
+   * A quoted word after its name, `"T1"` in `<tableau "T1"/>`, for its rule to read (`Tokenizer.keepsQuotedWords`):
+   * an attribute named `P.QUOTED_WORD`, NOT among its `attributes`.
+   */
+  get quotedWord() {
+    return this.record.quotedWord
+  }
   /** What it couldn't read among its attributes, `Ždge="1,048"` -- `undefined` when it read them all. */
   get unreadable() {
     return this.record.unreadable
@@ -261,6 +268,8 @@ export type JSXElementTokenProps = Prettify<P.TokenProps<never>> & {
   isUnaryTag?: boolean
   /** What its quoted word became -- see `JSXElementToken.quotedContents`. */
   quotedContents?: P.Token[]
+  /** A quoted word after its name -- see `JSXElementToken.quotedWord`. */
+  quotedWord?: JSXAttributeToken
   /** What it couldn't read among its attributes -- see `JSXElementToken.unreadable`. */
   unreadable?: string
   /** A chain branch's kind -- see `JSXElementToken.chain`. */

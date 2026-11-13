@@ -1729,7 +1729,7 @@
               "syntax": "(página de error|pagina de error)"
             },
             {
-              "syntax": "((slot:hijos)|slot)"
+              "syntax": "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor))"
             },
             {
               "syntax": "((slot:en)|slot)"
@@ -5453,7 +5453,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 62,
+          "line": 68,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -8663,11 +8663,61 @@
           "aliases": ["jsxChild", "expression"]
         },
         {
+          "className": "ActionButton",
+          "ruleNames": ["action_button"],
+          "internal": false,
+          "file": "src/spell/rules/JSX/ActionButton.ts",
+          "line": 39,
+          "purpose": "A button for ONE of the program's actions, in a drawing, named by its quoted word.",
+          "syntaxes": [
+            {
+              "example": "<acción \"jugar solo\"/>",
+              "outputs": {
+                "js": {
+                  "code": "core.drawAction(this, \"jugarSolo\")"
+                },
+                "ts": {
+                  "code": "core.drawAction(this, \"jugarSolo\")"
+                },
+                "py": {
+                  "code": "core.draw_action(self, \"jugar_solo\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["jsxChild", "expression"]
+        },
+        {
+          "className": "ContextMenuBlock",
+          "ruleNames": ["context_menu_block"],
+          "internal": false,
+          "file": "src/spell/rules/JSX/ContextMenuBlock.ts",
+          "line": 41,
+          "purpose": "The right-click menu of the element it's in, written inside it, in a drawing.",
+          "syntaxes": [
+            {
+              "example": "<menú-contextual>\n\t<acción \"jugar solo\"/>\n\t<divisor/>\n\t<acción \"deshacer\"/>\n</>",
+              "outputs": {
+                "js": {
+                  "code": "core.drawContextMenu(this, [\"jugarSolo\", \"-\", \"undo\"])"
+                },
+                "ts": {
+                  "code": "core.drawContextMenu(this, [\"jugarSolo\", \"-\", \"undo\"])"
+                },
+                "py": {
+                  "code": "core.draw_context_menu(self, [\"jugar_solo\", \"-\", \"undo\"])"
+                }
+              }
+            }
+          ],
+          "aliases": ["jsxChild", "expression"]
+        },
+        {
           "className": "SpellJSX",
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 67,
+          "line": 76,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

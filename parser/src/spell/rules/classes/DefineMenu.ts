@@ -58,6 +58,39 @@ export class DefineMenu extends SpellStatement<
     return (menuWord.start ?? 0) < (menu.start ?? 0) ? `${word} ${words}` : `${words} ${word}`
   }
 
+  /**
+   * The method of `type` (or a super-type) written as `words`, its name as compiled code names it (`P.ScopeMethod.name`):
+   * `deal` for `to deal`, `turn_over` for `to turn it over` -- `undefined` if it has none (yet).
+   * - Compared as written, any case and spacing;  a parameter in its signature, `turn (a card) over`, reads as `it`.
+   * - What a menu's items and an action's button (`action_button`) name their actions by.
+   */
+  static actionNamed(type: P.TypeScope, words: string): string | undefined {
+    const wanted = normalWords(words)
+    for (const each of type.chain()) {
+      for (const method of each.methods.get()) {
+        if (method.asWritten && normalWords(method.asWritten) === wanted) return method.name
+        if (normalWords(method.name) === wanted) return method.name
+      }
+    }
+    return undefined
+  }
+
+  /**
+   * The name a method written as `words` will have, for one not declared yet (an action declared below its menu):
+   * its words but `it` and its inputs, `turn it over` => `turn_over`.
+   */
+  static methodNameFor(words: string): string {
+    return normalWords(words)
+      .split(" ")
+      .filter((word) => word !== "it")
+      .join("_")
+  }
+
+  /** `words` as an app's own action names it (`undo`, Spanish's `deshacer`), its method:  `undo`;  else `undefined`. */
+  static appActionNamed(scope: P.Scope, words: string): string | undefined {
+    return SP.Language.of(scope).words.appActions[normalWords(words)]
+  }
+
   /** Each item's method, looked up while parsing (`getAST()` is pure):  `match.data.members`. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
@@ -134,17 +167,7 @@ function unquoted(text: string): string {
  *   inputs, `turn it over` => `turn_over`.
  */
 function methodNamed(type: P.TypeScope, words: string): string {
-  const wanted = normalWords(words)
-  for (const each of type.chain()) {
-    for (const method of each.methods.get()) {
-      if (method.asWritten && normalWords(method.asWritten) === wanted) return method.name
-      if (normalWords(method.name) === wanted) return method.name
-    }
-  }
-  return wanted
-    .split(" ")
-    .filter((word) => word !== "it")
-    .join("_")
+  return DefineMenu.actionNamed(type, words) ?? DefineMenu.methodNameFor(words)
 }
 
 /** `Turn (a card)  Over` => `turn it over`;  `turn_over` => `turn over`. */

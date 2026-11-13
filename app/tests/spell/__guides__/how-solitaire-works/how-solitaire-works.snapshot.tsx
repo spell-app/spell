@@ -150,11 +150,11 @@ export class Table extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // - its "column" is a new column
-  @prop({ init: () => new Column(), early: true })
+  @prop({ init: () => new Column({ id: "column" }), early: true })
   accessor column!: Column
 
   // - its "hand" is a new pile
-  @prop({ init: () => new Pile(), early: true })
+  @prop({ init: () => new Pile({ id: "hand" }), early: true })
   accessor hand!: Pile
 
   // - its "message" is text

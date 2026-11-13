@@ -3667,23 +3667,23 @@ export class PublicServer extends App {
   accessor tab!: string
 
   // "github" is a new github page
-  @prop({ init: () => new GithubPage(), early: true })
+  @prop({ init: () => new GithubPage({ id: "github" }), early: true })
   accessor github!: GithubPage
 
   // "library" is a new open library page
-  @prop({ init: () => new OpenLibraryPage(), early: true })
+  @prop({ init: () => new OpenLibraryPage({ id: "library" }), early: true })
   accessor library!: OpenLibraryPage
 
   // "weather" is a new open meteo page
-  @prop({ init: () => new OpenMeteoPage(), early: true })
+  @prop({ init: () => new OpenMeteoPage({ id: "weather" }), early: true })
   accessor weather!: OpenMeteoPage
 
   // "museum" is a new met museum page
-  @prop({ init: () => new MetMuseumPage(), early: true })
+  @prop({ init: () => new MetMuseumPage({ id: "museum" }), early: true })
   accessor museum!: MetMuseumPage
 
   // "atlas" is a new rest countries page
-  @prop({ init: () => new RestCountriesPage(), early: true })
+  @prop({ init: () => new RestCountriesPage({ id: "atlas" }), early: true })
   accessor atlas!: RestCountriesPage
 
   create() {

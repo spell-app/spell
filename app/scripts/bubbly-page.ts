@@ -1,7 +1,7 @@
 /**
  * `yarn tsx scripts/bubbly-page.ts [--out <folder>]`:  draws the drawn-bubbly page, `card-bubbly.html`, with the real
  * code (epic `language` P49), and writes the look's sheet beside it.
- * - Solitaire's four files, then the Spanish card, each laid out by the parser (`SP.BubblyLayout`) and drawn by
+ * - Solitaire's four files, then the Spanish card, then two HTML pages (`BubblyMarkup`), each laid out by the parser (`SP.BubblyLayout`) and drawn by
  *   `BubblyHtml`:  what `<spell-code>` shows, with each declaration in a `<ui-section>` the page's comments anchor to.
  * - The English files are laid out as ONE text, so each file's steps know the others' types and phrases.
  * - Also `bubbly.css` beside it:  a GENERATED copy of the app's sheet, the look's one home, which the analysis
@@ -15,6 +15,7 @@ import { join, resolve } from "node:path"
 
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
+import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
 
 const outIndex = process.argv.indexOf("--out")
 const OUT = resolve(
@@ -31,7 +32,9 @@ const DRAWINGS = [
   { id: "solitaire", label: "Solitaire, the game", files: ["Solitaire/Solitaire.spell"] },
   { id: "pile", label: "Pile", files: ["Solitaire/Pile.spell"] },
   { id: "deck", label: "Deck", files: ["Solitaire/Deck.spell"] },
-  { id: "carta", label: "La carta, en español", files: ["Solitario/Carta.es.spell"], lang: "es" }
+  { id: "carta", label: "La carta, en español", files: ["Solitario/Carta.es.spell"], lang: "es" },
+  { id: "html-viewer", label: "HTML:  the spell-viewer demo", files: ["app/demo/spell-viewer.html"], html: true },
+  { id: "html-editor", label: "HTML:  the spell-editor demo", files: ["app/demo/spell-editor.html"], html: true }
 ]
 
 /** The English files read as one text, card first:  alone, the game's steps can't know the card's phrases. */
@@ -58,6 +61,13 @@ for (const { files, lang } of DRAWINGS.filter((drawing) => drawing.lang)) {
   const text = readFileSync(join(EXAMPLES, file!), "utf8")
   const layout = SP.BubblyLayout.of(text, SP.Language.for(lang).parser)
   drawn.set(file!, BubblyHtml.write(layout, { sections: { idPrefix: idOf(file!), ids } }))
+}
+
+// HTML, drawn the same way with its corners cut (`BubblyMarkup`):  files from the app folder's root
+for (const { files } of DRAWINGS.filter((drawing) => drawing.html)) {
+  // its `<style>` left out:  page CSS, noise beside the markup (Owen)
+  const html = readFileSync(resolve(files[0]!), "utf8").replace(/[ \t]*<style\b[\s\S]*?<\/style>[ \t]*\n?/gi, "")
+  drawn.set(files[0]!, BubblyMarkup.write(html))
 }
 
 const sections = DRAWINGS.map(
@@ -111,7 +121,7 @@ writeFileSync(
           >
           <p class="lede">
             Solitaire in the bubbly look, every line, drawn by Spell's own code as every page that shows Spell now draws
-            it:  its card, the game, its piles and its deck, then the card in Spanish. Comment on any block with its
+            it:  its card, the game, its piles and its deck, then the card in Spanish;  last, two of the app's HTML pages, drawn the same way with their corners cut. Comment on any block with its
             bullhorn, or select some text and press ⌘ I.
           </p>
 ${sections}        </main>

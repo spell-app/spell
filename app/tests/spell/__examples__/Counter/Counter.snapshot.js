@@ -57,7 +57,7 @@ export class CounterApp extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "counter" is a new counter
-  static { this.declareProp("counter", { init: () => new Counter(), early: true }) }
+  static { this.declareProp("counter", { init: () => new Counter({ id: "counter" }), early: true }) }
   get counter() { return this.getProp("counter") }
   set counter(value) { this.setProp("counter", value) }
 

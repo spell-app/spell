@@ -75,7 +75,7 @@ export class CounterApp extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "counter" is a new counter
-  @prop({ init: () => new Counter(), early: true })
+  @prop({ init: () => new Counter({ id: "counter" }), early: true })
   accessor counter!: Counter
 
   @drawn draw() {

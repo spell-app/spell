@@ -473,7 +473,7 @@ class TaskList(App):
     element_tag = "test-project-app"
 
     # "checklist" is a new checklist
-    checklist = prop(init=lambda: Checklist(), early=True)
+    checklist = prop(init=lambda: Checklist(id="checklist"), early=True)
 
     # The next task's title, as the new task's field holds it
     # - its "draft" is text

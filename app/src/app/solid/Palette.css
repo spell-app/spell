@@ -131,3 +131,8 @@
 .PaletteTree ui-tree-item::part(toggle) {
   display: none;
 }
+
+/* the part menu (`<PartMenu>`):  at once, as the system's own right-click menu, with no fade in */
+ui-popup.PartMenu {
+  --ui-popup-duration: 0s;
+}

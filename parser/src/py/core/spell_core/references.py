@@ -10,7 +10,8 @@ reference_for(tableau, things, kept)              # "Tableau#T1"
 - The twin of the javascript core's `references.ts` (epic drawable-thing P18):  the same words, read the same way.
   - A reference reads like CSS's `tag#id`:  the type's name, `#`, then the thing's name or its place.
   - `Type#name`:  a thing of `Type`, or of a sub-type, with that `name`;  the first wins.
-    - None has it:  a thing the program keeps at its top level under that name, `Game#game`.
+    - None has it:  a thing whose CHOSEN id it is, `Tableau(id="T1")` (`has_chosen_id()`);  a name still wins.
+    - None has that either:  a thing the program keeps at its top level under that name, `Game#game`.
   - `Type#1`:  the first thing of `Type` exactly, counting from 1;  `-1` would be the last.
     - Digits are always a place:  a thing named "3" can't be found by its name.
   - `Type` is a class's name, exactly as the program declares it:  `Tableau`, never `tableau`;
@@ -26,7 +27,7 @@ import re
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from spell_core.things import SpellObject
+from spell_core.things import SpellObject, has_chosen_id
 
 # A reference, its type and its name or place captured:  `Tableau#T1`, `Card#queen-of-spades`, `Tableau#1`.
 REFERENCE = re.compile(r"^([A-Za-z_$][\w$]*)#(.+)$")
@@ -77,9 +78,16 @@ def thing_called(
 def thing_named(
     cls: type, name: str, things: Iterable[SpellObject], kept: Mapping[str, Any] | None = None
 ) -> SpellObject | None:
-    """The first of `things` of class `cls`, or a sub-class, named `name`;  else one `kept` under that name."""
-    for thing in things:
+    """The first of `things` of class `cls`, or a sub-class, named `name`;  else whose chosen id it is;  else `kept`'s.
+
+    - A chosen id counts after every name:  `Tableau(id="T1")` is `Tableau#T1` while nothing is named T1.
+    """
+    listed = list(things)
+    for thing in listed:
         if isinstance(thing, cls) and name_of(thing) == name:
+            return thing
+    for thing in listed:
+        if isinstance(thing, cls) and chosen_id_of(thing) == name:
             return thing
     keeper = (kept or {}).get(name)
     return keeper if isinstance(keeper, cls) else None
@@ -96,7 +104,8 @@ def thing_at_place(cls: type, place: int, things: Iterable[SpellObject]) -> Spel
 def reference_for(thing: object, things: Iterable[SpellObject], kept: Mapping[str, Any] | None = None) -> str | None:
     """The reference that finds `thing` again:  `Tableau#T1`, by its name;  else its place, `Tableau#3`.
 
-    - A thing with no name of its own goes by the name the program keeps it under:  `Game#game`.
+    - A thing with no name of its own goes by the id the program chose for it, `Tableau#T1`;
+      else by the name the program keeps it under:  `Game#game`.
     - A name an earlier thing has too, or digits:  its place instead.
     - `None` for anything not among `things`.
     """
@@ -104,7 +113,11 @@ def reference_for(thing: object, things: Iterable[SpellObject], kept: Mapping[st
         return None
     listed = list(things)
     cls = type(thing)
-    name = name_of(thing) or next((key for key, value in (kept or {}).items() if value is thing), None)
+    name = (
+        name_of(thing)
+        or chosen_id_of(thing)
+        or next((key for key, value in (kept or {}).items() if value is thing), None)
+    )
     if name and not PLACE.match(name) and thing_named(cls, name, listed, kept) is thing:
         return f"{cls.__name__}#{name}"
     of_class = [each for each in listed if type(each) is cls]
@@ -120,3 +133,11 @@ def name_of(thing: SpellObject) -> str | None:
     if value is None or value == "":
         return None
     return str(value)
+
+
+def chosen_id_of(thing: SpellObject) -> str | None:
+    """The id the program chose for `thing`, `T1` for `Tableau(id="T1")`:  `None` for a made-up one, or none."""
+    if not has_chosen_id(thing):
+        return None
+    chosen = thing.__dict__.get("_props", {}).get("id")
+    return None if chosen is None or chosen == "" else str(chosen)

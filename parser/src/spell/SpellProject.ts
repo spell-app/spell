@@ -402,6 +402,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   parse(parser?: P.Scope): Promise<unknown> {
     this.parser.cancel()
+    this.updateWaitingText()
     return this.parser.start(parser)
   }
   /**
@@ -423,6 +424,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   ): Promise<unknown> {
     this.parser.cancel()
     this.compiler.cancel()
+    // text typed and not parsed yet (`takeText()`):  parsed first, so nothing compiles from an older parse
+    this.updateWaitingText()
     // limited to some pages:  part of the program, so never saved or cached (`pagesInPlay`)
     if (this.pagesInPlay) {
       await this.load(undefined)
@@ -1314,14 +1317,56 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Does NOT mark `file` dirty or save it:  that's the editor's business.
    */
   async updateText(file: SP.SpellFile, text: string): Promise<SP.SpellFile[]> {
-    if (file.contents !== text) file.contents = text
+    this.takeText(file, text)
     if (!file.isActive) return [file]
+    return this.parseWaitingText()
+  }
 
+  /**
+   * An editor changed `file`'s text to `text`, e.g. on a keystroke:  take it now, and parse it later,
+   * with `parseWaitingText()` -- the editor does once the typing pauses, so no keystroke waits on a parse.
+   * - Until then `file.match` is the parse of its text before:  `compile()` and `parse()` parse what's waiting first.
+   * - A file we don't parse (see `SpellFile.isActive`) just takes the text, as in `updateText()`.
+   * - Does NOT mark `file` dirty or save it:  that's the editor's business.
+   */
+  takeText(file: SP.SpellFile, text: string): void {
+    if (file.contents !== text) file.contents = text
+    if (file.isActive) this.textWaiting.add(file)
+  }
+
+  /** Is any file's text waiting to be parsed?  See `takeText()`. */
+  get isTextWaiting(): boolean {
+    return this.textWaiting.size > 0
+  }
+
+  /**
+   * Parse the text `takeText()` left waiting, now, re-parsing as little as possible:  see `updateText()`.
+   * - Returns the spell files whose parse changed -- one edit can change LATER files, e.g. by renaming a type.
+   * - Nothing waiting:  does nothing, at once.
+   * - The incremental parse is done before it returns its promise, so a caller that doesn't wait still sees it;
+   *   only the parse from scratch, when the incremental one couldn't cope, comes later.
+   *   A crash there is left in `parseError`, NOT thrown.
+   */
+  async parseWaitingText(): Promise<SP.SpellFile[]> {
+    if (!this.textWaiting.size) return []
     const before = new Map(this.spellFiles.map((it) => [it, it.match]))
-    this.updatedContentsFor(file)
+    this.updateWaitingText()
     if (!this.incremental) await this.parse().catch(() => undefined)
     return this.spellFiles.filter((it) => it.match !== before.get(it))
   }
+
+  /** Re-parse the files whose text is waiting, as little as possible:  `updatedContentsFor()` each. */
+  private updateWaitingText(): void {
+    const files = [...this.textWaiting]
+    this.textWaiting.clear()
+    for (const file of files) this.updatedContentsFor(file)
+  }
+
+  /**
+   * Spell files whose new text waits to be parsed -- see `takeText()`.
+   * - NOTE: plain field, not state:  what reads the parse follows each file's `match`.
+   */
+  private textWaiting = new Set<SP.SpellFile>()
 
   ////////////////
   // ## Loading / contents

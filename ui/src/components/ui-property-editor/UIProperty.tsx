@@ -393,7 +393,7 @@ export class UIProperty extends UIField {
     })
   }
 
-  /** Its choices are colours:  each drawn with a chip of its hue (`hueChip()`). */
+  /** Its choices are colours:  each drawn with a chip of its hue (`hueChips()`). */
   get isHueChoice(): boolean {
     return !!this.spec && E.ValueSets.setFor(this.spec) === HUES
   }
@@ -470,12 +470,15 @@ export class UIProperty extends UIField {
       // every segment an icon:  icons alone, each one's name its tooltip
       const iconsOnly = isSegmented && choices.length > 0 && choices.every(UIProperty.hasIcon)
       if (iconsOnly) element.setAttribute("icon", "")
-      for (const choice of choices) {
-        const item = UIProperty.item(choice, iconsOnly)
-        if (this.isHueChoice)
-          item.setAttribute("image", UIProperty.hueChip(item.getAttribute("value")!, this.domElement))
-        element.append(item)
+      const items = choices.map((choice) => UIProperty.item(choice, iconsOnly))
+      if (this.isHueChoice) {
+        const chips = UIProperty.hueChips(
+          items.map((item) => item.getAttribute("value")!),
+          this.domElement
+        )
+        items.forEach((item, index) => item.setAttribute("image", chips[index]!))
       }
+      element.append(...items)
     }
     if (control.tag === EDITOR_TAG) element.setAttribute(VALUE_FROM_ATTRIBUTE, this.propertyName)
     return element
@@ -759,18 +762,26 @@ export class UIProperty extends UIField {
   }
 
   /**
-   * A round chip of `hue`'s colour, as an SVG `data:` URL:  a hue's choice shows it before its name.
-   * - The colour is worked out on a probe inside `near`, so it's the colour the theme there paints;
+   * A round chip of each of `hues`' colours, as SVG `data:` URLs:  a hue's choice shows it before its name.
+   * - Each colour is worked out on a probe inside `near`, so it's the colour the theme there paints;
    *   grey where it can't be read.
-   * - SIDE EFFECT:  adds and removes the probe.
+   * - All the probes go in at once, then are read:  the page's style is worked out ONCE, not once a hue
+   *   (one a hue took 350ms in the Inspector, for a part with a `color`, on a right click in Edit).
+   * - SIDE EFFECT:  adds and removes the probes.
    */
-  static hueChip(hue: string, near: Element): string {
-    const probe = near.appendChild(document.createElement("span"))
-    probe.style.color = `var(--ui-${hue}, gray)`
-    const color = getComputedStyle(probe).color
-    probe.remove()
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="${color}"/></svg>`
-    return `data:image/svg+xml,${encodeURIComponent(svg)}`
+  static hueChips(hues: readonly string[], near: Element): string[] {
+    const probes = hues.map((hue) => {
+      const probe = document.createElement("span")
+      probe.style.color = `var(--ui-${hue}, gray)`
+      return probe
+    })
+    near.append(...probes)
+    const colors = probes.map((probe) => getComputedStyle(probe).color)
+    for (const probe of probes) probe.remove()
+    return colors.map((color) => {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="${color}"/></svg>`
+      return `data:image/svg+xml,${encodeURIComponent(svg)}`
+    })
   }
 }
 

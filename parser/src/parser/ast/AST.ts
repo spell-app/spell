@@ -2048,6 +2048,18 @@ export type ASTJSXElementProps = Prettify<{
    * javascript's `core.drawPart(this, () => h(...))` (epic `notebook` P4).
    */
   drawnApart?: boolean
+  /**
+   * The program's action it draws a button for, its method's name as spell says it (`auto_play`):
+   * `<action "auto play"/>`, javascript's `core.drawAction(this, "autoPlay", { ... })` -- see spell's `action_button`.
+   * - Its `tagName` is the button's, `ui-button`, so its attributes are named as a button's are.
+   */
+  action?: string
+  /**
+   * The right-click menu it marks, its items as spell names them (`auto_play`, `-` a divider):
+   * `<context-menu>` inside an element, javascript's `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`
+   * -- see spell's `context_menu_block`.
+   */
+  contextMenu?: string[]
 }>
 
 export class ASTJSXElement extends ASTExpression {
@@ -2055,6 +2067,8 @@ export class ASTJSXElement extends ASTExpression {
   declare attrs: ASTJSXAttribute[] | undefined
   declare children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
   declare drawnApart: boolean | undefined
+  declare action: string | undefined
+  declare contextMenu: string[] | undefined
   constructor(match: P.AnyMatch, props: ASTJSXElementProps) {
     super(match, props)
     this.assertType("tagName", "string")

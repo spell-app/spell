@@ -462,6 +462,20 @@ Its first line is how you call it, with each blank's type in brackets:
     - Its name is its words and `menu`, `game menu`;  its title, with no `titled`, is its words, `game`.
     - The page draws it as the app's menu bar, as a toolbar (`<ui-toolbar menu="game menu" />`), and as a right
       click's menu (`context-menu="game menu"` on any element of a drawing), each item a `<ui-action>`.
+    - One action alone is a button in a drawing, `<action "auto play"/>`:  its title, icon, key and enabled are
+      the action's, live, and a click runs it;  every other attribute goes to the button (`icon-only` shows only its
+      icon).
+    - A right click's menu can be written in the element it belongs to, its actions and dividers inside:
+
+      ```spell
+      <grid>
+      	<context-menu>
+      		<action "deal"/>
+      		<divider/>
+      		<action "undo"/>
+      	</>
+      </grid>
+      ```
     - A menu may hold other menus, its sub-menus, after its actions, so a menu bar is a menu of menus;
       a menu's own title comes last, `titled "File"`:
 

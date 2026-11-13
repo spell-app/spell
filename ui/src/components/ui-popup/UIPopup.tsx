@@ -160,7 +160,8 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     if (this.box) UI.transitions.reveal(this.box)
     this.placeAtPoint()
     const target = this.targetElement
-    const anchor = target ? UIPopup.anchorBoxFor(target) : undefined
+    // the box at a point is our own block:  nothing to look up, so no style to work out mid-click
+    const anchor = target && (target === this.pointBox ? target : UIPopup.anchorBoxFor(target))
     domElement.popover ||= this.popoverMode
     domElement.style.setProperty("position-anchor", anchor === target ? this.anchorName : anchor ? "auto" : "none")
     if (!domElement.matches(":popover-open")) {

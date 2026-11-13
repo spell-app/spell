@@ -508,6 +508,105 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
+  test("a right click on a card:  the menu at once, for it;  never the browser's, even on the menu (Owen, 2026-11-12)", async () => {
+    const other = await context.newPage()
+    await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
+    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForTimeout(7000)
+    // every right click, as the page has dealt with it:  did the browser's own menu stay away?
+    await other.evaluate(() => {
+      const seen: { prevented: boolean; menuMs?: number }[] = []
+      Object.assign(window, { rightClicks: seen })
+      window.addEventListener(
+        "contextmenu",
+        (event) => {
+          const click: { prevented: boolean; menuMs?: number } = { prevented: false }
+          seen.push(click)
+          setTimeout(() => (click.prevented = event.defaultPrevented))
+          // how long until the part menu is open, measured in the page:  it may be busy just after
+          const start = performance.now()
+          const look = () => {
+            if (document.querySelector("ui-popup.PartMenu")?.matches(":popover-open"))
+              click.menuMs = performance.now() - start
+            else if (performance.now() - start < 5000) requestAnimationFrame(look)
+          }
+          requestAnimationFrame(look)
+        },
+        { capture: true }
+      )
+      const { Inspector } = window as unknown as { Inspector: { letGo(): void } }
+      Inspector.letGo()
+    })
+    // the top card of each pile, and its element, to tell which is selected
+    const cards = await other.evaluate(() => {
+      const found: Element[] = []
+      const walk = (root: Document | ShadowRoot) => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === "solitaire-card" && !element.nextElementSibling) found.push(element)
+          if (element.shadowRoot) walk(element.shadowRoot)
+        }
+      }
+      walk(document)
+      const shown = found.filter((card) => {
+        const { top, bottom } = card.getBoundingClientRect()
+        return top > 0 && bottom < innerHeight
+      })
+      Object.assign(window, { topCards: shown })
+      return shown.map((card) => {
+        const { x, y, width, height } = card.getBoundingClientRect()
+        return { x: x + width / 2, y: y + height / 2 }
+      })
+    })
+    const card = cards.at(-1)!
+    const rightClicks = () =>
+      other.evaluate(
+        () => (window as unknown as { rightClicks: { prevented: boolean; menuMs?: number }[] }).rightClicks
+      )
+    const selectedIs = (index: number) =>
+      other.evaluate((at) => {
+        const { Inspector, topCards } = window as unknown as {
+          Inspector: { allSelected: { element?: Element }[] }
+          topCards: Element[]
+        }
+        return Inspector.allSelected.at(-1)?.element === topCards[at]
+      }, index)
+
+    // at once:  the menu, then the card's selection, which draws the Inspector's card (seconds, with code in it)
+    await other.mouse.click(card.x, card.y, { button: "right" })
+
+    await other.waitForTimeout(SETTLE_MS)
+    // ~4.6s before (2026-11-12, Inspector open);  ~0.1s since
+    expect((await rightClicks())[0]!.menuMs).toBeLessThan(500)
+    expect(await selectedIs(cards.length - 1)).toBe(true)
+
+    // a quick second right click, on the menu itself
+    const menu = (await other.locator("ui-popup.PartMenu").boundingBox())!
+    await other.mouse.click(menu.x + 20, menu.y + 20, { button: "right" })
+    await other.waitForTimeout(300)
+    expect((await rightClicks()).map((click) => click.prevented)).toEqual([true, true])
+
+    // a Mac's Control-click is a right click:  the menu, and no drag of the card under it
+    await other.keyboard.press("Escape")
+    const next = cards.at(-2)!
+    await other.keyboard.down("Control")
+    await other.mouse.move(next.x, next.y)
+    await other.mouse.down()
+    await other.mouse.move(next.x + 40, next.y + 40, { steps: 5 })
+    const isDragging = await other.evaluate(() =>
+      [...document.body.children].some((element) => /grabbing/.test((element as HTMLElement).style.cssText))
+    )
+    await other.mouse.up()
+    await other.keyboard.up("Control")
+    if (process.platform === "darwin") {
+      expect(isDragging).toBe(false)
+      expect(await other.evaluate(() => !!document.querySelector("ui-popup.PartMenu")?.matches(":popover-open"))).toBe(
+        true
+      )
+    }
+    await other.keyboard.press("Escape")
+    await other.close()
+  })
+
   test("a project's code closes, and stays closed;  Show in Code opens it", async () => {
     const code = page.locator(".InputEditor .monaco-editor")
     expect(await code.count()).toBe(1)

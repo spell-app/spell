@@ -26,7 +26,6 @@ export const words = {
       estado: "estado"
     },
     Pila: {
-      name: "nombre",
       disposición: "disposición",
       color: "color",
       valor: "valor",

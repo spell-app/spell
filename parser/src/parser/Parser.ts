@@ -252,6 +252,17 @@ export class Parser extends Derivative {
   }
 
   /**
+   * Does `after`, a new version of a file's `before`, change what a type it declares IS, its line's words?
+   * - e.g. `a "tableau" is a pile` => `a "tableau" is a thing`:  a drawing above it, `<tableau "T1"/>`,
+   *   drew it as a view, and must not now (`SpellJSX`'s `laterView`).
+   * - Then `P.IncrementalProject` re-parses everything, as for `changesMethods()`, whose `keepEdited` this takes.
+   * - Default:  `false`.  Languages override, e.g. `SpellParser`.
+   */
+  changesTypeKinds(_before: string, _after: string, _keepEdited = false): boolean {
+    return false
+  }
+
+  /**
    * Does `after`, a new version of a file's `before`, change which methods can be called ahead of their definitions?
    * - A method whose first line is new, or gone, and parses alone -- see `stubDeclaredMethods()`.
    * - Then `P.IncrementalProject` re-parses everything, so every line sees the change, as a full parse would.

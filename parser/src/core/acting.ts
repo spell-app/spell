@@ -314,6 +314,35 @@ export const actingMethods = defineCoreModule({
   },
 
   /**
+   * Action `name` (`autoPlay`) for `thing`, ready to draw:  the first of `thing`, then up its chain to the app, that
+   * has a method of that name -- `undefined` if none has.
+   * - What `<action "auto play"/>` draws its button from (`core.drawAction()`, epic `language`):
+   *   so a card's drawing can draw its game's actions, and any drawing the app's `undo` and `redo`.
+   * - Live, as a menu's item is:  its `title`, `isEnabled` and `isSelected` read the thing each time.
+   */
+  actionOf(thing: object | undefined, name: string): (MenuItem & { kind: "action" }) | undefined {
+    for (const holder of chainOf(thing)) {
+      if (typeof (holder as Record<string, unknown>)[name] === "function") return actionItem(holder, name)
+    }
+    return undefined
+  },
+
+  /**
+   * The items of a menu written in a drawing, `<context-menu>` (epic `language`), ready to draw:
+   * each of `names` an action found from `thing` up its chain (`actionOf()`), `-` a line between groups.
+   * - What a right click on the element around it shows (`core.drawContextMenu()`).
+   * - An action nothing up the chain has is left out, with a warning:  the compiler said so already.
+   */
+  menuItemsOf(thing: object | undefined, names: readonly string[]): MenuItem[] {
+    return names.flatMap((name): MenuItem[] => {
+      if (name === "-") return [{ kind: "separator" }]
+      const item = actingMethods.actionOf(thing, name)
+      if (!item) console.warn(`<context-menu>:  nothing here has an action \`${name}\``)
+      return item ? [item] : []
+    })
+  },
+
+  /**
    * The app's MENU BAR, ready to draw:  the menu its class names, `static menuBar = "game menu"`
    * (`- its menu bar is "game menu"`).  `undefined` when it names none.
    */
@@ -448,26 +477,33 @@ function menuItem(holder: object, name: string, seen: Set<string>): MenuItem[] {
     console.warn(`menu:  ${holder.constructor.name} has no action \`${name}\``)
     return []
   }
+  return [actionItem(holder, name)]
+}
+
+/**
+ * Action `name` of `holder` as a menu item, ready to draw:  its title, enabled and selected read live.
+ * - A menu's action, and the button `<action "auto play"/>` draws (`core.actionOf()`).
+ * - `run()` runs it through `core.runAction()`;  a menu's way unless told otherwise.
+ */
+function actionItem(holder: object, name: string): MenuItem & { kind: "action" } {
   const description = describedAction(holder, name)
-  return [
-    {
-      kind: "action",
-      name,
-      thing: holder,
-      get title() {
-        return actingMethods.actionTitle(holder, name)
-      },
-      icon: description?.icon,
-      shortcut: description?.shortcuts?.[0],
-      get isEnabled() {
-        return actingMethods.isActionEnabled(holder, name)
-      },
-      get isSelected() {
-        return actingMethods.isActionSelected(holder, name)
-      },
-      run: (way: ActionWay = "menu") => actingMethods.runAction(holder, name, way)
-    }
-  ]
+  return {
+    kind: "action",
+    name,
+    thing: holder,
+    get title() {
+      return actingMethods.actionTitle(holder, name)
+    },
+    icon: description?.icon,
+    shortcut: description?.shortcuts?.[0],
+    get isEnabled() {
+      return actingMethods.isActionEnabled(holder, name)
+    },
+    get isSelected() {
+      return actingMethods.isActionSelected(holder, name)
+    },
+    run: (way: ActionWay = "menu") => actingMethods.runAction(holder, name, way)
+  }
 }
 
 /** `thing`'s description of action `name`, if it has one. */

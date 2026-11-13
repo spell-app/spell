@@ -11,7 +11,7 @@ import { P } from "spell/parser/parser"
  * - Before any file parses, every type and method the files declare is stubbed,
  *   so a line can name a type, or call a method, declared further down:
  *   `parser.stubDeclaredTypes()`, `stubDeclaredVariables()`, `stubDeclaredMethods()`, `stubDeclaredProperties()`.
- * - An edit which changes WHICH types or methods a file declares re-parses everything:
+ * - An edit which changes WHICH types or methods a file declares, or what a type is, re-parses everything:
  *   rare, and the only way a line above it learns of the change.  See `parser.changesMethods()`.
  * - A file ALONE, one a language says holds one thing and nothing else (spell's page alone in its file,
  *   `P.FileHead`, epic `notebook` P10) stays out of all that:
@@ -135,6 +135,7 @@ export class IncrementalProject {
       if (this.isBroken || types !== entry.types) return this.parseAll(path, text)
       if (parser.changesMethods(this.scope, file.text, text, this.keepLastGood)) return this.parseAll(path, text)
       if (parser.changesProperties(file.text, text, this.keepLastGood)) return this.parseAll(path, text)
+      if (parser.changesTypeKinds(file.text, text, this.keepLastGood)) return this.parseAll(path, text)
       const result = file.update(text)
       if (result === "same") return []
       if (result === "body" || result === "region") return [file]

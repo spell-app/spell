@@ -28,6 +28,9 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 export const RULES =
   "(or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
 
+/** The built-in member a new thing a member holds is named by:  every thing's `id` -- see `withMemberId()`. */
+const MEMBER_ID = "id"
+
 /** The kind of place whose rows link to each other by address. */
 const WEB_SERVER = "web server"
 
@@ -51,6 +54,9 @@ const WEB_SERVER = "web server"
  *     - `get name() { return this.getProp("name") }`
  *     - `set name(value) { this.setProp("name", value) }`
  * - An enumeration's values also go on the class, e.g. `static Suits = ["clubs", ...]` -- see `class_member`.
+ * - A new thing it holds from the start takes the member's name as its `id`, unless its line gives one:
+ *   `"T1" is a new tableau` => `init: () => new Tableau({ id: "T1" })` -- see `withMemberId()`.
+ *   Not a thing of a type saved in a place:  that's a draft, saved as a new row of its own.
  * - Its RULES, what its value must be (epic `property-editor` P9):
  *   - on its line:  `, which must ...`;  its length, `, with maximum length 1`;  `required`, in `a required date`
  *   - indented under it:  `- it must ...` (`property_body_must`)
@@ -411,7 +417,7 @@ export class DefinePropertyHas extends SpellStatement<
     }
     // instance specifier:  a default, made once per instance -- a list's says what it holds, for saving
     else if (specifier instanceof P.ASTNewInstanceExpression) {
-      initializer = specifier
+      initializer = DefinePropertyHas.withMemberId(match, specifier)
       const itemType = DefinePropertyHas.itemTypeOf(specifier)
       if (itemType) check.addProp("itemType", itemType)
     }
@@ -482,6 +488,35 @@ export class DefinePropertyHas extends SpellStatement<
       if (ast) statements.push(ast as P.ASTStatement)
     }
     return new P.ASTStatementGroup(match, { statements })
+  }
+
+  /**
+   * `made`, a new thing a member holds from the start, with the member's name as its `id`:
+   * `"T1" is a new tableau` => `new Tableau({ id: "T1" })` (Owen, 2026-11-12).
+   * - So the thing is found by that name, `tableau T1`, `<tableau "T1"/>`, with no `with name "T1"`:
+   *   `core.thingNamed()` matches a chosen id after names.
+   * - Its name as written, `"new letter"`:  what `<message "new letter"/>` names it by.
+   * - Not when its line gives an `id` itself:  `with id "first"` wins.
+   * - Not a new LIST:  it's made when first read, and its member's name is no id of a thing (`madeEarly()`).
+   * - Not a thing of a type saved in a place, e.g. Recipe Box's `"new recipe" is a new recipe`:
+   *   that's a draft, added as a new row when it's done, and every row needs an id of its own.
+   *   - Its type's RECORD, read when compiling (`data.valueType`):  the line saying where it's saved may be further down.
+   * - A new AST, `made` left as it is:  `getAST()` stays pure.
+   */
+  private static withMemberId(
+    match: P.MatchFor<DefinePropertyHas>,
+    made: P.ASTNewInstanceExpression
+  ): P.ASTNewInstanceExpression {
+    if (made.type.name === "List" || match.data.valueType?.savedPlace()) return made
+    const said = made.props?.properties ?? []
+    const hasId = said.some((it) => it instanceof P.ASTObjectLiteralProperty && it.property.value === MEMBER_ID)
+    if (hasId) return made
+    const props = new P.ASTObjectLiteral(made.props?.match ?? match, { properties: said })
+    const { property } = match.groups
+    const words = property.raw === undefined ? `${property.value}` : textOf(property)
+    const id = new P.ASTStringLiteral(property, { value: words, quote: '"' })
+    props.properties.unshift(new P.ASTObjectLiteralProperty(match, { property: MEMBER_ID, value: id }))
+    return new P.ASTNewInstanceExpression(made.match, { type: made.type, props })
   }
 
   /** The words its place writes for no value, as written:  `["n/a", "unknown"]` for `or "n/a" or "unknown"`. */

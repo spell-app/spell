@@ -76,6 +76,22 @@ describe("thing references", () => {
     }
   })
 
+  test("a thing with no name goes by the id the program chose for it;  a name still wins;  a made-up id never counts", () => {
+    // `"T7" is a new tableau` compiles so (Owen, 2026-11-12)
+    const t7 = new Tableau({ id: "T7" })
+    expect(core.thingForReference("Tableau#T7")).toBe(t7)
+    expect(core.thingForReference("Pile#T7")).toBe(t7)
+    expect(core.thingFor(Tableau, "T7")).toBe(t7)
+    expect(core.referenceFor(t7)).toBe("Tableau#T7")
+    // a name wins over an id:  this one's id is T1, but the tableau NAMED T1 is found
+    const other = new Tableau({ id: "T1" })
+    expect(core.thingNamed(Tableau, "T1")).toBe(t1)
+    expect(core.referenceFor(other)).toMatch(/^Tableau#\d+$/)
+    // a made-up id is no name
+    const unnamed = new Tableau()
+    expect(core.thingNamed(Tableau, unnamed.id)).toBeUndefined()
+  })
+
   describe("elementIdFor():  the id of an element the program draws (J43)", () => {
     /** A card whose name follows its rank and suit, as Drawable Solitaire's does. */
     class Card extends View {
@@ -123,6 +139,14 @@ describe("thing references", () => {
       sign.name = "discard  pile"
       expect(core.elementIdFor(sign)).toBe("discard-pile")
       expect(core.elementIdFor(3)).toBeUndefined()
+    })
+
+    test("a thing with no name:  the id the program chose for it", () => {
+      const sign = new Sign({ id: "welcome" })
+      expect(core.elementIdFor(sign)).toBe("welcome")
+      sign.name = "hello"
+      expect(core.elementIdFor(sign)).toBe("hello")
+      expect(core.elementIdFor(new Sign())).toBeUndefined()
     })
 
     test("only views count:  a pile named like a card leaves the card its plain id", () => {

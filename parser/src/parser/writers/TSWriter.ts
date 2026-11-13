@@ -893,7 +893,8 @@ export class TSWriter extends JSWriter {
     if (project === undefined) return undefined
     const typeName = this.typeNameOf(node.type.name)
     const name = this.elementClassName(typeName)
-    const tag = elementTagFor(project, elementNameOf(node) ?? typeName)
+    // the type's own name, not the class's (`STOCK_PILE`, a naming map's):  as a drawing names its tag, `<stock-pile>`
+    const tag = elementTagFor(project, elementNameOf(node) ?? node.type.name)
     this.elementTags.set(name, tag)
     const words = wordsOf(typeName)
     const attributes = this.elementAttributes(node)
@@ -1062,6 +1063,7 @@ export class TSWriter extends JSWriter {
     "followParent",
     "fontStates",
     "formIsDisabled",
+    "foundById",
     "gliding",
     "handedThing",
     "handlerFor",
@@ -1295,10 +1297,10 @@ export class TSWriter extends JSWriter {
     return `<Switch\n${indented(fallback)}\n>\n${indented(matches.join("\n"))}\n</Switch>`
   }
 
-  /** `value` as JSX:  an element as is, anything else as `{value}`. */
+  /** `value` as JSX:  an element as is, anything else (an action's button too) as `{value}`. */
   private jsxOf(value: P.ASTExpression): string {
     const inner = unwrapped(value)
-    return inner instanceof P.ASTJSXElement ? this.write(inner) : `{${this.bare(inner)}}`
+    return inner instanceof P.ASTJSXElement && !isCoreDrawn(inner) ? this.write(inner) : `{${this.bare(inner)}}`
   }
 
   /** `text` alone, or in parentheses and indented when it's JSX on several lines, e.g. after `return`. */
@@ -1341,6 +1343,8 @@ export class TSWriter extends JSWriter {
    * short text inline, `<span class="suit">{this.shortSuit}</span>`.
    */
   ASTJSXElement(node: P.ASTJSXElement): string {
+    if (node.action) return this.actionButton(node)
+    if (node.contextMenu) return `core.drawContextMenu(this, ${this.menuItemNames(node.contextMenu)})`
     const tag = node.tagName
     // `class` first, as javascript's `h()` calls give it, so both targets draw the same (the core contract)
     const attributes = (node.attrs ?? [])
@@ -1356,6 +1360,30 @@ export class TSWriter extends JSWriter {
     if (isShort && P.SourceMarks.widthOf(open + inline) < JSX_LINE) return `${open}>${inline}</${tag}>`
     return `${open}>\n${indented(this.jsxLines(children).join("\n"))}\n</${tag}>`
   }
+
+  /**
+   * A button for one of the program's actions, `<action "auto play"/>`, as javascript asks the core for it:
+   * `core.drawAction(this, "autoPlay", { class: "Play" })` -- a call, so a parent's JSX holds it in braces.
+   * - Its props as javascript's `h()` takes them, a value that can change as a function (`writingCallProps`).
+   * - Its children after them:  text in quotes, an element as JSX, a value as a function.
+   */
+  private actionButton(node: P.ASTJSXElement): string {
+    this.writingCallProps = true
+    let props: string
+    try {
+      props = this.jsxProps(node)
+    } finally {
+      this.writingCallProps = false
+    }
+    const children = node.childValues.map((child) =>
+      child instanceof P.ASTJSXLiveValue ? `() => ${this.bare(child.expression)}` : String(this.write(child))
+    )
+    const name = this.quoted(this.nameOf(node.action!, "method"))
+    return `core.drawAction(${["this", name, props || (children.length ? "{}" : ""), ...children].filter(Boolean).join(", ")})`
+  }
+
+  /** Writing an action button's props, as javascript's `h()` takes them:  a value that can change is a function. */
+  private writingCallProps = false
 
   /** A fragment, `<>...</>`, as is:  its children as an element's, `<></>` for none. */
   ASTJSXFragment(node: P.ASTJSXFragment): string {
@@ -1384,6 +1412,7 @@ export class TSWriter extends JSWriter {
 
   /** A value in JSX:  just the expression -- Solid's compiler makes it live. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
+    if (this.writingCallProps) return super.ASTJSXLiveValue(node)
     if (this.project.spotsThatWait.has(node)) return `core.whileWaiting(() => ${this.bare(node.expression)})`
     return this.loopDrawn(node.expression, this.bare(node.expression))
   }
@@ -1400,7 +1429,8 @@ export class TSWriter extends JSWriter {
       // and two spaces together, which it would collapse into one (javascript's `h()` keeps both;  epic `language` T56)
       return /[{}<>\n]|\s\s/.test(child.value) ? `{${JSON.stringify(child.value)}}` : child.value
     }
-    if (child instanceof P.ASTJSXElement) return this.write(child)
+    // an action's button, a context menu:  calls, in braces
+    if (child instanceof P.ASTJSXElement) return isCoreDrawn(child) ? `{${this.write(child)}}` : this.write(child)
     const expression = child instanceof P.ASTJSXExpression ? child.output : child
     if (!expression) return ""
     // JSX already, e.g. an element written as a child's value:  no braces
@@ -1559,4 +1589,9 @@ function wordsOf(typeName: string): string {
 /** `a` or `an`, for `words`. */
 function a(words: string): string {
   return /^[aeiou]/.test(words) ? "an" : "a"
+}
+
+/** Is `element` drawn by a call of the core, not as JSX:  an action's button, a context menu? */
+function isCoreDrawn(element: P.ASTJSXElement): boolean {
+  return !!element.action || !!element.contextMenu
 }

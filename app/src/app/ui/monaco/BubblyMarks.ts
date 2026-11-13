@@ -1,6 +1,8 @@
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import type { monaco } from "./monaco"
+import { MarkupMarks, type MarkupShape } from "./MarkupMarks"
+import { TextMarks, spacer } from "./TextMarks"
 
 /****************
  * ### `BubblyMarks`
@@ -10,8 +12,8 @@ import type { monaco } from "./monaco"
  *   - each piece's weight, slant and ink (`bubbly-reference bubbly-use` ...), as `<spell-code>` draws them
  *     (`BubblyHtml.classesFor()`)
  *   - a quoted input's own `"`, see-through, its curly mark drawn over it
- *   - ROOM either side of what a person typed, so its white pill has space round its words:
- *     injected text with a set width (`bubbly-room`), NEVER padding or margin on the text, which would move the
+ *   - SPACERS either side of what a person typed, so its white pill has space round its words:
+ *     injected text with a set width (`bubbly-spacer`), NEVER padding or margin on the text, which would move the
  *     caret off the letters
  *   - one mark spanning each shape, holding nothing but its place:  Monaco moves it as the text is edited,
  *     so the shapes follow typing before the look is laid out again (`SpellBubbly`)
@@ -19,35 +21,34 @@ import type { monaco } from "./monaco"
  *   typed:  `SpellBubbly` places them from where Monaco draws each line and letter.
  * - Which rule presents which way is `SP.BubblyPresentation`'s, read by the layout:  nothing here decides it.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
+ * - Its marks are made as every drawing's are:  `TextMarks`.
  ****************/
-export class BubblyMarks {
+export class BubblyMarks extends TextMarks {
   /** `drawing`'s marks and shapes. */
-  static of(drawing: SP.BubblyDrawing, tabSize = 4): BubblyMarks {
-    return new BubblyMarks(drawing, tabSize)
+  /**
+   * `drawing`'s marks and shapes.
+   * - `isView`:  is a tag in a drawing one of the project's own views?  Its pill is a thing's (`MarkupMarks.within()`).
+   */
+  static of(drawing: SP.BubblyDrawing, tabSize = 4, isView?: (tag: string) => boolean): BubblyMarks {
+    return new BubblyMarks(drawing, tabSize, isView)
   }
 
-  /** The decorations to set, in order:  a shape names its place by an index into them. */
-  readonly marks: monaco.editor.IModelDeltaDecoration[] = []
-
   /** The shapes at the top of the drawing, each holding those inside it. */
-  readonly shapes: BubblyShape[] = []
+  readonly shapes: Array<BubblyShape | MarkupShape> = []
 
-  /** Where each line starts in the drawing's text. */
-  private readonly lineStarts: number[] = []
+  /** A drawing's tags, `<text color="blue">`:  drawn as HTML is (`MarkupMarks`), so Spell's marks leave them alone. */
+  private readonly tags: Array<{ start: number; end: number }> = []
 
   /**
-   * `tabSize`:  how many columns a tab takes, as the editor shows it:  the room before a head's last tab is that many
+   * `tabSize`:  how many columns a tab takes, as the editor shows it:  the spacer before a head's last tab is that many
    * characters, so the tab after it still takes its whole width (Monaco counts injected text in a line's columns)
    */
   private constructor(
     private readonly drawing: SP.BubblyDrawing,
-    private readonly tabSize: number
+    private readonly tabSize: number,
+    private readonly isView?: (tag: string) => boolean
   ) {
-    let at = 0
-    for (const line of drawing.text.split("\n")) {
-      this.lineStarts.push(at)
-      at += line.length + 1
-    }
+    super(drawing.text)
     this.nodes(drawing.nodes, this.shapes)
   }
 
@@ -56,8 +57,13 @@ export class BubblyMarks {
   ////////////////
 
   /** Mark `nodes`, adding their shapes to `into`. */
-  private nodes(nodes: SP.BubblyNode[], into: BubblyShape[]) {
-    for (const node of nodes) {
+  private nodes(nodes: SP.BubblyNode[], into: Array<BubblyShape | MarkupShape>) {
+    for (let index = 0; index < nodes.length; index++) {
+      const node = nodes[index]!
+      if (node.kind === "line" && this.drawing.text[node.start] === "<") {
+        index = this.markup(nodes, index, into)
+        continue
+      }
       switch (node.kind) {
         case "gap":
           break
@@ -71,8 +77,24 @@ export class BubblyMarks {
     }
   }
 
+  /**
+   * A drawing's lines, from `nodes[first]`, the first that starts with a tag, to the last line before the next block:
+   * its tags drawn as HTML is, in pills, bands and blocks (`MarkupMarks.within()`), the rest as Spell;
+   * returns the index of its last line.
+   */
+  private markup(nodes: SP.BubblyNode[], first: number, into: Array<BubblyShape | MarkupShape>): number {
+    let last = first
+    while (nodes[last + 1] && nodes[last + 1]!.kind !== "block") last++
+    const lines = nodes.slice(first, last + 1).filter((node): node is SP.BubblyLine => node.kind === "line")
+    const tags = MarkupMarks.within(this.drawing.text, lines[0]!.start, lines.at(-1)!.end, this.marks, this.isView)
+    this.tags.push(...tags.tags)
+    into.push(...tags.shapes)
+    for (const line of lines) this.line(line, into)
+    return last
+  }
+
   /** A declaration:  its band, the pills on it, and what's under it. */
-  private block(block: SP.BubblyBlock, into: BubblyShape[]) {
+  private block(block: SP.BubblyBlock, into: Array<BubblyShape | MarkupShape>) {
     const shape: BubblyBlockShape = {
       kind: "block",
       place: this.place(block.head.start, endOf(block)),
@@ -84,95 +106,67 @@ export class BubblyMarks {
       inside: []
     }
     into.push(shape)
-    this.headRoom(block.head.start)
+    this.headSpacer(block.head.start)
     this.line(block.head, shape.inside, { band: block.partOfSpeech })
     this.nodes(block.body, shape.inside)
   }
 
   /**
-   * Room before a head line's words (`bubbly-room-head`), so they sit further into their band than the lines under it;
-   * its band stays where it was, as `SpellBubbly` places it from the words' indent, not this room (Owen, 2026-11-11).
+   * A spacer before a head line's words (`bubbly-head-spacer`), so they sit further into their band than the lines under it;
+   * its band stays where it was, as `SpellBubbly` places it from the words' indent, not this spacer (Owen, 2026-11-11).
    * - Before the indent's last tab, not the first word:  the word's first letter is then one place on screen, right
    *   after that tab, so a click, Home or a typed letter puts the caret by it.
-   * - A head at the top level has no indent:  its room goes before its first word, where the caret may be drawn on
+   * - A head at the top level has no indent:  its spacer goes before its first word, where the caret may be drawn on
    *   either side of it.
    */
-  private headRoom(start: number) {
+  private headSpacer(start: number) {
     const { line, column } = this.positionAt(start)
-    const range = { startLineNumber: line, startColumn: Math.max(1, column - 1), endLineNumber: line, endColumn: column }
+    const range = {
+      startLineNumber: line,
+      startColumn: Math.max(1, column - 1),
+      endLineNumber: line,
+      endColumn: column
+    }
     // plain spaces:  whitespace, so Home skips it as it skips the indent
-    const before = { ...HEAD_ROOM, content: " ".repeat(this.tabSize) }
+    const before = { ...HEAD_SPACER, content: " ".repeat(this.tabSize) }
     this.marks.push({ range, options: { before, showIfCollapsed: true } })
   }
 
   /**
    * A line's stretches (`SP.BubblyStretches`, as VS Code's are):  their classes, and a pill under each input;
    * `band`:  it's a declaration's head, on a band of this part of speech.
-   * a quoted one's own `"` marks see-through, the curly ones drawn over them, room outside them too.
+   * a quoted one's own `"` marks see-through, the curly ones drawn over them, spacers outside them too.
    */
-  private line(line: SP.BubblyLine, into: BubblyShape[], head: { band?: SP.BubblyPartOfSpeech } = {}) {
+  private line(
+    line: SP.BubblyLine,
+    into: Array<BubblyShape | MarkupShape>,
+    head: { band?: SP.BubblyPartOfSpeech } = {}
+  ) {
     for (const stretch of SP.BubblyStretches.ofLine(this.drawing.text, line, head)) {
       const { start, end, kind } = stretch
+      // a drawing's tag:  HTML's marks
+      if (this.tags.some((tag) => start >= tag.start && end <= tag.end)) continue
       if (kind === "quote-open")
-        this.mark(start, end, `${QUOTE_MARK} bubbly-quote-open`, { before: room("quote", "before") })
+        this.mark(start, end, `${QUOTE_MARK} bubbly-quote-open`, { before: spacer("quote", "before") })
       else if (kind === "quote-close")
-        this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: room("quote", "after") })
+        this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: spacer("quote", "after") })
       else if (kind === "input" || kind === "choice") this.input(stretch, into)
-      else if (kind === "comment" && head.band) this.mark(start, end, `${BubblyHtml.classesFor(kind)} ${ON_BAND}`)
+      else if (kind === "comment" && head.band) this.mark(start, end, `${BubblyHtml.classesFor(kind)} ${BAND_COMMENT}`)
       else this.mark(start, end, BubblyHtml.classesFor(kind))
     }
   }
 
-  /** What a person typed:  its words with room either side, a pill under them. */
-  private input({ start, end, kind, isQuoted = false, isName }: SP.BubblyStretch, into: BubblyShape[]) {
+  /** What a person typed:  its words with a spacer either side, a pill under them. */
+  private input(
+    { start, end, kind, isQuoted = false, isName }: SP.BubblyStretch,
+    into: Array<BubblyShape | MarkupShape>
+  ) {
     const classes = [BubblyHtml.classesFor(kind as SP.BubblyPieceKind), ...(isName ? [NAME] : [])].join(" ")
     const place = this.mark(start, end, classes, {
-      before: room("input", "before"),
-      after: room("input", "after")
+      before: spacer("input", "before"),
+      after: spacer("input", "after")
     })
     into.push({ kind: "input", place, isChoice: kind === "choice", isQuoted })
-  }
-
-  ////////////////
-  // ## Marks
-  ////////////////
-
-  /**
-   * Mark the text from `start` to `end` with `classes` (every piece is a `bubbly-piece`), and room `before` /
-   * `after` it;  returns the mark's index.
-   */
-  private mark(start: number, end: number, classes: string, rooms: Rooms = {}): number {
-    if (end <= start) return -1
-    const options: monaco.editor.IModelDecorationOptions = {
-      inlineClassName: classes ? `${PIECE} ${classes}` : PIECE,
-      ...(rooms.before ? { before: rooms.before } : {}),
-      ...(rooms.after ? { after: rooms.after } : {})
-    }
-    return this.marks.push({ range: this.range(start, end), options }) - 1
-  }
-
-  /** A mark holding a shape's place from `start` to `end`, and nothing else;  returns its index. */
-  private place(start: number, end: number): number {
-    return this.marks.push({ range: this.range(start, end), options: {} }) - 1
-  }
-
-  /** Monaco's range from offset `start` to `end`. */
-  private range(start: number, end: number): monaco.IRange {
-    const from = this.positionAt(start)
-    const to = this.positionAt(end)
-    return { startLineNumber: from.line, startColumn: from.column, endLineNumber: to.line, endColumn: to.column }
-  }
-
-  /** Offset `offset`'s line and column, 1-based. */
-  private positionAt(offset: number): { line: number; column: number } {
-    let low = 0
-    let high = this.lineStarts.length - 1
-    while (low < high) {
-      const middle = (low + high + 1) >> 1
-      if (this.lineStarts[middle]! <= offset) low = middle
-      else high = middle - 1
-    }
-    return { line: low + 1, column: offset - this.lineStarts[low]! + 1 }
   }
 
   ////////////////
@@ -217,26 +211,20 @@ export type BubblyBlockShape = {
   hasBody: boolean
   /** whether its head starts or ends with a pill, and a quoted one */
   ends: { startsWithInput: boolean; endsWithInput: boolean; endsQuoted: boolean }
-  /** the pills on its head and its lines, and the blocks in its body */
-  inside: BubblyShape[]
+  /** the pills on its head and its lines, and the blocks in its body;  a drawing's tags too */
+  inside: Array<BubblyShape | MarkupShape>
 }
 
 /** A pill under what a person typed (`bubbly-input`), or one of a list's values (`bubbly-choice`). */
 export type BubblyInputShape = {
   kind: "input"
-  /** the mark on its words:  the room either side of them is injected there */
+  /** the mark on its words:  the spacer either side of them is injected there */
   place: number
   /** one of a list's values */
   isChoice: boolean
   /** its words were quoted:  its curly marks are drawn outside it */
   isQuoted: boolean
 }
-
-/** Room injected before or after a mark. */
-type Rooms = { before?: monaco.editor.InjectedTextOptions; after?: monaco.editor.InjectedTextOptions }
-
-/** The class on every piece of text the look draws:  its ink, under any token's colour. */
-const PIECE = "bubbly-piece"
 
 /** The class of the name a head defines, `"card"` in `a "card" is a view`:  bold. */
 const NAME = "bubbly-name"
@@ -245,29 +233,15 @@ const NAME = "bubbly-name"
 const QUOTE_MARK = "bubbly-quote-mark"
 
 /** A comment at the end of a head, on its band:  the page's is inside the band's element, the editor's isn't. */
-const ON_BAND = "bubbly-on-band"
+const BAND_COMMENT = "bubbly-band-comment"
 
 /**
- * Room either side of a pill's words (`input`), or outside a quoted one's marks (`quote`):
- * a no-break space, `bubbly-room-<kind> bubbly-room-<side>`, its width the sheet's.
- * - The caret stops only on the text's side of it:  beside the letter, never out past the room.
- *   Monaco's `InjectedTextCursorStops`:  `Right` (1) for room before the text, `Left` (2) for room after it.
- */
-function room(kind: "input" | "quote", side: "before" | "after"): monaco.editor.InjectedTextOptions {
-  return {
-    content: "\u00a0",
-    inlineClassName: `bubbly-room bubbly-room-${kind} bubbly-room-${side}`,
-    cursorStops: side === "before" ? 1 : 2
-  }
-}
-
-/**
- * Room before a head line's words:  `bubbly-room-head`, its width the sheet's (`--bubbly-pill-left-shift`).
+ * A spacer before a head line's words:  `bubbly-head-spacer`, its width the sheet's (`--bubbly-pill-left-shift`).
  * - The caret stops only after it, by the tab or the word it's before.
  */
-const HEAD_ROOM: monaco.editor.InjectedTextOptions = {
+const HEAD_SPACER: monaco.editor.InjectedTextOptions = {
   content: " ",
-  inlineClassName: "bubbly-room bubbly-room-head",
+  inlineClassName: "bubbly-spacer bubbly-head-spacer",
   cursorStops: 1
 }
 

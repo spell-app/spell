@@ -220,14 +220,32 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    * - Digits are a place:  `<solitaire-tableau id="1">` is the first tableau.
    * - With no `id`, in a layout:  its one thing of our type exactly.
    * - The program asked is the one that defined our tag last.
+   *   - None of that class's:  the class of that name the program's things are of (`core.thingForReference()`),
+   *     when another copy of the program loaded its classes again after the one that runs.
    * - `undefined` if there's none (yet).
    * - Tracked:  found as soon as the program makes it.  See `core.thingFor()`.
+   * - Found by its `id`, it's kept:  while our id and our tag's program stay the same, it isn't looked for again
+   *   (`foundById`), so what draws it no longer follows every thing the program makes.
+   *   Its drawing may make things itself (a foundation's placeholder, `a new card whose rank is ace`):
+   *   followed, that drew it again, which made another, for ever.
    */
   get boundThing(): object | undefined {
     const { entry, idName } = this
     if (!idName && !this.isInLayout) return undefined
-    return entry?.core.thingFor(entry.Class, idName)
+    if (!entry) return undefined
+    const kept = this.foundById
+    if (idName && kept?.idName === idName && kept.entry === entry) return kept.thing
+    const found =
+      entry.core.thingFor(entry.Class, idName) ??
+      // our tag defined last by another copy of the program (its classes loaded again):
+      // the thing of the class the program's things are of, by its name, as a reference finds it
+      (idName ? entry.core.thingForReference(`${entry.Class.name}#${idName}`) : undefined)
+    if (idName && found) this.foundById = { idName, entry, thing: found }
+    return found
   }
+
+  /** The thing our `id` found last, and the id and tag's program it was found by -- see `boundThing`. */
+  private foundById: { idName: string; entry: SpellElementEntry; thing: object } | undefined
 
   /**
    * Our thing's drawing -- nothing before our tag's runtime is known.
@@ -388,12 +406,14 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /**
    * A press on a draggable thing:  a drag, if it moves -- see `Dragging`.
    * - Not one in a control inside it, e.g. a task's title field or checkbox:  that press is the control's.
+   * - Not a Control-click on a Mac:  that's a right click, its menu's (`contextmenu`), never a drag as well.
    * - In a list people may reorder (`its items can be reordered`), what's carried stays where it is, dimmed:
    *   our thing, or every selected one if it's selected -- see `carriedElements()`.
    */
   @E.on("pointerdown")
   protected onPointerDown(event: PointerEvent) {
     if (!this.isDraggable || event.button !== 0 || this.isInAControl(event)) return
+    if (event.ctrlKey && IS_MAC) return
     const onDrop = (target: HTMLElement | undefined) => this.dropOn(target)
     const onCancel = () => this.sendToThing("drag-cancelled")
     if (!SpellElement.reorders(this.ownerList)) return void new Dragging(this.domElement, event, { onDrop, onCancel })
@@ -884,14 +904,13 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const { core } = this.entry ?? {}
     if (!core?.input || LISTENING_CORES.has(core)) return
     LISTENING_CORES.add(core)
-    const isMac = /mac/i.test(navigator.platform || navigator.userAgent)
-    core.input.listen(window, { isMac })
+    core.input.listen(window, { isMac: IS_MAC })
     if (event instanceof KeyboardEvent || event instanceof MouseEvent) core.input.set({ shiftKey: event.shiftKey })
     core.input.onStillDown = (thing) => void core.send?.(thing, "mouse-still-down")?.catch(() => {})
     window.addEventListener("keydown", (key) => {
       const focused = SpellElement.focusedThing()
       // an action's shortcut takes the key first (epic `elemental-spell` P10, Q35 B)
-      if (ActionMenus.runShortcut(core, focused, key, isMac)) return
+      if (ActionMenus.runShortcut(core, focused, key, IS_MAC)) return
       void core.send?.(focused, "key-down", { key: key.key.toLowerCase() })?.catch(() => {})
     })
   }
@@ -1769,6 +1788,9 @@ Dragging.addDropRule({
     return !!component && component.takesDrag()
   }
 })
+
+/** Is this page's system a Mac:  its meta key is Command, and a Control-click is a right click. */
+const IS_MAC = typeof navigator !== "undefined" && /mac/i.test(navigator.platform || navigator.userAgent)
 
 /** What a press in starts no drag:  it's the control's, e.g. typing in a task's title. */
 const CONTROL_SELECTOR = "input, textarea, select, button, [contenteditable]:not([contenteditable=false])"

@@ -30,7 +30,9 @@
         "onActionRun",
         "runShortcut",
         "menuOf",
-        "menuBarOf"
+        "menuBarOf",
+        "actionOf",
+        "menuItemsOf"
       ]
     },
     {

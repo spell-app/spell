@@ -75,6 +75,14 @@ export class Tokenizer {
   markupComments = false
 
   /**
+   * Does a tag `quotedNameTags` doesn't list keep a quoted word after its name, for the tag's own rule to read
+   * (`JSXElementToken.quotedWord`)?  e.g. spell's `<tableau "T1"/>`, a view's `id` (Owen, 2026-11-12).
+   * - The tokenizer can't tell what the word means:  only the tag's parse knows which tags are the project's views.
+   * - Off by default:  the word is then unreadable, as any other stray text in a tag is.
+   */
+  keepsQuotedWords = false
+
+  /**
    * Quote symbols recognized by `matchText`.
    * - REFACTOR: backtick?  left/right quotes, e.g. `""` and `''`?
    */
@@ -612,6 +620,11 @@ export class Tokenizer {
         nextStart = quotedContents.next
         jsxElement.record.quotedContents = quotedContents.contents
       }
+      const quotedWord = named || quotedContents ? undefined : this.matchJSXQuotedWord(tagName, text, nextStart, end)
+      if (quotedWord) {
+        nextStart = quotedWord.next
+        jsxElement.record.quotedWord = quotedWord
+      }
       const attributes: P.JSXAttributeToken[] = named ? [named] : []
       // read what attributes it can;  what it can't is skipped, so the tag still ends at its own `>` (epic `notebook` I5)
       let endBitMatch: RegExpMatchArray | null | undefined
@@ -673,6 +686,24 @@ export class Tokenizer {
     if (!value) return undefined
     const next = this.eatWhitespace(text, value.next, end)
     return new P.JSXAttributeToken({ name, start, value, raw: text.slice(start, next) })
+  }
+
+  /**
+   * A tag's quoted word at `start`, `"T1"` in `<tableau "T1"/>`, kept for the tag's rule to read --
+   * only with `keepsQuotedWords`, on a tag `quotedNameTags` doesn't list.
+   * - An attribute named `P.QUOTED_WORD`:  the rule says what it is, e.g. a view's `id`.
+   */
+  private matchJSXQuotedWord(
+    tagName: string,
+    text: string,
+    start: number,
+    end: number
+  ): P.JSXAttributeToken | undefined {
+    if (!this.keepsQuotedWords || this.quotedNameTags[tagName]) return undefined
+    const value = this.matchText(text, start, end)
+    if (!value) return undefined
+    const next = this.eatWhitespace(text, value.next, end)
+    return new P.JSXAttributeToken({ name: P.QUOTED_WORD, start, value, raw: text.slice(start, next) })
   }
 
   /**
@@ -1444,6 +1475,8 @@ export type TokenizerProps = {
   phraseHeadTags?: string[]
   /** See `Tokenizer.markupComments`. */
   markupComments?: boolean
+  /** See `Tokenizer.keepsQuotedWords`. */
+  keepsQuotedWords?: boolean
 }
 
 /** How `Tokenizer.findPhraseEnd()` finds a phrase's end. */

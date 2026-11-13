@@ -1,6 +1,6 @@
 import { E } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
-import type { Core, MenuItem } from "spell/parser/core"
+import type { ContextMenuElement, Core, MenuItem } from "spell/parser/core"
 
 /****************
  * ### `ActionMenus`
@@ -13,6 +13,8 @@ import type { Core, MenuItem } from "spell/parser/core"
  *   thing or up its chain (`core.menuOf()`), drawn three ways:
  *   - as a toolbar or menu in a drawing, `<ui-toolbar menu="GameMenu" />`:  `fill()` puts its actions in
  *   - as a right click's menu, `context-menu="GameMenu"` on any element of a drawing:  `showContextMenu()`
+ * - A right click's menu written IN a drawing, `<context-menu>` inside an element (epic `language`):  the core draws it
+ *   as a hidden `<spell-context-menu>` holding its items (`core.drawContextMenu()`), which `showContextMenu()` finds.
  *   - as the app's menu bar, `- its menu bar is "GameMenu"`:  `SpellElement` draws it with `itemsFor()`
  * - Each `<ui-action>` reads its item live (title, enabled, selected), and a click runs it through the core.
  * - STATIC and page-wide on purpose, as `Glides` is:  one context menu on a page at a time.
@@ -57,12 +59,12 @@ export class ActionMenus {
    * Show the menu named by the nearest `context-menu=` on `event`'s path, from `thing` up its chain, where the
    * person right-clicked:  true if there was one.
    * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window.
-   * - SIDE EFFECT:  the browser's own menu doesn't show;
+   * - SIDE EFFECT:  the browser's own menu doesn't show, there or on the menu itself;
    *   the menu goes when an action runs, at Escape, or at a press anywhere else.
    */
   static showContextMenu(event: MouseEvent, stopAt: Element, thing: object | undefined, core: Core): boolean {
-    const name = ActionMenus.contextMenuName(event, stopAt)
-    const items = name ? core.menuOf(thing, name) : undefined
+    const found = ActionMenus.contextMenuOf(event, stopAt)
+    const items = found?.items ?? (found?.name ? core.menuOf(thing, found.name) : undefined)
     if (!items?.length) return false
     event.preventDefault()
     ActionMenus.closeContextMenu()
@@ -70,12 +72,12 @@ export class ActionMenus {
     popup.setAttribute("at", JSON.stringify({ x: event.clientX, y: event.clientY }))
     popup.setAttribute("open-on", "manual")
     popup.setAttribute("visible", "")
-    popup.setAttribute("aria-label", name!)
+    if (found?.name) popup.setAttribute("aria-label", found.name)
     popup.setAttribute(MADE, "")
     const menu = document.createElement(MENU_TAG)
     menu.setAttribute("direction", "vertical")
     menu.setAttribute("interactive", "")
-    menu.setAttribute("aria-label", name!)
+    if (found?.name) menu.setAttribute("aria-label", found.name)
     menu.setAttribute(MADE, "")
     menu.append(...ActionMenus.itemsFor(items))
     popup.append(menu)
@@ -90,6 +92,8 @@ export class ActionMenus {
       (click) => click.composedPath().some((at) => (at as Element).localName === ACTION_TAG) && close()
     )
     popup.addEventListener("ui-closing", close)
+    // a right click on the menu itself:  never the browser's own menu over it
+    popup.addEventListener("contextmenu", (click) => click.preventDefault())
     return true
   }
 
@@ -157,11 +161,18 @@ export class ActionMenus {
     await (element as { ready?: Promise<void> }).ready
   }
 
-  /** The nearest `context-menu=` on `event`'s path, up to `stopAt`. */
-  private static contextMenuName(event: Event, stopAt: Element): string | undefined {
+  /**
+   * The nearest right-click menu on `event`'s path, up to `stopAt`:
+   * - a menu written in the drawing, `<context-menu>` inside an element:  its items, ready (`core.drawContextMenu()`)
+   * - else a `context-menu="game menu"`, naming a template's menu:  its name
+   */
+  private static contextMenuOf(event: Event, stopAt: Element): { name?: string; items?: MenuItem[] } | undefined {
     for (const target of event.composedPath()) {
-      const name = (target as Element).getAttribute?.(CONTEXT_MENU)
-      if (name) return name
+      const element = target as Element
+      const written = element.querySelector?.<Element & ContextMenuElement>(`:scope > ${CONTEXT_MENU_TAG}`)
+      if (written?.menuItems) return { items: written.menuItems() }
+      const name = element.getAttribute?.(CONTEXT_MENU)
+      if (name) return { name }
       if (target === stopAt) return undefined
     }
     return undefined
@@ -188,6 +199,9 @@ const MENU = "menu"
 
 /** The attribute naming the menu a right click on an element shows:  `context-menu="GameMenu"`. */
 const CONTEXT_MENU = "context-menu"
+
+/** The element a menu written in a drawing draws, inside the element whose right click shows it:  `<context-menu>`. */
+const CONTEXT_MENU_TAG = "spell-context-menu"
 
 /** Marks the elements made here, so a menu filled again takes them away first. */
 const MADE = "data-spell-action-menu"

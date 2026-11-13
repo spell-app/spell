@@ -142,7 +142,7 @@ export class Garden extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // - its "sill" is a new windowsill
-  @prop({ init: () => new Windowsill(), early: true })
+  @prop({ init: () => new Windowsill({ id: "sill" }), early: true })
   accessor sill!: Windowsill
 
   /**

@@ -103,12 +103,12 @@ export class Mesa extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // su "columna" es una nueva columna
-  static { this.declareProp("columna", { init: () => new Columna(), early: true }) }
+  static { this.declareProp("columna", { init: () => new Columna({ id: "columna" }), early: true }) }
   get columna() { return this.getProp("columna") }
   set columna(value) { this.setProp("columna", value) }
 
   // su "mano" es una nueva pila
-  static { this.declareProp("mano", { init: () => new Pila(), early: true }) }
+  static { this.declareProp("mano", { init: () => new Pila({ id: "mano" }), early: true }) }
   get mano() { return this.getProp("mano") }
   set mano(value) { this.setProp("mano", value) }
 

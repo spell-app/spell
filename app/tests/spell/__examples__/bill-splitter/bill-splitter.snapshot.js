@@ -120,7 +120,7 @@ export class BillSplitter extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "diners" is a new table
-  static { this.declareProp("diners", { init: () => new Table(), early: true }) }
+  static { this.declareProp("diners", { init: () => new Table({ id: "diners" }), early: true }) }
   get diners() { return this.getProp("diners") }
   set diners(value) { this.setProp("diners", value) }
 

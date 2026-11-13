@@ -93,12 +93,12 @@
       "dark": "calc( 23px - 2 * max(0px, -1 * 0px) )"
     },
     "--bubbly-line-inset": {
-      "light": "8px",
-      "dark": "8px"
+      "light": "18px",
+      "dark": "18px"
     },
     "--bubbly-pill-pad-left": {
-      "light": "0px",
-      "dark": "0px"
+      "light": "3px",
+      "dark": "3px"
     },
     "--bubbly-pill-pad-right": {
       "light": "16px",
@@ -136,13 +136,17 @@
       "light": "1px",
       "dark": "1px"
     },
-    "--bubbly-rail-corner": {
+    "--bubbly-gutter-corner": {
       "light": "calc(3px + 8px)",
       "dark": "calc(3px + 8px)"
     },
-    "--bubbly-gap": {
+    "--bubbly-input-gap": {
       "light": "2px",
       "dark": "2px"
+    },
+    "--bubbly-bracket-pad": {
+      "light": "3px",
+      "dark": "3px"
     },
     "--bubbly-input-pad": {
       "light": "8px",
@@ -155,6 +159,10 @@
     "--bubbly-end-inset": {
       "light": "2px",
       "dark": "2px"
+    },
+    "--bubbly-input-radius": {
+      "light": "20px",
+      "dark": "20px"
     },
     "--bubbly-input-opacity": {
       "light": "80%",
@@ -172,9 +180,9 @@
       "light": "18px",
       "dark": "18px"
     },
-    "--bubbly-quote-room": {
-      "light": "15px",
-      "dark": "15px"
+    "--bubbly-quote-margin": {
+      "light": "12px",
+      "dark": "12px"
     },
     "--bubbly-quote-rotation": {
       "light": "15deg",
@@ -199,6 +207,66 @@
     "--bubbly-depth": {
       "light": "1",
       "dark": "1"
+    },
+    "--bubbly-block-outer-corner": {
+      "light": "calc((12px + 8px) / 2)",
+      "dark": "calc((12px + 8px) / 2)"
+    },
+    "--bubbly-block-outer-cut": {
+      "light": "calc(calc((12px + 8px) / 2) * 0.62) calc((12px + 8px) / 2)",
+      "dark": "calc(calc((12px + 8px) / 2) * 0.62) calc((12px + 8px) / 2)"
+    },
+    "--bubbly-tag-slope": {
+      "light": "0.62",
+      "dark": "0.62"
+    },
+    "--bubbly-tag-corner": {
+      "light": "calc(23px / 2 * 0.62) calc(23px / 2)",
+      "dark": "calc(23px / 2 * 0.62) calc(23px / 2)"
+    },
+    "--bubbly-foot-pill-height": {
+      "light": "calc(23px - 2px)",
+      "dark": "calc(23px - 2px)"
+    },
+    "--bubbly-html-row": {
+      "light": "25px",
+      "dark": "25px"
+    },
+    "--bubbly-page-scale": {
+      "light": "0.9375",
+      "dark": "0.9375"
+    },
+    "--bubbly-row": {
+      "light": "calc(25px / 0.9375)",
+      "dark": "calc(25px / 0.9375)"
+    },
+    "--bubbly-tab": {
+      "light": "calc(7.97px / 0.9375)",
+      "dark": "calc(7.97px / 0.9375)"
+    },
+    "--bubbly-band-margin": {
+      "light": "calc((calc(25px / 0.9375) - 23px) / 2)",
+      "dark": "calc((calc(25px / 0.9375) - 23px) / 2)"
+    },
+    "--bubbly-after-foot": {
+      "light": "calc( round( nearest, ( 1px + 3px + max(0px, 3px - calc((calc(25px / 0.9375) - 23px) / 2)) ) * 0.9375, 1px ) / 0.9375 - 1px - 3px )",
+      "dark": "calc( round( nearest, ( 1px + 3px + max(0px, 3px - calc((calc(25px / 0.9375) - 23px) / 2)) ) * 0.9375, 1px ) / 0.9375 - 1px - 3px )"
+    },
+    "--bubbly-head-words": {
+      "light": "calc(3px + 8.5px)",
+      "dark": "calc(3px + 8.5px)"
+    },
+    "--bubbly-quote-char": {
+      "light": "7.33px",
+      "dark": "7.33px"
+    },
+    "--bubbly-band-mark": {
+      "light": "#c0c0c3",
+      "dark": "#5a5961"
+    },
+    "--bubbly-end-mark": {
+      "light": "#d4d4d6",
+      "dark": "#47464d"
     }
   },
   "parts": {

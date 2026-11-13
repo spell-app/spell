@@ -24,9 +24,10 @@ game.start()                      # the game is drawn on `core.page`, when the p
   - Its tag is its class's `element_tag`, which the compiled class names (`element_tag_of()`).
 """
 
-from collections.abc import Callable
-from typing import TYPE_CHECKING
+from collections.abc import Callable, Iterator
+from typing import TYPE_CHECKING, Any
 
+from spell_core.described import DescribedMethods
 from spell_core.drawing import Element, Page, drawn_children, h
 
 if TYPE_CHECKING:
@@ -87,6 +88,22 @@ class DrawingMethods:
 
         items = self.draw_items(drawable) if isinstance(drawable, ViewableList) else None
         return element_of(tag, self.draw_own(drawable), items or [])
+
+    def draw_by_id(self, tag: str, attributes: dict[str, str]) -> Element | None:
+        """A view tag the drawing wrote itself, `<tableau "T1"/>`:  the thing its `id` names, drawn, with `attributes`.
+
+        - As the page's element finds it, by its `id` (`thing_called()`):  a name, a chosen id, or a place.
+        - `None` when `tag` is no view's, or its id names nothing:  then it's a plain element.
+        """
+        from spell_core.things import things
+
+        cls = things.class_drawn_as(tag)
+        found = self.thing_called(cls, attributes["id"]) if cls is not None else None
+        drawn = self.draw_thing(found) if found is not None else None
+        if not isinstance(drawn, Element):
+            return None
+        drawn.attributes.update(attributes)
+        return drawn
 
     def element_tag_of(self, drawable: object = None) -> str | None:
         """Tag of `drawable`'s element, e.g. `solitaire-card` -- `None` if its class has none.
@@ -192,6 +209,95 @@ class DrawingMethods:
           (`<Project>.elements.spell.js`), and draws with them.
         """
         self.page.defaults[file] = defaults
+
+    def draw_action(
+        self, thing: object, name: str, props: dict[str, object] | None = None, *children: object
+    ) -> Element:
+        """A button for ONE of the program's actions, `name` (`auto_play`), on `thing` or up its chain:  `<action>`.
+
+        - The twin of the JavaScript core's `drawAction()`, which a page draws it with, live:
+          here it's drawn as the page is written, once, as every Python drawing is.
+        - A `<ui-button>`:  its text the action's title, its icon, its key in its tooltip, `Auto Play (A)`,
+          disabled while it isn't enabled.
+        - `props`:  the tag's other attributes, each winning over what the action gives;
+          `icon-only` its own, no text, its title its `aria-label`.
+        - An action nobody up the chain has:  a disabled button of its name.
+        """
+        given = dict(props or {})
+        icon_only = given.pop(ICON_ONLY, False)
+        holder = next((at for at in self._chain_of(thing) if callable(getattr(at, name, None))), None)
+        if holder is not None:
+            description = DescribedMethods.actions_of(self, type(holder)).get(name, {})
+            live_title = getattr(holder, description.get("title_from") or "", None)
+            title = live_title if isinstance(live_title, str) else description.get("title") or _words_of(name)
+            enabled_when = description.get("enabled_when")
+            is_enabled = bool(getattr(holder, enabled_when)) if enabled_when else True
+        elif name in APP_ACTIONS:
+            # the app's own `undo` and `redo`:  Python keeps no history yet, so there's never a step to take
+            description = APP_ACTIONS[name]
+            title, is_enabled = self.message(name), False
+        else:
+            return h(BUTTON_TAG, {"disabled": True, **given}, *(children or (name,)))
+        shortcut = (description.get("shortcuts") or [None])[0]
+        own: dict[str, object] = {
+            "icon": description.get("icon"),
+            "title": f"{title} ({_keys_of(shortcut)})" if shortcut else None,
+            "disabled": not is_enabled,
+        }
+        if icon_only:
+            own["aria-label"] = title
+        text = children if icon_only or children else (title,)
+        return h(BUTTON_TAG, {**own, **given}, *text)
+
+    def draw_context_menu(self, thing: object, names: list[str]) -> Element:
+        """The right-click menu of the element around it, `<context-menu>`:  a hidden `<spell-context-menu>`.
+
+        - The twin of the JavaScript core's `drawContextMenu()`:  the page draws the menu with its drawing half,
+          each action run here;  printed, it's the hidden element alone, as the JavaScript run's page prints it.
+        """
+        return h(CONTEXT_MENU_TAG, {"hidden": True})
+
+    if TYPE_CHECKING:
+
+        def _chain_of(self, target: object) -> Iterator[object]:
+            """`SendingMethods`'s:  `target`, what holds it, up to the running app."""
+            ...
+
+        def message(self, key: str, **values: object) -> str:
+            """`Messages`'s:  message `key` in the program's language."""
+            ...
+
+
+# What `<action>` draws:  Spell UI's button, which the page defines
+BUTTON_TAG = "ui-button"
+
+# What `<context-menu>` draws where it is:  an element that draws nothing, holding its menu on a page
+CONTEXT_MENU_TAG = "spell-context-menu"
+
+# `<action>`'s own attribute:  its button shows only its icon
+ICON_ONLY = "icon-only"
+
+
+# The app's own actions, as the JavaScript core's `App` describes them:  its `undo` and `redo`
+APP_ACTIONS: dict[str, dict[str, Any]] = {
+    "undo": {"icon": "undo", "shortcuts": ["meta+Z"]},
+    "redo": {"icon": "redo", "shortcuts": ["meta+shift+Z"]},
+}
+
+
+def _keys_of(shortcut: str) -> str:
+    """A shortcut as a key tip shows it, as a page off a Mac does:  `meta+shift+Z` is `Ctrl+Shift+Z`, `A` is `A`.
+
+    - The twin of the JavaScript core's `keysOf()`, with no page:  the same text as a JavaScript run with no page.
+    """
+    *parts, key = [part.strip() for part in shortcut.split("+")]
+    names = ["Ctrl" if part.lower() in ("meta", "mod", "control") else part.lower().capitalize() for part in parts]
+    return "+".join([*names, key.upper() if len(key) == 1 else key])
+
+
+def _words_of(name: str) -> str:
+    """An action's name in words, in Initial Caps, for one described with no title:  `auto_play` => `Auto Play`."""
+    return " ".join(word.capitalize() for word in name.split("_") if word)
 
 
 ################

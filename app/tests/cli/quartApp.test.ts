@@ -186,8 +186,8 @@ describe("a Python spell app, in a real browser", () => {
   test("AutoPlay's pauses reach the page:  a patch at each, so it animates", async () => {
     const page = await opened()
     const before = page.received.length
-    // its button is the toolbar's:  an action's item box, its title inside
-    await page.page.locator("ui-toolbar [part=item]", { hasText: "Auto Play" }).click()
+    // its button is the toolbar's, `<action "auto play"/>`:  a `<ui-button>`, its title inside
+    await page.page.locator("ui-toolbar ui-button", { hasText: "Auto Play" }).click()
     await page.page.waitForTimeout(3000)
     const frames = page.received.slice(before).map((frame) => JSON.stringify(frame).length)
     process.stderr.write(`AutoPlay's frames:  ${frames.length}, of ${frames.join(", ")} characters\n`)

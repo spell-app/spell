@@ -55,6 +55,10 @@
   .ui.toast {
     backdrop-filter: var(--glass-blur);
   }
+  /* ... but a menu a popup holds:  the popup's blur is its own, a second one inside drew a ring (Owen) */
+  :host(:state(in-popup)) .ui.menu {
+    backdrop-filter: none;
+  }
   /*
    * an INVERTED surface on a light page (a dark segment, the inverted examples):  dark glass that reads as dark,
    * not the translucent grey the dark scheme's glass makes over a light wallpaper

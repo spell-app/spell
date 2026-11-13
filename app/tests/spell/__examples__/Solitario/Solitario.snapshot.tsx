@@ -307,11 +307,6 @@ export class Pila extends ViewableList<Carta> {
   static instanceType = Carta
   static elementTag = core.defineElement(this, "test-project")
 
-  /** Cómo la llama el juego, p. ej. reserva */
-  // su "nombre" es texto
-  @prop({ type: "text" })
-  accessor name!: string
-
   /** Cómo están sus cartas:  una sobre otra, hacia abajo en una columna, a lo largo de una fila, o en abanico, como se sostiene una mano -- styles.css */
   // su "disposición" es uno de apilada, vertical, horizontal o abanico
   static Disposiciones = ["apilada", "vertical", "horizontal", "abanico"] as const
@@ -330,9 +325,9 @@ export class Pila extends ViewableList<Carta> {
     return this.lastItem!.valor
   }
 
-  /** Su nombre, luego los nombres cortos de sus cartas:  reserva: D♠↑ 7♥↓ */
+  /** Su id, luego los nombres cortos de sus cartas:  reserva: D♠↑ 7♥↓ */
   @derived get estado() {
-    let resumen = `${this.name || "pila"}:`
+    let resumen = `${this.id}:`
     this.forEach((carta) => (resumen = `${resumen} ${carta.estado}`))
     return resumen
   }
@@ -365,7 +360,6 @@ export interface Pila {
  */
 export class PilaElement extends SpellElement<Pila> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-pila", "pila", [
-    { name: "name", kind: "string", description: "Its name." },
     { name: "disposición", kind: "string", description: "Its disposición." }
   ])
 
@@ -382,8 +376,8 @@ core.useElement(Pila, PilaElement)
 export function testLasPilas() {
   return core.test("test las pilas", function testLasPilas() {
     const it = new Pila()
-    core.echoTestAction(`poner la reserva a una nueva pila con nombre "reserva"`)
-    const reserva = new Pila({ name: "reserva" })
+    core.echoTestAction(`poner la reserva a una nueva pila con id "reserva"`)
+    const reserva = new Pila({ id: "reserva" })
     core.expect(reserva.color, `el color de la reserva`, "ninguno", `"ninguno"`)
     core.expect(reserva.valor, `el valor de la reserva`, 0, `0`)
     core.echoTestAction(`agregar (una nueva carta cuyo rango es dama, palo es espadas y dirección es arriba) a la reserva`)
@@ -399,7 +393,7 @@ export function testLasPilas() {
     core.expect(reserva.estado, `el estado de la reserva`, "reserva: D♠↑ 7♥↓", `"reserva: D♠↑ 7♥↓"`)
 
     /** una carta está en una sola pila a la vez */
-    const descartes = new Pila({ name: "descartes" })
+    const descartes = new Pila({ id: "descartes" })
     core.echoTestAction(`obtener la última carta de la reserva`)
     const it2 = reserva.lastItem
     core.echoTestAction(`agregar eso a los descartes`)
@@ -639,59 +633,59 @@ export class Solitario extends App {
   }
 
   // "mazo" es un nuevo mazo
-  @prop({ init: () => new Mazo(), early: true })
+  @prop({ init: () => new Mazo({ id: "mazo" }), early: true })
   accessor mazo!: Mazo
 
-  // "reserva" es una nueva pila de reserva con nombre "reserva"
-  @prop({ init: () => new PilaDeReserva({ name: "reserva" }), early: true })
+  // "reserva" es una nueva pila de reserva
+  @prop({ init: () => new PilaDeReserva({ id: "reserva" }), early: true })
   accessor reserva!: PilaDeReserva
 
-  // "descartes" es una nueva pila de descartes con nombre "descartes"
-  @prop({ init: () => new PilaDeDescartes({ name: "descartes" }), early: true })
+  // "descartes" es una nueva pila de descartes
+  @prop({ init: () => new PilaDeDescartes({ id: "descartes" }), early: true })
   accessor descartes!: PilaDeDescartes
 
-  // "tréboles" es una nueva fundación con nombre "tréboles", palo = tréboles
-  @prop({ init: () => new Fundación({ name: "tréboles", palo: "tréboles" }), early: true })
+  // "tréboles" es una nueva fundación con palo = tréboles
+  @prop({ init: () => new Fundación({ id: "tréboles", palo: "tréboles" }), early: true })
   accessor tréboles!: Fundación
 
-  // "diamantes" es una nueva fundación con nombre "diamantes", palo = diamantes
-  @prop({ init: () => new Fundación({ name: "diamantes", palo: "diamantes" }), early: true })
+  // "diamantes" es una nueva fundación con palo = diamantes
+  @prop({ init: () => new Fundación({ id: "diamantes", palo: "diamantes" }), early: true })
   accessor diamantes!: Fundación
 
-  // "corazones" es una nueva fundación con nombre "corazones", palo = corazones
-  @prop({ init: () => new Fundación({ name: "corazones", palo: "corazones" }), early: true })
+  // "corazones" es una nueva fundación con palo = corazones
+  @prop({ init: () => new Fundación({ id: "corazones", palo: "corazones" }), early: true })
   accessor corazones!: Fundación
 
-  // "espadas" es una nueva fundación con nombre "espadas", palo = espadas
-  @prop({ init: () => new Fundación({ name: "espadas", palo: "espadas" }), early: true })
+  // "espadas" es una nueva fundación con palo = espadas
+  @prop({ init: () => new Fundación({ id: "espadas", palo: "espadas" }), early: true })
   accessor espadas!: Fundación
 
-  // "C1" es una nueva columna con nombre "C1"
-  @prop({ init: () => new Columna({ name: "C1" }), early: true })
+  // "C1" es una nueva columna
+  @prop({ init: () => new Columna({ id: "C1" }), early: true })
   accessor C1!: Columna
 
-  // "C2" es una nueva columna con nombre "C2"
-  @prop({ init: () => new Columna({ name: "C2" }), early: true })
+  // "C2" es una nueva columna
+  @prop({ init: () => new Columna({ id: "C2" }), early: true })
   accessor C2!: Columna
 
-  // "C3" es una nueva columna con nombre "C3"
-  @prop({ init: () => new Columna({ name: "C3" }), early: true })
+  // "C3" es una nueva columna
+  @prop({ init: () => new Columna({ id: "C3" }), early: true })
   accessor C3!: Columna
 
-  // "C4" es una nueva columna con nombre "C4"
-  @prop({ init: () => new Columna({ name: "C4" }), early: true })
+  // "C4" es una nueva columna
+  @prop({ init: () => new Columna({ id: "C4" }), early: true })
   accessor C4!: Columna
 
-  // "C5" es una nueva columna con nombre "C5"
-  @prop({ init: () => new Columna({ name: "C5" }), early: true })
+  // "C5" es una nueva columna
+  @prop({ init: () => new Columna({ id: "C5" }), early: true })
   accessor C5!: Columna
 
-  // "C6" es una nueva columna con nombre "C6"
-  @prop({ init: () => new Columna({ name: "C6" }), early: true })
+  // "C6" es una nueva columna
+  @prop({ init: () => new Columna({ id: "C6" }), early: true })
   accessor C6!: Columna
 
-  // "C7" es una nueva columna con nombre "C7"
-  @prop({ init: () => new Columna({ name: "C7" }), early: true })
+  // "C7" es una nueva columna
+  @prop({ init: () => new Columna({ id: "C7" }), early: true })
   accessor C7!: Columna
 
   /** Cada carta del mazo a la reserva */
@@ -742,11 +736,20 @@ export class Solitario extends App {
   }
 
   @drawn draw() {
-    // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra el menú del juego
+    // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra sus jugadas
     return (
       <es-contenedor>
-        <es-barra-herramientas class="GameBar" menu="menú del juego" aria-label="Juego" encogible={true}>
+        <es-barra-herramientas class="GameBar" aria-label="Juego">
           <es-texto class="GameTitle" slot="titulo" tamano="grande">Solitario Encanto</es-texto>
+          <es-botones class="GameButtons" slot="centro">
+            {core.drawAction(this, "jugarSolo")}
+            {core.drawAction(this, "hacerTrampa")}
+            {core.drawAction(this, "reiniciarElJuego")}
+          </es-botones>
+          <es-botones class="GameButtons" slot="centro">
+            {core.drawAction(this, "undo", { "icon-only": true })}
+            {core.drawAction(this, "redo", { "icon-only": true })}
+          </es-botones>
           <es-texto slot="derecha">
             {"Movimientos: "}
             {this.movimientos}
@@ -755,21 +758,22 @@ export class Solitario extends App {
             {this.pista}
           </es-texto>
         </es-barra-herramientas>
-        <es-cuadricula class="Board" columnas="7" context-menu="menú del juego">
-          {core.drawThing(this.reserva)}
-          {core.drawThing(this.descartes)}
+        <es-cuadricula class="Board" columnas="7">
+          {core.drawContextMenu(this, ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "-", "undo", "redo"])}
+          <test-project-pila-de-reserva id="reserva" />
+          <test-project-pila-de-descartes id="descartes" />
           <es-columna />
-          {core.drawThing(this.tréboles)}
-          {core.drawThing(this.diamantes)}
-          {core.drawThing(this.corazones)}
-          {core.drawThing(this.espadas)}
-          {core.drawThing(this.C1)}
-          {core.drawThing(this.C2)}
-          {core.drawThing(this.C3)}
-          {core.drawThing(this.C4)}
-          {core.drawThing(this.C5)}
-          {core.drawThing(this.C6)}
-          {core.drawThing(this.C7)}
+          <test-project-fundacion id="tréboles" />
+          <test-project-fundacion id="diamantes" />
+          <test-project-fundacion id="corazones" />
+          <test-project-fundacion id="espadas" />
+          <test-project-columna id="C1" />
+          <test-project-columna id="C2" />
+          <test-project-columna id="C3" />
+          <test-project-columna id="C4" />
+          <test-project-columna id="C5" />
+          <test-project-columna id="C6" />
+          <test-project-columna id="C7" />
         </es-cuadricula>
       </es-contenedor>
     )
@@ -916,8 +920,6 @@ core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar", shortcu
 core.describeAction(Solitario, "jugarSolo", { title: "Jugar solo", shortcuts: ["A"], undoneAs: "Jugar solo" })
 /** Voltea una carta boca abajo de una columna, al azar, sobre los descartes */
 core.describeAction(Solitario, "hacerTrampa", { title: "Trampa", shortcuts: ["C"], undoneAs: "Trampa" })
-// su "menú del juego" es un menú de "jugar solo", "hacer trampa", "reiniciar el juego", "deshacer" y "rehacer"
-core.describeMenu(Solitario, "menúDelJuego", { items: ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "undo", "redo"] })
 
 core.heading("Jugar una carta")
 /////////////////////
@@ -957,8 +959,8 @@ core.heading("Las pilas")
 export function testLosMovimientos() {
   return core.test("test los movimientos", function testLosMovimientos() {
     const it = new Columna()
-    core.echoTestAction(`poner la columna a una nueva columna con nombre "C1"`)
-    let columna = new Columna({ name: "C1" })
+    core.echoTestAction(`poner la columna a una nueva columna con id "C1"`)
+    let columna = new Columna({ id: "C1" })
     core.echoTestAction(`poner el rey a una nueva carta cuyo rango es rey, palo es espadas y dirección es arriba`)
     const rey = new Carta({
       rango: "rey",
@@ -993,7 +995,7 @@ export function testLosMovimientos() {
     core.expect(core.canGiveUp(columna, dama), `la columna puede soltar la dama`, false, `no`)
 
     /** una fundación toma su palo, el as primero, luego uno más alto:  cada una la última carta de su pila */
-    const fundación = new Fundación({ name: "corazones", palo: "corazones" })
+    const fundación = new Fundación({ palo: "corazones" })
     core.echoTestAction(`poner el dos a una nueva carta cuyo rango es 2, palo es corazones y dirección es arriba`)
     const dos = new Carta({
       rango: 2,
@@ -1006,8 +1008,8 @@ export function testLosMovimientos() {
       palo: "corazones",
       direction: "up"
     })
-    core.echoTestAction(`poner la columna a una nueva columna con nombre "C2"`)
-    columna = new Columna({ name: "C2" })
+    core.echoTestAction(`poner la columna a una nueva columna con id "C2"`)
+    columna = new Columna({ id: "C2" })
     core.echoTestAction(`agregar el dos a la columna`)
     columna.append(dos)
     core.echoTestAction(`agregar el as a la columna`)
@@ -1025,7 +1027,7 @@ export function testLosMovimientos() {
 
 core.holdWhile(() => solitario.repartirLasCartas())
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the board looks -- each card, and how each pile lays its cards out (its disposición).¬   - A card is drawn as a playing card here, not as a Spell UI element:  no <ui-*> tag draws one, so its size, its¬     faces and its turn over are this sheet's.¬   - Every pile and card is an element of its own on the board, so these rules reach them all:¬     - a pile by its disposición, e.g. <solitario-columna disposición="vertical">¬     - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them¬     - an empty pile's placeholder, its marcador, which it draws itself, by its part:  ::part(marcador)¬   - A card is one letter of unicode's Playing Cards, at its pile's width:¬     so a card is as wide as its column, whatever the window's width. */¬¬/* A card's picture, in ems of its own letter (measured in Chrome on a Mac):¬   0.604em wide, 0.805em tall, its left edge 0.049em into the letter;  its outline reaches a little past that, so a¬   card keeps 0.008em to spare above and below. */¬:root,¬:host {¬  /* how wide a card is, for each em of its letter */¬  --card-width: 0.604;¬  /* how tall it is, for each of its widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  a fifth of it, its rank and suit */¬  --card-step-down: 0.2;¬  /* along a row, how much of each card the next one covers:  a tenth of it */¬  --card-overlap: 0.1;¬  /* fanned, how far each card turns from the one before */¬  --card-turn: 8deg;¬}¬¬/****************¬ * The table:  green felt, as on a casino's card table, with the words on it in white¬ ****************/¬¬solitario-app {¬  display: block;¬  box-sizing: border-box;¬  min-height: 100%;¬  /* room between the felt's edge and the toolbar and cards */¬  padding: 32px;¬  /* rounded at the bottom too, as the frame it sits in is at the top */¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬/* a large screen:  twice the room */¬@media (width >= 1100px) {¬  solitario-app {¬    padding: 64px;¬  }¬}¬.GameTitle,¬.GameBar > [slot] {¬  color: #f2fbf5;¬}¬¬/****************¬ * The board:  below the game's toolbar, its piles seven to a line¬ ****************/¬¬.Board {¬  /* gutters that shrink with a narrow window, so the cards keep most of its width */¬  --ui-grid-gutter: min(2rem, 2.5vw);¬  --ui-grid-row-spacing: min(2rem, 4vw);¬  /* 1.5rem below the toolbar:  the grid pulls itself up by half a row's spacing */¬  margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);¬}¬¬/****************¬ * The toolbar:  its buttons in the middle, each a button of its own, with no frame around them¬ ****************/¬¬.GameBar {¬  --ui-menu-divider: transparent;¬}¬/* the game's name, in the heavy type of Spell's loading screen */¬.GameTitle {¬  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;¬  font-weight: 800;¬  letter-spacing: -0.035em;¬}¬¬/* the title and the score take equal room, so the buttons sit in the true middle */¬.GameBar::part(title),¬.GameBar::part(right) {¬  flex: 1 1 0;¬}¬.GameBar::part(right) {¬  justify-content: flex-end;¬}¬.GameBar::part(menu) {¬  flex: 0 1 auto;¬  /* it would scroll, which would cut the pills' shadow */¬  overflow: visible;¬  min-width: 0;¬  gap: 0;¬  border: 0;¬  box-shadow: none;¬  background: transparent;¬  /* one shadow around each whole pill, with none falling across its buttons */¬  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));¬}¬/* two pills, auto play | cheat | restart and undo | redo:  each button shares its edge with the next */¬.GameBar > *::part(item) {¬  padding: 0.55em 1em;¬  margin-left: -1px;¬  border: 0;¬  border-radius: 0;¬  background: Canvas;¬  font-weight: 500;¬  box-shadow: inset 0 0 0 1px var(--ui-border-color);¬  transition: background-color 120ms ease-out;¬}¬.GameBar > :not([slot]):nth-of-type(1)::part(item),¬.GameBar > :not([slot]):nth-of-type(4)::part(item) {¬  border-start-start-radius: 99em;¬  border-end-start-radius: 99em;¬}¬.GameBar > :not([slot]):nth-of-type(3)::part(item),¬.GameBar > :not([slot]):nth-of-type(5)::part(item) {¬  border-start-end-radius: 99em;¬  border-end-end-radius: 99em;¬}¬.GameBar > :not([slot]):nth-of-type(4)::part(item) {¬  margin-left: 1em;¬}¬.GameBar > *::part(item):hover {¬  background: color-mix(in srgb, Canvas 92%, CanvasText);¬}¬.GameBar > *::part(item):active {¬  background: color-mix(in srgb, Canvas 84%, CanvasText);¬}¬/* undo and redo:  just their icons, their names kept for a screen reader */¬.GameBar > :not([slot]):nth-of-type(n + 4)::part(title) {¬  font-size: 0;¬}¬.GameBar > :not([slot]):nth-of-type(n + 4)::part(icon) {¬  margin: 0;¬}¬.GameBar > :not([slot]):nth-of-type(n + 4)::part(shortcut) {¬  display: none;¬}¬/* its key, a small key cap */¬.GameBar > *::part(shortcut) {¬  margin-inline-start: 0.6em;¬  padding: 0.1em 0.45em;¬  border-radius: var(--ui-radius-s);¬  background: color-mix(in oklch, currentColor 8%, transparent);¬  font-size: 0.75em;¬}¬¬/* A narrow window, a phone's:  the felt's edge thinner, so the seven columns get the width;¬   the toolbar loses its title and keys (a phone has no keyboard), and the score goes on a line of its own,¬   below the buttons, so every button keeps its name */¬@media (width < 36rem) {¬  solitario-app {¬    padding: 16px 12px;¬  }¬  .GameBar::part(toolbar) {¬    flex-wrap: wrap;¬    justify-content: center;¬    row-gap: 0.75rem;¬  }¬  .GameBar::part(title),¬  [slot="titulo"] {¬    display: none;¬  }¬  .GameBar::part(right) {¬    flex: 1 0 100%;¬    justify-content: center;¬  }¬  .GameBar > *::part(item) {¬    padding-inline: 0.65em;¬  }¬  .GameBar > :not([slot]):nth-of-type(4)::part(item) {¬    margin-left: 0.5em;¬  }¬  .GameBar > *::part(shortcut) {¬    display: none;¬  }¬  .GameBar > [slot] {¬    white-space: nowrap;¬  }¬}¬¬/****************¬ * A pile:  as wide as its cell of the board, and as tall as its cards¬ ****************/¬¬[disposición] {¬  /* a box of its own, holding its floated sizer */¬  display: flow-root;¬  position: relative;¬  /* its cards size themselves by its width */¬  container-type: inline-size;¬  /* no glow around the whole pile when a dragged card would land on it:  its top card glows instead (below) */¬  --spell-drop-glow: none;¬}¬/* its height:  a card's, by default -- a percentage of padding is one of its width */¬[disposición]::before {¬  content: "";¬  /* floated, so its cards start at the top of its content, not below it */¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card, and the placeholder:  a card's letter as wide as the pile, cut to the card it draws */¬[disposición] > *,¬[disposición]::part(marcador) {¬  position: absolute;¬  display: block;¬  /* where its pile's content starts, inside the cell's gutters:  its offsets in a layout are margins */¬  top: auto;¬  left: auto;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* A card on its own, in no pile (one added to the table in the editor):  a column's usual width, face up */¬solitario-carta:not([disposición] > *) {¬  position: relative;¬  display: inline-block;¬  vertical-align: top;¬  font-size: calc(var(--loose-card-width, 6rem) / var(--card-width));¬}¬[disposición] > *,¬[disposición]::part(marcador),¬solitario-carta {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* in the font that draws the cards, so the page's font never moves them:  a line's height comes from its FIRST font,¬     and a theme's (Fruity's system font) set them 0.027em higher than Lato did, cutting off their tops */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the card's spare room above and below its ink (0.008em) padding, its white face only the content, so it hugs the ink¬     (not a border:  a browser rounds a border to whole pixels) */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  /* Apple Symbols rises 0.67em and drops 0.25em, its card's ink 0.666em above its baseline:¬     a line of 0.917 starts the ink at the top of the face (measured:  0.912 by the font's rounded numbers) */¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/****************¬ * Turning over:  a two sided view's own (Carta.es.spell), both its sides back to back, the card turning in 3D¬ * - Here, only how deep the turn looks, for a card one letter wide:  3em.¬ * - 0.3s, the template's own time:  the game pauses that long after turning the stock's card (Solitario.es.spell), so it turns¬ *   over before it moves.¬ * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a¬ *   card that cut its own content would draw flat, and its sides couldn't turn with it.¬ ****************/¬¬[disposición] > *,¬solitario-carta {¬  --spell-turn-perspective: 3em;¬  /* its sides turn with it, in 3D:  nothing cut */¬  overflow: visible;¬}¬/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;¬   a <es-texto> draws no box of its own, so it's given one */¬solitario-carta::part(front),¬solitario-carta::part(back),¬[disposición] > *::part(front),¬[disposición] > *::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬/* Over every card and pile around it (the card's "levantada"), while the cheat turns it and moves it onto the discards */¬[disposición] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬[disposición] > [levantada] {¬  z-index: 5;¬}¬/*¬ * ... and turns face up as it goes:  moving it to the discards draws it there already face up, so its turn starts¬ * from face down (\`@starting-style\`)¬ */¬[disposición] > [levantada][direction="up"] {¬  @starting-style {¬    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);¬  }¬}¬¬@media (prefers-reduced-motion: reduce) {¬  [disposición] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[disposición]::part(marcador) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[disposición]::part(marcador):hover {¬  opacity: 0.5;¬}¬¬/*¬ * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",¬ * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,¬ * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder¬ * (above) pale, on the felt¬ */¬[disposición] > *,¬solitario-carta {¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬¬/****************¬ * Dropping:  a card dragged anywhere over a pile that would take it lights up the card it would land on¬ * - That's the pile's top card, its last:  on a column, the face-up card at its foot.¬ *   An empty pile's placeholder, where it would lie.¬ * - A tight glow hugging the card:  a thin ring, then a soft halo.¬ *   The rings grow out from the card's own corners, so they round more than it does.¬ * - The pile says it would take the card by its state, :state(accepting-drop):  the runtime sets it, by the pile's rules.¬ ****************/¬¬[disposición]:state(accepting-drop) > :last-child,¬[disposición]:state(accepting-drop)::part(marcador) {¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬/* an empty pile's placeholder shows clearly while it would take the card */¬[disposición]:state(accepting-drop)::part(marcador) {¬  opacity: 1;¬}¬¬/****************¬ * The disposiciones:  apilada puts every card on top of the one before¬ ****************/¬¬/* vertical:  each card a step below the one before */¬[disposición="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[disposición="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬¬/* horizontal:  side by side, each covering the edge of the one before;  smaller as there are more, to fit the pile */¬[disposición="horizontal"] {¬  --spread: calc(1 + (max(var(--count, 1), 1) - 1) * (1 - var(--card-overlap)));¬}¬[disposición="horizontal"]::before {¬  padding-top: calc(100% * var(--card-height) / var(--spread));¬}¬[disposición="horizontal"] > * {¬  font-size: calc(100cqi / var(--card-width) / var(--spread));¬  margin-left: calc(var(--index) * var(--card-width) * 1em * (1 - var(--card-overlap)));¬}¬¬/* abanico (fanned):  as a hand of cards is held, each turned a little from the one before, around a point below them */¬[disposición="abanico"] > * {¬  font-size: calc(60cqi / var(--card-width));¬  left: calc(50% - var(--card-width) * 0.5em);¬  margin-top: 10%;¬  transform-origin: 50% 200%;¬  rotate: calc((var(--index) - (var(--count) - 1) / 2) * var(--card-turn));¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  how the board looks -- each card, and how each pile lays its cards out (its disposición).¬   - A card is drawn as a playing card here, not as a Spell UI element:  no <ui-*> tag draws one, so its size, its¬     faces and its turn over are this sheet's.¬   - Every pile and card is an element of its own on the board, so these rules reach them all:¬     - a pile by its disposición, e.g. <solitario-columna disposición="vertical">¬     - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them¬     - an empty pile's placeholder, its marcador, which it draws itself, by its part:  ::part(marcador)¬   - A card is one letter of unicode's Playing Cards, at its pile's width:¬     so a card is as wide as its column, whatever the window's width. */¬¬/* A card's picture, in ems of its own letter (measured in Chrome on a Mac):¬   0.604em wide, 0.805em tall, its left edge 0.049em into the letter;  its outline reaches a little past that, so a¬   card keeps 0.008em to spare above and below. */¬:root,¬:host {¬  /* how wide a card is, for each em of its letter */¬  --card-width: 0.604;¬  /* how tall it is, for each of its widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  a fifth of it, its rank and suit */¬  --card-step-down: 0.2;¬  /* along a row, how much of each card the next one covers:  a tenth of it */¬  --card-overlap: 0.1;¬  /* fanned, how far each card turns from the one before */¬  --card-turn: 8deg;¬}¬¬/****************¬ * The table:  green felt, as on a casino's card table, with the words on it in white¬ ****************/¬¬solitario-app {¬  display: block;¬  box-sizing: border-box;¬  min-height: 100%;¬  /* room between the felt's edge and the toolbar and cards */¬  padding: 32px;¬  /* rounded at the bottom too, as the frame it sits in is at the top */¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬/* a large screen:  twice the room */¬@media (width >= 1100px) {¬  solitario-app {¬    padding: 64px;¬  }¬}¬.GameTitle,¬.GameBar > [slot] {¬  color: #f2fbf5;¬}¬¬/****************¬ * The board:  below the game's toolbar, its piles seven to a line¬ ****************/¬¬.Board {¬  /* gutters that shrink with a narrow window, so the cards keep most of its width */¬  --ui-grid-gutter: min(2rem, 2.5vw);¬  --ui-grid-row-spacing: min(2rem, 4vw);¬  /* 1.5rem below the toolbar:  the grid pulls itself up by half a row's spacing */¬  margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);¬}¬¬/****************¬ * The toolbar:  the game's name, its buttons in the middle in two pills, its score¬ ****************/¬¬/* the game's name, in the heavy type of Spell's loading screen */¬.GameTitle {¬  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;¬  font-weight: 800;¬  letter-spacing: -0.035em;¬}¬¬/* the title and the score take equal room, so the buttons sit in the true middle */¬.GameBar::part(title),¬.GameBar::part(right) {¬  flex: 1 1 0;¬}¬.GameBar::part(right) {¬  justify-content: flex-end;¬}¬.GameBar::part(center) {¬  flex: 0 1 auto;¬  gap: 1em;¬}¬/* each pill:  white on the felt, with one shadow around it */¬.GameButtons {¬  --ui-button-radius: 99em;¬  /* square where its buttons meet, so the line between them is straight */¬  --ui-button-group-item-radius: 0;¬  --ui-button-background: Canvas;¬  --ui-button-color: CanvasText;¬  --ui-button-font-weight: 500;¬  margin: 0;¬  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));¬}¬/* a faint line between a pill's buttons */¬.GameButtons > * + *::part(button) {¬  box-shadow: -1px 0 0 var(--ui-border-color);¬}¬¬/* A narrow window, a phone's:  the felt's edge thinner, so the seven columns get the width;¬   the toolbar loses its title, and the score goes on a line of its own, below the buttons, so every button keeps its name */¬@media (width < 36rem) {¬  solitario-app {¬    padding: 16px 12px;¬  }¬  .GameBar::part(toolbar) {¬    flex-wrap: wrap;¬    justify-content: center;¬    row-gap: 0.75rem;¬  }¬  .GameBar::part(title),¬  [slot="titulo"] {¬    display: none;¬  }¬  .GameBar::part(center) {¬    gap: 0.5em;¬  }¬  .GameButtons {¬    --ui-button-padding-inline: 0.65em;¬  }¬  .GameBar::part(right) {¬    flex: 1 0 100%;¬    justify-content: center;¬  }¬  .GameBar > [slot] {¬    white-space: nowrap;¬  }¬}¬¬/****************¬ * A pile:  as wide as its cell of the board, and as tall as its cards¬ ****************/¬¬[disposición] {¬  /* a box of its own, holding its floated sizer */¬  display: flow-root;¬  position: relative;¬  /* its cards size themselves by its width */¬  container-type: inline-size;¬  /* no glow around the whole pile when a dragged card would land on it:  its top card glows instead (below) */¬  --spell-drop-glow: none;¬}¬/* its height:  a card's, by default -- a percentage of padding is one of its width */¬[disposición]::before {¬  content: "";¬  /* floated, so its cards start at the top of its content, not below it */¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card, and the placeholder:  a card's letter as wide as the pile, cut to the card it draws */¬[disposición] > *,¬[disposición]::part(marcador) {¬  position: absolute;¬  display: block;¬  /* where its pile's content starts, inside the cell's gutters:  its offsets in a layout are margins */¬  top: auto;¬  left: auto;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* A card on its own, in no pile (one added to the table in the editor):  a column's usual width, face up */¬solitario-carta:not([disposición] > *) {¬  position: relative;¬  display: inline-block;¬  vertical-align: top;¬  font-size: calc(var(--loose-card-width, 6rem) / var(--card-width));¬}¬[disposición] > *,¬[disposición]::part(marcador),¬solitario-carta {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* in the font that draws the cards, so the page's font never moves them:  a line's height comes from its FIRST font,¬     and a theme's (Fruity's system font) set them 0.027em higher than Lato did, cutting off their tops */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the card's spare room above and below its ink (0.008em) padding, its white face only the content, so it hugs the ink¬     (not a border:  a browser rounds a border to whole pixels) */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  /* Apple Symbols rises 0.67em and drops 0.25em, its card's ink 0.666em above its baseline:¬     a line of 0.917 starts the ink at the top of the face (measured:  0.912 by the font's rounded numbers) */¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/****************¬ * Turning over:  a two sided view's own (Carta.es.spell), both its sides back to back, the card turning in 3D¬ * - Here, only how deep the turn looks, for a card one letter wide:  3em.¬ * - 0.3s, the template's own time:  the game pauses that long after turning the stock's card (Solitario.es.spell), so it turns¬ *   over before it moves.¬ * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a¬ *   card that cut its own content would draw flat, and its sides couldn't turn with it.¬ ****************/¬¬[disposición] > *,¬solitario-carta {¬  --spell-turn-perspective: 3em;¬  /* its sides turn with it, in 3D:  nothing cut */¬  overflow: visible;¬}¬/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;¬   a <es-texto> draws no box of its own, so it's given one */¬solitario-carta::part(front),¬solitario-carta::part(back),¬[disposición] > *::part(front),¬[disposición] > *::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬/* Over every card and pile around it (the card's "levantada"), while the cheat turns it and moves it onto the discards */¬[disposición] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬[disposición] > [levantada] {¬  z-index: 5;¬}¬/*¬ * ... and turns face up as it goes:  moving it to the discards draws it there already face up, so its turn starts¬ * from face down (\`@starting-style\`)¬ */¬[disposición] > [levantada][direction="up"] {¬  @starting-style {¬    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);¬  }¬}¬¬@media (prefers-reduced-motion: reduce) {¬  [disposición] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[disposición]::part(marcador) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[disposición]::part(marcador):hover {¬  opacity: 0.5;¬}¬¬/*¬ * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",¬ * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,¬ * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder¬ * (above) pale, on the felt¬ */¬[disposición] > *,¬solitario-carta {¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬¬/****************¬ * Dropping:  a card dragged anywhere over a pile that would take it lights up the card it would land on¬ * - That's the pile's top card, its last:  on a column, the face-up card at its foot.¬ *   An empty pile's placeholder, where it would lie.¬ * - A tight glow hugging the card:  a thin ring, then a soft halo.¬ *   The rings grow out from the card's own corners, so they round more than it does.¬ * - The pile says it would take the card by its state, :state(accepting-drop):  the runtime sets it, by the pile's rules.¬ ****************/¬¬[disposición]:state(accepting-drop) > :last-child,¬[disposición]:state(accepting-drop)::part(marcador) {¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬/* an empty pile's placeholder shows clearly while it would take the card */¬[disposición]:state(accepting-drop)::part(marcador) {¬  opacity: 1;¬}¬¬/****************¬ * The disposiciones:  apilada puts every card on top of the one before¬ ****************/¬¬/* vertical:  each card a step below the one before */¬[disposición="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[disposición="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬¬/* horizontal:  side by side, each covering the edge of the one before;  smaller as there are more, to fit the pile */¬[disposición="horizontal"] {¬  --spread: calc(1 + (max(var(--count, 1), 1) - 1) * (1 - var(--card-overlap)));¬}¬[disposición="horizontal"]::before {¬  padding-top: calc(100% * var(--card-height) / var(--spread));¬}¬[disposición="horizontal"] > * {¬  font-size: calc(100cqi / var(--card-width) / var(--spread));¬  margin-left: calc(var(--index) * var(--card-width) * 1em * (1 - var(--card-overlap)));¬}¬¬/* abanico (fanned):  as a hand of cards is held, each turned a little from the one before, around a point below them */¬[disposición="abanico"] > * {¬  font-size: calc(60cqi / var(--card-width));¬  left: calc(50% - var(--card-width) * 0.5em);¬  margin-top: 10%;¬  transform-origin: 50% 200%;¬  rotate: calc((var(--index) - (var(--count) - 1) / 2) * var(--card-turn));¬}¬`)
 // -----------
 if (!core.isCarryingOver) solitario.start()
 // -----------

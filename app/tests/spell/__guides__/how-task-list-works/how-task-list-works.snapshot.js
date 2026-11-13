@@ -83,7 +83,7 @@ export class TaskList extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // - its "tasks" is a new checklist
-  static { this.declareProp("tasks", { init: () => new Checklist(), early: true }) }
+  static { this.declareProp("tasks", { init: () => new Checklist({ id: "tasks" }), early: true }) }
   get tasks() { return this.getProp("tasks") }
   set tasks(value) { this.setProp("tasks", value) }
 

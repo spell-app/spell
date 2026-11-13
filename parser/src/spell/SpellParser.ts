@@ -119,7 +119,10 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   phraseHeadTags: ["for", "para"],
   // comments in markup, never drawn:  `<!-- ... -->`, and a line of its own starting `//`, in both forms (epic
   // `elemental-spell`, Owen 2026-10-26)
-  markupComments: true
+  markupComments: true,
+  // a quoted word on any other tag, for its rule:  on one of the project's own views, its `id`, `<tableau "T1"/>`
+  // (`SpellJSX`;  Owen, 2026-11-12)
+  keepsQuotedWords: true
 }
 
 // Above the class:  read while this module is still loading (the built-in templates compile then)
@@ -669,6 +672,27 @@ export class SpellParser extends P.Parser {
         const [subject = "", words = ""] = found.split("\t")
         scope.getType(subject)?.declarePropertyAhead(words)
       }
+    })
+  }
+
+  /**
+   * Does `after` change a type declaration's line, `a "tableau" is a pile`?  See `P.Parser.changesTypeKinds()`.
+   * - Its whole line, as a scan finds it (`typeDeclarationLines()`).
+   * - `keepEdited`:  only a type line added or deleted counts, as for `changesProperties()`.
+   */
+  changesTypeKinds(before: string, after: string, keepEdited = false): boolean {
+    const was = this.typeDeclarationLines(before)
+    const now = this.typeDeclarationLines(after)
+    if (keepEdited && now.length === was.length) return false
+    return was.length !== now.length || now.some((line, index) => line !== was[index])
+  }
+
+  /** Each line of `text` declaring a type, as `declaredTypes()` scans for them:  `a "tableau" is a pile`. */
+  private typeDeclarationLines(text: string): string[] {
+    if (this.form === "page") text = SP.PageTwin.skeletonOf(text, this)
+    return [...text.matchAll(this.declarations.typeDeclaration)].map(({ index }) => {
+      const end = text.indexOf("\n", index)
+      return text.slice(index, end < 0 ? undefined : end).trim()
     })
   }
 

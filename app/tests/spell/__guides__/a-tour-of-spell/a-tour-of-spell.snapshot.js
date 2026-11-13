@@ -116,7 +116,7 @@ export class Garden extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // - its "sill" is a new windowsill
-  static { this.declareProp("sill", { init: () => new Windowsill(), early: true }) }
+  static { this.declareProp("sill", { init: () => new Windowsill({ id: "sill" }), early: true }) }
   get sill() { return this.getProp("sill") }
   set sill(value) { this.setProp("sill", value) }
 

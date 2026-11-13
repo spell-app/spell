@@ -577,7 +577,7 @@ export class ListaDeTareas extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "tareas" es una nueva agenda
-  @prop({ init: () => new Agenda(), early: true })
+  @prop({ init: () => new Agenda({ id: "tareas" }), early: true })
   accessor tareas!: Agenda
 
   /** El título de la siguiente tarea, como lo tiene el campo de la nueva tarea */

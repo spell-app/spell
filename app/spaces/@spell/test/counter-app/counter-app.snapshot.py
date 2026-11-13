@@ -15,7 +15,7 @@ class Tally(App):
     element_tag = "test-project-app"
 
     # - its "counter" is a new counter
-    counter = prop(init=lambda: Counter(), early=True)
+    counter = prop(init=lambda: Counter(id="counter"), early=True)
 
     # the counter draws itself:  a button showing its count
 

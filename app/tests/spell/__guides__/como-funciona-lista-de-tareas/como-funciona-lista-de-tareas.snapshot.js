@@ -84,7 +84,7 @@ export class ListaDeTareas extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // sus "tareas" es una nueva agenda
-  static { this.declareProp("tareas", { init: () => new Agenda(), early: true }) }
+  static { this.declareProp("tareas", { init: () => new Agenda({ id: "tareas" }), early: true }) }
   get tareas() { return this.getProp("tareas") }
   set tareas(value) { this.setProp("tareas", value) }
 

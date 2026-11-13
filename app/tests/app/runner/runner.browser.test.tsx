@@ -637,22 +637,14 @@ describe("compiled spell draws with Solid", () => {
       expect(card.getAttribute("direction")).toMatch(/^(up|down)$/)
       expect(card.getAttribute("suit")).toMatch(/^(clubs|diamonds|hearts|spades)$/)
     }
-    expect(tableaus().map((tableau) => tableau.getAttribute("name"))).toEqual([
-      "T1",
-      "T2",
-      "T3",
-      "T4",
-      "T5",
-      "T6",
-      "T7"
-    ])
+    // each pile drawn by its tag, `<tableau "T1"/>`:  its id, its member's name (Owen, 2026-11-12)
+    expect(tableaus().map((tableau) => tableau.id)).toEqual(["T1", "T2", "T3", "T4", "T5", "T6", "T7"])
     // ... and the pile holding it, as that pile's reference (P18):  each tableau's cards say so
     expect(tableaus().map((tableau) => [...tableau.children].map((card) => card.getAttribute("pile")))).toEqual(
       [1, 2, 3, 4, 5, 6, 7].map((count, index) => Array<string>(count).fill(`Tableau#T${index + 1}`))
     )
     expect(stock.lastElementChild!.getAttribute("pile")).toBe("StockPile#stock")
     // ... and each element is named after its thing, by its id (J43):  the inspector says which card it is
-    expect(tableaus().map((tableau) => tableau.id)).toEqual(tableaus().map((tableau) => tableau.getAttribute("name")))
     expect(stock.id).toBe("stock")
     for (const card of cards()) expect(card.id).toBe(`${card.getAttribute("rank")}-of-${card.getAttribute("suit")}`)
 

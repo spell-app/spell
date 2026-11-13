@@ -71,7 +71,7 @@ export class TicTacToe extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "board" is a new board
-  @prop({ init: () => new Board(), early: true })
+  @prop({ init: () => new Board({ id: "board" }), early: true })
   accessor board!: Board
 
   /** Whose turn it is:  X or O */

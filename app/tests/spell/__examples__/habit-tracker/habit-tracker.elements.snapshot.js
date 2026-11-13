@@ -153,7 +153,7 @@ export class HabitTracker extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "habits" is a new week
-  static { this.declareProp("habits", { init: () => new Week(), early: true }) }
+  static { this.declareProp("habits", { init: () => new Week({ id: "habits" }), early: true }) }
   get habits() { return this.getProp("habits") }
   set habits(value) { this.setProp("habits", value) }
 

@@ -72,7 +72,7 @@ class BubblyWriter {
     const ends = this.endsOf(block.head)
     const head = this.pieces(block.head)
     const html = block.body.length
-      ? `<div class="bubbly-block ${kind}"><p class="bubbly-head${ends}">${head}</p><div class="bubbly-gutter"></div>` +
+      ? `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill${ends}">${head}</p><div class="bubbly-gutter"></div>` +
         `<div class="bubbly-body">${this.nodes(block.body)}</div><div class="bubbly-foot"></div></div>`
       : `<p class="bubbly-pill ${kind}${ends}">${head}</p>`
     return id ? `<ui-section class="bubbly-section" id="${id}">${html}</ui-section>` : html

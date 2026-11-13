@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onSettled } from "solid-js"
+import { For, Show, createSignal, flush, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
@@ -617,7 +617,9 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
  * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect, a line, then Change This.
  * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window, with arrow keys, Enter and Esc.
  * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
- * - `PartEdits.onMenu` opens it, having selected what was clicked.
+ * - It shows at once, with no fade in (`Palette.css`):  a quick second right click lands on it, not the part.
+ *   - A right click on it is ours too:  the browser's own menu never shows over it (Owen, 2026-11-12).
+ * - `PartEdits.openMenu()` opens it:  what was clicked is selected once the menu is on the screen.
  */
 export function PartMenu(): JSX.Element {
   const [at, setAt] = createSignal<{ x: number; y: number }>()
@@ -645,11 +647,20 @@ export function PartMenu(): JSX.Element {
           class={["BarMenuPopup", PART_MENU]}
           aria-label={appTexts.text("menuEdit")}
           on-ui-closing={() => setAt(undefined)}
+          onContextMenu={(event: MouseEvent) => event.preventDefault()}
         >
           <div
             class="BarMenuPanel"
             ref={(panel) =>
-              panel.addEventListener("click", (event) => (isClosing = isAnItem(event)), { capture: true })
+              panel.addEventListener(
+                "click",
+                (event) => {
+                  // the part right-clicked, if it's not selected yet:  the item acts on it
+                  if (PartEdits.selectMenuPart()) flush()
+                  isClosing = isAnItem(event)
+                },
+                { capture: true }
+              )
             }
             onClick={() => isClosing && setAt(undefined)}
           >
@@ -661,14 +672,14 @@ export function PartMenu(): JSX.Element {
               class="BarMenuItems"
               aria-label={appTexts.text("menuEdit")}
             >
-              <PartMenuItems whyNot={(action) => PartEdits.whyNot(action)} />
+              <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
               <ui-action kind="divider" />
               <Action
                 menu
                 icon="code"
                 title={appTexts.text("menuShowInCode")}
-                disabled={!!PartEdits.whyNoCode}
-                tip={PartEdits.whyNoCode}
+                disabled={!!whyNoCodeAt(where())}
+                tip={whyNoCodeAt(where())}
                 onClick={() => void Inspector.showWritten(Inspector.allSelected.at(-1)!.element!)}
               />
               <Action
@@ -684,8 +695,8 @@ export function PartMenu(): JSX.Element {
                   icon="magic"
                   title={appTexts.text("menuChangeThis")}
                   shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
-                  disabled={!!PartEdits.whyNoCode}
-                  tip={PartEdits.whyNoCode}
+                  disabled={!!whyNoCodeAt(where())}
+                  tip={whyNoCodeAt(where())}
                   onClick={() => ChangeThis.open()}
                 />
               </Show>
@@ -699,3 +710,16 @@ export function PartMenu(): JSX.Element {
 
 /** The class of the part menu's popup. */
 const PART_MENU = "PartMenu"
+
+/**
+ * Why `action` can't be done, for the menu opened at `_at`:  read again each time it opens somewhere new,
+ * as the part it's for may not be selected yet (`PartEdits.openMenu()`).
+ */
+function whyNotAt(_at: { x: number; y: number }, action: PartAction): string | undefined {
+  return PartEdits.whyNot(action)
+}
+
+/** Why what the menu opened at `_at` is for can't be shown in the code:  `whyNotAt()`'s reason. */
+function whyNoCodeAt(_at: { x: number; y: number }): string | undefined {
+  return PartEdits.whyNoCode
+}

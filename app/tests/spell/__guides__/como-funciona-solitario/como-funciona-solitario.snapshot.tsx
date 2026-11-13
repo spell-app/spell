@@ -148,11 +148,11 @@ export class Mesa extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // su "columna" es una nueva columna
-  @prop({ init: () => new Columna(), early: true })
+  @prop({ init: () => new Columna({ id: "columna" }), early: true })
   accessor columna!: Columna
 
   // su "mano" es una nueva pila
-  @prop({ init: () => new Pila(), early: true })
+  @prop({ init: () => new Pila({ id: "mano" }), early: true })
   accessor mano!: Pila
 
   // su "mensaje" es texto

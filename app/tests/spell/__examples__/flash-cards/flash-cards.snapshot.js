@@ -82,7 +82,7 @@ export class Quiz extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "deck" is a new deck
-  static { this.declareProp("deck", { init: () => new Deck(), early: true }) }
+  static { this.declareProp("deck", { init: () => new Deck({ id: "deck" }), early: true }) }
   get deck() { return this.getProp("deck") }
   set deck(value) { this.setProp("deck", value) }
 

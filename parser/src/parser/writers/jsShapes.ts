@@ -311,6 +311,18 @@ export function elementTagName(member: P.ASTNode): string | undefined {
   return name === undefined ? undefined : (JSON.parse(name) as string)
 }
 
+/**
+ * A view class's `core.defineElement(this, "<project>")` call `written`, naming its tag's own word `name`:
+ * `core.defineElement(this, "Solitaire", "StockPile")` -- as written, when it names one already, or isn't one.
+ * - For a class written under another name (`STOCK_PILE`, a naming map's):  its tag stays the type's,
+ *   `<solitaire-stock-pile>`, as a drawing's bare `<stock-pile>` names it.
+ */
+export function withElementName(written: string, name: string): string {
+  const found = DEFINE_ELEMENT.exec(written)
+  if (!found || found[2] !== undefined) return written
+  return `core.defineElement(this, ${found[1]}, ${JSON.stringify(name)})`
+}
+
 /** `member`'s `core.defineElement(...)`, matched by `DEFINE_ELEMENT` -- `undefined` for any other member. */
 function defineElementOf(member: P.ASTNode): RegExpExecArray | undefined {
   if (!(member instanceof P.ASTStaticDefinition) || member.name !== "elementTag") return undefined

@@ -1528,6 +1528,19 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Never in a page's `<spell>` or `<html>` block, code spell as written (J83):  there `<button>` is the web's.
 - A tag's head may be named by a quoted name after its word, `<example "one counter">`:
   the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
+- A VIEW'S QUOTED WORD is its `id` (Owen, 2026-11-12):  `<tableau "T1"/>` ~== `<tableau id="T1"/>`, the tableau
+  whose name, or chosen id, is T1 (`core.thingNamed()`).
+  - The tokenizer keeps a quoted word on any tag it doesn't list below (`Tokenizer.keepsQuotedWords`,
+    `JSXElementToken.quotedWord`):  only the tag's parse knows the project's views (`SpellJSX.attributesOf()`).
+  - On a tag that's no view it's unreadable, as before.
+  - A view declared further down is a stub as the drawing parses:  it's taken as a view once its line says so,
+    when it compiles (`laterView`, `SpellJSX.isLaterView()`).  A line a scan found that never parsed counts as one,
+    as an editor's parse keeps what it last compiled.
+    With a quoted word, such a type wins over a pack's component of its name:
+    Solitario's `<columna "C1"/>` is its column, `<columna/>` the grid's.
+  - Any language's tags alike:  it's the tag being a view that counts.
+  - A member made new takes its name as its thing's `id` (`DefinePropertyHas.withMemberId()`):
+    `"T1" is a new tableau` is `new Tableau({ id: "T1" })`, so the drawing names it with no `with name "T1"`.
 - A TAG'S QUOTED WORD (epic `language` P38):  on the tags below, it's the tag's contents, or what names it:
   `<header "Hardware" size="large"/>` draws exactly what `<header size="large">Hardware</header>` draws.
   - As contents (`P.QUOTED_CONTENTS`), the tokenizer makes it the tag's first children:
@@ -1549,6 +1562,29 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   | `td`, `th` | the web's own table tags |
   | `segment`, `column`, `content`, `stack` | they hold layouts;  their short text is mostly in demos |
   | `author`, `date` | common only in Spell UI's feed and comment demos |
+- AN ACTION'S BUTTON, `<action "auto play"/>` (`action_button`, [ActionButton.ts](rules/JSX/ActionButton.ts);
+  Owen, 2026-11-13):  a `<ui-button>` for ONE of the program's actions, named by its quoted word as it's declared.
+  - Its word is a tag word (`spell_jsx_tag`, meaning `action`):  Spanish's `<acción "jugar solo"/>`.
+    Only with a quoted word:  a bare `<action>` is Spell UI's `<ui-action>`, as before.
+  - The action is the drawing's type's (or a super-type's), else any type's the program knows, as any may be up the
+    thing's chain when it draws;  the app's `undo` and `redo` by their words (`appActions`).
+    Found nowhere once the whole program has parsed:  refused, `unknown-action` (`SpellWarnings.refuseIf()`).
+  - Compiles to `core.drawAction(this, "autoPlay", { ...its other attributes }, ...its children)`
+    (`P.ASTJSXElement.action`);  TypeScript writes the same call, in braces inside its parent's JSX;
+    Python `core.draw_action(self, "auto_play", {...})`.
+  - The core gives the button the action's title (its text), icon, key tip (`Auto Play (A)`) and disabled, LIVE,
+    and a click runs it as a menu item's does (`core.actionOf()`, `core.runAction()`).
+    What the tag says wins;  `icon-only` is its own:  no text, the title its `aria-label`.
+- A RIGHT-CLICK MENU WRITTEN IN A DRAWING, `<context-menu>` inside the element whose right click shows it
+  (`context_menu_block`, [ContextMenuBlock.ts](rules/JSX/ContextMenuBlock.ts);  Owen, 2026-11-13):
+  - Its words are tag words too (`context_menu`, `divider`):  Spanish's `<menú-contextual>`, `<divisor/>`.
+    A tag word may hold dashes, so the word rule reads `context-menu` whole;  each word is read once per rule
+    (`webWordFor()`'s cache).
+  - It holds only `<action "name"/>` items (read as an action's button is, so named and refused the same way) and
+    `<divider/>`s;  anything else is `context-menu-item`.  No sub-menus yet.
+  - Compiles to `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`:  a hidden `<spell-context-menu>`, which
+    the app's `ActionMenus.showContextMenu()` finds on the right click's path, before a `context-menu="name"`.
+  - A `<divider/>` anywhere else keeps its word:  Spell UI's divider.
 - COMMENTS INSIDE MARKUP (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to
@@ -1716,6 +1752,9 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
       With `keepLastGood`, a name being typed doesn't count.
     - Not yet:  a member `belongs to` declares.
+  - An edit which changes a type's line, `a "tableau" is a pile`, re-parses the whole project too
+    (`parser.changesTypeKinds()`):  a drawing above it decided by it whether `<tableau "T1"/>` is a view.
+    With `keepLastGood`, only a type line added or deleted counts.
   - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a file whose only top-level thing is one page's head,
     comments aside (`SP.alonePageName()`, read from its lines, before anything parses).
     - The project knows only its head (`SP.AlonePage`):  its name and its properties, declared in the project's scope.
@@ -2251,11 +2290,16 @@ sidebars any of them opens.
       - `@spell/project/<projectId>` => that project's compiled JS, fetched and linked the same way, afresh each run
     - The app, parser and forms NEVER load `core` themselves.
 - ALL files parse first, then ALL compile, so lazy compile-time lookups see the whole project.
-- The editor calls `project.updateText(file, text)` on every keystroke
-  (`onInputChanged`, in [the app's editor](../../../app/src/app/editor.ts)).
-  - That calls `updatedContentsFor(file)`.
-  - `project.incremental.update()` re-parses what changed right away, and hands changed files their new match.
-  - If that couldn't cope, `updateText()` parses from scratch straight away.
+- The editor's code editor calls `project.takeText(file, text)` on every keystroke, and parses once the typing pauses
+  (`project.parseWaitingText()`, 200 msec after the last key:  `SpellModels`, in
+  [the app's Monaco folder](../../../app/src/app/ui/monaco/)).
+  - So no keystroke waits on a parse:  a parse of Solitaire's game took 50 msec a key (2026-11-12).
+  - What needs the new parse sooner asks for it:  the language features, a click or focus elsewhere, `compile()`, `parse()`.
+  - Everything else calls `project.updateText(file, text)`, which takes the text and parses it at once
+    (`onInputChanged`, in [the app's editor](../../../app/src/app/editor.ts);  the language server).
+  - Either way it calls `updatedContentsFor(file)`.
+  - `project.incremental.update()` re-parses what changed, and hands changed files their new match.
+  - If that couldn't cope, it parses from scratch straight away.
   - After 2s:  it compiles, saves `<Project>.spell.js` and runs it.
 - A crash while parsing (a rule threw, NOT an error in the spell) is left in `project.parseError`.
 - `SpellProject`'s parse task list keeps its scope + `incremental` while they're good.
@@ -2505,7 +2549,7 @@ sidebars any of them opens.
   - by VS Code, over stdio
   - IN-PROCESS, by the app's Monaco editor ([the app's Monaco folder](../../../app/src/app/ui/monaco/))
     - its `SpellModels` keep one Monaco model per file in step with `file.contents`.
-      Edits go through `updateText()`.
+      Edits go through `takeText()`, parsed once the typing pauses (`parseWaitingText()`).
     - its `SpellLanguageFeatures` call the service, and convert its answers with `LspToMonaco`
   - The app shows one project at a time.
     `<spell-editor>`s on a page show one each, all in one Monaco:

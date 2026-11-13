@@ -312,10 +312,6 @@ class Pile(ViewableList):
     item_type = Card
     element_tag = "test-project-pile"
 
-    # What the game calls it, e.g. stock
-    # - its "name" is text
-    name = prop(type="text")
-
     # How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css
     # - its "layout" is one of stacked, vertical, horizontal or fanned
     LAYOUTS = ("stacked", "vertical", "horizontal", "fanned")
@@ -337,8 +333,8 @@ class Pile(ViewableList):
 
     @property
     def state(self) -> str:
-        """Its name, then its cards' short names:  stock: Q♠↑ 7♥↓"""
-        summary = f"{self.name or "pile"}:"
+        """Its id, then its cards' short names:  stock: Q♠↑ 7♥↓"""
+        summary = f"{self.id}:"
         for card in self:
             summary = f"{summary} {card.state}"
         return summary
@@ -360,8 +356,8 @@ class Pile(ViewableList):
 def test_piles() -> None:
     with core.test("test piles"):
         it = Pile()
-        core.echo_test_action("set the stock to a new pile with name \"stock\"")
-        stock = Pile(name="stock")
+        core.echo_test_action("set the stock to a new pile with id \"stock\"")
+        stock = Pile(id="stock")
         core.expect(stock.color, "stock's color", "none", "\"none\"")
         core.expect(stock.value, "stock's value", 0, "0")
         core.echo_test_action(
@@ -377,7 +373,7 @@ def test_piles() -> None:
         core.expect(stock.state, "stock's state", "stock: Q♠↑ 7♥↓", "\"stock: Q♠↑ 7♥↓\"")
 
         # a card is in one pile at a time
-        discards = Pile(name="discards")
+        discards = Pile(id="discards")
         core.echo_test_action("get the last card of the stock")
         it_2 = stock.last_item
         core.echo_test_action("add it to the discards")
@@ -525,46 +521,46 @@ class Solitaire(App):
         self.hint = ""
 
     # "deck" is a new deck
-    deck = prop(init=lambda: Deck(), early=True)
+    deck = prop(init=lambda: Deck(id="deck"), early=True)
 
-    # "stock" is a new stock pile with name "stock"
-    stock = prop(init=lambda: StockPile(name="stock"), early=True)
+    # "stock" is a new stock pile
+    stock = prop(init=lambda: StockPile(id="stock"), early=True)
 
-    # "discards" is a new discard pile with name "discards"
-    discards = prop(init=lambda: DiscardPile(name="discards"), early=True)
+    # "discards" is a new discard pile
+    discards = prop(init=lambda: DiscardPile(id="discards"), early=True)
 
-    # "clubs" is a new foundation with name "clubs", suit = clubs
-    clubs = prop(init=lambda: Foundation(name="clubs", suit="clubs"), early=True)
+    # "clubs" is a new foundation with suit = clubs
+    clubs = prop(init=lambda: Foundation(id="clubs", suit="clubs"), early=True)
 
-    # "diamonds" is a new foundation with name "diamonds", suit = diamonds
-    diamonds = prop(init=lambda: Foundation(name="diamonds", suit="diamonds"), early=True)
+    # "diamonds" is a new foundation with suit = diamonds
+    diamonds = prop(init=lambda: Foundation(id="diamonds", suit="diamonds"), early=True)
 
-    # "hearts" is a new foundation with name "hearts", suit = hearts
-    hearts = prop(init=lambda: Foundation(name="hearts", suit="hearts"), early=True)
+    # "hearts" is a new foundation with suit = hearts
+    hearts = prop(init=lambda: Foundation(id="hearts", suit="hearts"), early=True)
 
-    # "spades" is a new foundation with name "spades", suit = spades
-    spades = prop(init=lambda: Foundation(name="spades", suit="spades"), early=True)
+    # "spades" is a new foundation with suit = spades
+    spades = prop(init=lambda: Foundation(id="spades", suit="spades"), early=True)
 
-    # "T1" is a new tableau with name "T1"
-    t1 = prop(init=lambda: Tableau(name="T1"), early=True)
+    # "T1" is a new tableau
+    t1 = prop(init=lambda: Tableau(id="T1"), early=True)
 
-    # "T2" is a new tableau with name "T2"
-    t2 = prop(init=lambda: Tableau(name="T2"), early=True)
+    # "T2" is a new tableau
+    t2 = prop(init=lambda: Tableau(id="T2"), early=True)
 
-    # "T3" is a new tableau with name "T3"
-    t3 = prop(init=lambda: Tableau(name="T3"), early=True)
+    # "T3" is a new tableau
+    t3 = prop(init=lambda: Tableau(id="T3"), early=True)
 
-    # "T4" is a new tableau with name "T4"
-    t4 = prop(init=lambda: Tableau(name="T4"), early=True)
+    # "T4" is a new tableau
+    t4 = prop(init=lambda: Tableau(id="T4"), early=True)
 
-    # "T5" is a new tableau with name "T5"
-    t5 = prop(init=lambda: Tableau(name="T5"), early=True)
+    # "T5" is a new tableau
+    t5 = prop(init=lambda: Tableau(id="T5"), early=True)
 
-    # "T6" is a new tableau with name "T6"
-    t6 = prop(init=lambda: Tableau(name="T6"), early=True)
+    # "T6" is a new tableau
+    t6 = prop(init=lambda: Tableau(id="T6"), early=True)
 
-    # "T7" is a new tableau with name "T7"
-    t7 = prop(init=lambda: Tableau(name="T7"), early=True)
+    # "T7" is a new tableau
+    t7 = prop(init=lambda: Tableau(id="T7"), early=True)
 
     def create(self) -> None:
         """Every card of the deck into the stock"""
@@ -608,16 +604,23 @@ class Solitaire(App):
         await self.play_from_the_stock()
 
     def draw(self) -> Element:
-        """Its toolbar, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu"""
-        return h(
-            "ui-container",
+        return [
             h(
                 "ui-toolbar",
-                {"class": "GameBar", "menu": "game menu", "aria-label": "Game", "shrinkable": True},
+                {"class": "GameBar", "aria-label": "Game"},
+                h("ui-text", {"class": "GameTitle", "slot": "title", "size": "large"}, "Solitaire"),
                 h(
-                    "ui-text",
-                    {"class": "GameTitle", "slot": "title", "size": "large"},
-                    "Spell Solitaire",
+                    "ui-buttons",
+                    {"class": "GameButtons", "slot": "center"},
+                    core.draw_action(self, "auto_play"),
+                    core.draw_action(self, "cheat"),
+                    core.draw_action(self, "restart_the_game"),
+                ),
+                h(
+                    "ui-buttons",
+                    {"class": "GameButtons", "slot": "center"},
+                    core.draw_action(self, "undo", {"icon-only": True}),
+                    core.draw_action(self, "redo", {"icon-only": True}),
                 ),
                 h(
                     "ui-text",
@@ -630,24 +633,31 @@ class Solitaire(App):
                 ),
             ),
             h(
-                "ui-grid",
-                {"class": "Board", "columns": "7", "context-menu": "game menu"},
-                core.draw_thing(self.stock),
-                core.draw_thing(self.discards),
-                h("ui-column"),
-                core.draw_thing(self.clubs),
-                core.draw_thing(self.diamonds),
-                core.draw_thing(self.hearts),
-                core.draw_thing(self.spades),
-                core.draw_thing(self.t1),
-                core.draw_thing(self.t2),
-                core.draw_thing(self.t3),
-                core.draw_thing(self.t4),
-                core.draw_thing(self.t5),
-                core.draw_thing(self.t6),
-                core.draw_thing(self.t7),
+                "ui-container",
+                h(
+                    "ui-grid",
+                    {"class": "Board", "columns": "7"},
+                    core.draw_context_menu(
+                        self,
+                        ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
+                    ),
+                    h("test-project-stock-pile", {"id": "stock"}),
+                    h("test-project-discard-pile", {"id": "discards"}),
+                    h("ui-column"),
+                    h("test-project-foundation", {"id": "clubs"}),
+                    h("test-project-foundation", {"id": "diamonds"}),
+                    h("test-project-foundation", {"id": "hearts"}),
+                    h("test-project-foundation", {"id": "spades"}),
+                    h("test-project-tableau", {"id": "T1"}),
+                    h("test-project-tableau", {"id": "T2"}),
+                    h("test-project-tableau", {"id": "T3"}),
+                    h("test-project-tableau", {"id": "T4"}),
+                    h("test-project-tableau", {"id": "T5"}),
+                    h("test-project-tableau", {"id": "T6"}),
+                    h("test-project-tableau", {"id": "T7"}),
+                ),
             ),
-        )
+        ]
 
     async def turn_a_stock_card(self) -> None:
         await self.play_from_the_stock()
@@ -720,8 +730,6 @@ core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortc
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
 # Turn up a face-down card from a tableau, at random, onto the discards
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
-# - its "game menu" is a menu of "auto play", "cheat", "restart the game", "undo" and "redo"
-core.describe_menu(Solitaire, "game_menu", {"items": ["auto_play", "cheat", "restart_the_game", "undo", "redo"]})
 
 ###################
 # ## Playing a card
@@ -756,8 +764,8 @@ core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "und
 def test_the_moves() -> None:
     with core.test("test the moves"):
         it = Tableau()
-        core.echo_test_action("set the column to a new tableau with name \"T1\"")
-        column = Tableau(name="T1")
+        core.echo_test_action("set the column to a new tableau with id \"T1\"")
+        column = Tableau(id="T1")
         core.echo_test_action(
             "set the king to a new card whose rank is king, suit is spades and direction is up",
         )
@@ -796,7 +804,7 @@ def test_the_moves() -> None:
         )
 
         # a foundation takes its suit, ace first, then one higher:  each the last card of its pile
-        foundation = Foundation(name="hearts", suit="hearts")
+        foundation = Foundation(suit="hearts")
         core.echo_test_action(
             "set the two to a new card whose rank is 2, suit is hearts and direction is up",
         )
@@ -805,8 +813,8 @@ def test_the_moves() -> None:
             "set the ace to a new card whose rank is ace, suit is hearts and direction is up",
         )
         ace = Card(rank="ace", suit="hearts", direction="up")
-        core.echo_test_action("set the column to a new tableau with name \"T2\"")
-        column = Tableau(name="T2")
+        core.echo_test_action("set the column to a new tableau with id \"T2\"")
+        column = Tableau(id="T2")
         core.echo_test_action("add the two to the column")
         column.append(two)
         core.echo_test_action("add the ace to the column")
@@ -912,12 +920,9 @@ solitaire-app {
 }
 
 /****************
- * The toolbar:  its buttons in the middle, each a button of its own, with no frame around them
+ * The toolbar:  the game's name, its buttons in the middle in two pills, its score
  ****************/
 
-.GameBar {
-  --ui-menu-divider: transparent;
-}
 /* the game's name, in the heavy type of Spell's loading screen */
 .GameTitle {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
@@ -933,70 +938,28 @@ solitaire-app {
 .GameBar::part(right) {
   justify-content: flex-end;
 }
-.GameBar::part(menu) {
+.GameBar::part(center) {
   flex: 0 1 auto;
-  /* it would scroll, which would cut the pills' shadow */
-  overflow: visible;
-  min-width: 0;
-  gap: 0;
-  border: 0;
-  box-shadow: none;
-  background: transparent;
-  /* one shadow around each whole pill, with none falling across its buttons */
+  gap: 1em;
+}
+/* each pill:  white on the felt, with one shadow around it */
+.GameButtons {
+  --ui-button-radius: 99em;
+  /* square where its buttons meet, so the line between them is straight */
+  --ui-button-group-item-radius: 0;
+  --ui-button-background: Canvas;
+  --ui-button-color: CanvasText;
+  --ui-button-font-weight: 500;
+  margin: 0;
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
 }
-/* two pills, auto play | cheat | restart and undo | redo:  each button shares its edge with the next */
-.GameBar > *::part(item) {
-  padding: 0.55em 1em;
-  margin-left: -1px;
-  border: 0;
-  border-radius: 0;
-  background: Canvas;
-  font-weight: 500;
-  box-shadow: inset 0 0 0 1px var(--ui-border-color);
-  transition: background-color 120ms ease-out;
-}
-.GameBar > :not([slot]):nth-of-type(1)::part(item),
-.GameBar > :not([slot]):nth-of-type(4)::part(item) {
-  border-start-start-radius: 99em;
-  border-end-start-radius: 99em;
-}
-.GameBar > :not([slot]):nth-of-type(3)::part(item),
-.GameBar > :not([slot]):nth-of-type(5)::part(item) {
-  border-start-end-radius: 99em;
-  border-end-end-radius: 99em;
-}
-.GameBar > :not([slot]):nth-of-type(4)::part(item) {
-  margin-left: 1em;
-}
-.GameBar > *::part(item):hover {
-  background: color-mix(in srgb, Canvas 92%, CanvasText);
-}
-.GameBar > *::part(item):active {
-  background: color-mix(in srgb, Canvas 84%, CanvasText);
-}
-/* undo and redo:  just their icons, their names kept for a screen reader */
-.GameBar > :not([slot]):nth-of-type(n + 4)::part(title) {
-  font-size: 0;
-}
-.GameBar > :not([slot]):nth-of-type(n + 4)::part(icon) {
-  margin: 0;
-}
-.GameBar > :not([slot]):nth-of-type(n + 4)::part(shortcut) {
-  display: none;
-}
-/* its key, a small key cap */
-.GameBar > *::part(shortcut) {
-  margin-inline-start: 0.6em;
-  padding: 0.1em 0.45em;
-  border-radius: var(--ui-radius-s);
-  background: color-mix(in oklch, currentColor 8%, transparent);
-  font-size: 0.75em;
+/* a faint line between a pill's buttons */
+.GameButtons > * + *::part(button) {
+  box-shadow: -1px 0 0 var(--ui-border-color);
 }
 
 /* A narrow window, a phone's:  the felt's edge thinner, so the seven columns get the width;
-   the toolbar loses its title and keys (a phone has no keyboard), and the score goes on a line of its own,
-   below the buttons, so every button keeps its name */
+   the toolbar loses its title, and the score goes on a line of its own, below the buttons, so every button keeps its name */
 @media (width < 36rem) {
   solitaire-app {
     padding: 16px 12px;
@@ -1010,18 +973,15 @@ solitaire-app {
   [slot="title"] {
     display: none;
   }
+  .GameBar::part(center) {
+    gap: 0.5em;
+  }
+  .GameButtons {
+    --ui-button-padding-inline: 0.65em;
+  }
   .GameBar::part(right) {
     flex: 1 0 100%;
     justify-content: center;
-  }
-  .GameBar > *::part(item) {
-    padding-inline: 0.65em;
-  }
-  .GameBar > :not([slot]):nth-of-type(4)::part(item) {
-    margin-left: 0.5em;
-  }
-  .GameBar > *::part(shortcut) {
-    display: none;
   }
   .GameBar > [slot] {
     white-space: nowrap;

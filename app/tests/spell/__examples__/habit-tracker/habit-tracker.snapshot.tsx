@@ -198,7 +198,7 @@ export class HabitTracker extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
   // "habits" is a new week
-  @prop({ init: () => new Week(), early: true })
+  @prop({ init: () => new Week({ id: "habits" }), early: true })
   accessor habits!: Week
 
   /** The next habit's name, as the new habit's field holds it */

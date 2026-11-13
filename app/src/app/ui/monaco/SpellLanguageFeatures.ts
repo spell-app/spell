@@ -13,7 +13,7 @@ import type { SpellModels } from "./SpellModels"
  * - Hover, completion, signature help, quick fixes, definition / type definition,
  *   references, highlights, rename, outline,
  *   folding, expand selection, formatting, accent fixes as you type, and semantic colouring.
- * - Answers from each file's current parse, kept up to date by `SpellModels` + `project.updateText()`.
+ * - Answers from each file's current parse, kept up to date by `SpellModels` + `project.takeText()`.
  *   Asks nothing of a model whose file hasn't parsed, or whose text isn't its file's.
  * - A rename saves every file it touched -- see `SpellModels.saveAfterEdit()`.
  * - Going to a declaration in another file asks `open` to show it, as do links in hovers.
@@ -40,7 +40,7 @@ export class SpellLanguageFeatures {
       languages.registerDocumentSemanticTokensProvider(language, {
         onDidChange: this.models.onDidParse,
         getLegend: () => LSP.SpellLanguageService.TOKEN_LEGEND,
-        provideDocumentSemanticTokens: (model, lastResultId) => this.semanticTokens(model, lastResultId),
+        provideDocumentSemanticTokens: (model, lastResultId, token) => this.semanticTokens(model, lastResultId, token),
         releaseDocumentSemanticTokens: () => {}
       }),
       languages.registerHoverProvider(language, {
@@ -109,22 +109,28 @@ export class SpellLanguageFeatures {
 
   /**
    * `model`'s spell file, if we can answer about it:  parsed, and its text is `model`'s.
-   * - Always true straight after an edit, which `SpellModels` parses on the spot -- but NOT while a full parse
-   *   is under way, e.g. after the incremental parse couldn't cope.
+   * - Always true straight after an edit:  what's typed and not parsed yet is parsed first (`SpellModels.parseNow()`)
+   *   -- but NOT while a full parse is under way, e.g. after the incremental parse couldn't cope.
    */
   private fileOf(model: monaco.editor.ITextModel): SP.SpellFile | undefined {
+    this.models.parseNow()
     const file = this.addresses.fileFor(model.uri.toString())
     return file?.match && file.contents === model.getValue() ? file : undefined
   }
 
-  /** Semantic colouring of `model`, from its parse. */
   /**
    * Semantic colouring of `model`, from its parse -- as edits to `lastResultId`, what we sent last, if we can.
+   * - Waits for the typing to pause (`SpellModels.parsed()`):  Monaco keeps the last colours, moved with the text, till then.
+   * - `null` once Monaco has cancelled it, e.g. for a later keystroke:  it asks again.
    */
-  private semanticTokens(
+  private async semanticTokens(
     model: monaco.editor.ITextModel,
-    lastResultId: string | null
-  ): monaco.languages.SemanticTokens | monaco.languages.SemanticTokensEdits | null {
+    lastResultId: string | null,
+    cancel: monaco.CancellationToken
+  ): Promise<monaco.languages.SemanticTokens | monaco.languages.SemanticTokensEdits | null> {
+    // the colours can wait till the typing pauses:  no parse on every keystroke for them
+    await this.models.parsed()
+    if (cancel.isCancellationRequested) return null
     const file = this.fileOf(model)
     if (!file) return null
     const tokens = lastResultId
@@ -273,6 +279,9 @@ export class SpellLanguageFeatures {
     position: monaco.Position,
     typed: string
   ): monaco.languages.TextEdit[] {
+    // a language with no accent fixes (English):  nothing to ask, so no parse to wait for on every space
+    const typedIn = this.addresses.fileFor(model.uri.toString())
+    if (typedIn && !LSP.SpellKeywords.of(typedIn.language).hasAccentFixes) return []
     const file = this.fileOf(model)
     if (!file) return []
     const edits = this.service.onTypeFormatting(file, LspToMonaco.lspPosition(position), typed)

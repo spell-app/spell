@@ -68,6 +68,30 @@ describe("SpellProject editing", () => {
     expect(await project.updateText(game, game.contents!)).toEqual([])
   })
 
+  // so no keystroke waits on a parse (2026-11-12):  the editor parses once the typing pauses
+  test("`takeText()` takes the text at once, and parses it only when asked:  `parseWaitingText()`, or a compile", async () => {
+    const before = game.match
+    project.takeText(game, `${gameText}\nprint 1`)
+    project.takeText(game, `${gameText}\nprint 12`)
+    expect(game.contents).toBe(`${gameText}\nprint 12`)
+    expect(game.match, "not parsed yet").toBe(before)
+    expect(project.isTextWaiting).toBe(true)
+
+    const changed = project.parseWaitingText()
+    // the incremental parse is done before it returns
+    expect(game.match).not.toBe(before)
+    expect(game.inputLines?.join("\n")).toBe(`${gameText}\nprint 12`)
+    expect(await changed).toContain(game)
+    expect(project.isTextWaiting).toBe(false)
+    expect(await project.parseWaitingText(), "nothing waiting").toEqual([])
+
+    // a compile parses what's waiting first
+    project.takeText(game, `${gameText}\nprint 123`)
+    await project.compile(undefined, { save: false, cached: false })
+    expect(project.isTextWaiting).toBe(false)
+    expect(game.inputLines?.join("\n")).toBe(`${gameText}\nprint 123`)
+  })
+
   test("a file it doesn't parse just takes the text", async () => {
     const other = new SP.SpellFile(`${solitaire}/NotImported.spell`)
     expect(await project.updateText(other, "print 1")).toEqual([other])
