@@ -37,9 +37,16 @@ export class MarkupMarks extends TextMarks {
   /**
    * The tags of a Spell drawing's lines, from `from` to `to` in `text`, its file:  marked into `marks`, Spell's;
    * the lines themselves are Spell's to mark, at their own indent.
+   * - `isView`:  is a tag one of the project's own views, `<tableau "T1"/>`?  Then it draws a thing:  purple.
    */
-  static within(text: string, from: number, to: number, marks: monaco.editor.IModelDeltaDecoration[]): MarkupMarks {
-    return new MarkupMarks(text, { from, to, isInSpell: true }, marks)
+  static within(
+    text: string,
+    from: number,
+    to: number,
+    marks: monaco.editor.IModelDeltaDecoration[],
+    isView: (tag: string) => boolean = () => false
+  ): MarkupMarks {
+    return new MarkupMarks(text, { from, to, isInSpell: true, isView }, marks)
   }
 
   /** The shapes at the top of the drawing, each holding those inside it. */
@@ -54,13 +61,22 @@ export class MarkupMarks extends TextMarks {
   /** Lines of Spell, whose own marks are Spell's:  no spacers before them or a block's start tag. */
   private readonly isInSpell: boolean
 
+  /** Is a tag one of the project's own views:  `within()`'s. */
+  private readonly isView: (tag: string) => boolean
+
   private constructor(
     source: string,
-    { from, to, isInSpell }: { from: number; to: number; isInSpell: boolean },
+    {
+      from,
+      to,
+      isInSpell,
+      isView = () => false
+    }: { from: number; to: number; isInSpell: boolean; isView?: (tag: string) => boolean },
     marks?: monaco.editor.IModelDeltaDecoration[]
   ) {
     super(source, marks)
     this.isInSpell = isInSpell
+    this.isView = isView
     this.nodes(BubblyMarkup.treeOf(source, from, to), this.shapes)
   }
 
@@ -83,7 +99,8 @@ export class MarkupMarks extends TextMarks {
    */
   private element(element: MarkupElement, into: MarkupShape[]) {
     const { open, close } = element
-    const partOfSpeech = BubblyMarkup.partOfSpeechOf(element.tag)
+    // one of the project's own views draws a thing:  purple, whatever its name
+    const partOfSpeech = this.isView(element.tag) ? "thing" : BubblyMarkup.partOfSpeechOf(element.tag)
     const hasInside = element.children.some((child) => child.kind !== "text" || this.slice(child).trim())
     if (!hasInside && !close) {
       if (this.startsLine(open.start) && this.endsLine(open.end)) this.alone(open, partOfSpeech, into)

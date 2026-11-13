@@ -25,8 +25,12 @@ import { TextMarks, spacer } from "./TextMarks"
  ****************/
 export class BubblyMarks extends TextMarks {
   /** `drawing`'s marks and shapes. */
-  static of(drawing: SP.BubblyDrawing, tabSize = 4): BubblyMarks {
-    return new BubblyMarks(drawing, tabSize)
+  /**
+   * `drawing`'s marks and shapes.
+   * - `isView`:  is a tag in a drawing one of the project's own views?  Its pill is a thing's (`MarkupMarks.within()`).
+   */
+  static of(drawing: SP.BubblyDrawing, tabSize = 4, isView?: (tag: string) => boolean): BubblyMarks {
+    return new BubblyMarks(drawing, tabSize, isView)
   }
 
   /** The shapes at the top of the drawing, each holding those inside it. */
@@ -41,7 +45,8 @@ export class BubblyMarks extends TextMarks {
    */
   private constructor(
     private readonly drawing: SP.BubblyDrawing,
-    private readonly tabSize: number
+    private readonly tabSize: number,
+    private readonly isView?: (tag: string) => boolean
   ) {
     super(drawing.text)
     this.nodes(drawing.nodes, this.shapes)
@@ -81,7 +86,7 @@ export class BubblyMarks extends TextMarks {
     let last = first
     while (nodes[last + 1] && nodes[last + 1]!.kind !== "block") last++
     const lines = nodes.slice(first, last + 1).filter((node): node is SP.BubblyLine => node.kind === "line")
-    const tags = MarkupMarks.within(this.drawing.text, lines[0]!.start, lines.at(-1)!.end, this.marks)
+    const tags = MarkupMarks.within(this.drawing.text, lines[0]!.start, lines.at(-1)!.end, this.marks, this.isView)
     this.tags.push(...tags.tags)
     into.push(...tags.shapes)
     for (const line of lines) this.line(line, into)

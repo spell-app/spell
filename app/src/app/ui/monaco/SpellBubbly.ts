@@ -200,7 +200,7 @@ export class SpellBubbly {
       // the project hasn't parsed this text yet:  read alone for now, and again once it has
       if (within && !SP.BubblyLayout.isParseOf(within, text) && this.parseWaits++ < PARSE_WAITS) this.relayoutSoon()
       else this.parseWaits = 0
-      this.laidOut = BubblyMarks.of(drawing, model.getOptions().tabSize)
+      this.laidOut = BubblyMarks.of(drawing, model.getOptions().tabSize, (tag) => isViewTag(within, tag))
       this.marks!.set(this.laidOut.marks)
     } catch (error) {
       console.error("SpellBubbly.relayout():  couldn't lay the code out", error)
@@ -726,6 +726,19 @@ function place(shape: HTMLElement, at: Partial<Record<"left" | "top" | "width" |
   for (const [side, value] of Object.entries(at)) shape.style.setProperty(side, `${value / scale}px`)
   return shape
 }
+
+/**
+ * Is `tag`, in a drawing in `file`, one of its project's own views (`<tableau>`), so it draws a thing?
+ * - As the compiler decides it, by its type:  a view or a viewable list (SpellJSX's `isDrawnType()`).
+ * - No project file:  none is.
+ */
+function isViewTag(file: SP.SpellFile | undefined, tag: string): boolean {
+  const type = file?.scope?.getType(SP.typeName(tag))
+  return !!type && DRAWN_BASE_TYPES.some((base) => type.isA(base))
+}
+
+/** What a project's own view is built on:  SEE SpellJSX's `DRAWN_BASE_TYPES`, which this follows. */
+const DRAWN_BASE_TYPES = ["View", "ViewableList"]
 
 /** The parser that reads `model`'s Spell:  its file's language (`Carta.es.spell`), else English. */
 function parserFor(model: monaco.editor.ITextModel): SP.SpellParser {
