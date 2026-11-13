@@ -421,6 +421,12 @@ export type LanguageWords = {
    */
   appActions: Record<string, string>
   /**
+   * `<action>`'s own attribute, a button showing only its icon (epic `language` P53):
+   * English's `icon-only`, Spanish's `solo-icono` -- see `action_button`.
+   * - Read without accents too:  `sólo-icono` ~== `solo-icono`.
+   */
+  iconOnlyAttribute: string
+  /**
    * The tag of an example on a page, in a drawing (epic `elemental-spell` P16):
    * English's `<example "one counter">`, Spanish's `<ejemplo "un contador">`.
    * - SEE:  `example_block`.

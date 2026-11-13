@@ -4,15 +4,37 @@ import type { FillInParts } from "spell/parser/spell/rules/core"
 import { Wording } from "spell/parser/spell/rules/expressions"
 
 /**
- * Spell's own tag words in JSX, in ENGLISH, by the web's tag each becomes:  for the editor's completions.
- * - The rules never read it:  they ask the language's word rule, `spell_jsx_tag` (`webWordFor()`).
- * - `<children/>` => `<slot/>`:  where a viewable list's items show, in its `to draw`
- * - `<children name="header"/>` => `<slot name="header"/>`:
- *   a second, named place, filled by a child written `in="header"` (`spell_jsx_attribute`)
- * - The web's own `<slot/>` keeps working.
- * - TODO(es):  the editor should offer the file's language's words, not English's.
+ * Spell's own tag words in JSX, in `scope`'s language, each with what it means:  for the editor's completions.
+ * - English:  `children` (`slot`), `action`, `context-menu`, `divider`;
+ *   Spanish:  `hijos`, `acción`, `menú-contextual`, `divisor` (epic `language` P53).
+ * - Read off the language's word rule, `spell_jsx_tag` (`SPELL_TAG_WORDS`), so a new word shows by itself.
+ * - The web's own `slot` is left out:  it's the web's tag, not one of spell's words.
+ * - `[]` when the scope's parser has no such rule.
  */
-export const SPELL_TAG_NAMES = new Map([["children", "slot"]])
+export function spellTagsIn(scope: P.Scope): SpellTag[] {
+  const { parser } = scope
+  const rule = parser?.rules[SPELL_TAG_WORDS]
+  if (!parser || !rule) return []
+  const tags: SpellTag[] = []
+  for (const leading of P.leadingRules(rule, { parser })) {
+    const literals = leading instanceof P.Literal ? [leading.literal].flat() : []
+    if (leading instanceof P.Literals) for (const { literal } of leading.literals) literals.push(...[literal].flat())
+    for (const tag of literals) {
+      const meaning = webWordFor(scope, SPELL_TAG_WORDS, tag)
+      if (tag === meaning && SPELL_JSX_MEANINGS.includes(tag)) continue
+      if (!tags.some((it) => it.tag === tag)) tags.push({ tag, meaning })
+    }
+  }
+  return tags
+}
+
+/** One of spell's own tag words, as `spellTagsIn()` lists them. */
+export type SpellTag = {
+  /** the word, as the language writes it:  `children`, `acción` */
+  tag: string
+  /** what it means:  the web's tag it becomes (`slot`), or spell's own tag (`action`, `context_menu`, `divider`) */
+  meaning: string
+}
 
 /**
  * The word rule holding spell's own JSX TAG words, each meaning the web's tag it becomes (epic `spanish`),

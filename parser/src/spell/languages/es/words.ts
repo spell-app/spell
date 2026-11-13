@@ -125,6 +125,8 @@ export const spanishWords: SP.LanguageWords = {
   ongoingEventName: /(ando|iendo|yendo)$/,
   // las acciones de la propia aplicación, como las nombra un menú (`define_menu`, épica `elemental-spell` P10)
   appActions: { deshacer: "undo", rehacer: "redo" },
+  // el atributo propio de `<acción>`:  un botón que solo muestra su icono (`action_button`, épica `language` P53)
+  iconOnlyAttribute: "solo-icono",
   // el ejemplo de una página, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
   quotedNameTags: { panel: "etiqueta" },
