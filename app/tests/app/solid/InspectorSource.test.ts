@@ -79,7 +79,7 @@ a "card" is a view:
 
   test("the game:  its properties' changes, as written", () => {
     expect(eventsInSource(["Solitaire"], SOLITAIRE).map((row) => [row.words, row.code.split("\n")[0]])).toEqual([
-      ["when the score changes", "set home to the number of cards in the clubs + the number of cards in the diamonds"]
+      ["when the score changes", "if the number of cards in the foundations is 52"]
     ])
   })
 
