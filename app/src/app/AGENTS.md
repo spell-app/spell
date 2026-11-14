@@ -145,11 +145,16 @@ and in the app's build folder, `app/` at the app folder's root.
     - An HTML file (a property editor page, `Card.editor.html`) is drawn as the drawn-bubbly page draws HTML:
       [MarkupMarks](ui/monaco/MarkupMarks.ts), from the page's own reading of it (`BubblyMarkup`), the box a
       `.bubbly-html` too;  both kinds of marks are made by [TextMarks](ui/monaco/TextMarks.ts).
-  - Five helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
+  - Six helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
     - the caret snaps into the body a blank line is drawn in:  clicked or arrowed onto, the line gets that body's
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
+    - a space after a tag's name writes the rest of the tag, the caret where its next words go (epic `editor` T68):
+      `<action ` => `<action "|" />`, the program's actions listed at once;  `<divider ` => `<divider | />`;
+      any other, its closing tag written out, `<segment ` => `<segment |></segment>`;  one undo leaves `<action `
+      - the shape choosing it from the suggestion list writes, from the same table (`LSP.CompletionShapes.spaceAfterTag()`)
+      - only with nothing more of the tag written after the caret
     - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59);
       Cmd+V and the right-click menu's Paste alike (I63)
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
@@ -171,7 +176,8 @@ and in the app's build folder, `app/` at the app folder's root.
       through the component pack (`SP.ComponentPacks.help()`), from Spell UI's help table, `help.generated.ts`.
       On every line of a tag split over several, too (I64).
     - A tag or an attribute chosen from the list is written whole, the caret where you type next (I70):
-      `<action "|" />`, `<content>` a line in then `</>`, `color="|"` with its words listed at once.
+      `<action "|" />`, `<divider />`, `<content>` a line in then `</>`, `color="|"` with its words listed at once;
+      a tag that closes itself always with a space before its `/>` (I70 C4).
       The shapes are ONE table, the language service's `LSP.CompletionShapes`, so VS Code writes the same.
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.

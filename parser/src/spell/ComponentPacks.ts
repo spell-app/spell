@@ -179,7 +179,7 @@ export type ComponentTagHelp = {
   tag: string
   /** what it is, in one sentence */
   description?: string
-  /** it holds nothing (no default slot):  written closed, `<icon/>` (epic `editor` I70) */
+  /** it holds nothing (no default slot):  written closed, `<icon />` (epic `editor` I70) */
   empty?: boolean
 }
 

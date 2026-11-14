@@ -1,9 +1,10 @@
 import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
 import type { monaco } from "./monaco"
 
 /****************
  * ### `SpellTyping`
- * Five helps as a person types Spell in a Monaco editor (epic `language` P50;  epic `editor` P28), so what they see
+ * Six helps as a person types Spell in a Monaco editor (epic `language` P50;  epic `editor` P28), so what they see
  * is what they type.
  * - The caret snaps into the body a blank line is drawn in:
  *   clicking or arrowing onto a blank line inside a body writes that body's indent (the next line's, as below),
@@ -24,6 +25,15 @@ import type { monaco } from "./monaco"
  *     (`a`, `an`);  in a type, a member's (`group`, `its`, `it`);  under a property, a choice's (`it`).
  *   - Typed as a `"` would be, so Monaco closes the pair itself:  a `"` typed after the name steps over the closing one.
  *   - Its own undo step:  one undo leaves `group ` again.
+ * - A space after a tag's name writes the rest of the tag, the caret where its next words go (epic `editor` T68):
+ *   - a tag a quoted name names:  `<action ` => `<action "|" />`, the program's actions listed at once
+ *   - one that holds nothing:  `<divider ` => `<divider | />`
+ *   - any other:  its closing tag written out, `<segment ` => `<segment |></segment>`
+ *   - The language service's shapes (`LSP.CompletionShapes.spaceAfterTag()`), the ones choosing the tag from the
+ *     suggestion list writes, so the two agree.
+ *   - Only with nothing more of the tag after the caret:  editing `<action "x" />`, or a space elsewhere in a tag,
+ *     is left alone.
+ *   - Its own undo step:  one undo leaves `<action ` again.
  * - A paste takes the indent where it lands (epic `editor` I53, I59, I63):
  *   ⌘V or the right-click menu's Paste alike;
  *   its first line at the caret's indent, the rest kept where they were from it;
@@ -243,6 +253,9 @@ export class SpellTyping {
     }
     if (this.languages.quotes.includes(languageId) && change.text === " ") {
       const lang = SP.Language.langOfFile(model.uri.path) ?? "en"
+      const tag = SpellTyping.tagBeforeSpace(lines, line - 1, typedAt)
+      const rest = tag && LSP.CompletionShapes.spaceAfterTag(SP.Language.for(lang).rootScope, tag)
+      if (rest) return this.help(() => this.finishTag(rest))
       if (SpellTyping.opensQuotes(lines, line - 1, lang)) this.help(() => this.openQuotes())
     }
   }
@@ -295,6 +308,19 @@ export class SpellTyping {
       editor.setPosition(caret)
     }
     editor.pushUndoStop()
+  }
+
+  /**
+   * Write the rest of a tag after the caret, `rest`'s snippet (`"$1" />`, `$0></segment>`), the caret at its first stop;
+   * an undo step of its own.  Then run its command, if it has one:  the suggestion list, shown again.
+   */
+  private finishTag(rest: LspCompletionFields) {
+    const { editor } = this
+    const snippets = editor.getContribution(MONACO_SNIPPETS) as SnippetController | null
+    if (!snippets || !rest.insertText) return
+    editor.pushUndoStop()
+    snippets.insert(rest.insertText, { undoStopBefore: true, undoStopAfter: true })
+    if (rest.command) editor.trigger(SPELL_TYPING, rest.command.command, {})
   }
 
   /** It's writing a help:  the edits it makes aren't typing. */
@@ -350,6 +376,20 @@ export class SpellTyping {
     const parentWord = parent.text.trim().split(/\s/)[0]!.toLowerCase()
     if (!parent.indent && words.types.includes(parentWord)) return words.members.includes(word)
     return words.properties.includes(parentWord) && words.choices.includes(word)
+  }
+
+  /**
+   * The tag the space just typed at `column` (0-based) of `lines[index]` follows, if it ends one's name:
+   * `<action ` => `action`.
+   * - Only when nothing more of the tag is written after the space:  the line's end, or another tag.
+   * - `undefined` for a space anywhere else:  after an attribute, inside quotes, in text.
+   */
+  static tagBeforeSpace(lines: readonly string[], index: number, column: number): string | undefined {
+    const text = lines[index] ?? ""
+    if (text[column] !== " ") return undefined
+    const name = /<([\p{L}\p{M}][\p{L}\p{M}\d_-]*)$/u.exec(text.slice(0, column))?.[1]
+    if (!name || !NOTHING_MORE_OF_THE_TAG.test(text.slice(column + 1))) return undefined
+    return name
   }
 
   /**
@@ -533,6 +573,20 @@ const MONACO_PASTE = "paste"
 
 /** What Monaco's right-click Paste hands its `"paste"` handler. */
 type MonacoPaste = { text: string; pasteOnNewLine?: boolean }
+
+/** What's after a tag's name when none of the rest of it is written yet:  the line's end, or another tag. */
+const NOTHING_MORE_OF_THE_TAG = /^\s*(?:<|$)/
+
+/** Monaco's snippet writer's contribution id:  its `SnippetController2.ID`. */
+const MONACO_SNIPPETS = "snippetController2"
+
+/** What Monaco's snippet writer does that's used here, left out of its typed API. */
+type SnippetController = {
+  insert(template: string, options?: { undoStopBefore?: boolean; undoStopAfter?: boolean }): void
+}
+
+/** The completion fields a shape hands back:  its snippet, and the command to run once it's written. */
+type LspCompletionFields = { insertText?: string; command?: { command: string } }
 
 /** A model, with the colouring Monaco keeps for it but leaves out of its types. */
 type TokenizedModel = monaco.editor.ITextModel & { tokenization?: { forceTokenization?(line: number): void } }

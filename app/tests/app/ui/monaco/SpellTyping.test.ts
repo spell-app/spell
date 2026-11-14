@@ -105,6 +105,22 @@ describe("SpellTyping.opensQuotes()", () => {
   })
 })
 
+describe("SpellTyping.tagBeforeSpace() (T68)", () => {
+  test("a space right after a tag's name, nothing after it:  that tag", () => {
+    expect(SpellTyping.tagBeforeSpace([`\t<action `], 0, 8)).toBe("action")
+    expect(SpellTyping.tagBeforeSpace([`<acción `], 0, 7)).toBe("acción")
+    expect(SpellTyping.tagBeforeSpace([`<action  <divider/>`], 0, 7)).toBe("action")
+  })
+
+  test("none when more of the tag is written after it, or the space isn't after a tag's name", () => {
+    expect(SpellTyping.tagBeforeSpace([`<action "x"/>`], 0, 7)).toBeUndefined()
+    expect(SpellTyping.tagBeforeSpace([`<action foo`], 0, 7)).toBeUndefined()
+    expect(SpellTyping.tagBeforeSpace([`<action "x" `], 0, 11)).toBeUndefined()
+    expect(SpellTyping.tagBeforeSpace([`x < y`], 0, 3)).toBeUndefined()
+    expect(SpellTyping.tagBeforeSpace([`its action `], 0, 10)).toBeUndefined()
+  })
+})
+
 describe("SpellTyping.pastedLines()", () => {
   const TABS = { insertSpaces: false, tabSize: 4 }
   const SPACES = { insertSpaces: true, tabSize: 2 }

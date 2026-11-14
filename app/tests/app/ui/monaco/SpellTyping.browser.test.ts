@@ -164,4 +164,74 @@ describe("typing Spell in a real Monaco editor", () => {
       }
     })
   })
+
+  describe("a space after a tag's name writes the rest of the tag (T68)", () => {
+    const space = () => editor!.trigger("keyboard", "type", { text: " " })
+    /** The text, a `|` at the caret. */
+    const withCaret = () => {
+      const model = editor!.getModel()!
+      const offset = model.getOffsetAt(editor!.getPosition()!)
+      const text = model.getValue()
+      return text.slice(0, offset) + "|" + text.slice(offset)
+    }
+
+    test('`<action` + space => `<action "|" />`, as choosing it from the list writes', async () => {
+      editorOf([`	<action`], 1, 9)
+      space()
+      await Promise.resolve()
+      expect(withCaret()).toBe(`	<action "|" />`)
+    })
+
+    test("one undo takes the rest back, leaving `<action `", async () => {
+      editorOf([`	<action`], 1, 9)
+      space()
+      await Promise.resolve()
+      editor!.trigger("keyboard", "undo", null)
+      expect(withCaret()).toBe(`	<action |`)
+    })
+
+    test("Spanish's `<acción`, in a Spanish file", async () => {
+      const host = document.createElement("div")
+      host.style.cssText = "width: 600px; height: 300px"
+      document.body.append(host)
+      const uri = monaco.Uri.parse("file:///T68/Carta.es.spell")
+      const model = monaco.editor.createModel(`<acción`, SpellMonaco.LANGUAGE, uri)
+      editor = monaco.editor.create(host, { model })
+      editor.setPosition({ lineNumber: 1, column: 8 })
+      space()
+      await Promise.resolve()
+      expect(withCaret()).toBe(`<acción "|" />`)
+    })
+
+    test("any other tag:  its closing tag written out, the caret before its `>`;  one that holds nothing, ` />`", async () => {
+      const cases: [string, number, string][] = [
+        [`\t<segment`, 10, `\t<segment |></segment>`],
+        [`<divider`, 9, `<divider | />`]
+      ]
+      for (const [line, column, after] of cases) {
+        editorOf([line], 1, column)
+        space()
+        await Promise.resolve()
+        expect(withCaret()).toBe(after)
+        editor!.trigger("keyboard", "undo", null)
+        expect(withCaret()).toBe(`${line} |`)
+        editor!.dispose()
+      }
+    })
+
+    test("left alone:  a tag written on after the caret, a space elsewhere in a tag", async () => {
+      const cases: [string, number, string][] = [
+        [`<action"x" />`, 8, `<action |"x" />`],
+        [`<action "x" />`, 11, `<action "x |" />`],
+        [`<segment>`, 9, `<segment |>`]
+      ]
+      for (const [line, column, after] of cases) {
+        editorOf([line], 1, column)
+        space()
+        await Promise.resolve()
+        expect(withCaret()).toBe(after)
+        editor!.dispose()
+      }
+    })
+  })
 })

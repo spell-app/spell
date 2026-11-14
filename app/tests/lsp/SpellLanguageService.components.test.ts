@@ -118,16 +118,34 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
       return { writes: item.insertText ?? item.label, isSnippet: item.insertTextFormat === 2, lists: !!item.command }
     }
 
-    test('spell\'s own:  `<action "|" />`, its actions listed at once;  `<divider/>`;  `<context-menu>` a line in', async () => {
+    test('spell\'s own:  `<action "|" />`, its actions listed at once;  `<divider />`;  `<context-menu>` a line in', async () => {
       expect(await chosen(game, "<act", "action")).toEqual({ writes: 'action "$1" />', isSnippet: true, lists: true })
-      expect(await chosen(game, "<", "divider")).toMatchObject({ writes: "divider/>$0", lists: false })
-      expect(await chosen(game, "<chi", "children")).toMatchObject({ writes: "children/>$0" })
+      expect(await chosen(game, "<", "divider")).toMatchObject({ writes: "divider />$0", lists: false })
+      expect(await chosen(game, "<chi", "children")).toMatchObject({ writes: "children />$0" })
       expect(await chosen(game, "<con", "context-menu")).toMatchObject({ writes: "context-menu>\n\t$0\n</>" })
     })
 
-    test('Spell UI\'s, by what each holds:  `<icon |/>`, `<button>|</>`, `<tab "|">`, `<content>` a line in', async () => {
-      expect(await chosen(game, "<ic", "icon")).toEqual({ writes: "icon $0/>", isSnippet: true, lists: true })
-      expect(await chosen(game, "<inp", "input")).toMatchObject({ writes: "input $0/>" })
+    test("a space typed after a tag's name writes the rest of it, by the same shapes (T68)", () => {
+      const english = SP.Language.for("en").rootScope
+      const rest = (tag: string, scope = english) => {
+        const item = LSP.CompletionShapes.spaceAfterTag(scope, tag)
+        return { writes: item.insertText, isSnippet: item.insertTextFormat === 2, lists: !!item.command }
+      }
+      expect(rest("action")).toEqual({ writes: '"$1" />', isSnippet: true, lists: true })
+      expect(rest("acción", SP.Language.for("es").rootScope)).toMatchObject({ writes: '"$1" />' })
+      expect(rest("divider")).toEqual({ writes: "$0 />", isSnippet: true, lists: false })
+      expect(rest("icon")).toEqual({ writes: "$0 />", isSnippet: true, lists: true })
+      expect(rest("tab")).toMatchObject({ writes: '"$1"></tab>' })
+      expect(rest("context-menu")).toMatchObject({ writes: "$0></context-menu>", lists: false })
+      expect(rest("button")).toMatchObject({ writes: "$0></button>" })
+      expect(rest("segment")).toMatchObject({ writes: "$0></segment>" })
+      // one no pack knows, as the project's own views:  it holds things
+      expect(rest("tableau")).toMatchObject({ writes: "$0></tableau>" })
+    })
+
+    test('Spell UI\'s, by what each holds:  `<icon | />`, `<button>|</>`, `<tab "|">`, `<content>` a line in', async () => {
+      expect(await chosen(game, "<ic", "icon")).toEqual({ writes: "icon $0 />", isSnippet: true, lists: true })
+      expect(await chosen(game, "<inp", "input")).toMatchObject({ writes: "input $0 />" })
       expect(await chosen(game, "<but", "button")).toMatchObject({ writes: "button>$0</>", lists: false })
       expect(await chosen(game, "<ta", "tab")).toMatchObject({ writes: 'tab "$1">\n\t$0\n</>' })
       expect(await chosen(game, "<cont", "content")).toMatchObject({ writes: "content>\n\t$0\n</>" })
