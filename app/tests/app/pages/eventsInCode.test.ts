@@ -73,7 +73,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
   })
 
   test("a card's events and actions show their lines of the file, in the code editor", async () => {
-    expect(await page.locator("ui-property-group.InspectorEvents").getAttribute("label")).toBe("Code")
+    expect(await page.locator(".InspectorCard[data-panel=code]").getAttribute("label")).toBe("Code")
     await expect
       .poll(async () =>
         (await row("on click").locator(".CodeSlice .view-line").allInnerTexts()).map((line) =>

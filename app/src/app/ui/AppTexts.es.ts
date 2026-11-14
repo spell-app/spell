@@ -96,6 +96,7 @@ const APP_TEXTS_ES: AppTextPack = {
   codePinnedLines: "Líneas fijas sobre el código",
   codeCompilerWords: "Detalles del compilador en la información",
   codeBubbly: "Aspecto de burbujas",
+  codeWrapLines: "Ajustar las líneas largas",
   // la página de un cuaderno, `<NotebookPage>` (épica `elemental-spell` P16)
   notebookPageLock: "Bloquearlo:  mientras esté bloqueado no se guarda nada",
   notebookPageUnlock: "Desbloquearlo:  los cambios se guardan",
@@ -346,6 +347,7 @@ const APP_TEXTS_ES: AppTextPack = {
   "inspectorGroup.advanced": "Avanzado",
   inspectorNone: "ninguno",
   inspectorCode: "Código",
+  inspectorCodeNone: "Aún no hay código.  + añade un evento.",
   inspectorEvents: "Eventos",
   inspectorActions: "Acciones",
   inspectorTests: "Pruebas",

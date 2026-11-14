@@ -75,8 +75,9 @@ function showOnly(
   if (!props.column) undo.push(showWithoutIndent(editor, element, () => lines.getRange(0)))
   if (props.column && props.column > 1) undo.push(...hideWordsBefore(editor, props.from, props.column))
   if (props.endColumn) undo.push(...hideWordsAfter(editor, props.to, props.endColumn))
-  undo.push(editor.onDidContentSizeChange(({ contentHeight }) => (element.style.height = `${contentHeight}px`)))
-  element.style.height = `${editor.getContentHeight()}px`
+  const fit = () => (element.style.height = `${heightOf(editor, lines.getRange(0))}px`)
+  undo.push(editor.onDidContentSizeChange(fit), editor.onDidLayoutChange(fit))
+  fit()
   if (props.focus) {
     const end = lines.getRange(0)!
     editor.setPosition({ lineNumber: end.endLineNumber, column: model.getLineMaxColumn(end.endLineNumber) })
@@ -261,23 +262,48 @@ function hideWordsAfter(
   return [keepOut, { dispose: () => words.clear() }]
 }
 
+/**
+ * How tall a slice is:  its lines, and the sideways scrollbar under them while one runs past its edge
+ * (long lines don't wrap unless Wrap long lines is on, I110).
+ */
+function heightOf(editor: monaco.editor.ICodeEditor, shown: monaco.IRange | null): number {
+  const { contentWidth, horizontalScrollbarHeight } = editor.getLayoutInfo()
+  const model = editor.getModel()
+  let isWide = false
+  // its own lines' ends, as drawn:  the editor's scroll width counts the file's hidden lines too
+  for (let line = shown?.startLineNumber ?? 1; model && shown && line <= shown.endLineNumber && !isWide; line++) {
+    isWide = editor.getOffsetForColumn(line, model.getLineMaxColumn(line)) > contentWidth
+  }
+  return editor.getContentHeight() + (isWide ? horizontalScrollbarHeight : 0)
+}
+
 /** Monaco's own way to hide lines:  its code editor has it, its typings don't say. */
 type HiddenAreas = { setHiddenAreas(ranges: monaco.IRange[]): void }
 
-/** How a slice looks:  no line numbers or margin, and no scrolling of its own;  it wraps. */
+/**
+ * How a slice looks:  no line numbers or margin, as tall as its lines.
+ * - Its long lines wrap only while Wrap long lines is on (`CodeSettings`, epic `editor` I110);  off, the default,
+ *   they scroll sideways, a thin scrollbar under them while one runs past the edge.
+ * - No vertical scrolling:  the wheel scrolls the card, unless it's sideways over a line that runs past the edge.
+ */
 const SLICE_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   folding: false,
   glyphMargin: false,
   lineDecorationsWidth: 4,
   // laid out by its slice (`sizedTo()`), which moves it from page to pool and back
   automaticLayout: false,
-  wordWrap: "on",
-  // its words' real widths, measured:  the code's font isn't monospaced, so the simple way wrapped early (I33)
+  // while it wraps:  its words' real widths, measured;  the code's font isn't monospaced, so the simple way wrapped early (I33)
   wrappingStrategy: "advanced",
   // a wrapped line starts under its own first word
   wrappingIndent: "same",
   guides: { indentation: false },
-  scrollbar: { vertical: "hidden", horizontal: "hidden", alwaysConsumeMouseWheel: false, handleMouseWheel: false },
+  scrollbar: {
+    vertical: "hidden",
+    horizontal: "auto",
+    horizontalScrollbarSize: 6,
+    useShadows: false,
+    alwaysConsumeMouseWheel: false
+  },
   overviewRulerLanes: 0,
   stickyScroll: { enabled: false },
   fontSize: 14

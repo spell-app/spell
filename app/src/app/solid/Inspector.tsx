@@ -24,7 +24,7 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
 import {
-  CodeBand,
+  CodeCard,
   InspectorCard,
   WrittenCode,
   InspectorViews,
@@ -1484,7 +1484,9 @@ const OPEN_PREF = "inspector"
 /** The start of the pref remembering the trail, a project's each. */
 const TRAIL_PREF = "inspector:trail"
 /** The pref remembering which cards show. */
-const PANELS_PREF = "inspector:panels"
+const PANELS_PREF = "inspector:cards"
+/** The pref that remembered them before the Code card (I109):  read once, Code put under what's selected. */
+const OLD_PANELS_PREF = "inspector:panels"
 /** The pref remembering which of the properties card's sections are folded. */
 const FOLDED_GROUPS_PREF = "inspector:foldedGroups"
 /** The pref remembering which cards are folded. */
@@ -1545,10 +1547,12 @@ editorPrefs.declare(HELP_SEEN_PREF, { type: "choice" })
 const [helpSeen, setHelpSeen] = createSignal(!!editorPrefs.get(HELP_SEEN_PREF))
 
 /**
- * The Inspector's cards, top to bottom:  what's selected, with its events and actions, then the app's views.
- * - The Events card is gone (epic `debut` P28):  its events are a band of the properties card.
+ * The Inspector's cards, top to bottom:  what's selected, its code, then the app's views.
+ * - The Events card is gone (epic `debut` P28):  its events are the Code card's.
+ * - Code is a card of its own again, under what's selected (Owen, 2026-11-14, I109;  a band of the properties card
+ *   since P21).
  */
-export const INSPECTOR_PANELS = ["properties", "views"] as const
+export const INSPECTOR_PANELS = ["properties", "code", "views"] as const
 /** One of the Inspector's cards. */
 export type InspectorPanel = (typeof INSPECTOR_PANELS)[number]
 
@@ -1567,10 +1571,19 @@ export type InspectorCardId = InspectorPanel | TypePane
 /**
  * The cards showing, in order (remembered:  `PANELS_PREF`).
  * - A card remembered that's gone (Events) is dropped, so an old pref hides nothing.
+ * - A pref from before the Code card shows it under what's selected (`withCodeCard()`).
  */
 const [shownPanels, setShownPanels] = createSignal<readonly InspectorPanel[]>(
-  knownPanels(editorPrefs.get(PANELS_PREF)) ?? INSPECTOR_PANELS
+  knownPanels(editorPrefs.get(PANELS_PREF)) ??
+    withCodeCard(knownPanels(editorPrefs.get(OLD_PANELS_PREF))) ??
+    INSPECTOR_PANELS
 )
+
+/** `panels` remembered before the Code card:  with it under what's selected, as Code was a band of that card. */
+function withCodeCard(panels: InspectorPanel[] | undefined): InspectorPanel[] | undefined {
+  if (!panels?.includes("properties")) return panels
+  return INSPECTOR_PANELS.filter((panel) => panel === "code" || panels.includes(panel))
+}
 /** The cards folded to their headers (remembered:  `FOLDED_PANELS_PREF`). */
 const [foldedPanels, setFoldedPanels] = createSignal<readonly InspectorCardId[]>(
   knownPanels(editorPrefs.get(FOLDED_PANELS_PREF), [...INSPECTOR_PANELS, ...TYPE_PANES]) ?? []
@@ -1587,9 +1600,10 @@ function knownPanels<Card extends InspectorCardId = InspectorPanel>(
 
 /**
  * One of the properties card's folding bands:  a group of a Spell UI element's fields, its Events or Actions,
- * or a band of a thing's properties (`thing:Card:rank`;  `thing:open:builtIn` for one that starts folded).
+ * or a band of a thing's properties (`thing:Card:rank`;  `thing:open:builtIn` for one that starts folded),
+ * or one of the Code card's rows, a project's each (`code:<project>:event|on click`).
  */
-export type InspectorBand = E.AttributeGroup | "events" | "actions" | `thing:${string}`
+export type InspectorBand = E.AttributeGroup | "events" | "actions" | `thing:${string}` | `code:${string}`
 
 /** The properties card's folded sections (remembered:  `FOLDED_GROUPS_PREF`). */
 const [foldedGroups, setFoldedGroups] = createSignal<readonly InspectorBand[]>(
@@ -2341,7 +2355,8 @@ class PartSelector {
  * ### `<InspectorColumn>`
  * The Inspector, a tall column at the page's far right, while it's open (`Inspector.isOpen`):
  * its cards, one above the other, resizable (their sizes remembered, for each set of cards).
- *   - what's selected (`<PropertiesCard>`), its events and actions as bands at its end
+ *   - what's selected (`<PropertiesCard>`)
+ *   - its code (`<CodeCard>`):  its events, then its actions, while one thing is selected
  *   - the app's views, things or templates (`<InspectorViews>`)
  * - Which cards show:  the top bar's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
  * - Each card folds to its header (`<InspectorCard>`):
@@ -2359,7 +2374,7 @@ export function InspectorColumn(): JSX.Element {
   void loadBrandTokens()
   const rows = appParts()
   const shown = createMemo((): InspectorCardId[] => {
-    const cards = INSPECTOR_PANELS.filter((panel) => Inspector.isShown(panel))
+    const cards = INSPECTOR_PANELS.filter((panel) => Inspector.isShown(panel) && (panel !== "code" || codeCardPart()))
     if (!Inspector.typeEdited || !cards.includes("properties")) return cards
     return [cards[0]!, ...TYPE_PANES, ...cards.slice(1)]
   })
@@ -2411,6 +2426,13 @@ export function InspectorColumn(): JSX.Element {
             <div class="SplitPane">
               <PropertiesCard />
             </div>
+          </Show>
+          <Show when={Inspector.isShown("code") && codeCardPart()}>
+            {(part) => (
+              <div class="SplitPane">
+                <CodeCard element={part().element} thing={part().thing} />
+              </div>
+            )}
           </Show>
           <Show when={Inspector.isShown("properties") && Inspector.typeEdited} keyed>
             {(thing) => (
@@ -2521,6 +2543,17 @@ const SMALLEST_SHEET = 160
 const TALLEST_SHEET = 0.9
 
 /**
+ * What the Code card shows:  the part selected, alone -- not several together, nor All Cards' type,
+ * whose own cards say its code (`TYPE_PANES`);  `undefined`:  no Code card.
+ * - `element`:  its events;  `thing`:  its actions, for a drawn thing (not a Spell UI element's layout).
+ */
+function codeCardPart(): { element: Element; thing?: object } | undefined {
+  const part = Inspector.inspected
+  if (!part?.element || part.together || Inspector.typeEdited) return undefined
+  return { element: part.element, thing: part.layout ? undefined : part.value }
+}
+
+/**
  * The column's sizes for the cards `shown`:  a folded card its header's height,
  * the others their usual shares of the rest.
  * - Nothing selected (`isEmpty`):  the top card only as tall as its tip, the others sharing the rest, so Views takes the
@@ -2565,7 +2598,14 @@ function foldSmallCards(panes: HTMLElement[], forgetSizes: () => void): void {
 }
 
 /** Each card's usual share of the column, among those open. */
-const CARD_SHARES: Record<InspectorCardId, number> = { properties: 45, events: 15, actions: 15, tests: 10, views: 30 }
+const CARD_SHARES: Record<InspectorCardId, number> = {
+  properties: 40,
+  code: 25,
+  events: 15,
+  actions: 15,
+  tests: 10,
+  views: 30
+}
 /** A folded card's height:  its bar's (`<ui-panel appearance="pane">`). */
 const FOLDED_CARD_HEIGHT = 40
 /** The least a card's body may show, px:  dragged smaller, it folds. */
@@ -2580,8 +2620,7 @@ const SMALLEST_CARD_BODY = 32
  * - Nothing selected:  the card is titled "Inspector", and says how to select.
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
- * - Then its Code band (`<CodeBand>`):  what it does when people touch it, then what can be done to it,
- *   each one's code in the file (epic `debut` P28, P29;  epic `editor`, Events In Code).
+ * - Its code is the Code card's, under it (`<CodeCard>`, epic `editor` I109).
  * - A thing's property whose value is a thing is a link to it (`<ThingLink>`);  a list's items are links too.
  *   Following one, the title is the TRAIL from what was selected (`Solitaire › DiscardPile · discards`),
  *   each step a pill that goes back to it (`Inspector.inspected`).
@@ -2721,10 +2760,6 @@ function PropertiesCard(): JSX.Element {
                 >
                   {(markup) => <OwnEditor markup={markup()} />}
                 </Show>
-              </Show>
-              {/* All Cards:  the type's events, actions and tests are cards of their own (`TYPE_PANES`) */}
-              <Show when={!part.together && !Inspector.typeEdited}>
-                <CodeBand element={part.element} thing={part.layout ? undefined : part.value} />
               </Show>
             </ui-property-editor>
           )
@@ -3433,6 +3468,7 @@ export function InspectHelp(props: { for: string }): JSX.Element {
 /** Each card's name, in the menu of cards. */
 export const PANEL_TEXTS: Record<InspectorCardId, AppTextKey> = {
   properties: "inspectorProperties",
+  code: "inspectorCode",
   views: "inspectorParts",
   events: "inspectorEvents",
   actions: "inspectorActions",

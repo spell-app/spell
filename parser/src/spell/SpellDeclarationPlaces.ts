@@ -123,7 +123,11 @@ export class SpellDeclarationPlaces {
       endLine: lineOf(end).line,
       // its code, when it starts on its own first line after its words:  `- on click play it`
       codeColumn: code && code.line === from.line ? code.ch : undefined,
-      output: kind === "type" ? undefined : declarationOf(statement)?.output,
+      // a create hook's, `create`, as `to create it` has:  its rule records no call, so no declaration says it (I109)
+      output:
+        kind === "type"
+          ? undefined
+          : (declarationOf(statement)?.output ?? (statement.rule.name === CREATE_HOOK_RULE ? "create" : undefined)),
       // `to test ...`:  the test methods written beside a type, for its Tests pane
       test: (statement.groups as { asTest?: unknown }).asTest ? (true as const) : undefined
     })
@@ -177,6 +181,9 @@ function declarationOf(statement: P.Match): SP.SpellDeclaration | undefined {
     return undefined
   }
 }
+
+/** The rule of a type's `when creating ...`, the `create()` hook (`CreateHook`). */
+const CREATE_HOOK_RULE = "create_hook"
 
 /** An ability's words, up to its condition:  `clickable when`, `it is draggable`. */
 function wordsOf(statement: P.Match): string {

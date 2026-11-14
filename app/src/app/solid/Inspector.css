@@ -255,26 +255,50 @@ ui-panel.InspectorCard > .InspectorSection {
     margin-block-start: 12px;
   }
 }
-/* the Code band, at the properties card's end:  the editor's full width (epic `debut` P28, P29) */
-.Inspector ui-property-group.InspectorEvents {
-  grid-column: 1 / -1;
-}
-/* their rows too:  a band lays its content out as the editor's two columns */
-.Inspector .InspectorEvent {
-  grid-column: 1 / -1;
-}
-/* the Code band's "+", at the end of its band's title:  a bare icon and its caret, in the band's grey */
+/* the Code card's "+", in its header:  a bare icon and its caret, in the header's grey */
 .Inspector ui-dropdown.InspectorAddEvent {
   color: var(--ui-text-muted);
   --ui-dropdown-icon-spacing: 2px;
 }
-/* each event, ability and action:  its icon and words (or run button), then its code, in the file (`<CodeSlice>`) */
-.InspectorEvent {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-block-end: 12px;
+/* each event, ability and action of the Code card (`<ui-section>`, folding on its own;  epic `editor` I109):
+   its chevron, icon and words (or run button), then its code, in the file (`<CodeSlice>`) */
+ui-section.InspectorEvent {
+  display: block;
+  /* one value:  above and below */
+  --ui-section-margin: 4px;
+  --ui-section-title-padding: 2px 0;
+  --ui-section-title-gap: 6px;
+  --ui-section-h3: 1;
+  --ui-section-content-padding: 4px 0 0 0;
+  --ui-section-fold-icon-size: 12px;
+  /* the chevron down while open, as the cards' */
+  --ui-section-fold-icon-rotate: 0deg;
+  --ui-section-fold-icon-folded-rotate: -90deg;
+  font-size: 13px;
 
+  /* the card's own type, not a title's display face */
+  &::part(heading) {
+    margin: 0;
+    font-family: var(--ui-font-family);
+  }
+}
+.InspectorEventWords {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: var(--ui-font-weight-semibold, 600);
+
+  /* the bolt or hand, muted, its glyph's own width */
+  & > ui-icon {
+    --ui-icon-width: 1.1em;
+    --ui-icon-distance: 0;
+    margin: 0;
+    color: var(--ui-text-muted);
+  }
+}
+.InspectorEvent {
   & > h3 {
     display: flex;
     align-items: center;
@@ -302,6 +326,9 @@ ui-panel.InspectorCard > .InspectorSection {
 }
 /* an action's header:  its signature, `to put (a card) on (a pile)`, each type a small badge, words in their place */
 .InspectorActionSignature {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
   font-weight: var(--ui-font-weight-normal, 400);
 

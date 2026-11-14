@@ -91,6 +91,7 @@ export const APP_TEXTS = {
   codePinnedLines: "Pinned lines above the code",
   codeCompilerWords: "Compiler details in hover",
   codeBubbly: "Bubbly look",
+  codeWrapLines: "Wrap long lines",
   // a notebook's page, `<NotebookPage>` (epic `elemental-spell` P16)
   notebookPageLock: "Lock it:  nothing is saved while it's locked",
   notebookPageUnlock: "Unlock it:  changes are saved",
@@ -523,8 +524,9 @@ export const APP_TEXTS = {
   "inspectorGroup.behaviour": "Behaviour",
   "inspectorGroup.advanced": "Advanced",
   inspectorNone: "none",
-  // the Inspector's band of a part's events, abilities and actions, each with its code (`<CodeBand>`)
+  // the Inspector's Code card:  a part's events, abilities and actions, each with its code (`<CodeCard>`)
   inspectorCode: "Code",
+  inspectorCodeNone: "No code yet.  + adds an event.",
   // a type's cards, while All Cards edits it (`TYPE_PANES`):  its events and abilities, its actions, its tests
   inspectorEvents: "Events",
   inspectorActions: "Actions",

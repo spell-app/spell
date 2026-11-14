@@ -282,8 +282,8 @@ describe("the parts tree and events", () => {
   })
 })
 
-describe("the Code band (epic `debut` P28;  epic `editor`, Events In Code)", () => {
-  test("a Spell UI element's events end its properties card:  `on click`, with the code it was written with", async () => {
+describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a card of its own again, I109)", () => {
+  test("a Spell UI element's events are the Code card's, under its properties:  `on click`, with the code it was written with", async () => {
     const area = await inArea(`<ui-segment></ui-segment><ui-button>Go</ui-button>`)
     cleanups.push(Inspector.watch(area))
     const button = area.querySelector("ui-button")!
@@ -293,10 +293,16 @@ describe("the Code band (epic `debut` P28;  epic `editor`, Events In Code)", () 
     Inspector.select(button)
     flush()
     await ElementFixture.settle(host)
-    const band = host.querySelector(".InspectorMain ui-property-editor > ui-property-group.InspectorEvents")!
-    expect(band.getAttribute("label")).toBe("Code")
-    expect([...band.querySelectorAll(".InspectorEvent h3")].map((h3) => h3.textContent)).toEqual(["on click"])
-    expect(band.querySelector(".InspectorEvent ui-icon")!.getAttribute("name")).toBe("bolt")
+    const card = host.querySelector(".InspectorCard[data-panel=code]")!
+    expect(card.getAttribute("label")).toBe("Code")
+    // right under what's selected
+    expect([...host.querySelectorAll(".InspectorCard")].map((each) => (each as HTMLElement).dataset.panel)).toEqual([
+      "properties",
+      "code",
+      "views"
+    ])
+    expect([...card.querySelectorAll(".InspectorEventWords")].map((words) => words.textContent)).toEqual(["on click"])
+    expect(card.querySelector(".InspectorEvent ui-icon")!.getAttribute("name")).toBe("bolt")
   })
 
   test("a drawn thing's events by its own words;  an ability with no condition, a hand and its words alone", async () => {
@@ -314,17 +320,18 @@ describe("the Code band (epic `debut` P28;  epic `editor`, Events In Code)", () 
     Inspector.select(element)
     flush()
     await ElementFixture.settle(host)
-    const rows = () => [...host.querySelectorAll(".InspectorEvents .InspectorEvent h3")].map((h3) => h3.textContent)
+    const rows = () =>
+      [...host.querySelectorAll("[data-panel=code] .InspectorEventWords")].map((words) => words.textContent)
     expect(rows()).toEqual(["on click", "when card dropped on"])
     // no code known, and no place in a program:  no box
-    expect(host.querySelectorAll(".InspectorEvents .InspectorEvent :is(.InspectorCode, .CodeSlice)")).toHaveLength(0)
+    expect(host.querySelectorAll("[data-panel=code] .InspectorEvent :is(.InspectorCode, .CodeSlice)")).toHaveLength(0)
   })
 
-  test("nothing selected:  no band", async () => {
+  test("nothing selected:  no Code card", async () => {
     const host = await mount(() => <InspectorColumn />)
     Inspector.toggle()
     flush()
-    expect(host.querySelector(".InspectorEvents")).toBeNull()
+    expect(host.querySelector("[data-panel=code]")).toBeNull()
   })
 })
 

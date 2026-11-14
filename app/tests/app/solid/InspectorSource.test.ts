@@ -44,6 +44,18 @@ describe("eventsDeclared()", () => {
     ])
   })
 
+  test("a type's own `when creating ...`:  an event's row, as written, with its code;  never an action (I109)", () => {
+    const source = [
+      "counter is an app",
+      '\tits "count" is a number',
+      "\twhen creating it",
+      "\t\tset its count to 1"
+    ].join("\n")
+    expect(eventsInSource(["Counter"], [source])).toEqual([
+      { kind: "event", words: "when creating it", code: "set its count to 1" }
+    ])
+  })
+
   test("a column:  its bare abilities first (Owen), then its own conditions, then what it inherits from a pile;  each event's lines under it", () => {
     const rows = eventsInSource(["Column", "Pile"], SOLITAIRE)
     expect(rows.map((row) => [row.kind, row.words])).toEqual([
@@ -77,8 +89,9 @@ a "card" is a view:
     ])
   })
 
-  test("the game:  its properties' changes, as written", () => {
+  test("the game:  its own `when creating solitaire` (I109), then its properties' changes, as written", () => {
     expect(eventsInSource(["Solitaire"], SOLITAIRE).map((row) => [row.words, row.code.split("\n")[0]])).toEqual([
+      ["when creating solitaire", "add each card in the deck to the stock"],
       ["when the score changes", "set home to the number of cards in the clubs + the number of cards in the diamonds"]
     ])
   })

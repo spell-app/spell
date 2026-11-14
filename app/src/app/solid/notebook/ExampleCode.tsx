@@ -2,6 +2,7 @@ import { Loading, Show, createEffect, createSignal } from "solid-js"
 import type { monaco } from "spell/app/app/ui/monaco"
 
 import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
+import { OWN_WRAP } from "spell/app/app/ui/codePopups"
 import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
 import type { NotebookController } from "./NotebookController"
 
@@ -81,7 +82,8 @@ export function CellEditor(props: {
     }
   )
   return (
-    <div class="NotebookCode" style={{ height: `${height()}px` }}>
+    // its own wrap, always on:  Wrap long lines is the code pane's and the Inspector's (I110)
+    <div class="NotebookCode" {...{ [OWN_WRAP]: "" }} style={{ height: `${height()}px` }}>
       <Loading fallback={<pre class="NotebookCodeLoading">{props.code}</pre>}>
         <LazyMonaco.MonacoEditor
           value={shownCode()}

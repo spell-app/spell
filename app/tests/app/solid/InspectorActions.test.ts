@@ -29,6 +29,8 @@ class TwoSidedView extends Thing {
 }
 class Card extends TwoSidedView {
   play() {}
+  // the create hook:  run as a card is made, never an action (I109)
+  create() {}
   putOnPile(_pile: Pile) {
     return Promise.resolve()
   }
@@ -63,7 +65,7 @@ function coreFor(things: object[], enabled = (_name: string) => true): Core {
 }
 
 describe("InspectorActions.of()", () => {
-  test("its own actions first, then the template's;  no drawing, event, condition or question", () => {
+  test("its own actions first, then the template's;  no drawing, event, condition, question or hook (`create`)", () => {
     const actions = InspectorActions.of(new Card(), coreFor([]), WORDS)
     expect(actions.map((action) => action.words)).toEqual(["play it", "put it on a pile", "turn face up", "turn over"])
   })

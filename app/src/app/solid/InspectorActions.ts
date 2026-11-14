@@ -9,7 +9,7 @@ import { wordsOfName } from "./ThingMembers"
  * each action of its type, in the program's words, with what it takes.
  * - Read from the RUNNING program:  the thing's methods, its core (`core.isActionEnabled()`, `core.things`),
  *   and the project's words file (`SP.SpellWordsData`) for their wording.
- * - Knows nothing of Solid or the page:  the band draws what it answers.
+ * - Knows nothing of Solid or the page:  the Code card draws what it answers.
  * - NEVER imports `spell/parser/core`:  only its types, as the app may (core's AGENTS.md, "Who may value-import it").
  * - What an action takes, and of which type, comes from its words, `put a card on a pile`:
  *   the compiler records no parameter types yet.
@@ -195,8 +195,11 @@ const BASE_TYPES = ["Thing", "List", "App", "View", "Page", "ViewableList"]
 /** An event's method:  `onClick`, `whenCardDroppedOn`, `whileCardDraggedOver`. */
 const EVENT_METHOD = /^(?:on|when|while)[A-Z]/
 
-/** Methods that aren't actions:  drawings, events, conditions, questions. */
-const NOT_ACTIONS = /^(?:constructor|draw|(?:draw|on|when|while|can|is|has)[A-Z0-9_].*)$/
+/**
+ * Methods that aren't actions:  drawings, events, conditions, questions;  and the hooks a thing runs itself,
+ * `create()` and `draw()` (`MethodDefinition.hookOf()`):  `to create` is no action a person runs (Owen, I109)
+ */
+const NOT_ACTIONS = /^(?:constructor|create|draw|(?:draw|on|when|while|can|is|has)[A-Z0-9_].*)$/
 
 /** Words that aren't an action's:  a question (`is a (rank)`), a drawing (`draw it`). */
 const NOT_ACTION_WORDS = /^(?:is|are|has|draw)\b/i

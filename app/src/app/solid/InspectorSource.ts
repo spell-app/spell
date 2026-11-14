@@ -78,13 +78,15 @@ export function eventsDeclared(
   const bare = new Set<WrittenEvent>()
   for (const name of classNames) {
     for (const place of places) {
-      if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
+      if (place.of !== name || !isEventLike(place)) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
       if (!lines) continue
       const isBare = isOnTypeTag(place, lines)
+      // the create hook a bolt, as an event
+      const kind: WrittenEvent["kind"] = place.kind === "ability" ? "ability" : "event"
       const row = isBare
-        ? { kind: place.kind, words: bareAbility(place.name), code: "" }
-        : { kind: place.kind, words: wordsAt(place, lines), code: hasCode(place, lines) ? codeAt(place, lines) : "" }
+        ? { kind, words: bareAbility(place.name), code: "" }
+        : { kind, words: wordsAt(place, lines), code: hasCode(place, lines) ? codeAt(place, lines) : "" }
       if (rows.some((other) => sameWords(other.words, row.words))) continue
       rows.push(row)
       if (isBare) bare.add(row)
@@ -99,6 +101,17 @@ export function eventsDeclared(
 }
 
 /**
+ * Is `place` an event, an ability, or its type's own `when creating ...`?
+ * - The create hook is no action a person runs (I109):  it runs as a thing is made, so it reads as an event.
+ */
+function isEventLike(place: SP.SpellDeclarationPlace): boolean {
+  return place.kind === "event" || place.kind === "ability" || (place.kind === "method" && place.output === CREATE_HOOK)
+}
+
+/** A type's create hook's compiled name:  `when creating a task`, `to create it`, `al crearlo` (`MethodDefinition.hookOf()`). */
+const CREATE_HOOK = "create"
+
+/**
  * Where a thing's event or ability `row` is written, from where the compiler says it's declared:
  * the first of `classNames` (its own type first) that has it by its words.
  */
@@ -110,7 +123,7 @@ export function placeOfDeclaredEvent(
 ): CodePlace | undefined {
   for (const name of classNames) {
     for (const place of places) {
-      if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
+      if (place.of !== name || !isEventLike(place)) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
       // an ability that's its type tag's bare attribute (`<view "card" draggable>`) has no code to edit
       if (lines && hasCode(place, lines) && sameWords(wordsAt(place, lines), row.words)) {

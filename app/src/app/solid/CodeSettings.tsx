@@ -8,6 +8,7 @@ import {
   SUGGEST_DETAILS_HIDDEN,
   SUGGEST_MODES,
   SUGGEST_MODES_RENAMED,
+  OWN_WRAP,
   codeHover,
   hoverDetailFor,
   monacoOptionsFor,
@@ -23,7 +24,8 @@ import "./CodeSettings.css"
 /****************
  * ### `CodeSettings`
  * The code editor's settings, for its popups:  hover info, when suggestions show by themselves, their details, parameter hints,
- * pinned lines and the compiler's words in the hover;  and its look, bubbly or not (epic `language` P50).
+ * pinned lines and the compiler's words in the hover;  and its look, bubbly or not (epic `language` P50),
+ * and whether long lines wrap (epic `editor` I110:  the code pane and the Inspector's code alike).
  * - Changed in the code pane's "..." menu, "Settings…", which shows `<CodeSettingsPanel>` over the code.
  * - Each change applies at once to every Monaco editor on the page, and the browser remembers it
  *   (`spellEditor:codeHover` ...).
@@ -73,14 +75,20 @@ export class CodeSettings {
    * and its suggestions by themselves where they help.
    */
   private static setUp(codeEditor: monaco.editor.ICodeEditor): void {
+    // in a box that wraps its own (a notebook's cell):  it keeps it
+    if (codeEditor.getContainerDomNode().closest(`[${OWN_WRAP}]`)) wrapsItsOwn.add(codeEditor)
     CodeSettings.applyTo(codeEditor)
     showHoverOnAlt(codeEditor)
     suggestWhereItHelps(codeEditor)
   }
 
-  /** Apply what's chosen to `codeEditor`. */
+  /**
+   * Apply what's chosen to `codeEditor`.
+   * - Wrap long lines:  the code pane's and the Inspector's slices, never an editor made with its own (`wrapsItsOwn`).
+   */
   static applyTo(codeEditor: monaco.editor.ICodeEditor): void {
-    codeEditor.updateOptions(monacoOptionsFor(chosen))
+    const { wordWrap, ...options } = monacoOptionsFor(chosen)
+    codeEditor.updateOptions(wrapsItsOwn.has(codeEditor) ? options : { ...options, wordWrap })
     codeHover.detail = hoverDetailFor(chosen)
     codeEditor.getContainerDomNode().classList.toggle(SUGGEST_DETAILS_HIDDEN, !chosen.suggestDetails)
   }
@@ -94,7 +102,8 @@ const PREFS = {
   parameterHints: "codeParameterHints",
   pinnedLines: "codePinnedLines",
   compilerWords: "codeCompilerWords",
-  bubbly: "codeBubbly"
+  bubbly: "codeBubbly",
+  wrapLines: "codeWrapLines"
 } as const satisfies Record<keyof CodePopupChoices, string>
 
 editorPrefs
@@ -109,6 +118,7 @@ editorPrefs
   .declare(PREFS.pinnedLines, { type: "choice", default: CODE_POPUP_DEFAULTS.pinnedLines })
   .declare(PREFS.compilerWords, { type: "choice", default: CODE_POPUP_DEFAULTS.compilerWords })
   .declare(PREFS.bubbly, { type: "choice", default: CODE_POPUP_DEFAULTS.bubbly })
+  .declare(PREFS.wrapLines, { type: "choice", default: CODE_POPUP_DEFAULTS.wrapLines })
 
 /** What's chosen, as remembered:  read now, outside Solid's schedule (`choices()` is the reactive copy). */
 let chosen: CodePopupChoices = {
@@ -118,13 +128,17 @@ let chosen: CodePopupChoices = {
   parameterHints: editorPrefs.get(PREFS.parameterHints) as boolean,
   pinnedLines: editorPrefs.get(PREFS.pinnedLines) as boolean,
   compilerWords: editorPrefs.get(PREFS.compilerWords) as boolean,
-  bubbly: editorPrefs.get(PREFS.bubbly) as boolean
+  bubbly: editorPrefs.get(PREFS.bubbly) as boolean,
+  wrapLines: editorPrefs.get(PREFS.wrapLines) as boolean
 }
 const [choices, setChoices] = createSignal(chosen)
 const [isShowing, setShowing] = createSignal(false)
 
 /** Monaco, once it's loaded:  see `CodeSettings.follow()`. */
 let monacoApi: typeof monaco | undefined
+
+/** The editors made with a wrap of their own (a notebook's cells):  Wrap long lines leaves them be. */
+const wrapsItsOwn = new WeakSet<monaco.editor.ICodeEditor>()
 
 /**
  * HACK:  ⌥ pressed while the mouse rests on a word shows its hover, the first time too.
@@ -259,7 +273,8 @@ const TOGGLES = [
   { name: "parameterHints", label: "codeParameterHints" },
   { name: "pinnedLines", label: "codePinnedLines" },
   { name: "compilerWords", label: "codeCompilerWords" },
-  { name: "bubbly", label: "codeBubbly" }
+  { name: "bubbly", label: "codeBubbly" },
+  { name: "wrapLines", label: "codeWrapLines" }
 ] as const satisfies { name: keyof CodePopupChoices; label: AppTextKey }[]
 
 /** Each hover mode's label. */

@@ -664,6 +664,9 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
   - Sentence Tree:  the Spell tree of the cursor's line
   - Reference:  what you can use, your app's templates and Spell's, each with what it holds, searchable from the
     panel's header;  a click says what it is, and Show in Code for your own
+- The Inspector's Code card, under what's selected (epic `editor` I109):  its events, then its actions, each its
+  code in the file;  each folds on its own, remembered for the project.  A type's `when creating ...` is an event's
+  row there, never an action to run.
 - What the app made is the Inspector's Views card:  one tree of what's drawn, then what isn't (the deck),
   with a filter, and a sort by document order, name or type.
 - The add menu (the top bar's `+`) starts with This app:  the app's own views, added as `{draw a new card}`.
@@ -786,6 +789,8 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
     the caret never lands in it, and copying leaves it out
   - or ⌘-click (Ctrl-click off a Mac) on the address, as in VS Code, in every hover setting:
     ⌘ held over it underlines it, and a plain hover says so
+- Long lines don't wrap:  they scroll sideways, in the code pane and the Inspector's code alike, unless Settings…
+  › Wrap long lines is on (`CodeSettings`, epic `editor` I110).  A notebook's cells always wrap.
 - Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spell`,
   a view of its file:  the project's files stay the source of truth, and each edit re-parses as little as it can.
 - A rename saves every file it touched.

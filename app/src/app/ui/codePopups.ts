@@ -54,11 +54,16 @@ export type CodePopupChoices = {
   compilerWords: boolean
   /** Draw Spell in the bubbly look as it's typed (`SpellBubbly`)?  On unless someone turns it off (Owen, Q50). */
   bubbly: boolean
+  /**
+   * Wrap a long line onto the next, in the code pane and the Inspector's code alike?
+   * - Off unless someone turns it on:  a line stays one line, and scrolls sideways (Owen, epic `editor` I110).
+   */
+  wrapLines: boolean
 }
 
 /**
  * The choices until someone changes them:  hover only with ⌥ held, suggestions by themselves only where they help,
- * the rest off, but the bubbly look, on.
+ * the rest off, but the bubbly look, on;  long lines not wrapped, so they scroll sideways.
  */
 export const CODE_POPUP_DEFAULTS: CodePopupChoices = {
   hover: "withAlt",
@@ -67,7 +72,8 @@ export const CODE_POPUP_DEFAULTS: CodePopupChoices = {
   parameterHints: false,
   pinnedLines: false,
   compilerWords: false,
-  bubbly: true
+  bubbly: true,
+  wrapLines: false
 }
 
 /** Monaco's `hover.enabled` for each hover mode. */
@@ -88,6 +94,7 @@ const HOVER_ENABLED = {
  * - Ctrl+Space shows the suggestions in every mode:  only showing them as you type is turned off.
  *   - "Where it helps" turns Monaco's own off too:  the editor asks for them itself, at the places
  *     `suggestsByItself()` names (`CodeSettings`).
+ * - `wordWrap`:  for the editors that don't choose for themselves (`CodeSettings`);  a notebook's cells always wrap.
  * - The docs pane beside the list has no option of its own:  `CodeSettings` hides it with a class
  *   (`SUGGEST_DETAILS_HIDDEN`) when the details are off.  Monaco starts it folded anyway.
  */
@@ -100,7 +107,8 @@ export function monacoOptionsFor(choices: CodePopupChoices): monaco.editor.IEdit
     suggestOnTriggerCharacters: asYouType,
     suggest: { showInlineDetails: choices.suggestDetails },
     parameterHints: { enabled: choices.parameterHints },
-    stickyScroll: { enabled: choices.pinnedLines }
+    stickyScroll: { enabled: choices.pinnedLines },
+    wordWrap: choices.wrapLines ? "on" : "off"
   }
 }
 
@@ -157,3 +165,9 @@ export function showBubbly(isBubbly: boolean): void {
 
 /** The class on an editor's container that hides the docs pane beside its suggestions. */
 export const SUGGEST_DETAILS_HIDDEN = "suggest-details-hidden"
+
+/**
+ * The attribute on a box whose code editor wraps as it says itself, whatever Wrap long lines is (`CodeSettings`):
+ * a notebook's cell, as tall as its text (`data-own-wrap`).
+ */
+export const OWN_WRAP = "data-own-wrap"

@@ -548,31 +548,33 @@ const NOT_DRAWN_KEY = "not-drawn"
 const FOLDED_PREF = "inspector:folded"
 
 /****************
- * ### `<CodeBand>`
- * The selected part's code, a folding band at the end of the properties card, titled Code (epic `editor`,
- * Events In Code;  Owen's pick A):  what it does when people touch it, then what can be done to it.
+ * ### `<CodeCard>`
+ * The selected part's code, a card of its own under what's selected, titled Code (epic `editor` I109;
+ * a band at the end of the properties card from Events In Code, P21, until Owen:  "I'm back to wanting `code` this to
+ * be its own sidebar pane again"):  what it does when people touch it, then what can be done to it.
  * - A drawn thing's events, in its program's own words (`Inspector.writtenEventsOf()`):
  *   - first its abilities' conditions, a hand each:  `it can give up a card if`, its condition under it
  *     (an ability with no condition, `it can be dragged`, its words alone)
  *   - then its events, a bolt each:  `on click` as written (`when clicked` if written so), its code under it
+ *   - its own `when creating ...`, as written, a bolt too:  a hook, never an action to run
  * - A Spell UI element's:  what it handles (`Inspector.eventsOf()`), `on click`, with the code it was written with.
  * - Then a thing's actions (`InspectorActions.of()`), each its signature (`<ActionSignature>`) and its code.
  * - Each one's code is the code editor on its lines of the file (`<CodeSlice>`):  typing there is typing in the file.
  *   Code it can't find in the file shows as written, to read.
- * - The band's "+":  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
+ * - Each folds on its own, by its words, remembered for the project (`rowFold()`, Owen:  "event handlers / actions
+ *   should be collapsible").
+ * - The card's "+":  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
  *   handler in its place (`Inspector.addEvent()`), which then takes the cursor.
- * - Folds as the card's other bands do, remembered (`Inspector.setGroupFolded("events")`).
- * - Drawn while there's code to show, or an event could be added:  never a "None yet." line.
+ * - Resized, folded and closed as the other cards are;  shown by the column while one part is selected.
  ****************/
-export function CodeBand(props: {
+export function CodeCard(props: {
   /** The part selected, in the app:  its events. */
-  element?: Element
+  element: Element
   /** The thing selected (or the trail leads to):  its actions. */
   thing?: object
 }): JSX.Element {
   const rows = createMemo((): EventRow[] => {
     const element = props.element
-    if (!element) return []
     // read again as a handler's added (`justAdded`), not on every key typed in one:  each row's editor follows its lines
     void Inspector.justAdded
     return untrack(() => {
@@ -590,35 +592,36 @@ export function CodeBand(props: {
       : []
   })
   const addable = () =>
-    props.element
-      ? DEFAULT_EVENTS.filter(
-          (event) => !rows().some((row) => row.key === event || sameWords(row.words, onWords(event)))
-        )
-      : []
+    DEFAULT_EVENTS.filter((event) => !rows().some((row) => row.key === event || sameWords(row.words, onWords(event))))
   return (
-    <Show when={rows().length || addable().length || actions().length}>
-      <ui-property-group
-        class="InspectorEvents"
-        label={appTexts.text("inspectorCode")}
-        collapsible=""
-        open={Inspector.isGroupFolded("events") ? "false" : undefined}
-        ref={foldRemembered("events")}
-      >
+    <InspectorCard
+      panel="code"
+      class="InspectorCodeCard"
+      label={appTexts.text("inspectorCode")}
+      bar={<span slot="title">{appTexts.text("inspectorCode")}</span>}
+      actions={
         <Show when={addable().length}>
           <ui-dropdown
-            slot="output"
+            slot="right"
             class="InspectorAddEvent"
             aria-label={appTexts.text("inspectorAddEvent")}
             title={appTexts.text("inspectorAddEvent")}
             onClick={(event: MouseEvent) => event.stopPropagation()}
             ref={on<{ value: string }>("ui-changed", (event) => {
-              if (event.detail.value && props.element) Inspector.addEvent(props.element, event.detail.value)
+              if (event.detail.value) Inspector.addEvent(props.element, event.detail.value)
             })}
           >
             <ui-icon slot="trigger" name="plus" />
             <For each={addable()}>{(event) => <ui-item value={event}>{eventText(event)}</ui-item>}</For>
           </ui-dropdown>
         </Show>
+      }
+    >
+      <Show
+        when={rows().length || actions().length}
+        fallback={<p class="InspectorTip">{appTexts.text("inspectorCodeNone")}</p>}
+      >
+        {/* another part's rows are its own:  each reads where its code is once, as it's drawn */}
         <Show when={props.element} keyed>
           {(element) => (
             <For each={rows()} keyed={(row) => `${row.kind}|${row.key}`}>
@@ -633,12 +636,12 @@ export function CodeBand(props: {
             </For>
           )}
         </Show>
-      </ui-property-group>
-    </Show>
+      </Show>
+    </InspectorCard>
   )
 }
 
-/** One row of the Code band's events:  an event or an ability, as written, its code, and its key. */
+/** One row of the Code card's events:  an event or an ability, as written, its code, and its key. */
 type EventRow = WrittenEvent & {
   /** Which it is, among the part's:  the DOM event (`click`), else its words. */
   key: string
@@ -659,18 +662,27 @@ function sameWords(a: string, b: string): boolean {
   return a.replace(/\s+/g, " ").toLowerCase() === b.replace(/\s+/g, " ").toLowerCase()
 }
 
-/** A band's fold, remembered:  its `ui-closing` and `ui-opening` tell the Inspector. */
-function foldRemembered(band: InspectorBand): (group: HTMLElement) => void {
-  return (group) => {
-    on("ui-closing", () => Inspector.setGroupFolded(band, true))(group)
-    on("ui-opening", () => Inspector.setGroupFolded(band, false))(group)
+/**
+ * One of the Code card's rows, folded or not, remembered for the project by `key` (`event|on click`):
+ * its `<ui-section>`'s `open`, and `follow`, its ref, which hears it fold.
+ */
+function rowFold(key: string): { open: () => "false" | undefined; follow: (section: HTMLElement) => void } {
+  const band: InspectorBand = `code:${editor.project?.path ?? ""}:${key}`
+  return {
+    // `"false"` folds it;  a bare `false` is written as no attribute, which is open (the default)
+    open: () => (Inspector.isGroupFolded(band) ? "false" : undefined),
+    follow: (section) => {
+      // its own:  a section inside it (none today) would send these too
+      on("ui-closing", (event) => event.target === section && Inspector.setGroupFolded(band, true))(section)
+      on("ui-opening", (event) => event.target === section && Inspector.setGroupFolded(band, false))(section)
+    }
   }
 }
 
 /**
  * One of a part's events or abilities:  its icon and words, then its code, in the file (`<WrittenCode>`).
  * - An event's icon a bolt;  an ability's a hand.
- * - An ability with no condition (`it can be dragged`):  its words alone.
+ * - An ability with no condition (`it can be dragged`):  its words alone, nothing to fold.
  * - Where its code is, read once as it's drawn:  its editor follows its lines from then on.
  */
 function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
@@ -680,18 +692,27 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
     place: Inspector.placeOfEvent(props.element, props.row),
     isAdded: Inspector.justAdded !== "" && sameWords(Inspector.justAdded, props.row.key)
   }))
+  const { open: foldOpen, follow: followFold } = rowFold(untrack(() => `${props.row.kind}|${props.row.key}`))
   // once drawn:  a write while drawing is refused
   if (isAdded) queueMicrotask(() => Inspector.tookCursor())
+  const hasCode = () => !!(place || props.row.code)
   return (
-    <section class={["InspectorEvent", props.row.kind]}>
-      <h3>
+    <ui-section
+      class={["InspectorEvent", props.row.kind]}
+      level="3"
+      fold-icon="start"
+      collapsible={hasCode() ? "" : undefined}
+      open={hasCode() ? foldOpen() : undefined}
+      ref={followFold}
+    >
+      <span slot="label" class="InspectorEventWords">
         <ui-icon name={isEvent ? EVENT_ICON : ABILITY_ICON} />
         {props.row.words}
-      </h3>
-      <Show when={place || props.row.code}>
+      </span>
+      <Show when={hasCode()}>
         <WrittenCode place={place} code={props.row.code} focus={isAdded} />
       </Show>
-    </section>
+    </ui-section>
   )
 }
 
@@ -699,11 +720,21 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
 function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Element {
   // read once, as it's drawn:  its editor follows its lines from then on
   const place = untrack(() => Inspector.placeOfAction(props.thing, props.action))
+  const { open: foldOpen, follow: followFold } = rowFold(untrack(() => `action|${props.action.name}`))
   return (
-    <section class="InspectorEvent action">
-      <ActionSignature thing={props.thing} action={props.action} />
+    <ui-section
+      class="InspectorEvent action"
+      level="3"
+      fold-icon="start"
+      collapsible={place ? "" : undefined}
+      open={place ? foldOpen() : undefined}
+      ref={followFold}
+    >
+      <span slot="label" class="InspectorEventWords">
+        <ActionSignature thing={props.thing} action={props.action} />
+      </span>
       <Show when={place}>{(found) => <WrittenCode place={found()} code="" />}</Show>
-    </section>
+    </ui-section>
   )
 }
 
@@ -737,14 +768,14 @@ function letters(text: string): string {
 
 /** Is `card` one of the column's own cards, which the menu shows and hides (not a type's)? */
 function isPanel(card: InspectorCardId): card is InspectorPanel {
-  return card === "properties" || card === "views"
+  return card === "properties" || card === "code" || card === "views"
 }
 
 /****************
  * ### `<TypeEventsCard>`
  * A type's events and abilities, while All Cards edits it (epic `editor` P23;  Owen:  "Separate out events, actions and
  * tests in the sidebar for all cards"):  a card of its own, under what's selected, resized as the others are.
- * - Each as This's Code band shows it (`<EventCode>`):  its words, then its code, the file's own lines.
+ * - Each as the Code card shows a part's (`<EventCode>`):  its words, then its code, the file's own lines.
  * - Every one its type declares, wherever it's written (`Inspector.eventsOfType()`):
  *   a type's members can be written in another file's `a card:`.
  ****************/
@@ -788,8 +819,8 @@ function TypeEventCode(props: { thing: object; row: EventRow }): JSX.Element {
 
 /****************
  * ### `<TypeActionsCard>`
- * A type's actions, while All Cards edits it:  each its signature (`<ActionSignature>`) and its code, as This's Code
- * band shows them, on a card of its own.
+ * A type's actions, while All Cards edits it:  each its signature (`<ActionSignature>`) and its code, as the Code
+ * card shows a part's, on a card of its own.
  ****************/
 export function TypeActionsCard(props: { thing: object }): JSX.Element {
   const actions = createMemo(() => {
@@ -894,9 +925,9 @@ export function TypeTestsCard(props: { thing: object }): JSX.Element {
   )
 }
 
-/** An event's icon, in the Code band:  a bolt. */
+/** An event's icon, in the Code card:  a bolt. */
 const EVENT_ICON = "bolt"
-/** An ability's icon, in the Code band:  a hand. */
+/** An ability's icon, in the Code card:  a hand. */
 const ABILITY_ICON = "hand paper outline"
 
 /**
@@ -911,7 +942,7 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
   const ownType = () => InspectorActions.typeWordsOf(props.thing)[0] ?? ""
   const pieces = () => signaturePieces(props.action, ownType())
   return (
-    <h3 class="InspectorActionSignature">
+    <span class="InspectorActionSignature">
       <Show when={props.action.parameters.length === 0}>
         <ActionRunButton thing={props.thing} action={props.action} />
       </Show>
@@ -926,7 +957,7 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
           </Show>
         )}
       </For>
-    </h3>
+    </span>
   )
 }
 
@@ -958,7 +989,11 @@ function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX
       aria-label={why()}
       disabled={!isEnabled() || isRunning() ? "" : undefined}
       loading={isRunning() ? "" : undefined}
-      onClick={press}
+      // in its row's title:  a click runs it, never folds the row
+      onClick={(event: MouseEvent) => {
+        event.stopPropagation()
+        press()
+      }}
     />
   )
 }
