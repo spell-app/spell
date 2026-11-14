@@ -290,7 +290,13 @@ ifEs.addRule(ValueIf, {
       tests: [
         [
           ["para elegir un color:", `\tred si suit es "hearts"`],
-          ["export function elegirUnColor() {", '  if (suit === "hearts") return "red"', "}"]
+          [
+            "export function elegirUnColor() {",
+            '  return core.asAction({ undoneAs: "Elegir Un Color" }, () => {',
+            '    if (suit === "hearts") return "red"',
+            "  })",
+            "}"
+          ]
         ]
       ]
     },
@@ -319,7 +325,13 @@ ifEs.addRule(ValueOtherwise, {
       tests: [
         [
           ["para elegir un color:", "\tblack de lo contrario"],
-          ["export function elegirUnColor() {", '  return "black"', "}"]
+          [
+            "export function elegirUnColor() {",
+            '  return core.asAction({ undoneAs: "Elegir Un Color" }, () => {',
+            '    return "black"',
+            "  })",
+            "}"
+          ]
         ]
       ]
     }

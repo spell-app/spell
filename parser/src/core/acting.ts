@@ -29,6 +29,7 @@ import { ActionQueue } from "./ActionQueue"
 import { defineCoreModule } from "./core.types"
 import { describedMethods, type ActionDescription } from "./described"
 import { chainOf, waitOf } from "./sending"
+import type { ActionInfo } from "./undoing"
 
 /** The ways an action is run, for whoever listens:  a key, a click on a button or menu item, or code. */
 export type ActionWay = "key" | "click" | "menu" | "code"
@@ -198,6 +199,28 @@ export const actingMethods = defineCoreModule({
     const unrecorded = history ? () => history.run({ cantBeUndone: "keeps history" }, run) : run
     const step = actingMethods.meanwhile(unrecorded)
     if (!core.isCarryingOver) core.RUNTIME?.actions.holdFor(step)
+  },
+
+  /**
+   * Run `act`, a top-level action's steps, as an action:  ONE undo step titled `undoneAs`, or none (`cantBeUndone`).
+   * Returns what `act` returns.
+   *
+   * ```js
+   * export function dealTheCards() {
+   *   return core.asAction({ undoneAs: "Deal The Cards" }, () => {
+   *     solitaire.deal()
+   *   })
+   * }
+   * ```
+   *
+   * - What compiled spell writes for an action outside any type (`to deal the cards`, epic `language` J149):
+   *   a type's is declared on its class instead (`describeAction()`), which a function has none of.
+   * - As a declared action runs (`UndoHistory.run()`):  one it's called by takes it in, its step and all.
+   * - No program running:  `act` just runs.
+   */
+  asAction<T>(info: ActionInfo, act: () => T): T {
+    const history = core.RUNTIME?.history
+    return history ? history.run(info, act) : act()
   },
 
   /**

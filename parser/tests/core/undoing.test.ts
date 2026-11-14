@@ -354,6 +354,56 @@ describe("actions that can't be undone", () => {
   })
 })
 
+describe("top-level actions (`core.asAction()`, epic `language` J149)", () => {
+  /** `to turn every card over` outside any type, as compiled spell writes it. */
+  function turnEveryCardOver(): void {
+    return core.asAction({ undoneAs: "Turn Every Card Over" }, () => {
+      for (const card of cards) card.turnOver()
+    })
+  }
+
+  test("one is ONE step, what it calls included;  undo puts every card back", () => {
+    turnEveryCardOver()
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Turn Every Card Over"])
+    game.undo()
+    expect(cards.map((card) => card.faceUp)).toEqual([false, false, false])
+  })
+
+  test("one giving back a value is an action too, and called by another, joins its step", () => {
+    const countTheCards = () =>
+      core.asAction({ undoneAs: "Count The Cards" }, () => {
+        cards[0].turnOver()
+        return cards.length
+      })
+    expect(countTheCards()).toBe(3)
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Count The Cards"])
+    core.asAction({ undoneAs: "Turn And Count" }, () => {
+      cards[1].turnOver()
+      return countTheCards()
+    })
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Count The Cards", "Turn And Count"])
+  })
+
+  test("one that waits is ONE step, however long it waits", async () => {
+    await core.asAction({ undoneAs: "Deal Twice" }, async () => {
+      await game.deal(1)
+      await game.deal(1)
+    })
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Deal Twice"])
+  })
+
+  test("`can't be undone`:  what it changes is left out, and the steps before it stay", () => {
+    cards[0].turnOver()
+    core.asAction({ cantBeUndone: "keeps history" }, () => (cards[1].faceUp = true))
+    expect(game.undoTitle).toBe("Undo Turn Card")
+  })
+
+  test("no program running:  it just runs", () => {
+    core.clearRuntime()
+    expect(core.asAction({ undoneAs: "Two" }, () => 2)).toBe(2)
+  })
+})
+
 describe("the history's life", () => {
   test("a new run starts with none", () => {
     cards[0].turnOver()

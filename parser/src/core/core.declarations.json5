@@ -2910,6 +2910,21 @@
     },
     {
       "kind": "method",
+      "name": "asAction",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "info"
+        },
+        {
+          "name": "act"
+        }
+      ],
+      "description": "Run `act`, a top-level action's steps, as an action:  ONE undo step titled `undoneAs`, or none (`cantBeUndone`). Returns what `act` returns."
+    },
+    {
+      "kind": "method",
       "name": "cancelActions",
       "of": "core",
       "module": "acting",

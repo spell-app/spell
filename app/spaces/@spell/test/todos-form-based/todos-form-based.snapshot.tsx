@@ -129,14 +129,16 @@ app.filter = "all"
 app.newTaskName = ""
 
 export function createANewTask(props: { title?: string; completed?: boolean } = {}) {
-  let { title, completed } = props
-  if (title === undefined) {
-    if (app.newTaskName === "") return
-    title = app.newTaskName
-    app.newTaskName = ""
-  }
-  const it = new Task({ title: title, completed: completed || false })
-  core.append(app.tasks, it)
+  return core.asAction({ undoneAs: "Create A New Task With Title As Text, Completed As A Choice" }, () => {
+    let { title, completed } = props
+    if (title === undefined) {
+      if (app.newTaskName === "") return
+      title = app.newTaskName
+      app.newTaskName = ""
+    }
+    const it = new Task({ title: title, completed: completed || false })
+    core.append(app.tasks, it)
+  })
 }
 
 createANewTask({ title: "Create todos app", completed: true })

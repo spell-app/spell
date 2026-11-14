@@ -110,7 +110,9 @@ core.heading("The deck:  four words to start -- add your own")
 //## The deck:  four words to start -- add your own
 
 export function addWordMeaningMeaning(word, meaning) {
-  quiz.deck.append(new FlashCard({ word: word, meaning: meaning }))
+  return core.asAction({ undoneAs: "Add Word As Text Meaning Meaning As Text" }, () => {
+    quiz.deck.append(new FlashCard({ word: word, meaning: meaning }))
+  })
 }
 
 addWordMeaningMeaning("el gato", "the cat")
