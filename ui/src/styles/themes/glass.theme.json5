@@ -41,6 +41,10 @@
     "glass-surface-faint": { "light": "#ffffff66", "dark": "#ffffff0d" },
     "glass-edge": { "light": "#ffffffbf", "dark": "#ffffff1f" },
     "glass-hairline": { "light": "#3c3c431f", "dark": "#ffffff14" },
+    // a field's edge (inputs, dropdowns, selects):  in light, firmer than the hairline, so a pale well shows on a pale
+    // pane (epic `editor` I11:  12% read 1.1:1 on Fruity's panes);  in dark, the hairline still reads
+    "glass-field-edge": { "light": "#3c3c4338", "dark": "#ffffff14" },
+    "glass-field-edge-hover": { "light": "#3c3c4359", "dark": "#ffffff2e" },
     "glass-track": { "light": "#7676801f", "dark": "#7676803d" },
     // the track solid, as a Mac's on a bar:  the grey under tabs and toolbars, and the "or" between two buttons
     "glass-track-solid": { "light": "#e9e9ee", "dark": "#3a3846" },
@@ -198,15 +202,15 @@
       "radius": "{radii.m}",
       // Inputs:  a pale well with a hairline;  the accent ring on focus
       "background": { "light": "#ffffffb3", "dark": "#ffffff0f" },
-      "border-color": "{own.glass-hairline}",
-      "border-color-hover": "{borders.strong}",
+      "border-color": "{own.glass-field-edge}",
+      "border-color-hover": "{own.glass-field-edge-hover}",
       "border-color-focus": "{brand.focus.color}"
     },
     "dropdown": {
       "radius": "{radii.m}",
       "background": { "light": "#ffffffb3", "dark": "#ffffff0f" },
-      "border-color": "{own.glass-hairline}",
-      "border-color-hover": "{borders.strong}"
+      "border-color": "{own.glass-field-edge}",
+      "border-color-hover": "{own.glass-field-edge-hover}"
     },
     "menu": {
       "radius": "{radii.m}",

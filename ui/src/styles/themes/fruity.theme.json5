@@ -26,6 +26,12 @@
       // - its wine and plum washes, under Glass's 50%, drew a red / purple seam along every title band
       // - only over the wallpaper:  the editor's top bar keeps Glass's 50% at rest (`--ui-bar-rest-background`)
       "wallpaper-tint": { "light": "#ffffff80", "dark": "#1e1c26d9" }
+    },
+    "panel": {
+      // light:  a window's pane half white, not Glass's 22%, so the washes under the panes don't tint each its own
+      // colour (epic `editor` I11:  the Inspector's top card pink, its Views card sky);  still clearer than its
+      // header (60%), as Owen likes it
+      "pane-background": { "light": "#ffffff80", "dark": "{own.glass-surface}" }
     }
   },
   // The code's colours (epic `debut` P22):  Fruity's own (Q41):  pink and violet from its wallpaper, sky for names, a pastel green for text in quotes.

@@ -250,6 +250,9 @@ ui-panel.InspectorCard > .InspectorSection {
   padding: 12px 14px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* a row the card's foot cuts fades out over its bottom padding, so it reads as "more below", not sliced off
+     (epic `editor` I11);  scrolled to the end, only the empty padding is under the fade */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 12px), transparent);
 }
 /* Views:  the tree's path line sticks right under the card's header, not under the section's padding,
    so the room above the first row is the first row's own (Owen, 2026-11-13, I56) */
