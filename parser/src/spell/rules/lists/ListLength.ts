@@ -27,7 +27,7 @@ import {
  * - Rejects the match when `{list}` is KNOWN to be one thing, not a list, e.g. a `Card`:
  *   Spanish's `el número de palos de card` is then `list_count` of the card's values, `Card.Palos`.
  */
-export class ListLength extends SpellExpression<"arg|list|body?", { across?: ItemsAcross }> {
+export class ListLength extends SpellExpression<"arg|list|where?|body?", { across?: ItemsAcross }> {
   @proto static priority = Priority.mostSpecific
   @proto static datatype = "number"
 

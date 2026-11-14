@@ -33,7 +33,8 @@ import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
 import { EachInStatement } from "./EachInStatement"
 import { PluralCallStatement } from "./PluralCallStatement"
-import { ListIteration, ListIterationNamedForList } from "./ListIteration"
+import { ListIteration, ListIterationNamedForList, ListIterationWhere } from "./ListIteration"
+import { EachItemWhere } from "./EachItemWhere"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
 import { ListMove } from "./ListMove"
@@ -283,7 +284,7 @@ listsEs.addRule(ListLength, {
 
 listsEs.addRule(ListLength, {
   syntax:
-    "(el|la)? (número|numero|cantidad) de {arg:plural_identifier} (en|de|del) {list:operand} donde {inline_expression}?",
+    "(el|la)? (número|numero|cantidad) de {arg:plural_identifier} (en|de|del) {list:operand} (where:donde|que) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -517,7 +518,8 @@ listsEs.addRule(OrdinalOfExpression, {
 // packs: none PossessiveOrdinal -- Spanish has no "the deck's first card":  "la primera carta del mazo"
 
 listsEs.addRule(OrdinalWhereExpression, {
-  syntax: "(el|la)? {ordinal} {arg:singular_identifier} (en|de|del) {list:expression} donde {inline_expression}?",
+  syntax:
+    "(el|la)? {ordinal} {arg:singular_identifier} (en|de|del) {list:expression} (where:donde|que) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -629,7 +631,8 @@ listsEs.addRule(RangeCountExpression, {
 })
 
 listsEs.addRule(ListFilter, {
-  syntax: "(los|las)? {arg:plural_identifier} (en|de|del) {list:expression} donde {inline_expression}?",
+  syntax:
+    "(los|las)? {arg:plural_identifier} (en|de|del) {list:expression} (where:donde|que) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -645,10 +648,21 @@ listsEs.addRule(ListFilter, {
           'core.filter("a word list", (palabra: string) => core.startsWith(palabra, "a"))'
         ],
         ["los items en my-list donde el id del item > 1", "core.filter(myList, (item) => item.id > 1)"],
-        ["los items en my-list donde su id > 1", "core.filter(myList, (item) => item.id > 1)"]
+        ["los items en my-list donde su id > 1", "core.filter(myList, (item) => item.id > 1)"],
+        {
+          title: "`que`:  su sujeto omitido, como tras `donde` (epic `language` T133)",
+          input: "los items en my-list que no son 1",
+          js: "core.filter(myList, (item) => item !== 1)"
+        },
+        ["los items en my-list que están en my-list", "core.filter(myList, (item) => core.includes(myList, item))"]
       ]
     }
   ]
+})
+
+// el elemento de un bucle, su lista y la condición que cumple, para `list_iteration_where` (epic `language` T133)
+listsEs.addRule(EachItemWhere, {
+  syntax: "{arg:singular_identifier} (en|de|del) {list:expression} (where:donde|que) {inline_expression}?"
 })
 
 listsEs.addRule(AddNewThing, { syntax: "(añadir|agregar) {thing:expression}" })
@@ -704,7 +718,7 @@ listsEs.addRule(ListSortedBy, {
 })
 
 listsEs.addRule(ListMembershipTest, {
-  syntax: "{operator:has_or_has_no} {arg:plural_identifier} donde {inline_expression}?",
+  syntax: "{operator:has_or_has_no} {arg:plural_identifier} (where:donde|que) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -886,7 +900,7 @@ listsEs.addRule(ListRemove, {
 
 listsEs.addRule(ListRemoveWhere, {
   syntax:
-    "(quitar|eliminar) (los|las)? {arg:plural_identifier} (en|de|del|desde) {list:expression} donde {inline_expression}?",
+    "(quitar|eliminar) (los|las)? {arg:plural_identifier} (en|de|del|desde) {list:expression} (where:donde|que) {inline_expression}?",
   tests: [
     {
       compileAs: "statement",
@@ -1114,6 +1128,35 @@ listsEs.addRule(ListIteration, {
 })
 
 // a statement once for each item of a list, the list said in it (epic `language` P55, Q59):  `add each card in the deck to the stock`
+// sobre los elementos que cumplen una condición (epic `language` T133):  `para cada carta del mazo que no está en la reserva`
+listsEs.addRule(ListIterationWhere, {
+  syntax: "(para|por) cada? {list:each_item_where} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una carta es una cosa", "una pila es una lista de cartas"].join("\n"), "block")
+        scope.variables?.add({ name: "mazo", datatype: "Pila" })
+        scope.variables?.add({ name: "reserva", datatype: "Pila" })
+      },
+      tests: [
+        [
+          "para cada carta del mazo que no está en la reserva: imprimir eso",
+          "mazo.filter((carta) => !reserva.includes(carta)).forEach((carta) => core.console.log(carta))"
+        ],
+        [
+          "para cada carta del mazo donde no está en la reserva: imprimir eso",
+          "mazo.filter((carta) => !reserva.includes(carta)).forEach((carta) => core.console.log(carta))"
+        ],
+        [
+          ["por cada carta en el mazo que no está en la reserva", "\timprimir la carta"],
+          "mazo.filter((carta) => !reserva.includes(carta)).forEach((carta) => core.console.log(carta))"
+        ]
+      ]
+    }
+  ]
+})
+
 listsEs.addRule(EachInStatement, {
   syntax: "{statement} cada {item:singular_identifier} (en|de|del) {list:expression}",
   tests: [

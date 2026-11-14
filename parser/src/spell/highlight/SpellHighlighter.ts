@@ -80,6 +80,8 @@ export class SpellHighlighter {
     for (const item of match.matched) {
       if (item instanceof P.Match) continue
       if (!highlightAs || item instanceof P.CommentToken || item.start === undefined || item.end === undefined) continue
+      // a word a rule put back, on no text:  `which`'s subject (`SpellStatement.withWhichSubject()`)
+      if (item.end <= item.start) continue
       if (
         !(
           item instanceof P.WordToken ||

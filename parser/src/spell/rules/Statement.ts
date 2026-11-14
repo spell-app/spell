@@ -4,6 +4,8 @@ import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import -- rules are constructed while the `SP` barrel is still loading.
 import { BODY_KEYWORDS, type StatementBodySpec } from "spell/parser/spell/spell.types"
 import { SubjectIt, SubjectRule } from "spell/parser/spell/rules/types"
+// Import directly to avoid circular import:  the word rules' folder builds on this file
+import { Wording } from "spell/parser/spell/rules/expressions/Wording"
 import { Block } from "./Block"
 import { ParseError } from "./ParseError"
 
@@ -305,12 +307,35 @@ export class SpellStatement<
     // NOTE: `Scope.parse()` is typed for string input only;
     // call `parser.parse()` directly (exactly what `Scope.parse()` would do internally) so we can pass tokens instead.
     const { nestedScope } = statement
-    const inlineStatement = nestedScope.parser?.parse(unparsed, parseAs, nestedScope)
+    const tokens = SpellStatement.withWhichSubject(statement, unparsed)
+    const inlineStatement = nestedScope.parser?.parse(tokens, parseAs, nestedScope)
     if (inlineStatement) {
       statement.addMatch(inlineStatement, "body")
+      // the subject `withWhichSubject()` put back isn't on the line:  we're as long as the words we read
+      if (tokens !== unparsed) statement.tokens.splice(statement.tokens.indexOf(tokens[0]!), 1)
       statement.data.body = inlineStatement
     }
     return inlineStatement
+  }
+
+  /**
+   * `unparsed`, a condition after a list, with its subject put back when it starts `which` (epic `language` T133):
+   * `the cards in the deck which are face up` reads its condition as `it is face up`, as `where` would.
+   * - Only after a `where` group whose word means `which` (the `where_or_which` word rule):  `which`, `that`, `who`.
+   * - The subject, and the first word made the item's own (`are` => `is`), from the language's `whichClause`;
+   *   none (Spanish's `que`):  `unparsed` as it is, its subject left out as after `donde` (`implied_it`).
+   * - The subject takes no room on the line, just after `which`:  editors colour `which` and the words after as they are.
+   */
+  static withWhichSubject(statement: P.Match, unparsed: P.Token[]): P.Token[] {
+    const where = statement.groups.where
+    if (!(where instanceof P.Match)) return unparsed
+    if (!Wording.reads(statement.scope, "where_or_which", where.inputText.trim(), "which")) return unparsed
+    const clause = SP.Language.of(statement.scope).words.whichClause
+    const [first, ...rest] = unparsed
+    if (!clause || !(first instanceof P.WordToken)) return unparsed
+    const subject = new P.WordToken({ value: clause.subject, raw: "", whitespace: "", start: where.end ?? first.start })
+    const verb = clause.singularVerbs[first.value]
+    return [subject, verb ? new P.WordToken({ ...first.record, value: verb }) : first, ...rest]
   }
 
   /**

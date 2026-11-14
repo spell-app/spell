@@ -1025,13 +1025,17 @@ places.addRule(EveryThingMatching, {
     }
   ]
 })
-places.addRule(FirstFewWhere, { syntax: "the first {number} {type:plural_type} where {inline_expression}?" })
-places.addRule(NumberOfThingsWhere, { syntax: "the number of {type:plural_type} where {inline_expression}?" })
+places.addRule(FirstFewWhere, {
+  syntax: "the first {number} {type:plural_type} (where:where|which|that|who) {inline_expression}?"
+})
+places.addRule(NumberOfThingsWhere, {
+  syntax: "the number of {type:plural_type} (where:where|which|that|who) {inline_expression}?"
+})
 places.addRule(
   Wording.specialize({ ruleName: "there_are_how_many", meanings: ["none", "fewer", "more", "at_least", "at_most"] }),
   { syntax: "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))" }
 )
-places.addRule(ThereAreThings, { syntax: `${THERE_ARE} where {inline_expression}?` })
+places.addRule(ThereAreThings, { syntax: `${THERE_ARE} (where:where|which|that|who) {inline_expression}?` })
 places.addRule(ThereAreThings, { syntax: THERE_ARE })
 places.addRule(TotalOf, {
   syntax: "the (total|sum) of {list:operand}",

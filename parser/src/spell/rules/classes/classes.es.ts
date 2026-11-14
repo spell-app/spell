@@ -2710,7 +2710,7 @@ classesEs.addRule(EachThing, {
 })
 
 classesEs.addRule(EveryThingWhere, {
-  syntax: "(cada|todo|toda) {type:known_type} donde {inline_expression}?",
+  syntax: "(cada|todo|toda) {type:known_type} (where:donde|que) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -2722,6 +2722,11 @@ classesEs.addRule(EveryThingWhere, {
           "cada carta donde su rango es 1",
           "core.filter(core.everyThing(Carta), (carta) => carta.rango === 1)",
           "core.filter(core.everyThing(Carta), (carta: Carta) => carta.rango === 1)"
+        ],
+        [
+          "cada carta que no es 1",
+          "core.filter(core.everyThing(Carta), (carta) => carta !== 1)",
+          "core.filter(core.everyThing(Carta), (carta: Carta) => carta !== 1)"
         ]
       ]
     }
@@ -2729,7 +2734,7 @@ classesEs.addRule(EveryThingWhere, {
 })
 
 classesEs.addRule(EveryThingWhere, {
-  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} donde {inline_expression}?"
+  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} (where:donde|que) {inline_expression}?"
 })
 
 classesEs.addRule(TheThings, { syntax: "(todos|todas) (los|las)? {type:plural_type}" })
@@ -2812,20 +2817,21 @@ classesEs.addRule(EveryThingWith, {
   ]
 })
 classesEs.addRule(EveryThingWith, {
-  syntax: "(cada|todo|toda) {type:known_type} con {filters:thing_filters} donde {inline_expression}?"
+  syntax: "(cada|todo|toda) {type:known_type} con {filters:thing_filters} (where:donde|que) {inline_expression}?"
 })
 classesEs.addRule(EveryThingWith, {
   syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters}"
 })
 classesEs.addRule(EveryThingWith, {
   syntax:
-    "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters} donde {inline_expression}?"
+    "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters} (where:donde|que) {inline_expression}?"
 })
 classesEs.addRule(TheSavedThingsWith, {
   syntax: "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters}"
 })
 classesEs.addRule(TheSavedThingsWith, {
-  syntax: "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters} donde {inline_expression}?"
+  syntax:
+    "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters} (where:donde|que) {inline_expression}?"
 })
 
 classesEs.addRule(KindValues, {

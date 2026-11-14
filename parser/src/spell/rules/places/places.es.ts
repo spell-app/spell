@@ -977,14 +977,16 @@ placesEs.addRule(EveryThingMatching, {
   ]
 })
 placesEs.addRule(FirstFewWhere, {
-  syntax: `(los|las) (primeros|primeras) {number} {type:plural_type} donde {inline_expression}?`
+  syntax: `(los|las) (primeros|primeras) {number} {type:plural_type} (where:donde|que) {inline_expression}?`
 })
-placesEs.addRule(NumberOfThingsWhere, { syntax: "el número de {type:plural_type} donde {inline_expression}?" })
+placesEs.addRule(NumberOfThingsWhere, {
+  syntax: "el número de {type:plural_type} (where:donde|que) {inline_expression}?"
+})
 placesEs.addRule(
   Wording.specialize({ ruleName: "there_are_how_many", meanings: ["none", "fewer", "more", "at_least", "at_most"] }),
   { syntax: "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))" }
 )
-placesEs.addRule(ThereAreThings, { syntax: `${THERE_ARE} donde {inline_expression}?` })
+placesEs.addRule(ThereAreThings, { syntax: `${THERE_ARE} (where:donde|que) {inline_expression}?` })
 placesEs.addRule(ThereAreThings, { syntax: THERE_ARE })
 placesEs.addRule(TotalOf, {
   syntax: "(el total|la suma) de {list:operand}",

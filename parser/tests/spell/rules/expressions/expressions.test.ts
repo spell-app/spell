@@ -84,6 +84,7 @@ describe("priority and precedence", () => {
         "draw_slot_of:  Priority.specific",
         "draw_thing:  Priority.preferred",
         "drawn_markup:  Priority.specific",
+        "each_item_where:  Priority.specific",
         "else_if:  Priority.preferred",
         "ends_with:  Precedence.comparison",
         "example_block:  Priority.preferred",

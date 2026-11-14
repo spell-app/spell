@@ -14,7 +14,7 @@ import { loopItemsInDrawing, readableInDrawing } from "./places.shared"
  * - `Priority.mostSpecific`:  it has to beat `the number of` of the read `recipes where it is quick`, which isn't a drawing's.
  * - Compiles to `core.itemCountOf(...)` over what `every recipe where ...` reads.
  */
-export class NumberOfThingsWhere extends SpellExpression<"type|body?", { loopItems?: string[] }> {
+export class NumberOfThingsWhere extends SpellExpression<"type|where|body?", { loopItems?: string[] }> {
   @proto static datatype: P.Datatype | undefined = "number"
   @proto static priority = Priority.mostSpecific
 

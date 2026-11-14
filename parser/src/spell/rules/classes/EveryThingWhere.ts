@@ -24,7 +24,7 @@ const WORDS_TO_THE_TYPE = 3
  * - `it` and `its` are the recipe;  `the search` is still the action's thing's.
  * - Compiles to `core.filter(core.everyThing(Recipe), (recipe) => ...)`.
  */
-export class EveryThingWhere extends SpellExpression<"type|body?", { own?: OwnList }> {
+export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?: OwnList }> {
   /** A list of the type, e.g. `list of recipes`:  as `every_thing`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return P.listOf(SP.typeName(`${match.groups.type.value}`))

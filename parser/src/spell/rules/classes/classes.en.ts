@@ -2921,7 +2921,7 @@ classes.addRule(EachThing, {
 })
 
 classes.addRule(EveryThingWhere, {
-  syntax: "every {type:known_type} where {inline_expression}?",
+  syntax: "every {type:known_type} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -2938,13 +2938,20 @@ classes.addRule(EveryThingWhere, {
           "every card where it is 1",
           "core.filter(core.everyThing(Card), (card) => card === 1)",
           "core.filter(core.everyThing(Card), (card: Card) => card === 1)"
+        ],
+        [
+          "every card which is not 1",
+          "core.filter(core.everyThing(Card), (card) => card !== 1)",
+          "core.filter(core.everyThing(Card), (card: Card) => card !== 1)"
         ]
       ]
     }
   ]
 })
 
-classes.addRule(EveryThingWhere, { syntax: "(all|the)? {type:plural_type} where {inline_expression}?" })
+classes.addRule(EveryThingWhere, {
+  syntax: "(all|the)? {type:plural_type} (where:where|which|that|who) {inline_expression}?"
+})
 
 classes.addRule(TheThings, { syntax: "all {type:plural_type}" })
 classes.addRule(TheThings, { syntax: "{type:plural_type}" })
@@ -3018,15 +3025,15 @@ classes.addRule(EveryThingWith, {
   ]
 })
 classes.addRule(EveryThingWith, {
-  syntax: "every {type:known_type} with {filters:thing_filters} where {inline_expression}?"
+  syntax: "every {type:known_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
 })
 classes.addRule(EveryThingWith, { syntax: "(all|the)? {type:plural_type} with {filters:thing_filters}" })
 classes.addRule(EveryThingWith, {
-  syntax: "(all|the)? {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+  syntax: "(all|the)? {type:plural_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
 })
 classes.addRule(TheSavedThingsWith, { syntax: "the? saved {type:plural_type} with {filters:thing_filters}" })
 classes.addRule(TheSavedThingsWith, {
-  syntax: "the? saved {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+  syntax: "the? saved {type:plural_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
 })
 
 classes.addRule(KindValues, {
