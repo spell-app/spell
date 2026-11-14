@@ -100,6 +100,38 @@ describe("typing Spell in a real Monaco editor", () => {
     })
   })
 
+  describe("Tab at a line's indent takes the lines under it along (I59)", () => {
+    /** Press Tab, no modifier, in the editor's text area. */
+    const pressTab = () => {
+      const area = editor!.getDomNode()!.querySelector("textarea")!
+      area.focus()
+      area.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", code: "Tab", bubbles: true, cancelable: true }))
+    }
+
+    test("before an opening tag:  its children and closing tag go in a level with it, the caret at its new indent", () => {
+      const code = editorOf([`\t<segment>`, `\t\t<text>Hi</text>`, `\t</segment>`], 1, 2)
+      pressTab()
+      expect(code.getValue()).toBe([`\t\t<segment>`, `\t\t\t<text>Hi</text>`, `\t\t</segment>`].join("\n"))
+      expect(code.getPosition()).toMatchObject({ lineNumber: 1, column: 3 })
+    })
+
+    test("before a line with a body:  the body goes in with it, as one undo", () => {
+      const code = editorOf([`group "Moves"`, `\tto "cheat"`, `\t\tturn it up`], 2, 2)
+      pressTab()
+      expect(code.getValue()).toBe([`group "Moves"`, `\t\tto "cheat"`, `\t\t\tturn it up`].join("\n"))
+      // the model's own undo:  with the text area focused, the editor's "undo" goes to the browser's
+      void code.getModel()!.undo()
+      expect(code.getValue()).toBe([`group "Moves"`, `\tto "cheat"`, `\t\tturn it up`].join("\n"))
+    })
+
+    test("mid-line:  left to Monaco, nothing under it moves", () => {
+      const lines = [`\t<segment>`, `\t\t<text>Hi</text>`, `\t</segment>`]
+      const code = editorOf(lines, 1, 5)
+      pressTab()
+      expect(code.getValue().split("\n").slice(1)).toEqual(lines.slice(1))
+    })
+  })
+
   describe("Enter after an opening tag (I65)", () => {
     const enter = () => editor!.trigger("keyboard", "type", { text: "\n" })
 

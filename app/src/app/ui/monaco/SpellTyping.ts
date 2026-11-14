@@ -33,6 +33,7 @@ import type { monaco } from "./monaco"
  * - A line moved out a level takes the lines under it along (epic `editor` I59):
  *   Shift+Tab, or Backspace at the end of its indent, on a tag moves its children and its closing tag;
  *   on a type or a property, its body.  One undo for all of it.
+ *   Tab there, or Cmd / Ctrl+], moves them in a level the same way.
  * - One per editor, made as each editor is (`SpellMonaco.register()`).
  * - Only Monaco's TYPE (`import type`):  its rules are plain functions of the lines, tested without an editor.
  ****************/
@@ -101,6 +102,9 @@ export class SpellTyping {
   /**
    * Shift+Tab, Cmd / Ctrl+[, or Backspace at the end of a line's indent:  when lines sit under that line, move them out
    * with it;  Cmd / Ctrl+] moves them in with it (Owen, 2026-11-14, I59).  All as one edit.
+   * - Tab with the caret at the end of a line's indent moves them in too (Owen:  "Hitting tab before <segment> should
+   *   have tabbed its children to the right"):  only there, with no selection and no suggestions showing,
+   *   so Tab mid-line, over a selection, or taking a suggestion is still Monaco's.
    * - A line with nothing under it is left to Monaco.
    */
   private keyDown(event: monaco.IKeyboardEvent) {
@@ -109,8 +113,9 @@ export class SpellTyping {
     const { browserEvent: key } = event
     const isMod = (key.metaKey || key.ctrlKey) && !key.shiftKey && !key.altKey
     const isShiftTab = key.key === "Tab" && key.shiftKey && !key.metaKey && !key.ctrlKey && !key.altKey
+    const isTab = key.key === "Tab" && !key.shiftKey && !key.metaKey && !key.ctrlKey && !key.altKey
     const isBackspace = key.key === "Backspace" && !key.shiftKey && !key.metaKey && !key.ctrlKey && !key.altKey
-    const isIn = isMod && key.key === "]"
+    const isIn = (isMod && key.key === "]") || isTab
     const isOut = isShiftTab || isBackspace || (isMod && key.key === "[")
     if (!model || !(isOut || isIn) || editor.getRawOptions().readOnly) return
     if (!this.languages.indents.includes(model.getLanguageId())) return
@@ -121,7 +126,10 @@ export class SpellTyping {
     const text = model.getLineContent(line)
     const indent = indentOf(text)
     if ((isOut && !indent) || !text.trim()) return
-    if (isBackspace && (!selection.isEmpty() || selection.startColumn !== indent.length + 1)) return
+    const isAtIndent = selection.isEmpty() && selection.startColumn === indent.length + 1
+    if ((isBackspace || isTab) && !isAtIndent) return
+    // Tab takes a suggestion while the list shows:  Monaco's, not ours
+    if (isTab && editor.getDomNode()?.querySelector(SUGGESTIONS_SHOWING)) return
     const lines = model.getLinesContent()
     const under = SpellTyping.linesUnder(lines, line - 1)
     if (!under) return
@@ -145,6 +153,8 @@ export class SpellTyping {
     event.stopPropagation()
     editor.pushUndoStop()
     editor.executeEdits(SPELL_TYPING, edits)
+    // Tab:  the caret stays where typing goes, at the end of the line's new indent
+    if (isTab) editor.setPosition({ lineNumber: line, column: indentOf(model.getLineContent(line)).length + 1 })
     editor.pushUndoStop()
   }
 
@@ -528,6 +538,9 @@ type MonacoPaste = { text: string; pasteOnNewLine?: boolean }
 type TokenizedModel = monaco.editor.ITextModel & { tokenization?: { forceTokenization?(line: number): void } }
 
 /** The source of the edits it makes, for Monaco's undo and the editor's listeners. */
+/** Monaco's list of suggestions, while it shows:  Tab then takes one. */
+const SUGGESTIONS_SHOWING = ".suggest-widget.visible"
+
 const SPELL_TYPING = "spell-typing"
 
 /** What moves the caret onto a line it snaps on:  a click or a key, never code (`"api"`) nor its own edits. */
