@@ -1051,10 +1051,18 @@
         position: relative;
         border-top-right-radius: 0;
       }
+      /* its `⟩` as far in from the right end as its `⟨` is from the left (Owen, 2026-11-14) */
       .bubbly-tag-tail > .bubbly-mark:last-child {
-        position: absolute;
-        right: var(--bubbly-bracket-pad);
+        float: right;
+        margin-right: calc(var(--bubbly-tall-close-inset) - var(--bubbly-bracket-pad));
       }
+    }
+    /* how far in a flush tall tag's `⟩` sits:  a bracket's room;  a block's, as far as its `⟨` */
+    .bubbly-tag-tall {
+      --bubbly-tall-close-inset: var(--bubbly-bracket-pad);
+    }
+    .bubbly-tag-tall-head {
+      --bubbly-tall-close-inset: var(--bubbly-tag-pad-left);
     }
     /* each row a line tall, its words where a band's are:  a pixel up from the middle */
     .bubbly-tag-row {
@@ -1692,9 +1700,16 @@
     }
     /* a flush tall tag's `⟩`, drawn at its band's right end:  in its line, only its room */
     .bubbly-layer .bubbly-tag-tall-flush .bubbly-tag-tail > .bubbly-angle {
-      inset: 0 var(--bubbly-bracket-pad) 0 auto;
+      position: absolute;
+      inset: 0 var(--bubbly-tall-close-inset) 0 auto;
+      float: none;
+      margin: 0;
       display: flex;
       align-items: center;
+    }
+    /* a block's:  its ink as far from the end as its `⟨`'s from the start, measured (6.3px) */
+    .bubbly-layer .bubbly-tag-tall-head.bubbly-tag-tall-flush .bubbly-tag-tail > .bubbly-angle {
+      right: calc(var(--bubbly-tag-pad-left) - var(--bubbly-bracket-pad));
     }
     .bubbly-angle-at-end::before {
       visibility: hidden;

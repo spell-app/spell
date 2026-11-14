@@ -412,6 +412,23 @@ expressionsEs.addRule(IsInAType, {
         ["thing está en una columna", "core.isInA(thing, Columna)"],
         ["thing no está en una columna", "!core.isInA(thing, Columna)"]
       ]
+    },
+    {
+      // una carta que pertenece a una sola pila:  su pila lo dice, sin buscar (epic `language` J148)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          "una carta es una cosa\nuna pila es una lista de cartas\nuna columna es una pila\nuna carta pertenece a una pila",
+          "block"
+        )
+        scope.variables?.add({ name: "carta", datatype: "Carta" })
+        scope.variables?.add({ name: "reserva", datatype: "Pila" })
+      },
+      tests: [
+        ["carta está en una columna", "carta.pila instanceof Columna"],
+        ["carta no está en una columna", "!(carta.pila instanceof Columna)"],
+        ["carta está en reserva", "(carta.pila === reserva)"]
+      ]
     }
   ]
 })

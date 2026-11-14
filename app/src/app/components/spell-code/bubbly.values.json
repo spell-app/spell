@@ -312,6 +312,10 @@
       "light": "25px",
       "dark": "25px"
     },
+    "--bubbly-tall-close-inset": {
+      "light": "3px",
+      "dark": "3px"
+    },
     "--bubbly-page-scale": {
       "light": "0.9375",
       "dark": "0.9375"
