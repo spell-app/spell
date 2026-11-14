@@ -282,7 +282,7 @@ export class MarkupMarks extends TextMarks {
       } else this.value(attribute.valueStart, attribute.valueEnd!, attribute.isQuoted, partOfSpeech, into)
     }
     this.tags.push({ start: from, end })
-    if (tag.selfClosing) this.mark(end - 2, end - 1, SLASH)
+    if (tag.selfClosing) this.mark(end - 2, end - 1, `${SLASH} ${CLOSING_SLASH}`)
     this.mark(end - 1, end, ends === "self-closed" ? HIDDEN : ANGLE_CLOSE)
   }
 
@@ -298,7 +298,7 @@ export class MarkupMarks extends TextMarks {
     this.mark(start, start + 1, HIDDEN)
     // an attribute's room before its `/`, as on the page;  none where its start tag's `>` starts its line
     const spacers: Spacers = this.startsLine(start - 1) ? {} : { before: spacer("attribute", "before") }
-    this.mark(start + 1, start + 2, SLASH, spacers)
+    this.mark(start + 1, start + 2, `${SLASH} ${CLOSING_SLASH}`, spacers)
     this.mark(start + 2, end - 1, HIDDEN)
     this.mark(end - 1, end, ANGLE_CLOSE)
   }
@@ -452,6 +452,9 @@ const ANGLE_CLOSE = `${MARK} bubbly-angle bubbly-angle-close`
 
 /** An end tag's `/`, and `<br />`'s. */
 const SLASH = `${MARK} bubbly-slash`
+
+/** A self-closed tag's `/`, over its `>`:  `/⟩` one glyph (Owen, 2026-11-14). */
+const CLOSING_SLASH = "bubbly-closing-slash"
 
 /** A tag's name, and its attributes' names. */
 const TAG_NAME = "bubbly-tag-name"
