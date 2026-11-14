@@ -158,6 +158,9 @@ export class SpellMonaco {
   static register(): SpellMonacoParts {
     if (SpellMonaco.#registered) return SpellMonaco.#registered
     const { LANGUAGE, PAGE_LANGUAGE, LANGUAGES } = SpellMonaco
+    // start loading Spell UI's help table now (a chunk of its own, loaded as it's first asked for):  asked first by the
+    // first suggestion, it wasn't in yet, and `<segment col` offered the program's names, not `color` (Owen, I82)
+    SP.ComponentPacks.help("en")
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
     SpellBubbly.watch(LANGUAGES)
