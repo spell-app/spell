@@ -108,8 +108,12 @@
   /* its corners cut, but its top-left, square:  the rail runs into it */
   --bubbly-foot-tiny-cut: 4px;
   /* its words this far in from its ends */
-  --bubbly-foot-tiny-pad-left: 5px;
-  --bubbly-foot-tiny-pad-right: 5px;
+  --bubbly-foot-tiny-pad-left: 9px;
+  --bubbly-foot-tiny-pad-right: 9px;
+  /* its `</>` this dark:  readable, still lighter than a start tag's words (Owen:  "don't dim the text so much") */
+  /* an end tag's name, in a line:  lighter than its start tag's */
+  --bubbly-end-name-ink: color-mix(in srgb, var(--bubbly-ink) 45%, var(--bubbly-paper));
+  --bubbly-foot-tiny-ink: color-mix(in srgb, var(--bubbly-ink) 60%, var(--bubbly-paper));
   /* the body's paper over it, under the last row;  and the paper under it, before the next row */
   --bubbly-foot-tiny-above: 2px;
   --bubbly-foot-tiny-below: 4px;
@@ -768,6 +772,10 @@
   .bubbly-angle-open:has(+ .bubbly-slash)::before {
     margin-right: 0.5px;
   }
+  /* ... and a `/`'s close one, in a `</>` or a `/>`:  a pixel from it (epic `editor` I83) */
+  .bubbly-slash + .bubbly-angle-close::before {
+    margin-left: 2px;
+  }
 
   /* an attribute's `=` a pixel clear of its name */
   .bubbly-equals {
@@ -782,8 +790,11 @@
   .bubbly-tag-name {
     font-weight: 650;
   }
+  /* an end tag's name lighter than its start tag's:  it only repeats it (Owen, 2026-11-14) */
   .bubbly-tag-end .bubbly-tag-name {
     font-weight: 400;
+    color: var(--bubbly-end-name-ink);
+    opacity: 1;
   }
   .bubbly-attribute-name {
     margin-left: 0.33em;
@@ -955,6 +966,12 @@
     .bubbly-foot-tiny .bubbly-angle::before {
       font-size: var(--bubbly-foot-tiny-font);
       top: 0;
+    }
+    .bubbly-foot-tiny,
+    .bubbly-foot-tiny :is(.bubbly-mark, .bubbly-tag-name),
+    .bubbly-foot-tiny .bubbly-angle::before {
+      color: var(--bubbly-foot-tiny-ink);
+      opacity: 1;
     }
     .bubbly-foot-tiny .bubbly-angle-open::before {
       margin-right: 1px;
@@ -1369,6 +1386,22 @@
       right: 0;
     }
     /*
+     * beside a `/`, a bracket's own character narrowed to the page's room (epic `editor` I83):
+     * `<` is wider than the `⟨` drawn over it, so a `</>` had a gap either side of its slash
+     * - narrowed by letter-spacing, so the caret still lands either side of it, as Monaco measures where each letter is
+     * - in `em`, so a block's tiny end tag narrows as much;  for the editor's font, whose `<` is 0.61em, `⟨` 0.37em
+     * - the `/`'s `⟨` 0.5px from it, its `⟩` 1px, as on the page
+     */
+    .view-line .bubbly-angle-open.bubbly-tag-end {
+      letter-spacing: -0.21em;
+    }
+    .view-line .bubbly-slash + .bubbly-angle-close {
+      letter-spacing: -0.18em;
+    }
+    .view-line .bubbly-angle::before {
+      letter-spacing: normal;
+    }
+    /*
      * a tag's marks:  as dark as the page's on a band, which mixes its faint ink with the band's colour;
      * the text knows no band, so a little darker than the paper's faint ink instead
      */
@@ -1402,6 +1435,7 @@
     /* an end tag's name not bold, as the page's;  a block's in its marks' ink, not faded under it too */
     .view-line .bubbly-tag-name.bubbly-tag-end {
       font-weight: 400;
+      color: var(--bubbly-end-name-ink);
     }
     .view-line .bubbly-mark.bubbly-tag-name.bubbly-tag-end {
       opacity: 1;
@@ -1420,6 +1454,12 @@
     }
     .view-line .bubbly-angle.bubbly-foot-tiny::before {
       font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-monaco-scale));
+    }
+    .view-line .bubbly-foot-tiny.bubbly-mark:not(.bubbly-angle),
+    .view-line .bubbly-foot-tiny.bubbly-tag-name,
+    .view-line .bubbly-angle.bubbly-foot-tiny::before {
+      color: var(--bubbly-foot-tiny-ink);
+      opacity: 1;
     }
     /*
      * an element with nothing between its tags, drawn as if self-closed (Owen, Q62):  its start tag's `>`, its end

@@ -107,7 +107,7 @@ export class MarkupMarks extends TextMarks {
   private element(element: MarkupElement, into: MarkupShape[]) {
     const { open, close } = element
     // one of the project's own views draws a thing:  purple, whatever its name
-    const partOfSpeech = this.isView(element.tag) ? "thing" : BubblyMarkup.partOfSpeechOf(element.tag)
+    const partOfSpeech = this.isView(element.tag) ? "thing" : BubblyMarkup.partOfSpeechOfElement(element)
     const hasInside = element.children.some((child) => child.kind !== "text" || this.slice(child).trim())
     if (!hasInside && !close) {
       if (this.startsLine(open.start) && this.endsLine(open.end)) this.alone(open, partOfSpeech, into)

@@ -72,6 +72,16 @@ export class BubblyMarkup {
    *   A few names mean one thing in HTML and another in Spell UI (`<header>`, `<ui-header>`):  their `ui-` tag is
    *   listed as it is.
    */
+  /**
+   * An element's part of speech:  its tag's (`partOfSpeechOf()`), but a tag of no kind that names a thing with its
+   * quoted word is a thing too:  `<number "score"/>` declares the app's score (Owen, 2026-11-14).
+   */
+  static partOfSpeechOfElement(element: MarkupElement): MarkupPartOfSpeech {
+    const partOfSpeech = BubblyMarkup.partOfSpeechOf(element.tag)
+    const named = element.open.attributes[0]
+    return partOfSpeech === "plain" && named?.name === "" && named.isQuoted ? "thing" : partOfSpeech
+  }
+
   static partOfSpeechOf(tag: string): MarkupPartOfSpeech {
     const name = tag.toLowerCase()
     const listed = PART_OF_SPEECH_BY_TAG.get(name) ?? PART_OF_SPEECH_BY_TAG.get(name.replace(/^ui-/, ""))
@@ -242,10 +252,10 @@ function tokensOf(source: string, from: number, to: number): Token[] {
 
 /**
  * One attribute, or a start tag's end:  `/>` or `>` (1), a tag's quoted word (2), a name (3),
- * a value in `"` (4), `'` (5), a Spell `{…}` (6) or neither (7).
+ * a value in `"` (4), `'` (5), a Spell `{…}` (6) or neither (7), which stops before a `/>`:  `suit=clubs/>`.
  */
 const ATTRIBUTE_PATTERN =
-  /\s*(?:(\/?>)|"([^"]*)"|([^\s=/>"]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|(\{[^}]*\})|([^\s>]+)))?|\/)/.source
+  /\s*(?:(\/?>)|"([^"]*)"|([^\s=/>"]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|(\{[^}]*\})|((?:[^\s>/]|\/(?!>))+)))?|\/)/.source
 
 /** A start tag's attributes, from `at` just past its name, to its `>`. */
 function attributesFrom(
@@ -339,7 +349,7 @@ class MarkupWriter {
 
   /** An element:  a block when what's inside it is on lines of its own, else a band. */
   private element(element: MarkupElement): string {
-    const kind = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
+    const kind = `bubbly-${BubblyMarkup.partOfSpeechOfElement(element)}`
     const inside = element.children.filter((child) => child.kind !== "text" || this.slice(child).trim())
     const insideText = element.close ? this.source.slice(element.open.end, element.close.start) : ""
     const isTall = this.isTall(element.open)
@@ -400,7 +410,7 @@ class MarkupWriter {
    */
   private endPill(element: MarkupElement, touching: boolean): string {
     if (!element.close) return ""
-    const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}${touching ? " bubbly-tags-touch" : ""}`
+    const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOfElement(element)}${touching ? " bubbly-tags-touch" : ""}`
     return `<span class="${kind} bubbly-tag-end">${this.endTag(element.close)}</span>`
   }
 
@@ -429,7 +439,7 @@ class MarkupWriter {
     const inside = this.inline(element.children)
     // nothing between its tags:  their points touch
     const touching = inside ? "" : " bubbly-tags-touch"
-    const partOfSpeech = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
+    const partOfSpeech = `bubbly-${BubblyMarkup.partOfSpeechOfElement(element)}`
     const kind = `bubbly-tag-pill ${partOfSpeech}${touching}`
     // nothing at all between them:  ONE pill, as if self-closed, its end tag left out (Owen, Q62)
     if (BubblyMarkup.isDrawnSelfClosed(element)) {
