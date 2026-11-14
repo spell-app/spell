@@ -26,7 +26,7 @@ solitaire is an app
 		restart the game
 
 	to draw it
-		<segment inverted attach="top">
+		<segment inverted attach="top" color="">
 			<toolbar class="GameBar" aria-label="Game">
 				<text slot="title" size="large" heavy>Solitaire</text>
 				<buttons slot="center" padding="compact">
@@ -67,7 +67,7 @@ solitaire is an app
 		</>
 
 	group "Dealing"
-	to "restart the game" with title "Restart", shortcut "R"
+	to "restart the game" with shortcut "R"
 		undoable
 		clear the score
 		deal the cards
