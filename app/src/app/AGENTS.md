@@ -173,6 +173,9 @@ and in the app's build folder, `app/` at the app folder's root.
     ([LinkClick](ui/monaco/LinkClick.ts), epic `editor` I101)
   - A colour or an icon attribute's value is picked from its words list's first row, "Pick a color…":
     the palette or the icon picker at the caret ([ValuePicker](ui/monaco/ValuePicker.ts), epic `editor` T61)
+  - An attribute's words show quietly under its value once the caret rests in it for a second, the value ticked
+    ([ValueChoices](ui/monaco/ValueChoices.ts), epic `editor` T70):  typing or moving hides them, the keys stay with
+    the code;  ⌥↓ steps in, a click chooses, Ctrl+Space is the suggestion list
   - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;  between `<x>` and `</x>`,
     the caret a level in and the closing tag on its own line (epic `editor` I65):  Spell's Enter rules,
     `SpellMonaco.CONFIGURATION`, with VS Code's `language-configuration.json` kept the same by a test

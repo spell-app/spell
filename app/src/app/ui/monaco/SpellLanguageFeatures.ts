@@ -315,6 +315,15 @@ export class SpellLanguageFeatures {
   /** The languages `register()` registered for. */
   private languages: string[] = []
 
+  /**
+   * The words the attribute whose quoted value `position` is in takes, if it lists them:  `spacing="x|s"` => `none`, `xs` ...
+   * - For `ValueChoices`, the words shown beside a value the caret rests in (epic `editor` T70).
+   */
+  attributeValuesAt = (model: monaco.editor.ITextModel, position: monaco.Position): LSP.AttributeValues | undefined => {
+    const file = this.fileOf(model)
+    return file && this.service.attributeValuesAt(file, LspToMonaco.lspPosition(position))
+  }
+
   /** Outline of `model`:  what it declares, nested. */
   private documentSymbols(model: monaco.editor.ITextModel): monaco.languages.DocumentSymbol[] {
     const file = this.fileOf(model)

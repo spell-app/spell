@@ -9,6 +9,7 @@ import { SpellHeadings } from "./SpellHeadings"
 import { SpellBubbly } from "./SpellBubbly"
 import { SpellTyping } from "./SpellTyping"
 import { ValuePicker } from "./ValuePicker"
+import { ValueChoices } from "./ValueChoices"
 import { ErrorHover } from "./ErrorHover"
 import { LinkClick } from "./LinkClick"
 import { SpellTokensProvider } from "./SpellTokensProvider"
@@ -32,6 +33,7 @@ import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
  * - Typing on a blank line takes its block's indent, `group ` opens a name's quotes,
  *   and a space after a tag's name writes the rest of it (`<action "|" />`, `<segment |></segment>`):  see `SpellTyping`.
  * - A colour or an icon attribute's value can be picked at the caret, from its words list's first row:  see `ValuePicker`.
+ * - An attribute's words show quietly under its value once the caret rests in it:  see `ValueChoices`.
  * - An error shows its message on a plain hover over its squiggle, though the hover info waits for ⌥:  see `ErrorHover`.
  * - A web address in the code opens on a click on the icon after it, or on ⌘-click as in VS Code:  see `LinkClick`.
  */
@@ -175,6 +177,9 @@ export class SpellMonaco {
       new SpellTyping(editor, { indents: LANGUAGES, quotes: [LANGUAGE] })
       // the right-click menu's Rename Symbol only where something can be renamed (epic `editor` I147)
       SpellMonaco.#registered?.features.followRenameRow(editor)
+      // an attribute's words under its value, once the caret rests in it (epic `editor` T70)
+      const features = SpellMonaco.#registered?.features
+      if (features) new ValueChoices(editor, features.attributeValuesAt)
       new ErrorHover(editor)
       new LinkClick(editor)
     })

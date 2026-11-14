@@ -1944,6 +1944,24 @@ export class SpellLanguageService {
   }
 
   /**
+   * The words the attribute whose quoted value `position` is in takes:  `spacing="x|s"` => `spacing`, `none`, `xs` ...
+   * (epic `editor` T70, the app's choices shown beside a value the caret rests in);  `undefined` anywhere else,
+   * or for an attribute that takes any words.
+   * - Read from the file's text now, as `completion()` reads a typed tag, and its parse's scope for the component.
+   */
+  attributeValuesAt(file: SP.SpellFile, position: Position): LSP.AttributeValues | undefined {
+    if (!file.match) return undefined
+    const typedTag = SpellLanguageService.openTagTyped(file, position)
+    const typing = typedTag && ATTRIBUTE_VALUE_TYPED.exec(typedTag)
+    if (!typing) return undefined
+    const [, tag, attribute] = typing as unknown as [string, string, string, string]
+    const spec = SpellLanguageService.componentHelpAt(this.scopeAt(file, this.offsetAt(file, position)))
+      ?.attributesOf(tag)
+      ?.find((it) => it.name === attribute)
+    return spec?.values.length ? { tag, attribute, values: spec.values } : undefined
+  }
+
+  /**
    * The words an attribute takes, as its quoted value is typed at the end of `lineText`:
    * `<button color="pr` => `primary`, `red` ... -- `undefined` if no attribute's value is being typed there.
    * - Each replaces what's typed inside the quotes.

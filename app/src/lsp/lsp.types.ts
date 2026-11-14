@@ -643,3 +643,13 @@ export type RenameErrorCause = {
   /** for `taken`:  what's called that already, another action or a property */
   takenBy?: "action" | "property"
 }
+
+/** The words an attribute takes, for the quoted value the caret is in -- see `SpellLanguageService.attributeValuesAt()`. */
+export type AttributeValues = {
+  /** its tag, as written:  `container` */
+  tag: string
+  /** the attribute:  `spacing` */
+  attribute: string
+  /** the words it takes, in the file's language, in the component's order */
+  values: readonly string[]
+}
