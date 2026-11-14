@@ -61,7 +61,7 @@ spell editor is an app
 	group "Titles That Follow"
 	// The editor writes each in the page's language
 	its "revert words" is text
-		// Revert Changes to the file open
+		// Discard Changes, under Save
 	its "rename words" is text
 		// Rename the project…
 	its "delete words" is text
@@ -328,10 +328,10 @@ a "file menu" is a bar menu
 				<divider/>
 			</if>
 			<if spell editor's may design><action "save"/></if>
+			<action "revert changes"/>
 			<action "auto save"/>
 			<divider/>
 			<if spell editor's may change project><action "duplicate file"/></if>
-			<action "revert changes"/>
 		</menu>
 
 an "edit menu" is a bar menu

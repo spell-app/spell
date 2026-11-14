@@ -332,7 +332,7 @@ function ThemeItems(): JSX.Element {
  * - What each row does is the editor's, handed over by its name (`handOverActions()`).
  * - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them:
  *   Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards.
- * - File:  New Spell File, New CSS File, ─, Save, AutoSave, ─, Duplicate File, Revert Changes to the file open.
+ * - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File.
  * - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings….
  * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Program Panel, ─, the Inspector and its cards, ─, Line Numbers;  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
@@ -351,10 +351,9 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
       })
     )
   })
-  const fileName = tracked(() => (editor.file ? SP.SpellProject.sourceNameOf(editor.file.path) : ""))
   followEditor(spell, () => ({
     canRevert: editor.canRevertChanges,
-    revertWords: fileName() ? appTexts.text("revertChangesTo", { file: fileName() }) : appTexts.text("revertChanges"),
+    revertWords: appTexts.text("revertChanges"),
     autoSaving: editor.isAutoSaving,
     unsaved: editor.hasUnsavedEdits,
     mayCreate: editor.mayCreate && (!isStaticBuild || editor.canChangeProject),
