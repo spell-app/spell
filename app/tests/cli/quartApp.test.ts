@@ -3,7 +3,7 @@ import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync }
 import { createRequire } from "module"
 import { tmpdir } from "os"
 import { dirname, join, resolve } from "path"
-import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
+import { chromium, type Browser, type BrowserContext, type Locator, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell/server"
@@ -138,15 +138,16 @@ describe("a Python spell app, in a real browser", () => {
     expect(solitaire!["$history"]).toEqual(expect.objectContaining({ can_undo: true, undo_title: "Undo Play Card" }))
 
     // the toolbar's Undo, live:  it lights up for the move, and takes it back in Python
-    const undo = page.page.locator('ui-toolbar ui-button[icon="undo"]')
-    const redo = page.page.locator('ui-toolbar ui-button[icon="redo"]')
-    await expect.poll(() => undo.getAttribute("aria-label")).toBe("Undo Play Card")
-    expect(await undo.getAttribute("disabled")).toBeNull()
-    await undo.click()
+    // (an `<action>` right inside a `<toolbar>` is one of its rows, `<ui-action>`, handed its action)
+    const undo = await toolbarRow(page.page, "Undo")
+    const redo = await toolbarRow(page.page, "Redo")
+    await expect.poll(() => titleOf(undo)).toBe("Undo Play Card")
+    expect(await isEnabled(undo)).toBe(true)
+    await press(undo)
     await expect.poll(() => page.page.locator(DISCARDS).count()).toBe(discards)
-    await expect.poll(() => redo.getAttribute("aria-label")).toBe("Redo Play Card")
-    expect(await undo.getAttribute("disabled")).not.toBeNull()
-    await redo.click()
+    await expect.poll(() => titleOf(redo)).toBe("Redo Play Card")
+    expect(await isEnabled(undo)).toBe(false)
+    await press(redo)
     await expect.poll(() => page.page.locator(DISCARDS).count()).toBe(discards + 1)
 
     // the console shows each frame, both ways, its badge first:  the state, the click up, the two patches down
@@ -200,9 +201,11 @@ describe("a Python spell app, in a real browser", () => {
 
   test("AutoPlay's pauses reach the page:  a patch at each, so it animates", async () => {
     const page = await opened()
+    // the game dealt, so the toolbar's rows hold its actions
+    await expect.poll(() => page.page.locator(CARD).count(), { timeout: 20_000 }).toBe(52)
     const before = page.received.length
-    // its button is the toolbar's, `<action "auto play"/>`:  a `<ui-button>`, its title inside
-    await page.page.locator("ui-toolbar ui-button", { hasText: "Auto Play" }).click()
+    // its row is the toolbar's, `<action "auto play"/>`:  a `<ui-action>`, handed the action
+    await press(await toolbarRow(page.page, "Auto Play"))
     await page.page.waitForTimeout(3000)
     const frames = page.received.slice(before).map((frame) => JSON.stringify(frame).length)
     process.stderr.write(`AutoPlay's frames:  ${frames.length}, of ${frames.join(", ")} characters\n`)
@@ -339,4 +342,37 @@ async function waitFor(url: string): Promise<void> {
     await new Promise((wait) => setTimeout(wait, 500))
   }
   throw new Error(`${url} never answered`)
+}
+
+/** What a toolbar's row, `<ui-action>`, is handed:  the action, read live. */
+type RowAction = { title: string; isEnabled: boolean }
+
+/** The row of the game's toolbar whose action's title starts with `title`:  `Undo` finds `Undo Play Card`. */
+async function toolbarRow(page: Page, title: string): Promise<Locator> {
+  const rows = page.locator("ui-toolbar ui-action")
+  await expect.poll(() => rows.count()).toBeGreaterThan(0)
+  const titles = await rows.evaluateAll((each) =>
+    each.map((row) => (row as unknown as { action?: RowAction }).action?.title ?? "")
+  )
+  const at = titles.findIndex((it) => it.startsWith(title))
+  if (at < 0) throw new TypeError(`toolbarRow():  no row titled ${title} in ${JSON.stringify(titles)}`)
+  return rows.nth(at)
+}
+
+/**
+ * Press a toolbar's `row`:  a click on the element, which runs its action (`<ui-action>`'s own listener).
+ * - Not Playwright's `click()`:  the row's box is drawn inside it, so Playwright never finds it visible.
+ */
+function press(row: Locator): Promise<void> {
+  return row.dispatchEvent("click")
+}
+
+/** `row`'s action's title, now. */
+function titleOf(row: Locator): Promise<string | undefined> {
+  return row.evaluate((it) => (it as unknown as { action?: RowAction }).action?.title)
+}
+
+/** Whether `row`'s action is enabled, now. */
+function isEnabled(row: Locator): Promise<boolean | undefined> {
+  return row.evaluate((it) => (it as unknown as { action?: RowAction }).action?.isEnabled)
 }

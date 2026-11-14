@@ -137,12 +137,13 @@ describe("core.drawAction():  an action's button", () => {
     expect([deal.hasAttribute("disabled"), undo.hasAttribute("disabled")]).toEqual([false, true])
   })
 
-  test("what the tag says wins over what the action gives:  its icon, its tooltip, its text", async () => {
+  test("what the tag says wins over what the action gives:  its icon, its title (in the tooltip, WITH the key), its text", async () => {
     const { button } = await mountedGame()
     const again = button("Again")
+    // `title="Deal again"` is the action's title here:  the tooltip is that title and the action's key
     expect([again.getAttribute("icon"), again.getAttribute("title"), again.textContent]).toEqual([
       "refresh",
-      "Deal again",
+      "Deal again (D)",
       "Again"
     ])
   })
