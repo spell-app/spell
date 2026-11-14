@@ -314,6 +314,8 @@ export class Inspector {
         return place?.path === path && place.line === line
       })
     const found = written.length ? written : Inspector.drawnInTagAround(area, path, line)
+    // what's selected already, with no trail from it (another line of the same tag):  nothing to do again (I69)
+    if (found.length && !trail().length && isSameElements(selectedParts(), found)) return
     if (found.length) Inspector.selectAll(found)
     else if (ifNone === "deselect" && selectedParts().length) Inspector.select(undefined)
   }
@@ -1663,6 +1665,11 @@ function setArea(area: HTMLElement | undefined): void {
   appArea = area
   if (import.meta.hot) import.meta.hot.data.appArea = area
   setAreaMoved((count) => count + 1)
+}
+
+/** Are `parts` the parts of `elements`, in the same order? */
+function isSameElements(parts: readonly SelectedPart[], elements: readonly Element[]): boolean {
+  return parts.length === elements.length && parts.every((part, index) => part.element === elements[index])
 }
 
 /** The row added last, by its words (a drawn thing's) or DOM event:  `Inspector.justAdded`. */

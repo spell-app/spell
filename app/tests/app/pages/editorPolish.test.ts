@@ -8,6 +8,7 @@ import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
  * - I50:  the selection's ants never draw over the loading screen
  * - I51, I52:  the outline follows the code's cursor, by click or arrow keys;  a line in a tag selects what the tag
  *   draws, inside a drawn thing's own drawing too;  a line that draws nothing selects nothing
+ * - I69:  the arrow keys' follow waits for the cursor to rest, one follow for a run of presses
  * - I53, I59:  a paste takes the indent where it lands, markup as a tree;  Shift+Tab takes a tag's children along
  * - I54, I55:  the suggestions show by themselves where they help, each row saying what it is
  * - NOTHING reaches the disk:  every save is answered here, and a later read of the file gets what was saved.
@@ -177,6 +178,27 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       // a line inside the square's button, in each square's own drawing:  the nine buttons
       await clickLine(page, await lineOf(page, "{the label of the square}"))
       expect(await selected(page)).toEqual(Array(9).fill("ui-button"))
+    }
+  )
+
+  test(
+    "I69:  a run of arrow presses is one follow, on the line the cursor rests on",
+    { timeout: 150_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire", "Solitaire.spell")
+      await clickLine(page, await lineOf(page, `"stock" is a new stock pile`))
+      expect(await selected(page)).toEqual(["solitaire-stock-pile"])
+      // the stock, the discards, then four foundations:  as quick as a held key
+      for (let press = 0; press < 5; press++) {
+        await page.keyboard.press("ArrowDown")
+        await page.waitForTimeout(30)
+      }
+      // the cursor's already there;  the selection waits for it to rest
+      expect(await selected(page)).toEqual(["solitaire-stock-pile"])
+      await page.waitForTimeout(800)
+      expect(await page.evaluate(`window.editor.followed.line + 1`)).toBe(await lineOf(page, `"spades" is a new`))
+      expect(await selected(page)).toEqual(["solitaire-foundation"])
     }
   )
 
