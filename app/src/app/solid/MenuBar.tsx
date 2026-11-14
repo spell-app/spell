@@ -281,8 +281,10 @@ function rowsFor(count: number): number {
  * ### `<ProjectBarMenu>`
  * The top bar's second menu, the PROJECT's, after Spell's (`<SpellBarMenu>`):
  * the project's name, bold, a caret after it.
- * - Rename Solitaire…, Delete Solitaire…, Reset to Saved, ─, Theme:  Fruity ›.
- * - Everything else about a project is in the File menu.
+ * - Everything about the whole project, not the file open (Owen, epic `mockup`):  `AppMenus.spell`'s `project menu`,
+ *   Rename Solitaire…, Delete Solitaire…, Duplicate Solitaire, Reset to Saved, ─, Publish, Versions, ─,
+ *   Project Settings, ─, Export…, Import…, ─, Theme:  Fruity ›.
+ * - What each does is here:  `itemFor()`, by the item's name;  the titles naming the project follow it.
  * - Theme ›:  Spell UI's theme menu in its menu mode (`<ui-theme-menu show="menu">`), then Edit Theme….
  * - SIDE EFFECT:  names the browser's tab for the project (`followTabTitle()`).
  ****************/
@@ -293,6 +295,40 @@ export function ProjectBarMenu(): JSX.Element {
     title: editor.project ? new SP.SpellProject(editor.project.path).title : ""
   }))
   const project = () => ({ project: shown().title })
+  const menu = spellMenu("project menu")
+  const itemFor = (item: SpellMenuAction): JSX.Element => {
+    switch (item.name) {
+      case "renameProject":
+        return <Actions.renameApp {...itemState(item)} title={appTexts.text("renameProject", project())} />
+      case "deleteProject":
+        return <Actions.deleteApp {...itemState(item)} title={appTexts.text("deleteProject", project())} />
+      case "duplicateProject":
+        return <Actions.duplicateApp {...itemState(item)} title={appTexts.text("duplicateProject", project())} />
+      case "resetToSaved":
+        return <Actions.resetApp {...itemState(item)} />
+      // drafts are the server's:  in the preview a visitor's edits stay in their browser, and Reset Example forgets them
+      case "publish":
+        if (isStaticBuild) return null
+        return <Action {...titled(item)} disabled={!item.isEnabled} onClick={() => void editor.publish()} />
+      case "versions":
+        if (isStaticBuild) return null
+        return <Action {...titled(item)} onClick={() => void editor.showVersions()} />
+      case "projectSettings":
+        return <Actions.showProjectSettings {...titled(item)} />
+      case "exportProject":
+        return <Actions.exportApp {...titled(item)} />
+      case "importProject":
+        return <Actions.importApp {...titled(item)} />
+      case "theme":
+        return (
+          <SubMenuRow sub="theme" icon={item.icon}>
+            {appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
+          </SubMenuRow>
+        )
+      default:
+        return null
+    }
+  }
   return (
     <>
       <BarMenu
@@ -307,13 +343,7 @@ export function ProjectBarMenu(): JSX.Element {
         }
         subMenus={{ theme: () => <ThemeSubMenu /> }}
       >
-        <Actions.renameApp menu title={appTexts.text("renameProject", project())} />
-        <Actions.deleteApp menu title={appTexts.text("deleteProject", project())} />
-        <Actions.resetApp menu />
-        <Divider />
-        <SubMenuRow sub="theme" icon="paint brush">
-          {appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
-        </SubMenuRow>
+        <SpellMenuRows items={menu()} itemFor={itemFor} />
       </BarMenu>
     </>
   )
@@ -323,7 +353,6 @@ export function ProjectBarMenu(): JSX.Element {
  * ### `<FileBarMenu>`
  * The File menu:  `menu`, the bar's File in `AppMenus.spell`, its title and items, keys, icons, greying and ticks.
  * - What each does is here:  `itemFor()`, by the item's name.
- * - The project's name is in Duplicate's title.
  * - More Examples ›:  the group's projects (`<ProjectsMenu>`), as the Spell menu shows them.
  *   `useRunner`:  the one chosen opens in Run.
  * - The static build's actions that need a server draw nothing, as everywhere (`HIDDEN_IN_STATIC_BUILD`).
@@ -349,7 +378,6 @@ function fileMenuParts(props: { menu: SpellMenu; useRunner?: boolean }): {
   projects: () => JSX.Element
 } {
   const root = trackProjectRoot(() => undefined)
-  const projectName = tracked(() => (editor.project ? new SP.SpellProject(editor.project.path).title : ""))
   const itemFor = (item: SpellMenuAction): JSX.Element => {
     const state = itemState(item)
     switch (item.name) {
@@ -367,23 +395,8 @@ function fileMenuParts(props: { menu: SpellMenu; useRunner?: boolean }): {
         return <Actions.saveFile {...titled(item)} />
       case "discardChanges":
         return <Actions.discardChanges {...titled(item)} disabled={!item.isEnabled} />
-      // drafts are the server's:  in the preview a visitor's edits stay in their browser, and Reset Example forgets them
-      case "publish":
-        if (isStaticBuild) return null
-        return <Action {...titled(item)} disabled={!item.isEnabled} onClick={() => void editor.publish()} />
-      case "versions":
-        if (isStaticBuild) return null
-        return <Action {...titled(item)} onClick={() => void editor.showVersions()} />
-      case "duplicateProject":
-        return <Actions.duplicateApp {...state} title={appTexts.text("duplicateProject", { project: projectName() })} />
-      case "projectSettings":
-        return <Actions.showProjectSettings {...titled(item)} />
       case "autoSave":
         return <Action {...titled(item)} active={item.isSelected} onClick={() => editor.toggleAutoSave()} />
-      case "exportProject":
-        return <Actions.exportApp {...titled(item)} />
-      case "importProject":
-        return <Actions.importApp {...titled(item)} />
       case "home":
         return <Actions.showProjectChooser {...titled(item)} />
       default:

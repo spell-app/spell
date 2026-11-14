@@ -146,7 +146,7 @@ const APP_TEXTS_ES: AppTextPack = {
   publishAnyway: "Publicar lo mío de todos modos",
   noVersions: "Aún no hay versiones:  cada Publicar guarda una.",
   versionsMessage:
-    "Cada Publicar guardó el proyecto entero.  Restaurar una la vuelve tu borrador;  nada es público hasta que publiques.",
+    "Cada vez que publicas, Encanto guarda una copia de todo tu proyecto.  Elige una para traerla de vuelta como tu borrador:  reemplaza los cambios que aún no has publicado.  Lo que ven todos no cambia hasta que hagas clic en Publicar, y sigue en esta lista.",
   restoreVersion: "Restaurar",
   versionRestored: "{count} archivo(s) restaurado(s) de {version} como tu borrador.",
   autoSave: "AutoSave",

@@ -4,7 +4,7 @@ import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { editor, type EditorStore } from "spell/app/app/editor"
-import { AppBarMenus, BarMenu, uiReady } from "spell/app/app/solid"
+import { AppBarMenus, BarMenu, ProjectBarMenu, uiReady } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 
 /**
@@ -52,15 +52,7 @@ describe("<AppBarMenus>", () => {
       "─",
       `Save ${EDITOR_HOTKEYS.saveFile.shortcut}`,
       `Discard Changes ${EDITOR_HOTKEYS.discardChanges.shortcut}`,
-      "Publish",
-      "Versions",
-      expect.stringMatching(/^Duplicate/),
-      "─",
-      "Project Settings",
       "AutoSave",
-      "─",
-      expect.stringMatching(/^Export/),
-      expect.stringMatching(/^Import/),
       "─",
       "Home"
     ])
@@ -80,6 +72,33 @@ describe("<AppBarMenus>", () => {
     flush()
     expect(saveFile).toHaveBeenCalledTimes(1)
     expect(popup.visible).toBe(false)
+  })
+})
+
+describe("<ProjectBarMenu>", () => {
+  test("everything about the whole project:  its name's actions, Publish and Versions, its settings, Export and Import, its theme", async () => {
+    const host = await mount(() => <ProjectBarMenu />)
+    const menu = host.querySelector("ui-popup[for=ProjectBarMenu] ui-menu.BarMenuItems")!
+    await waitForCondition(() => menu.children.length > 0)
+    const items = [...menu.children].map((item) =>
+      item.getAttribute("kind") === "divider" ? "─" : (item.textContent?.trim() ?? "")
+    )
+    expect(items).toEqual([
+      expect.stringMatching(/^Rename/),
+      expect.stringMatching(/^Delete/),
+      expect.stringMatching(/^Duplicate/),
+      "Reset to Saved",
+      "─",
+      "Publish",
+      "Versions",
+      "─",
+      "Project Settings",
+      "─",
+      expect.stringMatching(/^Export/),
+      expect.stringMatching(/^Import/),
+      "─",
+      expect.stringMatching(/^Theme/)
+    ])
   })
 })
 

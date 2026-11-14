@@ -41,6 +41,10 @@ app menus is an app
 	to "versions" with icon "history"
 	to "duplicate project" with icon "clone outline"
 	to "project settings" with icon "cog"
+	to "rename project" with icon "edit outline"
+	to "delete project" with icon "trash alternate outline"
+	to "reset to saved" with icon "undo"
+	to "theme" with icon "paint brush"
 	to "auto save" with title "AutoSave", icon "sync alternate"
 		selected when its auto saving is yes
 	to "export project" with title "Export…", icon "download"
@@ -77,7 +81,10 @@ app menus is an app
 		enabled when its inspecting is yes
 	to "clear console" with icon "ban"
 
-	its "file menu" is a menu of "more examples", "-", "new file", "new example", "-", "save", "discard changes", "publish", "versions", "duplicate project", "-", "project settings", "auto save", "-", "export project", "import project", "-" and "home" titled "File"
+	its "file menu" is a menu of "more examples", "-", "new file", "new example", "-", "save", "discard changes", "auto save", "-" and "home" titled "File"
+
+	// The project's own menu, under its name before File:  what's about the whole project, not the file open
+	its "project menu" is a menu of "rename project", "delete project", "duplicate project", "reset to saved", "-", "publish", "versions", "-", "project settings", "-", "export project", "import project", "-" and "theme"
 
 	its "edit menu" is a menu of "undo", "redo", "-", "part actions", "-", "find", "-" and "code settings" titled "Edit"
 

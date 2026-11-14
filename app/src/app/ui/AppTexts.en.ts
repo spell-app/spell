@@ -140,7 +140,7 @@ export const APP_TEXTS = {
   publishAnyway: "Publish Mine Anyway",
   noVersions: "No versions yet:  each Publish keeps one.",
   versionsMessage:
-    "Each Publish kept the whole project.  Restoring one makes it your draft;  nothing is public until you publish.",
+    "Each time you publish, Spell keeps a copy of your whole project.  Pick one to bring it back as your draft:  it replaces changes you haven't published yet.  What everyone sees stays the same until you click Publish, and it stays in this list.",
   restoreVersion: "Restore",
   versionRestored: "Restored {count} file(s) from {version} as your draft.",
   autoSave: "AutoSave",
