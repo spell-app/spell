@@ -570,6 +570,40 @@ export const request_getIndex = respondWithJSON(async (request) => {
 })
 
 /**
+ * EVERY file of project `projectId`, as paths from it (`/Solitaire.spell`, `/__thumbnail.png`):  what Export zips.
+ * - More than its index:  pictures and any other file, and its project file (`__project.json5`).
+ * - Left out, as they're not the project's to move:
+ *   - what spell builds for it (`Solitaire.spell.js`, its words, its declarations), and what's in `build/` or `dist/`
+ *   - spaces' own names but its project file:  its drafts and versions (`__draft/`, `versions/`), its data ...
+ *   - hidden files (`.DS_Store`), and a project inside it
+ * - Only what's on disk:  a file only drafted so far is in its index, which the editor reads too.
+ */
+export async function everyFileOf(projectId: string): Promise<string[]> {
+  const location = SP.SpellLocation.getProjectLocation(projectId)
+  const folder = location.serverPath
+  const ignoreFolder = (relativePath: string) => isFolderOutsideProject(folder, relativePath)
+  const files: string[] = []
+  for (const filePath of await fileUtils.getFilesInside(folder, { ignoreFolder })) {
+    const name = basename(filePath)
+    if (SPACES.isSpaceName(name) && !SP.isProjectFile(name)) continue
+    if (GENERATED_SUFFIXES.some((suffix) => name.endsWith(suffix))) continue
+    if (filePath === name && isGeneratedFileOf(name, location.projectName ?? "")) continue
+    if (await isWordsFileOnDisk(folder, filePath)) continue
+    files.push(`/${filePath}`)
+  }
+  return files
+}
+
+/**
+ * `GET /api/projects/files/<project>` -- every file of a project, for Export:  see `everyFileOf()`.
+ * - e.g. `/api/projects/files/@spell/examples/Solitaire` => `["/Solitaire.spell", ..., "/__project.json5"]`
+ * - Failure:  500 if the place isn't a project's (`SP.SpellUrls.projectIdFor()`).
+ */
+export const request_getEveryFile = respondWithJSON(async (request) => {
+  return await everyFileOf(SP.SpellUrls.projectIdFor(tailOf(request, SPACES.PROJECT_FILES_URL)))
+})
+
+/**
  * The still-encoded rest of `request`'s path after `prefix`, e.g. `@spell/examples` for `/api/projects/list/...`.
  * - From the path AS IT ARRIVED (`originalUrl`):
  *   a route's params are decoded whole, and a place is decoded part by part (`SP.SpellUrls`, rule 4).
@@ -951,14 +985,18 @@ export const createFile = async (projectId: string, filePath: string, contents: 
 
 /**
  * `POST /api/projects/create/file` -- create a new file within an existing project.
- * - Client sends body: `{ projectId, filePath, contents }`.
+ * - Client sends body: `{ projectId, filePath, contents, encoding? }`.
+ *   - `encoding`:  `"base64"` (`SPACES.BASE64_ENCODING`) when `contents` is a file's bytes, as base64:  a picture
  * - Returns: updated `ProjectIndexJSON` -- `getIndex()` will pick up new file and `import` it at the end.
  * - Failure: 500 if `projectId`/`filePath` invalid, or on write error.
  * - NOTE: no check that file doesn't already exist:  this silently overwrites.
  *   Client-side `SPACES.ProjectFiles.create()` checks first, but nothing stops another caller skipping that.
  */
 export const request_createFile = respondWithJSON(async (request) => {
-  const { projectId, filePath, contents } = request.body
+  const { projectId, filePath, encoding } = request.body
+  // a picture's bytes, sent as base64 text (`SPACES.ProjectFiles.writeFile()`, Import)
+  const contents =
+    encoding === SPACES.BASE64_ENCODING ? Buffer.from(request.body.contents, "base64") : request.body.contents
   await mayChangeOrDie(request, projectId, "create")
   const location = SP.SpellLocation.getFileLocation(projectId, filePath)
   // a new document is your draft until its first Publish (Q23):  nothing public before then
@@ -1084,7 +1122,8 @@ export const reorderFiles = async (projectId: string, filePaths: string[]) => {
   const placeOf = (importPath: string) =>
     filePaths.findIndex(
       (filePath) =>
-        filePath === importPath || isImportOf(projectId, importPath, SP.SpellLocation.getFileLocation(projectId, filePath))
+        filePath === importPath ||
+        isImportOf(projectId, importPath, SP.SpellLocation.getFileLocation(projectId, filePath))
     )
   const named = importsFile.imports.filter(({ path }) => placeOf(path) >= 0)
   named.sort((one, other) => placeOf(one.path) - placeOf(other.path))

@@ -15,6 +15,7 @@ import { MissingResourceError } from "spell/util/spell/ResponseErrors"
 import { SP } from "spell/parser/spell"
 // Import directly:  the barrel would pull the group's models into this file's chunk
 import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
+import { PROJECT_FILES_URL } from "spell/app/spaces/models/projectArchive"
 
 import { STATIC_BUILD_CLASS } from "./staticBuild"
 
@@ -29,6 +30,7 @@ import "./static.css"
  *     its files' text swapped for the visitor's edits
  *   - a file, `/spaces/<project>/<file>`:  the visitor's edit if there is one, else the file the build copied
  *   - saving a file, `/api/projects/file/<project>/<file>`:  kept in the browser (below)
+ *   - every file of a project, for Export, `/api/projects/files/<project>`:  none beyond its index's, `[]`
  *   - a visitor's own project, in their group (`you@spell`):  its list, index and files from the browser
  *   - making, copying, renaming and deleting a visitor's own projects and files:  in the browser (`VISITOR_ROUTES`)
  *   - anything else (settings, or changing a built-in project):  a `UIError`, as the build hides those
@@ -96,6 +98,7 @@ export class StaticFiles {
       return (await this.fromBuild(url, [])) as T
     }
     if (url.startsWith(SP.SpellUrls.INDEX)) return (await this.index(url)) as T
+    if (url.startsWith(PROJECT_FILES_URL)) return [] as T
     if (url.startsWith(SP.SpellUrls.SPACES)) {
       const { path, projectId } = SP.SpellUrls.fileForUrl(url)
       const kept = await this.keptText(path)
@@ -217,7 +220,8 @@ export class StaticFiles {
    */
   private async change(url: string, body: VisitorChange): Promise<SP.ProjectList | SP.ProjectManifestJSON5> {
     await this.ready()
-    const { projectId, newProjectId, filePath, newFilePath, contents, title } = body ?? ({} as VisitorChange)
+    const { projectId, newProjectId, filePath, newFilePath, contents, title, encoding } = body ?? ({} as VisitorChange)
+    if (encoding) throw new UIError(`${filePath}:  not in the preview -- it keeps text files only`)
     const isCopy = url === VISITOR_ROUTES.duplicateProject
     if (!isOwnProject(newProjectId ?? projectId) || (!isCopy && !isOwnProject(projectId))) {
       throw new UIError(`${url}:  not in the preview -- it keeps your own projects in this browser only`)
@@ -398,6 +402,8 @@ type VisitorChange = {
   newFilePath?: string
   contents?: string
   title?: string | null
+  /** `"base64"` for a file's bytes (Import's pictures):  refused, as the preview keeps text alone */
+  encoding?: string
 }
 
 /** The store of the files a visitor changed, in the browser's database:  each under its address. */

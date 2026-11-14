@@ -1,17 +1,11 @@
-import { JSON5File, LoadableFile, getDier, KnownFormat } from "spell/util"
+import { JSON5File, LoadableFile, getDier, KnownFormat, parseJSON5 } from "spell/util"
 import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 
 import { LOCAL_PERSON } from "./projectGroups"
 import { ProjectFiles } from "./ProjectFiles"
-import {
-  PROJECT_ARCHIVE_FORMAT,
-  STARTER_PROGRAMS,
-  freeProjectId,
-  type ProjectArchive,
-  type ProjectArchiveFile,
-  type StarterProgram
-} from "./starterProjects"
+import { projectFileOf, projectFilesUrl, type ProjectArchive, type ProjectArchiveFile } from "./projectArchive"
+import { STARTER_PROGRAMS, freeProjectId, type StarterProgram } from "./starterProjects"
 
 /**
  * A project GROUP's list of projects, e.g. `@spell/examples`.
@@ -286,33 +280,66 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   }
 
   /**
-   * Project `project` as one file's worth of text, to keep or to move:  `importApp()` reads it back.
-   * - Only its text files:  a picture stays behind.
+   * Every file of project `project`, gathered to keep or to move:  `importApp()` reads it back,
+   * `projectArchiveZip()` zips it.
+   * - Its own files first, in its order, as the editor has them now;
+   *   then every other file of its folder (`PROJECT_FILES_URL`):  pictures, its project file ...
+   * - Each read through its URL, so a file you've drafted is your draft, as the editor shows it.
+   * - A project with no project file on the list (the static build's) gets one made from its index:
+   *   its settings and its files' order.
    * - throws if a file can't be read
    */
   async exportApp(project: SP.SpellProject): Promise<ProjectArchive> {
-    const files: ProjectArchiveFile[] = []
+    const files = new Map<string, string | Uint8Array>()
     for (const file of project.files) {
       const contents = file.contents ?? (await file.load(undefined))
-      if (typeof contents === "string" && file.filePath) files.push({ path: file.filePath, contents })
+      if (typeof contents === "string" && file.filePath) files.set(file.filePath, contents)
     }
-    const title = project.contents?.title
-    return { format: PROJECT_ARCHIVE_FORMAT, name: project.projectName!, ...(title && { title }), files }
+    const everyFile = await LoadableFile.fetch<string[]>({
+      url: projectFilesUrl(project.projectId),
+      format: KnownFormat.json
+    })
+    for (const path of everyFile) {
+      if (!files.has(path)) files.set(path, await bytesOfFile(`${project.projectId}${path}`))
+    }
+    const archive: ProjectArchive = {
+      name: project.projectName!,
+      ...(project.contents?.title && { title: project.contents.title }),
+      files: [...files].map(([path, contents]) => ({ path, contents }))
+    }
+    if (!projectFileOf(archive)) archive.files.push(projectFileMadeFrom(project.contents))
+    return archive
   }
 
   /**
    * Make a project in this group from `archive`, under its own name, or the next one free.
-   * - Returns the new project;  throws on error.
+   * - Its first file makes the project (the first its project file lists, else its first spell file),
+   *   the rest follow, its project file LAST:
+   *   so the project's settings and its files' order are the archive's.
+   * - `keep`:  what the place it's made in keeps
+   *   - `"everything"` (default):  every file
+   *   - `"text"`:  its text files only, and no project file but its title;
+   *     the static build's, which keeps text alone, in the browser
+   * - Returns the new project;  throws on error, e.g. an archive with no text file to start it.
    */
-  async importApp(archive: ProjectArchive): Promise<SP.SpellProject> {
+  async importApp(archive: ProjectArchive, { keep = "everything" }: ImportOptions = {}): Promise<SP.SpellProject> {
+    const die = getDier(this, `importing ${this.type}`, { name: archive.name })
     await this.load(undefined)
     const projectId = freeProjectId(this.path, archive.name, this.projectPaths)
     if (archive.title) this.titlesTyped.set(projectId, archive.title)
-    const [first, ...others] = archive.files as [ProjectArchiveFile, ...ProjectArchiveFile[]]
+    const projectFile = projectFileOf(archive)
+    const others = archive.files.filter((file) => file !== projectFile)
+    const isText = (file: ProjectArchiveFile): file is ProjectArchiveFile & { contents: string } =>
+      typeof file.contents === "string"
+    const first =
+      firstFileIn(others.filter(isText), projectFile) ?? die(`${archive.name} has no text file to start it.`)
     const project = (await this.createApp(projectId, { filePath: first.path, contents: first.contents }))!
     await project.load(undefined)
     const files = new ProjectFiles(project)
-    for (const { path, contents } of others) await files.create(path, contents)
+    for (const file of others) {
+      if (file !== first && (isText(file) || keep === "everything")) await files.writeFile(file.path, file.contents)
+    }
+    if (projectFile && keep === "everything") await files.writeFile(projectFile.path, projectFile.contents)
     return project
   }
 
@@ -456,6 +483,53 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
 }
 
 /** What people call the project at `location`:  `my-app` => `My App`. */
+/** Options for `SpellProjectRoot.importApp()`. */
+export type ImportOptions = {
+  /** What the place it's made in keeps:  `"everything"` (default), or `"text"` alone (the static build). */
+  keep?: "everything" | "text"
+}
+
+/**
+ * The file a project imported from `textFiles` starts as:
+ * the first its project file lists, else its first spell file, else its first text file.
+ */
+function firstFileIn<T extends ProjectArchiveFile>(textFiles: T[], projectFile?: ProjectArchiveFile): T | undefined {
+  const settings =
+    typeof projectFile?.contents === "string"
+      ? (parseJSON5(projectFile.contents, projectFile.path, true) as { imports?: { path?: unknown }[] } | undefined)
+      : undefined
+  for (const { path } of settings?.imports ?? []) {
+    const listed = textFiles.find((file) => file.path === path)
+    if (listed) return listed
+  }
+  return textFiles.find(({ path }) => path.endsWith(SP.SPELL_SUFFIX)) ?? textFiles[0]
+}
+
+/** The bytes of the file at address `path`, read through its URL:  a picture, or text kept as bytes. */
+async function bytesOfFile(path: string): Promise<Uint8Array> {
+  const answer = await LoadableFile.fetch<Blob | string>({
+    url: SP.SpellUrls.fileUrl(path),
+    format: KnownFormat.binary
+  })
+  if (typeof answer === "string") return new TextEncoder().encode(answer)
+  return new Uint8Array(await answer.arrayBuffer())
+}
+
+/**
+ * A project file made from project index `index`, for a project with none on its list (the static build's):
+ * its settings, and its own files in order.
+ */
+function projectFileMadeFrom(index: SP.ProjectManifestJSON5 | undefined): ProjectArchiveFile {
+  const {
+    manifest: _manifest,
+    buildFolder: _buildFolder,
+    imports = [],
+    ...settings
+  } = index ?? ({} as Partial<SP.ProjectManifestJSON5>)
+  const file = { ...settings, imports: imports.map(({ path, active }) => ({ path, active })) }
+  return { path: `/${SP.PROJECT_FILE}`, contents: `${JSON.stringify(file, null, 2)}\n` }
+}
+
 function titleFor(location: SP.SpellLocation): string {
   return SP.SpellLocation.titleFor(location.projectName!)
 }

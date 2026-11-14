@@ -942,7 +942,8 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Save the current `project` as one file, in the browser's downloads:  `importApp()` reads it back.
+   * Save the current `project` as a zip, `<Project>.zip`, in the browser's downloads:  `importApp()` reads it back.
+   * - Every file of it, pictures too, at their paths, in a folder of its name:  see `SPACES.projectArchiveZip()`.
    * - NEVER throws:  a failure is shown.
    */
   async exportApp(): Promise<void> {
@@ -950,7 +951,8 @@ export class EditorStore extends Observable {
     if (!project || !projectRoot) return
     try {
       const archive = await projectRoot.exportApp(project)
-      const url = URL.createObjectURL(new Blob([JSON.stringify(archive, null, 2)], { type: "application/json" }))
+      const zip = await SPACES.projectArchiveZip(archive)
+      const url = URL.createObjectURL(new Blob([zip as Uint8Array<ArrayBuffer>], { type: "application/zip" }))
       const link = document.createElement("a")
       link.href = url
       link.download = `${archive.name}${SPACES.PROJECT_ARCHIVE_EXTENSION}`
@@ -962,14 +964,20 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Ask for a file `exportApp()` wrote, make a project of the person's own from it, and show it.
+   * Ask for a zip `exportApp()` wrote (or an old `.spell.json`), make a project of the person's own from it,
+   * and show it.
    * - NEVER throws:  a failure is shown;  cancelling the file picker does nothing.
    */
   importApp(): Promise<void> {
     return new Promise((resolve) => {
       const input = document.createElement("input")
       input.type = "file"
-      input.accept = `${SPACES.PROJECT_ARCHIVE_EXTENSION},application/json`
+      input.accept = [
+        SPACES.PROJECT_ARCHIVE_EXTENSION,
+        "application/zip",
+        SPACES.OLD_PROJECT_ARCHIVE_EXTENSION,
+        "application/json"
+      ].join(",")
       input.addEventListener("cancel", () => resolve())
       input.addEventListener("change", () => {
         void editor.importFile(input.files?.[0]).finally(resolve)
@@ -978,13 +986,20 @@ export class EditorStore extends Observable {
     })
   }
 
-  /** The file a person chose for `importApp()`.  NEVER throws:  a failure is shown. */
+  /**
+   * The file a person chose for `importApp()`.
+   * - The static build keeps text alone:  a picture in it is left out there.
+   * - NEVER throws:  a failure is shown.
+   */
   private async importFile(file: File | undefined): Promise<void> {
     if (!file) return
     try {
-      const archive = JSON.parse(await file.text()) as unknown
-      if (!SPACES.isProjectArchive(archive)) throw new UIError(appTexts.text("notAProjectFile", { file: file.name }))
-      const project = await SPACES.SpellProjectRoot.projects.importApp(archive)
+      const bytes = new Uint8Array(await file.arrayBuffer())
+      const archive = await SPACES.projectArchiveFrom(file.name, bytes).catch(() => {
+        throw new UIError(appTexts.text("notAProjectFile", { file: file.name }))
+      })
+      const keep = isStaticBuild ? "text" : "everything"
+      const project = await SPACES.SpellProjectRoot.projects.importApp(archive, { keep })
       editor.showEditor(project.path)
       editor.showKept(appTexts.text("importedApp", { name: project.projectName! }))
     } catch (error) {

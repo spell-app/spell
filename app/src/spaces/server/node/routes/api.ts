@@ -108,6 +108,8 @@ api.delete("/projects/remove/file", projectUtils.request_deleteFile)
 // - reading a file is `/spaces/<project>/<file>`:  `spaceFiles`, below
 // - `*` captures the REST of the URL, `/`s included;  the handlers read it as it arrived
 api.get("/projects/index/*", projectUtils.request_getIndex)
+// every file of a project, pictures and its project file too:  what File > Export zips
+api.get("/projects/files/*", projectUtils.request_getEveryFile)
 api.post("/projects/file/*", projectUtils.request_saveFile)
 
 // your drafts, Publish and versions:  see `projectUtils.request_getDrafts` ... and `ProjectDrafts` (epic `editor` P24)

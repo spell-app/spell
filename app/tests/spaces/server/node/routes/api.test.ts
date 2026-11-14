@@ -604,6 +604,48 @@ describe("request body parsing on POST /api/projects/create/file", () => {
 })
 
 ////////////////
+// ## File > Export and Import:  every file, and bytes
+////////////////
+
+describe("File > Export and Import", () => {
+  /** A PNG's first bytes, a NUL among them:  never text. */
+  const PICTURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff, 0xfe])
+
+  it("POST /api/projects/create/file with `encoding: base64` writes the bytes, which /spaces/ reads back", async () => {
+    const body = JSON.stringify({
+      projectId: PROJECT,
+      filePath: "/pictures/logo.png",
+      contents: PICTURE.toString("base64"),
+      encoding: "base64"
+    })
+    const reply = await request("POST", "/api/projects/create/file", body, "application/json")
+    expect(reply.status).toBe(200)
+    expect(fs.readFileSync(fixturePath("user/Proj/pictures/logo.png"))).toEqual(PICTURE)
+    const read = await fetch(`${baseUrl}/spaces/${PROJECT}/pictures/logo.png`)
+    expect(Buffer.from(await read.arrayBuffer())).toEqual(PICTURE)
+  })
+
+  it("GET /api/projects/files/<project> lists every file:  pictures and the project file, never what's built or drafted", async () => {
+    writeFixture("user/Proj/notes.txt", "a note\n")
+    writeFixture("user/Proj/Proj.declarations.json5", "{}\n")
+    writeFixture("user/Proj/.DS_Store", "x")
+    const reply = await request("GET", `/api/projects/files/${PROJECT}`)
+    expect(reply.status).toBe(200)
+    const files: string[] = reply.json()
+    expect(files).toEqual(
+      expect.arrayContaining([
+        "/top.spell",
+        "/folder/sub/file.spell",
+        "/notes.txt",
+        "/pictures/logo.png",
+        "/__project.json5"
+      ])
+    )
+    expect(files.filter((file) => /__draft|declarations|DS_Store|\.spell\.js$/.test(file))).toEqual([])
+  })
+})
+
+////////////////
 // ## DELETE with a body
 ////////////////
 

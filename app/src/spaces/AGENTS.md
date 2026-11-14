@@ -28,6 +28,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [SpellProjectRoot.ts](models/SpellProjectRoot.ts):  a group's list of projects,
       and its projects' create, copy, rename and delete
     - [ProjectFiles.ts](models/ProjectFiles.ts):  a project's FILE create, copy, rename and delete
+    - [projectArchive.ts](models/projectArchive.ts):  a project as a zip, for File > Export and Import
+      (every file, pictures and its project file too, listed by `GET /api/projects/files/<project>`);
+      an old `.spell.json` export still imports
     - [spaceNames.ts](models/spaceNames.ts):  spaces' own `__` names, `SPACE_NAMES`
     - [spellUIPack.ts](models/spellUIPack.ts):  Spell UI as a drawing names its components bare
       (`<button>` => `<ui-button>`), registered with spell as the barrel loads (`SP.ComponentPacks`, epic
@@ -176,8 +179,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The disk's:  [DiskStorage.ts](server/node/storage/DiskStorage.ts).
     - It writes through the page server's file operations.
     - It keeps each folder's list, and one recursive watcher drops a folder's when anyone changes it.
-  - Zip files are written and read in ONE place, [zip.ts](server/node/storage/zip.ts), on node's `zlib`:
-    a project's versions, a space's export.
+  - Zip files are laid out in ONE place, the browser-safe [zip.ts](models/zip.ts) (`zipLayout()`, `zipEntries()`):
+    - in a browser it packs with the platform's `CompressionStream`:  File > Export and Import (`zipOf()`, `filesInZip()`)
+    - on node, [its twin](server/node/storage/zip.ts) packs with `zlib`:  a project's versions, a space's export
   - JSON5 is read and written in ONE place, [json5.ts](server/node/storage/json5.ts), on json5-writer:
     an edit writes the whole value back, every comment where it was;  double quotes, no trailing commas.
     - The editing itself, `json5Edited()`, is the kit's util's ([json5.ts](../../../src/util/node/json5.ts)):

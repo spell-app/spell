@@ -69,6 +69,35 @@ export class ProjectFiles {
   }
 
   /**
+   * Write file `filePath` as it is, text or bytes, whether or not the project lists it:
+   * a picture, or its project file (`__project.json5`), as Import brings them in.
+   * - Through the same route as `create()`, which makes its folder;  bytes are sent as base64.
+   * - Never a draft:  the server drafts only a page or its source sent as text (`isDraftable()`).
+   * - SIDE EFFECT:  sets the project's index (`contents`) to the one the server answers.
+   * - throws if the server says no;  the static build says no to bytes, as it keeps text only
+   */
+  async writeFile(filePath: string, contents: string | Uint8Array): Promise<void> {
+    const { project } = this
+    const die = getDier(project, "writing file", { projectId: project.projectId, filePath })
+    const isBytes = typeof contents !== "string"
+    try {
+      project.contents = await LoadableFile.fetch<SP.ProjectManifestJSON5>({
+        url: `/api/projects/create/file`,
+        contents: {
+          projectId: project.projectId,
+          filePath,
+          contents: isBytes ? base64Of(contents) : contents,
+          ...(isBytes && { encoding: BASE64_ENCODING })
+        },
+        requestFormat: ProjectFiles.REQUEST_FORMAT_JSON,
+        format: "json"
+      })
+    } catch (e) {
+      die("Server error writing file", e)
+    }
+  }
+
+  /**
    * Copy an existing file, and return the copy.
    * - throws if the file isn't there, or the server says no
    */
@@ -231,4 +260,19 @@ export class ProjectFiles {
       return die(`Server error ${doing}`, error)
     }
   }
+}
+
+/**
+ * How a file's bytes travel to the create route as JSON:  its `encoding`, when `contents` is base64.
+ * - The server's `request_createFile()` reads it, and writes the bytes.
+ */
+export const BASE64_ENCODING = "base64"
+
+/** `bytes` as base64 text, a slice at a time:  `btoa()` takes a string of one char per byte. */
+function base64Of(bytes: Uint8Array): string {
+  let text = ""
+  for (let at = 0; at < bytes.length; at += 0x8000) {
+    text += String.fromCharCode(...bytes.subarray(at, at + 0x8000))
+  }
+  return btoa(text)
 }

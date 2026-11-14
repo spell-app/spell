@@ -4,6 +4,7 @@
  * - `SPELL_UI_PACK`:  Spell UI, as a drawing names its components bare;  SIDE EFFECT:  registers it with spell.
  * - `SpellProjectRoot`:  a group's list of projects, and its project create, copy, rename and delete.
  * - `ProjectFiles`:  a project's file create, copy, rename and delete (decision Q20), and its drafts, Publish and versions.
+ * - `ProjectArchive`:  a project as a zip, for File > Export and Import (`projectArchiveZip()`, `projectArchiveFrom()`).
  * - `DraftJSON`, `PublishJSON` ...:  drafts and versions over the wire (epic `editor` P24).
  * - `TypeSchemas`:  a spell type's properties, from its project's declarations, for a property editor.
  * - `SPACE_NAMES`:  spaces' own `__` names, never a project's file.
@@ -21,6 +22,7 @@ export * from "./TypeSchemas"
 export * from "./ProjectFiles"
 export * from "./drafts"
 export * from "./starterProjects"
+export * from "./projectArchive"
 export * from "./homeOrder"
 export type * from "./SpaceStorage"
 export type * from "./people"
