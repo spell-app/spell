@@ -281,6 +281,9 @@ export class SpellBubbly {
     if (!visible.length) return shapes.replaceChildren()
     view.first = visible[0]!.startLineNumber
     view.last = visible.at(-1)!.endLineNumber
+    // a line scrolled partly out of view is drawn by Monaco, but left out of its visible ranges:  its shapes too
+    while (view.first > 1 && this.isDrawnByMonaco(view.first - 1)) view.first--
+    while (view.last < editor.getModel()!.getLineCount() && this.isDrawnByMonaco(view.last + 1)) view.last++
     // each head's description against the window's edge:  its lines drawn again, so Monaco measures them anew
     if (this.fitDescriptions(laidOut.shapes, view)) editor.render(true)
     shapes.replaceChildren(...this.drawAll(laidOut.shapes, view))
@@ -740,6 +743,11 @@ export class SpellBubbly {
   ////////////////
 
   /** Where the letter at `column` of `line` starts, before any room injected there:  from the line's start, px. */
+  /** Has Monaco drawn `line` on the page, so its letters' places can be measured?  A line out of view hasn't. */
+  private isDrawnByMonaco(line: number): boolean {
+    return this.editor.getOffsetForColumn(line, 1) >= 0
+  }
+
   private xOf(line: number, column: number): number {
     return Math.max(0, this.editor.getOffsetForColumn(line, column))
   }
