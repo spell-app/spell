@@ -447,7 +447,7 @@ export class TaskList extends App {
     this.checklist.showing = "all"
     this.storage = "browser"
     this.keeper = new BrowserKeeper()
-    this.fillTheChecklist()
+    core.holdWhile(() => this.fillTheChecklist())
   }
 
   addTheStartingTaskTitleWithPriorityLevel(title, level) {
