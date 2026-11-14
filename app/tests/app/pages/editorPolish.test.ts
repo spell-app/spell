@@ -1,4 +1,4 @@
-import { chromium, type BrowserContext, type Page } from "playwright"
+import { chromium, type BrowserContext, type Page, type Route } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
@@ -9,6 +9,8 @@ import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
  * - I51, I52:  the outline follows the code's cursor, by click or arrow keys;  a line in a tag selects what the tag
  *   draws, inside a drawn thing's own drawing too;  a line that draws nothing selects nothing
  * - I69:  the arrow keys' follow waits for the cursor to rest, one follow for a run of presses
+ * - I87:  once an edit typed or pasted in the code is drawn, the outline follows the cursor's line, once;
+ *   a line that draws nothing keeps what's selected
  * - I88:  loading, following and editing log no Solid warning about a signal read where it isn't followed
  * - I53, I59:  a paste takes the indent where it lands, markup as a tree;  Shift+Tab takes a tag's children along
  * - I54, I55:  the suggestions show by themselves where they help, each row saying what it is
@@ -17,22 +19,29 @@ import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
  * - Headless Playwright, never a real browser window.
  */
 
-/** A browser context whose saves go nowhere near the disk:  a read of a saved file gets the saved text. */
+/**
+ * A browser context whose saves go nowhere near the disk:  a read of a saved file gets the saved text.
+ * - Its preferences too (`/api/prefs`).
+ * - A file is saved through the API and read again from where it's served (`/spaces/...`):
+ *   both reads get the saved text, or a save would seem to be undone.
+ */
 async function contextWithNoSaving(context: BrowserContext): Promise<void> {
   const saved = new Map<string, string>()
-  await context.route(/\/api\/projects\/file\//, (route) => {
+  // a file by where it's served:  `/api/projects/file/@spell/...` is `/spaces/@spell/...`
+  const keyOf = (url: string) => new URL(url).pathname.replace(/^\/api\/projects\/file\//, "/spaces/")
+  const answer = (route: Route) => {
     const request = route.request()
-    const url = request.url().split("?")[0]!
+    const key = keyOf(request.url())
     if (request.method() !== "GET") {
-      saved.set(url, request.postData() ?? "")
+      saved.set(key, request.postData() ?? "")
       return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
     }
-    const text = saved.get(url)
+    const text = saved.get(key)
     return text === undefined ? route.continue() : route.fulfill({ status: 200, contentType: "text/plain", body: text })
-  })
-  await context.route(/\.spell(\?.*)?$/, (route) =>
-    route.request().method() === "GET" ? route.continue() : route.fulfill({ status: 200, body: "{}" })
-  )
+  }
+  await context.route(/\/api\/(projects\/file|prefs)\//, answer)
+  await context.route(/\/api\/prefs(\?.*)?$/, answer)
+  await context.route(/\.spell(\?.*)?$/, answer)
 }
 
 /** Open example `project`, showing its file `file`. */
@@ -72,6 +81,11 @@ async function clickLine(page: Page, lineNumber: number, column = 0): Promise<vo
 /** What's selected:  each element's tag. */
 function selected(page: Page): Promise<string[]> {
   return page.evaluate(`window.Inspector.allSelected.map(({ element }) => element.localName)`)
+}
+
+/** What's selected:  where each element is written, `Solitaire.spell:18:4` (its line from 0). */
+function selectedPlaces(page: Page): Promise<string[]> {
+  return page.evaluate(`window.Inspector.allSelected.map(({ element }) => element.dataset.spellAt)`)
 }
 
 /** Lines `lineNumber` (from 1) on, `count` of them, of the code showing. */
@@ -118,7 +132,14 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
   const browser = chromium.launch()
 
   beforeEach(async () => {
-    context = await (await browser).newContext({ viewport: { width: 1440, height: 860 }, colorScheme: "dark" })
+    context = await (
+      await browser
+    ).newContext({
+      viewport: { width: 1440, height: 860 },
+      colorScheme: "dark",
+      // Cmd+X and Cmd+V, as a person cuts and pastes (I87)
+      permissions: ["clipboard-read", "clipboard-write"]
+    })
     await contextWithNoSaving(context)
   })
   afterEach(() => context.close())
@@ -188,9 +209,9 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
     async () => {
       const page = await context.newPage()
       await open(page, "Solitaire", "Solitaire.spell")
-      await clickLine(page, await lineOf(page, `"stock" is a new stock pile`))
+      await clickLine(page, await lineOf(page, `<stock-pile "stock"/>`))
       expect(await selected(page)).toEqual(["solitaire-stock-pile"])
-      // the stock, the discards, then four foundations:  as quick as a held key
+      // the discards, the spacer, then three foundations:  as quick as a held key
       for (let press = 0; press < 5; press++) {
         await page.keyboard.press("ArrowDown")
         await page.waitForTimeout(30)
@@ -198,10 +219,55 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       // the cursor's already there;  the selection waits for it to rest
       expect(await selected(page)).toEqual(["solitaire-stock-pile"])
       await page.waitForTimeout(800)
-      expect(await page.evaluate(`window.editor.followed.line + 1`)).toBe(await lineOf(page, `"spades" is a new`))
+      expect(await page.evaluate(`window.editor.followed.line + 1`)).toBe(await lineOf(page, `<foundation "hearts"`))
       expect(await selected(page)).toEqual(["solitaire-foundation"])
     }
   )
+
+  test(
+    "I87:  two actions swapped by cut and paste:  once it's drawn, the action on the cursor's line is selected",
+    { timeout: 150_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire", "Solitaire.spell")
+      const cheat = await lineOf(page, `<action "cheat"/>`)
+      await page.evaluate(`(() => {
+        const code = window.editor.shownCodeEditor
+        code.focus()
+        code.setPosition({ lineNumber: ${cheat}, column: 7 })
+      })()`)
+      // the real keys:  no range selected, so Cmd+X takes the whole line, and Cmd+V puts it back as a line
+      await page.keyboard.press("Meta+x")
+      await page.waitForTimeout(3500)
+      // up onto `auto play`, then nothing selected, so only the paste's drawing can select it
+      await page.keyboard.press("ArrowUp")
+      await page.waitForTimeout(800)
+      await page.evaluate(`window.Inspector.letGo()`)
+      await page.keyboard.press("Meta+v")
+      await page.waitForTimeout(300)
+      expect(await linesFrom(page, cheat - 1, 2).then((lines) => lines.map((line) => line.trim()))).toEqual([
+        `<action "cheat"/>`,
+        `<action "auto play"/>`
+      ])
+      // typing never moves the selection:  nothing yet, until the app has taken the edit and drawn it
+      expect(await selected(page)).toEqual([])
+      // the compile waits for typing to pause, then runs:  however long that takes here
+      await page.waitForFunction(`window.Inspector.allSelected.length > 0`, null, { timeout: 20_000 }).catch(() => {})
+      const cursorLine = (await page.evaluate(`window.editor.shownCodeEditor.getPosition().lineNumber`)) as number
+      expect(cursorLine).toBe(cheat)
+      expect(await selectedPlaces(page)).toEqual([`Solitaire.spell:${cursorLine - 1}:4`])
+    }
+  )
+
+  test("I87:  an edit on a line that draws nothing keeps what's selected", { timeout: 150_000 }, async () => {
+    const page = await context.newPage()
+    await open(page, "Solitaire", "Solitaire.spell")
+    await clickLine(page, await lineOf(page, `<stock-pile "stock"/>`))
+    expect(await selected(page)).toEqual(["solitaire-stock-pile"])
+    await typeAfter(page, await lineOf(page, "// Deal seven columns"), "// a note")
+    await page.waitForTimeout(4500)
+    expect(await selected(page)).toEqual(["solitaire-stock-pile"])
+  })
 
   test(
     "I88:  loading, following and editing Solitaire log no warning about a signal read unfollowed",
