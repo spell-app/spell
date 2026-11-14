@@ -29,11 +29,15 @@ const ROOT = resolve(HERE, "../..")
 const KIT = resolve(ROOT, "..")
 
 if (!process.env.CHECK_AWAY_UNDER_TSX) {
-  const run = spawnSync(process.execPath, ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)], {
-    stdio: "inherit",
-    cwd: ROOT,
-    env: { ...process.env, CHECK_AWAY_UNDER_TSX: "1", TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json") }
-  })
+  const run = spawnSync(
+    process.execPath,
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    {
+      stdio: "inherit",
+      cwd: ROOT,
+      env: { ...process.env, CHECK_AWAY_UNDER_TSX: "1", TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json") }
+    }
+  )
   process.exit(run.status ?? 1)
 }
 
@@ -77,12 +81,15 @@ try {
     const toolbar = [...document.querySelectorAll(".spell-toolbar ui-item[data-rail]")]
     const item = toolbar.find((each) => each.getAttribute("data-rail") === "away")
     return {
-      first: page.firstElementChild === away || [...page.children].find((child) => !child.hasAttribute("slot")) === away,
+      first:
+        page.firstElementChild === away || [...page.children].find((child) => !child.hasAttribute("slot")) === away,
       title: away.shadowRoot.textContent.includes("0. While you were out"),
       open: toggle?.getAttribute("aria-expanded"),
       rail: !!item,
       badge: item?.querySelector("ui-label")?.textContent?.trim(),
       text: away.textContent.replace(/\s+/g, " "),
+      waiting: away.getAttribute("waiting"),
+      lines: [...away.querySelectorAll("epic-away-line")].map((line) => line.textContent.replace(/\s+/g, " ").trim()),
       overview: document.querySelector("epic-overview")?.contentsEntry?.label
     }
   })
@@ -90,11 +97,14 @@ try {
   check(facts.title, 'titled "0. While you were out"')
   check(facts.open === "true", `it opened by itself (${facts.open})`)
   check(facts.rail, "the toolbar has its button")
-  check(facts.badge === "4", `its button's red badge counts what waits (${facts.badge})`)
+  check(facts.badge === facts.waiting, `its button's red badge counts what waits (${facts.badge} of ${facts.waiting})`)
   check(facts.text.includes("P1 · Build it done: the thing, built"), "What was done names the phase and what it built")
+  const linesAfter = (heading) => facts.lines[facts.lines.indexOf(heading) + 1]
   check(
-    facts.text.includes("New manual tests 1. M1") && facts.text.includes("Waiting on you 1. Q1 Which colour?"),
-    "a part per kind (I277), each line with its item's title"
+    facts.lines[0] === "Waiting on you" &&
+      linesAfter("Waiting on you") === "1. Q1 Which colour?" &&
+      linesAfter("New manual tests")?.startsWith("1. M1"),
+    `a part per kind (I277), Waiting on you first, each line with its item's title (${facts.lines.join(" | ")})`
   )
   check(facts.overview === "1. Overview", `the Overview keeps its number (${facts.overview})`)
   await page.screenshot({ path: join(outDir, "away.png") })
@@ -106,8 +116,13 @@ try {
     return !!box && box.top >= 0 && box.top < innerHeight
   })
   check(landed, "a line's link lands on its item")
-  const before = await page.evaluate(() => [...document.querySelectorAll("#away epic-away-line")].map((line) => line.getAttribute("line")))
-  check(before.includes("done") && before.includes("todo") && before.includes("q1"), `every line and part heading is an <epic-away-line> (${before.join(" ")})`)
+  const before = await page.evaluate(() =>
+    [...document.querySelectorAll("#away epic-away-line")].map((line) => line.getAttribute("line"))
+  )
+  check(
+    before.includes("done") && before.includes("asks") && before.includes("q1"),
+    `every line and part heading is an <epic-away-line> (${before.join(" ")})`
+  )
   // Owen ticks Q1's line Read, and `epic inbox apply` applies it:  the page rewritten, the live update brings it in
   night.now = new Date(2026, 10, 3, 8, 0)
   night.applyMark({ id: "away:q1", action: "seen" })
@@ -116,8 +131,13 @@ try {
   await page
     .waitForFunction(() => !document.querySelector("#away epic-away-line[line='q1']"), undefined, { timeout: 10_000 })
     .catch(() => {})
-  const after = await page.evaluate(() => [...document.querySelectorAll("#away epic-away-line")].map((line) => line.getAttribute("line")))
-  check(!after.includes("q1") && after.includes("i1") && after.includes("done"), `a line read leaves;  the rest stays (${after.join(" ")})`)
+  const after = await page.evaluate(() =>
+    [...document.querySelectorAll("#away epic-away-line")].map((line) => line.getAttribute("line"))
+  )
+  check(
+    !after.includes("q1") && after.includes("i1") && after.includes("done"),
+    `a line read leaves;  the rest stays (${after.join(" ")})`
+  )
   check(!errors.length, `no page errors${errors.length ? `:  ${errors.join(" / ")}` : ""}`)
 } finally {
   await browser.close()
