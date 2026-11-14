@@ -1301,6 +1301,9 @@ plain Spell.
 - A DRAWN LINE (Q14):  in a drawing, a line of markup, or a slot placed, IS the drawing.
   - [`drawn_markup`](rules/classes/DrawnMarkup.ts):  `{markup:jsxElement}`, `{markup:jsxFragment}` or
     `{markup:draw_slot}` => `return ...`, at `Priority.specific`.
+    - An action's button and a right-click menu have their own (`{markup:action_button}`,
+      `{markup:context_menu_block}`), registered before `jsxElement`:  else a drawing that is only one of them
+      draws a plain tag (epic `language` I78).
   - Only in a drawing:  `DrawIt.drawingIn()` finds the nearest method, a `draw_it`'s, or one named `draw`.
     A loop's body counts as the drawing around it (`SpellStatement.loops`:  `for each`, `repeat`).
   - SEVERAL drawn lines (C28):  [`DrawnLines.gather()`](rules/classes/DrawnLines.ts),

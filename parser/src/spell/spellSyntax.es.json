@@ -6525,6 +6525,12 @@
               "syntax": "{markup:markdown_block}"
             },
             {
+              "syntax": "{markup:action_button}"
+            },
+            {
+              "syntax": "{markup:context_menu_block}"
+            },
+            {
               "syntax": "{markup:jsxElement}"
             },
             {

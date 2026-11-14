@@ -2623,6 +2623,15 @@ classes.addRule(DrawnMarkup, {
   syntax: "{markup:markdown_block}"
 })
 
+// an action's button, or a right-click menu, on a line of its own:  theirs, not a plain element's (epic `language` I78)
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:action_button}"
+})
+
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:context_menu_block}"
+})
+
 classes.addRule(DrawnMarkup, {
   syntax: "{markup:jsxElement}"
 })
