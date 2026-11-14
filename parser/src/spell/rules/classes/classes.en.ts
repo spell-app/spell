@@ -171,7 +171,7 @@ classes.addRule(WithNestedStatements, {
 
 classes.addRule(CreateType, {
   syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -280,10 +280,77 @@ classes.addRule(CreateType, {
 
 classes.addRule(CreateType, {
   syntax:
-    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     { compileAs: "statement", tests: [['a "card" is a thing', "export class Card extends Thing {}"]] },
-    { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] }
+    { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] },
+    {
+      // its own values for its kind's properties, on its line (epic `language` P55):  as its body's lines would be
+      compileAs: "block",
+      tests: [
+        {
+          title: "a type's own value for its kind's property:  `with layout \"vertical\"`, or `layout = vertical`",
+          input: [
+            'a "pile" is a thing',
+            '\tits "layout" is one of stacked or vertical',
+            '\tits "size" is a number',
+            'a "column" is a pile with layout "vertical", size = 3'
+          ],
+          js: [
+            "export class Pile extends Thing {",
+            '  // - its "layout" is one of stacked or vertical',
+            '  static Layouts = ["stacked", "vertical"]',
+            '  static { this.declareProp("layout", { oneOf: Pile.Layouts }) }',
+            '  get layout() { return this.getProp("layout") }',
+            '  set layout(value) { this.setProp("layout", value) }',
+            "",
+            '  // - its "size" is a number',
+            '  static { this.declareProp("size", { type: "number" }) }',
+            '  get size() { return this.getProp("size") }',
+            '  set size(value) { this.setProp("size", value) }',
+            "}",
+            "export class Column extends Pile {",
+            "  get layout() {",
+            '    return "vertical"',
+            "  }",
+            "  get size() {",
+            "    return 3",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export type Layout = (typeof Pile.Layouts)[number]",
+            "",
+            "export class Pile extends Thing {",
+            '  // - its "layout" is one of stacked or vertical',
+            '  static Layouts = ["stacked", "vertical"] as const',
+            "  @prop({ oneOf: () => Pile.Layouts })",
+            "  accessor layout!: Layout",
+            "",
+            '  // - its "size" is a number',
+            '  @prop({ type: "number" })',
+            "  accessor size!: number",
+            "}",
+            "export class Column extends Pile {",
+            "  get layout(): Layout {",
+            '    return "vertical"',
+            "  }",
+            "  get size(): number {",
+            "    return 3",
+            "  }",
+            "}"
+          ]
+        },
+        {
+          title: "a property its kind hasn't:  an error naming it",
+          input: ['a "pile" is a thing', 'a "column" is a pile with width = 3'],
+          js: [
+            "export class Pile extends Thing {}",
+            "/* PARSE ERROR: A pile has no width:  a type's line gives values only to what its kind has */"
+          ]
+        }
+      ]
+    }
   ]
 })
 

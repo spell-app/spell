@@ -235,7 +235,7 @@ classesEs.addRule(WithNestedStatements, {
 })
 
 classesEs.addRule(CreateType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -298,10 +298,59 @@ classesEs.addRule(CreateType, {
 })
 
 classesEs.addRule(CreateType, {
-  syntax: `${A} {type:quoted_type} es ${A} {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `${A} {type:quoted_type} es ${A} {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     { compileAs: "statement", tests: [['una "card" es una cosa', "export class Card extends Thing {}"]] },
-    { compileAs: "block", tests: [['una "card" es una cosa donde:', "export class Card extends Thing {}"]] }
+    { compileAs: "block", tests: [['una "card" es una cosa donde:', "export class Card extends Thing {}"]] },
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "el valor propio de un tipo para una propiedad de su clase",
+          input: [
+            'una "pila" es una cosa',
+            '\tsu "disposición" es una de apilada o vertical',
+            'una "columna" es una pila con disposición "vertical"'
+          ],
+          js: [
+            "export class Pila extends Thing {",
+            '  // su "disposición" es una de apilada o vertical',
+            '  static Disposiciones = ["apilada", "vertical"]',
+            '  static { this.declareProp("disposición", { oneOf: Pila.Disposiciones }) }',
+            '  get disposición() { return this.getProp("disposición") }',
+            '  set disposición(value) { this.setProp("disposición", value) }',
+            "}",
+            "export class Columna extends Pila {",
+            "  get disposición() {",
+            '    return "vertical"',
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export type Disposición = (typeof Pila.Disposiciones)[number]",
+            "",
+            "export class Pila extends Thing {",
+            '  // su "disposición" es una de apilada o vertical',
+            '  static Disposiciones = ["apilada", "vertical"] as const',
+            "  @prop({ oneOf: () => Pila.Disposiciones })",
+            "  accessor disposición!: Disposición",
+            "}",
+            "export class Columna extends Pila {",
+            "  get disposición(): Disposición {",
+            '    return "vertical"',
+            "  }",
+            "}"
+          ]
+        },
+        {
+          input: ['una "pila" es una cosa', 'una "columna" es una pila con ancho = 3'],
+          js: [
+            "export class Pila extends Thing {}",
+            "/* PARSE ERROR: Una pila no tiene ancho:  la línea de un tipo solo da valores a lo que tiene su clase */"
+          ]
+        }
+      ]
+    }
   ]
 })
 
