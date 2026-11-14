@@ -8639,6 +8639,80 @@ export interface UIContainerAttributes {
    */
   "prop:width"?: string
   /**
+   * Text size, `mini` ... `massive`, as `<ui-segment size>`;  `medium` is the default.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * The dark scheme, as `<ui-segment inverted>`:  a dark surface, and everything inside follows (`color-scheme: dark`, `--ui-inverted`).
+   * - takes:  flag (present / absent)
+   */
+  inverted?: boolean | ""
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
+  "prop:inverted"?: boolean | ""
+  /**
+   * Room inside its edges:  `small` (1em, a segment's own), `md` more (1.5em), `lg` even more (3em);  `none`, the default.  The same steps as `<ui-segment padding>`.
+   * - takes:  `none` · `small` · `md` · `lg`
+   */
+  padding?: "none" | "small" | "md" | "lg"
+  /**
+   * `padding`, as the DOM element's property.
+   * @deprecated write `padding` -- `prop:` stays only for compiled spell
+   */
+  "prop:padding"?: "none" | "small" | "md" | "lg"
+  /**
+   * Lays its children out as a grid of that many columns, `1` ... `16`, as `<ui-grid columns>` does:  each child a cell, with no `<ui-grid>` or `<ui-column>` around them.
+   * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
+   */
+  columns?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
+  "prop:columns"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /**
    * Holds a grid:  widened by the grid's gutters so its columns line up with other containers.
    * - takes:  flag (present / absent)
    */
@@ -8649,15 +8723,15 @@ export interface UIContainerAttributes {
    */
   "prop:grid"?: boolean | ""
   /**
-   * With `grid`:  room for a grid's wider gutters (`spacing="lg"`, `xl` wider still).  Its old name was `relaxed`.
-   * - takes:  `lg` · `xl`
+   * With `columns`:  the room between its columns, as `<ui-grid spacing>`:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  With `grid`:  room for a grid's wider gutters (`spacing="lg"`, `xl` wider still).  Its old name was `relaxed`.
+   * - takes:  `xs` · `compact` · `lg` · `xl`
    */
-  spacing?: "lg" | "xl"
+  spacing?: "xs" | "compact" | "lg" | "xl"
   /**
    * `spacing`, as the DOM element's property.
    * @deprecated write `spacing` -- `prop:` stays only for compiled spell
    */
-  "prop:spacing"?: "lg" | "xl"
+  "prop:spacing"?: "xs" | "compact" | "lg" | "xl"
   /**
    * Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`

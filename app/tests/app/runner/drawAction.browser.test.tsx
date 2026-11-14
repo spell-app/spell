@@ -180,4 +180,60 @@ describe("core.drawAction():  an action's button", () => {
     expect(menu.isConnected).toBe(false)
     expect(game.undoTitle).toBe("Undo Deal")
   })
+
+  describe("<context-menu> at the drawing's own level (I81)", () => {
+    /** A card of the table's:  a view of its own, drawn in its own element's shadow root, with no menu of its own. */
+    class Card extends View {
+      static elementTag = core.defineElement(this, "Patience")
+      draw(): ReturnType<View["draw"]> {
+        return (h("button", { class: "Card" }, "A") as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+
+    /**
+     * The table, as spell compiles a drawing whose `<context-menu>` is its last line, beside its toolbar and board:
+     *
+     *       to draw it
+     *         <div class="Bar">Patience</div>
+     *         <div class="Board"><card .../></div>
+     *         <context-menu>
+     *           <action "deal"/>
+     *         </>
+     */
+    class Patience extends App {
+      static elementTag = core.defineElement(this, "Patience", "App")
+      card = new Card()
+      deal(): void {}
+      draw(): ReturnType<View["draw"]> {
+        return [
+          h("div", { class: "Bar" }, "Patience"),
+          h("div", { class: "Board" }, () => core.drawThing(this.card)),
+          core.drawContextMenu(this, ["deal"])
+        ] as unknown as ReturnType<View["draw"]>
+      }
+    }
+    core.describeAction(Patience, "deal", { title: "Deal" })
+
+    test("is the right-click menu of the app's own element, wherever in its drawing the click lands", async () => {
+      await Promise.resolve()
+      core.mountApp(new Patience({}), root)
+      flush()
+      const app = root.querySelector("patience-app") as HTMLElement & { ready: Promise<void> }
+      const card = app.querySelector("patience-card") as HTMLElement & { ready: Promise<void> }
+      await Promise.all([app.ready, card.ready])
+      flush()
+      // the app's own child:  nothing draws it in an element
+      expect(app.querySelector(":scope > spell-context-menu")).not.toBeNull()
+      const spots = { bar: app.querySelector(".Bar")!, card: card.shadowRoot!.querySelector(".Card")!, app }
+      const shown: Record<string, boolean> = {}
+      for (const [name, spot] of Object.entries(spots)) {
+        ActionMenus.closeContextMenu()
+        // as the page hears a right click:  each element's own handler, the card's first, then the app's
+        const click = new MouseEvent("contextmenu", { bubbles: true, composed: true, cancelable: true })
+        spot.dispatchEvent(click)
+        shown[name] = click.defaultPrevented && !!document.querySelector("ui-menu[data-spell-action-menu]")
+      }
+      expect(shown).toEqual({ bar: true, card: true, app: true })
+    })
+  })
 })

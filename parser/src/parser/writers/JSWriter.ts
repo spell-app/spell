@@ -59,6 +59,9 @@ const ELEMENT_TAG = "elementTag"
 /** `core`'s call a place's line compiles to. */
 const PLACE_CALL = "place"
 
+/** A line's description comment, `-- ...`:  written as a plain `//` (`ASTLineComment()`). */
+const DESCRIPTION_SYMBOL = "--"
+
 const DESCRIBERS = { action: "describeAction", event: "describeEvent", menu: "describeMenu" } as const
 
 export class JSWriter extends ProgramWriter {
@@ -351,11 +354,15 @@ export class JSWriter extends ProgramWriter {
   // ## Comments
   ////////////////
 
-  /** Prefixes `commentSymbol` with `//` unless it already IS exactly `//`. */
+  /**
+   * Prefixes `commentSymbol` with `//` unless it already IS exactly `//`.
+   * - A description's `--` is `//` alone:  `a card -- ...` writes `// ...`, not `//-- ...` (epic `language` P55).
+   */
   ASTLineComment(node: P.ASTLineComment): string {
     const { initialWhitespace = " ", value } = node
     let { commentSymbol = "" } = node
-    if (commentSymbol !== "//") commentSymbol = `//${commentSymbol}`
+    if (commentSymbol === DESCRIPTION_SYMBOL) commentSymbol = "//"
+    else if (commentSymbol !== "//") commentSymbol = `//${commentSymbol}`
     return `${commentSymbol}${initialWhitespace}${value}`
   }
 

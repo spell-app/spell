@@ -249,6 +249,61 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-variations-columns" label="Columns" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="Its children laid out as a grid of `columns`, as `<ui-grid columns>` does:  each child a cell, with no `<ui-grid>` or `<ui-column>` around them.  `spacing` takes the grid's words for the room between them (`xs`, `compact`, `lg`, `xl`)."
+                >
+                  <ui-container padding="small" columns="7" spacing="xs">
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                    <div><ui-image src="images/wireframe/square-image.png" alt="" fluid></ui-image></div>
+                  </ui-container>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-variations-padding" label="Padding" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="Room inside its edges, a segment's steps:  `small` (1em, a segment's own), `md` (1.5em), `lg` (3em);  `none` is the default."
+                >
+                  <ui-container padding="small" inverted>
+                    <p>padding=&quot;small&quot;</p>
+                  </ui-container>
+                  <ui-divider spacer></ui-divider>
+                  <ui-container padding="md" inverted>
+                    <p>padding=&quot;md&quot;</p>
+                  </ui-container>
+                  <ui-divider spacer></ui-divider>
+                  <ui-container padding="lg" inverted>
+                    <p>padding=&quot;lg&quot;</p>
+                  </ui-container>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="The dark scheme, as a segment's:  a dark surface, and everything inside follows."
+                >
+                  <ui-container inverted padding="small">
+                    <ui-header>A dark container</ui-header>
+                    <p>Headers, buttons and text inside it take the dark scheme.</p>
+                    <ui-button color="primary">Play</ui-button>
+                  </ui-container>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
+                <ui-example description="Its text size, `mini` ... `massive`, as a segment's;  `medium` is the default.">
+                  <ui-container size="small"><p>A small container's text.</p></ui-container>
+                  <ui-container size="large"><p>A large container's text.</p></ui-container>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-variations-grid" label="Grid" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A container that holds a grid is widened by the grid's gutters, so its columns line up with other containers;  `spacing=&quot;lg&quot;` (or `xl`) makes room for a grid's wider gutters."
@@ -385,11 +440,17 @@
                   - `text` narrows it to a reading column with slightly larger type; `wide` makes it a fifth wider; `fluid` drops the
                     maximum width (useful only for `align` on unstyled content).
                   - `width` gives it a width of its own, any CSS length (`width="20em"`): centred, and never wider than the page.
+                  - `columns` lays its children out as a grid of that many columns, as `<ui-grid columns>` does, each child a cell:
+                    `<ui-container padding="small" columns="7" spacing="xs">` is a game board in one element. `spacing` takes the
+                    grid's words for the room between them (`xs`, `compact`, `lg`, `xl`).
+                  - `padding`, `size` and `inverted` are a segment's: room inside its edges (`small`, `md`, `lg`), its text size,
+                    and the dark scheme for everything inside.
                   - `grid` is for a container that holds a `<ui-grid>`: it adds the grid's gutters so the columns line up with other
                     containers; add `spacing="lg"` (or `xl`) to match a grid with wider gutters.
                   - `scrolling` caps the height (per breakpoint) and scrolls; `short`, `very short`, `long`, `very long` scale the cap,
                     and `resizable` lets the reader drag it.
-                  - The host is a block; the look lives on the `container` part inside, around one slot.
+                  - The DOM element has no box of its own: the look lives on the `container` part inside, around one slot (with
+                    `columns`, in the `grid` part inside that).
                   - No events: a container is pure layout.
                 </script>
               </ui-markdown>
@@ -503,6 +564,10 @@
                   through a private alias, so nothing inside blocks them.
 
                   - The fixed widths are one token per breakpoint: `--ui-container-width-tablet`, `-computer`, `-large-monitor`.
+                  - The `padding` steps: `--ui-container-lightly-padded` (`small`, 1em), `--ui-container-padded` (`md`, 1.5em),
+                    `--ui-container-very-padded` (`lg`, 3em).
+                  - `inverted`'s surface and text: `--ui-container-inverted-background`, `--ui-container-inverted-color`.
+                  - With `columns`, the grid's own tokens (`--ui-grid-*`) set its gutters.
                   - The `scrolling` heights too: `--ui-container-scrolling-height` (phones, 15em), then
                     `--ui-container-scrolling-height-tablet` (18em), `-computer` (24em), `-widescreen` (30em).
                   - Never set the `--_ui-*` names: they're the sheet's private plumbing.

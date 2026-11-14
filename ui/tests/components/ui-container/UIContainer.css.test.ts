@@ -8,6 +8,7 @@ import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { containerVocabulary } from "spell/ui/components/ui-container/UIContainer.en"
 
+import gridCSS from "spell/ui/components/ui-grid/UIGrid.css?inline"
 import containerCSS from "spell/ui/components/ui-container/UIContainer.css?inline"
 import containerRaw from "spell/ui/components/ui-container/UIContainer.css?raw"
 
@@ -53,7 +54,9 @@ describe("UIContainer.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    for (const phrase of Sheets.classPhrases(containerVocabulary))
+    // `columns` makes no class on the box:  the inner grid's, which the grid's own sheet styles
+    const attributes = containerVocabulary.attributes.filter(({ name }) => name !== "columns")
+    for (const phrase of Sheets.classPhrases({ ...containerVocabulary, attributes }))
       expect(Sheets.covers(containerRaw, phrase), phrase).toBe(true)
   })
 })
@@ -111,6 +114,39 @@ describe("UIContainer.css examples", () => {
 })
 
 ////////////////
+// ## A segment's padding, size and inverted (epic `language` T119)
+////////////////
+
+describe("UIContainer.css padding, size and inverted", () => {
+  it.each([
+    ["fitted", "0px"],
+    ["lightly padded", "16px"],
+    ["padded", "24px"],
+    ["very padded", "48px"]
+  ])("`%s` pads it %s", (classes, padding) => {
+    Sheets.adopt([...foundationCSS, containerCSS])
+    const root = Fixture.render(`<div class="ui ${classes} container">A</div>`)
+    expect(getComputedStyle(root).paddingTop).toBe(padding)
+    expect(getComputedStyle(root).paddingLeft).toBe(padding)
+  })
+
+  it("sizes its text, and hands its content the dark scheme", () => {
+    Sheets.adopt([...foundationCSS, containerCSS])
+    const root = Fixture.render(`<div class="ui large inverted container"><p>A</p></div>`)
+    const style = getComputedStyle(root)
+    expect(parseFloat(style.fontSize)).toBeGreaterThan(16)
+    expect(style.colorScheme).toBe("dark")
+    expect(getComputedStyle(root.firstElementChild!).colorScheme).toBe("dark")
+  })
+
+  it("leaves a plain container's text and scheme alone", () => {
+    Sheets.adopt([...foundationCSS, containerCSS])
+    const root = Fixture.render(`<div style="font-size: 10px"><div class="ui container">A</div></div>`)
+    expect(getComputedStyle(root.firstElementChild!).fontSize).toBe("10px")
+  })
+})
+
+////////////////
 // ## Tokens
 ////////////////
 
@@ -159,6 +195,24 @@ describe("UIContainer.css in shadow roots", () => {
     ])
     expect(getComputedStyle(host).display).toBe("contents")
     expect(Sheets.inner(host).getBoundingClientRect().width).toBeCloseTo(933, 0)
+  })
+
+  // epic `language` T119:  the element adopts the grid's sheet first, for `columns`
+  it("stays out of layout under the grid's sheet, which lays out its inner grid", async () => {
+    await resize(1000)
+    Sheets.adopt(foundationCSS)
+    const host = Sheets.host(
+      `<div class="ui gridded container" part="container"><div class="ui seven column grid" part="grid"><slot></slot></div></div>`,
+      [...foundationCSS, gridCSS, containerCSS]
+    )
+    host.innerHTML = "<div>A</div>".repeat(7)
+    expect(getComputedStyle(host).display).toBe("contents")
+    const box = Sheets.inner(host)
+    // the grid's rules never reach the container box:  no flex, no negative margins
+    expect(getComputedStyle(box).display).toBe("block")
+    expect(box.getBoundingClientRect().width).toBeCloseTo(933 + 32, 0)
+    const cells = [...host.children]
+    expect(new Set(cells.map((cell) => Math.round(cell.getBoundingClientRect().top))).size).toBe(1)
   })
 })
 

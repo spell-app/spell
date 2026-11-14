@@ -160,6 +160,11 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const statements: SP.HoistableStatement[] = []
     const heading = isFileTopLevel ? this.headingText(item) : undefined
     if (heading) statements.push(new P.ASTHeadingInvocation(item, { heading }))
+    // a file's group, `group "The piles"`:  its heading's banner, as `## The piles` writes it (epic `language` P55)
+    if (heading && this.groupHeadingOf(item)) {
+      statements.push(new P.ASTBannerComment(item, { value: heading }))
+      return statements
+    }
     if (this.isBannerHeading(item, block.matched[index + 1])) {
       statements.push(new P.ASTBannerComment(item, { value: this.commentText(this.commentOnlyLine(item)!) }))
       return statements
@@ -343,7 +348,8 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const docs = new Map<P.Match, DocComment>()
     block.matched.forEach((item, index) => {
       const statement = item instanceof P.Match ? this.statementOf(item) : undefined
-      if (!statement || !statement.rule.getDeclaration(statement)) return
+      if (!statement || !(statement.rule.getDeclaration(statement) || this.describesItsMethod(item as P.Match, statement)))
+        return
       // the first comment under it, in its body or a block no line took (epic `language` P48)
       const below = this.descriptionBelow(statement, block.matched[index + 1])
       if (below) {
@@ -410,6 +416,16 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     return !!heading && this.isHeading(heading) && !!following && !this.isHeading(following)
   }
 
+  /**
+   * Does `item`'s line end in a description, `-- ...`, of a method it makes that declares nothing:
+   * a drawing, `to draw its placeholder  -- a grey ace` (epic `language` P55, Q55)?
+   */
+  private describesItsMethod(item: P.Match, statement: P.Match): boolean {
+    const onLine = item.matched.find((it): it is P.Match => this.isComment(it))
+    const symbol = onLine && (onLine.tokens[0] as P.CommentToken).commentSymbol
+    return symbol === DESCRIPTION_SYMBOL && statement.AST instanceof P.ASTPropertyDefinition
+  }
+
   /** `item`'s statement, if it's a `line` with one. */
   private statementOf(item: P.Match): P.Match | undefined {
     const { statement } = (item as P.Match<P.MatchGroups, BlockMatchData>).data
@@ -466,10 +482,25 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     return description ? { name, description } : { name }
   }
 
-  /** Text of `item`, if it's a heading's line -- `undefined` for any other, or one with no text, e.g. `#####`. */
+  /**
+   * Text of `item`, if it's a heading's line -- `undefined` for any other, or one with no text, e.g. `#####`.
+   * - A file's group is one, `group "The piles"` (`groupHeadingOf()`).
+   */
   private headingText(item: P.Match): string | undefined {
+    const group = this.groupHeadingOf(item)
+    if (group) return (group.rule as unknown as SP.GroupRule).groupName(group)
     const comment = this.commentOnlyLine(item)
     return (comment && this.isHeading(comment) && this.commentText(comment).trim()) || undefined
+  }
+
+  /**
+   * `item`'s statement, if it's a group with no template, a file's heading:  `group "The piles"` (epic `language` P55).
+   * - Duck-typed, as `groupOpenedBy()`:  a group's rule that says `isFileHeading()`.
+   */
+  private groupHeadingOf(item: P.Match): P.Match | undefined {
+    const statement = this.statementOf(item)
+    const rule = statement?.rule as Partial<SP.GroupRule> & { isFileHeading?: (match: P.Match) => boolean }
+    return statement && rule.isFileHeading?.(statement) ? statement : undefined
   }
 
   /** Text of `comment`, without its comment symbol. */
@@ -538,3 +569,6 @@ export type BlockMatchData = {
 type CatchesLineAbove = {
   catchesLineAbove?(match: P.Match, statements: P.ASTNode[], from: number): boolean
 }
+
+/** A line's description comment, `-- ...`:  `a "column" is a pile  -- A column, built down from king to ace`. */
+const DESCRIPTION_SYMBOL = "--"

@@ -13,11 +13,28 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  *   - The declarations note each member's group, and the words file lists a type's members by group:
  *     the Inspector's bands (epic `debut` P26;  `SP.SpellWords`).
  * - Compiles to nothing:  a group says how a template is laid out for people, not what it does.
- * - Only in a template's outline:  `{type:subject_implied}` is the template its line is in.
+ * - In a template's outline:  `{type:subject_implied}` is the template its line is in.
+ * - Or at a file's top level, with no template (epic `language` P55, Q54):  `group "The piles"` is the same as
+ *   the heading `## The piles` -- see `isFileHeading()`, which `Block` asks.
  */
-export class DefineGroup extends SpellStatement<"type|group|color?"> {
+export class DefineGroup extends SpellStatement<"type?|group|color?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
+
+  /** With no template, only outside every outline and action:  a heading's place. */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (!match || match.groups.type) return match
+    for (let current: P.Scope | undefined = scope; current; current = current.parentScope) {
+      if (current instanceof P.SubjectScope || current instanceof P.MethodScope) return undefined
+    }
+    return match
+  }
+
+  /** Is `match` a file's heading, `group "The piles"` at its top level, as `## The piles` is?  `Block` asks. */
+  isFileHeading(match: P.Match): boolean {
+    return !(match as P.MatchFor<DefineGroup>).groups.type
+  }
 
   /** The group's name, as written:  `direction`. */
   static nameOf(match: P.MatchFor<DefineGroup>): string {

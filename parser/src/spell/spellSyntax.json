@@ -938,6 +938,36 @@
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
+              "syntax": "{operator:is_or_is_not} the same as {expression:operand}",
+              "example": "thing is the same as other",
+              "outputs": {
+                "js": {
+                  "code": "(thing === other)"
+                },
+                "ts": {
+                  "code": "(thing === other)"
+                },
+                "py": {
+                  "code": "(thing == other)"
+                }
+              }
+            },
+            {
+              "syntax": "and {expression:operand} {operator:are_or_are_not} the same",
+              "example": "thing and other are the same",
+              "outputs": {
+                "js": {
+                  "code": "(thing === other)"
+                },
+                "ts": {
+                  "code": "(thing === other)"
+                },
+                "py": {
+                  "code": "(thing == other)"
+                }
+              }
+            },
+            {
               "syntax": "{operator:is_or_is_not} {expression:operand}",
               "example": "thing is other",
               "outputs": {
@@ -5953,7 +5983,7 @@
           "ruleNames": ["define_group"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineGroup.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "A GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).",
           "syntaxes": [
             {
@@ -5968,6 +5998,21 @@
                 },
                 "py": {
                   "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
+                }
+              }
+            },
+            {
+              "syntax": "group {group:text}",
+              "example": "group \"The piles\"\n\na pile is a thing",
+              "outputs": {
+                "js": {
+                  "code": "export class Pile extends Thing {}"
+                },
+                "ts": {
+                  "code": "export class Pile extends Thing {}"
+                },
+                "py": {
+                  "code": "class Pile(Thing):\n    pass"
                 }
               }
             },

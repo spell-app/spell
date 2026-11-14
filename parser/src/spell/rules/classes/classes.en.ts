@@ -2192,6 +2192,69 @@ classes.addRule(DrawIt, {
             "}",
             "core.useElement(Pile, PileElement)"
           ]
+        },
+        {
+          title:
+            "a `--` at its line's end is its description, a re-opened type's a plain comment (epic `language` P55, Q55)",
+          input: [
+            'a "pile" is a viewable list of things',
+            "\tto draw its placeholder  -- a grey ace",
+            "\t\t<text>🂠</text>",
+            "a pile  -- the pile again",
+            "\ton click",
+            "\t\tprint 1"
+          ],
+          js: [
+            "export class Pile extends ViewableList {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  /** a grey ace */",
+            "  drawItsPlaceholder() {",
+            '    return h("text", { part: "placeholder" }, "🂠")',
+            "  }",
+            "",
+            "  onClick(event) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "// the pile again"
+          ],
+          ts: [
+            "export class Pile extends ViewableList<Thing> {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  /** a grey ace */",
+            "  drawItsPlaceholder() {",
+            '    return <text part="placeholder">🂠</text>',
+            "  }",
+            "",
+            "  onClick(event: ClickEvent) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pile>`:  a pile, drawn in its own element, e.g. by `draw the pile`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pile's properties;  its methods call its pile's.",
+            " * - What every view's element does, e.g. drawing its pile, is `SpellElement`'s.",
+            " */",
+            "export class PileElement extends SpellElement<Pile> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pile", "pile", [])',
+            "",
+            "  drawItsPlaceholder() {",
+            "    return this.currentThing?.drawItsPlaceholder()",
+            "  }",
+            "",
+            "  onClick(event: ClickEvent) {",
+            "    return this.currentThing?.onClick(event)",
+            "  }",
+            "}",
+            "core.useElement(Pile, PileElement)",
+            "// the pile again"
+          ]
         }
       ]
     }
@@ -2283,6 +2346,23 @@ classes.addRule(DefineGroup, {
             "}",
             "core.useElement(Card, CardElement)"
           ]
+        }
+      ]
+    }
+  ]
+})
+
+// ... and at a file's top level, its heading (epic `language` P55, Q54):  `group "The piles"`, as `## The piles`
+classes.addRule(DefineGroup, {
+  syntax: "group {group:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "a file's heading, as `## The piles` is",
+          input: ['group "The piles"', "// Each kind of pile", "", "a pile is a thing"],
+          js: ["// Each kind of pile", "", "export class Pile extends Thing {}"]
         }
       ]
     }
