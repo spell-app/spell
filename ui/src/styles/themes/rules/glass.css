@@ -38,14 +38,14 @@
                 Glass
   *******************************/
 
-  /* the blur behind every translucent surface;  plain surfaces (`basic`, `text`, `secondary` menus) stay clear */
+  /* the blur behind every translucent surface;  plain surfaces (`basic`, `text`, `secondary`, `pills` menus) stay clear */
   .ui.card,
   .ui.sidebar,
   .ui.section.panel:not(.sub, .loose, .pane),
   .ui.segment:not(.basic),
   .ui.section:is(.bordered, .styled),
   .ui.section:is(.block, .styled) > .title,
-  .ui.menu:not(.secondary, .text, .tabular, .segmented.header),
+  .ui.menu:not(.secondary, .text, .tabular, .pills, .segmented.header),
   .ui.popup,
   .ui.dropdown .menu[role="listbox"],
   .overflow-menu,
