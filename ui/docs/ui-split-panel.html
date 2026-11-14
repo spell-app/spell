@@ -80,7 +80,7 @@
               </ui-section>
             </ui-section>
             <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
-              <ui-section id="examples-content-parent" label="Panes written anywhere" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-panes-written-anywhere" label="Panes written anywhere" sticky="stack" collapsible dividing>
                 <ui-example description="A `<ui-panel>` written anywhere joins the split panel it names with `parent`, as a section joins a section.  So the page can stay flat.">
                   <ui-split-panel id="split-panel-joined" columns="40%,*" resizable style="height: 8em"></ui-split-panel>
                   <ui-panel parent="split-panel-joined" appearance="pane" label="Views">The tree</ui-panel>
@@ -89,7 +89,7 @@
               </ui-section>
             </ui-section>
             <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
-              <ui-section id="examples-states-hidden" label="Hidden panes" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-hidden-panes" label="Hidden panes" sticky="stack" collapsible dividing>
                 <ui-example description="A child with `hidden` isn't a pane:  the others share its room.  Showing it again moves nothing, so a running program in a pane keeps running.">
                   <ui-split-panel columns="*,*,*" resizable style="height: 6em">
                     <ui-panel appearance="pane">One</ui-panel>
@@ -103,7 +103,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="examples-using-it" label="Using it" sticky="stack" collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Write your panes as children, and say how big each is in `columns` or `rows`.
@@ -118,14 +118,14 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="examples-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A bar takes the focus with Tab, after every pane.  The arrow keys along it move it 16px, or 160px with Shift.
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="examples-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Each bar of a `resizable` panel is a named `separator`, saying its place as a percent of the two panes beside it.  Tab reaches the bars after every pane, not between them:  each pane is placed by CSS `order`, so nothing has to move.

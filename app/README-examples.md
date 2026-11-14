@@ -709,7 +709,7 @@ solitaire is an app
 		restart the game
 
 	to draw it
-		<segment inverted attach="top" color="">
+		<segment inverted attach-to="top" color="">
 			<toolbar class="GameBar" aria-label="Game" appearance="pills" inverted size="small" shrinkable>
 				<text slot="title" size="large" heavy>Solitaire</text>
 				<action "auto play"/>

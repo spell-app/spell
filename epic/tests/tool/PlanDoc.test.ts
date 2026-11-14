@@ -934,8 +934,8 @@ describe("PlanDoc questions and decisions", () => {
   /** Option cards A and B (B recommended), as an agent writes them for the old markup. */
   const GRID =
     '<ui-grid class="spell-pros-cons" columns="2" stackable>' +
-    '<ui-column><ui-segment><ui-label attach="top">A · Keep folds</ui-label><p>a</p></ui-segment></ui-column>' +
-    '<ui-column><ui-segment><ui-label attach="top">B · Unfold <code>it</code> (recommended)</ui-label><p>b</p></ui-segment></ui-column>' +
+    '<ui-column><ui-segment><ui-label attach-to="top">A · Keep folds</ui-label><p>a</p></ui-segment></ui-column>' +
+    '<ui-column><ui-segment><ui-label attach-to="top">B · Unfold <code>it</code> (recommended)</ui-label><p>b</p></ui-segment></ui-column>' +
     "</ui-grid>"
 
   test("one section (D13):  open questions on top, then the answered ones in id order;  a decision is born answered", () => {

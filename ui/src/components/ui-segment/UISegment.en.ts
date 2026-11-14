@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
  *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-segment appearance="raised" padding="lg" attach="top">` => `ui very padded top attached raised segment`.
+ *   `<ui-segment appearance="raised" padding="lg" attach-to="top">` => `ui very padded top attached raised segment`.
  * - No `ownsParts`:  Fomantic's segment styles no content parts of its own.
  *   What it hands its content is inherited (`--ui-inverted`, `color-scheme`, label owner tokens):
  *   see `UISegment.css`.
@@ -101,7 +101,7 @@ export const segmentVocabulary = {
       description: "Aligns its text `left`, `center` or `right`.  Its old name was `text-align`."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom", "left", "right"],
@@ -112,16 +112,16 @@ export const segmentVocabulary = {
         left: "left attached",
         right: "right attached"
       },
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
         "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits " +
-        "in the middle.  Its old name was `attached`."
+        "in the middle.  Its old names were `attach` and `attached`."
     },
     {
       name: "seamless",
       group: "appearance",
       kind: "keyOnly",
-      description: "With `attach`:  no line where attached segments meet."
+      description: "With `attach-to`:  no line where attached segments meet."
     },
     {
       name: "inverted",

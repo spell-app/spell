@@ -377,7 +377,7 @@ export type DebugPane = "explorer" | "things" | "console"
  ****************/
 function SpellAppToolbar(props: SpellAppToolbarProps) {
   return (
-    <ui-menu attach="top" size="small" class="SpellAppToolbar">
+    <ui-menu attach-to="top" size="small" class="SpellAppToolbar">
       <ui-item kind="header">{props.name}</ui-item>
       <ui-item appearance="link" icon="redo" class="restart" onClick={() => props.onRestart()}>
         {appTexts.text("restart")}

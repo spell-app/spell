@@ -560,7 +560,7 @@ export class Solitario extends App {
   @drawn draw() {
     return (
       <>
-        <es-segmento invertido={true} unir="arriba" color="">
+        <es-segmento invertido={true} unir-a="arriba" color="">
           <es-barra-herramientas class="GameBar" aria-label="Juego" apariencia="pildoras" invertido={true} tamano="pequeño" encogible={true}>
             <es-texto slot="titulo" tamano="grande" extranegrita={true}>Solitario</es-texto>
             {core.drawAction(this, "jugarSolo", { "in-menu": true })}

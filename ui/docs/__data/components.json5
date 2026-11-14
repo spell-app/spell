@@ -3000,7 +3000,7 @@
           "description": "On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  Its old name was `animated`."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
@@ -3009,7 +3009,7 @@
             "left",
             "right"
           ],
-          "description": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name was `attached`."
+          "description": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old names were `attach` and `attached`."
         },
         {
           "name": "icon",
@@ -3274,7 +3274,7 @@
         },
         {
           "name": "fluid",
-          "description": "The host is block-level:  `fluid`, or attached top, bottom or both (`attach`)."
+          "description": "The host is block-level:  `fluid`, or attached top, bottom or both (`attach-to`)."
         },
         {
           "name": "ellipsis",
@@ -3459,7 +3459,7 @@
           "description": "Stacks vertically on mobile."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
@@ -3468,7 +3468,7 @@
             "left",
             "right"
           ],
-          "description": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name was `attached`."
+          "description": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old names were `attach` and `attached`."
         },
         {
           "name": "width",
@@ -6609,13 +6609,13 @@
           "description": "Width while the grid is 1920px wide or more."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "left",
             "right"
           ],
-          "description": "No gutter on the `left` / `right` side.  Its old name was `attached`."
+          "description": "No gutter on the `left` / `right` side.  Its old names were `attach` and `attached`."
         },
         {
           "name": "centered",
@@ -15416,14 +15416,14 @@
           "description": "In a tinted box."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name was `attached`."
+          "description": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old names were `attach` and `attached`."
         },
         {
           "name": "seamless",
@@ -19702,7 +19702,7 @@
           "description": "The look, several words at once:  `basic` (less pronounced:  an outline on the surface colour), `tinted` (soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge;  not Fomantic's), `circular` (a round badge).  Old names:  `basic`, `tinted`, `circular` written alone."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "top",
@@ -19712,7 +19712,7 @@
             "bottom left",
             "bottom right"
           ],
-          "description": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name was `attached` (bare:  `top`)."
+          "description": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old names were `attach` and `attached` (bare:  `top`)."
         },
         {
           "name": "direction",
@@ -22048,14 +22048,14 @@
           "description": "`none`:  no item padding;  `none-x` / `none-y` keep only the top and bottom, or the left and right;  `compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`."
+          "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`."
         },
         {
           "name": "fixed",
@@ -22516,14 +22516,14 @@
           "description": "The dark scheme;  a coloured one keeps its hue in the text."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old name:  `attached` (bare is `both`)."
+          "description": "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old names:  `attach`, `attached` (bare is `both`)."
         },
         {
           "name": "align",
@@ -24724,14 +24724,14 @@
           "description": "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded=\"very\"` is `lg`)."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`)."
+          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`)."
         },
         {
           "name": "scrolling",
@@ -26977,14 +26977,14 @@
           "description": "Unknown progress:  a pulsing full bar, or a `filling` / `sliding` / `swinging` one."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old name:  `attached`."
+          "description": "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old names:  `attach`, `attached`."
         },
         {
           "name": "value",
@@ -28154,14 +28154,14 @@
           "description": "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded=\"very\"` is `lg`)."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`)."
+          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`)."
         },
         {
           "name": "scrolling",
@@ -28975,14 +28975,14 @@
           "description": "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded=\"very\"` is `lg`)."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`)."
+          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`)."
         },
         {
           "name": "scrolling",
@@ -30623,12 +30623,12 @@
           "description": "A vertical rule between the rail and its container."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both"
           ],
-          "description": "`both`:  flush against its container, no gap.  Its old name was `attached`."
+          "description": "`both`:  flush against its container, no gap.  Its old names were `attach` and `attached`."
         },
         {
           "name": "close",
@@ -33279,14 +33279,14 @@
           "description": "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old names:  `compact`, `padded` (`padded=\"very\"` is `lg`)."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`)."
+          "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`)."
         },
         {
           "name": "scrolling",
@@ -34126,7 +34126,7 @@
           "description": "Aligns its text `left`, `center` or `right`.  Its old name was `text-align`."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
@@ -34135,12 +34135,12 @@
             "left",
             "right"
           ],
-          "description": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name was `attached`."
+          "description": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old names were `attach` and `attached`."
         },
         {
           "name": "seamless",
           "kind": "keyOnly",
-          "description": "With `attach`:  no line where attached segments meet."
+          "description": "With `attach-to`:  no line where attached segments meet."
         },
         {
           "name": "inverted",
@@ -39298,14 +39298,14 @@
           "description": "Every step the same width, from the steps themselves (no count):  each as wide as the widest;  with `fluid`, an equal share of the row each.  Not for `vertical` or `circular` steps (already alike)."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name was `attached`."
+          "description": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old names were `attach` and `attached`."
         },
         {
           "name": "unstackable",
@@ -40436,14 +40436,14 @@
           "description": "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-opened` with `first: true` to fill it yourself)."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name was `attached`."
+          "description": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old names were `attach` and `attached`."
         },
         {
           "name": "parent",
@@ -40825,14 +40825,14 @@
           "description": "Cell padding:  `xs` and `compact` less, `md` and `lg` more.  Old names:  `compact` (`compact=\"very\"` is `xs`), `padded` (`padded=\"very\"` is `lg`)."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old name:  `attached`."
+          "description": "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old names:  `attach`, `attached`."
         },
         {
           "name": "stackable",
@@ -41174,15 +41174,15 @@
         },
         {
           "name": "attached",
-          "description": "Set while `attach` is set (any edge):  the host drops the outer margin it carries."
+          "description": "Set while `attach-to` is set (any edge):  the host drops the outer margin it carries."
         },
         {
           "name": "attached-top",
-          "description": "Set while `attach` is `top`:  the host keeps only its top margin."
+          "description": "Set while `attach-to` is `top`:  the host keeps only its top margin."
         },
         {
           "name": "attached-bottom",
-          "description": "Set while `attach` is `bottom`:  the host keeps only its bottom margin."
+          "description": "Set while `attach-to` is `bottom`:  the host keeps only its bottom margin."
         },
         {
           "name": "disabled",
@@ -41360,13 +41360,13 @@
           "description": "Every tab the same width, from the tabs themselves (no count):  with `align=\"fluid\"` an equal share of the row each;  otherwise each as wide as the widest."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "top",
             "bottom"
           ],
-          "description": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name was `attached` (bare ~== `top`)."
+          "description": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old names were `attach` and `attached` (bare ~== `top`)."
         },
         {
           "name": "value",
@@ -46368,14 +46368,14 @@
           "description": "`none`:  no item padding;  `none-x` / `none-y` keep only the top and bottom, or the left and right;  `compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`."
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "kind": "valueOnly",
           "values": [
             "both",
             "top",
             "bottom"
           ],
-          "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`."
+          "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`."
         },
         {
           "name": "fixed",

@@ -35,7 +35,7 @@
 
 			An accordion's titles are buttons, not headings, and its panels are one group; each section closes on its own and
 			its title IS a heading. A section borrows Fomantic's looks for its box: `dividing` and `block` from the header,
-			the `bordered` and `raised` looks, `attach` and `padding` from the segment, the `styled` look from the accordion.
+			the `bordered` and `raised` looks, `attach-to` and `padding` from the segment, the `styled` look from the accordion.
 		</>
 	</>
 

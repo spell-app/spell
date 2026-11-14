@@ -104,9 +104,9 @@ describe("<ui-table> classes, mirrored onto the table", () => {
     // the new words (epic `ui-gaps` P4):  the old names above draw the same
     ['appearance="very-basic striped"', "ui very basic striped table"],
     ['padding="xs"', "ui very compact table"],
-    ['attach="top"', "ui top attached table"],
+    ['attach-to="top"', "ui top attached table"],
     ['align="center"', "ui center aligned table"],
-    ['attach="top"', "ui top attached table"],
+    ['attach-to="top"', "ui top attached table"],
     ['stackable="tablet"', "ui tablet stackable table"],
     ["unstackable", "ui unstackable table"],
     ['scrolling="very short"', "ui very short scrolling table"],
@@ -177,7 +177,7 @@ describe("<ui-table> shadow markup", () => {
 
   it("scrolls as a focusable region named by the caption, else the DOM element's aria-label, else `Table`", async () => {
     const { host, table: element } = await table(
-      'scrolling="short" resizable attach="top"',
+      'scrolling="short" resizable attach-to="top"',
       `<caption>People</caption>${HEAD}${BODY}`
     )
     const box = scroller(host)
@@ -348,7 +348,7 @@ describe("<ui-table> outer margin", () => {
   })
 
   it("mirrors attached tables:  no margin on a joined edge", async () => {
-    const { hosts } = await tables(['attach="top"', 'attach="both"', 'attach="bottom"'])
+    const { hosts } = await tables(['attach-to="top"', 'attach-to="both"', 'attach-to="bottom"'])
     const margins = hosts.map((host) => [getComputedStyle(host).marginTop, getComputedStyle(host).marginBottom])
     expect(margins).toEqual([
       ["16px", "0px"],

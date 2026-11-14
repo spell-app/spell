@@ -127,7 +127,7 @@
                 </ui-example>
                 <!-- GAP I53:  the wrench dropdown's nested `New` sub-menu, divider and header have no `<ui-dropdown>` equivalent (a select, not an action menu). -->
                 <ui-example>
-                  <ui-menu attach="top" aria-label="Toolbar">
+                  <ui-menu attach-to="top" aria-label="Toolbar">
                     <ui-item>
                       <ui-dropdown aria-label="File">
                         <ui-icon slot="trigger" name="wrench"></ui-icon>
@@ -145,7 +145,7 @@
                       </ui-item>
                     </ui-menu>
                   </ui-menu>
-                  <ui-segment attach="bottom">
+                  <ui-segment attach-to="bottom">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
                 </ui-example>
@@ -256,7 +256,7 @@
                   </ui-menu>
                 </ui-example>
                 <ui-example>
-                  <ui-menu appearance="tabular" attach="top" aria-label="Tabbed, attached top">
+                  <ui-menu appearance="tabular" attach-to="top" aria-label="Tabbed, attached top">
                     <ui-item link="#bio" selected>Bio</ui-item>
                     <ui-item link="#photos">Photos</ui-item>
                     <ui-menu position="right">
@@ -270,15 +270,15 @@
                       </ui-item>
                     </ui-menu>
                   </ui-menu>
-                  <ui-segment attach="bottom">
+                  <ui-segment attach-to="bottom">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
                 </ui-example>
                 <ui-example>
-                  <ui-segment attach="top">
+                  <ui-segment attach-to="top">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-menu appearance="tabular" attach="bottom" aria-label="Tabbed, attached bottom">
+                  <ui-menu appearance="tabular" attach-to="bottom" aria-label="Tabbed, attached bottom">
                     <ui-item link="#active-project" selected>Active Project</ui-item>
                     <ui-item link="#project-2">Project #2</ui-item>
                     <ui-item link="#project-3">Project #3</ui-item>
@@ -294,7 +294,7 @@
                     <code>attached</code> grid columns and a <code>seamless attached</code> segment.</ui-message
                   >
                   <ui-grid>
-                    <ui-column width="4" attach="left">
+                    <ui-column width="4" attach-to="left">
                       <ui-menu direction="vertical" fluid appearance="tabular" aria-label="Vertical tabbed">
                         <ui-item link="#bio" selected>Bio</ui-item>
                         <ui-item link="#pics">Pics</ui-item>
@@ -302,8 +302,8 @@
                         <ui-item link="#links">Links</ui-item>
                       </ui-menu>
                     </ui-column>
-                    <ui-column width="12" stretched attach="right">
-                      <ui-segment seamless attach="right">
+                    <ui-column width="12" stretched attach-to="right">
+                      <ui-segment seamless attach-to="right">
                         This is an stretched grid column. This segment will always match the tab height
                       </ui-segment>
                     </ui-column>
@@ -313,12 +313,12 @@
                   description="`position=&quot;right&quot;` opens a vertical tabbed menu's tabs to the left, for a menu on the content's right."
                 >
                   <ui-grid>
-                    <ui-column width="12" stretched attach="left">
-                      <ui-segment seamless attach="left">
+                    <ui-column width="12" stretched attach-to="left">
+                      <ui-segment seamless attach-to="left">
                         This is an stretched grid column. This segment will always match the tab height
                       </ui-segment>
                     </ui-column>
-                    <ui-column width="4" attach="right">
+                    <ui-column width="4" attach-to="right">
                       <ui-menu direction="vertical" fluid appearance="tabular" position="right" aria-label="Vertical tabbed, right">
                         <ui-item link="#bio" selected>Bio</ui-item>
                         <ui-item link="#pics">Pics</ui-item>
@@ -1205,27 +1205,27 @@
 
               <ui-section id="examples-variations-attached" label="Attached" sticky="stack" collapsible dividing>
                 <ui-example description="A menu may be attached to other content segments.">
-                  <ui-menu appearance="tabular" attach="top" aria-label="Attached tabs">
+                  <ui-menu appearance="tabular" attach-to="top" aria-label="Attached tabs">
                     <ui-item link="#tab-1" selected>Tab 1</ui-item>
                     <ui-item link="#tab-2">Tab 2</ui-item>
                   </ui-menu>
-                  <ui-segment attach="bottom">
+                  <ui-segment attach-to="bottom">
                     There are many variations of passages of Lorem Ipsum available, but the majority have suffered
                     alteration in some form, by injected humour, or randomized words which don't look even slightly
                     believable.
                   </ui-segment>
                 </ui-example>
                 <ui-example>
-                  <ui-menu attach="top" aria-label="Attached top">
+                  <ui-menu attach-to="top" aria-label="Attached top">
                     <ui-item link="#section-1" selected>Section 1</ui-item>
                     <ui-item link="#section-2">Section 2</ui-item>
                   </ui-menu>
-                  <ui-segment attach="both">
+                  <ui-segment attach-to="both">
                     There are many variations of passages of Lorem Ipsum available, but the majority have suffered
                     alteration in some form, by injected humour, or randomized words which don't look even slightly
                     believable.
                   </ui-segment>
-                  <ui-menu attach="bottom" aria-label="Attached bottom">
+                  <ui-menu attach-to="bottom" aria-label="Attached bottom">
                     <ui-item link="#section-1" selected>Section 1</ui-item>
                     <ui-item link="#section-2">Section 2</ui-item>
                   </ui-menu>

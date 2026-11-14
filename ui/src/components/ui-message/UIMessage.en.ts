@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-message state="negative" attach="bottom" size="small">` => `ui small negative bottom attached message`.
+ *   `<ui-message state="negative" attach-to="bottom" size="small">` => `ui small negative bottom attached message`.
  *   The component adds `icon` when it shows an icon.
  * - `color` and `state` are both remaps (`colors.css`);  `state` is `kind: "valueOnly"` because it emits its value
  *   alone (`ui negative message`), as dropdown's `state` does.
@@ -65,15 +65,15 @@ export const messageVocabulary = {
       description: "The dark scheme;  a coloured one keeps its hue in the text."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom"],
       classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
-        "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old " +
-        "name:  `attached` (bare is `both`)."
+        "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  " +
+        "Old names:  `attach`, `attached` (bare is `both`)."
     },
     {
       name: "align",

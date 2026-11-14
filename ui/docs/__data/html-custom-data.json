@@ -3648,10 +3648,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name was `attached`.\n\nTakes:  `both` · `top` · `bottom` · `left` · `right`"
+            "value": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old names were `attach` and `attached`.\n\nTakes:  `both` · `top` · `bottom` · `left` · `right`"
           },
           "values": [
             {
@@ -4278,10 +4278,10 @@
           }
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name was `attached`.\n\nTakes:  `both` · `top` · `bottom` · `left` · `right`"
+            "value": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old names were `attach` and `attached`.\n\nTakes:  `both` · `top` · `bottom` · `left` · `right`"
           },
           "values": [
             {
@@ -8557,10 +8557,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "No gutter on the `left` / `right` side.  Its old name was `attached`.\n\nTakes:  `left` · `right`"
+            "value": "No gutter on the `left` / `right` side.  Its old names were `attach` and `attached`.\n\nTakes:  `left` · `right`"
           },
           "values": [
             {
@@ -19933,10 +19933,10 @@
           }
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name was `attached`.\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old names were `attach` and `attached`.\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -25563,10 +25563,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name was `attached` (bare:  `top`).\n\nTakes:  `top` · `bottom` · `top left` · `top right` · `bottom left` · `bottom right`"
+            "value": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old names were `attach` and `attached` (bare:  `top`).\n\nTakes:  `top` · `bottom` · `top left` · `top right` · `bottom left` · `bottom right`"
           },
           "values": [
             {
@@ -28596,10 +28596,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`.\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -29235,10 +29235,10 @@
           }
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old name:  `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old names:  `attach`, `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -32019,10 +32019,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -34883,10 +34883,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old name:  `attached`.\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old names:  `attach`, `attached`.\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -36235,10 +36235,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -36949,10 +36949,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -38912,10 +38912,10 @@
           }
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "`both`:  flush against its container, no gap.  Its old name was `attached`.\n\nTakes:  `both`"
+            "value": "`both`:  flush against its container, no gap.  Its old names were `attach` and `attached`.\n\nTakes:  `both`"
           },
           "values": [
             {
@@ -42430,10 +42430,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -43357,10 +43357,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name was `attached`.\n\nTakes:  `both` · `top` · `bottom` · `left` · `right`"
+            "value": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old names were `attach` and `attached`.\n\nTakes:  `both` · `top` · `bottom` · `left` · `right`"
           },
           "values": [
             {
@@ -43384,7 +43384,7 @@
           "name": "seamless",
           "description": {
             "kind": "markdown",
-            "value": "With `attach`:  no line where attached segments meet.\n\nTakes:  flag (present / absent)"
+            "value": "With `attach-to`:  no line where attached segments meet.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -50186,10 +50186,10 @@
           }
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name was `attached`.\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old names were `attach` and `attached`.\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -51677,10 +51677,10 @@
           }
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name was `attached`.\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old names were `attach` and `attached`.\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -52239,10 +52239,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old name:  `attached`.\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old names:  `attach`, `attached`.\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {
@@ -52991,10 +52991,10 @@
           }
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name was `attached` (bare ~== `top`).\n\nTakes:  `top` · `bottom`"
+            "value": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old names were `attach` and `attached` (bare ~== `top`).\n\nTakes:  `top` · `bottom`"
           },
           "values": [
             {
@@ -57721,10 +57721,10 @@
           ]
         },
         {
-          "name": "attach",
+          "name": "attach-to",
           "description": {
             "kind": "markdown",
-            "value": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.\n\nTakes:  `both` · `top` · `bottom`"
+            "value": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`.\n\nTakes:  `both` · `top` · `bottom`"
           },
           "values": [
             {

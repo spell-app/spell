@@ -367,41 +367,41 @@
 
 		<section label="Attached" sticky="stack" collapsible dividing>
 			<example "Attached" description="A segment can be attached to other content on a page.">
-				<segment attach="top">
+				<segment attach-to="top">
 					<text paragraph>This segment is on top</text>
 				</segment>
-				<segment attach="both">
+				<segment attach-to="both">
 					<text paragraph>This segment is attached on both sides</text>
 				</segment>
-				<segment attach="bottom">
+				<segment attach-to="bottom">
 					<text paragraph>This segment is on bottom</text>
 				</segment>
 				<message slot="description" state="info" size="small">Attached segments are designed to be used with other attached variations, like an attached <text code>&lt;ui-header&gt;</text> or an attached <text code>&lt;ui-message&gt;</text>.</message>
 			</example>
 			<example "Attached">
-				<header level="5" attach="top">Dogs</header>
-				<segment attach="both">
+				<header level="5" attach-to="top">Dogs</header>
+				<segment attach-to="both">
 					<text paragraph>Dogs are one type of animal</text>
 				</segment>
-				<header level="5" attach="both">Cats</header>
-				<segment attach="both">
+				<header level="5" attach-to="both">Cats</header>
+				<segment attach-to="both">
 					<text paragraph>Cats are thought of as being related to dogs, but only humans think this.</text>
 				</segment>
-				<header level="5" attach="both">Lions</header>
-				<segment attach="both">
+				<header level="5" attach-to="both">Lions</header>
+				<segment attach-to="both">
 					<text paragraph>Humans don't think of lions as being like cats, but they are.</text>
 				</segment>
-				<message attach="bottom" state="warning"><icon name="warning"/> You've reached the end of this content segment!</message>
+				<message attach-to="bottom" state="warning"><icon name="warning"/> You've reached the end of this content segment!</message>
 			</example>
 		</>
 
 		<section label="Seamless attached" sticky collapsible dividing>
 			<example "Seamless attached" description="A segment can be seamless attached removing the related sides border.  This is especially useful with a vertical tabbed menu.">
 				<segments direction="horizontal">
-					<segment seamless attach="left" align="right">
+					<segment seamless attach-to="left" align="right">
 						<text paragraph>This segment is seamless left attached</text>
 					</segment>
-					<segment seamless attach="right">
+					<segment seamless attach-to="right">
 						<text paragraph>This segment is seamless right attached</text>
 					</segment>
 				</segments>

@@ -1575,10 +1575,10 @@
 
 		<section label="Upward" sticky="stack" collapsible dividing>
 			<example "Upward" description="A dropdown menu will automatically change which direction it opens if it can't fit on screen. To open in a specific direction, use `upward`.">
-				<segment attach="top">
+				<segment attach-to="top">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<menu attach="bottom">
+				<menu attach-to="bottom">
 					<item>
 						<dropdown direction="up" aria-label="Settings">
 							<icon slot="trigger" name="cog"/>

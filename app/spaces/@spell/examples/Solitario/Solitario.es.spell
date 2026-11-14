@@ -12,7 +12,7 @@ solitario es una aplicación
 		reiniciar el juego
 
 	para dibujar eso
-		<segmento invertido unir="arriba" color="">
+		<segmento invertido unir-a="arriba" color="">
 			<barra-herramientas class="GameBar" aria-label="Juego" apariencia="pildoras" invertido tamano="pequeño" encogible>
 				<texto slot="titulo" tamano="grande" extranegrita>Solitario</texto>
 				<acción "jugar solo"/>

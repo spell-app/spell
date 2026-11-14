@@ -64,14 +64,14 @@ export const headerVocabulary = {
     { name: "dividing", group: "appearance", kind: "keyOnly", description: "A rule below it." },
     { name: "block", group: "layout", kind: "keyOnly", description: "In a tinted box." },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom"],
       classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
-        "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name was `attached`."
+        "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old names were `attach` and `attached`."
     },
     {
       name: "seamless",

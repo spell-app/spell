@@ -62,7 +62,7 @@ describe("<ui-label> classes", () => {
     ["pointing", "ui pointing label"],
     ['pointing="below"', "ui below pointing label"],
     ['floating="left"', "ui left floating label"],
-    ['attach="top right"', "ui top right attached label"],
+    ['attach-to="top right"', "ui top right attached label"],
     ['direction="horizontal" appearance="circular" empty', "ui horizontal empty circular label"],
     ['fluid align="center"', "ui centered fluid label"],
     ["prompt", "ui prompt label"],
@@ -318,7 +318,7 @@ describe("<ui-label> tokens from outside", () => {
 
   it("owner tokens:  a plain owner sets the public `--ui-label-owner-edge`", async () => {
     const owner = await ElementFixture.render(
-      `<div style="position: relative; --ui-label-owner-edge: 5px"><ui-label attach="top">A</ui-label></div>`
+      `<div style="position: relative; --ui-label-owner-edge: 5px"><ui-label attach-to="top">A</ui-label></div>`
     )
     const box = getComputedStyle(owner.querySelector("ui-label")!.shadowRoot!.querySelector("[part~=label]")!)
     expect(box.top).toBe("-5px")

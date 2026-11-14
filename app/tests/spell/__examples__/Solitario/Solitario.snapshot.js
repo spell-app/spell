@@ -402,7 +402,7 @@ export class Solitario extends App {
 
   draw() {
     return [
-      h("es-segmento", { invertido: true, unir: "arriba", color: "" },
+      h("es-segmento", { invertido: true, "unir-a": "arriba", color: "" },
         h("es-barra-herramientas", {
           class: "GameBar",
           "aria-label": "Juego",

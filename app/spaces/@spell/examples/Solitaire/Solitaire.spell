@@ -11,7 +11,7 @@ solitaire is an app
 
 	to draw it
 		<deck "deck"hidden />
-		<segment inverted attach="top" >
+		<segment inverted attach-to="top" >
 			<toolbar class="GameBar" appearance="pills" inverted size="small" shrinkable>
 				<text slot="title" size="large" heavy>Spell Solitaire</>
 				<action "cheat"/>

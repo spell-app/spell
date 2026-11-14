@@ -397,21 +397,21 @@
 		<!-- GAP I20:  `attached="top|bottom"` buttons stay content-wide. -->
 		<section label="Vertically Attached" sticky collapsible dividing>
 			<example "Vertically Attached" description="A button can be attached to the top or bottom of other content.">
-				<button attach="top">Top</button>
-				<segment attach="both">
+				<button attach-to="top">Top</button>
+				<segment attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<button attach="bottom">Bottom</button>
+				<button attach-to="bottom">Bottom</button>
 			</example>
 			<example "Vertically Attached">
-				<buttons width="2" attach="top">
+				<buttons width="2" attach-to="top">
 					<button>One</button>
 					<button>Two</button>
 				</buttons>
-				<segment attach="both">
+				<segment attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<buttons width="2" attach="bottom">
+				<buttons width="2" attach-to="bottom">
 					<button>One</button>
 					<button>Two</button>
 				</buttons>
@@ -420,8 +420,8 @@
 
 		<section label="Horizontally Attached" sticky collapsible dividing>
 			<example "Horizontally Attached" description="A button can be attached to the left or right of other content.">
-				<button attach="left">Left</button>
-				<button attach="right">Right</button>
+				<button attach-to="left">Left</button>
+				<button attach-to="right">Right</button>
 			</example>
 		</>
 	</>

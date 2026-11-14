@@ -40,12 +40,12 @@
 
 		<section label="Toggle from a menu" sticky collapsible dividing>
 			<example "Toggle from a menu" description="A menu item drives the flyout through a button with `command=\"--toggle\"`.">
-				<menu attach="top">
+				<menu attach-to="top">
 					<item>
 						<button commandfor="flyout-usage-menu" command="--toggle" icon="sidebar" appearance="basic">Toggle flyout</button>
 					</item>
 				</menu>
-				<segment attach="bottom">
+				<segment attach-to="bottom">
 					<header level="3">Application Content</header>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				</segment>

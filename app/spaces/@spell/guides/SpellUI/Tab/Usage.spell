@@ -28,14 +28,14 @@
 
 			- The tab menu is styled by the menu's own sheet, so its look words are the menu's: `appearance`
 			  (`tabular`, `pointing`, `secondary`, `text`), `direction`, `fluid`, `padding`, `inverted`, `size`, `color`.
-			- The panes are segments: `attach` joins them to the menu, `appearance="basic"` drops their box.
+			- The panes are segments: `attach-to` joins them to the menu, `appearance="basic"` drops their box.
 			- `value` is the selected pane: its `value`, else its index. With no `value`, the first `selected`
 			  pane shows, else the first enabled one.
 			- Name the tab list with `aria-label` on `<ui-tabs>`.
 		</>
 		<markdown>
 			```html
-			<ui-tabs appearance="tabular" attach="top" aria-label="Profile">
+			<ui-tabs appearance="tabular" attach-to="top" aria-label="Profile">
 			  <ui-tab label="Bio" value="bio">...</ui-tab>
 			  <ui-tab label="Photos" value="photos" icon="image" lazy><template>...</template></ui-tab>
 			</ui-tabs>
@@ -123,7 +123,7 @@
 		<header level="4" id="framework-react">React 19</>
 		<markdown>
 			```jsx
-			<ui-tabs appearance="tabular" attach="top" value={tab} onui-changed={(e) => setTab(e.detail.value)}>
+			<ui-tabs appearance="tabular" attach-to="top" value={tab} onui-changed={(e) => setTab(e.detail.value)}>
 			  <ui-tab label="Bio" value="bio">...</ui-tab>
 			</ui-tabs>
 			```
@@ -132,7 +132,7 @@
 		<markdown>
 			```html
 			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-			<ui-tabs appearance="tabular" attach="top" :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
+			<ui-tabs appearance="tabular" attach-to="top" :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
 			  <ui-tab label="Bio" value="bio">...</ui-tab>
 			</ui-tabs>
 			```
@@ -143,7 +143,7 @@
 			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
 			<ui-tabs
 			  appearance="tabular"
-			  attach="top"
+			  attach-to="top"
 			  value={tab()}
 			  on-ui-changing={(e) => setTab(e.detail.value)}
 			>

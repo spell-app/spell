@@ -98,7 +98,7 @@ export const labelVocabulary = {
         "Fomantic's), `circular` (a round badge).  Old names:  `basic`, `tinted`, `circular` written alone."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["top", "bottom", "top left", "top right", "bottom left", "bottom right"],
@@ -110,9 +110,9 @@ export const labelVocabulary = {
         "bottom left": "bottom left attached",
         "bottom right": "bottom right attached"
       },
-      replaces: [{ from: "attached", value: "top" }],
+      replaces: ["attach", { from: "attached", value: "top" }],
       description:
-        "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name was `attached` " +
+        "Attached across (or on a corner of) the owner's top or bottom edge.  Its old names were `attach` and `attached` " +
         "(bare:  `top`)."
     },
     {

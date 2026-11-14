@@ -59,7 +59,7 @@ describe("<ui-button> classes", () => {
     ['labeled="right"', "ui right labeled button"],
     ['reveal="slide"', "ui animated button"],
     ['reveal="fade"', "ui fade animated button"],
-    ['attach="top"', "ui top attached button"],
+    ['attach-to="top"', "ui top attached button"],
     // `floated` is gone (epic ui-gaps P8):  a `<ui-stack>` places buttons
     ["floated", "ui button"]
   ])("<ui-button %s>", async (attributes, classes) => {
@@ -99,7 +99,7 @@ describe("<ui-button> classes", () => {
   })
 
   it("sets host states for layout", async () => {
-    const { host } = await button(`<ui-button attach="top">Go</ui-button>`)
+    const { host } = await button(`<ui-button attach-to="top">Go</ui-button>`)
     expect(host.matches(":state(fluid)")).toBe(true)
   })
 
@@ -184,10 +184,10 @@ describe("<ui-button> padding and text", () => {
     expect(parseFloat(getComputedStyle(grouped).paddingLeft)).toBeGreaterThan(0)
   })
 
-  it("`attach` top / bottom:  as wide as what it's joined to;  its corners the theme's, never a pill's", async () => {
+  it("`attach-to` top / bottom:  as wide as what it's joined to;  its corners the theme's, never a pill's", async () => {
     const box = await ElementFixture.render(
       `<div style="width: 400px; --ui-button-radius: 9999px; --ui-radius: 6px">` +
-        `<ui-button attach="top">Top</ui-button></div>`
+        `<ui-button attach-to="top">Top</ui-button></div>`
     )
     const control = box.querySelector("ui-button")!.shadowRoot!.querySelector<HTMLElement>("[part~=button]")!
     expect(control.getBoundingClientRect().width).toBeCloseTo(400, 0)

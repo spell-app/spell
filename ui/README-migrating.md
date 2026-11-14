@@ -122,7 +122,7 @@ _That card, drawn by Spell UI:  the docs site's snapshot of it, in the site's ow
 - A look joins `appearance`, several at once:  `appearance="basic circular"`, `appearance="raised"`.
 - Any other bare word becomes a bare attribute:  `fluid`, `inverted`, `labeled`.
 - A word with a side or a direction takes it as a value:
-  `left pointing` → `pointing="left"`, `top attached` → `attach="top"`, `vertical` → `direction="vertical"`.
+  `left pointing` → `pointing="left"`, `top attached` → `attach-to="top"`, `vertical` → `direction="vertical"`.
 - Size and colour take a value:  `size="small"`, `color="red"`.
 - Attributes go in any order.
   Fomantic needs some words in a strict order (`ui left labeled icon button`);
@@ -141,7 +141,7 @@ its shadow root carries the words on the left, except the icon's, which is an SV
 | `class="ui labeled icon button"` + `<i class="save icon">` | `<ui-button labeled icon="save">` |
 | `class="ui left floated image"` | `<ui-image floated="left">`:  text wraps round it |
 | `class="ui raised segment"` | `<ui-segment appearance="raised">` |
-| `class="ui top attached segment"` | `<ui-segment attach="top">` |
+| `class="ui top attached segment"` | `<ui-segment attach-to="top">` |
 | `class="ui center aligned segment"` | `<ui-segment align="center">` |
 | `class="ui warning message"` | `<ui-message state="warning">` |
 | `<h2 class="ui dividing header">` | `<ui-header level="2" dividing>`:  it draws the `<h2>` |

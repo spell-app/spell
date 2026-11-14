@@ -2099,22 +2099,22 @@
 		</>
 
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example "Attached" description="A table can be attached to other content on a page:  `attach=\"top\"`, `attach=\"both\"` (the middle) or `attach=\"bottom\"`.">
-				<table attach="top">
+			<example "Attached" description="A table can be attached to other content on a page:  `attach-to=\"top\"`, `attach-to=\"both\"` (the middle) or `attach-to=\"bottom\"`.">
+				<table attach-to="top">
 					<row>
 						<cell>John</cell>
 						<cell>Approved</cell>
 						<cell>None</cell>
 					</row>
 				</table>
-				<table attach="both">
+				<table attach-to="both">
 					<row>
 						<cell>Jamie</cell>
 						<cell>Approved</cell>
 						<cell>Requires call</cell>
 					</row>
 				</table>
-				<table attach="bottom">
+				<table attach-to="bottom">
 					<row>
 						<cell>Jill</cell>
 						<cell>Denied</cell>

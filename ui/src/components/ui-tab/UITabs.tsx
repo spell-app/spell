@@ -26,7 +26,7 @@ import tabCSS from "./UITab.css?inline"
  *         <button type="button" class="[active] [disabled] item" part="tab" role="tab" aria-selected>label</button>
  *       </div>
  *       <button class="scroll end" part="scroll-end" aria-label title>›</button>
- *       <slot></slot>                                   (the panes;  before the menu when `attached="bottom"`)
+ *       <slot></slot>                                   (the panes;  before the menu when `attach-to="bottom"`)
  *     </div>
  *
  * - The tab list is drawn from the panes' `label` / `icon` in THIS shadow root,
@@ -294,11 +294,11 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     return words.join(" ") || undefined
   }
 
-  /** The tab list's edge:  `top` / `bottom` when `attach` says;  never while vertical. */
+  /** The tab list's edge:  `top` / `bottom` when `attach-to` says;  never while vertical. */
   get menuEdge(): MenuEdge | undefined {
-    const attach = this.attach
-    if (!attach || this.isVertical) return undefined
-    return attach === UIT.BOTTOM ? UIT.BOTTOM : UIT.TOP
+    const { attachTo } = this
+    if (!attachTo || this.isVertical) return undefined
+    return attachTo === UIT.BOTTOM ? UIT.BOTTOM : UIT.TOP
   }
 
   /** Where the tabs sit (`align`);  none while vertical, whose tabs fill their column. */
@@ -319,12 +319,12 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
       padding: this.padding,
       equal: this.equal,
       align: this.menuAlignment,
-      attach: this.menuEdge
+      "attach-to": this.menuEdge
     })
   }
 
   protected classValue(name: E.AttributeName<typeof tabsVocabulary>): unknown {
-    if (name === "attach") return this.menuEdge
+    if (name === "attach-to") return this.menuEdge
     if (name === "align") return this.menuAlignment
     return super.classValue(name)
   }

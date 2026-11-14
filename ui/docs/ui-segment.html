@@ -419,30 +419,30 @@
                     >Attached segments are designed to be used with other attached variations, like an attached
                     <code>&lt;ui-header&gt;</code> or an attached <code>&lt;ui-message&gt;</code>.</ui-message
                   >
-                  <ui-segment attach="top">
+                  <ui-segment attach-to="top">
                     <p>This segment is on top</p>
                   </ui-segment>
-                  <ui-segment attach="both">
+                  <ui-segment attach-to="both">
                     <p>This segment is attached on both sides</p>
                   </ui-segment>
-                  <ui-segment attach="bottom">
+                  <ui-segment attach-to="bottom">
                     <p>This segment is on bottom</p>
                   </ui-segment>
                 </ui-example>
                 <ui-example>
-                  <ui-header level="5" attach="top">Dogs</ui-header>
-                  <ui-segment attach="both">
+                  <ui-header level="5" attach-to="top">Dogs</ui-header>
+                  <ui-segment attach-to="both">
                     <p>Dogs are one type of animal</p>
                   </ui-segment>
-                  <ui-header level="5" attach="both">Cats</ui-header>
-                  <ui-segment attach="both">
+                  <ui-header level="5" attach-to="both">Cats</ui-header>
+                  <ui-segment attach-to="both">
                     <p>Cats are thought of as being related to dogs, but only humans think this.</p>
                   </ui-segment>
-                  <ui-header level="5" attach="both">Lions</ui-header>
-                  <ui-segment attach="both">
+                  <ui-header level="5" attach-to="both">Lions</ui-header>
+                  <ui-segment attach-to="both">
                     <p>Humans don't think of lions as being like cats, but they are.</p>
                   </ui-segment>
-                  <ui-message attach="bottom" state="warning">
+                  <ui-message attach-to="bottom" state="warning">
                     <ui-icon name="warning"></ui-icon>
                     You've reached the end of this content segment!
                   </ui-message>
@@ -460,10 +460,10 @@
                   description="A segment can be seamless attached removing the related sides border.  This is especially useful with a vertical tabbed menu."
                 >
                   <ui-segments direction="horizontal">
-                    <ui-segment seamless attach="left" align="right">
+                    <ui-segment seamless attach-to="left" align="right">
                       <p>This segment is seamless left attached</p>
                     </ui-segment>
-                    <ui-segment seamless attach="right">
+                    <ui-segment seamless attach-to="right">
                       <p>This segment is seamless right attached</p>
                     </ui-segment>
                   </ui-segments>
@@ -753,7 +753,7 @@
             <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Wrap content in `<ui-segment>`, and add attributes for the look: `<ui-segment padding="lg" attach="top" appearance="raised">`
+                  Wrap content in `<ui-segment>`, and add attributes for the look: `<ui-segment padding="lg" attach-to="top" appearance="raised">`
                   renders `ui raised very padded top attached segment`.
 
                   - Group segments in `<ui-segments>`: the group draws one box with dividers, and its words (`direction`,

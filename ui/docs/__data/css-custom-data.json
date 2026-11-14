@@ -12007,21 +12007,21 @@
       "name": ":state(attached)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach` is set (any edge):  the host drops the outer margin it carries."
+        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach-to` is set (any edge):  the host drops the outer margin it carries."
       }
     },
     {
       "name": ":state(attached-bottom)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach` is `bottom`:  the host keeps only its bottom margin."
+        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach-to` is `bottom`:  the host keeps only its bottom margin."
       }
     },
     {
       "name": ":state(attached-top)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach` is `top`:  the host keeps only its top margin."
+        "value": "Custom state of:\n\n- `<ui-table>`:  Set while `attach-to` is `top`:  the host keeps only its top margin."
       }
     },
     {
@@ -12301,7 +12301,7 @@
       "name": ":state(fluid)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-button>`:  The host is block-level:  `fluid`, or attached top, bottom or both (`attach`).\n- `<ui-buttons>`:  The host is block-level:  `fluid`, `width`, or attached top, bottom or both.\n- `<ui-calendar>`:  The host is block-level (`fluid`).\n- `<ui-dropdown>`:  The host is block-level (`fluid`).\n- `<ui-input>`:  The host is block-level (`fluid`, or inside a `<ui-field>`).\n- `<ui-popup>`:  As wide as its target (`fluid`).\n- `<ui-search>`:  The host is block-level (`fluid`).\n- `<ui-select>`:  The host is block-level (`fluid`).\n- `<ui-textarea>`:  The host is block-level (`fluid`, or inside a `<ui-field>`)."
+        "value": "Custom state of:\n\n- `<ui-button>`:  The host is block-level:  `fluid`, or attached top, bottom or both (`attach-to`).\n- `<ui-buttons>`:  The host is block-level:  `fluid`, `width`, or attached top, bottom or both.\n- `<ui-calendar>`:  The host is block-level (`fluid`).\n- `<ui-dropdown>`:  The host is block-level (`fluid`).\n- `<ui-input>`:  The host is block-level (`fluid`, or inside a `<ui-field>`).\n- `<ui-popup>`:  As wide as its target (`fluid`).\n- `<ui-search>`:  The host is block-level (`fluid`).\n- `<ui-select>`:  The host is block-level (`fluid`).\n- `<ui-textarea>`:  The host is block-level (`fluid`, or inside a `<ui-field>`)."
       }
     },
     {

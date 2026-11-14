@@ -48,7 +48,7 @@ describe("<ui-segment> classes", () => {
     ['padding="lg"', "ui very padded segment"],
     ['appearance="tall-stacked raised"', "ui tall stacked raised segment"],
     ['align="center"', "ui center aligned segment"],
-    ['attach="top" seamless', "ui top attached seamless segment"],
+    ['attach-to="top" seamless', "ui top attached seamless segment"],
     ["loading disabled", "ui disabled loading segment"],
     ['scrolling="long" resizable', "ui resizable long scrolling segment"]
   ])("<ui-segment %s>", async (attributes, classes) => {
@@ -226,7 +226,7 @@ describe("<ui-segment> tokens from outside", () => {
 
   it("owner tokens:  an attached label covers the border width the page set", async () => {
     const { host } = await render(
-      `<ui-segment style="--ui-segment-border-width: 3px"><ui-label attach="top">A</ui-label>x</ui-segment>`
+      `<ui-segment style="--ui-segment-border-width: 3px"><ui-label attach-to="top">A</ui-label>x</ui-segment>`
     )
     await ElementFixture.settle(host)
     const label = host.querySelector("ui-label")!.shadowRoot!.querySelector("[part~=label]")!

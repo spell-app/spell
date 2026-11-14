@@ -97,7 +97,7 @@ describe("<ui-section> classes", () => {
     ['size="medium"', "ui section"],
     // old names and new draw the same words (epic `ui-gaps` P4)
     ['appearance="bordered raised" padding="compact"', "ui compact bordered raised section"],
-    ['padding="lg" attach="top" appearance="bordered"', "ui very padded top attached bordered section"],
+    ['padding="lg" attach-to="top" appearance="bordered"', "ui very padded top attached bordered section"],
     ['align="center"', "ui center aligned section"],
     ['scrolling="very short"', "ui very short scrolling section"],
     ['sticky="stack"', "ui stack sticky section"],

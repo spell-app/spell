@@ -88,8 +88,8 @@ describe("<ui-grid> classes", () => {
       'width-tablet="8" width-computer="4" width-large="3" width-widescreen="2"',
       "ui eight wide tablet four wide computer three wide large screen two wide widescreen column"
     ],
-    ['color="teal" attach="left"', "ui teal left attached column"],
-    ['color="teal" attach="left"', "ui teal left attached column"],
+    ['color="teal" attach-to="left"', "ui teal left attached column"],
+    ['color="teal" attach-to="left"', "ui teal left attached column"],
     ['centered stretched="no"', "ui centered column"],
     ['only="computer" align="center"', "ui computer only center aligned column"]
   ])("<ui-column %s>", async (attributes, classes) => {

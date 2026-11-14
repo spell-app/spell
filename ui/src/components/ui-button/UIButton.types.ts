@@ -14,7 +14,7 @@ export const COLOR_SWITCHES = ["primary", "secondary", "positive", "negative"].m
   value
 }))
 
-/** `attach`'s class words:  `both` was the bare `attached`;  a side is `<side> attached`. */
+/** `attach-to`'s class words:  `both` was the bare `attached`;  a side is `<side> attached`. */
 export const ATTACH_CLASSES = {
   both: "attached",
   top: "top attached",

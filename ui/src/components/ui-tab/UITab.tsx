@@ -117,7 +117,7 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
     if (owner) return owner.paneState(this.domElement)
     return {
       selected: this.isMarkedSelected,
-      attached: this.attach,
+      attached: this.attachTo,
       basic: String(this.appearance ?? "")
         .split(" ")
         .includes(BASIC),
@@ -134,7 +134,7 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
   protected classValue(name: E.AttributeName<typeof tabVocabulary>): unknown {
     const state = this.paneState
     if (name === "selected") return state.selected
-    if (name === "attach") return state.attached
+    if (name === "attach-to") return state.attached
     if (name === "appearance") return state.basic ? BASIC : undefined
     if (name === "inverted") return state.inverted
     return super.classValue(name)

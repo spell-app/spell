@@ -178,36 +178,36 @@
 
 		<section label="Attached" sticky="stack" collapsible dividing>
 			<example "Attached" description="A header can be attached to other content, like a segment.">
-				<header level="3" attach="top">Top Attached</header>
-				<segment attach="both">
+				<header level="3" attach-to="top">Top Attached</header>
+				<segment attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<header level="3" attach="both">Attached</header>
-				<segment attach="both">
+				<header level="3" attach-to="both">Attached</header>
+				<segment attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<header level="3" attach="bottom">Bottom Attached</header>
+				<header level="3" attach-to="bottom">Bottom Attached</header>
 			</example>
 		</>
 
 		<section label="Seamless attached" sticky collapsible dividing>
 			<example "Seamless attached" description="A top header can be seamless attached without related attached border.">
-				<header level="3" seamless attach="top">Seamless Top Attached</header>
-				<segment attach="both">
+				<header level="3" seamless attach-to="top">Seamless Top Attached</header>
+				<segment attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<segment attach="both">
+				<segment attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
 			</example>
 			<example "Seamless attached">
-				<segment attach="both">
+				<segment attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<segment seamless attach="both">
+				<segment seamless attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<header level="3" attach="bottom">Seamless Bottom Attached</header>
+				<header level="3" attach-to="bottom">Seamless Bottom Attached</header>
 				<message slot="description" state="warning" size="small">This variant is not available for the bottom header, which doesn't have the attached border. To get a seamless bottom header, make the previous attached element seamless.</message>
 			</example>
 		</>

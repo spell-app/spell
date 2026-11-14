@@ -482,7 +482,7 @@ class Solitaire(App):
         return [
             h(
                 "ui-segment",
-                {"inverted": True, "attach": "top"},
+                {"inverted": True, "attach-to": "top"},
                 h(
                     "ui-toolbar",
                     {

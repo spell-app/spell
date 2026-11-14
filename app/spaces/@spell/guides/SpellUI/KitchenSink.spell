@@ -1681,7 +1681,7 @@
 
 		<section label="Tab" sticky="stack" collapsible dividing>
 			<example "Tab" description="A tab is a hidden section of content activated by a menu. \[Tab page](/tab)">
-				<tabs appearance="tabular" attach="top" aria-label="Tabular demo">
+				<tabs appearance="tabular" attach-to="top" aria-label="Tabular demo">
 					<tab label="First">First</tab>
 					<tab label="Second">Second</tab>
 					<tab label="Third">Third</tab>

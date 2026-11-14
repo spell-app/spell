@@ -110,7 +110,7 @@ describe("<ui-example> code pane", () => {
     expect(events).toEqual([true])
     expect(host.hasAttribute("code")).toBe(true)
     expect(codeOf(host)).not.toBeNull()
-    expect(demo.getAttribute("attach")).toBe("top")
+    expect(demo.getAttribute("attach-to")).toBe("top")
     expect(demo.hasAttribute("appearance")).toBe(false)
 
     toggleOf(host).click()
@@ -125,7 +125,7 @@ describe("<ui-example> code pane", () => {
   it("is never framed when `bare`", async () => {
     const { host } = await render(`<ui-example bare code><ui-button>A</ui-button></ui-example>`)
     expect(host.shadowRoot!.querySelector("[part~=demo]")!.getAttribute("appearance")).toBe("basic")
-    expect(host.shadowRoot!.querySelector("[part~=code]")!.hasAttribute("attach")).toBe(false)
+    expect(host.shadowRoot!.querySelector("[part~=code]")!.hasAttribute("attach-to")).toBe(false)
   })
 
   it("takes `language`", async () => {

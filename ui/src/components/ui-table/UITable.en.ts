@@ -128,14 +128,14 @@ export const tableVocabulary = {
         'Old names:  `compact` (`compact="very"` is `xs`), `padded` (`padded="very"` is `lg`).'
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom"],
       classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
-        "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old name:  `attached`."
+        "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old names:  `attach`, `attached`."
     },
     {
       name: "stackable",
@@ -301,12 +301,12 @@ export const tableVocabulary = {
     },
     {
       name: "attached",
-      description: "Set while `attach` is set (any edge):  the host drops the outer margin it carries."
+      description: "Set while `attach-to` is set (any edge):  the host drops the outer margin it carries."
     },
-    { name: "attached-top", description: "Set while `attach` is `top`:  the host keeps only its top margin." },
+    { name: "attached-top", description: "Set while `attach-to` is `top`:  the host keeps only its top margin." },
     {
       name: "attached-bottom",
-      description: "Set while `attach` is `bottom`:  the host keeps only its bottom margin."
+      description: "Set while `attach-to` is `bottom`:  the host keeps only its bottom margin."
     }
   ],
   texts: [

@@ -5,7 +5,7 @@ import { tableVocabulary } from "./UITable.en"
  * ### `TableGrammar`
  * Class strings a table needs besides its own root's:  the shadow `.scroller`'s, and a data-mode cell's.
  * - Scroller:  `ClassBuilder` over the table vocabulary's scroller-shaped attributes
- *   (`resizable`, `attach`, `scrolling`, `overflowing`) with the noun `scroller` and no `ui`,
+ *   (`resizable`, `attach-to`, `scrolling`, `overflowing`) with the noun `scroller` and no `ui`,
  *   e.g. `resizable top attached short scrolling scroller`.
  *   Same grammar as the table, so `UITable.css` keys the scroller on the same phrases (`[class*="very short"]`).
  * - Cell:  a `TableColumn`'s `textAlign` / `width` as Fomantic's cell classes (`right aligned four wide`).
@@ -57,7 +57,7 @@ export class TableGrammar {
 }
 
 /** Scroller attribute that joins it to what's above or below:  `both`, `top`, `bottom`. */
-export const ATTACH = "attach"
+export const ATTACH = "attach-to"
 
 /** Scroller attribute that caps the height and scrolls, head and foot stuck. */
 const SCROLLING = "scrolling"
