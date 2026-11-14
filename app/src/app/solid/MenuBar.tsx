@@ -226,8 +226,8 @@ function rowsFor(count: number): number {
  *   Project Settings, ─, Export…, Import…, ─, Theme:  Fruity ›, ─, Home.
  * - Delete Draft:  every file back to what's published, after asking;  greyed with no draft (`editor.deleteDraft()`).
  * - What each does is the editor's (`handOverActions()`);  the titles naming the project follow it.
- * - Theme ›:  Spell UI's theme menu in its menu mode (`<ui-theme-menu show="menu">`), then Edit Theme…:
- *   a row the editor draws in the Spell's place for it.
+ * - Theme ›:  Spell UI's theme menu in its menu mode (`<ui-theme-menu show="menu">`), then Edit Theme and
+ *   Theme Bench, each in a new window:  rows the editor draws in the Spell's place for it.
  * - SIDE EFFECT:  names the browser's tab for the project (`followTabTitle()`).
  * - SIDE EFFECT:  keeps the editor's Spell in step with the project, for its titles and what greys its rows.
  ****************/
@@ -285,16 +285,35 @@ export function ProjectBarMenu(): JSX.Element {
 /** The project menu's Theme ›'s icon. */
 const THEME_ICON = "paint brush"
 
+/** Icon of a row opening a new window:  Edit Theme and Theme Bench, as the theme menu's own Theme bench row. */
+const NEW_WINDOW_ICON = "external alternate"
+
 /**
- * The project menu's Theme ›'s fly-out:  Spell UI's theme menu drawn in place (Light | Dark | Auto, the tint, every
- * theme), then Edit Theme…, the theme editor's page.
+ * The project menu's Theme ›'s fly-out:  Spell UI's theme menu drawn in place (Light | Dark | Auto, every theme,
+ * the tint), then, under a divider and none between them, each in a new window (Owen, epic `mockup`):
+ * - Edit Theme:  the theme editor's page (`editor.openThemeEditor()`)
+ * - Theme Bench:  Spell UI's theme bench, in the theme chosen (`EditorTheme.openBench()`);  while developing only
+ * - The theme menu's own Theme bench row is left out (`bench="none"`):  it came with a divider above it.
  */
 function ThemeItems(): JSX.Element {
   return (
     <>
-      <ui-theme-menu show="menu" bench={import.meta.env.DEV ? String(import.meta.env.SPELL_PAGE_SERVER) : "none"} />
+      <ui-theme-menu show="menu" bench="none" />
       <Divider />
-      <Action menu title={appTexts.text("editTheme")} onClick={() => editor.showThemeEditor()} />
+      <Action
+        menu
+        icon={NEW_WINDOW_ICON}
+        title={appTexts.text("openThemeEditor")}
+        onClick={() => editor.openThemeEditor()}
+      />
+      <Show when={EditorTheme.benchSite}>
+        <Action
+          menu
+          icon={NEW_WINDOW_ICON}
+          title={appTexts.text("openThemeBench")}
+          onClick={() => EditorTheme.openBench()}
+        />
+      </Show>
     </>
   )
 }

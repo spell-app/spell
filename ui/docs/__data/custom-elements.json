@@ -44153,11 +44153,11 @@
             },
             {
               "name": "schemes",
-              "description": "The overlay's Light | Dark | Auto control (`role=radiogroup`)."
+              "description": "The overlay's Light | Dark | Auto control:  a segmented `<ui-menu>`."
             },
             {
               "name": "scheme-option",
-              "description": "One choice in it (`role=radio`):  an icon and its name."
+              "description": "One choice in it, a `<ui-item>`:  an icon and its name."
             },
             {
               "name": "tip",
@@ -44255,11 +44255,6 @@
               "name": "--ui-theme-menu-swap-duration",
               "default": "280ms",
               "description": "How long the sun / moon swap takes."
-            },
-            {
-              "name": "--ui-theme-menu-choice-shadow",
-              "default": "0 1px 2px oklch(0 0 0 / 0.16)",
-              "description": "The chosen scheme's raised key in the segmented control: its drop shadow."
             },
             {
               "name": "--ui-theme-menu-inverted-ink",

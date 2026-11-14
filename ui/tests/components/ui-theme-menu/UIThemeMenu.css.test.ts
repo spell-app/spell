@@ -14,11 +14,7 @@ const MARKUP = `<div class="ui themes" part="controls">
     <span class="light glyph">S</span><span class="dark glyph">M</span>
   </button>
   <div class="panel">
-    <div class="schemes" role="radiogroup">
-      <button class="choice checked" role="radio" aria-checked="true"><span class="name">Light</span></button>
-      <button class="choice" role="radio" aria-checked="false"><span class="name">Dark</span></button>
-      <button class="choice" role="radio" aria-checked="false"><span class="name">Auto</span></button>
-    </div>
+    <div class="schemes" part="schemes">L D A</div>
     <div class="menu">
       <button class="option checked" role="menuitemradio"><span class="check">C</span><span class="name">Spell</span></button>
       <button class="option" role="menuitemradio"><span class="check">C</span><span class="name">Merlot</span></button>
@@ -84,19 +80,14 @@ describe("UIThemeMenu.css look", () => {
     expect(getComputedStyle(shadow.querySelector(".light.glyph")!).opacity).toBe("0")
   })
 
-  it("marks the chosen theme;  Light | Dark | Auto:  three equal keys, the chosen one raised", () => {
+  it("marks the chosen theme;  Light | Dark | Auto (a segmented menu, its own look) fills the row", () => {
     const host = Sheets.host(MARKUP, [...foundationCSS, themesCSS])
     const [checked, other] = host.shadowRoot!.querySelectorAll(".option")
     expect(getComputedStyle(checked!.querySelector(".check")!).opacity).toBe("1")
     expect(getComputedStyle(other!.querySelector(".check")!).opacity).toBe("0")
     expect(getComputedStyle(checked!).backgroundColor).not.toBe(getComputedStyle(other!).backgroundColor)
     const schemes = getComputedStyle(host.shadowRoot!.querySelector(".schemes")!)
-    expect(schemes.display).toBe("grid")
-    expect(schemes.gridTemplateColumns.split(" ")).toHaveLength(3)
-    const [chosen, plain] = host.shadowRoot!.querySelectorAll(".choice")
-    expect(getComputedStyle(chosen!).boxShadow).not.toBe("none")
-    expect(getComputedStyle(plain!).boxShadow).toBe("none")
-    expect(getComputedStyle(chosen!).backgroundColor).not.toBe(getComputedStyle(plain!).backgroundColor)
+    expect(schemes.display).toBe("flex")
   })
 
   it("size scales the buttons", () => {

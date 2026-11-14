@@ -42,7 +42,8 @@ describe("<AppBarMenus>", () => {
     await waitForCondition(() => folded.every((row) => row.children.length > 0))
     // File and View tick what's on, as the bar's own do:  the Spell's menu written inside the row has `ticks`
     const ticks = (row: Element) =>
-      !!row.shadowRoot?.querySelector("[part~=flyout] > ui-menu[ticks]") || !!row.querySelector(":scope > ui-menu[ticks]")
+      !!row.shadowRoot?.querySelector("[part~=flyout] > ui-menu[ticks]") ||
+      !!row.querySelector(":scope > ui-menu[ticks]")
     await ElementFixture.settle(host)
     expect(folded.map((row) => [row.getAttribute("label"), ticks(row)])).toEqual([
       ["File", true],
@@ -134,11 +135,53 @@ describe("<ProjectBarMenu>", () => {
       "─",
       "Home"
     ])
-    // Theme ›:  Spell UI's theme menu in its menu mode, then Edit Theme…, written inside its row
+    // Theme ›:  Spell UI's theme menu in its menu mode, then Edit Theme, written inside its row
     const theme = menu.querySelector("ui-submenu")!
     expect(theme.hasAttribute("menu")).toBe(false)
     expect(theme.querySelector("ui-theme-menu")?.getAttribute("show")).toBe("menu")
-    expect(theme.lastElementChild?.textContent?.trim()).toMatch(/^Edit theme/)
+    expect(theme.querySelector("ui-theme-menu")?.getAttribute("bench")).toBe("none")
+  })
+
+  test("Theme ›'s end:  a divider, then Edit Theme and Theme Bench, none between, each opening a new window", async () => {
+    vi.stubEnv("SPELL_PAGE_SERVER", "http://127.0.0.1:4747")
+    cleanups.push(() => vi.unstubAllEnvs())
+    const opened = vi.spyOn(window, "open").mockReturnValue(null)
+    cleanups.push(() => opened.mockRestore())
+    const host = await mount(() => <ProjectBarMenu />)
+    const found = () => host.querySelector("ui-popup[for=ProjectBarMenu] ui-menu.BarMenuItems ui-submenu")
+    await waitForCondition(() => !!found()?.children.length)
+    const theme = found()!
+    await rowsReady(theme)
+    const rows = [...theme.children].map((row) =>
+      row.localName === "ui-theme-menu" ? "theme menu" : row.getAttribute("kind") === "divider" ? "─" : row.textContent
+    )
+    expect(rows).toEqual(["theme menu", "─", "Edit Theme", "Theme Bench"])
+    const [edit, bench] = [...theme.querySelectorAll<HTMLElement>(":scope > ui-action:not([kind])")]
+    expect([edit!.getAttribute("icon"), bench!.getAttribute("icon")]).toEqual([
+      "external alternate",
+      "external alternate"
+    ])
+
+    // Edit Theme:  the theme editor's page, in a new window;  this one stays where it is
+    const before = location.href
+    edit!.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
+    flush()
+    await waitForCondition(() => opened.mock.calls.length === 1)
+    expect(opened.mock.calls[0]).toEqual([new URL("/theme", location.href).href, "_blank", "noopener"])
+    expect(location.href).toBe(before)
+
+    // Theme Bench:  Spell UI's theme bench on the page server, in the theme chosen, its app page alone
+    bench!.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
+    flush()
+    await waitForCondition(() => opened.mock.calls.length === 2)
+    const [address, target, features] = opened.mock.calls[1]!
+    const url = new URL(String(address))
+    expect([url.origin + url.pathname, url.searchParams.get("pages"), target, features]).toEqual([
+      "http://127.0.0.1:4747/components/ui/theme-bench.html",
+      "app",
+      "_blank",
+      "noopener"
+    ])
   })
 })
 

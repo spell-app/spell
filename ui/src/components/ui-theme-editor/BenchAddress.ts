@@ -55,6 +55,20 @@ export class BenchAddress {
     return url.href
   }
 
+  /**
+   * The theme bench on the site starting at `site` (`http://127.0.0.1:4747`;  `""`:  this page's own),
+   * in theme `theme` (none:  the bench's own pick), with only page `page` shown (\`pages=app\`).
+   * - The theme menu's Theme bench row, and the Spell editor's (its project menu's Theme ›, which draws its own).
+   */
+  static benchOn(site: string, { theme, page }: { theme?: string; page: string }): string {
+    const url = new URL(
+      site.replace(/\/$/, "") + BENCH_PATH,
+      typeof location === "undefined" ? "http://localhost" : location.href
+    )
+    if (theme) url.searchParams.set(PARAMS.theme, theme)
+    return BenchAddress.withPage(url.href, page)
+  }
+
   /** `name=1` on `url` while `isOn`, else none. */
   private static setOn(url: URL, name: string, isOn: boolean): void {
     if (isOn) url.searchParams.set(name, ON)
@@ -78,6 +92,9 @@ export type BenchView = {
 
 /** The address's parameters. */
 const PARAMS = { theme: "theme", scheme: "scheme", swap: "swap", pages: "pages", phone: "phone" } as const
+
+/** The theme bench's page, from a site's root:  Spell UI's docs page (`ui/docs/theme-bench.html`). */
+const BENCH_PATH = "/components/ui/theme-bench.html"
 
 /** A switch that's on:  `swap=1`. */
 const ON = "1"

@@ -33,13 +33,13 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  * - Its shadow DOM:  `<div class="ui [size] [inverted] themes" part="controls">`, holding by `show`:
  *   - `both` (the default):  ONE round icon button, compact enough for a side column or a phone's top bar
  *     - `<button part="palette">` opens `<ui-popup part="overlay" open-on="click">`, a small panel with
- *       - Light | Dark | Auto, a segmented control (`role=radiogroup` of `radio`s, `part="schemes"`):
- *         the scheme the viewer CHOSE, Auto while it follows the OS
+ *       - Light | Dark | Auto, a segmented `<ui-menu part="schemes">` of `<ui-item part="scheme-option">`s,
+ *         as every other row of a few buttons in Spell UI:  the scheme the viewer CHOSE, Auto while it follows the OS
  *       - the theme list (`role=menu` of `menuitemradio`s, the chosen one checked):
  *         Spell's own themes (`UI.themes.own`), each with its one-line description (`ThemeMenu`)
  *       - under a divider, "Theme bench" (`<a part="bench">`):  the theme bench, in a new window, in the theme
  *         chosen (`bench`;  Owen:  "Add \"theme bench\" link to theme dropdown, opens in new window")
- *       - the `end` slot's rows, the page's own (the Spell editor's "Edit theme...")
+ *       - the `end` slot's rows, the page's own (the Spell editor's palette:  "Edit theme...")
  *     - its tooltip, `<ui-popup part="tip" inverted size="mini">` (hidden while the overlay is open)
  *     - Until epic `debut` (Owen, 2026-10-23:  "Merge day/night buttons into the theme picker") a sun / moon
  *       button stood beside it, and the overlay had a "Match system" switch.
@@ -56,10 +56,10 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *     - The host calls `focusChosen()` as it opens the sub-menu.
  *     - ArrowLeft / ArrowRight / Escape in the list are left to the host (closing its sub-menu).
  *     - `:state(menu)`;  the rows take the host's text size.
- * - The theme bench is Spell UI's docs page, on the site `bench` names (the Spell editor:  the page server's
- *   address), else this page's own (a worktree's pages:  the worktree's bench);  `bench="none"`:  no row.
- *   - It's opened with the theme chosen in its address (`ThemePreference.addressWith()`), so it opens as this page
- *     shows, and only the bench's page for this place on (`pages=epic`, `benchPageId`;  `BenchAddress.withPage()`).
+ * - The theme bench is Spell UI's docs page, on the site `bench` names, else this page's own
+ *   (a worktree's pages:  the worktree's bench);  `bench="none"`:  no row (the Spell editor draws its own).
+ *   - It's opened with the theme chosen in its address, so it opens as this page shows,
+ *     and only the bench's page for this place on (`pages=epic`, `benchPageId`;  `BenchAddress.benchOn()`).
  * - The theme and scheme themselves are `ThemePreference`'s
  *   (one pair per page, remembered per viewer, the scheme shared with every Spell site's header).
  *   - Picking calls `ThemePreference.setTheme()` / `setScheme()` / `flipScheme()`,
@@ -69,9 +69,11 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  * - Keyboard, in the overlay:  focus moves to the chosen theme as it opens.
  *   - In the theme list:  arrows / Home / End move (one tab stop, a roving `tabindex`);
  *     Enter / Space / a click pick (the overlay stays open, to compare)
- *   - Shift+Tab reaches the scheme control:  arrows move AND choose, as in any radio group (one tab stop)
+ *   - Shift+Tab reaches the scheme control's one tab stop, the chosen scheme:
+ *     ← → Home End move AND choose, as in any radio group
  *   - Escape closes the overlay, and focus goes back to the palette button (`UI.overlays`).
- * - Its shadow DOM is built of `<ui-popup>`, `<ui-icon>`, `<ui-dropdown>` and `<ui-item>`, which its barrel imports.
+ * - Its shadow DOM is built of `<ui-popup>`, `<ui-icon>`, `<ui-dropdown>`, `<ui-menu>` and `<ui-item>`,
+ *   which its barrel imports.
  * - Reads the themes and their titles from Spell UI's theme list (`UI.themes`), never a site's data:
  *   so it works on any page.
  ****************/
@@ -179,9 +181,8 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   get benchAddress(): string | undefined {
     const given = this.bench as string | undefined
     if (given === NO_BENCH || isServer) return undefined
-    const site = given?.replace(/\/$/, "") ?? WORKTREE_ROOT.exec(location.pathname)?.[0] ?? ""
-    const address = site + BENCH_PATH
-    return BenchAddress.withPage(ThemePreference.addressWith(address, { theme: this.chosenTheme }), this.benchPageId)
+    const site = given ?? WORKTREE_ROOT.exec(location.pathname)?.[0] ?? ""
+    return BenchAddress.benchOn(site, { theme: this.chosenTheme, page: this.benchPageId })
   }
 
   /**
@@ -425,52 +426,66 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     )
   }
 
-  /** Light | Dark | Auto:  the overlay's segmented control, a radio group (arrows move and choose). */
+  /**
+   * Light | Dark | Auto:  a segmented `<ui-menu>`, as every other choice of a few buttons in Spell UI
+   * (a property editor's `buttons`, `<ui-tabs appearance="segmented">`):  its track, its sliding thumb, its tokens.
+   * - `interactive`:  ONE tab stop, the chosen scheme, and arrows move between them (the menu's own roving focus);
+   *   `onSchemeKey()` chooses where they land.
+   * - The chosen scheme is the item `selected`, drawn from `chosen`:  the menu's own move is cancelled (`onSchemeChoosing()`).
+   */
   private schemes(): JSX.Element {
     return (
-      <div
+      <ui-menu
         class={SCHEMES_CLASS}
         part={this.partForName("schemes")}
-        role={SCHEME_ROLES.group}
+        appearance={SEGMENTED}
+        interactive=""
+        align={FLUID}
+        equal=""
+        size={SCHEMES_SIZE}
         aria-label={this.translationForKey("schemeName")}
+        on-ui-choosing={(event: CustomEvent<{ value: string }>) => this.onSchemeChoosing(event)}
         onKeyDown={(event) => this.onSchemeKey(event)}
       >
         <For each={SchemeChoices}>
-          {(scheme) => {
-            const isChosen = () => this.chosen.scheme === scheme
-            return (
-              <button
-                type="button"
-                class={[SCHEME_OPTION_CLASS, { checked: isChosen() }]}
-                part={this.partForName("scheme-option")}
-                role={SCHEME_ROLES.item}
-                value={scheme}
-                aria-checked={isChosen() ? "true" : "false"}
-                tabindex={isChosen() ? 0 : -1}
-                onClick={(event) => this.chooseScheme(scheme, event)}
-              >
-                <ui-icon name={SCHEME_CHOICE_ICONS[scheme]} aria-hidden="true" padding="none" />
-                <span class={NAME_CLASS}>{this.translationForKey(SCHEME_TEXTS[scheme])}</span>
-              </button>
-            )
-          }}
+          {(scheme) => (
+            <ui-item
+              part={this.partForName("scheme-option")}
+              value={scheme}
+              icon={SCHEME_CHOICE_ICONS[scheme]}
+              selected={this.chosen.scheme === scheme ? "" : undefined}
+            >
+              {this.translationForKey(SCHEME_TEXTS[scheme])}
+            </ui-item>
+          )}
         </For>
-      </div>
+      </ui-menu>
     )
   }
 
   /**
-   * Arrow keys in the scheme control:  move AND choose, wrapping, as in any radio group;  Home / End to the ends.
-   * - The chosen scheme is the tab stop, drawn by `schemes()` (`tabindex: "left alone"`).
+   * A scheme clicked (the menu's `ui-choosing`):  choose it.
+   * - Cancelled:  `selected` follows `chosen`, never the menu's own move.
+   * - Stopped:  a host menu round the panel would close its sub-menu on it, and the panel stays open, to compare.
+   */
+  private onSchemeChoosing(event: CustomEvent<{ value: string }>): void {
+    event.preventDefault()
+    event.stopPropagation()
+    this.chooseScheme(event.detail.value as SchemeChoice, event)
+  }
+
+  /**
+   * Arrow keys, Home and End in the scheme control:  the menu has moved focus (its roving tabindex), so choose
+   * the scheme they landed on, as in any radio group.
+   * - Stopped:  a host's sub-menu closes on the arrow away from it, and this row's arrows are its own.
    */
   private onSchemeKey(event: KeyboardEvent): void {
-    UI.focus.arrowKey(event, {
-      container: event.currentTarget as HTMLElement,
-      items: SCHEME_SELECTOR,
-      orientation: "both",
-      tabindex: "left alone",
-      onChange: (_option, index) => this.chooseScheme(SchemeChoices[index]!, event)
-    })
+    if (!SCHEME_KEYS.has(event.key)) return
+    event.stopPropagation()
+    if (!event.defaultPrevented) return
+    const landed = (event.currentTarget as HTMLElement).querySelector(FOCUSED_ITEM)
+    const scheme = landed?.getAttribute("value") as SchemeChoice | null
+    if (scheme) this.chooseScheme(scheme, event)
   }
 
   /** One row of the overlay's list:  a theme (or a divider or a header, which `ThemeMenu` lists none of today). */
@@ -671,9 +686,6 @@ const SCHEME_TEXTS = { light: "light", dark: "dark", system: "auto" } as const s
 /** Icon of the button opening the overlay (`fomantic` pack). */
 const PALETTE_ICON = "palette"
 
-/** The theme bench's page, from a site's root:  Spell UI's docs page (`ui/docs/theme-bench.html`). */
-const BENCH_PATH = "/components/ui/theme-bench.html"
-
 /** A worktree's site on the page server:  `/worktrees/<name>`, where its pages start. */
 const WORKTREE_ROOT = /^\/worktrees\/[^/]+/
 
@@ -723,14 +735,23 @@ const IDS = { palette: "palette", heading: "themes-heading" } as const
 /** ARIA of the overlay's theme list:  a menu of radio items (arrows move, Enter / Space / click picks). */
 const MENU_ROLES = { menu: "menu", item: "menuitemradio" } as const
 
-/** ARIA of the overlay's scheme control:  a radio group (arrows move and choose). */
-const SCHEME_ROLES = { group: "radiogroup", item: "radio" } as const
-
 /** A theme row of the overlay's list. */
 const ITEM_SELECTOR = `[role="${MENU_ROLES.item}"]`
 
-/** A choice of the overlay's scheme control, in `SchemeChoices` order. */
-const SCHEME_SELECTOR = `[role="${SCHEME_ROLES.item}"]`
+/** The scheme control's look:  a segmented `<ui-menu>`. */
+const SEGMENTED = "segmented"
+
+/** The scheme control's items fill its row (`align`), each as wide as the others (`equal`). */
+const FLUID = "fluid"
+
+/** `size` of the scheme control:  the panel's small rows, as a property editor's `buttons`. */
+const SCHEMES_SIZE = "small"
+
+/** The keys the scheme control's menu moves focus with (a row:  ← → Home End);  ← is also a host sub-menu's close. */
+const SCHEME_KEYS: ReadonlySet<string> = new Set([UIT.Key.arrowLeft, UIT.Key.arrowRight, UIT.Key.home, UIT.Key.end])
+
+/** The scheme control's item holding focus (in its own shadow root). */
+const FOCUSED_ITEM = "ui-item:focus-within"
 
 /** Where the buttons' tooltips show. */
 const TIP_POSITION = "bottom center"
@@ -777,9 +798,6 @@ const DIVIDER_CLASS = "divider"
 
 /** Class word of the overlay's scheme control. */
 const SCHEMES_CLASS = "schemes"
-
-/** Class word of one choice in the scheme control. */
-const SCHEME_OPTION_CLASS = "choice"
 
 /** Class word of a row's or a choice's name. */
 const NAME_CLASS = "name"

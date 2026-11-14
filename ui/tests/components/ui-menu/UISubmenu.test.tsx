@@ -1,5 +1,5 @@
 import { userEvent } from "vite-plus/test/browser"
-import { describe, expect, onTestFinished, test } from "vite-plus/test"
+import { describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 
 import { A11y } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -90,6 +90,20 @@ function pointer(type: string, target: Element, at?: { x: number; y: number }) {
   target.dispatchEvent(
     new PointerEvent(type, { bubbles: true, composed: true, pointerType: "mouse", clientX: x, clientY: y })
   )
+}
+
+/** The mouse leaving `box` for `to` (`pointerleave`, which neither bubbles nor crosses a shadow root). */
+function leave(box: Element, to: Element) {
+  box.dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse", relatedTarget: to }))
+}
+
+/** How long a fly-out waits after the pointer leaves it, ms (`LEAVE_SECONDS`). */
+const LEAVE_MS = 300
+
+/** Fake the timers from here to the test's end:  the fly-out's close-on-leave is one. */
+function fakeTimers() {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })
+  onTestFinished(() => void vi.useRealTimers())
 }
 
 ////////////////
@@ -360,6 +374,44 @@ describe("<ui-submenu> closing", () => {
     await ElementFixture.settle()
     expect(isShowing(flyoutOf(more!))).toBe(false)
     expect(isShowing(flyoutOf(size!))).toBe(false)
+  })
+
+  test("the mouse leaving the fly-out for anywhere but its menu closes it, 0.3s later", async () => {
+    const { submenus } = await render(`<div>${NESTED}<button>Outside</button></div>`)
+    const [theme] = submenus
+    await userEvent.hover(rowOf(theme!))
+    await ElementFixture.settle()
+    const box = flyoutOf(theme!)
+    expect(isShowing(box)).toBe(true)
+    fakeTimers()
+    leave(box, document.querySelector("button")!)
+    // not at once:  a pointer that slips off the edge has 0.3s to come back
+    vi.advanceTimersByTime(LEAVE_MS - 10)
+    await ElementFixture.settle()
+    expect(isShowing(box)).toBe(true)
+    vi.advanceTimersByTime(10)
+    await ElementFixture.settle()
+    expect(isShowing(box)).toBe(false)
+  })
+
+  test("coming back into the fly-out before then keeps it open;  leaving onto its menu leaves it to the menu's rows", async () => {
+    const { menu, submenus } = await render(`<div>${NESTED}<button>Outside</button></div>`)
+    const [theme] = submenus
+    await userEvent.hover(rowOf(theme!))
+    await ElementFixture.settle()
+    const box = flyoutOf(theme!)
+    fakeTimers()
+    leave(box, document.querySelector("button")!)
+    vi.advanceTimersByTime(LEAVE_MS / 2)
+    box.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
+    vi.advanceTimersByTime(LEAVE_MS * 2)
+    await ElementFixture.settle()
+    expect(isShowing(box)).toBe(true)
+    // onto its own menu (the row it came from, a row beside it):  no timer;  the rows decide
+    leave(box, menu)
+    vi.advanceTimersByTime(LEAVE_MS * 2)
+    await ElementFixture.settle()
+    expect(isShowing(box)).toBe(true)
   })
 
   test("a fly-out inside a fly-out:  ← closes only the inner one", async () => {
