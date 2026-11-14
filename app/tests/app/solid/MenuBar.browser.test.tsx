@@ -44,22 +44,22 @@ describe("<AppBarMenus>", () => {
         ? "─"
         : `${item.textContent?.trim()} ${item.getAttribute("shortcut") ?? ""}`
     )
+    // Owen, epic `mockup`:  exactly these;  Revert Changes names the file open, when there is one
     expect(items.map((item) => item.trim())).toEqual([
-      expect.stringMatching(/^More /),
+      `New Spell File ${EDITOR_HOTKEYS.createFile.shortcut}`,
+      "New CSS File",
       "─",
-      `New File ${EDITOR_HOTKEYS.createFile.shortcut}`,
-      expect.stringMatching(/^New /),
-      "─",
-      `Save ${EDITOR_HOTKEYS.saveFile.shortcut}`,
-      `Discard Changes ${EDITOR_HOTKEYS.discardChanges.shortcut}`,
+      `Save ${EDITOR_HOTKEYS.saveAll.shortcut}`,
       "AutoSave",
       "─",
-      "Home"
+      "Duplicate File",
+      `Revert Changes ${EDITOR_HOTKEYS.revertChanges.shortcut}`
     ])
+    expect(EDITOR_HOTKEYS.createFile.shortcut).toBe("alt+mod+N")
   })
 
   test("choosing an item runs it, and closes its menu", async () => {
-    const saveFile = spyOnEditor("saveFile", () => Promise.resolve())
+    const saveAll = spyOnEditor("saveAll", () => Promise.resolve())
     const host = await mount(() => <AppBarMenus mode="edit" />)
     const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=FileBarMenu]")!
     popup.visible = true
@@ -70,13 +70,13 @@ describe("<AppBarMenus>", () => {
     )!
     save.click()
     flush()
-    expect(saveFile).toHaveBeenCalledTimes(1)
+    expect(saveAll).toHaveBeenCalledTimes(1)
     expect(popup.visible).toBe(false)
   })
 })
 
 describe("<ProjectBarMenu>", () => {
-  test("everything about the whole project:  its name's actions, Publish and Versions, its settings, Export and Import, its theme", async () => {
+  test("everything about the whole project:  its name's actions, Publish, Versions and Delete Draft, its settings, Export and Import, its theme, Home", async () => {
     const host = await mount(() => <ProjectBarMenu />)
     const menu = host.querySelector("ui-popup[for=ProjectBarMenu] ui-menu.BarMenuItems")!
     await waitForCondition(() => menu.children.length > 0)
@@ -91,13 +91,16 @@ describe("<ProjectBarMenu>", () => {
       "─",
       "Publish",
       "Versions",
+      "Delete Draft",
       "─",
       "Project Settings",
       "─",
       expect.stringMatching(/^Export/),
       expect.stringMatching(/^Import/),
       "─",
-      expect.stringMatching(/^Theme/)
+      expect.stringMatching(/^Theme/),
+      "─",
+      "Home"
     ])
   })
 })

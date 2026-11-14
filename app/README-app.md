@@ -663,10 +663,14 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
   in a narrow pane its tabs scroll sideways with ‹ › keys instead of wrapping.
 
 The top bar, left to right ([MenuBar.tsx](src/app/solid/MenuBar.tsx)):
-- the project's menu:  Spell's hat, the project's name, bold
-  - New Example, Duplicate Solitaire, Reset to Saved, Rename, Delete, Project Settings, Theme ›, More Examples ›
-    (in columns past ten), Home
+- Spell's menu:  Spell's hat and name
+  - the group's projects (in columns past ten), then New Example and Home
+- the project's menu:  the project's name, bold
+  - Rename, Delete, Duplicate, Reset to Saved, ─, Publish, Versions, Delete Draft, ─, Project Settings, ─,
+    Export…, Import…, ─, Theme ›, ─, Home
 - File · Edit · View · Run · Help, each item showing its key
+  - File:  New Spell File (⌥⌘N:  ⌘N is the browser's New Window), New CSS File, ─, Save, AutoSave, ─,
+    Duplicate File, Revert Changes to the file
 - Run | Edit, in the middle
 - at the right, one group of icons:  in Edit, Inspect app and the Inspector's menu, a thin line;
   then Restart, the theme menu, a palette, and you, as an avatar
@@ -678,12 +682,16 @@ a puzzle piece for libraries, a flask for tests ([projectGroups.ts](src/spaces/m
 The code column:
 - every file of the project as a tab, none closing, a dot on one not saved;
   too many, ‹ › scroll them;  too narrow for two tabs, a file dropdown instead
-- Save, Discard Changes and New File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
+- Save, Revert Changes and New Spell File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
+  - Save saves every file with changes not saved, not just the one showing.
 - Saving never changes the public file:  it's your draft, in the project's private `__draft/` folder
   (`ProjectDrafts`, in spaces).
-  - File › Publish makes your drafts public, and keeps the whole project as a version, a zip in `versions/`;
-    if someone published since your draft began, it shows both side by side first.
-  - File › Versions restores one as your draft;  Discard Changes deletes your draft, back to what's published.
+  - The project menu's Publish makes your drafts public, and keeps the whole project as a version, a zip in
+    `versions/`;  if someone published since your draft began, it shows both side by side first.
+  - Its Versions restores one as your draft;  its Save Current Changes, on the dialog's left, keeps your draft in the
+    list first, never published.
+  - Its Delete Draft puts every file back as published, after asking:  one step Undo takes back.
+  - File › Revert Changes:  with AutoSave off, the file back to what was last saved;  on, back to what's published.
   - Neither folder is ever served to visitors, nor copied into the preview, whose edits stay in the visitor's browser.
 - There's no Compile button:  the editor compiles two seconds after typing stops, and on `Mod+Enter`.
 - The code is 17px, with no line numbers until you turn them on;  the browser remembers that choice.

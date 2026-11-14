@@ -54,6 +54,20 @@ export type ChooserModalProps = ConfirmModalProps & {
   defaultValue?: unknown
   /** Choose any number of values (checkboxes);  default one (radios). */
   multiple?: boolean
+  /** A button of its own on the dialog's left, which changes the list and leaves the dialog open. */
+  sideButton?: ChooserSideButton
+}
+
+/**
+ * `<Chooser>`'s button on the left (`ChooserModalProps.sideButton`):  e.g. Versions' "Save Current Changes".
+ * - A click runs `run`, the button busy meanwhile;  what it returns becomes the list, and the button goes grey.
+ * - The dialog stays open, the choice where it was;  `run` throwing shows nothing here:  the caller shows it.
+ */
+export type ChooserSideButton = {
+  /** its text */
+  text: string
+  /** what it does;  returns the new list of options */
+  run: () => Promise<ChooserOptionInput[]>
 }
 
 ////////////////

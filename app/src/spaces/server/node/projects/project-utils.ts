@@ -1081,6 +1081,17 @@ export const request_discard = respondWithJSON(async (request) => {
 })
 
 /**
+ * `POST /api/projects/keep-draft` -- keep your draft of a project as a version of its own, never published.
+ * - Client sends body:  `{ projectId }`.
+ * - Returns:  the version kept, `VersionJSON`.
+ * - Failure:  409 when you have no draft;  403 when you may not design it.
+ */
+export const request_keepDraft = respondWithJSON(async (request) => {
+  const { projectId } = request.body
+  return await (await draftsFor(request, projectId)).keepDraft()
+})
+
+/**
  * `POST /api/projects/restore` -- make drafts of a version's files.
  * - Client sends body:  `{ projectId, version }`, the version's name.
  * - Returns:  the files drafted.

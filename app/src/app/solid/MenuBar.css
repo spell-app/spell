@@ -70,10 +70,12 @@ ui-popup.BarMenuPopup::part(popup) {
   align-items: flex-start;
   gap: 4px;
 }
+/* at least 220px, wider for a long row (Revert Changes to <file>):  a vertical menu's own width is fixed */
 ui-menu.BarMenuItems::part(menu),
 .BarSubMenu ui-menu::part(menu),
 .SpellMenuPanel > ui-menu::part(menu) {
   min-width: 220px;
+  width: max-content;
   border: 0;
   box-shadow: none;
   background: transparent;

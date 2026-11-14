@@ -528,6 +528,12 @@ export class EditorStore extends Observable {
     }
   }
 
+  /** Drop `file`'s edit still waiting for typing to pause (`keepEdit()`):  Save or a revert deals with it now. */
+  private forgetWaitingKeep(file: SP.AnySpellFile): void {
+    clearTimeout(waitingKeeps.get(file))
+    waitingKeeps.delete(file)
+  }
+
   /** Keep `file` now, if it still has changes.  NEVER throws:  a failure is logged. */
   private keepNow(file: SP.AnySpellFile): void {
     waitingKeeps.delete(file)
@@ -1043,20 +1049,34 @@ export class EditorStore extends Observable {
   ////////////////
 
   /**
-   * Save current `file` if it's loaded:  ⌘S, and Publish's first step.
+   * "Save" (⌘S), and Publish's first step:  every file of current `project` with edits not saved, and the file open.
+   * - Owen, epic `mockup`:  "`Save` should save all open files".
    * - A locked page's file is never saved (`isLocked()`):  its edits are try-outs.
+   * - An edit AutoSave was still waiting to keep is saved now, once.
    */
-  async saveFile(): Promise<void> {
-    const { file } = editor
-    if (file?.isLoaded && !editor.isLocked(file)) await file.save(undefined)
+  async saveAll(): Promise<void> {
+    const { file, project } = editor
+    const files = new Set(project?.files.filter((each) => each.isDirty))
+    if (file) files.add(file)
+    for (const each of files) {
+      if (!each.isLoaded || editor.isLocked(each)) continue
+      editor.forgetWaitingKeep(each)
+      await each.save(undefined)
+    }
     await editor.saveSideBarEdits()
     await editor.refreshDrafts()
+  }
+
+  /** Has the file open, or any other file of current `project`, edits not saved?  Lights Save. */
+  get hasUnsavedEdits(): boolean {
+    void editor.edits
+    return !!editor.file?.isDirty || !!editor.project?.files.some((file) => file.isDirty)
   }
 
   /**
    * Is `file` a LOCKED page's (`"x" is a locked page`, `"x" is a locked notebook page`;  epic `notebook` P3)?
    * - Then nothing ever saves it, for anyone:  every edit is a try-out, gone on reload or the editor's Reset.
-   * - The ONE check that keeping (`keepEdit()`), saving (`saveFile()`) and so publishing (`publish()`) all ask.
+   * - The ONE check that keeping (`keepEdit()`), saving (`saveAll()`) and so publishing (`publish()`) all ask.
    * - Read from the file's text as it is now (`NotebookPageCells.holdsLockedPage()`):
    *   locking or unlocking is a page's own step, which saves itself (`NotebookController.setLocked()`).
    */
@@ -1079,8 +1099,57 @@ export class EditorStore extends Observable {
 
   /** The files the side bar has changed since the last Save:  see `saveSideBarEdits()`. */
   private readonly filesEditedFromSideBar = new Set<SP.AnySpellFile>()
+
   /**
-   * "Discard Changes" (⌘⇧R):  your draft of current `file` goes, back to what's published (epic `editor` P24).
+   * File › "Revert Changes to <file>" (⇧⌘R):  current `file`'s changes go, as one step ⌘Z undoes (Owen, epic `mockup`).
+   * - AutoSave off:  back to what was last saved, your draft if you have one (`revertToSaved()`).
+   * - AutoSave on, where every edit is kept as it's made:  back to what's published, your draft gone
+   *   (`discardChanges()`).
+   * - In the public preview, either way:  back to where it was when the project was opened.
+   * - Nothing to revert in that mode (`canRevertChanges`):  nothing happens.
+   * - NEVER throws:  a failure is shown.
+   */
+  async revertChanges(): Promise<void> {
+    if (!editor.canRevertChanges) return
+    if (isStaticBuild || editor.isAutoSaving) return await editor.discardChanges()
+    await editor.revertToSaved()
+  }
+
+  /**
+   * Has current `file` anything to revert (`revertChanges()`)?  Follows its text.
+   * - AutoSave off:  edits not saved.
+   * - AutoSave on:  your draft of it, or an edit not kept yet.
+   * - In the preview:  a difference from where it started.
+   */
+  get canRevertChanges(): boolean {
+    void editor.edits
+    const { file } = editor
+    if (!file) return false
+    if (isStaticBuild) return editor.canDiscardChanges
+    return editor.isAutoSaving ? editor.canDiscardChanges : file.isDirty
+  }
+
+  /**
+   * Current `file` back to what was last saved:  your draft of it if you have one, else what's published.
+   * - One step of `editor.history`, so ⌘Z brings the edits back.
+   * - NEVER throws:  a failure is shown.
+   */
+  private async revertToSaved(): Promise<void> {
+    const { file } = editor
+    if (!file) return
+    try {
+      editor.forgetWaitingKeep(file)
+      // the server answers the editor your draft first, else the public file
+      const saved = await LoadableFile.fetch<string>({ url: SP.SpellUrls.fileUrl(file.path), format: "text" })
+      editor.putBack(file, saved, appTexts.text("revertChanges"))
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /**
+   * Your draft of current `file` goes, back to what's published (epic `editor` P24):
+   * Revert Changes with AutoSave on, and the file's draft label's Discard.
    * - One step of `editor.history`, so ⌘Z brings the changes back:
    *   discarding can't lose work (with AutoSave on, the next keep makes them your draft again).
    * - In the public preview, which keeps a visitor's edits in their browser:  back to where the file was when the
@@ -1094,6 +1163,7 @@ export class EditorStore extends Observable {
     let start = startingPoints.of(file.path)
     if (!isStaticBuild) {
       try {
+        editor.forgetWaitingKeep(file)
         const filePath = new SP.SpellLocation(file.path).filePath!
         if (editor.hasDraft(file)) await new SPACES.ProjectFiles(project).discard(filePath)
         start = await LoadableFile.fetch<string>({ url: SP.SpellUrls.fileUrl(file.path), format: "text" })
@@ -1103,15 +1173,28 @@ export class EditorStore extends Observable {
         await editor.refreshDrafts()
       }
     }
-    if (start === undefined || start === file.contents) return
+    if (start !== undefined) editor.putBack(file, start, appTexts.text("revertChanges"))
+  }
+
+  /**
+   * Put `text` in place of `file`'s, as one step of `editor.history` titled `title`, then compile:
+   * what Revert Changes and Delete Draft do to each file.
+   * - Inside an open transaction (`history.transaction()`):  it joins that step.
+   * - SIDE EFFECT:  `file` has nothing to save after (`isDirty`), as `text` is what's kept;  not in the preview.
+   */
+  private putBack(file: SP.AnySpellFile, text: string, title: string): void {
+    if (text === file.contents) {
+      if (!isStaticBuild) file.isDirty = false
+      editor.edits++
+      return
+    }
     const before = file.contents ?? ""
-    const { span, newText } = SourceEdits.editBetween(before, start)
+    const { span, newText } = SourceEdits.editBetween(before, text)
     editor.clearCompileAppSoon()
     editor.history.change(
       { file, at: span.start, before: before.slice(span.start, span.end), after: newText },
-      { title: appTexts.text("discardChanges"), live: () => void editor.compileApp().catch(editor.showError) }
+      { title, live: () => void editor.compileApp().catch(editor.showError) }
     )
-    // it's what's published now:  nothing left to save, or to discard, until the next edit
     if (!isStaticBuild) file.isDirty = false
     editor.edits++
     void editor.compileApp().catch(editor.showError)
@@ -1125,7 +1208,7 @@ export class EditorStore extends Observable {
    * Has current `file` anything to discard (`discardChanges()`)?  Follows its text.
    * - Your draft of it, or an edit not saved yet;  in the preview, a difference from where it started.
    */
-  get canDiscardChanges(): boolean {
+  private get canDiscardChanges(): boolean {
     void editor.edits
     const { file } = editor
     if (!file) return false
@@ -1199,7 +1282,7 @@ export class EditorStore extends Observable {
 
   /**
    * Publish:  your drafts of current `project` become its public files, and the project is kept as a new version.
-   * - Your latest edit is saved first, so it's in your draft:  never a locked page's (`saveFile()`, `isLocked()`).
+   * - Your latest edits are saved first, so they're in your draft:  never a locked page's (`saveAll()`, `isLocked()`).
    * - A published file changed since your draft began (Q25):  both side by side first, `<PublishClash>`,
    *   to publish yours anyway or start again from theirs.
    * - NEVER throws:  a failure is shown.
@@ -1208,7 +1291,7 @@ export class EditorStore extends Observable {
     const { project } = editor
     if (!project || isStaticBuild) return
     try {
-      await editor.saveFile()
+      await editor.saveAll()
       const files = new SPACES.ProjectFiles(project)
       const { drafts } = await files.drafts()
       if (!drafts.length) return editor.showNotice(appTexts.text("nothingToPublish"))
@@ -1232,7 +1315,54 @@ export class EditorStore extends Observable {
   }
 
   /**
+   * Has current project a draft of yours, for the project menu's Delete Draft?  Never in the preview.
+   */
+  get canDeleteDraft(): boolean {
+    return !isStaticBuild && !!editor.draftedFiles?.length
+  }
+
+  /**
+   * The project menu's "Delete Draft":  every file of your draft back to what's published, after asking
+   * (Owen, epic `mockup`).
+   * - Edits not saved yet in those files go too.
+   * - ONE step of `editor.history` (`history.transaction()`), so ⌘Z brings every file's changes back;
+   *   with AutoSave on, they're kept as your draft again as they come back.
+   * - NEVER throws:  a failure is shown.
+   */
+  async deleteDraft(): Promise<void> {
+    const { project } = editor
+    if (!project || !editor.canDeleteDraft) return
+    const message = appTexts.text("deleteDraftConfirm")
+    if (!(await editor.confirm({ message, ok: appTexts.text("deleteDraft") }))) return
+    try {
+      const files = new SPACES.ProjectFiles(project)
+      const drafted = (editor.draftedFiles ?? []).map((path) => path.slice(project.path.length))
+      for (const filePath of drafted) await files.discard(filePath)
+      const published: [SP.AnySpellFile, string][] = []
+      for (const filePath of drafted) {
+        const file = project.getFile(filePath)
+        if (!file) continue
+        editor.forgetWaitingKeep(file)
+        const url = SP.SpellUrls.fileUrl(file.path)
+        published.push([file, await LoadableFile.fetch<string>({ url, format: "text", cache: "no-store" })])
+      }
+      const title = appTexts.text("deleteDraft")
+      editor.history.transaction(title, () => {
+        for (const [file, text] of published) editor.putBack(file, text, title)
+      })
+      editor.showNotice(appTexts.text("draftDeleted", { count: drafted.length }))
+    } catch (error) {
+      editor.showError(error)
+    } finally {
+      await editor.refreshDrafts()
+    }
+  }
+
+  /**
    * The project's versions, newest first, to restore one:  it becomes your draft, and nothing is public until Publish.
+   * - With a draft, or edits not saved, "Save Current Changes" on the dialog's left keeps them as an entry of its own,
+   *   never published (`ProjectFiles.keepDraft()`):  the list shows it at once, and the dialog stays open.
+   * - A kept draft restores as any version does:  it's your draft again.
    * - NEVER throws:  a failure is shown.
    */
   async showVersions(): Promise<void> {
@@ -1240,14 +1370,37 @@ export class EditorStore extends Observable {
     if (!project || isStaticBuild) return
     try {
       const files = new SPACES.ProjectFiles(project)
-      const { versions } = await files.drafts()
-      if (!versions.length) return await editor.alert(appTexts.text("noVersions"))
+      const { versions, drafts } = await files.drafts()
+      if (!versions.length && !drafts.length) return await editor.alert(appTexts.text("noVersions"))
+      const optionsFor = (list: SPACES.VersionJSON[]) =>
+        list.map(({ name, at, draft }) => ({
+          value: name,
+          key: name,
+          text: draft ? appTexts.text("keptDraftAt", { time: versionTime(at) }) : versionTime(at)
+        }))
+      const firstPublished = versions.find((version) => !version.draft) ?? versions[0]
       const version = (await editor.choose({
         header: appTexts.text("versions"),
         message: appTexts.text("versionsMessage"),
-        options: versions.map(({ name, at }) => ({ value: name, text: versionTime(at) })),
-        defaultValue: versions[0]!.name,
-        ok: appTexts.text("restoreVersion")
+        options: optionsFor(versions),
+        defaultValue: firstPublished?.name,
+        ok: appTexts.text("restoreVersion"),
+        ...((drafts.length > 0 || editor.hasUnsavedEdits) && {
+          sideButton: {
+            text: appTexts.text("saveCurrentChanges"),
+            run: async () => {
+              try {
+                // edits not saved yet are part of what's kept:  saved into your draft first
+                await editor.saveAll()
+                await files.keepDraft()
+                return optionsFor((await files.drafts()).versions)
+              } catch (error) {
+                editor.showError(error)
+                throw error
+              }
+            }
+          }
+        })
       })) as string | undefined
       if (!version) return
       const drafted = await files.restore(version)
@@ -1314,12 +1467,24 @@ export class EditorStore extends Observable {
     }
   }
 
-  /** Create `filePath` (with optional `contents`) in current `project` and show it. */
-  async createFile(filePath?: string, contents?: string): Promise<void> {
+  /**
+   * Create `filePath` (with optional `contents`) in current `project` and show it:  File › New Spell File.
+   * - No `filePath`:  asks for one, `Untitled` and `extension` to start;  a name typed without one gets `extension`.
+   * - `extension`:  default `.spell`
+   */
+  async createFile(
+    filePath?: string,
+    contents?: string,
+    { extension = SPELL_EXTENSION }: { extension?: string } = {}
+  ): Promise<void> {
     editor.clearCompileAppSoon()
     try {
-      filePath ||= await editor.prompt({ message: appTexts.text("askNewFileName"), defaultValue: NEW_FILE_NAME })
+      filePath ||= await editor.prompt({
+        message: appTexts.text("askNewFileName"),
+        defaultValue: `${NEW_FILE_STEM}${extension}`
+      })
       if (!filePath) return
+      if (!HAS_EXTENSION.test(filePath)) filePath += extension
       const newFile = await new SPACES.ProjectFiles(editor.project!).create(filePath, contents)
       editor.showEditor(newFile.path)
       editor.showNotice(appTexts.text("fileCreated"))
@@ -1327,6 +1492,11 @@ export class EditorStore extends Observable {
       editor.showError(e)
     }
   }
+  /** File › New CSS File:  a style sheet in current `project`, empty, asking its name as New Spell File does. */
+  async createCssFile(): Promise<void> {
+    await editor.createFile(undefined, "", { extension: CSS_EXTENSION })
+  }
+
   /** Duplicate current `file` to `newPath` and show it. */
   async duplicateFile(newPath?: string): Promise<void> {
     editor.clearCompileAppSoon()
@@ -1766,7 +1936,14 @@ const AUTO_SAVE_PREF = "autoSave"
 const NEW_PROJECT_NAME = "untitled"
 
 /** The name a new file starts with, in the dialog that asks for it. */
-const NEW_FILE_NAME = "Untitled.spell"
+/** A new file's name, before its extension, as New Spell File and New CSS File suggest it. */
+const NEW_FILE_STEM = "Untitled"
+/** A Spell file's extension. */
+const SPELL_EXTENSION = ".spell"
+/** A style sheet's extension. */
+const CSS_EXTENSION = ".css"
+/** A file name with an extension:  `Card.spell`, `Button/Card.css`. */
+const HAS_EXTENSION = /\.[^./]+$/
 editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: true })
 
 /** How long typing pauses before AutoSave keeps an edit (`keepEdit()`), in milliseconds. */

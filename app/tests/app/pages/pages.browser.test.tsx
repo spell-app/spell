@@ -115,11 +115,11 @@ describe("routes", () => {
 
 describe("editor hotkeys", () => {
   test.each([
-    ["Mod+S", { key: "s", metaKey: true }, "saveFile"],
-    ["Ctrl+S", { key: "s", ctrlKey: true }, "saveFile"],
-    ["Mod+Shift+R", { key: "R", metaKey: true, shiftKey: true }, "discardChanges"],
+    ["Mod+S", { key: "s", metaKey: true }, "saveAll"],
+    ["Ctrl+S", { key: "s", ctrlKey: true }, "saveAll"],
+    ["Mod+Shift+R", { key: "R", metaKey: true, shiftKey: true }, "revertChanges"],
     ["Mod+Enter", { key: "Enter", metaKey: true }, "compileApp"],
-    ["Mod+N", { key: "n", metaKey: true }, "createFile"]
+    ["Mod+Alt+N", { key: "˜", code: "KeyN", metaKey: true, altKey: true }, "createFile"]
   ] as const)("%s calls `editor.%s()`, instead of the browser's own", async (_name, init, method) => {
     const spies = spyOnHotkeys()
     await mountHotkeys()
@@ -136,6 +136,7 @@ describe("editor hotkeys", () => {
     host.append(input)
     keydown(document.body, { key: "s" })
     keydown(document.body, { key: "r", metaKey: true }) // no Shift:  the browser's reload
+    keydown(document.body, { key: "n", metaKey: true }) // no Alt:  the browser's New Window, never a page's
     keydown(input, { key: "s", metaKey: true })
     const handled = new KeyboardEvent("keydown", { key: "s", metaKey: true, bubbles: true, cancelable: true })
     handled.preventDefault()
@@ -148,7 +149,7 @@ describe("editor hotkeys", () => {
     await mountHotkeys()
     cleanups.pop()!() // unmount
     keydown(document.body, { key: "s", metaKey: true })
-    expect(spies.saveFile).not.toHaveBeenCalled()
+    expect(spies.saveAll).not.toHaveBeenCalled()
   })
 })
 
@@ -221,8 +222,8 @@ function keydown(target: EventTarget, init: KeyboardEventInit): KeyboardEvent {
 /** Spy on every `editor` method `EDITOR_HOTKEYS` runs (Esc stops inspecting;  Undo, Redo and Find are Monaco's). */
 function spyOnHotkeys() {
   expect(Object.keys(EDITOR_HOTKEYS)).toEqual([
-    "saveFile",
-    "discardChanges",
+    "saveAll",
+    "revertChanges",
     "compileApp",
     "createFile",
     "stopInspecting",
@@ -238,8 +239,8 @@ function spyOnHotkeys() {
     "deletePartsForward"
   ])
   return {
-    saveFile: spyOnEditor("saveFile", () => Promise.resolve()),
-    discardChanges: spyOnEditor("discardChanges", () => undefined),
+    saveAll: spyOnEditor("saveAll", () => Promise.resolve()),
+    revertChanges: spyOnEditor("revertChanges", () => undefined),
     compileApp: spyOnEditor("compileApp", () => Promise.resolve()),
     createFile: spyOnEditor("createFile", () => Promise.resolve())
   }
