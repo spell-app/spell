@@ -1138,6 +1138,17 @@
     corner-shape: round;
     border-radius: calc(var(--bubbly-pill-height) / 2);
   }
+  /*
+   * - one on lines of its own (T118) too:  its box and its last line's band round where they'd be cut or pointed;
+   *   e.g. one being typed, `<column "s"` over the `</container>` under it, reads to that line's `>` (epic `editor` I135)
+   */
+  &.bubbly-html .bubbly-tag-tall.bubbly-tag-declares :is(.bubbly-tag-rows, .bubbly-tag-tail) {
+    corner-shape: round;
+  }
+  &.bubbly-html .bubbly-tag-tall.bubbly-tag-declares .bubbly-tag-tail {
+    border-top-right-radius: calc(var(--bubbly-pill-height) / 2);
+    border-bottom-right-radius: calc(var(--bubbly-pill-height) / 2);
+  }
   /****** a head's description, `-- A playing card`:  at the drawing's right edge, its band reaching there (Owen) ******/
   /*
    * - as the editor draws it, at the window's edge:  on a page, the drawing's widest line's
