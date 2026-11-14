@@ -227,3 +227,36 @@ describe("startPage():  the app's Undo and Redo", () => {
     }
   })
 })
+
+describe("startPage():  the program's dialogs and toasts", () => {
+  test("a question is shown as the core shows it here, then answered by its number", async () => {
+    const sent: PageMessage[] = []
+    core.resetRuntime()
+    const page = startPage({ modules: [], state: {}, send: (message) => sent.push(message) })
+    const info = vi.spyOn(core.console, "info").mockImplementation(() => {})
+    const prompt = vi.spyOn(core, "prompt").mockResolvedValue("Bob")
+    try {
+      // with no Spell UI, as under node:  confirm says yes, as a program running here would
+      page.receive({ ui: "confirm", args: ["Deal again?", "Deal", "Not now"], asks: 1 })
+      page.receive({ ui: "prompt", args: ["Your name?", "Ann"], asks: 2 })
+      page.receive({ ui: "alert", args: ["You won!", "New game"], asks: 3 })
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(prompt).toHaveBeenCalledWith("Your name?", "Ann")
+      expect(sent).toEqual([
+        { answer: 1, value: true },
+        { answer: 2, value: "Bob" },
+        { answer: 3, value: null }
+      ])
+      expect(info.mock.calls.map(([line]) => line)).toEqual(["Deal again? (yes)", "You won!"])
+    } finally {
+      info.mockRestore()
+      prompt.mockRestore()
+      core.remote = undefined
+    }
+  })
+
+  test("their frames, in the console:  the question, by its words and number;  the answer", () => {
+    expect(frameSummary({ ui: "confirm", args: ["Deal again?"], asks: 3 })).toBe('confirm "Deal again?" (#3)')
+    expect(frameSummary({ answer: 3, value: true })).toBe("answer #3:  true")
+  })
+})

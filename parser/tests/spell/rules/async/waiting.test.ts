@@ -161,6 +161,21 @@ describe("what a person presses", () => {
     expect(compiled(DRAWN, "ts/solid")).toContain("onClick={core.pressed(this, async () => await this.deal())}")
   })
 
+  test("a dialog waits in Python too, and `notify ... and wait`;  a plain `notify` doesn't", () => {
+    const py = compiled(
+      PROJECT(
+        `	- to ask it:\n		alert "You won!" with "New game"\n	- to tell it:\n		notify "Saved!"\n	- to wait on it:\n		notify "Saved!" for 2 seconds and wait`
+      ),
+      "py"
+    )
+    expect(py).toContain("async def ask(self)")
+    expect(py).toContain('await core.alert("You won!", "New game")')
+    expect(py).toMatch(/\n {4}def tell\(self\)/)
+    expect(py).toMatch(/\n {8}core\.notify\("Saved!"\)/)
+    expect(py).toContain("async def wait_on_card(self)")
+    expect(py).toMatch(/await core\.notify\("Saved!", \{/)
+  })
+
   test("an action that waits holds no guard of its own:  that's the queue's job", () => {
     const js = compiled("a card is a thing:\n\t- to deal it:\n\t\tpause for 1 sec\n")
     expect(js).toContain("async deal()")

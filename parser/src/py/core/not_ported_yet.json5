@@ -141,12 +141,7 @@
         "doubleQuote",
         "getPath",
         "setPath",
-        "splitPath",
-        "notify",
-        "alert",
-        "warn",
-        "confirm",
-        "prompt"
+        "splitPath"
       ]
     }
   ]

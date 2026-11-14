@@ -153,6 +153,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - After each, the patches so far must add up to the whole state, else `PatchMismatchError`.
   - The contract's 300 clicks per game play through it
     ([patches_in_a_game.py](../../tests/py/core/tests/patches_in_a_game.py)).
+- DIALOGS AND TOASTS (`ui_methods.py`, epic `language` I90):  the JavaScript core's `notify`, `alert`, `warn`,
+  `confirm` and `prompt`, the same words and answers.
+  - The dialogs are `async`, awaited;  `notify` isn't, but `notify ... and wait` awaits what it returns.
+  - With a page:  the page shows Spell UI's own and answers, `{"ui": "confirm", ..., "asks": 1}` =>
+    `{"answer": 1, "value": true}` (`PageAsks`;  spell_quart asks the tab that sent the last message).
+  - With none (`spell run`):  printed as javascript prints them, the default answer taken;
+    in a terminal, `confirm` and `prompt` read what's typed.
 - UNDO (`undoing.py`, epic `language` P54):  the JavaScript core's history, the same steps and titles.
   - An action described `undone_as` is ONE step:  `core.describe_action()` wraps its method (`declare_action()`).
   - The app's `undo()`, `redo()`, `can_undo`, `undo_title` ...;  its `undo` and `redo` are actions, as javascript's.

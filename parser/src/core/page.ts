@@ -24,6 +24,10 @@
  *   - The app's undo history too (`"$history"`):  its Undo and Redo enable and retitle as the program's history
  *     changes (`REMOTE.history`, epic `language` P54).
  * - The app the state holds starts, drawn into the page as `App.start()` draws it.
+ * - A dialog or a toast the program shows is a question to the page (`PageQuestion`, epic `language` I90):
+ *   `{ "ui": "confirm", "args": ["Deal again?"], "asks": 3 }`.
+ *   - The page shows it as a program running here would, with Spell UI's own (`core.confirm()` ...).
+ *   - Then it answers:  `{ "answer": 3, "value": true }`.
  * - ONE page at a time:  the messages go to the last one started.
  */
 import { Cell } from "spell/util"
@@ -36,10 +40,22 @@ import { Thing } from "./classes/Thing"
 import { HISTORY_KEY, ID_KEY, StateMirror } from "./state"
 import type { ShownHistory } from "./undoing"
 
-/** What a page sends:  a call, or an event -- see the file's docs. */
+/** What a page sends:  a call, an event, or its answer to a question -- see the file's docs. */
 export type PageMessage =
   | { call: string; on?: PageMessageThing; args: unknown[] }
   | { trigger: string; target?: PageMessageThing | PageMessageThing[]; details: Record<string, unknown> }
+  | { answer: number; value: unknown }
+
+/**
+ * A question the program asks its page:  a dialog or a toast, which the page shows, then answers -- see the file's docs.
+ * - `ui`:  the core's method that shows it, one of `QUESTIONS`
+ * - `args`:  its arguments, as the program called it
+ * - `asks`:  its number, which the answer names
+ */
+export type PageQuestion = { ui: (typeof QUESTIONS)[number]; args: unknown[]; asks: number }
+
+/** The core's methods a program running elsewhere may ask its page to run:  its dialogs and toasts, no others. */
+const QUESTIONS = ["notify", "alert", "warn", "confirm", "prompt"] as const
 
 /** A thing in a page's message:  by reference, `"Card#ace-of-hearts"`, else by its id, `{ "$id": "3" }`. */
 export type PageMessageThing = string | { [ID_KEY]: string }
@@ -74,10 +90,33 @@ export function startPage({ modules, state, send }: PageSpec): StartedPage {
   const app = Object.values(things).find((value) => value instanceof App) as App | undefined
   app?.start()
   const receive = (next: unknown) => {
+    // un-awaited on purpose:  the dialog stays up while the patches its program sends meanwhile come in
+    if (isQuestion(next)) return void answerQuestion(next, send)
     whileReading(() => mirror.read(next))
     noteHistory(next)
   }
   return { mirror, receive }
+}
+
+/** Is `frame` a question from the program (`PageQuestion`), rather than a state or a patch? */
+function isQuestion(frame: unknown): frame is PageQuestion {
+  if (typeof frame !== "object" || frame === null || Array.isArray(frame)) return false
+  const { ui, args, asks } = frame as Record<string, unknown>
+  return QUESTIONS.includes(ui as PageQuestion["ui"]) && Array.isArray(args) && typeof asks === "number"
+}
+
+/**
+ * Show `question` as the core shows it here (`core.confirm()` ...), then send its answer:  `null` for none.
+ * - NEVER throws:  one the page can't show is said in the console, and answered `null`.
+ */
+async function answerQuestion({ ui, args, asks }: PageQuestion, send: (message: PageMessage) => void): Promise<void> {
+  let value: unknown
+  try {
+    value = await (core[ui] as (...args: unknown[]) => unknown)(...args)
+  } catch (error) {
+    logError(`the page couldn't show the program's ${ui}:  ${String(error)}`, error)
+  }
+  send({ answer: asks, value: value ?? null })
 }
 
 /** The program's undo history, as its last state or patch said:  `REMOTE.history`. */
@@ -313,6 +352,7 @@ export function logError(what: string, detail: unknown): void {
  * - the program's:
  *   - its first:  `state:  game, stock, discards ...`
  *   - `patch:  Card #26, StockPile #3`
+ *   - a question:  `confirm "Deal again?" (#3)`, and the page's answer, `answer #3:  true`
  */
 export function frameSummary(frame: unknown): string {
   if (Array.isArray(frame)) return `patch:  ${frame.map(thingLabel).join(", ")}`
@@ -328,6 +368,8 @@ export function frameSummary(frame: unknown): string {
     const things = [...targets, ...named].map(thingLabel)
     return `event ${message.trigger}${things.length ? ` (${things.join(", ")})` : ""}`
   }
+  if (isQuestion(message)) return `${message.ui} ${JSON.stringify(message.args[0])} (#${message.asks})`
+  if (typeof message.answer === "number") return `answer #${message.answer}:  ${JSON.stringify(message.value)}`
   return `state:  ${Object.keys(message).join(", ")}`
 }
 

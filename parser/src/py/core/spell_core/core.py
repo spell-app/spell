@@ -35,6 +35,7 @@ from spell_core.sending import SendingMethods
 from spell_core.spell_tests import SpellTestMethods
 from spell_core.text_methods import TextMethods
 from spell_core.thing_methods import ThingMethods
+from spell_core.ui_methods import UIMethods
 from spell_core.word_methods import WordMethods
 
 
@@ -55,6 +56,7 @@ class Core(
     DescribedMethods,
     DimensionMethods,
     PlaceMethods,
+    UIMethods,
 ):
     """Everything compiled Python calls on `core`, each part in a module of its own:
 
@@ -73,6 +75,7 @@ class Core(
     - the things a program made, found by name, place or reference:  `reference_methods.py`, `references.py`
     - what's saved in a place, and what's behind each kind:  `places.py`, `place_kinds.py`
     - what its templates say about their actions and events:  `described.py`
+    - talking to the person running the program, a toast or a dialog:  `ui_methods.py`
     - the console, `core.console`:  `console.py`
     - the classes compiled Python extends, `Thing`, `List` and `App`:  `things.py`, `lists.py`, `apps.py`
 

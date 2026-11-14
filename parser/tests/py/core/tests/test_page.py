@@ -1,5 +1,8 @@
 """A program's side of its page (`page.py`):  the state it starts from, each message run, answered by a patch."""
 
+import json
+import subprocess
+import sys
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -119,3 +122,43 @@ def test_javascripts_names_read_as_pythons() -> None:
     assert python_name("startPile") == "start_pile"
     assert python_name("card") == "card"
     assert python_name("isAFaceCard") == "is_a_face_card"
+
+
+# A program that asks the person something:  its page shows the dialog, and answers
+ASKING = """\
+from spell_core import Thing, core, prop
+
+
+class Lamp(Thing):
+    is_on = prop(type="choice", default=False)
+
+
+lamp = Lamp()
+
+
+async def ask_to_switch():
+    if await core.confirm("Switch it on?", "On", "Off"):
+        lamp.is_on = True
+"""
+
+
+def test_over_stdio_a_dialog_is_a_question_the_pages_next_line_answers(tmp_path: Path) -> None:
+    program = tmp_path / "Asking.spell.py"
+    program.write_text(ASKING)
+    pages = subprocess.Popen(
+        [sys.executable, "-m", "spell_core.page", str(program), "--seed", "1"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    assert pages.stdin and pages.stdout
+    state = json.loads(pages.stdout.readline())
+    assert not state["lamp"].get("is_on")
+    pages.stdin.write(json.dumps({"call": "ask_to_switch", "args": []}) + "\n")
+    pages.stdin.flush()
+    assert json.loads(pages.stdout.readline()) == {"ui": "confirm", "args": ["Switch it on?", "On", "Off"], "asks": 1}
+    pages.stdin.write(json.dumps({"answer": 1, "value": True}) + "\n")
+    pages.stdin.flush()
+    assert json.loads(pages.stdout.readline()) == [{**state["lamp"], "is_on": True}]
+    pages.stdin.close()
+    assert pages.wait(timeout=10) == 0
