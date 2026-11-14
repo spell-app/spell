@@ -8,6 +8,8 @@ import { SubjectRule } from "spell/parser/spell/rules/types"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 import { DrawnLines } from "./DrawnLines"
+// Through the folder:  read only when called, once the folder has loaded
+import { DrawnMarkup } from "spell/parser/spell/rules/classes"
 
 /**
  * `draw_it` rule:  how a type draws, in its outline body (epic `spanish` P20).
@@ -260,7 +262,7 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
    * - A quoted slot's markup carries the slot's name (`withPart()`);  a statement body's markup lines do it
    *   themselves (`drawn_markup`).
    */
-  getAST(match: P.MatchFor<this>): P.ASTPropertyDefinition {
+  getAST(match: P.MatchFor<this>): P.ASTPropertyDefinition | P.ASTStatementGroup {
     const drawing = match.data.drawing ?? "draw"
     const isEachItem = drawing === "draw_each_item"
     const { slot } = match.data
@@ -274,11 +276,14 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
     // several drawn lines, or a loop of them:  all of them, in order (C28)
     if (method.body.statements) method.body.statements = DrawnLines.gather(method.body.statements)
     else method.body = DrawnLines.gatherLoopAlone(method.body)
-    return new P.ASTPropertyDefinition(match, {
+    const drawn = new P.ASTPropertyDefinition(match, {
       type: P.SubjectScope.of(match.scope)!.subject,
       property: slot ? DrawIt.slotMethodName(slot) : drawing,
       method
     })
+    // what its tags declare, as members after it (epic `language` P55, Q52):  `<column "C1"/>`
+    const members = drawing === "draw" ? DrawnMarkup.membersDeclared(this.getBody(match), drawn.type) : []
+    return members.length ? new P.ASTStatementGroup(match, { statements: [drawn, ...members] }) : drawn
   }
 }
 

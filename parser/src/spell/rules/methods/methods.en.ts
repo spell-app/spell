@@ -289,14 +289,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.addToPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
           ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
           ]
         },
         {
@@ -306,14 +306,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.addToPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
           ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
           ]
         },
         {
@@ -323,14 +323,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.addToPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
           ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
           ]
         },
         {
@@ -340,14 +340,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ]
         },
         {
@@ -357,14 +357,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ]
         },
         {
@@ -374,14 +374,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ]
         },
         {
@@ -391,14 +391,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this.name)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this.name)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ]
         },
         {
@@ -410,7 +410,7 @@ methods.addRule(ToDoSomething, {
             "  const it = this.name",
             "  core.console.log(it)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
@@ -419,7 +419,7 @@ methods.addRule(ToDoSomething, {
             "  const it = this.name",
             "  core.console.log(it)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
           ]
         },
         {
@@ -500,7 +500,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.showOnPile = function (pile) {",
             "  return core.console.log(1)",
             "}",
-            'core.describeAction(Card, "showOnPile", { title: "Show (a Card) On (a Pile)", undoneAs: "Show (a Card) On (a Pile)" })',
+            'core.describeAction(Card, "showOnPile", { title: "Show A Card On A Pile", undoneAs: "Show A Card On A Pile" })',
             ";(new Joker()).showOnPile(new Pile())",
             '/* PARSE ERROR: Don\'t understand "show a new card on a new card" */'
           ],
@@ -510,7 +510,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.showOnPile = function (this: Card, pile: Pile) {",
             "  return core.console.log(1)",
             "}",
-            'core.describeAction(Card, "showOnPile", { title: "Show (a Card) On (a Pile)", undoneAs: "Show (a Card) On (a Pile)" })',
+            'core.describeAction(Card, "showOnPile", { title: "Show A Card On A Pile", undoneAs: "Show A Card On A Pile" })',
             ";(new Joker()).showOnPile(new Pile())",
             '/* PARSE ERROR: Don\'t understand "show a new card on a new card" */'
           ]
@@ -522,7 +522,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (a Card)", undoneAs: "Show (a Card)" })',
+            'core.describeAction(Card, "show", { title: "Show A Card", undoneAs: "Show A Card" })',
             ";(new Card()).show()"
           ],
           ts: [
@@ -530,7 +530,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show (a Card)", undoneAs: "Show (a Card)" })',
+            'core.describeAction(Card, "show", { title: "Show A Card", undoneAs: "Show A Card" })',
             ";(new Card()).show()"
           ]
         },
@@ -541,7 +541,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "playOnPile", { title: "Play (a Card) On (a Pile)", undoneAs: "Play (a Card) On (a Pile)" })',
+            'core.describeAction(Card, "playOnPile", { title: "Play A Card On A Pile", undoneAs: "Play A Card On A Pile" })',
             ";(new Card()).playOnPile(new Pile())"
           ],
           ts: [
@@ -549,7 +549,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "playOnPile", { title: "Play (a Card) On (a Pile)", undoneAs: "Play (a Card) On (a Pile)" })',
+            'core.describeAction(Card, "playOnPile", { title: "Play A Card On A Pile", undoneAs: "Play A Card On A Pile" })',
             ";(new Card()).playOnPile(new Pile())"
           ]
         },

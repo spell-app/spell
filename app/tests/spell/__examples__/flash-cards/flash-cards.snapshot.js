@@ -117,6 +117,28 @@ export class Quiz extends App {
     this.card?.turnFaceUp()
   }
 
+  showTheAnswer() {
+    this.card?.turnOver()
+  }
+
+  /** Counted, then the next card */
+  sayIKnew() {
+    this.known = this.known + 1
+    this.tried = this.tried + 1
+    this.dealACard()
+  }
+
+  sayIMissed() {
+    this.tried = this.tried + 1
+    this.dealACard()
+  }
+
+  startOver() {
+    this.known = 0
+    this.tried = 0
+    this.dealACard()
+  }
+
   /** The toolbar with the score, the card, then what you can do:  turn it over, or say how you did */
   draw() {
     return h("ui-container", { text: true },
@@ -152,35 +174,14 @@ export class Quiz extends App {
       )
     )
   }
-
-  showTheAnswer() {
-    this.card?.turnOver()
-  }
-
-  sayIKnew() {
-    this.known = this.known + 1
-    this.tried = this.tried + 1
-    this.dealACard()
-  }
-
-  sayIMissed() {
-    this.tried = this.tried + 1
-    this.dealACard()
-  }
-
-  startOver() {
-    this.known = 0
-    this.tried = 0
-    this.dealACard()
-  }
 }
 export const quiz = new Quiz()
+core.describeAction(Quiz, "dealACard", { title: "Deal A Card", undoneAs: "Deal A Card" })
+core.describeAction(Quiz, "showTheAnswer", { title: "Show The Answer", shortcuts: ["space"], undoneAs: "Show The Answer" })
+core.describeAction(Quiz, "sayIKnew", { title: "I knew it", shortcuts: ["Y"], icon: "check", undoneAs: "I knew it" })
+core.describeAction(Quiz, "sayIMissed", { title: "I missed it", shortcuts: ["N"], icon: "close", undoneAs: "I missed it" })
+core.describeAction(Quiz, "startOver", { title: "Start Over", icon: "redo", undoneAs: "Start Over" })
 
-core.describeAction(Quiz, "showTheAnswer", { title: "Show The Answer", shortcuts: ["space"] })
-/** Counted, then the next card */
-core.describeAction(Quiz, "sayIKnew", { title: "I knew it", shortcuts: ["Y"], icon: "check" })
-core.describeAction(Quiz, "sayIMissed", { title: "I missed it", shortcuts: ["N"], icon: "close" })
-core.describeAction(Quiz, "startOver", { title: "Start Over", icon: "redo" })
 // - its "quiz menu" is a menu of "start over"
 core.describeMenu(Quiz, "quizMenu", { items: ["startOver"] })
 

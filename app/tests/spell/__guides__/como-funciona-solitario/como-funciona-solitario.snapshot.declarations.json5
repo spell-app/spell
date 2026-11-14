@@ -102,18 +102,18 @@
       "defined": "/ComoFuncionaSolitario.es.spell:1469-1510"
     },
     {
+      "type": "Columna",
+      "superType": "Pila",
+      "gender": "feminine",
+      "defined": "/ComoFuncionaSolitario.es.spell:1859-2094"
+    },
+    {
       "property": "pila",
       "of": "Carta",
       "group": "Una pila, y una columna",
       "datatype": "Pila",
       "exclusive": true,
       "defined": "/ComoFuncionaSolitario.es.spell:1511-1541"
-    },
-    {
-      "type": "Columna",
-      "superType": "Pila",
-      "gender": "feminine",
-      "defined": "/ComoFuncionaSolitario.es.spell:1859-2094"
     },
     {
       "type": "Mesa",
@@ -158,13 +158,13 @@
     44,
     48,
     63,
-    77,
-    84,
-    90,
+    76,
+    88,
     101,
     104,
-    109,
-    114,
-    141
+    107,
+    112,
+    117,
+    144
   ]
 }

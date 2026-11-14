@@ -237,12 +237,12 @@ describe("class members go in their class's body", () => {
       "    return core.console.log(2)",
       "  }",
       "}",
+      'core.describeAction(Card, "flip", { title: "Flip A Card", undoneAs: "Flip A Card" })',
       "core.console.log(1)",
       "// -----------",
       "export class Pile extends List {",
       "  static instanceType = Card",
       "}",
-      'core.describeAction(Card, "flip", { title: "Flip (a Card)", undoneAs: "Flip (a Card)" })',
       "core.console.log(3)"
     ])
     expect(cardAST.compile()).toBe(cardBefore)

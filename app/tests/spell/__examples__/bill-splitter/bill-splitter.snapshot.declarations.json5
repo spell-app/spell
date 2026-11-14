@@ -152,19 +152,6 @@
       "defined": "/BillSplitter.spell:747-990"
     },
     {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
-      "of": "BillSplitter",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/BillSplitter.spell:1126-2231"
-    },
-    {
       "syntax": "add someone (of {thisArg:expression})?",
       "output": "add_someone",
       "rule": "method_call",
@@ -177,6 +164,19 @@
       "name": "add someone",
       "returns": "nothing",
       "defined": "/BillSplitter.spell:992-1123"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "BillSplitter",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/BillSplitter.spell:1126-2231"
     }
   ],
   "codeLines": [
@@ -190,15 +190,15 @@
     57,
     62,
     93,
-    105,
-    118,
-    121,
-    127,
-    133,
-    139,
-    143,
-    148,
-    155,
-    206
+    107,
+    120,
+    123,
+    129,
+    135,
+    141,
+    145,
+    150,
+    157,
+    162
   ]
 }

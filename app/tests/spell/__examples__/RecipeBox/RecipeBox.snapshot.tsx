@@ -19,7 +19,7 @@ export class Recipe extends Thing {
   @prop({ type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 1200, end: 1219 } })
   accessor notes!: string
 
-  /** Its Edit screen:  nothing changes until Save */
+  /** Its Edit screen:  nothing changes until Save;  only which screen shows, so no step to undo */
   edit() {
     recipeBox.editing = this
   }
@@ -60,6 +60,7 @@ export class Recipe extends Thing {
   @prop({ type: "date", declaredAt: { path: "/RecipeBox.api.spell", start: 1122, end: 1149 } })
   accessor modified!: any /* spell: type unknown */
 }
+core.describeAction(Recipe, "edit", { title: "Edit It", cantBeUndone: "keeps history" })
 
 /**
  * Where they're kept is the next line, and only that line knows.  Change it to keep them somewhere else:
@@ -101,7 +102,7 @@ export class RecipeEditor extends View {
     return core.draftOf(this.recipe!)
   }
 
-  /** Every changed field, sent together */
+  /** Every changed field, sent together:  its own undo step, Edit, as a saved thing's change is */
   save() {
     core.saveDraft(this.draft)
     recipeBox.editing = undefined
@@ -174,6 +175,9 @@ core.heading("A recipe:  a card you can read and change")
 core.heading("Its Edit screen:  a form over a draft, so nothing changes until Save")
 //## Its Edit screen:  a form over a draft, so nothing changes until Save
 
+core.describeAction(RecipeEditor, "save", { title: "Save It", cantBeUndone: "keeps history" })
+core.describeAction(RecipeEditor, "cancel", { title: "Cancel It", cantBeUndone: "keeps history" })
+
 core.heading("The box:  the card for a new recipe, then a card for each one you have")
 //## The box:  the card for a new recipe, then a card for each one you have
 
@@ -216,7 +220,7 @@ export class RecipeBox extends App {
   }
 
   /** Newest first, by when each was saved */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3147, end: 3300 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 3300, end: 3453 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => core.includes(recipe.title, this.search)), (item: Recipe) => core.descending(item.created))
   }, () => [this.search]) }
@@ -318,6 +322,7 @@ export class RecipeBoxElement extends SpellElement<RecipeBox> {
 }
 core.useElement(RecipeBox, RecipeBoxElement)
 export const recipeBox = new RecipeBox()
+core.describeAction(RecipeBox, "addTheNewRecipe", { title: "Add The New Recipe", undoneAs: "Add The New Recipe" })
 // - its "box menu" is a menu of "undo"
 core.describeMenu(RecipeBox, "boxMenu", { items: ["undo"] })
 // -----------

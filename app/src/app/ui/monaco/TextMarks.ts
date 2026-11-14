@@ -85,8 +85,19 @@ export type Spacers = { before?: monaco.editor.InjectedTextOptions; after?: mona
  *   Spell file's drawing
  * - `tag-foot`:  before an HTML block's end tag that starts its line, its `⟨` as far into its band as on the page
  * - `attribute`, `equals`:  before an HTML attribute's name, and its `=`
+ * - `description`:  before a head's description, `-- A playing card`, to right-align it at the window's edge
  */
-export type SpacerKind = "input" | "quote" | "line" | "tag" | "touch" | "tag-head" | "tag-foot" | "attribute" | "equals"
+export type SpacerKind =
+  | "input"
+  | "quote"
+  | "line"
+  | "tag"
+  | "touch"
+  | "tag-head"
+  | "tag-foot"
+  | "attribute"
+  | "equals"
+  | "description"
 
 /** The class on every piece of text the look draws:  its ink, under any token's colour. */
 const PIECE = "bubbly-piece"

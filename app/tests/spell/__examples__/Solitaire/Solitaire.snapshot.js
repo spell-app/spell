@@ -1,28 +1,29 @@
 import { core, List, App, TwoSidedView, ViewableList, h, positionOf, spellPosition, position } from "@spell/core"
 
-core.heading("A playing card")
-////////////////////
-// ## A playing card
-////////////////////
-// A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-// It's a two sided view:  face up it shows its picture, face down the back every card shares.
-// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
-
+/** A card says what its rank, suit and color are:  a deck, a pile or the game only reads them. */
+// A playing card
 export class Card extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "rank" is one of ace, 2 ... 10, jack, queen, king
-  //   it "is a (rank)"
   static Ranks = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"]
   static { this.declareProp("rank", { oneOf: Card.Ranks }) }
   get rank() { return this.getProp("rank") }
   set rank(value) { this.setProp("rank", value) }
-  isARank(rank) {
-    return this.rank === rank
-  }
 
-  get value() {
-    return spellPosition(positionOf(Card.Ranks, this.rank))
+  // - its "suit" is one of clubs, diamonds, hearts or spades
+  static Suits = ["clubs", "diamonds", "hearts", "spades"]
+  static { this.declareProp("suit", { oneOf: Card.Suits }) }
+  get suit() { return this.getProp("suit") }
+  set suit(value) { this.setProp("suit", value) }
+
+  // - its "color" is one of red, black
+  //   red if it is a diamond or it is a heart
+  //   black otherwise
+  static Colors = ["red", "black"]
+  get color() {
+    if (this.suit === "diamonds" || this.suit === "hearts") return "red"
+    return "black"
   }
 
   get isAFaceCard() {
@@ -33,42 +34,28 @@ export class Card extends TwoSidedView {
     return !this.isAFaceCard
   }
 
-  // - its "suit" is one of clubs, diamonds, hearts or spades
-  //   it "is a (suit)"
-  static Suits = ["clubs", "diamonds", "hearts", "spades"]
-  static { this.declareProp("suit", { oneOf: Card.Suits }) }
-  get suit() { return this.getProp("suit") }
-  set suit(value) { this.setProp("suit", value) }
-  isASuit(suit) {
-    return this.suit === suit
-  }
-
-  // - its "color" is one of red, black
-  //   red if it is a diamond or it is a heart
-  //   black otherwise
-  static Colors = ["red", "black"]
-  get color() {
-    if (this.isASuit("diamonds") || this.isASuit("hearts")) return "red"
-    return "black"
-  }
-
-  get symbol() {
-    if (this.isASuit("clubs")) return "♣"
-    if (this.isASuit("diamonds")) return "♦"
-    if (this.isASuit("hearts")) return "♥"
-    return "♠"
+  /** e.g. the card is the two of spades */
+  isTheRankOfSuit(rank, suit) {
+    return this.rank === rank && this.suit === suit
   }
 
   get name() {
     return core.joined(core.joined(this.rank, "of", " "), this.suit, " ")
   }
 
-  isTheRankOfSuit(rank, suit) {
-    return this.rank === rank && this.suit === suit
+  get value() {
+    return spellPosition(positionOf(Card.Ranks, this.rank))
+  }
+
+  get symbol() {
+    if (this.suit === "clubs") return "♣"
+    if (this.suit === "diamonds") return "♦"
+    if (this.suit === "hearts") return "♥"
+    return "♠"
   }
 
   /** Its short name:  Q♠↓ is the queen of spades, face down */
-  get state() {
+  get shortName() {
     const letter = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
     const arrow = this.isFaceDirection("up") ? "↑" : "↓"
     return letter + this.symbol + arrow
@@ -77,9 +64,9 @@ export class Card extends TwoSidedView {
   /** Its face:  https://www.compart.com/en/unicode/block/U+1F0A0 */
   get picture() {
     let column = this.value
-    if (this.isASuit("clubs")) return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column))
-    if (this.isASuit("diamonds")) return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column))
-    if (this.isASuit("hearts")) return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column))
+    if (this.suit === "clubs") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column))
+    if (this.suit === "diamonds") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column))
+    if (this.suit === "hearts") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column))
     return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(column))
   }
 
@@ -97,25 +84,8 @@ export class Card extends TwoSidedView {
     return h("ui-text", { color: "blue", part: "back" }, "🂠")
   }
 
-  /** what the move scores:  10 on a foundation, 5 from the discards, else nothing */
-  countThePointsForCardOnPile(pile) {
-    if (pile instanceof Foundation) return 10
-    if (this.pile === solitaire.discards) return 5
-    return 0
-  }
-
-  async onClick(event) {
-    if (this.isFaceDirection("up") || this.pile === solitaire.stock) await this.play()
-  }
-
-  static draggable = true
-
-  get pile() {
-    return Pile.ownerOf(this)
-  }
-
   async play() {
-    if (this.pile === solitaire.stock) await solitaire.turnAStockCard()
+    if (solitaire.stock.includes(this)) await solitaire.playFromTheStock()
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
@@ -123,6 +93,7 @@ export class Card extends TwoSidedView {
     }
   }
 
+  /** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
   async putOnPile(pile) {
     /** - the pile it left turns its new last card up;  the move counts, and scores */
     const startPile = this.pile
@@ -137,10 +108,34 @@ export class Card extends TwoSidedView {
     solitaire.score = solitaire.score + points
     return true
   }
+
+  /** what the move scores:  10 on a foundation, 5 from the discards, else nothing */
+  countThePointsForCardOnPile(pile) {
+    if (pile instanceof Foundation) return 10
+    if (solitaire.discards.includes(this)) return 5
+    return 0
+  }
+
+  async onClick(event) {
+    if (this.isFaceDirection("up") || this.pile === solitaire.stock) await this.play()
+  }
+
+  static draggable = true
+
+  get pile() {
+    return Pile.ownerOf(this)
+  }
 }
+core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
+core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
+core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count The Points For A Card On A Pile", undoneAs: "Count The Points For A Card On A Pile" })
+// It's a two sided view:  face up it shows its picture, face down the back every card shares.
+// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 // Ace is low:  ace = 1 ... king = 13
 
-// What a person, test or console calls it
+// Spell for identifying cards
+
+// identifying a card
 
 // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
@@ -156,12 +151,12 @@ export function testCardSetup() {
     core.expect(it2.name, `its name`, "queen of spades", `"queen of spades"`)
     core.expect(it2.color, `its color`, "black", `black`)
     core.expect(it2.value, `its value`, 12, `12`)
-    core.expect(it2.state, `its state`, "Q♠↓", `"Q♠↓"`)
+    core.expect(it2.shortName, `its short name`, "Q♠↓", `"Q♠↓"`)
     core.expect(it2.isAFaceCard, `it is a face card`, true, `yes`)
-    core.expect(it2.isASuit("spades"), `it is a spade`, true, `yes`)
-    core.expect(it2.isASuit("clubs"), `it is a club`, false, `no`)
-    core.expect(it2.isARank("queen"), `it is a queen`, true, `yes`)
-    core.expect(it2.isARank(2), `it is a 2`, false, `no`)
+    core.expect(it2.suit === "spades", `it is a spade`, true, `yes`)
+    core.expect(it2.suit === "clubs", `it is a club`, false, `no`)
+    core.expect(it2.rank === "queen", `it is a queen`, true, `yes`)
+    core.expect(it2.rank === 2, `it is a 2`, false, `no`)
     core.expect(it2.isTheRankOfSuit("queen", "spades"), `it is the queen of spades`, true, `yes`)
     core.expect(it2.isTheRankOfSuit("queen", "clubs"), `it is the queen of clubs`, false, `no`)
     core.expect(it2.picture, `its picture`, "🂭", `"🂭"`)
@@ -169,7 +164,7 @@ export function testCardSetup() {
     core.echoTestAction(`turn it over`)
     it2.turnOver()
     core.expect(it2.isFaceDirection("up"), `it is face up`, true, `yes`)
-    core.expect(it2.state, `its state`, "Q♠↑", `"Q♠↑"`)
+    core.expect(it2.shortName, `its short name`, "Q♠↑", `"Q♠↑"`)
 
     core.echoTestAction(`set seven to a new card whose rank is 7 and suit is hearts`)
     const seven = new Card({ rank: 7, suit: "hearts" })
@@ -196,9 +191,9 @@ export class Deck extends List {
   }
 
   /** Its cards' short names, top to bottom */
-  get state() {
+  get shortName() {
     const cardNames = new List({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.state))
+    this.forEach((card) => cardNames.append(card.shortName))
     return `deck: ${cardNames}`
   }
 }
@@ -209,8 +204,8 @@ export function testANewDeck() {
     core.echoTestAction(`the deck is a new deck`)
     const deck = new Deck()
     core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-    core.expect(deck.filter((card) => card.isARank("queen")).length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
-    core.expect(deck.firstItem?.state, `deck's first card's state`, "A♣↓", `"A♣↓"`)
+    core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
+    core.expect(deck.firstItem?.shortName, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
     core.expect(deck.lastItem?.name, `deck's last card's name`, "king of spades", `"king of spades"`)
     core.echoTestAction(`shuffle the deck`)
     deck.randomize()
@@ -250,9 +245,9 @@ export class Pile extends ViewableList {
   }
 
   /** Its id, then its cards' short names:  stock: Q♠↑ 7♥↓ */
-  get state() {
+  get shortName() {
     let summary = `${this.id}:`
-    this.forEach((card) => (summary = `${summary} ${card.state}`))
+    this.forEach((card) => (summary = `${summary} ${card.shortName}`))
     return summary
   }
 
@@ -286,7 +281,7 @@ export function testPiles() {
     }))
     core.expect(stock.color, `stock's color`, "red", `red`)
     core.expect(stock.value, `stock's value`, 7, `7`)
-    core.expect(stock.state, `stock's state`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
+    core.expect(stock.shortName, `stock's short name`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
 
     /** a card is in one pile at a time */
     const discards = new Pile({ id: "discards" })
@@ -296,7 +291,7 @@ export function testPiles() {
     discards.append(it2)
     core.expect(it2?.pile === discards, `its pile is the discards`, true, `yes`)
     core.expect(stock.length, `the number of cards in the stock`, 1, `1`)
-    core.expect(discards.state, `the discards' state`, "discards: 7♥↓", `"discards: 7♥↓"`)
+    core.expect(discards.shortName, `the discards' short name`, "discards: 7♥↓", `"discards: 7♥↓"`)
   })
 }
 
@@ -309,11 +304,11 @@ core.heading("Klondike Solitaire")
 // Deal seven columns, then build four foundations, ace to king, one suit each:
 // [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
 // The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
+// Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
 
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
-
   get layout() {
     return "stacked"
   }
@@ -331,14 +326,13 @@ export class StockPile extends Pile {
   }
 
   async onClick(event) {
-    await solitaire.turnAStockCard()
+    await solitaire.playFromTheStock()
   }
 }
 
 /** Where the stock's cards go as they're turned over */
 export class DiscardPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
-
   get layout() {
     return "stacked"
   }
@@ -357,7 +351,6 @@ export class DiscardPile extends Pile {
 /** Where a suit is built up, ace to king, one card at a time */
 export class Foundation extends Pile {
   static elementTag = core.defineElement(this, "test-project")
-
   get layout() {
     return "stacked"
   }
@@ -371,7 +364,7 @@ export class Foundation extends Pile {
     return false
   }
 
-  //-- a light grey ace of its suit, face up
+  /** a light grey ace of its suit, face up */
   drawItsPlaceholder() {
     return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
   }
@@ -387,7 +380,6 @@ export class Foundation extends Pile {
 /** A column, built down from king to ace, red and black in turn */
 export class Column extends Pile {
   static elementTag = core.defineElement(this, "test-project")
-
   get layout() {
     return "vertical"
   }
@@ -399,8 +391,7 @@ export class Column extends Pile {
   static itemsDraggable = true
 
   canTake(card) {
-    if (this.isEmpty) return card.isARank("king")
-    return this.color !== card.color && this.value === card.value + 1
+    return (this.isEmpty && card.rank === "king") || (this.color !== card.color && this.value === card.value + 1)
   }
 
   static droppable = true
@@ -414,76 +405,6 @@ export class Solitaire extends App {
   get deck() { return this.getProp("deck") }
   set deck(value) { this.setProp("deck", value) }
 
-  // "stock" is a new stock pile
-  static { this.declareProp("stock", { init: () => new StockPile({ id: "stock" }), early: true }) }
-  get stock() { return this.getProp("stock") }
-  set stock(value) { this.setProp("stock", value) }
-
-  // "discards" is a new discard pile
-  static { this.declareProp("discards", { init: () => new DiscardPile({ id: "discards" }), early: true }) }
-  get discards() { return this.getProp("discards") }
-  set discards(value) { this.setProp("discards", value) }
-
-  // "clubs" is a new foundation with suit = clubs
-  static { this.declareProp("clubs", { init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true }) }
-  get clubs() { return this.getProp("clubs") }
-  set clubs(value) { this.setProp("clubs", value) }
-
-  // "diamonds" is a new foundation with suit = diamonds
-  static { this.declareProp("diamonds", { init: () => new Foundation({ id: "diamonds", suit: "diamonds" }), early: true }) }
-  get diamonds() { return this.getProp("diamonds") }
-  set diamonds(value) { this.setProp("diamonds", value) }
-
-  // "hearts" is a new foundation with suit = hearts
-  static { this.declareProp("hearts", { init: () => new Foundation({ id: "hearts", suit: "hearts" }), early: true }) }
-  get hearts() { return this.getProp("hearts") }
-  set hearts(value) { this.setProp("hearts", value) }
-
-  // "spades" is a new foundation with suit = spades
-  static { this.declareProp("spades", { init: () => new Foundation({ id: "spades", suit: "spades" }), early: true }) }
-  get spades() { return this.getProp("spades") }
-  set spades(value) { this.setProp("spades", value) }
-
-  // "C1" is a new column
-  static { this.declareProp("C1", { init: () => new Column({ id: "C1" }), early: true }) }
-  get C1() { return this.getProp("C1") }
-  set C1(value) { this.setProp("C1", value) }
-
-  // "C2" is a new column
-  static { this.declareProp("C2", { init: () => new Column({ id: "C2" }), early: true }) }
-  get C2() { return this.getProp("C2") }
-  set C2(value) { this.setProp("C2", value) }
-
-  // "C3" is a new column
-  static { this.declareProp("C3", { init: () => new Column({ id: "C3" }), early: true }) }
-  get C3() { return this.getProp("C3") }
-  set C3(value) { this.setProp("C3", value) }
-
-  // "C4" is a new column
-  static { this.declareProp("C4", { init: () => new Column({ id: "C4" }), early: true }) }
-  get C4() { return this.getProp("C4") }
-  set C4(value) { this.setProp("C4", value) }
-
-  // "C5" is a new column
-  static { this.declareProp("C5", { init: () => new Column({ id: "C5" }), early: true }) }
-  get C5() { return this.getProp("C5") }
-  set C5(value) { this.setProp("C5", value) }
-
-  // "C6" is a new column
-  static { this.declareProp("C6", { init: () => new Column({ id: "C6" }), early: true }) }
-  get C6() { return this.getProp("C6") }
-  set C6(value) { this.setProp("C6", value) }
-
-  // "C7" is a new column
-  static { this.declareProp("C7", { init: () => new Column({ id: "C7" }), early: true }) }
-  get C7() { return this.getProp("C7") }
-  set C7(value) { this.setProp("C7", value) }
-
-  // "score" is a number
-  static { this.declareProp("score", { type: "number" }) }
-  get score() { return this.getProp("score") }
-  set score(value) { this.setProp("score", value) }
-
   create() {
     this.deck.forEach((card) => this.stock.append(card))
     core.holdWhile(() => this.restartTheGame())
@@ -491,7 +412,7 @@ export class Solitaire extends App {
 
   draw() {
     return [
-      h("ui-segment", { inverted: true, attach: "top" },
+      h("ui-segment", { inverted: true, attach: "top", color: "" },
         h("ui-toolbar", { class: "GameBar", "aria-label": "Game" },
           h("ui-text", { slot: "title", size: "large", heavy: true }, "Solitaire"),
           h("ui-buttons", { slot: "center", padding: "compact" },
@@ -506,28 +427,85 @@ export class Solitaire extends App {
           h("ui-text", { slot: "right" }, "Score: ", () => this.score)
         )
       ),
-      h("ui-container",
-        h("ui-segment", { appearance: "basic" },
-          h("ui-grid", { columns: "7", spacing: "xs" },
-            core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"]),
-            h("test-project-stock-pile", { id: "stock" }),
-            h("test-project-discard-pile", { id: "discards" }),
-            h("spacer"),
-            h("test-project-foundation", { id: "clubs" }),
-            h("test-project-foundation", { id: "diamonds" }),
-            h("test-project-foundation", { id: "hearts" }),
-            h("test-project-foundation", { id: "spades" }),
-            h("test-project-column", { id: "C1" }),
-            h("test-project-column", { id: "C2" }),
-            h("test-project-column", { id: "C3" }),
-            h("test-project-column", { id: "C4" }),
-            h("test-project-column", { id: "C5" }),
-            h("test-project-column", { id: "C6" }),
-            h("test-project-column", { id: "C7" })
-          )
-        )
-      )
+      h("ui-container", { padding: "small", columns: "7", spacing: "xs" },
+        h("test-project-stock-pile", { id: "stock" }),
+        h("test-project-discard-pile", { id: "discards" }),
+        h("spacer"),
+        h("test-project-foundation", { id: "clubs" }),
+        h("test-project-foundation", { id: "diamonds" }),
+        h("test-project-foundation", { id: "hearts" }),
+        h("test-project-foundation", { id: "spades" }),
+        h("test-project-column", { id: "C1" }),
+        h("test-project-column", { id: "C2" }),
+        h("test-project-column", { id: "C3" }),
+        h("test-project-column", { id: "C4" }),
+        h("test-project-column", { id: "C5" }),
+        h("test-project-column", { id: "C6" }),
+        h("test-project-column", { id: "C7" })
+      ),
+      core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])
     ]
+  }
+  // <number "score"/>
+  static { this.declareProp("score", { type: "number" }) }
+  get score() { return this.getProp("score") }
+  set score(value) { this.setProp("score", value) }
+  // <stock-pile "stock"/>
+  static { this.declareProp("stock", { init: () => new StockPile({ id: "stock" }), early: true }) }
+  get stock() { return this.getProp("stock") }
+  set stock(value) { this.setProp("stock", value) }
+  // <discard-pile "discards"/>
+  static { this.declareProp("discards", { init: () => new DiscardPile({ id: "discards" }), early: true }) }
+  get discards() { return this.getProp("discards") }
+  set discards(value) { this.setProp("discards", value) }
+  // <foundation "clubs" suit=clubs/>
+  static { this.declareProp("clubs", { init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true }) }
+  get clubs() { return this.getProp("clubs") }
+  set clubs(value) { this.setProp("clubs", value) }
+  // <foundation "diamonds" suit=diamonds/>
+  static { this.declareProp("diamonds", { init: () => new Foundation({ id: "diamonds", suit: "diamonds" }), early: true }) }
+  get diamonds() { return this.getProp("diamonds") }
+  set diamonds(value) { this.setProp("diamonds", value) }
+  // <foundation "hearts" suit=hearts/>
+  static { this.declareProp("hearts", { init: () => new Foundation({ id: "hearts", suit: "hearts" }), early: true }) }
+  get hearts() { return this.getProp("hearts") }
+  set hearts(value) { this.setProp("hearts", value) }
+  // <foundation "spades" suit=spades/>
+  static { this.declareProp("spades", { init: () => new Foundation({ id: "spades", suit: "spades" }), early: true }) }
+  get spades() { return this.getProp("spades") }
+  set spades(value) { this.setProp("spades", value) }
+  // <column "C1"/>
+  static { this.declareProp("C1", { init: () => new Column({ id: "C1" }), early: true }) }
+  get C1() { return this.getProp("C1") }
+  set C1(value) { this.setProp("C1", value) }
+  // <column "C2"/>
+  static { this.declareProp("C2", { init: () => new Column({ id: "C2" }), early: true }) }
+  get C2() { return this.getProp("C2") }
+  set C2(value) { this.setProp("C2", value) }
+  // <column "C3"/>
+  static { this.declareProp("C3", { init: () => new Column({ id: "C3" }), early: true }) }
+  get C3() { return this.getProp("C3") }
+  set C3(value) { this.setProp("C3", value) }
+  // <column "C4"/>
+  static { this.declareProp("C4", { init: () => new Column({ id: "C4" }), early: true }) }
+  get C4() { return this.getProp("C4") }
+  set C4(value) { this.setProp("C4", value) }
+  // <column "C5"/>
+  static { this.declareProp("C5", { init: () => new Column({ id: "C5" }), early: true }) }
+  get C5() { return this.getProp("C5") }
+  set C5(value) { this.setProp("C5", value) }
+  // <column "C6"/>
+  static { this.declareProp("C6", { init: () => new Column({ id: "C6" }), early: true }) }
+  get C6() { return this.getProp("C6") }
+  set C6(value) { this.setProp("C6", value) }
+  // <column "C7"/>
+  static { this.declareProp("C7", { init: () => new Column({ id: "C7" }), early: true }) }
+  get C7() { return this.getProp("C7") }
+  set C7(value) { this.setProp("C7", value) }
+
+  async restartTheGame() {
+    this.score = 0
+    await this.dealTheCards()
   }
 
   /** Gather every card into the stock, shuffle it, and deal the columns */
@@ -554,6 +532,7 @@ export class Solitaire extends App {
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
   async playFromTheStock() {
+    // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
     if (this.stock.isEmpty) this.resetTheStock()
     const it = this.stock.lastItem
     it?.turnFaceUp()
@@ -566,27 +545,11 @@ export class Solitaire extends App {
   resetTheStock() {
     const cards = this.discards.clone()
     cards.reverse()
-    cards.forEach((card) => {
-      this.stock.append(card)
-      card.turnFaceDown()
-    })
+    cards.forEach((card) => this.stock.append(card))
+    this.stock.forEach((card) => card.turnFaceDown())
   }
 
-  async onScoreChange(event) {
-    let home = this.clubs.length + this.diamonds.length
-    home = home + this.hearts.length + this.spades.length
-    if (home === 52) await core.alert("You won!")
-  }
-
-  async restartTheGame() {
-    this.score = 0
-    await this.dealTheCards()
-  }
-
-  async turnAStockCard() {
-    await this.playFromTheStock()
-  }
-
+  /** Play every card that can go somewhere, until none can */
   async autoPlay() {
     let anythingChanged = false
     if (!this.discards.isEmpty) {
@@ -612,7 +575,7 @@ export class Solitaire extends App {
       const faceUpCards = pile.filter((card) => card.isFaceDirection("up"))
       if (faceUpCards.isEmpty) return
       const testCard = faceUpCards.firstItem
-      if (testCard.isARank("king") && testCard === pile.firstItem) return
+      if (testCard.rank === "king" && testCard === pile.firstItem) return
       if (await testCard.play()) {
         anythingChanged = true
         await core.pauseFor(500, "msec")
@@ -621,6 +584,7 @@ export class Solitaire extends App {
     if (anythingChanged) await this.autoPlay()
   }
 
+  /** Turn up a face-down card from a column, at random, onto the discards */
   async cheat() {
     const remainingPiles = core.filter(core.everyThing(Column), (pile) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
     if (core.isEmpty(remainingPiles)) return
@@ -633,28 +597,27 @@ export class Solitaire extends App {
     await core.pauseFor(300, "msec")
     card.lifted = false
   }
+
+  async onScoreChange(event) {
+    let home = this.clubs.length + this.diamonds.length
+    home = home + this.hearts.length + this.spades.length
+    if (home === 52) {
+      await core.alert("You won!", "New game")
+      await this.restartTheGame()
+    }
+  }
 }
 export const solitaire = new Solitaire()
-
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["R"], undoneAs: "Restart" })
-
-/** a click on the stock:  one step to undo, where the deal's own turn isn't */
-core.describeAction(Solitaire, "turnAStockCard", { title: "Turn A Stock Card", undoneAs: "Turn Card" })
-
-core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
-
-/** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
-core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
-
-/** Play every card that can go somewhere, until none can */
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], undoneAs: "Restart The Game" })
+core.describeAction(Solitaire, "dealTheCards", { title: "Deal The Cards", undoneAs: "Deal The Cards" })
+core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Turn Card" })
+core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], undoneAs: "Auto Play" })
-
-/** Turn up a face-down card from a column, at random, onto the discards */
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
 
-//-- play the card on click if it is a legal move
+// play the card on click if it is a legal move
 
-//-- drop the card on the pile if it is a legal move
+// drop the card on the pile if it is a legal move
 
 core.heading("The piles")
 ///////////////
@@ -695,7 +658,7 @@ export function testTheMoves() {
     core.expect(core.canTake(column, queen), `the column can take the queen`, true, `yes`)
     core.echoTestAction(`add the queen to the column`)
     column.append(queen)
-    core.expect(column.state, `the state of the column`, "T1: K♠↑ Q♥↑", `"T1: K♠↑ Q♥↑"`)
+    core.expect(column.shortName, `the short name of the column`, "T1: K♠↑ Q♥↑", `"T1: K♠↑ Q♥↑"`)
     core.expect(core.canGiveUp(column, queen), `the column can give up the queen`, true, `yes`)
     core.echoTestAction(`turn the queen face down`)
     queen.turnFaceDown()

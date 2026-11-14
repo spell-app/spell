@@ -4,41 +4,22 @@
 // Las cartas, el mazo y las pilas son los de este proyecto:  `Carta`, `Mazo` y `Pila`.
 
 solitario es una aplicación
-	su "puntuación" es un número
-	su "movimientos" es un número
-		// Las cartas jugadas en este juego:  voltear la reserva no cuenta
-	su "pista" es texto
-		// Lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. (+10), un arrastre que no cae en nada, una victoria
+	// Cada pila se declara donde se dibuja, `<columna "C1"/>`, y también la puntuación, `<número "puntuación"/>`
 	cuando su puntuación cambia
 		// el cambio de una propiedad es un evento:  cada uno corre justo después del cambio
 		// cada carta en una fundación:  el juego está ganado
 		poner colocadas a el número de cartas en los tréboles + el número de cartas en los diamantes
 		poner colocadas a colocadas + el número de cartas en los corazones + el número de cartas en las espadas
-		si colocadas es 52: poner la pista a " -- ¡Ganaste!"
+		si colocadas es 52
+			avisar "¡Ganaste!" con "Juego nuevo"
+			reiniciar el juego
 	al cambiar sus movimientos
 		// una carta jugada:  la última pista se va
 		limpiar la pista
 	"mazo" es un nuevo mazo
-
-	grupo "Pilas"
-		// Una de cada, hecha con el solitario
-	"reserva" es una nueva pila de reserva
-	"descartes" es una nueva pila de descartes
-	"tréboles" es una nueva fundación con palo = tréboles
-	"diamantes" es una nueva fundación con palo = diamantes
-	"corazones" es una nueva fundación con palo = corazones
-	"espadas" es una nueva fundación con palo = espadas
-	"C1" es una nueva columna
-	"C2" es una nueva columna
-	"C3" es una nueva columna
-	"C4" es una nueva columna
-	"C5" es una nueva columna
-	"C6" es una nueva columna
-	"C7" es una nueva columna
-	al crearlo
+	al crear el solitario
 		// Cada carta del mazo a la reserva
-		para carta en el mazo
-			agregar eso a la reserva
+		agregar cada carta del mazo a la reserva
 
 	grupo "Repartir"
 		// Cada uno se detiene un momento, así el reparto se anima
@@ -46,11 +27,11 @@ solitario es una aplicación
 		// Los descartes, volteados, de vuelta a la reserva
 		poner cartas a una copia de la lista (los descartes) como una pila
 		invertir las cartas
-		para carta en las cartas
-			agregar eso a la reserva
-			voltear la carta boca abajo
-	para robar de la reserva
+		agregar cada carta de las cartas a la reserva
+		voltear cada carta de la reserva boca abajo
+	para robar de la reserva, deshacible como "Voltear carta"
 		// Voltea la siguiente carta de la reserva, sobre los descartes:  los descartes de vuelta a la reserva cuando está vacía
+		// - un clic en la reserva, un paso para deshacer;  el del reparto ninguno, pues empieza el juego
 		si la reserva está vacía
 			rehacer la reserva
 		obtener la última carta de la reserva
@@ -58,10 +39,6 @@ solitario es una aplicación
 		// lo que tarda su giro (styles.css), así se voltea antes de moverse
 		pausar 300 mseg
 		agregar eso a los descartes
-	para voltear la reserva
-		// Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es
-		deshacible como "Voltear carta"
-		robar de la reserva
 	para repartir las cartas
 		// Junta cada carta en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha
 		para carta en el mazo
@@ -75,7 +52,7 @@ solitario es una aplicación
 		para fila desde 1 hasta 7
 			para lugar desde fila hasta 7
 				agregar la última carta de la reserva al elemento lugar de las columnas
-				si lugar es fila
+				si lugar es igual a fila
 					voltear la última carta de (el elemento lugar de las columnas) boca arriba
 				pausar 50 mseg
 		robar de la reserva
@@ -84,7 +61,6 @@ solitario es una aplicación
 		// Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
 	para "reiniciar el juego" con título "Reiniciar"
 		atajo N
-		deshacible
 		limpiar la puntuación
 		limpiar los movimientos
 		limpiar la pista
@@ -92,7 +68,6 @@ solitario es una aplicación
 	para "jugar solo" con título "Jugar solo"
 		// Juega cada carta que puede ir a algún lado, hasta que ninguna pueda
 		atajo A
-		deshacible
 		poner hubo cambios a no
 		si los descartes no está vacía
 			poner candidata a la última carta de los descartes
@@ -121,7 +96,6 @@ solitario es una aplicación
 	para "hacer trampa" con título "Trampa"
 		// Voltea una carta boca abajo de una columna, al azar, sobre los descartes
 		atajo C
-		deshacible
 		poner pilas restantes a las pilas en las columnas donde no está vacía y su primera carta está boca abajo
 		si pilas restantes está vacía devolver
 		poner la pila a una pila al azar de pilas restantes
@@ -148,7 +122,7 @@ solitario es una aplicación
 					<acción "deshacer" solo-icono/>
 					<acción "rehacer" solo-icono/>
 				</botones>
-				<texto slot="derecha">Movimientos: {los movimientos}  ·  Puntos: {la puntuación}{la pista}</texto>
+				<texto slot="derecha">Movimientos: <número "movimientos"/>  ·  Puntos: <número "puntuación"/><texto "pista"/></texto>
 			</barra-herramientas>
 		</segmento>
 		<contenedor relleno="pequeño" columnas="7" separacion="xs">
@@ -163,10 +137,10 @@ solitario es una aplicación
 			<pila-de-reserva "reserva"/>
 			<pila-de-descartes "descartes"/>
 			<columna/>
-			<fundación "tréboles"/>
-			<fundación "diamantes"/>
-			<fundación "corazones"/>
-			<fundación "espadas"/>
+			<fundación "tréboles" palo=tréboles/>
+			<fundación "diamantes" palo=diamantes/>
+			<fundación "corazones" palo=corazones/>
+			<fundación "espadas" palo=espadas/>
 			<columna "C1"/>
 			<columna "C2"/>
 			<columna "C3"/>
@@ -234,52 +208,50 @@ una pila
 	cuando una carta se suelta sobre ella
 		poner la carta en la pila
 
-## Las pilas
+grupo "Las pilas"
 // Cada tipo de pila, qué puede tomar o soltar, y cómo están sus cartas.
 // Mientras está vacía, muestra su marcador, si tiene uno.
 
-una "pila de reserva" es una pila
+una "pila de reserva" es una pila con disposición "apilada"
 	// Las cartas aún sin jugar, boca abajo:  un clic voltea la siguiente, así que no se le puede quitar ninguna
-	su "disposición" es apilada
 	nunca puede tomar una carta
 	nunca puede soltar una carta
 	para dibujar su marcador
 		// Una carta gris claro, boca abajo
-		<texto part="marcador">🂠</texto>
+		<texto>🂠</texto>
 	al clic
 		// Vacía:  un clic vuelve a voltear los descartes;  un clic en una de sus cartas es de la carta
-		voltear la reserva
+		robar de la reserva
 
-una "pila de descartes" es una pila
+una "pila de descartes" es una pila con disposición "apilada"
 	// Adonde van las cartas de la reserva al voltearse
-	su "disposición" es apilada
 	nunca puede tomar una carta
 	sus cartas son arrastrables cuando la carta es su última carta
 		// solo su carta de arriba se puede levantar
 
-una "fundación" es una pila
+una "fundación" es una pila con disposición "apilada"
 	// Donde se arma un palo, del as al rey, una carta a la vez
-	su "disposición" es apilada
 	su "palo" es un palo de carta
 	nunca puede soltar una carta
 	es soltable cuando
 		// una carta a la vez, la última de su pila:  su palo, uno más alto
-		si la carta no es la última carta de la pila de la carta devolver no
-		devolver su palo es el palo de la carta y su valor + 1 es el valor de la carta
+		devolver no si la carta no es la última carta de la pila de la carta
+		devolver su palo es el palo de la carta y
+		  su valor + 1 es el valor de la carta
 	para dibujar su marcador
 		// Un as gris claro de su palo, boca arriba
-		<texto part="marcador">{la imagen de una nueva carta cuyo rango es as y palo es su palo}</texto>
+		<texto>{la imagen de una nueva carta cuyo rango es as y palo es su palo}</texto>
 
-una "columna" es una pila
+una "columna" es una pila con disposición "vertical"
 	// Una columna, armada hacia abajo del rey al as, rojo y negro alternados
-	su "disposición" es vertical
 	sus cartas son arrastrables cuando la carta está boca arriba
 		// sus cartas boca arriba se pueden levantar, con cada carta sobre ellas
 	es soltable cuando
 		// un rey en una vacía;  si no, uno más bajo, del otro color
-		si está vacía
-			devolver la carta es un rey
-		devolver su color no es el color de la carta y su valor es el valor de la carta + 1
+		está vacía y la carta es un rey
+		o
+		su color no es el color de la carta y
+		  su valor es el valor de la carta + 1
 
 	para probar los movimientos
 		poner la columna a una nueva columna con id "C1"
@@ -293,7 +265,7 @@ una "columna" es una pila
 		la columna puede tomar la jota debería ser no
 		la columna puede tomar la dama debería ser sí
 		agregar la dama a la columna
-		el estado de la columna debería ser "C1: R♠↑ D♥↑"
+		el nombre corto de la columna debería ser "C1: R♠↑ D♥↑"
 		la columna puede soltar la dama debería ser sí
 		voltear la dama boca abajo
 		la columna puede soltar la dama debería ser no

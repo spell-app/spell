@@ -4,7 +4,7 @@ core.heading("Thing references:  one thing by its type and its name, or its plac
 /////////////////////////////////////////////////////////////////////////
 // ## Thing references:  one thing by its type and its name, or its place
 /////////////////////////////////////////////////////////////////////////
-//-- epic `drawable-thing` P19:  `tableau T1` is the tableau named T1;  `the first tableau` the first one made.
+// epic `drawable-thing` P19:  `tableau T1` is the tableau named T1;  `the first tableau` the first one made.
 
 export class Pile extends List<Thing> {
   static instanceType = Thing

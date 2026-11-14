@@ -122,6 +122,8 @@ export class TableElement extends SpellElement<Table> {
 }
 core.useElement(Table, TableElement)
 
+core.describeAction(Diner, "remove", { title: "Remove It", undoneAs: "Remove It" })
+
 /** a diner sits at one table */
 // -----------
 core.heading("Bill Splitter")
@@ -171,6 +173,11 @@ export class BillSplitter extends App {
     this.diners.append(new Diner({ name: "Cleo", amount: 31.25 }))
   }
 
+  /** An empty row, for the next person */
+  addSomeone() {
+    this.diners.append(new Diner({ name: "", amount: 0 }))
+  }
+
   /** The tip, the diners, then the sums */
   @drawn draw() {
     return (
@@ -211,10 +218,6 @@ export class BillSplitter extends App {
       </ui-container>
     )
   }
-
-  addSomeone() {
-    this.diners.append(new Diner({ name: "", amount: 0 }))
-  }
 }
 
 /**
@@ -239,9 +242,7 @@ export class BillSplitterElement extends SpellElement<BillSplitter> {
 }
 core.useElement(BillSplitter, BillSplitterElement)
 export const billSplitter = new BillSplitter()
-
-/** An empty row, for the next person */
-core.describeAction(BillSplitter, "addSomeone", { title: "Add Someone", icon: "plus" })
+core.describeAction(BillSplitter, "addSomeone", { title: "Add Someone", icon: "plus", undoneAs: "Add Someone" })
 // -----------
 if (!core.isCarryingOver) billSplitter.start()
 // -----------

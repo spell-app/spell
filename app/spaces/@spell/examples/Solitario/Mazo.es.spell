@@ -7,18 +7,18 @@ un "mazo" es una lista de cartas
 		para rango en rangos de carta
 			para palo en palos de carta
 				agregar una nueva carta con rango = el rango, palo = el palo al mazo
-	su "estado" es
+	su "nombre corto" es
 		// Los nombres cortos de sus cartas, de arriba abajo
 		poner nombres a una nueva lista de texto
 		para carta en el mazo
-			agregar el estado de la carta a nombres
+			agregar el nombre corto de la carta a nombres
 		devolver "mazo: " + nombres
 
 	para probar la creación del mazo
 		el mazo es un nuevo mazo
 		el número de cartas en el mazo debería ser 52
 		el número de (cartas en el mazo donde es una dama) debería ser 4
-		el estado de la primera carta del mazo debería ser "A♣↓"
+		el nombre corto de la primera carta del mazo debería ser "A♣↓"
 		el nombre de la última carta del mazo debería ser "rey de espadas"
 		barajar el mazo
 		el número de cartas en el mazo debería ser 52

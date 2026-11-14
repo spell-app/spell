@@ -78,6 +78,7 @@ export class Tarea extends View {
     return Agenda.ownerOf(this)
   }
 }
+core.describeAction(Tarea, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
 
 export function testMarcarUna() {
   return core.test("test marcar una", function testMarcarUna() {
@@ -120,6 +121,7 @@ export class GuardiánDeTareas extends Thing {
     return new Tarea({ título: título })
   }
 }
+core.describeAction(GuardiánDeTareas, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Guardadas en este navegador")
 /////////////////////////////////
@@ -174,6 +176,9 @@ export const almacénDelNavegador = core.place(new AlmacénDelNavegador(), {
   unclearNumbers: ","
 })
 
+core.describeAction(TareaDelNavegador, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
+
+core.describeAction(GuardiánDelNavegador, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Guardadas en un archivo JSON en el servidor")
 /////////////////////////////////////////////////
@@ -231,6 +236,9 @@ export const archivosDeTareas = core.place(new ArchivoDeTareas(), {
   unclearNumbers: ","
 })
 
+core.describeAction(TareaDelServidor, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
+
+core.describeAction(GuardiánDelServidor, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Guardadas en un archivo CSV en el servidor")
 ////////////////////////////////////////////////
@@ -290,6 +298,9 @@ export const hojaDeTareas = core.place(new HojaDeTareas(), {
   unclearNumbers: ","
 })
 
+core.describeAction(TareaDeLaHoja, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
+
+core.describeAction(GuardiánDeLaHoja, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Guardadas en tu cuenta de atmosphere")
 //////////////////////////////////////////
@@ -353,6 +364,9 @@ export const cieloDeTareas = core.place(new CieloDeTareas(), {
   unclearNumbers: ","
 })
 
+core.describeAction(TareaDelCielo, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
+
+core.describeAction(GuardiánDelCielo, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Lista de tareas")
 /////////////////////
@@ -413,6 +427,7 @@ export class Agenda extends ViewableList {
 
   static exclusive = true
 }
+core.describeAction(Agenda, "guardarElOrden", { title: "Guardar El Orden", undoneAs: "Guardar El Orden" })
 
 // en la página, sus tareas se pueden arrastrar a otro lugar:  se mueven con el puntero, deslizándose
 
@@ -532,6 +547,34 @@ export class ListaDeTareas extends App {
     this.borrador = ""
   }
 
+  mostrarTodas() {
+    this.tareas.mostrando = "todas"
+  }
+  get mostrarTodasIsSelected() {
+    return this.tareas.estáMostrandoMostrando("todas")
+  }
+
+  mostrarPendientes() {
+    this.tareas.mostrando = "pendientes"
+  }
+  get mostrarPendientesIsSelected() {
+    return this.tareas.estáMostrandoMostrando("pendientes")
+  }
+
+  mostrarHechas() {
+    this.tareas.mostrando = "hechas"
+  }
+  get mostrarHechasIsSelected() {
+    return this.tareas.estáMostrandoMostrando("hechas")
+  }
+
+  quitarLasTareasHechas() {
+    this.tareas.filter((tarea) => tarea.estáHecha).forEach((tarea) => {
+      tarea.tirar()
+      this.tareas.remove(tarea)
+    })
+  }
+
   draw() {
     // El editor de propiedades edita todas las tareas seleccionadas a la vez:  una propiedad en la que no coinciden muestra Varios
     return h("es-contenedor",
@@ -589,47 +632,19 @@ export class ListaDeTareas extends App {
       )
     )
   }
-
-  mostrarTodas() {
-    this.tareas.mostrando = "todas"
-  }
-
-  get mostrarTodasIsSelected() {
-    return this.tareas.estáMostrandoMostrando("todas")
-  }
-
-  mostrarPendientes() {
-    this.tareas.mostrando = "pendientes"
-  }
-
-  get mostrarPendientesIsSelected() {
-    return this.tareas.estáMostrandoMostrando("pendientes")
-  }
-
-  mostrarHechas() {
-    this.tareas.mostrando = "hechas"
-  }
-
-  get mostrarHechasIsSelected() {
-    return this.tareas.estáMostrandoMostrando("hechas")
-  }
-
-  quitarLasTareasHechas() {
-    this.tareas.filter((tarea) => tarea.estáHecha).forEach((tarea) => {
-      tarea.tirar()
-      this.tareas.remove(tarea)
-    })
-  }
 }
 export const listaDeTareas = new ListaDeTareas()
+core.describeAction(ListaDeTareas, "llenarLaAgenda", { title: "Llenar La Agenda", undoneAs: "Llenar La Agenda" })
+core.describeAction(ListaDeTareas, "agregarLaTareaInicialTítuloConPrioridadNivel", { title: "Agregar La Tarea Inicial Título Como Texto Con Prioridad Nivel Como Texto", undoneAs: "Agregar La Tarea Inicial Título Como Texto Con Prioridad Nivel Como Texto" })
+core.describeAction(ListaDeTareas, "agregarElBorrador", { title: "Agregar El Borrador", undoneAs: "Agregar El Borrador" })
+core.describeAction(ListaDeTareas, "mostrarTodas", { title: "Todas", icon: "list", selectedWhen: "mostrarTodasIsSelected", undoneAs: "Todas" })
+core.describeAction(ListaDeTareas, "mostrarPendientes", { title: "Pendientes", icon: "square outline", selectedWhen: "mostrarPendientesIsSelected", undoneAs: "Pendientes" })
+core.describeAction(ListaDeTareas, "mostrarHechas", { title: "Hechas", icon: "check square outline", selectedWhen: "mostrarHechasIsSelected", undoneAs: "Hechas" })
+core.describeAction(ListaDeTareas, "quitarLasTareasHechas", { title: "Quitar las tareas hechas", icon: "trash alternate outline", undoneAs: "Quitar las tareas hechas" })
 
 // Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián
 
 // Qué tareas muestra la lista:  la barra de herramientas marca la que muestra
-core.describeAction(ListaDeTareas, "mostrarTodas", { title: "Todas", icon: "list", selectedWhen: "mostrarTodasIsSelected" })
-core.describeAction(ListaDeTareas, "mostrarPendientes", { title: "Pendientes", icon: "square outline", selectedWhen: "mostrarPendientesIsSelected" })
-core.describeAction(ListaDeTareas, "mostrarHechas", { title: "Hechas", icon: "check square outline", selectedWhen: "mostrarHechasIsSelected" })
-core.describeAction(ListaDeTareas, "quitarLasTareasHechas", { title: "Quitar las tareas hechas", icon: "trash alternate outline" })
 
 // Los botones de la barra de herramientas, y el clic derecho en la lista:  las mismas acciones
 // su "menú de tareas" es un menú de "mostrar todas", "mostrar pendientes", "mostrar hechas", "-" y "quitar las tareas hechas"

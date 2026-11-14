@@ -160,7 +160,13 @@ export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
       panel={() => (
         <div class="SpellMenuPanel">
           {/* ticks:  room for one, as the projects have, so the icons line up with theirs */}
-          <ui-menu direction="vertical" size="small" ticks="" class="SpellMenuHome" aria-label={appTexts.text("home")}>
+          <ui-menu
+            direction="vertical"
+            size="small"
+            ticks=""
+            class={["SpellMenuHome", { wide: root().projects.length > PROJECTS_PER_COLUMN }]}
+            aria-label={appTexts.text("home")}
+          >
             <Actions.showProjectChooser menu />
             <Actions.createApp menu />
             <Divider />

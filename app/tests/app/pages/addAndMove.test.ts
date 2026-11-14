@@ -733,6 +733,94 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
+  test("in Edit, the game's own right-click menu comes first, a thick line, then the editor's (T120)", async () => {
+    const other = await context.newPage()
+    await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
+    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForTimeout(7000)
+    await other.evaluate(() => (window as unknown as { Inspector: { letGo(): void } }).Inspector.letGo())
+    // a pile, and the top card of the last one:  each its own element, the game's menu up their chain
+    const [pile, card] = await other.evaluate(() => {
+      const found: Element[] = []
+      const walk = (root: Document | ShadowRoot) => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === "solitaire-column") found.push(element)
+          if (element.shadowRoot) walk(element.shadowRoot)
+        }
+      }
+      walk(document)
+      const box = (element: Element, low = false) => {
+        const { x, y, width, height } = element.getBoundingClientRect()
+        return { x: x + width / 2, y: low ? y + height - 6 : y + Math.min(height / 2, 30) }
+      }
+      const last = found.at(-1)!
+      return [box(found[0]!, true), box(last.querySelector(":scope > solitaire-card:last-child")!)]
+    })
+    /** The part menu's rows:  `=====` for the thick line, `---` for a thin one, `(off)` when greyed. */
+    const rows = () =>
+      other.evaluate(() =>
+        [...document.querySelector("ui-popup.PartMenu ui-menu")!.children].map((element) => {
+          if (element.getAttribute("kind") === "divider") {
+            return element.classList.contains("ProgramMenuEnd") ? "=====" : "---"
+          }
+          const { action } = element as Element & { action?: { title: string } }
+          const title = action?.title ?? element.textContent!.trim()
+          return element.matches(":state(disabled)") ? `${title} (off)` : title
+        })
+      )
+    const game = ["Auto Play", "Cheat", "Restart", "---"]
+
+    for (const at of [pile, card]) {
+      await other.mouse.click(at.x, at.y, { button: "right" })
+      await other.waitForTimeout(SETTLE_MS)
+      const shown = await rows()
+      expect(shown.slice(0, 4)).toEqual(game)
+      expect(shown[4]).toMatch(/^Undo/)
+      expect(shown[5]).toMatch(/^Redo/)
+      expect(shown[6]).toBe("=====")
+      expect(shown.slice(7, 15).map((row) => row.replace(" (off)", ""))).toEqual([
+        "Cut",
+        "Copy",
+        "Paste",
+        "Duplicate",
+        "Delete",
+        "---",
+        "Show in Code",
+        "Inspect"
+      ])
+      await other.keyboard.press("Escape")
+      await other.waitForTimeout(300)
+    }
+
+    // the thick line is heavier than the editor's own
+    await other.mouse.click(card.x, card.y, { button: "right" })
+    await other.waitForTimeout(SETTLE_MS)
+    const lines = await other.evaluate(() =>
+      [...document.querySelectorAll("ui-popup.PartMenu ui-action[kind=divider]")].map(
+        (divider) => getComputedStyle(divider.shadowRoot!.querySelector("[part~=item]")!).borderTopWidth
+      )
+    )
+    expect(lines[0]).toBe("3px")
+    expect(lines.slice(1).every((width) => width === "1px")).toBe(true)
+
+    // Cheat runs in the program, as in Run:  the menu closes, and its Undo says so
+    const cheat = await other.evaluate(() => {
+      const item = [...document.querySelectorAll("ui-popup.PartMenu ui-action")].find(
+        (action) => (action as Element & { action?: { title: string } }).action?.title === "Cheat"
+      )!
+      const { x, y, width, height } = item.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
+      return { x: x + width / 2, y: y + height / 2 }
+    })
+    await other.mouse.click(cheat.x, cheat.y)
+    await other.waitForTimeout(SETTLE_MS)
+    expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
+    await other.mouse.click(card.x, card.y, { button: "right" })
+    await other.waitForTimeout(SETTLE_MS)
+    expect((await rows())[4]).toBe("Undo Cheat")
+    await other.keyboard.press("Escape")
+    await other.close()
+  })
+
   test("a project's code closes, and stays closed;  Show in Code opens it", async () => {
     const code = page.locator(".InputEditor .monaco-editor")
     expect(await code.count()).toBe(1)

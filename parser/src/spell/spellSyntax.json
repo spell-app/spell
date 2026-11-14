@@ -29,7 +29,7 @@
           "ruleNames": ["block"],
           "internal": false,
           "file": "src/spell/rules/Block.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "`Block`s are generally the root entity that we parse in spell -- a top-level construct, e.g. used to parse an entire file.",
           "syntaxes": [],
           "aliases": []
@@ -1038,6 +1038,35 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "IsListedValue",
+          "ruleNames": ["is_listed_value"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsListedValue.ts",
+          "line": 18,
+          "purpose": "`{lhs} is [not] a`/`an {value}`, comparing the property that lists the value (epic `language` P39, C4).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not_a} {expression:number}",
+              "example": "card is a 2",
+              "outputs": {
+                "js": {
+                  "code": "(card.rank === 2)"
+                },
+                "ts": {
+                  "code": "(card.rank === 2)"
+                },
+                "py": {
+                  "code": "(card.rank == 2)"
+                }
+              }
+            },
+            {
+              "syntax": "{operator:is_or_is_not_a} {expression:constant}"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "IsSameTypeAs",
           "ruleNames": ["is_same_type_as"],
           "internal": false,
@@ -1777,20 +1806,6 @@
           "aliases": []
         },
         {
-          "className": "IsListedValue",
-          "ruleNames": ["is_listed_value"],
-          "internal": false,
-          "file": "src/spell/rules/expressions/IsListedValue.ts",
-          "line": 16,
-          "purpose": "`{lhs} is [not] a`/`an {value}`, comparing the property that lists the value (epic `language` P39, C4).",
-          "syntaxes": [
-            {
-              "syntax": "{operator:is_or_is_not_a} {expression:constant}"
-            }
-          ],
-          "aliases": ["expression_suffix"]
-        },
-        {
           "className": "MeasureIn",
           "ruleNames": ["measure_in"],
           "internal": false,
@@ -2179,13 +2194,13 @@
               "example": "a \"card\" is a thing\na \"pile\" is a list of cards\nsolitaire is an app\n\t\"stock\" is a new pile\n\tto play a card\n\t\tprint the stock",
               "outputs": {
                 "js": {
-                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"stock\", { init: () => new Pile({ id: \"stock\" }), early: true }) }\n  get stock() { return this.getProp(\"stock\") }\n  set stock(value) { this.setProp(\"stock\", value) }\n}\nexport const solitaire = new Solitaire()\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })"
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })\nexport class Pile extends List {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"stock\", { init: () => new Pile({ id: \"stock\" }), early: true }) }\n  get stock() { return this.getProp(\"stock\") }\n  set stock(value) { this.setProp(\"stock\", value) }\n}\nexport const solitaire = new Solitaire()"
                 },
                 "ts": {
-                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pile({ id: \"stock\" }), early: true })\n  accessor stock!: Pile\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitaire\", [\n    { name: \"stock\", kind: \"json\", description: \"Its stock.\" }\n  ])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })"
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pile({ id: \"stock\" }), early: true })\n  accessor stock!: Pile\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitaire\", [\n    { name: \"stock\", kind: \"json\", description: \"Its stock.\" }\n  ])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    def play(self) -> None:\n        core.console.log(solitaire.stock)\n\nclass Pile(List):\n    item_type = Card\n\nclass Solitaire(App):\n    element_tag = \"syntax-block-app\"\n\n    stock = prop(init=lambda: Pile(id=\"stock\"), early=True)\n\nsolitaire = Solitaire()\ncore.describe_action(Card, \"play\", {\"title\": \"Play A Card\", \"undone_as\": \"Play A Card\"})"
+                  "code": "class Card(Thing):\n    def play(self) -> None:\n        core.console.log(solitaire.stock)\n\ncore.describe_action(Card, \"play\", {\"title\": \"Play A Card\", \"undone_as\": \"Play A Card\"})\n\nclass Pile(List):\n    item_type = Card\n\nclass Solitaire(App):\n    element_tag = \"syntax-block-app\"\n\n    stock = prop(init=lambda: Pile(id=\"stock\"), early=True)\n\nsolitaire = Solitaire()"
                 }
               }
             }
@@ -3011,7 +3026,7 @@
           "ruleNames": ["changed_property"],
           "internal": false,
           "file": "src/spell/rules/events/ChangedProperty.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "The property a change event names, `score` in `- when its score changes:` (epic `debut` P30).",
           "syntaxes": [],
           "aliases": []
@@ -5951,7 +5966,7 @@
           "ruleNames": ["draw_it"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawIt.ts",
-          "line": 54,
+          "line": 56,
           "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
           "syntaxes": [
             {
@@ -6532,7 +6547,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 29,
+          "line": 35,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {
@@ -8881,7 +8896,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 87,
+          "line": 88,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -9452,8 +9467,8 @@
           "purpose": "`(else|otherwise) if {condition} (then|:)?` -- else-if branch, chained after `if`.",
           "syntaxes": [
             {
-              "syntax": "(else|otherwise) if {condition:expression} (then|:)? {statement_body}?",
-              "example": "else if a",
+              "syntax": "(otherwise|else) if {condition:expression} (then|:)? {statement_body}?",
+              "example": "otherwise if a",
               "outputs": {
                 "js": {
                   "code": "else if (a) {}"
@@ -9478,8 +9493,8 @@
           "purpose": "`(else|otherwise) :?` -- else branch.",
           "syntaxes": [
             {
-              "syntax": "(else|otherwise) :? {statement_body}?",
-              "example": "else",
+              "syntax": "(otherwise|else) :? {statement_body}?",
+              "example": "otherwise",
               "outputs": {
                 "js": {
                   "code": "else {}"

@@ -81,6 +81,7 @@ export class LiveBox extends App {
   }
 }
 export const liveBox = new LiveBox()
+core.describeAction(LiveBox, "addOne", { title: "Add One", undoneAs: "Add One" })
 
 on("a-recipe-change", (event) => {
   const { recipe } = event

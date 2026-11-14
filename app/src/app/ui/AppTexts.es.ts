@@ -365,7 +365,6 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorProperties: "Propiedades",
   inspectorClose: "Cerrar el Inspector",
   inspectorHide: "Ocultar esta tarjeta",
-  inspectorLetGo: "Soltar {part} (Esc)",
   inspectorExpandAll: "Desplegar todo",
   inspectorCollapseAll: "Plegar todo",
   inspectorPanels: "Mostrar u ocultar paneles",

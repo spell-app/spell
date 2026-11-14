@@ -257,6 +257,15 @@ export class SpellKeywords {
     /^\s*(?:otherwise|else|sino|de\s+lo\s+contrario|si\s+no(?=\s*:|\s+si\b))(?![\p{L}\p{M}\d_-])/u
 
   /**
+   * A line that goes on onto the next, as it's typed:  one ending in `and` or `or`, in every language spell reads
+   * (`and_or`;  epic `language` P55, Q53).
+   * - Enter after one indents the next line, which the parser joins to it (`JoinedLines`).
+   * - Monaco's (`SpellMonaco`) and VS Code's (`language-configuration.json`, by hand):  a test checks they match,
+   *   and that it knows every pack's words.
+   */
+  static CONTINUES_LINE = /(?<![\p{L}\p{M}\d_-])(?:and|or|y|e|o|u)\s*$/u
+
+  /**
    * The text before the caret ending in an opening tag, so Enter goes in a level (epic `editor` I65):
    * `<content>`, `<toolbar class="x">`, `<pile "stock">`.
    * - Not a tag that closes itself (`<action "x"/>`), one HTML never closes (`<br>`), nor a closing tag (`</x>`).

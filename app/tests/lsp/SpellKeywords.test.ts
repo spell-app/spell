@@ -120,6 +120,20 @@ describe("SpellKeywords", () => {
       expect(DECREASE_INDENT.test("\telsewhere")).toBe(false)
     })
 
+    test("a line ending in `and` / `or` goes on, in every pack's words;  VS Code's rule the same (P55, Q53)", () => {
+      const { CONTINUES_LINE } = LSP.SpellKeywords
+      for (const line of ["\tif it is empty and", "\tits value is 1 or ", "\tsi está vacía y", "\tsu valor es 1 o"]) {
+        expect(CONTINUES_LINE.test(line), line).toBe(true)
+      }
+      expect(CONTINUES_LINE.test("\tset the band")).toBe(false)
+      expect(CONTINUES_LINE.test("\tprint the score")).toBe(false)
+      const rules = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).onEnterRules as { beforeText: unknown }[]
+      expect(rules.map((rule) => rule.beforeText)).toContainEqual({
+        pattern: CONTINUES_LINE.source,
+        flags: CONTINUES_LINE.flags
+      })
+    })
+
     test("VS Code's is the same as Monaco's", () => {
       const { pattern, flags } = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).indentationRules
         .decreaseIndentPattern
@@ -192,7 +206,7 @@ describe("SpellLanguageService, in Spanish", () => {
   })
 
   test("completion at a statement's start offers Spanish's words, not English's", () => {
-    const line = mazoText.split("\n").findIndex((it) => it.startsWith('\tsu "estado" es')) + 1
+    const line = mazoText.split("\n").findIndex((it) => it.startsWith('\tsu "nombre corto" es')) + 1
     const words = service
       .completion(mazo, { line, character: 2 })
       .items.filter((item) => item.kind === CompletionItemKind.Keyword)
@@ -264,11 +278,11 @@ describe("SpellLanguageService, in Spanish", () => {
       })
     }
 
-    test("offered WITH its accent, found as typed without it:  `esta` finds `está`, above `estado`", async () => {
+    test("offered WITH its accent, found as typed without it:  `esta` finds `está`, beside the names, `espadas`", async () => {
       await completionAfter("\tsi la carta de arriba del mazo e", ({ items }) => {
         const labels = items.map((item) => item.label)
         expect(items.find((item) => item.label === "está")).toMatchObject({ filterText: "esta" })
-        expect(labels).toContain("estado")
+        expect(labels).toContain("espadas")
         expect(labels).not.toContain("esta")
       })
     })
