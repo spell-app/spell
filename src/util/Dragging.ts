@@ -5,7 +5,8 @@ import { beforeNextPaint, soon } from "./timing"
  * One drag of a view's element, from pointer down to pointer up:  a mouse and a finger alike.
  *
  * - What it carries:  the element, and its list's items after it, e.g. a tableau's face-up card and the cards on it.
- *   - They follow the pointer by their `translate`, raised above the board.
+ *   - They follow the pointer by their `translate`, raised above the board,
+ *     with no transition meanwhile, so a page whose cards glide (Solitaire) still keeps up with it (epic `editor` I99).
  *   - They ignore the pointer meanwhile, so what's under it can be found.
  * - Or what its owner says (`DragOptions.carried`), staying where it is (`follows: false`):
  *   e.g. a task list's selected tasks, dimmed, while a line shows where they'd go
@@ -145,6 +146,8 @@ export class Dragging {
       for (const element of this.moving) {
         element.style.zIndex = DRAGGING_Z_INDEX
         element.style.pointerEvents = "none"
+        // follows the pointer at once:  a page's own `transition` on `translate` (Solitaire's cards glide) would trail it
+        element.style.transition = "none"
       }
     }
     // no text selected as the pointer sweeps the page, as the browser's own drag selects none
@@ -212,6 +215,9 @@ export class Dragging {
       element.style.translate = ""
       element.style.pointerEvents = ""
       element.style.zIndex = ""
+      // its new place taken without a transition (read, so the browser has it), then the page's own back
+      void getComputedStyle(element).translate
+      element.style.transition = ""
       if (element.isConnected && from && from !== "0px 0px") {
         element.animate(
           [
