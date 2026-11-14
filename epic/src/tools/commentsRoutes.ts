@@ -59,6 +59,12 @@
  *       blank empties his pending one
  *     - `resolve` `{ id, how: "good" | "skip" }`:  "that's good" or "skip it" closes the thread
  *     - `reopen` `{ id }`:  open again (Undo, Reopen)
+ * - `POST /api/docs/comments/picture` `{ page, png }` -- a PICTURE pasted or dropped in a comment's field (epic
+ *   `epic-engine` I267):  `png` a PNG data URL, at most 8 MB (else 413)
+ *   - written beside the page, `pictures/<page>-20261114-0102.png` (`TestShots.savePicture()`), never over a file
+ *   - answers `{ picture }`, its URL path (`/guides/pictures/x-20261114-0102.png`):  the field puts it in the words,
+ *     `![picture](<path>)`, so it goes wherever they go, and a session reads it from the epic folder
+ *   - only a page that takes comments (`commentsPage()`)
  * - `page`:  the page's URL path, as served (a worktree's `/worktrees/<w>/...` too).
  *   Which pages take comments (`commentsPage()`):
  *   - any `.html` under `guides/`, `pages/` (the home page, details pages),
@@ -80,7 +86,7 @@
  *   read only, and `epic notes` still answers them
  */
 import { existsSync, readFileSync } from "node:fs"
-import { join } from "node:path"
+import { basename, join } from "node:path"
 
 import { SRV } from "spell/server"
 import { COMPONENTS_PREFIX, type RouteModule } from "spell/server/page"
@@ -99,12 +105,22 @@ import { GuideInbox } from "spell/epic/tool/GuideInbox"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { ReviewStart } from "spell/epic/tool/ReviewStart"
 import { SeeAlso } from "spell/epic/tool/SeeAlso"
+import { TestShots } from "spell/epic/tool/TestShots"
+import { InboxError } from "spell/epic/tool/ReviewInbox"
+import { SHOT_MAX_BYTES } from "spell/epic/review/review.types"
 
 import { rowsFile } from "./choicesRoutes"
 
 /** Where the routes live. */
 const API = "/api/docs/comments"
 const SEND_API = "/api/docs/comments/send"
+const PICTURE_API = "/api/docs/comments/picture"
+
+/** Where a comment's pictures go, beside its page. */
+const PICTURES = "pictures"
+
+/** Biggest picture body accepted:  8 MB of PNG, as base64, and the rest of the body. */
+const MAX_PICTURE_BODY = Math.ceil((SHOT_MAX_BYTES * 4) / 3) + 64 * 1024
 
 /** Biggest body accepted:  a comment is a few paragraphs. */
 const MAX_BODY = 64 * 1024
@@ -172,6 +188,21 @@ const commentsRoutes: RouteModule = {
       reply
         .set("Cache-Control", "no-store")
         .json({ page, takesComments: true, comments: shown(commentsOf(file)), ...sendOf(root, page as string, file) })
+    })
+    router.post(PICTURE_API, guard.writeCheck, SRV.parseBodies({ limit: MAX_PICTURE_BODY }), async (request, reply) => {
+      const { page, png } = (request.body ?? {}) as { page?: unknown; png?: unknown }
+      const file = commentsPage(web.files, page)
+      let bytes: Buffer
+      try {
+        bytes = TestShots.pngOf(png)
+      } catch (error) {
+        throw error instanceof InboxError ? new SRV.HttpError(400, error.message) : error
+      }
+      if (bytes.length > SHOT_MAX_BYTES)
+        throw new SRV.HttpError(413, `a picture is ${SHOT_MAX_BYTES / 1024 / 1024} MB at most`)
+      const name = `${PICTURES}/${basename(file, ".html").replace(/\.(?:plan|saga)$/, "")}`
+      const saved = await TestShots.savePicture(file, name, bytes)
+      reply.json({ picture: (page as string).replace(/[^/]*$/, "") + saved })
     })
     router.post(SEND_API, guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }), async (request, reply) => {
       const { page } = (request.body ?? {}) as { page?: unknown }

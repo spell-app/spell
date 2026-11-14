@@ -203,6 +203,9 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `<epic-review>`'s note pictures (P51):  saved beside the page (`saveShot()`), put in the note's mark
         (`attachShot()`);  `Pictures`, beside the client, reads a paste or a drop and turns any image into a PNG,
         for `<epic-option-form>` too
+      - a COMMENT's field, the pane's and a thread's reply (epic `epic-engine` I267):  `Pictures.intoWords()` saves a pasted
+        or dropped picture beside the page (the comments route's `POST picture`) and writes `![picture](<path>)` into the
+        words, so it goes wherever they go;  `<epic-thread>` draws it as a thumbnail, a click opening it full size
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and the person's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.

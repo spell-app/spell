@@ -669,3 +669,26 @@ describe("a test run:  answers and screenshots", () => {
     )
   })
 })
+
+// epic `epic-engine` I268:  a Read in "0. While you were out" takes effect at once, with no Send
+describe("a Read in While you were out", () => {
+  /** a page with the section drawn:  What was done, one phase, with a new update block */
+  const AWAY = "epics/away/away.plan.html"
+  const now = new Date()
+  const at = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} 08:00`
+  const PAGE = `<!doctype html><title>x</title><body class="plan-doc"><epic-page epic="away" title="Away" away-read="2026-01-01T00:00">
+<epic-section id="away" kind="away" title="While you were out" lines="done p-go"><epic-away-line line="done" state="recent" heading><b>What was done</b></epic-away-line><epic-away-line line="p-go" state="recent"><a href="#p-go">P1 · Go</a> done</epic-away-line></epic-section>
+<epic-section id="phases" kind="phases"><epic-phase id="p-go" title="Go" status="done"><epic-update at="${at}" summary="Built twice"><p>Built a second way.</p></epic-update></epic-phase></epic-section>
+</epic-page>`
+
+  test("a part's heading:  applied to the page now, its lines' update blocks seen, the inbox left empty", async () => {
+    mkdirSync(dirname(join(root, AWAY)), { recursive: true })
+    writeFileSync(join(root, AWAY), PAGE)
+    const { status, body } = await post("mark", { page: `/${AWAY}`, id: "away:done", mark: { action: "seen" } })
+    expect(status).toBe(200)
+    expect(body.marks).toEqual({})
+    const page = readFileSync(join(root, AWAY), "utf8")
+    expect(page).toMatch(/away-seen="done=/)
+    expect(page).toMatch(/<epic-update[^>]* seen=/)
+  })
+})

@@ -95,6 +95,9 @@ export class ReviewState {
   readonly markOf = (itemId: string): InboxMark | undefined =>
     this.readPage((client) => (itemId ? client.markOf(itemId.toLowerCase()) : undefined))
 
+  /** Is away line `id` (`away:<line>`) read, applied or not (`ReviewClient.wasRead()`)? */
+  readonly wasRead = (id: string): boolean => this.readPage((client) => client.wasRead(id.toLowerCase())) ?? false
+
   /** Its mark, if any. */
   readonly mark = (): InboxMark | undefined => this.read((client, id) => client.markOf(id))
 

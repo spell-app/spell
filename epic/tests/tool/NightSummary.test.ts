@@ -188,6 +188,34 @@ describe("a line's Read (I206)", () => {
     expect(lines(plan).slice(0, 4)).toEqual(["underway", "p-polish-it", "todo", "q1"])
   })
 
+  test("a part's Read sees what's under it:  each phase's new update blocks go quiet (I268)", () => {
+    const plan = readPage()
+    night(plan)
+    plan.addPhaseUpdate(1, "<p>Built a second way.</p>", { summary: "Built twice" })
+    plan.refreshAway()
+    const update = plan.phase(1).querySelector("epic-update")!
+    expect(update.hasAttribute("seen")).toBe(false)
+    plan.now = new Date(2026, 10, 3, 8, 0)
+    const done = plan.applyMark({ id: "away:done", action: "seen" } as Parameters<PlanDoc["applyMark"]>[0])
+    expect(done).toMatchObject({ applied: true, did: "While you were out:  done read, 1 update seen" })
+    expect(update.getAttribute("seen")).toBeTruthy()
+    // the items themselves stay as they are:  the question still waits on him
+    expect(plan.findItem("q1")!.getAttribute("status")).not.toBe("done")
+  })
+
+  test("a line's own Read sees its phase's update blocks too;  another phase's stay new (I268)", () => {
+    const plan = readPage()
+    night(plan)
+    plan.addPhaseUpdate(1, "<p>Built a second way.</p>", { summary: "Built twice" })
+    plan.addPhaseUpdate(2, "<p>Started over.</p>", { summary: "Restarted" })
+    plan.refreshAway()
+    const id = plan.phase(1).id
+    expect(plan.awayLinesOf("done")).toEqual([id])
+    plan.applyMark({ id: `away:${id}`, action: "seen" } as Parameters<PlanDoc["applyMark"]>[0])
+    expect(plan.phase(1).querySelector("epic-update")!.hasAttribute("seen")).toBe(true)
+    expect(plan.phase(2).querySelector("epic-update")!.hasAttribute("seen")).toBe(false)
+  })
+
   test("a line read, then changed again, comes back;  Done reading forgets every line's read", () => {
     const plan = readPage()
     night(plan)

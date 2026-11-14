@@ -3177,8 +3177,13 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * A line's or a part's Read in "0. While you were out" (epic `epic-engine` I206):  a Seen on `away:<line>`;  only
-   * that line leaves the section (`readAwayLine()`), the item itself staying as it is.
+   * A line's or a part's Read in "0. While you were out" (epic `epic-engine` I206):  a Seen on `away:<line>`;  that
+   * line, or that part (`done`, `todo`), leaves the section (`readAwayLine()`).
+   * - and what it's about is SEEN too (epic `epic-engine` I268;  Owen, 2026-11-14:  "mark each item Seen"):  every
+   *   update block still new in its phase or item (each line of a part, for a part's) stamped `seen`, as its own
+   *   Seen does (`seeUpdatesFor()`)
+   *   - nothing else about the item changes:  a call or a question still waiting stays red, his to answer
+   * - the page server applies it the moment he ticks it (`AwayReads.applyNow()`):  no Send
    * - the section gone already (read whole):  dropped
    */
   private applyReadLine({ id, action }: PlanMark): MarkResult {
@@ -3189,8 +3194,43 @@ export class PlanDoc extends PlanReader {
       return { applied: false, left: `${String(id).toUpperCase()}:  a line takes Read, not ${action}` }
     if (!this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`))
       return { applied: false, gone: true, left: `${String(id).toUpperCase()}:  read already:  dropped` }
+    const seen = this.seeUpdatesFor(line)
     this.readAwayLine(line)
-    return { applied: true, did: `While you were out:  ${line} read` }
+    const updates = seen ? `, ${seen} update${seen === 1 ? "" : "s"} seen` : ""
+    return { applied: true, did: `While you were out:  ${line} read${updates}` }
+  }
+
+  /**
+   * SIDE EFFECT:  every update block still new under away line `line` stamped `seen` (`stampSeen()`);  how many.
+   * - `line`:  a phase's or an item's id, or a part's (`done`, `todo`):  then each line of that part, as the
+   *   section draws it now (`awayLinesOf()`)
+   * - new:  not `seen`, and not gone quiet (`PlanDates.isQuiet()`), as `updateUpdates()` counts them
+   */
+  seeUpdatesFor(line: string): number {
+    const ids = (AWAY_PARTS as readonly string[]).includes(line) ? this.awayLinesOf(line as AwayPart) : [line]
+    let seen = 0
+    for (const id of ids) {
+      const host = this.findItem(id) ?? this.document.getElementById(id)
+      for (const update of host?.querySelectorAll(UPDATE_BLOCKS) ?? []) {
+        if (update.hasAttribute("seen") || PlanDates.isQuiet(update.getAttribute("at"), this.now)) continue
+        this.stampSeen(update)
+        seen++
+      }
+    }
+    return seen
+  }
+
+  /** The lines of part `part` of "0. While you were out", as it's drawn now:  their phase or item ids, in order. */
+  awayLinesOf(part: AwayPart): string[] {
+    const section = this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)
+    const lines: string[] = []
+    let current: string | undefined
+    for (const line of section?.querySelectorAll("epic-away-line[line]") ?? []) {
+      const key = line.getAttribute("line")!
+      if (line.hasAttribute("heading")) current = key
+      else if (current === part) lines.push(key)
+    }
+    return lines
   }
 
   /**
@@ -3207,11 +3247,16 @@ export class PlanDoc extends PlanReader {
       return { applied: false, gone: true, left: `${label}:  no such update any more:  dropped` }
     if (action !== "seen") return { applied: false, left: `${label}:  an update takes Seen, not ${action}` }
     if (update.hasAttribute("seen")) return { applied: true, did: "seen already" }
+    return { applied: true, did: this.stampSeen(update) }
+  }
+
+  /** SIDE EFFECT:  update block `update` stamped `seen` (now), and logged (`UP3 seen:  Split in two`);  what it did. */
+  private stampSeen(update: Element): string {
     Markup.set<"epic-update">(update, { seen: PlanTime.clockTime(this.now) })
     const summary = update.getAttribute("summary")
     const did = `seen${summary ? `:  ${summary}` : ""}`
-    this.log(`${label} ${did}`)
-    return { applied: true, did }
+    this.log(`${update.id.toUpperCase()} ${did}`)
+    return did
   }
 
   ////////////////
@@ -3564,6 +3609,9 @@ function cardSetWords(choices: number | undefined): string {
 
 /** The update BLOCKS (`updateUpdates()`):  dated or titled;  a bare UPDATE label is none. */
 const UPDATE_BLOCKS = "epic-update[at], epic-update[summary]"
+
+/** The parts of "0. While you were out", by their headings' keys:  a Read on one reads each of its lines. */
+const AWAY_PARTS: readonly AwayPart[] = ["done", "underway", "todo"]
 
 /** The tags whose `phase` names a phase by number:  renumbered with it (`PlanDoc.makeRoomForPhase()`). */
 

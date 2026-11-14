@@ -8,6 +8,8 @@ import { epicCommentPaneVocabulary } from "./EpicCommentPane.en"
 
 import paneCSS from "./EpicCommentPane.css?inline"
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
+import savedMarkCSS from "spell/epic/components/epic-review/SavedMark.css?inline"
+import { SAVED_MARK } from "spell/epic/components/epic-review/EpicReview.types"
 
 /****************
  * ### `EpicCommentPane`
@@ -20,14 +22,15 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - Ivory, 8px inside on every side, lifted off the page by a shadow (Owen, 2026-10-10:  "make the modal bg beige so
  *   it stands out";  "reduce padding inside bullhorn frame to 8px");  no buttons below its text.
  * - Its header:  the bullhorn, the first words it's on (`headline`;  its tooltip `about`), the floppy once saved
- *   (`saved`, red when `failed`), the trash once saved (`deletable`), ×.
+ *   (`saved`, red when `failed`;  Saved fades out 10 seconds later, `SavedMark.css`, epic `epic-engine` I269), the
+ *   trash once saved (`deletable`), ×.
  * - Its field is slotted:  the comments' code saves what's typed, closes it (×, Escape, ⌘ Enter, the focus leaving),
  *   and deletes it;  this only says which button was pressed (`epic-comment-closing`, `epic-comment-removing`).
  ****************/
 export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabulary> {
   @E.proto static vocabulary = epicCommentPaneVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-comment-pane": paneCSS },
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-comment-pane": paneCSS, "epic-saved-mark": savedMarkCSS },
     aria: { role: "dialog" },
     // its field takes the focus;  a click on its header starts a drag, never focuses ×
     delegatesFocus: false
@@ -66,7 +69,7 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
           <ui-icon name="bullhorn" />
           <span class={HEADLINE}>{this.headline}</span>
           <Show when={this.saved}>
-            <span class={FLOPPY} title={this.saved} data-failed={this.failed ? "" : undefined}>
+            <span class={`${FLOPPY} ${SAVED_MARK}`} title={this.saved} data-failed={this.failed ? "" : undefined}>
               <ui-icon name="floppy disk outline" />
             </span>
           </Show>

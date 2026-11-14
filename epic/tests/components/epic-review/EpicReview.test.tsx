@@ -394,6 +394,16 @@ describe("<epic-item> review controls", () => {
     // the floppy showing or hiding never moves the picture
     expect([b.left, b.top]).toEqual([pickBefore.left, pickBefore.top])
     expect(field.getBoundingClientRect().right - b.right).toBeLessThanOrEqual(4)
+    // shown, it fades out 10 seconds later, as every Saved floppy does (I269):  seeked, visible before, gone after
+    const [fade] = saved.getAnimations()
+    fade!.pause()
+    fade!.currentTime = 9_500
+    const before = getComputedStyle(saved).visibility
+    fade!.currentTime = 10_700
+    expect([before, getComputedStyle(saved).visibility]).toEqual(["visible", "hidden"])
+    // red, it stays
+    saved.setAttribute("data-failed", "")
+    expect(saved.getAnimations()).toEqual([])
   })
 
   test("Revisit on an item without details:  a box under its line;  typing makes the note a mark, Escape closes it", async () => {
@@ -443,6 +453,12 @@ describe("<epic-item> review controls", () => {
     // the box's floppy says Saved
     await vi.waitFor(() =>
       expect(deep(call!).querySelector("[part~='note-box'] >>> .note-saved")!.hasAttribute("hidden")).toBe(false)
+    )
+    // something new typed:  it goes at once, until the next save (I269)
+    note.value = "do it now"
+    note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await vi.waitFor(() =>
+      expect(deep(call!).querySelector("[part~='note-box'] >>> .note-saved")!.hasAttribute("hidden")).toBe(true)
     )
     // a todo without details:  its box under its line;  Later makes it the mark's note
     button(todo!, "revisit").click()

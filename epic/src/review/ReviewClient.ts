@@ -1,6 +1,8 @@
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { StoragePlace } from "spell/util/persist/StoragePlace"
+
+import { AWAY_ID } from "spell/epic/definitions/definitions.types"
 import {
   REVIEW_ACTIONS,
   REVIEW_API,
@@ -123,6 +125,11 @@ export class ReviewClient extends PageStore {
    *   and the Choose pill dropped back to "Choose" meanwhile (Owen, 2026-10-10)
    */
   private readonly taken = new Map<string, PickFields>()
+  /**
+   * The Reads in "0. While you were out" (`away`, `away:<line>`) the page server applied and cleared since the page
+   * loaded (epic `epic-engine` I268):  their lines stay faded (`wasRead()`) until the page's patch takes them away.
+   */
+  private readonly readAway = new Set<string>()
 
   /** Notes of sent marks the last inbox read no longer has, id -> words:  `changed()` lets their boxes go of them. */
   private readonly goneNotes = new Map<string, string>()
@@ -240,6 +247,11 @@ export class ReviewClient extends PageStore {
   /** Item `id`'s mark, if any. */
   markOf(id: string): InboxMark | undefined {
     return this.inbox.marks[id]
+  }
+
+  /** Is `id` (`away:<line>`) read:  its Seen in the inbox, or applied and cleared since the page loaded? */
+  wasRead(id: string): boolean {
+    return this.inbox.marks[id]?.action === "seen" || this.readAway.has(id)
   }
 
   /** Item `id`'s saved draft, if any. */
@@ -1054,6 +1066,9 @@ export class ReviewClient extends PageStore {
     for (const [id, mark] of Object.entries(this.inbox.marks))
       if (mark.note && !next.marks[id] && this.isSent(mark)) this.goneNotes.set(id, mark.note)
     for (const id of Object.keys(next.marks)) this.taken.delete(id)
+    // a Read the page server applied at once (I268):  remembered, so its line doesn't come back before the patch
+    for (const [id, mark] of Object.entries(this.inbox.marks))
+      if (mark.action === "seen" && id.startsWith(`${AWAY_ID}:`) && !next.marks[id]) this.readAway.add(id)
     this.inbox = next
   }
 

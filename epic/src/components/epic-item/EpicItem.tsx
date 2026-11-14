@@ -223,7 +223,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * a todo's three (the plane, Revisit, the x:  Owen, 2026-10-09), else an item's four.
    * - declared before `chipMark`, which reads it (memos compute as they're made)
    */
-  readonly reviewButtons = createMemo(() => BUTTONS_OF[buttonsForItem(this.id, this.limit)])
+  readonly reviewButtons = createMemo(() => BUTTONS_OF[this.buttonsKind])
 
   /**
    * May Owen call it urgent or not (its id chip, while the page is reviewed)?
@@ -643,6 +643,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same chip, its tooltip saying it was fixed or
    *   done there;  `handled` wins when an item has both
    * - the phase read from the page when drawn:  a phase moved since shows its old number until the next redraw
+   * - it's the item's button for its phase (epic `epic-engine` I271;  Owen, 2026-11-14:  "merge it into the pill"):
+   *   a click goes to the phase, an ⌥-click starts it (`startPhase()`);  a todo draws no plane beside it
    */
   private handledMark(): JSX.Element {
     const phaseId = () => this.handled || this.takenIn || ""
@@ -660,11 +662,30 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         size="mini"
         appearance="basic"
         link={`#${phaseId()}`}
-        title={this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}
+        title={`${this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}\n${this.translationForKey("phasePillTip", { phase: phase().short })}`}
+        onClick={(event: MouseEvent) => {
+          if (!event.altKey) return
+          event.preventDefault()
+          event.stopPropagation()
+          this.startPhase(phaseId())
+        }}
       >
         {this.translationForKey("handledIn", { phase: phase().short })}
       </ui-label>
     )
+  }
+
+  /**
+   * SIDE EFFECT:  phase `phaseId` is started, as its own review buttons start it (the pill's ⌥-click, I271):
+   * - a plan waiting, or held:  Accept plan (`approve`)
+   * - else:  Do this (`todo`), which `inbox apply` takes on a phase as a go-ahead
+   * - pressed again:  taken back, as a second click on that button does
+   */
+  private startPhase(phaseId: string): void {
+    const phase = isServer ? null : document.getElementById(phaseId)
+    if (!phaseId || phase?.localName !== "epic-phase") return
+    const plan = phase.getAttribute("plan")
+    this.reviewState.client?.press(phaseId.toLowerCase(), plan === "waiting" || plan === "held" ? "approve" : "todo")
   }
 
   /** The git icon:  shows or hides its own commits;  pressed while they show. */
@@ -702,13 +723,18 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return this.reviewControl("note", "note-box")
   }
 
+  /** Which review buttons it draws:  a todo already in a phase draws no plane (`todo-in-phase`, I271). */
+  get buttonsKind(): ReturnType<typeof buttonsForItem> {
+    return buttonsForItem(this.id, { limit: this.limit, inPhase: !!(this.handled || this.takenIn) })
+  }
+
   /** One of its review controls (`<epic-review>`):  what it `shows`, as its `part`. */
   private reviewControl(shows: ReviewShows, part: "review-buttons" | "note-box" | "said"): JSX.Element {
     return (
       <epic-review
         of={this.id}
         shows={shows}
-        buttons={buttonsForItem(this.id, this.limit)}
+        buttons={this.buttonsKind}
         label={this.label()}
         tip={this.reviewTip()}
         under-line={shows === "note" && !this.hasDetails() ? "" : undefined}
