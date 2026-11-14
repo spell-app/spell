@@ -39,7 +39,7 @@ describe("<TreeViewer>", () => {
   test("no line there:  a hint, no diagram", async () => {
     const host = await mount(() => <TreeViewer match={parse(SOURCE)} offset={undefined} />)
     expect(host.querySelector("ui-tree-diagram")).toBeNull()
-    expect(host.querySelector(".TreeViewer-hint")?.textContent).toContain("Put the cursor on a line")
+    expect(host.querySelector(".TreeViewer-hint")?.textContent).toContain("Click a line of your program")
   })
 })
 
