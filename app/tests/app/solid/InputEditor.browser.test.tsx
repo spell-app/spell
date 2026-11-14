@@ -255,7 +255,7 @@ describe("<FileTabs>", () => {
     setEditor("file", file)
     const host = await mount(() => <FileTabs />)
     const tabs = await tabsIn(host)
-    expect(tabs[0]!.parentElement!.querySelector(":scope > ui-dropdown")).not.toBeNull()
+    expect(tabs[0]!.parentElement!.querySelector(":scope > .CodeMoreMenu")).not.toBeNull()
     tabs[0]!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, clientX: 10, clientY: 10 }))
     expect(showEditor).toHaveBeenLastCalledWith("test-project/one.js")
   })
