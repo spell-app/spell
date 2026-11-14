@@ -179,8 +179,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         match.data.error.data.drawnAnyway = true
       }
     }
-    // a Spell UI menu:  its actions and dividers are its rows (epic `editor` P29)
-    if (MENU_TAGS.includes(match.data.tagName)) SpellJSX.markMenuRows(scope, match)
+    // a Spell UI menu or toolbar, in any language:  its actions and dividers are its rows (epic `editor` P29)
+    if (SpellJSX.isMenu(scope, match.data.tagName)) SpellJSX.markMenuRows(scope, match)
     match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
       scope.parser?.parse(attr, "jsxAttribute", scope)
     )
@@ -588,6 +588,18 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       else if (child?.is(SpellJSX) && child.data.chain) SpellJSX.markMenuRows(scope, child)
       else if (child?.is(SpellJSX) && SpellJSX.isDivider(scope, child)) child.data.menuDivider = true
     }
+  }
+
+  /**
+   * Is `tag` a Spell UI menu, whose actions are its rows:  `menu`, `ui-menu`, `toolbar`, `ui-toolbar` (`MENU_TAGS`),
+   * or the same in the file's language (`es-barra-herramientas`),
+   * as the pack says (`SP.ComponentPacks.canonicalTagFor()`).
+   */
+  private static isMenu(scope: P.Scope, tag: string | undefined): boolean {
+    if (!tag) return false
+    if (MENU_TAGS.includes(tag)) return true
+    const canonical = SP.ComponentPacks.canonicalTagFor(tag, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
+    return !!canonical && MENU_TAGS.includes(canonical)
   }
 
   /** Is `match` a `<divider/>`, its word the language's (`<divisor/>`)? */

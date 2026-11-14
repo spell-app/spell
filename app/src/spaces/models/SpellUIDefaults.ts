@@ -121,7 +121,7 @@ export class SpellUIDefaults {
    * The canonical tag `tag` stands for in `language`:  `ui-button` itself, `es-boton`, or bare as a drawing writes it
    * (`button`, `botón`), or `ui-` and a bare word (`ui-botón`);  `undefined` for none of Spell UI's.
    */
-  private static canonicalTagFor(tag: string, language: string): string | undefined {
+  static canonicalTagFor(tag: string, language: string): string | undefined {
     if (DEFAULTS_TABLE[tag]) return tag
     const bare = withoutAccents(tag.replace(/^ui-/, ""))
     const local = SpellUIDefaults.localTags.get(withoutAccents(tag)) ?? SpellUIDefaults.localTags.get(`es-${bare}`)

@@ -24,6 +24,10 @@ export class Recipe extends View {
     )
   }
 
+  remove() {
+    core.removeSaved(this)
+  }
+
   static savedIn = {
     place: "family_cookbook",
     collection: "recipes",
@@ -37,10 +41,6 @@ export class Recipe extends View {
   // - it is saved in the family cookbook
   @prop({ type: "date", declaredAt: { path: "/RecipeBox.spell", start: 180, end: 214 } })
   accessor modified!: any /* spell: type unknown */
-
-  remove() {
-    core.removeSaved(this)
-  }
 }
 
 /**
@@ -131,6 +131,7 @@ export class RecipeBoxElement extends SpellElement<RecipeBox> {
 }
 core.useElement(RecipeBox, RecipeBoxElement)
 export const recipeBox = new RecipeBox()
+core.describeAction(RecipeBox, "addTheDraft", { title: "Add The Draft", undoneAs: "Add The Draft" })
 
 if (!core.isCarryingOver) recipeBox.start()
 

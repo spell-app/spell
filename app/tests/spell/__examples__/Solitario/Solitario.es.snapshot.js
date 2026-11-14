@@ -17,10 +17,10 @@ export const words = {
       estado: "estado",
       imagen: "imagen",
       levantada: "levantada",
-      contarLosPuntosDeCartaEnPila: "contar los puntos de una carta en una pila",
-      pila: "pila",
       jugar: "jugar una carta",
-      ponerEnPila: "poner una carta en una pila"
+      ponerEnPila: "poner una carta en una pila",
+      contarLosPuntosDeCartaEnPila: "contar los puntos de una carta en una pila",
+      pila: "pila"
     },
     Mazo: {
       estado: "estado"
@@ -64,8 +64,8 @@ export const words = {
       C7: "C7",
       rehacerLaReserva: "rehacer la reserva",
       robarDeLaReserva: "robar de la reserva",
-      repartirLasCartas: "repartir las cartas",
       voltearLaReserva: "voltear la reserva",
+      repartirLasCartas: "repartir las cartas",
       reiniciarElJuego: "reiniciar el juego",
       jugarSolo: "jugar solo",
       hacerTrampa: "hacer trampa"
@@ -165,12 +165,12 @@ export const words = {
       { name: "Palo", members: ["palo", "color", "símbolo"] },
       { name: "Nombres", description: "Cómo la llama una persona, una prueba o la consola", members: ["nombre", "esElRangoDePalo", "estado"] },
       { name: "Dibujo", description: "Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css", members: ["imagen", "levantada"] },
-      { name: "Jugar una carta", members: ["contarLosPuntosDeCartaEnPila", "jugar", "ponerEnPila"] },
+      { name: "Jugar una carta", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
       { name: "Una pila de cartas", members: ["pila"] }
     ],
     Solitario: [
       { name: "Pilas", description: "Una de cada, hecha con el solitario", members: ["reserva", "descartes", "tréboles", "diamantes", "corazones", "espadas", "C1", "C2", "C3", "C4", "C5", "C6", "C7"] },
-      { name: "Repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "repartirLasCartas", "voltearLaReserva"] },
+      { name: "Repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "voltearLaReserva", "repartirLasCartas"] },
       { name: "Juego", description: "Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres", members: ["reiniciarElJuego", "jugarSolo", "hacerTrampa"] }
     ]
   }

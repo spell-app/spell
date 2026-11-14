@@ -1582,12 +1582,18 @@ export class GithubPage extends Thing {
   }
 }
 
+core.describeAction(GithubPage, "tryWords", { title: "Try (words As Text)", undoneAs: "Try (words As Text)" })
+
 core.heading("Someone on GitHub")
 ///////////////////////
 // ## Someone on GitHub
 ///////////////////////
 // A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.
 // A search gives only a little of each:  their page reads them whole, by their login.
+
+core.describeAction(User, "lookAtUser", { title: "Look At It", undoneAs: "Look At It" })
+
+core.describeAction(User, "lookAwayFromUser", { title: "Look Away From It", undoneAs: "Look Away From It" })
 
 core.heading("An issue")
 //////////////
@@ -2196,6 +2202,10 @@ core.heading("A book")
 ////////////
 // Its cover, its title and who wrote it:  on its card, every name the search gave;  on its own page, its first author, read from their own record.
 
+core.describeAction(Book, "open", { title: "Open It", undoneAs: "Open It" })
+
+core.describeAction(Book, "close", { title: "Close It", undoneAs: "Close It" })
+
 core.heading("An edition")
 ////////////////
 // ## An edition
@@ -2537,6 +2547,8 @@ export class JsonplaceholderPage extends Thing {
   }
 }
 
+core.describeAction(JsonplaceholderPage, "addTheNewTodo", { title: "Add The New Todo", undoneAs: "Add The New Todo" })
+
 core.heading("A todo")
 ////////////
 // ## A todo
@@ -2783,6 +2795,8 @@ export class City extends Thing {
     )
   }
 }
+
+core.describeAction(City, "pick", { title: "Pick It", undoneAs: "Pick It" })
 
 core.heading("Its hours")
 ///////////////
@@ -3264,6 +3278,8 @@ export class MetMuseumPage extends Thing {
   }
 }
 
+core.describeAction(MetMuseumPage, "tryWords", { title: "Try (words As Text)", undoneAs: "Try (words As Text)" })
+
 core.heading("An artwork")
 ////////////////
 // ## An artwork
@@ -3636,6 +3652,8 @@ export class RestCountriesPage extends Thing {
     })
   }
 }
+
+core.describeAction(RestCountriesPage, "pickRegionRegion", { title: "Pick Region (region As Text)", undoneAs: "Pick Region (region As Text)" })
 
 core.heading("Its money")
 ///////////////

@@ -13,16 +13,16 @@ export const words = {
       tried: "tried",
       score: "score",
       dealACard: "deal a card",
-      draw: "draw it",
       showTheAnswer: "show the answer",
       sayIKnew: "say i knew it",
       sayIMissed: "say i missed it",
-      startOver: "start over"
+      startOver: "start over",
+      draw: "draw it"
     }
   },
   groups: {
     Quiz: [
-      { name: "Playing", members: ["dealACard", "draw", "showTheAnswer", "sayIKnew", "sayIMissed", "startOver"] }
+      { name: "Playing", members: ["dealACard", "showTheAnswer", "sayIKnew", "sayIMissed", "startOver", "draw"] }
     ]
   }
 }

@@ -158,6 +158,8 @@ export class StatusphereElement extends SpellElement<Statusphere> {
 }
 core.useElement(Statusphere, StatusphereElement)
 export const statusphere = new Statusphere()
+
+core.describeAction(Statusphere, "postEmoji", { title: "Post (emoji As Text)", undoneAs: "Post (emoji As Text)" })
 // -----------
 if (!core.isCarryingOver) statusphere.start()
 

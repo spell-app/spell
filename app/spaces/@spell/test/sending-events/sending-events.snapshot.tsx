@@ -91,6 +91,12 @@ export class Pile extends List<Card> {
 // - it sends "flipped" with side as a text
 core.describeEvent(Card, "flipped", { params: { side: "text" } })
 
+core.describeAction(Card, "flip", { title: "Flip It", undoneAs: "Flip It" })
+
+core.describeAction(Card, "flipSlowly", { title: "Flip It Slowly", undoneAs: "Flip It Slowly" })
+
+core.describeAction(Card, "close", { title: "Close It", undoneAs: "Close It" })
+
 
 on("picked", () => core.console.log("the program heard picked"))
 

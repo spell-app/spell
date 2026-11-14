@@ -1587,6 +1587,14 @@ export class Guide extends App {
 }
 export const guide = new Guide()
 
+core.describeAction(Guide, "goBack", { title: "Go Back", undoneAs: "Go Back" })
+
+core.describeAction(Guide, "goToWhere", { title: "Go To (where As Text)", undoneAs: "Go To (where As Text)" })
+
+core.describeAction(Guide, "playTheOpening", { title: "Play The Opening", undoneAs: "Play The Opening" })
+
+core.describeAction(Guide, "punch", { title: "Punch It", undoneAs: "Punch It" })
+
 core.heading("What everything here can do")
 /////////////////////////////////
 // ## What everything here can do
@@ -1600,6 +1608,7 @@ Thing.prototype.open = function () {
   guide.showing = this
   core.scrollToTop()
 }
+core.describeAction(Thing, "open", { title: "Open (a Thing)", undoneAs: "Open (a Thing)" })
 
 /** A number for people to read:  with none, nothing, so its row doesn't show */
 export function measureAmountInUnit(amount, unit) {
@@ -1627,6 +1636,9 @@ core.heading("A page's parts")
 
 core.heading("A film")
 //# A film
+
+core.describeAction(Film, "play", { title: "Play It", undoneAs: "Play It" })
+core.describeAction(Film, "end", { title: "End It", undoneAs: "End It" })
 
 core.heading("A character")
 //# A character

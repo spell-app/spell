@@ -97,6 +97,31 @@ export class Card extends TwoSidedView {
     return h("ui-text", { color: "blue", part: "back" }, "🂠")
   }
 
+  async play() {
+    if (this.pile === solitaire.stock) await solitaire.turnAStockCard()
+    else {
+      const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
+      if (endPile === undefined) return false
+      return await this.putOnPile(endPile)
+    }
+  }
+
+  /** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
+  async putOnPile(pile) {
+    /** - the pile it left turns its new last card up;  the move counts, and scores */
+    const startPile = this.pile
+    if (!core.canGiveUp(startPile, this)) return false
+    if (!core.canTake(pile, this)) return false
+    const points = this.countThePointsForCardOnPile(pile)
+    startPile.startingWith(this).forEach((card) => core.move(card, pile))
+    if (startPile instanceof Column && !startPile.isEmpty) {
+      await core.pauseFor(200, "msec")
+      startPile.lastItem?.turnFaceUp()
+    }
+    solitaire.score = solitaire.score + points
+    return true
+  }
+
   /** what the move scores:  10 on a foundation, 5 from the discards, else nothing */
   countThePointsForCardOnPile(pile) {
     if (pile instanceof Foundation) return 10
@@ -112,30 +137,6 @@ export class Card extends TwoSidedView {
 
   get pile() {
     return Pile.ownerOf(this)
-  }
-
-  async play() {
-    if (this.pile === solitaire.stock) await solitaire.turnAStockCard()
-    else {
-      const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
-      if (endPile === undefined) return false
-      return await this.putOnPile(endPile)
-    }
-  }
-
-  async putOnPile(pile) {
-    /** - the pile it left turns its new last card up;  the move counts, and scores */
-    const startPile = this.pile
-    if (!core.canGiveUp(startPile, this)) return false
-    if (!core.canTake(pile, this)) return false
-    const points = this.countThePointsForCardOnPile(pile)
-    startPile.startingWith(this).forEach((card) => core.move(card, pile))
-    if (startPile instanceof Column && !startPile.isEmpty) {
-      await core.pauseFor(200, "msec")
-      startPile.lastItem?.turnFaceUp()
-    }
-    solitaire.score = solitaire.score + points
-    return true
   }
 }
 // Ace is low:  ace = 1 ... king = 13
@@ -371,7 +372,7 @@ export class Foundation extends Pile {
     return false
   }
 
-  //-- a light grey ace of its suit, face up
+  /** a light grey ace of its suit, face up */
   drawItsPlaceholder() {
     return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
   }
@@ -492,42 +493,47 @@ export class Solitaire extends App {
   draw() {
     return [
       h("ui-segment", { inverted: true, attach: "top" },
-        h("ui-toolbar", { class: "GameBar", "aria-label": "Game" },
+        h("ui-toolbar", {
+          class: "GameBar",
+          "aria-label": "Game",
+          appearance: "secondary",
+          inverted: true,
+          size: "small",
+          shrinkable: true
+        },
           h("ui-text", { slot: "title", size: "large", heavy: true }, "Solitaire"),
-          h("ui-buttons", { slot: "center", padding: "compact" },
-            core.drawAction(this, "autoPlay"),
-            core.drawAction(this, "cheat"),
-            core.drawAction(this, "restartTheGame")
-          ),
-          h("ui-buttons", { slot: "center", padding: "compact" },
-            core.drawAction(this, "undo", { "icon-only": true }),
-            core.drawAction(this, "redo", { "icon-only": true })
-          ),
+          core.drawAction(this, "autoPlay", { "in-menu": true }),
+          core.drawAction(this, "cheat", { "in-menu": true }),
+          core.drawAction(this, "restartTheGame", { "in-menu": true }),
+          h("ui-action", { kind: "divider" }),
+          core.drawAction(this, "undo", { "in-menu": true }),
+          core.drawAction(this, "redo", { "in-menu": true }),
           h("ui-text", { slot: "right" }, "Score: ", () => this.score)
         )
       ),
-      h("ui-container",
-        h("ui-segment", { appearance: "basic" },
-          h("ui-grid", { columns: "7", spacing: "xs" },
-            core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"]),
-            h("test-project-stock-pile", { id: "stock" }),
-            h("test-project-discard-pile", { id: "discards" }),
-            h("spacer"),
-            h("test-project-foundation", { id: "clubs" }),
-            h("test-project-foundation", { id: "diamonds" }),
-            h("test-project-foundation", { id: "hearts" }),
-            h("test-project-foundation", { id: "spades" }),
-            h("test-project-column", { id: "C1" }),
-            h("test-project-column", { id: "C2" }),
-            h("test-project-column", { id: "C3" }),
-            h("test-project-column", { id: "C4" }),
-            h("test-project-column", { id: "C5" }),
-            h("test-project-column", { id: "C6" }),
-            h("test-project-column", { id: "C7" })
-          )
-        )
-      )
+      h("ui-container", { padding: "small", columns: "7", spacing: "xs" },
+        h("test-project-stock-pile", { id: "stock" }),
+        h("test-project-discard-pile", { id: "discards" }),
+        h("spacer"),
+        h("test-project-foundation", { id: "clubs" }),
+        h("test-project-foundation", { id: "diamonds" }),
+        h("test-project-foundation", { id: "hearts" }),
+        h("test-project-foundation", { id: "spades" }),
+        h("test-project-column", { id: "C1" }),
+        h("test-project-column", { id: "C2" }),
+        h("test-project-column", { id: "C3" }),
+        h("test-project-column", { id: "C4" }),
+        h("test-project-column", { id: "C5" }),
+        h("test-project-column", { id: "C6" }),
+        h("test-project-column", { id: "C7" })
+      ),
+      core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])
     ]
+  }
+
+  async restartTheGame() {
+    this.score = 0
+    await this.dealTheCards()
   }
 
   /** Gather every card into the stock, shuffle it, and deal the columns */
@@ -562,6 +568,11 @@ export class Solitaire extends App {
     this.discards.append(it)
   }
 
+  /** a click on the stock:  one step to undo, where the deal's own turn isn't */
+  async turnAStockCard() {
+    await this.playFromTheStock()
+  }
+
   /** The discards, turned over, back into the stock */
   resetTheStock() {
     const cards = this.discards.clone()
@@ -572,21 +583,7 @@ export class Solitaire extends App {
     })
   }
 
-  async onScoreChange(event) {
-    let home = this.clubs.length + this.diamonds.length
-    home = home + this.hearts.length + this.spades.length
-    if (home === 52) await core.alert("You won!")
-  }
-
-  async restartTheGame() {
-    this.score = 0
-    await this.dealTheCards()
-  }
-
-  async turnAStockCard() {
-    await this.playFromTheStock()
-  }
-
+  /** Play every card that can go somewhere, until none can */
   async autoPlay() {
     let anythingChanged = false
     if (!this.discards.isEmpty) {
@@ -621,6 +618,7 @@ export class Solitaire extends App {
     if (anythingChanged) await this.autoPlay()
   }
 
+  /** Turn up a face-down card from a column, at random, onto the discards */
   async cheat() {
     const remainingPiles = core.filter(core.everyThing(Column), (pile) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
     if (core.isEmpty(remainingPiles)) return
@@ -633,28 +631,38 @@ export class Solitaire extends App {
     await core.pauseFor(300, "msec")
     card.lifted = false
   }
+
+  async onScoreChange(event) {
+    let home = this.clubs.length + this.diamonds.length
+    home = home + this.hearts.length + this.spades.length
+    if (home === 52) await core.alert("You won!")
+  }
 }
 export const solitaire = new Solitaire()
 
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["R"], undoneAs: "Restart" })
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart" })
 
-/** a click on the stock:  one step to undo, where the deal's own turn isn't */
+core.describeAction(Solitaire, "dealTheCards", { title: "Deal The Cards", undoneAs: "Deal The Cards" })
+
+core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Play From The Stock" })
+
 core.describeAction(Solitaire, "turnAStockCard", { title: "Turn A Stock Card", undoneAs: "Turn Card" })
+
+core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
 
 core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
 
-/** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
 core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
 
-/** Play every card that can go somewhere, until none can */
-core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], undoneAs: "Auto Play" })
+core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], icon: "play", undoneAs: "Auto Play" })
 
-/** Turn up a face-down card from a column, at random, onto the discards */
-core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
+core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon: "eye", undoneAs: "Cheat" })
 
-//-- play the card on click if it is a legal move
+core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count The Points For A Card On A Pile", undoneAs: "Count The Points For A Card On A Pile" })
 
-//-- drop the card on the pile if it is a legal move
+// play the card on click if it is a legal move
+
+// drop the card on the pile if it is a legal move
 
 core.heading("The piles")
 ///////////////
@@ -732,7 +740,7 @@ export function testTheMoves() {
   })
 }
 // -----------
-core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitaire.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its layout (<solitaire-column layout="vertical">), each card in it by its place:¬     --index from 0, of --count;  an empty pile's placeholder by its part, ::part(placeholder). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitaire-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* The toolbar:  its buttons in the true middle, the title and the score taking equal room on either side;¬   in pills (no attribute rounds a joined group:  \`circular\` parts its buttons) */¬.GameBar::part(title),¬.GameBar::part(right) {¬  flex: 1 1 0;¬}¬.GameBar::part(right) {¬  justify-content: flex-end;¬}¬ui-buttons {¬  --ui-button-radius: var(--ui-radius-pill);¬}¬/* a phone:  no title, and the score on a line of its own, so every button keeps its name */¬@media (width < 36rem) {¬  .GameBar::part(toolbar) {¬    flex-wrap: wrap;¬    justify-content: center;¬  }¬  .GameBar::part(title) {¬    display: none;¬  }¬  .GameBar::part(right) {¬    flex: 1 0 100%;¬    justify-content: center;¬  }¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[layout] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[layout]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[layout] > *,¬[layout]::part(placeholder) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitaire-card:not([layout] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[layout] > *,¬solitaire-card,¬[layout]::part(placeholder) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Card.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[layout] > *,¬solitaire-card {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[layout] > *::part(front),¬[layout] > *::part(back),¬solitaire-card::part(front),¬solitaire-card::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Moving:  the cheat's card is "lifted" over every card around it, and turns face up as it goes to the discards¬   (the game pauses 0.3s for it:  Solitaire.spell) */¬[layout] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬[layout] > [lifted] {¬  z-index: 5;¬}¬[layout] > [lifted][direction="up"] {¬  @starting-style {¬    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);¬  }¬}¬@media (prefers-reduced-motion: reduce) {¬  [layout] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[layout]::part(placeholder) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[layout]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[layout]:state(accepting-drop) > :last-child,¬[layout]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The layouts:  stacked puts every card on top of the one before;  vertical, each a step below it */¬[layout="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[layout="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitaire.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its layout (<solitaire-column layout="vertical">), each card in it by its place:¬     --index from 0, of --count;  an empty pile's placeholder by its part, ::part(placeholder). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitaire-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* The toolbar:  its actions in the true middle, the title and the score taking equal room on either side,¬   never squeezed:  as the bar narrows, the actions give way (\`shrinkable\`), down to one \`…\` button */¬.GameBar {¬  --ui-toolbar-gap: 1em;¬}¬.GameBar::part(title),¬.GameBar::part(right) {¬  flex: 1 0 0;¬  min-width: max-content;¬}¬.GameBar::part(right) {¬  justify-content: flex-end;¬}¬.GameBar::part(menu) {¬  flex: 0 1 auto;¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[layout] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[layout]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[layout] > *,¬[layout]::part(placeholder) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitaire-card:not([layout] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[layout] > *,¬solitaire-card,¬[layout]::part(placeholder) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Card.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[layout] > *,¬solitaire-card {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[layout] > *::part(front),¬[layout] > *::part(back),¬solitaire-card::part(front),¬solitaire-card::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Moving:  the cheat's card is "lifted" over every card around it, and turns face up as it goes to the discards¬   (the game pauses 0.3s for it:  Solitaire.spell) */¬[layout] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬[layout] > [lifted] {¬  z-index: 5;¬}¬[layout] > [lifted][direction="up"] {¬  @starting-style {¬    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);¬  }¬}¬@media (prefers-reduced-motion: reduce) {¬  [layout] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[layout]::part(placeholder) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[layout]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[layout]:state(accepting-drop) > :last-child,¬[layout]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The layouts:  stacked puts every card on top of the one before;  vertical, each a step below it */¬[layout="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[layout="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
 // -----------
 if (!core.isCarryingOver) solitaire.start()
 // -----------

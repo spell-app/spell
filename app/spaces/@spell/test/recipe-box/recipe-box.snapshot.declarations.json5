@@ -43,15 +43,6 @@
       "defined": "/RecipeBox.spell:271-510"
     },
     {
-      "type": "FamilyCookbook",
-      "superType": "Place",
-      "place": {
-        "name": "family_cookbook",
-        "kind": "in memory database"
-      },
-      "defined": "/RecipeBox.spell:113-153"
-    },
-    {
       "syntax": "remove {thisArg:expression}",
       "output": "remove",
       "rule": "method_call",
@@ -64,6 +55,15 @@
       "name": "remove it",
       "returns": "nothing",
       "defined": "/RecipeBox.spell:514-588"
+    },
+    {
+      "type": "FamilyCookbook",
+      "superType": "Place",
+      "place": {
+        "name": "family_cookbook",
+        "kind": "in memory database"
+      },
+      "defined": "/RecipeBox.spell:113-153"
     },
     {
       "type": "RecipeBox",
@@ -121,8 +121,8 @@
     5,
     10,
     15,
+    27,
     49,
-    52,
     54,
     57,
     62,

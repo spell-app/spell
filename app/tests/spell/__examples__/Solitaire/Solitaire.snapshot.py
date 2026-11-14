@@ -117,6 +117,33 @@ class Card(TwoSidedView):
     def draw_back(self) -> Element:
         return h("ui-text", {"color": "blue", "part": "back"}, "🂠")
 
+    async def play(self) -> Any:
+        if self.pile == solitaire.stock:
+            await solitaire.turn_a_stock_card()
+        else:
+            end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
+            if end_pile is None:
+                return False
+            return await self.put_on_pile(end_pile)
+
+    async def put_on_pile(self, pile: Pile) -> bool:
+        """the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved"""
+        # - the pile it left turns its new last card up;  the move counts, and scores
+        start_pile = self.pile
+        assert start_pile is not None
+        if not core.can_give_up(start_pile, self):
+            return False
+        if not core.can_take(pile, self):
+            return False
+        points = self.count_the_points_for_card_on_pile(pile)
+        for card in start_pile.starting_with(self):
+            core.move(card, pile)
+        if isinstance(start_pile, Column) and (start_pile):
+            await core.pause_for(200, "msec")
+            start_pile.last_item.turn_face_up()
+        solitaire.score = solitaire.score + points
+        return True
+
     def count_the_points_for_card_on_pile(self, pile: Pile) -> float:
         """what the move scores:  10 on a foundation, 5 from the discards, else nothing"""
         if isinstance(pile, Foundation):
@@ -134,32 +161,6 @@ class Card(TwoSidedView):
     @property
     def pile(self) -> Pile | None:
         return Pile.owner_of(self)
-
-    async def play(self) -> Any:
-        if self.pile == solitaire.stock:
-            await solitaire.turn_a_stock_card()
-        else:
-            end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
-            if end_pile is None:
-                return False
-            return await self.put_on_pile(end_pile)
-
-    async def put_on_pile(self, pile: Pile) -> bool:
-        # - the pile it left turns its new last card up;  the move counts, and scores
-        start_pile = self.pile
-        assert start_pile is not None
-        if not core.can_give_up(start_pile, self):
-            return False
-        if not core.can_take(pile, self):
-            return False
-        points = self.count_the_points_for_card_on_pile(pile)
-        for card in start_pile.starting_with(self):
-            core.move(card, pile)
-        if isinstance(start_pile, Column) and (start_pile):
-            await core.pause_for(200, "msec")
-            start_pile.last_item.turn_face_up()
-        solitaire.score = solitaire.score + points
-        return True
 
 
 # Ace is low:  ace = 1 ... king = 13
@@ -436,9 +437,8 @@ class Foundation(Pile):
     def can_give_up(self, card: Card) -> bool:
         return False
 
-    # a light grey ace of its suit, face up
-
     def draw_its_placeholder(self) -> Element:
+        """a light grey ace of its suit, face up"""
         return h("ui-text", {"part": "placeholder"}, Card(rank="ace", suit=self.suit).picture)
 
     def can_take(self, card: Card) -> bool:
@@ -532,54 +532,51 @@ class Solitaire(App):
                 {"inverted": True, "attach": "top"},
                 h(
                     "ui-toolbar",
-                    {"class": "GameBar", "aria-label": "Game"},
+                    {
+                        "class": "GameBar",
+                        "aria-label": "Game",
+                        "appearance": "secondary",
+                        "inverted": True,
+                        "size": "small",
+                        "shrinkable": True,
+                    },
                     h("ui-text", {"slot": "title", "size": "large", "heavy": True}, "Solitaire"),
-                    h(
-                        "ui-buttons",
-                        {"slot": "center", "padding": "compact"},
-                        core.draw_action(self, "auto_play"),
-                        core.draw_action(self, "cheat"),
-                        core.draw_action(self, "restart_the_game"),
-                    ),
-                    h(
-                        "ui-buttons",
-                        {"slot": "center", "padding": "compact"},
-                        core.draw_action(self, "undo", {"icon-only": True}),
-                        core.draw_action(self, "redo", {"icon-only": True}),
-                    ),
+                    core.draw_action(self, "auto_play", {"in-menu": True}),
+                    core.draw_action(self, "cheat", {"in-menu": True}),
+                    core.draw_action(self, "restart_the_game", {"in-menu": True}),
+                    h("ui-action", {"kind": "divider"}),
+                    core.draw_action(self, "undo", {"in-menu": True}),
+                    core.draw_action(self, "redo", {"in-menu": True}),
                     h("ui-text", {"slot": "right"}, "Score: ", self.score),
                 ),
             ),
             h(
                 "ui-container",
-                h(
-                    "ui-segment",
-                    {"appearance": "basic"},
-                    h(
-                        "ui-grid",
-                        {"columns": "7", "spacing": "xs"},
-                        core.draw_context_menu(
-                            self,
-                            ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
-                        ),
-                        h("test-project-stock-pile", {"id": "stock"}),
-                        h("test-project-discard-pile", {"id": "discards"}),
-                        h("spacer"),
-                        h("test-project-foundation", {"id": "clubs"}),
-                        h("test-project-foundation", {"id": "diamonds"}),
-                        h("test-project-foundation", {"id": "hearts"}),
-                        h("test-project-foundation", {"id": "spades"}),
-                        h("test-project-column", {"id": "C1"}),
-                        h("test-project-column", {"id": "C2"}),
-                        h("test-project-column", {"id": "C3"}),
-                        h("test-project-column", {"id": "C4"}),
-                        h("test-project-column", {"id": "C5"}),
-                        h("test-project-column", {"id": "C6"}),
-                        h("test-project-column", {"id": "C7"}),
-                    ),
-                ),
+                {"padding": "small", "columns": "7", "spacing": "xs"},
+                h("test-project-stock-pile", {"id": "stock"}),
+                h("test-project-discard-pile", {"id": "discards"}),
+                h("spacer"),
+                h("test-project-foundation", {"id": "clubs"}),
+                h("test-project-foundation", {"id": "diamonds"}),
+                h("test-project-foundation", {"id": "hearts"}),
+                h("test-project-foundation", {"id": "spades"}),
+                h("test-project-column", {"id": "C1"}),
+                h("test-project-column", {"id": "C2"}),
+                h("test-project-column", {"id": "C3"}),
+                h("test-project-column", {"id": "C4"}),
+                h("test-project-column", {"id": "C5"}),
+                h("test-project-column", {"id": "C6"}),
+                h("test-project-column", {"id": "C7"}),
+            ),
+            core.draw_context_menu(
+                self,
+                ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
             ),
         ]
+
+    async def restart_the_game(self) -> None:
+        self.score = 0
+        await self.deal_the_cards()
 
     async def deal_the_cards(self) -> None:
         """Gather every card into the stock, shuffle it, and deal the columns"""
@@ -609,6 +606,10 @@ class Solitaire(App):
         await core.pause_for(300, "msec")
         self.discards.append(it)
 
+    async def turn_a_stock_card(self) -> None:
+        """a click on the stock:  one step to undo, where the deal's own turn isn't"""
+        await self.play_from_the_stock()
+
     def reset_the_stock(self) -> None:
         """The discards, turned over, back into the stock"""
         cards = self.discards.clone()
@@ -617,20 +618,8 @@ class Solitaire(App):
             self.stock.append(card)
             card.turn_face_down()
 
-    async def on_score_change(self, event: ScoreChangeEvent) -> None:
-        home = len(self.clubs) + len(self.diamonds)
-        home = home + len(self.hearts) + len(self.spades)
-        if home == 52:
-            core.alert("You won!")
-
-    async def restart_the_game(self) -> None:
-        self.score = 0
-        await self.deal_the_cards()
-
-    async def turn_a_stock_card(self) -> None:
-        await self.play_from_the_stock()
-
     async def auto_play(self) -> None:
+        """Play every card that can go somewhere, until none can"""
         anything_changed = False
         if self.discards:
             test_card = self.discards.last_item
@@ -662,6 +651,7 @@ class Solitaire(App):
             await self.auto_play()
 
     async def cheat(self) -> None:
+        """Turn up a face-down card from a column, at random, onto the discards"""
         remaining_piles = core.filter(
             core.every_thing(Column),
             lambda pile: (pile) and pile.first_item.is_face_direction("down"),
@@ -677,24 +667,34 @@ class Solitaire(App):
         await core.pause_for(300, "msec")
         card.lifted = False
 
+    async def on_score_change(self, event: ScoreChangeEvent) -> None:
+        home = len(self.clubs) + len(self.diamonds)
+        home = home + len(self.hearts) + len(self.spades)
+        if home == 52:
+            core.alert("You won!")
+
 
 solitaire = Solitaire()
 
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["R"], "undone_as": "Restart"})
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart"})
 
-# a click on the stock:  one step to undo, where the deal's own turn isn't
+core.describe_action(Solitaire, "deal_the_cards", {"title": "Deal The Cards", "undone_as": "Deal The Cards"})
+
+core.describe_action(Solitaire, "play_from_the_stock", {"title": "Play From The Stock", "undone_as": "Play From The Stock"})
+
 core.describe_action(Solitaire, "turn_a_stock_card", {"title": "Turn A Stock Card", "undone_as": "Turn Card"})
+
+core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset The Stock", "undone_as": "Reset The Stock"})
 
 core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
 
-# the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
 core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "undone_as": "Move Card"})
 
-# Play every card that can go somewhere, until none can
-core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
+core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "icon": "play", "undone_as": "Auto Play"})
 
-# Turn up a face-down card from a column, at random, onto the discards
-core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
+core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})
+
+core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count The Points For A Card On A Pile", "undone_as": "Count The Points For A Card On A Pile"})
 
 # play the card on click if it is a legal move
 
@@ -823,31 +823,21 @@ solitaire-app {
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;
 }
 
-/* The toolbar:  its buttons in the true middle, the title and the score taking equal room on either side;
-   in pills (no attribute rounds a joined group:  \\`circular\\` parts its buttons) */
+/* The toolbar:  its actions in the true middle, the title and the score taking equal room on either side,
+   never squeezed:  as the bar narrows, the actions give way (\\`shrinkable\\`), down to one \\`…\\` button */
+.GameBar {
+  --ui-toolbar-gap: 1em;
+}
 .GameBar::part(title),
 .GameBar::part(right) {
-  flex: 1 1 0;
+  flex: 1 0 0;
+  min-width: max-content;
 }
 .GameBar::part(right) {
   justify-content: flex-end;
 }
-ui-buttons {
-  --ui-button-radius: var(--ui-radius-pill);
-}
-/* a phone:  no title, and the score on a line of its own, so every button keeps its name */
-@media (width < 36rem) {
-  .GameBar::part(toolbar) {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .GameBar::part(title) {
-    display: none;
-  }
-  .GameBar::part(right) {
-    flex: 1 0 100%;
-    justify-content: center;
-  }
+.GameBar::part(menu) {
+  flex: 0 1 auto;
 }
 
 /* A pile:  as wide as its cell of the board, as tall as its cards */

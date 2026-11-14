@@ -210,6 +210,43 @@
       "defined": "/Card.spell:2113-2138"
     },
     {
+      "syntax": "play {thisArg:expression}",
+      "output": "play",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Game Play",
+      "kind": "method",
+      "name": "play a card",
+      "waits": true,
+      "defined": "/Solitaire.spell:3302-3564"
+    },
+    {
+      "syntax": "put {thisArg:expression} on {callArgs:expression}",
+      "output": "put_on_$pile",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Game Play",
+      "kind": "method",
+      "name": "put a card on a pile",
+      "params": [
+        {
+          "name": "pile",
+          "datatype": "Pile"
+        }
+      ],
+      "returns": "choice",
+      "waits": true,
+      "defined": "/Solitaire.spell:3567-4273"
+    },
+    {
       "syntax": "count the points for {thisArg:expression} on {callArgs:expression}",
       "output": "count_the_points_for_card_on_$pile",
       "rule": "method_call",
@@ -228,7 +265,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitaire.spell:6150-6369"
+      "defined": "/Solitaire.spell:6013-6232"
     },
     {
       "syntax": "test card setup",
@@ -319,53 +356,53 @@
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6992-7294"
+      "defined": "/Solitaire.spell:6855-7157"
     },
     {
       "property": "layout",
       "of": "StockPile",
-      "defined": "/Solitaire.spell:7122-7145"
+      "defined": "/Solitaire.spell:6985-7008"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:7296-7483"
+      "defined": "/Solitaire.spell:7159-7346"
     },
     {
       "property": "layout",
       "of": "DiscardPile",
-      "defined": "/Solitaire.spell:7378-7401"
+      "defined": "/Solitaire.spell:7241-7264"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:7485-7999"
+      "defined": "/Solitaire.spell:7348-7862"
     },
     {
       "property": "layout",
       "of": "Foundation",
-      "defined": "/Solitaire.spell:7573-7596"
+      "defined": "/Solitaire.spell:7436-7459"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spell:7598-7623"
+      "defined": "/Solitaire.spell:7461-7486"
     },
     {
       "type": "Column",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:8001-8322"
+      "defined": "/Solitaire.spell:7864-8185"
     },
     {
       "property": "layout",
       "of": "Column",
-      "defined": "/Solitaire.spell:8089-8113"
+      "defined": "/Solitaire.spell:7952-7976"
     },
     {
       "type": "Solitaire",
       "superType": "App",
-      "defined": "/Solitaire.spell:303-6605"
+      "defined": "/Solitaire.spell:303-6468"
     },
     {
       "property": "deck",
@@ -468,53 +505,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Solitaire.spell:873-1998"
-    },
-    {
-      "syntax": "deal the cards (of {thisArg:expression})?",
-      "output": "deal_the_cards",
-      "rule": "method_call",
-      "of": "Solitaire",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Dealing",
-      "kind": "method",
-      "name": "deal the cards",
-      "waits": true,
-      "defined": "/Solitaire.spell:2124-2718"
-    },
-    {
-      "syntax": "play from the stock (of {thisArg:expression})?",
-      "output": "play_from_the_stock",
-      "rule": "method_call",
-      "of": "Solitaire",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Dealing",
-      "kind": "method",
-      "name": "play from the stock",
-      "returns": "nothing",
-      "waits": true,
-      "defined": "/Solitaire.spell:2721-3068"
-    },
-    {
-      "syntax": "reset the stock (of {thisArg:expression})?",
-      "output": "reset_the_stock",
-      "rule": "method_call",
-      "of": "Solitaire",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Dealing",
-      "kind": "method",
-      "name": "reset the stock",
-      "returns": "nothing",
-      "defined": "/Solitaire.spell:3221-3440"
+      "defined": "/Solitaire.spell:873-1813"
     },
     {
       "syntax": "restart the game (of {thisArg:expression})?",
@@ -530,7 +521,38 @@
       "name": "restart the game",
       "waits": true,
       "title": "Restart",
-      "defined": "/Solitaire.spell:2018-2120"
+      "defined": "/Solitaire.spell:1833-1958"
+    },
+    {
+      "syntax": "deal the cards (of {thisArg:expression})?",
+      "output": "deal_the_cards",
+      "rule": "method_call",
+      "of": "Solitaire",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Dealing",
+      "kind": "method",
+      "name": "deal the cards",
+      "waits": true,
+      "defined": "/Solitaire.spell:1962-2556"
+    },
+    {
+      "syntax": "play from the stock (of {thisArg:expression})?",
+      "output": "play_from_the_stock",
+      "rule": "method_call",
+      "of": "Solitaire",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Dealing",
+      "kind": "method",
+      "name": "play from the stock",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/Solitaire.spell:2559-2906"
     },
     {
       "syntax": "turn a stock card (of {thisArg:expression})?",
@@ -546,44 +568,22 @@
       "name": "turn a stock card",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spell:3072-3218"
+      "defined": "/Solitaire.spell:2910-3056"
     },
     {
-      "syntax": "play {thisArg:expression}",
-      "output": "play",
+      "syntax": "reset the stock (of {thisArg:expression})?",
+      "output": "reset_the_stock",
       "rule": "method_call",
-      "of": "Card",
+      "of": "Solitaire",
       "alias": [
         "statement",
         "expression"
       ],
-      "group": "Game Play",
+      "group": "Dealing",
       "kind": "method",
-      "name": "play a card",
-      "waits": true,
-      "defined": "/Solitaire.spell:3464-3726"
-    },
-    {
-      "syntax": "put {thisArg:expression} on {callArgs:expression}",
-      "output": "put_on_$pile",
-      "rule": "method_call",
-      "of": "Card",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Game Play",
-      "kind": "method",
-      "name": "put a card on a pile",
-      "params": [
-        {
-          "name": "pile",
-          "datatype": "Pile"
-        }
-      ],
-      "returns": "choice",
-      "waits": true,
-      "defined": "/Solitaire.spell:3729-4435"
+      "name": "reset the stock",
+      "returns": "nothing",
+      "defined": "/Solitaire.spell:3059-3278"
     },
     {
       "syntax": "auto play (of {thisArg:expression})?",
@@ -599,7 +599,7 @@
       "name": "auto play",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spell:4438-5526"
+      "defined": "/Solitaire.spell:4276-5377"
     },
     {
       "syntax": "cheat {thisArg:expression}?",
@@ -615,7 +615,7 @@
       "name": "cheat",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spell:5530-6147"
+      "defined": "/Solitaire.spell:5381-6010"
     },
     {
       "syntax": "test the moves",
@@ -624,7 +624,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spell:8324-9774"
+      "defined": "/Solitaire.spell:8187-9637"
     }
   ],
   "codeLines": [
@@ -643,54 +643,54 @@
     70,
     77,
     86,
-    100,
-    146,
-    189,
-    193,
-    198,
-    205,
-    228,
-    233,
-    240,
-    246,
-    252,
-    267,
-    303,
-    313,
-    316,
-    338,
-    341,
-    357,
-    360,
-    364,
-    387,
-    390,
-    408,
-    411,
-    416,
-    421,
-    426,
-    431,
-    436,
-    441,
-    446,
-    451,
-    456,
-    461,
-    466,
-    471,
-    476,
-    481,
-    491,
+    99,
+    109,
+    125,
+    147,
+    190,
+    194,
+    199,
+    206,
+    229,
+    234,
+    241,
+    247,
+    253,
+    268,
+    304,
+    314,
+    317,
+    339,
+    342,
+    358,
+    361,
+    365,
+    388,
+    391,
+    409,
+    412,
+    417,
+    422,
+    427,
+    432,
+    437,
+    442,
+    447,
+    452,
+    457,
+    462,
+    467,
+    472,
+    477,
+    482,
+    492,
     533,
-    555,
-    565,
-    638,
-    641,
-    643,
-    646,
-    649,
-    652,
-    665
+    539,
+    561,
+    571,
+    576,
+    586,
+    621,
+    673
   ]
 }

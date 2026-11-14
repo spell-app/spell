@@ -1591,7 +1591,8 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - The rest are read through the component pack's dictionary as it parses (`ComponentPacks.readAttribute()`,
       Spell UI's `SpellUIDefaults.readAttribute()`), since the core draws English's `<ui-button>`;
       one the pack doesn't know (`class`, `aria-label`) or a `{...}` value stays as written.
-  - Inside a Spell UI menu, `<menu>` (`ui-menu`), it's a menu's ROW, not a button (epic `editor` P29):
+  - Inside a Spell UI menu, `<menu>` (`ui-menu`) or `<toolbar>` (`ui-toolbar`), it's a menu's ROW, not a button
+    (epic `editor` P29):
     `SpellJSX.markMenuRows()` marks each it holds, an `<if ...>`'s too, and it compiles with the core's own
     `in-menu`, `core.drawAction(this, "save", { "in-menu": true })`.
     - The core draws a `<ui-action>` handed the action itself, which reads its title, icon and key, greyed and

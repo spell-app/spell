@@ -43,6 +43,25 @@ export class ComponentPacks {
   }
 
   /**
+   * The pack's own (English) tag that `tag` stands for in `language`, from the first of `packNames` that knows it:
+   * `("es-barra-herramientas", "es")` => `"ui-toolbar"`;  `undefined` if none does.
+   * - `tag` as a page writes it (`ui-toolbar`, `es-barra-herramientas`), or bare as a drawing does (`toolbar`).
+   * - So a rule about one of the pack's components finds it in every language:  a Spanish `<barra-herramientas>`'s
+   *   actions are its items, as an English `<toolbar>`'s are (`SpellJSX.markMenuRows()`).
+   */
+  static canonicalTagFor(
+    tag: string,
+    language: string,
+    packNames: readonly string[] = this.DEFAULT
+  ): string | undefined {
+    for (const name of packNames) {
+      const canonical = this.packs.get(name)?.canonicalTagFor?.(tag, language)
+      if (canonical) return canonical
+    }
+    return undefined
+  }
+
+  /**
    * What `sample`, one attribute of an app's widget defaults as written in `language`, means in the first of
    * `packNames` that has its tag (epic `language` P29, `ui_defaults`):  its tag, attribute and value in the pack's
    * own (English) names, or what's wrong with it.
@@ -116,6 +135,12 @@ export type ComponentPack = {
    * - Accents count as written or not:  `botón` ~== `boton`.
    */
   tagFor(word: string, language: string): string | undefined
+  /**
+   * The pack's own (English) tag `tag` stands for in `language` (`ComponentPacks.canonicalTagFor()`):
+   * `("es-barra-herramientas", "es")` => `"ui-toolbar"`;  `undefined` for none of the pack's.
+   * - Left out:  the pack can't say, and a tag counts only as written.
+   */
+  canonicalTagFor?(tag: string, language: string): string | undefined
   /**
    * One attribute of an app's widget defaults, as written in `language`, in the pack's own names
    * (`ComponentPacks.readDefault()`):

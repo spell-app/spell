@@ -97,6 +97,44 @@ export class Carta extends TwoSidedView {
     return h("es-texto", { color: "azul", part: "back" }, "🂠")
   }
 
+  /////////////////////
+  // ## Jugar una carta
+  /////////////////////
+  // Qué hace un clic o un arrastre:  los movimientos propios de la carta, y los de cada pila, como el juego los juega.
+
+  /**
+   * la carta, y cada carta sobre ella, a la primera pila que la tome;  dice si se movió
+   * - la carta de la reserva se voltea sobre los descartes en su lugar
+   */
+  async jugar() {
+    if (this.pila === solitario.reserva) {
+      await solitario.robarDeLaReserva()
+      return
+    }
+    const pilaFinal = core.filter(core.everyThing(Pila), (pila) => core.canTake(pila, this)).firstItem
+    if (pilaFinal === undefined) return false
+    return await this.ponerEnPila(pilaFinal)
+  }
+
+  /**
+   * la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
+   * - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
+   */
+  async ponerEnPila(pila) {
+    const pilaInicial = this.pila
+    if (!core.canGiveUp(pilaInicial, this)) return false
+    if (!core.canTake(pila, this)) return false
+    const puntos = this.contarLosPuntosDeCartaEnPila(pila)
+    pilaInicial.startingWith(this).forEach((carta) => core.move(carta, pila))
+    if (pilaInicial instanceof Columna && !pilaInicial.isEmpty) {
+      await core.pauseFor(200, "msec")
+      pilaInicial.lastItem?.turnFaceUp()
+    }
+    solitario.movimientos = solitario.movimientos + 1
+    solitario.puntuación = solitario.puntuación + puntos
+    return true
+  }
+
   /** lo que suma el movimiento:  10 en una fundación, 5 desde los descartes, si no nada */
   contarLosPuntosDeCartaEnPila(pila) {
     if (pila instanceof Fundación) return 10
@@ -123,31 +161,6 @@ export class Carta extends TwoSidedView {
 
   get pila() {
     return Pila.ownerOf(this)
-  }
-
-  async jugar() {
-    if (this.pila === solitario.reserva) {
-      await solitario.robarDeLaReserva()
-      return
-    }
-    const pilaFinal = core.filter(core.everyThing(Pila), (pila) => core.canTake(pila, this)).firstItem
-    if (pilaFinal === undefined) return false
-    return await this.ponerEnPila(pilaFinal)
-  }
-
-  async ponerEnPila(pila) {
-    const pilaInicial = this.pila
-    if (!core.canGiveUp(pilaInicial, this)) return false
-    if (!core.canTake(pila, this)) return false
-    const puntos = this.contarLosPuntosDeCartaEnPila(pila)
-    pilaInicial.startingWith(this).forEach((carta) => core.move(carta, pila))
-    if (pilaInicial instanceof Columna && !pilaInicial.isEmpty) {
-      await core.pauseFor(200, "msec")
-      pilaInicial.lastItem?.turnFaceUp()
-    }
-    solitario.movimientos = solitario.movimientos + 1
-    solitario.puntuación = solitario.puntuación + puntos
-    return true
   }
 
   get clickableWhen() {
@@ -554,6 +567,11 @@ export class Solitario extends App {
     this.descartes.append(it)
   }
 
+  /** Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es */
+  async voltearLaReserva() {
+    await this.robarDeLaReserva()
+  }
+
   /** Junta cada carta en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha */
   async repartirLasCartas() {
     for (const carta of this.mazo) {
@@ -576,58 +594,6 @@ export class Solitario extends App {
     await this.robarDeLaReserva()
   }
 
-  draw() {
-    // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra sus jugadas
-    return [
-      h("es-segmento", { invertido: true, unir: "arriba" },
-        h("es-barra-herramientas", { class: "GameBar", "aria-label": "Juego" },
-          h("es-texto", { slot: "titulo", tamano: "grande", extranegrita: true }, "Solitario Encanto"),
-          h("es-botones", { slot: "centro", relleno: "compact" },
-            core.drawAction(this, "jugarSolo"),
-            core.drawAction(this, "hacerTrampa"),
-            core.drawAction(this, "reiniciarElJuego")
-          ),
-          h("es-botones", { slot: "centro", relleno: "compact" },
-            core.drawAction(this, "undo", { "icon-only": true }),
-            core.drawAction(this, "redo", { "icon-only": true })
-          ),
-          h("es-texto", { slot: "derecha" },
-            "Movimientos: ",
-            () => this.movimientos,
-            "  ·  Puntos: ",
-            () => this.puntuación,
-            () => this.pista
-          )
-        )
-      ),
-      h("es-contenedor",
-        h("es-segmento", { apariencia: "básico" },
-          h("es-cuadricula", { columnas: "7", separacion: "xs" },
-            core.drawContextMenu(this, ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "-", "undo", "redo"]),
-            h("test-project-pila-de-reserva", { id: "reserva" }),
-            h("test-project-pila-de-descartes", { id: "descartes" }),
-            h("es-columna"),
-            h("test-project-fundacion", { id: "tréboles" }),
-            h("test-project-fundacion", { id: "diamantes" }),
-            h("test-project-fundacion", { id: "corazones" }),
-            h("test-project-fundacion", { id: "espadas" }),
-            h("test-project-columna", { id: "C1" }),
-            h("test-project-columna", { id: "C2" }),
-            h("test-project-columna", { id: "C3" }),
-            h("test-project-columna", { id: "C4" }),
-            h("test-project-columna", { id: "C5" }),
-            h("test-project-columna", { id: "C6" }),
-            h("test-project-columna", { id: "C7" })
-          )
-        )
-      )
-    ]
-  }
-
-  async voltearLaReserva() {
-    await this.robarDeLaReserva()
-  }
-
   async reiniciarElJuego() {
     this.puntuación = 0
     this.movimientos = 0
@@ -635,6 +601,7 @@ export class Solitario extends App {
     await this.repartirLasCartas()
   }
 
+  /** Juega cada carta que puede ir a algún lado, hasta que ninguna pueda */
   async jugarSolo() {
     let huboCambios = false
     if (!this.descartes.isEmpty) {
@@ -669,6 +636,7 @@ export class Solitario extends App {
     if (huboCambios) await this.jugarSolo()
   }
 
+  /** Voltea una carta boca abajo de una columna, al azar, sobre los descartes */
   async hacerTrampa() {
     const pilasRestantes = core.filter(core.everyThing(Columna), (pila) => !pila.isEmpty && pila.firstItem?.isFaceDirection("down"))
     if (core.isEmpty(pilasRestantes)) return
@@ -681,39 +649,76 @@ export class Solitario extends App {
     await core.pauseFor(300, "msec")
     carta.levantada = false
   }
+
+  draw() {
+    // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra sus jugadas
+    return [
+      h("es-segmento", { invertido: true, unir: "arriba" },
+        h("es-barra-herramientas", {
+          class: "GameBar",
+          "aria-label": "Juego",
+          apariencia: "secundario",
+          invertido: true,
+          tamano: "pequeño",
+          encogible: true
+        },
+          h("es-texto", { slot: "titulo", tamano: "grande", extranegrita: true }, "Solitario Encanto"),
+          core.drawAction(this, "jugarSolo", { "in-menu": true }),
+          core.drawAction(this, "hacerTrampa", { "in-menu": true }),
+          core.drawAction(this, "reiniciarElJuego", { "in-menu": true }),
+          h("ui-action", { kind: "divider" }),
+          core.drawAction(this, "undo", { "in-menu": true }),
+          core.drawAction(this, "redo", { "in-menu": true }),
+          h("es-texto", { slot: "derecha" },
+            "Movimientos: ",
+            () => this.movimientos,
+            "  ·  Puntos: ",
+            () => this.puntuación,
+            () => this.pista
+          )
+        )
+      ),
+      h("es-contenedor", { relleno: "pequeño", columnas: "7", separacion: "xs" },
+        core.drawContextMenu(this, ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "-", "undo", "redo"]),
+        h("test-project-pila-de-reserva", { id: "reserva" }),
+        h("test-project-pila-de-descartes", { id: "descartes" }),
+        h("es-columna"),
+        h("test-project-fundacion", { id: "tréboles" }),
+        h("test-project-fundacion", { id: "diamantes" }),
+        h("test-project-fundacion", { id: "corazones" }),
+        h("test-project-fundacion", { id: "espadas" }),
+        h("test-project-columna", { id: "C1" }),
+        h("test-project-columna", { id: "C2" }),
+        h("test-project-columna", { id: "C3" }),
+        h("test-project-columna", { id: "C4" }),
+        h("test-project-columna", { id: "C5" }),
+        h("test-project-columna", { id: "C6" }),
+        h("test-project-columna", { id: "C7" })
+      )
+    ]
+  }
 }
 export const solitario = new Solitario()
 
 // Una de cada, hecha con el solitario
 
 // Cada uno se detiene un momento, así el reparto se anima
-/** Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es */
+core.describeAction(Solitario, "rehacerLaReserva", { title: "Rehacer La Reserva", undoneAs: "Rehacer La Reserva" })
+core.describeAction(Solitario, "robarDeLaReserva", { title: "Robar De La Reserva", undoneAs: "Robar De La Reserva" })
 core.describeAction(Solitario, "voltearLaReserva", { title: "Voltear La Reserva", undoneAs: "Voltear carta" })
+core.describeAction(Solitario, "repartirLasCartas", { title: "Repartir Las Cartas", undoneAs: "Repartir Las Cartas" })
 
 // Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
-core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar", shortcuts: ["N"], undoneAs: "Reiniciar" })
-/** Juega cada carta que puede ir a algún lado, hasta que ninguna pueda */
-core.describeAction(Solitario, "jugarSolo", { title: "Jugar solo", shortcuts: ["A"], undoneAs: "Jugar solo" })
-/** Voltea una carta boca abajo de una columna, al azar, sobre los descartes */
-core.describeAction(Solitario, "hacerTrampa", { title: "Trampa", shortcuts: ["C"], undoneAs: "Trampa" })
+core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar", shortcuts: ["N"], icon: "sync alternate", undoneAs: "Reiniciar" })
+core.describeAction(Solitario, "jugarSolo", { title: "Jugar solo", shortcuts: ["A"], icon: "play", undoneAs: "Jugar solo" })
+core.describeAction(Solitario, "hacerTrampa", { title: "Trampa", shortcuts: ["C"], icon: "eye", undoneAs: "Trampa" })
 
 core.heading("Jugar una carta")
-/////////////////////
-// ## Jugar una carta
-/////////////////////
-// Qué hace un clic o un arrastre:  los movimientos propios de la carta, y los de cada pila, como el juego los juega.
-
-/**
- * la carta, y cada carta sobre ella, a la primera pila que la tome;  dice si se movió
- * - la carta de la reserva se voltea sobre los descartes en su lugar
- */
 core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar carta" })
 
-/**
- * la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
- * - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
- */
 core.describeAction(Carta, "ponerEnPila", { title: "Poner Una Carta En Una Pila", undoneAs: "Mover carta" })
+
+core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar Los Puntos De Una Carta En Una Pila", undoneAs: "Contar Los Puntos De Una Carta En Una Pila" })
 
 // los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
 // solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero
@@ -803,7 +808,7 @@ export function testLosMovimientos() {
 
 core.holdWhile(() => solitario.repartirLasCartas())
 // -----------
-core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitario.es.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its disposición, its layout (<solitario-columna disposición="vertical">),¬     each card in it by its place:  --index from 0, of --count;¬     an empty pile's placeholder, its marcador, by its part:  ::part(marcador). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitario-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* The toolbar:  its buttons in the true middle, the title and the score taking equal room on either side;¬   in pills (no attribute rounds a joined group:  \`circular\` parts its buttons) */¬.GameBar::part(title),¬.GameBar::part(right) {¬  flex: 1 1 0;¬}¬.GameBar::part(right) {¬  justify-content: flex-end;¬}¬es-botones {¬  --ui-button-radius: var(--ui-radius-pill);¬}¬/* a phone:  no title, and the score on a line of its own, so every button keeps its name */¬@media (width < 36rem) {¬  .GameBar::part(toolbar) {¬    flex-wrap: wrap;¬    justify-content: center;¬  }¬  .GameBar::part(title) {¬    display: none;¬  }¬  .GameBar::part(right) {¬    flex: 1 0 100%;¬    justify-content: center;¬  }¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[disposición] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[disposición]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[disposición] > *,¬[disposición]::part(marcador) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitario-carta:not([disposición] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[disposición] > *,¬solitario-carta,¬[disposición]::part(marcador) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Carta.es.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[disposición] > *,¬solitario-carta {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[disposición] > *::part(front),¬[disposición] > *::part(back),¬solitario-carta::part(front),¬solitario-carta::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Moving:  the cheat's card is "levantada" over every card around it, and turns face up as it goes to the discards¬   (the game pauses 0.3s for it:  Solitario.es.spell) */¬[disposición] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬[disposición] > [levantada] {¬  z-index: 5;¬}¬[disposición] > [levantada][direction="up"] {¬  @starting-style {¬    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);¬  }¬}¬@media (prefers-reduced-motion: reduce) {¬  [disposición] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[disposición]::part(marcador) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[disposición]::part(marcador):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[disposición]:state(accepting-drop) > :last-child,¬[disposición]:state(accepting-drop)::part(marcador) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The disposiciones:  apilada puts every card on top of the one before;  vertical, each a step below it */¬[disposición="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[disposición="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitario.es.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its disposición, its layout (<solitario-columna disposición="vertical">),¬     each card in it by its place:  --index from 0, of --count;¬     an empty pile's placeholder, its marcador, by its part:  ::part(marcador). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitario-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* The toolbar:  its actions in the true middle, the title and the score taking equal room on either side,¬   never squeezed:  as the bar narrows, the actions give way (\`shrinkable\`), down to one \`…\` button */¬.GameBar {¬  --ui-toolbar-gap: 1em;¬}¬.GameBar::part(title),¬.GameBar::part(right) {¬  flex: 1 0 0;¬  min-width: max-content;¬}¬.GameBar::part(right) {¬  justify-content: flex-end;¬}¬.GameBar::part(menu) {¬  flex: 0 1 auto;¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[disposición] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[disposición]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[disposición] > *,¬[disposición]::part(marcador) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitario-carta:not([disposición] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[disposición] > *,¬solitario-carta,¬[disposición]::part(marcador) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Carta.es.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[disposición] > *,¬solitario-carta {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[disposición] > *::part(front),¬[disposición] > *::part(back),¬solitario-carta::part(front),¬solitario-carta::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Moving:  the cheat's card is "levantada" over every card around it, and turns face up as it goes to the discards¬   (the game pauses 0.3s for it:  Solitario.es.spell) */¬[disposición] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬[disposición] > [levantada] {¬  z-index: 5;¬}¬[disposición] > [levantada][direction="up"] {¬  @starting-style {¬    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);¬  }¬}¬@media (prefers-reduced-motion: reduce) {¬  [disposición] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[disposición]::part(marcador) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[disposición]::part(marcador):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[disposición]:state(accepting-drop) > :last-child,¬[disposición]:state(accepting-drop)::part(marcador) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The disposiciones:  apilada puts every card on top of the one before;  vertical, each a step below it */¬[disposición="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[disposición="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
 // -----------
 if (!core.isCarryingOver) solitario.start()
 // -----------

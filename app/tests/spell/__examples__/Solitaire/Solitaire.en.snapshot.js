@@ -17,10 +17,10 @@ export const words = {
       state: "state",
       picture: "picture",
       lifted: "lifted",
-      countThePointsForCardOnPile: "count the points for a card on a pile",
-      pile: "pile",
       play: "play a card",
-      putOnPile: "put a card on a pile"
+      putOnPile: "put a card on a pile",
+      countThePointsForCardOnPile: "count the points for a card on a pile",
+      pile: "pile"
     },
     Deck: {
       state: "state"
@@ -61,11 +61,11 @@ export const words = {
       C7: "C7",
       score: "score",
       draw: "draw it",
+      restartTheGame: "restart the game",
       dealTheCards: "deal the cards",
       playFromTheStock: "play from the stock",
-      resetTheStock: "reset the stock",
-      restartTheGame: "restart the game",
       turnAStockCard: "turn a stock card",
+      resetTheStock: "reset the stock",
       autoPlay: "auto play",
       cheat: "cheat"
     }
@@ -76,11 +76,11 @@ export const words = {
       { name: "Suit", members: ["suit", "color", "symbol"] },
       { name: "Names", description: "What a person, test or console calls it", members: ["name", "isTheRankOfSuit", "state"] },
       { name: "Drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["picture", "lifted"] },
-      { name: "Game Play", members: ["countThePointsForCardOnPile", "play", "putOnPile"] },
+      { name: "Game Play", members: ["play", "putOnPile", "countThePointsForCardOnPile"] },
       { name: "A pile of cards", members: ["pile"] }
     ],
     Solitaire: [
-      { name: "Dealing", members: ["dealTheCards", "playFromTheStock", "resetTheStock", "restartTheGame", "turnAStockCard"] },
+      { name: "Dealing", members: ["restartTheGame", "dealTheCards", "playFromTheStock", "turnAStockCard", "resetTheStock"] },
       { name: "Game Play", members: ["autoPlay", "cheat"] }
     ]
   }

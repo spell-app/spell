@@ -82,6 +82,12 @@ class Pile(List):
 # - it sends "flipped" with side as a text
 core.describe_event(Card, "flipped", {"params": {"side": "text"}})
 
+core.describe_action(Card, "flip", {"title": "Flip It", "undone_as": "Flip It"})
+
+core.describe_action(Card, "flip_slowly", {"title": "Flip It Slowly", "undone_as": "Flip It Slowly"})
+
+core.describe_action(Card, "close", {"title": "Close It", "undone_as": "Close It"})
+
 
 
 @core.on("picked")

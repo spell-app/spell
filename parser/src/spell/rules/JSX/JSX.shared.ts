@@ -57,11 +57,14 @@ export const CONTEXT_MENU_TAG_MEANING = "context_menu"
 export const DIVIDER_TAG_MEANING = "divider"
 
 /**
- * The Spell UI menu whose `<action "save"/>`s are its ROWS, not buttons (epic `editor` P29, Choice 1 A):
+ * The Spell UI menus whose `<action "save"/>`s are their ROWS, not buttons (epic `editor` P29, Choice 1 A):
  * `<menu>` as a drawing names it bare, `ui-menu` once its pack is loaded.
- * - So are its `<divider/>`s:  a line between groups, a row of its own.
+ * - And `<toolbar>`, which IS a menu (epic `mockup`):  its actions are its items,
+ *   so a `shrinkable` one fits their titles, then their icons, then folds them into its `…` button.
+ *   An action in one of its slots (`<buttons slot="center">`) is inside another element, so it stays a button.
+ * - So are their `<divider/>`s:  a line between groups, a row of its own.
  */
-export const MENU_TAGS = ["menu", "ui-menu"]
+export const MENU_TAGS = ["menu", "ui-menu", "toolbar", "ui-toolbar"]
 
 /** What a menu's actions and dividers draw as:  Spell UI's `<ui-action>`, a menu's row (`core.drawAction()`). */
 export const MENU_ROW_TAG = "ui-action"

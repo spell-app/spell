@@ -24,6 +24,7 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
   tagFor(word, language) {
     return tagsFor(language).get(withoutAccents(word))
   },
+  canonicalTagFor: (tag, language) => SpellUIDefaults.canonicalTagFor(tag, language),
   readDefault: (sample, language) => SpellUIDefaults.read(sample, language),
   readAttribute: (sample, language) => SpellUIDefaults.readAttribute(sample, language),
   help(language) {

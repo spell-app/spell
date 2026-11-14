@@ -108,6 +108,13 @@ export class TicTacToe extends App {
     core.map(core.countTo(9), () => this.board.append(new Square()))
   }
 
+  /** An empty board, X to play */
+  startANewGame() {
+    this.board.forEach((square) => (square.mark = ""))
+    this.turn = "X"
+    this.winner = ""
+  }
+
   /** the same mark in all three squares wins */
   checkTheLineFromSquareAThroughBToC(a, b, c) {
     const mark = this.board.getItem(position(a))?.mark
@@ -147,17 +154,12 @@ export class TicTacToe extends App {
       )
     )
   }
-
-  startANewGame() {
-    this.board.forEach((square) => (square.mark = ""))
-    this.turn = "X"
-    this.winner = ""
-  }
 }
 export const ticTacToe = new TicTacToe()
 
-/** An empty board, X to play */
-core.describeAction(TicTacToe, "startANewGame", { title: "Start A New Game", shortcuts: ["N"] })
+core.describeAction(TicTacToe, "startANewGame", { title: "Start A New Game", shortcuts: ["N"], undoneAs: "Start A New Game" })
+core.describeAction(TicTacToe, "checkTheLineFromSquareAThroughBToC", { title: "Check The Line From Square (a As A Number) Through (b As A Number) To (c As A Number)", undoneAs: "Check The Line From Square (a As A Number) Through (b As A Number) To (c As A Number)" })
+core.describeAction(TicTacToe, "checkForAWinner", { title: "Check For A Winner", undoneAs: "Check For A Winner" })
 
 core.heading("The board")
 ///////////////
@@ -171,6 +173,8 @@ core.heading("Playing a square")
 // ## Playing a square
 //////////////////////
 // What a click on a square does, added to this project's square:  `<extend>` adds to a type another file declares.
+
+core.describeAction(Square, "play", { title: "Play It", undoneAs: "Play It" })
 
 /** a square is on one board */
 

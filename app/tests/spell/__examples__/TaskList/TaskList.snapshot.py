@@ -92,6 +92,9 @@ class Task(View):
         return Checklist.owner_of(self)
 
 
+core.describe_action(Task, "throw_away", {"title": "Throw It Away", "undone_as": "Throw It Away"})
+
+
 def test_checking_one_off() -> None:
     with core.test("test checking one off"):
         it = Task()
@@ -131,6 +134,9 @@ class TaskKeeper(Thing):
     def keep_a_new_task_titled_title(self, title: str) -> Task:
         """a new task, kept from now on, which it hands back"""
         return Task(title=title)
+
+
+core.describe_action(TaskKeeper, "keep_a_new_task_titled_title", {"title": "Keep A New Task Titled (title As Text)", "undone_as": "Keep A New Task Titled (title As Text)"})
 
 
 # -----------
@@ -182,6 +188,10 @@ browser_storage = core.place(
     BrowserStorage(),
     {"name": "browser_storage", "kind": "database on this device"},
 )
+
+core.describe_action(BrowserTask, "throw_away", {"title": "Throw It Away", "undone_as": "Throw It Away"})
+
+core.describe_action(BrowserKeeper, "keep_a_new_task_titled_title", {"title": "Keep A New Task Titled (title As Text)", "undone_as": "Keep A New Task Titled (title As Text)"})
 
 
 # -----------
@@ -235,6 +245,10 @@ task_files = core.place(
         "checked_every": 30,
     },
 )
+
+core.describe_action(ServerTask, "throw_away", {"title": "Throw It Away", "undone_as": "Throw It Away"})
+
+core.describe_action(ServerKeeper, "keep_a_new_task_titled_title", {"title": "Keep A New Task Titled (title As Text)", "undone_as": "Keep A New Task Titled (title As Text)"})
 
 
 # -----------
@@ -290,6 +304,10 @@ task_sheet = core.place(
         "checked_every": 30,
     },
 )
+
+core.describe_action(SheetTask, "throw_away", {"title": "Throw It Away", "undone_as": "Throw It Away"})
+
+core.describe_action(SheetKeeper, "keep_a_new_task_titled_title", {"title": "Keep A New Task Titled (title As Text)", "undone_as": "Keep A New Task Titled (title As Text)"})
 
 
 # -----------
@@ -347,6 +365,10 @@ task_sky = core.place(
         "collections": {"sky_tasks": {"at": "spaces.spell.examples.tasklist.task"}},
     },
 )
+
+core.describe_action(SkyTask, "throw_away", {"title": "Throw It Away", "undone_as": "Throw It Away"})
+
+core.describe_action(SkyKeeper, "keep_a_new_task_titled_title", {"title": "Keep A New Task Titled (title As Text)", "undone_as": "Keep A New Task Titled (title As Text)"})
 
 
 # -----------
@@ -414,6 +436,7 @@ class Checklist(ViewableList):
 
 
 # on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
+core.describe_action(Checklist, "keep_the_order", {"title": "Keep The Order", "undone_as": "Keep The Order"})
 
 
 def test_the_filter() -> None:
@@ -549,6 +572,32 @@ class TaskList(App):
         task.order = len(self.checklist)
         self.draft = ""
 
+    def show_all(self) -> None:
+        self.checklist.showing = "all"
+
+    @property
+    def show_all_is_selected(self) -> bool:
+        return self.checklist.is_showing_showing("all")
+
+    def show_to_do(self) -> None:
+        self.checklist.showing = "active"
+
+    @property
+    def show_to_do_is_selected(self) -> bool:
+        return self.checklist.is_showing_showing("active")
+
+    def show_done(self) -> None:
+        self.checklist.showing = "done"
+
+    @property
+    def show_done_is_selected(self) -> bool:
+        return self.checklist.is_showing_showing("done")
+
+    def remove_the_done_tasks(self) -> None:
+        for task in self.checklist.filter(lambda task: task.is_done):
+            task.throw_away()
+            self.checklist.remove(task)
+
     def draw(self) -> Element:
         """The property editor edits every selected task at once:  a property they disagree on shows Mixed"""
         return h(
@@ -631,42 +680,22 @@ class TaskList(App):
             ),
         )
 
-    def show_all(self) -> None:
-        self.checklist.showing = "all"
-
-    @property
-    def show_all_is_selected(self) -> bool:
-        return self.checklist.is_showing_showing("all")
-
-    def show_to_do(self) -> None:
-        self.checklist.showing = "active"
-
-    @property
-    def show_to_do_is_selected(self) -> bool:
-        return self.checklist.is_showing_showing("active")
-
-    def show_done(self) -> None:
-        self.checklist.showing = "done"
-
-    @property
-    def show_done_is_selected(self) -> bool:
-        return self.checklist.is_showing_showing("done")
-
-    def remove_the_done_tasks(self) -> None:
-        for task in self.checklist.filter(lambda task: task.is_done):
-            task.throw_away()
-            self.checklist.remove(task)
-
 
 task_list = TaskList()
 
 # Where the tasks are kept:  the person picks, and the app asks that keeper
 
+core.describe_action(TaskList, "fill_the_checklist", {"title": "Fill The Checklist", "undone_as": "Fill The Checklist"})
+
+core.describe_action(TaskList, "add_the_starting_task_title_with_priority_level", {"title": "Add The Starting Task (title As Text) With Priority (level As Text)", "undone_as": "Add The Starting Task (title As Text) With Priority (level As Text)"})
+
+core.describe_action(TaskList, "add_the_draft", {"title": "Add The Draft", "undone_as": "Add The Draft"})
+
 # Which tasks the list shows:  the toolbar ticks the one it's showing
-core.describe_action(TaskList, "show_all", {"title": "All", "icon": "list", "selected_when": "show_all_is_selected"})
-core.describe_action(TaskList, "show_to_do", {"title": "To do", "icon": "square outline", "selected_when": "show_to_do_is_selected"})
-core.describe_action(TaskList, "show_done", {"title": "Done", "icon": "check square outline", "selected_when": "show_done_is_selected"})
-core.describe_action(TaskList, "remove_the_done_tasks", {"title": "Remove The Done Tasks", "icon": "trash alternate outline"})
+core.describe_action(TaskList, "show_all", {"title": "All", "icon": "list", "selected_when": "show_all_is_selected", "undone_as": "All"})
+core.describe_action(TaskList, "show_to_do", {"title": "To do", "icon": "square outline", "selected_when": "show_to_do_is_selected", "undone_as": "To do"})
+core.describe_action(TaskList, "show_done", {"title": "Done", "icon": "check square outline", "selected_when": "show_done_is_selected", "undone_as": "Done"})
+core.describe_action(TaskList, "remove_the_done_tasks", {"title": "Remove The Done Tasks", "icon": "trash alternate outline", "undone_as": "Remove The Done Tasks"})
 
 # The toolbar's buttons, and the list's right click:  the same actions
 # - its "tasks menu" is a menu of "show all", "show to do", "show done", "-" and "remove the done tasks"
