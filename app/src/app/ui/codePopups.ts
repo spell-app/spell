@@ -6,7 +6,9 @@ import type { monaco } from "spell/app/app/ui/monaco"
  * "vscode popup with details about what you are typing is annoying when I'm trying to look at code");
  * and its look:  Spell drawn bubbly, or not (epic `language` P50).
  * - The choices, their defaults, and what each one means to Monaco:  nothing else.
- * - By default nothing shows by itself as you type (Owen, epic `editor` P4).
+ * - By default the suggestions show by themselves only where they help (epic `editor` P28, Owen's choice C):
+ *   a tag after `<`, an attribute inside a tag, a property after `its` / `'s` / `of` (`SUGGEST_WHERE_IT_HELPS`).
+ *   Everywhere else they wait for Ctrl+Space, as Quiet Code Popups (P4) chose;  hover waits for ⌥.
  * - Every Monaco editor starts on the defaults (`SpellMonaco.OPTIONS`), `<spell-editor>`'s too.
  * - The editor app lets people change them, in the code pane's "..." menu, "Settings…" (`CodeSettings`).
  * - Types only from Monaco:  the editor app reads this before Monaco loads, and Monaco is a lazy chunk.
@@ -17,8 +19,11 @@ export const HOVER_MODES = ["withAlt", "always", "never"] as const
 /** When hover info shows:  one of `HOVER_MODES`. */
 export type HoverMode = (typeof HOVER_MODES)[number]
 
-/** When suggestions show, first the default:  only on Ctrl+Space, or as you type. */
-export const SUGGEST_MODES = ["onCtrlSpace", "asYouType"] as const
+/**
+ * When suggestions show by themselves, first the default:
+ * only where they help (`SUGGEST_WHERE_IT_HELPS`), everywhere as you type, or never (only on Ctrl+Space).
+ */
+export const SUGGEST_MODES = ["whereItHelps", "everywhere", "onCtrlSpace"] as const
 /** When suggestions show:  one of `SUGGEST_MODES`. */
 export type SuggestMode = (typeof SUGGEST_MODES)[number]
 
@@ -41,12 +46,12 @@ export type CodePopupChoices = {
 }
 
 /**
- * The choices until someone changes them:  hover only with ⌥ held, suggestions only on Ctrl+Space, the rest off,
- * but the bubbly look, on.
+ * The choices until someone changes them:  hover only with ⌥ held, suggestions by themselves only where they help,
+ * the rest off, but the bubbly look, on.
  */
 export const CODE_POPUP_DEFAULTS: CodePopupChoices = {
   hover: "withAlt",
-  suggest: "onCtrlSpace",
+  suggest: "whereItHelps",
   suggestDetails: false,
   parameterHints: false,
   pinnedLines: false,
@@ -68,11 +73,13 @@ const HOVER_ENABLED = {
  *   - SIDE EFFECT:  ⌘-click then adds a cursor, and ⌥-click goes to a definition, the other way round from Monaco's
  *     own.  The other hover modes keep Monaco's.
  * - Ctrl+Space shows the suggestions in every mode:  only showing them as you type is turned off.
+ *   - "Where it helps" turns Monaco's own off too:  the editor asks for them itself, at the places
+ *     `suggestsByItself()` names (`CodeSettings`).
  * - The docs pane beside the list has no option of its own:  `CodeSettings` hides it with a class
  *   (`SUGGEST_DETAILS_HIDDEN`) when the details are off.  Monaco starts it folded anyway.
  */
 export function monacoOptionsFor(choices: CodePopupChoices): monaco.editor.IEditorOptions {
-  const asYouType = choices.suggest === "asYouType"
+  const asYouType = choices.suggest === "everywhere"
   return {
     hover: { enabled: HOVER_ENABLED[choices.hover] },
     multiCursorModifier: choices.hover === "withAlt" ? "ctrlCmd" : "alt",
@@ -82,6 +89,28 @@ export function monacoOptionsFor(choices: CodePopupChoices): monaco.editor.IEdit
     parameterHints: { enabled: choices.parameterHints },
     stickyScroll: { enabled: choices.pinnedLines }
   }
+}
+
+/**
+ * Where the suggestions show by themselves while "Where it helps" is chosen:  ONE list, easy to change.
+ * - Each is the text before the caret, right as the list is due:  the moment its first letter can be typed.
+ *   Monaco keeps the list open, filtering, as the word is typed after it.
+ * - `its`, `of` and the rest only after a word:  a line starting `its ` declares a property, its name quoted
+ *   (`SpellTyping`).
+ */
+export const SUGGEST_WHERE_IT_HELPS: readonly { place: string; before: RegExp }[] = [
+  { place: "a tag, after <", before: /(?:^\s*|[>({])<$/u },
+  {
+    place: "an attribute, inside a tag",
+    before: /<\p{L}[\p{L}\p{M}\d-]*(?:\s(?:[^<>"{}]|"[^"]*"|\{[^{}]*\})*)?\s$/u
+  },
+  { place: "the words an attribute takes, in its quotes", before: /<\p{L}[\p{L}\p{M}\d-]*\s[^<>]*[\p{L}\d-]="$/u },
+  { place: "a property, after its / 's / of", before: /\S\s+(?:its|of|su|sus|de)\s$|\p{L}'s\s$/iu }
+]
+
+/** Should the suggestions show by themselves after `before`, the text before the caret on its line? */
+export function suggestsByItself(before: string): boolean {
+  return SUGGEST_WHERE_IT_HELPS.some(({ before: place }) => place.test(before))
 }
 
 /** How much the hover says for `choices`:  Monaco has no option for it. */

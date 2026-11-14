@@ -10,7 +10,7 @@ import { CodeThemeFile, type CodeThemeColors, type CodeThemeScheme } from "spell
 /****************
  * ### `VscodeThemes`
  * Every Spell theme as a VS Code colour theme, light and dark, for the Spell extension (epic `debut` P22):
- * "Spell Matrix Dark" and the rest, 18 in all, in its `themes/`, listed in its `package.json`'s `contributes.themes`.
+ * "Spell Matrix Dark" and the rest, 16 in all (Merlot left out:  `LEFT_OUT`), in its `themes/`, listed in its `package.json`'s `contributes.themes`.
  * - Each theme's colours are worked out as a page draws them:  its sheet (on `classic`, over Spell UI's foundation)
  *   in a headless browser, every token of `CodeThemeFile.TOKENS` read off a probe and painted, in each scheme.
  *   - So a theme's `light-dark()`, relative colours and the code's recipe come out exactly as the editor shows them.
@@ -65,6 +65,7 @@ export class VscodeThemes {
     return readdirSync(STYLES_THEMES)
       .filter((file) => file.endsWith(THEME_FILE))
       .map((file) => file.slice(0, -THEME_FILE.length))
+      .filter((name) => !LEFT_OUT.includes(name))
       .sort()
   }
 
@@ -107,6 +108,13 @@ const OPAQUE = ["--ui-surface", "--ui-surface-muted"]
 
 /** Spell UI's styles folder, found through the package. */
 const STYLES = dirname(createRequire(import.meta.url).resolve("spell/ui/styles/StyleGenerator.ts"))
+
+/**
+ * Spell themes with NO VS Code theme, for now (Owen, 2026-11-13:  "the Spell Merlot themes in VS Code don't work ...
+ * just remove them").
+ * - TODO:  epic `debut`'s todo, to get them working, then take them off this list.
+ */
+const LEFT_OUT = ["merlot"]
 
 /** Its themes folder. */
 const STYLES_THEMES = join(STYLES, "themes")

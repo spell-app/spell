@@ -24,7 +24,8 @@ import {
   stamped,
   tabShows,
   windowEpic,
-  windowsFolder
+  windowsFolder,
+  worktreeEpic
 } from "spell/epic/vscode/src/docUrls.ts"
 
 const top = mkdtempSync(join(tmpdir(), "spell-epic-vscode-"))
@@ -100,6 +101,15 @@ test("windowEpic():  a worktree's own epic, else the one changed last", () => {
   equal(windowEpic("/Users/o/www/spell", content), "seo")
   equal(windowEpic(undefined, content), "seo")
   equal(windowEpic("/x", join(top, "no-epics")), undefined)
+})
+
+test("worktreeEpic():  a worktree window's own epic, and none for the main checkout's (epic `epic-engine` I266)", () => {
+  const content = join(top, "worktree-epic")
+  epicPage(content, "data", "Data", 1_000)
+  epicPage(content, "seo", "SEO", 5_000)
+  equal(worktreeEpic("/Users/o/www/spell.worktrees/data", content), "data")
+  equal(worktreeEpic("/Users/o/www/spell", content), undefined)
+  equal(worktreeEpic(undefined, content), undefined)
 })
 
 test("planDocsIn() / planDocsOf():  every repo's epic pages, newest first, titles without `Epic: `", () => {

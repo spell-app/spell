@@ -6,6 +6,10 @@
   // Linting is oxlint, via Vite+:  the `lint` block of each folder's `vite.config.ts`, from `spell/toolchain/lint`.
   // The ESLint extension is no longer used here.
   "oxc.enable": true,
+  // NEVER ask to use the install's TypeScript (Owen, 2026-11-13:  "I keep seeing this pop up randomly"):
+  // it's TypeScript 7, the native compiler, which has no `tsserver.js` for VS Code's TypeScript to run;
+  // VS Code keeps its own.
+  "typescript.enablePromptUseWorkspaceTsdk": false,
   // Spell's `.json5` files open as "JSON with comments" (epic `people-and-orgs` P5):
   // - VS Code has no JSON5 mode, and checks a file against its JSON Schema only in its JSON modes.
   // - Spell writes keys and text in double quotes, so its files read cleanly there.

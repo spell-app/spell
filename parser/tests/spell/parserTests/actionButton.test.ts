@@ -90,6 +90,52 @@ describe("an action's button, <action>", () => {
     expect(file.compiled).not.toContain("core.drawAction")
   })
 
+  test("inside a <menu>, an action is a menu's row and a divider a line between groups (epic `editor` P29)", () => {
+    const file = parsed(
+      game(
+        '<menu direction="vertical">',
+        '\t<action "auto play"/>',
+        "\t<divider/>",
+        '\t<action "restart the game" icon="refresh"/>',
+        "\t<if 1 is 1>",
+        '\t\t<action "undo"/>',
+        "\t</if>",
+        "\t<buttons>",
+        '\t\t<action "cheat"/>',
+        "\t</buttons>",
+        "</menu>"
+      )
+    )
+    expect(file.errors).toEqual([])
+    expect(file.compiled).toContain('core.drawAction(this, "autoPlay", { "in-menu": true })')
+    expect(file.compiled).toContain('h("ui-action", { kind: "divider" })')
+    expect(file.compiled).toContain('core.drawAction(this, "restartTheGame", { icon: "refresh", "in-menu": true })')
+    // an `<if>`'s rows keep their actions, hidden while it isn't so
+    expect(file.compiled).toMatch(/core\.drawAction\(this, "undo", \{ "in-menu": true, hidden: .* \}\)/)
+    // a `<buttons>` inside the menu keeps its buttons
+    expect(file.compiled).toContain('core.drawAction(this, "cheat")')
+    const ts = String(P.TSWriter.instance.writeMatch(file.match!))
+    expect(ts).toContain('{core.drawAction(this, "autoPlay", { "in-menu": true })}')
+    const python = String(PY.PyWriter.instance.writeMatch(file.match!))
+    expect(python).toContain('core.draw_action(self, "auto_play", {"in-menu": True})')
+  })
+
+  test("Spanish:  <acción> in a <ui-menu>, its <divisor/>", () => {
+    const file = parsed(
+      [
+        "un juego es una app",
+        "\tpara jugar solo",
+        "\t\timprimir 1",
+        "\tpara dibujarlo",
+        '\t\t<ui-menu><acción "jugar solo"/><divisor/><acción "deshacer"/></ui-menu>'
+      ],
+      "/Juego.es.spell"
+    )
+    expect(file.errors).toEqual([])
+    expect(file.compiled).toContain('core.drawAction(this, "jugarSolo", { "in-menu": true })')
+    expect(file.compiled).toContain('h("ui-action", { kind: "divider" })')
+  })
+
   test("<context-menu> inside an element:  its right-click menu, its actions and dividers, in every target", () => {
     const file = parsed(
       game(

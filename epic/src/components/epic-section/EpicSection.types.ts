@@ -520,11 +520,11 @@ export type PhaseStateName = (typeof PHASE_FILTER_STATES)[number]["state"]
 export const DOC_REVIEW = /^doc review$/i
 
 /**
- * `localStorage` key prefix of the state filters, per page path:  `{ [section id]: [states shown] }`.
- * - the old runtime's (`spell-doc-runtime.js` `ITEM_FILTER_KEY_PREFIX`), same shape:  a filter left on an old page
- *   holds on its converted copy
+ * `localStorage` key prefix of the state filters, per page path:  `{ [section id]: [states turned off] }`.
+ * - NOT the old key, `spell-item-state:`, which kept the states SHOWN (epic `epic-engine` I265):  a state with no items
+ *   when the reader clicked was hidden for good;  those lists can't tell that from one turned off, so they're dropped
  */
-export const FILTER_KEY = "spell-item-state:"
+export const FILTER_KEY = "spell-filter-off:"
 
 /** What the toolbar's orange badge counts:  an item's orange and light orange, a phase's plan waiting for his Accept. */
 export const ORANGE_STATES: ReadonlySet<string> = new Set(["replied", "requested", "waiting"])

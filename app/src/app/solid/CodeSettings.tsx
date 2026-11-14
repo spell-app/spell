@@ -11,6 +11,7 @@ import {
   hoverDetailFor,
   monacoOptionsFor,
   showBubbly,
+  suggestsByItself,
   type CodePopupChoices
 } from "spell/app/app/ui/codePopups"
 import type { monaco } from "spell/app/app/solid/monaco"
@@ -20,7 +21,7 @@ import "./CodeSettings.css"
 
 /****************
  * ### `CodeSettings`
- * The code editor's settings, for its popups:  hover info, suggestions, their details, parameter hints,
+ * The code editor's settings, for its popups:  hover info, when suggestions show by themselves, their details, parameter hints,
  * pinned lines and the compiler's words in the hover;  and its look, bubbly or not (epic `language` P50).
  * - Changed in the code pane's "..." menu, "Settings…", which shows `<CodeSettingsPanel>` over the code.
  * - Each change applies at once to every Monaco editor on the page, and the browser remembers it
@@ -66,10 +67,14 @@ export class CodeSettings {
     api.editor.onDidCreateEditor((each) => CodeSettings.setUp(each))
   }
 
-  /** A new editor:  apply the choices, and show its hover when ⌥ is pressed over a word. */
+  /**
+   * A new editor:  apply the choices, show its hover when ⌥ is pressed over a word,
+   * and its suggestions by themselves where they help.
+   */
   private static setUp(codeEditor: monaco.editor.ICodeEditor): void {
     CodeSettings.applyTo(codeEditor)
     showHoverOnAlt(codeEditor)
+    suggestWhereItHelps(codeEditor)
   }
 
   /** Apply what's chosen to `codeEditor`. */
@@ -135,6 +140,33 @@ function showHoverOnAlt(codeEditor: monaco.editor.ICodeEditor): void {
     root.elementFromPoint(clientX, clientY)?.dispatchEvent(move)
   })
 }
+
+/**
+ * While "Where it helps" is chosen:  a letter or sign typed that leaves the caret at one of those places
+ * (`suggestsByItself()`) shows the suggestions, as Ctrl+Space would.
+ * - Only Spell's code, one character typed, never an undo:  a paste or a help's own edit asks for nothing.
+ * - After the keystroke's own edit is in, so the caret is past it.
+ */
+function suggestWhereItHelps(codeEditor: monaco.editor.ICodeEditor): void {
+  codeEditor.onDidChangeModelContent((event) => {
+    if (chosen.suggest !== "whereItHelps" || event.isUndoing || event.isRedoing || event.changes.length !== 1) return
+    const [change] = event.changes
+    if (change!.rangeLength !== 0 || !ONE_CHARACTER.test(change!.text)) return
+    queueMicrotask(() => {
+      const model = codeEditor.getModel()
+      const caret = codeEditor.getPosition()
+      if (!model || !caret || !model.getLanguageId().startsWith(SPELL_LANGUAGE)) return
+      const before = model.getLineContent(caret.lineNumber).slice(0, caret.column - 1)
+      if (suggestsByItself(before)) codeEditor.trigger("keyboard", "editor.action.triggerSuggest", { auto: true })
+    })
+  })
+}
+
+/** One character, typed:  an emoji's surrogate pair counts as one. */
+const ONE_CHARACTER = /^.$/su
+
+/** Monaco's language ids for Spell's code all start with it:  `spell`, `spell-page`. */
+const SPELL_LANGUAGE = "spell"
 
 /****************
  * ### `<CodeSettingsPanel>`
@@ -234,6 +266,7 @@ const HOVER_TEXTS = {
 
 /** Each suggestion mode's label. */
 const SUGGEST_TEXTS = {
-  onCtrlSpace: "codeSuggestOnCtrlSpace",
-  asYouType: "codeSuggestAsYouType"
+  whereItHelps: "codeSuggestWhereItHelps",
+  everywhere: "codeSuggestEverywhere",
+  onCtrlSpace: "codeSuggestOnCtrlSpace"
 } as const satisfies Record<CodePopupChoices["suggest"], AppTextKey>

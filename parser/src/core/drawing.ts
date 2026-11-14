@@ -164,15 +164,28 @@ export const drawingMethods = defineCoreModule({
    * - `props`:  the tag's other attributes, each winning over what the action gives
    *   (`<action "restart the game" icon="refresh"/>`), plus the tag's own:
    *   - `icon-only`:  no text, its title its name for a screen reader and its tooltip (`aria-label`)
-   * - An action nobody up the chain has:  a disabled button of its name, and a warning;  the compiler said so already.
-   * - Knows nothing of Spell UI but its tag:  the page draws it.
+   *   - `in-menu`:  a Spell UI menu holds it, so it's a menu's ROW (epic `editor` P29), not a button:  see below
+   * - An action nobody up the chain has:  a disabled button (or row) of its name, and a warning;
+   *   the compiler said so already.
+   * - Knows nothing of Spell UI but its tags:  the page draws them.
+   *
+   * A menu's ROW, `<menu><action "save"/></menu>` (`in-menu`):
+   * - A `<ui-action>`, handed the action itself (its `action`), which it reads LIVE:  its title, icon and key,
+   *   greyed while not enabled, ticked while selected;  a click runs it (`run("click")`), through the core.
+   * - Its key in Spell UI's words, `mod+S` for spell's `meta+S`:  ⌘ on a Mac, Ctrl elsewhere (`menuKeysOf()`).
    */
   drawAction(thing: unknown, name: string, props: Record<string, unknown> = {}, ...children: unknown[]): Drawing {
-    const { [ICON_ONLY]: iconOnly, ...given } = props
+    const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, ...given } = props
     const action = core.actionOf(thing as object | undefined, name)
     if (!action) {
       console.warn(`<action>:  nothing here has an action \`${name}\``)
-      return h(BUTTON_TAG, { disabled: true, ...given }, ...(children.length ? children : [name])) as unknown as Drawing
+      const tag = inMenu ? MENU_ROW_TAG : BUTTON_TAG
+      return h(tag, { disabled: true, ...given }, ...(children.length ? children : [name])) as unknown as Drawing
+    }
+    if (inMenu) {
+      const row: Record<string, unknown> = { "prop:action": action }
+      if (action.shortcut) row.shortcut = menuKeysOf(action.shortcut)
+      return h(MENU_ROW_TAG, { ...row, ...given }, ...children) as unknown as Drawing
     }
     const tip = () =>
       action.shortcut ? `${action.title} (${keysOf(action.shortcut, !!core.input?.isMac)})` : undefined
@@ -725,6 +738,15 @@ export type ContextMenuElement = { menuItems?: () => MenuItem[] }
 /** `<action>`'s own attribute:  its button shows only its icon. */
 const ICON_ONLY = "icon-only"
 
+/** `<action>`'s own attribute, which the compiler sets on one a Spell UI menu holds:  it draws a menu's row. */
+const IN_MENU = "in-menu"
+
+/** What a menu's row is:  Spell UI's action, which the page defines. */
+const MENU_ROW_TAG = "ui-action"
+
+/** Spell's `meta`:  Command on a Mac, Control elsewhere, which Spell UI calls `mod`. */
+const SPELL_META = /^meta$/i
+
 /** The key names a Mac shows as symbols, in a key tip. */
 const MAC_KEYS: Record<string, string> = {
   meta: "⌘",
@@ -734,6 +756,18 @@ const MAC_KEYS: Record<string, string> = {
   option: "⌥",
   alt: "⌥",
   control: "⌃"
+}
+
+/**
+ * A spell shortcut in Spell UI's words, for a menu's row to show:  `meta+S` => `mod+S`.
+ * - Spell's `meta` is Command on a Mac and Control elsewhere (epic `elemental-spell` Q31);
+ *   Spell UI's `meta` is the Meta key itself, and its `mod` is spell's `meta`.
+ */
+function menuKeysOf(shortcut: string): string {
+  return shortcut
+    .split("+")
+    .map((key) => (SPELL_META.test(key.trim()) ? "mod" : key))
+    .join("+")
 }
 
 /**

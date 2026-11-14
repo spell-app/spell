@@ -57,6 +57,23 @@ export const CONTEXT_MENU_TAG_MEANING = "context_menu"
 export const DIVIDER_TAG_MEANING = "divider"
 
 /**
+ * The Spell UI menu whose `<action "save"/>`s are its ROWS, not buttons (epic `editor` P29, Choice 1 A):
+ * `<menu>` as a drawing names it bare, `ui-menu` once its pack is loaded.
+ * - So are its `<divider/>`s:  a line between groups, a row of its own.
+ */
+export const MENU_TAGS = ["menu", "ui-menu"]
+
+/** What a menu's actions and dividers draw as:  Spell UI's `<ui-action>`, a menu's row (`core.drawAction()`). */
+export const MENU_ROW_TAG = "ui-action"
+
+/**
+ * `<action "save"/>`'s mark that it's a menu's row (`core.drawAction()`):  `SpellJSX` sets it on the actions
+ * a `<menu>` holds.
+ * - The core's own attribute, as `icon-only` is;  the core's name for it is the same.
+ */
+export const IN_MENU_ATTRIBUTE = "in-menu"
+
+/**
  * The word rule holding spell's own JSX ATTRIBUTE words, each meaning the web's attribute it becomes.
  * - English `((slot:in)|slot)`, Spanish `((slot:en)|slot)`:
  *   `<h3 in="header">` / `<h3 en="header">` => `<h3 slot="header">`, "put me in the frame's `header` children".
@@ -173,6 +190,11 @@ export type JSXMatchData = {
    * and the tag its element would have:  a view only if its line says so, read when it compiles (`SpellJSX.viewOf()`).
    */
   laterView?: { type: P.TypeScope; tag: string }
+  /**
+   * (`jsxElement`) A `<divider/>` a `<menu>` holds:  a line between its groups, drawn as a row of its own,
+   * `<ui-action kind="divider">` (`SpellJSX.markMenuRows()`).
+   */
+  menuDivider?: boolean
   /** `<film/>` in a loop over films:  the loop's item, drawn. */
   loopItem?: P.ScopeVariable
   /**

@@ -30,8 +30,25 @@ export const PageLoading = {
     isStarted = true
     setTimeout(finish, LONGEST_WAIT_MSEC)
     goneIfNotHeld()
+  },
+
+  /**
+   * Has the hero gone, its fade done?  True on a page that never had one (a test, a demo).
+   * - What draws over the page waits for this (the selection's marching ants):  never on top of the hero.
+   */
+  get isGone(): boolean {
+    return isGone || !document.getElementById(HERO_ID)
+  },
+
+  /** Run `callback` once the hero has gone, its fade done:  at once if it has. */
+  whenGone(callback: () => void): void {
+    if (PageLoading.isGone) callback()
+    else whenGone.push(callback)
   }
 }
+
+/** The hero's `id`, in `index.html`. */
+const HERO_ID = "PageLoading"
 
 /** The most the hero stays up, whatever holds it. */
 const LONGEST_WAIT_MSEC = 8000
@@ -41,6 +58,9 @@ const FADE_MSEC = 150
 let holds = 0
 let isStarted = false
 let isDone = false
+let isGone = false
+/** What waits for the hero to go (`whenGone()`). */
+const whenGone: (() => void)[] = []
 
 /** Take the hero away, if it's time;  on the next frame, so what just drew has painted. */
 function goneIfNotHeld() {
@@ -51,7 +71,11 @@ function goneIfNotHeld() {
 function finish() {
   if (isDone) return
   isDone = true
-  const hero = document.getElementById("PageLoading")
+  const hero = document.getElementById(HERO_ID)
   hero?.classList.add("done")
-  setTimeout(() => hero?.remove(), FADE_MSEC)
+  setTimeout(() => {
+    hero?.remove()
+    isGone = true
+    for (const callback of whenGone.splice(0)) callback()
+  }, FADE_MSEC)
 }

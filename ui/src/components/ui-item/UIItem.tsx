@@ -129,6 +129,14 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
     return this.selected || E.Converters.boolean(this.attributes[UIT.ACTIVE], UIT.ACTIVE)
   }
 
+  /**
+   * It says whether it's on or off:  its `selected` (or `active`) is written, `"false"` too.
+   * - A `<ui-submenu>`'s fly-out ticks its items when one does (`UISubmenu.hasOnOrOffItems`).
+   */
+  get saysOnOrOff(): boolean {
+    return this.attributes[UIT.SELECTED] != null || this.attributes[UIT.ACTIVE] != null
+  }
+
   @E.cssState("disabled")
   get isDisabled(): boolean {
     return this.disabled

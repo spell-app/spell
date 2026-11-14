@@ -505,6 +505,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         with one address it's all the cloud, as before.
       - The editor's is `EditorServer`'s running dev server, its port followed by the Caddy file (its name from the page server, a terminal's from the record).
         - That port stays the same across restarts (`steadyPort()`), since a changed Caddy file restarts Caddy.
+        - STANDING RULE (Owen, 2026-11-13, epic `epic-engine` P74):  test.spell.app ALWAYS names the MAIN checkout's
+          editor's current port.
+          - The site waits for the editor to pick it (`EditorServer.portPicked`), never writing the default meanwhile.
+          - A page server whose editor lands on another port rewrites the file and restarts Caddy alone.
+          - A worktree's editor never takes test.spell.app:  an epic that wants Owen to see ITS editor pastes a link
+            with that editor's port (`http://localhost:<port>/...`).
       - It runs as this machine's person, with no sign-in:  HOUSE NETWORK ONLY, as `setup` and `start` say.
         The production build and sign-in come first for any public address (a todo on the epic).
       - Caddy tells the dev server that a request came from this machine's editor (`Host`, and that one address's `Origin`):

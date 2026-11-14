@@ -123,6 +123,8 @@ The helper's report reaches this session as a notice, between whatever else it's
      epic page.
 2. Reply, the FIRST line in bold, by itself:  `**Agent <full name> came back with:**`.
    - Then the report, short, in the person's words:  what changed, where to look, what needs them.
+   - What they CAN'T do or see yet ("not on test.spell.app yet", "the merge stopped") starts a line of its own, in
+     bold:  run on after a sentence, it gets lost (2026-11-13).
    - Links as the root rules say:
      - a page:  side bar + browser, `epic pages link ... --show`
      - an epic page:  `--review`

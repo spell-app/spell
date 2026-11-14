@@ -115,8 +115,10 @@ export class LocalSiteServer {
   private readonly platform: string
   /** Whether this is the main checkout's server:  a worktree's never starts it. */
   private readonly isMainCheckout: boolean
-  /** The port the editor's dev server is on, for Caddy's file. */
-  private readonly editorPort: () => number | undefined
+  /** The port the editor's dev server is on, for Caddy's file:  waited for, as the editor may still be picking it. */
+  private readonly editorPort: () => number | undefined | Promise<number | undefined>
+  /** What `editorPort()` answered last:  Caddy's file names it. */
+  private editorPortNow?: number
 
   /** The page server's attempt to start it:  one per server, however often it's asked. */
   private starting?: Promise<void>
@@ -220,6 +222,7 @@ export class LocalSiteServer {
    * - Answers once the update is under way:  it finishes in the background, the old cloud serving, and lets go of the lock.
    */
   private async startOrUpdate(): Promise<void> {
+    await this.learnEditorPort()
     const running = this.runner?.detached
     if (!running) {
       this.watch(await this.launch({ by: PAGE_SERVER }))
@@ -382,6 +385,7 @@ export class LocalSiteServer {
     this.takeOverOldCertificate()
     const addresses = address?.length ? address : (this.settings.addresses ?? DEFAULT_ADDRESSES)
     const names = namesOf(addresses)
+    await this.learnEditorPort()
     if (!this.certificateCovers(names)) {
       const flags = address?.length ? address.map((each) => ` --address ${each}`).join("") : ""
       throw new LocalSiteError(`This Mac isn't set up for ${names.join(" and ")} yet:  spell space local setup${flags}`)
@@ -616,10 +620,19 @@ export class LocalSiteServer {
     return existsSync(this.caddyFile) ? readFileSync(this.caddyFile, "utf8") : undefined
   }
 
+  /**
+   * SIDE EFFECT:  `editorPortNow` is the editor's port, once the editor has picked it (epic `epic-engine` P74, r66).
+   * - So test.spell.app ALWAYS names the main editor's port:  never the default while the editor is still choosing,
+   *   and a page server starting with the editor on another port rewrites Caddy's file and restarts Caddy.
+   */
+  private async learnEditorPort(): Promise<void> {
+    this.editorPortNow = await this.editorPort()
+  }
+
   /** What the Caddy file should say for `names`. */
   private caddyFileText(names: string[]): string {
     const name = editorNameAmong(names, this.settings.editorAddress)
-    const editor = name ? { name, port: this.editorPort() ?? environment.vitePort } : undefined
+    const editor = name ? { name, port: this.editorPortNow ?? environment.vitePort } : undefined
     return caddyFileFor({ names, certificate: this.certificate, key: this.key, editor })
   }
 
@@ -683,8 +696,11 @@ export type LocalSiteServerProps = {
   platform?: string
   /** Whether this is the main checkout's page server;  default no. */
   isMainCheckout?: boolean
-  /** The port the editor's dev server is on;  default what the page server's record says, for a terminal's site. */
-  editorPort?: () => number | undefined
+  /**
+   * The port the editor's dev server is on, or a promise of it while the editor picks it (`EditorServer.portPicked`);
+   * default what the page server's record says, for a terminal's site.
+   */
+  editorPort?: () => number | undefined | Promise<number | undefined>
 }
 
 /** What's wrong, in words for the person:  the command line prints it plainly. */

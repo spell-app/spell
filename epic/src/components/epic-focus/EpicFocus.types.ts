@@ -109,8 +109,12 @@ export type FocusPlaceData = {
   tab?: FocusKind
   /** the item showing, by id */
   item?: string
-  /** each tab's chips:  the states showing;  none, every one */
-  shown?: Partial<Record<FocusKind, string[]>>
+  /**
+   * each tab's chips:  the states the reader turned OFF;  none, every one shows
+   * - NOT the states showing, as before (`shown`, ignored now;  epic `epic-engine` I265):  a state with no entries when
+   *   the reader clicked was hidden for good
+   */
+  off?: Partial<Record<FocusKind, string[]>>
 }
 
 // the tag its owner draws in its shadow root

@@ -58,7 +58,8 @@ export class ActionMenus {
   /**
    * Show the menu named by the nearest `context-menu=` on `event`'s path, from `thing` up its chain, where the
    * person right-clicked:  true if there was one.
-   * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window.
+   * - A `<ui-popup>` at the click, holding a compact `<ui-menu>`, its icons in a column:  it stays inside the window.
+   *   - The editor's page draws it as its own menus (`MenuBar.css`):  a file tab's menu is one (epic `editor` P29).
    * - SIDE EFFECT:  the browser's own menu doesn't show, there or on the menu itself;
    *   the menu goes when an action runs, at Escape, or at a press anywhere else.
    */
@@ -77,6 +78,9 @@ export class ActionMenus {
     const menu = document.createElement(MENU_TAG)
     menu.setAttribute("direction", "vertical")
     menu.setAttribute("interactive", "")
+    // a menu's look:  compact rows, each icon in a column of its own, before its title (epic `editor` P29)
+    menu.setAttribute("size", "small")
+    menu.setAttribute("icon-column", "")
     if (found?.name) menu.setAttribute("aria-label", found.name)
     menu.setAttribute(MADE, "")
     menu.append(...ActionMenus.itemsFor(items))

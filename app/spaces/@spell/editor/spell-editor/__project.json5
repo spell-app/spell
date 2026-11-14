@@ -1,0 +1,5 @@
+{
+  "title": "Spell editor",
+  "description": "The editor itself, in Spell:  its top bar, its panes, its file tabs and its menus, views of one app (epic `editor` P29)",
+  "imports": [{ "path": "/SpellEditor.spell", "active": true }]
+}

@@ -110,13 +110,6 @@ ui-panel.InspectorCard > .InspectorSection {
   font-size: 14px;
   line-height: 1.35;
   color: var(--ui-text-muted);
-
-  /* the inspect button, before the words:  a selection starts here too (I92) */
-  & > .InspectAppButton {
-    float: left;
-    margin: 1px 8px 0 0;
-    color: var(--ui-text-color);
-  }
 }
 
 /*

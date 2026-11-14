@@ -884,6 +884,20 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return !!box && box.matches(":focus")
   }
 
+  /**
+   * Focus its chosen item (`selected`), shown and not disabled, as a fly-out opens by keyboard;
+   * true when one took focus, false when none is chosen.
+   */
+  @E.untracked
+  focusChosenItem(): boolean {
+    const box = this.menuItems().find((each) => {
+      const host = (each.getRootNode() as ShadowRoot).host
+      return host?.matches(SELECTED_STATE) && !host.matches(UIT.DISABLED_STATE)
+    })
+    box?.focus()
+    return !!box && box.matches(":focus")
+  }
+
   /** Live roving tabindex while `interactive`. */
   private rovingTabindex: E.RovingTabindex | undefined
 

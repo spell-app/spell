@@ -1,5 +1,0 @@
-{
-  "title": "Editor layout",
-  "description": "How the editor's panes are arranged, in Spell (epic `editor` P6)",
-  "imports": [{ "path": "/EditorLayout.spell", "active": true }]
-}
