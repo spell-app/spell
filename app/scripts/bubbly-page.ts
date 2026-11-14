@@ -53,7 +53,7 @@ let from = 0
 for (const [index, file] of ENGLISH_ORDER.entries()) {
   const to = from + english[index]!.length
   const nodes = whole.nodes.filter((node) => startOf(node) >= from && startOf(node) <= to)
-  drawn.set(file, BubblyHtml.write({ text: whole.text, nodes }, { sections: { idPrefix: idOf(file), ids } }))
+  drawn.set(file, BubblyHtml.write({ ...whole, nodes }, { sections: { idPrefix: idOf(file), ids } }))
   from = to + 1
 }
 for (const { files, lang } of DRAWINGS.filter((drawing) => drawing.lang)) {

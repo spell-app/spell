@@ -598,7 +598,8 @@ export class SpellBubbly {
     const { measures, lineHeight } = view
     const line = range.startLineNumber
     const left = this.tagLeft(shape, range, view)
-    const kind = `bubbly-${shape.partOfSpeech}`
+    // a tag that declares the member it draws:  round, not pointed (epic `editor` I84)
+    const kind = `bubbly-${shape.partOfSpeech}${shape.declares ? " bubbly-tag-declares" : ""}`
     // a start tag on lines of its own:  one tall band (T118)
     if (range.endLineNumber > line && shape.side === "start") {
       const where = shape.isAlone ? "bubbly-tag-tall-alone" : "bubbly-tag-tall-inline"
