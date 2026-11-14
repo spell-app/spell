@@ -225,3 +225,36 @@
     right: 8px;
   }
 }
+
+/*
+ * The tooltips of the code's own buttons (the find box's toggles, arrows, ✕ ...):  Monaco draws them itself,
+ * in a box beside the editor (`.context-view`), with a pointer (epic `editor` I113).
+ * - Fixed to the page, not the code pane:  absolute, the pane's `overflow: hidden` cut off any that rose
+ *   above it, under the file tabs, leaving an empty grey box.
+ *   Monaco measures where the box landed before placing it, so its own sums still come out right.
+ * - In a Spell UI popup's look:  that box is outside `.monaco-editor`, so it gets the popup's colours here,
+ *   and Monaco's theme names them on it again (`.monaco-component`), which this selector beats.
+ */
+.MonacoEditor > .context-view {
+  --vscode-editorHoverWidget-background: var(--ui-popup-background, var(--ui-surface));
+  --vscode-editorHoverWidget-foreground: var(--ui-popup-color, var(--ui-text-color));
+  --vscode-editorHoverWidget-border: var(--ui-popup-border-color, var(--ui-border-color-strong));
+  position: fixed !important;
+
+  & .monaco-hover.workbench-hover {
+    border-radius: 6px;
+    box-shadow: var(--ui-popup-shadow, var(--ui-shadow-floating));
+    font-family: var(--ui-font-family);
+  }
+}
+
+/* The find box's buttons:  no square ring on a click;  a rounded one in the focus colour from the keyboard (I113) */
+.MonacoEditor .monaco-editor .find-widget :is(.button, .monaco-custom-toggle) {
+  &:focus {
+    outline: none;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--vscode-focusBorder);
+    outline-offset: 0;
+  }
+}
