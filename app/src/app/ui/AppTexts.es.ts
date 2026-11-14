@@ -77,6 +77,8 @@ const APP_TEXTS_ES: AppTextPack = {
   partInsideItself: "Algo no puede ir dentro de sí mismo.",
   lineNumbers: "Números de línea",
   // los ajustes del panel de código, `<CodeSettingsPanel>` (épica `debut`)
+  // Spell › About Spell (epic `editor` I94)
+  aboutSpell: "Acerca de Spell…",
   codeSettings: "Ajustes del editor de código…",
   codeSettingsHeader: "Editor de código",
   codeSettingsClose: "Cerrar los ajustes del editor de código",

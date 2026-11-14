@@ -163,12 +163,12 @@ ui-submenu::part(chevron) {
   display: flex;
   flex-direction: column;
 
-  & > ui-menu.SpellMenuHome::part(menu) {
+  & > :is(ui-menu.SpellMenuHome, ui-menu.SpellMenuAbout)::part(menu) {
     min-width: 0;
     width: 100%;
   }
-  /* Home's icon as wide as a project's, the same room after it:  its title starts where theirs do */
-  & > ui-menu.SpellMenuHome ui-action::part(icon) {
+  /* Home's icon (and About Spell's) as wide as a project's, the same room after it:  its title starts where theirs do */
+  & > :is(ui-menu.SpellMenuHome, ui-menu.SpellMenuAbout) ui-action::part(icon) {
     width: 14px;
     margin-inline-end: 8px;
   }

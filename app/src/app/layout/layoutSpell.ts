@@ -166,6 +166,10 @@ export type SpellEditorApp = Record<string, unknown> & {
   editMenu: BarMenuView
   viewMenu: BarMenuView
   runMenu: BarMenuView
+  /** The top of Spell's menu:  About Spell. */
+  aboutMenu: Record<string, unknown>
+  /** What About Spell shows;  its `version` the editor's. */
+  aboutBox: Record<string, unknown> & { version: string }
 }
 
 /** One of the bar's menus in `SpellEditor.spell`, a `bar menu`:  its title, the bar's word for it, in English. */

@@ -72,6 +72,8 @@ export const APP_TEXTS = {
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
   // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
+  // Spell › About Spell (epic `editor` I94)
+  aboutSpell: "About Spell…",
   codeSettings: "Code Editor Settings…",
   codeSettingsHeader: "Code editor",
   codeSettingsClose: "Close the code editor's settings",

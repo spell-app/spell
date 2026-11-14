@@ -13,6 +13,8 @@ spell editor is an app
 	"edit menu" is a new edit menu
 	"view menu" is a new view menu
 	"run menu" is a new run menu
+	"about menu" is a new about menu
+	"about box" is a new about box
 
 	group "What the Menus Follow"
 	// The editor's state, which the menus grey and tick by:  the editor keeps each in step
@@ -68,6 +70,9 @@ spell editor is an app
 		// Delete the project…
 	its "duplicate words" is text
 		// Duplicate the project
+
+	group "Spell"
+	to "about spell" with title "About Spell…", icon "info circle"
 
 	group "The Project"
 	to "rename project" with title "[its rename words]", icon "edit outline"
@@ -301,6 +306,32 @@ a "file tab bar" is a view
 				{draw its more}
 			</toolbar>
 		</panel>
+
+an "about menu" is a view
+	// The top of Spell's menu, above Home and New Example:  About Spell
+	to draw it
+		<menu direction="vertical" size="small" class="SpellMenuAbout" ticks>
+			<action "about spell"/>
+			<divider/>
+		</menu>
+
+an "about box" is a view
+	// What Spell › About Spell… shows:  what Spell is, its version, and where to read more.
+	// Change what it says right here:  the editor shows it as it's drawn.
+	its "version" is text
+		// The editor's version, "0.8.9":  the editor's own
+	to draw it
+		<modal heading="About Spell" size="tiny" closable visible>
+			<content>
+				<text paragraph>Write programs in plain words, and see them run as you type.</text>
+				<text paragraph>Spell draws with Spell UI, and runs in your browser.</text>
+				<text color="grey">Version {its version}</text>
+			</content>
+			<actions>
+				<button appearance="tertiary" link="https://github.com/spell-app/spell" target="_blank" icon="github">Source</button>
+				<button class="approve" color="primary">OK</button>
+			</actions>
+		</modal>
 
 a "project menu" is a view
 	// The project's own menu, under its name before File:  what's about the whole project, not the file open (Owen, epic `mockup`)
