@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { handlersInSource } from "spell/app/app/solid/InspectorSource"
+import { handlerPlacesInSource, handlersInSource } from "spell/app/app/solid/InspectorSource"
 
 /**
  * `handlersInSource()`:  the handlers an element was written with, read at the place the compiler marked on it.
@@ -39,5 +39,22 @@ describe("handlersInSource()", () => {
     expect(handlersInSource(document.createElement("ui-button"), SOURCES)).toEqual({})
     expect(handlersInSource(drawnAt(2, 2, "Other.spell"), SOURCES)).toEqual({})
     expect(handlersInSource(drawnAt(0, 0), SOURCES)).toEqual({})
+  })
+})
+
+describe("handlerPlacesInSource()", () => {
+  test("only the code between its braces, never the tag around it (epic `editor` I141)", () => {
+    // `onClick={set its percent to 15}`:  line 3, its code from column 23 to 44
+    expect(handlerPlacesInSource(drawnAt(2, 2), SOURCES)).toEqual({
+      click: { path: FILE, from: 3, to: 3, column: 23, endColumn: 44 }
+    })
+  })
+
+  test("a handler just added, `onClick={}`:  an empty slice, its two columns the same", () => {
+    const source = '\t<text slot="title" size="large" heavy onClick={}>Spell Solitaire</>'
+    const at = source.indexOf("{}") + 2
+    expect(handlerPlacesInSource(drawnAt(0, 1), new Map([[FILE, source]]))).toEqual({
+      click: { path: FILE, from: 1, to: 1, column: at, endColumn: at }
+    })
   })
 })

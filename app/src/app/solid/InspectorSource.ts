@@ -34,7 +34,9 @@ export function handlersInSource(element: Element, sources: ReadonlyMap<string, 
 }
 
 /**
- * Where each handler `element` was written with is:  the line holding its `onClick={...}`, by event.
+ * Where each handler `element` was written with is:  the code between its `onClick={` and `}`, by event.
+ * - Only its code, never the tag around it (epic `editor` I141):
+ *   `column` and `endColumn` hide the rest of its lines, so `<text slot="title" onClick={}>` shows an empty field.
  * - As `handlersInSource()` finds them;  `{}` for none.
  */
 export function handlerPlacesInSource(
@@ -48,8 +50,15 @@ export function handlerPlacesInSource(
   const places: Record<string, CodePlace> = {}
   for (const { name, quote, valueSpan } of SourceEdits.tagAt(source, opening)?.attributes ?? []) {
     if (quote !== "{" || !HANDLER.test(name) || !valueSpan) continue
-    const line = SourceEdits.positionAt(source, valueSpan.start).line + 1
-    places[name.slice(2).toLowerCase()] = { path: place.path, from: line, to: line }
+    const start = SourceEdits.positionAt(source, valueSpan.start)
+    const end = SourceEdits.positionAt(source, valueSpan.end)
+    places[name.slice(2).toLowerCase()] = {
+      path: place.path,
+      from: start.line + 1,
+      to: end.line + 1,
+      column: start.character + 1,
+      endColumn: end.character + 1
+    }
   }
   return places
 }

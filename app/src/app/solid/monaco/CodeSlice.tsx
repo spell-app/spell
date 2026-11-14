@@ -29,6 +29,7 @@ import "./CodeSlice.css"
  * - Its code editor is kept once it goes, for the next slice of the same file (`SlicePool`):
  *   making one measures every line of the file, ~60ms each time the Inspector's card was drawn again (epic `editor` I69).
  * - Its file, lines and columns are read once, as it's drawn:  a slice of other lines is a new `<CodeSlice>`.
+ * - Made again while it's typed in, it keeps the cursor where it was (`keepCursor()`, epic `editor` I141).
  ****************/
 export function CodeSlice(props: CodeSliceProps) {
   let element!: HTMLDivElement
@@ -37,7 +38,9 @@ export function CodeSlice(props: CodeSliceProps) {
     const slice = SlicePool.take(SpellMonaco.models.modelFor(untrack(() => props.file)), element, lines)
     const shown = untrack(() => showOnly(slice.editor, element, props))
     shown.push(sizedTo(slice))
+    untrack(() => takeCursorBack(slice.editor, props.from, props.to))
     return () => {
+      if (slice.editor.hasTextFocus()) keepCursor(slice.editor)
       for (const each of shown) each.dispose()
       SlicePool.give(slice)
     }
@@ -84,6 +87,47 @@ function showOnly(
     editor.focus()
   }
   return undo
+}
+
+////////////////
+// ## The cursor, across a slice made again
+////////////////
+
+/**
+ * The cursor of a slice that went while it was typed in, for the slice made in its place to take back
+ * (epic `editor` I141).
+ * - Why:  a Spell UI element's handler, `onClick={...}`, is a change to its drawing,
+ *   so each compile draws the element again, the Inspector's card with it, and makes its slice again:
+ *   the cursor would drop out of it after the first word.
+ * - Forgotten once anything else takes the focus.
+ */
+let cursorLeft: { model: monaco.editor.ITextModel; position: monaco.Position } | undefined
+
+/** Keep `editor`'s cursor, as its slice goes while it's typed in. */
+function keepCursor(editor: monaco.editor.IStandaloneCodeEditor): void {
+  const model = editor.getModel()
+  const position = editor.getPosition()
+  if (!model || !position) return
+  const kept = (cursorLeft = { model, position })
+  const forget = () => {
+    if (cursorLeft === kept) cursorLeft = undefined
+  }
+  document.addEventListener("focusin", forget, { capture: true, once: true })
+}
+
+/**
+ * Put the cursor kept (`keepCursor()`) back in `editor`, when it's in the same file, inside lines `from` to `to`.
+ * - Only while nothing else has the focus:  it dropped to the page as the old slice went.
+ */
+function takeCursorBack(editor: monaco.editor.IStandaloneCodeEditor, from: number, to: number): void {
+  const kept = cursorLeft
+  if (!kept || kept.model !== editor.getModel()) return
+  if (kept.position.lineNumber < from || kept.position.lineNumber > to) return
+  const focused = document.activeElement
+  if (focused && focused !== document.body) return
+  cursorLeft = undefined
+  editor.setPosition(kept.position)
+  editor.focus()
 }
 
 /****************

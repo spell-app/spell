@@ -851,7 +851,7 @@ export class Inspector {
    * - A drawn thing's:  in its type, or a type it inherits,
    *   where the compiler says it's declared (`placeOfDeclaredEvent()`).
    * - A Spell UI element's (`row.key`, its DOM event):
-   *   the line holding its `onClick={...}` (`handlerPlacesInSource()`).
+   *   the code inside its `onClick={...}`, never the tag around it (`handlerPlacesInSource()`, I141).
    */
   static placeOfEvent(element: Element, row: WrittenEvent & { key?: string }): SlicePlace | undefined {
     const thing = SpellElement.thingOf(element)
