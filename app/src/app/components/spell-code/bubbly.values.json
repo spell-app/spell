@@ -145,12 +145,20 @@
       "dark": "4px"
     },
     "--bubbly-foot-tiny-pad-left": {
-      "light": "5px",
-      "dark": "5px"
+      "light": "9px",
+      "dark": "9px"
     },
     "--bubbly-foot-tiny-pad-right": {
-      "light": "5px",
-      "dark": "5px"
+      "light": "9px",
+      "dark": "9px"
+    },
+    "--bubbly-end-name-ink": {
+      "light": "#a6a6ab",
+      "dark": "#73727a"
+    },
+    "--bubbly-foot-tiny-ink": {
+      "light": "#89898f",
+      "dark": "#908f98"
     },
     "--bubbly-foot-tiny-above": {
       "light": "2px",
