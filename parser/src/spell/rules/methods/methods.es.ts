@@ -720,6 +720,103 @@ methodsEs.addRule(ToDoSomething, {
           ]
         }
       ]
+    },
+    {
+      title:
+        "un gancho nombra su tipo o su único como `eso`:  `para dibujar el mazo` ~== `para dibujarlo` (épica `language` T122)",
+      compileAs: "block",
+      tests: [
+        {
+          input: ['un "mazo" es una cosa', "\tpara dibujar el mazo", "\t\timprimir 1"],
+          js: ["export class Mazo extends Thing {", "  draw() {", "    core.console.log(1)", "  }", "}"],
+          ts: ["export class Mazo extends Thing {", "  @drawn draw() {", "    core.console.log(1)", "  }", "}"]
+        },
+        {
+          input: ['un "mazo" es una cosa', "\tpara dibujar un mazo", "\t\timprimir 1"],
+          js: ["export class Mazo extends Thing {", "  draw() {", "    core.console.log(1)", "  }", "}"],
+          ts: ["export class Mazo extends Thing {", "  @drawn draw() {", "    core.console.log(1)", "  }", "}"]
+        },
+        {
+          input: ["solitario es una aplicación", "\tpara dibujar el solitario", "\t\timprimir 1"],
+          js: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitario = new Solitario()"
+          ],
+          ts: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  @drawn draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitario, drawn in its own element, e.g. by `draw the solitario`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitario's properties;  its methods call its solitario's.",
+            " * - What every view's element does, e.g. drawing its solitario, is `SpellElement`'s.",
+            " */",
+            "export class SolitarioElement extends SpellElement<Solitario> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitario", [])',
+            "}",
+            "core.useElement(Solitario, SolitarioElement)",
+            "export const solitario = new Solitario()"
+          ]
+        },
+        {
+          input: ["solitario es una aplicación", "\tpara dibujar solitario", "\t\timprimir 1"],
+          js: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitario = new Solitario()"
+          ],
+          ts: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  @drawn draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitario, drawn in its own element, e.g. by `draw the solitario`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitario's properties;  its methods call its solitario's.",
+            " * - What every view's element does, e.g. drawing its solitario, is `SpellElement`'s.",
+            " */",
+            "export class SolitarioElement extends SpellElement<Solitario> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitario", [])',
+            "}",
+            "core.useElement(Solitario, SolitarioElement)",
+            "export const solitario = new Solitario()"
+          ]
+        },
+        {
+          title: "no es un gancho:  un método de sus palabras",
+          input: ['un "mazo" es una cosa', "\tpara barajar el mazo", "\t\timprimir 1"],
+          js: [
+            "export class Mazo extends Thing {",
+            "  barajarElMazo() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            'core.describeAction(Mazo, "barajarElMazo", { title: "Barajar El Mazo", undoneAs: "Barajar El Mazo" })'
+          ]
+        }
+      ]
     }
   ]
 })

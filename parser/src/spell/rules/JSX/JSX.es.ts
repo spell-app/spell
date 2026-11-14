@@ -15,7 +15,7 @@ import { P } from "spell/parser/parser"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { Wording } from "spell/parser/spell/rules/expressions"
 
-import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { SPELL_ATTRIBUTE_MEANINGS, SPELL_ATTRIBUTE_WORDS, SPELL_TAG_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
 import { ActionButton } from "./ActionButton"
 import { ContextMenuBlock } from "./ContextMenuBlock"
 import { ExampleBlock } from "./ExampleBlock"
@@ -38,9 +38,10 @@ JSXEs.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_TA
   syntax: "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor))"
 })
 
-// spell's own attribute words, each meaning the web's attribute:  `<h3 en="header">` => `<h3 slot="header">`
-JSXEs.addRule(Wording.specialize({ ruleName: SPELL_ATTRIBUTE_WORDS, meanings: SPELL_JSX_MEANINGS }), {
-  syntax: "((slot:en)|slot)"
+// spell's own attribute words, each meaning the web's attribute:  `<h3 en="header">` => `<h3 slot="header">`;
+// `oculto` => `hidden`, so `<mazo "mazo" oculto/>` declares the deck and draws nothing (epic `language` T123)
+JSXEs.addRule(Wording.specialize({ ruleName: SPELL_ATTRIBUTE_WORDS, meanings: SPELL_ATTRIBUTE_MEANINGS }), {
+  syntax: "((slot:en)|slot|(hidden:oculto|oculta)|hidden)"
 })
 
 JSXEs.addRule(MarkdownBlock, {

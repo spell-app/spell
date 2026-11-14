@@ -60,7 +60,8 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
         kept.push(...carried.filter((item) => item instanceof P.ASTHeadingInvocation))
         const moved = carried.filter((item) => !(item instanceof P.ASTHeadingInvocation))
         addMember(members, typeName, [...moved, statement])
-        if (descriptions.length) descriptionsByType.set(typeName, [...(descriptionsByType.get(typeName) ?? []), ...descriptions])
+        if (descriptions.length)
+          descriptionsByType.set(typeName, [...(descriptionsByType.get(typeName) ?? []), ...descriptions])
         removed = true
       } else {
         kept.push(...pending, statement)

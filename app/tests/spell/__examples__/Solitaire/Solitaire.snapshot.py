@@ -355,7 +355,7 @@ def test_piles() -> None:
 
         # a card is in one pile at a time
         discards = Pile(id="discards")
-        core.echo_test_action("get the last card of the stock")
+        core.echo_test_action("get the top card of the stock")
         it_2 = stock.last_item
         core.echo_test_action("add it to the discards")
         discards.append(it_2)

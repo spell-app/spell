@@ -38,7 +38,7 @@
   ✅ As expected `stock's color` is `red`
   ✅ As expected `stock's value` is `7`
   ✅ As expected `stock's short name` is `"stock: Q♠↑ 7♥↓"`
-  ▶️ Executing   `get the last card of the stock`
+  ▶️ Executing   `get the top card of the stock`
   ▶️ Executing   `add it to the discards`
   ✅ As expected `its pile is the discards` is `yes`
   ✅ As expected `the number of cards in the stock` is `1`

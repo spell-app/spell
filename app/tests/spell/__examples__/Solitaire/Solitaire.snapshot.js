@@ -285,7 +285,7 @@ export function testPiles() {
 
     /** a card is in one pile at a time */
     const discards = new Pile({ id: "discards" })
-    core.echoTestAction(`get the last card of the stock`)
+    core.echoTestAction(`get the top card of the stock`)
     const it2 = stock.lastItem
     core.echoTestAction(`add it to the discards`)
     discards.append(it2)

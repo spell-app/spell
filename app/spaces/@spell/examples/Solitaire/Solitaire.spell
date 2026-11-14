@@ -66,7 +66,7 @@ solitaire is an app
 		// each row's first card lands face down, then turns up where it lies
 		for row from 1 to 7
 			for column from row to 7
-				add the last card of the stock to item column of the columns
+				add the top card of the stock to item column of the columns
 				if column is the same as row
 					turn the last card of (item column of the columns) face up
 				pause for 50 msec
@@ -77,7 +77,7 @@ solitaire is an app
 		// - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
 		if the stock is empty
 			reset the stock
-		get the last card of the stock
+		get the top card of the stock
 		turn it face up
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec

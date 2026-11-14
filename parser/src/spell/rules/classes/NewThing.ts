@@ -2,6 +2,7 @@ import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
+import { FlagObjectLiteralProperty } from "spell/parser/spell/rules/properties"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
@@ -12,17 +13,29 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - `a new date` is this moment, `new Date()` (epic `atmosphere` P10):  the javascript targets only, so far.
  * - A built-in member given in another language's words goes by its own name (epic `spanish` P15):
  *   `una nueva pila con nombre = "mazo"` => `new Pila({ name: "mazo" })` -- see `noteBuiltInNames()`.
+ * - A property named alone takes the variable of its name (epic `language` T121):
+ *   `a new card with rank and suit` ~== `a new card with rank = the rank, suit = the suit` -- see `noteNamedAlone()`.
  */
 export class NewThing extends SpellStatement<
   "type|props?",
-  { builtInNames?: Record<string, string>; builtInValues?: Record<string, Record<string, string>> }
+  {
+    builtInNames?: Record<string, string>
+    builtInValues?: Record<string, Record<string, string>>
+    namedAlone?: Record<string, P.Match>
+  }
 > {
   @proto static alias = "expression"
 
-  /** Notes the built-in members its props name in the language's own words -- see `noteBuiltInNames()`. */
+  /**
+   * Notes the built-in members its props name in the language's own words -- see `noteBuiltInNames()`;
+   * and the props named alone that take a variable -- see `noteNamedAlone()`.
+   */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (match) NewThing.noteBuiltInNames(match)
+    if (match) {
+      NewThing.noteBuiltInNames(match)
+      NewThing.noteNamedAlone(match)
+    }
     return match
   }
 
@@ -81,6 +94,33 @@ export class NewThing extends SpellStatement<
     }
   }
 
+  ////////////////
+  // ## Properties named alone
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  notes each prop named alone that takes the variable of its name, in `match.data.namedAlone`,
+   * e.g. `{ rank: <the match of rank> }` for `a new card with rank and suit` in `for rank in card ranks` (epic `language` T121).
+   * - Only when both are true:
+   *   - the type it makes has that property, and it isn't a yes or no:  `a new deck with jokers` is still `jokers = yes`
+   *   - its words name a variable where the line is:  a local, a loop's item, an argument ...
+   *     (never the thing's own member:  a bare word reads only variables, epic `language` Q3;  `with the rank` reads one)
+   * - Otherwise it's a flag, as before:  `jokers: true`.
+   * - A lookup:  call it WHILE PARSING.
+   */
+  private static noteNamedAlone(match: P.MatchFor<NewThing>): void {
+    const { scopeType } = (match.groups.type.data ?? {}) as { scopeType?: unknown }
+    if (!(scopeType instanceof P.TypeScope)) return
+    for (const item of match.groups.props?.items ?? []) {
+      if (!item.is(FlagObjectLiteralProperty)) continue
+      const key = `${item.groups.property.value}`
+      const member = scopeType.getMember(key)
+      if (!(member instanceof P.ScopeVariable) || member.datatype === "choice") continue
+      const variable = FlagObjectLiteralProperty.variableNamed(match.scope, item.tokens)
+      if (variable) match.data.namedAlone = { ...match.data.namedAlone, [key]: variable }
+    }
+  }
+
   /** The property `key` of `type` or a super-type, when it compiles by another name:  a built-in template's. */
   private static templateProperty(type: P.TypeScope, key: string): P.ScopeVariable | undefined {
     for (const each of type.chain()) {
@@ -110,16 +150,24 @@ export class NewThing extends SpellStatement<
   /**
    * `props`, each prop `builtInNames` holds going by the member's name instead:
    * `{ nombre: "mazo" }` => `{ name: "mazo" }`;  and a value `builtInValues` holds, by its own:
-   * `{ dirección: arriba }` => `{ direction: "up" }`.
+   * `{ dirección: arriba }` => `{ direction: "up" }`;  and a prop `namedAlone` holds, set to its variable:
+   * `{ rank: true }` => `{ rank: rank }`.
    */
   private static renamed(
     props: P.ASTObjectLiteral | undefined,
-    { builtInNames: names = {}, builtInValues: values = {} }: P.MatchFor<NewThing>["data"]
+    { builtInNames: names = {}, builtInValues: values = {}, namedAlone = {} }: P.MatchFor<NewThing>["data"]
   ): P.ASTObjectLiteral | undefined {
     if (!props) return props
     const properties = props.properties.map((it) => {
       if (!(it instanceof P.ASTObjectLiteralProperty)) return it
       const key = it.property.value
+      const variable = namedAlone[key]
+      if (variable) {
+        it = new P.ASTObjectLiteralProperty(it.match, {
+          property: it.property,
+          value: P.asAST<P.ASTExpression>(variable.AST)
+        })
+      }
       const constant = it.value instanceof P.ASTConstantExpression ? it.value : undefined
       const said = constant ? values[key]?.[constant.name] : undefined
       if (!names[key] && said === undefined) return it

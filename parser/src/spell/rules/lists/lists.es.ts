@@ -74,7 +74,8 @@ export const listsEs = new SpellParser({ module: "lists" })
 /**
  * Each Spanish ordinal's forms and the position it means:  every gender and number, with and without its accent.
  * - `primer` and `tercer` are the short forms before a masculine noun:  `el primer item`.
- * - `arriba` (top) and `abajo` (bottom) are the ends of a pile, as English's `top` and `bottom`.
+ * - `arriba` (top) and `abajo` (bottom) are the ends of a pile, as English's `top` and `bottom`:
+ *   every list is stacked as a pile of cards is, so its top is its last item, its bottom its first (epic `language` Q63).
  */
 const ORDINAL_VALUES: Record<string, number> = {
   ...genderedForms("primer", 1),
@@ -93,8 +94,8 @@ const ORDINAL_VALUES: Record<string, number> = {
   ...genderedForms("últim", -1),
   final: -1,
   finales: -1,
-  arriba: 1,
-  abajo: -1
+  arriba: -1,
+  abajo: 1
 }
 
 /** `stem`'s four endings (`-o`, `-a`, `-os`, `-as`), each with and without its written accent, all meaning `value`. */
@@ -134,7 +135,7 @@ listsEs.addRule(Negatable.specialize({ ruleName: "has_or_has_no" }), {
 
 // Which end of a list, for `list_add`:  `agregar thing al principio de my-list`
 listsEs.addRule(Wording.specialize({ ruleName: "list_end", meanings: ["start", "end"] }), {
-  syntax: "((start:principio|comienzo|inicio|frente|arriba)|(end:final|fin|fondo|abajo))"
+  syntax: "((start:principio|comienzo|inicio|frente|abajo)|(end:final|fin|fondo|arriba))"
 })
 
 // Which side of an item, for `list_add_relative`:  `agregar thing a my-list después de other-thing`
@@ -414,8 +415,8 @@ listsEs.addRule(Ordinal.specialize({ pattern: ordinalPattern(), VALUE_MAP: ORDIN
         ["ultima", -1],
         ["últimas", -1],
 
-        ["arriba", 1],
-        ["abajo", -1]
+        ["arriba", -1],
+        ["abajo", 1]
       ]
     }
   ]
@@ -473,8 +474,8 @@ listsEs.addRule(OrdinalPositionExpression.specialize({ priority: Priority.specif
         scope.variables?.add("deck")
       },
       tests: [
-        ["la carta de arriba del deck", "core.getItemAt(deck, 0)"],
-        ["la carta de abajo de deck", "core.getItemAt(deck, -1)"]
+        ["la carta de arriba del deck", "core.getItemAt(deck, -1)"],
+        ["la carta de abajo de deck", "core.getItemAt(deck, 0)"]
       ]
     }
   ]
@@ -604,7 +605,7 @@ listsEs.addRule(RangeCountExpression, {
         scope.variables?.add("deck")
       },
       tests: [
-        ["arriba 2 items de my-list", "core.rangeStartingAt(myList, 0, 2)"],
+        ["arriba 2 items de my-list", "core.rangeStartingAt(myList, -2, 2)"],
         [`las primeras 2 palabras en "some other words"`, 'core.rangeStartingAt("some other words", 0, 2)'],
         ["las últimas dos cartas del deck", "core.rangeStartingAt(deck, -2, 2)"],
         ["las penúltimas dos cartas de deck", "core.rangeStartingAt(deck, -3, 2)"]

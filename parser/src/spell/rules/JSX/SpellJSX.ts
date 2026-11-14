@@ -13,6 +13,7 @@ import {
   MENU_TAGS,
   SPELL_JSX_MEANINGS,
   SPELL_TAG_WORDS,
+  HIDDEN_ATTRIBUTE,
   webWordFor,
   type DrawnDeclaration,
   type JSXMatchData
@@ -195,7 +196,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     )
     // a view declared where it's drawn (Q52):  `<column "C1"/>` ~== `"C1" is a new column`
     const view = SpellJSX.viewDeclaredBy(scope, match, element)
-    if (view) match.data.declares = view
+    if (view) match.data.declares = SpellJSX.saysHidden(match) ? { ...view, hidden: true } : view
     SpellJSX.warnAboutListedValues(scope, match, element)
     SpellJSX.refuseFormOfReadOnlyPlace(scope, match)
     // a dotted tag, `<UI.Form>`:  the writer writes the error where the element would be, this reports it
@@ -269,6 +270,18 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     // said on a line of its own:  only drawn
     if (owner.getMember(name)) return { owner: owner.name, name, datatype, drawnOnly: true }
     return { owner: owner.name, name, datatype }
+  }
+
+  /** Does `match`'s tag say `hidden` (Spanish `oculto`), by the web's name for its attribute? */
+  private static saysHidden(match: P.MatchFor<SpellJSX>): boolean {
+    return !!match.data.attributes?.some(
+      (attr) => (attr?.data as JSXMatchData | undefined)?.webAttribute === HIDDEN_ATTRIBUTE
+    )
+  }
+
+  /** Is `match` a tag that draws nothing:  a view it declares, `hidden` (`<deck "deck" hidden/>`, T123)? */
+  private static drawsNothing(match: P.Match | undefined): boolean {
+    return !!(match?.is(SpellJSX) && match.data.declares?.hidden)
   }
 
   /** The thing whose own drawing (`to draw it`) `scope` is in, if it's in one -- `undefined` elsewhere. */
@@ -620,6 +633,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         asts.push(...SpellJSX.hiddenUnless(child, shown, this.childASTs(child as P.MatchFor<this>)))
         continue
       }
+      // a view it declares, hidden:  nothing drawn (T123)
+      if (SpellJSX.drawsNothing(child)) continue
       const ast = SpellJSX.childAST(child)
       if (ast) asts.push(ast)
     }

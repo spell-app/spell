@@ -163,7 +163,7 @@
     },
     {
       path: "type:List/method:item (n) of (a list)",
-      description: "Item at a position, e.g. `card 3 of the deck`, `the last card of the deck`.\n- Ordinals:  `first` to `tenth`, `penultimate`, `last` or `final`, `top` (first) and `bottom` (last).\n- Nothing if there's no item there.",
+      description: "Item at a position, e.g. `card 3 of the deck`, `the last card of the deck`.\n- Ordinals:  `first` to `tenth`, `penultimate`, `last` or `final`, `top` (last) and `bottom` (first), as a pile of cards is stacked.\n- Nothing if there's no item there.",
       rules: [
         { name: "position_expression", syntax: "{arg:singular_identifier} {position:expression} of {expression:operand}" },
         { name: "ordinal_position_expression", syntax: "the {ordinal} {arg:singular_identifier} (in|of) {expression:operand}" }
@@ -171,7 +171,7 @@
     },
     {
       path: "type:List/method:items (start) to (end) of (a list)",
-      description: "Several items in a row, as a new list of the same type -- the list itself doesn't change.\n- `card 1 to 3 of the deck`\n- `top 2 cards of the deck`, `last two cards of the deck`\n- `cards in the deck starting with the ace`",
+      description: "Several items in a row, as a new list of the same type -- the list itself doesn't change.\n- `card 1 to 3 of the deck`\n- `first 2 cards of the deck`, `top two cards of the deck` (its last two)\n- `cards in the deck starting with the ace`",
       rules: [
         { name: "range_between_expression", syntax: "{arg:variable} {start:expression} to {end:expression} (of|in|from) {list:operand}" },
         { name: "range_count_expression", syntax: "{ordinal} {number} {arg:plural_identifier} (of|in|from) {list:operand}" },
