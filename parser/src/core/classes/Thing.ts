@@ -7,7 +7,7 @@ import type { Drawing } from "spell/parser/core/drawing"
 import { Eventful } from "spell/parser/core/SpellEvent"
 import type { PropCheck } from "spell/parser/core/core.types"
 import { rememberedStartFor, rememberSetting } from "spell/parser/core/remembered"
-import { declareAction, type ActionInfo } from "spell/parser/core/undoing"
+import { declareAction, runCreate, type ActionInfo } from "spell/parser/core/undoing"
 
 import { hasChosenId, ID_PROP } from "./ids"
 
@@ -75,7 +75,8 @@ export class Thing extends Eventful(Observable) {
     registerThing(this)
     // make its early starting values now (`PropInfo.early`), e.g. a solitaire's piles -- unless `props` gave them
     for (const name of schemaOf(new.target).earlyProps()) this.getProp(name)
-    if (runsCreate(Thing, new.target)) this.create(props)
+    // made while no action runs, e.g. on the opening:  what its creation hook changes is no undo step
+    if (runsCreate(Thing, new.target)) runCreate(this, props)
     // its starting values are set:  a change from now on is heard (`when its score changes`);  `@thing`'s say so later
     if (isLastToConstruct(Thing, new.target)) noteMade(this)
   }
