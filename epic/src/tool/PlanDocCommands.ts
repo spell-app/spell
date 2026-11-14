@@ -1493,7 +1493,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    first opened in test mode (?test=1&all=1)
   requested <name> <id>...                         issues filed from the person's own words:  light orange once
                                                    Claude closes them, until they review them (--requested on add)
-  calm <name> <id>... [--loud]                     calls / issues not urgent (a call grey, an issue yellow), as the page's
+  calm <name> <id>... [--loud]                     calls / issues not urgent (yellow), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
   failed <name> <M id> <I id> | off                a manual test failed, filed as that issue:  "failed -> I12"
                                                    on its line, a Noted card linking it, the test left open;

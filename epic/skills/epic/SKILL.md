@@ -528,7 +528,7 @@ than just being able to move on").
      - Skipped, the item stays red with nothing chosen, though the work is built (`outline-spell` J9, 2026-10-19).
    - A choice made WITHOUT the person (they're away, or an agent decided):  `add <name>#J`.
      - Ids `J1` ...;  see `/bedtime`.
-     - CALM by default:  `--calm` (last):  a call grey, an issue yellow, rather than red.
+     - CALM by default:  `--calm` (last):  yellow (a call blue while its work isn't on main), rather than red.
      - An issue filed from the person's own words (their request, their screenshot):  add `--requested` too.
        Closed, it turns light orange until they've looked;  without it, a calm issue Claude closes goes grey (epic `epic-engine` P63).
        - "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
@@ -1644,7 +1644,7 @@ add <name>#T "title" [--limit]                      a todo:  work still to do;  
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)
 test <name>[#M3] [--list [--json]]  /  test --all   the page in the Review tab, Start testing pressed (?test=1);  --list:  open manual tests, the person's order
-calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (a call grey, an issue yellow);  --loud:  red again
+calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again
 update <name>#I3 --requested                        an issue filed from the person's own words:  light orange once closed
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option the person settled in words, any item:  as their pick (latest set)

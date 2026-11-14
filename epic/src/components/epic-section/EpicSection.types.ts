@@ -430,7 +430,7 @@ export const FILTER_TEXTS = [
   {
     key: "stateQuiet",
     text: "open, nothing to think about",
-    description: "A state chip's words:  `quiet` (grey:  a calm judgement call, a limit)."
+    description: "A state chip's words:  `quiet` (grey:  a limit)."
   },
   { key: "stateRecent", text: "decided or done", description: "A state chip's words:  `recent` (green)." },
   {
