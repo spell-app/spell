@@ -198,15 +198,19 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * (`<Project>.es.names.json5`, `spell translate`'s) but aren't written in -- see `SP.SpellWordsData.titles`.
    * - e.g. the editor's English menus, `AppMenus.es.js`:  `{ "Compile and Run": "Compilar y ejecutar" }`.
    * - A language whose dictionary has words for none of our titles, or that we have none for:  no file.
+   * - Reads only the dictionaries our index lists (`contents.namesLanguages`, epic `editor` I68):
+   *   asking for every language's blind showed a 404 in the browser for each one a project doesn't have.
    * - NEVER throws:  a dictionary it can't read is left out.
    */
   protected async writeTitleWords(): Promise<void> {
     this.titleLanguages = []
+    const namesLanguages = this.contents?.namesLanguages ?? []
+    if (!namesLanguages.length) return
     const declarations = SP.SpellDeclarations.read(this.declarationsFile.contents ?? "")
     if (!declarations?.statements.some((statement) => statement.title)) return
-    for (const lang of SP.Language.all.keys()) {
+    for (const lang of namesLanguages) {
       if (this.wordsLanguages.includes(lang)) continue
-      const location = this.getFileLocation(`${this.projectName}.${lang}.names.json5`)
+      const location = this.getFileLocation(`${this.projectName}${SP.namesSuffixFor(lang)}`)
       if (!location) continue
       let text: string | undefined
       try {

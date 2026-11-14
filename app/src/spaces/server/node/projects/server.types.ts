@@ -133,6 +133,8 @@ export type ManifestJSON = Record<string, ManifestEntryJSON>
  * - `imports` -- import list, synced with `manifest` and persisted back to the project file when it changes.
  * - `title` / `version` / `exports` / `targets` / `listsStartAt` / `development` -- straight from the project file (`ProjectFileJSON`).
  * - `buildFolder` -- where its compiled output goes, inside the checkout's `build/`:  `project-utils.buildFolderInBuild()`.
+ * - `namesLanguages` -- the languages it has a names dictionary in, beside its project file (`Solitaire.es.names.json5`);
+ *   left out when none:  see `SP.ProjectManifestJSON5`.
  */
 export type ProjectIndexJSON = {
   manifest: ManifestJSON
@@ -144,4 +146,5 @@ export type ProjectIndexJSON = {
   listsStartAt?: 0 | 1
   development?: ProjectDevelopmentJSON
   buildFolder?: string
+  namesLanguages?: string[]
 }
