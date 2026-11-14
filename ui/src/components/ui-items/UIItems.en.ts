@@ -24,6 +24,7 @@ export const itemsVocabulary = {
   aka: ["item list", "media list", "product list", "results"],
   skeleton: "header with image, 3 line paragraph",
   noun: "items",
+  partOfSpeech: "structure",
   description: "A group of items:  site content, each an image beside its header, meta, description and extra.",
   attributes: [
     {

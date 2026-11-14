@@ -24,6 +24,7 @@ export const feedVocabulary = {
   aka: ["activity feed", "timeline", "news feed", "activity stream"],
   skeleton: "header with image, 2 line paragraph",
   noun: "feed",
+  partOfSpeech: "structure",
   description: "A feed presents people's activity chronologically.",
   attributes: [
     {

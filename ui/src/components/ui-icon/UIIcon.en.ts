@@ -23,6 +23,7 @@ export const iconVocabulary = {
   aka: ["glyph", "symbol", "font awesome", "svg icon"],
   skeleton: "inline 1 x 1",
   noun: "icon",
+  partOfSpeech: "property",
   description: "An icon is a glyph used to represent something else.",
   attributes: [
     {

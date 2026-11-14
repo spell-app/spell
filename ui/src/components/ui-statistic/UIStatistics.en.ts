@@ -28,6 +28,7 @@ export const statisticsVocabulary = {
   topics: ["data display", "layout", "views"],
   aka: ["stats", "kpis", "metrics", "dashboard numbers"],
   noun: "statistics",
+  partOfSpeech: "structure",
   description: "A group of statistics.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Size of every statistic in the group." },

@@ -30,6 +30,7 @@ export const dimensionVocabulary = {
   ],
   skeleton: "inline 4 x 1",
   noun: "dimension",
+  partOfSpeech: "property",
   description: "A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.",
   attributes: [
     {

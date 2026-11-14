@@ -23,6 +23,7 @@ export const markdownVocabulary = {
   aka: ["markdown", "md", "gfm", "readme", "rich text", "prose"],
   skeleton: "header, 4 line paragraph",
   noun: "markdown",
+  partOfSpeech: "property",
   description:
     "Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site.",
   attributes: [

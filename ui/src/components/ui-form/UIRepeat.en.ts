@@ -18,6 +18,7 @@ export const repeatVocabulary = {
   topics: ["forms", "lists", "collections"],
   aka: ["repeater", "field array", "form list", "for each", "list editor"],
   noun: "repeat",
+  partOfSpeech: "structure",
   ui: false,
   description: "A repeat shows its fields once per item of a list, each row bound to its own item.",
   attributes: [

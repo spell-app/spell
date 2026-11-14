@@ -30,6 +30,7 @@ export const selectVocabulary = {
   aka: ["select box", "native select", "picker", "option list"],
   skeleton: "inline 12 x 2.5",
   noun: "select",
+  partOfSpeech: "action",
   description: "A select lets people choose one or more values from a native list of options.",
   attributes: [
     {

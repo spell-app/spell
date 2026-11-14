@@ -36,6 +36,7 @@ export const flagVocabulary = {
   aka: ["country flag", "country", "locale flag"],
   skeleton: "inline 1.1 x 0.8",
   noun: "flag",
+  partOfSpeech: "property",
   description: "A flag is used to represent a political state.",
   attributes: [
     {

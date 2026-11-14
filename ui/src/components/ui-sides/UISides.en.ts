@@ -19,6 +19,7 @@ export const sidesVocabulary = {
   aka: ["margin", "padding", "box model", "spacing", "insets", "sides"],
   skeleton: "inline 8 x 4.5",
   noun: "sides",
+  partOfSpeech: "structure",
   description:
     "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.",
   attributes: [

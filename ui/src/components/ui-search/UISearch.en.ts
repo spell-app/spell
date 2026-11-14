@@ -26,6 +26,7 @@ export const searchVocabulary = {
   aka: ["autocomplete", "typeahead", "search box", "combobox", "lookup"],
   skeleton: "inline 15 x 2.5",
   noun: "search",
+  partOfSpeech: "action",
   description: "A search module lets people query for results from a selection of data.",
   attributes: [
     {

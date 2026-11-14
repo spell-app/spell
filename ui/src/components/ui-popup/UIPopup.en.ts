@@ -28,6 +28,7 @@ export const popupVocabulary = {
   topics: ["popups", "overlays", "feedback", "modules"],
   aka: ["tooltip", "popover", "hint", "hover card", "info bubble"],
   noun: "popup",
+  partOfSpeech: "structure",
   description: "A popup displays additional information on top of a page.",
   attributes: [
     {

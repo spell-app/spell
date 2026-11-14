@@ -19,6 +19,7 @@ export const cardsVocabulary = {
   topics: ["cards", "layout", "lists", "views"],
   aka: ["card grid", "card group", "gallery"],
   noun: "cards",
+  partOfSpeech: "structure",
   description: "A group of cards, laid out in a wrapping row.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Text size of every card in the group." },

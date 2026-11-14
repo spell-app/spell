@@ -109,6 +109,7 @@ export const propertyEditorVocabulary = {
   aka: ["inspector", "property sheet", "properties panel", "settings form", "object editor"],
   skeleton: "header, 3 line paragraph",
   noun: "form",
+  partOfSpeech: "action",
   description:
     "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.",
   attributes: passThrough<E.AttributeSpec>(

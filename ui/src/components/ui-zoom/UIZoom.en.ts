@@ -19,6 +19,7 @@ export const zoomVocabulary = {
   topics: ["images", "media", "overlays"],
   aka: ["lightbox", "zoom", "full size", "image viewer", "magnifier", "expand", "screenshot", "thumbnail"],
   noun: "zoom",
+  partOfSpeech: "structure",
   description:
     "A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and " +
     "height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or " +

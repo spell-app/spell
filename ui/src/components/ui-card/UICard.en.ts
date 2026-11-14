@@ -50,6 +50,7 @@ export const cardVocabulary = {
   aka: ["tile", "panel", "profile card"],
   skeleton: "18 wide: square image, header, 3 line paragraph",
   noun: "card",
+  partOfSpeech: "structure",
   plural: "cards",
   description: "A card displays site content in a manner similar to a playing card.",
   attributes: [

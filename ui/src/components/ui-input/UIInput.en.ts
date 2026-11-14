@@ -50,6 +50,7 @@ export const inputVocabulary = {
   aka: ["text field", "text box", "textbox", "input field", "search box"],
   skeleton: "inline 14 x 2.5",
   noun: "input",
+  partOfSpeech: "action",
   description: "An input is a field used to elicit a response from a person.",
   attributes: [
     {

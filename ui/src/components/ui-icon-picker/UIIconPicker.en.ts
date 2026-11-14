@@ -24,6 +24,7 @@ export const iconPickerVocabulary = {
   aka: ["icon chooser", "icon selector", "glyph picker", "symbol picker", "icon search"],
   skeleton: "inline 14 x 2.5",
   noun: "icon picker",
+  partOfSpeech: "action",
   description: "An icon picker lets people choose an icon by searching for it and clicking its glyph.",
   attributes: [
     {

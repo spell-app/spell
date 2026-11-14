@@ -25,6 +25,7 @@ export const commentVocabulary = {
   aka: ["reply", "post", "message"],
   skeleton: "header with image, 2 line paragraph",
   noun: "comment",
+  partOfSpeech: "structure",
   ui: false,
   description: "One comment:  who wrote it, when, what, and the replies to it.",
   attributes: [

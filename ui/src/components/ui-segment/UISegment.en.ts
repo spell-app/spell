@@ -24,6 +24,7 @@ export const segmentVocabulary = {
   aka: ["panel", "box", "section", "well", "paper", "card"],
   skeleton: "header, paragraph",
   noun: "segment",
+  partOfSpeech: "structure",
   plural: "segments",
   description: "A segment is used to create a grouping of related content.",
   attributes: [

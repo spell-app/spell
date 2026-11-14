@@ -32,6 +32,7 @@ export const formVocabulary = {
   topics: ["forms", "inputs", "basic", "collections"],
   aka: ["form layout", "fieldset", "validation"],
   noun: "form",
+  partOfSpeech: "action",
   description: "A form displays a set of related input fields in a structured way.",
   attributes: [
     {

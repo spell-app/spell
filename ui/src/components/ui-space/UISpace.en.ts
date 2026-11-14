@@ -18,6 +18,7 @@ export const spaceVocabulary = {
   topics: ["layout", "basic"],
   aka: ["spacer", "gap", "line break", "br", "spring", "filler", "strut"],
   noun: "space",
+  partOfSpeech: "structure",
   description:
     "A space is a gap between things.  Bare, it is a line break;  `inline`, a gap inside the line;  `fluid`, " +
     "it takes the room left in its row or column.  It has no look of its own.",

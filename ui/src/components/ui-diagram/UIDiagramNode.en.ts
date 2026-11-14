@@ -15,6 +15,7 @@ export const diagramNodeVocabulary = {
   topics: ["data display", "images"],
   aka: ["diagram box", "box content", "flip card in a diagram"],
   noun: "diagram node",
+  partOfSpeech: "structure",
   description:
     "A diagram node holds what one box of a diagram shows instead of its texts, e.g. a `<ui-shape>` that flips:  the " +
     "box takes its size, and its lines follow when it changes.",

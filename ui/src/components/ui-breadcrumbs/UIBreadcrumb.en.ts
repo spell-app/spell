@@ -18,6 +18,7 @@ export const breadcrumbVocabulary = {
   topics: ["navigation", "collections"],
   aka: ["crumb", "breadcrumb item"],
   noun: "section",
+  partOfSpeech: "action",
   ui: false,
   description: "A section of a breadcrumb:  a link to a level of the hierarchy, or the current page.",
   attributes: [

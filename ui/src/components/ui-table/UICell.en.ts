@@ -19,6 +19,7 @@ export const cellVocabulary = {
   topics: ["tables", "collections"],
   aka: ["table cell", "td", "th", "header cell"],
   noun: "cell",
+  partOfSpeech: "structure",
   description: "A cell holds one value of a table row;  a header cell names its column or row.",
   attributes: [
     {

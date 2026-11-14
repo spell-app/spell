@@ -19,6 +19,7 @@ export const stackVocabulary = {
   topics: ["layout", "basic"],
   aka: ["stack", "cluster", "flex box", "row", "column", "hbox", "vbox", "spacer"],
   noun: "stack",
+  partOfSpeech: "structure",
   description:
     "A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own.",
   attributes: [

@@ -20,6 +20,7 @@ export const sectionsVocabulary = {
   topics: ["layout", "containers"],
   aka: ["accordion", "section group", "collapsible group", "outline"],
   noun: "sections",
+  partOfSpeech: "structure",
   description:
     "A group of sections:  with `collapsing`, every section in it can close, and closed ones stack with no space between.",
   attributes: [

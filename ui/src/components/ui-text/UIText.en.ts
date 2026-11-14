@@ -37,6 +37,7 @@ export const textVocabulary = {
     "code"
   ],
   noun: "text",
+  partOfSpeech: "property",
   description: "A text is used to style some inline text with a simple color, or to hold a paragraph.",
   attributes: [
     {

@@ -20,6 +20,7 @@ import { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
 export const toolbarVocabulary = {
   ...menuVocabulary,
   tag: "ui-toolbar",
+  partOfSpeech: "structure",
   icon: "tools",
   topics: ["menus", "navigation", "collections"],
   aka: ["toolbar", "tool bar", "scrolling tabs", "overflow menu", "chip bar", "scrollable menu"],

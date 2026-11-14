@@ -11,7 +11,7 @@
  *   - `css-custom-data.json`:  its `css.customData`
  *   - and the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell/ui/jsx`)
  * - What the spell compiler checks an app's widget defaults against, `src/vocabulary/defaults.generated.ts`
- *   (`DefaultsTable`, epic `language` P29)
+ *   (`DefaultsTable`, epic `language` P29);  each tag's part of speech, `partsOfSpeech.generated.ts` (T124)
  * - All COMMITTED:  the docs pages fetch them as they are, with no build step.
  *   - Rerun after changing a vocabulary, a family's sheet (its tokens), `pages.json5` or a page's sections.
  *   - `tests/tools/SiteDataBuilder.test.ts` fails while they're stale.
@@ -44,7 +44,8 @@ const outputs: GeneratedOutput[] = [
   ...manifests.outputs(builder.dataFolder),
   await manifests.jsxOutput(),
   await DefaultsTable.output(builder.root, builder.componentsFolder),
-  await DefaultsTable.helpOutput(builder.root, builder.componentsFolder)
+  await DefaultsTable.helpOutput(builder.root, builder.componentsFolder),
+  await DefaultsTable.partsOfSpeechOutput(builder.root, builder.componentsFolder)
 ]
 
 const stale = writeOrCheck(outputs, { command: "site:data", isCheck: values.check })
