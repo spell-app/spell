@@ -101,10 +101,13 @@ export class LspToMonaco {
   /**
    * Monaco completion for LSP `item`, replacing `range`, e.g. the word being typed.
    * - A snippet stays a snippet:  `move ${1:card} to ${2:pile}`.
+   * - So does its command, run once it's written:  `editor.action.triggerSuggest` lists what goes in its quotes
+   *   (epic `editor` I70).
    */
   static completion(item: CompletionItem, range: monaco.IRange): monaco.languages.CompletionItem {
     const { label, labelDetails, kind, detail, documentation, insertText, insertTextFormat, sortText, filterText } =
       item
+    const { command } = item
     return {
       label: labelDetails ? LspToMonaco.completionLabel(label, labelDetails) : label,
       kind: (kind && LspToMonaco.COMPLETION_KINDS[kind]) ?? CompletionItemKind.Text,
@@ -115,7 +118,8 @@ export class LspToMonaco {
         insertTextFormat === InsertTextFormat.Snippet ? CompletionItemInsertTextRule.InsertAsSnippet : undefined,
       sortText,
       filterText,
-      range
+      range,
+      ...(command && { command: { id: command.command, title: command.title, arguments: command.arguments } })
     }
   }
 

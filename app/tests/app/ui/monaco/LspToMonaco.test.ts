@@ -56,6 +56,13 @@ describe("LspToMonaco", () => {
       range: monacoRange
     })
     expect(LspToMonaco.completion({ label: "card" }, monacoRange)).toMatchObject({ insertText: "card" })
+    // its command too, run once it's written:  the list again, in its quotes (epic `editor` I70)
+    const command = { title: "", command: "editor.action.triggerSuggest" }
+    expect(LspToMonaco.completion({ label: "color", command }, monacoRange).command).toEqual({
+      id: "editor.action.triggerSuggest",
+      title: "",
+      arguments: undefined
+    })
   })
 
   test("symbols and highlights:  1-based kinds => 0-based", () => {
