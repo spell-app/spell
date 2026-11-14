@@ -101,7 +101,11 @@ export class SpellMonaco {
       increaseIndentPattern: /:\s*$/,
       decreaseIndentPattern: LSP.SpellKeywords.DECREASE_INDENT
     },
-    onEnterRules: [{ beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } }]
+    onEnterRules: [
+      { beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } },
+      // a condition going on onto the next line (epic `language` P55, Q53)
+      { beforeText: LSP.SpellKeywords.CONTINUES_LINE, action: { indentAction: monaco.languages.IndentAction.Indent } }
+    ]
   }
 
   /** Who hears each edit -- see `onEdit()`. */

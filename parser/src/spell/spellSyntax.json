@@ -29,7 +29,7 @@
           "ruleNames": ["block"],
           "internal": false,
           "file": "src/spell/rules/Block.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "`Block`s are generally the root entity that we parse in spell -- a top-level construct, e.g. used to parse an entire file.",
           "syntaxes": [],
           "aliases": []

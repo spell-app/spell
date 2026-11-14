@@ -120,6 +120,17 @@ describe("SpellKeywords", () => {
       expect(DECREASE_INDENT.test("\telsewhere")).toBe(false)
     })
 
+    test("a line ending in `and` / `or` goes on, in every pack's words;  VS Code's rule the same (P55, Q53)", () => {
+      const { CONTINUES_LINE } = LSP.SpellKeywords
+      for (const line of ["\tif it is empty and", "\tits value is 1 or ", "\tsi está vacía y", "\tsu valor es 1 o"]) {
+        expect(CONTINUES_LINE.test(line), line).toBe(true)
+      }
+      expect(CONTINUES_LINE.test("\tset the band")).toBe(false)
+      expect(CONTINUES_LINE.test("\tprint the score")).toBe(false)
+      const rules = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).onEnterRules
+      expect(rules[1].beforeText).toEqual({ pattern: CONTINUES_LINE.source, flags: CONTINUES_LINE.flags })
+    })
+
     test("VS Code's is the same as Monaco's", () => {
       const { pattern, flags } = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).indentationRules
         .decreaseIndentPattern
