@@ -108,7 +108,7 @@ class Card(TwoSidedView):
 
     async def play(self) -> Any:
         if self in solitaire.stock:
-            await solitaire.play_from_the_stock()
+            await solitaire.turn_over_the_next_card()
         else:
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
             if end_pile is None:
@@ -405,7 +405,7 @@ class StockPile(Pile):
         return h("ui-text", {"part": "placeholder"}, "🂠")
 
     async def on_click(self, event: ClickEvent) -> None:
-        await solitaire.play_from_the_stock()
+        await solitaire.turn_over_the_next_card()
 
 
 class DiscardPile(Pile):
@@ -497,8 +497,8 @@ class Solitaire(App):
                         "shrinkable": True,
                     },
                     h("ui-text", {"slot": "title", "size": "large", "heavy": True}, "Spell Solitaire"),
-                    core.draw_action(self, "cheat", {"in-menu": True}),
                     core.draw_action(self, "auto_play", {"in-menu": True}),
+                    core.draw_action(self, "cheat", {"in-menu": True}),
                     core.draw_action(self, "restart_the_game", {"title": "Restart", "in-menu": True}),
                     h("spacer"),
                     core.draw_action(self, "undo", {"in-menu": True}),
@@ -563,10 +563,7 @@ class Solitaire(App):
 
     async def restart_the_game(self) -> None:
         self.score = 0
-        await self.deal_the_cards()
-
-    async def deal_the_cards(self) -> None:
-        """Gather every card into the stock, shuffle it, and deal the columns"""
+        # Gather every card into the stock, shuffle it, and deal the columns
         for card in self.deck:
             start_pile = card.pile
             card.turn_face_down()
@@ -581,9 +578,9 @@ class Solitaire(App):
                 if column == row:
                     core.get_item_at(core.every_thing(Column), position(column)).last_item.turn_face_up()
                 await core.pause_for(50, "msec")
-        await self.play_from_the_stock()
+        await self.turn_over_the_next_card()
 
-    async def play_from_the_stock(self) -> None:
+    async def turn_over_the_next_card(self) -> None:
         """Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty"""
         # - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
         if not self.stock:
@@ -662,8 +659,7 @@ class Solitaire(App):
 
 solitaire = Solitaire()
 core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart The Game"})
-core.describe_action(Solitaire, "deal_the_cards", {"title": "Deal The Cards", "undone_as": "Deal The Cards"})
-core.describe_action(Solitaire, "play_from_the_stock", {"title": "Play From The Stock", "undone_as": "Turn Card"})
+core.describe_action(Solitaire, "turn_over_the_next_card", {"title": "Turn Over The Next Card", "undone_as": "Turn Card"})
 core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset The Stock", "undone_as": "Reset The Stock"})
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "icon": "play", "undone_as": "Auto Play"})
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})

@@ -85,7 +85,7 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (solitaire.stock.includes(this)) await solitaire.playFromTheStock()
+    if (solitaire.stock.includes(this)) await solitaire.turnOverTheNextCard()
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
@@ -322,7 +322,7 @@ export class StockPile extends Pile {
   }
 
   async onClick(event) {
-    await solitaire.playFromTheStock()
+    await solitaire.turnOverTheNextCard()
   }
 }
 
@@ -406,8 +406,8 @@ export class Solitaire extends App {
       h("ui-segment", { inverted: true, attach: "top" },
         h("ui-toolbar", { class: "GameBar", appearance: "pills", inverted: true, size: "small", shrinkable: true },
           h("ui-text", { slot: "title", size: "large", heavy: true }, "Spell Solitaire"),
-          core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "autoPlay", { "in-menu": true }),
+          core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true }),
           h("spacer"),
           core.drawAction(this, "undo", { "in-menu": true }),
@@ -497,11 +497,7 @@ export class Solitaire extends App {
 
   async restartTheGame() {
     this.score = 0
-    await this.dealTheCards()
-  }
-
-  /** Gather every card into the stock, shuffle it, and deal the columns */
-  async dealTheCards() {
+    // Gather every card into the stock, shuffle it, and deal the columns
     for (const card of this.deck) {
       const startPile = card.pile
       card.turnFaceDown()
@@ -519,11 +515,11 @@ export class Solitaire extends App {
         await core.pauseFor(50, "msec")
       }
     }
-    await this.playFromTheStock()
+    await this.turnOverTheNextCard()
   }
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
-  async playFromTheStock() {
+  async turnOverTheNextCard() {
     // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
     if (this.stock.isEmpty) this.resetTheStock()
     const it = this.stock.lastItem
@@ -601,8 +597,7 @@ export class Solitaire extends App {
 }
 export const solitaire = new Solitaire()
 core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart The Game" })
-core.describeAction(Solitaire, "dealTheCards", { title: "Deal The Cards", undoneAs: "Deal The Cards" })
-core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Turn Card" })
+core.describeAction(Solitaire, "turnOverTheNextCard", { title: "Turn Over The Next Card", undoneAs: "Turn Card" })
 core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], icon: "play", undoneAs: "Auto Play" })
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon: "eye", undoneAs: "Cheat" })

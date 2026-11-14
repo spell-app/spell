@@ -256,9 +256,9 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     expect(isSame).toBe(true)
     const code = await page.evaluate(() => {
       const app = document.querySelector(".AppPaneBody solitaire-app") as HTMLElement & {
-        thing: { playFromTheStock(): void }
+        thing: { turnOverTheNextCard(): void }
       }
-      return String(app.thing.playFromTheStock)
+      return String(app.thing.turnOverTheNextCard)
     })
     expect(code).toContain("200")
   })
