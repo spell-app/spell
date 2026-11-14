@@ -1,3 +1,5 @@
 479 reportReturnType Type "list[Element]" is not assignable to return type "Element"
+533 reportUndefinedVariable "discard" is not defined
+533  Statements must be separated by newlines or semicolons
 636 reportOptionalMemberAccess "filter" is not a known attribute of "None"
-646 reportAttributeAccessIssue Cannot access attribute "alert" for class "Core"
+643 reportAttributeAccessIssue Cannot access attribute "alert" for class "Core"

@@ -110,10 +110,10 @@ export class Card extends TwoSidedView {
     return true
   }
 
-  /** what the move scores:  10 on a foundation, 5 from the discards, else nothing */
+  /** what the move scores:  10 on a foundation, 5 from the discard pile, else nothing */
   countThePointsForCardOnPile(pile: Pile) {
     if (pile instanceof Foundation) return 10
-    if (solitaire.discards.includes(this)) return 5
+    if (solitaire.discardPile.includes(this)) return 5
     return 0
   }
 
@@ -583,7 +583,7 @@ export class Solitaire extends App {
         </ui-segment>
         <ui-container padding="small" columns="7" spacing="xs">
           <test-project-stock-pile id="stock" />
-          <test-project-discard-pile id="discards" />
+          <test-project-discard-pile id="discard pile" />
           <spacer />
           <test-project-foundation id="clubs" />
           <test-project-foundation id="diamonds" />
@@ -610,9 +610,9 @@ export class Solitaire extends App {
   // <stock-pile "stock"/>
   @prop({ init: () => new StockPile({ id: "stock" }), early: true })
   accessor stock!: StockPile
-  // <discard-pile "discards"/>
-  @prop({ init: () => new DiscardPile({ id: "discards" }), early: true })
-  accessor discards!: DiscardPile
+  // <discard-pile "discard pile"/>
+  @prop({ init: () => new DiscardPile({ id: "discard pile" }), early: true })
+  accessor "discard pile"!: DiscardPile
   // <foundation "clubs" suit=clubs/>
   @prop({ init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true })
   accessor clubs!: Foundation
@@ -666,7 +666,7 @@ export class Solitaire extends App {
     await this.turnOverTheNextCard()
   }
 
-  /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
+  /** Turn the stock's next card over, onto the discard pile:  the discard pile back into the stock when it's empty */
   async turnOverTheNextCard() {
     // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
     if (this.stock.isEmpty) this.resetTheStock()
@@ -674,12 +674,12 @@ export class Solitaire extends App {
     it?.turnFaceUp()
     // as long as its flip takes (styles.css), so it turns over before it moves
     await core.pauseFor(300, "msec")
-    this.discards.append(it!)
+    this.discardPile.append(it!)
   }
 
-  /** The discards, turned over, back into the stock */
+  /** The discard pile, turned over, back into the stock */
   resetTheStock() {
-    const cards = this.discards.clone()
+    const cards = this.discardPile.clone()
     cards.reverse()
     cards.forEach((card) => this.stock.append(card))
     this.stock.forEach((card) => card.turnFaceDown())
@@ -688,8 +688,8 @@ export class Solitaire extends App {
   /** Play every card that can go somewhere, until none can */
   async autoPlay() {
     let anythingChanged: boolean = false
-    if (!this.discards.isEmpty) {
-      const testCard = this.discards.lastItem
+    if (!this.discardPile.isEmpty) {
+      const testCard = this.discardPile.lastItem
       if (await testCard?.play()) {
         anythingChanged = true
         await core.pauseFor(500, "msec")
@@ -720,18 +720,15 @@ export class Solitaire extends App {
     if (anythingChanged) await this.autoPlay()
   }
 
-  /** Turn up a face-down card from a column, at random, onto the discards */
-  async cheat() {
+  /** Turn up a face-down card from a column, at random, onto the discard pile */
+  cheat() {
     const remainingPiles = core.filter(core.everyThing(Column), (pile: Column) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
     if (core.isEmpty(remainingPiles)) return
     const pile = core.randomItemOf<Column>(remainingPiles)
     const card = pile?.filter((card) => card.isFaceDirection("down"))?.randomItem()
-    // over every card around it, then turned face up as it moves onto the discards
-    card!.lifted = true
-    card?.turnFaceUp()
-    this.discards.append(card!)
-    await core.pauseFor(300, "msec")
-    card!.lifted = false
+    // turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile
+    this.discardPile.append(card!)
+    return card?.turnFaceUp()
   }
 
   async onScoreChange(event: ScoreChangeEvent) {
@@ -753,7 +750,7 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     { name: "deck", kind: "json", description: "Its deck." },
     { name: "score", kind: "number", description: "Its score." },
     { name: "stock", kind: "json", description: "Its stock." },
-    { name: "discards", kind: "json", description: "Its discards." },
+    { name: "\"discard pile\"", kind: "json", description: "Its \"discard pile\"." },
     { name: "clubs", kind: "json", description: "Its clubs." },
     { name: "diamonds", kind: "json", description: "Its diamonds." },
     { name: "hearts", kind: "json", description: "Its hearts." },
