@@ -38,6 +38,7 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
   "ordinal_of_expression": "ordinal|expression",
   "ordinal_position_expression": "ordinal|arg|expression",
   "ordinal_where_expression": "ordinal|arg|list|body?",
+  "plural_call_statement": "statement|item|list",
   "position_expression": "arg|position|expression",
   "random_item_expression": "arg|list",
   "random_items_expression": "number|arg|list",

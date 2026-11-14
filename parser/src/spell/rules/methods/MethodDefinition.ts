@@ -174,6 +174,8 @@ export class MethodDefinition<
    * `- to draw the deck:` (`to draw a deck`), `- to draw solitaire:` (`the solitaire`) ~== `- to draw it:`
    * (Owen, 2026-11-14, epic `language` T122);  Spanish's `- para dibujar el mazo:`, `- para dibujar el solitario:`.
    * - Its last words, an article or not, then the type's words (`deck`) or the one of a kind's name (`solitaire`).
+   * - Or, after an article, the built-in kind it is:  `- to draw the app:` in `solitaire is an app`
+   *   (epic `language` T129;  `namesForItself()`).
    * - Only for a hook (`hookOf()`, `draw` or `create`):  `- to shuffle the deck:` stays a method of those words.
    * - A slot's drawing isn't one:  `- to draw its front:` names no type.
    * - SIDE EFFECT: mutates `signature` in place:  those words become the place `it` was, as `splitFusedIt()` marks it.
@@ -181,16 +183,14 @@ export class MethodDefinition<
   private static itForItsName(signature: MethodSignatureData, subject: P.TypeScope, scope: P.Scope): void {
     const { methodBits, syntaxBits } = signature
     if (methodBits.length !== syntaxBits.length || syntaxBits.some((bit) => /^[{(]/.test(bit))) return
-    const declaredBy = P.SubjectScope.of(scope)?.declaredBy
-    const name = declaredBy?.is(CreateOneOfAKind) ? CreateOneOfAKind.variableName(declaredBy) : undefined
-    const names = [kebabCase(subject.name).replace(/^-/, "").replace(/-/g, " "), name].filter(Boolean)
-    for (const named of names) {
-      const count = named!.split(" ").length
+    for (const { words: named, needsArticle } of MethodDefinition.namesForItself(subject, scope)) {
+      const count = named.split(" ").length
       let start = syntaxBits.length - count
       if (start < 1 || syntaxBits.slice(start).join(" ").toLowerCase() !== named) continue
       const article = syntaxBits[start - 1]!
       const isArticle = ["definite_article", "indefinite_article"].some((rule) => Wording.reads(scope, rule, article))
       if (start > 1 && isArticle) start--
+      else if (needsArticle) continue
       // English's hooks are their words already, `draw`;  another language's, its own:  `dibujar`
       const verb = methodBits.slice(0, start)
       if (!HOOKS.some(({ hook }) => hook === verb.join(" ")) && !MethodDefinition.hookOf(verb, scope)) continue
@@ -198,6 +198,26 @@ export class MethodDefinition<
       syntaxBits.splice(start, syntaxBits.length - start, FUSED_IT)
       return
     }
+  }
+
+  /**
+   * The words a hook in `subject`'s outline may name it by, as `it` -- see `itForItsName()`, `CreateHook`:
+   * - its type's words, `deck`, `stock pile`
+   * - a one of a kind's own name, `solitaire`
+   * - after an article only, each built-in kind it is, in the file's language (epic `language` T129):
+   *   `app` for `solitaire is an app`, Spanish's `aplicación`;  `view`, `thing` too
+   * - A lookup:  call it WHILE PARSING.
+   */
+  static namesForItself(subject: P.TypeScope, scope: P.Scope): Array<{ words: string; needsArticle: boolean }> {
+    const declaredBy = P.SubjectScope.of(scope)?.declaredBy
+    const name = declaredBy?.is(CreateOneOfAKind) ? CreateOneOfAKind.variableName(declaredBy) : undefined
+    const own = [kebabCase(subject.name).replace(/^-/, "").replace(/-/g, " "), name]
+    const { typeWords } = SP.Language.of(scope)
+    const kinds = Object.keys(typeWords).filter((words) => subject.isA(typeWords[words]!))
+    return [
+      ...own.filter((words): words is string => !!words).map((words) => ({ words, needsArticle: false })),
+      ...kinds.map((words) => ({ words: words.toLowerCase(), needsArticle: true }))
+    ]
   }
 
   /**

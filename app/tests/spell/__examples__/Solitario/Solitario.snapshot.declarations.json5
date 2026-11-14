@@ -324,36 +324,36 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7204-7517"
+      "defined": "/Solitario.es.spell:7032-7345"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7519-7726"
+      "defined": "/Solitario.es.spell:7347-7554"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7728-8234"
+      "defined": "/Solitario.es.spell:7556-8062"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:7844-7873"
+      "defined": "/Solitario.es.spell:7672-7701"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:8236-8565"
+      "defined": "/Solitario.es.spell:8064-8393"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:427-6747"
+      "defined": "/Solitario.es.spell:427-6575"
     },
     {
       "property": "mazo",
@@ -545,7 +545,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:8567-10123"
+      "defined": "/Solitario.es.spell:8395-9951"
     }
   ],
   "codeLines": [
@@ -604,6 +604,6 @@
     544,
     552,
     587,
-    628
+    626
   ]
 }

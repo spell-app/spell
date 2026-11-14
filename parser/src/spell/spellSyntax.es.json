@@ -3140,7 +3140,7 @@
           "ruleNames": ["list_length"],
           "internal": false,
           "file": "src/spell/rules/lists/ListLength.ts",
-          "line": 20,
+          "line": 30,
           "purpose": "Return length of a list, e.g. `number of items in my-list` => `core.itemCountOf(myList)`.",
           "syntaxes": [
             {
@@ -3497,7 +3497,7 @@
           "ruleNames": ["list_filter"],
           "internal": false,
           "file": "src/spell/rules/lists/ListFilter.ts",
-          "line": 16,
+          "line": 25,
           "purpose": "List filter, e.g. `words in \"a word list\" where word starts with \"a\"`.",
           "syntaxes": [
             {
@@ -3638,6 +3638,21 @@
           "syntaxes": [
             {
               "syntax": "(para|por) cada? {list:expression} :? {statement_body}?"
+            },
+            {
+              "syntax": "(para|por) {list:each_thing} :? {statement_body}?",
+              "example": "para cada columna: imprimir eso",
+              "outputs": {
+                "js": {
+                  "code": "core.map(core.everyThing(Columna), (columna) => core.console.log(columna))"
+                },
+                "ts": {
+                  "code": "core.map(core.everyThing(Columna), (columna: Columna) => core.console.log(columna))"
+                },
+                "py": {
+                  "code": "for columna in core.every_thing(Columna):\n    core.console.log(columna)"
+                }
+              }
             }
           ],
           "aliases": ["statement", "expression"]
@@ -4311,6 +4326,32 @@
                 },
                 "py": {
                   "code": "for carta in mazo:\n    core.append(reserva, carta)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PluralCallStatement",
+          "ruleNames": ["plural_call_statement"],
+          "internal": false,
+          "file": "src/spell/rules/lists/PluralCallStatement.ts",
+          "line": 25,
+          "purpose": "A thing's action, called on a list of those things, done to each in turn -- `turn the cards in the deck face down` (epic `language` T126).",
+          "syntaxes": [
+            {
+              "syntax": "{statement} (los|las)? {item:plural_identifier} (en|de|del) {list:expression}",
+              "example": "voltear las cartas del mazo boca abajo",
+              "outputs": {
+                "js": {
+                  "code": "mazo.forEach((carta) => carta.voltearBocaAbajo())"
+                },
+                "ts": {
+                  "code": "mazo.forEach((carta) => carta.voltearBocaAbajo())"
+                },
+                "py": {
+                  "code": "for carta in mazo:\n    carta.voltear_boca_abajo()"
                 }
               }
             }
@@ -6168,6 +6209,32 @@
                 },
                 "py": {
                   "code": "\"T1\""
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "EachThing",
+          "ruleNames": ["each_thing"],
+          "internal": false,
+          "file": "src/spell/rules/classes/EachThing.ts",
+          "line": 11,
+          "purpose": "`each column`, every thing of a type, as a loop's list -- `for each column` (epic `language` T128).",
+          "syntaxes": [
+            {
+              "syntax": "cada {type:known_type}",
+              "example": "cada columna",
+              "outputs": {
+                "js": {
+                  "code": "core.everyThing(Columna)"
+                },
+                "ts": {
+                  "code": "core.everyThing(Columna)"
+                },
+                "py": {
+                  "code": "core.every_thing(Columna)"
                 }
               }
             }
@@ -10077,7 +10144,7 @@
           "ruleNames": ["create_hook"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateHook.ts",
-          "line": 30,
+          "line": 34,
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {

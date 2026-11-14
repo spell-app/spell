@@ -642,9 +642,7 @@ class Solitaire(App):
         card.lifted = False
 
     async def on_score_change(self, event: ScoreChangeEvent) -> None:
-        home = len(self.clubs) + len(self.diamonds)
-        home = home + len(self.hearts) + len(self.spades)
-        if home == 52:
+        if core.item_count_of(core.merge_lists(core.every_thing(Foundation))) == 52:
             core.alert("You won!", "New game")
             await self.restart_the_game()
 

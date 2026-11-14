@@ -165,7 +165,7 @@ export class ListIterationNamedForList extends SpellStatement<"list|body?"> {
 }
 
 /** Words that start a list, in each language. */
-const STARTS_A_LIST = /^(its|every|all|the|my|their|these|those|sus?|cada|tod[oa]s?|l[oa]s|mis|est[oa]s)\s/i
+const STARTS_A_LIST = /^(its|every|each|all|the|my|their|these|those|sus?|cada|tod[oa]s?|l[oa]s|mis|est[oa]s)\s/i
 
 /** The variable of a list with nothing to name its item for:  it's read as `it`. */
 const ITEM_WITH_NO_NAME = "item"

@@ -32,6 +32,7 @@ import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
 import { EachInStatement } from "./EachInStatement"
+import { PluralCallStatement } from "./PluralCallStatement"
 import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
@@ -262,6 +263,19 @@ listsEs.addRule(ListLength, {
         ["número de items en my-list", "core.itemCountOf(myList)"],
         ["el número de cosas en el foo del bar", "core.itemCountOf(bar.foo)"],
         ["la cantidad de items en [1,2,3]", "core.itemCountOf([1, 2, 3])"]
+      ]
+    },
+    {
+      // de listas de listas:  sus elementos juntos (épica `language` T130)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["una carta es una cosa", "una pila es una lista de cartas", "una fundación es una pila"].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["el número de cartas en las fundaciones", "core.itemCountOf(core.mergeLists(core.everyThing(Fundación)))"]
       ]
     }
   ]
@@ -1123,8 +1137,68 @@ listsEs.addRule(EachInStatement, {
   ]
 })
 
+// la acción de una cosa sobre una lista de ellas, hecha a cada una (epic `language` T126):  `voltear las cartas del mazo boca abajo`
+listsEs.addRule(PluralCallStatement, {
+  syntax: "{statement} (los|las)? {item:plural_identifier} (en|de|del) {list:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "\tpara voltearla boca abajo",
+            "\t\timprimir 1",
+            "una pila es una lista de cartas",
+            "para repartir una carta sobre una pila",
+            "\timprimir 2"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add({ name: "mazo", datatype: "Pila" })
+        scope.variables?.add({ name: "reserva", datatype: "Pila" })
+      },
+      tests: [
+        ["voltear las cartas del mazo boca abajo", "mazo.forEach((carta) => carta.voltearBocaAbajo())"],
+        ["voltear las cartas en el mazo boca abajo", "mazo.forEach((carta) => carta.voltearBocaAbajo())"],
+        {
+          title: "lo mismo que `cada carta del`",
+          input: "voltear cada carta del mazo boca abajo",
+          js: "mazo.forEach((carta) => carta.voltearBocaAbajo())"
+        },
+        ["repartir las cartas del mazo sobre la reserva", "mazo.forEach((carta) => carta.repartirSobrePila(reserva))"]
+      ]
+    }
+  ]
+})
+
 // el elemento nombrado por la lista:  `para películas`
 listsEs.addRule(ListIterationNamedForList, { syntax: "(para|por) cada? {list:expression} :? {statement_body}?" })
+
+// cada cosa de un tipo, el elemento nombrado por él (epic `language` T128):  `para cada columna`
+listsEs.addRule(ListIterationNamedForList, {
+  syntax: "(para|por) {list:each_thing} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una pila es una lista de cosas", "una columna es una pila"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "para cada columna: imprimir eso",
+          "core.map(core.everyThing(Columna), (columna) => core.console.log(columna))",
+          "core.map(core.everyThing(Columna), (columna: Columna) => core.console.log(columna))"
+        ],
+        [
+          ["para cada columna:", "\timprimir la columna"],
+          "core.map(core.everyThing(Columna), (columna) => core.console.log(columna))",
+          "core.map(core.everyThing(Columna), (columna: Columna) => core.console.log(columna))"
+        ]
+      ]
+    }
+  ]
+})
 
 // the item named for a value kind of several words (epic `spanish` P22)
 listsEs.addRule(ListIteration, {

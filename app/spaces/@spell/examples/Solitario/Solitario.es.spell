@@ -164,9 +164,7 @@ solitario es una aplicación
 		devolver 0
 
 	cuando su puntuación cambia
-		poner colocadas a el número de cartas en los tréboles + el número de cartas en los diamantes
-		poner colocadas a colocadas + el número de cartas en los corazones + el número de cartas en las espadas
-		si colocadas es 52
+		si el número de cartas en las fundaciones es 52
 			avisar "¡Ganaste!" con "Juego nuevo"
 			reiniciar el juego
 

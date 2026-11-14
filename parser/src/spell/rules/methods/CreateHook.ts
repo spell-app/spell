@@ -7,6 +7,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { CreateOneOfAKind } from "spell/parser/spell/rules/classes"
 import type { MethodSignatureData } from "./methods.shared"
 // Import directly to avoid circular import
+import { MethodDefinition } from "./MethodDefinition"
 import { ToDoSomething } from "./ToDoSomething"
 
 /**
@@ -17,6 +18,9 @@ import { ToDoSomething } from "./ToDoSomething"
  * - A one of a kind's says `it`, `- when creating it:` (`al crearlo`):  there's only ever one (`isOneOfAKind()`).
  *   - Or its own name, with or without `the`:  `- when creating solitaire:`, `- al crear el solitario:`
  *     (Owen, 2026-11-13, epic `language` P55).
+ * - Any type's may name it with `the`, by its type's words or the built-in kind it is (epic `language` T129):
+ *   `- when creating the deck:`, `- when creating the app:` in `solitaire is an app`, `- al crear la aplicación:`
+ *   (`MethodDefinition.namesForItself()`).
  * - The older forms read too:  `- when created:`, `- al crearla:`.
  * - The type's `create()` hook, as `- to create it:` is:  core runs it once, after the thing's props are set,
  *   and hands it those props, so its `(with ...)` names read them (epic `spanish` P28).
@@ -39,22 +43,28 @@ export class CreateHook extends ToDoSomething {
     const signature = (match.groups as { signature?: P.Match }).signature
     const words = signature?.inputText.split("(")[0]!.trim() ?? ""
     if (Wording.reads(scope, "create_hook_words", words, "create")) return match
-    if (CreateHook.isOneOfAKind(scope) && this.namesTheOneOfAKind(words, scope)) return match
+    if (this.namesItself(words, scope)) return match
     return signature ? this.namingItsType(match, signature, words, scope) : undefined
   }
 
   /**
-   * Are `words` the hook's verb, then the one of a kind's own name, `the` or not:  `creating solitaire`,
-   * `crear el solitario`?
+   * Are `words` the hook's verb, then a name for the thing it's made in (`MethodDefinition.namesForItself()`):
+   * `creating solitaire`, `creating the solitaire`, `creating the app`, `crear la aplicación`?
+   * - A one of a kind's name, `the` or not;  any other name only after `the`:  `creating a deck` is `namingItsType()`'s.
    */
-  private namesTheOneOfAKind(words: string, scope: P.Scope): boolean {
-    const name = CreateOneOfAKind.variableName(P.SubjectScope.of(scope)!.declaredBy!)
-    if (!words.endsWith(` ${name}`)) return false
-    let verb = words.slice(0, -name.length).trim()
-    const article = verb.split(" ").at(-1)!
-    if (article !== verb && Wording.reads(scope, "definite_article", article))
-      verb = verb.slice(0, -article.length).trim()
-    return this.readsHookVerb(verb, scope)
+  private namesItself(words: string, scope: P.Scope): boolean {
+    const subject = P.SubjectScope.of(scope)!.subjectType!
+    const oneOfAKind = CreateHook.isOneOfAKind(scope)
+    const name = oneOfAKind ? CreateOneOfAKind.variableName(P.SubjectScope.of(scope)!.declaredBy!) : undefined
+    return MethodDefinition.namesForItself(subject, scope).some(({ words: named }) => {
+      if (!words.toLowerCase().endsWith(` ${named}`)) return false
+      let verb = words.slice(0, -named.length).trim()
+      const article = verb.split(" ").at(-1)!
+      const hasThe = article !== verb && Wording.reads(scope, "definite_article", article)
+      if (hasThe) verb = verb.slice(0, -article.length).trim()
+      else if (named !== name) return false
+      return this.readsHookVerb(verb, scope)
+    })
   }
 
   /** Is `verb` the hook's verb, alone (`crear`) or as it reads before `it` (`creating it`)? */

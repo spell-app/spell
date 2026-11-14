@@ -3,7 +3,14 @@ import { P } from "spell/parser/parser"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { getWhereScope, getWhereMethod } from "./lists.shared"
+import {
+  getWhereScope,
+  getWhereMethod,
+  itemsAcrossAST,
+  itemsAcrossDatatype,
+  itemsAcrossOf,
+  type ItemsAcross
+} from "./lists.shared"
 
 /**
  * `list_filter` rule:  list filter, e.g. `words in "a word list" where word starts with "a"`.
@@ -12,24 +19,37 @@ import { getWhereScope, getWhereMethod } from "./lists.shared"
  *   for `words`) and `it` both map to current item.
  * - `Priority.specific` -- preferred over lower-priority expression rules when tokens are ambiguous.
  * - Compiles to `core.filter(list, (item) => { ... })`.
+ * - Of lists of lists, their items together (epic `language` T130):
+ *   `the cards in the foundations where ...` filters every foundation's cards -- see `itemsAcrossDatatype()`.
  */
-export class ListFilter extends SpellExpression<"arg|list|body?"> {
+export class ListFilter extends SpellExpression<"arg|list|body?", { across?: ItemsAcross }> {
   @proto static priority = Priority.specific
+
+  /** Notes `across`, when its body didn't:  `the cards in the foundations where`, with no condition yet. */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (match && !match.data.across) match.data.across = itemsAcrossOf(scope, match.groups.arg, match.groups.list)
+    return match
+  }
 
   /** Nested scope for filter body -- singularized `{arg}` variable, also aliased from `it`. */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
-    return getWhereScope(match, match.groups.arg, match.groups.list)
+    const { arg, list } = match.groups
+    // noted now, while parsing:  the body parses in this scope, its item what the lists hold
+    match.data.across = itemsAcrossOf(match.scope, arg, list)
+    const across = itemsAcrossDatatype(match.data.across)
+    return getWhereScope(match, arg, across ? { datatype: across } : list)
   }
-  /** The items which pass:  the list's type. */
+  /** The items which pass:  the list's type, or its lists' items' (`across`). */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
-    return match.groups.list.datatype
+    return itemsAcrossDatatype(match.data.across) ?? match.groups.list.datatype
   }
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const { arg, list } = match.groups
     const filter = getWhereMethod(match, arg, this.getBody(match))
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "filter",
-      args: [P.matchAST(list), filter]
+      args: [itemsAcrossAST(match, list, match.data.across), filter]
     })
   }
 }
