@@ -136,9 +136,8 @@ const APP_TEXTS_ES: AppTextPack = {
   publishDraft: "Publicar borrador",
   editingDraft: "Editando un borrador",
   draftTip: "Por ahora solo tú ves estos cambios.  Haz clic en Publicar borrador para mostrárselos a todos.",
-  yourDraft: "Tu borrador",
-  yourDraftTip: "Solo tú lo ves hasta que hagas clic en Publicar.",
-  discard: "Descartar",
+  updatedInYourDraft: "Actualizado en tu borrador.",
+  discardChanges: "Descartar los cambios",
   versions: "Versiones",
   deleteDraft: "Borrar el borrador",
   deleteDraftConfirm:

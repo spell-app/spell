@@ -235,7 +235,8 @@ describe("<FileTabs>", () => {
     setEditor("file", file)
     const host = await mount(() => <FileTabs />)
     const tabs = await tabsIn(host)
-    expect(tabs.map(text)).toEqual(["one.js", "two.js"])
+    // its words are its `label`:  a drafted file's pen's tip holds words too (I92)
+    expect(tabs.map((tab) => tab.getAttribute("label"))).toEqual(["one.js", "two.js"])
     expect(tabs.map((tab) => tab.hasAttribute("selected"))).toEqual([true, false])
     expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(true)
 

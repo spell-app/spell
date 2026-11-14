@@ -1155,17 +1155,28 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Your draft of current `file` goes, back to what's published (epic `editor` P24):
-   * Revert Changes with AutoSave on, and the file's draft label's Discard.
+   * Your draft of current `file` goes, back to what's published (epic `editor` P24):  Revert Changes with AutoSave on.
+   * - What `discardDraftOf()` does, for the file showing.
+   * - NEVER throws:  a failure is shown.
+   */
+  async discardChanges(): Promise<void> {
+    if (editor.file) await editor.discardDraftOf(editor.file.path)
+  }
+
+  /**
+   * Your draft of the file at `path` (`SpellFile.path`) of current `project` goes, back to what's published:
+   * the file showing's (`discardChanges()`), or any tab's, by its pen's tip's Discard changes (epic `editor` I92).
    * - One step of `editor.history`, so ⌘Z brings the changes back:
    *   discarding can't lose work (with AutoSave on, the next keep makes them your draft again).
    * - In the public preview, which keeps a visitor's edits in their browser:  back to where the file was when the
    *   project was opened (`StartingPoints`), as before drafts.
    * - Drawn as any other edit is:  the running app stays up.
+   * - A path that isn't a file of the project:  nothing happens.
    * - NEVER throws:  a failure is shown.
    */
-  async discardChanges(): Promise<void> {
-    const { file, project } = editor
+  async discardDraftOf(path: string): Promise<void> {
+    const { project } = editor
+    const file = project?.getFile(new SP.SpellLocation(path).filePath!)
     if (!file || !project) return
     let start = startingPoints.of(file.path)
     if (!isStaticBuild) {

@@ -130,9 +130,8 @@ export const APP_TEXTS = {
   publishDraft: "Publish Draft",
   editingDraft: "Editing a Draft",
   draftTip: "Only you can see these changes so far.  Click Publish Draft to show them to everyone.",
-  yourDraft: "Your draft",
-  yourDraftTip: "Only you can see this until you click Publish.",
-  discard: "Discard",
+  updatedInYourDraft: "Updated in your draft.",
+  discardChanges: "Discard changes",
   versions: "Versions",
   deleteDraft: "Delete Draft",
   deleteDraftConfirm:

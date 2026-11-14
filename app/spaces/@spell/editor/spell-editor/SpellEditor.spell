@@ -218,12 +218,18 @@ a "file" is a thing
 		it "is (status)"
 	its "place" is one of chosen or other
 		it "is (place)"
+	its "draft note" is text
+		// What its pen's tip says, "Updated in your draft.", in the page's language:  the editor's own
+	its "discard words" is text
+		// The tip's link, "Discard changes", in the page's language:  the editor's own
 	to show it
+	to discard it
+		// Your draft of it goes, back to what's published:  the editor's own
 
 a "file list" is a viewable list of files
 	// Every file of the project, a tab each:  a click shows it;  a right click shows it, and its menu
 	to draw each item
-		<item icon={the icon of the file} selected={the file is chosen} onClick={show the file}>
+		<item icon={the icon of the file} label={the name of the file} selected={the file is chosen} onClick={show the file}>
 			<context-menu>
 				<action "duplicate file"/>
 				<action "rename file"/>
@@ -231,14 +237,22 @@ a "file list" is a viewable list of files
 			</>
 			{the name of the file}
 			<if the file is changed><span class="NotSaved"/></if>
-			<if the file is drafted><span class="Drafted"><icon name="fa7-free:pen-to-square"/></span></if>
+			<if the file is drafted>
+				<span class="Drafted">
+					<icon name="fa7-free:pen-to-square"/>
+					<popup class="DraftTip" position="bottom center">
+						{the draft note of the file}
+						<button appearance="tertiary" color="primary" size="small" onClick={discard the file}>{the discard words of the file}</>
+					</popup>
+				</span>
+			</if>
 		</item>
 
 a "file tab bar" is a view
 	// Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
 	// Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
 	// With more files than fit the bar's limit, only the ones opened lately are tabs;  the ▾ beside them lists every file.
-	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14).
+	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14):  hovered, it says so, with a link that discards that file's draft (I92).
 	// The bar's ⋯ is at its right, which compiled code to show beside the code.
 	// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 	"files" is a new file list
@@ -256,10 +270,12 @@ a "file tab bar" is a view
 			border-radius: 50%;
 			background: var(--ui-warning, var(--ui-orange, #f2994a));
 		}
-		/* a tab whose file is your draft, saved but not published:  a pen on a square, small, in the theme's primary hue */
+		/* a tab whose file is your draft, saved but not published:  a pen on a square, small, in the theme's primary hue;  its tip, the popup, as any */
 		.Drafted {
 			display: inline-flex;
 			margin-inline-start: 6px;
+		}
+		.Drafted > ui-icon {
 			font-size: 0.8em;
 			color: var(--ui-primary, var(--ui-blue, #2185d0));
 		}
