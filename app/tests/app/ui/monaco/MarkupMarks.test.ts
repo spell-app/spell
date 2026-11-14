@@ -154,6 +154,15 @@ describe("MarkupMarks", () => {
     expect(textMarked(marks, "bubbly-slash")).toContain("/")
   })
 
+  test("every end tag's `/` drawn as a bar after its `⟨`, `⟨|title⟩`, in the editor and on the page (Owen)", () => {
+    const marks = MarkupMarks.of(PAGE)
+    // `</spell-viewer>` drawn self-closed, `/⟩`:  not one
+    expect(textMarked(marks, "bubbly-end-slash")).toHaveLength(6)
+    expect(BubblyMarkup.write(PAGE).match(/bubbly-end-slash/g)).toHaveLength(6)
+    // a self-closed tag's `/` isn't an end tag's
+    expect(BubblyMarkup.write("<br />")).not.toContain("bubbly-end-slash")
+  })
+
   test("a block's end tag's name faint, as its marks are;  a tag in a line's not", () => {
     const marks = MarkupMarks.of(PAGE)
     const faintNames = marks.marks
@@ -173,7 +182,7 @@ describe("MarkupMarks", () => {
     expect(lineSpacers.map(({ range }) => range.startLineNumber)).toEqual([2])
   })
 
-  test("a block's start and end tags a spacer in from its band's end, in an HTML file and a Spell drawing alike", () => {
+  test("a block's start and end tags a spacer in from its band's end, in an HTML file and a Spell drawing alike;  a `</>` its own, its glyph at its pill's right end", () => {
     const html = `<div>\n  <p>words</p>\n</div>\n`
     const spell = `to draw it\n\t<grid>\n\t\t<text>hi</text>\n\t</>\n`
     const spacers = (marks: MarkupMarks, kind: string) =>
@@ -183,7 +192,8 @@ describe("MarkupMarks", () => {
     const inHtml = MarkupMarks.of(html)
     const inSpell = MarkupMarks.within(spell, spell.indexOf("<grid>"), spell.length, [])
     expect([spacers(inHtml, "tag-head"), spacers(inHtml, "tag-foot")]).toEqual([[1], [3]])
-    expect([spacers(inSpell, "tag-head"), spacers(inSpell, "tag-foot")]).toEqual([[2], [4]])
+    expect([spacers(inSpell, "tag-head"), spacers(inSpell, "tag-foot")]).toEqual([[2], []])
+    expect(spacers(inSpell, "tag-foot-bare")).toEqual([4])
   })
 
   test("a start tag on lines of its own is one tall shape, its `>` alone on the last line a short tail (T118)", () => {

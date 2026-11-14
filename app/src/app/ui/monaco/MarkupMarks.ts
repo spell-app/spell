@@ -155,7 +155,9 @@ export class MarkupMarks extends TextMarks {
     this.nodes(element.children, block.inside)
     if (footStartsLine) {
       block.foot = this.place(close.start, close.end)
-      this.mark(close.start, close.start + 1, "", { before: spacer("tag-foot", "before") })
+      // a `</>`:  its `⟨|⟩` at its pill's right end (Owen)
+      const footSpacer = close.tag ? "tag-foot" : "tag-foot-bare"
+      this.mark(close.start, close.start + 1, "", { before: spacer(footSpacer, "before") })
       this.endTag(close, "block")
     } else this.tagPill(close, { partOfSpeech, side: "end" }, block.inside)
   }
@@ -292,7 +294,16 @@ export class MarkupMarks extends TextMarks {
         this.tags.push({ start: from, end: attribute.valueStart })
         from = attribute.valueEnd!
         this.expression(attribute.valueStart, attribute.valueEnd!, partOfSpeech, into)
-      } else this.value(attribute.valueStart, attribute.valueEnd!, attribute.isQuoted, partOfSpeech, into)
+      } else {
+        const isTagWord = !attribute.name
+        this.value(
+          attribute.valueStart,
+          attribute.valueEnd!,
+          { isQuoted: attribute.isQuoted, isTagWord },
+          partOfSpeech,
+          into
+        )
+      }
     }
     this.tags.push({ start: from, end })
     if (tag.selfClosing) this.mark(end - 2, end - 1, `${SLASH} ${CLOSING_SLASH}${declares}`)
@@ -328,15 +339,28 @@ export class MarkupMarks extends TextMarks {
     // a nameless one, `</>`, drawn close as one glyph (Owen)
     const endClasses = [END, place === "block" && FOOT, !tag.tag && BARE_END].filter(Boolean).join(" ")
     this.mark(start, start + 1, `${ANGLE_OPEN} ${endClasses}`)
-    this.mark(start + 1, start + 2, `${SLASH} ${endClasses}`)
+    this.mark(start + 1, start + 2, `${SLASH} ${END_SLASH} ${endClasses}`)
     this.mark(start + 2, start + 2 + tag.tag.length, place === "block" ? `${MARK} ${END_NAME} ${FOOT}` : END_NAME)
     this.mark(end - 1, end, `${ANGLE_CLOSE} ${endClasses}`)
   }
 
   /** An attribute's value:  its words with a spacer either side, a pill under them;  a quoted one's marks outside. */
-  private value(start: number, end: number, isQuoted: boolean, inTag: MarkupPartOfSpeech, into: MarkupShape[]) {
+  private value(
+    start: number,
+    end: number,
+    { isQuoted, isTagWord }: { isQuoted: boolean; isTagWord: boolean },
+    inTag: MarkupPartOfSpeech,
+    into: MarkupShape[]
+  ) {
     if (isQuoted) {
-      this.mark(start - 1, start, `${QUOTE_MARK} ${TAG_QUOTE} bubbly-quote-open`, { before: spacer("quote", "before") })
+      // a tag's quoted word, `<deck "deck">`:  its opening mark an attribute's room from the name, not over an `=` (Owen)
+      const open = isTagWord
+        ? {
+            classes: `${QUOTE_MARK} ${TAG_QUOTE} ${TAG_WORD_QUOTE} bubbly-quote-open`,
+            before: spacer("attribute", "before")
+          }
+        : { classes: `${QUOTE_MARK} ${TAG_QUOTE} bubbly-quote-open`, before: spacer("quote", "before") }
+      this.mark(start - 1, start, open.classes, { before: open.before })
       this.mark(end, end + 1, `${QUOTE_MARK} ${TAG_QUOTE} bubbly-quote-close`, { after: spacer("tag-quote", "after") })
     }
     const place = this.mark(start, end, INPUT, { before: spacer("input", "before"), after: spacer("input", "after") })
@@ -355,7 +379,8 @@ export class MarkupMarks extends TextMarks {
       before: spacer("input", "before"),
       after: spacer("input", "after")
     })
-    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
+    if (place >= 0)
+      into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
   }
 
   ////////////////
@@ -488,6 +513,9 @@ const SLASH = `${MARK} bubbly-slash`
 /** A self-closed tag's `/`, snug against its `>`:  `/⟩` one glyph (Owen, 2026-11-14). */
 const CLOSING_SLASH = "bubbly-closing-slash"
 
+/** An end tag's `/`, drawn as a bar flush after its `⟨`:  `</text>` drawn `⟨|text⟩` (Owen, 2026-11-14). */
+const END_SLASH = "bubbly-end-slash"
+
 /** A tag that declares the member it draws:  its pill round, its brackets and `/` not drawn (epic `editor` I84). */
 const DECLARES = "bubbly-tag-declares"
 
@@ -523,6 +551,9 @@ const QUOTE_MARK = "bubbly-quote-mark"
 
 /** A tag's quote marks:  leaning further, the opening one over the `=` before it (Owen, 2026-11-14). */
 const TAG_QUOTE = "bubbly-tag-quote"
+
+/** A tag's quoted word's opening mark, `<deck "deck">`:  upright beside its name, no `=` to sit over (Owen, 2026-11-14). */
+const TAG_WORD_QUOTE = "bubbly-tag-word-quote"
 
 /** A comment's lines:  faint. */
 const COMMENT = "bubbly-comment"

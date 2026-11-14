@@ -778,13 +778,14 @@
   }
   /*
    * a `/>` and a `</>` drawn `|⟩` and `⟨|⟩`, the bar flush between its brackets:  one glyph (Owen, 2026-11-14);
+   * every end tag's too, `</text>` drawn `⟨|text⟩` (Owen:  "show this as `<|`");
    * the file keeps its `/`, drawn as a bar over it
    */
-  .bubbly-slash:has(+ .bubbly-angle-close):where(:not(.view-line *)) {
+  .bubbly-slash:is(:has(+ .bubbly-angle-close), .bubbly-end-slash):where(:not(.view-line *)) {
     font-size: 0;
     transform: none;
   }
-  .bubbly-slash:has(+ .bubbly-angle-close):where(:not(.view-line *))::before {
+  .bubbly-slash:is(:has(+ .bubbly-angle-close), .bubbly-end-slash):where(:not(.view-line *))::before {
     content: "|";
     font-size: var(--bubbly-font-size);
     font-weight: 300;
@@ -989,8 +990,9 @@
       color: var(--bubbly-foot-tiny-ink);
       opacity: 1;
     }
+    /* its `⟨` right against its bar, `⟨|head⟩` */
     .bubbly-foot-tiny .bubbly-angle-open::before {
-      margin-right: 1px;
+      margin-right: 0;
     }
     .bubbly-foot-tiny .bubbly-angle-close::before {
       margin-left: 1px;
@@ -1335,7 +1337,7 @@
     }
     /* after a tag's quoted value:  a little, the next attribute's own room after it (Owen) */
     .bubbly-tag-quote-spacer {
-      width: calc(7px * var(--bubbly-monaco-scale));
+      width: calc(3px * var(--bubbly-monaco-scale));
     }
     /* a tag's quote marks lean further, the opening one up over the `=` before it (Owen) */
     .bubbly-tag-quote {
@@ -1343,6 +1345,13 @@
     }
     .view-line .bubbly-tag-quote.bubbly-quote-open::after {
       translate: -75% -0.3em;
+    }
+    /*
+     * ... but a tag's quoted word's, `<deck "deck">`:  no `=` to sit over, so upright over its own `"`, which is
+     * room enough from the name (Owen:  "more room left of the opening quote", "less room right of the closing")
+     */
+    .view-line .bubbly-tag-word-quote.bubbly-quote-open::after {
+      translate: -50% 0;
     }
 
     /* the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size */
@@ -1425,16 +1434,17 @@
       right: 0;
     }
     /*
-     * a `/>` and a `</>` drawn `|⟩` and `⟨|⟩`, the bar flush between its brackets:  one glyph (Owen, 2026-11-14)
+     * a `/>` and a `</>` drawn `|⟩` and `⟨|⟩`, the bar flush between its brackets:  one glyph (Owen, 2026-11-14);
+     * every end tag's `/` too, `</text>` drawn `⟨|text⟩`
      * - the file's `/` kept, see-through, narrowed to the bar's width;  the bar drawn over its left edge
      */
-    .view-line .bubbly-mark.bubbly-slash:is(.bubbly-closing-slash, .bubbly-end-bare) {
+    .view-line .bubbly-mark.bubbly-slash:is(.bubbly-closing-slash, .bubbly-end-slash) {
       position: relative;
       transform: none;
       color: transparent;
       letter-spacing: -0.16em;
     }
-    .view-line :is(.bubbly-closing-slash, .bubbly-end-bare.bubbly-slash)::before {
+    .view-line :is(.bubbly-closing-slash, .bubbly-end-slash)::before {
       content: "|";
       position: absolute;
       left: 0;
@@ -1446,11 +1456,11 @@
     .view-line .bubbly-mark.bubbly-slash.bubbly-end-bare {
       letter-spacing: -0.2em;
     }
-    .view-line .bubbly-end-bare.bubbly-slash::before {
+    .view-line .bubbly-end-slash::before {
       left: -0.08em;
       color: var(--bubbly-end-mark);
     }
-    .view-line .bubbly-end-bare.bubbly-foot-tiny.bubbly-slash::before {
+    .view-line .bubbly-end-slash.bubbly-foot-tiny::before {
       color: var(--bubbly-foot-tiny-ink);
     }
     .view-line .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
@@ -1467,6 +1477,20 @@
       letter-spacing: -0.21em;
     }
     .view-line .bubbly-slash + .bubbly-angle-close {
+      letter-spacing: -0.18em;
+    }
+    /*
+     * a named end tag, `⟨|text⟩`:  a little room after its bar, before its name;  its `>` as narrow as a `</>`'s,
+     * so no room after its name either (Owen, 2026-11-14:  "No space at the end of this")
+     */
+    .view-line .bubbly-mark.bubbly-slash.bubbly-end-slash:not(.bubbly-end-bare) {
+      letter-spacing: -0.06em;
+    }
+    /* ... a tiny foot's:  as much room, in its tiny letters */
+    .view-line .bubbly-mark.bubbly-slash.bubbly-end-slash.bubbly-foot-tiny:not(.bubbly-end-bare) {
+      letter-spacing: -0.2em;
+    }
+    .view-line .bubbly-angle-close.bubbly-tag-end {
       letter-spacing: -0.18em;
     }
     .view-line .bubbly-angle::before {
@@ -1519,14 +1543,16 @@
       font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-monaco-scale));
       /*
        * in the middle of its line, as the pill is:  on the line's own baseline, small letters sat 2px low in it
-       * - a nudge up won't do better:  the browser draws text on whole pixels, and its ink is 0.4px low now
+       * - a nudge up won't do:  the browser places text on whole pixels, even on a 3x screen, and a pixel up is too
+       *   far;  its pill moved down instead (`--bubbly-foot-tiny-above`, below)
        */
       vertical-align: top;
     }
     .view-line .bubbly-angle.bubbly-foot-tiny::before {
       font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-monaco-scale));
     }
-    .view-line .bubbly-foot-tiny.bubbly-mark:not(.bubbly-angle),
+    /* not its `/`:  see-through under its bar */
+    .view-line .bubbly-foot-tiny.bubbly-mark:not(.bubbly-angle, .bubbly-slash),
     .view-line .bubbly-foot-tiny.bubbly-tag-name,
     .view-line .bubbly-angle.bubbly-foot-tiny::before {
       color: var(--bubbly-foot-tiny-ink);
@@ -1619,6 +1645,35 @@
     /* before a line of text:  in from the tags beside it, as on the page */
     .bubbly-line-spacer {
       width: calc((var(--bubbly-line-inset) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+    }
+  }
+
+  /*
+   * the editor's tags:  each `⟨` and `⟩` right at its band's or pill's end, a block's too (Owen, 2026-11-14:
+   * "Push the `<` and `>` to the ends of the band.  Try it for the blocks as well.")
+   * - after the page's settings, so these win;  told to the layer's box of HTML's shapes too, a `.bubbly` of its own
+   */
+  &:is(.bubbly-monaco, .bubbly-html-shapes) {
+    /* a bracket's ink this close to its point */
+    --bubbly-bracket-pad: 0.5px;
+    /* a block's start tag's `⟨` at its band's left end, its top-left corner cut as a pointed end's top half is */
+    --bubbly-tag-pad-left: var(--bubbly-bracket-pad);
+    --bubbly-block-outer-cut: var(--bubbly-tag-corner);
+    /* a tiny foot's `⟨` just past its rail;  its `⟩` at its right end, no room after it ("No space at the end") */
+    --bubbly-foot-tiny-pad-left: calc(var(--bubbly-gutter) + 1px);
+    --bubbly-foot-tiny-pad-right: 1px;
+    /* a `</>` foot as wide as before, its `⟨|⟩` at its right end ("Push this to the right end") */
+    --bubbly-foot-bare-pad-left: 27px;
+    /*
+     * a tiny foot 0.6px further down its row, its body with it:  its words in its middle (Owen:  "that text is too
+     * low in its band");  before, the height of their `x` was 0.8px low in it, its brackets 0.4px
+     * - its row as tall:  the words are placed by it, on whole pixels
+     */
+    --bubbly-foot-tiny-above: 2.6px;
+    --bubbly-foot-tiny-below: 3.4px;
+
+    .bubbly-tag-foot-bare-spacer {
+      width: calc((var(--bubbly-foot-bare-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
     }
   }
 }

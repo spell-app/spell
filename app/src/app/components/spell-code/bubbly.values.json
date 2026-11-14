@@ -343,6 +343,10 @@
     "--bubbly-end-mark": {
       "light": "#c8c8cb",
       "dark": "#525159"
+    },
+    "--bubbly-foot-bare-pad-left": {
+      "light": "27px",
+      "dark": "27px"
     }
   },
   "parts": {
