@@ -224,13 +224,13 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       await typeAfter(page, content, "")
       await paste(page, "<content>\n<button fluid>\n{its label}\n</button>\n</content>")
       const indent = /^\t*/.exec(contentLine!)![0]
-      // the new line keeps `<content>`'s indent (Enter doesn't go in a level:  left out of P28), so the paste starts there
+      // Enter after `<content>` goes in a level (I65), so the paste starts there, a level under it
       expect(await linesFrom(page, content + 1, 5)).toEqual([
-        `${indent}<content>`,
-        `${indent}\t<button fluid>`,
-        `${indent}\t\t{its label}`,
-        `${indent}\t</button>`,
-        `${indent}</content>`
+        `${indent}\t<content>`,
+        `${indent}\t\t<button fluid>`,
+        `${indent}\t\t\t{its label}`,
+        `${indent}\t\t</button>`,
+        `${indent}\t</content>`
       ])
       // one undo takes the paste back, the new line still there
       await page.keyboard.press("Meta+z")
