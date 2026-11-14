@@ -658,7 +658,7 @@ describe("compiled spell draws with Solid", () => {
     await waitFor(() => discards() > 1)
     // ... and they follow as the game plays:  the card played from the stock is face up, on the discards
     await waitFor(() => played.getAttribute("direction") === "up")
-    await waitFor(() => played.getAttribute("pile") === "DiscardPile#discards")
+    await waitFor(() => played.getAttribute("pile") === "DiscardPile#discard pile")
   })
 
   test('a viewable list\'s frame:  its cards in its <children/>, a child written in="header" in its <children name="header"/>', async () => {

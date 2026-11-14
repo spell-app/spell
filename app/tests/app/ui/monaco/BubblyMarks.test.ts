@@ -106,6 +106,25 @@ describe("BubblyMarks.of()", () => {
     ])
   })
 
+  test("a top-level head's bare name:  its pill starts past the head's room, as even either side as any pill (epic `language` I84)", () => {
+    const text = `solitaire is an app\n\t"deck" is a new deck\na deck is a list of cards\n`
+    const marks = marked(text)
+    const pills: string[] = []
+    const walk = (shapes: Array<BubblyShape | MarkupShape>) => {
+      for (const shape of shapes) {
+        if (shape.kind === "block") walk(shape.inside)
+        else if (shape.kind === "input") {
+          const { range } = marks.marks[shape.place]!
+          const words = text.split("\n")[range.startLineNumber - 1]!.slice(range.startColumn - 1, range.endColumn - 1)
+          pills.push(`${words}${shape.afterHeadSpacer ? " (after the head's room)" : ""}`)
+        }
+      }
+    }
+    walk(marks.shapes)
+    // only a name at the head's very start shares its column with the head's room;  a quoted one starts past its `"`
+    expect(pills).toEqual(["solitaire (after the head's room)", "deck", "deck"])
+  })
+
   test("its shapes:  a band per declaration and per control line with steps, pills on what was typed", () => {
     expect(shapesOf(marked())).toEqual([
       'thing:  a "card" is a draggable two sided view',

@@ -330,6 +330,47 @@ create a new task with title = "Shop"
   })
 })
 
+// epic `language` T132
+describe("Translator:  an action's `enabled when` and `disabled when`", () => {
+  const source = `a card is a thing where:
+	- its "direction" is up or down
+	- to turn it over:
+		- enabled when its direction is down
+		set its direction to up
+	- to peek:
+		- disabled when its direction is up
+		print 1
+`
+  const { file } = translatedWith(NAMES, source)
+
+  test("each in the other language's words:  `activa cuando`, `inactiva cuando`", () => {
+    expect(file.lines[3]).toBe("\t\t- activa cuando su dirección es abajo")
+    expect(file.lines[6]).toBe("\t\t- inactiva cuando su dirección es arriba")
+  })
+
+  test("Spanish to English too:  `inactiva cuando` is `disabled when`", () => {
+    const spanishSource = file.lines.join("\n")
+    const { files } = parseSpellProject([{ path: "/Carta.es.spell", contents: spanishSource }])
+    const back: NamesData = {
+      types: { carta: { name: "card" } },
+      names: { dirección: "direction", arriba: "up", abajo: "down" },
+      phrases: { "voltear eso": "turn it over", mirar: "peek" }
+    }
+    const names = new TranslationNames(back, { from: SPANISH, to: ENGLISH })
+    const translator = new Translator({ from: SPANISH, to: ENGLISH, names })
+    const english = translator.translateFile({ path: "/Carta.es.spell", contents: spanishSource, match: files[0]!.match })
+    expect(english.lines[3]).toBe("\t\t- enabled when its direction is down")
+    expect(english.lines[6]).toBe("\t\t- disabled when its direction is up")
+  })
+
+  test("and reads back as the same program", () => {
+    const english = parseSpellProject([{ path: "/Card.spell", contents: source }]).files[0]!
+    const spanish = parseSpellProject([{ path: "/Carta.es.spell", contents: file.lines.join("\n") }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(shapeOf(spanish.compiled)).toBe(shapeOf(english.compiled))
+  })
+})
+
 describe("TranslationNames", () => {
   const names = new TranslationNames(NAMES, { from: ENGLISH, to: SPANISH })
 

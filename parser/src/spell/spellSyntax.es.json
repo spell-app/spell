@@ -10170,7 +10170,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 33,
+          "line": 36,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -10185,6 +10185,21 @@
                 },
                 "py": {
                   "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return self.dirección == \"abajo\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"Voltearla\", \"shortcuts\": [\"meta+T\"], \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltear carta\"})"
+                }
+              }
+            },
+            {
+              "syntax": "inactiva cuando {disabled:expression}",
+              "example": "una carta es una cosa donde:\n\t- su dirección es una de arriba o abajo\n\t- para voltearla:\n\t\t- inactiva cuando su dirección es arriba\n\t\tponer su dirección en arriba",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"]\n  static { this.declareProp(\"dirección\", { oneOf: Carta.Direcciones }) }\n  get dirección() { return this.getProp(\"dirección\") }\n  set dirección(value) { this.setProp(\"dirección\", value) }\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n  get voltearIsEnabled() {\n    return !(this.dirección === \"arriba\")\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"Voltearla\", enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltearla\" })"
+                },
+                "ts": {
+                  "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n  get voltearIsEnabled() {\n    return !(this.dirección === \"arriba\")\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"Voltearla\", enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltearla\" })"
+                },
+                "py": {
+                  "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return not self.dirección == \"arriba\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"Voltearla\", \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltearla\"})"
                 }
               }
             },

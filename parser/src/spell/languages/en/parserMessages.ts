@@ -68,6 +68,8 @@ export const PARSER_MESSAGES = {
   "cant-go-without-waiting": "Only a call can go without waiting:  this has a value or a body to wait for",
   "cant-wait-for-toast-that-stays": "A toast that stays can't be waited for:  clicks would wait until it's closed",
   "cant-wait-in-draw": "A drawing can't wait:  make it a property that waits, and draw that",
+  /** An action's body with both `- enabled when` and `- disabled when` (epic `language` T132). */
+  "enabled-and-disabled-when": 'An action says "enabled when" or "disabled when", not both:  keep one',
   /** A write to a thing saved in a read-only place:  won't compile.  `{place}` is its name, `{kind}` what kind it is. */
   "place-read-only":
     "The {place} is a {kind}, which is read only here:  this can't change it.  Keep what changes somewhere else, or read it from a place that takes writes",
