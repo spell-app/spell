@@ -1656,9 +1656,7 @@
   &:is(.bubbly-monaco, .bubbly-html-shapes) {
     /* a bracket's ink this close to its point */
     --bubbly-bracket-pad: 0.5px;
-    /* a block's start tag's `⟨` at its band's left end, its top-left corner cut as a pointed end's top half is */
-    --bubbly-tag-pad-left: var(--bubbly-bracket-pad);
-    --bubbly-block-outer-cut: var(--bubbly-tag-corner);
+    /* a block's start tag keeps its room before its `⟨`, its corner as before (Owen:  "put the spacing back") */
     /* a tiny foot's `⟨` just past its rail;  its `⟩` at its right end, no room after it ("No space at the end") */
     --bubbly-foot-tiny-pad-left: calc(var(--bubbly-gutter) + 1px);
     --bubbly-foot-tiny-pad-right: 1px;
