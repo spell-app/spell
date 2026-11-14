@@ -1,5 +1,5 @@
 import type { RouteSectionProps } from "@solidjs/router"
-import { Match, Show, Switch, createEffect, createSignal, onCleanup, onSettled } from "solid-js"
+import { Match, Show, Switch, createEffect, createSignal, onCleanup, onSettled, untrack } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
@@ -109,7 +109,8 @@ export function SpellEditor(props: { mode: Mode }) {
   createEffect(
     () => props.mode === "run",
     (isRun) => {
-      if (isRun && Inspector.allSelected.length) Inspector.letGo()
+      // what's selected read as Run starts, not followed:  only the switch to Run lets go
+      if (isRun && untrack(() => Inspector.allSelected.length)) Inspector.letGo()
     }
   )
   const columns = rememberedSizes(() => columnsFor(hidesCode(), showsInspector(), !!CodeOutputShown.target))

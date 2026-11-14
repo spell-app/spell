@@ -185,7 +185,7 @@ export function ChangeThisBox(): JSX.Element {
           visible=""
           class="BarMenuPopup ChangeThisPopup"
           aria-label={appTexts.text("menuChangeThis")}
-          on-ui-closing={() => setBoxAt(undefined)}
+          ref={on("ui-closing", () => setBoxAt(undefined))}
         >
           <div class="ChangeThisBox">
             <label class="ChangeThisHeader">{appTexts.text("changeThisHeader")}</label>

@@ -674,7 +674,7 @@ export function PartMenu(): JSX.Element {
           visible=""
           class={["BarMenuPopup", PART_MENU]}
           aria-label={appTexts.text("menuEdit")}
-          on-ui-closing={() => setAt(undefined)}
+          ref={on("ui-closing", () => setAt(undefined))}
           onContextMenu={(event: MouseEvent) => event.preventDefault()}
         >
           <div

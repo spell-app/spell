@@ -216,7 +216,11 @@ export class Reactive {
       }
       if (isServer) {
         if (writesDOMElement && !defer) apply(untrack(compute))
-      } else createEffect(createMemo(compute, { equals: isSameList }), apply, { defer })
+      } else {
+        // named for Solid's dev reports:  `UIMenu.onFoldsChanged`, not "effect"
+        const name = `${instance.constructor.name}.${String(method)}`
+        createEffect(createMemo(compute, { equals: isSameList, name }), apply, { defer, name })
+      }
     }
     Reactive.startAriaEffect(instance as ComponentShape, self)
     if (isServer) return

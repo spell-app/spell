@@ -444,7 +444,11 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         equal=""
         size={SCHEMES_SIZE}
         aria-label={this.translationForKey("schemeName")}
-        on-ui-choosing={(event: CustomEvent<{ value: string }>) => this.onSchemeChoosing(event)}
+        ref={(menu: HTMLElement) =>
+          menu.addEventListener("ui-choosing", (event) =>
+            this.onSchemeChoosing(event as CustomEvent<{ value: string }>)
+          )
+        }
         onKeyDown={(event) => this.onSchemeKey(event)}
       >
         <For each={SchemeChoices}>

@@ -237,15 +237,18 @@ export function InspectorViews(props: {
 function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]; filter?: string }): JSX.Element {
   const shown = () => shownIn(props.nodes, foldedKeys())
   // what's selected, however it came to be:  the rows around it open, so its row can be seen
-  createEffect(
-    // a thing reached along a trail (the deck, picked under Not drawn) isn't its base's row:  that row isn't revealed
-    () => ((Inspector.inspected?.crumbs.length ?? 1) > 1 ? undefined : Inspector.selected?.element),
-    (element) => {
-      setRevealing(() => element)
-      // once this update's done:  folds written while a selection settles redrew the app's pane (I18)
-      if (element) queueMicrotask(() => openRowsAround(props.nodes, element))
-    }
+  // the part whose row should come into view:  a new one for each new selection, so only that scrolls the tree;
+  // a thing reached along a trail (the deck, picked under Not drawn) isn't its base's row:  that row isn't revealed
+  const revealing = createMemo(
+    (): Revealing => ({
+      element: (Inspector.inspected?.crumbs.length ?? 1) > 1 ? undefined : Inspector.selected?.element
+    }),
+    { equals: (a, b) => a.element === b.element }
   )
+  createEffect(revealing, ({ element }) => {
+    // once this update's done:  folds written while a selection settles redrew the app's pane (I18)
+    if (element) queueMicrotask(() => openRowsAround(props.nodes, element))
+  })
   const notDrawn = createMemo(() => {
     const core = runtimeCore()
     if (!core) return []
@@ -266,7 +269,7 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
         ref={treeChoosesRows}
       >
         <For each={props.nodes} keyed={(node) => node.element}>
-          {(node) => <PartItem node={node()} shown={shown} />}
+          {(node) => <PartItem node={node()} shown={shown} revealing={revealing} />}
         </For>
         <Show when={notDrawn().length}>
           <ui-tree-item
@@ -337,7 +340,7 @@ function keysAround(nodes: readonly PartNode[], element: Element): string[] | un
 }
 
 /** One part's row, with the parts inside it. */
-function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Element {
+function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: () => Revealing }): JSX.Element {
   const words = () => Inspector.rowWordsFor(props.node.element)
   // a thing made as the program runs is a pill, as the Inspector shows it;  markup the program wrote stays words (Owen)
   const isThingRow = () => !!SpellElement.thingOf(props.node.element)
@@ -347,9 +350,12 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
   // again once the rows around it open (`openRowsAround()`), as it was hidden till then;
   // a row opened or closed by hand never scrolls the tree (I27)
   createEffect(
-    () => revealing() === props.node.element && foldedKeys(),
+    () => {
+      const wanted = props.revealing()
+      return wanted.element === props.node.element && revealed() !== wanted && { wanted, folds: foldedKeys() }
+    },
     (isRevealing) => {
-      if (isRevealing && row) requestAnimationFrame(() => revealRow(row!))
+      if (isRevealing && row) requestAnimationFrame(() => revealRow(row!, isRevealing.wanted))
     }
   )
   return (
@@ -374,7 +380,7 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
         <ThingChip label={Inspector.thingLabel(SpellElement.thingOf(props.node.element) as object)} inRow />
       </Show>
       <For each={props.node.children} keyed={(child) => child.element}>
-        {(child) => <PartItem node={child()} shown={props.shown} />}
+        {(child) => <PartItem node={child()} shown={props.shown} revealing={props.revealing} />}
       </For>
     </ui-tree-item>
   )
@@ -511,17 +517,23 @@ function setFolds(keys: readonly string[]): void {
 /** Counts the folds, so the tree reads them again. */
 const [foldsChanged, setFoldsChanged] = createSignal(0)
 
+/** A part whose row should come into view, one per selection:  `<PartsTree>`'s `revealing`. */
+type Revealing = {
+  /** the part;  `undefined`:  none */
+  element: Element | undefined
+}
+
 /**
- * The part whose row should come into view:  set as the selection changes, cleared once its row shows.
+ * The `Revealing` whose row has come into view:  nothing more to reveal till the next selection.
  * - So only a new selection scrolls the tree;  opening or closing a row by hand never does (I27).
  */
-const [revealing, setRevealing] = createSignal<Element | undefined>()
+const [revealed, setRevealed] = createSignal<Revealing | undefined>()
 
-/** Scroll `row` into the tree's view, once it's drawn:  then nothing more to reveal till the next selection. */
-function revealRow(row: Element): void {
+/** Scroll `row` into the tree's view, once it's drawn, for `wanted`. */
+function revealRow(row: Element, wanted: Revealing): void {
   if (!row.getClientRects().length) return
   scrollIntoSight(row)
-  setRevealing(undefined)
+  setRevealed(wanted)
 }
 
 /** The key of the "Not drawn" group, among the parts' (theirs are `<place>|<tag>`). */
@@ -657,9 +669,12 @@ function foldRemembered(band: InspectorBand): (group: HTMLElement) => void {
  * - Where its code is, read once as it's drawn:  its editor follows its lines from then on.
  */
 function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
-  const isEvent = props.row.kind === "event"
-  const place = Inspector.placeOfEvent(props.element, props.row)
-  const isAdded = Inspector.justAdded !== "" && sameWords(Inspector.justAdded, props.row.key)
+  // read once, as it's drawn, on purpose:  its editor follows its lines from then on
+  const { isEvent, place, isAdded } = untrack(() => ({
+    isEvent: props.row.kind === "event",
+    place: Inspector.placeOfEvent(props.element, props.row),
+    isAdded: Inspector.justAdded !== "" && sameWords(Inspector.justAdded, props.row.key)
+  }))
   // once drawn:  a write while drawing is refused
   if (isAdded) queueMicrotask(() => Inspector.tookCursor())
   return (
@@ -677,7 +692,8 @@ function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
 
 /** One of a thing's actions:  its signature as Spell writes it (`<ActionSignature>`), then its code, in the file. */
 function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Element {
-  const place = Inspector.placeOfAction(props.thing, props.action)
+  // read once, as it's drawn:  its editor follows its lines from then on
+  const place = untrack(() => Inspector.placeOfAction(props.thing, props.action))
   return (
     <section class="InspectorEvent action">
       <ActionSignature thing={props.thing} action={props.action} />
@@ -750,7 +766,8 @@ export function TypeEventsCard(props: { thing: object }): JSX.Element {
 
 /** One of a type's events or abilities, as `<EventCode>` draws a part's:  its icon and words, then its code. */
 function TypeEventCode(props: { thing: object; row: EventRow }): JSX.Element {
-  const place = Inspector.placeOfTypeEvent(props.thing, props.row)
+  // read once, as it's drawn:  its editor follows its lines from then on
+  const place = untrack(() => Inspector.placeOfTypeEvent(props.thing, props.row))
   return (
     <section class={["InspectorEvent", props.row.kind]}>
       <h3>
@@ -894,16 +911,15 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
         <ActionRunButton thing={props.thing} action={props.action} />
       </Show>
       <span>{toWordOf(editor.project?.wordsLanguages?.[0])}</span>
-      <For each={pieces()}>
-        {(piece) =>
-          piece.isType ? (
+      {/* by position:  a new signature's pieces are new objects, the same words */}
+      <For each={pieces()} keyed={false}>
+        {(piece) => (
+          <Show when={piece().isType} fallback={<span>{piece().text}</span>}>
             <ui-label size="mini" appearance="basic" class="InspectorActionType">
-              {piece.text}
+              {piece().text}
             </ui-label>
-          ) : (
-            <span>{piece.text}</span>
-          )
-        }
+          </Show>
+        )}
       </For>
     </h3>
   )

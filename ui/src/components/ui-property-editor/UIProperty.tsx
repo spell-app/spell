@@ -130,23 +130,16 @@ export class UIProperty extends UIField {
   // ## The editor and the schema
   ////////////////
 
-  /** The `<ui-property-editor>` around it, while connected. */
-  @E.state accessor editor: DOMEditorLike | undefined = undefined
-
   /**
-   * Find the editor (and a `readonly` group or editor) on connect.
+   * The `<ui-property-editor>` around it, while connected:  found as it connects.
    * - The editor by what it is, the nearest element around us with a schema:
    *   so a translated one is found too (`<es-editor-propiedades>`), before its state is drawn.
+   * - `@derived` on `isConnected`, read where it's drawn:  found by an effect after it connected, everything
+   *   reading it drew twice (I98).
    */
-  @E.whileConnected
-  protected watchEditor() {
-    this.editor = UIProperty.editorAround(this.domElement)
-    const readonly = [GROUP_TAG, EDITOR_TAG].map((tag) => `${tag}[readonly]`)
-    readonly.push(`${GROUP_SELECTOR}:state(readonly)`, `${EDITOR_SELECTOR}:state(readonly)`)
-    this.isInReadonly = !!this.domElement.parentElement?.closest(readonly.join(", "))
-    return () => {
-      this.editor = undefined
-    }
+  @E.derived
+  get editor(): DOMEditorLike | undefined {
+    return this.isConnected ? UIProperty.editorAround(this.domElement) : undefined
   }
 
   /** Why a change here can't be saved:  its own `unsaved`, else its editor's. */
@@ -212,8 +205,14 @@ export class UIProperty extends UIField {
   // ## Readonly and changed
   ////////////////
 
-  /** A `readonly` group or editor is around it. */
-  @E.state accessor isInReadonly = false
+  /** A `readonly` group or editor is around it:  looked for as it connects, as `editor` is. */
+  @E.derived
+  get isInReadonly(): boolean {
+    if (!this.isConnected) return false
+    const readonly = [GROUP_TAG, EDITOR_TAG].map((tag) => `${tag}[readonly]`)
+    readonly.push(`${GROUP_SELECTOR}:state(readonly)`, `${EDITOR_SELECTOR}:state(readonly)`)
+    return !!this.domElement.parentElement?.closest(readonly.join(", "))
+  }
 
   /** `:state(readonly)`:  its own `readonly`, or a group's or the editor's. */
   /** Always `:state(property)`:  how its family finds it, whatever its tag is called (`PROPERTY_SELECTOR`). */
@@ -306,8 +305,8 @@ export class UIProperty extends UIField {
     return (
       <Show when={this.origin?.action}>
         {(action) => {
-          const { text, event } = ORIGIN_ACTIONS[action()]
-          const words = () => this.translationForKey(text as never, { label: this.ownLabel ?? "" } as never)
+          const chosen = () => ORIGIN_ACTIONS[action()]
+          const words = () => this.translationForKey(chosen().text as never, { label: this.ownLabel ?? "" } as never)
           return (
             <button
               type="button"
@@ -315,7 +314,7 @@ export class UIProperty extends UIField {
               part={this.partForName("origin" as never)}
               title={words()}
               aria-label={words()}
-              onClick={() => this.send(event as never, { name: this.propertyName } as never)}
+              onClick={() => this.send(chosen().event as never, { name: this.propertyName } as never)}
             >
               {this.originGlyph.svg}
             </button>
