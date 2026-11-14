@@ -772,6 +772,10 @@
   .bubbly-angle-open:has(+ .bubbly-slash)::before {
     margin-right: 0.5px;
   }
+  /* ... and a `/`'s close one, in a `</>` or a `/>`:  a pixel from it (epic `editor` I83) */
+  .bubbly-slash + .bubbly-angle-close::before {
+    margin-left: 2px;
+  }
 
   /* an attribute's `=` a pixel clear of its name */
   .bubbly-equals {
@@ -1380,6 +1384,22 @@
     .view-line .bubbly-angle-close::before {
       left: auto;
       right: 0;
+    }
+    /*
+     * beside a `/`, a bracket's own character narrowed to the page's room (epic `editor` I83):
+     * `<` is wider than the `⟨` drawn over it, so a `</>` had a gap either side of its slash
+     * - narrowed by letter-spacing, so the caret still lands either side of it, as Monaco measures where each letter is
+     * - in `em`, so a block's tiny end tag narrows as much;  for the editor's font, whose `<` is 0.61em, `⟨` 0.37em
+     * - the `/`'s `⟨` 0.5px from it, its `⟩` 1px, as on the page
+     */
+    .view-line .bubbly-angle-open.bubbly-tag-end {
+      letter-spacing: -0.21em;
+    }
+    .view-line .bubbly-slash + .bubbly-angle-close {
+      letter-spacing: -0.18em;
+    }
+    .view-line .bubbly-angle::before {
+      letter-spacing: normal;
     }
     /*
      * a tag's marks:  as dark as the page's on a band, which mixes its faint ink with the band's colour;
