@@ -579,8 +579,10 @@
     .bubbly-quote-open::after {
       top: -0.1em;
     }
+    /* its closing mark tucked in against the pill, as its opening one is:  centred on its `"`, it read as a space (Owen) */
     .bubbly-quote-close::after {
       top: 0.25em;
+      translate: -85% 0;
     }
   }
 
