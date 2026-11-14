@@ -58,6 +58,14 @@
       "defined": "/HowTaskListWorks.spell:882-1163"
     },
     {
+      "property": "checklist",
+      "of": "Task",
+      "group": "The checklist:  the tasks, shown as its filter says",
+      "datatype": "Checklist",
+      "exclusive": true,
+      "defined": "/HowTaskListWorks.spell:1637-1668"
+    },
+    {
       "type": "Checklist",
       "superType": "ViewableList",
       "itemType": "Task",
@@ -73,14 +81,6 @@
         "done"
       ],
       "defined": "/HowTaskListWorks.spell:1264-1379"
-    },
-    {
-      "property": "checklist",
-      "of": "Task",
-      "group": "The checklist:  the tasks, shown as its filter says",
-      "datatype": "Checklist",
-      "exclusive": true,
-      "defined": "/HowTaskListWorks.spell:1637-1668"
     },
     {
       "type": "TaskList",
@@ -130,13 +130,13 @@
     32,
     36,
     41,
+    50,
     57,
     62,
-    78,
-    81,
-    84,
-    90,
-    94,
-    129
+    80,
+    83,
+    89,
+    93,
+    128
   ]
 }

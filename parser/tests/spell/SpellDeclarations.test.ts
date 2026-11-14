@@ -40,7 +40,7 @@ describe("SpellDeclarations of `a card belongs to one pile`", () => {
     { path: "/Card.spell", contents: "a card is a thing" },
     { path: "/Pile.spell", contents: "a pile is a list of cards\na card belongs to one pile\na tableau is a pile" }
   ]
-  const declarations = compiledSpellProject(library).declarations
+  const { code, declarations } = compiledSpellProject(library)
   const from = "@spell/library/piles"
 
   test("says the member it gives cards -- its list types stay plain", () => {
@@ -57,6 +57,15 @@ describe("SpellDeclarations of `a card belongs to one pile`", () => {
       itemType: "Card",
       defined: "/Pile.spell:0-25"
     })
+  })
+
+  test("its code is the member, moved into `Card`'s class with its marker:  a Type Explorer still finds it (I91)", () => {
+    const index = declarations.statements.findIndex(({ property }) => property === "pile")
+    const lines = code.split("\n")
+    const at = declarations.codeLines![index]!
+    expect(lines.slice(at, at + 3).join("\n")).toBe("  get pile() {\n    return Pile.ownerOf(this)\n  }")
+    expect(lines.slice(0, at).findLast((line) => line.startsWith("export class"))).toMatch(/^export class Card\b/)
+    expect(code).toContain("  static exclusive = true\n")
   })
 
   test("loads it again:  `the pile of a card` is a `Pile`, read-only, declared on its own line", () => {

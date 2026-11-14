@@ -118,6 +118,7 @@ export class Card extends TwoSidedView {
 
   static draggable = true
 
+  /** a card is in one pile at a time:  putting it on another pile takes it off this one */
   get pile() {
     return Pile.ownerOf(this)!
   }
@@ -319,7 +320,6 @@ export function testPiles() {
   })
 }
 
-/** a card is in one pile at a time:  putting it on another pile takes it off this one */
 // -----------
 /** a deck of playing cards */
 @thing

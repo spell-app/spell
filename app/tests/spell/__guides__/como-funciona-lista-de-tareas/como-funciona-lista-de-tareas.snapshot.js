@@ -77,7 +77,6 @@ export class Agenda extends ViewableList {
   static exclusive = true
 }
 
-
 core.heading("La aplicación")
 /** La aplicación */
 export class ListaDeTareas extends App {

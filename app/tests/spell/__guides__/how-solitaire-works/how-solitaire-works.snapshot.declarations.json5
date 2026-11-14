@@ -104,6 +104,14 @@
       "defined": "/HowSolitaireWorks.spell:2515-2753"
     },
     {
+      "property": "pile",
+      "of": "Card",
+      "group": "A pile, and a column",
+      "datatype": "Pile",
+      "exclusive": true,
+      "defined": "/HowSolitaireWorks.spell:1327-1353"
+    },
+    {
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
@@ -113,14 +121,6 @@
       "type": "Column",
       "superType": "Pile",
       "defined": "/HowSolitaireWorks.spell:1692-1918"
-    },
-    {
-      "property": "pile",
-      "of": "Card",
-      "group": "A pile, and a column",
-      "datatype": "Pile",
-      "exclusive": true,
-      "defined": "/HowSolitaireWorks.spell:1327-1353"
     },
     {
       "type": "Table",
@@ -179,9 +179,9 @@
     47,
     52,
     65,
-    78,
-    90,
-    103,
+    73,
+    79,
+    91,
     106,
     109,
     114,

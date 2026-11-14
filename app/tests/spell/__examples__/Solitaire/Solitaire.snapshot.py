@@ -145,6 +145,7 @@ class Card(TwoSidedView):
 
     @property
     def pile(self) -> Pile | None:
+        """a card is in one pile at a time:  putting it on another pile takes it off this one"""
         return Pile.owner_of(self)
 
 
@@ -312,9 +313,6 @@ def test_piles() -> None:
             "discards: 7♥↓",
             "\"discards: 7♥↓\"",
         )
-
-
-# a card is in one pile at a time:  putting it on another pile takes it off this one
 
 
 # -----------

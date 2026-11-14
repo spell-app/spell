@@ -86,7 +86,6 @@ core.describe_action(Card, "close", {"title": "Close It", "undone_as": "Close It
 core.describe_event(Card, "flipped", {"params": {"side": "text"}})
 
 
-
 @core.on("picked")
 def on_picked(event: Any) -> None:
     print("the program heard picked")

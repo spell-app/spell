@@ -76,7 +76,6 @@ export class Checklist extends ViewableList {
   static exclusive = true
 }
 
-
 core.heading("The app")
 /** The app */
 export class TaskList extends App {

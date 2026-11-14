@@ -105,6 +105,14 @@
       "defined": "/HabitTracker.spell:1187-2050"
     },
     {
+      "property": "week",
+      "of": "Habit",
+      "group": "The week",
+      "datatype": "Week",
+      "exclusive": true,
+      "defined": "/HabitTracker.spell:2761-2788"
+    },
+    {
       "type": "Week",
       "superType": "ViewableList",
       "itemType": "Habit",
@@ -131,14 +139,6 @@
       "kind": "function",
       "name": "streaks",
       "defined": "/HabitTracker.spell:2053-2294"
-    },
-    {
-      "property": "week",
-      "of": "Habit",
-      "group": "The week",
-      "datatype": "Week",
-      "exclusive": true,
-      "defined": "/HabitTracker.spell:2761-2788"
     },
     {
       "type": "HabitTracker",
@@ -205,10 +205,10 @@
     65,
     70,
     83,
-    117,
-    122,
-    136,
-    162,
+    109,
+    118,
+    123,
+    137,
     169,
     172,
     178,

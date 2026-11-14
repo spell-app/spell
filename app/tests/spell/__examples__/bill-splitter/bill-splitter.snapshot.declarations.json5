@@ -93,18 +93,18 @@
       "defined": "/Diner.spell:618-1104"
     },
     {
-      "type": "Table",
-      "superType": "ViewableList",
-      "itemType": "Diner",
-      "defined": "/Diner.spell:1106-1248"
-    },
-    {
       "property": "table",
       "of": "Diner",
       "group": "A diner",
       "datatype": "Table",
       "exclusive": true,
       "defined": "/Diner.spell:1250-1278"
+    },
+    {
+      "type": "Table",
+      "superType": "ViewableList",
+      "itemType": "Diner",
+      "defined": "/Diner.spell:1106-1248"
     },
     {
       "type": "BillSplitter",
@@ -189,8 +189,8 @@
     52,
     57,
     62,
-    93,
-    107,
+    88,
+    94,
     120,
     123,
     129,

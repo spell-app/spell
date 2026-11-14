@@ -37,6 +37,7 @@ export class Square extends Thing {
     ticTacToe.turn = ticTacToe.turn === "X" ? "O" : "X"
   }
 
+  /** a square is on one board */
   get board() {
     return Board.ownerOf(this)!
   }
@@ -181,8 +182,6 @@ core.heading("The board:  nine squares, three a row")
 // - `<for square in it as="grid" columns="3">` draws a `<grid>` with a column per square
 // - each column holds a big button, and a click plays its square
 // - the space after `or` is a no-break space, one that doesn't vanish:  an empty square keeps its height
-
-/** a square is on one board */
 
 core.heading("Start, and a check:  X wins across the top")
 ////////////////////////////////////////////////

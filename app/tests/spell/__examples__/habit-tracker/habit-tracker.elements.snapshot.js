@@ -104,6 +104,7 @@ export class Habit extends View {
     )
   }
 
+  /** a habit is in one week */
   get week() {
     return Week.ownerOf(this)
   }
@@ -142,7 +143,6 @@ export function testStreaks(...args) {
 // The habits, one under the other:  `<habit-tracker-week>`, around its habits' elements.
 
 // on the page, its habits can be dragged to another place
-/** a habit is in one week */
 
 /////////////////
 // ## The tracker

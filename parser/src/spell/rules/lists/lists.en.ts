@@ -230,7 +230,8 @@ lists.addRule(ListLength, {
 })
 
 lists.addRule(ListLength, {
-  syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} (where:where|which|that|who) {inline_expression}?",
+  syntax:
+    "the? number of {arg:plural_identifier} (in|of) {list:operand} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -935,7 +936,8 @@ lists.addRule(ListRemove, {
 })
 
 lists.addRule(ListRemoveWhere, {
-  syntax: "remove {arg:plural_identifier} (in|of|from) {list:expression} (where:where|which|that|who) {inline_expression}?",
+  syntax:
+    "remove {arg:plural_identifier} (in|of|from) {list:expression} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "statement",

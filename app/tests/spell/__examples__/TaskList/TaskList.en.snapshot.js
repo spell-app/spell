@@ -70,11 +70,11 @@ export const words = {
     }
   },
   groups: {
-    SkyTask: [
-      { name: "Kept in your atmosphere account", members: ["owner"] }
-    ],
     Task: [
       { name: "The checklist", members: ["checklist"] }
+    ],
+    SkyTask: [
+      { name: "Kept in your atmosphere account", members: ["owner"] }
     ],
     TaskList: [
       { name: "Keeping", description: "Where the tasks are kept:  the person picks, and the app asks that keeper", members: ["storage", "keeper", "fillTheChecklist", "addTheStartingTaskTitleWithPriorityLevel", "addTheDraft"] },

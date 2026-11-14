@@ -72,6 +72,7 @@ export class Tarea extends View {
 
   static draggable = true
 
+  /** una tarea está en una sola agenda a la vez */
   get agenda() {
     return Agenda.ownerOf(this)!
   }
@@ -577,7 +578,6 @@ export function testUnOrdenArrastradoSeGuarda() {
     core.expect(core.getItemAt(core.sortedBy(tareas, (item: Tarea) => item.orden), 0)?.título!, `el título de la primera tarea en (las tareas ordenadas por su orden)`, "segunda", `"segunda"`)
   })
 }
-/** una tarea está en una sola agenda a la vez */
 
 core.heading("La aplicación")
 ///////////////////

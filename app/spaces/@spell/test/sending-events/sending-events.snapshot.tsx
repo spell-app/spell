@@ -94,7 +94,6 @@ core.describeAction(Card, "close", { title: "Close It", undoneAs: "Close It" })
 // - it sends "flipped" with side as a text
 core.describeEvent(Card, "flipped", { params: { side: "text" } })
 
-
 on("picked", () => core.console.log("the program heard picked"))
 
 on("lonely", () => core.console.log("the program heard lonely"))

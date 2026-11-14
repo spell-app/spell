@@ -609,14 +609,17 @@ Numbers with units (epic `language` P23):  a DIMENSION is a type whose record ho
   - NOT for a built-in item type (`a thing belongs to one bag`):  the root scope is shared.
   - Nothing goes on the list type's `TypeScope`:  the member is the whole record.
 - `set the pile of the card to ...` is refused (`AssignmentStatement.parse()`):  move the card instead.
-- It compiles to two patches, where the line is:  after both classes, NEVER hoisted into them.
+- It compiles to two patched members, the member first:  each in its class's body when the project declares the class,
+  else patched on where the line is, after both classes.
 
   ```js
-  Pile.exclusive = true
   Object.defineProperty(Card.prototype, 'pile', { get() { return Pile.ownerOf(this) }, configurable: true })
+  Pile.exclusive = true
   ```
 
   - They're `P.ASTPatchedMember`s:  the member must win over any accessor an earlier statement gave it.
+  - Moved into `Card`, the member takes the line's docstring and `SPELL: DECLARES` with it
+    (`P.WriterProject.moveMembers()`):  so its declaration's code is the getter, and a Type Explorer finds it (I91).
 - Declarations:  the member itself, `{ property: "pile", of: "Card", datatype: "Pile", exclusive: true }`.
   - Loading adds it as written (`SpellDeclarations.loadVariables()`):  no other record needed.
   - Picking `Card` brings `Pile`, as any property's datatype does.
@@ -1438,6 +1441,9 @@ would.
 - A run of markup stops at a line a page's tag starts (`nextElementStart()`, the parser tokenizer's hook):
   else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
 - Read a line at a time (`tokenizeLine()`, with the tags open before it):  the editor's colouring.
+- A tag left half typed stays on its line (epic `language` I92), so the rest of the file still reads:
+  - a quoted word left open, `<action "`, is no word:  as an attribute's value, it may not run past a line a tag starts
+  - a start tag with no `>`, `<text`, has no children
 
 ### The tags a page's body draws with
 

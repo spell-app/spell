@@ -220,6 +220,14 @@
       "defined": "/Solitaire.spell:5273-5492"
     },
     {
+      "property": "pile",
+      "of": "Card",
+      "group": "A pile of cards",
+      "datatype": "Pile",
+      "exclusive": true,
+      "defined": "/Pile.spell:1630-1656"
+    },
+    {
       "syntax": "test card setup",
       "output": "test_card_setup",
       "rule": "method_call",
@@ -270,14 +278,6 @@
       "kind": "function",
       "name": "piles",
       "defined": "/Pile.spell:940-1628"
-    },
-    {
-      "property": "pile",
-      "of": "Card",
-      "group": "A pile of cards",
-      "datatype": "Pile",
-      "exclusive": true,
-      "defined": "/Pile.spell:1630-1656"
     },
     {
       "type": "Deck",
@@ -544,14 +544,14 @@
     80,
     90,
     106,
-    135,
-    180,
-    185,
-    192,
-    198,
-    204,
-    219,
-    255,
+    119,
+    136,
+    181,
+    186,
+    193,
+    199,
+    205,
+    220,
     257,
     262,
     267,

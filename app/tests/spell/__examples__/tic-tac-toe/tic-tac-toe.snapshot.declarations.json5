@@ -55,6 +55,14 @@
       "defined": "/TicTacToe.spell:3013-3317"
     },
     {
+      "property": "board",
+      "of": "Square",
+      "group": "Playing a square",
+      "datatype": "Board",
+      "exclusive": true,
+      "defined": "/TicTacToe.spell:3319-3348"
+    },
+    {
       "type": "Board",
       "superType": "List",
       "itemType": "Square",
@@ -192,14 +200,6 @@
       "defined": "/TicTacToe.spell:2005-2383"
     },
     {
-      "property": "board",
-      "of": "Square",
-      "group": "Playing a square",
-      "datatype": "Board",
-      "exclusive": true,
-      "defined": "/TicTacToe.spell:3319-3348"
-    },
-    {
       "syntax": "test three in a row",
       "output": "test_three_in_a_row",
       "rule": "method_call",
@@ -216,20 +216,20 @@
     20,
     27,
     33,
-    55,
-    58,
-    74,
-    77,
-    83,
-    89,
-    94,
-    99,
-    106,
-    112,
-    119,
-    126,
-    139,
-    177,
-    183
+    41,
+    56,
+    59,
+    75,
+    78,
+    84,
+    90,
+    95,
+    100,
+    107,
+    113,
+    120,
+    127,
+    140,
+    182
   ]
 }
