@@ -124,7 +124,10 @@ ui-popup[data-spell-action-menu] > ui-menu::part(menu),
   padding-inline-start: 24px;
 }
 
-/* a divider:  a hairline right across the menu, edge to edge through the popup's 4px padding (Owen, 2026-11-14, I85) */
+/*
+ * a divider:  a hairline across the menu, stopping short of its edges, 12px in from each side (Owen, 2026-11-14, I85)
+ * - square ends:  an item's rounded corners would turn a dashed line solid in Chrome (I102)
+ */
 :is(
     ui-menu.BarMenuItems,
     ui-menu.BarMenuItems ui-submenu,
@@ -134,16 +137,20 @@ ui-popup[data-spell-action-menu] > ui-menu::part(menu),
   > :is(ui-action, ui-item)[kind="divider"]::part(item) {
   min-height: 0;
   height: 0;
-  margin: 4px -4px;
+  margin: 4px 8px;
   padding: 0;
   border-top: 1px solid var(--ui-border-color);
+  border-radius: 0;
 }
 
-/* the line after a program's own right-click menu, before the editor's items (epic `editor` I76):
-   2px dashed, edge to edge as every divider (I102) */
+/*
+ * the line after a program's own right-click menu, before the editor's items (epic `editor` I76):
+ * - 2px dashed (I102), a shade darker than the other lines
+ * - the ONE line that runs edge to edge, through the popup's 4px padding (I85)
+ */
 ui-menu.BarMenuItems > ui-action.ProgramMenuEnd[kind="divider"]::part(item) {
   margin: 6px -4px;
-  border-top: 2px dashed var(--ui-border-color);
+  border-top: 2px dashed var(--ui-border-color-strong);
 }
 
 /* a divider left first, last or doubled (the static build's hidden actions):  none */

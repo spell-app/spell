@@ -506,7 +506,7 @@ export class PartEdits {
    * - Meanwhile the menu greys its items for `element` (`menuPart`),
    *   and a click on one selects it first (`selectMenuPart()`).
    * - `programMenu`:  the program's own right-click menu there, as Run shows it (`SpellElement.programMenuAt()`),
-   *   shown first, then a thick line, then ours (epic `editor` I76).
+   *   shown first, then a dashed line, then ours (epic `editor` I76).
    */
   static openMenu(element: Element, x: number, y: number, programMenu?: readonly MenuItem[]): void {
     if (Inspector.isSelected(element)) PartEdits.menuPart = undefined

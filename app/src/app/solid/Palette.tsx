@@ -626,7 +626,7 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
  * The ONE right-click menu on the app's parts, in the app and the Views tree:
  * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect, a line, then Change This.
  * - The program's own right-click menu there comes first, if it has one (`<context-menu>`, `context-menu=`),
- *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a thick line, then ours (epic `editor` I76, Owen's pick).
+ *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a dashed line, then ours (epic `editor` I76, Owen's pick).
  * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window, with arrow keys, Enter and Esc.
  * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
  * - It shows at once, with no fade in (`Palette.css`):  a quick second right click lands on it, not the part.
@@ -642,7 +642,7 @@ export function PartMenu(): JSX.Element {
       setAt({ x, y })
     }
   })
-  // the program's items, drawn afresh each time the menu opens somewhere new, then the thick line
+  // the program's items, drawn afresh each time the menu opens somewhere new, then the dashed line
   const programItems = () => {
     at()
     const items = programMenu()
@@ -740,7 +740,7 @@ export function PartMenu(): JSX.Element {
 /** The class of the part menu's popup. */
 const PART_MENU = "PartMenu"
 
-/** The class of the thick line between the program's own right-click menu and ours (`MenuBar.css`). */
+/** The class of the dashed line, edge to edge, between the program's own right-click menu and ours (`MenuBar.css`). */
 const PROGRAM_MENU_END = "ProgramMenuEnd"
 
 /**
