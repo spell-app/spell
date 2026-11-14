@@ -289,6 +289,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+    font-size: 0.875em;
   }
   ui-menu.AppMenu > ui-menu.third::part(menu) {
     flex: 0 0 auto;
@@ -304,10 +305,47 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   }
 }
 
-/* `<PublishDraft>`:  "Editing a Draft", then Publish, right of the modes' group, centred on the bar's row */
+/*
+ * `<PublishDraft>`:  ONE pill right of the modes' group, the size and shape of the tools group at the bar's right
+ * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
+ * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
+ * - "Editing a Draft" plain words in deep amber;  "Publish Draft" the primary button, a round thumb 2px inside its end
+ */
 .ModeButtons > .PublishDraft {
+  --spell-draft-height: 28px;
+  --spell-draft-inset: 2px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  box-sizing: border-box;
+  block-size: var(--spell-draft-height);
   margin-inline-start: var(--spell-bar-icon-gap, 12px);
+  padding: var(--spell-draft-inset) var(--spell-draft-inset) var(--spell-draft-inset) 11px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ui-yellow-background) 85%, transparent);
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.1),
+    inset 0 0 0 1px color-mix(in oklab, var(--ui-yellow-border) 32%, transparent);
+  white-space: nowrap;
+
+  & > .DraftState {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: var(--ui-yellow-header);
+    --ui-icon-width: auto;
+    --ui-icon-distance: 0;
+  }
+  & > ui-button {
+    --ui-button-radius: 999px;
+    --ui-button-font-size: 1em;
+    --ui-button-padding-block: 0;
+    --ui-button-padding-inline: 10px;
+    margin: 0;
+  }
+  & > ui-button::part(button) {
+    block-size: calc(var(--spell-draft-height) - 2 * var(--spell-draft-inset));
+    margin: 0;
+  }
 }

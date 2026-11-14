@@ -154,7 +154,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
       .poll(() => page.locator(".CodeOutputPane ui-item[selected]").textContent(), { timeout: 8000 })
       .toContain("TypeScript")
 
-    await chooseOutput(page, "Hide it")
+    await chooseOutput(page, "None")
     expect((await following(page)).outputShows).toBe(false)
   })
 

@@ -45,6 +45,15 @@
   .scrolling-row > .ui.menu::-webkit-scrollbar {
     display: none;
   }
+  /*
+   * a segmented row's chosen thumb has a shadow, which the box would cut (it scrolls, so it clips up and down too):
+   * room for it above and below, which takes no room in the row (Owen, 2026-11-14, epic `editor` I91:  the chosen file
+   * tab's shadow was cut off)
+   */
+  .scrolling-row > .ui.segmented.menu {
+    padding-block: 3px;
+    margin-block: -3px;
+  }
 
   /*
    * A rule under the row is drawn INSIDE its box (an inset shadow), never as its border:
