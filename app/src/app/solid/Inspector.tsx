@@ -31,6 +31,7 @@ import {
   InspectorCard,
   WrittenCode,
   InspectorViews,
+  NoCodeCard,
   TypeActionsCard,
   TypeEventsCard,
   TypeTestsCard,
@@ -2446,11 +2447,14 @@ class PartSelector {
  * The Inspector, a tall column at the page's far right, while it's open (`Inspector.isOpen`):
  * its cards, one above the other, resizable (their sizes remembered, for each set of cards).
  *   - what's selected (`<PropertiesCard>`)
- *   - its code (`<CodeCard>`):  its events, then its actions, while one thing is selected
+ *   - its code (`<CodeCard>`):  its events, then its actions, while one thing is selected;
+ *     while nothing is, its bar alone, folded for good (`<NoCodeCard>`, T69)
  *   - the app's views, things or templates (`<InspectorViews>`)
  * - Which cards show:  the top bar's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
  * - Each card folds to its header (`<InspectorCard>`):
  *   a folded card keeps its header's height, the others share the rest.
+ * - A card is never taller than what it shows (I140):  the room it leaves goes to the others (`Inspector.css`).
+ * - As the selection changes or a card folds, the cards glide to their new sizes (`CardGlide`, T69).
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
  * - The cards' insides are the brand's Theme Creator inspector, in the Spell Brand theme whatever the editor
@@ -2464,12 +2468,21 @@ export function InspectorColumn(): JSX.Element {
   void loadBrandTokens()
   const rows = appParts()
   const shown = createMemo((): InspectorCardId[] => {
-    const cards = INSPECTOR_PANELS.filter((panel) => Inspector.isShown(panel) && (panel !== "code" || codeCardPart()))
+    const cards = INSPECTOR_PANELS.filter((panel) => Inspector.isShown(panel) && (panel !== "code" || hasCodeCard()))
     if (!Inspector.typeEdited || !cards.includes("properties")) return cards
     return [cards[0]!, ...TYPE_PANES, ...cards.slice(1)]
   })
   const layout = createMemo(() => cardsLayout(shown(), !Inspector.inspected))
   const cardSizes = rememberedSizes(layout)
+  const glide = new CardGlide()
+  onCleanup(() => glide.stop())
+  // what's selected, or a card folded:  the sizes about to change glide
+  createEffect(
+    () => [layout(), Inspector.inspected],
+    () => {
+      glide.arm()
+    }
+  )
   // on a phone, Esc puts the sheet away while it's up
   createEffect(
     () => Inspector.isSheetUp,
@@ -2506,23 +2519,26 @@ export function InspectorColumn(): JSX.Element {
           rows={cardSizes.sizes()}
           resizable
           class="InspectorSplit"
-          ref={on("ui-changed", (event: Event) => {
-            cardSizes.keep(event)
-            if (event.target === event.currentTarget)
-              foldSmallCards((event as CustomEvent).detail.panes, cardSizes.forget)
-          })}
+          ref={[
+            on("ui-changed", (event: Event) => {
+              cardSizes.keep(event)
+              if (event.target === event.currentTarget)
+                foldSmallCards((event as CustomEvent).detail.panes, cardSizes.forget)
+            }),
+            (split: HTMLElement) => glide.watch(split)
+          ]}
         >
           <Show when={Inspector.isShown("properties")}>
             <div class="SplitPane">
               <PropertiesCard />
             </div>
           </Show>
-          <Show when={Inspector.isShown("code") && codeCardPart()}>
-            {(part) => (
-              <div class="SplitPane">
-                <CodeCard element={part().element} thing={part().thing} />
-              </div>
-            )}
+          <Show when={Inspector.isShown("code") && hasCodeCard()}>
+            <div class="SplitPane">
+              <Show when={codeCardPart()} fallback={<NoCodeCard />}>
+                {(part) => <CodeCard element={part().element} thing={part().thing} />}
+              </Show>
+            </div>
           </Show>
           <Show when={Inspector.isShown("properties") && Inspector.typeEdited} keyed>
             {(thing) => (
@@ -2643,34 +2659,35 @@ function codeCardPart(): { element: Element; thing?: object } | undefined {
   return { element: part.element, thing: part.layout ? undefined : part.value }
 }
 
+/** Is the Code card in the column?  With what's selected (`codeCardPart()`), or folded for good while nothing is (T69). */
+function hasCodeCard(): boolean {
+  return !Inspector.inspected || !!codeCardPart()
+}
+
 /**
  * The column's sizes for the cards `shown`:  a folded card its header's height,
  * the others their usual shares of the rest.
  * - Nothing selected (`isEmpty`):  the top card only as tall as its tip, the others sharing the rest, so Views takes the
  *   column (Owen, 2026-11-14, I81).  Its own `id`, so a drag then is kept apart from the split you set while inspecting.
+ *   - the top card needs no size of its own for that:  it's as tall as its tip, as any card is as tall as what it shows
+ *   - the Code card its bar alone:  folded for good (`<NoCodeCard>`, T69)
+ * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140).
  * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
  */
 function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id: string; sizes: string } {
-  const isShort = (panel: InspectorCardId) => isEmpty && panel === "properties" && !Inspector.isFolded(panel)
-  const open = shown.filter((panel) => !Inspector.isFolded(panel) && !isShort(panel))
+  const isFolded = (panel: InspectorCardId) => Inspector.isFolded(panel) || (isEmpty && panel === "code")
+  const open = shown.filter((panel) => !isFolded(panel))
   const total = open.reduce((sum, panel) => sum + CARD_SHARES[panel], 0)
-  const cards = shown.map((panel) => (Inspector.isFolded(panel) ? `${panel}-folded` : panel)).join(",")
+  const cards = shown.map((panel) => (isFolded(panel) ? `${panel}-folded` : panel)).join(",")
   return {
     id: `spellEditor-inspectorCards-${cards}${isEmpty ? "-nothingSelected" : ""}`,
     sizes: shown
       .map((panel) =>
-        Inspector.isFolded(panel)
-          ? `${FOLDED_CARD_HEIGHT}px`
-          : isShort(panel)
-            ? `${TIP_CARD_HEIGHT}px`
-            : `${Math.round((CARD_SHARES[panel] / total) * 100)}%`
+        isFolded(panel) ? `${FOLDED_CARD_HEIGHT}px` : `${Math.round((CARD_SHARES[panel] / total) * 100)}%`
       )
       .join(",")
   }
 }
-
-/** The top card's height while nothing is selected:  its header and the tip's three lines. */
-const TIP_CARD_HEIGHT = 150
 
 /**
  * Fold each card dragged too small to show anything
@@ -2679,8 +2696,9 @@ const TIP_CARD_HEIGHT = 150
  */
 function foldSmallCards(panes: HTMLElement[], forgetSizes: () => void): void {
   for (const pane of panes) {
-    const panel = pane.querySelector<HTMLElement>(".InspectorCard")?.dataset.panel as InspectorCardId | undefined
-    if (!panel || Inspector.isFolded(panel)) continue
+    const card = pane.querySelector<HTMLElement>(".InspectorCard")
+    const panel = card?.dataset.panel as InspectorCardId | undefined
+    if (!panel || Inspector.isFolded(panel) || card!.classList.contains("locked")) continue
     if (pane.getBoundingClientRect().height >= FOLDED_CARD_HEIGHT + SMALLEST_CARD_BODY) continue
     forgetSizes()
     Inspector.toggleFolded(panel)
@@ -2700,6 +2718,115 @@ const CARD_SHARES: Record<InspectorCardId, number> = {
 const FOLDED_CARD_HEIGHT = 40
 /** The least a card's body may show, px:  dragged smaller, it folds. */
 const SMALLEST_CARD_BODY = 32
+
+/****************
+ * ### `CardGlide`
+ * The Inspector's cards GLIDE to their new heights, over `GLIDE_SECONDS`,
+ * as the selection changes or a card folds (Owen, 2026-11-14, epic `editor` T69).
+ * - Each card's last height is kept as the browser lays it out (a `ResizeObserver` on the panes).
+ *   Once armed (`arm()`), the next change runs every pane from its old height to its new one, all together,
+ *   so the column adds up on every frame;  what loads with it, just after, glides on from there.
+ * - Not a CSS transition:  a card is as tall as what it shows (`max-height: max-content`, I140),
+ *   and a change to what it shows changes no style, so there's nothing for a transition to run on.
+ *   `interpolate-size` only helps a change between `auto` and a length, which these aren't.
+ * - Only while armed:  a drag, the window resized, or code loading in a card just lays out.
+ * - None for anyone who asks for less motion.
+ ****************/
+class CardGlide {
+  /** Each pane's height, px, as last laid out. */
+  private heights = new WeakMap<Element, number>()
+  /** Until when a change glides, `performance.now()`;  `0`:  not armed. */
+  private armedUntil = 0
+  /** The glide running, if any:  the sizes it reports are its own frames, not new heights. */
+  private running: Animation[] = []
+  /** The column's split panel, and what watches its panes. */
+  private split: HTMLElement | undefined
+  private observer: ResizeObserver | undefined
+
+  /** Watch `split`'s panes (its ref). */
+  watch(split: HTMLElement): void {
+    this.split = split
+    this.observer ??= new ResizeObserver((entries) => this.resized(entries))
+    this.observePanes()
+  }
+
+  /** The next change glides:  call it as the selection changes or a card folds. */
+  arm(): void {
+    this.observePanes()
+    this.armedUntil = performance.now() + ARMED_WAIT_MS
+  }
+
+  /** Stop watching, and end any glide. */
+  stop(): void {
+    this.observer?.disconnect()
+    for (const animation of this.running) animation.cancel()
+  }
+
+  /** The panes now:  the split panel's children. */
+  private get panes(): HTMLElement[] {
+    return this.split ? [...this.split.querySelectorAll<HTMLElement>(":scope > .SplitPane")] : []
+  }
+
+  /** Watch every pane, a card just shown too (watching one twice does nothing). */
+  private observePanes() {
+    for (const pane of this.panes) this.observer?.observe(pane)
+  }
+
+  /** The panes laid out again:  glide, if armed, from the heights kept to the new ones;  else keep them. */
+  private resized(entries: ResizeObserverEntry[]) {
+    if (this.running.length) return
+    const panes = this.panes
+    const known = panes.filter((pane) => this.heights.has(pane))
+    const changed = entries.some((entry) => {
+      const before = this.heights.get(entry.target)
+      return before === undefined || Math.abs(before - heightOf(entry)) >= 1
+    })
+    if (changed && known.length && this.canGlide) {
+      // a card just shown grows from nothing
+      const glides = panes.map((pane) => ({ pane, from: this.heights.get(pane) ?? 0, to: pane.offsetHeight }))
+      this.running = glides.map(({ pane, from, to }) =>
+        pane.animate([pinnedAt(from), pinnedAt(to)], { duration: GLIDE_SECONDS * 1000, easing: "ease-out" })
+      )
+      // what it ends at is what shows;  a change made while it ran (code laid out) glides next, while still armed
+      for (const { pane, to } of glides) this.heights.set(pane, to)
+      this.armedUntil = performance.now() + ARMED_AFTER_MS
+      void Promise.all(this.running.map((animation) => animation.finished))
+        .catch(() => {}) // cancelled:  `stop()`
+        .finally(() => (this.running = []))
+      return
+    }
+    for (const entry of entries) this.heights.set(entry.target, heightOf(entry))
+  }
+
+  /** Armed, nothing being dragged, and motion's welcome. */
+  private get canGlide(): boolean {
+    return (
+      performance.now() < this.armedUntil &&
+      !this.split?.matches(":state(dragging)") &&
+      !matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+  }
+}
+
+/** How long a card takes to glide to its new height (`CardGlide`). */
+const GLIDE_SECONDS = 0.2
+/**
+ * How long a change may take to lay out once armed, ms, and still glide:
+ * a part with much to show (Solitaire's properties and code) takes a second.
+ */
+const ARMED_WAIT_MS = 2000
+/** How long after a glide starts what loads with the change (its code) glides too, ms. */
+const ARMED_AFTER_MS = 400
+
+/** A pane's height from its `ResizeObserver` entry, px. */
+function heightOf(entry: ResizeObserverEntry): number {
+  return entry.borderBoxSize[0]?.blockSize ?? entry.contentRect.height
+}
+
+/** A glide's frame:  a pane held at `height` px, whatever its share or its content. */
+function pinnedAt(height: number): Keyframe {
+  return { flexGrow: 0, flexShrink: 0, flexBasis: `${height}px`, minHeight: "0px", maxHeight: "none" }
+}
 
 /****************
  * ### `<PropertiesCard>`

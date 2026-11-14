@@ -327,11 +327,17 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
     expect(host.querySelectorAll("[data-panel=code] .InspectorEvent :is(.InspectorCode, .CodeSlice)")).toHaveLength(0)
   })
 
-  test("nothing selected:  no Code card", async () => {
+  test("nothing selected:  the Code card's bar alone, folded for good (T69)", async () => {
     const host = await mount(() => <InspectorColumn />)
     Inspector.toggle()
     flush()
-    expect(host.querySelector("[data-panel=code]")).toBeNull()
+    const card = host.querySelector<HTMLElement>(".InspectorCard[data-panel=code]")!
+    expect(card.classList.contains("locked")).toBe(true)
+    expect(card.classList.contains("folded")).toBe(true)
+    // no chevron to unfold it, no body, no "+"
+    expect(card.hasAttribute("collapsible")).toBe(false)
+    expect(card.querySelector(".InspectorSection")).toBeNull()
+    expect(card.querySelector(".InspectorAddEvent")).toBeNull()
   })
 })
 
@@ -341,25 +347,50 @@ describe("the cards", () => {
     Inspector.toggle()
     flush()
     const titles = () => [...host.querySelectorAll(".InspectorCard")].map((card) => card.classList.contains("folded"))
-    // two cards:  the Events card is gone, its events a band of the properties card (epic `debut` P28)
-    expect(titles()).toEqual([false, false])
+    // three cards, nothing selected:  the Code card's bar alone (T69);  the Events card is gone, its events a band of
+    // the properties card (epic `debut` P28)
+    expect(titles()).toEqual([false, true, false])
     expect(host.querySelector('.InspectorCard[data-panel="events"]')).toBeNull()
     Inspector.toggleFolded("views")
     flush()
-    expect(titles()).toEqual([false, true])
+    expect(titles()).toEqual([false, true, true])
     Inspector.setShown("views", false)
     flush()
-    expect(titles()).toEqual([false])
+    expect(titles()).toEqual([false, true])
     // closed, then opened again, a click each
     Inspector.toggle()
     flush()
     Inspector.toggle()
     flush()
-    expect(titles()).toEqual([false])
+    expect(titles()).toEqual([false, true])
     // as it was, for the other tests
     Inspector.setShown("views", true)
     Inspector.toggleFolded("views")
     flush()
+  })
+})
+
+describe("the cards' heights (I140)", () => {
+  test("a card is as tall as what it shows:  no room left under it", async () => {
+    const host = await mount(() => <InspectorColumn />)
+    // the page's class:  the cards' look and layout are the editor page's (`Inspector.css`)
+    host.className = "SpellPage"
+    Inspector.toggle()
+    flush()
+    // as tall as the editor's column
+    host.querySelector<HTMLElement>(".InspectorColumn")!.style.height = "900px"
+    await ElementFixture.settle(host)
+    const pane = (panel: string) => host.querySelector(`.InspectorCard[data-panel=${panel}]`)!.parentElement!
+    const properties = host.querySelector<HTMLElement>(".InspectorCard[data-panel=properties]")!
+    const section = properties.querySelector<HTMLElement>(".InspectorSection")!
+    // the tip's card ends where its tip does, though its share of the column is more
+    expect(
+      Math.abs(pane("properties").getBoundingClientRect().bottom - section.getBoundingClientRect().bottom)
+    ).toBeLessThan(1)
+    expect(section.scrollHeight - section.clientHeight).toBeLessThan(2)
+    expect(pane("properties").getBoundingClientRect().height).toBeLessThan(300)
+    // the Code card its bar:  the room left goes to Views
+    expect(pane("code").getBoundingClientRect().height).toBeLessThanOrEqual(41)
   })
 })
 

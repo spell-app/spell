@@ -34,10 +34,13 @@ import { on } from "./on"
  * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
  * - The eye hides the card (`Inspector.setShown()`);  the Inspector's button, held, shows it again.
  * - The body scrolls by itself, and is drawn only while the card is unfolded.
+ * - `locked`:  folded for good, with no chevron, its bar alone (`<NoCodeCard>`).
  ****************/
 export function InspectorCard(props: {
   /** Which card. */
   panel: InspectorCardId
+  /** Folded, and can't be unfolded:  no chevron, no body. */
+  locked?: boolean
   /** What a screen reader calls it. */
   label: string
   /** What the bar says:  `<ui-item>`s, or `slot="title"`. */
@@ -49,17 +52,17 @@ export function InspectorCard(props: {
   /** The body. */
   children?: JSX.Element
 }): JSX.Element {
-  const isFolded = () => Inspector.isFolded(props.panel)
+  const isFolded = () => props.locked || Inspector.isFolded(props.panel)
   const setFolded = (folded: boolean) => {
     if (folded !== isFolded()) Inspector.toggleFolded(props.panel)
   }
   return (
     <ui-panel
       appearance="pane"
-      class={["InspectorCard", { folded: isFolded() }]}
+      class={["InspectorCard", { folded: isFolded(), locked: props.locked }]}
       data-panel={props.panel}
       label={props.label}
-      collapsible=""
+      collapsible={props.locked ? undefined : ""}
       fold-icon="start"
       open={isFolded() ? "false" : undefined}
       ref={(panel: HTMLElement) => {
@@ -655,6 +658,23 @@ export function CodeCard(props: {
         </Show>
       </Show>
     </InspectorCard>
+  )
+}
+
+/****************
+ * ### `<NoCodeCard>`
+ * The Code card while nothing's selected:  its bar alone, folded, with no chevron to unfold it (epic `editor` T69).
+ * - So the card stays in the column, and selecting something only changes its size, which glides (`CardGlide`).
+ * - No "+":  there's nothing to add an event to.  Its ✕ still hides the card.
+ ****************/
+export function NoCodeCard(): JSX.Element {
+  return (
+    <InspectorCard
+      panel="code"
+      locked
+      label={appTexts.text("inspectorCode")}
+      bar={<span slot="title">{appTexts.text("inspectorCode")}</span>}
+    />
   )
 }
 

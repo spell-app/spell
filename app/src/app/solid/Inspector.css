@@ -90,6 +90,11 @@ ui-panel.InspectorCard > .InspectorSection {
   min-height: 0;
 }
 .InspectorCard {
+  /* folded for good, no chevron (`<NoCodeCard>`, T69):  its title where the others' are, after their chevron's room
+     (the bar's 6px, then the chevron's 14px:  `UIPanel.css`) */
+  &.locked {
+    --ui-panel-pane-bar-padding: 20px 16px;
+  }
   /* what's selected, as its title:  a blue pill (Owen) */
   & .InspectorPartTag {
     min-width: 0;
@@ -227,9 +232,27 @@ ui-panel.InspectorCard > .InspectorSection {
   flex: 1 1 auto;
   min-height: 0;
 }
+/*
+ * A card is as tall as what it shows, never more (Owen, 2026-11-14, epic `editor` I140:
+ * "Don't have this big gap between sections when not showing"):
+ * - its share of the column (`cardsLayout()`) is the most it takes;  the room it leaves goes to the others, by their shares,
+ *   and what none of them needs stays under the last card
+ * - a pane is a column its card fills, not a box the card is laid over (`SplitPane.css`), so it has a height of its own to stop at
+ * - too much for the column:  each card gets its share, and scrolls inside
+ */
 .SpellPage .InspectorColumn > .InspectorSplit > .SplitPane {
   border: 0;
   box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  max-height: max-content;
+
+  & > * {
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
 }
 /* Events, as tall as its events (`cardsLayout()`), up to this much of the column */
 .SpellPage .InspectorColumn > .InspectorSplit > .SplitPane[data-split-fit] {
