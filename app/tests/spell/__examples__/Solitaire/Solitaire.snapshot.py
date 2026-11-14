@@ -473,9 +473,6 @@ class Column(Pile):
 class Solitaire(App):
     element_tag = "test-project-app"
 
-    # "deck" is a new deck
-    deck = prop(init=lambda: Deck(id="deck"), early=True)
-
     async def create(self) -> None:
         for card in self.deck:
             self.stock.append(card)
@@ -529,6 +526,8 @@ class Solitaire(App):
             ),
         ]
 
+    # <deck "deck"hidden />
+    deck = prop(init=lambda: Deck(id="deck"), early=True)
     # <number "score" />
     score = prop(type="number")
     # <stock-pile "stock"/>

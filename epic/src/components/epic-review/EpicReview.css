@@ -120,6 +120,13 @@
   [data-color="red"] {
     --_act: var(--ui-red, #c8102e);
   }
+  /* a toned tick's other colours ("0. While you were out"'s parts, I277):  a fix to review, a new issue or test */
+  [data-color="orange"] {
+    --_act: var(--epic-state-replied, var(--ui-orange, #f2711c));
+  }
+  [data-color="yellow"] {
+    --_act: var(--ui-yellow-text, #b58105);
+  }
   /* a toned tick (`tone`):  its colour at rest;  dotted once marked, until it's sent */
   ui-button[data-tone]::part(button) {
     color: var(--_act);

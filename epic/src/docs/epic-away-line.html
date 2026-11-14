@@ -75,8 +75,8 @@
             <epic-away-line line="p-example"
               ><a href="#p-example">P7 · Example</a> done:  the thing, built (a10023c2a, merged)</epic-away-line
             >
-            <epic-away-line line="todo" heading><b>Still to do</b></epic-away-line>
-            <epic-away-line line="i9">1. <a href="#i9">I9</a> open issue:  it flickers</epic-away-line>
+            <epic-away-line line="issues" heading state="open"><b>Newly opened issues</b></epic-away-line>
+            <epic-away-line line="i9" state="open">1. <a href="#i9">I9</a> it flickers</epic-away-line>
           </ui-section>
 
           <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
@@ -84,7 +84,8 @@
             <ul>
               <li>
                 <code>line</code>:  what it's about, a phase's or an item's id (<code>p-x</code>, <code>i205</code>), or a
-                part's (<code>done</code>, <code>todo</code>).  Its Read is a Seen on <code>away:&lt;line&gt;</code>.
+                part's (<code>done</code>, <code>underway</code>, <code>fixed</code>, <code>issues</code>,
+                <code>tests</code>, <code>asks</code>:  epic <code>epic-engine</code> I277).  Its Read is a Seen on <code>away:&lt;line&gt;</code>.
               </li>
               <li>
                 <code>heading</code>:  a part's heading;  read, every line of its part fades at once, and the whole part

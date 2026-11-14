@@ -90,6 +90,23 @@ describe("members declared in a drawing", () => {
     expect(code).not.toContain("hidden: true")
   })
 
+  test('no space after its quoted word:  `<deck "deck"hidden />` reads as `<deck "deck" hidden/>` (epic `language` T125)', () => {
+    const lines = (tag: string) => [
+      ...piles,
+      "solitaire is an app",
+      "\tto draw it",
+      "\t\t<container>",
+      `\t\t\t${tag}`,
+      "\t\t</>"
+    ]
+    // the code, less what tells them apart:  the line each declaration echoes, and where each is (one space shorter)
+    const code = (tag: string) => compiled(lines(tag)).code.replace(/^\s*(\/\/ <|defined: ).*\n/gm, "")
+    expect(compiled(lines('<column "deck"hidden />')).errors).toEqual([])
+    expect(code('<column "deck"hidden />')).toBe(code('<column "deck" hidden/>'))
+    expect(code('<column "deck"hidden />')).toContain('init: () => new Column({ id: "deck" })')
+    expect(code('<column "C1"suit=clubs/>')).toBe(code('<column "C1" suit=clubs/>'))
+  })
+
   test("a tag that declares nothing keeps its `hidden`", () => {
     const { errors, code } = compiled([
       ...piles,

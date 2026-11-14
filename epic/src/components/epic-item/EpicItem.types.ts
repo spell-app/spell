@@ -139,8 +139,7 @@ export class DrawnState {
   /** `fields`'s state as drawn, with the inbox saying `live`. */
   static of(fields: StateFields, live: LiveReview, now = Date.now()): ItemState {
     if (live.workedOn) return "progress"
-    if (live.urgency && DrawnState.canCalm(fields))
-      return live.urgency.calm ? DrawnState.calmState() : "attention"
+    if (live.urgency && DrawnState.canCalm(fields)) return live.urgency.calm ? DrawnState.calmState() : "attention"
     const state = fields.state
     const written = state && (ITEM_STATES as readonly string[]).includes(state) ? (state as ItemState) : undefined
     const shown = ItemAge.shown(

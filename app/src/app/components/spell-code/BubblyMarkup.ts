@@ -503,8 +503,8 @@ class MarkupWriter {
     if (!tag) return ""
     const name = `<span class="bubbly-tag-name">${tag.tag}</span>`
     return place === "block"
-      ? `<span class="bubbly-mark">${ANGLE_OPEN}${SLASH}${name}${ANGLE_CLOSE}</span>`
-      : `<span class="bubbly-mark">${ANGLE_OPEN}${SLASH}</span>${name}<span class="bubbly-mark">${ANGLE_CLOSE}</span>`
+      ? `<span class="bubbly-mark">${ANGLE_OPEN}${END_SLASH}${name}${ANGLE_CLOSE}</span>`
+      : `<span class="bubbly-mark">${ANGLE_OPEN}${END_SLASH}</span>${name}<span class="bubbly-mark">${ANGLE_CLOSE}</span>`
   }
 
   /** Text on lines of its own:  each line in its body, its indent kept past the text's own;  blank lines a gap. */
@@ -585,6 +585,9 @@ const ANGLE_OPEN_MARK = `<span class="bubbly-mark">${ANGLE_OPEN}</span>`
 
 /** The `/` of an end tag, `</h2>`, and of `<br />`:  heavy, as the brackets beside it are. */
 const SLASH = `<span class="bubbly-slash">/</span>`
+
+/** An end tag's `/`, drawn as a bar flush after its `⟨`:  `</h2>` drawn `⟨|h2⟩`, as `</>` is `⟨|⟩` (Owen, 2026-11-14). */
+const END_SLASH = `<span class="bubbly-slash bubbly-end-slash">/</span>`
 
 /** A quoted value's marks:  the file's own `"`, kept for copying, its curly mark drawn by the sheet. */
 const QUOTE_OPEN = `<span class="bubbly-quote-mark bubbly-quote-open">"</span>`

@@ -86,12 +86,16 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - What Claude did since the person last pressed Done reading (`<epic-page away-read>`),
       and what needs them, in order:
       written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
-      no section.  `waiting` is its toolbar badge;  `news` its title's badges, by colour (done, under way, needs you):  a click filters its lines, and each line's tick wears its badge's colour (`<epic-away-line state>`).
+      no section.  `waiting` is its toolbar badge;  `news` its title's badges, by colour (done, under way, fixed,
+      new, needs you):  a click filters its lines, and each line's tick wears its badge's colour (`<epic-away-line state>`).
+    - Its parts, in order (epic `epic-engine` I277;  Owen:  "If these are fixed, why are they in 'Still to do'?"):
+      Waiting on you (red:  calls and questions waiting on their answer), Under way (blue), What was done (green),
+      Fixed, to review (orange), Newly opened issues and New manual tests (yellow);  each heading's Read takes its part.
     - It opens by itself the first time a page shows it;  after that it stays as you folded it.
     - An item the person addressed leaves it, however recently it changed (`NightSummary.isAddressed()`,
       epic `epic-engine`
       I235):  reviewed, deferred, queued, made a todo, or a sent mark waiting in the inbox;  a closed one too.
-      A fix Claude made since (orange) is back, "fixed, to review".
+      A fix Claude made since (orange) is back, under Fixed, to review.
     - A finished phase, and a bedtime run's lead line, age out after `away.finishedPhaseDays` days (3;  `epic settings`),
       by `done-at`.  One with no `done-at` stays until read.
     - Drawn on every edit:  an edit is what brings an idle page up to date.

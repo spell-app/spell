@@ -21,7 +21,7 @@ import { parseSetLetter, setPicksOf } from "spell/epic/review/review.types"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 
 import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
-import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary"
+import { NightSummary, OLD_TODO, type AwayPart, type NeedPart, type SummaryOptions } from "./NightSummary"
 
 import {
   CALM_ID,
@@ -2824,7 +2824,7 @@ export class PlanDoc extends PlanReader {
 
   /**
    * When Owen ticked each line or part of the section Read (epic `epic-engine` I206):  `<epic-page away-seen>`,
-   * `<line>=<time>` pairs (`p-x=2026-11-03T14:30 todo=...`), by phase or item id, or a part's (`done`, `todo`).
+   * `<line>=<time>` pairs (`p-x=2026-11-03T14:30 todo=...`), by phase or item id, or a part's (`done`, `fixed`, `asks` ...).
    */
   get awaySeen(): Record<string, string> {
     const seen: Record<string, string> = {}
@@ -2848,7 +2848,8 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * The section's body:  the bedtime runs' lines, What was done, Under way, Still to do, each line linking its phase or item.
+   * The section's body:  the bedtime runs' lines, Waiting on you, Under way, What was done, Fixed, to review, Newly
+   * opened issues, New manual tests (I277), each line linking its phase or item.
    * - each line and each part's heading an `<epic-away-line>`, with its own Read (I206)
    */
   private awayBody(summary: NightSummary): Node[] {
@@ -2873,18 +2874,18 @@ export class PlanDoc extends PlanReader {
       return element
     }
     const body: Node[] = summary.lead.map((text) => html("p", text))
+    // what needs Owen, a part per kind (I277):  a fix isn't "still to do";  Waiting on you first, then Under way, then What was done (Owen's redirects)
+    const needPart = (part: (typeof NEED_PARTS)[number]) => {
+      const needs = summary.needs.filter((need) => need.part === part.key)
+      if (!needs.length) return
+      body.push(heading(part.key, part.state, part.title))
+      for (const [index, need] of needs.entries())
+        body.push(line(need.id, part.state, `${index + 1}. `, link(need.id, need.label), ` ${need.title}`))
+    }
+    needPart(NEED_PARTS[0])
     // done and dropped (I228) alike:  each line says which
     const finished = summary.done.filter((done) => done.status !== "under way")
     const running = summary.done.filter((done) => done.status === "under way")
-    if (finished.length) {
-      body.push(heading("done", "recent", "What was done"))
-      for (const done of finished) {
-        const merged = done.merged === undefined ? "" : done.merged ? ", merged" : ", not merged yet"
-        const commit = done.sha ? `  (${done.sha}${merged})` : ""
-        const built = done.built ? `:  ${done.built}` : ""
-        body.push(line(done.id, "recent", link(done.id, done.label), ` ${done.status}${built}${commit}`))
-      }
-    }
     // a part of its own (epic `epic-engine` I223):  each line's mark spins, no tick (nothing to read yet)
     if (running.length) {
       body.push(heading("underway", "progress", "Under way"))
@@ -2894,13 +2895,16 @@ export class PlanDoc extends PlanReader {
         body.push(element)
       }
     }
-    if (summary.needs.length) {
-      body.push(heading("todo", "attention", "Still to do"))
-      for (const [index, need] of summary.needs.entries())
-        body.push(
-          line(need.id, "attention", `${index + 1}. `, link(need.id, need.label), ` ${need.why}:  ${need.title}`)
-        )
+    if (finished.length) {
+      body.push(heading("done", "recent", "What was done"))
+      for (const done of finished) {
+        const merged = done.merged === undefined ? "" : done.merged ? ", merged" : ", not merged yet"
+        const commit = done.sha ? `  (${done.sha}${merged})` : ""
+        const built = done.built ? `:  ${done.built}` : ""
+        body.push(line(done.id, "recent", link(done.id, done.label), ` ${done.status}${built}${commit}`))
+      }
     }
+    for (const part of NEED_PARTS.slice(1)) needPart(part)
     return body
   }
 
@@ -3239,7 +3243,7 @@ export class PlanDoc extends PlanReader {
 
   /**
    * A line's or a part's Read in "0. While you were out" (epic `epic-engine` I206):  a Seen on `away:<line>`;  that
-   * line, or that part (`done`, `todo`), leaves the section (`readAwayLine()`).
+   * line, or that part (`done`, `fixed`, `asks` ...), leaves the section (`readAwayLine()`).
    * - and what it's about is SEEN too (epic `epic-engine` I268;  Owen, 2026-11-14:  "mark each item Seen"):  every
    *   update block still new in its phase or item (each line of a part, for a part's) stamped `seen`, as its own
    *   Seen does (`seeUpdatesFor()`)
@@ -3263,7 +3267,7 @@ export class PlanDoc extends PlanReader {
 
   /**
    * SIDE EFFECT:  every update block still new under away line `line` stamped `seen` (`stampSeen()`);  how many.
-   * - `line`:  a phase's or an item's id, or a part's (`done`, `todo`):  then each line of that part, as the
+   * - `line`:  a phase's or an item's id, or a part's (`done`, `fixed`, `asks` ...):  then each line of that part, as the
    *   section draws it now (`awayLinesOf()`)
    * - new:  not `seen`, and not gone quiet (`PlanDates.isQuiet()`), as `updateUpdates()` counts them
    */
@@ -3281,7 +3285,10 @@ export class PlanDoc extends PlanReader {
     return seen
   }
 
-  /** The lines of part `part` of "0. While you were out", as it's drawn now:  their phase or item ids, in order. */
+  /**
+   * The lines of part `part` of "0. While you were out", as it's drawn now:  their phase or item ids, in order.
+   * - `todo`, the one need part before I277 (an old page's mark):  every need part's lines
+   */
   awayLinesOf(part: AwayPart): string[] {
     const section = this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)
     const lines: string[] = []
@@ -3289,7 +3296,7 @@ export class PlanDoc extends PlanReader {
     for (const line of section?.querySelectorAll("epic-away-line[line]") ?? []) {
       const key = line.getAttribute("line")!
       if (line.hasAttribute("heading")) current = key
-      else if (current === part) lines.push(key)
+      else if (current === part || (part === OLD_TODO && NEED_PARTS.some((it) => it.key === current))) lines.push(key)
     }
     return lines
   }
@@ -3672,7 +3679,19 @@ function cardSetWords(choices: number | undefined): string {
 const UPDATE_BLOCKS = "epic-update[at], epic-update[summary]"
 
 /** The parts of "0. While you were out", by their headings' keys:  a Read on one reads each of its lines. */
-const AWAY_PARTS: readonly AwayPart[] = ["done", "underway", "todo"]
+const AWAY_PARTS: readonly AwayPart[] = ["done", "underway", "fixed", "issues", "tests", "asks", OLD_TODO]
+
+/**
+ * What needs Owen, a part each, in the section's order (epic `epic-engine` I277):  its key (its heading's line), its
+ * colour, its heading.
+ */
+const NEED_PARTS: readonly { key: NeedPart; state: AwayState; title: string }[] = [
+  // first of all, above What was done (Owen, 2026-11-14)
+  { key: "asks", state: "attention", title: "Waiting on you" },
+  { key: "fixed", state: "replied", title: "Fixed, to review" },
+  { key: "issues", state: "open", title: "Newly opened issues" },
+  { key: "tests", state: "open", title: "New manual tests" }
+]
 
 /** The tags whose `phase` names a phase by number:  renumbered with it (`PlanDoc.makeRoomForPhase()`). */
 
@@ -3715,15 +3734,18 @@ function changeTitle(change: Element): string {
 const AWAY_TITLE = "0. While you were out"
 
 /** A line of "0. While you were out":  which of its title's badges it counts in, and so its tick's colour. */
-type AwayState = "recent" | "progress" | "attention"
+type AwayState = "recent" | "progress" | "replied" | "open" | "attention"
 
 /** What's new in "0. While you were out", for its title's badges:  `recent:2 progress:1 attention:3`. */
 function awayCounts(summary: NightSummary): string {
   const running = summary.done.filter((done) => done.status === "under way").length
+  const needs = (...parts: NeedPart[]) => summary.needs.filter((need) => parts.includes(need.part)).length
   const counts = {
     recent: summary.done.length - running,
     progress: running,
-    attention: summary.waiting
+    replied: needs("fixed"),
+    open: needs("issues", "tests"),
+    attention: needs("asks")
   }
   return Object.entries(counts)
     .filter(([, count]) => count > 0)
