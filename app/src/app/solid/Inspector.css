@@ -350,6 +350,28 @@ ui-section.InspectorEvent {
   }
 }
 
+/* an action's run button, at its row's right (`<ActionRunButton>`):  the circled play alone, as big as the row's
+   words, no ring or fill round it (Owen, epic `editor` I132:  "No ring around this, just make the icon bigger");
+   a hover deepens its colour, and only the keyboard's focus draws a thin ring */
+ui-button.InspectorActionButton::part(button) {
+  padding: 0;
+  font-size: 18px;
+  background: none;
+  box-shadow: none;
+  outline: none;
+}
+ui-button.InspectorActionButton::part(icon) {
+  margin: 0;
+}
+ui-button.InspectorActionButton:not([disabled]):hover::part(button) {
+  color: var(--ui-primary);
+}
+ui-button.InspectorActionButton::part(button):focus-visible {
+  border-radius: 50%;
+  outline: 1px solid var(--ui-primary);
+  outline-offset: 1px;
+}
+
 /* the views tree:  a row a part, indented by its depth, tight (Owen:  "tighten up spacing ... line to line and icon
    to label");  a part with parts inside, its caret first.
    Plain text in every theme (Owen:  "and inspector tree"):  each title the text's colour, which one it is
@@ -359,6 +381,13 @@ ui-section.InspectorEvent {
   display: block;
   margin: -4px -14px 0;
   font-size: 13px;
+}
+/* a drawn thing's pill, as its row's title (`<ThingChip inRow>`):  its words as close to the icon as a plain row's
+   (Owen, epic `editor` I130:  "too much space between icon and title"),
+   the pill's rim tucked in by the room the row leaves after its icon */
+ui-button.InspectorRowChip {
+  margin-inline-start: -2px;
+  --ui-button-padding-inline: 6px;
 }
 .InspectorFilter {
   flex: 1 1 auto;

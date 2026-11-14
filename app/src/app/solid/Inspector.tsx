@@ -762,7 +762,8 @@ export class Inspector {
    * - A Spell UI element reads as its tag, then which it is:
    *   - its `name`
    *   - else its `label` (or `aria-label`:  an icon-only menu item's, `<ui-item "Cheat" />`)
-   *   - else the title of the action it draws, `<ui-action "Auto Play" />` (epic `editor` I107)
+   *   - else the action it draws, by its name as the code writes it, `<ui-action "auto play" />`:
+   *     not its title (epic `editor` I107, I129;  Owen:  "\"Cheat\" shouldn't be upper case")
    *   - else its own words, shortened
    *     (Owen:  "show name or label to make it clearer which is which";  `<ui-button "20%" />`)
    *   - none:  its tag alone, `<ui-form />`
@@ -770,7 +771,7 @@ export class Inspector {
   static labelFor(element: Element): string {
     const thing = SpellElement.thingOf(element)
     if (!thing) {
-      const which = ownTitleOf(element)
+      const which = ownTitleOf(element, "as written")
       return which ? `<${element.localName} "${which}" />` : `<${element.localName} />`
     }
     return Inspector.thingLabel(thing, "", element)
@@ -813,11 +814,14 @@ export class Inspector {
   /**
    * A part's icon, in the views tree.
    * - A drawn thing:  the type's own, when it has a property `icon`;  else a cube.
+   * - An action (a `<ui-action>` drawing one):  a circled play, as every action shows (Owen, epic `editor` I131).
    * - A Spell UI element:  its vocabulary's (`ComponentVocabulary.icon`).
    */
   static iconFor(element: Element): string {
     const thing = SpellElement.thingOf(element) as { icon?: unknown } | undefined
     if (thing) return typeof thing.icon === "string" && thing.icon ? thing.icon : THING_ICON
+    const drawn = (element as E.DOMElement).component as { actionToDraw?: object } | undefined
+    if (drawn?.actionToDraw) return ACTION_ICON
     return Inspector.vocabularyOf(element)?.icon ?? CONTROL_ICON
   }
 
@@ -1490,17 +1494,28 @@ const WORDS_LENGTH = 24
 /**
  * Which Spell UI element `element` is, in its own words:  `""` for none.
  * - its `name`, else its `label` (or `aria-label`:  an icon-only menu item's)
- * - else the title of the action it draws:  a `<ui-action>`'s are its action's, not its own (epic `editor` I107)
+ * - else the action it draws:  a `<ui-action>`'s words are its action's, not its own (epic `editor` I107)
+ *   - `"as said"`:  its title, as people read it, `Auto Play` (the views tree's row)
+ *   - `"as written"`:  its name as the code writes it, `auto play` (the card's header, the row's tooltip;  I129)
  * - else its own words, shortened
  */
-function ownTitleOf(element: Element): string {
-  const action = (element as E.DOMElement).component as { actionToDraw?: { title?: unknown } } | undefined
-  const actionTitle = action?.actionToDraw?.title
+function ownTitleOf(element: Element, words: "as said" | "as written" = "as said"): string {
+  const action = (element as E.DOMElement).component as
+    | { actionToDraw?: { title?: unknown; name?: unknown } }
+    | undefined
+  const { title, name } = action?.actionToDraw ?? {}
+  // an action's name is its method's, `autoPlay`:  its words are the code's, `auto play`
+  const actionWords =
+    words === "as written" && typeof name === "string" && name
+      ? kebabCase(name).replaceAll("-", " ")
+      : typeof title === "string"
+        ? title
+        : ""
   return (
     element.getAttribute("name") ||
     element.getAttribute("label") ||
     element.getAttribute("aria-label") ||
-    (typeof actionTitle === "string" ? actionTitle : "") ||
+    actionWords ||
     ownWords(element)
   )
 }
@@ -2066,6 +2081,8 @@ const INSPECTING_MARK = "data-inspecting"
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
 const THING_ICON = "cube"
 const CONTROL_ICON = "square outline"
+/** An action's icon, wherever the Inspector shows one:  Font Awesome's circled play (epic `editor` I116, I131). */
+export const ACTION_ICON = "fa7-free:circle-play"
 
 /****************
  * ### `PartSelector`

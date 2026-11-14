@@ -7,6 +7,7 @@ import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import {
+  ACTION_ICON,
   Inspector,
   ThingChip,
   addressKey,
@@ -949,9 +950,6 @@ const EVENT_ICON = "bolt"
 /** An ability's icon, in the Code card:  a hand. */
 const ABILITY_ICON = "hand paper outline"
 
-/** An action's run button, at its row's right:  Font Awesome's circled play (Owen, epic `editor` I116). */
-const RUN_ICON = "fa7-free:circle-play"
-
 /**
  * An action's header:  its signature as Spell writes it, `to put (a card) on (a pile)`, each thing it takes a badge
  * of its type (Owen:  "where `a card` is in a badge to show it is a type").
@@ -1077,7 +1075,7 @@ function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX
       slot="actions"
       size="mini"
       appearance="link"
-      icon={RUN_ICON}
+      icon={ACTION_ICON}
       class="InspectorActionButton"
       title={why()}
       aria-label={why()}
