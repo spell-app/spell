@@ -2,16 +2,16 @@
   "spellVersion": "0.8.0",
   "provides": [
     "Card",
-    "Deck",
     "Pile",
+    "Deck",
     "Solitaire",
     "StockPile",
     "DiscardPile",
     "Foundation",
     "Column",
     "test_card_setup",
-    "test_a_new_deck",
     "test_piles",
+    "test_a_new_deck",
     "test_the_moves"
   ],
   "statements": [
@@ -229,34 +229,6 @@
       "defined": "/Card.spell:2200-3091"
     },
     {
-      "type": "Deck",
-      "superType": "ViewableList",
-      "itemType": "Card",
-      "defined": "/Deck.spell:0-759"
-    },
-    {
-      "kind": "method",
-      "name": "creating a deck",
-      "returns": "nothing",
-      "defined": "/Deck.spell:65-235"
-    },
-    {
-      "property": "short_name",
-      "asWritten": "short name",
-      "of": "Deck",
-      "datatype": "text",
-      "defined": "/Deck.spell:237-430"
-    },
-    {
-      "syntax": "test a new deck",
-      "output": "test_a_new_deck",
-      "rule": "method_call",
-      "alias": "statement",
-      "kind": "function",
-      "name": "a new deck",
-      "defined": "/Deck.spell:433-759"
-    },
-    {
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
@@ -306,6 +278,34 @@
       "datatype": "Pile",
       "exclusive": true,
       "defined": "/Pile.spell:1630-1656"
+    },
+    {
+      "type": "Deck",
+      "superType": "ViewableList",
+      "itemType": "Card",
+      "defined": "/Deck.spell:0-759"
+    },
+    {
+      "kind": "method",
+      "name": "creating a deck",
+      "returns": "nothing",
+      "defined": "/Deck.spell:65-235"
+    },
+    {
+      "property": "short_name",
+      "asWritten": "short name",
+      "of": "Deck",
+      "datatype": "text",
+      "defined": "/Deck.spell:237-430"
+    },
+    {
+      "syntax": "test a new deck",
+      "output": "test_a_new_deck",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "a new deck",
+      "defined": "/Deck.spell:433-759"
     },
     {
       "type": "StockPile",
@@ -559,17 +559,17 @@
     90,
     106,
     135,
-    173,
-    178,
-    183,
-    190,
-    213,
-    218,
-    225,
-    231,
-    237,
-    252,
-    288,
+    180,
+    185,
+    192,
+    198,
+    204,
+    219,
+    255,
+    257,
+    262,
+    267,
+    274,
     299,
     323,
     341,

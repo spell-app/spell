@@ -137,28 +137,6 @@ export function testCardSetup(...args) {
   return sendCall("test_card_setup", args)
 }
 // -----------
-/** a deck of playing cards */
-export class Deck extends ViewableList {
-  static instanceType = Card
-  static elementTag = core.defineElement(this, "test-project")
-
-  /** Create one of each card, ace of clubs first */
-  create() {
-    Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
-  }
-
-  /** its card names, top to bottom */
-  get shortName() {
-    const cardNames = new List({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shortName))
-    return `deck: ${cardNames}`
-  }
-}
-
-export function testANewDeck(...args) {
-  return sendCall("test_a_new_deck", args)
-}
-// -----------
 /////////////////////
 // ## A pile of cards
 /////////////////////
@@ -210,6 +188,28 @@ export function testPiles(...args) {
 }
 
 /** a card is in one pile at a time:  putting it on another pile takes it off this one */
+// -----------
+/** a deck of playing cards */
+export class Deck extends ViewableList {
+  static instanceType = Card
+  static elementTag = core.defineElement(this, "test-project")
+
+  /** Create one of each card, ace of clubs first */
+  create() {
+    Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
+  }
+
+  /** its card names, top to bottom */
+  get shortName() {
+    const cardNames = new List({ instanceType: "text" })
+    this.forEach((card) => cardNames.append(card.shortName))
+    return `deck: ${cardNames}`
+  }
+}
+
+export function testANewDeck(...args) {
+  return sendCall("test_a_new_deck", args)
+}
 // -----------
 ////////////////////////
 // ## Klondike Solitaire

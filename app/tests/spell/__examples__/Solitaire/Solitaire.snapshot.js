@@ -170,39 +170,6 @@ export function testCardSetup() {
   })
 }
 // -----------
-/** a deck of playing cards */
-export class Deck extends ViewableList {
-  static instanceType = Card
-  static elementTag = core.defineElement(this, "test-project")
-
-  /** Create one of each card, ace of clubs first */
-  create() {
-    Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
-  }
-
-  /** its card names, top to bottom */
-  get shortName() {
-    const cardNames = new List({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shortName))
-    return `deck: ${cardNames}`
-  }
-}
-
-export function testANewDeck() {
-  return core.test("test a new deck", function testANewDeck() {
-    const it = new Deck()
-    core.echoTestAction(`the deck is a new deck`)
-    const deck = new Deck()
-    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-    core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
-    core.expect(deck.firstItem?.shortName, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
-    core.expect(deck.lastItem?.name, `deck's last card's name`, "king of spades", `"king of spades"`)
-    core.echoTestAction(`shuffle the deck`)
-    deck.randomize()
-    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-  })
-}
-// -----------
 core.heading("A pile of cards")
 /////////////////////
 // ## A pile of cards
@@ -286,6 +253,39 @@ export function testPiles() {
 }
 
 /** a card is in one pile at a time:  putting it on another pile takes it off this one */
+// -----------
+/** a deck of playing cards */
+export class Deck extends ViewableList {
+  static instanceType = Card
+  static elementTag = core.defineElement(this, "test-project")
+
+  /** Create one of each card, ace of clubs first */
+  create() {
+    Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
+  }
+
+  /** its card names, top to bottom */
+  get shortName() {
+    const cardNames = new List({ instanceType: "text" })
+    this.forEach((card) => cardNames.append(card.shortName))
+    return `deck: ${cardNames}`
+  }
+}
+
+export function testANewDeck() {
+  return core.test("test a new deck", function testANewDeck() {
+    const it = new Deck()
+    core.echoTestAction(`the deck is a new deck`)
+    const deck = new Deck()
+    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+    core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
+    core.expect(deck.firstItem?.shortName, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
+    core.expect(deck.lastItem?.name, `deck's last card's name`, "king of spades", `"king of spades"`)
+    core.echoTestAction(`shuffle the deck`)
+    deck.randomize()
+    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+  })
+}
 // -----------
 core.heading("Klondike Solitaire")
 ////////////////////////
@@ -683,6 +683,6 @@ core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- t
 if (!core.isCarryingOver) solitaire.start()
 // -----------
 if (!core.isCarryingOver) testCardSetup()
-if (!core.isCarryingOver) testANewDeck()
 if (!core.isCarryingOver) testPiles()
+if (!core.isCarryingOver) testANewDeck()
 if (!core.isCarryingOver) testTheMoves()

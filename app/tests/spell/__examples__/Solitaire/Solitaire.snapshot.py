@@ -219,59 +219,6 @@ def test_card_setup() -> None:
 # -----------
 
 
-class Deck(ViewableList):
-    """a deck of playing cards"""
-
-    item_type = Card
-    element_tag = "test-project-deck"
-
-    async def create(self) -> None:
-        """Create one of each card, ace of clubs first"""
-        for rank in Card.RANKS:
-            for suit in Card.SUITS:
-                self.append(Card(rank=rank, suit=suit))
-
-    @property
-    def short_name(self) -> str:
-        """its card names, top to bottom"""
-        card_names = List(item_type="text")
-        for card in self:
-            card_names.append(card.short_name)
-        return f"deck: {card_names}"
-
-
-def test_a_new_deck() -> None:
-    with core.test("test a new deck"):
-        it = Deck()
-        core.echo_test_action("the deck is a new deck")
-        deck = Deck()
-        core.expect(len(deck), "the number of cards in the deck", 52, "52")
-        core.expect(
-            len(deck.filter(lambda card: card.rank == "queen")),
-            "the number of (cards in the deck where it is a queen)",
-            4,
-            "4",
-        )
-        core.expect(
-            getattr(deck.first_item, "short_name", None),
-            "deck's first card's short name",
-            "A♣↓",
-            "\"A♣↓\"",
-        )
-        core.expect(
-            getattr(deck.last_item, "name", None),
-            "deck's last card's name",
-            "king of spades",
-            "\"king of spades\"",
-        )
-        core.echo_test_action("shuffle the deck")
-        deck.randomize()
-        core.expect(len(deck), "the number of cards in the deck", 52, "52")
-
-
-# -----------
-
-
 ####################
 # ## A pile of cards
 ####################
@@ -368,6 +315,59 @@ def test_piles() -> None:
 
 
 # a card is in one pile at a time:  putting it on another pile takes it off this one
+
+
+# -----------
+
+
+class Deck(ViewableList):
+    """a deck of playing cards"""
+
+    item_type = Card
+    element_tag = "test-project-deck"
+
+    async def create(self) -> None:
+        """Create one of each card, ace of clubs first"""
+        for rank in Card.RANKS:
+            for suit in Card.SUITS:
+                self.append(Card(rank=rank, suit=suit))
+
+    @property
+    def short_name(self) -> str:
+        """its card names, top to bottom"""
+        card_names = List(item_type="text")
+        for card in self:
+            card_names.append(card.short_name)
+        return f"deck: {card_names}"
+
+
+def test_a_new_deck() -> None:
+    with core.test("test a new deck"):
+        it = Deck()
+        core.echo_test_action("the deck is a new deck")
+        deck = Deck()
+        core.expect(len(deck), "the number of cards in the deck", 52, "52")
+        core.expect(
+            len(deck.filter(lambda card: card.rank == "queen")),
+            "the number of (cards in the deck where it is a queen)",
+            4,
+            "4",
+        )
+        core.expect(
+            getattr(deck.first_item, "short_name", None),
+            "deck's first card's short name",
+            "A♣↓",
+            "\"A♣↓\"",
+        )
+        core.expect(
+            getattr(deck.last_item, "name", None),
+            "deck's last card's name",
+            "king of spades",
+            "\"king of spades\"",
+        )
+        core.echo_test_action("shuffle the deck")
+        deck.randomize()
+        core.expect(len(deck), "the number of cards in the deck", 52, "52")
 
 
 # -----------
@@ -918,8 +918,8 @@ solitaire.start()
 
 
 test_card_setup()
-test_a_new_deck()
 test_piles()
+test_a_new_deck()
 test_the_moves()
 
 
