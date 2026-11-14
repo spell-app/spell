@@ -103,19 +103,8 @@ export class Card extends TwoSidedView {
     return 0
   }
 
-  /** a click plays it */
   async onClick(event) {
-    await this.play()
-  }
-
-  /** a drag starting clears the last hint */
-  onDrag(event) {
-    solitaire.hint = ""
-  }
-
-  /** dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so */
-  onDragCancelled(event) {
-    solitaire.hint = " -- Not there"
+    if (this.isFaceDirection("up") || this.pile === solitaire.stock) await this.play()
   }
 
   static draggable = true
@@ -125,35 +114,28 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (this.pile === solitaire.stock) {
-      await solitaire.playFromTheStock()
-      return
+    if (this.pile === solitaire.stock) await solitaire.playFromTheStock()
+    else {
+      const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
+      if (endPile === undefined) return false
+      return await this.putOnPile(endPile)
     }
-    const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
-    if (endPile === undefined) return false
-    return await this.putOnPile(endPile)
   }
 
   async putOnPile(pile) {
+    /** - the pile it left turns its new last card up;  the move counts, and scores */
     const startPile = this.pile
     if (!core.canGiveUp(startPile, this)) return false
     if (!core.canTake(pile, this)) return false
     const points = this.countThePointsForCardOnPile(pile)
     startPile.startingWith(this).forEach((card) => core.move(card, pile))
-    if (startPile instanceof Tableau && !startPile.isEmpty) {
+    if (startPile instanceof Column && !startPile.isEmpty) {
       await core.pauseFor(200, "msec")
       startPile.lastItem?.turnFaceUp()
     }
-    solitaire.moves = solitaire.moves + 1
     solitaire.score = solitaire.score + points
     return true
   }
-
-  get clickableWhen() {
-    return this.isFaceDirection("up") || this.pile === solitaire.stock
-  }
-
-  static clickable = true
 }
 // Ace is low:  ace = 1 ... king = 13
 
@@ -194,16 +176,16 @@ export function testANewDeck(...args) {
 // ## A pile of cards
 /////////////////////
 // A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-// Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
+// Each pile is its own element around its cards' elements, `<solitaire-column>` around `<solitaire-card>`s.
 // A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 export class Pile extends ViewableList {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
-  /** How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css */
-  // - its "layout" is one of stacked, vertical, horizontal or fanned
-  static Layouts = ["stacked", "vertical", "horizontal", "fanned"]
+  /** How its cards lie:  on top of each other, or down a column -- styles.css */
+  // - its "layout" is one of stacked or vertical
+  static Layouts = ["stacked", "vertical"]
   static { this.declareProp("layout", { oneOf: Pile.Layouts }) }
   get layout() { return this.getProp("layout") }
   set layout(value) { this.setProp("layout", value) }
@@ -225,12 +207,6 @@ export class Pile extends ViewableList {
     let summary = `${this.id}:`
     this.forEach((card) => (summary = `${summary} ${card.state}`))
     return summary
-  }
-
-  /** while a card it would take is over it, the score shows what the move would add -- gone as the card leaves */
-  whileCardDraggedOver(card) {
-    const points = card.countThePointsForCardOnPile(this)
-    if (core.canTake(this, card) && points > 0) solitaire.hint = ` (+${points})`
   }
 
   async whenCardDroppedOn(card) {
@@ -272,13 +248,11 @@ export class StockPile extends Pile {
   }
 
   drawItsPlaceholder() {
-    // A light grey card, face down
     return h("ui-text", { part: "placeholder" }, "🂠")
   }
 
-  /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
   async onClick(event) {
-    await solitaire.turnAStockCard()
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -318,8 +292,8 @@ export class Foundation extends Pile {
     return false
   }
 
+  //-- a light grey ace of its suit, face up
   drawItsPlaceholder() {
-    // A light grey ace of its suit, face up
     return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
   }
 
@@ -332,7 +306,7 @@ export class Foundation extends Pile {
 }
 
 /** A column, built down from king to ace, red and black in turn */
-export class Tableau extends Pile {
+export class Column extends Pile {
   static elementTag = core.defineElement(this, "test-project")
 
   get layout() {
@@ -355,36 +329,6 @@ export class Tableau extends Pile {
 
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
-
-  // - its "score" is a number
-  static { this.declareProp("score", { type: "number" }) }
-  get score() { return this.getProp("score") }
-  set score(value) { this.setProp("score", value) }
-
-  /** The cards played this game:  a stock card turned over isn't one */
-  // - its "moves" is a number
-  static { this.declareProp("moves", { type: "number" }) }
-  get moves() { return this.getProp("moves") }
-  set moves(value) { this.setProp("moves", value) }
-
-  /** Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win */
-  // - its "hint" is text
-  static { this.declareProp("hint", { type: "text" }) }
-  get hint() { return this.getProp("hint") }
-  set hint(value) { this.setProp("hint", value) }
-
-  /** a change to a property is an event:  each runs just after the change lands */
-  onScoreChange(event) {
-    /** every card on a foundation:  the game is won */
-    let home = this.clubs.length + this.diamonds.length
-    home = home + this.hearts.length + this.spades.length
-    if (home === 52) this.hint = " -- You won!"
-  }
-
-  /** a card played:  the last hint goes */
-  onMovesChange(event) {
-    this.hint = ""
-  }
 
   // "deck" is a new deck
   static { this.declareProp("deck", { init: () => new Deck({ id: "deck" }), early: true }) }
@@ -421,67 +365,93 @@ export class Solitaire extends App {
   get spades() { return this.getProp("spades") }
   set spades(value) { this.setProp("spades", value) }
 
-  // "T1" is a new tableau
-  static { this.declareProp("T1", { init: () => new Tableau({ id: "T1" }), early: true }) }
-  get T1() { return this.getProp("T1") }
-  set T1(value) { this.setProp("T1", value) }
+  // "C1" is a new column
+  static { this.declareProp("C1", { init: () => new Column({ id: "C1" }), early: true }) }
+  get C1() { return this.getProp("C1") }
+  set C1(value) { this.setProp("C1", value) }
 
-  // "T2" is a new tableau
-  static { this.declareProp("T2", { init: () => new Tableau({ id: "T2" }), early: true }) }
-  get T2() { return this.getProp("T2") }
-  set T2(value) { this.setProp("T2", value) }
+  // "C2" is a new column
+  static { this.declareProp("C2", { init: () => new Column({ id: "C2" }), early: true }) }
+  get C2() { return this.getProp("C2") }
+  set C2(value) { this.setProp("C2", value) }
 
-  // "T3" is a new tableau
-  static { this.declareProp("T3", { init: () => new Tableau({ id: "T3" }), early: true }) }
-  get T3() { return this.getProp("T3") }
-  set T3(value) { this.setProp("T3", value) }
+  // "C3" is a new column
+  static { this.declareProp("C3", { init: () => new Column({ id: "C3" }), early: true }) }
+  get C3() { return this.getProp("C3") }
+  set C3(value) { this.setProp("C3", value) }
 
-  // "T4" is a new tableau
-  static { this.declareProp("T4", { init: () => new Tableau({ id: "T4" }), early: true }) }
-  get T4() { return this.getProp("T4") }
-  set T4(value) { this.setProp("T4", value) }
+  // "C4" is a new column
+  static { this.declareProp("C4", { init: () => new Column({ id: "C4" }), early: true }) }
+  get C4() { return this.getProp("C4") }
+  set C4(value) { this.setProp("C4", value) }
 
-  // "T5" is a new tableau
-  static { this.declareProp("T5", { init: () => new Tableau({ id: "T5" }), early: true }) }
-  get T5() { return this.getProp("T5") }
-  set T5(value) { this.setProp("T5", value) }
+  // "C5" is a new column
+  static { this.declareProp("C5", { init: () => new Column({ id: "C5" }), early: true }) }
+  get C5() { return this.getProp("C5") }
+  set C5(value) { this.setProp("C5", value) }
 
-  // "T6" is a new tableau
-  static { this.declareProp("T6", { init: () => new Tableau({ id: "T6" }), early: true }) }
-  get T6() { return this.getProp("T6") }
-  set T6(value) { this.setProp("T6", value) }
+  // "C6" is a new column
+  static { this.declareProp("C6", { init: () => new Column({ id: "C6" }), early: true }) }
+  get C6() { return this.getProp("C6") }
+  set C6(value) { this.setProp("C6", value) }
 
-  // "T7" is a new tableau
-  static { this.declareProp("T7", { init: () => new Tableau({ id: "T7" }), early: true }) }
-  get T7() { return this.getProp("T7") }
-  set T7(value) { this.setProp("T7", value) }
+  // "C7" is a new column
+  static { this.declareProp("C7", { init: () => new Column({ id: "C7" }), early: true }) }
+  get C7() { return this.getProp("C7") }
+  set C7(value) { this.setProp("C7", value) }
 
-  /** Every card of the deck into the stock */
-  create() {
+  // "score" is a number
+  static { this.declareProp("score", { type: "number" }) }
+  get score() { return this.getProp("score") }
+  set score(value) { this.setProp("score", value) }
+
+  async onCreatingSolitaire(event) {
     this.deck.forEach((card) => this.stock.append(card))
+    await this.restartTheGame()
   }
 
-  /** The discards, turned over, back into the stock */
-  resetTheStock() {
-    const cards = this.discards.clone()
-    cards.reverse()
-    cards.forEach((card) => {
-      this.stock.append(card)
-      card.turnFaceDown()
-    })
+  draw() {
+    return [
+      h("ui-segment", { inverted: true, attach: "top" },
+        h("ui-toolbar", { class: "GameBar", "aria-label": "Game" },
+          h("ui-text", { slot: "title", size: "large", heavy: true }, "Solitaire"),
+          h("ui-buttons", { slot: "center", padding: "compact" },
+            core.drawAction(this, "autoPlay"),
+            core.drawAction(this, "cheat"),
+            core.drawAction(this, "restartTheGame", { title: "Restart" })
+          ),
+          h("ui-buttons", { slot: "center", padding: "compact" },
+            core.drawAction(this, "undo", { "icon-only": true }),
+            core.drawAction(this, "redo", { "icon-only": true })
+          ),
+          h("ui-text", { slot: "right" }, "Score: ", () => this.score)
+        )
+      ),
+      h("ui-container",
+        h("ui-segment", { appearance: "basic" },
+          h("ui-grid", { columns: "7", spacing: "xs" },
+            core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"]),
+            h("test-project-stock-pile", { id: "stock" }),
+            h("test-project-discard-pile", { id: "discards" }),
+            h("spacer"),
+            h("test-project-foundation", { id: "clubs" }),
+            h("test-project-foundation", { id: "diamonds" }),
+            h("test-project-foundation", { id: "hearts" }),
+            h("test-project-foundation", { id: "spades" }),
+            h("test-project-column", { id: "C1" }),
+            h("test-project-column", { id: "C2" }),
+            h("test-project-column", { id: "C3" }),
+            h("test-project-column", { id: "C4" }),
+            h("test-project-column", { id: "C5" }),
+            h("test-project-column", { id: "C6" }),
+            h("test-project-column", { id: "C7" })
+          )
+        )
+      )
+    ]
   }
 
-  /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
-  async playFromTheStock() {
-    if (this.stock.isEmpty) this.resetTheStock()
-    const it = this.stock.lastItem
-    it?.turnFaceUp()
-    // as long as its flip takes (styles.css), so it turns over before it moves
-    await core.pauseFor(300, "msec")
-    this.discards.append(it)
-  }
-
-  /** Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
+  /** Gather every card into the stock, shuffle it, and deal the columns */
   async dealTheCards() {
     for (const card of this.deck) {
       const startPile = card.pile
@@ -495,65 +465,42 @@ export class Solitaire extends App {
     // each row's first card lands face down, then turns up where it lies
     for (const row of core.getRange(1, 7)) {
       for (const column of core.getRange(row, 7)) {
-        core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
-        if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
+        core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
+        if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
         await core.pauseFor(50, "msec")
       }
     }
     await this.playFromTheStock()
   }
 
-  draw() {
-    return [
-      h("ui-toolbar", { class: "GameBar", "aria-label": "Game" },
-        h("ui-text", { class: "GameTitle", slot: "title", size: "large" }, "Solitaire"),
-        h("ui-buttons", { class: "GameButtons", slot: "center" },
-          core.drawAction(this, "autoPlay"),
-          core.drawAction(this, "cheat"),
-          core.drawAction(this, "restartTheGame")
-        ),
-        h("ui-buttons", { class: "GameButtons", slot: "center" },
-          core.drawAction(this, "undo", { "icon-only": true }),
-          core.drawAction(this, "redo", { "icon-only": true })
-        ),
-        h("ui-text", { slot: "right" },
-          "Moves: ",
-          () => this.moves,
-          "  ·  Score: ",
-          () => this.score,
-          () => this.hint
-        )
-      ),
-      h("ui-container",
-        h("ui-grid", { class: "Board", columns: "7" },
-          core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"]),
-          h("test-project-stock-pile", { id: "stock" }),
-          h("test-project-discard-pile", { id: "discards" }),
-          h("ui-column"),
-          h("test-project-foundation", { id: "clubs" }),
-          h("test-project-foundation", { id: "diamonds" }),
-          h("test-project-foundation", { id: "hearts" }),
-          h("test-project-foundation", { id: "spades" }),
-          h("test-project-tableau", { id: "T1" }),
-          h("test-project-tableau", { id: "T2" }),
-          h("test-project-tableau", { id: "T3" }),
-          h("test-project-tableau", { id: "T4" }),
-          h("test-project-tableau", { id: "T5" }),
-          h("test-project-tableau", { id: "T6" }),
-          h("test-project-tableau", { id: "T7" })
-        )
-      )
-    ]
+  /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
+  async playFromTheStock() {
+    if (this.stock.isEmpty) this.resetTheStock()
+    const it = this.stock.lastItem
+    it?.turnFaceUp()
+    // as long as its flip takes (styles.css), so it turns over before it moves
+    await core.pauseFor(300, "msec")
+    this.discards.append(it)
   }
 
-  async turnAStockCard() {
-    await this.playFromTheStock()
+  /** The discards, turned over, back into the stock */
+  resetTheStock() {
+    const cards = this.discards.clone()
+    cards.reverse()
+    cards.forEach((card) => {
+      this.stock.append(card)
+      card.turnFaceDown()
+    })
+  }
+
+  async onScoreChange(event) {
+    let home = this.clubs.length + this.diamonds.length
+    home = home + this.hearts.length + this.spades.length
+    if (home === 52) await core.alert("You won!")
   }
 
   async restartTheGame() {
     this.score = 0
-    this.moves = 0
-    this.hint = ""
     await this.dealTheCards()
   }
 
@@ -566,8 +513,8 @@ export class Solitaire extends App {
         await core.pauseFor(500, "msec")
       }
     }
-    // each tableau's last card onto its foundation
-    await core.forEachSequential(core.everyThing(Tableau), async (pile) => {
+    // each column's last card onto its foundation
+    await core.forEachSequential(core.everyThing(Column), async (pile) => {
       if (pile.isEmpty) return
       const testCard = pile.lastItem
       const foundation = core.filter(core.everyThing(Foundation), (pile) => pile.suit === testCard.suit).firstItem
@@ -577,8 +524,8 @@ export class Solitaire extends App {
         await core.pauseFor(100, "msec")
       }
     })
-    // each tableau's face-up cards, all together, onto another tableau
-    await core.forEachSequential(core.everyThing(Tableau), async (pile) => {
+    // each column's face-up cards, all together, onto another column
+    await core.forEachSequential(core.everyThing(Column), async (pile) => {
       const faceUpCards = pile.filter((card) => card.isFaceDirection("up"))
       if (faceUpCards.isEmpty) return
       const testCard = faceUpCards.firstItem
@@ -592,7 +539,7 @@ export class Solitaire extends App {
   }
 
   async cheat() {
-    const remainingPiles = core.filter(core.everyThing(Tableau), (pile) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
+    const remainingPiles = core.filter(core.everyThing(Column), (pile) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
     if (core.isEmpty(remainingPiles)) return
     const pile = core.randomItemOf(remainingPiles)
     const card = pile?.filter((card) => card.isFaceDirection("down"))?.randomItem()
@@ -606,38 +553,22 @@ export class Solitaire extends App {
 }
 export let solitaire
 
-// One of each, made with the solitaire
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], undoneAs: "Restart The Game" })
 
-// Each pauses a moment, so a deal animates
-/** A click on the empty stock:  one step to undo, where the deal's own turn isn't */
-core.describeAction(Solitaire, "turnAStockCard", { title: "Turn A Stock Card", undoneAs: "Turn Card" })
-
-// Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["N"], undoneAs: "Restart" })
-/** Play every card that can go somewhere, until none can */
-core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], undoneAs: "Auto Play" })
-/** Turn up a face-down card from a tableau, at random, onto the discards */
-core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
-
-////////////////////
-// ## Playing a card
-////////////////////
-// What a click or a drag does:  the card's own moves, and each pile's, as the game plays them.
-
-/**
- * the card, and every card on it, onto the first pile that takes it;  it says whether it moved
- * - the stock's card turns over onto the discards instead
- */
 core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
 
-/**
- * the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
- * - the pile it left turns its new last card up;  the move counts, and scores
- */
+/** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
 core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
 
-// each card's events, and when it may be clicked:  the Inspector lists them, as written here
-// only a card face up, or the stock's, can be clicked:  the others show no pointer
+/** Play every card that can go somewhere, until none can */
+core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], undoneAs: "Auto Play" })
+
+/** Turn up a face-down card from a column, at random, onto the discards */
+core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
+
+//-- play the card on click if it is a legal move
+
+//-- drop the card on the pile if it is a legal move
 
 ///////////////
 // ## The piles
@@ -645,19 +576,11 @@ core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs
 // Each kind of pile, what it may take or give up, and how it lies.
 // While one's empty, it shows its placeholder, if it has one.
 
-/** only its top card may be picked up */
-
-/** one card at a time, the last of its pile:  its suit, one higher */
-
-/** its face-up cards may be picked up, with every card on them */
-/** a king onto an empty one;  else one lower, in the other color */
-
 export function testTheMoves(...args) {
   return sendCall("test_the_moves", args)
 }
-
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the board looks -- each card, and how each pile lays its cards out.¬   - A card is drawn as a playing card here, not as a Spell UI element:  no <ui-*> tag draws one, so its size, its¬     faces and its turn over are this sheet's.¬   - Every pile and card is an element of its own on the board, so these rules reach them all:¬     - a pile by its layout, e.g. <solitaire-tableau layout="vertical">¬     - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them¬     - an empty pile's placeholder, which it draws itself, by its part:  ::part(placeholder)¬   - A card is one letter of unicode's Playing Cards, at its pile's width:¬     so a card is as wide as its column, whatever the window's width. */¬¬/* A card's picture, in ems of its own letter (measured in Chrome on a Mac):¬   0.604em wide, 0.805em tall, its left edge 0.049em into the letter;  its outline reaches a little past that, so a¬   card keeps 0.008em to spare above and below. */¬:root,¬:host {¬  /* how wide a card is, for each em of its letter */¬  --card-width: 0.604;¬  /* how tall it is, for each of its widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  a fifth of it, its rank and suit */¬  --card-step-down: 0.2;¬  /* along a row, how much of each card the next one covers:  a tenth of it */¬  --card-overlap: 0.1;¬  /* fanned, how far each card turns from the one before */¬  --card-turn: 8deg;¬}¬¬/****************¬ * The table:  green felt, as on a casino's card table, with the words on it in white¬ ****************/¬¬solitaire-app {¬  display: block;¬  box-sizing: border-box;¬  min-height: 100%;¬  /* room between the felt's edge and the toolbar and cards */¬  padding: 32px;¬  /* rounded at the bottom too, as the frame it sits in is at the top */¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬/* a large screen:  twice the room */¬@media (width >= 1100px) {¬  solitaire-app {¬    padding: 64px;¬  }¬}¬.GameTitle,¬.GameBar > [slot] {¬  color: #f2fbf5;¬}¬¬/****************¬ * The board:  below the game's toolbar, its piles seven to a line¬ ****************/¬¬.Board {¬  /* gutters that shrink with a narrow window, so the cards keep most of its width */¬  --ui-grid-gutter: min(2rem, 2.5vw);¬  --ui-grid-row-spacing: min(2rem, 4vw);¬  /* 1.5rem below the toolbar:  the grid pulls itself up by half a row's spacing */¬  margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);¬}¬¬/****************¬ * The toolbar:  the game's name, its buttons in the middle in two pills, its score¬ ****************/¬¬/* the game's name, in the heavy type of Spell's loading screen */¬.GameTitle {¬  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;¬  font-weight: 800;¬  letter-spacing: -0.035em;¬}¬¬/* the title and the score take equal room, so the buttons sit in the true middle */¬.GameBar::part(title),¬.GameBar::part(right) {¬  flex: 1 1 0;¬}¬.GameBar::part(right) {¬  justify-content: flex-end;¬}¬.GameBar::part(center) {¬  flex: 0 1 auto;¬  gap: 1em;¬}¬/* each pill:  white on the felt, with one shadow around it */¬.GameButtons {¬  --ui-button-radius: 99em;¬  /* square where its buttons meet, so the line between them is straight */¬  --ui-button-group-item-radius: 0;¬  --ui-button-background: Canvas;¬  --ui-button-color: CanvasText;¬  --ui-button-font-weight: 500;¬  margin: 0;¬  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));¬}¬/* a faint line between a pill's buttons */¬.GameButtons > * + *::part(button) {¬  box-shadow: -1px 0 0 var(--ui-border-color);¬}¬¬/* A narrow window, a phone's:  the felt's edge thinner, so the seven columns get the width;¬   the toolbar loses its title, and the score goes on a line of its own, below the buttons, so every button keeps its name */¬@media (width < 36rem) {¬  solitaire-app {¬    padding: 16px 12px;¬  }¬  .GameBar::part(toolbar) {¬    flex-wrap: wrap;¬    justify-content: center;¬    row-gap: 0.75rem;¬  }¬  .GameBar::part(title),¬  [slot="title"] {¬    display: none;¬  }¬  .GameBar::part(center) {¬    gap: 0.5em;¬  }¬  .GameButtons {¬    --ui-button-padding-inline: 0.65em;¬  }¬  .GameBar::part(right) {¬    flex: 1 0 100%;¬    justify-content: center;¬  }¬  .GameBar > [slot] {¬    white-space: nowrap;¬  }¬}¬¬/****************¬ * A pile:  as wide as its cell of the board, and as tall as its cards¬ ****************/¬¬[layout] {¬  /* a box of its own, holding its floated sizer */¬  display: flow-root;¬  position: relative;¬  /* its cards size themselves by its width */¬  container-type: inline-size;¬  /* no glow around the whole pile when a dragged card would land on it:  its top card glows instead (below) */¬  --spell-drop-glow: none;¬}¬/* its height:  a card's, by default -- a percentage of padding is one of its width */¬[layout]::before {¬  content: "";¬  /* floated, so its cards start at the top of its content, not below it */¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card, and the placeholder:  a card's letter as wide as the pile, cut to the card it draws */¬[layout] > *,¬[layout]::part(placeholder) {¬  position: absolute;¬  display: block;¬  /* where its pile's content starts, inside the cell's gutters:  its offsets in a layout are margins */¬  top: auto;¬  left: auto;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* A card on its own, in no pile (one added to the table in the editor):  a column's usual width, face up */¬solitaire-card:not([layout] > *) {¬  position: relative;¬  display: inline-block;¬  vertical-align: top;¬  font-size: calc(var(--loose-card-width, 6rem) / var(--card-width));¬}¬[layout] > *,¬[layout]::part(placeholder),¬solitaire-card {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* in the font that draws the cards, so the page's font never moves them:  a line's height comes from its FIRST font,¬     and a theme's (Fruity's system font) set them 0.027em higher than Lato did, cutting off their tops */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the card's spare room above and below its ink (0.008em) padding, its white face only the content, so it hugs the ink¬     (not a border:  a browser rounds a border to whole pixels) */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  /* Apple Symbols rises 0.67em and drops 0.25em, its card's ink 0.666em above its baseline:¬     a line of 0.917 starts the ink at the top of the face (measured:  0.912 by the font's rounded numbers) */¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/****************¬ * Turning over:  a two sided view's own (Card.spell), both its sides back to back, the card turning in 3D¬ * - Here, only how deep the turn looks, for a card one letter wide:  3em.¬ * - 0.3s, the template's own time:  the game pauses that long after turning the stock's card (Solitaire.spell), so it turns¬ *   over before it moves.¬ * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a¬ *   card that cut its own content would draw flat, and its sides couldn't turn with it.¬ ****************/¬¬[layout] > *,¬solitaire-card {¬  --spell-turn-perspective: 3em;¬  /* its sides turn with it, in 3D:  nothing cut */¬  overflow: visible;¬}¬/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;¬   a <ui-text> draws no box of its own, so it's given one */¬solitaire-card::part(front),¬solitaire-card::part(back),¬[layout] > *::part(front),¬[layout] > *::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬/* Over every card and pile around it (the card's "lifted"), while the cheat turns it and moves it onto the discards */¬[layout] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬[layout] > [lifted] {¬  z-index: 5;¬}¬/*¬ * ... and turns face up as it goes:  moving it to the discards draws it there already face up, so its turn starts¬ * from face down (\`@starting-style\`)¬ */¬[layout] > [lifted][direction="up"] {¬  @starting-style {¬    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);¬  }¬}¬¬@media (prefers-reduced-motion: reduce) {¬  [layout] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[layout]::part(placeholder) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[layout]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/*¬ * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",¬ * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,¬ * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder¬ * (above) pale, on the felt¬ */¬[layout] > *,¬solitaire-card {¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬¬/****************¬ * Dropping:  a card dragged anywhere over a pile that would take it lights up the card it would land on¬ * - That's the pile's top card, its last:  on a column, the face-up card at its foot.¬ *   An empty pile's placeholder, where it would lie.¬ * - A tight glow hugging the card:  a thin ring, then a soft halo.¬ *   The rings grow out from the card's own corners, so they round more than it does.¬ * - The pile says it would take the card by its state, :state(accepting-drop):  the runtime sets it, by the pile's rules.¬ ****************/¬¬[layout]:state(accepting-drop) > :last-child,¬[layout]:state(accepting-drop)::part(placeholder) {¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬/* an empty pile's placeholder shows clearly while it would take the card */¬[layout]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬}¬¬/****************¬ * The layouts:  stacked puts every card on top of the one before¬ ****************/¬¬/* vertical:  each card a step below the one before */¬[layout="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[layout="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬¬/* horizontal:  side by side, each covering the edge of the one before;  smaller as there are more, to fit the pile */¬[layout="horizontal"] {¬  --spread: calc(1 + (max(var(--count, 1), 1) - 1) * (1 - var(--card-overlap)));¬}¬[layout="horizontal"]::before {¬  padding-top: calc(100% * var(--card-height) / var(--spread));¬}¬[layout="horizontal"] > * {¬  font-size: calc(100cqi / var(--card-width) / var(--spread));¬  margin-left: calc(var(--index) * var(--card-width) * 1em * (1 - var(--card-overlap)));¬}¬¬/* fanned:  as a hand of cards is held, each turned a little from the one before, around a point below them */¬[layout="fanned"] > * {¬  font-size: calc(60cqi / var(--card-width));¬  left: calc(50% - var(--card-width) * 0.5em);¬  margin-top: 10%;¬  transform-origin: 50% 200%;¬  rotate: calc((var(--index) - (var(--count) - 1) / 2) * var(--card-turn));¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitaire.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its layout (<solitaire-column layout="vertical">), each card in it by its place:¬     --index from 0, of --count;  an empty pile's placeholder by its part, ::part(placeholder). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitaire-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* The toolbar:  its buttons in the true middle, the title and the score taking equal room on either side;¬   in pills (no attribute rounds a joined group:  \`circular\` parts its buttons) */¬.GameBar::part(title),¬.GameBar::part(right) {¬  flex: 1 1 0;¬}¬.GameBar::part(right) {¬  justify-content: flex-end;¬}¬ui-buttons {¬  --ui-button-radius: var(--ui-radius-pill);¬}¬/* a phone:  no title, and the score on a line of its own, so every button keeps its name */¬@media (width < 36rem) {¬  .GameBar::part(toolbar) {¬    flex-wrap: wrap;¬    justify-content: center;¬  }¬  .GameBar::part(title) {¬    display: none;¬  }¬  .GameBar::part(right) {¬    flex: 1 0 100%;¬    justify-content: center;¬  }¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[layout] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[layout]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[layout] > *,¬[layout]::part(placeholder) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitaire-card:not([layout] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[layout] > *,¬solitaire-card,¬[layout]::part(placeholder) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Card.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[layout] > *,¬solitaire-card {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[layout] > *::part(front),¬[layout] > *::part(back),¬solitaire-card::part(front),¬solitaire-card::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Moving:  the cheat's card is "lifted" over every card around it, and turns face up as it goes to the discards¬   (the game pauses 0.3s for it:  Solitaire.spell) */¬[layout] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬[layout] > [lifted] {¬  z-index: 5;¬}¬[layout] > [lifted][direction="up"] {¬  @starting-style {¬    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);¬  }¬}¬@media (prefers-reduced-motion: reduce) {¬  [layout] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[layout]::part(placeholder) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[layout]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[layout]:state(accepting-drop) > :last-child,¬[layout]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The layouts:  stacked puts every card on top of the one before;  vertical, each a step below it */¬[layout="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[layout="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
 // -----------
 
 // -----------

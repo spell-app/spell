@@ -153,13 +153,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - After each, the patches so far must add up to the whole state, else `PatchMismatchError`.
   - The contract's 300 clicks per game play through it
     ([patches_in_a_game.py](../../tests/py/core/tests/patches_in_a_game.py)).
-- Five checks keep it in step with the javascript core ([core's AGENTS.md](../core/AGENTS.md)):
+- UNDO (`undoing.py`, epic `language` P54):  the JavaScript core's history, the same steps and titles.
+  - An action described `undone_as` is ONE step:  `core.describe_action()` wraps its method (`declare_action()`).
+  - The app's `undo()`, `redo()`, `can_undo`, `undo_title` ...;  its `undo` and `redo` are actions, as javascript's.
+  - A page is sent them on the app, `"$history"`, which is in the next patch each time they change:
+    its Undo and Redo enable and retitle by themselves.
+- Six checks keep it in step with the javascript core ([core's AGENTS.md](../core/AGENTS.md)):
   - the core's method list ([core.declarations.json5](../core/core.declarations.json5)):
     `spell_core` has each name, or lists it, with why, in [not_ported_yet.json5](core/not_ported_yet.json5)
   - seeded random:  both read [seededRandom.expected.json5](../../tests/core/seededRandom.expected.json5)
   - state by id:  both write and read [stateById.expected.json5](../../tests/core/stateById.expected.json5)
   - saved by id:  both write and read [savedById.expected.json5](../../tests/core/savedById.expected.json5)
-  - Those three are with the JavaScript core's tests (`tests/core/`).
+  - undo:  both play the moves in [undoing.expected.json5](../../tests/core/undoing.expected.json5)
+  - Those four are with the JavaScript core's tests (`tests/core/`).
   - the core contract (cli's [contract.test.ts](../../../app/tests/cli/contract.test.ts)):
     a compiled program prints exactly what javascript prints
 - The terminal-drawing study (P15) is in `core/experiments/terminal`.

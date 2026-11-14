@@ -28,6 +28,51 @@ describe("SPELL_UI_PACK", () => {
     expect(file!.compiled).toContain('h("ui-button", "Go")')
   })
 
+  test("<acción> takes Spell UI's Spanish names, as a Spanish ui-* tag does:  the same button as English's (P53)", () => {
+    expect(
+      SPACES.SPELL_UI_PACK.readAttribute!({ tag: "ui-button", attribute: "tamano", value: "pequeño" }, "es")
+    ).toEqual({
+      attribute: "size",
+      value: "small"
+    })
+    expect(SPACES.SPELL_UI_PACK.readAttribute!({ tag: "ui-button", attribute: "basico", value: true }, "es")).toEqual({
+      attribute: "basic",
+      value: true
+    })
+    expect(
+      SPACES.SPELL_UI_PACK.readAttribute!({ tag: "ui-button", attribute: "icono", value: "refresh" }, "es")
+    ).toEqual({
+      attribute: "icon",
+      value: "refresh"
+    })
+    expect(
+      SPACES.SPELL_UI_PACK.readAttribute!({ tag: "ui-button", attribute: "class", value: "x" }, "es")
+    ).toBeUndefined()
+    const drawn = (path: string, lines: string[]) => {
+      const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
+      expect(file!.errors).toEqual([])
+      return /core\.drawAction\(this, "undo"[^)]*\)/.exec(file!.compiled)?.[0]
+    }
+    const english = drawn("/card.spell", [
+      'a "card" is a view',
+      "\tto draw it",
+      "\t\t<buttons>",
+      '\t\t\t<action "undo" icon-only basic size="small" icon="refresh" class="Undo"/>',
+      "\t\t</>"
+    ])
+    const spanish = drawn("/carta.es.spell", [
+      'una "carta" es una vista',
+      "\tpara dibujar eso",
+      "\t\t<botones>",
+      '\t\t\t<acción "deshacer" solo-icono basico tamano="pequeño" icono="refresh" class="Undo"/>',
+      "\t\t</>"
+    ])
+    expect(english).toBe(
+      'core.drawAction(this, "undo", { class: "Undo", "icon-only": true, basic: true, size: "small", icon: "refresh" })'
+    )
+    expect(spanish).toBe(english)
+  })
+
   test("<json> is ui-json (P31):  its text as written, braces and brackets JSON's", () => {
     expect(SPACES.SPELL_UI_PACK.tagFor("json", "en")).toBe("ui-json")
     expect(SPACES.SPELL_UI_PACK.tagFor("json", "es")).toBe("es-json")

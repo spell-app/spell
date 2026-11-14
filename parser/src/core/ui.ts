@@ -518,6 +518,8 @@ const NON_TEXT_INPUTS = new Set(["button", "checkbox", "radio", "range", "reset"
  * - Through the page's Spell UI keyboard registry (`UI.keyboard`), in its page scope:
  *   a modal open over the app keeps its own keys (Q19).
  * - A text field keeps its own ⌘Z:  the key passes on to it.  So does a key with nothing to undo.
+ * - A page drawing a program that runs elsewhere (Python's) undoes there:  the app's `undo` action, run by the core
+ *   (`core.runAction()`), as its `<action "undo"/>` is (epic `language` P54).
  * - No Spell UI on the page (node, a bare page):  nothing listens.
  * - `core.mountApp()` calls it, and its `unmount()` stops it.
  * - NEVER throws:  a registry that fails to load is logged.
@@ -548,7 +550,9 @@ function undoKeyPressed(event: KeyboardEvent, element: HTMLElement, action: "und
   if (isTypedIn(focused)) return false
   if (!path.includes(element) && focused !== element.ownerDocument.body) return false
   if (core.pageUndoKey?.(action)) return true
-  const { history, actions } = core.RUNTIME
+  const { history, actions, app } = core.RUNTIME
+  // a program running elsewhere (Python's) undoes in its own history:  its app's action, run there
+  if (core.remote) return app ? core.runAction(app, action, "key") : false
   // while an action runs, undo is refused, as from a menu (epic `language`, J2);  the key is still taken
   if (actions.isBusy) return true
   return action === "undo" ? history.undo() : history.redo()

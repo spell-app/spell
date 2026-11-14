@@ -1,6 +1,16 @@
 import { describe, test, expect, vi } from "vite-plus/test"
 
-import { core, ViewableList, frameSummary, logError, logFrame, startPage, type PageMessage } from "spell/parser/core"
+import { observe } from "spell/util"
+import {
+  App,
+  core,
+  ViewableList,
+  frameSummary,
+  logError,
+  logFrame,
+  startPage,
+  type PageMessage
+} from "spell/parser/core"
 
 /**
  * A page's frames, as its console shows them (`page.ts`, `logFrame()`):  one folded line each,
@@ -171,6 +181,47 @@ describe("startPage():  actions and menus", () => {
         { call: "auto_play", on, args: [] },
         { call: "auto_play", on, args: [] }
       ])
+    } finally {
+      core.remote = undefined
+    }
+  })
+})
+
+/** A Python program's undo history, on its page (epic `language` P54):  its app's Undo and Redo follow it. */
+describe("startPage():  the app's Undo and Redo", () => {
+  test("they show the program's history as its frames say, live;  run, they're calls of the program's", async () => {
+    /** A game, as a Python program's drawing half declares it. */
+    class Game extends App {}
+    const sent: PageMessage[] = []
+    const shown = (canUndo: boolean, undoTitle: string, canRedo = false, redoTitle = "Redo") => ({
+      $history: { can_undo: canUndo, can_redo: canRedo, undo_title: undoTitle, redo_title: redoTitle }
+    })
+    core.resetRuntime()
+    const page = startPage({
+      modules: [{ Game }],
+      state: { game: { $type: "Game", $id: "1", ...shown(false, "Deshacer") } },
+      send: (message) => sent.push(message)
+    })
+    try {
+      const game = core.things.all().find((thing) => thing instanceof Game)!
+      // the program's history:  nothing to undo, in its language
+      expect([game.canUndo, game.undoTitle, game.redoTitle]).toEqual([false, "Deshacer", "Redo"])
+      // it's no prop of the app
+      expect(Object.keys(game.toJSON())).not.toContain("$history")
+      const titles: string[] = []
+      const stop = observe(() => titles.push(game.undoTitle))
+      // a move made there:  its patch says so
+      page.receive([{ $type: "Game", $id: "1", ...shown(true, "Undo Turn Card") }])
+      expect([game.canUndo, titles.at(-1)]).toEqual([true, "Undo Turn Card"])
+      stop()
+      // its Undo, run here as a click or ⌘Z runs it:  a call of the program's own
+      expect(core.runAction(game, "undo", "click")).toBe(true)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(sent).toEqual([{ call: "undo", on: "Game#1", args: [] }])
+      page.receive([{ $type: "Game", $id: "1", ...shown(false, "Undo", true, "Redo Turn Card") }])
+      expect([game.canUndo, game.canRedo, game.redoTitle]).toEqual([false, true, "Redo Turn Card"])
+      // nothing to undo:  nothing sent
+      expect(core.runAction(game, "undo", "click")).toBe(false)
     } finally {
       core.remote = undefined
     }

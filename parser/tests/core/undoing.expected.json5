@@ -1,0 +1,176 @@
+{
+  "about": [
+    "Undo and redo in a running program:  the JavaScript core (undoing.test.ts) and Python core (test_undoing.py) both play these moves, and both must end each as it says.",
+    "The game:  three cards, ace, two and three, in a stock pile, face down;  a waste pile;  a count of moves.",
+    "Its actions:  a card's turn (undone as \"Turn Card\") and the game's deal of n cards (\"Deal\"), which waits before each card, takes the stock's last card onto the waste, turns it and counts a move.",
+    "Each move:  turn a card, deal, undo, redo, or write (a card turned by a plain write, no action:  no step).",
+    "After each:  what undo or redo returned, the steps' titles, what the Edit menu shows, the piles' cards by rank, each card's face (ace, two, three) and the moves."
+  ],
+  "moves": [
+    {
+      "do": "turn",
+      "card": "ace",
+      "after": {
+        "steps": ["Turn Card"],
+        "canUndo": true,
+        "canRedo": false,
+        "undoTitle": "Undo Turn Card",
+        "redoTitle": "Redo",
+        "stock": ["ace", "two", "three"],
+        "waste": [],
+        "faceUp": [true, false, false],
+        "moves": 0
+      }
+    },
+    {
+      "do": "deal",
+      "count": 2,
+      "after": {
+        "steps": ["Turn Card", "Deal"],
+        "canUndo": true,
+        "canRedo": false,
+        "undoTitle": "Undo Deal",
+        "redoTitle": "Redo",
+        "stock": ["ace"],
+        "waste": ["three", "two"],
+        "faceUp": [true, true, true],
+        "moves": 2
+      }
+    },
+    {
+      "do": "undo",
+      "after": {
+        "returned": true,
+        "steps": ["Turn Card"],
+        "canUndo": true,
+        "canRedo": true,
+        "undoTitle": "Undo Turn Card",
+        "redoTitle": "Redo Deal",
+        "stock": ["ace", "two", "three"],
+        "waste": [],
+        "faceUp": [true, false, false],
+        "moves": 0
+      }
+    },
+    {
+      "do": "undo",
+      "after": {
+        "returned": true,
+        "steps": [],
+        "canUndo": false,
+        "canRedo": true,
+        "undoTitle": "Undo",
+        "redoTitle": "Redo Turn Card",
+        "stock": ["ace", "two", "three"],
+        "waste": [],
+        "faceUp": [false, false, false],
+        "moves": 0
+      }
+    },
+    {
+      "do": "undo",
+      "after": {
+        "returned": false,
+        "steps": [],
+        "canUndo": false,
+        "canRedo": true,
+        "undoTitle": "Undo",
+        "redoTitle": "Redo Turn Card",
+        "stock": ["ace", "two", "three"],
+        "waste": [],
+        "faceUp": [false, false, false],
+        "moves": 0
+      }
+    },
+    {
+      "do": "redo",
+      "after": {
+        "returned": true,
+        "steps": ["Turn Card"],
+        "canUndo": true,
+        "canRedo": true,
+        "undoTitle": "Undo Turn Card",
+        "redoTitle": "Redo Deal",
+        "stock": ["ace", "two", "three"],
+        "waste": [],
+        "faceUp": [true, false, false],
+        "moves": 0
+      }
+    },
+    {
+      "do": "redo",
+      "after": {
+        "returned": true,
+        "steps": ["Turn Card", "Deal"],
+        "canUndo": true,
+        "canRedo": false,
+        "undoTitle": "Undo Deal",
+        "redoTitle": "Redo",
+        "stock": ["ace"],
+        "waste": ["three", "two"],
+        "faceUp": [true, true, true],
+        "moves": 2
+      }
+    },
+    {
+      "do": "redo",
+      "after": {
+        "returned": false,
+        "steps": ["Turn Card", "Deal"],
+        "canUndo": true,
+        "canRedo": false,
+        "undoTitle": "Undo Deal",
+        "redoTitle": "Redo",
+        "stock": ["ace"],
+        "waste": ["three", "two"],
+        "faceUp": [true, true, true],
+        "moves": 2
+      }
+    },
+    {
+      "do": "turn",
+      "card": "two",
+      "after": {
+        "steps": ["Turn Card", "Deal", "Turn Card"],
+        "canUndo": true,
+        "canRedo": false,
+        "undoTitle": "Undo Turn Card",
+        "redoTitle": "Redo",
+        "stock": ["ace"],
+        "waste": ["three", "two"],
+        "faceUp": [true, false, true],
+        "moves": 2
+      }
+    },
+    {
+      "do": "write",
+      "card": "ace",
+      "after": {
+        "steps": ["Turn Card", "Deal", "Turn Card"],
+        "canUndo": true,
+        "canRedo": false,
+        "undoTitle": "Undo Turn Card",
+        "redoTitle": "Redo",
+        "stock": ["ace"],
+        "waste": ["three", "two"],
+        "faceUp": [false, false, true],
+        "moves": 2
+      }
+    },
+    {
+      "do": "undo",
+      "after": {
+        "returned": true,
+        "steps": ["Turn Card", "Deal"],
+        "canUndo": true,
+        "canRedo": true,
+        "undoTitle": "Undo Deal",
+        "redoTitle": "Redo Turn Card",
+        "stock": ["ace"],
+        "waste": ["three", "two"],
+        "faceUp": [false, true, true],
+        "moves": 2
+      }
+    }
+  ]
+}

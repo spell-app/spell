@@ -27,7 +27,15 @@ import { assignment } from "./assignment"
 import { expressions, Negatable } from "./expressions"
 import { statements } from "./statements"
 import { _if_ } from "./if"
-import { JSX, SPELL_TAG_NAMES, isBareComponentName, type JSXMatchData, MarkdownBlock } from "./JSX"
+import {
+  JSX,
+  ActionButton,
+  spellTagsIn,
+  isBareComponentName,
+  type JSXMatchData,
+  type SpellTag,
+  MarkdownBlock
+} from "./JSX"
 import { lists } from "./lists"
 import { math } from "./math"
 import { properties, MemberReadExpression } from "./properties"
@@ -102,10 +110,11 @@ export { Block, BlockLine }
  */
 export type { JSXMatchData }
 /**
- * Export so editors can offer spell's own JSX tags, e.g. `<children/>` -- see `SPELL_TAG_NAMES`;
+ * Export so editors can offer spell's own JSX tags, e.g. `<children/>` -- see `spellTagsIn()`,
+ * and the actions an `<action "...">` may name -- see `ActionButton.actionsIn()`;
  * and so others can tell a component's bare name -- see `isBareComponentName()`.
  */
-export { SPELL_TAG_NAMES, isBareComponentName }
+export { spellTagsIn, type SpellTag, ActionButton, isBareComponentName }
 
 /** Export so editors can show a type's `<markdown>` description where its docstring shows -- e.g. hover. */
 export { MarkdownDescription }

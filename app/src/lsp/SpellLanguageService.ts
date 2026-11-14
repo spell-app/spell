@@ -1546,7 +1546,8 @@ export class SpellLanguageService {
   /**
    * What could be typed at `position`:
    * - in a `<css>` block:  CSS, e.g. `color` for `col` -- see `LSP.SpellCSS`
-   * - typing a JSX tag (`<chi`):  spell's own tags, e.g. `children` -- see `tagItems()`
+   * - typing a JSX tag (`<chi`):  spell's own tags, e.g. `children`, `action` -- see `tagItems()`
+   * - in an action's quoted word (`<action "au`):  the program's actions, e.g. `auto play` -- see `actionItems()`
    * - mid-statement:  what can come NEXT, if the parser can say -- see `expectedNext()`
    * - otherwise, names visible there:  variables declared before it, types, constants
    * - at the start of a statement:  the first words of every kind of statement (`to`, `if`, `set`...),
@@ -1562,7 +1563,7 @@ export class SpellLanguageService {
     if (cssList) return cssList
     if (!file.match) return { isIncomplete: false, items: [] }
     const lineText = text.slice(text.lastIndexOf("\n", offset - 1) + 1, offset)
-    const tagItems = this.tagItems(lineText, LSP.LspTexts.for(file.language))
+    const tagItems = this.tagItems(file, offset, lineText) ?? this.actionItems(file, offset, position, lineText)
     if (tagItems) return { isIncomplete: false, items: tagItems }
     const atStatementStart = /^\s*[\p{L}\p{M}\d_-]*$/u.test(lineText)
     if (!atStatementStart) {
@@ -1603,17 +1604,53 @@ export class SpellLanguageService {
   }
 
   /**
-   * Spell's own JSX tags, while one is being typed at the end of `lineText` -- `undefined` if no tag is.
-   * - e.g. `children` for `return <div><chi`:  spell's word for the web's `<slot>` (`SP.SPELL_TAG_NAMES`).
+   * Spell's own JSX tags, in the file's language, while one is being typed at the end of `lineText` --
+   * `undefined` if no tag is (`SP.spellTagsIn()`).
+   * - e.g. for `return <div><chi`:  `children`, spell's word for the web's `<slot>`;
+   *   `action`, `context-menu` and `divider` (epic `language` P53).
+   * - Spanish's for a Spanish file:  `hijos`, `acción`, `menú-contextual`, `divisor`.
    * - The web's own tags aren't offered.
    * - A tag is a `<` right before a word:  `x < y` isn't one.
    */
-  private tagItems(lineText: string, texts: LSP.LspTexts): CompletionItem[] | undefined {
+  private tagItems(file: SP.SpellFile, offset: number, lineText: string): CompletionItem[] | undefined {
     if (!JSX_TAG_TYPED.test(lineText)) return undefined
-    return [...SP.SPELL_TAG_NAMES].map(([tag, webTag]) => ({
+    const scope = this.scopeAt(file, offset)
+    const texts = LSP.LspTexts.of(scope)
+    return SP.spellTagsIn(scope).map(({ tag, meaning }) => ({
       label: tag,
       kind: CompletionItemKind.Keyword,
-      detail: texts.text("spellWordFor", { tag: webTag })
+      detail: texts.text(SPELL_TAG_DETAILS[meaning] ?? "spellWordFor", { tag: meaning })
+    }))
+  }
+
+  /**
+   * The program's actions, while an `<action "...">`'s quoted word is being typed at the end of `lineText`:
+   * `auto play`, `deal the cards` ... -- `undefined` if no action's word is (epic `language` P53).
+   * - Its tag in the file's language:  `<acción "jugar solo"/>` in a Spanish file.
+   * - The drawing's own type's first, then the app's `undo` and `redo`, then every other type's
+   *   (`SP.ActionButton.actionsIn()`).
+   * - Each replaces what's typed inside the quotes, so a word of several words is found as it's typed.
+   */
+  private actionItems(
+    file: SP.SpellFile,
+    offset: number,
+    position: Position,
+    lineText: string
+  ): CompletionItem[] | undefined {
+    const typing = ACTION_WORD_TYPED.exec(lineText)
+    if (!typing) return undefined
+    const [, tag, typed] = typing as unknown as [string, string, string]
+    const scope = this.scopeAt(file, offset)
+    if (!SP.spellTagsIn(scope).some((it) => it.tag === tag && it.meaning === ACTION_TAG)) return undefined
+    const texts = LSP.LspTexts.of(scope)
+    const range = { start: { line: position.line, character: position.character - typed.length }, end: position }
+    return SP.ActionButton.actionsIn(scope).map(({ words, kind, of }, order) => ({
+      label: words,
+      kind: CompletionItemKind.Method,
+      detail: kind === "app" ? texts.text("appAction") : texts.text("actionOf", { type: of ?? "" }),
+      sortText: `${ACTION_KINDS.indexOf(kind)}${String(order).padStart(3, "0")}`,
+      filterText: words,
+      textEdit: { range, newText: words }
     }))
   }
 
@@ -2649,8 +2686,27 @@ type CommentStyle = {
   code?: boolean
 }
 
-/** A JSX tag being typed at the end of a line:  `<` right before a word, after a space, `>`, `(` or `{`, e.g. `<div><chi`. */
-const JSX_TAG_TYPED = /(?:^|[\s>({])<[a-z][\w-]*$/
+/**
+ * A JSX tag being typed at the end of a line:  `<` right before a word, after a space, `>`, `(` or `{`, e.g. `<div><chi`.
+ * - Accented letters too:  `<menú-con`.
+ */
+const JSX_TAG_TYPED = /(?:^|[\s>({])<\p{Ll}[\p{L}\p{M}\d_-]*$/u
+
+/** An action's quoted word being typed at the end of a line:  its tag, then what's typed inside the quotes, `<action "au`. */
+const ACTION_WORD_TYPED = /<(\p{L}[\p{L}\p{M}-]*)\s+"([^"]*)$/u
+
+/** What spell's action tag means, whatever its word:  `SP.spellTagsIn()`'s `action`. */
+const ACTION_TAG = "action"
+
+/** The detail of each of spell's own tags, by what it means;  any other is spell's word for the web's tag. */
+const SPELL_TAG_DETAILS: Record<string, LSP.LspTextKey | undefined> = {
+  action: "actionTag",
+  context_menu: "contextMenuTag",
+  divider: "dividerTag"
+}
+
+/** The order an action's completions come in, by whose it is. */
+const ACTION_KINDS = ["own", "app", "other"] as const
 
 /** Where a scope record says it's declared:  its scope, or the match declaring it (a method's). */
 type RecordScopes = { scope?: P.Scope; declaredBy?: P.Match }

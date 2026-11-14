@@ -135,45 +135,49 @@ solitario es una aplicación
 
 	para dibujar eso
 		// Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra sus jugadas
-		<contenedor>
+		<segmento invertido unir="arriba">
 			// sus acciones como botones, en dos píldoras:  cada una con su título, su tecla en su descripción;  deshacer y rehacer solo sus iconos
 			<barra-herramientas class="GameBar" aria-label="Juego">
-				<texto class="GameTitle" slot="titulo" tamano="grande">Solitario Encanto</texto>
-				<botones class="GameButtons" slot="centro">
+				<texto slot="titulo" tamano="grande" extranegrita>Solitario Encanto</texto>
+				<botones slot="centro" relleno="compact">
 					<acción "jugar solo"/>
 					<acción "hacer trampa"/>
 					<acción "reiniciar el juego"/>
 				</botones>
-				<botones class="GameButtons" slot="centro">
-					<acción "deshacer" icon-only/>
-					<acción "rehacer" icon-only/>
+				<botones slot="centro" relleno="compact">
+					<acción "deshacer" solo-icono/>
+					<acción "rehacer" solo-icono/>
 				</botones>
 				<texto slot="derecha">Movimientos: {los movimientos}  ·  Puntos: {la puntuación}{la pista}</texto>
 			</barra-herramientas>
-			<cuadricula class="Board" columnas="7">
-				<menú-contextual>
-					<acción "jugar solo"/>
-					<acción "hacer trampa"/>
-					<acción "reiniciar el juego"/>
-					<divisor/>
-					<acción "deshacer"/>
-					<acción "rehacer"/>
-				</>
-				<pila-de-reserva "reserva"/>
-				<pila-de-descartes "descartes"/>
-				<columna/>
-				<fundación "tréboles"/>
-				<fundación "diamantes"/>
-				<fundación "corazones"/>
-				<fundación "espadas"/>
-				<columna "C1"/>
-				<columna "C2"/>
-				<columna "C3"/>
-				<columna "C4"/>
-				<columna "C5"/>
-				<columna "C6"/>
-				<columna "C7"/>
-			</cuadricula>
+		</segmento>
+		<contenedor>
+			<segmento apariencia="básico">
+				<cuadricula columnas="7" separacion="xs">
+					<menú-contextual>
+						<acción "jugar solo"/>
+						<acción "hacer trampa"/>
+						<acción "reiniciar el juego"/>
+						<divisor/>
+						<acción "deshacer"/>
+						<acción "rehacer"/>
+					</>
+					<pila-de-reserva "reserva"/>
+					<pila-de-descartes "descartes"/>
+					<columna/>
+					<fundación "tréboles"/>
+					<fundación "diamantes"/>
+					<fundación "corazones"/>
+					<fundación "espadas"/>
+					<columna "C1"/>
+					<columna "C2"/>
+					<columna "C3"/>
+					<columna "C4"/>
+					<columna "C5"/>
+					<columna "C6"/>
+					<columna "C7"/>
+				</cuadricula>
+			</segmento>
 		</contenedor>
 
 ## Jugar una carta

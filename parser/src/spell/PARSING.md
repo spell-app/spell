@@ -1575,6 +1575,18 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - The core gives the button the action's title (its text), icon, key tip (`Auto Play (A)`) and disabled, LIVE,
     and a click runs it as a menu item's does (`core.actionOf()`, `core.runAction()`).
     What the tag says wins;  `icon-only` is its own:  no text, the title its `aria-label`.
+  - In another language, Spell UI's names in that language, as its `ui-*` tags take them (epic `language` P53):
+    `<acción "deshacer" solo-icono tamano="pequeño"/>` compiles to the same call as
+    `<action "undo" icon-only size="small"/>`.
+    - `solo-icono` is the language's word for `icon-only` (`LanguageWords.iconOnlyAttribute`), accents or not.
+    - The rest are read through the component pack's dictionary as it parses (`ComponentPacks.readAttribute()`,
+      Spell UI's `SpellUIDefaults.readAttribute()`), since the core draws English's `<ui-button>`;
+      one the pack doesn't know (`class`, `aria-label`) or a `{...}` value stays as written.
+  - The editor offers it, `<context-menu>` and `<divider/>` as a tag is typed, in the file's language
+    (`SP.spellTagsIn()`, read off the `spell_jsx_tag` word rule), and the program's actions inside its quotes
+    (`ActionButton.actionsIn()`):  the drawing's type's first, then the app's `undo` and `redo`, then every other
+    type's;  an action takes nothing and gives nothing back, so a question, a drawing, a creation hook or a test
+    is none.
 - A RIGHT-CLICK MENU WRITTEN IN A DRAWING, `<context-menu>` inside the element whose right click shows it
   (`context_menu_block`, [ContextMenuBlock.ts](rules/JSX/ContextMenuBlock.ts);  Owen, 2026-11-13):
   - Its words are tag words too (`context_menu`, `divider`):  Spanish's `<menú-contextual>`, `<divisor/>`.

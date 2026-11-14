@@ -465,6 +465,8 @@ Its first line is how you call it, with each blank's type in brackets:
     - One action alone is a button in a drawing, `<action "auto play"/>`:  its title, icon, key and enabled are
       the action's, live, and a click runs it;  every other attribute goes to the button (`icon-only` shows only its
       icon).
+      In Spanish, `<acción "deshacer" solo-icono/>` takes Spell UI's Spanish names, as a Spanish `ui-*` tag does.
+      The editor offers the action's names inside its quotes.
     - A right click's menu can be written in the element it belongs to, its actions and dividers inside:
 
       ```spell

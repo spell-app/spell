@@ -3,6 +3,7 @@
  */
 import { core } from "spell/parser/core/core"
 import { describedMethods } from "spell/parser/core/described"
+import type { ShownHistory } from "spell/parser/core/undoing"
 // Import directly to avoid circular import
 import { View } from "./View"
 
@@ -49,6 +50,8 @@ export class App extends View {
    * - False with nothing to undo.
    * - ⌘Z does it too, while the app has the focus.
    * - The run's history, `core.RUNTIME.history`:  see `undoing.ts`.
+   * - On a page drawing a program that runs elsewhere (Python's), the program undoes it:
+   *   its `<action "undo"/>` runs there (`core.runAction()`), never this.
    */
   undo(): boolean {
     return core.RUNTIME.history.undo()
@@ -61,25 +64,26 @@ export class App extends View {
 
   /**
    * Is there a step to undo?  Live:  a menu item drawn from it greys out by itself.
-   * - A page drawing a program that runs elsewhere (Python's) has no history here:  nothing to undo.
+   * - A page drawing a program that runs elsewhere (Python's):  that program's history, as it last said
+   *   (`core.remote.history`, epic `language` P54).
    */
   get canUndo(): boolean {
-    return core.RUNTIME?.history.canUndo ?? false
+    return shownHistory()?.canUndo ?? false
   }
 
   /** Is there a step to redo?  Live. */
   get canRedo(): boolean {
-    return core.RUNTIME?.history.canRedo ?? false
+    return shownHistory()?.canRedo ?? false
   }
 
   /** The Edit menu's undo item, in the program's language:  `Undo Turn Card`, or `Undo` with nothing to undo.  Live. */
   get undoTitle(): string {
-    return core.RUNTIME?.history.undoTitle ?? core.message("undo")
+    return shownHistory()?.undoTitle ?? core.message("undo")
   }
 
   /** The Edit menu's redo item:  `Redo Turn Card`, or `Redo`.  Live. */
   get redoTitle(): string {
-    return core.RUNTIME?.history.redoTitle ?? core.message("redo")
+    return shownHistory()?.redoTitle ?? core.message("redo")
   }
 
   // `undo` and `redo` are the app's own ACTIONS (epic `elemental-spell` P10):  a menu names them, `- its "edit menu" is
@@ -110,4 +114,9 @@ export class App extends View {
   start(): void {
     core.startDrawing(this)
   }
+}
+
+/** The history the app's Undo and Redo show:  a program running elsewhere's, as it last said, else this run's own. */
+function shownHistory(): ShownHistory | undefined {
+  return core.remote?.history ?? core.RUNTIME?.history
 }

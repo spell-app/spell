@@ -41,13 +41,10 @@ export const words = {
       layout: "layout",
       suit: "suit"
     },
-    Tableau: {
+    Column: {
       layout: "layout"
     },
     Solitaire: {
-      score: "score",
-      moves: "moves",
-      hint: "hint",
       deck: "deck",
       stock: "stock",
       discards: "discards",
@@ -55,18 +52,18 @@ export const words = {
       diamonds: "diamonds",
       hearts: "hearts",
       spades: "spades",
-      T1: "T1",
-      T2: "T2",
-      T3: "T3",
-      T4: "T4",
-      T5: "T5",
-      T6: "T6",
-      T7: "T7",
-      resetTheStock: "reset the stock",
-      playFromTheStock: "play from the stock",
-      dealTheCards: "deal the cards",
+      C1: "C1",
+      C2: "C2",
+      C3: "C3",
+      C4: "C4",
+      C5: "C5",
+      C6: "C6",
+      C7: "C7",
+      score: "score",
       draw: "draw it",
-      turnAStockCard: "turn a stock card",
+      dealTheCards: "deal the cards",
+      playFromTheStock: "play from the stock",
+      resetTheStock: "reset the stock",
       restartTheGame: "restart the game",
       autoPlay: "auto play",
       cheat: "cheat"
@@ -78,13 +75,12 @@ export const words = {
       { name: "Suit", members: ["suit", "color", "symbol"] },
       { name: "Names", description: "What a person, test or console calls it", members: ["name", "isTheRankOfSuit", "state"] },
       { name: "Drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["picture", "lifted"] },
-      { name: "Playing a card", members: ["countThePointsForCardOnPile", "play", "putOnPile"] },
+      { name: "Game Play", members: ["countThePointsForCardOnPile", "play", "putOnPile"] },
       { name: "A pile of cards", members: ["pile"] }
     ],
     Solitaire: [
-      { name: "Piles", description: "One of each, made with the solitaire", members: ["stock", "discards", "clubs", "diamonds", "hearts", "spades", "T1", "T2", "T3", "T4", "T5", "T6", "T7"] },
-      { name: "Dealing", description: "Each pauses a moment, so a deal animates", members: ["resetTheStock", "playFromTheStock", "dealTheCards", "turnAStockCard"] },
-      { name: "Game Play", description: "Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three", members: ["draw", "restartTheGame", "autoPlay", "cheat"] }
+      { name: "Dealing", members: ["dealTheCards", "playFromTheStock", "resetTheStock", "restartTheGame"] },
+      { name: "Game Play", members: ["autoPlay", "cheat"] }
     ]
   }
 }

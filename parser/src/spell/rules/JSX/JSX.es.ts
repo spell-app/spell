@@ -154,6 +154,17 @@ JSXEs.addRule(ActionButton, {
         ],
         ['<acción "rehacer">Again</acción>', 'core.drawAction(this, "redo", {}, "Again")']
       ]
+    },
+    {
+      title: "Su atributo propio en español:  `solo-icono`, con tilde o sin ella",
+      compileAs: "expression",
+      tests: [
+        ['<acción "deshacer" solo-icono/>', 'core.drawAction(this, "undo", { "icon-only": true })'],
+        [
+          '<acción "rehacer" sólo-icono class="Redo"/>',
+          'core.drawAction(this, "redo", { class: "Redo", "icon-only": true })'
+        ]
+      ]
     }
   ]
 })

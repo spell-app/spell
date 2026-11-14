@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import asyncio
-from typing import Literal
+from typing import Any, Literal
 
 from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
 
@@ -127,16 +126,8 @@ class Card(TwoSidedView):
         return 0
 
     async def on_click(self, event: ClickEvent) -> None:
-        """a click plays it"""
-        await self.play()
-
-    def on_drag(self, event: DragSpellEvent) -> None:
-        """a drag starting clears the last hint"""
-        solitaire.hint = ""
-
-    def on_drag_cancelled(self, event: DragCancelledEvent) -> None:
-        """dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so"""
-        solitaire.hint = " -- Not there"
+        if self.is_face_direction("up") or self.pile == solitaire.stock:
+            await self.play()
 
     draggable = True
 
@@ -144,16 +135,17 @@ class Card(TwoSidedView):
     def pile(self) -> Pile | None:
         return Pile.owner_of(self)
 
-    async def play(self) -> bool | None:
+    async def play(self) -> Any:
         if self.pile == solitaire.stock:
             await solitaire.play_from_the_stock()
-            return
-        end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
-        if end_pile is None:
-            return False
-        return await self.put_on_pile(end_pile)
+        else:
+            end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
+            if end_pile is None:
+                return False
+            return await self.put_on_pile(end_pile)
 
     async def put_on_pile(self, pile: Pile) -> bool:
+        # - the pile it left turns its new last card up;  the move counts, and scores
         start_pile = self.pile
         assert start_pile is not None
         if not core.can_give_up(start_pile, self):
@@ -163,18 +155,11 @@ class Card(TwoSidedView):
         points = self.count_the_points_for_card_on_pile(pile)
         for card in start_pile.starting_with(self):
             core.move(card, pile)
-        if isinstance(start_pile, Tableau) and (start_pile):
+        if isinstance(start_pile, Column) and (start_pile):
             await core.pause_for(200, "msec")
             start_pile.last_item.turn_face_up()
-        solitaire.moves = solitaire.moves + 1
         solitaire.score = solitaire.score + points
         return True
-
-    @property
-    def clickable_when(self) -> bool:
-        return self.is_face_direction("up") or self.pile == solitaire.stock
-
-    clickable = True
 
 
 # Ace is low:  ace = 1 ... king = 13
@@ -301,20 +286,20 @@ def test_a_new_deck() -> None:
 # ## A pile of cards
 ####################
 # A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-# Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
+# Each pile is its own element around its cards' elements, `<solitaire-column>` around `<solitaire-card>`s.
 # A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 
-Layout = Literal["stacked", "vertical", "horizontal", "fanned"]
+Layout = Literal["stacked", "vertical"]
 
 
 class Pile(ViewableList):
     item_type = Card
     element_tag = "test-project-pile"
 
-    # How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css
-    # - its "layout" is one of stacked, vertical, horizontal or fanned
-    LAYOUTS = ("stacked", "vertical", "horizontal", "fanned")
+    # How its cards lie:  on top of each other, or down a column -- styles.css
+    # - its "layout" is one of stacked or vertical
+    LAYOUTS = ("stacked", "vertical")
     layout = prop(one_of=LAYOUTS)
 
     @property
@@ -338,12 +323,6 @@ class Pile(ViewableList):
         for card in self:
             summary = f"{summary} {card.state}"
         return summary
-
-    def while_card_dragged_over(self, card: Card) -> None:
-        """while a card it would take is over it, the score shows what the move would add -- gone as the card leaves"""
-        points = card.count_the_points_for_card_on_pile(self)
-        if core.can_take(self, card) and points > 0:
-            solitaire.hint = f" (+{points})"
 
     async def when_card_dropped_on(self, card: Card) -> None:
         await card.put_on_pile(self)
@@ -418,12 +397,10 @@ class StockPile(Pile):
         return False
 
     def draw_its_placeholder(self) -> Element:
-        # A light grey card, face down
         return h("ui-text", {"part": "placeholder"}, "🂠")
 
     async def on_click(self, event: ClickEvent) -> None:
-        """Empty:  a click turns the discards back over;  a click on one of its cards is the card's"""
-        await solitaire.turn_a_stock_card()
+        await solitaire.play_from_the_stock()
 
 
 class DiscardPile(Pile):
@@ -459,8 +436,9 @@ class Foundation(Pile):
     def can_give_up(self, card: Card) -> bool:
         return False
 
+    # a light grey ace of its suit, face up
+
     def draw_its_placeholder(self) -> Element:
-        # A light grey ace of its suit, face up
         return h("ui-text", {"part": "placeholder"}, Card(rank="ace", suit=self.suit).picture)
 
     def can_take(self, card: Card) -> bool:
@@ -472,10 +450,10 @@ class Foundation(Pile):
     droppable = True
 
 
-class Tableau(Pile):
+class Column(Pile):
     """A column, built down from king to ace, red and black in turn"""
 
-    element_tag = "test-project-tableau"
+    element_tag = "test-project-column"
 
     @property
     def layout(self) -> str:
@@ -496,29 +474,6 @@ class Tableau(Pile):
 
 class Solitaire(App):
     element_tag = "test-project-app"
-
-    # - its "score" is a number
-    score = prop(type="number")
-
-    # The cards played this game:  a stock card turned over isn't one
-    # - its "moves" is a number
-    moves = prop(type="number")
-
-    # Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win
-    # - its "hint" is text
-    hint = prop(type="text")
-
-    def on_score_change(self, event: ScoreChangeEvent) -> None:
-        """a change to a property is an event:  each runs just after the change lands"""
-        # every card on a foundation:  the game is won
-        home = len(self.clubs) + len(self.diamonds)
-        home = home + len(self.hearts) + len(self.spades)
-        if home == 52:
-            self.hint = " -- You won!"
-
-    def on_moves_change(self, event: MovesChangeEvent) -> None:
-        """a card played:  the last hint goes"""
-        self.hint = ""
 
     # "deck" is a new deck
     deck = prop(init=lambda: Deck(id="deck"), early=True)
@@ -541,39 +496,108 @@ class Solitaire(App):
     # "spades" is a new foundation with suit = spades
     spades = prop(init=lambda: Foundation(id="spades", suit="spades"), early=True)
 
-    # "T1" is a new tableau
-    t1 = prop(init=lambda: Tableau(id="T1"), early=True)
+    # "C1" is a new column
+    c1 = prop(init=lambda: Column(id="C1"), early=True)
 
-    # "T2" is a new tableau
-    t2 = prop(init=lambda: Tableau(id="T2"), early=True)
+    # "C2" is a new column
+    c2 = prop(init=lambda: Column(id="C2"), early=True)
 
-    # "T3" is a new tableau
-    t3 = prop(init=lambda: Tableau(id="T3"), early=True)
+    # "C3" is a new column
+    c3 = prop(init=lambda: Column(id="C3"), early=True)
 
-    # "T4" is a new tableau
-    t4 = prop(init=lambda: Tableau(id="T4"), early=True)
+    # "C4" is a new column
+    c4 = prop(init=lambda: Column(id="C4"), early=True)
 
-    # "T5" is a new tableau
-    t5 = prop(init=lambda: Tableau(id="T5"), early=True)
+    # "C5" is a new column
+    c5 = prop(init=lambda: Column(id="C5"), early=True)
 
-    # "T6" is a new tableau
-    t6 = prop(init=lambda: Tableau(id="T6"), early=True)
+    # "C6" is a new column
+    c6 = prop(init=lambda: Column(id="C6"), early=True)
 
-    # "T7" is a new tableau
-    t7 = prop(init=lambda: Tableau(id="T7"), early=True)
+    # "C7" is a new column
+    c7 = prop(init=lambda: Column(id="C7"), early=True)
 
-    def create(self) -> None:
-        """Every card of the deck into the stock"""
+    # "score" is a number
+    score = prop(type="number")
+
+    async def on_creating_solitaire(self, event: Any) -> None:
         for card in self.deck:
             self.stock.append(card)
+        await self.restart_the_game()
 
-    def reset_the_stock(self) -> None:
-        """The discards, turned over, back into the stock"""
-        cards = self.discards.clone()
-        cards.reverse()
-        for card in cards:
-            self.stock.append(card)
+    def draw(self) -> Element:
+        return [
+            h(
+                "ui-segment",
+                {"inverted": True, "attach": "top"},
+                h(
+                    "ui-toolbar",
+                    {"class": "GameBar", "aria-label": "Game"},
+                    h("ui-text", {"slot": "title", "size": "large", "heavy": True}, "Solitaire"),
+                    h(
+                        "ui-buttons",
+                        {"slot": "center", "padding": "compact"},
+                        core.draw_action(self, "auto_play"),
+                        core.draw_action(self, "cheat"),
+                        core.draw_action(self, "restart_the_game", {"title": "Restart"}),
+                    ),
+                    h(
+                        "ui-buttons",
+                        {"slot": "center", "padding": "compact"},
+                        core.draw_action(self, "undo", {"icon-only": True}),
+                        core.draw_action(self, "redo", {"icon-only": True}),
+                    ),
+                    h("ui-text", {"slot": "right"}, "Score: ", self.score),
+                ),
+            ),
+            h(
+                "ui-container",
+                h(
+                    "ui-segment",
+                    {"appearance": "basic"},
+                    h(
+                        "ui-grid",
+                        {"columns": "7", "spacing": "xs"},
+                        core.draw_context_menu(
+                            self,
+                            ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
+                        ),
+                        h("test-project-stock-pile", {"id": "stock"}),
+                        h("test-project-discard-pile", {"id": "discards"}),
+                        h("spacer"),
+                        h("test-project-foundation", {"id": "clubs"}),
+                        h("test-project-foundation", {"id": "diamonds"}),
+                        h("test-project-foundation", {"id": "hearts"}),
+                        h("test-project-foundation", {"id": "spades"}),
+                        h("test-project-column", {"id": "C1"}),
+                        h("test-project-column", {"id": "C2"}),
+                        h("test-project-column", {"id": "C3"}),
+                        h("test-project-column", {"id": "C4"}),
+                        h("test-project-column", {"id": "C5"}),
+                        h("test-project-column", {"id": "C6"}),
+                        h("test-project-column", {"id": "C7"}),
+                    ),
+                ),
+            ),
+        ]
+
+    async def deal_the_cards(self) -> None:
+        """Gather every card into the stock, shuffle it, and deal the columns"""
+        for card in self.deck:
+            start_pile = card.pile
             card.turn_face_down()
+            if start_pile != self.stock:
+                self.stock.append(card)
+                await core.pause_for(50, "msec")
+        self.stock.randomize()
+        # each row's first card lands face down, then turns up where it lies
+        for row in range(1, 8):
+            for column in core.get_range(row, 7):
+                core.get_item_at(core.every_thing(Column), position(column)).append(self.stock.last_item)
+                if column == row:
+                    core.get_item_at(core.every_thing(Column), position(column)).last_item.turn_face_up()
+                await core.pause_for(50, "msec")
+        await self.play_from_the_stock()
 
     async def play_from_the_stock(self) -> None:
         """Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty"""
@@ -585,87 +609,22 @@ class Solitaire(App):
         await core.pause_for(300, "msec")
         self.discards.append(it)
 
-    async def deal_the_cards(self) -> None:
-        """Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right"""
-        for card in self.deck:
-            start_pile = card.pile
+    def reset_the_stock(self) -> None:
+        """The discards, turned over, back into the stock"""
+        cards = self.discards.clone()
+        cards.reverse()
+        for card in cards:
+            self.stock.append(card)
             card.turn_face_down()
-            if start_pile != self.stock:
-                self.stock.append(card)
-                await core.pause_for(50, "msec")
-        self.stock.randomize()
-        # each row's first card lands face down, then turns up where it lies
-        for row in range(1, 8):
-            for column in core.get_range(row, 7):
-                core.get_item_at(core.every_thing(Tableau), position(column)).append(self.stock.last_item)
-                if column == row:
-                    core.get_item_at(core.every_thing(Tableau), position(column)).last_item.turn_face_up()
-                await core.pause_for(50, "msec")
-        await self.play_from_the_stock()
 
-    def draw(self) -> Element:
-        return [
-            h(
-                "ui-toolbar",
-                {"class": "GameBar", "aria-label": "Game"},
-                h("ui-text", {"class": "GameTitle", "slot": "title", "size": "large"}, "Solitaire"),
-                h(
-                    "ui-buttons",
-                    {"class": "GameButtons", "slot": "center"},
-                    core.draw_action(self, "auto_play"),
-                    core.draw_action(self, "cheat"),
-                    core.draw_action(self, "restart_the_game"),
-                ),
-                h(
-                    "ui-buttons",
-                    {"class": "GameButtons", "slot": "center"},
-                    core.draw_action(self, "undo", {"icon-only": True}),
-                    core.draw_action(self, "redo", {"icon-only": True}),
-                ),
-                h(
-                    "ui-text",
-                    {"slot": "right"},
-                    "Moves: ",
-                    self.moves,
-                    "  ·  Score: ",
-                    self.score,
-                    self.hint,
-                ),
-            ),
-            h(
-                "ui-container",
-                h(
-                    "ui-grid",
-                    {"class": "Board", "columns": "7"},
-                    core.draw_context_menu(
-                        self,
-                        ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
-                    ),
-                    h("test-project-stock-pile", {"id": "stock"}),
-                    h("test-project-discard-pile", {"id": "discards"}),
-                    h("ui-column"),
-                    h("test-project-foundation", {"id": "clubs"}),
-                    h("test-project-foundation", {"id": "diamonds"}),
-                    h("test-project-foundation", {"id": "hearts"}),
-                    h("test-project-foundation", {"id": "spades"}),
-                    h("test-project-tableau", {"id": "T1"}),
-                    h("test-project-tableau", {"id": "T2"}),
-                    h("test-project-tableau", {"id": "T3"}),
-                    h("test-project-tableau", {"id": "T4"}),
-                    h("test-project-tableau", {"id": "T5"}),
-                    h("test-project-tableau", {"id": "T6"}),
-                    h("test-project-tableau", {"id": "T7"}),
-                ),
-            ),
-        ]
-
-    async def turn_a_stock_card(self) -> None:
-        await self.play_from_the_stock()
+    async def on_score_change(self, event: ScoreChangeEvent) -> None:
+        home = len(self.clubs) + len(self.diamonds)
+        home = home + len(self.hearts) + len(self.spades)
+        if home == 52:
+            core.alert("You won!")
 
     async def restart_the_game(self) -> None:
         self.score = 0
-        self.moves = 0
-        self.hint = ""
         await self.deal_the_cards()
 
     async def auto_play(self) -> None:
@@ -675,8 +634,8 @@ class Solitaire(App):
             if await test_card.play():
                 anything_changed = True
                 await core.pause_for(500, "msec")
-        # each tableau's last card onto its foundation
-        for pile in core.every_thing(Tableau):
+        # each column's last card onto its foundation
+        for pile in core.every_thing(Column):
             if not pile:
                 continue
             test_card = pile.last_item
@@ -685,8 +644,8 @@ class Solitaire(App):
                 anything_changed = True
                 await test_card.play()
                 await core.pause_for(100, "msec")
-        # each tableau's face-up cards, all together, onto another tableau
-        for pile in core.every_thing(Tableau):
+        # each column's face-up cards, all together, onto another column
+        for pile in core.every_thing(Column):
             face_up_cards = pile.filter(lambda card: card.is_face_direction("up"))
             if not face_up_cards:
                 continue
@@ -701,7 +660,7 @@ class Solitaire(App):
 
     async def cheat(self) -> None:
         remaining_piles = core.filter(
-            core.every_thing(Tableau),
+            core.every_thing(Column),
             lambda pile: (pile) and pile.first_item.is_face_direction("down"),
         )
         if core.is_empty(remaining_piles):
@@ -718,34 +677,22 @@ class Solitaire(App):
 
 solitaire = Solitaire()
 
-# One of each, made with the solitaire
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "undone_as": "Restart The Game"})
 
-# Each pauses a moment, so a deal animates
-# A click on the empty stock:  one step to undo, where the deal's own turn isn't
-core.describe_action(Solitaire, "turn_a_stock_card", {"title": "Turn A Stock Card", "undone_as": "Turn Card"})
-
-# Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["N"], "undone_as": "Restart"})
-# Play every card that can go somewhere, until none can
-core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
-# Turn up a face-down card from a tableau, at random, onto the discards
-core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
-
-###################
-# ## Playing a card
-###################
-# What a click or a drag does:  the card's own moves, and each pile's, as the game plays them.
-
-# the card, and every card on it, onto the first pile that takes it;  it says whether it moved
-# - the stock's card turns over onto the discards instead
 core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
 
 # the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-# - the pile it left turns its new last card up;  the move counts, and scores
 core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "undone_as": "Move Card"})
 
-# each card's events, and when it may be clicked:  the Inspector lists them, as written here
-# only a card face up, or the stock's, can be clicked:  the others show no pointer
+# Play every card that can go somewhere, until none can
+core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
+
+# Turn up a face-down card from a column, at random, onto the discards
+core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
+
+# play the card on click if it is a legal move
+
+# drop the card on the pile if it is a legal move
 
 ##############
 # ## The piles
@@ -753,19 +700,11 @@ core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "und
 # Each kind of pile, what it may take or give up, and how it lies.
 # While one's empty, it shows its placeholder, if it has one.
 
-# only its top card may be picked up
-
-# one card at a time, the last of its pile:  its suit, one higher
-
-# its face-up cards may be picked up, with every card on them
-# a king onto an empty one;  else one lower, in the other color
-
 
 def test_the_moves() -> None:
     with core.test("test the moves"):
-        it = Tableau()
-        core.echo_test_action("set the column to a new tableau with id \"T1\"")
-        column = Tableau(id="T1")
+        core.echo_test_action("set the column to a new column with id \"T1\"")
+        column = Column(id="T1")
         core.echo_test_action(
             "set the king to a new card whose rank is king, suit is spades and direction is up",
         )
@@ -778,7 +717,8 @@ def test_the_moves() -> None:
             "set the jack to a new card whose rank is jack, suit is clubs and direction is up",
         )
         jack = Card(rank="jack", suit="clubs", direction="up")
-        # an empty tableau takes only a king, then one lower in the other color
+
+        # an empty column takes only a king, then one lower in the other color
         core.expect(core.can_take(column, queen), "the column can take the queen", False, "no")
         core.expect(core.can_take(column, king), "the column can take the king", True, "yes")
         core.echo_test_action("add the king to the column")
@@ -813,8 +753,8 @@ def test_the_moves() -> None:
             "set the ace to a new card whose rank is ace, suit is hearts and direction is up",
         )
         ace = Card(rank="ace", suit="hearts", direction="up")
-        core.echo_test_action("set the column to a new tableau with id \"T2\"")
-        column = Tableau(id="T2")
+        core.echo_test_action("set the column to a new column with id \"T2\"")
+        column = Column(id="T2")
         core.echo_test_action("add the two to the column")
         column.append(two)
         core.echo_test_action("add the ace to the column")
@@ -849,88 +789,36 @@ def test_the_moves() -> None:
         )
 
 
-asyncio.run(solitaire.deal_the_cards())
-
-
 # -----------
 
 
-core.install_styles(None, """/* File styles.css:  how the board looks -- each card, and how each pile lays its cards out.
-   - A card is drawn as a playing card here, not as a Spell UI element:  no <ui-*> tag draws one, so its size, its
-     faces and its turn over are this sheet's.
-   - Every pile and card is an element of its own on the board, so these rules reach them all:
-     - a pile by its layout, e.g. <solitaire-tableau layout="vertical">
-     - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them
-     - an empty pile's placeholder, which it draws itself, by its part:  ::part(placeholder)
-   - A card is one letter of unicode's Playing Cards, at its pile's width:
-     so a card is as wide as its column, whatever the window's width. */
+core.install_styles(None, """/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.
+   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitaire.spell).
+   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.
+   - A pile is styled by its layout (<solitaire-column layout="vertical">), each card in it by its place:
+     --index from 0, of --count;  an empty pile's placeholder by its part, ::part(placeholder). */
 
-/* A card's picture, in ems of its own letter (measured in Chrome on a Mac):
-   0.604em wide, 0.805em tall, its left edge 0.049em into the letter;  its outline reaches a little past that, so a
-   card keeps 0.008em to spare above and below. */
+/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,
+   with 0.008em to spare above and below */
 :root,
 :host {
-  /* how wide a card is, for each em of its letter */
   --card-width: 0.604;
-  /* how tall it is, for each of its widths:  (0.805 + 2 x 0.008) / 0.604 */
+  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */
   --card-height: 1.359;
-  /* down a column, how much of each card shows under the next:  a fifth of it, its rank and suit */
+  /* down a column, how much of each card shows under the next:  its rank and suit */
   --card-step-down: 0.2;
-  /* along a row, how much of each card the next one covers:  a tenth of it */
-  --card-overlap: 0.1;
-  /* fanned, how far each card turns from the one before */
-  --card-turn: 8deg;
 }
 
-/****************
- * The table:  green felt, as on a casino's card table, with the words on it in white
- ****************/
-
+/* The table:  green felt, as on a casino's card table */
 solitaire-app {
   display: block;
-  box-sizing: border-box;
   min-height: 100%;
-  /* room between the felt's edge and the toolbar and cards */
-  padding: 32px;
-  /* rounded at the bottom too, as the frame it sits in is at the top */
   border-radius: 12px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;
 }
-/* a large screen:  twice the room */
-@media (width >= 1100px) {
-  solitaire-app {
-    padding: 64px;
-  }
-}
-.GameTitle,
-.GameBar > [slot] {
-  color: #f2fbf5;
-}
 
-/****************
- * The board:  below the game's toolbar, its piles seven to a line
- ****************/
-
-.Board {
-  /* gutters that shrink with a narrow window, so the cards keep most of its width */
-  --ui-grid-gutter: min(2rem, 2.5vw);
-  --ui-grid-row-spacing: min(2rem, 4vw);
-  /* 1.5rem below the toolbar:  the grid pulls itself up by half a row's spacing */
-  margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);
-}
-
-/****************
- * The toolbar:  the game's name, its buttons in the middle in two pills, its score
- ****************/
-
-/* the game's name, in the heavy type of Spell's loading screen */
-.GameTitle {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-}
-
-/* the title and the score take equal room, so the buttons sit in the true middle */
+/* The toolbar:  its buttons in the true middle, the title and the score taking equal room on either side;
+   in pills (no attribute rounds a joined group:  \\`circular\\` parts its buttons) */
 .GameBar::part(title),
 .GameBar::part(right) {
   flex: 1 1 0;
@@ -938,137 +826,86 @@ solitaire-app {
 .GameBar::part(right) {
   justify-content: flex-end;
 }
-.GameBar::part(center) {
-  flex: 0 1 auto;
-  gap: 1em;
+ui-buttons {
+  --ui-button-radius: var(--ui-radius-pill);
 }
-/* each pill:  white on the felt, with one shadow around it */
-.GameButtons {
-  --ui-button-radius: 99em;
-  /* square where its buttons meet, so the line between them is straight */
-  --ui-button-group-item-radius: 0;
-  --ui-button-background: Canvas;
-  --ui-button-color: CanvasText;
-  --ui-button-font-weight: 500;
-  margin: 0;
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
-}
-/* a faint line between a pill's buttons */
-.GameButtons > * + *::part(button) {
-  box-shadow: -1px 0 0 var(--ui-border-color);
-}
-
-/* A narrow window, a phone's:  the felt's edge thinner, so the seven columns get the width;
-   the toolbar loses its title, and the score goes on a line of its own, below the buttons, so every button keeps its name */
+/* a phone:  no title, and the score on a line of its own, so every button keeps its name */
 @media (width < 36rem) {
-  solitaire-app {
-    padding: 16px 12px;
-  }
   .GameBar::part(toolbar) {
     flex-wrap: wrap;
     justify-content: center;
-    row-gap: 0.75rem;
   }
-  .GameBar::part(title),
-  [slot="title"] {
+  .GameBar::part(title) {
     display: none;
-  }
-  .GameBar::part(center) {
-    gap: 0.5em;
-  }
-  .GameButtons {
-    --ui-button-padding-inline: 0.65em;
   }
   .GameBar::part(right) {
     flex: 1 0 100%;
     justify-content: center;
   }
-  .GameBar > [slot] {
-    white-space: nowrap;
-  }
 }
 
-/****************
- * A pile:  as wide as its cell of the board, and as tall as its cards
- ****************/
-
+/* A pile:  as wide as its cell of the board, as tall as its cards */
 [layout] {
-  /* a box of its own, holding its floated sizer */
   display: flow-root;
   position: relative;
-  /* its cards size themselves by its width */
   container-type: inline-size;
-  /* no glow around the whole pile when a dragged card would land on it:  its top card glows instead (below) */
+  /* its top card glows when a dragged card would land on it (below), not the whole pile */
   --spell-drop-glow: none;
 }
-/* its height:  a card's, by default -- a percentage of padding is one of its width */
+/* its height, a floated sizer:  a padding's percentage is one of its width */
 [layout]::before {
   content: "";
-  /* floated, so its cards start at the top of its content, not below it */
   float: left;
   width: 100%;
   padding-top: calc(100% * var(--card-height));
 }
 
-/* Each card, and the placeholder:  a card's letter as wide as the pile, cut to the card it draws */
+/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */
 [layout] > *,
 [layout]::part(placeholder) {
   position: absolute;
   display: block;
-  /* where its pile's content starts, inside the cell's gutters:  its offsets in a layout are margins */
-  top: auto;
-  left: auto;
   font-size: calc(100cqi / var(--card-width));
 }
-/* A card on its own, in no pile (one added to the table in the editor):  a column's usual width, face up */
+/* a card in no pile (one added to the table in the editor):  a column's usual width */
 solitaire-card:not([layout] > *) {
   position: relative;
   display: inline-block;
-  vertical-align: top;
-  font-size: calc(var(--loose-card-width, 6rem) / var(--card-width));
+  font-size: calc(6rem / var(--card-width));
 }
 [layout] > *,
-[layout]::part(placeholder),
-solitaire-card {
+solitaire-card,
+[layout]::part(placeholder) {
   width: calc(var(--card-width) * 1em);
   height: calc(var(--card-width) * var(--card-height) * 1em);
   overflow: hidden;
-  /* in the font that draws the cards, so the page's font never moves them:  a line's height comes from its FIRST font,
-     and a theme's (Fruity's system font) set them 0.027em higher than Lato did, cutting off their tops */
+  /* the font that draws the cards, so a theme's font never moves them */
   font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;
-  /* the card's spare room above and below its ink (0.008em) padding, its white face only the content, so it hugs the ink
-     (not a border:  a browser rounds a border to whole pixels) */
+  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */
   box-sizing: border-box;
   padding-block: 0.008em;
-  /* Apple Symbols rises 0.67em and drops 0.25em, its card's ink 0.666em above its baseline:
-     a line of 0.917 starts the ink at the top of the face (measured:  0.912 by the font's rounded numbers) */
   line-height: 0.917;
   --ui-text-line-height: 0.917;
   text-indent: -0.049em;
   user-select: none;
 }
 
-/****************
- * Turning over:  a two sided view's own (Card.spell), both its sides back to back, the card turning in 3D
- * - Here, only how deep the turn looks, for a card one letter wide:  3em.
- * - 0.3s, the template's own time:  the game pauses that long after turning the stock's card (Solitaire.spell), so it turns
- *   over before it moves.
- * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
- *   card that cut its own content would draw flat, and its sides couldn't turn with it.
- ****************/
-
+/* A card:  a two sided view (Card.spell), its sides turning in 3D, so it cuts nothing itself;
+   a real deck's inks in every theme and scheme */
 [layout] > *,
 solitaire-card {
-  --spell-turn-perspective: 3em;
-  /* its sides turn with it, in 3D:  nothing cut */
   overflow: visible;
+  --spell-turn-perspective: 3em;
+  color-scheme: light;
+  --ui-red-text: #c8102e;
+  --ui-black-text: #1a1a1a;
+  --ui-blue-text: #2f6fd6;
 }
-/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;
-   a <ui-text> draws no box of its own, so it's given one */
-solitaire-card::part(front),
-solitaire-card::part(back),
+/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */
 [layout] > *::part(front),
-[layout] > *::part(back) {
+[layout] > *::part(back),
+solitaire-card::part(front),
+solitaire-card::part(back) {
   display: block;
   position: absolute;
   inset: 0;
@@ -1079,7 +916,9 @@ solitaire-card::part(back),
   background-clip: content-box;
   border-radius: 0.035em;
 }
-/* Over every card and pile around it (the card's "lifted"), while the cheat turns it and moves it onto the discards */
+
+/* Moving:  the cheat's card is "lifted" over every card around it, and turns face up as it goes to the discards
+   (the game pauses 0.3s for it:  Solitaire.spell) */
 [layout] > * {
   transition:
     transform 0.3s ease-in-out,
@@ -1088,16 +927,11 @@ solitaire-card::part(back),
 [layout] > [lifted] {
   z-index: 5;
 }
-/*
- * ... and turns face up as it goes:  moving it to the discards draws it there already face up, so its turn starts
- * from face down (\\`@starting-style\\`)
- */
 [layout] > [lifted][direction="up"] {
   @starting-style {
     transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   [layout] > * {
     transition: none;
@@ -1113,72 +947,23 @@ solitaire-card::part(back),
   opacity: 0.5;
 }
 
-/*
- * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",
- * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,
- * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder
- * (above) pale, on the felt
- */
-[layout] > *,
-solitaire-card {
-  color-scheme: light;
-  --ui-red-text: #c8102e;
-  --ui-black-text: #1a1a1a;
-  --ui-blue-text: #2f6fd6;
-}
-
-/****************
- * Dropping:  a card dragged anywhere over a pile that would take it lights up the card it would land on
- * - That's the pile's top card, its last:  on a column, the face-up card at its foot.
- *   An empty pile's placeholder, where it would lie.
- * - A tight glow hugging the card:  a thin ring, then a soft halo.
- *   The rings grow out from the card's own corners, so they round more than it does.
- * - The pile says it would take the card by its state, :state(accepting-drop):  the runtime sets it, by the pile's rules.
- ****************/
-
+/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder
+   (:state(accepting-drop), set by the pile's rules) */
 [layout]:state(accepting-drop) > :last-child,
 [layout]:state(accepting-drop)::part(placeholder) {
+  opacity: 1;
   border-radius: 0.035em;
   box-shadow:
     0 0 0 0.012em rgb(150 80 255 / 0.85),
     0 0 0.06em 0.025em rgb(150 80 255 / 0.55);
 }
-/* an empty pile's placeholder shows clearly while it would take the card */
-[layout]:state(accepting-drop)::part(placeholder) {
-  opacity: 1;
-}
 
-/****************
- * The layouts:  stacked puts every card on top of the one before
- ****************/
-
-/* vertical:  each card a step below the one before */
+/* The layouts:  stacked puts every card on top of the one before;  vertical, each a step below it */
 [layout="vertical"]::before {
   padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));
 }
 [layout="vertical"] > * {
   margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));
-}
-
-/* horizontal:  side by side, each covering the edge of the one before;  smaller as there are more, to fit the pile */
-[layout="horizontal"] {
-  --spread: calc(1 + (max(var(--count, 1), 1) - 1) * (1 - var(--card-overlap)));
-}
-[layout="horizontal"]::before {
-  padding-top: calc(100% * var(--card-height) / var(--spread));
-}
-[layout="horizontal"] > * {
-  font-size: calc(100cqi / var(--card-width) / var(--spread));
-  margin-left: calc(var(--index) * var(--card-width) * 1em * (1 - var(--card-overlap)));
-}
-
-/* fanned:  as a hand of cards is held, each turned a little from the one before, around a point below them */
-[layout="fanned"] > * {
-  font-size: calc(60cqi / var(--card-width));
-  left: calc(50% - var(--card-width) * 0.5em);
-  margin-top: 10%;
-  transform-origin: 50% 200%;
-  rotate: calc((var(--index) - (var(--count) - 1) / 2) * var(--card-turn));
 }
 """)
 
@@ -1200,16 +985,9 @@ test_the_moves()
 
 # what each event this program hears holds
 ClickEvent = SentEvent
-DragSpellEvent = SentEvent
-DragCancelledEvent = SentEvent
 
 
 class ScoreChangeEvent(SentEvent):
-    value: float
-    was: float
-
-
-class MovesChangeEvent(SentEvent):
     value: float
     was: float
 

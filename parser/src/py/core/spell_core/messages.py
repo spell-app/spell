@@ -24,8 +24,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
 | `confirm-default` | `confirm` with no page:  the JavaScript core's only, so far | `question` |
 | `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
-| `undo`, `redo` | an app's Edit menu with nothing to undo or redo:  the JavaScript core's, so far | |
-| `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`):  the JavaScript core's | `step` |
+| `undo`, `redo` | an app's Edit menu with nothing to undo or redo | |
+| `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`) | `step` |
 | `write-refused` | the notice when a place refuses a change:  the JavaScript core's, so far | `thing` |
 | `write-refused-role` | the same, refused as your role can't write:  the JavaScript core's, so far | `thing` |
 | `write-refused-taken-down` | the same, refused as Spell took it down:  the JavaScript core's, so far | `thing` |
