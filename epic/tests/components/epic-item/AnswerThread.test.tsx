@@ -169,6 +169,22 @@ describe("<epic-item>'s thread, drawn", () => {
     })
   })
 
+  test("done, not on main yet (I273):  `not on main yet` after Done, the branch in its tooltip;  none once it lands", async () => {
+    const host = await ElementFixture.render(
+      ANSWERED.replace(`state="done" at=`, `state="done" unmerged="editor" at=`)
+    )
+    await ElementFixture.settle()
+    const done = host.querySelectorAll<HTMLElement>("epic-status")[1]!
+    const pill = () => done.shadowRoot!.querySelector<HTMLElement>("[part~='unmerged']")
+    expect([pill()?.textContent, pill()?.title]).toEqual([
+      "not on main yet",
+      "Done on branch editor, not merged into main yet"
+    ])
+    done.removeAttribute("unmerged")
+    await ElementFixture.settle()
+    expect(pill()).toBeNull()
+  })
+
   test("a drive-by's line goes ABOVE the Choices, `your earlier comment` after its steps", async () => {
     const host = await ElementFixture.render(WITH_DRIVE_BY)
     await ElementFixture.settle()

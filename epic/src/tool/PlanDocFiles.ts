@@ -23,6 +23,7 @@ import {
   PlanDocError,
   type CommitHistory,
   type CommitLogEntry,
+  type Landing,
   type PlanDocOptions,
   type PlanDocParts
 } from "./planDoc.types"
@@ -335,6 +336,7 @@ export class PlanDocFiles {
     return SRV.FileLock.runAsync(file, async () => {
       const plan = this.read(file, { recentSince: this.recentSince(file) })
       plan.earlierVersions = PlanDocFiles.earlierVersions(file)
+      plan.landing = this.landing(file)
       const before = new Set(plan.check())
       plan.migrate()
       const result = change(plan)
@@ -659,6 +661,36 @@ export class PlanDocFiles {
   isMerged(file: string, sha: string): boolean | undefined {
     const run = SRV.Git.run(["merge-base", "--is-ancestor", sha, BASE_BRANCH], this.checkoutOf(file))
     return run.ok ? true : run.code === 1 ? false : undefined
+  }
+
+  /**
+   * What of the epic at `file` isn't on main yet (epic `epic-engine` I273):  its branch's commits not in `main`
+   * (`git log main..<epic>`), the phases and items their subjects name, and their shas;  `PlanDoc.updateLanded()`
+   * marks the page from it.
+   * - the branch is the epic's id (`editor`), a standing epic's too;  no such branch:  everything is on main
+   * - `undefined`:  git can't tell (no git, a doc outside a checkout):  the page's marks stay as they are
+   * - NEVER throws
+   */
+  landing(file: string): Landing | undefined {
+    const epic = basename(file).replace(/\.plan\.html$/, "")
+    const cwd = this.checkoutOf(file)
+    const ref = `refs/heads/${epic}`
+    if (!SRV.Git.run(["rev-parse", "--verify", "--quiet", BASE_BRANCH], cwd).ok) return undefined
+    if (!SRV.Git.run(["rev-parse", "--verify", "--quiet", ref], cwd).ok) return { branch: epic, ids: new Set(), shas: [] }
+    const log = SRV.Git.run(["log", "--format=%H%x09%s", `${BASE_BRANCH}..${ref}`], cwd)
+    if (!log.ok) return undefined
+    const ids = new Set<string>()
+    const shas: string[] = []
+    for (const line of log.out.split("\n").filter(Boolean)) {
+      const [sha, subject = ""] = line.split("\t")
+      shas.push(sha!)
+      const parsed = PlanCommits.parseCommitSubject(subject)
+      // another epic's commit, merged into this branch:  not this page's work
+      if (!parsed || (parsed.epic && parsed.epic !== epic)) continue
+      for (const phase of parsed.phases) ids.add(`p${phase}`)
+      for (const item of parsed.items) ids.add(item.toLowerCase())
+    }
+    return { branch: epic, ids, shas }
   }
 
   /** The main checkout's root:  the parent of git's common dir (`.git`), the same from any worktree. */
