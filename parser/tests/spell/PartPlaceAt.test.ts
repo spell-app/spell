@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vite-plus/test"
+import { describe, expect, it, vi } from "vite-plus/test"
 
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
@@ -42,5 +42,16 @@ describe("SP.SpellProject.partPlaceAt()", () => {
   it("finds none outside a drawing", () => {
     expect(tagAround(1)).toBeUndefined()
     expect(tagAround(9)).toBeUndefined()
+  })
+
+  // language I85:  a keyword's match (`is`, `to draw`) has no AST;  asking it for one warned, once a cursor move
+  it("asks no keyword for its AST", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    try {
+      for (let line = 0; line < lines.length - 1; line++) tagAround(line)
+      expect(warn.mock.calls.map((call) => String(call[0]))).not.toContainEqual(expect.stringContaining("No getAST()"))
+    } finally {
+      warn.mockRestore()
+    }
   })
 })
