@@ -1,6 +1,7 @@
 /// <reference types="node" />
 
 import solid, { type Options as SolidOptions } from "@solidjs/vite-plugin"
+import type { Plugin } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
 
@@ -21,6 +22,22 @@ import { standardDecorators } from "spell/toolchain/decorators"
  * - Lightning CSS encodes versions as `major << 16 | minor << 8`.
  */
 export const CSS_TARGETS = { chrome: 125 << 16, safari: 26 << 16, firefox: 147 << 16 }
+
+/**
+ * The same browsers as `CSS_TARGETS`, as a build's `build.cssTarget`:  what its CSS MINIFY reads.
+ * - Left at Vite's default (older Safari), the minify lowers `light-dark()` whatever `css.lightningcss.targets` says:
+ *   `.ui-dark` and a shadow root's colours change nothing in a build (dev and tests are fine).
+ */
+export const CSS_BUILD_TARGET = Object.entries(CSS_TARGETS).map(([browser, version]) => `${browser}${version >> 16}`)
+
+/**
+ * A plugin giving every build `CSS_BUILD_TARGET`, so its CSS minify keeps `light-dark()` as the browsers have it.
+ * - A plugin, not a key of the base config:  each config writes a `build` block of its own, which would drop it.
+ * - In `elementBaseConfig()` (Spell UI's library, its site, every component pack) and the app's `appConfig()`.
+ */
+export function cssBuildTarget(): Plugin {
+  return { name: "spell-css-build-target", config: () => ({ build: { cssTarget: CSS_BUILD_TARGET } }) }
+}
 
 /** Packages that MUST resolve to one copy:  two Solids can't share owners (`agents/PAPERCUTS.md`). */
 export const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
@@ -46,7 +63,7 @@ export const DEV_SERVER_SETTINGS = { forwardConsole: false }
  */
 export function elementBaseConfig({ solid: solidOptions = {} }: { solid?: SolidOptions } = {}) {
   return {
-    plugins: [standardDecorators(), solid(solidOptions)],
+    plugins: [standardDecorators(), solid(solidOptions), cssBuildTarget()],
     resolve: {
       tsconfigPaths: true,
       dedupe: SOLID_DEDUPE

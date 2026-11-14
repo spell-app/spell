@@ -44,8 +44,6 @@ export default defineConfig(() => {
       sourcemap: false,
       minify: true,
       target: "esnext",
-      // the CSS minify reads `cssTarget`, not `css.lightningcss.targets`:  same browsers (see `vite.config.ts`)
-      cssTarget: ["chrome125", "safari26", "firefox147"],
       modulePreload: { polyfill: false },
       reportCompressedSize: false,
       // `brands.json`-sized icon data and highlight.js's languages are lazy chunks, loaded only when used

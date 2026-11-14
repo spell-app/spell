@@ -6,7 +6,7 @@ import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
-import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE } from "spell/element-tools/elementConfig"
+import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE, cssBuildTarget } from "spell/element-tools/elementConfig"
 import { emitIconPacks } from "spell/ui/vite.config.ts"
 
 /**
@@ -46,16 +46,17 @@ export const TOP_REPO = (() => {
  * - `iconPacks`:  a BUILD that bundles `spell-ui` emits its built-in icon packs
  *   beside the chunk that loads them (`iconPacksBesideBuiltIns()`).
  *   Omit for `vitest`, and for builds that import `ui` from `spell-ui.js`.
- * - Lightning CSS with the kit's `CSS_TARGETS`, as Spell UI's own:
- *   Vite's default targets lower `light-dark()` and break `ui-dark` subtrees
- *   (see `spell/element-tools/elementConfig`).
+ * - Lightning CSS with the kit's `CSS_TARGETS`, and every build's CSS minify with the same browsers
+ *   (`cssBuildTarget()`), as Spell UI's own:  Vite's default targets lower `light-dark()` and break `ui-dark`
+ *   subtrees and shadow roots (see `spell/element-tools/elementConfig`).
  */
 export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
   const plugins: PluginOption[] = [
     standardDecorators(),
     packageVersion(import.meta.dirname),
     solid({ exclude: [NOT_SOLID_SOURCE] }),
-    compiledSpell()
+    compiledSpell(),
+    cssBuildTarget()
   ]
   if (iconPacks) plugins.push(iconPacksBesideBuiltIns())
   return {
