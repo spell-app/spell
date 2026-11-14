@@ -35,11 +35,11 @@
  *   "Review" a line saying how to fill it;  "Details" its list.
  * - Title-bar buttons:  back, forward, reload, restart the page server, open in the browser;
  *   then Inspect (`toggleDevTools()`).
- *   - the Review tab's:  its epic list right of Home (Owen, 2026-10-22)
  *   - Home:  the page's own site header (its logo, or "Docs");  VS Code has no clickable view titles.
  *   - `spellEpic.docView.home` stays a palette command, as does "Review:  Home Page" (`spellEpic.reviewView.home`).
- *   - the Epic Docs tab's:  this window's epic page, right of Home, shown in the Review tab (`showWindowEpic()`)
- * - "Review" has a list button too, "Review:  Open Epic..." (`spellEpic.reviewView.openEpic`):
+ *   - the Review and Epic Docs tabs':  a checklist right of Home, this window's worktree epic page, in the Review tab;
+ *     in the main checkout's window, the epic list (`showWindowEpic()`;  epic `epic-engine` I266)
+ * - "Review:  Open Epic..." (`spellEpic.reviewView.openEpic`), a palette command, the button before I266:
  *   pick an epic of ANY registered repo (`~/.spell-epic/repos.json5`), its epic page shows there.
  *   No terminal, no Claude:  how Owen gets around the epic pages offline (epic `airplane` P4).
  * - Links in the page:  docs pages open here;  other files on the page server in the editor;
@@ -98,7 +98,8 @@ import {
   samePage,
   serverBaseIn,
   stamped,
-  windowEpic
+  windowEpic,
+  worktreeEpic
 } from "./docUrls"
 
 /** The page's iframe's sandbox:  Simple Browser's.  Scripts need the webview's `enableScripts` too. */
@@ -250,6 +251,7 @@ export class DocView implements vscode.WebviewViewProvider {
     context.subscriptions.push(
       vscode.commands.registerCommand("spellEpic.docView.home", () => DocView.goHome()),
       vscode.commands.registerCommand("spellEpic.docView.showWindowEpic", () => DocView.showWindowEpic()),
+      vscode.commands.registerCommand("spellEpic.reviewView.showWindowEpic", () => DocView.showWindowEpic()),
       vscode.commands.registerCommand("spellEpic.reviewView.home", () => DocView.goHome("review")),
       vscode.commands.registerCommand("spellEpic.reviewView.openEpic", () => DocView.pickEpic()),
       vscode.commands.registerCommand("spellEpic.detailsView.list", () => DocView.of("details").showList()),
@@ -305,20 +307,25 @@ export class DocView implements vscode.WebviewViewProvider {
         detail: `changed ${doc.changed.toLocaleString()}`,
         doc
       })),
-      { title: "Review an epic", placeHolder: "Which epic page?", matchOnDescription: true }
+      // stays open when focus moves:  the page in a view takes the focus back after a title-bar click,
+      // which closed the list before Owen could pick (epic `epic-engine` I266)
+      { title: "Review an epic", placeHolder: "Which epic page?", matchOnDescription: true, ignoreFocusOut: true }
     )
     if (picked) await DocView.showFile?.(picked.doc.file, "review")
   }
 
   /**
-   * The epic page of this window's epic (`windowEpic()`), in the "Review" tab (epic `epic-engine` I243).
-   * - a warning when the window has none
+   * The epic page of this window's worktree epic (`worktreeEpic()`), in the "Review" tab:
+   * the checklist button on the Review and Epic Docs tabs (epic `epic-engine` I243, I266).
+   * - ALWAYS that epic in a worktree's window, whatever the tab showed last
+   *   (Owen, 2026-11-13:  "should always just show the [epic page] for the worktree")
+   * - no worktree (the main checkout's window):  asks, with the epic list (`pickEpic()`)
    */
   static async showWindowEpic(): Promise<void> {
     const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
     const content = root && EpicConfig.contentOf(root)
-    const epic = content && windowEpic(root, content)
-    if (!content || !epic) return void vscode.window.showWarningMessage("Spell Epic:  this window has no epic.")
+    const epic = content && worktreeEpic(root, content)
+    if (!content || !epic) return DocView.pickEpic()
     await DocView.showFile?.(join(content, "epics", epic, `${epic}.plan.html`), "review")
   }
 

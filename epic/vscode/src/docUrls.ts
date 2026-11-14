@@ -156,14 +156,21 @@ export function planDocsOf(repos: { name: string; content: string }[]): PlanDocE
 
 /**
  * The epic a window works on, in epic folder `content`:
- * - a worktree's window:  its folder's name, when an epic page has that name (`~/www/spell.worktrees/data` => `data`)
+ * - a worktree's window:  its own epic (`worktreeEpic()`)
  * - else (the main checkout's window):  the epic whose page changed last
  * - `undefined`:  no epic pages at all
  */
 export function windowEpic(folder: string | undefined, content: string): string | undefined {
+  return worktreeEpic(folder, content) ?? planDocsIn(content)[0]?.name
+}
+
+/**
+ * A worktree window's own epic, in epic folder `content`:  its folder's name, when an epic page has that name
+ * (`~/www/spell.worktrees/data` => `data`);  `undefined` for any other window (the main checkout's).
+ */
+export function worktreeEpic(folder: string | undefined, content: string): string | undefined {
   const named = folder && basename(folder)
-  if (named && existsSync(join(content, "epics", named, `${named}.plan.html`))) return named
-  return planDocsIn(content)[0]?.name
+  return named && existsSync(join(content, "epics", named, `${named}.plan.html`)) ? named : undefined
 }
 
 ////////////////

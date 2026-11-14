@@ -102,10 +102,15 @@
         "icon": "$(link-external)"
       },
       {
+        "command": "spellEpic.reviewView.showWindowEpic",
+        "title": "Review:  This Window's Epic Page",
+        "icon": "$(checklist)"
+      },
+      {
         "command": "spellEpic.reviewView.openEpic",
         "title": "Review:  Open Epic...",
         "category": "Spell Epic",
-        "icon": "$(checklist)"
+        "icon": "$(list-unordered)"
       },
       {
         "command": "spellEpic.reviewView.home",
@@ -296,7 +301,7 @@
           "group": "navigation@4"
         },
         {
-          "command": "spellEpic.reviewView.openEpic",
+          "command": "spellEpic.reviewView.showWindowEpic",
           "when": "view == spellEpic.reviewView",
           "group": "navigation@7"
         },
