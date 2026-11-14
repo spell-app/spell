@@ -1526,6 +1526,19 @@ would.
 
 ## Markup in a drawing
 
+- A tag in a thing's own drawing (`to draw it`) may DECLARE the member it draws (epic `language` P55, Q52):
+  - a view's tag with a quoted word naming no member:  `<column "C1" suit=clubs/>` ~== `"C1" is a new column with
+    suit = clubs` (`SpellJSX.viewDeclaredBy()`)
+  - a value's type as a tag:  `<number "score"/>` ~== `"score" is a number`, drawn as `{the score}`
+    (`valueDeclaredBy()`;  Spanish's `<número "puntuación"/>`)
+  - `DrawnMarkup.mutateScope()` declares them on the thing;  the drawing compiles them beside it, as their own lines
+    would (`DrawnMarkup.membersDeclared()`)
+  - the scan before parsing knows them ahead (`SpellParser.drawnMembers()`), so an action above the drawing reads
+    `the stock`, and a `set the score` there doesn't declare it again
+  - a member said on a line of its own wins:  the tag only draws it
+  - a line that declares changes what the rest of the program reads (`getScopeChanges()`):  an edit to it is a
+    full re-parse
+
 What a drawing's markup may say, a page's or a plain file's (epic `elemental-spell` P7;  plain Spell's since epic
 `language` P45, Q4 A).
 

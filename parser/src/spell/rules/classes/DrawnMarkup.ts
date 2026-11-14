@@ -5,6 +5,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { DrawIt } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
 
 /**
  * `drawn_markup` rule:  in a drawing's body, a line of markup IS what it draws -- no `return`
@@ -25,6 +26,10 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - In a slot's drawing, its element carries the slot's name as a CSS part (J6):  see `DrawIt.withPart()`.
  *   - In a list's placeholder, `part="placeholder"` (`DrawIt.partOf()`).
  * - `return <...>` still works, as before.
+ * - A tag in the thing's own drawing may DECLARE the member it draws (epic `language` P55, Q52):
+ *   `<column "C1"/>` ~== `"C1" is a new column`, `<number "score"/>` ~== `"score" is a number` (`SpellJSX`);
+ *   this line declares them on the thing (`mutateScope()`), and its drawing compiles them as members
+ *   (`membersDeclared()`).
  */
 export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
   /** Beats `draw_thing` (`Priority.preferred`), which reads `draw its front` as drawing a `front`, and does nothing. */
@@ -54,6 +59,83 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
   test(scope: P.Scope, tokens: P.Token[], start = 0): boolean | undefined {
     if (this.rules[0]?.test(scope, tokens, start) === false) return false
     return super.test(scope, tokens, start)
+  }
+
+  /** SIDE EFFECT:  each member a tag of ours declares, on its thing (`declaredIn()`). */
+  mutateScope(match: P.MatchFor<this>) {
+    for (const { declares, at } of DrawnMarkup.declaredIn(match)) {
+      const owner = match.scope.getType(declares.owner)
+      if (!owner || owner.getMember(declares.name)) continue
+      owner.declareProperty(declares.name, at, { datatype: declares.view ?? declares.datatype })
+    }
+  }
+
+  /** A line that declares members changes what the rest of the program reads;  any other, nothing. */
+  getScopeChanges(match?: P.MatchFor<this>): P.ScopeChanges | undefined {
+    return match && DrawnMarkup.declaredIn(match).length ? "global" : undefined
+  }
+
+  /**
+   * Each member the tags in `match`'s markup declare, with the tag's match -- see `JSXMatchData.declares`.
+   * - Reads only matches and their `data`:  pure, for `getAST()` too.
+   */
+  static declaredIn(match: P.Match): Array<{ declares: DrawnDeclaration; at: P.Match }> {
+    const found: Array<{ declares: DrawnDeclaration; at: P.Match }> = []
+    const visit = (each: P.Match | undefined) => {
+      if (!each) return
+      const { declares, children } = each.data as { declares?: DrawnDeclaration; children?: Array<P.Match | undefined> }
+      if (declares && !declares.drawnOnly) found.push({ declares, at: each })
+      for (const child of each.matched) if (child instanceof P.Match) visit(child)
+      for (const child of children ?? []) visit(child)
+    }
+    visit(match)
+    return found
+  }
+
+  /**
+   * The members the drawing lines of `body` declare, as their own lines would compile them (Q52):
+   * - a view:  `static { this.declareProp("C1", { init: () => new Column({ id: "C1" }), early: true }) }`,
+   *   its tag's attributes its starting values
+   * - a value:  `static { this.declareProp("score", { type: "number" }) }`
+   * - What `draw_it` and English's `to draw it` (a method named `draw`) write beside the drawing.
+   */
+  static membersDeclared(body: P.Match | undefined, type: P.ASTTypeExpression): P.ASTReactiveProperty[] {
+    if (!body) return []
+    const seen = new Set<string>()
+    const members: P.ASTReactiveProperty[] = []
+    const lines: P.Match[] = []
+    const gather = (each: P.Match) => {
+      if (each.is(DrawnMarkup)) lines.push(each)
+      else for (const child of each.matched) if (child instanceof P.Match) gather(child)
+    }
+    gather(body)
+    for (const line of lines) {
+      for (const { declares, at } of DrawnMarkup.declaredIn(line)) {
+        if (seen.has(declares.name)) continue
+        seen.add(declares.name)
+        members.push(DrawnMarkup.memberAST(declares, at, type))
+      }
+    }
+    return members
+  }
+
+  /** One member `declares` says, declared by the tag `at` -- see `membersDeclared()`. */
+  private static memberAST(declares: DrawnDeclaration, at: P.Match, type: P.ASTTypeExpression): P.ASTReactiveProperty {
+    const check = new P.ASTObjectLiteral(at)
+    if (declares.datatype) {
+      check.addProp("type", new P.ASTTypeNameLiteral(at, { value: declares.datatype, quote: "'" }))
+      return new P.ASTReactiveProperty(at, { type, property: declares.name, check })
+    }
+    // its id, the member's name, then its tag's other attributes:  `{ id: "clubs", suit: "clubs" }`
+    const id = new P.ASTStringLiteral(at, { value: declares.name, quote: '"' })
+    const props = new P.ASTObjectLiteral(at, { properties: [new P.ASTObjectLiteralProperty(at, { property: "id", value: id })] })
+    for (const attribute of (at.data as { attributes?: Array<P.Match | undefined> }).attributes ?? []) {
+      const ast = attribute?.AST
+      if (!(ast instanceof P.ASTJSXAttribute) || ast.name === "id" || !(ast.value instanceof P.ASTExpression)) continue
+      props.properties.push(new P.ASTObjectLiteralProperty(attribute!, { property: ast.name, value: ast.value }))
+    }
+    const made = new P.ASTNewInstanceExpression(at, { type: new P.ASTTypeExpression(at, { name: declares.view! }), props })
+    return new P.ASTReactiveProperty(at, { type, property: declares.name, initializer: made })
   }
 
   getAST(match: P.MatchFor<this>): P.ASTReturnStatement {

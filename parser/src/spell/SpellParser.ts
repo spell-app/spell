@@ -662,6 +662,29 @@ export class SpellParser extends P.Parser {
         if (property) found.push(`${subject}\t${property}`)
       }
     })
+    found.push(...this.drawnMembers(text))
+    return found
+  }
+
+  /**
+   * Members a type's drawing may declare, by a scan of its lines:  each `<type>\t<id>` (epic `language` P55, Q52).
+   * - Each tag with a quoted word, at any depth of a type's outline:  `<column "C1"/>`, `<number "score"/>`.
+   * - Generous, as `declaredProperties()` is:  an action's button, `<action "deal"/>`, is a name ahead too;
+   *   only `the deal` would read it, as a property nothing declares.
+   */
+  private drawnMembers(text: string): string[] {
+    const found: string[] = []
+    const onlyOnes = new Set(this.oneOfAKindsIn(text))
+    let subject = ""
+    for (const line of text.split("\n")) {
+      if (!line.trim()) continue
+      if (!/^\s/.test(line)) {
+        subject = this.subjectOf(line, onlyOnes) ?? ""
+        continue
+      }
+      if (!subject || !line.includes('"')) continue
+      for (const [, id] of line.matchAll(DRAWN_MEMBER_TAG)) found.push(`${subject}\t${id}`)
+    }
     return found
   }
 
@@ -952,3 +975,6 @@ function addLeadingWords(rule: P.Rule, words: Set<string>): void {
     }
   }
 }
+
+/** A tag with a quoted word, in a drawing:  `<column "C1"`, `<number "score"` -- see `SpellParser.drawnMembers()`. */
+const DRAWN_MEMBER_TAG = /<[\p{L}][\p{L}\p{M}\d-]*\s+"([^"]+)"/gu

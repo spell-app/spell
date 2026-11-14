@@ -5949,7 +5949,7 @@
           "ruleNames": ["draw_it"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawIt.ts",
-          "line": 54,
+          "line": 56,
           "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
           "syntaxes": [
             {
@@ -6530,7 +6530,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 29,
+          "line": 34,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {
@@ -8859,7 +8859,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 87,
+          "line": 88,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

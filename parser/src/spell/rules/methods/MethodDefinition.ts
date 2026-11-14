@@ -3,7 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Wording } from "spell/parser/spell/rules/expressions"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawnLines } from "spell/parser/spell/rules/classes"
+import { DrawnLines, DrawnMarkup } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
 import { SubjectRule } from "spell/parser/spell/rules/types"
@@ -620,6 +620,11 @@ export class MethodDefinition<
           })
         )
       } else {
+        // English's `to draw it`:  what its tags declare, as members beside it (epic `language` P55, Q52)
+        if (methodName === "draw") {
+          const type = new P.ASTTypeExpression(match, { name: typeName })
+          output.push(...DrawnMarkup.membersDeclared(this.getBody(match), type))
+        }
         output.push(
           new P.ASTPropertyDefinition(match, {
             type: typeName,
