@@ -56,8 +56,15 @@ export class StrayFiles {
   /**
    * Read what's uncommitted in `checkout` now.
    * - `generators`:  the repo's generators, whose outputs count as generated;  default its `.epic/generators.json5`
+   * - `among`:  only these paths count (`epic merge`'s:  the files the merge changes);  default every one
+   *   - the others are left exactly as they are:  a fast-forward never touches them (Owen's edits to an example,
+   *     made live in the editor while an epic merges, epic `epic-engine` I270)
    */
-  constructor(checkout: string, generators: Generator[] = MainMerge.generatorsOf(checkout)) {
+  constructor(
+    checkout: string,
+    generators: Generator[] = MainMerge.generatorsOf(checkout),
+    among?: ReadonlySet<string>
+  ) {
     this.checkout = checkout
     const generated = [...LEFT_BY_TOOLS, ...generators.flatMap(({ outputs }) => outputs)]
     // v2:  each entry starts with its kind, so `Git.run()`'s trimming can't eat a status column
@@ -70,6 +77,7 @@ export class StrayFiles {
         const fields = entry.split(" ")
         return { path: fields.slice(STATUS_FIELDS[fields[0]!] ?? 1).join(" "), tracked: fields[0] !== "?" }
       })
+      .filter(({ path }) => !among || among.has(path))
     const marked = entries.length
       ? LinesOfCode.generatedFiles(
           checkout,

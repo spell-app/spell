@@ -442,8 +442,9 @@ export class Requests {
    *     (`ExitWorktree`) and came back (`EnterWorktree`):  Claude Code asked Owen to enter every time (r11).
    * - Fast-forward only, after the checks `/isolate done` makes (its "Finish", step 7):
    *   - this is the main checkout, on `main`
-   *   - nothing uncommitted there (another session may work there), but for STRAY files (`StrayFiles`;  epic
-   *     `epic-engine` I77):
+   *   - nothing uncommitted there IN THE FILES THE MERGE CHANGES (another session may work there), but for STRAY
+   *     files (`StrayFiles`;  epic `epic-engine` I77);  every other uncommitted file is left alone (I270:  Owen's live
+   *     edits to an example the branch never touches):
    *     - generated ones (a test's snapshot, a repo's generated output) are moved aside
    *     - with `ditch`, up to `StrayFiles.ASK_LIMIT` others too:  only once Owen said so;  more is somebody's work
    *     - moved aside into `ditched` (`StrayFiles.folderFor()`), never deleted, and only once every check passed
@@ -485,7 +486,9 @@ export class Requests {
       )
     const branch = Git.run(["branch", "--show-current"], main).out
     if (branch !== base) throw new EpicCommandError(`merge:  ${label} is on '${branch}', not ${base}`)
-    const stray = new StrayFiles(main)
+    // only what the fast-forward would change:  anything else uncommitted there is left as it is (I270)
+    const changed = Git.run(["diff", "--name-only", "-z", `${base}...${epic}`], main)
+    const stray = new StrayFiles(main, undefined, new Set(changed.out.split("\0").filter(Boolean)))
     stray.check({ label, epic, ditch })
     if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], main).ok) {
       throw new EpicCommandError(`merge:  no branch '${epic}'`)
