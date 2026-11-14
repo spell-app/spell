@@ -35,4 +35,11 @@ describe("DefaultsTable.output()", () => {
     expect(HELP_TABLE["ui-button"]?.attributes.color).toMatch(/\S/)
     expect(SHARED_HELP.disabled).toMatch(/\S/)
   })
+
+  test("...and which tags hold nothing (no default slot), for an editor to write them closed (epic `editor` I70)", () => {
+    expect(HELP_TABLE["ui-icon"]?.empty).toBe(true)
+    expect(HELP_TABLE["ui-input"]?.empty).toBe(true)
+    expect(HELP_TABLE["ui-button"]?.empty).toBeUndefined()
+    expect(HELP_TABLE["ui-content"]?.empty).toBeUndefined()
+  })
 })

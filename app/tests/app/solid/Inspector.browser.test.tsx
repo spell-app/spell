@@ -162,7 +162,7 @@ describe("inspecting", () => {
     expect(Inspector.allSelected.map((part) => part.element)).toEqual([b, c, a])
   })
 
-  test("the pill's ✕ lets go of what's selected, and so does Esc;  Esc in a field doesn't (I92)", async () => {
+  test("Esc lets go of what's selected, the pill has no ✕ (I79);  Esc in a field doesn't (I92)", async () => {
     const area = await inArea(`<ui-input value="hi"></ui-input>`)
     const host = await mount(() => <InspectorColumn />)
     Inspector.toggle()
@@ -170,9 +170,8 @@ describe("inspecting", () => {
     Inspector.select(area.querySelector("ui-input")!)
     flush()
     await ElementFixture.settle(host)
-    const letGo = host.querySelector<HTMLElement>(".InspectorCard .InspectorLetGo")!
-    expect(letGo.getAttribute("title")).toBe("Let go of <ui-input /> (Esc)")
-    letGo.click()
+    expect(host.querySelector(".InspectorCard .InspectorLetGo")).toBeNull()
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
     flush()
     expect(Inspector.selected).toBeUndefined()
     // nothing selected:  the tip, and the inspect button in the card's header (I60)

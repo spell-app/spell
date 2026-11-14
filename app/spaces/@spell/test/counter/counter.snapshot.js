@@ -34,6 +34,7 @@ export class Counter extends View {
     }, () => `Count: ${this.count}`)
   }
 }
+core.describeAction(Counter, "increment", { title: "Increment It", undoneAs: "Increment It" })
 
 core.describeAction(Counter, "increment", { title: "Increment It", undoneAs: "Increment It" })
 

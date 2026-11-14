@@ -734,7 +734,14 @@ A kind that says so is saved in a file of its own.
 
 ## File => block => line => statement
 
-- [`Block.parse()`](rules/Block.ts) loops over the root `BlockToken`'s items:
+- [`Block.parse()`](rules/Block.ts) first joins a condition said over several lines into ONE line
+  ([`JoinedLines`](rules/JoinedLines.ts), epic `language` P55, Q53):
+  - a line ending in `and` / `or` (the `and_or` word rule) takes the line indented under it, however deep;
+    what's under THAT is the joined line's body
+  - a line of just `and` / `or` joins the lines either side, each in parentheses of no width
+  - the tokens stay the lines' own:  every rule reads the joined line as one written whole
+  - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)
+- Then it loops over the root `BlockToken`'s items:
   - a `LineToken` => `parser.parse(items, "line", scope)`
     - it passes ALL remaining items, so a statement can take the indented block after it
   - a nested `BlockToken` nobody claimed => parsed recursively, in the SAME scope
@@ -1518,6 +1525,19 @@ would.
 - `spell place ingest` writes plain Spell only.
 
 ## Markup in a drawing
+
+- A tag in a thing's own drawing (`to draw it`) may DECLARE the member it draws (epic `language` P55, Q52):
+  - a view's tag with a quoted word naming no member:  `<column "C1" suit=clubs/>` ~== `"C1" is a new column with
+    suit = clubs` (`SpellJSX.viewDeclaredBy()`)
+  - a value's type as a tag:  `<number "score"/>` ~== `"score" is a number`, drawn as `{the score}`
+    (`valueDeclaredBy()`;  Spanish's `<número "puntuación"/>`)
+  - `DrawnMarkup.mutateScope()` declares them on the thing;  the drawing compiles them beside it, as their own lines
+    would (`DrawnMarkup.membersDeclared()`)
+  - the scan before parsing knows them ahead (`SpellParser.drawnMembers()`), so an action above the drawing reads
+    `the stock`, and a `set the score` there doesn't declare it again
+  - a member said on a line of its own wins:  the tag only draws it
+  - a line that declares changes what the rest of the program reads (`getScopeChanges()`):  an edit to it is a
+    full re-parse
 
 What a drawing's markup may say, a page's or a plain file's (epic `elemental-spell` P7;  plain Spell's since epic
 `language` P45, Q4 A).

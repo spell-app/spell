@@ -11,6 +11,6 @@ Lo que muestra el Inspector de una carta:  su rango, su cara y su palo para camb
 		<ui-property name="valor" label="Valor" width="1/2" />
 		<ui-property name="color" label="Color" width="1/2" />
 		<ui-property name="símbolo" label="Símbolo" width="1/2" />
-		<ui-property name="estado" label="Nombre corto" width="1/2" />
+		<ui-property name="nombreCorto" label="Nombre corto" width="1/2" />
 		<ui-property name="nombre" label="Nombre" />
 	</ui-property-group>

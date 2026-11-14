@@ -59,7 +59,10 @@ export const toolbarVocabulary = {
     ...menuVocabulary.slots,
     { name: "icon", description: "First, at the start:  an icon or an icon button (a menu button)." },
     { name: "title", description: "After the icon:  the title, never squeezed." },
-    { name: "center", description: "After the title, taking the room left, what's in it centred there:  e.g. a row of links." },
+    {
+      name: "center",
+      description: "After the title, taking the room left, what's in it centred there:  e.g. a row of links."
+    },
     { name: "right", description: "Last, pushed to the end:  e.g. search and settings." }
   ],
   parts: [

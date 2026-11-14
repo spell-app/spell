@@ -42,6 +42,10 @@
     {
       "beforeText": ":\\s*$",
       "action": { "indent": "indent" }
+    },
+    {
+      "beforeText": { "pattern": "(?<![\\p{L}\\p{M}\\d_-])(?:and|or|y|e|o|u)\\s*$", "flags": "u" },
+      "action": { "indent": "indent" }
     }
   ]
 }

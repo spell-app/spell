@@ -103,6 +103,22 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: 0;
   }
+  /* done, its work not on main yet (I273):  the time pill's size, outlined in blue:  still in process */
+  .unmerged {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    box-sizing: border-box;
+    height: 22px;
+    margin-inline-end: 6px;
+    padding: 0 8px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--epic-state-progress, var(--ui-blue));
+    color: var(--ui-blue-text, var(--ui-blue));
+    font: 600 12px/1 var(--epic-sans, var(--ui-font-family));
+    white-space: nowrap;
+    cursor: help;
+  }
   /* done and timed:  what it took, in done's green;  the estimate is its tooltip (epic `epic-engine` P41) */
   .estimate.took {
     color: var(--ui-green-text, var(--ui-green));

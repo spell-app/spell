@@ -5,6 +5,9 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import "spell/epic/components/epic-item"
+import { buttonsForItem } from "spell/epic/components/epic-item/EpicItem.types"
+import { BUTTONS_OF } from "spell/epic/components/epic-review/EpicReview.types"
+import { ReviewClient } from "spell/epic/review/ReviewClient"
 import "spell/epic/components/epic-aside"
 
 ////////////////
@@ -344,13 +347,51 @@ describe("<epic-item>", () => {
       expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
         "in P2",
         "#p-retry",
-        "Handled in P2 · Retry Logic:  rewritten into that phase's text.  Reopen its change mark to talk it over again."
+        "Handled in P2 · Retry Logic:  rewritten into that phase's text.  Reopen its change mark to talk it over again.\n" +
+          "Click:  go to P2.  ⌥-click:  start P2."
       ])
       expect(chip.title).toMatch(/^Handled in a phase/)
       await expectAccessible(host)
     } finally {
       phases.remove()
     }
+  })
+
+  test("a todo in a phase (I271):  no plane, the pill its button;  ⌥-click starts the phase, a plain click doesn't", async () => {
+    const phases = document.createElement("div")
+    phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix" plan="waiting"></epic-phase>`
+    document.body.append(phases)
+    const press = vi.spyOn(ReviewClient.prototype, "press").mockReturnValue(undefined)
+    try {
+      const inPhase = await item(`<epic-item id="t3" title="Queued" status="open" taken-in="p-one"></epic-item>`)
+      const loose = await item(`<epic-item id="t4" title="Loose" status="open"></epic-item>`)
+      // the buttons draw only while the page is reviewed:  what they would be
+      const buttonsOf = (host: HTMLElement) =>
+        (host as HTMLElement & { component: { buttonsKind: string } }).component.buttonsKind
+      expect([buttonsOf(inPhase.host), buttonsOf(loose.host)]).toEqual(["todo-in-phase", "todo"])
+      const pill = inPhase.host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
+      pill.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true }))
+      expect(press).not.toHaveBeenCalled()
+      pill.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
+      expect(press).toHaveBeenCalledWith("p-one", "todo")
+      // a plan waiting:  ⌥-click accepts it, as its own Accept plan would
+      const waiting = await item(`<epic-item id="t5" title="Waits" status="open" taken-in="p-fix"></epic-item>`)
+      waiting.host
+        .shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
+        .dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
+      expect(press).toHaveBeenLastCalledWith("p-fix", "approve")
+    } finally {
+      press.mockRestore()
+      phases.remove()
+    }
+  })
+
+  test("buttonsForItem():  a todo in a phase draws no plane;  anything else as before", () => {
+    expect(buttonsForItem("t1", { inPhase: true })).toBe("todo-in-phase")
+    expect(buttonsForItem("t1")).toBe("todo")
+    expect(buttonsForItem("t1", { limit: true, inPhase: true })).toBe("item")
+    expect(buttonsForItem("i1", { inPhase: true })).toBe("issue")
+    expect(BUTTONS_OF["todo-in-phase"].map((spec) => spec.action)).toEqual(["revisit", "drop"])
   })
 
   test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P2`, its tooltip saying so;  still green", async () => {
@@ -365,7 +406,7 @@ describe("<epic-item>", () => {
       expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
         "in P2",
         "#p-fix",
-        "Taken up in P2 · Fix Open Issues:  fixed or done there"
+        "Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.  ⌥-click:  start P2."
       ])
       expect(chip.title).toMatch(/^Decided or done/)
       await expectAccessible(host)

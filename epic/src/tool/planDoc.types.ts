@@ -292,6 +292,8 @@ export type ItemFacts = {
   reviewAs: string | undefined
   /** the phase whose text took its answer (`<epic-item handled>`, epic `epic-engine` P31), or `undefined` */
   handled: string | undefined
+  /** its work is on this branch, not on main yet (`<epic-item unmerged>`, epic `epic-engine` I273), or `undefined` */
+  unmerged: string | undefined
 }
 
 /** One item (or an Overview sub-section), as `PlanReader.describeItem()` says it for `epic inbox`. */
@@ -747,6 +749,22 @@ export type BackfillOptions = CommitOptions & {
    * P52):  an old page's lists hold its commits by their shas before the repos were merged into one
    */
   logOnly?: boolean
+}
+
+/**
+ * What of an epic's work isn't on main yet (epic `epic-engine` I273):  the command line reads it from git
+ * (`PlanDocFiles.landing()`) and hands it to `PlanDoc.landing`, which marks the page (`updateLanded()`).
+ */
+export type Landing = {
+  /** the epic's branch, `editor` */
+  branch: string
+  /**
+   * the phases and items its commits not on main name, lower case:  `p28`, `i55`
+   * - each commit's subject as `PlanCommits.parseCommitSubject()` reads it;  one naming another epic first is left out
+   */
+  ids: ReadonlySet<string>
+  /** those commits' full shas:  a phase's or an item's listed `<epic-commit>` among them is not on main either */
+  shas: readonly string[]
 }
 
 /** What a commit subject says it did (`PlanCommits.parseCommitSubject()`). */

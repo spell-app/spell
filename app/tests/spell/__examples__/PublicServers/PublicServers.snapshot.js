@@ -586,6 +586,8 @@ export class User extends Thing {
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
+core.describeAction(User, "lookAtUser", { title: "Look At It", undoneAs: "Look At It" })
+core.describeAction(User, "lookAwayFromUser", { title: "Look Away From It", undoneAs: "Look Away From It" })
 
 export class IssueUser extends Thing {
   // - its "login" is text
@@ -1870,8 +1872,7 @@ export class GithubPage extends Thing {
     }
   }
 }
-
-core.describeAction(GithubPage, "tryWords", { title: "Try (words As Text)", undoneAs: "Try (words As Text)" })
+core.describeAction(GithubPage, "tryWords", { title: "Try Words As Text", undoneAs: "Try Words As Text" })
 
 core.heading("Someone on GitHub")
 ///////////////////////
@@ -1879,10 +1880,6 @@ core.heading("Someone on GitHub")
 ///////////////////////
 // A person or an organization:  a card in a search, and a page of their own, with their bio and their most popular repositories.
 // A search gives only a little of each:  their page reads them whole, by their login.
-
-core.describeAction(User, "lookAtUser", { title: "Look At It", undoneAs: "Look At It" })
-
-core.describeAction(User, "lookAwayFromUser", { title: "Look Away From It", undoneAs: "Look Away From It" })
 
 core.heading("An issue")
 //////////////
@@ -2118,6 +2115,8 @@ export class Book extends Thing {
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
+core.describeAction(Book, "open", { title: "Open It", undoneAs: "Open It" })
+core.describeAction(Book, "close", { title: "Close It", undoneAs: "Close It" })
 
 export class Author extends Thing {
   // - its "links" is a list of links
@@ -2594,10 +2593,6 @@ core.heading("A book")
 ////////////
 // Its cover, its title and who wrote it:  on its card, every name the search gave;  on its own page, its first author, read from their own record.
 
-core.describeAction(Book, "open", { title: "Open It", undoneAs: "Open It" })
-
-core.describeAction(Book, "close", { title: "Close It", undoneAs: "Close It" })
-
 core.heading("An edition")
 ////////////////
 // ## An edition
@@ -2988,7 +2983,6 @@ export class JsonplaceholderPage extends Thing {
     ), failedSay: () => "JSONPlaceholder can't be reached just now." })
   }
 }
-
 core.describeAction(JsonplaceholderPage, "addTheNewTodo", { title: "Add The New Todo", undoneAs: "Add The New Todo" })
 
 core.heading("A todo")
@@ -3262,7 +3256,6 @@ export class City extends Thing {
     }, () => this.name)
   }
 }
-
 core.describeAction(City, "pick", { title: "Pick It", undoneAs: "Pick It" })
 
 core.heading("Its hours")
@@ -3824,8 +3817,7 @@ export class MetMuseumPage extends Thing {
     )
   }
 }
-
-core.describeAction(MetMuseumPage, "tryWords", { title: "Try (words As Text)", undoneAs: "Try (words As Text)" })
+core.describeAction(MetMuseumPage, "tryWords", { title: "Try Words As Text", undoneAs: "Try Words As Text" })
 
 core.heading("An artwork")
 ////////////////
@@ -4260,8 +4252,7 @@ export class RestCountriesPage extends Thing {
     })
   }
 }
-
-core.describeAction(RestCountriesPage, "pickRegionRegion", { title: "Pick Region (region As Text)", undoneAs: "Pick Region (region As Text)" })
+core.describeAction(RestCountriesPage, "pickRegionRegion", { title: "Pick Region Region As Text", undoneAs: "Pick Region Region As Text" })
 
 core.heading("Its money")
 ///////////////

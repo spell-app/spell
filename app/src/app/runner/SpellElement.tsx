@@ -7,7 +7,7 @@ import { RootLoader } from "spell/ui/components/ui-root"
 // By file:  a click's rule is all this needs
 import { Dragging } from "spell/util/Dragging"
 import { ListSelection } from "spell/util/ListSelection"
-import type { ElementApi, Core } from "spell/parser/core"
+import type { ElementApi, Core, MenuItem } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
 import { ActionMenus } from "./ActionMenus"
@@ -983,6 +983,36 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /** May people reorder `list`'s items, dragging them?  Its type says so:  `its items can be reordered`. */
   private static reorders(list: object | undefined): boolean {
     return (list?.constructor as { reorderItemsAfter?: number } | undefined)?.reorderItemsAfter !== undefined
+  }
+
+  /**
+   * The program's right-click menu along `path` (innermost first), as a right click in Run finds it:
+   * each view's element on the path, innermost first, looks from the path's start up to itself (`onThingRightClick()`).
+   * - The editor's part menu, in Edit, shows these first, then a thick line, then its own (epic `editor` I76).
+   * - None:  `undefined`.
+   */
+  static programMenuAt(path: readonly EventTarget[]): MenuItem[] | undefined {
+    for (const target of path) {
+      const component = target instanceof Element ? SpellElement.componentOf(target) : undefined
+      const entry = component?.entry
+      if (!component || !entry) continue
+      const items = ActionMenus.contextMenuItemsOf(path, component.domElement, component.currentThing, entry.core)
+      if (items) return items
+    }
+    return undefined
+  }
+
+  /** `programMenuAt()` for a right click on `element` itself:  the Views tree's row, the Menu key. */
+  static programMenuOf(element: Element): MenuItem[] | undefined {
+    // as an event's path:  each shadow root between what's in it and its host, where a drawing's menu may sit
+    const path: (Element | ShadowRoot)[] = []
+    for (let at: Element | undefined = element; at;) {
+      path.push(at)
+      const root = at.getRootNode()
+      if (!at.parentElement && root instanceof ShadowRoot) path.push(root)
+      at = at.parentElement ?? (root instanceof ShadowRoot ? root.host : undefined)
+    }
+    return SpellElement.programMenuAt(path)
   }
 
   /** The `SpellElement` behind `element`, if it's a view's element. */

@@ -50,6 +50,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     - while the page is reviewed, a ✓ after it:  Seen on every one at once
  *     - an older page's `changes` (every plan change) until the tool's next write
  *   - the estimate as a badge;  once done and timed, what it took instead (`21m`), the estimate its tooltip
+ *   - done, its work not on main yet (`unmerged`, epic `epic-engine` I273):  a blue `not on main` pill before it
  *     (`~3-4h`;  Owen, M1 and M3 on epic `epic-engine` P41)
  *     - with its clock time too, `34m / 4h`, its tooltip in words (`span`, epic `epic-engine` I127)
  * - Its children, in order (the vocabulary's):
@@ -386,6 +387,17 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
       // them), in the tools:  the review buttons end at one right edge on every row
       tools: () => (
         <>
+          <Show when={this.shownStatus === "done" && this.unmerged}>
+            {(branch) => (
+              <span
+                class={UNMERGED}
+                part={this.partForName("unmerged")}
+                title={this.translationForKey("unmergedTip", { branch: branch() })}
+              >
+                {this.translationForKey("unmerged")}
+              </span>
+            )}
+          </Show>
           <Show when={this.timeShown}>
             {(shown) => (
               <span
@@ -609,6 +621,9 @@ const STATUS_TEXTS = {
 
 /** Its gear's entry for its commits. */
 const COMMITS_ENTRY = "commits"
+
+/** Class of a done phase's `not on main` pill (`unmerged`, epic `epic-engine` I273), before its time pill. */
+const UNMERGED = "unmerged"
 
 /** Class of its time pill (the estimate, or what it took), before its review controls. */
 const ESTIMATE = "estimate"

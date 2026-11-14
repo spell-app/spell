@@ -1,5 +1,6 @@
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { JoinedLines } from "./JoinedLines"
 
 /**
  * `Block`s are generally the root entity that we parse in spell -- a top-level construct, e.g. used to
@@ -38,7 +39,8 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
 
     // build up matches for individual items
     const matched: P.Match[] = []
-    const items: (P.LineToken | P.BlockToken)[] = [...block.tokens]
+    // a condition said over several lines is one line (`and` / `or` ending a line, or a line of its own)
+    const items: (P.LineToken | P.BlockToken)[] = [...JoinedLines.of(scope, block.tokens)]
     while (items.length) {
       // a nested block, or a line plus any indented body it takes -- see `SpellParser.parseItem()`
       const match = scope.parser?.parseItem(scope, items)

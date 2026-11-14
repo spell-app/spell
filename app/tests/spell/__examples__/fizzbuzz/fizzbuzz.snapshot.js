@@ -155,6 +155,7 @@ export class FizzbuzzExplainer extends Page {
   }
 }
 export const fizzbuzzExplainer = new FizzbuzzExplainer()
+core.describeAction(FizzbuzzExplainer, "showWordForNumber", { title: "Show Word As Text For Number As A Number", undoneAs: "Show Word As Text For Number As A Number" })
 
 core.heading("Listening")
 ///////////////
@@ -162,7 +163,6 @@ core.heading("Listening")
 ///////////////
 // The page listens itself:  each event the counting sends becomes a result in its tally.
 
-core.describeAction(FizzbuzzExplainer, "showWordForNumber", { title: "Show (word As Text) For (number As A Number)", undoneAs: "Show (word As Text) For (number As A Number)" })
 // -----------
 core.heading("FizzBuzz")
 //////////////

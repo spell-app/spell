@@ -149,7 +149,6 @@ export class QuizElement extends SpellElement<Quiz> {
 }
 core.useElement(Quiz, QuizElement)
 export const quiz = new Quiz()
-
 core.describeAction(Quiz, "dealACard", { title: "Deal A Card", undoneAs: "Deal A Card" })
 
 core.heading("The deck:  four words to start -- add your own")

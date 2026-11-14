@@ -143,6 +143,23 @@ describe("<epic-phase>", () => {
     ])
   })
 
+  // epic `epic-engine` I273 (Owen:  "This says it's done, but it's not on main yet.  That should be indicated.")
+  test("done, its work not on main yet:  a `not on main` pill before its time pill, the branch in its tooltip", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p-off" title="Off main" status="done" took="21m" unmerged="editor"></epic-phase>` +
+        `<epic-phase id="p-on" title="On main" status="done" took="21m"></epic-phase>` +
+        `<epic-phase id="p-open" title="Open" status="active" estimate="1h" unmerged="editor"></epic-phase>` +
+        `</epic-section>`,
+      "#p-off"
+    )
+    const shown = Array.from(host.parentElement!.children).map((phase) => {
+      const pill = phase.shadowRoot!.querySelector('[part~="unmerged"]')
+      return pill && [pill.textContent, pill.getAttribute("title")]
+    })
+    expect(shown).toEqual([["not on main", "Done on branch editor, not merged into main yet"], null, null])
+  })
+
   // epic `epic-engine` I228 (atmosphere's r60, Owen:  "P18 should show as 'done', or better, crossed out somehow")
   test("dropped:  its title struck through and grey, a crossed circle, its Dropped field;  grey in the chips, not open", async () => {
     const host = await render(

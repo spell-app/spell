@@ -75,7 +75,6 @@ export class HelloSign extends App {
   }
 }
 export const helloSign = new HelloSign()
-
 core.describeAction(HelloSign, "waveBack", { title: "Wave Back", undoneAs: "Wave Back" })
 
 core.heading("Step 2:  change one sentence")

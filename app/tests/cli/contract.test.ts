@@ -392,7 +392,7 @@ describe("the core contract:  a page's Undo and Redo follow a Python game's hist
           const run = ["run", "--quiet", "--project", SPELL_CORE, "python", "-m"]
           const app = { on: "Solitaire#1", args: [] }
           const messages = [
-            { call: "turn_a_stock_card", ...app },
+            { call: "play_from_the_stock", ...app },
             { call: "undo", ...app }
           ]
           const session = spawnSync("uv", [...run, "spell_core.page", program, "--seed", "1", "--no-pauses"], {

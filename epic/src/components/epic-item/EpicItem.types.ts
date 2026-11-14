@@ -333,9 +333,15 @@ export function isTodo(id: string | undefined, limit: boolean | undefined): bool
 /**
  * Which review buttons item `id` draws (`<epic-review buttons>`):
  * a todo's;  an issue's or a call's, whose first is Do this (I232);  else an item's, Make Todo first.
+ * - `limit`:  its `limit` (a todo that's a limit draws an item's)
+ * - `inPhase`:  it's already in a phase (`handled` or `taken-in`, its `in P52` pill):  a todo draws no plane
+ *   (`todo-in-phase`, epic `epic-engine` I271)
  */
-export function buttonsForItem(id: string | undefined, limit: boolean | undefined): "todo" | "issue" | "item" {
-  if (isTodo(id, limit)) return "todo"
+export function buttonsForItem(
+  id: string | undefined,
+  { limit, inPhase }: { limit?: boolean; inPhase?: boolean } = {}
+): "todo" | "todo-in-phase" | "issue" | "item" {
+  if (isTodo(id, limit)) return inPhase ? "todo-in-phase" : "todo"
   return CALM_ID.test(id ?? "") ? "issue" : "item"
 }
 

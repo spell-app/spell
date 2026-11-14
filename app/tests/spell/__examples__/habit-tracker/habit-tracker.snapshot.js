@@ -238,7 +238,6 @@ export class HabitTracker extends App {
   }
 }
 export const habitTracker = new HabitTracker()
-
 core.describeAction(HabitTracker, "addTheDraft", { title: "Add The Draft", undoneAs: "Add The Draft" })
 // -----------
 if (!core.isCarryingOver) habitTracker.start()

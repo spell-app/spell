@@ -39,8 +39,8 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
       HELP_TABLE[tag]?.attributes[attribute] ?? SHARED_HELP[attribute]
     help = {
       tags: SpellUIDefaults.tagsIn(language).map(({ tag, canonical }) => {
-        const description = HELP_TABLE[canonical]?.description
-        return { tag, ...(description && { description }) }
+        const { description, empty } = HELP_TABLE[canonical] ?? {}
+        return { tag, ...(description && { description }), ...(empty && { empty }) }
       }),
       attributesOf: (tag) => SpellUIDefaults.attributesOf(tag, language, describe)
     }

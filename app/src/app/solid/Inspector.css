@@ -401,17 +401,6 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  /* the selected part's let-go ✕, inside its pill (I92) */
-  & .InspectorLetGo {
-    flex: none;
-    margin-right: -4px;
-    font-size: 0.85em;
-    opacity: 0.7;
-    cursor: var(--ui-control-cursor);
-  }
-  & .InspectorLetGo:hover {
-    opacity: 1;
-  }
   & > .InspectorPartTag.back {
     cursor: var(--ui-control-cursor);
     opacity: 0.75;

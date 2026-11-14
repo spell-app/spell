@@ -42,6 +42,7 @@ export class Square extends Thing {
     return Board.ownerOf(this)!
   }
 }
+core.describeAction(Square, "play", { title: "Play It", undoneAs: "Play It" })
 // -----------
 core.heading("Tic-Tac-Toe")
 /////////////////
@@ -179,9 +180,8 @@ export class TicTacToeElement extends SpellElement<TicTacToe> {
 }
 core.useElement(TicTacToe, TicTacToeElement)
 export const ticTacToe = new TicTacToe()
-
 core.describeAction(TicTacToe, "startANewGame", { title: "Start A New Game", shortcuts: ["N"], undoneAs: "Start A New Game" })
-core.describeAction(TicTacToe, "checkTheLineFromSquareAThroughBToC", { title: "Check The Line From Square (a As A Number) Through (b As A Number) To (c As A Number)", undoneAs: "Check The Line From Square (a As A Number) Through (b As A Number) To (c As A Number)" })
+core.describeAction(TicTacToe, "checkTheLineFromSquareAThroughBToC", { title: "Check The Line From Square A As A Number Through B As A Number To C As A Number", undoneAs: "Check The Line From Square A As A Number Through B As A Number To C As A Number" })
 core.describeAction(TicTacToe, "checkForAWinner", { title: "Check For A Winner", undoneAs: "Check For A Winner" })
 
 core.heading("The board")
@@ -196,8 +196,6 @@ core.heading("Playing a square")
 // ## Playing a square
 //////////////////////
 // What a click on a square does, added to this project's square:  `<extend>` adds to a type another file declares.
-
-core.describeAction(Square, "play", { title: "Play It", undoneAs: "Play It" })
 
 /** a square is on one board */
 

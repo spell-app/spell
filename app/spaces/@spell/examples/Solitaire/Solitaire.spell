@@ -2,31 +2,17 @@
 // Deal seven columns, then build four foundations, ace to king, one suit each:
 // [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
 // The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
+// Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
 
 solitaire is an app
 	"deck" is a new deck
-	"stock" is a new stock pile
-	"discards" is a new discard pile
-	"clubs" is a new foundation with suit = clubs
-	"diamonds" is a new foundation with suit = diamonds
-	"hearts" is a new foundation with suit = hearts
-	"spades" is a new foundation with suit = spades
-	"C1" is a new column
-	"C2" is a new column
-	"C3" is a new column
-	"C4" is a new column
-	"C5" is a new column
-	"C6" is a new column
-	"C7" is a new column
-	"score" is a number
-	
-	when creating it
-		for each card in the deck
-			add it to the stock
+
+	when creating solitaire
+		add each card in the deck to the stock
 		restart the game
 
 	to draw it
-		<segment inverted attach="top">
+		<segment inverted attach="top" color="">
 			<toolbar class="GameBar" aria-label="Game" appearance="secondary" inverted size="small" shrinkable>
 				<text slot="title" size="large" heavy>Solitaire</text>
 				<action "auto play"/>
@@ -35,17 +21,17 @@ solitaire is an app
 				<divider/>
 				<action "undo"/>
 				<action "redo"/>
-				<text slot="right">Score: {the score}</>
+				<text slot="right">Score: <number "score"/></>
 			</toolbar>
 		</segment>
 		<container padding="small" columns="7" spacing="xs">
 			<stock-pile "stock"/>
 			<discard-pile "discards"/>
 			<spacer/>
-			<foundation "clubs"/>
-			<foundation "diamonds"/>
-			<foundation "hearts"/>
-			<foundation "spades"/>
+			<foundation "clubs" suit=clubs/>
+			<foundation "diamonds" suit=diamonds/>
+			<foundation "hearts" suit=hearts/>
+			<foundation "spades" suit=spades/>
 			<column "C1"/>
 			<column "C2"/>
 			<column "C3"/>
@@ -64,8 +50,7 @@ solitaire is an app
 		</>
 
 	group "Dealing"
-	to "restart the game" with title "Restart", shortcut "R", icon "sync alternate"
-		undoable
+	to "restart the game" with shortcut "R", icon "sync alternate"
 		clear the score
 		deal the cards
 	
@@ -82,13 +67,14 @@ solitaire is an app
 		for row from 1 to 7
 			for column from row to 7
 				add the last card of the stock to item column of the columns
-				if column is row
+				if column is the same as row
 					turn the last card of (item column of the columns) face up
 				pause for 50 msec
 		play from the stock
 
-	to play from the stock
+	to play from the stock, undoable as "Turn Card"
 		// Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
+		// - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
 		if the stock is empty
 			reset the stock
 		get the last card of the stock
@@ -97,25 +83,19 @@ solitaire is an app
 		pause for 300 msec
 		add it to the discards
 	
-	to turn a stock card
-		// a click on the stock:  one step to undo, where the deal's own turn isn't
-		undoable as "Turn Card"
-		play from the stock
-
 	to reset the stock
 		// The discards, turned over, back into the stock
 		set cards to a copy of list (the discards) as a pile
 		reverse the cards
-		for card in the cards
-			add it to the stock
-			turn the card face down
+		add each card in the cards to the stock
+		turn each card in the stock face down
 
 	group "Game Play"
 	
 	to play a card
 		undoable as "Play Card"
-		if card's pile is solitaire's stock
-			turn a stock card
+		if the card is in the stock
+			play from the stock
 		otherwise
 			set end pile to the first pile in every pile where it can take the card
 			if there is not an end pile return no
@@ -138,7 +118,6 @@ solitaire is an app
 
 	to "auto play" with shortcut "A", icon "play"
 		// Play every card that can go somewhere, until none can
-		undoable
 		set anything changed to no
 		if the discards is not empty
 			set test card to the last card of the discards
@@ -167,7 +146,6 @@ solitaire is an app
 	
 	to "cheat" with shortcut "C", icon "eye"
 		// Turn up a face-down card from a column, at random, onto the discards
-		undoable
 		set remaining piles to piles in the columns where it is not empty and its first card is face down
 		if remaining piles is empty return
 		set the pile to a random pile in remaining piles
@@ -182,13 +160,15 @@ solitaire is an app
 	to count the points for a card on a pile
 		// what the move scores:  10 on a foundation, 5 from the discards, else nothing
 		if pile is a foundation return 10
-		if card's pile is solitaire's discards return 5
+		if the card is in the discards return 5
 		return 0
 	
 	when the score changes
 		set home to the number of cards in the clubs + the number of cards in the diamonds
 		set home to home + the number of cards in the hearts + the number of cards in the spades
-		if home is 52: alert "You won!"
+		if home is 52
+			alert "You won!" with "New game"
+			restart the game
 
 a card		-- play the card on click if it is a legal move
 	on click
@@ -199,42 +179,40 @@ a pile  -- drop the card on the pile if it is a legal move
 	on card dropped
 		put the card on the pile
 
-## The piles
+group "The piles"
 // Each kind of pile, what it may take or give up, and how it lies.
 // While one's empty, it shows its placeholder, if it has one.
 
-a "stock pile" is a pile
+a "stock pile" is a pile with layout "stacked"
 	// The cards not played yet, face down:  a click turns the next one over, so none can be taken from it
-	its "layout" is stacked
 	it can never take a card
 	it can never let go of a card
 	to draw its placeholder
-		<text part="placeholder">🂠</text>
+		<text>🂠</text>
 	on click
-		turn a stock card
+		play from the stock
 
-a "discard pile" is a pile		-- Where the stock's cards go as they're turned over
-	its "layout" is stacked
+a "discard pile" is a pile with layout "stacked"		-- Where the stock's cards go as they're turned over
 	it can never take a card
 	its cards are draggable when the card is its last card
 
-a "foundation" is a pile		-- Where a suit is built up, ace to king, one card at a time
-	its "layout" is stacked
+a "foundation" is a pile with layout "stacked"		-- Where a suit is built up, ace to king, one card at a time
 	its "suit" is a card suit
 	it can never let go of a card
 	it is droppable when
-		if the card is not the last card of the pile of the card return no
-		return its suit is the suit of the card and its value + 1 is the value of the card
+		return no if the card is not the last card of the pile of the card
+		return its suit is the suit of the card and
+		  its value + 1 is the value of the card
 	to draw its placeholder			-- a light grey ace of its suit, face up
-		<text part="placeholder">{the picture of a new card whose rank is ace and suit is its suit}</text>
+		<text>{the picture of a new card whose rank is ace and suit is its suit}</text>
 
-a "column" is a pile			-- A column, built down from king to ace, red and black in turn
-	its "layout" is vertical
+a "column" is a pile with layout "vertical"			-- A column, built down from king to ace, red and black in turn
 	its cards are draggable when the card is face up
 	it is droppable when
-		if it is empty
-			return the card is a king
-		return its color is not the color of the card and its value is the value of the card + 1
+		it is empty and the card is a king
+		or
+		its color is not the color of the card and
+		  its value is the value of the card + 1
 
 to test the moves
 	set the column to a new column with id "T1"
@@ -249,7 +227,7 @@ to test the moves
 	the column can take the jack should be no
 	the column can take the queen should be yes
 	add the queen to the column
-	the state of the column should be "T1: K♠↑ Q♥↑"
+	the short name of the column should be "T1: K♠↑ Q♥↑"
 	the column can give up the queen should be yes
 	turn the queen face down
 	the column can give up the queen should be no

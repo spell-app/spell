@@ -644,7 +644,11 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
    * row has it (`EpicPhase.reviewKind`:  a waiting plan's, a proposal's ...).
    */
   static buttonsOf(item: FocusEntry): string {
-    if (item.kind !== "phases") return buttonsForItem(item.id, item.element.hasAttribute("limit"))
+    if (item.kind !== "phases")
+      return buttonsForItem(item.id, {
+        limit: item.element.hasAttribute("limit"),
+        inPhase: item.element.hasAttribute("handled") || item.element.hasAttribute("taken-in")
+      })
     const phase = item.element as Element & { component?: { reviewKind?: string } }
     return phase.component?.reviewKind ?? "phase"
   }

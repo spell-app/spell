@@ -508,6 +508,132 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
+  test("in Edit, a part inside a program menu shows its items first, a thick line, then ours;  Run's is its own (I76)", async () => {
+    const other = await context.newPage()
+    await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
+    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForTimeout(7000)
+    // a face-down card on top of a pile, as it's drawn now
+    const topCard = () =>
+      other.evaluate(() => {
+        const walk = (root: Document | ShadowRoot): { x: number; y: number } | undefined => {
+          for (const element of root.querySelectorAll("*")) {
+            if (element.localName === "solitaire-card" && !element.nextElementSibling) {
+              const { x, y, width, height } = element.getBoundingClientRect()
+              if (y > 0) return { x: x + width / 2, y: y + height / 2 }
+            }
+            const inside = element.shadowRoot && walk(element.shadowRoot)
+            if (inside) return inside
+          }
+          return undefined
+        }
+        return walk(document)!
+      })
+    const card = await topCard()
+    // every row of a menu, the program's by its action's title:  `=` the thick line, `-` a hairline
+    const rows = (selector: string) =>
+      other.evaluate(
+        (menu) =>
+          [...document.querySelectorAll(`${menu} :is(ui-action, ui-item)`)].map((row) =>
+            row.getAttribute("kind") === "divider"
+              ? row.classList.contains("ProgramMenuEnd")
+                ? "="
+                : "-"
+              : ((row as { action?: { title: string } }).action?.title ?? (row.textContent ?? "").trim())
+          ),
+        selector
+      )
+    // Solitaire's `<context-menu>`, then ours
+    const program = ["Auto Play", "Cheat", "Restart", "-"]
+    await other.mouse.click(card.x, card.y, { button: "right" })
+    await other.waitForTimeout(600)
+    const shown = await rows(".PartMenu")
+    expect(shown.slice(0, 4)).toEqual(program)
+    expect(shown.slice(shown.indexOf("="))).toEqual([
+      "=",
+      "Cut",
+      "Copy",
+      "Paste",
+      "Duplicate",
+      "Delete",
+      "-",
+      "Show in Code",
+      "Inspect",
+      "-",
+      "Change This..."
+    ])
+    const thickness = await other.evaluate(() => {
+      const line = document
+        .querySelector(".PartMenu ui-action.ProgramMenuEnd")!
+        .shadowRoot!.querySelector("[part~=item]")!
+      const hairline = document.querySelector(".PartMenu ui-action[kind=divider]:not(.ProgramMenuEnd)")!
+      return [line, hairline.shadowRoot!.querySelector("[part~=item]")!].map(
+        (one) => getComputedStyle(one).borderTopWidth
+      )
+    })
+    expect(thickness).toEqual(["3px", "1px"])
+    // one of the program's items runs through its core, and the menu goes:  Cheat turns a card face up
+    const faceDown = () =>
+      other.evaluate(() => {
+        let count = 0
+        const walk = (root: Document | ShadowRoot) => {
+          for (const element of root.querySelectorAll("*")) {
+            if (element.localName === "solitaire-card" && element.getAttribute("direction") === "down") count++
+            if (element.shadowRoot) walk(element.shadowRoot)
+          }
+        }
+        walk(document)
+        return count
+      })
+    const before = await faceDown()
+    // its row as drawn:  the host draws no box of its own
+    const cheat = await other.evaluate((index) => {
+      const row = document.querySelectorAll(".PartMenu :is(ui-action, ui-item)")[index]!
+      const { x, y, height } = row.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
+      return { x, y, height }
+    }, program.indexOf("Cheat"))
+    await other.mouse.click(cheat.x + 20, cheat.y + cheat.height / 2)
+    await other.waitForTimeout(800)
+    expect(await other.locator(".PartMenu").count()).toBe(0)
+    expect(await faceDown()).toBeLessThan(before)
+
+    // the Views tree's row of a part:  the same
+    await other.evaluate(() => {
+      const { Inspector } = window as unknown as { Inspector: { showSelected(): void } }
+      Inspector.showSelected()
+    })
+    await other.waitForTimeout(800)
+    // a pile's row, brought into view:  its line, as drawn, not the rows inside it
+    const box = await other.evaluate(async () => {
+      const row = document.querySelector('.InspectorTree ui-tree-item[label="DiscardPile"]')
+      const line = row?.shadowRoot?.querySelector(".row")
+      line?.scrollIntoView({ block: "center" })
+      await new Promise((settled) => setTimeout(settled, 300))
+      const { x, y } = line?.getBoundingClientRect() ?? {}
+      return x === undefined ? undefined : { x, y: y! }
+    })
+    expect(box).toBeDefined()
+    await other.mouse.click(box!.x + 40, box!.y + 10, { button: "right" })
+    await other.waitForTimeout(600)
+    expect((await rows(".PartMenu")).slice(0, 4)).toEqual(program)
+    await other.keyboard.press("Escape")
+    await other.waitForTimeout(300)
+
+    // Run:  the program's menu alone, as before
+    await other.locator('.ModeTabs ui-item:has-text("Run")').first().click()
+    await other.waitForTimeout(1500)
+    const inRun = await topCard()
+    await other.mouse.click(inRun.x, inRun.y, { button: "right" })
+    await other.waitForTimeout(600)
+    expect(await other.locator(".PartMenu").count()).toBe(0)
+    const run = await rows("ui-popup[data-spell-action-menu]")
+    expect(run.slice(0, 4)).toEqual(program)
+    expect(run).not.toContain("=")
+    expect(run).not.toContain("Cut")
+    await other.keyboard.press("Escape")
+    await other.close()
+  })
+
   test("a right click on a card:  the menu at once, for it;  never the browser's, even on the menu (Owen, 2026-11-12)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
@@ -603,6 +729,94 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         true
       )
     }
+    await other.keyboard.press("Escape")
+    await other.close()
+  })
+
+  test("in Edit, the game's own right-click menu comes first, a thick line, then the editor's (T120)", async () => {
+    const other = await context.newPage()
+    await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
+    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForTimeout(7000)
+    await other.evaluate(() => (window as unknown as { Inspector: { letGo(): void } }).Inspector.letGo())
+    // a pile, and the top card of the last one:  each its own element, the game's menu up their chain
+    const [pile, card] = await other.evaluate(() => {
+      const found: Element[] = []
+      const walk = (root: Document | ShadowRoot) => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === "solitaire-column") found.push(element)
+          if (element.shadowRoot) walk(element.shadowRoot)
+        }
+      }
+      walk(document)
+      const box = (element: Element, low = false) => {
+        const { x, y, width, height } = element.getBoundingClientRect()
+        return { x: x + width / 2, y: low ? y + height - 6 : y + Math.min(height / 2, 30) }
+      }
+      const last = found.at(-1)!
+      return [box(found[0]!, true), box(last.querySelector(":scope > solitaire-card:last-child")!)]
+    })
+    /** The part menu's rows:  `=====` for the thick line, `---` for a thin one, `(off)` when greyed. */
+    const rows = () =>
+      other.evaluate(() =>
+        [...document.querySelector("ui-popup.PartMenu ui-menu")!.children].map((element) => {
+          if (element.getAttribute("kind") === "divider") {
+            return element.classList.contains("ProgramMenuEnd") ? "=====" : "---"
+          }
+          const { action } = element as Element & { action?: { title: string } }
+          const title = action?.title ?? element.textContent!.trim()
+          return element.matches(":state(disabled)") ? `${title} (off)` : title
+        })
+      )
+    const game = ["Auto Play", "Cheat", "Restart", "---"]
+
+    for (const at of [pile, card]) {
+      await other.mouse.click(at.x, at.y, { button: "right" })
+      await other.waitForTimeout(SETTLE_MS)
+      const shown = await rows()
+      expect(shown.slice(0, 4)).toEqual(game)
+      expect(shown[4]).toMatch(/^Undo/)
+      expect(shown[5]).toMatch(/^Redo/)
+      expect(shown[6]).toBe("=====")
+      expect(shown.slice(7, 15).map((row) => row.replace(" (off)", ""))).toEqual([
+        "Cut",
+        "Copy",
+        "Paste",
+        "Duplicate",
+        "Delete",
+        "---",
+        "Show in Code",
+        "Inspect"
+      ])
+      await other.keyboard.press("Escape")
+      await other.waitForTimeout(300)
+    }
+
+    // the thick line is heavier than the editor's own
+    await other.mouse.click(card.x, card.y, { button: "right" })
+    await other.waitForTimeout(SETTLE_MS)
+    const lines = await other.evaluate(() =>
+      [...document.querySelectorAll("ui-popup.PartMenu ui-action[kind=divider]")].map(
+        (divider) => getComputedStyle(divider.shadowRoot!.querySelector("[part~=item]")!).borderTopWidth
+      )
+    )
+    expect(lines[0]).toBe("3px")
+    expect(lines.slice(1).every((width) => width === "1px")).toBe(true)
+
+    // Cheat runs in the program, as in Run:  the menu closes, and its Undo says so
+    const cheat = await other.evaluate(() => {
+      const item = [...document.querySelectorAll("ui-popup.PartMenu ui-action")].find(
+        (action) => (action as Element & { action?: { title: string } }).action?.title === "Cheat"
+      )!
+      const { x, y, width, height } = item.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
+      return { x: x + width / 2, y: y + height / 2 }
+    })
+    await other.mouse.click(cheat.x, cheat.y)
+    await other.waitForTimeout(SETTLE_MS)
+    expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
+    await other.mouse.click(card.x, card.y, { button: "right" })
+    await other.waitForTimeout(SETTLE_MS)
+    expect((await rows())[4]).toBe("Undo Cheat")
     await other.keyboard.press("Escape")
     await other.close()
   })

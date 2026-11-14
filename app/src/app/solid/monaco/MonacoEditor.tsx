@@ -110,9 +110,9 @@ export function MonacoEditor(props: MonacoEditorProps) {
  * - Monaco's own listeners, inside the editor, still hear every move.  Moves elsewhere in the shadow root, or
  *   out of it, still reach `document`, so leaving is still seen.
  * - Returns what stops it.  Does nothing outside a shadow root.
- * - NOTE: a copy of the React `MonacoEditor.tsx`'s (not exported there);  that one goes with React (P8).
+ * - `<CodeSlice>`'s editors keep them in too.
  */
-function keepMouseMovesInShadowRoot(editor: monaco.editor.IStandaloneCodeEditor): () => void {
+export function keepMouseMovesInShadowRoot(editor: monaco.editor.IStandaloneCodeEditor): () => void {
   const node = editor.getContainerDomNode()
   const root = node.getRootNode()
   if (!(root instanceof ShadowRoot)) return () => {}

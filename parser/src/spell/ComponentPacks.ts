@@ -179,6 +179,8 @@ export type ComponentTagHelp = {
   tag: string
   /** what it is, in one sentence */
   description?: string
+  /** it holds nothing (no default slot):  written closed, `<icon/>` (epic `editor` I70) */
+  empty?: boolean
 }
 
 /** One attribute of a component, as `ComponentHelp` says what it is. */
@@ -189,6 +191,8 @@ export type ComponentAttributeHelp = {
   description?: string
   /** the words it takes, as the drawing's language writes them:  `primary`, `rojo`;  none for any text */
   values: readonly string[]
+  /** it takes no value:  written by its name alone, `fluid`, `disabled` (epic `editor` I70) */
+  bare?: boolean
 }
 
 /** An attribute in a pack's own names, as `ComponentPacks.readAttribute()` reads it:  `size="large"`, `basic`. */

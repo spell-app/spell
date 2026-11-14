@@ -158,6 +158,18 @@ export class Inspector {
   }
 
   /**
+   * View › Inspector:  open the column with every card, or close it;  remember which.
+   * - Opening doesn't start inspecting:  that's Inspect app's (Owen, 2026-11-14, I75).
+   * - Every card, so one hidden by its ✕ comes back:  View lists no cards of its own (I74).
+   */
+  static showOrHide(): void {
+    if (isOpen()) return Inspector.close()
+    setPanels(INSPECTOR_PANELS)
+    setOpen(true)
+    editorPrefs.set(OPEN_PREF, true)
+  }
+
+  /**
    * Open the column, inspecting, with no help popup:  for a page that says what to do itself.
    * - SIDE EFFECT:  the help counts as seen.
    */
@@ -302,6 +314,8 @@ export class Inspector {
         return place?.path === path && place.line === line
       })
     const found = written.length ? written : Inspector.drawnInTagAround(area, path, line)
+    // what's selected already, with no trail from it (another line of the same tag):  nothing to do again (I69)
+    if (found.length && !trail().length && isSameElements(selectedParts(), found)) return
     if (found.length) Inspector.selectAll(found)
     else if (ifNone === "deselect" && selectedParts().length) Inspector.select(undefined)
   }
@@ -1653,6 +1667,11 @@ function setArea(area: HTMLElement | undefined): void {
   setAreaMoved((count) => count + 1)
 }
 
+/** Are `parts` the parts of `elements`, in the same order? */
+function isSameElements(parts: readonly SelectedPart[], elements: readonly Element[]): boolean {
+  return parts.length === elements.length && parts.every((part, index) => part.element === elements[index])
+}
+
 /** The row added last, by its words (a drawn thing's) or DOM event:  `Inspector.justAdded`. */
 const [justAdded, setJustAdded] = createSignal("")
 
@@ -2523,9 +2542,6 @@ function PropertiesCard(): JSX.Element {
                         }}
                       >
                         <span class="InspectorPartTagText">{crumb.label}</span>
-                        <Show when={!crumb.depth}>
-                          <LetGo label={crumb.label} />
-                        </Show>
                       </span>
                     </>
                   )}
@@ -2685,9 +2701,6 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
       >
         {appTexts.text("inspectorScopeAll", { Types: titleCase(P.pluralize(typeWords())) })}
       </ui-item>
-      <Show when={isWhole()}>
-        <LetGo label={props.part.crumbs[0]!.label} />
-      </Show>
     </Show>
   )
 }
@@ -2857,29 +2870,6 @@ function OwnEditor(props: { markup: string }): JSX.Element {
 
 /** An element's tag closing itself, `<ui-property name="rank" />`:  its name, then its attributes. */
 const SELF_CLOSING_TAG = /<([a-z][\w-]*-[\w-]*)((?:\s[^<>]*?)?)\s*\/>/gi
-
-/****************
- * ### `<LetGo>`
- * The ✕ in the selected part's title pill:  lets go of it (`Inspector.letGo()`), as Esc does.
- * - Owen:  "It's unclear how to turn the inspector off for selected thing".
- * - Apart from the card's own hide button, which hides the card, not the selection.
- ****************/
-function LetGo(props: { label: string }): JSX.Element {
-  const tip = () => appTexts.text("inspectorLetGo", { part: props.label })
-  return (
-    <ui-icon
-      name="close"
-      link=""
-      class="InspectorLetGo"
-      label={tip()}
-      title={tip()}
-      onClick={(event: MouseEvent) => {
-        event.stopPropagation()
-        Inspector.letGo()
-      }}
-    />
-  )
-}
 
 /**
  * A Spell UI element's fields in the Inspector's sections, one per group, in the groups' order

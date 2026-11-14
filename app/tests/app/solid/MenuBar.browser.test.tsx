@@ -106,7 +106,7 @@ describe("<AppBarMenus>", () => {
 })
 
 describe("<ProjectBarMenu>", () => {
-  test("everything about the whole project:  its name's actions, Publish, Versions and Delete Draft, its settings, Export and Import, its theme, Home", async () => {
+  test("everything about the whole project:  its name's actions, Publish, Versions and Delete Draft, its settings, Export and Import, its theme (Home is the Spell menu's)", async () => {
     const host = await mount(() => <ProjectBarMenu />)
     const found = () => host.querySelector("ui-popup[for=ProjectBarMenu] ui-menu.BarMenuItems")
     await waitForCondition(() => !!found()?.children.length)
@@ -131,9 +131,7 @@ describe("<ProjectBarMenu>", () => {
       expect.stringMatching(/^Export/),
       expect.stringMatching(/^Import/),
       "─",
-      expect.stringMatching(/^Theme/),
-      "─",
-      "Home"
+      expect.stringMatching(/^Theme/)
     ])
     // Theme ›:  Spell UI's theme menu in its menu mode, then Edit Theme, written inside its row
     const theme = menu.querySelector("ui-submenu")!

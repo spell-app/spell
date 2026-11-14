@@ -1,34 +1,28 @@
-# A playing card
-// A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-// It's a two sided view:  face up it shows its picture, face down the back every card shares.
-// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
-
-a "card" is a draggable two sided view
-	group "Rank"
-		// Ace is low:  ace = 1 ... king = 13
+a "card" is a draggable two sided view 			-- A playing card
+	-- A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
+	-- It's a two sided view:  face up it shows its picture, face down the back every card shares.
+	-- On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
+	group "Card Rank & Suit" -- Ace is low:  ace = 1 ... king = 13
 	its "rank" is one of ace, 2 ... 10, jack, queen, king
-		it "is a (rank)"
-	its "value" is the position of its rank
-	it "is a face card" if its rank is jack, queen or king
-	it "is a number card" if it is not a face card
-
-	group "Suit"
 	its "suit" is one of clubs, diamonds, hearts or spades
-		it "is a (suit)"
 	its "color" is one of red, black
 		red if it is a diamond or it is a heart
 		black otherwise
+
+	group "Aliases" 								-- Spell for identifying cards
+	it "is a face card" if its rank is jack, queen or king
+	it "is a number card" if it is not a face card
+	it "is the (rank) of (suit)"  -- e.g. the card is the two of spades
+
+	group "Names" 								-- identifying a card
+	its "name" is its rank && "of" && its suit
+	its "value" is the position of its rank
 	its "symbol" is
 		"♣" if it is a club
 		"♦" if it is a diamond
 		"♥" if it is a heart
 		"♠" otherwise
-
-	group "Names"
-		// What a person, test or console calls it
-	its "name" is its rank && "of" && its suit
-	it "is the (rank) of (suit)"
-	its "state" is
+	its "short name" is
 		// Its short name:  Q♠↓ is the queen of spades, face down
 		letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
 		arrow is "↑" if it is face up otherwise "↓"
@@ -59,7 +53,7 @@ a "card" is a draggable two sided view
 		its name should be "queen of spades"
 		its color should be black
 		its value should be 12
-		its state should be "Q♠↓"
+		its short name should be "Q♠↓"
 		it is a face card should be yes
 		it is a spade should be yes
 		it is a club should be no
@@ -71,7 +65,7 @@ a "card" is a draggable two sided view
 
 		turn it over
 		it is face up should be yes
-		its state should be "Q♠↑"
+		its short name should be "Q♠↑"
 
 		set seven to a new card whose rank is 7 and suit is hearts
 		seven is a number card should be yes

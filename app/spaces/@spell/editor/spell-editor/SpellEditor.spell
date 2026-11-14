@@ -30,6 +30,8 @@ spell editor is an app
 		// The page is in Run, not Edit
 	its "code showing" is yes or no
 		// The code shows, in Edit
+	its "compiled code showing" is yes or no
+		// The compiled code shows beside the code, in Edit
 	its "program panel showing" is yes or no
 		// The Program panel shows under the code, in Edit
 	its "inspector open" is yes or no
@@ -80,7 +82,6 @@ spell editor is an app
 	to "project settings" with icon "cog"
 	to "export project" with title "Export…", icon "download"
 	to "import project" with title "Import…", icon "upload"
-	to "home" with icon "home"
 
 	group "The File"
 	to "new spell file" with icon "file outline"
@@ -112,6 +113,8 @@ spell editor is an app
 		enabled when its site ready is yes
 	to "show code" with title "Code", icon "code"
 		selected when its code showing is yes
+	to "show compiled code" with title "Compiled Code", icon "file code outline"
+		selected when its compiled code showing is yes
 	to "show program panel" with title "Program Panel", icon "terminal"
 		selected when its program panel showing is yes
 	to "show inspector" with title "Inspector", icon "info circle"
@@ -311,8 +314,6 @@ a "project menu" is a view
 			<action "import project"/>
 			<divider/>
 			{draw its theme}
-			<divider/>
-			<action "home"/>
 		</menu>
 
 a "bar menu" is a view
@@ -360,8 +361,6 @@ an "edit menu" is a bar menu
 a "view menu" is a bar menu
 	// View:  Run or Edit, then what shows, each ticked while it does
 	its title is "View"
-	its "inspector cards" is an editor part
-		// A row for each of the Inspector's cards:  the editor's own
 	to draw it
 		<menu direction="vertical" size="small" class="BarMenuItems" icon-column ticks>
 			<action "run mode"/>
@@ -369,10 +368,10 @@ a "view menu" is a bar menu
 			<action "site view"/>
 			<divider/>
 			<action "show code"/>
+			<action "show compiled code"/>
 			<action "show program panel"/>
 			<divider/>
 			<action "show inspector"/>
-			{draw its inspector cards}
 			<divider/>
 			<action "show line numbers"/>
 		</menu>

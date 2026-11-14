@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
+import type { MenuItem } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
 // Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
 import type { ScopeNode } from "spell/app/lsp/lsp.types"
@@ -10,6 +11,7 @@ import { editor } from "spell/app/app/editor"
 import { cutCopyOrPaste, EDITOR_HOTKEYS, undoWay } from "spell/app/app/pages/editorHotkeys"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import { Action } from "./Actions"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { ChangeThis } from "./ChangeThis"
@@ -623,6 +625,8 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
 /**
  * The ONE right-click menu on the app's parts, in the app and the Views tree:
  * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect, a line, then Change This.
+ * - The program's own right-click menu there comes first, if it has one (`<context-menu>`, `context-menu=`),
+ *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a thick line, then ours (epic `editor` I76, Owen's pick).
  * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window, with arrow keys, Enter and Esc.
  * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
  * - It shows at once, with no fade in (`Palette.css`):  a quick second right click lands on it, not the part.
@@ -631,9 +635,25 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
  */
 export function PartMenu(): JSX.Element {
   const [at, setAt] = createSignal<{ x: number; y: number }>()
+  const [programMenu, setProgramMenu] = createSignal<readonly MenuItem[]>()
   onSettled(() => {
-    PartEdits.onMenu = (x, y) => setAt({ x, y })
+    PartEdits.onMenu = (x, y, items) => {
+      setProgramMenu(items?.length ? items : undefined)
+      setAt({ x, y })
+    }
   })
+  // the program's items, drawn afresh each time the menu opens somewhere new, then the thick line
+  const programItems = () => {
+    at()
+    const items = programMenu()
+    if (!items) return null
+    return (
+      <>
+        {ActionMenus.itemsFor(items)}
+        <ui-action kind="divider" class={PROGRAM_MENU_END} />
+      </>
+    )
+  }
   const isAnItem = (event: Event) =>
     event.composedPath().some((target) => {
       return (
@@ -680,6 +700,7 @@ export function PartMenu(): JSX.Element {
               class="BarMenuItems"
               aria-label={appTexts.text("menuEdit")}
             >
+              {programItems()}
               <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
               <ui-action kind="divider" />
               <Action
@@ -718,6 +739,9 @@ export function PartMenu(): JSX.Element {
 
 /** The class of the part menu's popup. */
 const PART_MENU = "PartMenu"
+
+/** The class of the thick line between the program's own right-click menu and ours (`MenuBar.css`). */
+const PROGRAM_MENU_END = "ProgramMenuEnd"
 
 /**
  * Why `action` can't be done, for the menu opened at `_at`:  read again each time it opens somewhere new,

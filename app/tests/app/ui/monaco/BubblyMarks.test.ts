@@ -56,6 +56,21 @@ describe("BubblyMarks.of()", () => {
       if (mark.options.inlineClassName) expect(mark.options.inlineClassName).toMatch(/^bubbly-piece\b/)
   })
 
+  test("a head's description:  a spacer of its own before it, its `--` an em dash;  a `{…}`'s braces darker (Owen)", () => {
+    const text = `a "card" is a view\t\t-- A playing card\n\t-- Its rank and suit\n\tto draw it\n\t\t<text>{its rank}</text>\n`
+    const marks = marked(text)
+    const card = marks.shapes[0]!
+    if (card.kind !== "block") throw new TypeError("expected the card's block first")
+    const { range } = marks.marks[card.description!.place]!
+    expect(text.split("\n")[0]!.slice(range.startColumn - 1, range.endColumn - 1)).toBe("-- A playing card")
+    expect(card.description!.spacer).toBe("bubbly-description-0")
+    const spacers = marks.marks.filter((mark) => mark.options.before?.inlineClassName?.includes("bubbly-description-0"))
+    expect(spacers).toHaveLength(1)
+    // every description's `--`, its own line's too, an em dash over it
+    expect(wordsMarked(marks, "bubbly-dash", text)).toEqual(["--", "--"])
+    expect(wordsMarked(marks, "bubbly-brace", text)).toEqual(["{", "}"])
+  })
+
   test("a quoted input:  its own marks see-through, room outside them, room either side of its words", () => {
     const marks = marked()
     expect(wordsMarked(marks, "bubbly-quote-open").slice(0, 2)).toEqual(['"', '"'])

@@ -1697,7 +1697,10 @@ export class EditorStore extends Observable {
     inputEditorPath = editor.file?.path
     inputEditor.onDidChangeCursorSelection((event) => {
       editor.onInputCursor("cursor")
-      if (isCursorMovedToFollow(event, api)) editor.followCodeLine(event.selection.positionLineNumber)
+      if (!isCursorMovedToFollow(event, api)) return
+      // a click at once;  the keys once the cursor rests, so the caret never waits on the Inspector (I69)
+      if (event.source === "mouse") followNow(event.selection.positionLineNumber)
+      else followOnceRested(inputEditor)
     })
     editor.shownCodeEditor = inputEditor
     inputEditor.onDidScrollChange((event) => {
@@ -1989,6 +1992,38 @@ export function runtimeConsole(): SpellConsole | undefined {
 let inputEditorInstance: monaco.editor.IStandaloneCodeEditor | undefined
 /** Path of the file `inputEditorInstance` shows. */
 let inputEditorPath: string | undefined
+
+/**
+ * How long the code's cursor rests on a line, moved by the keys, before what's selected follows it, in milliseconds.
+ * - A run of arrow presses, or a held key, is one follow, on the line it stops on (epic `editor` I69):
+ *   each follow draws the Inspector's card again, which took ~190ms a line, and the caret waited for it.
+ */
+const CURSOR_REST_MS = 120
+
+/** The follow waiting for the cursor to rest:  `followOnceRested()`. */
+let restingFollow: ReturnType<typeof setTimeout> | undefined
+
+/** Follow line `lineNumber`, from 1, of the code at once:  a click.  A follow still waiting on the keys is dropped. */
+function followNow(lineNumber: number): void {
+  clearTimeout(restingFollow)
+  editor.followCodeLine(lineNumber)
+}
+
+/**
+ * Follow `inputEditor`'s cursor once it has rested `CURSOR_REST_MS` on its line:  the keys moved it.
+ * - Nothing follows if the text changed meanwhile (typing never moves the selection), the editor went,
+ *   or a range is selected now.
+ */
+function followOnceRested(inputEditor: monaco.editor.IStandaloneCodeEditor): void {
+  clearTimeout(restingFollow)
+  const version = inputEditor.getModel()?.getVersionId()
+  restingFollow = setTimeout(() => {
+    const selection = inputEditor.getSelection()
+    if (inputEditorInstance !== inputEditor || !selection?.isEmpty()) return
+    if (inputEditor.getModel()?.getVersionId() !== version) return
+    editor.followCodeLine(selection.positionLineNumber)
+  }, CURSOR_REST_MS)
+}
 
 /** The `editor` singleton. */
 export const editor = new EditorStore({})

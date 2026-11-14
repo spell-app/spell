@@ -7,14 +7,12 @@ una "carta" es una vista reversible arrastrable
 	grupo "Rango"
 		// El as es bajo:  as = 1 ... rey = 13
 	su "rango" es uno de as, 2 ... 10, jota, dama, rey
-		"es un (rango)"
 	su "valor" es la posición de su rango
 	"es una figura" si su rango es jota, dama o rey
 	"es una carta numérica" si no es una figura
 
 	grupo "Palo"
 	su "palo" es uno de tréboles, diamantes, corazones o espadas
-		"es un (palo)"
 	su "color" es uno de rojo, negro
 		rojo si es un diamante o es un corazón
 		negro de lo contrario
@@ -28,7 +26,7 @@ una "carta" es una vista reversible arrastrable
 		// Cómo la llama una persona, una prueba o la consola
 	su "nombre" es su rango && "de" && su palo
 	"es el (rango) de (palo)"
-	su "estado" es
+	su "nombre corto" es
 		// Su nombre corto:  D♠↓ es la dama de espadas, boca abajo
 		letra es 10 si su valor es 10 de lo contrario la primera letra de su rango como mayúsculas
 		flecha es "↑" si está boca arriba de lo contrario "↓"
@@ -58,7 +56,7 @@ una "carta" es una vista reversible arrastrable
 		su nombre debería ser "dama de espadas"
 		su color debería ser negro
 		su valor debería ser 12
-		su estado debería ser "D♠↓"
+		su nombre corto debería ser "D♠↓"
 		es una figura debería ser sí
 		es una espada debería ser sí
 		es un trébol debería ser no
@@ -70,7 +68,7 @@ una "carta" es una vista reversible arrastrable
 
 		voltear eso
 		está boca arriba debería ser sí
-		su estado debería ser "D♠↑"
+		su nombre corto debería ser "D♠↑"
 
 		poner siete a una nueva carta cuyo rango es 7 y palo es corazones
 		siete es una carta numérica debería ser sí

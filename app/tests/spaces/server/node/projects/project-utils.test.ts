@@ -202,6 +202,16 @@ describe("project-utils", () => {
     expect((await projectUtils.getIndex(projectId)).buildFolder).toBe("build-test-projects/Indexed")
   })
 
+  // epic `editor` I68:  a compile asks only for the dictionaries the index lists, so the browser sees no 404s
+  test("a project's index lists the languages it has a names dictionary in;  none, no list", async () => {
+    const projectId = project("Named")
+    expect((await projectUtils.getIndex(projectId)).namesLanguages).toBeUndefined()
+    writeFileSync(resolve(workspace, "Named", `Named${SP.namesSuffixFor("es")}`), "{ texts: {} }\n")
+    const index = await projectUtils.getIndex(projectId)
+    expect(index.namesLanguages).toEqual(["es"])
+    expect(Object.keys(index.manifest)).not.toContain(expect.stringContaining("names.json5"))
+  })
+
   test("a property editor page is one of a project's files:  its index lists it (property-editor P6)", async () => {
     const projectId = project("Paged")
     await projectUtils.createFile(
