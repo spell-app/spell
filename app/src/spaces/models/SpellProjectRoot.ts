@@ -280,8 +280,8 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
   }
 
   /**
-   * Every file of project `project`, gathered to keep or to move:  `importApp()` reads it back,
-   * `projectArchiveZip()` zips it.
+   * Every file of project `project`, gathered to keep or to move:
+   * `projectArchiveZip()` zips it, `importApp()` reads it back.
    * - Its own files first, in its order, as the editor has them now;
    *   then every other file of its folder (`PROJECT_FILES_URL`):  pictures, its project file ...
    * - Each read through its URL, so a file you've drafted is your draft, as the editor shows it.

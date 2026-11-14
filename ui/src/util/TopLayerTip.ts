@@ -15,9 +15,11 @@ export class TopLayerTip {
    * Show the tip inside `container` while the pointer's on a `trigger`, or one has keyboard focus.
    * - `container`:  an element holding the tip and every trigger;  a tip that comes and goes is found each time.
    * - `trigger`:  a selector inside the same shadow root.
-   * - `showOnClick`:  a click on a trigger shows it at once, for as long as it keeps focus:  an info icon's, whose click does nothing else.
-   *   Not for a trigger whose click does something, e.g. a section's title:  there, only keyboard focus shows it.
-   *   A click anywhere else hides it again, even where the browser keeps the focus on it (a dialog's empty space).
+   * - `showOnClick`:  a click on a trigger shows it at once, for as long as it keeps focus.
+   *   - For an info icon's, whose click does nothing else.
+   *   - Not for a trigger whose click does something, e.g. a section's title:  there, only keyboard focus shows it.
+   *   - A click anywhere else hides it again,
+   *     even where the browser keeps the focus on it (a dialog's empty space).
    * - Escape hides it, until the pointer or the focus comes back.
    * - NEVER throws.
    */

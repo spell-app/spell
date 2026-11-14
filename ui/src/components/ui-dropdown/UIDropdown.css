@@ -439,8 +439,8 @@
     visibility: hidden;
   }
 
-  /* Multiple:  chosen values as labels, the padding split between the box and its children;
-     centred top to bottom, so a placeholder sits mid-box when its min-height is taller than a line. */
+  /* Multiple:  chosen values as labels, the padding split between the box and its children.
+     Centred top to bottom, so a placeholder sits mid-box when its min-height is taller than a line. */
   .ui.multiple.dropdown {
     align-content: center;
     padding-block: calc(var(--_dropdown-search-padding-block) / 3);

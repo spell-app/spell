@@ -23,8 +23,9 @@ const CHOOSING = "ui-choosing"
  * The fly-out's box, while open:  a raised panel beside the row, its top level with the row's, on its other side
  * when it doesn't fit, framing the menu inside (which draws no frame of its own:  `UIMenu.isInPopup`).
  * - `position-anchor: auto`:  the row, its implicit anchor (`showPopover({ source })`).
- * - Tokens, so a theme restyles it:  `--ui-popup-background` (else `--ui-surface`), `--ui-border-color`,
- *   `--ui-menu-radius`, `--ui-shadow-raised`;  inside a popup, the popup's own background (it inherits its token).
+ * - Tokens, so a theme restyles it:
+ *   - `--ui-popup-background` (else `--ui-surface`), `--ui-border-color`, `--ui-menu-radius`, `--ui-shadow-raised`
+ *   - inside a popup, the popup's own background (it inherits its token)
  * - As wide as what it holds (so it turns to the other side rather than squeezing), at most the window's width less
  *   a margin;  at most its height, scrolling inside.
  * - `--ui-menu-margin: 0`:  the menu inside sits flush in its frame.
@@ -85,24 +86,25 @@ const FLYOUT_SHEET = `@layer ui.components.submenu.types { .flyout:popover-open 
  *     and icon column;  so no `<ui-menu>` is written inside
  *   - or the `<ui-menu>` its `menu` names, elsewhere on the page, shown where it is:  a popover anchored to the row,
  *     NOT moved, so the page's tree stays as it was written
- * - Either way the fly-out's menu is a fly-out (`UIMenu.isAFlyout`):  `role="menu"`, its items `menuitem`s,
- *   arrow keys between them, no frame of its own.
+ * - Either way the fly-out's menu is a fly-out (`UIMenu.isAFlyout`):
+ *   `role="menu"`, its items `menuitem`s, arrow keys between them, no frame of its own.
  *   - The fly-out's box is the frame:  a popover in the top layer, placed beside the row by CSS anchor positioning
  *     (`FLYOUT_STYLE`), turned to the other side at the window's edge.
  *   - Its anchor is the implicit one its row sets as it shows it (`showPopover({ source })`), as `<ui-popup>`'s is:
  *     a menu elsewhere on the page can't name an anchor inside this element's shadow root.
  * - Opening:
  *   - the pointer over its row;  `SubMenuAim` keeps it open while the pointer heads for it, across other rows
- *   - a click, Enter or Space;  the arrow key toward the fly-out (→, ← in a right-to-left page;  ↓ in a menu whose
- *     items run sideways).  By keyboard, focus goes to its first item.
+ *   - a click, Enter or Space
+ *   - the arrow key toward the fly-out:  →, ← in a right-to-left page, ↓ in a menu whose items run sideways
+ *   - By keyboard, focus goes to its first item.
  *   - Only one open per menu:  opening one closes the one open beside it (`openByOwner`).
  * - Closing:
  *   - the arrow key away from it, or Escape (`UI.overlays`):  focus back on the row
  *   - Tab, a click outside, the pointer settling on another row of its menu
  *   - choosing one of its items:  every fly-out closes, and the choice goes on up as a choice in the menu
  *     (the `ui-choosing` its menu sends, through the row;  a named menu's is sent again from the row)
- *   - its menu closing:  its row loses its box (a popup round the menu hid), so the fly-out goes too
- *     (a `ResizeObserver`)
+ *   - its menu closing:  its row loses its box (a popup round the menu hid),
+ *     so the fly-out goes too (a `ResizeObserver`)
  ****************/
 export class UISubmenu extends UIItem {
   // its own names, and the item's it shares:  TypeScript only knows the item's literals
@@ -394,8 +396,8 @@ export class UISubmenu extends UIItem {
   }
 
   /**
-   * While open, the pointer over its menu:  over another row, the fly-out closes, unless the pointer is heading
-   * for it (`SubMenuAim`).
+   * While open, the pointer over its menu:  over another row, the fly-out closes,
+   * unless the pointer is heading for it (`SubMenuAim`).
    * - Another `<ui-submenu>`'s row opens its own, closing this one (its `onPointerOver()`, first).
    */
   @E.untracked
@@ -482,8 +484,8 @@ export class UISubmenu extends UIItem {
 
   /**
    * An item of the named menu was chosen:  the choice is the row's menu's, as the items inside would be.
-   * - It goes on up from the row (sent again, the same detail;  cancelling it cancels the menu's), not from where
-   *   the named menu sits in the page.
+   * - It goes on up from the row, not from where the named menu sits in the page:
+   *   sent again, the same detail;  cancelling it cancels the menu's.
    */
   @E.untracked
   private readonly onNamedMenuChoosing = (event: Event) => {

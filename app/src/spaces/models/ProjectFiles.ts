@@ -151,7 +151,8 @@ export class ProjectFiles {
   }
 
   /**
-   * Put the project's files in the order `filePaths` gives (`/Card.spell` ...):  its project file's `imports`, so its tabs.
+   * Put the project's files in the order `filePaths` gives (`/Card.spell` ...):
+   * its project file's `imports`, so its tabs.
    * - Those not named keep their order, after them.
    * - throws if the server says no
    */

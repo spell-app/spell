@@ -156,8 +156,8 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   }
 
   /**
-   * It's the menu a `<ui-submenu>` row opens beside itself:  `role="menu"`, its items `menuitem`s, one Tab stop
-   * and arrow keys between them, no frame of its own.
+   * It's the menu a `<ui-submenu>` row opens beside itself:
+   * `role="menu"`, its items `menuitem`s, one Tab stop and arrow keys between them, no frame of its own.
    * - Set by the row (`UISubmenu`):  on the menu it draws round its items, or on the one its `menu` names.
    *   Never an attribute:  a menu is a fly-out because a row shows it as one.
    */
