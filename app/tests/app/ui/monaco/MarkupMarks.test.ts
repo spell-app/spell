@@ -40,8 +40,8 @@ function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
             ? `${shape.isAlone ? "band" : "pill"} ${shape.side} ${shape.room?.join("+") ?? ""}`.trim()
             : shape.kind === "tag-link"
               ? `link ${shape.start.side} to ${shape.end.side}`
-              : shape.expressionIn
-                ? `expression ${shape.expressionIn}`
+              : shape.isExpression
+                ? `expression ${shape.inTag}`
                 : "input"
       out.push(`${"  ".repeat(depth)}${what}:  ${text.slice(0, 24)}`)
       if (shape.kind === "markup-block") walk(shape.inside, depth + 1)

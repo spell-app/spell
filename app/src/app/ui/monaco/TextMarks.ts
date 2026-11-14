@@ -78,6 +78,7 @@ export type Spacers = { before?: monaco.editor.InjectedTextOptions; after?: mona
  * What a spacer makes room for, `bubbly-<kind>-spacer`:
  * - `input`:  either side of a pill's words
  * - `quote`:  outside a quoted input's marks
+ * - `tag-quote`:  after a tag's quoted value's closing mark:  less than `quote`, the next attribute's own room after it (Owen)
  * - `line`:  before an HTML line of text, so it sits in from the tags beside it, as on the page
  * - `tag`:  either side of an HTML tag in a line, room for its pill
  * - `touch`:  between an empty element's two tags, whose points touch
@@ -90,6 +91,7 @@ export type Spacers = { before?: monaco.editor.InjectedTextOptions; after?: mona
 export type SpacerKind =
   | "input"
   | "quote"
+  | "tag-quote"
   | "line"
   | "tag"
   | "touch"

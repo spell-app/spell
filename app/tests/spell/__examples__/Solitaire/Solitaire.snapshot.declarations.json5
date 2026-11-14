@@ -181,7 +181,7 @@
       "kind": "method",
       "name": "play a card",
       "waits": true,
-      "defined": "/Solitaire.spell:2993-3249"
+      "defined": "/Solitaire.spell:2989-3245"
     },
     {
       "syntax": "put {thisArg:expression} on {callArgs:expression}",
@@ -203,7 +203,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitaire.spell:3252-3958"
+      "defined": "/Solitaire.spell:3248-3954"
     },
     {
       "syntax": "count the points for {thisArg:expression} on {callArgs:expression}",
@@ -224,7 +224,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitaire.spell:5676-5887"
+      "defined": "/Solitaire.spell:5672-5883"
     },
     {
       "syntax": "test card setup",
@@ -317,33 +317,33 @@
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6553-6835"
+      "defined": "/Solitaire.spell:6549-6831"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6837-7021"
+      "defined": "/Solitaire.spell:6833-7017"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:7023-7519"
+      "defined": "/Solitaire.spell:7019-7515"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spell:7133-7158"
+      "defined": "/Solitaire.spell:7129-7154"
     },
     {
       "type": "Column",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:7521-7832"
+      "defined": "/Solitaire.spell:7517-7828"
     },
     {
       "type": "Solitaire",
       "superType": "App",
-      "defined": "/Solitaire.spell:406-6161"
+      "defined": "/Solitaire.spell:406-6157"
     },
     {
       "property": "deck",
@@ -362,91 +362,91 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Solitaire.spell:536-1540"
+      "defined": "/Solitaire.spell:536-1536"
     },
     {
       "property": "score",
       "of": "Solitaire",
       "datatype": "number",
-      "defined": "/Solitaire.spell:920-937"
+      "defined": "/Solitaire.spell:916-933"
     },
     {
       "property": "stock",
       "of": "Solitaire",
       "datatype": "StockPile",
-      "defined": "/Solitaire.spell:1026-1047"
+      "defined": "/Solitaire.spell:1022-1043"
     },
     {
       "property": "discards",
       "of": "Solitaire",
       "datatype": "DiscardPile",
-      "defined": "/Solitaire.spell:1051-1077"
+      "defined": "/Solitaire.spell:1047-1073"
     },
     {
       "property": "clubs",
       "of": "Solitaire",
       "datatype": "Foundation",
-      "defined": "/Solitaire.spell:1094-1126"
+      "defined": "/Solitaire.spell:1090-1122"
     },
     {
       "property": "diamonds",
       "of": "Solitaire",
       "datatype": "Foundation",
-      "defined": "/Solitaire.spell:1130-1168"
+      "defined": "/Solitaire.spell:1126-1164"
     },
     {
       "property": "hearts",
       "of": "Solitaire",
       "datatype": "Foundation",
-      "defined": "/Solitaire.spell:1172-1206"
+      "defined": "/Solitaire.spell:1168-1202"
     },
     {
       "property": "spades",
       "of": "Solitaire",
       "datatype": "Foundation",
-      "defined": "/Solitaire.spell:1210-1244"
+      "defined": "/Solitaire.spell:1206-1240"
     },
     {
       "property": "C1",
       "of": "Solitaire",
       "datatype": "Column",
-      "defined": "/Solitaire.spell:1248-1262"
+      "defined": "/Solitaire.spell:1244-1258"
     },
     {
       "property": "C2",
       "of": "Solitaire",
       "datatype": "Column",
-      "defined": "/Solitaire.spell:1266-1280"
+      "defined": "/Solitaire.spell:1262-1276"
     },
     {
       "property": "C3",
       "of": "Solitaire",
       "datatype": "Column",
-      "defined": "/Solitaire.spell:1284-1298"
+      "defined": "/Solitaire.spell:1280-1294"
     },
     {
       "property": "C4",
       "of": "Solitaire",
       "datatype": "Column",
-      "defined": "/Solitaire.spell:1302-1316"
+      "defined": "/Solitaire.spell:1298-1312"
     },
     {
       "property": "C5",
       "of": "Solitaire",
       "datatype": "Column",
-      "defined": "/Solitaire.spell:1320-1334"
+      "defined": "/Solitaire.spell:1316-1330"
     },
     {
       "property": "C6",
       "of": "Solitaire",
       "datatype": "Column",
-      "defined": "/Solitaire.spell:1338-1352"
+      "defined": "/Solitaire.spell:1334-1348"
     },
     {
       "property": "C7",
       "of": "Solitaire",
       "datatype": "Column",
-      "defined": "/Solitaire.spell:1356-1370"
+      "defined": "/Solitaire.spell:1352-1366"
     },
     {
       "syntax": "restart the game (of {thisArg:expression})?",
@@ -461,7 +461,7 @@
       "kind": "method",
       "name": "restart the game",
       "waits": true,
-      "defined": "/Solitaire.spell:1560-1657"
+      "defined": "/Solitaire.spell:1556-1653"
     },
     {
       "syntax": "deal the cards (of {thisArg:expression})?",
@@ -476,7 +476,7 @@
       "kind": "method",
       "name": "deal the cards",
       "waits": true,
-      "defined": "/Solitaire.spell:1661-2267"
+      "defined": "/Solitaire.spell:1657-2263"
     },
     {
       "syntax": "play from the stock (of {thisArg:expression})?",
@@ -492,7 +492,7 @@
       "name": "play from the stock",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spell:2270-2738"
+      "defined": "/Solitaire.spell:2266-2734"
     },
     {
       "syntax": "reset the stock (of {thisArg:expression})?",
@@ -507,7 +507,7 @@
       "kind": "method",
       "name": "reset the stock",
       "returns": "nothing",
-      "defined": "/Solitaire.spell:2742-2969"
+      "defined": "/Solitaire.spell:2738-2965"
     },
     {
       "syntax": "auto play (of {thisArg:expression})?",
@@ -523,7 +523,7 @@
       "name": "auto play",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spell:3961-5051"
+      "defined": "/Solitaire.spell:3957-5047"
     },
     {
       "syntax": "cheat {thisArg:expression}?",
@@ -539,7 +539,7 @@
       "name": "cheat",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spell:5055-5673"
+      "defined": "/Solitaire.spell:5051-5669"
     },
     {
       "syntax": "test the moves",
@@ -548,7 +548,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spell:7834-9289"
+      "defined": "/Solitaire.spell:7830-9285"
     }
   ],
   "codeLines": [

@@ -3834,6 +3834,8 @@
         {"id":"examples-fitting-titles","title":"Fitting titles","tab":"examples"},
         {"id":"examples-fitting-titles-shrinkable","title":"Shrinkable","parent":5},
         {"id":"examples-fitting-titles-actions","title":"Actions","parent":5},
+        {"id":"examples-fitting-titles-show-keys","title":"Show keys","parent":5},
+        {"id":"examples-fitting-titles-pills","title":"Pills","parent":5},
         {"id":"examples-fitting-titles-scroll-first","title":"Scroll first","parent":5},
         {"id":"usage-using-it","title":"Using it","tab":"usage"},
         {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},

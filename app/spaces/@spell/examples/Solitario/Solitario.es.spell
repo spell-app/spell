@@ -111,7 +111,7 @@ solitario es una aplicación
 		// Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra sus jugadas
 		<segmento invertido unir="arriba">
 			// sus acciones en medio, cada una con su icono y su tecla:  al angostarse la barra, sus títulos se cortan, luego quedan solo sus iconos, luego un solo botón `…`
-			<barra-herramientas class="GameBar" aria-label="Juego" apariencia="secundario" invertido tamano="pequeño" encogible>
+			<barra-herramientas class="GameBar" aria-label="Juego" apariencia="pildoras" invertido tamano="pequeño" encogible>
 				<texto slot="titulo" tamano="grande" extranegrita>Solitario Encanto</texto>
 				<acción "jugar solo"/>
 				<acción "hacer trampa"/>

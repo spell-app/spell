@@ -1327,6 +1327,17 @@
     .bubbly-quote-spacer.bubbly-spacer-before {
       width: 0;
     }
+    /* after a tag's quoted value:  a little, the next attribute's own room after it (Owen) */
+    .bubbly-tag-quote-spacer {
+      width: calc(4px * var(--bubbly-monaco-scale));
+    }
+    /* a tag's quote marks lean further, the opening one up over the `=` before it (Owen) */
+    .bubbly-tag-quote {
+      --bubbly-quote-rotation: 30deg;
+    }
+    .view-line .bubbly-tag-quote.bubbly-quote-open::after {
+      translate: -75% -0.3em;
+    }
 
     /* the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size */
     .bubbly-layer {
@@ -1406,6 +1417,10 @@
     .view-line .bubbly-angle-close::before {
       left: auto;
       right: 0;
+    }
+    /* a nameless end tag, `</>`, in a line:  its brackets narrowed to the `/` between them, so it reads as one glyph (Owen) */
+    .view-line .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
+      letter-spacing: -0.2em;
     }
     /*
      * beside a `/`, a bracket's own character narrowed to the page's room (epic `editor` I83):

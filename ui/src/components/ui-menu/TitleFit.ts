@@ -23,7 +23,9 @@ import { E } from "spell/ui/core"
  *     all before the next paint, so nothing flashes and a page's own CSS for `:state(icons-only)` counts
  *   - so a width between two stages never flips back and forth
  * - It refits (`update()`) whenever a size could have changed:  the box, an item's box or title, anything else in
- *   the row (`ResizeObserver`), the fonts loading;  the menu also asks when its items or their words change.
+ *   the row, the menu's DOM element and the nearest box around it (`ResizeObserver`), the fonts loading;
+ *   the menu also asks when its items or their words change.
+ *   - So the titles come back as the room does:  the box itself may not grow, being only as wide as what it shows.
  *   - It writes only when the answer changed, so the sizes it causes can't set it off again.
  ****************/
 export class TitleFit {
@@ -181,10 +183,11 @@ export class TitleFit {
   private watch(elements: readonly Element[]): void {
     const resizes = this.resizes
     if (!resizes) return
-    // the menu's parent too:  a segmented one's dropdown is only as wide as its button, so its box can't tell
-    // when there's room again
-    const parent = this.setup.domElement.parentElement
-    const next = new Set([this.box, ...(parent ? [parent] : []), ...elements])
+    // the menu's DOM element and the box around it too:  the menu's box is only as wide as what it shows (a segmented
+    // one's dropdown, a page's `flex: 0 1 auto`), so once its titles are gone it can't tell when there's room again
+    const { domElement } = this.setup
+    const around = TitleFit.boxAround(domElement)
+    const next = new Set([this.box, ...TitleFit.boxesOf(domElement), ...(around ? [around] : []), ...elements])
     for (const element of this.watched) {
       if (!next.has(element)) {
         resizes.unobserve(element)
@@ -293,6 +296,21 @@ export class TitleFit {
         ? (element as HTMLSlotElement).assignedElements()
         : [...(element.shadowRoot?.children ?? element.children)]
     return inside.filter((child) => child.localName !== STYLE).flatMap(TitleFit.boxesOf)
+  }
+
+  /**
+   * The nearest box around `element`, in the page as drawn:  its slot's, its parent's or its shadow root's host's,
+   * past any of `display: contents` (a `<ui-segment>`'s DOM element), which draws no box and so never resizes.
+   */
+  private static boxAround(element: Element): Element | undefined {
+    let around = TitleFit.drawnParentOf(element)
+    while (around && getComputedStyle(around).display === CONTENTS) around = TitleFit.drawnParentOf(around)
+    return around
+  }
+
+  /** `element`'s parent in the page as drawn:  its slot, else its parent, else its shadow root's host. */
+  private static drawnParentOf(element: Element): Element | undefined {
+    return element.assignedSlot ?? element.parentElement ?? (element.parentNode as ShadowRoot | null)?.host ?? undefined
   }
 
   /** Does `element` draw anything (not hidden, not `display: none`)? */

@@ -498,7 +498,7 @@ class Solitaire(App):
                     {
                         "class": "GameBar",
                         "aria-label": "Game",
-                        "appearance": "secondary",
+                        "appearance": "pills",
                         "inverted": True,
                         "size": "small",
                         "shrinkable": True,

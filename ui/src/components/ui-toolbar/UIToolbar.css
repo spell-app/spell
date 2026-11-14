@@ -10,6 +10,11 @@
  * | --- | --- | --- |
  * | `--ui-toolbar-gap` | space between a key and the items | `0.25em` |
  * | `--ui-toolbar-button-radius` | a key's corners | a circle;  on a segmented track, the track's corner less its inset |
+ * | `--ui-toolbar-pill-background` | `appearance="pills"`:  a pill's track | the ink at 8%, as a group of buttons' |
+ * | `--ui-toolbar-pill-padding` | how far a pill's items sit in from its edge | `--ui-space-3xs` |
+ * | `--ui-toolbar-pill-radius` | a pill's corners | `--ui-radius` |
+ * | `--ui-toolbar-pill-gap` | the room between two pills, where a divider is | `0.75em` |
+ * | `--ui-toolbar-pill-item-padding` | room inside a pill's item | `0.5em 0.75em` |
  */
 
 @layer ui.components.toolbar.types;
@@ -144,5 +149,89 @@
           var(--ui-menu-segmented-padding, 0px)
       )
     );
+  }
+
+  /*
+   * ## Pills (`appearance="pills"`):  each run of items between two dividers is one rounded track,
+   * as a group of buttons is drawn (`UIButton.css`, "Groups"), its items rounded tiles on it.
+   * - The toolbar works out each item's place in its run (`UIToolbar.pills()`), and the item draws its piece of
+   *   the track behind itself:  its `::before`, rounded at the run's two ends, set out by the track's inset.
+   * - No dividers between the items, no box of the menu's own;  a divider item is the room between two pills.
+   * - The menu's box is a stacking context, so the pieces sit on it, behind the tiles.
+   * - Through every `shrinkable` stage:  a cut title or an icon is still a tile;  the `…` button is a pill alone.
+   */
+  .ui.toolbar > .ui.pills.menu {
+    --_ui-toolbar-pill-background: var(--ui-toolbar-pill-background, oklch(from var(--ui-ink) l c h / 0.08));
+    --_ui-toolbar-pill-padding: var(--ui-toolbar-pill-padding, var(--ui-space-3xs));
+    --_ui-toolbar-pill-radius: var(--ui-toolbar-pill-radius, var(--ui-radius));
+    --_ui-toolbar-pill-gap: var(--ui-toolbar-pill-gap, 0.75em);
+    --_toolbar-pill-inner-radius: max(0px, var(--_ui-toolbar-pill-radius) - var(--_ui-toolbar-pill-padding));
+    --_toolbar-pills: 1;
+    --_ui-menu-background: none;
+    --_ui-menu-border: none;
+    --_ui-menu-gap: 0;
+    --_ui-menu-item-padding: var(--ui-toolbar-pill-item-padding, 0.5em 0.75em);
+    --_ui-menu-item-margin: 0;
+    --_ui-menu-item-align: center;
+    --_ui-menu-item-radius: var(--_toolbar-pill-inner-radius);
+    --_ui-menu-first-radius: var(--_toolbar-pill-inner-radius);
+    --_ui-menu-last-radius: var(--_toolbar-pill-inner-radius);
+    --_ui-menu-only-radius: var(--_toolbar-pill-inner-radius);
+    --_ui-menu-divider-display: none;
+    --_ui-menu-divider-first-display: none;
+    --_ui-menu-divider-last-display: none;
+    isolation: isolate;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  /* an item's piece of its pill:  the track's inset above and below it, and before its run's first, after its last */
+  :host(:state(in-menu)) > .item.pill {
+    margin-block: var(--_ui-toolbar-pill-padding);
+  }
+  :host(:state(in-menu)) > .item.pill-start {
+    margin-inline-start: var(--_ui-toolbar-pill-padding);
+  }
+  :host(:state(in-menu)) > .item.pill-end {
+    margin-inline-end: var(--_ui-toolbar-pill-padding);
+  }
+  :host(:state(in-menu)) > .item.pill::before {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--_ui-toolbar-pill-padding)) 0;
+    z-index: -1;
+    display: block;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: var(--_ui-toolbar-pill-background);
+    pointer-events: none;
+  }
+  :host(:state(in-menu)) > .item.pill-start::before {
+    inset-inline-start: calc(-1 * var(--_ui-toolbar-pill-padding));
+    border-start-start-radius: var(--_ui-toolbar-pill-radius);
+    border-end-start-radius: var(--_ui-toolbar-pill-radius);
+  }
+  :host(:state(in-menu)) > .item.pill-end::before {
+    inset-inline-end: calc(-1 * var(--_ui-toolbar-pill-padding));
+    border-start-end-radius: var(--_ui-toolbar-pill-radius);
+    border-end-end-radius: var(--_ui-toolbar-pill-radius);
+  }
+  /* a divider item:  no hairline, only the room between two pills */
+  @container style(--_toolbar-pills: 1) {
+    :host(:state(in-menu)) > .divider {
+      width: 0;
+      margin: 0 calc(var(--_ui-toolbar-pill-gap) / 2);
+      background: none;
+    }
+  }
+  /* the `…` button, once every item has folded into it:  a pill of its own */
+  .ui.toolbar > .ui.pills.menu > .overflow.item {
+    margin: var(--_ui-toolbar-pill-padding);
+    border-radius: var(--_toolbar-pill-inner-radius);
+    box-shadow: 0 0 0 var(--_ui-toolbar-pill-padding) var(--_ui-toolbar-pill-background);
+    background-color: var(--_ui-toolbar-pill-background);
+  }
+  .ui.toolbar > .ui.pills.menu > .overflow.item:hover {
+    background-image: linear-gradient(var(--_ui-menu-hover-background) 0 0);
   }
 }

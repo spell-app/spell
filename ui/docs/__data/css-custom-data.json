@@ -10236,10 +10236,45 @@
       }
     },
     {
+      "name": "--ui-toolbar-pill-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toolbar>`'s token.  Default:  `oklch(from var(--ui-ink) l c h / 0.08)`"
+      }
+    },
+    {
+      "name": "--ui-toolbar-pill-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toolbar>`'s token.  Default:  `var(--ui-space-3xs)`"
+      }
+    },
+    {
+      "name": "--ui-toolbar-pill-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toolbar>`'s token.  Default:  `var(--ui-radius)`"
+      }
+    },
+    {
+      "name": "--ui-toolbar-pill-gap",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toolbar>`'s token.  Default:  `0.75em`"
+      }
+    },
+    {
       "name": "--ui-toolbar-header-action-gap",
       "description": {
         "kind": "markdown",
         "value": "`<ui-toolbar>`'s token.  Default:  `10px`"
+      }
+    },
+    {
+      "name": "--ui-toolbar-pill-item-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toolbar>`'s token.  Default:  `0.5em 0.75em`"
       }
     },
     {

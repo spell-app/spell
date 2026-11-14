@@ -49876,8 +49876,8 @@ export interface UIToolbarAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width), `capsule` (a nested menu of actions, grouped on one rounded piece of glass).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.
-   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless` · `header` · `capsule`
+   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width), `capsule` (a nested menu of actions, grouped on one rounded piece of glass).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.  A toolbar's own:  `pills` (each run of items between two `<ui-item kind="divider">`s is one rounded track, its items rounded tiles on it, as a group of buttons is drawn;  a run cut, down to its icons or into the `…` button, stays on its track).
+   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless` · `header` · `capsule` · `pills`
    */
   appearance?: string
   /**
@@ -50169,6 +50169,16 @@ export interface UIToolbarAttributes {
    * @deprecated write `interactive` -- `prop:` stays only for compiled spell
    */
   "prop:interactive"?: boolean | ""
+  /**
+   * Show each action's keys beside its title, as a menu does.  Without it, a toolbar's own items leave them out:  they're in each item's tooltip either way (`Undo (⌘Z)`).
+   * - takes:  flag (present / absent)
+   */
+  "show-keys"?: boolean | ""
+  /**
+   * `show-keys`, as the DOM element's property.
+   * @deprecated write `show-keys` -- `prop:` stays only for compiled spell
+   */
+  "prop:showKeys"?: boolean | ""
   /**
    * With `shrinkable`:  once only its icons are left, they scroll with `‹` / `›`, no overflow button.  With a `segmented` look too:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files.
    * - takes:  flag (present / absent)

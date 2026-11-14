@@ -292,7 +292,7 @@ export class MarkupMarks extends TextMarks {
         this.tags.push({ start: from, end: attribute.valueStart })
         from = attribute.valueEnd!
         this.expression(attribute.valueStart, attribute.valueEnd!, partOfSpeech, into)
-      } else this.value(attribute.valueStart, attribute.valueEnd!, attribute.isQuoted, into)
+      } else this.value(attribute.valueStart, attribute.valueEnd!, attribute.isQuoted, partOfSpeech, into)
     }
     this.tags.push({ start: from, end })
     if (tag.selfClosing) this.mark(end - 2, end - 1, SLASH + declares)
@@ -325,7 +325,8 @@ export class MarkupMarks extends TextMarks {
     const { start, end } = tag
     this.tags.push({ start, end })
     // every piece an end tag's (`bubbly-tag-end`):  its marks fainter than a start tag's
-    const endClasses = place === "block" ? `${END} ${FOOT}` : END
+    // a nameless one, `</>`, drawn close as one glyph (Owen)
+    const endClasses = [END, place === "block" && FOOT, !tag.tag && BARE_END].filter(Boolean).join(" ")
     this.mark(start, start + 1, `${ANGLE_OPEN} ${endClasses}`)
     this.mark(start + 1, start + 2, `${SLASH} ${endClasses}`)
     this.mark(start + 2, start + 2 + tag.tag.length, place === "block" ? `${MARK} ${END_NAME} ${FOOT}` : END_NAME)
@@ -333,13 +334,13 @@ export class MarkupMarks extends TextMarks {
   }
 
   /** An attribute's value:  its words with a spacer either side, a pill under them;  a quoted one's marks outside. */
-  private value(start: number, end: number, isQuoted: boolean, into: MarkupShape[]) {
+  private value(start: number, end: number, isQuoted: boolean, inTag: MarkupPartOfSpeech, into: MarkupShape[]) {
     if (isQuoted) {
-      this.mark(start - 1, start, `${QUOTE_MARK} bubbly-quote-open`, { before: spacer("quote", "before") })
-      this.mark(end, end + 1, `${QUOTE_MARK} bubbly-quote-close`, { after: spacer("quote", "after") })
+      this.mark(start - 1, start, `${QUOTE_MARK} ${TAG_QUOTE} bubbly-quote-open`, { before: spacer("quote", "before") })
+      this.mark(end, end + 1, `${QUOTE_MARK} ${TAG_QUOTE} bubbly-quote-close`, { after: spacer("tag-quote", "after") })
     }
     const place = this.mark(start, end, INPUT, { before: spacer("input", "before"), after: spacer("input", "after") })
-    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted })
+    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted, inTag })
   }
 
   /**
@@ -354,7 +355,7 @@ export class MarkupMarks extends TextMarks {
       before: spacer("input", "before"),
       after: spacer("input", "after")
     })
-    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted: false, expressionIn: partOfSpeech })
+    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
   }
 
   ////////////////
@@ -498,6 +499,9 @@ const END_NAME = `${TAG_NAME} ${END}`
 /** A block's end tag on its own line:  its letters tiny, in its tiny pill (Q61). */
 const FOOT = "bubbly-foot-tiny"
 
+/** A nameless end tag's pieces, `</>`:  drawn close together, as one glyph (Owen, 2026-11-14). */
+const BARE_END = "bubbly-end-bare"
+
 /** An empty element's end tag's `<` and name, and its start tag's `>`:  hidden, no wider than nothing (Q62). */
 const HIDDEN = "bubbly-tag-hidden"
 
@@ -513,6 +517,9 @@ const BRACE = `${MARK} ${BubblyHtml.BRACE}`
 
 /** A quoted value's own `"`:  see-through, its curly mark drawn over it. */
 const QUOTE_MARK = "bubbly-quote-mark"
+
+/** A tag's quote marks:  leaning further, the opening one over the `=` before it (Owen, 2026-11-14). */
+const TAG_QUOTE = "bubbly-tag-quote"
 
 /** A comment's lines:  faint. */
 const COMMENT = "bubbly-comment"

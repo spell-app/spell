@@ -1625,6 +1625,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "icon-column",
       "tabs",
       "interactive",
+      "show-keys",
       "scroll-first",
       "max-visible",
       "remember"
