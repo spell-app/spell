@@ -1113,7 +1113,7 @@
           "ruleNames": ["is_in_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsInAType.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "`{lhs} is [not] in a {list type}` -- is it in any list of that type?",
           "syntaxes": [
             {
@@ -1139,7 +1139,7 @@
           "ruleNames": ["is_in"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsIn.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "`{lhs} is [not] in`/`one of`/`either`/`neither ... nor {list}`.",
           "syntaxes": [
             {

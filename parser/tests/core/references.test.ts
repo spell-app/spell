@@ -157,3 +157,33 @@ describe("thing references", () => {
     })
   })
 })
+
+/** `the card is in a column`:  `core.isInA(card, Column)` (epic `language` P55, J148). */
+describe("in any list of a type", () => {
+  class Card extends Thing {}
+
+  test("a family's class:  the one list holding the thing says, no search", () => {
+    class Pile extends List {
+      static exclusive = true
+    }
+    class Column extends Pile {}
+    const card = new Card()
+    const pile = new Pile().append(card)
+    expect(core.isInA(card, Pile)).toBe(true)
+    expect(core.isInA(card, Column)).toBe(false)
+    new Column().append(card)
+    expect(pile.includes(card)).toBe(false)
+    expect(core.isInA(card, Column)).toBe(true)
+    // a number is held, never owned:  the search
+    new Column().append(7)
+    expect(core.isInA(7, Column)).toBe(true)
+  })
+
+  test("not a family's:  every list of it the program made", () => {
+    class Deck extends List {}
+    const card = new Card()
+    new Deck().append(card)
+    expect(core.isInA(card, Deck)).toBe(true)
+    expect(core.isInA(new Card(), Deck)).toBe(false)
+  })
+})
