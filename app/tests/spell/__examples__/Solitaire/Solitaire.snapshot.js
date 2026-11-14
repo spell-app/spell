@@ -293,15 +293,6 @@ export function testPiles() {
 
 /** a card is in one pile at a time:  putting it on another pile takes it off this one */
 // -----------
-core.heading("Klondike Solitaire")
-////////////////////////
-// ## Klondike Solitaire
-////////////////////////
-// Deal seven columns, then build four foundations, ace to king, one suit each:
-// [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
-// The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
-// Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
-
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
@@ -393,6 +384,7 @@ export class Column extends Pile {
   static droppable = true
 }
 
+/** See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules */
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -498,23 +490,19 @@ export class Solitaire extends App {
   async restartTheGame() {
     this.score = 0
     // Gather every card into the stock, shuffle it, and deal the columns
+    this.deck.forEach((card) => core.meanwhile(() => card.turnFaceDown()))
     for (const card of this.deck) {
-      const startPile = card.pile
-      card.turnFaceDown()
-      if (startPile !== this.stock) {
-        this.stock.append(card)
-        await core.pauseFor(50, "msec")
+      if (!this.stock.includes(card)) {
+        core.meanwhile(() => this.stock.append(card))
+        await core.pauseFor(10, "msec")
       }
     }
     this.stock.randomize()
     // each row's first card lands face down, then turns up where it lies
-    for (const row of core.getRange(1, 7)) {
-      for (const column of core.getRange(row, 7)) {
-        core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
-        if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
-        await core.pauseFor(50, "msec")
-      }
-    }
+    core.getRange(1, 7).forEach((row) => core.getRange(row, 7).forEach((column) => {
+      core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
+      if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
+    }))
     await this.turnOverTheNextCard()
   }
 

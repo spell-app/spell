@@ -1,15 +1,10 @@
-# Klondike Solitaire
-// Deal seven columns, then build four foundations, ace to king, one suit each:
-// [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
-// The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
-// Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
-
-solitaire is an app
+solitaire is an app 
+	-- See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules
 	when creating solitaire
 		add each card in the deck to the stock
 		restart the game
 	
-	to draw it
+	to draw solitaire
 		<deck "deck"hidden />
 		<segment inverted attach="top">
 			<toolbar class="GameBar" appearance="pills" inverted size="small" shrinkable>
@@ -52,12 +47,12 @@ solitaire is an app
 	to "restart the game" with shortcut "R", icon "sync alternate"
 		clear the score
 		// Gather every card into the stock, shuffle it, and deal the columns
-		for card in the deck
-			set start pile to card's pile
-			turn the card face down
-			if start pile is not the stock
-				add the card to the stock
-				pause for 50 msec
+		for each card in the deck
+			turn the card face down without waiting
+		for each card in the deck
+			if the card is not in the stock
+				add the card to the stock without waiting
+				pause for 10 msec
 		shuffle the stock
 		// each row's first card lands face down, then turns up where it lies
 		for row from 1 to 7
@@ -65,7 +60,6 @@ solitaire is an app
 				add the top card of the stock to item column of the columns
 				if column is the same as row
 					turn the last card of (item column of the columns) face up
-				pause for 50 msec
 		turn over the next card
 	
 	to "turn over the next card", undoable as "Turn Card"

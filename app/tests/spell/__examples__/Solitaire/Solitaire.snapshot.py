@@ -377,15 +377,6 @@ def test_piles() -> None:
 # -----------
 
 
-#######################
-# ## Klondike Solitaire
-#######################
-# Deal seven columns, then build four foundations, ace to king, one suit each:
-# [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
-# The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
-# Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
-
-
 class StockPile(Pile):
     """The cards not played yet, face down:  a click turns the next one over, so none can be taken from it"""
 
@@ -475,6 +466,8 @@ class Column(Pile):
 
 
 class Solitaire(App):
+    """See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules"""
+
     element_tag = "test-project-app"
 
     async def create(self) -> None:
@@ -565,11 +558,11 @@ class Solitaire(App):
         self.score = 0
         # Gather every card into the stock, shuffle it, and deal the columns
         for card in self.deck:
-            start_pile = card.pile
-            card.turn_face_down()
-            if start_pile != self.stock:
-                self.stock.append(card)
-                await core.pause_for(50, "msec")
+            core.meanwhile(lambda: card.turn_face_down())
+        for card in self.deck:
+            if not card in self.stock:
+                core.meanwhile(lambda: self.stock.append(card))
+                await core.pause_for(10, "msec")
         self.stock.randomize()
         # each row's first card lands face down, then turns up where it lies
         for row in range(1, 8):
@@ -577,7 +570,6 @@ class Solitaire(App):
                 core.get_item_at(core.every_thing(Column), position(column)).append(self.stock.last_item)
                 if column == row:
                     core.get_item_at(core.every_thing(Column), position(column)).last_item.turn_face_up()
-                await core.pause_for(50, "msec")
         await self.turn_over_the_next_card()
 
     async def turn_over_the_next_card(self) -> None:
