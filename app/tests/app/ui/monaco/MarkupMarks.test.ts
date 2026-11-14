@@ -35,7 +35,7 @@ function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
       const text = lines[range.startLineNumber - 1]!.slice(range.startColumn - 1).trim()
       const what =
         shape.kind === "markup-block"
-          ? `block ${shape.partOfSpeech}${shape.foot === undefined ? "" : shape.isThinFoot ? " +thin foot" : " +foot"}`
+          ? `block ${shape.partOfSpeech}${shape.foot === undefined ? "" : " +foot"}`
           : shape.kind === "tag"
             ? `${shape.isAlone ? "band" : "pill"} ${shape.side} ${shape.room?.join("+") ?? ""}`.trim()
             : shape.kind === "tag-link"
@@ -171,7 +171,7 @@ describe("MarkupMarks", () => {
     expect(spaced).toEqual([])
   })
 
-  test("a nameless end tag on its own line ends its block in a thin foot;  a named one in a band (Q58)", () => {
+  test("a block's end tag on its own line, named or `</>`, is its foot:  every piece tiny (Q61)", () => {
     const text = `<context-menu>
   <action "cheat"/>
 </>
@@ -180,9 +180,15 @@ describe("MarkupMarks", () => {
 </grid>
 `
     expect(shapesOf(MarkupMarks.of(text), text).filter((line) => line.startsWith("block"))).toEqual([
-      "block structure +thin foot:  <context-menu>",
+      "block structure +foot:  <context-menu>",
       "block structure +foot:  <grid>"
     ])
+    const marks = MarkupMarks.of(text)
+    const lines = text.split("\n")
+    const tiny = marks.marks
+      .filter((mark) => mark.options.inlineClassName?.split(" ").includes("bubbly-foot-tiny"))
+      .map(({ range }) => lines[range.startLineNumber - 1]!.slice(range.startColumn - 1, range.endColumn - 1))
+    expect(tiny.join("")).toBe("</></grid>")
   })
 
   test("a tag's part of speech:  structure blue, actions and a menu's items green (Owen, 2026-11-14)", () => {

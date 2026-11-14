@@ -17,12 +17,12 @@ import type { BubblyInputShape } from "./BubblyMarks"
  * (`BubblyMarkup`):  the MARKS on the text, and the SHAPES drawn under it.
  * - From the same reading as the page's, `BubblyMarkup.treeOf()`, so both see the same elements:
  *   - an element with what's inside it on lines of its own:  a block, its start tag the band, an end tag that starts
- *     its line a band of its own under the rail
+ *     its line, named or `</>`, a TINY pill at the rail's turn, its letters tiny, its line only the pill's row tall
+ *     (Owen, Q61;  `SpellBubbly` shortens its line)
  *   - an element alone on its line with no end tag (`<meta …>`), and a doctype:  a band by itself
  *   - any other tag:  a small pill of its own, in its line;  a one-line element with something between its tags, a
  *     line linking its two pills too, between them (`MarkupLinkShape`)
  *   - a start tag on lines of its own:  its shape's place spans them, drawn as ONE tall band
- *   - a block's nameless `</>` on its own line:  a thin foot, not a band (`isThinFoot`)
  * - Marks:
  *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;  its `/`, name and
  *     attributes' names, as the page draws them
@@ -132,8 +132,6 @@ export class MarkupMarks extends TextMarks {
       head: this.place(open.start, open.end),
       partOfSpeech,
       ...(this.isTall(open) && BubblyMarkup.hasShortTail(this.text, open) ? { isShortTail: true } : {}),
-      // a nameless end tag on its own line, `</>`:  a thin foot (Owen, Q58)
-      ...(footStartsLine && !close.tag ? { isThinFoot: true } : {}),
       inside: []
     }
     into.push(block)
@@ -267,15 +265,19 @@ export class MarkupMarks extends TextMarks {
     this.mark(end - 1, end, ANGLE_CLOSE)
   }
 
-  /** An end tag's pieces;  `"block"`:  a block's, its name faint as its marks are, as the page draws it. */
+  /**
+   * An end tag's pieces;  `"block"`:  a block's, its name faint as its marks are, as the page draws it, every piece
+   * tiny (`bubbly-foot-tiny`, Q61).
+   */
   private endTag(tag: MarkupEndTag, place: "block" | "inline") {
     const { start, end } = tag
     this.tags.push({ start, end })
     // every piece an end tag's (`bubbly-tag-end`):  its marks fainter than a start tag's
-    this.mark(start, start + 1, `${ANGLE_OPEN} ${END}`)
-    this.mark(start + 1, start + 2, `${SLASH} ${END}`)
-    this.mark(start + 2, start + 2 + tag.tag.length, place === "block" ? `${MARK} ${END_NAME}` : END_NAME)
-    this.mark(end - 1, end, `${ANGLE_CLOSE} ${END}`)
+    const endClasses = place === "block" ? `${END} ${FOOT}` : END
+    this.mark(start, start + 1, `${ANGLE_OPEN} ${endClasses}`)
+    this.mark(start + 1, start + 2, `${SLASH} ${endClasses}`)
+    this.mark(start + 2, start + 2 + tag.tag.length, place === "block" ? `${MARK} ${END_NAME} ${FOOT}` : END_NAME)
+    this.mark(end - 1, end, `${ANGLE_CLOSE} ${endClasses}`)
   }
 
   /** An attribute's value:  its words with a spacer either side, a pill under them;  a quoted one's marks outside. */
@@ -351,14 +353,15 @@ export type MarkupBlockShape = {
   place: number
   /** the mark on its start tag */
   head: number
-  /** the mark on its end tag, when it starts its line:  a band under the rail;  else the end tag is a pill in its line */
+  /**
+   * the mark on its end tag, when it starts its line:  a tiny pill at the rail's turn, its line only its row tall;
+   * else the end tag is a pill in its line
+   */
   foot?: number
   /** its bands' colour */
   partOfSpeech: MarkupPartOfSpeech
   /** its start tag on lines of its own, its `>` alone on the last:  the rows above overhang it, their corner cut */
   isShortTail?: boolean
-  /** its end tag a nameless `</>` on its own line:  a thin foot under it, not a band (Owen, Q58) */
-  isThinFoot?: boolean
   /** the pills on its start tag, and the shapes in its body */
   inside: MarkupShape[]
 }
@@ -418,6 +421,9 @@ const ATTRIBUTE_NAME = "bubbly-attribute-name"
 /** An end tag's pieces:  its marks fainter, its name not bold, as the page draws it (its `.bubbly-tag-end` holds them). */
 const END = "bubbly-tag-end"
 const END_NAME = `${TAG_NAME} ${END}`
+
+/** A block's end tag on its own line:  its letters tiny, in its tiny pill (Q61). */
+const FOOT = "bubbly-foot-tiny"
 
 /** An attribute's `=`. */
 const EQUALS = `${MARK} bubbly-equals`

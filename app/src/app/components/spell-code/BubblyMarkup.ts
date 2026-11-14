@@ -5,9 +5,8 @@ import { BubblyHtml } from "./BubblyHtml"
  * HTML source drawn in the bubbly look, as HTML in the classes of the look's ONE sheet, `bubbly.css` beside it
  * (epic `language`, Owen 2026-11-11):  the same shapes as Spell's, their corners cut (`bubbly-html`).
  * - Each element with children on lines of their own is a `bubbly-block`:
- *   its start tag the band, its children the body, its end tag a band of its own under the rail (`bubbly-foot-pill`).
- *   - a nameless end tag, Spell's `</>`, is the block's foot instead:  a thin band under it, from the rail to past
- *     its `⟩` (`bubbly-foot-thin`, Owen, Q58)
+ *   its start tag the band, its children the body, its end tag, named or Spell's nameless `</>`, a TINY pill at
+ *   the rail's turn, its words tiny in it (`bubbly-foot-tiny`, Owen, Q61)
  * - An element on one line is a line of its own:  its start tag a small pill (`bubbly-tag-pill`), what's inside it on
  *   the paper, its end tag a pill of its own;  the two pills linked by a line along the top and bottom of what's
  *   between them, when something is (`bubbly-tag-link`, Q58).
@@ -347,15 +346,12 @@ class MarkupWriter {
     const head = isTall
       ? this.tallTag(element.open, "bubbly-tag-tall-head", "")
       : `<p class="bubbly-head-pill bubbly-tag-start">${this.startTag(element.open)}</p>`
-    // a nameless end tag, `</>`:  the block's foot, a thin band under it (Owen, Q58)
-    const foot = !element.close
-      ? `<div class="bubbly-foot"></div>`
-      : element.close.tag
-        ? `<p class="bubbly-foot bubbly-foot-pill bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
-        : `<p class="bubbly-foot bubbly-foot-thin bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
-    const thin = element.close && !element.close.tag ? " bubbly-thin-foot" : ""
+    // its end tag, named or `</>`:  a tiny pill at the rail's turn (Owen, Q61)
+    const foot = element.close
+      ? `<p class="bubbly-foot bubbly-foot-tiny bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
+      : `<div class="bubbly-foot"></div>`
     return (
-      `<div class="bubbly-block ${kind}${thin}">${head}` +
+      `<div class="bubbly-block ${kind}">${head}` +
       `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>${foot}</div>`
     )
   }
@@ -477,7 +473,7 @@ class MarkupWriter {
 
   /**
    * An end tag:  `</` and `>` faint, its name in the ink;  none, nothing.
-   * - `"block"`:  a block's, on its foot under the gutter, its name faint too:  the gutter already shows where it ends
+   * - `"block"`:  a block's, its tiny pill at the rail's turn, its name faint too:  the rail already shows where it ends
    */
   private endTag(tag: MarkupEndTag | undefined, place: "block" | "inline" = "inline"): string {
     if (!tag) return ""

@@ -206,6 +206,7 @@ export class SpellBubbly {
     try {
       if (this.isMarkup) {
         this.laidOut = MarkupMarks.of(model.getValue())
+        this.shortenFootLines(this.laidOut)
         this.marks!.set(this.laidOut.marks)
         return this.redraw()
       }
@@ -220,6 +221,7 @@ export class SpellBubbly {
       if (within && !SP.BubblyLayout.isParseOf(within, text) && this.parseWaits++ < PARSE_WAITS) this.relayoutSoon()
       else this.parseWaits = 0
       this.laidOut = BubblyMarks.of(drawing, model.getOptions().tabSize, (tag) => isViewTag(within, tag))
+      this.shortenFootLines(this.laidOut)
       this.marks!.set(this.laidOut.marks)
       this.resetDescriptions()
     } catch (error) {
@@ -228,6 +230,27 @@ export class SpellBubbly {
       this.marks?.clear()
     }
     this.redraw()
+  }
+
+  /**
+   * Each HTML block's end tag on its own line, `</segment>` or `</>`:  its line only its tiny pill's row tall
+   * (`--bubbly-foot-tiny-row`, Owen, Q61), so nested ones stack close, as on the page.
+   * - Monaco's own line height for the lines a mark spans (`lineHeight`, a multiple of the editor's):
+   *   on the mark holding the end tag's place.
+   */
+  private shortenFootLines(laidOut: BubblyMarks | MarkupMarks) {
+    const { footTinyRow, lineHeight } = this.measures()
+    const multiple = footTinyRow / lineHeight
+    const shorten = (shapes: Shape[]) => {
+      for (const shape of shapes) {
+        if (shape.kind === "markup-block" && shape.foot !== undefined) {
+          const mark = laidOut.marks[shape.foot]!
+          mark.options = { ...mark.options, lineHeight: multiple }
+        }
+        if ("inside" in shape) shorten(shape.inside)
+      }
+    }
+    shorten(laidOut.shapes)
   }
 
   ////////////////
@@ -491,7 +514,8 @@ export class SpellBubbly {
     }
     if (hasBody) {
       const bodyTop = headTop + (lineHeight + measures.pillHeight) / 2
-      const lastBottom = lastTop + lineHeight
+      // its last line may be an HTML end tag's, shorter than the rest (`shortenFootLines()`)
+      const lastBottom = lastTop + this.lineHeightOf(lastLine)
       const footTop = lastBottom + measures.footRoom - measures.footHeight + this.footDrop(shape, view)
       const height = footTop - bodyTop
       const gutter = this.railX(shape, view)
@@ -515,7 +539,8 @@ export class SpellBubbly {
    * - Its band starts a bracket's room left of its `<`, at its line's indent:  its words clear of the cut corner by
    *   the spacer before the `<` (`bubbly-tag-head-spacer`);  its end tag's band likewise (`bubbly-tag-foot-spacer`).
    * - A start tag on lines of its own:  one tall band (`drawTall()`), its body from under its last line.
-   * - A nameless end tag, `</>`:  a thin foot under it, the body down to it (`isThinFoot`).
+   * - Its end tag on its own line, named or `</>`:  a TINY pill at the rail's turn, the body down to it (Q61);
+   *   its line only the pill's row tall (`shortenFootLines()`).
    */
   private drawMarkupBlock(shape: MarkupBlockShape, range: monaco.Range, view: View): HTMLElement | undefined {
     const { editor } = this
@@ -523,7 +548,7 @@ export class SpellBubbly {
     const headLine = range.startLineNumber
     const lastLine = range.endLineNumber
     if (lastLine < view.first - 1 || headLine > view.last) return undefined
-    const block = element(`bubbly-block bubbly-${shape.partOfSpeech}${shape.isThinFoot ? " bubbly-thin-foot" : ""}`)
+    const block = element(`bubbly-block bubbly-${shape.partOfSpeech}`)
     const left = this.wordsX(headLine) - measures.bracketPad
     const headTop = editor.getTopForLineNumber(headLine)
     const head = view.ranges[shape.head]
@@ -542,12 +567,8 @@ export class SpellBubbly {
     const foot = shape.foot === undefined ? undefined : view.ranges[shape.foot]
     const lastTop = editor.getTopForLineNumber(lastLine)
     const bodyTop = editor.getTopForLineNumber(headEnd) + (lineHeight + measures.pillHeight) / 2
-    // a `</>` foot:  the body down to its thin band, the bottom of where a band would be (Q58)
-    const bodyBottom = !foot
-      ? lastTop + (lineHeight + measures.pillHeight) / 2
-      : shape.isThinFoot
-        ? lastTop + (lineHeight + measures.pillHeight) / 2 - measures.footHeight
-        : lastTop + (lineHeight - measures.footPillHeight) / 2
+    // the body down to its end tag's tiny pill, the paper's room above it (Q61)
+    const bodyBottom = foot ? lastTop + measures.footTinyAbove : lastTop + (lineHeight + measures.pillHeight) / 2
     if (bodyBottom > bodyTop) {
       const height = bodyBottom - bodyTop
       block.append(
@@ -560,11 +581,9 @@ export class SpellBubbly {
       )
     }
     if (foot && lastLine >= view.first && lastLine <= view.last) {
-      const right = this.xOf(lastLine, foot.endColumn) + measures.bracketPad
-      const band = element(
-        shape.isThinFoot ? "bubbly-foot bubbly-foot-thin bubbly-tag-end" : "bubbly-foot-pill bubbly-tag-end"
-      )
-      block.append(place(band, { left, top: bodyBottom, width: right - left }, measures.scale))
+      const right = this.xOf(lastLine, foot.endColumn) + measures.footTinyPadRight
+      const pill = element("bubbly-foot bubbly-foot-tiny bubbly-tag-end")
+      block.append(place(pill, { left, top: bodyBottom, width: right - left }, measures.scale))
     }
     block.append(...this.drawAll(shape.inside, view))
     return block
@@ -742,12 +761,17 @@ export class SpellBubbly {
   // ## Where Monaco draws
   ////////////////
 
-  /** Where the letter at `column` of `line` starts, before any room injected there:  from the line's start, px. */
+  /** How tall `line` is:  the editor's line height, or a shorter one's (`shortenFootLines()`). */
+  private lineHeightOf(line: number): number {
+    return this.editor.getLineHeightForPosition({ lineNumber: line, column: 1 })
+  }
+
   /** Has Monaco drawn `line` on the page, so its letters' places can be measured?  A line out of view hasn't. */
   private isDrawnByMonaco(line: number): boolean {
     return this.editor.getOffsetForColumn(line, 1) >= 0
   }
 
+  /** Where the letter at `column` of `line` starts, before any room injected there:  from the line's start, px. */
   private xOf(line: number, column: number): number {
     return Math.max(0, this.editor.getOffsetForColumn(line, column))
   }
@@ -804,7 +828,9 @@ export class SpellBubbly {
       touchSpacer: spacerWidth("bubbly-touch-spacer"),
       bracketPad: length("--bubbly-bracket-pad", htmlProbe) * scale,
       tagPoint: length("--bubbly-tag-point", htmlProbe) * scale,
-      footPillHeight: length("--bubbly-foot-pill-height", htmlProbe) * scale,
+      footTinyAbove: length("--bubbly-foot-tiny-above", htmlProbe) * scale,
+      footTinyPadRight: length("--bubbly-foot-tiny-pad-right", htmlProbe) * scale,
+      footTinyRow: length("--bubbly-foot-tiny-row", htmlProbe) * scale,
       padLeft: length("--bubbly-pill-pad-left") * scale,
       padRight: length("--bubbly-pill-pad-right") * scale,
       endInset: length("--bubbly-end-inset") * scale,
@@ -895,8 +921,10 @@ type Measures = {
   bracketPad: number
   /** HTML:  how wide a tag's pointed end is */
   tagPoint: number
-  /** HTML:  a block's end tag's band's height */
-  footPillHeight: number
+  /** HTML:  a block's end tag's tiny pill:  the body's paper above it, its room after its `⟩`, its line's height */
+  footTinyAbove: number
+  footTinyPadRight: number
+  footTinyRow: number
   /** a band's room before its words, and after them */
   padLeft: number
   padRight: number

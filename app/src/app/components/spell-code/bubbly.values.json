@@ -128,13 +128,41 @@
       "light": "6px",
       "dark": "6px"
     },
-    "--bubbly-tag-end-pad-left": {
-      "light": "7px",
-      "dark": "7px"
-    },
     "--bubbly-tag-link-width": {
       "light": "2px",
       "dark": "2px"
+    },
+    "--bubbly-foot-tiny-height": {
+      "light": "13px",
+      "dark": "13px"
+    },
+    "--bubbly-foot-tiny-font": {
+      "light": "10px",
+      "dark": "10px"
+    },
+    "--bubbly-foot-tiny-cut": {
+      "light": "4px",
+      "dark": "4px"
+    },
+    "--bubbly-foot-tiny-pad-left": {
+      "light": "5px",
+      "dark": "5px"
+    },
+    "--bubbly-foot-tiny-pad-right": {
+      "light": "5px",
+      "dark": "5px"
+    },
+    "--bubbly-foot-tiny-above": {
+      "light": "2px",
+      "dark": "2px"
+    },
+    "--bubbly-foot-tiny-below": {
+      "light": "4px",
+      "dark": "4px"
+    },
+    "--bubbly-foot-tiny-row": {
+      "light": "calc( 2px + 13px + 4px )",
+      "dark": "calc( 2px + 13px + 4px )"
     },
     "--bubbly-gutter": {
       "light": "3px",
@@ -267,14 +295,6 @@
     "--bubbly-tag-corner": {
       "light": "",
       "dark": ""
-    },
-    "--bubbly-tag-foot-corner": {
-      "light": "6px",
-      "dark": "6px"
-    },
-    "--bubbly-foot-pill-height": {
-      "light": "calc(23px - 2px)",
-      "dark": "calc(23px - 2px)"
     },
     "--bubbly-html-row": {
       "light": "25px",
