@@ -12,7 +12,7 @@ import {
   utimesSync,
   writeFileSync
 } from "fs"
-import { homedir } from "os"
+import { homedir, networkInterfaces } from "os"
 import { join } from "path"
 import { setTimeout as sleep } from "timers/promises"
 
@@ -708,7 +708,9 @@ export class LocalSiteServer {
   /** What the Caddy file should say for `names`. */
   private caddyFileText(names: string[]): string {
     const name = editorNameAmong(names, this.settings.editorAddress)
-    const editor = name ? { name, port: this.editorPortNow ?? environment.vitePort } : undefined
+    const editor = name
+      ? { name, port: this.editorPortNow ?? environment.vitePort, thisMac: thisMacAddresses() }
+      : undefined
     return caddyFileFor({ names, certificate: this.certificate, key: this.key, editor })
   }
 
@@ -971,6 +973,12 @@ export type CaddyEditorSite = {
   name: string
   /** The dev server's port. */
   port: number
+  /**
+   * This Mac's own addresses, which pass where everyone else is refused (epic `editor` I120):
+   * its browser reaches test.spell.app by the Mac's address on the house network, not `127.0.0.1`.
+   * - Left out:  `127.0.0.1` and `::1` alone.
+   */
+  thisMac?: readonly string[]
 }
 
 /** The lines that pass a request on to `port`, holding it while what's there is down;  `settings`:  more lines inside. */
@@ -996,13 +1004,18 @@ function caddyProxyTo(port: number, settings: string[] = []): string[] {
  *     - NEVER every `Origin`:  a page on any other site, posting here, would then pass as this machine's own
  * - Each request it passes on is marked (`HOUSE_SITE_HEADER`), so a save to a built-in stays a draft
  *   (`savesInPlace()`):  only this Mac's own editor writes the checkout's files.
- * - Never passed on to this machine's person, from elsewhere on the network:
+ * - Never passed on to this machine's person, from elsewhere on the network (only from this Mac's own addresses,
+ *   `thisMac`:  Owen, 2026-11-14, I120, Change This at test.spell.app on this Mac):
  *   - `/api/changes`:  a request into one of this machine's Claude sessions
  *   - saving a theme into Spell UI's source
  *   - the API's test routes
  * - No editor running:  a plain message once the hold (`caddyProxyTo()`) runs out.
  */
-function editorSite({ name, port }: CaddyEditorSite, tls: string, cloudName: string | undefined): string[] {
+function editorSite(
+  { name, port, thisMac = LOOPBACK }: CaddyEditorSite,
+  tls: string,
+  cloudName: string | undefined
+): string[] {
   return [
     `# Spell's editor, for this house network only:  it runs as this machine's person, with no sign-in.`,
     `${name} {`,
@@ -1014,12 +1027,16 @@ function editorSite({ name, port }: CaddyEditorSite, tls: string, cloudName: str
           `\tredir @cloudPages https://${cloudName}{uri}`
         ]
       : []),
-    `\t# For this machine alone:  requests into its Claude sessions, the API's test routes, themes saved into Spell UI,`,
-    `\t# the home page's order of cards.`,
-    `\t@refused path ${REFUSED_FOR_THE_EDITOR}`,
+    `\t# For this machine alone, from its own addresses:  requests into its Claude sessions, the API's test routes,`,
+    `\t# themes saved into Spell UI, the home page's order of cards.`,
+    `\t@refused {`,
+    `\t\tpath ${REFUSED_FOR_THE_EDITOR}`,
+    `\t\tnot remote_ip ${thisMac.join(" ")}`,
+    `\t}`,
     `\t@themeSaves {`,
     `\t\tpath /api/themes/*`,
     `\t\tnot method GET HEAD`,
+    `\t\tnot remote_ip ${thisMac.join(" ")}`,
     `\t}`,
     `\trespond @refused "${REFUSED_ANSWER}" 403`,
     `\trespond @themeSaves "${REFUSED_ANSWER}" 403`,
@@ -1045,6 +1062,24 @@ const REFUSED_FOR_THE_EDITOR =
 
 /** The answer to what's refused there. */
 const REFUSED_ANSWER = "This is only for this Mac, not this address."
+
+/** This Mac's loopback addresses:  what passes there when its other addresses aren't known. */
+const LOOPBACK = ["127.0.0.1", "::1"]
+
+/**
+ * This Mac's own addresses, as Caddy's `remote_ip` reads them:  loopback, then each of its network interfaces'.
+ * - Not link-local IPv6 (`fe80::`):  scoped to an interface (`%en0`), which a matcher can't name, and never how a
+ *   browser on this Mac reaches test.spell.app.
+ * - Read as the Caddy file is written:  an address that changes later (a new network) is refused until the page
+ *   server starts again, which writes it anew.
+ */
+export function thisMacAddresses(): string[] {
+  const own = Object.values(networkInterfaces())
+    .flat()
+    .map((each) => each?.address)
+    .filter((address): address is string => !!address && !/^fe80:/i.test(address))
+  return [...new Set([...LOOPBACK, ...own])]
+}
 
 ////////////////
 // ## The real tools

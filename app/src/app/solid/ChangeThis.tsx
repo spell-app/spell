@@ -67,7 +67,8 @@ export class ChangeThis {
   /**
    * Ask for `text` to happen to what was selected when the box opened:  a click in the box may change the selection.
    * - Saves first:  the session reads the files on disk, so it must see what's on screen.
-   * - NEVER throws:  a failure is said in the editor's error.
+   * - NEVER throws:  a failure is said in the editor's error;  a refusal (403:  asked from another machine than the
+   *   one running Spell, epic `editor` I120) says so plainly, not as an `AuthenticationError`.
    */
   static async send(text: string): Promise<void> {
     const place = placeAsked
@@ -84,7 +85,8 @@ export class ChangeThis {
       setRequest(answer)
       void ChangeThis.followUntilDone(project, answer.id)
     } catch (error) {
-      editor.showError(error as Error)
+      const isRefused = (error as { status?: number }).status === REFUSED_STATUS
+      editor.showError(isRefused ? appTexts.text("changeThisRefused") : (error as Error))
     }
   }
 
@@ -257,6 +259,9 @@ const [request, setRequest] = createSignal<SPACES.ChangeAnswer>()
 
 /** The attribute the compiler's mark is on a drawn element:  `SourceMarks`'. */
 const DRAWN_AT = "data-spell-at"
+
+/** What the local site answers when Change This is asked from another machine than the one running Spell (I120). */
+const REFUSED_STATUS = 403
 
 /** The route. */
 const CHANGES_URL = "/api/changes"

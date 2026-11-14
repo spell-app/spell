@@ -67,6 +67,7 @@ const APP_TEXTS_ES: AppTextPack = {
   changeThisDone: "Claude cambió el código.",
   changeThisNoChange: "Claude terminó, y ningún archivo cambió.",
   changeThisFailed: "Claude no pudo hacerlo:  {summary}",
+  changeThisRefused: "Cambiar esto solo funciona en el Mac donde corre Spell.",
   menuShowInCode: "Mostrar en el código",
   menuInspect: "Inspeccionar",
   partIsApp: "Es la aplicación misma:  no se puede cortar, duplicar ni borrar.",

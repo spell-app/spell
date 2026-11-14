@@ -62,6 +62,7 @@ export const APP_TEXTS = {
   changeThisDone: "Claude changed the code.",
   changeThisNoChange: "Claude finished, and no file changed.",
   changeThisFailed: "Claude couldn't do that:  {summary}",
+  changeThisRefused: "Change This only works on the Mac running Spell.",
   menuShowInCode: "Show in Code",
   menuInspect: "Inspect",
   partIsApp: "That's the app itself:  it can't be cut, duplicated or deleted.",

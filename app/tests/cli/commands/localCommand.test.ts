@@ -23,6 +23,7 @@ import {
   cloudCode,
   editorNameAmong,
   localSiteTools,
+  thisMacAddresses,
   type LocalSiteChild,
   type LocalSiteServerProps
 } from "spell/app/spaces/server/node/routes/LocalSiteServer"
@@ -897,13 +898,32 @@ describe("spell space local", () => {
     test("requests into a Claude session, test routes, themes saved into Spell UI and the home page's order are refused there", () => {
       world = setUp()
       expect(file()).toContain(
-        "@refused path /api/changes /api/changes/* /api/home/order /api/test /api/missing /api/not-authorized /api/error"
+        "@refused {\n\t\tpath /api/changes /api/changes/* /api/home/order /api/test /api/missing /api/not-authorized /api/error"
       )
       expect(file()).toContain("path /api/themes/*\n\t\tnot method GET HEAD")
+      // but not from this Mac:  with no addresses given, its loopback alone (epic `editor` I120)
+      expect(file()).toContain("\t\tnot remote_ip 127.0.0.1 ::1\n\t}\n\t@themeSaves")
+      expect(file().match(/not remote_ip/g)).toHaveLength(2)
       expect(file()).toContain(`respond @refused "`)
       expect(file()).toContain(`respond @themeSaves "`)
       // and never at the cloud's address
       expect(file().split("\ntest.spell.app {")[0]).not.toContain("@refused")
+    })
+
+    test("this Mac's own addresses pass where everyone else is refused (epic `editor` I120)", () => {
+      world = setUp()
+      const thisMac = ["127.0.0.1", "::1", "192.168.4.22"]
+      const withAddresses = caddyFileFor({
+        names: NAMES,
+        certificate: "/c.pem",
+        key: "/k.pem",
+        editor: { name: NAMES[0]!, port: 3456, thisMac }
+      })
+      expect(withAddresses.match(/\t\tnot remote_ip 127\.0\.0\.1 ::1 192\.168\.4\.22\n/g)).toHaveLength(2)
+      // this machine's, as the local site reads them:  loopback first, no link-local IPv6 (an interface's own)
+      const own = thisMacAddresses()
+      expect(own.slice(0, 2)).toEqual(["127.0.0.1", "::1"])
+      expect(own.some((address) => /^fe80:/i.test(address))).toBe(false)
     })
 
     test("no editor running:  it says so plainly, after the hold", () => {
