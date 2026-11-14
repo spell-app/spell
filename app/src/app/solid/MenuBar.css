@@ -236,3 +236,9 @@ ui-item.FoldedBarMenu:hover::part(item) {
     display: none;
   }
 }
+
+/* New Example, last of the projects:  the theme's primary colour, a thing to do rather than a project to open
+   (Owen, 2026-11-14, I117) */
+ui-menu.ProjectsSubMenu > ui-action:last-child:not(:hover)::part(item) {
+  color: var(--ui-primary);
+}
