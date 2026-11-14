@@ -143,6 +143,48 @@ game is an app:
     expect(propertyEditorInSource(["carta"], [carta])).toBe('<ui-property name="palo" />')
   })
 
+  test('a property editor\'s tag, `<property-editor "card">`, its markup its children:  what its plain head gives (epic `language` T125)', () => {
+    const markup = ['\t<ui-property-group label="Card">', '\t\t<ui-property name="rank" />', "\t</ui-property-group>"]
+    const plain = ["# A card's", "", '"card" is a property editor', ...markup, ""].join("\n")
+    const expected = propertyEditorInSource(["card"], [plain])
+    expect(expected).toBe('<ui-property-group label="Card">\n\t<ui-property name="rank" />\n</ui-property-group>')
+    for (const close of ["</property-editor>", "</>"]) {
+      const tagged = ["# A card's", "", '<property-editor "card">', ...markup, close, ""].join("\n")
+      expect(propertyEditorInSource(["card"], [tagged])).toBe(expected)
+    }
+    // one after another, each closed:  the next one's its own
+    const two = [
+      '<property-editor "pile">',
+      '\t<ui-property name="cards" />',
+      "</>",
+      ...plain.split("\n").slice(2)
+    ].join("\n")
+    expect(propertyEditorInSource(["pile"], [two])).toBe('<ui-property name="cards" />')
+    expect(propertyEditorInSource(["card"], [two])).toBe(expected)
+    // none of its own markup
+    expect(propertyEditorInSource(["card"], ['<property-editor "card"/>'])).toBe("")
+    // Spanish:  `<editor-de-propiedades "carta">`, and Spell UI's own name for the tag
+    for (const tag of ["editor-de-propiedades", "editor-propiedades"]) {
+      const carta = `<${tag} "carta">\n\t<ui-property name="palo" />\n</>\n`
+      expect(propertyEditorInSource(["carta"], [carta])).toBe('<ui-property name="palo" />')
+    }
+    // only at the file's left edge:  a tag inside another's markup is markup
+    expect(propertyEditorInSource(["card"], ['<x "y">\n\t<property-editor "card">\n\t</>\n</>'])).toBe("")
+  })
+
+  test("Solitaire's and Solitario's card editors, as their tags write them:  what their plain heads said (T125)", () => {
+    const plainOf = (source: string, head: string) =>
+      source.replace(/^<[\w-]+ "(\w+)">$/m, `"$1" ${head}`).replace(/^<\/[\w-]*>\n?/m, "")
+    expect(cardEditor).toMatch(/^<property-editor "card">$/m)
+    expect(propertyEditorInSource(["card"], [cardEditor])).toBe(
+      propertyEditorInSource(["card"], [plainOf(cardEditor, "is a property editor")])
+    )
+    expect(cartaEditor).toMatch(/^<editor-de-propiedades "carta">$/m)
+    expect(propertyEditorInSource(["carta"], [cartaEditor])).toBe(
+      propertyEditorInSource(["carta"], [plainOf(cartaEditor, "es un editor de propiedades")])
+    )
+  })
+
   test("an action's `enabled when`, in its own words;  none:  empty", () => {
     const source = `
 a card is a thing where:

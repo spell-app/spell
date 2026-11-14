@@ -500,7 +500,8 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
   - Its built-in `id` last, folded.
   - A type may lay its card out itself:  Solitaire's card does, in
-    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), `"card" is a property editor`.
+    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), `<property-editor "card">`
+    (the same as `"card" is a property editor`, its markup indented under it).
     - Its own file, `<Type>.editor.spell`, or one for the project, `<Project>.editors.spell`:
       never compiled, read by the Inspector (`propertyEditorInSource()`).
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.

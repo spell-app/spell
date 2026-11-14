@@ -220,55 +220,6 @@ export function testCardSetup() {
   })
 }
 // -----------
-/** a deck of playing cards */
-@thing
-export class Deck extends ViewableList<Card> {
-  static instanceType = Card
-  static elementTag = core.defineElement(this, "test-project")
-
-  /** Create one of each card, ace of clubs first */
-  create() {
-    Card.Ranks.forEach((rank: Rank) => Card.Suits.forEach((suit: Suit) => this.append(new Card({ rank: rank, suit: suit }))))
-  }
-
-  /** its card names, top to bottom */
-  @derived get shortName() {
-    const cardNames = new List<string>({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shortName))
-    return `deck: ${cardNames}`
-  }
-}
-
-/**
- * `<test-project-deck>`:  a deck, drawn in its own element, e.g. by `draw the deck`.
- * - The page defines its tag with this class:  `core.useElement()`, below.
- * - Its attributes are its deck's properties;  its methods call its deck's.
- * - What every view's element does, e.g. drawing its deck, is `SpellElement`'s.
- */
-export class DeckElement extends SpellElement<Deck> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-deck", "deck", [])
-
-  create() {
-    return this.currentThing?.create()
-  }
-}
-core.useElement(Deck, DeckElement)
-
-export function testANewDeck() {
-  return core.test("test a new deck", function testANewDeck() {
-    const it = new Deck()
-    core.echoTestAction(`the deck is a new deck`)
-    const deck = new Deck()
-    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-    core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
-    core.expect(deck.firstItem?.shortName!, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
-    core.expect(deck.lastItem?.name!, `deck's last card's name`, "king of spades", `"king of spades"`)
-    core.echoTestAction(`shuffle the deck`)
-    deck.randomize()
-    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-  })
-}
-// -----------
 core.heading("A pile of cards")
 /////////////////////
 // ## A pile of cards
@@ -375,6 +326,55 @@ export function testPiles() {
 }
 
 /** a card is in one pile at a time:  putting it on another pile takes it off this one */
+// -----------
+/** a deck of playing cards */
+@thing
+export class Deck extends ViewableList<Card> {
+  static instanceType = Card
+  static elementTag = core.defineElement(this, "test-project")
+
+  /** Create one of each card, ace of clubs first */
+  create() {
+    Card.Ranks.forEach((rank: Rank) => Card.Suits.forEach((suit: Suit) => this.append(new Card({ rank: rank, suit: suit }))))
+  }
+
+  /** its card names, top to bottom */
+  @derived get shortName() {
+    const cardNames = new List<string>({ instanceType: "text" })
+    this.forEach((card) => cardNames.append(card.shortName))
+    return `deck: ${cardNames}`
+  }
+}
+
+/**
+ * `<test-project-deck>`:  a deck, drawn in its own element, e.g. by `draw the deck`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its deck's properties;  its methods call its deck's.
+ * - What every view's element does, e.g. drawing its deck, is `SpellElement`'s.
+ */
+export class DeckElement extends SpellElement<Deck> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-deck", "deck", [])
+
+  create() {
+    return this.currentThing?.create()
+  }
+}
+core.useElement(Deck, DeckElement)
+
+export function testANewDeck() {
+  return core.test("test a new deck", function testANewDeck() {
+    const it = new Deck()
+    core.echoTestAction(`the deck is a new deck`)
+    const deck = new Deck()
+    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+    core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
+    core.expect(deck.firstItem?.shortName!, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
+    core.expect(deck.lastItem?.name!, `deck's last card's name`, "king of spades", `"king of spades"`)
+    core.echoTestAction(`shuffle the deck`)
+    deck.randomize()
+    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+  })
+}
 // -----------
 core.heading("Klondike Solitaire")
 ////////////////////////
@@ -569,10 +569,6 @@ core.useElement(Column, ColumnElement)
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // "deck" is a new deck
-  @prop({ init: () => new Deck({ id: "deck" }), early: true })
-  accessor deck!: Deck
-
   create() {
     this.deck.forEach((card) => this.stock.append(card))
     core.holdWhile(() => this.restartTheGame())
@@ -613,6 +609,9 @@ export class Solitaire extends App {
       </>
     )
   }
+  // <deck "deck"hidden />
+  @prop({ init: () => new Deck({ id: "deck" }), early: true })
+  accessor deck!: Deck
   // <number "score" />
   @prop({ type: "number" })
   accessor score!: number
@@ -912,8 +911,8 @@ core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- t
 if (!core.isCarryingOver) solitaire.start()
 // -----------
 if (!core.isCarryingOver) testCardSetup()
-if (!core.isCarryingOver) testANewDeck()
 if (!core.isCarryingOver) testPiles()
+if (!core.isCarryingOver) testANewDeck()
 if (!core.isCarryingOver) testTheMoves()
 
 // what each event this program hears holds
@@ -926,10 +925,10 @@ declare module "@solidjs/web/types/jsx.js" {
     interface IntrinsicElements {
       /** `CardElement` */
       "test-project-card": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
-      /** `DeckElement` */
-      "test-project-deck": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `PileElement` */
       "test-project-pile": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `DeckElement` */
+      "test-project-deck": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `StockPileElement` */
       "test-project-stock-pile": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `DiscardPileElement` */

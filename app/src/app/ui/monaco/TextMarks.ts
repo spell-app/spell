@@ -84,7 +84,8 @@ export type Spacers = { before?: monaco.editor.InjectedTextOptions; after?: mona
  * - `touch`:  between an empty element's two tags, whose points touch
  * - `tag-head`:  before an HTML block's start tag, its `⟨` clear of its band's cut corner, in an HTML file or a
  *   Spell file's drawing
- * - `tag-foot`:  before an HTML block's end tag that starts its line, its `⟨` as far into its band as on the page
+ * - `tag-foot`:  before an HTML block's end tag that starts its line, its `⟨` just past its rail
+ * - `tag-foot-bare`:  ... a `</>`, its `⟨|⟩` at its tiny pill's right end (Owen)
  * - `attribute`, `equals`:  before an HTML attribute's name, and its `=`
  * - `description`:  before a head's description, `-- A playing card`, to right-align it at the window's edge
  */
@@ -97,6 +98,7 @@ export type SpacerKind =
   | "touch"
   | "tag-head"
   | "tag-foot"
+  | "tag-foot-bare"
   | "attribute"
   | "equals"
   | "description"

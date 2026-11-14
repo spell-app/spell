@@ -21,14 +21,6 @@
   ✅ As expected `the picture of seven` is `"🂷"`
   ✅ As expected `the picture of a new card whose rank is ace and suit is clubs` is `"🃑"`
   ✅ As expected `the picture of a new card whose rank is king and suit is diamonds` is `"🃎"`
-✅ test a new deck
-  ▶️ Executing   `the deck is a new deck`
-  ✅ As expected `the number of cards in the deck` is `52`
-  ✅ As expected `the number of (cards in the deck where it is a queen)` is `4`
-  ✅ As expected `deck's first card's short name` is `"A♣↓"`
-  ✅ As expected `deck's last card's name` is `"king of spades"`
-  ▶️ Executing   `shuffle the deck`
-  ✅ As expected `the number of cards in the deck` is `52`
 ✅ test piles
   ▶️ Executing   `set the stock to a new pile with id "stock"`
   ✅ As expected `stock's color` is `"none"`
@@ -43,6 +35,14 @@
   ✅ As expected `its pile is the discards` is `yes`
   ✅ As expected `the number of cards in the stock` is `1`
   ✅ As expected `the discards' short name` is `"discards: 7♥↓"`
+✅ test a new deck
+  ▶️ Executing   `the deck is a new deck`
+  ✅ As expected `the number of cards in the deck` is `52`
+  ✅ As expected `the number of (cards in the deck where it is a queen)` is `4`
+  ✅ As expected `deck's first card's short name` is `"A♣↓"`
+  ✅ As expected `deck's last card's name` is `"king of spades"`
+  ▶️ Executing   `shuffle the deck`
+  ✅ As expected `the number of cards in the deck` is `52`
 ✅ test the moves
   ▶️ Executing   `set the column to a new column with id "T1"`
   ▶️ Executing   `set the king to a new card whose rank is king, suit is spades and direction is up`

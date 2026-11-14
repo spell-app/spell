@@ -112,8 +112,9 @@ const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spe
  * Is `name` (a file's name or path) a PROPERTY EDITORS file's (epic `editor` P25, from `data`'s P31 Q28)?
  * - `Card.editor.spell`, one type's;  `Solitaire.editors.spell`, any of the project's types'
  * - In another language, its code before the ending:  `Carta.editor.es.spell`
- * - It holds `"card" is a property editor` blocks, each a type's layout for its Inspector card, as markup
- *   indented under its line (epic `language` J72).
+ * - It holds `<property-editor "card">` blocks, each a type's layout for its Inspector card, as the tag's
+ *   markup (epic `language` T125;  Spanish `<editor-de-propiedades "carta">`)
+ *   - or the plain head they mean, `"card" is a property editor`, its markup indented under its line (J72)
  * - One of a project's own files, which the editor opens and the Inspector reads;
  *   NEVER compiled, so it's no spell SOURCE file (`isSpellSourceName()`).
  * - Not the property editor PAGE, `Card.editor.html` (`EDITOR_PAGE_SUFFIX`):  that's a page of its own.

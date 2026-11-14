@@ -20,21 +20,21 @@ export const words = {
       countThePointsForCardOnPile: "count the points for a card on a pile",
       pile: "pile"
     },
-    Deck: {
-      shortName: "short name"
-    },
     Pile: {
       layout: "layout",
       color: "color",
       value: "value",
       shortName: "short name"
     },
+    Deck: {
+      shortName: "short name"
+    },
     Foundation: {
       suit: "suit"
     },
     Solitaire: {
-      deck: "deck",
       draw: "draw it",
+      deck: "deck",
       score: "score",
       stock: "stock",
       discards: "discards",

@@ -745,7 +745,7 @@ _The solitaire's first lines, and the top of its drawing, shortened._
   its direction, face up or down, and `turn it over` come from that built-in template,
   and it says what its `to draw its front` and its `to draw its back` look like.
 - Its Inspector card is laid out in a file of its own, [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell):
-  `"card" is a property editor`, of Spell UI's property controls, which the program never compiles.
+  `<property-editor "card">`, of Spell UI's property controls, which the program never compiles.
 - It draws both sides at once, one over the other (its own `to draw it`):
   [styles.css](spaces/@spell/examples/Solitaire/styles.css) shows the side turned up,
   and turns the card about its middle as its direction changes, the other side taking over halfway.
