@@ -199,10 +199,14 @@ methods.addRule(ToDoSomething, {
         {
           title: "simple arg in signature - arg is defined",
           input: "to notify (message): print the message",
-          js: ["export function notifyMessage(message) {", "  return core.console.log(message)", "}"],
+          js: [
+            "export function notifyMessage(message) {",
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
+            "}"
+          ],
           ts: [
             "export function notifyMessage(message: any /* spell: type unknown */) {",
-            "  return core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}"
           ]
         },
@@ -218,8 +222,16 @@ methods.addRule(ToDoSomething, {
         {
           title: "typed simple arg in signature - arg is defined",
           input: "to notify (message as text): print the message",
-          js: ["export function notifyMessage(message) {", "  return core.console.log(message)", "}"],
-          ts: ["export function notifyMessage(message: string) {", "  return core.console.log(message)", "}"]
+          js: [
+            "export function notifyMessage(message) {",
+            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            "}"
+          ],
+          ts: [
+            "export function notifyMessage(message: string) {",
+            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            "}"
+          ]
         },
         {
           title: "typed simple arg in signature - `it` is not defined",
@@ -230,10 +242,14 @@ methods.addRule(ToDoSomething, {
         {
           title: "valued simple arg in signature - arg is defined",
           input: 'to notify (message = "Really?"): print the message',
-          js: ['export function notifyMessage(message = "Really?") {', "  return core.console.log(message)", "}"],
+          js: [
+            'export function notifyMessage(message = "Really?") {',
+            '  return core.asAction({ undoneAs: "Notify Message = \\"Really?\\"" }, () => core.console.log(message))',
+            "}"
+          ],
           ts: [
             'export function notifyMessage(message: string = "Really?") {',
-            "  return core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify Message = \\"Really?\\"" }, () => core.console.log(message))',
             "}"
           ]
         },
@@ -441,20 +457,27 @@ methods.addRule(ToDoSomething, {
         {
           title: "top level keyword-only method",
           input: ["to start the game", "\tprint 1", "start the game"],
-          js: ["export function startTheGame() {", "  core.console.log(1)", "}", "startTheGame()"]
+          js: [
+            "export function startTheGame() {",
+            '  return core.asAction({ undoneAs: "Start The Game" }, () => {',
+            "    core.console.log(1)",
+            "  })",
+            "}",
+            "startTheGame()"
+          ]
         },
         {
           title: "top level simple argument method",
           input: ["to notify (message): print the message", "notify 1"],
           js: [
             "export function notifyMessage(message) {",
-            "  return core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}",
             "notifyMessage(1)"
           ],
           ts: [
             "export function notifyMessage(message: any /* spell: type unknown */) {",
-            "  return core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}",
             "notifyMessage(1)"
           ]
@@ -464,13 +487,13 @@ methods.addRule(ToDoSomething, {
           input: ["to notify (message as text): print the message", 'notify "hi"'],
           js: [
             "export function notifyMessage(message) {",
-            "  return core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
             "}",
             'notifyMessage("hi")'
           ],
           ts: [
             "export function notifyMessage(message: string) {",
-            "  return core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
             "}",
             'notifyMessage("hi")'
           ]
@@ -479,10 +502,15 @@ methods.addRule(ToDoSomething, {
           title:
             "typed call:  an argument KNOWN to be the wrong type isn't a call to it -- here, the built-in `notify`",
           input: ["to notify (message as text): print the message", "notify 1"],
-          js: ["export function notifyMessage(message) {", "  return core.console.log(message)", "}", "core.notify(1)"],
+          js: [
+            "export function notifyMessage(message) {",
+            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            "}",
+            "core.notify(1)"
+          ],
           ts: [
             "export function notifyMessage(message: string) {",
-            "  return core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
             "}",
             "core.notify(1)"
           ]
@@ -592,15 +620,19 @@ methods.addRule(ToDoSomething, {
           input: ["to notify (with message):", "\tprint the message", "notify"],
           js: [
             "export function notify(props = {}) {",
-            "  const { message } = props",
-            "  core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            "    const { message } = props",
+            "    core.console.log(message)",
+            "  })",
             "}",
             "notify()"
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            "  const { message } = props",
-            "  core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            "    const { message } = props",
+            "    core.console.log(message)",
+            "  })",
             "}",
             "notify()"
           ]
@@ -611,15 +643,19 @@ methods.addRule(ToDoSomething, {
           input: ["to notify (with message):", "\tprint the message", 'notify with message = "It worked!"'],
           js: [
             "export function notify(props = {}) {",
-            "  const { message } = props",
-            "  core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            "    const { message } = props",
+            "    core.console.log(message)",
+            "  })",
             "}",
             'notify({ message: "It worked!" })'
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            "  const { message } = props",
-            "  core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            "    const { message } = props",
+            "    core.console.log(message)",
+            "  })",
             "}",
             'notify({ message: "It worked!" })'
           ]
@@ -634,16 +670,20 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function play(props = {}) {",
-            "  const { card } = props",
-            "  core.console.log(card)",
+            '  return core.asAction({ undoneAs: "Play With A Card" }, () => {',
+            "    const { card } = props",
+            "    core.console.log(card)",
+            "  })",
             "}",
             "play({ card: new Card() })",
             'play({ card: new Card({ suit: "hearts" }) })'
           ],
           ts: [
             "export function play(props: { card?: Card } = {}) {",
-            "  const { card } = props",
-            "  core.console.log(card)",
+            '  return core.asAction({ undoneAs: "Play With A Card" }, () => {',
+            "    const { card } = props",
+            "    core.console.log(card)",
+            "  })",
             "}",
             "play({ card: new Card() })",
             'play({ card: new Card({ suit: "hearts" }) })'
@@ -654,15 +694,19 @@ methods.addRule(ToDoSomething, {
           input: ['to notify (with message = "nope"):', "\tprint the message", 'notify with message = "Ship it!!"'],
           js: [
             "export function notify(props = {}) {",
-            '  const { message = "nope" } = props',
-            "  core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify With Message = \\"nope\\"" }, () => {',
+            '    const { message = "nope" } = props',
+            "    core.console.log(message)",
+            "  })",
             "}",
             'notify({ message: "Ship it!!" })'
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            '  const { message = "nope" } = props',
-            "  core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify With Message = \\"nope\\"" }, () => {',
+            '    const { message = "nope" } = props',
+            "    core.console.log(message)",
+            "  })",
             "}",
             'notify({ message: "Ship it!!" })'
           ]
@@ -677,16 +721,20 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function notify(props = {}) {",
-            '  const { message = "nope", reply = "yep" } = props',
-            "  core.console.log(message + reply)",
+            '  return core.asAction({ undoneAs: "Notify With Message = \\"nope\\" And Reply = \\"yep\\"" }, () => {',
+            '    const { message = "nope", reply = "yep" } = props',
+            "    core.console.log(message + reply)",
+            "  })",
             "}",
             'notify({ message: "How many?" })',
             'notify({ message: "How many?", reply: 2 })'
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            '  const { message = "nope", reply = "yep" } = props',
-            "  core.console.log(message + reply)",
+            '  return core.asAction({ undoneAs: "Notify With Message = \\"nope\\" And Reply = \\"yep\\"" }, () => {',
+            '    const { message = "nope", reply = "yep" } = props',
+            "    core.console.log(message + reply)",
+            "  })",
             "}",
             'notify({ message: "How many?" })',
             'notify({ message: "How many?", reply: 2 })'
@@ -701,8 +749,10 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function notify(props = {}) {",
-            '  const { name, message, reply = "yep" } = props',
-            "  core.console.log(name + message + reply)",
+            '  return core.asAction({ undoneAs: "Notify With Name, Message As Text And Reply = \\"yep\\"" }, () => {',
+            '    const { name, message, reply = "yep" } = props',
+            "    core.console.log(name + message + reply)",
+            "  })",
             "}",
             "notify({",
             '  name: "Bob",',
@@ -712,8 +762,10 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function notify(props: { name?: any /* spell?: type unknown */; message?: string; reply?: any /* spell?: type unknown */ } = {}) {",
-            '  const { name, message, reply = "yep" } = props',
-            "  core.console.log(name + message + reply)",
+            '  return core.asAction({ undoneAs: "Notify With Name, Message As Text And Reply = \\"yep\\"" }, () => {',
+            '    const { name, message, reply = "yep" } = props',
+            "    core.console.log(name + message + reply)",
+            "  })",
             "}",
             "notify({",
             '  name: "Bob",',
@@ -732,17 +784,21 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function notifyMessage(message, props = {}) {",
-            '  const { reply = "yep" } = props',
-            "  core.console.log(message)",
-            "  core.console.log(reply)",
+            '  return core.asAction({ undoneAs: "Notify Message With Reply = \\"yep\\"" }, () => {',
+            '    const { reply = "yep" } = props',
+            "    core.console.log(message)",
+            "    core.console.log(reply)",
+            "  })",
             "}",
             'notifyMessage("Really?", { reply: "yes" })'
           ],
           ts: [
             "export function notifyMessage(message: any /* spell: type unknown */, props: Object = {}) {",
-            '  const { reply = "yep" } = props',
-            "  core.console.log(message)",
-            "  core.console.log(reply)",
+            '  return core.asAction({ undoneAs: "Notify Message With Reply = \\"yep\\"" }, () => {',
+            '    const { reply = "yep" } = props',
+            "    core.console.log(message)",
+            "    core.console.log(reply)",
+            "  })",
             "}",
             'notifyMessage("Really?", { reply: "yes" })'
           ]
@@ -756,15 +812,19 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function notify(props = {}) {",
-            "  const { message } = props",
-            "  core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            "    const { message } = props",
+            "    core.console.log(message)",
+            "  })",
             "}",
             'notify({ message: "It worked!", reply: "No it didn\'t" })'
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            "  const { message } = props",
-            "  core.console.log(message)",
+            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            "    const { message } = props",
+            "    core.console.log(message)",
+            "  })",
             "}",
             'notify({ message: "It worked!", reply: "No it didn\'t" })'
           ]

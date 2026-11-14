@@ -6914,13 +6914,13 @@
               "example": "para do something\n\tal mismo tiempo:\n\t\timprimir 1\n\t\timprimir 2",
               "outputs": {
                 "js": {
-                  "code": "export function doSomething() {\n  core.together(() => core.console.log(1), () => core.console.log(2))\n}"
+                  "code": "export function doSomething() {\n  return core.asAction({ undoneAs: \"Do Something\" }, () => {\n    core.together(() => core.console.log(1), () => core.console.log(2))\n  })\n}"
                 },
                 "ts": {
-                  "code": "export function doSomething() {\n  core.together(() => core.console.log(1), () => core.console.log(2))\n}"
+                  "code": "export function doSomething() {\n  return core.asAction({ undoneAs: \"Do Something\" }, () => {\n    core.together(() => core.console.log(1), () => core.console.log(2))\n  })\n}"
                 },
                 "py": {
-                  "code": "def do_something() -> None:\n    core.together(lambda: print(1), lambda: print(2))"
+                  "code": "@core.as_action({\"undone_as\": \"Do Something\"})\ndef do_something() -> None:\n    core.together(lambda: print(1), lambda: print(2))"
                 }
               }
             }
@@ -6940,13 +6940,13 @@
               "example": "para do something\n\tmientras tanto imprimir 1",
               "outputs": {
                 "js": {
-                  "code": "export function doSomething() {\n  core.meanwhile(() => core.console.log(1))\n}"
+                  "code": "export function doSomething() {\n  return core.asAction({ undoneAs: \"Do Something\" }, () => {\n    core.meanwhile(() => core.console.log(1))\n  })\n}"
                 },
                 "ts": {
-                  "code": "export function doSomething() {\n  core.meanwhile(() => core.console.log(1))\n}"
+                  "code": "export function doSomething() {\n  return core.asAction({ undoneAs: \"Do Something\" }, () => {\n    core.meanwhile(() => core.console.log(1))\n  })\n}"
                 },
                 "py": {
-                  "code": "def do_something() -> None:\n    core.meanwhile(lambda: print(1))"
+                  "code": "@core.as_action({\"undone_as\": \"Do Something\"})\ndef do_something() -> None:\n    core.meanwhile(lambda: print(1))"
                 }
               }
             }
@@ -9619,13 +9619,13 @@
               "example": "para elegir un color:\n\tred si suit es \"hearts\"",
               "outputs": {
                 "js": {
-                  "code": "export function elegirUnColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
+                  "code": "export function elegirUnColor() {\n  return core.asAction({ undoneAs: \"Elegir Un Color\" }, () => {\n    if (suit === \"hearts\") return \"red\"\n  })\n}"
                 },
                 "ts": {
-                  "code": "export function elegirUnColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
+                  "code": "export function elegirUnColor() {\n  return core.asAction({ undoneAs: \"Elegir Un Color\" }, () => {\n    if (suit === \"hearts\") return \"red\"\n  })\n}"
                 },
                 "py": {
-                  "code": "def elegir_un_color() -> Any:\n    if suit == \"hearts\":\n        return \"red\""
+                  "code": "@core.as_action({\"undone_as\": \"Elegir Un Color\"})\ndef elegir_un_color() -> Any:\n    if suit == \"hearts\":\n        return \"red\""
                 }
               }
             }
@@ -9645,13 +9645,13 @@
               "example": "para elegir un color:\n\tblack de lo contrario",
               "outputs": {
                 "js": {
-                  "code": "export function elegirUnColor() {\n  return \"black\"\n}"
+                  "code": "export function elegirUnColor() {\n  return core.asAction({ undoneAs: \"Elegir Un Color\" }, () => {\n    return \"black\"\n  })\n}"
                 },
                 "ts": {
-                  "code": "export function elegirUnColor() {\n  return \"black\"\n}"
+                  "code": "export function elegirUnColor() {\n  return core.asAction({ undoneAs: \"Elegir Un Color\" }, () => {\n    return \"black\"\n  })\n}"
                 },
                 "py": {
-                  "code": "def elegir_un_color() -> str:\n    return \"black\""
+                  "code": "@core.as_action({\"undone_as\": \"Elegir Un Color\"})\ndef elegir_un_color() -> str:\n    return \"black\""
                 }
               }
             }

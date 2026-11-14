@@ -25,7 +25,7 @@ describe("a line starting with ( or [ doesn't run into the line above", () => {
   it("writes a ; in front of it", () => {
     const { files } = parseSpellProject([{ path: "/Test.spell", contents: LINES.join("\n") }])
     expect(files[0]!.errors).toEqual([])
-    expect(files[0]!.compiled).toContain('  core.clear(seen)\n  ;["a", "b"].forEach(')
+    expect(files[0]!.compiled).toContain('    core.clear(seen)\n    ;["a", "b"].forEach(')
     expect(files[0]!.compiled).toContain('core.clear(kept)\n;["c", "d"].forEach(')
   })
 

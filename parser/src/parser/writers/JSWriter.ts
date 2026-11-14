@@ -929,6 +929,7 @@ export class JSWriter extends ProgramWriter {
 
   /** `ASTMethodDefinition()`'s work, for one that isn't inline. */
   private methodDefinition(node: P.ASTMethodDefinition): string {
+    if (node.action) return this.actionDefinition(node, node.action)
     const async = node.isAsync ? "async " : ""
     const args = this.params(node)
     const body = this.write(node.body)
@@ -939,6 +940,44 @@ export class JSWriter extends ProgramWriter {
     }
     const export_ = node.exported ? "export " : ""
     return `${export_}${async}function ${methodName}${args} ${body}`
+  }
+
+  /**
+   * A top-level ACTION (`to deal the cards` outside any type, epic `language` J149):
+   * its body run through the core, as ONE undo step, or none for one that `can't be undone`.
+   *
+   * ```js
+   * export function dealTheCards() {
+   *   return core.asAction({ undoneAs: "Deal The Cards" }, () => {
+   *     solitaire.deal()
+   *   })
+   * }
+   * ```
+   *
+   * - Its body as an arrow's (`actionBody()`):  both `async` when it waits.
+   * - Still a function of its own, its parameters as they were:  so it's hoisted, and takes as many arguments.
+   */
+  private actionDefinition(node: P.ASTMethodDefinition, action: P.ASTActionUndo): string {
+    const params = this.params(node)
+    const async = node.isAsync ? "async " : ""
+    const act = `${async}() => ${this.actionBody(node)}`
+    const info = Object.entries(action).map(([key, value]) => `${key}: ${this.quoted(value)}`)
+    const run = `core.asAction({ ${info.join(", ")} }, ${act})`
+    const export_ = node.exported ? "export " : ""
+    return `${export_}${async}function ${this.methodNameOf(node)}${params} {\n${jsText.indented(`return ${run}`)}\n}`
+  }
+
+  /**
+   * A top-level action's body, as its arrow's:  what it gives back alone, `() => total * 2`;  else its block.
+   * - NEVER a step alone as the arrow's value, as `arrowBody()` writes one:
+   *   what it gives back (`core.meanwhile()`'s) would keep the action's step open while it runs.
+   */
+  private actionBody(node: P.ASTMethodDefinition): string {
+    const statements = (node.body.statements ?? []).filter((it) => !(it instanceof P.ASTBlankLine))
+    const [only] = statements
+    if (statements.length !== 1 || !(only instanceof P.ASTReturnStatement) || !only.value) return this.write(node.body)
+    const value = unwrapped(only.value)
+    return value instanceof P.ASTObjectLiteral ? `(${this.write(value)})` : this.bare(only.value)
   }
 
   /**

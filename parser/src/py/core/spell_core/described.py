@@ -14,10 +14,11 @@ core.actions_of(Card)["turn_over"]["shortcuts"]  # ["meta+T"]
 - A class's facts, not one run's:  kept beside the class, whichever `core` describes it.
 """
 
+from collections.abc import Callable
 from typing import Any
 from weakref import WeakKeyDictionary
 
-from spell_core.undoing import declare_action
+from spell_core.undoing import action_of, declare_action
 
 # Each class's own action descriptions, by method name
 _ACTIONS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictionary()
@@ -30,7 +31,7 @@ _MENUS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictionary
 
 
 class DescribedMethods:
-    """`core.describe_action()`, `core.describe_event()`, `core.actions_of()` and `core.events_of()`."""
+    """`core.describe_action()`, `as_action()`, `describe_event()`, `actions_of()`, `events_of()`."""
 
     def describe_action(self, cls: type, name: str, description: dict[str, Any]) -> None:
         """Describe class `cls`'s action `name`, its method's name, e.g. `turn_over` for `to turn it over`.
@@ -41,6 +42,24 @@ class DescribedMethods:
         - `"cant_be_undone"`:  `"keeps history"`, nothing it changes is recorded.
         """
         describe_action(cls, name, description)
+
+    def as_action[**Params, Result](
+        self, info: dict[str, str]
+    ) -> Callable[[Callable[Params, Result]], Callable[Params, Result]]:
+        """Make the function below an ACTION:  ONE undo step titled `info["undone_as"]`, or none (`"cant_be_undone"`).
+
+        ```python
+        @core.as_action({"undone_as": "Deal The Cards"})
+        def deal_the_cards() -> Any:
+            solitaire.deal()
+        ```
+
+        - What compiled spell writes above an action outside any type (`to deal the cards`, epic `language` J149):
+          a type's is described after its class instead (`describe_action()`), which a function has none of.
+        - As a described action runs:  one it's called by takes it in, its step and all.
+        - The JavaScript core's `core.asAction(info, act)`, which runs a function's steps:  a decorator here.
+        """
+        return lambda function: action_of(function, info.get("undone_as"), info.get("cant_be_undone"))
 
     def describe_event(self, cls: type, name: str, description: dict[str, Any]) -> None:
         """Describe an event class `cls`'s things send, e.g. `flipped` with its `side`."""

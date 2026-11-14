@@ -54,11 +54,13 @@ core.heading("The algorithm")
 //   The algorithm doesn't know, or care, who's listening.
 
 export function playFizzbuzz() {
-  core.getRange(1, 20).forEach((number) => {
-    if (core.isOfType(number / 15, "integer")) trigger("fizzbuzz", { number: number })
-    else if (core.isOfType(number / 3, "integer")) trigger("fizz", { number: number })
-    else if (core.isOfType(number / 5, "integer")) trigger("buzz", { number: number })
-    else trigger("plain-number", { number: number })
+  return core.asAction({ undoneAs: "Play Fizzbuzz" }, () => {
+    core.getRange(1, 20).forEach((number) => {
+      if (core.isOfType(number / 15, "integer")) trigger("fizzbuzz", { number: number })
+      else if (core.isOfType(number / 3, "integer")) trigger("fizz", { number: number })
+      else if (core.isOfType(number / 5, "integer")) trigger("buzz", { number: number })
+      else trigger("plain-number", { number: number })
+    })
   })
 }
 

@@ -35,6 +35,7 @@
  * - Built on the kit's generic `UndoStack`.
  * - Imports only `spell/util` and the core's own `core.ts`:  `Thing.ts` and `List.ts` import it, under the model too.
  * - Compiled spell declares one through `core.describeAction()`:  `undoable as "Turn Card"` (`described.ts`).
+ *   - A top-level action, which has no class, runs its body through `core.asAction()` (`acting.ts`, epic `language` J149).
  * - Python's core has the same history, `undoing.py`:  both play `undoing.expected.json5` (epic `language` P54).
  */
 import { schemaOf, UndoStack, type UndoRecord } from "spell/util"

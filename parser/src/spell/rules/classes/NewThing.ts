@@ -32,10 +32,7 @@ export class NewThing extends SpellStatement<
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (match) {
-      NewThing.noteBuiltInNames(match)
-      NewThing.noteNamedAlone(match)
-    }
+    if (match) NewThing.readProps(match)
     return match
   }
 
@@ -50,8 +47,30 @@ export class NewThing extends SpellStatement<
     const isDate = !props && this.getDatatype(match) === "date"
     return new P.ASTNewInstanceExpression(match, {
       type: isDate ? new P.ASTTypeExpression(match, { name: "Date" }) : P.matchAST<P.ASTTypeExpression>(type),
-      props: NewThing.renamed(P.matchAST<P.ASTObjectLiteral>(props), match.data)
+      props: NewThing.propsAST(match)
     })
+  }
+
+  ////////////////
+  // ## Its props, read the same way by `create a ...`
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  notes how its props read, in `match.data`:
+   * the built-in members named in the language's own words (`noteBuiltInNames()`),
+   * and the props named alone that take a variable (`noteNamedAlone()`).
+   * - Shared with `create_thing`, so `create a card with rank and suit` reads as `a new card with rank and suit` does
+   *   (epic `language` J159).
+   * - A lookup:  call it WHILE PARSING.
+   */
+  static readProps(match: P.MatchFor<NewThing>): void {
+    NewThing.noteBuiltInNames(match)
+    NewThing.noteNamedAlone(match)
+  }
+
+  /** Its props' AST, as `readProps()` noted them:  see `renamed()`. */
+  static propsAST(match: P.MatchFor<NewThing>): P.ASTObjectLiteral | undefined {
+    return NewThing.renamed(P.matchAST<P.ASTObjectLiteral>(match.groups.props), match.data)
   }
 
   ////////////////

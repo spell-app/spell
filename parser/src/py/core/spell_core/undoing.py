@@ -17,6 +17,7 @@ game.undo()          # the card faces as it did
 - ONE history per run, `core.RUNTIME.history`:  a new run starts with none.
   - Loading saved state clears it (`core.from_json()`, `Loader.load()`):  the person's document changed.
 - Only what an undoable action changes is recorded:  one described `undone_as` (`core.describe_action()`).
+  - A top-level action, which has no class:  `@core.as_action({"undone_as": ...})` above its `def` (J149).
   - everything it sets, and everything it adds to or takes from a list, is ONE step
   - however long it waits, and whatever it calls:  another action it calls joins its step,
     and so does work begun while it waits, e.g. a drag's `while` handler
@@ -328,17 +329,32 @@ def declare_action(cls: type, name: str, undone_as: str | None, cant_be_undone: 
     if getattr(method, UNDONE_AS_KEY, None) is not None:
         return
 
-    @functools.wraps(method)
-    def action(self: object, *args: object, **kwargs: object) -> object:
+    setattr(cls, name, action_of(method, undone_as, cant_be_undone))
+
+
+def action_of[**Params, Result](
+    function: Callable[Params, Result], undone_as: str | None, cant_be_undone: str | None = None
+) -> Callable[Params, Result]:
+    """`function`, as an action that's ONE undo step titled `undone_as`:  what runs in its place.
+
+    - Or, with no `undone_as`, one that can't be undone (`cant_be_undone`, `"keeps history"`):  nothing it changes is
+      recorded (`UndoHistory.run_unrecorded()`).
+    - What `declare_action()` puts on a class, and `core.as_action()` above a top-level action's `def` (epic `language`
+      J149).
+    - Through the history of the program running when it's called:  one per web visitor.
+    """
+
+    @functools.wraps(function)
+    def action(*args: Params.args, **kwargs: Params.kwargs) -> Result:
         from spell_core.things import program_core
 
         history = program_core().RUNTIME.history
         if undone_as is None:
-            return history.run_unrecorded(lambda: method(self, *args, **kwargs))
-        return history.run(undone_as, lambda: method(self, *args, **kwargs))
+            return history.run_unrecorded(lambda: function(*args, **kwargs))
+        return history.run(undone_as, lambda: function(*args, **kwargs))
 
     setattr(action, UNDONE_AS_KEY, undone_as if undone_as is not None else cant_be_undone)
-    setattr(cls, name, action)
+    return action
 
 
 # What an action's method made undoable is marked with:  its step's title

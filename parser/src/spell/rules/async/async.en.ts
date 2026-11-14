@@ -34,11 +34,23 @@ _async.addRule(Await, {
       tests: [
         {
           input: ["to do something", "\twait for 1"],
-          js: ["export async function doSomething() {", "  await 1", "}"]
+          js: [
+            "export async function doSomething() {",
+            '  return core.asAction({ undoneAs: "Do Something" }, async () => {',
+            "    await 1",
+            "  })",
+            "}"
+          ]
         },
         {
           input: ["to do something", "\tif (1) wait for 1"],
-          js: ["export async function doSomething() {", "  if (1) await 1", "}"]
+          js: [
+            "export async function doSomething() {",
+            '  return core.asAction({ undoneAs: "Do Something" }, async () => {',
+            "    if (1) await 1",
+            "  })",
+            "}"
+          ]
         }
       ]
     }
@@ -76,7 +88,9 @@ _async.addRule(AtTheSameTime, {
           input: ["to do something", "\tat the same time:", "\t\tprint 1", "\t\tprint 2"],
           js: [
             "export function doSomething() {",
-            "  core.together(() => core.console.log(1), () => core.console.log(2))",
+            '  return core.asAction({ undoneAs: "Do Something" }, () => {',
+            "    core.together(() => core.console.log(1), () => core.console.log(2))",
+            "  })",
             "}"
           ]
         }
@@ -93,7 +107,13 @@ _async.addRule(Meanwhile, {
       tests: [
         {
           input: ["to do something", "\tmeanwhile print 1"],
-          js: ["export function doSomething() {", "  core.meanwhile(() => core.console.log(1))", "}"]
+          js: [
+            "export function doSomething() {",
+            '  return core.asAction({ undoneAs: "Do Something" }, () => {',
+            "    core.meanwhile(() => core.console.log(1))",
+            "  })",
+            "}"
+          ]
         }
       ]
     }
