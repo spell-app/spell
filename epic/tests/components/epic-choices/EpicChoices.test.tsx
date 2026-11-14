@@ -681,4 +681,20 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     expect(part(first!, "chosen")!.textContent).toBe("Chosen:  A · A named palette")
     expect(part(second!, "chosen")!.textContent).toBe("Chosen:  B2 · Any CSS colour")
   })
+
+  test("a set chosen with Owen's own added option (no pros and cons) folds into the box too, naming it (I264)", async () => {
+    const owens = `<epic-option letter="C" title="A, and a menu item to choose B" by="owen"></epic-option>`
+    const phase = await choices(
+      `<epic-phase id="p-four"><epic-field name="choices"><epic-choices chosen="C" chosen-on="2026-11-13" ` +
+        `chosen-note="recorded">${OPTIONS}${owens}</epic-choices>` +
+        `<epic-choices chosen="A">${OPTIONS}</epic-choices></epic-field></epic-phase>`
+    )
+    const [first, second] = Array.from(phase.host.closest("epic-phase")!.querySelectorAll("epic-choices"))
+    for (const set of [first!, second!]) expect(set.matches(":state(answered)")).toBe(true)
+    expect([part(first!, "chosen")!.textContent, part(first!, "panels")!.getAttribute("hidden")]).toEqual([
+      "Chosen:  C · A, and a menu item to choose B",
+      "until-found"
+    ])
+    expect([part(first!, "cards"), part(first!, "add")]).toEqual([null, null])
+  })
 })
