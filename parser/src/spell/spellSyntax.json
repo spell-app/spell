@@ -9950,7 +9950,7 @@
           "ruleNames": ["create_hook"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateHook.ts",
-          "line": 28,
+          "line": 30,
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {

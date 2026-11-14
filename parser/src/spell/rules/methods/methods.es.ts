@@ -1046,7 +1046,86 @@ methodsEs.addRule(CreateHook, {
           ["una tarea es una cosa donde:", "\t- al crear la:", "\t\timprimir 1"],
           ["export class Tarea extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
           ["@thing", "export class Tarea extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
-        ]
+        ],
+        {
+          title: "a one of a kind's names itself, with its article or not",
+          input: ["solitario es una aplicación", "\tal crear el solitario", "\t\timprimir 1"],
+          js: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitario = new Solitario()"
+          ],
+          ts: [
+            "@thing",
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitario, drawn in its own element, e.g. by `draw the solitario`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitario's properties;  its methods call its solitario's.",
+            " * - What every view's element does, e.g. drawing its solitario, is `SpellElement`'s.",
+            " */",
+            "export class SolitarioElement extends SpellElement<Solitario> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitario", [])',
+            "",
+            "  create() {",
+            "    return this.currentThing?.create()",
+            "  }",
+            "}",
+            "core.useElement(Solitario, SolitarioElement)",
+            "export const solitario = new Solitario()"
+          ]
+        },
+        {
+          input: ["solitario es una aplicación", "\tal crear solitario", "\t\timprimir 1"],
+          js: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitario = new Solitario()"
+          ],
+          ts: [
+            "@thing",
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitario, drawn in its own element, e.g. by `draw the solitario`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitario's properties;  its methods call its solitario's.",
+            " * - What every view's element does, e.g. drawing its solitario, is `SpellElement`'s.",
+            " */",
+            "export class SolitarioElement extends SpellElement<Solitario> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitario", [])',
+            "",
+            "  create() {",
+            "    return this.currentThing?.create()",
+            "  }",
+            "}",
+            "core.useElement(Solitario, SolitarioElement)",
+            "export const solitario = new Solitario()"
+          ]
+        }
       ]
     }
   ]
