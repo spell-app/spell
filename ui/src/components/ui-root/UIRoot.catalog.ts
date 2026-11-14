@@ -1391,6 +1391,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ]
   },
   "ui-sticky": { folder: "ui-sticky", attributes: ["offset", "bottom-offset", "pushing"] },
+  "ui-submenu": {
+    folder: "ui-menu",
+    skeleton: { display: "inline", width: "8em", height: "2.5em" },
+    attributes: ["label", "icon", "menu", "disabled"]
+  },
   "ui-summary": { folder: "ui-parts", attributes: [] },
   "ui-tab": {
     folder: "ui-tab",

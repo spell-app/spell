@@ -1,0 +1,52 @@
+/*
+ * The style sheet of `<ui-submenu>`:  its row's own pieces, on top of the menu's item rules
+ * (the row adopts `UIItem.css`, this sheet, then its menu's `UIMenu.css`, as any item does).
+ * - Shadow markup contract:
+ *   `<button class="item" part="item" aria-haspopup="menu">` holding the icon box, `<span class="title" part="title">`
+ *   and `<span class="chevron" part="chevron">`;  then, for the items inside, `<div class="flyout" part="flyout"
+ *   popover="manual">` round the `<ui-menu>` it draws them in.
+ * - The row is a flex row, so the chevron sits at its end, after the icon where a vertical menu's icons float to
+ *   the end:  it sets the menu's own switches on its box
+ *   (`--_ui-menu-item-display`, `--_ui-menu-icon-float`), which the menu's later layers read, rather than
+ *   out-ranking them.
+ * - The fly-out's frame and place are inline, set while it's open (`FLYOUT_STYLE`, `UISubmenu.tsx`):
+ *   a named menu elsewhere on the page is the page's element, which this sheet can't reach.
+ */
+
+@layer ui.components.submenu.types;
+
+@layer ui.components.submenu.types {
+  .item {
+    --_ui-menu-item-display: flex;
+    --_ui-menu-icon-float: none;
+  }
+  .item > .title {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .item > .chevron {
+    display: inline-flex;
+    flex: none;
+    order: 2;
+    align-items: center;
+    margin-inline-start: 1em;
+    opacity: 0.6;
+  }
+  .item > .chevron svg {
+    width: auto;
+    height: 0.75em;
+    fill: currentColor;
+  }
+  /* a vertical menu's icons sit after the words (they float to the end there);  in an icon column, before them */
+  @container style(--_ui-menu-layout: vertical) {
+    :host(:not(:state(in-icon-column))) > .item > .icon {
+      order: 1;
+    }
+  }
+  :host(:dir(rtl)) .item > .chevron svg {
+    transform: scaleX(-1);
+  }
+  :host(:state(open)) > .item > .chevron {
+    opacity: 1;
+  }
+}

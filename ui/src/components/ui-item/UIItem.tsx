@@ -57,7 +57,8 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   @E.proto static vocabulary = itemVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { item: itemCSS },
-    isAPart: true,
+    // `boolean`, not `true`:  `<ui-submenu>` extends the item and isn't one
+    isAPart: true as boolean,
     // `disabled`:  its link, button or option is disabled
     disabled: "its own"
   } satisfies Partial<E.ElementSetup>
@@ -388,9 +389,10 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
 
   /**
    * The owned item box, around its content (`boxContent()`).
-   * - The DOM element's `aria-label` names it (an icon-only item);  its `aria-expanded` goes to a `<button>` box.
+   * - The DOM element's `aria-label` names it (an icon-only item);  its `aria-expanded` goes to a `<button>` box
+   *   (`boxExpanded`).
    */
-  private box(): JSX.Element {
+  protected box(): JSX.Element {
     const isDisabledButton = () => this.rootTag === "button" && this.isDisabled
     return (
       <Dynamic
@@ -410,11 +412,8 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         aria-checked={this.itemContext?.role === "menuitemcheckbox" ? (this.isSelected ? "true" : "false") : undefined}
         aria-label={this.boxLabel}
         title={this.boxTooltip}
-        aria-expanded={
-          this.rootTag === "button"
-            ? ((this.attributes["aria-expanded"] ?? undefined) as "true" | "false" | undefined)
-            : undefined
-        }
+        aria-haspopup={this.rootTag === "button" ? this.boxHasPopup : undefined}
+        aria-expanded={this.rootTag === "button" ? this.boxExpanded : undefined}
         data-value={this.value}
       >
         <Show when={this.isInTicks}>
@@ -447,6 +446,16 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         {this.boxContent()}
       </Dynamic>
     )
+  }
+
+  /** A `<button>` box's `aria-expanded`:  the DOM element's own (a disclosure);  `<ui-submenu>`'s, its fly-out's. */
+  protected get boxExpanded(): "true" | "false" | undefined {
+    return (this.attributes["aria-expanded"] ?? undefined) as "true" | "false" | undefined
+  }
+
+  /** A `<button>` box's `aria-haspopup`:  none;  `<ui-submenu>`'s, `menu`. */
+  protected get boxHasPopup(): "menu" | undefined {
+    return undefined
   }
 
   /**
