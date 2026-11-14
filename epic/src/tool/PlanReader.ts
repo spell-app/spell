@@ -304,6 +304,9 @@ export abstract class PlanReader {
    * - waiting on Owen:  `attention`:  an open question;  an open judgement call, issue or `urgent` todo not reviewed,
    *   unless it's `calm` (not urgent:  it wouldn't surprise Owen, or he said so from its id chip):  then a call is
    *   `quiet` (grey) and the rest `open` (yellow;  epic `epic-engine` P63)
+   *   - a calm call whose work isn't on main yet (`unmerged`, epic `epic-engine` I273):  `progress`, blue, still in
+   *     process, grey once it lands (Owen, 2026-11-14:  "don't mark judgement calls as grey if they haven't landed on
+   *     main yet, I'm gonna want to look at them")
    * - a judgement call or issue he pressed Do this on (`urgent`, I232), not handled yet:  `handed`, blue outlined:  his
    *   part is over, reviewed or not (epic `epic-engine` P63)
    * - settled by a review, though still open (`SETTLED_AS`:  approved, made a todo):  `recent`
@@ -326,7 +329,9 @@ export abstract class PlanReader {
     if (facts.urgent && CALM_ID.test(facts.id)) return "handed"
     if ((CALM_ID.test(facts.id) || facts.urgent) && facts.reviewed === undefined) {
       if (!facts.calm) return "attention"
-      return JUDGEMENT_ID.test(facts.id) ? "quiet" : "open"
+      // a calm call whose work isn't on main yet:  blue, still in process, until it lands (I273)
+      if (JUDGEMENT_ID.test(facts.id)) return facts.unmerged ? "progress" : "quiet"
+      return "open"
     }
     if (SETTLED_AS.has(facts.reviewAs ?? "")) return "recent"
     if (facts.limit) return "quiet"

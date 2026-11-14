@@ -230,6 +230,22 @@ describe("PlanDocFiles links written as from a part", () => {
     await files.writeDoc(file, files.read(file), true)
     expect(readFileSync(part, "utf8")).toBe(before)
   })
+
+  test("landing():  what the epic's branch has that main hasn't, by the ids its subjects name (I273)", () => {
+    commit(worktree, "x P1:  One -- built", { "ui/src/one.ts": "1" })
+    commit(worktree, "other I2:  another epic's, merged in", { "ui/src/two.ts": "2" })
+    commit(worktree, "x I3, J4:  a fix", { "ui/src/three.ts": "3" })
+    const landing = new PlanDocFiles({ root: main }).landing(file)!
+    expect(landing.branch).toBe("x")
+    expect([...landing.ids].sort()).toEqual(["i3", "j4", "p1"])
+    expect(landing.shas).toHaveLength(3)
+    // an epic with no branch:  everything is on main
+    const none = new PlanDocFiles({ root: main }).landing(join(content, "epics", "y", "y.plan.html"))!
+    expect([none.branch, none.ids.size, none.shas.length]).toEqual(["y", 0, 0])
+    // merged:  nothing left
+    git(main, "merge", "-q", "--ff-only", "x")
+    expect(new PlanDocFiles({ root: worktree }).landing(file)!.ids.size).toBe(0)
+  })
 })
 
 /** `text` at `path` under `root`, its folders made. */
