@@ -332,6 +332,7 @@ export class PlanDocCommands {
           plan.log(`${decided.toUpperCase()} answered:  ${rest[1]}`)
           return decided
         })
+        this.inbox.stopWorking(file, [id])
         return this.print(id.toUpperCase())
       }
       case "choose":
@@ -344,8 +345,11 @@ export class PlanDocCommands {
       case "commits":
         if (!flags.backfill) throw new PlanDocError(`commits what?  --backfill  (${USAGE_HINT})`)
         return this.backfillCommits(file, flags.merged)
-      case "close":
-        return this.closeItems(file, rest, flags)
+      case "close": {
+        const closed = await this.closeItems(file, rest, flags)
+        this.inbox.stopWorking(file, rest)
+        return closed
+      }
       case "reopen":
         return this.edit(file, (plan) => {
           const title = plan.setItem(need(rest[0], "an item id"), "open")
@@ -353,11 +357,13 @@ export class PlanDocCommands {
         })
       case "stale":
         return this.printStale(name, file, Boolean(flags.json))
-      case "cancel":
-        return this.edit(file, (plan) => {
+      case "cancel": {
+        await this.edit(file, (plan) => {
           const title = plan.setItem(need(rest[0], "an item id"), "canceled")
           plan.log(`${rest[0].toUpperCase()} canceled:  ${rest[1] ?? title}`)
         })
+        return this.inbox.stopWorking(file, [rest[0]!])
+      }
       case "review":
         return this.edit(file, (plan) => {
           const id = need(rest[0], "an item id")

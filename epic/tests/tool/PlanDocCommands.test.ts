@@ -321,6 +321,19 @@ describe("PlanDocCommands calm:  an existing call or issue not urgent, or urgent
     expect(plan.itemState(plan.item(quiet))).toBe("recent")
   })
 
+  test("closing or canceling an item takes its working flag off (I280);  another item's stays", async () => {
+    const owner = commands()
+    for (const title of ["One", "Two", "Three"]) await owner.run(["add", "x", "todo", title])
+    const [one, two, three] = printed
+    const inbox = ReviewInbox.pathFor(file)
+    ReviewInbox.update(inbox, (box) => {
+      for (const id of [one, two, three]) box.setWorking(id, "details")
+    })
+    await owner.run(["close", "x", one])
+    await owner.run(["cancel", "x", two])
+    expect(Object.keys(ReviewInbox.read(inbox).working)).toEqual([three.toLowerCase()])
+  })
+
   test("refuses no id, an id the doc doesn't have, or an item that's never urgent, writing nothing", async () => {
     const owner = commands()
     await owner.run(["add", "x", "todo", "A todo"])
