@@ -81,6 +81,37 @@ describe("<epic-comment-pane>", () => {
     saved.remove()
   })
 
+  test("the Saved floppy shows on a save, fades out 10 seconds later, goes as he types;  a red one stays (I269)", async () => {
+    const host = await pane(undefined)
+    host.setAttribute("saved", "Saved 14:02 · waiting for Claude")
+    await ElementFixture.settle(host)
+    const floppy = () => host.shadowRoot!.querySelector<HTMLElement>(".floppy")
+    // its fade, seeked to a moment:  shown up to 10 seconds, gone after
+    const at = (ms: number) => {
+      const [fade] = floppy()!.getAnimations()
+      fade!.pause()
+      fade!.currentTime = ms
+      return getComputedStyle(floppy()!).visibility
+    }
+    expect([floppy()!.getAnimations().length, at(9_500), at(10_700)]).toEqual([1, "visible", "hidden"])
+    // something new typed:  the comments take `saved` away, and the floppy goes at once
+    host.removeAttribute("saved")
+    await ElementFixture.settle(host)
+    expect(floppy()).toBeNull()
+    // the next save shows it afresh, its 10 seconds starting again
+    host.setAttribute("saved", "Saved 14:03 · waiting for Claude")
+    await ElementFixture.settle(host)
+    expect([Number(floppy()!.getAnimations()[0]!.currentTime) < 1_000, getComputedStyle(floppy()!).visibility]).toEqual(
+      [true, "visible"]
+    )
+    // a failed save:  red, and it never fades
+    host.setAttribute("failed", "")
+    host.setAttribute("saved", "Not saved:  offline (kept in this browser)")
+    await ElementFixture.settle(host)
+    expect(floppy()!.getAnimations()).toEqual([])
+    host.remove()
+  })
+
   test("× and the trash say so:  `epic-comment-closing`, `epic-comment-removing`", async () => {
     const host = await pane(undefined, "deletable")
     const heard: string[] = []

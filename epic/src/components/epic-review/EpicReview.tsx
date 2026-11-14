@@ -22,6 +22,7 @@ import {
   NOTE_PICK,
   NOTE_PICTURE,
   NOTE_SAVED,
+  SAVED_MARK,
   NOTE_TEXT,
   NOTE_TOOLS,
   REVIEW_CONTROLS,
@@ -45,6 +46,7 @@ import {
 } from "./EpicReview.types"
 
 import reviewCSS from "./EpicReview.css?inline"
+import savedMarkCSS from "./SavedMark.css?inline"
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
@@ -85,7 +87,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   @E.proto static vocabulary = epicReviewVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-review": reviewCSS },
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-review": reviewCSS, "epic-saved-mark": savedMarkCSS },
     // a click on a marked note's words must not jump to its Edit button
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -417,7 +419,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *   - as the mark it makes (`ReviewClient.saveTyped()`;  epic `epic-engine` P20):  words typed turn Revisit ON, at
    *     the first key, so Send and the countdown hand them over;  the box stays open under the cursor
    *   - a request at work, or an emptied box with no revisit:  a draft, as before
-   *   - the floppy says Saved (its tooltip:  when), or turns red with why not
+   *   - the floppy says Saved (its tooltip:  when), or turns red with why not;  Saved fades out 10 seconds later, or
+   *     goes at once as he types (`SavedMark.css`, epic `epic-engine` I269), red stays
    *   - a localStorage backup too, for a save that fails (`ReviewClient.type()`)
    * - Escape leaves it, the draft kept (`leaveNote()`)
    */
@@ -448,7 +451,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             <span class={NOTE_TOOLS}>
               {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
               <span
-                class={NOTE_SAVED}
+                class={`${NOTE_SAVED} ${SAVED_MARK}`}
                 hidden={!this.saved}
                 data-failed={this.saved && !this.saved.ok ? "" : undefined}
                 title={this.savedTip}

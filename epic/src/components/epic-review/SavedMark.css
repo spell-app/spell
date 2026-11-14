@@ -1,0 +1,27 @@
+/*
+ * The little Saved floppy beside a box people type in (epic `epic-engine` I269;  Owen, 2026-11-14:  "it should show up
+ * upon save, then fade out after 10 seconds or when something new is typed").
+ * - Every floppy has it:  the note box's (`<epic-review>`), the comment pane's and a thread's reply box
+ *   (`<epic-comment-pane>`, `<epic-thread>`), each adopting this sheet as `epic-saved-mark`.
+ * - Shown when a save lands;  10 seconds later it fades out (`SAVED_MARK_SHOWS`), then takes no room's worth of
+ *   pointer either.
+ * - Something new typed takes it away at once:  its owner hides it (the note box's `showSave()`, the comments
+ *   runtime's field `input`), and the next save shows it afresh, its 10 seconds starting again.
+ * - A failed save (`[data-failed]`, red) NEVER fades:  it says why until a save goes through.
+ * - Reduced motion:  Spell UI's reset makes the fade instant;  it still waits its 10 seconds.
+ */
+
+@layer ui.components.epic-saved-mark;
+
+@layer ui.components.epic-saved-mark {
+  .saved-mark:not([data-failed]) {
+    animation: epic-saved-mark-fade 600ms ease-in 10s forwards;
+  }
+}
+
+@keyframes epic-saved-mark-fade {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

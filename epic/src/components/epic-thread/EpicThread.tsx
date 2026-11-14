@@ -35,6 +35,8 @@ import {
 
 import threadCSS from "./EpicThread.css?inline"
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
+import savedMarkCSS from "spell/epic/components/epic-review/SavedMark.css?inline"
+import { SAVED_MARK } from "spell/epic/components/epic-review/EpicReview.types"
 
 /****************
  * ### `DOMThreadElement`
@@ -82,7 +84,7 @@ export class DOMThreadElement extends E.DOMElement<EpicThread> {
 export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
   @E.proto static vocabulary = epicThreadVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-thread": threadCSS },
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-thread": threadCSS, "epic-saved-mark": savedMarkCSS },
     DOMElement: DOMThreadElement,
     // a click on its words selects them;  its fold and buttons take the focus themselves
     delegatesFocus: false
@@ -215,7 +217,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
               <div class={REPLY} part={this.partForName("reply")}>
                 <slot />
                 <Show when={this.saved}>
-                  <span class={FLOPPY} title={this.saved} data-failed={this.failed ? "" : undefined}>
+                  <span class={`${FLOPPY} ${SAVED_MARK}`} title={this.saved} data-failed={this.failed ? "" : undefined}>
                     <ui-icon name="floppy disk outline" />
                   </span>
                 </Show>
