@@ -13,5 +13,5 @@ export const containerEs = {
   snippet: "<es-contenedor></es-contenedor>",
   aka: ["contenedor", "envoltorio", "ancho de página", "ancho de contenido"],
   attributes: { grid: "cuadricula" },
-  parts: { container: "contenedor" }
+  parts: { container: "contenedor", grid: "cuadricula" }
 } as const satisfies E.TagDictionary

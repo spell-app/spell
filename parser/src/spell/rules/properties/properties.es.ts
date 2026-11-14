@@ -209,7 +209,8 @@ propertiesEs.addRule(TheOwnProperty, {
             '  get reserva() { return this.getProp("reserva") }',
             '  set reserva(value) { this.setProp("reserva", value) }',
             "}",
-            "export const solitario = new Solitario()"
+            "export const solitario = new Solitario()",
+            'core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })'
           ],
           ts: [
             "export class Carta extends Thing {",
@@ -240,7 +241,8 @@ propertiesEs.addRule(TheOwnProperty, {
             "  ])",
             "}",
             "core.useElement(Solitario, SolitarioElement)",
-            "export const solitario = new Solitario()"
+            "export const solitario = new Solitario()",
+            'core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })'
           ]
         }
       ]

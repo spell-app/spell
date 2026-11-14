@@ -197,7 +197,8 @@ properties.addRule(TheOwnProperty, {
             '  get stock() { return this.getProp("stock") }',
             '  set stock(value) { this.setProp("stock", value) }',
             "}",
-            "export const solitaire = new Solitaire()"
+            "export const solitaire = new Solitaire()",
+            'core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play A Card" })'
           ],
           ts: [
             "export class Card extends Thing {",
@@ -228,7 +229,8 @@ properties.addRule(TheOwnProperty, {
             "  ])",
             "}",
             "core.useElement(Solitaire, SolitaireElement)",
-            "export const solitaire = new Solitaire()"
+            "export const solitaire = new Solitaire()",
+            'core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play A Card" })'
           ]
         }
       ]

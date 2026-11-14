@@ -60,14 +60,14 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
       const listTokens = [...lead, ...tokens.slice(listAt, end)]
       const list = listRule.parse(scope, listTokens)
       if (list?.length !== listTokens.length) continue
-      const match = new P.Match({ rule: this, matched: [...tokens], tokens: [...tokens], scope })
+      const match = new P.Match({ rule: this, matched: [...tokens], tokens: [...tokens], scope }) as P.MatchFor<this>
       match.addMatch(item, "item")
       match.addMatch(list, "list")
       const rest = tokens.slice(end)
       const statementTokens = [...tokens.slice(0, at), ...item.tokens, ...rest]
       const statement = scope.parser?.parse(statementTokens, "statement", this.getNestedScopeForMatch(match))
       // read to the line's end:  by where it ends, as a match over tokens cut out of the line may count them its own way
-      if (!statement || statement.end !== new P.Match({ rule: this, tokens: statementTokens, scope }).end) continue
+      if (!statement || statement.end !== EachInStatement.endOf(statementTokens)) continue
       // a statement that takes a body is a loop's or a method's head line, `para cada carta en sus cartas`:  not ours
       if ((statement.rule as SpellStatement).bodySpec) continue
       match.addMatch(statement, "statement")
@@ -78,6 +78,16 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
       return match
     }
     return undefined
+  }
+
+  /** Where the last of `tokens` that isn't whitespace ends, as `P.Match.end` counts. */
+  private static endOf(tokens: P.Token[]): number | undefined {
+    let end: number | undefined
+    P.Tokenizer.forEachToken(tokens, (token) => {
+      if (token instanceof P.LineToken || token instanceof P.BlockToken || token instanceof P.WhitespaceToken) return
+      if (end === undefined || token.end > end) end = token.end
+    })
+    return end
   }
 
   /**

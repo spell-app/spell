@@ -38,6 +38,15 @@ export class MethodDefinition<
    */
   declare inlineInitialType: boolean
   @proto static inlineInitialType = false
+  /**
+   * `true` when each method it makes on a type is an ACTION, one undo step by itself, named by its title
+   * (Owen, 2026-11-14, epic `language` P55, Q60):  `to_do_something`'s.
+   * - Not a question (it gives back yes or no), a drawing, a hook (`create_hook`) or a test.
+   * - `can't be undone` says otherwise;  `undoable as "Turn Card"` names its step.
+   * - What another action calls joins that one's step, as the core runs it.
+   */
+  declare undoableByDefault: boolean
+  @proto static undoableByDefault = false
   /** TYPE-ONLY: props `parser.addRule()` accepts for this rule -- see `P.Rule`'s `Props`. */
   declare readonly Props: MethodDefinitionProps
 
@@ -661,7 +670,8 @@ export class MethodDefinition<
   private describedAction(match: P.MatchFor<this>, typeName: string, methodName: string): P.ASTStatement[] {
     // Generic `Groups` keeps `MatchFor<this>` from narrowing to a plain `P.Match` -- cast once.
     const action = match as P.Match
-    const details = ActionDetail.detailsOf(action, this.getBody(match))
+    const isAction = this.isUndoableByDefault(match, methodName)
+    const details = ActionDetail.detailsOf(action, this.getBody(match)) ?? (isAction ? { shortcuts: [] } : undefined)
     if (!details) return []
     const signature = (action.groups as { signature?: P.Match }).signature
     // its title by default:  its words as written, in Initial Caps -- `auto play` is `Auto Play` (epic `language` P48)
@@ -707,11 +717,29 @@ export class MethodDefinition<
       } else description.title = title
     }
     // `- undoable`:  its undo goes by its title;  one with a fill-in changes, so by its words
-    if (details.undoable) description.undone_as = description.title as string
+    // -- an action is that by itself (Q60), unless it `can't be undone`
+    if (details.cantBeUndone) {
+      delete description.undone_as
+      description.cant_be_undone = CANT_BE_UNDONE
+    } else if (details.undoable || (isAction && description.undone_as === undefined)) {
+      description.undone_as = description.title as string
+    }
     statements.push(
       new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description, title })
     )
     return statements
+  }
+
+  /**
+   * Is the method `match` makes an action, one undo step by itself (`undoableByDefault`)?
+   * - Not a hook (`draw()`, `create()`), nor a question:  one whose words end in `?`, or that gives back yes or no.
+   * - Pure:  reads only `match` and what it noted while parsing.
+   */
+  private isUndoableByDefault(match: P.MatchFor<this>, methodName: string): boolean {
+    if (!this.undoableByDefault || HOOKS.some(({ hook }) => hook === methodName)) return false
+    const signature = (match.groups as { signature?: P.Match }).signature
+    if (`${signature?.inputText ?? ""}`.trim().replace(/"$/, "").endsWith("?")) return false
+    return match.data.scopeMethod?.returns !== "choice"
   }
 
   /**
@@ -743,6 +771,9 @@ type MethodDefinitionData = {
   /** Record of the method it declared -- see `addMethod()`. */
   scopeMethod?: P.ScopeMethod
 }
+
+/** What an action that `can't be undone` does to the history:  the steps before it stay (`core.describeAction()`). */
+const CANT_BE_UNDONE = "keeps history"
 
 /** The hooks a type's method may be, and the word rule that says each:  see `MethodDefinition.hookOf()`. */
 const HOOKS = [

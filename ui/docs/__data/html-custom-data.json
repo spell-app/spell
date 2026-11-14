@@ -10058,6 +10058,124 @@
           }
         },
         {
+          "name": "size",
+          "description": {
+            "kind": "markdown",
+            "value": "Text size, `mini` ... `massive`, as `<ui-segment size>`;  `medium` is the default.\n\nTakes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`"
+          },
+          "values": [
+            {
+              "name": "mini"
+            },
+            {
+              "name": "tiny"
+            },
+            {
+              "name": "small"
+            },
+            {
+              "name": "medium"
+            },
+            {
+              "name": "large"
+            },
+            {
+              "name": "big"
+            },
+            {
+              "name": "huge"
+            },
+            {
+              "name": "massive"
+            }
+          ]
+        },
+        {
+          "name": "inverted",
+          "description": {
+            "kind": "markdown",
+            "value": "The dark scheme, as `<ui-segment inverted>`:  a dark surface, and everything inside follows (`color-scheme: dark`, `--ui-inverted`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "padding",
+          "description": {
+            "kind": "markdown",
+            "value": "Room inside its edges:  `small` (1em, a segment's own), `md` more (1.5em), `lg` even more (3em);  `none`, the default.  The same steps as `<ui-segment padding>`.\n\nTakes:  `none` · `small` · `md` · `lg`"
+          },
+          "values": [
+            {
+              "name": "none"
+            },
+            {
+              "name": "small"
+            },
+            {
+              "name": "md"
+            },
+            {
+              "name": "lg"
+            }
+          ]
+        },
+        {
+          "name": "columns",
+          "description": {
+            "kind": "markdown",
+            "value": "Lays its children out as a grid of that many columns, `1` ... `16`, as `<ui-grid columns>` does:  each child a cell, with no `<ui-grid>` or `<ui-column>` around them.\n\nTakes:  `1`-`16`, a fraction (`1/4`) or a percentage"
+          },
+          "values": [
+            {
+              "name": "1"
+            },
+            {
+              "name": "2"
+            },
+            {
+              "name": "3"
+            },
+            {
+              "name": "4"
+            },
+            {
+              "name": "5"
+            },
+            {
+              "name": "6"
+            },
+            {
+              "name": "7"
+            },
+            {
+              "name": "8"
+            },
+            {
+              "name": "9"
+            },
+            {
+              "name": "10"
+            },
+            {
+              "name": "11"
+            },
+            {
+              "name": "12"
+            },
+            {
+              "name": "13"
+            },
+            {
+              "name": "14"
+            },
+            {
+              "name": "15"
+            },
+            {
+              "name": "16"
+            }
+          ]
+        },
+        {
           "name": "grid",
           "description": {
             "kind": "markdown",
@@ -10068,9 +10186,15 @@
           "name": "spacing",
           "description": {
             "kind": "markdown",
-            "value": "With `grid`:  room for a grid's wider gutters (`spacing=\"lg\"`, `xl` wider still).  Its old name was `relaxed`.\n\nTakes:  `lg` · `xl`"
+            "value": "With `columns`:  the room between its columns, as `<ui-grid spacing>`:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  With `grid`:  room for a grid's wider gutters (`spacing=\"lg\"`, `xl` wider still).  Its old name was `relaxed`.\n\nTakes:  `xs` · `compact` · `lg` · `xl`"
           },
           "values": [
+            {
+              "name": "xs"
+            },
+            {
+              "name": "compact"
+            },
             {
               "name": "lg"
             },

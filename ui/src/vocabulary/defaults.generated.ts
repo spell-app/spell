@@ -308,8 +308,12 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "fluid", kind: "keyOnly", group: "layout" },
     { name: "wide", kind: "keyOnly", group: "layout" },
     { name: "width", kind: "string", group: "layout" },
+    { name: "size", kind: "size", group: "appearance" },
+    { name: "inverted", kind: "keyOnly", group: "appearance" },
+    { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "small", "md", "lg"] },
+    { name: "columns", kind: "width", group: "layout", values: "widths" },
     { name: "grid", kind: "keyOnly", group: "layout" },
-    { name: "spacing", kind: "valueOnly", group: "layout", values: ["lg", "xl"] },
+    { name: "spacing", kind: "valueOnly", group: "layout", values: ["xs", "compact", "lg", "xl"] },
     { name: "align", kind: "textAlign", group: "layout", values: "alignments" },
     {
       name: "scrolling",

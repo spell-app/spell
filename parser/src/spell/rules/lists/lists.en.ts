@@ -776,14 +776,22 @@ lists.addRule(ListEmpty, {
       tests: [
         [
           "to reset a sign\n\tclear its hint\n\tclear its count\n\tclear its lit",
-          ["Sign.prototype.reset = function () {", '  this.hint = ""', "  this.count = 0", "  this.lit = false", "}"],
+          [
+            "Sign.prototype.reset = function () {",
+            '  this.hint = ""',
+            "  this.count = 0",
+            "  this.lit = false",
+            "}",
+            'core.describeAction(Sign, "reset", { title: "Reset A Sign", undoneAs: "Reset A Sign" })'
+          ],
           [
             "export interface Sign { reset(): any /* spell: type unknown */ }",
             "Sign.prototype.reset = function (this: Sign) {",
             '  this.hint = ""',
             "  this.count = 0",
             "  this.lit = false",
-            "}"
+            "}",
+            'core.describeAction(Sign, "reset", { title: "Reset A Sign", undoneAs: "Reset A Sign" })'
           ]
         ]
       ]

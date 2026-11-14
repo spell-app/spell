@@ -938,6 +938,36 @@
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
+              "syntax": "{operator:is_or_is_not} the same as {expression:operand}",
+              "example": "thing is the same as other",
+              "outputs": {
+                "js": {
+                  "code": "(thing === other)"
+                },
+                "ts": {
+                  "code": "(thing === other)"
+                },
+                "py": {
+                  "code": "(thing == other)"
+                }
+              }
+            },
+            {
+              "syntax": "and {expression:operand} {operator:are_or_are_not} the same",
+              "example": "thing and other are the same",
+              "outputs": {
+                "js": {
+                  "code": "(thing === other)"
+                },
+                "ts": {
+                  "code": "(thing === other)"
+                },
+                "py": {
+                  "code": "(thing == other)"
+                }
+              }
+            },
+            {
               "syntax": "{operator:is_or_is_not} {expression:operand}",
               "example": "thing is other",
               "outputs": {
@@ -2149,13 +2179,13 @@
               "example": "a \"card\" is a thing\na \"pile\" is a list of cards\nsolitaire is an app\n\t\"stock\" is a new pile\n\tto play a card\n\t\tprint the stock",
               "outputs": {
                 "js": {
-                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"stock\", { init: () => new Pile({ id: \"stock\" }), early: true }) }\n  get stock() { return this.getProp(\"stock\") }\n  set stock(value) { this.setProp(\"stock\", value) }\n}\nexport const solitaire = new Solitaire()"
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"stock\", { init: () => new Pile({ id: \"stock\" }), early: true }) }\n  get stock() { return this.getProp(\"stock\") }\n  set stock(value) { this.setProp(\"stock\", value) }\n}\nexport const solitaire = new Solitaire()\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })"
                 },
                 "ts": {
-                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pile({ id: \"stock\" }), early: true })\n  accessor stock!: Pile\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitaire\", [\n    { name: \"stock\", kind: \"json\", description: \"Its stock.\" }\n  ])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()"
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pile({ id: \"stock\" }), early: true })\n  accessor stock!: Pile\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitaire\", [\n    { name: \"stock\", kind: \"json\", description: \"Its stock.\" }\n  ])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    def play(self) -> None:\n        core.console.log(solitaire.stock)\n\nclass Pile(List):\n    item_type = Card\n\nclass Solitaire(App):\n    element_tag = \"syntax-block-app\"\n\n    stock = prop(init=lambda: Pile(id=\"stock\"), early=True)\n\nsolitaire = Solitaire()"
+                  "code": "class Card(Thing):\n    def play(self) -> None:\n        core.console.log(solitaire.stock)\n\nclass Pile(List):\n    item_type = Card\n\nclass Solitaire(App):\n    element_tag = \"syntax-block-app\"\n\n    stock = prop(init=lambda: Pile(id=\"stock\"), early=True)\n\nsolitaire = Solitaire()\ncore.describe_action(Card, \"play\", {\"title\": \"Play A Card\", \"undone_as\": \"Play A Card\"})"
                 }
               }
             }
@@ -5953,7 +5983,7 @@
           "ruleNames": ["define_group"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineGroup.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "A GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).",
           "syntaxes": [
             {
@@ -5961,13 +5991,28 @@
               "example": "a card is a view where:\n\t- group \"direction\"\n\t- its direction is one of up or down\n\t- to turn it over:\n\t\tset its direction to up",
               "outputs": {
                 "js": {
-                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}"
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", undoneAs: \"Turn It Over\" })"
                 },
                 "ts": {
-                  "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [\n    { name: \"direction\", kind: \"string\", description: \"Its direction.\" }\n  ])\n\n  turnOver() {\n    return this.currentThing?.turnOver()\n  }\n}\ncore.useElement(Card, CardElement)"
+                  "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [\n    { name: \"direction\", kind: \"string\", description: \"Its direction.\" }\n  ])\n\n  turnOver() {\n    return this.currentThing?.turnOver()\n  }\n}\ncore.useElement(Card, CardElement)\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", undoneAs: \"Turn It Over\" })"
                 },
                 "py": {
-                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"Turn It Over\", \"undone_as\": \"Turn It Over\"})"
+                }
+              }
+            },
+            {
+              "syntax": "group {group:text}",
+              "example": "group \"The piles\"\n\na pile is a thing",
+              "outputs": {
+                "js": {
+                  "code": "export class Pile extends Thing {}"
+                },
+                "ts": {
+                  "code": "export class Pile extends Thing {}"
+                },
+                "py": {
+                  "code": "class Pile(Thing):\n    pass"
                 }
               }
             },
@@ -6002,13 +6047,13 @@
               "example": "a game is an app where:\n\t- to deal:\n\t\t- undoable as \"Deal\"\n\t\tnotify 1\n\t- to turn the top card over:\n\t\tnotify 2\n\t- its \"game menu\" is a menu of \"deal\", \"turn the top card over\", \"-\", \"undo\" and \"redo\"",
               "outputs": {
                 "js": {
-                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\ncore.describeAction(Game, \"deal\", { title: \"Deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  deal() {\n    core.notify(1)\n  }\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n}\ncore.describeAction(Game, \"deal\", { title: \"Deal\", undoneAs: \"Deal\" })\ncore.describeAction(Game, \"turnTheTopCardOver\", { title: \"Turn The Top Card Over\", undoneAs: \"Turn The Top Card Over\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
                 },
                 "ts": {
-                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\n\nexport class GameElement extends SpellElement<Game> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"game\", [])\n\n  turnTheTopCardOver() {\n    return this.currentThing?.turnTheTopCardOver()\n  }\n\n  deal() {\n    return this.currentThing?.deal()\n  }\n}\ncore.useElement(Game, GameElement)\ncore.describeAction(Game, \"deal\", { title: \"Deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  deal() {\n    core.notify(1)\n  }\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n}\n\nexport class GameElement extends SpellElement<Game> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"game\", [])\n\n  deal() {\n    return this.currentThing?.deal()\n  }\n\n  turnTheTopCardOver() {\n    return this.currentThing?.turnTheTopCardOver()\n  }\n}\ncore.useElement(Game, GameElement)\ncore.describeAction(Game, \"deal\", { title: \"Deal\", undoneAs: \"Deal\" })\ncore.describeAction(Game, \"turnTheTopCardOver\", { title: \"Turn The Top Card Over\", undoneAs: \"Turn The Top Card Over\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
                 },
                 "py": {
-                  "code": "class Game(App):\n    element_tag = \"syntax-block-app\"\n\n    def turn_the_top_card_over(self) -> None:\n        core.notify(2)\n\n    def deal(self) -> None:\n        core.notify(1)\n\ncore.describe_action(Game, \"deal\", {\"title\": \"Deal\", \"undone_as\": \"Deal\"})\ncore.describe_menu(Game, \"game_menu\", {\"items\": [\"deal\", \"turn_the_top_card_over\", \"-\", \"undo\", \"redo\"]})"
+                  "code": "class Game(App):\n    element_tag = \"syntax-block-app\"\n\n    def deal(self) -> None:\n        core.notify(1)\n\n    def turn_the_top_card_over(self) -> None:\n        core.notify(2)\n\ncore.describe_action(Game, \"deal\", {\"title\": \"Deal\", \"undone_as\": \"Deal\"})\ncore.describe_action(Game, \"turn_the_top_card_over\", {\"title\": \"Turn The Top Card Over\", \"undone_as\": \"Turn The Top Card Over\"})\ncore.describe_menu(Game, \"game_menu\", {\"items\": [\"deal\", \"turn_the_top_card_over\", \"-\", \"undo\", \"redo\"]})"
                 }
               }
             },
@@ -6495,6 +6540,12 @@
             },
             {
               "syntax": "{markup:markdown_block}"
+            },
+            {
+              "syntax": "{markup:action_button}"
+            },
+            {
+              "syntax": "{markup:context_menu_block}"
             },
             {
               "syntax": "{markup:jsxElement}"
@@ -10078,7 +10129,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 31,
+          "line": 33,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -10086,13 +10137,28 @@
               "example": "a card is a thing where:\n\t- its direction is one of up or down\n\t- to turn it over:\n\t\t- shortcut meta+T\n\t\t- shortcut F2\n\t\t- enabled when its direction is down\n\t\t- selected when its direction is up\n\t\t- undoable as \"Turn Card\"\n\t\t- icon \"rotate\"\n\t\tset its direction to up",
               "outputs": {
                 "js": {
-                  "code": "export class Card extends Thing {\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
+                  "code": "export class Card extends Thing {\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
                 },
                 "ts": {
-                  "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends Thing {\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
+                  "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends Thing {\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
                 },
                 "py": {
                   "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"Turn It Over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
+                }
+              }
+            },
+            {
+              "syntax": "(cantBeUndone:can't be undone|cannot be undone|can not be undone)",
+              "example": "a card is a thing where:\n\t- to turn it over:\n\t\tprint 1\n\t- to peek:\n\t\t- can't be undone\n\t\tprint 2",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends Thing {\n  turnOver() {\n    core.console.log(1)\n  }\n\n  peek() {\n    core.console.log(2)\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", undoneAs: \"Turn It Over\" })\ncore.describeAction(Card, \"peek\", { title: \"Peek\", cantBeUndone: \"keeps history\" })"
+                },
+                "ts": {
+                  "code": "export class Card extends Thing {\n  turnOver() {\n    core.console.log(1)\n  }\n\n  peek() {\n    core.console.log(2)\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", undoneAs: \"Turn It Over\" })\ncore.describeAction(Card, \"peek\", { title: \"Peek\", cantBeUndone: \"keeps history\" })"
+                },
+                "py": {
+                  "code": "class Card(Thing):\n    def turn_over(self) -> None:\n        print(1)\n\n    def peek(self) -> None:\n        print(2)\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"Turn It Over\", \"undone_as\": \"Turn It Over\"})\ncore.describe_action(Card, \"peek\", {\"title\": \"Peek\", \"cant_be_undone\": \"keeps history\"})"
                 }
               }
             },
@@ -10101,13 +10167,13 @@
               "example": "a game is a thing where:\n\t- to compile and run:\n\t\t- titled \"Compile and Run\"\n\t\tprint 1",
               "outputs": {
                 "js": {
-                  "code": "export class Game extends Thing {\n  compileAndRun() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Game, \"compileAndRun\", { title: \"Compile and Run\" })"
+                  "code": "export class Game extends Thing {\n  compileAndRun() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Game, \"compileAndRun\", { title: \"Compile and Run\", undoneAs: \"Compile and Run\" })"
                 },
                 "ts": {
-                  "code": "export class Game extends Thing {\n  compileAndRun() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Game, \"compileAndRun\", { title: \"Compile and Run\" })"
+                  "code": "export class Game extends Thing {\n  compileAndRun() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Game, \"compileAndRun\", { title: \"Compile and Run\", undoneAs: \"Compile and Run\" })"
                 },
                 "py": {
-                  "code": "class Game(Thing):\n    def compile_and_run(self) -> None:\n        print(1)\n\ncore.describe_action(Game, \"compile_and_run\", {\"title\": \"Compile and Run\"})"
+                  "code": "class Game(Thing):\n    def compile_and_run(self) -> None:\n        print(1)\n\ncore.describe_action(Game, \"compile_and_run\", {\"title\": \"Compile and Run\", \"undone_as\": \"Compile and Run\"})"
                 }
               }
             },
@@ -10279,6 +10345,9 @@
             },
             {
               "syntax": "(undoable:undoable)"
+            },
+            {
+              "syntax": "(cantBeUndone:can't be undone|cannot be undone|can not be undone)"
             },
             {
               "syntax": "undoable as {undoneAs:text}"

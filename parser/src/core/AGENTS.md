@@ -498,13 +498,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `listenForUndoKeys()`, in [ui.ts](ui.ts), started by `core.mountApp()`.
   - A text field and a modal keep their own.
 - The compiler writes no `declareAction()`:  `describeAction()` declares an action described `undoneAs` itself
-  (`undoable as "Turn Card"`).
+  (`undoable as "Turn Card"`), or `cantBeUndone`.
+  - Every action a program writes (`to ...`) is described `undoneAs` its title, `undoable` said or not
+    (Owen, 2026-11-14, epic `language` P55, Q60):  one undo step by itself.
+    - `can't be undone` describes it `cantBeUndone: "keeps history"` instead.
+    - Not an action:  a question (it gives back yes or no), a drawing, a creation hook, a test.
+    - What another action calls joins that one's step, as above.
 - Python's core has the same history, `undoing.py` (epic `language` P54):
   - its app's `can_undo`, `undo_title` ... go to the page on the app, `"$history"` (`StateWriter`);
     the page's `App` reads them from `core.remote.history` (`page.ts`), so `<action "undo"/>` and the menus follow it
   - its Undo and Redo, and ⌘Z, run there:  the app's `undo` action, a call of the program's
   - both cores play the moves in `undoing.expected.json5` (below)
-  - NOT ported:  `cantBeUndone` and props declared `undoable: false`, which compiled spell never writes
+  - `"cant_be_undone": "keeps history"` too (`run_unrecorded()`), as `can't be undone` compiles
+  - NOT ported:  `"clears history"` and props declared `undoable: false`, which compiled spell never writes
 
 ## Sending events
 

@@ -151,33 +151,29 @@ solitario es una aplicación
 				<texto slot="derecha">Movimientos: {los movimientos}  ·  Puntos: {la puntuación}{la pista}</texto>
 			</barra-herramientas>
 		</segmento>
-		<contenedor>
-			<segmento apariencia="básico">
-				<cuadricula columnas="7" separacion="xs">
-					<menú-contextual>
-						<acción "jugar solo"/>
-						<acción "hacer trampa"/>
-						<acción "reiniciar el juego"/>
-						<divisor/>
-						<acción "deshacer"/>
-						<acción "rehacer"/>
-					</>
-					<pila-de-reserva "reserva"/>
-					<pila-de-descartes "descartes"/>
-					<columna/>
-					<fundación "tréboles"/>
-					<fundación "diamantes"/>
-					<fundación "corazones"/>
-					<fundación "espadas"/>
-					<columna "C1"/>
-					<columna "C2"/>
-					<columna "C3"/>
-					<columna "C4"/>
-					<columna "C5"/>
-					<columna "C6"/>
-					<columna "C7"/>
-				</cuadricula>
-			</segmento>
+		<contenedor relleno="pequeño" columnas="7" separacion="xs">
+			<menú-contextual>
+				<acción "jugar solo"/>
+				<acción "hacer trampa"/>
+				<acción "reiniciar el juego"/>
+				<divisor/>
+				<acción "deshacer"/>
+				<acción "rehacer"/>
+			</>
+			<pila-de-reserva "reserva"/>
+			<pila-de-descartes "descartes"/>
+			<columna/>
+			<fundación "tréboles"/>
+			<fundación "diamantes"/>
+			<fundación "corazones"/>
+			<fundación "espadas"/>
+			<columna "C1"/>
+			<columna "C2"/>
+			<columna "C3"/>
+			<columna "C4"/>
+			<columna "C5"/>
+			<columna "C6"/>
+			<columna "C7"/>
 		</contenedor>
 
 ## Jugar una carta

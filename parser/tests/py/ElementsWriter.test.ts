@@ -22,7 +22,7 @@ describe("ElementsWriter", () => {
       "set the game to a new game",
       "deal the game"
     ])
-    expect(js).toContain('core.describeAction(Game, "deal", { title: "Deal", shortcuts: ["D"] })')
+    expect(js).toContain('core.describeAction(Game, "deal", { title: "Deal", shortcuts: ["D"], undoneAs: "Deal" })')
     expect(js).toContain('core.describeMenu(Game, "gameMenu", { items: ["deal", "undo"] })')
     // its top-level steps are Python's
     expect(js).not.toMatch(/\bgame\.deal\(\)/)
