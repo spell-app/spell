@@ -1921,10 +1921,12 @@ let appRoot: HTMLElement | undefined
 /** Scope explorer on the in-page language service, once Monaco's loaded -- NOT spell state.  See `editor.setScopeExplorer()`. */
 let scopeExplorer: LSP.ScopeExplorer | undefined
 /**
- * Seconds after typing stops before the running app recompiles (Owen, 2026-10-29:  "change refresh page to 10 seconds";
- * it was 2).  Cmd / Ctrl+Enter compiles at once.
+ * Seconds after typing stops before the running app recompiles:  2 (Owen, 2026-11-13, epic `editor` I58).
+ * - It was 10 from 2026-10-29 ("change refresh page to 10 seconds"), while an edit still redrew the whole page;
+ *   since Edit Without Redraw only what changed draws again, and 10 felt like a 20-second lag while typing.
+ * - Cmd / Ctrl+Enter compiles at once.
  */
-const EDIT_COMPILE_DELAY = 10
+const EDIT_COMPILE_DELAY = 2
 
 /** How often the open file is read for a change from outside, seconds:  see `editor.watchOpenFile()`. */
 const FILE_POLL = 2
