@@ -38,18 +38,10 @@ solitaire is an app
 					<action "undo" icon-only/>
 					<action "redo" icon-only/>
 				</buttons>
-				<text slot="right">Score: {the score}</text>
+				<text slot="right">Score: {the score}</>
 			</toolbar>
 		</segment>
 		<container padding="small" columns="7" spacing="xs">
-			<context-menu>
-				<action "auto play"/>
-				<action "cheat"/>
-				<action "restart the game"/>
-				<divider/>
-				<action "undo"/>
-				<action "redo"/>
-			</>
 			<stock-pile "stock"/>
 			<discard-pile "discards"/>
 			<spacer/>
@@ -65,6 +57,14 @@ solitaire is an app
 			<column "C6"/>
 			<column "C7"/>
 		</container>
+		<context-menu>
+			<action "auto play"/>
+			<action "cheat"/>
+			<action "restart the game"/>
+			<divider/>
+			<action "undo"/>
+			<action "redo"/>
+		</>
 
 	group "Dealing"
 	to "restart the game" with title "Restart", shortcut "R"
