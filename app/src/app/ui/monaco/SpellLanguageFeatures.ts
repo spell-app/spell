@@ -2,6 +2,7 @@ import type { Position } from "vscode-languageserver"
 
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+import { appTexts, renameRefusal } from "spell/app/app/ui/AppTexts"
 import { codeHover } from "spell/app/app/ui/codePopups"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { monaco } from "./monaco"
@@ -18,6 +19,8 @@ import type { SpellModels } from "./SpellModels"
  * - Answers from each file's current parse, kept up to date by `SpellModels` + `project.takeText()`.
  *   Asks nothing of a model whose file hasn't parsed, or whose text isn't its file's.
  * - A rename saves every file it touched -- see `SpellModels.saveAfterEdit()`.
+ * - An action renames as the Inspector renames it (`renameActionAt()`), refused in its words (`renameRefusal()`);
+ *   the right-click menu shows Rename Symbol only where something can be renamed (`followRenameRow()`, I147).
  * - Going to a declaration in another file asks `open` to show it, as do links in hovers.
  */
 export class SpellLanguageFeatures {
@@ -36,8 +39,9 @@ export class SpellLanguageFeatures {
    * - Once:  the editor and link openers aren't a language's, so a second call would open each file twice.
    * - Returns what unregisters it all.
    */
-  register(language: monaco.languages.LanguageSelector): monaco.IDisposable[] {
+  register(language: string[]): monaco.IDisposable[] {
     const { languages, editor } = monaco
+    this.languages = language
     return [
       languages.registerDocumentSemanticTokensProvider(language, {
         onDidChange: this.models.onDidParse,
@@ -228,9 +232,8 @@ export class SpellLanguageFeatures {
   ): monaco.languages.RenameLocation & monaco.languages.Rejection {
     const file = this.fileOf(model)
     const prepared = file && this.service.prepareRename(file, LspToMonaco.lspPosition(position))
-    if (!prepared) {
-      return { range: new monaco.Range(1, 1, 1, 1), text: "", rejectReason: "Can't rename this" }
-    }
+    if (!prepared)
+      return { range: new monaco.Range(1, 1, 1, 1), text: "", rejectReason: appTexts.text("renameNothingHere") }
     return { range: LspToMonaco.range(prepared.range), text: prepared.placeholder }
   }
 
@@ -244,12 +247,73 @@ export class SpellLanguageFeatures {
     newName: string
   ): (monaco.languages.WorkspaceEdit & monaco.languages.Rejection) | null {
     const file = this.fileOf(model)
-    const edit = file && this.service.rename(file, LspToMonaco.lspPosition(position), newName)
-    if (!edit) return { edits: [], rejectReason: `Can't rename to '${newName}'` }
+    const at = LspToMonaco.lspPosition(position)
+    let edit: ReturnType<LSP.SpellLanguageService["rename"]> | undefined
+    try {
+      // an action:  as the Inspector renames it, its calls and buttons too, and refused in its words (I111, I139)
+      edit =
+        file && this.service.subjectAt(file, at)?.kind === "method"
+          ? this.service.renameActionAt(file, at, newName)
+          : file && this.service.rename(file, at, newName)
+    } catch (error) {
+      if (!(error instanceof LSP.RenameError)) throw error
+      return this.refuseRename(model, position, renameRefusal(error, newName))
+    }
+    if (!edit) {
+      const oldName = model.getWordAtPosition(position)?.word ?? ""
+      return this.refuseRename(model, position, appTexts.text("renameRefused", { oldName, newName }))
+    }
     const files = Object.keys(edit.changes ?? {}).flatMap((uri) => this.addresses.fileFor(uri) ?? [])
     this.models.saveAfterEdit(files)
     return LspToMonaco.workspaceEdit(edit)
   }
+
+  /**
+   * Refuse a rename, saying why over the name, as a place that can't be renamed says it.
+   * - HACK: Monaco hands a refused new name to its notifications, which a page of its own never shows:
+   *   so the message is shown here, once Monaco has closed its rename field.
+   */
+  private refuseRename(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    why: string
+  ): monaco.languages.WorkspaceEdit & monaco.languages.Rejection {
+    const editor = monaco.editor.getEditors().find((each) => each.getModel() === model && each.hasWidgetFocus())
+    const messages = editor?.getContribution(MONACO_MESSAGES) as MessageController | null | undefined
+    setTimeout(() => messages?.showMessage(why, position))
+    return { edits: [], rejectReason: why }
+  }
+
+  /**
+   * Show the right-click menu's Rename Symbol row only where something can be renamed (epic `editor` I147):
+   * a right click on an action's name shows it, on `to draw solitaire` it doesn't.
+   * - HACK: Monaco shows the row wherever a rename provider is, by its context key `editorHasRenameProvider`, which
+   *   it sets as a model comes and has no other way to change.  So a right click sets it to whether this place can be
+   *   renamed, and once the menu is drawn it's set back:  F2 still asks, and says what can be renamed where nothing can.
+   * - Only in a Spell model:  another's is Monaco's own.
+   */
+  followRenameRow(editor: monaco.editor.ICodeEditor): void {
+    // every editor Monaco makes is a standalone one, though `onDidCreateEditor` types it as any code editor
+    if (!("createContextKey" in editor)) return
+    const hasRename = (editor as monaco.editor.IStandaloneCodeEditor).createContextKey<boolean>(MONACO_HAS_RENAME, true)
+    let isChanged = false
+    editor.onMouseDown(({ event, target }) => {
+      const model = editor.getModel()
+      if (!event.rightButton || !model || !target.position || !this.languages.includes(model.getLanguageId())) return
+      const file = this.fileOf(model)
+      hasRename.set(!!file && !!this.service.prepareRename(file, LspToMonaco.lspPosition(target.position)))
+      isChanged = true
+    })
+    editor.onContextMenu(() => {
+      if (!isChanged) return
+      isChanged = false
+      // after Monaco's own listener, which drew the menu
+      queueMicrotask(() => hasRename.set(true))
+    })
+  }
+
+  /** The languages `register()` registered for. */
+  private languages: string[] = []
 
   /** Outline of `model`:  what it declares, nested. */
   private documentSymbols(model: monaco.editor.ITextModel): monaco.languages.DocumentSymbol[] {
@@ -352,6 +416,15 @@ export class SpellLanguageFeatures {
 
 /** Where Go to Definition goes for a Spell UI tag or attribute:  its help, shown in place -- see `helpLocation()`. */
 const HELP_SCHEME = "spell-help"
+
+/** Monaco's context key for "this editor's model has a rename provider":  its `EditorContextKeys.hasRenameProvider`. */
+const MONACO_HAS_RENAME = "editorHasRenameProvider"
+
+/** Monaco's message over the code's contribution id:  its `MessageController.ID`. */
+const MONACO_MESSAGES = "editor.contrib.messageController"
+
+/** What Monaco's message over the code does that's used here, left out of its typed API. */
+type MessageController = { showMessage(message: string, position: monaco.IPosition): void }
 
 /** Constructor props for `SpellLanguageFeatures`. */
 export type SpellLanguageFeaturesProps = {

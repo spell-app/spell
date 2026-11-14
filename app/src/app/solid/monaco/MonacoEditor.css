@@ -271,3 +271,8 @@
 .MonacoEditor .monaco-editor .findOptionsWidget {
   display: none !important;
 }
+
+/* A message over the code (Rename Symbol's "Nothing here can be renamed" ...) breaks at its new lines, one idea each (I147) */
+.MonacoEditor .monaco-editor-overlaymessage .message {
+  white-space: pre-line;
+}

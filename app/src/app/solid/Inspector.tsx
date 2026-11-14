@@ -9,14 +9,14 @@ import { SP } from "spell/parser/spell"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 // by file:  the language service itself loads with the code editor
-import { RenameError, type RenameErrorCause } from "spell/app/lsp/lsp.types"
+import { RenameError } from "spell/app/lsp/lsp.types"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
 // By file:  a click's rule is all this needs
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
-import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+import { appTexts, renameRefusal, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
 import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { isEditable } from "spell/app/app/pages/editorHotkeys"
@@ -916,11 +916,7 @@ export class Inspector {
         editor.showError(error as Error)
         return false
       }
-      const key =
-        error.cause?.takenBy === "property"
-          ? "renameActionTakenByProperty"
-          : RENAME_REFUSED[error.cause?.kind ?? "not-an-action"]
-      throw new UIError(appTexts.text(key, { action: action.words, newName: newWords.trim() }))
+      throw new UIError(renameRefusal(error, newWords, action.words))
     }
   }
 
@@ -1862,18 +1858,6 @@ function declarationPlaces(): SP.SpellDeclarationPlace[] {
   }
   return readPlaces.places
 }
-/**
- * What an action's name field says under it when it can't take a new name, by why (`RenameError`).
- * - `taken` by a property says so instead:  `renameActionTakenByProperty` (I139)
- */
-const RENAME_REFUSED: Record<RenameErrorCause["kind"], AppTextKey> = {
-  "not-an-action": "renameActionNotAction",
-  empty: "renameActionEmpty",
-  "not-words": "renameActionNotWords",
-  taken: "renameActionTakenByAction",
-  "calls-differ": "renameActionCallsDiffer"
-}
-
 /** The map `declarationPlaces()` read last, and what it read. */
 let readPlaces: { map: string; places: SP.SpellDeclarationPlace[] } = { map: "", places: [] }
 

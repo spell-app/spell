@@ -52,6 +52,14 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     expect(await errors(renamed)).toEqual(await errors(text))
   })
 
+  test("F2 can rename an action that takes nothing, not the drawing's method nor one that takes something (I147)", async () => {
+    await workspace.update(uri, text)
+    const file = workspace.fileFor(uri)!
+    expect(service.prepareRename(file, positionOf(text, 'to "cheat"', "cheat"))?.placeholder).toBe("cheat")
+    expect(service.prepareRename(file, positionOf(text, "to draw solitaire", "draw"))).toBeNull()
+    expect(service.prepareRename(file, positionOf(text, "to play a card", "play"))).toBeNull()
+  })
+
   test("refuses an empty name, one another member has, and what isn't an action", async () => {
     await workspace.update(uri, text)
     const file = workspace.fileFor(uri)!

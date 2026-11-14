@@ -173,6 +173,8 @@ export class SpellMonaco {
     SpellBubbly.watch(LANGUAGES)
     monaco.editor.onDidCreateEditor((editor) => {
       new SpellTyping(editor, { indents: LANGUAGES, quotes: [LANGUAGE] })
+      // the right-click menu's Rename Symbol only where something can be renamed (epic `editor` I147)
+      SpellMonaco.#registered?.features.followRenameRow(editor)
       new ErrorHover(editor)
       new LinkClick(editor)
     })

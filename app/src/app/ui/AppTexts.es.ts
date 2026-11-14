@@ -400,6 +400,10 @@ const APP_TEXTS_ES: AppTextPack = {
   renameActionNotAction:
     "{action} no se puede renombrar aquí:\nsolo una acción del propio programa que no toma nada más.",
   renameActionCallsDiffer: "{action} se llama con otras palabras en algún sitio:\nrenombrarla lo dejaría atrás.",
+  renameNothingHere:
+    "Aquí no hay nada que renombrar.\nSe puede renombrar:\nuna acción del propio programa que no toma nada,\nuna propiedad, un tipo o un nombre escrito igual en todas partes.",
+  renameRefused:
+    "{oldName} no se puede llamar {newName}:\nusa letras, números y guiones,\ny un nombre que nada más tenga.",
   inspectorProperties: "Propiedades",
   inspectorClose: "Cerrar el Inspector",
   inspectorHide: "Ocultar esta tarjeta",

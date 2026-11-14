@@ -598,6 +598,12 @@ export const APP_TEXTS = {
   renameActionNotAction:
     "{action} can't be renamed here:\nonly an action of the program's own that takes nothing else.",
   renameActionCallsDiffer: "{action} is called in other words somewhere:\nrenaming it would leave that behind.",
+  // the code's Rename Symbol (F2) where nothing can be renamed, and what can (I147)
+  renameNothingHere:
+    "Nothing here can be renamed.\nWhat can:\nan action of the program's own that takes nothing,\na property, a type or a name written the same everywhere.",
+  // F2's new name refused, for a property, a type or a name
+  renameRefused:
+    "{oldName} can't be renamed {newName}:\nuse letters, numbers and dashes,\nand a name nothing else has.",
   inspectorProperties: "Properties",
   inspectorClose: "Close the Inspector",
   inspectorHide: "Hide this card",

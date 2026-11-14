@@ -165,6 +165,9 @@ and in the app's build folder, `app/` at the app folder's root.
       measured as it's drawn, tabs then spaces;  one undo
   - An error shows its message on a plain hover over its squiggle, though the hover info waits for ⌥
     ([ErrorHover](ui/monaco/ErrorHover.ts), epic `editor` I97)
+  - Rename Symbol (F2) renames an action as the Inspector's Code card does, its calls and buttons too, one undo,
+    refused in the same words (`renameRefusal()`, epic `editor` I147);  the right-click menu shows it only where
+    something can be renamed (`SpellLanguageFeatures.followRenameRow()`), and F2 elsewhere says what can
   - A web address in the code opens on a click on the icon after it, or on ⌘-click as in VS Code,
     whatever key the hover takes
     ([LinkClick](ui/monaco/LinkClick.ts), epic `editor` I101)

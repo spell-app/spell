@@ -1,6 +1,7 @@
 import type { E } from "spell/element"
 import { Observable, once, state } from "spell/util"
 import type { I18n } from "spell/ui/core"
+import type { RenameError, RenameErrorCause } from "spell/app/lsp/lsp.types"
 
 import { APP_TEXTS, type AppTextKey, type AppTextPack } from "./AppTexts.en"
 
@@ -174,6 +175,29 @@ export class AppTexts extends Observable {
 
 /** The page's ONE `AppTexts`:  the editor's words, in its language. */
 export const appTexts = new AppTexts()
+
+/**
+ * What the editor says when an action can't be renamed `newName` (`LSP.RenameError`), by why:
+ * the Inspector's name field and the code's Rename Symbol (F2) say the same (epic `editor` I139, I147).
+ * - `words`:  the action's name as it's written now, for one the error doesn't name
+ * - `taken` by a property says so, not "an action" (I139).
+ */
+export function renameRefusal(error: RenameError, newName: string, words = error.cause?.words ?? ""): string {
+  const key =
+    error.cause?.takenBy === "property"
+      ? "renameActionTakenByProperty"
+      : RENAME_REFUSED[error.cause?.kind ?? "not-an-action"]
+  return appTexts.text(key, { action: words, newName: newName.trim() })
+}
+
+/** Each refusal's words, by why -- see `renameRefusal()`. */
+const RENAME_REFUSED: Record<RenameErrorCause["kind"], AppTextKey> = {
+  "not-an-action": "renameActionNotAction",
+  empty: "renameActionEmpty",
+  "not-words": "renameActionNotWords",
+  taken: "renameActionTakenByAction",
+  "calls-differ": "renameActionCallsDiffer"
+}
 
 ////////////////
 // ## Types and helpers
