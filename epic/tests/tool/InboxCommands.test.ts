@@ -1060,6 +1060,17 @@ test("one question, one choice set:  two open sets are said by choiceSetProblems
   expect(plan.check().some((problem) => problem.includes("choice sets"))).toBe(false)
 })
 
+test("run-together details (T74):  a paragraph of 5+ sentences is said by denseParagraphs(), never by check()", () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  const dense = plan.addItem("todo", "Dense", { details: `<p>One. Two. Three. Four. Five.</p>` })
+  plan.addItem("todo", "Split", { details: `<p>One. Two. Three.</p><p>Four. Five.</p>` })
+  plan.addItem("todo", "Code", { details: `<epic-code title="x"><pre>a. B. C. D. E.</pre></epic-code>` })
+  expect(plan.denseParagraphs()).toEqual([
+    `${dense.toUpperCase()} has a paragraph of 5 sentences:  a new paragraph wherever the context changes`
+  ])
+  expect(plan.check().some((problem) => problem.includes("sentences"))).toBe(false)
+})
+
 ////////////////
 // ## Add and order phases (epic `epic-engine` P34)
 ////////////////

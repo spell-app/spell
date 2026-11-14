@@ -27,6 +27,10 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   - then bullets, one idea each, nested for sub-points; never a list run together inside a sentence ("a, b, c and
     d" is four bullets)
   - full words, the articles back in; short sentences
+  - a new paragraph wherever the context changes (2026-11-14, epic `epic-engine` T74:  "too run together"):
+    a new subject, another language, an example, what's left to do;  never one block of everything.
+    E.g. `language`'s J174, four paragraphs:  what English does;  how each rule reads it;  Spanish;  what's left.
+    `epic lint` says which items run on (`DENSE:`, a paragraph of 5+ sentences)
   - a concrete example for anything tricky: the real code, the command and what it prints, a before / after, a
     table of values
   - ids explained: "the inbox file decision (D1)", never a bare `D1`

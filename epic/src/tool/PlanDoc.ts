@@ -3446,6 +3446,27 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * An item whose details run on:  a paragraph of `DENSE_SENTENCES` or more sentences (epic `epic-engine` T74;  Owen:
+   * "too run together.  Break up into paragraphs when context changes").
+   * - outside its Original Discussion and its code;  one line per item, naming its densest paragraph
+   * - `epic lint` prints them, failing nothing:  a split is a writer's call, and older items are left as they are
+   */
+  denseParagraphs(): string[] {
+    const notes: string[] = []
+    for (const item of this.allItems) {
+      const counts = Array.from(item.querySelectorAll("p"))
+        .filter((paragraph) => !paragraph.closest("epic-original, epic-code, pre"))
+        .map((paragraph) => sentenceCount(PlanMarkup.squeeze(paragraph.textContent ?? "")))
+      const most = Math.max(0, ...counts)
+      if (most >= DENSE_SENTENCES)
+        notes.push(
+          `${item.id.toUpperCase()} has a paragraph of ${most} sentences:  a new paragraph wherever the context changes`
+        )
+    }
+    return notes
+  }
+
+  /**
    * What's wrong with the change marks, as `check()` reports it:
    * - one naming no item on the page (`item`)
    * - one not stamped yet (no id):  written by hand, with no `epic` command since (`epic change <name>` stamps it)
@@ -3608,6 +3629,17 @@ type ReviewPart = {
 
 /** Tags that stand as blocks in a status card's reading or summary;  anything else is inline, wrapped in a `<p>`. */
 const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
+
+/** How many sentences make an item's paragraph run on (`PlanDoc.denseParagraphs()`). */
+const DENSE_SENTENCES = 5
+
+/** A sentence's end, followed by the next's start (a capital, a digit, a quote or a bracket);  as `epic pages fuss`. */
+const SENTENCE_END = /[.?!]["'”)\]]*\s+(?=[A-Z0-9"“'(])/g
+
+/** How many sentences `text` holds, as `SENTENCE_END` splits them. */
+function sentenceCount(text: string): number {
+  return text ? (text.match(SENTENCE_END)?.length ?? 0) + 1 : 0
+}
 
 /** What `PlanDoc.followUp()` made:  the new todo's id, and did its source propose a fix? */
 type FiledFollowUp = { id: string; hasFix: boolean }

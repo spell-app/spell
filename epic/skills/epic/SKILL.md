@@ -420,6 +420,8 @@ The phases go to a background agent, `<name>-plan-doc`, as if the person had typ
   The question is then HANDLED in that phase (P31):  grey, out of the lists.
   Prefer this to leaving one more decided item.
 - Per item:  `epic add <name>#D|#T|#I|#M|#Q "title" [--details "<p>...</p>"]`.
+  - Its details:  a new `<p>` wherever the context changes
+    ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").
   - `#T`:  a todo, work still to do;  `#T ... --limit`:  a limit to know about, not work (epic `epic-engine` P32).
   - `#M`:  a manual test ("5. Each phase", below).
   - The letters before epic `epic-engine` P44 (`C` a caveat, `T` a test, `V` before P32):  `#C` and `#V` are refused,
