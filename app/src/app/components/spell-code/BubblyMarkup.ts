@@ -12,6 +12,8 @@ import { BubblyHtml } from "./BubblyHtml"
  *   between them, when something is (`bubbly-tag-link`, Q58).
  * - A start tag on lines of its own (`<spell-editor`, an attribute a line, `>`) is ONE tall band, a row a line, its
  *   point at its `⟩` (`bubbly-tag-tall`, T118):  a block's band, a band alone, or a one-line element's start tag.
+ * - An element with NOTHING between its two tags (`<spell-editor …></spell-editor>`) is ONE pill, as if self-closed:
+ *   its start tag ends in `/⟩`, its end tag left out (`bubbly-tag-self-closed`, Owen, Q62);  the file keeps it.
  * - An element with no end tag (`<meta …>`, `<br />`) is a band by itself, `bubbly-pill`.
  * - Whatever holds a start tag is a `bubbly-tag-start` too, an end tag's a `bubbly-tag-end`:  hooks to style them by.
  * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
@@ -48,6 +50,15 @@ export class BubblyMarkup {
   static hasShortTail(source: string, tag: MarkupStartTag): boolean {
     const lastLineStart = source.lastIndexOf("\n", tag.end - 1)
     return !tag.attributes.some((attribute) => attribute.nameStart > lastLineStart)
+  }
+
+  /**
+   * Is `element` drawn as if self-closed:  ONE pill, its start tag ending in `/⟩`, its end tag left out (Owen, Q62)?
+   * - Nothing at all between its two tags, not even a space:  `<div class="x"></div>`
+   * - The file keeps its end tag:  a custom element's `/>` means nothing to HTML
+   */
+  static isDrawnSelfClosed(element: MarkupElement): boolean {
+    return !!element.close && element.close.start === element.open.end
   }
 
   /**
@@ -339,7 +350,10 @@ class MarkupWriter {
     }
     if (!insideText.includes("\n")) {
       if (!isTall) return `<p class="bubbly-line bubbly-tag-line">${this.inline([element])}</p>`
-      // its start tag on lines of its own:  one tall band, the rest of the element after its `⟩` on its last line
+      // its start tag on lines of its own:  one tall band, the rest of the element after its `⟩` on its last line;
+      // nothing between its tags:  its `/⟩` instead, its end tag left out (Q62)
+      if (BubblyMarkup.isDrawnSelfClosed(element))
+        return this.tallTag(element.open, `bubbly-tag-tall-inline bubbly-tag-self-closed ${kind}`, "", "self-closed")
       const after = this.inline(element.children) + this.endPill(element, !inside.length)
       return this.tallTag(element.open, `bubbly-tag-tall-inline ${kind}`, after)
     }
@@ -361,9 +375,10 @@ class MarkupWriter {
    * each line a row in it, as in the file;  its last line's piece ends in the band's point, at its `⟩`,
    * `after` it on the same line:  what's left of a one-line element, its end tag's pill.
    * - `classes`:  where it sits, `bubbly-tag-tall-head` (a block's), `-alone`, `-inline`;  and its colour
+   * - `ends`:  `"self-closed"`, its `>` drawn `/⟩`:  an empty element's (Q62)
    */
-  private tallTag(tag: MarkupStartTag, classes: string, after: string): string {
-    const rows = this.startTagRows(tag)
+  private tallTag(tag: MarkupStartTag, classes: string, after: string, ends: TagEnds = "as-written"): string {
+    const rows = this.startTagRows(tag, ends)
     const last = rows.pop()!
     const upper = rows.map((row) => `<p class="bubbly-tag-row">${row}</p>`).join("")
     // its `>` alone on its last line:  the rows above overhang it, their corner cut
@@ -416,22 +431,30 @@ class MarkupWriter {
     const touching = inside ? "" : " bubbly-tags-touch"
     const partOfSpeech = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
     const kind = `bubbly-tag-pill ${partOfSpeech}${touching}`
+    // nothing at all between them:  ONE pill, as if self-closed, its end tag left out (Owen, Q62)
+    if (BubblyMarkup.isDrawnSelfClosed(element)) {
+      const classes = `bubbly-tag-pill ${partOfSpeech} bubbly-tag-start bubbly-tag-self-closed`
+      return `<span class="${classes}">${this.startTag(element.open, "self-closed")}</span>`
+    }
     const start = `<span class="${kind} bubbly-tag-start">${this.startTag(element.open)}</span>`
     if (!element.close) return start + inside
     const between = inside ? `<span class="bubbly-tag-link ${partOfSpeech}">${inside}</span>` : ""
     return `${start}${between}${this.endPill(element, !inside)}`
   }
 
-  /** A start tag on its band:  `<` faint, its name, each value a white pill. */
-  private startTag(tag: MarkupStartTag): string {
-    return `${ANGLE_OPEN_MARK}<span class="bubbly-tag-name">${tag.tag}</span>${this.attributes(tag.attributes)}${this.closeMark(tag)}`
+  /**
+   * A start tag on its band:  `<` faint, its name, each value a white pill.
+   * - `ends`:  `"self-closed"`, its `>` drawn `/⟩` (Q62)
+   */
+  private startTag(tag: MarkupStartTag, ends: TagEnds = "as-written"): string {
+    return `${ANGLE_OPEN_MARK}<span class="bubbly-tag-name">${tag.tag}</span>${this.attributes(tag.attributes)}${this.closeMark(tag, ends)}`
   }
 
   /**
    * A start tag on lines of its own, a row each, as in the file:  the first its `<`, name and the attributes on its
    * line, each other its attributes, the last its `>` too;  each row's indent past the tag's `<` kept, as spaces.
    */
-  private startTagRows(tag: MarkupStartTag): string[] {
+  private startTagRows(tag: MarkupStartTag, ends: TagEnds): string[] {
     const lineOf = (offset: number) => this.source.slice(tag.start, offset).split("\n").length - 1
     const rows: MarkupAttribute[][] = []
     for (const attribute of tag.attributes) (rows[lineOf(attribute.nameStart)] ??= []).push(attribute)
@@ -449,7 +472,7 @@ class MarkupWriter {
       const indent = " ".repeat(Math.max(0, columnOf(this.source, first) - tagColumn))
       // its first attribute's own room before it is in the file's indent, as in the editor
       const row = `<span class="bubbly-tag-indent">${indent}</span>${attributes.replace(/^ /, "")}`
-      html.push(line === lastLine ? row + this.closeMark(tag) : row)
+      html.push(line === lastLine ? row + this.closeMark(tag, ends) : row)
     }
     return html
   }
@@ -466,9 +489,14 @@ class MarkupWriter {
       .join("")
   }
 
-  /** A start tag's `>`, or `/>`. */
-  private closeMark(tag: MarkupStartTag): string {
-    return `<span class="bubbly-mark">${tag.selfClosing ? `${SLASH}${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
+  /**
+   * A start tag's `>`, or `/>`:  as written, or drawn self-closed (Q62).
+   * - drawn self-closed:  an attribute's room before its `/`, as the editor's spacer (`bubbly-self-close`)
+   */
+  private closeMark(tag: MarkupStartTag, ends: TagEnds): string {
+    if (tag.selfClosing) return `<span class="bubbly-mark">${SLASH}${ANGLE_CLOSE}</span>`
+    if (ends === "self-closed") return `<span class="bubbly-mark bubbly-self-close">${SLASH}${ANGLE_CLOSE}</span>`
+    return `<span class="bubbly-mark">${ANGLE_CLOSE}</span>`
   }
 
   /**
@@ -552,6 +580,9 @@ function expressionOf(value: string): string {
  */
 const ANGLE_OPEN = `<span class="bubbly-angle bubbly-angle-open">&lt;</span>`
 const ANGLE_CLOSE = `<span class="bubbly-angle bubbly-angle-close">&gt;</span>`
+
+/** How a start tag's `>` is drawn:  as the file has it, or `/⟩`, an empty element's drawn self-closed (Q62). */
+type TagEnds = "as-written" | "self-closed"
 
 /** A start tag's `<`, faint. */
 const ANGLE_OPEN_MARK = `<span class="bubbly-mark">${ANGLE_OPEN}</span>`

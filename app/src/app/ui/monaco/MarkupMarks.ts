@@ -20,6 +20,8 @@ import type { BubblyInputShape } from "./BubblyMarks"
  *     its line, named or `</>`, a TINY pill at the rail's turn, its letters tiny, its line only the pill's row tall
  *     (Owen, Q61;  `SpellBubbly` shortens its line)
  *   - an element alone on its line with no end tag (`<meta …>`), and a doctype:  a band by itself
+ *   - an element with nothing between its tags:  ONE pill over both, drawn as if self-closed, `/⟩`, its end tag's
+ *     `<` and name hidden (Owen, Q62)
  *   - any other tag:  a small pill of its own, in its line;  a one-line element with something between its tags, a
  *     line linking its two pills too, between them (`MarkupLinkShape`)
  *   - a start tag on lines of its own:  its shape's place spans them, drawn as ONE tall band
@@ -112,6 +114,11 @@ export class MarkupMarks extends TextMarks {
       else this.tagPill(open, { partOfSpeech, side: "start" }, into)
       return
     }
+    // nothing at all between its tags:  ONE pill, as if self-closed, its end tag's letters hidden (Owen, Q62)
+    if (BubblyMarkup.isDrawnSelfClosed(element)) {
+      this.tagPill(open, { partOfSpeech, side: "start", through: close }, into)
+      return
+    }
     if (!close || !this.slice({ start: open.end, end: close.start }).includes("\n")) {
       // one line:  each tag a pill;  nothing between them, their points touch
       const touch = !hasInside
@@ -177,12 +184,19 @@ export class MarkupMarks extends TextMarks {
    * A tag in a line:  a small pill of its own, with room either side for it, but at the line's start or end;
    * returns its shape.
    * - `touch`:  it's an empty element's, its points touching its other tag's
+   * - `through`:  a start tag's end tag, right after it:  ONE pill over both, drawn as if self-closed (Q62)
    */
   private tagPill(
     tag: MarkupStartTag | MarkupEndTag,
-    { partOfSpeech, side, touch = false }: { partOfSpeech: MarkupPartOfSpeech; side: "start" | "end"; touch?: boolean },
+    {
+      partOfSpeech,
+      side,
+      touch = false,
+      through
+    }: { partOfSpeech: MarkupPartOfSpeech; side: "start" | "end"; touch?: boolean; through?: MarkupEndTag },
     into: MarkupShape[]
   ): MarkupTagShape {
+    const end = through?.end ?? tag.end
     const spacers: Spacers = {}
     // the room before it:  the tag's it follows right on, then its own
     const room: TagRoom[] = []
@@ -193,13 +207,13 @@ export class MarkupMarks extends TextMarks {
       spacers.before = spacer(before, "before")
       room.push(before)
     }
-    if (!this.endsLine(tag.end)) {
+    if (!this.endsLine(end)) {
       const after: TagRoom = touch && side === "start" ? "touch" : "tag"
       spacers.after = spacer(after, "after")
-      this.roomAfter.set(tag.end, after)
+      this.roomAfter.set(end, after)
     }
-    // the room either side, and the pill's place:  the whole tag
-    const place = this.mark(tag.start, tag.end, "", spacers)
+    // the room either side, and the pill's place:  the whole tag, its end tag too when it's drawn self-closed
+    const place = this.mark(tag.start, end, "", spacers)
     const shape: MarkupTagShape = {
       kind: "tag",
       place,
@@ -210,8 +224,9 @@ export class MarkupMarks extends TextMarks {
       ...this.tallness(tag)
     }
     into.push(shape)
-    if (tag.kind === "start") this.startTag(tag, partOfSpeech, into)
+    if (tag.kind === "start") this.startTag(tag, partOfSpeech, into, through ? "self-closed" : "as-written")
     else this.endTag(tag, "inline")
+    if (through) this.hiddenEndTag(through)
     return shape
   }
 
@@ -237,8 +252,14 @@ export class MarkupMarks extends TextMarks {
   /**
    * A start tag's pieces:  its brackets, name and attributes;  a pill under each value, into `into`.
    * - `partOfSpeech`:  its band's colour, a `{…}` value's pill a shade of it
+   * - `ends`:  `"self-closed"`, its `>` hidden:  its end tag's `/>` drawn in its place (`hiddenEndTag()`, Q62)
    */
-  private startTag(tag: MarkupStartTag, partOfSpeech: MarkupPartOfSpeech, into: MarkupShape[]) {
+  private startTag(
+    tag: MarkupStartTag,
+    partOfSpeech: MarkupPartOfSpeech,
+    into: MarkupShape[],
+    ends: "as-written" | "self-closed" = "as-written"
+  ) {
     const { start, end } = tag
     let from = start
     this.mark(start, start + 1, ANGLE_OPEN)
@@ -262,6 +283,23 @@ export class MarkupMarks extends TextMarks {
     }
     this.tags.push({ start: from, end })
     if (tag.selfClosing) this.mark(end - 2, end - 1, SLASH)
+    this.mark(end - 1, end, ends === "self-closed" ? HIDDEN : ANGLE_CLOSE)
+  }
+
+  /**
+   * An empty element's end tag, drawn as if its start tag were self-closed (Owen, Q62):  its `/` and `>` shown as
+   * the start tag's `/⟩`, in its ink;  its `<` and name hidden, no wider than nothing.
+   * - Every letter stays in the file, so the caret, a selection, a copy and typing all work on them:
+   *   the caret steps over the hidden ones without seeming to move
+   */
+  private hiddenEndTag(tag: MarkupEndTag) {
+    const { start, end } = tag
+    this.tags.push({ start, end })
+    this.mark(start, start + 1, HIDDEN)
+    // an attribute's room before its `/`, as on the page;  none where its start tag's `>` starts its line
+    const spacers: Spacers = this.startsLine(start - 1) ? {} : { before: spacer("attribute", "before") }
+    this.mark(start + 1, start + 2, SLASH, spacers)
+    this.mark(start + 2, end - 1, HIDDEN)
     this.mark(end - 1, end, ANGLE_CLOSE)
   }
 
@@ -369,7 +407,7 @@ export type MarkupBlockShape = {
 /** A tag:  a small pill in its line (`bubbly-tag-pill`), or a band by itself, alone on its line (`bubbly-pill`). */
 export type MarkupTagShape = {
   kind: "tag"
-  /** the mark on the tag */
+  /** the mark on the tag;  an empty element's start tag's runs on over its end tag, drawn as if self-closed (Q62) */
   place: number
   /** its colour */
   partOfSpeech: MarkupPartOfSpeech
@@ -424,6 +462,9 @@ const END_NAME = `${TAG_NAME} ${END}`
 
 /** A block's end tag on its own line:  its letters tiny, in its tiny pill (Q61). */
 const FOOT = "bubbly-foot-tiny"
+
+/** An empty element's end tag's `<` and name, and its start tag's `>`:  hidden, no wider than nothing (Q62). */
+const HIDDEN = "bubbly-tag-hidden"
 
 /** An attribute's `=`. */
 const EQUALS = `${MARK} bubbly-equals`

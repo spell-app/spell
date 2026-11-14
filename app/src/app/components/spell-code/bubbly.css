@@ -1046,6 +1046,16 @@
     .bubbly-tag-tail + .bubbly-tags-touch {
       margin-left: 0;
     }
+    /*
+     * an element with nothing between its tags, drawn as if self-closed (Owen, Q62):  an attribute's room before its
+     * `/⟩`, as the editor's spacer;  none where its `>` starts its line
+     */
+    .bubbly-self-close {
+      margin-left: 0.33em;
+    }
+    .bubbly-tag-indent + .bubbly-self-close {
+      margin-left: 0;
+    }
 
     /*
      * a one-line element's two tags linked:  a line along the top and bottom of what's between their pills, from one
@@ -1410,6 +1420,15 @@
     }
     .view-line .bubbly-angle.bubbly-foot-tiny::before {
       font-size: calc(var(--bubbly-foot-tiny-font) * var(--bubbly-monaco-scale));
+    }
+    /*
+     * an element with nothing between its tags, drawn as if self-closed (Owen, Q62):  its start tag's `>`, its end
+     * tag's `<` and name no wider than nothing, so its end tag's `/` and `>` read as the start tag's `/⟩`
+     * - the letters stay in the file:  the caret, a selection and a copy still work on them, as Monaco measures where
+     *   each is drawn
+     */
+    .view-line .bubbly-tag-hidden {
+      font-size: 0;
     }
 
     /* spacers:  where the page has a tag's margin and padding */

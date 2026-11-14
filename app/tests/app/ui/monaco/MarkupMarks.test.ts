@@ -71,8 +71,7 @@ describe("MarkupMarks", () => {
       "    pill end tag:  </code></h2>",
       "    pill end tag+tag:  </h2>",
       '    pill start:  <spell-viewer id="a"></s',
-      '    input:  a"></spell-viewer>',
-      "    pill end touch+touch:  </spell-viewer>"
+      '    input:  a"></spell-viewer>'
     ])
   })
 
@@ -161,14 +160,49 @@ describe("MarkupMarks", () => {
       const { range } = marks.marks[place]!
       return `${range.startLineNumber}-${range.endLineNumber}`
     })
-    // its start tag lines 1-4, its end tag a pill on line 4;  `<meta` lines 5-6, a band alone
-    expect(lineSpan).toEqual(["1-4", "4-4", "5-6"])
-    expect(tags.map((shape) => shape.kind === "tag" && !!shape.isShortTail)).toEqual([true, false, false])
+    // its start tag lines 1-4, on over its end tag, drawn self-closed (Q62);  `<meta` lines 5-6, a band alone
+    expect(lineSpan).toEqual(["1-4", "5-6"])
+    expect(tags.map((shape) => shape.kind === "tag" && !!shape.isShortTail)).toEqual([true, false])
     // an attribute that starts its line has no room before it:  its indent is its room, as on the page
     const spaced = marks.marks.filter((mark) =>
       mark.options.before?.inlineClassName?.includes("bubbly-attribute-spacer")
     )
     expect(spaced).toEqual([])
+  })
+
+  test("an element with nothing between its tags is ONE pill, drawn as if self-closed:  its end tag's `<` and name hidden (Q62)", () => {
+    const text = `<div class="x"></div> <b> </b>`
+    const marks = MarkupMarks.of(text)
+    expect(shapesOf(marks, text)).toEqual([
+      'pill start:  <div class="x"></div> <b',
+      'input:  x"></div> <b> </b>',
+      "pill start tag:  <b> </b>",
+      "pill end touch:  </b>"
+    ])
+    // the one pill runs from its `<` to its end tag's `>`
+    const { range } = marks.marks[marks.shapes[0]!.place]!
+    expect(text.slice(range.startColumn - 1, range.endColumn - 1)).toBe(`<div class="x"></div>`)
+    // its start tag's `>` and its end tag's `<` and name hidden;  its end tag's `/` and `>` drawn as `/⟩`, room before
+    const piecesOf = (classes: string) =>
+      marks.marks
+        .filter((mark) => mark.options.inlineClassName?.split(" ").includes(classes))
+        .map(({ range }) => text.slice(range.startColumn - 1, range.endColumn - 1))
+    expect(piecesOf("bubbly-tag-hidden")).toEqual([">", "<", "div"])
+    expect(piecesOf("bubbly-slash")).toEqual(["/", "/"])
+    const slash = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-slash"))!
+    expect(slash.options.before?.inlineClassName).toContain("bubbly-attribute-spacer")
+    // something between them, a space even:  two pills, as before
+    expect(BubblyMarkup.write(text)).toContain("bubbly-tag-self-closed")
+    expect(BubblyMarkup.write(text).match(/bubbly-tag-self-closed/g)).toHaveLength(1)
+  })
+
+  test("on the page, an empty element's start tag ends in `/⟩` and its end tag is left out (Q62)", () => {
+    const html = BubblyMarkup.write(`<spell-viewer id="a"></spell-viewer>\n<x-tall\n  a="1"\n></x-tall>`)
+    expect(html).not.toContain(">spell-viewer</span><span")
+    expect(html.match(/bubbly-self-close"/g)).toHaveLength(2)
+    expect(html).toContain("bubbly-tag-tall-inline bubbly-tag-self-closed")
+    // neither end tag drawn
+    expect(html).not.toMatch(/bubbly-tag-end/)
   })
 
   test("a block's end tag on its own line, named or `</>`, is its foot:  every piece tiny (Q61)", () => {
