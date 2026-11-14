@@ -641,8 +641,10 @@ export class SpellBubbly {
     const isFlush = classes.includes(FLUSH)
     const tail = element("bubbly-tag-tail")
     if (isFlush) {
-      // its `⟩` drawn here, at the right end;  in its line it's only room (`MarkupMarks`)
-      tailRight = rowsRight = Math.max(rowsRight, tailRight)
+      // its `⟩` drawn here, at the right end;  in its line it's only room (`MarkupMarks`);
+      // a block's as far in as its `⟨` (`--bubbly-tall-close-inset`), the band wider by that room
+      const room = classes.includes("bubbly-tag-tall-head") ? measures.tagPadLeft - measures.bracketPad : 0
+      tailRight = rowsRight = Math.max(rowsRight, tailRight + room)
       tail.append(element("bubbly-mark bubbly-angle bubbly-angle-close"))
     }
     const tall = element(classes)
@@ -849,6 +851,7 @@ export class SpellBubbly {
       bracketPad: length("--bubbly-bracket-pad", htmlProbe) * scale,
       blockInset: length("--bubbly-tag-block-inset") * scale,
       tagPoint: length("--bubbly-tag-point", htmlProbe) * scale,
+      tagPadLeft: length("--bubbly-tag-pad-left", htmlProbe) * scale,
       footTinyAbove: length("--bubbly-foot-tiny-above", htmlProbe) * scale,
       footTinyPadRight: length("--bubbly-foot-tiny-pad-right", htmlProbe) * scale,
       footTinyRow: length("--bubbly-foot-tiny-row", htmlProbe) * scale,
@@ -949,6 +952,8 @@ type Measures = {
   blockInset: number
   /** HTML:  how wide a tag's pointed end is */
   tagPoint: number
+  /** HTML:  a block's band's room before its `⟨`, and a flush one's after its `⟩` */
+  tagPadLeft: number
   /** HTML:  a block's end tag's tiny pill:  the body's paper above it, its room after its `⟩`, its line's height */
   footTinyAbove: number
   footTinyPadRight: number
