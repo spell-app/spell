@@ -1203,10 +1203,6 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
-          "name": "InspectorCards",
-          "file": "src/app/solid/MenuBar.tsx"
-        },
-        {
           "name": "PartMenu",
           "file": "src/app/solid/Palette.tsx"
         },
@@ -2272,10 +2268,6 @@
         {
           "name": "CodeOutputPane",
           "file": "src/app/solid/CodeOutput.tsx"
-        },
-        {
-          "name": "CodeSlice",
-          "file": "src/app/solid/monaco/CodeSlice.tsx"
         },
         {
           "name": "FallbackEditor",
