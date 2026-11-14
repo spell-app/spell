@@ -699,7 +699,8 @@ The code column:
   - AutoSave, on unless you turn it off:  each file is kept once typing pauses for 0.8s, and as you leave the page.
 - Saving keeps your draft, not the public file:
   it goes in the project's private `__draft/` folder (`ProjectDrafts`, in spaces).
-  - Under the tabs, "Your draft" says when the file showing is one, with Discard beside it.
+  - A file you have a draft of shows a pen on its tab;  hovered, it says "Updated in your draft.",
+    with a link, Discard changes, that takes that file back to what's published.
   - The exception:  in a checkout, a built-in example's file (`@spell/examples/...`, `@spell/library/...`) is
     written in place, so git sees the edit;  through the house-network site it's still a draft.
   - The project menu's Publish makes your drafts public, and keeps the whole project as a version, a zip in

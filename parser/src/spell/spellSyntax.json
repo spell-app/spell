@@ -1695,7 +1695,7 @@
               "syntax": "((click:clicked)|(double_click:double clicked)|(right_click:right clicked)|(drag:dragged)|(drag_cancelled:drag is cancelled|the drag is cancelled|drag cancelled))"
             },
             {
-              "syntax": "((start:start|front|top)|(end:end|back|bottom))"
+              "syntax": "((start:start|front|bottom)|(end:end|back|top))"
             },
             {
               "syntax": "((before:before)|(after:after))"
@@ -2468,7 +2468,7 @@
           "ruleNames": ["flag_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 42,
+          "line": 46,
           "purpose": "`jokers` -- a property's name alone, meaning `jokers = yes` (epic `outline-spell` P26).",
           "syntaxes": [
             {
@@ -2509,7 +2509,7 @@
           "ruleNames": ["said_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 73,
+          "line": 92,
           "purpose": "`suit hearts`, `short name \"foo\"` -- a property and its value, no `=` (epic `data` P32, I68).",
           "syntaxes": [
             {
@@ -2535,7 +2535,7 @@
           "ruleNames": ["the_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 88,
+          "line": 107,
           "purpose": "`the suit` -- the property `suit`, set to what `the suit` means where the line is (epic `data` P32, Q30).",
           "syntaxes": [
             {
@@ -3471,7 +3471,7 @@
           "ruleNames": ["range_count_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RangeCountExpression.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Alternative form of range expression.",
           "syntaxes": [
             {
@@ -3479,13 +3479,13 @@
               "example": "top 2 items of my-list",
               "outputs": {
                 "js": {
-                  "code": "core.rangeStartingAt(myList, 0, 2)"
+                  "code": "core.rangeStartingAt(myList, -2, 2)"
                 },
                 "ts": {
-                  "code": "core.rangeStartingAt(myList, 0, 2)"
+                  "code": "core.rangeStartingAt(myList, -2, 2)"
                 },
                 "py": {
-                  "code": "core.range_starting_at(my_list, 0, 2)"
+                  "code": "core.range_starting_at(my_list, -2, 2)"
                 }
               }
             }
@@ -4387,7 +4387,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -8896,7 +8896,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 88,
+          "line": 89,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

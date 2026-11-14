@@ -1,3 +1,5 @@
+import type { PartOfSpeech as MarkupPartOfSpeech } from "spell/element/vocabulary.types"
+import { PARTS_OF_SPEECH } from "spell/ui/vocabulary/partsOfSpeech.generated"
 import { BubblyHtml } from "./BubblyHtml"
 
 /****************
@@ -62,17 +64,6 @@ export class BubblyMarkup {
   }
 
   /**
-   * The part of speech an element's band takes, by its tag (`TAG_WORDS`, below):
-   * - `structure` (blue):  what lays a page out, HTML's (`div`, `section`) and Spell UI's (`container`, `toolbar`)
-   * - `action` (green):  what a person clicks or types into, and a menu's items (`button`, `action`, `input`)
-   * - `property` (amber):  text and what sits in it (`p`, `text`, `icon`)
-   * - `thing` (purple):  any other custom element (`spell-editor`);  in the editor, the project's own views too
-   * - `plain` (grey):  the page's head, and the rest
-   * - A Spell UI tag counts by its name without `ui-`, as a drawing writes it bare:  `<ui-segment>` ~== `<segment>`.
-   *   A few names mean one thing in HTML and another in Spell UI (`<header>`, `<ui-header>`):  their `ui-` tag is
-   *   listed as it is.
-   */
-  /**
    * An element's part of speech:  its tag's (`partOfSpeechOf()`), but a tag of no kind that names a thing with its
    * quoted word is a thing too:  `<number "score"/>` declares the app's score (Owen, 2026-11-14).
    */
@@ -82,55 +73,49 @@ export class BubblyMarkup {
     return partOfSpeech === "plain" && named?.name === "" && named.isQuoted ? "thing" : partOfSpeech
   }
 
+  /**
+   * The part of speech an element's band takes, by its tag (`MarkupPartOfSpeech` says what each one is):
+   * - a Spell UI tag's is its vocabulary's (`partOfSpeech`, epic `language` T124), by its tag or its bare name,
+   *   as a drawing writes it:  `<ui-segment>` ~== `<segment>`
+   * - HTML's own tags have no vocabulary:  theirs are `HTML_WORDS`, below, and win over a bare Spell UI name:
+   *   `<header>` is HTML's (structure), `<ui-header>` Spell UI's (property)
+   * - else a name with a dash is a thing (a custom element), any other plain
+   */
   static partOfSpeechOf(tag: string): MarkupPartOfSpeech {
     const name = tag.toLowerCase()
-    const listed = PART_OF_SPEECH_BY_TAG.get(name) ?? PART_OF_SPEECH_BY_TAG.get(name.replace(/^ui-/, ""))
+    const listed =
+      PART_OF_SPEECH_BY_TAG.get(name) ??
+      (name.startsWith("ui-") ? PARTS_OF_SPEECH[name] : PARTS_OF_SPEECH[`ui-${name}`])
     if (listed) return listed
     return name.includes("-") ? "thing" : "plain"
   }
 }
 
-/** The parts of speech an element's band can take. */
-export type MarkupPartOfSpeech = "structure" | "thing" | "action" | "property" | "plain"
+/** The parts of speech an element's band can take:  every vocabulary's `partOfSpeech`. */
+export type { PartOfSpeech as MarkupPartOfSpeech } from "spell/element/vocabulary.types"
 
 /**
- * The tags of each part of speech that has a list:  HTML's, then Spell UI's by their bare names (`ui-` off).
- * - The ONE table:  the page (`BubblyHtml`) and the editor (`MarkupMarks`) both read it through `partOfSpeechOf()`.
- * - Unlisted:  a name with a dash is a thing (a custom element), any other plain:  a divider (`hr`, `divider`) and a
- *   spacer are grey, as they hold nothing (Owen, 2026-11-14).
- * - Chosen by Owen (2026-11-14):  container, segment, toolbar, menu blue;  button, buttons, action and a menu's items green.
- *   The rest is a calm judgement call (epic `language`):  every layout box blue, every control green.
+ * HTML's tags of each part of speech, which have no vocabulary to say;  and Spell's own `<context-menu>`.
+ * - Spell UI's are in its vocabularies (`partOfSpeech`), read from `PARTS_OF_SPEECH`.
+ * - `plain`:  the head's tags a Spell UI tag is also named (`<title>`, `<meta>`, `<link>`), so they stay grey.
+ * - Unlisted:  a divider (`hr`) and the rest of the head are plain, as they hold nothing (Owen, 2026-11-14).
  */
-const TAG_WORDS = {
+const HTML_WORDS = {
   structure: [
-    // HTML's layout
     "html body main header footer nav section article aside div ul ol dl table thead tbody tfoot tr figure fieldset",
-    "dialog template slot",
-    // Spell UI's boxes, grids and panes;  a context menu (Spell's `<context-menu>`)
-    "container segment segments toolbar menu submenu context-menu grid row column cell stack sides side split-panel",
-    "sidebar rail sticky panel pushable pusher space accordion sections tabs tab page root list items card",
-    "cards fields steps modal flyout popup dimmer site-nav site-tabs"
+    "dialog template slot context-menu"
   ],
-  action: [
-    // HTML's controls
-    "a button input select option textarea form label details summary",
-    // Spell UI's controls, and a menu's items
-    "buttons action actions or item ui-link dropdown checkbox radio slider rating search calendar icon-picker field",
-    "step tree-item"
-  ],
+  action: ["a button input select option textarea form label details summary"],
   property: [
-    // HTML's text
     "p span h1 h2 h3 h4 h5 h6 strong em b i u s small code pre kbd mark q blockquote cite li dt dd td th caption img",
-    "figcaption sup sub abbr time",
-    // Spell UI's text, and what sits in it
-    "text ui-title ui-header ui-label labels quote markdown icon icons emoji image images statistic value description",
-    "ui-meta date term keys"
-  ]
+    "figcaption sup sub abbr time"
+  ],
+  plain: ["head title meta link base"]
 } satisfies Partial<Record<MarkupPartOfSpeech, string[]>>
 
-/** `TAG_WORDS` turned round:  each tag => its part of speech. */
+/** `HTML_WORDS` turned round:  each tag => its part of speech. */
 const PART_OF_SPEECH_BY_TAG = new Map<string, MarkupPartOfSpeech>(
-  Object.entries(TAG_WORDS).flatMap(([part, lines]) =>
+  Object.entries(HTML_WORDS).flatMap(([part, lines]) =>
     lines.flatMap((line) => line.split(" ").map((tag) => [tag, part as MarkupPartOfSpeech] as const))
   )
 )

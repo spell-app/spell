@@ -21,6 +21,7 @@ export const valueVocabulary = {
   topics: ["content parts", "data display"],
   aka: ["statistic value", "number", "metric value"],
   noun: "value",
+  partOfSpeech: "property",
   ui: false,
   description: "A statistic's value;  a search result's price.",
   attributes: [

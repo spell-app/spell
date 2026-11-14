@@ -24,6 +24,7 @@ export const toastVocabulary = {
   topics: ["notifications", "messages", "feedback", "overlays", "modules"],
   aka: ["snackbar", "notification", "growl", "flash message", "toaster"],
   noun: "toast",
+  partOfSpeech: "structure",
   description: "A toast gives people a short, non-blocking notification.",
   attributes: [
     {

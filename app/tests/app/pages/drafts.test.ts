@@ -81,11 +81,11 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
 
   test("Publish makes it public, keeps a version, and the draft goes", async () => {
     await edit('"words"', '"text"')
-    // while there's a draft:  Draft | Publish beside the project's name, and a ring on its tab (I44)
-    await page.waitForSelector(".DraftPill", { timeout: 5000 })
+    // while there's a draft:  Editing a Draft | Publish Draft beside the modes, and a pen on its tab (I44, I90, I93)
+    await page.waitForSelector(".PublishDraft", { timeout: 5000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(1)
-    await page.locator(".DraftPill").click()
-    await page.waitForSelector(".DraftPill", { state: "detached", timeout: 10_000 })
+    await page.locator(".PublishDraft ui-button").click()
+    await page.waitForSelector(".PublishDraft", { state: "detached", timeout: 10_000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(0)
     expect(published()).toContain('"text"')
     expect(drafts()).toEqual([])

@@ -72,6 +72,8 @@ export const APP_TEXTS = {
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
   // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
+  // Spell › About Spell (epic `editor` I94)
+  aboutSpell: "About Spell…",
   codeSettings: "Code Editor Settings…",
   codeSettingsHeader: "Code editor",
   codeSettingsClose: "Close the code editor's settings",
@@ -126,14 +128,12 @@ export const APP_TEXTS = {
   renameFile: "Rename File",
   deleteFile: "Delete File",
   save: "Save",
-  revertChanges: "Revert Changes",
-  revertChangesTo: "Revert Changes to {file}",
+  revertChanges: "Discard Changes",
   publishDraft: "Publish Draft",
   editingDraft: "Editing a Draft",
   draftTip: "Only you can see these changes so far.  Click Publish Draft to show them to everyone.",
-  yourDraft: "Your draft",
-  yourDraftTip: "Only you can see this until you click Publish.",
-  discard: "Discard",
+  updatedInYourDraft: "Updated in your draft.",
+  discardChanges: "Discard changes",
   versions: "Versions",
   deleteDraft: "Delete Draft",
   deleteDraftConfirm:

@@ -21,6 +21,7 @@ export const embedVocabulary = {
   aka: ["iframe", "video", "youtube", "vimeo", "player"],
   skeleton: "28 x 15.75",
   noun: "embed",
+  partOfSpeech: "property",
   description: "An embed displays content from other websites, like YouTube videos, loaded only when asked for.",
   attributes: [
     {

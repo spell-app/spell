@@ -28,6 +28,7 @@ export const statisticVocabulary = {
   aka: ["stat", "kpi", "metric", "counter", "number display"],
   skeleton: "inline 6 x 4",
   noun: "statistic",
+  partOfSpeech: "property",
   plural: "statistics",
   description: "A statistic emphasizes the current value of an attribute.",
   attributes: [

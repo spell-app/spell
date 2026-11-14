@@ -30,6 +30,7 @@ export const themeEditorVocabulary = {
   ],
   skeleton: "30 tall",
   noun: "theme editor",
+  partOfSpeech: "action",
   description:
     "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by " +
     "hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser.",

@@ -21,6 +21,7 @@ export const extraVocabulary = {
   topics: ["content parts", "cards"],
   aka: ["footer", "card footer", "extra content"],
   noun: "extra",
+  partOfSpeech: "structure",
   ui: false,
   description: "Extra content, set apart from the main content, e.g. a card's footer.",
   attributes: [{ name: "text", group: "name", kind: "keyOnly", description: "In a feed:  a block of extra text." }],

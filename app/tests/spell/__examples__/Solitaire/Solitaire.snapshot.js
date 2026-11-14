@@ -176,21 +176,17 @@ export function testCardSetup() {
   })
 }
 // -----------
-core.heading("A deck")
-////////////
-// ## A deck
-////////////
-// The 52 cards of a standard deck, ace of clubs first.
-
-export class Deck extends List {
+/** a deck of playing cards */
+export class Deck extends ViewableList {
   static instanceType = Card
+  static elementTag = core.defineElement(this, "test-project")
 
-  /** One of each card, ace of clubs first:  each starts face down, as every two sided view does */
+  /** Create one of each card, ace of clubs first */
   create() {
     Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
   }
 
-  /** Its cards' short names, top to bottom */
+  /** its card names, top to bottom */
   get shortName() {
     const cardNames = new List({ instanceType: "text" })
     this.forEach((card) => cardNames.append(card.shortName))
@@ -285,7 +281,7 @@ export function testPiles() {
 
     /** a card is in one pile at a time */
     const discards = new Pile({ id: "discards" })
-    core.echoTestAction(`get the last card of the stock`)
+    core.echoTestAction(`get the top card of the stock`)
     const it2 = stock.lastItem
     core.echoTestAction(`add it to the discards`)
     discards.append(it2)
@@ -412,20 +408,13 @@ export class Solitaire extends App {
 
   draw() {
     return [
-      h("ui-segment", { inverted: true, attach: "top", color: "" },
-        h("ui-toolbar", {
-          class: "GameBar",
-          "aria-label": "Game",
-          appearance: "pills",
-          inverted: true,
-          size: "small",
-          shrinkable: true
-        },
-          h("ui-text", { slot: "title", size: "large", heavy: true }, "Solitaire"),
-          core.drawAction(this, "autoPlay", { "in-menu": true }),
+      h("ui-segment", { inverted: true, attach: "top" },
+        h("ui-toolbar", { class: "GameBar", appearance: "pills", inverted: true, size: "small", shrinkable: true },
+          h("ui-text", { slot: "title", size: "large", heavy: true }, "Spell Solitaire"),
           core.drawAction(this, "cheat", { "in-menu": true }),
-          core.drawAction(this, "restartTheGame", { "in-menu": true }),
-          h("ui-action", { kind: "divider" }),
+          core.drawAction(this, "autoPlay", { "in-menu": true }),
+          core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true }),
+          h("spacer"),
           core.drawAction(this, "undo", { "in-menu": true }),
           core.drawAction(this, "redo", { "in-menu": true }),
           h("ui-text", { slot: "right" }, "Score: ", () => this.score)
@@ -450,7 +439,7 @@ export class Solitaire extends App {
       core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])
     ]
   }
-  // <number "score"/>
+  // <number "score" />
   static { this.declareProp("score", { type: "number" }) }
   get score() { return this.getProp("score") }
   set score(value) { this.setProp("score", value) }

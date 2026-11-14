@@ -21,6 +21,7 @@ export const titleVocabulary = {
   topics: ["content parts", "typography", "containers"],
   aka: ["accordion title", "summary", "toggle header"],
   noun: "title",
+  partOfSpeech: "property",
   ui: false,
   description: "A title:  a step's, an accordion panel's, a search result's.",
   attributes: [

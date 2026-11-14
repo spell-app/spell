@@ -24,6 +24,7 @@ export const columnVocabulary = {
   topics: ["layout", "collections"],
   aka: ["grid column", "col", "cell"],
   noun: "column",
+  partOfSpeech: "structure",
   description: "A column is a vertical cell of a grid, N of 16 wide.",
   attributes: [
     {

@@ -295,7 +295,7 @@ export class MarkupMarks extends TextMarks {
       } else this.value(attribute.valueStart, attribute.valueEnd!, attribute.isQuoted, partOfSpeech, into)
     }
     this.tags.push({ start: from, end })
-    if (tag.selfClosing) this.mark(end - 2, end - 1, SLASH + declares)
+    if (tag.selfClosing) this.mark(end - 2, end - 1, `${SLASH} ${CLOSING_SLASH}${declares}`)
     this.mark(end - 1, end, ends === "self-closed" ? HIDDEN : ANGLE_CLOSE + declares)
   }
 
@@ -312,7 +312,7 @@ export class MarkupMarks extends TextMarks {
     this.mark(start, start + 1, HIDDEN)
     // an attribute's room before its `/`, as on the page;  none where its start tag's `>` starts its line
     const spacers: Spacers = this.startsLine(start - 1) ? {} : { before: spacer("attribute", "before") }
-    this.mark(start + 1, start + 2, SLASH + declares, spacers)
+    this.mark(start + 1, start + 2, `${SLASH} ${CLOSING_SLASH}${declares}`, spacers)
     this.mark(start + 2, end - 1, HIDDEN)
     this.mark(end - 1, end, ANGLE_CLOSE + declares)
   }
@@ -355,7 +355,8 @@ export class MarkupMarks extends TextMarks {
       before: spacer("input", "before"),
       after: spacer("input", "after")
     })
-    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
+    if (place >= 0)
+      into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
   }
 
   ////////////////
@@ -484,6 +485,9 @@ const ANGLE_CLOSE = `${MARK} bubbly-angle bubbly-angle-close`
 
 /** An end tag's `/`, and `<br />`'s. */
 const SLASH = `${MARK} bubbly-slash`
+
+/** A self-closed tag's `/`, snug against its `>`:  `/⟩` one glyph (Owen, 2026-11-14). */
+const CLOSING_SLASH = "bubbly-closing-slash"
 
 /** A tag that declares the member it draws:  its pill round, its brackets and `/` not drawn (epic `editor` I84). */
 const DECLARES = "bubbly-tag-declares"

@@ -59,16 +59,16 @@ describe("<AppBarMenus>", () => {
     const items = [...file()!.children].map((item) =>
       item.getAttribute("kind") === "divider" ? "─" : `${rowText(item)} ${item.getAttribute("shortcut") ?? ""}`
     )
-    // Owen, epic `mockup`:  exactly these;  Revert Changes names the file open, when there is one
+    // Owen, epic `mockup`:  exactly these;  Discard Changes under Save (Owen, epic `editor` I96)
     expect(items.map((item) => item.trim())).toEqual([
       `New Spell File ${EDITOR_HOTKEYS.createFile.shortcut}`,
       "New CSS File",
       "─",
       `Save ${EDITOR_HOTKEYS.saveAll.shortcut}`,
+      `Discard Changes ${EDITOR_HOTKEYS.revertChanges.shortcut}`,
       "AutoSave",
       "─",
-      "Duplicate File",
-      `Revert Changes ${EDITOR_HOTKEYS.revertChanges.shortcut}`
+      "Duplicate File"
     ])
     expect(EDITOR_HOTKEYS.createFile.shortcut).toBe("alt+mod+N")
 

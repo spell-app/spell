@@ -43,6 +43,7 @@ export const keysVocabulary = {
   topics: ["text", "typography"],
   aka: ["kbd", "keyboard shortcut", "key caps", "hotkey", "accelerator"],
   noun: "keys",
+  partOfSpeech: "property",
   description: "Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.",
   attributes: [
     {

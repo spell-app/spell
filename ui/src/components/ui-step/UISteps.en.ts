@@ -28,6 +28,7 @@ export const stepsVocabulary = {
   aka: ["stepper", "wizard", "progress steps", "checkout steps"],
   skeleton: "5 tall",
   noun: "steps",
+  partOfSpeech: "structure",
   description: "A set of steps shows the progress of an activity in a series of steps.",
   attributes: [
     {

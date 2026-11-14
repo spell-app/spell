@@ -1,5 +1,5 @@
 import { For, Show, createEffect, createSignal } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { render, type JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
 import { editor, runtimeConsole } from "spell/app/app/editor"
@@ -27,6 +27,7 @@ import {
 import { EDITOR_HOTKEYS, runCodeEditorAction } from "spell/app/app/pages/editorHotkeys"
 import { CodeOutputShown } from "spell/app/app/solid/CodeOutput"
 import { loadEditorSpell, type EditorSpell, type SpellEditorApp } from "spell/app/app/layout/layoutSpell"
+import { uiReady } from "spell/app/app/solid/loadUI"
 
 import "./MenuBar.css"
 
@@ -139,7 +140,8 @@ function Divider(): JSX.Element {
  * (Owen, 2026-11-06:  "Change the Spell menu in the editor to show the Examples menu").
  * - Opens the project's group's projects (`<ProjectsMenu>`):
  *   the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more.
- * - At its top, Home (`Actions.showProjectChooser`), where the hat linked to before;
+ * - At its very top, About Spell (`SpellEditor.spell`'s `about menu`), which shows its `about box` (epic `editor` I94).
+ * - Then Home (`Actions.showProjectChooser`), where the hat linked to before;
  *   then New Example (`Actions.createApp`:  New Guide among the guides), above the projects it adds to
  *   (Owen, 2026-11-14:  "Home and New Example should be at the top rather than the bottom").
  * - `useRunner`:  the one chosen opens in Run.
@@ -149,6 +151,7 @@ function Divider(): JSX.Element {
 export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
   const root = trackProjectRoot(() => undefined)
   const shown = followTabTitle()
+  const spell = editorSpell()
   return (
     <BarMenu
       id="SpellBarMenu"
@@ -159,6 +162,7 @@ export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
       label={<AppMarkLabel />}
       panel={() => (
         <div class="SpellMenuPanel">
+          <SpellMenu spell={spell()} view={(app) => app.aboutMenu} />
           {/* ticks:  room for one, as the projects have, so the icons line up with theirs */}
           <ui-menu
             direction="vertical"
@@ -332,7 +336,7 @@ function ThemeItems(): JSX.Element {
  * - What each row does is the editor's, handed over by its name (`handOverActions()`).
  * - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them:
  *   Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards.
- * - File:  New Spell File, New CSS File, ─, Save, AutoSave, ─, Duplicate File, Revert Changes to the file open.
+ * - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File.
  * - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings….
  * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Program Panel, ─, the Inspector and its cards, ─, Line Numbers;  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
@@ -351,10 +355,9 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
       })
     )
   })
-  const fileName = tracked(() => (editor.file ? SP.SpellProject.sourceNameOf(editor.file.path) : ""))
   followEditor(spell, () => ({
     canRevert: editor.canRevertChanges,
-    revertWords: fileName() ? appTexts.text("revertChangesTo", { file: fileName() }) : appTexts.text("revertChanges"),
+    revertWords: appTexts.text("revertChanges"),
     autoSaving: editor.isAutoSaving,
     unsaved: editor.hasUnsavedEdits,
     mayCreate: editor.mayCreate && (!isStaticBuild || editor.canChangeProject),
@@ -488,7 +491,7 @@ export function startInspecting() {
  */
 export function editorSpellWithActions(): Promise<EditorSpell> {
   loadingWithActions ??= loadEditorSpell().then((spell) => {
-    handOverActions(spell.editor)
+    handOverActions(spell)
     return spell
   })
   return loadingWithActions
@@ -529,8 +532,10 @@ function followEditor(spell: () => EditorSpell | undefined, values: () => Record
  * - Each starts its work and returns (`started()`):  a dialog it opens (Rename's) never holds the next row's click.
  * - SIDE EFFECT:  once, as the Spell loads.
  */
-function handOverActions(app: SpellEditorApp) {
+function handOverActions(spell: EditorSpell) {
+  const app = spell.editor
   const actions: Record<string, () => unknown> = {
+    aboutSpell: () => showAboutSpell(spell),
     renameProject: () => editor.renameApp(),
     deleteProject: () => editor.deleteApp(),
     duplicateProject: () => editor.duplicateApp(),
@@ -572,6 +577,28 @@ function handOverActions(app: SpellEditorApp) {
     clearConsole: () => runtimeConsole()?.clear()
   }
   for (const [name, work] of Object.entries(actions)) app[name] = () => started(work())
+}
+
+/**
+ * Spell › About Spell…:  `SpellEditor.spell`'s `about box`, a `<ui-modal>` drawn in `<body>`, removed once it closes.
+ * - What it says is the Spell's, to change there;  its version is the editor's (`__PACKAGE_VERSION__`).
+ */
+async function showAboutSpell(spell: EditorSpell): Promise<void> {
+  await uiReady
+  const box = spell.editor.aboutBox
+  box.version = __PACKAGE_VERSION__
+  const host = document.createElement("div")
+  host.className = "AboutSpell"
+  document.body.append(host)
+  const dispose = render(() => spell.drawInPlace(box) as JSX.Element, host)
+  host.addEventListener(
+    "ui-closed",
+    () => {
+      dispose()
+      host.remove()
+    },
+    { once: true }
+  )
 }
 
 /** Let `work` go on by itself:  a failure shows as the editor shows errors. */

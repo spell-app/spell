@@ -1,4 +1,4 @@
-import { Show, createEffect, createSignal, onCleanup } from "solid-js"
+import { createEffect, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { Dragging } from "spell/util/Dragging"
@@ -21,6 +21,8 @@ import "./FileTabs.css"
  * This is the editor's side of them, which Spell can't reach yet (epic `editor`'s Backing In Spell):
  * - which files there are, and which is showing (`trackProjectFiles()`), kept in the bar's files as they change
  * - what showing one does:  `editor.showEditor()`
+ * - a drafted file's pen's tip, in the page's language:  "Updated in your draft.", and its link, Discard changes,
+ *   which discards THAT file's draft (`editor.discardDraftOf()`;  epic `editor` I92)
  * - the bar's ⋯ (`<CodeMoreMenu>`)
  * - A tab's right-click menu is the Spell's too, a `<context-menu>` inside each tab:  Duplicate, Rename, Delete,
  *   the app's actions, which the editor does (`editorSpellWithActions()`);  the page's right click on the bar finds it.
@@ -50,9 +52,14 @@ export function FileTabs() {
     (problem: unknown) => console.error("<FileTabs>:  can't load its Spell", problem)
   )
 
+  const tipWords = tracked(() => ({
+    note: appTexts.text("updatedInYourDraft"),
+    discard: appTexts.text("discardChanges")
+  }))
+
   createEffect(
-    () => [bar(), state(), drafted(), spell()] as const,
-    ([it, { files, path }, drafts, loaded]) => {
+    () => [bar(), state(), drafted(), spell(), tipWords()] as const,
+    ([it, { files, path }, drafts, loaded, words]) => {
       if (!it || !loaded) return
       it.rememberAs = `file-tabs:${editor.project?.path ?? ""}`
       const File = loaded.exports.File as new () => TabFile
@@ -65,14 +72,35 @@ export function FileTabs() {
         // not saved beats a draft:  the dot, else the ring (epic `editor` I44)
         file.status = each.isDirty ? "changed" : drafts.includes(each.path) ? "drafted" : "saved"
         file.place = each.path === path ? "chosen" : "other"
-        file.show = () => editor.showEditor(file.path)
+        file.draftNote = words.note
+        file.discardWords = words.discard
+        // a click in the tab's tip (Discard changes) is the tip's alone:  it doesn't show the tab's file too
+        file.show = () => {
+          if (!clickedInTip) editor.showEditor(file.path)
+        }
+        file.discard = () => void editor.discardDraftOf(file.path)
         return file
       })
     }
   )
 
-  /** The tab `event` happened on, and its file. */
+  /**
+   * Was the click going on now in a tab's tip (`<ui-popup>`), not the tab itself?  Noted as it starts down the page.
+   * - The tip is inside its tab, so its click reaches the tab:  it neither shows the tab's file nor chooses the tab.
+   */
+  let clickedInTip = false
+  const noteClick = (event: MouseEvent) => {
+    clickedInTip = isInTip(event)
+  }
+  /** The bar choosing a tab (its `ui-choosing`) for a click in its tip:  it doesn't. */
+  const keepChoice = (event: Event) => {
+    const { originalEvent } = (event as CustomEvent<{ originalEvent?: Event }>).detail ?? {}
+    if (originalEvent && isInTip(originalEvent)) event.preventDefault()
+  }
+
+  /** The tab `event` happened on, and its file;  none for an event in a tab's tip. */
   const tabOf = (event: Event) => {
+    if (isInTip(event)) return undefined
     const tab = event.composedPath().find((at) => (at as Element).localName === "ui-item") as HTMLElement | undefined
     if (!tab?.parentElement) return undefined
     // by its place among the TABS:  the bar's ⋯ (a `<ui-dropdown>`) sits among them too (epic `editor` T50)
@@ -126,7 +154,15 @@ export function FileTabs() {
     if (file) editor.showEditor(file.path)
   }
   return (
-    <div class="FileTabs" onContextMenu={showTabFile} onPointerDown={startDrag}>
+    <div
+      class="FileTabs"
+      ref={(div) => {
+        div.addEventListener("click", noteClick, { capture: true })
+        div.addEventListener("ui-choosing", keepChoice)
+      }}
+      onContextMenu={showTabFile}
+      onPointerDown={startDrag}
+    >
       {(() => {
         const loaded = spell()
         if (!loaded) return null
@@ -137,32 +173,6 @@ export function FileTabs() {
   )
 }
 
-/****************
- * ### `<YourDraftNote>`
- * "Your draft", with Discard beside it, under the file tabs while the file showing is your draft (epic `mockup` P20).
- * - A sibling of `<FileTabs>`, never inside it:  the tabs' box is the bar's height, and clips what's below.
- ****************/
-export function YourDraftNote() {
-  const state = trackProjectFiles()
-  const drafted = tracked(() => editor.draftedFiles ?? [])
-  const showsDraft = () => {
-    const { path } = state()
-    return !!path && drafted().includes(path)
-  }
-  return (
-    <Show when={showsDraft()}>
-      <div class="YourDraft" title={appTexts.text("yourDraftTip")}>
-        <ui-label size="small" color="yellow" appearance="basic">
-          {appTexts.text("yourDraft")}
-        </ui-label>
-        <ui-button size="mini" appearance="basic" onClick={() => void editor.discardChanges()}>
-          {appTexts.text("discard")}
-        </ui-button>
-      </div>
-    </Show>
-  )
-}
-
 /** A `file` of `SpellEditor.spell`, as its compiled class has it. */
 type TabFile = {
   path: string
@@ -170,8 +180,14 @@ type TabFile = {
   icon: string
   status: "saved" | "changed" | "drafted"
   place: "chosen" | "other"
+  /** What its pen's tip says:  "Updated in your draft.", in the page's language. */
+  draftNote: string
+  /** Its tip's link:  "Discard changes", in the page's language. */
+  discardWords: string
   /** Spell's `show it`, which the editor fills in. */
   show: () => void
+  /** Spell's `discard it`, its tip's link:  your draft of it goes (`editor.discardDraftOf()`). */
+  discard: () => void
 }
 
 /** The `file tab bar` of `SpellEditor.spell`, as its compiled class has it. */
@@ -180,6 +196,11 @@ type FileTabBar = {
   /** The code pane's ⋯, an editor part (`EditorSpell.parts()`). */
   more: object
   rememberAs: string
+}
+
+/** Is `event` in a tab's tip, the `<ui-popup>` by its pen? */
+function isInTip(event: Event): boolean {
+  return event.composedPath().some((at) => (at as Element).localName === "ui-popup")
 }
 
 /** On a tab being dragged. */

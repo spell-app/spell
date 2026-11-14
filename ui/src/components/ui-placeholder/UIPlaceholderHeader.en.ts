@@ -19,6 +19,7 @@ export const placeholderHeaderVocabulary = {
   topics: ["loading", "content parts", "elements"],
   aka: ["skeleton heading"],
   noun: "header",
+  partOfSpeech: "property",
   ui: false,
   description: "The skeleton of a header:  a block of taller, shorter lines, optionally beside an image.",
   attributes: [{ name: "image", group: "content", kind: "keyOnly", description: "A square image beside the lines." }],

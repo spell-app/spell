@@ -8,7 +8,7 @@ import { P } from "spell/parser/parser"
 import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { JSX } from "./JSX.parser"
-import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { SPELL_ATTRIBUTE_MEANINGS, SPELL_ATTRIBUTE_WORDS, SPELL_TAG_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
 import { ActionButton } from "./ActionButton"
 import { ContextMenuBlock } from "./ContextMenuBlock"
 import { ExampleBlock } from "./ExampleBlock"
@@ -29,7 +29,7 @@ JSX.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_TAG_
 })
 
 // spell's own attribute words, each meaning the web's attribute:  `<h3 in="header">` => `<h3 slot="header">`
-JSX.addRule(Wording.specialize({ ruleName: SPELL_ATTRIBUTE_WORDS, meanings: SPELL_JSX_MEANINGS }), {
+JSX.addRule(Wording.specialize({ ruleName: SPELL_ATTRIBUTE_WORDS, meanings: SPELL_ATTRIBUTE_MEANINGS }), {
   syntax: "((slot:in)|slot)"
 })
 

@@ -19,6 +19,7 @@ const pageOwnVocabulary = {
   topics: ["layout", "containers", "navigation"],
   aka: ["page", "app shell", "body", "layout", "frame", "landmarks", "holy grail layout"],
   noun: "page",
+  partOfSpeech: "structure",
   description:
     "A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a " +
     "landmark screen readers jump between.  It's a root too:  it loads the components inside it.",

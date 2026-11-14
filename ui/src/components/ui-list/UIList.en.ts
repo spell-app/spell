@@ -26,6 +26,7 @@ export const listVocabulary = {
   aka: ["ul", "ol", "bullet list", "list view"],
   skeleton: "3 line paragraph",
   noun: "list",
+  partOfSpeech: "structure",
   description: "A list groups related content.",
   attributes: [
     {

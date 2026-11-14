@@ -15,6 +15,7 @@ export const siteTabsVocabulary = {
   topics: ["navigation", "menus"],
   aka: ["page tabs", "section tabs", "sub navigation", "secondary navigation", "local navigation", "sibling pages"],
   noun: "site tabs",
+  partOfSpeech: "structure",
   description:
     "Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.",
   attributes: [

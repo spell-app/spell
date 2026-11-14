@@ -185,7 +185,7 @@
       "kind": "method",
       "name": "jugar una carta",
       "waits": true,
-      "defined": "/Solitario.es.spell:3312-3597"
+      "defined": "/Solitario.es.spell:3318-3603"
     },
     {
       "syntax": "poner {thisArg:expression} en {callArgs:expression}",
@@ -207,7 +207,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitario.es.spell:3600-4385"
+      "defined": "/Solitario.es.spell:3606-4391"
     },
     {
       "syntax": "contar los puntos (de|del) {thisArg:expression} en {callArgs:expression}",
@@ -228,7 +228,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:6193-6427"
+      "defined": "/Solitario.es.spell:6199-6433"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -244,20 +244,20 @@
       "superType": "List",
       "gender": "masculine",
       "itemType": "Carta",
-      "defined": "/Mazo.es.spell:79-973"
+      "defined": "/Mazo.es.spell:79-953"
     },
     {
       "kind": "method",
       "name": "crear un mazo",
       "returns": "nothing",
-      "defined": "/Mazo.es.spell:113-373"
+      "defined": "/Mazo.es.spell:113-353"
     },
     {
       "property": "nombre_corto",
       "asWritten": "nombre corto",
       "of": "Mazo",
       "datatype": "text",
-      "defined": "/Mazo.es.spell:375-596"
+      "defined": "/Mazo.es.spell:355-576"
     },
     {
       "syntax": "probar la creación (del|de el) mazo",
@@ -266,14 +266,14 @@
       "alias": "statement",
       "kind": "function",
       "name": "la creación del mazo",
-      "defined": "/Mazo.es.spell:599-973"
+      "defined": "/Mazo.es.spell:579-953"
     },
     {
       "type": "Pila",
       "superType": "ViewableList",
       "gender": "feminine",
       "itemType": "Carta",
-      "defined": "/Pila.es.spell:377-1858"
+      "defined": "/Pila.es.spell:377-1861"
     },
     {
       "property": "disposición",
@@ -310,7 +310,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "las pilas",
-      "defined": "/Pila.es.spell:1047-1858"
+      "defined": "/Pila.es.spell:1047-1861"
     },
     {
       "property": "pila",
@@ -318,42 +318,42 @@
       "group": "Una pila de cartas",
       "datatype": "Pila",
       "exclusive": true,
-      "defined": "/Pila.es.spell:1860-1890"
+      "defined": "/Pila.es.spell:1863-1893"
     },
     {
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7198-7511"
+      "defined": "/Solitario.es.spell:7204-7517"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7513-7720"
+      "defined": "/Solitario.es.spell:7519-7726"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7722-8228"
+      "defined": "/Solitario.es.spell:7728-8234"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:7838-7867"
+      "defined": "/Solitario.es.spell:7844-7873"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:8230-8559"
+      "defined": "/Solitario.es.spell:8236-8565"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:427-6741"
+      "defined": "/Solitario.es.spell:427-6747"
     },
     {
       "property": "mazo",
@@ -473,7 +473,7 @@
       "kind": "method",
       "name": "repartir las cartas",
       "waits": true,
-      "defined": "/Solitario.es.spell:1846-2511"
+      "defined": "/Solitario.es.spell:1846-2514"
     },
     {
       "syntax": "robar de la reserva ((de|del) {thisArg:expression})?",
@@ -489,7 +489,7 @@
       "name": "robar de la reserva",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitario.es.spell:2514-3028"
+      "defined": "/Solitario.es.spell:2517-3034"
     },
     {
       "syntax": "rehacer la reserva ((de|del) {thisArg:expression})?",
@@ -504,7 +504,7 @@
       "kind": "method",
       "name": "rehacer la reserva",
       "returns": "nothing",
-      "defined": "/Solitario.es.spell:3031-3293"
+      "defined": "/Solitario.es.spell:3037-3299"
     },
     {
       "syntax": "jugar solo ((de|del) {thisArg:expression})?",
@@ -520,7 +520,7 @@
       "name": "jugar solo",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitario.es.spell:4388-5513"
+      "defined": "/Solitario.es.spell:4394-5519"
     },
     {
       "syntax": "hacer trampa ((de|del) {thisArg:expression})?",
@@ -536,7 +536,7 @@
       "name": "hacer trampa",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitario.es.spell:5516-6190"
+      "defined": "/Solitario.es.spell:5522-6196"
     },
     {
       "syntax": "probar los movimientos",
@@ -545,7 +545,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:8561-10117"
+      "defined": "/Solitario.es.spell:8567-10123"
     }
   ],
   "codeLines": [

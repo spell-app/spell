@@ -66,7 +66,7 @@ solitario es una aplicación
 		// la primera carta de cada fila cae boca abajo, y se voltea donde queda
 		para fila desde 1 hasta 7
 			para lugar desde fila hasta 7
-				agregar la última carta de la reserva al elemento lugar de las columnas
+				agregar la carta de arriba de la reserva al elemento lugar de las columnas
 				si lugar es igual a fila
 					voltear la última carta de (el elemento lugar de las columnas) boca arriba
 				pausar 50 mseg
@@ -77,7 +77,7 @@ solitario es una aplicación
 		// - un clic en la reserva, un paso para deshacer;  el del reparto ninguno, pues empieza el juego
 		si la reserva está vacía
 			rehacer la reserva
-		obtener la última carta de la reserva
+		obtener la carta de arriba de la reserva
 		voltear eso boca arriba
 		// lo que tarda su giro (styles.css), así se voltea antes de moverse
 		pausar 300 mseg

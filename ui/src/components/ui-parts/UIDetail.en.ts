@@ -21,6 +21,7 @@ export const detailVocabulary = {
   topics: ["content parts", "text"],
   aka: ["secondary text", "note"],
   noun: "detail",
+  partOfSpeech: "property",
   ui: false,
   description: "A label's dimmer second value, e.g. a count.",
   attributes: [

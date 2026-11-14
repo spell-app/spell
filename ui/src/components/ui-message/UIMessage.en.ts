@@ -26,6 +26,7 @@ export const messageVocabulary = {
   aka: ["alert", "callout", "notice", "banner", "info box", "error message"],
   skeleton: "header, long line",
   noun: "message",
+  partOfSpeech: "structure",
   description: "A message displays information that explains nearby content.",
   attributes: [
     {

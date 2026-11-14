@@ -19,6 +19,7 @@ export const videoVocabulary = {
   topics: ["media", "elements"],
   aka: ["video", "movie", "clip", "player", "video player"],
   noun: "video",
+  partOfSpeech: "property",
   description: "A video plays a video file in the browser's own player.",
   attributes: [
     ...MediaAttributes,

@@ -27,6 +27,7 @@ export const modalVocabulary = {
   topics: ["dialogs", "overlays", "popups", "modules"],
   aka: ["dialog", "popup window", "lightbox", "confirm", "alert dialog"],
   noun: "modal",
+  partOfSpeech: "structure",
   description: "A modal displays content that temporarily blocks interactions with the main view of a site.",
   attributes: [
     {

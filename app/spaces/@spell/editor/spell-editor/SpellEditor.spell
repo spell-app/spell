@@ -13,6 +13,8 @@ spell editor is an app
 	"edit menu" is a new edit menu
 	"view menu" is a new view menu
 	"run menu" is a new run menu
+	"about menu" is a new about menu
+	"about box" is a new about box
 
 	group "What the Menus Follow"
 	// The editor's state, which the menus grey and tick by:  the editor keeps each in step
@@ -61,13 +63,16 @@ spell editor is an app
 	group "Titles That Follow"
 	// The editor writes each in the page's language
 	its "revert words" is text
-		// Revert Changes to the file open
+		// Discard Changes, under Save
 	its "rename words" is text
 		// Rename the project…
 	its "delete words" is text
 		// Delete the project…
 	its "duplicate words" is text
 		// Duplicate the project
+
+	group "Spell"
+	to "about spell" with title "About Spell…", icon "info circle"
 
 	group "The Project"
 	to "rename project" with title "[its rename words]", icon "edit outline"
@@ -218,12 +223,18 @@ a "file" is a thing
 		it "is (status)"
 	its "place" is one of chosen or other
 		it "is (place)"
+	its "draft note" is text
+		// What its pen's tip says, "Updated in your draft.", in the page's language:  the editor's own
+	its "discard words" is text
+		// The tip's link, "Discard changes", in the page's language:  the editor's own
 	to show it
+	to discard it
+		// Your draft of it goes, back to what's published:  the editor's own
 
 a "file list" is a viewable list of files
 	// Every file of the project, a tab each:  a click shows it;  a right click shows it, and its menu
 	to draw each item
-		<item icon={the icon of the file} selected={the file is chosen} onClick={show the file}>
+		<item icon={the icon of the file} label={the name of the file} selected={the file is chosen} onClick={show the file}>
 			<context-menu>
 				<action "duplicate file"/>
 				<action "rename file"/>
@@ -231,14 +242,22 @@ a "file list" is a viewable list of files
 			</>
 			{the name of the file}
 			<if the file is changed><span class="NotSaved"/></if>
-			<if the file is drafted><span class="Drafted"><icon name="fa7-free:pen-to-square"/></span></if>
+			<if the file is drafted>
+				<span class="Drafted">
+					<icon name="fa7-free:pen-to-square"/>
+					<popup class="DraftTip" position="bottom center">
+						{the draft note of the file}
+						<button appearance="tertiary" color="primary" size="small" onClick={discard the file}>{the discard words of the file}</>
+					</popup>
+				</span>
+			</if>
 		</item>
 
 a "file tab bar" is a view
 	// Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
 	// Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
 	// With more files than fit the bar's limit, only the ones opened lately are tabs;  the ▾ beside them lists every file.
-	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14).
+	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14):  hovered, it says so, with a link that discards that file's draft (I92).
 	// The bar's ⋯ is at its right, which compiled code to show beside the code.
 	// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 	"files" is a new file list
@@ -256,10 +275,12 @@ a "file tab bar" is a view
 			border-radius: 50%;
 			background: var(--ui-warning, var(--ui-orange, #f2994a));
 		}
-		/* a tab whose file is your draft, saved but not published:  a pen on a square, small, in the theme's primary hue */
+		/* a tab whose file is your draft, saved but not published:  a pen on a square, small, in the theme's primary hue;  its tip, the popup, as any */
 		.Drafted {
 			display: inline-flex;
 			margin-inline-start: 6px;
+		}
+		.Drafted > ui-icon {
 			font-size: 0.8em;
 			color: var(--ui-primary, var(--ui-blue, #2185d0));
 		}
@@ -285,6 +306,32 @@ a "file tab bar" is a view
 				{draw its more}
 			</toolbar>
 		</panel>
+
+an "about menu" is a view
+	// The top of Spell's menu, above Home and New Example:  About Spell
+	to draw it
+		<menu direction="vertical" size="small" class="SpellMenuAbout" ticks>
+			<action "about spell"/>
+			<divider/>
+		</menu>
+
+an "about box" is a view
+	// What Spell › About Spell… shows:  what Spell is, its version, and where to read more.
+	// Change what it says right here:  the editor shows it as it's drawn.
+	its "version" is text
+		// The editor's version, "0.8.9":  the editor's own
+	to draw it
+		<modal heading="About Spell" size="tiny" closable visible>
+			<content>
+				<text paragraph>Write programs in plain words, and see them run as you type.</text>
+				<text paragraph>Spell draws with Spell UI, and runs in your browser.</text>
+				<text color="grey">Version {its version}</text>
+			</content>
+			<actions>
+				<button appearance="tertiary" link="https://github.com/spell-app/spell" target="_blank" icon="github">Source</button>
+				<button class="approve" color="primary">OK</button>
+			</actions>
+		</modal>
 
 a "project menu" is a view
 	// The project's own menu, under its name before File:  what's about the whole project, not the file open (Owen, epic `mockup`)
@@ -328,10 +375,10 @@ a "file menu" is a bar menu
 				<divider/>
 			</if>
 			<if spell editor's may design><action "save"/></if>
+			<action "revert changes"/>
 			<action "auto save"/>
 			<divider/>
 			<if spell editor's may change project><action "duplicate file"/></if>
-			<action "revert changes"/>
 		</menu>
 
 an "edit menu" is a bar menu

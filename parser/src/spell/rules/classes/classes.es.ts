@@ -1083,6 +1083,31 @@ classesEs.addRule(NewThing, {
         ["un nuevo Object", "new Object()"],
         ["un nuevo object con x = 1, b = sí", "new Object({ x: 1, b: true })"]
       ]
+    },
+    {
+      title: "una propiedad nombrada sola toma la variable de su nombre, salvo un sí o no (épica `language` T121)",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            'una "carta" es una cosa',
+            '\tsu "rango" es un número',
+            '\tsu "palo" es texto',
+            '\tsu "boca arriba" es sí o no'
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("rango")
+        scope.variables?.add("palo")
+        scope.variables?.add("boca arriba")
+      },
+      tests: [
+        ["una nueva carta con rango y palo", "new Carta({ rango: rango, palo: palo })"],
+        [
+          "una nueva carta con rango, palo y boca arriba",
+          ["new Carta({", "  rango: rango,", "  palo: palo,", "  bocaArriba: true", "})"]
+        ]
+      ]
     }
   ]
 })

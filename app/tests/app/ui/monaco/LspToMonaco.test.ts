@@ -155,7 +155,7 @@ describe("LspToMonaco", () => {
 
     test("rename => one edit per use, by file", () => {
       const file = workspace.fileFor(deckUri)!
-      const edit = service.rename(file, at("the rank, suit", 4), "level")
+      const edit = service.rename(file, at("of the card to", 7), "level")
       const edits = LspToMonaco.workspaceEdit(edit!).edits as Array<{ resource: { scheme: string } }>
       expect(edits.length).toBeGreaterThan(1)
       expect(new Set(edits.map((it) => it.resource.scheme))).toEqual(new Set(["file"]))

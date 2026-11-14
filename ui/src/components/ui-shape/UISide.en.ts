@@ -20,6 +20,7 @@ export const sideVocabulary = {
   topics: ["animation", "content parts", "modules"],
   aka: ["shape side", "face"],
   noun: "side",
+  partOfSpeech: "structure",
   ui: false,
   description: "One side of a shape.",
   attributes: [],

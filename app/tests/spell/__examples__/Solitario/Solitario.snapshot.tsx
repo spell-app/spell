@@ -349,7 +349,7 @@ export function testLasPilas() {
 
     /** una carta está en una sola pila a la vez */
     const descartes = new Pila({ id: "descartes" })
-    core.echoTestAction(`obtener la última carta de la reserva`)
+    core.echoTestAction(`obtener la carta de arriba de la reserva`)
     const it2 = reserva.lastItem
     core.echoTestAction(`agregar eso a los descartes`)
     descartes.append(it2!)

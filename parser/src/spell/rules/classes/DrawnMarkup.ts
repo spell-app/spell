@@ -138,6 +138,8 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
     for (const attribute of (at.data as { attributes?: Array<P.Match | undefined> }).attributes ?? []) {
       const ast = attribute?.AST
       if (!(ast instanceof P.ASTJSXAttribute) || ast.name === "id" || !(ast.value instanceof P.ASTExpression)) continue
+      // what it says to draw nothing isn't the new view's (T123)
+      if (declares.hidden && ast.name === "hidden") continue
       props.properties.push(new P.ASTObjectLiteralProperty(attribute!, { property: ast.name, value: ast.value }))
     }
     const made = new P.ASTNewInstanceExpression(at, {
@@ -147,8 +149,19 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
     return new P.ASTReactiveProperty(at, { type, property: declares.name, initializer: made })
   }
 
-  getAST(match: P.MatchFor<this>): P.ASTReturnStatement {
-    const markup = P.matchAST<P.ASTExpression>(match.groups.markup)
+  /** Is `markup` a tag that draws nothing:  a view it declares, hidden (`<deck "deck" hidden/>`, T123)? */
+  private static drawsNothing(markup: P.Match): boolean {
+    return !!(markup.data as { declares?: DrawnDeclaration }).declares?.hidden
+  }
+
+  /** `return <markup>`;  nothing for a view its tag declares hidden, `<deck "deck" hidden/>` (epic `language` T123). */
+  getAST(match: P.MatchFor<this>): P.ASTReturnStatement | P.ASTStatementGroup {
+    if (DrawnMarkup.drawsNothing(match.groups.markup)) return new P.ASTStatementGroup(match, { statements: [] })
+    let markup = P.matchAST<P.ASTExpression>(match.groups.markup)
+    // lines of markup beside a hidden one:  what's left, as it'd be drawn alone
+    const hidesOne = DrawnMarkup.declaredIn(match).some(({ declares }) => declares.hidden)
+    const [only, ...more] = markup instanceof P.ASTJSXFragment ? markup.childValues : []
+    if (hidesOne && only instanceof P.ASTJSXElement && !more.length) markup = only
     const { slot } = match.data
     return new P.ASTReturnStatement(match, { value: slot ? DrawIt.withPart(markup, slot) : markup })
   }

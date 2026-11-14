@@ -16,6 +16,7 @@ export const splitPanelVocabulary = {
   topics: ["layout", "containers"],
   aka: ["split view", "split pane", "resizable panes", "panes", "splitter", "sash"],
   noun: "split panel",
+  partOfSpeech: "structure",
   description: "A split panel lays its children out side by side or one above the other, with bars to resize them.",
   attributes: [
     {

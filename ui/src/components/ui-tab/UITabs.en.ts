@@ -32,6 +32,7 @@ export const tabsVocabulary = {
   aka: ["tab bar", "tab strip", "tabbed panel", "tab view"],
   skeleton: "medium line, 3 line paragraph",
   noun: "tabs",
+  partOfSpeech: "structure",
   description: "A tab is a hidden section of content activated by a menu.",
   attributes: [
     {

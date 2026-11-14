@@ -686,6 +686,7 @@ export class EditorStore extends Observable {
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
     else output.info(appTexts.text("consoleExecuted", words))
+    if (!error) followOnceDrawn()
     editor.showOpenPage()
   }
 
@@ -1154,17 +1155,28 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Your draft of current `file` goes, back to what's published (epic `editor` P24):
-   * Revert Changes with AutoSave on, and the file's draft label's Discard.
+   * Your draft of current `file` goes, back to what's published (epic `editor` P24):  Revert Changes with AutoSave on.
+   * - What `discardDraftOf()` does, for the file showing.
+   * - NEVER throws:  a failure is shown.
+   */
+  async discardChanges(): Promise<void> {
+    if (editor.file) await editor.discardDraftOf(editor.file.path)
+  }
+
+  /**
+   * Your draft of the file at `path` (`SpellFile.path`) of current `project` goes, back to what's published:
+   * the file showing's (`discardChanges()`), or any tab's, by its pen's tip's Discard changes (epic `editor` I92).
    * - One step of `editor.history`, so ⌘Z brings the changes back:
    *   discarding can't lose work (with AutoSave on, the next keep makes them your draft again).
    * - In the public preview, which keeps a visitor's edits in their browser:  back to where the file was when the
    *   project was opened (`StartingPoints`), as before drafts.
    * - Drawn as any other edit is:  the running app stays up.
+   * - A path that isn't a file of the project:  nothing happens.
    * - NEVER throws:  a failure is shown.
    */
-  async discardChanges(): Promise<void> {
-    const { file, project } = editor
+  async discardDraftOf(path: string): Promise<void> {
+    const { project } = editor
+    const file = project?.getFile(new SP.SpellLocation(path).filePath!)
     if (!file || !project) return
     let start = startingPoints.of(file.path)
     if (!isStaticBuild) {
@@ -1702,6 +1714,10 @@ export class EditorStore extends Observable {
       if (event.source === "mouse") followNow(event.selection.positionLineNumber)
       else followOnceRested(inputEditor)
     })
+    // typed or pasted here, not the side bar's edits through it:  the cursor's line is followed once it's drawn (I87)
+    inputEditor.onDidChangeModelContent(() => {
+      if (inputEditor.hasTextFocus()) followWhenRun = true
+    })
     editor.shownCodeEditor = inputEditor
     inputEditor.onDidScrollChange((event) => {
       if (event.scrollTopChanged) editor.onInputCursor("scroll")
@@ -1731,11 +1747,15 @@ export class EditorStore extends Observable {
   @prop()
   accessor followed: FollowedPlace | undefined
 
-  /** The code's cursor moved to line `lineNumber`, from 1, of the file showing:  the place in focus, if it's spell. */
-  followCodeLine(lineNumber: number): void {
+  /**
+   * The code's cursor moved to line `lineNumber`, from 1, of the file showing:  the place in focus, if it's spell.
+   * - `from`:  `"code"`, the cursor moved;  `"edit"`, it rests there as an edit typed in the code is drawn
+   *   (`followOnceDrawn()`).
+   */
+  followCodeLine(lineNumber: number, from: "code" | "edit" = "code"): void {
     const { file } = editor
     if (file instanceof SP.SpellFile) {
-      editor.followed = { path: SP.SpellProject.sourceNameOf(file.path), line: lineNumber - 1, from: "code" }
+      editor.followed = { path: SP.SpellProject.sourceNameOf(file.path), line: lineNumber - 1, from }
     }
   }
   /** Track cursor/scroll position in `inputEditor` -- see `onInputCursor()` below. */
@@ -2025,6 +2045,30 @@ function followOnceRested(inputEditor: monaco.editor.IStandaloneCodeEditor): voi
   }, CURSOR_REST_MS)
 }
 
+/** An edit typed or pasted in the code is waiting for the running app to take it:  `followOnceDrawn()`. */
+let followWhenRun = false
+
+/**
+ * The running app has taken the code's edits:  once it's drawn them, what's selected follows the cursor's line, once
+ * (epic `editor` I87;  Owen:  "after redraw, cursor was the row for one of the actions, but the action wasn't selected").
+ * - Only for an edit typed or pasted in the code (`followWhenRun`):  the side bar's and the palette's select their own.
+ * - A line that draws nothing leaves what's selected as it was (`from: "edit"`):  typing never lets go of it.
+ * - Still typing (the next compile waiting), a range selected, or the code gone:  the next run's drawing follows instead.
+ * - Two frames on:  the app's parts are walked a frame after it draws, and what was selected is selected again
+ *   (`Inspector.restoreSelection()`), so this comes after it.
+ */
+function followOnceDrawn(): void {
+  if (!followWhenRun) return
+  followWhenRun = false
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      const selection = inputEditorInstance?.getSelection()
+      if (editor.compileAppSoonTimer) followWhenRun = true
+      else if (selection?.isEmpty()) editor.followCodeLine(selection.positionLineNumber, "edit")
+    })
+  )
+}
+
 /** The `editor` singleton. */
 export const editor = new EditorStore({})
 // DEBUG:  `editor` at the devtools console
@@ -2074,8 +2118,11 @@ export type FollowedPlace = {
   path: string
   /** Its line, from 0 */
   line: number
-  /** Where the click was:  that one needn't follow itself. */
-  from: "code" | "output" | "parts"
+  /**
+   * Where the click was:  that one needn't follow itself.
+   * - `edit`:  the code's cursor, where it rests once an edit typed there is drawn (`followOnceDrawn()`)
+   */
+  from: "code" | "edit" | "output" | "parts"
 }
 
 /**

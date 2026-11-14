@@ -186,7 +186,8 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
  *   someone's typing in it.
  * - A line that draws or makes something selects it:  every card, for the line that makes them all;  a line inside
  *   a tag, what that tag draws.
- * - A line of the code that draws nothing lets go of what's selected;  one of compiled code leaves it as it was.
+ * - A line of the code that draws nothing lets go of what's selected;  one of compiled code leaves it as it was,
+ *   and so does the cursor's line once an edit typed there is drawn (`from: "edit"`, I87).
  ****************/
 export function FollowAlong() {
   const follower = lineFollower()
@@ -205,7 +206,7 @@ export function FollowAlong() {
         if (followed.from !== "parts")
           untrack(() => Inspector.selectWrittenAt(followed.path, followed.line, { ifNone }))
       }
-      if (followed.from === "code") return follower.clear()
+      if (followed.from === "code" || followed.from === "edit") return follower.clear()
       if (!codeEditor || codeEditor.hasTextFocus()) return
       const file = InspectorWrites.fileNamed(followed.path)
       if (!file) return

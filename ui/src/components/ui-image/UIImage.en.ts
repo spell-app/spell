@@ -28,6 +28,7 @@ export const imageVocabulary = {
   aka: ["picture", "img", "photo", "avatar", "thumbnail"],
   skeleton: "10 wide: square image",
   noun: "image",
+  partOfSpeech: "property",
   plural: "images",
   description: "An image is a graphic representation of something.",
   attributes: [

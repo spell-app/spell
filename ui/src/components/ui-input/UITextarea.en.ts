@@ -28,6 +28,7 @@ export const textareaVocabulary = {
   aka: ["multiline", "text area", "memo", "comment box"],
   skeleton: "20 x 6",
   noun: "input",
+  partOfSpeech: "action",
   description: "A textarea is a multi-line field used to elicit a longer response.",
   attributes: [
     {

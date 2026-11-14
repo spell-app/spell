@@ -20,6 +20,7 @@ export const rootVocabulary = {
   topics: ["layout", "containers", "loading", "basic"],
   aka: ["app shell", "app root", "provider", "loader", "lazy loading", "theme provider"],
   noun: "root",
+  partOfSpeech: "structure",
   description:
     "A root loads the components inside it on demand, sets their theme and size, and shows them once they're ready.",
   attributes: [

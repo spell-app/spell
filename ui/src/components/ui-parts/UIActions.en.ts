@@ -21,6 +21,7 @@ export const actionsVocabulary = {
   topics: ["content parts", "buttons", "dialogs"],
   aka: ["footer buttons", "button bar", "dialog actions"],
   noun: "actions",
+  partOfSpeech: "action",
   ui: false,
   description: "Actions a person can take:  a modal's or toast's buttons, a comment's reply links.",
   attributes: [],

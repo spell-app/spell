@@ -27,6 +27,7 @@ export const pushableVocabulary = {
   topics: ["layout", "navigation", "modules"],
   aka: ["sidebar container", "pushable area"],
   noun: "pushable",
+  partOfSpeech: "structure",
   ui: false,
   description: "The context a sidebar appears in:  it clips them and moves its pusher.",
   attributes: [],

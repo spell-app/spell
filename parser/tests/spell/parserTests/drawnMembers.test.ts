@@ -14,7 +14,11 @@ describe("members declared in a drawing", () => {
     return { errors: file!.errors, code: `${file!.compiled}` }
   }
 
-  const piles = ['a "pile" is a viewable list of things', '\tits "suit" is one of clubs or hearts', 'a "column" is a pile']
+  const piles = [
+    'a "pile" is a viewable list of things',
+    '\tits "suit" is one of clubs or hearts',
+    'a "column" is a pile'
+  ]
 
   test("a view's tag declares it, its attributes its starting values;  the actions above read it", () => {
     const { errors, code } = compiled([
@@ -29,7 +33,9 @@ describe("members declared in a drawing", () => {
       "\t\t</container>"
     ])
     expect(errors).toEqual([])
-    expect(code).toContain('static { this.declareProp("stock", { init: () => new Column({ id: "stock" }), early: true }) }')
+    expect(code).toContain(
+      'static { this.declareProp("stock", { init: () => new Column({ id: "stock" }), early: true }) }'
+    )
     expect(code).toContain('init: () => new Column({ id: "C1", suit: "clubs" })')
     expect(code).toContain("this.stock.randomize()")
   })
@@ -63,7 +69,40 @@ describe("members declared in a drawing", () => {
     expect(code.match(/declareProp\("score"/g)).toHaveLength(1)
   })
 
-  test("Spanish:  `<columna \"C1\"/>`, `<número \"puntuación\"/>`", () => {
+  test("a view's tag that says `hidden` declares it and draws nothing (epic `language` T123)", () => {
+    const { errors, code } = compiled([
+      ...piles,
+      "solitaire is an app",
+      "\tto draw it",
+      "\t\t<container>",
+      '\t\t\t<column "deck" hidden/>',
+      '\t\t\t<column "C1"/>',
+      "\t\t</container>",
+      '\t\t<column "spare" suit=clubs hidden/>'
+    ])
+    expect(errors).toEqual([])
+    expect(code).toContain(
+      'static { this.declareProp("deck", { init: () => new Column({ id: "deck" }), early: true }) }'
+    )
+    expect(code).toContain('init: () => new Column({ id: "spare", suit: "clubs" })')
+    expect(code).toContain('return h("container", h("test-project-column", { id: "C1" }))')
+    expect(code).not.toContain('h("test-project-column", { id: "deck" })')
+    expect(code).not.toContain("hidden: true")
+  })
+
+  test("a tag that declares nothing keeps its `hidden`", () => {
+    const { errors, code } = compiled([
+      ...piles,
+      "solitaire is an app",
+      '\t"stock" is a new column',
+      "\tto draw it",
+      '\t\t<column "stock" hidden/>'
+    ])
+    expect(errors).toEqual([])
+    expect(code).toContain('h("test-project-column", { hidden: true, id: "stock" })')
+  })
+
+  test('Spanish:  `<columna "C1"/>`, `<número "puntuación"/>`', () => {
     const { errors, code } = compiled(
       [
         'una "pila" es una lista visible de cosas',
@@ -77,5 +116,22 @@ describe("members declared in a drawing", () => {
     expect(errors).toEqual([])
     expect(code).toContain('init: () => new Columna({ id: "C1" })')
     expect(code).toContain('static { this.declareProp("puntuación", { type: "number" }) }')
+  })
+
+  test('Spanish:  `<columna "mazo" oculto/>` declares it and draws nothing', () => {
+    const { errors, code } = compiled(
+      [
+        'una "pila" es una lista visible de cosas',
+        'una "columna" es una pila',
+        "solitario es una aplicación",
+        "\tpara dibujarlo",
+        '\t\t<contenedor><columna "mazo" oculto/> <columna "C1"/></contenedor>'
+      ],
+      "/Prueba.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('init: () => new Columna({ id: "mazo" })')
+    expect(code).toContain('return h("contenedor", h("test-project-columna", { id: "C1" }))')
+    expect(code).not.toContain("hidden: true")
   })
 })

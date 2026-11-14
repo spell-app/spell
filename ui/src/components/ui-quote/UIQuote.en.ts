@@ -18,6 +18,7 @@ export const quoteVocabulary = {
   topics: ["text", "typography"],
   aka: ["blockquote", "quotation", "q", "pull quote", "citation"],
   noun: "quote",
+  partOfSpeech: "property",
   description: "A quote holds someone else's words:  a block of its own, or a few words inside a sentence.",
   attributes: [
     {

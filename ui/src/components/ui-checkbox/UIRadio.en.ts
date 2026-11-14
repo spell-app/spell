@@ -22,6 +22,7 @@ export const radioVocabulary = {
   aka: ["radio button", "option button", "radio group"],
   skeleton: "inline 6 x 1.25",
   noun: "checkbox",
+  partOfSpeech: "action",
   description: "A radio button chooses exactly one value of a group.",
   attributes: [
     ...LEADING_ATTRIBUTES,
