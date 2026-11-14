@@ -1,4 +1,5 @@
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { declaredPrefix } from "spell/parser/spell/rules/rules.types"
 import { MemberReadExpression } from "./MemberReadExpression"
 
@@ -14,6 +15,9 @@ import { MemberReadExpression } from "./MemberReadExpression"
  *   Named values and bare words beside a property went silently wrong when it could:  `this.side === this.front`.
  * - NEVER follows `it`:  in a loop, `the X` is still the action's thing, and `its X` the item's (Q4).
  * - `set the X to` writes it, for the same reason `Variable` steps aside for it (Q1).
+ * - An action written in an app's outline for another type (`to play a card`, in `solitaire is an app`) reads the
+ *   app's members too, when its thing hasn't one by those words:  `the stock` => `solitaire.stock`
+ *   (epic `language` P55) -- see `outlineOneOfAKind()`.
  * - Not a `KnownVariable`:  it's a member read, so enums, built-in members and other languages' words come with it,
  *   and `set the X to` can ask `MemberReadExpression.memberRead()`.
  */
@@ -28,18 +32,47 @@ export class TheOwnProperty extends MemberReadExpression<"definite_article" | "p
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
-    const ownerType = P.MethodScope.thingTypeOf(scope)
+    let ownerType = P.MethodScope.thingTypeOf(scope)
+    let thingName = P.MethodScope.withThing(scope)?.thingName
     const { property } = match.groups
-    const count = declaredPrefix(property, (words) => !!ownerType?.hasProperty(words))
+    let count = declaredPrefix(property, (words) => !!ownerType?.hasProperty(words))
+    // not its thing's:  the app whose outline it's written in, `solitaire.stock`
+    const only = count ? undefined : TheOwnProperty.outlineOneOfAKind(scope, ownerType)
+    if (only) {
+      count = declaredPrefix(property, (words) => only.type.hasProperty(words))
+      ownerType = only.type
+      thingName = only.name
+    }
     if (!count) return undefined
     // fewer words than we took:  parse just those -- our article and them
     if (count < property.length) return this.parse(scope, tokens.slice(0, 1 + count))
     const words = `${property.raw}`
     if (scope.variables?.get(words)) return undefined
     match.data.ownerType = ownerType
-    match.data.thingName = P.MethodScope.withThing(scope)?.thingName
+    match.data.thingName = thingName
     this.resolveMember(match, ownerType, words)
     return match
+  }
+
+  /**
+   * The one of a kind (`solitaire is an app`) whose outline holds the action `scope` is in, when that action runs on
+   * another type (`to play a card`):  its type and its instance's name, `solitaire` -- else `undefined`.
+   * - A lookup:  call it WHILE PARSING.
+   */
+  private static outlineOneOfAKind(
+    scope: P.Scope,
+    thingType: P.TypeScope | undefined
+  ): { type: P.TypeScope; name: string } | undefined {
+    const method = P.MethodScope.withThing(scope)
+    let outline: P.Scope | undefined = method?.parentScope
+    while (outline && !(outline instanceof P.SubjectScope)) outline = outline.parentScope
+    const subject = outline as P.SubjectScope | undefined
+    const type = subject?.subjectType
+    const words = (subject?.declaredBy?.groups.type as P.Match | undefined)?.raw
+    if (!type || type === thingType || !words) return undefined
+    const name = SP.SpellParser.oneOfAKindVariableName(`${words}`)
+    const only = scope.variables?.get(name)
+    return only?.kind === "only" && only.datatype === type.name ? { type, name } : undefined
   }
 
   /**

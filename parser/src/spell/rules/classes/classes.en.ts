@@ -171,7 +171,7 @@ classes.addRule(WithNestedStatements, {
 
 classes.addRule(CreateType, {
   syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -280,10 +280,77 @@ classes.addRule(CreateType, {
 
 classes.addRule(CreateType, {
   syntax:
-    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     { compileAs: "statement", tests: [['a "card" is a thing', "export class Card extends Thing {}"]] },
-    { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] }
+    { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] },
+    {
+      // its own values for its kind's properties, on its line (epic `language` P55):  as its body's lines would be
+      compileAs: "block",
+      tests: [
+        {
+          title: "a type's own value for its kind's property:  `with layout \"vertical\"`, or `layout = vertical`",
+          input: [
+            'a "pile" is a thing',
+            '\tits "layout" is one of stacked or vertical',
+            '\tits "size" is a number',
+            'a "column" is a pile with layout "vertical", size = 3'
+          ],
+          js: [
+            "export class Pile extends Thing {",
+            '  // - its "layout" is one of stacked or vertical',
+            '  static Layouts = ["stacked", "vertical"]',
+            '  static { this.declareProp("layout", { oneOf: Pile.Layouts }) }',
+            '  get layout() { return this.getProp("layout") }',
+            '  set layout(value) { this.setProp("layout", value) }',
+            "",
+            '  // - its "size" is a number',
+            '  static { this.declareProp("size", { type: "number" }) }',
+            '  get size() { return this.getProp("size") }',
+            '  set size(value) { this.setProp("size", value) }',
+            "}",
+            "export class Column extends Pile {",
+            "  get layout() {",
+            '    return "vertical"',
+            "  }",
+            "  get size() {",
+            "    return 3",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export type Layout = (typeof Pile.Layouts)[number]",
+            "",
+            "export class Pile extends Thing {",
+            '  // - its "layout" is one of stacked or vertical',
+            '  static Layouts = ["stacked", "vertical"] as const',
+            "  @prop({ oneOf: () => Pile.Layouts })",
+            "  accessor layout!: Layout",
+            "",
+            '  // - its "size" is a number',
+            '  @prop({ type: "number" })',
+            "  accessor size!: number",
+            "}",
+            "export class Column extends Pile {",
+            "  get layout(): Layout {",
+            '    return "vertical"',
+            "  }",
+            "  get size(): number {",
+            "    return 3",
+            "  }",
+            "}"
+          ]
+        },
+        {
+          title: "a property its kind hasn't:  an error naming it",
+          input: ['a "pile" is a thing', 'a "column" is a pile with width = 3'],
+          js: [
+            "export class Pile extends Thing {}",
+            "/* PARSE ERROR: A pile has no width:  a type's line gives values only to what its kind has */"
+          ]
+        }
+      ]
+    }
   ]
 })
 
@@ -2082,7 +2149,53 @@ classes.addRule(DrawIt, {
 
 // unquoted:  a method's body, which returns it -- `- to draw each item:` + `return <div>{draw the card}</div>`
 classes.addRule(DrawIt, {
-  syntax: "to {phrase:draw_method} :? {statement_body}?"
+  syntax: "to {phrase:draw_method} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: 'a placeholder\'s markup carries its part by itself, `part="placeholder"` (epic `language` P55)',
+          input: ['a "pile" is a viewable list of things', "\tto draw its placeholder", "\t\t<text>🂠</text>"],
+          js: [
+            "export class Pile extends ViewableList {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  drawItsPlaceholder() {",
+            '    return h("text", { part: "placeholder" }, "🂠")',
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Pile extends ViewableList<Thing> {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  drawItsPlaceholder() {",
+            '    return <text part="placeholder">🂠</text>',
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pile>`:  a pile, drawn in its own element, e.g. by `draw the pile`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pile's properties;  its methods call its pile's.",
+            " * - What every view's element does, e.g. drawing its pile, is `SpellElement`'s.",
+            " */",
+            "export class PileElement extends SpellElement<Pile> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pile", "pile", [])',
+            "",
+            "  drawItsPlaceholder() {",
+            "    return this.currentThing?.drawItsPlaceholder()",
+            "  }",
+            "}",
+            "core.useElement(Pile, PileElement)"
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 // a slot's own drawing (epic `elemental-spell` P5):  `- to draw its front:`, its lines drawing it

@@ -13,6 +13,7 @@ import { ElseIf } from "./ElseIf"
 import { If } from "./If"
 import { ValueIf } from "./ValueIf"
 import { ValueOtherwise } from "./ValueOtherwise"
+import { StatementIf } from "./StatementIf"
 
 _if_.addRule(If, {
   syntax: "if {condition:expression} (then|:)? {statement_body}?",
@@ -290,6 +291,35 @@ _if_.addRule(ValueOtherwise, {
           ["to pick a color:", "\tblack otherwise"],
           ["export function pickAColor() {", '  return "black"', "}"]
         ]
+      ]
+    }
+  ]
+})
+
+// a statement, then when it runs (epic `language` P55):  `return yes if the card is a king`
+_if_.addRule(StatementIf, {
+  syntax: "{statement} if {condition:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        const { variables } = scope as P.BlockScope
+        variables.add("bar")
+        variables.add("foo")
+      },
+      tests: [
+        { input: "return yes if bar", js: "if (bar) return true" },
+        { input: 'print "won" if bar is 52', js: 'if (bar === 52) core.console.log("won")' },
+        {
+          title: "with `otherwise` it's `backwards_if`'s, a value either way",
+          input: "print 1 if bar otherwise 2",
+          js: "core.console.log(bar ? 1 : 2)"
+        },
+        {
+          title: "a statement with a body keeps its own:  the inline body is ours",
+          input: "if foo then print 1 if bar",
+          js: "if (foo) { if (bar) core.console.log(1) }"
+        }
       ]
     }
   ]

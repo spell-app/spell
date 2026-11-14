@@ -214,11 +214,7 @@ export default defineConfig(() => {
       emptyOutDir: true,
       sourcemap: true,
       lib: { entry: ENTRIES, formats: ["es"] },
-      // the build's CSS MINIFY reads `cssTarget`, not `css.lightningcss.targets`:  left at Vite's default (older
-      // Safari) it lowered `light-dark()` into `--lightningcss-light` variables fixed at `:root`, so `.ui-dark` /
-      // `<ui-root theme="dark">` changed nothing in `dist/` (dev and tests were fine).  Same browsers as the kit's
-      // `CSS_TARGETS` (`spell/element-tools/elementConfig`).
-      cssTarget: ["chrome125", "safari26", "firefox147"],
+      // its CSS minify's browsers, `build.cssTarget`:  `cssBuildTarget()`, in `elementBaseConfig()`
       rolldownOptions: {
         external: (id: string) => SOLID_EXTERNAL.test(id),
         preserveEntrySignatures: "allow-extension",
