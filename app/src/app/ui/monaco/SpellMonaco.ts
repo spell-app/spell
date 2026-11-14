@@ -71,7 +71,8 @@ export class SpellMonaco {
   }
 
   /**
-   * How spell edits:  comments, brackets, indenting after a trailing `:`, back out for `else` (`SpellKeywords`).
+   * How spell edits:  comments, brackets, back out for `else` (`SpellKeywords`);
+   *   in a level after a trailing `:` or an opening tag, and between `<x>` and `</x>` (epic `editor` I65).
    * - NOTE: keep in step with the VS Code extension's `vscode/language-configuration.json`:
    *   a test checks they match.
    */
@@ -101,7 +102,15 @@ export class SpellMonaco {
       increaseIndentPattern: /:\s*$/,
       decreaseIndentPattern: LSP.SpellKeywords.DECREASE_INDENT
     },
-    onEnterRules: [{ beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } }]
+    onEnterRules: [
+      {
+        beforeText: LSP.SpellKeywords.OPENS_TAG,
+        afterText: LSP.SpellKeywords.CLOSES_TAG,
+        action: { indentAction: monaco.languages.IndentAction.IndentOutdent }
+      },
+      { beforeText: LSP.SpellKeywords.OPENS_TAG, action: { indentAction: monaco.languages.IndentAction.Indent } },
+      { beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } }
+    ]
   }
 
   /** Who hears each edit -- see `onEdit()`. */

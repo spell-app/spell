@@ -153,6 +153,9 @@ and in the app's build folder, `app/` at the app folder's root.
       Cmd+V and the right-click menu's Paste alike (I63)
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
       and closing tag, a body;  one undo
+  - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;  between `<x>` and `</x>`,
+    the caret a level in and the closing tag on its own line (epic `editor` I65):  Spell's Enter rules,
+    `SpellMonaco.CONFIGURATION`, with VS Code's `language-configuration.json` kept the same by a test
   - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,
     a property after `its` / `'s` / `of`, ONE list, `SUGGEST_WHERE_IT_HELPS` in `codePopups.ts`;
     "Settings…" › "Suggest as you type" makes it everywhere, or never.

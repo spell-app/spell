@@ -67,4 +67,37 @@ describe("typing Spell in a real Monaco editor", () => {
       expect(code.getValue()).toBe(`its suit\n\tits rank`)
     })
   })
+
+  describe("Enter after an opening tag (I65)", () => {
+    const enter = () => editor!.trigger("keyboard", "type", { text: "\n" })
+
+    test("goes in a level", () => {
+      const code = editorOf([`\t<content>`], 1, 11)
+      enter()
+      expect(code.getValue()).toBe(`\t<content>\n\t\t`)
+      expect(code.getPosition()).toMatchObject({ lineNumber: 2, column: 3 })
+    })
+
+    test("after a tag with attributes too", () => {
+      const code = editorOf([`<toolbar class="x">`], 1, 20)
+      enter()
+      expect(code.getValue()).toBe(`<toolbar class="x">\n\t`)
+    })
+
+    test("between `<x>` and `</x>`:  the caret a level in, the closing tag on its own line", () => {
+      const code = editorOf([`\t<content></content>`], 1, 11)
+      enter()
+      expect(code.getValue()).toBe(`\t<content>\n\t\t\n\t</content>`)
+      expect(code.getPosition()).toMatchObject({ lineNumber: 2, column: 3 })
+    })
+
+    test("not after a tag that closes itself, nor a closing tag:  the line's own indent", () => {
+      for (const line of [`\t<action "x"/>`, `\t</content>`]) {
+        const code = editorOf([line], 1, line.length + 1)
+        enter()
+        expect(code.getValue()).toBe(`${line}\n\t`)
+        editor!.dispose()
+      }
+    })
+  })
 })
