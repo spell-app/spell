@@ -13,6 +13,8 @@ import { afterAll, afterEach } from "vite-plus/test"
  *   - The editor is meant to be running, so skipping would look like a pass.
  *   - Start one with `spell server start all`.
  * - And it fails any test during which a page's updates stopped for good ("A stopped page", below).
+ * - Its pages keep running the code they loaded, though the editor's code changes on disk meanwhile
+ *   ("Code as it was loaded", below).
  */
 
 /** The kit's root, where the page server leaves its note of the editor's address. */
@@ -95,8 +97,67 @@ function watchForStoppedPages(context: BrowserContext): void {
   })
 }
 
+////////////////
+// ## Code as it was loaded
+////////////////
+
 /**
- * Every test file's browsers watched for stopped pages, with nothing for a test to remember.
+ * Vite's messages to a page that would change its code under a running test:  reload it, or swap a module.
+ * - Its others (`connected`, `ping`, `error` ...) still go through.
+ */
+const CODE_CHANGED = new Set(["full-reload", "update", "prune"])
+
+/** Vite's own socket to a page, `ws://localhost:57509/?token=...`:  its address is the page's root. */
+const isViteSocket = (url: URL): boolean => url.pathname === "/" && url.searchParams.has("token")
+
+/**
+ * Keep every page of `context` on the code it loaded:  Vite's reloads and module swaps never reach it.
+ * - Why:  agents edit the editor's code while its tests run, in the same checkout.
+ *   Vite then reloads every open editor, a test's too, in the middle of its clicks and drags:
+ *   what's selected, the open palette and menu, a move half done, all gone (epic `editor` I143).
+ * - A page loaded after the change, or a module it loads later, gets the new code, as ever.
+ * - Says so once per test file, naming the first file that changed.
+ * - NEVER throws.
+ */
+async function keepCodeAsLoaded(context: BrowserContext): Promise<void> {
+  await context.routeWebSocket(isViteSocket, (socket) => {
+    const vite = socket.connectToServer()
+    vite.onMessage((message) => {
+      const change = codeChangeIn(message)
+      if (!change) return socket.send(message)
+      if (!saidCodeChanged) {
+        saidCodeChanged = true
+        console.warn(
+          `runningEditor:  the editor's code changed during this test file (${change}):\n` +
+            "its pages keep running what they loaded, not reloaded by Vite"
+        )
+      }
+    })
+  })
+}
+
+/** What Vite's `message` says changed, if it would reload or swap the page's code;  else `undefined`. */
+function codeChangeIn(message: string | Buffer): string | undefined {
+  try {
+    const { type, triggeredBy, updates } = JSON.parse(String(message)) as {
+      type?: string
+      triggeredBy?: string
+      updates?: { path?: string }[]
+    }
+    if (!type || !CODE_CHANGED.has(type)) return undefined
+    return triggeredBy ?? updates?.[0]?.path ?? type
+  } catch (ignored) {
+    // not JSON:  not one of Vite's
+    return undefined
+  }
+}
+
+/** Has this test file said its pages kept their code (`keepCodeAsLoaded()`)? */
+let saidCodeChanged = false
+
+/**
+ * Every test file's browsers watched for stopped pages, and kept on the code they loaded,
+ * with nothing for a test to remember.
  * - HACK:  replaces `chromium.launch()`, and each browser's `newContext()` and `newPage()`:
  *   Playwright has no event for "a context was made".
  * - NEVER throws by itself:  `failOnStoppedPages()` is what fails the test.
@@ -110,11 +171,13 @@ function watchEveryBrowser(): void {
     browser.newContext = async (...args) => {
       const context = await newContext(...args)
       watchForStoppedPages(context)
+      await keepCodeAsLoaded(context)
       return context
     }
     browser.newPage = async (...args) => {
       const page = await newPage(...args)
       watchForStoppedPages(page.context())
+      await keepCodeAsLoaded(page.context())
       return page
     }
     return browser
