@@ -1221,25 +1221,25 @@ describe("PlanDoc states", () => {
     })
   })
 
-  test("calm (Owen, 2026-10-07):  a call is grey, an issue yellow, not red;  the id chip's urgency, applied", () => {
+  test("calm (Owen, 2026-10-07):  a call and an issue yellow, not red (a call grey until 2026-11-14);  the id chip's urgency, applied", () => {
     const plan = freshPlan()
     plan.addItem("judgement", "follows WWOD", { calm: true })
     plan.addItem("judgement", "a real choice")
     plan.addItem("issue", "minor", { calm: true })
     expect(el(plan, "j1").hasAttribute("calm")).toBe(true)
-    expect(stateOf(plan, "j1", "j2", "i1")).toEqual(["quiet", "attention", "open"])
+    expect(stateOf(plan, "j1", "j2", "i1")).toEqual(["open", "attention", "open"])
     expect(() => plan.addItem("question", "calm?", { calm: true })).toThrow(PlanDocError)
     // Owen's id chip, applied:  urgent again, and back;  the same twice changes nothing
     expect(plan.setCalm("j1", false)).toBe("urgent")
     expect(plan.setCalm("j2", true)).toBe("not urgent")
     expect(plan.setCalm("j2", true)).toBeUndefined()
-    expect(stateOf(plan, "j1", "j2")).toEqual(["attention", "quiet"])
+    expect(stateOf(plan, "j1", "j2")).toEqual(["attention", "open"])
     plan.addItem("question", "which?")
     expect(() => plan.setCalm("q1", true)).toThrow(PlanDocError)
     expect(problems(plan)).toEqual([])
   })
 
-  test("not on main yet (I273):  a done phase and item say so, a calm call stays blue;  all quiet once it lands", () => {
+  test("not on main yet (I273):  a done phase and item say so, a calm call stays blue;  yellow once it lands", () => {
     const plan = freshPlan()
     plan.addPhase("Polish")
     plan.addPhase("Later")
@@ -1261,21 +1261,21 @@ describe("PlanDoc states", () => {
     expect(phases()).toEqual(["editor", null])
     expect(unmerged("#i1")).toBe("editor")
     expect(unmerged("#i1 > epic-status")).toBe("editor")
-    // made in P1, whose work isn't on main:  blue;  one from no phase stays grey
-    expect(stateOf(plan, "j1", "j2")).toEqual(["progress", "quiet"])
+    // made in P1, whose work isn't on main:  blue;  one from no phase stays yellow
+    expect(stateOf(plan, "j1", "j2")).toEqual(["progress", "open"])
 
     // a listed commit not on main counts too, by a prefix either way
     plan.landing = { branch: "editor", ids: new Set(), shas: ["abc1234def"] }
     plan.addCommit({ item: "j2" }, "abc1234", "the call's commit")
     plan.updateStates()
-    expect(stateOf(plan, "j1", "j2")).toEqual(["quiet", "progress"])
+    expect(stateOf(plan, "j1", "j2")).toEqual(["open", "progress"])
     expect(phases()).toEqual([null, null])
 
-    // landed:  every mark gone, the calls grey
+    // landed:  every mark gone, the calls yellow
     plan.landing = { branch: "editor", ids: new Set(), shas: [] }
     plan.updateStates()
     expect([unmerged("#i1"), unmerged("#i1 > epic-status")]).toEqual([null, null])
-    expect(stateOf(plan, "j1", "j2")).toEqual(["quiet", "quiet"])
+    expect(stateOf(plan, "j1", "j2")).toEqual(["open", "open"])
     // no landing (no git):  nothing changes
     plan.landing = undefined
     expect(plan.updateLanded()).toBe(0)

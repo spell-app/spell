@@ -306,7 +306,7 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
   it's light orange until they've reviewed it.
 - An item's colour (its state), from its status and review marks, rewritten by the tool on every edit: "Colours",
   "Item states", below.
-- A judgement call or issue is CALM by default (`--calm`: a call grey, an issue yellow;
+- A judgement call or issue is CALM by default (`--calm`: yellow, a call too (2026-11-14:  "calm => yellow, not grey, otherwise I'll never see it");
   a call BLUE while its work isn't on main yet, I273),
   RED only when it would surprise the person
   (2026-10-10: "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow",

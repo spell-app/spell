@@ -598,6 +598,14 @@ describe("spell space local", () => {
       expect(startedSince()).toEqual(["build"])
     })
 
+    test("a Caddy that's alive but not on 443 is restarted alone, with no build (I274, r68)", async () => {
+      const left = await leftRunning()
+      world.listeners["-tiTCP:443"] = []
+      await world.pageServerSite().startWithPageServer()
+      await vi.waitFor(() => expect(startedSince()).toEqual(["caddy"]))
+      expect(world.stopped).toEqual([left.caddy.pid])
+    })
+
     test("a Caddy file that changed restarts Caddy alone, with no build", async () => {
       const left = await leftRunning()
       writeFileSync(join(world.root, "local-site", "Caddyfile"), "an older file")
@@ -719,16 +727,19 @@ describe("spell space local", () => {
       expect(siteLog()).toContain(why)
     })
 
-    test("one program stopping by itself stops the other, and the table says so", async () => {
+    test("a program stopping by itself leaves the other running, says so, and comes back (I274)", async () => {
       await setUpMac()
-      const server = world.pageServerSite()
+      const server = world.pageServerSite({ keepUpMs: 5 })
       await server.startWithPageServer()
-      world.children[1]!.child.end(1)
-      await vi.waitFor(async () =>
-        expect(await server.report()).toMatchObject({ state: expect.stringContaining("stopped by itself") })
-      )
-      expect(world.children[0]!.child.stop).toHaveBeenCalled()
-      expect(siteLog()).toContain("stopped by itself")
+      const caddy = world.children[1]!
+      delete world.processes[caddy.child.pid]
+      world.listeners["-tiTCP:443"] = []
+      caddy.child.end(1)
+      await vi.waitFor(() => expect(siteLog()).toContain("stopped by itself"))
+      expect(world.children[0]!.child.stop).not.toHaveBeenCalled()
+      await vi.waitFor(() => expect(world.children.filter((each) => each.command === "caddy")).toHaveLength(2))
+      expect(siteLog()).toContain("starting it again")
+      server.stop()
     })
   })
 

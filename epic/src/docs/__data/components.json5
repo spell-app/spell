@@ -2571,7 +2571,7 @@
             "quiet",
             "old"
           ],
-          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  your turn to pick or review;  a manual test whose phase isn't done), `requested` (light orange:  what you asked for is finished, your turn to see it), `progress` (blue:  Claude is working on it), `handed` (blue outlined:  you pressed Do this, Claude hasn't started), `open` (yellow:  still undecided), `scheduled` (dotted blue:  queued work, agreed, not started), `recent` (green:  decided or done), `handled` (grey:  its answer is in a phase's text now, `handled`;  or an issue Claude found and fixed itself), `quiet` (grey:  a calm judgement call, a limit:  nothing to think about), `old` (grey:  no longer relevant, canceled)."
+          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  your turn to pick or review;  a manual test whose phase isn't done), `requested` (light orange:  what you asked for is finished, your turn to see it), `progress` (blue:  Claude is working on it), `handed` (blue outlined:  you pressed Do this, Claude hasn't started), `open` (yellow:  still undecided), `scheduled` (dotted blue:  queued work, agreed, not started), `recent` (green:  decided or done), `handled` (grey:  its answer is in a phase's text now, `handled`;  or an issue Claude found and fixed itself), `quiet` (grey:  a limit:  nothing to think about), `old` (grey:  no longer relevant, canceled)."
         },
         {
           "name": "handled",
@@ -2670,7 +2670,7 @@
         {
           "name": "unmerged",
           "kind": "string",
-          "description": "An item (done, or a judgement call) whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  A calm judgement call stays blue (`progress`) while its work hasn't landed, grey once it has."
+          "description": "An item (done, or a judgement call) whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  A calm judgement call stays blue (`progress`) while its work hasn't landed, yellow once it has."
         },
         {
           "name": "fixed",
@@ -2938,7 +2938,7 @@
         {
           "key": "stateQuiet",
           "text": "Open, nothing to think about",
-          "description": "Id chip tooltip, `state=quiet` (grey):  a calm judgement call, a limit."
+          "description": "Id chip tooltip, `state=quiet` (grey):  a limit."
         },
         {
           "key": "stateProgress",
@@ -6890,7 +6890,7 @@
         {
           "key": "stateQuiet",
           "text": "open, nothing to think about",
-          "description": "A state chip's words:  `quiet` (grey:  a calm judgement call, a limit)."
+          "description": "A state chip's words:  `quiet` (grey:  a limit)."
         },
         {
           "key": "stateRecent",
