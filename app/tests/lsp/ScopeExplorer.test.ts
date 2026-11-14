@@ -22,8 +22,8 @@ const CARD_TYPE = 'a "card" is a'
 const SUIT = 'its "suit" is one of'
 /** The card's short name, whose comment above it is its docstring. */
 const STATE_DESCRIPTION = "Its short name:  Q♠↓ is the queen of spades, face down"
-/** The `##` heading in the game's file that the card's moves are under, e.g. `play a card`:  their section. */
-const PLAYING_HEADING = "Playing a card"
+/** The `##` heading in the game's file that its kinds of pile are under, e.g. a foundation's `suit`:  their section. */
+const PILES_HEADING = "The piles"
 
 /** A project whose folders each hold a `Usage.spell`, as a language server sees it (epic `notebook` P10). */
 describe("ScopeExplorer of a project with sub-folders", () => {
@@ -112,12 +112,15 @@ describe("ScopeExplorer", () => {
   test("each member's section:  the heading it's under, in the file it's declared in", () => {
     const card = find(tree, "Card")
     const member = (name: string) => card.members.find((it) => it.name === name)!
-    // the card's moves are declared in the game's file, under its `## Playing a card`
-    expect(member("play a card").section).toBe(PLAYING_HEADING)
+    // the card's moves are declared in the game's file, in the game's own outline:  above its first `##` heading
     expect(details(member("play a card")).uri).toMatch(/\/Solitaire\.spell$/)
-    expect(member("count the points for a card on a pile").section).toBe(PLAYING_HEADING)
+    expect(member("play a card").section).toBeUndefined()
+    expect(member("count the points for a card on a pile").section).toBeUndefined()
     // the card's own file has no `##` heading
     expect(member("suit").section).toBeUndefined()
+    // a foundation's suit is under the game's `## The piles`
+    const suit = find(tree, "Foundation").members.find((it) => it.name === "suit")!
+    expect(suit.section).toBe(PILES_HEADING)
   })
 
   test("a sub-type shows what it inherits, and from where", () => {
@@ -308,12 +311,12 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   })
 
   test("our types inherit from its OWN types, from its sources -- with their docs and locations", () => {
-    const tableau = find(tree, "Tableau")
-    const fromPile = tableau.members.filter((member) => member.inheritedFrom === "Pile")
+    const column = find(tree, "Column")
+    const fromPile = column.members.filter((member) => member.inheritedFrom === "Pile")
     expect(fromPile.length).toBeGreaterThan(0)
     // pointing at the members of its OWN Pile, in the imported project -- NOT the declarations-only one
     for (const member of fromPile) expect(member.path).toMatch(/^project:lib\/file:Pile\.spell\/type:Pile\//)
-    expect(find(tree, "Tableau").super).toBe("project:lib/file:Pile.spell/type:Pile")
+    expect(find(tree, "Column").super).toBe("project:lib/file:Pile.spell/type:Pile")
     expect(explorer.details(app, fromPile[0]!.path)?.line).toBeDefined()
   })
 
@@ -433,7 +436,7 @@ describe("ScopeExplorer scope packs", () => {
     )
     const { tree: built, details } = LSP.scopeTreeFromPacks([builtIns, pack])
     expect(withoutUris(built)).toEqual(withoutUris(tree))
-    expect(details.get(find(tree, "Tableau").path)?.description).toMatch(/^A column, built down from king to ace/)
+    expect(details.get(find(tree, "Column").path)?.description).toMatch(/^A column, built down from king to ace/)
   })
 
   test("a page with NO sources finds each entry's compiled code by its declarations -- all but variables", async () => {

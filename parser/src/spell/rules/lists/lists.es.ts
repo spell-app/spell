@@ -31,6 +31,7 @@ import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
+import { EachInStatement } from "./EachInStatement"
 import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
@@ -1077,7 +1078,7 @@ listsEs.addRule(ListIteration, {
         ],
         [
           [`para cada card en deck:`, `\tponer el direction de la card a "down"`, `\tponer el value de la card a 10`],
-          [`core.map(deck, (card) => {`, `  card.direction = "down"`, `  card.value = 10`, `})`]
+          ["core.map(deck, (card) => {", '  card.direction = "down"', "  card.value = 10", "})"]
         ],
         [
           ["para message y index en messages:", "\tsi index es mayor que 2 agregar message a messages"],
@@ -1092,6 +1093,30 @@ listsEs.addRule(ListIteration, {
             "}))"
           ]
         ]
+      ]
+    }
+  ]
+})
+
+// a statement once for each item of a list, the list said in it (epic `language` P55, Q59):  `add each card in the deck to the stock`
+listsEs.addRule(EachInStatement, {
+  syntax: "{statement} cada {item:singular_identifier} (en|de|del) {list:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("mazo")
+        scope.variables?.add("reserva")
+        scope.variables?.add("pilas")
+      },
+      tests: [
+        ["agregar cada carta en mazo a reserva", "core.map(mazo, (carta) => core.append(reserva, carta))"],
+        ["imprimir cada carta de mazo", "core.map(mazo, (carta) => core.console.log(carta))"],
+        {
+          title: "`del mazo` es `de el mazo`:  la lista es `el mazo`",
+          input: "agregar cada carta del mazo a reserva",
+          js: "core.map(mazo, (carta) => core.append(reserva, carta))"
+        }
       ]
     }
   ]

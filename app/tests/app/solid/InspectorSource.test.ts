@@ -40,26 +40,22 @@ describe("eventsDeclared()", () => {
   test("a card:  its abilities, then its events, as written, each with its code", () => {
     expect(eventsInSource(["Card"], SOLITAIRE)).toEqual([
       { kind: "ability", words: "draggable", code: "" },
-      { kind: "ability", words: "clickable when", code: "it is face up or its pile is solitaire's stock" },
-      { kind: "event", words: "on click", code: "play it" },
-      { kind: "event", words: "when dragged", code: "clear solitaire's hint" },
-      { kind: "event", words: "on drag cancelled", code: 'set solitaire\'s hint to " -- Not there"' }
+      { kind: "event", words: "on click", code: "if it is face up or its pile is solitaire's stock\n\tplay the card" }
     ])
   })
 
-  test("a tableau:  its bare abilities first (Owen), then its own conditions, then what it inherits from a pile;  each event's lines under it", () => {
-    const rows = eventsInSource(["Tableau", "Pile"], SOLITAIRE)
+  test("a column:  its bare abilities first (Owen), then its own conditions, then what it inherits from a pile;  each event's lines under it", () => {
+    const rows = eventsInSource(["Column", "Pile"], SOLITAIRE)
     expect(rows.map((row) => [row.kind, row.words])).toEqual([
       ["ability", "droppable"],
       ["ability", "its cards are draggable when"],
       ["ability", "it is droppable when"],
-      ["event", "while card dragged over"],
       ["event", "on card dropped"]
     ])
     expect(rows[0]!.code).toBe("")
     expect(rows[1]!.code).toBe("the card is face up")
     expect(rows[2]!.code.split("\n")[0]).toBe("if it is empty")
-    expect(rows[4]!.code).toBe("put the card on it")
+    expect(rows[3]!.code).toBe("put the card on the pile")
   })
 
   test("an event:  `on click:`, its code under it", () => {
@@ -83,8 +79,7 @@ a "card" is a view:
 
   test("the game:  its properties' changes, as written", () => {
     expect(eventsInSource(["Solitaire"], SOLITAIRE).map((row) => [row.words, row.code.split("\n")[0]])).toEqual([
-      ["when its score changes", "// every card on a foundation:  the game is won"],
-      ["when its moves change", "clear the hint"]
+      ["when the score changes", "set home to the number of cards in the clubs + the number of cards in the diamonds"]
     ])
   })
 

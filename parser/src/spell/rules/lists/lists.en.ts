@@ -24,6 +24,7 @@ import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
+import { EachInStatement } from "./EachInStatement"
 import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
@@ -1095,6 +1096,30 @@ lists.addRule(ListIteration, {
             "}))"
           ]
         ]
+      ]
+    }
+  ]
+})
+
+// a statement once for each item of a list, the list said in it (epic `language` P55, Q59):  `add each card in the deck to the stock`
+lists.addRule(EachInStatement, {
+  syntax: "{statement} each {item:singular_identifier} in {list:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("deck")
+        scope.variables?.add("stock")
+        scope.variables?.add("piles")
+      },
+      tests: [
+        ["add each card in deck to stock", "core.map(deck, (card) => core.append(stock, card))"],
+        ["print each card in deck", "core.map(deck, (card) => core.console.log(card))"],
+        {
+          title: "a second `each ... in` in the statement:  an error",
+          input: "add each card in deck to each pile in piles",
+          js: '/* PARSE ERROR: One "each ... in" a statement:  loop over the other with "for each ... in", around it */'
+        }
       ]
     }
   ]
