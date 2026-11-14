@@ -9467,8 +9467,8 @@
           "purpose": "`(else|otherwise) if {condition} (then|:)?` -- else-if branch, chained after `if`.",
           "syntaxes": [
             {
-              "syntax": "(else|otherwise) if {condition:expression} (then|:)? {statement_body}?",
-              "example": "else if a",
+              "syntax": "(otherwise|else) if {condition:expression} (then|:)? {statement_body}?",
+              "example": "otherwise if a",
               "outputs": {
                 "js": {
                   "code": "else if (a) {}"
@@ -9493,8 +9493,8 @@
           "purpose": "`(else|otherwise) :?` -- else branch.",
           "syntaxes": [
             {
-              "syntax": "(else|otherwise) :? {statement_body}?",
-              "example": "else",
+              "syntax": "(otherwise|else) :? {statement_body}?",
+              "example": "otherwise",
               "outputs": {
                 "js": {
                   "code": "else {}"
