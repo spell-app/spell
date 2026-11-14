@@ -19,6 +19,7 @@
  *   - `rememberedSizes()`:  what a `<ui-split-panel>` was dragged to
  *   - `AppRoot` / `AppContainer`:  where a program draws, with React
  *   - `ProjectMenu` / `ProjectDropdown`
+ *   - `EditorZones`:  the app pane of the editor's own Spell, a zone per view (epic `editor` T63)
  *   - The pages and the router are `spell/app/app/pages`.
  * - The editor's panes (P6):
  *   console, match and AST viewers, type and thing explorers, the Monaco editors, `FileDropdown`, `FileTabs`.
@@ -48,6 +49,7 @@ export * from "./Palette"
 export * from "./ChangeThis"
 export * from "./ErrorNotice"
 export * from "./ErrorBoundary"
+export * from "./EditorZones"
 export * from "./Notice"
 export * from "./Markdown"
 

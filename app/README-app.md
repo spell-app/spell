@@ -487,6 +487,17 @@ app/src/app/solid/FileTabs.tsx                              the tabs:  which fil
 - What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
 - The menus' titles are written in English in the Spell, and shown in the page's language:
   the editor hands the Spell the same texts in that language, by each English title (`appTexts.titles`).
+- Opened as a project, its app pane shows each of the app's views in a zone of its own, drawn from the code as you
+  type (`<EditorZones>`, epic `editor` T63):  the bar, the layout, the file tabs, each menu drawn open, the home row.
+  - The zones are the app's views, in its order, read as it runs:  a view you add shows by itself.
+  - What the editor draws in a view's place for it (a pane, the Spell menu's projects) is a grey stand-in naming it.
+  - A modal (About Spell, Versions) waits behind a Show button, filled with sample words:  open, it covers the page.
+  - A zone whose drawing throws shows the error;  the others go on drawing.
+  - It runs on the programs' copy of the runtime, afresh each compile, as a layout:  its app never starts itself.
+  - Until I122 the pane showed a second whole editor in a frame, reloaded on every keystroke, which locked the page up.
+  - The editor you're using runs the Spell as it's saved.
+    At the house site (`test.spell.app`) a save is your draft, so it changes only once you Publish;
+    on this Mac's own address it's written in place, and the editor takes it at once.
 - It loads once for the page (`loadEditorSpell()`), and each view draws where it belongs.
   The bar, the panes and the menus are drawn in place, with no element of their own, so the editor's sheets reach them;
   the file tabs as their view's own element, with its own sheet.

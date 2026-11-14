@@ -1,0 +1,51 @@
+/*
+ * Look of the editor's own Spell in the app pane (`EditorZones.tsx`, epic `editor` T63):
+ * each of its views in a zone of its own, headed by its name, stacked down the pane.
+ */
+.EditorZones {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+.EditorZonesWaiting {
+  margin: 0;
+  color: var(--ui-text-muted, var(--ui-muted-color));
+}
+
+/* one zone:  a card, its view's name over it, small and muted */
+.EditorZone {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ui-border-color);
+  border-radius: var(--ui-radius-m, 8px);
+  background: var(--ui-background, Canvas);
+}
+.EditorZoneTitle {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--ui-border-color);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ui-text-muted, var(--ui-muted-color));
+  text-transform: capitalize;
+}
+.EditorZoneBody {
+  /* room round a drawing, and a menu's width for one drawn open */
+  padding: 12px;
+  overflow: auto;
+}
+
+/* what the editor draws there itself is a grey stand-in naming it:  its look is written on it (`STAND_IN_STYLE`) */
+
+/* a drawing that threw */
+.EditorZoneError {
+  margin: 0;
+  color: var(--ui-error-color, var(--ui-red));
+  font-family: var(--ui-font-monospace, monospace);
+  font-size: 12px;
+  white-space: pre-wrap;
+}

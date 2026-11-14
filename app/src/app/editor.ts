@@ -9,6 +9,7 @@ import type { LSP } from "spell/app/lsp"
 import type { SpellRuntime } from "spell/app/app/runner"
 import type { TestRun } from "spell/app/app/runner/spellRuntime"
 import type * as UIT from "spell/app/app/ui/ui.types"
+import { EDITOR_PIECES } from "spell/app/app/ui/ui.types"
 import type { monaco, EditWay } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
@@ -573,12 +574,27 @@ export class EditorStore extends Observable {
   @prop()
   accessor restartNeededBecause: string | undefined
 
+  /**
+   * How many times a program has finished running on the page (reactive):  what's read off its things afresh then
+   * re-runs, e.g. the editor's own Spell's zones (`<EditorZones>`, T63), as a run afresh makes its things anew.
+   */
+  @prop({ type: "number", default: 0 })
+  accessor programRuns!: number
+
   /** Path of the project run last:  a compile of the same project keeps its things. */
   lastExecutedPath: string | undefined = undefined
 
   /** Does `project` hold a site?  Its Run shows the site, and Edit its own pages (epic `notebook` P10). */
   projectHasSite(project: SP.SpellProject): boolean {
     return project.spellFiles.some((file) => file.contents && declaresSite(file.contents))
+  }
+
+  /**
+   * Is `project` one of the editor's own (`@spell/editor/spell-editor`, epic `editor` P22)?
+   * - Its app pane shows each of its views in a zone (`<EditorZones>`, T63), not its app:  it runs as a layout.
+   */
+  isEditorPiece(project: SP.SpellProject | undefined): boolean {
+    return !!project?.path.startsWith(`${EDITOR_PIECES}/`)
   }
 
   /** Is `project` a site of pages alone in their files, e.g. the Spell UI site?  It wears the docs look in Run. */
@@ -653,7 +669,8 @@ export class EditorStore extends Observable {
     const output = runtime.core.console
     const words = appTexts.groupWords(editor.projectRoot)
     output.group(appTexts.text("consoleExecuting", words))
-    const keepThings = !editor.startAfresh && editor.lastExecutedPath === project.path
+    // the editor's own Spell starts afresh each time:  its zones draw its views anew, from the edit (T63)
+    const keepThings = !editor.startAfresh && editor.lastExecutedPath === project.path && !editor.isEditorPiece(project)
     editor.startAfresh = false
     editor.lastExecutedPath = project.path
     editor.lastExecutedProgram = compiled
@@ -679,10 +696,13 @@ export class EditorStore extends Observable {
       projectId: project.projectId,
       sourceMap,
       placesFrom: sourceMap,
-      siteHost: runSite
+      siteHost: runSite,
+      // the editor's own Spell:  its views draw in the app pane's zones, its app never starts itself (T63)
+      layout: editor.isEditorPiece(project)
     })
     editor.appRun = run
     const error = await run
+    editor.programRuns += 1
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)
     else output.info(appTexts.text("consoleExecuted", words))

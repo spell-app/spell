@@ -52,7 +52,8 @@ and in the app's build folder, `app/` at the app folder's root.
     `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
   - `layout/`:  how the editor loads its own Spell (`layoutSpell.ts`);  the Spell itself is ONE project of the group `@spell/editor`,
     `spell-editor`, one file, `SpellEditor.spell`:  the app `spell editor`, whose views are the top bar, the panes, the file tabs
-    and the menus (P22, P29;  [README-app.md](../../README-app.md), "The editor in Spell")
+    and the menus (P22, P29;  [README-app.md](../../README-app.md), "The editor in Spell");  opened as a project, its app
+    pane draws each of its views in a zone of its own (`solid/EditorZones.tsx`, T63)
   - `index.tsx`:  the entry, drawing the app into `#app-root`
   - `ServerCompileStore.ts`:  the editor's compile cache, on the page server (`/api/compiles`;  epic `language` P27),
     installed by `index.tsx`, never in the static build

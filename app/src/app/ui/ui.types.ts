@@ -104,3 +104,9 @@ export type ThingOrder = "document" | "type"
  * - Never one of the app's parts, for the Inspector, its Views tree, or a click or a drag.
  */
 export const EDITOR_OWN = "data-editor-own"
+
+/**
+ * The group the editor's own Spell is a project of (epic `editor` P22):  `@spell/editor/spell-editor`.
+ * - Run in the app pane, its views show as zones, one each (`<EditorZones>`, T63), not as an app.
+ */
+export const EDITOR_PIECES = "@spell/editor"
