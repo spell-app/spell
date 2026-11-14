@@ -184,3 +184,48 @@ describe("liveClient's reportStale()", () => {
     await page.close()
   })
 })
+
+// epic `epic-engine` I272:  Owen couldn't paste a picture into an item's note box in VS Code's Review tab
+describe("liveClient's paste of a picture the extension read off the clipboard (VS Code's side bar)", () => {
+  /** A 1 x 1 PNG, as `ClipboardImage.read()` hands it over. */
+  const PNG =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+
+  it("reaches the field typed in, inside shadow roots, as a paste event carrying the file", async () => {
+    const host = await browser.newPage({ viewport: { width: 800, height: 600 } })
+    const url = `http://127.0.0.1:${server.info.port}/docs/page.html`
+    await host.setContent(`<iframe src="${url}" style="width:700px;height:500px"></iframe>`)
+    const frame = await (await host.waitForSelector("iframe")).contentFrame()
+    await frame!.waitForFunction(() => !!(window as { SPELL_SERVER?: { reloadNow?: unknown } }).SPELL_SERVER?.reloadNow)
+    // a note box as `<epic-review>` draws one:  its paste listener inside its shadow root, around a textarea
+    // that is itself inside another shadow root (`<ui-textarea>`'s)
+    await frame!.evaluate(() => {
+      const box = document.createElement("div")
+      document.body.prepend(box)
+      const outer = box.attachShadow({ mode: "open" })
+      const wrapper = document.createElement("div")
+      outer.append(wrapper)
+      const field = document.createElement("span")
+      wrapper.append(field)
+      const inner = field.attachShadow({ mode: "open", delegatesFocus: true })
+      const textarea = document.createElement("textarea")
+      inner.append(textarea)
+      const got: string[] = []
+      Object.assign(window, { got })
+      wrapper.addEventListener("paste", (event) => {
+        const file = (event as ClipboardEvent).clipboardData?.files[0]
+        got.push(file ? `${file.type} ${file.size}` : "no file")
+      })
+      textarea.focus()
+    })
+    // as VS Code's view passes on the extension's answer (`DocView.ts` `edit()`)
+    await host.evaluate((image) => {
+      document.querySelector("iframe")!.contentWindow!.postMessage({ spell: "edit", command: "paste", image }, "*")
+    }, PNG)
+    await frame!.waitForFunction(() => (window as unknown as { got: string[] }).got.length > 0, undefined, {
+      timeout: 5000
+    })
+    expect(await frame!.evaluate(() => (window as unknown as { got: string[] }).got)).toEqual(["image/png 70"])
+    await host.close()
+  })
+})
