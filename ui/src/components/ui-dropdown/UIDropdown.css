@@ -370,8 +370,10 @@
   }
 
   /* Selection:  looks like a select box. */
+  /* centred top to bottom:  its text sits mid-box whenever its min-height is taller than its line (a menu's, no padding) */
   .ui.selection.dropdown {
     display: inline-block;
+    align-content: center;
     min-width: var(--_ui-dropdown-min-width);
     min-height: var(--_ui-dropdown-min-height);
     padding-block: var(--_ui-dropdown-padding-block);

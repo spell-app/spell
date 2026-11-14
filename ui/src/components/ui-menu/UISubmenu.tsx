@@ -101,6 +101,7 @@ const FLYOUT_SHEET = `@layer ui.components.submenu.types { .flyout:popover-open 
  * - Closing:
  *   - the arrow key away from it, or Escape (`UI.overlays`):  focus back on the row
  *   - Tab, a click outside, the pointer settling on another row of its menu
+ *   - the pointer leaving the fly-out for anywhere but its menu, after 0.3s
  *   - choosing one of its items:  every fly-out closes, and the choice goes on up as a choice in the menu
  *     (the `ui-choosing` its menu sends, through the row;  a named menu's is sent again from the row)
  *   - its menu closing:  its row loses its box (a popup round the menu hid),
@@ -320,6 +321,8 @@ export class UISubmenu extends UIItem {
     const { signal } = listeners
     owner?.addEventListener("pointerover", this.onMenuPointerOver, { signal })
     box.addEventListener("keydown", this.onFlyoutKey, { signal })
+    box.addEventListener("pointerleave", this.onFlyoutLeave, { signal })
+    box.addEventListener("pointerenter", this.onFlyoutEnter, { signal })
     if (this.namesAMenu) box.addEventListener(this.choosingEventOf(box), this.onNamedMenuChoosing, { signal })
     // its menu closing (a popup round it hid):  the row has no box any more
     const rowWatch = new ResizeObserver(() => {
@@ -330,6 +333,7 @@ export class UISubmenu extends UIItem {
     if (this.focusesOnShow) E.afterSolidUpdate(() => this.focusFlyout())
 
     return () => {
+      this.leaving?.cancel()
       listeners.abort()
       rowWatch.disconnect()
       this.aim.stop()
@@ -405,6 +409,31 @@ export class UISubmenu extends UIItem {
     if (event.pointerType !== MOUSE || event.composedPath().includes(this.domElement)) return
     if (this.aim.wantsToSwitch(event)) this.close()
   }
+
+  /**
+   * The pointer left the fly-out, for somewhere that isn't its menu:  it closes, after `LEAVE_SECONDS`.
+   * - Back onto its menu, the menu's rows decide (`onMenuPointerOver()`).
+   * - Coming back in before then keeps it open (`onFlyoutEnter()`).
+   */
+  @E.untracked
+  private readonly onFlyoutLeave = (event: PointerEvent) => {
+    if (event.pointerType !== MOUSE) return
+    const to = event.relatedTarget as Node | null
+    const owner = this.ownerElement
+    if (to && owner && (owner === to || owner.contains(to))) return
+    this.leaving?.cancel()
+    this.leaving = E.after(LEAVE_SECONDS, () => this.close())
+  }
+
+  /** The pointer came back into the fly-out:  it stays open. */
+  @E.untracked
+  private readonly onFlyoutEnter = () => {
+    this.leaving?.cancel()
+    this.leaving = undefined
+  }
+
+  /** Closing the fly-out once the pointer has left it (`onFlyoutLeave()`). */
+  private leaving?: E.CancelablePromise<unknown>
 
   /** The pointer stopped aiming at the fly-out:  it closes, and a `<ui-submenu>` the pointer is over opens. */
   @E.untracked
@@ -615,6 +644,9 @@ type OpenedBy = {
   /** by the pointer over the row:  where the aim starts */
   pointer?: PointerEvent
 }
+
+/** How long the pointer may be out of the fly-out, not on its menu, before it closes:  a slip of the hand comes back. */
+const LEAVE_SECONDS = 0.3
 
 /** `pointerType` of a mouse:  the only pointer whose hover opens a fly-out (a touch taps the row). */
 const MOUSE = "mouse"
