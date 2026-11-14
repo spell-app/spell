@@ -335,6 +335,19 @@ ui-section.InspectorEvent {
   & > .InspectorActionType {
     margin: 0;
   }
+
+  /* an action's name, which a click renames (epic `editor` I111):  a dotted underline on hover says so */
+  & > .InspectorActionName {
+    cursor: text;
+    border-radius: 3px;
+  }
+  & > .InspectorActionName:hover {
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+  & > .InspectorActionNameField {
+    width: 14em;
+  }
 }
 
 /* the views tree:  a row a part, indented by its depth, tight (Owen:  "tighten up spacing ... line to line and icon

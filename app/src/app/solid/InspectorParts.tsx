@@ -943,25 +943,93 @@ const RUN_ICON = "fa7-free:circle-play"
  *   at its row's far right (`<ActionRunButton>`, in its section's `actions`;  epic `editor` I116), not here.
  * - One that needs another thing gets no button and no field:  it can't be run from here (Owen:  "shouldn't be a select
  *   here because you can't actually execute it").
+ * - One whose words are its name alone (`to cheat`):  a click on its name renames it (`<ActionName>`, I111).
  * - Its words are the program's, in its language:  `to` is `para` in a Spanish one.
  */
 function ActionSignature(props: { thing: object; action: InspectorAction }): JSX.Element {
   const ownType = () => InspectorActions.typeWordsOf(props.thing)[0] ?? ""
   const pieces = () => signaturePieces(props.action, ownType())
+  // its words its name alone:  a click renames it
+  const isRenamable = () => props.action.parameters.length === 0 && pieces().every((piece) => !piece.isType)
   return (
     <span class="InspectorActionSignature">
       <span>{toWordOf(editor.project?.wordsLanguages?.[0])}</span>
-      {/* by position:  a new signature's pieces are new objects, the same words */}
-      <For each={pieces()} keyed={false}>
-        {(piece) => (
-          <Show when={piece().isType} fallback={<span>{piece().text}</span>}>
-            <ui-label size="mini" appearance="basic" class="InspectorActionType">
-              {piece().text}
-            </ui-label>
-          </Show>
-        )}
-      </For>
+      <Show
+        when={isRenamable()}
+        fallback={
+          // by position:  a new signature's pieces are new objects, the same words
+          <For each={pieces()} keyed={false}>
+            {(piece) => (
+              <Show when={piece().isType} fallback={<span>{piece().text}</span>}>
+                <ui-label size="mini" appearance="basic" class="InspectorActionType">
+                  {piece().text}
+                </ui-label>
+              </Show>
+            )}
+          </For>
+        }
+      >
+        <ActionName thing={props.thing} action={props.action} />
+      </Show>
     </span>
+  )
+}
+
+/**
+ * An action's name, which a click renames (epic `editor` I111;  Owen:  "I should be able to rename the function (and
+ * refactor its callers) by clicking on the name"):  a field holding it, Enter renames it everywhere it's named
+ * (`Inspector.renameAction()`), Esc or a click away leaves it as it was.
+ * - Only an action of the program's own that takes nothing:  its words are its name alone.
+ * - Its clicks never fold its row.
+ */
+function ActionName(props: { thing: object; action: InspectorAction }): JSX.Element {
+  const [isEditing, setEditing] = createSignal(false)
+  const title = () => appTexts.text("inspectorActionRename", { action: props.action.words })
+  const rename = async (field: HTMLElement & { value?: string }) => {
+    const words = `${field.value ?? ""}`
+    setEditing(false)
+    if (words.trim() === props.action.words) return
+    await Inspector.renameAction(props.thing, props.action, words)
+  }
+  return (
+    <Show
+      when={isEditing()}
+      fallback={
+        <span
+          class="InspectorActionName"
+          title={title()}
+          onClick={(event: MouseEvent) => {
+            event.stopPropagation()
+            setEditing(true)
+          }}
+        >
+          {props.action.words}
+        </span>
+      }
+    >
+      <ui-input
+        size="small"
+        class="InspectorActionNameField"
+        value={props.action.words}
+        aria-label={title()}
+        autofocus=""
+        // its words chosen, to type over:  once it has drawn its input
+        ref={(field: HTMLElement) =>
+          requestAnimationFrame(() => {
+            field.focus()
+            field.shadowRoot?.querySelector("input")?.select()
+          })
+        }
+        onClick={(event: MouseEvent) => event.stopPropagation()}
+        onKeyDown={(event: KeyboardEvent) => {
+          // the row's own keys never see them:  Space and Enter would fold it
+          event.stopPropagation()
+          if (event.key === "Enter") void rename(event.currentTarget as HTMLElement)
+          else if (event.key === "Escape") setEditing(false)
+        }}
+        onFocusOut={() => setEditing(false)}
+      />
+    </Show>
   )
 }
 

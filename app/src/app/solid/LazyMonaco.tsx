@@ -38,6 +38,11 @@ export const LazyMonaco = {
   DiffView: lazy<Component<DiffViewProps>>(async () => ({
     default: (await loadMonaco()).DiffView
   })),
+  /**
+   * The module itself, loaded once and connected:  for what isn't a component, e.g. the language service
+   * an action's rename asks (`Inspector.renameAction()`, epic `editor` I111).
+   */
+  load: () => loadMonaco(),
   /** What to show while Monaco loads. */
   Loading() {
     return <div class="MonacoEditor">{appTexts.text("loadingEditor")}</div>

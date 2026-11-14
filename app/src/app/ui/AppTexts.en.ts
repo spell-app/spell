@@ -554,6 +554,14 @@ export const APP_TEXTS = {
   inspectorActionNotNow: "Can't be done now",
   // an action's run button's tip:  `{action}` is its words, `play it`
   inspectorActionRun: "Run {action}",
+  inspectorActionRename: "Rename {action}",
+  renameAction: "Rename {action} to {newName}",
+  renameActionEmpty: "An action needs a name:  {action} keeps its own.",
+  renameActionTaken: "There's an action called {newName} already.",
+  renameActionNotWords: "{newName} can't be an action's name:  use letters, numbers, spaces and dashes.",
+  renameActionNotAction:
+    "{action} can't be renamed here:  only an action of the program's own that takes nothing else.",
+  renameActionCallsDiffer: "{action} is called in other words somewhere, so renaming it would leave that behind.",
   inspectorProperties: "Properties",
   inspectorClose: "Close the Inspector",
   inspectorHide: "Hide this card",

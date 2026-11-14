@@ -368,6 +368,15 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorActionOnlyWhen: "Solo cuando {condition}",
   inspectorActionNotNow: "No se puede hacer ahora",
   inspectorActionRun: "Ejecutar {action}",
+  inspectorActionRename: "Renombrar {action}",
+  renameAction: "Renombrar {action} a {newName}",
+  renameActionEmpty: "Una acciÃ³n necesita un nombre:  {action} se queda con el suyo.",
+  renameActionTaken: "Ya hay una acciÃ³n que se llama {newName}.",
+  renameActionNotWords: "{newName} no puede ser el nombre de una acciÃ³n:  usa letras, nÃºmeros, espacios y guiones.",
+  renameActionNotAction:
+    "{action} no se puede renombrar aquÃ­:  solo una acciÃ³n del propio programa que no toma nada mÃ¡s.",
+  renameActionCallsDiffer:
+    "{action} se llama con otras palabras en algÃºn sitio, asÃ­ que renombrarla lo dejarÃ­a atrÃ¡s.",
   inspectorProperties: "Propiedades",
   inspectorClose: "Cerrar el Inspector",
   inspectorHide: "Ocultar esta tarjeta",

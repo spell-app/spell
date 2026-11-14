@@ -8,6 +8,8 @@ import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
+// by file:  the language service itself loads with the code editor
+import { RenameError, type RenameErrorCause } from "spell/app/lsp/lsp.types"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
@@ -23,6 +25,7 @@ import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
+import { LazyMonaco } from "./LazyMonaco"
 import {
   CodeCard,
   InspectorCard,
@@ -41,6 +44,7 @@ import {
   oneOfAt,
   startingValues,
   oneOfWritten,
+  declaredActionPlace,
   placeOfDeclaredAction,
   placeOfDeclaredEvent,
   propertyCodePlace,
@@ -856,6 +860,56 @@ export class Inspector {
    */
   static placeOfAction(thing: object, action: { words: string; name: string }): SlicePlace | undefined {
     return sliceOf(placeOfDeclaredAction(action, classNamesOf(thing), declarationPlaces(), sourceFiles()))
+  }
+
+  /**
+   * Call `thing`'s action `action` `newWords`, wherever it's named (epic `editor` I111):  its head, each call and each
+   * `<action "...">`, in every file of the project, as the language service finds them (`renameActionAt()`).
+   * - ONE step of the editor's history, however many files it changes;  then a compile.
+   * - Answers whether it renamed it.  NEVER throws:  a name refused shows in the error banner, in words.
+   */
+  static async renameAction(
+    thing: object,
+    action: { words: string; name: string },
+    newWords: string
+  ): Promise<boolean> {
+    const place = declaredActionPlace(action, classNamesOf(thing), declarationPlaces())
+    const file = place && editor.project?.spellFiles.find((each) => marksPathOf(each) === place.path)
+    const head = file?.contents?.split("\n")[place!.line] ?? ""
+    const at = head.toLowerCase().indexOf(action.words.toLowerCase())
+    if (!file || at < 0) {
+      editor.showError(appTexts.text("renameActionNotAction", { action: action.words }))
+      return false
+    }
+    try {
+      const { SpellMonaco } = await LazyMonaco.load()
+      const { service, addresses } = SpellMonaco.register()
+      const { changes = {} } = service.renameActionAt(file, { line: place!.line, character: at + 1 }, newWords)
+      const wanted = newWords.trim().replace(/\s+/g, " ")
+      const title = appTexts.text("renameAction", { action: action.words, newName: wanted })
+      editor.history.transaction(title, () => {
+        for (const [uri, edits] of Object.entries(changes)) {
+          const at = editor.project?.spellFiles.find((each) => addresses.uriFor(each) === uri)
+          const before = at?.contents ?? ""
+          if (!at || !edits.length) continue
+          const { span, newText } = SourceEdits.editBetween(before, SourceEdits.applied(before, edits))
+          editor.history.change(
+            { file: at, at: span.start, before: before.slice(span.start, span.end), after: newText },
+            { title }
+          )
+        }
+      })
+      void editor.compileApp().catch((error: unknown) => editor.showError(error as Error))
+      return true
+    } catch (error) {
+      if (!(error instanceof RenameError)) {
+        editor.showError(error as Error)
+        return false
+      }
+      const key = RENAME_REFUSED[error.cause?.kind ?? "not-an-action"]
+      editor.showError(appTexts.text(key, { action: action.words, newName: newWords.trim() }))
+      return false
+    }
   }
 
   /**
@@ -1785,6 +1839,15 @@ function declarationPlaces(): SP.SpellDeclarationPlace[] {
   }
   return readPlaces.places
 }
+/** What the error banner says when an action can't take a new name, by why (`RenameError`). */
+const RENAME_REFUSED: Record<RenameErrorCause["kind"], AppTextKey> = {
+  "not-an-action": "renameActionNotAction",
+  empty: "renameActionEmpty",
+  "not-words": "renameActionNotWords",
+  taken: "renameActionTaken",
+  "calls-differ": "renameActionCallsDiffer"
+}
+
 /** The map `declarationPlaces()` read last, and what it read. */
 let readPlaces: { map: string; places: SP.SpellDeclarationPlace[] } = { map: "", places: [] }
 

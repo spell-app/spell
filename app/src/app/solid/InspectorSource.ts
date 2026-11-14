@@ -156,6 +156,25 @@ export function placeOfDeclaredAction(
 }
 
 /**
+ * Where the compiler says a thing's action is declared, as `placeOfDeclaredAction()` finds it:
+ * its head is `line`, e.g. `to "cheat" with shortcut "C"`, what a rename starts from (epic `editor` I111).
+ */
+export function declaredActionPlace(
+  action: { name: string },
+  classNames: readonly string[],
+  places: readonly SP.SpellDeclarationPlace[]
+): SP.SpellDeclarationPlace | undefined {
+  const key = letters(action.name)
+  for (const name of classNames) {
+    const place = places.find(
+      (each) => each.of === name && each.kind === "method" && !!each.output && letters(each.output) === key
+    )
+    if (place) return place
+  }
+  return undefined
+}
+
+/**
  * A type's `to test ...` methods (`<test "card setup">`), from where the compiler says they're declared:
  * each written inside `typeName`'s own lines, its words and its code's place (epic `editor` P23).
  * - A test is a top-level function, so it's on no type:  it's the type's when it's written beside it, in its tag.

@@ -617,3 +617,26 @@ export function scopeTreeFromPacks(packs: ScopePack[]): { tree: ScopeNode; detai
  * - `"plain"`:  the sentence and its description, in words anyone can read
  */
 export type HoverDetail = "full" | "plain"
+
+// ## Renaming
+
+/**
+ * Thrown by `SpellLanguageService.renameActionAt()` when an action can't take the new name;  `cause.kind` says why.
+ * - `not-an-action`:  what's there isn't an action of the program's own that takes nothing
+ * - `empty`:  the new name has no words
+ * - `not-words`:  the new name isn't words a name can be (letters, digits, spaces and dashes)
+ * - `taken`:  another action is called that already
+ * - `calls-differ`:  a call of it is written in other words than its name, so a rename would leave it behind
+ */
+export class RenameError extends Error {
+  declare cause: RenameErrorCause | undefined
+}
+RenameError.prototype.name = "RenameError"
+
+/** Why an action can't be renamed -- see `RenameError`. */
+export type RenameErrorCause = {
+  /** what's wrong */
+  kind: "not-an-action" | "empty" | "not-words" | "taken" | "calls-differ"
+  /** the action's name as it's written now */
+  words?: string
+}

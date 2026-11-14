@@ -1272,6 +1272,11 @@ export class SpellLanguageService {
    */
   prepareRename(file: SP.SpellFile, position: Position): { range: Range; placeholder: string } | null {
     const subject = this.subjectAt(file, position)
+    if (subject?.kind === "method") {
+      const action = this.actionNamed(subject)
+      const range = action && this.rangeOf(file, subject.nameMatch)
+      return range ? { range, placeholder: action!.words } : null
+    }
     const occurrences = subject && this.renamable(subject)
     const range = occurrences && subject && this.rangeOf(file, subject.nameMatch)
     return range ? { range, placeholder: subject!.nameMatch.raw! } : null
@@ -1279,8 +1284,16 @@ export class SpellLanguageService {
 
   /** Edits renaming the thing at `position` to `newName` wherever it's used, in every file -- see `prepareRename()`. */
   rename(file: SP.SpellFile, position: Position, newName: string): WorkspaceEdit | null {
-    if (!SpellLanguageService.RENAMABLE_WORD.test(newName)) return null
     const subject = this.subjectAt(file, position)
+    if (subject?.kind === "method") {
+      try {
+        return this.renameActionAt(file, position, newName)
+      } catch (error) {
+        if (error instanceof LSP.RenameError) return null
+        throw error
+      }
+    }
+    if (!SpellLanguageService.RENAMABLE_WORD.test(newName)) return null
     const occurrences = subject && this.renamable(subject)
     if (!occurrences) return null
     const changes: Record<string, TextEdit[]> = {}
@@ -1294,6 +1307,82 @@ export class SpellLanguageService {
     }
     return { changes }
   }
+
+  /**
+   * Edits renaming the action whose name is at `position` -- its head, `to "cheat"` -- to `newWords`, wherever it's named
+   * (epic `editor` I111):  its head, each call (`cheat`, `if anything changed auto play`) and each button and menu row
+   * (`<action "cheat"/>`), in every file of the project.
+   * - Only an action of the program's own that takes nothing (`SP.ActionButton.actionsIn()`):
+   *   one that takes something is called in its own words around what it takes, which a rename can't follow.
+   * - Its head keeps its quotes, its title and its icon:  `to "peek" with shortcut "C", icon "eye"`.
+   * - throws `LSP.RenameError` when it can't:  `cause.kind` says why, for the editor's message.
+   */
+  renameActionAt(file: SP.SpellFile, position: Position, newWords: string): WorkspaceEdit {
+    const subject = this.subjectAt(file, position)
+    const action = subject?.kind === "method" ? this.actionNamed(subject) : undefined
+    if (!action)
+      throw new LSP.RenameError("renameActionAt():  no action of the program's own here", {
+        cause: { kind: "not-an-action" }
+      })
+    const words = newWords.trim().replace(/\s+/g, " ")
+    const { project } = file
+    const fail = (kind: LSP.RenameErrorCause["kind"]) =>
+      new LSP.RenameError(`renameActionAt():  can't rename "${action.words}" to "${words}" (${kind})`, {
+        cause: { kind, words: action.words }
+      })
+    if (!words) throw fail("empty")
+    if (!SpellLanguageService.ACTION_WORDS.test(words)) throw fail("not-words")
+    const taken = SP.ActionButton.actionsIn(action.scope).some(
+      (other) => sameWords(other.words, words) && !sameWords(other.words, action.words)
+    )
+    if (taken) throw fail("taken")
+    const changes: Record<string, TextEdit[]> = {}
+    const change = (at: SP.SpellFile, range: Range | undefined, newText: string) => {
+      if (range) (changes[this.addresses.uriFor(at)] ??= []).push({ range, newText })
+    }
+    // its head:  quoted or not, as written
+    const head = subject!.nameMatch
+    const headFile = this.fileOf(head)!
+    change(headFile, this.rangeOf(headFile, head), head.tokens[0] instanceof P.TextToken ? `"${words}"` : words)
+    // each call:  the whole statement, which is its words alone
+    for (const { file: at, match } of this.occurrencesOf(subject!, false)) {
+      const text = at.parseText.slice(match.start, match.end)
+      if (!sameWords(text, action.words)) throw fail("calls-differ")
+      change(at, this.rangeOf(at, match), words)
+    }
+    // each button and menu row naming it:  its quoted word
+    for (const at of project?.spellFiles ?? []) {
+      if (!at.match) continue
+      SpellLanguageService.walk(at.match, (match) => {
+        if (match.rule.name !== ACTION_BUTTON_RULE) return
+        const element = match.tokens[0]
+        const quoted = element instanceof P.JSXElementToken ? element.quotedWord?.value : undefined
+        if (!(quoted instanceof P.TextToken) || !sameWords(quoted.innerText, action.words)) return
+        if (quoted.start === undefined || quoted.end === undefined) return
+        change(at, { start: this.positionAt(at, quoted.start), end: this.positionAt(at, quoted.end) }, `"${words}"`)
+      })
+    }
+    return { changes }
+  }
+
+  /**
+   * The action `subject` names, if it's one of the program's own that takes nothing:  its words as written, `cheat`,
+   * and the scope its buttons are found in;  `undefined` for any other method.
+   */
+  private actionNamed(
+    subject: Extract<LSP.SpellSubject, { kind: "method" }>
+  ): { words: string; scope: P.Scope } | undefined {
+    const { declaredBy } = subject.record
+    if (!declaredBy) return undefined
+    const name = subject.nameMatch.tokens[0]
+    const words = name instanceof P.TextToken ? name.innerText : `${subject.nameMatch.raw ?? ""}`
+    const scope = declaredBy.scope
+    const action = SP.ActionButton.actionsIn(scope).find((it) => sameWords(it.words, words))
+    return action ? { words: action.words, scope } : undefined
+  }
+
+  /** Words an action's name can be:  a letter first, then letters, digits, spaces, dashes and apostrophes. */
+  static ACTION_WORDS = /^\p{L}[\p{L}\p{M}\d' -]*$/u
 
   /** Does `property` list its values, so its type holds them as an enumeration, e.g. `suits` for a card's `suit`? */
   private static hasValuesListed({ name, scope }: P.ScopeVariable): boolean {
@@ -3009,3 +3098,11 @@ const GROUP_HEADING_LEVEL = 2
  */
 export const PICK_VALUE_COMMAND = "spell.pickValue"
 
+/** The rule of `<action "...">`, a button or menu row naming one of the program's actions:  what an action's rename finds. */
+const ACTION_BUTTON_RULE = "action_button"
+
+/** Are `a` and `b` the same words, whatever their case, accents and spacing:  `Auto  play` and `auto play`? */
+function sameWords(a: string, b: string): boolean {
+  const plain = (text: string) => withoutAccents(text.trim().replace(/\s+/g, " ")).toLowerCase()
+  return plain(a) === plain(b)
+}
