@@ -1596,10 +1596,10 @@
      * Spell file's drawing's alike;  the band starts a bracket's room left of the tag
      */
     .bubbly-tag-head-spacer {
-      width: calc((var(--bubbly-tag-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+      width: calc((var(--bubbly-tag-pad-left) - var(--bubbly-tag-block-inset)) * var(--bubbly-monaco-scale));
     }
     .bubbly-tag-foot-spacer {
-      width: calc((var(--bubbly-foot-tiny-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+      width: calc((var(--bubbly-foot-tiny-pad-left) - var(--bubbly-tag-block-inset)) * var(--bubbly-monaco-scale));
     }
     /* before an attribute's name, and its `=`:  the page's margins */
     .bubbly-attribute-spacer {
@@ -1654,6 +1654,8 @@
   &.bubbly-monaco.bubbly-html {
     /* the box is the editor's, not the page's column of rows */
     display: block;
+    /* a block's band a bracket's room before its words:  every band here is HTML's, so its rails are one indent apart */
+    --bubbly-tag-block-inset: var(--bubbly-bracket-pad);
 
     /* spacers:  where the page has a line's inset */
     /* before a line of text:  in from the tags beside it, as on the page */
@@ -1671,6 +1673,13 @@
     /* a bracket's ink this close to its point */
     --bubbly-bracket-pad: 0.5px;
     /* a block's start tag keeps its room before its `⟨`, its corner as before (Owen:  "put the spacing back") */
+    /*
+     * an HTML block's band, rail and tiny foot start this far left of its line's words:  where a Spell band starts,
+     * so each nested rail is one indent right of the one it's in, Spell's and HTML's alike (epic `language` I87:
+     * at the bracket's 0.5px, a Spell rail to an HTML one was an indent and 2.3px)
+     * - the spacers before its `⟨`s take it off, so they keep their room in the band;  an HTML file's:  above
+     */
+    --bubbly-tag-block-inset: var(--bubbly-pill-pad-left);
     /* a tiny foot's `⟨` just past its rail;  its `⟩` at its right end, no room after it ("No space at the end") */
     --bubbly-foot-tiny-pad-left: calc(var(--bubbly-gutter) + 1px);
     --bubbly-foot-tiny-pad-right: 1px;
@@ -1685,7 +1694,7 @@
     --bubbly-foot-tiny-below: 3.4px;
 
     .bubbly-tag-foot-bare-spacer {
-      width: calc((var(--bubbly-foot-bare-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+      width: calc((var(--bubbly-foot-bare-pad-left) - var(--bubbly-tag-block-inset)) * var(--bubbly-monaco-scale));
     }
   }
 }

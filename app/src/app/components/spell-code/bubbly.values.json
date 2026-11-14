@@ -348,6 +348,10 @@
       "light": "#c8c8cb",
       "dark": "#525159"
     },
+    "--bubbly-tag-block-inset": {
+      "light": "3px",
+      "dark": "3px"
+    },
     "--bubbly-foot-bare-pad-left": {
       "light": "14px",
       "dark": "14px"

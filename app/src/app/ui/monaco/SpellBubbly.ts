@@ -536,8 +536,10 @@ export class SpellBubbly {
   /**
    * An HTML element with what's inside it on lines of its own:  its start tag's band, its gutter and body down to its
    * end tag's band (when that starts its line), then what's inside it;  `undefined` when none of it is in view.
-   * - Its band starts a bracket's room left of its `<`, at its line's indent:  its words clear of the cut corner by
-   *   the spacer before the `<` (`bubbly-tag-head-spacer`);  its end tag's band likewise (`bubbly-tag-foot-spacer`).
+   * - Its band starts `blockInset` left of its line's indent:  in a Spell file where a Spell band starts, so its rail
+   *   is one indent right of the one it's in (I87);  in an HTML file a bracket's room.
+   * - Its words clear of the cut corner by the spacer before the `<` (`bubbly-tag-head-spacer`);
+   *   its end tag's band likewise (`bubbly-tag-foot-spacer`).
    * - A start tag on lines of its own:  one tall band (`drawTall()`), its body from under its last line.
    * - Its end tag on its own line, named or `</>`:  a TINY pill at the rail's turn, the body down to it (Q61);
    *   its line only the pill's row tall (`shortenFootLines()`).
@@ -549,7 +551,7 @@ export class SpellBubbly {
     const lastLine = range.endLineNumber
     if (lastLine < view.first - 1 || headLine > view.last) return undefined
     const block = element(`bubbly-block bubbly-${shape.partOfSpeech}`)
-    const left = this.wordsX(headLine) - measures.bracketPad
+    const left = this.wordsX(headLine) - measures.blockInset
     const headTop = editor.getTopForLineNumber(headLine)
     const head = view.ranges[shape.head]
     // its start tag's last line:  a tall one's (T118), else its first
@@ -831,6 +833,7 @@ export class SpellBubbly {
       tagSpacer: spacerWidth("bubbly-tag-spacer"),
       touchSpacer: spacerWidth("bubbly-touch-spacer"),
       bracketPad: length("--bubbly-bracket-pad", htmlProbe) * scale,
+      blockInset: length("--bubbly-tag-block-inset") * scale,
       tagPoint: length("--bubbly-tag-point", htmlProbe) * scale,
       footTinyAbove: length("--bubbly-foot-tiny-above", htmlProbe) * scale,
       footTinyPadRight: length("--bubbly-foot-tiny-pad-right", htmlProbe) * scale,
@@ -925,6 +928,11 @@ type Measures = {
   touchSpacer: number
   /** HTML:  a tag's bracket this far in from its band's end */
   bracketPad: number
+  /**
+   * HTML:  a block's band, rail and tiny foot this far left of its words (`--bubbly-tag-block-inset`):
+   * in a Spell file where a Spell band starts (`padLeft`), so the rails are one indent apart at every level
+   */
+  blockInset: number
   /** HTML:  how wide a tag's pointed end is */
   tagPoint: number
   /** HTML:  a block's end tag's tiny pill:  the body's paper above it, its room after its `⟩`, its line's height */
