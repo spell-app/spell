@@ -4247,6 +4247,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "EachInStatement",
+          "ruleNames": ["each_in_statement"],
+          "internal": false,
+          "file": "src/spell/rules/lists/EachInStatement.ts",
+          "line": 24,
+          "purpose": "A statement run once for each item of a list, the list said in it -- `add each card in the deck to the stock` (epic `language` P55, Q59).",
+          "syntaxes": [
+            {
+              "syntax": "{statement} cada {item:singular_identifier} (en|de|del) {list:expression}",
+              "example": "agregar cada carta en mazo a reserva",
+              "outputs": {
+                "js": {
+                  "code": "core.map(mazo, (carta) => core.append(reserva, carta))"
+                },
+                "ts": {
+                  "code": "core.map(mazo, (carta) => core.append(reserva, carta))"
+                },
+                "py": {
+                  "code": "for carta in mazo:\n    core.append(reserva, carta)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ListRangeIteration",
           "ruleNames": ["list_range_iteration"],
           "internal": false,

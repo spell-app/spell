@@ -183,7 +183,7 @@ type LoopData = ItemVariableData & {
  * - Not a read already filtered here (`core.filter()`):  that's a list of its own.
  * - Not in a drawing:  a drawn list SHOULD follow its place, and `DrawnLines` reads the read as it is.
  */
-function loopedList(match: P.Match, list: P.ASTExpression): P.ASTExpression {
+export function loopedList(match: P.Match, list: P.ASTExpression): P.ASTExpression {
   const isSavedRead = list instanceof P.ASTCoreMethodInvocation && list.methodName === "savedThings"
   if (!isSavedRead || (match.data as LoopData).inDrawing) return list
   return new P.ASTCoreMethodInvocation(match, { methodName: "duplicateList", args: [list] })

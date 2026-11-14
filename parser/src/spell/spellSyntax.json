@@ -4247,6 +4247,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "EachInStatement",
+          "ruleNames": ["each_in_statement"],
+          "internal": false,
+          "file": "src/spell/rules/lists/EachInStatement.ts",
+          "line": 24,
+          "purpose": "A statement run once for each item of a list, the list said in it -- `add each card in the deck to the stock` (epic `language` P55, Q59).",
+          "syntaxes": [
+            {
+              "syntax": "{statement} each {item:singular_identifier} in {list:expression}",
+              "example": "add each card in deck to stock",
+              "outputs": {
+                "js": {
+                  "code": "core.map(deck, (card) => core.append(stock, card))"
+                },
+                "ts": {
+                  "code": "core.map(deck, (card) => core.append(stock, card))"
+                },
+                "py": {
+                  "code": "for card in deck:\n    core.append(stock, card)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ListRangeIteration",
           "ruleNames": ["list_range_iteration"],
           "internal": false,

@@ -259,6 +259,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "no-dotted-field":
     'El nombre de un campo no lleva punto:  lo que hay dentro de "{field}" es una cosa aparte, un tipo con sus propios campos, y se lee con palabras',
   "type-default-not-a-property": "{AType} no tiene {property}:  la línea de un tipo solo da valores a lo que tiene su clase",
+  "one-each-a-statement": 'Un solo "cada ... en" por instrucción:  recorre el otro con "para cada ... en", alrededor',
   "create-hook-names-another-type": 'Nombra el tipo en el que está:  "al {verb} {aType}"',
   "cant-save-built-in-inline":
     "No se puede guardar el tipo {type} dentro:  viene incorporado, y todos los proyectos lo comparten",
