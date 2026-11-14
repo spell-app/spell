@@ -46,7 +46,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [prefs/](server/node/prefs/):  see "Preferences" below
     - [places/](server/node/places/):  every project data folder, served to programs (`SpaceFolders`, below)
     - [changes/](server/node/changes/):  the inbox of changes people ask for in the editor, for a Claude session
-      (`ChangeRequests`, `/api/changes`, `spell app changes`;  epic `editor` P18)
+      (`ChangeRequests`, `/api/changes`, `spell app changes`;  epic `editor` P18);  with nobody listening, the page
+      server starts a headless Claude Code session for a request itself (`ClaudeStarter`, epic `editor` T66)
     - [routes/](server/node/routes/):  the editor's server (below)
   - [the Python side](server/py/pyproject.toml):  `spell_quart`, Python's web server, a uv project (below)
 - Tests live in the app folder's `tests/spaces/`, at the same paths as the code they test:

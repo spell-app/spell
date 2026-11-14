@@ -43,7 +43,13 @@ describe("ChangeRequests", () => {
   it("writes the pictures sent with it beside the inbox, for the session to read (epic `editor` T62)", () => {
     const png = Buffer.from("not really a png").toString("base64")
     const request = inbox.add(
-      { ...ASKED, pictures: [{ type: "image/png", data: png }, { type: "image/jpeg", data: png }] },
+      {
+        ...ASKED,
+        pictures: [
+          { type: "image/png", data: png },
+          { type: "image/jpeg", data: png }
+        ]
+      },
       "/disk/Proj.spell"
     )
     expect(request.pictureFiles).toEqual([
@@ -85,6 +91,23 @@ describe("ChangeRequests", () => {
     inbox.add(ASKED, "/disk/Proj.spell")
     expect(inbox.finish("c1", "done", "it says Stop")).toMatchObject({ status: "done", summary: "it says Stop" })
     expect(() => inbox.finish("c9", "done")).toThrow(/no request c9/)
+  })
+
+  it("takes a request by its id, for the session started for it, once (epic `editor` T66)", () => {
+    inbox.add(ASKED, "/disk/Proj.spell")
+    expect(inbox.take("c1").status).toBe("taken")
+    expect(() => inbox.take("c1")).toThrow(/c1 is taken already/)
+    expect(() => inbox.take("c9")).toThrow(/no request c9/)
+  })
+
+  it("leaves a request with a session started for it to that session, not to a listener", () => {
+    inbox.add(ASKED, "/disk/Proj.spell")
+    inbox.add(ASKED, "/disk/Proj.spell")
+    const session = { pid: 1, at: new Date().toISOString(), log: "/x.log" }
+    expect(inbox.startedFor("c1", session).session).toEqual(session)
+    expect(inbox.takeNext()?.id).toBe("c2")
+    expect(inbox.takeNext()).toBeUndefined()
+    expect(inbox.of("c1")?.status).toBe("waiting")
   })
 
   it("is listened to while a session's beat is live, or while one has a request", () => {

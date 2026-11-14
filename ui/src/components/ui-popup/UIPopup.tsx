@@ -27,7 +27,8 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
  *     it hides as the pointer leaves the target, after `hide-delay`.
  *
  * - `at`, a point in the window (`{ x, y }`), in place of a target:  a right click's menu.
- *   - It opens with its corner there, staying inside the window, and takes focus, which goes back when it closes.
+ *   - It opens with its corner there, staying inside the window, and takes focus, which goes back when it closes:
+ *     its `autofocus` element's, else its first tabbable's.
  *   - The point is a box the popup puts on the page while it's open (`placeAtPoint()`):  anchor positioning needs one.
  *   - Written with `open-on="manual"`, and with `visible` to open:  it has no target to listen to.
  *
@@ -122,7 +123,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
       if (!this.isVisible || !this.isConnected) return
       this.show()
       // no ring for a mouse's right click:  the arrow keys show it
-      if (this.point) E.beforeNextPaint(() => UI.focus.first(this.domElement)?.focus(QUIET_FOCUS))
+      if (this.point) E.beforeNextPaint(() => this.firstFocus?.focus(QUIET_FOCUS))
       if (keyframes && box) await UI.transitions.animate({ element: box, name: keyframes, direction: UIT.IN })
       return
     }
@@ -132,6 +133,14 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     this.hide()
     const animations = [...this.domElement.getAnimations(), ...(box?.getAnimations() ?? [])]
     await Promise.allSettled(animations.map((each) => each.finished))
+  }
+  /**
+   * What takes the focus as it opens at a point:  an `autofocus` element inside it, else its first tabbable,
+   * as a dialog's focusing steps do (`UI.focus.enter()`).
+   * - So a close button before a field doesn't take it from the field (Change This, epic `editor` I133).
+   */
+  private get firstFocus(): HTMLElement | undefined {
+    return this.domElement.querySelector<HTMLElement>("[autofocus]") ?? UI.focus.first(this.domElement)
   }
 
   /**

@@ -133,6 +133,7 @@ api.post("/people/me", peopleRoutes.request_saveMe)
 
 // A change asked for on what's selected, for a Claude session on this machine -- see `changesRoutes.ts` (epic `editor` P18)
 api.post("/changes", changesRoutes.request_askForChange)
+api.post("/changes/start", changesRoutes.request_startClaude)
 api.get("/changes", changesRoutes.request_getChange)
 
 // Save into Spell UI, a Spell admin's -- see `themesRoutes.ts` (epic `debut` P25)

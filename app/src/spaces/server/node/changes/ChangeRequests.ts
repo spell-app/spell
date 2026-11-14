@@ -33,7 +33,8 @@ export class ChangeRequests {
   add({ pictures = [], ...asked }: SPACES.ChangeAsked, diskPath: string): SPACES.ChangeRequest {
     const extensions = pictures.map(({ type }) => {
       const extension = PICTURE_EXTENSIONS[type]
-      if (!extension) throw new TypeError(`ChangeRequests.add():  a picture of type ${type};  send PNG, JPEG, GIF or WebP`)
+      if (!extension)
+        throw new TypeError(`ChangeRequests.add():  a picture of type ${type};  send PNG, JPEG, GIF or WebP`)
       return extension
     })
     return this.change((inbox) => {
@@ -66,6 +67,7 @@ export class ChangeRequests {
   /**
    * Take the oldest waiting request:  it's `taken` now, and `undefined` if none waits.
    * - One left waiting too long is dropped, not done:  whoever asked has long moved on.
+   * - One with a session started for it is that session's (`startedFor()`).
    */
   takeNext(now = Date.now()): SPACES.ChangeRequest | undefined {
     // nothing waits (each look, every half second):  no lock, no write
@@ -74,7 +76,7 @@ export class ChangeRequests {
       const waiting = inbox.requests.filter((request) => request.status === "waiting")
       const isStale = (request: SPACES.ChangeRequest) => now - Date.parse(request.at) > WAITS_AT_MOST_MS
       for (const request of waiting.filter(isStale)) request.status = "failed"
-      const next = waiting.find((request) => !isStale(request))
+      const next = waiting.find((request) => !isStale(request) && !request.session)
       if (next) next.status = "taken"
       return next
     })
@@ -85,11 +87,48 @@ export class ChangeRequests {
    * - throws `TypeError` if there's no such request.
    */
   finish(id: string, status: "done" | "failed", summary?: string): SPACES.ChangeRequest {
-    return this.change((inbox) => {
-      const request = inbox.requests.find((each) => each.id === id)
-      if (!request) throw new TypeError(`ChangeRequests.finish():  there's no request ${id};  'spell app changes list'`)
+    return this.changeRequest(id, "finish", (request) => {
       request.status = status
       if (summary) request.summary = summary
+    })
+  }
+
+  /**
+   * Take request `id` by its id:  what the session the page server started for it does first
+   * (`spell app changes take`, epic `editor` T66).
+   * - throws `TypeError` if there's no such request, or it isn't waiting any more
+   */
+  take(id: string): SPACES.ChangeRequest {
+    return this.changeRequest(id, "take", (request) => {
+      if (request.status !== "waiting") {
+        throw new TypeError(`ChangeRequests.take():  ${id} is ${request.status} already`)
+      }
+      request.status = "taken"
+    })
+  }
+
+  /**
+   * A Claude session was started for request `id` (`ClaudeStarter`):  it takes the request itself,
+   * so `takeNext()` leaves it for that session.
+   * - throws `TypeError` if there's no such request
+   */
+  startedFor(id: string, session: SPACES.ChangeSession): SPACES.ChangeRequest {
+    return this.changeRequest(id, "startedFor", (request) => {
+      request.session = session
+    })
+  }
+
+  /** Change request `id` with `edit`, under the lock;  throws `TypeError` naming `method` if there's none. */
+  private changeRequest(
+    id: string,
+    method: string,
+    edit: (request: SPACES.ChangeRequest) => void
+  ): SPACES.ChangeRequest {
+    return this.change((inbox) => {
+      const request = inbox.requests.find((each) => each.id === id)
+      if (!request)
+        throw new TypeError(`ChangeRequests.${method}():  there's no request ${id};  'spell app changes list'`)
+      edit(request)
       return request
     })
   }

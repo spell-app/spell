@@ -492,6 +492,18 @@ describe("<ui-popup> manual", () => {
     expect(closes).toHaveLength(1)
   })
 
+  it("opened at a point, focuses its `autofocus` element, else its first tabbable", async () => {
+    const { host } = await popup(
+      `<ui-popup open-on="manual"><button class="close">x</button><input class="words" autofocus></ui-popup>`
+    )
+    ;(host as Popup & { at: { x: number; y: number } }).at = { x: 300, y: 200 }
+    host.visible = true
+    await settle()
+    // it focuses just before the next paint
+    await new Promise((painted) => requestAnimationFrame(() => requestAnimationFrame(painted)))
+    expect(document.activeElement?.className).toBe("words")
+  })
+
   it("hides when removed, and shows again when put back", async () => {
     const { host, wrapper } = await popup(`<button>Target</button><ui-popup open-on="manual" visible>Tip</ui-popup>`)
     expect(UI.overlays.isOpen(UI.overlays.entries.find((entry) => entry.element === host)!)).toBe(true)

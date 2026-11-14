@@ -95,6 +95,12 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     expect(await page.locator(".ChangeThisBox ui-code").textContent()).toContain("spell app changes wait")
   })
 
+  test("with Claude Code here, the page server starts a session:  the box says so (epic `editor` T66)", async () => {
+    request = { ...request, hasClaude: true, session: { pid: 1, at: new Date().toISOString(), log: "/x.log" } }
+    await page.waitForSelector(".ChangeThisStarting", { timeout: 5000 })
+    expect(await page.locator(".ChangeThisStarting").innerText()).toContain("Starting Claude")
+  })
+
   test("a session taking it says so", async () => {
     request = { ...request, status: "taken", listening: true }
     await page.waitForSelector(".ChangeThisWorking", { timeout: 5000 })
@@ -124,6 +130,15 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     await page.locator(".AppPaneBody").click({ position: { x: 5, y: 300 }, force: true })
     await page.keyboard.press("Meta+z")
     await expect.poll(() => button().innerText(), { timeout: 15_000 }).toBe("Clicked 3 times")
+  })
+
+  test("its ✕ closes it, and Send is off until there are words (epic `editor` I133)", async () => {
+    await selectButton()
+    await page.keyboard.press("Meta+k")
+    await page.waitForSelector(".ChangeThisBox")
+    expect(await page.locator(".ChangeThisSend").getAttribute("disabled")).toBe("")
+    await page.locator(".ChangeThisClose").click()
+    await page.waitForFunction(() => !document.querySelector(".ChangeThisBox"))
   })
 
   test("a session that couldn't says why, and nothing changes", async () => {

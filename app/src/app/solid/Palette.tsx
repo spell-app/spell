@@ -726,7 +726,7 @@ export function PartMenu(): JSX.Element {
                   shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
                   disabled={!!whyNoCodeAt(where())}
                   tip={whyNoCodeAt(where())}
-                  onClick={() => ChangeThis.open()}
+                  onClick={() => ChangeThis.open(where())}
                 />
               </Show>
             </ui-menu>

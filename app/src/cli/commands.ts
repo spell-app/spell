@@ -5,7 +5,7 @@
  * - `spell app preview build | serve`:  the editor's static build, the public preview -- written, then shown as a host would
  * - `spell app preview viewer <folder> <project...> [--editor]`:  `<spell-viewer>` (and `<spell-editor>`) and those
  *   projects, into a site's folder
- * - `spell app changes wait | done | list`:  the changes people ask for in the editor, for a Claude session (epic `editor` P18)
+ * - `spell app changes wait | take | done | list`:  the changes people ask for in the editor, for a Claude session (epic `editor` P18)
  * - `spell space takedown hide | delete | restore | list <target>`:
  *   Spell taking down a record, a space or an account, for Spell's admins,
  *   with a reason in a log beside it (epic `atmosphere` P6)
@@ -116,6 +116,12 @@ export default function appCommands(spell: Command): void {
     .description("listen until a request comes, then print it:  exit 2 at the timeout")
     .option("--timeout <seconds>", "how long to wait -- default an hour", (value) => Number(value))
     .action((_options, command: Command) => runChanges(["wait"], command))
+
+  changes
+    .command("take")
+    .description("take one request by its id, then print it:  what a session the editor started does first")
+    .argument("<id>", "the request, c3")
+    .action((id: string, _options, command: Command) => runChanges(["take", id], command))
 
   changes
     .command("done")

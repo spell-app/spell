@@ -587,15 +587,22 @@ A program written in outline style with no `<draw>` has nowhere to add to, and s
 ### Asking for a change
 
 On your own machine, select something in the app, press ⌘K (or right click, Change This...), and say what should change.
-A Claude session you leave open makes the change, and the app shows it with its state kept:
+The box opens next to what you selected:  Enter or its paper plane sends, Shift+Enter starts a new line, its ✕ closes it.
+Claude Code makes the change, and the app shows it with its state kept:
 the count stays at 3, and only the words on the button move.
+
+With no session listening, the page server starts one itself, headless, in the project's folder:
+the box says "Starting Claude…", then "Claude is working on it…".
+That session may edit files in the project's folder, read, and run `spell app changes`;  anything else is refused.
+A session you leave open takes requests too:
 
 ```sh
 spell app changes wait    # in the session, in the background:  it prints the next request, and what to do with it
 spell app changes done c3 "the button says Pressed now"
 ```
 
-- The request is a small file in your spaces folder, so it waits if no session is listening, and the box says what to run.
+- The request is a small file in your spaces folder, so it waits if nothing takes it.
+- Claude Code not on this machine:  the box says so, links its install page, and shows what to run by hand.
 - The result is one step of the editor's history, so ⌘Z takes it back.
 - What it doesn't do:
   - It's hidden in the public preview, which has no server.

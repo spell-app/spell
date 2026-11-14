@@ -11,6 +11,7 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
+import { PartEdits } from "./PartEdits"
 import { on } from "./on"
 
 import "./ChangeThis.css"
@@ -19,8 +20,9 @@ import "./ChangeThis.css"
  * ### `ChangeThis`
  * Select something in the app, say what should change, and a Claude session on this machine changes the code
  * (epic `editor` P18):  the flow, from the selection to the result.
- * - The selection gives the place;  `POST /api/changes` writes it to the inbox, with no Claude needed for that;
- *   a session takes it with `spell app changes wait`.
+ * - The selection gives the place;  `POST /api/changes` writes it to the inbox, with no Claude needed for that.
+ * - A session takes it:  one listening (`spell app changes wait`), else one the page server starts itself,
+ *   headless, when Claude Code is on this machine (`ClaudeStarter`, epic `editor` T66).
  * - The result arrives as any other edit does:  one step of `editor.history`, compiled with the running app left up.
  * - One request at a time.
  * - Never in the public preview, which has no server (`isStaticBuild`).
@@ -33,19 +35,20 @@ export class ChangeThis {
 
   /**
    * Open the box on what's selected, or on the request under way.
+   * - `at`:  where it was asked from, a right click's point;  else next to the selected part (`boxPlaceFor()`)
+   * - It stays inside the window (`<ui-popup at>`).
    * - Nothing selected, or nothing written:  nothing to ask about, so nothing opens.
    */
-  static open(): void {
+  static open(at?: BoxPlace): void {
     if (!ChangeThis.isAvailable) return
     const element = selectedElement()
     placeAsked = element && ChangeThis.placeFor(element)
-    if (request() || placeAsked) setBoxAt(ChangeThis.whereFor(element))
+    if (request() || placeAsked) setBoxAt(at ?? boxPlaceFor(element))
   }
 
-  /** Where the box opens:  under `element`, inside the window. */
-  private static whereFor(element: Element | undefined): BoxPlace {
-    const box = element?.getBoundingClientRect()
-    return box ? { x: box.left, y: box.bottom } : { x: innerWidth / 2, y: innerHeight / 3 }
+  /** Close the box:  a request under way goes on without it. */
+  static close(): void {
+    setBoxAt(undefined)
   }
 
   /** The place of `element`, as a request says it:  `undefined` if it isn't written in a file of this project. */
@@ -91,6 +94,21 @@ export class ChangeThis {
     }
   }
 
+  /**
+   * Start a Claude session for the request under way, the box's Start Claude button:
+   * for when the page server didn't start one by itself (epic `editor` T66).
+   * - NEVER throws:  a failure is said in the editor's error
+   */
+  static async startClaude(): Promise<void> {
+    const id = request()?.id
+    if (!id) return
+    try {
+      setRequest(await ChangeThis.fetchAnswer({ url: `${CHANGES_URL}/start?id=${id}`, method: "POST" }))
+    } catch (error) {
+      editor.showError(error as Error)
+    }
+  }
+
   /** Ask the server, and hear a request back. */
   private static fetchAnswer(params: Parameters<typeof LoadableFile.fetch>[0]): Promise<SPACES.ChangeAnswer> {
     return LoadableFile.fetch<SPACES.ChangeAnswer>({ ...params, format: "json", cache: "no-store" })
@@ -112,7 +130,10 @@ export class ChangeThis {
           break
         }
         if (answer.status === "failed") {
-          editor.showError(appTexts.text("changeThisFailed", { summary: answer.summary ?? "" }))
+          const { summary } = answer
+          editor.showError(
+            summary ? appTexts.text("changeThisFailed", { summary }) : appTexts.text("changeThisStopped")
+          )
           break
         }
       }
@@ -194,13 +215,17 @@ export class ChangeThis {
 
 /****************
  * ### `<ChangeThisBox>`
- * The small box on what's selected:  a `<ui-popup>` at it, with what to change, then how the request is getting on.
+ * The small box next to what's selected:  a `<ui-popup>` there, with what to change, then how the request is getting on.
  * - A popup, not a panel:  it covers nothing but the place it's about.
- * - Enter sends, shift+Enter starts a new line, Esc closes it, and a request under way goes on without it.
+ * - Its ✕, top right, closes it;  so does Esc.  A request under way goes on without it.
+ * - Send, the paper plane left of the words, sends them;  so does Enter.  Shift+Enter starts a new line.
  * - A picture pasted or dropped into it goes with the words, a thumbnail under them, its ✕ taking it out (epic `editor` T62).
+ * - Under way, in short lines (epic `editor` T66):  "Starting Claude…", then "Claude is working on it…";
+ *   no Claude Code on this machine:  a link to install it, and the command to run by hand.
  * - `ChangeThis.open()` opens it.
  ****************/
 export function ChangeThisBox(): JSX.Element {
+  const send = () => void ChangeThis.send(words())
   return (
     <Show when={boxAt()}>
       {(where) => (
@@ -210,7 +235,7 @@ export function ChangeThisBox(): JSX.Element {
           visible=""
           class="BarMenuPopup ChangeThisPopup"
           aria-label={appTexts.text("menuChangeThis")}
-          ref={on("ui-closing", () => setBoxAt(undefined))}
+          ref={on("ui-closing", () => ChangeThis.close())}
         >
           <div
             class="ChangeThisBox"
@@ -221,24 +246,47 @@ export function ChangeThisBox(): JSX.Element {
             }}
             onDrop={(event: DragEvent) => takePictures(event, event.dataTransfer)}
           >
-            <label class="ChangeThisHeader">{appTexts.text("changeThisHeader")}</label>
-            <ui-textarea
-              grow=""
-              fluid=""
-              rows="3"
-              max-rows="6"
-              autofocus=""
-              readonly={!!request()}
-              aria-label={appTexts.text("changeThisPrompt")}
-              placeholder={appTexts.text("changeThisPrompt")}
-              value={words()}
-              ref={on<{ value: string }>("ui-typed", (event) => setWords(event.detail.value))}
-              onKeyDown={(event: KeyboardEvent) => {
-                if (event.key !== "Enter" || event.shiftKey || event.isComposing || request()) return
-                event.preventDefault()
-                void ChangeThis.send(words())
-              }}
-            />
+            <div class="ChangeThisTop">
+              <label class="ChangeThisHeader">{appTexts.text("changeThisHeader")}</label>
+              <ui-button
+                class="ChangeThisClose"
+                appearance="circular basic"
+                size="mini"
+                icon="close"
+                aria-label={appTexts.text("changeThisClose")}
+                title={appTexts.text("changeThisClose")}
+                onClick={() => ChangeThis.close()}
+              />
+            </div>
+            <div class="ChangeThisField">
+              <ui-button
+                class="ChangeThisSend"
+                appearance="circular"
+                color="primary"
+                icon={SEND_ICON}
+                aria-label={appTexts.text("changeThisSend")}
+                title={appTexts.text("changeThisSend")}
+                disabled={request() || !words().trim() ? "" : undefined}
+                onClick={send}
+              />
+              <ui-textarea
+                grow=""
+                fluid=""
+                rows="3"
+                max-rows="6"
+                autofocus=""
+                readonly={!!request()}
+                aria-label={appTexts.text("changeThisPrompt")}
+                placeholder={appTexts.text("changeThisPrompt")}
+                value={words()}
+                ref={on<{ value: string }>("ui-typed", (event) => setWords(event.detail.value))}
+                onKeyDown={(event: KeyboardEvent) => {
+                  if (event.key !== "Enter" || event.shiftKey || event.isComposing || request()) return
+                  event.preventDefault()
+                  send()
+                }}
+              />
+            </div>
             <Show when={pictures().length}>
               <div class="ChangeThisPictures">
                 <For each={pictures()}>
@@ -260,15 +308,37 @@ export function ChangeThisBox(): JSX.Element {
               </div>
             </Show>
             <Switch>
-              <Match when={request()?.status === "waiting" && !request()!.listening}>
-                <p>{appTexts.text("changeThisNobody")}</p>
-                <ui-code language="sh">{LISTEN_COMMAND}</ui-code>
+              <Match when={stageOf(request()) === "starting"}>
+                <p class="ChangeThisWorking ChangeThisStarting">
+                  <ui-loader visible="" inline="" size="tiny" />
+                  {appTexts.text("changeThisStarting")}
+                </p>
               </Match>
-              <Match when={request()}>
+              <Match when={stageOf(request()) === "working"}>
                 <p class="ChangeThisWorking">
                   <ui-loader visible="" inline="" size="tiny" />
                   {appTexts.text("changeThisWorking")}
                 </p>
+              </Match>
+              <Match when={stageOf(request()) === "no claude"}>
+                <p class="ChangeThisNoClaude">{appTexts.text("changeThisNoClaude")}</p>
+                <a class="ChangeThisInstall" href={INSTALL_URL} target="_blank" rel="noopener">
+                  {appTexts.text("changeThisInstall")}
+                </a>
+                <p>{appTexts.text("changeThisByHand")}</p>
+                <ui-code language="sh">{LISTEN_COMMAND}</ui-code>
+              </Match>
+              <Match when={stageOf(request()) === "nobody"}>
+                <p>{appTexts.text("changeThisNobody")}</p>
+                <ui-button
+                  class="ChangeThisStart"
+                  size="small"
+                  icon="play"
+                  onClick={() => void ChangeThis.startClaude()}
+                >
+                  {appTexts.text("changeThisStart")}
+                </ui-button>
+                <ui-code language="sh">{LISTEN_COMMAND}</ui-code>
               </Match>
             </Switch>
           </div>
@@ -276,6 +346,109 @@ export function ChangeThisBox(): JSX.Element {
       )}
     </Show>
   )
+}
+
+/**
+ * Where `request` has got to, as the box says it:
+ * - `starting`:  the page server started a Claude session, which hasn't taken it yet
+ * - `working`:  a session has it, or one listening will take it
+ * - `no claude`:  nobody listens, and Claude Code isn't on this machine
+ * - `nobody`:  nobody listens, and no session started:  the Start Claude button
+ * - `undefined`:  no request
+ */
+function stageOf(
+  request: SPACES.ChangeAnswer | undefined
+): "starting" | "working" | "no claude" | "nobody" | undefined {
+  if (!request) return undefined
+  if (request.status === "waiting" && request.session) return "starting"
+  if (request.status !== "waiting" || request.listening) return "working"
+  return request.hasClaude ? "nobody" : "no claude"
+}
+
+/**
+ * Where the box opens for `element`, the selected part:  next to what it was asked from.
+ * - the focus in the Inspector or its Views tree (⌘K there):  beside the row it's on, else under what has it
+ * - else under the part in the app, when it has a box on screen
+ * - else (a part scrolled away, or drawn by nothing):  beside its row in the Views tree
+ * - else a third of the way down the window, in its middle
+ * - `<ui-popup at>` keeps it inside the window, turning it to the point's left or top where there's no room
+ */
+function boxPlaceFor(element: Element | undefined): BoxPlace {
+  const focused = focusedElement()
+  const inInspector = focused && closestAcross(focused, INSPECTOR_COLUMN)
+  if (inInspector) {
+    const place = besideRow(closestAcross(focused, TREE_ROW)) ?? under(shownBoxOf(focused))
+    if (place) return place
+  }
+  return (
+    under(element && shownBoxOf(element)) ??
+    besideRow(element && PartEdits.rowOf(element)) ?? { x: innerWidth / 2, y: innerHeight / 3 }
+  )
+}
+
+/** Under `box`, at its left. */
+function under(box: DOMRect | undefined): BoxPlace | undefined {
+  return box && { x: box.left, y: box.bottom + BOX_GAP_PX }
+}
+
+/**
+ * Beside a Views tree row's own line, level with it:  on the side with the most room, so it covers no row.
+ * - The Inspector is a column at the window's right:  its rows' left, where the box turns to the left.
+ */
+function besideRow(row: Element | undefined): BoxPlace | undefined {
+  const line = shownBoxOf(row?.shadowRoot?.querySelector(".row") ?? row)
+  if (!line) return undefined
+  const hasMoreRoomLeft = line.left > innerWidth - line.right
+  return { x: hasMoreRoomLeft ? line.left - BOX_GAP_PX : line.right + BOX_GAP_PX, y: line.top }
+}
+
+/** `element`'s box in the window (`drawnBoxOf()`):  `undefined` when it has none, or none of it shows. */
+function shownBoxOf(element: Element | undefined): DOMRect | undefined {
+  const box = element?.isConnected ? drawnBoxOf(element) : undefined
+  if (!box) return undefined
+  const isInWindow = box.bottom > 0 && box.right > 0 && box.top < innerHeight && box.left < innerWidth
+  return isInWindow ? box : undefined
+}
+
+/**
+ * The box of what `element` draws:  its own, else, for a host with none (`display: contents`, many Spell UI hosts,
+ * a toolbar's segment), the box round what's inside it, through its shadow root and slots;  `undefined`:  nothing drawn.
+ * - Why:  such a host's own box is all zeros, at the window's top left, where the box opened (epic `editor` I133).
+ */
+function drawnBoxOf(element: Element, depth = 0): DOMRect | undefined {
+  const own = element.getBoundingClientRect()
+  if (own.width || own.height) return own
+  if (depth > MOST_DRAWN_DEPTH) return undefined
+  const inside =
+    element instanceof HTMLSlotElement ? element.assignedElements() : [...(element.shadowRoot ?? element).children]
+  const boxes = inside.flatMap((child) => drawnBoxOf(child, depth + 1) ?? [])
+  if (!boxes.length) return undefined
+  const left = Math.min(...boxes.map((box) => box.left))
+  const top = Math.min(...boxes.map((box) => box.top))
+  return new DOMRect(
+    left,
+    top,
+    Math.max(...boxes.map((box) => box.right)) - left,
+    Math.max(...boxes.map((box) => box.bottom)) - top
+  )
+}
+
+/** The element with the focus, through shadow roots. */
+function focusedElement(): Element | undefined {
+  let active = document.activeElement
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+  return active && active !== document.body ? active : undefined
+}
+
+/** The closest element around `element` matching `selector`, out through shadow roots. */
+function closestAcross(element: Element, selector: string): Element | undefined {
+  for (let at: Element | undefined = element; at;) {
+    const found = at.closest(selector)
+    if (found) return found
+    const root = at.getRootNode()
+    at = root instanceof ShadowRoot ? root.host : undefined
+  }
+  return undefined
 }
 
 /** The element in `root`, through shadow roots, drawn from the code at `drawnAt`. */
@@ -354,6 +527,22 @@ const CHANGES_URL = "/api/changes"
 
 /** What a session runs to listen. */
 const LISTEN_COMMAND = "spell app changes wait"
+
+/** Where Claude Code's install is explained. */
+const INSTALL_URL = "https://code.claude.com/docs/en/setup"
+
+/** Send's icon:  Publish's paper plane (`EditorMode.tsx`). */
+const SEND_ICON = "paper plane outline"
+
+/** The Inspector, and a row of its Views tree:  where ⌘K may be pressed, and the box opens by. */
+const INSPECTOR_COLUMN = ".InspectorColumn"
+const TREE_ROW = "ui-tree-item"
+
+/** How deep `drawnBoxOf()` looks for what a box-less host draws. */
+const MOST_DRAWN_DEPTH = 4
+
+/** How far below what it's about the box opens, in px. */
+const BOX_GAP_PX = 6
 
 /** How many lines of code a request quotes. */
 const EXCERPT_LINES = 5

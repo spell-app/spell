@@ -4,17 +4,44 @@
 ui-popup.ChangeThisPopup::part(popup) {
   padding: 12px;
 }
+/* two columns:  Send, then the words (epic `editor` I133);  the header over the words, the rest across both */
 .ChangeThisBox {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 8px;
   width: 420px;
+
+  & > * {
+    grid-column: 1 / -1;
+  }
+}
+/* the top row:  "Tell your buddy Claude:", then its ✕ at the right (I133) */
+.ChangeThisBox > .ChangeThisTop {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 /* "Tell your buddy Claude:" over the words (epic `editor` I103), its first letter over theirs (I121):
    the field's border and its own inline padding in */
 .ChangeThisHeader {
   padding-inline-start: calc(var(--ui-input-padding-inline, 1em) + var(--ui-border-width, 1px));
   font-weight: 600;
+}
+/* Send, the paper plane, left of the words (I133), on their first line:  the row's two cells are the grid's */
+.ChangeThisBox > .ChangeThisField {
+  display: contents;
+}
+.ChangeThisSend {
+  grid-column: 1;
+  align-self: start;
+}
+.ChangeThisBox ui-textarea {
+  grid-column: 2;
+}
+.ChangeThisStart {
+  justify-self: start;
 }
 /* the words with room all round (I121):  the editor's compact sizing (Glass's `<ui-root app>`) takes a field's
    padding away, as its height alone decides a one-line field's;  a box of several lines needs it back */

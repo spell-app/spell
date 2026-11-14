@@ -381,6 +381,15 @@ export class PartEdits {
   /** The Views tree's row of each part:  `rememberRow()`. */
   private static rowParts = new WeakMap<Element, Element>()
 
+  /**
+   * The Views tree's row showing `element`:  `undefined` when none is drawn (a closed row's parts, the Inspector shut).
+   * - Looks through the rows on the page:  a rare question (Change This opening by a part with no box of its own).
+   */
+  static rowOf(element: Element): Element | undefined {
+    for (const row of document.querySelectorAll("ui-tree-item")) if (PartEdits.rowParts.get(row) === element) return row
+    return undefined
+  }
+
   /** `row` of the Views tree shows `element`, and a press on it drags it. */
   static rememberRow(row: Element, element: Element): void {
     PartEdits.rowParts.set(row, element)

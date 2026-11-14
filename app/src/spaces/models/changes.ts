@@ -64,10 +64,27 @@ export type ChangeRequest = Omit<ChangeAsked, "pictures"> & {
   at: string
   /** the session's own line about what it did, or why it couldn't */
   summary?: string
+  /** the Claude session the page server started for it, when none was listening (epic `editor` T66) */
+  session?: ChangeSession
+}
+
+/**
+ * A Claude session the page server started for a request:  headless, in the background (`ClaudeStarter`).
+ * - It takes the request with `spell app changes take`, changes the files, and says `done`.
+ */
+export type ChangeSession = {
+  /** its process */
+  pid: number
+  /** when it started, ISO */
+  at: string
+  /** where its output goes, on this machine */
+  log: string
 }
 
 /** `POST` and `GET /api/changes`' answer. */
 export type ChangeAnswer = ChangeRequest & {
   /** is a session on this machine listening? */
   listening: boolean
+  /** is Claude Code installed on this machine, so the page server can start a session itself (epic `editor` T66)? */
+  hasClaude: boolean
 }
