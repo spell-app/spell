@@ -866,16 +866,22 @@ export class EditorStore extends Observable {
    * Compile `project` again, taken from the compile cache, for what reads its parse and each file's compile:
    * the side bar, the Types tab, the code's marks, the compiled-code pane (`compiled`, `codeWithMapFor()`).
    * - Not from the cache, and saving nothing:  the running app keeps the cached program, which this compile matches.
+   * - A compile that fails still leaves a parse, so hover and go to definition work before the first edit (I127).
    * - NEVER throws:  a parse error shows on its line, as a compile's would;  anything else goes to devtools.
    */
   async compileBehind(project: SP.SpellProject): Promise<void> {
     try {
       await project.compile(undefined, { save: false, cached: false })
-      editor.edits++
-      await editor.refreshScopes()
     } catch (error) {
       console.error("editor.compileBehind():  couldn't compile", project.projectId, error)
+      if (project.needsFullParse) {
+        await project.parse().catch((parseError: unknown) => {
+          console.error("editor.compileBehind():  couldn't parse", project.projectId, parseError)
+        })
+      }
     }
+    editor.edits++
+    await editor.refreshScopes()
   }
 
   /**

@@ -60,6 +60,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - a reload doesn't compile a project that hasn't changed:  `compileApp()` runs what's kept at once, then
       compiles behind it, not from the cache and saving nothing, for what reads the parse and each file's compile:
       the side bar, the code's marks, the compiled-code pane (`editor.compileBehind()`;  epic `language` r11)
+      - a compile behind that fails still parses, so hover and go to definition work before the first edit (I127)
     - the counts:  `SpellProject.compileCache.counts` in devtools, and a `compile-cache` line per compile
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`

@@ -321,13 +321,7 @@ async function thingNamedAtCursor(
   const { models, addresses, service } = SpellMonaco.register()
   // the language service's own parse of the code showing, as its other features read it
   models.parseNow()
-  let file = addresses.fileFor(model.uri.toString())
-  // run from the compile cache, nothing's parsed yet:  parsed once, behind the running app
-  const project = untrack(() => editor.project)
-  if (file instanceof SP.SpellFile && !file.match && project?.compiledFrom === "cache") {
-    await parsedBehind(project)
-    file = addresses.fileFor(model.uri.toString())
-  }
+  const file = addresses.fileFor(model.uri.toString())
   if (!(file instanceof SP.SpellFile) || !file.match || file.contents !== model.getValue()) return undefined
   const declared = service.declaredThingAt(file, {
     line: selection.positionLineNumber - 1,
@@ -335,21 +329,6 @@ async function thingNamedAtCursor(
   })
   return declared && { path: SP.SpellProject.sourceNameOf(declared.file.path), line: declared.line }
 }
-
-/**
- * `project`, run from the compile cache, parsed and compiled behind it, once:  what the cursor's word is read from.
- * - HACK:  the editor's own compile behind a cache hit (`editor.compileBehind()`) leaves the files unparsed on a
- *   reload (seen on main too, 2026-11-14:  `compiledFrom` stays `"cache"`, every file's `match` empty), so hover,
- *   go to definition and this find nothing till an edit;  asked here, it parses.
- */
-function parsedBehind(project: SP.SpellProject): Promise<void> {
-  let parsing = parsedProjects.get(project)
-  if (!parsing) parsedProjects.set(project, (parsing = editor.compileBehind(project)))
-  return parsing
-}
-
-/** Each project `parsedBehind()` has parsed, or is parsing. */
-const parsedProjects = new WeakMap<SP.SpellProject, Promise<void>>()
 
 /**
  * A mark in a code editor's margin on the line being followed, scrolling to it only when it's out of view.
