@@ -114,6 +114,12 @@ export const epicReviewVocabulary = {
         "What it draws:  the buttons' group (`shows=buttons`), the note box (`note`), or the marked note (`said`)."
     },
     {
+      name: "busy",
+      description:
+        "The turning ring round a review button Claude is on (Send's, `CountdownRing.turning()`), in the button's " +
+        "colour;  its icon stays still (I279)."
+    },
+    {
       name: "taken",
       description:
         "With `shows=said`:  the note Claude took and is answering, quiet and read-only, above the marked note (I190)."

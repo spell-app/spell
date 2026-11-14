@@ -408,6 +408,8 @@ export const DO_IT_ID = /^[jt]\d+$/i
 
 /** Class names inside the shadow root (`EpicReview.css`). */
 export const REVIEW_CONTROLS = "review-controls"
+/** A busy review button's icon box (`slot="icon"`):  its icon, still, and the turning ring round the button (I279). */
+export const BUSY_GLYPH = "busy-glyph"
 export const REVIEW_GROUP = "review-group"
 export const REVIEW_NOTED = "review-noted"
 export const REVIEW_PICK = "review-pick"
