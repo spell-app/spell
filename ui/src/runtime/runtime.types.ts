@@ -121,6 +121,13 @@ export type KeyRegistrationOptions = {
   global?: boolean
   /** fire even when focus is in an `<input>` / `<textarea>` / contenteditable without a modifier */
   inEditable?: boolean
+  /**
+   * Sits over another registration of its chord ON PURPOSE:  its handler passes on (`false`) what isn't its own,
+   * so the one under it gets that.
+   * - e.g. a running program's ⌘Z over the editor's:  the program's history while it has the focus, else the editor's.
+   * - So the keyboard doesn't warn that the chord is registered twice.
+   */
+  layered?: boolean
 }
 
 /** Scope at the bottom of `Keyboard`'s stack:  page-level shortcuts, active when no overlay is open. */

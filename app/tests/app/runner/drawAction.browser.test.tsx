@@ -140,9 +140,10 @@ describe("core.drawAction():  an action's button", () => {
   test("what the tag says wins over what the action gives:  its icon, its tooltip, its text", async () => {
     const { button } = await mountedGame()
     const again = button("Again")
+    // its `title` is the action's title for it, so the tooltip is that and its key (language, 2026-11-14)
     expect([again.getAttribute("icon"), again.getAttribute("title"), again.textContent]).toEqual([
       "refresh",
-      "Deal again",
+      "Deal again (D)",
       "Again"
     ])
   })
