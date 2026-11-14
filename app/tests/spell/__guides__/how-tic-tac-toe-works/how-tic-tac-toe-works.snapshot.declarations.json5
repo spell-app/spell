@@ -43,6 +43,14 @@
       "defined": "/HowTicTacToeWorks.spell:2629-2834"
     },
     {
+      "property": "board",
+      "of": "Square",
+      "group": "The board:  nine squares, three a row",
+      "datatype": "Board",
+      "exclusive": true,
+      "defined": "/HowTicTacToeWorks.spell:3492-3521"
+    },
+    {
       "type": "Board",
       "superType": "List",
       "itemType": "Square",
@@ -166,14 +174,6 @@
       "defined": "/HowTicTacToeWorks.spell:2066-2245"
     },
     {
-      "property": "board",
-      "of": "Square",
-      "group": "The board:  nine squares, three a row",
-      "datatype": "Board",
-      "exclusive": true,
-      "defined": "/HowTicTacToeWorks.spell:3492-3521"
-    },
-    {
       "syntax": "test a row",
       "output": "test_a_row",
       "rule": "method_call",
@@ -188,19 +188,19 @@
     23,
     28,
     32,
-    44,
-    47,
-    72,
-    75,
-    81,
-    87,
-    92,
-    98,
-    103,
-    110,
-    117,
-    123,
-    158,
-    167
+    40,
+    45,
+    48,
+    73,
+    76,
+    82,
+    88,
+    93,
+    99,
+    104,
+    111,
+    118,
+    124,
+    166
   ]
 }

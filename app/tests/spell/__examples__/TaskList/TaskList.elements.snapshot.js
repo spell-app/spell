@@ -73,6 +73,7 @@ export class Task extends View {
 
   static selectable = true
 
+  /** a task is in one checklist at a time */
   get checklist() {
     return Checklist.ownerOf(this)
   }
@@ -399,7 +400,6 @@ export function testTheFilter(...args) {
 export function testADraggedOrderIsKept(...args) {
   return sendCall("test_a_dragged_order_is_kept", args)
 }
-/** a task is in one checklist at a time */
 
 /////////////
 // ## The app

@@ -108,7 +108,6 @@ export class ChecklistElement extends SpellElement<Checklist> {
 }
 core.useElement(Checklist, ChecklistElement)
 
-
 core.heading("The app")
 /** The app */
 export class TaskList extends App {

@@ -20,10 +20,13 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  *   the pile holding it, or nothing.  Declared by THIS line -- see `P.TypeScope.declareOwnerMember()`.
  *   - A built-in item type, e.g. `a thing belongs to one bag`, gets NO member:
  *     it would go on a type every project shares.  Its lists still hold each OBJECT once.
- * - Compiles to two patches, run where we are, after both classes:
- *   - `Pile.exclusive = true`:  the runtime `List` keeps who holds each item
- *   - the member, `Object.defineProperty(Card.prototype, 'pile', { get() { return Pile.ownerOf(this) } ... })`
- *   - NEVER hoisted into the classes:  the member must win over any accessor an earlier statement gave it,
+ * - Compiles to two patched members (`P.ASTPatchedMember`), the member first:
+ *   - the member, `get pile() { return Pile.ownerOf(this) }`
+ *   - `static exclusive = true` on `Pile`:  the runtime `List` keeps who holds each item
+ *   - Each is written in its class's body when the project declares the class (`P.WriterProject.movedMembers`),
+ *     else patched on where we are, after both classes.
+ *     The member's docstring and `SPELL: DECLARES` go with it, so a Type Explorer still finds its code.
+ *   - Patched, so the member wins over any accessor an earlier statement gave it,
  *     e.g. `set the pile of the card to ...` above us.
  * - An owner saved in a place needn't be a list (epic `data` Q10):  `an ingredient belongs to one recipe` keeps ingredients
  *   INSIDE the recipe's row, in its list of them.  So a recipe removed takes them with it, and undo brings them back,
@@ -137,9 +140,10 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
       name: "exclusive",
       value: new P.ASTBooleanLiteral(match, true)
     })
+    // the member first:  what the line declares, so its `SPELL: DECLARES` moves with it -- see class docs
     const statements: P.ASTStatement[] = [new P.ASTPatchedMember(match, { member: exclusive })]
     if (!P.isBuiltInType(SP.typeName(`${type.value}`))) {
-      statements.push(BelongsToOne.ownerMemberAST(match, P.matchAST<P.ASTTypeExpression>(type), listAST))
+      statements.unshift(BelongsToOne.ownerMemberAST(match, P.matchAST<P.ASTTypeExpression>(type), listAST))
     }
     return new P.ASTStatementGroup(match, { statements })
   }

@@ -547,7 +547,8 @@ export class Tokenizer {
         jsxElement.record.children = children as P.JSXElementToken[]
         jsxElement.record.raw = text.slice(start, children[children.length - 1]!.next)
       }
-    } else if (jsxElement.record.isUnaryTag) {
+    } else if (jsxElement.record.isUnaryTag || jsxElement.record.error) {
+      // a start tag never ended, `<text` half typed, has no children:  else it'd take the rest of the file as its own
       if (jsxElement.record.quotedContents?.length) {
         jsxElement.record.children = jsxElement.record.quotedContents as P.JSXElementToken[]
       }
@@ -676,13 +677,23 @@ export class Tokenizer {
   }
 
   /**
+   * A quoted word in a tag's head at `start` -- `undefined` if its quote is left open, `<action "` half typed:
+   * else it'd run on to the next tag's quote, and the rest of the file would read as one broken tag (epic `language`).
+   * - As an attribute's value (`UNCLOSED_QUOTE`):  it may run over lines, but not past one a tag starts.
+   */
+  private matchQuotedInTag(text: string, start: number, end: number): P.TextToken | undefined {
+    const value = this.matchText(text, start, end)
+    return value && !UNCLOSED_QUOTE.test(`${value.raw}`) ? value : undefined
+  }
+
+  /**
    * A tag's bare quoted name at `start`, `"one counter"` in `<example "one counter">`, as the attribute
    * `quotedNameTags` says -- only for one of them.
    */
   matchJSXQuotedName(tagName: string, text: string, start: number, end: number): P.JSXAttributeToken | undefined {
     const name = this.quotedNameTags[tagName]
     if (!name || name === P.QUOTED_CONTENTS) return undefined
-    const value = this.matchText(text, start, end)
+    const value = this.matchQuotedInTag(text, start, end)
     if (!value) return undefined
     const next = this.eatWhitespace(text, value.next, end)
     return new P.JSXAttributeToken({ name, start, value, raw: text.slice(start, next) })
@@ -700,7 +711,7 @@ export class Tokenizer {
     end: number
   ): P.JSXAttributeToken | undefined {
     if (!this.keepsQuotedWords || this.quotedNameTags[tagName]) return undefined
-    const value = this.matchText(text, start, end)
+    const value = this.matchQuotedInTag(text, start, end)
     if (!value) return undefined
     const next = this.eatWhitespace(text, value.next, end)
     return new P.JSXAttributeToken({ name: P.QUOTED_WORD, start, value, raw: text.slice(start, next) })
@@ -719,7 +730,7 @@ export class Tokenizer {
     end: number
   ): { contents: P.Token[]; next: number } | undefined {
     if (this.quotedNameTags[tagName] !== P.QUOTED_CONTENTS) return undefined
-    const value = this.matchText(text, start, end)
+    const value = this.matchQuotedInTag(text, start, end)
     if (!value) return undefined
     const wordStart = text.indexOf('"', start) + 1
     const wordEnd = wordStart + value.innerText.length

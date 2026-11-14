@@ -83,18 +83,18 @@
       "defined": "/TourOfSpell.spell:1851-2092"
     },
     {
-      "type": "Windowsill",
-      "superType": "ViewableList",
-      "itemType": "Plant",
-      "defined": "/TourOfSpell.spell:2214-2257"
-    },
-    {
       "property": "windowsill",
       "of": "Plant",
       "group": "Many things together:  a windowsill",
       "datatype": "Windowsill",
       "exclusive": true,
       "defined": "/TourOfSpell.spell:2259-2292"
+    },
+    {
+      "type": "Windowsill",
+      "superType": "ViewableList",
+      "itemType": "Plant",
+      "defined": "/TourOfSpell.spell:2214-2257"
     },
     {
       "type": "Garden",
@@ -153,12 +153,12 @@
     62,
     68,
     80,
-    100,
-    115,
-    117,
-    120,
-    129,
-    133,
-    170
+    95,
+    101,
+    116,
+    119,
+    128,
+    132,
+    169
   ]
 }

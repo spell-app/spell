@@ -155,11 +155,11 @@ export const words = {
     "table-edit": "Editar tabla"
   },
   groups: {
-    TareaDelCielo: [
-      { name: "Guardadas en tu cuenta de atmosphere", members: ["dueño"] }
-    ],
     Tarea: [
       { name: "La agenda", members: ["agenda"] }
+    ],
+    TareaDelCielo: [
+      { name: "Guardadas en tu cuenta de atmosphere", members: ["dueño"] }
     ],
     ListaDeTareas: [
       { name: "Guardado", description: "Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián", members: ["almacén", "guardián", "llenarLaAgenda", "agregarLaTareaInicialTítuloConPrioridadNivel", "agregarElBorrador"] },

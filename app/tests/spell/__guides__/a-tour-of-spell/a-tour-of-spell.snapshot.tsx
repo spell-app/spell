@@ -88,6 +88,7 @@ export class Plant extends View {
     )
   }
 
+  /** a plant sits on one windowsill */
   get windowsill() {
     return Windowsill.ownerOf(this)!
   }
@@ -137,8 +138,6 @@ core.heading("Many things together:  a windowsill")
 /////////////////////////////////////////
 // ## Many things together:  a windowsill
 /////////////////////////////////////////
-
-/** a plant sits on one windowsill */
 
 /** the app:  the page on the right */
 export class Garden extends App {

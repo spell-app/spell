@@ -5141,7 +5141,7 @@
           "ruleNames": ["belongs_to_one"],
           "internal": false,
           "file": "src/spell/rules/classes/BelongsToOne.ts",
-          "line": 33,
+          "line": 36,
           "purpose": "`a card belongs to one pile` -- a card is in at most ONE pile at a time (epic page D7, D8, Q22).",
           "syntaxes": [
             {
@@ -5149,13 +5149,13 @@
               "example": "una carta pertenece a una pile",
               "outputs": {
                 "js": {
-                  "code": "Pile.exclusive = true\nObject.defineProperty(Carta.prototype, \"pile\", {\n  get() {\n    return Pile.ownerOf(this)\n  },\n  configurable: true\n})"
+                  "code": "Object.defineProperty(Carta.prototype, \"pile\", {\n  get() {\n    return Pile.ownerOf(this)\n  },\n  configurable: true\n})\nPile.exclusive = true"
                 },
                 "ts": {
-                  "code": "Pile.exclusive = true\nexport interface Carta { readonly pile: Pile }\nObject.defineProperty(Carta.prototype, \"pile\", {\n  get(this: Carta) {\n    return Pile.ownerOf(this)!\n  },\n  configurable: true\n})"
+                  "code": "export interface Carta { readonly pile: Pile }\nObject.defineProperty(Carta.prototype, \"pile\", {\n  get(this: Carta) {\n    return Pile.ownerOf(this)!\n  },\n  configurable: true\n})\nPile.exclusive = true"
                 },
                 "py": {
-                  "code": "Pile.exclusive = True\n@Carta.add_property(\"pile\")\ndef _carta_pile(self) -> Pile | None:\n    return Pile.owner_of(self)"
+                  "code": "@Carta.add_property(\"pile\")\ndef _carta_pile(self) -> Pile | None:\n    return Pile.owner_of(self)\nPile.exclusive = True"
                 }
               }
             },
@@ -9916,7 +9916,7 @@
                   "code": "await core.alert(\"Yo!\")"
                 },
                 "py": {
-                  "code": "core.alert(\"Yo!\")"
+                  "code": "await core.alert(\"Yo!\")"
                 }
               }
             }
@@ -9942,7 +9942,7 @@
                   "code": "await core.warn(\"Yo!\")"
                 },
                 "py": {
-                  "code": "core.warn(\"Yo!\")"
+                  "code": "await core.warn(\"Yo!\")"
                 }
               }
             }
@@ -9968,7 +9968,7 @@
                   "code": "await core.confirm(\"Yo!\")"
                 },
                 "py": {
-                  "code": "core.confirm(\"Yo!\")"
+                  "code": "await core.confirm(\"Yo!\")"
                 }
               }
             }
@@ -9994,7 +9994,7 @@
                   "code": "await core.prompt(\"¿Nombre para el bebé?\")"
                 },
                 "py": {
-                  "code": "core.prompt(\"¿Nombre para el bebé?\")"
+                  "code": "await core.prompt(\"¿Nombre para el bebé?\")"
                 }
               }
             }

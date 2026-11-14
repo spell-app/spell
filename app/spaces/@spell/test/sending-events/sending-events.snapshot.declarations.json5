@@ -88,18 +88,18 @@
       "defined": "/SendingEvents.spell:957-1012"
     },
     {
-      "type": "Pile",
-      "superType": "List",
-      "itemType": "Card",
-      "defined": "/SendingEvents.spell:1100-1264"
-    },
-    {
       "property": "pile",
       "of": "Card",
       "group": "Events sent to things, which every target must deliver alike",
       "datatype": "Pile",
       "exclusive": true,
       "defined": "/SendingEvents.spell:1266-1292"
+    },
+    {
+      "type": "Pile",
+      "superType": "List",
+      "itemType": "Card",
+      "defined": "/SendingEvents.spell:1100-1264"
     },
     {
       "syntax": "play the story",
@@ -124,8 +124,8 @@
     25,
     53,
     59,
+    71,
     76,
-    98,
-    103
+    102
   ]
 }

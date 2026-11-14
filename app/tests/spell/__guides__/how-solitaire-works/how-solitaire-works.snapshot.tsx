@@ -71,6 +71,7 @@ export class Card extends View {
     } else table.message = `The column won't take the ${this.name}.`
   }
 
+  /** a card is in one pile at a time:  putting it on another takes it off this one */
   get pile() {
     return Pile.ownerOf(this)!
   }
@@ -145,7 +146,6 @@ core.useElement(Column, ColumnElement)
 core.describeAction(Card, "try", { title: "Try A Card", undoneAs: "Try A Card" })
 
 core.heading("A pile, and a column")
-/** a card is in one pile at a time:  putting it on another takes it off this one */
 
 core.heading("The table:  a column, and a hand of cards to try on it")
 /** The table:  a column, and a hand of cards to try on it */

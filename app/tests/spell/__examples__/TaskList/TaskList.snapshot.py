@@ -89,6 +89,7 @@ class Task(View):
 
     @property
     def checklist(self) -> Checklist | None:
+        """a task is in one checklist at a time"""
         return Checklist.owner_of(self)
 
 
@@ -481,8 +482,6 @@ def test_a_dragged_order_is_kept() -> None:
             "\"second\"",
         )
 
-
-# a task is in one checklist at a time
 
 ############
 # ## The app

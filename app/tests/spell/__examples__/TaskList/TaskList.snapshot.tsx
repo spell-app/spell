@@ -72,6 +72,7 @@ export class Task extends View {
 
   static selectable = true
 
+  /** a task is in one checklist at a time */
   get checklist() {
     return Checklist.ownerOf(this)!
   }
@@ -569,7 +570,6 @@ export function testADraggedOrderIsKept() {
     core.expect(core.getItemAt(core.sortedBy(tasks, (item: Task) => item.order), 0)?.title!, `the title of the first task in (the tasks sorted by its order)`, "second", `"second"`)
   })
 }
-/** a task is in one checklist at a time */
 
 core.heading("The app")
 /////////////

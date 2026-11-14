@@ -67,6 +67,19 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
     expect(words).toEqual(expect.arrayContaining(["jugar solo", "hacer trampa", "reiniciar el juego", "deshacer"]))
   })
 
+  test("...with the tag half typed, nothing after the caret:  the rest of the program is still read", async () => {
+    // as the editor has it before the tag's end lands:  the quote left open, or closed with the caret inside
+    for (const afterCaret of ["", '"']) {
+      const words = labels(await solitaire.typed('<action "', afterCaret))
+      expect(words, afterCaret).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "undo"]))
+    }
+  })
+
+  test("...and with another tag left half typed on the line above", async () => {
+    const words = labels(await solitaire.typedBelow("<text", '<action "', CLOSED))
+    expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "undo"]))
+  })
+
   test("a quoted word on any other tag offers no actions", async () => {
     const items = await solitaire.typed('<foundation "', CLOSED)
     expect(items.some(({ textEdit }) => textEdit && "range" in textEdit)).toBe(false)
@@ -75,8 +88,8 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
 
 /**
  * What the editor writes after the caret as a quote is typed:  its closing quote, then the tag's end.
- * - Without it, the quote left open pairs with the next one in the file, and what follows parses as one broken
- *   drawing:  the game's actions, declared after it, are never read (epic `language`, 2026-11-14).
+ * - A tag left half typed reads too (epic `language` I92):
+ *   its open quote and missing `>` stop at its line, so the game's actions, declared after it, are still read.
  */
 const CLOSED = '"/>'
 
@@ -100,14 +113,20 @@ function gameIn(project: string, file: string, after: string) {
   const service = new LSP.SpellLanguageService(workspace)
 
   async function typed(line: string, afterCaret = ""): Promise<CompletionItem[]> {
+    return typedBelow(undefined, line, afterCaret)
+  }
+
+  /** As `typed()`, with `above` typed on a line of its own first, if given. */
+  async function typedBelow(above: string | undefined, line: string, afterCaret = ""): Promise<CompletionItem[]> {
     const lines = original.split("\n")
     const at = lines.findIndex((it) => it.includes(after))
     if (at < 0) throw new TypeError(`typed():  no line in ${file} says \`${after}\``)
     const indent = /^\s*/.exec(lines[at]!)![0]
-    lines.splice(at + 1, 0, `${indent}${line}${afterCaret}`)
+    const added = [...(above === undefined ? [] : [`${indent}${above}`]), `${indent}${line}${afterCaret}`]
+    lines.splice(at + 1, 0, ...added)
     await workspace.update(uri, lines.join("\n"))
-    const position = { line: at + 1, character: indent.length + line.length }
+    const position = { line: at + added.length, character: indent.length + line.length }
     return service.completion(workspace.fileFor(uri)!, position).items
   }
-  return { typed }
+  return { typed, typedBelow }
 }

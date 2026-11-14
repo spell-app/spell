@@ -38,6 +38,7 @@ export class Square extends Thing {
     ticTacToe.turn = ticTacToe.turn === "X" ? "O" : "X"
   }
 
+  /** a square is on one board */
   get board() {
     return Board.ownerOf(this)
   }
@@ -173,8 +174,6 @@ core.heading("Playing a square")
 // ## Playing a square
 //////////////////////
 // What a click on a square does, added to this project's square:  `<extend>` adds to a type another file declares.
-
-/** a square is on one board */
 
 core.heading("Start, and a test")
 //## Start, and a test

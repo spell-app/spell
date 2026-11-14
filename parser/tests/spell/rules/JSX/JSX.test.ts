@@ -200,3 +200,48 @@ function findData(match: P.Match, key: "expression" | "error" | "statement"): P.
   }
   return undefined
 }
+
+/**
+ * A tag left half typed in a drawing, as the editor has it while typing (epic `language` I92):
+ * it stays on its line, so the rest of the file still reads.
+ * - An open quote, `<action "`, stops at its line, as an attribute's does;  a tag with no `>`, `<text`, has no children.
+ */
+describe("a half-typed tag in a drawing", () => {
+  const game = (typed: string) =>
+    [
+      "a game is an app",
+      "\tto draw it",
+      "\t\t<toolbar>",
+      '\t\t\t<action "auto play"/>',
+      `\t\t\t${typed}`,
+      '\t\t\t<text slot="right">Score</>',
+      "\t\t</>",
+      "",
+      '\tto "auto play"',
+      '\t\tprint "auto"',
+      "",
+      '\tto "cheat"',
+      '\t\tprint "cheat"'
+    ].join("\n")
+
+  test.each(['<action "', '<action ""', "<text", '<toolbar size="sm'])(
+    "`%s`:  the actions declared after it are still the game's, and its error is its own line's",
+    (typed) => {
+      const { scope, files } = parseSpellProject([{ path: "/Game.spell", contents: game(typed) }])
+      const type = scope.types.get("Game", "LOCAL_ONLY") as P.TypeScope
+      expect(type.methods.get().map(({ name }) => name)).toEqual(["draw", "auto_play", "cheat"])
+      expect(files[0]!.errors.every((error) => error.startsWith("5:"))).toBe(true)
+    }
+  )
+
+  test("its line's tokens:  the tag alone, its next line's `<text>` a sibling in the toolbar", () => {
+    const toolbar = SP.english.parser.tokenizer.matchJSXElement(
+      '<toolbar>\n\t<action "\n\t<text slot="right">Score</>\n</>'
+    ) as P.JSXElementToken
+    const tags = (toolbar.children ?? []).flatMap((child) =>
+      child instanceof P.JSXElementToken ? [child.tagName] : []
+    )
+    expect(tags).toEqual(["action", "text"])
+    expect(`${toolbar.raw}`.endsWith("</>")).toBe(true)
+  })
+})

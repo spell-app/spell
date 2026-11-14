@@ -607,23 +607,23 @@ classesEs.addRule(BelongsToOne, {
         [
           "una carta pertenece a una pile",
           [
-            "Pile.exclusive = true",
             'Object.defineProperty(Carta.prototype, "pile", {',
             "  get() {",
             "    return Pile.ownerOf(this)",
             "  },",
             "  configurable: true",
-            "})"
+            "})",
+            "Pile.exclusive = true"
           ],
           [
-            "Pile.exclusive = true",
             "export interface Carta { readonly pile: Pile }",
             'Object.defineProperty(Carta.prototype, "pile", {',
             "  get(this: Carta) {",
             "    return Pile.ownerOf(this)!",
             "  },",
             "  configurable: true",
-            "})"
+            "})",
+            "Pile.exclusive = true"
           ]
         ],
         {

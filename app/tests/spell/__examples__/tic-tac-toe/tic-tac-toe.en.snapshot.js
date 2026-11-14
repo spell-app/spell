@@ -26,11 +26,11 @@ export const words = {
     }
   },
   groups: {
-    TicTacToe: [
-      { name: "Playing", members: ["startANewGame", "checkTheLineFromSquareAThroughBToC", "checkForAWinner", "draw"] }
-    ],
     Square: [
       { name: "Playing a square", members: ["board"] }
+    ],
+    TicTacToe: [
+      { name: "Playing", members: ["startANewGame", "checkTheLineFromSquareAThroughBToC", "checkForAWinner", "draw"] }
     ]
   }
 }

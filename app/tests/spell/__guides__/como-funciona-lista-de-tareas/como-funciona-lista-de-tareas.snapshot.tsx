@@ -110,7 +110,6 @@ export class AgendaElement extends SpellElement<Agenda> {
 }
 core.useElement(Agenda, AgendaElement)
 
-
 core.heading("La aplicación")
 /** La aplicación */
 export class ListaDeTareas extends App {

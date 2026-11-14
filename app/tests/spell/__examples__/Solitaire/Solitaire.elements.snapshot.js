@@ -122,6 +122,7 @@ export class Card extends TwoSidedView {
 
   static draggable = true
 
+  /** a card is in one pile at a time:  putting it on another pile takes it off this one */
   get pile() {
     return Pile.ownerOf(this)
   }
@@ -215,7 +216,6 @@ export function testPiles(...args) {
   return sendCall("test_piles", args)
 }
 
-/** a card is in one pile at a time:  putting it on another pile takes it off this one */
 // -----------
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 export class StockPile extends Pile {
@@ -422,10 +422,13 @@ export class Solitaire extends App {
     }
     this.stock.randomize()
     // each row's first card lands face down, then turns up where it lies
-    core.getRange(1, 7).forEach((row) => core.getRange(row, 7).forEach((column) => {
-      core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
-      if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
-    }))
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
+        await core.pauseFor(20, "msec")
+        if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
+      }
+    }
     await this.turnOverTheNextCard()
   }
 

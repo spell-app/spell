@@ -68,6 +68,7 @@ export class Carta extends View {
     } else mesa.mensaje = `La columna no toma la ${this.nombre}.`
   }
 
+  /** una carta está en una sola pila a la vez:  ponerla en otra la quita de esta */
   get pila() {
     return Pila.ownerOf(this)
   }
@@ -98,7 +99,6 @@ export class Columna extends Pila {
 core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })
 
 core.heading("Una pila, y una columna")
-/** una carta está en una sola pila a la vez:  ponerla en otra la quita de esta */
 
 core.heading("La mesa:  una columna, y una mano de cartas para probar en ella")
 /** La mesa:  una columna, y una mano de cartas para probar en ella */

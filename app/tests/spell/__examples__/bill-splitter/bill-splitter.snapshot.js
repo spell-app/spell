@@ -85,6 +85,7 @@ export class Diner extends View {
     )
   }
 
+  /** a diner sits at one table */
   get table() {
     return Table.ownerOf(this)
   }
@@ -104,7 +105,6 @@ export class Table extends ViewableList {
 
 core.describeAction(Diner, "remove", { title: "Remove It", undoneAs: "Remove It" })
 
-/** a diner sits at one table */
 // -----------
 core.heading("Bill Splitter")
 ///////////////////

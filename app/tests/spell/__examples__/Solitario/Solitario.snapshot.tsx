@@ -123,6 +123,7 @@ export class Carta extends TwoSidedView {
 
   static draggable = true
 
+  /** una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta */
   get pila() {
     return Pila.ownerOf(this)!
   }
@@ -359,7 +360,6 @@ export function testLasPilas() {
   })
 }
 
-/** una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta */
 // -----------
 core.heading("Solitario Klondike")
 ////////////////////////

@@ -631,8 +631,7 @@ listsEs.addRule(RangeCountExpression, {
 })
 
 listsEs.addRule(ListFilter, {
-  syntax:
-    "(los|las)? {arg:plural_identifier} (en|de|del) {list:expression} (where:donde|que) {inline_expression}?",
+  syntax: "(los|las)? {arg:plural_identifier} (en|de|del) {list:expression} (where:donde|que) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",

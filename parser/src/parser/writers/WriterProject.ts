@@ -680,9 +680,16 @@ export class WriterProject {
    * SIDE EFFECT:  notes each member in `statements` written outside a class in `classes`,
    * and the comments right above it, into `movedMembers` and `moved`.
    * - Looks inside groups, never inside a class or a method.
+   *   - The comments right above a group go with its first member:
+   *     e.g. `a card belongs to one pile`'s docstring and `SPELL: DECLARES` above its two members,
+   *     so the declaration's code is still found below it (`SP.SpellDeclarations.split()`).
    */
-  private moveMembers(statements: P.ASTNode[], classes: Map<string, P.ASTClassDeclaration>) {
-    let comments: Array<P.ASTComment | P.ASTBlankLine> = []
+  private moveMembers(
+    statements: P.ASTNode[],
+    classes: Map<string, P.ASTClassDeclaration>,
+    above: Array<P.ASTComment | P.ASTBlankLine> = []
+  ) {
+    let comments: Array<P.ASTComment | P.ASTBlankLine> = [...above]
     for (const statement of statements) {
       if (statement instanceof P.ASTComment) {
         comments.push(statement)
@@ -701,7 +708,7 @@ export class WriterProject {
         for (const comment of comments) this.moved.add(comment)
         this.moved.add(statement)
       } else if (statement instanceof P.ASTStatementGroup && statement.statements) {
-        this.moveMembers(statement.statements, classes)
+        this.moveMembers(statement.statements, classes, comments)
       }
       comments = []
     }
