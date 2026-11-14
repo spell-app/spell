@@ -37,7 +37,7 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
     // comments, blank lines and headings since the last statement -- the comments go with a member below them
     let pending: HoistableStatement[] = []
     let removed = false
-    for (const statement of statements) {
+    for (let statement of statements) {
       if (
         statement instanceof P.ASTComment ||
         statement instanceof P.ASTBlankLine ||
@@ -46,8 +46,11 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
         pending.push(statement)
         continue
       }
-      const typeName = memberOf(statement)
+      // an action written outside its class, then what describes it:  the action moves in, its description stays
+      const { members: statementMembers, descriptions } = splitDescriptions(statement)
+      const typeName = memberOf(statementMembers)
       if (typeName && classNames.has(typeName)) {
+        statement = statementMembers
         const firstComment = pending.findIndex((item) => item instanceof P.ASTComment)
         const carried = firstComment < 0 ? [] : pending.slice(firstComment)
         kept.push(...(firstComment < 0 ? pending : pending.slice(0, firstComment)))
@@ -55,6 +58,7 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
         kept.push(...carried.filter((item) => item instanceof P.ASTHeadingInvocation))
         const moved = carried.filter((item) => !(item instanceof P.ASTHeadingInvocation))
         addMember(members, typeName, [...moved, statement])
+        kept.push(...descriptions)
         removed = true
       } else {
         kept.push(...pending, statement)
@@ -152,6 +156,32 @@ function classBodyItems(statement: HoistableStatement): ClassBodyItem[] | undefi
     items.push(...itsItems)
   }
   return items
+}
+
+/**
+ * `statement`, a group of a class's members and what describes them after (`core.describeAction()`, epic `language`
+ * P55), as its members alone and its descriptions -- or as it is, with none, when it has no description to take out.
+ * - So an action written outside its class (`to play a card`, in an app's outline) still moves into it.
+ */
+function splitDescriptions(statement: HoistableStatement): {
+  members: HoistableStatement
+  descriptions: P.ASTTypeDescription[]
+} {
+  const descriptions: P.ASTTypeDescription[] = []
+  const without = (it: HoistableStatement): HoistableStatement | undefined => {
+    if (it instanceof P.ASTTypeDescription) {
+      descriptions.push(it)
+      return undefined
+    }
+    if (!(it instanceof P.ASTStatementGroup) || !it.statements) return it
+    const rest = it.statements.map((each) => without(each as HoistableStatement)).filter((each) => !!each)
+    const isSame = rest.length === it.statements.length && rest.every((each, index) => each === it.statements![index])
+    return isSame ? it : new P.ASTStatementGroup(it.match, { statements: rest as never })
+  }
+  const members = without(statement)
+  // only descriptions, or none:  as it is
+  if (!members || !descriptions.length) return { members: statement, descriptions: [] }
+  return { members, descriptions }
 }
 
 /** Name of the ONE class `statement` declares members of, if it's nothing but those -- see `classBodyItems()`. */

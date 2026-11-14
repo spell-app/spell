@@ -29,6 +29,8 @@ import { ToDoSomething } from "./ToDoSomething"
  */
 export class CreateHook extends ToDoSomething {
   @proto static priority = Priority.specific
+  // a hook, not an action:  never an undo step of its own
+  @proto static undoableByDefault = false
 
   /** Only a `create_hook`'s words, in a type's outline. */
   parse(scope: P.Scope, tokens: P.Token[]) {

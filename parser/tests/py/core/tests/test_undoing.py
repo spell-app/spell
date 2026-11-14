@@ -255,3 +255,16 @@ def test_undo_waits_no_turn_while_an_action_runs(game: Game) -> None:
 
     asyncio.run(undo_mid_deal())
     assert [step.title for step in core.RUNTIME.history.steps] == ["Turn Card", "Deal"]
+
+
+def test_an_action_that_cant_be_undone_records_nothing_and_keeps_the_steps_before(game: Game) -> None:
+    """`to peek, can't be undone`:  `"cant_be_undone": "keeps history"` (epic `language` P55, Q60)."""
+
+    class Peeker(Card):
+        def peek(self) -> None:
+            self.face_up = True
+
+    core.describe_action(Peeker, "peek", {"title": "Peek", "cant_be_undone": "keeps history"})
+    cards_of(game)[0].turn_over()
+    Peeker(rank="joker").peek()
+    assert game.undo_title == "Undo Turn Card"

@@ -13,7 +13,7 @@
  */
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
-import { declareAction } from "./undoing"
+import { declareAction, type CantBeUndone } from "./undoing"
 
 export const describedMethods = defineCoreModule({
   /**
@@ -23,10 +23,12 @@ export const describedMethods = defineCoreModule({
    */
   describeAction(Class: Function, name: string, description: ActionDescription): void {
     ownDescriptions(ACTIONS, Class).set(name, description)
-    // `undoable as "Turn Card"`:  ONE undo step, through the run's history (C11)
+    // `undoable as "Turn Card"`:  ONE undo step, through the run's history (C11);  `can't be undone`:  none
     const method = (Class.prototype as Record<string, unknown>)[name]
-    if (description.undoneAs !== undefined && typeof method === "function" && !UNDOABLE.has(method)) {
-      declareAction(Class, name, { undoneAs: description.undoneAs })
+    const { undoneAs, cantBeUndone } = description
+    const declares = undoneAs !== undefined || cantBeUndone !== undefined
+    if (declares && typeof method === "function" && !UNDOABLE.has(method)) {
+      declareAction(Class, name, undoneAs !== undefined ? { undoneAs } : { cantBeUndone })
       UNDOABLE.add((Class.prototype as Record<string, unknown>)[name] as Function)
     }
   },
@@ -63,6 +65,7 @@ Object.assign(core, describedMethods)
  * - `icon`:  its icon's name, if it says one
  * - `enabledWhen`, `selectedWhen`:  the name of the class's getter that says so, e.g. `turnOverIsEnabled`
  * - `undoneAs`:  its undo's name, e.g. `Turn Card`, as the Edit menu says `Undo Turn Card`
+ * - `cantBeUndone`:  `"keeps history"` for `can't be undone`:  nothing it changes is a step (epic `language` P55, Q60)
  * - `titleFrom`:  the name of the class's getter whose text is its title NOW, e.g. the app's `undoTitle`
  * - `replacesLast`:  the newest wins (`- a new one replaces the last one`), where a repeat is otherwise ignored
  * - `refusedWhileBusy`:  never waits its turn:  does nothing while an action runs, e.g. the app's `undo` (J2)
@@ -74,6 +77,7 @@ export type ActionDescription = {
   enabledWhen?: string
   selectedWhen?: string
   undoneAs?: string
+  cantBeUndone?: CantBeUndone
   titleFrom?: string
   replacesLast?: boolean
   refusedWhileBusy?: boolean
