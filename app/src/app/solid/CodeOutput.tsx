@@ -12,6 +12,8 @@ import { InspectorWrites } from "./InspectorWrites"
 import { LazyMonaco } from "./LazyMonaco"
 
 import "./CodeOutput.css"
+// the top bar's menu look, as text:  for the ⋯'s shadow root (`adoptMenuLook()`)
+import menuLook from "./MenuBar.css?inline"
 
 /** The targets the compiled-code pane shows, in its menu's order, each with its code editor language and name. */
 const OUTPUT_TARGETS = {
@@ -60,6 +62,26 @@ export class CodeOutputShown {
 /** The compiled code shown last, what View › Compiled Code shows again. */
 let lastShown: OutputTarget = CodeOutputShown.target ?? "js/solid"
 
+/** The top bar's menu look as one sheet, built the first time a shadow root needs it. */
+let menuLookSheet: CSSStyleSheet | undefined
+
+/**
+ * Give the shadow root `element` is drawn in the top bar's menu look (`MenuBar.css`), so a menu there looks like
+ * the bar's;  nothing in the page's own tree, which has it already.
+ * - Once per root;  after its own sheets, so the menu rules win as they do in the page.
+ */
+function adoptMenuLook(element: Element) {
+  const root = element.getRootNode()
+  if (!(root instanceof ShadowRoot)) return
+  if (!menuLookSheet) {
+    menuLookSheet = new CSSStyleSheet()
+    menuLookSheet.replaceSync(menuLook)
+  }
+  if (!root.adoptedStyleSheets.includes(menuLookSheet)) {
+    root.adoptedStyleSheets = [...root.adoptedStyleSheets, menuLookSheet]
+  }
+}
+
 /** The ⋯'s id, its popup's target:  one code pane per page. */
 const MORE_MENU_ID = "CodeMoreMenu"
 
@@ -70,6 +92,8 @@ const MORE_MENU_ID = "CodeMoreMenu"
  *   a tick before it on the one showing (Owen, epic `editor` I73).
  * - A click on the ticked one hides it;  on another, shows that one instead.  No "None" row.
  * - Not a `<ui-dropdown>`:  a dropdown has no column for ticks, and swapped the showing row's icon for one.
+ * - Drawn inside the file tab bar's shadow root (`SpellEditor.spell`'s view), where the page's `MenuBar.css`
+ *   doesn't reach:  it brings that look in itself (`adoptMenuLook()`;  epic `editor` I128).
  ****************/
 export function CodeMoreMenu() {
   let popup: (HTMLElement & { visible?: boolean }) | undefined
@@ -88,6 +112,7 @@ export function CodeMoreMenu() {
         aria-haspopup="menu"
         label={appTexts.text("codeMore")}
         title={appTexts.text("codeMore")}
+        ref={(element: HTMLElement) => queueMicrotask(() => adoptMenuLook(element))}
       />
       <ui-popup
         slot="right"
