@@ -1614,7 +1614,7 @@ export class SpellLanguageService {
    * What could be typed at `position`:
    * - in a `<css>` block:  CSS, e.g. `color` for `col` -- see `LSP.SpellCSS`
    * - typing a JSX tag (`<chi`):  spell's own tags, e.g. `children`, `action`, then Spell UI's -- see `tagItems()`;
-   *   each, and each attribute, written whole when chosen (`<action "|"/>`, `color="|"`) -- see `LSP.CompletionShapes`
+   *   each, and each attribute, written whole when chosen (`<action "|" />`, `color="|"`) -- see `LSP.CompletionShapes`
    * - inside a tag (`<button col`):  its attributes, each saying what it is;  in its quotes (`color="`), its words --
    *   see `attributeItems()`, `attributeValueItems()`
    * - in an action's quoted word (`<action "au`):  the program's actions, e.g. `auto play` -- see `actionItems()`
@@ -1693,7 +1693,7 @@ export class SpellLanguageService {
    * - The web's own tags aren't offered.
    * - A tag is a `<` right before a word:  `x < y` isn't one.
    * - Each is written whole when chosen, the caret where you type next, unless `afterCaret` already goes on:
-   *   `<action "|"/>`, `<content>` ... -- see `LSP.CompletionShapes` (epic `editor` I70).
+   *   `<action "|" />`, `<content>` ... -- see `LSP.CompletionShapes` (epic `editor` I70).
    */
   private tagItems(
     file: SP.SpellFile,
@@ -1819,7 +1819,7 @@ export class SpellLanguageService {
   /**
    * The program's actions, while an `<action "...">`'s quoted word is being typed at the end of `lineText`:
    * `auto play`, `deal the cards` ... -- `undefined` if no action's word is (epic `language` P53).
-   * - Its tag in the file's language:  `<acción "jugar solo"/>` in a Spanish file.
+   * - Its tag in the file's language:  `<acción "jugar solo" />` in a Spanish file.
    * - The drawing's own type's first, then the app's `undo` and `redo`, then every other type's
    *   (`SP.ActionButton.actionsIn()`).
    * - Each replaces what's typed inside the quotes, so a word of several words is found as it's typed.

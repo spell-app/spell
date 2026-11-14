@@ -15,7 +15,7 @@ when working with code in this folder, `src/lsp/` of the kit's app folder (`spel
   - `SpellLanguageService`:  diagnostics, hover, completion, definition, references, rename, outline, folding, formatting,
     accent fixes as you type
   - `CompletionShapes`:  how a tag or an attribute chosen from the suggestion list is written whole, as a snippet,
-    the caret where you type next (`<action "|"/>`, `color="|"`;  epic `editor` I70):  the ONE table of shapes
+    the caret where you type next (`<action "|" />`, `color="|"`;  epic `editor` I70):  the ONE table of shapes
   - `LspTexts`:  the labels it shows people, in the language of the file they're about (its name says it) (epic `spanish` P13)
     - read through `LspTexts.of(scope)`
   - `SpellKeywords`:  a language pack's keywords, as editors want them (accent fixes, the VS Code grammar's keywords)

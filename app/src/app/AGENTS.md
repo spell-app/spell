@@ -168,7 +168,7 @@ and in the app's build folder, `app/` at the app folder's root.
       through the component pack (`SP.ComponentPacks.help()`), from Spell UI's help table, `help.generated.ts`.
       On every line of a tag split over several, too (I64).
     - A tag or an attribute chosen from the list is written whole, the caret where you type next (I70):
-      `<action "|"/>`, `<content>` a line in then `</>`, `color="|"` with its words listed at once.
+      `<action "|" />`, `<content>` a line in then `</>`, `color="|"` with its words listed at once.
       The shapes are ONE table, the language service's `LSP.CompletionShapes`, so VS Code writes the same.
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.

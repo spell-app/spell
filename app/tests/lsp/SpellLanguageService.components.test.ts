@@ -85,8 +85,8 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
       return { writes: item.insertText ?? item.label, isSnippet: item.insertTextFormat === 2, lists: !!item.command }
     }
 
-    test('spell\'s own:  `<action "|"/>`, its actions listed at once;  `<divider/>`;  `<context-menu>` a line in', async () => {
-      expect(await chosen(game, "<act", "action")).toEqual({ writes: 'action "$1"/>', isSnippet: true, lists: true })
+    test('spell\'s own:  `<action "|" />`, its actions listed at once;  `<divider/>`;  `<context-menu>` a line in', async () => {
+      expect(await chosen(game, "<act", "action")).toEqual({ writes: 'action "$1" />', isSnippet: true, lists: true })
       expect(await chosen(game, "<", "divider")).toMatchObject({ writes: "divider/>$0", lists: false })
       expect(await chosen(game, "<chi", "children")).toMatchObject({ writes: "children/>$0" })
       expect(await chosen(game, "<con", "context-menu")).toMatchObject({ writes: "context-menu>\n\t$0\n</>" })
@@ -101,8 +101,8 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
       expect(await chosen(game, "<tool", "toolbar")).toMatchObject({ writes: "toolbar>\n\t$0\n</>" })
     })
 
-    test('...in Spanish, a Spanish file\'s names:  `<acción "|"/>`, `<boton>|</>`', async () => {
-      expect(await chosen(solitario, "<acc", "acción")).toMatchObject({ writes: 'acción "$1"/>', lists: true })
+    test('...in Spanish, a Spanish file\'s names:  `<acción "|" />`, `<boton>|</>`', async () => {
+      expect(await chosen(solitario, "<acc", "acción")).toMatchObject({ writes: 'acción "$1" />', lists: true })
       expect(await chosen(solitario, "<bot", "boton")).toMatchObject({ writes: "boton>$0</>" })
     })
 

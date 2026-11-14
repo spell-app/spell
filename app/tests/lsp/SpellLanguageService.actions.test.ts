@@ -24,7 +24,7 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
     // then Spell UI's (epic `editor` I55)
     expect(labels(items).slice(0, 4)).toEqual(["children", "action", "context-menu", "divider"])
     expect(items.find(({ label }) => label === "action")?.detail).toBe(
-      'a button for one of the program\'s actions:  <action "auto play"/>'
+      'a button for one of the program\'s actions:  <action "auto play" />'
     )
     expect(items.find(({ label }) => label === "children")?.detail).toBe("spell's word for <slot>")
   })

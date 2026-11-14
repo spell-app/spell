@@ -44,7 +44,7 @@ export const LSP_TEXTS_ES: LspTextPack = {
   statement: "sentencia",
   next: "siguiente",
   spellWordFor: "la palabra de spell para <{tag}>",
-  actionTag: 'un botón para una de las acciones del programa:  <acción "jugar solo"/>',
+  actionTag: 'un botón para una de las acciones del programa:  <acción "jugar solo" />',
   contextMenuTag: "el menú del clic derecho del elemento donde está",
   dividerTag: "una línea entre los grupos de un menú contextual",
   actionOf: "acción de {type}",

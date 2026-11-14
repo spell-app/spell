@@ -9,7 +9,7 @@ const SHOW_SUGGESTIONS: Command = { title: "", command: "editor.action.triggerSu
 
 /**
  * How each of spell's own tags is written, by what it means (`SP.spellTagsIn()`):
- * - `action`:  a button for one of the program's actions, `<action "auto play"/>`
+ * - `action`:  a button for one of the program's actions, `<action "auto play" />`
  * - `divider`, `slot` (`<children/>`):  hold nothing
  * - `context_menu`:  holds its `<action>`s, a line each
  */
@@ -24,7 +24,7 @@ const SPELL_TAG_SHAPES: Record<string, TagShape | undefined> = {
  * ### `CompletionShapes`
  * How a tag or an attribute chosen from the suggestion list is written WHOLE, the caret where you type next
  * (epic `editor` I70):  the ONE table of shapes, as snippets, so Monaco and VS Code write the same.
- * - `<act` => `<action "|"/>`, the program's actions listed at once;  `<divider/>|`;  `<content>`, a line in, `</>`.
+ * - `<act` => `<action "|" />`, the program's actions listed at once;  `<divider/>|`;  `<content>`, a line in, `</>`.
  * - `<segment col` => `color="|"`, its words listed at once;  `fluid` alone, as it takes no value.
  * - What's already written after the caret is never doubled:  then only the name is (`isWrittenAfter()`).
  * - Each snippet leaves out the `<`:  the editor replaces only the word being typed, after it.
@@ -88,7 +88,7 @@ export class CompletionShapes {
     if (CompletionShapes.isWrittenAfter(after)) return {}
     // oxfmt-ignore
     const snippet =
-      shape === "named" ? `${tag} "$1"/>`
+      shape === "named" ? `${tag} "$1" />`
       : shape === "closed" ? `${tag}/>$0`
       : shape === "attributes" ? `${tag} $0/>`
       : shape === "words" ? `${tag}>$0</>`
@@ -105,7 +105,7 @@ export class CompletionShapes {
 
 /**
  * How a tag is written whole, chosen from the suggestion list:
- * - `named`:  a quoted word names it, and it holds nothing, `<action "|"/>`
+ * - `named`:  a quoted word names it, and it holds nothing, `<action "|" />`
  * - `closed`:  it holds nothing, `<divider/>|`
  * - `attributes`:  it holds nothing, the caret where its attributes go, `<icon |/>`
  * - `words`:  a few words, on its line, `<button>|</>`
