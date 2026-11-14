@@ -32,6 +32,7 @@ import {
   type WorkspaceSymbol
 } from "vscode-languageserver"
 
+import { withoutAccents } from "spell/util/string"
 import { P } from "spell/parser/parser"
 import { MD, type InlineNode } from "spell/parser/markdown"
 import { SP } from "spell/parser/spell"
@@ -702,6 +703,7 @@ export class SpellLanguageService {
   /**
    * What to show when hovering over `position`:
    * - in a `<css>` block:  the CSS service's hover, e.g. a property's docs -- see `LSP.SpellCSS`
+   * - on a component's tag or attribute in a drawing (`<button color`):  what it is -- see `componentHover()`
    * - the rule that matched there, its syntax and an example from its tests
    * - what the word refers to and where that was declared, e.g. a variable's kind and output name
    * - the javascript its statement compiles to
@@ -714,6 +716,8 @@ export class SpellLanguageService {
     const offset = this.offsetAt(file, position)
     const cssHover = this.css.hover(file.parseText, offset, position)
     if (cssHover !== undefined) return cssHover
+    const markupHover = this.componentHover(file, position)
+    if (markupHover) return markupHover
     const stack = this.matchesAt(file, position)
     const described = [...stack]
       .reverse()
@@ -735,6 +739,50 @@ export class SpellLanguageService {
     if (!sections.length) return null
     const range = subject ? this.rangeOf(file, subject.nameMatch) : this.rangeOf(file, described)
     return { contents: { kind: MarkupKind.Markdown, value: sections.join("\n\n---\n\n") }, range }
+  }
+
+  /**
+   * What the component tag or attribute at `position` is, in a drawing (epic `editor` I55):
+   * `<button>` => "a component that ...";  `color` inside it => the attribute, what it is, the words it takes.
+   * - Spell UI's, in the file's language (`SP.ComponentPacks.help()`).
+   * - A tag's attributes are read on its own line:  `null` for one on a line of its own, or anything else.
+   */
+  private componentHover(file: SP.SpellFile, position: Position): Hover | null {
+    const text = file.parseText
+    const offset = this.offsetAt(file, position)
+    const lineStart = text.lastIndexOf("\n", offset - 1) + 1
+    const lineEnd = text.indexOf("\n", offset)
+    const line = text.slice(lineStart, lineEnd < 0 ? undefined : lineEnd)
+    const at = offset - lineStart
+    const start = at - /[\p{L}\p{M}\d-]*$/u.exec(line.slice(0, at))![0].length
+    const end = at + /^[\p{L}\p{M}\d-]*/u.exec(line.slice(at))![0].length
+    const word = line.slice(start, end)
+    if (!word || !/\p{L}/u.test(word)) return null
+    const scope = this.scopeAt(file, offset)
+    const help = SpellLanguageService.componentHelpAt(scope)
+    if (!help) return null
+    const texts = LSP.LspTexts.of(scope)
+    const range = {
+      start: { line: position.line, character: start },
+      end: { line: position.line, character: end }
+    }
+    const before = line.slice(0, start)
+    let value: string | undefined
+    if (/<\/?$/.test(before)) {
+      const tag = !SpellLanguageService.isOwnView(scope, word) && help.tags.find((it) => it.tag === word)
+      if (tag) value = [`**<${word}>** · ${texts.text("componentTag")}`, tag.description].filter(Boolean).join("\n\n")
+    } else {
+      const open = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*)?\s$/u.exec(before)
+      if (!open || isInQuotesOrBraces(open[2] ?? "") || SpellLanguageService.isOwnView(scope, open[1]!)) return null
+      const attribute = help.attributesOf(open[1]!)?.find((it) => it.name === word)
+      if (attribute) {
+        const takes = attribute.values.map((it) => `\`${it}\``).join(" · ")
+        value = [`**${word}** · ${texts.text("attributeOf", { tag: open[1]! })}`, attribute.description, takes]
+          .filter(Boolean)
+          .join("\n\n")
+      }
+    }
+    return value ? { contents: { kind: MarkupKind.Markdown, value }, range } : null
   }
 
   /**
@@ -1546,7 +1594,9 @@ export class SpellLanguageService {
   /**
    * What could be typed at `position`:
    * - in a `<css>` block:  CSS, e.g. `color` for `col` -- see `LSP.SpellCSS`
-   * - typing a JSX tag (`<chi`):  spell's own tags, e.g. `children`, `action` -- see `tagItems()`
+   * - typing a JSX tag (`<chi`):  spell's own tags, e.g. `children`, `action`, then Spell UI's -- see `tagItems()`
+   * - inside a tag (`<button col`):  its attributes, each saying what it is;  in its quotes (`color="`), its words --
+   *   see `attributeItems()`, `attributeValueItems()`
    * - in an action's quoted word (`<action "au`):  the program's actions, e.g. `auto play` -- see `actionItems()`
    * - mid-statement:  what can come NEXT, if the parser can say -- see `expectedNext()`
    * - otherwise, names visible there:  variables declared before it, types, constants
@@ -1563,7 +1613,14 @@ export class SpellLanguageService {
     if (cssList) return cssList
     if (!file.match) return { isIncomplete: false, items: [] }
     const lineText = text.slice(text.lastIndexOf("\n", offset - 1) + 1, offset)
-    const tagItems = this.tagItems(file, offset, lineText) ?? this.actionItems(file, offset, position, lineText)
+    // a drawing's markup as it's typed:  the file's text now, which a parse may not have caught up with yet
+    // (`<` alone parses as an error;  the editor asks the moment it's typed)
+    const typedLine = file.contents?.split("\n")[position.line]?.slice(0, position.character) ?? lineText
+    const tagItems =
+      this.tagItems(file, offset, typedLine) ??
+      this.actionItems(file, offset, position, typedLine) ??
+      this.attributeValueItems(file, offset, position, typedLine) ??
+      this.attributeItems(file, offset, typedLine)
     if (tagItems) return { isIncomplete: false, items: tagItems }
     const atStatementStart = /^\s*[\p{L}\p{M}\d_-]*$/u.test(lineText)
     if (!atStatementStart) {
@@ -1616,11 +1673,91 @@ export class SpellLanguageService {
     if (!JSX_TAG_TYPED.test(lineText)) return undefined
     const scope = this.scopeAt(file, offset)
     const texts = LSP.LspTexts.of(scope)
-    return SP.spellTagsIn(scope).map(({ tag, meaning }) => ({
+    const own: CompletionItem[] = SP.spellTagsIn(scope).map(({ tag, meaning }) => ({
       label: tag,
       kind: CompletionItemKind.Keyword,
-      detail: texts.text(SPELL_TAG_DETAILS[meaning] ?? "spellWordFor", { tag: meaning })
+      detail: texts.text(SPELL_TAG_DETAILS[meaning] ?? "spellWordFor", { tag: meaning }),
+      sortText: `0${tag}`
     }))
+    const components = (SpellLanguageService.componentHelpAt(scope)?.tags ?? [])
+      // a word spell has for its own (`action`, `acción`) is spell's, accented or not
+      .filter(({ tag }) => !own.some((item) => withoutAccents(item.label) === withoutAccents(tag)))
+      .map(({ tag, description }) => ({
+        label: tag,
+        kind: CompletionItemKind.Class,
+        detail: texts.text("componentTag"),
+        sortText: `1${tag}`,
+        ...(description && { labelDetails: { description }, documentation: this.markdown(description) })
+      }))
+    return [...own, ...components]
+  }
+
+  /**
+   * The attributes of the component whose tag is open at the end of `lineText`, as one is typed:
+   * `<button col` => `color`, `fluid` ... each with what it is -- `undefined` if no tag is open there.
+   * - Spell UI's, in the file's language (`SP.ComponentPacks.help()`):  `<botón tam` => `tamano`.
+   * - Not inside a quoted value or a `{...}`.
+   */
+  private attributeItems(file: SP.SpellFile, offset: number, lineText: string): CompletionItem[] | undefined {
+    const typing = ATTRIBUTE_TYPED.exec(lineText)
+    if (!typing || isInQuotesOrBraces(typing[2] ?? "")) return undefined
+    const scope = this.scopeAt(file, offset)
+    if (SpellLanguageService.isOwnView(scope, typing[1]!)) return undefined
+    const attributes = SpellLanguageService.componentHelpAt(scope)?.attributesOf(typing[1]!)
+    if (!attributes) return undefined
+    const texts = LSP.LspTexts.of(scope)
+    return attributes.map(({ name, description, values }) => {
+      const takes = values.length ? values.map((it) => `\`${it}\``).join(" · ") : undefined
+      const docs = [description, takes].filter(Boolean).join("\n\n")
+      return {
+        label: name,
+        kind: CompletionItemKind.Property,
+        detail: texts.text("attributeOf", { tag: typing[1]! }),
+        ...(description && { labelDetails: { description } }),
+        ...(docs && { documentation: this.markdown(docs) })
+      }
+    })
+  }
+
+  /**
+   * The words an attribute takes, as its quoted value is typed at the end of `lineText`:
+   * `<button color="pr` => `primary`, `red` ... -- `undefined` if no attribute's value is being typed there.
+   * - Each replaces what's typed inside the quotes.
+   */
+  private attributeValueItems(
+    file: SP.SpellFile,
+    offset: number,
+    position: Position,
+    lineText: string
+  ): CompletionItem[] | undefined {
+    const typing = ATTRIBUTE_VALUE_TYPED.exec(lineText)
+    if (!typing) return undefined
+    const [, tag, attribute, typed] = typing as unknown as [string, string, string, string]
+    const scope = this.scopeAt(file, offset)
+    const spec = SpellLanguageService.componentHelpAt(scope)
+      ?.attributesOf(tag)
+      ?.find((it) => it.name === attribute)
+    if (!spec?.values.length) return undefined
+    const word = /[^\s"]*$/.exec(typed)![0]
+    const range = { start: { line: position.line, character: position.character - word.length }, end: position }
+    return spec.values.map((value, order) => ({
+      label: value,
+      kind: CompletionItemKind.EnumMember,
+      detail: attribute,
+      sortText: String(order).padStart(3, "0"),
+      textEdit: { range, newText: value }
+    }))
+  }
+
+  /** Does `tag` name one of the program's own types (`<card>` in Solitaire), not a pack's component? */
+  private static isOwnView(scope: P.Scope, tag: string): boolean {
+    return !!scope.getType(SP.typeName(tag))
+  }
+
+  /** What the components a drawing in `scope` names are, in its language;  `undefined` while none can say. */
+  private static componentHelpAt(scope: P.Scope): SP.ComponentHelp | undefined {
+    const packs = (scope.parser as SP.SpellParser | undefined)?.packs
+    return SP.ComponentPacks.help(SP.Language.of(scope).lang, packs ?? SP.ComponentPacks.DEFAULT)
   }
 
   /**
@@ -2019,17 +2156,21 @@ export class SpellLanguageService {
     for (const type of SpellLanguageService.visible(scope.types)) {
       for (const property of SpellLanguageService.propertiesOf(type)) {
         const words = SpellLanguageService.memberWords(property.name, property)
-        const doc = property.declaredBy ? undefined : property.docstring
+        // a built-in's docs from its record;  a declared one's from its docstring, as its hover says (epic `editor` I55)
+        const doc = property.declaredBy ? this.docsOfRecord(property) : property.docstring
         owners.set(words, [...(owners.get(words) ?? []), { type: type.name, doc }])
       }
     }
     return [...owners].map(([label, of]) => {
-      // a built-in's docs, e.g. a text's and a list's `length` -- each type's, if more than one says
+      // each type's docs, if more than one says
       const docs = of.filter((it) => it.doc).map((it) => (of.length > 1 ? `**${it.type}**:  ${it.doc}` : it.doc))
+      // in the row itself:  the first type's first line, as the list shows it
+      const description = of.find((it) => it.doc)?.doc?.split("\n")[0]
       return {
         label,
         kind: CompletionItemKind.Property,
         detail: LSP.LspTexts.of(scope).text("propertyOf", { types: of.map((it) => it.type).join(", ") }),
+        ...(description && { labelDetails: { description } }),
         ...(docs.length ? { documentation: this.markdown(docs.join("\n\n")) } : {})
       }
     })
@@ -2689,8 +2830,31 @@ type CommentStyle = {
 /**
  * A JSX tag being typed at the end of a line:  `<` right before a word, after a space, `>`, `(` or `{`, e.g. `<div><chi`.
  * - Accented letters too:  `<menú-con`.
+ * - Or a `<` alone, starting its line or after `>`, `(` or `{`:  the moment it's typed, before its first letter
+ *   (`x <` isn't one).
  */
-const JSX_TAG_TYPED = /(?:^|[\s>({])<\p{Ll}[\p{L}\p{M}\d_-]*$/u
+const JSX_TAG_TYPED = /(?:(?:^|[\s>({])<\p{Ll}[\p{L}\p{M}\d_-]*|(?:^\s*|[>({])<)$/u
+
+/**
+ * An attribute being typed inside a tag at the end of a line:  the tag, then all after it, `<button fluid col`.
+ * - Only after a space, past the tag's name;  a `>` after it closes the tag.
+ */
+const ATTRIBUTE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*?)?\s+[\p{L}-]*$/u
+
+/** An attribute's quoted value being typed at the end of a line:  its tag, its attribute, then what's typed, `<button color="pr`. */
+const ATTRIBUTE_VALUE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)\s(?:[^<>]*\s)?([\p{L}\p{M}\d-]+)="([^"]*)$/u
+
+/** Is the end of `text`, what's written inside a tag, inside a quoted value or a `{...}`? */
+function isInQuotesOrBraces(text: string): boolean {
+  let quotes = 0
+  let braces = 0
+  for (const char of text) {
+    if (char === '"' && !braces) quotes ^= 1
+    else if (!quotes && char === "{") braces++
+    else if (!quotes && char === "}") braces = Math.max(0, braces - 1)
+  }
+  return !!quotes || !!braces
+}
 
 /** An action's quoted word being typed at the end of a line:  its tag, then what's typed inside the quotes, `<action "au`. */
 const ACTION_WORD_TYPED = /<(\p{L}[\p{L}\p{M}-]*)\s+"([^"]*)$/u

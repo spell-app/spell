@@ -175,8 +175,9 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
  * - By statement, as the source map is (Owen:  "This is fine").
  * - Quiet:  it never takes the keyboard's focus, scrolls only what's out of view, and leaves the code alone while
  *   someone's typing in it.
- * - A line that draws or makes something selects it:  every card, for the line that makes them all.  A line that
- *   doesn't leaves what's selected as it was.
+ * - A line that draws or makes something selects it:  every card, for the line that makes them all;  a line inside
+ *   a tag, what that tag draws.
+ * - A line of the code that draws nothing lets go of what's selected;  one of compiled code leaves it as it was.
  ****************/
 export function FollowAlong() {
   const follower = lineFollower()
@@ -188,7 +189,9 @@ export function FollowAlong() {
       if (!followed) return
       if (followed !== selectedFor) {
         selectedFor = followed
-        if (followed.from !== "parts") Inspector.selectWrittenAt(followed.path, followed.line)
+        // the code's cursor on a line that draws nothing:  nothing's selected (P28, Choice 2)
+        const ifNone = followed.from === "code" ? "deselect" : "keep"
+        if (followed.from !== "parts") Inspector.selectWrittenAt(followed.path, followed.line, { ifNone })
       }
       if (followed.from === "code") return follower.clear()
       if (!codeEditor || codeEditor.hasTextFocus()) return

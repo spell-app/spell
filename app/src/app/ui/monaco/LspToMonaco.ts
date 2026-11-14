@@ -103,9 +103,10 @@ export class LspToMonaco {
    * - A snippet stays a snippet:  `move ${1:card} to ${2:pile}`.
    */
   static completion(item: CompletionItem, range: monaco.IRange): monaco.languages.CompletionItem {
-    const { label, kind, detail, documentation, insertText, insertTextFormat, sortText, filterText } = item
+    const { label, labelDetails, kind, detail, documentation, insertText, insertTextFormat, sortText, filterText } =
+      item
     return {
-      label,
+      label: labelDetails ? LspToMonaco.completionLabel(label, labelDetails) : label,
       kind: (kind && LspToMonaco.COMPLETION_KINDS[kind]) ?? CompletionItemKind.Text,
       detail,
       documentation: documentation === undefined ? undefined : LspToMonaco.markdown(documentation),
@@ -116,6 +117,19 @@ export class LspToMonaco {
       filterText,
       range
     }
+  }
+
+  /**
+   * A completion's label with what it is (`labelDetails.description`) in the row itself, just after its name,
+   * dimmed:  the app's list hides the right of a row while "Details beside suggestions" is off (`codePopups.ts`).
+   */
+  private static completionLabel(
+    label: string,
+    { detail, description }: NonNullable<CompletionItem["labelDetails"]>
+  ): monaco.languages.CompletionItemLabel {
+    // plain text there:  a description's markdown code marks would show as they are
+    const plain = description?.replaceAll("`", "")
+    return { label, detail: [detail, plain && `  ${plain}`].filter(Boolean).join("") }
   }
 
   /** Monaco document highlight for LSP `highlight`.  Kinds are 1-based in LSP, 0-based in Monaco. */

@@ -1,6 +1,13 @@
 import { withoutAccents } from "spell/util/string"
 import { SP } from "spell/parser/spell"
-import { DefaultValues, Vocabulary, type ComponentVocabulary, type LocalizedVocabulary } from "spell/ui/vocabulary"
+import {
+  DefaultValues,
+  SharedVocabulary,
+  ValueSets,
+  Vocabulary,
+  type ComponentVocabulary,
+  type LocalizedVocabulary
+} from "spell/ui/vocabulary"
 import { DEFAULTS_TABLE } from "spell/ui/vocabulary/defaults.generated"
 import { es } from "spell/ui/components/components.es"
 
@@ -70,6 +77,44 @@ export class SpellUIDefaults {
         if (withoutAccents(written) === word) return { attribute: canonical, value: true }
     }
     return undefined
+  }
+
+  /**
+   * The attributes of Spell UI's tag `tag`, as `language` writes them on it (the pack's `help()`, epic `editor` P28):
+   * each attribute's name and the words it takes, the shared ones too (`disabled`), with what `describe()` says of it.
+   * - `tag` as `canonicalTagFor()` takes it:  bare (`button`, `botón`), or as a page writes it.
+   * - Not the ones a program hands rich data (`kind: "json"`):  no drawing writes those as text.
+   * - `undefined` for a tag Spell UI doesn't have.
+   */
+  static attributesOf(
+    tag: string,
+    language: string,
+    describe: (tag: string, attribute: string) => string | undefined
+  ): SP.ComponentAttributeHelp[] | undefined {
+    const canonical = SpellUIDefaults.canonicalTagFor(tag, language)
+    if (!canonical) return undefined
+    const localized = SpellUIDefaults.localizedFor(canonical, language)
+    const english = SpellUIDefaults.registry.localizedFor(canonical)!
+    return SharedVocabulary.attributesFor(english.vocabulary)
+      .filter((spec) => spec.kind !== "json")
+      .map((spec) => {
+        const set = ValueSets.setFor(spec)
+        const words = localized.names.values.get(spec.name)
+        const values = set ? ValueSets.get(set).map((value) => words?.get(value) ?? value) : []
+        const name = localized.names.attributes.get(spec.name) ?? spec.name
+        const description = describe(canonical, spec.name)
+        return { name, values, ...(description && { description }) }
+      })
+  }
+
+  /** Each of Spell UI's tags in `language`, bare as a drawing writes it (`button`, `botón`), with its canonical tag. */
+  static tagsIn(language: string): { tag: string; canonical: string }[] {
+    const canonicals = Object.keys(DEFAULTS_TABLE)
+    if (language !== es.lang) return canonicals.map((canonical) => ({ tag: canonical.replace(/^ui-/, ""), canonical }))
+    return canonicals.flatMap((canonical) => {
+      const tag = SpellUIDefaults.spanish.get(canonical)?.tag.replace(/^es-/, "")
+      return tag ? [{ tag: es.tags?.[canonical] ?? tag, canonical }] : []
+    })
   }
 
   /**

@@ -104,3 +104,97 @@ describe("SpellTyping.opensQuotes()", () => {
     expect(SpellTyping.opensQuotes(["a "], 0, "xx")).toBe(false)
   })
 })
+
+describe("SpellTyping.pastedLines()", () => {
+  const TABS = { insertSpaces: false, tabSize: 4 }
+  const SPACES = { insertSpaces: true, tabSize: 2 }
+
+  test("a paste at an indent:  its first line there, the rest kept where they were from it", () => {
+    expect(SpellTyping.pastedLines(["its rank", "\tit is high", "its suit"], "\t\t", TABS)).toEqual([
+      "its rank",
+      "\t\t\tit is high",
+      "\t\tits suit"
+    ])
+  })
+
+  test("the first line's own indent goes, at the caret's", () => {
+    expect(SpellTyping.pastedLines(["\t\tits rank", "\t\t\tit is high"], "\t", TABS)).toEqual([
+      "its rank",
+      "\t\tit is high"
+    ])
+  })
+
+  test("spaces, in a file of spaces", () => {
+    expect(SpellTyping.pastedLines(["its rank", "  it is high"], "    ", SPACES)).toEqual([
+      "its rank",
+      "      it is high"
+    ])
+  })
+
+  test("a drawing's markup is laid out as a tree (I53's paste)", () => {
+    expect(SpellTyping.pastedLines(["<header>Two</header>", "\t<text>Nested</text>"], "\t\t\t\t", TABS)).toEqual([
+      "<header>Two</header>",
+      "\t\t\t\t<text>Nested</text>"
+    ])
+    expect(
+      SpellTyping.pastedLines(
+        ["<content>", "<button fluid>", "{its label}", "</button>", '<text "hi"/>', "<br>", "</>"],
+        "\t\t",
+        TABS
+      )
+    ).toEqual([
+      "<content>",
+      "\t\t\t<button fluid>",
+      "\t\t\t\t{its label}",
+      "\t\t\t</button>",
+      '\t\t\t<text "hi"/>',
+      "\t\t\t<br>",
+      "\t\t</>"
+    ])
+  })
+
+  test("mid-line:  the line's indent, its first line as it was", () => {
+    expect(SpellTyping.pastedLines(["rank", "\tit is high"], "\tits ", TABS)).toEqual(["rank", "\t\tit is high"])
+  })
+
+  test("at a line's very start, or one line:  as copied", () => {
+    expect(SpellTyping.pastedLines(["\tits rank", "\t\tit is high"], "", TABS)).toEqual([
+      "\tits rank",
+      "\t\tit is high"
+    ])
+    expect(SpellTyping.pastedLines(["its rank"], "\t\t", TABS)).toEqual(["its rank"])
+  })
+
+  test("blank lines stay blank", () => {
+    expect(SpellTyping.pastedLines(["a", "  ", "\tb"], "\t", TABS)).toEqual(["a", "", "\t\tb"])
+  })
+})
+
+describe("SpellTyping.linesUnder()", () => {
+  const DRAWING = [
+    `\tto draw it`,
+    `\t\t<column>`,
+    `\t\t\t<button fluid>`,
+    `\t\t\t\t{its label}`,
+    ``,
+    `\t\t\t</button>`,
+    `\t\t\t<text>Two</text>`,
+    `\t\t</column>`,
+    `\tgroup "Names"`
+  ]
+
+  test("a tag's children and its closing tag", () => {
+    expect(SpellTyping.linesUnder(DRAWING, 1)).toBe(6)
+    expect(SpellTyping.linesUnder(DRAWING, 2)).toBe(3)
+  })
+
+  test("a tag closed on its own line has none", () => {
+    expect(SpellTyping.linesUnder(DRAWING, 6)).toBe(0)
+  })
+
+  test("a body:  the lines indented under it", () => {
+    expect(SpellTyping.linesUnder(DRAWING, 0)).toBe(7)
+    expect(SpellTyping.linesUnder(CARD, 4)).toBe(2)
+    expect(SpellTyping.linesUnder(CARD, 1)).toBe(0)
+  })
+})

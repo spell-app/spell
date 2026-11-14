@@ -261,7 +261,7 @@ describe("<FileTabs>", () => {
 })
 
 describe("CodeSettings", () => {
-  test("a new editor starts on the defaults:  hover only with ⌥, suggestions only on Ctrl+Space, no details", async () => {
+  test("a new editor starts on the defaults:  hover only with ⌥, Monaco's own suggestions off, no details", async () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const host = await mount(() => <InputEditor />)
     const inputEditor = await waitForInputEditor(host)
@@ -287,7 +287,7 @@ describe("CodeSettings", () => {
     const { monaco } = await import("spell/app/app/solid/monaco")
     const option = monaco.editor.EditorOption
     choose("hover", "always")
-    choose("suggest", "asYouType")
+    choose("suggest", "everywhere")
     choose("suggestDetails", true)
     choose("parameterHints", true)
     choose("pinnedLines", true)

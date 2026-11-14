@@ -49,11 +49,12 @@
         width: revert-layer;
       }
       /* The whole page, until it's ready to show at once (`PageLoading`):  nothing appears piecemeal.
-         Plain markup:  it shows before any script has run, so no `<ui-*>` could draw it yet. */
+         Plain markup:  it shows before any script has run, so no `<ui-*>` could draw it yet.
+         Above everything, the selection's ants and the hover box included (their 2147483000). */
       #PageLoading {
         position: fixed;
         inset: 0;
-        z-index: 2147483000;
+        z-index: 2147483647;
         display: flex;
         flex-direction: column;
         align-items: center;

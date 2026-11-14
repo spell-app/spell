@@ -1691,8 +1691,7 @@ export class EditorStore extends Observable {
     inputEditorPath = editor.file?.path
     inputEditor.onDidChangeCursorSelection((event) => {
       editor.onInputCursor("cursor")
-      if (event.source === "mouse" && event.selection.isEmpty())
-        editor.followCodeLine(event.selection.positionLineNumber)
+      if (isCursorMovedToFollow(event, api)) editor.followCodeLine(event.selection.positionLineNumber)
     })
     editor.shownCodeEditor = inputEditor
     inputEditor.onDidScrollChange((event) => {
@@ -1716,14 +1715,14 @@ export class EditorStore extends Observable {
   accessor shownCodeEditor: monaco.editor.IStandaloneCodeEditor | undefined
 
   /**
-   * The place in the program in focus:  a line of it last clicked, in the code, in compiled code or by way of a part.
+   * The place in the program in focus:  the line the code's cursor moved to, a line of compiled code clicked, or a part.
    * - The panes show it, each by itself, the one it came from excepted (`<FollowAlong>`, `<CodeOutputPane>`).
    * - A new object per click, so a second click on one line brings it back into view.
    */
   @prop()
   accessor followed: FollowedPlace | undefined
 
-  /** A click on line `lineNumber`, from 1, of the file showing:  the place in focus, if it's spell. */
+  /** The code's cursor moved to line `lineNumber`, from 1, of the file showing:  the place in focus, if it's spell. */
   followCodeLine(lineNumber: number): void {
     const { file } = editor
     if (file instanceof SP.SpellFile) {
@@ -2042,6 +2041,23 @@ export type FollowedPlace = {
  * `inputEditor`'s cursor moved (`event` `"cursor"`) or it scrolled (`"scroll"`):  remember where, in `selection`.
  * - SIDE EFFECT:  saves it as the file's pref too, for `selectPath()` to restore.
  */
+/**
+ * Should what's selected follow the code's cursor to its line (epic `editor` I51, taking back J43's clicks only)?
+ * - A click:  always, so a second click on one line brings it back into view.
+ * - The arrow keys, Page Down, Cmd+End ...:  only to another line.
+ * - NEVER while typing (the text changed), nor for the cursor moved by code (the caret snapping into a body).
+ * - Never with a range selected.
+ */
+function isCursorMovedToFollow(event: monaco.editor.ICursorSelectionChangedEvent, api: typeof monaco): boolean {
+  if (!event.selection.isEmpty()) return false
+  if (event.source === "mouse") return true
+  const isMove =
+    event.source === "keyboard" &&
+    event.reason === api.editor.CursorChangeReason.Explicit &&
+    event.modelVersionId === event.oldModelVersionId
+  return isMove && event.oldSelections?.[0]?.positionLineNumber !== event.selection.positionLineNumber
+}
+
 function onInputCursor(event: UIT.EditorScrollInfo["event"]): void {
   const { file } = editor
   const inputEditor = inputEditorInstance

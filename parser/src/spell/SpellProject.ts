@@ -590,6 +590,32 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return SpellProject.placeOfMatch(node.match)
   }
 
+  /**
+   * Where the innermost drawn tag around `offset` of `fileMatch`, a file's parse, is written:  `partPlaceOf()`'s place
+   * for it, so what it draws is found by the place stamped on it.
+   * - Anywhere in the tag counts:  its attributes, its content, its closing tag.
+   * - `<>...</>` draws no element of its own:  the tag around it, if any.
+   * - `undefined` outside any drawing.
+   */
+  static partPlaceAt(fileMatch: P.Match, offset: number): P.SourcePlace | undefined {
+    const top = fileMatch
+      .matchStackForOffset(offset)
+      .map((match) => match.AST)
+      .filter((ast): ast is P.ASTJSXElement => ast instanceof P.ASTJSXElement)
+      .at(-1)
+    let around: P.ASTJSXElement | undefined
+    for (let element = top; element;) {
+      if (!(element instanceof P.ASTJSXFragment)) around = element
+      element = element.children?.find(
+        (child): child is P.ASTJSXElement =>
+          child instanceof P.ASTJSXElement &&
+          (child.match?.start ?? Infinity) <= offset &&
+          offset < (child.match?.end ?? -Infinity)
+      )
+    }
+    return around && SpellProject.partPlaceOf(around)
+  }
+
   /** Where `match` is:  its file, line and column. */
   private static placeOfMatch(match: P.AnyMatch | undefined): P.SourcePlace | undefined {
     const path = match?.getScopeOfType(P.FileScope)?.path
