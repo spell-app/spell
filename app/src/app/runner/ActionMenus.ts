@@ -63,9 +63,9 @@ export class ActionMenus {
    *   the menu goes when an action runs, at Escape, or at a press anywhere else.
    */
   static showContextMenu(event: MouseEvent, stopAt: Element, thing: object | undefined, core: Core): boolean {
-    const found = ActionMenus.contextMenuOf(event, stopAt)
-    const items = found?.items ?? (found?.name ? core.menuOf(thing, found.name) : undefined)
-    if (!items?.length) return false
+    const found = ActionMenus.contextMenuAt(event, stopAt, thing, core)
+    if (!found) return false
+    const { items } = found
     event.preventDefault()
     ActionMenus.closeContextMenu()
     const popup = document.createElement(POPUP_TAG)
@@ -95,6 +95,19 @@ export class ActionMenus {
     // a right click on the menu itself:  never the browser's own menu over it
     popup.addEventListener("contextmenu", (click) => click.preventDefault())
     return true
+  }
+
+  /**
+   * The right-click menu the program shows for `event`:  its items, ready to draw;  `undefined` for none, or none in it.
+   * - The ONE way to find a spot's menu:  Run's right click (`showContextMenu()`),
+   *   and Edit's part menu, which shows it first (epic `language` T120).
+   * - The nearest on `event`'s path, up to `stopAt`:  a `<context-menu>` written in the drawing,
+   *   else a `context-menu="game menu"` naming a menu of `thing` or up its chain (`core.menuOf()`).
+   */
+  static contextMenuAt(event: Event, stopAt: Element, thing: object | undefined, core: Core): ContextMenu | undefined {
+    const found = ActionMenus.contextMenuOf(event, stopAt)
+    const items = found?.items ?? (found?.name ? core.menuOf(thing, found.name) : undefined)
+    return items?.length ? { name: found?.name, items } : undefined
   }
 
   /** Close the context menu showing, if one is. */
@@ -192,6 +205,14 @@ export class ActionMenus {
     if ((target as { editContext?: unknown }).editContext) return true
     return target instanceof HTMLInputElement && !NOT_TYPED_IN.has(target.type)
   }
+}
+
+/** A right click's menu, found by `ActionMenus.contextMenuAt()`. */
+export type ContextMenu = {
+  /** the template's menu a `context-menu=` named;  none for a `<context-menu>` written in the drawing */
+  name?: string
+  /** its items, at least one */
+  items: MenuItem[]
 }
 
 /** The attribute naming the menu a toolbar or menu in a drawing shows:  `<ui-toolbar menu="GameMenu" />`. */

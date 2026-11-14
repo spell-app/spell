@@ -2,6 +2,7 @@ import { setDebugGlobal } from "spell/util"
 import { Dragging } from "spell/util/Dragging"
 import { beforeNextPaint } from "spell/util/timing"
 
+import type { MenuItem } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SourceEdits, type ElementPlace, type TextSpan, type WrittenElement } from "spell/app/lsp/SourceEdits"
@@ -447,6 +448,7 @@ export class PartEdits {
    * Listen on `area`, in Edit, while it's the app's:  answers how to stop.
    * - A press on what's selected drags it, inspecting or not.
    * - A right click on a part selects it, if it isn't, and opens the part menu;  on the background, the app itself.
+   *   The menu the program shows there in Run comes first in it, its actions live (`SpellElement.contextMenuAt()`).
    *   The browser's own menu never shows there:  `preventDefault()` comes first, before any other work.
    * - In Run the program has every right click;  with Shift held, the browser does, for its Inspect Element.
    * - The Menu key and Shift+F10 open the menu on what's selected.
@@ -472,7 +474,8 @@ export class PartEdits {
         event.preventDefault()
         event.stopPropagation()
         const part = partAt(event) ?? Inspector.partsIn(area)[0]?.element
-        if (part) PartEdits.openMenu(part, event.clientX, event.clientY)
+        // the program's own menu for that spot goes first, as Run would show it (epic `language` T120)
+        if (part) PartEdits.openMenu(part, event.clientX, event.clientY, SpellElement.contextMenuAt(event)?.items)
       },
       options
     )
@@ -492,8 +495,8 @@ export class PartEdits {
     return () => stop.abort()
   }
 
-  /** Told to open the part menu at a place:  `<PartMenu>`. */
-  static onMenu: ((x: number, y: number) => void) | undefined
+  /** Told to open the part menu at a place, the program's menu there first, if it has one:  `<PartMenu>`. */
+  static onMenu: ((x: number, y: number, programItems?: readonly MenuItem[]) => void) | undefined
 
   /**
    * Open the part menu at (`x`, `y`) for `element`, selecting it if it isn't:  a right click on it, or on its row.
@@ -502,14 +505,15 @@ export class PartEdits {
    *   (a button's card starts a code editor for its `onClick`).
    * - Meanwhile the menu greys its items for `element` (`menuPart`),
    *   and a click on one selects it first (`selectMenuPart()`).
+   * - `programItems`:  the menu the running program shows there, drawn above the editor's (epic `language` T120).
    */
-  static openMenu(element: Element, x: number, y: number): void {
+  static openMenu(element: Element, x: number, y: number, programItems?: readonly MenuItem[]): void {
     if (Inspector.isSelected(element)) PartEdits.menuPart = undefined
     else {
       PartEdits.menuPart = element
       beforeNextPaint(() => beforeNextPaint(() => PartEdits.selectMenuPart()))
     }
-    PartEdits.onMenu?.(x, y)
+    PartEdits.onMenu?.(x, y, programItems)
   }
 
   /**

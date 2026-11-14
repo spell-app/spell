@@ -10,7 +10,7 @@ import { ListSelection } from "spell/util/ListSelection"
 import type { ElementApi, Core } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
-import { ActionMenus } from "./ActionMenus"
+import { ActionMenus, type ContextMenu } from "./ActionMenus"
 
 // Above the class:  its `elementSetup` reads it while the class is defined
 /**
@@ -983,6 +983,23 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /** May people reorder `list`'s items, dragging them?  Its type says so:  `its items can be reordered`. */
   private static reorders(list: object | undefined): boolean {
     return (list?.constructor as { reorderItemsAfter?: number } | undefined)?.reorderItemsAfter !== undefined
+  }
+
+  /**
+   * The menu the running program would show for right click `event`, wherever it lands:  `undefined` for none.
+   * - As Run finds it:  each view's element on the path asks in turn, innermost first (`onThingRightClick()`),
+   *   from the click up to itself (`ActionMenus.contextMenuAt()`).
+   * - For Edit's part menu, which shows it above its own (epic `language` T120).
+   */
+  static contextMenuAt(event: Event): ContextMenu | undefined {
+    for (const target of event.composedPath()) {
+      const component = target instanceof Element ? SpellElement.componentOf(target) : undefined
+      const entry = component?.entry
+      if (!component || !entry) continue
+      const found = ActionMenus.contextMenuAt(event, component.domElement, component.currentThing, entry.core)
+      if (found) return found
+    }
+    return undefined
   }
 
   /** The `SpellElement` behind `element`, if it's a view's element. */
