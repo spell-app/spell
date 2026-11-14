@@ -2971,6 +2971,11 @@
           "description": "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
         },
         {
+          "key": "phasePillTip",
+          "text": "Click:  go to {phase}.  ⌥-click:  start {phase}.",
+          "description": "The phase link's tooltip's second line:  what a click and an ⌥-click do (epic `epic-engine` I271)."
+        },
+        {
           "key": "takenTip",
           "text": "Taken up in {phase}:  fixed or done there",
           "description": "The phase link's tooltip with `taken-in`:  the phase's number and name (epic `epic-engine` I128)."
