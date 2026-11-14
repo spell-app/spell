@@ -222,6 +222,12 @@ export const SHARED_DEFAULTS: Readonly<Record<string, string>> = { [H_PACKAGE]: 
 /** Virtual module `sharedSolid()` resolves `H_PACKAGE` to:  `spell-solid-shared.js`'s `h`, as a default export. */
 const SHARED_H = "\0spell-shared-h"
 
+/**
+ * `ui`'s generated DATA, plain tables with no Solid in them (`spell/ui/vocabulary/partsOfSpeech.generated`, which
+ * the bubbly look reads):  bundled where it's used, as any plain module is.
+ */
+const UI_DATA = /^spell\/ui\/.+\.generated$/
+
 /** Any other import from Solid's or `ui`'s packages:  `sharedSolid()` refuses it, as the shared files may lack it. */
 const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)/
 
@@ -235,6 +241,7 @@ const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)
  * - Side-effect imports too:  `import "spell/ui/components/ui-table"` becomes `import "./spell-ui-shared.js"`.
  * - Looked up by the import name itself, the key of the maps above and of a page's `SpellUI.packModules`
  *   (`SHARED_SPECIFIERS`;  epic `repo-split` P14, Q45).
+ * - `ui`'s generated data (`UI_DATA`) is bundled, as it holds no Solid.
  * - Any other Solid / `ui` specifier (`solid-js/store`, `spell/ui/runtime`) is a build ERROR:
  *   add it to `FROM_SHARED_SOLID` and to what `vite.solid.config.ts` exports, or the shared files won't have its names.
  * - Type-only imports (`@solidjs/web/types/jsx.js`) are gone before this runs.
@@ -251,6 +258,7 @@ export function sharedSolid(): Plugin {
       const file = FROM_SHARED_SOLID.get(source)
       if (file) return { id: `${SHARED_ID}${file}`, external: true }
       if (source.startsWith(SHARED_ID)) return { id: source, external: true }
+      if (UI_DATA.test(source)) return null
       if (SOLID_FAMILY.test(source)) {
         this.error(`"${source}" can't come from ${Object.values(SHARED_SOLID).join(" / ")}:  see sharedSolid()`)
       }
