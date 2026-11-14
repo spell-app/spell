@@ -626,6 +626,16 @@
   .bubbly-mark {
     color: var(--bubbly-faint);
   }
+  /*
+   * an attribute's `=` and a quoted input's marks 10% darker than the other marks (Owen, epic `editor` I145):
+   * they only ever sit on a band, and in the editor no band wraps them, so the rule is theirs everywhere
+   */
+  .bubbly-mark.bubbly-equals {
+    color: color-mix(in oklab, var(--bubbly-faint), black 10%);
+  }
+  .bubbly-quote-mark::after {
+    color: color-mix(in oklab, color-mix(in srgb, var(--bubbly-ink) 33%, var(--bubbly-input)), black 10%);
+  }
   /* ... but a Spell expression's `{` and `}`:  darker, so a `{…}` reads as one (Owen) */
   .bubbly-brace {
     color: var(--bubbly-brace-ink);
@@ -1536,6 +1546,10 @@
     .view-line .bubbly-mark.bubbly-tag-end,
     .view-line .bubbly-angle.bubbly-tag-end::before {
       color: var(--bubbly-end-mark);
+    }
+    /* an attribute's `=` 10% darker, as on the page (I145) */
+    .view-line .bubbly-mark.bubbly-equals {
+      color: color-mix(in oklab, var(--bubbly-band-mark), black 10%);
     }
     /* a `{…}`'s braces darker, as on the page */
     .view-line .bubbly-mark.bubbly-brace {
