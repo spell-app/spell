@@ -42,6 +42,7 @@ import {
   isItemKind,
   isPhaseStatus,
   type AddItemOptions,
+  type UpdateBecame,
   type AddPhaseOptions,
   type BackfilledCommit,
   type CommitLogEntry,
@@ -1057,7 +1058,7 @@ export class PlanDoc extends PlanReader {
     Markup.set<"epic-item">(question, { status: "decided", answered: true })
     this.placeQuestion(question)
     this.stamp(question)
-    this.markUpdate(question)
+    this.markUpdate(question, "decided")
     return question.id
   }
 
@@ -1154,6 +1155,9 @@ export class PlanDoc extends PlanReader {
     let live: "open" | "decided" =
       Object.values(KINDS).find((spec) => new RegExp(`^${spec.prefix}\\d+$`).test(item.id))?.live ?? "open"
     if (question) live = item.hasAttribute("answered") ? "decided" : "open"
+    const was = item.getAttribute("status") ?? ""
+    // reopened:  closed before, live now (an answered question set open stays decided:  no change)
+    const reopened = status === "open" && CLOSED.has(was) && was !== live
     Markup.set<"epic-item">(item, { status: status === "open" ? live : (status as "done" | "canceled") })
     // a test closed has passed:  its "failed → I12" goes (epic `epic-engine` I174)
     if (status === "done") Markup.set<"epic-item">(item, { failed: undefined })
@@ -1167,7 +1171,7 @@ export class PlanDoc extends PlanReader {
     }
     if (question) this.placeQuestion(item)
     this.stamp(item)
-    this.markUpdate(item)
+    this.markUpdate(item, status === "open" ? (reopened ? "reopened" : undefined) : (status as "done" | "canceled"))
     return PlanItem.titleOf(item)
   }
 
@@ -1183,12 +1187,23 @@ export class PlanDoc extends PlanReader {
   /**
    * While a phase is active, flag `item` as changed in it (once):  an `<epic-update phase="N">` in its title, which
    * becomes a `slot="title"` child to hold it (as the converter writes one).
+   * - `became`:  the change was a status change (epic `epic-engine` T75):  the label says which, `UPDATE : FIXED`;
+   *   a later one replaces it, a plain edit (none) keeps it
    */
-  markUpdate(item: Element): void {
+  markUpdate(item: Element, became?: UpdateBecame): void {
     const n = this.activePhase
-    if (!n || item.querySelector(':scope > [slot="title"] > epic-update')) return
-    const slot = this.titleSlot(item)
-    slot.append(this.document.createTextNode(" "), this.make("epic-update", { phase: n }))
+    if (!n) return
+    let label = PlanDoc.updateLabelOf(item)
+    if (!label) {
+      label = this.make("epic-update", { phase: n })
+      this.titleSlot(item).append(this.document.createTextNode(" "), label)
+    }
+    if (became) Markup.set<"epic-update">(label, { became })
+  }
+
+  /** `item`'s bare UPDATE label (`markUpdate()`), if it has one. */
+  static updateLabelOf(item: Element): Element | null {
+    return item.querySelector(':scope > [slot="title"] > epic-update')
   }
 
   ////////////////
@@ -2171,6 +2186,7 @@ export class PlanDoc extends PlanReader {
   private markFixed(item: Element, title: string): void {
     Markup.set<"epic-item">(item, { fixed: true, reviewed: undefined })
     this.stamp(item)
+    this.markUpdate(item, "fixed")
     this.log(`${item.id.toUpperCase()} fixed, for review:  ${title}`)
   }
 
@@ -2380,6 +2396,7 @@ export class PlanDoc extends PlanReader {
    *   - an item they name (`editor I55:`), the phase its `work` names, or one listed under it;  a judgement call also
    *     by the phase it was made in (`phase`):  its state reads it (`itemState()`:  a calm call stays blue)
    *   - a done or fixed item's last finished status card, whose line then says `not on main yet`
+   *   - that item's UPDATE label, when it names a status change (`UPDATE : FIXED`, T75):  its `Not in main` pill
    * - gone again once the work lands;  no `landing` (no git, a test):  nothing changes
    */
   updateLanded(): number {
@@ -2416,6 +2433,9 @@ export class PlanDoc extends PlanReader {
       const cards = Array.from(item.querySelectorAll(":scope > epic-status"))
       const last = cards.findLast((card) => card.getAttribute("state") === "done")
       for (const card of cards) mark(card, offMain && finished && card === last)
+      // its UPDATE label's `Not in main` pill (`UPDATE : FIXED`, T75), on a status change's label only
+      const label = PlanDoc.updateLabelOf(item)
+      if (label) mark(label, offMain && finished && label.hasAttribute("became"))
     }
     return changed
   }
@@ -3219,7 +3239,7 @@ export class PlanDoc extends PlanReader {
         Markup.set<"epic-item">(question, { status: "open" })
         if (QUESTION_ID.test(question.id)) this.placeQuestion(question)
         this.stamp(question)
-        this.markUpdate(question)
+        this.markUpdate(question, "reopened")
       }
       const did = `reopened ${item}${was === "open" ? " (open already)" : `, was ${was}`};  the change waits`
       this.log(`${label} ${did}`)

@@ -554,6 +554,8 @@ ONE element for every update, `<epic-update>` (2026-10-11;  `PLAN-DOC.md`, "Upda
 active, flag what changed so the user can spot it:
 
 - a new or changed item gets a bare UPDATE label in its title (the tool adds it: `PLAN-DOC.md`, "Items")
+  - a status change says which (`became`, T75):  `UPDATE : FIXED`, `DONE`, `CANCELED`, `DECIDED`, `REOPENED`
+  - then a blue `Not in main` pill while that work is on the epic's branch alone (`unmerged`, from git on every edit)
 - a changed prose block gets, right AFTER it, an update of the active phase, titled and dated:
   `<epic-update at="2026-10-11 14:30" summary="what changed, one line" phase="2"><p>what changed, and
   why</p></epic-update>`;  an update to a whole Overview sub-section goes last inside it

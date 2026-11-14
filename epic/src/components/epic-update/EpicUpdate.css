@@ -11,7 +11,8 @@
  *   - What changed below the title row, folded `until-found` (findable).
  * - QUIET (`:state(quiet)`:  seen, or more than 3 days old;  epic `epic-engine` I168):  grey, the page's muted ink on a
  *   faint grey ground, a grey outline;  folded to its title row by the element.
- * - A bare label:  an inline orange `UPDATE`, its text centred, sitting on the text's middle.
+ * - A bare label:  an inline orange `UPDATE`, its text centred, sitting on the text's middle;
+ *   `UPDATE : FIXED` after a status change, then a blue `Not in main` pill while its work isn't merged (T75).
  * - Public tokens (`--epic-update-*`) are never declared here:  read through private aliases.
  *   - `--epic-update-accent`:  the orange of the box, its outline and the label (default `--ui-orange`)
  *   - `--epic-update-background`:  the box's ground (default the accent, 8% into the page's)
@@ -115,5 +116,21 @@
     color: var(--ui-orange-on);
     font: 700 10px/1 var(--epic-sans, var(--ui-font-family));
     letter-spacing: 0.06em;
+  }
+  /* its status change's work not in main yet (T75):  a small blue outlined pill, as a status card's (I273) */
+  .unmerged {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 18px;
+    margin-inline-start: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--epic-state-progress, var(--ui-blue));
+    color: var(--ui-blue-text, var(--ui-blue));
+    font: 600 10px/1 var(--epic-sans, var(--ui-font-family));
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: help;
   }
 }

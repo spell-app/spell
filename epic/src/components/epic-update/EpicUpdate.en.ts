@@ -53,6 +53,21 @@ export const epicUpdateVocabulary = {
         "outside a phase;  a phase's own plan changes stay."
     },
     {
+      name: "became",
+      kind: "string",
+      description:
+        "A bare label's status change, when the change was one (epic `epic-engine` T75):  `fixed`, `done`, `canceled`, " +
+        "`decided` or `reopened`, drawn `UPDATE : FIXED`.  Written by the epic tool;  a later status change replaces " +
+        "it, a plain edit keeps it.  None:  a plain `UPDATE`."
+    },
+    {
+      name: "unmerged",
+      kind: "string",
+      description:
+        "A bare label's branch while its item's work isn't merged into main (the item's own `unmerged`, I273, copied " +
+        "by the epic tool on every edit):  a `Not in main` pill after the label, when it has `became`."
+    },
+    {
       name: "seen",
       kind: "string",
       format: "time",
@@ -77,7 +92,11 @@ export const epicUpdateVocabulary = {
         'A new block\'s ✓ Seen, before its date, while the page is reviewed:  an `<epic-review buttons="update">`.'
     },
     { name: "body", description: "What changed, under the title row;  hidden (`until-found`) while folded." },
-    { name: "label", description: "The bare orange `UPDATE` label." }
+    { name: "label", description: "The bare orange `UPDATE` label (`UPDATE : FIXED` with `became`)." },
+    {
+      name: "unmerged",
+      description: "A bare label's `Not in main` pill, after it, while its item's work is on its branch alone."
+    }
   ],
   states: [
     { name: "block", description: "Drawn as a block:  it has a summary, a date or what changed." },
@@ -101,7 +120,19 @@ export const epicUpdateVocabulary = {
     { key: "title", text: "Update", description: "A block's title, in bold, before `: <summary>`." },
     { key: "during", text: "Written during P{phase}", description: "The date's tooltip, after the full date." },
     { key: "label", text: "UPDATE", description: "The bare label." },
-    { key: "tip", text: "Changed during P{phase}", description: "The bare label's tooltip." }
+    { key: "tip", text: "Changed during P{phase}", description: "The bare label's tooltip." },
+    { key: "became", text: "UPDATE : {status}", description: "The bare label after a status change (`became`)." },
+    { key: "fixed", text: "FIXED", description: "`became` fixed:  fixed, for your review." },
+    { key: "done", text: "DONE", description: "`became` done." },
+    { key: "canceled", text: "CANCELED", description: "`became` canceled." },
+    { key: "decided", text: "DECIDED", description: "`became` decided:  a question answered." },
+    { key: "reopened", text: "REOPENED", description: "`became` reopened." },
+    { key: "unmerged", text: "Not in main", description: "The pill after the label while its work isn't merged." },
+    {
+      key: "unmergedTip",
+      text: "On branch {branch}, not merged into main yet",
+      description: "That pill's tooltip."
+    }
   ],
   children: [{ tag: "flow", description: "What changed, and why." }, ACTIONS_CHILD],
   flow: true

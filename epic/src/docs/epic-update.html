@@ -85,6 +85,10 @@
               phase's description holds it, its text made up for this page: its title row folds it.
             </p>
             <p>Plan changes in their phase <epic-update phase="6"></epic-update></p>
+            <p>
+              An issue fixed in P6, its fix still on the epic's branch:
+              <epic-update phase="6" became="fixed" unmerged="epic-engine"></epic-update>
+            </p>
             <epic-update at="2026-10-11 14:30" summary="No Plan changes box" phase="6"
               ><p>
                 2026-10-11: lose the surround. Each change is its own block at the end of its phase's description.
@@ -229,6 +233,7 @@
                 <ui-code language="html"
                   ><script type="text/plain">
                     <span slot="title">Plan changes in their phase <epic-update phase="6"></epic-update></span>
+                    <span slot="title">The help is missing <epic-update phase="6" became="fixed" unmerged="epic-engine"></epic-update></span>
                   </script></ui-code
                 >
               </ui-content>
@@ -341,6 +346,25 @@
                       updates outside a phase; a phase's own plan changes stay.
                     </td>
                     <td>a label's</td>
+                  </tr>
+                  <tr>
+                    <td><code>became</code></td>
+                    <td><code>fixed</code>, <code>done</code>, <code>canceled</code>, <code>decided</code>, <code>reopened</code></td>
+                    <td>
+                      A label's status change (T75): drawn <code>UPDATE : FIXED</code>. Written by the epic tool; a later
+                      status change replaces it, a plain edit keeps it. None: a plain <code>UPDATE</code>.
+                    </td>
+                    <td>no</td>
+                  </tr>
+                  <tr>
+                    <td><code>unmerged</code></td>
+                    <td>a branch (<code>epic-engine</code>)</td>
+                    <td>
+                      A label with <code>became</code> whose item's work isn't merged into main yet: a blue
+                      <code>Not in main</code> pill after it. Copied from the item's own <code>unmerged</code> on every
+                      edit; gone once it lands.
+                    </td>
+                    <td>no</td>
                   </tr>
                   <tr>
                     <td><code>id</code></td>

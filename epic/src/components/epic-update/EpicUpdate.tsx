@@ -42,6 +42,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - A bare LABEL:  no summary, no date, no children.
  *   An orange `UPDATE` inline, on an item changed while a phase is active (`phase 3 done` removes it).
  *   Its tooltip names the phase:  `Changed during P3`.
+ *   - A status change says which (`became`;  Owen, 2026-11-14, epic `epic-engine` T75):  `UPDATE : FIXED`.
+ *   - Then a blue `Not in main` pill while that work is on its epic's branch alone (`unmerged`).
  * - Its own family, so its look changes in one place (Owen:  "so we can restyle easily").
  ****************/
 export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
@@ -185,7 +187,18 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
     )
   }
 
-  /** The bare label:  an orange `UPDATE`, its phase in its tooltip. */
+  /** The bare label's words:  `UPDATE`, or `UPDATE : FIXED` after a status change (`became`). */
+  get labelText(): string {
+    const became = this.became as BecameStatus | undefined
+    return became && BECAME.includes(became)
+      ? this.translationForKey("became", { status: this.translationForKey(became) })
+      : this.translationForKey("label")
+  }
+
+  /**
+   * The bare label:  an orange `UPDATE` (`UPDATE : FIXED` after a status change), its phase in its tooltip;
+   * after it, a blue `Not in main` pill while that change's work isn't merged (`unmerged`, epic `epic-engine` T75).
+   */
   private renderLabel(): JSX.Element {
     return (
       <span class={this.rootClass} part={this.partForName("base")}>
@@ -194,8 +207,19 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
           part={this.partForName("label")}
           title={this.phase === undefined ? undefined : this.translationForKey("tip", { phase: this.phase })}
         >
-          {this.translationForKey("label")}
+          {this.labelText}
         </span>
+        <Show when={this.became && this.unmerged}>
+          {(branch) => (
+            <span
+              class={UNMERGED}
+              part={this.partForName("unmerged")}
+              title={this.translationForKey("unmergedTip", { branch: branch() })}
+            >
+              {this.translationForKey("unmerged")}
+            </span>
+          )}
+        </Show>
         <slot />
       </span>
     )
@@ -224,6 +248,11 @@ const TITLE = "title"
 const TIME = "time"
 const BODY = "body"
 const LABEL = "label"
+const UNMERGED = "unmerged"
+
+/** The status changes a bare label names (`became`), each its own word in the vocabulary. */
+const BECAME = ["fixed", "done", "canceled", "decided", "reopened"] as const
+type BecameStatus = (typeof BECAME)[number]
 
 /** Ids of the shadow markup:  the title (the fold button's name), the box it folds. */
 const TITLE_ID = "title"
