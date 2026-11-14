@@ -1,5 +1,6 @@
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
+import type { MarkupPartOfSpeech } from "spell/app/app/components/spell-code/BubblyMarkup"
 import type { monaco } from "./monaco"
 import { MarkupMarks, type MarkupShape } from "./MarkupMarks"
 import { TextMarks, spacer } from "./TextMarks"
@@ -152,7 +153,17 @@ export class BubblyMarks extends TextMarks {
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: spacer("quote", "after") })
       else if (kind === "input" || kind === "choice") this.input(stretch, into)
       else if (kind === "comment" && head.band) this.mark(start, end, `${BubblyHtml.classesFor(kind)} ${BAND_COMMENT}`)
+      else if (kind === "mark") this.marksIn(start, end)
       else this.mark(start, end, BubblyHtml.classesFor(kind))
+    }
+  }
+
+  /** Marks, faint;  but a Spell expression's `{` and `}` a step darker, so it reads as one (`bubbly-brace`, Owen). */
+  private marksIn(start: number, end: number) {
+    const classes = BubblyHtml.classesFor("mark")
+    for (const part of this.drawing.text.slice(start, end).matchAll(/[{}]+|[^{}]+/g)) {
+      const from = start + part.index
+      this.mark(from, from + part[0].length, /[{}]/.test(part[0]) ? `${classes} ${BubblyHtml.BRACE}` : classes)
     }
   }
 
@@ -224,6 +235,8 @@ export type BubblyInputShape = {
   isChoice: boolean
   /** its words were quoted:  its curly marks are drawn outside it */
   isQuoted: boolean
+  /** a tag's `{…}` value, worked out as it runs:  its pill inverted, a shade of its tag's colour (Owen) */
+  expressionIn?: MarkupPartOfSpeech
 }
 
 /** The class of the name a head defines, `"card"` in `a "card" is a view`:  bold. */

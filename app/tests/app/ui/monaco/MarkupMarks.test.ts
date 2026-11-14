@@ -39,8 +39,10 @@ function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
           : shape.kind === "tag"
             ? `${shape.isAlone ? "band" : "pill"} ${shape.side} ${shape.room?.join("+") ?? ""}`.trim()
             : shape.kind === "tag-link"
-              ? `link ${shape.room.join("+")}`.trim()
-              : "input"
+              ? `link ${shape.start.side} to ${shape.end.side}`
+              : shape.expressionIn
+                ? `expression ${shape.expressionIn}`
+                : "input"
       out.push(`${"  ".repeat(depth)}${what}:  ${text.slice(0, 24)}`)
       if (shape.kind === "markup-block") walk(shape.inside, depth + 1)
     }
@@ -58,13 +60,13 @@ describe("MarkupMarks", () => {
       "  block plain +foot:  <head>",
       '    band start:  <meta charset="UTF-8" />',
       '    input:  UTF-8" />',
-      "    link:  <title>A demo</title>",
+      "    link start to end:  <title>A demo</title>",
       "    pill start:  <title>A demo</title>",
       "    pill end tag:  </title>",
       "  block structure +foot:  <body>",
-      "    link:  <h2>Two <code>x</code></",
+      "    link start to end:  <h2>Two <code>x</code></",
       "    pill start:  <h2>Two <code>x</code></",
-      "    link tag:  <code>x</code></h2>",
+      "    link start to end:  <code>x</code></h2>",
       "    pill start tag:  <code>x</code></h2>",
       "    pill end tag:  </code></h2>",
       "    pill end tag+tag:  </h2>",
@@ -72,6 +74,36 @@ describe("MarkupMarks", () => {
       '    input:  a"></spell-viewer>',
       "    pill end touch+touch:  </spell-viewer>"
     ])
+  })
+
+  test("a one-line element's link runs between its two pills:  from its start tag's to its end tag's (Owen)", () => {
+    const text = "<text>{its picture}</text>"
+    const marks = MarkupMarks.of(text)
+    const link = marks.shapes[0]!
+    if (link.kind !== "tag-link") throw new TypeError("expected a link first, under the pills")
+    const textOf = (place: number) => {
+      const { range } = marks.marks[place]!
+      return text.slice(range.startColumn - 1, range.endColumn - 1)
+    }
+    expect([textOf(link.start.place), textOf(link.end.place)]).toEqual(["<text>", "</text>"])
+  })
+
+  test("a `{…}` value:  an inverted pill in its tag's colour, its braces darker;  its words Spell's to mark (Owen)", () => {
+    const spell = `to draw it\n\t<text color={its color}>{its picture}</text>`
+    const marks = MarkupMarks.within(spell, spell.indexOf("<text"), spell.length, [])
+    expect(shapesOf(marks, spell)).toEqual([
+      "link start to end:  <text color={its color}>",
+      "pill start:  <text color={its color}>",
+      "expression property:  its color}>{its picture}",
+      "pill end tag:  </text>"
+    ])
+    const braces = marks.marks.filter((mark) => /bubbly-brace/.test(mark.options.inlineClassName ?? ""))
+    expect(braces.map(({ range }) => spell.split("\n")[1]!.slice(range.startColumn - 1, range.endColumn - 1))).toEqual([
+      "{",
+      "}"
+    ])
+    // the tag's marks stop at the value:  Spell marks what's in it
+    expect(marks.tags.map(({ start, end }) => spell.slice(start, end))).toEqual(["<text color=", ">", "</text>"])
   })
 
   test("a tag's brackets, names and values marked as the page draws them", () => {

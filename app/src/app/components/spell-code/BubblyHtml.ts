@@ -27,6 +27,14 @@ export class BubblyHtml {
   static classesFor(kind: SP.BubblyPieceKind): string {
     return PIECE_CLASSES[kind]
   }
+
+  /** A Spell expression's `{` and `}`:  a step darker than the other marks, so a `{…}` reads as one (Owen). */
+  static readonly BRACE = "bubbly-brace"
+
+  /** `marks`, faint marks' text, as HTML:  each `{` and `}` among them a `BRACE`. */
+  static marksHtml(marks: string): string {
+    return escape(marks).replace(/[{}]/g, (brace) => `<span class="${BubblyHtml.BRACE}">${brace}</span>`)
+  }
 }
 
 /** How `BubblyHtml.write()` draws. */
@@ -111,6 +119,8 @@ class BubblyWriter {
         return /^".*"$/s.test(words) && words.length > 1
           ? `<span class="bubbly-quoted"><span class="bubbly-input">${QUOTE_OPEN}${escape(words.slice(1, -1))}${QUOTE_CLOSE}</span></span>`
           : `<span class="bubbly-input">${escape(words)}</span>`
+      case "mark":
+        return `<span class="${BubblyHtml.classesFor(piece.kind)}">${BubblyHtml.marksHtml(words)}</span>`
       default:
         return `<span class="${BubblyHtml.classesFor(piece.kind)}">${escape(words)}</span>`
     }

@@ -20,9 +20,21 @@
       "light": "#c0c0c3",
       "dark": "#5a5961"
     },
+    "--bubbly-comment-ink": {
+      "light": "#7d7d84",
+      "dark": "#9c9ba3"
+    },
     "--bubbly-band-comment": {
       "light": "#3a3a448c",
       "dark": "#dedde68c"
+    },
+    "--bubbly-brace-ink": {
+      "light": "#75757c",
+      "dark": "#a4a3ab"
+    },
+    "--bubbly-selection-strength": {
+      "light": "55%",
+      "dark": "55%"
     },
     "--bubbly-bold": {
       "light": "650",
@@ -220,6 +232,14 @@
       "light": "1px",
       "dark": "1px"
     },
+    "--bubbly-expression-pill": {
+      "light": "#61646d",
+      "dark": "#cacdd1"
+    },
+    "--bubbly-expression-ink": {
+      "light": "#ffffff",
+      "dark": "#1c1b22"
+    },
     "--bubbly-dot-color": {
       "light": "#3a3a4466",
       "dark": "#dedde666"
@@ -240,9 +260,13 @@
       "light": "0.62",
       "dark": "0.62"
     },
+    "--bubbly-tag-point": {
+      "light": "calc(23px / 2 * 0.62)",
+      "dark": "calc(23px / 2 * 0.62)"
+    },
     "--bubbly-tag-corner": {
-      "light": "calc(23px / 2 * 0.62) calc(23px / 2)",
-      "dark": "calc(23px / 2 * 0.62) calc(23px / 2)"
+      "light": "",
+      "dark": ""
     },
     "--bubbly-tag-foot-corner": {
       "light": "6px",

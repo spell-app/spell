@@ -1,3 +1,5 @@
+import { BubblyHtml } from "./BubblyHtml"
+
 /****************
  * ### `BubblyMarkup`
  * HTML source drawn in the bubbly look, as HTML in the classes of the look's ONE sheet, `bubbly.css` beside it
@@ -7,14 +9,15 @@
  *   - a nameless end tag, Spell's `</>`, is the block's foot instead:  a thin band under it, from the rail to past
  *     its `⟩` (`bubbly-foot-thin`, Owen, Q58)
  * - An element on one line is a line of its own:  its start tag a small pill (`bubbly-tag-pill`), what's inside it on
- *   the paper, its end tag a pill of its own;  the two pills linked by a line along their top and bottom when
- *   something is between them (`bubbly-tag-link`, Q58).
+ *   the paper, its end tag a pill of its own;  the two pills linked by a line along the top and bottom of what's
+ *   between them, when something is (`bubbly-tag-link`, Q58).
  * - A start tag on lines of its own (`<spell-editor`, an attribute a line, `>`) is ONE tall band, a row a line, its
  *   point at its `⟩` (`bubbly-tag-tall`, T118):  a block's band, a band alone, or a one-line element's start tag.
  * - An element with no end tag (`<meta …>`, `<br />`) is a band by itself, `bubbly-pill`.
  * - Whatever holds a start tag is a `bubbly-tag-start` too, an end tag's a `bubbly-tag-end`:  hooks to style them by.
  * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
- *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `⟨` `⟩`.
+ *   outside it (`bubbly-quoted`);  a `{…}` one, Spell worked out as it runs, an inverted pill (`bubbly-expression`),
+ *   its braces darker;  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `⟨` `⟩`.
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
  * - Text, a `<style>`'s or `<script>`'s lines, a comment:  plain lines in their element's body.
  * - Its own small reader, not a full HTML parser:  enough for hand-written pages, the drawn-bubbly page's examples.
@@ -133,7 +136,7 @@ export type MarkupAttribute = {
   name: string
   value?: string
   isQuoted: boolean
-  /** a Spell expression, `{its color}`:  no pill */
+  /** a Spell expression, `{its color}`:  an inverted pill, its braces outside it */
   isExpression?: boolean
   /** where its name starts */
   nameStart: number
@@ -408,8 +411,8 @@ class MarkupWriter {
 
   /**
    * An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill of its own.
-   * - Something between them:  the two pills linked by a thin line along their top and bottom (`bubbly-tag-link`,
-   *   Owen, Q58), so the pair reads as one element
+   * - Something between them:  the two pills linked by a thin line along its top and bottom, from one pill's point
+   *   to the other's (`bubbly-tag-link`, Owen, Q58), so the pair reads as one element;  never under the tags
    */
   private tagPills(element: MarkupElement): string {
     const inside = this.inline(element.children)
@@ -419,8 +422,8 @@ class MarkupWriter {
     const kind = `bubbly-tag-pill ${partOfSpeech}${touching}`
     const start = `<span class="${kind} bubbly-tag-start">${this.startTag(element.open)}</span>`
     if (!element.close) return start + inside
-    const pills = `${start}${inside}${this.endPill(element, !inside)}`
-    return inside ? `<span class="bubbly-tag-link ${partOfSpeech}">${pills}</span>` : pills
+    const between = inside ? `<span class="bubbly-tag-link ${partOfSpeech}">${inside}</span>` : ""
+    return `${start}${between}${this.endPill(element, !inside)}`
   }
 
   /** A start tag on its band:  `<` faint, its name, each value a white pill. */
@@ -461,7 +464,7 @@ class MarkupWriter {
       .map(({ name, value, isQuoted, isExpression }) => {
         const named = ` <span class="bubbly-attribute-name">${escape(name)}</span>`
         if (value === undefined) return named
-        const shown = isExpression ? escape(value) : valueOf(value, isQuoted)
+        const shown = isExpression ? expressionOf(value) : valueOf(value, isQuoted)
         return name ? `${named}<span class="bubbly-mark bubbly-equals">=</span>${shown}` : ` ${shown}`
       })
       .join("")
@@ -535,6 +538,16 @@ function valueOf(value: string, isQuoted: boolean): string {
   return isQuoted
     ? `<span class="bubbly-quoted"><span class="bubbly-input">${QUOTE_OPEN}${words}${QUOTE_CLOSE}</span></span>`
     : `<span class="bubbly-input">${words}</span>`
+}
+
+/**
+ * A `{…}` value, Spell worked out as it runs (`{its color}`):  its words on an INVERTED pill, so it stands apart
+ * from a value typed in;  its braces outside it, darker than the tag's other marks (Owen).
+ */
+function expressionOf(value: string): string {
+  const brace = (mark: string) => `<span class="bubbly-mark">${BubblyHtml.marksHtml(mark)}</span>`
+  const words = value.slice(1, -1)
+  return `${brace("{")}${words ? `<span class="bubbly-input bubbly-expression">${escape(words)}</span>` : ""}${brace("}")}`
 }
 
 /**

@@ -1,3 +1,4 @@
+import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import {
   BubblyMarkup,
   type MarkupElement,
@@ -19,13 +20,14 @@ import type { BubblyInputShape } from "./BubblyMarks"
  *     its line a band of its own under the rail
  *   - an element alone on its line with no end tag (`<meta …>`), and a doctype:  a band by itself
  *   - any other tag:  a small pill of its own, in its line;  a one-line element with something between its tags, a
- *     line linking its two pills too (`MarkupLinkShape`)
+ *     line linking its two pills too, between them (`MarkupLinkShape`)
  *   - a start tag on lines of its own:  its shape's place spans them, drawn as ONE tall band
  *   - a block's nameless `</>` on its own line:  a thin foot, not a band (`isThinFoot`)
  * - Marks:
  *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;  its `/`, name and
  *     attributes' names, as the page draws them
- *   - each attribute's value a white pill, a quoted one's `"` see-through, its curly mark drawn over it
+ *   - each attribute's value a white pill, a quoted one's `"` see-through, its curly mark drawn over it;
+ *     a `{…}` one's (Spell, worked out as it runs) an inverted pill, its braces darker
  *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start and end
  *     tags, and before a line of text, so it sits in from the tags beside it, as on the page
  * - Shapes are placed by `SpellBubbly`, from where Monaco draws each line and letter.
@@ -113,19 +115,14 @@ export class MarkupMarks extends TextMarks {
     if (!close || !this.slice({ start: open.end, end: close.start }).includes("\n")) {
       // one line:  each tag a pill;  nothing between them, their points touch
       const touch = !hasInside
-      // something between them on one line:  the two pills linked, under them (Owen, Q58)
-      if (close && hasInside && !this.isTall(open)) {
-        const room = this.roomAfter.get(open.start)
-        into.push({
-          kind: "tag-link",
-          place: this.place(open.start, close.end),
-          partOfSpeech,
-          room: [...(room ? [room] : []), ...(this.startsLine(open.start) ? [] : (["tag"] as const))]
-        })
-      }
-      this.tagPill(open, { partOfSpeech, side: "start", touch }, into)
+      const first = into.length
+      const start = this.tagPill(open, { partOfSpeech, side: "start", touch }, into)
       this.nodes(element.children, into)
-      if (close) this.tagPill(close, { partOfSpeech, side: "end", touch }, into)
+      if (!close) return
+      const end = this.tagPill(close, { partOfSpeech, side: "end", touch }, into)
+      // something between them on one line:  the two pills linked, under them, between them (Owen, Q58)
+      if (hasInside && !this.isTall(open))
+        into.splice(first, 0, { kind: "tag-link", place: this.place(open.start, close.end), partOfSpeech, start, end })
       return
     }
     const footStartsLine = this.startsLine(close.start)
@@ -142,7 +139,7 @@ export class MarkupMarks extends TextMarks {
     into.push(block)
     // its `⟨` clear of its band's cut corner, an HTML file's or a Spell drawing's alike
     if (this.startsLine(open.start)) this.mark(open.start, open.start + 1, "", { before: spacer("tag-head", "before") })
-    this.startTag(open, block.inside)
+    this.startTag(open, partOfSpeech, block.inside)
     this.nodes(element.children, block.inside)
     if (footStartsLine) {
       block.foot = this.place(close.start, close.end)
@@ -175,18 +172,19 @@ export class MarkupMarks extends TextMarks {
       isAlone: true,
       ...this.tallness(tag)
     })
-    this.startTag(tag, into)
+    this.startTag(tag, partOfSpeech, into)
   }
 
   /**
-   * A tag in a line:  a small pill of its own, with room either side for it, but at the line's start or end.
+   * A tag in a line:  a small pill of its own, with room either side for it, but at the line's start or end;
+   * returns its shape.
    * - `touch`:  it's an empty element's, its points touching its other tag's
    */
   private tagPill(
     tag: MarkupStartTag | MarkupEndTag,
     { partOfSpeech, side, touch = false }: { partOfSpeech: MarkupPartOfSpeech; side: "start" | "end"; touch?: boolean },
     into: MarkupShape[]
-  ) {
+  ): MarkupTagShape {
     const spacers: Spacers = {}
     // the room before it:  the tag's it follows right on, then its own
     const room: TagRoom[] = []
@@ -204,9 +202,19 @@ export class MarkupMarks extends TextMarks {
     }
     // the room either side, and the pill's place:  the whole tag
     const place = this.mark(tag.start, tag.end, "", spacers)
-    into.push({ kind: "tag", place, partOfSpeech, side, isAlone: false, room, ...this.tallness(tag) })
-    if (tag.kind === "start") this.startTag(tag, into)
+    const shape: MarkupTagShape = {
+      kind: "tag",
+      place,
+      partOfSpeech,
+      side,
+      isAlone: false,
+      room,
+      ...this.tallness(tag)
+    }
+    into.push(shape)
+    if (tag.kind === "start") this.startTag(tag, partOfSpeech, into)
     else this.endTag(tag, "inline")
+    return shape
   }
 
   /** Lines of text or a comment, each that starts its line a spacer in from the tags beside it;  `classes`:  their marks. */
@@ -228,8 +236,11 @@ export class MarkupMarks extends TextMarks {
   // ## Tags
   ////////////////
 
-  /** A start tag's pieces:  its brackets, name and attributes;  a pill under each value, into `into`. */
-  private startTag(tag: MarkupStartTag, into: MarkupShape[]) {
+  /**
+   * A start tag's pieces:  its brackets, name and attributes;  a pill under each value, into `into`.
+   * - `partOfSpeech`:  its band's colour, a `{…}` value's pill a shade of it
+   */
+  private startTag(tag: MarkupStartTag, partOfSpeech: MarkupPartOfSpeech, into: MarkupShape[]) {
     const { start, end } = tag
     let from = start
     this.mark(start, start + 1, ANGLE_OPEN)
@@ -244,10 +255,11 @@ export class MarkupMarks extends TextMarks {
       if (attribute.equalsAt !== undefined && attribute.equalsAt >= 0)
         this.mark(attribute.equalsAt, attribute.equalsAt + 1, EQUALS, { before: spacer("equals", "before") })
       if (attribute.valueStart === undefined) continue
-      // a `{…}` value is Spell's to mark:  not the tag's
+      // a `{…}` value is Spell's to mark:  not the tag's;  its pill and braces are
       if (attribute.isExpression) {
         this.tags.push({ start: from, end: attribute.valueStart })
         from = attribute.valueEnd!
+        this.expression(attribute.valueStart, attribute.valueEnd!, partOfSpeech, into)
       } else this.value(attribute.valueStart, attribute.valueEnd!, attribute.isQuoted, into)
     }
     this.tags.push({ start: from, end })
@@ -274,6 +286,21 @@ export class MarkupMarks extends TextMarks {
     }
     const place = this.mark(start, end, INPUT, { before: spacer("input", "before"), after: spacer("input", "after") })
     if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted })
+  }
+
+  /**
+   * A `{…}` value, worked out as the program runs (`color={its color}`):  its braces darker than the tag's marks,
+   * its words on an INVERTED pill, so it stands apart from a value typed in (Owen);  its words are Spell's to mark.
+   */
+  private expression(start: number, end: number, partOfSpeech: MarkupPartOfSpeech, into: MarkupShape[]) {
+    this.mark(start, start + 1, BRACE)
+    this.mark(end - 1, end, BRACE)
+    if (end - start <= 2) return
+    const place = this.mark(start + 1, end - 1, EXPRESSION, {
+      before: spacer("input", "before"),
+      after: spacer("input", "after")
+    })
+    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted: false, expressionIn: partOfSpeech })
   }
 
   ////////////////
@@ -358,8 +385,9 @@ export type MarkupTagShape = {
 }
 
 /**
- * A one-line element with something between its tags:  a line along the top and bottom of its two pills, from its
- * start tag's to its end tag's, under them (`bubbly-tag-link`, Owen, Q58).
+ * A one-line element with something between its tags:  a line along the top and bottom of what's between its two
+ * pills, from its start tag's point to its end tag's, under them (`bubbly-tag-link`, Owen, Q58);
+ * never under the tags themselves.
  */
 export type MarkupLinkShape = {
   kind: "tag-link"
@@ -367,8 +395,9 @@ export type MarkupLinkShape = {
   place: number
   /** its colour */
   partOfSpeech: MarkupPartOfSpeech
-  /** the room injected before its start tag:  SEE `MarkupTagShape.room` */
-  room: TagRoom[]
+  /** its start tag's pill, and its end tag's:  it runs between them */
+  start: MarkupTagShape
+  end: MarkupTagShape
 }
 
 /** A spacer beside a tag in a line:  room for its pill and the gap outside it, or only its pill's where points touch. */
@@ -395,6 +424,10 @@ const EQUALS = `${MARK} bubbly-equals`
 
 /** A value's words:  a white pill under them. */
 const INPUT = "bubbly-input"
+
+/** A `{…}` value's words:  an inverted pill under them;  its braces darker than a mark (Owen). */
+const EXPRESSION = "bubbly-expression"
+const BRACE = `${MARK} ${BubblyHtml.BRACE}`
 
 /** A quoted value's own `"`:  see-through, its curly mark drawn over it. */
 const QUOTE_MARK = "bubbly-quote-mark"

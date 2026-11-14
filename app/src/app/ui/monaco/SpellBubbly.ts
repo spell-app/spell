@@ -2,7 +2,13 @@ import { SP } from "spell/parser/spell"
 import { codeLook } from "spell/app/app/ui/codePopups"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
-import { BubblyMarks, indentColumns, type BubblyBlockShape, type BubblyShape } from "./BubblyMarks"
+import {
+  BubblyMarks,
+  indentColumns,
+  type BubblyBlockShape,
+  type BubblyInputShape,
+  type BubblyShape
+} from "./BubblyMarks"
 import {
   MarkupMarks,
   type MarkupBlockShape,
@@ -345,7 +351,7 @@ export class SpellBubbly {
       else if (shape.kind === "tag-link") elements.push(this.asHtml(this.drawLink(shape, range, view)))
       else if (range.startLineNumber < view.first) continue
       else {
-        const element = this.drawInput(shape.isChoice, range, view)
+        const element = this.drawInput(shape, range, view)
         if (element) elements.push(element)
       }
     }
@@ -468,11 +474,7 @@ export class SpellBubbly {
   private drawTag(shape: MarkupTagShape, range: monaco.Range, view: View): HTMLElement {
     const { measures, lineHeight } = view
     const line = range.startLineNumber
-    const room = (shape.room ?? []).reduce(
-      (sum, kind) => sum + measures[kind === "tag" ? "tagSpacer" : "touchSpacer"],
-      0
-    )
-    const left = this.xOf(line, range.startColumn) + room - measures.bracketPad
+    const left = this.tagLeft(shape, range, view)
     const kind = `bubbly-${shape.partOfSpeech}`
     // a start tag on lines of its own:  one tall band (T118)
     if (range.endLineNumber > line && shape.side === "start") {
@@ -480,8 +482,7 @@ export class SpellBubbly {
       const short = shape.isShortTail ? " bubbly-tag-tall-short-tail" : ""
       return this.drawTall(`bubbly-tag-tall bubbly-tag-start ${where} ${kind}${short}`, range, left, view)
     }
-    const endColumn = range.endLineNumber === line ? range.endColumn : this.editor.getModel()!.getLineMaxColumn(line)
-    const right = this.xOf(line, endColumn) + measures.bracketPad
+    const right = this.tagRight(range, view)
     const classes = shape.isAlone
       ? `bubbly-pill bubbly-tag-start ${kind}`
       : `bubbly-tag-pill bubbly-tag-${shape.side} ${kind}`
@@ -523,16 +524,37 @@ export class SpellBubbly {
   }
 
   /**
-   * A one-line element's two tags linked:  a line along their pills' top and bottom, from its start tag's pill to its
-   * end tag's (Owen, Q58);  drawn before them, so under them.
+   * Where a tag's pill starts:  a bracket's room before its `<`.
+   * - Monaco's place for a column is before the room injected there:  the pill starts past that room.
+   */
+  private tagLeft(shape: MarkupTagShape, range: monaco.Range, view: View): number {
+    const { measures } = view
+    const room = (shape.room ?? []).reduce(
+      (sum, kind) => sum + measures[kind === "tag" ? "tagSpacer" : "touchSpacer"],
+      0
+    )
+    return this.xOf(range.startLineNumber, range.startColumn) + room - measures.bracketPad
+  }
+
+  /** Where a tag's pill on one line ends:  a bracket's room after its `>`, or its line's end. */
+  private tagRight(range: monaco.Range, view: View): number {
+    const line = range.startLineNumber
+    const endColumn = range.endLineNumber === line ? range.endColumn : this.editor.getModel()!.getLineMaxColumn(line)
+    return this.xOf(line, endColumn) + view.measures.bracketPad
+  }
+
+  /**
+   * A one-line element's two tags linked:  a line along the top and bottom of what's between their pills, from its
+   * start tag's point to its end tag's (Owen, Q58), never under the tags;  drawn before them, so under them.
    */
   private drawLink(shape: MarkupLinkShape, range: monaco.Range, view: View): HTMLElement {
     const { measures, lineHeight } = view
-    const line = range.startLineNumber
-    const room = shape.room.reduce((sum, kind) => sum + measures[kind === "tag" ? "tagSpacer" : "touchSpacer"], 0)
-    const left = this.xOf(line, range.startColumn) + room - measures.bracketPad
-    const right = this.xOf(line, range.endColumn) + measures.bracketPad
-    const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
+    const start = view.ranges[shape.start.place]!
+    const end = view.ranges[shape.end.place]!
+    // from where the start tag's point starts, so the line runs on from its pill's top and bottom
+    const left = this.tagRight(start, view) - measures.tagPoint
+    const right = this.tagLeft(shape.end, end, view) + measures.tagPoint
+    const top = this.editor.getTopForLineNumber(range.startLineNumber) + lineHeight / 2
     const link = element(`bubbly-tag-link bubbly-${shape.partOfSpeech}`)
     return place(link, { left, top, width: right - left }, measures.scale)
   }
@@ -548,15 +570,28 @@ export class SpellBubbly {
     return box
   }
 
-  /** A pill under the words in `range`:  from the room before them to the end of the room after. */
-  private drawInput(isChoice: boolean, range: monaco.Range, view: View): HTMLElement | undefined {
+  /**
+   * A pill under the words in `range`:  from the room before them to the end of the room after.
+   * - a tag's `{…}` value's inverted, in a shade of its tag's colour (`bubbly-expression`, Owen)
+   */
+  private drawInput(
+    { isChoice, expressionIn }: BubblyInputShape,
+    range: monaco.Range,
+    view: View
+  ): HTMLElement | undefined {
     const { measures, lineHeight } = view
     const line = range.startLineNumber
     if (range.endLineNumber !== line) return undefined
     const left = this.xOf(line, range.startColumn)
     const right = this.xOf(line, range.endColumn) + measures.inputSpacer
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
-    const pill = element(isChoice ? "bubbly-input bubbly-choice" : "bubbly-input")
+    const pill = element(
+      isChoice
+        ? "bubbly-input bubbly-choice"
+        : expressionIn
+          ? `bubbly-input bubbly-expression bubbly-${expressionIn}`
+          : "bubbly-input"
+    )
     return place(pill, { left, top, width: right - left }, measures.scale)
   }
 
@@ -659,6 +694,7 @@ export class SpellBubbly {
       tagSpacer: spacerWidth("bubbly-tag-spacer"),
       touchSpacer: spacerWidth("bubbly-touch-spacer"),
       bracketPad: length("--bubbly-bracket-pad", htmlProbe) * scale,
+      tagPoint: length("--bubbly-tag-point", htmlProbe) * scale,
       footPillHeight: length("--bubbly-foot-pill-height", htmlProbe) * scale,
       padLeft: length("--bubbly-pill-pad-left") * scale,
       padRight: length("--bubbly-pill-pad-right") * scale,
@@ -733,6 +769,8 @@ type Measures = {
   touchSpacer: number
   /** HTML:  a tag's bracket this far in from its band's end */
   bracketPad: number
+  /** HTML:  how wide a tag's pointed end is */
+  tagPoint: number
   /** HTML:  a block's end tag's band's height */
   footPillHeight: number
   /** a band's room before its words, and after them */

@@ -30,8 +30,14 @@
   --bubbly-bold-ink: light-dark(#1f1f26, #f6f5fb);
   /* marks (`<`, `:`, `,`) and comments:  faint on the paper;  on a band, faint on its colour */
   --bubbly-faint: color-mix(in srgb, var(--bubbly-ink) 32%, var(--bubbly-paper));
+  /* a `//` note:  lighter than code, but clear on the paper, and under the editor's selection (Owen) */
+  --bubbly-comment-ink: color-mix(in srgb, var(--bubbly-ink) 66%, var(--bubbly-paper));
   /* a note at the end of a head, on its band */
   --bubbly-band-comment: color-mix(in srgb, var(--bubbly-ink) 55%, transparent);
+  /* a Spell expression's `{` and `}`:  a step darker than the other marks, so a `{…}` reads as one (Owen) */
+  --bubbly-brace-ink: color-mix(in srgb, var(--bubbly-ink) 70%, var(--bubbly-paper));
+  /* how much of the editor theme's selection colour the look shows:  less, so faint words read through it (Owen) */
+  --bubbly-selection-strength: 55%;
   /* a name's first mention, a name a head defines, a list's value */
   --bubbly-bold: 650;
   /* every later use of a name, and what's declared elsewhere:  lighter than a first mention */
@@ -207,7 +213,8 @@
   .bubbly-tag-pill,
   .bubbly-tag-link,
   .bubbly-tag-tall,
-  .bubbly-taghead {
+  .bubbly-taghead,
+  .bubbly-expression {
     /* how much of its hue a band takes over the paper, light then dark */
     --bubbly-pill: light-dark(
       color-mix(in srgb, var(--bubbly-hue) 20%, white),
@@ -221,6 +228,15 @@
         transparent
       )
     );
+    /*
+     * a tag's `{…}` value, worked out as it runs:  its pill INVERTED, so it stands apart from a value typed in (Owen);
+     * a deep shade of its band's hue, its words the paper's colour
+     */
+    --bubbly-expression-pill: light-dark(
+      color-mix(in srgb, var(--bubbly-hue) 62%, #1f1f26),
+      color-mix(in srgb, var(--bubbly-hue) 45%, white)
+    );
+    --bubbly-expression-ink: var(--bubbly-paper);
   }
 
   /* a group:  its parent's hue, 10% darker (Owen) */
@@ -401,9 +417,9 @@
     height: var(--bubbly-gap-height);
   }
 
-  /* a `//` note:  faint, as it isn't Spell to run */
+  /* a `//` note:  lighter than code, as it isn't Spell to run */
   .bubbly-comment {
-    color: var(--bubbly-faint);
+    color: var(--bubbly-comment-ink);
     font-style: italic;
   }
 
@@ -443,6 +459,18 @@
         color-mix(in srgb, var(--bubbly-hue) 45%, var(--bubbly-input-dark))
       );
     white-space: nowrap;
+  }
+
+  /* a tag's `{…}` value, worked out as it runs:  inverted, a deep shade of its band's hue, its words light (Owen) */
+  .bubbly-input.bubbly-expression:where(:not(.view-line *)) {
+    color: var(--bubbly-expression-ink);
+    background: var(--bubbly-expression-pill);
+    box-shadow: none;
+  }
+
+  /* ... in the editor, its pill spans the room either side of its words:  clear of its braces by a gap, as on the page */
+  &.bubbly-monaco .bubbly-layer .bubbly-input.bubbly-expression {
+    clip-path: inset(0 var(--bubbly-input-gap) round var(--bubbly-input-radius));
   }
 
   /* in the editor:  its white a shape in the layer, as tall as on the page, as its words sit in it */
@@ -552,6 +580,10 @@
   /* `<`, `>`, `="`, `{`, `}`, `:` and `,` */
   .bubbly-mark {
     color: var(--bubbly-faint);
+  }
+  /* ... but a Spell expression's `{` and `}`:  darker, so a `{…}` reads as one (Owen) */
+  .bubbly-brace {
+    color: var(--bubbly-brace-ink);
   }
 
   /* a tag's name inside a drawing:  structure, a shade of its block's hue */
@@ -736,9 +768,9 @@
     --bubbly-pill-nudge: -1px;
     /* how much wider than tall each half of a tag's `⟨` is, in the system font:  a band's pointed ends are cut at its slant */
     --bubbly-tag-slope: 0.62;
-    /* a pointed end:  its corners, across and down, which meet at the middle of the band */
-    --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope))
-      calc(var(--bubbly-pill-height) / 2);
+    /* a pointed end:  how wide it is, and its corners, across and down, which meet at the middle of the band */
+    --bubbly-tag-point: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope));
+    --bubbly-tag-corner: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
     --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
     /* a `</>` foot's corners:  the body's over it, and the rail's turn into it, a gutter's width out */
     --bubbly-tag-foot-corner: 6px;
@@ -1008,32 +1040,25 @@
         var(--bubbly-foot-height) no-repeat;
     }
 
-    /****** a one-line element's two tags linked:  a line along their pills' top and bottom (Owen, Q58) ******/
+    /*
+     * a one-line element's two tags linked:  a line along the top and bottom of what's between their pills, from one
+     * pill's point to the other's, never under the tags (Owen, Q58)
+     * - it reaches back under each pill's point, so its line runs on from the pill's top and bottom
+     */
     .bubbly-tag-link {
       display: inline-block;
       vertical-align: top;
       height: var(--bubbly-pill-height);
       line-height: var(--bubbly-pill-text-line);
-      margin: 0 var(--bubbly-input-gap);
+      margin: 0 calc(-1 * (var(--bubbly-input-gap) + var(--bubbly-tag-point)));
+      padding: 0 calc(var(--bubbly-input-gap) + var(--bubbly-tag-point));
       background:
         linear-gradient(var(--bubbly-pill) 0 0) top / 100% var(--bubbly-tag-link-width) no-repeat,
         linear-gradient(var(--bubbly-pill) 0 0) bottom / 100% var(--bubbly-tag-link-width) no-repeat;
       white-space: nowrap;
-      > .bubbly-tag-pill {
-        translate: none;
-      }
-      > .bubbly-tag-pill:first-child {
-        margin-left: 0;
-      }
-      > .bubbly-tag-pill:last-child {
-        margin-right: 0;
-      }
     }
     .bubbly-tag-line > .bubbly-tag-link {
       translate: 0 calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
-    }
-    .bubbly-line > .bubbly-tag-link:first-child {
-      margin-left: calc(-1 * var(--bubbly-line-inset));
     }
   } /* END bubbly-html */
 
@@ -1310,6 +1335,15 @@
     .view-line .bubbly-angle.bubbly-tag-end::before {
       color: var(--bubbly-end-mark);
     }
+    /* a `{…}`'s braces darker, as on the page */
+    .view-line .bubbly-mark.bubbly-brace {
+      color: var(--bubbly-brace-ink);
+    }
+    /* a `{…}` value's words, on its inverted pill:  light, a reference in them too */
+    .view-line .bubbly-expression {
+      --bubbly-ink: var(--bubbly-expression-ink);
+      --bubbly-bold-ink: var(--bubbly-expression-ink);
+    }
     /* ... but a bracket's own character, under the one drawn over it */
     .view-line .bubbly-mark.bubbly-angle {
       color: transparent;
@@ -1427,6 +1461,18 @@
 /* brackets in the ink too, not Monaco's colour for each pair:  the page draws them as words */
 .bubbly-monaco .view-line span[class*="bracket-highlighting-"] {
   color: var(--bubbly-ink);
+}
+
+/*
+ * the selection, see-through enough that a faint word (a comment, a mark) still reads through it (Owen):
+ * the theme's colour, `--bubbly-selection-strength` of it
+ */
+.bubbly-monaco .monaco-editor .focused .selected-text {
+  background-color: color-mix(
+    in srgb,
+    var(--vscode-editor-selectionBackground) var(--bubbly-selection-strength),
+    transparent
+  );
 }
 
 /* no indent guides:  each body's gutter shows what's under what */
