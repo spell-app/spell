@@ -162,7 +162,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
     const page = await context.newPage()
     await open(page, "Solitaire")
     await chooseOutput(page, "JavaScript")
-    const place = await writtenPlace(page, "ui-text", "Moves")
+    const place = await writtenPlace(page, "ui-text", "Score")
     expect(place.file).toBe("Solitaire.spell")
 
     await showFile(page, "Solitaire.spell")
@@ -289,7 +289,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
       await page.waitForTimeout(800)
       await chooseOutput(page, "JavaScript")
       const seen = await page.evaluate(() => document.documentElement.dataset.spellTheme)
-      const place = await writtenPlace(page, "ui-text", "Moves")
+      const place = await writtenPlace(page, "ui-text", "Score")
       await showFile(page, place.file)
       await page.waitForTimeout(1500)
       await clickCodeLine(page, place.line)
