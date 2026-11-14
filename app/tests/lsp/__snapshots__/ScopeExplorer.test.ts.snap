@@ -123,12 +123,12 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     file Card.spell
       type Card (is a TwoSidedView)
       function test card setup
-    file Deck.spell
-      type Deck (is a ViewableList)
-      function test a new deck
     file Pile.spell
       type Pile (is a ViewableList)
       function test piles
+    file Deck.spell
+      type Deck (is a ViewableList)
+      function test a new deck
     file Solitaire.spell
       type Solitaire (is a App)
       variable solitaire (Solitaire)
