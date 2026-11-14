@@ -776,6 +776,22 @@
   .bubbly-slash + .bubbly-angle-close::before {
     margin-left: 2px;
   }
+  /*
+   * a `/>` and a `</>` drawn `|⟩` and `⟨|⟩`, the bar flush between its brackets:  one glyph (Owen, 2026-11-14);
+   * the file keeps its `/`, drawn as a bar over it
+   */
+  .bubbly-slash:has(+ .bubbly-angle-close):where(:not(.view-line *)) {
+    font-size: 0;
+    transform: none;
+  }
+  .bubbly-slash:has(+ .bubbly-angle-close):where(:not(.view-line *))::before {
+    content: "|";
+    font-size: var(--bubbly-font-size);
+    font-weight: 300;
+  }
+  .bubbly-slash:has(+ .bubbly-angle-close):where(:not(.view-line *)) + .bubbly-angle-close::before {
+    margin-left: 0;
+  }
 
   /* an attribute's `=` a pixel clear of its name */
   .bubbly-equals {
@@ -1408,10 +1424,34 @@
       left: auto;
       right: 0;
     }
-    /* a nameless end tag, `</>`, in a line:  its brackets narrowed to the `/` between them, so it reads as one glyph (Owen) */
-    /* a self-closed tag's `/`:  snug against its `⟩`, never over it, so `/⟩` reads as one glyph (Owen) */
-    .view-line .bubbly-closing-slash {
-      letter-spacing: -0.14em;
+    /*
+     * a `/>` and a `</>` drawn `|⟩` and `⟨|⟩`, the bar flush between its brackets:  one glyph (Owen, 2026-11-14)
+     * - the file's `/` kept, see-through, narrowed to the bar's width;  the bar drawn over its left edge
+     */
+    .view-line .bubbly-mark.bubbly-slash:is(.bubbly-closing-slash, .bubbly-end-bare) {
+      position: relative;
+      transform: none;
+      color: transparent;
+      letter-spacing: -0.16em;
+    }
+    .view-line :is(.bubbly-closing-slash, .bubbly-end-bare.bubbly-slash)::before {
+      content: "|";
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-weight: 300;
+      letter-spacing: normal;
+      color: var(--bubbly-band-mark);
+    }
+    .view-line .bubbly-mark.bubbly-slash.bubbly-end-bare {
+      letter-spacing: -0.2em;
+    }
+    .view-line .bubbly-end-bare.bubbly-slash::before {
+      left: -0.08em;
+      color: var(--bubbly-end-mark);
+    }
+    .view-line .bubbly-end-bare.bubbly-foot-tiny.bubbly-slash::before {
+      color: var(--bubbly-foot-tiny-ink);
     }
     .view-line .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
       letter-spacing: -0.2em;
