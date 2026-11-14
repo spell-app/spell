@@ -733,6 +733,9 @@ function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Elem
       <span slot="label" class="InspectorEventWords">
         <ActionSignature thing={props.thing} action={props.action} />
       </span>
+      <Show when={props.action.parameters.length === 0}>
+        <ActionRunButton thing={props.thing} action={props.action} />
+      </Show>
       <Show when={place}>{(found) => <WrittenCode place={found()} code="" />}</Show>
     </ui-section>
   )
@@ -930,10 +933,14 @@ const EVENT_ICON = "bolt"
 /** An ability's icon, in the Code card:  a hand. */
 const ABILITY_ICON = "hand paper outline"
 
+/** An action's run button, at its row's right:  Font Awesome's circled play (Owen, epic `editor` I116). */
+const RUN_ICON = "fa7-free:circle-play"
+
 /**
  * An action's header:  its signature as Spell writes it, `to put (a card) on (a pile)`, each thing it takes a badge
  * of its type (Owen:  "where `a card` is in a badge to show it is a type").
- * - One that takes nothing else (`to play (a card)`) keeps a small run button, for the thing selected.
+ * - One that takes nothing else (`to play (a card)`) has a run button, for the thing selected:
+ *   at its row's far right (`<ActionRunButton>`, in its section's `actions`;  epic `editor` I116), not here.
  * - One that needs another thing gets no button and no field:  it can't be run from here (Owen:  "shouldn't be a select
  *   here because you can't actually execute it").
  * - Its words are the program's, in its language:  `to` is `para` in a Spanish one.
@@ -943,9 +950,6 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
   const pieces = () => signaturePieces(props.action, ownType())
   return (
     <span class="InspectorActionSignature">
-      <Show when={props.action.parameters.length === 0}>
-        <ActionRunButton thing={props.thing} action={props.action} />
-      </Show>
       <span>{toWordOf(editor.project?.wordsLanguages?.[0])}</span>
       {/* by position:  a new signature's pieces are new objects, the same words */}
       <For each={pieces()} keyed={false}>
@@ -961,7 +965,10 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
   )
 }
 
-/** An action that takes nothing else's run button:  a small ▶, for the thing selected. */
+/**
+ * An action that takes nothing else's run button, for the thing selected:  a circled ▶ at the far right of its row
+ * (its section's `actions`;  epic `editor` I116), its words right after the row's chevron.
+ */
 function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX.Element {
   const [isRunning, setRunning] = createSignal(false)
   const isEnabled = () => runtimeCore()?.isActionEnabled(props.thing, props.action.name) ?? false
@@ -981,9 +988,10 @@ function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX
   }
   return (
     <ui-button
+      slot="actions"
       size="mini"
-      appearance="basic"
-      icon="play"
+      appearance="link"
+      icon={RUN_ICON}
       class="InspectorActionButton"
       title={why()}
       aria-label={why()}

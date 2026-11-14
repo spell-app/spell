@@ -90,8 +90,8 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     const signature = action.locator(".InspectorActionSignature")
     expect((await signature.innerText()).replace(/\s+/g, " ").trim()).toBe("to play a card")
     expect(await signature.locator("ui-label").allInnerTexts()).toEqual(["a card"])
-    // it takes nothing else:  a run button for the card selected
-    expect(await signature.locator("ui-button.InspectorActionButton").count()).toBe(1)
+    // it takes nothing else:  a run button for the card selected, at its row's right (I116)
+    expect(await action.locator(":scope > ui-button.InspectorActionButton[slot=actions]").count()).toBe(1)
     // one that needs a pile:  its type a badge, and no select or button, as it can't run from here
     const putOn = page.locator(".InspectorActionSignature").filter({ hasText: /put/ }).first()
     expect(await putOn.locator("ui-label").allInnerTexts()).toEqual(["a card", "a pile"])
