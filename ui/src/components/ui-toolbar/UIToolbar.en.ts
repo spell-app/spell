@@ -25,7 +25,7 @@ const toolbarAppearance = {
     menuAppearance.description +
     '  A toolbar\'s own:  `pills` (each run of items between two `<ui-item kind="divider">`s is one rounded track, ' +
     "its items rounded tiles on it, as a group of buttons is drawn;  a run cut, down to its icons or into the `…` " +
-    "button, stays on its track)."
+    "button, stays on its track;  the pills centred in the room the title and the right slot leave, never touching them)."
 } as const
 
 /****************
