@@ -345,8 +345,25 @@ ui-section.InspectorEvent {
     text-decoration: underline dotted;
     text-underline-offset: 3px;
   }
-  & > .InspectorActionNameField {
+  /* while it's renamed:  `to` beside the field, not halfway down the reason under it */
+  &:has(> .InspectorActionNameEdit) {
+    align-items: first baseline;
+  }
+  /* the field, and under it why a name was refused, in short lines */
+  & > .InspectorActionNameEdit {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  & .InspectorActionNameField {
     width: 14em;
+  }
+  & .InspectorActionNameError {
+    max-width: 18em;
+    color: var(--ui-error-text);
+    font-size: 0.9em;
+    line-height: 1.3;
+    white-space: pre-line;
   }
 }
 

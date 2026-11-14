@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { kebabCase, setDebugGlobal, upperFirst } from "spell/util"
+import { UIError, kebabCase, setDebugGlobal, upperFirst } from "spell/util"
 import { E } from "spell/element"
 import { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
@@ -876,7 +876,9 @@ export class Inspector {
    * Call `thing`'s action `action` `newWords`, wherever it's named (epic `editor` I111):  its head, each call and each
    * `<action "...">`, in every file of the project, as the language service finds them (`renameActionAt()`).
    * - ONE step of the editor's history, however many files it changes;  then a compile.
-   * - Answers whether it renamed it.  NEVER throws:  a name refused shows in the error banner, in words.
+   * - Answers whether it renamed it.
+   * - throws a `UIError` when the name is refused (empty, taken, not words ...):  its message says why, in words,
+   *   for the field it was typed in;  any other failure shows in the error banner
    */
   static async renameAction(
     thing: object,
@@ -887,10 +889,7 @@ export class Inspector {
     const file = place && editor.project?.spellFiles.find((each) => marksPathOf(each) === place.path)
     const head = file?.contents?.split("\n")[place!.line] ?? ""
     const at = head.toLowerCase().indexOf(action.words.toLowerCase())
-    if (!file || at < 0) {
-      editor.showError(appTexts.text("renameActionNotAction", { action: action.words }))
-      return false
-    }
+    if (!file || at < 0) throw new UIError(appTexts.text("renameActionNotAction", { action: action.words }))
     try {
       const { SpellMonaco } = await LazyMonaco.load()
       const { service, addresses } = SpellMonaco.register()
@@ -917,8 +916,7 @@ export class Inspector {
         return false
       }
       const key = RENAME_REFUSED[error.cause?.kind ?? "not-an-action"]
-      editor.showError(appTexts.text(key, { action: action.words, newName: newWords.trim() }))
-      return false
+      throw new UIError(appTexts.text(key, { action: action.words, newName: newWords.trim() }))
     }
   }
 

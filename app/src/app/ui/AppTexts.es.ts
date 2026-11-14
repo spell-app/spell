@@ -376,11 +376,11 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorActionRename: "Renombrar {action}",
   renameAction: "Renombrar {action} a {newName}",
   renameActionEmpty: "Una acción necesita un nombre:\n{action} se queda con el suyo.",
-  renameActionTaken: "Ya hay una acción que se llama {newName}.",
+  renameActionTaken: "{newName} ya está en uso:\nhay una propiedad o una acción que se llama así.",
   renameActionNotWords: "{newName} no puede ser el nombre de una acción:\nusa letras, números, espacios y guiones.",
   renameActionNotAction:
     "{action} no se puede renombrar aquí:\nsolo una acción del propio programa que no toma nada más.",
-  renameActionCallsDiffer: "{action} se llama con otras palabras en algún sitio, así que renombrarla lo dejaría atrás.",
+  renameActionCallsDiffer: "{action} se llama con otras palabras en algún sitio:\nrenombrarla lo dejaría atrás.",
   inspectorProperties: "Propiedades",
   inspectorClose: "Cerrar el Inspector",
   inspectorHide: "Ocultar esta tarjeta",

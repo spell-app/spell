@@ -1352,9 +1352,13 @@ export class SpellLanguageService {
       })
     if (!words) throw fail("empty")
     if (!SpellLanguageService.ACTION_WORDS.test(words)) throw fail("not-words")
-    const taken = SP.ActionButton.actionsIn(action.scope).some(
-      (other) => sameWords(other.words, words) && !sameWords(other.words, action.words)
-    )
+    // another action a button may name, or any other member of its type:  a property, an action that takes something
+    const member = SpellLanguageService.typeOf(action.scope)?.getMember(words)
+    const taken =
+      (!!member && member !== subject!.record && !sameWords(words, action.words)) ||
+      SP.ActionButton.actionsIn(action.scope).some(
+        (other) => sameWords(other.words, words) && !sameWords(other.words, action.words)
+      )
     if (taken) throw fail("taken")
     const changes: Record<string, TextEdit[]> = {}
     const change = (at: SP.SpellFile, range: Range | undefined, newText: string) => {
@@ -1399,6 +1403,17 @@ export class SpellLanguageService {
     const scope = declaredBy.scope
     const action = SP.ActionButton.actionsIn(scope).find((it) => sameWords(it.words, words))
     return action ? { words: action.words, scope } : undefined
+  }
+
+  /**
+   * The type `scope` is about:  the thing its method runs on, the subject of the body it's in (`solitaire is an app`),
+   * else itself or the nearest type around it.
+   */
+  private static typeOf(scope: P.Scope): P.TypeScope | undefined {
+    const about = P.MethodScope.thingTypeOf(scope) ?? P.SubjectScope.of(scope)?.subjectType
+    if (about) return about
+    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) if (at instanceof P.TypeScope) return at
+    return undefined
   }
 
   /** Words an action's name can be:  a letter first, then letters, digits, spaces, dashes and apostrophes. */

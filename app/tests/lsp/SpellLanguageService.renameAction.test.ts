@@ -52,18 +52,24 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     expect(await errors(renamed)).toEqual(await errors(text))
   })
 
-  test("refuses an empty name, one another action has, and what isn't an action", async () => {
+  test("refuses an empty name, one another member has, and what isn't an action", async () => {
     await workspace.update(uri, text)
     const file = workspace.fileFor(uri)!
     const cheat = positionOf(text, 'to "cheat"', "cheat")
     expect(kindOf(() => service.renameActionAt(file, cheat, "  "))).toBe("empty")
     expect(kindOf(() => service.renameActionAt(file, cheat, "Auto Play"))).toBe("taken")
+    // any other member of its type:  a property, an action that takes something
+    expect(kindOf(() => service.renameActionAt(file, cheat, "score"))).toBe("taken")
+    expect(kindOf(() => service.renameActionAt(file, cheat, "Cheat"))).toBeUndefined()
     expect(kindOf(() => service.renameActionAt(file, cheat, "a/b"))).toBe("not-words")
     expect(kindOf(() => service.renameActionAt(file, positionOf(text, "to count the points", "count"), "x"))).toBe(
       "not-an-action"
     )
     // and the editor's own rename, F2, says no rather than throwing
     expect(service.rename(file, cheat, "auto play")).toBeNull()
+    // a refusal leaves nothing behind:  the next name still renames it everywhere
+    const renamed = applied(text, service.renameActionAt(file, cheat, "peek").changes![uri]!)
+    expect(renamed.match(/<action "peek"\/>/g)?.length).toBe(text.match(/<action "cheat"\/>/g)?.length)
   })
 })
 

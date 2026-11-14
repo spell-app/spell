@@ -625,7 +625,8 @@ export type HoverDetail = "full" | "plain"
  * - `not-an-action`:  what's there isn't an action of the program's own that takes nothing
  * - `empty`:  the new name has no words
  * - `not-words`:  the new name isn't words a name can be (letters, digits, spaces and dashes)
- * - `taken`:  another action is called that already
+ * - `taken`:  another action, or another member of its type (a property, an action that takes something), is called
+ *   that already
  * - `calls-differ`:  a call of it is written in other words than its name, so a rename would leave it behind
  */
 export class RenameError extends Error {

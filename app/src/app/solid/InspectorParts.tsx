@@ -991,19 +991,49 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
 
 /**
  * An action's name, which a click renames (epic `editor` I111;  Owen:  "I should be able to rename the function (and
- * refactor its callers) by clicking on the name"):  a field holding it, Enter renames it everywhere it's named
- * (`Inspector.renameAction()`), Esc or a click away leaves it as it was.
+ * refactor its callers) by clicking on the name"):  a field holding it, which renames it everywhere it's named
+ * (`Inspector.renameAction()`) when it's left -- Enter, Tab or a click away.
+ * - Esc leaves it as it was.
+ * - A name refused (empty, another member's, not words) keeps the field open, saying why under it:
+ *   nothing is renamed.
  * - Only an action of the program's own that takes nothing:  its words are its name alone.
  * - Its clicks never fold its row.
  */
 function ActionName(props: { thing: object; action: InspectorAction }): JSX.Element {
   const [isEditing, setEditing] = createSignal(false)
+  const [refusal, setRefusal] = createSignal<string>()
+  // the words the field starts with:  set once per edit, so nothing redraws over what's typed
+  let wordsAtStart = ""
+  // a rename on its way, or a cancel:  the field's going, and its `focusout` must do nothing more
+  let isLeaving = false
   const title = () => appTexts.text("inspectorActionRename", { action: props.action.words })
-  const rename = async (field: HTMLElement & { value?: string }) => {
-    const words = `${field.value ?? ""}`
+  const start = () => {
+    wordsAtStart = props.action.words
+    isLeaving = false
+    setRefusal(undefined)
+    setEditing(true)
+  }
+  const cancel = () => {
+    isLeaving = true
+    setRefusal(undefined)
     setEditing(false)
-    if (words.trim() === props.action.words) return
-    await Inspector.renameAction(props.thing, props.action, words)
+  }
+  // `by`:  Enter keeps the focus in the field when the name's refused;  leaving it lets the focus go where it went
+  const rename = async (field: HTMLElement & { value?: string }, by: "enter" | "leaving") => {
+    if (isLeaving) return
+    const words = `${field.value ?? ""}`
+    if (words.trim().replace(/\s+/g, " ") === wordsAtStart) return cancel()
+    isLeaving = true
+    try {
+      await Inspector.renameAction(props.thing, props.action, words)
+      setRefusal(undefined)
+      setEditing(false)
+    } catch (error) {
+      // refused:  the field stays, saying why
+      isLeaving = false
+      setRefusal((error as Error).message)
+      if (by === "enter") focusField(field)
+    }
   }
   return (
     <Show
@@ -1014,37 +1044,49 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
           title={title()}
           onClick={(event: MouseEvent) => {
             event.stopPropagation()
-            setEditing(true)
+            start()
           }}
         >
           {props.action.words}
         </span>
       }
     >
-      <ui-input
-        size="small"
-        class="InspectorActionNameField"
-        value={props.action.words}
-        aria-label={title()}
-        autofocus=""
-        // its words chosen, to type over:  once it has drawn its input
-        ref={(field: HTMLElement) =>
-          requestAnimationFrame(() => {
-            field.focus()
-            field.shadowRoot?.querySelector("input")?.select()
-          })
-        }
-        onClick={(event: MouseEvent) => event.stopPropagation()}
-        onKeyDown={(event: KeyboardEvent) => {
-          // the row's own keys never see them:  Space and Enter would fold it
-          event.stopPropagation()
-          if (event.key === "Enter") void rename(event.currentTarget as HTMLElement)
-          else if (event.key === "Escape") setEditing(false)
-        }}
-        onFocusOut={() => setEditing(false)}
-      />
+      <span class="InspectorActionNameEdit" onClick={(event: MouseEvent) => event.stopPropagation()}>
+        <ui-input
+          size="small"
+          class="InspectorActionNameField"
+          state={refusal() ? "error" : undefined}
+          value={wordsAtStart}
+          aria-label={title()}
+          aria-invalid={refusal() ? "true" : undefined}
+          autofocus=""
+          // its words chosen, to type over:  once it has drawn its input
+          ref={(field: HTMLElement) => requestAnimationFrame(() => focusField(field))}
+          onInput={() => setRefusal(undefined)}
+          onKeyDown={(event: KeyboardEvent) => {
+            // the row's own keys never see them:  Space and Enter would fold it
+            event.stopPropagation()
+            if (event.key === "Enter") void rename(event.currentTarget as HTMLElement, "enter")
+            else if (event.key === "Escape") cancel()
+          }}
+          onFocusOut={(event: FocusEvent) => void rename(event.currentTarget as HTMLElement, "leaving")}
+        />
+        <Show when={refusal()}>
+          {(message) => (
+            <span class="InspectorActionNameError" role="alert">
+              {message()}
+            </span>
+          )}
+        </Show>
+      </span>
     </Show>
   )
+}
+
+/** Focus `field`, a `<ui-input>`, its words chosen to type over. */
+function focusField(field: HTMLElement): void {
+  field.focus()
+  field.shadowRoot?.querySelector("input")?.select()
 }
 
 /**
