@@ -4,7 +4,7 @@ import type { monaco } from "./monaco"
 
 /****************
  * ### `SpellTyping`
- * Six helps as a person types Spell in a Monaco editor (epic `language` P50;  epic `editor` P28), so what they see
+ * Seven helps as a person types Spell in a Monaco editor (epic `language` P50;  epic `editor` P28), so what they see
  * is what they type.
  * - The caret snaps into the body a blank line is drawn in:
  *   clicking or arrowing onto a blank line inside a body writes that body's indent (the next line's, as below),
@@ -44,6 +44,9 @@ import type { monaco } from "./monaco"
  *   Shift+Tab, or Backspace at the end of its indent, on a tag moves its children and its closing tag;
  *   on a type or a property, its body.  One undo for all of it.
  *   Tab there, or Cmd / Ctrl+], moves them in a level the same way.
+ *   - A line of a tag's attributes under its first line moves alone, its indent tabs then spaces (I142).
+ * - Enter between a tag's attributes lines the rest up under its first attribute (epic `editor` I142):
+ *   `<container columns="7" |spacing="xs">` puts `spacing` under `columns`, tabs then spaces, as it's drawn.
  * - One per editor, made as each editor is (`SpellMonaco.register()`).
  * - Only Monaco's TYPE (`import type`):  its rules are plain functions of the lines, tested without an editor.
  ****************/
@@ -118,6 +121,7 @@ export class SpellTyping {
    * - A line with nothing under it is left to Monaco.
    */
   private keyDown(event: monaco.IKeyboardEvent) {
+    if (this.enterInTag(event)) return
     const { editor } = this
     const model = editor.getModel()
     const { browserEvent: key } = event
@@ -141,11 +145,19 @@ export class SpellTyping {
     // Tab takes a suggestion while the list shows:  Monaco's, not ours
     if (isTab && editor.getDomNode()?.querySelector(SUGGESTIONS_SHOWING)) return
     const lines = model.getLinesContent()
-    const under = SpellTyping.linesUnder(lines, line - 1)
-    if (!under) return
+    // a line of a tag's attributes, under its first line, moves alone:  its indent tabs then spaces again (I142);
+    // Backspace there is Monaco's, a space at a time
+    const isAttributeLine = !!SpellTyping.tagOpenAt(lines, line - 1, 0)
+    if (isAttributeLine && isBackspace) return
+    const under = isAttributeLine ? 0 : SpellTyping.linesUnder(lines, line - 1)
+    if (!under && !isAttributeLine) return
     const settings = indentSettingsOf(model)
     // how far the lines move:  out to the level before, or in a level
-    const by = isIn ? settings.tabSize : -(widthOf(indent, settings.tabSize) - outdentWidth(indent, settings.tabSize))
+    // (a tag's attribute line:  a whole level, so its spaces stay lined up)
+    const outBy = isAttributeLine
+      ? settings.tabSize
+      : widthOf(indent, settings.tabSize) - outdentWidth(indent, settings.tabSize)
+    const by = isIn ? settings.tabSize : -outBy
     const edits = lines.slice(line - 1, line + under).flatMap((each, at) => {
       const its = indentOf(each)
       if (!each.trim()) return []
@@ -166,6 +178,60 @@ export class SpellTyping {
     // Tab:  the caret stays where typing goes, at the end of the line's new indent
     if (isTab) editor.setPosition({ lineNumber: line, column: indentOf(model.getLineContent(line)).length + 1 })
     editor.pushUndoStop()
+  }
+
+  ////////////////
+  // ## Enter between a tag's attributes
+  ////////////////
+
+  /**
+   * Enter between a tag's attributes (`<container columns="7" |spacing="xs">`):  the rest goes to a new line
+   * lined up under the tag's first attribute, `columns`, as one undo (Owen, 2026-11-14, I142).
+   * - Lined up as the editor draws it, not by counting letters:  its font isn't monospace, and the bubbly look
+   *   leaves room round some words.  So it measures where the first attribute is, then writes tabs, then spaces
+   *   for what's left (`indentOfWidth()`).
+   * - The spaces before the caret go:  no trailing space left on the tag's line.
+   * - Returns whether it did:  `false` leaves the key to Monaco (several carets, a selection, suggestions showing,
+   *   not between a tag's attributes).
+   */
+  private enterInTag(event: monaco.IKeyboardEvent): boolean {
+    const { editor } = this
+    const model = editor.getModel()
+    const key = event.browserEvent
+    if (key.key !== "Enter" || key.shiftKey || key.metaKey || key.ctrlKey || key.altKey || key.isComposing) return false
+    if (!model || editor.getRawOptions().readOnly || !this.languages.indents.includes(model.getLanguageId()))
+      return false
+    const selections = editor.getSelections() ?? []
+    const selection = selections[0]
+    if (selections.length !== 1 || !selection?.isEmpty()) return false
+    // Enter takes a suggestion while the list shows:  Monaco's
+    if (editor.getDomNode()?.querySelector(SUGGESTIONS_SHOWING)) return false
+    const line = selection.startLineNumber
+    const lines = model.getLinesContent()
+    const tag = SpellTyping.tagOpenAt(lines, line - 1, selection.startColumn - 1)
+    const firstAttribute = tag?.firstAttribute
+    if (!tag || firstAttribute === undefined) return false
+    if (tag.line === line - 1 && selection.startColumn - 1 <= firstAttribute) return false
+    const text = lines[line - 1]!
+    const before = text.slice(0, selection.startColumn - 1).replace(/[ \t]+$/, "")
+    const after = text.slice(selection.startColumn - 1).replace(/^[ \t]+/, "")
+    const { spaceWidth } = editor.getOption(FONT_INFO as monaco.editor.EditorOption.fontInfo)
+    const width = Math.round(editor.getOffsetForColumn(tag.line + 1, firstAttribute + 1) / spaceWidth)
+    const indent = indentOfWidth(width, indentSettingsOf(model))
+    const range = {
+      startLineNumber: line,
+      startColumn: before.length + 1,
+      endLineNumber: line,
+      endColumn: text.length - after.length + 1
+    }
+    event.preventDefault()
+    event.stopPropagation()
+    editor.pushUndoStop()
+    editor.executeEdits(SPELL_TYPING, [{ range, text: model.getEOL() + indent }])
+    editor.setPosition({ lineNumber: line + 1, column: indent.length + 1 })
+    editor.pushUndoStop()
+    editor.revealPosition(editor.getPosition()!)
+    return true
   }
 
   ////////////////
@@ -393,6 +459,30 @@ export class SpellTyping {
   }
 
   /**
+   * The tag whose attributes `column` (0-based) of `lines[index]` is between, if any:
+   * after its name, before its `>`, outside quotes.
+   * - `line`:  the index of the line the tag starts on
+   * - `firstAttribute`:  the column of the first word after its name on that line;
+   *   `undefined` when its name ends that line
+   * - Looks back at most `TAG_LINES_BACK` lines, so a long file isn't read for each key.
+   */
+  static tagOpenAt(lines: readonly string[], index: number, column: number): OpenTag | undefined {
+    for (let at = index; at >= Math.max(0, index - TAG_LINES_BACK); at--) {
+      const line = lines[at] ?? ""
+      const text = at === index ? line.slice(0, column) : line
+      const start = [...text.matchAll(TAG_START)].at(-1)
+      if (!start) continue
+      const nameEnd = start.index + start[0].length
+      const since = at === index ? [text.slice(nameEnd)] : [text.slice(nameEnd), ...lines.slice(at + 1, index)]
+      if (at !== index) since.push((lines[index] ?? "").slice(0, column))
+      if (!isStillOpen(since.join("\n"))) return undefined
+      const word = /\S/.exec(line.slice(nameEnd))
+      return { line: at, firstAttribute: word ? nameEnd + word.index : undefined }
+    }
+    return undefined
+  }
+
+  /**
    * `pasted`'s lines as they should land after `before`, the text before the caret on its line.
    * - The indent they're laid out from:
    *   - the caret's, when `before` is only an indent:  the first line's own indent goes
@@ -520,6 +610,32 @@ const VOID_TAGS = /^(area|base|br|col|embed|hr|img|input|link|meta|source|track|
 /** One tag on a line:  `<x ...>`, `<x/>`, `</x>`, `</>`, `<>`;  its slash before the name, its name, its slash at the end. */
 const TAG = /<(\/?)([A-Za-z][\w.:-]*)?(?:\s(?:[^>"']|"[^"]*"|'[^']*')*?)?(\/?)>/g
 
+/** A tag `SpellTyping.tagOpenAt()` found open:  the line it starts on, and its first attribute's column there. */
+export type OpenTag = {
+  /** index of the line the tag starts on */
+  line: number
+  /** column (0-based) of the first word after its name on that line;  `undefined` when the name ends the line */
+  firstAttribute: number | undefined
+}
+
+/** How far back `SpellTyping.tagOpenAt()` looks for the tag's start:  a tag's attributes span a few lines at most. */
+const TAG_LINES_BACK = 20
+
+/** A tag's start, `<` and its name:  `<container`, `<ui-button`;  never a closing tag's `</`. */
+const TAG_START = /<[\p{L}][\p{L}\p{M}\d_.:-]*/gu
+
+/** Is a tag still open at the end of `text`, what follows its name:  no `>` outside quotes, and not inside quotes? */
+function isStillOpen(text: string): boolean {
+  let quote = ""
+  for (const char of text) {
+    if (quote) {
+      if (char === quote) quote = ""
+    } else if (char === '"' || char === "'") quote = char
+    else if (char === ">") return false
+  }
+  return !quote
+}
+
 /** How many tags `line` leaves open:  each opened adds one, each closed takes one;  `<x/>` and `<br>` neither. */
 function tagDepthChange(line: string): number {
   let change = 0
@@ -599,6 +715,9 @@ const SPELL_TYPING = "spell-typing"
 
 /** What moves the caret onto a line it snaps on:  a click or a key, never code (`"api"`) nor its own edits. */
 const MOVED_BY = ["mouse", "keyboard"]
+
+/** Monaco's `EditorOption.fontInfo`:  the font's measures, a space's width among them. */
+const FONT_INFO = 59
 
 /** Monaco's `CursorChangeReason.Explicit`:  a move, not an edit's (`NotSet`) nor an undo's. */
 const CURSOR_MOVED_EXPLICITLY = 3

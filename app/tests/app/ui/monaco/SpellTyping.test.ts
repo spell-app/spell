@@ -224,3 +224,34 @@ describe("SpellTyping.linesUnder()", () => {
     expect(SpellTyping.linesUnder(CARD, 1)).toBe(0)
   })
 })
+
+describe("SpellTyping.tagOpenAt() (I142)", () => {
+  const TAG = [`\t\t<container columns="7" padding="small"`, `\t\t\t\t\t spacing="xs">`, `\t\t\t<text "hi" />`]
+
+  test("between a tag's attributes:  the line it starts on, its first attribute's column", () => {
+    expect(SpellTyping.tagOpenAt(TAG, 0, 25)).toEqual({ line: 0, firstAttribute: 13 })
+    // a line of its attributes under its first
+    expect(SpellTyping.tagOpenAt(TAG, 1, 0)).toEqual({ line: 0, firstAttribute: 13 })
+    expect(SpellTyping.tagOpenAt(TAG, 1, 6)).toEqual({ line: 0, firstAttribute: 13 })
+  })
+
+  test("not inside quotes, nor after the tag's `>`, nor on a line after it", () => {
+    expect(SpellTyping.tagOpenAt(TAG, 0, 22)).toBeUndefined()
+    expect(SpellTyping.tagOpenAt(TAG, 1, 16)).toBeUndefined()
+    expect(SpellTyping.tagOpenAt(TAG, 1, 19)).toBeUndefined()
+    expect(SpellTyping.tagOpenAt(TAG, 2, 0)).toBeUndefined()
+    expect(SpellTyping.tagOpenAt(TAG, 2, 10)).toBeUndefined()
+  })
+
+  test("a tag whose name ends its line has no first attribute there", () => {
+    expect(SpellTyping.tagOpenAt([`<container`, `\tcolumns="7">`], 1, 0)).toEqual({
+      line: 0,
+      firstAttribute: undefined
+    })
+  })
+
+  test("a closing tag, or no tag, is none", () => {
+    expect(SpellTyping.tagOpenAt([`\t</container>`], 0, 5)).toBeUndefined()
+    expect(SpellTyping.tagOpenAt([`its rank is 3`], 0, 5)).toBeUndefined()
+  })
+})

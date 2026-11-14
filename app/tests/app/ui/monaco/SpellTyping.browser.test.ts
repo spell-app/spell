@@ -132,6 +132,45 @@ describe("typing Spell in a real Monaco editor", () => {
     })
   })
 
+  describe("Enter and Tab between a tag's attributes (I142)", () => {
+    /** Press `key`, no modifier, in the editor's text area. */
+    const press = (key: string, shiftKey = false) => {
+      const area = editor!.getDomNode()!.querySelector("textarea")!
+      area.focus()
+      area.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, shiftKey, bubbles: true, cancelable: true }))
+    }
+
+    test("Enter lines the rest up under the first attribute, tabs then spaces, as one undo", () => {
+      // `columns` is 15 columns in, a tab 4:  3 tabs, then 3 spaces
+      const code = editorOf([`\t<container columns="7" spacing="xs">`, `\t</container>`], 1, 25)
+      press("Enter")
+      expect(code.getValue()).toBe([`\t<container columns="7"`, `\t\t\t   spacing="xs">`, `\t</container>`].join("\n"))
+      expect(code.getPosition()).toMatchObject({ lineNumber: 2, column: 7 })
+      const model = code.getModel()!
+      expect(code.getOffsetForColumn(2, 7)).toBe(
+        code.getOffsetForColumn(1, model.getLineContent(1).indexOf("c", 3) + 1)
+      )
+      void model.undo()
+      expect(code.getValue()).toBe([`\t<container columns="7" spacing="xs">`, `\t</container>`].join("\n"))
+    })
+
+    test("Enter before the first attribute, or after the tag's `>`, is Monaco's", () => {
+      const code = editorOf([`\t<container columns="7">`], 1, 13)
+      press("Enter")
+      expect(code.getValue()).toBe(`\t<container columns="7">`)
+    })
+
+    test("Tab at the start of an attribute line moves that line alone;  Shift+Tab takes it back", () => {
+      const lines = [`\t<container columns="7"`, `\t\t\t   spacing="xs">`, `\t\t<text "hi" />`, `\t</container>`]
+      const code = editorOf(lines, 2, 7)
+      press("Tab")
+      expect(code.getValue().split("\n")).toEqual([lines[0], `\t\t\t\t   spacing="xs">`, ...lines.slice(2)])
+      expect(code.getPosition()).toMatchObject({ lineNumber: 2, column: 8 })
+      press("Tab", true)
+      expect(code.getValue().split("\n")).toEqual(lines)
+    })
+  })
+
   describe("Enter after an opening tag (I65)", () => {
     const enter = () => editor!.trigger("keyboard", "type", { text: "\n" })
 
