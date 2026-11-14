@@ -189,7 +189,8 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
 /****************
  * ### `<PublishDraft>`
  * While you have drafts of the project (epic `editor` I44), right of the code and Inspect app buttons:
- * a yellow "Editing a Draft" pill, then a Publish button (Owen, 2026-11-14, I77).
+ * a yellow "Editing a Draft" pill, its pen-on-a-square the draft's mark, as a draft file's tab has it, then a Publish
+ * button (Owen, 2026-11-14, I77, I90).
  * - Publish is File › Publish's (`editor.publish()`).
  * - Gone once you have no drafts (after Publish, Delete Draft), and never in the public preview (`editor.canPublish`).
  ****************/
@@ -198,13 +199,25 @@ function PublishDraft(): JSX.Element {
   return (
     <Show when={hasDrafts()}>
       <span class="PublishDraft">
-        <ui-label size="small" color="yellow" title={appTexts.text("draftTip")}>
+        <ui-label size="small" color="yellow" icon={DRAFT_ICON} title={appTexts.text("draftTip")}>
           {appTexts.text("editingDraft")}
         </ui-label>
-        <ui-button size="small" color="primary" title={appTexts.text("draftTip")} onClick={() => void editor.publish()}>
+        <ui-button
+          size="small"
+          color="primary"
+          icon={PUBLISH_ICON}
+          title={appTexts.text("draftTip")}
+          onClick={() => void editor.publish()}
+        >
           {appTexts.text("publish")}
         </ui-button>
       </span>
     </Show>
   )
 }
+
+/** A draft's mark:  on "Editing a Draft", and on a draft file's tab (`SpellEditor.spell`'s `Drafted`). */
+const DRAFT_ICON = "fa7-free:pen-to-square"
+
+/** Publish's icon, as File's Publish has it:  a paper plane (Owen, 2026-11-14). */
+const PUBLISH_ICON = "paper plane outline"
