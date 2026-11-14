@@ -162,6 +162,7 @@ ui-submenu::part(chevron) {
 /* the Spell menu (`<SpellBarMenu>`):  Home and About Spell, then the group's projects under them, New Example last,
    the projects' width */
 .SpellMenuPanel {
+  --SpellMenu-column-gap: 24px;
   display: flex;
   flex-direction: column;
 
@@ -184,6 +185,8 @@ ui-submenu::part(chevron) {
   display: grid;
   /* a column each, as wide as the projects' columns;  the rest of the menu's width after them, for the line to cross */
   grid-template-columns: minmax(180px, max-content) minmax(180px, max-content) 1fr;
+  /* the projects' gap between columns, so Home and About Spell stay over theirs */
+  column-gap: var(--SpellMenu-column-gap);
 }
 .SpellMenuPanel.wide > ui-menu.SpellMenuHome > ui-action[kind="divider"],
 .SpellMenuPanel.wide > ui-menu.SpellMenuHome > ui-action[kind="divider"]::part(item) {
@@ -197,6 +200,9 @@ ui-menu.ProjectsSubMenu.many::part(menu) {
   grid-template-rows: repeat(var(--ProjectsSubMenu-rows, 10), auto);
   grid-auto-flow: column;
   grid-auto-columns: minmax(180px, auto);
+  /* room between columns, so a row's tick, before its icon, reads as its own and not as the end of the row to its
+     left (Owen, 2026-11-14, I118) */
+  column-gap: var(--SpellMenu-column-gap);
 }
 
 /* each project's group icon, a little room after it */
