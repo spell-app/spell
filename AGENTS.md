@@ -490,6 +490,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - Why:  Owen reviews in VS Code;  edits a window doesn't show are invisible there.
 - `epic window` works in a fresh worktree, before its `yarn install`.
   - The `spell` link runs the MAIN checkout's CLI, which has its packages.
+    Once the worktree is installed, that CLI hands off to the worktree's own `bin/spell.mjs`, so its code runs
+    (epic `epic-engine` I282:  main's page server code over a worktree's routes answered every `/api` with a 500).
   - `yarn` couldn't run it:  yarn runs no script there before `yarn install`.
 - A doc shown while the move is pending waits, then shows beside the session in the window it moved to.
   - That's `epic open <name> --review` or `epic window show`.

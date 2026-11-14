@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
  * The `spell` command:  runs the kit's `src/cli/main.ts` from THIS checkout, through `tsx` -- no build step.
+ * - Run from inside ANOTHER checkout of the kit (a worktree), it hands off to that checkout's own `bin/spell.mjs`
+ *   (`checkoutBin()`, below), so one checkout's code runs, whichever `spell` is on the `PATH` (epic `epic-engine` I282).
  * - `tsx` gets the kit's node settings explicitly, so they hold from ANY current folder,
  *   while relative paths on the command line still resolve against the caller's.
  *   - `tsx` takes ONE tsconfig for every file it runs:  the settings every repo's commands need are in it (JSX for
@@ -13,11 +15,45 @@
  * - Install on your `PATH` with `yarn cli:install`, at the kit's root -- see `scripts/install-cli.mjs`.
  * - NOTE: a symlink to this file works:  node runs the real path, so `import.meta.url` is in the kit.
  */
-import { dirname, resolve } from "node:path"
+import { existsSync, readFileSync, realpathSync } from "node:fs"
+import { dirname, join, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
-import { register } from "tsx/esm/api"
 
 /** The kit's root:  this file is in its `bin/`. */
 const kitRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-register({ tsconfig: resolve(kitRoot, "tsconfig.tsx.json") })
-await import(pathToFileURL(resolve(kitRoot, "src/cli/main.ts")).href)
+
+const handoff = checkoutBin(process.cwd())
+if (handoff) {
+  await import(pathToFileURL(handoff).href)
+} else {
+  const { register } = await import("tsx/esm/api")
+  register({ tsconfig: resolve(kitRoot, "tsconfig.tsx.json") })
+  await import(pathToFileURL(resolve(kitRoot, "src/cli/main.ts")).href)
+}
+
+/**
+ * The `bin/spell.mjs` of the kit checkout `folder` is in, when it's NOT this one and can run its own:
+ * `undefined` to run this checkout's.
+ * - Why:  the `PATH`'s `spell` is the main checkout's.  Run in a worktree, it served main's `Router` over the
+ *   worktree's route modules, and every `/api` request answered 500, "handler is not a function".
+ * - The checkout:  the nearest folder up from `folder` whose `package.json` is named `spell` (a big folder's,
+ *   `spell-ui` ..., is skipped).
+ * - Only once it's installed (`node_modules/tsx`):  a fresh worktree, before its `yarn install`, runs this
+ *   checkout's, which has its packages (`epic window` works there).
+ * - NEVER throws:  anything unreadable runs this checkout's.
+ */
+function checkoutBin(folder) {
+  try {
+    for (let dir = resolve(folder); ; dir = dirname(dir)) {
+      const manifest = join(dir, "package.json")
+      if (existsSync(manifest) && JSON.parse(readFileSync(manifest, "utf8")).name === "spell") {
+        const bin = join(dir, "bin", "spell.mjs")
+        const isOther = realpathSync(dir) !== realpathSync(kitRoot)
+        return isOther && existsSync(bin) && existsSync(join(dir, "node_modules", "tsx")) ? bin : undefined
+      }
+      if (dirname(dir) === dir) return undefined
+    }
+  } catch {
+    return undefined
+  }
+}
