@@ -214,10 +214,15 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
    */
   protected get extraClass(): string | undefined {
     const color = this.color
+    const pill = this.itemContext?.pill
     const extra = [
       this.kind === UIT.HEADER ? UIT.HEADER : "",
       color ? `${UIT.COLOR_CLASS_PREFIX}${color}` : "",
-      this.isIconOnly ? UIT.ICON_CLASS : ""
+      this.isIconOnly ? UIT.ICON_CLASS : "",
+      // its piece of a toolbar's pill (`UIToolbar.css`)
+      pill ? PILL : "",
+      pill === "start" || pill === "only" ? PILL_START : "",
+      pill === "end" || pill === "only" ? PILL_END : ""
     ]
     return extra.filter(Boolean).join(" ") || undefined
   }
@@ -332,7 +337,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
    * The box's tooltip in a `shrinkable` menu:  the element's own `title` where the page wrote one (or `tooltip`;
    * `title=""` for none), else its title while the menu shows icons only.
    */
-  private get boxTooltip(): string | undefined {
+  protected get boxTooltip(): string | undefined {
     if (!this.isInShrinkableMenu) return undefined
     // the page's own wins, an empty one too:  it wants no tooltip there
     const own = this.attributes.title
@@ -524,3 +529,8 @@ const LETTER = "letter"
 
 /** A letter or a digit:  what a first-letter icon shows. */
 const LETTER_OR_DIGIT = /[\p{L}\p{N}]/u
+
+/** Class words of an item's piece of a toolbar's pill (`<ui-toolbar appearance="pills">`):  every piece, its start, its end. */
+const PILL = "pill"
+const PILL_START = "pill-start"
+const PILL_END = "pill-end"

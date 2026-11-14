@@ -728,7 +728,7 @@ export class Solitario extends App {
     return (
       <>
         <es-segmento invertido={true} unir="arriba">
-          <es-barra-herramientas class="GameBar" aria-label="Juego" apariencia="secundario" invertido={true} tamano="pequeño" encogible={true}>
+          <es-barra-herramientas class="GameBar" aria-label="Juego" apariencia="pildoras" invertido={true} tamano="pequeño" encogible={true}>
             <es-texto slot="titulo" tamano="grande" extranegrita={true}>Solitario Encanto</es-texto>
             {core.drawAction(this, "jugarSolo", { "in-menu": true })}
             {core.drawAction(this, "hacerTrampa", { "in-menu": true })}

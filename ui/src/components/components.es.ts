@@ -618,6 +618,7 @@ export const sharedEs = {
     secondary: "secundario",
     text: "texto",
     segmented: "segmentado",
+    pills: "pildoras",
     pane: "panel-entero",
     fluid: "fluido",
     start: "inicio",

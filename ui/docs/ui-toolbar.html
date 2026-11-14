@@ -132,7 +132,7 @@
               </ui-section>
               <ui-section id="examples-fitting-titles-actions" label="Actions" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="A row of actions, as an app's menu draws one:  each its icon, title and key, a divider between two groups.  Drag the box narrower:  with the icons only, the keys go too, so the icons fit before the row folds into `…`, whose menu shows them again."
+                  description="A row of actions, as an app's menu draws one:  each its icon and title, a divider between two groups.  A toolbar leaves the keys out of its row:  each action's tooltip names them (`Cheat (C)`).  Drag the box narrower:  the titles are cut, then only the icons are left, then the row folds into `…`, whose menu shows them again."
                 >
                   <div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
                     <ui-toolbar shrinkable aria-label="Game">
@@ -141,6 +141,38 @@
                       <ui-item kind="divider"></ui-item>
                       <ui-action icon="fast forward" shortcut="A">Auto play</ui-action>
                       <ui-action icon="eye" shortcut="C">Cheat</ui-action>
+                    </ui-toolbar>
+                  </div>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-fitting-titles-show-keys" label="Show keys" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`show-keys`:  each action's keys beside its title, as a menu shows them.  They go with the titles once only the icons are left."
+                >
+                  <div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+                    <ui-toolbar shrinkable show-keys aria-label="Game">
+                      <ui-text slot="title" size="large">Solitaire</ui-text>
+                      <ui-action icon="redo" shortcut="N">Restart</ui-action>
+                      <ui-item kind="divider"></ui-item>
+                      <ui-action icon="fast forward" shortcut="A">Auto play</ui-action>
+                      <ui-action icon="eye" shortcut="C">Cheat</ui-action>
+                    </ui-toolbar>
+                  </div>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-fitting-titles-pills" label="Pills" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`appearance=&quot;pills&quot;`:  each run of items between two dividers is one rounded track, its items tiles on it, as a group of buttons is drawn.  Drag the box narrower:  cut titles and icons stay on their pills, and the `…` button is a pill of its own."
+                >
+                  <div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 760px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+                    <ui-toolbar appearance="pills" shrinkable aria-label="Game">
+                      <ui-text slot="title" size="large">Solitaire</ui-text>
+                      <ui-action icon="play" shortcut="A">Auto play</ui-action>
+                      <ui-action icon="eye" shortcut="C">Cheat</ui-action>
+                      <ui-action icon="sync alternate" shortcut="R">Restart</ui-action>
+                      <ui-item kind="divider"></ui-item>
+                      <ui-action icon="undo" shortcut="mod+Z">Undo</ui-action>
+                      <ui-action icon="redo" shortcut="mod+shift+Z">Redo</ui-action>
                     </ui-toolbar>
                   </div>
                 </ui-example>

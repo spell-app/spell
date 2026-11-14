@@ -561,7 +561,7 @@ export class Solitario extends App {
         h("es-barra-herramientas", {
           class: "GameBar",
           "aria-label": "Juego",
-          apariencia: "secundario",
+          apariencia: "pildoras",
           invertido: true,
           tamano: "pequeño",
           encogible: true

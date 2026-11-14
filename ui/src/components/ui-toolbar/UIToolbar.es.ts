@@ -16,6 +16,7 @@ export const toolbarEs = {
     interactive: "interactivo",
     shrinkable: "encogible",
     tabs: "pestanas",
+    "show-keys": "mostrar-teclas",
     "scroll-first": "desplazar-primero",
     "max-visible": "max-visibles",
     remember: "recordar"

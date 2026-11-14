@@ -571,7 +571,7 @@ export class Solitaire extends App {
     return (
       <>
         <ui-segment inverted={true} attach="top" color="">
-          <ui-toolbar class="GameBar" aria-label="Game" appearance="secondary" inverted={true} size="small" shrinkable={true}>
+          <ui-toolbar class="GameBar" aria-label="Game" appearance="pills" inverted={true} size="small" shrinkable={true}>
             <ui-text slot="title" size="large" heavy={true}>Solitaire</ui-text>
             {core.drawAction(this, "autoPlay", { "in-menu": true })}
             {core.drawAction(this, "cheat", { "in-menu": true })}
