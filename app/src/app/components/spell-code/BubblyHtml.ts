@@ -37,6 +37,12 @@ export class BubblyHtml {
    */
   static readonly DASH = "bubbly-dash"
 
+  /**
+   * Round a head's description (`-- A playing card`):  the room from the head's words to the band's right end,
+   * the description at its right, kept in view as the drawing scrolls (epic `language` J147)
+   */
+  static readonly DESCRIPTION = "bubbly-description"
+
   /** A comment's text as HTML:  its starting `--` a `DASH`. */
   static commentHtml(comment: string): string {
     return comment.startsWith("--")
@@ -91,7 +97,7 @@ class BubblyWriter {
     const id = this.sections && this.idFor(block)
     const kind = `bubbly-${block.partOfSpeech}${block.isGroup ? " bubbly-group" : ""} bubbly-level-${block.level}`
     const ends = this.endsOf(block.head)
-    const head = this.pieces(block.head)
+    const head = this.head(block.head)
     const html = block.body.length
       ? `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill${ends}">${head}</p><div class="bubbly-gutter"></div>` +
         `<div class="bubbly-body">${this.nodes(block.body)}</div><div class="bubbly-foot"></div></div>`
@@ -111,6 +117,18 @@ class BubblyWriter {
     const body =
       style === " bubbly-comment" ? BubblyHtml.commentHtml(this.text.slice(line.start, line.end)) : this.pieces(line)
     return `<p class="bubbly-line${style} bubbly-indent-${Math.min(line.depth, MAX_INDENT)}">${body}</p>`
+  }
+
+  /**
+   * A declaration's head line as HTML:  a description at its end (`-- A playing card`) in a `bubbly-description`,
+   * the room from the head's words to the band's right end, so the sheet can keep it in view (Owen, epic `language`
+   * J147)
+   */
+  private head(line: SP.BubblyLine): string {
+    const last = line.pieces.at(-1)
+    if (last?.kind !== "comment") return this.pieces(line)
+    const words = line.pieces.slice(0, -1).map((piece) => this.piece(piece))
+    return `${words.join("")}<span class="${BubblyHtml.DESCRIPTION}">${this.piece(last)}</span>`
   }
 
   /** A line's pieces as HTML. */
