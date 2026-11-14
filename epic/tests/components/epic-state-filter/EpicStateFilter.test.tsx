@@ -81,6 +81,27 @@ describe("<epic-state-filter>", () => {
     await expectAccessible(host)
   })
 
+  // epic `epic-engine` I263 (Owen, 2026-11-13:  "This is confusing -- two orange pills on top")
+  test("phases:  ONE chip a colour:  waiting and updated one orange, paused and done long ago one grey", async () => {
+    const host = await ElementFixture.render(
+      `<epic-state-filter phases counts="waiting:1 updated:1 recent:1 paused:1 old:71"></epic-state-filter>`
+    )
+    expect(chips(host)).toEqual(["waiting:2+", "paused:72+", "recent:1+"])
+    expect(chip(host, "waiting").title).toBe(
+      "2 your turn:  a plan to read and accept;  changed since you looked:  hide these\n⌥-click:  show only these"
+    )
+    const picks: unknown[] = []
+    host.addEventListener("epic-state-changed", (event) => picks.push((event as CustomEvent).detail.shown))
+    chip(host, "waiting").click()
+    chip(host, "paused").click()
+    altClick(chip(host, "paused"))
+    expect(picks).toEqual([
+      ["paused", "old", "recent", "handled", "quiet"],
+      ["waiting", "updated", "recent"],
+      ["paused", "old", "handled", "quiet"]
+    ])
+  })
+
   test('`shown` presses those;  `""` presses none;  no counts, nothing drawn', async () => {
     const host = await ElementFixture.render(
       `<epic-state-filter counts="open:2 recent:1" shown="recent"></epic-state-filter>`
