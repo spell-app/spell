@@ -147,5 +147,20 @@ describe("expectedAfter()", () => {
     test("a whole statement needs nothing of its own", () => {
       expect(expected("move c to p").own).toEqual([])
     })
+
+    test("a comparison partway there, in a plural call, never throws:  `if the number of cards in the foundations is 52`", () => {
+      // its half-matched sides had no datatype yet (`CompoundExpression.getDatatype()`):  Solitaire's line threw
+      const piles = SP.spellParser.getScope("expectedAfter plural")
+      SP.spellParser.parse(
+        ["a card is a thing", "a pile is a list of cards", "a foundation is a pile"].join("\n"),
+        "block",
+        piles
+      )
+      const line = "if the number of cards in the foundations is 52"
+      const words = line.split(" ")
+      for (let count = 1; count <= words.length; count++) {
+        expect(() => SP.spellParser.expectedAfter(words.slice(0, count).join(" "), "statement", piles)).not.toThrow()
+      }
+    })
   })
 })
