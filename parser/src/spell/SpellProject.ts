@@ -1076,6 +1076,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * A project's files' code as ONE module, in order, the writer's `fileSeparator` between each.
    * - Each `part` is a `.spell` file's AST, or code as is, e.g. a `.css` file's.
+   * - Every file sets itself up before any file's running code, each in file order (`SP.runningCodeLast()`):
+   *   so the order a project file lists its files in never changes what the program does.
    * - Each class gets its members from EVERY file -- see `SP.hoistClassMembers()`:
    *   e.g. `Card.move_to_$pile` from `Pile.spell` goes in `Card.spell`'s `class Card`.
    *   Each file's own were moved in by `SP.Block`.
@@ -1114,12 +1116,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     if (header && subclassed.names.length) {
       header = projectWriter.importsHeader(SpellProject.importsOf(scope, subclassed.names))
     }
-    const code = parts
-      .map((part, index) => {
-        if (typeof part !== "object") return projectWriter.codePart(part ?? "")
-        return String(projectWriter.write(new P.ASTStatementGroup(part.match, { statements: hoisted[index] })))
-      })
-      .join(projectWriter.fileSeparator)
+    // every file sets itself up before any file's steps run, so a file's order doesn't change what runs
+    const { setUp, runs } = SP.runningCodeLast(hoisted)
+    const written = (part: P.ASTStatementGroup, statements: SP.HoistableStatement[]) =>
+      String(projectWriter.write(new P.ASTStatementGroup(part.match, { statements })))
+    const settingUp = parts.map((part, index) => {
+      if (typeof part !== "object") return projectWriter.codePart(part ?? "")
+      return written(part, setUp[index]!)
+    })
+    const running = parts.flatMap((part, index) =>
+      typeof part === "object" && runs[index]!.length ? [written(part, runs[index]!)] : []
+    )
+    const code = [...settingUp, ...running].join(projectWriter.fileSeparator)
     const starts = [SpellProject.startedByItself(hoisted, mainFile), SpellProject.testRuns(hoisted)].filter(
       (it) => !!it
     )

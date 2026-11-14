@@ -60,7 +60,8 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
         kept.push(...carried.filter((item) => item instanceof P.ASTHeadingInvocation))
         const moved = carried.filter((item) => !(item instanceof P.ASTHeadingInvocation))
         addMember(members, typeName, [...moved, statement])
-        if (descriptions.length) descriptionsByType.set(typeName, [...(descriptionsByType.get(typeName) ?? []), ...descriptions])
+        if (descriptions.length)
+          descriptionsByType.set(typeName, [...(descriptionsByType.get(typeName) ?? []), ...descriptions])
         removed = true
       } else {
         kept.push(...pending, statement)
@@ -401,4 +402,74 @@ function declaresClass(statement: HoistableStatement): boolean {
   if (!(statement instanceof P.ASTStatementGroup)) return false
   const items = statement.statements ?? []
   return items.some(declaresClass) && items.every((item) => isQuiet(item) || declaresClass(item))
+}
+
+/**
+ * `files`, a whole PROJECT's top levels, each split where its running code starts:
+ * every file's `setUp` runs before any file's `runs`, each in file order.
+ * - So a program's steps run once every file has set itself up, whatever order its project file lists them in:
+ *   FizzBuzz's `play fizzbuzz` triggers its events after `Console.spell`'s `on fizz` listens,
+ *   and after `Explainer.spell`'s page is made, which listens itself (epic `mockup`, its FizzBuzz fix).
+ * - Each file's own order NEVER changes:  `setUp` is its lines above its first running code, `runs` the rest.
+ * - When no file after the first running code sets anything up, every file is `setUp` whole, `runs` empty:
+ *   so a one-file program, or one whose running code is all in its last files, compiles as it did.
+ * - `runs` starts with the last heading's call above it, so the Thing Explorer still names what it makes by its heading.
+ * - Running code:  a step that does something as the program loads (`runsAsItLoads()`), e.g. a call or a loop.
+ *   Anything else is setting up:  types, actions, listeners, variables, the things made as it loads.
+ * - NEVER mutates what it's given.
+ */
+export function runningCodeLast(files: HoistableStatement[][]): {
+  setUp: HoistableStatement[][]
+  runs: HoistableStatement[][]
+} {
+  const firstRuns = files.map((statements) => statements.findIndex(runsAsItLoads))
+  const firstFileThatRuns = firstRuns.findIndex((at) => at >= 0)
+  // nothing set up after the first running code:  every file stays as it is
+  const setsUpLater = files.some(
+    (statements, file) =>
+      firstFileThatRuns >= 0 &&
+      file > firstFileThatRuns &&
+      statements.slice(0, firstRuns[file]! < 0 ? undefined : firstRuns[file]).some((it) => !isQuiet(it))
+  )
+  if (!setsUpLater) return { setUp: files, runs: files.map(() => []) }
+  const setUp: HoistableStatement[][] = []
+  const runs: HoistableStatement[][] = []
+  files.forEach((statements, file) => {
+    const firstRun = firstRuns[file]!
+    if (firstRun < 0) {
+      setUp.push(statements)
+      runs.push([])
+      return
+    }
+    const head = statements.slice(0, firstRun)
+    const heading = [...head].reverse().find((statement) => statement instanceof P.ASTHeadingInvocation)
+    setUp.push(head)
+    runs.push([...(heading ? [heading] : []), ...statements.slice(firstRun)])
+  })
+  return { setUp, runs }
+}
+
+/** What a program sends as it loads, so it needs its listeners first:  `trigger fizz`, `send a click`. */
+const SENDING_CALLS = new Set(["trigger", "send"])
+
+/**
+ * Does `statement`, at a file's top level, RUN something as the program loads?
+ * - a call of the program's own steps (`playFizzbuzz()`), a `print`, a loop, an `if`, a start or a test's run
+ * - a core call that sends an event (`trigger()`), and a `set` of a variable declared before
+ * - NOT:  the quiet ones (`isQuiet()`), a class, an action's definition, a listener (`on()`), a new variable,
+ *   or what describes a type (`core.describeAction()`)
+ * - Unsure means no:  a line taken as setting up runs where it always did.
+ */
+function runsAsItLoads(statement: HoistableStatement): boolean {
+  if (statement instanceof P.ASTStatementGroup && !(statement instanceof P.ASTTryCatchBlock)) {
+    if (statement instanceof P.ASTStartProcessInvocation) return true
+    return (statement.statements ?? []).some(runsAsItLoads)
+  }
+  if (statement instanceof P.ASTTryCatchBlock || statement instanceof P.ASTIfStatement) return true
+  if (statement instanceof P.ASTAssignmentStatement) return !statement.isNewVariable
+  if (statement instanceof P.ASTCoreMethodInvocation) {
+    if (statement instanceof P.ASTHeadingInvocation) return false
+    return SENDING_CALLS.has(statement.methodName ?? "") || statement instanceof P.ASTExpectMethodInvocation
+  }
+  return statement instanceof P.ASTMethodInvocation
 }

@@ -28,13 +28,14 @@ The proof is a whole game.
 [Solitario](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitario/) is the Solitaire example
 written again in Spanish, file for file, cards and all, in plain Spell as Solitaire is, its words Spanish too
 (`una "carta" es una vista reversible`, `su "rango" es uno de as, 2 ... 10, jota, dama, rey`):
-it deals, plays and passes six tests, as Solitaire does, two of them its jokers'.
+it deals, plays and passes four tests, as Solitaire does.
 A person wrote it;  `spell translate` writes a first draft of one for any English project
 (below, "Translating a project").
 
-![The Spell editor in Spanish:  Carta.es.spell on the left;  on the right Solitario dealt, its menu reading Solitario Klondike, Puntos, Jugar solo, Trampa, Depurar;  the panes titled Aplicación and Salida en JavaScript](docs/images/spanish/solitario-editor.png)
+![The Spell editor in Spanish:  Carta.es.spell on the left;  on the right Solitario dealt, its bar reading Solitario Klondike, Puntos, Jugar solo, Trampa, Depurar, as an earlier version of the game had it;  the panes titled Aplicación and Salida en JavaScript](docs/images/spanish/solitario-editor.png)
 
-_Solitario open in the editor, in a Spanish browser:  the program, the game, and the editor's own words, in Spanish._
+_Solitario open in an earlier editor, in a Spanish browser:  the program, the game, and the editor's own words, in Spanish.
+Today's game bar is pills:  Solitario, then Jugar Solo, Hacer Trampa, Reiniciar El Juego, Deshacer and Rehacer, with Puntos on the right._
 
 ## Try it
 
@@ -42,7 +43,7 @@ You need a checkout of the kit, and `spell` on your `PATH`:
 the kit's [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) does both.
 
 **Run Solitario's tests.**
-Six, in Spanish:
+Four, in Spanish:
 
 ```sh
 spell test @spell/examples/Solitario
@@ -137,17 +138,17 @@ spell compile @spell/examples/Solitario --stdout
 
 ```text
 ...
+  get color() {
+    if (this.palo === "diamantes" || this.palo === "corazones") return "rojo"
+    return "negro"
+  }
+
   get esUnaFigura() {
     return core.includes(["jota", "dama", "rey"], this.rango)
   }
 
   get esUnaCartaNumérica() {
     return !this.esUnaFigura
-  }
-...
-  get color() {
-    if (this.esUnPalo("diamantes") || this.esUnPalo("corazones")) return "rojo"
-    return "negro"
   }
 ...
 ```
@@ -406,15 +407,17 @@ fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (3 files, ...)
     FizzBuzz.es.spell:9  names "number"
     FizzBuzz.es.spell:10  names "number", names "fizzbuzz"
 ...
-  7 problems left:
+  17 problems left:
 ...
 ```
 
 </details>
 
 - Every line is Spanish but its names:  `para number de 1 a 100`, `si el number dividido por 15 es un entero: ...`.
-  It exits 1, because 45 lines still need a person.
-  The seven shape problems are lines with an untranslated phrase, which can't compile until a person or Claude names it.
+  It exits 1, because 49 lines still need a person.
+  Its 17 problems are the lines those leave unreadable:
+  ten that lint can't read (the explainer's drawing, and its `show ... for ...` lines),
+  and seven that compile to a different program, until a person or Claude names what they say.
 - With Claude, the same command fills the names in and fixes the lines;
   through the Claude API when `ANTHROPIC_API_KEY` is set, else through `claude -p`, a little slower.
 - `--update` re-translates only the English lines changed since the last run:  hand edits to the Spanish stay.

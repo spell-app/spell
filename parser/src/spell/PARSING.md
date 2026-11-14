@@ -2495,6 +2495,21 @@ sidebars any of them opens.
     - So every class declared below it moves above it, and its properties' starting values can make them.
     - Its variable is of kind `only` (`P.ScopeVariable.kind`), in the project's scope (epic `data` I44).
       So a call of its body's methods with no receiver works anywhere, on it:  `DynamicMethodRule.theOnlyOne()`.
+- Every file sets itself up before any file's steps run (epic `mockup`):
+  `SP.runningCodeLast()`, from `SP.SpellProject.combineCompiled()`.
+  - So the order a project file lists its files in never changes what the program does.
+    FizzBuzz's `play fizzbuzz`, in the file listed first, sends its events once `Console.spell` listens
+    and `Explainer.spell`'s page is made, though both are listed after it.
+    (A person reorders a project's files by dragging the editor's tabs, which rewrites its project file.)
+  - Each file is cut where its running code starts:  a call of its steps, a `print`, a loop, an `if`, a `trigger`,
+    a `set` of a variable, a start.
+    Its lines above that set it up:  types, actions, listeners, new variables, the things made as it loads.
+  - The program is every file's setting up, in file order, then every file's running code, in file order.
+    - Each file's own lines keep their order.
+    - Its running code starts with the last heading's call above it again, for the Thing Explorer.
+  - When no file after the first running code sets anything up, nothing moves:
+    a one-file program, or one whose steps are in its last files, compiles as it did.
+  - A line it can't tell is running code counts as setting up, so it runs where it always did.
 - A program runs its own tests the first time it loads (P17):
   `SpellProject.combineCompiled()` ends with a call of each `to test ...` method its files declare.
   - e.g. `if (!core.isCarryingOver) testCardSetup()`
