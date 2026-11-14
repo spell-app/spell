@@ -158,6 +158,7 @@ and in the app's build folder, `app/` at the app folder's root.
     "Settings…" › "Suggest as you type" makes it everywhere, or never.
     - Spell UI's tags and attributes say what each is, as listed and on hover:  the language service reads them
       through the component pack (`SP.ComponentPacks.help()`), from Spell UI's help table, `help.generated.ts`.
+      On every line of a tag split over several, too (I64).
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:
