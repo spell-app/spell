@@ -548,8 +548,9 @@ export type SourceFile = { path: string; text: string }
 
 /**
  * Where a new event `words` (`on double click`) goes in the first type of `typeNames` written in `files`, and its code:
- * - under a plain line for it (`a "card" is a view:`, `a card:`):  `on double click:` after its last line, at its
- *   rows' indent, bare as plain Spell writes a member (epic `language` P46)
+ * - under a plain line for it (`a "card" is a view`, `a card -- play it on click`):  `on double click` after its last
+ *   line, at its rows' indent, bare as plain Spell writes a member (epic `language` P46)
+ *   - with a colon only under a header in the older form, that has one (`a card:`;  epic `editor` I62)
  * - `at`:  its offset in the file's text, where `code` is inserted;
  *   `undefined` when the type isn't written in `files`.
  */
@@ -574,7 +575,9 @@ export function newEventIn(
     const indent = row ? /^\s*/.exec(row)![0] : `${/^\s*/.exec(lines[first]!)![0]}\t`
     let end = last
     while (end > first && !lines[end]!.trim()) end--
-    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${indent}${words}:` }
+    // a colon only where the header has one:  the older form (`a card:`), not the one written today (`a card`)
+    const colon = /:\s*(?:(?:--|\/\/).*)?$/.test(lines[first]!) ? ":" : ""
+    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${indent}${words}${colon}` }
   }
   return undefined
 }
@@ -593,7 +596,8 @@ function typeLineRanges(text: string, name: string): [number, number][] {
   const lines = text.split("\n")
   const named = `"?${escapeForRegExp(name)}"?`
   const header = new RegExp(
-    `^(\\s*)(?:(?:an?|una?)\\s+)?${named}(?:\\s+(?:is|es)\\s+.+|\\s.*\\b(?:where|donde))?\\s*:\\s*$`,
+    // its colon only in the older form, and a description after it:  `a card -- play it on click` (I62)
+    `^(\\s*)(?:(?:an?|una?)\\s+)?${named}(?:\\s+(?:is|es)\\s+.+|\\s.*\\b(?:where|donde))?\\s*:?\\s*(?:(?:--|//).*)?$`,
     "i"
   )
   lines.forEach((line, index) => {

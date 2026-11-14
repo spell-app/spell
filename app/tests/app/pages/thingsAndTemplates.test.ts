@@ -177,7 +177,8 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     const own = await page
       .locator(".PalettePopup .ThisApp ui-tree-item")
       .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
-    expect(own).toEqual(["Card", "Discard pile", "Foundation", "Pile", "Stock pile", "Tableau"])
+    // Solitaire as it is now:  a tableau is a column, and its deck is drawn too (I62)
+    expect(own).toEqual(["Card", "Column", "Deck", "Discard pile", "Foundation", "Pile", "Stock pile"])
     const cards = () => page.evaluate(() => document.querySelectorAll("solitaire-card").length)
     const before = await cards()
     await page.locator('.PalettePopup .ThisApp ui-tree-item[label="Card"]').click()
@@ -246,7 +247,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
         ).editor.project.spellFiles
           .find((file) => file.path.endsWith("/Card.spell"))!
           .contents.split("\n")
-          .find((line) => line.includes('property "rank"'))!
+          .find((line) => line.includes('its "rank"'))!
       )
     await rank
       .locator(".label, ui-label")
@@ -256,10 +257,10 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
       .last()
       .click({ force: true })
     await page.waitForTimeout(800)
-    expect(await rankLine()).toContain('one-of="ace, 2 ... 10, jack, queen"')
+    expect(await rankLine()).toMatch(/its "rank" is one of ace, 2 \.\.\. 10, jack(,| or) queen\s*$/)
     await page.keyboard.press("ControlOrMeta+z")
     await page.waitForTimeout(600)
-    expect(await rankLine()).toContain('one-of="ace, 2 ... 10, jack, queen, king"')
+    expect(await rankLine()).toMatch(/its "rank" is one of ace, 2 \.\.\. 10, jack, queen(,| or) king\s*$/)
     // the tests run on a copy of their own, and say how they went
     await page.locator(".InspectorRunTests").click({ force: true })
     await expect

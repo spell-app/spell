@@ -145,6 +145,12 @@ afterEach(() => {
 ////////////////
 
 describe("undoable actions", () => {
+  test("an action declared undoable takes as many arguments as it did:  what reads its length still knows", () => {
+    // the editor's Code card gives a run button only to an action that takes nothing (epic `editor` I62)
+    expect(Game.prototype.deal.length).toBe(1)
+    expect(Card.prototype.turnOver.length).toBe(0)
+  })
+
   test("an action declared undoable is one step:  undo puts it back, redo makes it again", () => {
     const [ace] = cards
     ace.turnOver()

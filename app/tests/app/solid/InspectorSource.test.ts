@@ -5,6 +5,7 @@ import { parseSpellProject } from "spell/parser/spell/test"
 import {
   enabledWhenInSource,
   eventsDeclared,
+  newEventIn,
   propertyEditorInSource,
   startingValues,
   withClassNames
@@ -238,5 +239,25 @@ describe("startingValues()", () => {
   // its layout is a one-of with no Spell, on one line in plain Spell (epic `language` P46):  the tag spanned two
   test("a pile:  its layout, the first of its one-of", () => {
     expect(startingIn(["Pile"], [card, pile, solitaire])).toEqual([{ words: "layout", value: "stacked" }])
+  })
+})
+
+/** `newEventIn()`:  where the Code card's + writes a new handler (epic `editor` P21;  I62). */
+describe("newEventIn()", () => {
+  const files = [{ path: "/Solitaire.spell", text: solitaire }]
+
+  test("under Solitaire's `a card -- ...` header, as written today:  no colon, no description in the way", () => {
+    const written = newEventIn(["card"], files, "on double click")!
+    expect(written.code).toBe("\n\ton double click")
+    expect(solitaire.slice(0, written.at)).toMatch(/\na card\t+-- play the card on click[^\n]*\n\ton click\n[\s\S]*play the card$/)
+  })
+
+  test("under a header in the older form, the colon comes too", () => {
+    const text = "a card:\n\t- on click:\n\t\tplay it\n"
+    expect(newEventIn(["card"], [{ path: "/x.spell", text }], "on double click")).toEqual({
+      path: "/x.spell",
+      at: text.length - 1,
+      code: "\n\ton double click:"
+    })
   })
 })

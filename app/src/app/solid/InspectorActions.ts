@@ -114,10 +114,21 @@ export class InspectorActions {
     return quoted ? (quoted[1] ?? quoted[2]) : typed
   }
 
-  /** The program's types in spell's words, by name, the longest first:  `[["stock pile", "StockPile"], ...]`. */
+  /**
+   * The program's types in spell's words, by name, the longest first:  `[["stock pile", "StockPile"], ...]`.
+   * - With each known class's own super-types:  a type no thing is made of directly is known only through them,
+   *   e.g. Solitaire's `pile`, whose things are all stock piles, columns ... (epic `editor` I62)
+   */
   private static knownTypeWords(core: Core): [words: string, type: string][] {
-    return core.things
-      .knownClasses()
+    const classes = new Set<Function>()
+    for (const known of core.things.knownClasses()) {
+      for (let Class: Function | null = known; Class && !BASE_TYPES.includes(Class.name); ) {
+        classes.add(Class)
+        Class = Object.getPrototypeOf(Class) as Function | null
+        if (Class === Function.prototype) break
+      }
+    }
+    return [...classes]
       .map((Class): [string, string] => [wordsOfName(Class.name), Class.name])
       .sort(([a], [b]) => b.length - a.length)
   }

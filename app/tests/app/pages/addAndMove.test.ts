@@ -13,22 +13,16 @@ import { EDITOR, SERVING } from "./runningEditor"
  * - Headless Playwright, never a real browser window.
  */
 
-/** The file a blank program is answered for:  a project in tags, the example's text never read. */
+/** The file a blank program is answered for:  the example's text never read. */
 const FILE = "TaskList.spell"
 
-/** A program with nothing in it. */
+/** A program with nothing in it, in plain Spell (the tag form is gone:  epic `language` P47;  I62). */
 const BLANK = `# A new app
 
-<spell-app "blank">
-\t<draw>
-\t\t<ui-container>
-\t\t</ui-container>
-\t</draw>
-</spell-app>
-
-<spell>
-\tstart the blank
-</spell>
+blank is an app
+\tto draw blank
+\t\t<container>
+\t\t</>
 `
 
 /** What a compile and redraw takes, at most. */
@@ -52,13 +46,17 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     }, FILE)
 
   /** What's in the program's container, as written:  its tags, in order, with no indent. */
-  const written = async () =>
-    (await text())
-      .split("<ui-container>")[1]!
-      .split("</ui-container>")[0]!
-      .split("\n")
+  const written = async () => {
+    const lines = (await text()).split("\n")
+    const start = lines.findIndex((line) => line.trim() === "<container>")
+    const indent = /^\s*/.exec(lines[start]!)![0]
+    // to its own closing `</>`, at its indent
+    const end = lines.findIndex((line, at) => at > start && line === `${indent}</>`)
+    return lines
+      .slice(start + 1, end)
       .map((line) => line.trim())
       .filter(Boolean)
+  }
 
   /** The app's parts named `tag`, as they're drawn. */
   const drawn = (tag: string) =>

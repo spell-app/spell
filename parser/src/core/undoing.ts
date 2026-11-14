@@ -253,7 +253,10 @@ export function declareAction(Class: Function, name: string, info: ActionInfo): 
       const history = core.RUNTIME?.history
       return history ? history.run(info, () => method.apply(this, args)) : method.apply(this, args)
     }
-  }[name]
+  }[name]!
+  // and as many arguments as the method's:  what reads it (the editor's Code card) knows `put it on a pile` takes one
+  // (epic `editor` I62)
+  Object.defineProperty(action, "length", { value: method.length })
   Object.defineProperty(Class.prototype, name, { value: action, writable: true, configurable: true })
 }
 

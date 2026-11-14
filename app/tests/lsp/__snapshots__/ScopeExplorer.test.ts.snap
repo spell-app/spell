@@ -25,9 +25,6 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "constant jack",
   "constant queen",
   "constant king",
-  "property value",
-  "method is a face card",
-  "method is a number card",
   "property suit",
   "enumeration Suits",
   "constant clubs",
@@ -38,12 +35,14 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "enumeration Colors",
   "constant red",
   "constant black",
-  "property symbol",
-  "property name",
+  "method is a face card",
+  "method is a number card",
   "method is the (rank) of (suit)",
+  "property name",
+  "property value",
+  "property symbol",
   "property short name",
   "property picture",
-  "property lifted",
   "property pile",
   "method play a card",
   "method put a card on a pile",
@@ -125,7 +124,7 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
       type Card (is a TwoSidedView)
       function test card setup
     file Deck.spell
-      type Deck (is a List)
+      type Deck (is a ViewableList)
       function test a new deck
     file Pile.spell
       type Pile (is a ViewableList)
@@ -208,7 +207,7 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
       type Card (is a TwoSidedView)
       function test card setup
     file Deck.spell
-      type Deck (is a List)
+      type Deck (is a ViewableList)
       function test a new deck
     file Pile.spell
       type Pile (is a ViewableList)

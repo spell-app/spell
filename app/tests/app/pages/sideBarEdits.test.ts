@@ -228,7 +228,8 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       expect(words.slice(1)).toEqual(["All Cards"])
       expect(await scopes.first().getAttribute("selected")).not.toBeNull()
       const unsaved = page.locator("ui-property[name=suit] .unsaved")
-      expect(await unsaved.getAttribute("title")).toBe("You can't save this because it is created automatically.")
+      // its why in the info tip's bubble, not the browser's tooltip (mockup P20):  its label says it too
+      expect(await unsaved.getAttribute("aria-label")).toBe("Spell makes this for you, so a change here can't be kept.")
       expect(await page.locator(".InspectorNotSaved").count()).toBe(0)
 
       // it plays:  the running card changes, and no file does

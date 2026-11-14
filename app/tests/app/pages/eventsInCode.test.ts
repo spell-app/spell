@@ -29,6 +29,14 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
         ).project.spellFiles.find((file) => file.path.endsWith("/Solitaire.spell"))!.contents
     )
 
+  /** Every spell file of Solitaire, as the editor holds them now, one after another. */
+  const allFiles = () =>
+    page.evaluate(() =>
+      (window as unknown as { project: { spellFiles: { contents: string }[] } }).project.spellFiles
+        .map((file) => file.contents)
+        .join("\n")
+    )
+
   /** The Code band's row starting with `words`. */
   const row = (words: string) => page.locator(".InspectorEvent").filter({ hasText: words }).first()
 
@@ -80,8 +88,8 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
           line.replace(/\s+/g, " ").trim()
         )
       )
-      // its words are its row's header:  the field holds only its code
-      .toEqual(["play it"])
+      // its words are its row's header:  the field holds only its code (Solitaire as it is now, I62)
+      .toEqual(["if it is face up or its pile is solitaire's stock", "play the card"])
     // an action:  its signature, its types in badges, then its code
     const action = page
       .locator(".InspectorEvent.action")
@@ -96,8 +104,8 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     const putOn = page.locator(".InspectorActionSignature").filter({ hasText: /put/ }).first()
     expect(await putOn.locator("ui-label").allInnerTexts()).toEqual(["a card", "a pile"])
     expect(await putOn.locator("ui-button, ui-select, ui-input").count()).toBe(0)
-    expect((await action.locator(".CodeSlice .view-line").first().innerText()).replace(/\s+/g, " ")).toContain(
-      "if the card's pile is the solitaire's stock"
+    expect((await action.locator(".CodeSlice .view-lines").innerText()).replace(/\s+/g, " ")).toContain(
+      "if the card is in the stock"
     )
     // found where the compiler says it's declared, not by its words:  one whose words name another type (J58)
     const points = page
@@ -114,14 +122,19 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     await page.evaluate(() => {
       ;(window as unknown as { app: Element | null }).app = document.querySelector("solitaire-app")
     })
-    const line = row("on drag cancelled").locator(".CodeSlice .view-line").last()
+    // the points a move scores:  its last line, `return 0`;  found by its signature, as another row's code says its words
+    const line = page
+      .locator(".InspectorEvent.action")
+      .filter({ has: page.locator(".InspectorActionSignature", { hasText: /count/ }) })
+      .first()
+      .locator(".CodeSlice .view-line")
+      .last()
     await line.click()
     await page.keyboard.press("End")
-    await page.keyboard.press("ArrowLeft")
-    await page.keyboard.type(", really")
+    await page.keyboard.type(" + 0")
     await page.keyboard.press("ControlOrMeta+Enter")
     await page.waitForTimeout(SETTLE_MS)
-    expect(await mainFile()).toContain('" -- Not there, really"')
+    expect(await mainFile()).toContain("\t\treturn 0 + 0\n")
     // the same app, not drawn again (Edit Without Redraw)
     expect(
       await page.evaluate(() => {
@@ -137,17 +150,19 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     expect(await mainFile()).toBe(before)
   })
 
-  test("a one-line row's field starts after its words, and typing at its start lands there", async () => {
+  // Solitaire's card has no one-line row any more (`- clickable when ...` is its `on click`'s `if` now, I62):
+  // what this keeps is a row's first line, where Home lands at its code, past the file's indent
+  test("a row's field starts at its code, and typing at its start lands there", async () => {
     const before = await mainFile()
-    const field = row("clickable when").locator(".CodeSlice")
+    const field = row("on click").locator(".CodeSlice")
     await expect
       .poll(async () => (await field.locator(".view-lines").innerText()).replace(/\s+/g, " ").trim())
-      .toMatch(/^it is face up or its pile is the solitaire's stock/)
+      .toMatch(/^if it is face up or its pile is solitaire's stock/)
     await field.locator(".view-line").first().click()
     await page.keyboard.press("Home")
     await page.keyboard.type("really ")
     await page.waitForTimeout(300)
-    expect(await mainFile()).toContain("- clickable when really it is face up")
+    expect(await mainFile()).toContain("\t\treally if it is face up")
     for (let step = 0; step < 8 && (await mainFile()) !== before; step++) {
       await page.keyboard.press("ControlOrMeta+Z")
       await page.waitForTimeout(150)
@@ -157,6 +172,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
 
   test("the band's + writes an empty handler in its place, which takes the cursor", async () => {
     const before = await mainFile()
+    const beforeFiles = await allFiles()
     // its pick, as the dropdown tells it:  the dropdown itself is Spell UI's, tested there
     await page.evaluate(() =>
       document
@@ -164,8 +180,9 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
         .dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "dblclick" } }))
     )
     await page.waitForTimeout(SETTLE_MS)
-    const after = await mainFile()
-    expect(after).toContain(`- on drag cancelled set the solitaire's hint to " -- Not there"\n\t\t- on double click:`)
+    // one more handler than before, at the end of the card's declaration (`a "card" is a ...`, Card.spell), its own row
+    const after = await allFiles()
+    expect(after.split("\ton double click").length).toBe(beforeFiles.split("\ton double click").length + 1)
     expect(await row("on double click").locator(".CodeSlice").count()).toBe(1)
     expect(await page.evaluate(() => !!document.activeElement?.closest(".CodeSlice"))).toBe(true)
     // put it back, as the editor's own undo would

@@ -16,7 +16,7 @@ import { fixtureFolder } from "spell/app/spaces/test"
  * - The lines are found by what they say, never by number:  the examples are Owen's, and change.
  */
 describe("SpellLanguageService, action and menu tags (epic `language` P53)", () => {
-  const solitaire = gameIn("Solitaire", "Solitaire.spell", '<action "redo" icon-only/>')
+  const solitaire = gameIn("Solitaire", "Solitaire.spell", '<action "redo"')
   const solitario = gameIn("Solitario", "Solitario.es.spell", '<acción "rehacer"')
 
   test("typing a tag offers spell's own first:  `children`, `action`, `context-menu`, `divider`", async () => {
