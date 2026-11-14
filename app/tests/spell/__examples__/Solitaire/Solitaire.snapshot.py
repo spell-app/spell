@@ -137,7 +137,7 @@ class Card(TwoSidedView):
 
     async def play(self) -> Any:
         if self.pile == solitaire.stock:
-            await solitaire.play_from_the_stock()
+            await solitaire.turn_a_stock_card()
         else:
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
             if end_pile is None:
@@ -235,7 +235,7 @@ def test_card_setup() -> None:
 class Deck(List):
     item_type = Card
 
-    def create(self) -> None:
+    async def create(self) -> None:
         """One of each card, ace of clubs first:  each starts face down, as every two sided view does"""
         for rank in Card.RANKS:
             for suit in Card.SUITS:
@@ -400,7 +400,7 @@ class StockPile(Pile):
         return h("ui-text", {"part": "placeholder"}, "🂠")
 
     async def on_click(self, event: ClickEvent) -> None:
-        await solitaire.play_from_the_stock()
+        await solitaire.turn_a_stock_card()
 
 
 class DiscardPile(Pile):
@@ -520,7 +520,7 @@ class Solitaire(App):
     # "score" is a number
     score = prop(type="number")
 
-    async def on_creating_solitaire(self, event: Any) -> None:
+    async def create(self) -> None:
         for card in self.deck:
             self.stock.append(card)
         await self.restart_the_game()
@@ -539,7 +539,7 @@ class Solitaire(App):
                         {"slot": "center", "padding": "compact"},
                         core.draw_action(self, "auto_play"),
                         core.draw_action(self, "cheat"),
-                        core.draw_action(self, "restart_the_game", {"title": "Restart"}),
+                        core.draw_action(self, "restart_the_game"),
                     ),
                     h(
                         "ui-buttons",
@@ -627,6 +627,9 @@ class Solitaire(App):
         self.score = 0
         await self.deal_the_cards()
 
+    async def turn_a_stock_card(self) -> None:
+        await self.play_from_the_stock()
+
     async def auto_play(self) -> None:
         anything_changed = False
         if self.discards:
@@ -677,7 +680,10 @@ class Solitaire(App):
 
 solitaire = Solitaire()
 
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "undone_as": "Restart The Game"})
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["R"], "undone_as": "Restart"})
+
+# a click on the stock:  one step to undo, where the deal's own turn isn't
+core.describe_action(Solitaire, "turn_a_stock_card", {"title": "Turn A Stock Card", "undone_as": "Turn Card"})
 
 core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
 

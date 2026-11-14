@@ -607,15 +607,15 @@ describe("compiled spell draws with Solid", () => {
     await ElementFixture.settle(host)
     expect(host.querySelector(".spell-draw-error")).toBeNull()
     // each pile holds its cards' elements, shown through its frame's place for them, a <slot> on the page
-    const tableaus = () => [...host.querySelectorAll<Element>("test-project-tableau")]
+    const columns = () => [...host.querySelectorAll<Element>("test-project-column")]
     // dealt with a pause between cards:  wait for the last
-    await waitFor(() => tableaus()[6]?.children.length === 7, 10_000)
+    await waitFor(() => columns()[6]?.children.length === 7, 10_000)
     await ElementFixture.settle(host)
-    expect(tableaus().map((tableau) => tableau.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
-    expect(tableaus()[0]!.shadowRoot!.querySelector("slot")).not.toBeNull()
-    // styles.css lays them out (outline-spell P27):  a tableau is vertical, each card a step below the one before,
+    expect(columns().map((pile) => pile.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
+    expect(columns()[0]!.shadowRoot!.querySelector("slot")).not.toBeNull()
+    // styles.css lays them out (outline-spell P27):  a column is vertical, each card a step below the one before,
     // and every card as wide as its pile, inside its cell's gutters
-    const column = tableaus()[6]!
+    const column = columns()[6]!
     // once the deal's cards have glided into place
     await Promise.all([...column.children].flatMap((card) => card.getAnimations().map((glide) => glide.finished)))
     const tops = [...column.children].map((card) => card.getBoundingClientRect().top)
@@ -637,11 +637,11 @@ describe("compiled spell draws with Solid", () => {
       expect(card.getAttribute("direction")).toMatch(/^(up|down)$/)
       expect(card.getAttribute("suit")).toMatch(/^(clubs|diamonds|hearts|spades)$/)
     }
-    // each pile drawn by its tag, `<tableau "T1"/>`:  its id, its member's name (Owen, 2026-11-12)
-    expect(tableaus().map((tableau) => tableau.id)).toEqual(["T1", "T2", "T3", "T4", "T5", "T6", "T7"])
-    // ... and the pile holding it, as that pile's reference (P18):  each tableau's cards say so
-    expect(tableaus().map((tableau) => [...tableau.children].map((card) => card.getAttribute("pile")))).toEqual(
-      [1, 2, 3, 4, 5, 6, 7].map((count, index) => Array<string>(count).fill(`Tableau#T${index + 1}`))
+    // each pile drawn by its tag, `<column "C1"/>`:  its id, its member's name (Owen, 2026-11-12)
+    expect(columns().map((pile) => pile.id)).toEqual(["C1", "C2", "C3", "C4", "C5", "C6", "C7"])
+    // ... and the pile holding it, as that pile's reference (P18):  each column's cards say so
+    expect(columns().map((pile) => [...pile.children].map((card) => card.getAttribute("pile")))).toEqual(
+      [1, 2, 3, 4, 5, 6, 7].map((count, index) => Array<string>(count).fill(`Column#C${index + 1}`))
     )
     expect(stock.lastElementChild!.getAttribute("pile")).toBe("StockPile#stock")
     // ... and each element is named after its thing, by its id (J43):  the inspector says which card it is
@@ -772,7 +772,7 @@ describe("compiled spell draws with Solid", () => {
 
   test("`Solitaire`'s clicks during its deal wait their turn, and the board stays whole (epic `language`, Q6)", async () => {
     const { host } = await mountSettable(await solitaireSource())
-    const tableaus = () => [...host.querySelectorAll<HTMLElement>("test-project-tableau")]
+    const columns = () => [...host.querySelectorAll<HTMLElement>("test-project-column")]
     const stock = () => host.querySelector<HTMLElement>("test-project-stock-pile")!
     const discards = () => host.querySelector<HTMLElement>("test-project-discard-pile")!
     await waitFor(() => (host.querySelector("test-project-stock-pile")?.children.length ?? 0) > 0)
@@ -782,9 +782,9 @@ describe("compiled spell draws with Solid", () => {
       card.shadowRoot?.querySelector<HTMLElement>("[part=back]")?.click()
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
-    await waitFor(() => tableaus()[6]?.children.length === 7 && discards().children.length >= 1, 10_000)
+    await waitFor(() => columns()[6]?.children.length === 7 && discards().children.length >= 1, 10_000)
     await ElementFixture.settle(host)
-    expect(tableaus().map((tableau) => tableau.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
+    expect(columns().map((pile) => pile.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
     expect(consoleText()).not.toContain("failed")
   })
 
@@ -792,20 +792,20 @@ describe("compiled spell draws with Solid", () => {
     const solitaire = await solitaireSource()
     const { host, setSource } = await mountSettable(solitaire)
     type Element = HTMLElement & { ready: Promise<void> }
-    const tableaus = () => [...host.querySelectorAll<Element>("test-project-tableau")]
+    const columns = () => [...host.querySelectorAll<Element>("test-project-column")]
     const stock = () => host.querySelector<Element>("test-project-stock-pile")!
     const discards = () => host.querySelector<Element>("test-project-discard-pile")!
     // dealt, and the deal's own play from the stock done:  a click while it runs would wait its turn
-    await waitFor(() => tableaus()[6]?.children.length === 7 && discards().children.length === 1, 10_000)
+    await waitFor(() => columns()[6]?.children.length === 7 && discards().children.length === 1, 10_000)
     await ElementFixture.settle(host)
     ;(stock().lastElementChild as HTMLElement).shadowRoot!.querySelector<HTMLElement>("[part=back]")!.click()
     await waitFor(() => discards().children.length === 2)
     expect(consoleText()).toContain("test the moves")
 
-    // Solitaire's own file, which says `deal the cards`:  a new score to start from
+    // Solitaire's own file, which makes the app:  a new line at its top level, a new score to start from
     const edited = solitaire.compiled!.replace(
-      "core.holdWhile(() => solitaire.dealTheCards())\n",
-      "solitaire.score = 1\ncore.holdWhile(() => solitaire.dealTheCards())\n"
+      "export const solitaire = new Solitaire()\n",
+      "export const solitaire = new Solitaire()\nsolitaire.score = 1\n"
     )
     expect(edited).not.toBe(solitaire.compiled)
     setSource({ ...solitaire, compiled: edited })
@@ -1200,12 +1200,12 @@ async function rawText(path: string): Promise<string> {
 }
 
 /**
- * Has Solitaire in `host` finished its deal?  Seven tableaus dealt, and the stock's top card played onto the discards.
+ * Has Solitaire in `host` finished its deal?  Seven columns dealt, and the stock's top card played onto the discards.
  * - Solitaire's deal ends by playing from the stock:  both are animations, flagged on the core while they run.
  */
 function dealtAndPlayed(host: HTMLElement): boolean {
   return (
-    host.querySelectorAll("test-project-tableau")[6]?.children.length === 7 &&
+    host.querySelectorAll("test-project-column")[6]?.children.length === 7 &&
     host.querySelector("test-project-discard-pile")?.children.length === 1
   )
 }

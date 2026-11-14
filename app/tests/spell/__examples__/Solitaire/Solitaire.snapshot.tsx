@@ -116,7 +116,7 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (this.pile === solitaire.stock) await solitaire.playFromTheStock()
+    if (this.pile === solitaire.stock) await solitaire.turnAStockCard()
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
@@ -407,7 +407,7 @@ export class StockPile extends Pile {
   }
 
   async onClick(event: ClickEvent) {
-    await solitaire.playFromTheStock()
+    await solitaire.turnAStockCard()
   }
 }
 
@@ -571,6 +571,7 @@ export class ColumnElement extends SpellElement<Column> {
 }
 core.useElement(Column, ColumnElement)
 
+@thing
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -634,9 +635,9 @@ export class Solitaire extends App {
   @prop({ type: "number" })
   accessor score!: number
 
-  async onCreatingSolitaire(event: any /* spell: type unknown */) {
+  create() {
     this.deck.forEach((card) => this.stock.append(card))
-    await this.restartTheGame()
+    core.holdWhile(() => this.restartTheGame())
   }
 
   @drawn draw() {
@@ -648,7 +649,7 @@ export class Solitaire extends App {
             <ui-buttons slot="center" padding="compact">
               {core.drawAction(this, "autoPlay")}
               {core.drawAction(this, "cheat")}
-              {core.drawAction(this, "restartTheGame", { title: "Restart" })}
+              {core.drawAction(this, "restartTheGame")}
             </ui-buttons>
             <ui-buttons slot="center" padding="compact">
               {core.drawAction(this, "undo", { "icon-only": true })}
@@ -735,6 +736,10 @@ export class Solitaire extends App {
     await this.dealTheCards()
   }
 
+  async turnAStockCard() {
+    await this.playFromTheStock()
+  }
+
   async autoPlay() {
     let anythingChanged: boolean = false
     if (!this.discards.isEmpty) {
@@ -808,8 +813,8 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     { name: "score", kind: "number", description: "Its score." }
   ])
 
-  onCreatingSolitaire(event: any /* spell: type unknown */) {
-    return this.currentThing?.onCreatingSolitaire(event)
+  create() {
+    return this.currentThing?.create()
   }
 
   dealTheCards() {
@@ -832,6 +837,10 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     return this.currentThing?.restartTheGame()
   }
 
+  turnAStockCard() {
+    return this.currentThing?.turnAStockCard()
+  }
+
   autoPlay() {
     return this.currentThing?.autoPlay()
   }
@@ -843,7 +852,10 @@ export class SolitaireElement extends SpellElement<Solitaire> {
 core.useElement(Solitaire, SolitaireElement)
 export const solitaire = new Solitaire()
 
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], undoneAs: "Restart The Game" })
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["R"], undoneAs: "Restart" })
+
+/** a click on the stock:  one step to undo, where the deal's own turn isn't */
+core.describeAction(Solitaire, "turnAStockCard", { title: "Turn A Stock Card", undoneAs: "Turn Card" })
 
 core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
 
