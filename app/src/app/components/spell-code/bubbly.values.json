@@ -349,8 +349,8 @@
       "dark": "#525159"
     },
     "--bubbly-foot-bare-pad-left": {
-      "light": "27px",
-      "dark": "27px"
+      "light": "14px",
+      "dark": "14px"
     }
   },
   "parts": {

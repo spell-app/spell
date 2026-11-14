@@ -1675,7 +1675,7 @@
     --bubbly-foot-tiny-pad-left: calc(var(--bubbly-gutter) + 1px);
     --bubbly-foot-tiny-pad-right: 1px;
     /* a `</>` foot as wide as before, its `⟨|⟩` at its right end ("Push this to the right end") */
-    --bubbly-foot-bare-pad-left: 27px;
+    --bubbly-foot-bare-pad-left: 14px;
     /*
      * a tiny foot 0.6px further down its row, its body with it:  its words in its middle (Owen:  "that text is too
      * low in its band");  before, the height of their `x` was 0.8px low in it, its brackets 0.4px
