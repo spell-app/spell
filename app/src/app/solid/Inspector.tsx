@@ -55,6 +55,7 @@ import { InspectorData } from "./InspectorData"
 import { defaultsFileOf, InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
+import { PageLoading } from "./PageLoading"
 import { rememberedSizes } from "./rememberedSizes"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
 
@@ -283,12 +284,15 @@ export class Inspector {
   }
 
   /**
-   * Select the parts line `line`, from 0, of the file named `path` draws or makes:  a click on that line of code.
+   * Select what line `line`, from 0, of the file named `path` draws or makes:  the code's cursor moved there.
    * - Every card, for the line that makes them all.
-   * - None:  what's selected stays as it was, as most lines draw nothing.
+   * - A line in a tag, its content and closing tag included:  what the innermost tag around it draws,
+   *   inside a drawn thing's own drawing too (a pile's placeholder, a square's button, nine times).
+   * - None:  `ifNone` says.  `"keep"` leaves what's selected as it was;  `"deselect"` lets go (the code's cursor:
+   *   one selection everywhere, so the card matches the outline).
    * - NEVER throws.
    */
-  static selectWrittenAt(path: string, line: number): void {
+  static selectWrittenAt(path: string, line: number, { ifNone = "keep" }: { ifNone?: "keep" | "deselect" } = {}): void {
     const area = appArea
     if (!area) return
     const written = Inspector.partsIn(area)
@@ -297,7 +301,27 @@ export class Inspector {
         const place = placeOfPart(element)
         return place?.path === path && place.line === line
       })
-    if (written.length) Inspector.selectAll(written)
+    const found = written.length ? written : Inspector.drawnInTagAround(area, path, line)
+    if (found.length) Inspector.selectAll(found)
+    else if (ifNone === "deselect" && selectedParts().length) Inspector.select(undefined)
+  }
+
+  /** The parts in `area` the innermost tag around line `line` of file `path` draws, read from its parse. */
+  private static drawnInTagAround(area: Element, path: string, line: number): Element[] {
+    const file = InspectorWrites.fileNamed(path)
+    if (!(file instanceof SP.SpellFile) || !file.match || file.contents === undefined) return []
+    const lines = file.contents.split("\n")
+    if (line >= lines.length) return []
+    const indent = Math.max(0, lines[line]!.search(/\S/))
+    const offset = lines.slice(0, line).reduce((sum, text) => sum + text.length + 1, 0) + indent
+    const tag = SP.SpellProject.partPlaceAt(file.match, offset)
+    if (!tag) return []
+    // by `path` as the stamps name it:  the parse's own path is the file's whole one
+    const key = placeKey({ ...tag, path })
+    return drawnElementsIn(area).filter((element) => {
+      const drawnAt = SourceMarks.placeOfDrawn(element)
+      return Inspector.isPart(element) && drawnAt && placeKey(drawnAt) === key
+    })
   }
 
   /** Is `element` one of what's selected, or what a trail from it has reached (reactive)? */
@@ -2057,9 +2081,16 @@ class PartSelector {
     else PartSelector.place(box, element)
   }
 
-  /** Keep marching ants round each of `elements`:  a box on `<body>` each, following it every frame. */
+  /**
+   * Keep marching ants round each of `elements`:  a box on `<body>` each, following it every frame.
+   * - Not while the page's loading hero is up (`PageLoading`):  they start once it has gone, fade and all.
+   */
   static markSelected(elements: readonly Element[]): void {
     PartSelector.selected = elements
+    if (!PageLoading.isGone) {
+      PartSelector.selectedBoxes.forEach((box) => PartSelector.place(box, undefined))
+      return PageLoading.whenGone(() => PartSelector.selected === elements && PartSelector.markSelected(elements))
+    }
     const boxes = PartSelector.selectedBoxes
     while (boxes.length < elements.length) {
       const box = document.body.appendChild(document.createElement("div"))
@@ -2505,15 +2536,14 @@ function PropertiesCard(): JSX.Element {
           )}
         </Show>
       }
+      // Inspect app in the card's header, at its right before the eye (Owen, 2026-11-13, I60)
+      actions={<InspectAppButton slot="right" />}
     >
       <Show
         when={inspected()}
         keyed
         fallback={
-          <p class="InspectorTip">
-            <InspectAppButton />
-            {appTexts.text(Inspector.isInspecting ? "inspectorInspecting" : "inspectorTip")}
-          </p>
+          <p class="InspectorTip">{appTexts.text(Inspector.isInspecting ? "inspectorInspecting" : "inspectorTip")}</p>
         }
       >
         {(part) => {
@@ -3257,14 +3287,15 @@ export function InspectorToggle(): JSX.Element {
 
 /****************
  * ### `<InspectAppButton>`
- * Inspect app, in the top bar's Run | Edit group, after Edit (and in the properties card's tip):
+ * Inspect app, in the top bar's Run | Edit group, after Edit (and in the Inspector card's header):
  * select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
  * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
  * - `item`:  a menu item, icon only, for the bar's group (`<ModeButtons inspect>`);  else a bare icon.
+ * - `slot`:  the bare icon's place in a toolbar, `right` in a card's header.
  ****************/
-export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.Element {
+export function InspectAppButton(props: { id?: string; item?: boolean; slot?: string }): JSX.Element {
   const pressed = () => (Inspector.isInspecting ? "true" : "false")
   const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
   const inspect = () => {
@@ -3285,6 +3316,7 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
   ) : (
     <ui-icon
       id={props.id}
+      slot={props.slot}
       name="crosshairs"
       link=""
       class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}

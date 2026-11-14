@@ -41,9 +41,13 @@ import {
 } from "spell/app/app/solid"
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { EDITOR_PIECES, isDraftEditor, loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import editorBarSpell from "spell/app/spaces/@spell/editor/editor-bar/EditorBar.spell"
-import editorLayoutSpell from "spell/app/spaces/@spell/editor/editor-layout/EditorLayout.spell"
+import {
+  EDITOR_PIECES,
+  isDraftEditor,
+  loadEditorSpell,
+  type EditorSpell,
+  type SpellEditorApp
+} from "spell/app/app/layout/layoutSpell"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
@@ -77,7 +81,7 @@ const OUTPUT_ROOM = 440
  * - Showing or hiding the panel never redraws the code or the program:  a pane that comes or goes moves no other.
  * - The compiled code, while someone's asked for it (`CodeOutputShown`) and there's room, sits beside the code.
  * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
- *   - How they're arranged is Spell, `EditorLayout.spell`;  what's in each is still the editor's, handed over here,
+ *   - How they're arranged is Spell, the `editor layout` of `SpellEditor.spell`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
  * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
  * - The Inspector, while it's open, is a pane at the far right, after the app (`<InspectorPane>`, epic `debut` P13);
@@ -175,11 +179,16 @@ export function SpellEditor(props: { mode: Mode }) {
     grows: appGrows(hidesCode()),
     mode: hidesCode() ? "run" : "edit"
   })
-  const layout = drawnPiece(editorLayoutSpell, "editor-layout", "editorLayout", () => ({ ...parts, ...settings() }))
-  createEffect(settings, (changed) => {
-    const thing = layout.thing()
-    if (thing) Object.assign(thing, changed)
-  })
+  const layout = drawnView(
+    (app) => app.editorLayout,
+    () => ({ ...parts, ...settings() })
+  )
+  createEffect(
+    () => [layout.thing(), settings()] as const,
+    ([thing, changed]) => {
+      if (thing) Object.assign(thing, changed)
+    }
+  )
   /** A bar let go in the column of code, or between the columns:  the panels' own, not a control's in a pane. */
   const keepSizes = (event: CustomEvent<{ sizes: string }>) => {
     const panel = event.target as Element
@@ -215,15 +224,15 @@ export function SpellEditor(props: { mode: Mode }) {
 }
 
 /**
- * The thing `name` of the layout piece `compiled`, once it's loaded, and its drawing.
- * - `pieceProject`:  its project in the group `@spell/editor` (`editor-layout` ...), compiled from your drafts in the draft editor.
+ * The view `viewOf()` picks of the editor's own Spell (`SpellEditor.spell`), once it's loaded, and its drawing.
  * - `values()`:  what it's given before it first draws:  the things it draws, and its settings.
+ * - Drawn in place, with no element of its own (`EditorSpell.drawInPlace()`):  the editor's sheets reach it.
  * - The page's hero stays up while it loads (`PageLoading`).
  * - Call in a component body.
- * - NEVER throws:  a piece that won't load says so on the console, and `isBroken()`, for a plain stand-in.
+ * - NEVER throws:  Spell that won't load says so on the console, and `isBroken()`, for a plain stand-in.
  */
-function drawnPiece(compiled: string, pieceProject: string, name: string, values: () => object) {
-  const [piece, setPiece] = createSignal<LayoutPiece>()
+function drawnView(viewOf: (app: SpellEditorApp) => Record<string, unknown>, values: () => object) {
+  const [spell, setSpell] = createSignal<EditorSpell>()
   const [isBroken, setBroken] = createSignal(false)
   let isGone = false
   const release = PageLoading.hold()
@@ -231,24 +240,30 @@ function drawnPiece(compiled: string, pieceProject: string, name: string, values
     isGone = true
     release()
   })
-  void loadLayoutPiece(compiled, pieceProject)
+  void loadEditorSpell()
     .then(
       (loaded) => {
         if (isGone) return
-        Object.assign(loaded.exports[name], values())
-        setPiece(() => loaded)
+        Object.assign(viewOf(loaded.editor), values())
+        setSpell(() => loaded)
       },
       (problem: unknown) => {
-        console.error(`can't load the Spell of ${name}`, problem)
+        console.error("can't load the editor's Spell", problem)
         setBroken(true)
       }
     )
     .finally(release)
   return {
-    /** The thing, once loaded. */
-    thing: (): object | undefined => piece()?.exports[name],
+    /** The view, once loaded. */
+    thing: (): object | undefined => {
+      const loaded = spell()
+      return loaded && viewOf(loaded.editor)
+    },
     /** What it draws, once loaded. */
-    drawing: () => piece()?.draw(piece()!.exports[name]) as JSX.Element,
+    drawing: () => {
+      const loaded = spell()
+      return loaded?.drawInPlace(viewOf(loaded.editor)) as JSX.Element
+    },
     isBroken
   }
 }
@@ -268,8 +283,8 @@ function drawnPiece(compiled: string, pieceProject: string, name: string, values
  *   - Its cells move, are added and deleted as any app's parts are (epic `notebook` P5):  a click picks one for
  *     the Inspector (`Inspector.pagePartAt`, the page's `cellAt()`), then the editor's drag and drop, palette and Edit
  *     menu.
- * - One of the editor's own pieces (the group `@spell/editor`, epic `editor` P22) shows the editor ITSELF, built from your
- *   drafts of its pieces, in a frame of its own (`<DraftEditorFrame>`):  the editor you're using never runs a draft.
+ * - The editor's own project (the group `@spell/editor`, epic `editor` P22, P29) shows the editor ITSELF, built from your
+ *   drafts of its Spell, in a frame of its own (`<DraftEditorFrame>`):  the editor you're using never runs a draft.
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -279,7 +294,7 @@ export function AppPane() {
   // a site of notebook pages wears the docs site's look in Run (epic `notebook` P10)
   const isNotebookSite = tracked(() => !!editor.project && editor.isNotebookSite(editor.project))
   const [notebookPage, setNotebookPage] = createSignal<NotebookController>()
-  // one of the editor's own pieces, outside the draft editor:  its app is the editor itself, from your drafts
+  // the editor's own project, outside the draft editor:  its app is the editor itself, from your drafts
   const isEditorPiece = tracked(() => !isDraftEditor && !!editor.project?.path.startsWith(`${EDITOR_PIECES}/`))
   // the app area, once drawn:  the notebook's frame watches the program's drawing in it
   let program: HTMLDivElement | undefined
@@ -372,11 +387,11 @@ function SampleBar(): JSX.Element {
 
 /****************
  * ### `<DraftEditorFrame>`
- * The editor built from your drafts of its own pieces, in a frame:  a second editor, beside the one you're using (epic `editor` P22).
+ * The editor built from your drafts of its own Spell, in a frame:  a second editor, beside the one you're using (epic `editor` P22).
  * - A frame of its own, as the theme editor's pages are, so the two editors share nothing:  not `editor`, not Solid, not the page.
  * - It opens on Counter, the smallest app there is, and loads again after each compile of the piece you're editing,
  *   so a saved draft shows here first;  Publish makes it the editor you're using.
- * - Its pieces compile in its own page, from your drafts (`isDraftEditor`, `loadLayoutPiece()`).
+ * - Its Spell compiles in its own page, from your drafts (`isDraftEditor`, `loadEditorSpell()`).
  ****************/
 function DraftEditorFrame(): JSX.Element {
   const source = tracked(() => `/edit/@spell/examples/Counter?pieces=draft&compile=${editor.edits}`)
@@ -539,7 +554,7 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Add and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
- * - How they're arranged is Spell, `EditorBar.spell`.
+ * - How they're arranged is Spell, the `editor bar` of `SpellEditor.spell`.
  * - What's in each is still the editor's, handed over here, each a thing that draws itself.
  * - A phone runs only:  no app menus, no Run | Edit (`chrome.css`).
  * - Its spacing is the top bar's one rule (`chrome.css`):  60px between groups, 12px between icons.
@@ -568,7 +583,10 @@ export function EditorToolbar(props: { mode: Mode }) {
     },
     you: { draw: () => <Actions.you /> }
   }
-  const bar = drawnPiece(editorBarSpell, "editor-bar", "editorBar", () => parts)
+  const bar = drawnView(
+    (app) => app.editorBar,
+    () => parts
+  )
   return (
     <div class="EditorBarPlace">
       {bar.drawing()}

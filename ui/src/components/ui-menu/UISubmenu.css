@@ -2,19 +2,21 @@
  * The style sheet of `<ui-submenu>`:  its row's own pieces, on top of the menu's item rules
  * (the row adopts `UIItem.css`, this sheet, then its menu's `UIMenu.css`, as any item does).
  * - Shadow markup contract:
- *   `<button class="item" part="item" aria-haspopup="menu">` holding the icon box, `<span class="title" part="title">`
- *   and `<span class="chevron" part="chevron">`;  then, for the items inside, `<div class="flyout" part="flyout"
- *   popover="manual">` round the `<ui-menu>` it draws them in.
- * - The row is a flex row, so the chevron sits at its end, after the icon where a vertical menu's icons float to
- *   the end:  it sets the menu's own switches on its box
- *   (`--_ui-menu-item-display`, `--_ui-menu-icon-float`), which the menu's later layers read, rather than
- *   out-ranking them.
- * - The fly-out's frame and place:  `FLYOUT_STYLE` (`UISubmenu.tsx`), a sheet of its own for the box drawn round the
- *   items inside (so a page's `::part(flyout)` wins over it), inline while open for a named menu elsewhere on the
- *   page, the page's element, which this sheet can't reach.
- * - The menu drawn round the items inside is as wide as its widest item:  never a vertical menu's fixed 15em
- *   (Theme's "Light | Dark | Auto" showed "Li…"), never under its box's width (a page's `::part(flyout)`
- *   `min-width`), never over it (the window's width, less a margin).
+ *   - `<button class="item" part="item" aria-haspopup="menu">`, holding the icon box,
+ *     `<span class="title" part="title">` and `<span class="chevron" part="chevron">`
+ *   - then, for the items inside, `<div class="flyout" part="flyout" popover="manual">`
+ *     round the `<ui-menu>` it draws them in
+ * - The row is a flex row, so the chevron sits at its end,
+ *   after the icon where a vertical menu's icons float to the end.
+ *   - It sets the menu's own switches on its box (`--_ui-menu-item-display`, `--_ui-menu-icon-float`),
+ *     which the menu's later layers read, rather than out-ranking them.
+ * - The fly-out's frame and place:  `FLYOUT_STYLE` (`UISubmenu.tsx`), in two ways:
+ *   - for the box drawn round the items inside, a sheet of its own, so a page's `::part(flyout)` wins over it
+ *   - for a named menu elsewhere on the page, inline while open:  it's the page's element, which this sheet can't reach
+ * - The menu drawn round the items inside is as wide as its widest item:
+ *   - never a vertical menu's fixed 15em (Theme's "Light | Dark | Auto" showed "Li…")
+ *   - never under its box's width (a page's `::part(flyout)` `min-width`)
+ *   - never over it (the window's width, less a margin)
  */
 
 @layer ui.components.submenu.types;

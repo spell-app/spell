@@ -129,6 +129,42 @@ describe("SpellKeywords", () => {
       })
     })
   })
+
+  describe("Enter after an opening tag (epic `editor` I65)", () => {
+    const { OPENS_TAG, CLOSES_TAG } = LSP.SpellKeywords
+
+    test("goes in a level after a tag left open at the end of the line", () => {
+      for (const line of [`\t<content>`, `<toolbar class="x">`, `<pile "stock">`, `<a><b>`, `<menú-contextual>`]) {
+        expect(OPENS_TAG.test(line), line).toBe(true)
+      }
+    })
+
+    test("not after a tag that closes itself, a tag HTML never closes, a closing tag, or a comparison", () => {
+      for (const line of [`<action "x"/>`, `<br>`, `<text>Hi</text>`, `</x>`, `if x > y`, `<content> hi`]) {
+        expect(OPENS_TAG.test(line), line).toBe(false)
+      }
+      expect(OPENS_TAG.test(`<brand>`)).toBe(true)
+    })
+
+    test("a closing tag after the caret goes on its own line", () => {
+      expect(CLOSES_TAG.test(`</content>`)).toBe(true)
+      expect(CLOSES_TAG.test(`</>`)).toBe(true)
+      expect(CLOSES_TAG.test(`<x>`)).toBe(false)
+    })
+
+    test("VS Code's Enter rules are Monaco's", () => {
+      const rules = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).onEnterRules as {
+        beforeText: string | { pattern: string; flags: string }
+        afterText?: { pattern: string; flags: string }
+        action: { indent: string }
+      }[]
+      const asRegExp = (it: { source: string; flags: string }) => ({ pattern: it.source, flags: it.flags })
+      expect(rules.slice(0, 2)).toEqual([
+        { beforeText: asRegExp(OPENS_TAG), afterText: asRegExp(CLOSES_TAG), action: { indent: "indentOutdent" } },
+        { beforeText: asRegExp(OPENS_TAG), action: { indent: "indent" } }
+      ])
+    })
+  })
 })
 
 /**

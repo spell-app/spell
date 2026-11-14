@@ -45,8 +45,8 @@ export class SpellMonaco {
    * - Formats as you type:  a Spanish keyword typed without its accent gets it back (`SpellLanguageFeatures`).
    * - Large text (`fontSize`), and no line numbers:  the app's code editor turns them on from its `...` menu.
    * - No border or cursor mark down the scrollbar:  a hard line beside the pane's soft edge.
-   * - Popups at their defaults (`monacoOptionsFor()`):  hover info only with ⌥ held, suggestions only on Ctrl+Space,
-   *   no details beside them.  The app's code pane changes them from its `...` menu (`CodeSettings`).
+   * - Popups at their defaults (`monacoOptionsFor()`):  hover info only with ⌥ held,
+   *   suggestions by themselves only where they help, no details beside them.  The app's code pane changes them from its `...` menu (`CodeSettings`).
    */
   static OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
     automaticLayout: true,
@@ -71,7 +71,8 @@ export class SpellMonaco {
   }
 
   /**
-   * How spell edits:  comments, brackets, indenting after a trailing `:`, back out for `else` (`SpellKeywords`).
+   * How spell edits:  comments, brackets, back out for `else` (`SpellKeywords`);
+   *   in a level after a trailing `:` or an opening tag, and between `<x>` and `</x>` (epic `editor` I65).
    * - NOTE: keep in step with the VS Code extension's `vscode/language-configuration.json`:
    *   a test checks they match.
    */
@@ -101,7 +102,15 @@ export class SpellMonaco {
       increaseIndentPattern: /:\s*$/,
       decreaseIndentPattern: LSP.SpellKeywords.DECREASE_INDENT
     },
-    onEnterRules: [{ beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } }]
+    onEnterRules: [
+      {
+        beforeText: LSP.SpellKeywords.OPENS_TAG,
+        afterText: LSP.SpellKeywords.CLOSES_TAG,
+        action: { indentAction: monaco.languages.IndentAction.IndentOutdent }
+      },
+      { beforeText: LSP.SpellKeywords.OPENS_TAG, action: { indentAction: monaco.languages.IndentAction.Indent } },
+      { beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } }
+    ]
   }
 
   /** Who hears each edit -- see `onEdit()`. */

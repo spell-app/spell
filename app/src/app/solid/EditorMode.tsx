@@ -126,8 +126,8 @@ export function toggleCode() {
  * Site only for a project that declares a site (`EditorMode.hasSite`);
  * then, in Edit, Inspect app (`inspect`), then the code's icon, which shows the code or closes it
  * (Owen:  "it should be part of the run|edit group";  "the "inspect" button to be between "Edit" and "Code"").
- * - Right of Edit, while you have drafts of the project:  "Draft" Publish (`<PublishDraft>`;  Owen:  "move it into
- *   the run/edit bar, to the right of edit").
+ * - Right of Edit, while you have drafts of the project:
+ *   "Draft" Publish (`<PublishDraft>`;  Owen:  "move it into the run/edit bar, to the right of edit").
  * - None of those is ever chosen, so the thumb stays on the mode:  each icon's `aria-pressed` says whether it's on.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
  * - `inspect`:  Inspect app's item (`<InspectAppButton item>`), handed in so this file needs nothing of the Inspector's.
@@ -190,7 +190,7 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
  * ### `<PublishDraft>`
  * "Draft" Publish, right of Edit in `<ModeButtons>`, only while you have drafts of the project (epic `editor` I44):
  * - its click is File › Publish's (`editor.publish()`);  its words the size of the modes'
- * - gone after Publish or Discard Changes, and never in the public preview (`editor.canPublish`)
+ * - gone once you have no drafts (after Publish, Delete Draft), and never in the public preview (`editor.canPublish`)
  ****************/
 function PublishDraft(): JSX.Element {
   const hasDrafts = tracked(() => editor.canPublish)
@@ -211,5 +211,5 @@ function PublishDraft(): JSX.Element {
   )
 }
 
-/** The Publish action's icon, as `AppMenus.spell` gives it. */
+/** The Publish action's icon, as `SpellEditor.spell` gives it. */
 const PUBLISH_ICON = "paper plane outline"

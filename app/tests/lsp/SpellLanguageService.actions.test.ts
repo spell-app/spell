@@ -19,9 +19,10 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
   const solitaire = gameIn("Solitaire", "Solitaire.spell", '<action "redo" icon-only/>')
   const solitario = gameIn("Solitario", "Solitario.es.spell", '<acción "rehacer"')
 
-  test("typing a tag offers spell's own:  `children`, `action`, `context-menu`, `divider`", async () => {
+  test("typing a tag offers spell's own first:  `children`, `action`, `context-menu`, `divider`", async () => {
     const items = await solitaire.typed("<ac")
-    expect(labels(items)).toEqual(["children", "action", "context-menu", "divider"])
+    // then Spell UI's (epic `editor` I55)
+    expect(labels(items).slice(0, 4)).toEqual(["children", "action", "context-menu", "divider"])
     expect(items.find(({ label }) => label === "action")?.detail).toBe(
       'a button for one of the program\'s actions:  <action "auto play"/>'
     )
@@ -30,7 +31,7 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
 
   test("...in Spanish, a Spanish file's own:  `hijos`, `acción`, `menú-contextual`, `divisor`", async () => {
     const items = await solitario.typed("<acc")
-    expect(labels(items)).toEqual(["hijos", "acción", "menú-contextual", "divisor"])
+    expect(labels(items).slice(0, 4)).toEqual(["hijos", "acción", "menú-contextual", "divisor"])
     expect(items.find(({ label }) => label === "menú-contextual")?.detail).toBe(
       "el menú del clic derecho del elemento donde está"
     )

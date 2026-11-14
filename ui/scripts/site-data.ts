@@ -43,7 +43,8 @@ const outputs: GeneratedOutput[] = [
   [builder.searchFile, builder.searchText()],
   ...manifests.outputs(builder.dataFolder),
   await manifests.jsxOutput(),
-  await DefaultsTable.output(builder.root, builder.componentsFolder)
+  await DefaultsTable.output(builder.root, builder.componentsFolder),
+  await DefaultsTable.helpOutput(builder.root, builder.componentsFolder)
 ]
 
 const stale = writeOrCheck(outputs, { command: "site:data", isCheck: values.check })

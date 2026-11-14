@@ -1,5 +1,0 @@
-{
-  "title": "Editor bar",
-  "description": "The editor's top bar, in Spell (epic `editor` P6)",
-  "imports": [{ "path": "/EditorBar.spell", "active": true }]
-}

@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-85 families, 136 tags;  3 families in progress.
+85 families, 137 tags;  3 families in progress.
 
 ### Elements
 
@@ -267,7 +267,7 @@ Pieces made of several kinds of part.
 | <img src="docs/images/components/ui-breadcrumbs.png" alt="Breadcrumb, its first example" width="179" height="28"> | [Breadcrumb](docs/ui-breadcrumbs.html) | `<ui-breadcrumbs>` `<ui-breadcrumb>` | A breadcrumb is used to show hierarchy between content. | crumbs, path, trail, location |
 | <img src="docs/images/components/ui-form.png" alt="Form, its first example" width="200" height="78"> | [Form](docs/ui-form.html) | `<ui-form>` `<ui-field>` `<ui-fields>` `<ui-repeat>` | A form displays a set of related input fields in a structured way. | form layout, fieldset, validation |
 |  | [Grid](docs/ui-grid.html) | `<ui-grid>` `<ui-column>` `<ui-row>` | A grid is used to harmonize negative space in a layout. | columns, row, flex grid, layout grid |
-| <img src="docs/images/components/ui-menu.png" alt="Menu, its first example" width="200" height="18"> | [Menu](docs/ui-menu.html) | `<ui-menu>` | A menu displays grouped navigation actions. | navbar, nav, tabs bar, toolbar |
+| <img src="docs/images/components/ui-menu.png" alt="Menu, its first example" width="200" height="18"> | [Menu](docs/ui-menu.html) | `<ui-menu>` `<ui-submenu>` | A menu displays grouped navigation actions. | navbar, nav, tabs bar, toolbar |
 | <img src="docs/images/components/ui-message.png" alt="Message, its first example" width="200" height="36"> | [Message](docs/ui-message.html) | `<ui-message>` | A message displays information that explains nearby content. | alert, callout, notice, banner |
 | <img src="docs/images/components/ui-property-editor.png" alt="Property Editor, its first example" width="95" height="96"> | [Property Editor](docs/ui-property-editor.html) *(In progress)* | `<ui-property-editor>` `<ui-property>` `<ui-property-group>` | A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many. | inspector, property sheet, properties panel, settings form |
 | <img src="docs/images/components/ui-table.png" alt="Table, its first example" width="200" height="65"> | [Table](docs/ui-table.html) | `<ui-table>` `<ui-cell>` | A table displays a collection of data grouped into rows. | data table, data grid, grid, spreadsheet |
@@ -361,11 +361,12 @@ Elements with no Fomantic counterpart.
 |  | [Zoom](docs/ui-zoom.html) | `<ui-zoom>` | A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it. | lightbox, zoom, full size, image viewer |
 
 <details>
-<summary>The docs site's own elements:  6 families, never in the library</summary>
+<summary>The docs site's own elements:  7 families, never in the library</summary>
 
 | Family | Tags | What it is | Also called |
 | --- | --- | --- | --- |
 | Docs api | `<ui-docs-api>` | An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data;  for a function component, its props and where it's drawn;  for a family, its tags. | api reference, api table, props table, properties table |
+| Docs index | `<ui-docs-index>` | A site index draws a card for each of a site's pages, grouped by the pages' tags, with a search field above them. | site index, site map, component index, table of contents |
 | Docs inspector | `<ui-docs-inspector>` | An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change. | inspector, element inspector, devtools, live properties |
 | Docs nav | `<ui-docs-nav>` | A docs nav is a panel listing the site's pages and every component, A-Z or by topic, in folding groups, with search and favourites;  the current page is highlighted and scrolled into view. | sidebar, table of contents, toc, site nav |
 | Docs search | `<ui-docs-search>` | A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere. | site search, docs search, quick find, jump to |

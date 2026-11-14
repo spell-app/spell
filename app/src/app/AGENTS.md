@@ -50,8 +50,9 @@ and in the app's build folder, `app/` at the app folder's root.
     `solid/InspectorWrites.ts` writes the Inspector's changes through it;
     `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
     `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
-  - `layout/`:  how the editor loads its own pieces written in Spell (`layoutSpell.ts`);  the pieces themselves, the file tabs,
-    the top bar, the menus and the panes, are projects of the group `@spell/editor`, in `spaces/@spell/editor/` (P22;  [README-app.md](../../README-app.md), "The editor in Spell")
+  - `layout/`:  how the editor loads its own Spell (`layoutSpell.ts`);  the Spell itself is ONE project of the group `@spell/editor`,
+    `spell-editor`, one file, `SpellEditor.spell`:  the app `spell editor`, whose views are the top bar, the panes, the file tabs
+    and the menus (P22, P29;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
   - `ServerCompileStore.ts`:  the editor's compile cache, on the page server (`/api/compiles`;  epic `language` P27),
     installed by `index.tsx`, never in the static build
@@ -143,11 +144,24 @@ and in the app's build folder, `app/` at the app folder's root.
     - An HTML file (a property editor page, `Card.editor.html`) is drawn as the drawn-bubbly page draws HTML:
       [MarkupMarks](ui/monaco/MarkupMarks.ts), from the page's own reading of it (`BubblyMarkup`), the box a
       `.bubbly-html` too;  both kinds of marks are made by [TextMarks](ui/monaco/TextMarks.ts).
-  - Three helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
+  - Five helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
     - the caret snaps into the body a blank line is drawn in:  clicked or arrowed onto, the line gets that body's
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
+    - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59);
+      Cmd+V and the right-click menu's Paste alike (I63)
+    - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
+      and closing tag, a body;  one undo
+  - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;  between `<x>` and `</x>`,
+    the caret a level in and the closing tag on its own line (epic `editor` I65):  Spell's Enter rules,
+    `SpellMonaco.CONFIGURATION`, with VS Code's `language-configuration.json` kept the same by a test
+  - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,
+    a property after `its` / `'s` / `of`, ONE list, `SUGGEST_WHERE_IT_HELPS` in `codePopups.ts`;
+    "Settings…" › "Suggest as you type" makes it everywhere, or never.
+    - Spell UI's tags and attributes say what each is, as listed and on hover:  the language service reads them
+      through the component pack (`SP.ComponentPacks.help()`), from Spell UI's help table, `help.generated.ts`.
+      On every line of a tag split over several, too (I64).
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:

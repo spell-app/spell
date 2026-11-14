@@ -25,8 +25,8 @@ import "./Chooser.css"
  *   - `size="tiny"`, Cancel first, the same translated button texts
  *   - `closedby="closerequest"`:  Escape cancels, a stray click on the dimmer does nothing
  *     (the React one cancelled on a dimmer click)
- * - The radios / checkboxes keep their own state:  OK reads their `selected`
- *   (a radio group settles a few microtasks after a click, long before a person reaches OK).
+ * - The radios / checkboxes keep their own state:
+ *   OK reads their `selected` (a radio group settles a few microtasks after a click, long before a person reaches OK).
  * - NOTE: the React one was a SEARCHABLE dropdown:
  *   this is a plain list, fine for the handful of options callers pass.
  *   A long list would want `<ui-dropdown search>` instead.

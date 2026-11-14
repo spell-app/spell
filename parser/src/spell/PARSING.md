@@ -1591,6 +1591,13 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     - The rest are read through the component pack's dictionary as it parses (`ComponentPacks.readAttribute()`,
       Spell UI's `SpellUIDefaults.readAttribute()`), since the core draws English's `<ui-button>`;
       one the pack doesn't know (`class`, `aria-label`) or a `{...}` value stays as written.
+  - Inside a Spell UI menu, `<menu>` (`ui-menu`), it's a menu's ROW, not a button (epic `editor` P29):
+    `SpellJSX.markMenuRows()` marks each it holds, an `<if ...>`'s too, and it compiles with the core's own
+    `in-menu`, `core.drawAction(this, "save", { "in-menu": true })`.
+    - The core draws a `<ui-action>` handed the action itself, which reads its title, icon and key, greyed and
+      ticked, live;  its key in Spell UI's words (`meta+S` => `mod+S`).
+    - A `<divider/>` the menu holds is a row too, `<ui-action kind="divider">` (`menuDivider`).
+    - Not inside another element in it:  a `<buttons>` in a menu keeps its buttons.
   - The editor offers it, `<context-menu>` and `<divider/>` as a tag is typed, in the file's language
     (`SP.spellTagsIn()`, read off the `spell_jsx_tag` word rule), and the program's actions inside its quotes
     (`ActionButton.actionsIn()`):  the drawing's type's first, then the app's `undo` and `redo`, then every other
@@ -1605,7 +1612,7 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     `<divider/>`s;  anything else is `context-menu-item`.  No sub-menus yet.
   - Compiles to `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`:  a hidden `<spell-context-menu>`, which
     the app's `ActionMenus.showContextMenu()` finds on the right click's path, before a `context-menu="name"`.
-  - A `<divider/>` anywhere else keeps its word:  Spell UI's divider.
+  - A `<divider/>` anywhere else keeps its word:  Spell UI's divider;  in a `<menu>`, a menu's line (above).
 - COMMENTS INSIDE MARKUP (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
   `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
   each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to

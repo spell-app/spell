@@ -4,7 +4,7 @@ import { SP } from "spell/parser/spell"
 // Through the folder:  read only when parsing, once the folder has loaded
 import { DefineMenu } from "spell/parser/spell/rules/classes"
 import { Priority } from "spell/parser/spell/rules/rules.types"
-import { ACTION_TAG_MEANING, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import { ACTION_TAG_MEANING, IN_MENU_ATTRIBUTE, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
 // Read only when compiling:  SpellJSX imports this file's neighbours
 import { SpellJSX } from "./SpellJSX"
 
@@ -40,6 +40,11 @@ import { SpellJSX } from "./SpellJSX"
  *   - A Python program's page draws it with its drawing half's javascript, the action run in Python (`core.remote`).
  * - An action named nowhere in the program, its thing's types or any other:  the line is refused, naming it
  *   (`unknown-action`).  Asked once the whole program has parsed:  an action may be declared below its drawing.
+ * - Inside a Spell UI `<menu>`, it's a menu's ROW, not a button (epic `editor` P29):  Spell UI's `<ui-action>`, its title,
+ *   icon and key the action's, greyed by its `enabled when` and ticked by its `selected when`, live;
+ *   a click runs it through the core, one undo step, as a button's does.
+ *   - `SpellJSX` marks it as the menu parses (`markMenuRows()`);  it compiles with the core's own `in-menu`,
+ *     `core.drawAction(this, "save", { "in-menu": true })`.
  * - Without a quoted word, `<action>` is Spell UI's `<ui-action>`, a menu's item, as before.
  */
 export class ActionButton extends P.TokenType<never, ActionButtonData> {
@@ -91,7 +96,13 @@ export class ActionButton extends P.TokenType<never, ActionButtonData> {
       })
       .filter(Boolean)
     const children = match.data.children?.flatMap((child) => SpellJSX.childAST(child) ?? []) ?? []
-    return new P.ASTJSXElement(match, { tagName: BUTTON_TAG, attrs, children, action: match.data.action })
+    // a menu's row:  the core's own mark, last, so the tag's attributes keep their places
+    const inMenu = new P.ASTJSXAttribute(match, {
+      name: IN_MENU_ATTRIBUTE,
+      value: new P.ASTBooleanLiteral(match, { value: true })
+    })
+    const marked = match.data.inMenu ? [...(attrs ?? []), inMenu] : attrs
+    return new P.ASTJSXElement(match, { tagName: BUTTON_TAG, attrs: marked, children, action: match.data.action })
   }
 
   /**
@@ -201,6 +212,8 @@ type ActionButtonData = JSXMatchData & {
   action?: string
   /** Its attributes in Spell UI's own names, by attribute, for a language other than English -- see `readingsOf()`. */
   readings?: Array<SP.AttributeReading | undefined>
+  /** A `<menu>` holds it:  it draws a menu's row, not a button (`SpellJSX.markMenuRows()`, epic `editor` P29). */
+  inMenu?: boolean
 }
 
 /** One action `<action "...">` may name, as the editor offers it -- see `ActionButton.actionsIn()`. */
