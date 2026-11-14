@@ -1,4 +1,4 @@
-import { For, Loading, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
+import { For, Loading, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
 
 import { P } from "spell/parser/parser"
 import { editor, type FollowedPlace } from "spell/app/app/editor"
@@ -200,7 +200,10 @@ export function FollowAlong() {
         selectedFor = followed
         // the code's cursor on a line that draws nothing:  nothing's selected (P28, Choice 2)
         const ifNone = followed.from === "code" ? "deselect" : "keep"
-        if (followed.from !== "parts") Inspector.selectWrittenAt(followed.path, followed.line, { ifNone })
+        // only a new place runs it, so what it reads (the selection, the trail) it reads as it is now,
+        // untracked on purpose (I88)
+        if (followed.from !== "parts")
+          untrack(() => Inspector.selectWrittenAt(followed.path, followed.line, { ifNone }))
       }
       if (followed.from === "code") return follower.clear()
       if (!codeEditor || codeEditor.hasTextFocus()) return

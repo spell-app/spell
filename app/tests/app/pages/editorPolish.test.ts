@@ -9,6 +9,7 @@ import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
  * - I51, I52:  the outline follows the code's cursor, by click or arrow keys;  a line in a tag selects what the tag
  *   draws, inside a drawn thing's own drawing too;  a line that draws nothing selects nothing
  * - I69:  the arrow keys' follow waits for the cursor to rest, one follow for a run of presses
+ * - I88:  loading, following and editing log no Solid warning about a signal read where it isn't followed
  * - I53, I59:  a paste takes the indent where it lands, markup as a tree;  Shift+Tab takes a tag's children along
  * - I54, I55:  the suggestions show by themselves where they help, each row saying what it is
  * - NOTHING reaches the disk:  every save is answered here, and a later read of the file gets what was saved.
@@ -199,6 +200,26 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       await page.waitForTimeout(800)
       expect(await page.evaluate(`window.editor.followed.line + 1`)).toBe(await lineOf(page, `"spades" is a new`))
       expect(await selected(page)).toEqual(["solitaire-foundation"])
+    }
+  )
+
+  test(
+    "I88:  loading, following and editing Solitaire log no warning about a signal read unfollowed",
+    { timeout: 150_000 },
+    async () => {
+      const page = await context.newPage()
+      const warnings: string[] = []
+      page.on("console", (message) => {
+        if (message.text().includes("STRICT_READ_UNTRACKED")) warnings.push(message.text())
+      })
+      await open(page, "Solitaire", "Solitaire.spell")
+      await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
+      await page.waitForTimeout(1000)
+      await clickLine(page, await lineOf(page, `<action "cheat"/>`))
+      expect(await selected(page)).toEqual(["ui-action"])
+      await typeAfter(page, await lineOf(page, "// Deal seven columns"), "// a note")
+      await page.waitForTimeout(4500)
+      expect(warnings).toEqual([])
     }
   )
 

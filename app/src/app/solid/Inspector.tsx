@@ -3375,7 +3375,8 @@ const [brandTokens, setBrandTokens] = createSignal("")
  * - NEVER throws:  without them the column wears the editor's theme, and says so on the console.
  */
 async function loadBrandTokens(): Promise<void> {
-  if (brandTokens() || loadingBrandTokens) return
+  // the flag, never the tokens:  this runs in the column's body, where a signal read isn't followed (I88)
+  if (loadingBrandTokens) return
   loadingBrandTokens = true
   try {
     const { UI } = await import("spell/ui")
