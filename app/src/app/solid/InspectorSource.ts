@@ -444,17 +444,31 @@ export function withClassNames(markup: string, names: ReadonlyMap<string, string
 const PLAIN_EDITOR_HEADS = ["is a property editor", "es un editor de propiedades"]
 
 /**
+ * A property editor's TAG, in every language (epic `language` T125):  `<property-editor "card">`,
+ * `<editor-de-propiedades "carta">`;  its markup its children, closed by `</property-editor>` or `</>`.
+ * - Spanish also takes Spell UI's own name for `<ui-property-editor>`, `editor-propiedades`.
+ */
+const EDITOR_TAGS = ["property-editor", "editor-de-propiedades", "editor-propiedades"]
+
+/**
  * The markup of the property editor for type `name` in a property editors file's `source`:
  * - its plain head, `"card" is a property editor`, its markup the lines indented under it (epic `language` P45)
+ * - or its tag at the file's left edge, `<property-editor "card">`, its markup its children (T125):
+ *   the same markup the plain head's lines give;  `<property-editor "card"/>` has none
  * - `undefined` if it has none.
  */
 function namedEditorIn(source: string, name: string): string | undefined {
-  for (const head of PLAIN_EDITOR_HEADS) {
-    const said = head.split(" ").map(escapeForRegExp).join("[ \\t]+")
-    const opening = new RegExp(`^"${escapeForRegExp(name)}"[ \\t]+${said}[ \\t]*$`, "imu").exec(source)
+  const quoted = `"${escapeForRegExp(name)}"`
+  const heads = [
+    ...PLAIN_EDITOR_HEADS.map((head) => `${quoted}[ \\t]+${head.split(" ").map(escapeForRegExp).join("[ \\t]+")}`),
+    `<(?:${EDITOR_TAGS.join("|")})[ \\t]*${quoted}[ \\t]*(?<empty>\\/)?>`
+  ]
+  for (const head of heads) {
+    const opening = new RegExp(`^${head}[ \\t]*$`, "imu").exec(source)
     if (!opening) continue
+    if (opening.groups?.empty) return ""
     const lines = source.slice(opening.index + opening[0].length + 1).split("\n")
-    // its markup ends at the next line at the file's left edge
+    // its markup ends at the next line at the file's left edge:  a tag's own end tag, `</>`, or what comes next
     const end = lines.findIndex((line) => line.trim() && !/^[ \t]/.test(line))
     return dedent(lines.slice(0, end < 0 ? undefined : end)).trim()
   }

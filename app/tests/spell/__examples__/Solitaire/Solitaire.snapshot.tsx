@@ -569,10 +569,6 @@ core.useElement(Column, ColumnElement)
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // "deck" is a new deck
-  @prop({ init: () => new Deck({ id: "deck" }), early: true })
-  accessor deck!: Deck
-
   create() {
     this.deck.forEach((card) => this.stock.append(card))
     core.holdWhile(() => this.restartTheGame())
@@ -613,6 +609,9 @@ export class Solitaire extends App {
       </>
     )
   }
+  // <deck "deck"hidden />
+  @prop({ init: () => new Deck({ id: "deck" }), early: true })
+  accessor deck!: Deck
   // <number "score" />
   @prop({ type: "number" })
   accessor score!: number

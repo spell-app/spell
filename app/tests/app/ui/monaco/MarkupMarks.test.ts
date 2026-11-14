@@ -124,6 +124,27 @@ describe("MarkupMarks", () => {
     expect(marked).toEqual(["2:<", "2:/", "2:>", "4:<", "4:/", "4:>"])
   })
 
+  test('no space after a tag\'s quoted word:  `<deck "deck"hidden />` marked as `<deck "deck" hidden/>` is (epic `language` T125)', () => {
+    const markedIn = (tag: string) => {
+      const spell = `to draw it\n\t${tag}`
+      const marks = MarkupMarks.within(spell, spell.indexOf("<"), spell.length, [], {
+        declaringTags: [spell.indexOf("<")]
+      })
+      const line = spell.split("\n")[1]!
+      // each piece's mark, not the whole tag's
+      return marks.marks
+        .filter(({ options }) => options.inlineClassName)
+        .map(({ range, options }) => [
+          options.inlineClassName,
+          line.slice(range.startColumn - 1, range.endColumn - 1).trim()
+        ])
+    }
+    const joined = markedIn('<deck "deck"hidden />')
+    expect(joined).toEqual(markedIn('<deck "deck" hidden/>'))
+    expect(joined).toContainEqual([expect.stringContaining("bubbly-attribute-name"), "hidden"])
+    expect(BubblyMarkup.write('<deck "deck"hidden />')).toBe(BubblyMarkup.write('<deck "deck" hidden/>'))
+  })
+
   test("a tag's brackets, names and values marked as the page draws them", () => {
     const marks = MarkupMarks.of(PAGE)
     expect(textMarked(marks, "bubbly-angle-open").slice(0, 3)).toEqual(["<", "<", "<"])

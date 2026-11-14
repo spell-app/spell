@@ -33,8 +33,8 @@ export const words = {
       suit: "suit"
     },
     Solitaire: {
-      deck: "deck",
       draw: "draw it",
+      deck: "deck",
       score: "score",
       stock: "stock",
       discards: "discards",

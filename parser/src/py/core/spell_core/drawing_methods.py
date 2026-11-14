@@ -229,7 +229,8 @@ class DrawingMethods:
         given = dict(props or {})
         icon_only = given.pop(ICON_ONLY, False)
         in_menu = given.pop(IN_MENU, False)
-        # a `title` the tag gives is what it shows, over the action's own:  `<action "restart the game" title="Restart"/>`
+        # a `title` the tag gives is what it shows, over the action's own:
+        # `<action "restart the game" title="Restart"/>`
         given_title = given.pop("title", None)
         holder = next((at for at in self._chain_of(thing) if callable(getattr(at, name, None))), None)
         if holder is not None:

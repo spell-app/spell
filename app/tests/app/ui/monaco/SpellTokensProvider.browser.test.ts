@@ -189,6 +189,26 @@ describe("SpellTokensProvider.forPages()", () => {
     expect(property).toContain('"\\"rank\\"" attribute.value.html')
   })
 
+  test('a property editors file\'s tag, `<property-editor "card">`:  a tag, its quoted word a value (epic `language` T125)', () => {
+    const [, , head, property] = colour(
+      [
+        "# A card's property editor",
+        "",
+        '<property-editor "card">',
+        '\t<ui-property name="rank" />',
+        "</property-editor>"
+      ],
+      codeSpell
+    )
+    expect(head).toEqual([
+      '"<" delimiter.html',
+      '"property-editor" tag.html',
+      '"\\"card\\"" attribute.value.html',
+      '">" delimiter.html'
+    ])
+    expect(property).toContain('"ui-property" tag.html')
+  })
+
   test("a .spell file's colours don't change", () => {
     const lines = [
       "a card is a thing",

@@ -319,11 +319,6 @@ export class Column extends Pile {
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  // "deck" is a new deck
-  static { this.declareProp("deck", { init: () => new Deck({ id: "deck" }), early: true }) }
-  get deck() { return this.getProp("deck") }
-  set deck(value) { this.setProp("deck", value) }
-
   create() {
     this.deck.forEach((card) => this.stock.append(card))
     core.holdWhile(() => this.restartTheGame())
@@ -362,6 +357,10 @@ export class Solitaire extends App {
       core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])
     ]
   }
+  // <deck "deck"hidden />
+  static { this.declareProp("deck", { init: () => new Deck({ id: "deck" }), early: true }) }
+  get deck() { return this.getProp("deck") }
+  set deck(value) { this.setProp("deck", value) }
   // <number "score" />
   static { this.declareProp("score", { type: "number" }) }
   get score() { return this.getProp("score") }
