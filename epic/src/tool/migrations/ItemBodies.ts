@@ -4,7 +4,7 @@ import type { Migration, MigrationContext } from "./migrations.types"
 
 /****************
  * ### `ItemBodies`
- * The migration `item-bodies` (epic `epic-engine` I209):  every item with only a title gets its title's words as its
+ * The migration `item-bodies` (epic `epic-engine` I209):  every item with only a title gets "_What it says on the tin_" as its
  * body, so it opens, and takes a comment like any other (`PlanItem.giveBody()`).
  * - Owen, 2026-11-03, on epic `data`'s T98, a todo with no details:  "This has no body ... so I can't comment"
  * - new items get theirs as they're made (`PlanDoc.addItem()`);  this is for the ones made before
@@ -16,7 +16,8 @@ export class ItemBodies implements Migration {
   readonly kind = "epic"
   readonly date = "2026-11-03"
   readonly everyEdit = true
-  readonly description = "an item with only a title gets its title's words as its body, so it opens and takes a comment"
+  readonly description =
+    'an item with only a title gets "What it says on the tin" as its body, so it opens and takes a comment'
 
   /** Give every bodiless item of `document` its body, IN PLACE;  did it change the page? */
   run(document: Document, context: MigrationContext): boolean {

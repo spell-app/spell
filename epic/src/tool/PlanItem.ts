@@ -96,28 +96,35 @@ export class PlanItem {
    * Give a bodiless `item` (`isBodiless()`) its title's words as its body, so it opens, and takes a comment like any
    * other (epic `epic-engine` I209, J202;  Owen, 2026-11-03, on a title-only todo:  "This has no body ... so I can't
    * comment");  did it change the item?
-   * - a `<p data-title-body>` of the title's text;  a question's inside its `<epic-question>`, as an asked question's
-   *   details are
-   * - one given before follows a renamed title
+   * - a `<p data-title-body>` saying "_What it says on the tin_" (`TIN`):  repeating the title, often unhelpful there, said
+   *   nothing more (Owen, 2026-11-14);  a question's inside its `<epic-question>`, as an asked question's details are
+   * - one given before (the title's words, before then) is rewritten to it
    * - an item with a body anyone wrote is left as it is
    */
   static giveBody(item: Element): boolean {
     if (!PlanItem.isBodiless(item)) return false
-    const title = PlanItem.titleOf(item)
+    const document = item.ownerDocument
     const given = [...item.children].find((child) => PlanItem.isTitleBody(child))
     if (given) {
-      // as the page lays it out:  the formatter wraps a long title over lines
-      if (PlanMarkup.squeeze(given.textContent ?? "") === PlanMarkup.squeeze(title)) return false
-      ;(given.querySelector("p") ?? given).textContent = title
+      const words = given.querySelector("p") ?? given
+      if (words.childNodes.length === 1 && words.firstElementChild?.localName === "em" && words.textContent === TIN)
+        return false
+      words.replaceChildren(PlanItem.tin(document))
       return true
     }
-    const document = item.ownerDocument
     const words = document.createElement("p")
-    words.textContent = title
+    words.append(PlanItem.tin(document))
     words.setAttribute(TITLE_BODY, "")
     const isQuestion = PlanItem.kindOfItem(item) === "question"
     item.append(isQuestion ? Markup.element(document, "epic-question", {}, [words]) : words)
     return true
+  }
+
+  /** The words a bodiless item's body says, `<em>What it says on the tin</em>`. */
+  private static tin(document: Document): Element {
+    const words = document.createElement("em")
+    words.textContent = TIN
+    return words
   }
 
   /** Take the body `giveBody()` gave `item` off it:  real details are coming. */
@@ -364,6 +371,9 @@ const CARD_HEADINGS: Record<string, (element: Element) => string | undefined> = 
 
 /** The mark on the body an item with only a title was given (`PlanItem.giveBody()`). */
 const TITLE_BODY = "data-title-body"
+
+/** What the body a bodiless item is given says (`PlanItem.giveBody()`), in italics. */
+const TIN = "What it says on the tin"
 
 /**
  * The prose elements' headings as prose (`PlanItem.asProse({ plain })`, P14):  what each draws over its children.

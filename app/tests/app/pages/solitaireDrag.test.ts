@@ -33,7 +33,10 @@ describe.skipIf(!SERVING)("dragging a card in Solitaire", { timeout: 240_000 }, 
   /** A face-up ace, last on a pile that isn't a foundation, and the foundations:  `undefined` if this deal has none. */
   const findAnAce = () =>
     page.evaluate(() => {
-      const elements: (Element & { thing?: any })[] = []
+      // the thing each draws, as `SpellElement.thingOf()` reads it:  a pile drawn by its id alone (`<column "C1"/>`)
+      // finds its pile by that id, and is never handed it, so its `thing` property is empty
+      const thingOf = (element: Element): any => (element as Element & { component?: any }).component?.currentThing
+      const elements: Element[] = []
       const walk = (root: Document | ShadowRoot) => {
         for (const element of root.querySelectorAll("*")) {
           elements.push(element)
@@ -45,7 +48,9 @@ describe.skipIf(!SERVING)("dragging a card in Solitaire", { timeout: 240_000 }, 
         const box = element.getBoundingClientRect()
         return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
       }
-      const ace = elements.find(({ tagName, thing }) => {
+      const ace = elements.find((element) => {
+        const { tagName } = element
+        const thing = thingOf(element)
         if (tagName !== "SOLITAIRE-CARD" || String(thing?.rank) !== "ace") return false
         const pile = thing.pile
         return (
@@ -56,8 +61,12 @@ describe.skipIf(!SERVING)("dragging a card in Solitaire", { timeout: 240_000 }, 
       })
       const foundations = elements
         .filter(({ tagName }) => tagName === "SOLITAIRE-FOUNDATION")
-        .map((element) => ({ suit: String(element.thing.suit), count: element.thing.items.length, ...spot(element) }))
-      return ace ? { ace: { rank: "ace", suit: String(ace.thing.suit), ...spot(ace) }, foundations } : undefined
+        .map((element) => ({
+          suit: String(thingOf(element)?.suit),
+          count: thingOf(element)?.items.length,
+          ...spot(element)
+        }))
+      return ace ? { ace: { rank: "ace", suit: String(thingOf(ace).suit), ...spot(ace) }, foundations } : undefined
     })
 
   /** Drag from `from` to `to` with the mouse, in steps, as a person would. */
@@ -88,10 +97,11 @@ describe.skipIf(!SERVING)("dragging a card in Solitaire", { timeout: 240_000 }, 
       await drag(ace, foundation)
       const after = (await page.evaluate(() => {
         const counts: Record<string, number> = {}
+        const thingOf = (element: Element): any => (element as Element & { component?: any }).component?.currentThing
         const walk = (root: Document | ShadowRoot) => {
-          for (const element of root.querySelectorAll("*") as NodeListOf<Element & { thing?: any }>) {
+          for (const element of root.querySelectorAll("*")) {
             if (element.tagName === "SOLITAIRE-FOUNDATION")
-              counts[String(element.thing.suit)] = element.thing.items.length
+              counts[String(thingOf(element).suit)] = thingOf(element).items.length
             if (element.shadowRoot) walk(element.shadowRoot)
           }
         }

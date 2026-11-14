@@ -968,7 +968,7 @@ export class PlanDoc extends PlanReader {
    * - `calm`:  not urgent (yellow, not red, until reviewed):  a judgement call or issue that wouldn't surprise Owen
    * - `urgent`:  a todo that asks Owen to act, red until reviewed, as an open issue is (`followUp()`, I230);
    *   `urgent` on an issue or a call is Owen's Do this (`doThis()`, I232), set by his mark, never by `add`
-   * - no `details`:  its title's words are its body (`PlanItem.giveBody()`), so it opens and takes a comment
+   * - no `details`:  its body says "What it says on the tin" (`PlanItem.giveBody()`), so it opens and takes a comment
    * - stamped (`stamp()`)
    * - throws on a kind not in `KINDS`;  `calm` on a kind that's never urgent
    */
@@ -997,7 +997,7 @@ export class PlanDoc extends PlanReader {
     }
     const item = this.make("epic-item", data, heading.slot ? [heading.slot] : [])
     for (const node of this.incoming(details, { question: kind === "question" })) Markup.place(item, node)
-    // no details:  its title's words as its body, so it opens and takes a comment (epic `epic-engine` I209)
+    // no details:  "What it says on the tin" as its body, so it opens and takes a comment (epic `epic-engine` I209)
     PlanItem.giveBody(item)
     section.append(item)
     if (spec.prefix === KINDS.question.prefix) this.placeQuestion(item)
