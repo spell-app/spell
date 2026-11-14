@@ -124,7 +124,8 @@ export class PrefStore {
 
   /**
    * The value kept under `key`, else `fallback`, else its declared default.
-   * - A kept value its declaration doesn't allow reads as the default, logged.
+   * - A kept value its declaration doesn't allow reads as the default, logged;
+   *   one it renamed (`ValueInfo.renamed`) reads as its new one, quietly.
    * - throws `TypeError` when its place must be waited on:  use `load()`
    */
   get<T = unknown>(key: string): T | undefined
@@ -243,11 +244,20 @@ export class PrefStore {
   // ## Checks
   ////////////////
 
-  /** `kept` when there is one its declaration allows, else `fallback`, else `key`'s default. */
+  /**
+   * `kept` when there is one its declaration allows, else `fallback`, else `key`'s default.
+   * - An old value its declaration renamed (`ValueInfo.renamed`) reads as its new one.
+   *   SIDE EFFECT:  a quick place keeps the new one in its place, so it's moved only once.
+   */
   private keptOrDefault(method: string, key: string, kept: unknown, fallback: unknown): unknown {
     const info = this.declared.get(key)
     if (kept !== undefined) {
       if (isAllowed(info, kept)) return kept
+      const renamed = renamedValue(info, kept)
+      if (renamed !== undefined) {
+        if (!this.place.isAsync) this.place.write(this.name, key, renamed)
+        return renamed
+      }
       console.error(
         `PrefStore.${method}():  \`${this.name}:${key}\` isn't ${allowedText(info)};  answering its default:`,
         kept
@@ -320,6 +330,13 @@ function placeFor(place: PrefPlaceName | PrefPlace): PrefPlace {
   let shared = sharedPlaces.get(place)
   if (!shared) sharedPlaces.set(place, (shared = new StoragePlace(SHARED_PLACES[place])))
   return shared
+}
+
+/** The value `kept` is called now, when `info` renamed it and allows the new one;  else `undefined`. */
+function renamedValue(info: ValueInfo | undefined, kept: unknown): unknown {
+  if (typeof kept !== "string" || !info?.renamed || !Object.hasOwn(info.renamed, kept)) return undefined
+  const renamed = info.renamed[kept]
+  return isAllowed(info, renamed) ? renamed : undefined
 }
 
 /** What `info` allows, in words:  `one of light, dark, auto`, `a number`, `anything`. */

@@ -289,7 +289,8 @@ export class ThreadFacts {
    * quotes;  "This page" for the page.
    */
   static headline(place: ThreadPlace & { text?: string }): string {
-    const own = (place.text ?? "").replace(/\s+/g, " ").trim()
+    // a picture pasted in (`![picture](<path>)`, epic `epic-engine` I267) reads as the word
+    const own = (place.text ?? "").replace(PICTURE_WORDS, "(picture)").replace(/\s+/g, " ").trim()
     if (own) return ThreadFacts.quoted(own)
     if (place.kind === "page") return "This page"
     const words = (place.quote || place.excerpt || place.label || "").replace(/\s+/g, " ").trim()
@@ -425,6 +426,12 @@ const OLD_AGENT_TURN = "claude"
 
 /** A typed comment id:  `C3`, `c3`, the old `cm3`, a `#` before it (`M3` is a manual test's:  epic `epic-engine` P44). */
 const TYPED_ID = /^#?cm?(\d+)$/i
+
+/**
+ * A picture in a comment's words (`Pictures.wordsFor()`, epic `epic-engine` I267):  written out here, as this file
+ * imports nothing (the comments' own script loads it alone).
+ */
+const PICTURE_WORDS = /!\[picture\]\([^)\s]+\)/g
 
 /** How many characters of the selected text (or the block's) a header shows. */
 const HEADLINE_CHARS = 40

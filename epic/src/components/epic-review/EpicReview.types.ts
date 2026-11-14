@@ -404,6 +404,12 @@ export const NOTE_BOX = "note-box"
 export const NOTE_TEXT = "note-text"
 export const NOTE_INPUT = "note-input"
 export const NOTE_SAVED = "note-saved"
+
+/**
+ * Every Saved floppy's class, the note box's and the comments' (`<epic-comment-pane>`, `<epic-thread>`):
+ * its fade 10 seconds after a save, from the shared sheet `SavedMark.css` (epic `epic-engine` I269).
+ */
+export const SAVED_MARK = "saved-mark"
 export const NOTE_FIELD = "note-field"
 export const NOTE_PICK = "note-pick"
 export const NOTE_TOOLS = "note-tools"

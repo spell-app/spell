@@ -81,7 +81,8 @@ describe("DiskCache", () => {
     const served = await serveHandler(router.handle)
     try {
       expect(JSON.parse((await ask(served.port, "GET", "/api/compiles/version")).text)).toEqual({ version })
-      expect((await ask(served.port, "GET", `/api/compiles/${version}/beef0001`)).status).toBe(404)
+      const miss = await ask(served.port, "GET", `/api/compiles/${version}/beef0001`)
+      expect([miss.status, miss.text]).toEqual([204, ""])
       const headers = { "content-type": "text/plain" }
       const put = await ask(served.port, "PUT", `/api/compiles/${version}/beef0001`, { body: '{"a":1}', headers })
       expect(put.status).toBe(204)

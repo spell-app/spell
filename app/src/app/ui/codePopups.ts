@@ -27,6 +27,12 @@ export const SUGGEST_MODES = ["whereItHelps", "everywhere", "onCtrlSpace"] as co
 /** When suggestions show:  one of `SUGGEST_MODES`. */
 export type SuggestMode = (typeof SUGGEST_MODES)[number]
 
+/**
+ * Suggestion modes kept under their old names, each to the mode it is now:  so a choice from before stays chosen.
+ * - `asYouType`:  epic `debut` I81's "as you type", "Everywhere" since epic `editor` P28 (I66)
+ */
+export const SUGGEST_MODES_RENAMED: Readonly<Record<string, SuggestMode>> = { asYouType: "everywhere" }
+
 /** What someone chose for the code editor's popups. */
 export type CodePopupChoices = {
   /** When hover info shows. */

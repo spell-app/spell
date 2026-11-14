@@ -94,6 +94,7 @@ Then, for what it printed:
    A plain revisit's note comes as a comment instead ("his revisit note on J3, made a comment"):  step 4.
 4. Comments:  `epic inbox working <epic>#C3 on`, answer into the item it's on,
    then `epic inbox done <epic>#C3 --file answer.html`.
+   Words holding `![picture](<path>)` are a picture they pasted:  look at `$(epic config contentFolder)<path>` first.
 5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again, unless they said stop.
 
 ## turn -- End every turn

@@ -68,7 +68,8 @@ export const epicThreadVocabulary = {
       name: "saved",
       kind: "string",
       description:
-        "The box's floppy, in its corner, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy."
+        "The box's floppy, in its corner, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy." +
+        "  It fades out 10 seconds after the save, or at once when something new is typed;  a red one stays."
     },
     {
       name: "failed",

@@ -7,6 +7,7 @@ import {
   HOVER_MODES,
   SUGGEST_DETAILS_HIDDEN,
   SUGGEST_MODES,
+  SUGGEST_MODES_RENAMED,
   codeHover,
   hoverDetailFor,
   monacoOptionsFor,
@@ -98,7 +99,11 @@ const PREFS = {
 
 editorPrefs
   .declare(PREFS.hover, { oneOf: [...HOVER_MODES], default: CODE_POPUP_DEFAULTS.hover })
-  .declare(PREFS.suggest, { oneOf: [...SUGGEST_MODES], default: CODE_POPUP_DEFAULTS.suggest })
+  .declare(PREFS.suggest, {
+    oneOf: [...SUGGEST_MODES],
+    default: CODE_POPUP_DEFAULTS.suggest,
+    renamed: SUGGEST_MODES_RENAMED
+  })
   .declare(PREFS.suggestDetails, { type: "choice", default: CODE_POPUP_DEFAULTS.suggestDetails })
   .declare(PREFS.parameterHints, { type: "choice", default: CODE_POPUP_DEFAULTS.parameterHints })
   .declare(PREFS.pinnedLines, { type: "choice", default: CODE_POPUP_DEFAULTS.pinnedLines })

@@ -350,10 +350,26 @@ export class SpellTyping {
    */
   static pastedLines(pasted: readonly string[], before: string, settings: IndentSettings): string[] {
     if (pasted.length < 2) return [...pasted]
+    const lines = SpellTyping.reindented(pasted, before, settings)
+    // a paste that ends its last line (`restart the game\n`) leaves what was after the caret on a line of its own:
+    // at the caret's indent, so it stays in its body (Owen, 2026-11-14, I53)
+    if (!pasted.at(-1)!.trim())
+      lines[lines.length - 1] = indentOfWidth(SpellTyping.pasteBase(before, pasted[0]!, settings), settings)
+    return lines
+  }
+
+  /** The indent width a paste lands at:  the caret's, when it's in a line's indent, else its line's (or the paste's). */
+  private static pasteBase(before: string, first: string, { tabSize }: IndentSettings): number {
+    const isIndent = !!before && !before.trim()
+    return isIndent ? widthOf(before, tabSize) : widthOf(indentOf(before || first), tabSize)
+  }
+
+  /** `pastedLines()`' re-indenting, its last line left as it came. */
+  private static reindented(pasted: readonly string[], before: string, settings: IndentSettings): string[] {
     const { tabSize } = settings
     const first = pasted[0]!
     const isIndent = !!before && !before.trim()
-    const base = isIndent ? widthOf(before, tabSize) : widthOf(indentOf(before || first), tabSize)
+    const base = SpellTyping.pasteBase(before, first, settings)
     const firstLine = isIndent ? first.trimStart() : first
     const isMarkup = /^\s*</.test(pasted.find((line) => line.trim()) ?? "")
     if (isMarkup) {
