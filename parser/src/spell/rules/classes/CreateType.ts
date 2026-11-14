@@ -20,6 +20,9 @@ import { TypeDeclaration } from "./TypeDeclaration"
  * - Its own values for properties its super-type has, on its line (epic `language` P55):
  *   `a "column" is a pile with layout "vertical"` (or `layout = vertical`), several joined by commas, as on a new thing.
  *   - The same as its body's line, `its "layout" is vertical`:  `get layout() { return "vertical" }`.
+ *   - Each is the type's own member, as its body's line would be (epic `language` J157):
+ *     declared on it (`mutateScope()`), with its `SPELL: DECLARES` comment above its getter,
+ *     so the words file, hover, the Inspector and the scope explorer list it.
  *   - Spanish:  `una "columna" es una pila con disposición "vertical"`.
  *   - A property its super-type hasn't is refused, naming it:  "A pile has no size" -- see `checkDefaults()`.
  */
@@ -99,10 +102,27 @@ export class CreateType extends TypeDeclaration<
 
   /**
    * SIDE EFFECT:  declares our type -- see `TypeDeclaration.declareType()`.
-   * - Its own values for its super-type's properties declare nothing:  the super-type's members are ours already.
+   * - And each of its own values for its super-type's properties as a member of ours, declared by its own words
+   *   (`layout "vertical"`), as its body's line `its layout is "vertical"` declares it (epic `language` J157):
+   *   - what the value is, its datatype:  `text` for a quoted one, `boolean` for a flag (`with face up`)
+   *   - the inherited member's names in compiled code and its values, as `PropertyValueGetter.mutateScope()` keeps
    */
   mutateScope(match: P.MatchFor<this>) {
     this.declareType(match, `${match.groups.superType.value}`)
+    const typeScope = match.scope.getType(`${match.groups.type.value}`)
+    if (!typeScope) return
+    for (const { name, item } of match.data.defaults ?? []) {
+      const { property, value } = item.groups as { property?: P.Match; value?: P.Match }
+      const member = typeScope.inheritedMember(name)
+      const datatype = value ? value.datatype : "boolean"
+      typeScope.declareProperty(name, item, {
+        asWritten: property?.raw,
+        datatype: typeof datatype === "string" ? datatype : undefined,
+        output: member?.output,
+        valueOutputs: member?.valueOutputs,
+        listedValues: member?.listedValues
+      })
+    }
   }
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const { type, superType } = match.groups
@@ -120,17 +140,25 @@ export class CreateType extends TypeDeclaration<
     })
   }
 
-  /** A getter for each of our own values, as its body's line writes it:  `get layout() { return "vertical" }`. */
-  private static defaultGetters(match: P.MatchFor<CreateType>, type: P.ASTTypeExpression): P.ASTPropertyDefinition[] {
-    return (match.data.defaults ?? []).map(({ name, output, datatype, item }) => {
+  /**
+   * A getter for each of our own values, as its body's line writes it:  `get layout() { return "vertical" }`.
+   * - Its `SPELL: DECLARES` comment above it, as its body's line has (J157):  see `mutateScope()`.
+   */
+  private static defaultGetters(
+    match: P.MatchFor<CreateType>,
+    type: P.ASTTypeExpression
+  ): Array<P.ASTPropertyDefinition | P.ASTComment> {
+    return (match.data.defaults ?? []).flatMap(({ name, output, datatype, item }) => {
       const { value } = item.groups as { value?: P.Match }
       // a flag, `with face up`:  yes
       const body = value ? P.matchAST<P.ASTExpression>(value) : new P.ASTBooleanLiteral(item, true)
-      return new P.ASTPropertyDefinition(item, {
+      const getter = new P.ASTPropertyDefinition(item, {
         type,
         property: new P.ASTPropertyLiteral(item, output ?? name),
         get: new P.ASTMethodDefinition(item, { body, datatype })
       })
+      const declared = SP.SpellDeclarations.commentFor(item)
+      return declared ? [declared, getter] : [getter]
     })
   }
 }
