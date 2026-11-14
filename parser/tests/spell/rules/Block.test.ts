@@ -238,11 +238,14 @@ describe("class members go in their class's body", () => {
       "  }",
       "}",
       'core.describeAction(Card, "flip", { title: "Flip A Card", undoneAs: "Flip A Card" })',
-      "core.console.log(1)",
       "// -----------",
       "export class Pile extends List {",
       "  static instanceType = Card",
       "}",
+      // every file sets itself up before any file's steps run -- see `SP.runningCodeLast()`
+      "// -----------",
+      "core.console.log(1)",
+      "// -----------",
       "core.console.log(3)"
     ])
     expect(cardAST.compile()).toBe(cardBefore)
