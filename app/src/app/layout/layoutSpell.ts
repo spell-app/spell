@@ -75,6 +75,7 @@ async function loadEditor(): Promise<EditorSpell> {
     exports,
     draw: (thing) => runtime.core.drawThing(thing),
     drawInPlace: (thing) => runtime.core.drawOwn(thing),
+    parts: (parts) => editorParts(exports.EditorPart as new () => object, parts),
     useTitles: (titles) => runtime.core.useTitles(titles)
   }
 }
@@ -108,6 +109,27 @@ export function layoutPieceBroken(piece: string, problem: string): void {
   queueMicrotask(() => editor.showError(appTexts.text("editorPieceBroken", { piece, problem })))
 }
 
+/**
+ * `parts` made the Spell's editor parts (`an "editor part" is a thing`, `EditorPart`), each drawn by its `draw()`.
+ * - So a view's place for one holds what its type says:  a plain `{ draw }` was no thing, and each warned.
+ */
+function editorParts<Name extends string>(
+  EditorPart: new () => object,
+  parts: Record<Name, DrawnByTheEditor>
+): Record<Name, object> {
+  const made = Object.entries<DrawnByTheEditor>(parts).map(([name, { draw }]) => [
+    name,
+    Object.assign(new EditorPart(), { draw })
+  ])
+  return Object.fromEntries(made) as Record<Name, object>
+}
+
+/** What the editor draws in a place a view of its Spell leaves for it:  a pane, a menu, a row. */
+export type DrawnByTheEditor = {
+  /** Its drawing, the editor's own. */
+  draw: () => unknown
+}
+
 /** The editor's own Spell, as `loadEditorSpell()` answers it. */
 export type EditorSpell = {
   /** Its app, `spell editor`:  its views, the state its menus follow, its actions. */
@@ -121,6 +143,11 @@ export type EditorSpell = {
    * so the page's sheets reach it, and what the editor draws in its holes.
    */
   drawInPlace: (thing: unknown) => unknown
+  /**
+   * `parts` as its editor parts (`an "editor part" is a thing`):  what the editor draws in its views' places for it,
+   * ready to hand to a view, `Object.assign(app.editorBar, spell.parts({ you: { draw: ... } }))`.
+   */
+  parts: <Name extends string>(parts: Record<Name, DrawnByTheEditor>) => Record<Name, object>
   /** Show its titles in the page's language:  each English title's text in it (`appTexts.titles`). */
   useTitles: (titles: Record<string, string>) => void
 }

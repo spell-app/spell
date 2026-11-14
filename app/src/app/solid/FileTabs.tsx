@@ -43,7 +43,7 @@ export function FileTabs() {
       if (isGone) return
       setSpell(() => loaded)
       const made = loaded.editor.fileTabBar as unknown as FileTabBar
-      made.more = { draw: () => <CodeMoreMenu /> }
+      Object.assign(made, loaded.parts({ more: { draw: () => <CodeMoreMenu /> } }))
       setBar(() => made)
     },
     // no tabs:  the code still shows, and File > Open is a way round
@@ -51,11 +51,11 @@ export function FileTabs() {
   )
 
   createEffect(
-    () => [bar(), state(), drafted()] as const,
-    ([it, { files, path }, drafts]) => {
-      if (!it) return
+    () => [bar(), state(), drafted(), spell()] as const,
+    ([it, { files, path }, drafts, loaded]) => {
+      if (!it || !loaded) return
       it.rememberAs = `file-tabs:${editor.project?.path ?? ""}`
-      const File = spell()!.exports.File as new () => TabFile
+      const File = loaded.exports.File as new () => TabFile
       const known = new Map(it.files.getValues().map((file) => [file.path, file]))
       it.files.items = files.map((each) => {
         const file = known.get(each.path) ?? new File()
@@ -177,7 +177,8 @@ type TabFile = {
 /** The `file tab bar` of `SpellEditor.spell`, as its compiled class has it. */
 type FileTabBar = {
   files: { items: TabFile[]; getValues: () => TabFile[] }
-  more: { draw: () => JSX.Element }
+  /** The code pane's ⋯, an editor part (`EditorSpell.parts()`). */
+  more: object
   rememberAs: string
 }
 

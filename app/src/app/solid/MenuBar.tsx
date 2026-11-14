@@ -238,20 +238,23 @@ export function ProjectBarMenu(): JSX.Element {
     title: editor.project ? new SP.SpellProject(editor.project.path).title : ""
   }))
   const project = () => ({ project: shown().title })
-  const spell = editorSpell((app) =>
-    Object.assign(app.projectMenu, {
-      theme: {
-        draw: () => (
-          <ui-submenu
-            label={appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
-            icon={THEME_ICON}
-            class="ThemeSubmenu"
-          >
-            <ThemeItems />
-          </ui-submenu>
-        )
-      }
-    })
+  const spell = editorSpell((app, loaded) =>
+    Object.assign(
+      app.projectMenu,
+      loaded.parts({
+        theme: {
+          draw: () => (
+            <ui-submenu
+              label={appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
+              icon={THEME_ICON}
+              class="ThemeSubmenu"
+            >
+              <ThemeItems />
+            </ui-submenu>
+          )
+        }
+      })
+    )
   )
   followEditor(spell, () => ({
     renameWords: appTexts.text("renameProject", project()),
@@ -314,13 +317,16 @@ function ThemeItems(): JSX.Element {
  * - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows.
  ****************/
 export function AppBarMenus(props: { mode: Mode }): JSX.Element {
-  const spell = editorSpell((app) => {
-    Object.assign(app.editMenu, {
-      undo: { draw: () => <Actions.undo menu icon="undo" /> },
-      redo: { draw: () => <Actions.redo menu icon="redo" /> },
-      partActions: { draw: () => <PartMenuItems /> }
-    })
-    Object.assign(app.viewMenu, { inspectorCards: { draw: () => <InspectorCards /> } })
+  const spell = editorSpell((app, loaded) => {
+    Object.assign(
+      app.editMenu,
+      loaded.parts({
+        undo: { draw: () => <Actions.undo menu icon="undo" /> },
+        redo: { draw: () => <Actions.redo menu icon="redo" /> },
+        partActions: { draw: () => <PartMenuItems /> }
+      })
+    )
+    Object.assign(app.viewMenu, loaded.parts({ inspectorCards: { draw: () => <InspectorCards /> } }))
   })
   const fileName = tracked(() => (editor.file ? SP.SpellProject.sourceNameOf(editor.file.path) : ""))
   followEditor(spell, () => ({
@@ -483,15 +489,15 @@ let loadingWithActions: Promise<EditorSpell> | undefined
 
 /**
  * The editor's Spell, as an accessor:  `undefined` until it's loaded (`editorSpellWithActions()`).
- * - `holes`:  run once it's loaded, to hand its views what the editor draws in their holes.
+ * - `holes`:  run once it's loaded, to hand its views what the editor draws in their holes (`loaded.parts()`).
  * - Call in a component body.
  * - NEVER throws:  Spell that won't load leaves the menus empty, and says so on the console.
  */
-function editorSpell(holes?: (app: SpellEditorApp) => void): () => EditorSpell | undefined {
+function editorSpell(holes?: (app: SpellEditorApp, loaded: EditorSpell) => void): () => EditorSpell | undefined {
   const [spell, setSpell] = createSignal<EditorSpell>()
   editorSpellWithActions().then(
     (loaded) => {
-      holes?.(loaded.editor)
+      holes?.(loaded.editor, loaded)
       setSpell(() => loaded)
     },
     (problem: unknown) => console.error("the menus can't load the editor's Spell", problem)
