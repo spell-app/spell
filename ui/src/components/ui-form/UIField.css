@@ -109,7 +109,7 @@
     transform: rotate(-45deg);
   }
 
-  /* ## The info icon and its tip */
+  /* ## The info icon and its tip;  the not-saved icon says why in the same bubble */
   .field > .row > .info {
     position: relative;
     display: inline-flex;
@@ -131,7 +131,7 @@
     height: 100%;
     fill: currentColor;
   }
-  .field > .row > .info > .tip {
+  .field > .row > :is(.info, .unsaved) > .tip {
     position: absolute;
     inset-block-start: calc(100% + 0.5em);
     inset-inline-end: -0.5em;
@@ -154,24 +154,29 @@
       visibility var(--ui-duration-fast);
   }
   /* shown:  no longer faded with the icon */
-  .field > .row > .info:is(:hover, :focus) > .tip {
+  .field > .row > :is(.info, .unsaved):is(:hover, :focus) > .tip {
     opacity: 1;
     visibility: visible;
   }
-  .field > .row > .info:hover > .tip {
+  .field > .row > :is(.info, .unsaved):hover > .tip {
     transition-delay: var(--_ui-field-tip-delay);
   }
   /* focus shows it at once:  none, not a delay of 0, which would leave a hover already waiting to run on */
-  .field > .row > .info:focus > .tip {
+  .field > .row > :is(.info, .unsaved):focus > .tip {
     transition: none;
   }
   /* In the top layer while it shows (`TopLayerTip`):  under the icon, flipping to stay in the window. */
   .field > .row > .info {
+    --_field-tip-anchor: --ui-field-info;
     anchor-name: --ui-field-info;
   }
-  .field > .row > .info > .tip:popover-open {
+  .field > .row > .unsaved {
+    --_field-tip-anchor: --ui-field-unsaved;
+    anchor-name: --ui-field-unsaved;
+  }
+  .field > .row > :is(.info, .unsaved) > .tip:popover-open {
     position: fixed;
-    position-anchor: --ui-field-info;
+    position-anchor: var(--_field-tip-anchor);
     position-area: block-end span-inline-start;
     position-try-fallbacks:
       flip-block,
@@ -184,7 +189,7 @@
     border: 0;
     overflow: visible;
   }
-  .field > .row > .info:is(:hover, :focus) > .tip:popover-open {
+  .field > .row > :is(.info, .unsaved):is(:hover, :focus) > .tip:popover-open {
     @starting-style {
       opacity: 0;
       visibility: hidden;
