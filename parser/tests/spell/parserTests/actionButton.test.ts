@@ -2,7 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
 import { PY } from "spell/parser/py"
-import { parseSpellProject } from "spell/parser/spell/test"
+import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
  * `<action "auto play"/>`:  a button for one of the program's actions, in a drawing (`action_button`, epic `language`;
@@ -25,9 +25,9 @@ describe("an action's button, <action>", () => {
     '\tto "restart the game" with title "Restart"',
     "\t\tprint 2",
     "\tto draw it",
-    "\t\t<toolbar>",
+    "\t\t<segment>",
     ...drawing.map((line) => `\t\t\t${line}`),
-    "\t\t</toolbar>",
+    "\t\t</segment>",
     "\tto cheat",
     "\t\tprint 3"
   ]
@@ -118,6 +118,43 @@ describe("an action's button, <action>", () => {
     expect(ts).toContain('{core.drawAction(this, "autoPlay", { "in-menu": true })}')
     const python = String(PY.PyWriter.instance.writeMatch(file.match!))
     expect(python).toContain('core.draw_action(self, "auto_play", {"in-menu": True})')
+  })
+
+  test("inside a <toolbar>, a menu too, an action is its item;  one in its slot's <buttons> stays a button", () => {
+    const file = parsed(
+      game(
+        "<toolbar shrinkable>",
+        '\t<action "auto play"/>',
+        "\t<divider/>",
+        '\t<action "undo"/>',
+        '\t<buttons slot="right">',
+        '\t\t<action "cheat"/>',
+        "\t</buttons>",
+        "</toolbar>"
+      )
+    )
+    expect(file.errors).toEqual([])
+    expect(file.compiled).toContain('core.drawAction(this, "autoPlay", { "in-menu": true })')
+    expect(file.compiled).toContain('h("ui-action", { kind: "divider" })')
+    expect(file.compiled).toContain('core.drawAction(this, "undo", { "in-menu": true })')
+    expect(file.compiled).toContain('core.drawAction(this, "cheat")')
+  })
+
+  test("Spanish:  <acción> in a <barra-herramientas>, its <divisor/>:  the pack says it's a toolbar", () => {
+    registerTestComponentPack()
+    const file = parsed(
+      [
+        "un juego es una app",
+        "\tpara jugar solo",
+        "\t\timprimir 1",
+        "\tpara dibujarlo",
+        '\t\t<barra-herramientas encogible><acción "jugar solo"/><divisor/><acción "deshacer"/></barra-herramientas>'
+      ],
+      "/Juego.es.spell"
+    )
+    expect(file.errors).toEqual([])
+    expect(file.compiled).toContain('core.drawAction(this, "jugarSolo", { "in-menu": true })')
+    expect(file.compiled).toContain('h("ui-action", { kind: "divider" })')
   })
 
   test("Spanish:  <acción> in a <ui-menu>, its <divisor/>", () => {

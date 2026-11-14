@@ -223,9 +223,12 @@ class DrawingMethods:
           `icon-only` its own, no text, its title its `aria-label`.
         - The app's own `undo` and `redo` too:  their titles and whether they're enabled follow its history (`apps.py`).
         - An action nobody up the chain has:  a disabled button of its name.
+        - `in-menu`, the core's own:  a Spell UI menu or toolbar holds it, so it's the menu's ROW, `<ui-action>`,
+          its key in Spell UI's words (`meta+Z` => `mod+Z`);  the page's drawing half hands it the action, live.
         """
         given = dict(props or {})
         icon_only = given.pop(ICON_ONLY, False)
+        in_menu = given.pop(IN_MENU, False)
         holder = next((at for at in self._chain_of(thing) if callable(getattr(at, name, None))), None)
         if holder is not None:
             description = DescribedMethods.actions_of(self, type(holder)).get(name, {})
@@ -234,8 +237,11 @@ class DrawingMethods:
             enabled_when = description.get("enabled_when")
             is_enabled = bool(getattr(holder, enabled_when)) if enabled_when else True
         else:
-            return h(BUTTON_TAG, {"disabled": True, **given}, *(children or (name,)))
+            return h(MENU_ROW_TAG if in_menu else BUTTON_TAG, {"disabled": True, **given}, *(children or (name,)))
         shortcut = (description.get("shortcuts") or [None])[0]
+        if in_menu:
+            row: dict[str, object] = {"shortcut": _menu_keys_of(shortcut)} if shortcut else {}
+            return h(MENU_ROW_TAG, {**row, **given}, *children)
         own: dict[str, object] = {
             "icon": description.get("icon"),
             "title": f"{title} ({_keys_of(shortcut)})" if shortcut else None,
@@ -274,6 +280,12 @@ CONTEXT_MENU_TAG = "spell-context-menu"
 # `<action>`'s own attribute:  its button shows only its icon
 ICON_ONLY = "icon-only"
 
+# `<action>`'s mark that a Spell UI menu or toolbar holds it:  it's the menu's row
+IN_MENU = "in-menu"
+
+# What `<action>` draws in a menu:  Spell UI's menu row, which the page defines
+MENU_ROW_TAG = "ui-action"
+
 
 def _keys_of(shortcut: str) -> str:
     """A shortcut as a key tip shows it, as a page off a Mac does:  `meta+shift+Z` is `Ctrl+Shift+Z`, `A` is `A`.
@@ -283,6 +295,14 @@ def _keys_of(shortcut: str) -> str:
     *parts, key = [part.strip() for part in shortcut.split("+")]
     names = ["Ctrl" if part.lower() in ("meta", "mod", "control") else part.lower().capitalize() for part in parts]
     return "+".join([*names, key.upper() if len(key) == 1 else key])
+
+
+def _menu_keys_of(shortcut: str) -> str:
+    """A shortcut in Spell UI's words, as a menu's row reads it:  `meta+shift+Z` is `mod+shift+Z`.
+
+    - The twin of the JavaScript core's `menuKeysOf()`.
+    """
+    return "+".join("mod" if part.strip().lower() == "meta" else part for part in shortcut.split("+"))
 
 
 def _words_of(name: str) -> str:

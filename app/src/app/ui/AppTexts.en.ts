@@ -536,6 +536,9 @@ export const APP_TEXTS = {
   // an event's heading over its code (Owen:  "make label `on click`")
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",
+  // the project menu's Theme ›, at its foot:  each opens in a new window
+  openThemeEditor: "Edit Theme",
+  openThemeBench: "Theme Bench",
   // the pages it previews while it's worked on (`BenchPages`, in development)
   "themePage.app": "App",
   "themePage.epic": "Epic page",

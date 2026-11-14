@@ -40,8 +40,9 @@ import { SpellJSX } from "./SpellJSX"
  *   - A Python program's page draws it with its drawing half's javascript, the action run in Python (`core.remote`).
  * - An action named nowhere in the program, its thing's types or any other:  the line is refused, naming it
  *   (`unknown-action`).  Asked once the whole program has parsed:  an action may be declared below its drawing.
- * - Inside a Spell UI `<menu>`, it's a menu's ROW, not a button (epic `editor` P29):  Spell UI's `<ui-action>`, its title,
- *   icon and key the action's, greyed by its `enabled when` and ticked by its `selected when`, live;
+ * - Inside a Spell UI `<menu>` or `<toolbar>`, it's a menu's ROW, not a button (epic `editor` P29):
+ *   Spell UI's `<ui-action>`, its title, icon and key the action's,
+ *   greyed by its `enabled when` and ticked by its `selected when`, live;
  *   a click runs it through the core, one undo step, as a button's does.
  *   - `SpellJSX` marks it as the menu parses (`markMenuRows()`);  it compiles with the core's own `in-menu`,
  *     `core.drawAction(this, "save", { "in-menu": true })`.

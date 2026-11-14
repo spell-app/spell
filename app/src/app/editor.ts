@@ -87,6 +87,11 @@ export class EditorStore extends Observable {
     navigate(THEME_PAGE)
   }
 
+  /** Open the theme editor's page in a new window, this one staying as it is (the project menu's Theme ›). */
+  openThemeEditor(): void {
+    window.open(new URL(THEME_PAGE, location.href).href, "_blank", "noopener")
+  }
+
   /**
    * Show the site editor (`<SiteEditorPage>`, epic `mockup` P4) for the project at `projectPath`, default the current
    * one:  its pages, as a tree and a board.

@@ -55,18 +55,23 @@ function shownOf(host: Element) {
   return classes.contains("dark") ? "dark" : classes.contains("light") ? "light" : undefined
 }
 
-/** `host`'s overlay choice for scheme `scheme` (Light | Dark | Auto). */
+/** `host`'s overlay choice for scheme `scheme` (Light | Dark | Auto):  its segmented menu's `<ui-item>`. */
 function choice(host: Element, scheme: SchemeChoice) {
-  return host.shadowRoot!.querySelector<HTMLButtonElement>(`[role=radio][value="${scheme}"]`)!
+  return part(host, "schemes").querySelector<HTMLElement>(`ui-item[value="${scheme}"]`)!
 }
 
-/** `host`'s scheme choices:  `[value, name, aria-checked, tabindex]`. */
-function choices(host: Element): [string, string, string, number][] {
-  return [...host.shadowRoot!.querySelectorAll<HTMLButtonElement>("[role=radio]")].map((each) => [
-    each.value,
-    each.querySelector(".name")!.textContent!,
-    each.getAttribute("aria-checked")!,
-    each.tabIndex
+/** The button `choice` draws:  what focus and a click land on. */
+function boxOf(item: Element) {
+  return item.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!
+}
+
+/** `host`'s scheme choices:  `[value, name, selected, its box's tabindex]`. */
+function choices(host: Element): [string, string, boolean, number][] {
+  return [...part(host, "schemes").querySelectorAll<HTMLElement>("ui-item")].map((each) => [
+    each.getAttribute("value")!,
+    each.textContent!.trim(),
+    each.matches(":state(selected)"),
+    boxOf(each).tabIndex
   ])
 }
 
@@ -149,14 +154,19 @@ describe("<ui-theme-menu> markup", () => {
     expect(overlay.localName).toBe("ui-popup")
     expect(overlay.getAttribute("open-on")).toBe("click")
     expect(part(host, "scheme")).toBeNull()
-    expect(part(host, "schemes").getAttribute("role")).toBe("radiogroup")
-    expect(part(host, "schemes").getAttribute("aria-label")).toBe("Light or dark")
+    // a segmented menu, as every other row of a few buttons:  its own track and thumb
+    const schemes = part(host, "schemes")
+    expect(schemes.localName).toBe("ui-menu")
+    expect(schemes.getAttribute("appearance")).toBe("segmented")
+    expect(schemes.shadowRoot!.querySelector("[part~=menu]")!.getAttribute("role")).toBe("menubar")
+    expect(schemes.getAttribute("aria-label")).toBe("Light or dark")
     expect(choices(host)).toEqual([
-      ["light", "Light", "false", -1],
-      ["dark", "Dark", "false", -1],
-      ["system", "Auto", "true", 0]
+      ["light", "Light", false, -1],
+      ["dark", "Dark", false, -1],
+      ["system", "Auto", true, 0]
     ])
-    expect([...part(host, "schemes").querySelectorAll("ui-icon")].map((icon) => icon.getAttribute("name"))).toEqual([
+    expect(choice(host, "system").getAttribute("part")).toBe("scheme-option")
+    expect([...schemes.querySelectorAll("ui-item")].map((item) => item.getAttribute("icon"))).toEqual([
       "sun outline",
       "moon",
       "adjust"
@@ -305,7 +315,7 @@ describe("<ui-theme-menu> menu (show=menu)", () => {
     expect(getComputedStyle(host).display).toBe("block")
     for (const name of ["palette", "overlay", "tip", "scheme", "theme"]) expect(part(host, name), name).toBeNull()
     expect(host.shadowRoot!.querySelector("ui-popup")).toBeNull()
-    expect(part(host, "schemes").getAttribute("role")).toBe("radiogroup")
+    expect(part(host, "schemes").getAttribute("appearance")).toBe("segmented")
     expect(choices(host).map(([value]) => value)).toEqual(["light", "dark", "system"])
     expect(part(host, "menu").getAttribute("role")).toBe("menu")
     expect(rows(host).map(([value]) => value)).toEqual([...UI.themes.own])
@@ -397,29 +407,29 @@ describe("<ui-theme-menu> scheme", () => {
     const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     const changes: ThemeMenuChange[] = []
     host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<ThemeMenuChange>).detail))
-    choice(host, "light").click()
+    boxOf(choice(host, "light")).click()
     await ElementFixture.settle()
     expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("light")
     expect(htmlScheme()).toEqual({ light: true, dark: false, colorScheme: "light" })
-    expect(choices(host).map(([value, , checked]) => [value, checked])).toEqual([
-      ["light", "true"],
-      ["dark", "false"],
-      ["system", "false"]
+    expect(choices(host).map(([value, , selected]) => [value, selected])).toEqual([
+      ["light", true],
+      ["dark", false],
+      ["system", false]
     ])
     expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Glass, Light")
-    choice(host, "dark").click()
+    boxOf(choice(host, "dark")).click()
     await ElementFixture.settle()
     expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("dark")
     expect(htmlScheme().dark).toBe(true)
     expect(host.matches(":state(dark)")).toBe(true)
-    choice(host, "system").click()
+    boxOf(choice(host, "system")).click()
     await ElementFixture.settle()
     expect(localStorage.getItem(THEME_KEYS.scheme)).toBeNull()
     expect(htmlScheme()).toEqual({ light: false, dark: false, colorScheme: "" })
     expect(host.matches(":state(following)")).toBe(true)
     expect(host.matches(":state(dark)")).toBe(true) // the OS's
     // the chosen one again:  nothing
-    choice(host, "system").click()
+    boxOf(choice(host, "system")).click()
     expect(changes.map(({ scheme, shown }) => [scheme, shown])).toEqual([
       ["light", "light"],
       ["dark", "dark"],
@@ -427,32 +437,58 @@ describe("<ui-theme-menu> scheme", () => {
     ])
   })
 
-  it("Light | Dark | Auto is a radio group:  one tab stop, the chosen one;  arrows move AND choose, wrapping", async () => {
+  it("Light | Dark | Auto:  one tab stop, the chosen one;  ← → Home End move AND choose, wrapping", async () => {
     const host = await render(`<ui-theme-menu></ui-theme-menu>`)
-    const focused = () => host.shadowRoot!.activeElement
+    const focused = () => document.activeElement === host && host.shadowRoot!.activeElement
+    const focusedScheme = () =>
+      [...part(host, "schemes").querySelectorAll("ui-item")].find((item) => item.matches(":focus-within"))
     part(host, "palette").click()
     await vi.waitFor(() => expect(part(host, "overlay").matches(":popover-open")).toBe(true))
     // Shift+Tab from the theme list reaches the scheme control's one tab stop:  the chosen scheme
     await vi.waitFor(() => expect(focused()).toBe(row(host, "glass")))
     await userEvent.keyboard("{Shift>}{Tab}{/Shift}")
-    expect(focused()).toBe(choice(host, "system"))
+    expect(focusedScheme()).toBe(choice(host, "system"))
     await userEvent.keyboard("{ArrowRight}")
     await ElementFixture.settle()
-    expect(focused()).toBe(choice(host, "light"))
+    expect(focusedScheme()).toBe(choice(host, "light"))
     expect(ThemePreference.chosen.scheme).toBe("light")
-    expect(choices(host).map(([value, , , tabIndex]) => [value, tabIndex])).toEqual([
-      ["light", 0],
-      ["dark", -1],
-      ["system", -1]
+    expect(choices(host).map(([value, , selected, tabIndex]) => [value, selected, tabIndex])).toEqual([
+      ["light", true, 0],
+      ["dark", false, -1],
+      ["system", false, -1]
     ])
-    await userEvent.keyboard("{ArrowDown}")
+    await userEvent.keyboard("{ArrowRight}")
     await ElementFixture.settle()
-    expect(focused()).toBe(choice(host, "dark"))
+    expect(focusedScheme()).toBe(choice(host, "dark"))
     expect(htmlScheme().dark).toBe(true)
-    await userEvent.keyboard("{ArrowLeft}{ArrowUp}")
+    await userEvent.keyboard("{End}")
     await ElementFixture.settle()
-    expect(focused()).toBe(choice(host, "system"))
+    expect(focusedScheme()).toBe(choice(host, "system"))
     expect(ThemePreference.chosen.scheme).toBe("system")
+    await userEvent.keyboard("{ArrowRight}{ArrowLeft}{ArrowLeft}")
+    await ElementFixture.settle()
+    expect(focusedScheme()).toBe(choice(host, "dark"))
+    expect(ThemePreference.chosen.scheme).toBe("dark")
+    // the panel stays open, to compare
+    expect(part(host, "overlay").matches(":popover-open")).toBe(true)
+  })
+
+  it("choosing a scheme sends no ui-choosing past the menu:  a host's sub-menu stays open", async () => {
+    const host = await render(`<ui-theme-menu show="menu" bench="none"></ui-theme-menu>`)
+    const heard: Event[] = []
+    host.addEventListener("ui-choosing", (event) => heard.push(event))
+    const keys: KeyboardEvent[] = []
+    host.addEventListener("keydown", (event) => keys.push(event))
+    boxOf(choice(host, "dark")).click()
+    await ElementFixture.settle()
+    expect(ThemePreference.chosen.scheme).toBe("dark")
+    boxOf(choice(host, "dark")).focus()
+    await userEvent.keyboard("{ArrowLeft}")
+    await ElementFixture.settle()
+    expect(ThemePreference.chosen.scheme).toBe("light")
+    expect(heard).toEqual([])
+    // ← is the host's sub-menu's close:  the row keeps it
+    expect(keys).toEqual([])
   })
 
   it("every menu on the page follows a change made in another", async () => {
@@ -460,7 +496,7 @@ describe("<ui-theme-menu> scheme", () => {
       `<div><ui-theme-menu></ui-theme-menu><ui-theme-menu show="theme"></ui-theme-menu></div>`
     )
     const [first, second] = wrapper.querySelectorAll("ui-theme-menu")
-    choice(first!, "dark").click()
+    boxOf(choice(first!, "dark")).click()
     row(first!, "merlot").click()
     await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
     await ElementFixture.settle()
@@ -559,7 +595,7 @@ describe("<ui-theme-menu> Theme bench", () => {
 describe("<ui-theme-menu> persistence", () => {
   it("stores the theme and scheme, and restore() re-applies them on the next page", async () => {
     const host = await render(`<ui-theme-menu></ui-theme-menu>`)
-    choice(host, "dark").click()
+    boxOf(choice(host, "dark")).click()
     row(host, "merlot").click()
     await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
     expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot")
@@ -574,14 +610,14 @@ describe("<ui-theme-menu> persistence", () => {
     expect(UI.themes.current).toBe("merlot")
     const next = await render(`<ui-theme-menu></ui-theme-menu>`)
     expect(row(next, "merlot").getAttribute("aria-checked")).toBe("true")
-    expect(choice(next, "dark").getAttribute("aria-checked")).toBe("true")
+    expect(choice(next, "dark").matches(":state(selected)")).toBe(true)
   })
 
   it("system and Glass (the default) are stored as absent keys", async () => {
     const host = await render(`<ui-theme-menu></ui-theme-menu>`)
-    choice(host, "dark").click()
+    boxOf(choice(host, "dark")).click()
     await ElementFixture.settle()
-    choice(host, "system").click()
+    boxOf(choice(host, "system")).click()
     row(host, "merlot").click()
     await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
     row(host, "glass").click()
@@ -596,7 +632,7 @@ describe("<ui-theme-menu> persistence", () => {
     })
     try {
       const host = await render(`<ui-theme-menu></ui-theme-menu>`)
-      choice(host, "dark").click()
+      boxOf(choice(host, "dark")).click()
       await ElementFixture.settle()
       expect(htmlScheme().dark).toBe(true)
       expect(ThemePreference.chosen.scheme).toBe("dark")

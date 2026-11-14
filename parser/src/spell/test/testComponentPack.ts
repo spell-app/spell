@@ -12,6 +12,7 @@ export function registerTestComponentPack(): void {
   SP.ComponentPacks.register({
     name: "spell-ui",
     tagFor: (word, language) => TEST_TAGS[language]?.[withoutAccents(word)],
+    canonicalTagFor: (tag, language) => CANONICAL[TEST_TAGS[language]?.[withoutAccents(tag)] ?? tag],
     readDefault: readTestDefault
   })
 }
@@ -42,7 +43,7 @@ function readTestDefault(sample: SP.DefaultSample, language: string): SP.Default
 }
 
 /** The test pack's Spanish tags, by their canonical one. */
-const CANONICAL: Record<string, string> = { "es-boton": "ui-button" }
+const CANONICAL: Record<string, string> = { "es-boton": "ui-button", "es-barra-herramientas": "ui-toolbar" }
 
 /** `<ui-button>`'s attributes in the test pack, by language:  as written => its own name. */
 const BUTTON_NAMES: Record<string, Record<string, string>> = {
@@ -77,6 +78,7 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     imagen: "es-imagen",
     encabezado: "es-encabezado",
     boton: "es-boton",
+    "barra-herramientas": "es-barra-herramientas",
     tarjetas: "es-tarjetas",
     seccion: "es-seccion",
     tabla: "es-tabla",

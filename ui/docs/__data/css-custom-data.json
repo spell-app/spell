@@ -9977,13 +9977,6 @@
       }
     },
     {
-      "name": "--ui-theme-menu-choice-shadow",
-      "description": {
-        "kind": "markdown",
-        "value": "The chosen scheme's raised key in the segmented control: its drop shadow.\n\n`<ui-theme-menu>`'s token.  Default:  `0 1px 2px oklch(0 0 0 / 0.16)`"
-      }
-    },
-    {
       "name": "--ui-theme-menu-inverted-ink",
       "description": {
         "kind": "markdown",
@@ -11564,14 +11557,14 @@
       "name": "::part(scheme-option)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-theme-menu>`:  One choice in it (`role=radio`):  an icon and its name."
+        "value": "Part of:\n\n- `<ui-theme-menu>`:  One choice in it, a `<ui-item>`:  an icon and its name."
       }
     },
     {
       "name": "::part(schemes)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-theme-menu>`:  The overlay's Light | Dark | Auto control (`role=radiogroup`)."
+        "value": "Part of:\n\n- `<ui-theme-menu>`:  The overlay's Light | Dark | Auto control:  a segmented `<ui-menu>`."
       }
     },
     {

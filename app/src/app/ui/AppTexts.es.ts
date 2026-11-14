@@ -354,6 +354,8 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorTestsNone: "Aún no hay pruebas.",
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Editar el tema…",
+  openThemeEditor: "Editar el tema",
+  openThemeBench: "Banco de temas",
   "themePage.app": "App",
   "themePage.epic": "Página de épica",
   "themePage.ui": "Spell UI",

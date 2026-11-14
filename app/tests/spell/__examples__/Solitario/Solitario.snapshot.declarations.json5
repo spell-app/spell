@@ -184,7 +184,7 @@
       "kind": "method",
       "name": "jugar una carta",
       "waits": true,
-      "defined": "/Solitario.es.spell:6672-6961"
+      "defined": "/Solitario.es.spell:6676-6965"
     },
     {
       "syntax": "poner {thisArg:expression} en {callArgs:expression}",
@@ -206,7 +206,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitario.es.spell:7169-7806"
+      "defined": "/Solitario.es.spell:7173-7810"
     },
     {
       "syntax": "contar los puntos (de|del) {thisArg:expression} en {callArgs:expression}",
@@ -227,7 +227,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:7808-8058"
+      "defined": "/Solitario.es.spell:7812-8062"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -323,36 +323,36 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:9239-9680"
+      "defined": "/Solitario.es.spell:9243-9684"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:9682-9936"
+      "defined": "/Solitario.es.spell:9686-9940"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:9938-10514"
+      "defined": "/Solitario.es.spell:9942-10518"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:10054-10083"
+      "defined": "/Solitario.es.spell:10058-10087"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10516-12568"
+      "defined": "/Solitario.es.spell:10520-12572"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:316-6375"
+      "defined": "/Solitario.es.spell:316-6379"
     },
     {
       "property": "mazo",
@@ -430,7 +430,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Reiniciar",
-      "defined": "/Solitario.es.spell:2867-3016"
+      "defined": "/Solitario.es.spell:2867-3040"
     },
     {
       "syntax": "jugar solo ((de|del) {thisArg:expression})?",
@@ -447,7 +447,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Jugar solo",
-      "defined": "/Solitario.es.spell:3018-4149"
+      "defined": "/Solitario.es.spell:3042-4187"
     },
     {
       "syntax": "hacer trampa ((de|del) {thisArg:expression})?",
@@ -464,103 +464,103 @@
       "returns": "nothing",
       "waits": true,
       "title": "Trampa",
-      "defined": "/Solitario.es.spell:4151-4828"
+      "defined": "/Solitario.es.spell:4189-4879"
     },
     {
       "property": "movimientos",
       "of": "Solitario",
       "datatype": "number",
-      "defined": "/Solitario.es.spell:5612-5635"
+      "defined": "/Solitario.es.spell:5616-5639"
     },
     {
       "property": "puntuación",
       "of": "Solitario",
       "datatype": "number",
-      "defined": "/Solitario.es.spell:5648-5670"
+      "defined": "/Solitario.es.spell:5652-5674"
     },
     {
       "property": "pista",
       "of": "Solitario",
       "datatype": "text",
-      "defined": "/Solitario.es.spell:5670-5686"
+      "defined": "/Solitario.es.spell:5674-5690"
     },
     {
       "property": "reserva",
       "of": "Solitario",
       "datatype": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:5982-6010"
+      "defined": "/Solitario.es.spell:5986-6014"
     },
     {
       "property": "descartes",
       "of": "Solitario",
       "datatype": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:6014-6046"
+      "defined": "/Solitario.es.spell:6018-6050"
     },
     {
       "property": "tréboles",
       "of": "Solitario",
       "datatype": "Fundación",
-      "defined": "/Solitario.es.spell:6064-6101"
+      "defined": "/Solitario.es.spell:6068-6105"
     },
     {
       "property": "diamantes",
       "of": "Solitario",
       "datatype": "Fundación",
-      "defined": "/Solitario.es.spell:6105-6144"
+      "defined": "/Solitario.es.spell:6109-6148"
     },
     {
       "property": "corazones",
       "of": "Solitario",
       "datatype": "Fundación",
-      "defined": "/Solitario.es.spell:6148-6187"
+      "defined": "/Solitario.es.spell:6152-6191"
     },
     {
       "property": "espadas",
       "of": "Solitario",
       "datatype": "Fundación",
-      "defined": "/Solitario.es.spell:6191-6226"
+      "defined": "/Solitario.es.spell:6195-6230"
     },
     {
       "property": "C1",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:6230-6245"
+      "defined": "/Solitario.es.spell:6234-6249"
     },
     {
       "property": "C2",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:6249-6264"
+      "defined": "/Solitario.es.spell:6253-6268"
     },
     {
       "property": "C3",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:6268-6283"
+      "defined": "/Solitario.es.spell:6272-6287"
     },
     {
       "property": "C4",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:6287-6302"
+      "defined": "/Solitario.es.spell:6291-6306"
     },
     {
       "property": "C5",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:6306-6321"
+      "defined": "/Solitario.es.spell:6310-6325"
     },
     {
       "property": "C6",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:6325-6340"
+      "defined": "/Solitario.es.spell:6329-6344"
     },
     {
       "property": "C7",
       "of": "Solitario",
       "datatype": "Columna",
-      "defined": "/Solitario.es.spell:6344-6359"
+      "defined": "/Solitario.es.spell:6348-6363"
     },
     {
       "syntax": "probar los movimientos",
@@ -569,7 +569,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:10985-12568"
+      "defined": "/Solitario.es.spell:10989-12572"
     }
   ],
   "codeLines": [
@@ -615,7 +615,6 @@
     500,
     508,
     543,
-    599,
     603,
     607,
     611,
@@ -631,6 +630,7 @@
     651,
     655,
     659,
-    694
+    663,
+    698
   ]
 }

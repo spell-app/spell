@@ -336,8 +336,9 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
             `startPage({ modules: [${moduleNames}], state: ${state}, send: (message) => sent.push(message) })`,
             // the toolbar's Auto Play:  in the solitaire's drawing, as each view draws in its own shadow root
             ...FOUND,
-            // its button, `<action \"auto play\"/>`, clicked:  the core runs its action (`core.drawAction()`)
-            "found(document, 'ui-button[title^=\"Auto Play\"]')?.click()",
+            // its row, `<action \"auto play\"/>`, clicked:
+            // `<ui-action>` runs the action it was handed (`core.drawAction()`), as its click does where Spell UI is loaded
+            "found(document, 'ui-action[shortcut=\"A\"]')?.action.run('click')",
             "await new Promise((resolve) => setTimeout(resolve, 10))",
             "console.log(JSON.stringify(sent))"
           ].join("\n")
@@ -376,7 +377,7 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
 /**
  * A page's Undo and Redo follow a Python game's history (epic `language` P54):
  * each game run as its page runs it (`spell_core.page`), a stock card turned (one step, `Turn Card`), then undone;
- * its page, given the state and each patch, shows the toolbar's Undo and Redo after each.
+ * its page, given the state and each patch, shows the toolbar's Undo and Redo rows after each (`<ui-action>`s).
  */
 describe("the core contract:  a page's Undo and Redo follow a Python game's history", () => {
   for (const name of GAMES) {
@@ -413,8 +414,10 @@ describe("the core contract:  a page's Undo and Redo follow a Python game's hist
             `const page = startPage({ modules: [${moduleNames}], state: ${state}, send: () => {} })`,
             "const shown = async () => {",
             "  await new Promise((resolve) => setTimeout(resolve, 10))",
-            "  return ['undo', 'redo'].map((icon) => found(document, `ui-button[icon=\"${icon}\"]`))",
-            "    .map((button) => `${button.getAttribute('aria-label')}${button.hasAttribute('disabled') ? ' (disabled)' : ''}`)",
+            // the toolbar's rows, by their keys:  each reads its action live, its title and whether it's enabled
+            "  return ['mod+Z', 'mod+shift+Z']",
+            '    .map((keys) => found(document, `ui-action[shortcut="${keys}"]`).action)',
+            "    .map((action) => `${action.title}${action.isEnabled ? '' : ' (disabled)'}`)",
             "}",
             "const seen = [await shown()]",
             ...patches.map((patch) => `page.receive(${patch});  seen.push(await shown())`),

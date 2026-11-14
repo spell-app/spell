@@ -144,7 +144,8 @@
                   - Enter or Space on the palette button opens its panel, the chosen theme focused.
                   - In the theme list:  the arrows, Home and End move;  Enter or Space picks, and the panel stays open
                     to compare.
-                  - Shift+Tab reaches Light | Dark | Auto:  the arrows move and choose, as in any radio group.
+                  - Shift+Tab reaches Light | Dark | Auto, a segmented control:  ArrowLeft, ArrowRight, Home and End
+                    move and choose, as in any radio group.
                   - Escape closes the panel, and focus goes back to the palette button.
                   - In a menu (`show="menu"`), the menu around it calls `focusChosen()` as it opens it:
                     the chosen theme is focused, and the keys are the panel's.  ArrowLeft, ArrowRight and Escape
@@ -158,7 +159,7 @@
                   - The palette button's name says the theme and scheme chosen ("Theme and light / dark:  Spell,
                     Auto");  it's its tooltip too.
                   - The theme list is a `menu` of `menuitemradio`s, the chosen one checked;  Light | Dark | Auto a
-                    `radiogroup`.
+                    segmented `<ui-menu>`, the chosen one current (`aria-current`).
                   - Nothing for an author to add.
                 </script>
               </ui-markdown>

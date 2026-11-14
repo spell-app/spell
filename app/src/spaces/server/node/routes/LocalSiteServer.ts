@@ -44,6 +44,9 @@ const SETTLE_MS = 1500
 /** How often the lock is touched while it's held:  a build outlasts `SRV.FileLock`'s minute before a lock counts as a dead holder's. */
 const LOCK_BEAT_MS = 20_000
 
+/** How often a page server's site looks that it's still serving (`keepUp()`):  half a minute. */
+const KEEP_UP_MS = 30_000
+
 /** Where HTTPS listens. */
 const HTTPS_PORT = 443
 
@@ -115,10 +118,16 @@ export class LocalSiteServer {
   private readonly platform: string
   /** Whether this is the main checkout's server:  a worktree's never starts it. */
   private readonly isMainCheckout: boolean
+  /** How often `keepUp()` looks. */
+  private readonly keepUpMs: number
+
   /** The port the editor's dev server is on, for Caddy's file:  waited for, as the editor may still be picking it. */
   private readonly editorPort: () => number | undefined | Promise<number | undefined>
   /** What `editorPort()` answered last:  Caddy's file names it. */
   private editorPortNow?: number
+
+  /** What looks every `KEEP_UP_MS` that the site is still serving, while this page server runs. */
+  private keeping?: NodeJS.Timeout
 
   /** The page server's attempt to start it:  one per server, however often it's asked. */
   private starting?: Promise<void>
@@ -142,8 +151,10 @@ export class LocalSiteServer {
     machineEmail = machinePersonEmail,
     platform = process.platform,
     isMainCheckout = false,
-    editorPort = recordedEditorPort
+    editorPort = recordedEditorPort,
+    keepUpMs = KEEP_UP_MS
   }: LocalSiteServerProps = {}) {
+    this.keepUpMs = keepUpMs
     this.editorPort = editorPort
     this.tools = tools
     this.folder = folder
@@ -163,7 +174,56 @@ export class LocalSiteServer {
    * - NEVER throws.
    */
   startWithPageServer(): Promise<void> {
-    return (this.starting ??= this.startOnce())
+    return (this.starting ??= this.startOnce().then(() => this.keepUp()))
+  }
+
+  /**
+   * SIDE EFFECT:  every `KEEP_UP_MS`, while this page server runs, a site that stopped serving starts again
+   * (epic `epic-engine` I274, r68;  Owen's standing rule, r66:  test.spell.app always follows main's editor).
+   * - a program gone, or Caddy not on 443:  `startOrUpdate()` starts or swaps what's missing, under the lock
+   * - the editor moved since:  Caddy's file is rewritten and Caddy restarted, as at a start
+   * - only where this page server runs the site at all (the main checkout's, on a Mac set up for it), and never while
+   *   a terminal runs it
+   * - NEVER throws:  a failure is `failed()`'s line, and it looks again next time
+   */
+  private keepUp(): void {
+    if (this.keeping || this.wasStopped || this.reasonToStayOut) return
+    this.keeping = setInterval(() => void this.checkUp(), this.keepUpMs)
+    this.keeping.unref()
+  }
+
+  /** One of `keepUp()`'s looks.  - NEVER throws */
+  private async checkUp(): Promise<void> {
+    if (this.wasStopped || this.isUpdating || this.reasonToStayOut) return
+    try {
+      const running = this.runner?.detached
+      const editorMoved = this.currentCaddyFileText !== undefined && running && (await this.caddyFileChanged())
+      if (running && this.isServing(running.caddy) && !editorMoved) return
+      if (!this.takeLock()) return
+      try {
+        this.note(
+          running
+            ? "Caddy wasn't serving, or the editor moved:  starting it again."
+            : "The site wasn't running:  starting it again."
+        )
+        await this.startOrUpdate()
+      } finally {
+        if (!this.isUpdating) this.letGoOfLock()
+      }
+    } catch (error) {
+      this.failed(error)
+    }
+  }
+
+  /** Whether Caddy's file no longer names the editor's port. */
+  private async caddyFileChanged(): Promise<boolean> {
+    await this.learnEditorPort()
+    return this.currentCaddyFileText !== this.caddyFileText(namesOf(this.settings.addresses ?? DEFAULT_ADDRESSES))
+  }
+
+  /** Whether `caddy` is what listens on the HTTPS port:  alive is not enough (I274). */
+  private isServing(caddy: number): boolean {
+    return this.listening(HTTPS_PORT).includes(String(caddy))
   }
 
   /**
@@ -172,6 +232,8 @@ export class LocalSiteServer {
    */
   stop(): void {
     this.wasStopped = true
+    clearInterval(this.keeping)
+    this.keeping = undefined
     this.building?.stop()
     this.letGoOfLock()
     this.run = undefined
@@ -240,7 +302,8 @@ export class LocalSiteServer {
         running.code !== wanted.code ||
         JSON.stringify(running.addresses) !== JSON.stringify(wanted.addresses) ||
         JSON.stringify(running.mail) !== JSON.stringify(wanted.mail),
-      caddy: this.currentCaddyFileText !== caddyText
+      // its file changed, or Caddy isn't serving after all (alive, but not on 443:  I274, r68)
+      caddy: this.currentCaddyFileText !== caddyText || !this.isServing(running.caddy)
     }
     if (!changes.cloud && !changes.caddy) {
       this.state = RUNNING
@@ -291,7 +354,7 @@ export class LocalSiteServer {
     }
 
     this.writeRecord({ ...pids, ...wanted })
-    if (children.length) this.watch(this.runOf(children, wanted.addresses, wanted.mail))
+    if (children.length) this.watch(this.runOf(children, wanted.addresses, wanted.mail, { detached: true }))
     this.state = STARTED
   }
 
@@ -406,7 +469,7 @@ export class LocalSiteServer {
     } else {
       SRV.DataFile.write(this.runFile, { pid: process.pid, by } satisfies LocalSiteRunner)
     }
-    return this.runOf([cloud, caddy], addresses, mail)
+    return this.runOf([cloud, caddy], addresses, mail, { detached: by === PAGE_SERVER })
   }
 
   /** SIDE EFFECT:  the cloud is starting;  the page server's detached, with its output in the log. */
@@ -456,8 +519,20 @@ export class LocalSiteServer {
     }
   }
 
-  /** What `launch()` hands back:  the programs, as one thing that stops and ends together. */
-  private runOf(children: LocalSiteChild[], addresses: string[], mail: Record<string, string>): LocalSiteRun {
+  /**
+   * What `launch()` hands back:  the programs, as one thing that stops and ends together.
+   * - a TERMINAL's:  one stopping by itself stops the other, and the run ends
+   * - the PAGE SERVER's (`detached`):  one stopping by itself is only noted;  the other keeps running, and
+   *   `keepUp()` starts what's missing (epic `epic-engine` I274, r68)
+   *   - before, a page server watching programs it started stopped the cloud when a NEWER page server swapped
+   *     Caddy, and test.spell.app answered nothing until the next start
+   */
+  private runOf(
+    children: LocalSiteChild[],
+    addresses: string[],
+    mail: Record<string, string>,
+    { detached = false } = {}
+  ): LocalSiteRun {
     let wasAsked = false
     const stop = () => {
       wasAsked = true
@@ -467,6 +542,7 @@ export class LocalSiteServer {
     const untilEnded = async (): Promise<LocalSiteEnd> => {
       await Promise.race(children.map((child) => child.exited))
       const end = wasAsked ? "asked" : "by itself"
+      if (detached && !wasAsked) return end
       for (const child of children) child.stop()
       await Promise.all(children.map((child) => child.exited))
       this.forgetRunner()
@@ -701,6 +777,8 @@ export type LocalSiteServerProps = {
    * default what the page server's record says, for a terminal's site.
    */
   editorPort?: () => number | undefined | Promise<number | undefined>
+  /** How often the page server's site looks that it's still serving;  default `KEEP_UP_MS`. */
+  keepUpMs?: number
 }
 
 /** What's wrong, in words for the person:  the command line prints it plainly. */

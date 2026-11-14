@@ -59,13 +59,13 @@ solitario es una aplicación
 
 	grupo "Juego"
 		// Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
-	para "reiniciar el juego" con título "Reiniciar"
+	para "reiniciar el juego" con título "Reiniciar", icono "sync alternate"
 		atajo N
 		limpiar la puntuación
 		limpiar los movimientos
 		limpiar la pista
 		repartir las cartas
-	para "jugar solo" con título "Jugar solo"
+	para "jugar solo" con título "Jugar solo", icono "play"
 		// Juega cada carta que puede ir a algún lado, hasta que ninguna pueda
 		atajo A
 		poner hubo cambios a no
@@ -93,7 +93,7 @@ solitario es una aplicación
 				poner hubo cambios a sí
 				pausar 500 mseg
 		si hubo cambios jugar solo
-	para "hacer trampa" con título "Trampa"
+	para "hacer trampa" con título "Trampa", icono "eye"
 		// Voltea una carta boca abajo de una columna, al azar, sobre los descartes
 		atajo C
 		poner pilas restantes a las pilas en las columnas donde no está vacía y su primera carta está boca abajo
@@ -110,18 +110,15 @@ solitario es una aplicación
 	para dibujar eso
 		// Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra sus jugadas
 		<segmento invertido unir="arriba">
-			// sus acciones como botones, en dos píldoras:  cada una con su título, su tecla en su descripción;  deshacer y rehacer solo sus iconos
-			<barra-herramientas class="GameBar" aria-label="Juego">
+			// sus acciones en medio, cada una con su icono y su tecla:  al angostarse la barra, sus títulos se cortan, luego quedan solo sus iconos, luego un solo botón `…`
+			<barra-herramientas class="GameBar" aria-label="Juego" apariencia="secundario" invertido tamano="pequeño" encogible>
 				<texto slot="titulo" tamano="grande" extranegrita>Solitario Encanto</texto>
-				<botones slot="centro" relleno="compact">
-					<acción "jugar solo"/>
-					<acción "hacer trampa"/>
-					<acción "reiniciar el juego"/>
-				</botones>
-				<botones slot="centro" relleno="compact">
-					<acción "deshacer" solo-icono/>
-					<acción "rehacer" solo-icono/>
-				</botones>
+				<acción "jugar solo"/>
+				<acción "hacer trampa"/>
+				<acción "reiniciar el juego"/>
+				<divisor/>
+				<acción "deshacer"/>
+				<acción "rehacer"/>
 				<texto slot="derecha">Movimientos: <número "movimientos"/>  ·  Puntos: <número "puntuación"/><texto "pista"/></texto>
 			</barra-herramientas>
 		</segmento>

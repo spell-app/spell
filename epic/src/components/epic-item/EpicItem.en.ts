@@ -87,8 +87,8 @@ export const epicItemVocabulary = {
         "you asked for is finished, your turn to see it), `progress` (blue:  Claude is working on it), `handed` (blue " +
         "outlined:  you pressed Do this, Claude hasn't started), `open` (yellow:  still undecided), `scheduled` (dotted " +
         "blue:  queued work, agreed, not started), `recent` (green:  decided or done), `handled` (grey:  its answer is in " +
-        "a phase's text now, `handled`;  or an issue Claude found and fixed itself), `quiet` (grey:  a calm judgement " +
-        "call, a limit:  nothing to think about), `old` (grey:  no longer relevant, canceled)."
+        "a phase's text now, `handled`;  or an issue Claude found and fixed itself), `quiet` (grey:  a limit:  " +
+        "nothing to think about), `old` (grey:  no longer relevant, canceled)."
     },
     {
       name: "handled",
@@ -197,7 +197,7 @@ export const epicItemVocabulary = {
       description:
         "An item (done, or a judgement call) whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the " +
         "branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  " +
-        "A calm judgement call stays blue (`progress`) while its work hasn't landed, grey once it has."
+        "A calm judgement call stays blue (`progress`) while its work hasn't landed, yellow once it has."
     },
     {
       name: "fixed",
@@ -404,7 +404,7 @@ export const epicItemVocabulary = {
     {
       key: "stateQuiet",
       text: "Open, nothing to think about",
-      description: "Id chip tooltip, `state=quiet` (grey):  a calm judgement call, a limit."
+      description: "Id chip tooltip, `state=quiet` (grey):  a limit."
     },
     { key: "stateProgress", text: "Claude is working on it", description: "Id chip tooltip, `state=progress`." },
     { key: "stateOpen", text: "Open, still undecided", description: "Id chip tooltip, `state=open`." },

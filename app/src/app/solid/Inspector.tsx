@@ -2296,7 +2296,7 @@ export function InspectorColumn(): JSX.Element {
     if (!Inspector.typeEdited || !cards.includes("properties")) return cards
     return [cards[0]!, ...TYPE_PANES, ...cards.slice(1)]
   })
-  const layout = createMemo(() => cardsLayout(shown()))
+  const layout = createMemo(() => cardsLayout(shown(), !Inspector.inspected))
   const cardSizes = rememberedSizes(layout)
   // on a phone, Esc puts the sheet away while it's up
   createEffect(
@@ -2456,20 +2456,31 @@ const TALLEST_SHEET = 0.9
 /**
  * The column's sizes for the cards `shown`:  a folded card its header's height,
  * the others their usual shares of the rest.
+ * - Nothing selected (`isEmpty`):  the top card only as tall as its tip, the others sharing the rest, so Views takes the
+ *   column (Owen, 2026-11-14, I81).  Its own `id`, so a drag then is kept apart from the split you set while inspecting.
  * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
  */
-function cardsLayout(shown: readonly InspectorCardId[]): { id: string; sizes: string } {
-  const open = shown.filter((panel) => !Inspector.isFolded(panel))
+function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id: string; sizes: string } {
+  const isShort = (panel: InspectorCardId) => isEmpty && panel === "properties" && !Inspector.isFolded(panel)
+  const open = shown.filter((panel) => !Inspector.isFolded(panel) && !isShort(panel))
   const total = open.reduce((sum, panel) => sum + CARD_SHARES[panel], 0)
+  const cards = shown.map((panel) => (Inspector.isFolded(panel) ? `${panel}-folded` : panel)).join(",")
   return {
-    id: `spellEditor-inspectorCards-${shown.map((panel) => (Inspector.isFolded(panel) ? `${panel}-folded` : panel)).join(",")}`,
+    id: `spellEditor-inspectorCards-${cards}${isEmpty ? "-nothingSelected" : ""}`,
     sizes: shown
       .map((panel) =>
-        Inspector.isFolded(panel) ? `${FOLDED_CARD_HEIGHT}px` : `${Math.round((CARD_SHARES[panel] / total) * 100)}%`
+        Inspector.isFolded(panel)
+          ? `${FOLDED_CARD_HEIGHT}px`
+          : isShort(panel)
+            ? `${TIP_CARD_HEIGHT}px`
+            : `${Math.round((CARD_SHARES[panel] / total) * 100)}%`
       )
       .join(",")
   }
 }
+
+/** The top card's height while nothing is selected:  its header and the tip's three lines. */
+const TIP_CARD_HEIGHT = 150
 
 /**
  * Fold each card dragged too small to show anything

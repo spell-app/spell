@@ -495,21 +495,21 @@ class Solitaire(App):
                 {"inverted": True, "attach": "top", "color": ""},
                 h(
                     "ui-toolbar",
-                    {"class": "GameBar", "aria-label": "Game"},
+                    {
+                        "class": "GameBar",
+                        "aria-label": "Game",
+                        "appearance": "secondary",
+                        "inverted": True,
+                        "size": "small",
+                        "shrinkable": True,
+                    },
                     h("ui-text", {"slot": "title", "size": "large", "heavy": True}, "Solitaire"),
-                    h(
-                        "ui-buttons",
-                        {"slot": "center", "padding": "compact"},
-                        core.draw_action(self, "auto_play"),
-                        core.draw_action(self, "cheat"),
-                        core.draw_action(self, "restart_the_game"),
-                    ),
-                    h(
-                        "ui-buttons",
-                        {"slot": "center", "padding": "compact"},
-                        core.draw_action(self, "undo", {"icon-only": True}),
-                        core.draw_action(self, "redo", {"icon-only": True}),
-                    ),
+                    core.draw_action(self, "auto_play", {"in-menu": True}),
+                    core.draw_action(self, "cheat", {"in-menu": True}),
+                    core.draw_action(self, "restart_the_game", {"in-menu": True}),
+                    h("ui-action", {"kind": "divider"}),
+                    core.draw_action(self, "undo", {"in-menu": True}),
+                    core.draw_action(self, "redo", {"in-menu": True}),
                     h("ui-text", {"slot": "right"}, "Score: ", self.score),
                 ),
             ),
@@ -666,12 +666,12 @@ class Solitaire(App):
 
 
 solitaire = Solitaire()
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "undone_as": "Restart The Game"})
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart The Game"})
 core.describe_action(Solitaire, "deal_the_cards", {"title": "Deal The Cards", "undone_as": "Deal The Cards"})
 core.describe_action(Solitaire, "play_from_the_stock", {"title": "Play From The Stock", "undone_as": "Turn Card"})
 core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset The Stock", "undone_as": "Reset The Stock"})
-core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
-core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
+core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "icon": "play", "undone_as": "Auto Play"})
+core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})
 
 # play the card on click if it is a legal move
 
@@ -805,31 +805,21 @@ solitaire-app {
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;
 }
 
-/* The toolbar:  its buttons in the true middle, the title and the score taking equal room on either side;
-   in pills (no attribute rounds a joined group:  \\`circular\\` parts its buttons) */
+/* The toolbar:  its actions in the true middle, the title and the score taking equal room on either side,
+   never squeezed:  as the bar narrows, the actions give way (\\`shrinkable\\`), down to one \\`…\\` button */
+.GameBar {
+  --ui-toolbar-gap: 1em;
+}
 .GameBar::part(title),
 .GameBar::part(right) {
-  flex: 1 1 0;
+  flex: 1 0 0;
+  min-width: max-content;
 }
 .GameBar::part(right) {
   justify-content: flex-end;
 }
-ui-buttons {
-  --ui-button-radius: var(--ui-radius-pill);
-}
-/* a phone:  no title, and the score on a line of its own, so every button keeps its name */
-@media (width < 36rem) {
-  .GameBar::part(toolbar) {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .GameBar::part(title) {
-    display: none;
-  }
-  .GameBar::part(right) {
-    flex: 1 0 100%;
-    justify-content: center;
-  }
+.GameBar::part(menu) {
+  flex: 0 1 auto;
 }
 
 /* A pile:  as wide as its cell of the board, as tall as its cards */

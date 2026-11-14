@@ -50,7 +50,7 @@ export const CALM_ID = /^[ij]\d+$/
 /** A manual test's id. */
 export const MANUAL_TEST = /^m\d+$/i
 
-/** A judgement call's id:  grey once it's `calm`, where a calm issue stays yellow (epic `epic-engine` P63). */
+/** A judgement call's id:  blue while calm and its work isn't on main (I273), else as an issue. */
 export const JUDGEMENT_ID = /^j\d+$/
 
 /**
@@ -140,7 +140,7 @@ export class DrawnState {
   static of(fields: StateFields, live: LiveReview, now = Date.now()): ItemState {
     if (live.workedOn) return "progress"
     if (live.urgency && DrawnState.canCalm(fields))
-      return live.urgency.calm ? DrawnState.calmState(fields.id) : "attention"
+      return live.urgency.calm ? DrawnState.calmState() : "attention"
     const state = fields.state
     const written = state && (ITEM_STATES as readonly string[]).includes(state) ? (state as ItemState) : undefined
     const shown = ItemAge.shown(
@@ -153,12 +153,12 @@ export class DrawnState {
   }
 
   /**
-   * Where an open item stands once it's not urgent (`calm`), not reviewed yet (epic `epic-engine` P63):
-   * a judgement call asks nothing of Owen, so `quiet` (grey);  an issue is still something undone, so `open` (yellow).
-   * - `PlanReader.itemState()`:  the same rule, for what the tool writes
+   * Where an open item stands once it's not urgent (`calm`), not reviewed yet:  `open`, yellow, a judgement call too
+   * (Owen, 2026-11-14:  "calm => yellow, not grey, otherwise I'll never see it";  a call was grey from P63).
+   * - `PlanReader.itemState()`:  the same rule, for what the tool writes (and blue while a call's work isn't on main)
    */
-  static calmState(id: string | null | undefined): ItemState {
-    return JUDGEMENT_ID.test(id ?? "") ? "quiet" : "open"
+  static calmState(): ItemState {
+    return "open"
   }
 
   /**

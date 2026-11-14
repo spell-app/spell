@@ -6,7 +6,7 @@
  *   every place shows it (the editor, the epic pages and guides, Spell UI's pages).
  * - SIDE EFFECT:  importing it defines the tag, and the widgets its shadow DOM is built of:
  *   `<ui-popup>` (the overlay and the tooltips), `<ui-icon>` (sun, moon, palette, check),
- *   `<ui-dropdown>` and `<ui-item>` (its rows, `show="theme"`).
+ *   `<ui-dropdown>` and `<ui-item>` (its rows, `show="theme"`), `<ui-menu>` (Light | Dark | Auto, a segmented one).
  *   A `<ui-root>` only loads what's in the page's light DOM, so a family that is built of other widgets
  *   imports them itself.
  * - It applies themes through the runtime (`UI.themes`, in the runtime's chunk),
@@ -22,6 +22,7 @@ import { ThemePreference } from "./ThemePreference"
 
 import "spell/ui/components/ui-dropdown"
 import "spell/ui/components/ui-item"
+import "spell/ui/components/ui-menu"
 import "spell/ui/components/ui-popup"
 import "spell/ui/components/ui-icon"
 

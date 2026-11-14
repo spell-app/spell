@@ -8,6 +8,8 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { uiReady } from "./loadUI"
 import { tracked } from "./tracked"
+// Import directly:  static and DOM-only, so the bench's address needs none of Spell UI's lazy chunk
+import { BenchAddress } from "spell/ui/components/ui-theme-editor/BenchAddress"
 
 import "./EditorTheme.css"
 
@@ -38,6 +40,27 @@ export class EditorTheme {
   /** The theme chosen, its title for people (`Fruity`, one of My themes' own name), once known (reactive). */
   static get chosenTitle(): string {
     return chosenTitle()
+  }
+
+  /**
+   * The site the theme bench is on:  the page server, while developing (`SPELL_PAGE_SERVER`, set by the dev server);
+   * `undefined` in a build, which has none.
+   */
+  static get benchSite(): string | undefined {
+    return import.meta.env.DEV && import.meta.env.SPELL_PAGE_SERVER
+      ? String(import.meta.env.SPELL_PAGE_SERVER)
+      : undefined
+  }
+
+  /**
+   * Open Spell UI's theme bench in a new window, in the theme chosen, its app page alone:  the project menu's
+   * Theme Bench, as the theme menu's own Theme bench row opened it.
+   * - No bench (`benchSite`):  nothing.
+   */
+  static openBench(): void {
+    const site = EditorTheme.benchSite
+    if (!site) return
+    window.open(BenchAddress.benchOn(site, { theme: chosenTheme, page: BENCH_PAGE }), "_blank", "noopener")
   }
 
   /**
@@ -138,6 +161,7 @@ export class EditorTheme {
    * - My themes themselves are worn by `ThemePreference` (epic `debut` P25).
    */
   private static follow(theme: string | undefined): void {
+    chosenTheme = theme
     void Promise.all([
       import("spell/ui/components/ui-theme-editor/SavedTheme"),
       import("spell/ui/components/components.types")
@@ -232,6 +256,15 @@ export function followTabTitle(): () => { title: string | undefined; isNotebook:
 
 /** The chosen theme's title (`EditorTheme.chosenTitle`). */
 const [chosenTitle, setChosenTitle] = createSignal("")
+
+/**
+ * The chosen theme's name, as `ThemePreference` keeps it (`glass`, one of My themes' `mine:<id>`), once known:
+ * what the theme bench opens in.  Not reactive:  read on a click.
+ */
+let chosenTheme: string | undefined
+
+/** The theme bench's page the editor opens it on:  the app's. */
+const BENCH_PAGE = "app"
 
 /** How many times `showFullView()` looks for a part to select, while the app draws. */
 const PICK_TRIES = 30

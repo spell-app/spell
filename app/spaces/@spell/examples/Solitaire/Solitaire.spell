@@ -13,17 +13,14 @@ solitaire is an app
 
 	to draw it
 		<segment inverted attach="top" color="">
-			<toolbar class="GameBar" aria-label="Game">
+			<toolbar class="GameBar" aria-label="Game" appearance="secondary" inverted size="small" shrinkable>
 				<text slot="title" size="large" heavy>Solitaire</text>
-				<buttons slot="center" padding="compact">
-					<action "auto play"/>
-					<action "cheat"/>
-					<action "restart the game"/>
-				</buttons>
-				<buttons slot="center" padding="compact">
-					<action "undo" icon-only/>
-					<action "redo" icon-only/>
-				</buttons>
+				<action "auto play"/>
+				<action "cheat"/>
+				<action "restart the game"/>
+				<divider/>
+				<action "undo"/>
+				<action "redo"/>
 				<text slot="right">Score: <number "score"/></>
 			</toolbar>
 		</segment>
@@ -53,7 +50,7 @@ solitaire is an app
 		</>
 
 	group "Dealing"
-	to "restart the game" with shortcut "R"
+	to "restart the game" with shortcut "R", icon "sync alternate"
 		clear the score
 		deal the cards
 	
@@ -119,7 +116,7 @@ solitaire is an app
 		set solitaire's score to solitaire's score + points
 		return yes
 
-	to "auto play" with shortcut "A"
+	to "auto play" with shortcut "A", icon "play"
 		// Play every card that can go somewhere, until none can
 		set anything changed to no
 		if the discards is not empty
@@ -147,7 +144,7 @@ solitaire is an app
 				pause for 500 msec
 		if anything changed auto play
 	
-	to "cheat" with shortcut "C"
+	to "cheat" with shortcut "C", icon "eye"
 		// Turn up a face-down card from a column, at random, onto the discards
 		set remaining piles to piles in the columns where it is not empty and its first card is face down
 		if remaining piles is empty return
