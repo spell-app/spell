@@ -303,6 +303,7 @@ export const APP_TEXTS = {
   sampleInUse: "Showing sample data for {places}:  nothing you change reaches the real data.",
   useRealData: "Use the real data",
   find: "Find",
+  compiledCode: "Compiled Code",
   programPanel: "Program Panel",
   inspectorCard: "Inspector:  {card}",
   inspectApp: "Inspect App",

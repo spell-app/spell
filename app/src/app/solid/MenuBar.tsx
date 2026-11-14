@@ -27,6 +27,7 @@ import {
   type Mode
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS, runCodeEditorAction } from "spell/app/app/pages/editorHotkeys"
+import { CodeOutputShown } from "spell/app/app/solid/CodeOutput"
 import { loadEditorSpell, type EditorSpell, type SpellEditorApp } from "spell/app/app/layout/layoutSpell"
 
 import "./MenuBar.css"
@@ -140,8 +141,9 @@ function Divider(): JSX.Element {
  * (Owen, 2026-11-06:  "Change the Spell menu in the editor to show the Examples menu").
  * - Opens the project's group's projects (`<ProjectsMenu>`):
  *   the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more.
- * - At its foot, New Example (`Actions.createApp`:  New Guide among the guides), beside the projects it adds to;
- *   then Home (`Actions.showProjectChooser`), where the hat linked to before.
+ * - At its top, Home (`Actions.showProjectChooser`), where the hat linked to before;
+ *   then New Example (`Actions.createApp`:  New Guide among the guides), above the projects it adds to
+ *   (Owen, 2026-11-14:  "Home and New Example should be at the top rather than the bottom").
  * - `useRunner`:  the one chosen opens in Run.
  * - The Spell UI site's:  "Spell Notebooks".
  * - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`).
@@ -159,13 +161,13 @@ export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
       label={<AppMarkLabel />}
       panel={() => (
         <div class="SpellMenuPanel">
-          <ProjectsMenu useRunner={props.useRunner} label={root().words.title} />
           {/* ticks:  room for one, as the projects have, so the icons line up with theirs */}
-          <ui-menu direction="vertical" size="small" ticks="" aria-label={appTexts.text("home")}>
-            <Divider />
-            <Actions.createApp menu />
+          <ui-menu direction="vertical" size="small" ticks="" class="SpellMenuHome" aria-label={appTexts.text("home")}>
             <Actions.showProjectChooser menu />
+            <Actions.createApp menu />
+            <Divider />
           </ui-menu>
+          <ProjectsMenu useRunner={props.useRunner} label={root().words.title} />
         </div>
       )}
     />
@@ -274,7 +276,6 @@ export function ProjectBarMenu(): JSX.Element {
       label={
         <span class="ProjectBarLabel">
           <span class="ProjectName">{shown().title}</span>
-          <ui-icon name="dropdown" class="ProjectCaret" />
         </span>
       }
       panel={() => <SpellMenu spell={spell()} view={(app) => app.projectMenu} />}
@@ -339,6 +340,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     mayChangeProject: !isStaticBuild || editor.canChangeProject,
     running: props.mode === "run",
     codeShowing: props.mode === "edit" && !CodeShown.isClosed(editor.project?.path),
+    compiledCodeShowing: props.mode === "edit" && !!CodeOutputShown.target,
     programPanelShowing: props.mode === "edit" && ProgramPanelShown.isShowing,
     inspectorOpen: Inspector.isOpen,
     lineNumbersShowing: LineNumbers.isShowing,
@@ -533,7 +535,6 @@ function handOverActions(app: SpellEditorApp) {
     projectSettings: () => editor.showProjectSettings(),
     exportProject: () => editor.exportApp(),
     importProject: () => editor.importApp(),
-    home: () => editor.showProjectChooser(),
     newSpellFile: () => editor.createFile(),
     newCssFile: () => editor.createCssFile(),
     save: () => editor.saveAll(),
@@ -550,6 +551,10 @@ function handOverActions(app: SpellEditorApp) {
     showCode: () => {
       EditorMode.show("edit")
       CodeShown.set(editor.project?.path, CodeShown.isClosed(editor.project?.path))
+    },
+    showCompiledCode: () => {
+      EditorMode.show("edit")
+      CodeOutputShown.toggle()
     },
     showProgramPanel: () => toggleProgramPanel(app.running ? "run" : "edit"),
     showInspector: () => Inspector.toggle(),

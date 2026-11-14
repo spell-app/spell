@@ -45,10 +45,19 @@ export class CodeOutputShown {
 
   /** Show `target`'s code;  `undefined`:  hide it. */
   static set(target: OutputTarget | undefined): void {
+    if (target) lastShown = target
     setOutputTarget(target ?? NO_OUTPUT)
     editorPrefs.set(OUTPUT_PREF, target ?? NO_OUTPUT)
   }
+
+  /** View › Compiled Code:  hide it, or show the one shown last (JavaScript the first time). */
+  static toggle(): void {
+    CodeOutputShown.set(CodeOutputShown.target ? undefined : lastShown)
+  }
 }
+
+/** The compiled code shown last, what View › Compiled Code shows again. */
+let lastShown: OutputTarget = CodeOutputShown.target ?? "js/solid"
 
 /****************
  * ### `<CodeMoreMenu>`

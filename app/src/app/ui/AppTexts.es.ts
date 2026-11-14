@@ -305,6 +305,7 @@ const APP_TEXTS_ES: AppTextPack = {
   sampleInUse: "Se muestran datos de muestra de {places}:  nada de lo que cambies llega a los datos reales.",
   useRealData: "Usar los datos reales",
   find: "Buscar",
+  compiledCode: "Código compilado",
   programPanel: "Panel del programa",
   inspectorCard: "Inspector:  {card}",
   inspectApp: "Inspeccionar la app",
