@@ -102,14 +102,14 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await title.fill("Movie")
     await title.press("Enter")
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain('<page "film page" address="/films/:film" title="Movie"/>')
+    expect(await text()).toContain('\t\tit has a film page at "/films/:film", named "Movie"\n')
   })
 
   test("a page added, then taken back with ⌘Z", async () => {
     await page.locator(".SiteEditorPage ui-button", { hasText: "Add a page" }).click()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain('<page "new page" address="/new-page" title="New page"/>')
-    expect(await text()).toContain('<spell-page "new page"/>')
+    expect(await text()).toContain('\tit has a new page at "/new-page", named "New page"\n')
+    expect(await text()).toContain('a "new page" is a page\n')
     await page.locator(".SiteEditorPage h1").click()
     await page.keyboard.press("Meta+z")
     await page.waitForTimeout(SETTLE_MS)
@@ -126,7 +126,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await page.mouse.up()
     await page.waitForTimeout(SETTLE_MS)
     const after = await text()
-    expect(after.indexOf('<dialog "settings dialog"/>')).toBeLessThan(after.indexOf('<page "films page"'))
+    expect(after.indexOf("it has a settings dialog")).toBeLessThan(after.indexOf("it has a films page"))
   })
 
   /** Press part `name`'s row and drag it to `y` pixels down part `over`'s row:  still held, for its mark to be read. */
@@ -182,9 +182,8 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await page.waitForTimeout(SETTLE_MS)
     expect(await text()).toContain(
       [
-        '\t<page "reviews page" address="/reviews" title="Reviews">',
-        '\t\t<page "starship page" address="/starships/:starship" title="Starship"/>',
-        "\t</>"
+        '\tit has a reviews page at "/reviews", named "Reviews"',
+        '\t\tit has a starship page at "/starships/:starship", named "Starship"'
       ].join("\n")
     )
     await page.locator(".SiteEditorPage h1").click()
@@ -199,12 +198,12 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await ask.waitFor({ timeout: 10_000 })
     await page.getByRole("button", { name: "Delete them all" }).click()
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).not.toMatch(/(<page|<spell-page) "planets? page"/)
+    expect(await text()).not.toMatch(/it has an? planets? page|^planets? page is a page/m)
     await page.locator(".SiteEditorPage h1").click()
     await page.keyboard.press("Meta+z")
     await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain('<page "planet page" address="/planets/:planet" title="Planet"/>')
-    expect(await text()).toContain('<spell-page "planets page">')
+    expect(await text()).toContain('\t\tit has a planet page at "/planets/:planet", named "Planet"\n')
+    expect(await text()).toContain("\nplanets page is a page\n")
   })
 
   test("a page's stories:  one added, then ticked off, each one step written into the page;  its card counts them", async () => {
@@ -268,7 +267,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       await page.mouse.up()
       await page.waitForTimeout(SETTLE_MS)
       const after = await text()
-      expect(after.indexOf('<page "people page"')).toBeLessThan(after.indexOf('<page "films page"'))
+      expect(after.indexOf("it has a people page")).toBeLessThan(after.indexOf("it has a films page"))
       // the tree and the board show the one order
       const inTree = await page
         .locator("ui-tree > ui-tree-item")
@@ -288,7 +287,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       expect(await page.locator(".SiteBoard[data-moving] .spot[data-drop]").count()).toBe(1)
       await page.mouse.up()
       await page.waitForTimeout(SETTLE_MS)
-      expect(await text()).toMatch(/<page "film page"[^>]*row="1" column="3"/)
+      expect(await text()).toMatch(/it has a film page at [^\n]*, in row 1 column 3\n/)
       expect(await page.locator(".SiteBoard[data-moving]").count()).toBe(0)
       await undo()
       expect(await text()).toBe(before)
@@ -299,9 +298,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       await dragTo(cardOf("review dialog"), () => spotCentre("reviews page", 1, 2))
       await page.mouse.up()
       await page.waitForTimeout(SETTLE_MS)
-      expect(await text()).toMatch(
-        /<page "reviews page"[^>]*>\n\t+<dialog "review dialog" row="1" column="2"\/>\n\t+<\/>/
-      )
+      expect(await text()).toMatch(/it has a reviews page at [^\n]*\n\t+it has a review dialog, in row 1 column 2\n/)
       await undo()
       expect(await text()).toBe(before)
     })
