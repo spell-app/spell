@@ -836,6 +836,9 @@
     /* a pointed end:  how wide it is, and its corners, across and down, which meet at the middle of the band */
     --bubbly-tag-point: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope));
     --bubbly-tag-corner: var(--bubbly-tag-point) calc(var(--bubbly-pill-height) / 2);
+    /* a tiny foot's right end a point:  as slanted as a tag's, for its height (Owen) */
+    --bubbly-foot-tiny-point: calc(var(--bubbly-foot-tiny-height) / 2 * var(--bubbly-tag-slope))
+      calc(var(--bubbly-foot-tiny-height) / 2);
     --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
     /* a row:  the editor's line, 15px times `--bubbly-monaco-line-height` (1.65), rounded */
     --bubbly-html-row: 25px;
@@ -977,7 +980,12 @@
       line-height: var(--bubbly-foot-tiny-height);
       white-space: nowrap;
       background: var(--bubbly-pill);
-      border-radius: 0 var(--bubbly-foot-tiny-cut) var(--bubbly-foot-tiny-cut) var(--bubbly-foot-tiny-cut);
+      /* its right end a point, as a tag's (Owen):  its left a cut corner, its top-left square, the rail runs into it */
+      border-radius: 0;
+      border-top-right-radius: var(--bubbly-foot-tiny-point);
+      border-bottom-right-radius: var(--bubbly-foot-tiny-point);
+      border-bottom-left-radius: var(--bubbly-foot-tiny-cut);
+      corner-shape: bevel;
     }
     /* its brackets as tiny as its words, close beside them:  the sheet draws them at the drawing's size, else */
     .bubbly-foot-tiny .bubbly-angle::before {
@@ -1462,6 +1470,10 @@
     }
     .view-line .bubbly-end-slash.bubbly-foot-tiny::before {
       color: var(--bubbly-foot-tiny-ink);
+    }
+    /* a `</>` foot's bar:  its `⟩` close after it, as its `⟨` is before (Owen:  "tighten up the spacing after `|`") */
+    .view-line .bubbly-mark.bubbly-slash.bubbly-end-bare.bubbly-foot-tiny {
+      letter-spacing: -0.32em;
     }
     .view-line .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
       letter-spacing: -0.2em;

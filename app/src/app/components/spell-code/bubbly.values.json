@@ -304,6 +304,10 @@
       "light": "",
       "dark": ""
     },
+    "--bubbly-foot-tiny-point": {
+      "light": "calc(13px / 2 * 0.62) calc(13px / 2)",
+      "dark": "calc(13px / 2 * 0.62) calc(13px / 2)"
+    },
     "--bubbly-html-row": {
       "light": "25px",
       "dark": "25px"

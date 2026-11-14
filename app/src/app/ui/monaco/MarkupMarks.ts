@@ -353,11 +353,11 @@ export class MarkupMarks extends TextMarks {
     into: MarkupShape[]
   ) {
     if (isQuoted) {
-      // a tag's quoted word, `<deck "deck">`:  its opening mark an attribute's room from the name, not over an `=` (Owen)
+      // a tag's quoted word, `<deck "deck">`:  its opening mark over its own `"`, not over an `=` (Owen)
       const open = isTagWord
         ? {
             classes: `${QUOTE_MARK} ${TAG_QUOTE} ${TAG_WORD_QUOTE} bubbly-quote-open`,
-            before: spacer("attribute", "before")
+            before: spacer("quote", "before")
           }
         : { classes: `${QUOTE_MARK} ${TAG_QUOTE} bubbly-quote-open`, before: spacer("quote", "before") }
       this.mark(start - 1, start, open.classes, { before: open.before })
