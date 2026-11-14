@@ -1469,6 +1469,8 @@ class PageComments {
       growField(field)
       keep()
       drafts.changed()
+      // something new typed:  the Saved floppy goes at once (I269);  a failed save's stays, saying why
+      if (replying.floppy && !replying.floppy.failed) showFloppy(null)
     })
     field.addEventListener("keydown", (event) => {
       const leaving = event.key === "Escape" || (event.key === "Enter" && (event.metaKey || event.ctrlKey))
@@ -1738,6 +1740,8 @@ class PageComments {
       growField(field)
       keep()
       drafts.changed()
+      // something new typed:  the Saved floppy goes at once (I269);  a failed save's stays, saying why
+      if (!pane.hasAttribute("failed")) pane.removeAttribute("saved")
     })
     field.addEventListener("blur", () => void saveNow())
     return async () => {

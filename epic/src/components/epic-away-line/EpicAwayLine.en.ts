@@ -21,7 +21,8 @@ export const epicAwayLineVocabulary = {
     'One line of "0. While you were out" (a phase done, a call waiting, an issue, a test), or a part\'s heading ' +
     '(What was done, Under way, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  "a tick ' +
     "per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, " +
-    "and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
+    "and the page server takes it off straight away, no Send (epic `epic-engine` I268);  its phase's or item's new " +
+    "update blocks are seen too;  the epic tool writes every one, never a person.",
   attributes: [
     {
       name: "line",
@@ -46,7 +47,9 @@ export const epicAwayLineVocabulary = {
     {
       name: "heading",
       kind: "boolean",
-      description: "A part's heading (What was done, Under way, Still to do):  read, the whole part leaves the section."
+      description:
+        "A part's heading (What was done, Under way, Still to do):  read, every line under it fades at once, " +
+        "each line's update blocks are seen, and the whole part leaves the section."
     }
   ],
   events: [],

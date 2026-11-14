@@ -3,6 +3,7 @@
  * in Language Server Protocol shapes, hosted on `SP.SpellProject` / `SP.SpellFile`.
  * - `FileAddresses` (type) is how an editor addresses spell files:  by URI.
  * - `SpellLanguageService` answers questions about a parsed file, in LSP shapes.
+ * - `CompletionShapes`:  how a tag or an attribute chosen from the suggestion list is written whole.
  * - `SpellCSS`:  the `<css>` blocks in a file, edited as CSS.
  * - `SpellKeywords`:  a language pack's keywords, for accent fixes and colouring.
  * - `LspTexts`:  the labels it shows people, in the language of the file they're about (its name says it).
@@ -20,5 +21,6 @@ export * from "./LspTexts"
 export * from "./SpellKeywords"
 export * from "./SpellLanguageService"
 export * from "./SpellCSS"
+export * from "./CompletionShapes"
 export * from "./ScopeExplorer"
 export * from "./SpellLanguageServer"

@@ -43,12 +43,6 @@ ui-item.ProjectBarMenu::part(item) {
   & > .ProjectName {
     white-space: nowrap;
   }
-  & > ui-icon.ProjectCaret {
-    --ui-icon-width: auto;
-    --ui-icon-distance: 0;
-    font-size: 0.85em;
-    color: var(--ui-text-muted);
-  }
 }
 
 /*
@@ -145,6 +139,12 @@ ui-popup[data-spell-action-menu] > ui-menu::part(menu),
   border-top: 1px solid var(--ui-border-color);
 }
 
+/* the line after a program's own right-click menu, before the editor's items (epic `editor` I76):  thicker */
+ui-menu.BarMenuItems > ui-action.ProgramMenuEnd[kind="divider"]::part(item) {
+  margin: 5px 8px;
+  border-top-width: 3px;
+}
+
 /* a divider left first, last or doubled (the static build's hidden actions):  none */
 :is(ui-menu.BarMenuItems, ui-menu.BarMenuItems ui-submenu) > ui-action[kind="divider"]:is(:first-child, :last-child),
 :is(ui-menu.BarMenuItems, ui-menu.BarMenuItems ui-submenu) > ui-action[kind="divider"] + ui-action[kind="divider"] {
@@ -158,20 +158,32 @@ ui-submenu::part(chevron) {
   color: var(--ui-text-muted);
 }
 
-/* the Spell menu (`<SpellBarMenu>`):  the group's projects, then Home under them, the projects' width */
+/* the Spell menu (`<SpellBarMenu>`):  Home and New Example, then the group's projects under them, the projects' width */
 .SpellMenuPanel {
   display: flex;
   flex-direction: column;
 
-  & > ui-menu:last-child::part(menu) {
+  & > ui-menu.SpellMenuHome::part(menu) {
     min-width: 0;
     width: 100%;
   }
   /* Home's icon as wide as a project's, the same room after it:  its title starts where theirs do */
-  & > ui-menu:last-child ui-action::part(icon) {
+  & > ui-menu.SpellMenuHome ui-action::part(icon) {
     width: 14px;
     margin-inline-end: 8px;
   }
+}
+
+/* Home and New Example on one row, each over a column of projects, once the projects take columns (Owen, 2026-11-14, I78);
+   the line under them across the menu */
+ui-menu.SpellMenuHome.wide::part(menu) {
+  display: grid;
+  /* a column each, as wide as the projects' columns;  the rest of the menu's width after them, for the line to cross */
+  grid-template-columns: minmax(180px, max-content) minmax(180px, max-content) 1fr;
+}
+ui-menu.SpellMenuHome.wide > ui-action[kind="divider"],
+ui-menu.SpellMenuHome.wide > ui-action[kind="divider"]::part(item) {
+  grid-column: 1 / -1;
 }
 
 /* the group's projects (`<ProjectsMenu>`):  in columns of ten once there are more, longer past six columns */

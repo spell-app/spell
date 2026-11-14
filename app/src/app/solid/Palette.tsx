@@ -8,10 +8,10 @@ import { SP } from "spell/parser/spell"
 // Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
 import type { ScopeNode } from "spell/app/lsp/lsp.types"
 import { editor } from "spell/app/app/editor"
-import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import { cutCopyOrPaste, EDITOR_HOTKEYS, undoWay } from "spell/app/app/pages/editorHotkeys"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import { Action } from "./Actions"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { ChangeThis } from "./ChangeThis"
@@ -625,9 +625,8 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
 /**
  * The ONE right-click menu on the app's parts, in the app and the Views tree:
  * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect, a line, then Change This.
- * - Above them, the menu the program shows at that spot in Run, if it has one, then a thick line (epic `language` T120):
- *   - found as Run finds it (`SpellElement.contextMenuAt()`), drawn by `ActionMenus.itemsFor()`
- *   - each item live (title, icon, key, enabled), a click running it through the program, as in Run
+ * - The program's own right-click menu there comes first, if it has one (`<context-menu>`, `context-menu=`),
+ *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a thick line, then ours (epic `editor` I76, Owen's pick).
  * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window, with arrow keys, Enter and Esc.
  * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
  * - It shows at once, with no fade in (`Palette.css`):  a quick second right click lands on it, not the part.
@@ -635,10 +634,26 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
  * - `PartEdits.openMenu()` opens it:  what was clicked is selected once the menu is on the screen.
  */
 export function PartMenu(): JSX.Element {
-  const [at, setAt] = createSignal<MenuPlace>()
+  const [at, setAt] = createSignal<{ x: number; y: number }>()
+  const [programMenu, setProgramMenu] = createSignal<readonly MenuItem[]>()
   onSettled(() => {
-    PartEdits.onMenu = (x, y, programItems) => setAt({ x, y, programItems })
+    PartEdits.onMenu = (x, y, items) => {
+      setProgramMenu(items?.length ? items : undefined)
+      setAt({ x, y })
+    }
   })
+  // the program's items, drawn afresh each time the menu opens somewhere new, then the thick line
+  const programItems = () => {
+    at()
+    const items = programMenu()
+    if (!items) return null
+    return (
+      <>
+        {ActionMenus.itemsFor(items)}
+        <ui-action kind="divider" class={PROGRAM_MENU_END} />
+      </>
+    )
+  }
   const isAnItem = (event: Event) =>
     event.composedPath().some((target) => {
       return (
@@ -668,8 +683,8 @@ export function PartMenu(): JSX.Element {
               panel.addEventListener(
                 "click",
                 (event) => {
-                  // the part right-clicked, if it's not selected yet:  the item acts on it (not the program's items)
-                  if (!isProgramItem(event) && PartEdits.selectMenuPart()) flush()
+                  // the part right-clicked, if it's not selected yet:  the item acts on it
+                  if (PartEdits.selectMenuPart()) flush()
                   isClosing = isAnItem(event)
                 },
                 { capture: true }
@@ -685,10 +700,7 @@ export function PartMenu(): JSX.Element {
               class="BarMenuItems"
               aria-label={appTexts.text("menuEdit")}
             >
-              <Show when={where().programItems?.length}>
-                {programItemsFor(where().programItems!)}
-                <ui-action kind="divider" class={PROGRAM_MENU_END} />
-              </Show>
+              {programItems()}
               <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
               <ui-action kind="divider" />
               <Action
@@ -728,43 +740,18 @@ export function PartMenu(): JSX.Element {
 /** The class of the part menu's popup. */
 const PART_MENU = "PartMenu"
 
-/** The class of the thick line between the program's menu and the editor's, in the part menu. */
+/** The class of the thick line between the program's own right-click menu and ours (`MenuBar.css`). */
 const PROGRAM_MENU_END = "ProgramMenuEnd"
-
-/** The class of the program's own items, in the part menu. */
-const PROGRAM_ITEM = "ProgramMenuItem"
-
-/** Where the part menu opens, and the program's menu there, if any. */
-type MenuPlace = {
-  /** the click's x, in the window */
-  x: number
-  /** the click's y, in the window */
-  y: number
-  /** the program's menu at that spot:  `SpellElement.contextMenuAt()` */
-  programItems?: readonly MenuItem[]
-}
-
-/** The program's menu items, drawn as Run draws them, marked as the program's. */
-function programItemsFor(items: readonly MenuItem[]): HTMLElement[] {
-  const elements = ActionMenus.itemsFor(items)
-  for (const element of elements) element.classList.add(PROGRAM_ITEM)
-  return elements
-}
-
-/** Was `event` on one of the program's items?  It runs on the program's thing, not on the part. */
-function isProgramItem(event: Event): boolean {
-  return event.composedPath().some((target) => target instanceof Element && target.classList.contains(PROGRAM_ITEM))
-}
 
 /**
  * Why `action` can't be done, for the menu opened at `_at`:  read again each time it opens somewhere new,
  * as the part it's for may not be selected yet (`PartEdits.openMenu()`).
  */
-function whyNotAt(_at: MenuPlace, action: PartAction): string | undefined {
+function whyNotAt(_at: { x: number; y: number }, action: PartAction): string | undefined {
   return PartEdits.whyNot(action)
 }
 
 /** Why what the menu opened at `_at` is for can't be shown in the code:  `whyNotAt()`'s reason. */
-function whyNoCodeAt(_at: MenuPlace): string | undefined {
+function whyNoCodeAt(_at: { x: number; y: number }): string | undefined {
   return PartEdits.whyNoCode
 }

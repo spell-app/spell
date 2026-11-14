@@ -74,15 +74,21 @@ export function InspectorCard(props: {
       <ui-toolbar slot="actions" appearance="segmented link header" tabs="" shrinkable="" label={props.label}>
         {props.bar}
         {props.actions}
-        {/* an eye, not a ✕:  it hides the card, never lets go of what's selected (`<LetGo>`, I92);  a type's cards go with the switch */}
+        {/* a ✕ at the right:  the top card's closes the whole Inspector, another card's hides that card (Owen, 2026-11-14,
+            I74);  it never lets go of what's selected, the pill's own ✕ does (`<LetGo>`);  a type's cards go with the switch */}
         <Show when={isPanel(props.panel)}>
           <ui-icon
             slot="right"
-            name="eye slash"
+            name="close"
             link=""
-            label={appTexts.text("inspectorHide")}
-            title={appTexts.text("inspectorHide")}
-            onClick={() => Inspector.setShown(props.panel as InspectorPanel, false)}
+            class="InspectorCardClose"
+            label={appTexts.text(props.panel === "properties" ? "inspectorClose" : "inspectorHide")}
+            title={appTexts.text(props.panel === "properties" ? "inspectorClose" : "inspectorHide")}
+            onClick={() =>
+              props.panel === "properties"
+                ? Inspector.close()
+                : Inspector.setShown(props.panel as InspectorPanel, false)
+            }
           />
         </Show>
       </ui-toolbar>

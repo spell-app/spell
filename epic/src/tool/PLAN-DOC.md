@@ -95,7 +95,11 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - A finished phase, and a bedtime run's lead line, age out after `away.finishedPhaseDays` days (3;  `epic settings`),
       by `done-at`.  One with no `done-at` stays until read.
     - Drawn on every edit:  an edit is what brings an idle page up to date.
-    - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `inbox apply` runs `readAway()`.
+    - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `readAway()`.
+    - A line's or a part's Read is a Seen on `away:<line>`:  `readAwayLine()`, and every new update block of what it's
+      about (each line of a part) stamped seen (`seeUpdatesFor()`, epic `epic-engine` I268).
+    - Every Read is applied by the page server the moment it's ticked (`AwayReads.applyNow()`):  no Send, no session;
+      `epic inbox apply` still takes one a failure left.
     - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
     - what a run wrote for the person to read (an overnight `/bedtime` report)

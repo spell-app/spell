@@ -39,7 +39,9 @@ export const epicCommentPaneVocabulary = {
     {
       name: "saved",
       kind: "string",
-      description: "The floppy, in its header, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy."
+      description:
+        "The floppy, in its header, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy." +
+        "  It fades out 10 seconds after the save, or at once when something new is typed;  a red one stays."
     },
     { name: "failed", kind: "boolean", description: "The last save failed:  the floppy red, `saved` saying why." },
     {

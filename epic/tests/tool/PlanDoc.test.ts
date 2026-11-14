@@ -1239,6 +1239,49 @@ describe("PlanDoc states", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  test("not on main yet (I273):  a done phase and item say so, a calm call stays blue;  all quiet once it lands", () => {
+    const plan = freshPlan()
+    plan.addPhase("Polish")
+    plan.addPhase("Later")
+    plan.setPhase(1, "active")
+    plan.addItem("judgement", "picked the short name", { calm: true })
+    plan.addItem("judgement", "an older call", { calm: true })
+    Markup.set(el(plan, "j2"), { phase: undefined })
+    plan.addItem("issue", "the help is missing")
+    plan.addStatus("i1", "adding the help")
+    plan.finishStatus("i1", "the help shows")
+    plan.setItem("i1", "done")
+    plan.setPhase(1, "done")
+    const unmerged = (selector: string) => plan.document.querySelector(selector)!.getAttribute("unmerged")
+    const phases = () => plan.phaseElements.map((phase) => phase.getAttribute("unmerged"))
+
+    // `editor P1:` and `editor I1:` not on main;  another epic's `other I2:` names nothing here
+    plan.landing = { branch: "editor", ids: new Set(["p1", "i1"]), shas: ["abc1234def"] }
+    plan.updateStates()
+    expect(phases()).toEqual(["editor", null])
+    expect(unmerged("#i1")).toBe("editor")
+    expect(unmerged("#i1 > epic-status")).toBe("editor")
+    // made in P1, whose work isn't on main:  blue;  one from no phase stays grey
+    expect(stateOf(plan, "j1", "j2")).toEqual(["progress", "quiet"])
+
+    // a listed commit not on main counts too, by a prefix either way
+    plan.landing = { branch: "editor", ids: new Set(), shas: ["abc1234def"] }
+    plan.addCommit({ item: "j2" }, "abc1234", "the call's commit")
+    plan.updateStates()
+    expect(stateOf(plan, "j1", "j2")).toEqual(["quiet", "progress"])
+    expect(phases()).toEqual([null, null])
+
+    // landed:  every mark gone, the calls grey
+    plan.landing = { branch: "editor", ids: new Set(), shas: [] }
+    plan.updateStates()
+    expect([unmerged("#i1"), unmerged("#i1 > epic-status")]).toEqual([null, null])
+    expect(stateOf(plan, "j1", "j2")).toEqual(["quiet", "quiet"])
+    // no landing (no git):  nothing changes
+    plan.landing = undefined
+    expect(plan.updateLanded()).toBe(0)
+    expect(problems(plan)).toEqual([])
+  })
+
   test("replied (Owen, 2026-10-09):  orange while Claude's last reply holds options nothing is picked in", () => {
     const plan = freshPlan()
     const reply = (at: string, cards = true) =>

@@ -192,6 +192,14 @@ export const epicItemVocabulary = {
         "or issue, your Do this (I232):  red until handled, reviewed or not."
     },
     {
+      name: "unmerged",
+      kind: "string",
+      description:
+        "An item (done, or a judgement call) whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the " +
+        "branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  " +
+        "A calm judgement call stays blue (`progress`) while its work hasn't landed, grey once it has."
+    },
+    {
       name: "fixed",
       kind: "boolean",
       description:
@@ -412,6 +420,11 @@ export const epicItemVocabulary = {
       key: "handledTip",
       text: "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",
       description: "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
+    },
+    {
+      key: "phasePillTip",
+      text: "Click:  go to {phase}.  ⌥-click:  start {phase}.",
+      description: "The phase link's tooltip's second line:  what a click and an ⌥-click do (epic `epic-engine` I271)."
     },
     {
       key: "takenTip",

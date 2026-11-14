@@ -60,6 +60,14 @@ export const epicStatusVocabulary = {
         "but Ana, and plain `Claude` to her.  None (a card written before):  `Claude`."
     },
     {
+      name: "unmerged",
+      kind: "string",
+      description:
+        "A done card whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the " +
+        "branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  " +
+        "Its line then says `not on main yet` after Done."
+    },
+    {
       name: "agent",
       kind: "string",
       description:
@@ -79,6 +87,7 @@ export const epicStatusVocabulary = {
   ],
   parts: [
     { name: "base", description: "The card:  blue underway, green done, a calm outline noted." },
+    { name: "unmerged", description: "Its `not on main yet` pill, after Done, while `unmerged`." },
     {
       name: "header",
       description: "Its heading band, a flex row:  the fold chevron, `who` left, `date` right;  a click folds it."
@@ -118,6 +127,16 @@ export const epicStatusVocabulary = {
     { key: "underway", text: "{who} • Underway", description: "The heading while Claude is on it." },
     { key: "done", text: "{who} • Done", description: "The heading once work was done." },
     { key: "noted", text: "{who} • Noted", description: "The heading once Claude recorded what you chose." },
+    {
+      key: "unmerged",
+      text: "not on main yet",
+      description: "After Done, while its work is on its epic's branch alone (`unmerged`, I273)."
+    },
+    {
+      key: "unmergedTip",
+      text: "Done on branch {branch}, not merged into main yet",
+      description: "That pill's tooltip."
+    },
     {
       key: "agent",
       text: "{agent}",

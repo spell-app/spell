@@ -136,18 +136,3 @@
 ui-popup.PartMenu {
   --ui-popup-duration: 0s;
 }
-
-/* the program's own menu, first in the part menu (epic `language` T120):  its lines as the editor's */
-ui-menu.BarMenuItems > ui-item.ProgramMenuItem[kind="divider"]::part(item) {
-  min-height: 0;
-  height: 0;
-  margin: 4px 8px;
-  padding: 0;
-  border-top: 1px solid var(--ui-border-color);
-}
-
-/* the thick line under the program's menu, before the editor's own items:  heavier than the editor's own lines */
-ui-menu.BarMenuItems > ui-action.ProgramMenuEnd[kind="divider"]::part(item) {
-  margin: 6px 0;
-  border-top: 3px solid var(--ui-border-color-strong, var(--ui-text-muted));
-}

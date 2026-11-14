@@ -15,6 +15,8 @@ import type { ContextMenuElement, Core, MenuItem } from "spell/parser/core"
  *   - as a right click's menu, `context-menu="GameMenu"` on any element of a drawing:  `showContextMenu()`
  * - A right click's menu written IN a drawing, `<context-menu>` inside an element (epic `language`):  the core draws it
  *   as a hidden `<spell-context-menu>` holding its items (`core.drawContextMenu()`), which `showContextMenu()` finds.
+ * - In the editor's Edit, a right click's menu shows first in the editor's own part menu (`contextMenuItemsOf()`,
+ *   epic `editor` I76), drawn the same way (`itemsFor()`).
  *   - as the app's menu bar, `- its menu bar is "GameMenu"`:  `SpellElement` draws it with `itemsFor()`
  * - Each `<ui-action>` reads its item live (title, enabled, selected), and a click runs it through the core.
  * - STATIC and page-wide on purpose, as `Glides` is:  one context menu on a page at a time.
@@ -64,9 +66,9 @@ export class ActionMenus {
    *   the menu goes when an action runs, at Escape, or at a press anywhere else.
    */
   static showContextMenu(event: MouseEvent, stopAt: Element, thing: object | undefined, core: Core): boolean {
-    const found = ActionMenus.contextMenuAt(event, stopAt, thing, core)
-    if (!found) return false
-    const { items } = found
+    const found = ActionMenus.contextMenuOf(event.composedPath(), stopAt)
+    const items = ActionMenus.itemsOfFound(found, thing, core)
+    if (!items?.length) return false
     event.preventDefault()
     ActionMenus.closeContextMenu()
     const popup = document.createElement(POPUP_TAG)
@@ -102,16 +104,19 @@ export class ActionMenus {
   }
 
   /**
-   * The right-click menu the program shows for `event`:  its items, ready to draw;  `undefined` for none, or none in it.
-   * - The ONE way to find a spot's menu:  Run's right click (`showContextMenu()`),
-   *   and Edit's part menu, which shows it first (epic `language` T120).
-   * - The nearest on `event`'s path, up to `stopAt`:  a `<context-menu>` written in the drawing,
-   *   else a `context-menu="game menu"` naming a menu of `thing` or up its chain (`core.menuOf()`).
+   * The items of the nearest right-click menu along `path` (innermost first), up to `stopAt`:
+   * what `showContextMenu()` would show there, for another menu to draw (`itemsFor()`).
+   * - The editor's part menu, in Edit, puts them first (epic `editor` I76):  `SpellElement.programMenuAt()`.
+   * - None there, or an empty one:  `undefined`.
    */
-  static contextMenuAt(event: Event, stopAt: Element, thing: object | undefined, core: Core): ContextMenu | undefined {
-    const found = ActionMenus.contextMenuOf(event, stopAt)
-    const items = found?.items ?? (found?.name ? core.menuOf(thing, found.name) : undefined)
-    return items?.length ? { name: found?.name, items } : undefined
+  static contextMenuItemsOf(
+    path: readonly EventTarget[],
+    stopAt: Element,
+    thing: object | undefined,
+    core: Core
+  ): MenuItem[] | undefined {
+    const items = ActionMenus.itemsOfFound(ActionMenus.contextMenuOf(path, stopAt), thing, core)
+    return items?.length ? items : undefined
   }
 
   /** Close the context menu showing, if one is. */
@@ -178,13 +183,25 @@ export class ActionMenus {
     await (element as { ready?: Promise<void> }).ready
   }
 
+  /** The items of a right-click menu `contextMenuOf()` found:  written ones ready, a named one from `thing` up. */
+  private static itemsOfFound(
+    found: { name?: string; items?: MenuItem[] } | undefined,
+    thing: object | undefined,
+    core: Core
+  ): MenuItem[] | undefined {
+    return found?.items ?? (found?.name ? core.menuOf(thing, found.name) : undefined)
+  }
+
   /**
-   * The nearest right-click menu on `event`'s path, up to `stopAt`:
+   * The nearest right-click menu along `path` (an event's, innermost first), up to `stopAt`:
    * - a menu written in the drawing, `<context-menu>` inside an element:  its items, ready (`core.drawContextMenu()`)
    * - else a `context-menu="game menu"`, naming a template's menu:  its name
    */
-  private static contextMenuOf(event: Event, stopAt: Element): { name?: string; items?: MenuItem[] } | undefined {
-    for (const target of event.composedPath()) {
+  private static contextMenuOf(
+    path: readonly EventTarget[],
+    stopAt: Element
+  ): { name?: string; items?: MenuItem[] } | undefined {
+    for (const target of path) {
       const element = target as Element
       const written = element.querySelector?.<Element & ContextMenuElement>(`:scope > ${CONTEXT_MENU_TAG}`)
       if (written?.menuItems) return { items: written.menuItems() }
@@ -209,14 +226,6 @@ export class ActionMenus {
     if ((target as { editContext?: unknown }).editContext) return true
     return target instanceof HTMLInputElement && !NOT_TYPED_IN.has(target.type)
   }
-}
-
-/** A right click's menu, found by `ActionMenus.contextMenuAt()`. */
-export type ContextMenu = {
-  /** the template's menu a `context-menu=` named;  none for a `<context-menu>` written in the drawing */
-  name?: string
-  /** its items, at least one */
-  items: MenuItem[]
 }
 
 /** The attribute naming the menu a toolbar or menu in a drawing shows:  `<ui-toolbar menu="GameMenu" />`. */

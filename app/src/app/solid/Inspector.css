@@ -421,6 +421,18 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
   }
 }
 
+/* the pill's ✕ inside This of the This | All switch (`<ScopeSwitch>`), as a lone pill's (I74) */
+ui-item.InspectorScope > .InspectorScopeLetGo {
+  display: inline-flex;
+  align-items: center;
+  padding-inline-start: 6px;
+  font-size: 0.85em;
+  opacity: 0.7;
+  &:hover {
+    opacity: 1;
+  }
+}
+
 /* a property holding a thing:  its label as a field's, then a link to it, the row's full width */
 .Inspector .InspectorThingLink {
   grid-column: 1 / -1;

@@ -26,6 +26,7 @@ import { NightSummary, type AwayPart, type SummaryOptions } from "./NightSummary
 import {
   CALM_ID,
   ISSUE_ID,
+  JUDGEMENT_ID,
   CLOSED,
   ITEM_STATUSES,
   KINDS,
@@ -56,6 +57,7 @@ import {
   type ItemFacts,
   type ItemKind,
   type ItemText,
+  type Landing,
   type KeptNote,
   type MarkResult,
   type OptionCard,
@@ -103,6 +105,13 @@ import { CHANGE_ID, ReviewInbox, STAGE_ID, SUMMARY_ID, UPDATE_ID, type SetPick }
  *   it 1:1;  P8 switched its markup).
  ****************/
 export class PlanDoc extends PlanReader {
+  /**
+   * What of the epic's work isn't on main yet, from git (`PlanDocFiles.landing()`, epic `epic-engine` I273), which
+   * `updateStates()` marks on the page (`updateLanded()`);  `undefined` (default):  the marks stay as they are
+   * - handed in, so the doc stays pure:  the command line asks git
+   */
+  landing: Landing | undefined
+
   /** `PlanDoc` of HTML text;  `options` as the constructor's. */
   static parse(html: string, now?: Date, options?: ConstructorParameters<typeof PlanDoc>[2]): PlanDoc {
     return new PlanDoc(parseHTML(html).document as unknown as Document, now, options)
@@ -921,7 +930,8 @@ export class PlanDoc extends PlanReader {
       fixed: Boolean(data.fixed),
       awaitsPick: PlanItem.awaitsPick(item),
       reviewAs: data.reviewAs,
-      handled: data.handled
+      handled: data.handled,
+      unmerged: data.unmerged
     }
   }
 
@@ -2334,6 +2344,7 @@ export class PlanDoc extends PlanReader {
    * - the update blocks:  their ids, and each host's `to-see` (`updateUpdates()`, I168)
    * - the change marks:  new ones given their id, time and answer, each host's `to-accept` (`updateChanges()`)
    * - each done phase's `done-at`, from the log when it has none (`updateDoneAt()`, I170)
+   * - what's done but not on main yet (`updateLanded()`, I273), when `landing` was handed in
    */
   updateStates(): number {
     let changed = 0
@@ -2345,6 +2356,8 @@ export class PlanDoc extends PlanReader {
     }
     // first:  a new mark in a phase's text marks its item handled, which its state reads
     changed += this.updateChanges()
+    // and what isn't on main yet, which a judgement call's state reads (I273)
+    changed += this.updateLanded()
     changed += PhaseTakes.stamp(this.document).length
     for (const item of this.allItems) {
       const state = this.itemState(item)
@@ -2356,6 +2369,54 @@ export class PlanDoc extends PlanReader {
     changed += this.updateUpdates()
     changed += this.updateDoneAt()
     changed += OptionSets.updateOpenCounts(this.phaseElements)
+    return changed
+  }
+
+  /**
+   * Mark what's done but not on main yet, from `landing` (epic `epic-engine` I273;  Owen, 2026-11-14:  "This says it's
+   * done, but it's not on main yet.  That should be indicated.");  returns how many marks changed.
+   * - `unmerged="<branch>"` on:
+   *   - a done phase its commits not on main name (`P28:`), or with one of them listed under it
+   *   - an item they name (`editor I55:`), the phase its `work` names, or one listed under it;  a judgement call also
+   *     by the phase it was made in (`phase`):  its state reads it (`itemState()`:  a calm call stays blue)
+   *   - a done or fixed item's last finished status card, whose line then says `not on main yet`
+   * - gone again once the work lands;  no `landing` (no git, a test):  nothing changes
+   */
+  updateLanded(): number {
+    const landing = this.landing
+    if (!landing) return 0
+    const { branch, ids, shas } = landing
+    const isOffMain = (host: Element) =>
+      Array.from(host.querySelectorAll(":scope > epic-commit")).some((commit) => {
+        const listed = commit.getAttribute("sha") ?? ""
+        return Boolean(listed) && shas.some((sha) => sha.startsWith(listed) || listed.startsWith(sha))
+      })
+    const phaseOf = (label: string | undefined) => /^P(\d+(?:\.\d+)?)\b/i.exec(label ?? "")?.[1]
+    let changed = 0
+    const mark = (element: Element, on: boolean) => {
+      const value = on ? branch : undefined
+      if ((element.getAttribute("unmerged") ?? undefined) === value) return
+      Markup.set(element, { unmerged: value })
+      changed++
+    }
+    for (const phase of this.phaseElements) {
+      const done = phase.getAttribute("status") === "done"
+      mark(phase, done && (ids.has(`p${PhaseIds.numberOf(phase)}`) || isOffMain(phase)))
+    }
+    for (const item of this.allItems) {
+      const facts = this.facts(item)
+      const work = phaseOf(facts.work)
+      const offMain =
+        ids.has(facts.id) ||
+        (work !== undefined && ids.has(`p${work}`)) ||
+        (JUDGEMENT_ID.test(facts.id) && facts.phase !== undefined && ids.has(`p${facts.phase}`)) ||
+        isOffMain(item)
+      mark(item, offMain)
+      const finished = CLOSED.has(facts.status) || facts.fixed
+      const cards = Array.from(item.querySelectorAll(":scope > epic-status"))
+      const last = cards.findLast((card) => card.getAttribute("state") === "done")
+      for (const card of cards) mark(card, offMain && finished && card === last)
+    }
     return changed
   }
 
@@ -3177,8 +3238,13 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * A line's or a part's Read in "0. While you were out" (epic `epic-engine` I206):  a Seen on `away:<line>`;  only
-   * that line leaves the section (`readAwayLine()`), the item itself staying as it is.
+   * A line's or a part's Read in "0. While you were out" (epic `epic-engine` I206):  a Seen on `away:<line>`;  that
+   * line, or that part (`done`, `todo`), leaves the section (`readAwayLine()`).
+   * - and what it's about is SEEN too (epic `epic-engine` I268;  Owen, 2026-11-14:  "mark each item Seen"):  every
+   *   update block still new in its phase or item (each line of a part, for a part's) stamped `seen`, as its own
+   *   Seen does (`seeUpdatesFor()`)
+   *   - nothing else about the item changes:  a call or a question still waiting stays red, his to answer
+   * - the page server applies it the moment he ticks it (`AwayReads.applyNow()`):  no Send
    * - the section gone already (read whole):  dropped
    */
   private applyReadLine({ id, action }: PlanMark): MarkResult {
@@ -3189,8 +3255,43 @@ export class PlanDoc extends PlanReader {
       return { applied: false, left: `${String(id).toUpperCase()}:  a line takes Read, not ${action}` }
     if (!this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`))
       return { applied: false, gone: true, left: `${String(id).toUpperCase()}:  read already:  dropped` }
+    const seen = this.seeUpdatesFor(line)
     this.readAwayLine(line)
-    return { applied: true, did: `While you were out:  ${line} read` }
+    const updates = seen ? `, ${seen} update${seen === 1 ? "" : "s"} seen` : ""
+    return { applied: true, did: `While you were out:  ${line} read${updates}` }
+  }
+
+  /**
+   * SIDE EFFECT:  every update block still new under away line `line` stamped `seen` (`stampSeen()`);  how many.
+   * - `line`:  a phase's or an item's id, or a part's (`done`, `todo`):  then each line of that part, as the
+   *   section draws it now (`awayLinesOf()`)
+   * - new:  not `seen`, and not gone quiet (`PlanDates.isQuiet()`), as `updateUpdates()` counts them
+   */
+  seeUpdatesFor(line: string): number {
+    const ids = (AWAY_PARTS as readonly string[]).includes(line) ? this.awayLinesOf(line as AwayPart) : [line]
+    let seen = 0
+    for (const id of ids) {
+      const host = this.findItem(id) ?? this.document.getElementById(id)
+      for (const update of host?.querySelectorAll(UPDATE_BLOCKS) ?? []) {
+        if (update.hasAttribute("seen") || PlanDates.isQuiet(update.getAttribute("at"), this.now)) continue
+        this.stampSeen(update)
+        seen++
+      }
+    }
+    return seen
+  }
+
+  /** The lines of part `part` of "0. While you were out", as it's drawn now:  their phase or item ids, in order. */
+  awayLinesOf(part: AwayPart): string[] {
+    const section = this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)
+    const lines: string[] = []
+    let current: string | undefined
+    for (const line of section?.querySelectorAll("epic-away-line[line]") ?? []) {
+      const key = line.getAttribute("line")!
+      if (line.hasAttribute("heading")) current = key
+      else if (current === part) lines.push(key)
+    }
+    return lines
   }
 
   /**
@@ -3207,11 +3308,16 @@ export class PlanDoc extends PlanReader {
       return { applied: false, gone: true, left: `${label}:  no such update any more:  dropped` }
     if (action !== "seen") return { applied: false, left: `${label}:  an update takes Seen, not ${action}` }
     if (update.hasAttribute("seen")) return { applied: true, did: "seen already" }
+    return { applied: true, did: this.stampSeen(update) }
+  }
+
+  /** SIDE EFFECT:  update block `update` stamped `seen` (now), and logged (`UP3 seen:  Split in two`);  what it did. */
+  private stampSeen(update: Element): string {
     Markup.set<"epic-update">(update, { seen: PlanTime.clockTime(this.now) })
     const summary = update.getAttribute("summary")
     const did = `seen${summary ? `:  ${summary}` : ""}`
-    this.log(`${label} ${did}`)
-    return { applied: true, did }
+    this.log(`${update.id.toUpperCase()} ${did}`)
+    return did
   }
 
   ////////////////
@@ -3564,6 +3670,9 @@ function cardSetWords(choices: number | undefined): string {
 
 /** The update BLOCKS (`updateUpdates()`):  dated or titled;  a bare UPDATE label is none. */
 const UPDATE_BLOCKS = "epic-update[at], epic-update[summary]"
+
+/** The parts of "0. While you were out", by their headings' keys:  a Read on one reads each of its lines. */
+const AWAY_PARTS: readonly AwayPart[] = ["done", "underway", "todo"]
 
 /** The tags whose `phase` names a phase by number:  renumbered with it (`PlanDoc.makeRoomForPhase()`). */
 

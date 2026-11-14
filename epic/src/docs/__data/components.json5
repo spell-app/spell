@@ -474,7 +474,7 @@
         "read",
         "seen"
       ],
-      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Under way, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
+      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Under way, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and the page server takes it off straight away, no Send (epic `epic-engine` I268);  its phase's or item's new update blocks are seen too;  the epic tool writes every one, never a person.",
       "noun": "away line",
       "attributes": [
         {
@@ -495,7 +495,7 @@
         {
           "name": "heading",
           "kind": "boolean",
-          "description": "A part's heading (What was done, Under way, Still to do):  read, the whole part leaves the section."
+          "description": "A part's heading (What was done, Under way, Still to do):  read, every line under it fades at once, each line's update blocks are seen, and the whole part leaves the section."
         }
       ],
       "slots": [
@@ -1825,7 +1825,7 @@
         {
           "name": "saved",
           "kind": "string",
-          "description": "The floppy, in its header, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy."
+          "description": "The floppy, in its header, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy.  It fades out 10 seconds after the save, or at once when something new is typed;  a red one stays."
         },
         {
           "name": "failed",
@@ -2668,6 +2668,11 @@
           "description": "A todo that asks you to act (Make Todo's follow-up, epic `epic-engine` I230):  `attention` (red) until reviewed, queued or done, as an open issue is.  `calm` (its id chip) makes it yellow.  On a judgement call or issue, your Do this (I232):  red until handled, reviewed or not."
         },
         {
+          "name": "unmerged",
+          "kind": "string",
+          "description": "An item (done, or a judgement call) whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  A calm judgement call stays blue (`progress`) while its work hasn't landed, grey once it has."
+        },
+        {
           "name": "fixed",
           "kind": "boolean",
           "description": "A judgement call or issue Claude has fixed (`epic update ... fixed`, epic `epic-engine` I232):  `replied` (orange), your turn to review it;  Approve closes it, Do this sends it back."
@@ -2969,6 +2974,11 @@
           "key": "handledTip",
           "text": "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",
           "description": "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
+        },
+        {
+          "key": "phasePillTip",
+          "text": "Click:  go to {phase}.  ⌥-click:  start {phase}.",
+          "description": "The phase link's tooltip's second line:  what a click and an ⌥-click do (epic `epic-engine` I271)."
         },
         {
           "key": "takenTip",
@@ -5023,6 +5033,11 @@
           "description": "How long it was under way by the clock, from going active to done, waits on you included, written beside `took` from the page's log (epic `epic-engine` I127):  `4h`, `1h 30m`.  A done phase's pill then reads `34m / 4h`.  None when the log has no start for it:  the pill shows only `took`."
         },
         {
+          "name": "unmerged",
+          "kind": "string",
+          "description": "A done phase whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  Its row then shows `not on main` before its time pill."
+        },
+        {
           "name": "source",
           "kind": "string",
           "description": "Its body's part file (`parts/p2.html`), loaded into its children when it opens."
@@ -5146,6 +5161,10 @@
         {
           "name": "note",
           "description": "The `Loads from parts/x.html ...` line, when its part can't load."
+        },
+        {
+          "name": "unmerged",
+          "description": "A done phase's `not on main` pill, before its time pill, while `unmerged`."
         },
         {
           "name": "status",
@@ -5284,6 +5303,16 @@
           "key": "tookTip",
           "text": "~{estimate}",
           "description": "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
+        },
+        {
+          "key": "unmerged",
+          "text": "not on main",
+          "description": "A done phase's pill while its work is on its epic's branch alone (`unmerged`, I273)."
+        },
+        {
+          "key": "unmergedTip",
+          "text": "Done on branch {branch}, not merged into main yet",
+          "description": "That pill's tooltip."
         },
         {
           "key": "spanTip",
@@ -6974,6 +7003,11 @@
           "description": "Whose session wrote it (epic `epic-friend` P2):  the person's name, `Ana`, drawn `Claude (Ana)` to anyone but Ana, and plain `Claude` to her.  None (a card written before):  `Claude`."
         },
         {
+          "name": "unmerged",
+          "kind": "string",
+          "description": "A done card whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  Its line then says `not on main yet` after Done."
+        },
+        {
           "name": "agent",
           "kind": "string",
           "description": "Which agent wrote it (epic `epic-friend` P10):  its id, `codex`, drawn by its name:  `Codex (Ana)`, or `Codex` to Ana.  None (a card written before):  `Claude`."
@@ -6994,6 +7028,10 @@
         {
           "name": "base",
           "description": "The card:  blue underway, green done, a calm outline noted."
+        },
+        {
+          "name": "unmerged",
+          "description": "Its `not on main yet` pill, after Done, while `unmerged`."
         },
         {
           "name": "header",
@@ -7095,6 +7133,16 @@
           "key": "noted",
           "text": "{who} • Noted",
           "description": "The heading once Claude recorded what you chose."
+        },
+        {
+          "key": "unmerged",
+          "text": "not on main yet",
+          "description": "After Done, while its work is on its epic's branch alone (`unmerged`, I273)."
+        },
+        {
+          "key": "unmergedTip",
+          "text": "Done on branch {branch}, not merged into main yet",
+          "description": "That pill's tooltip."
         },
         {
           "key": "agent",
@@ -7372,7 +7420,7 @@
         {
           "name": "saved",
           "kind": "string",
-          "description": "The box's floppy, in its corner, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy."
+          "description": "The box's floppy, in its corner, and its tooltip:  `Saved 14:02 · waiting for Claude`;  none:  no floppy.  It fades out 10 seconds after the save, or at once when something new is typed;  a red one stays."
         },
         {
           "name": "failed",

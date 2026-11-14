@@ -129,7 +129,7 @@ export const APP_TEXTS = {
   revertChanges: "Revert Changes",
   revertChangesTo: "Revert Changes to {file}",
   publish: "Publish",
-  draft: "Draft",
+  editingDraft: "Editing a Draft",
   draftTip: "Only you can see these changes so far.  Click Publish to show them to everyone.",
   yourDraft: "Your draft",
   yourDraftTip: "Only you can see this until you click Publish.",
@@ -303,8 +303,8 @@ export const APP_TEXTS = {
   sampleInUse: "Showing sample data for {places}:  nothing you change reaches the real data.",
   useRealData: "Use the real data",
   find: "Find",
+  compiledCode: "Compiled Code",
   programPanel: "Program Panel",
-  inspectorCard: "Inspector:  {card}",
   inspectApp: "Inspect App",
   stopInspecting: "Stop Inspecting",
   inspectHelp:
@@ -548,6 +548,7 @@ export const APP_TEXTS = {
   // an action's run button's tip:  `{action}` is its words, `play it`
   inspectorActionRun: "Run {action}",
   inspectorProperties: "Properties",
+  inspectorClose: "Close the Inspector",
   inspectorHide: "Hide this card",
   inspectorLetGo: "Let go of {part} (Esc)",
   inspectorExpandAll: "Expand all",

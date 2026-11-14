@@ -306,7 +306,8 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
   it's light orange until they've reviewed it.
 - An item's colour (its state), from its status and review marks, rewritten by the tool on every edit: "Colours",
   "Item states", below.
-- A judgement call or issue is CALM by default (`--calm`: a call grey, an issue yellow),
+- A judgement call or issue is CALM by default (`--calm`: a call grey, an issue yellow;
+  a call BLUE while its work isn't on main yet, I273),
   RED only when it would surprise the person
   (2026-10-10: "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow",
   the principle of least surprise). Red when:
@@ -338,7 +339,7 @@ element takes its colour from this table, never a colour that means something el
 | red    | needs you (the person)                            | an open question's chip; an unreviewed judgement call or issue, unless calm; a phase with a choice open in it; the toolbar's count; a details question with nothing picked; a details page "waiting for your answer"; an open goals question; an epic with errors (every phase done, items need you) |
 | yellow | open, still undecided                       | an open todo; a test whose phase is done; a calm issue; a reviewed issue or judgement call; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (2026-10-10) |
 | light orange | what you asked for is finished: your turn to see it | an issue filed from your own words (`requested`), closed by Claude, until you review it. DARK text |
-| blue   | do it now, or it's with Claude              | a Do this not started (outlined, `handed`); a todo a review queued and "to do" (dotted, `scheduled`); Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); a phase under way or worked on; a phase SCHEDULED, still to do (a DOTTED blue outline); an epic in progress; a goals topic "building" |
+| blue   | do it now, or it's with Claude              | a Do this not started (outlined, `handed`); a todo a review queued and "to do" (dotted, `scheduled`); Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); a phase under way or worked on; a phase SCHEDULED, still to do (a DOTTED blue outline); a calm judgement call whose work isn't on main yet (I273); a done phase's or item's `not on main` pill (outlined); an epic in progress; a goals topic "building" |
 | green  | decided or done, in the last day (a phase:  3 days);  older, grey          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done in the last 3 days, the Done status card (filled: the item's work finished), the Noted status card (outlined: a step done, your choice recorded or an answer written, the item not finished); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
 | orange | your turn to read: changed since you looked, a plan waiting for your Accept, a manual test whose phase isn't done, and warnings; an item Claude answered with options, waiting for your pick (2026-10-09); an issue or call Claude fixed, waiting for your review (I232) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen, a phase changed since you looked (its chip and circle); "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
 | violet | a person's voice (you, everyone alike): `--epic-voice-person`, `-text`, `-fill`, `-rule` | a person's reply cards (their mark, name, faint fill and rule); the note box and a marked note; the forms and kept text of their own words |
@@ -476,11 +477,15 @@ edit. The FIRST row that applies wins, top to bottom (`PLAN-DOC.md`, "Items", th
 | `replied`   | orange | an issue or call Claude has fixed (`fixed`): your turn to review it; Approve closes it        |
 | `attention` | red    | an open question; an open judgement call or issue not reviewed, unless `calm` (not urgent)   |
 | `handed`    | blue, outlined | a judgement call or issue you pressed Do this on, Claude hasn't started |
-| `quiet`     | grey   | open, nothing to think about: a `calm` judgement call not reviewed, a limit |
+| `progress`  | blue   | a `calm` judgement call not reviewed whose work isn't on main yet (`unmerged`, I273): still in process, grey once it lands |
+| `quiet`     | grey   | open, nothing to think about: a `calm` judgement call not reviewed, its work on main; a limit |
 | `recent`    | green  | open, settled by a review: approved as it stands, or made a todo                           |
 | `replied`   | orange | a manual test whose phase isn't done |
 | `open`      | yellow | anything else open: still undecided, not urgent (todos; calm issues; tests whose phase is done; reviewed issues and judgement calls; a revisit or request for now Claude answered) |
 
+- NOT ON MAIN YET (epic `epic-engine` I273): the tool marks, from git on every edit, what's done but whose work is
+  on the epic's branch alone (`unmerged="<branch>"`, `PlanDoc.updateLanded()`): a done phase shows a blue `not on main`
+  pill, a done item's status line says `not on main yet`, a calm judgement call stays blue. Gone once it lands.
 - Green across the board for what's decided; grey only for what no longer matters (2026-10-08). Neither age
   nor a `/bedtime` run colours a chip any more.
 - `replied` (2026-10-09; branch `spell-element` until it merges): a pick (`chosen`), a newer reply from you, or

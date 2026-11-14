@@ -208,6 +208,16 @@ export function wordsSuffixFor(lang = "en"): string {
 }
 
 /**
+ * End of a project's names dictionary's name in language `lang`, e.g. `.es.names.json5`:
+ * `spell translate`'s, beside the project, as `Solitaire.es.names.json5`.
+ * - The project's index lists the languages it has one in, `namesLanguages`,
+ *   so nothing asks for one that isn't there (epic `editor` I68).
+ */
+export function namesSuffixFor(lang: string): string {
+  return `.${lang}.names.json5`
+}
+
+/**
  * Start of the ES module specifier for another project's compiled JS, e.g. `@spell/project/owen@spell/cards`.
  * - A runner fetches that project's compiled JS from the server, at its file's URL,
  *   `/spaces/<project>/<Project>.spell.js` (`SpellUrls.fileUrl()`), and points the specifier at it.
@@ -246,6 +256,12 @@ export type ProjectManifestJSON5 = {
    * - Only a Python program's web app needs it so far, to find the program:  `PY.QuartAppSpec.outputs`.
    */
   buildFolder?: string
+  /**
+   * Languages it has a names dictionary in, beside its project file, e.g. `["es"]` for `Solitaire.es.names.json5`.
+   * - Found by the server (spaces' `getIndex()`):  a `.json5` file is never in `manifest`.
+   * - What a compile reads its action titles in other languages from:  see `SpellProject.titleLanguages`.
+   */
+  namesLanguages?: string[]
 }
 
 /** A single entry in `contents.manifest`, augmented with `path`/`location`/`file` once loaded. */

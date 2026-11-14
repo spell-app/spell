@@ -304,7 +304,10 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   }
 }
 
-/* `<PublishDraft>`:  "Draft" Publish, right of Edit in the modes' group;  its words the modes' size */
-ui-menu.ModeTabs ui-item.PublishDraft ui-label {
-  align-self: center;
+/* `<PublishDraft>`:  "Editing a Draft", then Publish, right of the modes' group, centred on the bar's row */
+.ModeButtons > .PublishDraft {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: var(--spell-bar-icon-gap, 12px);
 }

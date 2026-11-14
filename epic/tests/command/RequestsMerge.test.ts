@@ -30,48 +30,60 @@ git("worktree", "add", "-q", WORKTREE, "tooling")
 commit("b.txt", "two", "P1:  the phase", WORKTREE)
 
 describe("mergeEpic()", () => {
-  test("a stray file someone may have made in the main checkout:  refused, saying to ask Owen;  nothing moved", () => {
-    writeFileSync(join(REPO, "a.txt"), "changed")
-    expect(() => Requests.merge("tooling", REPO)).toThrow(/1 stray file.*\n  a\.txt\n.*epic merge tooling --ditch/s)
+  test("a stray file in a file the merge changes:  refused, saying to ask Owen;  nothing moved", () => {
+    writeFileSync(join(REPO, "b.txt"), "mine")
+    expect(() => Requests.merge("tooling", REPO)).toThrow(
+      /1 stray file.*\n  b\.txt  \(new\)\n.*epic merge tooling --ditch/s
+    )
     expect(() => Requests.merge("tooling", WORKTREE)).toThrow(/stray file/)
-    expect(readFileSync(join(REPO, "a.txt"), "utf8")).toBe("changed")
-    git("checkout", "--", "a.txt")
+    expect(readFileSync(join(REPO, "b.txt"), "utf8")).toBe("mine")
+    rmSync(join(REPO, "b.txt"))
   })
 
   test("more than a few is somebody's work:  refused, --ditch or not", () => {
-    for (const name of ["n1", "n2", "n3", "n4"]) writeFileSync(join(REPO, `${name}.json5`), "{}")
+    const names = ["n1", "n2", "n3", "n4"]
+    for (const name of names) writeFileSync(join(WORKTREE, `${name}.json5`), "{ theirs: true }")
+    git("-C", WORKTREE, "add", ...names.map((name) => `${name}.json5`))
+    git("-C", WORKTREE, "-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "-m", "four files")
+    for (const name of names) writeFileSync(join(REPO, `${name}.json5`), "{}")
     expect(() => Requests.merge("tooling", REPO, { ditch: true })).toThrow(/uncommitted work \(4 files\)/)
     expect(existsSync(join(REPO, "n4.json5"))).toBe(true)
-    for (const name of ["n1", "n2", "n3", "n4"]) rmSync(join(REPO, `${name}.json5`))
+    for (const name of names) rmSync(join(REPO, `${name}.json5`))
   })
 
-  test("fast-forwards main from the epic's own worktree (no ExitWorktree), returning the commits;  then nothing", () => {
+  test("uncommitted work in files the merge doesn't change is left alone, and the merge goes on (I270)", () => {
+    writeFileSync(join(REPO, "a.txt"), "Owen's live edit")
     const { commits, ditched } = Requests.merge("tooling", WORKTREE)
-    expect(commits.map((line) => line.replace(/^\w+ /, ""))).toEqual(["P1:  the phase"])
+    expect(commits.map((line) => line.replace(/^\w+ /, ""))).toEqual(["P1:  the phase", "four files"])
     expect(ditched).toEqual([])
-    expect(git("log", "-1", "--format=%s", "main")).toBe("P1:  the phase")
+    expect(git("log", "-1", "--format=%s", "main")).toBe("four files")
+    expect(readFileSync(join(REPO, "a.txt"), "utf8")).toBe("Owen's live edit")
     expect(Requests.merge("tooling", REPO).commits).toEqual([])
+    git("checkout", "--", "a.txt")
   })
 
   test("a test's snapshot is moved aside by itself;  a hand-made file once --ditch says so;  both kept, not deleted", () => {
     commit("e.txt", "five", "P3", WORKTREE)
+    commit("tests/x/__snapshots__/x.test.ts.snap", "fresh", "P3's snapshot", WORKTREE)
     put("tests/x/__snapshots__/x.test.ts.snap", "stale")
+    writeFileSync(join(REPO, "e.txt"), "mine")
     writeFileSync(join(REPO, "a.txt"), "changed")
-    put("settings.json5", "{}")
-    expect(() => Requests.merge("tooling", REPO)).toThrow(/2 stray files/)
+    expect(() => Requests.merge("tooling", REPO)).toThrow(/1 stray file/)
     const folder = join(HOME, "moved")
     const { commits, ditched, ditchedTo } = Requests.merge("tooling", REPO, { ditch: true, ditched: folder })
-    expect(commits.map((line) => line.replace(/^\w+ /, ""))).toEqual(["P3"])
-    expect(ditched.sort()).toEqual(["a.txt", "settings.json5", "tests/x/__snapshots__/x.test.ts.snap"])
+    expect(commits.map((line) => line.replace(/^\w+ /, ""))).toEqual(["P3", "P3's snapshot"])
+    expect(ditched.sort()).toEqual(["e.txt", "tests/x/__snapshots__/x.test.ts.snap"])
     expect(ditchedTo).toBe(folder)
-    expect(readFileSync(join(folder, "a.txt"), "utf8")).toBe("changed")
+    expect(readFileSync(join(folder, "e.txt"), "utf8")).toBe("mine")
     expect(readFileSync(join(folder, "tests/x/__snapshots__/x.test.ts.snap"), "utf8")).toBe("stale")
-    expect(readFileSync(join(REPO, "a.txt"), "utf8")).toBe("one")
-    expect(existsSync(join(REPO, "settings.json5"))).toBe(false)
-    expect(git("status", "--porcelain")).toBe("")
+    expect(readFileSync(join(REPO, "e.txt"), "utf8")).toBe("five")
+    // not the merge's:  left as it was
+    expect(git("status", "--porcelain")).toBe("M a.txt")
+    git("checkout", "--", "a.txt")
 
     // generated only:  no --ditch needed
     commit("f.txt", "six", "P4", WORKTREE)
+    commit("tests/x/__snapshots__/y.test.ts.snap", "fresh", "P4's snapshot", WORKTREE)
     put("tests/x/__snapshots__/y.test.ts.snap", "stale")
     expect(Requests.merge("tooling", REPO).ditched).toEqual(["tests/x/__snapshots__/y.test.ts.snap"])
     expect(new StrayFiles(REPO).files).toEqual([])
@@ -99,6 +111,7 @@ function git(...args: string[]): string {
 
 /** Commit `file` holding `text` in `cwd`, with `message`. */
 function commit(file: string, text: string, message: string, cwd = REPO): void {
+  mkdirSync(dirname(join(cwd, file)), { recursive: true })
   writeFileSync(join(cwd, file), text)
   const run = (...args: string[]) => execFileSync("git", args, { cwd, encoding: "utf8" })
   run("add", file)

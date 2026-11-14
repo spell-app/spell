@@ -1613,7 +1613,8 @@ export class SpellLanguageService {
   /**
    * What could be typed at `position`:
    * - in a `<css>` block:  CSS, e.g. `color` for `col` -- see `LSP.SpellCSS`
-   * - typing a JSX tag (`<chi`):  spell's own tags, e.g. `children`, `action`, then Spell UI's -- see `tagItems()`
+   * - typing a JSX tag (`<chi`):  spell's own tags, e.g. `children`, `action`, then Spell UI's -- see `tagItems()`;
+   *   each, and each attribute, written whole when chosen (`<action "|"/>`, `color="|"`) -- see `LSP.CompletionShapes`
    * - inside a tag (`<button col`):  its attributes, each saying what it is;  in its quotes (`color="`), its words --
    *   see `attributeItems()`, `attributeValueItems()`
    * - in an action's quoted word (`<action "au`):  the program's actions, e.g. `auto play` -- see `actionItems()`
@@ -1637,11 +1638,13 @@ export class SpellLanguageService {
     const typedLine = file.contents?.split("\n")[position.line]?.slice(0, position.character) ?? lineText
     // inside a tag split over lines:  the tag's lines as one, so its attributes help on every line (epic `editor` I64)
     const typedTag = SpellLanguageService.openTagTyped(file, position) ?? typedLine
+    // what's already written after the caret, so a tag or an attribute chosen is never written twice (I70)
+    const afterCaret = file.contents?.split("\n")[position.line]?.slice(position.character) ?? ""
     const tagItems =
-      this.tagItems(file, offset, typedLine) ??
+      this.tagItems(file, offset, typedLine, afterCaret) ??
       this.actionItems(file, offset, position, typedLine) ??
       this.attributeValueItems(file, offset, position, typedTag) ??
-      this.attributeItems(file, offset, typedTag)
+      this.attributeItems(file, offset, typedTag, afterCaret)
     if (tagItems) return { isIncomplete: false, items: tagItems }
     const atStatementStart = /^\s*[\p{L}\p{M}\d_-]*$/u.test(lineText)
     if (!atStatementStart) {
@@ -1689,8 +1692,15 @@ export class SpellLanguageService {
    * - Spanish's for a Spanish file:  `hijos`, `acción`, `menú-contextual`, `divisor`.
    * - The web's own tags aren't offered.
    * - A tag is a `<` right before a word:  `x < y` isn't one.
+   * - Each is written whole when chosen, the caret where you type next, unless `afterCaret` already goes on:
+   *   `<action "|"/>`, `<content>` ... -- see `LSP.CompletionShapes` (epic `editor` I70).
    */
-  private tagItems(file: SP.SpellFile, offset: number, lineText: string): CompletionItem[] | undefined {
+  private tagItems(
+    file: SP.SpellFile,
+    offset: number,
+    lineText: string,
+    afterCaret: string
+  ): CompletionItem[] | undefined {
     if (!JSX_TAG_TYPED.test(lineText)) return undefined
     const scope = this.scopeAt(file, offset)
     const texts = LSP.LspTexts.of(scope)
@@ -1698,17 +1708,22 @@ export class SpellLanguageService {
       label: tag,
       kind: CompletionItemKind.Keyword,
       detail: texts.text(SPELL_TAG_DETAILS[meaning] ?? "spellWordFor", { tag: meaning }),
-      sortText: `0${tag}`
+      sortText: `0${tag}`,
+      ...LSP.CompletionShapes.spellTag(tag, meaning, afterCaret)
     }))
     const components = (SpellLanguageService.componentHelpAt(scope)?.tags ?? [])
       // a word spell has for its own (`action`, `acción`) is spell's, accented or not
       .filter(({ tag }) => !own.some((item) => withoutAccents(item.label) === withoutAccents(tag)))
-      .map(({ tag, description }) => ({
-        label: tag,
+      .map((help) => ({
+        label: help.tag,
         kind: CompletionItemKind.Class,
         detail: texts.text("componentTag"),
-        sortText: `1${tag}`,
-        ...(description && { labelDetails: { description }, documentation: this.markdown(description) })
+        sortText: `1${help.tag}`,
+        ...(help.description && {
+          labelDetails: { description: help.description },
+          documentation: this.markdown(help.description)
+        }),
+        ...LSP.CompletionShapes.componentTag(scope, help, afterCaret)
       }))
     return [...own, ...components]
   }
@@ -1718,8 +1733,15 @@ export class SpellLanguageService {
    * `<button col` => `color`, `fluid` ... each with what it is -- `undefined` if no tag is open there.
    * - Spell UI's, in the file's language (`SP.ComponentPacks.help()`):  `<botón tam` => `tamano`.
    * - Not inside a quoted value or a `{...}`.
+   * - Each is written whole when chosen, unless `afterCaret` has its `=` already:  `color="|"`, its words listed at
+   *   once;  `fluid` alone -- see `LSP.CompletionShapes` (epic `editor` I70).
    */
-  private attributeItems(file: SP.SpellFile, offset: number, lineText: string): CompletionItem[] | undefined {
+  private attributeItems(
+    file: SP.SpellFile,
+    offset: number,
+    lineText: string,
+    afterCaret: string
+  ): CompletionItem[] | undefined {
     const typing = ATTRIBUTE_TYPED.exec(lineText)
     if (!typing || isInQuotesOrBraces(typing[2] ?? "")) return undefined
     const scope = this.scopeAt(file, offset)
@@ -1727,7 +1749,8 @@ export class SpellLanguageService {
     const attributes = SpellLanguageService.componentHelpAt(scope)?.attributesOf(typing[1]!)
     if (!attributes) return undefined
     const texts = LSP.LspTexts.of(scope)
-    return attributes.map(({ name, description, values }) => {
+    return attributes.map((help) => {
+      const { name, description, values } = help
       const takes = values.length ? values.map((it) => `\`${it}\``).join(" · ") : undefined
       const docs = [description, takes].filter(Boolean).join("\n\n")
       return {
@@ -1735,7 +1758,8 @@ export class SpellLanguageService {
         kind: CompletionItemKind.Property,
         detail: texts.text("attributeOf", { tag: typing[1]! }),
         ...(description && { labelDetails: { description } }),
-        ...(docs && { documentation: this.markdown(docs) })
+        ...(docs && { documentation: this.markdown(docs) }),
+        ...LSP.CompletionShapes.attribute(help, afterCaret)
       }
     })
   }

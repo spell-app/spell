@@ -464,8 +464,8 @@ export const getIndex = async (
 
   // Get non-hidden files in project which the front-end knows how to deal with
   const ignoreFolder = (relativePath: string) => isFolderOutsideProject(location.serverPath, relativePath)
-  const listed = (await fileUtils.getFilesInside(location.serverPath, { ignoreFolder })) //
-    .filter((filePath) => isManifestFile(basename(filePath), location.projectName))
+  const inside = await fileUtils.getFilesInside(location.serverPath, { ignoreFolder })
+  const listed = inside.filter((filePath) => isManifestFile(basename(filePath), location.projectName))
   const isWords = await Promise.all(listed.map((name) => isWordsFileOnDisk(location.serverPath, name)))
   let fileNames = listed.filter((_name, index) => !isWords[index])
   // a file only drafted so far, e.g. a new document before its first Publish (Q23), is the project's too
@@ -545,6 +545,10 @@ export const getIndex = async (
   // return manifest and imports
   const { title, version, exports, targets, listsStartAt, development } = importsFile
   const buildFolder = buildFolderInBuild(projectId)
+  // its names dictionaries, beside its project file:  so a compile asks for no other (epic `editor` I68)
+  const namesLanguages = [...SP.Language.all.keys()].filter((lang) =>
+    inside.includes(`${location.projectName}${SP.namesSuffixFor(lang)}`)
+  )
   return {
     imports: importsFile.imports,
     manifest,
@@ -554,7 +558,8 @@ export const getIndex = async (
     targets,
     listsStartAt,
     development,
-    buildFolder
+    buildFolder,
+    ...(namesLanguages.length > 0 && { namesLanguages })
   }
 }
 

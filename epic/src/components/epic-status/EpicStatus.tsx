@@ -49,6 +49,9 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   open to start with;  page state, never written;  folded, `hidden="until-found"`
  * - Written by the epic tool (`plan-doc status`, `inbox apply`), never by hand;
  *   a later mark on the same item adds a new card, the old ones stay
+ * - Done, its work not on main yet (`unmerged`, the epic tool's, from git;  epic `epic-engine` I273):  a small blue
+ *   `not on main yet` pill after Done, the branch in its tooltip (Owen, 2026-11-14:  "This says it's done, but it's
+ *   not on main yet.  That should be indicated.")
  * - IN AN ITEM, a LINE, not a card (epic `epic-engine` P27, Owen's layout A):
  *   `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`
  *   - a run of cards about one task is ONE line, drawn by its last card, the others hidden (`AnswerThread`):
@@ -247,6 +250,17 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
             )}
           </For>
         </span>
+        <Show when={finished() && this.unmerged}>
+          {(branch) => (
+            <span
+              class={UNMERGED}
+              part={this.partForName("unmerged")}
+              title={this.translationForKey("unmergedTip", { branch: branch() })}
+            >
+              {this.translationForKey("unmerged")}
+            </span>
+          )}
+        </Show>
         <Show when={this.isDriveBy}>
           <span class={EARLIER} part={this.partForName("earlier")}>
             {HEADING_SEPARATOR}
@@ -333,6 +347,8 @@ const MARK = "mark"
 const STEPS = "steps"
 const STEP = "step"
 const EARLIER = "earlier"
+/** Its `not on main yet` pill (`unmerged`, epic `epic-engine` I273). */
+const UNMERGED = "unmerged"
 const TEXT = "text"
 const READING = "reading"
 

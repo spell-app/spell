@@ -97,6 +97,14 @@ export const epicPhaseVocabulary = {
         "`34m / 4h`.  None when the log has no start for it:  the pill shows only `took`."
     },
     {
+      name: "unmerged",
+      kind: "string",
+      description:
+        "A done phase whose work is on its epic's branch, not merged into main yet (epic `epic-engine` I273):  the " +
+        "branch's name, `editor`.  Written by the epic tool on every edit, from git;  gone once the work lands.  " +
+        "Its row then shows `not on main` before its time pill."
+    },
+    {
       name: "source",
       kind: "string",
       description: "Its body's part file (`parts/p2.html`), loaded into its children when it opens."
@@ -180,6 +188,7 @@ export const epicPhaseVocabulary = {
   ],
   parts: [
     ...FOLD_PARTS,
+    { name: "unmerged", description: "A done phase's `not on main` pill, before its time pill, while `unmerged`." },
     {
       name: "status",
       description:
@@ -282,6 +291,16 @@ export const epicPhaseVocabulary = {
       key: "tookTip",
       text: "~{estimate}",
       description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
+    },
+    {
+      key: "unmerged",
+      text: "not on main",
+      description: "A done phase's pill while its work is on its epic's branch alone (`unmerged`, I273)."
+    },
+    {
+      key: "unmergedTip",
+      text: "Done on branch {branch}, not merged into main yet",
+      description: "That pill's tooltip."
     },
     {
       key: "spanTip",

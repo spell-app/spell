@@ -77,11 +77,75 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
     expect(labels(await game.typed("<button fluid\ncol"))).not.toContain("color")
   })
 
+  describe("a tag or an attribute chosen is written whole, the caret where you type next (epic `editor` I70)", () => {
+    /** What choosing `label` writes, typed as `line`:  its snippet, or its name alone;  and whether a list follows. */
+    async function chosen(project: typeof game, line: string, label: string) {
+      const item = (await project.typed(line)).find((it) => it.label === label)
+      if (!item) throw new TypeError(`chosen():  no \`${label}\` for \`${line}\``)
+      return { writes: item.insertText ?? item.label, isSnippet: item.insertTextFormat === 2, lists: !!item.command }
+    }
+
+    test('spell\'s own:  `<action "|"/>`, its actions listed at once;  `<divider/>`;  `<context-menu>` a line in', async () => {
+      expect(await chosen(game, "<act", "action")).toEqual({ writes: 'action "$1"/>', isSnippet: true, lists: true })
+      expect(await chosen(game, "<", "divider")).toMatchObject({ writes: "divider/>$0", lists: false })
+      expect(await chosen(game, "<chi", "children")).toMatchObject({ writes: "children/>$0" })
+      expect(await chosen(game, "<con", "context-menu")).toMatchObject({ writes: "context-menu>\n\t$0\n</>" })
+    })
+
+    test('Spell UI\'s, by what each holds:  `<icon |/>`, `<button>|</>`, `<tab "|">`, `<content>` a line in', async () => {
+      expect(await chosen(game, "<ic", "icon")).toEqual({ writes: "icon $0/>", isSnippet: true, lists: true })
+      expect(await chosen(game, "<inp", "input")).toMatchObject({ writes: "input $0/>" })
+      expect(await chosen(game, "<but", "button")).toMatchObject({ writes: "button>$0</>", lists: false })
+      expect(await chosen(game, "<ta", "tab")).toMatchObject({ writes: 'tab "$1">\n\t$0\n</>' })
+      expect(await chosen(game, "<cont", "content")).toMatchObject({ writes: "content>\n\t$0\n</>" })
+      expect(await chosen(game, "<tool", "toolbar")).toMatchObject({ writes: "toolbar>\n\t$0\n</>" })
+    })
+
+    test('...in Spanish, a Spanish file\'s names:  `<acción "|"/>`, `<boton>|</>`', async () => {
+      expect(await chosen(solitario, "<acc", "acción")).toMatchObject({ writes: 'acción "$1"/>', lists: true })
+      expect(await chosen(solitario, "<bot", "boton")).toMatchObject({ writes: "boton>$0</>" })
+    })
+
+    test("nothing doubled:  a tag already written on after the caret writes its name alone", async () => {
+      expect(await chosen(game, '<act| "cheat"/>', "action")).toEqual({
+        writes: "action",
+        isSnippet: false,
+        lists: false
+      })
+      expect(await chosen(game, "<but|>New</button>", "button")).toMatchObject({ writes: "button", isSnippet: false })
+      expect(await chosen(game, '<cont| class="x">', "content")).toMatchObject({ writes: "content" })
+      // the line's end, or another tag, after it:  written whole
+      expect(await chosen(game, "<but|</segment>", "button")).toMatchObject({ writes: "button>$0</>" })
+    })
+
+    test('an attribute:  `color="|"`, its words listed at once;  `fluid` by its name alone (Owen, on I55)', async () => {
+      expect(await chosen(game, "<segment col", "color")).toEqual({
+        writes: 'color="$1"',
+        isSnippet: true,
+        lists: true
+      })
+      expect(await chosen(game, "<button flu", "fluid")).toEqual({ writes: "fluid", isSnippet: false, lists: false })
+      expect(await chosen(game, "<button dis", "disabled")).toMatchObject({ writes: "disabled", isSnippet: false })
+      // any text:  its quotes, no list
+      expect(await chosen(game, "<button lab", "label")).toEqual({
+        writes: 'label="$1"',
+        isSnippet: true,
+        lists: false
+      })
+      // its `=` already there
+      expect(await chosen(game, '<segment col|="red">', "color")).toMatchObject({ writes: "color", isSnippet: false })
+      expect(await chosen(solitario, "<botón tam", "tamano")).toMatchObject({ writes: 'tamano="$1"', lists: true })
+    })
+  })
+
   test("nothing in a quoted value, or for a project's own view", async () => {
     expect(labels(await game.typed('<button label="a col'))).not.toContain("color")
     expect(await game.hovered("<square></square>", "square")).toBeNull()
   })
 })
+
+/** Where `projectIn().typed()`'s caret is, in a line that says. */
+const CARET = "|"
 
 /** Each completion's label. */
 function labels(items: CompletionItem[]): string[] {
@@ -96,7 +160,7 @@ function textOf(hover: Hover | null): string {
 /**
  * A temp copy of example `project`:
  * - `typed(line)`:  completions at the end of `line`, typed into `file` on a new line after the first holding `after`;
- *   a `line` of several (`\n`) ends on its last
+ *   a `line` of several (`\n`) ends on its last;  at its `|`, if it has one:  `<act|/>`
  * - `typedInAction(line)`:  the same, after the first line that sets a property (`set its turn to "X"`)
  * - `hovered(line, word)`:  the hover over `word` in `line`'s last line, typed there
  */
@@ -125,8 +189,11 @@ function projectIn(project: string, file: string, after: string) {
 
   return {
     async typed(line: string): Promise<CompletionItem[]> {
-      const written = await write(line)
-      const character = written.indent + written.last.length
+      // a `|` is the caret, what follows it written after it (epic `editor` I70);  else the line's end
+      const caret = line.lastIndexOf(CARET)
+      const written = await write(caret < 0 ? line : line.slice(0, caret) + line.slice(caret + 1))
+      const lastCaret = caret < 0 ? -1 : line.split("\n").at(-1)!.lastIndexOf(CARET)
+      const character = written.indent + (lastCaret < 0 ? written.last.length : lastCaret)
       return service.completion(written.file, { line: written.line, character }).items
     },
     async typedInAction(line: string): Promise<CompletionItem[]> {

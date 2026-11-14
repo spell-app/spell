@@ -31,6 +31,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `item`:  an item's four (`REVIEW_BUTTONS`), the note box's two (`NOTE_BUTTONS`)
  * - `issue`:  an issue's or a judgement call's (epic `epic-engine` I232):  Do this, Revisit, Approve (`ISSUE_BUTTONS`)
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
+ * - `todo-in-phase`:  a todo already in a phase (its `in P52` pill, epic `epic-engine` I271):  Revisit and the x
+ *   (`TODO_IN_PHASE_BUTTONS`);  the pill does what the plane would
  * - `part`:  a part of the plan -- an Overview sub-section, the summary:  no Approve (`PART_BUTTONS`)
  * - `phase`:  a phase, still to do (epic `epic-engine` I181):  Do this, Revisit (`PHASE_BUTTONS`);  its note box a part's
  * - `thread`:  a comment thread's, while it's Owen's turn (`<epic-thread>`, epic `epic-engine` P3):
@@ -57,6 +59,7 @@ export const REVIEW_KINDS = [
   "item",
   "issue",
   "todo",
+  "todo-in-phase",
   "part",
   "phase",
   "thread",
@@ -183,6 +186,13 @@ export const TODO_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
+ * A todo ALREADY IN A PHASE (its `in P52` pill;  epic `epic-engine` I271, Owen, 2026-11-14:  "If these items are
+ * already part of a phase, as indicated, you don't need the send icon"):  Revisit and the x, no plane.
+ * - the pill is its button instead:  a click goes to the phase, an ⌥-click starts it (`EpicItem`)
+ */
+export const TODO_IN_PHASE_BUTTONS: readonly ReviewButtonSpec[] = TODO_BUTTONS.filter((spec) => spec.action !== "next")
+
+/**
  * A part of the plan's review buttons -- an Overview sub-section's (decision Q14), a phase's, the summary's:
  * Make Todo, Revisit -- notes on the plan's parts, not sign-off, so no Approve.
  */
@@ -277,6 +287,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   item: REVIEW_BUTTONS,
   issue: ISSUE_BUTTONS,
   todo: TODO_BUTTONS,
+  "todo-in-phase": TODO_IN_PHASE_BUTTONS,
   part: PART_BUTTONS,
   phase: PHASE_BUTTONS,
   thread: [],
@@ -404,6 +415,12 @@ export const NOTE_BOX = "note-box"
 export const NOTE_TEXT = "note-text"
 export const NOTE_INPUT = "note-input"
 export const NOTE_SAVED = "note-saved"
+
+/**
+ * Every Saved floppy's class, the note box's and the comments' (`<epic-comment-pane>`, `<epic-thread>`):
+ * its fade 10 seconds after a save, from the shared sheet `SavedMark.css` (epic `epic-engine` I269).
+ */
+export const SAVED_MARK = "saved-mark"
 export const NOTE_FIELD = "note-field"
 export const NOTE_PICK = "note-pick"
 export const NOTE_TOOLS = "note-tools"

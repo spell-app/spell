@@ -21,6 +21,8 @@
  *     holder's other sets' changes (epic `epic-engine` I227), checked by `ReviewInbox.toMark()`
  *   - `id` must be an item, phase, Overview sub-section or the summary (`summary`) of that doc
  *     (400 otherwise:  `ReviewInbox.itemIds()`)
+ *   - a READ in "0. While you were out" (`away`, `away:<line>`, a Seen) is applied to the page at once
+ *     (`AwayReads.applyNow()`, epic `epic-engine` I268):  no Send, no session;  the answer is the inbox after it
  *   - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item only:
  *     `{ action: "test", result: "passed" | "failed" | "skip" | "notnow", note?, shot? }`
  * - `POST /api/epics/review/shot` `{ page, id, png }` -- Owen's screenshot of test `id` failing, pasted or dropped in
@@ -60,13 +62,14 @@
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  * - Loaded by the page server under `tsx` (`PageServer.loadRoutes()`), with `packages/server/tsconfig.json`'s aliases.
  *   Imports `ReviewInbox` (and `TestShots`, as light), never `PlanDoc`:  a request reads the doc's TEXT
- *   (`ReviewInbox.itemIds()`).
+ *   (`ReviewInbox.itemIds()`);  only a Read loads `AwayReads`, and `PlanDoc` with it, when one comes.
  * - From the docs tools' `reviewRoutes.ts` (epic `epic-components`, P7).
  */
 
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
+import { AWAY_ID } from "spell/epic/definitions/definitions.types"
 import { SAGA_PREFIX } from "spell/epic/review/review.types"
 
 import { InboxError, ReviewInbox, type PageInbox } from "./ReviewInbox"
@@ -114,7 +117,9 @@ const reviewRoutes: RouteModule = {
       const file = planDoc(web.files, body.page)
       const id = await itemOf(file, body.id)
       if (body.mark === undefined) throw new SRV.HttpError(400, "no mark (null removes one)")
-      reply.json(await update(file, (inbox) => inbox.setMark(id, body.mark)))
+      const inbox = await update(file, (each) => each.setMark(id, body.mark))
+      // a Read in "0. While you were out" takes effect now, with no Send (epic `epic-engine` I268)
+      reply.json(isRead(id, body.mark) ? await readNow(file, root, inbox) : inbox)
     })
     api.post("/now", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown; action?: unknown; note?: unknown }
@@ -189,6 +194,27 @@ export function planDoc(files: SRV.StaticHandler, page: unknown): string {
 function epicOf(file: string): string {
   const saga = SAGA_PAGE.exec(file)?.[1]
   return saga ? `${SAGA_PREFIX}${saga}` : PLAN_DOC.exec(file)![1]!
+}
+
+/** Is `mark` on `id` a Read in "0. While you were out":  a Seen on `away` or `away:<line>`? */
+function isRead(id: string, mark: unknown): boolean {
+  return (id === AWAY_ID || id.startsWith(`${AWAY_ID}:`)) && (mark as { action?: unknown } | null)?.action === "seen"
+}
+
+/**
+ * The Reads waiting in epic page `file`'s inbox applied to the page now (`AwayReads.applyNow()`);  the inbox after.
+ * - a failure is one line in the page server's log, and `inbox` as it was:  the Read waits for `epic inbox apply`
+ */
+async function readNow(file: string, root: string, inbox: PageInbox): Promise<PageInbox> {
+  try {
+    // loaded only now:  it brings `PlanDoc`, which no other review route needs
+    const { AwayReads } = await import("./AwayReads")
+    await AwayReads.applyNow(file, root)
+    return ReviewInbox.read(ReviewInbox.pathFor(file)).forPage()
+  } catch (error) {
+    console.error(`review:  a Read on ${file} waits for \`epic inbox apply\`:  ${(error as Error).message}`)
+    return inbox
+  }
 }
 
 /** Send:  every mark so far is sent;  whether anything was new to hand over (a Send with nothing new wakes nobody). */

@@ -616,8 +616,7 @@ export function liveClient(scrollKey: string): void {
    */
   function typing(): boolean {
     if (!edited) return false
-    let focused = document.activeElement
-    while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement
+    const focused = focusedElement()
     if (!(focused instanceof HTMLElement)) return false
     if (focused.isContentEditable || focused instanceof HTMLTextAreaElement) return true
     const notText = /^(button|checkbox|radio|range|reset|submit|color|file|image|hidden)$/
@@ -777,8 +776,12 @@ export function liveClient(scrollKey: string): void {
     const blob = await (await fetch(url)).blob()
     const data = new DataTransfer()
     data.items.add(new File([blob], `pasted.${blob.type.slice(6) || "png"}`, { type: blob.type || "image/png" }))
-    const target = document.activeElement ?? document.body
-    target.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
+    // the field itself, through shadow roots, and `composed`:  sent to the outermost host, a note box's own listener
+    // (inside `<epic-review>`'s shadow root) never heard it (epic `epic-engine` I272)
+    const target = focusedElement() ?? document.body
+    target.dispatchEvent(
+      new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true, composed: true })
+    )
   }
 
   /**
@@ -1040,8 +1043,7 @@ export function liveClient(scrollKey: string): void {
 
   /** What's selected:  in the focused field (through shadow roots:  `ui-textarea`'s own), else on the page. */
   function selectedText(): string {
-    let focused = document.activeElement
-    while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement
+    const focused = focusedElement()
     if (focused instanceof HTMLTextAreaElement || focused instanceof HTMLInputElement) {
       const { selectionStart: start, selectionEnd: end, value } = focused
       if (start !== null && end !== null && end > start) return value.slice(start, end)
@@ -1079,6 +1081,16 @@ export function liveClient(scrollKey: string): void {
       // storage blocked
     }
   }
+}
+
+/**
+ * The element that has the focus, through shadow roots:  `<ui-textarea>`'s own textarea, not the host around it.
+ * - `undefined` when nothing has it
+ */
+function focusedElement(): Element | undefined {
+  let focused = document.activeElement
+  while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement
+  return focused ?? undefined
 }
 
 /**
@@ -1419,7 +1431,7 @@ const SCROLL_KEY = "spell-server:scroll"
 
 /**
  * `liveClient` as a classic script, for `/api/server/live.js`:  the helpers it calls first
- * (`forVsCode()`, `liveAction()`, `servedPath()`, `worktreeHref()`, `reloadGate()`).
+ * (`forVsCode()`, `liveAction()`, `servedPath()`, `worktreeHref()`, `reloadGate()`, `focusedElement()`).
  * - HACK: `__name` is a no-op shim:  tsx / esbuild's `keepNames` wraps nested functions in `__name(fn, "fn")`,
  *   a helper that lives in the MODULE, not in the stringified function
  */
@@ -1432,6 +1444,7 @@ export function liveClientScript(): string {
     servedPath.toString(),
     worktreeHref.toString(),
     reloadGate.toString(),
+    focusedElement.toString(),
     `(${liveClient.toString()})(${JSON.stringify(SCROLL_KEY)})`,
     ""
   ].join("\n")
