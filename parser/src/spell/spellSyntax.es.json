@@ -5836,6 +5836,38 @@
           "aliases": ["statement"]
         },
         {
+          "className": "DrawIt",
+          "ruleNames": ["draw_it"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DrawIt.ts",
+          "line": 54,
+          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
+          "syntaxes": [
+            {
+              "syntax": "para {phrase:draw_method} :? {statement_body}?",
+              "example": "una \"pila\" es una lista visible de cosas\n\tpara dibujar su marcador\n\t\t<texto>🂠</texto>",
+              "outputs": {
+                "js": {
+                  "code": "export class Pila extends ViewableList {\n  static instanceType = Thing\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  drawItsPlaceholder() {\n    return h(\"texto\", { part: \"placeholder\" }, \"🂠\")\n  }\n}"
+                },
+                "ts": {
+                  "code": "export class Pila extends ViewableList<Thing> {\n  static instanceType = Thing\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  drawItsPlaceholder() {\n    return <texto part=\"placeholder\">🂠</texto>\n  }\n}\n\nexport class PilaElement extends SpellElement<Pila> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-pila\", \"pila\", [])\n\n  drawItsPlaceholder() {\n    return this.currentThing?.drawItsPlaceholder()\n  }\n}\ncore.useElement(Pila, PilaElement)"
+                },
+                "py": {
+                  "code": "class Pila(ViewableList):\n    item_type = Thing\n    element_tag = \"syntax-block-pila\"\n\n    def draw_its_placeholder(self) -> Element:\n        return h(\"texto\", {\"part\": \"placeholder\"}, \"🂠\")"
+                }
+              }
+            },
+            {
+              "syntax": "para {alias:text} :? ({inline_expression}|{nested_expression})?"
+            },
+            {
+              "syntax": "para dibujar su {slot:member_words} :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "DefineGroup",
           "ruleNames": ["define_group"],
           "internal": false,
@@ -6350,26 +6382,6 @@
           "aliases": ["statement"]
         },
         {
-          "className": "DrawIt",
-          "ruleNames": ["draw_it"],
-          "internal": false,
-          "file": "src/spell/rules/classes/DrawIt.ts",
-          "line": 52,
-          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
-          "syntaxes": [
-            {
-              "syntax": "para {alias:text} :? ({inline_expression}|{nested_expression})?"
-            },
-            {
-              "syntax": "para {phrase:draw_method} :? {statement_body}?"
-            },
-            {
-              "syntax": "para dibujar su {slot:member_words} :? {statement_body}?"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
           "className": "HasSlots",
           "ruleNames": ["has_slots"],
           "internal": false,
@@ -6394,7 +6406,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 28,
+          "line": 29,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {

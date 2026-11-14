@@ -23,6 +23,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - Only in a drawing (`DrawIt.drawingIn()`):  `to draw it`, `to draw each item`, a slot's own `to draw its front`,
  *   and a loop in one.
  * - In a slot's drawing, its element carries the slot's name as a CSS part (J6):  see `DrawIt.withPart()`.
+ *   - In a list's placeholder, `part="placeholder"` (`DrawIt.partOf()`).
  * - `return <...>` still works, as before.
  */
 export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
@@ -31,7 +32,7 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
   @proto static alias = "statement"
 
   /**
-   * Only in a drawing;  notes which slot's, if a slot's, for `getAST()`.
+   * Only in a drawing;  notes the part its markup carries, a slot's or a placeholder's, for `getAST()`.
    * - The tokens first (`test()`):  they turn down nearly every line at once,
    *   while `drawingIn()` asks the method around it for its signature.
    */
@@ -40,7 +41,8 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
     if (!match) return undefined
     const drawing = DrawIt.drawingIn(scope)
     if (!drawing) return undefined
-    if (drawing.slot) match.data.slot = drawing.slot
+    const part = DrawIt.partOf(drawing)
+    if (part) match.data.slot = part
     return match
   }
 

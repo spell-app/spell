@@ -1997,7 +1997,53 @@ classesEs.addRule(DrawIt, {
 
 // unquoted:  a method's body, which returns it -- `- para dibujar cada elemento:` + `devolver <div>...</div>`
 classesEs.addRule(DrawIt, {
-  syntax: "para {phrase:draw_method} :? {statement_body}?"
+  syntax: "para {phrase:draw_method} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: 'a placeholder\'s markup carries its part by itself, `part="placeholder"` (epic `language` P55)',
+          input: ['una "pila" es una lista visible de cosas', "\tpara dibujar su marcador", "\t\t<texto>🂠</texto>"],
+          js: [
+            "export class Pila extends ViewableList {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  drawItsPlaceholder() {",
+            '    return h("texto", { part: "placeholder" }, "🂠")',
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Pila extends ViewableList<Thing> {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  drawItsPlaceholder() {",
+            '    return <texto part="placeholder">🂠</texto>',
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pila>`:  a pila, drawn in its own element, e.g. by `draw the pila`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pila's properties;  its methods call its pila's.",
+            " * - What every view's element does, e.g. drawing its pila, is `SpellElement`'s.",
+            " */",
+            "export class PilaElement extends SpellElement<Pila> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pila", "pila", [])',
+            "",
+            "  drawItsPlaceholder() {",
+            "    return this.currentThing?.drawItsPlaceholder()",
+            "  }",
+            "}",
+            "core.useElement(Pila, PilaElement)"
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 // el dibujo propio de una ranura (épica `elemental-spell` P5):  `- para dibujar su frente:`, sus líneas lo dibujan
