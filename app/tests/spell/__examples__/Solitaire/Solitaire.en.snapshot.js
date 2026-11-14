@@ -14,7 +14,6 @@ export const words = {
       symbol: "symbol",
       shortName: "short name",
       picture: "picture",
-      lifted: "lifted",
       play: "play a card",
       putOnPile: "put a card on a pile",
       countThePointsForCardOnPile: "count the points for a card on a pile",
@@ -62,7 +61,7 @@ export const words = {
       { name: "Card Rank & Suit", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "suit", "color"] },
       { name: "Aliases", description: "Spell for identifying cards", members: ["isAFaceCard", "isANumberCard", "isTheRankOfSuit"] },
       { name: "Names", description: "identifying a card", members: ["name", "value", "symbol", "shortName"] },
-      { name: "Drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["picture", "lifted"] },
+      { name: "Drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["picture"] },
       { name: "Game Play", members: ["play", "putOnPile", "countThePointsForCardOnPile"] },
       { name: "A pile of cards", members: ["pile"] }
     ],

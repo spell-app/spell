@@ -18,7 +18,7 @@
     {
       "type": "Card",
       "superType": "TwoSidedView",
-      "defined": "/Card.spell:0-3196"
+      "defined": "/Card.spell:0-3091"
     },
     {
       "property": "rank",
@@ -162,13 +162,6 @@
       "defined": "/Card.spell:1501-2081"
     },
     {
-      "property": "lifted",
-      "of": "Card",
-      "group": "Drawing",
-      "datatype": "choice",
-      "defined": "/Card.spell:2162-2187"
-    },
-    {
       "syntax": "play {thisArg:expression}",
       "output": "play",
       "rule": "method_call",
@@ -224,7 +217,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitaire.spell:5648-5859"
+      "defined": "/Solitaire.spell:5581-5792"
     },
     {
       "syntax": "test card setup",
@@ -233,7 +226,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "card setup",
-      "defined": "/Card.spell:2305-3196"
+      "defined": "/Card.spell:2200-3091"
     },
     {
       "type": "Deck",
@@ -317,33 +310,33 @@
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6525-6807"
+      "defined": "/Solitaire.spell:6458-6740"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6809-6993"
+      "defined": "/Solitaire.spell:6742-6926"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6995-7491"
+      "defined": "/Solitaire.spell:6928-7424"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spell:7105-7130"
+      "defined": "/Solitaire.spell:7038-7063"
     },
     {
       "type": "Column",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:7493-7804"
+      "defined": "/Solitaire.spell:7426-7737"
     },
     {
       "type": "Solitaire",
       "superType": "App",
-      "defined": "/Solitaire.spell:406-6133"
+      "defined": "/Solitaire.spell:406-6066"
     },
     {
       "property": "deck",
@@ -537,9 +530,7 @@
       "group": "Game Play",
       "kind": "method",
       "name": "cheat",
-      "returns": "nothing",
-      "waits": true,
-      "defined": "/Solitaire.spell:5027-5645"
+      "defined": "/Solitaire.spell:5027-5578"
     },
     {
       "syntax": "test the moves",
@@ -548,7 +539,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spell:7806-9261"
+      "defined": "/Solitaire.spell:7739-9194"
     }
   ],
   "codeLines": [
@@ -564,50 +555,49 @@
     49,
     57,
     64,
-    73,
-    86,
-    96,
-    112,
-    141,
-    179,
-    184,
-    189,
-    196,
-    219,
-    224,
+    80,
+    90,
+    106,
+    135,
+    173,
+    178,
+    183,
+    190,
+    213,
+    218,
+    225,
     231,
     237,
-    243,
-    258,
-    294,
-    305,
-    329,
+    252,
+    288,
+    299,
+    323,
+    341,
     347,
-    353,
-    376,
-    395,
-    398,
-    408,
-    441,
-    445,
-    449,
-    453,
-    457,
-    461,
-    465,
-    469,
-    473,
-    477,
-    481,
-    485,
-    489,
-    493,
+    370,
+    389,
+    392,
+    402,
+    435,
+    439,
+    443,
+    447,
+    451,
+    455,
+    459,
+    463,
+    467,
+    471,
+    475,
+    479,
+    483,
+    487,
+    492,
     498,
-    504,
-    526,
-    537,
-    545,
-    580,
-    621
+    520,
+    531,
+    539,
+    574,
+    612
   ]
 }

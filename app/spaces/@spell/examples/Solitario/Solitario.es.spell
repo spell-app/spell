@@ -150,12 +150,9 @@ solitario es una aplicación
 		si pilas restantes está vacía devolver
 		poner la pila a una pila al azar de pilas restantes
 		poner la carta a una carta al azar de (las cartas en la pila donde la carta está boca abajo)
-		// por encima de las cartas de su alrededor, luego se voltea mientras pasa a los descartes
-		poner la levantada de la carta a sí
-		voltear la carta boca arriba
+		// volteada mientras se mueve:  se alza boca abajo sobre su columna, luego se voltea mientras pasa a los descartes
 		agregar la carta a los descartes
-		pausar 300 mseg
-		poner la levantada de la carta a no
+		voltear la carta boca arriba
 
 	para contar los puntos de una carta en una pila
 		// lo que suma el movimiento:  10 en una fundación, 5 desde los descartes, si no nada

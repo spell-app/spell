@@ -41,8 +41,6 @@ una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
 			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
 
-	// Por encima de las cartas y pilas de su alrededor mientras la trampa la mueve -- styles.css
-	su "levantada" es sí o no
 	para dibujar su frente
 		<texto color={su color}>{su imagen}</texto>
 	para dibujar su dorso

@@ -17,6 +17,11 @@ import { E } from "spell/ui/core"
  *   - it notes where its items are (`noteForLater()`)
  *   - it glides them once its children are drawn again (`glideNoted()`)
  *   - which may be later:  a program running elsewhere, e.g. in Python, moves them when its patch comes
+ * - A thing TURNED OVER as it moves (a card turned face up and put on the discards, in one step):
+ *   it rises over everything where it was, still showing the side it showed there, for a beat (`TURN_BEAT_MS`),
+ *   then turns as it glides, both in one motion (epic `editor` I100).
+ *   - Its side is its element's `direction` attribute, a two sided view's (`up`, `down`):
+ *     the one thing it reads of what an element draws.
  * - None with reduced motion:  the thing just lands.
  * - STATIC and page-wide on purpose:  every runtime copy on a page shares the page's elements.
  * - Knows nothing of core:  core hands it things, and its elements say what they draw.
@@ -71,6 +76,9 @@ export class Glides {
       const element = Glides.elements.get(thing)
       if (!element?.isConnected) continue
       Glides.startedAt.set(thing, element.getBoundingClientRect())
+      const side = element.getAttribute(SIDE_ATTRIBUTE)
+      if (side) Glides.sideAt.set(thing, side)
+      else Glides.sideAt.delete(thing)
       noted.push(thing)
     }
     return noted
@@ -85,17 +93,41 @@ export class Glides {
     const from = Glides.startedAt.get(thing)
     const element = Glides.elements.get(thing)
     if (!from || !element?.isConnected) return
+    const wasSide = Glides.sideAt.get(thing)
     Glides.startedAt.delete(thing)
+    Glides.sideAt.delete(thing)
     const to = element.getBoundingClientRect()
     const dx = from.left - to.left
     const dy = from.top - to.top
     if (!dx && !dy) return
+    const side = element.getAttribute(SIDE_ATTRIBUTE)
+    if (wasSide && side && side !== wasSide) return Glides.turnAndGlide(element, `${dx}px ${dy}px`, wasSide, side)
     element.animate(
       [
         { translate: `${dx}px ${dy}px`, zIndex: GLIDING_Z_INDEX },
         { translate: "0 0", zIndex: GLIDING_Z_INDEX }
       ],
       { duration: GLIDE_MS, easing: GLIDE_EASING }
+    )
+  }
+
+  /**
+   * `element` turned over as it moved:  raised where it was (`from`, a `translate`), showing `wasSide`, for a beat;
+   * then it turns to `side` as it glides home.
+   * - Its own turn (a two sided view's `transition` on `transform`) is cancelled:  this one turns it, in step with the glide.
+   */
+  private static turnAndGlide(element: HTMLElement, from: string, wasSide: string, side: string): void {
+    for (const animation of element.getAnimations()) {
+      if (animation instanceof CSSTransition && animation.transitionProperty === "transform") animation.cancel()
+    }
+    const beat = TURN_BEAT_MS / (TURN_BEAT_MS + TURN_MS)
+    element.animate(
+      [
+        { offset: 0, translate: from, transform: turnedTo(wasSide), zIndex: GLIDING_Z_INDEX },
+        { offset: beat, translate: from, transform: turnedTo(wasSide), zIndex: GLIDING_Z_INDEX, easing: TURN_EASING },
+        { offset: 1, translate: "0 0", transform: turnedTo(side), zIndex: GLIDING_Z_INDEX }
+      ],
+      { duration: TURN_BEAT_MS + TURN_MS }
     )
   }
 
@@ -109,6 +141,9 @@ export class Glides {
 
   /** Where each moving thing's element was, noted just before it moved;  gone once it has glided. */
   private static readonly startedAt = new WeakMap<object, DOMRect>()
+
+  /** The side each moving thing showed where it was (`SIDE_ATTRIBUTE`), if it has sides. */
+  private static readonly sideAt = new WeakMap<object, string>()
 }
 
 /** How long a slide takes, in milliseconds. */
@@ -122,3 +157,21 @@ const NOTE_KEPT_S = 3
 
 /** Above the board while it slides. */
 const GLIDING_Z_INDEX = 1000
+
+/** The attribute saying which side a two sided view shows:  `up` or `down`. */
+const SIDE_ATTRIBUTE = "direction"
+
+/** How long a thing turned over as it moves waits, raised where it was, before it turns and glides, in milliseconds. */
+const TURN_BEAT_MS = 150
+
+/** How long it then takes to turn and glide home, in milliseconds:  a two sided view's turn (`--spell-turn-time`). */
+const TURN_MS = 300
+
+/** How it turns and glides:  as a two sided view turns. */
+const TURN_EASING = "ease-in-out"
+
+/** A two sided view's `transform` showing `side`, as its own styles turn it (`TwoSidedView.css`). */
+function turnedTo(side: string): string {
+  const turn = side === "up" ? "0deg" : "180deg"
+  return `perspective(var(--spell-turn-perspective, 100em)) rotateY(${turn})`
+}

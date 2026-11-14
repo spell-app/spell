@@ -97,20 +97,11 @@ solitario-carta::part(back) {
   border-radius: 0.035em;
 }
 
-/* Moving:  the cheat's card is "levantada" over every card around it, and turns face up as it goes to the discards
-   (the game pauses 0.3s for it:  Solitario.es.spell) */
+/* Turning over and moving ease, as a card is turned and slid */
 [disposición] > * {
   transition:
     transform 0.3s ease-in-out,
     translate 0.3s ease-out;
-}
-[disposición] > [levantada] {
-  z-index: 5;
-}
-[disposición] > [levantada][direction="up"] {
-  @starting-style {
-    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   [disposición] > * {

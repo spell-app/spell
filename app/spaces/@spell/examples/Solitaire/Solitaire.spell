@@ -150,12 +150,9 @@ solitaire is an app
 		if remaining piles is empty return
 		set the pile to a random pile in remaining piles
 		set the card to a random card in (the cards in the pile where the card is face down)
-		// over every card around it, then turned face up as it moves onto the discards
-		set the lifted of the card to yes
-		turn the card face up
+		// turned up as it moves:  it rises over its column face down, then turns as it glides onto the discards
 		add the card to the discards
-		pause for 300 msec
-		set the lifted of the card to no
+		turn the card face up
 
 	to count the points for a card on a pile
 		// what the move scores:  10 on a foundation, 5 from the discards, else nothing

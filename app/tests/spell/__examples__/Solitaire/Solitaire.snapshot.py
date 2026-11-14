@@ -96,10 +96,6 @@ class Card(TwoSidedView):
             position(column),
         )
 
-    # Over every card and pile around it while the cheat moves it -- styles.css
-    # - its "lifted" is yes or no
-    lifted = prop(type="choice")
-
     def draw_front(self) -> Element:
         return h("ui-text", {"color": self.color, "part": "front"}, self.picture)
 
@@ -636,7 +632,7 @@ class Solitaire(App):
         if anything_changed:
             await self.auto_play()
 
-    async def cheat(self) -> None:
+    def cheat(self) -> Any:
         """Turn up a face-down card from a column, at random, onto the discards"""
         remaining_piles = core.filter(
             core.every_thing(Column),
@@ -646,12 +642,9 @@ class Solitaire(App):
             return
         pile = core.random_item_of(remaining_piles)
         card = pile.filter(lambda card: card.is_face_direction("down")).random_item()
-        # over every card around it, then turned face up as it moves onto the discards
-        card.lifted = True
-        card.turn_face_up()
+        # turned up as it moves:  it rises over its column face down, then turns as it glides onto the discards
         self.discards.append(card)
-        await core.pause_for(300, "msec")
-        card.lifted = False
+        return card.turn_face_up()
 
     async def on_score_change(self, event: ScoreChangeEvent) -> None:
         home = len(self.clubs) + len(self.diamonds)
@@ -874,20 +867,11 @@ solitaire-card::part(back) {
   border-radius: 0.035em;
 }
 
-/* Moving:  the cheat's card is "lifted" over every card around it, and turns face up as it goes to the discards
-   (the game pauses 0.3s for it:  Solitaire.spell) */
+/* Turning over and moving ease, as a card is turned and slid */
 [layout] > * {
   transition:
     transform 0.3s ease-in-out,
     translate 0.3s ease-out;
-}
-[layout] > [lifted] {
-  z-index: 5;
-}
-[layout] > [lifted][direction="up"] {
-  @starting-style {
-    transform: perspective(var(--spell-turn-perspective, 100em)) rotateY(180deg);
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   [layout] > * {
