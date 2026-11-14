@@ -47,10 +47,10 @@ import "./MenuBar.css"
  * ### `<BarMenu>`
  * One menu of the top bar:  its name, a button;  a click opens its items under it, a Spell UI popup.
  * - Its items (`children`):  `<Action menu>`s, dividers (`<ui-action kind="divider">`) and `<ui-submenu>`s.
- * - A SUB-MENU is Spell UI's `<ui-submenu menu>`:  a row whose fly-out opens beside it, on hover, a click, Enter or →.
- *   - Its fly-out is a menu of `flyouts`, named by id:  a `<FlyoutMenu>`.
- *   - Not the items written inside a `<ui-submenu>`:  it draws them in a menu of its own, which no sheet of the
- *     page reaches, its width fixed at a vertical menu's 15em, its ticks its row's menu's.
+ * - A SUB-MENU is Spell UI's `<ui-submenu label icon>`, its items written inside it:  a row whose fly-out opens
+ *   beside it, on hover, a click, Enter or →.
+ *   - The fly-out is as wide as its widest item, ticks what's on when an item is on or off, and takes the popup's
+ *     look (`MenuBar.css`, `ui-submenu::part(flyout)`).
  * - Choosing an action closes the menu, in a fly-out too;  so does a click elsewhere, or Esc (the popup's own).
  ****************/
 export function BarMenu(props: BarMenuProps): JSX.Element {
@@ -92,7 +92,6 @@ export function BarMenu(props: BarMenuProps): JSX.Element {
               {props.children}
             </ui-menu>
           )}
-          {props.flyouts?.()}
         </div>
       </ui-popup>
     </>
@@ -113,8 +112,6 @@ export type BarMenuProps = {
   ticks?: boolean
   /** Its items. */
   children?: JSX.Element
-  /** The fly-outs its `<ui-submenu menu>` rows open:  `<FlyoutMenu>`s, hidden until one opens. */
-  flyouts?: () => JSX.Element
   /**
    * What it opens, drawn whole in place of its items' menu (`children`):  menus of its own, as the Spell menu's.
    */
@@ -124,7 +121,7 @@ export type BarMenuProps = {
 /**
  * A click in a menu's panel:  an action chosen closes it.
  * - A `<ui-submenu>`'s row is no action:  it opens its fly-out, and the menu stays.
- * - A click on an action in a fly-out comes here too:  the fly-out is inside the panel.
+ * - A click on an action in a fly-out comes here too:  its items are written inside the sub-menu, in the panel.
  */
 function closeOnAction(event: MouseEvent, close: () => void) {
   const action = event
@@ -132,37 +129,6 @@ function closeOnAction(event: MouseEvent, close: () => void) {
     .find((target): target is Element => (target as Element).localName === ACTION_TAG) as Element | undefined
   if (!action || action.getAttribute("kind") === "divider" || action.hasAttribute("disabled")) return
   close()
-}
-
-/****************
- * ### `<FlyoutMenu>`
- * A `<BarMenu>`'s fly-out:  the menu a `<ui-submenu menu>` row names, shown beside the row while open.
- * - Hidden until then (`popover`);  `<ui-submenu>` frames and places it.
- * - In the menu's panel, so a click in it closes the menu as an item's does (`closeOnAction()`),
- *   and the page's sheet reaches it (`MenuBar.css`, `ui-menu.BarFlyout`).
- * - `ticks`:  its rows are on or off.
- ****************/
-function FlyoutMenu(props: {
-  id: string
-  name: string
-  ticks?: boolean
-  class?: string
-  children: JSX.Element
-}): JSX.Element {
-  return (
-    <ui-menu
-      id={props.id}
-      popover="manual"
-      direction="vertical"
-      size="small"
-      class={["BarFlyout", props.class]}
-      icon-column=""
-      ticks={props.ticks ? "" : undefined}
-      aria-label={props.name}
-    >
-      {props.children}
-    </ui-menu>
-  )
 }
 
 /** A line between groups of items. */
@@ -303,8 +269,10 @@ export function ProjectBarMenu(): JSX.Element {
           <ui-submenu
             label={appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
             icon={item.icon}
-            menu={THEME_FLYOUT}
-          />
+            class="ThemeSubmenu"
+          >
+            <ThemeItems />
+          </ui-submenu>
         )
       case "home":
         return <Actions.showProjectChooser {...titled(item)} />
@@ -324,15 +292,6 @@ export function ProjectBarMenu(): JSX.Element {
             <ui-icon name="dropdown" class="ProjectCaret" />
           </span>
         }
-        flyouts={() => (
-          <FlyoutMenu
-            id={THEME_FLYOUT}
-            name={appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}
-            class="ThemeFlyout"
-          >
-            <ThemeItems />
-          </FlyoutMenu>
-        )}
       >
         <SpellMenuRows items={menu()} itemFor={itemFor} />
       </BarMenu>
@@ -388,9 +347,6 @@ function fileMenuRows(props: { menu: SpellMenu }): () => JSX.Element {
   }
   return () => <SpellMenuRows items={props.menu.items} itemFor={itemFor} />
 }
-
-/** The id of the project menu's Theme ›'s fly-out. */
-const THEME_FLYOUT = "ThemeBarFlyout"
 
 /**
  * The project menu's Theme ›'s fly-out:  Spell UI's theme menu drawn in place (Light | Dark | Auto, the tint, every
@@ -565,8 +521,8 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
  * File · Edit · View · Run · Help folded into one ☰ menu, each a sub-menu, on a tablet's width (Owen, 2026-11-04,
  * epic `editor` I46):  so Run | Edit keeps its words in the bar's middle, and nothing runs over anything.
  * - The same rows as the bar's own menus, from the same Spell:  `AppBarMenus` hands them over.
- * - Each a `<ui-submenu menu>` row, its fly-out a `<FlyoutMenu>` (`Folded<Name>BarMenu`):
- *   File's and View's tick what's on, as the bar's own do.
+ * - Each a `<ui-submenu>` row, its rows written inside it:
+ *   File's and View's tick what's on, as the bar's own do (their rows say whether they're on or off).
  * - Shown only between the phone's width and the desktop's (`MenuBar.css`);  a phone runs only, as before.
  ****************/
 function FoldedBarMenus(props: {
@@ -591,23 +547,13 @@ function FoldedBarMenus(props: {
   })
   return (
     <span class="AppBarMenusFolded">
-      <BarMenu
-        id="FoldedBarMenu"
-        class="FoldedBarMenu"
-        label={<ui-icon name="bars" />}
-        name={appTexts.text("menuAll")}
-        flyouts={() => (
-          <For each={folded()}>
-            {(menu) => (
-              <FlyoutMenu id={foldedMenuId(menu.name)} name={menu.title} ticks={TICKED_MENUS.has(menu.name)}>
-                {menu.rows?.()}
-              </FlyoutMenu>
-            )}
-          </For>
-        )}
-      >
+      <BarMenu id="FoldedBarMenu" class="FoldedBarMenu" label={<ui-icon name="bars" />} name={appTexts.text("menuAll")}>
         <For each={folded()}>
-          {(menu) => <ui-submenu label={menu.title} icon={FOLDED_ICONS[menu.name]} menu={foldedMenuId(menu.name)} />}
+          {(menu) => (
+            <ui-submenu label={menu.title} icon={FOLDED_ICONS[menu.name]}>
+              {menu.rows?.()}
+            </ui-submenu>
+          )}
         </For>
       </BarMenu>
     </span>
@@ -616,11 +562,6 @@ function FoldedBarMenus(props: {
 
 /** A menu folded into the ☰ menu:  its name in the Spell, its title, its rows. */
 type FoldedMenu = { name: string; title: string; rows: (() => JSX.Element) | undefined }
-
-/** The id of a folded menu's fly-out, from its name in the Spell:  `editMenu` => `FoldedEditBarMenu`. */
-function foldedMenuId(name: string): string {
-  return `Folded${barMenuId(name)}`
-}
 
 /** Each folded menu's row's icon, by its name in the Spell. */
 const FOLDED_ICONS: Record<string, string> = {

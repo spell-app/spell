@@ -19,6 +19,52 @@ import submenuCSS from "./UISubmenu.css?inline"
  */
 const CHOOSING = "ui-choosing"
 
+/**
+ * The fly-out's box, while open:  a raised panel beside the row, its top level with the row's, on its other side
+ * when it doesn't fit, framing the menu inside (which draws no frame of its own:  `UIMenu.isInPopup`).
+ * - `position-anchor: auto`:  the row, its implicit anchor (`showPopover({ source })`).
+ * - Tokens, so a theme restyles it:  `--ui-popup-background` (else `--ui-surface`), `--ui-border-color`,
+ *   `--ui-menu-radius`, `--ui-shadow-raised`;  inside a popup, the popup's own background (it inherits its token).
+ * - As wide as what it holds (so it turns to the other side rather than squeezing), at most the window's width less
+ *   a margin;  at most its height, scrolling inside.
+ * - `--ui-menu-margin: 0`:  the menu inside sits flush in its frame.
+ * - The popover's own look (`inset`, `margin`, `padding`, `border`, `background`) is replaced, and a named menu
+ *   (`display: contents`, as every menu) gets a box.
+ * - Above the class:  `elementSetup`'s sheet (`FLYOUT_SHEET`) reads it while the class is defined.
+ */
+const FLYOUT_STYLE: Readonly<Record<string, string>> = {
+  display: "block",
+  position: "fixed",
+  "position-anchor": "auto",
+  "position-area": "inline-end span-block-end",
+  "position-try-fallbacks": "flip-inline, flip-block, flip-block flip-inline",
+  inset: "auto",
+  margin: "calc(-0.25em - var(--ui-border-width, 1px)) 0",
+  padding: "0.25em 0",
+  "box-sizing": "border-box",
+  width: "max-content",
+  "max-height": "100%",
+  "max-width": "calc(100vw - 1em)",
+  "overflow-y": "auto",
+  "overscroll-behavior": "contain",
+  color: "var(--ui-text-color)",
+  background: "var(--ui-popup-background, var(--ui-surface))",
+  border: "var(--ui-border-width) solid var(--ui-border-color)",
+  "border-radius": "var(--ui-menu-radius, var(--ui-radius))",
+  "box-shadow": "var(--ui-shadow-raised)",
+  "--ui-menu-margin": "0"
+}
+
+/**
+ * The box drawn round the items inside, while open:  `FLYOUT_STYLE`, as a rule of its own sheet, never inline.
+ * - So a page's `::part(flyout)` rules win over it (a page's rule beats a shadow root's own):
+ *   its background, blur, padding, min-width.
+ * - Above the class:  `elementSetup` reads it while the class is defined.
+ */
+const FLYOUT_SHEET = `@layer ui.components.submenu.types { .flyout:popover-open { ${Object.entries(FLYOUT_STYLE)
+  .map(([name, value]) => `${name}: ${value};`)
+  .join(" ")} } }`
+
 /****************
  * ### `<ui-submenu>`
  * The component behind `<ui-submenu>`:  a row of a menu that opens a FLY-OUT, another menu beside it.
@@ -62,7 +108,7 @@ export class UISubmenu extends UIItem {
   // its own names, and the item's it shares:  TypeScript only knows the item's literals
   @E.proto static vocabulary = submenuVocabulary as unknown as typeof itemVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { item: UIItem.elementSetup.styleSheets.item, submenu: submenuCSS },
+    styleSheets: { item: UIItem.elementSetup.styleSheets.item, submenu: submenuCSS, "submenu-flyout": FLYOUT_SHEET },
     // NOT a part, unlike an item:  the `<ui-menu>` it draws round its items stops climbing here,
     // so it's a menu of its own, not a sub-menu of the row's menu
     isAPart: false,
@@ -164,6 +210,16 @@ export class UISubmenu extends UIItem {
     return (this.domElement.getRootNode() as Document | ShadowRoot).getElementById?.(id) ?? undefined
   }
 
+  /**
+   * An item written inside it says whether it's on or off (`selected` or `active`, written, `"false"` too):
+   * its fly-out ticks what's on, in a menu of its own without `ticks` too (the ☰ menu's View ›).
+   * - Watches the items' attributes:  one ticked later gets its gutter then.
+   */
+  @E.watches({ childList: true, subtree: true, attributes: true })
+  get hasOnOrOffItems(): boolean {
+    return [...this.domElement.children].some((child) => UISubmenu.isOnOrOff(child))
+  }
+
   /** The box drawn round the items inside, while drawn. */
   private panel: HTMLElement | undefined
 
@@ -251,7 +307,8 @@ export class UISubmenu extends UIItem {
       E.afterSolidUpdate(() => this.close())
       return
     }
-    const unframe = UISubmenu.frame(box)
+    // the box drawn round the items inside is framed by its own sheet (`FLYOUT_SHEET`)
+    const unframe = this.namesAMenu ? UISubmenu.frame(box) : undefined
     const hide = this.flyout.follow(box, true, row)
     // `HTMLElement`'s event map, for `pointerover`
     const owner = this.ownerElement as HTMLElement | undefined
@@ -275,15 +332,44 @@ export class UISubmenu extends UIItem {
       rowWatch.disconnect()
       this.aim.stop()
       hide?.()
-      unframe()
+      unframe?.()
       if (owner && UISubmenu.openByOwner.get(owner) === this) UISubmenu.openByOwner.delete(owner)
     }
   }
 
-  /** Focus the fly-out's first item, once it can take it (a menu that just became a fly-out draws again first). */
+  /**
+   * Focus the fly-out's chosen item, else its first, once it can take it
+   * (a menu that just became a fly-out draws again first).
+   */
   private focusFlyout() {
-    if (this.flyoutMenu?.focusFirstItem()) return
-    E.beforeNextPaint(() => this.flyoutMenu?.focusFirstItem())
+    if (this.focusChosen()) return
+    E.beforeNextPaint(() => this.focusChosen())
+  }
+
+  /**
+   * Focus what the fly-out opens to;  true when something in it took focus:
+   * - its chosen item (`selected`, `active`), as a menu's tab stop is
+   * - else the first thing in it that takes focus:  an item, or rich content that knows its own chosen row --
+   *   a component with a `focusChosen()` (`<ui-theme-menu show="menu">`'s, which its host calls as it opens)
+   */
+  @E.untracked
+  private focusChosen(): boolean {
+    const menu = this.flyoutMenu
+    if (!menu) return false
+    if (menu.focusChosenItem()) return true
+    for (const child of this.flyoutChildren()) {
+      const component = (child as E.DOMElement).component as (object & { focusChosen?: () => void }) | undefined
+      if (component instanceof UIItem && component.kind === UIT.ITEM && !component.isDisabled) break
+      if (typeof component?.focusChosen !== "function") continue
+      component.focusChosen()
+      if (child.matches(":focus-within")) return true
+    }
+    return menu.focusFirstItem()
+  }
+
+  /** What its fly-out holds:  the named menu's children, else the items written inside it. */
+  private flyoutChildren(): Element[] {
+    return [...((this.namesAMenu ? this.namedMenu() : this.domElement)?.children ?? [])]
   }
 
   ////////////////
@@ -442,7 +528,11 @@ export class UISubmenu extends UIItem {
     )
   }
 
-  /** The box round the items inside, and the menu it draws them in, sized and ticked as the row's menu. */
+  /**
+   * The box round the items inside, and the menu it draws them in:  the row's menu's size and icon column;
+   * ticks when the row's menu has them, or an item inside is on or off (`hasOnOrOffItems`).
+   * - As wide as its widest item (`UISubmenu.css`), not a vertical menu's fixed width.
+   */
   private flyoutPanel(): JSX.Element {
     const menu = () => this.ownerMenu
     return (
@@ -456,7 +546,7 @@ export class UISubmenu extends UIItem {
           ref={(element: HTMLElement) => (this.innerMenu = element)}
           direction="vertical"
           size={menu()?.size}
-          ticks={menu()?.ticks ? "" : undefined}
+          ticks={menu()?.ticks || this.hasOnOrOffItems ? "" : undefined}
           icon-column={menu()?.iconColumn ? "" : undefined}
           aria-label={this.label}
         >
@@ -484,8 +574,21 @@ export class UISubmenu extends UIItem {
   }
 
   /**
-   * Frame and place `box` as a fly-out (`FLYOUT_STYLE`), inline;  returns what puts its own style back.
+   * `child` is an item that says whether it's on or off:  its `selected` or `active` written, true or false.
+   * - Its component's word (`UIItem.saysOnOrOff`, a translated tag's own names);
+   *   the English attributes before it has a component.
+   */
+  private static isOnOrOff(child: Element): boolean {
+    const component = (child as E.DOMElement).component
+    if (component instanceof UISubmenu) return false
+    if (component instanceof UIItem) return component.saysOnOrOff
+    return child.hasAttribute(UIT.SELECTED) || child.hasAttribute(UIT.ACTIVE)
+  }
+
+  /**
+   * Frame and place a NAMED menu as a fly-out (`FLYOUT_STYLE`), inline;  returns what puts its own style back.
    * - Inline, and only while open:  a named menu is the page's element, and no sheet of this one reaches it.
+   * - The box drawn round the items inside has the same rules in its sheet instead (`FLYOUT_SHEET`).
    * - STATIC:  needs no instance, only the box.
    */
   private static frame(box: HTMLElement): () => void {
@@ -533,33 +636,3 @@ const CHEVRON_ICON = "chevron right"
 const TITLE = "title"
 const CHEVRON = "chevron"
 const FLYOUT = "flyout"
-
-/**
- * The fly-out's box, while open:  a raised panel beside the row, its top level with the row's, on its other side
- * when it doesn't fit, framing the menu inside (which draws no frame of its own:  `UIMenu.isInPopup`).
- * - `position-anchor: auto`:  the row, its implicit anchor (`showPopover({ source })`).
- * - Tokens, so a theme restyles it:  `--ui-surface`, `--ui-border-color`, `--ui-menu-radius`, `--ui-shadow-raised`.
- * - `--ui-menu-margin: 0`:  the menu inside sits flush in its frame.
- * - The popover's own look (`inset`, `margin`, `padding`, `border`, `background`) is replaced, and a named menu
- *   (`display: contents`, as every menu) gets a box.
- */
-const FLYOUT_STYLE: Readonly<Record<string, string>> = {
-  display: "block",
-  position: "fixed",
-  "position-anchor": "auto",
-  "position-area": "inline-end span-block-end",
-  "position-try-fallbacks": "flip-inline, flip-block, flip-block flip-inline",
-  inset: "auto",
-  margin: "calc(-0.25em - var(--ui-border-width, 1px)) 0",
-  padding: "0.25em 0",
-  "box-sizing": "border-box",
-  "max-height": "100%",
-  "overflow-y": "auto",
-  "overscroll-behavior": "contain",
-  color: "var(--ui-text-color)",
-  background: "var(--ui-surface)",
-  border: "var(--ui-border-width) solid var(--ui-border-color)",
-  "border-radius": "var(--ui-menu-radius, var(--ui-radius))",
-  "box-shadow": "var(--ui-shadow-raised)",
-  "--ui-menu-margin": "0"
-}

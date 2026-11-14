@@ -262,6 +262,32 @@ describe("<ui-submenu> keyboard", () => {
     expect(deepActive()).toBe(rowOf(theme!))
   })
 
+  test("→ focuses its chosen item, when one is", async () => {
+    const { submenus } = await render(BOXES)
+    const view = submenus[2]!
+    view.querySelector("ui-item")!.removeAttribute("selected")
+    view.querySelectorAll("ui-item")[1]!.setAttribute("selected", "")
+    await ElementFixture.settle()
+    rowOf(view).focus()
+    await userEvent.keyboard("{ArrowRight}")
+    await ElementFixture.settle()
+    expect(deepActive()).toBe(rowOf(view.querySelectorAll("ui-item")[1]!))
+  })
+
+  test("→ hands focus to rich content that knows its chosen row (`focusChosen()`), before the items after it", async () => {
+    const { submenus } = await render(
+      NESTED.replace('<ui-item value="light">Light</ui-item>', '<div class="rich"><button>Chosen</button></div>')
+    )
+    const theme = submenus[0]!
+    const rich = theme.querySelector<HTMLElement>(".rich")!
+    const chosen = rich.querySelector("button")!
+    Object.assign(rich, { component: { focusChosen: () => chosen.focus() } })
+    rowOf(theme).focus()
+    await userEvent.keyboard("{ArrowRight}")
+    await ElementFixture.settle()
+    expect(document.activeElement).toBe(chosen)
+  })
+
   test("the pointer opening it leaves focus where it was", async () => {
     const { submenus } = await render()
     const [theme] = submenus
@@ -359,6 +385,129 @@ describe("<ui-submenu> closing", () => {
     expect(isShowing(flyoutOf(more!))).toBe(false)
     expect(isShowing(flyoutOf(panels!))).toBe(true)
     expect(deepActive()).toBe(rowOf(more!))
+  })
+})
+
+////////////////
+// ## The fly-out's box
+////////////////
+
+/** A menu with no ticks:  a fly-out of short items, one of long ones, one of on-or-off items, one of plain ones. */
+const BOXES = `
+  <ui-menu direction="vertical" aria-label="Menu" style="width: 220px">
+    <ui-submenu label="Short">
+      <ui-item>Light</ui-item>
+      <ui-item>Dark</ui-item>
+    </ui-submenu>
+    <ui-submenu label="Long">
+      <ui-item>A row far too long for a vertical menu's fifteen em</ui-item>
+    </ui-submenu>
+    <ui-submenu label="View">
+      <ui-item selected>Code</ui-item>
+      <ui-item selected="false">Line Numbers</ui-item>
+    </ui-submenu>
+    <ui-submenu label="Run">
+      <ui-item>Restart</ui-item>
+      <ui-item>Clear Console</ui-item>
+    </ui-submenu>
+  </ui-menu>`
+
+/** The menu a `<ui-submenu>` draws round the items inside. */
+function innerMenuOf(submenu: Element): HTMLElement {
+  return flyoutOf(submenu).querySelector<HTMLElement>("ui-menu")!
+}
+
+/** Open `submenu`'s fly-out by a click on its row. */
+async function openByClick(submenu: Element) {
+  await userEvent.click(rowOf(submenu))
+  await ElementFixture.settle()
+}
+
+describe("<ui-submenu> fly-out box", () => {
+  test("as wide as its widest item:  narrower than 15em for short ones, wider for a long one, never cut", async () => {
+    const { submenus } = await render(BOXES)
+    await Viewport.resize(1200)
+    const [short, long] = submenus
+    await openByClick(short!)
+    expect(flyoutOf(short!).getBoundingClientRect().width).toBeLessThan(15 * 16)
+    await openByClick(long!)
+    const box = flyoutOf(long!).getBoundingClientRect()
+    const item = rowOf(long!.querySelector("ui-item")!)
+    expect(box.width).toBeGreaterThan(15 * 16)
+    expect(item.scrollWidth).toBeLessThanOrEqual(item.clientWidth + 1)
+    expect(item.getBoundingClientRect().right).toBeLessThanOrEqual(box.right)
+  })
+
+  test("never wider than the window, nor taller:  it scrolls inside", async () => {
+    const many = Array.from({ length: 40 }, (_, index) => `<ui-item>Row ${index + 1}</ui-item>`).join("")
+    const { submenus } = await render(BOXES.replace("<ui-item>Light</ui-item>", many))
+    await Viewport.resize(800, 400)
+    await openByClick(submenus[0]!)
+    const flyout = flyoutOf(submenus[0]!)
+    const box = flyout.getBoundingClientRect()
+    // its negative margin lines its first item up with the row:  a few px over the top, by design
+    expect(box.top).toBeGreaterThanOrEqual(-8)
+    expect(box.bottom).toBeLessThanOrEqual(window.innerHeight + 1)
+    expect(flyout.scrollHeight).toBeGreaterThan(flyout.clientHeight)
+  })
+
+  test("a page styles it through ::part(flyout):  background, padding, min-width, blur", async () => {
+    const style = document.createElement("style")
+    style.textContent = `ui-submenu::part(flyout) {
+      background: rgb(1, 2, 3); padding: 7px; min-width: 300px; backdrop-filter: blur(4px);
+    }`
+    document.head.append(style)
+    onTestFinished(() => style.remove())
+    const { submenus } = await render(BOXES)
+    await Viewport.resize(1200)
+    await openByClick(submenus[0]!)
+    const flyout = flyoutOf(submenus[0]!)
+    const looks = getComputedStyle(flyout)
+    expect(looks.backgroundColor).toBe("rgb(1, 2, 3)")
+    expect(looks.paddingTop).toBe("7px")
+    expect(looks.backdropFilter).toBe("blur(4px)")
+    expect(flyout.getBoundingClientRect().width).toBeGreaterThanOrEqual(300)
+    // the menu inside fills it
+    const menuBox = innerMenuOf(submenus[0]!).shadowRoot!.querySelector("[part~=menu]")!
+    expect(menuBox.getBoundingClientRect().width).toBeGreaterThanOrEqual(300 - 2 * 7 - 2)
+  })
+
+  test("inside a popup:  the popup's background (`--ui-popup-background`)", async () => {
+    const { root, submenus } = await render(`<div style="--ui-popup-background: rgb(9, 8, 7)">${BOXES}</div>`)
+    expect(root.localName).toBe("div")
+    await openByClick(submenus[0]!)
+    expect(getComputedStyle(flyoutOf(submenus[0]!)).backgroundColor).toBe("rgb(9, 8, 7)")
+  })
+})
+
+describe("<ui-submenu> fly-out ticks", () => {
+  test("an item that says whether it's on or off ticks the fly-out, in a menu without ticks", async () => {
+    const { submenus } = await render(BOXES)
+    const [, , view, run] = submenus
+    await openByClick(view!)
+    expect(innerMenuOf(view!).hasAttribute("ticks")).toBe(true)
+    const [code, lines] = view!.querySelectorAll("ui-item")
+    expect(code!.matches(":state(in-ticks)")).toBe(true)
+    expect(lines!.matches(":state(in-ticks)")).toBe(true)
+    expect(rowOf(code!).getAttribute("aria-checked")).toBe("true")
+    expect(rowOf(lines!).getAttribute("aria-checked")).toBe("false")
+    // plain items:  no ticks
+    expect(innerMenuOf(run!).hasAttribute("ticks")).toBe(false)
+    expect(run!.querySelector("ui-item")!.matches(":state(in-ticks)")).toBe(false)
+  })
+
+  test("an item ticked later gives its fly-out ticks then", async () => {
+    const { submenus } = await render(BOXES)
+    const run = submenus[3]!
+    expect(innerMenuOf(run).hasAttribute("ticks")).toBe(false)
+    run.querySelector("ui-item")!.setAttribute("selected", "")
+    await ElementFixture.settle()
+    expect(innerMenuOf(run).hasAttribute("ticks")).toBe(true)
+  })
+
+  test("a menu with ticks still ticks every fly-out", async () => {
+    const { submenus } = await render(BOXES.replace('aria-label="Menu"', 'aria-label="Menu" ticks'))
+    expect(innerMenuOf(submenus[3]!).hasAttribute("ticks")).toBe(true)
   })
 })
 
