@@ -778,6 +778,8 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   and the rest, from [the language service](README-lsp.md#what-it-answers-request-by-request),
   called in the page itself.
   - That's why the language service must stay safe to run in a browser.
+- An error shows its message on a plain hover over its squiggle;  the rest of the hover waits for ⌥, as the
+  code pane's Settings… choose ([ErrorHover](src/app/ui/monaco/ErrorHover.ts)).
 - Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spell`,
   a view of its file:  the project's files stay the source of truth, and each edit re-parses as little as it can.
 - A rename saves every file it touched.

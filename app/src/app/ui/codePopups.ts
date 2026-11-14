@@ -9,12 +9,17 @@ import type { monaco } from "spell/app/app/ui/monaco"
  * - By default the suggestions show by themselves only where they help (epic `editor` P28, Owen's choice C):
  *   a tag after `<`, an attribute inside a tag, a property after `its` / `'s` / `of` (`SUGGEST_WHERE_IT_HELPS`).
  *   Everywhere else they wait for Ctrl+Space, as Quiet Code Popups (P4) chose;  hover waits for ⌥.
+ * - An error's message shows on a plain hover over its squiggle all the same, unless hover is "Always", when
+ *   Monaco's own shows it (`ErrorHover`, epic `editor` I97).
  * - Every Monaco editor starts on the defaults (`SpellMonaco.OPTIONS`), `<spell-editor>`'s too.
  * - The editor app lets people change them, in the code pane's "..." menu, "Settings…" (`CodeSettings`).
  * - Types only from Monaco:  the editor app reads this before Monaco loads, and Monaco is a lazy chunk.
  */
 
-/** When hover info shows, first the default:  only while ⌥ (Alt) is held, always, or never. */
+/**
+ * When hover info shows, first the default:  only while ⌥ (Alt) is held, always, or never.
+ * - Not an error's message:  that shows on a plain hover in every mode (`ErrorHover`).
+ */
 export const HOVER_MODES = ["withAlt", "always", "never"] as const
 /** When hover info shows:  one of `HOVER_MODES`. */
 export type HoverMode = (typeof HOVER_MODES)[number]

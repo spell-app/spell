@@ -65,3 +65,11 @@
 .monaco-editor .spell-heading {
   font-weight: bold;
 }
+
+/* An error's message on a plain hover over its squiggle (`ErrorHover`):  Monaco's hover look, a row per error. */
+.monaco-editor .ErrorHover {
+  max-width: min(480px, 90vw);
+  & .ErrorHoverRow + .ErrorHoverRow {
+    border-top: 1px solid var(--vscode-editorHoverWidget-border);
+  }
+}
