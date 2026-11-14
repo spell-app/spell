@@ -174,6 +174,18 @@ ui-submenu::part(chevron) {
   }
 }
 
+/* Home and New Example on one row, each over a column of projects, once the projects take columns (Owen, 2026-11-14, I78);
+   the line under them across the menu */
+ui-menu.SpellMenuHome.wide::part(menu) {
+  display: grid;
+  /* a column each, as wide as the projects' columns;  the rest of the menu's width after them, for the line to cross */
+  grid-template-columns: minmax(180px, max-content) minmax(180px, max-content) 1fr;
+}
+ui-menu.SpellMenuHome.wide > ui-action[kind="divider"],
+ui-menu.SpellMenuHome.wide > ui-action[kind="divider"]::part(item) {
+  grid-column: 1 / -1;
+}
+
 /* the group's projects (`<ProjectsMenu>`):  in columns of ten once there are more, longer past six columns */
 ui-menu.ProjectsSubMenu.many::part(menu) {
   display: grid;
