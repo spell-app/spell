@@ -1101,10 +1101,11 @@ export class EditorStore extends Observable {
   private readonly filesEditedFromSideBar = new Set<SP.AnySpellFile>()
 
   /**
-   * File › "Revert Changes to <file>" (⇧⌘R):  current `file`'s changes go, as one step ⌘Z undoes (Owen, epic `mockup`).
+   * File › "Revert Changes to <file>" (⇧⌘R):
+   * current `file`'s changes go, as one step ⌘Z undoes (Owen, epic `mockup`).
    * - AutoSave off:  back to what was last saved, your draft if you have one (`revertToSaved()`).
-   * - AutoSave on, where every edit is kept as it's made:  back to what's published, your draft gone
-   *   (`discardChanges()`).
+   * - AutoSave on, where every edit is kept as it's made:
+   *   back to what's published, your draft gone (`discardChanges()`).
    * - In the public preview, either way:  back to where it was when the project was opened.
    * - Nothing to revert in that mode (`canRevertChanges`):  nothing happens.
    * - NEVER throws:  a failure is shown.
@@ -1322,8 +1323,8 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * The project menu's "Delete Draft":  every file of your draft back to what's published, after asking
-   * (Owen, epic `mockup`).
+   * The project menu's "Delete Draft":  every file of your draft back to what's published,
+   * after asking (Owen, epic `mockup`).
    * - Edits not saved yet in those files go too.
    * - ONE step of `editor.history` (`history.transaction()`), so ⌘Z brings every file's changes back;
    *   with AutoSave on, they're kept as your draft again as they come back.
@@ -1957,7 +1958,7 @@ const waitingKeeps = new Map<SP.AnySpellFile, ReturnType<typeof setTimeout>>()
 // leaving the page keeps what's still waiting
 if (typeof window !== "undefined") window.addEventListener("pagehide", () => editor.keepWaitingEdits())
 
-/** Where each file started, for Discard Changes. */
+/** Where each file started, for Revert Changes in the public preview (`discardChanges()`). */
 const startingPoints = new StartingPoints()
 
 /** The preference that remembers a visitor has been told where their work is kept:  `editor.showKept()`. */

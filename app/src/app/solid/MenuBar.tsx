@@ -222,7 +222,8 @@ function rowsFor(count: number): number {
  * ### `<ProjectBarMenu>`
  * The top bar's second menu, the PROJECT's, after Spell's (`<SpellBarMenu>`):
  * the project's name, bold, a caret after it.
- * - Everything about the whole project, not the file open (Owen, epic `mockup`):  `AppMenus.spell`'s `project menu`,
+ * - Everything about the whole project, not the file open (Owen, epic `mockup`):
+ *   `AppMenus.spell`'s `project menu`:
  *   Rename Solitaire…, Delete Solitaire…, Duplicate Solitaire, Reset to Saved, ─, Publish, Versions, Delete Draft, ─,
  *   Project Settings, ─, Export…, Import…, ─, Theme:  Fruity ›, ─, Home.
  * - Delete Draft:  every file back to what's published, after asking;  greyed with no draft (`editor.deleteDraft()`).
@@ -305,8 +306,8 @@ export function ProjectBarMenu(): JSX.Element {
  * - What's about the file open (Owen, epic `mockup`):  New Spell File ⌥⌘N, New CSS File, ─, Save ⌘S, AutoSave, ─,
  *   Duplicate File, Revert Changes to Solitaire.spell ⇧⌘R.
  * - Save saves every file of the project with edits not saved (`editor.saveAll()`).
- * - Revert Changes:  with AutoSave off, back to what was last saved;  on, back to what's published
- *   (`editor.revertChanges()`).
+ * - Revert Changes (`editor.revertChanges()`):
+ *   with AutoSave off, back to what was last saved;  on, back to what's published.
  * - What each does is here:  `fileMenuRows()`, by the item's name.
  * - The static build's actions that need a server draw nothing, as everywhere (`HIDDEN_IN_STATIC_BUILD`).
  ****************/
@@ -669,9 +670,10 @@ export function SpellMenuRows(props: {
 /**
  * What every `<Action>` takes from its Spell item:  it's in a menu, with the key and icon the Spell names, if any.
  * - No key named:  the action's own, from `EDITOR_HOTKEYS`;  no icon named:  the action's own, if it has one.
- * - Greyed and ticked only where the Spell says when (`enabled-when`, `selected-when`):  those rows pass
- *   `disabled={!item.isEnabled}` or `active={item.isSelected}` themselves, so an action's own (Clear Console
- *   greyed while the console's empty, Save ticked while the file has changes) isn't overruled.
+ * - Greyed and ticked only where the Spell says when (`enabled-when`, `selected-when`):
+ *   those rows pass `disabled={!item.isEnabled}` or `active={item.isSelected}` themselves,
+ *   so an action's own isn't overruled (Clear Console greyed while the console's empty, Save ticked while the file
+ *   has changes).
  */
 export function itemState(item: SpellMenuAction): { menu: true; shortcut?: string; icon?: string } {
   return {

@@ -13,8 +13,8 @@ import { Disclosure } from "spell/element"
  *   - the anchor it hangs from:  a name of its own per element, written inline,
  *     on the anchor box (`anchorStyle`:  its `anchor-name`) and on the panel (`panelStyle`:  its `position-anchor`);
  *     so no control's sheet names an anchor, and the panel's place, size and look stay its sheet's
- *   - or, where no name can reach (the panel in another tree than its anchor:  a `<ui-submenu>`'s `menu`),
- *     the implicit anchor of `follow()`'s `source`, as `<ui-popup>`'s is
+ *   - or the implicit anchor of `follow()`'s `source`, as `<ui-popup>`'s is,
+ *     where no name can reach:  the panel in another tree than its anchor (a `<ui-submenu>`'s `menu`)
  * - What differs stays the component's:  which box, what opening resets (`onChange`), where focus goes,
  *   the panel's own place and size (its sheet).
  * - A component holds one as a field, and follows it in one `@onChange`:

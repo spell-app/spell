@@ -1,7 +1,8 @@
 /****************
  * ### `StartingPoints`
- * Each file's text as it was when its project was opened:  what "Discard Changes" goes back to in the public preview
- * (`editor.discardChanges()`);  elsewhere it deletes your draft (epic `editor` P24).
+ * Each file's text as it was when its project was opened:
+ * what Revert Changes goes back to in the public preview (`editor.discardChanges()`);
+ * elsewhere it deletes your draft (epic `editor` P24).
  * - With AutoSave on, what's saved is already the latest, so this is the only way back to before you started trying things.
  * - Kept for the open tab, in the browser, so a reload doesn't lose it:  opening another project starts afresh.
  * - Plain data:  no Solid, no editor.
