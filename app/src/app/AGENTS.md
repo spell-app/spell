@@ -149,7 +149,8 @@ and in the app's build folder, `app/` at the app folder's root.
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
-    - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59)
+    - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59);
+      Cmd+V and the right-click menu's Paste alike (I63)
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
       and closing tag, a body;  one undo
   - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,

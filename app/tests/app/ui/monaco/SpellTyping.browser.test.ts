@@ -1,0 +1,70 @@
+import { afterEach, beforeAll, describe, expect, test } from "vite-plus/test"
+
+import { monaco } from "spell/app/app/ui/monaco/monaco"
+import { SpellMonaco } from "spell/app/app/ui/monaco/SpellMonaco"
+
+/**
+ * `SpellTyping` and Spell's language settings on a real Monaco editor, in the browser (epic `editor` I63, I65):
+ * the right-click menu's Paste, and Enter after an opening tag.
+ * - A plain model of the `spell` language, no project:  only what's typed and pasted is checked.
+ */
+describe("typing Spell in a real Monaco editor", () => {
+  let editor: monaco.editor.IStandaloneCodeEditor | undefined
+
+  beforeAll(() => {
+    SpellMonaco.register()
+  })
+
+  afterEach(() => {
+    const model = editor?.getModel()
+    editor?.dispose()
+    model?.dispose()
+    editor = undefined
+  })
+
+  /** An editor of Spell holding `lines`, its caret at `line`, `column` (1-based). */
+  function editorOf(lines: string[], line: number, column: number) {
+    const host = document.createElement("div")
+    host.style.cssText = "width: 600px; height: 300px"
+    document.body.append(host)
+    const model = monaco.editor.createModel(lines.join("\n"), SpellMonaco.LANGUAGE)
+    model.updateOptions({ insertSpaces: false, tabSize: 4 })
+    editor = monaco.editor.create(host, { model, autoIndent: "full" })
+    editor.setPosition({ lineNumber: line, column })
+    return editor
+  }
+
+  describe("the right-click menu's Paste (I63)", () => {
+    /** As the menu's Paste does on the web:  it reads the clipboard, then asks the editor to paste it. */
+    const pasteFromMenu = (text: string) =>
+      editor!.trigger("keyboard", "paste", { text, pasteOnNewLine: false, multicursorText: null, mode: null })
+
+    test("takes the indent where it lands, as Cmd+V does", () => {
+      const code = editorOf([`a "card" is a view`, `\tits "name" is`, `\t\t`], 3, 3)
+      pasteFromMenu(`its rank\n\tit is high`)
+      expect(code.getValue()).toBe(
+        [`a "card" is a view`, `\tits "name" is`, `\t\tits rank`, `\t\t\tit is high`].join("\n")
+      )
+    })
+
+    test("a drawing's markup, as a tree", () => {
+      const code = editorOf([`\t\t`], 1, 3)
+      pasteFromMenu(`<content>\n<text>Hi</text>\n</content>`)
+      expect(code.getValue()).toBe([`\t\t<content>`, `\t\t\t<text>Hi</text>`, `\t\t</content>`].join("\n"))
+    })
+
+    test("one undo takes it all back", () => {
+      const code = editorOf([`\t`], 1, 2)
+      pasteFromMenu(`its rank\nits suit`)
+      expect(code.getValue()).toBe(`\tits rank\n\tits suit`)
+      code.trigger("keyboard", "undo", null)
+      expect(code.getValue()).toBe(`\t`)
+    })
+
+    test("a whole line copied is left to Monaco:  it pastes above, as copied", () => {
+      const code = editorOf([`\tits rank`], 1, 3)
+      code.trigger("keyboard", "paste", { text: `its suit\n`, pasteOnNewLine: true, multicursorText: null, mode: null })
+      expect(code.getValue()).toBe(`its suit\n\tits rank`)
+    })
+  })
+})

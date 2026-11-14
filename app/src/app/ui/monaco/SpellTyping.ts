@@ -24,7 +24,8 @@ import type { monaco } from "./monaco"
  *     (`a`, `an`);  in a type, a member's (`group`, `its`, `it`);  under a property, a choice's (`it`).
  *   - Typed as a `"` would be, so Monaco closes the pair itself:  a `"` typed after the name steps over the closing one.
  *   - Its own undo step:  one undo leaves `group ` again.
- * - A paste takes the indent where it lands (epic `editor` I53, I59):
+ * - A paste takes the indent where it lands (epic `editor` I53, I59, I63):
+ *   ⌘V or the right-click menu's Paste alike;
  *   its first line at the caret's indent, the rest kept where they were from it;
  *   a drawing's markup laid out as a tree instead, each tag's children one level under it.
  *   - One undo takes the whole paste back.
@@ -45,35 +46,52 @@ export class SpellTyping {
     editor.onKeyDown((event) => this.keyDown(event))
     // in the capture phase, before Monaco's own text area takes it;  on the container, there before a model is
     editor.getContainerDomNode().addEventListener("paste", (event) => this.pasting(event), { capture: true })
+    // the right-click menu's Paste reads the clipboard itself and asks the editor to paste it:  no paste event
+    // HACK: Monaco has no hook for a paste it's asked for, so this editor's `trigger()` is wrapped
+    const trigger = editor.trigger.bind(editor)
+    editor.trigger = (source, handlerId, payload) => {
+      const asked = handlerId === MONACO_PASTE && (payload as MonacoPaste | undefined)
+      if (asked && this.paste(asked.text, !!asked.pasteOnNewLine)) return
+      trigger(source, handlerId, payload)
+    }
   }
 
   ////////////////
   // ## A paste takes its indent
   ////////////////
 
-  /**
-   * Cmd / Ctrl+V:  write the clipboard's text re-indented to where it lands, as one edit, so one undo takes it back.
-   * - Left to Monaco:  several carets, a whole line copied (it pastes above), a one-line paste, or no change needed.
-   */
+  /** Cmd / Ctrl+V:  the browser's paste, re-indented by `paste()` unless it's left to Monaco. */
   private pasting(event: ClipboardEvent) {
+    const clipboard = event.clipboardData
+    const text = clipboard?.getData("text/plain")
+    if (!clipboard || !text || !this.paste(text, wasCopiedAsWholeLine(clipboard))) return
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  /**
+   * Write `text` re-indented to where it lands, as one edit, so one undo takes it back:
+   * every paste, Cmd / Ctrl+V's and the right-click menu's (epic `editor` I63).
+   * - Returns whether it did:  `false` leaves the paste to Monaco, as it was.
+   * - Left to Monaco:  several carets, a whole line copied (`isWholeLine`:  it pastes above),
+   *   a one-line paste, or no change needed.
+   */
+  private paste(text: string, isWholeLine: boolean): boolean {
     const { editor } = this
     const model = editor.getModel()
-    const text = event.clipboardData?.getData("text/plain")
     const selections = editor.getSelections() ?? []
-    if (!model || !text || selections.length !== 1 || editor.getRawOptions().readOnly) return
-    if (!this.languages.indents.includes(model.getLanguageId())) return
-    if (wasCopiedAsWholeLine(event.clipboardData!)) return
+    if (!model || !text || isWholeLine || selections.length !== 1 || editor.getRawOptions().readOnly) return false
+    if (!this.languages.indents.includes(model.getLanguageId())) return false
     const selection = selections[0]!
     const pasted = text.replace(/\r\n?/g, "\n").split("\n")
     const before = model.getLineContent(selection.startLineNumber).slice(0, selection.startColumn - 1)
     const lines = SpellTyping.pastedLines(pasted, before, indentSettingsOf(model))
-    if (lines.join("\n") === pasted.join("\n")) return
-    event.preventDefault()
-    event.stopPropagation()
+    if (lines.join("\n") === pasted.join("\n")) return false
     editor.pushUndoStop()
     editor.executeEdits(SPELL_TYPING, [{ range: selection, text: lines.join(model.getEOL()), forceMoveMarkers: true }])
     editor.pushUndoStop()
     editor.revealPosition(editor.getPosition()!)
+    return true
   }
 
   ////////////////
@@ -478,6 +496,12 @@ function wasCopiedAsWholeLine(clipboard: DataTransfer): boolean {
     return false
   }
 }
+
+/** Monaco's handler id for a paste it's asked for, `editor.trigger(source, "paste", ...)`:  its `Handler.Paste`. */
+const MONACO_PASTE = "paste"
+
+/** What Monaco's right-click Paste hands its `"paste"` handler. */
+type MonacoPaste = { text: string; pasteOnNewLine?: boolean }
 
 /** A model, with the colouring Monaco keeps for it but leaves out of its types. */
 type TokenizedModel = monaco.editor.ITextModel & { tokenization?: { forceTokenization?(line: number): void } }
