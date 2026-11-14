@@ -302,16 +302,6 @@
         "path": "./themes/spell-matrix-dark.json"
       },
       {
-        "label": "Spell Merlot Light",
-        "uiTheme": "vs",
-        "path": "./themes/spell-merlot-light.json"
-      },
-      {
-        "label": "Spell Merlot Dark",
-        "uiTheme": "vs-dark",
-        "path": "./themes/spell-merlot-dark.json"
-      },
-      {
         "label": "Spell Midnight Light",
         "uiTheme": "vs",
         "path": "./themes/spell-midnight-light.json"
