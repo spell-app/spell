@@ -99,16 +99,20 @@ export class SpellTyping {
   ////////////////
 
   /**
-   * Shift+Tab, or Backspace at the end of a line's indent:  when lines sit under that line, move them out with it,
-   * all as one edit.  A line with nothing under it is left to Monaco.
+   * Shift+Tab, Cmd / Ctrl+[, or Backspace at the end of a line's indent:  when lines sit under that line, move them out
+   * with it;  Cmd / Ctrl+] moves them in with it (Owen, 2026-11-14, I59).  All as one edit.
+   * - A line with nothing under it is left to Monaco.
    */
   private keyDown(event: monaco.IKeyboardEvent) {
     const { editor } = this
     const model = editor.getModel()
     const { browserEvent: key } = event
+    const isMod = (key.metaKey || key.ctrlKey) && !key.shiftKey && !key.altKey
     const isShiftTab = key.key === "Tab" && key.shiftKey && !key.metaKey && !key.ctrlKey && !key.altKey
     const isBackspace = key.key === "Backspace" && !key.shiftKey && !key.metaKey && !key.ctrlKey && !key.altKey
-    if (!model || !(isShiftTab || isBackspace) || editor.getRawOptions().readOnly) return
+    const isIn = isMod && key.key === "]"
+    const isOut = isShiftTab || isBackspace || (isMod && key.key === "[")
+    if (!model || !(isOut || isIn) || editor.getRawOptions().readOnly) return
     if (!this.languages.indents.includes(model.getLanguageId())) return
     const selections = editor.getSelections() ?? []
     const selection = selections[0]
@@ -116,18 +120,19 @@ export class SpellTyping {
     const line = selection.startLineNumber
     const text = model.getLineContent(line)
     const indent = indentOf(text)
-    if (!indent || !text.trim()) return
+    if ((isOut && !indent) || !text.trim()) return
     if (isBackspace && (!selection.isEmpty() || selection.startColumn !== indent.length + 1)) return
     const lines = model.getLinesContent()
     const under = SpellTyping.linesUnder(lines, line - 1)
     if (!under) return
     const settings = indentSettingsOf(model)
-    const out = widthOf(indent, settings.tabSize) - outdentWidth(indent, settings.tabSize)
+    // how far the lines move:  out to the level before, or in a level
+    const by = isIn ? settings.tabSize : -(widthOf(indent, settings.tabSize) - outdentWidth(indent, settings.tabSize))
     const edits = lines.slice(line - 1, line + under).flatMap((each, at) => {
       const its = indentOf(each)
       if (!each.trim()) return []
       const lineNumber = line + at
-      const width = Math.max(0, widthOf(its, settings.tabSize) - out)
+      const width = Math.max(0, widthOf(its, settings.tabSize) + by)
       const range = {
         startLineNumber: lineNumber,
         startColumn: 1,

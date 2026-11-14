@@ -309,8 +309,10 @@
     font-size: 13px;
   }
   /* no way to fold it:  the bar starts with what's in it, and its label is for screen readers (epic `editor` P2) */
+  /* its right end as far in as its first item's glyph is from the left:  an action icon there (⋯, ✕) isn't jammed against
+     the pane's edge (Owen, 2026-11-14, epic `editor` I71) */
   .ui.pane.section.panel:not(:has(> .title > .heading > button.toggle)) > .title {
-    padding-inline: var(--ui-panel-pane-bar-padding, 8px);
+    padding-inline: var(--ui-panel-pane-bar-padding, 8px 16px);
   }
   .ui.pane.section.panel:not(:has(> .title > .heading > button.toggle)) > .title > .heading {
     position: absolute;

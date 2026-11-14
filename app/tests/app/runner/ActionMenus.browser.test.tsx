@@ -3,7 +3,7 @@ import { flush } from "solid-js"
 import h from "@solidjs/h"
 
 import { core, App, View } from "spell/parser/core"
-import { installSpellElements } from "spell/app/app/runner/SpellElement"
+import { installSpellElements, SpellElement } from "spell/app/app/runner/SpellElement"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 
 import "spell/app/app/solid/cellsBridge"
@@ -181,6 +181,27 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
     // the card's turn, undone by name
     core.runAction(game.card, "turnOver", "click")
     expect(game.undoTitle).toBe("Undo Turn Card")
+  })
+
+  test("the editor's part menu finds the program's menu as Run does:  from a click's path, or from an element (I76)", async () => {
+    const { game, app, card } = await mountedGame()
+    const face = card.shadowRoot!.querySelector(".card")!
+    let path: EventTarget[] = []
+    face.addEventListener("contextmenu", (event) => (path = event.composedPath()), { once: true })
+    face.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, cancelable: true }))
+    ActionMenus.closeContextMenu()
+    const titles = (items: { kind: string; title?: string }[] | undefined) =>
+      items?.map((item) => (item.kind === "separator" ? "-" : item.title))
+    expect(titles(SpellElement.programMenuAt(path))).toEqual(["deal", "-", "Undo", "Redo"])
+    // a row of the Views tree has only the element:  its path, shadow roots and all
+    expect(titles(SpellElement.programMenuOf(face))).toEqual(["deal", "-", "Undo", "Redo"])
+    // each item runs through the core, as Run's does
+    SpellElement.programMenuOf(face)!
+      .find((item) => item.kind === "action")!
+      .run("click")
+    expect(game.card.faceUp).toBe(false)
+    // outside the card's menu:  none
+    expect(SpellElement.programMenuOf(app)).toBeUndefined()
   })
 
   test("a shortcut runs its action only while it's enabled;  the app's own undo takes ⌘Z", async () => {

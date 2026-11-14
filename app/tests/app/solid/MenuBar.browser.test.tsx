@@ -42,7 +42,8 @@ describe("<AppBarMenus>", () => {
     await waitForCondition(() => folded.every((row) => row.children.length > 0))
     // File and View tick what's on, as the bar's own do:  the Spell's menu written inside the row has `ticks`
     const ticks = (row: Element) =>
-      !!row.shadowRoot?.querySelector("[part~=flyout] > ui-menu[ticks]") || !!row.querySelector(":scope > ui-menu[ticks]")
+      !!row.shadowRoot?.querySelector("[part~=flyout] > ui-menu[ticks]") ||
+      !!row.querySelector(":scope > ui-menu[ticks]")
     await ElementFixture.settle(host)
     expect(folded.map((row) => [row.getAttribute("label"), ticks(row)])).toEqual([
       ["File", true],
@@ -105,7 +106,7 @@ describe("<AppBarMenus>", () => {
 })
 
 describe("<ProjectBarMenu>", () => {
-  test("everything about the whole project:  its name's actions, Publish, Versions and Delete Draft, its settings, Export and Import, its theme, Home", async () => {
+  test("everything about the whole project:  its name's actions, Publish, Versions and Delete Draft, its settings, Export and Import, its theme (Home is the Spell menu's)", async () => {
     const host = await mount(() => <ProjectBarMenu />)
     const found = () => host.querySelector("ui-popup[for=ProjectBarMenu] ui-menu.BarMenuItems")
     await waitForCondition(() => !!found()?.children.length)
@@ -130,9 +131,7 @@ describe("<ProjectBarMenu>", () => {
       expect.stringMatching(/^Export/),
       expect.stringMatching(/^Import/),
       "─",
-      expect.stringMatching(/^Theme/),
-      "─",
-      "Home"
+      expect.stringMatching(/^Theme/)
     ])
     // Theme ›:  Spell UI's theme menu in its menu mode, then Edit Theme…, written inside its row
     const theme = menu.querySelector("ui-submenu")!

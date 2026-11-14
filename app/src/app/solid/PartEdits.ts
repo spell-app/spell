@@ -2,6 +2,7 @@ import { setDebugGlobal } from "spell/util"
 import { Dragging } from "spell/util/Dragging"
 import { beforeNextPaint } from "spell/util/timing"
 
+import type { MenuItem } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SourceEdits, type ElementPlace, type TextSpan, type WrittenElement } from "spell/app/lsp/SourceEdits"
@@ -393,7 +394,7 @@ export class PartEdits {
       if (isRunningApp() || shiftKey) return
       event.preventDefault()
       event.stopPropagation()
-      PartEdits.openMenu(element, clientX, clientY)
+      PartEdits.openMenu(element, clientX, clientY, SpellElement.programMenuOf(element))
     })
   }
 
@@ -447,6 +448,7 @@ export class PartEdits {
    * Listen on `area`, in Edit, while it's the app's:  answers how to stop.
    * - A press on what's selected drags it, inspecting or not.
    * - A right click on a part selects it, if it isn't, and opens the part menu;  on the background, the app itself.
+   *   - The program's own right-click menu there, if it has one, comes first in it, as Run finds it (epic `editor` I76).
    *   The browser's own menu never shows there:  `preventDefault()` comes first, before any other work.
    * - In Run the program has every right click;  with Shift held, the browser does, for its Inspect Element.
    * - The Menu key and Shift+F10 open the menu on what's selected.
@@ -468,11 +470,12 @@ export class PartEdits {
       (event) => {
         if (isRunningApp() || event.shiftKey) return
         // first, before anything else:  the browser's own menu never shows over the app in Edit,
-        // nor the program's (`context-menu=`), even when there's no part to show ours for
+        // nor the program's on its own (`<context-menu>`):  its items go first in ours
         event.preventDefault()
         event.stopPropagation()
         const part = partAt(event) ?? Inspector.partsIn(area)[0]?.element
-        if (part) PartEdits.openMenu(part, event.clientX, event.clientY)
+        if (part)
+          PartEdits.openMenu(part, event.clientX, event.clientY, SpellElement.programMenuAt(event.composedPath()))
       },
       options
     )
@@ -485,15 +488,15 @@ export class PartEdits {
         if (!selected) return
         event.preventDefault()
         const { left, bottom } = boxOf(selected)
-        PartEdits.onMenu?.(left, bottom)
+        PartEdits.onMenu?.(left, bottom, SpellElement.programMenuOf(selected))
       },
       { signal: stop.signal }
     )
     return () => stop.abort()
   }
 
-  /** Told to open the part menu at a place:  `<PartMenu>`. */
-  static onMenu: ((x: number, y: number) => void) | undefined
+  /** Told to open the part menu at a place, the program's own right-click menu first if it has one:  `<PartMenu>`. */
+  static onMenu: ((x: number, y: number, programMenu?: readonly MenuItem[]) => void) | undefined
 
   /**
    * Open the part menu at (`x`, `y`) for `element`, selecting it if it isn't:  a right click on it, or on its row.
@@ -502,14 +505,16 @@ export class PartEdits {
    *   (a button's card starts a code editor for its `onClick`).
    * - Meanwhile the menu greys its items for `element` (`menuPart`),
    *   and a click on one selects it first (`selectMenuPart()`).
+   * - `programMenu`:  the program's own right-click menu there, as Run shows it (`SpellElement.programMenuAt()`),
+   *   shown first, then a thick line, then ours (epic `editor` I76).
    */
-  static openMenu(element: Element, x: number, y: number): void {
+  static openMenu(element: Element, x: number, y: number, programMenu?: readonly MenuItem[]): void {
     if (Inspector.isSelected(element)) PartEdits.menuPart = undefined
     else {
       PartEdits.menuPart = element
       beforeNextPaint(() => beforeNextPaint(() => PartEdits.selectMenuPart()))
     }
-    PartEdits.onMenu?.(x, y)
+    PartEdits.onMenu?.(x, y, programMenu)
   }
 
   /**

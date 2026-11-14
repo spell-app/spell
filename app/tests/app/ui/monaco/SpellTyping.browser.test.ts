@@ -68,6 +68,38 @@ describe("typing Spell in a real Monaco editor", () => {
     })
   })
 
+  describe("Cmd+[ and Cmd+] take the lines under a line along (I59)", () => {
+    /** Press `key` with Command on a Mac, Control elsewhere, in the editor's text area. */
+    const pressMod = (key: string) => {
+      const area = editor!.getDomNode()!.querySelector("textarea")!
+      area.focus()
+      const isMac = /Mac/.test(navigator.platform)
+      area.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key,
+          code: key === "[" ? "BracketLeft" : "BracketRight",
+          metaKey: isMac,
+          ctrlKey: !isMac,
+          bubbles: true,
+          cancelable: true
+        })
+      )
+    }
+    const block = [`\t\t<content>`, `\t\t\t<text>Hi</text>`, `\t\t</content>`]
+
+    test("Cmd+[ moves a tag out a level, its children and closing tag with it", () => {
+      const code = editorOf(block, 1, 3)
+      pressMod("[")
+      expect(code.getValue()).toBe([`\t<content>`, `\t\t<text>Hi</text>`, `\t</content>`].join("\n"))
+    })
+
+    test("Cmd+] moves them in a level", () => {
+      const code = editorOf(block, 1, 3)
+      pressMod("]")
+      expect(code.getValue()).toBe([`\t\t\t<content>`, `\t\t\t\t<text>Hi</text>`, `\t\t\t</content>`].join("\n"))
+    })
+  })
+
   describe("Enter after an opening tag (I65)", () => {
     const enter = () => editor!.trigger("keyboard", "type", { text: "\n" })
 
