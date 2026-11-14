@@ -38,38 +38,33 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
       const said = inWord.parse(scope, tokens.slice(inAt))
       if (!said) continue
       const lead = EachInStatement.contractedArticle(scope, said)
-      const match = this.matchAt(scope, tokens, { at, item, listAt: inAt + said.length, listRule, lead })
+      const reading = { at, item, itemTokens: item.tokens, listAt: inAt + said.length, listRule, lead }
+      const match = this.matchAt(scope, tokens, reading)
       if (match) return match
     }
     return undefined
   }
 
-  /** Our match, the list starting at `listAt` -- `undefined` unless the list and the statement around it read whole. */
-  private matchAt(
-    scope: P.Scope,
-    tokens: P.Token[],
-    {
-      at,
-      item,
-      listAt,
-      listRule,
-      lead
-    }: { at: number; item: P.Match; listAt: number; listRule: P.Rule; lead: P.Token[] }
-  ): P.Match | undefined {
+  /**
+   * Our match, the list starting at `listAt` -- `undefined` unless the list and the statement around it read whole.
+   * - The statement reads with `itemTokens` in place of the words from `at` to the list's end.
+   */
+  protected matchAt(scope: P.Scope, tokens: P.Token[], reading: EachReading): P.Match | undefined {
+    const { at, item, itemTokens, listAt } = reading
     for (let end = listAt + 1; end <= tokens.length; end++) {
-      const listTokens = [...lead, ...tokens.slice(listAt, end)]
-      const list = listRule.parse(scope, listTokens)
-      if (list?.length !== listTokens.length) continue
+      const list = this.readList(scope, tokens, reading, end)
+      if (!list) continue
       const match = new P.Match({ rule: this, matched: [...tokens], tokens: [...tokens], scope }) as P.MatchFor<this>
       match.addMatch(item, "item")
       match.addMatch(list, "list")
       const rest = tokens.slice(end)
-      const statementTokens = [...tokens.slice(0, at), ...item.tokens, ...rest]
+      const statementTokens = [...tokens.slice(0, at), ...itemTokens, ...rest]
       const statement = scope.parser?.parse(statementTokens, "statement", this.getNestedScopeForMatch(match))
       // read to the line's end:  by where it ends, as a match over tokens cut out of the line may count them its own way
       if (!statement || statement.end !== EachInStatement.endOf(statementTokens)) continue
       // a statement that takes a body is a loop's or a method's head line, `para cada carta en sus cartas`:  not ours
       if ((statement.rule as SpellStatement).bodySpec) continue
+      if (!this.takesStatement(match, statement)) continue
       match.addMatch(statement, "statement")
       // a second `each ... in` in the statement:  one loop a statement
       if (statement.is(EachInStatement)) {
@@ -80,8 +75,20 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
     return undefined
   }
 
+  /** The list, its words from `listAt` to `end`, read whole -- `undefined` if they aren't one. */
+  protected readList(scope: P.Scope, tokens: P.Token[], { listAt, listRule, lead }: EachReading, end: number) {
+    const listTokens = [...lead, ...tokens.slice(listAt, end)]
+    const list = listRule.parse(scope, listTokens)
+    return list?.length === listTokens.length ? list : undefined
+  }
+
+  /** Is `statement`, read with the item in it, one we run for each item?  Any statement is. */
+  protected takesStatement(_match: P.Match, _statement: P.Match): boolean {
+    return true
+  }
+
   /** Where the last of `tokens` that isn't whitespace ends, as `P.Match.end` counts. */
-  private static endOf(tokens: P.Token[]): number | undefined {
+  protected static endOf(tokens: P.Token[]): number | undefined {
     let end: number | undefined
     P.Tokenizer.forEachToken(tokens, (token) => {
       if (token instanceof P.LineToken || token instanceof P.BlockToken || token instanceof P.WhitespaceToken) return
@@ -94,7 +101,7 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
    * The article a contraction holds, as tokens to read the list with:  Spanish's `del mazo` is `de el mazo`,
    * so the list is `el mazo` (`SP.LanguageWords.contractions`) -- none for a word that's no contraction.
    */
-  private static contractedArticle(scope: P.Scope, said: P.Match): P.Token[] {
+  protected static contractedArticle(scope: P.Scope, said: P.Match): P.Token[] {
     const expanded = SP.Language.of(scope).words.contractions?.[said.inputText.trim()]
     const article = expanded?.split(" ").slice(1).join(" ")
     return (article && scope.parser?.tokenize(`${article} `)) || []
@@ -109,7 +116,7 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
     if (cached) return cached
     const { item, list } = match.groups
     const datatype = match.scope.getItemType(list.datatype)
-    const name = EachInStatement.itemName(item)
+    const name = this.itemName(match.scope, item)
     const variable = new P.ScopeVariable({ name, datatype, declaredBy: item })
     ;(match.data as ItemVariableData).itemVariable = variable
     const nested = new P.MethodScope({
@@ -124,7 +131,7 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
   }
 
   /** The item's variable:  its word, `card`, or a kind's words joined (`kind_name`). */
-  private static itemName(item: P.Match): string {
+  protected itemName(_scope: P.Scope, item: P.Match): string {
     return item.is(KindName) ? KindName.variableName(item) : `${item.value}`
   }
 
@@ -134,7 +141,7 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
     const { itemVariable: variable } = match.data as ItemVariableData
     const method = new P.ASTMethodDefinition(match, {
       inline: true,
-      args: [new P.ASTVariableExpression(item, { name: EachInStatement.itemName(item), variable })],
+      args: [new P.ASTVariableExpression(item, { name: this.itemName(match.scope, item), variable })],
       body: P.matchAST<MethodBody>(statement)
     })
     return new P.ASTCoreMethodInvocation(match, {
@@ -142,4 +149,20 @@ export class EachInStatement extends SpellStatement<"item|list|statement"> {
       args: [loopedList(match, P.matchAST(list)), method]
     })
   }
+}
+
+/** Where `EachInStatement` found its item and list, in a statement's tokens. */
+export type EachReading = {
+  /** Where the words the item stands in for start:  `each`, or `the` of `the cards in ...` */
+  at: number
+  /** The item's word, as said:  `card`, or `cards` */
+  item: P.Match
+  /** What the statement reads in place of those words:  `card` */
+  itemTokens: P.Token[]
+  /** Where the list's words start */
+  listAt: number
+  /** What reads them */
+  listRule: P.Rule
+  /** Words read before them, from a contraction:  Spanish's `del`, `el` */
+  lead: P.Token[]
 }

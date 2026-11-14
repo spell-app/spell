@@ -310,33 +310,33 @@
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6153-6439"
+      "defined": "/Solitaire.spell:6011-6297"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6441-6625"
+      "defined": "/Solitaire.spell:6299-6483"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6627-7123"
+      "defined": "/Solitaire.spell:6485-6981"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spell:6737-6762"
+      "defined": "/Solitaire.spell:6595-6620"
     },
     {
       "type": "Column",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:7125-7436"
+      "defined": "/Solitaire.spell:6983-7294"
     },
     {
       "type": "Solitaire",
       "superType": "App",
-      "defined": "/Solitaire.spell:0-5761"
+      "defined": "/Solitaire.spell:0-5619"
     },
     {
       "syntax": "draw {thisArg:expression}?",
@@ -524,7 +524,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spell:7438-8893"
+      "defined": "/Solitaire.spell:7296-8751"
     }
   ],
   "codeLines": [
@@ -582,6 +582,6 @@
     514,
     522,
     557,
-    594
+    592
   ]
 }

@@ -726,9 +726,7 @@ export class Solitaire extends App {
   }
 
   async onScoreChange(event: ScoreChangeEvent) {
-    let home = this.clubs.length + this.diamonds.length
-    home = home + this.hearts.length + this.spades.length
-    if (home === 52) {
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Foundation))) === 52) {
       await core.alert("You won!", "New game")
       await this.restartTheGame()
     }

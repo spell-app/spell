@@ -3129,7 +3129,7 @@
           "ruleNames": ["list_length"],
           "internal": false,
           "file": "src/spell/rules/lists/ListLength.ts",
-          "line": 20,
+          "line": 30,
           "purpose": "Return length of a list, e.g. `number of items in my-list` => `core.itemCountOf(myList)`.",
           "syntaxes": [
             {
@@ -3497,7 +3497,7 @@
           "ruleNames": ["list_filter"],
           "internal": false,
           "file": "src/spell/rules/lists/ListFilter.ts",
-          "line": 16,
+          "line": 25,
           "purpose": "List filter, e.g. `words in \"a word list\" where word starts with \"a\"`.",
           "syntaxes": [
             {
@@ -3596,7 +3596,7 @@
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
-              "syntax": "for each? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?",
+              "syntax": "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?",
               "example": "for each card in deck:",
               "outputs": {
                 "js": {
@@ -3611,7 +3611,7 @@
               }
             },
             {
-              "syntax": "for each? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
+              "syntax": "for (each|every)? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
               "example": "for each card rank in card ranks: print card rank",
               "outputs": {
                 "js": {
@@ -3638,6 +3638,21 @@
           "syntaxes": [
             {
               "syntax": "for each? {list:expression} :? {statement_body}?"
+            },
+            {
+              "syntax": "for {list:each_thing} :? {statement_body}?",
+              "example": "for each column: print it",
+              "outputs": {
+                "js": {
+                  "code": "core.map(core.everyThing(Column), (column) => core.console.log(column))"
+                },
+                "ts": {
+                  "code": "core.map(core.everyThing(Column), (column: Column) => core.console.log(column))"
+                },
+                "py": {
+                  "code": "for column in core.every_thing(Column):\n    core.console.log(column)"
+                }
+              }
             }
           ],
           "aliases": ["statement", "expression"]
@@ -4300,7 +4315,7 @@
           "purpose": "A statement run once for each item of a list, the list said in it -- `add each card in the deck to the stock` (epic `language` P55, Q59).",
           "syntaxes": [
             {
-              "syntax": "{statement} each {item:singular_identifier} in {list:expression}",
+              "syntax": "{statement} (each|every) {item:singular_identifier} in {list:expression}",
               "example": "add each card in deck to stock",
               "outputs": {
                 "js": {
@@ -4311,6 +4326,32 @@
                 },
                 "py": {
                   "code": "for card in deck:\n    core.append(stock, card)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PluralCallStatement",
+          "ruleNames": ["plural_call_statement"],
+          "internal": false,
+          "file": "src/spell/rules/lists/PluralCallStatement.ts",
+          "line": 25,
+          "purpose": "A thing's action, called on a list of those things, done to each in turn -- `turn the cards in the deck face down` (epic `language` T126).",
+          "syntaxes": [
+            {
+              "syntax": "{statement} the? {item:plural_identifier} (in|of) {list:expression}",
+              "example": "turn the cards in the deck face down",
+              "outputs": {
+                "js": {
+                  "code": "deck.forEach((card) => card.turnFaceDown())"
+                },
+                "ts": {
+                  "code": "deck.forEach((card) => card.turnFaceDown())"
+                },
+                "py": {
+                  "code": "for card in deck:\n    card.turn_face_down()"
                 }
               }
             }
@@ -6185,6 +6226,32 @@
                 },
                 "py": {
                   "code": "\"T1\""
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "EachThing",
+          "ruleNames": ["each_thing"],
+          "internal": false,
+          "file": "src/spell/rules/classes/EachThing.ts",
+          "line": 11,
+          "purpose": "`each column`, every thing of a type, as a loop's list -- `for each column` (epic `language` T128).",
+          "syntaxes": [
+            {
+              "syntax": "each {type:known_type}",
+              "example": "each column",
+              "outputs": {
+                "js": {
+                  "code": "core.everyThing(Column)"
+                },
+                "ts": {
+                  "code": "core.everyThing(Column)"
+                },
+                "py": {
+                  "code": "core.every_thing(Column)"
                 }
               }
             }
@@ -10118,7 +10185,7 @@
           "ruleNames": ["create_hook"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateHook.ts",
-          "line": 30,
+          "line": 34,
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {

@@ -590,9 +590,7 @@ export class Solitario extends App {
   }
 
   async onPuntuaciónChange(event) {
-    let colocadas = this.tréboles.length + this.diamantes.length
-    colocadas = colocadas + this.corazones.length + this.espadas.length
-    if (colocadas === 52) {
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Fundación))) === 52) {
       await core.alert("¡Ganaste!", "Juego nuevo")
       await this.reiniciarElJuego()
     }

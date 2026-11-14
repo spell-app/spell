@@ -151,9 +151,7 @@ solitaire is an app
 		return 0
 	
 	when the score changes
-		set home to the number of cards in the clubs + the number of cards in the diamonds
-		set home to home + the number of cards in the hearts + the number of cards in the spades
-		if home is 52
+		if the number of cards in the foundations is 52
 			alert "You won!" with "New game"
 			restart the game
 

@@ -160,6 +160,7 @@ describe("priority and precedence", () => {
         "page_size_is:  Priority.declaration",
         "picture_at:  Priority.declaration",
         "play_sound:  Priority.overridable",
+        "plural_call_statement:  Priority.overridable",
         "plus:  Precedence.sum",
         "possessive_ordinal:  Priority.specific",
         "possessive_property:  Priority.mostSpecific",

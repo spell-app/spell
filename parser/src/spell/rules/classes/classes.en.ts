@@ -33,6 +33,7 @@ import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
+import { EachThing } from "./EachThing"
 import { EveryThingWhere } from "./EveryThingWhere"
 import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
@@ -2901,6 +2902,20 @@ classes.addRule(EveryThing, {
         scope.compile(["a card is a thing", "a card has a suit as one of clubs, diamonds"].join("\n"), "block")
       },
       tests: [["every card suit", "Card.Suits"]]
+    }
+  ]
+})
+
+// a loop's list only:  `for each column` (epic `language` T128)
+classes.addRule(EachThing, {
+  syntax: "each {type:known_type}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a pile is a list of things", "a column is a pile"].join("\n"), "block")
+      },
+      // read only as a loop's list (`for each column`):  `each column` alone is no expression
+      tests: [["each column", "core.everyThing(Column)"]]
     }
   ]
 })
