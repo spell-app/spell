@@ -173,6 +173,12 @@ export class SpellMonaco {
       new ErrorHover(editor)
       new LinkClick(editor)
     })
+    // ⌘F finds with its replace row showing, as VS Code's ⌥⌘F:  ⌘R reloads the page here (epic `editor` I105);
+    // the same command as `EDITOR_HOTKEYS.find`'s, which this file can't import (Monaco loads lazily)
+    monaco.editor.addKeybindingRule({
+      keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF,
+      command: "editor.action.startFindReplaceAction"
+    })
     monaco.languages.register({
       id: LANGUAGE,
       extensions: [SP.SPELL_SUFFIX],
