@@ -211,5 +211,5 @@ function PublishDraft(): JSX.Element {
   )
 }
 
-/** The Publish action's icon, as `AppMenus.spell` gives it. */
+/** The Publish action's icon, as `SpellEditor.spell` gives it. */
 const PUBLISH_ICON = "paper plane outline"

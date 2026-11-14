@@ -4,12 +4,10 @@ import type { JSX } from "@solidjs/web"
 import { Dragging } from "spell/util/Dragging"
 
 import { editor } from "spell/app/app/editor"
-import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
-import fileTabs from "spell/app/spaces/@spell/editor/file-tabs/FileTabs.spell"
+import type { EditorSpell } from "spell/app/app/layout/layoutSpell"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { Actions } from "./Actions"
 import { CodeMoreMenu } from "./CodeOutput"
-import { SpellMenuRows, titled, type SpellMenuAction } from "./MenuBar"
+import { editorSpellWithActions } from "./MenuBar"
 import { fileIconFor } from "./chrome"
 import { trackProjectFiles } from "./FileDropdown"
 import { tracked } from "./tracked"
@@ -18,12 +16,15 @@ import "./FileTabs.css"
 
 /****************
  * ### `<FileTabs>`
- * Every file of the project as a tab over the code:  the tabs themselves are Spell, `FileTabs.spell`.
+ * Every file of the project as a tab over the code:  the tabs themselves are Spell, the `file tab bar` of
+ * `SpellEditor.spell` (epic `editor` P29).
  * This is the editor's side of them, which Spell can't reach yet (epic `editor`'s Backing In Spell):
  * - which files there are, and which is showing (`trackProjectFiles()`), kept in the bar's files as they change
  * - what showing one does:  `editor.showEditor()`
  * - the bar's ⋯ (`<CodeMoreMenu>`)
- * - what a tab's right-click menu's items do, and are called:  its items and their order are the Spell's `tab menu`
+ * - A tab's right-click menu is the Spell's too, a `<context-menu>` inside each tab:  Duplicate, Rename, Delete,
+ *   the app's actions, which the editor does (`editorSpellWithActions()`);  the page's right click on the bar finds it.
+ *   - The right click shows that file first, so its actions are about it.
  * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
  * - A tab dragged along the row moves its file there:  the project's file order, saved in its project file
  *   (`editor.moveFile()`;  Owen, epic `mockup`).
@@ -33,15 +34,15 @@ import "./FileTabs.css"
 export function FileTabs() {
   const state = trackProjectFiles()
   const drafted = tracked(() => editor.draftedFiles ?? [])
-  const [piece, setPiece] = createSignal<LayoutPiece>()
+  const [spell, setSpell] = createSignal<EditorSpell>()
   const [bar, setBar] = createSignal<FileTabBar>()
   let isGone = false
   onCleanup(() => (isGone = true))
-  void loadLayoutPiece(fileTabs, "file-tabs").then(
+  void editorSpellWithActions().then(
     (loaded) => {
       if (isGone) return
-      setPiece(() => loaded)
-      const made = new loaded.exports.FileTabBar() as FileTabBar
+      setSpell(() => loaded)
+      const made = loaded.editor.fileTabBar as unknown as FileTabBar
       made.more = { draw: () => <CodeMoreMenu /> }
       setBar(() => made)
     },
@@ -54,7 +55,7 @@ export function FileTabs() {
     ([it, { files, path }, drafts]) => {
       if (!it) return
       it.rememberAs = `file-tabs:${editor.project?.path ?? ""}`
-      const File = piece()!.exports.File as new () => TabFile
+      const File = spell()!.exports.File as new () => TabFile
       const known = new Map(it.files.getValues().map((file) => [file.path, file]))
       it.files.items = files.map((each) => {
         const file = known.get(each.path) ?? new File()
@@ -119,36 +120,19 @@ export function FileTabs() {
     })
   }
 
-  // a right click on a tab:  that file shown, and what can be done to it
-  const [menuAt, setMenuAt] = createSignal<{ x: number; y: number }>()
-  const openMenu = (event: MouseEvent) => {
+  // a right click on a tab:  that file shown, so the Spell's menu there (its `<context-menu>`) is about it
+  const showTabFile = (event: MouseEvent) => {
     const file = tabOf(event)?.file
-    if (!file) return
-    event.preventDefault()
-    editor.showEditor(file.path)
-    setMenuAt({ x: event.clientX, y: event.clientY })
+    if (file) editor.showEditor(file.path)
   }
   return (
-    <div class="FileTabs" onContextMenu={openMenu} onPointerDown={startDrag}>
-      {piece()?.draw(bar()) as JSX.Element}
-      <Show when={menuAt()}>
-        {(where) => (
-          <ui-popup
-            at={where()}
-            open-on="manual"
-            visible=""
-            class="BarMenuPopup FileTabMenu"
-            aria-label={appTexts.text("menuFile")}
-            on-ui-closing={() => setMenuAt(undefined)}
-          >
-            <div class="BarMenuPanel" onClick={() => setMenuAt(undefined)}>
-              <ui-menu direction="vertical" size="small" interactive="" icon-column="" class="BarMenuItems">
-                <SpellMenuRows items={tabMenu(piece()!, bar()!)} itemFor={tabMenuItem} />
-              </ui-menu>
-            </div>
-          </ui-popup>
-        )}
-      </Show>
+    <div class="FileTabs" onContextMenu={showTabFile} onPointerDown={startDrag}>
+      {(() => {
+        const loaded = spell()
+        if (!loaded) return null
+        loaded.useTitles(appTexts.titles)
+        return loaded.draw(bar()) as JSX.Element
+      })()}
     </div>
   )
 }
@@ -179,27 +163,7 @@ export function YourDraftNote() {
   )
 }
 
-/** The tab menu's items, `FileTabs.spell`'s `tab menu` on `bar`, their titles in the page's language. */
-function tabMenu(piece: LayoutPiece, bar: object) {
-  piece.useTitles(appTexts.titles)
-  return piece.menu(bar, "tab menu")
-}
-
-/** An item of a tab's right-click menu, by its name in `FileTabs.spell`:  its title the Spell's. */
-function tabMenuItem(item: SpellMenuAction): JSX.Element {
-  switch (item.name) {
-    case "duplicateFile":
-      return <Actions.duplicateFile {...titled(item)} />
-    case "renameFile":
-      return <Actions.renameFile {...titled(item)} />
-    case "deleteFile":
-      return <Actions.deleteFile {...titled(item)} />
-    default:
-      return null
-  }
-}
-
-/** A file in `FileTabs.spell`, as its compiled class has it. */
+/** A `file` of `SpellEditor.spell`, as its compiled class has it. */
 type TabFile = {
   path: string
   name: string
@@ -210,7 +174,7 @@ type TabFile = {
   show: () => void
 }
 
-/** The bar in `FileTabs.spell`, as its compiled class has it. */
+/** The `file tab bar` of `SpellEditor.spell`, as its compiled class has it. */
 type FileTabBar = {
   files: { items: TabFile[]; getValues: () => TabFile[] }
   more: { draw: () => JSX.Element }

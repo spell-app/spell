@@ -3,7 +3,8 @@ import type { monaco } from "./monaco"
 
 /****************
  * ### `SpellTyping`
- * Three helps as a person types Spell in a Monaco editor (epic `language` P50), so what they see is what they type.
+ * Five helps as a person types Spell in a Monaco editor (epic `language` P50;  epic `editor` P28), so what they see
+ * is what they type.
  * - The caret snaps into the body a blank line is drawn in:
  *   clicking or arrowing onto a blank line inside a body writes that body's indent (the next line's, as below),
  *   the caret after it, so it shows where typing goes (Owen, 2026-11-11:  tab stops).
@@ -23,6 +24,15 @@ import type { monaco } from "./monaco"
  *     (`a`, `an`);  in a type, a member's (`group`, `its`, `it`);  under a property, a choice's (`it`).
  *   - Typed as a `"` would be, so Monaco closes the pair itself:  a `"` typed after the name steps over the closing one.
  *   - Its own undo step:  one undo leaves `group ` again.
+ * - A paste takes the indent where it lands (epic `editor` I53, I59, I63):
+ *   ⌘V or the right-click menu's Paste alike;
+ *   its first line at the caret's indent, the rest kept where they were from it;
+ *   a drawing's markup laid out as a tree instead, each tag's children one level under it.
+ *   - One undo takes the whole paste back.
+ *   - At a line's very start, or a one-line paste:  as it was copied.
+ * - A line moved out a level takes the lines under it along (epic `editor` I59):
+ *   Shift+Tab, or Backspace at the end of its indent, on a tag moves its children and its closing tag;
+ *   on a type or a property, its body.  One undo for all of it.
  * - One per editor, made as each editor is (`SpellMonaco.register()`).
  * - Only Monaco's TYPE (`import type`):  its rules are plain functions of the lines, tested without an editor.
  ****************/
@@ -33,6 +43,104 @@ export class SpellTyping {
   ) {
     editor.onDidChangeModelContent((event) => this.typed(event))
     editor.onDidChangeCursorPosition((event) => this.moved(event))
+    editor.onKeyDown((event) => this.keyDown(event))
+    // in the capture phase, before Monaco's own text area takes it;  on the container, there before a model is
+    editor.getContainerDomNode().addEventListener("paste", (event) => this.pasting(event), { capture: true })
+    // the right-click menu's Paste reads the clipboard itself and asks the editor to paste it:  no paste event
+    // HACK: Monaco has no hook for a paste it's asked for, so this editor's `trigger()` is wrapped
+    const trigger = editor.trigger.bind(editor)
+    editor.trigger = (source, handlerId, payload) => {
+      const asked = handlerId === MONACO_PASTE && (payload as MonacoPaste | undefined)
+      if (asked && this.paste(asked.text, !!asked.pasteOnNewLine)) return
+      trigger(source, handlerId, payload)
+    }
+  }
+
+  ////////////////
+  // ## A paste takes its indent
+  ////////////////
+
+  /** Cmd / Ctrl+V:  the browser's paste, re-indented by `paste()` unless it's left to Monaco. */
+  private pasting(event: ClipboardEvent) {
+    const clipboard = event.clipboardData
+    const text = clipboard?.getData("text/plain")
+    if (!clipboard || !text || !this.paste(text, wasCopiedAsWholeLine(clipboard))) return
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  /**
+   * Write `text` re-indented to where it lands, as one edit, so one undo takes it back:
+   * every paste, Cmd / Ctrl+V's and the right-click menu's (epic `editor` I63).
+   * - Returns whether it did:  `false` leaves the paste to Monaco, as it was.
+   * - Left to Monaco:  several carets, a whole line copied (`isWholeLine`:  it pastes above),
+   *   a one-line paste, or no change needed.
+   */
+  private paste(text: string, isWholeLine: boolean): boolean {
+    const { editor } = this
+    const model = editor.getModel()
+    const selections = editor.getSelections() ?? []
+    if (!model || !text || isWholeLine || selections.length !== 1 || editor.getRawOptions().readOnly) return false
+    if (!this.languages.indents.includes(model.getLanguageId())) return false
+    const selection = selections[0]!
+    const pasted = text.replace(/\r\n?/g, "\n").split("\n")
+    const before = model.getLineContent(selection.startLineNumber).slice(0, selection.startColumn - 1)
+    const lines = SpellTyping.pastedLines(pasted, before, indentSettingsOf(model))
+    if (lines.join("\n") === pasted.join("\n")) return false
+    editor.pushUndoStop()
+    editor.executeEdits(SPELL_TYPING, [{ range: selection, text: lines.join(model.getEOL()), forceMoveMarkers: true }])
+    editor.pushUndoStop()
+    editor.revealPosition(editor.getPosition()!)
+    return true
+  }
+
+  ////////////////
+  // ## A line moved out takes what's under it
+  ////////////////
+
+  /**
+   * Shift+Tab, or Backspace at the end of a line's indent:  when lines sit under that line, move them out with it,
+   * all as one edit.  A line with nothing under it is left to Monaco.
+   */
+  private keyDown(event: monaco.IKeyboardEvent) {
+    const { editor } = this
+    const model = editor.getModel()
+    const { browserEvent: key } = event
+    const isShiftTab = key.key === "Tab" && key.shiftKey && !key.metaKey && !key.ctrlKey && !key.altKey
+    const isBackspace = key.key === "Backspace" && !key.shiftKey && !key.metaKey && !key.ctrlKey && !key.altKey
+    if (!model || !(isShiftTab || isBackspace) || editor.getRawOptions().readOnly) return
+    if (!this.languages.indents.includes(model.getLanguageId())) return
+    const selections = editor.getSelections() ?? []
+    const selection = selections[0]
+    if (selections.length !== 1 || !selection || selection.startLineNumber !== selection.endLineNumber) return
+    const line = selection.startLineNumber
+    const text = model.getLineContent(line)
+    const indent = indentOf(text)
+    if (!indent || !text.trim()) return
+    if (isBackspace && (!selection.isEmpty() || selection.startColumn !== indent.length + 1)) return
+    const lines = model.getLinesContent()
+    const under = SpellTyping.linesUnder(lines, line - 1)
+    if (!under) return
+    const settings = indentSettingsOf(model)
+    const out = widthOf(indent, settings.tabSize) - outdentWidth(indent, settings.tabSize)
+    const edits = lines.slice(line - 1, line + under).flatMap((each, at) => {
+      const its = indentOf(each)
+      if (!each.trim()) return []
+      const lineNumber = line + at
+      const width = Math.max(0, widthOf(its, settings.tabSize) - out)
+      const range = {
+        startLineNumber: lineNumber,
+        startColumn: 1,
+        endLineNumber: lineNumber,
+        endColumn: its.length + 1
+      }
+      return [{ range, text: indentOfWidth(width, settings) }]
+    })
+    event.preventDefault()
+    event.stopPropagation()
+    editor.pushUndoStop()
+    editor.executeEdits(SPELL_TYPING, edits)
+    editor.pushUndoStop()
   }
 
   ////////////////
@@ -228,6 +336,66 @@ export class SpellTyping {
     if (!parent.indent && words.types.includes(parentWord)) return words.members.includes(word)
     return words.properties.includes(parentWord) && words.choices.includes(word)
   }
+
+  /**
+   * `pasted`'s lines as they should land after `before`, the text before the caret on its line.
+   * - The indent they're laid out from:
+   *   - the caret's, when `before` is only an indent:  the first line's own indent goes
+   *   - the line's, when `before` has text:  the first line follows it as it was
+   *   - the first line's own, at the line's very start
+   * - A drawing's markup (its first line a tag):  each line one level under each tag still open above it,
+   *   a closing tag back at its tag's level.
+   * - Anything else:  each line keeps its indent from the first line, shifted with it.
+   * - One line, or none:  as it is.
+   */
+  static pastedLines(pasted: readonly string[], before: string, settings: IndentSettings): string[] {
+    if (pasted.length < 2) return [...pasted]
+    const { tabSize } = settings
+    const first = pasted[0]!
+    const isIndent = !!before && !before.trim()
+    const base = isIndent ? widthOf(before, tabSize) : widthOf(indentOf(before || first), tabSize)
+    const firstLine = isIndent ? first.trimStart() : first
+    const isMarkup = /^\s*</.test(pasted.find((line) => line.trim()) ?? "")
+    if (isMarkup) {
+      let depth = tagDepthChange(first)
+      const rest = pasted.slice(1).map((line) => {
+        const trimmed = line.trim()
+        if (!trimmed) return ""
+        const level = Math.max(0, trimmed.startsWith("</") ? depth - 1 : depth)
+        depth = Math.max(0, depth + tagDepthChange(trimmed))
+        return indentOfWidth(base + level * tabSize, settings) + trimmed
+      })
+      return [firstLine, ...rest]
+    }
+    const from = widthOf(indentOf(first), tabSize)
+    const rest = pasted.slice(1).map((line) => {
+      if (!line.trim()) return ""
+      const width = Math.max(0, base + widthOf(indentOf(line), tabSize) - from)
+      return indentOfWidth(width, settings) + line.trimStart()
+    })
+    return [firstLine, ...rest]
+  }
+
+  /**
+   * How many lines after `lines[index]` sit under it, and so move with it:
+   * the ones indented further (blank lines among them, not after them), then its closing tag if it opens one.
+   */
+  static linesUnder(lines: readonly string[], index: number): number {
+    const text = lines[index] ?? ""
+    const indent = indentOf(text).length
+    let under = 0
+    for (let at = index + 1; at < lines.length; at++) {
+      const line = lines[at]!
+      if (!line.trim()) continue
+      if (indentOf(line).length <= indent) {
+        const closes = indentOf(line) === indentOf(text) && line.trim().startsWith("</") && tagDepthChange(text) > 0
+        if (closes) under = at - index
+        break
+      }
+      under = at - index
+    }
+    return under
+  }
 }
 
 ////////////////
@@ -266,6 +434,74 @@ export const QUOTED_NAME_WORDS: Record<string, QuotedNameWords> = {
   en: { types: ["a", "an"], members: ["group", "its", "it"], properties: ["its"], choices: ["it"] },
   es: { types: ["un", "una"], members: ["grupo", "su", "sus"], properties: ["su", "sus"], choices: [] }
 }
+
+/** How a file indents:  tabs or spaces, and how wide a tab or a level is. */
+export type IndentSettings = {
+  /** Spaces for a level, not a tab. */
+  insertSpaces: boolean
+  /** Columns a tab, and a level, takes. */
+  tabSize: number
+}
+
+/** The tags HTML never closes:  no children under them. */
+const VOID_TAGS = /^(area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)$/i
+
+/** One tag on a line:  `<x ...>`, `<x/>`, `</x>`, `</>`, `<>`;  its slash before the name, its name, its slash at the end. */
+const TAG = /<(\/?)([A-Za-z][\w.:-]*)?(?:\s(?:[^>"']|"[^"]*"|'[^']*')*?)?(\/?)>/g
+
+/** How many tags `line` leaves open:  each opened adds one, each closed takes one;  `<x/>` and `<br>` neither. */
+function tagDepthChange(line: string): number {
+  let change = 0
+  for (const [, closing, name = "", selfClosing] of line.matchAll(TAG)) {
+    if (closing) change--
+    else if (!selfClosing && !VOID_TAGS.test(name)) change++
+  }
+  return change
+}
+
+/** How wide `indent` is, a tab `tabSize` columns. */
+function widthOf(indent: string, tabSize: number): number {
+  let width = 0
+  for (const char of indent) width = char === "\t" ? (Math.floor(width / tabSize) + 1) * tabSize : width + 1
+  return width
+}
+
+/** How wide one level out takes off `indent`:  back to the tab stop before its end. */
+function outdentWidth(indent: string, tabSize: number): number {
+  const width = widthOf(indent, tabSize)
+  return width % tabSize ? width - (width % tabSize) : Math.max(0, width - tabSize)
+}
+
+/** An indent `width` columns wide, in the file's tabs or spaces. */
+function indentOfWidth(width: number, { insertSpaces, tabSize }: IndentSettings): string {
+  if (insertSpaces) return " ".repeat(width)
+  return "\t".repeat(Math.floor(width / tabSize)) + " ".repeat(width % tabSize)
+}
+
+/** `model`'s indent settings. */
+function indentSettingsOf(model: monaco.editor.ITextModel): IndentSettings {
+  const { insertSpaces, tabSize } = model.getOptions()
+  return { insertSpaces, tabSize }
+}
+
+/**
+ * Did the clipboard come from a copy with nothing selected, a whole line (Monaco's own note on it)?
+ * - Monaco pastes that above the caret's line:  left to it.
+ */
+function wasCopiedAsWholeLine(clipboard: DataTransfer): boolean {
+  try {
+    const data = JSON.parse(clipboard.getData("vscode-editor-data") || "{}") as { isFromEmptySelection?: boolean }
+    return !!data.isFromEmptySelection
+  } catch {
+    return false
+  }
+}
+
+/** Monaco's handler id for a paste it's asked for, `editor.trigger(source, "paste", ...)`:  its `Handler.Paste`. */
+const MONACO_PASTE = "paste"
+
+/** What Monaco's right-click Paste hands its `"paste"` handler. */
+type MonacoPaste = { text: string; pasteOnNewLine?: boolean }
 
 /** A model, with the colouring Monaco keeps for it but leaves out of its types. */
 type TokenizedModel = monaco.editor.ITextModel & { tokenization?: { forceTokenization?(line: number): void } }

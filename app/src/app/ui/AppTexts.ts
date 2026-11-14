@@ -37,7 +37,7 @@ export class AppTexts extends Observable {
   /**
    * Every English text with no fill-in, and the same text in the page's language:  `{ Save: "Guardar" }`.
    * - What the editor's own Spell titles are looked up by (`core.useTitles()`):  its menus, written in English
-   *   (`AppMenus.spell`), show in the page's language.
+   *   (`SpellEditor.spell`), show in the page's language.
    * - Reactive, as `text()` is.
    */
   get titles(): Record<string, string> {

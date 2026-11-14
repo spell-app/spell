@@ -177,11 +177,15 @@ export type RunAppOptions = RunCompiledOptions & {
 
 /**
  * Import compiled spell `compiled` as a module on this copy of the runtime, known to compiled spell as `coreUrl`:
- * what the editor runs its own layout pieces with (`layoutSpell.ts`).
- * - Not a program's run:  nothing's reset or mounted, and it stays until the page goes.
+ * what the editor runs its own Spell with (`layoutSpell.ts`).
+ * - Not a program's run:  nothing's mounted, and it stays until the page goes.
+ * - SIDE EFFECT:  resets this copy's runtime first, so its app is the copy's running app (`core.RUNTIME.app`):
+ *   an action in any of its views is found up the chain, as a card finds its game's (epic `editor` P29).
+ *   So it's imported once per copy.
  * - throws if it doesn't load
  */
 export async function importCompiled(compiled: string, coreUrl: string): Promise<Record<string, unknown>> {
+  core.resetRuntime()
   const url = URL.createObjectURL(new Blob([linkModule(compiled, coreUrl)], { type: "text/javascript" }))
   // an app in it never starts by itself:  whoever imports it draws what it holds
   core.isCarryingOver = true

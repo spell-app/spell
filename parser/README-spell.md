@@ -467,6 +467,8 @@ Its first line is how you call it, with each blank's type in brackets:
       icon).
       In Spanish, `<acción "deshacer" solo-icono/>` takes Spell UI's Spanish names, as a Spanish `ui-*` tag does.
       The editor offers the action's names inside its quotes.
+    - Inside a `<menu>`, an action is one of its rows instead, greyed and ticked as the action says, and a
+      `<divider/>` a line between groups:  `<menu><action "deal"/><divider/><action "undo"/></menu>`.
     - A right click's menu can be written in the element it belongs to, its actions and dividers inside:
 
       ```spell

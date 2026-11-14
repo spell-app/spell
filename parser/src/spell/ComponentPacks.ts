@@ -84,6 +84,19 @@ export class ComponentPacks {
     return undefined
   }
 
+  /**
+   * What the components of the first of `packNames` that can say are, written in `language`:
+   * for an editor's completions and hovers on a drawing's tags (epic `editor` P28).
+   * - `undefined` while none can say yet:  a pack may load its help as it's first asked (`ComponentPack.help()`).
+   */
+  static help(language: string, packNames: readonly string[] = this.DEFAULT): ComponentHelp | undefined {
+    for (const name of packNames) {
+      const help = this.packs.get(name)?.help?.(language)
+      if (help) return help
+    }
+    return undefined
+  }
+
   /** `packNames` as an error says what it searched, e.g. `spell-ui`, or `spell-ui (not loaded)`. */
   static searched(packNames: readonly string[] = this.DEFAULT): string {
     return packNames.map((name) => (this.packs.has(name) ? name : `${name} (not loaded)`)).join(", ")
@@ -119,6 +132,38 @@ export type ComponentPack = {
    * - Left out:  the pack can't read attributes, and each is taken as written.
    */
   readAttribute?(sample: DefaultSample, language: string): AttributeReading | undefined
+  /**
+   * What its components are, as `language` writes them in a drawing (`ComponentPacks.help()`).
+   * - `undefined` until it has them:  the first call may start loading them, for a later one.
+   * - Left out:  the pack can't say.
+   */
+  help?(language: string): ComponentHelp | undefined
+}
+
+/** What a pack's components are, as a drawing in one language writes them:  `ComponentPack.help()`. */
+export type ComponentHelp = {
+  /** Each component, bare as a drawing writes it (`button`, `botón`), with what it is. */
+  tags: readonly ComponentTagHelp[]
+  /** The attributes of the component `tag` names, bare or as a page writes it;  `undefined` for none of the pack's. */
+  attributesOf(tag: string): readonly ComponentAttributeHelp[] | undefined
+}
+
+/** One component, as `ComponentHelp` says what it is. */
+export type ComponentTagHelp = {
+  /** bare, as a drawing writes it:  `button`, `botón` */
+  tag: string
+  /** what it is, in one sentence */
+  description?: string
+}
+
+/** One attribute of a component, as `ComponentHelp` says what it is. */
+export type ComponentAttributeHelp = {
+  /** as the drawing's language writes it:  `color`, `tamano` */
+  name: string
+  /** what it is, in one sentence */
+  description?: string
+  /** the words it takes, as the drawing's language writes them:  `primary`, `rojo`;  none for any text */
+  values: readonly string[]
 }
 
 /** An attribute in a pack's own names, as `ComponentPacks.readAttribute()` reads it:  `size="large"`, `basic`. */

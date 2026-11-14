@@ -12,6 +12,8 @@ import { SpellUIDefaults } from "./SpellUIDefaults"
  *   accents count as written or not (`botón` ~== `boton`).
  * - SIDE EFFECT:  loading this registers it with spell as `"spell-ui"` (`SP.ComponentPacks`), the pack every
  *   project draws with unless its project file says otherwise:  spell-parser never imports Spell UI.
+ * - It says what each tag and attribute is, for the editors' completions and hovers (`help()`, epic `editor` P28),
+ *   from Spell UI's help table, loaded the first time it's asked.
  * - It reads an app's widget defaults too, `<ui-defaults>`, into Spell UI's own names (`SpellUIDefaults`, epic
  *   `language` P29);  and the Spanish attributes on an `<acción>`'s button (P53).
  * - Loaded by spaces' barrel, as every program that compiles a project loads it;  NOT by `<spell-viewer>`, which runs
@@ -23,8 +25,48 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
     return tagsFor(language).get(withoutAccents(word))
   },
   readDefault: (sample, language) => SpellUIDefaults.read(sample, language),
-  readAttribute: (sample, language) => SpellUIDefaults.readAttribute(sample, language)
+  readAttribute: (sample, language) => SpellUIDefaults.readAttribute(sample, language),
+  help(language) {
+    if (!helpTable) {
+      loadHelp()
+      return undefined
+    }
+    const { HELP_TABLE, SHARED_HELP } = helpTable
+    let help = HELP_BY_LANGUAGE.get(language)
+    if (help) return help
+    const describe = (tag: string, attribute: string) =>
+      HELP_TABLE[tag]?.attributes[attribute] ?? SHARED_HELP[attribute]
+    help = {
+      tags: SpellUIDefaults.tagsIn(language).map(({ tag, canonical }) => {
+        const description = HELP_TABLE[canonical]?.description
+        return { tag, ...(description && { description }) }
+      }),
+      attributesOf: (tag) => SpellUIDefaults.attributesOf(tag, language, describe)
+    }
+    HELP_BY_LANGUAGE.set(language, help)
+    return help
+  }
 }
+
+/** Spell UI's help table (`help.generated.ts`), once loaded:  loaded the first time it's asked for, a chunk of its own. */
+let helpTable: typeof import("spell/ui/vocabulary/help.generated") | undefined
+/** Each language's help, made the first time it's asked for. */
+const HELP_BY_LANGUAGE = new Map<string, SP.ComponentHelp>()
+
+/**
+ * Load Spell UI's help table, once:  until it's in, the pack's `help()` says nothing.
+ * - NEVER throws:  a table that won't load leaves the editor without the help, and says why in the console.
+ */
+function loadHelp() {
+  if (isHelpLoading) return
+  isHelpLoading = true
+  import("spell/ui/vocabulary/help.generated")
+    .then((table) => (helpTable = table))
+    .catch((error: unknown) => console.error("SPELL_UI_PACK.help():  couldn't load Spell UI's help table", error))
+}
+
+/** Has `loadHelp()` started? */
+let isHelpLoading = false
 
 /** Each language's bare names => tags, made the first time it's asked for. */
 const TAGS_BY_LANGUAGE = new Map<string, Map<string, string>>()

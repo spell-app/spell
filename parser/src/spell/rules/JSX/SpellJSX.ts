@@ -6,7 +6,16 @@ import { DrawIt, DrawnLines } from "spell/parser/spell/rules/classes"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
 import { ParseError } from "spell/parser/spell/rules/ParseError"
 import { refuseWriteIfReadOnly } from "spell/parser/spell/rules/places/places.shared"
-import { isBareComponentName, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import {
+  DIVIDER_TAG_MEANING,
+  isBareComponentName,
+  MENU_ROW_TAG,
+  MENU_TAGS,
+  SPELL_JSX_MEANINGS,
+  SPELL_TAG_WORDS,
+  webWordFor,
+  type JSXMatchData
+} from "./JSX.shared"
 import { ActionButton } from "./ActionButton"
 import { ContextMenuBlock } from "./ContextMenuBlock"
 import { ExampleBlock } from "./ExampleBlock"
@@ -19,6 +28,8 @@ const FORM_TAG = "ui-form"
 const VALUE_ATTRIBUTE = "value"
 /** A disabled form's fields can't change anything. */
 const DISABLED_ATTRIBUTE = "disabled"
+/** A menu's divider, as Spell UI's `<ui-action>` takes it:  its `kind`. */
+const MENU_DIVIDER = "divider"
 /** What a project's own view is built on:  the core's classes drawn as elements of their own -- see `isDrawnType()`. */
 const DRAWN_BASE_TYPES = ["View", "ViewableList"]
 /** What a view's quoted word is, `<tableau "T1"/>`:  the id of the thing it draws -- see `attributesOf()`. */
@@ -168,6 +179,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         match.data.error.data.drawnAnyway = true
       }
     }
+    // a Spell UI menu:  its actions and dividers are its rows (epic `editor` P29)
+    if (MENU_TAGS.includes(match.data.tagName)) SpellJSX.markMenuRows(scope, match)
     match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
       scope.parser?.parse(attr, "jsxAttribute", scope)
     )
@@ -312,6 +325,15 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         methodName: "drawThing",
         args: [value]
       }) as unknown as P.ASTJSXElement
+    }
+    // a menu's divider:  a row of its own, a line between groups
+    if (match.data.menuDivider) {
+      const kind = new P.ASTJSXAttribute(match, {
+        name: "kind",
+        value: new P.ASTStringLiteral(match, { value: MENU_DIVIDER, quote: '"', raw: JSON.stringify(MENU_DIVIDER) })
+      })
+      const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST)).filter(Boolean) ?? []
+      return new P.ASTJSXElement(match, { tagName: MENU_ROW_TAG, attrs: [kind, ...attrs], children: [] })
     }
     // a chain branch alone, in no element (an error), or an `<html>` block:  its children, drawn as they are
     if (match.data.chain || match.data.htmlBlock)
@@ -550,6 +572,32 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   ////////////////
+  // ## A menu's rows
+  ////////////////
+
+  /**
+   * Mark the rows of `menu`, a Spell UI `<menu>` (epic `editor` P29, Choice 1 A):
+   * - each `<action "save"/>` it holds draws a menu's row, not a button (`action_button`'s `inMenu`)
+   * - each `<divider/>`, a line between groups:  a row of its own, `<ui-action kind="divider">`
+   * - Inside an `<if ...>` / `<otherwise>` too:  its branches are drawn in the menu, each row in its place.
+   * - Not inside another element:  a `<buttons>` in a menu keeps its buttons.
+   */
+  private static markMenuRows(scope: P.Scope, menu: P.Match) {
+    for (const child of (menu.data as JSXMatchData).children ?? []) {
+      if (child?.is(ActionButton)) child.data.inMenu = true
+      else if (child?.is(SpellJSX) && child.data.chain) SpellJSX.markMenuRows(scope, child)
+      else if (child?.is(SpellJSX) && SpellJSX.isDivider(scope, child)) child.data.menuDivider = true
+    }
+  }
+
+  /** Is `match` a `<divider/>`, its word the language's (`<divisor/>`)? */
+  private static isDivider(scope: P.Scope, match: P.MatchFor<SpellJSX>): boolean {
+    const [token] = match.matched
+    if (!(token instanceof P.JSXElementToken) || token.chain || token.children?.length) return false
+    return webWordFor(scope, SPELL_TAG_WORDS, token.tagName) === DIVIDER_TAG_MEANING
+  }
+
+  ////////////////
   // ## An if-chain inside markup
   ////////////////
 
@@ -658,8 +706,17 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
         out.push(...SpellJSX.hiddenUnless(match, shown, child.children))
       } else if (child instanceof P.ASTJSXElement) {
         endRun()
-        const { tagName, attrs = [], children: inside } = child
-        out.push(new P.ASTJSXElement(child.match, { tagName, attrs: [...attrs, hidden(tagName)], children: inside }))
+        const { tagName, attrs = [], children: inside, action, contextMenu } = child
+        // an action's button or row keeps its action (`action_button`), a right-click menu its items
+        out.push(
+          new P.ASTJSXElement(child.match, {
+            tagName,
+            attrs: [...attrs, hidden(tagName)],
+            children: inside,
+            ...(action && { action }),
+            ...(contextMenu && { contextMenu })
+          })
+        )
       } else run.push(child)
     }
     endRun()

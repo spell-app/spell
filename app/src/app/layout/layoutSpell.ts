@@ -2,12 +2,14 @@ import { editor, runtimeUrl } from "spell/app/app/editor"
 import { loadRuntime, type SpellRuntime } from "spell/app/app/runner/loadRuntime"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { SP } from "spell/parser/spell"
-import type { MenuItem } from "spell/parser/core"
+import spellEditorSpell from "spell/app/spaces/@spell/editor/spell-editor/SpellEditor.spell"
 
 /**
- * The editor's own layout pieces, written in Spell (`.spell`, epic `editor` P6, its first stage of turtles):
- * - The pieces are projects of the group `@spell/editor` (`app/spaces/@spell/editor/`, epic `editor` P22):
- *   a `.spell` file there is imported as its compiled javascript, as text:  `compiledSpell()`, in `vite.shared.ts`.
+ * The editor's own Spell (`.spell`, epic `editor` P6, its first stage of turtles):
+ * - ONE project, `@spell/editor/spell-editor`, its one file `SpellEditor.spell` (epic `editor` P29):
+ *   the app `spell editor`, whose views are the bar, the panes, the file tabs and the menus.
+ *   - a project of the group `@spell/editor` (`app/spaces/@spell/editor/`, epic `editor` P22)
+ *   - a `.spell` file there is imported as its compiled javascript, as text:  `compiledSpell()`, in `vite.shared.ts`
  * - It runs on the LAYOUT'S OWN copy of the runtime, never the one programs run on (`editor.loadRuntime()`):
  *   a program's run resets its runtime, lists every thing made on it in the Things tab, and writes on its console.
  *   - a build:  `loadRuntime()`, as each `<spell-viewer>` has its own
@@ -32,54 +34,70 @@ function layoutRuntime(): Promise<{ runtime: SpellRuntime; coreUrl: string }> {
 }
 let loading: ReturnType<typeof layoutRuntime> | undefined
 
-/** The group the editor's own pieces are projects of (epic `editor` P22). */
+/** The group the editor's own Spell is a project of (epic `editor` P22). */
 export const EDITOR_PIECES = "@spell/editor"
 
+/** The editor's own Spell's project in `EDITOR_PIECES`, its one file `SpellEditor.spell` (epic `editor` P29). */
+const EDITOR_PROJECT = "spell-editor"
+
 /**
- * Is this page the editor built from your DRAFTS of its pieces?  `?pieces=draft` in its address (epic `editor` P22):
- * what an editor piece's project shows in its app pane, a second editor in a frame, so the editor you're using never runs
- * a draft.
+ * Is this page the editor built from your DRAFTS of its Spell?  `?pieces=draft` in its address (epic `editor` P22):
+ * what the editor's own project shows in its app pane, a second editor in a frame, so the editor you're using never
+ * runs a draft.
  */
 export const isDraftEditor = new URLSearchParams(globalThis.location?.search ?? "").get("pieces") === "draft"
 
 /**
- * What layout piece `compiled` exports, and how to draw one of its things.
- * - `piece`:  its project in `EDITOR_PIECES`, `editor-layout` ...:  in the draft editor (`isDraftEditor`), that project is
- *   compiled here, from your drafts, in place of `compiled`;  one that doesn't compile keeps `compiled`, and says why
- * - throws if the runtime or the piece can't load
+ * The editor's own Spell, `SpellEditor.spell`, loaded ONCE for the page (epic `editor` P29):
+ * the app `spell editor`, whose views the bar, the panes, the file tabs and the menus each draw.
+ * - In the draft editor (`isDraftEditor`), its project is compiled here, from your drafts;
+ *   one that doesn't compile keeps the last good compile, and says why.
+ * - Its app is the layout copy's running app (`importCompiled()` resets the copy's runtime first):
+ *   so an `<action "save"/>` in any of its views finds the app's action up its chain.
+ * - throws if the runtime or the Spell can't load
  */
-export async function loadLayoutPiece(compiled: string, piece?: string): Promise<LayoutPiece> {
-  if (isDraftEditor && piece) compiled = (await draftOf(piece)) ?? compiled
+export function loadEditorSpell(): Promise<EditorSpell> {
+  loadingEditor ??= loadEditor()
+  return loadingEditor
+}
+let loadingEditor: Promise<EditorSpell> | undefined
+
+/** `loadEditorSpell()`'s work, once. */
+async function loadEditor(): Promise<EditorSpell> {
+  const compiled = (isDraftEditor && (await draftOf(EDITOR_PROJECT))) || spellEditorSpell
   const { runtime, coreUrl } = await layoutRuntime()
-  // The editor draws each piece where it belongs:  an app in one must not start itself, as a program's does
+  // The editor draws each view where it belongs:  an app in it must not start itself, as a program's does
   runtime.core.appLayout = true
+  // its app the copy's running app:  `importCompiled()` resets the copy's runtime first
+  const exports = await runtime.importCompiled(compiled, coreUrl)
   return {
-    exports: await runtime.importCompiled(compiled, coreUrl),
+    editor: exports.spellEditor as SpellEditorApp,
+    exports,
     draw: (thing) => runtime.core.drawThing(thing),
-    menu: (thing, name) => runtime.core.menuOf(thing, name) ?? [],
+    drawInPlace: (thing) => runtime.core.drawOwn(thing),
     useTitles: (titles) => runtime.core.useTitles(titles)
   }
 }
 
 /**
- * Piece `piece`'s project compiled from your drafts, in the page;  `undefined` if it doesn't compile (said, as
- * `layoutPieceBroken()` says it).
+ * Project `project` of `EDITOR_PIECES` compiled from your drafts, in the page;  `undefined` if it doesn't compile
+ * (said, as `layoutPieceBroken()` says it).
  * - NEVER throws.
  */
-async function draftOf(piece: string): Promise<string | undefined> {
+async function draftOf(project: string): Promise<string | undefined> {
   try {
-    const project = new SP.SpellProject(`${EDITOR_PIECES}/${piece}`)
-    await project.compile()
-    if (project.compiled) return project.compiled
-    layoutPieceBroken(piece, project.parseError ?? "")
+    const drafted = new SP.SpellProject(`${EDITOR_PIECES}/${project}`)
+    await drafted.compile()
+    if (drafted.compiled) return drafted.compiled
+    layoutPieceBroken(project, drafted.parseError ?? "")
   } catch (problem) {
-    layoutPieceBroken(piece, problem instanceof Error ? problem.message : String(problem))
+    layoutPieceBroken(project, problem instanceof Error ? problem.message : String(problem))
   }
   return undefined
 }
 
 /**
- * Say that the editor's piece `piece` (`editor-layout` ...) doesn't compile, so its last good compile is running:
+ * Say that the editor's own Spell (its project, `spell-editor`) doesn't compile, so its last good compile is running:
  * the module the dev server writes for it calls this (`compiledSpell()`, `vite.shared.ts`;  epic `editor` P22).
  * - So a broken edit to the editor's own Spell never locks you out:  the editor still draws, and says why.
  * - NEVER throws.
@@ -90,14 +108,38 @@ export function layoutPieceBroken(piece: string, problem: string): void {
   queueMicrotask(() => editor.showError(appTexts.text("editorPieceBroken", { piece, problem })))
 }
 
-/** A layout piece, as `loadLayoutPiece()` answers it. */
-export type LayoutPiece = {
+/** The editor's own Spell, as `loadEditorSpell()` answers it. */
+export type EditorSpell = {
+  /** Its app, `spell editor`:  its views, the state its menus follow, its actions. */
+  editor: SpellEditorApp
   /** What its compiled javascript exports:  its classes, by their compiled names. */
   exports: Record<string, any>
-  /** `thing`'s drawing, for Solid to insert. */
+  /** `thing` drawn as its own element (a view's `<spell-editor-file-tab-bar>`), for Solid to insert. */
   draw: (thing: unknown) => unknown
-  /** The items of `thing`'s menu `name`, in order. */
-  menu: (thing: object, name: string) => MenuItem[]
+  /**
+   * `thing`'s own drawing, with no element around it, for Solid to insert (`core.drawOwn()`):
+   * so the page's sheets reach it, and what the editor draws in its holes.
+   */
+  drawInPlace: (thing: unknown) => unknown
   /** Show its titles in the page's language:  each English title's text in it (`appTexts.titles`). */
   useTitles: (titles: Record<string, string>) => void
 }
+
+/**
+ * The app `spell editor`, as `SpellEditor.spell` compiles:  its views, and what the editor keeps in step.
+ * - Each action of it is a method of its name (`save`, `showInspector` ...), which the editor's own replaces
+ *   (`MenuBar.tsx`):  a row's click runs it through the core.
+ */
+export type SpellEditorApp = Record<string, unknown> & {
+  editorBar: Record<string, unknown>
+  editorLayout: Record<string, unknown>
+  fileTabBar: Record<string, unknown>
+  projectMenu: Record<string, unknown>
+  fileMenu: BarMenuView
+  editMenu: BarMenuView
+  viewMenu: BarMenuView
+  runMenu: BarMenuView
+}
+
+/** One of the bar's menus in `SpellEditor.spell`, a `bar menu`:  its title, the bar's word for it, in English. */
+export type BarMenuView = Record<string, unknown> & { title: string }

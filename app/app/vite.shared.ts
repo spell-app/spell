@@ -302,22 +302,22 @@ function iconPacksBesideBuiltIns(): Plugin {
   }
 }
 
-/** The editor's own pieces, the group `@spell/editor`:  any other `.spell` is a program's, read as text (a test's `?raw`). */
+/** The editor's own Spell, the group `@spell/editor`:  any other `.spell` is a program's, read as text (a test's `?raw`). */
 const LAYOUT_FOLDER = "/spaces/@spell/editor/"
 
-/** Where the editor's pieces keep their last good compiles:  the app's `build/`, never committed, one file per piece. */
+/** Where the editor's own Spell keeps its last good compile:  the app's `build/`, never committed, one file per project. */
 const LAST_GOOD_FOLDER = "app/build/editor-pieces"
 
 /**
- * A `.spell` file of the editor's own pieces (the group `@spell/editor`), imported,
- * is its project's compiled javascript, as text (`layoutSpell.ts`).
+ * A `.spell` file of the editor's own Spell (the group `@spell/editor`;  one project since epic `editor` P29,
+ * `spell-editor`), imported, is its project's compiled javascript, as text (`layoutSpell.ts`).
  * - Its folder is a project of its own:  this runs `spell compile <folder> --stdout`.
  * - Compiled in a process of its own, as the preview build compiles, so no config loads the parser.
  * - Text, not a module:  it can only run on a copy of the runtime, which isn't in this bundle.
  * - Each good compile is kept (`LAST_GOOD_FOLDER`), so a broken edit can't lock you out of the editor (epic `editor` P22):
- *   - the dev server:  a piece that doesn't compile falls back to its last good compile, and the module tells the
+ *   - the dev server:  Spell that doesn't compile falls back to its last good compile, and the module tells the
  *     editor why (`layoutPieceBroken()`), which says so in plain words
- *   - a build, or a test, or a piece never compiled before:  it stops, saying why, so nothing broken ships
+ *   - a build, or a test, or a project never compiled before:  it stops, saying why, so nothing broken ships
  */
 function compiledSpell(): Plugin {
   let canFallBack = false
