@@ -136,6 +136,7 @@ export class IncrementalProject {
       if (parser.changesMethods(this.scope, file.text, text, this.keepLastGood)) return this.parseAll(path, text)
       if (parser.changesProperties(file.text, text, this.keepLastGood)) return this.parseAll(path, text)
       if (parser.changesTypeKinds(file.text, text, this.keepLastGood)) return this.parseAll(path, text)
+      const kindsBefore = this.typeKinds()
       const result = file.update(text)
       if (result === "same") return []
       if (result === "body" || result === "region") return [file]
@@ -143,12 +144,26 @@ export class IncrementalProject {
       // Alone files are never in the journal we rewound.
       const later = this.files.slice(index + 1).flatMap((it) => (it.head ? [] : [it.parse!]))
       later.forEach((it) => it.parseAll(it.text))
+      // A type line the scan still sees, but the parse no longer reads as one (swallowed by a tag left open above
+      // it, `<text>🂠</text`):  what it is changed after all, so every line above may read differently.
+      if (this.typeKinds() !== kindsBefore) return this.parseAll(path, text)
       return [file, ...later]
     } catch (error) {
       // e.g. a rule's `getAST()` crashed while committing a line -- a full parse would crash too.
       this.isBroken = true
       throw error
     }
+  }
+
+  /**
+   * What each type the project declares IS, as parsed:  `Foundation<Pile[Card]`, a stub `?Foundation`.
+   * - What `update()` compares across a rewind:  `parser.changesTypeKinds()` only sees the text's type lines,
+   *   and an item above a type, kept as it was, read what that type was (`the cards in the foundations`).
+   */
+  private typeKinds(): string {
+    return (this.scope.types?.get() ?? [])
+      .map(({ name, stub, superType, itemType }) => `${stub ? "?" : ""}${name}<${superType ?? ""}[${itemType ?? ""}]`)
+      .join()
   }
 
   /**

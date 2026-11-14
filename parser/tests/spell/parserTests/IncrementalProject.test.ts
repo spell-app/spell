@@ -102,3 +102,27 @@ describe("incremental parsing ~== full parse", () => {
     expect(project.getFile("/A.spell")!.lastUpdate).toBe("body")
   })
 })
+
+describe("incremental parsing ~== full parse, a type line swallowed", () => {
+  test("a tag never closed above a type line:  the line above, reading what that type is, reads it again (I93)", () => {
+    const contents = (endTag: string) =>
+      [
+        "a card is a thing",
+        "a game is a thing",
+        "\tto count the cards",
+        "\t\tprint the number of cards in the piles",
+        'a "marker" is a thing',
+        "\tto draw it",
+        `\t\t<text>x${endTag}`,
+        'a "pile" is a list of cards'
+      ].join("\n")
+    const files: SpellSourceFile[] = [{ path: "/Game.spell", contents: contents("</text>") }]
+    const project = incrementalSpellProject(files)
+    // compiled now:  the game's method read `the piles` as a list of lists of cards, and keeps that AST
+    expect(summarizeIncremental(project)[0]!.compiled).toContain("mergeLists")
+    // `<text>` with no end tag takes in the pile's line as text:  the scan still sees it, the parse doesn't
+    const edited: SpellSourceFile[] = [{ path: "/Game.spell", contents: contents("") }]
+    project.update("/Game.spell", edited[0]!.contents)
+    expect(summarizeIncremental(project)).toEqual(summarize(parseSpellProject(edited)))
+  })
+})
