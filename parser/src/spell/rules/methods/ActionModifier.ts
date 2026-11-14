@@ -11,7 +11,7 @@ import { P } from "spell/parser/parser"
  *   - `undoable as "Move Card"`:  `undoable as "Move Card"`
  * - Matched only:  its action's definition reads them with its body's lines (`ActionDetail.detailsOf()`).
  */
-export class ActionModifier extends P.Sequence<"title?|icon?|keys?|undoable?|undoneAs?"> {
+export class ActionModifier extends P.Sequence<"title?|icon?|keys?|undoable?|undoneAs?|cantBeUndone?"> {
   /** Compiles to nothing:  the action's description gathers it. */
   compile(): string {
     return ""

@@ -2311,7 +2311,8 @@ classes.addRule(DefineGroup, {
             "  turnOver() {",
             '    this.direction = "up"',
             "  }",
-            "}"
+            "}",
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", undoneAs: "Turn It Over" })'
           ],
           ts: [
             "export type Direction = (typeof Card.Directions)[number]",
@@ -2344,7 +2345,8 @@ classes.addRule(DefineGroup, {
             "    return this.currentThing?.turnOver()",
             "  }",
             "}",
-            "core.useElement(Card, CardElement)"
+            "core.useElement(Card, CardElement)",
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", undoneAs: "Turn It Over" })'
           ]
         }
       ]
@@ -2390,15 +2392,16 @@ classes.addRule(DefineMenu, {
             "export class Game extends App {",
             '  static elementTag = core.defineElement(this, "test_classes", "App")',
             "",
-            "  turnTheTopCardOver() {",
-            "    core.notify(2)",
-            "  }",
-            "",
             "  deal() {",
             "    core.notify(1)",
             "  }",
+            "",
+            "  turnTheTopCardOver() {",
+            "    core.notify(2)",
+            "  }",
             "}",
             'core.describeAction(Game, "deal", { title: "Deal", undoneAs: "Deal" })',
+            'core.describeAction(Game, "turnTheTopCardOver", { title: "Turn The Top Card Over", undoneAs: "Turn The Top Card Over" })',
             '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
             'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
           ],
@@ -2406,12 +2409,12 @@ classes.addRule(DefineMenu, {
             "export class Game extends App {",
             '  static elementTag = core.defineElement(this, "test_classes", "App")',
             "",
-            "  turnTheTopCardOver() {",
-            "    core.notify(2)",
-            "  }",
-            "",
             "  deal() {",
             "    core.notify(1)",
+            "  }",
+            "",
+            "  turnTheTopCardOver() {",
+            "    core.notify(2)",
             "  }",
             "}",
             "",
@@ -2424,16 +2427,17 @@ classes.addRule(DefineMenu, {
             "export class GameElement extends SpellElement<Game> {",
             '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
             "",
-            "  turnTheTopCardOver() {",
-            "    return this.currentThing?.turnTheTopCardOver()",
-            "  }",
-            "",
             "  deal() {",
             "    return this.currentThing?.deal()",
+            "  }",
+            "",
+            "  turnTheTopCardOver() {",
+            "    return this.currentThing?.turnTheTopCardOver()",
             "  }",
             "}",
             "core.useElement(Game, GameElement)",
             'core.describeAction(Game, "deal", { title: "Deal", undoneAs: "Deal" })',
+            'core.describeAction(Game, "turnTheTopCardOver", { title: "Turn The Top Card Over", undoneAs: "Turn The Top Card Over" })',
             '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
             'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
           ]
@@ -2621,6 +2625,15 @@ classes.addRule(DrawnMarkup, {
 
 classes.addRule(DrawnMarkup, {
   syntax: "{markup:markdown_block}"
+})
+
+// an action's button, or a right-click menu, on a line of its own:  theirs, not a plain element's (epic `language` I78)
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:action_button}"
+})
+
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:context_menu_block}"
 })
 
 classes.addRule(DrawnMarkup, {

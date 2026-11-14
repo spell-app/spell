@@ -271,6 +271,21 @@ describe("actions that can't be undone", () => {
     expect([cards[0].faceUp, game.moves]).toEqual([false, 10])
   })
 
+  test("described so, as compiled spell's `can't be undone` writes it (epic `language` P55, Q60)", () => {
+    class Peeker extends Card {
+      peek(): void {
+        this.faceUp = true
+      }
+    }
+    core.describeAction(Peeker, "peek", { title: "Peek", cantBeUndone: "keeps history" })
+    cards[0].turnOver()
+    const peeker = new Peeker({ rank: "joker" })
+    peeker.peek()
+    expect(core.RUNTIME.history.steps).toHaveLength(1)
+    game.undo()
+    expect([cards[0].faceUp, peeker.faceUp]).toEqual([false, true])
+  })
+
   test('"clears history":  every step is forgotten once it\'s done, e.g. a new game', async () => {
     await game.deal(2)
     game.newGame()

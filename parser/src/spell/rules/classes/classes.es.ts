@@ -2422,6 +2422,15 @@ classesEs.addRule(DrawnMarkup, {
   syntax: "{markup:markdown_block}"
 })
 
+// el botón de una acción, o un menú contextual, en una línea propia:  los suyos, no los de un elemento cualquiera (I78)
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:action_button}"
+})
+
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:context_menu_block}"
+})
+
 classesEs.addRule(DrawnMarkup, {
   syntax: "{markup:jsxElement}"
 })

@@ -24,9 +24,11 @@ describe("an action's title", () => {
     ].join("\n")
     const [file] = parseSpellProject([{ path: "/Editor.spell", contents }]).files
     expect(file!.errors).toEqual([])
-    expect(file!.compiled).toContain('core.describeAction(Editor, "compileAndRun", { title: "Compile and Run" })')
+    expect(file!.compiled).toContain(
+      'core.describeAction(Editor, "compileAndRun", { title: "Compile and Run", undoneAs: "Compile and Run" })'
+    )
     expect(file!.compiled).toContain("get duplicateTitle() {")
-    expect(file!.compiled).toContain('{ title: "Duplicate It", titleFrom: "duplicateTitle" }')
+    expect(file!.compiled).toContain('{ title: "Duplicate It", titleFrom: "duplicateTitle", undoneAs: "Duplicate It" }')
   })
 
   test("Spanish:  `- titulada`", () => {
@@ -38,7 +40,7 @@ describe("an action's title", () => {
     ].join("\n")
     const [file] = parseSpellProject([{ path: "/Editor.es.spell", contents }]).files
     expect(file!.errors).toEqual([])
-    expect(file!.compiled).toContain('{ title: "Código" }')
+    expect(file!.compiled).toContain('{ title: "Código", undoneAs: "Código" }')
   })
 
   test("another language's words file:  each title's words there, from the names dictionary's texts", () => {

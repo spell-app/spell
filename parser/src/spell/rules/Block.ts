@@ -348,7 +348,10 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const docs = new Map<P.Match, DocComment>()
     block.matched.forEach((item, index) => {
       const statement = item instanceof P.Match ? this.statementOf(item) : undefined
-      if (!statement || !(statement.rule.getDeclaration(statement) || this.describesItsMethod(item as P.Match, statement)))
+      if (
+        !statement ||
+        !(statement.rule.getDeclaration(statement) || this.describesItsMethod(item as P.Match, statement))
+      )
         return
       // the first comment under it, in its body or a block no line took (epic `language` P48)
       const below = this.descriptionBelow(statement, block.matched[index + 1])
