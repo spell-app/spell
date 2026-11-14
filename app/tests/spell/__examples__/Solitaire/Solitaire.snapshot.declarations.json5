@@ -228,7 +228,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitaire.spell:7343-7558"
+      "defined": "/Solitaire.spell:7456-7671"
     },
     {
       "syntax": "test card setup",
@@ -270,7 +270,7 @@
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/Pile.spell:336-1669"
+      "defined": "/Pile.spell:336-1610"
     },
     {
       "property": "layout",
@@ -278,28 +278,26 @@
       "of": "Pile",
       "enumeration": [
         "stacked",
-        "vertical",
-        "horizontal",
-        "fanned"
+        "vertical"
       ],
-      "defined": "/Pile.spell:384-563"
+      "defined": "/Pile.spell:384-504"
     },
     {
       "property": "color",
       "of": "Pile",
-      "defined": "/Pile.spell:565-692"
+      "defined": "/Pile.spell:506-633"
     },
     {
       "property": "value",
       "of": "Pile",
       "datatype": "number",
-      "defined": "/Pile.spell:694-787"
+      "defined": "/Pile.spell:635-728"
     },
     {
       "property": "state",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spell:789-987"
+      "defined": "/Pile.spell:730-928"
     },
     {
       "syntax": "test piles",
@@ -308,7 +306,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "piles",
-      "defined": "/Pile.spell:990-1669"
+      "defined": "/Pile.spell:931-1610"
     },
     {
       "property": "pile",
@@ -316,58 +314,58 @@
       "group": "A pile of cards",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/Pile.spell:1671-1697"
+      "defined": "/Pile.spell:1612-1638"
     },
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:8556-8986"
+      "defined": "/Solitaire.spell:8669-9099"
     },
     {
       "property": "layout",
       "of": "StockPile",
-      "defined": "/Solitaire.spell:8686-8709"
+      "defined": "/Solitaire.spell:8799-8822"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:8988-9215"
+      "defined": "/Solitaire.spell:9101-9328"
     },
     {
       "property": "layout",
       "of": "DiscardPile",
-      "defined": "/Solitaire.spell:9070-9093"
+      "defined": "/Solitaire.spell:9183-9206"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:9217-9800"
+      "defined": "/Solitaire.spell:9330-9913"
     },
     {
       "property": "layout",
       "of": "Foundation",
-      "defined": "/Solitaire.spell:9305-9328"
+      "defined": "/Solitaire.spell:9418-9441"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spell:9330-9355"
+      "defined": "/Solitaire.spell:9443-9468"
     },
     {
       "type": "Tableau",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:9802-11738"
+      "defined": "/Solitaire.spell:9915-11851"
     },
     {
       "property": "layout",
       "of": "Tableau",
-      "defined": "/Solitaire.spell:9890-9914"
+      "defined": "/Solitaire.spell:10003-10027"
     },
     {
       "type": "Solitaire",
       "superType": "App",
-      "defined": "/Solitaire.spell:303-6075"
+      "defined": "/Solitaire.spell:303-6188"
     },
     {
       "property": "score",
@@ -551,7 +549,7 @@
       "group": "Game Play",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Solitaire.spell:5023-6075"
+      "defined": "/Solitaire.spell:5023-6188"
     },
     {
       "syntax": "turn a stock card (of {thisArg:expression})?",
@@ -632,7 +630,7 @@
       "kind": "method",
       "name": "play a card",
       "waits": true,
-      "defined": "/Solitaire.spell:6347-6599"
+      "defined": "/Solitaire.spell:6460-6712"
     },
     {
       "syntax": "put {thisArg:expression} on {callArgs:expression}",
@@ -654,7 +652,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitaire.spell:6799-7341"
+      "defined": "/Solitaire.spell:6912-7454"
     },
     {
       "syntax": "test the moves",
@@ -663,7 +661,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spell:10258-11738"
+      "defined": "/Solitaire.spell:10371-11851"
     }
   ],
   "codeLines": [
@@ -727,12 +725,12 @@
     553,
     563,
     584,
-    691,
-    694,
-    696,
+    695,
     698,
-    710,
-    716,
-    735
+    700,
+    702,
+    714,
+    720,
+    739
   ]
 }

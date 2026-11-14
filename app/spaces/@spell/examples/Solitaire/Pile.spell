@@ -4,8 +4,8 @@
 // A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 a "pile" is a droppable viewable list of cards
-	its "layout" is one of stacked, vertical, horizontal or fanned
-		// How its cards lie:  on top of each other, down a column, along a row, or fanned as a hand is held -- styles.css
+	its "layout" is one of stacked or vertical
+		// How its cards lie:  on top of each other, or down a column -- styles.css
 	its "color" is
 		// Its last card's:  what the next card goes on
 		"none" if it is empty

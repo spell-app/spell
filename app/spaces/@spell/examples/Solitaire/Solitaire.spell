@@ -134,44 +134,48 @@ solitaire is an app
 		set the lifted of the card to no
 
 	to draw it
-		<toolbar class="GameBar" aria-label="Game">
-			<text class="GameTitle" slot="title" size="large">Solitaire</text>
-			<buttons class="GameButtons" slot="center">
-				<action "auto play"/>
-				<action "cheat"/>
-				<action "restart the game"/>
-			</buttons>
-			<buttons class="GameButtons" slot="center">
-				<action "undo" icon-only/>
-				<action "redo" icon-only/>
-			</buttons>
-			<text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</text>
-		</toolbar>
-		<container>
-			<grid class="Board" columns="7">
-				<context-menu>
+		<segment inverted attach="top">
+			<toolbar class="GameBar" aria-label="Game">
+				<text slot="title" size="large" heavy>Solitaire</text>
+				<buttons slot="center" padding="compact">
 					<action "auto play"/>
 					<action "cheat"/>
 					<action "restart the game"/>
-					<divider/>
-					<action "undo"/>
-					<action "redo"/>
-				</>
-				<stock-pile "stock"/>
-				<discard-pile "discards"/>
-				<column/>
-				<foundation "clubs"/>
-				<foundation "diamonds"/>
-				<foundation "hearts"/>
-				<foundation "spades"/>
-				<tableau "T1"/>
-				<tableau "T2"/>
-				<tableau "T3"/>
-				<tableau "T4"/>
-				<tableau "T5"/>
-				<tableau "T6"/>
-				<tableau "T7"/>
-			</grid>
+				</buttons>
+				<buttons slot="center" padding="compact">
+					<action "undo" icon-only/>
+					<action "redo" icon-only/>
+				</buttons>
+				<text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</text>
+			</toolbar>
+		</segment>
+		<container>
+			<segment appearance="basic">
+				<grid columns="7" spacing="xs">
+					<context-menu>
+						<action "auto play"/>
+						<action "cheat"/>
+						<action "restart the game"/>
+						<divider/>
+						<action "undo"/>
+						<action "redo"/>
+					</>
+					<stock-pile "stock"/>
+					<discard-pile "discards"/>
+					<column/>
+					<foundation "clubs"/>
+					<foundation "diamonds"/>
+					<foundation "hearts"/>
+					<foundation "spades"/>
+					<tableau "T1"/>
+					<tableau "T2"/>
+					<tableau "T3"/>
+					<tableau "T4"/>
+					<tableau "T5"/>
+					<tableau "T6"/>
+					<tableau "T7"/>
+				</grid>
+			</segment>
 		</container>
 
 ## Playing a card

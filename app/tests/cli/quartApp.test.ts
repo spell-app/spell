@@ -138,8 +138,8 @@ describe("a Python spell app, in a real browser", () => {
     expect(solitaire!["$history"]).toEqual(expect.objectContaining({ can_undo: true, undo_title: "Undo Play Card" }))
 
     // the toolbar's Undo, live:  it lights up for the move, and takes it back in Python
-    const undo = page.page.locator('.GameButtons ui-button[icon="undo"]')
-    const redo = page.page.locator('.GameButtons ui-button[icon="redo"]')
+    const undo = page.page.locator('ui-toolbar ui-button[icon="undo"]')
+    const redo = page.page.locator('ui-toolbar ui-button[icon="redo"]')
     await expect.poll(() => undo.getAttribute("aria-label")).toBe("Undo Play Card")
     expect(await undo.getAttribute("disabled")).toBeNull()
     await undo.click()
