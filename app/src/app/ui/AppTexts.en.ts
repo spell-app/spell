@@ -583,7 +583,8 @@ export const APP_TEXTS = {
   closeProgram: "Close the Program panel",
   codeMore: "More for this code",
   codeOutputHeader: "Compiled code",
-  codeOutputOff: "Hide it",
+  codeOutputMenu: "Show Compiled Code",
+  codeOutputOff: "None",
   codeOutputClose: "Hide the compiled code",
   referenceTab: "Reference",
   // the Reference tab (`<SpellReference>`):  what you can use

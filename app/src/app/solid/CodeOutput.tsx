@@ -81,7 +81,7 @@ export function CodeMoreMenu() {
       })}
     >
       <ui-icon slot="icon" name="ellipsis horizontal" />
-      <ui-item kind="header">{appTexts.text("codeOutputHeader")}</ui-item>
+      <ui-item kind="header">{appTexts.text("codeOutputMenu")}</ui-item>
       <ui-item value={NO_OUTPUT} icon={CodeOutputShown.target ? "eye slash outline" : "check"}>
         {appTexts.text("codeOutputOff")}
       </ui-item>
