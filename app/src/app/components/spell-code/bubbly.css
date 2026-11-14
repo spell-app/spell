@@ -1101,23 +1101,13 @@
    * `<number "score"/>` ~== `"score" is a number`, `<stock-pile "stock"/>` ~== `"stock" is a new stock pile`:
    * it makes a name, where any other tag (`<action "redo"/>`, `<text>`) draws something
    * - which tags:  the compiler's own test, `SP.BubblyDrawing.declaringTags`;  marked `bubbly-tag-declares`
-   * - its pill's ends round;  its `⟨` and `/⟩` not drawn
-   * - in the editor the file's own `<` and `>` keep their width, see-through, so the caret, a click, a selection and a
-   *   copy land as before, the room either side the pill's round ends;  its `/` no wider than nothing
+   * - its pill's ends round, its `⟨` and `/⟩` drawn in them as on any tag (Owen, 2026-11-14:  "we should still see
+   *   the <> in these, but make it round")
    */
   &.bubbly-html :is(.bubbly-pill, .bubbly-tag-pill).bubbly-tag-declares {
     corner-shape: round;
     border-radius: calc(var(--bubbly-pill-height) / 2);
   }
-  &.bubbly-monaco .view-line {
-    .bubbly-angle.bubbly-tag-declares::before {
-      content: none;
-    }
-    .bubbly-slash.bubbly-tag-declares {
-      font-size: 0;
-    }
-  }
-
   /****** a head's description, `-- A playing card`:  at the drawing's right edge, its band reaching there (Owen) ******/
   /*
    * - as the editor draws it, at the window's edge:  on a page, the drawing's widest line's
