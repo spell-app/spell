@@ -44,6 +44,9 @@ export class EditorServer {
   /** the running vite, in its own process group */
   private child?: ChildProcess
 
+  /** `stop()` was called:  a start under way picks no more ports */
+  private isStopped = false
+
   constructor(root: string) {
     this.root = root
     this.portPicked = new Promise((resolve) => (this.pickedPort = resolve))
@@ -61,14 +64,38 @@ export class EditorServer {
    *   requests alone (`pageServerProxy()`), and the editor's origin may write (epic `language` T68)
    * - `thisMachineOnly`:  vite listens on this machine alone, when this machine's site gives it a house-network address
    *   (`LocalSiteServer.editorAddress`, epic `atmosphere` P39):  so Caddy, with what it refuses, is the one way in
+   * - its port taken after all (`Port 3001 is already in use`):  it picks again, up to `PORT_TRIES` times, rather than
+   *   leaving no editor (epic `epic-engine` I274, r68);  `portPicked` names the port it ends up on
    */
   async start(pagePort: number, guard: SRV.Guard, { thisMachineOnly = false } = {}): Promise<void> {
     if (process.env.SPELL_NO_EDITOR || this.child) return this.pickedPort(this.port)
-    const port = await editorPort({ thisMachineOnly })
-    this.port = port
-    this.pickedPort(port)
     const log = createWriteStream(join(this.root, ".spell-server.editor.log"), { flags: "a" })
-    guard.allowOriginPort(port)
+    const taken: number[] = []
+    for (let tries = 0; tries < PORT_TRIES && !this.isStopped; tries++) {
+      const port = await editorPort({ thisMachineOnly, taken })
+      if (this.isStopped) break
+      this.port = port
+      guard.allowOriginPort(port)
+      const outcome = await this.launch(port, pagePort, guard, { thisMachineOnly, log })
+      if (outcome === "ready") return this.pickedPort(port)
+      if (outcome !== "port taken") break
+      taken.push(port)
+    }
+    this.pickedPort(this.port)
+  }
+
+  /**
+   * SIDE EFFECT:  vite runs on `port`, recorded once it says it's ready;  what happened:
+   * - `ready`:  it listens
+   * - `port taken`:  it stopped at once, `--strictPort` finding the port held (an editor still letting go of it)
+   * - `ended`:  it stopped for some other reason, or was stopped
+   */
+  private launch(
+    port: number,
+    pagePort: number,
+    guard: SRV.Guard,
+    { thisMachineOnly, log }: { thisMachineOnly: boolean; log: NodeJS.WritableStream }
+  ): Promise<"ready" | "port taken" | "ended"> {
     const env = {
       ...process.env,
       VITE_PORT: String(port),
@@ -84,36 +111,58 @@ export class EditorServer {
       stdio: ["ignore", "pipe", "pipe"]
     })
     this.child = child
-    child.on("exit", () => {
-      if (this.child === child) this.stop()
+    return new Promise((settle) => {
+      // its output to the log -- and the record once IT says it's ready:  a fetch could be answered by another
+      // checkout's editor holding the port, before ours fails with "already in use" (`--strictPort`)
+      let output = ""
+      let ready = false
+      const watch = (data: Buffer) => {
+        log.write(data)
+        if (ready) return
+        output += data
+        if (!READY.test(stripVTControlCharacters(output))) return
+        ready = true
+        if (this.child !== child) return
+        this.record(`http://localhost:${port}/`, child)
+        settle("ready")
+      }
+      child.stdout!.on("data", watch)
+      child.stderr!.on("data", watch)
+      child.on("exit", () => {
+        if (this.child === child) {
+          this.child = undefined
+          rmSync(this.recordFile, { force: true })
+        }
+        settle(!ready && PORT_IN_USE.test(stripVTControlCharacters(output)) ? "port taken" : "ended")
+      })
     })
-    // its output to the log -- and the record once IT says it's ready:  a fetch could be answered by another
-    // checkout's editor holding the port, before ours fails with "already in use" (`--strictPort`)
-    let output = ""
-    let ready = false
-    const watch = (data: Buffer) => {
-      log.write(data)
-      if (ready) return
-      output += data
-      if (!READY.test(stripVTControlCharacters(output))) return
-      ready = true
-      if (this.child === child) this.record(`http://localhost:${port}/`, child)
-    }
-    child.stdout!.on("data", watch)
-    child.stderr!.on("data", watch)
   }
 
-  /** stop vite and everything it started, and forget its record */
-  stop(): void {
+  /**
+   * Stop vite and everything it started, forget its record, and wait for it to END (epic `epic-engine` I274, r68).
+   * - `SIGTERM` to its group;  `SIGKILL` if it's still there after `STOP_WAIT_MS`
+   * - why wait:  the page server awaits its stop handlers before it exits, and a restart waits for that, so the next
+   *   page server's editor finds the port free;  before, the old vite still held it, and the new one failed
+   *   (`Port 3001 is already in use`) with no editor at all
+   * - NEVER throws
+   */
+  async stop(): Promise<void> {
+    this.isStopped = true
     const pid = this.child?.pid
     this.child = undefined
     rmSync(this.recordFile, { force: true })
     if (!pid) return
-    try {
-      process.kill(-pid, "SIGTERM")
-    } catch {
-      // already gone
+    const signal = (name: NodeJS.Signals) => {
+      try {
+        process.kill(-pid, name)
+      } catch {
+        // already gone
+      }
     }
+    signal("SIGTERM")
+    for (let waited = 0; waited < STOP_WAIT_MS && SRV.isProcessAlive(pid); waited += STOP_LOOK_MS)
+      await sleep(STOP_LOOK_MS)
+    if (SRV.isProcessAlive(pid)) signal("SIGKILL")
   }
 
   /** Write the record:  `url` is `child`'s, which said it's ready. */
@@ -142,14 +191,31 @@ const VP = join(dirname(createRequire(join(APP_DIR, "package.json")).resolve("vi
  */
 const READY = /\bLocal:\s+http/
 
+/** What vite prints when `--strictPort` finds its port held:  `Port 3001 is already in use`. */
+const PORT_IN_USE = /\bis already in use\b/
+
+/** How many ports `start()` tries before it gives up on an editor. */
+const PORT_TRIES = 3
+
+/** How long `stop()` waits for vite to end before `SIGKILL`, and how often it looks. */
+const STOP_WAIT_MS = 5000
+const STOP_LOOK_MS = 100
+
 /**
  * The editor's port:  the wanted one if free on IPv4 AND IPv6 (vite listens on 0.0.0.0), else any free one.
  * - NOTE: both:  on macOS `::` binds even while another process holds `0.0.0.0:<port>` -- another checkout's editor.
  * - `thisMachineOnly`:  the house site's editor, whose port is in Caddy's file:  `steadyPort()`.
  */
-async function editorPort({ thisMachineOnly }: { thisMachineOnly: boolean }): Promise<number> {
+async function editorPort({
+  thisMachineOnly,
+  taken = []
+}: {
+  thisMachineOnly: boolean
+  taken?: number[]
+}): Promise<number> {
   const wanted = Number(process.env.SPELL_EDITOR_PORT) || environment.vitePort
-  const isFreeEverywhere = async (port: number) => (await SRV.isFree(port, "0.0.0.0")) && (await SRV.isFree(port, "::"))
+  const isFreeEverywhere = async (port: number) =>
+    !taken.includes(port) && (await SRV.isFree(port, "0.0.0.0")) && (await SRV.isFree(port, "::"))
   if (thisMachineOnly) return (await steadyPort(wanted, isFreeEverywhere)) ?? SRV.freePort()
   return (await isFreeEverywhere(wanted)) ? wanted : SRV.freePort()
 }

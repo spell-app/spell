@@ -514,6 +514,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           editor's current port.
           - The site waits for the editor to pick it (`EditorServer.portPicked`), never writing the default meanwhile.
           - A page server whose editor lands on another port rewrites the file and restarts Caddy alone.
+          - It stays up (I274, r68):  a stopping page server waits for its editor to end, so the next one's editor
+            gets the port;  the site looks every 30s (`keepUp()`) that Caddy really listens on 443 and names the
+            editor's port, and starts what's missing;  one program ending no longer stops the other.
           - A worktree's editor never takes test.spell.app:  an epic that wants Owen to see ITS editor pastes a link
             with that editor's port (`http://localhost:<port>/...`).
       - It runs as this machine's person, with no sign-in:  HOUSE NETWORK ONLY, as `setup` and `start` say.
