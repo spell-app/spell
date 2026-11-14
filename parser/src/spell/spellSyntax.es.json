@@ -5966,7 +5966,7 @@
           "ruleNames": ["define_group"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineGroup.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "A GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).",
           "syntaxes": [
             {
@@ -5981,6 +5981,21 @@
                 },
                 "py": {
                   "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)"
+                }
+              }
+            },
+            {
+              "syntax": "grupo {group:text}",
+              "example": "grupo \"Las pilas\"\n\nuna pila es una cosa",
+              "outputs": {
+                "js": {
+                  "code": "export class Pila extends Thing {}"
+                },
+                "ts": {
+                  "code": "export class Pila extends Thing {}"
+                },
+                "py": {
+                  "code": "class Pila(Thing):\n    pass"
                 }
               }
             },

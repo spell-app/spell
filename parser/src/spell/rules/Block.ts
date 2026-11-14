@@ -160,6 +160,11 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const statements: SP.HoistableStatement[] = []
     const heading = isFileTopLevel ? this.headingText(item) : undefined
     if (heading) statements.push(new P.ASTHeadingInvocation(item, { heading }))
+    // a file's group, `group "The piles"`:  its heading's banner, as `## The piles` writes it (epic `language` P55)
+    if (heading && this.groupHeadingOf(item)) {
+      statements.push(new P.ASTBannerComment(item, { value: heading }))
+      return statements
+    }
     if (this.isBannerHeading(item, block.matched[index + 1])) {
       statements.push(new P.ASTBannerComment(item, { value: this.commentText(this.commentOnlyLine(item)!) }))
       return statements
@@ -466,10 +471,25 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     return description ? { name, description } : { name }
   }
 
-  /** Text of `item`, if it's a heading's line -- `undefined` for any other, or one with no text, e.g. `#####`. */
+  /**
+   * Text of `item`, if it's a heading's line -- `undefined` for any other, or one with no text, e.g. `#####`.
+   * - A file's group is one, `group "The piles"` (`groupHeadingOf()`).
+   */
   private headingText(item: P.Match): string | undefined {
+    const group = this.groupHeadingOf(item)
+    if (group) return (group.rule as unknown as SP.GroupRule).groupName(group)
     const comment = this.commentOnlyLine(item)
     return (comment && this.isHeading(comment) && this.commentText(comment).trim()) || undefined
+  }
+
+  /**
+   * `item`'s statement, if it's a group with no template, a file's heading:  `group "The piles"` (epic `language` P55).
+   * - Duck-typed, as `groupOpenedBy()`:  a group's rule that says `isFileHeading()`.
+   */
+  private groupHeadingOf(item: P.Match): P.Match | undefined {
+    const statement = this.statementOf(item)
+    const rule = statement?.rule as Partial<SP.GroupRule> & { isFileHeading?: (match: P.Match) => boolean }
+    return statement && rule.isFileHeading?.(statement) ? statement : undefined
   }
 
   /** Text of `comment`, without its comment symbol. */

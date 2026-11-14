@@ -2172,6 +2172,21 @@ classesEs.addRule(DefineGroup, {
   ]
 })
 
+classesEs.addRule(DefineGroup, {
+  syntax: "grupo {group:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ['grupo "Las pilas"', "", "una pila es una cosa"],
+          js: "export class Pila extends Thing {}"
+        }
+      ]
+    }
+  ]
+})
+
 // el menú de una plantilla, de sus acciones (épica `elemental-spell` P10):
 // `- su "menú del juego" es un menú de "repartir" y "deshacer"`
 classesEs.addRule(DefineMenu, {

@@ -2289,6 +2289,23 @@ classes.addRule(DefineGroup, {
   ]
 })
 
+// ... and at a file's top level, its heading (epic `language` P55, Q54):  `group "The piles"`, as `## The piles`
+classes.addRule(DefineGroup, {
+  syntax: "group {group:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "a file's heading, as `## The piles` is",
+          input: ['group "The piles"', "// Each kind of pile", "", "a pile is a thing"],
+          js: ["// Each kind of pile", "", "export class Pile extends Thing {}"]
+        }
+      ]
+    }
+  ]
+})
+
 classes.addRule(DefineMenu, {
   syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?",
   tests: [
