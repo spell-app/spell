@@ -2505,15 +2505,14 @@ function PropertiesCard(): JSX.Element {
           )}
         </Show>
       }
+      // Inspect app in the card's header, at its right before the eye (Owen, 2026-11-13, I60)
+      actions={<InspectAppButton slot="right" />}
     >
       <Show
         when={inspected()}
         keyed
         fallback={
-          <p class="InspectorTip">
-            <InspectAppButton />
-            {appTexts.text(Inspector.isInspecting ? "inspectorInspecting" : "inspectorTip")}
-          </p>
+          <p class="InspectorTip">{appTexts.text(Inspector.isInspecting ? "inspectorInspecting" : "inspectorTip")}</p>
         }
       >
         {(part) => {
@@ -3257,14 +3256,15 @@ export function InspectorToggle(): JSX.Element {
 
 /****************
  * ### `<InspectAppButton>`
- * Inspect app, in the top bar's Run | Edit group, after Edit (and in the properties card's tip):
+ * Inspect app, in the top bar's Run | Edit group, after Edit (and in the Inspector card's header):
  * select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
  * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
  * - `item`:  a menu item, icon only, for the bar's group (`<ModeButtons inspect>`);  else a bare icon.
+ * - `slot`:  the bare icon's place in a toolbar, `right` in a card's header.
  ****************/
-export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.Element {
+export function InspectAppButton(props: { id?: string; item?: boolean; slot?: string }): JSX.Element {
   const pressed = () => (Inspector.isInspecting ? "true" : "false")
   const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
   const inspect = () => {
@@ -3285,6 +3285,7 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
   ) : (
     <ui-icon
       id={props.id}
+      slot={props.slot}
       name="crosshairs"
       link=""
       class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}
