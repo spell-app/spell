@@ -1,4 +1,4 @@
-import { Match, Show, Switch, createSignal } from "solid-js"
+import { For, Match, Show, Switch, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { KnownFormat, LoadableFile } from "spell/util"
@@ -76,7 +76,8 @@ export class ChangeThis {
     if (!place || !project || !text.trim()) return
     try {
       for (const file of project.spellFiles) if (file.isDirty) await file.save(undefined)
-      const asked: SPACES.ChangeAsked = { ...place, text: text.trim() }
+      const sent = pictures().map(({ type, data }) => ({ type, data }))
+      const asked: SPACES.ChangeAsked = { ...place, text: text.trim(), ...(sent.length ? { pictures: sent } : {}) }
       const answer = await ChangeThis.fetchAnswer({
         url: CHANGES_URL,
         contents: asked,
@@ -120,7 +121,28 @@ export class ChangeThis {
     }
     setRequest(undefined)
     setWords("")
+    ChangeThis.removePictures()
     setBoxAt(undefined)
+  }
+
+  /**
+   * Add the pictures among `files` (pasted or dropped into the box, epic `editor` T62):  they go with the request.
+   * - Only PNG, JPEG, GIF and WebP, what the server takes;  anything else is passed over.
+   * - Nothing while a request is under way:  it has already gone.
+   */
+  static async addPictures(files: readonly File[]): Promise<void> {
+    if (request()) return
+    const added = await Promise.all(
+      files.filter((file) => PICTURE_TYPES.includes(file.type)).map((file) => pictureOf(file))
+    )
+    setPictures((kept) => [...kept, ...added])
+  }
+
+  /** Take the picture at `index` out of the box;  none:  every one. */
+  static removePictures(index?: number): void {
+    const gone = index === undefined ? pictures() : pictures().slice(index, index + 1)
+    for (const picture of gone) URL.revokeObjectURL(picture.url)
+    setPictures((kept) => (index === undefined ? [] : kept.filter((_, at) => at !== index)))
   }
 
   /**
@@ -175,6 +197,7 @@ export class ChangeThis {
  * The small box on what's selected:  a `<ui-popup>` at it, with what to change, then how the request is getting on.
  * - A popup, not a panel:  it covers nothing but the place it's about.
  * - Enter sends, shift+Enter starts a new line, Esc closes it, and a request under way goes on without it.
+ * - A picture pasted or dropped into it goes with the words, a thumbnail under them, its ✕ taking it out (epic `editor` T62).
  * - `ChangeThis.open()` opens it.
  ****************/
 export function ChangeThisBox(): JSX.Element {
@@ -189,7 +212,15 @@ export function ChangeThisBox(): JSX.Element {
           aria-label={appTexts.text("menuChangeThis")}
           ref={on("ui-closing", () => setBoxAt(undefined))}
         >
-          <div class="ChangeThisBox">
+          <div
+            class="ChangeThisBox"
+            onPaste={(event: ClipboardEvent) => takePictures(event, event.clipboardData)}
+            onDragOver={(event: DragEvent) => {
+              // a file dragged over:  it may be dropped here
+              if (event.dataTransfer?.types.includes("Files")) event.preventDefault()
+            }}
+            onDrop={(event: DragEvent) => takePictures(event, event.dataTransfer)}
+          >
             <label class="ChangeThisHeader">{appTexts.text("changeThisHeader")}</label>
             <ui-textarea
               grow=""
@@ -208,6 +239,26 @@ export function ChangeThisBox(): JSX.Element {
                 void ChangeThis.send(words())
               }}
             />
+            <Show when={pictures().length}>
+              <div class="ChangeThisPictures">
+                <For each={pictures()}>
+                  {(picture, index) => (
+                    <span class="ChangeThisPicture">
+                      <img src={picture.url} alt={appTexts.text("changeThisPicture")} />
+                      <Show when={!request()}>
+                        <ui-icon
+                          name="close"
+                          link=""
+                          label={appTexts.text("changeThisRemovePicture")}
+                          title={appTexts.text("changeThisRemovePicture")}
+                          onClick={() => ChangeThis.removePictures(index())}
+                        />
+                      </Show>
+                    </span>
+                  )}
+                </For>
+              </div>
+            </Show>
             <Switch>
               <Match when={request()?.status === "waiting" && !request()!.listening}>
                 <p>{appTexts.text("changeThisNobody")}</p>
@@ -256,6 +307,41 @@ let placeAsked: SPACES.ChangePlace | undefined
 
 /** The request under way, as last heard. */
 const [request, setRequest] = createSignal<SPACES.ChangeAnswer>()
+
+/** A picture in the box:  what's sent, and a URL of it for its thumbnail. */
+type BoxPicture = SPACES.ChangePicture & {
+  /** an object URL of its bytes, revoked as it leaves the box */
+  url: string
+}
+
+/** The pictures pasted or dropped into the box, in order (epic `editor` T62). */
+const [pictures, setPictures] = createSignal<BoxPicture[]>([])
+
+/** The pictures the server takes, by type:  `ChangeRequests`' too. */
+const PICTURE_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"]
+
+/**
+ * The box's paste or drop:  its pictures are taken, and nothing else of it happens;  words go in as ever.
+ * - `data`:  the clipboard's, or the drop's
+ */
+function takePictures(event: Event, data: DataTransfer | null): void {
+  const files = [...(data?.files ?? [])].filter((file) => PICTURE_TYPES.includes(file.type))
+  if (!files.length) return
+  event.preventDefault()
+  void ChangeThis.addPictures(files).catch((error: unknown) => editor.showError(error as Error))
+}
+
+/** `file` as a picture in the box:  its bytes as base64, and a URL for its thumbnail. */
+async function pictureOf(file: File): Promise<BoxPicture> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    // read as a data URL:  its result is text
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error ?? new Error(`ChangeThis:  can't read the picture ${file.name}`))
+    reader.readAsDataURL(file)
+  })
+  return { type: file.type, data: dataUrl.slice(dataUrl.indexOf(",") + 1), url: URL.createObjectURL(file) }
+}
 
 /** The attribute the compiler's mark is on a drawn element:  `SourceMarks`'. */
 const DRAWN_AT = "data-spell-at"

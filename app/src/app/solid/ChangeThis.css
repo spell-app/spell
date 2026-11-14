@@ -29,3 +29,37 @@ ui-popup.ChangeThisPopup::part(popup) {
   align-items: center;
   gap: 8px;
 }
+/* the pictures sent with it (epic `editor` T62):  thumbnails in a row under the words, each with its ✕ */
+.ChangeThisPictures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ChangeThisPicture {
+  position: relative;
+  display: inline-flex;
+
+  & img {
+    max-width: 96px;
+    max-height: 72px;
+    border: 1px solid var(--ui-border-color);
+    border-radius: 4px;
+    object-fit: contain;
+    background: var(--ui-background);
+  }
+  /* its ✕, a small disc on its corner */
+  & ui-icon {
+    position: absolute;
+    inset-block-start: -7px;
+    inset-inline-end: -7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--ui-background);
+    box-shadow: 0 0 0 1px var(--ui-border-color);
+    font-size: 9px;
+  }
+}

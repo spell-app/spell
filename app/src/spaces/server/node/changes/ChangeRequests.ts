@@ -25,11 +25,29 @@ export class ChangeRequests {
     return new ChangeRequests(join(environment.spellSpacesDir, INBOX_FILE))
   }
 
-  /** Add a request, for `diskPath`:  it waits for a session. */
-  add(asked: SPACES.ChangeAsked, diskPath: string): SPACES.ChangeRequest {
+  /**
+   * Add a request, for `diskPath`:  it waits for a session.
+   * - Its pictures (epic `editor` T62) are written beside the inbox, `__change-pictures/c3-1.png`, for the session to Read.
+   * - throws `TypeError` for a picture that isn't a PNG, JPEG, GIF or WebP
+   */
+  add({ pictures = [], ...asked }: SPACES.ChangeAsked, diskPath: string): SPACES.ChangeRequest {
+    const extensions = pictures.map(({ type }) => {
+      const extension = PICTURE_EXTENSIONS[type]
+      if (!extension) throw new TypeError(`ChangeRequests.add():  a picture of type ${type};  send PNG, JPEG, GIF or WebP`)
+      return extension
+    })
     return this.change((inbox) => {
       const id = `c${(inbox.lastId += 1)}`
       const request: SPACES.ChangeRequest = { ...asked, id, diskPath, status: "waiting", at: new Date().toISOString() }
+      if (pictures.length) {
+        const folder = join(dirname(this.file), PICTURES_FOLDER)
+        mkdirSync(folder, { recursive: true })
+        request.pictureFiles = pictures.map(({ data }, index) => {
+          const file = join(folder, `${id}-${index + 1}.${extensions[index]}`)
+          writeFileSync(file, Buffer.from(data, "base64"))
+          return file
+        })
+      }
       inbox.requests = [...inbox.requests, request].slice(-MOST_KEPT)
       return request
     })
@@ -151,6 +169,17 @@ type ChangeInbox = {
 
 /** The inbox's name, in spell-spaces:  `__` keeps it out of the project lists. */
 const INBOX_FILE = "__change-requests.json"
+
+/** Where a request's pictures are written, beside the inbox:  `__` keeps it out of the project lists too. */
+const PICTURES_FOLDER = "__change-pictures"
+
+/** The pictures a request takes, by type, and the extension each is written with. */
+const PICTURE_EXTENSIONS: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp"
+}
 
 /** How many finished requests stay:  the file stays small. */
 const MOST_KEPT = 50

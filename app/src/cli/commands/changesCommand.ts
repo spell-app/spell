@@ -59,6 +59,9 @@ function describeRequest(request: SPACES.ChangeRequest): string {
     "The code there:",
     ...request.excerpt.split("\n").map((line) => `  ${line}`),
     "",
+    ...(request.pictureFiles?.length
+      ? ["Pictures sent with it (Read each):", ...request.pictureFiles.map((file) => `  ${file}`), ""]
+      : []),
     "Change the project's files on disk, then say so, and listen for the next one:",
     `  spell app changes done ${request.id} "what you changed, in a few plain words"`,
     "  spell app changes wait    (in the background)",

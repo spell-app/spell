@@ -26,6 +26,16 @@ export type ChangePlace = {
 export type ChangeAsked = ChangePlace & {
   /** what the person typed */
   text: string
+  /** pictures pasted or dropped into the box with it (epic `editor` T62) */
+  pictures?: ChangePicture[]
+}
+
+/** A picture sent with a request:  its type and its bytes, as base64 (no `data:` prefix). */
+export type ChangePicture = {
+  /** `image/png`, `image/jpeg`, `image/gif` or `image/webp` */
+  type: string
+  /** its bytes, base64 */
+  data: string
 }
 
 /**
@@ -37,8 +47,13 @@ export type ChangeAsked = ChangePlace & {
  */
 export type ChangeStatus = "waiting" | "taken" | "done" | "failed"
 
-/** One request, as the inbox file holds it. */
-export type ChangeRequest = ChangeAsked & {
+/**
+ * One request, as the inbox file holds it.
+ * - Its pictures are files beside the inbox, by their absolute paths (`pictureFiles`):  never the bytes, so the file stays small.
+ */
+export type ChangeRequest = Omit<ChangeAsked, "pictures"> & {
+  /** the pictures sent with it, each a file on this machine, for the session to Read */
+  pictureFiles?: string[]
   /** its id:  `c3` */
   id: string
   /** the file's absolute path on this machine */

@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process"
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import os from "node:os"
 import path from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vite-plus/test"
@@ -38,6 +38,25 @@ describe("ChangeRequests", () => {
     expect(inbox.add(ASKED, "/disk/Proj.spell").id).toBe("c2")
     expect(inbox.of("c2")?.text).toBe("say Stop")
     expect(inbox.of("c9")).toBeUndefined()
+  })
+
+  it("writes the pictures sent with it beside the inbox, for the session to read (epic `editor` T62)", () => {
+    const png = Buffer.from("not really a png").toString("base64")
+    const request = inbox.add(
+      { ...ASKED, pictures: [{ type: "image/png", data: png }, { type: "image/jpeg", data: png }] },
+      "/disk/Proj.spell"
+    )
+    expect(request.pictureFiles).toEqual([
+      path.join(folder, "__change-pictures", "c1-1.png"),
+      path.join(folder, "__change-pictures", "c1-2.jpg")
+    ])
+    expect(readFileSync(request.pictureFiles![0]!, "utf8")).toBe("not really a png")
+    // the inbox keeps where they are, never their bytes
+    expect(readFileSync(inbox.file, "utf8")).not.toContain(png)
+    expect(inbox.of("c1")).not.toHaveProperty("pictures")
+    // a picture of a type it doesn't take:  refused, and nothing added
+    expect(() => inbox.add({ ...ASKED, pictures: [{ type: "image/svg+xml", data: png }] }, "/x")).toThrow(TypeError)
+    expect(inbox.all).toHaveLength(1)
   })
 
   it("is read afresh, so the command and the server see the same", () => {
