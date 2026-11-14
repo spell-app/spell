@@ -35,8 +35,6 @@ export class Counter extends View {
 }
 core.describeAction(Counter, "increment", { title: "Increment It", undoneAs: "Increment It" })
 
-core.describeAction(Counter, "increment", { title: "Increment It", undoneAs: "Increment It" })
-
 /** Tests */
 export function testCounting(...args) {
   return sendCall("test_counting", args)
