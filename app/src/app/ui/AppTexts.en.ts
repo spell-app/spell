@@ -305,7 +305,6 @@ export const APP_TEXTS = {
   find: "Find",
   compiledCode: "Compiled Code",
   programPanel: "Program Panel",
-  inspectorCard: "Inspector:  {card}",
   inspectApp: "Inspect App",
   stopInspecting: "Stop Inspecting",
   inspectHelp:
@@ -549,6 +548,7 @@ export const APP_TEXTS = {
   // an action's run button's tip:  `{action}` is its words, `play it`
   inspectorActionRun: "Run {action}",
   inspectorProperties: "Properties",
+  inspectorClose: "Close the Inspector",
   inspectorHide: "Hide this card",
   inspectorLetGo: "Let go of {part} (Esc)",
   inspectorExpandAll: "Expand all",

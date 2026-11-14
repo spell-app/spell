@@ -13,10 +13,8 @@ import {
   CodeShown,
   EditorMode,
   EditorTheme,
-  INSPECTOR_PANELS,
   Inspector,
   LineNumbers,
-  PANEL_TEXTS,
   PROJECT_ICON,
   PartMenuItems,
   ProgramPanelShown,
@@ -327,7 +325,6 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
         partActions: { draw: () => <PartMenuItems /> }
       })
     )
-    Object.assign(app.viewMenu, loaded.parts({ inspectorCards: { draw: () => <InspectorCards /> } }))
   })
   const fileName = tracked(() => (editor.file ? SP.SpellProject.sourceNameOf(editor.file.path) : ""))
   followEditor(spell, () => ({
@@ -390,22 +387,6 @@ type BarMenuName = (typeof BAR_MENUS)[number]
 function titleOf(spell: EditorSpell, name: BarMenuName): string {
   const { title } = spell.editor[name]
   return appTexts.titles[title] ?? title
-}
-
-/** View's Inspector cards:  a row each, ticked while it shows. */
-function InspectorCards(): JSX.Element {
-  return (
-    <For each={INSPECTOR_PANELS}>
-      {(panel) => (
-        <Action
-          menu
-          title={appTexts.text("inspectorCard", { card: appTexts.text(PANEL_TEXTS[panel]) })}
-          active={Inspector.isOpen && Inspector.isShown(panel)}
-          onClick={() => Inspector.setShown(panel, !(Inspector.isOpen && Inspector.isShown(panel)))}
-        />
-      )}
-    </For>
-  )
 }
 
 /****************
@@ -557,7 +538,7 @@ function handOverActions(app: SpellEditorApp) {
       CodeOutputShown.toggle()
     },
     showProgramPanel: () => toggleProgramPanel(app.running ? "run" : "edit"),
-    showInspector: () => Inspector.toggle(),
+    showInspector: () => Inspector.showOrHide(),
     showLineNumbers: () => LineNumbers.toggle(),
     compileAndRun: () => editor.compileApp(),
     restart: () => editor.restartApp(),

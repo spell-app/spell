@@ -158,6 +158,18 @@ export class Inspector {
   }
 
   /**
+   * View › Inspector:  open the column with every card, or close it;  remember which.
+   * - Opening doesn't start inspecting:  that's Inspect app's (Owen, 2026-11-14, I75).
+   * - Every card, so one hidden by its ✕ comes back:  View lists no cards of its own (I74).
+   */
+  static showOrHide(): void {
+    if (isOpen()) return Inspector.close()
+    setPanels(INSPECTOR_PANELS)
+    setOpen(true)
+    editorPrefs.set(OPEN_PREF, true)
+  }
+
+  /**
    * Open the column, inspecting, with no help popup:  for a page that says what to do itself.
    * - SIDE EFFECT:  the help counts as seen.
    */
@@ -2677,6 +2689,12 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
         onClick={() => Inspector.setScope(props.part, "this")}
       >
         {these()}
+        {/* the pill's ✕ inside its pill, as a lone pill has it:  a toolbar draws its own children, and set beside them it rode high (I74) */}
+        <Show when={isWhole()}>
+          <span class="InspectorScopeLetGo">
+            <LetGo label={props.part.crumbs[0]!.label} />
+          </span>
+        </Show>
       </ui-item>
       <ui-item
         selected={scope() === "all"}
@@ -2685,9 +2703,6 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
       >
         {appTexts.text("inspectorScopeAll", { Types: titleCase(P.pluralize(typeWords())) })}
       </ui-item>
-      <Show when={isWhole()}>
-        <LetGo label={props.part.crumbs[0]!.label} />
-      </Show>
     </Show>
   )
 }

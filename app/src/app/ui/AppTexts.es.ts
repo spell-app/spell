@@ -307,7 +307,6 @@ const APP_TEXTS_ES: AppTextPack = {
   find: "Buscar",
   compiledCode: "Código compilado",
   programPanel: "Panel del programa",
-  inspectorCard: "Inspector:  {card}",
   inspectApp: "Inspeccionar la app",
   stopInspecting: "Dejar de inspeccionar",
   inspectHelp:
@@ -364,6 +363,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorActionNotNow: "No se puede hacer ahora",
   inspectorActionRun: "Ejecutar {action}",
   inspectorProperties: "Propiedades",
+  inspectorClose: "Cerrar el Inspector",
   inspectorHide: "Ocultar esta tarjeta",
   inspectorLetGo: "Soltar {part} (Esc)",
   inspectorExpandAll: "Desplegar todo",

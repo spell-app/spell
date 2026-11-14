@@ -361,8 +361,6 @@ an "edit menu" is a bar menu
 a "view menu" is a bar menu
 	// View:  Run or Edit, then what shows, each ticked while it does
 	its title is "View"
-	its "inspector cards" is an editor part
-		// A row for each of the Inspector's cards:  the editor's own
 	to draw it
 		<menu direction="vertical" size="small" class="BarMenuItems" icon-column ticks>
 			<action "run mode"/>
@@ -374,7 +372,6 @@ a "view menu" is a bar menu
 			<action "show program panel"/>
 			<divider/>
 			<action "show inspector"/>
-			{draw its inspector cards}
 			<divider/>
 			<action "show line numbers"/>
 		</menu>
