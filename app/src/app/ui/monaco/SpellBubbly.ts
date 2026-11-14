@@ -162,6 +162,9 @@ export class SpellBubbly {
     this.shapes = Object.assign(document.createElement("div"), { className: "bubbly-shapes" })
     this.layer.append(this.shapes)
     container.prepend(this.layer)
+    this.descriptionSheet = Object.assign(document.createElement("style"), { className: "bubbly-description-sheet" })
+    container.dataset.bubblySheet = String(++SpellBubbly.sheets)
+    container.append(this.descriptionSheet)
   }
 
   /** Stop drawing:  every mark, shape, room and class gone, the lines their height again. */
@@ -174,6 +177,10 @@ export class SpellBubbly {
     this.setZones([])
     this.layer?.remove()
     this.layer = this.shapes = undefined
+    this.descriptionSheet?.remove()
+    this.descriptionSheet = undefined
+    this.descriptionWidths.clear()
+    this.descriptionWordWidths.clear()
     editor.getContainerDomNode().classList.remove(...BOX_CLASSES, MARKUP_CLASS)
     editor.updateOptions({ lineHeight: this.lineHeightBefore })
   }
@@ -214,6 +221,7 @@ export class SpellBubbly {
       else this.parseWaits = 0
       this.laidOut = BubblyMarks.of(drawing, model.getOptions().tabSize, (tag) => isViewTag(within, tag))
       this.marks!.set(this.laidOut.marks)
+      this.resetDescriptions()
     } catch (error) {
       console.error("SpellBubbly.relayout():  couldn't lay the code out", error)
       this.laidOut = undefined
@@ -273,7 +281,99 @@ export class SpellBubbly {
     if (!visible.length) return shapes.replaceChildren()
     view.first = visible[0]!.startLineNumber
     view.last = visible.at(-1)!.endLineNumber
+    // each head's description against the window's edge:  its lines drawn again, so Monaco measures them anew
+    if (this.fitDescriptions(laidOut.shapes, view)) editor.render(true)
     shapes.replaceChildren(...this.drawAll(laidOut.shapes, view))
+  }
+
+  ////////////////
+  // ## Descriptions at the window's edge
+  ////////////////
+
+  /**
+   * Widen the spacer before each shown head's description, `-- A playing card`, so it ends at the window's right
+   * edge, a band's padding in, its band reaching there too (Owen);  returns whether any changed.
+   * - The window's edge where it's scrolled to, NOT the widest line's:  but never past where the code alone could be
+   *   scrolled, or each scroll to the right would make room to scroll further (`naturalWidth`).
+   * - Too narrow a window:  no room, the description right after the code as before.
+   * - Each spacer's width is a rule in the editor's own sheet (`bubbly-description-<n>`):  a decoration's class
+   *   can't change without the text being marked again.
+   */
+  private fitDescriptions(shapes: Shape[], view: View): boolean {
+    const { editor } = this
+    const layout = editor.getLayoutInfo()
+    // the text's width in the window:  its content less the scrollbar over its right side
+    const shown = layout.contentWidth - layout.verticalScrollbarWidth
+    // what the code alone needs, read while every spacer is empty:  just after it's laid out
+    this.naturalWidth ??= editor.getScrollWidth()
+    const right = Math.min(editor.getScrollLeft() + shown, Math.max(shown, this.naturalWidth)) - view.measures.padRight
+    let isChanged = false
+    const fit = (shapes: Shape[]) => {
+      for (const shape of shapes) {
+        if (shape.kind !== "block") continue
+        const range = shape.description && view.ranges[shape.description.place]
+        const line = range?.startLineNumber ?? 0
+        if (range && line >= view.first && line <= view.last) {
+          const { spacer } = shape.description!
+          const was = this.descriptionWidths.get(spacer) ?? 0
+          // where its spacer starts:  Monaco's place for a column is before the room injected there
+          const start = this.xOf(line, range.startColumn)
+          const words = this.descriptionWords(spacer, line, range)
+          const width = Math.max(0, Math.round(right - start - words))
+          if (width !== was) {
+            this.descriptionWidths.set(spacer, width)
+            isChanged = true
+          }
+        }
+        fit(shape.inside)
+      }
+    }
+    fit(shapes)
+    if (isChanged) this.writeDescriptionSheet()
+    return isChanged
+  }
+
+  /**
+   * How wide a description's words are, `-- A playing card`:  read while its spacer is still empty, and kept.
+   * - HACK:  Monaco's place for the END of a line whose spacer is wider than its sheet first said counts that spacer
+   *   twice (measured:  865px for a line its page draws 653px wide, its spacer 212px);  a place inside it is right.
+   */
+  private descriptionWords(spacer: string, line: number, range: monaco.IRange): number {
+    let words = this.descriptionWordWidths.get(spacer)
+    if (words === undefined) {
+      words = this.xOf(line, range.endColumn) - this.xOf(line, range.startColumn)
+      this.descriptionWordWidths.set(spacer, words)
+    }
+    return words
+  }
+
+  /** Where a head's line ends, when it ends in a description `fitDescriptions()` has placed. */
+  private descriptionEnd(shape: BubblyBlockShape, view: View): number | undefined {
+    const range = shape.description && view.ranges[shape.description.place]
+    const width = shape.description && this.descriptionWidths.get(shape.description.spacer)
+    if (!range || width === undefined) return undefined
+    const words = this.descriptionWordWidths.get(shape.description!.spacer)!
+    return this.xOf(range.startLineNumber, range.startColumn) + width + words
+  }
+
+  /** Every description's spacer empty again, and the code's own width read afresh:  its marks were made anew. */
+  private resetDescriptions() {
+    this.naturalWidth = undefined
+    this.descriptionWordWidths.clear()
+    if (!this.descriptionWidths.size) return
+    this.descriptionWidths.clear()
+    this.writeDescriptionSheet()
+    this.editor.render(true)
+  }
+
+  /** The editor's own sheet:  each description's spacer as wide as `fitDescriptions()` worked out. */
+  private writeDescriptionSheet() {
+    if (!this.descriptionSheet) return
+    // as strong as the sheet's rule for every such spacer, and more:  `.bubbly.bubbly-monaco .bubbly-description-spacer`
+    const box = `[data-bubbly-sheet="${this.editor.getContainerDomNode().dataset.bubblySheet}"].bubbly.bubbly-monaco`
+    this.descriptionSheet.textContent = [...this.descriptionWidths]
+      .map(([spacer, width]) => `${box} .${spacer} { width: ${width}px; }`)
+      .join("\n")
   }
 
   /**
@@ -376,7 +476,8 @@ export class SpellBubbly {
     const left = view.lefts.get(shape)!
     if (headLine >= view.first) {
       const ends = shape.ends
-      const lineEnd = this.xOf(headLine, editor.getModel()!.getLineMaxColumn(headLine))
+      const lineEnd =
+        this.descriptionEnd(shape, view) ?? this.xOf(headLine, editor.getModel()!.getLineMaxColumn(headLine))
       const right = !ends.endsWithInput
         ? lineEnd + measures.padRight
         : lineEnd + (ends.endsQuoted ? measures.quoteSpacer : measures.inputSpacer) + measures.endInset
@@ -726,6 +827,21 @@ export class SpellBubbly {
   /** The layer behind the editor, and the shapes in it, while drawing. */
   private layer: HTMLElement | undefined
   private shapes: HTMLElement | undefined
+
+  /** The editor's own sheet:  the width of each spacer before a head's description (`fitDescriptions()`). */
+  private descriptionSheet: HTMLStyleElement | undefined
+
+  /** Each description's spacer's width, by its class. */
+  private readonly descriptionWidths = new Map<string, number>()
+
+  /** Each description's words' width, by its spacer's class:  read while the spacer was empty (`descriptionWords()`). */
+  private readonly descriptionWordWidths = new Map<string, number>()
+
+  /** How wide the code alone is, its descriptions' spacers empty:  how far right they may reach. */
+  private naturalWidth: number | undefined
+
+  /** How many editors have had a sheet of their own:  each one's box is told apart by its number. */
+  private static sheets = 0
 
   /** The view zones under declarations, and what they were made from. */
   private zoneIds: string[] = []

@@ -31,6 +31,19 @@ export class BubblyHtml {
   /** A Spell expression's `{` and `}`:  a step darker than the other marks, so a `{…}` reads as one (Owen). */
   static readonly BRACE = "bubbly-brace"
 
+  /**
+   * The `--` that starts a description (`-- A playing card`):  drawn as an em dash, `—`, over the file's own `--`,
+   * which is kept, see-through, so a copied line copies it (Owen).
+   */
+  static readonly DASH = "bubbly-dash"
+
+  /** A comment's text as HTML:  its starting `--` a `DASH`. */
+  static commentHtml(comment: string): string {
+    return comment.startsWith("--")
+      ? `<span class="${BubblyHtml.DASH}">--</span>${escape(comment.slice(2))}`
+      : escape(comment)
+  }
+
   /** `marks`, faint marks' text, as HTML:  each `{` and `}` among them a `BRACE`. */
   static marksHtml(marks: string): string {
     return escape(marks).replace(/[{}]/g, (brace) => `<span class="${BubblyHtml.BRACE}">${brace}</span>`)
@@ -95,7 +108,8 @@ class BubblyWriter {
         : first?.kind === "heading"
           ? " bubbly-heading"
           : ""
-    const body = style === " bubbly-comment" ? escape(this.text.slice(line.start, line.end)) : this.pieces(line)
+    const body =
+      style === " bubbly-comment" ? BubblyHtml.commentHtml(this.text.slice(line.start, line.end)) : this.pieces(line)
     return `<p class="bubbly-line${style} bubbly-indent-${Math.min(line.depth, MAX_INDENT)}">${body}</p>`
   }
 
@@ -121,6 +135,8 @@ class BubblyWriter {
           : `<span class="bubbly-input">${escape(words)}</span>`
       case "mark":
         return `<span class="${BubblyHtml.classesFor(piece.kind)}">${BubblyHtml.marksHtml(words)}</span>`
+      case "comment":
+        return `<span class="${BubblyHtml.classesFor(piece.kind)}">${BubblyHtml.commentHtml(words)}</span>`
       default:
         return `<span class="${BubblyHtml.classesFor(piece.kind)}">${escape(words)}</span>`
     }

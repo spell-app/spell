@@ -423,6 +423,24 @@
     font-style: italic;
   }
 
+  /*
+   * the `--` that starts a description, `-- A playing card`:  an em dash, `—`, centred over the file's own `--`,
+   * which keeps its place, see-through, so a copied line copies it and the caret stays on its letters (Owen)
+   */
+  .bubbly-dash {
+    position: relative;
+    -webkit-text-fill-color: transparent;
+  }
+  .bubbly-dash::before {
+    content: "\2014";
+    position: absolute;
+    inset: 0;
+    text-align: center;
+    /* its line as tall as the `--` it covers, so the dash sits where the hyphens did */
+    line-height: normal;
+    -webkit-text-fill-color: currentcolor;
+  }
+
   /* a note at the end of a head, on its band:  darker than a mark there, so it reads on the band's colour */
   :is(.bubbly-head-pill, .bubbly-pill) .bubbly-comment,
   .bubbly-comment.bubbly-band-comment {
@@ -1062,6 +1080,29 @@
     }
   } /* END bubbly-html */
 
+  /****** a head's description, `-- A playing card`:  at the drawing's right edge, its band reaching there (Owen) ******/
+  /*
+   * - as the editor draws it, at the window's edge:  on a page, the drawing's widest line's
+   * - each block round it as wide as the drawing, so its band can be;  their bodies' paper is the paper's colour
+   */
+  &:not(.bubbly-monaco, .bubbly-html) {
+    .bubbly-block:has(:is(.bubbly-head-pill, .bubbly-pill) > .bubbly-comment:last-child) {
+      width: auto;
+      min-width: max-content;
+      grid-template-columns: var(--bubbly-gutter) minmax(max-content, 1fr);
+    }
+    :is(.bubbly-block > .bubbly-head-pill, .bubbly-pill):has(> .bubbly-comment:last-child) {
+      display: flex;
+      justify-self: stretch;
+      width: auto;
+      white-space: pre;
+      > .bubbly-comment:last-child {
+        margin-left: auto;
+        padding-left: 1em;
+      }
+    }
+  }
+
   /****** Spell on a page, laid out as the editor lays it out:  the same rows, indents and gaps (Owen) ******/
   /*
    * The editor (`SpellBubbly`) draws on its lines:  every line one row tall, a band in the middle of its row, each
@@ -1228,6 +1269,13 @@
     /* either side of an input's words:  its gap and its white, as on the page */
     .bubbly-input-spacer {
       width: calc((var(--bubbly-input-gap) + var(--bubbly-input-pad)) * var(--bubbly-monaco-scale));
+    }
+    /*
+     * before a head's description, `-- A playing card`:  none, till the code works out how much puts it at the window's
+     * right edge, line by line (`SpellBubbly.fitDescriptions()`, Owen)
+     */
+    .bubbly-description-spacer {
+      width: 0;
     }
     /* outside a quoted input's marks:  half the page's, as the file's own `"` takes room of its own */
     .bubbly-quote-spacer {

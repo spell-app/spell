@@ -3,7 +3,7 @@ import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import type { MarkupPartOfSpeech } from "spell/app/app/components/spell-code/BubblyMarkup"
 import type { monaco } from "./monaco"
 import { MarkupMarks, type MarkupShape } from "./MarkupMarks"
-import { TextMarks, spacer } from "./TextMarks"
+import { TextMarks, spacer, type Spacers } from "./TextMarks"
 
 /****************
  * ### `BubblyMarks`
@@ -39,6 +39,9 @@ export class BubblyMarks extends TextMarks {
 
   /** A drawing's tags, `<text color="blue">`:  drawn as HTML is (`MarkupMarks`), so Spell's marks leave them alone. */
   private readonly tags: Array<{ start: number; end: number }> = []
+
+  /** How many head lines' descriptions it has marked:  each one's spacer is `bubbly-description-<n>`. */
+  private descriptions = 0
 
   /**
    * `tabSize`:  how many columns a tab takes, as the editor shows it:  the spacer before a head's last tab is that many
@@ -108,7 +111,8 @@ export class BubblyMarks extends TextMarks {
     }
     into.push(shape)
     this.headSpacer(block.head.start)
-    this.line(block.head, shape.inside, { band: block.partOfSpeech })
+    const description = this.line(block.head, shape.inside, { band: block.partOfSpeech })
+    if (description) shape.description = description
     this.nodes(block.body, shape.inside)
   }
 
@@ -142,7 +146,8 @@ export class BubblyMarks extends TextMarks {
     line: SP.BubblyLine,
     into: Array<BubblyShape | MarkupShape>,
     head: { band?: SP.BubblyPartOfSpeech } = {}
-  ) {
+  ): BubblyBlockShape["description"] {
+    let description: BubblyBlockShape["description"]
     for (const stretch of SP.BubblyStretches.ofLine(this.drawing.text, line, head)) {
       const { start, end, kind } = stretch
       // a drawing's tag:  HTML's marks
@@ -152,10 +157,33 @@ export class BubblyMarks extends TextMarks {
       else if (kind === "quote-close")
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: spacer("quote", "after") })
       else if (kind === "input" || kind === "choice") this.input(stretch, into)
-      else if (kind === "comment" && head.band) this.mark(start, end, `${BubblyHtml.classesFor(kind)} ${BAND_COMMENT}`)
+      else if (kind === "comment" && head.band) description = this.description(start, end)
+      else if (kind === "comment") this.comment(start, end, BubblyHtml.classesFor(kind))
       else if (kind === "mark") this.marksIn(start, end)
       else this.mark(start, end, BubblyHtml.classesFor(kind))
     }
+    return description
+  }
+
+  /**
+   * A head line's description, `-- A playing card` at its end, on its band:  right-aligned at the window's edge, its
+   * band reaching there too (Owen);  returns its mark and its spacer's class.
+   * - The room before it is a spacer of its own, `bubbly-description-<n>`, as wide as `SpellBubbly` works out for it,
+   *   line by line, as the window's width and scroll change:  the caret stays on its letters.
+   */
+  private description(start: number, end: number): BubblyBlockShape["description"] {
+    const spacerClass = `${DESCRIPTION}${this.descriptions++}`
+    const own = spacer("description", "before")
+    const before = { ...own, inlineClassName: `${own.inlineClassName} ${spacerClass}` }
+    this.comment(start, end, `${BubblyHtml.classesFor("comment")} ${BAND_COMMENT}`, { before })
+    return { place: this.place(start, end), spacer: spacerClass }
+  }
+
+  /** A comment, in `classes`;  the `--` that starts a description drawn as an em dash over it (`BubblyHtml.DASH`). */
+  private comment(start: number, end: number, classes: string, spacers: Spacers = {}) {
+    if (!this.drawing.text.startsWith("--", start)) return this.mark(start, end, classes, spacers)
+    this.mark(start, start + 2, `${classes} ${BubblyHtml.DASH}`, spacers)
+    return this.mark(start + 2, end, classes)
   }
 
   /** Marks, faint;  but a Spell expression's `{` and `}` a step darker, so it reads as one (`bubbly-brace`, Owen). */
@@ -222,6 +250,16 @@ export type BubblyBlockShape = {
   hasBody: boolean
   /** whether its head starts or ends with a pill, and a quoted one */
   ends: { startsWithInput: boolean; endsWithInput: boolean; endsQuoted: boolean }
+  /**
+   * the mark on its head's description, `-- A playing card` at its end:  right-aligned at the window's edge, its band
+   * reaching there (Owen)
+   */
+  description?: {
+    /** the mark on it, from its `--` to the line's end */
+    place: number
+    /** the class of the spacer before it, `bubbly-description-<n>`:  `SpellBubbly` sets its width */
+    spacer: string
+  }
   /** the pills on its head and its lines, and the blocks in its body;  a drawing's tags too */
   inside: Array<BubblyShape | MarkupShape>
 }
@@ -238,6 +276,9 @@ export type BubblyInputShape = {
   /** a tag's `{…}` value, worked out as it runs:  its pill inverted, a shade of its tag's colour (Owen) */
   expressionIn?: MarkupPartOfSpeech
 }
+
+/** The class of the spacer before a head's description, then its number:  `bubbly-description-3`. */
+export const DESCRIPTION = "bubbly-description-"
 
 /** The class of the name a head defines, `"card"` in `a "card" is a view`:  bold. */
 const NAME = "bubbly-name"
