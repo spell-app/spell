@@ -348,7 +348,8 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const docs = new Map<P.Match, DocComment>()
     block.matched.forEach((item, index) => {
       const statement = item instanceof P.Match ? this.statementOf(item) : undefined
-      if (!statement || !statement.rule.getDeclaration(statement)) return
+      if (!statement || !(statement.rule.getDeclaration(statement) || this.describesItsMethod(item as P.Match, statement)))
+        return
       // the first comment under it, in its body or a block no line took (epic `language` P48)
       const below = this.descriptionBelow(statement, block.matched[index + 1])
       if (below) {
@@ -413,6 +414,16 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const heading = this.commentOnlyLine(item)
     const following = this.commentOnlyLine(next)
     return !!heading && this.isHeading(heading) && !!following && !this.isHeading(following)
+  }
+
+  /**
+   * Does `item`'s line end in a description, `-- ...`, of a method it makes that declares nothing:
+   * a drawing, `to draw its placeholder  -- a grey ace` (epic `language` P55, Q55)?
+   */
+  private describesItsMethod(item: P.Match, statement: P.Match): boolean {
+    const onLine = item.matched.find((it): it is P.Match => this.isComment(it))
+    const symbol = onLine && (onLine.tokens[0] as P.CommentToken).commentSymbol
+    return symbol === DESCRIPTION_SYMBOL && statement.AST instanceof P.ASTPropertyDefinition
   }
 
   /** `item`'s statement, if it's a `line` with one. */
@@ -558,3 +569,6 @@ export type BlockMatchData = {
 type CatchesLineAbove = {
   catchesLineAbove?(match: P.Match, statements: P.ASTNode[], from: number): boolean
 }
+
+/** A line's description comment, `-- ...`:  `a "column" is a pile  -- A column, built down from king to ace`. */
+const DESCRIPTION_SYMBOL = "--"

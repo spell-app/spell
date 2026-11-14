@@ -205,7 +205,7 @@ coreEs.addRule(CommentLine, {
       tests: [
         ["//", "//"],
         ["// hola", "// hola"],
-        ["-- hola", "//-- hola"],
+        ["-- hola", "// hola"],
         ["## hola", "//## hola"],
         ["//    hola qué tal", "//    hola qué tal"]
       ]

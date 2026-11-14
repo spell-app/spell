@@ -2089,6 +2089,69 @@ classesEs.addRule(DrawIt, {
             "}",
             "core.useElement(Pila, PilaElement)"
           ]
+        },
+        {
+          title:
+            "a `--` at its line's end is its description, a re-opened type's a plain comment (epic `language` P55, Q55)",
+          input: [
+            'una "pila" es una lista visible de cosas',
+            "\tpara dibujar su marcador  -- un as gris",
+            "\t\t<texto>🂠</texto>",
+            "una pila  -- la pila otra vez",
+            "\tal clic",
+            "\t\timprimir 1"
+          ],
+          js: [
+            "export class Pila extends ViewableList {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  /** un as gris */",
+            "  drawItsPlaceholder() {",
+            '    return h("texto", { part: "placeholder" }, "🂠")',
+            "  }",
+            "",
+            "  onClic(event) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "// la pila otra vez"
+          ],
+          ts: [
+            "export class Pila extends ViewableList<Thing> {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  /** un as gris */",
+            "  drawItsPlaceholder() {",
+            '    return <texto part="placeholder">🂠</texto>',
+            "  }",
+            "",
+            "  onClic(event: any /* spell: type unknown */) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pila>`:  a pila, drawn in its own element, e.g. by `draw the pila`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pila's properties;  its methods call its pila's.",
+            " * - What every view's element does, e.g. drawing its pila, is `SpellElement`'s.",
+            " */",
+            "export class PilaElement extends SpellElement<Pila> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pila", "pila", [])',
+            "",
+            "  drawItsPlaceholder() {",
+            "    return this.currentThing?.drawItsPlaceholder()",
+            "  }",
+            "",
+            "  onClic(event: any /* spell: type unknown */) {",
+            "    return this.currentThing?.onClic(event)",
+            "  }",
+            "}",
+            "core.useElement(Pila, PilaElement)",
+            "// la pila otra vez"
+          ]
         }
       ]
     }
