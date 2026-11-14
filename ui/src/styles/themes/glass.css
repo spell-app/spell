@@ -17,6 +17,8 @@
     --glass-surface-faint: light-dark(#ffffff66, #ffffff0d);
     --glass-edge: light-dark(#ffffffbf, #ffffff1f);
     --glass-hairline: light-dark(#3c3c431f, #ffffff14);
+    --glass-field-edge: light-dark(#3c3c4338, #ffffff14);
+    --glass-field-edge-hover: light-dark(#3c3c4359, #ffffff2e);
     --glass-track: light-dark(#7676801f, #7676803d);
     --glass-track-solid: light-dark(#e9e9ee, #3a3846);
     --glass-blur: blur(28px) saturate(1.7);
@@ -119,13 +121,13 @@
     --ui-checkbox-radius: var(--ui-radius-circle);
     --ui-input-radius: var(--ui-radius-m);
     --ui-input-background: light-dark(#ffffffb3, #ffffff0f);
-    --ui-input-border-color: var(--glass-hairline);
-    --ui-input-border-color-hover: var(--ui-border-color-strong);
+    --ui-input-border-color: var(--glass-field-edge);
+    --ui-input-border-color-hover: var(--glass-field-edge-hover);
     --ui-input-border-color-focus: var(--ui-focus-color);
     --ui-dropdown-radius: var(--ui-radius-m);
     --ui-dropdown-background: light-dark(#ffffffb3, #ffffff0f);
-    --ui-dropdown-border-color: var(--glass-hairline);
-    --ui-dropdown-border-color-hover: var(--ui-border-color-strong);
+    --ui-dropdown-border-color: var(--glass-field-edge);
+    --ui-dropdown-border-color-hover: var(--glass-field-edge-hover);
     --ui-menu-radius: var(--ui-radius-m);
     --ui-menu-text-active-weight: 600;
     --ui-menu-background: var(--glass-surface);

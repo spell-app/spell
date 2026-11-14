@@ -10,6 +10,7 @@
       radial-gradient(at 72% 92%, light-dark(#b8e4ff, #1f4d7a) 0, transparent 46%);
     --ui-bar-track-radius: var(--ui-radius-pill);
     --ui-bar-wallpaper-tint: light-dark(#ffffff80, #1e1c26d9);
+    --ui-panel-pane-background: light-dark(#ffffff80, var(--glass-surface));
     --ui-code-color: light-dark(#2b2238, #efe8f7);
     --ui-code-heading: light-dark(#6f3cc4, #d3b8ff);
     --ui-code-comment: light-dark(#6e6285, #a99bc4);

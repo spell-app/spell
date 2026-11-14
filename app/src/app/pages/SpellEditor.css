@@ -12,6 +12,21 @@
   min-width: 300px;
 }
 
+/*
+ * a narrow window (900px) still shows the app:  it keeps 320px, a phone's width, and the code 240px;
+ * what's left comes out of the Inspector, down to its 300px (epic `editor` I11:  the app was 244px at 900, and
+ * after a drag it took every px the window lost)
+ * - a phone stacks the panes instead (below)
+ */
+@media (--ui-tablet), (--ui-computer) {
+  #SpellEditor .EditorColumns > .SplitPane:has(> .AppPane) {
+    min-width: 320px;
+  }
+  #SpellEditor .EditorColumns > .EditorCode {
+    min-width: 240px;
+  }
+}
+
 /* `<AppPane>`:  its header, then the program, filling the rest */
 .AppPane {
   flex: 1 1 auto;
