@@ -220,28 +220,39 @@ export function testCardSetup() {
   })
 }
 // -----------
-core.heading("A deck")
-////////////
-// ## A deck
-////////////
-// The 52 cards of a standard deck, ace of clubs first.
-
+/** a deck of playing cards */
 @thing
-export class Deck extends List<Card> {
+export class Deck extends ViewableList<Card> {
   static instanceType = Card
+  static elementTag = core.defineElement(this, "test-project")
 
-  /** One of each card, ace of clubs first:  each starts face down, as every two sided view does */
+  /** Create one of each card, ace of clubs first */
   create() {
     Card.Ranks.forEach((rank: Rank) => Card.Suits.forEach((suit: Suit) => this.append(new Card({ rank: rank, suit: suit }))))
   }
 
-  /** Its cards' short names, top to bottom */
+  /** its card names, top to bottom */
   @derived get shortName() {
     const cardNames = new List<string>({ instanceType: "text" })
     this.forEach((card) => cardNames.append(card.shortName))
     return `deck: ${cardNames}`
   }
 }
+
+/**
+ * `<test-project-deck>`:  a deck, drawn in its own element, e.g. by `draw the deck`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its deck's properties;  its methods call its deck's.
+ * - What every view's element does, e.g. drawing its deck, is `SpellElement`'s.
+ */
+export class DeckElement extends SpellElement<Deck> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-deck", "deck", [])
+
+  create() {
+    return this.currentThing?.create()
+  }
+}
+core.useElement(Deck, DeckElement)
 
 export function testANewDeck() {
   return core.test("test a new deck", function testANewDeck() {
@@ -570,12 +581,12 @@ export class Solitaire extends App {
   @drawn draw() {
     return (
       <>
-        <ui-segment inverted={true} attach="top" color="">
-          <ui-toolbar class="GameBar" aria-label="Game" appearance="pills" inverted={true} size="small" shrinkable={true}>
-            <ui-text slot="title" size="large" heavy={true}>Solitaire</ui-text>
-            {core.drawAction(this, "autoPlay", { "in-menu": true })}
+        <ui-segment inverted={true} attach="top">
+          <ui-toolbar class="GameBar" appearance="secondary" inverted={true} size="small" shrinkable={true}>
+            <ui-text slot="title" size="large" heavy={true}>Spell Solitaire</ui-text>
             {core.drawAction(this, "cheat", { "in-menu": true })}
-            {core.drawAction(this, "restartTheGame", { "in-menu": true })}
+            {core.drawAction(this, "autoPlay", { "in-menu": true })}
+            {core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true })}
             <ui-action kind="divider" />
             {core.drawAction(this, "undo", { "in-menu": true })}
             {core.drawAction(this, "redo", { "in-menu": true })}
@@ -602,7 +613,7 @@ export class Solitaire extends App {
       </>
     )
   }
-  // <number "score"/>
+  // <number "score" />
   @prop({ type: "number" })
   accessor score!: number
   // <stock-pile "stock"/>
@@ -915,6 +926,8 @@ declare module "@solidjs/web/types/jsx.js" {
     interface IntrinsicElements {
       /** `CardElement` */
       "test-project-card": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `DeckElement` */
+      "test-project-deck": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `PileElement` */
       "test-project-pile": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `StockPileElement` */

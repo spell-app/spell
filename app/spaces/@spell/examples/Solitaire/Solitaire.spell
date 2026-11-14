@@ -12,18 +12,18 @@ solitaire is an app
 		restart the game
 
 	to draw it
-		<segment inverted attach="top" color="">
-			<toolbar class="GameBar" aria-label="Game" appearance="pills" inverted size="small" shrinkable>
-				<text slot="title" size="large" heavy>Solitaire</text>
-				<action "auto play"/>
+		<segment inverted attach="top" >
+			<toolbar class="GameBar" appearance="secondary" inverted size="small" shrinkable>
+				<text slot="title" size="large" heavy>Spell Solitaire</>
 				<action "cheat"/>
-				<action "restart the game"/>
+				<action "auto play"/>
+				<action "restart the game" title="Restart"/>
 				<divider/>
 				<action "undo"/>
 				<action "redo"/>
-				<text slot="right">Score: <number "score"/></>
-			</toolbar>
-		</segment>
+				<text slot="right">Score: <number "score" /></>
+			</>
+		</>
 		<container padding="small" columns="7" spacing="xs">
 			<stock-pile "stock"/>
 			<discard-pile "discards"/>

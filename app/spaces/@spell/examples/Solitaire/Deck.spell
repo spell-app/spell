@@ -1,14 +1,10 @@
-# A deck
-// The 52 cards of a standard deck, ace of clubs first.
-
-a "deck" is a list of cards
+a "deck" is a viewable list of cards -- a deck of playing cards
 	when creating a deck
-		// One of each card, ace of clubs first:  each starts face down, as every two sided view does
+		// Create one of each card, ace of clubs first
 		for rank in card ranks
 			for suit in card suits
 				add a new card with rank and suit to the deck
-	its "short name" is
-		// Its cards' short names, top to bottom
+	its "short name" is -- its card names, top to bottom
 		set card names to a new list of text
 		for card in the deck
 			add the short name of the card to card names
