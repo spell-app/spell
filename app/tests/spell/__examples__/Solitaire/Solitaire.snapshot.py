@@ -563,6 +563,7 @@ class Solitaire(App):
         for row in range(1, 8):
             for column in core.get_range(row, 7):
                 core.get_item_at(core.every_thing(Column), position(column)).append(self.stock.last_item)
+                await core.pause_for(20, "msec")
                 if column == row:
                     core.get_item_at(core.every_thing(Column), position(column)).last_item.turn_face_up()
         await self.turn_over_the_next_card()

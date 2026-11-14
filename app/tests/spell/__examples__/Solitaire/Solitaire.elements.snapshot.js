@@ -416,10 +416,13 @@ export class Solitaire extends App {
     }
     this.stock.randomize()
     // each row's first card lands face down, then turns up where it lies
-    core.getRange(1, 7).forEach((row) => core.getRange(row, 7).forEach((column) => {
-      core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
-      if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
-    }))
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
+        await core.pauseFor(20, "msec")
+        if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
+      }
+    }
     await this.turnOverTheNextCard()
   }
 
