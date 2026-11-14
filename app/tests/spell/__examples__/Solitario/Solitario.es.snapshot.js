@@ -4,17 +4,15 @@ export const words = {
   types: {
     Carta: {
       rango: "rango",
-      esUnRango: "es un (rango)",
       valor: "valor",
       esUnaFigura: "es una figura",
       esUnaCartaNumérica: "es una carta numérica",
       palo: "palo",
-      esUnPalo: "es un (palo)",
       color: "color",
       símbolo: "símbolo",
       nombre: "nombre",
       esElRangoDePalo: "es el (rango) de (palo)",
-      estado: "estado",
+      nombreCorto: "nombre corto",
       imagen: "imagen",
       levantada: "levantada",
       jugar: "jugar una carta",
@@ -23,45 +21,19 @@ export const words = {
       pila: "pila"
     },
     Mazo: {
-      estado: "estado"
+      nombreCorto: "nombre corto"
     },
     Pila: {
       disposición: "disposición",
       color: "color",
       valor: "valor",
-      estado: "estado"
-    },
-    PilaDeReserva: {
-      disposición: "disposición"
-    },
-    PilaDeDescartes: {
-      disposición: "disposición"
+      nombreCorto: "nombre corto"
     },
     Fundación: {
-      disposición: "disposición",
       palo: "palo"
     },
-    Columna: {
-      disposición: "disposición"
-    },
     Solitario: {
-      puntuación: "puntuación",
-      movimientos: "movimientos",
-      pista: "pista",
       mazo: "mazo",
-      reserva: "reserva",
-      descartes: "descartes",
-      tréboles: "tréboles",
-      diamantes: "diamantes",
-      corazones: "corazones",
-      espadas: "espadas",
-      C1: "C1",
-      C2: "C2",
-      C3: "C3",
-      C4: "C4",
-      C5: "C5",
-      C6: "C6",
-      C7: "C7",
       rehacerLaReserva: "rehacer la reserva",
       robarDeLaReserva: "robar de la reserva",
       voltearLaReserva: "voltear la reserva",
@@ -163,13 +135,12 @@ export const words = {
     Carta: [
       { name: "Rango", description: "El as es bajo:  as = 1 ... rey = 13", members: ["rango", "valor", "esUnaFigura", "esUnaCartaNumérica"] },
       { name: "Palo", members: ["palo", "color", "símbolo"] },
-      { name: "Nombres", description: "Cómo la llama una persona, una prueba o la consola", members: ["nombre", "esElRangoDePalo", "estado"] },
+      { name: "Nombres", description: "Cómo la llama una persona, una prueba o la consola", members: ["nombre", "esElRangoDePalo", "nombreCorto"] },
       { name: "Dibujo", description: "Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css", members: ["imagen", "levantada"] },
       { name: "Jugar una carta", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
       { name: "Una pila de cartas", members: ["pila"] }
     ],
     Solitario: [
-      { name: "Pilas", description: "Una de cada, hecha con el solitario", members: ["reserva", "descartes", "tréboles", "diamantes", "corazones", "espadas", "C1", "C2", "C3", "C4", "C5", "C6", "C7"] },
       { name: "Repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "voltearLaReserva", "repartirLasCartas"] },
       { name: "Juego", description: "Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres", members: ["reiniciarElJuego", "jugarSolo", "hacerTrampa"] }
     ]

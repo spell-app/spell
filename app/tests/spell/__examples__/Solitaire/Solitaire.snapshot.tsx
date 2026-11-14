@@ -16,13 +16,9 @@ export class Card extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "rank" is one of ace, 2 ... 10, jack, queen, king
-  //   it "is a (rank)"
   static Ranks = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"] as const
   @prop({ oneOf: () => Card.Ranks })
   accessor rank!: Rank
-  isARank(rank: Rank) {
-    return this.rank === rank
-  }
 
   get value() {
     return spellPosition(positionOf(Card.Ranks, this.rank))
@@ -37,27 +33,23 @@ export class Card extends TwoSidedView {
   }
 
   // - its "suit" is one of clubs, diamonds, hearts or spades
-  //   it "is a (suit)"
   static Suits = ["clubs", "diamonds", "hearts", "spades"] as const
   @prop({ oneOf: () => Card.Suits })
   accessor suit!: Suit
-  isASuit(suit: Suit) {
-    return this.suit === suit
-  }
 
   // - its "color" is one of red, black
   //   red if it is a diamond or it is a heart
   //   black otherwise
   static Colors = ["red", "black"]
   get color() {
-    if (this.isASuit("diamonds") || this.isASuit("hearts")) return "red"
+    if (this.suit === "diamonds" || this.suit === "hearts") return "red"
     return "black"
   }
 
   get symbol() {
-    if (this.isASuit("clubs")) return "♣"
-    if (this.isASuit("diamonds")) return "♦"
-    if (this.isASuit("hearts")) return "♥"
+    if (this.suit === "clubs") return "♣"
+    if (this.suit === "diamonds") return "♦"
+    if (this.suit === "hearts") return "♥"
     return "♠"
   }
 
@@ -70,7 +62,7 @@ export class Card extends TwoSidedView {
   }
 
   /** Its short name:  Q♠↓ is the queen of spades, face down */
-  get state() {
+  get shortName() {
     const letter = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
     const arrow = this.isFaceDirection("up") ? "↑" : "↓"
     return letter + this.symbol + arrow
@@ -79,9 +71,9 @@ export class Card extends TwoSidedView {
   /** Its face:  https://www.compart.com/en/unicode/block/U+1F0A0 */
   get picture() {
     let column = this.value
-    if (this.isASuit("clubs")) return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column))
-    if (this.isASuit("diamonds")) return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column))
-    if (this.isASuit("hearts")) return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column))
+    if (this.suit === "clubs") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column))
+    if (this.suit === "diamonds") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column))
+    if (this.suit === "hearts") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column))
     return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(column))
   }
 
@@ -99,7 +91,7 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (this.pile === solitaire.stock) await solitaire.turnAStockCard()
+    if (solitaire.stock.includes(this)) await solitaire.turnAStockCard()
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
@@ -126,7 +118,7 @@ export class Card extends TwoSidedView {
   /** what the move scores:  10 on a foundation, 5 from the discards, else nothing */
   countThePointsForCardOnPile(pile: Pile) {
     if (pile instanceof Foundation) return 10
-    if (this.pile === solitaire.discards) return 5
+    if (solitaire.discards.includes(this)) return 5
     return 0
   }
 
@@ -153,14 +145,6 @@ export class CardElement extends SpellElement<Card> {
     { name: "suit", kind: "string", description: "Its suit." },
     { name: "lifted", kind: "boolean", description: "Its lifted." }
   ])
-
-  isARank(rank: Rank) {
-    return this.currentThing?.isARank(rank)
-  }
-
-  isASuit(suit: Suit) {
-    return this.currentThing?.isASuit(suit)
-  }
 
   isTheRankOfSuit(rank: Rank, suit: Suit) {
     return this.currentThing?.isTheRankOfSuit(rank, suit)
@@ -209,12 +193,12 @@ export function testCardSetup() {
     core.expect(it2.name, `its name`, "queen of spades", `"queen of spades"`)
     core.expect(it2.color, `its color`, "black", `black`)
     core.expect(it2.value, `its value`, 12, `12`)
-    core.expect(it2.state, `its state`, "Q♠↓", `"Q♠↓"`)
+    core.expect(it2.shortName, `its short name`, "Q♠↓", `"Q♠↓"`)
     core.expect(it2.isAFaceCard, `it is a face card`, true, `yes`)
-    core.expect(it2.isASuit("spades"), `it is a spade`, true, `yes`)
-    core.expect(it2.isASuit("clubs"), `it is a club`, false, `no`)
-    core.expect(it2.isARank("queen"), `it is a queen`, true, `yes`)
-    core.expect(it2.isARank(2), `it is a 2`, false, `no`)
+    core.expect(it2.suit === "spades", `it is a spade`, true, `yes`)
+    core.expect(it2.suit === "clubs", `it is a club`, false, `no`)
+    core.expect(it2.rank === "queen", `it is a queen`, true, `yes`)
+    core.expect(it2.rank === 2, `it is a 2`, false, `no`)
     core.expect(it2.isTheRankOfSuit("queen", "spades"), `it is the queen of spades`, true, `yes`)
     core.expect(it2.isTheRankOfSuit("queen", "clubs"), `it is the queen of clubs`, false, `no`)
     core.expect(it2.picture, `its picture`, "🂭", `"🂭"`)
@@ -222,7 +206,7 @@ export function testCardSetup() {
     core.echoTestAction(`turn it over`)
     it2.turnOver()
     core.expect(it2.isFaceDirection("up"), `it is face up`, true, `yes`)
-    core.expect(it2.state, `its state`, "Q♠↑", `"Q♠↑"`)
+    core.expect(it2.shortName, `its short name`, "Q♠↑", `"Q♠↑"`)
 
     core.echoTestAction(`set seven to a new card whose rank is 7 and suit is hearts`)
     const seven = new Card({ rank: 7, suit: "hearts" })
@@ -250,9 +234,9 @@ export class Deck extends List<Card> {
   }
 
   /** Its cards' short names, top to bottom */
-  @derived get state() {
+  @derived get shortName() {
     const cardNames = new List<string>({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.state))
+    this.forEach((card) => cardNames.append(card.shortName))
     return `deck: ${cardNames}`
   }
 }
@@ -263,8 +247,8 @@ export function testANewDeck() {
     core.echoTestAction(`the deck is a new deck`)
     const deck = new Deck()
     core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-    core.expect(deck.filter((card) => card.isARank("queen")).length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
-    core.expect(deck.firstItem?.state!, `deck's first card's state`, "A♣↓", `"A♣↓"`)
+    core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
+    core.expect(deck.firstItem?.shortName!, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
     core.expect(deck.lastItem?.name!, `deck's last card's name`, "king of spades", `"king of spades"`)
     core.echoTestAction(`shuffle the deck`)
     deck.randomize()
@@ -305,9 +289,9 @@ export class Pile extends ViewableList<Card> {
   }
 
   /** Its id, then its cards' short names:  stock: Q♠↑ 7♥↓ */
-  @derived get state() {
+  @derived get shortName() {
     let summary = `${this.id}:`
-    this.forEach((card) => (summary = `${summary} ${card.state}`))
+    this.forEach((card) => (summary = `${summary} ${card.shortName}`))
     return summary
   }
 
@@ -363,7 +347,7 @@ export function testPiles() {
     }))
     core.expect(stock.color, `stock's color`, "red", `red`)
     core.expect(stock.value, `stock's value`, 7, `7`)
-    core.expect(stock.state, `stock's state`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
+    core.expect(stock.shortName, `stock's short name`, "stock: Q♠↑ 7♥↓", `"stock: Q♠↑ 7♥↓"`)
 
     /** a card is in one pile at a time */
     const discards = new Pile({ id: "discards" })
@@ -373,7 +357,7 @@ export function testPiles() {
     discards.append(it2!)
     core.expect(it2?.pile === discards, `its pile is the discards`, true, `yes`)
     core.expect(stock.length, `the number of cards in the stock`, 1, `1`)
-    core.expect(discards.state, `the discards' state`, "discards: 7♥↓", `"discards: 7♥↓"`)
+    core.expect(discards.shortName, `the discards' short name`, "discards: 7♥↓", `"discards: 7♥↓"`)
   })
 }
 
@@ -386,11 +370,11 @@ core.heading("Klondike Solitaire")
 // Deal seven columns, then build four foundations, ace to king, one suit each:
 // [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
 // The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
+// Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
 
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
-
   get layout(): Layout {
     return "stacked"
   }
@@ -442,7 +426,6 @@ core.useElement(StockPile, StockPileElement)
 /** Where the stock's cards go as they're turned over */
 export class DiscardPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
-
   get layout(): Layout {
     return "stacked"
   }
@@ -480,7 +463,6 @@ core.useElement(DiscardPile, DiscardPileElement)
 /** Where a suit is built up, ace to king, one card at a time */
 export class Foundation extends Pile {
   static elementTag = core.defineElement(this, "test-project")
-
   get layout(): Layout {
     return "stacked"
   }
@@ -534,7 +516,6 @@ core.useElement(Foundation, FoundationElement)
 /** A column, built down from king to ace, red and black in turn */
 export class Column extends Pile {
   static elementTag = core.defineElement(this, "test-project")
-
   get layout(): Layout {
     return "vertical"
   }
@@ -546,8 +527,7 @@ export class Column extends Pile {
   static itemsDraggable = true
 
   canTake(card: Card) {
-    if (this.isEmpty) return card.isARank("king")
-    return this.color !== card.color && this.value === card.value + 1
+    return (this.isEmpty && card.rank === "king") || (this.color !== card.color && this.value === card.value + 1)
   }
 
   static droppable = true
@@ -580,67 +560,53 @@ export class Solitaire extends App {
   @prop({ init: () => new Deck({ id: "deck" }), early: true })
   accessor deck!: Deck
 
-  // "stock" is a new stock pile
-  @prop({ init: () => new StockPile({ id: "stock" }), early: true })
-  accessor stock!: StockPile
-
-  // "discards" is a new discard pile
-  @prop({ init: () => new DiscardPile({ id: "discards" }), early: true })
-  accessor discards!: DiscardPile
-
-  // "clubs" is a new foundation with suit = clubs
-  @prop({ init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true })
-  accessor clubs!: Foundation
-
-  // "diamonds" is a new foundation with suit = diamonds
-  @prop({ init: () => new Foundation({ id: "diamonds", suit: "diamonds" }), early: true })
-  accessor diamonds!: Foundation
-
-  // "hearts" is a new foundation with suit = hearts
-  @prop({ init: () => new Foundation({ id: "hearts", suit: "hearts" }), early: true })
-  accessor hearts!: Foundation
-
-  // "spades" is a new foundation with suit = spades
-  @prop({ init: () => new Foundation({ id: "spades", suit: "spades" }), early: true })
-  accessor spades!: Foundation
-
-  // "C1" is a new column
-  @prop({ init: () => new Column({ id: "C1" }), early: true })
-  accessor C1!: Column
-
-  // "C2" is a new column
-  @prop({ init: () => new Column({ id: "C2" }), early: true })
-  accessor C2!: Column
-
-  // "C3" is a new column
-  @prop({ init: () => new Column({ id: "C3" }), early: true })
-  accessor C3!: Column
-
-  // "C4" is a new column
-  @prop({ init: () => new Column({ id: "C4" }), early: true })
-  accessor C4!: Column
-
-  // "C5" is a new column
-  @prop({ init: () => new Column({ id: "C5" }), early: true })
-  accessor C5!: Column
-
-  // "C6" is a new column
-  @prop({ init: () => new Column({ id: "C6" }), early: true })
-  accessor C6!: Column
-
-  // "C7" is a new column
-  @prop({ init: () => new Column({ id: "C7" }), early: true })
-  accessor C7!: Column
-
-  // "score" is a number
-  @prop({ type: "number" })
-  accessor score!: number
-
   create() {
     this.deck.forEach((card) => this.stock.append(card))
     core.holdWhile(() => this.restartTheGame())
   }
 
+  // <number "score"/>
+  @prop({ type: "number" })
+  accessor score!: number
+  // <stock-pile "stock"/>
+  @prop({ init: () => new StockPile({ id: "stock" }), early: true })
+  accessor stock!: StockPile
+  // <discard-pile "discards"/>
+  @prop({ init: () => new DiscardPile({ id: "discards" }), early: true })
+  accessor discards!: DiscardPile
+  // <foundation "clubs" suit=clubs/>
+  @prop({ init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true })
+  accessor clubs!: Foundation
+  // <foundation "diamonds" suit=diamonds/>
+  @prop({ init: () => new Foundation({ id: "diamonds", suit: "diamonds" }), early: true })
+  accessor diamonds!: Foundation
+  // <foundation "hearts" suit=hearts/>
+  @prop({ init: () => new Foundation({ id: "hearts", suit: "hearts" }), early: true })
+  accessor hearts!: Foundation
+  // <foundation "spades" suit=spades/>
+  @prop({ init: () => new Foundation({ id: "spades", suit: "spades" }), early: true })
+  accessor spades!: Foundation
+  // <column "C1"/>
+  @prop({ init: () => new Column({ id: "C1" }), early: true })
+  accessor C1!: Column
+  // <column "C2"/>
+  @prop({ init: () => new Column({ id: "C2" }), early: true })
+  accessor C2!: Column
+  // <column "C3"/>
+  @prop({ init: () => new Column({ id: "C3" }), early: true })
+  accessor C3!: Column
+  // <column "C4"/>
+  @prop({ init: () => new Column({ id: "C4" }), early: true })
+  accessor C4!: Column
+  // <column "C5"/>
+  @prop({ init: () => new Column({ id: "C5" }), early: true })
+  accessor C5!: Column
+  // <column "C6"/>
+  @prop({ init: () => new Column({ id: "C6" }), early: true })
+  accessor C6!: Column
+  // <column "C7"/>
+  @prop({ init: () => new Column({ id: "C7" }), early: true })
+  accessor C7!: Column
   @drawn draw() {
     return (
       <>
@@ -726,10 +692,8 @@ export class Solitaire extends App {
   resetTheStock() {
     const cards = this.discards.clone()
     cards.reverse()
-    cards.forEach((card) => {
-      this.stock.append(card)
-      card.turnFaceDown()
-    })
+    cards.forEach((card) => this.stock.append(card))
+    this.stock.forEach((card) => card.turnFaceDown())
   }
 
   /** Play every card that can go somewhere, until none can */
@@ -758,7 +722,7 @@ export class Solitaire extends App {
       const faceUpCards = pile.filter((card) => card.isFaceDirection("up"))
       if (faceUpCards.isEmpty) return
       const testCard = faceUpCards.firstItem!
-      if (testCard.isARank("king") && testCard === pile.firstItem) return
+      if (testCard.rank === "king" && testCard === pile.firstItem) return
       if (await testCard.play()) {
         anythingChanged = true
         await core.pauseFor(500, "msec")
@@ -784,7 +748,10 @@ export class Solitaire extends App {
   async onScoreChange(event: ScoreChangeEvent) {
     let home = this.clubs.length + this.diamonds.length
     home = home + this.hearts.length + this.spades.length
-    if (home === 52) await core.alert("You won!")
+    if (home === 52) {
+      await core.alert("You won!", "New game")
+      await this.restartTheGame()
+    }
   }
 }
 
@@ -797,6 +764,7 @@ export class Solitaire extends App {
 export class SolitaireElement extends SpellElement<Solitaire> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "solitaire", [
     { name: "deck", kind: "json", description: "Its deck." },
+    { name: "score", kind: "number", description: "Its score." },
     { name: "stock", kind: "json", description: "Its stock." },
     { name: "discards", kind: "json", description: "Its discards." },
     { name: "clubs", kind: "json", description: "Its clubs." },
@@ -809,8 +777,7 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     { name: "-c4", kind: "json", description: "Its C4." },
     { name: "-c5", kind: "json", description: "Its C5." },
     { name: "-c6", kind: "json", description: "Its C6." },
-    { name: "-c7", kind: "json", description: "Its C7." },
-    { name: "score", kind: "number", description: "Its score." }
+    { name: "-c7", kind: "json", description: "Its C7." }
   ])
 
   create() {
@@ -915,7 +882,7 @@ export function testTheMoves() {
     core.expect(core.canTake(column, queen), `the column can take the queen`, true, `yes`)
     core.echoTestAction(`add the queen to the column`)
     column.append(queen)
-    core.expect(column.state, `the state of the column`, "T1: K♠↑ Q♥↑", `"T1: K♠↑ Q♥↑"`)
+    core.expect(column.shortName, `the short name of the column`, "T1: K♠↑ Q♥↑", `"T1: K♠↑ Q♥↑"`)
     core.expect(core.canGiveUp(column, queen), `the column can give up the queen`, true, `yes`)
     core.echoTestAction(`turn the queen face down`)
     queen.turnFaceDown()

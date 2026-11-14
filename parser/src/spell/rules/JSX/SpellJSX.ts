@@ -410,6 +410,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     let attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
     // a later type that's no view after all:  its quoted word, last, is no id (`noteUnreadable()` says so)
     if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
+    // a view this tag declares (Q52):  its attributes are the new thing's starting values, so the element has its id alone
+    if (match.data.declares?.view) attrs = attrs?.filter((attr) => attr?.name === VIEW_ID_ATTRIBUTE)
     const children = this.childASTs(match)
     return new P.ASTJSXElement(match, {
       tagName,

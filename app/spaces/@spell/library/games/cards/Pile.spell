@@ -14,11 +14,11 @@ a "pile" is a droppable viewable list of cards
 		// Its last card's
 		0 if it is empty
 		the value of its last card otherwise
-	its "state" is
+	its "short name" is
 		// Its id, then its cards' short names:  stock: Q♠↑ 7♥↓
 		set summary to its id + ":"
 		for card in the pile
-			set summary to summary + " " + the state of the card
+			set summary to summary + " " + the short name of the card
 		return summary
 
 	to test piles
@@ -29,7 +29,7 @@ a "pile" is a droppable viewable list of cards
 		add (a new card whose rank is 7, suit is hearts and direction is down) to the stock
 		the stock's color should be red
 		the stock's value should be 7
-		the stock's state should be "stock: Q♠↑ 7♥↓"
+		the stock's short name should be "stock: Q♠↑ 7♥↓"
 
 		// a card is in one pile at a time
 		set the discards to a new pile with id "discards"
@@ -37,7 +37,7 @@ a "pile" is a droppable viewable list of cards
 		add it to the discards
 		its pile is the discards should be yes
 		the number of cards in the stock should be 1
-		the discards' state should be "discards: 7♥↓"
+		the discards' short name should be "discards: 7♥↓"
 
 a card belongs to one pile
 	// a card is in one pile at a time:  putting it on another pile takes it off this one

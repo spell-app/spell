@@ -3026,7 +3026,7 @@
           "ruleNames": ["changed_property"],
           "internal": false,
           "file": "src/spell/rules/events/ChangedProperty.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "The property a change event names, `score` in `- when its score changes:` (epic `debut` P30).",
           "syntaxes": [],
           "aliases": []

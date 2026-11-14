@@ -3,7 +3,7 @@
    - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.
    - A pile is styled by its disposición, its layout (<solitario-columna disposición="vertical">),
      each card in it by its place:  --index from 0, of --count;
-     an empty pile's placeholder, its marcador, by its part:  ::part(marcador). */
+     an empty pile's placeholder, its marcador, by its part:  ::part(placeholder). */
 
 /* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,
    with 0.008em to spare above and below */
@@ -69,7 +69,7 @@ es-botones {
 
 /* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */
 [disposición] > *,
-[disposición]::part(marcador) {
+[disposición]::part(placeholder) {
   position: absolute;
   display: block;
   font-size: calc(100cqi / var(--card-width));
@@ -82,7 +82,7 @@ solitario-carta:not([disposición] > *) {
 }
 [disposición] > *,
 solitario-carta,
-[disposición]::part(marcador) {
+[disposición]::part(placeholder) {
   width: calc(var(--card-width) * 1em);
   height: calc(var(--card-width) * var(--card-height) * 1em);
   overflow: hidden;
@@ -146,18 +146,18 @@ solitario-carta::part(back) {
 }
 
 /* An empty pile's placeholder:  a faint pale card on the felt */
-[disposición]::part(marcador) {
+[disposición]::part(placeholder) {
   color: #d8f0e0;
   opacity: 0.4;
 }
-[disposición]::part(marcador):hover {
+[disposición]::part(placeholder):hover {
   opacity: 0.5;
 }
 
 /* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder
    (:state(accepting-drop), set by the pile's rules) */
 [disposición]:state(accepting-drop) > :last-child,
-[disposición]:state(accepting-drop)::part(marcador) {
+[disposición]:state(accepting-drop)::part(placeholder) {
   opacity: 1;
   border-radius: 0.035em;
   box-shadow:

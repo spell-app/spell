@@ -14,11 +14,11 @@ una "pila" es una lista visible soltable de cartas
 		// El de su última carta
 		0 si está vacía
 		el valor de su última carta de lo contrario
-	su "estado" es
+	su "nombre corto" es
 		// Su id, luego los nombres cortos de sus cartas:  reserva: D♠↑ 7♥↓
 		poner resumen a su id + ":"
 		para carta en la pila
-			poner resumen a resumen + " " + el estado de la carta
+			poner resumen a resumen + " " + el nombre corto de la carta
 		devolver resumen
 
 	para probar las pilas
@@ -29,7 +29,7 @@ una "pila" es una lista visible soltable de cartas
 		agregar (una nueva carta cuyo rango es 7 y palo es corazones) a la reserva
 		el color de la reserva debería ser rojo
 		el valor de la reserva debería ser 7
-		el estado de la reserva debería ser "reserva: D♠↑ 7♥↓"
+		el nombre corto de la reserva debería ser "reserva: D♠↑ 7♥↓"
 
 		// una carta está en una sola pila a la vez
 		poner los descartes a una nueva pila con id "descartes"
@@ -37,7 +37,7 @@ una "pila" es una lista visible soltable de cartas
 		agregar eso a los descartes
 		su pila es los descartes debería ser sí
 		el número de cartas en la reserva debería ser 1
-		el estado de los descartes debería ser "descartes: 7♥↓"
+		el nombre corto de los descartes debería ser "descartes: 7♥↓"
 
 una carta pertenece a una pila
 	// una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta

@@ -54,6 +54,7 @@
     red: { name: "rojo", from: "seed:Solitario" },
     row: { name: "fila", gender: "feminine", from: "seed:Solitario" },
     score: { name: "puntuación", gender: "feminine", from: "seed:Solitario" },
+    "short name": { name: "nombre corto", gender: "masculine", from: "seed:Solitario" },
     solitaire: { name: "solitario", gender: "masculine", from: "seed:Solitario" },
     spades: { name: "espadas", from: "seed:Solitario" },
     state: { name: "estado", gender: "masculine", from: "seed:Solitario" },
