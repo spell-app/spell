@@ -196,9 +196,9 @@
 				<segment appearance="raised"/>
 				<segment appearance="secondary"/>
 				<segment appearance="tertiary"/>
-				<segment attach="top"/>
-				<segment attach="both"/>
-				<segment attach="bottom"/>
+				<segment attach-to="top"/>
+				<segment attach-to="both"/>
+				<segment attach-to="bottom"/>
 			</>
 			<column>
 				<header size="small" link="/input">Input</>

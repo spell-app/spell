@@ -29,6 +29,7 @@ from spell_core.page import PageSession
 from spell_core.references import reference_for
 from spell_core.run import run_program
 from spell_core.state import ID_KEY, StateMirror, StateWriter
+from spell_core.things import program_core
 
 
 class PatchMismatchError(AssertionError):
@@ -45,7 +46,7 @@ class PagePlayer:
         self._by_id: dict[str, dict[str, Any]] = {}
         self._mirror = StateMirror()
         self.state: dict[str, Any] = session.state()
-        self._mirror.read(self.state)
+        self._mirror_read(self.state)
         self._note(self.state)
 
     def thing(self, the_id: str) -> dict[str, Any]:
@@ -97,7 +98,7 @@ class PagePlayer:
         patch = asyncio.run(self.session.handle_async(message))
         self.patches.append(patch)
         self._note(patch)
-        self._mirror.read(patch)
+        self._mirror_read(patch)
         self.check()
         return patch
 
@@ -107,6 +108,14 @@ class PagePlayer:
         if StateWriter().state_of(mirrored) != StateWriter().state_of(self.session.things):
             messages = len(self.patches)
             raise PatchMismatchError(f"after {messages} messages, the patches don't add up to the program's state")
+
+    def _mirror_read(self, state: Any) -> None:
+        """SIDE EFFECT:  the mirror reads `state`, `quietly()`:  its copies are the test's, never the program's things.
+
+        - Else `every pile` would find the mirror's piles too, and play a card onto one (epic `language` I89).
+        """
+        with program_core().quietly():
+            self._mirror.read(state)
 
     def _note(self, value: Any) -> None:
         """SIDE EFFECT:  keep each thing written whole in `value`, by its id:  the page's view of it now."""

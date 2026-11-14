@@ -1385,6 +1385,11 @@ start the box
         await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
         const title = page.locator(".editor .edit-title input")
 
+        // the recipes to start from are no undo step:  Undo at once does nothing (epic `language` I88)
+        await undoOn(page).click({ force: true })
+        await page.waitForTimeout(300)
+        expect(await cardsOn(page)).toEqual(examples)
+
         // Cancel:  the copy is forgotten, and the recipe never changed
         await page.locator(".edit").first().click()
         await expect.poll(() => title.inputValue(), WAITING).toBe(examples[0])

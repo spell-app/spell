@@ -38,7 +38,7 @@
 		<section label="Placeholder content" sticky collapsible dividing>
 			<example "Placeholder content" description="Children go inside the play button, over the image:  a caption, a duration.">
 				<embed source="youtube" video-id="O6Xo21L0ybE" label="A waving bear" placeholder="../images/image-16by9.png">
-					<label color="black" attach="top right">Watch · 2:10</label>
+					<label color="black" attach-to="top right">Watch · 2:10</label>
 				</embed>
 			</example>
 		</>

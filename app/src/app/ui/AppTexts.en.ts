@@ -557,6 +557,8 @@ export const APP_TEXTS = {
   inspectorEventHeading: "on {event}",
   // a dimmed action's tooltip:  `{condition}` is its `enabled when`, in its own words
   inspectorActionOnlyWhen: "Only when {condition}",
+  // ... its `disabled when`
+  inspectorActionNotWhen: "Not when {condition}",
   inspectorActionNotNow: "Can't be done now",
   // an action's run button's tip:  `{action}` is its words, `play it`
   inspectorActionRun: "Run {action}",

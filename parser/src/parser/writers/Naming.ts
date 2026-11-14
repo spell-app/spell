@@ -137,10 +137,13 @@ export class Naming {
     /* if (nameCase === "SCREAMING_SNAKE_CASE") */ return words.map((word) => word.toUpperCase()).join("_")
   }
 
-  /** The words of spell's `name`:  split at `_`, `$` and a capital, e.g. `BankAccount` => `Bank`, `Account`. */
+  /**
+   * The words of spell's `name`:  split at `_`, `$`, a space and a capital, e.g. `BankAccount` => `Bank`, `Account`.
+   * - A space:  a member named by a tag's quoted id, `<discard-pile "discard pile"/>`, is `discard_pile` in Python
+   */
   static wordsOf(name: string): string[] {
     return name
-      .split(/[_$]+/)
+      .split(/[_$\s]+/)
       .flatMap((part) => part.split(P.CAMEL_WORD_BOUNDARY))
       .filter(Boolean)
   }

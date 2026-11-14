@@ -220,7 +220,7 @@ describe("<ui-toolbar shrinkable> widening", () => {
   async function gameBar(width: number) {
     const outer = await ElementFixture.render(
       `<div style="width: ${width}px"><style>.bar::part(menu) { flex: 0 1 auto } .bar::part(title), .bar::part(right) { flex: 1 0 0; min-width: max-content }</style>` +
-        `<ui-segment inverted attach="top"><ui-toolbar class="bar" aria-label="Game" shrinkable appearance="pills">` +
+        `<ui-segment inverted attach-to="top"><ui-toolbar class="bar" aria-label="Game" shrinkable appearance="pills">` +
         `<ui-text slot="title">Solitaire</ui-text>${actions(true)}<ui-text slot="right">Score: 0</ui-text>` +
         `</ui-toolbar></ui-segment></div>`
     )

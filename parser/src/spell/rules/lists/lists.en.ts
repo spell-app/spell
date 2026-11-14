@@ -25,7 +25,9 @@ import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
 import { EachInStatement } from "./EachInStatement"
-import { ListIteration, ListIterationNamedForList } from "./ListIteration"
+import { PluralCallStatement } from "./PluralCallStatement"
+import { ListIteration, ListIterationNamedForList, ListIterationWhere } from "./ListIteration"
+import { EachItemWhere } from "./EachItemWhere"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
 import { ListMove } from "./ListMove"
@@ -208,12 +210,27 @@ lists.addRule(ListLength, {
         ["the number of foos in the foo of the bar", "core.itemCountOf(bar.foo)"],
         ["the number of items in [1,2,3]", "core.itemCountOf([1, 2, 3])"]
       ]
+    },
+    {
+      // of lists of lists:  their items together (epic `language` T130)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a pile is a list of cards", "a foundation is a pile"].join("\n"), "block")
+      },
+      tests: [
+        ["the number of cards in the foundations", "core.itemCountOf(core.mergeLists(core.everyThing(Foundation)))"],
+        {
+          title: "the lists themselves, named:  not their items",
+          input: "the number of piles in the foundations",
+          js: "core.itemCountOf(core.everyThing(Foundation))"
+        }
+      ]
     }
   ]
 })
 
 lists.addRule(ListLength, {
-  syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} where {inline_expression}?",
+  syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -225,6 +242,10 @@ lists.addRule(ListLength, {
         [
           "the number of items in my-list where its id > 1",
           "core.itemCountOf(core.filter(myList, (item) => item.id > 1))"
+        ],
+        [
+          "the number of items in my-list which are not 1",
+          "core.itemCountOf(core.filter(myList, (item) => item !== 1))"
         ]
       ]
     }
@@ -475,7 +496,8 @@ lists.addRule(PossessiveOrdinal, {
 })
 
 lists.addRule(OrdinalWhereExpression, {
-  syntax: "the {ordinal} {arg:singular_identifier} (in|of) {list:expression} where {inline_expression}?",
+  syntax:
+    "the {ordinal} {arg:singular_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -483,7 +505,8 @@ lists.addRule(OrdinalWhereExpression, {
         scope.variables?.add("my-list")
       },
       tests: [
-        ["the first item in my-list where its id > 1", "core.getItemAt(core.filter(myList, (item) => item.id > 1), 0)"]
+        ["the first item in my-list where its id > 1", "core.getItemAt(core.filter(myList, (item) => item.id > 1), 0)"],
+        ["the first item in my-list that is not 1", "core.getItemAt(core.filter(myList, (item) => item !== 1), 0)"]
       ]
     }
   ]
@@ -587,7 +610,7 @@ lists.addRule(RangeCountExpression, {
 })
 
 lists.addRule(ListFilter, {
-  syntax: "the? {arg:plural_identifier} (in|of) {list:expression} where {inline_expression}?",
+  syntax: "the? {arg:plural_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -604,10 +627,45 @@ lists.addRule(ListFilter, {
         ],
         ["the items in my-list where the id of the item > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["the items in my-list where the id of it > 1", "core.filter(myList, (item) => item.id > 1)"],
-        ["the items in my-list where its id > 1", "core.filter(myList, (item) => item.id > 1)"]
+        ["the items in my-list where its id > 1", "core.filter(myList, (item) => item.id > 1)"],
+        {
+          title: "`which`:  its subject the item, as `where it` (epic `language` T133)",
+          input: "the items in my-list which are not 1",
+          js: "core.filter(myList, (item) => item !== 1)"
+        },
+        ["the items in my-list which is not 1", "core.filter(myList, (item) => item !== 1)"],
+        ["the items in my-list that are in my-list", "core.filter(myList, (item) => core.includes(myList, item))"],
+        ["the items in my-list who are not 1", "core.filter(myList, (item) => item !== 1)"]
+      ]
+    },
+    {
+      // of lists of lists:  their items together (epic `language` T130)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a rank as a number",
+            "a pile is a list of cards",
+            "a foundation is a pile"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        [
+          "the cards in the foundations where its rank is 1",
+          "core.filter(core.mergeLists(core.everyThing(Foundation)), (card) => card.rank === 1)",
+          "core.filter(core.mergeLists(core.everyThing(Foundation)), (card: Card) => card.rank === 1)"
+        ]
       ]
     }
   ]
+})
+
+// a loop's item, its list and the condition it meets, for `list_iteration_where` (epic `language` T133)
+lists.addRule(EachItemWhere, {
+  syntax: "{arg:singular_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?"
 })
 
 lists.addRule(AddNewThing, { syntax: "add {thing:expression}" })
@@ -660,7 +718,7 @@ lists.addRule(ListSortedBy, {
 })
 
 lists.addRule(ListMembershipTest, {
-  syntax: "{operator:has_or_has_no} {arg:plural_identifier} where {inline_expression}?",
+  syntax: "{operator:has_or_has_no} {arg:plural_identifier} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -677,7 +735,8 @@ lists.addRule(ListMembershipTest, {
         ["my-list has no items where item is 1", "!core.any(myList, (item) => item === 1)"],
         ["my-list has no items where it is 1", "!core.any(myList, (item) => item === 1)"],
         ["my-list doesnt have items where item is 1", "!core.any(myList, (item) => item === 1)"],
-        ["the foo of the bar does not have items where item is 1", "!core.any(bar.foo, (item) => item === 1)"]
+        ["the foo of the bar does not have items where item is 1", "!core.any(bar.foo, (item) => item === 1)"],
+        ["my-list has no items which are 1", "!core.any(myList, (item) => item === 1)"]
       ]
     }
   ]
@@ -876,7 +935,7 @@ lists.addRule(ListRemove, {
 })
 
 lists.addRule(ListRemoveWhere, {
-  syntax: "remove {arg:plural_identifier} (in|of|from) {list:expression} where {inline_expression}?",
+  syntax: "remove {arg:plural_identifier} (in|of|from) {list:expression} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "statement",
@@ -896,7 +955,8 @@ lists.addRule(ListRemoveWhere, {
           "remove cards in deck where the suit of it is clubs",
           'core.removeWhere(deck, (card) => card.suit === "clubs")'
         ],
-        ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit === "clubs")']
+        ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit === "clubs")'],
+        ['remove items from my-list that are not "ace"', 'core.removeWhere(myList, (item) => item !== "ace")']
       ]
     }
   ]
@@ -1051,7 +1111,7 @@ lists.addRule(RepeatNTimes, {
 
 lists.addRule(ListIteration, {
   syntax:
-    "for each? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?",
+    "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?",
   tests: [
     {
       compileAs: "block",
@@ -1062,6 +1122,7 @@ lists.addRule(ListIteration, {
       },
       tests: [
         ["for each card in deck:", "core.map(deck, () => {})"],
+        ["for every card in deck: print it", "core.map(deck, (card) => core.console.log(card))"],
         ["for item, index in my-list:", "core.map(myList, () => {})"],
         [
           `for each card in deck: set the direction of the card to "down"`,
@@ -1116,9 +1177,49 @@ lists.addRule(ListIteration, {
   ]
 })
 
+// over the items which meet a condition (epic `language` T133):  `for each card in the deck which is not in the stock`
+lists.addRule(ListIterationWhere, {
+  syntax: "for (each|every)? {list:each_item_where} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["a card is a thing", "a card has a rank as a number", "a pile is a list of cards"].join("\n"),
+          "block"
+        )
+        scope.variables?.add({ name: "deck", datatype: "Pile" })
+        scope.variables?.add({ name: "stock", datatype: "Pile" })
+      },
+      tests: [
+        [
+          "for each card in deck which is not in stock: print it",
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card))"
+        ],
+        [
+          "for each card in deck where it is not in stock: print it",
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card))"
+        ],
+        [
+          ["for each card in the deck which is not in the stock", "\tprint the card"],
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card))"
+        ],
+        [
+          "for card in deck that are not in stock: print its rank",
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card.rank))"
+        ],
+        [
+          "for every card in deck where its rank is 1: print it",
+          "deck.filter((card) => card.rank === 1).forEach((card) => core.console.log(card))"
+        ]
+      ]
+    }
+  ]
+})
+
 // a statement once for each item of a list, the list said in it (epic `language` P55, Q59):  `add each card in the deck to the stock`
 lists.addRule(EachInStatement, {
-  syntax: "{statement} each {item:singular_identifier} in {list:expression}",
+  syntax: "{statement} (each|every) {item:singular_identifier} in {list:expression}",
   tests: [
     {
       compileAs: "block",
@@ -1130,6 +1231,7 @@ lists.addRule(EachInStatement, {
       tests: [
         ["add each card in deck to stock", "core.map(deck, (card) => core.append(stock, card))"],
         ["print each card in deck", "core.map(deck, (card) => core.console.log(card))"],
+        ["add every card in deck to stock", "core.map(deck, (card) => core.append(stock, card))"],
         {
           title: "a second `each ... in` in the statement:  an error",
           input: "add each card in deck to each pile in piles",
@@ -1140,12 +1242,100 @@ lists.addRule(EachInStatement, {
   ]
 })
 
+// a thing's action on a list of them, done to each (epic `language` T126):  `turn the cards in the deck face down`
+lists.addRule(PluralCallStatement, {
+  syntax: "{statement} the? {item:plural_identifier} (in|of) {list:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "\tto turn it face down",
+            "\t\tprint 1",
+            "\tto turn it over",
+            "\t\tprint 4",
+            "a pile is a list of cards",
+            "\tto turn it over",
+            "\t\tprint 3",
+            "to deal a card onto a pile",
+            "\tprint 2"
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add({ name: "deck", datatype: "Pile" })
+        scope.variables?.add({ name: "stock", datatype: "Pile" })
+      },
+      tests: [
+        ["turn the cards in the deck face down", "deck.forEach((card) => card.turnFaceDown())"],
+        ["turn the cards of the deck face down", "deck.forEach((card) => card.turnFaceDown())"],
+        ["turn cards in deck face down", "deck.forEach((card) => card.turnFaceDown())"],
+        {
+          title: "the same as `each card in`",
+          input: "turn each card in the deck face down",
+          js: "deck.forEach((card) => card.turnFaceDown())"
+        },
+        ["deal the cards in the deck onto the stock", "deck.forEach((card) => card.dealOntoPile(stock))"],
+        [
+          "turn the cards in the deck where it is a card face down",
+          "deck.filter((card) => card instanceof Card).forEach((card) => card.turnFaceDown())"
+        ],
+        [
+          "turn the cards in the deck which are not in the stock face down",
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => card.turnFaceDown())"
+        ],
+        {
+          title: "the list's own action of the same words wins",
+          input: "turn the cards in the deck over",
+          js: "deck.turnOver()"
+        },
+        {
+          title: "only a thing's action:  not any statement",
+          input: "print the cards in the deck",
+          js: ["core.console.log(core.everyThing(Card))", '/* PARSE ERROR: Don\'t understand "in the deck" */']
+        }
+      ]
+    }
+  ]
+})
+
 // the item named for the list:  `for films`
 lists.addRule(ListIterationNamedForList, { syntax: "for each? {list:expression} :? {statement_body}?" })
 
+// every thing of a type, the item named for it (epic `language` T128):  `for each column`, Solitaire's seven
+lists.addRule(ListIterationNamedForList, {
+  syntax: "for {list:each_thing} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a pile is a list of things", "a column is a pile"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "for each column: print it",
+          "core.map(core.everyThing(Column), (column) => core.console.log(column))",
+          "core.map(core.everyThing(Column), (column: Column) => core.console.log(column))"
+        ],
+        [
+          ["for each column:", "\tprint the column"],
+          "core.map(core.everyThing(Column), (column) => core.console.log(column))",
+          "core.map(core.everyThing(Column), (column: Column) => core.console.log(column))"
+        ],
+        [
+          "for every column: print it",
+          "core.map(core.everyThing(Column), (column) => core.console.log(column))",
+          "core.map(core.everyThing(Column), (column: Column) => core.console.log(column))"
+        ]
+      ]
+    }
+  ]
+})
+
 // the item named for a value kind of several words (epic `spanish` P22)
 lists.addRule(ListIteration, {
-  syntax: "for each? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
+  syntax: "for (each|every)? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
   tests: [
     {
       compileAs: "block",

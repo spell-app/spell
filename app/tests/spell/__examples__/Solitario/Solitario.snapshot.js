@@ -402,7 +402,7 @@ export class Solitario extends App {
 
   draw() {
     return [
-      h("es-segmento", { invertido: true, unir: "arriba", color: "" },
+      h("es-segmento", { invertido: true, "unir-a": "arriba", color: "" },
         h("es-barra-herramientas", {
           class: "GameBar",
           "aria-label": "Juego",
@@ -590,9 +590,7 @@ export class Solitario extends App {
   }
 
   async onPuntuaciónChange(event) {
-    let colocadas = this.tréboles.length + this.diamantes.length
-    colocadas = colocadas + this.corazones.length + this.espadas.length
-    if (colocadas === 52) {
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Fundación))) === 52) {
       await core.alert("¡Ganaste!", "Juego nuevo")
       await this.reiniciarElJuego()
     }

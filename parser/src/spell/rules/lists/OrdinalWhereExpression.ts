@@ -13,7 +13,7 @@ import { getWhereMethod, getWhereScope } from "./lists.shared"
  *   `{arg}` and `it` are each item in the `where`, as `list_filter`'s are.
  * - Compiles to `core.getItemAt(core.filter(list, (pile) => ...), 0)`:  nothing if none passes.
  */
-export class OrdinalWhereExpression extends SpellExpression<"ordinal|arg|list|body?"> {
+export class OrdinalWhereExpression extends SpellExpression<"ordinal|arg|list|where|body?"> {
   @proto static priority = Priority.specific
 
   /** Nested scope for the `where` -- each item, as `{arg}` and `it`. */

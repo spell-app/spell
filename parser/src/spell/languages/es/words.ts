@@ -260,6 +260,8 @@ export const spanishWords: SP.LanguageWords = {
    * - The first one is how a translation writes `it`.
    */
   itWords: new Set(["eso", "ello", "ella", "él"]),
+  /** None:  after `que`, as after `donde`, Spanish leaves its subject out (`que están boca arriba`, `implied_it`). */
+  whichClause: undefined,
   /** `eso`, `su`, `ellos`:  drawn plain in the bubbly look, never bold (`SP.BubblyLayout`). */
   pronouns: new Set(["eso", "ello", "ella", "él", "su", "sus", "ellos", "ellas", "lo", "la", "los", "las"]),
 

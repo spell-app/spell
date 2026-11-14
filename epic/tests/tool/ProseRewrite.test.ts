@@ -107,8 +107,8 @@ describe("ProseRewrite.rewrite():  code, asides, notes", () => {
   test("an option grid:  its lettered cards as <epic-option>s, the chosen one on <epic-choices>", () => {
     expect(
       rewritten(
-        '<ui-grid class="spell-pros-cons"><ui-column><ui-segment><ui-label attach="top">A · Keep it (recommended)</ui-label>' +
-          '<p>a</p></ui-segment></ui-column><ui-column data-chosen><ui-segment><ui-label attach="top">B · Drop it</ui-label>' +
+        '<ui-grid class="spell-pros-cons"><ui-column><ui-segment><ui-label attach-to="top">A · Keep it (recommended)</ui-label>' +
+          '<p>a</p></ui-segment></ui-column><ui-column data-chosen><ui-segment><ui-label attach-to="top">B · Drop it</ui-label>' +
           "<p>b</p></ui-segment></ui-column></ui-grid>"
       )
     ).toBe(

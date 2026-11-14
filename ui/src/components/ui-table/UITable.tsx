@@ -1131,7 +1131,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     return this.attributes["aria-label"] ?? (caption || table?.ariaLabel || this.translationForKey("label"))
   }
 
-  // `attached` (any edge), `attached-top`, `attached-bottom`, from `attach`:
+  // `attached` (any edge), `attached-top`, `attached-bottom`, from `attach-to`:
   // the DOM element carries the table's outer margin, so it mirrors the attached scroller's
   // (`UITable.css`:  inside a size container a margin never collapses with the content above).
 

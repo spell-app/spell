@@ -10,6 +10,11 @@ describe("Naming.wordsOf()", () => {
     expect(P.Naming.wordsOf("corazónRojo")).toEqual(["corazón", "Rojo"])
     expect(P.Naming.wordsOf("ÁrbolViejo")).toEqual(["Árbol", "Viejo"])
   })
+
+  test('...and at a space:  a member named by a tag\'s quoted id, `<discard-pile "discard pile"/>`', () => {
+    expect(P.Naming.wordsOf("discard pile")).toEqual(["discard", "pile"])
+    expect(new P.Naming({ all: "snake_case" }).nameOf("discard pile", "property")).toBe("discard_pile")
+  })
 })
 
 describe("jsText.isLegalIdentifier()", () => {

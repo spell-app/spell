@@ -22,6 +22,7 @@ import {
   isHeld,
   isImmediate,
   isSent,
+  isWorkOnMark,
   pickFieldsOf,
   pickOf,
   setPicksOf,
@@ -310,10 +311,14 @@ export class ReviewClient extends PageStore {
    * (it spins;  a click calls it off);  else `null`.
    * - the mark's own button (Approve, Make Todo, Revisit:  Claude took a sent mark)
    * - else Do Now (`details`:  Add Details, a revisit now)
+   * - none when Owen marked the item AFTER Claude started on it (`isWorkOnMark()`):  that work is an earlier request's
    */
   busyButtonOf(id: string): ReviewAction | null {
     if (!this.runningOf(id)) return null
     const mark = this.inbox.marks[id]
+    // Claude is on an earlier request:  the mark Owen made since is still his, and nothing of his turns (I280)
+    const work = this.inbox.working[id]
+    if (work && !isWorkOnMark(work, mark)) return null
     const own = mark && !isImmediate(mark) && REVIEW_ACTIONS.find((action) => action === mark.action)
     return own || "details"
   }

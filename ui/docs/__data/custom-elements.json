@@ -1641,12 +1641,12 @@
               "fieldName": "reveal"
             },
             {
-              "name": "attach",
-              "description": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\" | \"left\" | \"right\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "icon",
@@ -1886,7 +1886,7 @@
             },
             {
               "name": "fluid",
-              "description": "The host is block-level:  `fluid`, or attached top, bottom or both (`attach`)."
+              "description": "The host is block-level:  `fluid`, or attached top, bottom or both (`attach-to`)."
             },
             {
               "name": "ellipsis",
@@ -2257,12 +2257,12 @@
               "fieldName": "stackable"
             },
             {
-              "name": "attach",
-              "description": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\" | \"left\" | \"right\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "width",
@@ -12397,12 +12397,12 @@
               "fieldName": "widthWidescreen"
             },
             {
-              "name": "attach",
-              "description": "No gutter on the `left` / `right` side.  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "No gutter on the `left` / `right` side.  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"left\" | \"right\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "centered",
@@ -17765,12 +17765,12 @@
               "fieldName": "appearance"
             },
             {
-              "name": "attach",
-              "description": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name was `attached` (bare:  `top`).",
+              "name": "attach-to",
+              "description": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old names were `attach` and `attached` (bare:  `top`).",
               "type": {
                 "text": "\"top\" | \"bottom\" | \"top left\" | \"top right\" | \"bottom left\" | \"bottom right\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "direction",
@@ -20199,12 +20199,12 @@
               "fieldName": "padding"
             },
             {
-              "name": "attach",
-              "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "fixed",
@@ -21302,12 +21302,12 @@
               "fieldName": "inverted"
             },
             {
-              "name": "attach",
-              "description": "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old name:  `attached` (bare is `both`).",
+              "name": "attach-to",
+              "description": "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old names:  `attach`, `attached` (bare is `both`).",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "align",
@@ -23177,12 +23177,12 @@
               "fieldName": "padding"
             },
             {
-              "name": "attach",
-              "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).",
+              "name": "attach-to",
+              "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "scrolling",
@@ -25414,12 +25414,12 @@
               "fieldName": "block"
             },
             {
-              "name": "attach",
-              "description": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "seamless",
@@ -28526,12 +28526,12 @@
               "fieldName": "indeterminate"
             },
             {
-              "name": "attach",
-              "description": "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old name:  `attached`.",
+              "name": "attach-to",
+              "description": "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old names:  `attach`, `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "value",
@@ -29738,12 +29738,12 @@
               "fieldName": "padding"
             },
             {
-              "name": "attach",
-              "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).",
+              "name": "attach-to",
+              "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "scrolling",
@@ -30544,12 +30544,12 @@
               "fieldName": "padding"
             },
             {
-              "name": "attach",
-              "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).",
+              "name": "attach-to",
+              "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "scrolling",
@@ -31304,12 +31304,12 @@
               "fieldName": "dividing"
             },
             {
-              "name": "attach",
-              "description": "`both`:  flush against its container, no gap.  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "`both`:  flush against its container, no gap.  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "close",
@@ -33360,12 +33360,12 @@
               "fieldName": "padding"
             },
             {
-              "name": "attach",
-              "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).",
+              "name": "attach-to",
+              "description": "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "scrolling",
@@ -34307,16 +34307,16 @@
               "fieldName": "align"
             },
             {
-              "name": "attach",
-              "description": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\" | \"left\" | \"right\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "seamless",
-              "description": "With `attach`:  no line where attached segments meet.",
+              "description": "With `attach-to`:  no line where attached segments meet.",
               "type": {
                 "text": "boolean"
               },
@@ -39891,12 +39891,12 @@
               "fieldName": "equal"
             },
             {
-              "name": "attach",
-              "description": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "unstackable",
@@ -40503,12 +40503,12 @@
               "fieldName": "lazy"
             },
             {
-              "name": "attach",
-              "description": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "parent",
@@ -40799,12 +40799,12 @@
               "fieldName": "equal"
             },
             {
-              "name": "attach",
-              "description": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name was `attached` (bare ~== `top`).",
+              "name": "attach-to",
+              "description": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old names were `attach` and `attached` (bare ~== `top`).",
               "type": {
                 "text": "\"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "value",
@@ -41467,12 +41467,12 @@
               "fieldName": "padding"
             },
             {
-              "name": "attach",
-              "description": "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old name:  `attached`.",
+              "name": "attach-to",
+              "description": "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old names:  `attach`, `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "stackable",
@@ -41748,15 +41748,15 @@
             },
             {
               "name": "attached",
-              "description": "Set while `attach` is set (any edge):  the host drops the outer margin it carries."
+              "description": "Set while `attach-to` is set (any edge):  the host drops the outer margin it carries."
             },
             {
               "name": "attached-top",
-              "description": "Set while `attach` is `top`:  the host keeps only its top margin."
+              "description": "Set while `attach-to` is `top`:  the host keeps only its top margin."
             },
             {
               "name": "attached-bottom",
-              "description": "Set while `attach` is `bottom`:  the host keeps only its bottom margin."
+              "description": "Set while `attach-to` is `bottom`:  the host keeps only its bottom margin."
             },
             {
               "name": "disabled",
@@ -45295,12 +45295,12 @@
               "fieldName": "padding"
             },
             {
-              "name": "attach",
-              "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.",
+              "name": "attach-to",
+              "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
-              "fieldName": "attach"
+              "fieldName": "attachTo"
             },
             {
               "name": "fixed",

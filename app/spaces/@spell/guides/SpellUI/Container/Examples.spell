@@ -152,7 +152,7 @@
 		<!-- GAP I31:  items inside a <ui-container> in a <ui-menu> lose the menu's row layout and their icons. -->
 		<section label="Centered Menu" sticky="stack" collapsible dividing>
 			<example "Centered Menu" description="A container can be used inside of a menu to make sure menu items appear inline with page contents.  A `stackable` menu adjusts to small screens.">
-				<menu attach="both" stackable aria-label="Centered menu">
+				<menu attach-to="both" stackable aria-label="Centered menu">
 					<container>
 						<item link="#centered-menu" icon="home">Home</item>
 						<item link="#centered-menu" icon="grip">Browse</item>

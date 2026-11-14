@@ -291,7 +291,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A field that links to things is written as their addresses (`addressOfLinked()`), and a followed list's change writes
       them back (`rememberLinkedList()`, epic `data` T74).
     - `draftOf()`:  a copy that takes changes and sends nothing, until `save()`;  it's kept on this device.
-      - `save()` is one undo step, `Edit`, or joins the undoable action it's in (I100).
+      - `save()` is one undo step, `Edit`, or joins the undoable action it's in (I100);
+        inside one that can't be undone, a step of its own all the same (epic `language` I88).
       - A draft with nothing changed in it ends when the real thing changes:  so after Undo, Edit shows what's back.
     - `saveNew()`:  a thing made here, under its browser-made `Thing.id`;  a place that makes ids renames it.
     - `startEdit()`, for a side bar:  a plain set per keystroke, held;  `commit()` makes one undo step and sends it (J4), in the
@@ -474,6 +475,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It's ONE step, however long it waits:
     what it calls, and work begun while it waits, join it.
   - `{ cantBeUndone: "keeps history" | "clears history" }`:  left out of the history.
+    - A saved thing it adds or removes too;  but a step of its own inside it is still one (`separateStep()`):
+      a draft's save, `Edit` (epic `language` I88).
     - The second forgets every step, once the action is done.
   - A prop declared `undoable: false` (a selection, say) is left out of every step.
 - What a step keeps:
@@ -503,6 +506,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (Owen, 2026-11-14, epic `language` P55, Q60):  one undo step by itself.
     - `can't be undone` describes it `cantBeUndone: "keeps history"` instead.
     - Not an action:  a question (it gives back yes or no), a drawing, a creation hook, a test.
+    - A creation hook run while no action runs (the program's opening, a one of a kind's `when creating it`) is no
+      step, as `core.holdWhile()`'s opening steps aren't (`runCreate()`, epic `language` I88):
+      Undo at once does nothing.
     - What another action calls joins that one's step, as above.
 - Python's core has the same history, `undoing.py` (epic `language` P54):
   - its app's `can_undo`, `undo_title` ... go to the page on the app, `"$history"` (`StateWriter`);

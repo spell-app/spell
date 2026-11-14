@@ -190,7 +190,7 @@
 
 		<section label="Negative Margins" sticky collapsible dividing>
 			<example "Negative Margins" description="Since all grid columns include gutters, grids use \[negative margins](https://csswizardry.com/2011/08/building-better-grid-systems/) to make sure that the first and last columns sit flush with content outside the grid.">
-				<button attach="top">Button before grid</button>
+				<button attach-to="top">Button before grid</button>
 				<grid>
 					<column width="16">
 						<segment/>
@@ -207,7 +207,7 @@
 						<segment/>
 					</column>
 				</grid>
-				<button attach="bottom">Button after grid</button>
+				<button attach-to="bottom">Button after grid</button>
 				<text slot="description" paragraph>In the following example, you can see even though the top row has padding, the <link link="/button"><text code>attached</text> button</link> still sits flush with the edge of the grid.</text>
 				<text slot="description" paragraph>In some cases, like when a column or row is <link link="#examples-varying-grids-colored"><text code>colored</text></link>, you may want to avoid using negative margins. You can do this by using a <link link="#examples-variations-padded"><text code>padded</text></link> variation.</text>
 			</example>
@@ -307,10 +307,10 @@
 		<section label="Left / Right Attached Column" sticky collapsible dividing>
 			<example "Left / Right Attached Column">
 				<grid columns="2">
-					<column attach="left">
+					<column attach-to="left">
 						<segment/>
 					</column>
-					<column attach="right">
+					<column attach-to="right">
 						<segment/>
 					</column>
 				</grid>

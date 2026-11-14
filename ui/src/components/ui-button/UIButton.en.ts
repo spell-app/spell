@@ -177,15 +177,15 @@ export const buttonVocabulary = {
         "Its old name was `animated`."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom", "left", "right"],
       classes: ATTACH_CLASSES,
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
         "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  " +
-        "Its old name was `attached`."
+        "Its old names were `attach` and `attached`."
     },
     {
       name: "icon",
@@ -313,7 +313,7 @@ export const buttonVocabulary = {
     { name: "active", description: "Pressed / on (`selected`)." },
     { name: "disabled", description: "Can't be used." },
     { name: "loading", description: "Busy." },
-    { name: "fluid", description: "The host is block-level:  `fluid`, or attached top, bottom or both (`attach`)." },
+    { name: "fluid", description: "The host is block-level:  `fluid`, or attached top, bottom or both (`attach-to`)." },
     { name: "ellipsis", description: "Cuts its text off with `…`:  the host is never wider than its parent." }
   ],
   texts: [{ key: "loading", text: "Loading…", description: "Announced while `loading`." }]

@@ -47,7 +47,7 @@
 							<header>My Neighbor Totoro</header>
 							<description>Two sisters move to the country with their father in order to be closer to their hospitalized mother, and discover the surrounding trees are inhabited by magical spirits.</description>
 						</content>
-						<buttons width="2" attach="bottom">
+						<buttons width="2" attach-to="bottom">
 							<button icon="plus">Queue</button>
 							<button icon="play" color="primary">Watch</button>
 						</buttons>
@@ -69,7 +69,7 @@
 							<header>Watchmen</header>
 							<description>In a gritty and alternate 1985 the glory days of costumed vigilantes have been brought to a close by a government crackdown, but after one of the masked veterans is brutally murdered an investigation into the killer is initiated.</description>
 						</content>
-						<buttons width="2" attach="bottom">
+						<buttons width="2" attach-to="bottom">
 							<button icon="plus">Queue</button>
 							<button icon="play" color="primary">Watch</button>
 						</buttons>

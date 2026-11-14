@@ -16,7 +16,7 @@ describe("Python on asyncio", () => {
 
   test("a method that pauses waits:  `async def`, `await core.pause_for(...)`", () => {
     expect(cards).toContain("    async def turn_over_the_next_card(self) -> None:")
-    expect(cards).toContain('            await core.pause_for(50, "msec")')
+    expect(cards).toContain('        await core.pause_for(300, "msec")')
   })
 
   test("a method that calls one that waits waits too, and awaits it", () => {

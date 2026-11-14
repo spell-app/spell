@@ -125,11 +125,11 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
     return this.isMarkedDisabled
   }
 
-  /** Full width:  `fluid`, or attached as a whole row (`attach` `both`, `top`, `bottom`). */
+  /** Full width:  `fluid`, or attached as a whole row (`attach-to` `both`, `top`, `bottom`). */
   @E.cssState("fluid")
   get isFluid(): boolean {
-    const { attach } = this
-    return this.fluid || attach === "both" || attach === "top" || attach === "bottom"
+    const { attachTo } = this
+    return this.fluid || attachTo === "both" || attachTo === "top" || attachTo === "bottom"
   }
 
   ////////////////

@@ -3220,15 +3220,15 @@ export interface UIButtonAttributes {
    */
   "prop:reveal"?: "slide" | "fade" | "vertical"
   /**
-   * Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name was `attached`.
+   * Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old names were `attach` and `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
-  attach?: "both" | "top" | "bottom" | "left" | "right"
+  "attach-to"?: "both" | "top" | "bottom" | "left" | "right"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom" | "left" | "right"
+  "prop:attachTo"?: "both" | "top" | "bottom" | "left" | "right"
   /**
    * Its icon, by name:  Font Awesome's, or Fomantic's aliases.  With no text, it's an icon button, with square padding (the `icon` class).  With `labeled`, it's a `labeled icon` button.
    * - takes:  icon name
@@ -3749,15 +3749,15 @@ export interface UIButtonsAttributes {
    */
   "prop:stackable"?: boolean | ""
   /**
-   * Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name was `attached`.
+   * Joins it to the edge of a segment:  the side its value names, or `both`.  Its old names were `attach` and `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
-  attach?: "both" | "top" | "bottom" | "left" | "right"
+  "attach-to"?: "both" | "top" | "bottom" | "left" | "right"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom" | "left" | "right"
+  "prop:attachTo"?: "both" | "top" | "bottom" | "left" | "right"
   /**
    * The older, count-based way to write `equal fluid`:  equal-width buttons that fill the row.  A count draws its word (`width="3"` draws `three buttons`).  `"equal"` draws `equal width buttons`.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -7423,15 +7423,15 @@ export interface UIColumnAttributes {
     | "16"
     | (string & {})
   /**
-   * No gutter on the `left` / `right` side.  Its old name was `attached`.
+   * No gutter on the `left` / `right` side.  Its old names were `attach` and `attached`.
    * - takes:  `left` · `right`
    */
-  attach?: "left" | "right"
+  "attach-to"?: "left" | "right"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "left" | "right"
+  "prop:attachTo"?: "left" | "right"
   /**
    * Centred in its line.
    * - takes:  flag (present / absent)
@@ -17153,15 +17153,15 @@ export interface UIHeaderAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name was `attached`.
+   * Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old names were `attach` and `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * With `attached`:  no line where it meets the segment.
    * - takes:  flag (present / absent)
@@ -21897,15 +21897,15 @@ export interface UILabelAttributes {
    */
   "prop:appearance"?: string
   /**
-   * Attached across (or on a corner of) the owner's top or bottom edge.  Its old name was `attached` (bare:  `top`).
+   * Attached across (or on a corner of) the owner's top or bottom edge.  Its old names were `attach` and `attached` (bare:  `top`).
    * - takes:  `top` · `bottom` · `top left` · `top right` · `bottom left` · `bottom right`
    */
-  attach?: "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
+  "attach-to"?: "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
+  "prop:attachTo"?: "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
   /**
    * `horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name was `horizontal`.
    * - takes:  `horizontal`
@@ -24472,15 +24472,15 @@ export interface UIMenuAttributes {
    */
   "prop:padding"?: "none" | "none-x" | "none-y" | "compact"
   /**
-   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.
+   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * Fixed to an edge of the viewport.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
@@ -25005,15 +25005,15 @@ export interface UIMessageAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old name:  `attached` (bare is `both`).
+   * Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old names:  `attach`, `attached` (bare is `both`).
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * Aligns its text `center` or `right`.  Old name:  `text-align`.
    * - takes:  `center` · `right`
@@ -27513,15 +27513,15 @@ export interface UIPanelAttributes {
    */
   "prop:padding"?: "compact" | "md" | "lg"
   /**
-   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).
+   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -29934,15 +29934,15 @@ export interface UIProgressAttributes {
    */
   "prop:indeterminate"?: boolean | "" | "filling" | "sliding" | "swinging"
   /**
-   * A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old name:  `attached`.
+   * A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  Old names:  `attach`, `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * Amount done:  a number, or a comma list for several bars.  A share of `total`, else a percentage.
    * - takes:  text
@@ -31384,15 +31384,15 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:padding"?: "compact" | "md" | "lg"
   /**
-   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).
+   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -32108,15 +32108,15 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:padding"?: "compact" | "md" | "lg"
   /**
-   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).
+   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -33751,15 +33751,15 @@ export interface UIRailAttributes {
    */
   "prop:dividing"?: boolean | ""
   /**
-   * `both`:  flush against its container, no gap.  Its old name was `attached`.
+   * `both`:  flush against its container, no gap.  Its old names were `attach` and `attached`.
    * - takes:  `both`
    */
-  attach?: "both"
+  "attach-to"?: "both"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both"
+  "prop:attachTo"?: "both"
   /**
    * Closer to its container:  `close` (1em away), `close="very"` (0.5em away).
    * - takes:  flag, or `very`
@@ -36868,15 +36868,15 @@ export interface UISectionAttributes {
    */
   "prop:padding"?: "compact" | "md" | "lg"
   /**
-   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old name:  `attached` (bare is `both`).
+   * With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).  Old names:  `attach`, `attached` (bare is `both`).
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
@@ -37610,17 +37610,17 @@ export interface UISegmentAttributes {
    */
   "prop:align"?: "left" | "center" | "right"
   /**
-   * Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name was `attached`.
+   * Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old names were `attach` and `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
-  attach?: "both" | "top" | "bottom" | "left" | "right"
+  "attach-to"?: "both" | "top" | "bottom" | "left" | "right"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom" | "left" | "right"
+  "prop:attachTo"?: "both" | "top" | "bottom" | "left" | "right"
   /**
-   * With `attach`:  no line where attached segments meet.
+   * With `attach-to`:  no line where attached segments meet.
    * - takes:  flag (present / absent)
    */
   seamless?: boolean | ""
@@ -43458,15 +43458,15 @@ export interface UIStepsAttributes {
    */
   "prop:equal"?: boolean | ""
   /**
-   * Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name was `attached`.
+   * Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old names were `attach` and `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * Never stacks;  by default steps stack below 768px of the group's width (or the screen's:  `stack-with`).
    * - takes:  flag (present / absent)
@@ -44734,15 +44734,15 @@ export interface UITabAttributes {
    */
   "prop:lazy"?: boolean | ""
   /**
-   * Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name was `attached`.
+   * Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old names were `attach` and `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * Id of the `<ui-tabs>` this pane belongs to, when it's written outside them (`parent="types"`):  it joins them, in page order, as if nested there.
    * - takes:  text
@@ -45218,15 +45218,15 @@ export interface UITableAttributes {
    */
   "prop:padding"?: "xs" | "compact" | "md" | "lg"
   /**
-   * Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old name:  `attached`.
+   * Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old names:  `attach`, `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * Rows become blocks on a viewport below 768px (the default, `stackable`);  `stackable="tablet"` also below 992px.  `stack-by="container"` follows the table's OWN width instead.
    * - takes:  flag, or `tablet`
@@ -45814,15 +45814,15 @@ export interface UITabsAttributes {
    */
   "prop:equal"?: boolean | ""
   /**
-   * Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name was `attached` (bare ~== `top`).
+   * Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old names were `attach` and `attached` (bare ~== `top`).
    * - takes:  `top` · `bottom`
    */
-  attach?: "top" | "bottom"
+  "attach-to"?: "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "top" | "bottom"
+  "prop:attachTo"?: "top" | "bottom"
   /**
    * Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-changing` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one.
    * - takes:  text
@@ -50036,15 +50036,15 @@ export interface UIToolbarAttributes {
    */
   "prop:padding"?: "none" | "none-x" | "none-y" | "compact"
   /**
-   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.
+   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old names were `attach` and `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
-  attach?: "both" | "top" | "bottom"
+  "attach-to"?: "both" | "top" | "bottom"
   /**
-   * `attach`, as the DOM element's property.
-   * @deprecated write `attach` -- `prop:` stays only for compiled spell
+   * `attach-to`, as the DOM element's property.
+   * @deprecated write `attach-to` -- `prop:` stays only for compiled spell
    */
-  "prop:attach"?: "both" | "top" | "bottom"
+  "prop:attachTo"?: "both" | "top" | "bottom"
   /**
    * Fixed to an edge of the viewport.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`

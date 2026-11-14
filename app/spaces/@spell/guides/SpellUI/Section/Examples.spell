@@ -325,14 +325,14 @@
 		</>
 
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example "Attached" description="Boxed sections can join edge to edge:  `attach=\"top\"` above, `attach=\"both\"` between, `attach=\"bottom\"` below.">
-				<section label="Step 1" level="4" appearance="bordered" attach="top">
+			<example "Attached" description="Boxed sections can join edge to edge:  `attach-to=\"top\"` above, `attach-to=\"both\"` between, `attach-to=\"bottom\"` below.">
+				<section label="Step 1" level="4" appearance="bordered" attach-to="top">
 					<text paragraph>Choose a plan.</text>
 				</section>
-				<section label="Step 2" level="4" appearance="bordered" attach="both">
+				<section label="Step 2" level="4" appearance="bordered" attach-to="both">
 					<text paragraph>Add your details.</text>
 				</section>
-				<section label="Step 3" level="4" appearance="bordered" attach="bottom">
+				<section label="Step 3" level="4" appearance="bordered" attach-to="bottom">
 					<text paragraph>Confirm.</text>
 				</section>
 			</example>

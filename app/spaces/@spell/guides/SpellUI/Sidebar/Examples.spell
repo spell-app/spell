@@ -300,7 +300,7 @@
 		<!-- GAP I73:  a menu item can't toggle the sidebar (no invoker commands on `<ui-item>`);  a button in the menu does. -->
 		<section label="Using a custom context" sticky collapsible dividing>
 			<example "Using a custom context" description="A sidebar can sit inside any element, not just a page's body: its `<ui-pushable>` is the context.">
-				<menu attach="top" aria-label="Demo">
+				<menu attach-to="top" aria-label="Demo">
 					<item>
 						<button commandfor="sidebar-context" command="--toggle" icon="sidebar" appearance="basic" padding="compact">Menu</button>
 					</item>

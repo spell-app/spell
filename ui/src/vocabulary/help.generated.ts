@@ -118,7 +118,7 @@ export const HELP_TABLE: Readonly<
       ellipsis: "One line, cut off with `…` where it doesn't fit.",
       labeled: 'With `icon`, the icon gets a block of its own: at the start, or at the end with `labeled="right"`.',
       reveal: "On hover, it brings the `icon` slot in over the content, the way its value names: `slide` is sideways.",
-      attach: "Joins it to the edge of a segment or another element: the side its value names, or `both`.",
+      "attach-to": "Joins it to the edge of a segment or another element: the side its value names, or `both`.",
       icon: "Its icon, by name: Font Awesome's, or Fomantic's aliases.",
       "icon-position": "Which side of the text the icon goes: `left` (the default) or `right`.",
       label: "The button's text, written as an attribute instead of in the default slot.",
@@ -152,7 +152,7 @@ export const HELP_TABLE: Readonly<
       wrapping: "Buttons wrap onto more rows.",
       spacing: "Room between the buttons: `md` separates them with gaps.",
       stackable: "Stacks vertically on mobile.",
-      attach: "Joins it to the edge of a segment: the side its value names, or `both`.",
+      "attach-to": "Joins it to the edge of a segment: the side its value names, or `both`.",
       width: "The older, count-based way to write `equal fluid`: equal-width buttons that fill the row."
     }
   },
@@ -307,7 +307,7 @@ export const HELP_TABLE: Readonly<
       "width-computer": "Width while the grid is 992px wide or more.",
       "width-large": "Width while the grid is 1200px ...",
       "width-widescreen": "Width while the grid is 1920px wide or more.",
-      attach: "No gutter on the `left` / `right` side.",
+      "attach-to": "No gutter on the `left` / `right` side.",
       centered: "Centred in its line.",
       stretched: "Fills the line's height; its content grows.",
       only: "Shown only on these devices (by the viewport).",
@@ -682,7 +682,7 @@ export const HELP_TABLE: Readonly<
       icon: "Its icon, by name, drawn before the text.",
       dividing: "A rule below it.",
       block: "In a tinted box.",
-      attach: "Joined to a segment below (`top`) or above (`bottom`); `both` sits between two.",
+      "attach-to": "Joined to a segment below (`top`) or above (`bottom`); `both` sits between two.",
       seamless: "With `attached`: no line where it meets the segment.",
       align: "Aligns its text `left`, `center`, `right` or `justified`.",
       padding: "`none`: no padding.",
@@ -898,7 +898,7 @@ export const HELP_TABLE: Readonly<
       floating: "Floats over the owner's top end corner, e.g.",
       appearance:
         "The look, several words at once: `basic` (less pronounced: an outline on the surface colour), `tinted` (soft: the colour's tint as the fill and its text colour as the text, as a pill or badge; not Fomantic's), `circular` (a round badge).",
-      attach: "Attached across (or on a corner of) the owner's top or bottom edge.",
+      "attach-to": "Attached across (or on a corner of) the owner's top or bottom edge.",
       direction: "`horizontal`: a fixed-width tag before a line of text, e.g.",
       empty: "With `circular`: an empty dot.",
       fluid: "Takes the full width of its container.",
@@ -1016,7 +1016,8 @@ export const HELP_TABLE: Readonly<
       inverted: "The dark scheme; with `color`, filled with the colour.",
       padding:
         "`none`: no item padding; `none-x` / `none-y` keep only the top and bottom, or the left and right; `compact`: only as wide as its items.",
-      attach: "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).",
+      "attach-to":
+        "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).",
       fixed: "Fixed to an edge of the viewport.",
       align:
         "Where the items sit: `fluid` -- they fill the bar; `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).",
@@ -1045,7 +1046,7 @@ export const HELP_TABLE: Readonly<
       padding: "`compact`: only as wide as its content.",
       centered: "Centres its text (and its icon with the content).",
       inverted: "The dark scheme; a coloured one keeps its hue in the text.",
-      attach: "Joined edge to edge with the segment or form below (`both`, `top`); `bottom` joins the one above.",
+      "attach-to": "Joined edge to edge with the segment or form below (`both`, `top`); `bottom` joins the one above.",
       align: "Aligns its text `center` or `right`.",
       icon: "Icon name, shown large beside the content; the root gets the `icon` class.",
       heading: "Shorthand for a header above the content; a slotted `<ui-header>` is the rich version.",
@@ -1151,7 +1152,7 @@ export const HELP_TABLE: Readonly<
       appearance:
         "The look: `pane`, a whole pane under one flat bar, with no box or padding of its own: its title is the bar and its content fills what's left, so it can scroll by itself.",
       padding: "`compact`: less padding and space around the title; `md` / `lg`: more padding in the content.",
-      attach:
+      "attach-to":
         "With a box: joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).",
       scrolling: "The content has a capped height and scrolls; `short` ...",
       height:
@@ -1233,7 +1234,7 @@ export const HELP_TABLE: Readonly<
       inverted: "For dark backgrounds.",
       align: "`right`: the bar grows from the right; its text sits at its left end.",
       indeterminate: "Unknown progress: a pulsing full bar, or a `filling` / `sliding` / `swinging` one.",
-      attach: "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).",
+      "attach-to": "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).",
       value: "Amount done: a number, or a comma list for several bars.",
       total: "What `value` counts up to; unset, `value` is a percentage.",
       percent: "Percentage done, bypassing `value` / `total`; a comma list for several bars.",
@@ -1338,7 +1339,7 @@ export const HELP_TABLE: Readonly<
       appearance:
         "The look, several words at once: `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion: a tinted title bar over padded content), `raised` (with a box: lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).",
       padding: "`compact`: less padding and space around the title; `md` / `lg`: more padding in the content.",
-      attach:
+      "attach-to":
         "With a box: joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).",
       scrolling: "The content has a capped height and scrolls; `short` ...",
       height:
@@ -1380,7 +1381,7 @@ export const HELP_TABLE: Readonly<
       appearance:
         "The look, several words at once: `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion: a tinted title bar over padded content), `raised` (with a box: lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).",
       padding: "`compact`: less padding and space around the title; `md` / `lg`: more padding in the content.",
-      attach:
+      "attach-to":
         "With a box: joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).",
       scrolling: "The content has a capped height and scrolls; `short` ...",
       height:
@@ -1431,7 +1432,7 @@ export const HELP_TABLE: Readonly<
       position: "Side: `left` or `right` of its container.",
       internal: "Inside its container's edge instead of outside it.",
       dividing: "A vertical rule between the rail and its container.",
-      attach: "`both`: flush against its container, no gap.",
+      "attach-to": "`both`: flush against its container, no gap.",
       close: 'Closer to its container: `close` (1em away), `close="very"` (0.5em away).'
     }
   },
@@ -1585,7 +1586,7 @@ export const HELP_TABLE: Readonly<
       appearance:
         "The look, several words at once: `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion: a tinted title bar over padded content), `raised` (with a box: lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).",
       padding: "`compact`: less padding and space around the title; `md` / `lg`: more padding in the content.",
-      attach:
+      "attach-to":
         "With a box: joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between two).",
       scrolling: "The content has a capped height and scrolls; `short` ...",
       height:
@@ -1619,9 +1620,9 @@ export const HELP_TABLE: Readonly<
         "Its padding: `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.",
       clearing: "Contains its floated children.",
       align: "Aligns its text `left`, `center` or `right`.",
-      attach:
+      "attach-to":
         "Joined edge to edge with the elements above / below: `top`, `bottom`, `left`, `right`; `both` sits in the middle.",
-      seamless: "With `attach`: no line where attached segments meet.",
+      seamless: "With `attach-to`: no line where attached segments meet.",
       inverted: "The dark scheme; everything inside follows (`color-scheme: dark`, `--ui-inverted`).",
       loading: "Dims its content under a spinner; `aria-busy`.",
       disabled: "Dimmed and inert.",
@@ -1866,7 +1867,7 @@ export const HELP_TABLE: Readonly<
       fluid: "Takes the full width of its container.",
       equal:
         "Every step the same width, from the steps themselves (no count): each as wide as the widest; with `fluid`, an equal share of the row each.",
-      attach: "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.",
+      "attach-to": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.",
       unstackable:
         "Never stacks; by default steps stack below 768px of the group's width (or the screen's: `stack-with`).",
       stackable: "`stackable=\"tablet\"`: stacks below 992px (of the group's width, or the screen's), not just 768px.",
@@ -1905,7 +1906,7 @@ export const HELP_TABLE: Readonly<
       disabled: "Its tab can't be selected (skipped by the arrow keys).",
       loading: "Busy: a spinner in place of the content.",
       lazy: "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-opened` with `first: true` to fill it yourself).",
-      attach: "Joined to a menu edge (`top`, `bottom`, or `both`); inside `<ui-tabs>`, the tabs decide.",
+      "attach-to": "Joined to a menu edge (`top`, `bottom`, or `both`); inside `<ui-tabs>`, the tabs decide.",
       parent:
         'Id of the `<ui-tabs>` this pane belongs to, when it\'s written outside them (`parent="types"`): it joins them, in page order, as if nested there.',
       appearance: "The look: `basic`, no segment box; inside `<ui-tabs>`, the tabs decide.",
@@ -1933,7 +1934,7 @@ export const HELP_TABLE: Readonly<
       unstackable:
         "Never stacks rows into blocks, even on a viewport below 768px: wider than its box, it scrolls sideways in it instead.",
       padding: "Cell padding: `xs` and `compact` less, `md` and `lg` more.",
-      attach: "Joins a segment or another table: `both` (in the middle), `top` or `bottom`.",
+      "attach-to": "Joins a segment or another table: `both` (in the middle), `top` or `bottom`.",
       stackable:
         'Rows become blocks on a viewport below 768px (the default, `stackable`); `stackable="tablet"` also below 992px.',
       "stack-by":
@@ -1972,7 +1973,7 @@ export const HELP_TABLE: Readonly<
         "Where the tabs sit: `fluid` -- they fill the row; `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).",
       equal:
         'Every tab the same width, from the tabs themselves (no count): with `align="fluid"` an equal share of the row each; otherwise each as wide as the widest.',
-      attach:
+      "attach-to":
         "Joins the tab menu and the panes edge to edge: `top` puts the tabs above (`top attached` menu, `bottom attached` panes); `bottom` puts them below.",
       value: "Value of the selected pane (its `value`, else its index).",
       activation: "`automatic`: moving focus with the arrow keys selects the tab (APG's default).",
@@ -2151,7 +2152,8 @@ export const HELP_TABLE: Readonly<
       inverted: "The dark scheme; with `color`, filled with the colour.",
       padding:
         "`none`: no item padding; `none-x` / `none-y` keep only the top and bottom, or the left and right; `compact`: only as wide as its items.",
-      attach: "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).",
+      "attach-to":
+        "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).",
       fixed: "Fixed to an edge of the viewport.",
       align:
         "Where the items sit: `fluid` -- they fill the bar; `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).",

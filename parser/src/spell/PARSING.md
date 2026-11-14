@@ -236,6 +236,17 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - An operand taking no tokens, so the verb is its suffix:  `CompoundExpression` takes it only with one after it.
   - Only where `it` is a variable;  its `syntax` is the words it comes before, none in English.
   - `Priority.preferred`, so `no es ...` isn't `no` (false) compared with something.
+- `which` after a list, its subject the item (epic `language` T133):  `the cards in the deck which are face up`
+  ~== `... where it is face up`, in every rule a `where` starts the condition of:  `(where:where|which|that|who)`.
+  - Its words:  English's `which`, `that`, `who`;  Spanish's `que`, beside `where` and `donde`.
+  - Written out in each syntax, not `{where_or_which}`:  a word the line must have (`Sequence.requiredWords`) turns a
+    line without one away at once, and a list's slot that read past it gives it back (`giveBack()`).
+    The word rule `where_or_which` says which of them means `which` (`Wording.reads()`).
+  - `SpellStatement.withWhichSubject()` reads the condition with its subject put back, before it parses:
+    English's `it` (the language's `whichClause`), on no text just after `which`, and a first plural verb made singular
+    (`are` => `is`);  Spanish leaves the subject out after `donde` too, so `que` reads as it is (`implied_it`).
+  - The loop's own:  `for each card in the deck which is not in the stock` (`list_iteration_where`), its item, list and
+    condition one `each_item_where`, a `list_filter` of one item's word, never an expression alone.
 - A number word is a name where it can't be a number (J96):
   - the target of `set` / `poner` tries `{variable}` first:  `set three to 3`
   - a variable of the name in scope wins over the number (`NumberAsString.parse()`)
@@ -1060,6 +1071,10 @@ a line of the built-in types table, a built-in template, or a project's own `one
       its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
     - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,
       after the class, a getter per condition and `core.describeAction(...)` (`P.ASTTypeDescription`).
+    - `- disabled when ...` (`inactiva cuando`) is `- enabled when` turned round (epic `language` T132):
+      the same `<name>IsEnabled` getter, giving back `not` of its condition.
+      - An action says one or the other:  a `disabled when` beside an `enabled when` is refused while both are there
+        (`SP.SpellWarnings.refuseIf()`, `ActionDetail.saysBoth()`).
     - `shortcut_keys` reads a key as typed, its tokens joined up to the first space:  `meta+shift+Z`.
   - A HANDLER, `- on mouse down:`, is a method of the template's things, `on_mouse_down`, `it` the thing (`On`).
     - `- when flipped:` is the same (`On`'s `when` registrations);  `- when creating a deck:` (and `- when created:`)

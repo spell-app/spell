@@ -2,7 +2,7 @@
 
 exports[`testing spell module methods > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
-  "action_detail": "keys?|cantBeUndone?|title?|enabled?|selected?|undoable?|undoneAs?|icon?|replacesLast?",
+  "action_detail": "keys?|disabled?|cantBeUndone?|title?|enabled?|selected?|undoable?|undoneAs?|icon?|replacesLast?",
   "action_modifier": "title?|icon?|keys?|undoable?|cantBeUndone?|undoneAs?",
   "bare_type_arg": "type",
   "create_animation": "signature|body?",

@@ -180,6 +180,24 @@ export class InboxCommands {
     })
   }
 
+  /**
+   * Items `ids` on epic page `file` closed (done, canceled, decided):  nobody works on them any more, so their working
+   * flags go (epic `epic-engine` I280:  a flag left on kept an item's button turning for days).
+   * - writes only when one of them had a flag;  NEVER throws (best effort beside the edit that closed them)
+   */
+  stopWorking(file: string, ids: readonly string[]): void {
+    try {
+      const keys = ids.map((id) => ReviewInbox.toItemId(id))
+      const path = ReviewInbox.pathFor(file)
+      if (!keys.some((key) => key in ReviewInbox.read(path).working)) return
+      ReviewInbox.update(path, (box) => {
+        for (const key of keys) box.setWorking(key, null)
+      })
+    } catch (error) {
+      console.error(`epic:  couldn't take the working flags off ${ids.join(", ")}:  ${(error as Error).message}`)
+    }
+  }
+
   ////////////////
   // ## Printing
   ////////////////

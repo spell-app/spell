@@ -199,14 +199,18 @@ game is an app:
     )
   })
 
-  test("an action's `enabled when`, in its own words;  none:  empty", () => {
+  test("an action's `enabled when` or `disabled when`, in its own words;  none:  undefined", () => {
     const source = `
 a card is a thing where:
 	- to turn it over:
 		- enabled when it is face down
-		set its direction to up`
-    expect(enabledWhenInSource("turn it over", [source])).toBe("it is face down")
-    expect(enabledWhenInSource("play it", [source])).toBe("")
+		set its direction to up
+	- to peek:
+		- disabled when it is face up
+		print 1`
+    expect(enabledWhenInSource("turn it over", [source])).toEqual({ words: "it is face down", when: "enabled" })
+    expect(enabledWhenInSource("peek", [source])).toEqual({ words: "it is face up", when: "disabled" })
+    expect(enabledWhenInSource("play it", [source])).toBeUndefined()
   })
 })
 

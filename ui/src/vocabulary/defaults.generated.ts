@@ -127,7 +127,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "ellipsis", kind: "keyOnly", group: "appearance" },
     { name: "labeled", kind: "keyOrValueAndKey", group: "appearance", values: ["left", "right"] },
     { name: "reveal", kind: "valueOnly", group: "appearance", values: ["slide", "fade", "vertical"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom", "left", "right"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom", "left", "right"] },
     { name: "icon", kind: "icon", group: "content" },
     { name: "icon-position", kind: "enum", group: "content", values: ["left", "right"] },
     { name: "label", kind: "string", group: "content" },
@@ -156,7 +156,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "wrapping", kind: "keyOnly", group: "layout" },
     { name: "spacing", kind: "valueOnly", group: "layout", values: ["md"] },
     { name: "stackable", kind: "keyOnly", group: "layout" },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom", "left", "right"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom", "left", "right"] },
     { name: "width", kind: "width", group: "layout", values: "widths" }
   ],
   "ui-calendar": [
@@ -278,7 +278,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "width-computer", kind: "width", group: "appearance", values: "widths" },
     { name: "width-large", kind: "width", group: "appearance", values: "widths" },
     { name: "width-widescreen", kind: "width", group: "appearance", values: "widths" },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["left", "right"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["left", "right"] },
     { name: "centered", kind: "keyOnly", group: "layout" },
     { name: "stretched", kind: "keyOnly", group: "layout" },
     {
@@ -568,7 +568,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "icon", kind: "icon", group: "content" },
     { name: "dividing", kind: "keyOnly", group: "appearance" },
     { name: "block", kind: "keyOnly", group: "layout" },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "seamless", kind: "keyOnly", group: "appearance" },
     { name: "align", kind: "textAlign", group: "layout", values: "alignments" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none"] },
@@ -763,7 +763,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "floating", kind: "keyOrValueAndKey", group: "appearance", values: ["left", "bottom", "bottom left"] },
     { name: "appearance", kind: "multiple", group: "appearance", values: ["basic", "tinted", "circular"] },
     {
-      name: "attach",
+      name: "attach-to",
       kind: "valueOnly",
       group: "layout",
       values: ["top", "bottom", "top left", "top right", "bottom left", "bottom right"]
@@ -863,7 +863,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "wrap", kind: "keyOnly", group: "appearance" },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y", "compact"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "fixed", kind: "keyOrValueAndKey", group: "layout", values: ["top", "bottom", "left", "right"] },
     { name: "align", kind: "valueAndKey", group: "layout", values: ["fluid", "left", "center", "right"] },
     { name: "equal", kind: "keyOnly", group: "layout" },
@@ -887,7 +887,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "padding", kind: "valueOnly", group: "layout", values: ["compact"] },
     { name: "centered", kind: "keyOnly", group: "layout" },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "align", kind: "textAlign", group: "layout", values: ["center", "right"] },
     { name: "icon", kind: "icon", group: "content" },
     { name: "heading", kind: "string", group: "name" },
@@ -969,7 +969,7 @@ export const DEFAULTS_TABLE: Readonly<
       values: ["bordered", "styled", "raised", "basic", "drawer", "pane"]
     },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["compact", "md", "lg"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     {
       name: "scrolling",
       kind: "keyOrValueAndKey",
@@ -1035,7 +1035,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "align", kind: "valueOnly", group: "layout", values: ["right"] },
     { name: "indeterminate", kind: "keyOrValueAndKey", group: "states", values: ["filling", "sliding", "swinging"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "value", kind: "string", group: "form" },
     { name: "total", kind: "number", group: "content" },
     { name: "percent", kind: "string", group: "content" },
@@ -1117,7 +1117,7 @@ export const DEFAULTS_TABLE: Readonly<
       values: ["bordered", "styled", "raised", "basic", "drawer"]
     },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["compact", "md", "lg"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     {
       name: "scrolling",
       kind: "keyOrValueAndKey",
@@ -1159,7 +1159,7 @@ export const DEFAULTS_TABLE: Readonly<
       values: ["bordered", "styled", "raised", "basic", "drawer"]
     },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["compact", "md", "lg"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     {
       name: "scrolling",
       kind: "keyOrValueAndKey",
@@ -1200,7 +1200,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "position", kind: "valueOnly", group: "layout", values: ["left", "right"] },
     { name: "internal", kind: "keyOnly", group: "advanced" },
     { name: "dividing", kind: "keyOnly", group: "appearance" },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both"] },
     { name: "close", kind: "keyOrValueAndKey", group: "appearance", values: ["very"] }
   ],
   "ui-rating": [
@@ -1331,7 +1331,7 @@ export const DEFAULTS_TABLE: Readonly<
       values: ["bordered", "styled", "raised", "basic", "drawer"]
     },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["compact", "md", "lg"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     {
       name: "scrolling",
       kind: "keyOrValueAndKey",
@@ -1365,7 +1365,7 @@ export const DEFAULTS_TABLE: Readonly<
     },
     { name: "clearing", kind: "keyOnly", group: "appearance" },
     { name: "align", kind: "textAlign", group: "layout", values: ["left", "center", "right"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom", "left", "right"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom", "left", "right"] },
     { name: "seamless", kind: "keyOnly", group: "appearance" },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "loading", kind: "keyOnly", group: "states" },
@@ -1546,7 +1546,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "appearance", kind: "multiple", group: "appearance", values: ["circular"] },
     { name: "fluid", kind: "keyOnly", group: "layout" },
     { name: "equal", kind: "keyOnly", group: "layout" },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "unstackable", kind: "keyOnly", group: "layout" },
     { name: "stackable", kind: "valueAndKey", group: "layout", values: ["tablet"] },
     { name: "stack-with", kind: "enum", group: "layout", values: ["container", "page"] },
@@ -1573,7 +1573,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "disabled", kind: "boolean", group: "states" },
     { name: "loading", kind: "keyOnly", group: "states" },
     { name: "lazy", kind: "boolean", group: "advanced" },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "parent", kind: "string", group: "layout" },
     { name: "appearance", kind: "multiple", group: "appearance", values: ["basic"] },
     { name: "inverted", kind: "keyOnly", group: "appearance" }
@@ -1599,7 +1599,7 @@ export const DEFAULTS_TABLE: Readonly<
     },
     { name: "unstackable", kind: "keyOnly", group: "layout" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["xs", "compact", "md", "lg"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "stackable", kind: "keyOrValueAndKey", group: "layout", values: ["tablet"] },
     { name: "stack-by", kind: "enum", group: "layout", values: ["viewport", "container", "none"] },
     {
@@ -1640,7 +1640,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "padding", kind: "valueOnly", group: "layout", values: ["compact"] },
     { name: "align", kind: "valueAndKey", group: "layout", values: ["fluid", "left", "center", "right"] },
     { name: "equal", kind: "keyOnly", group: "layout" },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["top", "bottom"] },
     { name: "value", kind: "string", group: "form" },
     { name: "activation", kind: "enum", group: "behaviour", values: ["automatic", "manual"] },
     { name: "history", kind: "boolean", group: "advanced" },
@@ -1784,7 +1784,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "wrap", kind: "keyOnly", group: "appearance" },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y", "compact"] },
-    { name: "attach", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
+    { name: "attach-to", kind: "valueOnly", group: "layout", values: ["both", "top", "bottom"] },
     { name: "fixed", kind: "keyOrValueAndKey", group: "layout", values: ["top", "bottom", "left", "right"] },
     { name: "align", kind: "valueAndKey", group: "layout", values: ["fluid", "left", "center", "right"] },
     { name: "equal", kind: "keyOnly", group: "layout" },

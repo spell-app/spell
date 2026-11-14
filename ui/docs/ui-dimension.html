@@ -50,7 +50,7 @@
         <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
-              <ui-section id="examples-types-in-the-readers-units" label="In the reader&#39;s units" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-in-the-reader-s-units" label="In the reader&#39;s units" sticky="stack" collapsible dividing>
                 <ui-example description="`value`, its `dimension` and the `unit` it&#39;s in:  shown in the reader&#39;s own units, from their region, or their choice.">
                   <p>
                     Luke is <ui-dimension value="172" dimension="length" unit="cm"></ui-dimension> tall, and weighs
@@ -102,6 +102,10 @@
 
             <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-dimension" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-dimension" only="states"></ui-docs-api>
             </ui-section>
 
             <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>

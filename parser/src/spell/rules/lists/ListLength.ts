@@ -3,7 +3,14 @@ import { P } from "spell/parser/parser"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { getWhereScope, getWhereMethod } from "./lists.shared"
+import {
+  getWhereScope,
+  getWhereMethod,
+  itemsAcrossAST,
+  itemsAcrossDatatype,
+  itemsAcrossOf,
+  type ItemsAcross
+} from "./lists.shared"
 
 /**
  * `list_length` rule:  return length of a list, e.g. `number of items in my-list` => `core.itemCountOf(myList)`.
@@ -13,11 +20,14 @@ import { getWhereScope, getWhereMethod } from "./lists.shared"
  *   => `core.itemCountOf(core.filter(deck, ...))`
  *   - Its own syntax, as `cards in the deck where ...` can't be a `list_filter` here:
  *     we've read `cards in` already.
+ * - Of lists of lists, their items together (epic `language` T130):
+ *   `the number of cards in the foundations` => `core.itemCountOf(core.mergeLists(core.everyThing(Foundation)))`,
+ *   every foundation's cards -- see `itemsAcrossDatatype()`.
  * - `Priority.mostSpecific` -- preferred over lower-priority expression rules when tokens are ambiguous.
  * - Rejects the match when `{list}` is KNOWN to be one thing, not a list, e.g. a `Card`:
  *   Spanish's `el número de palos de card` is then `list_count` of the card's values, `Card.Palos`.
  */
-export class ListLength extends SpellExpression<"arg|list|body?"> {
+export class ListLength extends SpellExpression<"arg|list|where?|body?", { across?: ItemsAcross }> {
   @proto static priority = Priority.mostSpecific
   @proto static datatype = "number"
 
@@ -27,22 +37,23 @@ export class ListLength extends SpellExpression<"arg|list|body?"> {
     if (!match) return undefined
     const listType = scope.getType(match.groups.list.datatype)
     if (listType && !listType.isA("list") && listType.isA("thing")) return undefined
+    match.data.across = itemsAcrossOf(scope, match.groups.arg, match.groups.list)
     return match
   }
 
   /** Nested scope for a `where` body -- singularized `{arg}` variable, also aliased from `it`. */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
-    return getWhereScope(match, match.groups.arg, match.groups.list)
+    const { arg, list } = match.groups
+    const across = itemsAcrossDatatype(itemsAcrossOf(match.scope, arg, list))
+    return getWhereScope(match, arg, across ? { datatype: across } : list)
   }
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const { arg, list } = match.groups
     const body = this.getBody(match)
+    const all = itemsAcrossAST(match, list, match.data.across)
     const items = body
-      ? new P.ASTCoreMethodInvocation(match, {
-          methodName: "filter",
-          args: [P.matchAST(list), getWhereMethod(match, arg, body)]
-        })
-      : P.matchAST(list)
+      ? new P.ASTCoreMethodInvocation(match, { methodName: "filter", args: [all, getWhereMethod(match, arg, body)] })
+      : all
     return new P.ASTCoreMethodInvocation(match, { methodName: "itemCountOf", args: [items] })
   }
 }

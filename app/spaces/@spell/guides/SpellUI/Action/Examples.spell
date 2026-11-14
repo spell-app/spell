@@ -4,7 +4,7 @@ a "game menu" is a view
 	its "sound" is yes or no
 	to "deal" with icon "play"
 		shortcut meta+N
-		enabled when its dealt is no
+		disabled when its dealt is yes
 		set its dealt to yes
 	to "start over" with icon "undo"
 		enabled when its dealt is yes

@@ -462,6 +462,14 @@ export type LanguageWords = {
    */
   pronouns: Set<string>
   /**
+   * How a condition starting `which` names its subject, the item (epic `language` T133):
+   * `the cards in the deck which are face up` reads as `... where it is face up`.
+   * - `subject`:  the word read before it, English's `it`
+   * - `singularVerbs`:  its first word, a plural verb, as the item's own:  `are` => `is`, `have` => `has`
+   * - None:  the language leaves the subject out after `where` too, Spanish's `que están boca arriba` (`implied_it`).
+   */
+  whichClause?: { subject: string; singularVerbs: Readonly<Record<string, string>> }
+  /**
    * A verb with `it` fused onto its end, its verb captured, e.g. Spanish's `barajarla` => `barajar` (epic `spanish` J96).
    * - In a type's outline body, `- para barajarla:` is English's `- to shuffle it:`:  the receiver goes where `it` was.
    * - None:  the language writes `it` as a word of its own, `subject_it`.

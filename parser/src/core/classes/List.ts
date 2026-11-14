@@ -19,7 +19,7 @@ import type { CollectionIterationCallback } from "spell/parser/core/collection-o
 import type { Drawing } from "spell/parser/core/drawing"
 import type { PropCheck } from "spell/parser/core/core.types"
 import { zeroIndexOf } from "spell/parser/core/positions"
-import { declareAction, type ActionInfo } from "spell/parser/core/undoing"
+import { declareAction, runCreate, type ActionInfo } from "spell/parser/core/undoing"
 
 import { ID_PROP } from "./ids"
 
@@ -109,7 +109,8 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   constructor(props?: Record<string, unknown>) {
     super(props)
     registerThing(this)
-    if (runsCreate(List, new.target)) this.create(props)
+    // made while no action runs, e.g. on the opening:  what its creation hook changes is no undo step
+    if (runsCreate(List, new.target)) runCreate(this, props)
     // its starting values are set:  a change from now on is heard (`when its score changes`);  `@thing`'s say so later
     if (isLastToConstruct(List, new.target)) noteMade(this)
   }

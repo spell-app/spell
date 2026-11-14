@@ -771,6 +771,41 @@ methodsEs.addRule(ToDoSomething, {
           ]
         },
         {
+          title: "el tipo incorporado que es, tras `la`:  `para dibujar la aplicación` (épica `language` T129)",
+          input: ["solitario es una aplicación", "\tpara dibujar la aplicación", "\t\timprimir 1"],
+          js: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitario = new Solitario()"
+          ],
+          ts: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  @drawn draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitario, drawn in its own element, e.g. by `draw the solitario`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitario's properties;  its methods call its solitario's.",
+            " * - What every view's element does, e.g. drawing its solitario, is `SpellElement`'s.",
+            " */",
+            "export class SolitarioElement extends SpellElement<Solitario> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitario", [])',
+            "}",
+            "core.useElement(Solitario, SolitarioElement)",
+            "export const solitario = new Solitario()"
+          ]
+        },
+        {
           input: ["solitario es una aplicación", "\tpara dibujar solitario", "\t\timprimir 1"],
           js: [
             "export class Solitario extends App {",
@@ -1237,6 +1272,46 @@ methodsEs.addRule(CreateHook, {
           ]
         },
         {
+          title: "el tipo incorporado que es, tras `la`:  `al crear la aplicación` (épica `language` T129)",
+          input: ["solitario es una aplicación", "\tal crear la aplicación", "\t\timprimir 1"],
+          js: [
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitario = new Solitario()"
+          ],
+          ts: [
+            "@thing",
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitario, drawn in its own element, e.g. by `draw the solitario`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitario's properties;  its methods call its solitario's.",
+            " * - What every view's element does, e.g. drawing its solitario, is `SpellElement`'s.",
+            " */",
+            "export class SolitarioElement extends SpellElement<Solitario> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitario", [])',
+            "",
+            "  create() {",
+            "    return this.currentThing?.create()",
+            "  }",
+            "}",
+            "core.useElement(Solitario, SolitarioElement)",
+            "export const solitario = new Solitario()"
+          ]
+        },
+        {
           input: ["solitario es una aplicación", "\tal crear solitario", "\t\timprimir 1"],
           js: [
             "export class Solitario extends App {",
@@ -1352,6 +1427,61 @@ methodsEs.addRule(ActionDetail, {
   ]
 })
 methodsEs.addRule(ActionDetail, { syntax: "activa cuando {enabled:expression}" })
+methodsEs.addRule(ActionDetail, {
+  syntax: "inactiva cuando {disabled:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "`inactiva cuando` es `activa cuando` al revés:  el mismo getter, que devuelve lo contrario",
+          input: [
+            "una carta es una cosa donde:",
+            "\t- su dirección es una de arriba o abajo",
+            "\t- para voltearla:",
+            "\t\t- inactiva cuando su dirección es arriba",
+            "\t\tponer su dirección en arriba"
+          ],
+          js: [
+            "export class Carta extends Thing {",
+            "  // su dirección es una de arriba o abajo",
+            '  static Direcciones = ["arriba", "abajo"]',
+            '  static { this.declareProp("dirección", { oneOf: Carta.Direcciones }) }',
+            '  get dirección() { return this.getProp("dirección") }',
+            '  set dirección(value) { this.setProp("dirección", value) }',
+            "",
+            "  voltear() {",
+            '    this.dirección = "arriba"',
+            "  }",
+            "  get voltearIsEnabled() {",
+            '    return !(this.dirección === "arriba")',
+            "  }",
+            "}",
+            'core.describeAction(Carta, "voltear", { title: "Voltearla", enabledWhen: "voltearIsEnabled", undoneAs: "Voltearla" })'
+          ],
+          ts: [
+            "export type Dirección = (typeof Carta.Direcciones)[number]",
+            "",
+            "export class Carta extends Thing {",
+            "  // su dirección es una de arriba o abajo",
+            '  static Direcciones = ["arriba", "abajo"] as const',
+            "  @prop({ oneOf: () => Carta.Direcciones })",
+            "  accessor dirección!: Dirección",
+            "",
+            "  voltear() {",
+            '    this.dirección = "arriba"',
+            "  }",
+            "  get voltearIsEnabled() {",
+            '    return !(this.dirección === "arriba")',
+            "  }",
+            "}",
+            'core.describeAction(Carta, "voltear", { title: "Voltearla", enabledWhen: "voltearIsEnabled", undoneAs: "Voltearla" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
 methodsEs.addRule(ActionDetail, { syntax: "seleccionada cuando {selected:expression}" })
 methodsEs.addRule(ActionDetail, { syntax: "(undoable:deshacible)" })
 methodsEs.addRule(ActionDetail, {

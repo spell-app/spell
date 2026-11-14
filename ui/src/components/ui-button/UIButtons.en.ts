@@ -100,14 +100,14 @@ export const buttonsVocabulary = {
     },
     { name: "stackable", group: "layout", kind: "keyOnly", description: "Stacks vertically on mobile." },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom", "left", "right"],
       classes: ATTACH_CLASSES,
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
-        "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name was `attached`."
+        "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old names were `attach` and `attached`."
     },
     {
       name: "width",

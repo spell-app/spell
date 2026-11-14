@@ -1133,10 +1133,10 @@ ui-tab > pre {
   display: block;
   height: 100%;
 }
-.spell-doc-main ui-grid.spell-pros-cons ui-label[attach="top"] {
+.spell-doc-main ui-grid.spell-pros-cons ui-label[attach-to="top"] {
   --ui-label-background: var(--ui-surface-strong, var(--spell-code-bg));
 }
-.spell-doc-main ui-grid.spell-pros-cons ui-label[attach="top"]::part(label) {
+.spell-doc-main ui-grid.spell-pros-cons ui-label[attach-to="top"]::part(label) {
   position: static;
   display: block;
   width: auto;
@@ -1149,7 +1149,7 @@ ui-tab > pre {
 .spell-doc-main ui-grid.spell-pros-cons ui-segment > :is(p, ul, ol, pre, ui-code, ui-accordion, ui-message) {
   margin-block: 8px;
 }
-.spell-doc-main ui-grid.spell-pros-cons ui-segment > :is(ui-label[attach="top"] + *, :first-child) {
+.spell-doc-main ui-grid.spell-pros-cons ui-segment > :is(ui-label[attach-to="top"] + *, :first-child) {
   margin-top: 0;
 }
 .spell-doc-main ui-grid.spell-pros-cons ui-segment > :last-child {

@@ -96,6 +96,7 @@ describe("<spell-markdown>", () => {
       block.addEventListener("ui-coloured", () => resolve(), { once: true })
     })
     await new Promise((resolve) => requestAnimationFrame(resolve))
-    expect(block.shadowRoot!.querySelector(".drawing .bubbly-reference")!.textContent).toBe("pile")
+    // `pile`, the name its head defines, is a pill of its own (epic `language` T131):  `cards` is what it refers to
+    expect(block.shadowRoot!.querySelector(".drawing .bubbly-reference")!.textContent).toBe("cards")
   })
 })

@@ -36,7 +36,7 @@ export function AppMenu(props: MenuProps) {
  ****************/
 export function PanelMenu(props: MenuProps) {
   return (
-    <ui-menu attach="top" {...omit(props, "class", "children")} class={["PanelMenu", "short", "tight", props.class]}>
+    <ui-menu attach-to="top" {...omit(props, "class", "children")} class={["PanelMenu", "short", "tight", props.class]}>
       {props.children}
     </ui-menu>
   )

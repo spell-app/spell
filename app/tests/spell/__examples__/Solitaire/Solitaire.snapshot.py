@@ -130,10 +130,10 @@ class Card(TwoSidedView):
         return True
 
     def count_the_points_for_card_on_pile(self, pile: Pile) -> float:
-        """what the move scores:  10 on a foundation, 5 from the discards, else nothing"""
+        """what the move scores:  10 on a foundation, 5 from the discard pile, else nothing"""
         if isinstance(pile, Foundation):
             return 10
-        if self in solitaire.discards:
+        if self in solitaire.discard_pile:
             return 5
         return 0
 
@@ -475,7 +475,7 @@ class Solitaire(App):
         return [
             h(
                 "ui-segment",
-                {"inverted": True, "attach": "top"},
+                {"inverted": True, "attach-to": "top"},
                 h(
                     "ui-toolbar",
                     {
@@ -497,9 +497,9 @@ class Solitaire(App):
             ),
             h(
                 "ui-container",
-                {"padding": "small", "columns": "7", "spacing": "xs"},
+                {"columns": "7", "padding": "small", "spacing": "xs"},
                 h("test-project-stock-pile", {"id": "stock"}),
-                h("test-project-discard-pile", {"id": "discards"}),
+                h("test-project-discard-pile", {"id": "discard pile"}),
                 h("spacer"),
                 h("test-project-foundation", {"id": "clubs"}),
                 h("test-project-foundation", {"id": "diamonds"}),
@@ -525,8 +525,8 @@ class Solitaire(App):
     score = prop(type="number")
     # <stock-pile "stock"/>
     stock = prop(init=lambda: StockPile(id="stock"), early=True)
-    # <discard-pile "discards"/>
-    discards = prop(init=lambda: DiscardPile(id="discards"), early=True)
+    # <discard-pile "discard pile"/>
+    discard_pile = prop(init=lambda: DiscardPile(id="discard pile"), early=True)
     # <foundation "clubs" suit=clubs/>
     clubs = prop(init=lambda: Foundation(id="clubs", suit="clubs"), early=True)
     # <foundation "diamonds" suit=diamonds/>
@@ -552,7 +552,6 @@ class Solitaire(App):
 
     async def restart_the_game(self) -> None:
         self.score = 0
-        # Gather every card into the stock, shuffle it, and deal the columns
         for card in self.deck:
             core.meanwhile(lambda: card.turn_face_down())
         for card in self.deck:
@@ -564,12 +563,13 @@ class Solitaire(App):
         for row in range(1, 8):
             for column in core.get_range(row, 7):
                 core.get_item_at(core.every_thing(Column), position(column)).append(self.stock.last_item)
+                await core.pause_for(20, "msec")
                 if column == row:
                     core.get_item_at(core.every_thing(Column), position(column)).last_item.turn_face_up()
         await self.turn_over_the_next_card()
 
     async def turn_over_the_next_card(self) -> None:
-        """Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty"""
+        """Turn the stock's next card over, onto the discard pile:  the discard pile back into the stock when it's empty"""
         # - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
         if not self.stock:
             self.reset_the_stock()
@@ -577,11 +577,11 @@ class Solitaire(App):
         it.turn_face_up()
         # as long as its flip takes (styles.css), so it turns over before it moves
         await core.pause_for(300, "msec")
-        self.discards.append(it)
+        self.discard_pile.append(it)
 
     def reset_the_stock(self) -> None:
-        """The discards, turned over, back into the stock"""
-        cards = self.discards.clone()
+        """The discard pile, turned over, back into the stock"""
+        cards = self.discard_pile.clone()
         cards.reverse()
         for card in cards:
             self.stock.append(card)
@@ -591,8 +591,8 @@ class Solitaire(App):
     async def auto_play(self) -> None:
         """Play every card that can go somewhere, until none can"""
         anything_changed = False
-        if self.discards:
-            test_card = self.discards.last_item
+        if self.discard_pile:
+            test_card = self.discard_pile.last_item
             if await test_card.play():
                 anything_changed = True
                 await core.pause_for(500, "msec")
@@ -621,7 +621,7 @@ class Solitaire(App):
             await self.auto_play()
 
     def cheat(self) -> Any:
-        """Turn up a face-down card from a column, at random, onto the discards"""
+        """Turn up a face-down card from a column, at random, onto the discard pile"""
         remaining_piles = core.filter(
             core.every_thing(Column),
             lambda pile: (pile) and pile.first_item.is_face_direction("down"),
@@ -630,14 +630,12 @@ class Solitaire(App):
             return
         pile = core.random_item_of(remaining_piles)
         card = pile.filter(lambda card: card.is_face_direction("down")).random_item()
-        # turned up as it moves:  it rises over its column face down, then turns as it glides onto the discards
-        self.discards.append(card)
+        # turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile
+        self.discard_pile.append(card)
         return card.turn_face_up()
 
     async def on_score_change(self, event: ScoreChangeEvent) -> None:
-        home = len(self.clubs) + len(self.diamonds)
-        home = home + len(self.hearts) + len(self.spades)
-        if home == 52:
+        if core.item_count_of(core.merge_lists(core.every_thing(Foundation))) == 52:
             core.alert("You won!", "New game")
             await self.restart_the_game()
 

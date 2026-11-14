@@ -71,7 +71,7 @@
                     <code>&lt;ui-tabs&gt;</code> draws the row of tabs from its panes' labels. A pane is hidden until
                     it's the selected one;  see the Usage tab.</ui-message
                   >
-                  <ui-tabs appearance="tabular" attach="top" aria-label="Tab demo">
+                  <ui-tabs appearance="tabular" attach-to="top" aria-label="Tab demo">
                     <ui-tab label="Tab">
                       <p>The pane:  whatever you put inside the <code>&lt;ui-tab&gt;</code> shows here.</p>
                     </ui-tab>
@@ -134,7 +134,7 @@
                     A pane can be written outside its tabs:  <code>parent</code> names the tabs' id, and the pane
                     joins them, in page order, as if it were nested there.
                   </p>
-                  <ui-tabs id="demo-pet-types" appearance="tabular" attach="top" aria-label="Flat markup demo"></ui-tabs>
+                  <ui-tabs id="demo-pet-types" appearance="tabular" attach-to="top" aria-label="Flat markup demo"></ui-tabs>
                   <ui-tab parent="demo-pet-types" label="Cats">Cats pane, written after the tabs.</ui-tab>
                   <ui-tab parent="demo-pet-types" label="Dogs">Dogs pane, written after the tabs.</ui-tab>
                 </ui-example>
@@ -146,7 +146,7 @@
                 <ui-example
                   description="The active tab is the selected one:  its pane shows, and the others stay hidden.  Mark it `selected` (alias `active`)."
                 >
-                  <ui-tabs appearance="tabular" attach="top" aria-label="Active demo">
+                  <ui-tabs appearance="tabular" attach-to="top" aria-label="Active demo">
                     <ui-tab label="First"><p>First pane:  hidden, since its tab isn't selected.</p></ui-tab>
                     <ui-tab label="Second" selected><p>Second pane:  showing, because its tab is selected.</p></ui-tab>
                     <ui-tab label="Third"><p>Third pane:  hidden, until you pick its tab.</p></ui-tab>
@@ -156,7 +156,7 @@
 
               <ui-section id="examples-states-loading" label="Loading" sticky="stack" collapsible dividing>
                 <ui-example description="A tab can display a loading indicator.">
-                  <ui-tabs appearance="tabular" attach="top" aria-label="Loading demo">
+                  <ui-tabs appearance="tabular" attach-to="top" aria-label="Loading demo">
                     <ui-tab label="Tab" loading>
                       <p>The pane:  hidden under the spinner while it loads.</p>
                     </ui-tab>
@@ -166,7 +166,7 @@
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="A `disabled` pane's tab can't be chosen, and the arrow keys skip it.">
-                  <ui-tabs appearance="tabular" attach="top" aria-label="Disabled demo">
+                  <ui-tabs appearance="tabular" attach-to="top" aria-label="Disabled demo">
                     <ui-tab label="First">First pane</ui-tab>
                     <ui-tab label="Second" selected>Second pane</ui-tab>
                     <ui-tab label="Third" disabled>Third pane</ui-tab>
@@ -180,7 +180,7 @@
                    centres the whole tab list, not one tab between its neighbours. -->
               <ui-section id="examples-variations-centered-item" label="Centered Item" sticky="stack" collapsible dividing>
                 <ui-example description="A tab can have center aligned items.">
-                  <ui-tabs appearance="tabular" attach="top" aria-label="Centered demo">
+                  <ui-tabs appearance="tabular" attach-to="top" aria-label="Centered demo">
                     <ui-tab label="One"><p>First pane:  the One tab's content.</p></ui-tab>
                     <ui-tab label="Two"><p>Second pane:  the Two tab's content.</p></ui-tab>
                     <ui-tab label="Three"><p>Third pane:  the Three tab's content.</p></ui-tab>
@@ -191,7 +191,7 @@
               <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="A tab can be shown inverted;  the panes follow.">
                   <ui-segment inverted>
-                    <ui-tabs inverted appearance="tabular" attach="top" aria-label="Inverted demo">
+                    <ui-tabs inverted appearance="tabular" attach-to="top" aria-label="Inverted demo">
                       <ui-tab label="Active Tab"><p>content one</p></ui-tab>
                       <ui-tab label="Tab 2"><p>content two</p></ui-tab>
                       <ui-tab label="Tab 3"><p>content three</p></ui-tab>
@@ -211,7 +211,7 @@
                   description='You can display the tabbed menu at the bottom of the tab segments:  `attached="bottom"`.'
                 >
                   <ui-segment inverted>
-                    <ui-tabs inverted appearance="tabular" attach="bottom" aria-label="Bottom attached demo">
+                    <ui-tabs inverted appearance="tabular" attach-to="bottom" aria-label="Bottom attached demo">
                       <ui-tab label="Active Tab"><p>content one</p></ui-tab>
                       <ui-tab label="Tab 2"><p>content two</p></ui-tab>
                       <ui-tab label="Tab 3" selected><p>content three</p></ui-tab>
@@ -331,7 +331,7 @@
                     >To have a tab visible on page load, give its pane <code>selected</code> (or set the tabs'
                     <code>value</code>); otherwise the first enabled pane shows.</ui-message
                   >
-                  <ui-tabs appearance="tabular" attach="top" aria-label="Basic tabs demo">
+                  <ui-tabs appearance="tabular" attach-to="top" aria-label="Basic tabs demo">
                     <ui-tab label="First">First</ui-tab>
                     <ui-tab label="Second">Second</ui-tab>
                     <ui-tab label="Third">Third</ui-tab>
@@ -358,21 +358,21 @@
                   >
                   <ui-tabs appearance="secondary" aria-label="Group one">
                     <ui-tab label="First">
-                      <ui-tabs appearance="tabular" attach="top" aria-label="First, inner">
+                      <ui-tabs appearance="tabular" attach-to="top" aria-label="First, inner">
                         <ui-tab label="1A">1A</ui-tab>
                         <ui-tab label="1B">1B</ui-tab>
                         <ui-tab label="1C">1C</ui-tab>
                       </ui-tabs>
                     </ui-tab>
                     <ui-tab label="Second" selected>
-                      <ui-tabs appearance="tabular" attach="top" aria-label="Second, inner">
+                      <ui-tabs appearance="tabular" attach-to="top" aria-label="Second, inner">
                         <ui-tab label="2A">2A</ui-tab>
                         <ui-tab label="2B">2B</ui-tab>
                         <ui-tab label="2C" selected>2C</ui-tab>
                       </ui-tabs>
                     </ui-tab>
                     <ui-tab label="Third">
-                      <ui-tabs appearance="tabular" attach="top" aria-label="Third, inner">
+                      <ui-tabs appearance="tabular" attach-to="top" aria-label="Third, inner">
                         <ui-tab label="3A">3A</ui-tab>
                         <ui-tab label="3B">3B</ui-tab>
                         <ui-tab label="3C">3C</ui-tab>
@@ -394,21 +394,21 @@
                 >
                   <ui-tabs appearance="pointing secondary" aria-label="Default paths demo">
                     <ui-tab label="First">
-                      <ui-tabs appearance="tabular" attach="top" aria-label="First, inner">
+                      <ui-tabs appearance="tabular" attach-to="top" aria-label="First, inner">
                         <ui-tab label="1A">1A</ui-tab>
                         <ui-tab label="1B">1B</ui-tab>
                         <ui-tab label="1C">1C</ui-tab>
                       </ui-tabs>
                     </ui-tab>
                     <ui-tab label="Second">
-                      <ui-tabs appearance="tabular" attach="top" aria-label="Second, inner">
+                      <ui-tabs appearance="tabular" attach-to="top" aria-label="Second, inner">
                         <ui-tab label="2A">2A</ui-tab>
                         <ui-tab label="2B">2B</ui-tab>
                         <ui-tab label="2C">2C</ui-tab>
                       </ui-tabs>
                     </ui-tab>
                     <ui-tab label="Third">
-                      <ui-tabs appearance="tabular" attach="top" aria-label="Third, inner">
+                      <ui-tabs appearance="tabular" attach-to="top" aria-label="Third, inner">
                         <ui-tab label="3A">3A</ui-tab>
                         <ui-tab label="3B">3B</ui-tab>
                         <ui-tab label="3C">3C</ui-tab>
@@ -523,7 +523,7 @@
 
                   - The tab menu is styled by the menu's own sheet, so its look words are the menu's: `appearance`
                     (`tabular`, `pointing`, `secondary`, `text`), `direction`, `fluid`, `padding`, `inverted`, `size`, `color`.
-                  - The panes are segments: `attach` joins them to the menu, `appearance="basic"` drops their box.
+                  - The panes are segments: `attach-to` joins them to the menu, `appearance="basic"` drops their box.
                   - `value` is the selected pane: its `value`, else its index. With no `value`, the first `selected`
                     pane shows, else the first enabled one.
                   - Name the tab list with `aria-label` on `<ui-tabs>`.
@@ -531,7 +531,7 @@
               </ui-markdown>
               <ui-code language="html">
                 <script type="text/plain">
-                  <ui-tabs appearance="tabular" attach="top" aria-label="Profile">
+                  <ui-tabs appearance="tabular" attach-to="top" aria-label="Profile">
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                     <ui-tab label="Photos" value="photos" icon="image" lazy><template>...</template></ui-tab>
                   </ui-tabs>
@@ -636,7 +636,7 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-tabs appearance="tabular" attach="top" value={tab} onui-changed={(e) => setTab(e.detail.value)}>
+                  <ui-tabs appearance="tabular" attach-to="top" value={tab} onui-changed={(e) => setTab(e.detail.value)}>
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>
                 </script>
@@ -645,7 +645,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-tabs appearance="tabular" attach="top" :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
+                  <ui-tabs appearance="tabular" attach-to="top" :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>
                 </script>
@@ -656,7 +656,7 @@
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-tabs
                     appearance="tabular"
-                    attach="top"
+                    attach-to="top"
                     value={tab()}
                     on-ui-changing={(e) => setTab(e.detail.value)}
                   >
@@ -692,6 +692,10 @@
             <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tab" only="states"></ui-docs-api>
             </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tab" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -725,7 +729,7 @@
               <ui-markdown>Edit a value below to try it.</ui-markdown>
               <ui-docs-tokens family="ui-tab" playground>
                 <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
-                <ui-tabs appearance="tabular" attach="top" aria-label="Tabular demo">
+                <ui-tabs appearance="tabular" attach-to="top" aria-label="Tabular demo">
                   <ui-tab label="First">First</ui-tab>
                   <ui-tab label="Second">Second</ui-tab>
                   <ui-tab label="Third">Third</ui-tab>

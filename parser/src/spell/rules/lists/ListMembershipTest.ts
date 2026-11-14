@@ -12,7 +12,7 @@ import { getWhereScope, getWhereMethod } from "./lists.shared"
  * - Compiles to `core.any(list, (item) => { ... })`, negated (wrapped in `NotExpression`) by its word rule's
  *   `negated` forms, e.g. `has no` -- see `Negatable`, `has_or_has_no`.
  */
-export class ListMembershipTest extends PostfixOperatorSuffix<"operator|arg|body?"> {
+export class ListMembershipTest extends PostfixOperatorSuffix<"operator|arg|where|body?"> {
   @proto static precedence = Precedence.comparison
 
   /**

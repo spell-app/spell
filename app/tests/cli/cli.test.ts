@@ -260,8 +260,8 @@ describe("spell compile", () => {
     // Solitaire's card
     const { status, stdout } = spell(["compile", "Card.spell"], SOLITAIRE)
     expect(status).toBe(0)
-    // after the file's heading and docstring;  just code:  declarations go in the project's declarations file
-    expect(stdout).toMatch(/^core\.heading\([^]*\nexport class Card extends TwoSidedView \{/)
+    // after the card's docstring and its head line's comment;  just code:  declarations go in the project's declarations file
+    expect(stdout).toMatch(/^\/\*\* A card says [^]*\n\/\/ A playing card\nexport class Card extends TwoSidedView \{/)
     expect(stdout).not.toContain("SPELL:")
   })
 
@@ -582,7 +582,8 @@ describe("spell describe", () => {
   test("a file:  what it declares", () => {
     const { status, stdout } = spell(["describe", "Card.spell"], SOLITAIRE)
     expect(status).toBe(0)
-    expect(stdout).toMatch(/^Card\.spell\n {2}A playing card\n {2}template Card {2}is a TwoSidedView\n/)
+    // its description, the first comment inside it, under it (the file has no heading of its own)
+    expect(stdout).toMatch(/^Card\.spell\n {2}template Card {2}is a TwoSidedView\n {4}A card says what its rank/)
   })
 
   test("one thing, by name -- ignoring case, and spaces ~== `_`", () => {

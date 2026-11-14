@@ -286,7 +286,7 @@ and every component loads on demand as an `es-*` tag, its attributes and texts i
 Solitario's toolbar is one:
 
 ```html
-<segmento invertido unir="arriba" color="">
+<segmento invertido unir-a="arriba" color="">
 	<barra-herramientas class="GameBar" aria-label="Juego" apariencia="pildoras" invertido tamano="pequeño" encogible>
 		<texto slot="titulo" tamano="grande" extranegrita>Solitario</texto>
 		<acción "jugar solo"/>

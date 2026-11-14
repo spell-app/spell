@@ -255,7 +255,7 @@ export const sharedEs = {
     padding: "relleno",
     spacing: "separacion",
     align: "alinear",
-    attach: "unir",
+    "attach-to": "unir-a",
     length: "longitud",
     wrap: "envolver",
     clip: "recorte",

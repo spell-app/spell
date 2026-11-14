@@ -33,6 +33,7 @@ import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
+import { EachThing } from "./EachThing"
 import { EveryThingWhere } from "./EveryThingWhere"
 import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
@@ -2905,8 +2906,22 @@ classes.addRule(EveryThing, {
   ]
 })
 
+// a loop's list only:  `for each column` (epic `language` T128)
+classes.addRule(EachThing, {
+  syntax: "each {type:known_type}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a pile is a list of things", "a column is a pile"].join("\n"), "block")
+      },
+      // read only as a loop's list (`for each column`):  `each column` alone is no expression
+      tests: [["each column", "core.everyThing(Column)"]]
+    }
+  ]
+})
+
 classes.addRule(EveryThingWhere, {
-  syntax: "every {type:known_type} where {inline_expression}?",
+  syntax: "every {type:known_type} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -2923,13 +2938,20 @@ classes.addRule(EveryThingWhere, {
           "every card where it is 1",
           "core.filter(core.everyThing(Card), (card) => card === 1)",
           "core.filter(core.everyThing(Card), (card: Card) => card === 1)"
+        ],
+        [
+          "every card which is not 1",
+          "core.filter(core.everyThing(Card), (card) => card !== 1)",
+          "core.filter(core.everyThing(Card), (card: Card) => card !== 1)"
         ]
       ]
     }
   ]
 })
 
-classes.addRule(EveryThingWhere, { syntax: "(all|the)? {type:plural_type} where {inline_expression}?" })
+classes.addRule(EveryThingWhere, {
+  syntax: "(all|the)? {type:plural_type} (where:where|which|that|who) {inline_expression}?"
+})
 
 classes.addRule(TheThings, { syntax: "all {type:plural_type}" })
 classes.addRule(TheThings, { syntax: "{type:plural_type}" })
@@ -3003,15 +3025,15 @@ classes.addRule(EveryThingWith, {
   ]
 })
 classes.addRule(EveryThingWith, {
-  syntax: "every {type:known_type} with {filters:thing_filters} where {inline_expression}?"
+  syntax: "every {type:known_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
 })
 classes.addRule(EveryThingWith, { syntax: "(all|the)? {type:plural_type} with {filters:thing_filters}" })
 classes.addRule(EveryThingWith, {
-  syntax: "(all|the)? {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+  syntax: "(all|the)? {type:plural_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
 })
 classes.addRule(TheSavedThingsWith, { syntax: "the? saved {type:plural_type} with {filters:thing_filters}" })
 classes.addRule(TheSavedThingsWith, {
-  syntax: "the? saved {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+  syntax: "the? saved {type:plural_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
 })
 
 classes.addRule(KindValues, {

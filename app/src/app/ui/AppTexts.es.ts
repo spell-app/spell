@@ -369,6 +369,7 @@ const APP_TEXTS_ES: AppTextPack = {
   "themePage.notebook": "Cuaderno",
   inspectorEventHeading: "con {event}",
   inspectorActionOnlyWhen: "Solo cuando {condition}",
+  inspectorActionNotWhen: "No cuando {condition}",
   inspectorActionNotNow: "No se puede hacer ahora",
   inspectorActionRun: "Ejecutar {action}",
   inspectorActionRename: "Renombrar {action}",

@@ -102,7 +102,7 @@
       path: "type:List/method:(a list) has items where",
       description: "Does ANY item pass a test?  e.g. `the deck has cards where the card is an ace`.\n- `has no ...` for none of them.",
       rules: [
-        { name: "list_membership_test", syntax: "{operator:has_or_has_no} {arg:plural_identifier} where {inline_expression}?" }
+        { name: "list_membership_test", syntax: "{operator:has_or_has_no} {arg:plural_identifier} (where:where|which|that|who) {inline_expression}?" }
       ]
     },
     {
@@ -157,8 +157,8 @@
       path: "type:List/method:for each (item) in (a list)",
       description: "Do something with each item in turn, e.g. `for each card in the deck`.\n- Its position too, counting from 1:  `for card and index in the deck`.",
       rules: [
-        { name: "list_iteration", syntax: "for each? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?" },
-        { name: "list_iteration", syntax: "for each? {item:kind_name} (in|of) {list:expression} :? {statement_body}?" }
+        { name: "list_iteration", syntax: "for (each|every)? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?" },
+        { name: "list_iteration", syntax: "for (each|every)? {item:kind_name} (in|of) {list:expression} :? {statement_body}?" }
       ]
     },
     {
@@ -182,7 +182,7 @@
       path: "type:List/method:items in (a list) where",
       description: "Items which pass a test, as a new list -- the list itself doesn't change.\n- e.g. `cards in the deck where the suit of the card is clubs`\n- `it` or the item's own word -- `the card` -- is each item in turn.",
       rules: [
-        { name: "list_filter", syntax: "the? {arg:plural_identifier} (in|of) {list:expression} where {inline_expression}?" }
+        { name: "list_filter", syntax: "the? {arg:plural_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?" }
       ]
     },
     {
@@ -204,7 +204,7 @@
       description: "How many items it has, e.g. `number of cards in the deck`.",
       rules: [
         { name: "list_length", syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand}" },
-        { name: "list_length", syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} where {inline_expression}?" },
+        { name: "list_length", syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} (where:where|which|that|who) {inline_expression}?" },
         { name: "list_count", syntax: "the? number of {list:operand}" }
       ]
     },
@@ -225,7 +225,7 @@
         { name: "list_remove_ordinal", syntax: "remove the? {position:ordinal} {arg:singular_identifier} of {list:expression}" },
         { name: "list_remove_range", syntax: "remove {arg:plural_identifier} {start:expression} to {end:expression} of {list:expression}" },
         { name: "list_remove_range_ordinal", syntax: "remove {start:ordinal} to {end:ordinal} {arg:plural_identifier} of {list:expression}" },
-        { name: "list_remove_where", syntax: "remove {arg:plural_identifier} (in|of|from) {list:expression} where {inline_expression}?" }
+        { name: "list_remove_where", syntax: "remove {arg:plural_identifier} (in|of|from) {list:expression} (where:where|which|that|who) {inline_expression}?" }
       ]
     },
     {
@@ -346,7 +346,7 @@
       description: "How many characters it has, e.g. `the number of characters in the name` -- its `length`.",
       rules: [
         { name: "list_length", syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand}" },
-        { name: "list_length", syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} where {inline_expression}?" }
+        { name: "list_length", syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} (where:where|which|that|who) {inline_expression}?" }
       ]
     },
     {

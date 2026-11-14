@@ -15,7 +15,7 @@
 	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">
 		<markdown>
-			Wrap content in `<ui-segment>`, and add attributes for the look: `<ui-segment padding="lg" attach="top" appearance="raised">`
+			Wrap content in `<ui-segment>`, and add attributes for the look: `<ui-segment padding="lg" attach-to="top" appearance="raised">`
 			renders `ui raised very padded top attached segment`.
 
 			- Group segments in `<ui-segments>`: the group draws one box with dividers, and its words (`direction`,

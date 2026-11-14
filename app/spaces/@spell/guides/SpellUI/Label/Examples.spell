@@ -218,37 +218,37 @@
 				<grid columns="3">
 					<column>
 						<segment>
-							<label attach="top">HTML</label>
+							<label attach-to="top">HTML</label>
 							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 						</segment>
 					</column>
 					<column>
 						<segment>
-							<label attach="bottom">CSS</label>
+							<label attach-to="bottom">CSS</label>
 							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 						</segment>
 					</column>
 					<column>
 						<segment>
-							<label attach="top right">Code</label>
+							<label attach-to="top right">Code</label>
 							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 						</segment>
 					</column>
 					<column>
 						<segment>
-							<label attach="top left">View</label>
+							<label attach-to="top left">View</label>
 							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 						</segment>
 					</column>
 					<column>
 						<segment>
-							<label attach="bottom left">User View</label>
+							<label attach-to="bottom left">User View</label>
 							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 						</segment>
 					</column>
 					<column>
 						<segment>
-							<label attach="bottom right">Admin View</label>
+							<label attach-to="bottom right">Admin View</label>
 							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 						</segment>
 					</column>

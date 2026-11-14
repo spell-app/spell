@@ -44,13 +44,13 @@ export const railVocabulary = {
       description: "A vertical rule between the rail and its container."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both"],
       classes: { both: "attached" },
-      replaces: [{ from: "attached", value: "both" }],
-      description: "`both`:  flush against its container, no gap.  Its old name was `attached`."
+      replaces: ["attach", { from: "attached", value: "both" }],
+      description: "`both`:  flush against its container, no gap.  Its old names were `attach` and `attached`."
     },
     {
       name: "close",

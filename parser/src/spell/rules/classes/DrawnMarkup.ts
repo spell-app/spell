@@ -7,6 +7,8 @@ import { DrawIt } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
+// Through the folder:  read only when called, once the folder has loaded
+import { QuotedMember } from "spell/parser/spell/rules/properties"
 
 /**
  * `drawn_markup` rule:  in a drawing's body, a line of markup IS what it draws -- no `return`
@@ -66,8 +68,12 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
   mutateScope(match: P.MatchFor<this>) {
     for (const { declares, at } of DrawnMarkup.declaredIn(match)) {
       const owner = match.scope.getType(declares.owner)
-      if (!owner || owner.getMember(declares.name)) continue
-      owner.declareProperty(declares.name, at, { datatype: declares.view ?? declares.datatype })
+      const name = QuotedMember.nameOf(declares.name)
+      if (!owner || owner.getMember(name)) continue
+      owner.declareProperty(name, at, {
+        asWritten: declares.name,
+        datatype: declares.view ?? declares.datatype
+      })
     }
   }
 
@@ -128,7 +134,7 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
     const check = new P.ASTObjectLiteral(at)
     if (declares.datatype) {
       check.addProp("type", new P.ASTTypeNameLiteral(at, { value: declares.datatype, quote: "'" }))
-      return new P.ASTReactiveProperty(at, { type, property: declares.name, check })
+      return new P.ASTReactiveProperty(at, { type, property: QuotedMember.nameOf(declares.name), check })
     }
     // its id, the member's name, then its tag's other attributes:  `{ id: "clubs", suit: "clubs" }`
     const id = new P.ASTStringLiteral(at, { value: declares.name, quote: '"' })
@@ -146,7 +152,7 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
       type: new P.ASTTypeExpression(at, { name: declares.view! }),
       props
     })
-    return new P.ASTReactiveProperty(at, { type, property: declares.name, initializer: made })
+    return new P.ASTReactiveProperty(at, { type, property: QuotedMember.nameOf(declares.name), initializer: made })
   }
 
   /** Is `markup` a tag that draws nothing:  a view it declares, hidden (`<deck "deck" hidden/>`, T123)? */

@@ -53,11 +53,11 @@ describe("<ui-progress> classes", () => {
     ['state="warning"', "ui warning progress"],
     // the new words (epic `ui-gaps` P4):  the old names above draw the same
     ['appearance="basic" inverted align="right" disabled', "ui right aligned disabled inverted basic progress"],
-    ['attach="top"', "ui top attached progress"],
+    ['attach-to="top"', "ui top attached progress"],
     ["indeterminate", "ui indeterminate progress"],
     ['indeterminate="sliding" speed="fast"', "ui fast sliding indeterminate progress"],
-    ['attach="both"', "ui attached progress"],
-    ['attach="top"', "ui top attached progress"],
+    ['attach-to="both"', "ui attached progress"],
+    ['attach-to="top"', "ui top attached progress"],
     ['value="100"', "ui success progress"],
     ['value="100" state="error"', "ui error progress"]
   ])("<ui-progress %s>", async (attributes, classes) => {

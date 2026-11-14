@@ -37,7 +37,9 @@ describe("SpellDeclarations, inline", () => {
     expect(lines[rankLine + 1]).toMatch(/^ {2}static Ranks = \[/)
     expect(lines[rankLine + 2]).toMatch(/^ {2}static \{ this\.declareProp\("rank", /)
     const card = declarations.statements.findIndex(({ type }) => type === "Card")
-    expect(lines[declarations.codeLines![card]!]).toBe("export class Card extends TwoSidedView {")
+    // a type's code starts with the comment on its head line, `-- A playing card`, then its class
+    const cardLine = declarations.codeLines![card]!
+    expect(lines.slice(cardLine, cardLine + 2)).toEqual(["// A playing card", "export class Card extends TwoSidedView {"])
   })
 
   test("`fromComments()` still reads a compiled .js from before declarations files", () => {
@@ -166,7 +168,7 @@ describe("SpellDeclarations.importScope()", () => {
     test("a type, its properties and constants:  `declaredAt` -- in the project's own files", () => {
       const card = imports.types.get("Card", "LOCAL_ONLY")!
       expect(card.declaredAt?.path).toBe(`${projectId}/Card.spell`)
-      expect(sourceAt(card.declaredAt)).toMatch(/^a "card" is a draggable two sided view\n/)
+      expect(sourceAt(card.declaredAt)).toMatch(/^a "card" is a draggable two sided view\s+-- A playing card\n/)
       // its suit, its list of suits and each suit:  all made by one statement, its line
       const suits = /^its "suit" is one of clubs, diamonds, hearts or spades$/
       expect(sourceAt(card.variables.get("suit", "LOCAL_ONLY")?.declaredAt)).toMatch(suits)

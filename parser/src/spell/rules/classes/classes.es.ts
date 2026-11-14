@@ -42,6 +42,7 @@ import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
+import { EachThing } from "./EachThing"
 import { EveryThingWhere } from "./EveryThingWhere"
 import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
@@ -2694,8 +2695,22 @@ classesEs.addRule(EveryThing, {
   ]
 })
 
+// solo la lista de un bucle:  `para cada columna` (épica `language` T128)
+classesEs.addRule(EachThing, {
+  syntax: "cada {type:known_type}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una pila es una lista de cosas", "una columna es una pila"].join("\n"), "block")
+      },
+      // leída solo como la lista de un bucle (`para cada columna`):  `cada columna` sola es `every_thing`
+      tests: [["cada columna", "core.everyThing(Columna)"]]
+    }
+  ]
+})
+
 classesEs.addRule(EveryThingWhere, {
-  syntax: "(cada|todo|toda) {type:known_type} donde {inline_expression}?",
+  syntax: "(cada|todo|toda) {type:known_type} (where:donde|que) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -2707,6 +2722,11 @@ classesEs.addRule(EveryThingWhere, {
           "cada carta donde su rango es 1",
           "core.filter(core.everyThing(Carta), (carta) => carta.rango === 1)",
           "core.filter(core.everyThing(Carta), (carta: Carta) => carta.rango === 1)"
+        ],
+        [
+          "cada carta que no es 1",
+          "core.filter(core.everyThing(Carta), (carta) => carta !== 1)",
+          "core.filter(core.everyThing(Carta), (carta: Carta) => carta !== 1)"
         ]
       ]
     }
@@ -2714,7 +2734,7 @@ classesEs.addRule(EveryThingWhere, {
 })
 
 classesEs.addRule(EveryThingWhere, {
-  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} donde {inline_expression}?"
+  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} (where:donde|que) {inline_expression}?"
 })
 
 classesEs.addRule(TheThings, { syntax: "(todos|todas) (los|las)? {type:plural_type}" })
@@ -2797,20 +2817,21 @@ classesEs.addRule(EveryThingWith, {
   ]
 })
 classesEs.addRule(EveryThingWith, {
-  syntax: "(cada|todo|toda) {type:known_type} con {filters:thing_filters} donde {inline_expression}?"
+  syntax: "(cada|todo|toda) {type:known_type} con {filters:thing_filters} (where:donde|que) {inline_expression}?"
 })
 classesEs.addRule(EveryThingWith, {
   syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters}"
 })
 classesEs.addRule(EveryThingWith, {
   syntax:
-    "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters} donde {inline_expression}?"
+    "((todos|todas) (los|las)?|los|las)? {type:plural_type} con {filters:thing_filters} (where:donde|que) {inline_expression}?"
 })
 classesEs.addRule(TheSavedThingsWith, {
   syntax: "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters}"
 })
 classesEs.addRule(TheSavedThingsWith, {
-  syntax: "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters} donde {inline_expression}?"
+  syntax:
+    "(los|las)? {type:plural_type} (guardados|guardadas) con {filters:thing_filters} (where:donde|que) {inline_expression}?"
 })
 
 classesEs.addRule(KindValues, {

@@ -145,11 +145,11 @@
 		</>
 
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example "Attached" description="A message can be formatted to attach itself to other content:  `attach=\"both\"` or `attach=\"top\"` joins the content below, `attach=\"bottom\"` the content above.">
-				<message attach="both" heading="Welcome to our site!">
+			<example "Attached" description="A message can be formatted to attach itself to other content:  `attach-to=\"both\"` or `attach-to=\"top\"` joins the content below, `attach-to=\"bottom\"` the content above.">
+				<message attach-to="both" heading="Welcome to our site!">
 					<text paragraph>Fill out the form below to sign-up for a new account</text>
 				</message>
-				<segment attach="both">
+				<segment attach-to="both">
 					<form>
 						<fields widths="2">
 							<field label="First Name">
@@ -171,7 +171,7 @@
 						<button color="blue" type="submit">Submit</button>
 					</form>
 				</segment>
-				<message attach="bottom" state="warning" icon="help">Already signed up? <link link="#login">Login here</link> instead.</message>
+				<message attach-to="bottom" state="warning" icon="help">Already signed up? <link link="#login">Login here</link> instead.</message>
 			</example>
 		</>
 

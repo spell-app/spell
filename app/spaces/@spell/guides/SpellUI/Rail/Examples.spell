@@ -98,7 +98,7 @@
 					<column width="8"/>
 					<column width="8">
 						<segment>
-							<rail position="left" attach="both">
+							<rail position="left" attach-to="both">
 								<segment>Left Rail Content</segment>
 							</rail>
 							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
@@ -110,7 +110,7 @@
 				<grid>
 					<column width="8">
 						<segment>
-							<rail position="right" attach="both">
+							<rail position="right" attach-to="both">
 								<segment>Right Rail Content</segment>
 							</rail>
 							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
@@ -120,10 +120,10 @@
 			</example>
 			<example "Attached">
 				<segment padding="lg">
-					<rail position="left" internal attach="both">
+					<rail position="left" internal attach-to="both">
 						<segment>Left Rail Content</segment>
 					</rail>
-					<rail position="right" internal attach="both">
+					<rail position="right" internal attach-to="both">
 						<segment>Right Rail Content</segment>
 					</rail>
 				</segment>

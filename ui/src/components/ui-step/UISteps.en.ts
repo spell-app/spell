@@ -83,15 +83,15 @@ export const stepsVocabulary = {
         "`fluid`, an equal share of the row each.  Not for `vertical` or `circular` steps (already alike)."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom"],
       classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
         "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  " +
-        "Its old name was `attached`."
+        "Its old names were `attach` and `attached`."
     },
     {
       name: "unstackable",

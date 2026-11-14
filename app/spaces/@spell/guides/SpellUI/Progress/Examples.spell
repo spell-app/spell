@@ -156,9 +156,9 @@
 		<section label="Attached" sticky="stack" collapsible dividing>
 			<example "Attached" description="A progress bar can show progress of an element: a thin line on its `top` or `bottom` edge.">
 				<segment>
-					<progress attach="top" value="30" aria-label="Top"/>
+					<progress attach-to="top" value="30" aria-label="Top"/>
 					<text paragraph>La la la la</text>
-					<progress attach="bottom" value="70" aria-label="Bottom"/>
+					<progress attach-to="bottom" value="70" aria-label="Bottom"/>
 				</segment>
 			</example>
 			<example "Attached">
@@ -173,7 +173,7 @@
 					<extra>
 						<link link="#project-friends"><icon name="user"/> 22 Friends</link>
 					</extra>
-					<progress attach="bottom" value="40" aria-label="Project progress"/>
+					<progress attach-to="bottom" value="40" aria-label="Project progress"/>
 				</card>
 			</example>
 		</>

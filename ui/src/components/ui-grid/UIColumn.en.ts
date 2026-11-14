@@ -81,13 +81,13 @@ export const columnVocabulary = {
       description: "Width while the grid is 1920px wide or more."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["left", "right"],
       classes: { left: "left attached", right: "right attached" },
-      replaces: ["attached"],
-      description: "No gutter on the `left` / `right` side.  Its old name was `attached`."
+      replaces: ["attach", "attached"],
+      description: "No gutter on the `left` / `right` side.  Its old names were `attach` and `attached`."
     },
     { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its line." },
     {

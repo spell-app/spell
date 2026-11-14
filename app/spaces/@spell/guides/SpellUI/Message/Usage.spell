@@ -24,7 +24,7 @@
 			  `<ui-icon loading>`).
 			- `state` picks the consequence (`positive`, `success`, `negative`, `error`, `warning`, `info`); `color` any hue.
 			  Both tint the surface, border and text.
-			- `attach="both"` (or `top`) joins the message to the segment or form below it; `attach="bottom"` to the one above.
+			- `attach-to="both"` (or `top`) joins the message to the segment or form below it; `attach-to="bottom"` to the one above.
 		</>
 	</>
 

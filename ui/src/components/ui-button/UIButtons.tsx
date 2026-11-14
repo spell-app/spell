@@ -14,7 +14,7 @@ import buttonCSS from "./UIButton.css?inline"
  *   That box is the group's TRACK:  the buttons' resting fill, which they sit on, set in a little (`UIButton.css`).
  * - Almost no code:  `UIButton.css` hands the group's look to the slotted buttons through inherited tokens.
  * - Its `:state()`s are only for layout the DOM element itself must do:
- *   `fluid` (also for a `width`, or `attach` top / bottom / both) and the floats.
+ *   `fluid` (also for a `width`, or `attach-to` top / bottom / both) and the floats.
  * - A `wrapping` group measures its rows, and draws a track behind each (`rows`):
  *   CSS can't tell which button starts or ends a row.
  * - A group whose buttons draw their own outline or fill draws no track (`isTrackless`):
@@ -28,11 +28,11 @@ export class UIButtons extends E.UIComponent<typeof buttonsVocabulary> {
   // ## Layout
   ////////////////
 
-  /** Full width:  `fluid`, a `width` (equal-width buttons), or attached as a whole row (`attach`). */
+  /** Full width:  `fluid`, a `width` (equal-width buttons), or attached as a whole row (`attach-to`). */
   @E.cssState("fluid")
   get isFluid(): boolean {
-    const { attach } = this
-    return this.fluid || !!this.width || attach === "both" || attach === "top" || attach === "bottom"
+    const { attachTo } = this
+    return this.fluid || !!this.width || attachTo === "both" || attachTo === "top" || attachTo === "bottom"
   }
 
   ////////////////

@@ -103,10 +103,10 @@ export class Card extends TwoSidedView {
     return true
   }
 
-  /** what the move scores:  10 on a foundation, 5 from the discards, else nothing */
+  /** what the move scores:  10 on a foundation, 5 from the discard pile, else nothing */
   countThePointsForCardOnPile(pile) {
     if (pile instanceof Foundation) return 10
-    if (solitaire.discards.includes(this)) return 5
+    if (solitaire.discardPile.includes(this)) return 5
     return 0
   }
 
@@ -389,7 +389,7 @@ export class Solitaire extends App {
 
   draw() {
     return [
-      h("ui-segment", { inverted: true, attach: "top" },
+      h("ui-segment", { inverted: true, "attach-to": "top" },
         h("ui-toolbar", { class: "GameBar", appearance: "pills", inverted: true, size: "small", shrinkable: true },
           h("ui-text", { slot: "title", size: "large", heavy: true }, "Spell Solitaire"),
           core.drawAction(this, "autoPlay", { "in-menu": true }),
@@ -401,9 +401,9 @@ export class Solitaire extends App {
           h("ui-text", { slot: "right" }, "Score: ", () => this.score)
         )
       ),
-      h("ui-container", { padding: "small", columns: "7", spacing: "xs" },
+      h("ui-container", { columns: "7", padding: "small", spacing: "xs" },
         h("test-project-stock-pile", { id: "stock" }),
-        h("test-project-discard-pile", { id: "discards" }),
+        h("test-project-discard-pile", { id: "discard pile" }),
         h("spacer"),
         h("test-project-foundation", { id: "clubs" }),
         h("test-project-foundation", { id: "diamonds" }),
@@ -432,10 +432,10 @@ export class Solitaire extends App {
   static { this.declareProp("stock", { init: () => new StockPile({ id: "stock" }), early: true }) }
   get stock() { return this.getProp("stock") }
   set stock(value) { this.setProp("stock", value) }
-  // <discard-pile "discards"/>
-  static { this.declareProp("discards", { init: () => new DiscardPile({ id: "discards" }), early: true }) }
-  get discards() { return this.getProp("discards") }
-  set discards(value) { this.setProp("discards", value) }
+  // <discard-pile "discard pile"/>
+  static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard pile" }), early: true }) }
+  get discardPile() { return this.getProp("discardPile") }
+  set discardPile(value) { this.setProp("discardPile", value) }
   // <foundation "clubs" suit=clubs/>
   static { this.declareProp("clubs", { init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true }) }
   get clubs() { return this.getProp("clubs") }
@@ -483,7 +483,6 @@ export class Solitaire extends App {
 
   async restartTheGame() {
     this.score = 0
-    // Gather every card into the stock, shuffle it, and deal the columns
     this.deck.forEach((card) => core.meanwhile(() => card.turnFaceDown()))
     for (const card of this.deck) {
       if (!this.stock.includes(card)) {
@@ -493,14 +492,17 @@ export class Solitaire extends App {
     }
     this.stock.randomize()
     // each row's first card lands face down, then turns up where it lies
-    core.getRange(1, 7).forEach((row) => core.getRange(row, 7).forEach((column) => {
-      core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
-      if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
-    }))
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
+        await core.pauseFor(20, "msec")
+        if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
+      }
+    }
     await this.turnOverTheNextCard()
   }
 
-  /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
+  /** Turn the stock's next card over, onto the discard pile:  the discard pile back into the stock when it's empty */
   async turnOverTheNextCard() {
     // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
     if (this.stock.isEmpty) this.resetTheStock()
@@ -508,12 +510,12 @@ export class Solitaire extends App {
     it?.turnFaceUp()
     // as long as its flip takes (styles.css), so it turns over before it moves
     await core.pauseFor(300, "msec")
-    this.discards.append(it)
+    this.discardPile.append(it)
   }
 
-  /** The discards, turned over, back into the stock */
+  /** The discard pile, turned over, back into the stock */
   resetTheStock() {
-    const cards = this.discards.clone()
+    const cards = this.discardPile.clone()
     cards.reverse()
     cards.forEach((card) => this.stock.append(card))
     this.stock.forEach((card) => card.turnFaceDown())
@@ -522,8 +524,8 @@ export class Solitaire extends App {
   /** Play every card that can go somewhere, until none can */
   async autoPlay() {
     let anythingChanged = false
-    if (!this.discards.isEmpty) {
-      const testCard = this.discards.lastItem
+    if (!this.discardPile.isEmpty) {
+      const testCard = this.discardPile.lastItem
       if (await testCard?.play()) {
         anythingChanged = true
         await core.pauseFor(500, "msec")
@@ -554,21 +556,19 @@ export class Solitaire extends App {
     if (anythingChanged) await this.autoPlay()
   }
 
-  /** Turn up a face-down card from a column, at random, onto the discards */
+  /** Turn up a face-down card from a column, at random, onto the discard pile */
   cheat() {
     const remainingPiles = core.filter(core.everyThing(Column), (pile) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
     if (core.isEmpty(remainingPiles)) return
     const pile = core.randomItemOf(remainingPiles)
     const card = pile?.filter((card) => card.isFaceDirection("down"))?.randomItem()
-    // turned up as it moves:  it rises over its column face down, then turns as it glides onto the discards
-    this.discards.append(card)
+    // turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile
+    this.discardPile.append(card)
     return card?.turnFaceUp()
   }
 
   async onScoreChange(event) {
-    let home = this.clubs.length + this.diamonds.length
-    home = home + this.hearts.length + this.spades.length
-    if (home === 52) {
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Foundation))) === 52) {
       await core.alert("You won!", "New game")
       await this.restartTheGame()
     }

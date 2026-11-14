@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
@@ -12,6 +13,8 @@ import type { MethodSignatureData } from "./methods.shared"
  * - e.g. under `- to turn it over:`
  *   - `- shortcut meta+T`:  a key that runs it, again for each
  *   - `- enabled when it is face down`:  when it may run
+ *   - `- disabled when there are no face down cards`:  when it may NOT run, `enabled when` turned round (epic `language` T132);
+ *     an action says one or the other, never both
  *   - `- selected when it is face up`:  when it shows checked, in a menu
  *   - `- undoable`:  ONE undo step, named by its title
  *   - `- undoable as "Turn Card"`:  one named otherwise, `Undo Turn Card`
@@ -30,14 +33,25 @@ import type { MethodSignatureData } from "./methods.shared"
  *   Its action's definition gathers them (`detailsOf()`):  a getter for each condition, then
  *   `core.describeAction(Card, "turnOver", {...})` after the class.
  */
-export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoable?|undoneAs?|cantBeUndone?|icon?|replacesLast?|title?"> {
+export class ActionDetail extends SpellStatement<"keys?|enabled?|disabled?|selected?|undoable?|undoneAs?|cantBeUndone?|icon?|replacesLast?|title?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 
-  /** Only in an action of a template's body -- see `actionIn()`. */
+  /**
+   * Only in an action of a template's body -- see `actionIn()`.
+   * - SIDE EFFECT:  a `disabled when` line in an action that also says `enabled when` is refused,
+   *   naming both, for as long as the action's body has both (`SP.SpellWarnings.refuseIf()`).
+   */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
-    if (!ActionDetail.actionIn(scope)) return undefined
-    return super.parse(scope, tokens)
+    const action = ActionDetail.actionIn(scope)
+    if (!action) return undefined
+    const match = super.parse(scope, tokens)
+    if (match?.groups.disabled) {
+      SP.SpellWarnings.refuseIf(match, SP.Language.of(scope).parserMessage("enabled-and-disabled-when"), () =>
+        ActionDetail.saysBoth(action)
+      )
+    }
+    return match
   }
 
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
@@ -79,9 +93,11 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoa
       const statement = line instanceof P.Match ? (line.data as { statement?: P.Match }).statement : undefined
       if (!statement?.is(ActionDetail)) continue
       any = true
-      const { keys, enabled, selected, undoable, undoneAs, cantBeUndone, icon, replacesLast, title } = statement.groups
+      const { keys, enabled, disabled, selected, undoable, undoneAs, cantBeUndone, icon, replacesLast, title } =
+        statement.groups
       if (keys) details.shortcuts.push(`${keys.value}`)
       if (enabled) details.enabled = enabled
+      if (disabled) details.disabled = disabled
       if (selected) details.selected = selected
       if (undoable) details.undoable = true
       if (cantBeUndone) details.cantBeUndone = true
@@ -91,6 +107,19 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoa
       if (title) details.title = title
     }
     return any ? details : undefined
+  }
+
+  /** Does action `action`'s body say both `enabled when` and `disabled when`? */
+  static saysBoth(action: P.Match): boolean {
+    const body = (action.rule as MethodDefinition).getBody(action)
+    const said = new Set<string>()
+    for (const line of body?.matched ?? []) {
+      const statement = line instanceof P.Match ? (line.data as { statement?: P.Match }).statement : undefined
+      if (!statement?.is(ActionDetail)) continue
+      if (statement.groups.enabled) said.add("enabled")
+      if (statement.groups.disabled) said.add("disabled")
+    }
+    return said.size === 2
   }
 
   /** Is `match` one of our lines, or the line holding one? */
@@ -111,12 +140,15 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoa
  * What an action's description lines say -- see `ActionDetail.detailsOf()`.
  * - `shortcuts`:  each key, in order
  * - `enabled`, `selected`:  each condition's match, which a getter on the class returns
+ * - `disabled`:  `enabled`'s condition turned round, which the same getter returns `not` of
  * - `undoneAs`, `icon`:  the text each says
  * - `undoable`:  a bare `- undoable`, so its undo goes by the action's title
  */
 export type ActionDetails = {
   shortcuts: string[]
   enabled?: P.Match
+  /** `- disabled when ...`:  the getter `enabled` would have, negated */
+  disabled?: P.Match
   selected?: P.Match
   undoable?: boolean
   undoneAs?: string

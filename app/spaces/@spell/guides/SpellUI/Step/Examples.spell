@@ -332,15 +332,15 @@
 
 		<section label="Attached" sticky="stack" collapsible dividing>
 			<example "Attached" description="Steps can be attached to other elements.">
-				<steps widths="3" attach="top">
+				<steps widths="3" attach-to="top">
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm Order" description="Verify order details"/>
 				</steps>
-				<segment attach="both">
+				<segment attach-to="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<steps widths="3" attach="bottom">
+				<steps widths="3" attach-to="bottom">
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm Order" description="Verify order details"/>

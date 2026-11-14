@@ -59,7 +59,7 @@ describe("chrome + Actions", () => {
     const menu = host.querySelector("ui-menu.PanelMenu")!
     // no colour of its own:  the editor's theme shapes it (the purple bar went in epic `debut` P17)
     expect(menu.hasAttribute("color")).toBe(false)
-    expect(menu.getAttribute("attach")).toBe("top")
+    expect(menu.getAttribute("attach-to")).toBe("top")
     const [left, right] = menu.querySelectorAll(":scope > ui-menu")
     expect(left.getAttribute("position")).toBe("left")
     expect(left.classList.contains("third")).toBe(true)

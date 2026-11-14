@@ -82,7 +82,7 @@
 
 			<!-- GAP I53:  the wrench dropdown's nested `New` sub-menu, divider and header have no `<ui-dropdown>` equivalent (a select, not an action menu). -->
 			<example "Menu">
-				<menu attach="top" aria-label="Toolbar">
+				<menu attach-to="top" aria-label="Toolbar">
 					<item>
 						<dropdown aria-label="File">
 							<icon slot="trigger" name="wrench"/>
@@ -100,7 +100,7 @@
 						</item>
 					</menu>
 				</menu>
-				<segment attach="bottom">
+				<segment attach-to="bottom">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
 			</example>
@@ -161,7 +161,7 @@
 				</menu>
 			</example>
 			<example "Tabbed">
-				<menu appearance="tabular" attach="top" aria-label="Tabbed, attached top">
+				<menu appearance="tabular" attach-to="top" aria-label="Tabbed, attached top">
 					<item link="#bio" selected>Bio</item>
 					<item link="#photos">Photos</item>
 					<menu position="right">
@@ -170,15 +170,15 @@
 						</item>
 					</menu>
 				</menu>
-				<segment attach="bottom">
+				<segment attach-to="bottom">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
 			</example>
 			<example "Tabbed">
-				<segment attach="top">
+				<segment attach-to="top">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
-				<menu appearance="tabular" attach="bottom" aria-label="Tabbed, attached bottom">
+				<menu appearance="tabular" attach-to="bottom" aria-label="Tabbed, attached bottom">
 					<item link="#active-project" selected>Active Project</item>
 					<item link="#project-2">Project #2</item>
 					<item link="#project-3">Project #3</item>
@@ -191,7 +191,7 @@
 			<!-- GAP I79:  the stretched column doesn't grow its `<ui-segment>`, so the segment doesn't match the tabs' height. -->
 			<example "Tabbed">
 				<grid>
-					<column width="4" attach="left">
+					<column width="4" attach-to="left">
 						<menu direction="vertical" fluid appearance="tabular" aria-label="Vertical tabbed">
 							<item link="#bio" selected>Bio</item>
 							<item link="#pics">Pics</item>
@@ -199,18 +199,18 @@
 							<item link="#links">Links</item>
 						</menu>
 					</column>
-					<column width="12" stretched attach="right">
-						<segment seamless attach="right">This is an stretched grid column. This segment will always match the tab height</segment>
+					<column width="12" stretched attach-to="right">
+						<segment seamless attach-to="right">This is an stretched grid column. This segment will always match the tab height</segment>
 					</column>
 				</grid>
 				<message slot="description" state="info" size="small">To make a vertical tabbed menu appear seamlessly attached to the related segment, use left / right <text code>attached</text> grid columns and a <text code>seamless attached</text> segment.</message>
 			</example>
 			<example "Tabbed" description="`position=\"right\"` opens a vertical tabbed menu's tabs to the left, for a menu on the content's right.">
 				<grid>
-					<column width="12" stretched attach="left">
-						<segment seamless attach="left">This is an stretched grid column. This segment will always match the tab height</segment>
+					<column width="12" stretched attach-to="left">
+						<segment seamless attach-to="left">This is an stretched grid column. This segment will always match the tab height</segment>
 					</column>
-					<column width="4" attach="right">
+					<column width="4" attach-to="right">
 						<menu direction="vertical" fluid appearance="tabular" position="right" aria-label="Vertical tabbed, right">
 							<item link="#bio" selected>Bio</item>
 							<item link="#pics">Pics</item>
@@ -975,19 +975,19 @@
 
 		<section label="Attached" sticky="stack" collapsible dividing>
 			<example "Attached" description="A menu may be attached to other content segments.">
-				<menu appearance="tabular" attach="top" aria-label="Attached tabs">
+				<menu appearance="tabular" attach-to="top" aria-label="Attached tabs">
 					<item link="#tab-1" selected>Tab 1</item>
 					<item link="#tab-2">Tab 2</item>
 				</menu>
-				<segment attach="bottom">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomized words which don't look even slightly believable.</segment>
+				<segment attach-to="bottom">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomized words which don't look even slightly believable.</segment>
 			</example>
 			<example "Attached">
-				<menu attach="top" aria-label="Attached top">
+				<menu attach-to="top" aria-label="Attached top">
 					<item link="#section-1" selected>Section 1</item>
 					<item link="#section-2">Section 2</item>
 				</menu>
-				<segment attach="both">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomized words which don't look even slightly believable.</segment>
-				<menu attach="bottom" aria-label="Attached bottom">
+				<segment attach-to="both">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomized words which don't look even slightly believable.</segment>
+				<menu attach-to="bottom" aria-label="Attached bottom">
 					<item link="#section-1" selected>Section 1</item>
 					<item link="#section-2">Section 2</item>
 				</menu>

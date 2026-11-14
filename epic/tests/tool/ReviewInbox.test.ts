@@ -11,6 +11,7 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 import { SRV } from "spell/server"
 import { InboxError, ReviewInbox, WAKE_COOLDOWN_MS, isoTime } from "spell/epic/tool/ReviewInbox"
 import { STAGE_COUNTDOWN_MS } from "spell/epic/review"
+import { WORK_STALE_MS, isLiveWork, isWorkOnMark } from "spell/epic/review/review.types"
 
 const M1 = "2026-10-04T15:00:00-04:00"
 const M2 = "2026-10-04T15:01:00-04:00"
@@ -1103,5 +1104,36 @@ describe("ReviewInbox test answers (epic `epic-engine` P4)", () => {
     expect(inbox.unsentMarks.map((mark) => [mark.id, mark.result])).toEqual([["m3", "skip"]])
     inbox.markSent(M2)
     expect(inbox.sentMarks.map((mark) => mark.id)).toEqual(["m3"])
+  })
+})
+
+describe("working flags (I280)", () => {
+  const NOW = Date.parse("2026-11-14T10:00:00.000Z")
+
+  test("a flag past WORK_STALE_MS (12 hours) no longer counts:  the inbox drops it as it's read", () => {
+    const fresh = new Date(NOW - WORK_STALE_MS + 60_000).toISOString()
+    const stale = new Date(NOW - WORK_STALE_MS - 60_000).toISOString()
+    expect([isLiveWork({ since: fresh }, NOW), isLiveWork({ since: stale }, NOW), isLiveWork(undefined, NOW)]).toEqual([
+      true,
+      false,
+      false
+    ])
+    const inbox = new ReviewInbox(
+      {
+        working: {
+          i30: { action: "details", since: "2026-11-04T07:27:43.791-05:00" },
+          t1: { action: "details", since: fresh }
+        }
+      },
+      NOW
+    )
+    expect(Object.keys(inbox.working)).toEqual(["t1"])
+  })
+
+  test("work is on a mark only when the mark came first;  no mark, it is", () => {
+    const work = { since: "2026-11-14T02:00:00.000-05:00" }
+    expect(isWorkOnMark(work, { at: "2026-11-14T01:00:00.000-05:00" })).toBe(true)
+    expect(isWorkOnMark(work, { at: "2026-11-14T03:00:00.000-05:00" })).toBe(false)
+    expect(isWorkOnMark(work, undefined)).toBe(true)
   })
 })

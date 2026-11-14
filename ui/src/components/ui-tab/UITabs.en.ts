@@ -5,7 +5,7 @@
  *   the tabs you click are the items of a `tabular` (or `pointing` / `secondary` / `text`) MENU.
  *   So `<ui-tab>` is the pane, and `<ui-tabs>` draws the menu from its panes' `label`s, with `UIMenu.css`.
  * - Class words come out through `ClassBuilder`:
- *   - `<ui-tabs appearance="tabular" attach="top" size="small">` => the root `ui small tabular top attached tabs`
+ *   - `<ui-tabs appearance="tabular" attach-to="top" size="small">` => the root `ui small tabular top attached tabs`
  *     and its tab list `ui small tabular top attached menu` (the same words, Fomantic's noun `menu`)
  *   - `<ui-tab>` in those tabs => `ui active bottom attached tab segment`
  *     (the menu's opposite edge;  `active` while selected)
@@ -114,15 +114,15 @@ export const tabsVocabulary = {
         "of the row each;  otherwise each as wide as the widest."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["top", "bottom"],
       classes: { top: "top attached", bottom: "bottom attached" },
-      replaces: [{ from: "attached", value: "top" }],
+      replaces: ["attach", { from: "attached", value: "top" }],
       description:
         "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, " +
-        "`bottom attached` panes);  `bottom` puts them below.  Its old name was `attached` (bare ~== `top`)."
+        "`bottom attached` panes);  `bottom` puts them below.  Its old names were `attach` and `attached` (bare ~== `top`)."
     },
     {
       name: "value",

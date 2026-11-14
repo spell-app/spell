@@ -23,8 +23,10 @@
  *   - for each list:  its items before the step and after it -- the same things, not copies
  * - Left out (Q10):
  *   - a prop declared `undoable: false`, e.g. a selection
- *   - what an action declared `cantBeUndone` changes
+ *   - what an action declared `cantBeUndone` changes, a saved thing it adds or removes too
+ *     - but a step of its own inside it is still one (`separateStep()`):  a draft's save, `Edit`
  *     - with `"clears history"`, it also forgets every step once it's done, e.g. a new game
+ *   - what a creation hook changes while no action runs (`runCreate()`):  the program's opening
  * - Every change is noted in one place, which this history hears from:
  *   - each property write, in `noteSetting()` (`core.ts`):
  *     a `while` handler's put-back hears of those too (`recordingSettings()`)
@@ -86,9 +88,17 @@ export class UndoHistory extends UndoStack {
     })
   }
 
-  /** Is a change made now recorded:  an undoable action running, nothing being undone, no `cantBeUndone` one? */
+  /**
+   * Is a change made now recorded:  an undoable action running, nothing being undone, no `cantBeUndone` one?
+   * - A step of its own (`separateStep()`) records, whatever runs around it.
+   */
   get isRecording(): boolean {
-    return this.isInTransaction && !this.isApplying && this.cantBeUndoneRunning === 0
+    return this.isInTransaction && !this.isApplying && !this.isLeavingOut
+  }
+
+  /** Is what changes now left out:  a `cantBeUndone` action running, with no step of its own open inside it? */
+  private get isLeavingOut(): boolean {
+    return this.cantBeUndoneRunning > 0 && !this.separateStepOpen
   }
 
   /** Is an action declared with `declareAction()` running, of either kind? */
@@ -155,6 +165,31 @@ export class UndoHistory extends UndoStack {
   }
 
   /**
+   * `run` is ONE step of its own, `title`, even inside an action that can't be undone:  e.g. a draft's save, `Edit`.
+   * - Such an action leaves out only what it changes itself:  Recipe Box's Save only says which screen shows,
+   *   while the draft it saves is the person's change (epic `language` I88).
+   * - Inside an undoable action:  joins that one's step, as `transaction()`.
+   * - `run` MUST NOT wait:  a step that waited would take in what the action does meanwhile.
+   */
+  separateStep<T>(title: string, run: () => T): T {
+    if (!this.cantBeUndoneRunning || this.isInTransaction || this.isApplying) return this.transaction(title, run)
+    this.separateStepOpen = true
+    try {
+      return this.transaction(title, run)
+    } finally {
+      this.separateStepOpen = false
+    }
+  }
+
+  /**
+   * Record one change, as `UndoStack.record()` -- but not while an action that can't be undone runs:  left out then.
+   * - e.g. a saved thing added on a program's opening (`core.saveThing()`), which records itself.
+   */
+  override record(record: UndoRecord, options: { title: string; target?: unknown }): void {
+    if (!this.isLeavingOut) super.record(record, options)
+  }
+
+  /**
    * Undo the newest step, as `UndoStack.undo()` -- but not while an undoable action is still running:  false then.
    * - e.g. ⌘Z while a deal still waits between cards:  putting the step before it back mid-deal would tangle them.
    */
@@ -209,6 +244,9 @@ export class UndoHistory extends UndoStack {
   /** How many `cantBeUndone` actions are running now:  nothing records while one is. */
   private cantBeUndoneRunning = 0
 
+  /** Is a step of its own open (`separateStep()`), inside an action that can't be undone? */
+  private separateStepOpen = false
+
   /** What's waiting for the `cantBeUndone` actions to end:  `afterAction()`. */
   private afterCantBeUndone: (() => void)[] = []
 }
@@ -258,6 +296,27 @@ export function declareAction(Class: Function, name: string, info: ActionInfo): 
   // (epic `editor` I62)
   Object.defineProperty(action, "length", { value: method.length })
   Object.defineProperty(Class.prototype, name, { value: action, writable: true, configurable: true })
+}
+
+/**
+ * Run `thing`'s creation hook, `create(props)`:  what `Thing`'s and `List`'s constructors call.
+ * - Made inside an action:  what it changes joins that action's step.
+ * - Made while no action runs (the program's opening, a one of a kind's `when creating it`):  no undo step, as
+ *   `core.holdWhile()`'s opening steps aren't -- however long it waits (epic `language` I88).
+ *   - e.g. Recipe Box's three recipes to start from:  Undo at once took the last one away.
+ */
+export function runCreate(
+  thing: { create(props?: Record<string, unknown>): unknown },
+  props?: Record<string, unknown>
+): void {
+  const history = core.RUNTIME?.history
+  if (!history || history.isActing || history.isApplying) {
+    thing.create(props)
+    return
+  }
+  const result = history.run({ cantBeUndone: "keeps history" }, () => thing.create(props))
+  // only the wait's copy:  an `async create()` that fails still fails as it did unwrapped
+  if (isPromise(result)) result.catch(() => {})
 }
 
 ////////////////

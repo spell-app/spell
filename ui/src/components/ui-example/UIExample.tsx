@@ -189,7 +189,7 @@ export class UIExample extends E.UIComponent<typeof exampleVocabulary> {
           <ui-segment
             part={this.partForName("demo")}
             appearance={this.demoIsFramed ? undefined : "basic"}
-            attach={this.demoIsFramed ? UIT.TOP : undefined}
+            attach-to={this.demoIsFramed ? UIT.TOP : undefined}
           >
             <slot />
           </ui-segment>
@@ -197,7 +197,7 @@ export class UIExample extends E.UIComponent<typeof exampleVocabulary> {
             <ui-segment
               id={CODE_PANE_ID}
               part={this.partForName("code")}
-              attach={this.bare ? undefined : UIT.BOTTOM}
+              attach-to={this.bare ? undefined : UIT.BOTTOM}
               appearance="secondary"
             >
               <slot name={this.slotForName("source")}>

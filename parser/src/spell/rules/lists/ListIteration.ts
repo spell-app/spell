@@ -6,6 +6,7 @@ import { KindName } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { type MethodBody, type ItemVariableData } from "./lists.shared"
+import { type EachItemWhere } from "./EachItemWhere"
 
 /**
  * `list_iteration` rule:  generic `for each` list iteration:
@@ -37,7 +38,8 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
    * - Looked up now, while parsing:  a body parses in this scope.
    */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
-    const { item, position, list } = match.groups
+    const { position, list } = match.groups
+    const item = this.itemOf(match)
     const datatype = match.scope.getItemType(list.datatype)
     const name = ListIteration.itemName(item)
     const variable = new P.ScopeVariable({ name, datatype, declaredBy: item })
@@ -64,7 +66,8 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
    * Build `map` call over `{list}`:  written one by one if its body waits, which only the whole project can say.
    */
   getAST(match: P.MatchFor<this>): P.ASTExpression {
-    const { list, item, position } = match.groups
+    const { list, position } = match.groups
+    const item = this.itemOf(match)
     const { itemVariable: variable } = match.data as ItemVariableData
     const args = [new P.ASTVariableExpression(item, { name: ListIteration.itemName(item), variable })]
     if (position) args.push(new P.ASTVariableExpression(position, { datatype: "number" }))
@@ -80,9 +83,28 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
     })
   }
 
+  /** The item's word as the loop says it:  `card` in `for each card in the deck`. */
+  protected itemOf(match: P.MatchFor<this>): P.Match {
+    return match.groups.item
+  }
+
   /** The item's variable:  its word, `card`, or a kind's words joined, `card_rank` for `card rank` (`kind_name`). */
   static itemName(item: P.Match): string {
     return item.is(KindName) ? KindName.variableName(item) : `${item.value}`
+  }
+}
+
+/**
+ * `list_iteration_where` rule:  a loop over the items which meet a condition (epic `language` T133), e.g.
+ * `for each card in the deck which is not in the stock`, `for each card in the deck where it is face up`.
+ * - Its list, its item and the condition are one `each_item_where`:  the list filtered, as `list_filter` does.
+ * - `core.map(core.filter(deck, (card) => !core.includes(stock, card)), (card) => ...)`
+ * - Anything else as `ListIteration`.
+ */
+export class ListIterationWhere extends ListIteration {
+  /** The item, as the condition names it too:  `card` in `card in the deck which ...`. */
+  protected itemOf(match: P.MatchFor<this>): P.Match {
+    return (match.groups.list as P.MatchFor<EachItemWhere>).groups.arg
   }
 }
 
@@ -165,7 +187,7 @@ export class ListIterationNamedForList extends SpellStatement<"list|body?"> {
 }
 
 /** Words that start a list, in each language. */
-const STARTS_A_LIST = /^(its|every|all|the|my|their|these|those|sus?|cada|tod[oa]s?|l[oa]s|mis|est[oa]s)\s/i
+const STARTS_A_LIST = /^(its|every|each|all|the|my|their|these|those|sus?|cada|tod[oa]s?|l[oa]s|mis|est[oa]s)\s/i
 
 /** The variable of a list with nothing to name its item for:  it's read as `it`. */
 const ITEM_WITH_NO_NAME = "item"

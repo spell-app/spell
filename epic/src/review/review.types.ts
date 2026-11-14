@@ -457,6 +457,32 @@ export function emptyInbox(): Inbox {
 }
 
 /**
+ * How long a WORKING flag counts (`inbox.working`, the page's spinner):  12 hours (epic `epic-engine` I280).
+ * - an agent that stopped without turning its flag off (`epic inbox working ... off`, `epic update ... done`) left the
+ *   item spinning for days (editor I30 from 11-04, still turning on 11-14)
+ * - long enough for a night's work on one item;  past it, nobody is on it any more
+ */
+export const WORK_STALE_MS = 12 * 60 * 60 * 1000
+
+/** Is working flag `work` still live:  started less than `WORK_STALE_MS` before `now` (ms)?  An unreadable time:  live. */
+export function isLiveWork(work: { since: string } | undefined, now = Date.now()): boolean {
+  if (!work) return false
+  const since = Date.parse(work.since)
+  return Number.isNaN(since) || now - since < WORK_STALE_MS
+}
+
+/**
+ * Is Claude's work `work` on `mark`, Owen's mark on the item now?  Not when he made the mark AFTER the work started:
+ * Claude took an earlier request, so his new mark's button doesn't turn (epic `epic-engine` I280).
+ * - no mark:  yes (an Add Details, a phase being planned)
+ */
+export function isWorkOnMark(work: { since: string }, mark: { at: string } | undefined): boolean {
+  if (!mark) return true
+  const [at, since] = [Date.parse(mark.at), Date.parse(work.since)]
+  return Number.isNaN(at) || Number.isNaN(since) || at <= since
+}
+
+/**
  * Has `mark` gone to Claude?  Made before the last "Send to Claude" (`sent`, ISO time or null), or an immediate one
  * (Add Details, revisit now:  handed over when made), as `ReviewInbox.unsentMarks` counts.
  */

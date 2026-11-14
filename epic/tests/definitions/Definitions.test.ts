@@ -122,6 +122,8 @@ describe("Definitions.all", () => {
       // a link to a saga, an epic, a phase or an item (P15 of `epic-workflow`)
       "epic-link",
       "epic-mark",
+      // Clarify, after a bodiless item's words (epic `epic-engine` I281)
+      "epic-clarify",
       // a change mark, around the words an answer changed (epic `epic-engine` P30)
       "epic-change"
     ])

@@ -172,15 +172,15 @@ export const menuVocabulary = {
         "`compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`."
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom"],
       classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
         "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  " +
-        "Its old name was `attached`."
+        "Its old names were `attach` and `attached`."
     },
     {
       name: "fixed",

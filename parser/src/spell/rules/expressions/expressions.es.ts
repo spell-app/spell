@@ -89,6 +89,13 @@ expressionsEs.addRule(Synonyms.specialize({ ruleName: "is_or_are" }), { syntax: 
 // The verbs an outline body's line may start with, its subject left out:  `tiene un mazo`, `pertenece a un juego`
 expressionsEs.addRule(Synonyms.specialize({ ruleName: "has_or_belongs" }), { syntax: "(tiene|pertenece)/i" })
 
+// The word before a list's condition (epic `language` T133):  `las cartas del mazo donde está boca arriba`;
+// `que` too, its subject left out as after `donde`:  `las cartas del mazo que están boca arriba`
+// - Each rule writes the words out, `(where:donde|que)`;  this says which one means `which` (`Wording.reads()`)
+expressionsEs.addRule(Wording.specialize({ ruleName: "where_or_which", meanings: ["which"] }), {
+  syntax: "(donde|(which:que))"
+})
+
 // The words joining things in a list:  `comodines y nombre = "grande"`;  `e` before an i- word, `u` before an o- one
 expressionsEs.addRule(Wording.specialize({ ruleName: "and_or", meanings: ["and", "or"] }), {
   syntax: "((and:y|e)|(or:o|u))"

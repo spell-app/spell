@@ -934,8 +934,8 @@ describe("PlanDoc questions and decisions", () => {
   /** Option cards A and B (B recommended), as an agent writes them for the old markup. */
   const GRID =
     '<ui-grid class="spell-pros-cons" columns="2" stackable>' +
-    '<ui-column><ui-segment><ui-label attach="top">A · Keep folds</ui-label><p>a</p></ui-segment></ui-column>' +
-    '<ui-column><ui-segment><ui-label attach="top">B · Unfold <code>it</code> (recommended)</ui-label><p>b</p></ui-segment></ui-column>' +
+    '<ui-column><ui-segment><ui-label attach-to="top">A · Keep folds</ui-label><p>a</p></ui-segment></ui-column>' +
+    '<ui-column><ui-segment><ui-label attach-to="top">B · Unfold <code>it</code> (recommended)</ui-label><p>b</p></ui-segment></ui-column>' +
     "</ui-grid>"
 
   test("one section (D13):  open questions on top, then the answered ones in id order;  a decision is born answered", () => {
@@ -964,7 +964,7 @@ describe("PlanDoc questions and decisions", () => {
     plan.decide("q2", "not now")
     // a question made with no details has its title's words as its text (I209):  the answer goes after them
     expect(el(plan, "q2").innerHTML).toBe(
-      '<epic-question><p data-title-body=""><em>What it says on the tin</em></p></epic-question><epic-answer title="not now"></epic-answer>'
+      '<epic-question><p data-title-body=""><em>What it says on the tin.</em><epic-clarify></epic-clarify></p></epic-question><epic-answer title="not now"></epic-answer>'
     )
     // answering again replaces the answer;  the old one goes into the Original Discussion (I7), as prose
     plan.decide("q2", "maybe later")

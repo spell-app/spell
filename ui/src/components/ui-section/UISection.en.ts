@@ -200,15 +200,15 @@ export const sectionVocabulary = {
         'names:  `compact`, `padded` (`padded="very"` is `lg`).'
     },
     {
-      name: "attach",
+      name: "attach-to",
       group: "layout",
       kind: "valueOnly",
       values: ["both", "top", "bottom"],
       classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
-      replaces: [{ from: "attached", value: "both" }],
+      replaces: ["attach", { from: "attached", value: "both" }],
       description:
         "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between " +
-        "two).  Old name:  `attached` (bare is `both`)."
+        "two).  Old names:  `attach`, `attached` (bare is `both`)."
     },
     {
       name: "scrolling",

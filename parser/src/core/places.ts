@@ -1539,7 +1539,8 @@ export class PlaceDraft {
 
   /**
    * Write each field changed to the real thing:  one group, shown at once.  Nothing changed:  nothing is sent.
-   * - One undo step, `Edit`;  nothing changed:  no step.  Inside an undoable action, it joins that action's step.
+   * - One undo step, `Edit`;  nothing changed:  no step.  Inside an undoable action, it joins that action's step;
+   *   inside one that can't be undone, it's still a step of its own (`separateStep()`, epic `language` I88).
    * - throws `TypeError`, and forgets it, if another place went behind its name since it began (`isStillGood`)
    */
   save(): void {
@@ -1556,7 +1557,8 @@ export class PlaceDraft {
           writeInto(this.original, field, valueOf(this.thing, field), "write")
       })
     const history = core.RUNTIME?.history
-    if (history) history.transaction(core.message("saved-changed"), write)
+    // a step of its own, even inside an action that can't be undone:  that leaves out only what it changes itself
+    if (history) history.separateStep(core.message("saved-changed"), write)
     else write()
     this.finish()
   }

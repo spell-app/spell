@@ -6,7 +6,7 @@ solitaire is an app
 	
 	to draw solitaire
 		<deck "deck"hidden />
-		<segment inverted attach="top">
+		<segment inverted attach-to="top">
 			<toolbar class="GameBar" appearance="pills" inverted size="small" shrinkable>
 				<text slot="title" size="large" heavy>Spell Solitaire</>
 				<action "auto play"/>
@@ -18,9 +18,9 @@ solitaire is an app
 				<text slot="right">Score: <number "score" /></>
 			</>
 		</>
-		<container padding="small" columns="7" spacing="xs">
+		<container columns="7" padding="small" spacing="xs">
 			<stock-pile "stock"/>
-			<discard-pile "discards"/>
+			<discard-pile "discard pile"/>
 			<spacer/>
 			<foundation "clubs" suit=clubs/>
 			<foundation "diamonds" suit=diamonds/>
@@ -46,7 +46,6 @@ solitaire is an app
 	group "Dealing & the Stock Pile"
 	to "restart the game" with shortcut "R", icon "sync alternate"
 		clear the score
-		// Gather every card into the stock, shuffle it, and deal the columns
 		for each card in the deck
 			turn the card face down without waiting
 		for each card in the deck
@@ -58,12 +57,13 @@ solitaire is an app
 		for row from 1 to 7
 			for column from row to 7
 				add the top card of the stock to item column of the columns
+				pause for 20 msec
 				if column is the same as row
 					turn the last card of (item column of the columns) face up
 		turn over the next card
 	
 	to "turn over the next card", undoable as "Turn Card"
-		// Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
+		// Turn the stock's next card over, onto the discard pile:  the discard pile back into the stock when it's empty
 		// - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
 		if the stock is empty
 			reset the stock
@@ -71,11 +71,11 @@ solitaire is an app
 		turn it face up
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec
-		add it to the discards
+		add it to the discard pile
 	
 	to "reset the stock"
-		// The discards, turned over, back into the stock
-		set cards to a copy of list (the discards) as a pile
+		// The discard pile, turned over, back into the stock
+		set cards to a copy of list (the discard pile) as a pile
 		reverse the cards
 		add each card in the cards to the stock
 		turn each card in the stock face down
@@ -109,8 +109,8 @@ solitaire is an app
 	to "auto play" with shortcut "A", icon "play"
 		// Play every card that can go somewhere, until none can
 		set anything changed to no
-		if the discards is not empty
-			set test card to the last card of the discards
+		if the discard pile is not empty
+			set test card to the last card of the discard pile
 			if play test card
 				set anything changed to yes
 				pause for 500 msec
@@ -135,25 +135,23 @@ solitaire is an app
 		if anything changed auto play
 	
 	to "cheat" with shortcut "C", icon "eye"
-		// Turn up a face-down card from a column, at random, onto the discards
+		// Turn up a face-down card from a column, at random, onto the discard pile
 		set remaining piles to piles in the columns where it is not empty and its first card is face down
 		if remaining piles is empty return
 		set the pile to a random pile in remaining piles
 		set the card to a random card in (the cards in the pile where the card is face down)
-		// turned up as it moves:  it rises over its column face down, then turns as it glides onto the discards
-		add the card to the discards
+		// turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile
+		add the card to the discard pile
 		turn the card face up
 
 	to count the points for a card on a pile
-		// what the move scores:  10 on a foundation, 5 from the discards, else nothing
+		// what the move scores:  10 on a foundation, 5 from the discard pile, else nothing
 		if pile is a foundation return 10
-		if the card is in the discards return 5
+		if the card is in the discard pile return 5
 		return 0
 	
 	when the score changes
-		set home to the number of cards in the clubs + the number of cards in the diamonds
-		set home to home + the number of cards in the hearts + the number of cards in the spades
-		if home is 52
+		if the number of cards in the foundations is 52
 			alert "You won!" with "New game"
 			restart the game
 

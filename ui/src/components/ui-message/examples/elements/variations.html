@@ -15,11 +15,13 @@
 
   <section>
     <h4>Attached</h4>
-    <ui-message attach="both" heading="Welcome to our site!">
+    <ui-message attach-to="both" heading="Welcome to our site!">
       <p>Fill out the form below to sign-up for a new account</p>
     </ui-message>
     <form style="padding: 1em; border: 1px solid var(--ui-border-color)">A form, attached between the messages</form>
-    <ui-message state="warning" attach="bottom">Already signed up? <a href="#login">Login here</a> instead.</ui-message>
+    <ui-message state="warning" attach-to="bottom"
+      >Already signed up? <a href="#login">Login here</a> instead.</ui-message
+    >
   </section>
 
   <section>
