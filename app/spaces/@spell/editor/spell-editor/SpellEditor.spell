@@ -14,7 +14,7 @@ spell editor is an app
 	"view menu" is a new view menu
 	"run menu" is a new run menu
 
-	group "What the Menus Follow"
+	group "Editor State"
 	// The editor's state, which the menus grey and tick by:  the editor keeps each in step
 	its "can revert" is yes or no
 		// The file has something to revert:  edits not saved, or with AutoSave on, a draft
@@ -28,9 +28,9 @@ spell editor is an app
 		// The project has edits not saved:  Save is ticked
 	its "running" is yes or no
 		// The page is in Run, not Edit
-	its "code showing" is yes or no
+	its "code is showing" is yes or no
 		// The code shows, in Edit
-	its "compiled code showing" is yes or no
+	its "compiled code is showing" is yes or no
 		// The compiled code shows beside the code, in Edit
 	its "program panel showing" is yes or no
 		// The Program panel shows under the code, in Edit
@@ -112,9 +112,9 @@ spell editor is an app
 	to "site view" with title "Site", icon "sitemap"
 		enabled when its site ready is yes
 	to "show code" with title "Code", icon "code"
-		selected when its code showing is yes
+		selected when its code is showing is yes
 	to "show compiled code" with title "Compiled Code", icon "file code outline"
-		selected when its compiled code showing is yes
+		selected when its compiled code is showing is yes
 	to "show program panel" with title "Program Panel", icon "terminal"
 		selected when its program panel showing is yes
 	to "show inspector" with title "Inspector", icon "info circle"
