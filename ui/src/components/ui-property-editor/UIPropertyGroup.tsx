@@ -97,16 +97,10 @@ export class UIPropertyGroup extends UIPanel {
   // ## Its editor's look (epic `debut` P31)
   ////////////////
 
-  /** The editor around it, while connected. */
-  @E.state private accessor editor: DOMEditorLike | undefined = undefined
-
-  /** Find its editor on connect. */
-  @E.whileConnected
-  protected watchEditor() {
-    this.editor = UIProperty.editorAround(this.domElement) as DOMEditorLike | undefined
-    return () => {
-      this.editor = undefined
-    }
+  /** The editor around it, while connected:  found as it connects, as `UIProperty.editor` is. */
+  @E.derived
+  private get editor(): DOMEditorLike | undefined {
+    return this.isConnected ? (UIProperty.editorAround(this.domElement) as DOMEditorLike | undefined) : undefined
   }
 
   /** `:state(compact)`:  its editor is `compact`, so its band is tight (`UIPropertyGroup.css`). */

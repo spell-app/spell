@@ -391,6 +391,8 @@
   /* "0. While you were out":  a line whose badge is turned off (its lines may load after the click, so a rule) */
   :host([data-away-hides~="recent"]) ::slotted(epic-away-line[state="recent"]),
   :host([data-away-hides~="progress"]) ::slotted(epic-away-line[state="progress"]),
+  :host([data-away-hides~="replied"]) ::slotted(epic-away-line[state="replied"]),
+  :host([data-away-hides~="open"]) ::slotted(epic-away-line[state="open"]),
   :host([data-away-hides~="attention"]) ::slotted(epic-away-line[state="attention"]) {
     display: none;
   }

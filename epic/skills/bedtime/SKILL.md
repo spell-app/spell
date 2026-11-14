@@ -186,8 +186,8 @@ Everything else stands:
 
 - `epic lint <name>`, then `epic open <name> --review`.
   - The person wakes to the doc, the night's calls and issues red.
-  - Its FIRST section, "0. While you were out", says what was done and what needs them, in order (epic `epic-engine`
-    P62):  the tool keeps it as every edit lands, from `NightSummary`, so nothing is written by hand;  only their
+  - Its FIRST section, "0. While you were out", says what was done and what needs them, a part per kind (epic
+    `epic-engine` P62, I277:  waiting on you, under way, what was done, fixed to review, new issues, new tests):  the tool keeps it as every edit lands, from `NightSummary`, so nothing is written by hand;  only their
     Done reading takes it off.  The Epics page's card says it's there.
   - Nothing to commit for the doc (in the epic repo, committed for you).
 - Final reply:  a VERY high-level summary, a few lines (what was built, what needs them), then the section's link pair

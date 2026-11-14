@@ -1036,7 +1036,9 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     const isFirst = internalState.wasVisible === undefined
     if (!isFirst && internalState.wasVisible === isVisible) return
     internalState.wasVisible = isVisible
-    void this.runVisibleChange(isVisible, isFirst ? E.NO_ANIMATION : this.animationToRun)
+    const animation = isFirst ? E.NO_ANIMATION : this.animationToRun
+    // once this update's done:  `:state(hiding)` written here would draw everything reading it twice (I98)
+    E.afterSolidUpdate(() => void this.runVisibleChange(isVisible, animation))
   }
 
   /**

@@ -9,12 +9,17 @@ import type { monaco } from "spell/app/app/ui/monaco"
  * - By default the suggestions show by themselves only where they help (epic `editor` P28, Owen's choice C):
  *   a tag after `<`, an attribute inside a tag, a property after `its` / `'s` / `of` (`SUGGEST_WHERE_IT_HELPS`).
  *   Everywhere else they wait for Ctrl+Space, as Quiet Code Popups (P4) chose;  hover waits for ⌥.
+ * - An error's message shows on a plain hover over its squiggle all the same, unless hover is "Always", when
+ *   Monaco's own shows it (`ErrorHover`, epic `editor` I97).
  * - Every Monaco editor starts on the defaults (`SpellMonaco.OPTIONS`), `<spell-editor>`'s too.
  * - The editor app lets people change them, in the code pane's "..." menu, "Settings…" (`CodeSettings`).
  * - Types only from Monaco:  the editor app reads this before Monaco loads, and Monaco is a lazy chunk.
  */
 
-/** When hover info shows, first the default:  only while ⌥ (Alt) is held, always, or never. */
+/**
+ * When hover info shows, first the default:  only while ⌥ (Alt) is held, always, or never.
+ * - Not an error's message:  that shows on a plain hover in every mode (`ErrorHover`).
+ */
 export const HOVER_MODES = ["withAlt", "always", "never"] as const
 /** When hover info shows:  one of `HOVER_MODES`. */
 export type HoverMode = (typeof HOVER_MODES)[number]
@@ -78,6 +83,8 @@ const HOVER_ENABLED = {
  *   So the multi-cursor key becomes ⌘ (Ctrl elsewhere), leaving ⌥ for the hover.
  *   - SIDE EFFECT:  ⌘-click then adds a cursor, and ⌥-click goes to a definition, the other way round from Monaco's
  *     own.  The other hover modes keep Monaco's.
+ *   - A web address still opens on ⌘-click, or a plain click on its icon, in every mode:  `LinkClick` takes that click before Monaco does
+ *     (Monaco's own would want ⌥-click here;  epic `editor` I101).
  * - Ctrl+Space shows the suggestions in every mode:  only showing them as you type is turned off.
  *   - "Where it helps" turns Monaco's own off too:  the editor asks for them itself, at the places
  *     `suggestsByItself()` names (`CodeSettings`).

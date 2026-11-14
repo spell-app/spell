@@ -2334,11 +2334,11 @@ export function InspectorColumn(): JSX.Element {
           rows={cardSizes.sizes()}
           resizable
           class="InspectorSplit"
-          on-ui-changed={(event: Event) => {
+          ref={on("ui-changed", (event: Event) => {
             cardSizes.keep(event)
             if (event.target === event.currentTarget)
               foldSmallCards((event as CustomEvent).detail.panes, cardSizes.forget)
-          }}
+          })}
         >
           <Show when={Inspector.isShown("properties")}>
             <div class="SplitPane">
@@ -2585,21 +2585,23 @@ function PropertiesCard(): JSX.Element {
               unsaved={Inspector.unsavedTipOf(part)}
               // a value kept in a data place is held as it's typed, and sent on Enter or leaving the field
               writer={InspectorData.write}
-              ref={(form: HTMLElement) => {
-                form.addEventListener("focusout", () => InspectorData.commitEdits())
-                form.addEventListener("change", () => InspectorData.commitEdits())
-                form.addEventListener("keydown", (event) => {
-                  if (event.key === "Enter") InspectorData.commitEdits()
-                })
-              }}
+              ref={[
+                (form: HTMLElement) => {
+                  form.addEventListener("focusout", () => InspectorData.commitEdits())
+                  form.addEventListener("change", () => InspectorData.commitEdits())
+                  form.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") InspectorData.commitEdits()
+                  })
+                },
+                on<{ name?: string; value: unknown }>("ui-changed", (event) => {
+                  // a field's own input says it changed too, with no name:  the field's own event follows
+                  if (event.detail.name) Inspector.fieldWritten(part, event.detail.name, event.detail.value)
+                }),
+                on<{ name: string }>("ui-reset", (event) => Inspector.fieldReset(part, event.detail.name)),
+                on<{ name: string }>("ui-show-code", (event) => Inspector.fieldCode(part, event.detail.name))
+              ]}
               compact=""
               show-defaults=""
-              on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
-                // a field's own input says it changed too, with no name:  the field's own event follows
-                event.detail.name && Inspector.fieldWritten(part, event.detail.name, event.detail.value)
-              }
-              on-ui-reset={(event: CustomEvent<{ name: string }>) => Inspector.fieldReset(part, event.detail.name)}
-              on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}
             >
               <NotSavedNote part={part} />
               <Show when={!part.layout && !part.together}>
@@ -2784,11 +2786,11 @@ function DataSourceNote(props: { thing: object; names: string[] }): JSX.Element 
             size="small"
             class="InspectorSampleSwitch"
             selected={shown().kind === "sample" ? "" : undefined}
-            on-ui-changed={(event: CustomEvent<{ selected: boolean }>) => {
+            ref={on("ui-changed", (event: CustomEvent<{ selected: boolean }>) => {
               // its own change:  never a field's
               event.stopPropagation()
               void InspectorData.showFrom(shown().placeName, event.detail.selected ? "sample" : "real place")
-            }}
+            })}
           >
             {appTexts.text("inspectorDataUseSample")}
           </ui-checkbox>

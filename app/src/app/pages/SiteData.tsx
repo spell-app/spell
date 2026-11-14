@@ -3,6 +3,7 @@ import { For, Show, createMemo, createSignal, onSettled } from "solid-js"
 import type { TableColumn, TableEditDetail } from "spell/ui/components/components.types"
 import { PlaceNerd, type ErdField, type NerdSpec } from "spell/parser/spell/ingest/PlaceNerd"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { on } from "spell/app/app/solid"
 import { SitePlaces, type ProjectIndex, type SampleRow, type SitePlace } from "./SitePlaces"
 
 import "./SiteData.css"
@@ -54,11 +55,11 @@ export function SiteData(props: SiteDataProps) {
                   size="small"
                   options={loaded().map((each, index) => ({ value: String(index), text: each.name }))}
                   value={String(placeIndex())}
-                  on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) => {
+                  ref={on("ui-changed", (event: CustomEvent<{ value: string | string[] }>) => {
                     setPlaceIndex(Number(event.detail.value))
                     setTurned([])
                     setPicked(undefined)
-                  }}
+                  })}
                 />
               </Show>
               <p class="quiet">{appTexts.text("siteDataHint")}</p>
@@ -70,10 +71,10 @@ export function SiteData(props: SiteDataProps) {
                   min="1"
                   max="6"
                   value={String(columns())}
-                  on-ui-changed={(event: CustomEvent<{ value: string }>) => {
+                  ref={on("ui-changed", (event: CustomEvent<{ value: string }>) => {
                     const count = Math.round(Number(event.detail.value))
                     if (count >= 1) setColumns(count)
-                  }}
+                  })}
                 />
               </label>
             </header>
@@ -81,7 +82,7 @@ export function SiteData(props: SiteDataProps) {
               class="nerd"
               spec={spec()}
               remember={`nerd:${props.projectId}:${place()?.path ?? ""}:${columns()}`}
-              on-ui-node-clicked={(event: CustomEvent<{ name: string }>) => turn(event.detail.name)}
+              ref={on("ui-node-clicked", (event: CustomEvent<{ name: string }>) => turn(event.detail.name))}
             >
               <For each={turned()}>
                 {(box) => (
@@ -221,11 +222,11 @@ function SampleRows(props: SampleRowsProps) {
         unstackable=""
         column-defs={columns()}
         rows={rows()}
-        on-ui-editing={(event: CustomEvent<TableEditDetail>) => {
+        ref={on("ui-editing", (event: CustomEvent<TableEditDetail>) => {
           const next = withEdits(rows(), event.detail)
           SitePlaces.keepRows(props.projectId, props.place, props.collection, next)
           setRows(next)
-        }}
+        })}
       />
     </section>
   )

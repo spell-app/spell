@@ -54,6 +54,7 @@ export const APP_TEXTS = {
   partNotWritten:
     "This isn't a part of its own in your program, so you can't move or remove it here.  Change your program instead.",
   menuChangeThis: "Change This...",
+  changeThisHeader: "Tell your buddy Claude:",
   changeThisPrompt: "What should change?",
   changeThisNobody:
     "This is waiting for a Claude session on this machine.  In one, ask it to run this in the background, and do what it says:",

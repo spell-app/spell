@@ -6,7 +6,7 @@ import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPr
 import { SP } from "spell/parser/spell"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { editor } from "spell/app/app/editor"
-import { SpellPage, rememberedSizes } from "spell/app/app/solid"
+import { SpellPage, on, rememberedSizes } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
@@ -106,7 +106,7 @@ export function SiteEditorPage() {
           grows="2"
           min-size={MIN_PANEL_SIZE}
           resizable
-          on-ui-changed={columns.keep}
+          ref={on("ui-changed", columns.keep)}
         >
           <aside class="pages" aria-label={appTexts.text("sitePages")}>
             <header>
@@ -292,7 +292,7 @@ function SitePartTree(props: { parts: readonly SitePart[]; picked?: string; onPi
   return (
     <ui-tree
       label={appTexts.text("sitePages")}
-      on-ui-changed={(event: CustomEvent<{ value: string }>) => props.onPick(event.detail.value)}
+      ref={on("ui-changed", (event: CustomEvent<{ value: string }>) => props.onPick(event.detail.value))}
     >
       <SitePartRows parts={props.parts} picked={props.picked} />
     </ui-tree>

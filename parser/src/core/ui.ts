@@ -518,6 +518,7 @@ const NON_TEXT_INPUTS = new Set(["button", "checkbox", "radio", "range", "reset"
  * - Through the page's Spell UI keyboard registry (`UI.keyboard`), in its page scope:
  *   a modal open over the app keeps its own keys (Q19).
  * - A text field keeps its own ⌘Z:  the key passes on to it.  So does a key with nothing to undo.
+ * - `layered`:  over the page's own ⌘Z on purpose (the editor's), which gets what this passes on (epic `editor` I104).
  * - A page drawing a program that runs elsewhere (Python's) undoes there:  the app's `undo` action, run by the core
  *   (`core.runAction()`), as its `<action "undo"/>` is (epic `language` P54).
  * - No Spell UI on the page (node, a bare page):  nothing listens.
@@ -533,7 +534,7 @@ export function listenForUndoKeys(element: HTMLElement): () => void {
     .then((runtime) => {
       if (isStopped) return
       stops = UNDO_KEYS.map(({ chord, action }) =>
-        runtime.keyboard.register({ chord, handler: (event) => undoKeyPressed(event, element, action) })
+        runtime.keyboard.register({ chord, handler: (event) => undoKeyPressed(event, element, action), layered: true })
       )
     })
     .catch((error) => console.error(error))
@@ -589,7 +590,12 @@ type PageUI = {
   }
   /** the page's keyboard shortcuts:  `UI.keyboard`;  `register()` answers how to stop */
   keyboard: {
-    register(registration: { chord: string; handler: (event: KeyboardEvent) => boolean }): () => void
+    register(registration: {
+      chord: string
+      handler: (event: KeyboardEvent) => boolean
+      /** over another registration of the chord on purpose:  no warning (`KeyRegistrationOptions.layered`) */
+      layered?: boolean
+    }): () => void
   }
 }
 

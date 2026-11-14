@@ -725,7 +725,7 @@ describe("<epic-item> review controls", () => {
     )
   })
 
-  test("an open judgement call's id chip:  urgent (red) <-> not urgent (blue), through the inbox", async () => {
+  test("an open judgement call's id chip:  urgent (red) <-> not urgent (yellow, I275), through the inbox", async () => {
     await adoptClient()
     const host = await render(`<epic-item id="j6" title="A call" status="open" state="attention"></epic-item>`)
     const chip = () => deep(host).querySelector<HTMLElement>("[part~='id']")!
@@ -735,7 +735,7 @@ describe("<epic-item> review controls", () => {
     chip().click()
     await settle()
     expect(routes.inbox.urgency.j6?.calm).toBe(true)
-    expect([box().classList.contains("quiet"), box().classList.contains("attention")]).toEqual([true, false])
+    expect([box().classList.contains("open"), box().classList.contains("attention")]).toEqual([true, false])
     expect(chip().hasAttribute("data-unsent")).toBe(true)
     expect(host.open).toBeFalsy()
     chip().click()

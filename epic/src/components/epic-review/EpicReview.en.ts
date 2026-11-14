@@ -45,7 +45,7 @@ export const epicReviewVocabulary = {
       name: "tone",
       kind: "string",
       description:
-        "A colour name for its buttons at rest and marked (`green`, `blue`, `red`):  a line whose colour says what it is."
+        "A colour name for its buttons at rest and marked (`green`, `blue`, `orange`, `yellow`, `red`):  a line whose colour says what it is."
     },
     {
       name: "buttons",

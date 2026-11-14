@@ -798,7 +798,10 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
           aria-label={this.moreText}
           onKeyDown={this.onOverflowMenuKey}
         >
-          <For each={this.folded}>{(row) => this.foldedRow(row)}</For>
+          {/* by its item:  a read of the rows makes new objects, and one row's change keeps the others' buttons */}
+          <For each={this.folded} keyed={(row) => row.element}>
+            {(row) => this.foldedRow(row)}
+          </For>
         </div>
       </Show>
     )
@@ -808,32 +811,40 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
    * One row of the overflow menu:  the item's icon (its `icon`, a copy of what's in its `icon` slot, else its first
    * letter), its title and a copy of its counts;  the chosen one a `menuitemradio`, ticked.
    */
-  private foldedRow(row: FoldedItem): JSX.Element {
-    const item = (row.element as E.DOMElement).component as ItemComponent | undefined
-    const copies = (name: "icon" | "badge") =>
-      (item?.slotted?.(name) ?? []).map((element) => {
+  private foldedRow(row: () => FoldedItem): JSX.Element {
+    const copies = (name: "icon" | "badge") => {
+      const item = (row().element as E.DOMElement).component as ItemComponent | undefined
+      return (item?.slotted?.(name) ?? []).map((element) => {
         const copy = element.cloneNode(true) as Element
         copy.removeAttribute("slot")
         return copy
       })
-    const icons = copies("icon")
-    const badges = copies("badge")
-    const glyph = row.icon ? new E.IconGlyph({ owner: this, name: () => row.icon }) : undefined
+    }
+    const glyph = new E.IconGlyph({ owner: this, name: () => row().icon })
+    const icon = () => {
+      if (row().icon) return glyph.svg
+      const copied = copies("icon")
+      return copied.length ? copied : <span class={LETTER}>{row().letter}</span>
+    }
+    const badges = () => {
+      const copied = copies("badge")
+      return copied.length ? <span class={BADGE}>{copied}</span> : undefined
+    }
     return (
       <button
         type="button"
-        class={[ROW, { [SELECTED_CLASS]: row.isSelected, [DISABLED_CLASS]: row.isDisabled }]}
-        role={row.isSelected ? "menuitemradio" : "menuitem"}
-        aria-checked={row.isSelected ? "true" : undefined}
-        aria-disabled={row.isDisabled ? "true" : undefined}
+        class={[ROW, { [SELECTED_CLASS]: row().isSelected, [DISABLED_CLASS]: row().isDisabled }]}
+        role={row().isSelected ? "menuitemradio" : "menuitem"}
+        aria-checked={row().isSelected ? "true" : undefined}
+        aria-disabled={row().isDisabled ? "true" : undefined}
         tabindex="-1"
-        onClick={() => this.pickFolded(row)}
+        onClick={() => this.pickFolded(row())}
       >
         <span class={UIT.ICON} aria-hidden="true">
-          {glyph ? glyph.svg : icons.length ? icons : <span class={LETTER}>{row.letter}</span>}
+          {icon()}
         </span>
-        <span class={TITLE}>{row.text}</span>
-        {badges.length ? <span class={BADGE}>{badges}</span> : undefined}
+        <span class={TITLE}>{row().text}</span>
+        {badges()}
       </button>
     )
   }

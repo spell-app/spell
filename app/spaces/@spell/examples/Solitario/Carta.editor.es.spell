@@ -1,11 +1,11 @@
 # El editor de propiedades de una carta
 Lo que muestra el Inspector de una carta:  su rango, su cara y su palo para cambiar, y lo que la hacen, para leer.
 
-"carta" es un editor de propiedades
+<editor-de-propiedades "carta">
 	<ui-property-group label="Carta" columns="2">
 		<ui-property name="rango" label="Rango" />
-		<ui-property name="dirección" label="Cara" as="buttons" />
 		<ui-property name="palo" label="Palo" as="buttons" width="16" />
+		<ui-property name="dirección" label="Cara" as="buttons" />
 	</ui-property-group>
 	<ui-property-group label="Lo que es" columns="2" readonly>
 		<ui-property name="valor" label="Valor" width="1/2" />
@@ -14,3 +14,4 @@ Lo que muestra el Inspector de una carta:  su rango, su cara y su palo para camb
 		<ui-property name="nombreCorto" label="Nombre corto" width="1/2" />
 		<ui-property name="nombre" label="Nombre" />
 	</ui-property-group>
+</editor-de-propiedades>

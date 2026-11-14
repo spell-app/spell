@@ -112,6 +112,19 @@ describe("Keyboard.register()", () => {
     expect(warn).toHaveBeenCalledOnce()
     warn.mockRestore()
   })
+
+  it("doesn't warn about a registration layered over another on purpose, which passes the rest on to it", () => {
+    keyboard = new Keyboard()
+    keyboard.warnConflicts = true
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const under = vi.fn()
+    keyboard.register({ chord: "Mod+Z", handler: under })
+    keyboard.register({ chord: "Mod+Z", handler: () => false, layered: true })
+    expect(warn).not.toHaveBeenCalled()
+    press(document.body, "z", { ctrlKey: true })
+    expect(under).toHaveBeenCalledOnce()
+    warn.mockRestore()
+  })
 })
 
 describe("Keyboard.popScope()", () => {

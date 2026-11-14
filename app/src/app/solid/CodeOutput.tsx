@@ -194,8 +194,8 @@ export function FollowAlong() {
   let selectedFor: FollowedPlace | undefined
   let openedFor: FollowedPlace | undefined
   createEffect(
-    () => [editor.followed, editor.shownCodeEditor, editor.file?.path] as const,
-    ([followed, codeEditor, shownPath]) => {
+    () => [editor.followed, editor.shownCodeEditor] as const,
+    ([followed, codeEditor]) => {
       if (!followed) return
       if (followed !== selectedFor) {
         selectedFor = followed
@@ -210,10 +210,18 @@ export function FollowAlong() {
       if (!codeEditor || codeEditor.hasTextFocus()) return
       const file = InspectorWrites.fileNamed(followed.path)
       if (!file) return
-      if (file.path === shownPath) return follower.show(codeEditor, [followed.line])
+      // the file showing read, not followed:  opening another one here would run this again (I98)
+      if (file.path === untrack(() => editor.file?.path)) return follower.show(codeEditor, [followed.line])
       if (followed === openedFor) return
       openedFor = followed
-      void editor.showFileQuietly(file.path).catch((error: unknown) => editor.showError(error as Error))
+      void editor
+        .showFileQuietly(file.path)
+        .then(() => {
+          const shown = editor.shownCodeEditor
+          // still the place in focus, and nobody typing:  mark its line in the file now showing
+          if (editor.followed === followed && shown && !shown.hasTextFocus()) follower.show(shown, [followed.line])
+        })
+        .catch((error: unknown) => editor.showError(error as Error))
     }
   )
   return null

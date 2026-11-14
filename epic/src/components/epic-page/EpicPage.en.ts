@@ -111,7 +111,7 @@ export const epicPageVocabulary = {
       kind: "string",
       description:
         'When you ticked each line or part of "0. While you were out" Read (epic `epic-engine` I206):  ' +
-        "`<line>=<time>` pairs, by phase or item id, or a part's (`done`, `todo`);  a line read before its last " +
+        "`<line>=<time>` pairs, by phase or item id, or a part's (`done`, `fixed`, `asks` ...);  a line read before its last " +
         "change shows again.  Written by the tool;  cleared by Done reading."
     },
     {
