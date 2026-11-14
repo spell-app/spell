@@ -159,34 +159,32 @@ export class TaskList extends Task {
 
       // `resetState()` will have been called.
       // `this.execution` will be set, with `this.execution.resolve/reject` available.
+      const { execution } = this
       return new Promise((resolve, reject) => {
         const complete = () => {
-          console.info("complete", this.name, this.resolveWith, this.lastTask, this.results)
           if (this.resolveWith === TaskResolveWith.LAST_TASK) resolve(this.lastTask?.result)
           else resolve(this.results)
         }
         const processNextTask = async (lastValue: unknown) => {
-          // Bail if we were explicitly cancelled
-          if (this.wasCancelled) return complete()
-
-          // TODO: shouldn't happen -- investigate if this ever fires.
-          if (!this.isActive) {
-            console.warn("processNextTask for inActive, non-cancelled task", this)
-            return complete()
-          }
+          // This run has ended:  `cancel()`, or a new `start()` after one, already settled its promise.
+          // - Expected, not a bug:  `SpellProject.parse()` cancels the parse in flight and starts another at once,
+          //   and the cancelled task's `await` below still comes back here, a tick later.
+          // - So it stops quietly, and leaves `index` alone:  the new run's, if one started.
+          if (execution !== this.execution) return
 
           // Advance to the next task in the queue
           this.setState("index", this.index + 1)
 
           // If we ran out of tasks, we're done!
-          if (!this.activeTask) return complete()
+          const task = this.activeTask
+          if (!task) return complete()
 
           let result
           try {
             // Start the task, continuing to the next when it completes
-            result = await this.activeTask.start(lastValue)
+            result = await task.start(lastValue)
           } catch (error) {
-            if (!this.continueOnError && !this.activeTask.optional) return reject(error)
+            if (!this.continueOnError && !task.optional) return reject(error)
             result = error
           }
 
