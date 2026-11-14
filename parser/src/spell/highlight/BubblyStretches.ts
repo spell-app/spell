@@ -12,7 +12,8 @@ import type {
  * A `BubblyDrawing`'s lines as an editor marks them on its text:  one STRETCH per piece, in order.
  * - What an editor needs that the drawing leaves to the drawer:
  *   - a quoted input split in three:  its own `"`, its words, its closing `"` (`quote-open`, `input`, `quote-close`)
- *   - the name a head defines, its first quoted input (`"card"` in `a "card" is a view`):  `isName`
+ *   - the name a head defines, `isName`:  its first quoted input (`"card"` in `a "card" is a view`),
+ *     or a thing's bare one (`solitaire` in `solitaire is an app`)
  *   - a heading's `#`s apart from its words (`heading-mark`, then `heading`)
  *   - the part of speech of the band a head's stretches sit on:  `partOfSpeech`
  * - Read by both editors, so they mark the same stretches the same way (epic `language` P50, P51):
@@ -47,7 +48,7 @@ export class BubblyStretches {
   /**
    * The stretches of `line`, a line of `text`.
    * - `band`:  the line is a declaration's head, on a band of this part of speech;
-   *   its first quoted input is the name it defines.
+   *   its first quoted input is the name it defines;  a thing's first input, quoted or bare (`solitaire is an app`).
    */
   static ofLine(text: string, line: BubblyLine, { band }: { band?: BubblyPartOfSpeech } = {}): BubblyStretch[] {
     const stretches: BubblyStretch[] = []
@@ -60,7 +61,10 @@ export class BubblyStretches {
       if (kind === "input" || kind === "choice") {
         const isQuoted = BubblyStretches.isQuoted(text, piece)
         if (!isQuoted) {
-          add(start, end, kind)
+          // a thing's head defines its name bare too:  `solitaire is an app` (epic `language` T131)
+          const isName = isFirstQuoted && band === "thing" && kind === "input"
+          add(start, end, kind, isName ? { isName } : {})
+          if (isName) isFirstQuoted = false
           continue
         }
         add(start, start + 1, "quote-open")

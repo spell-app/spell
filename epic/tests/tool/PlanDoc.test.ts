@@ -964,7 +964,7 @@ describe("PlanDoc questions and decisions", () => {
     plan.decide("q2", "not now")
     // a question made with no details has its title's words as its text (I209):  the answer goes after them
     expect(el(plan, "q2").innerHTML).toBe(
-      '<epic-question><p data-title-body=""><em>What it says on the tin</em></p></epic-question><epic-answer title="not now"></epic-answer>'
+      '<epic-question><p data-title-body=""><em>What it says on the tin.</em><epic-clarify></epic-clarify></p></epic-question><epic-answer title="not now"></epic-answer>'
     )
     // answering again replaces the answer;  the old one goes into the Original Discussion (I7), as prose
     plan.decide("q2", "maybe later")

@@ -1,0 +1,99 @@
+import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { expectAccessible } from "spell/test-helpers/A11y"
+
+import { ReviewClient, type Inbox } from "spell/epic/review"
+
+import "spell/epic/components/epic-clarify"
+
+afterEach(() => {
+  ReviewClient.adopt(undefined)
+})
+
+/** The review routes' `now`, as `fetch`, over an inbox kept here:  each reply the whole inbox. */
+class FakeRoutes {
+  inbox: Inbox = {
+    marks: {},
+    drafts: {},
+    urgency: {},
+    sent: null,
+    now: [],
+    working: {},
+    taken: {},
+    listening: null,
+    lastListener: null,
+    unsentComments: [],
+    waitingComments: [],
+    woken: null,
+    doing: null
+  }
+
+  /** The routes posted to, in order. */
+  readonly posted: { route: string; body: unknown }[] = []
+
+  readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
+    const route = input.replace("/api/epics/review/", "").replace(/\?.*/, "")
+    if (init?.body) {
+      const body = JSON.parse(init.body as string) as { id: string; action: string }
+      this.posted.push({ route, body })
+      if (route === "now")
+        this.inbox.now.push({ id: body.id, action: body.action, at: new Date().toISOString() } as Inbox["now"][number])
+    }
+    return new Response(JSON.stringify(this.inbox), { headers: { "content-type": "application/json" } })
+  })
+}
+
+/** A started, served client on `routes`, adopted as the page's:  the page is reviewed. */
+async function adoptClient(routes: FakeRoutes): Promise<ReviewClient> {
+  const client = new ReviewClient({
+    page: "/epics/sample/sample.plan.html",
+    server: { token: "token" },
+    protocol: "http:",
+    fetch: routes.fetch as unknown as typeof fetch,
+    storage: null
+  })
+  await client.start()
+  ReviewClient.adopt(client)
+  return client
+}
+
+/** Its link, in its shadow root;  `null` when not drawn. */
+function linkOf(clarify: Element): HTMLElement | null {
+  return clarify.shadowRoot!.querySelector<HTMLElement>('[part~="base"]')
+}
+
+describe("<epic-clarify>", () => {
+  const ITEM = `<epic-item id="t9" title="a todo" status="open"><p data-title-body=""><em>What it says on the tin.</em><epic-clarify></epic-clarify></p></epic-item>`
+
+  /** Its `<epic-clarify>`, rendered inside an item. */
+  async function render(): Promise<Element> {
+    const item = await ElementFixture.render(ITEM)
+    await ElementFixture.settle()
+    return item.querySelector("epic-clarify")!
+  }
+
+  test("not reviewed:  nothing drawn, the words stand alone", async () => {
+    const clarify = await render()
+    expect(linkOf(clarify)).toBeNull()
+  })
+
+  test("reviewed:  a Clarify link;  clicked, its item's details asked for now, and the link goes", async () => {
+    const routes = new FakeRoutes()
+    await adoptClient(routes)
+    const clarify = await render()
+    await vi.waitFor(() => expect(linkOf(clarify)).not.toBeNull())
+    const link = linkOf(clarify)!
+    expect(link.textContent).toBe("Clarify")
+    expect(link.title).toMatch(/without waiting for Send/)
+    await expectAccessible(clarify)
+    link.click()
+    await vi.waitFor(() =>
+      expect(routes.posted).toContainEqual({
+        route: "now",
+        body: expect.objectContaining({ id: "t9", action: "details" })
+      })
+    )
+    await vi.waitFor(() => expect(linkOf(clarify)).toBeNull())
+  })
+})

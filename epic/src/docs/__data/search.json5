@@ -522,6 +522,31 @@
       ]
     },
     {
+      "path": "epic-clarify.html",
+      "title": "<epic-clarify>",
+      "summary": "The <epic-clarify> element: Clarify, after an item with no details, asking Claude for them at once.",
+      "tag": "epic-clarify",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-behaviour",
+          "title": "2. Behaviour"
+        },
+        {
+          "id": "3-markup",
+          "title": "3. Markup"
+        },
+        {
+          "id": "epic-clarify-parts",
+          "title": "Parts",
+          "parent": 2
+        }
+      ]
+    },
+    {
       "path": "epic-code.html",
       "title": "<epic-code>",
       "summary": "The <epic-code> element: a folded, highlighted code block in an epic page's prose.",

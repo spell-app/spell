@@ -8,10 +8,11 @@ import type { JSXMatchData } from "./JSX.shared"
  */
 export class SpellJSXContent extends P.TokenType<never, JSXMatchData> {
   /**
-   * Move tokens `parsed` from a COPY of `jsxToken`'s `{...}` contents to where that text sits in the FILE,
-   * so errors and positions inside JSX line up with the source.
+   * Move tokens `parsed` from a COPY of `jsxToken`'s `{...}` contents, or its bare word (`suit=hearts`), to where
+   * that text sits in the FILE, so errors and positions inside JSX line up with the source.
    * - The copy is trimmed, with newlines collapsed to spaces:  same length, so one shift puts every token right.
-   * - Copy's char 0 is the file's `{`, plus 1, plus whatever whitespace `trim()` dropped in front.
+   * - Copy's char 0 is the file's `{`, plus 1, plus whatever whitespace `trim()` dropped in front;
+   *   a bare word's is the word's own first char.
    * - `line` / `ch` come from `jsxToken`'s own, counting the newlines in its `raw` up to each inner token.
    *   The copy lost them, and we haven't got the file text here.
    * - SIDE EFFECT:  remembers the tokens as `jsxToken.innerTokens`,
@@ -21,9 +22,11 @@ export class SpellJSXContent extends P.TokenType<never, JSXMatchData> {
    */
   protected placeInFile(parsed: P.Match | undefined, jsxToken: P.JSXExpressionToken) {
     const { contents, raw, start, line = 0, ch = 0 } = jsxToken
-    if (!parsed || typeof contents !== "string" || !raw) return
-    const lead = contents.length - contents.trimStart().length
-    P.Tokenizer.shiftTokens(parsed.tokens, start + raw.indexOf("{") + 1 + lead)
+    if (!parsed || !raw) return
+    // a bare value, `suit=hearts`, is its word alone (`contents` its token):  the copy starts where it does
+    // (left at 0, a head's first word drew as that word:  epic `language` I84)
+    const lead = typeof contents === "string" ? raw.indexOf("{") + 1 + contents.length - contents.trimStart().length : 0
+    P.Tokenizer.shiftTokens(parsed.tokens, start + lead)
     P.Tokenizer.forEachToken(parsed.tokens, (token) => {
       const before = raw.slice(0, token.start - start)
       const lastNewline = before.lastIndexOf("\n")

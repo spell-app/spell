@@ -104,7 +104,7 @@ class Card(TwoSidedView):
 
     async def play(self) -> Any:
         if self in solitaire.stock:
-            await solitaire.play_from_the_stock()
+            await solitaire.turn_over_the_next_card()
         else:
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
             if end_pile is None:
@@ -373,15 +373,6 @@ def test_a_new_deck() -> None:
 # -----------
 
 
-#######################
-# ## Klondike Solitaire
-#######################
-# Deal seven columns, then build four foundations, ace to king, one suit each:
-# [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
-# The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
-# Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
-
-
 class StockPile(Pile):
     """The cards not played yet, face down:  a click turns the next one over, so none can be taken from it"""
 
@@ -401,7 +392,7 @@ class StockPile(Pile):
         return h("ui-text", {"part": "placeholder"}, "🂠")
 
     async def on_click(self, event: ClickEvent) -> None:
-        await solitaire.play_from_the_stock()
+        await solitaire.turn_over_the_next_card()
 
 
 class DiscardPile(Pile):
@@ -471,6 +462,8 @@ class Column(Pile):
 
 
 class Solitaire(App):
+    """See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules"""
+
     element_tag = "test-project-app"
 
     async def create(self) -> None:
@@ -493,8 +486,8 @@ class Solitaire(App):
                         "shrinkable": True,
                     },
                     h("ui-text", {"slot": "title", "size": "large", "heavy": True}, "Spell Solitaire"),
-                    core.draw_action(self, "cheat", {"in-menu": True}),
                     core.draw_action(self, "auto_play", {"in-menu": True}),
+                    core.draw_action(self, "cheat", {"in-menu": True}),
                     core.draw_action(self, "restart_the_game", {"title": "Restart", "in-menu": True}),
                     h("spacer"),
                     core.draw_action(self, "undo", {"in-menu": True}),
@@ -559,16 +552,13 @@ class Solitaire(App):
 
     async def restart_the_game(self) -> None:
         self.score = 0
-        await self.deal_the_cards()
-
-    async def deal_the_cards(self) -> None:
-        """Gather every card into the stock, shuffle it, and deal the columns"""
+        # Gather every card into the stock, shuffle it, and deal the columns
         for card in self.deck:
-            start_pile = card.pile
-            card.turn_face_down()
-            if start_pile != self.stock:
-                self.stock.append(card)
-                await core.pause_for(50, "msec")
+            core.meanwhile(lambda: card.turn_face_down())
+        for card in self.deck:
+            if not card in self.stock:
+                core.meanwhile(lambda: self.stock.append(card))
+                await core.pause_for(10, "msec")
         self.stock.randomize()
         # each row's first card lands face down, then turns up where it lies
         for row in range(1, 8):
@@ -576,10 +566,9 @@ class Solitaire(App):
                 core.get_item_at(core.every_thing(Column), position(column)).append(self.stock.last_item)
                 if column == row:
                     core.get_item_at(core.every_thing(Column), position(column)).last_item.turn_face_up()
-                await core.pause_for(50, "msec")
-        await self.play_from_the_stock()
+        await self.turn_over_the_next_card()
 
-    async def play_from_the_stock(self) -> None:
+    async def turn_over_the_next_card(self) -> None:
         """Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty"""
         # - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
         if not self.stock:
@@ -646,17 +635,14 @@ class Solitaire(App):
         return card.turn_face_up()
 
     async def on_score_change(self, event: ScoreChangeEvent) -> None:
-        home = len(self.clubs) + len(self.diamonds)
-        home = home + len(self.hearts) + len(self.spades)
-        if home == 52:
+        if core.item_count_of(core.merge_lists(core.every_thing(Foundation))) == 52:
             core.alert("You won!", "New game")
             await self.restart_the_game()
 
 
 solitaire = Solitaire()
 core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart The Game"})
-core.describe_action(Solitaire, "deal_the_cards", {"title": "Deal The Cards", "undone_as": "Deal The Cards"})
-core.describe_action(Solitaire, "play_from_the_stock", {"title": "Play From The Stock", "undone_as": "Turn Card"})
+core.describe_action(Solitaire, "turn_over_the_next_card", {"title": "Turn Over The Next Card", "undone_as": "Turn Card"})
 core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset The Stock", "undone_as": "Reset The Stock"})
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "icon": "play", "undone_as": "Auto Play"})
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})

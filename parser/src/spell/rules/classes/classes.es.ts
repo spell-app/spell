@@ -42,6 +42,7 @@ import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
+import { EachThing } from "./EachThing"
 import { EveryThingWhere } from "./EveryThingWhere"
 import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
@@ -2690,6 +2691,20 @@ classesEs.addRule(EveryThing, {
         )
       },
       tests: [["cada palo de carta", "Carta.Palos"]]
+    }
+  ]
+})
+
+// solo la lista de un bucle:  `para cada columna` (épica `language` T128)
+classesEs.addRule(EachThing, {
+  syntax: "cada {type:known_type}",
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una pila es una lista de cosas", "una columna es una pila"].join("\n"), "block")
+      },
+      // leída solo como la lista de un bucle (`para cada columna`):  `cada columna` sola es `every_thing`
+      tests: [["cada columna", "core.everyThing(Columna)"]]
     }
   ]
 })

@@ -79,7 +79,9 @@ export function savedPlaceOfMatch(type: P.Match | undefined): P.SavedPlace | und
  */
 export function savedTypeMatchOf(list: P.Match): P.Match | undefined {
   const { type } = list.groups as { type?: P.Match }
-  return type && !Array.isArray(type) && /^(?:every_thing|the_things|the_saved_things)$/.test(list.rule.name ?? "")
+  return type &&
+    !Array.isArray(type) &&
+    /^(?:every_thing|each_thing|the_things|the_saved_things)$/.test(list.rule.name ?? "")
     ? type
     : undefined
 }

@@ -15,6 +15,60 @@ export type MethodBody = P.ASTStatementBlock | P.ASTStatement | P.ASTExpression
 export type GuardOperands = { lhs?: P.ASTExpression; rhs?: P.ASTExpression }
 
 ////////////////
+// ## The items of lists of lists
+////////////////
+
+/**
+ * `the cards in the foundations`:  every card of every foundation, together (epic `language` T130).
+ * - When `list` holds lists (`the foundations`, `list of foundations`), and `arg` names THEIR items (`cards`),
+ *   not the lists (`the piles in the foundations` is the foundations themselves).
+ * - Then `itemsAcrossAST()` merges them:  `core.mergeLists(core.everyThing(Foundation))`.
+ * - What it found while parsing:  the type the list holds, its RECORD, and the item's word --
+ *   read again when compiling (`isAcross()`), as a type used above its declaration is a stub till then
+ *   (Solitaire's `when the score changes`, above `a "foundation" is a pile`).
+ * - A lookup:  call it WHILE PARSING.
+ */
+export function itemsAcrossOf(scope: P.Scope, arg: P.Match, list: P.Match): ItemsAcross | undefined {
+  const inner = scope.getItemType(list.datatype)
+  const innerType = typeof inner === "string" ? scope.getType(inner) : undefined
+  return innerType ? { innerType, named: SP.singularIn(scope, `${arg.value}`) } : undefined
+}
+
+/**
+ * Do `across`'s lists hold what its word names, so their items are read together?
+ * - Read off the records:  call it when compiling, or while parsing for what's known by then.
+ */
+export function isAcross(across: ItemsAcross | undefined): boolean {
+  if (!across) return false
+  const { innerType, named } = across
+  if (!innerType.isA("list") || innerType.isA(named)) return false
+  const items = innerType.chain().find((type) => type.itemType)?.itemType
+  const itemType = typeof items === "string" ? innerType.getType(items) : undefined
+  return !!itemType?.isA(named)
+}
+
+/** The datatype of `across`'s items together, `list of cards` -- `undefined` unless it's `isAcross()` now. */
+export function itemsAcrossDatatype(across: ItemsAcross | undefined): P.Datatype | undefined {
+  if (!across || !isAcross(across)) return undefined
+  const items = across.innerType.chain().find((type) => type.itemType)?.itemType
+  return typeof items === "string" ? P.listOf(items) : undefined
+}
+
+/** `list`'s AST, its lists merged into one when `isAcross()`:  `core.mergeLists(list)`. */
+export function itemsAcrossAST(match: P.Match, list: P.Match, across: ItemsAcross | undefined): P.ASTExpression {
+  const ast = P.matchAST<P.ASTExpression>(list)
+  return isAcross(across) ? new P.ASTCoreMethodInvocation(match, { methodName: "mergeLists", args: [ast] }) : ast
+}
+
+/** What `itemsAcrossOf()` found:  the type a list holds, and the word a rule names its items by. */
+export type ItemsAcross = {
+  /** The type the list holds, `Foundation`:  its record, a stub if it's declared below */
+  innerType: P.TypeScope
+  /** The item's word, singular:  `card` */
+  named: string
+}
+
+////////////////
 // ## `where` clause helpers
 //    shared by `list_filter`, `list_membership_test` and `list_remove_where`
 ////////////////

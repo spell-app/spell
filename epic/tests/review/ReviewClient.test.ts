@@ -262,6 +262,17 @@ describe("ReviewClient.press()", () => {
     await vi.waitFor(() => expect(server.inbox.marks.q1?.action).toBe("details"))
   })
 
+  test("a mark Owen made AFTER Claude started on the item turns nothing (I280):  that work is an earlier request's", async () => {
+    const { client, server } = await started()
+    server.inbox.marks.j2 = { action: "approve", at: "2026-11-14T03:00:00.000-05:00" }
+    server.inbox.working.j2 = { action: "details", since: "2026-11-14T02:00:00.000-05:00" }
+    await client.refresh()
+    expect([client.isWorkedOn("j2"), client.busyButtonOf("j2")]).toEqual([true, null])
+    server.inbox.working.j2 = { action: "details", since: "2026-11-14T04:00:00.000-05:00" }
+    await client.refresh()
+    expect(client.busyButtonOf("j2")).toBe("approve")
+  })
+
   test("Do Now (no note:  details) spins while asked, waits QUEUED with nobody listening, and says so", async () => {
     const { client, server } = await started()
     const notices: string[] = []

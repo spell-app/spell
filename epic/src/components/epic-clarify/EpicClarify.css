@@ -1,0 +1,30 @@
+/*
+ * `<epic-clarify>` (`EpicClarify.tsx`):  "Clarify", a link in running text after an item's "What it says on the tin."
+ * - Its colour is the page's link colour, read through a private alias of its public token, `--epic-clarify-color`.
+ */
+
+@layer ui.components.epic-clarify.types;
+
+@layer ui.components.epic-clarify.types {
+  /* no box of its own:  a word in the sentence */
+  :host {
+    display: inline;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+  [part~="base"] {
+    --_epic-clarify-color: var(--epic-clarify-color, var(--epic-accent, var(--ui-link, LinkText)));
+    margin-inline-start: 0.4em;
+    color: var(--_epic-clarify-color);
+    font-style: normal;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    cursor: pointer;
+  }
+  [part~="base"]:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 1px;
+    border-radius: 2px;
+  }
+}

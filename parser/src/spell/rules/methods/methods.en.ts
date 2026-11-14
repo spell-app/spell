@@ -855,6 +855,41 @@ methods.addRule(ToDoSomething, {
           ]
         },
         {
+          title: "the built-in kind it is, after `the`:  `to draw the app` (epic `language` T129)",
+          input: ["solitaire is an app", "\tto draw the app", "\t\tprint 1"],
+          js: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitaire = new Solitaire()"
+          ],
+          ts: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  @drawn draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitaire, drawn in its own element, e.g. by `draw the solitaire`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitaire's properties;  its methods call its solitaire's.",
+            " * - What every view's element does, e.g. drawing its solitaire, is `SpellElement`'s.",
+            " */",
+            "export class SolitaireElement extends SpellElement<Solitaire> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitaire", [])',
+            "}",
+            "core.useElement(Solitaire, SolitaireElement)",
+            "export const solitaire = new Solitaire()"
+          ]
+        },
+        {
           title: "not a hook:  a method of its words",
           input: ['a "deck" is a thing', "\tto shuffle the deck", "\t\tprint 1"],
           js: [
@@ -1268,9 +1303,55 @@ methods.addRule(CreateHook, {
           ["export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
           ["@thing", "export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
         ],
+        // its type's own words, after `the` (epic `language` T129)
+        [
+          ["a task is a thing where:", "\t- when creating the task:", "\t\tprint 1"],
+          ["export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
+          ["@thing", "export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
+        ],
         {
           title: "a one of a kind's names itself, `the` or not (Owen, 2026-11-13)",
           input: ["solitaire is an app", "\twhen creating solitaire", "\t\tprint 1"],
+          js: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitaire = new Solitaire()"
+          ],
+          ts: [
+            "@thing",
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitaire, drawn in its own element, e.g. by `draw the solitaire`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitaire's properties;  its methods call its solitaire's.",
+            " * - What every view's element does, e.g. drawing its solitaire, is `SpellElement`'s.",
+            " */",
+            "export class SolitaireElement extends SpellElement<Solitaire> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitaire", [])',
+            "",
+            "  create() {",
+            "    return this.currentThing?.create()",
+            "  }",
+            "}",
+            "core.useElement(Solitaire, SolitaireElement)",
+            "export const solitaire = new Solitaire()"
+          ]
+        },
+        {
+          title: "the built-in kind it is, after `the`:  `when creating the app` (epic `language` T129)",
+          input: ["solitaire is an app", "\twhen creating the app", "\t\tprint 1"],
           js: [
             "export class Solitaire extends App {",
             '  static elementTag = core.defineElement(this, "test_methods", "App")',

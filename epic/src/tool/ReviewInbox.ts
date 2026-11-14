@@ -13,7 +13,14 @@ import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
 import { hasPick, hasSetChange, pickFieldsOf, pickOf, setPicksOf } from "spell/epic/review/review.types"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
-import { STAGE_COUNTDOWN_MS, isHeld, isSent, partOf, withInlineComments } from "spell/epic/review/review.types"
+import {
+  STAGE_COUNTDOWN_MS,
+  isHeld,
+  isLiveWork,
+  isSent,
+  partOf,
+  withInlineComments
+} from "spell/epic/review/review.types"
 
 import { CommentList, type Comment, type CommentPlace, type IdentifiedComment } from "./CommentList"
 import { EpicPageFormat } from "./EpicPageFormat"
@@ -181,10 +188,13 @@ export class ReviewInbox {
    * An inbox:  empty, or the fields of `record` (a file's JSON) over an empty one's.
    * - a field the record lacks keeps its empty value, so readers never check;  a key it adds is kept, after them
    * - a comment key spelt an older way (`m3`, `cm3`) respelt (`CommentList.migrate()`)
+   * - a working flag past `WORK_STALE_MS` dropped (`isLiveWork()`, epic `epic-engine` I280):  an agent that never turned
+   *   it off left items spinning for days;  the next write takes it out of the file
    */
-  constructor(record: Partial<InboxRecord> & Record<string, unknown> = {}) {
+  constructor(record: Partial<InboxRecord> & Record<string, unknown> = {}, now = Date.now()) {
     Object.assign(this, record)
     CommentList.migrate(this.comments)
+    this.working = Object.fromEntries(Object.entries(this.working).filter(([, work]) => isLiveWork(work, now)))
   }
 
   /**
