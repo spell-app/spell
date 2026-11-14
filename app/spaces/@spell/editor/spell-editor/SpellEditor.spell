@@ -15,6 +15,7 @@ spell editor is an app
 	"run menu" is a new run menu
 	"home row" is a new home row
 	"about box" is a new about box
+	"versions box" is a new versions box
 
 	group "What the Menus Follow"
 	// The editor's state, which the menus grey and tick by:  the editor keeps each in step
@@ -332,6 +333,58 @@ an "about box" is a view
 			<actions>
 				<button appearance="tertiary" link="https://github.com/spell-app/spell" target="_blank" icon="github">Source</button>
 				<button class="approve" color="primary">OK</button>
+			</actions>
+		</modal>
+
+a "version" is a thing
+	// One kept copy of the project, a row of Versions:  the editor's own
+	its "name" is text
+		// Its file's name on the server, "Solitaire.2026-11-03-091502.zip"
+	its "when" is text
+		// When it was kept, in the page's language:  "Nov 3, 2026, 9:15:02 AM";  a draft you kept says so
+	its "place" is one of chosen or other
+		it "is (place)"
+	to choose it
+		// It's the one Restore brings back
+
+a "version list" is a viewable list of versions
+	// The project's versions, newest first:  a click on one chooses it
+	to draw each item
+		<div><radio name="version" selected={the version is chosen} onClick={choose the version}>{the when of the version}</radio></div>
+
+a "versions box" is a view
+	// What the project menu's Versions shows:  the copies Spell keeps of the project, newest first, to bring one back as your draft.
+	// Change how it looks right here:  what it says is in the page's language, and what its buttons do is the editor's own.
+	"versions" is a new version list
+	its "heading" is text
+	its "message" is text
+	its "empty words" is text
+		// What it says with no versions yet
+	its "keep words" is text
+	its "cancel words" is text
+	its "restore words" is text
+	its "listing" is one of listed or empty
+		it "is (listing)"
+	its "keeping" is one of offered or busy or kept or hidden
+		// Save Current Changes:  shown while you have a draft or changes not saved;  greyed once they're kept
+		it "is (keeping)"
+	to restore it
+		// Restore:  the version chosen becomes your draft
+	to keep the changes
+		// Save Current Changes:  your draft is kept as an entry of the list, never published, and the box stays open
+	to draw it
+		<modal heading={its heading} size="tiny" closable visible>
+			<content>
+				<text paragraph>{its message}</text>
+				<if it is empty><text color="grey">{its empty words}</text></if>
+				<div>{draw each version in its versions}</div>
+			</content>
+			<actions>
+				<if it is not hidden>
+					<button class="KeepChanges" style="float: inline-start; margin-inline-start: 0" loading={it is busy} disabled={it is kept} onClick={keep the changes}>{its keep words}</button>
+				</if>
+				<button class="cancel">{its cancel words}</button>
+				<button class="approve" color="primary" disabled={it is empty} onClick={restore it}>{its restore words}</button>
 			</actions>
 		</modal>
 

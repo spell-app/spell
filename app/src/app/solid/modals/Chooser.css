@@ -1,9 +1,0 @@
-/*
- * `<Chooser>`'s own look, beside the modal's.
- * - Its side button (`sideButton`, Versions' "Save Current Changes") sits on the actions' left,
- *   Cancel and OK on their right, as the modal's parts put them.
- */
-.Chooser .ChooserSide {
-  float: inline-start;
-  margin-inline-start: 0;
-}

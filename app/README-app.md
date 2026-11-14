@@ -709,8 +709,10 @@ The code column:
     written in place, so git sees the edit;  through the house-network site it's still a draft.
   - The project menu's Publish makes your drafts public, and keeps the whole project as a version, a zip in
     `versions/`;  if someone published since your draft began, it shows both side by side first.
-  - Its Versions restores one as your draft;  its Save Current Changes, on the dialog's left, keeps your draft in the
+  - Its Versions restores one as your draft;  its Save Current Changes, on the box's left, keeps your draft in the
     list first, never published.
+    - The box is the editor's own Spell, `SpellEditor.spell`'s `versions box`, to change there (epic `editor` I115);
+      its words in the page's language and its buttons' work are the editor's (`editor.showVersions()`).
   - Its Delete Draft puts every file back as published, after asking:  one step Undo takes back.
   - File › Revert Changes:  with AutoSave off, the file back to what was last saved;  on, back to what's published.
   - Neither folder is ever served to visitors, nor copied into the preview, whose edits stay in the visitor's browser.

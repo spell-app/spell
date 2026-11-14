@@ -1,16 +1,9 @@
-import { For, Show, createSignal } from "solid-js"
+import { For, Show } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { UI as SpellUI } from "spell/ui"
 import { uiReady } from "spell/app/app/solid/loadUI"
-import type {
-  ChooserModalProps,
-  ChooserOption,
-  ChooserOptionInput,
-  ChooserSideButton
-} from "spell/app/app/solid/modals"
-
-import "./Chooser.css"
+import type { ChooserModalProps, ChooserOption, ChooserOptionInput } from "spell/app/app/solid/modals"
 
 /****************
  * ### `<Chooser>`
@@ -30,8 +23,6 @@ import "./Chooser.css"
  * - NOTE: the React one was a SEARCHABLE dropdown:
  *   this is a plain list, fine for the handful of options callers pass.
  *   A long list would want `<ui-dropdown search>` instead.
- * - `sideButton`:  a button of the caller's on the left of Cancel and OK, which changes the list in place
- *   (Versions' "Save Current Changes");  `Chooser.css` floats it there.
  * - Show one with `openChooser()`, which mounts it and cleans up.
  * - SEE:  its App UI components page, `app/docs/Chooser.html` (`/components/app/Chooser.html`).
  ****************/
@@ -39,9 +30,7 @@ export function Chooser(props: ChooserProps) {
   let modal: HTMLElement | undefined
   let value: unknown
   const group = `Chooser-${++chooserCount}`
-  const [options, setOptions] = createSignal(normalizeChooserOptions(props.options))
-  const [sideState, setSideState] = createSignal<"ready" | "running" | "done">("ready")
-  let startValue = props.defaultValue
+  const options = () => normalizeChooserOptions(props.options)
   return (
     <ui-modal
       class="Chooser"
@@ -80,18 +69,6 @@ export function Chooser(props: ChooserProps) {
         </div>
       </ui-content>
       <ui-actions>
-        <Show when={props.sideButton}>
-          {(side) => (
-            <ui-button
-              class="ChooserSide"
-              loading={sideState() === "running"}
-              disabled={sideState() !== "ready"}
-              onClick={() => void runSideButton(side())}
-            >
-              {side().text}
-            </ui-button>
-          )}
-        </Show>
         <ui-button class="cancel">{props.cancel ?? SpellUI.i18n.t("cancel")}</ui-button>
         <ui-button class="approve" color="primary">
           {props.ok ?? SpellUI.i18n.t("ok")}
@@ -100,26 +77,10 @@ export function Chooser(props: ChooserProps) {
     </ui-modal>
   )
 
-  /** Is `option` chosen at first?  `defaultValue` is a value, or an array of them;  after the side button, what was. */
+  /** Is `option` chosen at first?  `defaultValue` is a value, or an array of them. */
   function isDefault(option: ChooserOption): boolean {
-    const start = startValue
+    const start = props.defaultValue
     return Array.isArray(start) ? start.includes(option.value) : start !== undefined && start === option.value
-  }
-
-  /** The side button:  run it, then show the list it gives back, the choice kept where it was. */
-  async function runSideButton(side: ChooserSideButton) {
-    const chosen = chosenValues()
-    setSideState("running")
-    try {
-      const next = await side.run()
-      if (!props.multiple && chosen.length) startValue = chosen[0]
-      else if (props.multiple) startValue = chosen
-      setOptions(normalizeChooserOptions(next))
-      setSideState("done")
-    } catch {
-      // the caller shows what went wrong;  the button stays, to try again
-      setSideState("ready")
-    }
   }
 
   /** OK:  note the chosen value(s) now, while the choices are still in the page. */

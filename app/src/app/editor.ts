@@ -1378,8 +1378,11 @@ export class EditorStore extends Observable {
 
   /**
    * The project's versions, newest first, to restore one:  it becomes your draft, and nothing is public until Publish.
-   * - With a draft, or edits not saved, "Save Current Changes" on the dialog's left keeps them as an entry of its own,
-   *   never published (`ProjectFiles.keepDraft()`):  the list shows it at once, and the dialog stays open.
+   * - Drawn by the editor's Spell, its `versions box` (`openVersions()`, epic `editor` I115):  how it looks is
+   *   `SpellEditor.spell`'s;  what's listed and what its buttons do is here.
+   * - The latest published version is chosen at first;  none yet, the box says so.
+   * - With a draft, or edits not saved, "Save Current Changes" on the box's left keeps them as an entry of its own,
+   *   never published (`ProjectFiles.keepDraft()`):  the list shows it at once, and the box stays open.
    * - A kept draft restores as any version does:  it's your draft again.
    * - NEVER throws:  a failure is shown.
    */
@@ -1389,45 +1392,43 @@ export class EditorStore extends Observable {
     try {
       const files = new SPACES.ProjectFiles(project)
       const { versions, drafts } = await files.drafts()
-      if (!versions.length && !drafts.length) return await editor.alert(appTexts.text("noVersions"))
-      const optionsFor = (list: SPACES.VersionJSON[]) =>
+      const rowsFor = (list: SPACES.VersionJSON[]) =>
         list.map(({ name, at, draft }) => ({
-          value: name,
-          key: name,
-          text: draft ? appTexts.text("keptDraftAt", { time: versionTime(at) }) : versionTime(at)
+          name,
+          when: draft ? appTexts.text("keptDraftAt", { time: versionTime(at) }) : versionTime(at)
         }))
-      const firstPublished = versions.find((version) => !version.draft) ?? versions[0]
-      const version = (await editor.choose({
-        header: appTexts.text("versions"),
-        message: appTexts.text("versionsMessage"),
-        options: optionsFor(versions),
-        defaultValue: firstPublished?.name,
-        ok: appTexts.text("restoreVersion"),
-        ...((drafts.length > 0 || editor.hasUnsavedEdits) && {
-          sideButton: {
-            text: appTexts.text("saveCurrentChanges"),
-            run: async () => {
-              try {
-                // edits not saved yet are part of what's kept:  saved into your draft first
-                await editor.saveAll()
-                await files.keepDraft()
-                return optionsFor((await files.drafts()).versions)
-              } catch (error) {
-                editor.showError(error)
-                throw error
-              }
-            }
+      const { openVersions } = await dialogs()
+      await openVersions({
+        versions: rowsFor(versions),
+        chosen: (versions.find((version) => !version.draft) ?? versions[0])?.name,
+        canKeep: drafts.length > 0 || editor.hasUnsavedEdits,
+        restore: async (version) => {
+          try {
+            const drafted = await files.restore(version)
+            await editor.reloadFiles(drafted)
+            editor.showNotice(appTexts.text("versionRestored", { count: drafted.length, version }))
+          } catch (error) {
+            editor.showError(error)
+          } finally {
+            await editor.refreshDrafts()
           }
-        })
-      })) as string | undefined
-      if (!version) return
-      const drafted = await files.restore(version)
-      await editor.reloadFiles(drafted)
-      editor.showNotice(appTexts.text("versionRestored", { count: drafted.length, version }))
+        },
+        keep: async () => {
+          try {
+            // edits not saved yet are part of what's kept:  saved into your draft first
+            await editor.saveAll()
+            await files.keepDraft()
+            return rowsFor((await files.drafts()).versions)
+          } catch (error) {
+            editor.showError(error)
+            throw error
+          } finally {
+            await editor.refreshDrafts()
+          }
+        }
+      })
     } catch (error) {
       editor.showError(error)
-    } finally {
-      await editor.refreshDrafts()
     }
   }
 

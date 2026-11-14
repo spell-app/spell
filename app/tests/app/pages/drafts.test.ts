@@ -104,4 +104,37 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     expect(published()).toBe(theirs)
     expect(await page.evaluate(() => (window as any).editor.file.contents)).toBe(theirs)
   })
+
+  test("Versions, the editor's Spell's box:  Save Current Changes lists your draft, and Restore brings it back (I115)", async () => {
+    const box = "ui-modal[visible]"
+    const openVersions = async () => {
+      await page.evaluate(() => void (window as any).editor.showVersions())
+      await page.waitForSelector(`${box} ui-radio`, { timeout: 10_000 })
+    }
+    await edit('"theirs"', '"kept"')
+    await openVersions()
+    const before = await page.locator(`${box} ui-radio`).count()
+    expect(before).toBeGreaterThan(0)
+    await page.locator(`${box} ui-button.KeepChanges`).click()
+    await page.waitForFunction(
+      (count) => document.querySelectorAll("ui-modal[visible] ui-radio").length > count,
+      before
+    )
+    // kept:  greyed, and the box stays open
+    expect(await page.locator(`${box} ui-button.KeepChanges[disabled]`).count()).toBe(1)
+    await page.locator(`${box} ui-button.cancel`).click()
+    await page.waitForSelector(box, { state: "detached", timeout: 10_000 })
+
+    await edit('"kept"', '"other"')
+    await openVersions()
+    await page
+      .locator(`${box} ui-radio`, { hasText: /your draft/ })
+      .first()
+      .click()
+    await page.locator(`${box} ui-button.approve`).click()
+    await page.waitForFunction(() => (window as any).editor.file.contents.includes('"kept"'), undefined, {
+      timeout: 10_000
+    })
+    expect(await page.locator(box).count()).toBe(0)
+  })
 })

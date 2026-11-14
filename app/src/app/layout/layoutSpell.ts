@@ -170,6 +170,8 @@ export type SpellEditorApp = Record<string, unknown> & {
   homeRow: Record<string, unknown>
   /** What About Spell shows;  its `version` the editor's. */
   aboutBox: Record<string, unknown> & { version: string }
+  /** What the project menu's Versions shows (`openVersions()`):  its words and rows the editor's. */
+  versionsBox: Record<string, unknown>
 }
 
 /** One of the bar's menus in `SpellEditor.spell`, a `bar menu`:  its title, the bar's word for it, in English. */
