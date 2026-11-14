@@ -214,6 +214,31 @@ describe("outline style", () => {
     expect(tableaus.items.length).toBe(1)
   })
 
+  test("`is in a tableau`:  in any of the program's tableaus, sub-types too (epic `language` P55)", () => {
+    const run = runSpell(
+      [
+        "a card is a thing",
+        "a pile is a list of cards",
+        "a tableau is a pile",
+        "set card to a new card",
+        "set other to a new card",
+        "set a to a new pile",
+        "set b to a new tableau",
+        "add card to b",
+        "add other to a",
+        "set found to card is in a tableau",
+        "set missing to other is in a tableau",
+        "set held to other is in a pile"
+      ],
+      { registered: true }
+    )
+    expect(run("found, missing, held")).toEqual({
+      found: true,
+      missing: false,
+      held: true
+    })
+  })
+
   test("`the piles` is `every pile` (P23);  a variable called `piles` keeps its meaning", () => {
     const lines = ["a pile is a thing", "a tableau is a pile", 'set a to a new pile with name = "a"']
     const run = runSpell([...lines, "set found to the piles"], { registered: true })

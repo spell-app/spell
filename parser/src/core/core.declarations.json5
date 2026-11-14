@@ -2119,6 +2119,21 @@
     },
     {
       "kind": "method",
+      "name": "isInA",
+      "of": "core",
+      "module": "references",
+      "params": [
+        {
+          "name": "item"
+        },
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "Is `item` in any list of class `Class`, or of a sub-class, the program has made?"
+    },
+    {
+      "kind": "method",
       "name": "referenceFor",
       "of": "core",
       "module": "references",

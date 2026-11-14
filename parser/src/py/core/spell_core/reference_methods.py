@@ -88,6 +88,14 @@ class ReferenceMethods:
         things = [thing for thing in self.things_made() if isinstance(thing, cls)]
         return List(item_type=cls.__name__).as_scratch().append(*things)
 
+    def is_in_a(self, item: object, cls: type) -> bool:
+        """Is `item` in any list of class `cls`, or a sub-class, the program made:  `the card is in a column`."""
+        from spell_core.lists import List  # imported here, not at the top:  lists imports this module's package
+
+        return any(
+            isinstance(thing, cls) and isinstance(thing, List) and thing.includes(item) for thing in self.things_made()
+        )
+
     def reference_for(self, thing: object) -> str | None:
         """The reference that finds `thing` again:  `Tableau#T1`, else its place, `Tableau#3`."""
         return references.reference_for(thing, self.things_made(), _kept())

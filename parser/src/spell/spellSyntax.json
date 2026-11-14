@@ -1034,6 +1034,32 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "IsInAType",
+          "ruleNames": ["is_in_a_type"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsInAType.ts",
+          "line": 14,
+          "purpose": "`{lhs} is [not] in a {list type}` -- is it in any list of that type?",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} in (a|an) (expression:{known_type})",
+              "example": "thing is in a column",
+              "outputs": {
+                "js": {
+                  "code": "core.isInA(thing, Column)"
+                },
+                "ts": {
+                  "code": "core.isInA(thing, Column)"
+                },
+                "py": {
+                  "code": "core.is_in_a(thing, Column)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "IsIn",
           "ruleNames": ["is_in"],
           "internal": false,
@@ -2115,11 +2141,23 @@
           "ruleNames": ["the_own_property"],
           "internal": false,
           "file": "src/spell/rules/properties/TheOwnProperty.ts",
-          "line": 20,
+          "line": 24,
           "purpose": "`the {member words}` inside an action, reading a property of the thing the action runs on, e.g. `shuffle the stock` => `this.stock.shuffle()` (epic `language`, P2).",
           "syntaxes": [
             {
-              "syntax": "{definite_article} {property:member_words}"
+              "syntax": "{definite_article} {property:member_words}",
+              "example": "a \"card\" is a thing\na \"pile\" is a list of cards\nsolitaire is an app\n\t\"stock\" is a new pile\n\tto play a card\n\t\tprint the stock",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"stock\", { init: () => new Pile({ id: \"stock\" }), early: true }) }\n  get stock() { return this.getProp(\"stock\") }\n  set stock(value) { this.setProp(\"stock\", value) }\n}\nexport const solitaire = new Solitaire()"
+                },
+                "ts": {
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pile({ id: \"stock\" }), early: true })\n  accessor stock!: Pile\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitaire\", [\n    { name: \"stock\", kind: \"json\", description: \"Its stock.\" }\n  ])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()"
+                },
+                "py": {
+                  "code": "class Card(Thing):\n    def play(self) -> None:\n        core.console.log(solitaire.stock)\n\nclass Pile(List):\n    item_type = Card\n\nclass Solitaire(App):\n    element_tag = \"syntax-block-app\"\n\n    stock = prop(init=lambda: Pile(id=\"stock\"), early=True)\n\nsolitaire = Solitaire()"
+                }
+              }
             }
           ],
           "aliases": ["expression"]
@@ -9452,6 +9490,32 @@
                 },
                 "py": {
                   "code": "def pick_a_color() -> str:\n    return \"black\""
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StatementIf",
+          "ruleNames": ["statement_if"],
+          "internal": false,
+          "file": "src/spell/rules/if/StatementIf.ts",
+          "line": 19,
+          "purpose": "A statement, then when it runs -- `return yes if the card is a king`.",
+          "syntaxes": [
+            {
+              "syntax": "{statement} if {condition:expression}",
+              "example": "return yes if bar",
+              "outputs": {
+                "js": {
+                  "code": "if (bar) return true"
+                },
+                "ts": {
+                  "code": "if (bar) return true"
+                },
+                "py": {
+                  "code": "if bar:\n    return True"
                 }
               }
             }
