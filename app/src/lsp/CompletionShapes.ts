@@ -85,7 +85,8 @@ export class CompletionShapes {
    * the caret where you type next.  The completion fields for it, as a snippet:
    * - a quoted name names it (`action`, `tab`):  its quotes, `<action "|" />`, `<tab "|"></tab>`
    * - it holds nothing (`divider`, `icon`):  `<icon | />`
-   * - anything else, a tag of `scope`'s pack, the project's own or one no pack knows:
+   * - the program's own view (`<column>`, `<stock-pile>`):  named by its id, `<column "|" />` (I149)
+   * - anything else, a tag of `scope`'s pack, or one nothing knows:
    *   its closing tag written out, the caret before its `>`, `<segment |></segment>`
    * - A shape that lists next when chosen (`<action`'s actions, `<icon`'s attributes) lists here too.
    * - The shape is the one choosing the tag from the suggestion list writes (`spellTag()`, `componentTag()`),
@@ -115,6 +116,8 @@ export class CompletionShapes {
   private static shapeOf(scope: P.Scope, tag: string): TagShape {
     const meaning = SP.spellTagsIn(scope).find((each) => each.tag === tag)?.meaning
     if (meaning) return SPELL_TAG_SHAPES[meaning] ?? "holds"
+    // the program's own view (`<column>` => `column`):  named by its id, it draws itself, so it closes itself (I149)
+    if (scope.getType(SP.typeName(tag))) return "named"
     const packs = (scope.parser as SP.SpellParser | undefined)?.packs ?? SP.ComponentPacks.DEFAULT
     const help = SP.ComponentPacks.help(SP.Language.of(scope).lang, packs)?.tags.find((each) => each.tag === tag)
     return CompletionShapes.componentShape(scope, help ?? { tag })

@@ -139,8 +139,13 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
       expect(rest("context-menu")).toMatchObject({ writes: "$0></context-menu>", lists: false })
       expect(rest("button")).toMatchObject({ writes: "$0></button>" })
       expect(rest("segment")).toMatchObject({ writes: "$0></segment>" })
-      // one no pack knows, as the project's own views:  it holds things
+      // one nothing knows:  it holds things
       expect(rest("tableau")).toMatchObject({ writes: "$0></tableau>" })
+      // the program's own view, named by its id:  it draws itself, so it closes itself (I149)
+      const withColumn = Object.assign(Object.create(english), {
+        getType: (name: string) => (name === SP.typeName("column") ? {} : english.getType(name))
+      })
+      expect(rest("column", withColumn)).toEqual({ writes: '"$1" />', isSnippet: true, lists: true })
     })
 
     test('Spell UI\'s, by what each holds:  `<icon | />`, `<button>|</>`, `<tab "|">`, `<content>` a line in', async () => {
