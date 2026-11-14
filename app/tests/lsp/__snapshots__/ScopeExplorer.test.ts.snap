@@ -138,7 +138,7 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
       type StockPile (is a Pile)
       type DiscardPile (is a Pile)
       type Foundation (is a Pile)
-      type Tableau (is a Pile)
+      type Column (is a Pile)
       function test the moves"
 `;
 
@@ -222,6 +222,6 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
       type StockPile (is a Pile)
       type DiscardPile (is a Pile)
       type Foundation (is a Pile)
-      type Tableau (is a Pile)
+      type Column (is a Pile)
       function test the moves"
 `;

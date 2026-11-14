@@ -135,29 +135,31 @@ describe("incremental parsing ~== full parse", () => {
   describe("keepLastGood:  a broken line keeps its last working declarations", () => {
     const card = files.findIndex((it) => it.path === "/Card.spell")
     const cardText = files[card]!.contents
-    // a top-level action:  a type's outline body is ONE item, which declares the type, so it can't be kept
+    // a top-level action:  a type's outline body is ONE item, which declares the type, so it can't be kept.
+    // Solitaire's own actions are in its app's outline, so its one top-level action is its last, `to test the moves`:
+    // a line after it calls it, so there's a later line to keep.
     const game = files.findIndex((it) => it.path === "/Solitaire.spell")
-    const gameText = files[game]!.contents
-    // Later lines -- a card's `on click: play it` -- call `play ...`.
-    const broken = gameText.replace("to play a card\n", "to play (a card:\n")
+    const gameText = `${files[game]!.contents}\ntest the moves\n`
+    const withCall = files.map((file, index) => (index === game ? { ...file, contents: gameText } : file))
+    const broken = gameText.replace("\nto test the moves\n", "\nto test the (moves\n")
 
     test("without it, the broken declaration breaks later lines too", () => {
       expect(broken).not.toBe(gameText)
-      const project = incrementalSpellProject(files)
+      const project = incrementalSpellProject(withCall)
       project.update("/Solitaire.spell", broken)
       const errors = summarizeIncremental(project).flatMap((file) => file.errors)
       expect(errors.length).toBeGreaterThan(1)
     })
 
     test("with it, only the broken action has errors, and later lines + files are kept", () => {
-      const project = incrementalSpellProject(files, true)
+      const project = incrementalSpellProject(withCall, true)
       project.update("/Solitaire.spell", broken)
       expect(project.getFile("/Solitaire.spell")!.lastUpdate).toBe("region")
       const summary = summarizeIncremental(project)
       const lines = broken.split("\n")
-      const brokenLine = lines.findIndex((line) => line.includes("to play (a card")) + 1
-      const nextLine = lines.findIndex((line) => line.startsWith("to put a card on a pile")) + 1
-      // the broken line, and its own body, which no longer knows `the card`:  nothing after it
+      const brokenLine = lines.findIndex((line) => line.includes("to test the (moves")) + 1
+      const nextLine = lines.findIndex((line) => line === "test the moves") + 1
+      // the broken line, and its own body:  nothing after it, not even the line calling it
       const errorLines = summary[game]!.errors.map((error) => Number(error.split(":")[0]))
       expect(errorLines[0]).toBe(brokenLine)
       expect(errorLines.every((line) => line >= brokenLine && line < nextLine)).toBe(true)
