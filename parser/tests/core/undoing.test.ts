@@ -286,6 +286,60 @@ describe("actions that can't be undone", () => {
     expect([cards[0].faceUp, peeker.faceUp]).toEqual([false, true])
   })
 
+  test("a change recorded by itself (a saved thing added) is left out too", () => {
+    class Adder extends Card {
+      add(): void {
+        core.RUNTIME.history.record({ undo() {}, redo() {} }, { title: "Add" })
+      }
+    }
+    core.describeAction(Adder, "add", { title: "Add", cantBeUndone: "keeps history" })
+    new Adder({ rank: "joker" }).add()
+    expect(core.RUNTIME.history.steps).toHaveLength(0)
+  })
+
+  test("a step of its own inside one is still a step:  Recipe Box's Save, saving a draft (epic `language` I88)", () => {
+    class Saver extends Card {
+      save(): void {
+        core.RUNTIME.history.separateStep("Edit", () => (this.rank = "king"))
+        this.picked = true
+        this.faceUp = true
+      }
+    }
+    core.describeAction(Saver, "save", { title: "Save", cantBeUndone: "keeps history" })
+    const saver = new Saver({ rank: "joker" })
+    saver.save()
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Edit"])
+    game.undo()
+    expect([saver.rank, saver.faceUp]).toEqual(["joker", true])
+  })
+
+  test("what a creation hook changes, made while no action runs (the program's opening), is no step (I88)", async () => {
+    class Dealer extends Card {
+      override async create(): Promise<void> {
+        this.faceUp = true
+        await Promise.resolve()
+        core.RUNTIME.history.record({ undo() {}, redo() {} }, { title: "Add" })
+      }
+    }
+    new Dealer({ rank: "joker" })
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(core.RUNTIME.history.steps).toHaveLength(0)
+    expect(game.canUndo).toBe(false)
+    // made inside an undoable action:  what it records joins that one's step
+    class Turner extends Card {
+      async make(): Promise<void> {
+        this.turnOver()
+        new Dealer({ rank: "queen" })
+        await Promise.resolve()
+        await Promise.resolve()
+      }
+    }
+    core.describeAction(Turner, "make", { title: "Make", undoneAs: "Make" })
+    await new Turner({ rank: "jack" }).make()
+    expect(core.RUNTIME.history.steps.map((step) => [step.title, step.records.length])).toEqual([["Make", 2]])
+  })
+
   test('"clears history":  every step is forgotten once it\'s done, e.g. a new game', async () => {
     await game.deal(2)
     game.newGame()
