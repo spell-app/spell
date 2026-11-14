@@ -168,10 +168,7 @@ export function InspectorViews(props: {
       list.flatMap((node) => (node.children.length ? [node, ...walk(node.children)] : []))
     return walk(nodes())
   }
-  const isAllFolded = () => {
-    const folded = foldedKeys()
-    return parents().length > 0 && parents().every((node) => folded.has(node.key))
-  }
+  const isAllFolded = () => parents().length > 0 && parents().every((node) => !isRowOpen(node))
   const toggleFilter = () => setFilter((text) => (text === undefined ? "" : undefined))
   return (
     <InspectorCard
@@ -214,7 +211,7 @@ export function InspectorViews(props: {
               link=""
               label={appTexts.text(isAllFolded() ? "inspectorExpandAll" : "inspectorCollapseAll")}
               title={appTexts.text(isAllFolded() ? "inspectorExpandAll" : "inspectorCollapseAll")}
-              onClick={() => setFolds(isAllFolded() ? [] : parents().map((node) => node.key))}
+              onClick={() => setRowsOpen(parents(), isAllFolded())}
             />
           </Show>
         </>
@@ -235,7 +232,7 @@ export function InspectorViews(props: {
  * - What's not drawn:  a group of its own, closed to start.  A click inspects the thing (`Inspector.inspectThing()`).
  ****************/
 function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]; filter?: string }): JSX.Element {
-  const shown = () => shownIn(props.nodes, foldedKeys())
+  const shown = () => shownIn(props.nodes)
   // what's selected, however it came to be:  the rows around it open, so its row can be seen
   // the part whose row should come into view:  a new one for each new selection, so only that scrolls the tree;
   // a thing reached along a trail (the deck, picked under Not drawn) isn't its base's row:  that row isn't revealed
@@ -277,8 +274,8 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
             icon="eye slash outline"
             label={appTexts.text("inspectorNotDrawn")}
             which={String(notDrawn().length)}
-            open={isFolded(NOT_DRAWN_KEY) ? undefined : ""}
-            ref={whenRowToggled(() => toggleFold(NOT_DRAWN_KEY))}
+            open={isRowOpen(NOT_DRAWN) ? "" : undefined}
+            ref={whenRowToggled(() => toggleRow(NOT_DRAWN))}
           >
             <For each={notDrawn()}>
               {(thing) => (
@@ -324,17 +321,16 @@ function heldThings(roots: readonly object[], core: NonNullable<ReturnType<typeo
 
 /** Open the rows around `element`'s, among `nodes`, in one change:  its row then scrolls into view. */
 function openRowsAround(nodes: readonly PartNode[], element: Element): void {
-  const around = keysAround(nodes, element)
-  const folded = foldedKeys()
-  if (around?.some((key) => folded.has(key))) setFolds([...folded].filter((key) => !around.includes(key)))
+  const around = rowsAround(nodes, element)
+  if (around?.some((node) => !isRowOpen(node))) setRowsOpen(around, true)
 }
 
-/** The keys of the rows around `element`'s, outermost first:  `undefined` if it isn't among `nodes`. */
-function keysAround(nodes: readonly PartNode[], element: Element): string[] | undefined {
+/** The rows around `element`'s, outermost first:  `undefined` if it isn't among `nodes`. */
+function rowsAround(nodes: readonly PartNode[], element: Element): PartNode[] | undefined {
   for (const node of nodes) {
     if (node.element === element) return []
-    const inside = keysAround(node.children, element)
-    if (inside) return [node.key, ...inside]
+    const inside = rowsAround(node.children, element)
+    if (inside) return [node, ...inside]
   }
   return undefined
 }
@@ -352,7 +348,7 @@ function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: ()
   createEffect(
     () => {
       const wanted = props.revealing()
-      return wanted.element === props.node.element && revealed() !== wanted && { wanted, folds: foldedKeys() }
+      return wanted.element === props.node.element && revealed() !== wanted && { wanted, folds: rowOpenings() }
     },
     (isRevealing) => {
       if (isRevealing && row) requestAnimationFrame(() => revealRow(row!, isRevealing.wanted))
@@ -365,14 +361,14 @@ function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: ()
       which={words().which}
       title={words().tag}
       selected={Inspector.isSelected(props.node.element)}
-      open={isFolded(props.node.key) ? undefined : ""}
+      open={isRowOpen(props.node) ? "" : undefined}
       ref={(element: Element) => {
         row = element
         PartEdits.rememberRow(
           element,
           untrack(() => props.node.element)
         )
-        whenRowToggled(() => toggleFold(props.node.key))(element)
+        whenRowToggled(() => toggleRow(props.node))(element)
         chooseRow((event) => Inspector.clicked(props.node.element, props.shown(), event as MouseEvent))(element)
       }}
     >
@@ -389,15 +385,25 @@ function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: ()
   )
 }
 
-/** A row of the tree:  its part, its key, and the parts inside it. */
-type PartNode = { element: Element; key: string; children: PartNode[] }
+/**
+ * A row of the tree:  its part, its key, and the parts inside it.
+ * - `startsOpen`:  open until someone closes it (`isRowOpen()`):  a row at the top, or the program's own markup
+ *   (a grid, a toolbar);  a drawn thing (a pile, a card) starts closed, so its own parts don't crowd out the rest
+ *   (Owen, epic `editor` I119:  "seeing the other piles is more important than seeing what is in the stock pile")
+ */
+type PartNode = { element: Element; key: string; children: PartNode[]; startsOpen: boolean }
 
 /** `rows` nested, as the tree shows them. */
 function nodesFor(rows: readonly PartRow[]): PartNode[] {
   const top: PartNode[] = []
   const around: PartNode[] = []
   rows.forEach((row, index) => {
-    const node = { element: row.element, key: addressKey({ index, tag: row.element.localName }), children: [] }
+    const node = {
+      element: row.element,
+      key: addressKey({ index, tag: row.element.localName }),
+      children: [],
+      startsOpen: row.depth === 0 || !SpellElement.thingOf(row.element)
+    }
     around.length = row.depth
     ;(around.at(-1)?.children ?? top).push(node)
     around.push(node)
@@ -406,8 +412,8 @@ function nodesFor(rows: readonly PartRow[]): PartNode[] {
 }
 
 /** The parts on screen in the tree, in its order:  a closed part's own parts aren't. */
-function shownIn(nodes: readonly PartNode[], folded: ReadonlySet<string>): Element[] {
-  return nodes.flatMap((node) => [node.element, ...(folded.has(node.key) ? [] : shownIn(node.children, folded))])
+function shownIn(nodes: readonly PartNode[]): Element[] {
+  return nodes.flatMap((node) => [node.element, ...(isRowOpen(node) ? shownIn(node.children) : [])])
 }
 
 /****************
@@ -495,32 +501,38 @@ function byWords(a: string, b: string): number {
   return a.localeCompare(b, undefined, { sensitivity: "base", numeric: true })
 }
 
-/** The parts closed in the tree, by key (reactive):  this project's, remembered. */
-function foldedKeys(): ReadonlySet<string> {
-  foldsChanged()
-  return new Set((editorPrefs.get(Inspector.projectPref(FOLDED_PREF)) as string[] | undefined) ?? [])
+/**
+ * Which rows of the tree someone opened or closed, by key (reactive):  this project's, remembered.
+ * - Only what was changed by hand, or opened to show what's selected:  every other row is as it starts (`startsOpen`).
+ */
+function rowOpenings(): Readonly<Record<string, boolean>> {
+  rowsChanged()
+  return (editorPrefs.get(Inspector.projectPref(ROWS_OPEN_PREF)) as Record<string, boolean> | undefined) ?? {}
 }
 
-/** Is the row at `key` closed (reactive)?  What's not drawn starts closed. */
-function isFolded(key: string): boolean {
-  return foldedKeys().has(key) !== (key === NOT_DRAWN_KEY)
+/** Is `row` open (reactive)?  As it starts, unless someone opened or closed it. */
+function isRowOpen(row: TreeRow): boolean {
+  return rowOpenings()[row.key] ?? row.startsOpen
 }
 
-/** Close the part at `key`, or open it;  remember which. */
-function toggleFold(key: string): void {
-  const folded = new Set(foldedKeys())
-  if (!folded.delete(key)) folded.add(key)
-  setFolds([...folded])
+/** Open `row`, or close it;  remember which. */
+function toggleRow(row: TreeRow): void {
+  setRowsOpen([row], !isRowOpen(row))
 }
 
-/** Close exactly the parts at `keys`;  remember which. */
-function setFolds(keys: readonly string[]): void {
-  editorPrefs.set(Inspector.projectPref(FOLDED_PREF), keys)
-  setFoldsChanged((count) => count + 1)
+/** Open, or close, every one of `rows` in one change;  remember which. */
+function setRowsOpen(rows: readonly TreeRow[], open: boolean): void {
+  const openings = { ...rowOpenings() }
+  for (const row of rows) openings[row.key] = open
+  editorPrefs.set(Inspector.projectPref(ROWS_OPEN_PREF), openings)
+  setRowsChanged((count) => count + 1)
 }
 
-/** Counts the folds, so the tree reads them again. */
-const [foldsChanged, setFoldsChanged] = createSignal(0)
+/** A row `isRowOpen()` can say of:  a part's (`PartNode`), or Not drawn's. */
+type TreeRow = Pick<PartNode, "key" | "startsOpen">
+
+/** Counts the changes to `rowOpenings()`, so the tree reads them again. */
+const [rowsChanged, setRowsChanged] = createSignal(0)
 
 /** A part whose row should come into view, one per selection:  `<PartsTree>`'s `revealing`. */
 type Revealing = {
@@ -541,11 +553,15 @@ function revealRow(row: Element, wanted: Revealing): void {
   setRevealed(wanted)
 }
 
-/** The key of the "Not drawn" group, among the parts' (theirs are `<place>|<tag>`). */
-const NOT_DRAWN_KEY = "not-drawn"
+/** The "Not drawn" group, among the parts (their keys are `<place>|<tag>`):  closed until opened. */
+const NOT_DRAWN: TreeRow = { key: "not-drawn", startsOpen: false }
 
-/** The start of the pref remembering what's folded, a project's each. */
-const FOLDED_PREF = "inspector:folded"
+/**
+ * The start of the pref remembering the rows someone opened or closed, a project's each.
+ * - Not `inspector:folded`, the set of rows closed when every row started open:  left behind, it would open them all
+ *   (epic `editor` I119)
+ */
+const ROWS_OPEN_PREF = "inspector:rowsOpen"
 
 /****************
  * ### `<CodeCard>`

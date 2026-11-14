@@ -76,16 +76,16 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
 
   test("the Views card sorts by name or type, and remembers it", async () => {
     const inOrder = await boardRows()
-    expect(inOrder.slice(0, 3)).toEqual(["StockPile", "DiscardPile", "Column"])
+    expect(inOrder.slice(0, 3)).toEqual(["Stock Pile", "Discard Pile", "Foundation"])
     await sortBy("By name")
-    expect((await boardRows()).slice(0, 2)).toEqual(["Column", "DiscardPile"])
+    expect((await boardRows()).slice(0, 2)).toEqual(["Column", "Column"])
     await sortBy("By type")
-    // Spell UI's column after the program's own elements, which all start `solitaire-`
-    expect((await boardRows()).at(-1)).toBe("Column")
+    // by tag:  `solitaire-stock-pile` last of the program's own
+    expect((await boardRows()).at(-1)).toBe("Stock Pile")
     await page.reload()
     await page.waitForSelector("#AddPartButton", { timeout: 60_000 })
     await page.waitForTimeout(4000)
-    expect((await boardRows()).at(-1)).toBe("Column")
+    expect((await boardRows()).at(-1)).toBe("Stock Pile")
     await sortBy("In document order")
     expect(await boardRows()).toEqual(inOrder)
   })
@@ -207,9 +207,17 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
   })
 
   test("All Cards edits the type:  its values as pills, its worked-out fields' Spell, its events, actions and tests as cards (I26)", async () => {
-    const card = page.locator('[data-panel="views"] ui-tree-item[label^="Card"]').first()
-    await card.scrollIntoViewIfNeeded()
-    await card.click()
+    // a pile starts closed (I119):  open the first column, so its cards have rows
+    await page
+      .locator('[data-panel="views"] ui-tree-item[label^="Column"]')
+      .first()
+      .evaluate((row) => row.hasAttribute("open") || row.shadowRoot!.querySelector<HTMLElement>(".toggle")!.click())
+    await page.waitForTimeout(400)
+    const card = page.locator('[data-panel="views"] ui-tree-item[open] > ui-tree-item[label^="Card"]').first()
+    // its row slides open:  scrolled to, then clicked where it is
+    await card.evaluate((row) => row.scrollIntoView({ block: "center" }))
+    await page.waitForTimeout(400)
+    await card.click({ force: true })
     await page.waitForTimeout(800)
     await page.locator(".InspectorScope").nth(1).click({ force: true })
     await page.waitForTimeout(1500)
