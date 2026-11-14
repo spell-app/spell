@@ -1038,6 +1038,24 @@
     .bubbly-tag-tall-short-tail .bubbly-tag-rows {
       border-bottom-right-radius: var(--bubbly-tag-corner);
     }
+    /*
+     * flush, nothing after its `>` on its line:  its rows and last line one width, its `⟩` at their right end
+     * (Owen, 2026-11-14:  "make the whole block top extend to the same end point");  its right side straight down
+     * to the last line's cut corner
+     */
+    .bubbly-tag-tall-flush {
+      width: fit-content;
+      align-items: stretch;
+      .bubbly-tag-tail {
+        display: block;
+        position: relative;
+        border-top-right-radius: 0;
+      }
+      .bubbly-tag-tail > .bubbly-mark:last-child {
+        position: absolute;
+        right: var(--bubbly-bracket-pad);
+      }
+    }
     /* each row a line tall, its words where a band's are:  a pixel up from the middle */
     .bubbly-tag-row {
       height: var(--bubbly-html-row);
@@ -1649,6 +1667,15 @@
     }
     .bubbly-layer .bubbly-tag-link {
       translate: 0 -50%;
+    }
+    /* a flush tall tag's `⟩`, drawn at its band's right end:  in its line, only its room */
+    .bubbly-layer .bubbly-tag-tall-flush .bubbly-tag-tail > .bubbly-angle {
+      inset: 0 var(--bubbly-bracket-pad) 0 auto;
+      display: flex;
+      align-items: center;
+    }
+    .bubbly-angle-at-end::before {
+      visibility: hidden;
     }
   }
 
