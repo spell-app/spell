@@ -361,10 +361,13 @@ async function toolbarRow(page: Page, title: string): Promise<Locator> {
 
 /**
  * Press a toolbar's `row`:  a click on the element, which runs its action (`<ui-action>`'s own listener).
+ * - Once it's ready (`ready`):  its listener is its component's, so a click before then runs nothing
+ *   (Auto Play's test sent nothing, every other run:  epic `language` I89).
  * - Not Playwright's `click()`:  the row's box is drawn inside it, so Playwright never finds it visible.
  */
-function press(row: Locator): Promise<void> {
-  return row.dispatchEvent("click")
+async function press(row: Locator): Promise<void> {
+  await row.evaluate((it) => (it as unknown as { ready?: Promise<unknown> }).ready)
+  await row.dispatchEvent("click")
 }
 
 /** `row`'s action's title, now. */
