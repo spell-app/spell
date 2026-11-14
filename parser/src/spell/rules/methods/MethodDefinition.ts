@@ -718,6 +718,7 @@ export class MethodDefinition<
    * What action `match` says about itself, when its body's lines describe it (`ActionDetail`, epic `elemental-spell` P5):
    * a getter for each condition, then the description, after the class -- none when it says nothing.
    * - e.g. `- enabled when it is face down` => `get turnOverIsEnabled() { return this.isFaceDown }`
+   *   - `- disabled when it is face up` => the same getter, `return !this.isFaceUp`
    * - then `core.describeAction(Card, "turnOver", { title: "turn it over", enabledWhen: "turnOverIsEnabled" })`
    * - Its title is its words as written in Initial Caps, `Turn It Over` (epic `language` P48), unless it says one:
    *   `titled "Turn Over"`, or on its head line, `to "turn it over" with title "Turn Over"`
@@ -741,14 +742,16 @@ export class MethodDefinition<
     if (details.shortcuts.length) description.shortcuts = details.shortcuts
     if (details.icon) description.icon = details.icon
     const statements: P.ASTStatement[] = []
+    // `- disabled when ...` is `enabled when` turned round:  the same getter, giving back `not` of it
     const conditions = [
-      ["enabled", details.enabled],
-      ["selected", details.selected]
+      ["enabled", details.enabled ?? details.disabled, !details.enabled && !!details.disabled],
+      ["selected", details.selected, false]
     ] as const
-    for (const [moment, condition] of conditions) {
+    for (const [moment, condition, isNegated] of conditions) {
       if (!condition) continue
       const getter = `${methodName}_is_${moment}`
-      const body = condition.AST as P.ASTExpression
+      const expression = condition.AST as P.ASTExpression
+      const body = isNegated ? new P.ASTNotExpression(condition, { expression }) : expression
       statements.push(
         new P.ASTPropertyDefinition(condition, {
           type: typeName,

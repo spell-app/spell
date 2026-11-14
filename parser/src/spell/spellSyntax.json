@@ -10211,7 +10211,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 33,
+          "line": 36,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -10226,6 +10226,21 @@
                 },
                 "py": {
                   "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"Turn It Over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
+                }
+              }
+            },
+            {
+              "syntax": "disabled when {disabled:expression}",
+              "example": "a card is a thing where:\n\t- its direction is one of up or down\n\t- to turn it over:\n\t\t- disabled when its direction is up\n\t\tset its direction to up",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends Thing {\n  static Directions = [\"up\", \"down\"]\n  static { this.declareProp(\"direction\", { oneOf: Card.Directions }) }\n  get direction() { return this.getProp(\"direction\") }\n  set direction(value) { this.setProp(\"direction\", value) }\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n  get turnOverIsEnabled() {\n    return !(this.direction === \"up\")\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", enabledWhen: \"turnOverIsEnabled\", undoneAs: \"Turn It Over\" })"
+                },
+                "ts": {
+                  "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends Thing {\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n  get turnOverIsEnabled() {\n    return !(this.direction === \"up\")\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"Turn It Over\", enabledWhen: \"turnOverIsEnabled\", undoneAs: \"Turn It Over\" })"
+                },
+                "py": {
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return not self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"Turn It Over\", \"enabled_when\": \"turn_over_is_enabled\", \"undone_as\": \"Turn It Over\"})"
                 }
               }
             },

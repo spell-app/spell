@@ -1520,6 +1520,62 @@ methods.addRule(ActionDetail, {
   ]
 })
 methods.addRule(ActionDetail, { syntax: "enabled when {enabled:expression}" })
+// ... turned round (epic `language` T132):  the same getter, `not` of it;  an action says one or the other
+methods.addRule(ActionDetail, {
+  syntax: "disabled when {disabled:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "`disabled when` is `enabled when` turned round:  the same getter, giving back `not` of its condition",
+          input: [
+            "a card is a thing where:",
+            "\t- its direction is one of up or down",
+            "\t- to turn it over:",
+            "\t\t- disabled when its direction is up",
+            "\t\tset its direction to up"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            "  // - its direction is one of up or down",
+            '  static Directions = ["up", "down"]',
+            '  static { this.declareProp("direction", { oneOf: Card.Directions }) }',
+            '  get direction() { return this.getProp("direction") }',
+            '  set direction(value) { this.setProp("direction", value) }',
+            "",
+            "  turnOver() {",
+            '    this.direction = "up"',
+            "  }",
+            "  get turnOverIsEnabled() {",
+            '    return !(this.direction === "up")',
+            "  }",
+            "}",
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", enabledWhen: "turnOverIsEnabled", undoneAs: "Turn It Over" })'
+          ],
+          ts: [
+            "export type Direction = (typeof Card.Directions)[number]",
+            "",
+            "export class Card extends Thing {",
+            "  // - its direction is one of up or down",
+            '  static Directions = ["up", "down"] as const',
+            "  @prop({ oneOf: () => Card.Directions })",
+            "  accessor direction!: Direction",
+            "",
+            "  turnOver() {",
+            '    this.direction = "up"',
+            "  }",
+            "  get turnOverIsEnabled() {",
+            '    return !(this.direction === "up")',
+            "  }",
+            "}",
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", enabledWhen: "turnOverIsEnabled", undoneAs: "Turn It Over" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
 methods.addRule(ActionDetail, { syntax: "selected when {selected:expression}" })
 methods.addRule(ActionDetail, { syntax: "(undoable:undoable)" })
 methods.addRule(ActionDetail, {

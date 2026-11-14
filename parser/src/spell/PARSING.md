@@ -1060,6 +1060,10 @@ a line of the built-in types table, a built-in template, or a project's own `one
       its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
     - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,
       after the class, a getter per condition and `core.describeAction(...)` (`P.ASTTypeDescription`).
+    - `- disabled when ...` (`inactiva cuando`) is `- enabled when` turned round (epic `language` T132):
+      the same `<name>IsEnabled` getter, giving back `not` of its condition.
+      - An action says one or the other:  a `disabled when` beside an `enabled when` is refused while both are there
+        (`SP.SpellWarnings.refuseIf()`, `ActionDetail.saysBoth()`).
     - `shortcut_keys` reads a key as typed, its tokens joined up to the first space:  `meta+shift+Z`.
   - A HANDLER, `- on mouse down:`, is a method of the template's things, `on_mouse_down`, `it` the thing (`On`).
     - `- when flipped:` is the same (`On`'s `when` registrations);  `- when creating a deck:` (and `- when created:`)

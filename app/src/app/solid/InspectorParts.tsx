@@ -917,7 +917,9 @@ function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX
     if (isEnabled()) return appTexts.text("inspectorActionRun", { action: props.action.words })
     const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
     const condition = enabledWhenInSource(props.action.words, sources)
-    return condition ? appTexts.text("inspectorActionOnlyWhen", { condition }) : appTexts.text("inspectorActionNotNow")
+    if (!condition) return appTexts.text("inspectorActionNotNow")
+    const key = condition.when === "disabled" ? "inspectorActionNotWhen" : "inspectorActionOnlyWhen"
+    return appTexts.text(key, { condition: condition.words })
   }
   const press = () => {
     const core = runtimeCore()

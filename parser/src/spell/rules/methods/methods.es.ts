@@ -1427,6 +1427,61 @@ methodsEs.addRule(ActionDetail, {
   ]
 })
 methodsEs.addRule(ActionDetail, { syntax: "activa cuando {enabled:expression}" })
+methodsEs.addRule(ActionDetail, {
+  syntax: "inactiva cuando {disabled:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "`inactiva cuando` es `activa cuando` al revés:  el mismo getter, que devuelve lo contrario",
+          input: [
+            "una carta es una cosa donde:",
+            "\t- su dirección es una de arriba o abajo",
+            "\t- para voltearla:",
+            "\t\t- inactiva cuando su dirección es arriba",
+            "\t\tponer su dirección en arriba"
+          ],
+          js: [
+            "export class Carta extends Thing {",
+            "  // su dirección es una de arriba o abajo",
+            '  static Direcciones = ["arriba", "abajo"]',
+            '  static { this.declareProp("dirección", { oneOf: Carta.Direcciones }) }',
+            '  get dirección() { return this.getProp("dirección") }',
+            '  set dirección(value) { this.setProp("dirección", value) }',
+            "",
+            "  voltear() {",
+            '    this.dirección = "arriba"',
+            "  }",
+            "  get voltearIsEnabled() {",
+            '    return !(this.dirección === "arriba")',
+            "  }",
+            "}",
+            'core.describeAction(Carta, "voltear", { title: "Voltearla", enabledWhen: "voltearIsEnabled", undoneAs: "Voltearla" })'
+          ],
+          ts: [
+            "export type Dirección = (typeof Carta.Direcciones)[number]",
+            "",
+            "export class Carta extends Thing {",
+            "  // su dirección es una de arriba o abajo",
+            '  static Direcciones = ["arriba", "abajo"] as const',
+            "  @prop({ oneOf: () => Carta.Direcciones })",
+            "  accessor dirección!: Dirección",
+            "",
+            "  voltear() {",
+            '    this.dirección = "arriba"',
+            "  }",
+            "  get voltearIsEnabled() {",
+            '    return !(this.dirección === "arriba")',
+            "  }",
+            "}",
+            'core.describeAction(Carta, "voltear", { title: "Voltearla", enabledWhen: "voltearIsEnabled", undoneAs: "Voltearla" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
 methodsEs.addRule(ActionDetail, { syntax: "seleccionada cuando {selected:expression}" })
 methodsEs.addRule(ActionDetail, { syntax: "(undoable:deshacible)" })
 methodsEs.addRule(ActionDetail, {

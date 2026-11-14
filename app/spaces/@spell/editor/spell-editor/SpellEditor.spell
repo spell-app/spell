@@ -127,12 +127,12 @@ spell editor is an app
 		shortcut meta+Enter
 	to "restart" with icon "redo alternate"
 	to "inspect app" with icon "crosshairs"
-		enabled when its inspecting is no
+		disabled when its inspecting is yes
 	to "stop inspecting" with icon "stop circle outline"
 		shortcut Escape
 		enabled when its inspecting is yes
 	to "clear console" with icon "ban"
-		enabled when its console empty is no
+		disabled when its console empty is yes
 
 an "editor part" is a thing
 	// What the editor draws in a view's place for it:  a pane, a menu, a row it keeps in step itself.
