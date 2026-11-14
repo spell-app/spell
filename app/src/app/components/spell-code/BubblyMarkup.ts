@@ -377,10 +377,16 @@ class MarkupWriter {
     const rows = this.startTagRows(tag, ends)
     const last = rows.pop()!
     const upper = rows.map((row) => `<p class="bubbly-tag-row">${row}</p>`).join("")
-    // its `>` alone on its last line:  the rows above overhang it, their corner cut
-    const shortTail = BubblyMarkup.hasShortTail(this.source, tag) ? " bubbly-tag-tall-short-tail" : ""
+    // nothing after it:  flush, its rows and last line one width, its `⟩` at their right end (Owen, 2026-11-14);
+    // else its `>` alone on its last line:  the rows above overhang it, their corner cut
+    const isFlush = !after && ends === "as-written" && !tag.selfClosing
+    const end = isFlush
+      ? " bubbly-tag-tall-flush"
+      : BubblyMarkup.hasShortTail(this.source, tag)
+        ? " bubbly-tag-tall-short-tail"
+        : ""
     return (
-      `<div class="bubbly-tag-tall bubbly-tag-start ${classes}${shortTail}"><div class="bubbly-tag-rows">${upper}</div>` +
+      `<div class="bubbly-tag-tall bubbly-tag-start ${classes}${end}"><div class="bubbly-tag-rows">${upper}</div>` +
       `<p class="bubbly-tag-row bubbly-tag-row-last"><span class="bubbly-tag-tail">${last}</span>${after}</p></div>`
     )
   }
