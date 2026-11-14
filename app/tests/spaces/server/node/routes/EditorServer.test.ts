@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { steadyPort } from "spell/app/spaces/server/node/routes/EditorServer"
+import { EditorServer, steadyPort } from "spell/app/spaces/server/node/routes/EditorServer"
 
 /** A port check where `held` ports are taken. */
 const freeExcept =
@@ -31,5 +31,18 @@ describe("steadyPort():  the house site's editor keeps its port, so Caddy's file
 
   test("nothing free nearby:  says so", async () => {
     expect(await steadyPort(3000, () => Promise.resolve(false), noWait)).toBeUndefined()
+  })
+})
+
+describe("EditorServer.portPicked:  what the house site waits for before writing Caddy's file (epic `epic-engine` P74)", () => {
+  test("with no editor to start, it settles at once, with no port", async () => {
+    vi.stubEnv("SPELL_NO_EDITOR", "1")
+    try {
+      const editor = new EditorServer("/nowhere")
+      await editor.start(4747, {} as never)
+      expect(await editor.portPicked).toBeUndefined()
+    } finally {
+      vi.unstubAllEnvs()
+    }
   })
 })

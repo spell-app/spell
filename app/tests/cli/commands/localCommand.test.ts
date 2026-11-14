@@ -936,6 +936,38 @@ describe("spell space local", () => {
       await vi.waitFor(() => expect(readFileSync(caddyFile, "utf8")).toContain("reverse_proxy 127.0.0.1:3456 {"))
     })
 
+    test("waits for the editor to pick its port:  never the default meanwhile (epic `epic-engine` P74, r66)", async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      const caddyFile = join(world.root, "local-site", "Caddyfile")
+      let picked!: (port: number) => void
+      const portPicked = new Promise<number>((resolve) => (picked = resolve))
+      const starting = world.pageServerSite({ editorPort: () => portPicked }).startWithPageServer()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      expect(existsSync(caddyFile)).toBe(false)
+      picked(3001)
+      await starting
+      expect(readFileSync(caddyFile, "utf8")).toContain("reverse_proxy 127.0.0.1:3001 {")
+    })
+
+    test("the next page server's editor on another port rewrites the file and restarts Caddy alone", async () => {
+      world = setUp({ trusted: true })
+      await world.site.setup({})
+      const caddyFile = join(world.root, "local-site", "Caddyfile")
+      const first = world.pageServerSite({ editorPort: () => Promise.resolve(3001) })
+      await first.startWithPageServer()
+      first.stop()
+      const caddyBefore = world.children.filter((each) => each.command === "caddy").length
+      await world.pageServerSite({ editorPort: () => Promise.resolve(3002) }).startWithPageServer()
+      await vi.waitFor(() => expect(readFileSync(caddyFile, "utf8")).toContain("reverse_proxy 127.0.0.1:3002 {"))
+      await vi.waitFor(() =>
+        expect(world.children.filter((each) => each.command === "caddy")).toHaveLength(caddyBefore + 1)
+      )
+      expect(
+        world.children.filter((each) => each.command !== "caddy").map((each) => each.args.join(" "))
+      ).not.toContain(expect.stringContaining("build"))
+    })
+
     test("editorAddress:  the main checkout's, on a Mac set up for it, and only then", async () => {
       world = setUp({ trusted: true })
       expect(world.pageServerSite().editorAddress).toBeUndefined()

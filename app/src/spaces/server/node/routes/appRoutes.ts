@@ -111,7 +111,7 @@ const appRoutes: RouteModule = {
     const editor = new EditorServer(root)
     const site =
       !process.env.VITEST && !process.env.SPELL_NO_LOCAL_SITE
-        ? new LocalSiteServer({ isMainCheckout, editorPort: () => editor.port })
+        ? new LocalSiteServer({ isMainCheckout, editorPort: () => editor.portPicked })
         : undefined
     // an editor the house network reaches through Caddy listens on this machine alone (epic `atmosphere` P39)
     const thisMachineOnly = site?.editorAddress !== undefined
