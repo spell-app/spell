@@ -5,12 +5,8 @@ from typing import Any, Literal
 from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
 
 
-###################
-# ## A playing card
-###################
 # A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-# It's a two sided view:  face up it shows its picture, face down the back every card shares.
-# On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
+# A playing card
 
 
 Rank = Literal["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"]
@@ -23,18 +19,6 @@ class Card(TwoSidedView):
     # - its "rank" is one of ace, 2 ... 10, jack, queen, king
     RANKS = ("ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king")
     rank = prop(one_of=RANKS)
-
-    @property
-    def value(self) -> float:
-        return spell_position(core.position_of(Card.RANKS, self.rank))
-
-    @property
-    def is_a_face_card(self) -> bool:
-        return self.rank in ["jack", "queen", "king"]
-
-    @property
-    def is_a_number_card(self) -> bool:
-        return not self.is_a_face_card
 
     # - its "suit" is one of clubs, diamonds, hearts or spades
     SUITS = ("clubs", "diamonds", "hearts", "spades")
@@ -52,6 +36,26 @@ class Card(TwoSidedView):
         return "black"
 
     @property
+    def is_a_face_card(self) -> bool:
+        return self.rank in ["jack", "queen", "king"]
+
+    @property
+    def is_a_number_card(self) -> bool:
+        return not self.is_a_face_card
+
+    def is_the_rank_of_suit(self, rank: Rank, suit: Suit) -> bool:
+        """e.g. the card is the two of spades"""
+        return self.rank == rank and self.suit == suit
+
+    @property
+    def name(self) -> str:
+        return core.joined(core.joined(self.rank, "of", " "), self.suit, " ")
+
+    @property
+    def value(self) -> float:
+        return spell_position(core.position_of(Card.RANKS, self.rank))
+
+    @property
     def symbol(self) -> str:
         if self.suit == "clubs":
             return "♣"
@@ -60,13 +64,6 @@ class Card(TwoSidedView):
         if self.suit == "hearts":
             return "♥"
         return "♠"
-
-    @property
-    def name(self) -> str:
-        return core.joined(core.joined(self.rank, "of", " "), self.suit, " ")
-
-    def is_the_rank_of_suit(self, rank: Rank, suit: Suit) -> bool:
-        return self.rank == rank and self.suit == suit
 
     @property
     def short_name(self) -> str:
@@ -158,9 +155,13 @@ class Card(TwoSidedView):
 core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
 core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "undone_as": "Move Card"})
 core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count The Points For A Card On A Pile", "undone_as": "Count The Points For A Card On A Pile"})
+# It's a two sided view:  face up it shows its picture, face down the back every card shares.
+# On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 # Ace is low:  ace = 1 ... king = 13
 
-# What a person, test or console calls it
+# Spell for identifying cards
+
+# identifying a card
 
 # One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
@@ -491,7 +492,7 @@ class Solitaire(App):
         return [
             h(
                 "ui-segment",
-                {"inverted": True, "attach": "top"},
+                {"inverted": True, "attach": "top", "color": ""},
                 h(
                     "ui-toolbar",
                     {"class": "GameBar", "aria-label": "Game"},
@@ -665,7 +666,7 @@ class Solitaire(App):
 
 
 solitaire = Solitaire()
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["R"], "undone_as": "Restart"})
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "undone_as": "Restart The Game"})
 core.describe_action(Solitaire, "deal_the_cards", {"title": "Deal The Cards", "undone_as": "Deal The Cards"})
 core.describe_action(Solitaire, "play_from_the_stock", {"title": "Play From The Stock", "undone_as": "Turn Card"})
 core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset The Stock", "undone_as": "Reset The Stock"})

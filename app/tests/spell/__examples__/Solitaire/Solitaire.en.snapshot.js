@@ -4,14 +4,14 @@ export const words = {
   types: {
     Card: {
       rank: "rank",
-      value: "value",
-      isAFaceCard: "is a face card",
-      isANumberCard: "is a number card",
       suit: "suit",
       color: "color",
-      symbol: "symbol",
-      name: "name",
+      isAFaceCard: "is a face card",
+      isANumberCard: "is a number card",
       isTheRankOfSuit: "is the (rank) of (suit)",
+      name: "name",
+      value: "value",
+      symbol: "symbol",
       shortName: "short name",
       picture: "picture",
       lifted: "lifted",
@@ -59,9 +59,9 @@ export const words = {
   },
   groups: {
     Card: [
-      { name: "Rank", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "value", "isAFaceCard", "isANumberCard"] },
-      { name: "Suit", members: ["suit", "color", "symbol"] },
-      { name: "Names", description: "What a person, test or console calls it", members: ["name", "isTheRankOfSuit", "shortName"] },
+      { name: "Card Rank & Suit", description: "Ace is low:  ace = 1 ... king = 13", members: ["rank", "suit", "color"] },
+      { name: "Aliases", description: "Spell for identifying cards", members: ["isAFaceCard", "isANumberCard", "isTheRankOfSuit"] },
+      { name: "Names", description: "identifying a card", members: ["name", "value", "symbol", "shortName"] },
       { name: "Drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["picture", "lifted"] },
       { name: "Game Play", members: ["play", "putOnPile", "countThePointsForCardOnPile"] },
       { name: "A pile of cards", members: ["pile"] }

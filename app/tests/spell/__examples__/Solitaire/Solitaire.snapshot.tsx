@@ -1,14 +1,8 @@
 import { core, List, App, TwoSidedView, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, type SentEvent } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
-core.heading("A playing card")
-////////////////////
-// ## A playing card
-////////////////////
-// A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-// It's a two sided view:  face up it shows its picture, face down the back every card shares.
-// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
-
+/** A card says what its rank, suit and color are:  a deck, a pile or the game only reads them. */
+// A playing card
 export type Rank = (typeof Card.Ranks)[number]
 export type Suit = (typeof Card.Suits)[number]
 
@@ -19,18 +13,6 @@ export class Card extends TwoSidedView {
   static Ranks = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"] as const
   @prop({ oneOf: () => Card.Ranks })
   accessor rank!: Rank
-
-  get value() {
-    return spellPosition(positionOf(Card.Ranks, this.rank))
-  }
-
-  get isAFaceCard() {
-    return core.includes(["jack", "queen", "king"], this.rank)
-  }
-
-  get isANumberCard() {
-    return !this.isAFaceCard
-  }
 
   // - its "suit" is one of clubs, diamonds, hearts or spades
   static Suits = ["clubs", "diamonds", "hearts", "spades"] as const
@@ -46,19 +28,32 @@ export class Card extends TwoSidedView {
     return "black"
   }
 
-  get symbol() {
-    if (this.suit === "clubs") return "♣"
-    if (this.suit === "diamonds") return "♦"
-    if (this.suit === "hearts") return "♥"
-    return "♠"
+  get isAFaceCard() {
+    return core.includes(["jack", "queen", "king"], this.rank)
+  }
+
+  get isANumberCard() {
+    return !this.isAFaceCard
+  }
+
+  /** e.g. the card is the two of spades */
+  isTheRankOfSuit(rank: Rank, suit: Suit) {
+    return this.rank === rank && this.suit === suit
   }
 
   get name() {
     return core.joined(core.joined(this.rank, "of", " "), this.suit, " ")
   }
 
-  isTheRankOfSuit(rank: Rank, suit: Suit) {
-    return this.rank === rank && this.suit === suit
+  get value() {
+    return spellPosition(positionOf(Card.Ranks, this.rank))
+  }
+
+  get symbol() {
+    if (this.suit === "clubs") return "♣"
+    if (this.suit === "diamonds") return "♦"
+    if (this.suit === "hearts") return "♥"
+    return "♠"
   }
 
   /** Its short name:  Q♠↓ is the queen of spades, face down */
@@ -178,9 +173,13 @@ core.useElement(Card, CardElement)
 core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
 core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
 core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count The Points For A Card On A Pile", undoneAs: "Count The Points For A Card On A Pile" })
+// It's a two sided view:  face up it shows its picture, face down the back every card shares.
+// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 // Ace is low:  ace = 1 ... king = 13
 
-// What a person, test or console calls it
+// Spell for identifying cards
+
+// identifying a card
 
 // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
@@ -571,7 +570,7 @@ export class Solitaire extends App {
   @drawn draw() {
     return (
       <>
-        <ui-segment inverted={true} attach="top">
+        <ui-segment inverted={true} attach="top" color="">
           <ui-toolbar class="GameBar" aria-label="Game">
             <ui-text slot="title" size="large" heavy={true}>Solitaire</ui-text>
             <ui-buttons slot="center" padding="compact">
@@ -813,7 +812,7 @@ export class SolitaireElement extends SpellElement<Solitaire> {
 }
 core.useElement(Solitaire, SolitaireElement)
 export const solitaire = new Solitaire()
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["R"], undoneAs: "Restart" })
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], undoneAs: "Restart The Game" })
 core.describeAction(Solitaire, "dealTheCards", { title: "Deal The Cards", undoneAs: "Deal The Cards" })
 core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Turn Card" })
 core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
