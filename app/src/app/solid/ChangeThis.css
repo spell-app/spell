@@ -4,10 +4,10 @@
 ui-popup.ChangeThisPopup::part(popup) {
   padding: 12px;
 }
-/* two columns:  Send, then the words (epic `editor` I133);  the header over the words, the rest across both */
+/* two columns:  the words, then Send (epic `editor` I133);  the header over the words, the rest across both */
 .ChangeThisBox {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   width: 420px;
 
@@ -17,7 +17,7 @@ ui-popup.ChangeThisPopup::part(popup) {
 }
 /* the top row:  "Tell your buddy Claude:", then its ✕ at the right (I133) */
 .ChangeThisBox > .ChangeThisTop {
-  grid-column: 2;
+  grid-column: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -29,16 +29,16 @@ ui-popup.ChangeThisPopup::part(popup) {
   padding-inline-start: calc(var(--ui-input-padding-inline, 1em) + var(--ui-border-width, 1px));
   font-weight: 600;
 }
-/* Send, the paper plane, left of the words (I133), on their first line:  the row's two cells are the grid's */
+/* Send, a small paper plane right of the words, at their foot (I133):  the row's two cells are the grid's */
 .ChangeThisBox > .ChangeThisField {
   display: contents;
 }
 .ChangeThisSend {
-  grid-column: 1;
-  align-self: start;
+  grid-column: 2;
+  align-self: end;
 }
 .ChangeThisBox ui-textarea {
-  grid-column: 2;
+  grid-column: 1;
 }
 .ChangeThisStart {
   justify-self: start;

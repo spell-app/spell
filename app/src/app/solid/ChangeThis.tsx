@@ -218,7 +218,7 @@ export class ChangeThis {
  * The small box next to what's selected:  a `<ui-popup>` there, with what to change, then how the request is getting on.
  * - A popup, not a panel:  it covers nothing but the place it's about.
  * - Its ✕, top right, closes it;  so does Esc.  A request under way goes on without it.
- * - Send, the paper plane left of the words, sends them;  so does Enter.  Shift+Enter starts a new line.
+ * - Send, a small paper plane right of the words, at their foot, sends them;  so does Enter.  Shift+Enter starts a new line.
  * - A picture pasted or dropped into it goes with the words, a thumbnail under them, its ✕ taking it out (epic `editor` T62).
  * - Under way, in short lines (epic `editor` T66):  "Starting Claude…", then "Claude is working on it…";
  *   no Claude Code on this machine:  a link to install it, and the command to run by hand.
@@ -259,16 +259,6 @@ export function ChangeThisBox(): JSX.Element {
               />
             </div>
             <div class="ChangeThisField">
-              <ui-button
-                class="ChangeThisSend"
-                appearance="circular"
-                color="primary"
-                icon={SEND_ICON}
-                aria-label={appTexts.text("changeThisSend")}
-                title={appTexts.text("changeThisSend")}
-                disabled={request() || !words().trim() ? "" : undefined}
-                onClick={send}
-              />
               <ui-textarea
                 grow=""
                 fluid=""
@@ -285,6 +275,17 @@ export function ChangeThisBox(): JSX.Element {
                   event.preventDefault()
                   send()
                 }}
+              />
+              <ui-button
+                class="ChangeThisSend"
+                appearance="circular"
+                size="mini"
+                color="primary"
+                icon={SEND_ICON}
+                aria-label={appTexts.text("changeThisSend")}
+                title={appTexts.text("changeThisSend")}
+                disabled={request() || !words().trim() ? "" : undefined}
+                onClick={send}
               />
             </div>
             <Show when={pictures().length}>
