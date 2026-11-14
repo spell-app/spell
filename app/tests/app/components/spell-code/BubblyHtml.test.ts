@@ -25,6 +25,15 @@ describe("BubblyHtml.write()", () => {
     expect(drawn).toContain('<span class="bubbly-tag">text</span>')
   })
 
+  test("puts a head's description in the room after its words, for the sheet to keep in view (J147)", () => {
+    const drawn = BubblyHtml.write(
+      SP.BubblyLayout.of(`a "card" is a view -- A playing card\n\tits "rank" is a number\n`)
+    )
+    expect(drawn).toContain(
+      '<span class="bubbly-description"><span class="bubbly-comment"><span class="bubbly-dash">--</span> A playing card</span></span></p>'
+    )
+  })
+
   test("keeps every word of the code, quote marks too, for copying;  escapes the markup", () => {
     const drawn = html()
     expect(drawn).toContain(

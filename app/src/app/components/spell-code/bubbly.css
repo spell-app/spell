@@ -1171,21 +1171,32 @@
   /*
    * - as the editor draws it, at the window's edge:  on a page, the drawing's widest line's
    * - each block round it as wide as the drawing, so its band can be;  their bodies' paper is the paper's colour
+   * - a line wider than the box scrolls it:  the description stays at the box's visible right edge,
+   *   as the editor keeps it at the window's (epic `language` J147)
+   *   - never past its own place at the band's end, nor left over the head's words:
+   *     it sticks inside its `bubbly-description`, the room between the two (`BubblyHtml.DESCRIPTION`)
    */
   &:not(.bubbly-monaco, .bubbly-html) {
-    .bubbly-block:has(:is(.bubbly-head-pill, .bubbly-pill) > .bubbly-comment:last-child) {
+    .bubbly-block:has(:is(.bubbly-head-pill, .bubbly-pill) > .bubbly-description) {
       width: auto;
       min-width: max-content;
       grid-template-columns: var(--bubbly-gutter) minmax(max-content, 1fr);
     }
-    :is(.bubbly-block > .bubbly-head-pill, .bubbly-pill):has(> .bubbly-comment:last-child) {
+    :is(.bubbly-block > .bubbly-head-pill, .bubbly-pill):has(> .bubbly-description) {
       display: flex;
       justify-self: stretch;
       width: auto;
       white-space: pre;
-      > .bubbly-comment:last-child {
-        margin-left: auto;
+      > .bubbly-description {
+        flex: 1 0 auto;
+        display: flex;
+        justify-content: flex-end;
         padding-left: 1em;
+        > .bubbly-comment {
+          position: sticky;
+          /* as far in from the box's edge as from the band's end */
+          right: var(--bubbly-pill-pad-right);
+        }
       }
     }
   }
