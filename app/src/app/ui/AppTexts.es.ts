@@ -399,7 +399,6 @@ const APP_TEXTS_ES: AppTextPack = {
   codeMore: "Más para este código",
   codeOutputHeader: "Código compilado",
   codeOutputMenu: "Mostrar el código compilado",
-  codeOutputOff: "Ninguno",
   codeOutputClose: "Ocultar el código compilado",
   referenceTab: "Referencia",
   referenceSpell: "Encanto",

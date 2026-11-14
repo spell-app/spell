@@ -5,7 +5,7 @@ import { editor, type FollowedPlace } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import type { monaco } from "spell/app/app/ui/monaco"
-import { ErrorBoundary, on, tracked } from "spell/app/app/solid"
+import { ErrorBoundary, tracked } from "spell/app/app/solid"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
 import { LazyMonaco } from "./LazyMonaco"
@@ -22,7 +22,7 @@ const OUTPUT_TARGETS = {
 /** A target the compiled-code pane shows. */
 export type OutputTarget = keyof typeof OUTPUT_TARGETS
 
-/** The menu's value for no compiled code. */
+/** The remembered value for no compiled code. */
 const NO_OUTPUT = "off"
 
 /** The preference that remembers which compiled code shows beside the code. */
@@ -59,40 +59,67 @@ export class CodeOutputShown {
 /** The compiled code shown last, what View › Compiled Code shows again. */
 let lastShown: OutputTarget = CodeOutputShown.target ?? "js/solid"
 
+/** The ⋯'s id, its popup's target:  one code pane per page. */
+const MORE_MENU_ID = "CodeMoreMenu"
+
 /****************
  * ### `<CodeMoreMenu>`
- * The code pane's ⋯, at the right of its bar:  which compiled code to show beside the code, or none.
- * - A dropdown, as a notebook's ⋯ is, showing only its icon;  the row showing has a tick for its icon.
+ * The code pane's ⋯, at the right of its bar:  which compiled code to show beside the code.
+ * - A menu of ticks, as the top bar's are (`<BarMenu ticks>`):  each target keeps its icon,
+ *   a tick before it on the one showing (Owen, epic `editor` I73).
+ * - A click on the ticked one hides it;  on another, shows that one instead.  No "None" row.
+ * - Not a `<ui-dropdown>`:  a dropdown has no column for ticks, and swapped the showing row's icon for one.
  ****************/
 export function CodeMoreMenu() {
+  let popup: (HTMLElement & { visible?: boolean }) | undefined
+  const choose = (target: OutputTarget) => {
+    CodeOutputShown.set(CodeOutputShown.target === target ? undefined : target)
+    if (popup) popup.visible = false
+  }
   return (
-    <ui-dropdown
-      slot="right"
-      class="CodeMoreMenu"
-      direction="left"
-      title={appTexts.text("codeMore")}
-      aria-label={appTexts.text("codeMore")}
-      ref={on<{ value: string }>("ui-changed", (event) => {
-        const { value } = event.detail
-        CodeOutputShown.set(value in OUTPUT_TARGETS ? (value as OutputTarget) : undefined)
-        // chosen again next time:  a dropdown tells only of a new value
-        const dropdown = event.currentTarget as HTMLElement & { value: string }
-        queueMicrotask(() => (dropdown.value = ""))
-      })}
-    >
-      <ui-icon slot="icon" name="ellipsis horizontal" />
-      <ui-item kind="header">{appTexts.text("codeOutputMenu")}</ui-item>
-      <ui-item value={NO_OUTPUT} icon={CodeOutputShown.target ? "eye slash outline" : "check"}>
-        {appTexts.text("codeOutputOff")}
-      </ui-item>
-      <For each={Object.keys(OUTPUT_TARGETS) as OutputTarget[]}>
-        {(target) => (
-          <ui-item value={target} icon={CodeOutputShown.target === target ? "check" : OUTPUT_TARGETS[target].icon}>
-            {appTexts.text(OUTPUT_TARGETS[target].text)}
-          </ui-item>
-        )}
-      </For>
-    </ui-dropdown>
+    <>
+      <ui-icon
+        slot="right"
+        id={MORE_MENU_ID}
+        class="CodeMoreMenu"
+        name="ellipsis horizontal"
+        link=""
+        aria-haspopup="menu"
+        label={appTexts.text("codeMore")}
+        title={appTexts.text("codeMore")}
+      />
+      <ui-popup
+        slot="right"
+        for={MORE_MENU_ID}
+        open-on="click"
+        position="bottom right"
+        class="BarMenuPopup"
+        aria-label={appTexts.text("codeMore")}
+        ref={(element: HTMLElement) => (popup = element)}
+      >
+        <ui-menu
+          direction="vertical"
+          size="small"
+          class="BarMenuItems"
+          icon-column=""
+          ticks=""
+          aria-label={appTexts.text("codeOutputMenu")}
+        >
+          <ui-item kind="header">{appTexts.text("codeOutputMenu")}</ui-item>
+          <For each={Object.keys(OUTPUT_TARGETS) as OutputTarget[]}>
+            {(target) => (
+              <ui-action
+                icon={OUTPUT_TARGETS[target].icon}
+                selected={CodeOutputShown.target === target ? "" : undefined}
+                onClick={() => choose(target)}
+              >
+                {appTexts.text(OUTPUT_TARGETS[target].text)}
+              </ui-action>
+            )}
+          </For>
+        </ui-menu>
+      </ui-popup>
+    </>
   )
 }
 

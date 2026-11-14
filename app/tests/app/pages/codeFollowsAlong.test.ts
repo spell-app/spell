@@ -36,11 +36,11 @@ async function open(page: Page, project: string): Promise<void> {
   await page.waitForTimeout(1000)
 }
 
-/** Open the code pane's ⋯, and choose the row `words`. */
+/** Open the code pane's ⋯, and click the row `words`:  the ticked one hides it again (epic `editor` I73). */
 async function chooseOutput(page: Page, words: string): Promise<void> {
-  await page.locator(".CodeMoreMenu").click()
+  await page.locator(".CodeMoreMenu span").first().click()
   await page.waitForTimeout(300)
-  await page.locator(".CodeMoreMenu").getByRole("option", { name: words }).click()
+  await page.locator("ui-popup[for=CodeMoreMenu] ui-action", { hasText: words }).click()
   await page.waitForTimeout(1500)
 }
 
@@ -154,7 +154,8 @@ describe.skipIf(!SERVING)("code follows along", () => {
       .poll(() => page.locator(".CodeOutputPane ui-item[selected]").textContent(), { timeout: 8000 })
       .toContain("TypeScript")
 
-    await chooseOutput(page, "None")
+    // the ticked row again:  none shows
+    await chooseOutput(page, "TypeScript")
     expect((await following(page)).outputShows).toBe(false)
   })
 
@@ -295,7 +296,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
       await clickCodeLine(page, place.line)
       await page.waitForTimeout(800)
       await page.screenshot({ path: path.join(SHOTS!, `p17-${theme}-${colorScheme}.png`) })
-      await page.locator(".CodeMoreMenu").click()
+      await page.locator(".CodeMoreMenu span").first().click()
       await page.waitForTimeout(400)
       await page.screenshot({ path: path.join(SHOTS!, `p17-${theme}-${colorScheme}-menu.png`) })
       expect(seen).toBe(theme)
