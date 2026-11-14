@@ -90,9 +90,10 @@ export class ModalDialogs implements E.ModalProvider {
     })
   }
 
-  /** The message as a paragraph. */
+  /** The message as a paragraph, a `\n` in it a line break. */
   private paragraph(message: string): HTMLParagraphElement {
     const paragraph = this.document.createElement("p")
+    paragraph.style.whiteSpace = MESSAGE_LINES
     paragraph.textContent = message
     return paragraph
   }
@@ -111,7 +112,10 @@ export class ModalDialogs implements E.ModalProvider {
     const label = this.document.createElement("label")
     label.className = NATIVE_LOOK
     label.style.cssText = LABEL_LAYOUT
-    label.append(message, input)
+    const words = this.document.createElement("span")
+    words.style.whiteSpace = MESSAGE_LINES
+    words.textContent = message
+    label.append(words, input)
     return label
   }
 
@@ -175,6 +179,9 @@ const OK = "ok"
 
 /** `native.css`'s opt-in class, for the prompt's input. */
 const NATIVE_LOOK = "ui-native"
+
+/** A message's lines:  each `\n` in it a line break, so a long message reads a sentence or phrase a line. */
+const MESSAGE_LINES = "pre-line"
 
 /** The prompt's label:  message above a full-width input. */
 const LABEL_LAYOUT = "display: grid; gap: 0.5em"

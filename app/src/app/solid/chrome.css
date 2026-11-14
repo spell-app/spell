@@ -349,3 +349,19 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
     margin: 0;
   }
 }
+
+/* The editor's longer words keep their line breaks:  each AppTexts text over a line or so is written a sentence or
+   phrase a line, with `\n` (Owen, 2026-11-14, epic `editor` I124:  "break text up into chunks with newlines");
+   a one-line place (a bar, a button) shows the breaks as spaces */
+:is(
+  .InspectorTip,
+  .InspectHelpText,
+  .ChangeThisBox p,
+  ui-modal.PublishClash ui-content > p,
+  .Hero .intro,
+  .SiteData p.quiet,
+  .ErrorNotice p,
+  .Notice p
+) {
+  white-space: pre-line;
+}

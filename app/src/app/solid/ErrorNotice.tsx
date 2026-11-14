@@ -37,7 +37,9 @@ export function ErrorDisplay(props: ErrorDisplayProps) {
           style={props.style}
           ref={on("ui-closing", dismiss)}
         >
-          <p>{info().message}</p>
+          <Show when={info().message}>
+            <p>{info().message}</p>
+          </Show>
           <Show when={info().context}>
             <p>
               {appTexts.text("errorContext")} {info().context}
@@ -85,9 +87,9 @@ export type ErrorDisplayProps = {
 
 /** What `<ErrorDisplay>` shows of an error. */
 type ErrorInfo = {
-  /** `CustomError`'s `header`, else the class name. */
+  /** Its heading:  a `CustomError`'s first line, else its class name -- see `describeError()`. */
   header: string
-  /** `error.message`. */
+  /** The rest of `error.message`, its line breaks kept (`chrome.css`);  `""`:  the heading said it all. */
   message: string
   /** `CustomError`'s `props.context`, as text. */
   context?: string
@@ -95,15 +97,22 @@ type ErrorInfo = {
   params?: string[]
 }
 
-/** `error`, as `<ErrorDisplay>` shows it.  `CustomError` keeps its extras in `props` (`spell/util`'s `CustomError`). */
+/**
+ * `error`, as `<ErrorDisplay>` shows it.  `CustomError` keeps its extras in `props` (`spell/util`'s `CustomError`).
+ * - One the editor raises for people (`UIError`, `$fetch()`'s `AuthenticationError` ...):  its first line is the
+ *   heading, the rest under it, never its class name (Owen, epic `editor` I124:  "AuthenticationError" said nothing).
+ * - Any other (a `TypeError` from a bug):  its class name heads it, for whoever reports it.
+ */
 function describeError(error: Error): ErrorInfo {
   const custom = error instanceof CustomError ? error : undefined
   const params = custom?.props?.params
   const context = custom?.props?.context
   const entries = params ? Object.entries(params) : []
+  const [first = "", ...rest] = error.message.split("\n")
+  const ownWords = custom && first.trim()
   return {
-    header: custom?.header || error.constructor.name || appTexts.text("error"),
-    message: error.message,
+    header: ownWords ? first : error.constructor.name || appTexts.text("error"),
+    message: ownWords ? rest.join("\n") : error.message,
     context: context ? `${context}` : undefined,
     params: entries.length ? entries.map(([key, value]) => `${key}: ${value}`) : undefined
   }

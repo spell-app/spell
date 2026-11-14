@@ -8,6 +8,7 @@ import { FLOATING_MESSAGE_STYLE, on, tracked } from "spell/app/app/solid"
  * ### `<Notice>`
  * `editor.notice` as a success `<ui-message>`, fixed near the top of the page;  closing it calls
  * `editor.hideNotice()`.
+ * - Its first line is the heading, any more under it, each on its own line.
  * - SIDE EFFECT:  hides it after 3s (`editor.hideNotice()`), unless `autoHide` is `false` -- only if
  *   `editor.notice` is still the one the timer was started for.
  * - SEE:  its App UI components page, `app/docs/Notice.html` (`/components/app/Notice.html`).
@@ -33,7 +34,10 @@ export function Notice(props: NoticeProps) {
     <Show when={notice()}>
       {(notice) => (
         <div class="Notice" style={FLOATING_MESSAGE_STYLE}>
-          <ui-message state="success" heading={notice()} dismissible="" ref={on("ui-closing", dismiss)} />
+          {/* its first line the heading, the rest under it, a line each (epic `editor` I124) */}
+          <ui-message state="success" heading={notice().split("\n")[0]} dismissible="" ref={on("ui-closing", dismiss)}>
+            <Show when={notice().split("\n").slice(1).join("\n")}>{(rest) => <p>{rest()}</p>}</Show>
+          </ui-message>
         </div>
       )}
     </Show>

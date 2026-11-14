@@ -50,14 +50,14 @@ export const APP_TEXTS = {
   partStepDuplicate: "Duplicate",
   partStepDelete: "Delete",
   partFromLoop:
-    "These all come from one line of your program, so you can't change just one of them.  Pick the part that holds them all, or change that line.",
+    "These all come from one line of your program, so you can't change just one of them.\nPick the part that holds them all, or change that line.",
   partNotWritten:
-    "This isn't a part of its own in your program, so you can't move or remove it here.  Change your program instead.",
+    "This isn't a part of its own in your program, so you can't move or remove it here.\nChange your program instead.",
   menuChangeThis: "Change This...",
   changeThisHeader: "Tell your buddy Claude:",
   changeThisPrompt: "What should change?",
   changeThisNobody:
-    "This is waiting for a Claude session on this machine.  In one, ask it to run this in the background, and do what it says:",
+    "This is waiting for a Claude session on this machine.\nIn one, ask it to run this in the background, and do what it says:",
   changeThisWorking: "Claude is working on it...",
   changeThisDone: "Claude changed the code.",
   changeThisNoChange: "Claude finished, and no file changed.",
@@ -67,12 +67,12 @@ export const APP_TEXTS = {
   changeThisRemovePicture: "Take this picture out",
   menuShowInCode: "Show in Code",
   menuInspect: "Inspect",
-  partIsApp: "That's the app itself:  it can't be cut, duplicated or deleted.",
+  partIsApp: "That's the app itself:\nit can't be cut, duplicated or deleted.",
   partNothingCopied: "Nothing's been copied yet.",
   partNothingSelected: "Nothing's selected.",
   partBusy: "One moment:  the app is catching up with your last change.",
   partAcrossFiles: "These are written in different files, so they can't be moved together yet.",
-  partNoDrawing: "This program has no drawing to add to:  add a <draw> to it first.",
+  partNoDrawing: "This program has no drawing to add to:\nadd a <draw> to it first.",
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
   // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
@@ -110,7 +110,7 @@ export const APP_TEXTS = {
   importApp: "Import…",
   importedApp: "Imported {name}.",
   notAProjectFile: "{file} isn't a project Spell exported.",
-  keptInBrowser: "Your work is kept in this browser.  Clearing the site's data loses it:  Export keeps a copy.",
+  keptInBrowser: "Your work is kept in this browser.\nClearing the site's data loses it:\nExport keeps a copy.",
   startTitle: "Make something",
   startLine: "Start from nothing, or from something that already works.",
   startBlank: "Blank",
@@ -136,13 +136,13 @@ export const APP_TEXTS = {
   revertChanges: "Discard Changes",
   publishDraft: "Publish Draft",
   editingDraft: "Editing a Draft",
-  draftTip: "Only you can see these changes so far.  Click Publish Draft to show them to everyone.",
+  draftTip: "Only you can see these changes so far.\nClick Publish Draft to show them to everyone.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
   versions: "Versions",
   deleteDraft: "Delete Draft",
   deleteDraftConfirm:
-    "Throw away your draft?  Every file goes back to what everyone sees now.  Undo brings your changes back.",
+    "Throw away your draft?\nEvery file goes back to what everyone sees now.\nUndo brings your changes back.",
   draftDeleted: "Deleted your draft of {count} file(s).",
   saveCurrentChanges: "Save Current Changes",
   keptDraftAt: "{time}:  your draft, not published",
@@ -150,12 +150,12 @@ export const APP_TEXTS = {
   nothingToPublish: "Nothing to publish:  no file has a draft.",
   publishClashHeading: "Published since your draft began",
   publishClashMessage:
-    "Someone published these files after you started your draft.  Theirs is on the left, yours on the right.",
+    "Someone published these files after you started your draft.\nTheirs is on the left, yours on the right.",
   publishStartAgain: "Start Again from Theirs",
   publishAnyway: "Publish Mine Anyway",
   noVersions: "No versions yet:  each Publish keeps one.",
   versionsMessage:
-    "Each time you publish, Spell keeps a copy of your whole project.  Pick one to bring it back as your draft:  it replaces changes you haven't published yet.  What everyone sees stays the same until you click Publish, and it stays in this list.  To keep your changes first, click Save Current Changes:  they're added to the list as your draft, and only you see them.",
+    "Each time you publish, Spell keeps a copy of your whole project.\nPick one to bring it back as your draft:\nit replaces changes you haven't published yet.\nWhat everyone sees stays the same until you click Publish, and it stays in this list.\nTo keep your changes first, click Save Current Changes:\nthey're added to the list as your draft, and only you see them.",
   restoreVersion: "Restore",
   versionRestored: "Restored {count} file(s) from {version} as your draft.",
   autoSave: "AutoSave",
@@ -195,11 +195,11 @@ export const APP_TEXTS = {
   undoTextGone: "Couldn't undo {step}:  its text is no longer in the file.",
   // a running site's not found page, making the page its address names (epic `mockup` P2)
   siteCreatePage: "Create the page at {address}",
-  siteNoSiteFile: "This project has no site to add a page to:  make one, e.g. `galaxy guide is a site:`",
+  siteNoSiteFile: "This project has no site to add a page to:\nmake one, e.g. `galaxy guide is a site:`",
   // the site editor, `/site/<project>` (epic `mockup` P4)
   siteView: "Site",
   siteEditorTitle: "{project}:  sitemap",
-  siteNotASite: "{project} isn't a site:  a site's file says, e.g., `galaxy guide is a site:`",
+  siteNotASite: "{project} isn't a site:\na site's file says, e.g., `galaxy guide is a site:`",
   sitePages: "Pages",
   siteAddPage: "Add a page",
   siteNewPageTitle: "New page",
@@ -216,7 +216,7 @@ export const APP_TEXTS = {
   siteGroupTitle: "Sites",
   siteGroupLine: "Every site in this group:  open one to change its pages.",
   siteGroupNone: 'No sites here yet.  Make one by writing "galaxy guide is a site:" in a project of this group.',
-  sitesHomeLine: "Every site, by the group it's in:  open one to change its pages.",
+  sitesHomeLine: "Every site, by the group it's in:\nopen one to change its pages.",
   siteRunSite: "Run the site",
   siteFieldName: "Name",
   siteFieldTitle: "Title",
@@ -235,12 +235,12 @@ export const APP_TEXTS = {
   siteStories: "Stories",
   siteStoriesCount: "{done} of {count} stories",
   siteStoriesNone: "No stories yet:  what must this page let people do?",
-  siteStoriesElsewhere: "{name} is another project's page:  its stories are written there",
+  siteStoriesElsewhere: "{name} is another project's page:\nits stories are written there",
   siteAddStory: "Add a story",
   siteNewStory: "As a …, I want …, so that …\n\n\nIts description, after two blank lines",
   siteStoryDone: "Done",
   siteStoryMove: "Drag to move this story, or use the arrow keys",
-  siteStoryRemove: "Delete this story.  Hold Option to delete it without being asked first.",
+  siteStoryRemove: "Delete this story.\nHold Option to delete it without being asked first.",
   siteStoryConfirmRemove: "Delete this story?",
   siteChangeStories: "Change {name}'s stories",
   // the site's data, in the site editor's Data tab (epic `mockup` P11):  a NERD, its boxes turning over to their ERD
@@ -248,9 +248,9 @@ export const APP_TEXTS = {
   siteTabData: "Data",
   siteDataLoading: "Reading the site's places…",
   siteDataNone:
-    "This site reads no place described by spell place ingest:  its project file lists none under development.apis.",
+    "This site reads no place described by spell place ingest:\nits project file lists none under development.apis.",
   siteDataHint:
-    "Click a box to turn it over and see everything it holds, and to change its sample rows.  Drag a box to move it.",
+    "Click a box to turn it over and see everything it holds, and to change its sample rows.\nDrag a box to move it.",
   siteDataColumns: "Columns",
   siteDataErdTitle: "{box}:  every field",
   siteDataTurnBack: "Turn back",
@@ -261,7 +261,7 @@ export const APP_TEXTS = {
   inspectorNotSavedRunning: "The app sets this as it runs, so this change won't be saved.",
   inspectorShowCode: "Show the code",
   inspectorNotSavedNoStart: "Your program doesn't give this a starting value, so a change here won't be kept.",
-  inspectorNotSavedTypeSets: "Every one of the {types} starts with this.  To change it, pick All {types} first.",
+  inspectorNotSavedTypeSets: "Every one of the {types} starts with this.\nTo change it, pick All {types} first.",
   inspectorUnsavedAuto: "Spell makes this for you, so a change here can't be kept.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
   inspectorScopeThis: "This",
@@ -285,9 +285,9 @@ export const APP_TEXTS = {
   inspectorDataReadOnly: "Read only · {place}",
   inspectorDataWorkedOut: "From {places}",
   inspectorDataFrom:
-    "This is real data, kept in {place} with its other {collection}.  A change here is saved there too.",
+    "This is real data, kept in {place} with its other {collection}.\nA change here is saved there too.",
   inspectorDataFromSample:
-    "This is made-up sample data standing in for {place}.  A change here stays on this computer and never reaches it.",
+    "This is made-up sample data standing in for {place}.\nA change here stays on this computer and never reaches it.",
   inspectorDataWhyNotPlace: "Read only:  {place} takes no changes.",
   inspectorDataWhyNotOwner: "Read only:  this isn't yours to change in {place}.",
   inspectorDataWhyNotField: "Read only:  {place} doesn't let this field change.",
@@ -295,17 +295,17 @@ export const APP_TEXTS = {
   inspectorDataWhyNotTakenDown: "Read only:  Spell took this down in {place}.",
   inspectorDataWhyNotFull: "Full:  {place} has no place left for this.",
   inspectorDataWhyNotNotListed: "Read only:  only the people {place} lists sign up here.",
-  inspectorDataWhyNotUsedUp: "Used up:  you've asked {place} for every invitation you have.",
-  inspectorDataWorkedOutFrom: "Worked out from what it reads in {places}:  change those instead.",
-  inspectorDataSourceReal: "Real data, kept in {place}:  what you change here is saved there.",
+  inspectorDataWhyNotUsedUp: "Used up:\nyou've asked {place} for every invitation you have.",
+  inspectorDataWorkedOutFrom: "Worked out from what it reads in {places}:\nchange those instead.",
+  inspectorDataSourceReal: "Real data, kept in {place}:\nwhat you change here is saved there.",
   inspectorDataSourceReadOnly:
-    "This is kept in {place}, which doesn't let you change it from here.  Use a sample to try changes.",
-  inspectorDataSourceSample: "Sample data for {place}:  nothing you change here reaches it.",
+    "This is kept in {place}, which doesn't let you change it from here.\nUse a sample to try changes.",
+  inspectorDataSourceSample: "Sample data for {place}:\nnothing you change here reaches it.",
   inspectorDataUseSample: "Use a sample",
   inspectorDataChanges: "Change Data",
   sampleStartOver: "Start over",
   sampleMadeUp: "Made-up records",
-  sampleInUse: "Showing sample data for {places}:  nothing you change reaches the real data.",
+  sampleInUse: "Showing sample data for {places}:\nnothing you change reaches the real data.",
   useRealData: "Use the real data",
   find: "Find",
   compiledCode: "Compiled Code",
@@ -313,7 +313,7 @@ export const APP_TEXTS = {
   inspectApp: "Inspect App",
   stopInspecting: "Stop Inspecting",
   inspectHelp:
-    "Click a part of your app to see what it is.  Alt-click picks a part inside it.  Hold Shift or ⌘ to pick several, or drag across an empty spot.  Press Esc when you're done.",
+    "Click a part of your app to see what it is.\nAlt-click picks a part inside it.\nHold Shift or ⌘ to pick several, or drag across an empty spot.\nPress Esc when you're done.",
   inspectHelpClose: "Close",
   notSaved: "Not saved",
 
@@ -336,7 +336,7 @@ export const APP_TEXTS = {
   consoleExecuting: "Executing {type}",
   consoleFailed: "{Type} failed with error:",
   inspectorWrittenAt: "Written in {file}, line {line}",
-  inspectorWrittenAtShared: "Written in {file}, line {line}:  {count} of these come from this one place",
+  inspectorWrittenAtShared: "Written in {file}, line {line}:\n{count} of these come from this one place",
   consoleExecuted: "{Type} executed without errors.",
   testResults: "Tests:  {passed} passed, {failed} failed",
   noTests: "No tests -- write one as `to test <something>:`",
@@ -367,7 +367,7 @@ export const APP_TEXTS = {
   homeTitle: "Write an app in a sentence.",
   homeTagline: "Plain words in.  A working app out.",
   homeIntro:
-    "Spell is a programming language you can read aloud.  Open an example, change a sentence, and watch the app change beside it.",
+    "Spell is a programming language you can read aloud.\nOpen an example, change a sentence, and watch the app change beside it.",
   tryAnExample: "Try an example",
   readFirstSpell: "Read your first spell",
   homeQuoteTitle: "From the Task List",
@@ -377,7 +377,7 @@ export const APP_TEXTS = {
   homeExamplesLine: "Open one, change it, make it yours.",
   homeGuidesLine: "Your idea, your pace.",
   homeLibraryLine:
-    "Apps for an org:  its Admin page, chat, feed, inbox and events.  Open one, change it, give it to your own org.",
+    "Apps for an org:\nits Admin page, chat, feed, inbox and events.\nOpen one, change it, give it to your own org.",
   "category.first-steps": "First steps",
   "category.games": "Games",
   "category.everyday": "Everyday apps",
@@ -385,9 +385,9 @@ export const APP_TEXTS = {
   "category.sites": "Sites",
   homeProjectsLine: "What you've made, and where to start the next one.",
   editorPieceBroken:
-    "The editor's {piece} doesn't compile, so the editor runs the last one that did.  Fix it and publish again:  {problem}",
+    "The editor's {piece} doesn't compile, so the editor runs the last one that did.\nFix it and publish again:\n{problem}",
   draftEditorTitle: "The editor, from your drafts of its pieces",
-  homeEditorLine: "The editor's own pieces, in Spell:  change one, publish it, and the editor you're using changes.",
+  homeEditorLine: "The editor's own pieces, in Spell:\nchange one, publish it, and the editor you're using changes.",
   homeNoGuides: "Guides are on their way.",
 
   ////////////////
@@ -512,7 +512,7 @@ export const APP_TEXTS = {
   inspectorInspect: "Inspect app",
   inspectorTip: "Click the crosshairs, then click a part of your app to see what it is and change it.",
   inspectorInspecting:
-    "Click a part of your app to pick it.  Alt-click picks a part inside it.  Hold Shift or ⌘ to pick several, or drag across an empty spot.  Press Esc when you're done.",
+    "Click a part of your app to pick it.\nAlt-click picks a part inside it.\nHold Shift or ⌘ to pick several, or drag across an empty spot.\nPress Esc when you're done.",
   inspectorText: "Text",
   inspectorBuiltIn: "Built in",
   inspectorItems: "Its {count} items",
@@ -560,9 +560,9 @@ export const APP_TEXTS = {
   renameAction: "Rename {action} to {newName}",
   renameActionEmpty: "An action needs a name:  {action} keeps its own.",
   renameActionTaken: "There's an action called {newName} already.",
-  renameActionNotWords: "{newName} can't be an action's name:  use letters, numbers, spaces and dashes.",
+  renameActionNotWords: "{newName} can't be an action's name:\nuse letters, numbers, spaces and dashes.",
   renameActionNotAction:
-    "{action} can't be renamed here:  only an action of the program's own that takes nothing else.",
+    "{action} can't be renamed here:\nonly an action of the program's own that takes nothing else.",
   renameActionCallsDiffer: "{action} is called in other words somewhere, so renaming it would leave that behind.",
   inspectorProperties: "Properties",
   inspectorClose: "Close the Inspector",
@@ -609,7 +609,7 @@ export const APP_TEXTS = {
   thisPage: "This page",
   paletteNewView: "View",
   paletteNewViewTip:
-    "A new piece of this page, with a name of its own.  Write that name further down the page to show it there.",
+    "A new piece of this page, with a name of its own.\nWrite that name further down the page to show it there.",
   javascriptTab: "JavaScript",
   treeTab: "Sentence",
 
@@ -662,15 +662,15 @@ export const APP_TEXTS = {
 
   projectSettings: "{title} settings",
   projectSettingsHeading: "Project Settings",
-  titleTip: "Your app's name, as people see it:  in your list of apps, and at the top of the editor.",
+  titleTip: "Your app's name, as people see it:\nin your list of apps, and at the top of the editor.",
   versionTip:
-    "Which version of your app this is:  three numbers with dots, like 1.2.0.  Raise it when you change the app, so other apps that use yours can tell which one they have.",
+    "Which version of your app this is:\nthree numbers with dots, like 1.2.0.\nRaise it when you change the app, so other apps that use yours can tell which one they have.",
   targetsLabel: "Also compiles to",
   targetsTip:
-    "Spell turns your app into JavaScript, the language web browsers run, every time.  Pick a language here to get a copy of your app in it too.",
+    "Spell turns your app into JavaScript, the language web browsers run, every time.\nPick a language here to get a copy of your app in it too.",
   listsStartAtLabel: "Lists start at",
   listsStartAtTip:
-    "How your lists number their items.  At 1, the first item is number 1, the way people count.  At 0, it's number 0, the way JavaScript and Python count."
+    "How your lists number their items.\nAt 1, the first item is number 1, the way people count.\nAt 0, it's number 0, the way JavaScript and Python count."
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */
