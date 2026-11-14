@@ -13,12 +13,12 @@ solitaire is an app
 
 	to draw it
 		<segment inverted attach="top" >
-			<toolbar class="GameBar" appearance="secondary" inverted size="small" shrinkable>
+			<toolbar class="GameBar" appearance="pills" inverted size="small" shrinkable>
 				<text slot="title" size="large" heavy>Spell Solitaire</>
 				<action "cheat"/>
 				<action "auto play"/>
 				<action "restart the game" title="Restart"/>
-				<divider/>
+				<spacer/>
 				<action "undo"/>
 				<action "redo"/>
 				<text slot="right">Score: <number "score" /></>
