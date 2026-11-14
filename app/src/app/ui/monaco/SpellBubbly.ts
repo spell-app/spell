@@ -598,7 +598,8 @@ export class SpellBubbly {
     const { measures, lineHeight } = view
     const line = range.startLineNumber
     const left = this.tagLeft(shape, range, view)
-    const kind = `bubbly-${shape.partOfSpeech}`
+    // a tag that declares the member it draws:  round, not pointed (epic `editor` I84)
+    const kind = `bubbly-${shape.partOfSpeech}${shape.declares ? " bubbly-tag-declares" : ""}`
     // a start tag on lines of its own:  one tall band (T118)
     if (range.endLineNumber > line && shape.side === "start") {
       const where = shape.isAlone ? "bubbly-tag-tall-alone" : "bubbly-tag-tall-inline"
@@ -698,7 +699,7 @@ export class SpellBubbly {
    * - a tag's `{…}` value's inverted, in a shade of its tag's colour (`bubbly-expression`, Owen)
    */
   private drawInput(
-    { isChoice, expressionIn }: BubblyInputShape,
+    { isChoice, inTag, isExpression }: BubblyInputShape,
     range: monaco.Range,
     view: View
   ): HTMLElement | undefined {
@@ -708,13 +709,9 @@ export class SpellBubbly {
     const left = this.xOf(line, range.startColumn)
     const right = this.xOf(line, range.endColumn) + measures.inputSpacer
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
-    const pill = element(
-      isChoice
-        ? "bubbly-input bubbly-choice"
-        : expressionIn
-          ? `bubbly-input bubbly-expression bubbly-${expressionIn}`
-          : "bubbly-input"
-    )
+    // a tag's value in its tag's hue:  the layer draws it beside its tag's pill, not in it, so it can't inherit it
+    const classes = ["bubbly-input", isChoice && "bubbly-choice", isExpression && "bubbly-expression", inTag && `bubbly-${inTag}`]
+    const pill = element(classes.filter(Boolean).join(" "))
     return place(pill, { left, top, width: right - left }, measures.scale)
   }
 

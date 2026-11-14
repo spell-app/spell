@@ -118,6 +118,14 @@ export type BubblyDrawing = {
   text: string
   /** its top-level lines and blocks, in order */
   nodes: BubblyNode[]
+  /**
+   * where each tag in a drawing that DECLARES a member starts, its `<`, in order (epic `editor` I84):
+   * `<number "score"/>` ~== `"score" is a number`, `<column "C1"/>` ~== `"C1" is a new column`
+   * - as the parse decides it (`SpellJSX`'s `declares`):  a member said on a line of its own, `<action "redo"/>`,
+   *   any other tag, none
+   * - drawn round, not pointed:  it names a thing, where any other tag draws one
+   */
+  declaringTags: number[]
 }
 
 ////////////////

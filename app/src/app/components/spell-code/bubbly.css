@@ -1096,6 +1096,18 @@
     }
   } /* END bubbly-html */
 
+  /****** a drawing's tag that DECLARES the member it draws:  round, not pointed (Owen, epic `editor` I84) ******/
+  /*
+   * `<number "score"/>` ~== `"score" is a number`, `<stock-pile "stock"/>` ~== `"stock" is a new stock pile`:
+   * it makes a name, where any other tag (`<action "redo"/>`, `<text>`) draws something
+   * - which tags:  the compiler's own test, `SP.BubblyDrawing.declaringTags`;  marked `bubbly-tag-declares`
+   * - its pill's ends round, its `⟨` and `/⟩` drawn in them as on any tag (Owen, 2026-11-14:  "we should still see
+   *   the <> in these, but make it round")
+   */
+  &.bubbly-html :is(.bubbly-pill, .bubbly-tag-pill).bubbly-tag-declares {
+    corner-shape: round;
+    border-radius: calc(var(--bubbly-pill-height) / 2);
+  }
   /****** a head's description, `-- A playing card`:  at the drawing's right edge, its band reaching there (Owen) ******/
   /*
    * - as the editor draws it, at the window's edge:  on a page, the drawing's widest line's
@@ -1305,6 +1317,17 @@
     .bubbly-quote-spacer.bubbly-spacer-before {
       width: 0;
     }
+    /* after a tag's quoted value:  a little, the next attribute's own room after it (Owen) */
+    .bubbly-tag-quote-spacer {
+      width: calc(4px * var(--bubbly-monaco-scale));
+    }
+    /* a tag's quote marks lean further, the opening one up over the `=` before it (Owen) */
+    .bubbly-tag-quote {
+      --bubbly-quote-rotation: 30deg;
+    }
+    .view-line .bubbly-tag-quote.bubbly-quote-open::after {
+      translate: -75% -0.3em;
+    }
 
     /* the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size */
     .bubbly-layer {
@@ -1384,6 +1407,10 @@
     .view-line .bubbly-angle-close::before {
       left: auto;
       right: 0;
+    }
+    /* a nameless end tag, `</>`, in a line:  its brackets narrowed to the `/` between them, so it reads as one glyph (Owen) */
+    .view-line .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
+      letter-spacing: -0.2em;
     }
     /*
      * beside a `/`, a bracket's own character narrowed to the page's room (epic `editor` I83):
