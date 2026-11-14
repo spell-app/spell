@@ -26,7 +26,13 @@ import {
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS, runCodeEditorAction } from "spell/app/app/pages/editorHotkeys"
 import { CodeOutputShown } from "spell/app/app/solid/CodeOutput"
-import { loadEditorSpell, type EditorSpell, type SpellEditorApp } from "spell/app/app/layout/layoutSpell"
+import {
+  loadEditorSpell,
+  type BarMenuView,
+  type EditorSpell,
+  type SpellEditorApp
+} from "spell/app/app/layout/layoutSpell"
+import type { EditorMemberName } from "spell/app/app/layout/editorNames"
 import { uiReady } from "spell/app/app/solid/loadUI"
 
 import "./MenuBar.css"
@@ -262,7 +268,7 @@ export function ProjectBarMenu(): JSX.Element {
       })
     )
   )
-  followEditor(spell, () => ({
+  followEditor(spell, (): EditorValues => ({
     renameWords: appTexts.text("renameProject", project()),
     deleteWords: appTexts.text("deleteProject", project()),
     duplicateWords: appTexts.text("duplicateProject", project()),
@@ -351,7 +357,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
       })
     )
   })
-  followEditor(spell, () => ({
+  followEditor(spell, (): EditorValues => ({
     canRevert: editor.canRevertChanges,
     revertWords: appTexts.text("revertChanges"),
     autoSaving: editor.isAutoSaving,
@@ -402,14 +408,18 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
 }
 
 /** The bar's menus in `SpellEditor.spell`, in the bar's order:  each the app's member of that name. */
-const BAR_MENUS = ["fileMenu", "editMenu", "viewMenu", "runMenu"] as const
+const BAR_MENUS = ["fileMenu", "editMenu", "viewMenu", "runMenu"] as const satisfies readonly EditorMemberName<
+  "SpellEditor",
+  "view"
+>[]
 
 /** One of `BAR_MENUS`. */
 type BarMenuName = (typeof BAR_MENUS)[number]
 
 /** Bar menu `name`'s title, the Spell's word for it, in the page's language (`appTexts.titles`). */
 function titleOf(spell: EditorSpell, name: BarMenuName): string {
-  const { title } = spell.editor[name]
+  // a menu the Spell no longer has (renamed):  its name, and the load's notice says why
+  const title = (spell.editor[name] as BarMenuView | undefined)?.title ?? name
   return appTexts.titles[title] ?? title
 }
 
@@ -498,13 +508,19 @@ let loadingWithActions: Promise<EditorSpell> | undefined
  * The editor's Spell, as an accessor:  `undefined` until it's loaded (`editorSpellWithActions()`).
  * - `holes`:  run once it's loaded, to hand its views what the editor draws in their holes (`loaded.parts()`).
  * - Call in a component body.
- * - NEVER throws:  Spell that won't load leaves the menus empty, and says so on the console.
+ * - NEVER throws:  Spell that won't load leaves the menus empty, and says so on the console;
+ *   so does a view of it `holes` can't fill.
  */
 function editorSpell(holes?: (app: SpellEditorApp, loaded: EditorSpell) => void): () => EditorSpell | undefined {
   const [spell, setSpell] = createSignal<EditorSpell>()
   editorSpellWithActions().then(
     (loaded) => {
-      holes?.(loaded.editor, loaded)
+      // a view the Spell no longer has (renamed):  the load's notice says so, and its menu stays empty
+      try {
+        holes?.(loaded.editor, loaded)
+      } catch (problem) {
+        console.error("the menus can't fill the editor's Spell", problem)
+      }
       setSpell(() => loaded)
     },
     (problem: unknown) => console.error("the menus can't load the editor's Spell", problem)
@@ -512,8 +528,11 @@ function editorSpell(holes?: (app: SpellEditorApp, loaded: EditorSpell) => void)
   return spell
 }
 
-/** Keep the editor's Spell in step with `values`, the editor's state its rows grey, tick and title by. */
-function followEditor(spell: () => EditorSpell | undefined, values: () => Record<string, unknown>) {
+/**
+ * Keep the editor's Spell in step with `values`, the editor's state its rows grey, tick and title by.
+ * - Each by its name in `EDITOR_NAMES`:  one not there doesn't compile.
+ */
+function followEditor(spell: () => EditorSpell | undefined, values: () => EditorValues) {
   createEffect(
     () => [spell(), values()] as const,
     ([loaded, now]) => {
@@ -521,6 +540,9 @@ function followEditor(spell: () => EditorSpell | undefined, values: () => Record
     }
   )
 }
+
+/** The editor's state its Spell's rows grey, tick and title by:  each by its name in `EDITOR_NAMES`. */
+type EditorValues = Partial<Record<EditorMemberName<"SpellEditor", "value">, unknown>>
 
 /**
  * What each action of the editor's Spell DOES, the editor's own:  each a method of its name on `app`,
@@ -530,7 +552,8 @@ function followEditor(spell: () => EditorSpell | undefined, values: () => Record
  */
 function handOverActions(spell: EditorSpell) {
   const app = spell.editor
-  const actions: Record<string, () => unknown> = {
+  // every action `EDITOR_NAMES` lists, and no other
+  const actions: Record<EditorMemberName<"SpellEditor", "action">, () => unknown> = {
     home: () => editor.showProjectChooser(),
     aboutSpell: () => showAboutSpell(spell),
     renameProject: () => editor.renameApp(),
@@ -607,19 +630,22 @@ function started(work: unknown) {
  * A menu of the editor's Spell, drawn in place:  `view(app)`'s drawing, a Spell UI `<ui-menu>` of its rows
  * (`SpellEditor.spell`).
  * - Its titles in the page's language:  drawn again as that language's texts arrive (`appTexts.titles`).
- * - Nothing while `spell` is still loading.
+ * - Nothing while `spell` is still loading, nor for a view it doesn't have.
  */
 function SpellMenu(props: {
   spell: EditorSpell | undefined
-  view: (app: SpellEditorApp) => Record<string, unknown>
+  view: (app: SpellEditorApp) => Record<string, unknown> | undefined
 }): JSX.Element {
   return (
     <>
       {(() => {
         const { spell } = props
         if (!spell) return null
+        const view = props.view(spell.editor)
+        // a view the Spell no longer has (renamed):  an empty menu, and the load's notice says why
+        if (!view) return null
         spell.useTitles(appTexts.titles)
-        return spell.drawInPlace(props.view(spell.editor)) as JSX.Element
+        return spell.drawInPlace(view) as JSX.Element
       })()}
     </>
   )

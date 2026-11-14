@@ -2,6 +2,7 @@ import { editor, runtimeUrl } from "spell/app/app/editor"
 import { loadRuntime, type SpellRuntime } from "spell/app/app/runner/loadRuntime"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import spellEditorSpell from "spell/app/spaces/@spell/editor/spell-editor/SpellEditor.spell"
+import { missingEditorNames, type EditorMemberName, type EditorPartName, type MissingEditorName } from "./editorNames"
 
 /**
  * The editor's own Spell (`.spell`, epic `editor` P6, its first stage of turtles):
@@ -40,6 +41,8 @@ let loading: ReturnType<typeof layoutRuntime> | undefined
  *   and in the editor you're using once it's published;  one that doesn't compile keeps the last good compile, and says why.
  * - Its app is the layout copy's running app (`importCompiled()` resets the copy's runtime first):
  *   so an `<action "save"/>` in any of its views finds the app's action up its chain.
+ * - A name the editor needs that the Spell is missing (`EDITOR_NAMES`):  ONE notice naming every one
+ *   (`editorNamesMissing()`);  what it can, the editor still draws.
  * - throws if the runtime or the Spell can't load
  */
 export function loadEditorSpell(): Promise<EditorSpell> {
@@ -55,6 +58,7 @@ async function loadEditor(): Promise<EditorSpell> {
   runtime.core.appLayout = true
   // its app the copy's running app:  `importCompiled()` resets the copy's runtime first
   const exports = await runtime.importCompiled(spellEditorSpell, coreUrl)
+  editorNamesMissing(missingEditorNames(exports))
   return {
     editor: exports.spellEditor as SpellEditorApp,
     exports,
@@ -78,10 +82,29 @@ export function layoutPieceBroken(piece: string, problem: string): void {
 }
 
 /**
+ * Say which names the editor needs that its Spell is missing, `missing`, in ONE notice (epic `editor` I123):
+ * renamed in `SpellEditor.spell`, they'd stop a menu ticking, or a pane drawing, with nothing said.
+ * - Each a line of its own:  `code is showing`, of `spell editor`;  a whole type, `file tab bar`.
+ * - Nothing when none is missing.
+ * - NEVER throws.
+ */
+export function editorNamesMissing(missing: readonly MissingEditorName[]): void {
+  if (!missing.length) return
+  const names = missing
+    .map(({ type, member }) =>
+      member ? appTexts.text("editorNameOfType", { name: member, type }) : appTexts.text("editorTypeName", { type })
+    )
+    .join("\n")
+  console.error("The editor's Spell is missing names the editor fills:", missing)
+  // once the page's first draw is under way, so the notice shows where the editor shows errors
+  queueMicrotask(() => editor.showError(appTexts.text("editorNamesMissing", { names })))
+}
+
+/**
  * `parts` made the Spell's editor parts (`an "editor part" is a thing`, `EditorPart`), each drawn by its `draw()`.
  * - So a view's place for one holds what its type says:  a plain `{ draw }` was no thing, and each warned.
  */
-function editorParts<Name extends string>(
+function editorParts<Name extends EditorPartName>(
   EditorPart: new () => object,
   parts: Record<Name, DrawnByTheEditor>
 ): Record<Name, object> {
@@ -115,32 +138,34 @@ export type EditorSpell = {
    * `parts` as its editor parts (`an "editor part" is a thing`):  what the editor draws in its views' places for it,
    * ready to hand to a view, `Object.assign(app.editorBar, spell.parts({ you: { draw: ... } }))`.
    */
-  parts: <Name extends string>(parts: Record<Name, DrawnByTheEditor>) => Record<Name, object>
+  parts: <Name extends EditorPartName>(parts: Record<Name, DrawnByTheEditor>) => Record<Name, object>
   /** Show its titles in the page's language:  each English title's text in it (`appTexts.titles`). */
   useTitles: (titles: Record<string, string>) => void
 }
 
 /**
  * The app `spell editor`, as `SpellEditor.spell` compiles:  its views, and what the editor keeps in step.
+ * - Every name the editor reads or fills of it is in `EDITOR_NAMES`.
  * - Each action of it is a method of its name (`save`, `showInspector` ...), which the editor's own replaces
  *   (`MenuBar.tsx`):  a row's click runs it through the core.
  */
-export type SpellEditorApp = Record<string, unknown> & {
-  editorBar: Record<string, unknown>
-  editorLayout: Record<string, unknown>
-  fileTabBar: Record<string, unknown>
-  projectMenu: Record<string, unknown>
-  fileMenu: BarMenuView
-  editMenu: BarMenuView
-  viewMenu: BarMenuView
-  runMenu: BarMenuView
-  /** The top of Spell's menu:  Home and About Spell. */
-  homeRow: Record<string, unknown>
-  /** What About Spell shows;  its `version` the editor's. */
-  aboutBox: Record<string, unknown> & { version: string }
-  /** What the project menu's Versions shows (`openVersions()`):  its words and rows the editor's. */
-  versionsBox: Record<string, unknown>
-}
+export type SpellEditorApp = Record<string, unknown> &
+  Record<EditorMemberName<"SpellEditor", "view">, Record<string, unknown>> & {
+    editorBar: Record<string, unknown>
+    editorLayout: Record<string, unknown>
+    fileTabBar: Record<string, unknown>
+    projectMenu: Record<string, unknown>
+    fileMenu: BarMenuView
+    editMenu: BarMenuView
+    viewMenu: BarMenuView
+    runMenu: BarMenuView
+    /** The top of Spell's menu:  Home and About Spell. */
+    homeRow: Record<string, unknown>
+    /** What About Spell shows;  its `version` the editor's. */
+    aboutBox: Record<string, unknown> & { version: string }
+    /** What the project menu's Versions shows (`openVersions()`):  its words and rows the editor's. */
+    versionsBox: Record<string, unknown>
+  }
 
 /** One of the bar's menus in `SpellEditor.spell`, a `bar menu`:  its title, the bar's word for it, in English. */
 export type BarMenuView = Record<string, unknown> & { title: string }

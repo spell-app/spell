@@ -4,6 +4,7 @@ import { render, type JSX } from "@solidjs/web"
 import { kebabCase, schemaOf, type Schema } from "spell/util"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import type { EditorMemberName } from "spell/app/app/layout/editorNames"
 import { ErrorBoundary } from "./ErrorBoundary"
 
 import "./EditorZones.css"
@@ -243,7 +244,9 @@ function showModal(view: object, core: ZoneCore): void {
  */
 function sampleFill(view: object, core: ZoneCore): void {
   const fields = view as Record<string, unknown>
-  const words: Record<string, string> = {
+  const words: Partial<
+    Record<EditorMemberName<"AboutBox", "value"> | EditorMemberName<"VersionsBox", "value">, string>
+  > = {
     version: __PACKAGE_VERSION__,
     heading: appTexts.text("versions"),
     message: appTexts.text("versionsMessage"),

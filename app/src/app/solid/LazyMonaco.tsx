@@ -1,6 +1,7 @@
 import { lazy, type Component } from "solid-js"
 
 import { editor } from "spell/app/app/editor"
+import { editorHostNames } from "spell/app/app/layout/editorNames"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import type { CodeSliceProps, DiffViewProps, FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/monaco"
 import { CodeSettings } from "./CodeSettings"
@@ -14,6 +15,8 @@ import { CodeSettings } from "./CodeSettings"
  *   and "go to definition" in another file shows that file.
  * - SIDE EFFECT, once loaded:  hands the editor a scope explorer on its language service,
  *   for the Types tab (`editor.setScopeExplorer()`).
+ * - SIDE EFFECT, once loaded:  hands the language service the names the editor fills in its own Spell
+ *   (`editorHostNames()`), so renaming one there is an error as it's typed (epic `editor` I123).
  * - SIDE EFFECT, once loaded:  every Monaco editor on the page takes the code pane's settings (`CodeSettings`).
  * - SIDE EFFECT, once loaded:  puts `SpellMonaco` / `monaco` on `globalThis` for console debugging,
  *   as `debug.ts` does for everything else.
@@ -60,7 +63,9 @@ function loadMonaco(): Promise<typeof import("spell/app/app/solid/monaco")> {
     editor.codeEditorEdits = (file, edits, way) => module.SpellMonaco.models.applyEdits(file, edits, way)
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in Monaco's chunk
     const { LSP } = await import("spell/app/lsp")
-    editor.setScopeExplorer(new LSP.ScopeExplorer(module.SpellMonaco.register().service))
+    const { service } = module.SpellMonaco.register()
+    editor.setScopeExplorer(new LSP.ScopeExplorer(service))
+    service.hostNames.push(editorHostNames((name) => appTexts.text("editorNameNeeded", { name })))
     // the app's editor shows any file, so it takes whatever no `<spell-editor>` on the page did
     module.SpellMonaco.onOpen((path, selection) => {
       void editor.showFileAt(path, selection)

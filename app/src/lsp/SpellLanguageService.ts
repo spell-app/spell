@@ -62,6 +62,11 @@ export class SpellLanguageService {
   #docsCache = new WeakMap<P.Match, Map<P.Match, SP.DocComment>>()
   /** The `<css>` blocks in each file, answered as CSS -- see `LSP.SpellCSS`. */
   css = new LSP.SpellCSS()
+  /**
+   * The names each host fills by name in a project of its own, checked as its code is edited (`LSP.HostNameCheck`):
+   * the app's editor hands its own Spell's (epic `editor` I123);  none by default.
+   */
+  hostNames: LSP.HostNames[] = []
 
   constructor(addresses: LSP.FileAddresses) {
     this.addresses = addresses
@@ -119,6 +124,7 @@ export class SpellLanguageService {
    * - its parse errors, each under the text it couldn't make sense of
    * - then its warnings, each under what it's about, e.g. a property with no type -- see `SP.SpellWarnings`
    * - then the CSS mistakes in its `<css>` blocks -- see `LSP.SpellCSS`
+   * - then each name its host fills that the code no longer declares -- see `LSP.HostNameCheck`
    * - A file its project doesn't parse, or a project whose parse crashed, gets ONE diagnostic saying so, at the top.
    */
   diagnostics(file: SP.SpellFile): Diagnostic[] {
@@ -147,7 +153,7 @@ export class SpellLanguageService {
       const range = this.rangeOf(file, at)
       return range ? [{ range, severity: DiagnosticSeverity.Warning, source: "spell", message }] : []
     })
-    return [...errors, ...warnings, ...this.css.diagnostics(text)]
+    return [...errors, ...warnings, ...this.css.diagnostics(text), ...LSP.HostNameCheck.diagnostics(this, file)]
   }
 
   /**

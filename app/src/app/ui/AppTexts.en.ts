@@ -397,6 +397,12 @@ export const APP_TEXTS = {
   homeProjectsLine: "What you've made, and where to start the next one.",
   editorPieceBroken:
     "The editor's {piece} doesn't compile, so the editor runs the last one that did.\nFix it and publish again:\n{problem}",
+  editorNameNeeded:
+    "The editor fills `{name}` itself.\nRenaming it stops the editor from working.\nKeep this name, or ask Claude to rename it in the editor's code too.",
+  editorNamesMissing:
+    "The editor's Spell is missing names the editor fills itself:\n{names}\nWhat needs them won't show or work.\nPut them back in SpellEditor.spell, or ask Claude to rename them in the editor's code too.",
+  editorNameOfType: "`{name}`, of `{type}`",
+  editorTypeName: "`{type}`, the whole type",
   editorZonesWaiting: "Each of the editor's parts shows here, in a zone of its own, once its Spell runs.",
   editorZonesShow: "Show",
   editorZonesStandIn: "The editor's own:  {part}",
