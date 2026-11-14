@@ -186,6 +186,14 @@ describe("<ui-toolbar appearance=pills>", () => {
     expect(Math.round(actionsInRow[1]!.left - actionsInRow[0]!.right)).toBe(0)
   })
 
+  it("any element between two runs splits them, with the same gap:  a spacer as well as a divider", async () => {
+    const withSpacer = GROUPS.replace(`<ui-item kind="divider"></ui-item>`, `<spacer></spacer>`)
+    const { host } = await toolbar(900, withSpacer, `appearance="pills"`)
+    expect(pieces(host)).toEqual(["s", "m", "e", "s", "e"])
+    const boxes = [...host.querySelectorAll("ui-action")].map((action) => itemBox(action).getBoundingClientRect())
+    expect(boxes[3]!.left - boxes[2]!.right).toBeGreaterThan(8)
+  })
+
   it("a lone item is a pill rounded at both ends;  without `pills`, no pieces at all", async () => {
     const lone = await toolbar(900, `<ui-action icon="eye">Cheat</ui-action>`, `appearance="pills"`)
     expect(pieces(lone.host)).toEqual(["se"])

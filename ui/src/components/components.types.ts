@@ -189,8 +189,12 @@ export type ItemContext = {
   pill?: PillPlace
 }
 
-/** Where an item sits in its pill:  `only` is both its start and its end. */
-export type PillPlace = "start" | "middle" | "end" | "only"
+/**
+ * Where an item sits in its pill:  `only` is both its start and its end.
+ * - `next-start` / `next-only`:  the start of a pill that follows another, the gap between them before it,
+ *   whatever splits them (a divider, a spacer, any other element in the row).
+ */
+export type PillPlace = "start" | "middle" | "end" | "only" | "next-start" | "next-only"
 
 /** Roles an owner may give an item's root. */
 export type ItemRole = "menuitem" | "menuitemradio" | "menuitemcheckbox" | "option" | "treeitem" | "tab"
