@@ -10,9 +10,16 @@ ui-popup.ChangeThisPopup::part(popup) {
   gap: 8px;
   width: 420px;
 }
-/* "Tell your buddy Claude:" over the words (epic `editor` I103) */
+/* "Tell your buddy Claude:" over the words (epic `editor` I103), its first letter over theirs (I121):
+   the field's border and its own inline padding in */
 .ChangeThisHeader {
+  padding-inline-start: calc(var(--ui-input-padding-inline, 1em) + var(--ui-border-width, 1px));
   font-weight: 600;
+}
+/* the words with room all round (I121):  the editor's compact sizing (Glass's `<ui-root app>`) takes a field's
+   padding away, as its height alone decides a one-line field's;  a box of several lines needs it back */
+.ChangeThisBox ui-textarea {
+  --ui-input-padding-block: 0.6em;
 }
 .ChangeThisBox p {
   margin: 0;
