@@ -17,6 +17,10 @@
  *   - How many are kept:  the fewer of the org's policy (`OrgRoles.policy()`, its Admin space) and the project
  *     file's cap (`versionsKept`, Q26);  neither says:  every one.
  *   - It refuses (409) when a published file changed since your draft of it started, unless told to anyway (Q25).
+ * - A KEPT DRAFT (epic `mockup`, the Versions dialog's "Save Current Changes"):  your draft over the published files,
+ *   zipped beside the versions as `versions/<project>.<day>-<time>.draft.<person>.zip`.
+ *   - Never published, never counted against the versions kept, and listed only to you.
+ *   - Restored as any version is:  it's your draft again.
  * - The private folders, `__draft/` and `versions/`, are never served:  `isPrivatePath()`, which the routes ask.
  * - WHO may draft, and publish, asked through `ProjectRoles`;  no check of its own:
  *   - draft:  a DESIGNER of the project's space (`canDesign`, T47, J117):  its managers, and anyone its org lets design it
@@ -299,14 +303,39 @@ export class ProjectDrafts {
   // ## Versions
   ////////////////
 
-  /** The project's versions, newest first. */
+  /** The project's versions, and your kept drafts (`keepDraft()`), newest first. */
   async versions(): Promise<VersionJSON[]> {
     const folder = this.privatePath(VERSIONS_FOLDER)
     if (!(await fileUtils.pathExists(folder))) return []
     const names = await fileUtils.getFolderContents(folder, { namesOnly: true, pattern: /\.zip$/ })
-    return names
-      .map((name) => ({ name, at: name.slice(this.projectName.length + 1, -".zip".length) }))
-      .sort((one, other) => other.at.localeCompare(one.at))
+    const versions: VersionJSON[] = []
+    for (const name of names) {
+      const { at, draftOf } = versionNameParts(name.slice(this.projectName.length + 1))
+      if (draftOf === undefined) versions.push({ name, at })
+      else if (draftOf === this.nameTag) versions.push({ name, at, draft: true })
+    }
+    return versions.sort((one, other) => other.at.localeCompare(one.at))
+  }
+
+  /**
+   * SIDE EFFECT:  keep your draft as a version of its own, never published:  the Versions dialog's
+   * "Save Current Changes" (see the file).
+   * - Every public file, each you have a draft of as your draft has it.
+   * - throws 409 when you have no draft;  403 when you may not design the project (`mayDesign()`)
+   */
+  async keepDraft(): Promise<VersionJSON> {
+    await this.roles.mayOrDie("design")
+    const drafts = await this.drafts()
+    if (!drafts.length) throw new SRV.HttpError(409, `${this.projectId}:  you have no draft to keep`)
+    const mine = new Map(drafts.map(({ filePath, mine }) => [filePath, Buffer.from(mine, "utf8")]))
+    const entries = await Promise.all(
+      (await this.publicFiles())
+        .filter((filePath) => !mine.has(filePath))
+        .map(async (filePath) => [filePath, await readFile(this.publicPath(filePath))] as const)
+    )
+    const { name, at } = await this.newVersionName(`.${DRAFT_MARK}.${this.nameTag}`)
+    await fileUtils.saveBinaryFile(this.privatePath(VERSIONS_FOLDER, name), zipped([...entries, ...mine]))
+    return { name, at, draft: true }
   }
 
   /**
@@ -337,7 +366,8 @@ export class ProjectDrafts {
   /**
    * Make a draft of every file version `name` holds that differs from what's published.
    * - Restoring is drafting, so nothing public changes until Publish.
-   * - Returns the files drafted.
+   * - A file it holds as published:  your draft of it goes, so the project is the version's throughout.
+   * - Returns the files it changed:  drafted, or your draft gone.
    * - throws 404 when there's no such version
    */
   async restore(name: string): Promise<string[]> {
@@ -345,14 +375,16 @@ export class ProjectDrafts {
     if (name.includes("/") || !(await fileUtils.pathExists(path))) {
       throw new SRV.HttpError(404, `${this.projectId} has no version ${name}`)
     }
-    const drafted: string[] = []
+    const yours = await this.draftedFiles()
+    const changed: string[] = []
     for (const [filePath, contents] of unzipped(await readFile(path))) {
       const published = await fileUtils.loadTextFile(this.publicPath(filePath), "OPTIONAL")
-      if (published === contents.toString("utf8")) continue
+      if (published === contents.toString("utf8") && !yours.includes(filePath)) continue
+      // the same as published:  `save()` discards your draft
       await this.save(filePath, contents.toString("utf8"))
-      drafted.push(filePath)
+      changed.push(filePath)
     }
-    return drafted
+    return changed
   }
 
   /**
@@ -364,23 +396,40 @@ export class ProjectDrafts {
     const entries = await Promise.all(
       files.map(async (filePath) => [filePath, await readFile(this.publicPath(filePath))] as const)
     )
-    // two in the same second:  the second gets `-2`, so no version is ever written over
-    const stamp = versionStamp(new Date())
-    let name = `${this.projectName}.${stamp}.zip`
-    for (let count = 2; await fileUtils.pathExists(this.privatePath(VERSIONS_FOLDER, name)); count++) {
-      name = `${this.projectName}.${stamp}-${count}.zip`
-    }
+    const { name } = await this.newVersionName()
     await fileUtils.saveBinaryFile(this.privatePath(VERSIONS_FOLDER, name), zipped(entries))
     const kept = await this.versionsKept()
     if (kept !== undefined) {
-      // a version a message points to stays, past the cap:  it's never counted, never dropped
+      // a version a message points to stays, past the cap:  it's never counted, never dropped;  nor is a kept draft
       const forGood = await this.keptForGood()
-      const counted = (await this.versions()).filter(({ name: each }) => !forGood.includes(each))
+      const counted = (await this.versions()).filter(({ name: each, draft }) => !draft && !forGood.includes(each))
       for (const { name: old } of counted.slice(kept)) {
         await fileUtils.deletePath(this.privatePath(VERSIONS_FOLDER, old))
       }
     }
     return name
+  }
+
+  /**
+   * A new version's file name, stamped now, `mark` before `.zip` (a kept draft's):  two in the same second,
+   * the second gets `-2`, so no version is ever written over.
+   */
+  private async newVersionName(mark = ""): Promise<{ name: string; at: string }> {
+    const stamp = versionStamp(new Date())
+    let at = stamp
+    for (
+      let count = 2;
+      await fileUtils.pathExists(this.privatePath(VERSIONS_FOLDER, this.versionName(at, mark)));
+      count++
+    ) {
+      at = `${stamp}-${count}`
+    }
+    return { name: this.versionName(at, mark), at }
+  }
+
+  /** `Counter.2026-11-03-091502.zip`, or with `mark`, `Counter.2026-11-03-091502.draft.owen.zip` */
+  private versionName(at: string, mark: string): string {
+    return `${this.projectName}.${at}${mark}.zip`
   }
 
   /** How many versions are kept:  the fewer of the org's policy and the project file's cap;  `undefined`, every one. */
@@ -499,6 +548,8 @@ export type ProjectDraftsForProps = Omit<ProjectDraftsProps, "projectId" | "pers
 export const DRAFT_FOLDER = "__draft"
 /** Versions' private folder in a project. */
 export const VERSIONS_FOLDER = "versions"
+/** What marks a kept draft's file name in `versions/`, before its person:  `.draft.owen.zip` (`keepDraft()`). */
+const DRAFT_MARK = "draft"
 /** The versions kept for good, inside `versions/` (`keepForGood()`). */
 const KEPT_FILE = "__kept.json5"
 /** Your build's folder inside `__draft/`, before your name tag:  `__build.owen` (see "Your build"). */
@@ -519,6 +570,16 @@ type DraftRecords = Record<string, Record<string, DraftRecord>>
 function privateAddressOf(space: PairedSpace): string {
   if (space.of.kind === "the-admin-space") return `@${space.org}/${ADMIN_SPACE}`
   return `${space.address}/${PRIVATE_SPACE}`
+}
+
+/**
+ * A version's file name after its project's:  `2026-11-03-091502.zip` => `{ at: "2026-11-03-091502" }`;
+ * a kept draft's, `2026-11-03-091502.draft.owen.zip` => `{ at, draftOf: "owen" }`.
+ */
+function versionNameParts(rest: string): { at: string; draftOf?: string } {
+  const bare = rest.slice(0, -".zip".length)
+  const mark = bare.indexOf(`.${DRAFT_MARK}.`)
+  return mark < 0 ? { at: bare } : { at: bare.slice(0, mark), draftOf: bare.slice(mark + DRAFT_MARK.length + 2) }
 }
 
 /** `/a/Deck.spell` => `{ folder: ["a"], stem: "Deck", extensions: ".spell" }` */

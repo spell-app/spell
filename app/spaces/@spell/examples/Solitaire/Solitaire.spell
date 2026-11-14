@@ -20,7 +20,7 @@ solitaire is an app
 	"C7" is a new column
 	"score" is a number
 	
-	when creating solitaire
+	when creating it
 		for each card in the deck
 			add it to the stock
 		restart the game
@@ -32,7 +32,7 @@ solitaire is an app
 				<buttons slot="center" padding="compact">
 					<action "auto play"/>
 					<action "cheat"/>
-					<action "restart the game" title="Restart"/>
+					<action "restart the game"/>
 				</buttons>
 				<buttons slot="center" padding="compact">
 					<action "undo" icon-only/>
@@ -71,7 +71,7 @@ solitaire is an app
 		</container>
 
 	group "Dealing"
-	to "restart the game" with shortcut "R"
+	to "restart the game" with title "Restart", shortcut "R"
 		undoable
 		clear the score
 		deal the cards
@@ -104,6 +104,11 @@ solitaire is an app
 		pause for 300 msec
 		add it to the discards
 	
+	to turn a stock card
+		// a click on the stock:  one step to undo, where the deal's own turn isn't
+		undoable as "Turn Card"
+		play from the stock
+
 	to reset the stock
 		// The discards, turned over, back into the stock
 		set cards to a copy of list (the discards) as a pile
@@ -117,7 +122,7 @@ solitaire is an app
 	to play a card
 		undoable as "Play Card"
 		if card's pile is solitaire's stock
-			play from the stock
+			turn a stock card
 		otherwise
 			set end pile to the first pile in every pile where it can take the card
 			if there is not an end pile return no
@@ -138,7 +143,7 @@ solitaire is an app
 		set solitaire's score to solitaire's score + points
 		return yes
 
-	to "auto play"with shortcut "A"
+	to "auto play" with shortcut "A"
 		// Play every card that can go somewhere, until none can
 		undoable
 		set anything changed to no
@@ -213,7 +218,7 @@ a "stock pile" is a pile
 	to draw its placeholder
 		<text part="placeholder">🂠</text>
 	on click
-		play from the stock
+		turn a stock card
 
 a "discard pile" is a pile		-- Where the stock's cards go as they're turned over
 	its "layout" is stacked

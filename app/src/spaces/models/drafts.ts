@@ -18,12 +18,14 @@ export type DraftJSON = {
   theirs: string
 }
 
-/** A version of a project:  a zip of it at a Publish. */
+/** A version of a project:  a zip of it at a Publish, or your draft kept with "Save Current Changes". */
 export type VersionJSON = {
-  /** its file's name, e.g. `Counter.2026-11-03-091502.zip` */
+  /** its file's name, e.g. `Counter.2026-11-03-091502.zip`;  a kept draft's `Counter.2026-11-03-091502.draft.owen.zip` */
   name: string
   /** when, as its name says, e.g. `2026-11-03-091502` */
   at: string
+  /** Is it a draft of yours, kept and never published (`ProjectDrafts.keepDraft()`)?  Only yours are listed. */
+  draft?: boolean
 }
 
 /** What a Publish did. */

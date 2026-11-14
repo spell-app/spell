@@ -111,7 +111,7 @@ export type ActionProps = {
 
 /**
  * The app's public actions, each a Solid component around `<Action>`:
- * `<Actions.saveFile />`, or `<Actions.saveFile button />`.
+ * `<Actions.saveAll />`, or `<Actions.saveAll button />`.
  * - Props given at the call site win over the entry's own (`title`, `icon`, `onClick` ...).
  * - An entry whose look depends on `editor` reads it through `tracked()`, in its own body,
  *   and reads the accessor in JSX.
@@ -283,6 +283,15 @@ export const Actions = {
       {...props}
     />
   ),
+  /** "New CSS File":  a `.css` file in the project, asking its name as New File does. */
+  createCssFile: (props: ActionProps) => (
+    <Action
+      title={appTexts.text("newCssFile")}
+      icon="file code outline"
+      onClick={() => editor.createCssFile()}
+      {...props}
+    />
+  ),
   duplicateFile: (props: ActionProps) => (
     <Action
       title={appTexts.text("duplicateFile")}
@@ -302,30 +311,34 @@ export const Actions = {
       {...props}
     />
   ),
-  saveFile: (props: ActionProps) => {
-    const fileIsDirty = tracked(() => !!editor.file?.isDirty)
+  /** "Save":  every file of the project with edits not saved (⌘S);  lit while there are any. */
+  saveAll: (props: ActionProps) => {
+    const hasUnsavedEdits = tracked(() => editor.hasUnsavedEdits)
     return (
       <Action
         title={appTexts.text("save")}
-        active={fileIsDirty()}
+        active={hasUnsavedEdits()}
         color="green"
         icon="cloud upload"
-        shortcut={EDITOR_HOTKEYS.saveFile.shortcut}
-        onClick={() => editor.saveFile()}
+        shortcut={EDITOR_HOTKEYS.saveAll.shortcut}
+        onClick={() => editor.saveAll()}
         {...props}
       />
     )
   },
-  /** "Discard Changes":  your draft of the file goes, back to what's published;  ⌘Z brings it back (⌘⇧R). */
-  discardChanges: (props: ActionProps) => {
-    const canDiscard = tracked(() => editor.canDiscardChanges)
+  /**
+   * "Revert Changes":  the file back to what was last saved, or with AutoSave on, to what's published;
+   * ⌘Z brings it back (⇧⌘R).  Greyed with nothing to revert (`editor.revertChanges()`).
+   */
+  revertChanges: (props: ActionProps) => {
+    const canRevert = tracked(() => editor.canRevertChanges)
     return (
       <Action
-        title={appTexts.text("discardChanges")}
-        disabled={!canDiscard()}
+        title={appTexts.text("revertChanges")}
+        disabled={!canRevert()}
         icon="arrow rotate left"
-        shortcut={EDITOR_HOTKEYS.discardChanges.shortcut}
-        onClick={() => void editor.discardChanges()}
+        shortcut={EDITOR_HOTKEYS.revertChanges.shortcut}
+        onClick={() => void editor.revertChanges()}
         {...props}
       />
     )
@@ -439,6 +452,7 @@ const OWN_PROJECT_ONLY_IN_STATIC_BUILD = [
   "renameApp",
   "deleteApp",
   "createFile",
+  "createCssFile",
   "duplicateFile",
   "renameFile",
   "deleteFile"
@@ -460,8 +474,9 @@ function drawnWhen(name: keyof typeof Actions, condition: () => boolean): void {
 
 // "New File" makes a page:  only for someone whose role in the project's space may (epic `atmosphere` P25, J100)
 drawnWhen("createFile", () => editor.mayCreate)
+drawnWhen("createCssFile", () => editor.mayCreate)
 // "Save" saves your draft of a page:  only for someone who designs the project's space (T47, J117)
-drawnWhen("saveFile", () => editor.mayDesign)
+drawnWhen("saveAll", () => editor.mayDesign)
 
 if (isStaticBuild) {
   for (const name of OWN_PROJECT_ONLY_IN_STATIC_BUILD) drawnWhen(name, () => editor.canChangeProject)

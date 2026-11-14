@@ -23,8 +23,8 @@ import type { BubblyInputShape } from "./BubblyMarks"
  *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;  its `/`, name and
  *     attributes' names, as the page draws them
  *   - each attribute's value a white pill, a quoted one's `"` see-through, its curly mark drawn over it
- *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start tag, and
- *     before a line of text, so it sits in from the tags beside it, as on the page
+ *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start and end
+ *     tags, and before a line of text, so it sits in from the tags beside it, as on the page
  * - Shapes are placed by `SpellBubbly`, from where Monaco draws each line and letter.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
  ****************/
@@ -58,7 +58,7 @@ export class MarkupMarks extends TextMarks {
   /** The room injected after each tag in a line, by where it ends:  a tag right after it starts past it too. */
   private readonly roomAfter = new Map<number, TagRoom>()
 
-  /** Lines of Spell, whose own marks are Spell's:  no spacers before them or a block's start tag. */
+  /** Lines of Spell, whose own marks are Spell's:  no spacers before them. */
   private readonly isInSpell: boolean
 
   /** Is a tag one of the project's own views:  `within()`'s. */
@@ -124,12 +124,13 @@ export class MarkupMarks extends TextMarks {
       inside: []
     }
     into.push(block)
-    if (!this.isInSpell && this.startsLine(open.start))
-      this.mark(open.start, open.start + 1, "", { before: spacer("head", "before") })
+    // its `⟨` clear of its band's cut corner, an HTML file's or a Spell drawing's alike
+    if (this.startsLine(open.start)) this.mark(open.start, open.start + 1, "", { before: spacer("tag-head", "before") })
     this.startTag(open, block.inside)
     this.nodes(element.children, block.inside)
     if (footStartsLine) {
       block.foot = this.place(close.start, close.end)
+      this.mark(close.start, close.start + 1, "", { before: spacer("tag-foot", "before") })
       this.endTag(close, "block")
     } else this.tagPill(close, { partOfSpeech, side: "end" }, block.inside)
   }

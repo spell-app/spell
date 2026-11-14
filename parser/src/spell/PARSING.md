@@ -1926,6 +1926,9 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - Rules don't say which:  a pause is a plain call of `core`, and a loop a plain `core.map()`, written one by one
     when its function turns out to wait.
   - It stops at a program's top level, a function inside a function, and what a writer's `canWait()` refuses.
+    - A top-level step that waits is held instead (`heldSteps`, `core.holdWhile()`):  the first draw comes at once,
+      and people's actions wait for it.
+    - So is one in a `create()` that can't wait, javascript's:  `when creating it` dealing Solitaire's cards.
   - A getter that waits is a value on Solid, `core.waitedValue()`, and each read of one, by name, follows it
     (`waitingValues`):
     - In a function that waits it's `await core.answerOf(thing, "total")`, the answer after any writes (`project.awaited`).

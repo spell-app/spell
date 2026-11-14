@@ -287,18 +287,22 @@ export class SpellBubbly {
    * - Then that block's foot goes first, and this one under it,
    *   as far below it as this one's rail is left of that one's (Owen, 2026-11-11:
    *   the feet as far apart down as the rails across).
-   * - A group in it has no foot:  the block in the group that ends there counts, as if it were the parent's own.
+   * - A group in it, on its rail, ends in the SAME foot:  its rails 0 apart across, so its feet 0
+   *   apart down;  the group's, drawn over it, shows.
+   *   Stacked under the group's, they were one foot twice as thick, in two colours (Owen, 2026-11-13:  "end
+   *   class/group footers don't line up").
    */
   private footDrop(shape: BubblyBlockShape, view: View): number {
     const known = view.footDrops.get(shape)
     if (known !== undefined) return known
     const { measures } = view
     const inner = this.innerFoot(shape, view.ranges[shape.place]!.endLineNumber, view)
+    const railsApart = inner ? this.railX(inner, view) - this.railX(shape, view) : 0
     const drop = !inner
       ? 0
-      : this.footDrop(inner, view) +
-        measures.footHeight +
-        Math.max(0, this.railX(inner, view) - (this.railX(shape, view) + measures.gutter))
+      : railsApart <= 0
+        ? this.footDrop(inner, view)
+        : this.footDrop(inner, view) + measures.footHeight + Math.max(0, railsApart - measures.gutter)
     view.footDrops.set(shape, drop)
     return drop
   }
@@ -391,7 +395,7 @@ export class SpellBubbly {
    * An HTML element with what's inside it on lines of its own:  its start tag's band, its gutter and body down to its
    * end tag's band (when that starts its line), then what's inside it;  `undefined` when none of it is in view.
    * - Its band starts a bracket's room left of its `<`, at its line's indent:  its words clear of the cut corner by
-   *   the spacer before the `<` (`bubbly-head-spacer`).
+   *   the spacer before the `<` (`bubbly-tag-head-spacer`);  its end tag's band likewise (`bubbly-tag-foot-spacer`).
    */
   private drawMarkupBlock(shape: MarkupBlockShape, range: monaco.Range, view: View): HTMLElement | undefined {
     const { editor } = this

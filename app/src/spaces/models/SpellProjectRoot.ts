@@ -313,13 +313,18 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
 
   /**
    * Make a project in this group from `archive`, under its own name, or the next one free.
-   * - Its first file makes the project (the first its project file lists, else its first spell file),
-   *   the rest follow, its project file LAST:
-   *   so the project's settings and its files' order are the archive's.
    * - `keep`:  what the place it's made in keeps
-   *   - `"everything"` (default):  every file
+   *   - `"everything"` (default):  every file, the editor's server's (epic `mockup` T33)
+   *     - the project is made of its project file alone, as written, so its settings and its files' order are
+   *       the archive's;  an archive without one gets an empty one
+   *     - then every other file:  each page and its source your DRAFT until you Publish, the first one too,
+   *       as the server keeps a new document (`isDraftable()`)
+   *     - a picture, or any other file the server doesn't draft, written as it is:  a draft holds text alone
    *   - `"text"`:  its text files only, and no project file but its title;
-   *     the static build's, which keeps text alone, in the browser
+   *     the static build's, which keeps text alone, in the browser, and has no drafts
+   *     - its first file makes the project (the first its project file lists, else its first spell file),
+   *       the rest follow
+   * - Loaded only once every file is written:  loaded with no file to list, the server would make one.
    * - Returns the new project;  throws on error, e.g. an archive with no text file to start it.
    */
   async importApp(archive: ProjectArchive, { keep = "everything" }: ImportOptions = {}): Promise<SP.SpellProject> {
@@ -333,13 +338,13 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
       typeof file.contents === "string"
     const first =
       firstFileIn(others.filter(isText), projectFile) ?? die(`${archive.name} has no text file to start it.`)
-    const project = (await this.createApp(projectId, { filePath: first.path, contents: first.contents }))!
-    await project.load(undefined)
+    const start = keep === "everything" ? textProjectFileOf(projectFile) : first
+    const project = (await this.createApp(projectId, { filePath: start.path, contents: start.contents }))!
     const files = new ProjectFiles(project)
     for (const file of others) {
-      if (file !== first && (isText(file) || keep === "everything")) await files.writeFile(file.path, file.contents)
+      if (file !== start && (isText(file) || keep === "everything")) await files.writeFile(file.path, file.contents)
     }
-    if (projectFile && keep === "everything") await files.writeFile(projectFile.path, projectFile.contents)
+    await project.load(undefined)
     return project
   }
 
@@ -503,6 +508,15 @@ function firstFileIn<T extends ProjectArchiveFile>(textFiles: T[], projectFile?:
     if (listed) return listed
   }
   return textFiles.find(({ path }) => path.endsWith(SP.SPELL_SUFFIX)) ?? textFiles[0]
+}
+
+/**
+ * The project file to make an imported project of, as text:  the archive's own, else an empty one
+ * (`projectFileMadeFrom()`, with no index:  no settings, no files listed, so every file is appended as it comes).
+ */
+function textProjectFileOf(projectFile: ProjectArchiveFile | undefined): ProjectArchiveFile & { contents: string } {
+  if (typeof projectFile?.contents === "string") return { path: projectFile.path, contents: projectFile.contents }
+  return projectFileMadeFrom(undefined) as ProjectArchiveFile & { contents: string }
 }
 
 /** The bytes of the file at address `path`, read through its URL:  a picture, or text kept as bytes. */

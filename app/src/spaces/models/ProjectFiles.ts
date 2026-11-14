@@ -2,7 +2,7 @@ import { LoadableFile, getDier, KnownFormat } from "spell/util"
 import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 
-import { DRAFTS_URL, type ProjectDraftsJSON, type PublishJSON } from "./drafts"
+import { DRAFTS_URL, type ProjectDraftsJSON, type PublishJSON, type VersionJSON } from "./drafts"
 
 /**
  * A project's FILE edits:  create, copy, rename and delete one of its files, as the editor asks.
@@ -239,7 +239,22 @@ export class ProjectFiles {
     })
   }
 
-  /** Make your drafts of what version `version` (its name) holds;  returns the files drafted.  throws if it's gone */
+  /**
+   * Keep your draft as a version of its own, never published:  the Versions dialog's "Save Current Changes".
+   * - Restoring it later makes it your draft again, as any version does.
+   * - throws if you have no draft, or the server says no
+   */
+  async keepDraft(): Promise<VersionJSON> {
+    return await this.ask<VersionJSON>("keeping your draft", {
+      url: `/api/projects/keep-draft`,
+      contents: { projectId: this.project.projectId }
+    })
+  }
+
+  /**
+   * Make your drafts of what version `version` (its name) holds;  returns the files it changed.
+   * - throws if it's gone
+   */
   async restore(version: string): Promise<string[]> {
     return await this.ask<string[]>("restoring a version", {
       url: `/api/projects/restore`,
