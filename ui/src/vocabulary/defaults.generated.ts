@@ -1554,6 +1554,12 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "bottom-offset", kind: "number", group: "appearance" },
     { name: "pushing", kind: "keyOnly", group: "appearance" }
   ],
+  "ui-submenu": [
+    { name: "label", kind: "string", group: "name" },
+    { name: "icon", kind: "icon", group: "content" },
+    { name: "menu", kind: "string", group: "content" },
+    { name: "disabled", kind: "keyOnly", group: "states" }
+  ],
   "ui-summary": [],
   "ui-tab": [
     { name: "value", kind: "string", group: "form" },

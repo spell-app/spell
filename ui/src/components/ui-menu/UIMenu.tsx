@@ -62,6 +62,10 @@ function isSameFolded(a: readonly FoldedItem[], b: readonly FoldedItem[]): boole
  *   draws `<div class="[position] menu" part="menu">`, Fomantic's `.right.menu` or a vertical menu's `.item > .menu`,
  *   and hands its items the TOP menu's `ItemContext`.
  *
+ * - FLY-OUT:  the menu a `<ui-submenu>` row opens beside itself (`isAFlyout`, set by the row):
+ *   `<div role="menu" aria-orientation="vertical">`, its items `menuitem`s with the menubar's roving focus,
+ *   and no frame of its own (the fly-out's box is its frame, as a popup is).
+ *
  * - It owns its items (`ItemOwner`):  they draw themselves as `itemContext()` says,
  *   and adopt this component's `elementSetup.styleSheets` (the item rules live in `UIMenu.css`).
  *   Items ASK for their context, which is also how the menu learns its items' DOM elements (the roving set),
@@ -142,13 +146,22 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   }
 
   /**
-   * It's what a popup holds, a right click's menu:  `:state(in-popup)`.
-   * - The popup is its frame, so it draws none of its own (no border, fill, shadow or blur) and no line between items.
+   * It's what a popup holds, a right click's menu, or a `<ui-submenu>`'s fly-out:  `:state(in-popup)`.
+   * - The popup (or the fly-out's box) is its frame, so it draws none of its own (no border, fill, shadow or blur)
+   *   and no line between items.
    */
   @E.cssState("in-popup")
   get isInPopup(): boolean {
-    return this.isConnected && !!this.domElement.closest(POPUP_TAG)
+    return this.isAFlyout || (this.isConnected && !!this.domElement.closest(POPUP_TAG))
   }
+
+  /**
+   * It's the menu a `<ui-submenu>` row opens beside itself:  `role="menu"`, its items `menuitem`s, one Tab stop
+   * and arrow keys between them, no frame of its own.
+   * - Set by the row (`UISubmenu`):  on the menu it draws round its items, or on the one its `menu` names.
+   *   Never an attribute:  a menu is a fly-out because a row shows it as one.
+   */
+  @E.state accessor isAFlyout = false
 
   /** The owning menu's component, when this is a sub-menu:  only menus own `menu` parts. */
   get parentMenu(): UIMenu | undefined {
@@ -178,7 +191,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
    */
   @E.derived({ equals: isSameContext })
   get ownItemContext(): UIT.ItemContext {
-    const isInteractive = this.interactive
+    const isInteractive = this.interactive || this.isAFlyout
     const isTabs = this.isTabs
     return {
       domElementRole: isInteractive || isTabs ? "none" : undefined,
@@ -225,6 +238,8 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     if (this.parentMenu) return
     const item = UIMenu.activatedItem(event)
     if (!item || item.matches(UIT.DISABLED_STATE)) return
+    // a fly-out's items are its own menu's to choose, and a row that opens a fly-out chooses nothing
+    if (!this.itemsThatAsked.has(item) || UIMenu.componentOf(item)?.opensAMenu) return
     const isChosen = this.send("ui-choosing", { value: UIMenu.valueOf(item), item, originalEvent: event })
     if (!isChosen || !this.isSegmented) return
     if (this.choosesMany) this.toggle(item as ChoosableItem)
@@ -298,8 +313,12 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
 
   /** An item's `value`, else its text. */
   protected static valueOf(item: Element): string {
-    const component = (item as E.DOMElement).component as ItemComponent | undefined
-    return component?.value ?? item.textContent?.trim() ?? ""
+    return UIMenu.componentOf(item)?.value ?? item.textContent?.trim() ?? ""
+  }
+
+  /** An item DOM element's component, as the menu reads it. */
+  private static componentOf(item: Element): ItemComponent | undefined {
+    return (item as E.DOMElement).component as ItemComponent | undefined
   }
 
   /**
@@ -341,10 +360,31 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     })
   }
 
+  /**
+   * Every element of its light DOM, in page order, a `<slot>` standing for what's assigned to it:
+   * the menu a `<ui-submenu>` draws round its items holds only its `<slot>`.
+   */
+  @E.untracked
+  private lightElements(): HTMLElement[] {
+    const elements: HTMLElement[] = []
+    const add = (parent: Element) => {
+      for (const child of parent.children) {
+        const isSlot = child.localName === "slot"
+        const shown = isSlot ? (child as HTMLSlotElement).assignedElements({ flatten: true }) : [child]
+        for (const element of shown) {
+          elements.push(element as HTMLElement)
+          add(element)
+        }
+      }
+    }
+    add(this.domElement)
+    return elements
+  }
+
   /** Item DOM elements that asked THIS menu for their context, in page order. */
   @E.untracked
   private ownedItems(): ChoosableItem[] {
-    return [...this.domElement.querySelectorAll<ChoosableItem>("*")].filter((each) => this.itemsThatAsked.has(each))
+    return (this.lightElements() as ChoosableItem[]).filter((each) => this.itemsThatAsked.has(each))
   }
 
   ////////////////
@@ -400,7 +440,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   /** The chosen item's box (in its own shadow root), among the items this menu owns. */
   @E.untracked
   private chosenBox(): HTMLElement | undefined {
-    for (const element of this.domElement.querySelectorAll<HTMLElement>("*")) {
+    for (const element of this.lightElements()) {
       if (!this.itemsThatAsked.has(element) || element.hidden || !element.matches(SELECTED_STATE)) continue
       return element.shadowRoot?.querySelector<HTMLElement>(ITEM_BOX) ?? undefined
     }
@@ -813,9 +853,14 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return !this.parentMenu && !!this.tabs && !this.interactive
   }
 
-  /** Keys move between its items:  a live menubar, or tabs once rendered. */
+  /** Keys move between its items:  a live menubar, tabs or fly-out, once rendered. */
   get isRoving(): boolean {
-    return this.isMenubar || (this.isTabs && this.isReady)
+    return this.isMenubar || ((this.isTabs || this.isFlyoutMenu) && this.isReady)
+  }
+
+  /** A top-level fly-out:  a sub-menu nested in one is still its parent's. */
+  private get isFlyoutMenu(): boolean {
+    return this.isAFlyout && !this.parentMenu
   }
 
   /** The menubar is live:  top-level, `interactive`, rendered. */
@@ -823,9 +868,20 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return !this.parentMenu && this.interactive && this.isReady
   }
 
-  /** The menubar's arrow-key axis:  `vertical` menus go up and down. */
+  /** The menubar's arrow-key axis:  `vertical` menus (and fly-outs) go up and down. */
   private get orientation(): E.RovingOrientation {
-    return this.isVertical ? "vertical" : "horizontal"
+    return this.isVertical || this.isFlyoutMenu ? "vertical" : "horizontal"
+  }
+
+  /**
+   * Focus its first item that can be chosen (shown, not disabled), as a fly-out opens by keyboard;
+   * true when one took focus.
+   */
+  @E.untracked
+  focusFirstItem(): boolean {
+    const box = this.menuItems().find((each) => !(each.getRootNode() as ShadowRoot).host?.matches(UIT.DISABLED_STATE))
+    box?.focus()
+    return !!box && box.matches(":focus")
   }
 
   /** Live roving tabindex while `interactive`. */
@@ -893,7 +949,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   @E.untracked
   private menuItems(): HTMLElement[] {
     const boxes: HTMLElement[] = []
-    for (const element of this.domElement.querySelectorAll<HTMLElement>("*")) {
+    for (const element of this.lightElements()) {
       if (!this.itemsThatAsked.has(element) || element.hidden) continue
       const item = (element as E.DOMElement).component as ItemComponent | undefined
       const box = item?.focusTarget
@@ -931,6 +987,21 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       <Switch>
         <Match when={this.parentMenu}>
           <div class={this.subMenuClasses} part={this.partForName("menu")}>
+            <slot />
+          </div>
+        </Match>
+        <Match when={this.isAFlyout}>
+          <div
+            ref={(element: HTMLElement) => {
+              this.bar = element
+              this.box = element
+            }}
+            class={this.rootClass}
+            part={this.partForName("menu")}
+            role="menu"
+            aria-orientation="vertical"
+            aria-label={this.landmarkLabel}
+          >
             <slot />
           </div>
         </Match>
@@ -1071,6 +1142,8 @@ export type ItemComponent = {
   readonly firstLetter?: string
   /** its light-DOM children in slot `name` */
   slotted?(name: "icon" | "badge"): Element[]
+  /** it opens a menu of its own (`<ui-submenu>`):  a click on it chooses nothing */
+  readonly opensAMenu?: boolean
 }
 
 /** One row of a `shrinkable` menu's overflow menu:  a fitted item, as read when it was (`readFolded()`). */

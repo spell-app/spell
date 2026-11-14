@@ -13,6 +13,8 @@ import { Disclosure } from "spell/element"
  *   - the anchor it hangs from:  a name of its own per element, written inline,
  *     on the anchor box (`anchorStyle`:  its `anchor-name`) and on the panel (`panelStyle`:  its `position-anchor`);
  *     so no control's sheet names an anchor, and the panel's place, size and look stay its sheet's
+ *   - or, where no name can reach (the panel in another tree than its anchor:  a `<ui-submenu>`'s `menu`),
+ *     the implicit anchor of `follow()`'s `source`, as `<ui-popup>`'s is
  * - What differs stays the component's:  which box, what opening resets (`onChange`), where focus goes,
  *   the panel's own place and size (its sheet).
  * - A component holds one as a field, and follows it in one `@onChange`:
@@ -37,11 +39,16 @@ export class PopoverPanel extends Disclosure {
    * Escape or a click outside asks it to close (`onDismiss`, else `close()`).
    */
   get overlay(): E.OverlayEntry {
-    const { component, restoreFocus, onDismiss } = this.panelSetup
+    const { component, restoreFocus, onDismiss, pool, alsoInside } = this.panelSetup
     return (this.overlayEntry ??= {
       element: component.domElement,
       kind: "popover",
+      pool,
       restoreFocus,
+      // read at each click:  what's inside may change while it's open
+      get anchor() {
+        return alsoInside?.()
+      },
       onDismiss: onDismiss ?? (() => void this.close())
     })
   }
@@ -53,10 +60,11 @@ export class PopoverPanel extends Disclosure {
    * - `isShowing`:  open AND connected AND drawn, as the component decides
    *   (`keepAlive` keeps a removed element's state, but the page must not keep its overlay entry).
    * - Nothing for a box that isn't a popover:  a simple dropdown's menu, a server render's.
+   * - `source`:  its invoker, so its implicit anchor (`position-anchor: auto`), and where Tab continues from.
    */
-  follow(box: HTMLElement | undefined, isShowing: boolean): (() => void) | undefined {
+  follow(box: HTMLElement | undefined, isShowing: boolean, source?: HTMLElement): (() => void) | undefined {
     if (!isShowing || !box || !box.popover) return undefined
-    if (!box.matches(POPOVER_OPEN)) box.showPopover()
+    if (!box.matches(POPOVER_OPEN)) box.showPopover(source ? ({ source } as ShowPopoverOptions) : undefined)
     const { overlay } = this
     UI.overlays.open(overlay)
     return () => {
@@ -90,6 +98,20 @@ export type PopoverPanelSetup = E.DisclosureSetup & {
   restoreFocus?: boolean
   /** Escape or a click outside:  default `close()` */
   onDismiss?: E.OverlayEntry["onDismiss"]
+  /**
+   * Its `UI.overlays` pool:  only the topmost entry of each pool hears an outside click.
+   * - A pool of its own, so a click outside a `<ui-submenu>`'s fly-out AND the popup round its menu closes both.
+   * - Default:  the shared one.
+   */
+  pool?: string
+  /** Also counts as inside, besides the component's element:  a panel elsewhere on the page.  Read at each click. */
+  alsoInside?: () => Element | undefined
+}
+
+/** `showPopover()` options with `source` (not in every DOM lib yet). */
+type ShowPopoverOptions = {
+  /** the invoker:  the implicit anchor, and where Tab continues from */
+  source?: HTMLElement
 }
 
 /** A popover in the top layer. */

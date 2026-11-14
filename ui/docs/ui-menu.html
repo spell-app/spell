@@ -699,7 +699,7 @@
 
               <ui-section id="examples-content-sub-menu" label="Sub Menu" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="A menu item may contain another menu nested inside that acts as a grouped sub-menu."
+                  description="A menu item may contain another menu nested inside that acts as a grouped sub-menu, always shown.  A menu that opens beside its row is a [Submenu](#examples-content-submenu)."
                 >
                   <ui-menu direction="vertical" aria-label="Sub menu">
                     <ui-item>
@@ -722,6 +722,43 @@
                         <ui-item value="settings" icon="settings">Account Settings</ui-item>
                       </ui-dropdown>
                     </ui-item>
+                  </ui-menu>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-content-submenu" label="Submenu" sticky="stack" collapsible dividing>
+                <ui-example
+                  description='A `<ui-submenu>` is a row that opens another menu beside it, its fly-out:  the pointer over the row, a click, or → opens it;  ← or Escape closes it.  The items written inside it are its fly-out, in a menu it draws itself, sized like its own.'
+                >
+                  <ui-menu direction="vertical" icon-column aria-label="View">
+                    <ui-item appearance="link" icon="expand">Full Screen</ui-item>
+                    <ui-submenu label="Theme" icon="paint brush">
+                      <ui-item icon="sun">Light</ui-item>
+                      <ui-item icon="moon">Dark</ui-item>
+                      <ui-item icon="adjust">Same as the System</ui-item>
+                    </ui-submenu>
+                    <ui-submenu label="Panels" icon="columns">
+                      <ui-item>Tree</ui-item>
+                      <ui-item>Inspector</ui-item>
+                      <ui-submenu label="More">
+                        <ui-item>Console</ui-item>
+                        <ui-item>Output</ui-item>
+                      </ui-submenu>
+                    </ui-submenu>
+                    <ui-item appearance="link" icon="cog">Settings</ui-item>
+                  </ui-menu>
+                </ui-example>
+                <ui-example
+                  description='Or it shows a `<ui-menu>` written elsewhere on the page, named by its id:  `menu="examples-menu"`.  That menu stays where it is, and shows beside the row while open;  `popover` keeps it hidden until then.'
+                >
+                  <ui-menu direction="vertical" aria-label="File">
+                    <ui-item appearance="link" icon="folder open">Open</ui-item>
+                    <ui-submenu label="More Examples" icon="book" menu="examples-menu"></ui-submenu>
+                  </ui-menu>
+                  <ui-menu id="examples-menu" popover direction="vertical" aria-label="More Examples">
+                    <ui-item>Solitaire</ui-item>
+                    <ui-item>Todos</ui-item>
+                    <ui-item>Calculator</ui-item>
                   </ui-menu>
                 </ui-example>
               </ui-section>
@@ -1692,6 +1729,10 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-menu" only="tags"></ui-docs-api>
+            </ui-section>
+
             <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-menu" only="attributes"></ui-docs-api>
             </ui-section>
