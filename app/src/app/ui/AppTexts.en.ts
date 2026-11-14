@@ -562,6 +562,7 @@ export const APP_TEXTS = {
   inspectorSheetClose: "Put the Inspector away",
   inspectorAddEvent: "Add event",
   inspectorParts: "Views",
+  inspectorDivider: "Divider",
   inspectorFilter: "Filter",
   inspectorNotDrawn: "Not drawn",
   inspectorNoParts: "Run the app to see its parts.",

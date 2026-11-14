@@ -221,10 +221,10 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await select(page, "solitaire-card")
 
       // it starts on the card itself, as nothing can change for all of them, and each field says so before any change:
-      // a crossed-out save icon after its info icon (Q29);  the switch is one control, [Card · Jack of Diamonds | All Cards]
+      // a crossed-out save icon after its info icon (Q29);  the switch is one control, [Card "Jack of Diamonds" | All Cards]
       const scopes = page.locator(".InspectorScope")
       const words = await scopes.allTextContents()
-      expect(words[0]).toMatch(/^Card · /)
+      expect(words[0]).toMatch(/^Card "/)
       expect(words.slice(1)).toEqual(["All Cards"])
       expect(await scopes.first().getAttribute("selected")).not.toBeNull()
       const unsaved = page.locator("ui-property[name=suit] .unsaved")

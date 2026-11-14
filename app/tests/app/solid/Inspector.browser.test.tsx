@@ -443,12 +443,15 @@ describe("things inside things", () => {
     const pile = new Pile()
     pile.cards = [new Pile()]
     expect(itemsOf(pile)).toEqual(pile.cards)
-    expect(Inspector.thingLabel(pile)).toBe("Pile · discards")
+    expect(Inspector.thingLabel(pile)).toBe('Pile "discards"')
     pile.name = ""
     expect(Inspector.thingLabel(pile, "#3")).toBe("Pile #3")
+    // its type in words, from the class name when the program doesn't say:  `StockPile` => `Stock Pile` (I108)
+    class StockPile {}
+    expect(Inspector.thingLabel(new StockPile(), "", null)).toBe("Stock Pile")
   })
 
-  test("a thing named in its language's own word:  Spanish's `su \"nombre\" es ...` titles it `Carta · <nombre>`", () => {
+  test('a thing named in its language\'s own word:  Spanish\'s `su "nombre" es ...` titles it `Carta "<nombre>"`', () => {
     class Carta {}
     const carta = Object.assign(new Carta(), { nombre: "dama de espadas" })
     expect(Inspector.nameOf(carta, ["es"])).toBe("dama de espadas")

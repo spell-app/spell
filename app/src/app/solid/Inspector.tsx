@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { setDebugGlobal, upperFirst } from "spell/util"
+import { kebabCase, setDebugGlobal, upperFirst } from "spell/util"
 import { E } from "spell/element"
 import { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
@@ -495,12 +495,33 @@ export class Inspector {
       : undefined
   }
 
-  /** A thing's title:  its type, then its name if it has one (`DiscardPile · discards`);  a list's item, its place too. */
-  static thingLabel(thing: object, step = ""): string {
-    const type = thing.constructor.name
+  /**
+   * A thing's title:  its type in words, then which one, quoted (`thingWordsOf()`):
+   * `Stock Pile "stock"`, `Card "ace of spades"`;  a list's item with neither, its place too (`Pile #3`).
+   * - `element`:  the one drawing it, when the caller has it;  `null`:  none draws it;  left out, it's looked for.
+   */
+  static thingLabel(thing: object, step = "", element?: Element | null): string {
+    const { title, which } = Inspector.thingWordsOf(thing, element)
+    const titled = which ? `${title} ${which}` : title
+    return step.startsWith(ITEM_STEP) && !which ? `${titled} ${step}` : titled
+  }
+
+  /**
+   * A thing's type in words and which one it is, as Owen would say them:  `Stock Pile`, `"stock"`.
+   * - The type:  as its program declares it (`a "stock pile" is a pile`), each word capitalised but the small ones
+   *   (`Pila de Reserva`);  a type written elsewhere, its class name split into words (`StockPile` => `Stock Pile`).
+   * - Which:  its name (`nameOf()`), else the id the program chose for it
+   *   (`"stock" is a new stock pile`, drawn `<stock-pile "stock"/>`);  quoted, or `""` for neither.
+   *   - The id is read off the element drawing it:  reading `thing.id` would make one up (`Thing.id`).
+   *   - Name first:  a named thing's element is given an id from its name (`7-of-spades`), not as written.
+   */
+  static thingWordsOf(thing: object, element?: Element | null): { title: string; which: string } {
     const name = Inspector.nameOf(thing)
-    const titled = name ? `${type} · ${name}` : type
-    return step.startsWith(ITEM_STEP) && !name ? `${titled} ${step}` : titled
+    const id = name
+      ? ""
+      : ((element === undefined ? Inspector.elementDrawing(thing) : element)?.getAttribute("id") ?? "")
+    const which = name || (isMadeUpId(id, thing) ? "" : id)
+    return { title: typeWordsOf(thing.constructor.name), which: which ? `"${which}"` : "" }
   }
 
   /**
@@ -727,10 +748,11 @@ export class Inspector {
   }
 
   /**
-   * A part's title:  `Card · the queen of spades`, `<ui-button "20%" />`.
+   * A part's title:  `Card "queen of spades"`, `Stock Pile "stock"`, `<ui-button "20%" />`.
    * - A Spell UI element reads as its tag, then which it is:
    *   - its `name`
    *   - else its `label` (or `aria-label`:  an icon-only menu item's, `<ui-item "Cheat" />`)
+   *   - else the title of the action it draws, `<ui-action "Auto Play" />` (epic `editor` I107)
    *   - else its own words, shortened
    *     (Owen:  "show name or label to make it clearer which is which";  `<ui-button "20%" />`)
    *   - none:  its tag alone, `<ui-form />`
@@ -738,32 +760,29 @@ export class Inspector {
   static labelFor(element: Element): string {
     const thing = SpellElement.thingOf(element)
     if (!thing) {
-      const which =
-        element.getAttribute("name") ||
-        element.getAttribute("label") ||
-        element.getAttribute("aria-label") ||
-        ownWords(element)
+      const which = ownTitleOf(element)
       return which ? `<${element.localName} "${which}" />` : `<${element.localName} />`
     }
-    return Inspector.thingLabel(thing)
+    return Inspector.thingLabel(thing, "", element)
   }
 
   /**
    * A part's title in two pieces, for the views tree:  what it is, then which one, shown muted.
-   * - A drawn thing:  its type, then `· ` its name, if it has one (`DiscardPile`, `· discards`).
+   * - A drawn thing:  its type in words, then which one, quoted (`thingWordsOf()`):  `Stock Pile`, `"stock"`.
    * - A Spell UI element:  its whole title (`labelFor()`), nothing after.
    */
   static labelPartsFor(element: Element): { title: string; which: string } {
     const thing = SpellElement.thingOf(element)
     if (!thing) return { title: Inspector.labelFor(element), which: "" }
-    const name = Inspector.nameOf(thing)
-    return { title: thing.constructor.name, which: name ? `· ${name}` : "" }
+    return Inspector.thingWordsOf(thing, element)
   }
 
   /**
-   * A part's words in the views tree, as a person would say them:  `Moves: 0`, `Card · ace of spades`, `Menu`.
-   * - A drawn thing:  its type, then which one (`labelPartsFor()`).
-   * - A Spell UI element:  which one it is, when it says (its `name`, `label` or own words), else what it is.
+   * A part's words in the views tree, as a person would say them:
+   * `Moves: 0`, `Stock Pile "stock"`, `Auto Play`, `Menu`.
+   * - A drawn thing:  its type in words, then which one (`labelPartsFor()`).
+   * - A Spell UI element:  which one it is, when it says (`ownTitleOf()`:  its `name`, `label`, action's title
+   *   or own words), else what it is.
    * - `tag`:  how it's written, for the row's tooltip.
    */
   static rowWordsFor(element: Element): { label: string; which: string; tag: string } {
@@ -772,9 +791,13 @@ export class Inspector {
       const { title, which } = Inspector.labelPartsFor(element)
       return { label: title, which, tag: element.localName }
     }
-    const words = element.getAttribute("name") || element.getAttribute("label") || element.getAttribute("aria-label")
     const noun = Inspector.vocabularyOf(element)?.noun
-    return { label: words || ownWords(element) || upperFirst(noun ?? element.localName), which: "", tag }
+    // a menu's or toolbar's line between groups is one of its items:  it says what it is, not "Item" (I107)
+    const what =
+      element.getAttribute("kind") === "divider"
+        ? appTexts.text("inspectorDivider")
+        : upperFirst(noun ?? element.localName)
+    return { label: ownTitleOf(element) || what, which: "", tag }
   }
 
   /**
@@ -1345,7 +1368,7 @@ export type SelectedPart = {
   value: object
   /** What the editor shows:  the thing's class's properties, or the Spell UI tag's name (its vocabulary's). */
   schema: ReturnType<typeof ClassSchemas.fromClass> | string
-  /** Its title:  `Card · the queen of spades`, `<ui-input>`. */
+  /** Its title:  `Card "queen of spades"`, `<ui-input>`. */
   label: string
   /**
    * A Spell UI element's fields, in the editor's order:  what it sets first, the rest folded under "More";
@@ -1403,6 +1426,50 @@ function ownWords(element: Element): string {
 
 /** The most of a part's own words its title shows. */
 const WORDS_LENGTH = 24
+
+/**
+ * Which Spell UI element `element` is, in its own words:  `""` for none.
+ * - its `name`, else its `label` (or `aria-label`:  an icon-only menu item's)
+ * - else the title of the action it draws:  a `<ui-action>`'s are its action's, not its own (epic `editor` I107)
+ * - else its own words, shortened
+ */
+function ownTitleOf(element: Element): string {
+  const action = (element as E.DOMElement).component as { actionToDraw?: { title?: unknown } } | undefined
+  const actionTitle = action?.actionToDraw?.title
+  return (
+    element.getAttribute("name") ||
+    element.getAttribute("label") ||
+    element.getAttribute("aria-label") ||
+    (typeof actionTitle === "string" ? actionTitle : "") ||
+    ownWords(element)
+  )
+}
+
+/**
+ * A type's name in words, as its program declares it, each word capitalised but the small ones:
+ * `StockPile` => `Stock Pile` (`a "stock pile" is a pile`), `PilaDeReserva` => `Pila de Reserva` (epic `editor` I108).
+ * - Read from its declaration's line (`declarationPlaces()`), so a Spanish type keeps its accents (`Fundación`).
+ * - Declared nowhere this program says (a built-in type, a program not compiled here):  its class name, split.
+ */
+function typeWordsOf(className: string): string {
+  const declared = declarationPlaces().find((place) => place.kind === "type" && place.name === className)
+  const line =
+    declared &&
+    sourceFiles()
+      .find((file) => file.path === declared.path)
+      ?.text.split("\n")[declared.line]
+  const quoted = line && /"([^"]+)"/.exec(line.slice(declared.column))?.[1]
+  const words = quoted || className.replace(/(\p{Ll}|\d)(\p{Lu})/gu, "$1 $2")
+  return headlineCase(words)
+}
+
+/**
+ * Is `id` one the core made up for `thing`, not one its program chose:  its class in kebab case, then 8 random
+ * characters (`dated-event-k3x9q2mf`, core's `newThingId()`)?  A made-up id says nothing to a person.
+ */
+function isMadeUpId(id: string, thing: object): boolean {
+  return new RegExp(`^${kebabCase(thing.constructor.name) || "thing"}-[0-9a-z]{8}$`).test(id)
+}
 
 /** A part's place as one key:  `4:tic-tac-toe-square`. */
 export function addressKey(address: PartAddress): string {
@@ -2533,7 +2600,7 @@ function PropertiesCard(): JSX.Element {
           {(part) => (
             <Show
               when={!hasScopeSwitch(part()) || part().crumbs.length > 1}
-              // a thing alone, with no trail:  ONE segmented control, [Card · King of Diamonds | All Cards] (Owen)
+              // a thing alone, with no trail:  ONE segmented control, [Card "King of Diamonds" | All Cards] (Owen)
               fallback={<ScopeSwitch part={part()} />}
             >
               <span slot="title" class="InspectorTrail">
@@ -2689,7 +2756,7 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
   const typeWords = () => wordsOfType(props.part.value)
   const scope = () => Inspector.scopeOf(props.part)
   const count = () => props.part.together?.length ?? 1
-  // with no trail, the first segment IS what's selected, as its chip said it (`Card · King of Diamonds`), its ✕ after
+  // with no trail, the first segment IS what's selected, as its chip said it (`Card "King of Diamonds"`), its ✕ after
   const isWhole = () => props.part.crumbs.length === 1
   const these = () =>
     count() > 1
@@ -2725,23 +2792,26 @@ function hasScopeSwitch(part: Inspected): boolean {
   return isThing(part.value) && isOneType
 }
 
-/** `words` as a title:  `Card · king of diamonds` => `Card · King of Diamonds`, its small words left small. */
+/**
+ * `words` as a title:  `Card "king of diamonds"` => `Card "King of Diamonds"`, its small words left small.
+ * - A word just inside a quote is a first word too.
+ */
 function headlineCase(words: string): string {
-  return words.replace(/(^|\s)(\p{L}[\p{L}\p{N}]*)/gu, (all, space: string, word: string) =>
-    space && SMALL_WORDS.test(word) ? all : space + word.charAt(0).toUpperCase() + word.slice(1)
+  return words.replace(/(^|\s)("?)(\p{L}[\p{L}\p{N}]*)/gu, (all, space: string, quote: string, word: string) =>
+    space && !quote && SMALL_WORDS.test(word) ? all : space + quote + word.charAt(0).toUpperCase() + word.slice(1)
   )
 }
-/** The words a title leaves small, after its first. */
-const SMALL_WORDS = /^(?:a|an|and|at|by|for|in|of|on|or|the|to)$/
+/** The words a title leaves small, after its first:  English's, and Spanish's for `Pila de Reserva`. */
+const SMALL_WORDS = /^(?:a|an|and|at|by|for|in|of|on|or|the|to|de|del|el|la|los|las|y|en)$/
 
 /** `words` with each one's first letter capital:  `discard piles` => `Discard Piles`. */
 function titleCase(words: string): string {
   return words.replace(/(^|\s)(\p{L})/gu, (_, space: string, letter: string) => space + letter.toUpperCase())
 }
 
-/** A thing's type, in words:  `DiscardPile` => `discard pile`. */
+/** A thing's type, in words, small:  `DiscardPile` => `discard pile`;  as its program declares it (`typeWordsOf()`). */
 function wordsOfType(thing: object): string {
-  return thing.constructor.name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()
+  return typeWordsOf(thing.constructor.name).toLowerCase()
 }
 
 /** The last change in the properties card that couldn't be written to the source:  `<NotSavedNote>`'s. */
@@ -3146,7 +3216,7 @@ function computedText(read: { value?: unknown; error?: unknown }): string {
   return String(value as string | number | boolean | bigint | symbol)
 }
 
-/** `text`'s letters and digits alone, lower case:  `StockPile · stock` holds `Stock`. */
+/** `text`'s letters and digits alone, lower case:  `Stock Pile "stock"` holds `Stock`. */
 function lettersOf(text: string): string {
   return text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")
 }
@@ -3163,7 +3233,7 @@ function ThingLink(props: {
   /** Where it comes from, when a data place holds it or it's worked out from one:  its mark, after the chip. */
   origin?: PropertyOrigin
 }): JSX.Element {
-  // its chip already names it (`StockPile · stock` for Stock):  the label isn't said twice (Owen:  "Duplicated")
+  // its chip already names it (`Stock Pile "stock"` for Stock):  the label isn't said twice (Owen:  "Duplicated")
   const label = () => {
     const title = Inspector.thingLabel(props.thing, props.step)
     return props.label && !lettersOf(title).includes(lettersOf(props.label)) ? props.label : undefined
@@ -3185,7 +3255,7 @@ function ThingLink(props: {
 
 /****************
  * ### `<ThingChip>`
- * A thing made as the program runs, as a pill:  `Card · king of diamonds ›`.
+ * A thing made as the program runs, as a pill:  `Card "king of diamonds" ›`.
  * - The Inspector's link to a thing (`<ThingLink>`), and each such row of the Views tree
  *   (Owen:  "Full pill for items that are allocated objects, as opposed to `grid` above it, which is declared in spellml").
  * - `inRow`:  drawn inside a tree row, as its label:  `inert`, so a click, the keys and focus stay the row's,

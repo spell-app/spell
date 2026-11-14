@@ -605,7 +605,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.waitForTimeout(800)
     // a pile's row, brought into view:  its line, as drawn, not the rows inside it
     const box = await other.evaluate(async () => {
-      const row = document.querySelector('.InspectorTree ui-tree-item[label="DiscardPile"]')
+      const row = document.querySelector('.InspectorTree ui-tree-item[label="Discard Pile"]')
       const line = row?.shadowRoot?.querySelector(".row")
       line?.scrollIntoView({ block: "center" })
       await new Promise((settled) => setTimeout(settled, 300))

@@ -375,6 +375,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorSheetClose: "Guardar el inspector",
   inspectorAddEvent: "Añadir evento",
   inspectorParts: "Vistas",
+  inspectorDivider: "Divisor",
   inspectorFilter: "Filtrar",
   inspectorNotDrawn: "Sin dibujar",
   inspectorNoParts: "Ejecuta la app para ver sus partes.",

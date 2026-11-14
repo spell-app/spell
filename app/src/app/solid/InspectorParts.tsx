@@ -284,11 +284,11 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
               {(thing) => (
                 <ui-tree-item
                   icon="cube"
-                  label={Inspector.thingLabel(thing)}
+                  label={Inspector.thingLabel(thing, "", null)}
                   selected={Inspector.inspected?.value === thing}
                   ref={chooseRow(() => Inspector.inspectThing(thing))}
                 >
-                  <ThingChip label={Inspector.thingLabel(thing)} inRow />
+                  <ThingChip label={Inspector.thingLabel(thing, "", null)} inRow />
                 </ui-tree-item>
               )}
             </For>
@@ -377,7 +377,10 @@ function PartItem(props: { node: PartNode; shown: () => Element[]; revealing: ()
       }}
     >
       <Show when={isThingRow()}>
-        <ThingChip label={Inspector.thingLabel(SpellElement.thingOf(props.node.element) as object)} inRow />
+        <ThingChip
+          label={Inspector.thingLabel(SpellElement.thingOf(props.node.element) as object, "", props.node.element)}
+          inRow
+        />
       </Show>
       <For each={props.node.children} keyed={(child) => child.element}>
         {(child) => <PartItem node={child()} shown={props.shown} revealing={props.revealing} />}
@@ -481,7 +484,9 @@ function sortedThings(things: object[], order: ViewsOrder): object[] {
   if (order === "document") return things
   const typeOf = (thing: object) => (order === "type" ? thing.constructor.name : "")
   return [...things].sort(
-    (a, b) => typeOf(a).localeCompare(typeOf(b)) || byWords(Inspector.thingLabel(a), Inspector.thingLabel(b))
+    (a, b) =>
+      typeOf(a).localeCompare(typeOf(b)) ||
+      byWords(Inspector.thingLabel(a, "", null), Inspector.thingLabel(b, "", null))
   )
 }
 
