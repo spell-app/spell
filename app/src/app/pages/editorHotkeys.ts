@@ -5,6 +5,9 @@ import { editor } from "spell/app/app/editor"
 import { ChangeThis, Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
 import type { monaco } from "spell/app/app/solid/monaco"
 
+/** The code editor's find, opened with its replace row showing:  what ⌘F runs (epic `editor` I105). */
+export const FIND_AND_REPLACE = "editor.action.startFindReplaceAction"
+
 /**
  * The editor page's keyboard shortcuts:  ONE list (`EDITOR_HOTKEYS`), which the page's keys, the code editor's
  * commands and the top bar's menus all read (epic `debut` P32).
@@ -34,7 +37,8 @@ export const EDITOR_HOTKEYS = {
   changeThis: { shortcut: "mod+K", run: () => ChangeThis.open(), outsideCode: true },
   undo: { shortcut: "mod+Z", codeEditorAction: "undo", run: () => undoOutsideCode("undo"), inProperties: true },
   redo: { shortcut: "shift+mod+Z", codeEditorAction: "redo", run: () => undoOutsideCode("redo"), inProperties: true },
-  find: { shortcut: "mod+F", codeEditorAction: "actions.find" },
+  // find AND replace, as VS Code's ⌥⌘F:  its own ⌘R reloads the page here (Owen, epic `editor` I105)
+  find: { shortcut: "mod+F", codeEditorAction: FIND_AND_REPLACE },
   cutParts: { shortcut: "mod+X", run: () => partsAction("cut"), outsideCode: true },
   copyParts: { shortcut: "mod+C", run: () => partsAction("copy"), outsideCode: true },
   pasteParts: { shortcut: "mod+V", run: () => partsAction("paste"), outsideCode: true },
@@ -196,7 +200,7 @@ export function undoOrRedo(action: "undo" | "redo"): void {
   else if (way === "history") undoInEdit(action)
 }
 
-/** Run the code editor's own action `name` (`undo`, `actions.find`), focusing it first.  Nothing without one. */
+/** Run the code editor's own action `name` (`undo`, `FIND_AND_REPLACE`), focusing it first.  Nothing without one. */
 export function runCodeEditorAction(name: string): void {
   const codeEditor = editor.getInputEditor()
   if (!codeEditor) return
