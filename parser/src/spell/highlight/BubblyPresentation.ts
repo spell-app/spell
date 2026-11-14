@@ -31,18 +31,19 @@ export class BubblyPresentation {
     // ## Declarations:  a head on a band
     ////////////////
 
-    // things:  `a "card" is a draggable two sided view`, `solitaire is an app`, `a card` re-opened
-    create_type: { head: "thing", inputs: ["quoted_type"] },
-    create_list_type: { head: "thing", inputs: ["quoted_type"] },
-    create_viewable_list_type: { head: "thing", inputs: ["quoted_type"] },
-    create_one_of_a_kind: { head: "thing" },
+    // things:  `a "card" is a draggable two sided view`, `solitaire is an app`, `a card` re-opened;
+    // the name a head defines a pill, quoted or bare (`solitaire`, `a card is a thing`;  epic `language` T131)
+    create_type: { head: "thing", inputs: ["quoted_type", "type_words"] },
+    create_list_type: { head: "thing", inputs: ["quoted_type", "type_words"] },
+    create_viewable_list_type: { head: "thing", inputs: ["quoted_type", "type_words"] },
+    create_one_of_a_kind: { head: "thing", inputs: ["type_words"] },
     reopen_type: { head: "thing" },
     // places and sites:  `family cookbook is saved in the cloud`, `galaxy guide is a site`
-    create_place: { head: "thing" },
-    saved_in_the_cloud: { head: "thing" },
-    stored_on_this_device: { head: "thing" },
-    projection_of: { head: "thing" },
-    create_site: { head: "thing" },
+    create_place: { head: "thing", inputs: ["type_words"] },
+    saved_in_the_cloud: { head: "thing", inputs: ["type_words"] },
+    stored_on_this_device: { head: "thing", inputs: ["type_words"] },
+    projection_of: { head: "thing", inputs: ["type_words"] },
+    create_site: { head: "thing", inputs: ["type_words"] },
 
     // properties:  `its "rank" is one of ace, 2 ... 10`, `its "state" is`, `it "is a face card" if ...`
     define_property_has: { head: "property", inputs: ["quoted_member"], choices: ["identifier_list"] },
