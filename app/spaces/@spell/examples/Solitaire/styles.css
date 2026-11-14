@@ -1,7 +1,7 @@
 /* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.
    - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitaire.spell).
    - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.
-   - A pile is styled by its layout (<solitaire-tableau layout="vertical">), each card in it by its place:
+   - A pile is styled by its layout (<solitaire-column layout="vertical">), each card in it by its place:
      --index from 0, of --count;  an empty pile's placeholder by its part, ::part(placeholder). */
 
 /* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,

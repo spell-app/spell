@@ -4,134 +4,26 @@
 // The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
 
 solitaire is an app
-	its "score" is a number
-	its "moves" is a number
-		// The cards played this game:  a stock card turned over isn't one
-	its "hint" is text
-		// Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win
-	when its score changes
-		// a change to a property is an event:  each runs just after the change lands
-		// every card on a foundation:  the game is won
-		set home to the number of cards in the clubs + the number of cards in the diamonds
-		set home to home + the number of cards in the hearts + the number of cards in the spades
-		if home is 52: set the hint to " -- You won!"
-	when its moves change
-		// a card played:  the last hint goes
-		clear the hint
 	"deck" is a new deck
-
-	group "Piles"
-		// One of each, made with the solitaire
 	"stock" is a new stock pile
 	"discards" is a new discard pile
 	"clubs" is a new foundation with suit = clubs
 	"diamonds" is a new foundation with suit = diamonds
 	"hearts" is a new foundation with suit = hearts
 	"spades" is a new foundation with suit = spades
-	"T1" is a new tableau
-	"T2" is a new tableau
-	"T3" is a new tableau
-	"T4" is a new tableau
-	"T5" is a new tableau
-	"T6" is a new tableau
-	"T7" is a new tableau
-	when creating it
-		// Every card of the deck into the stock
-		for card in the deck
+	"C1" is a new column
+	"C2" is a new column
+	"C3" is a new column
+	"C4" is a new column
+	"C5" is a new column
+	"C6" is a new column
+	"C7" is a new column
+	"score" is a number
+	
+	when creating solitaire
+		for each card in the deck
 			add it to the stock
-
-	group "Dealing"
-		// Each pauses a moment, so a deal animates
-	to reset the stock
-		// The discards, turned over, back into the stock
-		set cards to a copy of list (the discards) as a pile
-		reverse the cards
-		for card in the cards
-			add it to the stock
-			turn the card face down
-	to play from the stock
-		// Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
-		if the stock is empty
-			reset the stock
-		get the last card of the stock
-		turn it face up
-		// as long as its flip takes (styles.css), so it turns over before it moves
-		pause for 300 msec
-		add it to the discards
-	to turn a stock card
-		// A click on the empty stock:  one step to undo, where the deal's own turn isn't
-		undoable as "Turn Card"
-		play from the stock
-	to deal the cards
-		// Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
-		for card in the deck
-			set start pile to card's pile
-			turn the card face down
-			if start pile is not the stock
-				add the card to the stock
-				pause for 50 msec
-		shuffle the stock
-		// each row's first card lands face down, then turns up where it lies
-		for row from 1 to 7
-			for column from row to 7
-				add the last card of the stock to item column of the tableaus
-				if column is row
-					turn the last card of (item column of the tableaus) face up
-				pause for 50 msec
-		play from the stock
-
-	group "Game Play"
-		// Its moves:  the toolbar's buttons, its keys, and the board's right click;  each says its title once, for all three
-	to "restart the game" with title "Restart"
-		shortcut N
-		undoable
-		clear the score
-		clear the moves
-		clear the hint
-		deal the cards
-	to auto play
-		// Play every card that can go somewhere, until none can
-		shortcut A
-		undoable
-		set anything changed to no
-		if the discards is not empty
-			set test card to the last card of the discards
-			if play test card
-				set anything changed to yes
-				pause for 500 msec
-		// each tableau's last card onto its foundation
-		for pile in the tableaus
-			if the pile is empty return
-			set test card to the last card of the pile
-			set foundation to the first pile in the foundations where its suit is the suit of test card
-			if the foundation can take test card
-				set anything changed to yes
-				play test card
-				pause for 100 msec
-		// each tableau's face-up cards, all together, onto another tableau
-		for pile in the tableaus
-			set face up cards to the cards in the pile where the card is face up
-			if face up cards is empty return
-			set test card to the first card of face up cards
-			if test card is a king and test card is the first card of the pile return
-			if play test card
-				set anything changed to yes
-				pause for 500 msec
-		if anything changed auto play
-	to cheat
-		// Turn up a face-down card from a tableau, at random, onto the discards
-		shortcut C
-		undoable
-		set remaining piles to piles in the tableaus where it is not empty and its first card is face down
-		if remaining piles is empty return
-		set the pile to a random pile in remaining piles
-		set the card to a random card in (the cards in the pile where the card is face down)
-		// over every card around it, then turned face up as it moves onto the discards
-		set the lifted of the card to yes
-		turn the card face up
-		add the card to the discards
-		pause for 300 msec
-		set the lifted of the card to no
+		restart the game
 
 	to draw it
 		<segment inverted attach="top">
@@ -140,13 +32,13 @@ solitaire is an app
 				<buttons slot="center" padding="compact">
 					<action "auto play"/>
 					<action "cheat"/>
-					<action "restart the game"/>
+					<action "restart the game" title="Restart"/>
 				</buttons>
 				<buttons slot="center" padding="compact">
 					<action "undo" icon-only/>
 					<action "redo" icon-only/>
 				</buttons>
-				<text slot="right">Moves: {the moves}  ·  Score: {the score}{the hint}</text>
+				<text slot="right">Score: {the score}</text>
 			</toolbar>
 		</segment>
 		<container>
@@ -162,79 +54,152 @@ solitaire is an app
 					</>
 					<stock-pile "stock"/>
 					<discard-pile "discards"/>
-					<column/>
+					<spacer/>
 					<foundation "clubs"/>
 					<foundation "diamonds"/>
 					<foundation "hearts"/>
 					<foundation "spades"/>
-					<tableau "T1"/>
-					<tableau "T2"/>
-					<tableau "T3"/>
-					<tableau "T4"/>
-					<tableau "T5"/>
-					<tableau "T6"/>
-					<tableau "T7"/>
+					<column "C1"/>
+					<column "C2"/>
+					<column "C3"/>
+					<column "C4"/>
+					<column "C5"/>
+					<column "C6"/>
+					<column "C7"/>
 				</grid>
 			</segment>
 		</container>
 
-## Playing a card
-// What a click or a drag does:  the card's own moves, and each pile's, as the game plays them.
-
-// the card, and every card on it, onto the first pile that takes it;  it says whether it moved
-// - the stock's card turns over onto the discards instead
-to play a card
-	undoable as "Play Card"
-	if card's pile is solitaire's stock
+	group "Dealing"
+	to "restart the game" with shortcut "R"
+		undoable
+		clear the score
+		deal the cards
+	
+	to deal the cards
+		// Gather every card into the stock, shuffle it, and deal the columns
+		for card in the deck
+			set start pile to card's pile
+			turn the card face down
+			if start pile is not the stock
+				add the card to the stock
+				pause for 50 msec
+		shuffle the stock
+		// each row's first card lands face down, then turns up where it lies
+		for row from 1 to 7
+			for column from row to 7
+				add the last card of the stock to item column of the columns
+				if column is row
+					turn the last card of (item column of the columns) face up
+				pause for 50 msec
 		play from the stock
-		return
-	set end pile to the first pile in every pile where it can take the card
-	if there is not an end pile return no
-	return put the card on end pile
 
-// the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-// - the pile it left turns its new last card up;  the move counts, and scores
-to put a card on a pile, undoable as "Move Card"
-	set start pile to card's pile
-	if start pile cannot give up the card return no
-	if pile cannot take the card return no
-	set points to count the points for the card on pile
-	for card in (cards in start pile starting with the card)
-		move it to pile
-	if the start pile is a tableau and the start pile is not empty
-		pause for 200 msec
-		turn the last card of the start pile face up
-	set solitaire's moves to solitaire's moves + 1
-	set solitaire's score to solitaire's score + points
-	return yes
+	to play from the stock
+		// Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
+		if the stock is empty
+			reset the stock
+		get the last card of the stock
+		turn it face up
+		// as long as its flip takes (styles.css), so it turns over before it moves
+		pause for 300 msec
+		add it to the discards
+	
+	to reset the stock
+		// The discards, turned over, back into the stock
+		set cards to a copy of list (the discards) as a pile
+		reverse the cards
+		for card in the cards
+			add it to the stock
+			turn the card face down
 
-to count the points for a card on a pile
-	// what the move scores:  10 on a foundation, 5 from the discards, else nothing
-	if pile is a foundation return 10
-	if card's pile is solitaire's discards return 5
-	return 0
+	group "Game Play"
+	
+	to play a card
+		undoable as "Play Card"
+		if card's pile is solitaire's stock
+			play from the stock
+		otherwise
+			set end pile to the first pile in every pile where it can take the card
+			if there is not an end pile return no
+			return put the card on end pile
 
-a card
-	// each card's events, and when it may be clicked:  the Inspector lists them, as written here
-	// only a card face up, or the stock's, can be clicked:  the others show no pointer
-	clickable when it is face up or its pile is solitaire's stock
+	to put a card on a pile, undoable as "Move Card"
+		// the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
+		// - the pile it left turns its new last card up;  the move counts, and scores
+		set start pile to card's pile
+		if start pile cannot give up the card return no
+		if pile cannot take the card return no
+		set points to count the points for the card on pile
+		for card in (cards in start pile starting with the card)
+			move it to pile
+		if the start pile is a column and the start pile is not empty
+			pause for 200 msec
+			turn the last card of the start pile face up
+		set solitaire's score to solitaire's score + points
+		return yes
+
+	to "auto play"with shortcut "A"
+		// Play every card that can go somewhere, until none can
+		undoable
+		set anything changed to no
+		if the discards is not empty
+			set test card to the last card of the discards
+			if play test card
+				set anything changed to yes
+				pause for 500 msec
+		// each column's last card onto its foundation
+		for pile in the columns
+			if the pile is empty return
+			set test card to the last card of the pile
+			set foundation to the first pile in the foundations where its suit is the suit of test card
+			if the foundation can take test card
+				set anything changed to yes
+				play test card
+				pause for 100 msec
+		// each column's face-up cards, all together, onto another column
+		for pile in the columns
+			set face up cards to the cards in the pile where the card is face up
+			if face up cards is empty return
+			set test card to the first card of face up cards
+			if test card is a king and test card is the first card of the pile return
+			if play test card
+				set anything changed to yes
+				pause for 500 msec
+		if anything changed auto play
+	
+	to "cheat" with shortcut "C"
+		// Turn up a face-down card from a column, at random, onto the discards
+		undoable
+		set remaining piles to piles in the columns where it is not empty and its first card is face down
+		if remaining piles is empty return
+		set the pile to a random pile in remaining piles
+		set the card to a random card in (the cards in the pile where the card is face down)
+		// over every card around it, then turned face up as it moves onto the discards
+		set the lifted of the card to yes
+		turn the card face up
+		add the card to the discards
+		pause for 300 msec
+		set the lifted of the card to no
+
+	to count the points for a card on a pile
+		// what the move scores:  10 on a foundation, 5 from the discards, else nothing
+		if pile is a foundation return 10
+		if card's pile is solitaire's discards return 5
+		return 0
+	
+	when the score changes
+		set home to the number of cards in the clubs + the number of cards in the diamonds
+		set home to home + the number of cards in the hearts + the number of cards in the spades
+		if home is 52: alert "You won!"
+
+a card		-- play the card on click if it is a legal move
 	on click
-		// a click plays it
-		play it
-	when dragged
-		// a drag starting clears the last hint
-		clear solitaire's hint
-	on drag cancelled
-		// dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so
-		set solitaire's hint to " -- Not there"
+		if it is face up or its pile is solitaire's stock
+			play the card
 
-a pile
-	while card dragged over
-		// while a card it would take is over it, the score shows what the move would add -- gone as the card leaves
-		set points to count the points for the card on it
-		if it can take the card and points > 0: set solitaire's hint to " (+" + points + ")"
+a pile  -- drop the card on the pile if it is a legal move
 	on card dropped
-		put the card on it
+		put the card on the pile
 
 ## The piles
 // Each kind of pile, what it may take or give up, and how it lies.
@@ -246,72 +211,62 @@ a "stock pile" is a pile
 	it can never take a card
 	it can never let go of a card
 	to draw its placeholder
-		// A light grey card, face down
 		<text part="placeholder">🂠</text>
 	on click
-		// Empty:  a click turns the discards back over;  a click on one of its cards is the card's
-		turn a stock card
+		play from the stock
 
-a "discard pile" is a pile
-	// Where the stock's cards go as they're turned over
+a "discard pile" is a pile		-- Where the stock's cards go as they're turned over
 	its "layout" is stacked
 	it can never take a card
 	its cards are draggable when the card is its last card
-		// only its top card may be picked up
 
-a "foundation" is a pile
-	// Where a suit is built up, ace to king, one card at a time
+a "foundation" is a pile		-- Where a suit is built up, ace to king, one card at a time
 	its "layout" is stacked
 	its "suit" is a card suit
 	it can never let go of a card
 	it is droppable when
-		// one card at a time, the last of its pile:  its suit, one higher
 		if the card is not the last card of the pile of the card return no
 		return its suit is the suit of the card and its value + 1 is the value of the card
-	to draw its placeholder
-		// A light grey ace of its suit, face up
+	to draw its placeholder			-- a light grey ace of its suit, face up
 		<text part="placeholder">{the picture of a new card whose rank is ace and suit is its suit}</text>
 
-a "tableau" is a pile
-	// A column, built down from king to ace, red and black in turn
+a "column" is a pile			-- A column, built down from king to ace, red and black in turn
 	its "layout" is vertical
 	its cards are draggable when the card is face up
-		// its face-up cards may be picked up, with every card on them
 	it is droppable when
-		// a king onto an empty one;  else one lower, in the other color
 		if it is empty
 			return the card is a king
 		return its color is not the color of the card and its value is the value of the card + 1
 
-	to test the moves
-		set the column to a new tableau with id "T1"
-		set the king to a new card whose rank is king, suit is spades and direction is up
-		set the queen to a new card whose rank is queen, suit is hearts and direction is up
-		set the jack to a new card whose rank is jack, suit is clubs and direction is up
-		// an empty tableau takes only a king, then one lower in the other color
-		the column can take the queen should be no
-		the column can take the king should be yes
-		add the king to the column
-		the column can take the jack should be no
-		the column can take the queen should be yes
-		add the queen to the column
-		the state of the column should be "T1: K♠↑ Q♥↑"
-		the column can give up the queen should be yes
-		turn the queen face down
-		the column can give up the queen should be no
+to test the moves
+	set the column to a new column with id "T1"
+	set the king to a new card whose rank is king, suit is spades and direction is up
+	set the queen to a new card whose rank is queen, suit is hearts and direction is up
+	set the jack to a new card whose rank is jack, suit is clubs and direction is up
 
-		// a foundation takes its suit, ace first, then one higher:  each the last card of its pile
-		set the foundation to a new foundation with suit = hearts
-		set the two to a new card whose rank is 2, suit is hearts and direction is up
-		set the ace to a new card whose rank is ace, suit is hearts and direction is up
-		set the column to a new tableau with id "T2"
-		add the two to the column
-		add the ace to the column
-		the foundation can take the two should be no
-		the foundation can take the ace should be yes
-		move the ace to the foundation
-		the foundation can take the two should be yes
-		add the queen to the column
-		the foundation can take the queen should be no
+	// an empty column takes only a king, then one lower in the other color
+	the column can take the queen should be no
+	the column can take the king should be yes
+	add the king to the column
+	the column can take the jack should be no
+	the column can take the queen should be yes
+	add the queen to the column
+	the state of the column should be "T1: K♠↑ Q♥↑"
+	the column can give up the queen should be yes
+	turn the queen face down
+	the column can give up the queen should be no
 
-deal the cards
+	// a foundation takes its suit, ace first, then one higher:  each the last card of its pile
+	set the foundation to a new foundation with suit = hearts
+	set the two to a new card whose rank is 2, suit is hearts and direction is up
+	set the ace to a new card whose rank is ace, suit is hearts and direction is up
+	set the column to a new column with id "T2"
+	add the two to the column
+	add the ace to the column
+	the foundation can take the two should be no
+	the foundation can take the ace should be yes
+	move the ace to the foundation
+	the foundation can take the two should be yes
+	add the queen to the column
+	the foundation can take the queen should be no
+

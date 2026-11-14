@@ -1,6 +1,6 @@
 # A pile of cards
 // A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-// Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
+// Each pile is its own element around its cards' elements, `<solitaire-column>` around `<solitaire-card>`s.
 // A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 a "pile" is a droppable viewable list of cards
