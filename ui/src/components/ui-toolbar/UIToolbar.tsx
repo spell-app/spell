@@ -49,7 +49,7 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - `scroll-first`, with a `segmented` look:  it does scroll with them while the row has `--ui-toolbar-scroll-min`
  *     (200px) to show, then it's the dropdown:  a row of many files stays a row for as long as it can.
  * - Its own items draw no key caps:  an action's keys are in its tooltip (`Undo (⌘Z)`).  `show-keys` draws them.
- * - `appearance="pills"`:  each run of its items between two dividers (`<ui-item kind="divider">`) is one rounded
+ * - `appearance="pills"`:  each run of its items between two dividers (`<ui-item kind="divider">`), spacers or other elements is one rounded
  *   track, as a group of buttons is drawn, its items tiles on it (`pills()`, `UIToolbar.css`).
  *   - Each item draws its piece of the track (`ItemContext.pill`):  the start and end pieces are rounded.
  *   - It holds through `shrinkable`'s stages:  cut titles and icons stay on their tracks, the `…` button is a pill.
@@ -147,12 +147,15 @@ export class UIToolbar extends UIMenu {
   private pills() {
     const places = new Map<Element, UIT.PillPlace>()
     let run: Element[] = []
+    let isFirstRun = true
     const endRun = () => {
       run.forEach((element, index) => {
         const isFirst = index === 0
         const isLast = index === run.length - 1
-        places.set(element, isFirst && isLast ? "only" : isFirst ? "start" : isLast ? "end" : "middle")
+        const start = isFirstRun ? "" : "next-"
+        places.set(element, isFirst && isLast ? `${start}only` : isFirst ? `${start}start` : isLast ? "end" : "middle")
       })
+      if (run.length) isFirstRun = false
       run = []
     }
     for (const element of this.rowElements()) {

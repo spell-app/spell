@@ -604,7 +604,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   static partPlaceAt(fileMatch: P.Match, offset: number): P.SourcePlace | undefined {
     const top = fileMatch
       .matchStackForOffset(offset)
-      .map((match) => match.AST)
+      // Only rules that build an AST:  a keyword's (`is`, `to draw`) has none, and asking warns
+      .map((match) => (match.rule.getAST ? match.AST : undefined))
       .filter((ast): ast is P.ASTJSXElement => ast instanceof P.ASTJSXElement)
       .at(-1)
     let around: P.ASTJSXElement | undefined

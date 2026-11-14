@@ -79,7 +79,7 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (solitaire.stock.includes(this)) await solitaire.playFromTheStock()
+    if (solitaire.stock.includes(this)) await solitaire.turnOverTheNextCard()
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
@@ -170,39 +170,6 @@ export function testCardSetup() {
   })
 }
 // -----------
-/** a deck of playing cards */
-export class Deck extends ViewableList {
-  static instanceType = Card
-  static elementTag = core.defineElement(this, "test-project")
-
-  /** Create one of each card, ace of clubs first */
-  create() {
-    Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
-  }
-
-  /** its card names, top to bottom */
-  get shortName() {
-    const cardNames = new List({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shortName))
-    return `deck: ${cardNames}`
-  }
-}
-
-export function testANewDeck() {
-  return core.test("test a new deck", function testANewDeck() {
-    const it = new Deck()
-    core.echoTestAction(`the deck is a new deck`)
-    const deck = new Deck()
-    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-    core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
-    core.expect(deck.firstItem?.shortName, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
-    core.expect(deck.lastItem?.name, `deck's last card's name`, "king of spades", `"king of spades"`)
-    core.echoTestAction(`shuffle the deck`)
-    deck.randomize()
-    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
-  })
-}
-// -----------
 core.heading("A pile of cards")
 /////////////////////
 // ## A pile of cards
@@ -287,15 +254,39 @@ export function testPiles() {
 
 /** a card is in one pile at a time:  putting it on another pile takes it off this one */
 // -----------
-core.heading("Klondike Solitaire")
-////////////////////////
-// ## Klondike Solitaire
-////////////////////////
-// Deal seven columns, then build four foundations, ace to king, one suit each:
-// [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
-// The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
-// Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
+/** a deck of playing cards */
+export class Deck extends ViewableList {
+  static instanceType = Card
+  static elementTag = core.defineElement(this, "test-project")
 
+  /** Create one of each card, ace of clubs first */
+  create() {
+    Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
+  }
+
+  /** its card names, top to bottom */
+  get shortName() {
+    const cardNames = new List({ instanceType: "text" })
+    this.forEach((card) => cardNames.append(card.shortName))
+    return `deck: ${cardNames}`
+  }
+}
+
+export function testANewDeck() {
+  return core.test("test a new deck", function testANewDeck() {
+    const it = new Deck()
+    core.echoTestAction(`the deck is a new deck`)
+    const deck = new Deck()
+    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+    core.expect(deck.filter((card) => card.rank === "queen").length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
+    core.expect(deck.firstItem?.shortName, `deck's first card's short name`, "A♣↓", `"A♣↓"`)
+    core.expect(deck.lastItem?.name, `deck's last card's name`, "king of spades", `"king of spades"`)
+    core.echoTestAction(`shuffle the deck`)
+    deck.randomize()
+    core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+  })
+}
+// -----------
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
@@ -316,7 +307,7 @@ export class StockPile extends Pile {
   }
 
   async onClick(event) {
-    await solitaire.playFromTheStock()
+    await solitaire.turnOverTheNextCard()
   }
 }
 
@@ -387,6 +378,7 @@ export class Column extends Pile {
   static droppable = true
 }
 
+/** See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules */
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -400,8 +392,8 @@ export class Solitaire extends App {
       h("ui-segment", { inverted: true, attach: "top" },
         h("ui-toolbar", { class: "GameBar", appearance: "pills", inverted: true, size: "small", shrinkable: true },
           h("ui-text", { slot: "title", size: "large", heavy: true }, "Spell Solitaire"),
-          core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "autoPlay", { "in-menu": true }),
+          core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true }),
           h("spacer"),
           core.drawAction(this, "undo", { "in-menu": true }),
@@ -491,33 +483,25 @@ export class Solitaire extends App {
 
   async restartTheGame() {
     this.score = 0
-    await this.dealTheCards()
-  }
-
-  /** Gather every card into the stock, shuffle it, and deal the columns */
-  async dealTheCards() {
+    // Gather every card into the stock, shuffle it, and deal the columns
+    this.deck.forEach((card) => core.meanwhile(() => card.turnFaceDown()))
     for (const card of this.deck) {
-      const startPile = card.pile
-      card.turnFaceDown()
-      if (startPile !== this.stock) {
-        this.stock.append(card)
-        await core.pauseFor(50, "msec")
+      if (!this.stock.includes(card)) {
+        core.meanwhile(() => this.stock.append(card))
+        await core.pauseFor(10, "msec")
       }
     }
     this.stock.randomize()
     // each row's first card lands face down, then turns up where it lies
-    for (const row of core.getRange(1, 7)) {
-      for (const column of core.getRange(row, 7)) {
-        core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
-        if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
-        await core.pauseFor(50, "msec")
-      }
-    }
-    await this.playFromTheStock()
+    core.getRange(1, 7).forEach((row) => core.getRange(row, 7).forEach((column) => {
+      core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
+      if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
+    }))
+    await this.turnOverTheNextCard()
   }
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
-  async playFromTheStock() {
+  async turnOverTheNextCard() {
     // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
     if (this.stock.isEmpty) this.resetTheStock()
     const it = this.stock.lastItem
@@ -592,8 +576,7 @@ export class Solitaire extends App {
 }
 export const solitaire = new Solitaire()
 core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart The Game" })
-core.describeAction(Solitaire, "dealTheCards", { title: "Deal The Cards", undoneAs: "Deal The Cards" })
-core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Turn Card" })
+core.describeAction(Solitaire, "turnOverTheNextCard", { title: "Turn Over The Next Card", undoneAs: "Turn Card" })
 core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], icon: "play", undoneAs: "Auto Play" })
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon: "eye", undoneAs: "Cheat" })
@@ -683,6 +666,6 @@ core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- t
 if (!core.isCarryingOver) solitaire.start()
 // -----------
 if (!core.isCarryingOver) testCardSetup()
-if (!core.isCarryingOver) testANewDeck()
 if (!core.isCarryingOver) testPiles()
+if (!core.isCarryingOver) testANewDeck()
 if (!core.isCarryingOver) testTheMoves()

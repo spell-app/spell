@@ -8,10 +8,13 @@ import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 import { DraftSaver } from "spell/epic/answers"
 import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, Pictures, clockOf, pickLabel, type InboxMark } from "spell/epic/review"
 
+import { CountdownRing } from "spell/epic/components/epic-send-buttons/CountdownRing"
+
 import { epicReviewVocabulary } from "./EpicReview.en"
 import { ReviewState } from "./ReviewState"
 import {
   ACCEPTED_CHECK,
+  BUSY_GLYPH,
   BUTTONS_OF,
   CHOSEN,
   DO_IT_ID,
@@ -45,6 +48,7 @@ import {
   type ThreadButtonSpec
 } from "./EpicReview.types"
 
+import ringCSS from "spell/epic/components/epic-send-buttons/CountdownRing.css?inline"
 import reviewCSS from "./EpicReview.css?inline"
 import savedMarkCSS from "./SavedMark.css?inline"
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
@@ -87,7 +91,12 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   @E.proto static vocabulary = epicReviewVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-review": reviewCSS, "epic-saved-mark": savedMarkCSS },
+    styleSheets: {
+      "epic-tooltip": tooltipCSS,
+      "epic-countdown-ring": ringCSS,
+      "epic-review": reviewCSS,
+      "epic-saved-mark": savedMarkCSS
+    },
     // a click on a marked note's words must not jump to its Edit button
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -152,7 +161,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *   - blue:  an ask of Claude (Revisit)
    *   - grey:  no longer relevant (a todo's x)
    * - work on its way or under way (`ReviewState.busyButton()`):
-   *   - that button's icon turns while Claude is on it (`data-busy`)
+   *   - while Claude is on it (`data-busy`), Send's turning ring goes round that button, its icon still
+   *     (`CountdownRing.turning()`;  epic `epic-engine` I279, Owen:  "wrap the thumbs up in a loading spinner rather than
+   *     rotating like a card")
    *   - queued with nobody listening, it stays dashed, "waiting for a session" (and what the page server's wake did:
    *     epic `epic-workflow` P16)
    *   - clicked then:  "nevermind"
@@ -295,6 +306,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /** One review button, as its action stands. */
   private button(spec: ReviewButtonSpec): JSX.Element {
     const busy = () => this.review.busyButton() === spec.action
+    const isWorkedOn = () => busy() && this.review.workedOn()
     return (
       <ui-button
         icon={spec.icon}
@@ -302,13 +314,21 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         data-color={this.tone ?? spec.color}
         data-tone={this.tone ? "" : undefined}
         data-fill={this.fillOf(spec)}
-        data-busy={busy() && this.review.workedOn() ? "" : undefined}
+        data-busy={isWorkedOn() ? "" : undefined}
         title={
           busy() ? this.translationForKey("callOff", { label: this.translationForKey(spec.label) }) : this.tipOf(spec)
         }
         aria-label={`${this.translationForKey(spec.label)} · ${this.stateOf(spec)}`}
         onClick={(event: MouseEvent) => this.press(event, spec)}
-      />
+      >
+        {/* Claude on it:  the icon, still, with the turning ring round the button (I279) */}
+        <Show when={isWorkedOn()}>
+          <span slot="icon" class={BUSY_GLYPH}>
+            <ui-icon name={spec.icon} />
+            {CountdownRing.turning(this.partForName("busy"))}
+          </span>
+        </Show>
+      </ui-button>
     )
   }
 

@@ -221,8 +221,9 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
       this.isIconOnly ? UIT.ICON_CLASS : "",
       // its piece of a toolbar's pill (`UIToolbar.css`)
       pill ? PILL : "",
-      pill === "start" || pill === "only" ? PILL_START : "",
-      pill === "end" || pill === "only" ? PILL_END : ""
+      pill && pill !== "middle" && pill !== "end" ? PILL_START : "",
+      pill === "end" || pill === "only" || pill === "next-only" ? PILL_END : "",
+      pill === "next-start" || pill === "next-only" ? PILL_NEXT : ""
     ]
     return extra.filter(Boolean).join(" ") || undefined
   }
@@ -534,3 +535,5 @@ const LETTER_OR_DIGIT = /[\p{L}\p{N}]/u
 const PILL = "pill"
 const PILL_START = "pill-start"
 const PILL_END = "pill-end"
+/** The start of a pill that follows another:  the room between the two before it. */
+const PILL_NEXT = "pill-next"

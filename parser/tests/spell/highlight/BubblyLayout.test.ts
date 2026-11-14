@@ -309,6 +309,30 @@ solitaire is an app
     expect(declaring(SP.BubblyLayout.of(GAME))).toEqual(['<number "score"/>', '<pile "C1"/>'])
   })
 
+  it("draws a bare attribute value (`suit=hearts`) where it is, not over the file's first word (epic `language` I84)", () => {
+    const GAME = `solitaire is an app
+\t-- See the rules
+\tits "suit" is one of hearts, spades
+\tto draw it
+\t\t<text suit=hearts/>
+`
+    const file = parseSpellProject([{ path: "/Game.spell", contents: GAME }]).files[0]!
+    const within = { match: file.match, inputLines: GAME.split("\n") } as unknown as SP.SpellFile
+    const drawing = SP.BubblyLayout.of(GAME, SP.spellParser, { within })
+    const head = blocksOf(drawing.nodes)[0]!.head
+    // its words were parsed alone, at 0:  `solita` drew as `hearts`, a pill over the app's name
+    expect(head.pieces.map((piece) => [piece.kind, GAME.slice(piece.start, piece.end)])).toEqual([
+      ["reference", "solitaire"],
+      ["words", " is an "],
+      ["reference", "app"]
+    ])
+    const hearts = SP.SpellHighlighter.spans(GAME, SP.spellParser, file.match)
+      .filter((span) => span.kind === "literal")
+      .at(-1)
+    expect(hearts && GAME.slice(hearts.start, hearts.end)).toBe("hearts")
+    expect(hearts!.start).toBe(GAME.indexOf("suit=hearts") + "suit=".length)
+  })
+
   it("never throws, whatever it's given", () => {
     for (const text of ["", "))) ((( '", "to to to\n\t\t\tis is", "<div>{</div>", "\n\n\t\n"]) {
       expect(() => SP.BubblyLayout.of(text)).not.toThrow()

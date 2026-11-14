@@ -15,13 +15,13 @@ describe("Python on asyncio", () => {
   if (process.env.SPELL_DUMP_ASYNC) writeFileSync(process.env.SPELL_DUMP_ASYNC, cards)
 
   test("a method that pauses waits:  `async def`, `await core.pause_for(...)`", () => {
-    expect(cards).toContain("    async def play_from_the_stock(self) -> None:")
+    expect(cards).toContain("    async def turn_over_the_next_card(self) -> None:")
     expect(cards).toContain('            await core.pause_for(50, "msec")')
   })
 
   test("a method that calls one that waits waits too, and awaits it", () => {
     expect(cards).toContain("    async def restart_the_game(self) -> None:")
-    expect(cards).toContain("        await self.deal_the_cards()")
+    expect(cards).toContain("        await self.turn_over_the_next_card()")
   })
 
   test("a getter that doesn't wait stays a plain property", () => {

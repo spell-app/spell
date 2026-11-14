@@ -293,7 +293,7 @@ describe("<epic-item> review controls", () => {
     expect(routes.inbox.marks.t6).toMatchObject({ action: "drop", note: "moot since P3" })
   })
 
-  test("the fill:  a mark dashed until sent, then outlined;  Claude on it, its icon turns;  handled, they CLEAR", async () => {
+  test("the fill:  a mark dashed until sent, then outlined;  Claude on it, a ring turns round it;  handled, they CLEAR", async () => {
     const before = new Date(Date.now() - 60_000).toISOString()
     routes.inbox.marks.j3 = { action: "revisit", when: "soon", note: "why?", at: before }
     routes.inbox.sent = new Date().toISOString()
@@ -307,6 +307,19 @@ describe("<epic-item> review controls", () => {
       "blue",
       true
     ])
+    // Claude on it (I279):  the icon still, Send's turning ring round the button, centred on it, the button's size
+    const glyph = revisit.querySelector<HTMLElement>("[slot='icon']")!
+    expect(glyph.querySelector("ui-icon")!.getAttribute("name")).toBe(revisit.getAttribute("icon"))
+    const ring = glyph.querySelector<SVGElement>("svg.ring.turning")!
+    const inner = revisit.shadowRoot!.querySelector("[part~='button']")!.getBoundingClientRect()
+    const round = ring.getBoundingClientRect()
+    expect(Math.abs(round.x + round.width / 2 - (inner.x + inner.width / 2))).toBeLessThan(0.5)
+    expect(Math.abs(round.y + round.height / 2 - (inner.y + inner.height / 2))).toBeLessThan(0.5)
+    expect(Math.abs(round.width - inner.width)).toBeLessThan(0.5)
+    expect(getComputedStyle(glyph.querySelector("ui-icon")!).animationName).toBe("none")
+    const icon = glyph.querySelector("ui-icon")!.shadowRoot!.querySelector("svg")!.getBoundingClientRect()
+    expect(Math.abs(icon.x + icon.width / 2 - (inner.x + inner.width / 2))).toBeLessThan(0.5)
+    expect(Math.abs(icon.y + icon.height / 2 - (inner.y + inner.height / 2))).toBeLessThan(0.5)
     // Claude's agent at work:  the chip is blue at once, before the script rewrites `state`
     expect(deep(host).querySelector("[part~='base']")!.classList.contains("progress")).toBe(true)
     // a request for now Claude did (`inbox done`):  its mark gone, every button a grey outline again;  the chip says the rest

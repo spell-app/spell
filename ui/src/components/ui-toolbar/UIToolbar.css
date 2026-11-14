@@ -224,11 +224,15 @@
     border-start-end-radius: var(--_ui-toolbar-pill-radius);
     border-end-end-radius: var(--_ui-toolbar-pill-radius);
   }
-  /* a divider item:  no hairline, only the room between two pills */
+  /* the room between two pills, before the second, whatever splits them (a divider, a spacer ...) */
+  :host(:state(in-menu)) > .item.pill-next {
+    margin-inline-start: calc(var(--_ui-toolbar-pill-gap) + var(--_ui-toolbar-pill-padding));
+  }
+  /* a divider item:  no hairline, and no room of its own:  the pill after it keeps the gap */
   @container style(--_toolbar-pills: 1) {
     :host(:state(in-menu)) > .divider {
       width: 0;
-      margin: 0 calc(var(--_ui-toolbar-pill-gap) / 2);
+      margin: 0;
       background: none;
     }
   }

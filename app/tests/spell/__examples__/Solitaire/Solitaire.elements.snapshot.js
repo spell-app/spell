@@ -79,7 +79,7 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (solitaire.stock.includes(this)) await solitaire.playFromTheStock()
+    if (solitaire.stock.includes(this)) await solitaire.turnOverTheNextCard()
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
@@ -137,28 +137,6 @@ export function testCardSetup(...args) {
   return sendCall("test_card_setup", args)
 }
 // -----------
-/** a deck of playing cards */
-export class Deck extends ViewableList {
-  static instanceType = Card
-  static elementTag = core.defineElement(this, "test-project")
-
-  /** Create one of each card, ace of clubs first */
-  create() {
-    Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
-  }
-
-  /** its card names, top to bottom */
-  get shortName() {
-    const cardNames = new List({ instanceType: "text" })
-    this.forEach((card) => cardNames.append(card.shortName))
-    return `deck: ${cardNames}`
-  }
-}
-
-export function testANewDeck(...args) {
-  return sendCall("test_a_new_deck", args)
-}
-// -----------
 /////////////////////
 // ## A pile of cards
 /////////////////////
@@ -211,14 +189,28 @@ export function testPiles(...args) {
 
 /** a card is in one pile at a time:  putting it on another pile takes it off this one */
 // -----------
-////////////////////////
-// ## Klondike Solitaire
-////////////////////////
-// Deal seven columns, then build four foundations, ace to king, one suit each:
-// [wikipedia](https://en.wikipedia.org/wiki/Klondike_(solitaire)) has its rules, and what each pile is called.
-// The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `Pile`.
-// Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
+/** a deck of playing cards */
+export class Deck extends ViewableList {
+  static instanceType = Card
+  static elementTag = core.defineElement(this, "test-project")
 
+  /** Create one of each card, ace of clubs first */
+  create() {
+    Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
+  }
+
+  /** its card names, top to bottom */
+  get shortName() {
+    const cardNames = new List({ instanceType: "text" })
+    this.forEach((card) => cardNames.append(card.shortName))
+    return `deck: ${cardNames}`
+  }
+}
+
+export function testANewDeck(...args) {
+  return sendCall("test_a_new_deck", args)
+}
+// -----------
 /** The cards not played yet, face down:  a click turns the next one over, so none can be taken from it */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
@@ -239,7 +231,7 @@ export class StockPile extends Pile {
   }
 
   async onClick(event) {
-    await solitaire.playFromTheStock()
+    await solitaire.turnOverTheNextCard()
   }
 }
 
@@ -310,6 +302,7 @@ export class Column extends Pile {
   static droppable = true
 }
 
+/** See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules */
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -323,8 +316,8 @@ export class Solitaire extends App {
       h("ui-segment", { inverted: true, attach: "top" },
         h("ui-toolbar", { class: "GameBar", appearance: "pills", inverted: true, size: "small", shrinkable: true },
           h("ui-text", { slot: "title", size: "large", heavy: true }, "Spell Solitaire"),
-          core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "autoPlay", { "in-menu": true }),
+          core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true }),
           h("spacer"),
           core.drawAction(this, "undo", { "in-menu": true }),
@@ -414,33 +407,25 @@ export class Solitaire extends App {
 
   async restartTheGame() {
     this.score = 0
-    await this.dealTheCards()
-  }
-
-  /** Gather every card into the stock, shuffle it, and deal the columns */
-  async dealTheCards() {
+    // Gather every card into the stock, shuffle it, and deal the columns
+    this.deck.forEach((card) => core.meanwhile(() => card.turnFaceDown()))
     for (const card of this.deck) {
-      const startPile = card.pile
-      card.turnFaceDown()
-      if (startPile !== this.stock) {
-        this.stock.append(card)
-        await core.pauseFor(50, "msec")
+      if (!this.stock.includes(card)) {
+        core.meanwhile(() => this.stock.append(card))
+        await core.pauseFor(10, "msec")
       }
     }
     this.stock.randomize()
     // each row's first card lands face down, then turns up where it lies
-    for (const row of core.getRange(1, 7)) {
-      for (const column of core.getRange(row, 7)) {
-        core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
-        if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
-        await core.pauseFor(50, "msec")
-      }
-    }
-    await this.playFromTheStock()
+    core.getRange(1, 7).forEach((row) => core.getRange(row, 7).forEach((column) => {
+      core.getItemAt(core.everyThing(Column), position(column))?.append(this.stock.lastItem)
+      if (column === row) core.getItemAt(core.everyThing(Column), position(column))?.lastItem?.turnFaceUp()
+    }))
+    await this.turnOverTheNextCard()
   }
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
-  async playFromTheStock() {
+  async turnOverTheNextCard() {
     // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
     if (this.stock.isEmpty) this.resetTheStock()
     const it = this.stock.lastItem
@@ -515,8 +500,7 @@ export class Solitaire extends App {
 }
 export let solitaire
 core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart The Game" })
-core.describeAction(Solitaire, "dealTheCards", { title: "Deal The Cards", undoneAs: "Deal The Cards" })
-core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Turn Card" })
+core.describeAction(Solitaire, "turnOverTheNextCard", { title: "Turn Over The Next Card", undoneAs: "Turn Card" })
 core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], icon: "play", undoneAs: "Auto Play" })
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon: "eye", undoneAs: "Cheat" })

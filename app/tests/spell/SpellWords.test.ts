@@ -14,7 +14,7 @@ describe("SpellWords", () => {
     const words = SP.SpellWords.read(fixtureWords("@spell/examples/Solitaire"))!
     expect(Object.keys(words.types)).toEqual(["Card", "Deck", "Pile", "Foundation", "Solitaire"])
     expect(words.types.Solitaire).toMatchObject({
-      dealTheCards: "deal the cards",
+      turnOverTheNextCard: "turn over the next card",
       restartTheGame: "restart the game",
       autoPlay: "auto play",
       draw: "draw it"

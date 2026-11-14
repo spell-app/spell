@@ -291,7 +291,7 @@ describe("spell compile", () => {
     expect(pack).toContain("type:Column")
     expect(pack).not.toContain("file://")
     const words = readFileSync(resolve(copy, `Solitaire${SP.WORDS_JS_SUFFIX}`), "utf8")
-    expect(words).toContain('dealTheCards: "deal the cards"')
+    expect(words).toContain('turnOverTheNextCard: "turn over the next card"')
   }, 30_000)
 
   test("a project with errors writes no scope pack", () => {
