@@ -1,6 +1,7 @@
 import { For, Loading, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
 
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { editor, type FollowedPlace } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -215,6 +216,9 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
  *   a tag, what that tag draws.
  * - A line of the code that draws nothing lets go of what's selected;  one of compiled code leaves it as it was,
  *   and so does the cursor's line once an edit typed there is drawn (`from: "edit"`, I87).
+ * - The code's cursor ON a word naming a thing the app has (`the stock`, `the deck`, `la reserva`) inspects that
+ *   thing instead of its line (epic `editor` T64;  Owen:  "How cool would it be if `the stock` was inspected when
+ *   your cursor was here"):  `followCodeCursor()`.
  ****************/
 export function FollowAlong() {
   const follower = lineFollower()
@@ -230,7 +234,8 @@ export function FollowAlong() {
         const ifNone = followed.from === "code" ? "deselect" : "keep"
         // only a new place runs it, so what it reads (the selection, the trail) it reads as it is now,
         // untracked on purpose (I88)
-        if (followed.from !== "parts")
+        if (followed.from === "code" || followed.from === "edit") void followCodeCursor(followed, codeEditor, ifNone)
+        else if (followed.from !== "parts")
           untrack(() => Inspector.selectWrittenAt(followed.path, followed.line, { ifNone }))
       }
       if (followed.from === "code" || followed.from === "edit") return follower.clear()
@@ -253,6 +258,73 @@ export function FollowAlong() {
   )
   return null
 }
+
+/**
+ * The code's cursor rests at `followed`:  select the thing the word under it names, when it names one the app draws,
+ * else what its line draws or makes, as ever (`Inspector.selectWrittenAt()`).
+ * - The word is read by the language service, from its declaration (`<stock-pile "stock"/>`, `"stock" is a new ...`):
+ *   that line's part is the thing, so what's inspected is what the program declared, never a guess from the text.
+ * - Only a property or a variable counts (`declaredThingAt()`):  a type, an action or a keyword falls back to the line.
+ * - A place followed since (the cursor moved on) is left alone:  the language service loads lazily.
+ * - NEVER throws.
+ */
+async function followCodeCursor(
+  followed: FollowedPlace,
+  codeEditor: monaco.editor.IStandaloneCodeEditor | undefined,
+  ifNone: "keep" | "deselect"
+): Promise<void> {
+  const named = codeEditor && (await thingNamedAtCursor(codeEditor, followed).catch(() => undefined))
+  if (editor.followed !== followed) return
+  untrack(() => {
+    if (named && Inspector.selectWrittenAt(named.path, named.line)) return
+    Inspector.selectWrittenAt(followed.path, followed.line, { ifNone })
+  })
+}
+
+/**
+ * Where the thing the word at `codeEditor`'s cursor names was declared, by its file's name and line from 0:
+ * `undefined` when the cursor isn't on `followed`'s line, a range is selected, or the word names no thing.
+ */
+async function thingNamedAtCursor(
+  codeEditor: monaco.editor.IStandaloneCodeEditor,
+  followed: FollowedPlace
+): Promise<{ path: string; line: number } | undefined> {
+  const selection = codeEditor.getSelection()
+  const model = codeEditor.getModel()
+  if (!model || !selection?.isEmpty() || selection.positionLineNumber !== followed.line + 1) return undefined
+  const { SpellMonaco } = await LazyMonaco.load()
+  const { models, addresses, service } = SpellMonaco.register()
+  // the language service's own parse of the code showing, as its other features read it
+  models.parseNow()
+  let file = addresses.fileFor(model.uri.toString())
+  // run from the compile cache, nothing's parsed yet:  parsed once, behind the running app
+  const project = untrack(() => editor.project)
+  if (file instanceof SP.SpellFile && !file.match && project?.compiledFrom === "cache") {
+    await parsedBehind(project)
+    file = addresses.fileFor(model.uri.toString())
+  }
+  if (!(file instanceof SP.SpellFile) || !file.match || file.contents !== model.getValue()) return undefined
+  const declared = service.declaredThingAt(file, {
+    line: selection.positionLineNumber - 1,
+    character: selection.positionColumn - 1
+  })
+  return declared && { path: SP.SpellProject.sourceNameOf(declared.file.path), line: declared.line }
+}
+
+/**
+ * `project`, run from the compile cache, parsed and compiled behind it, once:  what the cursor's word is read from.
+ * - HACK:  the editor's own compile behind a cache hit (`editor.compileBehind()`) leaves the files unparsed on a
+ *   reload (seen on main too, 2026-11-14:  `compiledFrom` stays `"cache"`, every file's `match` empty), so hover,
+ *   go to definition and this find nothing till an edit;  asked here, it parses.
+ */
+function parsedBehind(project: SP.SpellProject): Promise<void> {
+  let parsing = parsedProjects.get(project)
+  if (!parsing) parsedProjects.set(project, (parsing = editor.compileBehind(project)))
+  return parsing
+}
+
+/** Each project `parsedBehind()` has parsed, or is parsing. */
+const parsedProjects = new WeakMap<SP.SpellProject, Promise<void>>()
 
 /**
  * A mark in a code editor's margin on the line being followed, scrolling to it only when it's out of view.

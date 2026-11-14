@@ -1199,6 +1199,26 @@ export class SpellLanguageService {
   }
 
   /**
+   * Where the thing a word at `position` names was declared, when it names one a running program has:
+   * a property or variable (`the stock`, `the deck`, `la reserva`), never a type, an action or a keyword.
+   * - Its file and line, from 0:  the editor inspects what that line makes or draws (epic `editor` T64).
+   * - `undefined` for anything else, or one declared in no file of the workspace (imported).
+   */
+  declaredThingAt(file: SP.SpellFile, position: Position): { file: SP.SpellFile; line: number } | undefined {
+    const subject = this.subjectAt(file, position)
+    if (subject?.kind !== "property" && subject?.kind !== "variable") return undefined
+    const [declared] = this.declarationsOf(subject)
+    if (declared?.match.start !== undefined) {
+      return { file: declared.file, line: this.positionAt(declared.file, declared.match.start).line }
+    }
+    // a member made where it's drawn (`<stock-pile "stock"/>`):  its tag declared it, and says no declaration itself
+    const declaredBy = subject.record?.declaredBy
+    const declaringFile = declaredBy && this.fileOf(declaredBy)
+    if (!declaringFile || declaredBy?.start === undefined) return undefined
+    return { file: declaringFile, line: this.positionAt(declaringFile, declaredBy.start).line }
+  }
+
+  /**
    * Where IMPORTED `record` was declared, as its `declaredAt` says (`P.DeclaredAt`):  it has no `declaredBy`.
    * - in a file of a project the workspace has parsed, e.g. an import's own source
    * - else in one the workspace finds on disk, e.g. a built-in template's, `TwoSidedView.spell`

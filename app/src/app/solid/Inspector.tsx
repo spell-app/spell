@@ -306,11 +306,16 @@ export class Inspector {
    *   inside a drawn thing's own drawing too (a pile's placeholder, a square's button, nine times).
    * - None:  `ifNone` says.  `"keep"` leaves what's selected as it was;  `"deselect"` lets go (the code's cursor:
    *   one selection everywhere, so the card matches the outline).
+   * - Returns whether it found something there.
    * - NEVER throws.
    */
-  static selectWrittenAt(path: string, line: number, { ifNone = "keep" }: { ifNone?: "keep" | "deselect" } = {}): void {
+  static selectWrittenAt(
+    path: string,
+    line: number,
+    { ifNone = "keep" }: { ifNone?: "keep" | "deselect" } = {}
+  ): boolean {
     const area = appArea
-    if (!area) return
+    if (!area) return false
     const written = Inspector.partsIn(area)
       .map((row) => row.element)
       .filter((element) => {
@@ -319,9 +324,10 @@ export class Inspector {
       })
     const found = written.length ? written : Inspector.drawnInTagAround(area, path, line)
     // what's selected already, with no trail from it (another line of the same tag):  nothing to do again (I69)
-    if (found.length && !trail().length && isSameElements(selectedParts(), found)) return
+    if (found.length && !trail().length && isSameElements(selectedParts(), found)) return true
     if (found.length) Inspector.selectAll(found)
     else if (ifNone === "deselect" && selectedParts().length) Inspector.select(undefined)
+    return found.length > 0
   }
 
   /** The parts in `area` the innermost tag around line `line` of file `path` draws, read from its parse. */
