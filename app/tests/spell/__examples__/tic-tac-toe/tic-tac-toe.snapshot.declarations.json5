@@ -119,6 +119,21 @@
       "defined": "/TicTacToe.spell:717-908"
     },
     {
+      "syntax": "start a new game (of {thisArg:expression})?",
+      "output": "start_a_new_game",
+      "rule": "method_call",
+      "of": "TicTacToe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing",
+      "kind": "method",
+      "name": "start a new game",
+      "returns": "nothing",
+      "defined": "/TicTacToe.spell:928-1085"
+    },
+    {
       "syntax": "check the line from square {callArgs:expression} through {callArgs:expression} to {callArgs:expression} (of {thisArg:expression})?",
       "output": "check_the_line_from_square_$a_through_$b_to_$c",
       "rule": "method_call",
@@ -177,21 +192,6 @@
       "defined": "/TicTacToe.spell:2005-2383"
     },
     {
-      "syntax": "start a new game (of {thisArg:expression})?",
-      "output": "start_a_new_game",
-      "rule": "method_call",
-      "of": "TicTacToe",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Playing",
-      "kind": "method",
-      "name": "start a new game",
-      "returns": "nothing",
-      "defined": "/TicTacToe.spell:928-1085"
-    },
-    {
       "property": "board",
       "of": "Square",
       "group": "Playing a square",
@@ -216,20 +216,20 @@
     20,
     27,
     33,
-    54,
-    57,
-    73,
-    76,
-    82,
-    88,
-    93,
-    98,
-    105,
-    111,
-    118,
-    131,
-    159,
-    175,
-    181
+    55,
+    58,
+    74,
+    77,
+    83,
+    89,
+    94,
+    99,
+    106,
+    112,
+    119,
+    126,
+    139,
+    177,
+    183
   ]
 }

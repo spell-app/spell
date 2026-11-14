@@ -25,6 +25,10 @@ export class Recipe extends View {
     )
   }
 
+  remove() {
+    core.removeSaved(this)
+  }
+
   static savedIn = {
     place: "family_cookbook",
     collection: "recipes",
@@ -40,10 +44,6 @@ export class Recipe extends View {
   static { this.declareProp("modified", { type: "date", declaredAt: { path: "/RecipeBox.spell", start: 180, end: 214 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
-
-  remove() {
-    core.removeSaved(this)
-  }
 }
 
 /** The line a different back-end changes:  tests/spell/recipeBox.test.ts changes only this, for each one it runs */
@@ -103,5 +103,6 @@ export class RecipeBox extends App {
   }
 }
 export const recipeBox = new RecipeBox()
+core.describeAction(RecipeBox, "addTheDraft", { title: "Add The Draft", undoneAs: "Add The Draft" })
 
 if (!core.isCarryingOver) recipeBox.start()

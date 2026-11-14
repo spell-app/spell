@@ -111,6 +111,7 @@ export class LiveBoxElement extends SpellElement<LiveBox> {
 }
 core.useElement(LiveBox, LiveBoxElement)
 export const liveBox = new LiveBox()
+core.describeAction(LiveBox, "addOne", { title: "Add One", undoneAs: "Add One" })
 
 on<{ recipe: Recipe }>("a-recipe-change", ({ recipe }) => {
   liveBox.changes = liveBox.changes + 1

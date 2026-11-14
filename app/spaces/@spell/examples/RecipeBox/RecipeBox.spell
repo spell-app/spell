@@ -10,8 +10,8 @@
 ## A recipe:  a card you can read and change
 
 a recipe
-	to edit it
-		// Its Edit screen:  nothing changes until Save
+	to edit it, can't be undone
+		// Its Edit screen:  nothing changes until Save;  only which screen shows, so no step to undo
 		set the editing of the recipe box to it
 
 	to draw it
@@ -41,12 +41,12 @@ a "recipe editor" is a view
 	its "draft" is a draft of its recipe
 		// A copy to change:  the recipe stays as it was until Save
 
-	to save it
-		// Every changed field, sent together
+	to save it, can't be undone
+		// Every changed field, sent together:  its own undo step, Edit, as a saved thing's change is
 		save its draft
 		set the editing of the recipe box to nothing
 
-	to cancel it
+	to cancel it, can't be undone
 		// Forget the copy:  the recipe never changed
 		discard its draft
 		set the editing of the recipe box to nothing

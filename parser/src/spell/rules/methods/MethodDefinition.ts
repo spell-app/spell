@@ -3,7 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Wording } from "spell/parser/spell/rules/expressions"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawnLines } from "spell/parser/spell/rules/classes"
+import { DrawnLines, DrawnMarkup } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
 import { SubjectRule } from "spell/parser/spell/rules/types"
@@ -628,6 +628,11 @@ export class MethodDefinition<
           })
         )
         output.push(...this.describedAction(match, typeName, methodName))
+        // English's `to draw it`:  what its tags declare, as members after it (epic `language` P55, Q52)
+        if (methodName === "draw") {
+          const type = new P.ASTTypeExpression(match, { name: typeName })
+          output.push(...DrawnMarkup.membersDeclared(this.getBody(match), type))
+        }
       }
     }
     // No instance type: create as a loose function -- `export`ed at file level, so another project can import it.
@@ -675,7 +680,11 @@ export class MethodDefinition<
     if (!details) return []
     const signature = (action.groups as { signature?: P.Match }).signature
     // its title by default:  its words as written, in Initial Caps -- `auto play` is `Auto Play` (epic `language` P48)
-    const words = `${signature?.inputText ?? ""}`.trim().replace(/^"(.*)"$/, "$1")
+    // its blanks' parentheses left out:  `to put (a card) on (a pile)` is `Put A Card On A Pile` (epic `language` P55)
+    const words = `${signature?.inputText ?? ""}`
+      .trim()
+      .replace(/^"(.*)"$/, "$1")
+      .replace(/[()]/g, "")
     const description: Record<string, P.ASTDescriptionValue> = { title: initialCaps(words) }
     if (details.shortcuts.length) description.shortcuts = details.shortcuts
     if (details.icon) description.icon = details.icon

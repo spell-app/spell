@@ -149,5 +149,6 @@ export class Statusphere extends App {
   }
 }
 export const statusphere = new Statusphere()
+core.describeAction(Statusphere, "postEmoji", { title: "Post Emoji As Text", undoneAs: "Post Emoji As Text" })
 // -----------
 if (!core.isCarryingOver) statusphere.start()

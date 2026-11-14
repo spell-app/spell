@@ -189,9 +189,14 @@ export const actingMethods = defineCoreModule({
    * `core.holdWhile(() => solitaire.startANewGame())`.
    * - So the first draw comes at once, and a click during the opening deal waits its turn.
    * - Not while a recompiled program loads:  its pauses never end, so it would hold everything back for good.
+   * - No undo step:  what the program does to start (the opening deal) is no one's to undo, as an action run by it
+   *   that `can't be undone` -- even an action it calls, every one being undoable (epic `language` P55, Q60).
+   *   Python's does the same, as its `create()` runs before its actions are described.
    */
   holdWhile(run: () => unknown): void {
-    const step = actingMethods.meanwhile(run)
+    const history = core.RUNTIME?.history
+    const unrecorded = history ? () => history.run({ cantBeUndone: "keeps history" }, run) : run
+    const step = actingMethods.meanwhile(unrecorded)
     if (!core.isCarryingOver) core.RUNTIME?.actions.holdFor(step)
   },
 

@@ -48,9 +48,11 @@ export class SpellJSXAttribute extends SpellJSXContent {
     if (value) {
       const inputIsExpression = value instanceof P.JSXExpressionToken
       // `JSXExpression.contents` is typed `string | Token`:
-      // a bare, un-braced attribute value is tokenized by `matchJSXAttributeValueIdentifier`, which sets a `Token`.
-      // This rule only ever handles the braced / string form here, as it always has.
-      const input = inputIsExpression ? (value.contents as string).trim().replace(/\n/g, " ") : value
+      // a bare, un-braced attribute value is tokenized by `matchJSXAttributeValueIdentifier`, which sets a `Token`:
+      // read as its word, `suit=clubs` as `suit={clubs}` (epic `language` P55)
+      const { contents } = value as { contents?: string | P.Token }
+      const said = typeof contents === "string" ? contents : `${contents?.raw ?? contents?.value ?? ""}`
+      const input = inputIsExpression ? said.trim().replace(/\n/g, " ") : value
       // parse "onXXX" as an inline method with an `event` argument:  `onClick`, `on-click`, not `only` (P18)
       if (HANDLER_ATTRIBUTE.test(match.data.attribute)) {
         const methodScopeProps: P.MethodScopeProps = {

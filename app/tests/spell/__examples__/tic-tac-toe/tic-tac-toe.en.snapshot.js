@@ -19,15 +19,15 @@ export const words = {
       winner: "winner",
       isOver: "is over",
       message: "message",
+      startANewGame: "start a new game",
       checkTheLineFromSquareAThroughBToC: "check the line from square (a as a number) through (b as a number) to (c as a number)",
       checkForAWinner: "check for a winner",
-      draw: "draw it",
-      startANewGame: "start a new game"
+      draw: "draw it"
     }
   },
   groups: {
     TicTacToe: [
-      { name: "Playing", members: ["checkTheLineFromSquareAThroughBToC", "checkForAWinner", "draw", "startANewGame"] }
+      { name: "Playing", members: ["startANewGame", "checkTheLineFromSquareAThroughBToC", "checkForAWinner", "draw"] }
     ],
     Square: [
       { name: "Playing a square", members: ["board"] }

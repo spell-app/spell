@@ -980,7 +980,7 @@ export class SpellLanguageService {
    */
   headingsOf(file: SP.SpellFile): Array<{ start: number; level: number; text: string }> {
     const docEnd = this.fileDocComment(file)?.comments.at(-1)?.end ?? -1
-    return this.highlightSpans(file)
+    const headings = this.highlightSpans(file)
       .filter((span) => span.heading && span.start >= docEnd)
       .map((span) => ({
         start: span.start,
@@ -991,6 +991,23 @@ export class SpellLanguageService {
           .trim()
       }))
       .filter((heading) => heading.text)
+    // a file's group, `group "The piles"`, is the heading `## The piles` (epic `language` P55, Q54)
+    const groups = SpellLanguageService.fileGroupsOf(file)
+    return groups.length ? [...headings, ...groups].sort((a, b) => a.start - b.start) : headings
+  }
+
+  /** The groups at `file`'s top level, `group "The piles"`, as level-2 headings -- see `headingsOf()`. */
+  private static fileGroupsOf(file: SP.SpellFile): Array<{ start: number; level: number; text: string }> {
+    const found: Array<{ start: number; level: number; text: string }> = []
+    for (const item of file.match?.matched ?? []) {
+      const statement = item instanceof P.Match ? (item.data as { statement?: P.Match }).statement : undefined
+      const rule = statement?.rule as
+        | { isFileHeading?(match: P.Match): boolean; groupName?(match: P.Match): string }
+        | undefined
+      if (!statement || !rule?.isFileHeading?.(statement) || statement.start === undefined) continue
+      found.push({ start: statement.start, level: GROUP_HEADING_LEVEL, text: rule.groupName!(statement) })
+    }
+    return found
   }
 
   /** Comment-only lines at the very top of `file`, if the first is a `#` heading -- see `fileDescription()`. */
@@ -2960,3 +2977,6 @@ type TestDefinition = {
   /** Each `... should be ...` in it, in the order they're written:  the spell its call names, and its statement. */
   checks: Array<{ what: string; expected?: string; match: P.Match }>
 }
+
+/** The heading level a file's `group "..."` is, as `## ...` is:  see `SpellLanguageService.headingsOf()`. */
+const GROUP_HEADING_LEVEL = 2

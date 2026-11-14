@@ -231,6 +231,7 @@ class HabitTracker(App):
 
 
 habit_tracker = HabitTracker()
+core.describe_action(HabitTracker, "add_the_draft", {"title": "Add The Draft", "undone_as": "Add The Draft"})
 
 
 # -----------

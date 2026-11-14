@@ -37,8 +37,9 @@ describe.each(["@spell/examples/Solitaire", "@spell/examples/Solitario"] as cons
     expect(made.length).toBeGreaterThan(5)
     for (const [, , , source, line, column] of drawn) expect(lineAt(source, line, column)).toMatch(/^<[\p{L}]/u)
     // spell made a few by itself:  a test's own subject, at its `<test>`;  the app, at its name or its header
+    // -- and a pile declared where it's drawn is made at its tag, `<column "C1"/>` (epic `language` P55, Q52)
     const words = made.map(([, , , source, line, column]) => lineAt(source, line, column))
-    const written = words.filter((text) => /^(an? new|una? nuev|un nuev)/i.test(text))
+    const written = words.filter((text) => /^(an? new|una? nuev|un nuev|<[\p{L}][\p{L}\p{M}\d-]* ")/iu.test(text))
     expect(written.length / words.length).toBeGreaterThan(0.8)
   })
 

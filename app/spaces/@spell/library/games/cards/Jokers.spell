@@ -18,7 +18,7 @@ a "joker" is a card
 	its "picture" is
 		return "🃟"
 	its "name" is its color + " joker"
-	its "state" is
+	its "short name" is
 		// Its short name:  *R↑ is the red joker, face up
 		letter is (the first letter of its color) as upper case
 		arrow is "↑" if it is face up otherwise "↓"
@@ -30,7 +30,7 @@ a "joker" is a card
 		it is a joker should be yes
 		its color should be red
 		its name should be "red joker"
-		its state should be "*R↑"
+		its short name should be "*R↑"
 		its picture should be "🃟"
 		it is the red joker should be yes
 		it is the black joker should be no

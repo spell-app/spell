@@ -22,7 +22,7 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return match
-    const listed = IsEqual.listedPropertyFor(scope, SuffixLeft.current, match.groups.expression)
+    const listed = this.listedFor(scope, SuffixLeft.current, match.groups.expression)
     if (listed) {
       const { property, value } = listed
       ;(match.data as IsEqualMatchData).property = property.output ?? property.name
@@ -35,6 +35,11 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
     const wrongValue = SpellConstant.wrongValueOf(scope, SuffixLeft.current, match.groups.expression)
     if (wrongValue) SP.SpellWarnings.note(match, wrongValue)
     return match
+  }
+
+  /** The property of `left`'s thing that lists `right`'s value, if one does -- see `listedPropertyFor()`. */
+  protected listedFor(scope: P.Scope, left: P.Match | undefined, right: P.Match | undefined) {
+    return IsEqual.listedPropertyFor(scope, left, right)
   }
 
   /** `thing is clubs` => `thing.suit == "clubs"`, when it compares a thing to a value of its own -- see `parse()`. */
@@ -66,13 +71,32 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
   static listedPropertyFor(
     scope: P.Scope,
     left: P.Match | undefined,
-    right: P.Match | undefined
+    right: P.Match | undefined,
+    { anywhere = false }: { anywhere?: boolean } = {}
   ): { property: P.ScopeVariable; value: string } | undefined {
     const type = scope.getType(left?.datatype)
     const word = right?.inputText.trim()
-    if (!type || !word || /\s/.test(word) || scope.variables?.get(word)) return undefined
-    const found = type.propertiesListing(word)
+    if (!word || /\s/.test(word) || scope.variables?.get(word)) return undefined
+    if (!type && !anywhere) return undefined
+    const found = type ? type.propertiesListing(word) : IsEqual.listedAnywhere(scope, word)
     return found.length === 1 ? found[0] : undefined
+  }
+
+  /**
+   * Each property, of every type the program has, that lists `word` -- one per property name -- for a thing whose type
+   * isn't known yet where it's read (epic `language` P55):  `test card is a king`, `test card` set from a pile of a
+   * kind declared further down.
+   * - Only a word ONE property name lists is read so:  a card's `rank`, not a word two kinds of thing list.
+   */
+  private static listedAnywhere(scope: P.Scope, word: string): Array<{ property: P.ScopeVariable; value: string }> {
+    const byName = new Map<string, { property: P.ScopeVariable; value: string }>()
+    // every list of types up the chain:  the file's, the project's, what it imports
+    for (let list = scope.types; list; list = list.parent) {
+      for (const type of list.get()) {
+        for (const found of type.propertiesListing(word)) byName.set(`${found.property.name}`, found)
+      }
+    }
+    return [...byName.values()]
   }
 
   getOperator(operator: P.Match): P.ASTOperator {

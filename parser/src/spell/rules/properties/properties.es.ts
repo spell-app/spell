@@ -198,6 +198,7 @@ propertiesEs.addRule(TheOwnProperty, {
             "    core.console.log(solitario.reserva)",
             "  }",
             "}",
+            'core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })',
             "export class Pila extends List {",
             "  static instanceType = Carta",
             "}",
@@ -209,8 +210,7 @@ propertiesEs.addRule(TheOwnProperty, {
             '  get reserva() { return this.getProp("reserva") }',
             '  set reserva(value) { this.setProp("reserva", value) }',
             "}",
-            "export const solitario = new Solitario()",
-            'core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })'
+            "export const solitario = new Solitario()"
           ],
           ts: [
             "export class Carta extends Thing {",
@@ -218,6 +218,7 @@ propertiesEs.addRule(TheOwnProperty, {
             "    core.console.log(solitario.reserva)",
             "  }",
             "}",
+            'core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })',
             "export class Pila extends List<Carta> {",
             "  static instanceType = Carta",
             "}",
@@ -241,8 +242,7 @@ propertiesEs.addRule(TheOwnProperty, {
             "  ])",
             "}",
             "core.useElement(Solitario, SolitarioElement)",
-            "export const solitario = new Solitario()",
-            'core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })'
+            "export const solitario = new Solitario()"
           ]
         }
       ]

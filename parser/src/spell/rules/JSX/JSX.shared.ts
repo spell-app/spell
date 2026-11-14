@@ -170,6 +170,12 @@ export type JSXMatchData = {
   children?: Array<P.Match | undefined>
   /** (`jsxAttribute`) A text value's `[name]` fill-ins, if it has any -- see `parseFillIns()`. */
   fillIns?: FillInParts
+  /**
+   * (`jsxElement`) A member this tag declares on the drawing's thing, as it draws it (epic `language` P55, Q52):
+   * a view, `<column "C1"/>` ~== `"C1" is a new column`;  or a value, `<number "score"/>` ~== `"score" is a number`.
+   * - See `SpellJSX.declaredBy()`;  `DrawnMarkup` declares it, the drawing compiles it (`DrawnMarkup.membersDeclared()`).
+   */
+  declares?: DrawnDeclaration
   /** (`jsxElement`) A chain branch's kind, `<if ...>` ... -- see `SpellJSX`, "An if-chain inside markup". */
   chain?: P.JSXChainKind
   /** (`jsxElement`) A chain branch's condition, its phrase parsed as `{...}` (`jsxChild`);  none for `<otherwise>`. */
@@ -245,3 +251,17 @@ export const MARKDOWN_TAG = "markdown"
  * - `markdown_description` reads it, as the type's `static stories`.
  */
 export const STORIES_TAG = "stories"
+
+/** A member a drawing's tag declares on its thing:  see `JSXMatchData.declares`. */
+export type DrawnDeclaration = {
+  /** The thing's type, whose member it is, e.g. `Solitaire`. */
+  owner: string
+  /** The member's name, the tag's quoted word:  `C1`, `score`. */
+  name: string
+  /** A view:  its type's name, `Column`;  made new, its id the member's name, its attributes its starting values. */
+  view?: string
+  /** A value:  its datatype, `number` or `text`;  drawn where the tag is, as `{the score}`. */
+  datatype?: string
+  /** A value said on a line of its own:  the tag only draws it, declaring nothing. */
+  drawnOnly?: boolean
+}

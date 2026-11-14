@@ -1,20 +1,24 @@
+import { BubblyHtml } from "./BubblyHtml"
+
 /****************
  * ### `BubblyMarkup`
  * HTML source drawn in the bubbly look, as HTML in the classes of the look's ONE sheet, `bubbly.css` beside it
  * (epic `language`, Owen 2026-11-11):  the same shapes as Spell's, their corners cut (`bubbly-html`).
  * - Each element with children on lines of their own is a `bubbly-block`:
- *   its start tag the band, its children the body, its end tag a band of its own under the rail (`bubbly-foot-pill`).
- *   - a nameless end tag, Spell's `</>`, is the block's foot instead:  a thin band under it, from the rail to past
- *     its `⟩` (`bubbly-foot-thin`, Owen, Q58)
+ *   its start tag the band, its children the body, its end tag, named or Spell's nameless `</>`, a TINY pill at
+ *   the rail's turn, its words tiny in it (`bubbly-foot-tiny`, Owen, Q61)
  * - An element on one line is a line of its own:  its start tag a small pill (`bubbly-tag-pill`), what's inside it on
- *   the paper, its end tag a pill of its own;  the two pills linked by a line along their top and bottom when
- *   something is between them (`bubbly-tag-link`, Q58).
+ *   the paper, its end tag a pill of its own;  the two pills linked by a line along the top and bottom of what's
+ *   between them, when something is (`bubbly-tag-link`, Q58).
  * - A start tag on lines of its own (`<spell-editor`, an attribute a line, `>`) is ONE tall band, a row a line, its
  *   point at its `⟩` (`bubbly-tag-tall`, T118):  a block's band, a band alone, or a one-line element's start tag.
+ * - An element with NOTHING between its two tags (`<spell-editor …></spell-editor>`) is ONE pill, as if self-closed:
+ *   its start tag ends in `/⟩`, its end tag left out (`bubbly-tag-self-closed`, Owen, Q62);  the file keeps it.
  * - An element with no end tag (`<meta …>`, `<br />`) is a band by itself, `bubbly-pill`.
  * - Whatever holds a start tag is a `bubbly-tag-start` too, an end tag's a `bubbly-tag-end`:  hooks to style them by.
  * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
- *   outside it (`bubbly-quoted`);  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `⟨` `⟩`.
+ *   outside it (`bubbly-quoted`);  a `{…}` one, Spell worked out as it runs, an inverted pill (`bubbly-expression`),
+ *   its braces darker;  `<`, `=` and `>` are faint marks, `<` and `>` drawn as `⟨` `⟩`.
  * - The band's colour says what kind of element it is, in Spell's parts of speech (`partOfSpeechOf()`).
  * - Text, a `<style>`'s or `<script>`'s lines, a comment:  plain lines in their element's body.
  * - Its own small reader, not a full HTML parser:  enough for hand-written pages, the drawn-bubbly page's examples.
@@ -49,38 +53,74 @@ export class BubblyMarkup {
   }
 
   /**
-   * The part of speech an element's band takes, by its tag:
-   * - `thing` (purple):  what lays a page out, and custom elements (`ui-*`, `spell-*`)
-   * - `action` (green):  what a person clicks or types into
-   * - `property`:  text and what sits in it
+   * Is `element` drawn as if self-closed:  ONE pill, its start tag ending in `/⟩`, its end tag left out (Owen, Q62)?
+   * - Nothing at all between its two tags, not even a space:  `<div class="x"></div>`
+   * - The file keeps its end tag:  a custom element's `/>` means nothing to HTML
+   */
+  static isDrawnSelfClosed(element: MarkupElement): boolean {
+    return !!element.close && element.close.start === element.open.end
+  }
+
+  /**
+   * The part of speech an element's band takes, by its tag (`TAG_WORDS`, below):
+   * - `structure` (blue):  what lays a page out, HTML's (`div`, `section`) and Spell UI's (`container`, `toolbar`)
+   * - `action` (green):  what a person clicks or types into, and a menu's items (`button`, `action`, `input`)
+   * - `property` (amber):  text and what sits in it (`p`, `text`, `icon`)
+   * - `thing` (purple):  any other custom element (`spell-editor`);  in the editor, the project's own views too
    * - `plain` (grey):  the page's head, and the rest
+   * - A Spell UI tag counts by its name without `ui-`, as a drawing writes it bare:  `<ui-segment>` ~== `<segment>`.
+   *   A few names mean one thing in HTML and another in Spell UI (`<header>`, `<ui-header>`):  their `ui-` tag is
+   *   listed as it is.
    */
   static partOfSpeechOf(tag: string): MarkupPartOfSpeech {
     const name = tag.toLowerCase()
-    if (name.includes("-") || LAYOUT.has(name)) return "thing"
-    if (INTERACTIVE.has(name)) return "action"
-    if (TEXT.has(name)) return "property"
-    return "plain"
+    const listed = PART_OF_SPEECH_BY_TAG.get(name) ?? PART_OF_SPEECH_BY_TAG.get(name.replace(/^ui-/, ""))
+    if (listed) return listed
+    return name.includes("-") ? "thing" : "plain"
   }
 }
 
 /** The parts of speech an element's band can take. */
-export type MarkupPartOfSpeech = "thing" | "action" | "property" | "plain"
+export type MarkupPartOfSpeech = "structure" | "thing" | "action" | "property" | "plain"
 
-/** Elements that lay a page out:  purple. */
-const LAYOUT = new Set(
-  "html body main header footer nav section article aside div ul ol dl table thead tbody tfoot tr figure fieldset dialog template slot".split(
-    " "
-  )
-)
+/**
+ * The tags of each part of speech that has a list:  HTML's, then Spell UI's by their bare names (`ui-` off).
+ * - The ONE table:  the page (`BubblyHtml`) and the editor (`MarkupMarks`) both read it through `partOfSpeechOf()`.
+ * - Unlisted:  a name with a dash is a thing (a custom element), any other plain.
+ * - Chosen by Owen (2026-11-14):  container, segment, toolbar, menu blue;  button, buttons, action and a menu's items green.
+ *   The rest is a calm judgement call (epic `language`):  every layout box blue, every control green.
+ */
+const TAG_WORDS = {
+  structure: [
+    // HTML's layout
+    "html body main header footer nav section article aside div ul ol dl table thead tbody tfoot tr figure fieldset",
+    "dialog template slot hr",
+    // Spell UI's boxes, grids and panes;  a context menu (Spell's `<context-menu>`) and a menu's divider
+    "container segment segments toolbar menu submenu context-menu grid row column cell stack sides side split-panel",
+    "sidebar rail sticky panel pushable pusher space divider accordion sections tabs tab page root list items card",
+    "cards fields steps modal flyout popup dimmer site-nav site-tabs"
+  ],
+  action: [
+    // HTML's controls
+    "a button input select option textarea form label details summary",
+    // Spell UI's controls, and a menu's items
+    "buttons action actions or item ui-link dropdown checkbox radio slider rating search calendar icon-picker field",
+    "step tree-item"
+  ],
+  property: [
+    // HTML's text
+    "p span h1 h2 h3 h4 h5 h6 strong em b i u s small code pre kbd mark q blockquote cite li dt dd td th caption img",
+    "figcaption sup sub abbr time",
+    // Spell UI's text, and what sits in it
+    "text ui-title ui-header ui-label labels quote markdown icon icons emoji image images statistic value description",
+    "ui-meta date term keys"
+  ]
+} satisfies Partial<Record<MarkupPartOfSpeech, string[]>>
 
-/** Elements a person clicks or types into:  green. */
-const INTERACTIVE = new Set("a button input select option textarea form label details summary".split(" "))
-
-/** Text and what sits in it. */
-const TEXT = new Set(
-  "p span h1 h2 h3 h4 h5 h6 strong em b i u s small code pre kbd mark q blockquote cite li dt dd td th caption img figcaption sup sub abbr time".split(
-    " "
+/** `TAG_WORDS` turned round:  each tag => its part of speech. */
+const PART_OF_SPEECH_BY_TAG = new Map<string, MarkupPartOfSpeech>(
+  Object.entries(TAG_WORDS).flatMap(([part, lines]) =>
+    lines.flatMap((line) => line.split(" ").map((tag) => [tag, part as MarkupPartOfSpeech] as const))
   )
 )
 
@@ -106,7 +146,7 @@ export type MarkupAttribute = {
   name: string
   value?: string
   isQuoted: boolean
-  /** a Spell expression, `{its color}`:  no pill */
+  /** a Spell expression, `{its color}`:  an inverted pill, its braces outside it */
   isExpression?: boolean
   /** where its name starts */
   nameStart: number
@@ -310,22 +350,22 @@ class MarkupWriter {
     }
     if (!insideText.includes("\n")) {
       if (!isTall) return `<p class="bubbly-line bubbly-tag-line">${this.inline([element])}</p>`
-      // its start tag on lines of its own:  one tall band, the rest of the element after its `⟩` on its last line
+      // its start tag on lines of its own:  one tall band, the rest of the element after its `⟩` on its last line;
+      // nothing between its tags:  its `/⟩` instead, its end tag left out (Q62)
+      if (BubblyMarkup.isDrawnSelfClosed(element))
+        return this.tallTag(element.open, `bubbly-tag-tall-inline bubbly-tag-self-closed ${kind}`, "", "self-closed")
       const after = this.inline(element.children) + this.endPill(element, !inside.length)
       return this.tallTag(element.open, `bubbly-tag-tall-inline ${kind}`, after)
     }
     const head = isTall
       ? this.tallTag(element.open, "bubbly-tag-tall-head", "")
       : `<p class="bubbly-head-pill bubbly-tag-start">${this.startTag(element.open)}</p>`
-    // a nameless end tag, `</>`:  the block's foot, a thin band under it (Owen, Q58)
-    const foot = !element.close
-      ? `<div class="bubbly-foot"></div>`
-      : element.close.tag
-        ? `<p class="bubbly-foot bubbly-foot-pill bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
-        : `<p class="bubbly-foot bubbly-foot-thin bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
-    const thin = element.close && !element.close.tag ? " bubbly-thin-foot" : ""
+    // its end tag, named or `</>`:  a tiny pill at the rail's turn (Owen, Q61)
+    const foot = element.close
+      ? `<p class="bubbly-foot bubbly-foot-tiny bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
+      : `<div class="bubbly-foot"></div>`
     return (
-      `<div class="bubbly-block ${kind}${thin}">${head}` +
+      `<div class="bubbly-block ${kind}">${head}` +
       `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>${foot}</div>`
     )
   }
@@ -335,9 +375,10 @@ class MarkupWriter {
    * each line a row in it, as in the file;  its last line's piece ends in the band's point, at its `⟩`,
    * `after` it on the same line:  what's left of a one-line element, its end tag's pill.
    * - `classes`:  where it sits, `bubbly-tag-tall-head` (a block's), `-alone`, `-inline`;  and its colour
+   * - `ends`:  `"self-closed"`, its `>` drawn `/⟩`:  an empty element's (Q62)
    */
-  private tallTag(tag: MarkupStartTag, classes: string, after: string): string {
-    const rows = this.startTagRows(tag)
+  private tallTag(tag: MarkupStartTag, classes: string, after: string, ends: TagEnds = "as-written"): string {
+    const rows = this.startTagRows(tag, ends)
     const last = rows.pop()!
     const upper = rows.map((row) => `<p class="bubbly-tag-row">${row}</p>`).join("")
     // its `>` alone on its last line:  the rows above overhang it, their corner cut
@@ -381,8 +422,8 @@ class MarkupWriter {
 
   /**
    * An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill of its own.
-   * - Something between them:  the two pills linked by a thin line along their top and bottom (`bubbly-tag-link`,
-   *   Owen, Q58), so the pair reads as one element
+   * - Something between them:  the two pills linked by a thin line along its top and bottom, from one pill's point
+   *   to the other's (`bubbly-tag-link`, Owen, Q58), so the pair reads as one element;  never under the tags
    */
   private tagPills(element: MarkupElement): string {
     const inside = this.inline(element.children)
@@ -390,22 +431,30 @@ class MarkupWriter {
     const touching = inside ? "" : " bubbly-tags-touch"
     const partOfSpeech = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
     const kind = `bubbly-tag-pill ${partOfSpeech}${touching}`
+    // nothing at all between them:  ONE pill, as if self-closed, its end tag left out (Owen, Q62)
+    if (BubblyMarkup.isDrawnSelfClosed(element)) {
+      const classes = `bubbly-tag-pill ${partOfSpeech} bubbly-tag-start bubbly-tag-self-closed`
+      return `<span class="${classes}">${this.startTag(element.open, "self-closed")}</span>`
+    }
     const start = `<span class="${kind} bubbly-tag-start">${this.startTag(element.open)}</span>`
     if (!element.close) return start + inside
-    const pills = `${start}${inside}${this.endPill(element, !inside)}`
-    return inside ? `<span class="bubbly-tag-link ${partOfSpeech}">${pills}</span>` : pills
+    const between = inside ? `<span class="bubbly-tag-link ${partOfSpeech}">${inside}</span>` : ""
+    return `${start}${between}${this.endPill(element, !inside)}`
   }
 
-  /** A start tag on its band:  `<` faint, its name, each value a white pill. */
-  private startTag(tag: MarkupStartTag): string {
-    return `${ANGLE_OPEN_MARK}<span class="bubbly-tag-name">${tag.tag}</span>${this.attributes(tag.attributes)}${this.closeMark(tag)}`
+  /**
+   * A start tag on its band:  `<` faint, its name, each value a white pill.
+   * - `ends`:  `"self-closed"`, its `>` drawn `/⟩` (Q62)
+   */
+  private startTag(tag: MarkupStartTag, ends: TagEnds = "as-written"): string {
+    return `${ANGLE_OPEN_MARK}<span class="bubbly-tag-name">${tag.tag}</span>${this.attributes(tag.attributes)}${this.closeMark(tag, ends)}`
   }
 
   /**
    * A start tag on lines of its own, a row each, as in the file:  the first its `<`, name and the attributes on its
    * line, each other its attributes, the last its `>` too;  each row's indent past the tag's `<` kept, as spaces.
    */
-  private startTagRows(tag: MarkupStartTag): string[] {
+  private startTagRows(tag: MarkupStartTag, ends: TagEnds): string[] {
     const lineOf = (offset: number) => this.source.slice(tag.start, offset).split("\n").length - 1
     const rows: MarkupAttribute[][] = []
     for (const attribute of tag.attributes) (rows[lineOf(attribute.nameStart)] ??= []).push(attribute)
@@ -423,7 +472,7 @@ class MarkupWriter {
       const indent = " ".repeat(Math.max(0, columnOf(this.source, first) - tagColumn))
       // its first attribute's own room before it is in the file's indent, as in the editor
       const row = `<span class="bubbly-tag-indent">${indent}</span>${attributes.replace(/^ /, "")}`
-      html.push(line === lastLine ? row + this.closeMark(tag) : row)
+      html.push(line === lastLine ? row + this.closeMark(tag, ends) : row)
     }
     return html
   }
@@ -434,20 +483,25 @@ class MarkupWriter {
       .map(({ name, value, isQuoted, isExpression }) => {
         const named = ` <span class="bubbly-attribute-name">${escape(name)}</span>`
         if (value === undefined) return named
-        const shown = isExpression ? escape(value) : valueOf(value, isQuoted)
+        const shown = isExpression ? expressionOf(value) : valueOf(value, isQuoted)
         return name ? `${named}<span class="bubbly-mark bubbly-equals">=</span>${shown}` : ` ${shown}`
       })
       .join("")
   }
 
-  /** A start tag's `>`, or `/>`. */
-  private closeMark(tag: MarkupStartTag): string {
-    return `<span class="bubbly-mark">${tag.selfClosing ? `${SLASH}${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
+  /**
+   * A start tag's `>`, or `/>`:  as written, or drawn self-closed (Q62).
+   * - drawn self-closed:  an attribute's room before its `/`, as the editor's spacer (`bubbly-self-close`)
+   */
+  private closeMark(tag: MarkupStartTag, ends: TagEnds): string {
+    if (tag.selfClosing) return `<span class="bubbly-mark">${SLASH}${ANGLE_CLOSE}</span>`
+    if (ends === "self-closed") return `<span class="bubbly-mark bubbly-self-close">${SLASH}${ANGLE_CLOSE}</span>`
+    return `<span class="bubbly-mark">${ANGLE_CLOSE}</span>`
   }
 
   /**
    * An end tag:  `</` and `>` faint, its name in the ink;  none, nothing.
-   * - `"block"`:  a block's, on its foot under the gutter, its name faint too:  the gutter already shows where it ends
+   * - `"block"`:  a block's, its tiny pill at the rail's turn, its name faint too:  the rail already shows where it ends
    */
   private endTag(tag: MarkupEndTag | undefined, place: "block" | "inline" = "inline"): string {
     if (!tag) return ""
@@ -511,11 +565,24 @@ function valueOf(value: string, isQuoted: boolean): string {
 }
 
 /**
+ * A `{…}` value, Spell worked out as it runs (`{its color}`):  its words on an INVERTED pill, so it stands apart
+ * from a value typed in;  its braces outside it, darker than the tag's other marks (Owen).
+ */
+function expressionOf(value: string): string {
+  const brace = (mark: string) => `<span class="bubbly-mark">${BubblyHtml.marksHtml(mark)}</span>`
+  const words = value.slice(1, -1)
+  return `${brace("{")}${words ? `<span class="bubbly-input bubbly-expression">${escape(words)}</span>` : ""}${brace("}")}`
+}
+
+/**
  * A tag's `<` and `>`, drawn as math's angle brackets, `⟨` `⟩`:  steeper, nearer the slant its pill's ends are cut at
  * (Owen).  The file's own `<` and `>` are kept, unseen, so a copied line copies them (`bubbly-angle`).
  */
 const ANGLE_OPEN = `<span class="bubbly-angle bubbly-angle-open">&lt;</span>`
 const ANGLE_CLOSE = `<span class="bubbly-angle bubbly-angle-close">&gt;</span>`
+
+/** How a start tag's `>` is drawn:  as the file has it, or `/⟩`, an empty element's drawn self-closed (Q62). */
+type TagEnds = "as-written" | "self-closed"
 
 /** A start tag's `<`, faint. */
 const ANGLE_OPEN_MARK = `<span class="bubbly-mark">${ANGLE_OPEN}</span>`

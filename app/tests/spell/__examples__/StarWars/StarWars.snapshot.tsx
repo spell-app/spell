@@ -398,6 +398,8 @@ export class Film extends Thing {
   @prop({ type: "date", declaredAt: { path: "/StarWars.api.spell", start: 2267, end: 2288 } })
   accessor modified!: any /* spell: type unknown */
 }
+core.describeAction(Film, "play", { title: "Play It", undoneAs: "Play It" })
+core.describeAction(Film, "end", { title: "End It", undoneAs: "End It" })
 
 export class Species extends Thing {
   // - its "name" is text
@@ -1449,6 +1451,10 @@ export class GuideElement extends SpellElement<Guide> {
 }
 core.useElement(Guide, GuideElement)
 export const guide = new Guide()
+core.describeAction(Guide, "goBack", { title: "Go Back", undoneAs: "Go Back" })
+core.describeAction(Guide, "goToWhere", { title: "Go To Where As Text", undoneAs: "Go To Where As Text" })
+core.describeAction(Guide, "playTheOpening", { title: "Play The Opening", undoneAs: "Play The Opening" })
+core.describeAction(Guide, "punch", { title: "Punch It", undoneAs: "Punch It" })
 
 core.heading("What everything here can do")
 /////////////////////////////////
@@ -1464,6 +1470,7 @@ Thing.prototype.open = function (this: Thing) {
   guide.showing = this
   core.scrollToTop()
 }
+core.describeAction(Thing, "open", { title: "Open A Thing", undoneAs: "Open A Thing" })
 
 /** A number for people to read:  with none, nothing, so its row doesn't show */
 export function measureAmountInUnit(amount: number, unit: string) {

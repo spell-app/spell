@@ -53,6 +53,7 @@ export class CounterElement extends SpellElement<Counter> {
   }
 }
 core.useElement(Counter, CounterElement)
+core.describeAction(Counter, "countUp", { title: "Count Up", undoneAs: "Count Up" })
 
 export function testCounting() {
   return core.test("test counting", function testCounting() {

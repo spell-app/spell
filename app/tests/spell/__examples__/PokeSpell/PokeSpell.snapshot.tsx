@@ -257,6 +257,9 @@ export class Pokemon extends Thing {
   @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 1228, end: 1248 } })
   accessor modified!: any /* spell: type unknown */
 }
+core.describeAction(Pokemon, "open", { title: "Open It", undoneAs: "Open It" })
+core.describeAction(Pokemon, "hear", { title: "Hear It", undoneAs: "Hear It" })
+core.describeAction(Pokemon, "love", { title: "Love It", undoneAs: "Love It" })
 
 export class PokemonSpecies extends Thing {
   // - its "number" is a number, stored as "id"
@@ -489,6 +492,7 @@ export class Type extends Thing {
   @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3218, end: 3238 } })
   accessor modified!: any /* spell: type unknown */
 }
+core.describeAction(Type, "pick", { title: "Pick It", undoneAs: "Pick It" })
 
 export class Ability extends Thing {
   // - its "number" is a number, stored as "id"
@@ -1442,6 +1446,7 @@ export class Guess extends Thing {
     </ui-button>)
   }
 }
+core.describeAction(Guess, "playAgain", { title: "Play Again", undoneAs: "Play Again" })
 // -----------
 core.heading("PokéSpell")
 ///////////////
@@ -1664,6 +1669,9 @@ export class PokedexElement extends SpellElement<Pokedex> {
 }
 core.useElement(Pokedex, PokedexElement)
 export const pokedex = new Pokedex()
+core.describeAction(Pokedex, "goToWhere", { title: "Go To Where As Text", undoneAs: "Go To Where As Text" })
+core.describeAction(Pokedex, "goBack", { title: "Go Back", undoneAs: "Go Back" })
+core.describeAction(Pokedex, "surpriseMe", { title: "Surprise Me", undoneAs: "Surprise Me" })
 
 core.heading("Start it")
 //////////////

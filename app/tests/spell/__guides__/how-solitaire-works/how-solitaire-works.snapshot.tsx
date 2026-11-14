@@ -94,7 +94,6 @@ export class CardElement extends SpellElement<Card> {
 }
 core.useElement(Card, CardElement)
 
-core.heading("A pile, and a column")
 /** A pile, and a column */
 export class Pile extends ViewableList<Card> {
   static instanceType = Card
@@ -113,7 +112,6 @@ export class PileElement extends SpellElement<Pile> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-pile", "pile", [])
 }
 core.useElement(Pile, PileElement)
-/** a card is in one pile at a time:  putting it on another takes it off this one */
 
 /**
  * The rule that makes it Solitaire:  a column takes a card one lower than its last, in the other color.
@@ -143,6 +141,11 @@ export class ColumnElement extends SpellElement<Column> {
   }
 }
 core.useElement(Column, ColumnElement)
+
+core.describeAction(Card, "try", { title: "Try A Card", undoneAs: "Try A Card" })
+
+core.heading("A pile, and a column")
+/** a card is in one pile at a time:  putting it on another takes it off this one */
 
 core.heading("The table:  a column, and a hand of cards to try on it")
 /** The table:  a column, and a hand of cards to try on it */

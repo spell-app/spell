@@ -40,6 +40,9 @@ class Counter(View):
         )
 
 
+core.describe_action(Counter, "increment", {"title": "Increment It", "undone_as": "Increment It"})
+
+
 def test_counting() -> None:
     """Tests"""
     with core.test("test counting"):

@@ -75,7 +75,6 @@ export class Card extends View {
   }
 }
 
-core.heading("A pile, and a column")
 /** A pile, and a column */
 export class Pile extends ViewableList {
   static instanceType = Card
@@ -83,7 +82,6 @@ export class Pile extends ViewableList {
 
   static exclusive = true
 }
-/** a card is in one pile at a time:  putting it on another takes it off this one */
 
 /**
  * The rule that makes it Solitaire:  a column takes a card one lower than its last, in the other color.
@@ -98,6 +96,11 @@ export class Column extends Pile {
     return this.lastItem.color !== card.color && this.lastItem.value === card.value + 1
   }
 }
+
+core.describeAction(Card, "try", { title: "Try A Card", undoneAs: "Try A Card" })
+
+core.heading("A pile, and a column")
+/** a card is in one pile at a time:  putting it on another takes it off this one */
 
 core.heading("The table:  a column, and a hand of cards to try on it")
 /** The table:  a column, and a hand of cards to try on it */

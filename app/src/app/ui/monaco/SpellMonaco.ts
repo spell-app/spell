@@ -109,7 +109,9 @@ export class SpellMonaco {
         action: { indentAction: monaco.languages.IndentAction.IndentOutdent }
       },
       { beforeText: LSP.SpellKeywords.OPENS_TAG, action: { indentAction: monaco.languages.IndentAction.Indent } },
-      { beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } }
+      { beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } },
+      // a condition going on onto the next line (epic `language` P55, Q53)
+      { beforeText: LSP.SpellKeywords.CONTINUES_LINE, action: { indentAction: monaco.languages.IndentAction.Indent } }
     ]
   }
 

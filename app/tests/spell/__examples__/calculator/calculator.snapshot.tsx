@@ -220,6 +220,10 @@ export class CalculatorElement extends SpellElement<Calculator> {
 }
 core.useElement(Calculator, CalculatorElement)
 export const calculator = new Calculator()
+core.describeAction(Calculator, "clear", { title: "Clear It", undoneAs: "Clear It" })
+core.describeAction(Calculator, "finish", { title: "Finish It", undoneAs: "Finish It" })
+core.describeAction(Calculator, "pressDigit", { title: "Press Digit As Text", undoneAs: "Press Digit As Text" })
+core.describeAction(Calculator, "applyKey", { title: "Apply Key As Text", undoneAs: "Apply Key As Text" })
 // The sum being typed:  its left number, its operator and its right number
 
 /** 12 + 5, then times 2:  the total carries on as the next sum's left number */

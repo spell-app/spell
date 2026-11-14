@@ -32,6 +32,8 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
   if (!classNames.size) return files
 
   const members = new Map<string, ClassBodyItem[]>()
+  // what describes a member moved in (`core.describeAction()`), by its class:  written right after the class
+  const descriptionsByType = new Map<string, P.ASTTypeDescription[]>()
   const remaining = files.map((statements) => {
     const kept: HoistableStatement[] = []
     // comments, blank lines and headings since the last statement -- the comments go with a member below them
@@ -58,7 +60,7 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
         kept.push(...carried.filter((item) => item instanceof P.ASTHeadingInvocation))
         const moved = carried.filter((item) => !(item instanceof P.ASTHeadingInvocation))
         addMember(members, typeName, [...moved, statement])
-        kept.push(...descriptions)
+        if (descriptions.length) descriptionsByType.set(typeName, [...(descriptionsByType.get(typeName) ?? []), ...descriptions])
         removed = true
       } else {
         kept.push(...pending, statement)
@@ -69,7 +71,18 @@ export function hoistClassMembers(files: HoistableStatement[][]): HoistableState
     return removed ? tidyBlankLines(kept) : kept
   })
   if (!members.size) return files
-  return remaining.map((statements) => statements.map((statement) => withMembers(statement, members)))
+  return remaining.map((statements) =>
+    statements.flatMap((statement) => {
+      const placed = withMembers(statement, members)
+      // its moved members' descriptions after the class:  never above it, in a file before the class's own
+      const after: P.ASTTypeDescription[] = []
+      forEachClass(statement, (declaration) => {
+        after.push(...(descriptionsByType.get(declaration.type.name) ?? []))
+        descriptionsByType.delete(declaration.type.name)
+      })
+      return [placed, ...after]
+    })
+  )
 }
 
 /**
