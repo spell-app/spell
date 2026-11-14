@@ -68,9 +68,12 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
    * What the whole expression is:  the same shunting-yard as `getAST()`, over datatypes.
    * - Each operator's `getResultDatatype()`, applied in the order `getAST()` applies it.
    * - e.g. `the rank of the card + 1 is 2` => `+` makes `number`, then `is` makes `choice`.
+   * - A match only partway there (the editor asking what comes next, `expectedAfter()`) may have neither side yet:
+   *   `undefined`, never a throw (a plural call asked its list's, `if the number of cards in the foundations is 52`).
    */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     const { lhs, rhsChain } = match.groups
+    if (!lhs || !rhsChain) return undefined
     const output: Array<P.Datatype | undefined> = [lhs.datatype]
     const opStack: P.Match[] = []
     for (const suffix of rhsChain.matched) {

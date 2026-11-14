@@ -49,6 +49,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "cant-wait-for-toast-that-stays":
     "No se puede esperar a un aviso que se queda:  los clics esperarían hasta que se cierre",
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
+  "enabled-and-disabled-when": 'Una acción dice "activa cuando" o "inactiva cuando", no las dos:  deja una',
   "place-read-only":
     "El {place} es un lugar de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
   "adds-to-a-read": "Esto añade solo a lo que se leyó, y no guarda nada:  para guardarlo, añádelo a {theSavedThings}",

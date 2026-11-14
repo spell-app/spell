@@ -2,9 +2,9 @@
 
 exports[`describeOverview() > a file:  each thing it declares, a type's members grouped 1`] = `
 "Card.spell
-  A playing card
   template Card  is a TwoSidedView
-    Properties  rank, value, suit, color, symbol, name, short name, picture, lifted, pile
+    A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
+    Properties  rank, suit, color, name, value, symbol, short name, picture, lifted, pile
     Actions     is a face card, is a number card, is the (rank) of (suit), play a card,
                 put a card on a pile, count the points for a card on a pile
     Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
@@ -14,7 +14,7 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
 
 exports[`describeThing() > a property, with its compiled javascript 1`] = `
 "property color of Card
-Card.spell:16
+Card.spell:8
 
 Spell
     its "color" is one of red, black
@@ -37,38 +37,41 @@ Compiled
 
 exports[`describeThing() > a type 1`] = `
 "template Card is a TwoSidedView
-Card.spell:6
+Card.spell:1
 
-Properties  rank, value, suit, color, symbol, name, short name, picture, lifted, pile
+A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
+
+Properties  rank, suit, color, name, value, symbol, short name, picture, lifted, pile
 Actions     is a face card, is a number card, is the (rank) of (suit), play a card,
             put a card on a pile, count the points for a card on a pile
 Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
             Colors (red, black)
 
 Spell
-  a "card" is a draggable two sided view
-    group "Rank"
-      // Ace is low:  ace = 1 ... king = 13
+  a "card" is a draggable two sided view       -- A playing card
+    -- A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
+    -- It's a two sided view:  face up it shows its picture, face down the back every card shares.
+    -- On the page each card is its own element, \`<solitaire-card>\`:  people may drag it (\`draggable\`), when its pile lets it go.
+    group "Card Rank & Suit" -- Ace is low:  ace = 1 ... king = 13
     its "rank" is one of ace, 2 ... 10, jack, queen, king
-    its "value" is the position of its rank
-    it "is a face card" if its rank is jack, queen or king
-    it "is a number card" if it is not a face card
-  
-    group "Suit"
     its "suit" is one of clubs, diamonds, hearts or spades
     its "color" is one of red, black
       red if it is a diamond or it is a heart
       black otherwise
+  
+    group "Aliases"                 -- Spell for identifying cards
+    it "is a face card" if its rank is jack, queen or king
+    it "is a number card" if it is not a face card
+    it "is the (rank) of (suit)"  -- e.g. the card is the two of spades
+  
+    group "Names"                 -- identifying a card
+    its "name" is its rank && "of" && its suit
+    its "value" is the position of its rank
     its "symbol" is
       "♣" if it is a club
       "♦" if it is a diamond
       "♥" if it is a heart
       "♠" otherwise
-  
-    group "Names"
-      // What a person, test or console calls it
-    its "name" is its rank && "of" && its suit
-    it "is the (rank) of (suit)"
     its "short name" is
       // Its short name:  Q♠↓ is the queen of spades, face down
       letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase

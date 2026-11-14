@@ -40,6 +40,25 @@ describe("members declared in a drawing", () => {
     expect(code).toContain("this.stock.randomize()")
   })
 
+  test("a quoted word of several words is the member's name as code names it;  its id stays as written", () => {
+    const { errors, code } = compiled([
+      ...piles,
+      "solitaire is an app",
+      "\tto deal",
+      "\t\tshuffle the discard pile",
+      "\tto draw it",
+      '\t\t<column "discard pile"/> <number "high score"/>'
+    ])
+    expect(errors).toEqual([])
+    // never `declareProp("discard pile")` with `this.discardPile` read:  the game's discard pile was undefined
+    expect(code).toContain(
+      'static { this.declareProp("discardPile", { init: () => new Column({ id: "discard pile" }), early: true }) }'
+    )
+    expect(code).toContain("this.discardPile.randomize()")
+    expect(code).toContain('static { this.declareProp("highScore", { type: "number" }) }')
+    expect(code).toContain("() => this.highScore")
+  })
+
   test("a value's type as a tag declares it and draws it;  a `set` above it doesn't declare it again", () => {
     const { errors, code } = compiled([
       "solitaire is an app",

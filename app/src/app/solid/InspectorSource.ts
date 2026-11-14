@@ -578,10 +578,11 @@ function typeLineRanges(text: string, name: string): [number, number][] {
 }
 
 /**
- * The condition action `actionWords` (`turn it over`) was written to be enabled when:
- * its `- enabled when it is face down` (or `enabled-when="..."` on its tag), in its own words;  `""` if none.
+ * The condition action `actionWords` (`turn it over`) was written to be enabled (or disabled) when, in its own words:
+ * its `- enabled when it is face down` (or `enabled-when="..."` on its tag), or its `- disabled when it is face up`
+ * (epic `language` T132);  `undefined` if none.
  */
-export function enabledWhenInSource(actionWords: string, sources: readonly string[]): string {
+export function enabledWhenInSource(actionWords: string, sources: readonly string[]): ActionCondition | undefined {
   const words = escapeForRegExp(actionWords.trim()).replace(/\s+/g, "\\s+")
   const start = new RegExp(`(?:^[ \\t]*-?[ \\t]*to[ \\t]+${words}[ \\t]*:?[ \\t]*$|<action[ \\t]+"${words}")`, "im")
   for (const source of sources) {
@@ -590,11 +591,15 @@ export function enabledWhenInSource(actionWords: string, sources: readonly strin
     const after = source.slice(found.index, found.index + ACTION_DETAILS_REACH)
     const end = after.search(/<\/action>/)
     const details = end < 0 ? after : after.slice(0, end)
-    const condition = /enabled[ -]when(?:="([^"]*)"|[ \t]+(.+))/.exec(details)
-    if (condition) return (condition[1] ?? condition[2] ?? "").trim()
+    const condition = /(en|dis)abled[ -]when(?:="([^"]*)"|[ \t]+(.+))/.exec(details)
+    if (!condition) continue
+    return { words: (condition[2] ?? condition[3] ?? "").trim(), when: condition[1] === "dis" ? "disabled" : "enabled" }
   }
-  return ""
+  return undefined
 }
+
+/** What an action's `enabled when` or `disabled when` says:  its condition's `words`, and which it is. */
+export type ActionCondition = { words: string; when: "enabled" | "disabled" }
 
 /** How far after an action's start its details are looked for, in characters:  they're its first lines. */
 const ACTION_DETAILS_REACH = 600

@@ -140,3 +140,28 @@ describe("testing spell module methods", () => {
     })
   })
 })
+
+// epic `language` T132
+describe("an action's `disabled when`", () => {
+  /** Each parse error's line and message, in a project of `lines`. */
+  function errorsOf(lines: string[]) {
+    const [file] = parseSpellProject([{ path: "Cards.spell", contents: lines.join("\n") }]).files
+    return file!.errors.map((error) => `${error}`)
+  }
+  const card = ["a card is a thing where:", "\t- its direction is one of up or down", "\t- to turn it over:"]
+
+  test("alone, it's fine", () => {
+    expect(errorsOf([...card, "\t\t- disabled when its direction is up", "\t\tset its direction to up"])).toEqual([])
+  })
+
+  test("with `enabled when` on the same action, it's an error naming both", () => {
+    const errors = errorsOf([
+      ...card,
+      "\t\t- enabled when its direction is down",
+      "\t\t- disabled when its direction is up",
+      "\t\tset its direction to up"
+    ])
+    expect(errors).toHaveLength(1)
+    expect(errors[0]).toContain('"enabled when" or "disabled when", not both')
+  })
+})

@@ -17,7 +17,7 @@ describe("SpellWords", () => {
       turnOverTheNextCard: "turn over the next card",
       restartTheGame: "restart the game",
       autoPlay: "auto play",
-      draw: "draw it"
+      draw: "draw solitaire"
     })
     // its card, as Card.spell writes it, and as Solitaire.spell teaches it to play
     expect(words.types.Card).toMatchObject({ name: "name", play: "play a card" })

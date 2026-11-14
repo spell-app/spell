@@ -203,7 +203,7 @@ describe("grammar probes", () => {
   })
 
   test("P8b  Solitaire:105 without its parens", () => {
-    expect(probe("turn the bottom card of the deck face up")).toMatchInlineSnapshot(`"deck.lastItem?.turnFaceUp()"`)
+    expect(probe("turn the bottom card of the deck face up")).toMatchInlineSnapshot(`"deck.firstItem?.turnFaceUp()"`)
   })
 
   test("P8c  Solitaire:166 without its parens", () => {
