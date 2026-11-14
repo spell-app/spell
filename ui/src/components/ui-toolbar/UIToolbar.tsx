@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 // Import directly:  in `core`'s util barrel it would cost every page its bytes, as for `TocPreferences`
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { E } from "spell/ui/core"
+import { E, UIT } from "spell/ui/core"
 // the family barrel, not the leaf:
 // the lib build then imports `ui-menu.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines `<ui-menu>` and `<ui-item>`, which a toolbar extends and holds)
@@ -48,6 +48,11 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - `scroll-first`, without a `segmented` look:  once only its icons are left, it scrolls with them, no overflow button.
  *   - `scroll-first`, with a `segmented` look:  it does scroll with them while the row has `--ui-toolbar-scroll-min`
  *     (200px) to show, then it's the dropdown:  a row of many files stays a row for as long as it can.
+ * - Its own items draw no key caps:  an action's keys are in its tooltip (`Undo (⌘Z)`).  `show-keys` draws them.
+ * - `appearance="pills"`:  each run of its items between two dividers (`<ui-item kind="divider">`) is one rounded
+ *   track, as a group of buttons is drawn, its items tiles on it (`pills()`, `UIToolbar.css`).
+ *   - Each item draws its piece of the track (`ItemContext.pill`):  the start and end pieces are rounded.
+ *   - It holds through `shrinkable`'s stages:  cut titles and icons stay on their tracks, the `…` button is a pill.
  * - `max-visible`:  a row of many (a project's files) shows only the ones chosen lately, and a button lists them all.
  *   - Only with more items than that;  a bare `max-visible` means 8.
  *     An attribute, not on by default:  a toolbar of actions has nothing chosen to go by.
@@ -106,6 +111,78 @@ export class UIToolbar extends UIMenu {
   }
 
   ////////////////
+  // ## Its items:  their keys, their pills
+  ////////////////
+
+  /**
+   * `ItemOwner`:  the menu's context for `item`, plus the toolbar's own for the items in its row:
+   * no key caps (unless `show-keys`), and its place in its pill (`appearance="pills"`).
+   * - The same object for the same answer (`contextWith()`), so an item doesn't draw again for nothing.
+   * - SIDE EFFECT:  as the menu's, and with `pills`, works out the pills again once the items have drawn.
+   */
+  itemContext(item: Element): UIT.ItemContext {
+    const context = super.itemContext(item)
+    if (item.parentElement !== this.domElement) return context
+    const pill = this.hasPills ? this.pillPlaces.get(item) : undefined
+    if (this.hasPills) this.pillRefresh.ask()
+    return this.contextWith(context, !this.showKeys, pill)
+  }
+
+  /** `appearance` holds `pills`. */
+  get hasPills(): boolean {
+    return this.hasLook(PILLS)
+  }
+
+  /** Each item's place in its pill, by its DOM element:  `pills()` works them out. */
+  @E.state({ equals: isSamePlaces }) accessor pillPlaces: ReadonlyMap<Element, UIT.PillPlace> = new Map()
+
+  /** `pills()` once after Solid's update, however often asked. */
+  private readonly pillRefresh = new E.Queued({ when: E.afterSolidUpdate, run: () => this.pills() })
+
+  /**
+   * Work out each item's place in its pill:  a run of items between two dividers, or anything else in the row
+   * that isn't an item (a sub-menu), is one pill;  a hidden item is in none.
+   */
+  @E.untracked
+  private pills() {
+    const places = new Map<Element, UIT.PillPlace>()
+    let run: Element[] = []
+    const endRun = () => {
+      run.forEach((element, index) => {
+        const isFirst = index === 0
+        const isLast = index === run.length - 1
+        places.set(element, isFirst && isLast ? "only" : isFirst ? "start" : isLast ? "end" : "middle")
+      })
+      run = []
+    }
+    for (const element of this.rowElements()) {
+      if ((element as HTMLElement).hidden) continue
+      const kind = ((element as E.DOMElement).component as { kind?: string } | undefined)?.kind
+      if (kind === UIT.ITEM) run.push(element)
+      else endRun()
+    }
+    endRun()
+    this.pillPlaces = places
+  }
+
+  /** `context` with the toolbar's own:  one object per answer, kept while `context` is. */
+  private contextWith(
+    context: UIT.ItemContext,
+    hidesShortcuts: boolean,
+    pill: UIT.PillPlace | undefined
+  ): UIT.ItemContext {
+    let answers = this.contexts.get(context)
+    if (!answers) this.contexts.set(context, (answers = new Map()))
+    const key = `${hidesShortcuts}${SEPARATOR}${pill ?? ""}`
+    let answer = answers.get(key)
+    if (!answer) answers.set(key, (answer = { ...context, hidesShortcuts, ...(pill ? { pill } : {}) }))
+    return answer
+  }
+
+  /** `contextWith()`'s answers, by the menu's context. */
+  private readonly contexts = new WeakMap<UIT.ItemContext, Map<string, UIT.ItemContext>>()
+
+  ////////////////
   // ## Only the open items (`max-visible`)
   ////////////////
 
@@ -154,6 +231,7 @@ export class UIToolbar extends UIMenu {
 
   protected override onItemsChanged() {
     this.limitRefresh.ask()
+    if (this.hasPills) this.pillRefresh.ask()
   }
 
   /** SIDE EFFECT:  the row's items, as last kept under `remember`, then the items fitted to them. */
@@ -326,6 +404,16 @@ const OPEN_ITEMS_STORE = "ui-toolbar-open-items"
 
 /** Joins two lists of values to compare them:  no value holds it. */
 const SEPARATOR = "\0"
+
+/** The `appearance` word of a toolbar whose runs of items are pills. */
+const PILLS = "pills"
+
+/** Same places for the same items:  `pillPlaces` keeps its old map. */
+function isSamePlaces(a: ReadonlyMap<Element, UIT.PillPlace>, b: ReadonlyMap<Element, UIT.PillPlace>): boolean {
+  if (a.size !== b.size) return false
+  for (const [element, place] of a) if (b.get(element) !== place) return false
+  return true
+}
 
 /** A slot of the bar's layout around the items. */
 type BarSlot = typeof ICON | typeof TITLE | typeof CENTER | typeof RIGHT

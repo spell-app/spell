@@ -4,13 +4,29 @@
  * - Built ON the menu's:  the same attributes, events, slots, states and owned parts,
  *   so an attribute the menu gains reaches the toolbar with no change here.
  * - Its own:  the `toolbar` box around the menu,
- *   the two scroll buttons (`scroll-start`, `scroll-end`) and their names.
+ *   the two scroll buttons (`scroll-start`, `scroll-end`) and their names,
+ *   `show-keys`, and the `pills` look (`appearance`, the menu's words and one more).
  * - Its slots, a bar's layout:  `icon`, `title`, `center` and `right` around the items (the default slot).
  * - The same noun (`menu`):  its items draw as a menu's, and `UIMenu.css` styles it.
  */
 
 import type { E } from "spell/ui/core"
 import { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
+
+/** The menu's `appearance` attribute, which the toolbar's adds a word to. */
+const APPEARANCE = "appearance"
+const menuAppearance = menuVocabulary.attributes.find((attribute) => attribute.name === APPEARANCE)!
+
+/** The toolbar's `appearance`:  the menu's words, and `pills`. */
+const toolbarAppearance = {
+  ...menuAppearance,
+  values: [...menuAppearance.values, "pills"],
+  description:
+    menuAppearance.description +
+    '  A toolbar\'s own:  `pills` (each run of items between two `<ui-item kind="divider">`s is one rounded track, ' +
+    "its items rounded tiles on it, as a group of buttons is drawn;  a run cut, down to its icons or into the `…` " +
+    "button, stays on its track)."
+} as const
 
 /****************
  * ### `toolbarVocabulary`
@@ -30,7 +46,16 @@ export const toolbarVocabulary = {
     "while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every " +
     "`<ui-menu>` attribute.",
   attributes: [
-    ...menuVocabulary.attributes,
+    // the menu's, its `appearance` with one more word:  `pills`
+    ...menuVocabulary.attributes.map((attribute) => (attribute.name === APPEARANCE ? toolbarAppearance : attribute)),
+    {
+      name: "show-keys",
+      group: "content",
+      kind: "boolean",
+      description:
+        "Show each action's keys beside its title, as a menu does.  Without it, a toolbar's own items leave them out:  " +
+        "they're in each item's tooltip either way (`Undo (⌘Z)`)."
+    },
     {
       name: "scroll-first",
       group: "layout",

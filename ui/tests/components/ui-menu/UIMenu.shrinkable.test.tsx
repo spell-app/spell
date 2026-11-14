@@ -212,6 +212,21 @@ describe("<ui-menu shrinkable>", () => {
     }
   })
 
+  it("only as wide as its items, inside a box of `display: contents`:  widening still brings the titles back", async () => {
+    const { fixed } = await sizes()
+    // a flex row shrink-wraps the menu, and the box around it draws none of its own:  neither resizes as the row widens
+    const box = await ElementFixture.render(
+      `<div style="display: flex; width: ${Math.floor(fixed + 4 * 40)}px"><div style="display: contents">` +
+        `<style>.fitted::part(menu) { min-width: 0 }</style>` +
+        `<ui-menu class="fitted" label="Sections" shrinkable>${ITEMS}</ui-menu></div></div>`
+    )
+    const host = box.querySelector<DOMElement>("ui-menu")!
+    const row = host.shadowRoot!.querySelector<HTMLElement>("[part~=menu]")!
+    await expect.poll(() => stage(row)).toBe("icons")
+    box.style.width = "1000px"
+    await expect.poll(() => stage(row)).toBe("whole")
+  })
+
   it("an added item refits", async () => {
     const { whole } = await sizes()
     const { host, row } = await shrinkable(Math.ceil(whole + 4))

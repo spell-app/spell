@@ -124,7 +124,7 @@ ui-popup[data-spell-action-menu] > ui-menu::part(menu),
   padding-inline-start: 24px;
 }
 
-/* a divider:  a hairline across the menu, between groups */
+/* a divider:  a hairline right across the menu, edge to edge through the popup's 4px padding (Owen, 2026-11-14, I85) */
 :is(
     ui-menu.BarMenuItems,
     ui-menu.BarMenuItems ui-submenu,
@@ -134,14 +134,14 @@ ui-popup[data-spell-action-menu] > ui-menu::part(menu),
   > :is(ui-action, ui-item)[kind="divider"]::part(item) {
   min-height: 0;
   height: 0;
-  margin: 4px 8px;
+  margin: 4px -4px;
   padding: 0;
   border-top: 1px solid var(--ui-border-color);
 }
 
 /* the line after a program's own right-click menu, before the editor's items (epic `editor` I76):  thicker */
 ui-menu.BarMenuItems > ui-action.ProgramMenuEnd[kind="divider"]::part(item) {
-  margin: 5px 8px;
+  margin: 5px -4px;
   border-top-width: 3px;
 }
 

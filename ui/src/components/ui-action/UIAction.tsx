@@ -34,6 +34,8 @@ import actionCSS from "./UIAction.css?inline"
  * - Its shortcut's key caps, read and drawn as `<ui-keys>`' are (`keyCapsFor()`):
  *   `mod` is ⌘ on a Mac and Ctrl elsewhere;  `meta` is the Meta key itself.
  *   Plain caps, as a menu shows them, where `<ui-keys>` draws boxes.
+ * - Where its caps don't show (a toolbar's own row, unless `show-keys`;  icons only), its tooltip names its keys:
+ *   `Undo (⌘Z)`.
  ****************/
 export class UIAction extends UIItem {
   // the item's names under the action's tag, and its own:  TypeScript only knows the item's literals
@@ -116,9 +118,32 @@ export class UIAction extends UIItem {
     return this.title
   }
 
-  /** The item's title box and badge (`UIItem.boxContent()`), then its shortcut's key caps. */
+  /**
+   * Its key caps show beside its title:  not in a toolbar's own row (unless `show-keys`), nor while its menu shows
+   * icons only.
+   */
+  get drawsShortcut(): boolean {
+    const context = this.itemContext
+    return !context?.hidesShortcuts && !context?.iconsOnly
+  }
+
+  /**
+   * The box's tooltip:  where its key caps don't show, its title and its keys, `Auto Play (A)`, `Undo (⌘Z)` on a Mac,
+   * `Undo (Ctrl+Z)` elsewhere.
+   * - The page's own `title` still wins (`UIItem`'s).
+   */
+  protected get boxTooltip(): string | undefined {
+    const tooltip = super.boxTooltip
+    if (this.attributes.title !== null || this.drawsShortcut || !this.shortcut) return tooltip
+    const caps = this.keyCapsFor(this.shortcut)
+    if (!caps.length) return tooltip
+    const keys = caps.join(UI.browser.isApple ? "" : KEY_JOIN)
+    return `${this.titleText} (${keys})`
+  }
+
+  /** The item's title box and badge (`UIItem.boxContent()`), then its shortcut's key caps, while they show. */
   protected boxContent(): JSX.Element {
-    const caps = () => (this.shortcut ? this.keyCapsFor(this.shortcut) : [])
+    const caps = () => (this.shortcut && this.drawsShortcut ? this.keyCapsFor(this.shortcut) : [])
     return (
       <>
         {super.boxContent()}
@@ -185,3 +210,6 @@ export type ActionToDraw = {
 
 /** Class word and part of the key caps' box. */
 const SHORTCUT = "shortcut"
+
+/** Between two key caps in a tooltip, off a Mac:  `Ctrl+Z`. */
+const KEY_JOIN = "+"

@@ -1,16 +1,26 @@
-import { core, Thing, List, Page, prop, derived, drawn, on, trigger, type SentEvent } from "@spell/core"
+import { core, Thing, List, Page, prop, derived, drawn, trigger, on, type SentEvent } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
-core.heading("The console")
-/////////////////
-// ## The console
-/////////////////
-// One of FizzBuzz's listeners:  it prints each number as it's counted, and the word it gets.
+core.heading("FizzBuzz")
+//////////////
+// ## FizzBuzz
+//////////////
+// Counting to 100:  fizz for every number 3 goes into, buzz for 5, fizzbuzz for both.
+// The counting prints nothing itself:  it says what each number is, as an event, to whoever's listening.
+// - `Console.spell` listens, and prints each one.
+// - `Explainer.spell` listens too, and shows them on a page.
 
-on<{ number: number }>("fizzbuzz", ({ number }) => core.console.log(number, "fizzbuzz"))
-on<{ number: number }>("fizz", ({ number }) => core.console.log(number, "fizz"))
-on<{ number: number }>("buzz", ({ number }) => core.console.log(number, "buzz"))
-on<{ number: number }>("plain-number", ({ number }) => core.console.log(number))
+/** each number from 1 to 100, as one of four events:  fizzbuzz, fizz, buzz, or a plain number */
+export function playFizzbuzz() {
+  core.getRange(1, 100).forEach((number) => {
+    if (core.isOfType(number / 15, "integer")) trigger("fizzbuzz", { number: number })
+    else if (core.isOfType(number / 3, "integer")) trigger("fizz", { number: number })
+    else if (core.isOfType(number / 5, "integer")) trigger("buzz", { number: number })
+    else trigger("plain-number", { number: number })
+  })
+}
+
+playFizzbuzz()
 // -----------
 core.heading("The explainer")
 ///////////////////
@@ -185,26 +195,16 @@ core.heading("Listening")
 // The page listens itself:  each event the counting sends becomes a result in its tally.
 
 // -----------
-core.heading("FizzBuzz")
-//////////////
-// ## FizzBuzz
-//////////////
-// Counting to 100:  fizz for every number 3 goes into, buzz for 5, fizzbuzz for both.
-// The counting prints nothing itself:  it says what each number is, as an event, to whoever's listening.
-// - `Console.spell` listens, and prints each one.
-// - `Explainer.spell` listens too, and shows them on a page.
+core.heading("The console")
+/////////////////
+// ## The console
+/////////////////
+// One of FizzBuzz's listeners:  it prints each number as it's counted, and the word it gets.
 
-/** each number from 1 to 100, as one of four events:  fizzbuzz, fizz, buzz, or a plain number */
-export function playFizzbuzz() {
-  core.getRange(1, 100).forEach((number) => {
-    if (core.isOfType(number / 15, "integer")) trigger("fizzbuzz", { number: number })
-    else if (core.isOfType(number / 3, "integer")) trigger("fizz", { number: number })
-    else if (core.isOfType(number / 5, "integer")) trigger("buzz", { number: number })
-    else trigger("plain-number", { number: number })
-  })
-}
-
-playFizzbuzz()
+on<{ number: number }>("fizzbuzz", ({ number }) => core.console.log(number, "fizzbuzz"))
+on<{ number: number }>("fizz", ({ number }) => core.console.log(number, "fizz"))
+on<{ number: number }>("buzz", ({ number }) => core.console.log(number, "buzz"))
+on<{ number: number }>("plain-number", ({ number }) => core.console.log(number))
 // -----------
 if (!core.isCarryingOver) fizzbuzzExplainer.start()
 

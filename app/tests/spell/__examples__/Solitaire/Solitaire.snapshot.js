@@ -416,7 +416,7 @@ export class Solitaire extends App {
         h("ui-toolbar", {
           class: "GameBar",
           "aria-label": "Game",
-          appearance: "secondary",
+          appearance: "pills",
           inverted: true,
           size: "small",
           shrinkable: true

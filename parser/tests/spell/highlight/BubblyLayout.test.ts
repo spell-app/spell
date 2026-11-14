@@ -282,6 +282,33 @@ solitaire is an app
     expect(piecesOf(SP.BubblyLayout.of(GAME, SP.spellParser, { within }), "first-mention")).toContain("home")
   })
 
+  it("notes each drawing tag that declares a member, as the parse decides:  not one said on a line of its own, nor any other tag (epic `editor` I84)", () => {
+    const GAME = `a "pile" is a view
+\tto draw it
+\t\t<text>pile</text>
+
+solitaire is an app
+\tits "moves" is a number
+\tto "redo"
+\t\tset its moves to 0
+\tto draw it
+\t\t<text>Score: <number "score"/></>
+\t\t<number "moves"/>
+\t\t<pile "C1"/>
+\t\t<action "redo"/>
+`
+    const file = parseSpellProject([{ path: "/Game.spell", contents: GAME }]).files[0]!
+    const within = { match: file.match, inputLines: GAME.split("\n") } as unknown as SP.SpellFile
+    const declaring = (drawing: SP.BubblyDrawing) =>
+      drawing.declaringTags.map((at) => GAME.slice(at, GAME.indexOf(">", at) + 1))
+    expect(declaring(SP.BubblyLayout.of(GAME, SP.spellParser, { within }))).toEqual([
+      '<number "score"/>',
+      '<pile "C1"/>'
+    ])
+    // read alone, the same:  the file declares its own view
+    expect(declaring(SP.BubblyLayout.of(GAME))).toEqual(['<number "score"/>', '<pile "C1"/>'])
+  })
+
   it("never throws, whatever it's given", () => {
     for (const text of ["", "))) ((( '", "to to to\n\t\t\tis is", "<div>{</div>", "\n\n\t\n"]) {
       expect(() => SP.BubblyLayout.of(text)).not.toThrow()

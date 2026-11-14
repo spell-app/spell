@@ -105,6 +105,25 @@ describe("MarkupMarks", () => {
     expect(marks.tags.map(({ start, end }) => spell.slice(start, end))).toEqual(["<text color=", ">", "</text>"])
   })
 
+  test("a tag that declares the member it draws:  its shape and its brackets and `/` marked to be drawn round;  any other tag's not (epic `editor` I84)", () => {
+    const spell = `to draw it\n\t<number "score"/>\n\t<action "redo"/>\n\t<column "C1"></column>`
+    const declaringTags = [spell.indexOf("<number"), spell.indexOf("<column")]
+    const marks = MarkupMarks.within(spell, spell.indexOf("<number"), spell.length, [], { declaringTags })
+    const lines = spell.split("\n")
+    const tagsDeclaring = marks.shapes
+      .filter((shape) => shape.kind === "tag" && shape.declares)
+      .map(({ place }) => lines[marks.marks[place]!.range.startLineNumber - 1]!.trim())
+    expect(tagsDeclaring).toEqual(['<number "score"/>', '<column "C1"></column>'])
+    const marked = marks.marks
+      .filter((mark) => /bubbly-tag-declares/.test(mark.options.inlineClassName ?? ""))
+      .map(
+        ({ range }) =>
+          `${range.startLineNumber}:${lines[range.startLineNumber - 1]!.slice(range.startColumn - 1, range.endColumn - 1)}`
+      )
+    // `<column "C1"></column>`, drawn as if self-closed (Q62):  its start tag's `>` hidden, its end tag's `/>` drawn
+    expect(marked).toEqual(["2:<", "2:/", "2:>", "4:<", "4:/", "4:>"])
+  })
+
   test("a tag's brackets, names and values marked as the page draws them", () => {
     const marks = MarkupMarks.of(PAGE)
     expect(textMarked(marks, "bubbly-angle-open").slice(0, 3)).toEqual(["<", "<", "<"])

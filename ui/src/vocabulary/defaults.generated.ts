@@ -1756,7 +1756,18 @@ export const DEFAULTS_TABLE: Readonly<
       name: "appearance",
       kind: "multiple",
       group: "appearance",
-      values: ["tabular", "pointing", "secondary", "text", "segmented", "link", "borderless", "header", "capsule"]
+      values: [
+        "tabular",
+        "pointing",
+        "secondary",
+        "text",
+        "segmented",
+        "link",
+        "borderless",
+        "header",
+        "capsule",
+        "pills"
+      ]
     },
     { name: "name", kind: "string", group: "form" },
     { name: "value", kind: "string", group: "form" },
@@ -1783,6 +1794,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "icon-column", kind: "boolean", group: "appearance" },
     { name: "tabs", kind: "boolean", group: "behaviour" },
     { name: "interactive", kind: "boolean", group: "behaviour" },
+    { name: "show-keys", kind: "boolean", group: "content" },
     { name: "scroll-first", kind: "boolean", group: "layout" },
     { name: "max-visible", kind: "string", group: "layout" },
     { name: "remember", kind: "string", group: "layout" }

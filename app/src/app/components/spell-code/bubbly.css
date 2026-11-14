@@ -772,9 +772,9 @@
   .bubbly-angle-open:has(+ .bubbly-slash)::before {
     margin-right: 0.5px;
   }
-  /* a self-closed tag's `/` snug against its `⟩`, never over it, so `/⟩` reads as one glyph (Owen) */
-  .bubbly-slash:has(+ .bubbly-angle-close) {
-    margin-right: -0.12em;
+  /* ... and a `/`'s close one, in a `</>` or a `/>`:  a pixel from it (epic `editor` I83) */
+  .bubbly-slash + .bubbly-angle-close::before {
+    margin-left: 2px;
   }
 
   /* an attribute's `=` a pixel clear of its name */
@@ -1096,6 +1096,18 @@
     }
   } /* END bubbly-html */
 
+  /****** a drawing's tag that DECLARES the member it draws:  round, not pointed (Owen, epic `editor` I84) ******/
+  /*
+   * `<number "score"/>` ~== `"score" is a number`, `<stock-pile "stock"/>` ~== `"stock" is a new stock pile`:
+   * it makes a name, where any other tag (`<action "redo"/>`, `<text>`) draws something
+   * - which tags:  the compiler's own test, `SP.BubblyDrawing.declaringTags`;  marked `bubbly-tag-declares`
+   * - its pill's ends round, its `⟨` and `/⟩` drawn in them as on any tag (Owen, 2026-11-14:  "we should still see
+   *   the <> in these, but make it round")
+   */
+  &.bubbly-html :is(.bubbly-pill, .bubbly-tag-pill).bubbly-tag-declares {
+    corner-shape: round;
+    border-radius: calc(var(--bubbly-pill-height) / 2);
+  }
   /****** a head's description, `-- A playing card`:  at the drawing's right edge, its band reaching there (Owen) ******/
   /*
    * - as the editor draws it, at the window's edge:  on a page, the drawing's widest line's
@@ -1403,6 +1415,22 @@
     }
     .view-line .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
       letter-spacing: -0.2em;
+    }
+    /*
+     * beside a `/`, a bracket's own character narrowed to the page's room (epic `editor` I83):
+     * `<` is wider than the `⟨` drawn over it, so a `</>` had a gap either side of its slash
+     * - narrowed by letter-spacing, so the caret still lands either side of it, as Monaco measures where each letter is
+     * - in `em`, so a block's tiny end tag narrows as much;  for the editor's font, whose `<` is 0.61em, `⟨` 0.37em
+     * - the `/`'s `⟨` 0.5px from it, its `⟩` 1px, as on the page
+     */
+    .view-line .bubbly-angle-open.bubbly-tag-end {
+      letter-spacing: -0.21em;
+    }
+    .view-line .bubbly-slash + .bubbly-angle-close {
+      letter-spacing: -0.18em;
+    }
+    .view-line .bubbly-angle::before {
+      letter-spacing: normal;
     }
     /*
      * a tag's marks:  as dark as the page's on a band, which mixes its faint ink with the band's colour;

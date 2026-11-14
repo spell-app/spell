@@ -1,8 +1,8 @@
-98:29 TS2322 Type 'number' is not assignable to type 'string'.
-99:29 TS2322 Type 'number' is not assignable to type 'string'.
-100:29 TS2322 Type 'number' is not assignable to type 'string'.
-101:29 TS2322 Type 'number' is not assignable to type 'string'.
-127:40 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
-132:36 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
-137:36 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
-142:32 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+108:29 TS2322 Type 'number' is not assignable to type 'string'.
+109:29 TS2322 Type 'number' is not assignable to type 'string'.
+110:29 TS2322 Type 'number' is not assignable to type 'string'.
+111:29 TS2322 Type 'number' is not assignable to type 'string'.
+137:40 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+142:36 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+147:36 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+152:32 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.

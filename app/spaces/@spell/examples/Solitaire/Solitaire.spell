@@ -13,7 +13,7 @@ solitaire is an app
 
 	to draw it
 		<segment inverted attach="top" color="">
-			<toolbar class="GameBar" aria-label="Game" appearance="secondary" inverted size="small" shrinkable>
+			<toolbar class="GameBar" aria-label="Game" appearance="pills" inverted size="small" shrinkable>
 				<text slot="title" size="large" heavy>Solitaire</text>
 				<action "auto play"/>
 				<action "cheat"/>

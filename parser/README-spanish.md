@@ -14,8 +14,8 @@ It's a Spell program, written in Spanish, and it compiles:
   }
 ```
 
-_Line 10 of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),
-`<frase "es una figura">si su rango es jota, dama o rey</>`, as the compiler writes it (below, "Try it")._
+_Line 13 of [Carta.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Carta.es.spell),
+`"es una figura" si su rango es jota, dama o rey`, as the compiler writes it (below, "Try it")._
 
 Spanish is Spell's second human language.
 A file says it's Spanish in its name, `Carta.es.spell`, and Spell reads it with Spanish words, plurals and articles,
@@ -107,12 +107,14 @@ spell explain carta --in @spell/examples/Solitario
 <summary>Output</summary>
 
 ```text
-...Carta.es.spell:6
+...Carta.es.spell:1
 plantilla Carta, subplantilla de TwoSidedView
 
-propiedades:  rango, valor, palo, color, símbolo, nombre, estado, imagen, levantada, pila
+Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el juego solo los leen.
+
+propiedades:  rango, palo, color, nombre, valor, símbolo, nombre corto, imagen, levantada, pila
 enumeraciones:  Rangos, Palos, Colores
-declarado en Carta.es.spell:6
+declarado en Carta.es.spell:1
 
 export class Carta extends TwoSidedView {
   static elementTag = core.defineElement(this, "Solitario")
@@ -283,15 +285,22 @@ and every component loads on demand as an `es-*` tag, its attributes and texts i
 Solitario's toolbar is one:
 
 ```html
-<contenedor>
-	<barra-herramientas menu="menú del juego" aria-label="Juego" encogible>
-		<texto slot="titulo" tamano="grande">Solitario Klondike</texto>
-		<texto slot="derecha">Movimientos: {los movimientos} · Puntos: {la puntuación}{la pista}</texto>
+<segmento invertido unir="arriba" color="">
+	<barra-herramientas class="GameBar" aria-label="Juego" apariencia="pildoras" invertido tamano="pequeño" encogible>
+		<texto slot="titulo" tamano="grande" extranegrita>Solitario</texto>
+		<acción "jugar solo"/>
+		<acción "hacer trampa"/>
+		<acción "reiniciar el juego"/>
+		<divisor/>
+		<acción "deshacer"/>
+		<acción "rehacer"/>
+		<texto slot="derecha">Puntos: <número "puntuación"/></>
 	</barra-herramientas>
+</segmento>
 ```
 
 _From [Solitario.es.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitario/Solitario.es.spell),
-its `<dibujar>`:  a bare name is Spell UI's tag, `<texto>` for `<es-texto>`._
+its `para dibujar eso`:  a bare name is Spell UI's tag, `<texto>` for `<es-texto>`._
 
 - Tag and attribute names are plain ASCII, `es-boton`, `tamano`;  values keep their accents,
   and are found without them too:  `pequeno` finds `pequeño`.

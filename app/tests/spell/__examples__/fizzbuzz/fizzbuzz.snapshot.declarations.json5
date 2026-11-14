@@ -8,6 +8,18 @@
   ],
   "statements": [
     {
+      "syntax": "play fizzbuzz",
+      "output": "play_fizzbuzz",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "returns": "nothing",
+      "defined": "/FizzBuzz.spell:318-784"
+    },
+    {
       "type": "Result",
       "superType": "Thing",
       "defined": "/Explainer.spell:454-885"
@@ -127,36 +139,24 @@
       ],
       "returns": "nothing",
       "defined": "/Explainer.spell:3721-3870"
-    },
-    {
-      "syntax": "play fizzbuzz",
-      "output": "play_fizzbuzz",
-      "rule": "method_call",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "function",
-      "returns": "nothing",
-      "defined": "/FizzBuzz.spell:318-784"
     }
   ],
   "codeLines": [
-    40,
-    41,
-    47,
-    53,
-    59,
-    68,
-    71,
-    79,
-    82,
-    87,
-    91,
-    95,
-    99,
-    104,
-    132,
-    176
+    12,
+    38,
+    39,
+    45,
+    51,
+    57,
+    66,
+    69,
+    77,
+    80,
+    85,
+    89,
+    93,
+    97,
+    102,
+    130
   ]
 }

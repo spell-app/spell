@@ -2168,6 +2168,7 @@ export const HELP_TABLE: Readonly<
       tabs: "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`): one Tab stop, arrow keys between them.",
       interactive:
         "An application menubar (`role=menubar`): one Tab stop, arrow keys between items, every item a `menuitem`.",
+      "show-keys": "Show each action's keys beside its title, as a menu does.",
       "scroll-first":
         "With `shrinkable`: once only its icons are left, they scroll with `‹` / `›`, no overflow button.",
       "max-visible":

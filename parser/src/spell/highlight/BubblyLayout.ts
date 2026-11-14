@@ -12,6 +12,7 @@ import type {
   BubblyPieceKind,
   BubblyRulePresentation
 } from "./highlight.types"
+import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
 
 /****************
  * ### `BubblyLayout`
@@ -71,6 +72,9 @@ export class BubblyLayout {
   /** The names each enclosing declaration has introduced:  a name's first mention is bold, a later use semibold. */
   private readonly scopes: Array<Set<string>> = [new Set()]
 
+  /** Where each tag that declares a member starts:  `BubblyDrawing.declaringTags`. */
+  private readonly declaringTags = new Set<number>()
+
   /** Words that point back (`it`, `its`):  drawn plain. */
   private readonly pronouns: Set<string>
 
@@ -88,7 +92,11 @@ export class BubblyLayout {
       at += line.length + 1
     }
     this.readParse(parser, parsed)
-    this.drawing = { text, nodes: this.layout(this.treeOf(), { depth: 0, level: 0 }) }
+    this.drawing = {
+      text,
+      nodes: this.layout(this.treeOf(), { depth: 0, level: 0 }),
+      declaringTags: [...this.declaringTags].sort((a, b) => a - b)
+    }
   }
 
   ////////////////
@@ -120,6 +128,9 @@ export class BubblyLayout {
         }
       }
       this.overlaysOf(each)
+      // a tag that declares the member it draws (`<number "score"/>`), not one said on a line of its own
+      const { declares } = each.data as { declares?: DrawnDeclaration }
+      if (declares && !declares.drawnOnly && each.start !== undefined) this.declaringTags.add(each.start)
       for (const child of childrenOf(each)) walk(child)
     }
     walk(match)

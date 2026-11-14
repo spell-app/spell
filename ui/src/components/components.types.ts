@@ -177,7 +177,20 @@ export type ItemContext = {
   ticks?: boolean
   /** Its items keep an icon box before their words, empty for one with no icon (`<ui-menu icon-column>`):  `:state(in-icon-column)`. */
   iconColumn?: boolean
+  /**
+   * Its items draw no key caps (a `<ui-toolbar>` without `show-keys`):  an action's keys are in its tooltip instead.
+   * - Only for the toolbar's own items:  a sub-menu's rows keep theirs.
+   */
+  hidesShortcuts?: boolean
+  /**
+   * Where the item sits in its pill (`<ui-toolbar appearance="pills">`):  each run of items between two dividers is
+   * one rounded track, and the item draws its piece of it (classes `pill`, `pill-start`, `pill-end`).
+   */
+  pill?: PillPlace
 }
+
+/** Where an item sits in its pill:  `only` is both its start and its end. */
+export type PillPlace = "start" | "middle" | "end" | "only"
 
 /** Roles an owner may give an item's root. */
 export type ItemRole = "menuitem" | "menuitemradio" | "menuitemcheckbox" | "option" | "treeitem" | "tab"

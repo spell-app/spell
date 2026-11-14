@@ -4,7 +4,7 @@
   "category": "first-steps",
   "imports": [
     {
-      "path": "/Console.spell",
+      "path": "/FizzBuzz.spell",
       "active": true
     },
     {
@@ -12,7 +12,7 @@
       "active": true
     },
     {
-      "path": "/FizzBuzz.spell",
+      "path": "/Console.spell",
       "active": true
     }
   ]

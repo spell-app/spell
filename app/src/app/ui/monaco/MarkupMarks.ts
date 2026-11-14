@@ -45,15 +45,17 @@ export class MarkupMarks extends TextMarks {
    * The tags of a Spell drawing's lines, from `from` to `to` in `text`, its file:  marked into `marks`, Spell's;
    * the lines themselves are Spell's to mark, at their own indent.
    * - `isView`:  is a tag one of the project's own views, `<tableau "T1"/>`?  Then it draws a thing:  purple.
+   * - `declaringTags`:  where each tag that declares a member starts (`SP.BubblyDrawing.declaringTags`):
+   *   drawn round, `bubbly-tag-declares` (epic `editor` I84)
    */
   static within(
     text: string,
     from: number,
     to: number,
     marks: monaco.editor.IModelDeltaDecoration[],
-    isView: (tag: string) => boolean = () => false
+    { isView = () => false, declaringTags = [] }: MarkupWithin = {}
   ): MarkupMarks {
-    return new MarkupMarks(text, { from, to, isInSpell: true, isView }, marks)
+    return new MarkupMarks(text, { from, to, isInSpell: true, isView, declaringTags }, marks)
   }
 
   /** The shapes at the top of the drawing, each holding those inside it. */
@@ -71,19 +73,24 @@ export class MarkupMarks extends TextMarks {
   /** Is a tag one of the project's own views:  `within()`'s. */
   private readonly isView: (tag: string) => boolean
 
+  /** Where each tag that declares a member starts:  `within()`'s. */
+  private readonly declaringTags: ReadonlySet<number>
+
   private constructor(
     source: string,
     {
       from,
       to,
       isInSpell,
-      isView = () => false
-    }: { from: number; to: number; isInSpell: boolean; isView?: (tag: string) => boolean },
+      isView = () => false,
+      declaringTags = []
+    }: { from: number; to: number; isInSpell: boolean } & MarkupWithin,
     marks?: monaco.editor.IModelDeltaDecoration[]
   ) {
     super(source, marks)
     this.isInSpell = isInSpell
     this.isView = isView
+    this.declaringTags = new Set(declaringTags)
     this.nodes(BubblyMarkup.treeOf(source, from, to), this.shapes)
   }
 
@@ -169,13 +176,15 @@ export class MarkupMarks extends TextMarks {
 
   /** A tag alone on its line, with no end tag (`<meta …>`):  a band by itself. */
   private alone(tag: MarkupStartTag, partOfSpeech: MarkupPartOfSpeech, into: MarkupShape[]) {
+    const declares = this.declares(tag)
     into.push({
       kind: "tag",
       place: this.place(tag.start, tag.end),
       partOfSpeech,
       side: "start",
       isAlone: true,
-      ...this.tallness(tag)
+      ...this.tallness(tag),
+      ...(declares ? { declares } : {})
     })
     this.startTag(tag, partOfSpeech, into)
   }
@@ -214,6 +223,7 @@ export class MarkupMarks extends TextMarks {
     }
     // the room either side, and the pill's place:  the whole tag, its end tag too when it's drawn self-closed
     const place = this.mark(tag.start, end, "", spacers)
+    const declares = this.declares(tag)
     const shape: MarkupTagShape = {
       kind: "tag",
       place,
@@ -221,12 +231,13 @@ export class MarkupMarks extends TextMarks {
       side,
       isAlone: false,
       room,
-      ...this.tallness(tag)
+      ...this.tallness(tag),
+      ...(declares ? { declares } : {})
     }
     into.push(shape)
     if (tag.kind === "start") this.startTag(tag, partOfSpeech, into, through ? "self-closed" : "as-written")
     else this.endTag(tag, "inline")
-    if (through) this.hiddenEndTag(through)
+    if (through) this.hiddenEndTag(through, declares)
     return shape
   }
 
@@ -262,7 +273,9 @@ export class MarkupMarks extends TextMarks {
   ) {
     const { start, end } = tag
     let from = start
-    this.mark(start, start + 1, ANGLE_OPEN)
+    // a tag that declares a member:  its brackets and `/` not drawn, its pill round (I84)
+    const declares = this.declares(tag) ? ` ${DECLARES}` : ""
+    this.mark(start, start + 1, ANGLE_OPEN + declares)
     this.mark(start + 1, start + 1 + tag.tag.length, TAG_NAME)
     for (const attribute of tag.attributes) {
       if (attribute.name) {
@@ -282,8 +295,8 @@ export class MarkupMarks extends TextMarks {
       } else this.value(attribute.valueStart, attribute.valueEnd!, attribute.isQuoted, partOfSpeech, into)
     }
     this.tags.push({ start: from, end })
-    if (tag.selfClosing) this.mark(end - 2, end - 1, `${SLASH} ${CLOSING_SLASH}`)
-    this.mark(end - 1, end, ends === "self-closed" ? HIDDEN : ANGLE_CLOSE)
+    if (tag.selfClosing) this.mark(end - 2, end - 1, `${SLASH} ${CLOSING_SLASH}${declares}`)
+    this.mark(end - 1, end, ends === "self-closed" ? HIDDEN : ANGLE_CLOSE + declares)
   }
 
   /**
@@ -292,15 +305,16 @@ export class MarkupMarks extends TextMarks {
    * - Every letter stays in the file, so the caret, a selection, a copy and typing all work on them:
    *   the caret steps over the hidden ones without seeming to move
    */
-  private hiddenEndTag(tag: MarkupEndTag) {
+  private hiddenEndTag(tag: MarkupEndTag, isDeclaring = false) {
     const { start, end } = tag
     this.tags.push({ start, end })
+    const declares = isDeclaring ? ` ${DECLARES}` : ""
     this.mark(start, start + 1, HIDDEN)
     // an attribute's room before its `/`, as on the page;  none where its start tag's `>` starts its line
     const spacers: Spacers = this.startsLine(start - 1) ? {} : { before: spacer("attribute", "before") }
-    this.mark(start + 1, start + 2, `${SLASH} ${CLOSING_SLASH}`, spacers)
+    this.mark(start + 1, start + 2, `${SLASH} ${CLOSING_SLASH}${declares}`, spacers)
     this.mark(start + 2, end - 1, HIDDEN)
-    this.mark(end - 1, end, ANGLE_CLOSE)
+    this.mark(end - 1, end, ANGLE_CLOSE + declares)
   }
 
   /**
@@ -347,6 +361,11 @@ export class MarkupMarks extends TextMarks {
   ////////////////
   // ## Helpers
   ////////////////
+
+  /** Does `tag` declare the member it draws (`<number "score"/>`):  a start tag the parse said so of? */
+  private declares(tag: MarkupStartTag | MarkupEndTag): true | undefined {
+    return tag.kind === "start" && this.declaringTags.has(tag.start) ? true : undefined
+  }
 
   /** Does `tag` run over more than one line:  one tall band (T118)? */
   private isTall(tag: { start: number; end: number }): boolean {
@@ -419,6 +438,11 @@ export type MarkupTagShape = {
   /** a start tag on lines of its own, its `>` alone on the last:  its rows above overhang it, their corner cut */
   isShortTail?: boolean
   /**
+   * it declares the member it draws, `<number "score"/>` (`SP.BubblyDrawing.declaringTags`):
+   * drawn round, `bubbly-tag-declares` (epic `editor` I84)
+   */
+  declares?: true
+  /**
    * the room injected where it starts, each spacer's kind:  the tag's it follows right on (`<p><b>`), then its own;
    * none at its line's start, less where its point touches its element's other tag
    * - Monaco places a column before the room injected there:  the pill starts past it
@@ -442,6 +466,14 @@ export type MarkupLinkShape = {
   end: MarkupTagShape
 }
 
+/** What `MarkupMarks.within()` knows of a Spell drawing's tags, from its project. */
+export type MarkupWithin = {
+  /** is a tag one of the project's own views, `<tableau "T1"/>`?  Then it draws a thing:  purple */
+  isView?: (tag: string) => boolean
+  /** where each tag that declares a member starts:  `SP.BubblyDrawing.declaringTags` */
+  declaringTags?: readonly number[]
+}
+
 /** A spacer beside a tag in a line:  room for its pill and the gap outside it, or only its pill's where points touch. */
 export type TagRoom = "tag" | "touch"
 
@@ -455,6 +487,9 @@ const SLASH = `${MARK} bubbly-slash`
 
 /** A self-closed tag's `/`, snug against its `>`:  `/⟩` one glyph (Owen, 2026-11-14). */
 const CLOSING_SLASH = "bubbly-closing-slash"
+
+/** A tag that declares the member it draws:  its pill round, its brackets and `/` not drawn (epic `editor` I84). */
+const DECLARES = "bubbly-tag-declares"
 
 /** A tag's name, and its attributes' names. */
 const TAG_NAME = "bubbly-tag-name"
