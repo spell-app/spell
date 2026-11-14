@@ -12,6 +12,7 @@ import { uiReady } from "spell/app/app/solid/loadUI"
  * ### `<ProjectSettings>`
  * A project's settings, in a dialog.
  * - It's a `<ui-property-editor>` on `projectSettingsSchema()` (epic `property-editor` P5, its first real use).
+ * - Two to a row:  title and version, then where lists start and the other languages.
  * - In the page's language:  its title, labels and tips are `appTexts`'.
  * - What it edits:  the project file's `title`, `version`, `targets` and `listsStartAt`,
  *   a copy of what the project's index says (`settingsOf()`).
@@ -31,7 +32,8 @@ export function ProjectSettings(props: ProjectSettingsProps) {
   return (
     <ui-modal
       class="ProjectSettings"
-      size="small"
+      size="tiny"
+      heading={appTexts.text("projectSettingsHeading")}
       closedby="closerequest"
       aria-label={appTexts.text("projectSettings", { title: props.project.title })}
       visible=""
@@ -43,6 +45,7 @@ export function ProjectSettings(props: ProjectSettingsProps) {
       <ui-content>
         <ui-property-editor
           apply="on save"
+          columns="2"
           schema={schema}
           value={settings}
           ref={(editor: HTMLElement) => {
@@ -50,10 +53,10 @@ export function ProjectSettings(props: ProjectSettingsProps) {
             editor.addEventListener("ui-cancelled", () => hide())
           }}
         >
-          <ui-property name="title" hint={appTexts.text("titleHint")}></ui-property>
-          <ui-property name="version" apply="on leave"></ui-property>
-          <ui-property name="targets" as={CHOICES}></ui-property>
-          <ui-property name="listsStartAt" as="buttons"></ui-property>
+          <ui-property name="title" width="1/2" hint={appTexts.text("titleHint")}></ui-property>
+          <ui-property name="version" width="1/2" apply="on leave"></ui-property>
+          <ui-property name="listsStartAt" width="1/2" as="buttons"></ui-property>
+          <ui-property name="targets" width="1/2" as={CHOICES}></ui-property>
         </ui-property-editor>
       </ui-content>
     </ui-modal>
@@ -100,7 +103,7 @@ export async function openProjectSettings(
   await uiReady
   SpellUI.propertyControls.add(CHOICES, {
     tag: "ui-dropdown",
-    attributes: { multiple: "", selection: "" },
+    attributes: { multiple: "", selection: "", fluid: "" },
     choices: "items"
   })
   const host = document.createElement("div")
@@ -132,7 +135,7 @@ function settingsOf(project: SP.SpellProject): SPACES.ProjectSettings {
   }
 }
 
-/** The control kind for picking several choices:  a multiple-selection dropdown. */
+/** The control kind for picking several choices:  a multiple-selection dropdown, as wide as its column. */
 const CHOICES = "choices"
 
 /**

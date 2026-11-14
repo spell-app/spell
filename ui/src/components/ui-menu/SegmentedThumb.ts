@@ -71,13 +71,16 @@ export class SegmentedThumb {
     this.watch(box)
     const trackRect = this.track.getBoundingClientRect()
     const boxRect = box.getBoundingClientRect()
-    const x = boxRect.left - trackRect.left - this.track.clientLeft + this.track.scrollLeft
-    const y = boxRect.top - trackRect.top - this.track.clientTop + this.track.scrollTop
+    // On screen, sizes are scaled by any transform above:  a dialog zooming in as it opens drew the thumb small
+    const scaleX = trackRect.width / this.track.offsetWidth || 1
+    const scaleY = trackRect.height / this.track.offsetHeight || 1
+    const x = (boxRect.left - trackRect.left) / scaleX - this.track.clientLeft + this.track.scrollLeft
+    const y = (boxRect.top - trackRect.top) / scaleY - this.track.clientTop + this.track.scrollTop
     const style = this.track.style
     style.setProperty("--_menu-thumb-x", `${x}px`)
     style.setProperty("--_menu-thumb-y", `${y}px`)
-    style.setProperty("--_menu-thumb-width", `${boxRect.width}px`)
-    style.setProperty("--_menu-thumb-height", `${boxRect.height}px`)
+    style.setProperty("--_menu-thumb-width", `${boxRect.width / scaleX}px`)
+    style.setProperty("--_menu-thumb-height", `${boxRect.height / scaleY}px`)
     style.setProperty("--_menu-thumb-radius", getComputedStyle(box).borderRadius)
     if (this.track.classList.contains(THUMBED)) return
     // the first place:  drawn there at once, sliding only from the next one on

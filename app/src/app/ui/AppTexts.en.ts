@@ -629,6 +629,7 @@ export const APP_TEXTS = {
   ////////////////
 
   projectSettings: "{title} settings",
+  projectSettingsHeading: "Project Settings",
   titleHint: "Its folder's name, as words, when left empty.",
   titleTip: "The app's name for people, in the app list and the editor's title bar.",
   versionTip: "Its version, as `1.2.0`:  stamped on what it declares, for apps that import it.",

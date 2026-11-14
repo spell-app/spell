@@ -621,6 +621,7 @@ const APP_TEXTS_ES: AppTextPack = {
   ////////////////
 
   projectSettings: "Ajustes de {title}",
+  projectSettingsHeading: "Ajustes del proyecto",
   titleHint: "El nombre de su carpeta, en palabras, si se deja vacío.",
   titleTip:
     "El nombre de la aplicación para las personas, en la lista de aplicaciones y en la barra de título del editor.",
