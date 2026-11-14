@@ -96,7 +96,8 @@ export type MarkupPartOfSpeech = "structure" | "thing" | "action" | "property" |
 /**
  * The tags of each part of speech that has a list:  HTML's, then Spell UI's by their bare names (`ui-` off).
  * - The ONE table:  the page (`BubblyHtml`) and the editor (`MarkupMarks`) both read it through `partOfSpeechOf()`.
- * - Unlisted:  a name with a dash is a thing (a custom element), any other plain.
+ * - Unlisted:  a name with a dash is a thing (a custom element), any other plain:  a divider (`hr`, `divider`) and a
+ *   spacer are grey, as they hold nothing (Owen, 2026-11-14).
  * - Chosen by Owen (2026-11-14):  container, segment, toolbar, menu blue;  button, buttons, action and a menu's items green.
  *   The rest is a calm judgement call (epic `language`):  every layout box blue, every control green.
  */
@@ -104,10 +105,10 @@ const TAG_WORDS = {
   structure: [
     // HTML's layout
     "html body main header footer nav section article aside div ul ol dl table thead tbody tfoot tr figure fieldset",
-    "dialog template slot hr",
-    // Spell UI's boxes, grids and panes;  a context menu (Spell's `<context-menu>`) and a menu's divider
+    "dialog template slot",
+    // Spell UI's boxes, grids and panes;  a context menu (Spell's `<context-menu>`)
     "container segment segments toolbar menu submenu context-menu grid row column cell stack sides side split-panel",
-    "sidebar rail sticky panel pushable pusher space divider accordion sections tabs tab page root list items card",
+    "sidebar rail sticky panel pushable pusher space accordion sections tabs tab page root list items card",
     "cards fields steps modal flyout popup dimmer site-nav site-tabs"
   ],
   action: [

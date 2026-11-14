@@ -273,8 +273,10 @@ export type BubblyInputShape = {
   isChoice: boolean
   /** its words were quoted:  its curly marks are drawn outside it */
   isQuoted: boolean
+  /** an HTML tag's value:  the tag's part of speech, whose hue its pill's edge takes, as on the page */
+  inTag?: MarkupPartOfSpeech
   /** a tag's `{…}` value, worked out as it runs:  its pill inverted, a shade of its tag's colour (Owen) */
-  expressionIn?: MarkupPartOfSpeech
+  isExpression?: boolean
 }
 
 /** The class of the spacer before a head's description, then its number:  `bubbly-description-3`. */
