@@ -139,10 +139,11 @@ ui-popup[data-spell-action-menu] > ui-menu::part(menu),
   border-top: 1px solid var(--ui-border-color);
 }
 
-/* the line after a program's own right-click menu, before the editor's items (epic `editor` I76):  thicker */
+/* the line after a program's own right-click menu, before the editor's items (epic `editor` I76):
+   2px dashed, edge to edge as every divider (I102) */
 ui-menu.BarMenuItems > ui-action.ProgramMenuEnd[kind="divider"]::part(item) {
-  margin: 5px -4px;
-  border-top-width: 3px;
+  margin: 6px -4px;
+  border-top: 2px dashed var(--ui-border-color);
 }
 
 /* a divider left first, last or doubled (the static build's hidden actions):  none */
