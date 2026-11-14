@@ -139,7 +139,7 @@ export class GuardiánDeTareas extends Thing {
     return new Tarea({ título: título })
   }
 }
-core.describeAction(GuardiánDeTareas, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada (título Como Texto)", undoneAs: "Guardar Una Tarea Nueva Titulada (título Como Texto)" })
+core.describeAction(GuardiánDeTareas, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Guardadas en este navegador")
 /////////////////////////////////
@@ -212,7 +212,7 @@ export const almacénDelNavegador = core.place(new AlmacénDelNavegador(), {
 
 core.describeAction(TareaDelNavegador, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
 
-core.describeAction(GuardiánDelNavegador, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada (título Como Texto)", undoneAs: "Guardar Una Tarea Nueva Titulada (título Como Texto)" })
+core.describeAction(GuardiánDelNavegador, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Guardadas en un archivo JSON en el servidor")
 /////////////////////////////////////////////////
@@ -288,7 +288,7 @@ export const archivosDeTareas = core.place(new ArchivoDeTareas(), {
 
 core.describeAction(TareaDelServidor, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
 
-core.describeAction(GuardiánDelServidor, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada (título Como Texto)", undoneAs: "Guardar Una Tarea Nueva Titulada (título Como Texto)" })
+core.describeAction(GuardiánDelServidor, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Guardadas en un archivo CSV en el servidor")
 ////////////////////////////////////////////////
@@ -366,7 +366,7 @@ export const hojaDeTareas = core.place(new HojaDeTareas(), {
 
 core.describeAction(TareaDeLaHoja, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
 
-core.describeAction(GuardiánDeLaHoja, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada (título Como Texto)", undoneAs: "Guardar Una Tarea Nueva Titulada (título Como Texto)" })
+core.describeAction(GuardiánDeLaHoja, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Guardadas en tu cuenta de atmosphere")
 //////////////////////////////////////////
@@ -448,7 +448,7 @@ export const cieloDeTareas = core.place(new CieloDeTareas(), {
 
 core.describeAction(TareaDelCielo, "tirar", { title: "Tirarla", undoneAs: "Tirarla" })
 
-core.describeAction(GuardiánDelCielo, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada (título Como Texto)", undoneAs: "Guardar Una Tarea Nueva Titulada (título Como Texto)" })
+core.describeAction(GuardiánDelCielo, "guardarUnaTareaNuevaTituladaTítulo", { title: "Guardar Una Tarea Nueva Titulada Título Como Texto", undoneAs: "Guardar Una Tarea Nueva Titulada Título Como Texto" })
 // -----------
 core.heading("Lista de tareas")
 /////////////////////
@@ -541,9 +541,9 @@ export class AgendaElement extends SpellElement<Agenda> {
   }
 }
 core.useElement(Agenda, AgendaElement)
+core.describeAction(Agenda, "guardarElOrden", { title: "Guardar El Orden", undoneAs: "Guardar El Orden" })
 
 // en la página, sus tareas se pueden arrastrar a otro lugar:  se mueven con el puntero, deslizándose
-core.describeAction(Agenda, "guardarElOrden", { title: "Guardar El Orden", undoneAs: "Guardar El Orden" })
 
 export function testElFiltro() {
   return core.test("test el filtro", function testElFiltro() {
@@ -787,20 +787,17 @@ export class ListaDeTareasElement extends SpellElement<ListaDeTareas> {
 }
 core.useElement(ListaDeTareas, ListaDeTareasElement)
 export const listaDeTareas = new ListaDeTareas()
-
-// Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián
-
 core.describeAction(ListaDeTareas, "llenarLaAgenda", { title: "Llenar La Agenda", undoneAs: "Llenar La Agenda" })
-
-core.describeAction(ListaDeTareas, "agregarLaTareaInicialTítuloConPrioridadNivel", { title: "Agregar La Tarea Inicial (título Como Texto) Con Prioridad (nivel Como Texto)", undoneAs: "Agregar La Tarea Inicial (título Como Texto) Con Prioridad (nivel Como Texto)" })
-
+core.describeAction(ListaDeTareas, "agregarLaTareaInicialTítuloConPrioridadNivel", { title: "Agregar La Tarea Inicial Título Como Texto Con Prioridad Nivel Como Texto", undoneAs: "Agregar La Tarea Inicial Título Como Texto Con Prioridad Nivel Como Texto" })
 core.describeAction(ListaDeTareas, "agregarElBorrador", { title: "Agregar El Borrador", undoneAs: "Agregar El Borrador" })
-
-// Qué tareas muestra la lista:  la barra de herramientas marca la que muestra
 core.describeAction(ListaDeTareas, "mostrarTodas", { title: "Todas", icon: "list", selectedWhen: "mostrarTodasIsSelected", undoneAs: "Todas" })
 core.describeAction(ListaDeTareas, "mostrarPendientes", { title: "Pendientes", icon: "square outline", selectedWhen: "mostrarPendientesIsSelected", undoneAs: "Pendientes" })
 core.describeAction(ListaDeTareas, "mostrarHechas", { title: "Hechas", icon: "check square outline", selectedWhen: "mostrarHechasIsSelected", undoneAs: "Hechas" })
 core.describeAction(ListaDeTareas, "quitarLasTareasHechas", { title: "Quitar las tareas hechas", icon: "trash alternate outline", undoneAs: "Quitar las tareas hechas" })
+
+// Dónde se guardan las tareas:  la persona elige, y la aplicación le pregunta a ese guardián
+
+// Qué tareas muestra la lista:  la barra de herramientas marca la que muestra
 
 // Los botones de la barra de herramientas, y el clic derecho en la lista:  las mismas acciones
 // su "menú de tareas" es un menú de "mostrar todas", "mostrar pendientes", "mostrar hechas", "-" y "quitar las tareas hechas"

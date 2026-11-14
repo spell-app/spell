@@ -161,6 +161,9 @@ export class Carta extends TwoSidedView {
 
   static clickable = true
 }
+core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar carta" })
+core.describeAction(Carta, "ponerEnPila", { title: "Poner Una Carta En Una Pila", undoneAs: "Mover carta" })
+core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar Los Puntos De Una Carta En Una Pila", undoneAs: "Contar Los Puntos De Una Carta En Una Pila" })
 // El as es bajo:  as = 1 ... rey = 13
 
 // Cómo la llama una persona, una prueba o la consola
@@ -353,7 +356,7 @@ export class PilaDeReserva extends Pila {
 
   /** Vacía:  un clic vuelve a voltear los descartes;  un clic en una de sus cartas es de la carta */
   async onClic(event) {
-    await solitario.voltearLaReserva()
+    await solitario.robarDeLaReserva()
   }
 }
 
@@ -464,17 +467,13 @@ export class Solitario extends App {
 
   /** Voltea la siguiente carta de la reserva, sobre los descartes:  los descartes de vuelta a la reserva cuando está vacía */
   async robarDeLaReserva() {
+    // - un clic en la reserva, un paso para deshacer;  el del reparto ninguno, pues empieza el juego
     if (this.reserva.isEmpty) this.rehacerLaReserva()
     const it = this.reserva.lastItem
     it?.turnFaceUp()
     // lo que tarda su giro (styles.css), así se voltea antes de moverse
     await core.pauseFor(300, "msec")
     this.descartes.append(it)
-  }
-
-  /** Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es */
-  async voltearLaReserva() {
-    await this.robarDeLaReserva()
   }
 
   /** Junta cada carta en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha */
@@ -555,6 +554,49 @@ export class Solitario extends App {
     carta.levantada = false
   }
 
+  draw() {
+    // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra sus jugadas
+    return [
+      h("es-segmento", { invertido: true, unir: "arriba" },
+        h("es-barra-herramientas", { class: "GameBar", "aria-label": "Juego" },
+          h("es-texto", { slot: "titulo", tamano: "grande", extranegrita: true }, "Solitario Encanto"),
+          h("es-botones", { slot: "centro", relleno: "compact" },
+            core.drawAction(this, "jugarSolo"),
+            core.drawAction(this, "hacerTrampa"),
+            core.drawAction(this, "reiniciarElJuego")
+          ),
+          h("es-botones", { slot: "centro", relleno: "compact" },
+            core.drawAction(this, "undo", { "icon-only": true }),
+            core.drawAction(this, "redo", { "icon-only": true })
+          ),
+          h("es-texto", { slot: "derecha" },
+            "Movimientos: ",
+            () => this.movimientos,
+            "  ·  Puntos: ",
+            () => this.puntuación,
+            () => this.pista
+          )
+        )
+      ),
+      h("es-contenedor", { relleno: "pequeño", columnas: "7", separacion: "xs" },
+        core.drawContextMenu(this, ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "-", "undo", "redo"]),
+        h("test-project-pila-de-reserva", { id: "reserva" }),
+        h("test-project-pila-de-descartes", { id: "descartes" }),
+        h("es-columna"),
+        h("test-project-fundacion", { id: "tréboles" }),
+        h("test-project-fundacion", { id: "diamantes" }),
+        h("test-project-fundacion", { id: "corazones" }),
+        h("test-project-fundacion", { id: "espadas" }),
+        h("test-project-columna", { id: "C1" }),
+        h("test-project-columna", { id: "C2" }),
+        h("test-project-columna", { id: "C3" }),
+        h("test-project-columna", { id: "C4" }),
+        h("test-project-columna", { id: "C5" }),
+        h("test-project-columna", { id: "C6" }),
+        h("test-project-columna", { id: "C7" })
+      )
+    ]
+  }
   // <número "movimientos"/>
   static { this.declareProp("movimientos", { type: "number" }) }
   get movimientos() { return this.getProp("movimientos") }
@@ -619,70 +661,20 @@ export class Solitario extends App {
   static { this.declareProp("C7", { init: () => new Columna({ id: "C7" }), early: true }) }
   get C7() { return this.getProp("C7") }
   set C7(value) { this.setProp("C7", value) }
-  draw() {
-    // Su barra, luego sus pilas, siete por línea, la tercera celda vacía;  un clic derecho en la mesa muestra sus jugadas
-    return [
-      h("es-segmento", { invertido: true, unir: "arriba" },
-        h("es-barra-herramientas", { class: "GameBar", "aria-label": "Juego" },
-          h("es-texto", { slot: "titulo", tamano: "grande", extranegrita: true }, "Solitario Encanto"),
-          h("es-botones", { slot: "centro", relleno: "compact" },
-            core.drawAction(this, "jugarSolo"),
-            core.drawAction(this, "hacerTrampa"),
-            core.drawAction(this, "reiniciarElJuego")
-          ),
-          h("es-botones", { slot: "centro", relleno: "compact" },
-            core.drawAction(this, "undo", { "icon-only": true }),
-            core.drawAction(this, "redo", { "icon-only": true })
-          ),
-          h("es-texto", { slot: "derecha" },
-            "Movimientos: ",
-            () => this.movimientos,
-            "  ·  Puntos: ",
-            () => this.puntuación,
-            () => this.pista
-          )
-        )
-      ),
-      h("es-contenedor", { relleno: "pequeño", columnas: "7", separacion: "xs" },
-        core.drawContextMenu(this, ["jugarSolo", "hacerTrampa", "reiniciarElJuego", "-", "undo", "redo"]),
-        h("test-project-pila-de-reserva", { id: "reserva" }),
-        h("test-project-pila-de-descartes", { id: "descartes" }),
-        h("es-columna"),
-        h("test-project-fundacion", { id: "tréboles" }),
-        h("test-project-fundacion", { id: "diamantes" }),
-        h("test-project-fundacion", { id: "corazones" }),
-        h("test-project-fundacion", { id: "espadas" }),
-        h("test-project-columna", { id: "C1" }),
-        h("test-project-columna", { id: "C2" }),
-        h("test-project-columna", { id: "C3" }),
-        h("test-project-columna", { id: "C4" }),
-        h("test-project-columna", { id: "C5" }),
-        h("test-project-columna", { id: "C6" }),
-        h("test-project-columna", { id: "C7" })
-      )
-    ]
-  }
 }
 export const solitario = new Solitario()
-
-// Cada uno se detiene un momento, así el reparto se anima
 core.describeAction(Solitario, "rehacerLaReserva", { title: "Rehacer La Reserva", undoneAs: "Rehacer La Reserva" })
-core.describeAction(Solitario, "robarDeLaReserva", { title: "Robar De La Reserva", undoneAs: "Robar De La Reserva" })
-core.describeAction(Solitario, "voltearLaReserva", { title: "Voltear La Reserva", undoneAs: "Voltear carta" })
+core.describeAction(Solitario, "robarDeLaReserva", { title: "Robar De La Reserva", undoneAs: "Voltear carta" })
 core.describeAction(Solitario, "repartirLasCartas", { title: "Repartir Las Cartas", undoneAs: "Repartir Las Cartas" })
-
-// Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
 core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar", shortcuts: ["N"], undoneAs: "Reiniciar" })
 core.describeAction(Solitario, "jugarSolo", { title: "Jugar solo", shortcuts: ["A"], undoneAs: "Jugar solo" })
 core.describeAction(Solitario, "hacerTrampa", { title: "Trampa", shortcuts: ["C"], undoneAs: "Trampa" })
 
+// Cada uno se detiene un momento, así el reparto se anima
+
+// Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres
+
 core.heading("Jugar una carta")
-core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar carta" })
-
-core.describeAction(Carta, "ponerEnPila", { title: "Poner Una Carta En Una Pila", undoneAs: "Mover carta" })
-
-core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar Los Puntos De Una Carta En Una Pila", undoneAs: "Contar Los Puntos De Una Carta En Una Pila" })
-
 // los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
 // solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero
 

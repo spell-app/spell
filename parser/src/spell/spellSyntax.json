@@ -2194,13 +2194,13 @@
               "example": "a \"card\" is a thing\na \"pile\" is a list of cards\nsolitaire is an app\n\t\"stock\" is a new pile\n\tto play a card\n\t\tprint the stock",
               "outputs": {
                 "js": {
-                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"stock\", { init: () => new Pile({ id: \"stock\" }), early: true }) }\n  get stock() { return this.getProp(\"stock\") }\n  set stock(value) { this.setProp(\"stock\", value) }\n}\nexport const solitaire = new Solitaire()\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })"
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })\nexport class Pile extends List {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"stock\", { init: () => new Pile({ id: \"stock\" }), early: true }) }\n  get stock() { return this.getProp(\"stock\") }\n  set stock(value) { this.setProp(\"stock\", value) }\n}\nexport const solitaire = new Solitaire()"
                 },
                 "ts": {
-                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pile({ id: \"stock\" }), early: true })\n  accessor stock!: Pile\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitaire\", [\n    { name: \"stock\", kind: \"json\", description: \"Its stock.\" }\n  ])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })"
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\ncore.describeAction(Card, \"play\", { title: \"Play A Card\", undoneAs: \"Play A Card\" })\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pile({ id: \"stock\" }), early: true })\n  accessor stock!: Pile\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitaire\", [\n    { name: \"stock\", kind: \"json\", description: \"Its stock.\" }\n  ])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    def play(self) -> None:\n        core.console.log(solitaire.stock)\n\nclass Pile(List):\n    item_type = Card\n\nclass Solitaire(App):\n    element_tag = \"syntax-block-app\"\n\n    stock = prop(init=lambda: Pile(id=\"stock\"), early=True)\n\nsolitaire = Solitaire()\ncore.describe_action(Card, \"play\", {\"title\": \"Play A Card\", \"undone_as\": \"Play A Card\"})"
+                  "code": "class Card(Thing):\n    def play(self) -> None:\n        core.console.log(solitaire.stock)\n\ncore.describe_action(Card, \"play\", {\"title\": \"Play A Card\", \"undone_as\": \"Play A Card\"})\n\nclass Pile(List):\n    item_type = Card\n\nclass Solitaire(App):\n    element_tag = \"syntax-block-app\"\n\n    stock = prop(init=lambda: Pile(id=\"stock\"), early=True)\n\nsolitaire = Solitaire()"
                 }
               }
             }
@@ -6547,7 +6547,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 34,
+          "line": 35,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {

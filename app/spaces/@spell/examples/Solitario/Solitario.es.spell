@@ -29,8 +29,9 @@ solitario es una aplicación
 		invertir las cartas
 		agregar cada carta de las cartas a la reserva
 		voltear cada carta de la reserva boca abajo
-	para robar de la reserva
+	para robar de la reserva, deshacible como "Voltear carta"
 		// Voltea la siguiente carta de la reserva, sobre los descartes:  los descartes de vuelta a la reserva cuando está vacía
+		// - un clic en la reserva, un paso para deshacer;  el del reparto ninguno, pues empieza el juego
 		si la reserva está vacía
 			rehacer la reserva
 		obtener la última carta de la reserva
@@ -38,10 +39,6 @@ solitario es una aplicación
 		// lo que tarda su giro (styles.css), así se voltea antes de moverse
 		pausar 300 mseg
 		agregar eso a los descartes
-	para voltear la reserva
-		// Un clic en la reserva vacía:  un paso para deshacer, donde el del reparto no lo es
-		deshacible como "Voltear carta"
-		robar de la reserva
 	para repartir las cartas
 		// Junta cada carta en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha
 		para carta en el mazo
@@ -224,7 +221,7 @@ una "pila de reserva" es una pila con disposición "apilada"
 		<texto>🂠</texto>
 	al clic
 		// Vacía:  un clic vuelve a voltear los descartes;  un clic en una de sus cartas es de la carta
-		voltear la reserva
+		robar de la reserva
 
 una "pila de descartes" es una pila con disposición "apilada"
 	// Adonde van las cartas de la reserva al voltearse

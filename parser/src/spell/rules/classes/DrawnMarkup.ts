@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Through the folder:  read only when called, once the folder has loaded
 import { DrawIt } from "spell/parser/spell/rules/classes"
@@ -99,10 +100,10 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
    * - a value:  `static { this.declareProp("score", { type: "number" }) }`
    * - What `draw_it` and English's `to draw it` (a method named `draw`) write beside the drawing.
    */
-  static membersDeclared(body: P.Match | undefined, type: P.ASTTypeExpression): P.ASTReactiveProperty[] {
+  static membersDeclared(body: P.Match | undefined, type: P.ASTTypeExpression): P.ASTStatement[] {
     if (!body) return []
     const seen = new Set<string>()
-    const members: P.ASTReactiveProperty[] = []
+    const members: P.ASTStatement[] = []
     const lines: P.Match[] = []
     const gather = (each: P.Match) => {
       if (each.is(DrawnMarkup)) lines.push(each)
@@ -113,7 +114,10 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
       for (const { declares, at } of DrawnMarkup.declaredIn(line)) {
         if (seen.has(declares.name)) continue
         seen.add(declares.name)
-        members.push(DrawnMarkup.memberAST(declares, at, type))
+        // its `SPELL: DECLARES` comment, as its own line would have:  the Inspector, hover and other projects read it
+        const declared = SP.SpellDeclarations.commentFor(at)
+        const member = DrawnMarkup.memberAST(declares, at, type)
+        members.push(declared ? new P.ASTStatementGroup(at, { statements: [declared, member] }) : member)
       }
     }
     return members
@@ -128,13 +132,18 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
     }
     // its id, the member's name, then its tag's other attributes:  `{ id: "clubs", suit: "clubs" }`
     const id = new P.ASTStringLiteral(at, { value: declares.name, quote: '"' })
-    const props = new P.ASTObjectLiteral(at, { properties: [new P.ASTObjectLiteralProperty(at, { property: "id", value: id })] })
+    const props = new P.ASTObjectLiteral(at, {
+      properties: [new P.ASTObjectLiteralProperty(at, { property: "id", value: id })]
+    })
     for (const attribute of (at.data as { attributes?: Array<P.Match | undefined> }).attributes ?? []) {
       const ast = attribute?.AST
       if (!(ast instanceof P.ASTJSXAttribute) || ast.name === "id" || !(ast.value instanceof P.ASTExpression)) continue
       props.properties.push(new P.ASTObjectLiteralProperty(attribute!, { property: ast.name, value: ast.value }))
     }
-    const made = new P.ASTNewInstanceExpression(at, { type: new P.ASTTypeExpression(at, { name: declares.view! }), props })
+    const made = new P.ASTNewInstanceExpression(at, {
+      type: new P.ASTTypeExpression(at, { name: declares.view! }),
+      props
+    })
     return new P.ASTReactiveProperty(at, { type, property: declares.name, initializer: made })
   }
 

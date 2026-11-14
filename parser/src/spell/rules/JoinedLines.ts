@@ -93,7 +93,11 @@ export class JoinedLines {
       continued = only
       if (rest.length) body = JoinedLines.blockOf(below, rest)
     }
-    const joined = JoinedLines.lineOf(line, [...JoinedLines.spaced(JoinedLines.codeOf(line)), ...continued.tokens], continued)
+    const joined = JoinedLines.lineOf(
+      line,
+      [...JoinedLines.spaced(JoinedLines.codeOf(line)), ...continued.tokens],
+      continued
+    )
     if (body && JoinedLines.endsWithJoin(scope, continued)) return JoinedLines.joinBelow(scope, joined, body)
     return body ? [joined, body] : [joined]
   }
@@ -167,14 +171,21 @@ export class JoinedLines {
 
   /** Is `item` a line of code that may be a part:  a line, not blank, with no comment. */
   private static isPart(item: P.LineToken | P.BlockToken | undefined): item is P.LineToken {
-    return item instanceof P.LineToken && item.tokens.length > 0 && !item.tokens.some((it) => it instanceof P.CommentToken)
+    return (
+      item instanceof P.LineToken && item.tokens.length > 0 && !item.tokens.some((it) => it instanceof P.CommentToken)
+    )
   }
 
   /** `line`'s tokens, a zero-width `(` before them and `)` after. */
   private static inParentheses(line: P.LineToken): P.Token[] {
     const { tokens } = line
     const at = (token: P.Token, where: "start" | "end") =>
-      new P.SymbolToken({ start: where === "start" ? token.start : token.end, raw: "", value: where === "start" ? "(" : ")", whitespace: " " })
+      new P.SymbolToken({
+        start: where === "start" ? token.start : token.end,
+        raw: "",
+        value: where === "start" ? "(" : ")",
+        whitespace: " "
+      })
     return [at(tokens[0]!, "start"), ...tokens, at(tokens.at(-1)!, "end")]
   }
 

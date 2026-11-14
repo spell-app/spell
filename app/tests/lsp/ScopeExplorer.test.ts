@@ -102,8 +102,8 @@ describe("ScopeExplorer", () => {
     expect(details(card).line).toEqual([declared, outlineEnd(CARD_TEXT, declared)])
     expect(card.members.map(({ name, kind }) => `${kind} ${name}`)).toMatchSnapshot()
     const suit = card.members.find((member) => member.name === "suit")!
-    // its line, and its alias's under it
-    expect(details(suit).line).toEqual([lineOf(CARD_TEXT, SUIT), lineOf(CARD_TEXT, SUIT) + 1])
+    // its line
+    expect(details(suit).line).toEqual(lineOf(CARD_TEXT, SUIT))
     // in its node's file, so no `uri` of its own
     expect(details(suit).uri).toBeUndefined()
     expect(find(tree, "suit").uri).toBe(cardUri)
@@ -179,7 +179,7 @@ describe("ScopeExplorer", () => {
 
   test("a node lists the rules its statement made", () => {
     expect({
-      "is a (suit)": details("is a (suit)").rules,
+      "is a face card": details("is a face card").rules,
       "play a card": details("play a card").rules
     }).toMatchSnapshot()
   })
@@ -307,7 +307,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   test("its types are from its sources:  docs and locations", () => {
     const suit = find(tree, "Card").members.find((member) => member.name === "suit")!
     expect(find(tree, "suit").uri).toMatch(/\/lib\/Card\.spell$/)
-    expect(explorer.details(app, suit.path)?.line).toEqual([lineOf(CARD_TEXT, SUIT), lineOf(CARD_TEXT, SUIT) + 1])
+    expect(explorer.details(app, suit.path)?.line).toEqual(lineOf(CARD_TEXT, SUIT))
   })
 
   test("our types inherit from its OWN types, from its sources -- with their docs and locations", () => {
@@ -414,8 +414,8 @@ describe("ScopeExplorer scope packs", () => {
     expect(pack.entries[0]).toEqual({ path: "project:Solitaire" })
     expect(pack.entries.every((entry) => !("children" in entry) && !("members" in entry))).toBe(true)
     const suit = pack.entries.find((entry) => entry.path.endsWith("/property:suit"))!
-    expect(suit).toMatchObject({ line: [lineOf(CARD_TEXT, SUIT), lineOf(CARD_TEXT, SUIT) + 1] })
-    const state = pack.entries.find((entry) => entry.path.endsWith("/type:Card/property:state"))!
+    expect(suit).toMatchObject({ line: lineOf(CARD_TEXT, SUIT) })
+    const state = pack.entries.find((entry) => /\/type:Card\/property:short.name$/.test(entry.path))!
     expect(state.description).toBe(STATE_DESCRIPTION)
     // shown from its file and the compiled output, NOT kept in the pack
     expect(suit).not.toHaveProperty("spell")

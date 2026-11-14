@@ -224,14 +224,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.agregarAPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "agregarAPile", { title: "Agregar (una Card) A (una Pile)", undoneAs: "Agregar (una Card) A (una Pile)" })'
+            'core.describeAction(Card, "agregarAPile", { title: "Agregar Una Card A Una Pile", undoneAs: "Agregar Una Card A Una Pile" })'
           ],
           ts: [
             "export interface Card { agregarAPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.agregarAPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "agregarAPile", { title: "Agregar (una Card) A (una Pile)", undoneAs: "Agregar (una Card) A (una Pile)" })'
+            'core.describeAction(Card, "agregarAPile", { title: "Agregar Una Card A Una Pile", undoneAs: "Agregar Una Card A Una Pile" })'
           ]
         },
         {
@@ -241,14 +241,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.agregarAPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "agregarAPile", { title: "Agregar (una Card) A (una Pile)", undoneAs: "Agregar (una Card) A (una Pile)" })'
+            'core.describeAction(Card, "agregarAPile", { title: "Agregar Una Card A Una Pile", undoneAs: "Agregar Una Card A Una Pile" })'
           ],
           ts: [
             "export interface Card { agregarAPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.agregarAPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "agregarAPile", { title: "Agregar (una Card) A (una Pile)", undoneAs: "Agregar (una Card) A (una Pile)" })'
+            'core.describeAction(Card, "agregarAPile", { title: "Agregar Una Card A Una Pile", undoneAs: "Agregar Una Card A Una Pile" })'
           ]
         },
         {
@@ -258,14 +258,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrar = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ],
           ts: [
             "export interface Card { mostrar(): any /* spell: type unknown */ }",
             "Card.prototype.mostrar = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ]
         },
         {
@@ -275,14 +275,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrar = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ],
           ts: [
             "export interface Card { mostrar(): any /* spell: type unknown */ }",
             "Card.prototype.mostrar = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ]
         },
         {
@@ -292,14 +292,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrar = function () {",
             "  return core.console.log(this.name)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ],
           ts: [
             "export interface Card { mostrar(): any /* spell: type unknown */ }",
             "Card.prototype.mostrar = function (this: Card) {",
             "  return core.console.log(this.name)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ]
         },
         {
@@ -309,14 +309,14 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrar = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ],
           ts: [
             "export interface Card { mostrar(): any /* spell: type unknown */ }",
             "Card.prototype.mostrar = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ]
         },
         {
@@ -328,7 +328,7 @@ methodsEs.addRule(ToDoSomething, {
             "  const it = this.name",
             "  core.console.log(it)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ],
           ts: [
             "export interface Card { mostrar(): any /* spell: type unknown */ }",
@@ -337,7 +337,7 @@ methodsEs.addRule(ToDoSomething, {
             "  const it = this.name",
             "  core.console.log(it)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (thing Como Una Card)", undoneAs: "Mostrar (thing Como Una Card)" })'
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Thing Como Una Card", undoneAs: "Mostrar Thing Como Una Card" })'
           ]
         },
         {
@@ -432,7 +432,7 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrarEnPile = function (pile) {",
             "  return core.console.log(1)",
             "}",
-            'core.describeAction(Card, "mostrarEnPile", { title: "Mostrar (una Card) En (una Pile)", undoneAs: "Mostrar (una Card) En (una Pile)" })',
+            'core.describeAction(Card, "mostrarEnPile", { title: "Mostrar Una Card En Una Pile", undoneAs: "Mostrar Una Card En Una Pile" })',
             ";(new Joker()).mostrarEnPile(new Pile())",
             '/* PARSE ERROR: No entiendo "mostrar una nueva card en una nueva card" */'
           ],
@@ -442,7 +442,7 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrarEnPile = function (this: Card, pile: Pile) {",
             "  return core.console.log(1)",
             "}",
-            'core.describeAction(Card, "mostrarEnPile", { title: "Mostrar (una Card) En (una Pile)", undoneAs: "Mostrar (una Card) En (una Pile)" })',
+            'core.describeAction(Card, "mostrarEnPile", { title: "Mostrar Una Card En Una Pile", undoneAs: "Mostrar Una Card En Una Pile" })',
             ";(new Joker()).mostrarEnPile(new Pile())",
             '/* PARSE ERROR: No entiendo "mostrar una nueva card en una nueva card" */'
           ]
@@ -454,7 +454,7 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrar = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (una Card)", undoneAs: "Mostrar (una Card)" })',
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Una Card", undoneAs: "Mostrar Una Card" })',
             ";(new Card()).mostrar()"
           ],
           ts: [
@@ -462,7 +462,7 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.mostrar = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "mostrar", { title: "Mostrar (una Card)", undoneAs: "Mostrar (una Card)" })',
+            'core.describeAction(Card, "mostrar", { title: "Mostrar Una Card", undoneAs: "Mostrar Una Card" })',
             ";(new Card()).mostrar()"
           ]
         },
@@ -476,7 +476,7 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.jugarEnPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "jugarEnPile", { title: "Jugar (una Card) En (una Pile)", undoneAs: "Jugar (una Card) En (una Pile)" })',
+            'core.describeAction(Card, "jugarEnPile", { title: "Jugar Una Card En Una Pile", undoneAs: "Jugar Una Card En Una Pile" })',
             ";(new Card()).jugarEnPile(new Pile())"
           ],
           ts: [
@@ -484,7 +484,7 @@ methodsEs.addRule(ToDoSomething, {
             "Card.prototype.jugarEnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "jugarEnPile", { title: "Jugar (una Card) En (una Pile)", undoneAs: "Jugar (una Card) En (una Pile)" })',
+            'core.describeAction(Card, "jugarEnPile", { title: "Jugar Una Card En Una Pile", undoneAs: "Jugar Una Card En Una Pile" })',
             ";(new Card()).jugarEnPile(new Pile())"
           ]
         },

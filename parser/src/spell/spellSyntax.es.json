@@ -2241,13 +2241,13 @@
               "example": "una \"carta\" es una cosa\nuna \"pila\" es una lista de cartas\nsolitario es una aplicación\n\t\"reserva\" es una nueva pila\n\tpara jugar una carta\n\t\timprimir la reserva",
               "outputs": {
                 "js": {
-                  "code": "export class Carta extends Thing {\n  jugar() {\n    core.console.log(solitario.reserva)\n  }\n}\nexport class Pila extends List {\n  static instanceType = Carta\n}\nexport class Solitario extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"reserva\", { init: () => new Pila({ id: \"reserva\" }), early: true }) }\n  get reserva() { return this.getProp(\"reserva\") }\n  set reserva(value) { this.setProp(\"reserva\", value) }\n}\nexport const solitario = new Solitario()\ncore.describeAction(Carta, \"jugar\", { title: \"Jugar Una Carta\", undoneAs: \"Jugar Una Carta\" })"
+                  "code": "export class Carta extends Thing {\n  jugar() {\n    core.console.log(solitario.reserva)\n  }\n}\ncore.describeAction(Carta, \"jugar\", { title: \"Jugar Una Carta\", undoneAs: \"Jugar Una Carta\" })\nexport class Pila extends List {\n  static instanceType = Carta\n}\nexport class Solitario extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"reserva\", { init: () => new Pila({ id: \"reserva\" }), early: true }) }\n  get reserva() { return this.getProp(\"reserva\") }\n  set reserva(value) { this.setProp(\"reserva\", value) }\n}\nexport const solitario = new Solitario()"
                 },
                 "ts": {
-                  "code": "export class Carta extends Thing {\n  jugar() {\n    core.console.log(solitario.reserva)\n  }\n}\nexport class Pila extends List<Carta> {\n  static instanceType = Carta\n}\nexport class Solitario extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pila({ id: \"reserva\" }), early: true })\n  accessor reserva!: Pila\n}\n\nexport class SolitarioElement extends SpellElement<Solitario> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitario\", [\n    { name: \"reserva\", kind: \"json\", description: \"Its reserva.\" }\n  ])\n}\ncore.useElement(Solitario, SolitarioElement)\nexport const solitario = new Solitario()\ncore.describeAction(Carta, \"jugar\", { title: \"Jugar Una Carta\", undoneAs: \"Jugar Una Carta\" })"
+                  "code": "export class Carta extends Thing {\n  jugar() {\n    core.console.log(solitario.reserva)\n  }\n}\ncore.describeAction(Carta, \"jugar\", { title: \"Jugar Una Carta\", undoneAs: \"Jugar Una Carta\" })\nexport class Pila extends List<Carta> {\n  static instanceType = Carta\n}\nexport class Solitario extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pila({ id: \"reserva\" }), early: true })\n  accessor reserva!: Pila\n}\n\nexport class SolitarioElement extends SpellElement<Solitario> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitario\", [\n    { name: \"reserva\", kind: \"json\", description: \"Its reserva.\" }\n  ])\n}\ncore.useElement(Solitario, SolitarioElement)\nexport const solitario = new Solitario()"
                 },
                 "py": {
-                  "code": "class Carta(Thing):\n    def jugar(self) -> None:\n        core.console.log(solitario.reserva)\n\nclass Pila(List):\n    item_type = Carta\n\nclass Solitario(App):\n    element_tag = \"syntax-block-app\"\n\n    reserva = prop(init=lambda: Pila(id=\"reserva\"), early=True)\n\nsolitario = Solitario()\ncore.describe_action(Carta, \"jugar\", {\"title\": \"Jugar Una Carta\", \"undone_as\": \"Jugar Una Carta\"})"
+                  "code": "class Carta(Thing):\n    def jugar(self) -> None:\n        core.console.log(solitario.reserva)\n\ncore.describe_action(Carta, \"jugar\", {\"title\": \"Jugar Una Carta\", \"undone_as\": \"Jugar Una Carta\"})\n\nclass Pila(List):\n    item_type = Carta\n\nclass Solitario(App):\n    element_tag = \"syntax-block-app\"\n\n    reserva = prop(init=lambda: Pila(id=\"reserva\"), early=True)\n\nsolitario = Solitario()"
                 }
               }
             }
@@ -6530,7 +6530,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 34,
+          "line": 35,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {

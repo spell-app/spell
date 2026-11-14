@@ -89,7 +89,7 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (solitaire.stock.includes(this)) await solitaire.turnAStockCard()
+    if (solitaire.stock.includes(this)) await solitaire.playFromTheStock()
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
@@ -130,6 +130,9 @@ export class Card extends TwoSidedView {
     return Pile.ownerOf(this)
   }
 }
+core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
+core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
+core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count The Points For A Card On A Pile", undoneAs: "Count The Points For A Card On A Pile" })
 // Ace is low:  ace = 1 ... king = 13
 
 // What a person, test or console calls it
@@ -245,7 +248,7 @@ export class StockPile extends Pile {
   }
 
   async onClick(event) {
-    await solitaire.turnAStockCard()
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -329,6 +332,42 @@ export class Solitaire extends App {
     core.holdWhile(() => this.restartTheGame())
   }
 
+  draw() {
+    return [
+      h("ui-segment", { inverted: true, attach: "top" },
+        h("ui-toolbar", { class: "GameBar", "aria-label": "Game" },
+          h("ui-text", { slot: "title", size: "large", heavy: true }, "Solitaire"),
+          h("ui-buttons", { slot: "center", padding: "compact" },
+            core.drawAction(this, "autoPlay"),
+            core.drawAction(this, "cheat"),
+            core.drawAction(this, "restartTheGame")
+          ),
+          h("ui-buttons", { slot: "center", padding: "compact" },
+            core.drawAction(this, "undo", { "icon-only": true }),
+            core.drawAction(this, "redo", { "icon-only": true })
+          ),
+          h("ui-text", { slot: "right" }, "Score: ", () => this.score)
+        )
+      ),
+      h("ui-container", { padding: "small", columns: "7", spacing: "xs" },
+        h("test-project-stock-pile", { id: "stock" }),
+        h("test-project-discard-pile", { id: "discards" }),
+        h("spacer"),
+        h("test-project-foundation", { id: "clubs" }),
+        h("test-project-foundation", { id: "diamonds" }),
+        h("test-project-foundation", { id: "hearts" }),
+        h("test-project-foundation", { id: "spades" }),
+        h("test-project-column", { id: "C1" }),
+        h("test-project-column", { id: "C2" }),
+        h("test-project-column", { id: "C3" }),
+        h("test-project-column", { id: "C4" }),
+        h("test-project-column", { id: "C5" }),
+        h("test-project-column", { id: "C6" }),
+        h("test-project-column", { id: "C7" })
+      ),
+      core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])
+    ]
+  }
   // <number "score"/>
   static { this.declareProp("score", { type: "number" }) }
   get score() { return this.getProp("score") }
@@ -385,42 +424,6 @@ export class Solitaire extends App {
   static { this.declareProp("C7", { init: () => new Column({ id: "C7" }), early: true }) }
   get C7() { return this.getProp("C7") }
   set C7(value) { this.setProp("C7", value) }
-  draw() {
-    return [
-      h("ui-segment", { inverted: true, attach: "top" },
-        h("ui-toolbar", { class: "GameBar", "aria-label": "Game" },
-          h("ui-text", { slot: "title", size: "large", heavy: true }, "Solitaire"),
-          h("ui-buttons", { slot: "center", padding: "compact" },
-            core.drawAction(this, "autoPlay"),
-            core.drawAction(this, "cheat"),
-            core.drawAction(this, "restartTheGame")
-          ),
-          h("ui-buttons", { slot: "center", padding: "compact" },
-            core.drawAction(this, "undo", { "icon-only": true }),
-            core.drawAction(this, "redo", { "icon-only": true })
-          ),
-          h("ui-text", { slot: "right" }, "Score: ", () => this.score)
-        )
-      ),
-      h("ui-container", { padding: "small", columns: "7", spacing: "xs" },
-        h("test-project-stock-pile", { id: "stock" }),
-        h("test-project-discard-pile", { id: "discards" }),
-        h("spacer"),
-        h("test-project-foundation", { id: "clubs" }),
-        h("test-project-foundation", { id: "diamonds" }),
-        h("test-project-foundation", { id: "hearts" }),
-        h("test-project-foundation", { id: "spades" }),
-        h("test-project-column", { id: "C1" }),
-        h("test-project-column", { id: "C2" }),
-        h("test-project-column", { id: "C3" }),
-        h("test-project-column", { id: "C4" }),
-        h("test-project-column", { id: "C5" }),
-        h("test-project-column", { id: "C6" }),
-        h("test-project-column", { id: "C7" })
-      ),
-      core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])
-    ]
-  }
 
   async restartTheGame() {
     this.score = 0
@@ -451,17 +454,13 @@ export class Solitaire extends App {
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
   async playFromTheStock() {
+    // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
     if (this.stock.isEmpty) this.resetTheStock()
     const it = this.stock.lastItem
     it?.turnFaceUp()
     // as long as its flip takes (styles.css), so it turns over before it moves
     await core.pauseFor(300, "msec")
     this.discards.append(it)
-  }
-
-  /** a click on the stock:  one step to undo, where the deal's own turn isn't */
-  async turnAStockCard() {
-    await this.playFromTheStock()
   }
 
   /** The discards, turned over, back into the stock */
@@ -531,26 +530,12 @@ export class Solitaire extends App {
   }
 }
 export let solitaire
-
 core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["R"], undoneAs: "Restart" })
-
 core.describeAction(Solitaire, "dealTheCards", { title: "Deal The Cards", undoneAs: "Deal The Cards" })
-
-core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Play From The Stock" })
-
-core.describeAction(Solitaire, "turnAStockCard", { title: "Turn A Stock Card", undoneAs: "Turn Card" })
-
+core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Turn Card" })
 core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
-
-core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
-
-core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
-
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], undoneAs: "Auto Play" })
-
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
-
-core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count The Points For A Card On A Pile", undoneAs: "Count The Points For A Card On A Pile" })
 
 // play the card on click if it is a legal move
 

@@ -620,11 +620,6 @@ export class MethodDefinition<
           })
         )
       } else {
-        // English's `to draw it`:  what its tags declare, as members beside it (epic `language` P55, Q52)
-        if (methodName === "draw") {
-          const type = new P.ASTTypeExpression(match, { name: typeName })
-          output.push(...DrawnMarkup.membersDeclared(this.getBody(match), type))
-        }
         output.push(
           new P.ASTPropertyDefinition(match, {
             type: typeName,
@@ -633,6 +628,11 @@ export class MethodDefinition<
           })
         )
         output.push(...this.describedAction(match, typeName, methodName))
+        // English's `to draw it`:  what its tags declare, as members after it (epic `language` P55, Q52)
+        if (methodName === "draw") {
+          const type = new P.ASTTypeExpression(match, { name: typeName })
+          output.push(...DrawnMarkup.membersDeclared(this.getBody(match), type))
+        }
       }
     }
     // No instance type: create as a loose function -- `export`ed at file level, so another project can import it.
@@ -680,7 +680,11 @@ export class MethodDefinition<
     if (!details) return []
     const signature = (action.groups as { signature?: P.Match }).signature
     // its title by default:  its words as written, in Initial Caps -- `auto play` is `Auto Play` (epic `language` P48)
-    const words = `${signature?.inputText ?? ""}`.trim().replace(/^"(.*)"$/, "$1")
+    // its blanks' parentheses left out:  `to put (a card) on (a pile)` is `Put A Card On A Pile` (epic `language` P55)
+    const words = `${signature?.inputText ?? ""}`
+      .trim()
+      .replace(/^"(.*)"$/, "$1")
+      .replace(/[()]/g, "")
     const description: Record<string, P.ASTDescriptionValue> = { title: initialCaps(words) }
     if (details.shortcuts.length) description.shortcuts = details.shortcuts
     if (details.icon) description.icon = details.icon

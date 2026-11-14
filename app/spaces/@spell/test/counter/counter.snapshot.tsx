@@ -56,7 +56,6 @@ export class CounterElement extends SpellElement<Counter> {
   }
 }
 core.useElement(Counter, CounterElement)
-
 core.describeAction(Counter, "increment", { title: "Increment It", undoneAs: "Increment It" })
 
 core.heading("Tests")

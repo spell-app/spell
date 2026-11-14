@@ -58,6 +58,7 @@ describe("grammar probes", () => {
       "Card.prototype.removeOfPile = function (pile) {
         return core.console.log(1)
       }
+      core.describeAction(Card, "removeOfPile", { title: "Remove A Card Of A Pile", undoneAs: "Remove A Card Of A Pile" })
       card.removeOfPile(pile)"
     `)
   })
@@ -119,9 +120,11 @@ describe("grammar probes", () => {
       "Card.prototype.putOnPile = function (pile) {
         return core.console.log(1)
       }
+      core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Put A Card On A Pile" })
       Chip.prototype.putOnPot = function (pot) {
         return core.console.log(2)
       }
+      core.describeAction(Chip, "putOnPot", { title: "Put A Chip On A Pot", undoneAs: "Put A Chip On A Pot" })
       chip.putOnPot(pot)"
     `)
   })
@@ -135,6 +138,7 @@ describe("grammar probes", () => {
       "Card.prototype.addToPile = function (pile) {
         return core.console.log(1)
       }
+      core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })
       deck.append(card)"
     `)
   })
@@ -147,7 +151,8 @@ describe("grammar probes", () => {
     expect(probe("to give a card to a pile: print 1")).toMatchInlineSnapshot(`
       "Card.prototype.giveToPile = function (pile) {
         return core.console.log(1)
-      }"
+      }
+      core.describeAction(Card, "giveToPile", { title: "Give A Card To A Pile", undoneAs: "Give A Card To A Pile" })"
     `)
   })
 
@@ -204,7 +209,7 @@ describe("grammar probes", () => {
   test("P8c  Solitaire:166 without its parens", () => {
     // a card, as in Solitaire:  `x` here is a number, and a card's phrase now refuses one (`SuffixLeft`)
     expect(probe("if the card is a king and the card is the first card of the pile return")).toMatchInlineSnapshot(
-      `"if (card.isARank("king") && card === pile.firstItem) return"`
+      `"if (card.rank === "king" && card === pile.firstItem) return"`
     )
   })
 
@@ -277,6 +282,7 @@ describe("grammar probes", () => {
       "Card.prototype.giveToPile = function (pile) {
         return core.console.log(1)
       }
+      core.describeAction(Card, "giveToPile", { title: "Give A Card To A Pile", undoneAs: "Give A Card To A Pile" })
       card.giveToPile(pile)"
     `)
   })
@@ -549,6 +555,7 @@ describe("grammar probes", () => {
       Card.prototype.stashInPile = function (pile) {
         this.pile = pile
       }
+      core.describeAction(Card, "stashInPile", { title: "Stash A Card In A Pile", undoneAs: "Stash A Card In A Pile" })
       Object.defineProperty(Card.prototype, "pile", {
         get() {
           return Pile.ownerOf(this)

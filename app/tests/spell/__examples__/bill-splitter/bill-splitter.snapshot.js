@@ -205,7 +205,6 @@ export class BillSplitter extends App {
   }
 }
 export const billSplitter = new BillSplitter()
-
 core.describeAction(BillSplitter, "addSomeone", { title: "Add Someone", icon: "plus", undoneAs: "Add Someone" })
 // -----------
 if (!core.isCarryingOver) billSplitter.start()

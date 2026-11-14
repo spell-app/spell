@@ -92,7 +92,6 @@ export class CartaElement extends SpellElement<Carta> {
 }
 core.useElement(Carta, CartaElement)
 
-core.heading("Una pila, y una columna")
 /** Una pila, y una columna */
 export class Pila extends ViewableList<Carta> {
   static instanceType = Carta
@@ -111,7 +110,6 @@ export class PilaElement extends SpellElement<Pila> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-pila", "pila", [])
 }
 core.useElement(Pila, PilaElement)
-/** una carta está en una sola pila a la vez:  ponerla en otra la quita de esta */
 
 /**
  * La regla que lo hace Solitario:  una columna toma una carta uno menos que su última, del otro color.
@@ -141,6 +139,11 @@ export class ColumnaElement extends SpellElement<Columna> {
   }
 }
 core.useElement(Columna, ColumnaElement)
+
+core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })
+
+core.heading("Una pila, y una columna")
+/** una carta está en una sola pila a la vez:  ponerla en otra la quita de esta */
 
 core.heading("La mesa:  una columna, y una mano de cartas para probar en ella")
 /** La mesa:  una columna, y una mano de cartas para probar en ella */
@@ -187,8 +190,6 @@ export class MesaElement extends SpellElement<Mesa> {
 }
 core.useElement(Mesa, MesaElement)
 export const mesa = new Mesa()
-
-core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })
 
 core.heading("Inicio:  un rey de espadas en la columna")
 //## Inicio:  un rey de espadas en la columna

@@ -186,6 +186,7 @@ properties.addRule(TheOwnProperty, {
             "    core.console.log(solitaire.stock)",
             "  }",
             "}",
+            'core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play A Card" })',
             "export class Pile extends List {",
             "  static instanceType = Card",
             "}",
@@ -197,8 +198,7 @@ properties.addRule(TheOwnProperty, {
             '  get stock() { return this.getProp("stock") }',
             '  set stock(value) { this.setProp("stock", value) }',
             "}",
-            "export const solitaire = new Solitaire()",
-            'core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play A Card" })'
+            "export const solitaire = new Solitaire()"
           ],
           ts: [
             "export class Card extends Thing {",
@@ -206,6 +206,7 @@ properties.addRule(TheOwnProperty, {
             "    core.console.log(solitaire.stock)",
             "  }",
             "}",
+            'core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play A Card" })',
             "export class Pile extends List<Card> {",
             "  static instanceType = Card",
             "}",
@@ -229,8 +230,7 @@ properties.addRule(TheOwnProperty, {
             "  ])",
             "}",
             "core.useElement(Solitaire, SolitaireElement)",
-            "export const solitaire = new Solitaire()",
-            'core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play A Card" })'
+            "export const solitaire = new Solitaire()"
           ]
         }
       ]

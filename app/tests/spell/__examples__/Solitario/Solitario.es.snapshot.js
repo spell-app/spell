@@ -36,11 +36,26 @@ export const words = {
       mazo: "mazo",
       rehacerLaReserva: "rehacer la reserva",
       robarDeLaReserva: "robar de la reserva",
-      voltearLaReserva: "voltear la reserva",
       repartirLasCartas: "repartir las cartas",
       reiniciarElJuego: "reiniciar el juego",
       jugarSolo: "jugar solo",
-      hacerTrampa: "hacer trampa"
+      hacerTrampa: "hacer trampa",
+      movimientos: "movimientos",
+      puntuación: "puntuación",
+      pista: "pista",
+      reserva: "reserva",
+      descartes: "descartes",
+      tréboles: "tréboles",
+      diamantes: "diamantes",
+      corazones: "corazones",
+      espadas: "espadas",
+      C1: "C1",
+      C2: "C2",
+      C3: "C3",
+      C4: "C4",
+      C5: "C5",
+      C6: "C6",
+      C7: "C7"
     }
   },
   messages: {
@@ -141,7 +156,7 @@ export const words = {
       { name: "Una pila de cartas", members: ["pila"] }
     ],
     Solitario: [
-      { name: "Repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "voltearLaReserva", "repartirLasCartas"] },
+      { name: "Repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "repartirLasCartas"] },
       { name: "Juego", description: "Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres", members: ["reiniciarElJuego", "jugarSolo", "hacerTrampa"] }
     ]
   }

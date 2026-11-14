@@ -139,8 +139,7 @@ export class AddingMachineElement extends SpellElement<AddingMachine> {
 }
 core.useElement(AddingMachine, AddingMachineElement)
 export const addingMachine = new AddingMachine()
-
-core.describeAction(AddingMachine, "pressDigit", { title: "Press (digit As Text)", undoneAs: "Press (digit As Text)" })
+core.describeAction(AddingMachine, "pressDigit", { title: "Press Digit As Text", undoneAs: "Press Digit As Text" })
 core.describeAction(AddingMachine, "addUp", { title: "Add It Up", undoneAs: "Add It Up" })
 core.describeAction(AddingMachine, "clear", { title: "Clear It", undoneAs: "Clear It" })
 

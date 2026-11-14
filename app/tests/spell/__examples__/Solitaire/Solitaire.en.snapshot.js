@@ -35,10 +35,23 @@ export const words = {
     Solitaire: {
       deck: "deck",
       draw: "draw it",
+      score: "score",
+      stock: "stock",
+      discards: "discards",
+      clubs: "clubs",
+      diamonds: "diamonds",
+      hearts: "hearts",
+      spades: "spades",
+      C1: "C1",
+      C2: "C2",
+      C3: "C3",
+      C4: "C4",
+      C5: "C5",
+      C6: "C6",
+      C7: "C7",
       restartTheGame: "restart the game",
       dealTheCards: "deal the cards",
       playFromTheStock: "play from the stock",
-      turnAStockCard: "turn a stock card",
       resetTheStock: "reset the stock",
       autoPlay: "auto play",
       cheat: "cheat"
@@ -54,7 +67,7 @@ export const words = {
       { name: "A pile of cards", members: ["pile"] }
     ],
     Solitaire: [
-      { name: "Dealing", members: ["restartTheGame", "dealTheCards", "playFromTheStock", "turnAStockCard", "resetTheStock"] },
+      { name: "Dealing", members: ["restartTheGame", "dealTheCards", "playFromTheStock", "resetTheStock"] },
       { name: "Game Play", members: ["autoPlay", "cheat"] }
     ]
   }

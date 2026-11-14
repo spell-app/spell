@@ -111,7 +111,7 @@ class Card(TwoSidedView):
 
     async def play(self) -> Any:
         if self in solitaire.stock:
-            await solitaire.turn_a_stock_card()
+            await solitaire.play_from_the_stock()
         else:
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
             if end_pile is None:
@@ -155,6 +155,9 @@ class Card(TwoSidedView):
         return Pile.owner_of(self)
 
 
+core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
+core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "undone_as": "Move Card"})
+core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count The Points For A Card On A Pile", "undone_as": "Count The Points For A Card On A Pile"})
 # Ace is low:  ace = 1 ... king = 13
 
 # What a person, test or console calls it
@@ -404,7 +407,7 @@ class StockPile(Pile):
         return h("ui-text", {"part": "placeholder"}, "🂠")
 
     async def on_click(self, event: ClickEvent) -> None:
-        await solitaire.turn_a_stock_card()
+        await solitaire.play_from_the_stock()
 
 
 class DiscardPile(Pile):
@@ -484,35 +487,6 @@ class Solitaire(App):
             self.stock.append(card)
         await self.restart_the_game()
 
-    # <number "score"/>
-    score = prop(type="number")
-    # <stock-pile "stock"/>
-    stock = prop(init=lambda: StockPile(id="stock"), early=True)
-    # <discard-pile "discards"/>
-    discards = prop(init=lambda: DiscardPile(id="discards"), early=True)
-    # <foundation "clubs" suit=clubs/>
-    clubs = prop(init=lambda: Foundation(id="clubs", suit="clubs"), early=True)
-    # <foundation "diamonds" suit=diamonds/>
-    diamonds = prop(init=lambda: Foundation(id="diamonds", suit="diamonds"), early=True)
-    # <foundation "hearts" suit=hearts/>
-    hearts = prop(init=lambda: Foundation(id="hearts", suit="hearts"), early=True)
-    # <foundation "spades" suit=spades/>
-    spades = prop(init=lambda: Foundation(id="spades", suit="spades"), early=True)
-    # <column "C1"/>
-    c1 = prop(init=lambda: Column(id="C1"), early=True)
-    # <column "C2"/>
-    c2 = prop(init=lambda: Column(id="C2"), early=True)
-    # <column "C3"/>
-    c3 = prop(init=lambda: Column(id="C3"), early=True)
-    # <column "C4"/>
-    c4 = prop(init=lambda: Column(id="C4"), early=True)
-    # <column "C5"/>
-    c5 = prop(init=lambda: Column(id="C5"), early=True)
-    # <column "C6"/>
-    c6 = prop(init=lambda: Column(id="C6"), early=True)
-    # <column "C7"/>
-    c7 = prop(init=lambda: Column(id="C7"), early=True)
-
     def draw(self) -> Element:
         return [
             h(
@@ -562,6 +536,35 @@ class Solitaire(App):
             ),
         ]
 
+    # <number "score"/>
+    score = prop(type="number")
+    # <stock-pile "stock"/>
+    stock = prop(init=lambda: StockPile(id="stock"), early=True)
+    # <discard-pile "discards"/>
+    discards = prop(init=lambda: DiscardPile(id="discards"), early=True)
+    # <foundation "clubs" suit=clubs/>
+    clubs = prop(init=lambda: Foundation(id="clubs", suit="clubs"), early=True)
+    # <foundation "diamonds" suit=diamonds/>
+    diamonds = prop(init=lambda: Foundation(id="diamonds", suit="diamonds"), early=True)
+    # <foundation "hearts" suit=hearts/>
+    hearts = prop(init=lambda: Foundation(id="hearts", suit="hearts"), early=True)
+    # <foundation "spades" suit=spades/>
+    spades = prop(init=lambda: Foundation(id="spades", suit="spades"), early=True)
+    # <column "C1"/>
+    c1 = prop(init=lambda: Column(id="C1"), early=True)
+    # <column "C2"/>
+    c2 = prop(init=lambda: Column(id="C2"), early=True)
+    # <column "C3"/>
+    c3 = prop(init=lambda: Column(id="C3"), early=True)
+    # <column "C4"/>
+    c4 = prop(init=lambda: Column(id="C4"), early=True)
+    # <column "C5"/>
+    c5 = prop(init=lambda: Column(id="C5"), early=True)
+    # <column "C6"/>
+    c6 = prop(init=lambda: Column(id="C6"), early=True)
+    # <column "C7"/>
+    c7 = prop(init=lambda: Column(id="C7"), early=True)
+
     async def restart_the_game(self) -> None:
         self.score = 0
         await self.deal_the_cards()
@@ -586,6 +589,7 @@ class Solitaire(App):
 
     async def play_from_the_stock(self) -> None:
         """Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty"""
+        # - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
         if not self.stock:
             self.reset_the_stock()
         it = self.stock.last_item
@@ -593,10 +597,6 @@ class Solitaire(App):
         # as long as its flip takes (styles.css), so it turns over before it moves
         await core.pause_for(300, "msec")
         self.discards.append(it)
-
-    async def turn_a_stock_card(self) -> None:
-        """a click on the stock:  one step to undo, where the deal's own turn isn't"""
-        await self.play_from_the_stock()
 
     def reset_the_stock(self) -> None:
         """The discards, turned over, back into the stock"""
@@ -665,26 +665,12 @@ class Solitaire(App):
 
 
 solitaire = Solitaire()
-
 core.describe_action(Solitaire, "restart_the_game", {"title": "Restart", "shortcuts": ["R"], "undone_as": "Restart"})
-
 core.describe_action(Solitaire, "deal_the_cards", {"title": "Deal The Cards", "undone_as": "Deal The Cards"})
-
-core.describe_action(Solitaire, "play_from_the_stock", {"title": "Play From The Stock", "undone_as": "Play From The Stock"})
-
-core.describe_action(Solitaire, "turn_a_stock_card", {"title": "Turn A Stock Card", "undone_as": "Turn Card"})
-
+core.describe_action(Solitaire, "play_from_the_stock", {"title": "Play From The Stock", "undone_as": "Turn Card"})
 core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset The Stock", "undone_as": "Reset The Stock"})
-
-core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
-
-core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "undone_as": "Move Card"})
-
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "undone_as": "Auto Play"})
-
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "undone_as": "Cheat"})
-
-core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count The Points For A Card On A Pile", "undone_as": "Count The Points For A Card On A Pile"})
 
 # play the card on click if it is a legal move
 

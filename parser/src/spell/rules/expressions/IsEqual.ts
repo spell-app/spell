@@ -90,8 +90,11 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
    */
   private static listedAnywhere(scope: P.Scope, word: string): Array<{ property: P.ScopeVariable; value: string }> {
     const byName = new Map<string, { property: P.ScopeVariable; value: string }>()
-    for (const type of scope.types?.get() ?? []) {
-      for (const found of type.propertiesListing(word)) byName.set(`${found.property.name}`, found)
+    // every list of types up the chain:  the file's, the project's, what it imports
+    for (let list = scope.types; list; list = list.parent) {
+      for (const type of list.get()) {
+        for (const found of type.propertiesListing(word)) byName.set(`${found.property.name}`, found)
+      }
     }
     return [...byName.values()]
   }

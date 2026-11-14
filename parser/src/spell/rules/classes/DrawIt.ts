@@ -281,9 +281,9 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
       property: slot ? DrawIt.slotMethodName(slot) : drawing,
       method
     })
-    // what its tags declare, as members beside it (epic `language` P55, Q52):  `<column "C1"/>`
+    // what its tags declare, as members after it (epic `language` P55, Q52):  `<column "C1"/>`
     const members = drawing === "draw" ? DrawnMarkup.membersDeclared(this.getBody(match), drawn.type) : []
-    return members.length ? new P.ASTStatementGroup(match, { statements: [...members, drawn] }) : drawn
+    return members.length ? new P.ASTStatementGroup(match, { statements: [drawn, ...members] }) : drawn
   }
 }
 

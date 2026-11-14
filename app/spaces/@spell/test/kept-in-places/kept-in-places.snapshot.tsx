@@ -165,9 +165,7 @@ export class NoteKeeperElement extends SpellElement<NoteKeeper> {
 }
 core.useElement(NoteKeeper, NoteKeeperElement)
 export const noteKeeper = new NoteKeeper()
-
 core.describeAction(NoteKeeper, "keepTheDraft", { title: "Keep The Draft", undoneAs: "Keep The Draft" })
-
 core.describeAction(NoteKeeper, "countTheNotes", { title: "Count The Notes", undoneAs: "Count The Notes" })
 
 core.heading("Start")

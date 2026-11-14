@@ -92,7 +92,6 @@ export class HelloSignElement extends SpellElement<HelloSign> {
 }
 core.useElement(HelloSign, HelloSignElement)
 export const helloSign = new HelloSign()
-
 core.describeAction(HelloSign, "waveBack", { title: "Wave Back", undoneAs: "Wave Back" })
 
 core.heading("Step 2:  change one sentence")
