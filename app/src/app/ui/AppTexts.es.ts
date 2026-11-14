@@ -59,6 +59,7 @@ const APP_TEXTS_ES: AppTextPack = {
   partNotWritten:
     "Esto no es una parte propia en tu programa, así que no puedes moverlo ni quitarlo aquí.  Cambia tu programa.",
   menuChangeThis: "Cambiar esto...",
+  changeThisHeader: "Dile a tu amigo Claude:",
   changeThisPrompt: "¿Qué debería cambiar?",
   changeThisNobody:
     "Esto espera una sesión de Claude en esta máquina.  En una, pídele que ejecute esto en segundo plano, y que haga lo que diga:",

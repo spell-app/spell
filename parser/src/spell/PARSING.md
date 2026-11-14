@@ -1536,6 +1536,8 @@ would.
   - the scan before parsing knows them ahead (`SpellParser.drawnMembers()`), so an action above the drawing reads
     `the stock`, and a `set the score` there doesn't declare it again
   - a member said on a line of its own wins:  the tag only draws it
+  - no space is needed after the quoted word:  `<deck "deck"hidden />` reads as `<deck "deck" hidden/>` (T125;
+    the tag's attributes start right after it, `Tokenizer.matchJSXAttribute()`)
   - a line that declares changes what the rest of the program reads (`getScopeChanges()`):  an edit to it is a
     full re-parse
 

@@ -1,4 +1,5 @@
 import { For } from "solid-js"
+import { isServer } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 import { splitPanelVocabulary } from "./UISplitPanel.en"
@@ -130,7 +131,8 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   @E.onChange("panes", "sizesGiven", { writesDOMElement: true })
   protected onPanesChanged(panes: HTMLElement[], sizesGiven: string) {
     this.apply(UISplitPanel.sizesFor(sizesGiven, panes.length))
-    this.findBarPlaces()
+    // measured once laid out, after this update:  the bars read the places, so a write now would draw them twice
+    if (!isServer) E.beforeNextPaint(() => this.findBarPlaces())
   }
 
   /** Read each bar's place from where the panes are now:  not on every move of a drag. */

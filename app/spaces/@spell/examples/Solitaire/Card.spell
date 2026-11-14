@@ -41,8 +41,6 @@ a "card" is a draggable two sided view 			-- A playing card
 			return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
 
-	// Over every card and pile around it while the cheat moves it -- styles.css
-	its "lifted" is yes or no
 	to draw its front
 		<text color={its color}>{its picture}</text>
 	to draw its back

@@ -500,7 +500,8 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
   - Its built-in `id` last, folded.
   - A type may lay its card out itself:  Solitaire's card does, in
-    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), `"card" is a property editor`.
+    [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell), `<property-editor "card">`
+    (the same as `"card" is a property editor`, its markup indented under it).
     - Its own file, `<Type>.editor.spell`, or one for the project, `<Project>.editors.spell`:
       never compiled, read by the Inspector (`propertyEditorInSource()`).
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
@@ -780,6 +781,11 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   - That's why the language service must stay safe to run in a browser.
 - An error shows its message on a plain hover over its squiggle;  the rest of the hover waits for ⌥, as the
   code pane's Settings… choose ([ErrorHover](src/app/ui/monaco/ErrorHover.ts)).
+- A web address in the code opens in a new tab ([LinkClick](src/app/ui/monaco/LinkClick.ts)):
+  - a plain click on the small open icon drawn after it (Font Awesome's `up-right-from-square`), which isn't text:
+    the caret never lands in it, and copying leaves it out
+  - or ⌘-click (Ctrl-click off a Mac) on the address, as in VS Code, in every hover setting:
+    ⌘ held over it underlines it, and a plain hover says so
 - Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spell`,
   a view of its file:  the project's files stay the source of truth, and each edit re-parses as little as it can.
 - A rename saves every file it touched.

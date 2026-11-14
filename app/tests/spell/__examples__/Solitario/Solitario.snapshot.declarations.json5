@@ -22,7 +22,7 @@
       "type": "Carta",
       "superType": "TwoSidedView",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:0-3392"
+      "defined": "/Carta.es.spell:0-3270"
     },
     {
       "property": "rango",
@@ -166,13 +166,6 @@
       "defined": "/Carta.es.spell:1579-2186"
     },
     {
-      "property": "levantada",
-      "of": "Carta",
-      "group": "Dibujo",
-      "datatype": "choice",
-      "defined": "/Carta.es.spell:2284-2309"
-    },
-    {
       "syntax": "jugar {thisArg:expression}",
       "output": "jugar",
       "rule": "method_call",
@@ -228,7 +221,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:6199-6433"
+      "defined": "/Solitario.es.spell:6129-6363"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -237,7 +230,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "la preparación de la carta",
-      "defined": "/Carta.es.spell:2438-3392"
+      "defined": "/Carta.es.spell:2316-3270"
     },
     {
       "type": "Mazo",
@@ -324,36 +317,36 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7204-7517"
+      "defined": "/Solitario.es.spell:7134-7447"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7519-7726"
+      "defined": "/Solitario.es.spell:7449-7656"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7728-8234"
+      "defined": "/Solitario.es.spell:7658-8164"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:7844-7873"
+      "defined": "/Solitario.es.spell:7774-7803"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:8236-8565"
+      "defined": "/Solitario.es.spell:8166-8495"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:427-6747"
+      "defined": "/Solitario.es.spell:427-6677"
     },
     {
       "property": "mazo",
@@ -534,9 +527,7 @@
       "group": "Juego",
       "kind": "method",
       "name": "hacer trampa",
-      "returns": "nothing",
-      "waits": true,
-      "defined": "/Solitario.es.spell:5522-6196"
+      "defined": "/Solitario.es.spell:5522-6126"
     },
     {
       "syntax": "probar los movimientos",
@@ -545,7 +536,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:8567-10123"
+      "defined": "/Solitario.es.spell:8497-10053"
     }
   ],
   "codeLines": [
@@ -561,49 +552,48 @@
     49,
     57,
     64,
-    73,
-    86,
-    96,
-    112,
-    141,
-    184,
-    188,
-    193,
-    200,
-    223,
-    228,
+    80,
+    90,
+    106,
+    135,
+    178,
+    182,
+    187,
+    194,
+    217,
+    222,
+    229,
     235,
     241,
-    247,
-    262,
-    294,
-    305,
-    329,
+    256,
+    288,
+    299,
+    323,
+    341,
     347,
-    353,
-    376,
-    395,
-    398,
-    448,
-    452,
-    456,
-    460,
-    464,
-    468,
-    472,
-    476,
-    480,
-    484,
-    488,
-    492,
-    496,
-    500,
+    370,
+    389,
+    392,
+    442,
+    446,
+    450,
+    454,
+    458,
+    462,
+    466,
+    470,
+    474,
+    478,
+    482,
+    486,
+    490,
+    494,
+    499,
     505,
-    511,
-    533,
-    544,
-    552,
-    587,
-    628
+    527,
+    538,
+    546,
+    581,
+    619
   ]
 }
