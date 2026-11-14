@@ -1054,6 +1054,35 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "IsListedValue",
+          "ruleNames": ["is_listed_value"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsListedValue.ts",
+          "line": 18,
+          "purpose": "`{lhs} is [not] a`/`an {value}`, comparing the property that lists the value (epic `language` P39, C4).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not_a} {expression:number}",
+              "example": "carta es un 2",
+              "outputs": {
+                "js": {
+                  "code": "(carta.rango === 2)"
+                },
+                "ts": {
+                  "code": "(carta.rango === 2)"
+                },
+                "py": {
+                  "code": "(carta.rango == 2)"
+                }
+              }
+            },
+            {
+              "syntax": "{operator:is_or_is_not_a} {expression:constant}"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "IsSameTypeAs",
           "ruleNames": ["is_same_type_as"],
           "internal": false,
@@ -1792,20 +1821,6 @@
             }
           ],
           "aliases": []
-        },
-        {
-          "className": "IsListedValue",
-          "ruleNames": ["is_listed_value"],
-          "internal": false,
-          "file": "src/spell/rules/expressions/IsListedValue.ts",
-          "line": 16,
-          "purpose": "`{lhs} is [not] a`/`an {value}`, comparing the property that lists the value (epic `language` P39, C4).",
-          "syntaxes": [
-            {
-              "syntax": "{operator:is_or_is_not_a} {expression:constant}"
-            }
-          ],
-          "aliases": ["expression_suffix"]
         },
         {
           "className": "MeasureIn",

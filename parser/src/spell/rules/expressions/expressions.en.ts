@@ -345,6 +345,25 @@ expressions.addRule(IsA, {
 
 // after `is_a`, so a known type wins:  `is a queen` with a type named `queen`
 expressions.addRule(IsListedValue, { syntax: "{operator:is_or_is_not_a} {expression:constant}" })
+// ... a number of its list too (epic `language` P55):  `it is a 2`
+expressions.addRule(IsListedValue, {
+  syntax: "{operator:is_or_is_not_a} {expression:number}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          ["a card is a thing", "a card has a rank as one of ace, 2, 3, king", "card = a new card"].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["card is a 2", "(card.rank === 2)"],
+        ["card is not a 3", "(card.rank !== 3)"]
+      ]
+    }
+  ]
+})
 
 expressions.addRule(IsSameTypeAs, {
   syntax: "{operator:is_or_is_not} the same type as {expression:operand}",

@@ -353,6 +353,26 @@ expressionsEs.addRule(IsA, {
 
 // después de `is_a`, para que un tipo conocido gane:  `es una reina` con un tipo llamado `reina`
 expressionsEs.addRule(IsListedValue, { syntax: "{operator:is_or_is_not_a} {expression:constant}" })
+// ... a number of its list too (epic `language` P55):  `it is a 2`
+expressionsEs.addRule(IsListedValue, {
+  syntax: "{operator:is_or_is_not_a} {expression:number}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          [
+            "una carta es una cosa",
+            "una carta tiene un rango como uno de as, 2, 3, rey",
+            "carta = una nueva carta"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [["carta es un 2", "(carta.rango === 2)"]]
+    }
+  ]
+})
 
 expressionsEs.addRule(IsSameTypeAs, {
   syntax: "{operator:is_or_is_not} (del|el) mismo tipo que {expression:operand}",
