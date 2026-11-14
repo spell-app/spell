@@ -126,8 +126,8 @@ export function toggleCode() {
  * Site only for a project that declares a site (`EditorMode.hasSite`);
  * then, in Edit, the code's icon, which shows the code or closes it, then Inspect app (`inspect`)
  * (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and inspect buttons should be swapped").
- * - After the group, while you have drafts of the project:  "Editing a Draft", then Publish (`<PublishDraft>`;
- *   Owen, 2026-11-14:  "move it to the right of code/inspect buttons").
+ * - After the group, while you have drafts of the project:  "Editing a Draft", then Publish Draft, one pill
+ *   (`<PublishDraft>`;  Owen, 2026-11-14:  "move it to the right of code/inspect buttons").
  * - Neither icon is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
  * - `inspect`:  Inspect app's item (`<InspectAppButton item>`), handed in so this file needs nothing of the Inspector's.
@@ -189,27 +189,23 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
 /****************
  * ### `<PublishDraft>`
  * While you have drafts of the project (epic `editor` I44), right of the code and Inspect app buttons:
- * a yellow "Editing a Draft" pill, its pen-on-a-square the draft's mark, as a draft file's tab has it, then a Publish
- * button (Owen, 2026-11-14, I77, I90).
- * - Publish is File › Publish's (`editor.publish()`).
+ * ONE pill, the size and shape of the bar's tools group, tinted a soft yellow (Owen, 2026-11-14, I77, I90, I93:
+ * "one unified thing with a slight inset border").
+ * - Left:  the draft's mark, a pen on a square (as a draft file's tab has it), and "Editing a Draft", as plain words.
+ * - Right:  "Publish Draft", the primary button, a round thumb inside the pill:  File › Publish's (`editor.publish()`).
  * - Gone once you have no drafts (after Publish, Delete Draft), and never in the public preview (`editor.canPublish`).
  ****************/
 function PublishDraft(): JSX.Element {
   const hasDrafts = tracked(() => editor.canPublish)
   return (
     <Show when={hasDrafts()}>
-      <span class="PublishDraft">
-        <ui-label size="small" color="yellow" icon={DRAFT_ICON} title={appTexts.text("draftTip")}>
+      <span class="PublishDraft" title={appTexts.text("draftTip")}>
+        <span class="DraftState">
+          <ui-icon name={DRAFT_ICON} />
           {appTexts.text("editingDraft")}
-        </ui-label>
-        <ui-button
-          size="small"
-          color="primary"
-          icon={PUBLISH_ICON}
-          title={appTexts.text("draftTip")}
-          onClick={() => void editor.publish()}
-        >
-          {appTexts.text("publish")}
+        </span>
+        <ui-button color="primary" icon={PUBLISH_ICON} onClick={() => void editor.publish()}>
+          {appTexts.text("publishDraft")}
         </ui-button>
       </span>
     </Show>
