@@ -83,6 +83,8 @@ const HOVER_ENABLED = {
  *   So the multi-cursor key becomes ⌘ (Ctrl elsewhere), leaving ⌥ for the hover.
  *   - SIDE EFFECT:  ⌘-click then adds a cursor, and ⌥-click goes to a definition, the other way round from Monaco's
  *     own.  The other hover modes keep Monaco's.
+ *   - A web address still opens on ⌘-click, or a plain click on its icon, in every mode:  `LinkClick` takes that click before Monaco does
+ *     (Monaco's own would want ⌥-click here;  epic `editor` I101).
  * - Ctrl+Space shows the suggestions in every mode:  only showing them as you type is turned off.
  *   - "Where it helps" turns Monaco's own off too:  the editor asks for them itself, at the places
  *     `suggestsByItself()` names (`CodeSettings`).

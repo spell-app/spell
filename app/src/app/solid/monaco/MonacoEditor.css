@@ -73,3 +73,36 @@
     border-top: 1px solid var(--vscode-editorHoverWidget-border);
   }
 }
+
+/* A web address with ⌘ held over it (`LinkClick`):  underlined, a hand to click it with */
+.monaco-editor .LinkClickReady {
+  text-decoration: underline;
+  cursor: pointer;
+}
+/* Its tip on a plain hover, "⌘-click to open":  Monaco's hover look, as `ErrorHover` */
+.monaco-editor .LinkClickTip {
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+/* The icon after each web address (`LinkClick`):  Font Awesome's up-right-from-square, small and muted
+   (Font Awesome Free 7.3.1 by @fontawesome, https://fontawesome.com, icons CC BY 4.0);
+   a plain click on it opens the address, so it shows a hand, and the link's colour when hovered */
+.monaco-editor .LinkClickIcon {
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-inline-start: 0.25em;
+  /* its bottom on the text's baseline (`overflow` makes it so), a little below, as the letters' feet */
+  overflow: hidden;
+  vertical-align: -0.1em;
+  background-color: currentColor;
+  opacity: 0.45;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M290.4 19.8C295.4 7.8 307.1 0 320 0L480 0c17.7 0 32 14.3 32 32l0 160c0 12.9-7.8 24.6-19.8 29.6s-25.7 2.2-34.9-6.9L400 157.3 246.6 310.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L354.7 112 297.4 54.6c-9.2-9.2-11.9-22.9-6.9-34.9zM0 176c0-44.2 35.8-80 80-80l80 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-80 0c-8.8 0-16 7.2-16 16l0 256c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-80c0-17.7 14.3-32 32-32s32 14.3 32 32l0 80c0 44.2-35.8 80-80 80L80 512c-44.2 0-80-35.8-80-80L0 176z"/></svg>')
+    center / contain no-repeat;
+  cursor: pointer;
+  &:hover {
+    background-color: var(--vscode-textLink-foreground);
+    opacity: 1;
+  }
+}

@@ -155,6 +155,9 @@ and in the app's build folder, `app/` at the app folder's root.
       and closing tag, a body;  one undo
   - An error shows its message on a plain hover over its squiggle, though the hover info waits for ⌥
     ([ErrorHover](ui/monaco/ErrorHover.ts), epic `editor` I97)
+  - A web address in the code opens on a click on the icon after it, or on ⌘-click as in VS Code,
+    whatever key the hover takes
+    ([LinkClick](ui/monaco/LinkClick.ts), epic `editor` I101)
   - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;  between `<x>` and `</x>`,
     the caret a level in and the closing tag on its own line (epic `editor` I65):  Spell's Enter rules,
     `SpellMonaco.CONFIGURATION`, with VS Code's `language-configuration.json` kept the same by a test
