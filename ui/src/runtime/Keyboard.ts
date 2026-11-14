@@ -147,8 +147,12 @@ export class Keyboard {
     document.addEventListener("keydown", this.onKeyDown, { capture: true, signal: this.listener.signal })
   }
 
-  /** Dev warning when `registration` claims a chord another registration in its scope already has. */
+  /**
+   * Dev warning when `registration` claims a chord another registration in its scope already has.
+   * - Not for one registered `layered`, over another on purpose.
+   */
   private checkConflict(registration: Registration) {
+    if (registration.options.layered) return
     const text = registration.chord.toString()
     const clash = this.registrations.find(
       (other) =>
