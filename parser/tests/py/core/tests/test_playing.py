@@ -84,3 +84,44 @@ def test_a_change_the_patches_left_out_fails_the_check(game: PagePlayer) -> None
     game.session.writer.patch = lambda: []  # type: ignore[method-assign]
     with pytest.raises(PatchMismatchError):
         game.call("play_from_the_stock_pile")
+
+
+# A program that plays a ball into a box it finds by `every box`,
+# as Solitaire's Auto Play finds a pile
+EVERY_BOX = """\
+from spell_core import List, Thing, core
+
+
+class Ball(Thing):
+    pass
+
+
+class Box(List):
+    item_type = Ball
+    exclusive = True
+
+
+left = Box([Ball()])
+right = Box()
+
+
+def play():
+    box = core.every_thing(Box).last_item
+    core.move(left.first_item, box)
+"""
+
+
+def test_the_pages_mirror_makes_none_of_the_programs_things(tmp_path: Path) -> None:
+    # `every box` finds the program's own two boxes, never the test's copies of them (epic `language` I89):
+    # Solitaire's Auto Play played a card onto the mirror's pile, and the next patch sent a 53rd card
+    program = tmp_path / "Boxes.spell.py"
+    program.write_text(EVERY_BOX)
+    game = play_page(program, seed=1)
+    try:
+        assert core.item_count_of(core.every_thing(game.session.things["left"].__class__)) == 2
+        game.call("play")
+        assert len(ids(game.named("right"))) == 1
+        assert len(game.ids_of_type("Ball")) == 1
+        assert ids(game.named("left")) == []
+    finally:
+        core.seed_random(1)
