@@ -24,6 +24,12 @@ class Room(List):
 room = Room([Lamp(), Lamp()])
 
 
+async def ask_the_color():
+    color = await core.prompt("Which color?", "blue")
+    if color is not None:
+        room.first_item.color = color
+
+
 @core.on("lamp-click")
 async def on_lamp_click(event):
     event.lamp.is_on = True
@@ -101,3 +107,13 @@ async def test_a_press_that_fails_says_so_on_the_socket(app: Quart) -> None:
         await socket.receive()
         await socket.send(json.dumps({"call": "no_such_function"}))
         assert "error" in json.loads(await socket.receive())
+
+
+async def test_a_dialog_is_asked_of_the_page_whose_answer_the_program_waits_for(app: Quart) -> None:
+    async with app.test_client().websocket("/ws") as socket:
+        json.loads(await socket.receive())  # the state
+        await socket.send(json.dumps({"call": "ask_the_color", "args": []}))
+        question = json.loads(await socket.receive())
+        assert question == {"ui": "prompt", "args": ["Which color?", "blue"], "asks": 1}
+        await socket.send(json.dumps({"answer": 1, "value": "green"}))
+        assert json.loads(await socket.receive()) == [{"$type": "Lamp", "$id": "2", "color": "green"}]

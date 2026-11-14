@@ -1,3 +1,2 @@
 479 reportReturnType Type "list[Element]" is not assignable to return type "Element"
 635 reportOptionalMemberAccess "filter" is not a known attribute of "None"
-642 reportAttributeAccessIssue Cannot access attribute "alert" for class "Core"

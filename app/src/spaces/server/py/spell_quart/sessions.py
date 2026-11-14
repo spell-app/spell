@@ -17,6 +17,9 @@ async def ws():
   and at each pause (`core.before_pause`):  so a game animates.
 - What a person pressed runs one at a time, through the visitor's queue (`PageSession.enter()`):
   the loop goes on reading, so a repeat is ignored, and only the latest click waits.
+- A dialog the program shows (`alert`, `confirm`, `prompt` ...) is asked of the page that sent the last message,
+  what changed sent first:  it shows Spell UI's own, and answers up the same socket (`spell_core.ui_methods`).
+  - That page closing answers it as a cancel:  `None`.
 - A message that fails is logged, and the page goes on:
   it's sent `{"error": "ValueError: ...", "message": {...}}`, which its console shows as `< ERROR  >`.
 """
@@ -33,6 +36,7 @@ from typing import Any, Protocol
 from spell_core.core import Core, using_core
 from spell_core.page import PageSession
 from spell_core.run import run_program
+from spell_core.ui_methods import PageAsks
 
 # What an error frame names its message by:  `{"error": "ValueError: ..."}` -- the javascript core's `ERROR_KEY`.
 ERROR_KEY = "error"
@@ -64,6 +68,11 @@ class Visit:
         self.names = names
         # each open page:  its session (its own ids), and how to send it something
         self.pages: list[tuple[PageSession, Callable[[str], Awaitable[None]]]] = []
+        # the page that sent the last message:  the one a dialog is asked of
+        self.asking: Callable[[str], Awaitable[None]] | None = None
+        # the program's dialogs, asked of the page (`core.ask_page`)
+        self.asks = PageAsks(self.send_question)
+        core.ask_page = self.asks.ask
 
     async def send_changes(self) -> None:
         """SIDE EFFECT:  send each page what changed since it was last sent anything, if anything did."""
@@ -71,6 +80,19 @@ class Visit:
             patch = page.writer.patch()
             if patch:
                 await send(json.dumps(patch, ensure_ascii=False))
+
+    async def send_question(self, frame: dict[str, Any]) -> None:
+        """SIDE EFFECT:  ask the page that sent the last message `frame`, a dialog, once it has what changed so far.
+
+        - No page open:  answered at once as a cancel.
+        """
+        await self.send_changes()
+        pages = [send for _, send in self.pages]
+        send = self.asking if self.asking in pages else (pages[-1] if pages else None)
+        if send is None:
+            self.asks.give_up()
+            return
+        await send(json.dumps(frame, ensure_ascii=False))
 
 
 class SpellSessions:
@@ -123,6 +145,10 @@ class SpellSessions:
             try:
                 while True:
                     message = json.loads(await socket.receive())
+                    # the answer to a dialog the program asked of this page:  its action, waiting, goes on
+                    if visit.asks.answered(message):
+                        continue
+                    visit.asking = send
                     if page.is_action(message):
                         # through the queue, not waited for here:  the next click must be read while this one runs
 
@@ -145,6 +171,9 @@ class SpellSessions:
                     await visit.send_changes()
             finally:
                 visit.pages.remove((page, send))
+                if visit.asking is send:
+                    visit.asking = None
+                    visit.asks.give_up()
 
 
 def visitor_of(request: Any) -> str:

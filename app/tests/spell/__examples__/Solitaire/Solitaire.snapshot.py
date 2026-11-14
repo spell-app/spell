@@ -639,7 +639,7 @@ class Solitaire(App):
 
     async def on_score_change(self, event: ScoreChangeEvent) -> None:
         if core.item_count_of(core.merge_lists(core.every_thing(Foundation))) == 52:
-            core.alert("You won!", "New game")
+            await core.alert("You won!", "New game")
             await self.restart_the_game()
 
 

@@ -5,10 +5,12 @@ import * as pyText from "./pyText"
 const { isCoreCall } = P.jsShapes
 
 /**
- * `core`'s calls that read or ask a place, each a coroutine in `spell_core` (`places.py`, epic `data` P40):
- * the JavaScript core's that wait (`P.CORE_CALLS_THAT_WAIT`), but the dialogs, which Python hasn't ported.
+ * `core`'s calls that are each a coroutine in `spell_core`, awaited wherever they're written:
+ * the JavaScript core's that wait (`P.CORE_CALLS_THAT_WAIT`), but its pause, written on its own (`pause_for()`).
+ * - a read or a call of a place, `core.saved_things()` ... (`places.py`, epic `data` P40)
+ * - a dialog, `core.alert()`, `core.confirm()` ... (`ui_methods.py`, epic `language` I90)
  */
-const PLACE_CALLS_THAT_WAIT = new Set(["savedThings", "savedThingAt", "savedThingWithId", "inOneGo", "callPlace"])
+const CORE_COROUTINES = new Set([...P.CORE_CALLS_THAT_WAIT].filter((name) => name !== "pauseFor"))
 
 /****************
  * ### `PyWriter`
@@ -52,10 +54,10 @@ export class PyWriter extends PyBaseWriter {
    * Does `call`, of `core`, wait?  `spell_core` has three kinds:
    * - spell's pause
    * - a `send` a handler of which waits
-   * - a read of a place, `core.saved_things()` ... (epic `data` P40):  each `PLACE_CALLS_THAT_WAIT`
+   * - a coroutine of `spell_core`'s, a read of a place or a dialog:  each `CORE_COROUTINES`
    */
   protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
-    return call.methodName === "pauseFor" || PLACE_CALLS_THAT_WAIT.has(call.methodName) || this.sendWaits(call)
+    return call.methodName === "pauseFor" || CORE_COROUTINES.has(call.methodName) || this.sendWaits(call)
   }
 
   /** Is `node` a call of a function that waits, by name, or spell's own pause? */
@@ -116,8 +118,8 @@ export class PyWriter extends PyBaseWriter {
       return `await ${pyText.call("core.filter_in_turn", this.items(node.args.args))}`
     }
     const written = super.ASTScopedMethodInvocation(node)
-    // a read of a place:  awaited wherever it's written, as `core.saved_things()` is a coroutine
-    if (isCoreCall(node) && PLACE_CALLS_THAT_WAIT.has(node.methodName)) return `await ${written}`
+    // a read of a place, a dialog:  awaited wherever it's written, as `core.saved_things()` is a coroutine
+    if (isCoreCall(node) && CORE_COROUTINES.has(node.methodName)) return `await ${written}`
     if (this.project.togetherWaits(node, (run) => this.project.waitingMethods.has(run))) return `await ${written}`
     // a `send` where nothing can wait, a drawing or a getter, runs its handlers beside it:  `core.send()`
     const waits = isCoreCall(node)
@@ -126,9 +128,16 @@ export class PyWriter extends PyBaseWriter {
     return waits ? `await ${written}` : written
   }
 
-  /** What it waits for, which says its own `await` -- see the calls above. */
+  /**
+   * What it waits for, which says its own `await` -- see the calls above.
+   * - But `notify ... and wait`:  `await core.notify(...)`, as `core.notify()` waits only when awaited.
+   */
   ASTAwaitExpression(node: P.ASTAwaitExpression): string {
-    return this.loop(node.expression) ?? String(this.write(node.expression))
+    const written = this.loop(node.expression) ?? String(this.write(node.expression))
+    const inner = node.expression
+    return isCoreCall(inner) && (inner as P.ASTScopedMethodInvocation).methodName === "notify"
+      ? `await ${written}`
+      : written
   }
 
   /** `node`, in parentheses unless it binds tightly:  `(await x.play()).name`. */

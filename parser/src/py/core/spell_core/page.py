@@ -22,6 +22,8 @@ session.handle({"trigger": "card-click", "details": {"card": {"$id": "12"}}})
   - A reference's place (`Tableau#1`) counts the things this page was sent, in the order it was sent them:
     the order its copies were made in.
 - Each message is run, then answered with what it changed (`StateWriter.patch()`).
+- A dialog the program shows (`alert`, `confirm` ...) is a question to the page, `{"ui": "confirm", ..., "asks": 1}`,
+  which the page's next line answers, `{"answer": 1, "value": true}` (`spell_core.ui_methods`).
 - A page's messages use Python's names:  its javascript was written with them (`PY.ElementsWriter`).
   - Except an event's details, which are javascript's (`camelCase`):  read as Python's (`snake_case`).
 - Epic python-target, P19.
@@ -41,6 +43,7 @@ from spell_core.events import SentEvent
 from spell_core.references import is_reference, thing_for_reference
 from spell_core.state import ID_KEY, StateWriter
 from spell_core.things import SpellObject
+from spell_core.ui_methods import PageAsks
 
 
 class PageSession:
@@ -192,6 +195,16 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     session = PageSession(run_program(args.program, seed=args.seed, pauses=not args.no_pauses))
     print(json.dumps(session.state(), ensure_ascii=False), flush=True)
+
+    async def ask_on_stdout(frame: dict[str, Any]) -> None:
+        # the question, then its answer read straight off stdin:  the message that asked waits for it
+        print(json.dumps(frame, ensure_ascii=False), flush=True)
+        line = await asyncio.to_thread(sys.stdin.readline)
+        if not asks.answered(json.loads(line) if line.strip() else None):
+            asks.give_up()
+
+    asks = PageAsks(ask_on_stdout)
+    core.ask_page = asks.ask
 
     async def answer_each_line() -> None:
         # one loop for every message:  a function that waits is awaited, and what it starts goes on beside the next
