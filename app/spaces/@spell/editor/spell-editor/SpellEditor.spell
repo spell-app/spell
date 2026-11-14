@@ -1,7 +1,7 @@
 # Spell's editor
 // The editor itself, as one app:  its top bar, its panes, the file tabs over the code, and its menus, each a view of it.
 // What's in each pane, and what each action does, is still the editor's own (`SpellEditor.tsx`, `MenuBar.tsx`, `FileTabs.tsx`):
-// each pane is a thing that draws itself, and each action's work is handed over by its name.
+// each pane is an editor part, which draws itself, and each action's work is handed over by its name.
 // The editor shows every title in the page's language.
 
 spell editor is an app
@@ -131,21 +131,25 @@ spell editor is an app
 	to "clear console" with icon "ban"
 		enabled when its console empty is no
 
+an "editor part" is a thing
+	// What the editor draws in a view's place for it:  a pane, a menu, a row it keeps in step itself.
+	// Its drawing is the editor's own, handed over in TypeScript (`EditorSpell.parts()`, `layoutSpell.ts`).
+
 an "editor bar" is a view
 	// The editor's top bar, joined to the top of the window, with three sections:
 	// Spell's menu, the project's menu and the app's menus, then Run and Edit in the middle, then the tools and you.
-	// What's in each is still the editor's own, `EditorToolbar` in `SpellEditor.tsx`:  each is a thing here that draws itself.
-	its "spell menu" is a thing
+	// What's in each is still the editor's own, `EditorToolbar` in `SpellEditor.tsx`:  each is an editor part here, which draws itself.
+	its "spell menu" is an editor part
 		// Spell's menu:  its hat and name, opening the group's projects and Home
-	its "project menu" is a thing
+	its "project menu" is an editor part
 		// The project's menu:  its name, opening the project menu
-	its "app menus" is a thing
+	its "app menus" is an editor part
 		// File, Edit, View, Run and Help, each opening its menu
-	its "mode buttons" is a thing
+	its "mode buttons" is an editor part
 		// Run and Edit, then Inspect app and the code's icon in Edit
-	its "tools" is a thing
+	its "tools" is an editor part
 		// Add and the Inspector's menu in Edit, then Restart and the theme
-	its "you" is a thing
+	its "you" is an editor part
 		// The person's own menu
 
 	to draw it
@@ -172,16 +176,16 @@ an "editor bar" is a view
 
 an "editor layout" is a view
 	// The editor's panes:  the code on the left, the Program panel under it, then the running app, and the Inspector at the far right while it's open (Owen, 2026-11-06).
-	// What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  each is a thing here that draws itself.
+	// What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  each is an editor part here, which draws itself.
 	// The app takes every change of size (`grows`, its place across):  dragging the code's bar sizes the code, the app gives or takes the room, and the Inspector keeps its width.
 	// The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
-	its "code" is a thing
+	its "code" is an editor part
 		// The file tabs and the code
-	its "program panel" is a thing
+	its "program panel" is an editor part
 		// The program's output and compiled code, under the code
-	its "app" is a thing
+	its "app" is an editor part
 		// The running program
-	its "inspector" is a thing
+	its "inspector" is an editor part
 		// The Inspector, while it's open
 	its "columns" is text
 		// The sizes across, as they were last dragged
@@ -235,7 +239,7 @@ a "file tab bar" is a view
 	// The bar's ⋯ is at its right, which compiled code to show beside the code.
 	// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 	"files" is a new file list
-	its "more" is a thing
+	its "more" is an editor part
 		// The code pane's ⋯, the editor's own
 	its "remember as" is text
 		// What this project's open tabs are kept under, the editor's own
@@ -284,7 +288,7 @@ a "file tab bar" is a view
 
 a "project menu" is a view
 	// The project's own menu, under its name before File:  what's about the whole project, not the file open (Owen, epic `mockup`)
-	its "theme" is a thing
+	its "theme" is an editor part
 		// Theme ›, the theme's fly-out:  the editor's own
 	to draw it
 		<menu direction="vertical" size="small" class="BarMenuItems" icon-column>
@@ -335,11 +339,11 @@ a "file menu" is a bar menu
 an "edit menu" is a bar menu
 	// Edit:  the code editor's Undo and Redo, what can be done to the selection, then Find
 	its title is "Edit"
-	its "undo" is a thing
+	its "undo" is an editor part
 		// Undo, its title the step it undoes:  the editor's own
-	its "redo" is a thing
+	its "redo" is an editor part
 		// Redo, likewise
-	its "part actions" is a thing
+	its "part actions" is an editor part
 		// What can be done to the parts selected:  the editor's own
 	to draw it
 		<menu direction="vertical" size="small" class="BarMenuItems" icon-column>
@@ -356,7 +360,7 @@ an "edit menu" is a bar menu
 a "view menu" is a bar menu
 	// View:  Run or Edit, then what shows, each ticked while it does
 	its title is "View"
-	its "inspector cards" is a thing
+	its "inspector cards" is an editor part
 		// A row for each of the Inspector's cards:  the editor's own
 	to draw it
 		<menu direction="vertical" size="small" class="BarMenuItems" icon-column ticks>

@@ -40,11 +40,14 @@ export class HueDropdown {
         size={options.size}
         value={chosen() ?? NONE_VALUE}
         aria-label={options.label()}
-        on-ui-changed={(event) => {
-          event.stopPropagation()
-          const value = String(event.detail.value)
-          options.onPick(value === NONE_VALUE ? undefined : (value as UIT.ThemeHue), event)
-        }}
+        // listened for, not `on-ui-changed`:  Solid's dev build warns of that spelling on every page (epic `editor` I66)
+        ref={(dropdown: HTMLElement) =>
+          dropdown.addEventListener("ui-changed", (event) => {
+            event.stopPropagation()
+            const value = String((event as CustomEvent<{ value: unknown }>).detail.value)
+            options.onPick(value === NONE_VALUE ? undefined : (value as UIT.ThemeHue), event)
+          })
+        }
       >
         <span slot="trigger" class={CHOSEN_CLASS}>
           {HueDropdown.dot(chosen, options.noneColors)}

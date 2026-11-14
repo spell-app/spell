@@ -28,10 +28,10 @@ export class ServerCompileStore implements SP.CompileCacheStore {
     return cache
   }
 
-  /** Entry `key`'s text, or `undefined` if the server has none. */
+  /** Entry `key`'s text, or `undefined` if the server has none:  its 204, no body (`SRV.DiskCache.router()`). */
   async get(key: string): Promise<string | undefined> {
     const response = await fetch(`${this.base}/${await this.versionNow()}/${key}`)
-    if (response.status === 404) return undefined
+    if (response.status === NO_ENTRY) return undefined
     if (!response.ok) throw new Error(`ServerCompileStore.get():  ${response.status} for ${key}`)
     return await response.text()
   }
@@ -62,3 +62,6 @@ export class ServerCompileStore implements SP.CompileCacheStore {
 
 /** The page server's compile cache. */
 const COMPILES_API = "/api/compiles"
+
+/** The status the compile cache answers a miss with:  204, No Content, never a failed request. */
+const NO_ENTRY = 204

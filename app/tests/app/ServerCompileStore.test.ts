@@ -20,7 +20,7 @@ describe("ServerCompileStore", () => {
         return new Response(null, { status: 204 })
       }
       const text = at === version ? entries.get(key) : undefined
-      return text === undefined ? new Response("", { status: 404 }) : new Response(text)
+      return text === undefined ? new Response(null, { status: 204 }) : new Response(text)
     })
     return { entries, asked }
   }

@@ -114,6 +114,21 @@ describe("PrefStore.declare()", () => {
     expect(errors).toHaveBeenCalledOnce()
   })
 
+  test("a kept value its declaration renamed reads as its new one, quietly, and is kept as it", () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined)
+    localStorage.setItem("PrefStore-test-renamed:suggest", "asYouType")
+    const prefs = store("PrefStore-test-renamed").declare("suggest", {
+      oneOf: ["whereItHelps", "everywhere", "onCtrlSpace"],
+      renamed: { asYouType: "everywhere", gone: "nowhere" }
+    })
+    expect(prefs.get("suggest")).toBe("everywhere")
+    expect(localStorage.getItem("PrefStore-test-renamed:suggest")).toBe("everywhere")
+    // renamed to a value it doesn't allow:  the default, logged
+    localStorage.setItem("PrefStore-test-renamed:suggest", "gone")
+    expect(prefs.get("suggest")).toBe("whereItHelps")
+    expect(errors).toHaveBeenCalledOnce()
+  })
+
   test("throws `TypeError` for a value its declaration doesn't allow", () => {
     const prefs = store("PrefStore-test-refuse").declare("scheme", { oneOf: ["light", "dark"] })
     expect(() => prefs.set("scheme", "purple")).toThrow("`scheme` is one of light, dark;  not `purple`")

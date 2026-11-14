@@ -336,8 +336,15 @@ export const HELP_TABLE: Readonly<
       fluid: "Always the full width of the page.",
       wide: "A fifth wider than the default container.",
       width: "A width of its own, any CSS length (`20em`, `320px`): centred, never wider than the page.",
+      size: "Text size, `mini` ...",
+      inverted:
+        "The dark scheme, as `<ui-segment inverted>`: a dark surface, and everything inside follows (`color-scheme: dark`, `--ui-inverted`).",
+      padding:
+        "Room inside its edges: `small` (1em, a segment's own), `md` more (1.5em), `lg` even more (3em); `none`, the default.",
+      columns: "Lays its children out as a grid of that many columns, `1` ...",
       grid: "Holds a grid: widened by the grid's gutters so its columns line up with other containers.",
-      spacing: 'With `grid`: room for a grid\'s wider gutters (`spacing="lg"`, `xl` wider still).',
+      spacing:
+        "With `columns`: the room between its columns, as `<ui-grid spacing>`: `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).",
       align: "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).",
       scrolling: "A capped height (per breakpoint) that scrolls; `short` ...",
       resizable: "With `scrolling`: people can drag its height."

@@ -175,8 +175,9 @@ describe("inspecting", () => {
     letGo.click()
     flush()
     expect(Inspector.selected).toBeUndefined()
-    // nothing selected:  the tip, with the inspect button
-    expect(host.querySelector(".InspectorTip .InspectAppButton")).not.toBeNull()
+    // nothing selected:  the tip, and the inspect button in the card's header (I60)
+    expect(host.querySelector(".InspectorTip")).not.toBeNull()
+    expect(host.querySelector('.InspectorCard [slot="actions"] .InspectAppButton')).not.toBeNull()
 
     Inspector.select(area.querySelector("ui-input")!)
     flush()
