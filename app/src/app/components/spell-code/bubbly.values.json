@@ -108,6 +108,18 @@
       "light": "8.5px",
       "dark": "8.5px"
     },
+    "--bubbly-tag-pad-left": {
+      "light": "6px",
+      "dark": "6px"
+    },
+    "--bubbly-tag-end-pad-left": {
+      "light": "7px",
+      "dark": "7px"
+    },
+    "--bubbly-tag-link-width": {
+      "light": "2px",
+      "dark": "2px"
+    },
     "--bubbly-gutter": {
       "light": "3px",
       "dark": "3px"
@@ -188,6 +200,10 @@
       "light": "15deg",
       "dark": "15deg"
     },
+    "--bubbly-font-family": {
+      "light": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "dark": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
+    },
     "--bubbly-monaco-line-height": {
       "light": "1.65",
       "dark": "1.65"
@@ -223,6 +239,10 @@
     "--bubbly-tag-corner": {
       "light": "calc(23px / 2 * 0.62) calc(23px / 2)",
       "dark": "calc(23px / 2 * 0.62) calc(23px / 2)"
+    },
+    "--bubbly-tag-foot-corner": {
+      "light": "6px",
+      "dark": "6px"
     },
     "--bubbly-foot-pill-height": {
       "light": "calc(23px - 2px)",
@@ -265,8 +285,8 @@
       "dark": "#5a5961"
     },
     "--bubbly-end-mark": {
-      "light": "#d4d4d6",
-      "dark": "#47464d"
+      "light": "#c8c8cb",
+      "dark": "#525159"
     }
   },
   "parts": {

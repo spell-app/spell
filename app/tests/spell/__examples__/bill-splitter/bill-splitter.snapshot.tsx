@@ -101,7 +101,7 @@ export class Table extends ViewableList<Diner> {
   static elementTag = core.defineElement(this, "test-project")
 
   drawItsPlaceholder() {
-    return <ui-text color="grey">{"Nobody yet:  add someone"}</ui-text>
+    return <ui-text color="grey" part="placeholder">{"Nobody yet:  add someone"}</ui-text>
   }
 
   static exclusive = true

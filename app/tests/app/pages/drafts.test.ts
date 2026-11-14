@@ -33,10 +33,10 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     page.evaluate(
       async ([from, to]) => {
         const { editor } = window as unknown as {
-          editor: { file: { contents: string }; saveFile(): Promise<void> }
+          editor: { file: { contents: string }; saveAll(): Promise<void> }
         }
         editor.file.contents = editor.file.contents.replace(from, to)
-        await editor.saveFile()
+        await editor.saveAll()
       },
       [from, to] as const
     )

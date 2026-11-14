@@ -49,7 +49,7 @@ describe("chrome + Actions", () => {
       <PanelMenu>
         <Submenu left>
           <Actions.showHelp />
-          <Actions.saveFile />
+          <Actions.saveAll />
         </Submenu>
         <Submenu right spring>
           <Actions.restartApp button />
@@ -90,8 +90,8 @@ describe("chrome + Actions", () => {
   })
 
   test("`iconOnly`:  a bare `<ui-icon link>`, its title the tooltip", async () => {
-    const saveFile = spyOnEditor("saveFile")
-    const host = await mount(() => <Actions.saveFile iconOnly />)
+    const saveFile = spyOnEditor("saveAll")
+    const host = await mount(() => <Actions.saveAll iconOnly />)
     const icon = host.querySelector<HTMLElement>("ui-icon.IconAction")!
     expect(host.querySelector("ui-item")).toBeNull()
     expect([icon.getAttribute("name"), icon.getAttribute("label"), icon.getAttribute("title")]).toEqual([
@@ -118,19 +118,19 @@ describe("chrome + Actions", () => {
     const host = await mount(() => (
       <PanelMenu>
         <Actions.showEditor />
-        <Actions.saveFile />
+        <Actions.saveAll />
       </PanelMenu>
     ))
-    const [showEditor, saveFile] = host.querySelectorAll("ui-item")
+    const [showEditor, saveAll] = host.querySelectorAll("ui-item")
     expect(text(showEditor)).toBe("Edit App")
-    expect(saveFile.hasAttribute("selected")).toBe(false)
+    expect(saveAll.hasAttribute("selected")).toBe(false)
 
     editor.projectRoot = { type: "example", Type: "Example" } as EditorStore["projectRoot"]
     editor.file = { isDirty: true } as EditorStore["file"]
     flush()
     expect(text(showEditor)).toBe("Edit Example")
-    expect(saveFile.hasAttribute("selected")).toBe(true)
-    expect((saveFile as HTMLElement & { selected?: boolean }).selected).toBe(true)
+    expect(saveAll.hasAttribute("selected")).toBe(true)
+    expect((saveAll as HTMLElement & { selected?: boolean }).selected).toBe(true)
   })
 
   test("a dialog action shows its dialog with the other props, and hands on the value", async () => {

@@ -1034,6 +1034,32 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "IsInAType",
+          "ruleNames": ["is_in_a_type"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsInAType.ts",
+          "line": 14,
+          "purpose": "`{lhs} is [not] in a {list type}` -- is it in any list of that type?",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} in (a|an) (expression:{known_type})",
+              "example": "thing is in a column",
+              "outputs": {
+                "js": {
+                  "code": "core.isInA(thing, Column)"
+                },
+                "ts": {
+                  "code": "core.isInA(thing, Column)"
+                },
+                "py": {
+                  "code": "core.is_in_a(thing, Column)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "IsIn",
           "ruleNames": ["is_in"],
           "internal": false,
@@ -2115,11 +2141,23 @@
           "ruleNames": ["the_own_property"],
           "internal": false,
           "file": "src/spell/rules/properties/TheOwnProperty.ts",
-          "line": 20,
+          "line": 24,
           "purpose": "`the {member words}` inside an action, reading a property of the thing the action runs on, e.g. `shuffle the stock` => `this.stock.shuffle()` (epic `language`, P2).",
           "syntaxes": [
             {
-              "syntax": "{definite_article} {property:member_words}"
+              "syntax": "{definite_article} {property:member_words}",
+              "example": "a \"card\" is a thing\na \"pile\" is a list of cards\nsolitaire is an app\n\t\"stock\" is a new pile\n\tto play a card\n\t\tprint the stock",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"stock\", { init: () => new Pile({ id: \"stock\" }), early: true }) }\n  get stock() { return this.getProp(\"stock\") }\n  set stock(value) { this.setProp(\"stock\", value) }\n}\nexport const solitaire = new Solitaire()"
+                },
+                "ts": {
+                  "code": "export class Card extends Thing {\n  play() {\n    core.console.log(solitaire.stock)\n  }\n}\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}\nexport class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pile({ id: \"stock\" }), early: true })\n  accessor stock!: Pile\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitaire\", [\n    { name: \"stock\", kind: \"json\", description: \"Its stock.\" }\n  ])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()"
+                },
+                "py": {
+                  "code": "class Card(Thing):\n    def play(self) -> None:\n        core.console.log(solitaire.stock)\n\nclass Pile(List):\n    item_type = Card\n\nclass Solitaire(App):\n    element_tag = \"syntax-block-app\"\n\n    stock = prop(init=lambda: Pile(id=\"stock\"), early=True)\n\nsolitaire = Solitaire()"
+                }
+              }
             }
           ],
           "aliases": ["expression"]
@@ -4209,6 +4247,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "EachInStatement",
+          "ruleNames": ["each_in_statement"],
+          "internal": false,
+          "file": "src/spell/rules/lists/EachInStatement.ts",
+          "line": 24,
+          "purpose": "A statement run once for each item of a list, the list said in it -- `add each card in the deck to the stock` (epic `language` P55, Q59).",
+          "syntaxes": [
+            {
+              "syntax": "{statement} each {item:singular_identifier} in {list:expression}",
+              "example": "add each card in deck to stock",
+              "outputs": {
+                "js": {
+                  "code": "core.map(deck, (card) => core.append(stock, card))"
+                },
+                "ts": {
+                  "code": "core.map(deck, (card) => core.append(stock, card))"
+                },
+                "py": {
+                  "code": "for card in deck:\n    core.append(stock, card)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ListRangeIteration",
           "ruleNames": ["list_range_iteration"],
           "internal": false,
@@ -4738,11 +4802,11 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 17,
+          "line": 26,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?",
               "example": "a card is a thing",
               "outputs": {
                 "js": {
@@ -4757,7 +4821,7 @@
               }
             },
             {
-              "syntax": "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?",
               "example": "a \"card\" is a thing",
               "outputs": {
                 "js": {
@@ -5853,6 +5917,38 @@
           "aliases": ["statement"]
         },
         {
+          "className": "DrawIt",
+          "ruleNames": ["draw_it"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DrawIt.ts",
+          "line": 54,
+          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
+          "syntaxes": [
+            {
+              "syntax": "to {phrase:draw_method} :? {statement_body}?",
+              "example": "a \"pile\" is a viewable list of things\n\tto draw its placeholder\n\t\t<text>🂠</text>",
+              "outputs": {
+                "js": {
+                  "code": "export class Pile extends ViewableList {\n  static instanceType = Thing\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  drawItsPlaceholder() {\n    return h(\"text\", { part: \"placeholder\" }, \"🂠\")\n  }\n}"
+                },
+                "ts": {
+                  "code": "export class Pile extends ViewableList<Thing> {\n  static instanceType = Thing\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  drawItsPlaceholder() {\n    return <text part=\"placeholder\">🂠</text>\n  }\n}\n\nexport class PileElement extends SpellElement<Pile> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-pile\", \"pile\", [])\n\n  drawItsPlaceholder() {\n    return this.currentThing?.drawItsPlaceholder()\n  }\n}\ncore.useElement(Pile, PileElement)"
+                },
+                "py": {
+                  "code": "class Pile(ViewableList):\n    item_type = Thing\n    element_tag = \"syntax-block-pile\"\n\n    def draw_its_placeholder(self) -> Element:\n        return h(\"text\", {\"part\": \"placeholder\"}, \"🂠\")"
+                }
+              }
+            },
+            {
+              "syntax": "to {alias:text} :? ({inline_expression}|{nested_expression})?"
+            },
+            {
+              "syntax": "to draw its {slot:member_words} :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "DefineGroup",
           "ruleNames": ["define_group"],
           "internal": false,
@@ -6367,26 +6463,6 @@
           "aliases": ["statement"]
         },
         {
-          "className": "DrawIt",
-          "ruleNames": ["draw_it"],
-          "internal": false,
-          "file": "src/spell/rules/classes/DrawIt.ts",
-          "line": 52,
-          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
-          "syntaxes": [
-            {
-              "syntax": "to {alias:text} :? ({inline_expression}|{nested_expression})?"
-            },
-            {
-              "syntax": "to {phrase:draw_method} :? {statement_body}?"
-            },
-            {
-              "syntax": "to draw its {slot:member_words} :? {statement_body}?"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
           "className": "HasSlots",
           "ruleNames": ["has_slots"],
           "internal": false,
@@ -6411,7 +6487,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 28,
+          "line": 29,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {
@@ -9445,6 +9521,32 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "StatementIf",
+          "ruleNames": ["statement_if"],
+          "internal": false,
+          "file": "src/spell/rules/if/StatementIf.ts",
+          "line": 19,
+          "purpose": "A statement, then when it runs -- `return yes if the card is a king`.",
+          "syntaxes": [
+            {
+              "syntax": "{statement} if {condition:expression}",
+              "example": "return yes if bar",
+              "outputs": {
+                "js": {
+                  "code": "if (bar) return true"
+                },
+                "ts": {
+                  "code": "if (bar) return true"
+                },
+                "py": {
+                  "code": "if bar:\n    return True"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },
@@ -9950,7 +10052,7 @@
           "ruleNames": ["create_hook"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateHook.ts",
-          "line": 28,
+          "line": 30,
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {

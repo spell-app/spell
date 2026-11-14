@@ -106,6 +106,7 @@ describe("BubblyMarks.of()", () => {
       "    action:  to draw its front",
       "      input:  draw its front",
       "      control:  if it is face up",
+      '        tag-link:  <text color="blue">{its rank}</text>',
       '        tag:  <text color="blue">{its rank}</text>',
       '        input:  blue">{its rank}</text>',
       "        tag:  </text>"

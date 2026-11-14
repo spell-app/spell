@@ -47,6 +47,8 @@ import { DrawnLines } from "./DrawnLines"
  *   - SIDE EFFECT:  the slot is one of its type's (`P.TypeScope.declareSlot()`).
  *   - Its markup carries the slot's name as a CSS part (J6):  `part="front"`, so `::part(front)` styles it --
  *     see `withPart()`.
+ * - A list's placeholder carries its part too, `part="placeholder"`, in every language (epic `language` P55):
+ *   `to draw its placeholder` then `<text>🂠</text>`, and `::part(placeholder)` styles it -- see `partOf()`.
  * - In a drawing's body, a line of markup IS what it draws, no `return` -- see `drawn_markup`.
  */
 export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItMatchData> {
@@ -170,6 +172,14 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
     return method === "draw" ? { drawing: "draw" } : undefined
   }
 
+  /**
+   * The CSS part a drawing's markup carries, if any:  a slot's name (`front`), or a placeholder's, `placeholder`.
+   * - The placeholder's is the same in every language:  a page's styles say `::part(placeholder)`.
+   */
+  static partOf({ drawing, slot }: { drawing: Drawing; slot?: string }): string | undefined {
+    return slot ?? (drawing === "draw_its_placeholder" ? PLACEHOLDER_PART : undefined)
+  }
+
   /** Is `scope` a loop's body, `for each ...`'s or `repeat ...`'s -- see `SpellStatement.loops`? */
   static isLoop(scope: P.MethodScope): boolean {
     return (scope.declaredBy?.rule as { loops?: boolean } | undefined)?.loops === true
@@ -188,6 +198,8 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
     const index = attrs.findIndex((attr) => attr.name === "part")
     const said = index < 0 ? undefined : attrs[index]!.value
     if (index >= 0 && !(said instanceof P.ASTStringLiteral)) return element
+    // said already, `<text part="placeholder">`:  as it is
+    if (said instanceof P.ASTStringLiteral && `${said.value}`.split(/\s+/).includes(name)) return element
     const names = said instanceof P.ASTStringLiteral ? `${said.value} ${name}` : name
     const value = new P.ASTStringLiteral(element.match, { value: names, quote: '"' })
     const attr = new P.ASTJSXAttribute(element.match, { name: "part", value })
@@ -252,8 +264,9 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
     const drawing = match.data.drawing ?? "draw"
     const isEachItem = drawing === "draw_each_item"
     const { slot } = match.data
+    const part = DrawIt.partOf({ drawing, slot })
     let body = P.matchAST<MethodBody>(this.getBody(match))
-    if (slot && body instanceof P.ASTExpression) body = DrawIt.withPart(body, slot) as MethodBody
+    if (part && body instanceof P.ASTExpression) body = DrawIt.withPart(body, part) as MethodBody
     const method = new P.ASTMethodDefinition(match, {
       args: isEachItem ? [new P.ASTVariableExpression(match, { name: ITEM, datatype: match.data.itemType })] : [],
       body
@@ -284,6 +297,9 @@ type Drawing = (typeof DRAWINGS)[number] | "draw_its_slot"
 
 /** See `Drawing`. */
 const DRAWINGS = ["draw", "draw_each_item", "draw_its_placeholder"] as const
+
+/** The CSS part a list's placeholder carries, `part="placeholder"` -- see `DrawIt.partOf()`. */
+const PLACEHOLDER_PART = "placeholder"
 
 /** The name `to draw each item` calls its item, in every language:  `drawEachItem(item)`. */
 const ITEM = "item"

@@ -4,8 +4,13 @@
  * (epic `language`, Owen 2026-11-11):  the same shapes as Spell's, their corners cut (`bubbly-html`).
  * - Each element with children on lines of their own is a `bubbly-block`:
  *   its start tag the band, its children the body, its end tag a band of its own under the rail (`bubbly-foot-pill`).
+ *   - a nameless end tag, Spell's `</>`, is the block's foot instead:  a thin band under it, from the rail to past
+ *     its `⟩` (`bubbly-foot-thin`, Owen, Q58)
  * - An element on one line is a line of its own:  its start tag a small pill (`bubbly-tag-pill`), what's inside it on
- *   the paper, its end tag a pill of its own.
+ *   the paper, its end tag a pill of its own;  the two pills linked by a line along their top and bottom when
+ *   something is between them (`bubbly-tag-link`, Q58).
+ * - A start tag on lines of its own (`<spell-editor`, an attribute a line, `>`) is ONE tall band, a row a line, its
+ *   point at its `⟩` (`bubbly-tag-tall`, T118):  a block's band, a band alone, or a one-line element's start tag.
  * - An element with no end tag (`<meta …>`, `<br />`) is a band by itself, `bubbly-pill`.
  * - Whatever holds a start tag is a `bubbly-tag-start` too, an end tag's a `bubbly-tag-end`:  hooks to style them by.
  * - An attribute's value is a white pill on its band (`bubbly-input`), a quoted one with Spell's curly marks just
@@ -32,6 +37,15 @@ export class BubblyMarkup {
    */
   static treeOf(source: string, from = 0, to = source.length): MarkupNode[] {
     return treeOf(tokensOf(source, from, to))
+  }
+
+  /**
+   * Is `tag`, a start tag on lines of its own, alone on its last line but its `>`?  Then its rows above overhang
+   * that line's piece of its band, their bottom-right corner cut (`bubbly-tag-tall-short-tail`).
+   */
+  static hasShortTail(source: string, tag: MarkupStartTag): boolean {
+    const lastLineStart = source.lastIndexOf("\n", tag.end - 1)
+    return !tag.attributes.some((attribute) => attribute.nameStart > lastLineStart)
   }
 
   /**
@@ -288,18 +302,65 @@ class MarkupWriter {
     const kind = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
     const inside = element.children.filter((child) => child.kind !== "text" || this.slice(child).trim())
     const insideText = element.close ? this.source.slice(element.open.end, element.close.start) : ""
+    const isTall = this.isTall(element.open)
     // no end tag (`<meta …>`, `<br />`):  one band;  else a line of tags, each its own pill
-    if (!inside.length && !element.close)
+    if (!inside.length && !element.close) {
+      if (isTall) return this.tallTag(element.open, `bubbly-tag-tall-alone ${kind}`, "")
       return `<p class="bubbly-pill bubbly-tag-start ${kind}">${this.startTag(element.open)}</p>`
-    if (!insideText.includes("\n")) return `<p class="bubbly-line bubbly-tag-line">${this.inline([element])}</p>`
-    return (
-      `<div class="bubbly-block ${kind}"><p class="bubbly-head-pill bubbly-tag-start">${this.startTag(element.open)}</p>` +
-      `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>` +
-      (element.close
+    }
+    if (!insideText.includes("\n")) {
+      if (!isTall) return `<p class="bubbly-line bubbly-tag-line">${this.inline([element])}</p>`
+      // its start tag on lines of its own:  one tall band, the rest of the element after its `⟩` on its last line
+      const after = this.inline(element.children) + this.endPill(element, !inside.length)
+      return this.tallTag(element.open, `bubbly-tag-tall-inline ${kind}`, after)
+    }
+    const head = isTall
+      ? this.tallTag(element.open, "bubbly-tag-tall-head", "")
+      : `<p class="bubbly-head-pill bubbly-tag-start">${this.startTag(element.open)}</p>`
+    // a nameless end tag, `</>`:  the block's foot, a thin band under it (Owen, Q58)
+    const foot = !element.close
+      ? `<div class="bubbly-foot"></div>`
+      : element.close.tag
         ? `<p class="bubbly-foot bubbly-foot-pill bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
-        : `<div class="bubbly-foot"></div>`) +
-      `</div>`
+        : `<p class="bubbly-foot bubbly-foot-thin bubbly-tag-end">${this.endTag(element.close, "block")}</p>`
+    const thin = element.close && !element.close.tag ? " bubbly-thin-foot" : ""
+    return (
+      `<div class="bubbly-block ${kind}${thin}">${head}` +
+      `<div class="bubbly-gutter"></div><div class="bubbly-body">${this.nodes(element.children)}</div>${foot}</div>`
     )
+  }
+
+  /**
+   * A start tag on lines of its own (`<spell-editor`, an attribute a line, `>`):  ONE tall band (Owen, T118),
+   * each line a row in it, as in the file;  its last line's piece ends in the band's point, at its `⟩`,
+   * `after` it on the same line:  what's left of a one-line element, its end tag's pill.
+   * - `classes`:  where it sits, `bubbly-tag-tall-head` (a block's), `-alone`, `-inline`;  and its colour
+   */
+  private tallTag(tag: MarkupStartTag, classes: string, after: string): string {
+    const rows = this.startTagRows(tag)
+    const last = rows.pop()!
+    const upper = rows.map((row) => `<p class="bubbly-tag-row">${row}</p>`).join("")
+    // its `>` alone on its last line:  the rows above overhang it, their corner cut
+    const shortTail = BubblyMarkup.hasShortTail(this.source, tag) ? " bubbly-tag-tall-short-tail" : ""
+    return (
+      `<div class="bubbly-tag-tall bubbly-tag-start ${classes}${shortTail}"><div class="bubbly-tag-rows">${upper}</div>` +
+      `<p class="bubbly-tag-row bubbly-tag-row-last"><span class="bubbly-tag-tail">${last}</span>${after}</p></div>`
+    )
+  }
+
+  /** Does `tag` run over more than one line? */
+  private isTall(tag: MarkupStartTag): boolean {
+    return this.source.slice(tag.start, tag.end).includes("\n")
+  }
+
+  /**
+   * A one-line element's end tag's pill;  none without one.
+   * - `touching`:  nothing between its tags, their points touch
+   */
+  private endPill(element: MarkupElement, touching: boolean): string {
+    if (!element.close) return ""
+    const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}${touching ? " bubbly-tags-touch" : ""}`
+    return `<span class="${kind} bubbly-tag-end">${this.endTag(element.close)}</span>`
   }
 
   /**
@@ -318,19 +379,58 @@ class MarkupWriter {
       .join("")
   }
 
-  /** An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill of its own. */
+  /**
+   * An element on a line's paper:  its start tag a pill, what's inside it, its end tag a pill of its own.
+   * - Something between them:  the two pills linked by a thin line along their top and bottom (`bubbly-tag-link`,
+   *   Owen, Q58), so the pair reads as one element
+   */
   private tagPills(element: MarkupElement): string {
     const inside = this.inline(element.children)
     // nothing between its tags:  their points touch
     const touching = inside ? "" : " bubbly-tags-touch"
-    const kind = `bubbly-tag-pill bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}${touching}`
-    const close = element.close ? `<span class="${kind} bubbly-tag-end">${this.endTag(element.close)}</span>` : ""
-    return `<span class="${kind} bubbly-tag-start">${this.startTag(element.open)}</span>${inside}${close}`
+    const partOfSpeech = `bubbly-${BubblyMarkup.partOfSpeechOf(element.tag)}`
+    const kind = `bubbly-tag-pill ${partOfSpeech}${touching}`
+    const start = `<span class="${kind} bubbly-tag-start">${this.startTag(element.open)}</span>`
+    if (!element.close) return start + inside
+    const pills = `${start}${inside}${this.endPill(element, !inside)}`
+    return inside ? `<span class="bubbly-tag-link ${partOfSpeech}">${pills}</span>` : pills
   }
 
   /** A start tag on its band:  `<` faint, its name, each value a white pill. */
   private startTag(tag: MarkupStartTag): string {
-    const attributes = tag.attributes
+    return `${ANGLE_OPEN_MARK}<span class="bubbly-tag-name">${tag.tag}</span>${this.attributes(tag.attributes)}${this.closeMark(tag)}`
+  }
+
+  /**
+   * A start tag on lines of its own, a row each, as in the file:  the first its `<`, name and the attributes on its
+   * line, each other its attributes, the last its `>` too;  each row's indent past the tag's `<` kept, as spaces.
+   */
+  private startTagRows(tag: MarkupStartTag): string[] {
+    const lineOf = (offset: number) => this.source.slice(tag.start, offset).split("\n").length - 1
+    const rows: MarkupAttribute[][] = []
+    for (const attribute of tag.attributes) (rows[lineOf(attribute.nameStart)] ??= []).push(attribute)
+    const lastLine = lineOf(tag.end - 1)
+    const tagColumn = columnOf(this.source, tag.start)
+    const html: string[] = []
+    for (let line = 0; line <= lastLine; line++) {
+      const attributes = this.attributes(rows[line] ?? [])
+      if (!line) {
+        html.push(`${ANGLE_OPEN_MARK}<span class="bubbly-tag-name">${tag.tag}</span>${attributes}`)
+        continue
+      }
+      // the row's indent past the `<`:  its first attribute's, or its `>`'s
+      const first = rows[line]?.[0]?.nameStart ?? tag.end - (tag.selfClosing ? 2 : 1)
+      const indent = " ".repeat(Math.max(0, columnOf(this.source, first) - tagColumn))
+      // its first attribute's own room before it is in the file's indent, as in the editor
+      const row = `<span class="bubbly-tag-indent">${indent}</span>${attributes.replace(/^ /, "")}`
+      html.push(line === lastLine ? row + this.closeMark(tag) : row)
+    }
+    return html
+  }
+
+  /** Attributes on a start tag's band, each with a space before it. */
+  private attributes(attributes: MarkupAttribute[]): string {
+    return attributes
       .map(({ name, value, isQuoted, isExpression }) => {
         const named = ` <span class="bubbly-attribute-name">${escape(name)}</span>`
         if (value === undefined) return named
@@ -338,7 +438,11 @@ class MarkupWriter {
         return name ? `${named}<span class="bubbly-mark bubbly-equals">=</span>${shown}` : ` ${shown}`
       })
       .join("")
-    return `<span class="bubbly-mark">${ANGLE_OPEN}</span><span class="bubbly-tag-name">${tag.tag}</span>${attributes}<span class="bubbly-mark">${tag.selfClosing ? `${SLASH}${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
+  }
+
+  /** A start tag's `>`, or `/>`. */
+  private closeMark(tag: MarkupStartTag): string {
+    return `<span class="bubbly-mark">${tag.selfClosing ? `${SLASH}${ANGLE_CLOSE}` : ANGLE_CLOSE}</span>`
   }
 
   /**
@@ -413,6 +517,9 @@ function valueOf(value: string, isQuoted: boolean): string {
 const ANGLE_OPEN = `<span class="bubbly-angle bubbly-angle-open">&lt;</span>`
 const ANGLE_CLOSE = `<span class="bubbly-angle bubbly-angle-close">&gt;</span>`
 
+/** A start tag's `<`, faint. */
+const ANGLE_OPEN_MARK = `<span class="bubbly-mark">${ANGLE_OPEN}</span>`
+
 /** The `/` of an end tag, `</h2>`, and of `<br />`:  heavy, as the brackets beside it are. */
 const SLASH = `<span class="bubbly-slash">/</span>`
 
@@ -429,6 +536,12 @@ function indentOf(line: string): number {
     else break
   }
   return columns
+}
+
+/** Which column `offset` is at on its line, a tab 2, as `indentOf()` counts. */
+function columnOf(source: string, offset: number): number {
+  const lineStart = source.lastIndexOf("\n", offset - 1) + 1
+  return indentOf(source.slice(lineStart, offset).replace(/\S/g, " "))
 }
 
 /** `text` safe in HTML. */

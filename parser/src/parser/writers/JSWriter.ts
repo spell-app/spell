@@ -1134,7 +1134,9 @@ export class JSWriter extends ProgramWriter {
         statements
           // the first starts the block;  each after it could run into the one above -- see `jsText.statement()`
           .map((statement, index) => {
-            const code = String(this.write(statement))
+            const written = String(this.write(statement))
+            // a step that waits, in a `create()` that can't:  see `WriterProject.heldSteps`
+            const code = this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written
             return index ? jsText.statement(code) : code
           })
           .join(jsText.NEWLINE)
@@ -1225,6 +1227,11 @@ export class JSWriter extends ProgramWriter {
    */
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     if (!node.value) return this.returnContinues ? "continue" : "return"
+    // a `create()`'s last line, a call that waits:  held, as `create()` answers nothing -- see `WriterProject.heldSteps`
+    if (this.project.heldSteps.has(node.value)) {
+      this.statements.add(node.value)
+      return `core.holdWhile(() => ${this.bare(node.value)})`
+    }
     // a body's last line calling a method that gives nothing (I47's last-line value):  just the call
     if (this.givesNothing(node.value)) {
       this.statements.add(node.value)

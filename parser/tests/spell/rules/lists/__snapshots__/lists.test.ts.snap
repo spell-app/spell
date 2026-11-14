@@ -7,6 +7,7 @@ exports[`testing spell module lists > rule group specs > match snapshot -- if th
   "can_give_up": "operator|expression",
   "can_take": "operator|expression",
   "copy_list": "expression|type?",
+  "each_in_statement": "statement|item|list",
   "ends_with": "operator|exactly?|expression",
   "list_add": "thing|method?|list",
   "list_add_relative": "thing|list|operator|item",

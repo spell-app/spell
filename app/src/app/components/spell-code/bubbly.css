@@ -84,6 +84,11 @@
   --bubbly-pill-pad-right: 16px;
   /* in the editor, a head line's words this much further in than the lines under it, its band where it was (Owen) */
   --bubbly-pill-left-shift: 8.5px;
+  /* an HTML block's start tag's `⟨` this far into its band, clear of its cut top-left corner;  its end tag's */
+  --bubbly-tag-pad-left: 6px;
+  --bubbly-tag-end-pad-left: 7px;
+  /* a one-line element's start and end tags linked by a line this thick along their pills' top and bottom (Q58) */
+  --bubbly-tag-link-width: 2px;
 
   /****** a body:  the gutter down its left, its white, the foot under it ******/
   --bubbly-gutter: 3px;
@@ -124,8 +129,9 @@
   quotes: "\201C" "\201D";
 
   /****** the drawing's box ******/
-  /* the system font:  Spell's default */
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* the system font:  Spell's default;  a tag's brackets are drawn in it in the editor too, not the editor's font */
+  --bubbly-font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--bubbly-font-family);
   font-size: var(--bubbly-font-size);
   line-height: var(--bubbly-line-height);
   color: var(--bubbly-ink);
@@ -193,6 +199,8 @@
   .bubbly-block,
   .bubbly-pill,
   .bubbly-tag-pill,
+  .bubbly-tag-link,
+  .bubbly-tag-tall,
   .bubbly-taghead {
     /* how much of its hue a band takes over the paper, light then dark */
     --bubbly-pill: light-dark(
@@ -353,7 +361,7 @@
   }
 
   /* every band, with a body or not:  one line exactly its setting tall (an input would push it a pixel taller) */
-  .bubbly-block > :is(.bubbly-head-pill, .bubbly-tag-end),
+  .bubbly-block > :is(.bubbly-head-pill, .bubbly-foot-pill.bubbly-tag-end),
   .bubbly-pill {
     background: var(--bubbly-pill);
     padding: max(0px, 2 * var(--bubbly-pill-nudge)) var(--bubbly-pill-pad-right) max(0px, -2 * var(--bubbly-pill-nudge))
@@ -657,6 +665,11 @@
   }
   .bubbly-angle::before {
     position: relative;
+    /*
+     * the drawing's font, never the editor's:  the system font has no `⟨`, so the browser borrows one, and with the
+     * editor's list (`…, Menlo, …`) it borrows Menlo's, half as slanted as the bands' ends are cut
+     */
+    font-family: var(--bubbly-font-family);
     font-size: var(--bubbly-font-size);
     font-weight: 800;
     /* line up > point with the pill corner. */
@@ -721,6 +734,8 @@
     --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope))
       calc(var(--bubbly-pill-height) / 2);
     --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
+    /* a `</>` foot's corners:  the body's over it, and the rail's turn into it, a gutter's width out */
+    --bubbly-tag-foot-corner: 6px;
     /* a block's end tag:  a shorter band than its start tag's */
     --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 2px);
     /* a row:  the editor's line, 15px times `--bubbly-monaco-line-height` (1.65), rounded */
@@ -728,7 +743,7 @@
     /* a quoted value's marks snug beside it:  less room outside them than Spell's */
     --bubbly-quote-margin: 11px;
     /* a block's band's words clear of its cut top-left corner */
-    --bubbly-pill-pad-left: 6px;
+    --bubbly-pill-pad-left: var(--bubbly-tag-pad-left);
 
     :is(.bubbly-head-pill, .bubbly-pill, .bubbly-foot, .bubbly-tag-end, .bubbly-gutter, .bubbly-body) {
       corner-shape: bevel;
@@ -795,7 +810,7 @@
       padding-top: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
       padding-bottom: calc((var(--bubbly-html-row) - var(--bubbly-foot-pill-height)) / 2);
     }
-    .bubbly-block > .bubbly-tag-end {
+    .bubbly-block > .bubbly-foot-pill.bubbly-tag-end {
       margin-bottom: calc((var(--bubbly-html-row) - var(--bubbly-foot-pill-height)) / 2);
     }
 
@@ -851,17 +866,168 @@
      * a block's end tag:  shorter, from the rail's left edge, its outer corner as its start tag's, its point at the
      * same slant, its words a pixel up as a band's are
      */
-    .bubbly-block > .bubbly-tag-end {
+    .bubbly-block > .bubbly-foot-pill.bubbly-tag-end {
       width: auto;
       height: var(--bubbly-foot-pill-height);
       margin-left: 0;
-      padding-left: 7px;
+      padding-left: var(--bubbly-tag-end-pad-left);
       line-height: calc(var(--bubbly-foot-pill-height) + 2 * var(--bubbly-pill-nudge));
       border-top-left-radius: 0;
       /* a start tag's corners, which the browser shrinks to fit its shorter height, the outer one with them */
       border-top-right-radius: var(--bubbly-tag-corner);
       border-bottom-right-radius: var(--bubbly-tag-corner);
       border-bottom-left-radius: var(--bubbly-block-outer-cut);
+    }
+
+    /****** a start tag on lines of its own (T118):  ONE tall band, a row a line, its point at its `⟩` (Owen) ******/
+    /*
+     * - its rows above the last one a box of the band's colour, the last one's piece a band to its `⟩`, ending in the
+     *   point;  where the box overhangs that piece (a `>` alone on its line), its bottom-right corner is cut too
+     * - a block's:  its outer corner top-left, the rail dropping from its bottom-left;  else cut both corners there
+     */
+    .bubbly-tag-tall {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      /* where a band in its first row would start */
+      margin-top: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+    }
+    .bubbly-tag-rows,
+    .bubbly-tag-tail {
+      background: var(--bubbly-pill);
+      padding-inline: var(--bubbly-bracket-pad);
+      corner-shape: bevel;
+      white-space: pre;
+    }
+    .bubbly-tag-rows {
+      border-top-left-radius: var(--bubbly-tag-corner);
+      border-top-right-radius: var(--bubbly-tag-corner);
+    }
+    .bubbly-tag-tall-short-tail .bubbly-tag-rows {
+      border-bottom-right-radius: var(--bubbly-tag-corner);
+    }
+    /* each row a line tall, its words where a band's are:  a pixel up from the middle */
+    .bubbly-tag-row {
+      height: var(--bubbly-html-row);
+      line-height: var(--bubbly-pill-text-line);
+    }
+    /* the last row:  its band in the row, as a band's;  the rest of the line after it */
+    .bubbly-tag-row-last {
+      height: var(--bubbly-pill-height);
+      margin-bottom: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+      white-space: nowrap;
+    }
+    .bubbly-tag-tail {
+      display: inline-block;
+      box-sizing: border-box;
+      vertical-align: top;
+      height: var(--bubbly-pill-height);
+      /* wide enough for its point whole, and the cut corner left of it */
+      min-width: calc(var(--bubbly-pill-height) * var(--bubbly-tag-slope));
+      border-top-right-radius: var(--bubbly-tag-corner);
+      border-bottom-right-radius: var(--bubbly-tag-corner);
+      border-bottom-left-radius: var(--bubbly-tag-corner);
+    }
+    /* the indent past its `<` is the file's:  its spaces */
+    .bubbly-tag-indent {
+      white-space: pre;
+    }
+    .bubbly-tag-row .bubbly-tag-indent + .bubbly-attribute-name {
+      margin-left: 0;
+    }
+    /* a block's:  its `⟨` as far in as a block's band's, its outer corner, the rail from its bottom-left */
+    .bubbly-block > .bubbly-tag-tall-head {
+      grid-row: 1;
+      grid-column: 1 / -1;
+      justify-self: start;
+      .bubbly-tag-row:first-child {
+        padding-left: calc(var(--bubbly-tag-pad-left) - var(--bubbly-bracket-pad));
+      }
+      .bubbly-tag-rows {
+        border-top-left-radius: var(--bubbly-block-outer-cut);
+      }
+      .bubbly-tag-tail {
+        border-bottom-left-radius: 0;
+      }
+    }
+    /* by itself or a line's start:  where a band starts, left of the body's lines */
+    :is(&, .bubbly-body) > .bubbly-tag-tall:not(.bubbly-tag-tall-head) {
+      margin-left: calc(-1 * var(--bubbly-line-inset));
+    }
+    /* a one-line element's end tag after its `⟩`:  room before it, or their points touch */
+    .bubbly-tag-tail + .bubbly-tag-pill {
+      translate: none;
+    }
+    .bubbly-tag-tail + .bubbly-tags-touch {
+      margin-left: 0;
+    }
+
+    /****** a block's nameless end tag, `</>`:  its foot, a thin band from the rail to past its `⟩` (Owen, Q58) ******/
+    /*
+     * - the `</>` on the body's paper, where a band's words would be;  the band only the bottom of a band, a foot's
+     *   height, the rail turning into it at a cut corner, as a declaration's foot
+     */
+    .bubbly-thin-foot {
+      /* the body's corner over the foot:  small, so the `⟨` above it stays on the paper */
+      --bubbly-block-inner-corner: var(--bubbly-tag-foot-corner);
+      --bubbly-gutter-corner: calc(var(--bubbly-gutter) + var(--bubbly-tag-foot-corner));
+    }
+    .bubbly-block.bubbly-thin-foot {
+      > .bubbly-gutter {
+        grid-row: 2 / span 2;
+        border-bottom-left-radius: calc(var(--bubbly-gutter-corner) * var(--bubbly-tag-slope))
+          var(--bubbly-gutter-corner);
+      }
+      /* down to the foot's top:  the `</>`'s row, but the foot under it */
+      > .bubbly-body {
+        padding-bottom: calc((var(--bubbly-html-row) + var(--bubbly-pill-height)) / 2 - var(--bubbly-foot-height));
+      }
+    }
+    .bubbly-block > .bubbly-foot-thin {
+      grid-row: 3;
+      grid-column: 1 / -1;
+      justify-self: start;
+      box-sizing: border-box;
+      width: auto;
+      height: calc((var(--bubbly-html-row) + var(--bubbly-pill-height)) / 2);
+      margin: calc(var(--bubbly-foot-height) - (var(--bubbly-html-row) + var(--bubbly-pill-height)) / 2) 0
+        calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2) 0;
+      padding: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2) var(--bubbly-bracket-pad) 0
+        var(--bubbly-tag-end-pad-left);
+      line-height: var(--bubbly-pill-text-line);
+      border-radius: 0;
+      white-space: nowrap;
+      /* the band:  its bottom, past the rail's corner */
+      background: linear-gradient(var(--bubbly-pill) 0 0) right bottom / calc(100% - var(--bubbly-gutter-corner))
+        var(--bubbly-foot-height) no-repeat;
+    }
+
+    /****** a one-line element's two tags linked:  a line along their pills' top and bottom (Owen, Q58) ******/
+    .bubbly-tag-link {
+      display: inline-block;
+      vertical-align: top;
+      height: var(--bubbly-pill-height);
+      line-height: var(--bubbly-pill-text-line);
+      margin: 0 var(--bubbly-input-gap);
+      background:
+        linear-gradient(var(--bubbly-pill) 0 0) top / 100% var(--bubbly-tag-link-width) no-repeat,
+        linear-gradient(var(--bubbly-pill) 0 0) bottom / 100% var(--bubbly-tag-link-width) no-repeat;
+      white-space: nowrap;
+      > .bubbly-tag-pill {
+        translate: none;
+      }
+      > .bubbly-tag-pill:first-child {
+        margin-left: 0;
+      }
+      > .bubbly-tag-pill:last-child {
+        margin-right: 0;
+      }
+    }
+    .bubbly-tag-line > .bubbly-tag-link {
+      translate: 0 calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+    }
+    .bubbly-line > .bubbly-tag-link:first-child {
+      margin-left: calc(-1 * var(--bubbly-line-inset));
     }
   } /* END bubbly-html */
 
@@ -940,6 +1106,10 @@
     }
     .bubbly-block > .bubbly-body:has(> ui-section:last-child > .bubbly-block.bubbly-group) {
       padding-bottom: 0;
+    }
+    /* ... and its foot is the group's:  the same place, the group's drawn over it, as the editor draws them */
+    .bubbly-block:has(> .bubbly-body > ui-section:last-child > .bubbly-block.bubbly-group) > .bubbly-foot {
+      margin-top: calc(-1 * var(--bubbly-foot-height));
     }
 
     /*
@@ -1073,8 +1243,11 @@
       padding: 0;
       box-sizing: border-box;
     }
-    /* placed by the code:  not the page's room round a pill or an input */
-    .bubbly-layer :is(.bubbly-pill, .bubbly-input, .bubbly-tag-pill) {
+    /*
+     * placed by the code:  not the page's room round a band, a pill or an input
+     * - an HTML start tag's band has a margin above it on the page:  here it moved the band a pixel below its `⟩`'s point
+     */
+    .bubbly-layer :is(.bubbly-head-pill, .bubbly-pill, .bubbly-input, .bubbly-tag-pill, .bubbly-tag-end) {
       margin: 0;
     }
     /* a band sits on its line's middle;  an input's own rule places it */
@@ -1122,8 +1295,8 @@
      * the text knows no band, so a little darker than the paper's faint ink instead
      */
     --bubbly-band-mark: color-mix(in srgb, var(--bubbly-ink) 32%, var(--bubbly-paper));
-    /* ... an end tag's fainter still */
-    --bubbly-end-mark: color-mix(in srgb, var(--bubbly-ink) 22%, var(--bubbly-paper));
+    /* ... an end tag's a little fainter (Owen:  at 22%, and its name faded on top, it didn't read) */
+    --bubbly-end-mark: color-mix(in srgb, var(--bubbly-ink) 28%, var(--bubbly-paper));
     .view-line .bubbly-mark {
       color: var(--bubbly-band-mark);
     }
@@ -1139,9 +1312,12 @@
     .view-line :is(.bubbly-equals, .bubbly-attribute-name) {
       margin: 0;
     }
-    /* an end tag's name not bold, as the page's */
+    /* an end tag's name not bold, as the page's;  a block's in its marks' ink, not faded under it too */
     .view-line .bubbly-tag-name.bubbly-tag-end {
       font-weight: 400;
+    }
+    .view-line .bubbly-mark.bubbly-tag-name.bubbly-tag-end {
+      opacity: 1;
     }
 
     /* spacers:  where the page has a tag's margin and padding */
@@ -1152,6 +1328,16 @@
     /* between an empty element's tags:  their points touch */
     .bubbly-touch-spacer {
       width: calc(var(--bubbly-bracket-pad) * var(--bubbly-monaco-scale));
+    }
+    /*
+     * before a block's start tag, and its end tag:  its `⟨` as far into its band as the page's, an HTML file's and a
+     * Spell file's drawing's alike;  the band starts a bracket's room left of the tag
+     */
+    .bubbly-tag-head-spacer {
+      width: calc((var(--bubbly-tag-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
+    }
+    .bubbly-tag-foot-spacer {
+      width: calc((var(--bubbly-tag-end-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
     }
     /* before an attribute's name, and its `=`:  the page's margins */
     .bubbly-attribute-spacer {
@@ -1178,6 +1364,31 @@
     :is(&.bubbly-html .bubbly-layer, .bubbly-html-shapes) .bubbly-block > .bubbly-gutter {
       padding-bottom: 0;
     }
+    /* ... but a `</>`'s thin foot:  it runs on beside it, as a declaration's */
+    :is(&.bubbly-html .bubbly-layer, .bubbly-html-shapes) .bubbly-thin-foot > .bubbly-gutter {
+      padding-bottom: var(--bubbly-foot-height);
+    }
+    /* a tall start tag's pieces, a `</>`'s foot, a one-line element's link:  placed by the code, as the bands are */
+    .bubbly-layer .bubbly-tag-tall {
+      position: absolute;
+      inset: 0 auto auto 0;
+      display: block;
+      width: 0;
+      height: 0;
+      margin: 0;
+    }
+    .bubbly-layer :is(.bubbly-tag-rows, .bubbly-tag-tail, .bubbly-tag-link, .bubbly-block > .bubbly-foot-thin) {
+      position: absolute;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .bubbly-layer .bubbly-block > .bubbly-foot-thin {
+      height: var(--bubbly-foot-height);
+    }
+    .bubbly-layer .bubbly-tag-link {
+      translate: 0 -50%;
+    }
   }
 
   /* an HTML file in the editor:  the box is a `.bubbly-html` too;  these undo what's the page's alone */
@@ -1186,10 +1397,6 @@
     display: block;
 
     /* spacers:  where the page has a line's inset */
-    /* before a block's start tag:  its words as far into its band as the page's */
-    .bubbly-head-spacer {
-      width: calc((var(--bubbly-pill-pad-left) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));
-    }
     /* before a line of text:  in from the tags beside it, as on the page */
     .bubbly-line-spacer {
       width: calc((var(--bubbly-line-inset) - var(--bubbly-bracket-pad)) * var(--bubbly-monaco-scale));

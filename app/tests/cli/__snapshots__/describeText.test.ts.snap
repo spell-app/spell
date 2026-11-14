@@ -89,8 +89,9 @@ Spell
       if it is a heart
         return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
       return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
+  
+    // Over every card and pile around it while the cheat moves it -- styles.css
     its "lifted" is yes or no
-      // Over every card and pile around it while the cheat moves it -- styles.css
     to draw its front
       <text color={its color}>{its picture}</text>
     to draw its back

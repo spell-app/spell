@@ -107,6 +107,7 @@ describe("priority and precedence", () => {
         "is_exactly:  Precedence.equality",
         "is_gt_lt:  Precedence.comparison",
         "is_in:  Precedence.comparison",
+        "is_in_a_type:  Precedence.comparison",
         "is_listed_value:  Precedence.comparison",
         "is_read_only:  Priority.declaration",
         "is_same_type_as:  Precedence.comparison",

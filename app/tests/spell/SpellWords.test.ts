@@ -19,7 +19,7 @@ describe("SpellWords", () => {
       "StockPile",
       "DiscardPile",
       "Foundation",
-      "Tableau",
+      "Column",
       "Solitaire"
     ])
     expect(words.types.Solitaire).toMatchObject({

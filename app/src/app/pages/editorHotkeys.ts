@@ -25,10 +25,11 @@ import type { monaco } from "spell/app/app/solid/monaco"
  *     `elemental-spell` J116);  with nothing there either, the running program's
  */
 export const EDITOR_HOTKEYS = {
-  saveFile: { shortcut: "mod+S", run: () => editor.saveFile() },
-  discardChanges: { shortcut: "shift+mod+R", run: () => void editor.discardChanges() },
+  saveAll: { shortcut: "mod+S", run: () => editor.saveAll() },
+  revertChanges: { shortcut: "shift+mod+R", run: () => void editor.revertChanges() },
   compileApp: { shortcut: "mod+Enter", run: () => editor.compileApp() },
-  createFile: { shortcut: "mod+N", run: () => editor.createFile() },
+  // ⌘N is the browser's own New Window, which a page never gets:  ⌥⌘N, which neither Chrome nor Safari takes
+  createFile: { shortcut: "alt+mod+N", run: () => editor.createFile() },
   stopInspecting: { shortcut: "Escape", run: stopInspecting, outsideCode: true },
   changeThis: { shortcut: "mod+K", run: () => ChangeThis.open(), outsideCode: true },
   undo: { shortcut: "mod+Z", codeEditorAction: "undo", run: () => undoOutsideCode("undo"), inProperties: true },
@@ -125,7 +126,7 @@ export function addCodeEditorKeys(codeEditor: monaco.editor.IStandaloneCodeEdito
     if (!run || hotkey.outsideCode || hotkey.codeEditorAction) continue
     const chord = UI.keyboard.chord(hotkey.shortcut)
     const key = chord.key === "enter" ? KeyCode.Enter : KeyCode[`Key${chord.key.toUpperCase()}` as "KeyS"]
-    const modifiers = KeyMod.CtrlCmd | (chord.shift ? KeyMod.Shift : 0)
+    const modifiers = KeyMod.CtrlCmd | (chord.shift ? KeyMod.Shift : 0) | (chord.alt ? KeyMod.Alt : 0)
     codeEditor.addCommand(modifiers | key, () => void run())
   }
 }

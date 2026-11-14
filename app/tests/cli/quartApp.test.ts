@@ -12,7 +12,7 @@ import { SRV } from "spell/server"
  * A Python spell app in a real browser (epic `python-target` P20):
  * Solitaire compiled to `py`, served on Quart as `spell run --target py` serves it, and played in headless Chromium.
  * - Its cards and its piles are views:  each its own element, `<solitaire-card>` inside
- *   `<solitaire-tableau>` ... (epic `python-target` P28;  epic `spanish` P11, P21).
+ *   `<solitaire-column>` ... (epic `python-target` P28;  epic `spanish` P11, P21).
  * - A project it imports goes beside it, as `counter.py` and its drawing half:
  *   `spell run` writes them in its temp folder, `spell compile` beside the compiled program (J97),
  *   so the app compiling writes runs as it is.
@@ -113,7 +113,7 @@ describe("a Python spell app, in a real browser", () => {
     const page = await opened()
     // each card its own element, named by its card (drawable-thing's J43), the piles too (epic `python-target` P28)
     await expect.poll(() => page.page.locator(CARD).count(), { timeout: 20_000 }).toBe(52)
-    expect(await page.page.locator("solitaire-tableau").count()).toBe(7)
+    expect(await page.page.locator("solitaire-column").count()).toBe(7)
     expect(await page.page.locator(CARD).first().getAttribute("id")).toMatch(/^[a-z0-9]+-of-[a-z]+$/)
 
     // the stock's top card:  turned over onto the discards

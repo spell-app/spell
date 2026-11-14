@@ -3,11 +3,13 @@
 // when it's greyed and when it's ticked.
 // The bar itself (File · Edit · View · Run) and every title are here too;  the editor shows them in the page's language.
 // What each item does is still the editor's own:  `<AppBarMenus>` in `MenuBar.tsx` fills them in, by name,
-// and so are the titles that follow the editor's state (Undo's, New Example's, Duplicate's, More Examples').
+// and so are the titles that follow the editor's state (Undo's, Revert Changes to the file's, the project's name).
 
 app menus is an app
-	its "can discard" is yes or no
-		// The file differs from where it started
+	its "can revert" is yes or no
+		// The file has something to revert:  edits not saved, or with AutoSave on, a draft
+	its "drafted" is yes or no
+		// The project has a draft:  Delete Draft puts every file back as published
 	its "auto saving" is yes or no
 		// AutoSave is on
 	its "can publish" is yes or no
@@ -27,17 +29,19 @@ app menus is an app
 	its "site ready" is yes or no
 		// The project is a site, with pages at addresses:  View › Site edits it
 
-	to "more examples" with icon "folder open outline"
-	to "new file" with icon "file outline"
-		shortcut meta+N
-	to "new example" with icon "file code outline"
+	to "new spell file" with icon "file outline"
+		shortcut alt+meta+N
+	to "new css file" with title "New CSS File", icon "file code outline"
 	to "save" with icon "save outline"
 		shortcut meta+S
-	to "discard changes" with icon "undo"
+	to "duplicate file" with icon "clone outline"
+	to "revert changes" with icon "undo"
 		shortcut shift+meta+R
-		enabled when its can discard is yes
+		enabled when its can revert is yes
 	to "publish" with icon "paper plane outline"
 		enabled when its can publish is yes
+	to "delete draft" with icon "eraser"
+		enabled when its drafted is yes
 	to "versions" with icon "history"
 	to "duplicate project" with icon "clone outline"
 	to "project settings" with icon "cog"
@@ -81,10 +85,10 @@ app menus is an app
 		enabled when its inspecting is yes
 	to "clear console" with icon "ban"
 
-	its "file menu" is a menu of "more examples", "-", "new file", "new example", "-", "save", "discard changes", "auto save", "-" and "home" titled "File"
+	its "file menu" is a menu of "new spell file", "new css file", "-", "save", "auto save", "-", "duplicate file" and "revert changes" titled "File"
 
 	// The project's own menu, under its name before File:  what's about the whole project, not the file open
-	its "project menu" is a menu of "rename project", "delete project", "duplicate project", "reset to saved", "-", "publish", "versions", "-", "project settings", "-", "export project", "import project", "-" and "theme"
+	its "project menu" is a menu of "rename project", "delete project", "duplicate project", "reset to saved", "-", "publish", "versions", "delete draft", "-", "project settings", "-", "export project", "import project", "-", "theme", "-" and "home"
 
 	its "edit menu" is a menu of "undo", "redo", "-", "part actions", "-", "find", "-" and "code settings" titled "Edit"
 

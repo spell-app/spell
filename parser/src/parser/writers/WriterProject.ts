@@ -130,6 +130,8 @@ export class WriterProject {
   /**
    * The program's own top-level steps that wait, `solitaire.startANewGame()`:  written `core.holdWhile(...)`, which
    * doesn't hold the first draw, while people's actions wait for them.
+   * - And the steps that wait in a `create()` that can't wait itself (javascript's):
+   *   `when creating it` dealing the cards, `core.holdWhile(() => this.restartTheGame())`.
    */
   readonly heldSteps = new WeakSet<P.ASTNode>()
   /** The calls written `await`:  each in a function that waits, of something that waits. */
@@ -243,6 +245,16 @@ export class WriterProject {
     const callOrReadWaits = (node: P.ASTNode) => callWaits(node) || readWaits(node)
     for (const method of named.keys()) if (method.isAsync) this.noteAwaited(method.body, callOrReadWaits)
     for (const file of files) for (const statement of file) this.noteHeldSteps(statement, callWaits)
+    // a `create()` that can't wait (javascript's):  its steps that wait are held as a top level's are,
+    // e.g. Solitaire's `when creating it` dealing the cards, so a click during the deal waits its turn
+    for (const [method, name] of named) {
+      if (name !== "create" || allowed.get(method)) continue
+      for (const statement of method.body.statements ?? []) {
+        // its last line, a call:  `return this.restartTheGame()` as the tree has it
+        const step = statement instanceof P.ASTReturnStatement ? statement.value : statement
+        if (step) this.noteHeldSteps(step, callWaits)
+      }
+    }
     // the top level:  only what `core` itself always waits for, and on Solid an answer read there
     this.noteAwaited(
       files,

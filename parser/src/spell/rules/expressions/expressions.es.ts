@@ -31,6 +31,7 @@ import { IsEqual } from "./IsEqual"
 import { IsListedValue } from "./IsListedValue"
 import { IsExactly } from "./IsExactly"
 import { IsIn } from "./IsIn"
+import { IsInAType } from "./IsInAType"
 import { IsSameTypeAs } from "./IsSameTypeAs"
 import { Synonyms } from "./Synonyms"
 import { Wording } from "./Wording"
@@ -329,6 +330,24 @@ expressionsEs.addRule(IsSameTypeAs, {
       tests: [
         ["thing es del mismo tipo que other", "core.matchesType(thing, other)"],
         ["thing no es del mismo tipo que other", "!core.matchesType(thing, other)"]
+      ]
+    }
+  ]
+})
+
+// in any list of a type (epic `language` P55):  `the card is in a column`
+expressionsEs.addRule(IsInAType, {
+  syntax: "{operator:is_or_is_not} en (un|una) (expression:{known_type})",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile("una columna es una lista", "block")
+        scope.variables?.add("thing")
+      },
+      tests: [
+        ["thing está en una columna", "core.isInA(thing, Columna)"],
+        ["thing no está en una columna", "!core.isInA(thing, Columna)"]
       ]
     }
   ]

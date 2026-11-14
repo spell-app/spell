@@ -18,13 +18,16 @@ import type { BubblyInputShape } from "./BubblyMarks"
  *   - an element with what's inside it on lines of its own:  a block, its start tag the band, an end tag that starts
  *     its line a band of its own under the rail
  *   - an element alone on its line with no end tag (`<meta …>`), and a doctype:  a band by itself
- *   - any other tag:  a small pill of its own, in its line
+ *   - any other tag:  a small pill of its own, in its line;  a one-line element with something between its tags, a
+ *     line linking its two pills too (`MarkupLinkShape`)
+ *   - a start tag on lines of its own:  its shape's place spans them, drawn as ONE tall band
+ *   - a block's nameless `</>` on its own line:  a thin foot, not a band (`isThinFoot`)
  * - Marks:
  *   - a tag's `<` and `>` drawn as `⟨` `⟩` over the file's own, which keep their width;  its `/`, name and
  *     attributes' names, as the page draws them
  *   - each attribute's value a white pill, a quoted one's `"` see-through, its curly mark drawn over it
- *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start tag, and
- *     before a line of text, so it sits in from the tags beside it, as on the page
+ *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start and end
+ *     tags, and before a line of text, so it sits in from the tags beside it, as on the page
  * - Shapes are placed by `SpellBubbly`, from where Monaco draws each line and letter.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
  ****************/
@@ -58,7 +61,7 @@ export class MarkupMarks extends TextMarks {
   /** The room injected after each tag in a line, by where it ends:  a tag right after it starts past it too. */
   private readonly roomAfter = new Map<number, TagRoom>()
 
-  /** Lines of Spell, whose own marks are Spell's:  no spacers before them or a block's start tag. */
+  /** Lines of Spell, whose own marks are Spell's:  no spacers before them. */
   private readonly isInSpell: boolean
 
   /** Is a tag one of the project's own views:  `within()`'s. */
@@ -110,6 +113,16 @@ export class MarkupMarks extends TextMarks {
     if (!close || !this.slice({ start: open.end, end: close.start }).includes("\n")) {
       // one line:  each tag a pill;  nothing between them, their points touch
       const touch = !hasInside
+      // something between them on one line:  the two pills linked, under them (Owen, Q58)
+      if (close && hasInside && !this.isTall(open)) {
+        const room = this.roomAfter.get(open.start)
+        into.push({
+          kind: "tag-link",
+          place: this.place(open.start, close.end),
+          partOfSpeech,
+          room: [...(room ? [room] : []), ...(this.startsLine(open.start) ? [] : (["tag"] as const))]
+        })
+      }
       this.tagPill(open, { partOfSpeech, side: "start", touch }, into)
       this.nodes(element.children, into)
       if (close) this.tagPill(close, { partOfSpeech, side: "end", touch }, into)
@@ -121,15 +134,19 @@ export class MarkupMarks extends TextMarks {
       place: this.place(open.start, close.end),
       head: this.place(open.start, open.end),
       partOfSpeech,
+      ...(this.isTall(open) && BubblyMarkup.hasShortTail(this.text, open) ? { isShortTail: true } : {}),
+      // a nameless end tag on its own line, `</>`:  a thin foot (Owen, Q58)
+      ...(footStartsLine && !close.tag ? { isThinFoot: true } : {}),
       inside: []
     }
     into.push(block)
-    if (!this.isInSpell && this.startsLine(open.start))
-      this.mark(open.start, open.start + 1, "", { before: spacer("head", "before") })
+    // its `⟨` clear of its band's cut corner, an HTML file's or a Spell drawing's alike
+    if (this.startsLine(open.start)) this.mark(open.start, open.start + 1, "", { before: spacer("tag-head", "before") })
     this.startTag(open, block.inside)
     this.nodes(element.children, block.inside)
     if (footStartsLine) {
       block.foot = this.place(close.start, close.end)
+      this.mark(close.start, close.start + 1, "", { before: spacer("tag-foot", "before") })
       this.endTag(close, "block")
     } else this.tagPill(close, { partOfSpeech, side: "end" }, block.inside)
   }
@@ -150,7 +167,14 @@ export class MarkupMarks extends TextMarks {
 
   /** A tag alone on its line, with no end tag (`<meta …>`):  a band by itself. */
   private alone(tag: MarkupStartTag, partOfSpeech: MarkupPartOfSpeech, into: MarkupShape[]) {
-    into.push({ kind: "tag", place: this.place(tag.start, tag.end), partOfSpeech, side: "start", isAlone: true })
+    into.push({
+      kind: "tag",
+      place: this.place(tag.start, tag.end),
+      partOfSpeech,
+      side: "start",
+      isAlone: true,
+      ...this.tallness(tag)
+    })
     this.startTag(tag, into)
   }
 
@@ -180,7 +204,7 @@ export class MarkupMarks extends TextMarks {
     }
     // the room either side, and the pill's place:  the whole tag
     const place = this.mark(tag.start, tag.end, "", spacers)
-    into.push({ kind: "tag", place, partOfSpeech, side, isAlone: false, room })
+    into.push({ kind: "tag", place, partOfSpeech, side, isAlone: false, room, ...this.tallness(tag) })
     if (tag.kind === "start") this.startTag(tag, into)
     else this.endTag(tag, "inline")
   }
@@ -213,7 +237,9 @@ export class MarkupMarks extends TextMarks {
     for (const attribute of tag.attributes) {
       if (attribute.name) {
         const nameEnd = attribute.nameStart + attribute.name.length
-        this.mark(attribute.nameStart, nameEnd, ATTRIBUTE_NAME, { before: spacer("attribute", "before") })
+        // one that starts its line (a tall start tag's):  its indent is its room, as on the page
+        const spacers: Spacers = this.startsLine(attribute.nameStart) ? {} : { before: spacer("attribute", "before") }
+        this.mark(attribute.nameStart, nameEnd, ATTRIBUTE_NAME, spacers)
       }
       if (attribute.equalsAt !== undefined && attribute.equalsAt >= 0)
         this.mark(attribute.equalsAt, attribute.equalsAt + 1, EQUALS, { before: spacer("equals", "before") })
@@ -254,6 +280,18 @@ export class MarkupMarks extends TextMarks {
   // ## Helpers
   ////////////////
 
+  /** Does `tag` run over more than one line:  one tall band (T118)? */
+  private isTall(tag: { start: number; end: number }): boolean {
+    return this.slice(tag).includes("\n")
+  }
+
+  /** A start tag's shape's `isShortTail`, when it's tall. */
+  private tallness(tag: MarkupStartTag | MarkupEndTag): { isShortTail?: true } {
+    return tag.kind === "start" && this.isTall(tag) && BubblyMarkup.hasShortTail(this.text, tag)
+      ? { isShortTail: true }
+      : {}
+  }
+
   /** The text of `node`. */
   private slice({ start, end }: { start: number; end: number }): string {
     return this.text.slice(start, end)
@@ -277,7 +315,7 @@ export class MarkupMarks extends TextMarks {
 ////////////////
 
 /** A shape `SpellBubbly` draws under an HTML file's text. */
-export type MarkupShape = MarkupBlockShape | MarkupTagShape | BubblyInputShape
+export type MarkupShape = MarkupBlockShape | MarkupTagShape | MarkupLinkShape | BubblyInputShape
 
 /** An element with what's inside it on lines of its own:  its band, gutter, body, and its end tag's band. */
 export type MarkupBlockShape = {
@@ -290,6 +328,10 @@ export type MarkupBlockShape = {
   foot?: number
   /** its bands' colour */
   partOfSpeech: MarkupPartOfSpeech
+  /** its start tag on lines of its own, its `>` alone on the last:  the rows above overhang it, their corner cut */
+  isShortTail?: boolean
+  /** its end tag a nameless `</>` on its own line:  a thin foot under it, not a band (Owen, Q58) */
+  isThinFoot?: boolean
   /** the pills on its start tag, and the shapes in its body */
   inside: MarkupShape[]
 }
@@ -305,12 +347,28 @@ export type MarkupTagShape = {
   side: "start" | "end"
   /** alone on its line:  a band */
   isAlone: boolean
+  /** a start tag on lines of its own, its `>` alone on the last:  its rows above overhang it, their corner cut */
+  isShortTail?: boolean
   /**
    * the room injected where it starts, each spacer's kind:  the tag's it follows right on (`<p><b>`), then its own;
    * none at its line's start, less where its point touches its element's other tag
    * - Monaco places a column before the room injected there:  the pill starts past it
    */
   room?: TagRoom[]
+}
+
+/**
+ * A one-line element with something between its tags:  a line along the top and bottom of its two pills, from its
+ * start tag's to its end tag's, under them (`bubbly-tag-link`, Owen, Q58).
+ */
+export type MarkupLinkShape = {
+  kind: "tag-link"
+  /** the mark from its start tag's `<` to its end tag's `>` */
+  place: number
+  /** its colour */
+  partOfSpeech: MarkupPartOfSpeech
+  /** the room injected before its start tag:  SEE `MarkupTagShape.room` */
+  room: TagRoom[]
 }
 
 /** A spacer beside a tag in a line:  room for its pill and the gap outside it, or only its pill's where points touch. */

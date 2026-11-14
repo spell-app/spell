@@ -79,8 +79,8 @@ describe("describeOverview()", () => {
   })
 
   test("inherited members only when asked, with where from", () => {
-    const tableau = find(solitaire, "Solitaire.spell", "Tableau") as LSP.ScopeNode
-    const file = { ...(find(solitaire, "Solitaire.spell") as LSP.ScopeNode), children: [tableau] }
+    const column = find(solitaire, "Solitaire.spell", "Column") as LSP.ScopeNode
+    const file = { ...(find(solitaire, "Solitaire.spell") as LSP.ScopeNode), children: [column] }
     expect(CLI.describeOverview(file, solitaire.options).join("\n")).not.toContain("(Pile)")
     expect(CLI.describeOverview(file, { ...solitaire.options, inherited: true }).join("\n")).toContain("color (Pile)")
   })

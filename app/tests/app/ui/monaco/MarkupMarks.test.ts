@@ -24,9 +24,9 @@ function textMarked(marks: MarkupMarks, classes: string): string[] {
     .map(({ range }) => lines[range.startLineNumber - 1]!.slice(range.startColumn - 1, range.endColumn - 1))
 }
 
-/** Every shape, those inside a block too, as `kind:  its first line's text` lines. */
-function shapesOf(marks: MarkupMarks): string[] {
-  const lines = PAGE.split("\n")
+/** Every shape, those inside a block too, as `kind:  its first line's text` lines;  `text`:  what it marked. */
+function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
+  const lines = text.split("\n")
   const out: string[] = []
   const walk = (shapes: MarkupShape[], depth: number) => {
     for (const shape of shapes) {
@@ -34,10 +34,12 @@ function shapesOf(marks: MarkupMarks): string[] {
       const text = lines[range.startLineNumber - 1]!.slice(range.startColumn - 1).trim()
       const what =
         shape.kind === "markup-block"
-          ? `block ${shape.partOfSpeech}${shape.foot === undefined ? "" : " +foot"}`
+          ? `block ${shape.partOfSpeech}${shape.foot === undefined ? "" : shape.isThinFoot ? " +thin foot" : " +foot"}`
           : shape.kind === "tag"
             ? `${shape.isAlone ? "band" : "pill"} ${shape.side} ${shape.room?.join("+") ?? ""}`.trim()
-            : "input"
+            : shape.kind === "tag-link"
+              ? `link ${shape.room.join("+")}`.trim()
+              : "input"
       out.push(`${"  ".repeat(depth)}${what}:  ${text.slice(0, 24)}`)
       if (shape.kind === "markup-block") walk(shape.inside, depth + 1)
     }
@@ -55,10 +57,13 @@ describe("MarkupMarks", () => {
       "  block plain +foot:  <head>",
       '    band start:  <meta charset="UTF-8" />',
       '    input:  UTF-8" />',
+      "    link:  <title>A demo</title>",
       "    pill start:  <title>A demo</title>",
       "    pill end tag:  </title>",
       "  block thing +foot:  <body>",
+      "    link:  <h2>Two <code>x</code></",
       "    pill start:  <h2>Two <code>x</code></",
+      "    link tag:  <code>x</code></h2>",
       "    pill start tag:  <code>x</code></h2>",
       "    pill end tag:  </code></h2>",
       "    pill end tag+tag:  </h2>",
@@ -94,5 +99,56 @@ describe("MarkupMarks", () => {
       mark.options.before?.inlineClassName?.includes("bubbly-line-spacer")
     )
     expect(lineSpacers.map(({ range }) => range.startLineNumber)).toEqual([2])
+  })
+
+  test("a block's start and end tags a spacer in from its band's end, in an HTML file and a Spell drawing alike", () => {
+    const html = `<div>\n  <p>words</p>\n</div>\n`
+    const spell = `to draw it\n\t<grid>\n\t\t<text>hi</text>\n\t</>\n`
+    const spacers = (marks: MarkupMarks, kind: string) =>
+      marks.marks
+        .filter((mark) => mark.options.before?.inlineClassName?.includes(`bubbly-${kind}-spacer`))
+        .map(({ range }) => range.startLineNumber)
+    const inHtml = MarkupMarks.of(html)
+    const inSpell = MarkupMarks.within(spell, spell.indexOf("<grid>"), spell.length, [])
+    expect([spacers(inHtml, "tag-head"), spacers(inHtml, "tag-foot")]).toEqual([[1], [3]])
+    expect([spacers(inSpell, "tag-head"), spacers(inSpell, "tag-foot")]).toEqual([[2], [4]])
+  })
+
+  test("a start tag on lines of its own is one tall shape, its `>` alone on the last line a short tail (T118)", () => {
+    const text = `<spell-editor
+  project="a"
+  toolbar
+></spell-editor>
+<meta
+  name="x" />
+`
+    const marks = MarkupMarks.of(text)
+    const tags = marks.shapes.filter((shape) => shape.kind === "tag")
+    const lineSpan = tags.map(({ place }) => {
+      const { range } = marks.marks[place]!
+      return `${range.startLineNumber}-${range.endLineNumber}`
+    })
+    // its start tag lines 1-4, its end tag a pill on line 4;  `<meta` lines 5-6, a band alone
+    expect(lineSpan).toEqual(["1-4", "4-4", "5-6"])
+    expect(tags.map((shape) => shape.kind === "tag" && !!shape.isShortTail)).toEqual([true, false, false])
+    // an attribute that starts its line has no room before it:  its indent is its room, as on the page
+    const spaced = marks.marks.filter((mark) =>
+      mark.options.before?.inlineClassName?.includes("bubbly-attribute-spacer")
+    )
+    expect(spaced).toEqual([])
+  })
+
+  test("a nameless end tag on its own line ends its block in a thin foot;  a named one in a band (Q58)", () => {
+    const text = `<context-menu>
+  <action "cheat"/>
+</>
+<grid>
+  <spacer/>
+</grid>
+`
+    expect(shapesOf(MarkupMarks.of(text), text).filter((line) => line.startsWith("block"))).toEqual([
+      "block thing +thin foot:  <context-menu>",
+      "block plain +foot:  <grid>"
+    ])
   })
 })

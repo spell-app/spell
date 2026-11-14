@@ -459,6 +459,35 @@ describe("drafts, Publish and versions", () => {
     expect(readFixture("user/Proj/pub.spell")).toBe("second")
   })
 
+  it("Save Current Changes keeps your draft as a version of its own, never published;  a restore makes it your draft again", async () => {
+    fs.writeFileSync(fixturePath("user/Proj/kd.spell"), "published")
+    fs.writeFileSync(fixturePath("user/Proj/other.spell"), "other")
+    await request("POST", `${SAVE}kd.spell`, "my draft", "text/plain")
+    const kept = await request("POST", "/api/projects/keep-draft", json({ projectId: PROJECT }), "application/json")
+    expect(kept.status).toBe(200)
+    const { name, draft } = kept.json()
+    expect(draft).toBe(true)
+    expect(name).toMatch(/^Proj\.\d{4}-\d{2}-\d{2}-\d{6}(-\d+)?\.draft\.owen\.zip$/)
+    // nothing public changed, and your draft is still your draft
+    expect(readFixture("user/Proj/kd.spell")).toBe("published")
+    expect(readDraft("kd.spell")).toBe("my draft")
+    const { versions } = (await request("GET", `/api/projects/drafts/${PLACE}`)).json()
+    expect(versions.find((each: any) => each.name === name)).toMatchObject({ draft: true })
+
+    // a draft of another file meanwhile:  restoring the kept draft puts both files back as it held them
+    await request("POST", `${SAVE}kd.spell`, "published", "text/plain")
+    await request("POST", `${SAVE}other.spell`, "other, changed", "text/plain")
+    const restored = await request(
+      "POST",
+      "/api/projects/restore",
+      json({ projectId: PROJECT, version: name }),
+      "application/json"
+    )
+    expect(restored.json()).toEqual(expect.arrayContaining(["/kd.spell", "/other.spell"]))
+    expect(readDraft("kd.spell")).toBe("my draft")
+    expect(readDraft("other.spell")).toBeUndefined()
+  })
+
   it("Discard deletes your draft;  a draft the same as what's published is no draft", async () => {
     fs.writeFileSync(fixturePath("user/Proj/keep.spell"), "kept")
     await request("POST", `${SAVE}keep.spell`, "changed", "text/plain")
@@ -623,6 +652,46 @@ describe("File > Export and Import", () => {
     expect(fs.readFileSync(fixturePath("user/Proj/pictures/logo.png"))).toEqual(PICTURE)
     const read = await fetch(`${baseUrl}/spaces/${PROJECT}/pictures/logo.png`)
     expect(Buffer.from(await read.arrayBuffer())).toEqual(PICTURE)
+  })
+
+  it("Import's way in keeps everything as drafts:  a project of its project file alone, each source then your draft, in the file's order", async () => {
+    const json = (body: object) => JSON.stringify(body)
+    const projectId = "owen@spell/Imported"
+    const projectFile =
+      '{\n  // as the archive wrote it\n  imports: [{ path: "/B.spell", active: true }, { path: "/A.spell", active: true }]\n}\n'
+    // `SPACES.SpellProjectRoot.importApp()`:  the project made of its project file, then every other file
+    const made = await request(
+      "POST",
+      "/api/projects/create/project",
+      json({ projectId, filePath: "/__project.json5", contents: projectFile }),
+      "application/json"
+    )
+    expect(made.status).toBe(200)
+    for (const name of ["A", "B"]) {
+      const reply = await request(
+        "POST",
+        "/api/projects/create/file",
+        json({ projectId, filePath: `/${name}.spell`, contents: `# ${name}\n` }),
+        "application/json"
+      )
+      expect(reply.status).toBe(200)
+    }
+    const index = (await request("GET", `/api/projects/index/${projectId}`)).json()
+    expect(index.imports.map(({ path, contents }: { path: string; contents: string }) => [path, contents])).toEqual([
+      ["/B.spell", "# B\n"],
+      ["/A.spell", "# A\n"]
+    ])
+    // nothing public but the project file, as written:  no file made up for a project with none listed
+    expect(
+      fs
+        .readdirSync(fixturePath("user/Imported"))
+        .filter((name) => !name.startsWith("__draft"))
+        .sort()
+    ).toEqual(["__project.json5"])
+    expect(readFixture("user/Imported/__project.json5")).toBe(projectFile)
+    expect(fs.readdirSync(fixturePath("user/Imported/__draft")).filter((name) => name.endsWith(".spell"))).toHaveLength(
+      2
+    )
   })
 
   it("GET /api/projects/files/<project> lists every file:  pictures and the project file, never what's built or drafted", async () => {

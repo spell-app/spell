@@ -86,3 +86,15 @@ def test_reference_for_finds_the_thing_again() -> None:
     assert reference_for("queen", THINGS, KEPT) is None
     for thing in THINGS:
         assert thing_for_reference(reference_for(thing, THINGS, KEPT) or "", THINGS, KEPT) is thing
+
+
+def test_is_in_a_any_list_of_the_type_sub_types_too() -> None:
+    """`the card is in a tableau`:  `core.is_in_a(card, RefTableau)` (epic `language` P55)."""
+    from spell_core import core
+
+    held = RefCard(rank="2", suit="clubs")
+    loose = RefCard(rank="3", suit="clubs")
+    tableau = RefTableau(name="held")
+    tableau.append(held)
+    assert core.is_in_a(held, RefTableau) and core.is_in_a(held, RefPile)
+    assert not core.is_in_a(loose, RefTableau)

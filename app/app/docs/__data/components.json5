@@ -1207,7 +1207,7 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
-          "name": "fileMenuParts",
+          "name": "fileMenuRows",
           "file": "src/app/solid/MenuBar.tsx"
         },
         {
@@ -1219,7 +1219,11 @@
           "file": "src/app/solid/Palette.tsx"
         },
         {
-          "name": "ThemeSubMenu",
+          "name": "ProjectBarMenu",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "ThemeItems",
           "file": "src/app/solid/MenuBar.tsx"
         },
         {
