@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
 import { SRV } from "spell/server"
 import {
+  DEFAULT_PORT,
   PageServer,
   componentSetPath,
   componentSets,
@@ -12,11 +13,13 @@ import {
   engineRoutes,
   findById,
   folderUrl,
+  portFor,
   replaceById,
   SERVER_REPORTS_API,
   urlPathOf,
   withWorktreeLoads
 } from "spell/server/page"
+import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 import { ask } from "spell/server/test/serve"
 
 /**
@@ -80,6 +83,26 @@ describe("withWorktreeLoads()", () => {
     expect(withWorktreeLoads(`<img src="/components/ui/x.png">`, "/worktrees/w", [])).toBe(
       `<img src="/components/ui/x.png">`
     )
+  })
+})
+
+describe("portFor()", () => {
+  const scratch = mkdtempSync(join(tmpdir(), "page-port-"))
+  const main = fakeMainCheckout(join(scratch, "main"))
+  const worktree = fakeWorktree(main, join(scratch, "worktrees", "language"))
+  afterAll(() => rmSync(scratch, { recursive: true, force: true }))
+
+  it("keeps DEFAULT_PORT for the main checkout:  it's main's", () => {
+    expect(portFor(main, DEFAULT_PORT)).toBe(DEFAULT_PORT)
+  })
+
+  it("never gives a worktree DEFAULT_PORT:  any free one (0) instead (epic-engine I276)", () => {
+    expect(portFor(worktree, DEFAULT_PORT)).toBe(0)
+  })
+
+  it("keeps any other port asked for, in a worktree too", () => {
+    expect(portFor(worktree, 5123)).toBe(5123)
+    expect(portFor(main, 0)).toBe(0)
   })
 })
 

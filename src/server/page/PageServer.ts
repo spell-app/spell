@@ -70,7 +70,8 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  * - NO redirects for old URLs (epic `people-and-orgs`, Q30):  an old address answers "not found"
  * - The server knows nothing of what the sets, routes, scripts and tabs are:  they come from the settings
  *   (epic `repo-split` P4).
- * - port:  `DEFAULT_PORT` (4747) if free, else any
+ * - port:  `DEFAULT_PORT` (4747) if free, else any;  a WORKTREE's server never asks for it (`portFor()`):
+ *   it's the main checkout's, which the side bar and every opener expect (epic `epic-engine` I276)
  *   - the real one goes in `<root>/.spell-server.json`, where `spell server start` and the openers find it
  * - its root:  the kit, from any folder of it (`pageServerRoot()`, epic `repo-split` P16)
  * - Run it with `spell server` (`page/cli.ts`), never by hand.
@@ -233,6 +234,7 @@ export class PageServer {
    * Start watching, build the stale bundles in the background, load the route modules, listen, write the pid file,
    * then run route modules' `onListening`s.
    * - `port`:  wanted port (default `DEFAULT_PORT`);  taken:  any free one
+   *   - a worktree asking for `DEFAULT_PORT` gets any free one instead (`portFor()`)
    * - `routes`:  load route modules and build the bundles (default `true`;  tests turn it off)
    * - `pidFile`:  write `.spell-server.json` (default `true`)
    */
@@ -252,7 +254,7 @@ export class PageServer {
       this.bundles.start().watch()
       for (const path of settings.routes ?? []) await this.loadRoutes(path)
     }
-    const { port: actual } = await this.web.listen({ port })
+    const { port: actual } = await this.web.listen({ port: portFor(this.root, port) })
     this.info.port = actual
     if (pidFile) {
       this.pidFile.write(this.info)
@@ -619,6 +621,21 @@ const WORKTREE_ADDRESS = /^\/worktrees\/([^/]+)\//
 
 /** Port the page server asks for first:  `SPELL_SERVER_PORT`, else 4747 (the goals server's old port). */
 export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747
+
+/**
+ * The port the page server of checkout `root` asks for, when `wanted` is asked:  `wanted`, but never
+ * `DEFAULT_PORT` in a worktree (0:  any free one).
+ * - `DEFAULT_PORT` is the MAIN checkout's:  the Review side bar, `spell server url` and the openers expect main's
+ *   pages there, and a worktree's are served under main's `/worktrees/<w>/` too
+ * - before (epic `epic-engine` I276):  every checkout asked for it first, so a worktree's server started while main's
+ *   was down took it, and kept it:  the side bar showed that worktree's pages, its `⎇ language` chip in the header
+ * - another port asked for by hand (`--port 5000`) is kept, in a worktree too
+ */
+export function portFor(root: string, wanted: number): number {
+  if (wanted !== DEFAULT_PORT) return wanted
+  const checkout = SRV.checkoutOf(root)
+  return checkout?.worktree && checkout.root === resolve(root) ? 0 : wanted
+}
 
 /** The page server's own call:  its `ServerInfo` (`SRV.SERVER_API`). */
 const SERVER_API = SRV.SERVER_API
