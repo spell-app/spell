@@ -23,6 +23,7 @@ export const transitionVocabulary = {
   topics: ["animation", "modules"],
   aka: ["animate", "fade", "slide", "motion", "effect"],
   noun: "transition",
+  partOfSpeech: "structure",
   description: "A transition is an animation used to show or hide content, or to draw attention to it.",
   attributes: [
     {

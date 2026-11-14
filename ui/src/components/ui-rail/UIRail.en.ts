@@ -20,6 +20,7 @@ export const railVocabulary = {
   topics: ["layout", "containers", "elements"],
   aka: ["side rail", "aside", "gutter", "margin column"],
   noun: "rail",
+  partOfSpeech: "structure",
   description: "A rail is used to show accompanying content outside the boundaries of the main view of a site.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Size of the rail's text, `mini` ... `massive`." },

@@ -33,7 +33,7 @@ a "pile" is a droppable viewable list of cards
 
 		// a card is in one pile at a time
 		set the discards to a new pile with id "discards"
-		get the last card of the stock
+		get the top card of the stock
 		add it to the discards
 		its pile is the discards should be yes
 		the number of cards in the stock should be 1

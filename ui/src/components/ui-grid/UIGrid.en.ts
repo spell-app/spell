@@ -36,6 +36,7 @@ export const gridVocabulary = {
   topics: ["layout", "basic", "collections"],
   aka: ["columns", "row", "flex grid", "layout grid", "responsive grid"],
   noun: "grid",
+  partOfSpeech: "structure",
   description: "A grid is used to harmonize negative space in a layout.",
   attributes: [
     {

@@ -26,6 +26,7 @@ export const fieldVocabulary = {
   aka: ["form field", "form group", "form control", "label and input", "property", "inspector row"],
   skeleton: "4.5 tall",
   noun: "field",
+  partOfSpeech: "action",
   ui: false,
   description: "A field is a form element containing a label and an input, with a hint, a tip and its errors.",
   attributes: [

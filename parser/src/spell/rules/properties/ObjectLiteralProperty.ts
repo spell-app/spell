@@ -38,6 +38,10 @@ export class NamedObjectLiteralProperty extends ObjectLiteralProperty {
  * - e.g. `a new deck with jokers`, `a new deck with jokers and name = "big"`
  * - Several words, when a type declares them (`declared_member_words`, epic `data` P32):  `a new card with face up`.
  * - Its words, then the end, a comma or `and` (`and_or`, meaning `and`):  a word with more after it is something else.
+ *   - Except words naming a variable where the line is:  they may end the list, `a new card with suit to the deck`.
+ * - In a new thing's list, words naming a variable take its value instead, when the type's property isn't a yes or no:
+ *   `a new card with rank and suit` ~== `a new card with rank = the rank, suit = the suit`
+ *   (epic `language` T121) -- see `new_thing`'s `noteNamedAlone()`.
  */
 export class FlagObjectLiteralProperty extends ObjectLiteralProperty {
   @proto static alias = "object_literal_property"
@@ -48,10 +52,25 @@ export class FlagObjectLiteralProperty extends ObjectLiteralProperty {
     return tokens[start + 1] instanceof P.WordToken || endsAProperty(scope, tokens, start + 1)
   }
 
-  /** Its words, then nothing, `,` or `and`. */
+  /** Its words, then nothing, `,` or `and` -- or anything, after words naming a variable. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens)
-    return match && endsAProperty(scope, tokens, match.length) ? match : undefined
+    if (!match) return undefined
+    const ends = endsAProperty(scope, tokens, match.length)
+    return ends || FlagObjectLiteralProperty.variableNamed(scope, match.tokens) ? match : undefined
+  }
+
+  /**
+   * `tokens`, all of them, read as a variable `scope` knows (a local, a loop's item, an argument ...), else `undefined`.
+   * - Variables only, never the thing's own members:  a bare word reads only variables (epic `language` Q3).
+   * - A lookup:  call it WHILE PARSING.
+   */
+  static variableNamed(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    for (const ruleName of ["known_variable", "known_words_variable"]) {
+      const variable = scope.getRuleOrDie(ruleName).parse(scope, tokens)
+      if (variable?.length === tokens.length) return variable
+    }
+    return undefined
   }
 
   getAST(match: P.MatchFor<this>) {

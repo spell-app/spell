@@ -18,6 +18,7 @@ export const treeNodeVocabulary = {
   topics: ["data display", "images"],
   aka: ["diagram node", "tree diagram node", "org chart box", "node"],
   noun: "tree node",
+  partOfSpeech: "structure",
   description:
     "A tree node is one box of a tree diagram:  its label, and the nodes under it as its children.  Its text is its " +
     "label;  any other element inside it shows in its box.",

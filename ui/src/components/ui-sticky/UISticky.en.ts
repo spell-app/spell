@@ -18,6 +18,7 @@ export const stickyVocabulary = {
   topics: ["layout", "navigation", "modules"],
   aka: ["affix", "pinned", "fixed header", "sticky header"],
   noun: "sticky",
+  partOfSpeech: "structure",
   description: "Sticky content stays fixed to the viewport while its container is on screen.",
   attributes: [
     {

@@ -26,6 +26,7 @@ export const tabVocabulary = {
   topics: ["navigation", "containers", "content parts", "modules"],
   aka: ["tab panel", "pane"],
   noun: "tab",
+  partOfSpeech: "structure",
   description: "A tab pane:  the content shown while its tab is selected.",
   attributes: [
     {

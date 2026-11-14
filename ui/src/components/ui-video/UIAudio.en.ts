@@ -19,6 +19,7 @@ export const audioVocabulary = {
   topics: ["media", "elements"],
   aka: ["audio", "sound", "music", "sound effect", "audio player"],
   noun: "audio",
+  partOfSpeech: "property",
   description: "An audio plays a sound file:  in the browser's own player, or unseen, when the page says.",
   attributes: [
     ...MediaAttributes,

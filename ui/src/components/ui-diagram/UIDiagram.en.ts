@@ -32,6 +32,7 @@ export const diagramVocabulary = {
   ],
   skeleton: "14 tall",
   noun: "diagram",
+  partOfSpeech: "structure",
   description:
     "A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for " +
     "what it refers to.  Drag a box to move it.",

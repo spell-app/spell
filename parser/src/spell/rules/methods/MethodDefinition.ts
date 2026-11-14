@@ -3,7 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Wording } from "spell/parser/spell/rules/expressions"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawnLines, DrawnMarkup } from "spell/parser/spell/rules/classes"
+import { CreateOneOfAKind, DrawnLines, DrawnMarkup } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
 import { SubjectRule } from "spell/parser/spell/rules/types"
@@ -78,6 +78,7 @@ export class MethodDefinition<
       // a test in a template's outline tests the template:  a test as any other, its `it` a new one (Q21)
       signature.testOf = subject.name
     } else if (subject) {
+      MethodDefinition.itForItsName(signature, subject, scope)
       MethodDefinition.takeSubject(signature, subject, scope)
     } else if (this.inlineInitialType && initialType) {
       signature.instanceType = initialType.name
@@ -166,6 +167,37 @@ export class MethodDefinition<
     // -- and left out, the call is on this one:  see `DynamicMethodRule.onThis()`
     if (signature.syntaxBits.length === 1) signature.syntaxBits.push("{thisArg:expression}?")
     else signature.syntaxBits.push(`(${scope.getRuleOrDie("receiver_of").syntax} {thisArg:expression})?`)
+  }
+
+  /**
+   * A hook in a type's outline body that names its type, or a one of a kind by its own name, as `it`:
+   * `- to draw the deck:` (`to draw a deck`), `- to draw solitaire:` (`the solitaire`) ~== `- to draw it:`
+   * (Owen, 2026-11-14, epic `language` T122);  Spanish's `- para dibujar el mazo:`, `- para dibujar el solitario:`.
+   * - Its last words, an article or not, then the type's words (`deck`) or the one of a kind's name (`solitaire`).
+   * - Only for a hook (`hookOf()`, `draw` or `create`):  `- to shuffle the deck:` stays a method of those words.
+   * - A slot's drawing isn't one:  `- to draw its front:` names no type.
+   * - SIDE EFFECT: mutates `signature` in place:  those words become the place `it` was, as `splitFusedIt()` marks it.
+   */
+  private static itForItsName(signature: MethodSignatureData, subject: P.TypeScope, scope: P.Scope): void {
+    const { methodBits, syntaxBits } = signature
+    if (methodBits.length !== syntaxBits.length || syntaxBits.some((bit) => /^[{(]/.test(bit))) return
+    const declaredBy = P.SubjectScope.of(scope)?.declaredBy
+    const name = declaredBy?.is(CreateOneOfAKind) ? CreateOneOfAKind.variableName(declaredBy) : undefined
+    const names = [kebabCase(subject.name).replace(/^-/, "").replace(/-/g, " "), name].filter(Boolean)
+    for (const named of names) {
+      const count = named!.split(" ").length
+      let start = syntaxBits.length - count
+      if (start < 1 || syntaxBits.slice(start).join(" ").toLowerCase() !== named) continue
+      const article = syntaxBits[start - 1]!
+      const isArticle = ["definite_article", "indefinite_article"].some((rule) => Wording.reads(scope, rule, article))
+      if (start > 1 && isArticle) start--
+      // English's hooks are their words already, `draw`;  another language's, its own:  `dibujar`
+      const verb = methodBits.slice(0, start)
+      if (!HOOKS.some(({ hook }) => hook === verb.join(" ")) && !MethodDefinition.hookOf(verb, scope)) continue
+      methodBits.splice(start, methodBits.length - start, FUSED_IT)
+      syntaxBits.splice(start, syntaxBits.length - start, FUSED_IT)
+      return
+    }
   }
 
   /**

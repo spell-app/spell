@@ -18,6 +18,7 @@ export const commentsVocabulary = {
   topics: ["social", "lists", "data display", "views"],
   aka: ["discussion", "thread", "replies"],
   noun: "comments",
+  partOfSpeech: "structure",
   description: "A list of comments, or the thread of replies to one.",
   attributes: [
     {

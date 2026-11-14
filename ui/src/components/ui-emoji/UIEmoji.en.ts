@@ -31,6 +31,7 @@ export const emojiVocabulary = {
   aka: ["emoticon", "smiley", "unicode emoji"],
   skeleton: "inline 1 x 1",
   noun: "emoji",
+  partOfSpeech: "property",
   description: "An emoji is a glyph used to represent something else.",
   attributes: [
     {

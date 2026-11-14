@@ -23,6 +23,7 @@ export const containerVocabulary = {
   topics: ["layout", "containers", "basic", "elements"],
   aka: ["wrapper", "page width", "content width"],
   noun: "container",
+  partOfSpeech: "structure",
   description: "A container limits content to a maximum width.",
   attributes: [
     { name: "text", group: "name", kind: "keyOnly", description: "A narrower reading column with larger type." },

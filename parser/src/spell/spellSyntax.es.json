@@ -1712,7 +1712,7 @@
               "syntax": "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
             },
             {
-              "syntax": "((start:principio|comienzo|inicio|frente|arriba)|(end:final|fin|fondo|abajo))"
+              "syntax": "((start:principio|comienzo|inicio|frente|abajo)|(end:final|fin|fondo|arriba))"
             },
             {
               "syntax": "((before:antes de|antes del)|(after:después de|despues de|después del|despues del))"
@@ -1817,7 +1817,7 @@
               "syntax": "((slot:hijos)|slot|(action:acción)|(context_menu:menú-contextual)|(divider:divisor))"
             },
             {
-              "syntax": "((slot:en)|slot)"
+              "syntax": "((slot:en)|slot|(hidden:oculto|oculta)|hidden)"
             }
           ],
           "aliases": []
@@ -2489,7 +2489,7 @@
           "ruleNames": ["flag_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 42,
+          "line": 46,
           "purpose": "`jokers` -- a property's name alone, meaning `jokers = yes` (epic `outline-spell` P26).",
           "syntaxes": [
             {
@@ -2530,7 +2530,7 @@
           "ruleNames": ["said_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 73,
+          "line": 92,
           "purpose": "`suit hearts`, `short name \"foo\"` -- a property and its value, no `=` (epic `data` P32, I68).",
           "syntaxes": [
             {
@@ -2556,7 +2556,7 @@
           "ruleNames": ["the_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 88,
+          "line": 107,
           "purpose": "`the suit` -- the property `suit`, set to what `the suit` means where the line is (epic `data` P32, Q30).",
           "syntaxes": [
             {
@@ -3297,13 +3297,13 @@
               "example": "la carta de arriba del deck",
               "outputs": {
                 "js": {
-                  "code": "core.getItemAt(deck, 0)"
+                  "code": "core.getItemAt(deck, -1)"
                 },
                 "ts": {
-                  "code": "core.getItemAt(deck, 0)"
+                  "code": "core.getItemAt(deck, -1)"
                 },
                 "py": {
-                  "code": "core.get_item_at(deck, 0)"
+                  "code": "core.get_item_at(deck, -1)"
                 }
               }
             }
@@ -3471,7 +3471,7 @@
           "ruleNames": ["range_count_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RangeCountExpression.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Alternative form of range expression.",
           "syntaxes": [
             {
@@ -3479,13 +3479,13 @@
               "example": "arriba 2 items de my-list",
               "outputs": {
                 "js": {
-                  "code": "core.rangeStartingAt(myList, 0, 2)"
+                  "code": "core.rangeStartingAt(myList, -2, 2)"
                 },
                 "ts": {
-                  "code": "core.rangeStartingAt(myList, 0, 2)"
+                  "code": "core.rangeStartingAt(myList, -2, 2)"
                 },
                 "py": {
-                  "code": "core.range_starting_at(my_list, 0, 2)"
+                  "code": "core.range_starting_at(my_list, -2, 2)"
                 }
               }
             }
@@ -4397,7 +4397,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -8859,7 +8859,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 88,
+          "line": 89,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

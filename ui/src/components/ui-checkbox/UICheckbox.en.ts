@@ -28,6 +28,7 @@ export const checkboxVocabulary = {
   aka: ["check box", "toggle", "switch", "tick box"],
   skeleton: "inline 6 x 1.25",
   noun: "checkbox",
+  partOfSpeech: "action",
   description: "A checkbox lets people choose a value from a small set of options, often on or off.",
   attributes: [
     ...LEADING_ATTRIBUTES,

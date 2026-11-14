@@ -21,6 +21,7 @@ export const fieldsVocabulary = {
   topics: ["forms", "layout", "collections"],
   aka: ["field group", "form row", "inline fields"],
   noun: "fields",
+  partOfSpeech: "structure",
   ui: false,
   description: "A set of fields can appear grouped together, side by side or stacked.",
   attributes: [

@@ -21,6 +21,7 @@ export const componentsVocabulary = {
   topics: ["loading", "modules"],
   aka: ["component pack", "plugin", "extension", "custom elements", "web components", "element library"],
   noun: "components",
+  partOfSpeech: "plain",
   description:
     "Components name a pack of another package's elements, which the root around them loads on demand, once per page.",
   attributes: [

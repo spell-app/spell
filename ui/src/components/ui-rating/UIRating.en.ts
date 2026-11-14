@@ -22,6 +22,7 @@ export const ratingVocabulary = {
   aka: ["stars", "star rating", "score", "review stars", "hearts"],
   skeleton: "inline 5.5 x 1.1",
   noun: "rating",
+  partOfSpeech: "action",
   description: "A rating indicates people's interest in content.",
   attributes: [
     {

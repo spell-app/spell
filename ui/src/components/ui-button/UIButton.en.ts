@@ -30,6 +30,7 @@ export const buttonVocabulary = {
   aka: ["btn", "action", "submit", "link button"],
   skeleton: "inline 6 x 2.5",
   noun: "button",
+  partOfSpeech: "action",
   plural: "buttons",
   description: "A button indicates a possible action.",
   attributes: [

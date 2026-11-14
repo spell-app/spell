@@ -220,7 +220,7 @@ class DrawingMethods:
         - A `<ui-button>`:  its text the action's title, its icon, its key in its tooltip, `Auto Play (A)`,
           disabled while it isn't enabled.
         - `props`:  the tag's other attributes, each winning over what the action gives;
-          `icon-only` its own, no text, its title its `aria-label`.
+          `icon-only` its own, no text, its title its `aria-label`;  `title` its text, over the action's title.
         - The app's own `undo` and `redo` too:  their titles and whether they're enabled follow its history (`apps.py`).
         - An action nobody up the chain has:  a disabled button of its name.
         - `in-menu`, the core's own:  a Spell UI menu or toolbar holds it, so it's the menu's ROW, `<ui-action>`,
@@ -229,15 +229,20 @@ class DrawingMethods:
         given = dict(props or {})
         icon_only = given.pop(ICON_ONLY, False)
         in_menu = given.pop(IN_MENU, False)
+        # a `title` the tag gives is what it shows, over the action's own:  `<action "restart the game" title="Restart"/>`
+        given_title = given.pop("title", None)
         holder = next((at for at in self._chain_of(thing) if callable(getattr(at, name, None))), None)
         if holder is not None:
             description = DescribedMethods.actions_of(self, type(holder)).get(name, {})
             live_title = getattr(holder, description.get("title_from") or "", None)
             title = live_title if isinstance(live_title, str) else description.get("title") or _words_of(name)
+            if isinstance(given_title, str):
+                title = given_title
             enabled_when = description.get("enabled_when")
             is_enabled = bool(getattr(holder, enabled_when)) if enabled_when else True
         else:
-            return h(MENU_ROW_TAG if in_menu else BUTTON_TAG, {"disabled": True, **given}, *(children or (name,)))
+            shown = given_title if isinstance(given_title, str) else name
+            return h(MENU_ROW_TAG if in_menu else BUTTON_TAG, {"disabled": True, **given}, *(children or (shown,)))
         shortcut = (description.get("shortcuts") or [None])[0]
         if in_menu:
             row: dict[str, object] = {"shortcut": _menu_keys_of(shortcut)} if shortcut else {}

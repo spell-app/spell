@@ -23,6 +23,7 @@ export const jsonVocabulary = {
   topics: ["data display", "modules"],
   aka: ["data", "data island", "json script", "application/json", "data block", "datos"],
   noun: "JSON data",
+  partOfSpeech: "property",
   description:
     "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the " +
     "parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.",

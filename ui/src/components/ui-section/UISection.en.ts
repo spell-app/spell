@@ -38,6 +38,7 @@ export const sectionVocabulary = {
   // a title over its content, as a segment's skeleton
   skeleton: "header, paragraph",
   noun: "section",
+  partOfSpeech: "structure",
   description: "A section is a titled block of content that can close and keep its title in view.",
   attributes: [
     {

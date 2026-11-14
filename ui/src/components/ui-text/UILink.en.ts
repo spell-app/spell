@@ -19,6 +19,7 @@ export const linkVocabulary = {
   topics: ["text", "navigation", "basic"],
   aka: ["a", "anchor", "hyperlink", "text link"],
   noun: "text",
+  partOfSpeech: "action",
   description: "A link takes the reader somewhere else from inside a sentence.",
   attributes: [
     {

@@ -38,7 +38,7 @@
   ✅ Como se esperaba, `el color de la reserva` es `rojo`
   ✅ Como se esperaba, `el valor de la reserva` es `7`
   ✅ Como se esperaba, `el nombre corto de la reserva` es `"reserva: D♠↑ 7♥↓"`
-  ▶️ Ejecutando   `obtener la última carta de la reserva`
+  ▶️ Ejecutando   `obtener la carta de arriba de la reserva`
   ▶️ Ejecutando   `agregar eso a los descartes`
   ✅ Como se esperaba, `su pila es los descartes` es `sí`
   ✅ Como se esperaba, `el número de cartas en la reserva` es `1`

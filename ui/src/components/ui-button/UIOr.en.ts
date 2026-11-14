@@ -16,6 +16,7 @@ export const orVocabulary = {
   topics: ["buttons", "controls", "elements"],
   aka: ["button separator", "or divider"],
   noun: "or",
+  partOfSpeech: "action",
   ui: false,
   description: "A conditional between two buttons of a group.",
   attributes: [

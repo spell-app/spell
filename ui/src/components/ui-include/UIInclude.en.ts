@@ -21,6 +21,7 @@ export const includeVocabulary = {
   aka: ["island", "partial", "fragment", "server-side include", "html import", "transclusion", "embed"],
   skeleton: "4 line paragraph",
   noun: "include",
+  partOfSpeech: "structure",
   description:
     "An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view.",
   attributes: [

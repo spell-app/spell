@@ -39,6 +39,7 @@ export const menuVocabulary = {
   aka: ["navbar", "nav", "tabs bar", "toolbar", "sidebar menu", "pagination"],
   skeleton: "3 tall",
   noun: "menu",
+  partOfSpeech: "structure",
   description: "A menu displays grouped navigation actions.",
   attributes: [
     {

@@ -8,7 +8,7 @@ a "deck" is a list of cards
 		// One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does
 		for rank in card ranks
 			for suit in card suits
-				add a new card with rank = the rank, suit = the suit to the deck
+				add a new card with rank and suit to the deck
 		if its jokers is yes
 			add a new joker with color = red to the deck
 			add a new joker with color = black to the deck
@@ -36,4 +36,5 @@ a "deck" is a list of cards
 		the number of cards in wild cards should be 2
 		the first card of the deck is the ace of clubs should be yes
 		the last card of the deck is the black joker should be yes
-		the deck's bottom card's name should be "black joker"
+		the deck's top card's name should be "black joker"
+		the deck's bottom card's name should be "ace of clubs"

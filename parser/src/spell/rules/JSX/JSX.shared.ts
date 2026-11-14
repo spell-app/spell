@@ -78,7 +78,7 @@ export const IN_MENU_ATTRIBUTE = "in-menu"
 
 /**
  * The word rule holding spell's own JSX ATTRIBUTE words, each meaning the web's attribute it becomes.
- * - English `((slot:in)|slot)`, Spanish `((slot:en)|slot)`:
+ * - English `((slot:in)|slot)`, Spanish `((slot:en)|slot|(hidden:oculto|oculta)|hidden)`:
  *   `<h3 in="header">` / `<h3 en="header">` => `<h3 slot="header">`, "put me in the frame's `header` children".
  * - On any tag, renamed as the attribute is parsed (`SpellJSXAttribute`).
  * - The web's own `slot="header"` keeps working.
@@ -90,6 +90,15 @@ export const SPELL_ATTRIBUTE_WORDS = "spell_jsx_attribute"
  * the web's names they become, `SPELL_TAG_WORDS`' and `SPELL_ATTRIBUTE_WORDS`' meanings.
  */
 export const SPELL_JSX_MEANINGS = ["slot"]
+
+/**
+ * What spell's own JSX ATTRIBUTE words may mean:  `SPELL_JSX_MEANINGS`, and the web's `hidden`,
+ * which Spanish says `oculto` (epic `language` T123):  `<mazo "mazo" oculto/>`.
+ */
+export const SPELL_ATTRIBUTE_MEANINGS = [...SPELL_JSX_MEANINGS, "hidden"]
+
+/** The web's `hidden`, in any language's words (`SPELL_ATTRIBUTE_MEANINGS`):  a declaring tag with it draws nothing. */
+export const HIDDEN_ATTRIBUTE = "hidden"
 
 /**
  * What spell's own JSX TAG words may mean:  the web's names they become (`SPELL_JSX_MEANINGS`), and spell's own tags.
@@ -267,4 +276,10 @@ export type DrawnDeclaration = {
   datatype?: string
   /** A value said on a line of its own:  the tag only draws it, declaring nothing. */
   drawnOnly?: boolean
+  /**
+   * A view's tag that says `hidden` (Spanish `oculto`):  it declares the member and draws NOTHING (epic `language` T123).
+   * - `<deck "deck" hidden/>` ~== `"deck" is a new deck`:  a viewable list drawn would take its items' elements
+   *   out of wherever else they're drawn, and nothing hides a view's element by `hidden`.
+   */
+  hidden?: boolean
 }

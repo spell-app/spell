@@ -21,6 +21,7 @@ export const dividerVocabulary = {
   aka: ["separator", "hr", "horizontal rule", "rule", "line"],
   skeleton: "0.25 tall",
   noun: "divider",
+  partOfSpeech: "plain",
   description: "A divider visually segments content into groups.",
   attributes: [
     {

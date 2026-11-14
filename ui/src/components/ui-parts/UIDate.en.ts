@@ -21,6 +21,7 @@ export const dateVocabulary = {
   topics: ["content parts", "date & time", "social"],
   aka: ["timestamp", "time ago", "posted at"],
   noun: "date",
+  partOfSpeech: "property",
   ui: false,
   description: "When something happened;  inline and small inside a summary.",
   attributes: [

@@ -26,6 +26,7 @@ export const loaderVocabulary = {
   topics: ["loading", "feedback", "progress", "elements"],
   aka: ["spinner", "loading indicator", "busy", "throbber", "activity indicator"],
   noun: "loader",
+  partOfSpeech: "property",
   description: "A loader tells people to wait for an activity to complete.",
   attributes: [
     {

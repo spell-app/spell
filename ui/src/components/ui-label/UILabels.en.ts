@@ -17,6 +17,7 @@ export const labelsVocabulary = {
   topics: ["status", "lists", "elements"],
   aka: ["badges", "chips", "tags", "tag list"],
   noun: "labels",
+  partOfSpeech: "property",
   description: "Labels can be grouped to share a look.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Size of every label in the group." },

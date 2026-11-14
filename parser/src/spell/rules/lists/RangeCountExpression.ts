@@ -6,7 +6,8 @@ import { SpellExpression } from "spell/parser/spell/rules/expressions"
  * `range_count_expression` rule:  alternative form of range expression.
  * - `{arg}` (e.g. `items`) captured for readability only, unused in output.
  * - Returns a new list.
- * - e.g. `top 2 items of my-list` => `core.rangeStartingAt(myList, 0, 2)`.
+ * - e.g. `first 2 items of my-list` => `core.rangeStartingAt(myList, 0, 2)`;
+ *   `top 2 items of my-list`, its last two (a list is stacked as a pile of cards is), `core.rangeStartingAt(myList, -2, 2)`.
  * - Counting from the end, the range ENDS at the ordinal:
  *   `last two cards of deck` starts at `-2`, the two last cards.
  *   - Before epic `python-target` P2 it started at `-1`, so it held one card.
@@ -28,7 +29,7 @@ export class RangeCountExpression extends SpellExpression<"ordinal|number|arg|li
 
 /**
  * Where a range of `count` items said with `ordinal` starts:
- * - counting from the front (`top 2`):  the ordinal itself
+ * - counting from the front (`first 2`, `bottom 2`):  the ordinal itself
  * - counting from the end:  `count - 1` before it, so the range ends there (`last 2` => `-2`)
  * - a count spell can't know while compiling:  the ordinal as is
  */

@@ -17,6 +17,7 @@ export const buttonsVocabulary = {
   topics: ["buttons", "controls", "layout", "elements"],
   aka: ["button group", "segmented control", "toolbar"],
   noun: "buttons",
+  partOfSpeech: "action",
   description: "Buttons can exist together as a group.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Size of every button in the group." },

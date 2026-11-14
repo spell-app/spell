@@ -33,7 +33,7 @@ una "pila" es una lista visible soltable de cartas
 
 		// una carta está en una sola pila a la vez
 		poner los descartes a una nueva pila con id "descartes"
-		obtener la última carta de la reserva
+		obtener la carta de arriba de la reserva
 		agregar eso a los descartes
 		su pila es los descartes debería ser sí
 		el número de cartas en la reserva debería ser 1

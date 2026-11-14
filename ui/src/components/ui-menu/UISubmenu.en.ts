@@ -26,6 +26,7 @@ export const submenuVocabulary = {
   aka: ["submenu", "flyout menu", "cascading menu", "nested menu", "menu item with submenu"],
   skeleton: "inline 8 x 2.5",
   noun: "item",
+  partOfSpeech: "structure",
   ui: false,
   description: "A menu's row that opens another menu beside it:  its fly-out.",
   attributes: [

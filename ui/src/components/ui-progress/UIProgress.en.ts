@@ -24,6 +24,7 @@ export const progressVocabulary = {
   aka: ["progress bar", "meter", "percent bar", "upload progress"],
   skeleton: "2 tall",
   noun: "progress",
+  partOfSpeech: "property",
   description: "A progress bar shows the progression of a task.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Bar height and text size, `mini` ... `massive`." },

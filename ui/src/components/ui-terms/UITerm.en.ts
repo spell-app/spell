@@ -18,6 +18,7 @@ export const termVocabulary = {
   topics: ["text", "data display"],
   aka: ["dt", "dd", "term", "key value", "property", "name value"],
   noun: "term",
+  partOfSpeech: "property",
   description: "A term is one fact:  a label, and its value.",
   attributes: [
     { name: "label", group: "content", kind: "string", description: "What it is:  `Suit`." },

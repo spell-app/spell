@@ -21,6 +21,7 @@ export const avatarVocabulary = {
   topics: ["content parts", "images", "social"],
   aka: ["profile picture", "user image", "userpic"],
   noun: "avatar",
+  partOfSpeech: "property",
   ui: false,
   description: "A small picture of a person:  a comment's or a card's.",
   attributes: [

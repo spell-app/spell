@@ -1,2 +1,2 @@
-573:50 TS2322 Type '""' is not assignable to type '"red" | "green" | "blue" | "yellow" | "primary" | "secondary" | "orange" | "olive" | "teal" | "violet" | "purple" | "pink" | "brown" | "grey" | "black" | "positive" | "negative" | undefined'.
-588:11 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+590:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+599:11 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.

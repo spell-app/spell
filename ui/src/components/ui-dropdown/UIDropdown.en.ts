@@ -23,6 +23,7 @@ export const dropdownVocabulary = {
   aka: ["select", "combobox", "picker", "autocomplete", "menu button", "multi select"],
   skeleton: "inline 14 x 2.5",
   noun: "dropdown",
+  partOfSpeech: "action",
   description: "A dropdown lets people choose a value from a series of options.",
   attributes: [
     {
