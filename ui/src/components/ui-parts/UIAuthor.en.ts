@@ -21,6 +21,7 @@ export const authorVocabulary = {
   topics: ["content parts", "social"],
   aka: ["user name", "byline", "poster"],
   noun: "author",
+  partOfSpeech: "property",
   ui: false,
   description: "Who wrote a comment or did a feed event (Fomantic's feed `user`).",
   attributes: [

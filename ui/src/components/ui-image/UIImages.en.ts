@@ -17,6 +17,7 @@ export const imagesVocabulary = {
   topics: ["images", "media", "layout", "elements"],
   aka: ["image group", "gallery", "avatars"],
   noun: "images",
+  partOfSpeech: "property",
   description: "A group of images can be formatted together.",
   attributes: [
     {

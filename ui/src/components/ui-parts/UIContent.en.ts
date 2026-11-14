@@ -21,6 +21,7 @@ export const contentVocabulary = {
   topics: ["content parts", "containers", "cards"],
   aka: ["body", "content area", "card body"],
   noun: "content",
+  partOfSpeech: "structure",
   ui: false,
   description: "The main content block of a card, item, event, comment, modal, message, list item, step ...",
   attributes: [

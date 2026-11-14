@@ -21,6 +21,7 @@ export const tocVocabulary = {
   aka: ["table of contents", "on this page", "page index", "scrollspy", "toc", "following menu"],
   skeleton: "short line, 6 line paragraph",
   noun: "toc",
+  partOfSpeech: "structure",
   description:
     "A table of contents lists the page's sections and examples as links, opens the one in view and follows the " +
     "scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  " +

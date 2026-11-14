@@ -160,6 +160,14 @@
    * - The menu's box is a stacking context, so the pieces sit on it, behind the tiles.
    * - Through every `shrinkable` stage:  a cut title or an icon is still a tile;  the `…` button is a pill alone.
    */
+  /* a pills bar keeps more room round its title and its right slot, so a pill never butts up against them */
+  .ui.toolbar:has(> .ui.pills.menu) {
+    --_ui-toolbar-gap: var(--ui-toolbar-gap, 1em);
+  }
+  /* the pills in the middle of the room the title and the right slot leave */
+  .ui.toolbar > .ui.pills.menu {
+    justify-content: center;
+  }
   .ui.toolbar > .ui.pills.menu {
     --_ui-toolbar-pill-background: var(--ui-toolbar-pill-background, oklch(from var(--ui-ink) l c h / 0.08));
     --_ui-toolbar-pill-padding: var(--ui-toolbar-pill-padding, var(--ui-space-3xs));

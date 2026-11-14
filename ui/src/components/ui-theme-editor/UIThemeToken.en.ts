@@ -18,6 +18,7 @@ export const themeTokenVocabulary = {
   aka: ["theme token", "design token", "token row", "css variable", "custom property editor"],
   skeleton: "2 tall",
   noun: "theme token",
+  partOfSpeech: "action",
   description:
     "A theme token is one token of a theme being made:  where its value comes from, its value as colour chips in " +
     "light and dark, and, under its name, a drawer to change it.",

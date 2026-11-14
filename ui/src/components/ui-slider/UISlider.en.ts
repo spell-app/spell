@@ -23,6 +23,7 @@ export const sliderVocabulary = {
   aka: ["range", "range slider", "volume", "scrubber", "track bar"],
   skeleton: "16 x 1.25",
   noun: "slider",
+  partOfSpeech: "action",
   description: "A slider lets people select values within a range.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Size of track and thumbs, `mini` ... `massive`." },

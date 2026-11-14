@@ -145,12 +145,12 @@
       "dark": "4px"
     },
     "--bubbly-foot-tiny-pad-left": {
-      "light": "9px",
-      "dark": "9px"
+      "light": "14px",
+      "dark": "14px"
     },
     "--bubbly-foot-tiny-pad-right": {
-      "light": "9px",
-      "dark": "9px"
+      "light": "14px",
+      "dark": "14px"
     },
     "--bubbly-end-name-ink": {
       "light": "#a6a6ab",

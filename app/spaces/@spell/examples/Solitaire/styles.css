@@ -23,20 +23,6 @@ solitaire-app {
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;
 }
 
-/* The toolbar:  its actions centred in the room between the title and the score, which are
-   never squeezed:  as the bar narrows, the actions give way (`shrinkable`), down to one `…` button */
-.GameBar {
-  --ui-toolbar-gap: 1em;
-}
-.GameBar::part(title),
-.GameBar::part(right) {
-  flex: none;
-}
-.GameBar::part(menu) {
-  flex: 1 1 auto;
-  justify-content: center;
-}
-
 /* A pile:  as wide as its cell of the board, as tall as its cards */
 [layout] {
   display: flow-root;

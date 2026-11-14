@@ -15,6 +15,7 @@ export const treeItemVocabulary = {
   topics: ["lists", "navigation"],
   aka: ["tree node", "tree row", "outline row"],
   noun: "tree item",
+  partOfSpeech: "action",
   description: "One row of a tree:  an icon and a label, with the rows inside it, which it opens and closes.",
   skeleton: "line",
   attributes: [

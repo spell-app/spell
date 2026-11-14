@@ -27,6 +27,7 @@ export const stepVocabulary = {
   topics: ["navigation", "progress", "content parts", "elements"],
   aka: ["wizard step", "stage"],
   noun: "step",
+  partOfSpeech: "action",
   ui: false,
   description: "One step of a set of steps.",
   attributes: [

@@ -318,13 +318,18 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
         </Show>
         <Show when={this.unsavedText}>
           <span
+            ref={(icon) => E.TopLayerTip.showIn(icon, `.${CLASSES.unsaved}`, { showOnClick: true })}
             class={CLASSES.unsaved}
             part={this.partForName("unsaved")}
-            title={this.unsavedText}
+            tabindex="0"
             role="img"
             aria-label={this.unsavedText}
+            aria-describedby={UNSAVED_TIP_ID}
           >
             {this.unsavedGlyph.svg}
+            <span id={UNSAVED_TIP_ID} class={CLASSES.tip} part={this.partForName("tip")} role="tooltip">
+              {this.unsavedText}
+            </span>
           </span>
         </Show>
       </div>
@@ -406,6 +411,9 @@ const UNSAVED_ICON = "save"
 
 /** Shadow-root id of the tip, which the info icon is described by. */
 const TIP_ID = "tip"
+
+/** Shadow-root id of the not-saved icon's tip:  why a change here can't be kept, in the same bubble as the info tip. */
+const UNSAVED_TIP_ID = "unsaved-tip"
 
 /** A control with one of these has a name of its own:  the field doesn't name it. */
 const NAMED_ATTRIBUTES = ["aria-label", "aria-labelledby"] as const

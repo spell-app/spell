@@ -25,6 +25,7 @@ export const calendarVocabulary = {
   aka: ["date picker", "datepicker", "time picker", "datetime", "date range"],
   skeleton: "inline 14 x 2.5",
   noun: "calendar",
+  partOfSpeech: "action",
   description: "A calendar lets a person pick a date, a time, or both.",
   attributes: [
     {

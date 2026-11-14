@@ -15,6 +15,7 @@ export const treeVocabulary = {
   topics: ["lists", "navigation"],
   aka: ["tree view", "outline", "hierarchy", "file tree", "nested list", "folder list"],
   noun: "tree",
+  partOfSpeech: "structure",
   description: "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.",
   skeleton: "3 line paragraph",
   attributes: [

@@ -19,6 +19,7 @@ import { keyCapTexts } from "spell/ui/components/ui-keys/UIKeys.en"
 export const actionVocabulary = {
   ...itemVocabulary,
   tag: "ui-action",
+  partOfSpeech: "action",
   icon: "play",
   topics: ["menus", "buttons", "controls"],
   aka: ["action", "command", "menu item", "toolbar button", "context menu item", "keyboard shortcut"],

@@ -27,6 +27,7 @@ export const tableVocabulary = {
   aka: ["data table", "data grid", "grid", "spreadsheet"],
   skeleton: "long line, 4 line paragraph",
   noun: "table",
+  partOfSpeech: "structure",
   description: "A table displays a collection of data grouped into rows.",
   attributes: [
     {

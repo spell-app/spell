@@ -21,6 +21,7 @@ export const codeVocabulary = {
   aka: ["code block", "syntax highlighting", "highlighter", "pre", "snippet", "source code", "listing"],
   skeleton: "5 line paragraph",
   noun: "code",
+  partOfSpeech: "property",
   description:
     "Code shows a block of source code coloured by its language, from the element's own text or a file on this site.",
   attributes: [

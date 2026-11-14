@@ -22,6 +22,7 @@ export const exampleVocabulary = {
   aka: ["example", "demo", "live example", "code sample", "playground", "show code"],
   skeleton: "header, 2 line paragraph",
   noun: "example",
+  partOfSpeech: "structure",
   description:
     "An example shows its own markup live, under a heading and description, with the same markup as code a button " +
     "shows and hides.",

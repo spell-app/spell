@@ -6,7 +6,7 @@ un "mazo" es una lista de cartas
 		// Una carta de cada, el as de tréboles primero:  cada una empieza boca abajo, como toda vista reversible
 		para rango en rangos de carta
 			para palo en palos de carta
-				agregar una nueva carta con rango = el rango, palo = el palo al mazo
+				agregar una nueva carta con rango y palo al mazo
 	su "nombre corto" es
 		// Los nombres cortos de sus cartas, de arriba abajo
 		poner nombres a una nueva lista de texto

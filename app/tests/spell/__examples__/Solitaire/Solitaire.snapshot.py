@@ -223,24 +223,21 @@ def test_card_setup() -> None:
 # -----------
 
 
-###########
-# ## A deck
-###########
-# The 52 cards of a standard deck, ace of clubs first.
+class Deck(ViewableList):
+    """a deck of playing cards"""
 
-
-class Deck(List):
     item_type = Card
+    element_tag = "test-project-deck"
 
     async def create(self) -> None:
-        """One of each card, ace of clubs first:  each starts face down, as every two sided view does"""
+        """Create one of each card, ace of clubs first"""
         for rank in Card.RANKS:
             for suit in Card.SUITS:
                 self.append(Card(rank=rank, suit=suit))
 
     @property
     def short_name(self) -> str:
-        """Its cards' short names, top to bottom"""
+        """its card names, top to bottom"""
         card_names = List(item_type="text")
         for card in self:
             card_names.append(card.short_name)
@@ -355,7 +352,7 @@ def test_piles() -> None:
 
         # a card is in one pile at a time
         discards = Pile(id="discards")
-        core.echo_test_action("get the last card of the stock")
+        core.echo_test_action("get the top card of the stock")
         it_2 = stock.last_item
         core.echo_test_action("add it to the discards")
         discards.append(it_2)
@@ -492,22 +489,21 @@ class Solitaire(App):
         return [
             h(
                 "ui-segment",
-                {"inverted": True, "attach": "top", "color": ""},
+                {"inverted": True, "attach": "top"},
                 h(
                     "ui-toolbar",
                     {
                         "class": "GameBar",
-                        "aria-label": "Game",
                         "appearance": "pills",
                         "inverted": True,
                         "size": "small",
                         "shrinkable": True,
                     },
-                    h("ui-text", {"slot": "title", "size": "large", "heavy": True}, "Solitaire"),
-                    core.draw_action(self, "auto_play", {"in-menu": True}),
+                    h("ui-text", {"slot": "title", "size": "large", "heavy": True}, "Spell Solitaire"),
                     core.draw_action(self, "cheat", {"in-menu": True}),
-                    core.draw_action(self, "restart_the_game", {"in-menu": True}),
-                    h("ui-action", {"kind": "divider"}),
+                    core.draw_action(self, "auto_play", {"in-menu": True}),
+                    core.draw_action(self, "restart_the_game", {"title": "Restart", "in-menu": True}),
+                    h("spacer"),
                     core.draw_action(self, "undo", {"in-menu": True}),
                     core.draw_action(self, "redo", {"in-menu": True}),
                     h("ui-text", {"slot": "right"}, "Score: ", self.score),
@@ -537,7 +533,7 @@ class Solitaire(App):
             ),
         ]
 
-    # <number "score"/>
+    # <number "score" />
     score = prop(type="number")
     # <stock-pile "stock"/>
     stock = prop(init=lambda: StockPile(id="stock"), early=True)
@@ -803,20 +799,6 @@ solitaire-app {
   min-height: 100%;
   border-radius: 12px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;
-}
-
-/* The toolbar:  its actions centred in the room between the title and the score, which are
-   never squeezed:  as the bar narrows, the actions give way (\\`shrinkable\\`), down to one \\`…\\` button */
-.GameBar {
-  --ui-toolbar-gap: 1em;
-}
-.GameBar::part(title),
-.GameBar::part(right) {
-  flex: none;
-}
-.GameBar::part(menu) {
-  flex: 1 1 auto;
-  justify-content: center;
 }
 
 /* A pile:  as wide as its cell of the board, as tall as its cards */

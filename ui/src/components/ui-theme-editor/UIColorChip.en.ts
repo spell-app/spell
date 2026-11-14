@@ -17,6 +17,7 @@ export const colorChipVocabulary = {
   aka: ["color chip", "swatch", "colour sample", "color preview", "color dot"],
   skeleton: "inline 1.4 x 1.4",
   noun: "colour chip",
+  partOfSpeech: "property",
   description: "A colour chip shows one colour, as a small rounded square:  read-only, its value in its tooltip.",
   attributes: [
     {

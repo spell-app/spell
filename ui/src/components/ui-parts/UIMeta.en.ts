@@ -21,6 +21,7 @@ export const metaVocabulary = {
   topics: ["content parts", "text"],
   aka: ["metadata", "subtitle", "byline", "caption"],
   noun: "meta",
+  partOfSpeech: "property",
   ui: false,
   description: "Metadata about the content, e.g. a date or a category;  a comment's `metadata`.",
   attributes: [],

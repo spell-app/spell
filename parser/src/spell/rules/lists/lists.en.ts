@@ -78,8 +78,9 @@ lists.addRule(Negatable.specialize({ ruleName: "has_or_has_no" }), {
 })
 
 // Which end of a list, for `list_add`:  `add thing to the front of my-list`
+// - A list is stacked as a pile of cards is:  its `top` is its end, its `bottom` its start (epic `language` Q63)
 lists.addRule(Wording.specialize({ ruleName: "list_end", meanings: ["start", "end"] }), {
-  syntax: "((start:start|front|top)|(end:end|back|bottom))"
+  syntax: "((start:start|front|bottom)|(end:end|back|top))"
 })
 
 // Which side of an item, for `list_add_relative`:  `add thing to my-list after other-thing`
@@ -345,8 +346,8 @@ lists.addRule(
       penultimate: -2,
       final: -1,
       last: -1,
-      top: 1,
-      bottom: -1
+      top: -1,
+      bottom: 1
     }
   }),
   {
@@ -368,8 +369,8 @@ lists.addRule(
           ["final", -1],
           ["last", -1],
 
-          ["top", 1],
-          ["bottom", -1]
+          ["top", -1],
+          ["bottom", 1]
         ]
       }
     ]
@@ -408,7 +409,10 @@ lists.addRule(OrdinalPositionExpression, {
       tests: [
         ["the first item of my-list", "core.getItemAt(myList, 0)"],
         ["the tenth card of deck", "core.getItemAt(deck, 9)"],
-        ["the penultimate word in words", "core.getItemAt(words, -2)"]
+        ["the penultimate word in words", "core.getItemAt(words, -2)"],
+        // a list is stacked as a pile of cards is (epic `language` Q63)
+        ["the top card of deck", "core.getItemAt(deck, -1)"],
+        ["the bottom card of deck", "core.getItemAt(deck, 0)"]
       ]
     }
   ]
@@ -428,7 +432,8 @@ lists.addRule(OrdinalOfExpression, {
       tests: [
         ["the first of authors", "core.getItemAt(authors, 0)"],
         ["the last of my-deck", "myDeck.lastItem"],
-        ["the top of my-deck", "myDeck.firstItem"],
+        ["the top of my-deck", "myDeck.lastItem"],
+        ["the bottom of my-deck", "myDeck.firstItem"],
         ["the name of the first of authors", "core.getItemAt(authors, 0)?.name"],
         ["the first of loose", "core.getItemAt(loose, 0)"]
       ]
@@ -462,7 +467,8 @@ lists.addRule(PossessiveOrdinal, {
       },
       tests: [
         ["deck's first card", "core.getItemAt(deck, 0)"],
-        ["the deck's last card", "core.getItemAt(deck, -1)"]
+        ["the deck's last card", "core.getItemAt(deck, -1)"],
+        ["the deck's top card", "core.getItemAt(deck, -1)"]
       ]
     }
   ]
@@ -570,7 +576,8 @@ lists.addRule(RangeCountExpression, {
         scope.variables?.add("deck")
       },
       tests: [
-        ["top 2 items of my-list", "core.rangeStartingAt(myList, 0, 2)"],
+        ["top 2 items of my-list", "core.rangeStartingAt(myList, -2, 2)"],
+        ["bottom 2 items of my-list", "core.rangeStartingAt(myList, 0, 2)"],
         [`first 2 words in "some other words"`, 'core.rangeStartingAt("some other words", 0, 2)'],
         ["last two cards from deck", "core.rangeStartingAt(deck, -2, 2)"],
         ["penultimate two cards from deck", "core.rangeStartingAt(deck, -3, 2)"]
@@ -688,12 +695,12 @@ lists.addRule(ListAdd, {
       tests: [
         ["add thing to the start of my-list", "core.prepend(myList, thing)"],
         ["add thing to the front of my-list", "core.prepend(myList, thing)"],
-        ["add thing to the top of my-list", "core.prepend(myList, thing)"],
+        ["add thing to the bottom of my-list", "core.prepend(myList, thing)"],
 
         ["add thing to my-list", "core.append(myList, thing)"],
         ["add thing to the end of my-list", "core.append(myList, thing)"],
         ["add thing to the back of my-list", "core.append(myList, thing)"],
-        ["add thing to the bottom of my-list", "core.append(myList, thing)"]
+        ["add thing to the top of my-list", "core.append(myList, thing)"]
       ]
     }
   ]

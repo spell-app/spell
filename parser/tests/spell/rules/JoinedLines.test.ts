@@ -38,7 +38,9 @@ describe("a condition over several lines", () => {
       '\t\t  its color is "black"'
     ])
     expect(errors).toEqual([])
-    expect(code).toContain('return (this.rank === 1 && this.color === "red") || (this.rank === 2 && this.color === "black")')
+    expect(code).toContain(
+      'return (this.rank === 1 && this.color === "red") || (this.rank === 2 && this.color === "black")'
+    )
   })
 
   test("a lone `and` binds its parts before an `or` inside them", () => {

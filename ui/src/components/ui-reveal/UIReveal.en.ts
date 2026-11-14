@@ -22,6 +22,7 @@ export const revealVocabulary = {
   topics: ["animation", "images", "media", "elements"],
   aka: ["hover reveal", "flip", "slide reveal", "overlay image"],
   noun: "reveal",
+  partOfSpeech: "structure",
   description: "A reveal displays additional content in place of previous content when activated.",
   attributes: [
     {

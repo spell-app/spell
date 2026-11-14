@@ -18,6 +18,7 @@ export const termsVocabulary = {
   topics: ["text", "data display", "collections"],
   aka: ["dl", "definition list", "description list", "key value list", "properties", "details"],
   noun: "terms",
+  partOfSpeech: "structure",
   description: "Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen.",
   attributes: [
     {

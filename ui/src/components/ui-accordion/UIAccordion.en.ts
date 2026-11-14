@@ -37,6 +37,7 @@ export const accordionVocabulary = {
   aka: ["collapse", "collapsible", "disclosure", "expander", "details", "faq"],
   skeleton: "long line, long line, long line",
   noun: "accordion",
+  partOfSpeech: "structure",
   description: "An accordion lets people show and hide sections of content.",
   attributes: [
     {

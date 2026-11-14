@@ -18,6 +18,7 @@ export const placeholderLineVocabulary = {
   topics: ["loading", "content parts", "elements"],
   aka: ["skeleton line"],
   noun: "line",
+  partOfSpeech: "property",
   ui: false,
   description: "One line of text's skeleton:  a bar.",
   attributes: [

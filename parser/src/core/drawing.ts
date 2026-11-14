@@ -163,6 +163,8 @@ export const drawingMethods = defineCoreModule({
    * - A click runs it through the core, as a menu item's does (`core.runAction()`):  one at a time, one undo step.
    * - `props`:  the tag's other attributes, each winning over what the action gives
    *   (`<action "restart the game" icon="refresh"/>`), plus the tag's own:
+   *   - `title`:  its text, over the action's title, on a button and a menu's row alike
+   *     (`<action "restart the game" title="Restart"/>`;  Owen, 2026-11-14)
    *   - `icon-only`:  no text, its title its name for a screen reader and its tooltip (`aria-label`)
    *   - `in-menu`:  a Spell UI menu holds it, so it's a menu's ROW (epic `editor` P29), not a button:  see below
    * - An action nobody up the chain has:  a disabled button (or row) of its name, and a warning;
@@ -175,12 +177,19 @@ export const drawingMethods = defineCoreModule({
    * - Its key in Spell UI's words, `mod+S` for spell's `meta+S`:  ⌘ on a Mac, Ctrl elsewhere (`menuKeysOf()`).
    */
   drawAction(thing: unknown, name: string, props: Record<string, unknown> = {}, ...children: unknown[]): Drawing {
-    const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, ...given } = props
-    const action = core.actionOf(thing as object | undefined, name)
+    const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, title, ...given } = props
+    const found = core.actionOf(thing as object | undefined, name)
+    // a `title` the tag gives is what it shows, over the action's own:  `<action "restart the game" title="Restart"/>`
+    const action =
+      found && typeof title === "string" ? (Object.create(found, { title: { value: title } }) as typeof found) : found
     if (!action) {
       console.warn(`<action>:  nothing here has an action \`${name}\``)
       const tag = inMenu ? MENU_ROW_TAG : BUTTON_TAG
-      return h(tag, { disabled: true, ...given }, ...(children.length ? children : [name])) as unknown as Drawing
+      return h(
+        tag,
+        { disabled: true, ...given },
+        ...(children.length ? children : [title ?? name])
+      ) as unknown as Drawing
     }
     if (inMenu) {
       const row: Record<string, unknown> = { "prop:action": action }

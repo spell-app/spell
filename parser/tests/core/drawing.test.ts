@@ -166,6 +166,22 @@ describe("@drawn", () => {
     expect(drawCalls.get(card)).toBe(1)
   })
 
+  test('<action "..." title="..."/>:  the tag\'s title is what it shows, on a button and a menu\'s row (Owen)', () => {
+    class Game extends Thing {
+      restartTheGame(): void {}
+    }
+    core.describeAction(Game, "restartTheGame", { title: "Restart The Game" })
+    const game = new Game()
+    draw(() => core.drawAction(game, "restartTheGame", { title: "Restart" }))
+    expect(element.querySelector("ui-button")?.textContent).toBe("Restart")
+    dispose?.()
+    element.innerHTML = ""
+    draw(() => core.drawAction(game, "restartTheGame", { title: "Restart", "in-menu": true }))
+    const row = element.querySelector("ui-action") as (Element & { action?: { title: string } }) | null
+    expect(row?.action?.title).toBe("Restart")
+    expect(core.actionOf(game, "restartTheGame")?.title).toBe("Restart The Game")
+  })
+
   test("a part that throws shows its stand-in, in its own place;  the parts beside it stay (epic `notebook` I5)", () => {
     const card = new Card({ rank: 2 })
     const parts = () => [

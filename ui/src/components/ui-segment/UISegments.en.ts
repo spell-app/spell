@@ -17,6 +17,7 @@ export const segmentsVocabulary = {
   topics: ["containers", "layout", "elements"],
   aka: ["panel group", "stacked panels"],
   noun: "segments",
+  partOfSpeech: "structure",
   description: "A group of segments can be formatted to appear together.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Text size of every segment in the group." },

@@ -770,6 +770,103 @@ methods.addRule(ToDoSomething, {
           ]
         }
       ]
+    },
+    {
+      title:
+        "a hook names its type or its one of a kind as `it`:  `to draw the deck` ~== `to draw it` (epic `language` T122)",
+      compileAs: "block",
+      tests: [
+        {
+          input: ['a "deck" is a thing', "\tto draw the deck", "\t\tprint 1"],
+          js: ["export class Deck extends Thing {", "  draw() {", "    core.console.log(1)", "  }", "}"],
+          ts: ["export class Deck extends Thing {", "  @drawn draw() {", "    core.console.log(1)", "  }", "}"]
+        },
+        {
+          input: ['a "deck" is a thing', "\tto draw a deck", "\t\tprint 1"],
+          js: ["export class Deck extends Thing {", "  draw() {", "    core.console.log(1)", "  }", "}"],
+          ts: ["export class Deck extends Thing {", "  @drawn draw() {", "    core.console.log(1)", "  }", "}"]
+        },
+        {
+          input: ["solitaire is an app", "\tto draw solitaire", "\t\tprint 1"],
+          js: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitaire = new Solitaire()"
+          ],
+          ts: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  @drawn draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitaire, drawn in its own element, e.g. by `draw the solitaire`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitaire's properties;  its methods call its solitaire's.",
+            " * - What every view's element does, e.g. drawing its solitaire, is `SpellElement`'s.",
+            " */",
+            "export class SolitaireElement extends SpellElement<Solitaire> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitaire", [])',
+            "}",
+            "core.useElement(Solitaire, SolitaireElement)",
+            "export const solitaire = new Solitaire()"
+          ]
+        },
+        {
+          input: ["solitaire is an app", "\tto draw the solitaire", "\t\tprint 1"],
+          js: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitaire = new Solitaire()"
+          ],
+          ts: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  @drawn draw() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitaire, drawn in its own element, e.g. by `draw the solitaire`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitaire's properties;  its methods call its solitaire's.",
+            " * - What every view's element does, e.g. drawing its solitaire, is `SpellElement`'s.",
+            " */",
+            "export class SolitaireElement extends SpellElement<Solitaire> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitaire", [])',
+            "}",
+            "core.useElement(Solitaire, SolitaireElement)",
+            "export const solitaire = new Solitaire()"
+          ]
+        },
+        {
+          title: "not a hook:  a method of its words",
+          input: ['a "deck" is a thing', "\tto shuffle the deck", "\t\tprint 1"],
+          js: [
+            "export class Deck extends Thing {",
+            "  shuffleTheDeck() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            'core.describeAction(Deck, "shuffleTheDeck", { title: "Shuffle The Deck", undoneAs: "Shuffle The Deck" })'
+          ]
+        }
+      ]
     }
   ]
 })

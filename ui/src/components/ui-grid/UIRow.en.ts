@@ -30,6 +30,7 @@ export const rowVocabulary = {
   topics: ["layout", "collections"],
   aka: ["grid row", "table row", "tr"],
   noun: "row",
+  partOfSpeech: "structure",
   description: "A row is a horizontal grouping of columns;  in a table, of cells.",
   attributes: [
     {

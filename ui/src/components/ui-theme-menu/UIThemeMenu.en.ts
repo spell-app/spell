@@ -23,6 +23,7 @@ export const themeMenuVocabulary = {
   aka: ["theme picker", "theme switcher", "dark mode toggle", "colour scheme", "appearance", "skin"],
   skeleton: "inline 5 x 2.25",
   noun: "themes",
+  partOfSpeech: "action",
   description:
     "A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers " +
     "both for the next page.",

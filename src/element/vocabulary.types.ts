@@ -348,6 +348,15 @@ export type ComponentVocabulary = {
   /** Group noun, e.g. `cards` for `<ui-cards>`. */
   plural?: string
   /**
+   * What kind of word the tag is in a drawing, which colours its band in Spell's bubbly look (epic `language` T124):
+   * `structure` for `<ui-segment>`, `action` for `<ui-button>`, `property` for `<ui-text>`.
+   * - Read through `yarn site:data`'s small table, `spell/ui/vocabulary/partsOfSpeech.generated`,
+   *   so a page drawing HTML bubbly never loads Spell UI for it.
+   * - None:  `thing` (purple), as any other custom element.
+   * - NEVER translated:  drawing data, like `states`.
+   */
+  partOfSpeech?: PartOfSpeech
+  /**
    * Emit the leading `ui` class.  Default true.
    * - `false` for parts which Fomantic styles by context only, e.g. `column` (`four wide column`, no `ui`).
    */
@@ -406,6 +415,16 @@ export type ComponentVocabulary = {
    */
   skeleton?: string
 }
+
+/**
+ * The parts of speech a tag can be, each its band's colour in Spell's bubbly look (epic `language`):
+ * - `structure` (blue):  what lays a page out (`<ui-container>`, `<div>`)
+ * - `action` (green):  what a person clicks or types into, and a menu's items (`<ui-button>`, `<input>`)
+ * - `property` (amber):  text and what sits in it (`<ui-text>`, `<ui-icon>`, `<p>`)
+ * - `thing` (purple):  any other custom element (`<spell-editor>`);  in the editor, the project's own views too
+ * - `plain` (grey):  what holds nothing to read (`<ui-divider>`), and the page's head
+ */
+export type PartOfSpeech = "structure" | "action" | "property" | "thing" | "plain"
 
 /**
  * A tag's skeleton:  the `<ui-placeholder>` shapes that stand in for it until it loads

@@ -15,6 +15,7 @@ export const siteNavVocabulary = {
   topics: ["navigation", "lists"],
   aka: ["site navigation", "side navigation", "sidebar menu", "nav menu", "site map", "page tree"],
   noun: "site nav",
+  partOfSpeech: "structure",
   description: "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.",
   skeleton: "4 line paragraph",
   attributes: [

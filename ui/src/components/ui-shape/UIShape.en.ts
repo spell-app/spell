@@ -21,6 +21,7 @@ export const shapeVocabulary = {
   topics: ["animation", "media", "modules"],
   aka: ["3d flip", "cube", "flip card", "carousel"],
   noun: "shape",
+  partOfSpeech: "structure",
   description: "A shape is a three dimensional object displayed on a two dimensional plane.",
   attributes: [
     { name: "cube", group: "appearance", kind: "keyOnly", description: "Square grey faces, as the sides of a cube." },

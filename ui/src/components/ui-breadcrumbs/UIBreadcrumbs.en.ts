@@ -23,6 +23,7 @@ export const breadcrumbsVocabulary = {
   aka: ["crumbs", "path", "trail", "location"],
   skeleton: "medium line",
   noun: "breadcrumb",
+  partOfSpeech: "structure",
   description: "A breadcrumb is used to show hierarchy between content.",
   attributes: [
     {

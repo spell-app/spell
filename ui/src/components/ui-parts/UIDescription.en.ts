@@ -21,6 +21,7 @@ export const descriptionVocabulary = {
   topics: ["content parts", "text"],
   aka: ["body text", "summary text", "details"],
   noun: "description",
+  partOfSpeech: "property",
   ui: false,
   description: "A description of the content:  card / item / modal / list / step / search text, a comment's text.",
   attributes: [],

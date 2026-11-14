@@ -25,6 +25,7 @@ export const flyoutVocabulary = {
   topics: ["overlays", "dialogs", "containers", "modules"],
   aka: ["drawer", "sheet", "side panel", "off canvas", "slide over"],
   noun: "flyout",
+  partOfSpeech: "structure",
   description: "A flyout is a modal that slides in from a side of the page.",
   attributes: [
     {

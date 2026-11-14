@@ -24,6 +24,7 @@ export const adVocabulary = {
   aka: ["advertisement", "banner ad", "ad slot"],
   skeleton: "18 x 15",
   noun: "ad",
+  partOfSpeech: "property",
   description: "An ad displays third-party promotional content.",
   attributes: [
     {

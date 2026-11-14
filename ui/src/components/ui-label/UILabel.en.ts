@@ -26,6 +26,7 @@ export const labelVocabulary = {
   aka: ["badge", "chip", "tag", "pill", "lozenge", "count"],
   skeleton: "inline 4 x 1.8",
   noun: "label",
+  partOfSpeech: "property",
   plural: "labels",
   description: "A label displays content classification.",
   attributes: [

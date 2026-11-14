@@ -26,6 +26,7 @@ export const headerVocabulary = {
   aka: ["heading", "title", "h1", "headline"],
   skeleton: "medium line",
   noun: "header",
+  partOfSpeech: "property",
   plural: "headers",
   description: "A header provides a short summary of content.",
   attributes: [

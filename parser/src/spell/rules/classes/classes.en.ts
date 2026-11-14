@@ -1140,6 +1140,40 @@ classes.addRule(NewThing, {
         ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"],
         { title: "a new date is this moment", input: "a new date", js: "new Date()" }
       ]
+    },
+    {
+      title: "a property named alone takes the variable of its name, unless it's a yes or no (epic `language` T121)",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            'a "card" is a thing',
+            '\tits "rank" is a number',
+            '\tits "suit" is text',
+            '\tits "face up" is yes or no'
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("rank")
+        scope.variables?.add("suit")
+        scope.variables?.add("face up")
+      },
+      tests: [
+        ["a new card with rank and suit", "new Card({ rank: rank, suit: suit })"],
+        [
+          "a new card with rank, suit and face up",
+          ["new Card({", "  rank: rank,", "  suit: suit,", "  faceUp: true", "})"]
+        ],
+        ["a new card with rank = 1, suit", "new Card({ rank: 1, suit: suit })"]
+      ]
+    },
+    {
+      title: "... and stays a flag when no variable goes by its name",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(['a "card" is a thing', '\tits "rank" is a number'].join("\n"), "block")
+      },
+      tests: [["a new card with rank", "new Card({ rank: true })"]]
     }
   ]
 })

@@ -3,11 +3,11 @@ import { P } from "spell/parser/parser"
 
 /**
  * A WORD RULE:  the words a language says one thing with, and what each form MEANS (epic `spanish` P3).
- * - e.g. where an item goes in a list, `((start:start|front|top)|(end:end|back|bottom))`:
+ * - e.g. where an item goes in a list, `((start:start|front|bottom)|(end:end|back|top))`:
  *   `front` means `start`, `back` means `end`.
  * - Each language registers its own wording under the same rule name, so the rule that uses it never reads a word:
  *   it asks `Wording.meaningOf(match)`, e.g. `"start"`, whatever the language said.
- *   - English:  `(start:start|front|top)`;  Spanish:  `(start:principio|frente|arriba)`.
+ *   - English:  `(start:start|front|bottom)`;  Spanish:  `(start:principio|frente|abajo)`.
  * - The meanings are the names of the groups the forms sit in;  the rule lists them in `meanings`.
  *   A form outside every named group means nothing special:  `meaningOf()` is `undefined`.
  * - Registered once per wording, `Wording.specialize({ ruleName: "list_end", meanings: ["start", "end"] })`.

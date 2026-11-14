@@ -20,6 +20,7 @@ export const iconsVocabulary = {
   aka: ["icon group", "stacked icons", "icon stack"],
   skeleton: "inline 1 x 1",
   noun: "icons",
+  partOfSpeech: "property",
   description: "Several icons can be used together as a group.",
   attributes: [
     {

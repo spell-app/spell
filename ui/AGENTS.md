@@ -579,6 +579,9 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - And what the spell compiler checks an app's `<ui-defaults>` against (epic `language` P29):
       every tag's attributes, cut down, `src/vocabulary/defaults.generated.ts`
       ([DefaultsTable](src/tools/DefaultsTable.ts);  its test fails while it's stale).
+    - And each tag's part of speech, its vocabulary's `partOfSpeech` (epic `language` T124):
+      `src/vocabulary/partsOfSpeech.generated.ts`, a small table the bubbly look reads (the app's `BubblyMarkup`)
+      to colour a tag's band, without loading Spell UI.
 - `yarn site:check <page...> | --all`:
   loads the `docs/` pages from the page server, at `/components/ui/` (Playwright).
   - [Its script](scripts/site-check.ts), on [the site check](src/tools/SiteCheck.ts).
