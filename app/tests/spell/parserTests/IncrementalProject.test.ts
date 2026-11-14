@@ -84,7 +84,7 @@ describe("incremental parsing ~== full parse", () => {
 
   test("a body can't see names declared after it", () => {
     // `the solitaire` is declared in Solitaire.spell, AFTER Deck.spell -- a full parse doesn't know it yet.
-    const added = "\t\t\t\tadd a new card with rank = the rank, suit = the suit to the deck\n"
+    const added = "\t\t\t\tadd a new card with rank and suit to the deck\n"
     const edited = files.map((it) =>
       it.path === "/Deck.spell"
         ? { ...it, contents: it.contents.replace(added, `${added}\t\tprint the solitaire\n`) }
