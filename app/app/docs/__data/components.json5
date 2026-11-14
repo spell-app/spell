@@ -1195,10 +1195,6 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
-          "name": "AppBarMenus",
-          "file": "src/app/solid/MenuBar.tsx"
-        },
-        {
           "name": "CodeEditorAction",
           "file": "src/app/solid/Actions.tsx"
         },
@@ -1207,7 +1203,7 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
-          "name": "fileMenuRows",
+          "name": "InspectorCards",
           "file": "src/app/solid/MenuBar.tsx"
         },
         {
@@ -1217,10 +1213,6 @@
         {
           "name": "PartMenuItems",
           "file": "src/app/solid/Palette.tsx"
-        },
-        {
-          "name": "ProjectBarMenu",
-          "file": "src/app/solid/MenuBar.tsx"
         },
         {
           "name": "ThemeItems",

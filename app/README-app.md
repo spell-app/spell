@@ -454,20 +454,25 @@ opens as text in the code editor:  coloured, with errors and hover, as any Spell
 ### The editor in Spell
 
 The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
-Its pieces are projects of their own, in the group `@spell/editor`, beside the examples:
-you open and change them in the editor, as any project (epic `editor` P22).
+It's ONE project, `spell-editor`, in the group `@spell/editor`, beside the examples, and ONE file, `SpellEditor.spell`:
+you open and change it in the editor, as any project (epic `editor` P22, P29).
 The group is listed on your own machine only, never in the public preview.
 
 ```text
-app/spaces/@spell/editor/file-tabs/FileTabs.spell          the tabs:  what each shows and how it looks, in Spell
-app/src/app/solid/FileTabs.tsx                               the editor's side:  which files there are, what showing one does
-app/spaces/@spell/editor/editor-bar/EditorBar.spell        the top bar:  its three sections, in Spell
-app/spaces/@spell/editor/editor-layout/EditorLayout.spell  the panes:  code, Program panel, app, Inspector, in Spell
-app/src/app/pages/SpellEditor.tsx                            what's in each section and pane, each a thing that draws itself
-app/spaces/@spell/editor/app-menus/AppMenus.spell          the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
-app/src/app/solid/MenuBar.tsx                                the editor's side:  what each item does, and titles that follow its state (Undo's)
+app/spaces/@spell/editor/spell-editor/SpellEditor.spell   the app `spell editor`:  its views, the bar, the panes, the tabs and the menus
+app/src/app/pages/SpellEditor.tsx                           what's in each section of the bar and each pane, each a thing that draws itself
+app/src/app/solid/MenuBar.tsx                               what each action does, and the rows that follow the editor (Undo's)
+app/src/app/solid/FileTabs.tsx                              the tabs:  which files there are, what showing one does
 ```
 
+- `spell editor is an app`, holding its views as members:  `editor bar`, `editor layout`, `file tab bar`,
+  the `project menu`, and the bar's menus, `file menu`, `edit menu`, `view menu` and `run menu`.
+- The menus are drawn in Spell:  each a Spell UI `<menu>` of the app's `<action "save"/>`s and `<divider/>`s,
+  each row its action's title, icon and key, greyed and ticked live, as the actions say.
+  - A row's click runs its action through the core;  what it DOES is the editor's, handed over by its name.
+  - What follows the editor (Undo's title, the selection's part actions, the Inspector's cards, Theme ›)
+    is the editor's own, drawn in a hole the Spell leaves for it.
+- A tab's right-click menu is a `<context-menu>` inside each tab:  Duplicate, Rename, Delete.
 - A `.spell` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
 - It runs on the layout's own copy of the runtime, so a program's run never touches it.
   A program's things stay the only ones in the Views card, and its console stays its own.
@@ -481,7 +486,10 @@ app/src/app/solid/MenuBar.tsx                                the editor's side: 
   with the running app at the same time as before.
 - What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
 - The menus' titles are written in English in the Spell, and shown in the page's language:
-  the editor hands the layout the same texts in that language, by each English title (`appTexts.titles`).
+  the editor hands the Spell the same texts in that language, by each English title (`appTexts.titles`).
+- It loads once for the page (`loadEditorSpell()`), and each view draws where it belongs.
+  The bar, the panes and the menus are drawn in place, with no element of their own, so the editor's sheets reach them;
+  the file tabs as their view's own element, with its own sheet.
 
 ### The Inspector:  look inside the running app
 

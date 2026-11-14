@@ -181,3 +181,113 @@ describe("core.drawAction():  an action's button", () => {
     expect(game.undoTitle).toBe("Undo Deal")
   })
 })
+
+/**
+ * `<menu><action "deal"/></menu>`:  an action a Spell UI menu holds is a menu's ROW (epic `editor` P29), as the editor's
+ * own menus are drawn.
+ * - The class is what spell compiles this to:
+ *
+ *       a patience is an app
+ *         its "face up" is yes or no
+ *         to deal
+ *           shortcut meta+D
+ *           enabled when its face up is yes
+ *           selected when its face up is no
+ *           undoable as "Deal"
+ *         to draw it
+ *           <menu direction="vertical">
+ *             <action "deal"/>
+ *             <divider/>
+ *             <action "undo"/>
+ *           </menu>
+ */
+describe("core.drawAction() in a menu:  an action's row", () => {
+  installSpellElements(core)
+
+  /** A game whose deal turns its one card face down, drawing a menu of its deal and undo. */
+  class Patience extends App {
+    static elementTag = core.defineElement(this, "Patience", "App")
+    static {
+      this.declareProp("faceUp", { type: "choice" })
+    }
+    get faceUp(): boolean {
+      return this.getProp("faceUp")
+    }
+    set faceUp(faceUp: boolean) {
+      this.setProp("faceUp", faceUp)
+    }
+    deal(): void {
+      this.faceUp = false
+    }
+    get dealIsEnabled(): boolean {
+      return this.faceUp
+    }
+    get dealIsSelected(): boolean {
+      return !this.faceUp
+    }
+    draw(): ReturnType<View["draw"]> {
+      return (
+        h(
+          "ui-menu",
+          { direction: "vertical" },
+          core.drawAction(this, "deal", { "in-menu": true }),
+          h("ui-action", { kind: "divider" }),
+          core.drawAction(this, "undo", { "in-menu": true })
+        ) as unknown as () => ReturnType<View["draw"]>
+      )()
+    }
+  }
+  core.describeAction(Patience, "deal", {
+    title: "Deal",
+    icon: "play",
+    shortcuts: ["meta+D"],
+    enabledWhen: "dealIsEnabled",
+    selectedWhen: "dealIsSelected",
+    undoneAs: "Deal"
+  })
+
+  let root: HTMLElement
+
+  beforeEach(() => {
+    core.resetRuntime()
+    root = document.createElement("div")
+    document.body.append(root)
+  })
+
+  afterEach(() => root.remove())
+
+  test("a <ui-action> of the action, live:  its title, icon and key;  greyed and ticked;  a click runs it, one undo step", async () => {
+    await Promise.resolve()
+    const game = new Patience({ faceUp: true })
+    core.mountApp(game, root)
+    flush()
+    const app = root.querySelector("patience-app") as HTMLElement & { ready: Promise<void> }
+    await app.ready
+    const rows = [...app.querySelectorAll("ui-menu > ui-action")] as Array<HTMLElement & { ready: Promise<void> }>
+    await Promise.all(rows.map((row) => row.ready))
+    flush()
+    const [deal, divider, undo] = rows as unknown as [HTMLElement, HTMLElement, HTMLElement]
+    expect(rows.length).toBe(3)
+    expect(divider.getAttribute("kind")).toBe("divider")
+    // Spell's `meta` is Spell UI's `mod`:  ⌘ on a Mac, Ctrl elsewhere
+    expect(deal.getAttribute("shortcut")).toBe("mod+D")
+    const title = (row: HTMLElement) => row.shadowRoot!.querySelector("[part~=title]")!.textContent
+    expect([title(deal), title(undo)]).toEqual(["Deal", "Undo"])
+    const states = (row: HTMLElement) => [row.matches(":state(disabled)"), row.matches(":state(selected)")]
+    expect([states(deal), states(undo)]).toEqual([
+      [false, false],
+      [true, false]
+    ])
+    deal.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
+    flush()
+    await Promise.resolve()
+    flush()
+    expect(game.faceUp).toBe(false)
+    expect(game.undoTitle).toBe("Undo Deal")
+    expect([states(deal), states(undo)]).toEqual([
+      [true, true],
+      [false, false]
+    ])
+    expect(title(undo)).toBe("Undo Deal")
+  })
+})

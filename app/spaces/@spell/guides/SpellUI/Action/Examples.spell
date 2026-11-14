@@ -1,3 +1,29 @@
+a "game menu" is a view
+	// A menu of the game's own actions:  each row its action's title, icon and key, greyed while it can't be done, ticked while it's on
+	its "dealt" is yes or no
+	its "sound" is yes or no
+	to "deal" with icon "play"
+		shortcut meta+N
+		enabled when its dealt is no
+		set its dealt to yes
+	to "start over" with icon "undo"
+		enabled when its dealt is yes
+		set its dealt to no
+	to "sound on" with icon "volume up"
+		selected when its sound is yes
+		set its sound to yes
+	to "sound off" with icon "volume off"
+		selected when its sound is no
+		set its sound to no
+	to draw it
+		<menu direction="vertical" aria-label="Game">
+			<action "deal"/>
+			<action "start over"/>
+			<divider/>
+			<action "sound on"/>
+			<action "sound off"/>
+		</menu>
+
 "action examples" is a notebook page
 	<header level="1">
 		Action
@@ -33,6 +59,12 @@
 					<action icon="undo" shortcut="mod+Z">Undo Turn Card</action>
 					<action icon="redo" shortcut="mod+shift+Z" disabled>Redo</action>
 				</menu>
+			</example>
+		</>
+
+		<section label="Drawn from a program's actions" sticky="stack" collapsible dividing>
+			<example "Drawn from a program's actions" description="In Spell, `<action \"deal\"/>` inside a `<menu>` is one of its rows, drawn from the program's action:  its title, icon and key, greyed while it can't be done, ticked while it's on.  Choose Deal, then Start Over.">
+				<game-menu/>
 			</example>
 		</>
 

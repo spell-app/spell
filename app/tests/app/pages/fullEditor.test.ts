@@ -7,21 +7,22 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { EDITOR, KIT, SERVING } from "./runningEditor"
 
 /**
- * The editor in itself (epic `editor` P22):  its own Spell pieces are projects of the group `@spell/editor`.
- * - A piece opens in the editor like any project.
- * - A published change to a piece shows in the running editor.
- * - A piece that stops compiling can't lock you out:  the editor runs its last good compile, and says why.
- * - A piece's project shows the editor built from your drafts, in a frame:  the editor you're using never runs a draft.
- * - Writes the editor bar's file and a draft of it, and ALWAYS puts them back (`afterAll`, and on exit).
+ * The editor in itself (epic `editor` P22, P29):  its own Spell is ONE project of the group `@spell/editor`,
+ * `spell-editor`, one file, `SpellEditor.spell`.
+ * - It opens in the editor like any project.
+ * - A published change to it shows in the running editor.
+ * - Spell that stops compiling can't lock you out:  the editor runs its last good compile, and says why.
+ * - Its project shows the editor built from your drafts, in a frame:  the editor you're using never runs a draft.
+ * - Writes the editor's file and a draft of it, and ALWAYS puts them back (`afterAll`, and on exit).
  * - Needs this checkout's editor running:  `spell server start all`.
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
  */
 
-/** The editor bar's piece, the file this test changes. */
-const BAR = path.join(KIT, "app/spaces/@spell/editor/editor-bar/EditorBar.spell")
+/** The editor's own Spell, the file this test changes. */
+const BAR = path.join(KIT, "app/spaces/@spell/editor/spell-editor/SpellEditor.spell")
 
-/** Today's draft of the bar, as the server names one:  `__draft/EditorBar.owen-2026-11-03.spell` (P24, Q24). */
+/** Today's draft of it, as the server names one:  `__draft/SpellEditor.owen-2026-11-03.spell` (P24, Q24). */
 const BAR_DRAFTS = path.join(path.dirname(BAR), "__draft")
 
 describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
@@ -55,28 +56,28 @@ describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
     await browser?.close()
   })
 
-  test("a piece opens as a project:  the editor layout's code shows", async () => {
-    await page.goto(`${EDITOR}edit/@spell/editor/editor-layout`, { timeout: 60_000 })
+  test("the editor's Spell opens as a project:  its code shows", async () => {
+    await page.goto(`${EDITOR}edit/@spell/editor/spell-editor`, { timeout: 60_000 })
     await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
     expect(
-      await until(() => /editor\slayout/.test(document.querySelector(".InputEditor .view-lines")?.textContent ?? ""))
+      await until(() => /spell\seditor/.test(document.querySelector(".InputEditor .view-lines")?.textContent ?? ""))
     ).toBe(true)
   })
 
-  test("a piece shows the editor from your drafts, in a frame:  a draft of the bar shows there, never outside", async () => {
+  test("its project shows the editor from your drafts, in a frame:  a draft of the bar shows there, never outside", async () => {
     const now = new Date()
     const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()]
       .map((it) => String(it).padStart(2, "0"))
       .join("-")
     mkdirSync(BAR_DRAFTS, { recursive: true })
     writeFileSync(
-      path.join(BAR_DRAFTS, `EditorBar.owen-${day}.spell`),
+      path.join(BAR_DRAFTS, `SpellEditor.owen-${day}.spell`),
       original.replace(`class="AppMenu tight EditorBar"`, `class="AppMenu tight EditorBar DraftProbe"`)
     )
-    await page.goto(`${EDITOR}edit/@spell/editor/editor-bar`, { timeout: 60_000 })
+    await page.goto(`${EDITOR}edit/@spell/editor/spell-editor`, { timeout: 60_000 })
     const frame = page.frameLocator("iframe.DraftEditorFrame")
     await frame.locator(".EditorBar.DraftProbe").first().waitFor({ timeout: 90_000 })
-    // the piece's own program runs out of sight in the outer page:  only its own bar counts
+    // the project's own program runs out of sight in the outer page:  only its own bar counts
     expect(
       await page.evaluate(
         () => [...document.querySelectorAll(".DraftProbe")].filter((it) => !it.closest(".AppPaneProgram")).length
@@ -95,8 +96,8 @@ describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
     expect(await until(() => !!document.querySelector(".FullEditorProbe"))).toBe(true)
   })
 
-  test("a bar that stops compiling falls back to its last good one, and says why", async () => {
-    writeFileSync(BAR, original.replace("</draw>", "<draw>"))
+  test("Spell that stops compiling falls back to its last good one, and says why", async () => {
+    writeFileSync(BAR, original.replace("spell editor is an app", "spell editor is an app\n\t<draw>"))
     expect(
       await until(() =>
         /doesn't compile/.test(String((window as { editor?: { error?: Error } }).editor?.error?.message))

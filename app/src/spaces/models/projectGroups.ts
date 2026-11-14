@@ -63,7 +63,7 @@ export type ExampleCategory = (typeof EXAMPLE_CATEGORIES)[number]
  * - Each one's `path` is its address;  its folder comes from that (`SP.SpellUrls.folderFor()`):
  *   - `@spell/examples`, `@spell/guides`, `@spell/sites`, `@spell/library`:
  *     the `@spell` space's built-ins, `spaces/@spell/<group>/`, committed
- *   - `@spell/editor`:  the editor's own pieces in Spell, one project each (epic `editor` P22), committed
+ *   - `@spell/editor`:  the editor's own Spell, one project, `spell-editor` (epic `editor` P22, P29), committed
  *   - `@spell/test`:  the test projects, beside them in `spaces/@spell/test/`, committed and frozen
  *   - `owen@spell`:  this machine's person's own, `<spell-spaces>/@spell/<person>@/`, outside git
  * - A project in one is its address, a slash and the project's folder name:  `@spell/examples/Solitaire`.
