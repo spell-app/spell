@@ -26,8 +26,13 @@ describe("<ui-container> classes and layout", () => {
     ['fluid="yes"', "ui fluid container"],
     ["wide", "ui wide container"],
     // the old names (epic ui-gaps P4), and the new
-    ['grid spacing="xl"', "ui very relaxed grid container"],
-    ['grid spacing="lg"', "ui relaxed grid container"],
+    ['grid spacing="xl"', "ui very relaxed gridded container"],
+    ['grid spacing="lg"', "ui relaxed gridded container"],
+    // epic `language` T119:  a segment's padding, size and inverted;  `columns` makes no class on the box
+    ['padding="small"', "ui lightly padded container"],
+    ['padding="lg"', "ui very padded container"],
+    ['size="small" inverted', "ui small inverted container"],
+    ['columns="7" spacing="xs"', "ui very compact container"],
     ['scrolling="very short" resizable', "ui resizable very short scrolling container"],
     ['width="20em"', "ui set-width container"]
   ])("<ui-container %s>", async (attributes, classes) => {
@@ -36,6 +41,43 @@ describe("<ui-container> classes and layout", () => {
     expect(root.className).toBe(classes)
     expect(root.localName).toBe("div")
     expect(root.querySelector("slot")).not.toBeNull()
+  })
+
+  // epic `language` T119:  Solitaire's board, `<container padding="small" columns="7" spacing="xs">`
+  it("lays its children out as a grid of `columns`, with the grid's own gutters", async () => {
+    const host = await ElementFixture.render<DOMElement>(
+      `<ui-container padding="small" columns="7" spacing="xs">${"<div>x</div>".repeat(14)}</ui-container>`
+    )
+    const box = host.shadowRoot!.querySelector<HTMLElement>("[part~=container]")!
+    const grid = host.shadowRoot!.querySelector<HTMLElement>("[part~=grid]")!
+    expect(grid.className).toBe("ui very compact seven column grid")
+    expect(grid.querySelector("slot")).not.toBeNull()
+    expect(getComputedStyle(host).display).toBe("contents")
+    expect(getComputedStyle(box).paddingLeft).toBe("16px")
+
+    const cells = [...host.children] as HTMLElement[]
+    const tops = new Set(cells.map((cell) => Math.round(cell.getBoundingClientRect().top)))
+    expect(tops.size).toBe(2)
+    const width = grid.getBoundingClientRect().width
+    expect(cells[0]!.getBoundingClientRect().width).toBeCloseTo(width / 7, 0)
+    // `xs`:  the grid's very compact gutter, half of 0.5em each side
+    expect(getComputedStyle(cells[0]!).paddingLeft).toBe("4px")
+
+    host.removeAttribute("columns")
+    await host.ready
+    expect(host.shadowRoot!.querySelector("[part~=grid]")).toBeNull()
+    expect(box.querySelector("slot")).not.toBeNull()
+  })
+
+  it("is a segment's dark scheme when `inverted`, and sizes its text with `size`", async () => {
+    const host = await ElementFixture.render<DOMElement>(`<ui-container inverted size="large"><p>x</p></ui-container>`)
+    const box = host.shadowRoot!.querySelector<HTMLElement>("[part~=container]")!
+    const style = getComputedStyle(box)
+    expect(style.colorScheme).toBe("dark")
+    expect(style.getPropertyValue("--ui-inverted").trim()).toBe("1")
+    expect(getComputedStyle(host.querySelector("p")!).colorScheme).toBe("dark")
+    const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize)
+    expect(parseFloat(style.fontSize)).toBeGreaterThan(rootSize)
   })
 
   // epic `language` T76:  Calculator and Tic-Tac-Toe were 20em boxes, with a style sheet only to say so

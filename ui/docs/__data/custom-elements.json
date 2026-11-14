@@ -6147,6 +6147,38 @@
               "fieldName": "width"
             },
             {
+              "name": "size",
+              "description": "Text size, `mini` ... `massive`, as `<ui-segment size>`;  `medium` is the default.",
+              "type": {
+                "text": "\"mini\" | \"tiny\" | \"small\" | \"medium\" | \"large\" | \"big\" | \"huge\" | \"massive\""
+              },
+              "fieldName": "size"
+            },
+            {
+              "name": "inverted",
+              "description": "The dark scheme, as `<ui-segment inverted>`:  a dark surface, and everything inside follows (`color-scheme: dark`, `--ui-inverted`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "inverted"
+            },
+            {
+              "name": "padding",
+              "description": "Room inside its edges:  `small` (1em, a segment's own), `md` more (1.5em), `lg` even more (3em);  `none`, the default.  The same steps as `<ui-segment padding>`.",
+              "type": {
+                "text": "\"none\" | \"small\" | \"md\" | \"lg\""
+              },
+              "fieldName": "padding"
+            },
+            {
+              "name": "columns",
+              "description": "Lays its children out as a grid of that many columns, `1` ... `16`, as `<ui-grid columns>` does:  each child a cell, with no `<ui-grid>` or `<ui-column>` around them.",
+              "type": {
+                "text": "\"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" | \"10\" | \"11\" | \"12\" | \"13\" | \"14\" | \"15\" | \"16\" | string"
+              },
+              "fieldName": "columns"
+            },
+            {
               "name": "grid",
               "description": "Holds a grid:  widened by the grid's gutters so its columns line up with other containers.",
               "type": {
@@ -6156,9 +6188,9 @@
             },
             {
               "name": "spacing",
-              "description": "With `grid`:  room for a grid's wider gutters (`spacing=\"lg\"`, `xl` wider still).  Its old name was `relaxed`.",
+              "description": "With `columns`:  the room between its columns, as `<ui-grid spacing>`:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  With `grid`:  room for a grid's wider gutters (`spacing=\"lg\"`, `xl` wider still).  Its old name was `relaxed`.",
               "type": {
-                "text": "\"lg\" | \"xl\""
+                "text": "\"xs\" | \"compact\" | \"lg\" | \"xl\""
               },
               "fieldName": "spacing"
             },
@@ -6303,6 +6335,10 @@
             {
               "name": "container",
               "description": "The container box."
+            },
+            {
+              "name": "grid",
+              "description": "With `columns`:  the grid box inside it, around its children."
             }
           ],
           "cssStates": [
@@ -6403,6 +6439,26 @@
             {
               "name": "--ui-container-scrolling-height-widescreen",
               "default": "30em"
+            },
+            {
+              "name": "--ui-container-lightly-padded",
+              "default": "var(--_container-em)"
+            },
+            {
+              "name": "--ui-container-padded",
+              "default": "calc(var(--_container-em) * 1.5)"
+            },
+            {
+              "name": "--ui-container-very-padded",
+              "default": "calc(var(--_container-em) * 3)"
+            },
+            {
+              "name": "--ui-container-inverted-background",
+              "default": "var(--ui-surface)"
+            },
+            {
+              "name": "--ui-container-inverted-color",
+              "default": "var(--ui-text-color)"
             }
           ]
         }

@@ -4,6 +4,9 @@
  *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-container text align="justified">` => `ui text justified container`.
+ * - `grid`'s class word is `gridded` (Fomantic's `grid`), and `columns` makes no class on the box:
+ *   the box's shadow root also holds the grid's sheet (for `columns`), whose `.ui.grid` and `.ui.column` rules
+ *   would style the container itself.
  */
 
 import type { E } from "spell/ui/core"
@@ -34,21 +37,57 @@ export const containerVocabulary = {
         "For content as wide as it needs, e.g. a calculator or a game board, with no CSS."
     },
     {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`, as `<ui-segment size>`;  `medium` is the default."
+    },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description:
+        "The dark scheme, as `<ui-segment inverted>`:  a dark surface, and everything inside follows " +
+        "(`color-scheme: dark`, `--ui-inverted`)."
+    },
+    {
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["none", "small", "md", "lg"],
+      classes: { none: "fitted", small: "lightly padded", md: "padded", lg: "very padded" },
+      description:
+        "Room inside its edges:  `small` (1em, a segment's own), `md` more (1.5em), `lg` even more (3em);  " +
+        "`none`, the default.  The same steps as `<ui-segment padding>`."
+    },
+    {
+      name: "columns",
+      group: "layout",
+      kind: "width",
+      values: "widths",
+      widthClass: "column",
+      description:
+        "Lays its children out as a grid of that many columns, `1` ... `16`, as `<ui-grid columns>` does:  " +
+        "each child a cell, with no `<ui-grid>` or `<ui-column>` around them."
+    },
+    {
       name: "grid",
       group: "layout",
       kind: "keyOnly",
+      key: "gridded",
       description: "Holds a grid:  widened by the grid's gutters so its columns line up with other containers."
     },
     {
       name: "spacing",
       group: "layout",
       kind: "valueOnly",
-      values: ["lg", "xl"],
-      classes: { lg: "relaxed", xl: "very relaxed" },
+      values: ["xs", "compact", "lg", "xl"],
+      classes: { xs: "very compact", compact: "compact", lg: "relaxed", xl: "very relaxed" },
       replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
       description:
-        'With `grid`:  room for a grid\'s wider gutters (`spacing="lg"`, `xl` wider still).  ' +
-        "Its old name was `relaxed`."
+        "With `columns`:  the room between its columns, as `<ui-grid spacing>`:  `compact` narrower (`xs` " +
+        'narrower still), `lg` wider (`xl` wider still).  With `grid`:  room for a grid\'s wider gutters (`spacing="lg"`, ' +
+        "`xl` wider still).  Its old name was `relaxed`."
     },
     {
       name: "align",
@@ -78,7 +117,10 @@ export const containerVocabulary = {
   ],
   events: [],
   slots: [{ name: "", description: "Content." }],
-  parts: [{ name: "container", description: "The container box." }],
+  parts: [
+    { name: "container", description: "The container box." },
+    { name: "grid", description: "With `columns`:  the grid box inside it, around its children." }
+  ],
   states: [],
   texts: []
 } as const satisfies E.ComponentVocabulary

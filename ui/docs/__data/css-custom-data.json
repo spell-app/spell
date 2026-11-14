@@ -1542,6 +1542,41 @@
       }
     },
     {
+      "name": "--ui-container-lightly-padded",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-container>`'s token.  Default:  `var(--_container-em)`"
+      }
+    },
+    {
+      "name": "--ui-container-padded",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-container>`'s token.  Default:  `calc(var(--_container-em) * 1.5)`"
+      }
+    },
+    {
+      "name": "--ui-container-very-padded",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-container>`'s token.  Default:  `calc(var(--_container-em) * 3)`"
+      }
+    },
+    {
+      "name": "--ui-container-inverted-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-container>`'s token.  Default:  `var(--ui-surface)`"
+      }
+    },
+    {
+      "name": "--ui-container-inverted-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-container>`'s token.  Default:  `var(--ui-text-color)`"
+      }
+    },
+    {
       "name": "--ui-diagram-font-family",
       "description": {
         "kind": "markdown",
@@ -11032,7 +11067,7 @@
       "name": "::part(grid)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-calendar>`:  The `<table role=grid>`.\n- `<ui-grid>`:  The grid box (the flex container).\n- `<ui-icon-picker>`:  The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
+        "value": "Part of:\n\n- `<ui-calendar>`:  The `<table role=grid>`.\n- `<ui-container>`:  With `columns`:  the grid box inside it, around its children.\n- `<ui-grid>`:  The grid box (the flex container).\n- `<ui-icon-picker>`:  The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
       }
     },
     {
