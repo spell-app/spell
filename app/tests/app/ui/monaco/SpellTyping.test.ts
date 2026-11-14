@@ -164,7 +164,7 @@ describe("SpellTyping.pastedLines()", () => {
     ])
     expect(
       SpellTyping.pastedLines(
-        ["<content>", "<button fluid>", "{its label}", "</button>", '<text "hi"/>', "<br>", "</>"],
+        ["<content>", "<button fluid>", "{its label}", "</button>", '<text "hi"/>', "<br />", "</>"],
         "\t\t",
         TABS
       )
@@ -174,8 +174,24 @@ describe("SpellTyping.pastedLines()", () => {
       "\t\t\t\t{its label}",
       "\t\t\t</button>",
       '\t\t\t<text "hi"/>',
-      "\t\t\t<br>",
+      "\t\t\t<br />",
       "\t\t</>"
+    ])
+    // as spell reads them, not HTML:  `<br>` holds what's under it till its closer;  Spell UI's `<link>` its text
+    expect(SpellTyping.pastedLines(["<text>", "<link>", "docs", "</link>", "</text>"], "\t", TABS)).toEqual([
+      "<text>",
+      "\t\t<link>",
+      "\t\t\tdocs",
+      "\t\t</link>",
+      "\t</text>"
+    ])
+    // an if-chain's next branch back at its `<if>`'s level (epic `editor` T71's `LSP.MarkupIndent`)
+    expect(SpellTyping.pastedLines(["<if it is done>", "Done", "<otherwise>", "Not yet", "</>"], "\t", TABS)).toEqual([
+      "<if it is done>",
+      "\t\tDone",
+      "\t<otherwise>",
+      "\t\tNot yet",
+      "\t</>"
     ])
   })
 

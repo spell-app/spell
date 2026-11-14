@@ -2524,34 +2524,137 @@ export class SpellLanguageService {
   /**
    * Edits formatting `file`, or just the lines overlapping `range` -- whitespace ONLY, see `P.TokenFormatter`:
    * - one TAB per level, ALWAYS -- spell indents with tabs, whatever the editor's `insertSpaces` says
+   * - a body one level under its head;  a drawing's markup laid out as a tree, a tag's children one level under it,
+   *   its closing tag back at its level, as a paste lays it out (`LSP.MarkupIndent`, epic `editor` T71):
+   *   see `markupLaidOut()`
    * - one space between words;  one after `,` and `:`, none before them or just inside brackets,
    *   and none at the end of a line
    * - at most 2 blank lines in a row;  comments, strings and JSX left as written
    * - `trimFinalNewlines` / `insertFinalNewline` if `options` ask, as VS Code settings of those names do
-   * - One edit per changed line, so the editor keeps the cursor in place.  None if it can't format safely.
+   * - One edit per changed line, so the editor keeps the cursor in place.  None if it can't format safely;
+   *   the markup left as written if laying it out would make it read differently.
    */
   formatting(file: SP.SpellFile, options: FormattingOptions, range?: Range): TextEdit[] {
     const text = file.contents ?? ""
     if (!text.trim()) return []
+    // the file's own form's:  a `.spell` file's tags are tokens of its own tokenizer (epic `elemental-spell` P8)
+    const tokenizer = file.scope?.parser?.tokenizer ?? file.language.parser.tokenizer
     const formatter = new P.TokenFormatter({
-      // the file's own form's:  a `.spell` file's tags are tokens of its own tokenizer (epic `elemental-spell` P8)
-      tokenizer: file.scope?.parser?.tokenizer ?? file.language.parser.tokenizer,
+      tokenizer,
       indent: "\t",
       trimFinalBlankLines: !range && !!options.trimFinalNewlines,
       ...SpellLanguageService.FORMAT_SPACING
     })
-    const lines = formatter.formatLines(text)
-    if (!lines) return []
+    const formattedLines = formatter.formatLines(text)
+    if (!formattedLines) return []
+    const lines = this.markupLaidOut(file, formattedLines, { tokenizer, tabSize: options.tabSize || 1 })
     const from = range ? this.offsetAt(file, range.start) : 0
     const to = range ? this.offsetAt(file, range.end) : text.length
     const edits: TextEdit[] = []
     for (const { start, end, next, text: formatted } of lines) {
       if (start > to || next <= from) continue
       if (formatted === undefined) edits.push(this.editFor(file, start, next, ""))
-      else if (formatted !== text.slice(start, end)) edits.push(this.editFor(file, start, end, formatted))
+      else if (formatted !== text.slice(start, end)) edits.push(...this.lineEdits(file, start, end, formatted))
     }
     if (!range && options.insertFinalNewline && !text.endsWith("\n")) {
       edits.push(this.editFor(file, text.length, text.length, "\n"))
+    }
+    return edits
+  }
+
+  /**
+   * `lines`, as `P.TokenFormatter` formatted them, with each drawing's markup laid out as a tree (`LSP.MarkupIndent`):
+   * a drawing, one token over several lines, is copied as written by the formatter.
+   * - Its first line where the formatter put it;  each line under it a level in per tag still open above it.
+   * - `lines` as they were if the result reads differently to the parser:  see `readsTheSame()`.
+   */
+  private markupLaidOut(
+    file: SP.SpellFile,
+    lines: P.FormattedLine[],
+    { tokenizer, tabSize }: { tokenizer: P.Tokenizer; tabSize: number }
+  ): P.FormattedLine[] {
+    const written = file.contents ?? ""
+    const indentOfWidth = (width: number) => "\t".repeat(Math.floor(width / tabSize)) + " ".repeat(width % tabSize)
+    let changed = false
+    const laidOut = lines.map((line) => {
+      if (!line.text?.includes("\n")) return line
+      let text = line.text
+      // last first, so each drawing's place in `text` stays where the tokenizer said
+      for (const token of tokenizer.tokenize(line.text).toReversed()) {
+        if (!(token instanceof P.JSXToken) || token.end === undefined) continue
+        const drawing = text.slice(token.start, token.end)
+        if (!drawing.includes("\n")) continue
+        const lineStart = text.lastIndexOf("\n", token.start - 1) + 1
+        const base = LSP.MarkupIndent.widthOf(/^[ \t]*/.exec(text.slice(lineStart))![0], tabSize)
+        // how far the formatter moved the drawing's first line:  the lines under it that keep their place move as far
+        const firstMoved = lineStart
+          ? 0
+          : base - LSP.MarkupIndent.widthOf(/^[ \t]*/.exec(written.slice(line.start))![0], tabSize)
+        const options = { base, tabSize, indentOfWidth, tokenizer, firstMoved }
+        const tree = LSP.MarkupIndent.layout(drawing.split("\n"), options)
+        text = text.slice(0, token.start) + tree.join("\n") + text.slice(token.end)
+      }
+      if (text === line.text) return line
+      changed = true
+      return { ...line, text }
+    })
+    if (!changed) return lines
+    const before = P.TokenFormatter.applyLines(written, lines)
+    const after = P.TokenFormatter.applyLines(written, laidOut)
+    return this.readsTheSame(file, tokenizer, before, after) ? laidOut : lines
+  }
+
+  /**
+   * Does `after` read as `before` does, `file`'s text with only whitespace changed?
+   * - The same tokens, whitespace aside;  but a drawing whose lines moved is compiled, before and after, in the scope
+   *   it's drawn in:  its text's line breaks and indents are the parser's to read (`SpellJSXText`, `rawTextTags`).
+   * - NEVER throws:  a drawing that won't compile reads differently.
+   */
+  private readsTheSame(file: SP.SpellFile, tokenizer: P.Tokenizer, before: string, after: string): boolean {
+    const tokensOf = (text: string) => tokenizer.tokenize(text).filter((token) => !(token instanceof P.WhitespaceToken))
+    const was = tokensOf(before)
+    const now = tokensOf(after)
+    // where each was in the file, for its scope:  the formatter moved them, never changed them
+    const inFile = tokensOf(file.contents ?? "")
+    if (was.length !== now.length || inFile.length !== was.length) return false
+    return was.every((token, index) => {
+      const other = now[index]!
+      const written = before.slice(token.start, token.end)
+      const rewritten = after.slice(other.start, other.end)
+      if (token.constructor !== other.constructor) return false
+      if (written === rewritten) return true
+      if (!(token instanceof P.JSXToken)) return false
+      const rule = token instanceof P.JSXFragmentToken ? "jsxFragment" : "jsxElement"
+      // a file not parsed yet, e.g. new:  its own scope, else its language's
+      const scope = file.match ? this.scopeAt(file, inFile[index]!.start) : (file.scope ?? file.language.rootScope)
+      try {
+        return `${scope.compile(written, rule)}` === `${scope.compile(rewritten, rule)}`
+      } catch {
+        return false
+      }
+    })
+  }
+
+  /**
+   * Edits replacing `file`'s text from `start` to `end`, one line or a drawing over several, with `newText`:
+   * one edit per line that changed, only its indent if that's all, so the caret keeps its place.
+   * - One edit for the whole if the line count changed.
+   */
+  private lineEdits(file: SP.SpellFile, start: number, end: number, newText: string): TextEdit[] {
+    const was = (file.contents ?? "").slice(start, end).split("\n")
+    const now = newText.split("\n")
+    if (was.length !== now.length) return [this.editFor(file, start, end, newText)]
+    const edits: TextEdit[] = []
+    let at = start
+    for (const [index, line] of was.entries()) {
+      const rewritten = now[index]!
+      const indent = /^[ \t]*/.exec(line)![0].length
+      const newIndent = /^[ \t]*/.exec(rewritten)![0].length
+      // only its indent changed:  only its indent edited, so a caret further along stays where it is
+      if (line.slice(indent) === rewritten.slice(newIndent) && line !== rewritten)
+        edits.push(this.editFor(file, at, at + indent, rewritten.slice(0, newIndent)))
+      else if (line !== rewritten) edits.push(this.editFor(file, at, at + line.length, rewritten))
+      at += line.length + 1
     }
     return edits
   }

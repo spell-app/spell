@@ -4,6 +4,7 @@
  * - `FileAddresses` (type) is how an editor addresses spell files:  by URI.
  * - `SpellLanguageService` answers questions about a parsed file, in LSP shapes.
  * - `CompletionShapes`:  how a tag or an attribute chosen from the suggestion list is written whole.
+ * - `MarkupIndent`:  how a drawing's markup is indented as a tree, for a paste and for Format Document.
  * - `SpellCSS`:  the `<css>` blocks in a file, edited as CSS.
  * - `HostNameCheck`:  the names a host fills by name in a project, an error when the code drops one.
  * - `SpellKeywords`:  a language pack's keywords, for accent fixes and colouring.
@@ -24,5 +25,6 @@ export * from "./SpellLanguageService"
 export * from "./SpellCSS"
 export * from "./HostNames"
 export * from "./CompletionShapes"
+export * from "./MarkupIndent"
 export * from "./ScopeExplorer"
 export * from "./SpellLanguageServer"

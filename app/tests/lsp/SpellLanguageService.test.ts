@@ -1006,7 +1006,9 @@ describe("SpellLanguageService", () => {
       return withText(cardUri, cardText, spaced, () => {
         const edits = service.formatting(card, { tabSize: 2, insertSpaces: true })
         const line = lineOf(cardText, READ_SYMBOL) - 1
-        expect(edits.find(({ range }) => range.start.line === line)?.newText).toBe(`\t\t${READ_SYMBOL}`)
+        // its indent alone, so a caret further along stays put (epic `editor` T71)
+        const edit = edits.find(({ range }) => range.start.line === line)
+        expect(edit).toMatchObject({ newText: "\t\t", range: { start: { character: 0 }, end: { character: 4 } } })
       })
     })
   })

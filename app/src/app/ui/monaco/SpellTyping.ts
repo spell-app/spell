@@ -38,7 +38,8 @@ import type { monaco } from "./monaco"
  * - A paste takes the indent where it lands (epic `editor` I53, I59, I63):
  *   ⌘V or the right-click menu's Paste alike;
  *   its first line at the caret's indent, the rest kept where they were from it;
- *   a drawing's markup laid out as a tree instead, each tag's children one level under it.
+ *   a drawing's markup laid out as a tree instead, each tag's children one level under it
+ *   (`LSP.MarkupIndent`, the rules Format Document shares, epic `editor` T71).
  *   - One undo takes the whole paste back.
  *   - At a line's very start, or a one-line paste:  as it was copied.
  * - A line moved out a level takes the lines under it along (epic `editor` I59):
@@ -580,14 +581,8 @@ export class SpellTyping {
     const firstLine = isIndent ? first.trimStart() : first
     const isMarkup = /^\s*</.test(pasted.find((line) => line.trim()) ?? "")
     if (isMarkup) {
-      let depth = tagDepthChange(first)
-      const rest = pasted.slice(1).map((line) => {
-        const trimmed = line.trim()
-        if (!trimmed) return ""
-        const level = Math.max(0, trimmed.startsWith("</") ? depth - 1 : depth)
-        depth = Math.max(0, depth + tagDepthChange(trimmed))
-        return indentOfWidth(base + level * tabSize, settings) + trimmed
-      })
+      const indent = (width: number) => indentOfWidth(width, settings)
+      const [, ...rest] = LSP.MarkupIndent.layout(pasted, { base, tabSize, indentOfWidth: indent })
       return [firstLine, ...rest]
     }
     const from = widthOf(indentOf(first), tabSize)
@@ -611,7 +606,8 @@ export class SpellTyping {
       const line = lines[at]!
       if (!line.trim()) continue
       if (indentOf(line).length <= indent) {
-        const closes = indentOf(line) === indentOf(text) && line.trim().startsWith("</") && tagDepthChange(text) > 0
+        const closes =
+          indentOf(line) === indentOf(text) && line.trim().startsWith("</") && LSP.MarkupIndent.depthChange(text) > 0
         if (closes) under = at - index
         break
       }
@@ -666,12 +662,6 @@ export type IndentSettings = {
   tabSize: number
 }
 
-/** The tags HTML never closes:  no children under them. */
-const VOID_TAGS = /^(area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)$/i
-
-/** One tag on a line:  `<x ...>`, `<x/>`, `</x>`, `</>`, `<>`;  its slash before the name, its name, its slash at the end. */
-const TAG = /<(\/?)([A-Za-z][\w.:-]*)?(?:\s(?:[^>"']|"[^"]*"|'[^']*')*?)?(\/?)>/g
-
 /** A tag `SpellTyping.tagOpenAt()` found open:  the line it starts on, and its first attribute's column there. */
 export type OpenTag = {
   /** index of the line the tag starts on */
@@ -698,22 +688,8 @@ function isStillOpen(text: string): boolean {
   return !quote
 }
 
-/** How many tags `line` leaves open:  each opened adds one, each closed takes one;  `<x/>` and `<br>` neither. */
-function tagDepthChange(line: string): number {
-  let change = 0
-  for (const [, closing, name = "", selfClosing] of line.matchAll(TAG)) {
-    if (closing) change--
-    else if (!selfClosing && !VOID_TAGS.test(name)) change++
-  }
-  return change
-}
-
 /** How wide `indent` is, a tab `tabSize` columns. */
-function widthOf(indent: string, tabSize: number): number {
-  let width = 0
-  for (const char of indent) width = char === "\t" ? (Math.floor(width / tabSize) + 1) * tabSize : width + 1
-  return width
-}
+const widthOf = LSP.MarkupIndent.widthOf
 
 /** How wide one level out takes off `indent`:  back to the tab stop before its end. */
 function outdentWidth(indent: string, tabSize: number): number {
