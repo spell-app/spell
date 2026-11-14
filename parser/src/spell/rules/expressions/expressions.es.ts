@@ -236,6 +236,42 @@ expressionsEs.addRule(Or, {
   ]
 })
 
+// two values equal, said in full (epic `language` P55, Q51):  `if column is the same as row`
+expressionsEs.addRule(IsEqual, {
+  syntax: "{operator:is_or_is_not} igual (a|que) {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("thing")
+        scope.variables?.add("other")
+      },
+      tests: [
+        ["thing es igual a other", "(thing === other)"],
+        ["thing no es igual a other", "(thing !== other)"]
+      ]
+    }
+  ]
+})
+
+// ... or both said first:  `if row and column are the same`, an `and` of its own
+expressionsEs.addRule(IsEqual, {
+  syntax: "(y|e) {expression:operand} {operator:is_or_is_not} iguales",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("thing")
+        scope.variables?.add("other")
+      },
+      tests: [
+        ["thing y other son iguales", "(thing === other)"],
+        ["thing y other no son iguales", "(thing !== other)"]
+      ]
+    }
+  ]
+})
+
 expressionsEs.addRule(IsEqual, {
   syntax: "{operator:is_or_is_not} {expression:operand}",
   tests: [

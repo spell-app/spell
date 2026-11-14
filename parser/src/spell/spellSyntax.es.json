@@ -954,6 +954,36 @@
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
+              "syntax": "{operator:is_or_is_not} igual (a|que) {expression:operand}",
+              "example": "thing es igual a other",
+              "outputs": {
+                "js": {
+                  "code": "(thing === other)"
+                },
+                "ts": {
+                  "code": "(thing === other)"
+                },
+                "py": {
+                  "code": "(thing == other)"
+                }
+              }
+            },
+            {
+              "syntax": "(y|e) {expression:operand} {operator:is_or_is_not} iguales",
+              "example": "thing y other son iguales",
+              "outputs": {
+                "js": {
+                  "code": "(thing === other)"
+                },
+                "ts": {
+                  "code": "(thing === other)"
+                },
+                "py": {
+                  "code": "(thing == other)"
+                }
+              }
+            },
+            {
               "syntax": "{operator:is_or_is_not} {expression:operand}",
               "example": "thing es other",
               "outputs": {
