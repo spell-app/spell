@@ -125,6 +125,10 @@ export class AddingMachine extends App {
 }
 export const addingMachine = new AddingMachine()
 
+core.describeAction(AddingMachine, "pressDigit", { title: "Press (digit As Text)", undoneAs: "Press (digit As Text)" })
+core.describeAction(AddingMachine, "addUp", { title: "Add It Up", undoneAs: "Add It Up" })
+core.describeAction(AddingMachine, "clear", { title: "Clear It", undoneAs: "Clear It" })
+
 /** 12 and 5 make 17 */
 export function testAddingUp() {
   return core.test("test adding up", function testAddingUp() {

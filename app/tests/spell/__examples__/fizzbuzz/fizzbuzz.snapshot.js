@@ -162,6 +162,7 @@ core.heading("Listening")
 ///////////////
 // The page listens itself:  each event the counting sends becomes a result in its tally.
 
+core.describeAction(FizzbuzzExplainer, "showWordForNumber", { title: "Show (word As Text) For (number As A Number)", undoneAs: "Show (word As Text) For (number As A Number)" })
 // -----------
 core.heading("FizzBuzz")
 //////////////

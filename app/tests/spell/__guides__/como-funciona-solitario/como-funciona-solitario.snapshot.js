@@ -129,6 +129,8 @@ export class Mesa extends App {
 }
 export const mesa = new Mesa()
 
+core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })
+
 core.heading("Inicio:  un rey de espadas en la columna")
 //## Inicio:  un rey de espadas en la columna
 mesa.columna.append(new Carta({ rango: "rey", palo: "espadas" }))

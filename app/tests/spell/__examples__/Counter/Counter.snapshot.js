@@ -35,6 +35,7 @@ export class Counter extends View {
     }, "Clicked ", () => this.count, " times")
   }
 }
+core.describeAction(Counter, "countUp", { title: "Count Up", undoneAs: "Count Up" })
 
 export function testCounting() {
   return core.test("test counting", function testCounting() {

@@ -25,6 +25,10 @@ export class Receta extends View {
     )
   }
 
+  quitarEso() {
+    core.removeSaved(this)
+  }
+
   static savedIn = {
     place: "recetario_familiar",
     collection: "recetas",
@@ -40,10 +44,6 @@ export class Receta extends View {
   static { this.declareProp("modificado", { type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 194, end: 228 } }) }
   get modificado() { return this.getProp("modificado") }
   set modificado(value) { this.setProp("modificado", value) }
-
-  quitarEso() {
-    core.removeSaved(this)
-  }
 }
 
 /** La línea que cambia otro servidor:  tests/spell/recipeBox.test.ts solo cambia esta, para cada uno que prueba */
@@ -107,5 +107,6 @@ export class CajaDeRecetas extends App {
   }
 }
 export const cajaDeRecetas = new CajaDeRecetas()
+core.describeAction(CajaDeRecetas, "agregarElBorrador", { title: "Agregar El Borrador", undoneAs: "Agregar El Borrador" })
 
 if (!core.isCarryingOver) cajaDeRecetas.start()

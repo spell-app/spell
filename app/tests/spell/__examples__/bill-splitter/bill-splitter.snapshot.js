@@ -102,6 +102,8 @@ export class Table extends ViewableList {
   static exclusive = true
 }
 
+core.describeAction(Diner, "remove", { title: "Remove It", undoneAs: "Remove It" })
+
 /** a diner sits at one table */
 // -----------
 core.heading("Bill Splitter")
@@ -152,6 +154,11 @@ export class BillSplitter extends App {
     this.diners.append(new Diner({ name: "Cleo", amount: 31.25 }))
   }
 
+  /** An empty row, for the next person */
+  addSomeone() {
+    this.diners.append(new Diner({ name: "", amount: 0 }))
+  }
+
   /** The tip, the diners, then the sums */
   draw() {
     return h("ui-container", { text: true },
@@ -196,15 +203,10 @@ export class BillSplitter extends App {
       )
     )
   }
-
-  addSomeone() {
-    this.diners.append(new Diner({ name: "", amount: 0 }))
-  }
 }
 export const billSplitter = new BillSplitter()
 
-/** An empty row, for the next person */
-core.describeAction(BillSplitter, "addSomeone", { title: "Add Someone", icon: "plus" })
+core.describeAction(BillSplitter, "addSomeone", { title: "Add Someone", icon: "plus", undoneAs: "Add Someone" })
 // -----------
 if (!core.isCarryingOver) billSplitter.start()
 // -----------

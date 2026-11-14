@@ -98,6 +98,31 @@ export class Card extends TwoSidedView {
     return <ui-text color="blue" part="back">🂠</ui-text>
   }
 
+  async play() {
+    if (this.pile === solitaire.stock) await solitaire.turnAStockCard()
+    else {
+      const endPile = core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, this)).firstItem
+      if (endPile === undefined) return false
+      return await this.putOnPile(endPile)
+    }
+  }
+
+  /** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
+  async putOnPile(pile: Pile) {
+    /** - the pile it left turns its new last card up;  the move counts, and scores */
+    const startPile = this.pile
+    if (!core.canGiveUp(startPile, this)) return false
+    if (!core.canTake(pile, this)) return false
+    const points = this.countThePointsForCardOnPile(pile)
+    startPile.startingWith(this).forEach((card) => core.move(card, pile))
+    if (startPile instanceof Column && !startPile.isEmpty) {
+      await core.pauseFor(200, "msec")
+      startPile.lastItem?.turnFaceUp()
+    }
+    solitaire.score = solitaire.score + points
+    return true
+  }
+
   /** what the move scores:  10 on a foundation, 5 from the discards, else nothing */
   countThePointsForCardOnPile(pile: Pile) {
     if (pile instanceof Foundation) return 10
@@ -113,30 +138,6 @@ export class Card extends TwoSidedView {
 
   get pile() {
     return Pile.ownerOf(this)!
-  }
-
-  async play() {
-    if (this.pile === solitaire.stock) await solitaire.turnAStockCard()
-    else {
-      const endPile = core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, this)).firstItem
-      if (endPile === undefined) return false
-      return await this.putOnPile(endPile)
-    }
-  }
-
-  async putOnPile(pile: Pile) {
-    /** - the pile it left turns its new last card up;  the move counts, and scores */
-    const startPile = this.pile
-    if (!core.canGiveUp(startPile, this)) return false
-    if (!core.canTake(pile, this)) return false
-    const points = this.countThePointsForCardOnPile(pile)
-    startPile.startingWith(this).forEach((card) => core.move(card, pile))
-    if (startPile instanceof Column && !startPile.isEmpty) {
-      await core.pauseFor(200, "msec")
-      startPile.lastItem?.turnFaceUp()
-    }
-    solitaire.score = solitaire.score + points
-    return true
   }
 }
 
@@ -173,20 +174,20 @@ export class CardElement extends SpellElement<Card> {
     return this.currentThing?.drawBack()
   }
 
-  countThePointsForCardOnPile(pile: Pile) {
-    return this.currentThing?.countThePointsForCardOnPile(pile)
-  }
-
-  onClick(event: ClickEvent) {
-    return this.currentThing?.onClick(event)
-  }
-
   play() {
     return this.currentThing?.play()
   }
 
   putOnPile(pile: Pile) {
     return this.currentThing?.putOnPile(pile)
+  }
+
+  countThePointsForCardOnPile(pile: Pile) {
+    return this.currentThing?.countThePointsForCardOnPile(pile)
+  }
+
+  onClick(event: ClickEvent) {
+    return this.currentThing?.onClick(event)
   }
 }
 core.useElement(Card, CardElement)
@@ -492,7 +493,7 @@ export class Foundation extends Pile {
     return false
   }
 
-  //-- a light grey ace of its suit, face up
+  /** a light grey ace of its suit, face up */
   drawItsPlaceholder() {
     return <ui-text part="placeholder">{(new Card({ rank: "ace", suit: this.suit })).picture}</ui-text>
   }
@@ -658,29 +659,30 @@ export class Solitaire extends App {
             <ui-text slot="right">Score: {this.score}</ui-text>
           </ui-toolbar>
         </ui-segment>
-        <ui-container>
-          <ui-segment appearance="basic">
-            <ui-grid columns="7" spacing="xs">
-              {core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])}
-              <test-project-stock-pile id="stock" />
-              <test-project-discard-pile id="discards" />
-              <spacer />
-              <test-project-foundation id="clubs" />
-              <test-project-foundation id="diamonds" />
-              <test-project-foundation id="hearts" />
-              <test-project-foundation id="spades" />
-              <test-project-column id="C1" />
-              <test-project-column id="C2" />
-              <test-project-column id="C3" />
-              <test-project-column id="C4" />
-              <test-project-column id="C5" />
-              <test-project-column id="C6" />
-              <test-project-column id="C7" />
-            </ui-grid>
-          </ui-segment>
+        <ui-container padding="small" columns="7" spacing="xs">
+          <test-project-stock-pile id="stock" />
+          <test-project-discard-pile id="discards" />
+          <spacer />
+          <test-project-foundation id="clubs" />
+          <test-project-foundation id="diamonds" />
+          <test-project-foundation id="hearts" />
+          <test-project-foundation id="spades" />
+          <test-project-column id="C1" />
+          <test-project-column id="C2" />
+          <test-project-column id="C3" />
+          <test-project-column id="C4" />
+          <test-project-column id="C5" />
+          <test-project-column id="C6" />
+          <test-project-column id="C7" />
         </ui-container>
+        {core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])}
       </>
     )
+  }
+
+  async restartTheGame() {
+    this.score = 0
+    await this.dealTheCards()
   }
 
   /** Gather every card into the stock, shuffle it, and deal the columns */
@@ -715,6 +717,11 @@ export class Solitaire extends App {
     this.discards.append(it!)
   }
 
+  /** a click on the stock:  one step to undo, where the deal's own turn isn't */
+  async turnAStockCard() {
+    await this.playFromTheStock()
+  }
+
   /** The discards, turned over, back into the stock */
   resetTheStock() {
     const cards = this.discards.clone()
@@ -725,21 +732,7 @@ export class Solitaire extends App {
     })
   }
 
-  async onScoreChange(event: ScoreChangeEvent) {
-    let home = this.clubs.length + this.diamonds.length
-    home = home + this.hearts.length + this.spades.length
-    if (home === 52) await core.alert("You won!")
-  }
-
-  async restartTheGame() {
-    this.score = 0
-    await this.dealTheCards()
-  }
-
-  async turnAStockCard() {
-    await this.playFromTheStock()
-  }
-
+  /** Play every card that can go somewhere, until none can */
   async autoPlay() {
     let anythingChanged: boolean = false
     if (!this.discards.isEmpty) {
@@ -774,6 +767,7 @@ export class Solitaire extends App {
     if (anythingChanged) await this.autoPlay()
   }
 
+  /** Turn up a face-down card from a column, at random, onto the discards */
   async cheat() {
     const remainingPiles = core.filter(core.everyThing(Column), (pile: Column) => !pile.isEmpty && pile.firstItem?.isFaceDirection("down"))
     if (core.isEmpty(remainingPiles)) return
@@ -785,6 +779,12 @@ export class Solitaire extends App {
     this.discards.append(card!)
     await core.pauseFor(300, "msec")
     card!.lifted = false
+  }
+
+  async onScoreChange(event: ScoreChangeEvent) {
+    let home = this.clubs.length + this.diamonds.length
+    home = home + this.hearts.length + this.spades.length
+    if (home === 52) await core.alert("You won!")
   }
 }
 
@@ -817,6 +817,10 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     return this.currentThing?.create()
   }
 
+  restartTheGame() {
+    return this.currentThing?.restartTheGame()
+  }
+
   dealTheCards() {
     return this.currentThing?.dealTheCards()
   }
@@ -825,20 +829,12 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     return this.currentThing?.playFromTheStock()
   }
 
-  resetTheStock() {
-    return this.currentThing?.resetTheStock()
-  }
-
-  onScoreChange(event: ScoreChangeEvent) {
-    return this.currentThing?.onScoreChange(event)
-  }
-
-  restartTheGame() {
-    return this.currentThing?.restartTheGame()
-  }
-
   turnAStockCard() {
     return this.currentThing?.turnAStockCard()
+  }
+
+  resetTheStock() {
+    return this.currentThing?.resetTheStock()
   }
 
   autoPlay() {
@@ -848,29 +844,37 @@ export class SolitaireElement extends SpellElement<Solitaire> {
   cheat() {
     return this.currentThing?.cheat()
   }
+
+  onScoreChange(event: ScoreChangeEvent) {
+    return this.currentThing?.onScoreChange(event)
+  }
 }
 core.useElement(Solitaire, SolitaireElement)
 export const solitaire = new Solitaire()
 
 core.describeAction(Solitaire, "restartTheGame", { title: "Restart", shortcuts: ["R"], undoneAs: "Restart" })
 
-/** a click on the stock:  one step to undo, where the deal's own turn isn't */
+core.describeAction(Solitaire, "dealTheCards", { title: "Deal The Cards", undoneAs: "Deal The Cards" })
+
+core.describeAction(Solitaire, "playFromTheStock", { title: "Play From The Stock", undoneAs: "Play From The Stock" })
+
 core.describeAction(Solitaire, "turnAStockCard", { title: "Turn A Stock Card", undoneAs: "Turn Card" })
+
+core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
 
 core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
 
-/** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
 core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
 
-/** Play every card that can go somewhere, until none can */
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], undoneAs: "Auto Play" })
 
-/** Turn up a face-down card from a column, at random, onto the discards */
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], undoneAs: "Cheat" })
 
-//-- play the card on click if it is a legal move
+core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count The Points For A Card On A Pile", undoneAs: "Count The Points For A Card On A Pile" })
 
-//-- drop the card on the pile if it is a legal move
+// play the card on click if it is a legal move
+
+// drop the card on the pile if it is a legal move
 
 core.heading("The piles")
 ///////////////

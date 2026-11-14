@@ -91,20 +91,6 @@
       "defined": "/FlashCards.spell:681-895"
     },
     {
-      "syntax": "draw {thisArg:expression}",
-      "output": "draw",
-      "rule": "method_call",
-      "of": "Quiz",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Playing",
-      "kind": "method",
-      "name": "draw it",
-      "defined": "/FlashCards.spell:1387-2146"
-    },
-    {
       "syntax": "show the answer (of {thisArg:expression})?",
       "output": "show_the_answer",
       "rule": "method_call",
@@ -167,6 +153,20 @@
       "defined": "/FlashCards.spell:1259-1341"
     },
     {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Quiz",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Playing",
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/FlashCards.spell:1387-2146"
+    },
+    {
       "syntax": "add {callArgs:expression} meaning {callArgs:expression}",
       "output": "add_$word_meaning_$meaning",
       "rule": "method_call",
@@ -203,11 +203,11 @@
     101,
     107,
     113,
-    120,
-    178,
-    180,
-    181,
-    182,
-    189
+    119,
+    124,
+    130,
+    135,
+    142,
+    190
   ]
 }

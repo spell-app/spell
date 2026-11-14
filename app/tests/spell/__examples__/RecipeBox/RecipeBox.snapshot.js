@@ -175,8 +175,14 @@ core.useDefaults("/RecipeBox.spell", {
 core.heading("A recipe:  a card you can read and change")
 //## A recipe:  a card you can read and change
 
+core.describeAction(Recipe, "edit", { title: "Edit It", undoneAs: "Edit It" })
+
 core.heading("Its Edit screen:  a form over a draft, so nothing changes until Save")
 //## Its Edit screen:  a form over a draft, so nothing changes until Save
+
+core.describeAction(RecipeEditor, "save", { title: "Save It", undoneAs: "Save It" })
+
+core.describeAction(RecipeEditor, "cancel", { title: "Cancel It", undoneAs: "Cancel It" })
 
 core.heading("The box:  the card for a new recipe, then a card for each one you have")
 //## The box:  the card for a new recipe, then a card for each one you have
@@ -298,5 +304,7 @@ export class RecipeBox extends App {
 export const recipeBox = new RecipeBox()
 // - its "box menu" is a menu of "undo"
 core.describeMenu(RecipeBox, "boxMenu", { items: ["undo"] })
+
+core.describeAction(RecipeBox, "addTheNewRecipe", { title: "Add The New Recipe", undoneAs: "Add The New Recipe" })
 // -----------
 if (!core.isCarryingOver) recipeBox.start()

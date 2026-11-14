@@ -112,10 +112,6 @@ export class PlantElement extends SpellElement<Plant> {
 }
 core.useElement(Plant, PlantElement)
 
-core.heading("Many things together:  a windowsill")
-/////////////////////////////////////////
-// ## Many things together:  a windowsill
-/////////////////////////////////////////
 /** A list of things can be a view too:  a viewable list draws each one in turn. */
 export class Windowsill extends ViewableList<Plant> {
   static instanceType = Plant
@@ -134,6 +130,13 @@ export class WindowsillElement extends SpellElement<Windowsill> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-windowsill", "windowsill", [])
 }
 core.useElement(Windowsill, WindowsillElement)
+
+core.describeAction(Plant, "water", { title: "Water It", undoneAs: "Water It" })
+
+core.heading("Many things together:  a windowsill")
+/////////////////////////////////////////
+// ## Many things together:  a windowsill
+/////////////////////////////////////////
 
 /** a plant sits on one windowsill */
 
@@ -182,6 +185,7 @@ export class GardenElement extends SpellElement<Garden> {
 }
 core.useElement(Garden, GardenElement)
 export const garden = new Garden()
+core.describeAction(Garden, "waitADay", { title: "Wait A Day", undoneAs: "Wait A Day" })
 
 core.heading("Start:  three plants, one of them thirsty")
 //## Start:  three plants, one of them thirsty

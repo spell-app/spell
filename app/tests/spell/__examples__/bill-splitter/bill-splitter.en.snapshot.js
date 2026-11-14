@@ -17,8 +17,8 @@ export const words = {
       subtotal: "subtotal",
       tip: "tip",
       total: "total",
-      draw: "draw it",
-      addSomeone: "add someone"
+      addSomeone: "add someone",
+      draw: "draw it"
     }
   },
   groups: {

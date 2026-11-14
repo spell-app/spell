@@ -131,6 +131,8 @@ export class Table extends App {
 }
 export const table = new Table()
 
+core.describeAction(Card, "try", { title: "Try (a Card)", undoneAs: "Try (a Card)" })
+
 core.heading("Start:  a king of spades on the column")
 //## Start:  a king of spades on the column
 table.column.append(new Card({ rank: "king", suit: "spades" }))

@@ -132,6 +132,10 @@ export class TicTacToe extends App {
 }
 export const ticTacToe = new TicTacToe()
 
+core.describeAction(TicTacToe, "startANewGame", { title: "Start A New Game", undoneAs: "Start A New Game" })
+core.describeAction(TicTacToe, "checkTheLineFromSquareAThroughBToC", { title: "Check The Line From Square (a As A Number) Through (b As A Number) To (c As A Number)", undoneAs: "Check The Line From Square (a As A Number) Through (b As A Number) To (c As A Number)" })
+core.describeAction(TicTacToe, "checkForAWinner", { title: "Check For A Winner", undoneAs: "Check For A Winner" })
+
 core.heading("Playing a square")
 //////////////////////
 // ## Playing a square
@@ -140,6 +144,8 @@ core.heading("Playing a square")
 // Otherwise:  the mark goes in, the game checks for a winner, and the turn passes to the other player.
 // `<extend "square">` adds this action to the square, declared above:
 // it's here, after the game, because it needs the game's turn;  the board, below, draws a button that calls it.
+
+core.describeAction(Square, "play", { title: "Play It", undoneAs: "Play It" })
 
 core.heading("The board:  nine squares, three a row")
 ///////////////////////////////////////////

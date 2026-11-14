@@ -22,5 +22,5 @@
 1322:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
 1325:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
 1343:65 TS2339 Property 'drawPage' does not exist on type 'Thing'.
-1461:17 TS2339 Property 'open' does not exist on type 'Thing'.
-1588:36 TS2322 Type 'unknown' is not assignable to type 'Element'.
+1469:17 TS2339 Property 'open' does not exist on type 'Thing'.
+1600:36 TS2322 Type 'unknown' is not assignable to type 'Element'.

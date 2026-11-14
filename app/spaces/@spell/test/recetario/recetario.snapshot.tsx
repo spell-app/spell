@@ -24,6 +24,10 @@ export class Receta extends View {
     )
   }
 
+  quitarEso() {
+    core.removeSaved(this)
+  }
+
   static savedIn = {
     place: "recetario_familiar",
     collection: "recetas",
@@ -37,10 +41,6 @@ export class Receta extends View {
   // se guarda en el recetario familiar
   @prop({ type: "date", storedAs: "modified", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 194, end: 228 } })
   accessor modificado!: any /* spell: type unknown */
-
-  quitarEso() {
-    core.removeSaved(this)
-  }
 }
 
 /**
@@ -136,6 +136,7 @@ export class CajaDeRecetasElement extends SpellElement<CajaDeRecetas> {
 }
 core.useElement(CajaDeRecetas, CajaDeRecetasElement)
 export const cajaDeRecetas = new CajaDeRecetas()
+core.describeAction(CajaDeRecetas, "agregarElBorrador", { title: "Agregar El Borrador", undoneAs: "Agregar El Borrador" })
 
 if (!core.isCarryingOver) cajaDeRecetas.start()
 

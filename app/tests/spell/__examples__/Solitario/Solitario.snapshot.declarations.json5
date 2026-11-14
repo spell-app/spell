@@ -214,6 +214,43 @@
       "defined": "/Carta.es.spell:2146-2267"
     },
     {
+      "syntax": "jugar {thisArg:expression}",
+      "output": "jugar",
+      "rule": "method_call",
+      "of": "Carta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Jugar una carta",
+      "kind": "method",
+      "name": "jugar una carta",
+      "waits": true,
+      "defined": "/Solitario.es.spell:7345-7634"
+    },
+    {
+      "syntax": "poner {thisArg:expression} en {callArgs:expression}",
+      "output": "poner_en_$pila",
+      "rule": "method_call",
+      "of": "Carta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Jugar una carta",
+      "kind": "method",
+      "name": "poner una carta en una pila",
+      "params": [
+        {
+          "name": "pila",
+          "datatype": "Pila"
+        }
+      ],
+      "returns": "choice",
+      "waits": true,
+      "defined": "/Solitario.es.spell:7842-8479"
+    },
+    {
       "syntax": "contar los puntos (de|del) {thisArg:expression} en {callArgs:expression}",
       "output": "contar_los_puntos_de_carta_en_$pila",
       "rule": "method_call",
@@ -232,7 +269,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:8591-8841"
+      "defined": "/Solitario.es.spell:8481-8731"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -326,56 +363,56 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10017-10476"
+      "defined": "/Solitario.es.spell:9907-10366"
     },
     {
       "property": "disposición",
       "of": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:10162-10189"
+      "defined": "/Solitario.es.spell:10052-10079"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10478-10735"
+      "defined": "/Solitario.es.spell:10368-10625"
     },
     {
       "property": "disposición",
       "of": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:10568-10595"
+      "defined": "/Solitario.es.spell:10458-10485"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10737-11328"
+      "defined": "/Solitario.es.spell:10627-11218"
     },
     {
       "property": "disposición",
       "of": "Fundación",
-      "defined": "/Solitario.es.spell:10827-10854"
+      "defined": "/Solitario.es.spell:10717-10744"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:10856-10885"
+      "defined": "/Solitario.es.spell:10746-10775"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11330-13393"
+      "defined": "/Solitario.es.spell:11220-13283"
     },
     {
       "property": "disposición",
       "of": "Columna",
-      "defined": "/Solitario.es.spell:11432-11460"
+      "defined": "/Solitario.es.spell:11322-11350"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:316-7158"
+      "defined": "/Solitario.es.spell:316-7048"
     },
     {
       "property": "puntuación",
@@ -532,22 +569,6 @@
       "defined": "/Solitario.es.spell:2160-2541"
     },
     {
-      "syntax": "repartir las cartas ((de|del) {thisArg:expression})?",
-      "output": "repartir_las_cartas",
-      "rule": "method_call",
-      "of": "Solitario",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Repartir",
-      "kind": "method",
-      "name": "repartir las cartas",
-      "returns": "nothing",
-      "waits": true,
-      "defined": "/Solitario.es.spell:2712-3421"
-    },
-    {
       "syntax": "voltear la reserva ((de|del) {thisArg:expression})?",
       "output": "voltear_la_reserva",
       "rule": "method_call",
@@ -562,6 +583,22 @@
       "returns": "nothing",
       "waits": true,
       "defined": "/Solitario.es.spell:2543-2710"
+    },
+    {
+      "syntax": "repartir las cartas ((de|del) {thisArg:expression})?",
+      "output": "repartir_las_cartas",
+      "rule": "method_call",
+      "of": "Solitario",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "group": "Repartir",
+      "kind": "method",
+      "name": "repartir las cartas",
+      "returns": "nothing",
+      "waits": true,
+      "defined": "/Solitario.es.spell:2712-3421"
     },
     {
       "syntax": "reiniciar el juego ((de|del) {thisArg:expression})?",
@@ -616,50 +653,13 @@
       "defined": "/Solitario.es.spell:4887-5577"
     },
     {
-      "syntax": "jugar {thisArg:expression}",
-      "output": "jugar",
-      "rule": "method_call",
-      "of": "Carta",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Jugar una carta",
-      "kind": "method",
-      "name": "jugar una carta",
-      "waits": true,
-      "defined": "/Solitario.es.spell:7455-7744"
-    },
-    {
-      "syntax": "poner {thisArg:expression} en {callArgs:expression}",
-      "output": "poner_en_$pila",
-      "rule": "method_call",
-      "of": "Carta",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "group": "Jugar una carta",
-      "kind": "method",
-      "name": "poner una carta en una pila",
-      "params": [
-        {
-          "name": "pila",
-          "datatype": "Pila"
-        }
-      ],
-      "returns": "choice",
-      "waits": true,
-      "defined": "/Solitario.es.spell:7952-8589"
-    },
-    {
       "syntax": "probar los movimientos",
       "output": "test_los_movimientos",
       "rule": "method_call",
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:11816-13393"
+      "defined": "/Solitario.es.spell:11706-13283"
     }
   ],
   "codeLines": [
@@ -678,56 +678,56 @@
     70,
     77,
     86,
-    100,
-    164,
-    203,
-    207,
-    212,
-    219,
-    242,
-    247,
-    254,
+    108,
+    122,
+    138,
+    177,
+    216,
+    220,
+    225,
+    232,
+    255,
     260,
-    266,
-    287,
-    319,
-    329,
+    267,
+    273,
+    279,
+    300,
     332,
-    356,
-    359,
-    375,
-    378,
-    382,
-    407,
-    410,
-    428,
-    431,
-    437,
-    443,
-    461,
-    466,
-    471,
-    476,
-    481,
-    486,
-    491,
-    496,
-    501,
-    506,
-    511,
-    516,
-    521,
-    526,
-    532,
-    537,
-    547,
-    557,
-    690,
-    693,
-    695,
-    697,
-    709,
-    715,
-    734
+    342,
+    345,
+    369,
+    372,
+    388,
+    391,
+    395,
+    420,
+    423,
+    441,
+    444,
+    450,
+    456,
+    474,
+    479,
+    484,
+    489,
+    494,
+    499,
+    504,
+    509,
+    514,
+    519,
+    524,
+    529,
+    534,
+    539,
+    545,
+    550,
+    560,
+    570,
+    575,
+    596,
+    604,
+    639,
+    735
   ]
 }

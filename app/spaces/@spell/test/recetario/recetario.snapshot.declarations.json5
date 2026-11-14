@@ -34,15 +34,6 @@
       "defined": "/CajaDeRecetas.es.spell:256-284"
     },
     {
-      "type": "RecetarioFamiliar",
-      "superType": "Place",
-      "place": {
-        "name": "recetario_familiar",
-        "kind": "in memory database"
-      },
-      "defined": "/CajaDeRecetas.es.spell:112-162"
-    },
-    {
       "syntax": "quitar eso ((de|del) {thisArg:expression})?",
       "output": "quitar_eso",
       "rule": "method_call",
@@ -55,6 +46,15 @@
       "name": "quitar eso",
       "returns": "nothing",
       "defined": "/CajaDeRecetas.es.spell:537-617"
+    },
+    {
+      "type": "RecetarioFamiliar",
+      "superType": "Place",
+      "place": {
+        "name": "recetario_familiar",
+        "kind": "in memory database"
+      },
+      "defined": "/CajaDeRecetas.es.spell:112-162"
     },
     {
       "type": "CajaDeRecetas",
@@ -98,8 +98,8 @@
     2,
     5,
     10,
+    27,
     49,
-    56,
     58,
     61,
     66,

@@ -151,6 +151,10 @@ class NoteKeeper(App):
 
 note_keeper = NoteKeeper()
 
+core.describe_action(NoteKeeper, "keep_the_draft", {"title": "Keep The Draft", "undone_as": "Keep The Draft"})
+
+core.describe_action(NoteKeeper, "count_the_notes", {"title": "Count The Notes", "undone_as": "Count The Notes"})
+
 ##########
 # ## Start
 ##########

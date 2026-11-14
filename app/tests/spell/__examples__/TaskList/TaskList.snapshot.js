@@ -78,6 +78,7 @@ export class Task extends View {
     return Checklist.ownerOf(this)
   }
 }
+core.describeAction(Task, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
 
 export function testCheckingOneOff() {
   return core.test("test checking one off", function testCheckingOneOff() {
@@ -120,6 +121,7 @@ export class TaskKeeper extends Thing {
     return new Task({ title: title })
   }
 }
+core.describeAction(TaskKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled (title As Text)", undoneAs: "Keep A New Task Titled (title As Text)" })
 // -----------
 core.heading("Kept in this browser")
 //////////////////////////
@@ -170,6 +172,9 @@ export class BrowserKeeper extends TaskKeeper {
 export class BrowserStorage extends Place {}
 export const browserStorage = core.place(new BrowserStorage(), { name: "browser_storage", kind: "database on this device" })
 
+core.describeAction(BrowserTask, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
+
+core.describeAction(BrowserKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled (title As Text)", undoneAs: "Keep A New Task Titled (title As Text)" })
 // -----------
 core.heading("Kept in a JSON file on the server")
 ///////////////////////////////////////
@@ -226,6 +231,9 @@ export const taskFiles = core.place(new TaskFile(), {
   checkedEvery: 30
 })
 
+core.describeAction(ServerTask, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
+
+core.describeAction(ServerKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled (title As Text)", undoneAs: "Keep A New Task Titled (title As Text)" })
 // -----------
 core.heading("Kept in a CSV file on the server")
 //////////////////////////////////////
@@ -284,6 +292,9 @@ export const taskSheet = core.place(new TaskSheet(), {
   checkedEvery: 30
 })
 
+core.describeAction(SheetTask, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
+
+core.describeAction(SheetKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled (title As Text)", undoneAs: "Keep A New Task Titled (title As Text)" })
 // -----------
 core.heading("Kept in your atmosphere account")
 /////////////////////////////////////
@@ -346,6 +357,9 @@ export const taskSky = core.place(new TaskSky(), {
   collections: { skyTasks: { at: "spaces.spell.examples.tasklist.task" } }
 })
 
+core.describeAction(SkyTask, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
+
+core.describeAction(SkyKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled (title As Text)", undoneAs: "Keep A New Task Titled (title As Text)" })
 // -----------
 core.heading("Task List")
 ///////////////
@@ -408,6 +422,7 @@ export class Checklist extends ViewableList {
 }
 
 // on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
+core.describeAction(Checklist, "keepTheOrder", { title: "Keep The Order", undoneAs: "Keep The Order" })
 
 export function testTheFilter() {
   return core.test("test the filter", function testTheFilter() {
@@ -526,6 +541,34 @@ export class TaskList extends App {
     this.draft = ""
   }
 
+  showAll() {
+    this.checklist.showing = "all"
+  }
+  get showAllIsSelected() {
+    return this.checklist.isShowingShowing("all")
+  }
+
+  showToDo() {
+    this.checklist.showing = "active"
+  }
+  get showToDoIsSelected() {
+    return this.checklist.isShowingShowing("active")
+  }
+
+  showDone() {
+    this.checklist.showing = "done"
+  }
+  get showDoneIsSelected() {
+    return this.checklist.isShowingShowing("done")
+  }
+
+  removeTheDoneTasks() {
+    this.checklist.filter((task) => task.isDone).forEach((task) => {
+      task.throwAway()
+      this.checklist.remove(task)
+    })
+  }
+
   /** The property editor edits every selected task at once:  a property they disagree on shows Mixed */
   draw() {
     return h("ui-container",
@@ -573,47 +616,22 @@ export class TaskList extends App {
       )
     )
   }
-
-  showAll() {
-    this.checklist.showing = "all"
-  }
-
-  get showAllIsSelected() {
-    return this.checklist.isShowingShowing("all")
-  }
-
-  showToDo() {
-    this.checklist.showing = "active"
-  }
-
-  get showToDoIsSelected() {
-    return this.checklist.isShowingShowing("active")
-  }
-
-  showDone() {
-    this.checklist.showing = "done"
-  }
-
-  get showDoneIsSelected() {
-    return this.checklist.isShowingShowing("done")
-  }
-
-  removeTheDoneTasks() {
-    this.checklist.filter((task) => task.isDone).forEach((task) => {
-      task.throwAway()
-      this.checklist.remove(task)
-    })
-  }
 }
 export const taskList = new TaskList()
 
 // Where the tasks are kept:  the person picks, and the app asks that keeper
 
+core.describeAction(TaskList, "fillTheChecklist", { title: "Fill The Checklist", undoneAs: "Fill The Checklist" })
+
+core.describeAction(TaskList, "addTheStartingTaskTitleWithPriorityLevel", { title: "Add The Starting Task (title As Text) With Priority (level As Text)", undoneAs: "Add The Starting Task (title As Text) With Priority (level As Text)" })
+
+core.describeAction(TaskList, "addTheDraft", { title: "Add The Draft", undoneAs: "Add The Draft" })
+
 // Which tasks the list shows:  the toolbar ticks the one it's showing
-core.describeAction(TaskList, "showAll", { title: "All", icon: "list", selectedWhen: "showAllIsSelected" })
-core.describeAction(TaskList, "showToDo", { title: "To do", icon: "square outline", selectedWhen: "showToDoIsSelected" })
-core.describeAction(TaskList, "showDone", { title: "Done", icon: "check square outline", selectedWhen: "showDoneIsSelected" })
-core.describeAction(TaskList, "removeTheDoneTasks", { title: "Remove The Done Tasks", icon: "trash alternate outline" })
+core.describeAction(TaskList, "showAll", { title: "All", icon: "list", selectedWhen: "showAllIsSelected", undoneAs: "All" })
+core.describeAction(TaskList, "showToDo", { title: "To do", icon: "square outline", selectedWhen: "showToDoIsSelected", undoneAs: "To do" })
+core.describeAction(TaskList, "showDone", { title: "Done", icon: "check square outline", selectedWhen: "showDoneIsSelected", undoneAs: "Done" })
+core.describeAction(TaskList, "removeTheDoneTasks", { title: "Remove The Done Tasks", icon: "trash alternate outline", undoneAs: "Remove The Done Tasks" })
 
 // The toolbar's buttons, and the list's right click:  the same actions
 // - its "tasks menu" is a menu of "show all", "show to do", "show done", "-" and "remove the done tasks"

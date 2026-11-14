@@ -97,10 +97,6 @@ export class Plant extends View {
   }
 }
 
-core.heading("Many things together:  a windowsill")
-/////////////////////////////////////////
-// ## Many things together:  a windowsill
-/////////////////////////////////////////
 /** A list of things can be a view too:  a viewable list draws each one in turn. */
 export class Windowsill extends ViewableList {
   static instanceType = Plant
@@ -108,6 +104,13 @@ export class Windowsill extends ViewableList {
 
   static exclusive = true
 }
+
+core.describeAction(Plant, "water", { title: "Water It", undoneAs: "Water It" })
+
+core.heading("Many things together:  a windowsill")
+/////////////////////////////////////////
+// ## Many things together:  a windowsill
+/////////////////////////////////////////
 
 /** a plant sits on one windowsill */
 
@@ -140,6 +143,7 @@ export class Garden extends App {
   }
 }
 export const garden = new Garden()
+core.describeAction(Garden, "waitADay", { title: "Wait A Day", undoneAs: "Wait A Day" })
 
 core.heading("Start:  three plants, one of them thirsty")
 //## Start:  three plants, one of them thirsty
