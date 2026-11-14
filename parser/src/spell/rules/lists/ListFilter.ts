@@ -17,12 +17,14 @@ import {
  * - Trailing `where` expects an inline expression as filter body (`{inline_expression}?`),
  *   parsed in a nested `MethodScope` where singularized `{arg}` (e.g. `word`
  *   for `words`) and `it` both map to current item.
+ * - Or `which`, `that`, `who`, the item its subject (epic `language` T133):
+ *   `the cards in the deck which are face up` ~== `... where it is face up` -- see `SpellStatement.withWhichSubject()`.
  * - `Priority.specific` -- preferred over lower-priority expression rules when tokens are ambiguous.
  * - Compiles to `core.filter(list, (item) => { ... })`.
  * - Of lists of lists, their items together (epic `language` T130):
  *   `the cards in the foundations where ...` filters every foundation's cards -- see `itemsAcrossDatatype()`.
  */
-export class ListFilter extends SpellExpression<"arg|list|body?", { across?: ItemsAcross }> {
+export class ListFilter extends SpellExpression<"arg|list|where|body?", { across?: ItemsAcross }> {
   @proto static priority = Priority.specific
 
   /** Notes `across`, when its body didn't:  `the cards in the foundations where`, with no condition yet. */

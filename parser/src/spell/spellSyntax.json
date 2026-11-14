@@ -9,7 +9,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/Statement.ts",
-          "line": 21,
+          "line": 23,
           "purpose": "Base class for all spell statement rules.",
           "syntaxes": [],
           "aliases": []
@@ -1620,6 +1620,7 @@
         {
           "className": "Wording",
           "ruleNames": [
+            "where_or_which",
             "and_or",
             "join_mark",
             "date_form",
@@ -1670,6 +1671,9 @@
           "line": 16,
           "purpose": "A WORD RULE: the words a language says one thing with, and what each form MEANS (epic `spanish` P3).",
           "syntaxes": [
+            {
+              "syntax": "(where|(which:which|that|who))"
+            },
             {
               "syntax": "((and:and)|(or:or))"
             },
@@ -3148,7 +3152,7 @@
               }
             },
             {
-              "syntax": "the? number of {arg:plural_identifier} (in|of) {list:operand} where {inline_expression}?",
+              "syntax": "the? number of {arg:plural_identifier} (in|of) {list:operand} (where:where|which|that|who) {inline_expression}?",
               "example": "the number of items in my-list where its id > 1",
               "outputs": {
                 "js": {
@@ -3345,7 +3349,7 @@
           "purpose": "The first (second, last ...) item of a list that passes a test (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
-              "syntax": "the {ordinal} {arg:singular_identifier} (in|of) {list:expression} where {inline_expression}?",
+              "syntax": "the {ordinal} {arg:singular_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?",
               "example": "the first item in my-list where its id > 1",
               "outputs": {
                 "js": {
@@ -3497,11 +3501,11 @@
           "ruleNames": ["list_filter"],
           "internal": false,
           "file": "src/spell/rules/lists/ListFilter.ts",
-          "line": 25,
+          "line": 27,
           "purpose": "List filter, e.g. `words in \"a word list\" where word starts with \"a\"`.",
           "syntaxes": [
             {
-              "syntax": "the? {arg:plural_identifier} (in|of) {list:expression} where {inline_expression}?",
+              "syntax": "the? {arg:plural_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?",
               "example": "words in \"a word list\" where",
               "outputs": {
                 "js": {
@@ -3592,7 +3596,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 29,
+          "line": 30,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -3629,11 +3633,37 @@
           "aliases": ["statement", "expression"]
         },
         {
+          "className": "ListIterationWhere",
+          "ruleNames": ["list_iteration_where"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListIteration.ts",
+          "line": 104,
+          "purpose": "A loop over the items which meet a condition (epic `language` T133), e.g. `for each card in the deck which is not in the stock`, `for each card in the deck where it is face up`.",
+          "syntaxes": [
+            {
+              "syntax": "for (each|every)? {list:each_item_where} :? {statement_body}?",
+              "example": "for each card in deck which is not in stock: print it",
+              "outputs": {
+                "js": {
+                  "code": "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card))"
+                },
+                "ts": {
+                  "code": "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card))"
+                },
+                "py": {
+                  "code": "for card in deck.filter(lambda card: not card in stock):\n    core.console.log(card)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
           "className": "ListIterationNamedForList",
           "ruleNames": ["list_iteration_named_for_list"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 95,
+          "line": 117,
           "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
           "syntaxes": [
             {
@@ -3873,7 +3903,7 @@
           "purpose": "Set membership test, e.g. `my-list has items where the item is 1`.",
           "syntaxes": [
             {
-              "syntax": "{operator:has_or_has_no} {arg:plural_identifier} where {inline_expression}?",
+              "syntax": "{operator:has_or_has_no} {arg:plural_identifier} (where:where|which|that|who) {inline_expression}?",
               "example": "my-list has items where",
               "outputs": {
                 "js": {
@@ -4159,7 +4189,7 @@
           "purpose": "Remove all items from list where condition is true: e.g. `remove items from my-list where item is not \"ace\"`.",
           "syntaxes": [
             {
-              "syntax": "remove {arg:plural_identifier} (in|of|from) {list:expression} where {inline_expression}?",
+              "syntax": "remove {arg:plural_identifier} (in|of|from) {list:expression} (where:where|which|that|who) {inline_expression}?",
               "example": "remove items from my-list where",
               "outputs": {
                 "js": {
@@ -4397,6 +4427,20 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "EachItemWhere",
+          "ruleNames": ["each_item_where"],
+          "internal": false,
+          "file": "src/spell/rules/lists/EachItemWhere.ts",
+          "line": 13,
+          "purpose": "A loop's item, its list and the condition it must meet (epic `language` T133), e.g. `card in the deck which is not in the stock`, in `for each card in the deck which is not in the stock`.",
+          "syntaxes": [
+            {
+              "syntax": "{arg:singular_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?"
+            }
+          ],
+          "aliases": []
         }
       ]
     },
@@ -4660,7 +4704,7 @@
           "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
           "syntaxes": [
             {
-              "syntax": "every {type:known_type} where {inline_expression}?",
+              "syntax": "every {type:known_type} (where:where|which|that|who) {inline_expression}?",
               "example": "every card where its rank is 1",
               "outputs": {
                 "js": {
@@ -4675,7 +4719,7 @@
               }
             },
             {
-              "syntax": "(all|the)? {type:plural_type} where {inline_expression}?"
+              "syntax": "(all|the)? {type:plural_type} (where:where|which|that|who) {inline_expression}?"
             }
           ],
           "aliases": ["expression"]
@@ -4762,13 +4806,13 @@
               }
             },
             {
-              "syntax": "every {type:known_type} with {filters:thing_filters} where {inline_expression}?"
+              "syntax": "every {type:known_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
             },
             {
               "syntax": "(all|the)? {type:plural_type} with {filters:thing_filters}"
             },
             {
-              "syntax": "(all|the)? {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+              "syntax": "(all|the)? {type:plural_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
             }
           ],
           "aliases": ["expression", "things_with"]
@@ -4785,7 +4829,7 @@
               "syntax": "the? saved {type:plural_type} with {filters:thing_filters}"
             },
             {
-              "syntax": "the? saved {type:plural_type} with {filters:thing_filters} where {inline_expression}?"
+              "syntax": "the? saved {type:plural_type} with {filters:thing_filters} (where:where|which|that|who) {inline_expression}?"
             }
           ],
           "aliases": ["expression", "things_with"]
@@ -6614,7 +6658,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 35,
+          "line": 37,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {
@@ -7200,7 +7244,7 @@
           "purpose": "A few of a type, by its plural (epic `data` P11).",
           "syntaxes": [
             {
-              "syntax": "the first {number} {type:plural_type} where {inline_expression}?"
+              "syntax": "the first {number} {type:plural_type} (where:where|which|that|who) {inline_expression}?"
             }
           ],
           "aliases": ["expression"]
@@ -7214,7 +7258,7 @@
           "purpose": "How many of a type fit (epic `data` P11).",
           "syntaxes": [
             {
-              "syntax": "the number of {type:plural_type} where {inline_expression}?"
+              "syntax": "the number of {type:plural_type} (where:where|which|that|who) {inline_expression}?"
             }
           ],
           "aliases": ["expression"]
@@ -7228,7 +7272,7 @@
           "purpose": "A question about how many of them there are, anywhere a condition reads (epic `data` P15).",
           "syntaxes": [
             {
-              "syntax": "there (is|are) {compare:there_are_how_many}? ((one:one)|a|an)? {count:number}? ({type:known_type}|{list:member_words}) where {inline_expression}?"
+              "syntax": "there (is|are) {compare:there_are_how_many}? ((one:one)|a|an)? {count:number}? ({type:known_type}|{list:member_words}) (where:where|which|that|who) {inline_expression}?"
             },
             {
               "syntax": "there (is|are) {compare:there_are_how_many}? ((one:one)|a|an)? {count:number}? ({type:known_type}|{list:member_words})"
@@ -8963,7 +9007,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 89,
+          "line": 90,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

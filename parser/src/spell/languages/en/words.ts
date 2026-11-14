@@ -278,6 +278,12 @@ export const englishWords: SP.LanguageWords = {
     reopenedType: /^an?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:(?:where[ \t]*)?:)?[ \t]*$/iu
   },
 
+  /**
+   * `which are face up` reads as `it is face up`, after a list (`where_or_which`).
+   * - One word each:  `aren't` isn't one (spell's words split it at its `'`), so `which aren't` doesn't read.
+   */
+  whichClause: { subject: "it", singularVerbs: { are: "is", arent: "isnt", have: "has", do: "does", dont: "doesnt" } },
+
   /** `it`, `its`, `them`:  drawn plain in the bubbly look, never bold (`SP.BubblyLayout`). */
   pronouns: new Set(["it", "its", "them", "they", "their"])
 }

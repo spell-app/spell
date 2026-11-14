@@ -26,7 +26,8 @@ import { SortKeyOrder } from "./SortKeyOrder"
 import { AddNewThing } from "./AddNewThing"
 import { EachInStatement } from "./EachInStatement"
 import { PluralCallStatement } from "./PluralCallStatement"
-import { ListIteration, ListIterationNamedForList } from "./ListIteration"
+import { ListIteration, ListIterationNamedForList, ListIterationWhere } from "./ListIteration"
+import { EachItemWhere } from "./EachItemWhere"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
 import { ListMove } from "./ListMove"
@@ -229,7 +230,7 @@ lists.addRule(ListLength, {
 })
 
 lists.addRule(ListLength, {
-  syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} where {inline_expression}?",
+  syntax: "the? number of {arg:plural_identifier} (in|of) {list:operand} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -241,6 +242,10 @@ lists.addRule(ListLength, {
         [
           "the number of items in my-list where its id > 1",
           "core.itemCountOf(core.filter(myList, (item) => item.id > 1))"
+        ],
+        [
+          "the number of items in my-list which are not 1",
+          "core.itemCountOf(core.filter(myList, (item) => item !== 1))"
         ]
       ]
     }
@@ -491,7 +496,8 @@ lists.addRule(PossessiveOrdinal, {
 })
 
 lists.addRule(OrdinalWhereExpression, {
-  syntax: "the {ordinal} {arg:singular_identifier} (in|of) {list:expression} where {inline_expression}?",
+  syntax:
+    "the {ordinal} {arg:singular_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -499,7 +505,8 @@ lists.addRule(OrdinalWhereExpression, {
         scope.variables?.add("my-list")
       },
       tests: [
-        ["the first item in my-list where its id > 1", "core.getItemAt(core.filter(myList, (item) => item.id > 1), 0)"]
+        ["the first item in my-list where its id > 1", "core.getItemAt(core.filter(myList, (item) => item.id > 1), 0)"],
+        ["the first item in my-list that is not 1", "core.getItemAt(core.filter(myList, (item) => item !== 1), 0)"]
       ]
     }
   ]
@@ -603,7 +610,7 @@ lists.addRule(RangeCountExpression, {
 })
 
 lists.addRule(ListFilter, {
-  syntax: "the? {arg:plural_identifier} (in|of) {list:expression} where {inline_expression}?",
+  syntax: "the? {arg:plural_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -620,7 +627,15 @@ lists.addRule(ListFilter, {
         ],
         ["the items in my-list where the id of the item > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["the items in my-list where the id of it > 1", "core.filter(myList, (item) => item.id > 1)"],
-        ["the items in my-list where its id > 1", "core.filter(myList, (item) => item.id > 1)"]
+        ["the items in my-list where its id > 1", "core.filter(myList, (item) => item.id > 1)"],
+        {
+          title: "`which`:  its subject the item, as `where it` (epic `language` T133)",
+          input: "the items in my-list which are not 1",
+          js: "core.filter(myList, (item) => item !== 1)"
+        },
+        ["the items in my-list which is not 1", "core.filter(myList, (item) => item !== 1)"],
+        ["the items in my-list that are in my-list", "core.filter(myList, (item) => core.includes(myList, item))"],
+        ["the items in my-list who are not 1", "core.filter(myList, (item) => item !== 1)"]
       ]
     },
     {
@@ -646,6 +661,11 @@ lists.addRule(ListFilter, {
       ]
     }
   ]
+})
+
+// a loop's item, its list and the condition it meets, for `list_iteration_where` (epic `language` T133)
+lists.addRule(EachItemWhere, {
+  syntax: "{arg:singular_identifier} (in|of) {list:expression} (where:where|which|that|who) {inline_expression}?"
 })
 
 lists.addRule(AddNewThing, { syntax: "add {thing:expression}" })
@@ -698,7 +718,7 @@ lists.addRule(ListSortedBy, {
 })
 
 lists.addRule(ListMembershipTest, {
-  syntax: "{operator:has_or_has_no} {arg:plural_identifier} where {inline_expression}?",
+  syntax: "{operator:has_or_has_no} {arg:plural_identifier} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -715,7 +735,8 @@ lists.addRule(ListMembershipTest, {
         ["my-list has no items where item is 1", "!core.any(myList, (item) => item === 1)"],
         ["my-list has no items where it is 1", "!core.any(myList, (item) => item === 1)"],
         ["my-list doesnt have items where item is 1", "!core.any(myList, (item) => item === 1)"],
-        ["the foo of the bar does not have items where item is 1", "!core.any(bar.foo, (item) => item === 1)"]
+        ["the foo of the bar does not have items where item is 1", "!core.any(bar.foo, (item) => item === 1)"],
+        ["my-list has no items which are 1", "!core.any(myList, (item) => item === 1)"]
       ]
     }
   ]
@@ -914,7 +935,7 @@ lists.addRule(ListRemove, {
 })
 
 lists.addRule(ListRemoveWhere, {
-  syntax: "remove {arg:plural_identifier} (in|of|from) {list:expression} where {inline_expression}?",
+  syntax: "remove {arg:plural_identifier} (in|of|from) {list:expression} (where:where|which|that|who) {inline_expression}?",
   tests: [
     {
       compileAs: "statement",
@@ -934,7 +955,8 @@ lists.addRule(ListRemoveWhere, {
           "remove cards in deck where the suit of it is clubs",
           'core.removeWhere(deck, (card) => card.suit === "clubs")'
         ],
-        ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit === "clubs")']
+        ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit === "clubs")'],
+        ['remove items from my-list that are not "ace"', 'core.removeWhere(myList, (item) => item !== "ace")']
       ]
     }
   ]
@@ -1155,6 +1177,46 @@ lists.addRule(ListIteration, {
   ]
 })
 
+// over the items which meet a condition (epic `language` T133):  `for each card in the deck which is not in the stock`
+lists.addRule(ListIterationWhere, {
+  syntax: "for (each|every)? {list:each_item_where} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["a card is a thing", "a card has a rank as a number", "a pile is a list of cards"].join("\n"),
+          "block"
+        )
+        scope.variables?.add({ name: "deck", datatype: "Pile" })
+        scope.variables?.add({ name: "stock", datatype: "Pile" })
+      },
+      tests: [
+        [
+          "for each card in deck which is not in stock: print it",
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card))"
+        ],
+        [
+          "for each card in deck where it is not in stock: print it",
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card))"
+        ],
+        [
+          ["for each card in the deck which is not in the stock", "\tprint the card"],
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card))"
+        ],
+        [
+          "for card in deck that are not in stock: print its rank",
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => core.console.log(card.rank))"
+        ],
+        [
+          "for every card in deck where its rank is 1: print it",
+          "deck.filter((card) => card.rank === 1).forEach((card) => core.console.log(card))"
+        ]
+      ]
+    }
+  ]
+})
+
 // a statement once for each item of a list, the list said in it (epic `language` P55, Q59):  `add each card in the deck to the stock`
 lists.addRule(EachInStatement, {
   syntax: "{statement} (each|every) {item:singular_identifier} in {list:expression}",
@@ -1218,6 +1280,10 @@ lists.addRule(PluralCallStatement, {
         [
           "turn the cards in the deck where it is a card face down",
           "deck.filter((card) => card instanceof Card).forEach((card) => card.turnFaceDown())"
+        ],
+        [
+          "turn the cards in the deck which are not in the stock face down",
+          "deck.filter((card) => !stock.includes(card)).forEach((card) => card.turnFaceDown())"
         ],
         {
           title: "the list's own action of the same words wins",

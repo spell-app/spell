@@ -25,7 +25,7 @@ import { getWhereScope, getWhereMethod } from "./lists.shared"
  *     so removing each from it as it goes would skip every other one.
  *   - NOT `core.removeWhere()` there:  it takes them out of the read's own list, and the place never hears of it.
  */
-export class ListRemoveWhere extends SpellStatement<"arg|list|body?"> {
+export class ListRemoveWhere extends SpellStatement<"arg|list|where|body?"> {
   @proto static alias = "statement"
 
   /** Nested scope for predicate body -- singularized `{arg}` variable, also aliased from `it`. */

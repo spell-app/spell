@@ -88,6 +88,14 @@ expressions.addRule(Synonyms.specialize({ ruleName: "is_or_are" }), { syntax: "(
 // The verbs an outline body's line may start with after `it`:  `it has a deck`, `it belongs to a game`
 expressions.addRule(Synonyms.specialize({ ruleName: "has_or_belongs" }), { syntax: "(has|belongs)/i" })
 
+// The word before a list's condition (epic `language` T133):  `the cards in the deck where it is face up`;
+// `which`, `that` and `who` start one with no subject, the item its subject:  `... which are face up`
+// - Each rule writes the words out, `(where:where|which|that|who)`, so a line without one is turned away at once;
+//   this says which ones mean `which` (`Wording.reads()`, `SpellStatement.withWhichSubject()`)
+expressions.addRule(Wording.specialize({ ruleName: "where_or_which", meanings: ["which"] }), {
+  syntax: "(where|(which:which|that|who))"
+})
+
 // The words joining things in a list:  `jokers and name = "big"`;  `Wording.meaningOf()` says which
 expressions.addRule(Wording.specialize({ ruleName: "and_or", meanings: ["and", "or"] }), {
   syntax: "((and:and)|(or:or))"

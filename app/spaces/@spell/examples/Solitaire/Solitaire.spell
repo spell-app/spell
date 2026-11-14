@@ -57,6 +57,7 @@ solitaire is an app
 		for row from 1 to 7
 			for column from row to 7
 				add the top card of the stock to item column of the columns
+				pause for 20 msec
 				if column is the same as row
 					turn the last card of (item column of the columns) face up
 		turn over the next card

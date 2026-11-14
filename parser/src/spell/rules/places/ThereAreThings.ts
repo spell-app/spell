@@ -30,7 +30,7 @@ const COMPARED_BY: Record<string, P.ASTOperator> = {
  * - Compiles to `core.itemCountOf(list) < 2`.
  */
 export class ThereAreThings extends SpellExpression<
-  "compare?|none?|one?|count?|type?|list?|body?",
+  "compare?|none?|one?|count?|type?|list?|where?|body?",
   { own?: OwnList; loopItems?: string[] }
 > {
   @proto static datatype: P.Datatype | undefined = "choice"

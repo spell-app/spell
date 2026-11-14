@@ -11,7 +11,7 @@ import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
  * - Asks a place for no more than it needs, when it can tell it can.
  * - Compiles to `core.firstFew(core.filter(every, ...), 20)`;  a place's own where it can:  `EveryThing.savedAST()`.
  */
-export class FirstFewWhere extends SpellExpression<"number|type|body?"> {
+export class FirstFewWhere extends SpellExpression<"number|type|where|body?"> {
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return P.listOf(SP.typeName(`${match.groups.type.value}`))
   }
