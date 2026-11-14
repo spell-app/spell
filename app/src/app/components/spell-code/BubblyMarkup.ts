@@ -49,38 +49,65 @@ export class BubblyMarkup {
   }
 
   /**
-   * The part of speech an element's band takes, by its tag:
-   * - `thing` (purple):  what lays a page out, and custom elements (`ui-*`, `spell-*`)
-   * - `action` (green):  what a person clicks or types into
-   * - `property`:  text and what sits in it
+   * The part of speech an element's band takes, by its tag (`TAG_WORDS`, below):
+   * - `structure` (blue):  what lays a page out, HTML's (`div`, `section`) and Spell UI's (`container`, `toolbar`)
+   * - `action` (green):  what a person clicks or types into, and a menu's items (`button`, `action`, `input`)
+   * - `property` (amber):  text and what sits in it (`p`, `text`, `icon`)
+   * - `thing` (purple):  any other custom element (`spell-editor`);  in the editor, the project's own views too
    * - `plain` (grey):  the page's head, and the rest
+   * - A Spell UI tag counts by its name without `ui-`, as a drawing writes it bare:  `<ui-segment>` ~== `<segment>`.
+   *   A few names mean one thing in HTML and another in Spell UI (`<header>`, `<ui-header>`):  their `ui-` tag is
+   *   listed as it is.
    */
   static partOfSpeechOf(tag: string): MarkupPartOfSpeech {
     const name = tag.toLowerCase()
-    if (name.includes("-") || LAYOUT.has(name)) return "thing"
-    if (INTERACTIVE.has(name)) return "action"
-    if (TEXT.has(name)) return "property"
-    return "plain"
+    const listed = PART_OF_SPEECH_BY_TAG.get(name) ?? PART_OF_SPEECH_BY_TAG.get(name.replace(/^ui-/, ""))
+    if (listed) return listed
+    return name.includes("-") ? "thing" : "plain"
   }
 }
 
 /** The parts of speech an element's band can take. */
-export type MarkupPartOfSpeech = "thing" | "action" | "property" | "plain"
+export type MarkupPartOfSpeech = "structure" | "thing" | "action" | "property" | "plain"
 
-/** Elements that lay a page out:  purple. */
-const LAYOUT = new Set(
-  "html body main header footer nav section article aside div ul ol dl table thead tbody tfoot tr figure fieldset dialog template slot".split(
-    " "
-  )
-)
+/**
+ * The tags of each part of speech that has a list:  HTML's, then Spell UI's by their bare names (`ui-` off).
+ * - The ONE table:  the page (`BubblyHtml`) and the editor (`MarkupMarks`) both read it through `partOfSpeechOf()`.
+ * - Unlisted:  a name with a dash is a thing (a custom element), any other plain.
+ * - Chosen by Owen (2026-11-14):  container, segment, toolbar, menu blue;  button, buttons, action and a menu's items green.
+ *   The rest is a calm judgement call (epic `language`):  every layout box blue, every control green.
+ */
+const TAG_WORDS = {
+  structure: [
+    // HTML's layout
+    "html body main header footer nav section article aside div ul ol dl table thead tbody tfoot tr figure fieldset",
+    "dialog template slot hr",
+    // Spell UI's boxes, grids and panes;  a context menu (Spell's `<context-menu>`) and a menu's divider
+    "container segment segments toolbar menu submenu context-menu grid row column cell stack sides side split-panel",
+    "sidebar rail sticky panel pushable pusher space divider accordion sections tabs tab page root list items card",
+    "cards fields steps modal flyout popup dimmer site-nav site-tabs"
+  ],
+  action: [
+    // HTML's controls
+    "a button input select option textarea form label details summary",
+    // Spell UI's controls, and a menu's items
+    "buttons action actions or item ui-link dropdown checkbox radio slider rating search calendar icon-picker field",
+    "step tree-item"
+  ],
+  property: [
+    // HTML's text
+    "p span h1 h2 h3 h4 h5 h6 strong em b i u s small code pre kbd mark q blockquote cite li dt dd td th caption img",
+    "figcaption sup sub abbr time",
+    // Spell UI's text, and what sits in it
+    "text ui-title ui-header ui-label labels quote markdown icon icons emoji image images statistic value description",
+    "ui-meta date term keys"
+  ]
+} satisfies Partial<Record<MarkupPartOfSpeech, string[]>>
 
-/** Elements a person clicks or types into:  green. */
-const INTERACTIVE = new Set("a button input select option textarea form label details summary".split(" "))
-
-/** Text and what sits in it. */
-const TEXT = new Set(
-  "p span h1 h2 h3 h4 h5 h6 strong em b i u s small code pre kbd mark q blockquote cite li dt dd td th caption img figcaption sup sub abbr time".split(
-    " "
+/** `TAG_WORDS` turned round:  each tag => its part of speech. */
+const PART_OF_SPEECH_BY_TAG = new Map<string, MarkupPartOfSpeech>(
+  Object.entries(TAG_WORDS).flatMap(([part, lines]) =>
+    lines.flatMap((line) => line.split(" ").map((tag) => [tag, part as MarkupPartOfSpeech] as const))
   )
 )
 

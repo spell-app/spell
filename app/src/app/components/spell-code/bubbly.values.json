@@ -36,6 +36,10 @@
       "light": "#8a8f99",
       "dark": "#8a8f99"
     },
+    "--bubbly-structure": {
+      "light": "#2f80d1",
+      "dark": "#2f80d1"
+    },
     "--bubbly-thing": {
       "light": "#7c5cd6",
       "dark": "#7c5cd6"
@@ -290,6 +294,20 @@
     }
   },
   "parts": {
+    "structure": {
+      "--bubbly-hue": {
+        "light": "#2f80d1",
+        "dark": "#2f80d1"
+      },
+      "--bubbly-pill": {
+        "light": "#d5e6f6",
+        "dark": "#223d5e"
+      },
+      "--bubbly-input": {
+        "light": "#ffffffcc",
+        "dark": "#2c3649cc"
+      }
+    },
     "thing": {
       "--bubbly-hue": {
         "light": "#7c5cd6",

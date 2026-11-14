@@ -3,7 +3,8 @@
  * - Each declaration's head on a band in its part of speech's colour, what was typed in white pills on it,
  *   its body with a rail down its left, what it refers to in bold.
  * - Sizes are in pixels, for a 16px drawing:  tune it in the settings just below.
- * - Colours by part of speech:  things purple, actions green, properties amber, the rest grey (groups too);
+ * - Colours by part of speech:  things purple, actions green, properties amber, an HTML drawing's structure blue,
+ *   the rest grey (groups too);
  *   a band is its hue mixed over the paper.
  * - Light and dark from one set:  `light-dark()`, which follows the page's scheme.
  * - The ONE home of the look (epic `language` P49):  what draws it reads this sheet.
@@ -39,6 +40,8 @@
   /****** parts of speech:  one hue each ******/
   /* the rest:  groups, tests, settings, notes */
   --bubbly-plain: #8a8f99;
+  /* structure:  what lays a drawing out, HTML's and Spell UI's boxes (`div`, `container`, `toolbar`, `menu`) */
+  --bubbly-structure: #2f80d1;
   /* things, views, apps, pages, sites, places */
   --bubbly-thing: #7c5cd6;
   /* actions, events, drawings, handlers */
@@ -180,6 +183,9 @@
   /****** a part of speech, on a block:  its hue ******/
   .bubbly-plain {
     --bubbly-hue: var(--bubbly-plain);
+  }
+  .bubbly-structure {
+    --bubbly-hue: var(--bubbly-structure);
   }
   .bubbly-thing {
     --bubbly-hue: var(--bubbly-thing);

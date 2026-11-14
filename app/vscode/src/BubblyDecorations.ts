@@ -129,7 +129,7 @@ export type BubblyRange = {
   range: { start: { line: number; character: number }; end: { line: number; character: number } }
   /** what it is to a reader:  `SP.BubblyStretchKind` */
   kind: string
-  /** on a declaration's band of this part of speech:  `thing`, `action`, `property` or `plain` */
+  /** on a declaration's band of this part of speech:  `structure`, `thing`, `action`, `property` or `plain` */
   partOfSpeech?: string
   /** the name its head defines */
   isName?: boolean

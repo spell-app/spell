@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
+import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
 import { MarkupMarks, type MarkupShape } from "spell/app/app/ui/monaco/MarkupMarks"
 
 /** A page, as the drawn-bubbly page's examples are. */
@@ -52,7 +53,7 @@ describe("MarkupMarks", () => {
   test("blocks for elements on lines of their own, bands for tags alone, pills for tags in a line", () => {
     expect(shapesOf(MarkupMarks.of(PAGE))).toEqual([
       "band start:  <!doctype html>",
-      'block thing +foot:  <html lang="en">',
+      'block structure +foot:  <html lang="en">',
       '  input:  en">',
       "  block plain +foot:  <head>",
       '    band start:  <meta charset="UTF-8" />',
@@ -60,7 +61,7 @@ describe("MarkupMarks", () => {
       "    link:  <title>A demo</title>",
       "    pill start:  <title>A demo</title>",
       "    pill end tag:  </title>",
-      "  block thing +foot:  <body>",
+      "  block structure +foot:  <body>",
       "    link:  <h2>Two <code>x</code></",
       "    pill start:  <h2>Two <code>x</code></",
       "    link tag:  <code>x</code></h2>",
@@ -147,8 +148,37 @@ describe("MarkupMarks", () => {
 </grid>
 `
     expect(shapesOf(MarkupMarks.of(text), text).filter((line) => line.startsWith("block"))).toEqual([
-      "block thing +thin foot:  <context-menu>",
-      "block plain +foot:  <grid>"
+      "block structure +thin foot:  <context-menu>",
+      "block structure +foot:  <grid>"
+    ])
+  })
+
+  test("a tag's part of speech:  structure blue, actions and a menu's items green (Owen, 2026-11-14)", () => {
+    const partsOf = (tags: string) => tags.split(" ").map((tag) => `${tag} ${BubblyMarkup.partOfSpeechOf(tag)}`)
+    expect(partsOf("container segment toolbar menu context-menu div ui-grid")).toEqual([
+      "container structure",
+      "segment structure",
+      "toolbar structure",
+      "menu structure",
+      "context-menu structure",
+      "div structure",
+      "ui-grid structure"
+    ])
+    expect(partsOf("button buttons action ui-action item")).toEqual([
+      "button action",
+      "buttons action",
+      "action action",
+      "ui-action action",
+      "item action"
+    ])
+    // text stays a property;  a custom element a thing;  the head plain;  HTML's header a box, Spell UI's a heading
+    expect(partsOf("text spell-editor head title header ui-header")).toEqual([
+      "text property",
+      "spell-editor thing",
+      "head plain",
+      "title plain",
+      "header structure",
+      "ui-header property"
     ])
   })
 })
