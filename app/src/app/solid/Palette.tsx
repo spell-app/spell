@@ -270,6 +270,14 @@ function languageOf(file: SP.AnySpellFile | undefined): string {
   return file instanceof SP.SpellFile ? file.language.lang : "en"
 }
 
+/**
+ * `topic` in the editor's language, from Spell UI's dictionary:  `forms` => `formularios` on a Spanish page.
+ * - Reactive:  redrawn when the page language's texts arrive (`appTexts.lang`).
+ */
+function topicName(topic: PaletteGroup["topic"]): string {
+  return definitions?.topicIn(topic, appTexts.lang) ?? topic
+}
+
 /** A step's title for adding `definition`. */
 function stepTitle(definition: ComponentDefinition): string {
   return appTexts.text("partStepAdd", { part: definition.name })
@@ -474,14 +482,14 @@ function PaletteMenu(): JSX.Element {
           {(group) => (
             <section class="PaletteGroup">
               <div class="PaletteGroupHead">
-                <h4>{upperFirst(group.topic)}</h4>
+                <h4>{upperFirst(topicName(group.topic))}</h4>
                 <Show when={group.more.length}>
                   <ui-button
                     appearance="tertiary"
                     size="tiny"
                     padding="none"
                     class="PaletteMore"
-                    title={appTexts.text("paletteMoreTip", { topic: group.topic })}
+                    title={appTexts.text("paletteMoreTip", { topic: topicName(group.topic) })}
                     onClick={() => open(group.topic)}
                   >
                     {appTexts.text("paletteMore", { count: group.more.length })}
@@ -489,7 +497,7 @@ function PaletteMenu(): JSX.Element {
                 </Show>
               </div>
               <Show when={group.parts.length}>
-                <ui-tree class="PaletteTree" label={group.topic} ref={treeChoosesRows}>
+                <ui-tree class="PaletteTree" label={topicName(group.topic)} ref={treeChoosesRows}>
                   <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
                 </ui-tree>
               </Show>

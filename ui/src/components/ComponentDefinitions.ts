@@ -1,4 +1,5 @@
-import { ValueSets, type ComponentTopic, type ComponentVocabulary } from "spell/ui/vocabulary"
+import { ValueSets, type ComponentTopic, type ComponentVocabulary, type Dictionary } from "spell/ui/vocabulary"
+import { es } from "spell/ui/components/components.es"
 
 /** One tag, as the docs' component browser (and later `<ui-root>`'s loader) needs it. */
 export type ComponentDefinition = {
@@ -33,6 +34,9 @@ const DOCS_VOCABULARY_MODULES = import.meta.glob<Record<string, unknown>>("../do
 
 /** Every Spanish dictionary module, by path:  the palette's snippet for a program in Spanish. */
 const SPANISH_MODULES = import.meta.glob<Record<string, unknown>>("./*/*.es.ts", { eager: true })
+
+/** Each language's whole dictionary, by its code:  what the palette's topics are called (`topicIn()`). */
+const DICTIONARIES: Readonly<Record<string, Dictionary>> = { es }
 
 /** Tags a page holds once, around everything else:  never something to add to an app. */
 const NEVER_ADDED = new Set(["ui-root", "ui-components"])
@@ -157,6 +161,15 @@ export class ComponentDefinitions {
       }
     }
     return definition.snippet
+  }
+
+  /**
+   * `topic` as `language`'s dictionary words it, its `values.topics`:  `forms` => `formularios` in `es`.
+   * - The English when the language has no dictionary, or no word for it.
+   */
+  static topicIn(topic: ComponentTopic, language: string): string {
+    const dictionary = Object.hasOwn(DICTIONARIES, language) ? DICTIONARIES[language] : undefined
+    return dictionary?.values?.topics?.[topic] ?? topic
   }
 
   /** `ui-breadcrumb` => `Breadcrumb section`. */

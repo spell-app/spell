@@ -2,6 +2,7 @@ import { describe, expect, it } from "vite-plus/test"
 
 import * as library from "spell/ui"
 import { ComponentDefinitions } from "spell/ui/components/ComponentDefinitions"
+import { es } from "spell/ui/components/components.es"
 import { ValueSets } from "spell/ui/vocabulary"
 
 /** Tag of every element class `spell-ui` exports (each carries its vocabulary). */
@@ -91,5 +92,20 @@ describe("ComponentDefinitions.paletteGroups()", () => {
     expect(tags).not.toContain("ui-tree-item")
     expect(tags).not.toContain("ui-root")
     expect(groups.every(({ parts, more }) => parts.length + more.length > 0)).toBe(true)
+  })
+})
+
+describe("ComponentDefinitions.topicIn()", () => {
+  it("names each palette topic in the page's language, from Spell UI's dictionary", () => {
+    expect(ComponentDefinitions.topicIn("forms", "es")).toBe("formularios")
+    expect(ComponentDefinitions.topicIn("date & time", "es")).toBe("fecha y hora")
+    // every topic the palette shows has its own word (some, like `social`, are spelt the same)
+    for (const { topic } of ComponentDefinitions.paletteGroups())
+      expect(es.values?.topics, topic).toHaveProperty([topic])
+  })
+
+  it("keeps the English in English, and in a language it has no dictionary for", () => {
+    expect(ComponentDefinitions.topicIn("forms", "en")).toBe("forms")
+    expect(ComponentDefinitions.topicIn("forms", "fr")).toBe("forms")
   })
 })
