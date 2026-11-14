@@ -352,7 +352,7 @@ describe("names with grammar words", () => {
         }
         core.describeAction(Card, "putInPlay", { title: "Put A Card In Play", undoneAs: "Put A Card In Play" })
         export function openThePointOfSale() {
-          return core.console.log(2)
+          return core.asAction({ undoneAs: "Open The Point Of Sale" }, () => core.console.log(2))
         }
         export const c = new Card()
         c.putInPlay()
@@ -389,7 +389,7 @@ describe("names with grammar words", () => {
         }
         core.describeAction(Carta, "ponerEnJuego", { title: "Poner Una Carta En Juego", undoneAs: "Poner Una Carta En Juego" })
         export function abrirLaCuentaDeAhorro() {
-          return core.console.log(2)
+          return core.asAction({ undoneAs: "Abrir La Cuenta De Ahorro" }, () => core.console.log(2))
         }
         export const c = new Carta()
         c.ponerEnJuego()

@@ -7,7 +7,7 @@ import { CreateOneOfAKind, DrawnLines, DrawnMarkup } from "spell/parser/spell/ru
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
 import { SubjectRule } from "spell/parser/spell/rules/types"
-import { ActionDetail } from "./ActionDetail"
+import { ActionDetail, type ActionDetails } from "./ActionDetail"
 import { DynamicMethodRule } from "./DynamicMethodRule"
 import { MethodInfixRule } from "./MethodInfixRule"
 import { MethodPostfixRule } from "./MethodPostfixRule"
@@ -39,8 +39,9 @@ export class MethodDefinition<
   declare inlineInitialType: boolean
   @proto static inlineInitialType = false
   /**
-   * `true` when each method it makes on a type is an ACTION, one undo step by itself, named by its title
+   * `true` when each method it makes is an ACTION, one undo step by itself, named by its title
    * (Owen, 2026-11-14, epic `language` P55, Q60):  `to_do_something`'s.
+   * - On a type, and outside any (J149):  a top-level one runs its body through the core (`topLevelAction()`).
    * - Not a question (it gives back yes or no), a drawing, a hook (`create_hook`) or a test.
    * - `can't be undone` says otherwise;  `undoable as "Turn Card"` names its step.
    * - What another action calls joins that one's step, as the core runs it.
@@ -703,6 +704,8 @@ export class MethodDefinition<
       )
     } else {
       method.exported = isTopLevel(match.scope)
+      // a top-level action is one undo step too, run through the core:  no class to describe it on (J149)
+      method.action = this.topLevelAction(match, methodName, method)
       output.push(method)
     }
 
@@ -731,14 +734,7 @@ export class MethodDefinition<
     const isAction = this.isUndoableByDefault(match, methodName)
     const details = ActionDetail.detailsOf(action, this.getBody(match)) ?? (isAction ? { shortcuts: [] } : undefined)
     if (!details) return []
-    const signature = (action.groups as { signature?: P.Match }).signature
-    // its title by default:  its words as written, in Initial Caps -- `auto play` is `Auto Play` (epic `language` P48)
-    // its blanks' parentheses left out:  `to put (a card) on (a pile)` is `Put A Card On A Pile` (epic `language` P55)
-    const words = `${signature?.inputText ?? ""}`
-      .trim()
-      .replace(/^"(.*)"$/, "$1")
-      .replace(/[()]/g, "")
-    const description: Record<string, P.ASTDescriptionValue> = { title: initialCaps(words) }
+    const description: Record<string, P.ASTDescriptionValue> = { title: this.titleOf(match) }
     if (details.shortcuts.length) description.shortcuts = details.shortcuts
     if (details.icon) description.icon = details.icon
     const statements: P.ASTStatement[] = []
@@ -780,18 +776,70 @@ export class MethodDefinition<
         description.title_from = { member: getter }
       } else description.title = title
     }
-    // `- undoable`:  its undo goes by its title;  one with a fill-in changes, so by its words
-    // -- an action is that by itself (Q60), unless it `can't be undone`
-    if (details.cantBeUndone) {
+    // its undo:  an action is one step by itself (Q60), named by its title, unless it `can't be undone`
+    const undo = MethodDefinition.undoOf(details, isAction, description.title as string)
+    if (undo && "cantBeUndone" in undo) {
       delete description.undone_as
-      description.cant_be_undone = CANT_BE_UNDONE
-    } else if (details.undoable || (isAction && description.undone_as === undefined)) {
-      description.undone_as = description.title as string
-    }
+      description.cant_be_undone = undo.cantBeUndone
+    } else if (undo) description.undone_as = undo.undoneAs
     statements.push(
       new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description, title })
     )
     return statements
+  }
+
+  /**
+   * How top-level function `method`, which `match` makes, meets undo, when it's an action (epic `language` J149):
+   * `undefined` if it isn't one, or does nothing.
+   * - As an action on a type (`describedAction()`):  ONE step by itself, named by its title,
+   *   unless it `can't be undone`, or says its step's name (`undoable as "Deal"`).
+   * - Its title:  its words in Initial Caps, or the one it says (`with title "Deal"`);
+   *   one with a fill-in is named by its words, as a type's.
+   * - Pure:  reads only matches, and `method`'s body.
+   */
+  private topLevelAction(
+    match: P.MatchFor<this>,
+    methodName: string,
+    method: P.ASTMethodDefinition
+  ): P.ASTActionUndo | undefined {
+    // nothing to undo:  `to start the game` with no steps (or only comments) stays as it is
+    if (!method.body.statements?.some((line) => !NOT_STEPS.some((Kind) => line instanceof Kind))) return undefined
+    const action = match as P.Match
+    const isAction = this.isUndoableByDefault(match, methodName)
+    const details = ActionDetail.detailsOf(action, this.getBody(match)) ?? (isAction ? { shortcuts: [] } : undefined)
+    if (!details) return undefined
+    const plainTitle =
+      details.title && !(details.title.data as { fillIns?: unknown }).fillIns
+        ? ActionDetail.textOf(details.title)
+        : undefined
+    return MethodDefinition.undoOf(details, isAction, plainTitle ?? this.titleOf(match))
+  }
+
+  /**
+   * How an action meets undo, from what it says (`details`), titled `title` by default:  `undefined` for neither.
+   * - `can't be undone`:  `cantBeUndone`, whatever else it says
+   * - `undoable as "Turn Card"`:  that step's name
+   * - `undoable`, or an action by itself (Q60, `isAction`):  its title
+   */
+  private static undoOf(details: ActionDetails, isAction: boolean, title: string): P.ASTActionUndo | undefined {
+    if (details.cantBeUndone) return { cantBeUndone: CANT_BE_UNDONE }
+    if (details.undoneAs) return { undoneAs: details.undoneAs }
+    if (details.undoable || isAction) return { undoneAs: title }
+    return undefined
+  }
+
+  /**
+   * Its words as written, in Initial Caps:  an action's title said nowhere (epic `language` P48).
+   * - e.g. `Auto Play` for `to auto play`
+   * - its blanks' parentheses left out:  `to put (a card) on (a pile)` is `Put A Card On A Pile` (epic `language` P55)
+   */
+  private titleOf(match: P.MatchFor<this>): string {
+    const signature = (match.groups as { signature?: P.Match }).signature
+    const words = `${signature?.inputText ?? ""}`
+      .trim()
+      .replace(/^"(.*)"$/, "$1")
+      .replace(/[()]/g, "")
+    return initialCaps(words)
   }
 
   /**
@@ -835,6 +883,9 @@ type MethodDefinitionData = {
   /** Record of the method it declared -- see `addMethod()`. */
   scopeMethod?: P.ScopeMethod
 }
+
+/** What a function's body may hold that are no steps of it:  a top-level one of only these is no action (J149). */
+const NOT_STEPS = [P.ASTBlankLine, P.ASTComment, P.ASTParseError]
 
 /** What an action that `can't be undone` does to the history:  the steps before it stay (`core.describeAction()`). */
 const CANT_BE_UNDONE = "keeps history"

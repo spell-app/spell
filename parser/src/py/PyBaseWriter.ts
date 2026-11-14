@@ -1201,12 +1201,26 @@ export class PyBaseWriter extends P.ProgramWriter {
       const docstring = doc ? `${pyText.docstring(doc.lines)}\n` : ""
       // spell can't tell what it gives:  `Any`, said out loud (Owen, Q30)
       const signature = `${pyText.call(`def ${defName}`, params)} -> ${returns ?? "Any"}`
-      const header = [...decorators.map((decorator) => `@${decorator}`), signature]
+      // a top-level action:  one undo step, run through the core -- see `actionDecorator()`
+      const decorated = node.action ? [this.actionDecorator(node.action), ...decorators] : decorators
+      const header = [...decorated.map((decorator) => `@${decorator}`), signature]
       return pyText.block(header.join(pyText.NEWLINE), `${docstring}${body}`)
     } finally {
       this.inClassBody = inClassBody
       this.returnContinues = returnContinues
     }
+  }
+
+  /**
+   * What makes a top-level ACTION (`to deal the cards` outside any type) one undo step, or none
+   * (epic `language` J149):  `core.as_action({"undone_as": "Deal The Cards"})`, above its `def`.
+   * - A type's is described after its class instead, `core.describe_action(...)`.
+   */
+  protected actionDecorator(action: P.ASTActionUndo): string {
+    const fields = Object.entries(action).map(
+      ([key, value]) => `${this.quoted(this.nameOf(key, "property"))}: ${this.quoted(value)}`
+    )
+    return `core.as_action({${fields.join(", ")}})`
   }
 
   /**

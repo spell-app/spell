@@ -1154,6 +1154,31 @@ classesEs.addRule(CreateThing, {
       ]
     },
     {
+      title: "una propiedad nombrada sola toma la variable de su nombre, como con `una nueva ...` (épica `language` J159)",
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            'una "carta" es una cosa',
+            '\tsu "rango" es un número',
+            '\tsu "palo" es texto',
+            '\tsu "boca arriba" es sí o no'
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("rango")
+        scope.variables?.add("palo")
+        scope.variables?.add("boca arriba")
+      },
+      tests: [
+        ["crear una carta con rango y palo", "new Carta({ rango: rango, palo: palo })"],
+        [
+          "crear una nueva carta con rango, palo y boca arriba",
+          ["new Carta({", "  rango: rango,", "  palo: palo,", "  bocaArriba: true", "})"]
+        ]
+      ]
+    },
+    {
       title: "creates base types",
       compileAs: "expression",
       beforeEach(scope: P.Scope) {

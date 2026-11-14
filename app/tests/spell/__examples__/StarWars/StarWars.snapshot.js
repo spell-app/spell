@@ -1610,8 +1610,10 @@ core.describeAction(Thing, "open", { title: "Open A Thing", undoneAs: "Open A Th
 
 /** A number for people to read:  with none, nothing, so its row doesn't show */
 export function measureAmountInUnit(amount, unit) {
-  if (amount === undefined) return ""
-  return `${core.withCommas(amount)} ${unit}`
+  return core.asAction({ undoneAs: "Measure Amount As A Number In Unit As Text" }, () => {
+    if (amount === undefined) return ""
+    return `${core.withCommas(amount)} ${unit}`
+  })
 }
 
 core.heading("A card:  a picture, a name, what kind, and a click anywhere on it opens the thing")

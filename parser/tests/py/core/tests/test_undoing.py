@@ -268,3 +268,56 @@ def test_an_action_that_cant_be_undone_records_nothing_and_keeps_the_steps_befor
     cards_of(game)[0].turn_over()
     Peeker(rank="joker").peek()
     assert game.undo_title == "Undo Turn Card"
+
+
+################
+# ## Top-level actions
+################
+
+
+def test_a_top_level_action_is_one_step_and_one_it_calls_joins_it(game: Game) -> None:
+    """`to turn every card over` outside any type:  `@core.as_action({...})` above its `def` (epic `language` J149)."""
+
+    @core.as_action({"undone_as": "Turn Every Card Over"})
+    def turn_every_card_over() -> None:
+        for card in cards_of(game):
+            card.turn_over()
+
+    @core.as_action({"undone_as": "Count The Cards"})
+    def count_the_cards() -> int:
+        turn_every_card_over()
+        return len(cards_of(game))
+
+    assert turn_every_card_over.__name__ == "turn_every_card_over"
+    turn_every_card_over()
+    assert [step.title for step in core.RUNTIME.history.steps] == ["Turn Every Card Over"]
+    # one giving back a value is an action too:  what it calls joins its step
+    assert count_the_cards() == 3
+    assert [step.title for step in core.RUNTIME.history.steps] == ["Turn Every Card Over", "Count The Cards"]
+    game.undo()
+    assert [card.face_up for card in cards_of(game)] == [True, True, True]
+
+
+def test_a_top_level_action_that_cant_be_undone_records_nothing(game: Game) -> None:
+    """`to peek at every card, can't be undone`:  `"cant_be_undone": "keeps history"`."""
+
+    @core.as_action({"cant_be_undone": "keeps history"})
+    def peek_at_every_card() -> None:
+        for card in cards_of(game):
+            card.face_up = True
+
+    cards_of(game)[0].turn_over()
+    peek_at_every_card()
+    assert game.undo_title == "Undo Turn Card"
+
+
+def test_a_top_level_action_that_waits_is_one_step(game: Game) -> None:
+    """`to deal twice`, which waits:  ONE step, however long it waits."""
+
+    @core.as_action({"undone_as": "Deal Twice"})
+    async def deal_twice() -> None:
+        await game.deal(1)
+        await game.deal(1)
+
+    asyncio.run(deal_twice())
+    assert [step.title for step in core.RUNTIME.history.steps] == ["Deal Twice"]

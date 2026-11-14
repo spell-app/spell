@@ -1170,7 +1170,16 @@ export type ASTMethodDefinitionProps = Prettify<{
   async?: boolean
   /** `true` to `export` it:  a top-level function another project can import -- see `exported`. */
   exported?: boolean
+  /** How it meets undo, as a top-level ACTION -- see `action`. */
+  action?: ASTActionUndo
 }>
+
+/**
+ * How a top-level action meets undo (epic `language` J149):  one of the two, as the core's `ActionInfo` says it.
+ * - `undoneAs`:  ONE undo step, under this title, e.g. `"Deal The Cards"`
+ * - `cantBeUndone`:  `"keeps history"`, for `can't be undone`:  nothing it changes is a step
+ */
+export type ASTActionUndo = { undoneAs: string } | { cantBeUndone: "keeps history" }
 
 export class ASTMethodDefinition extends ASTExpression {
   declare args: ASTVariableExpression[] | undefined
@@ -1185,6 +1194,13 @@ export class ASTMethodDefinition extends ASTExpression {
    * - Only for a plain named function -- NEVER a property, an arrow, or one nested in another function.
    */
   declare exported: boolean | undefined
+  /**
+   * Set for a top-level ACTION (`to deal the cards` outside any type):  how it meets undo.
+   * - Its writer runs its body through the core, as one undo step or none:
+   *   `return core.asAction({ undoneAs: "Deal The Cards" }, () => ...)`, Python's `@core.as_action({...})`.
+   * - An action on a type has none:  `core.describeAction()`, after its class, declares it (`P.ASTTypeDescription`).
+   */
+  declare action: ASTActionUndo | undefined
   /** Normalizes `body` (Statement / StatementGroup / Expression / missing) into a wrapped `ASTStatementBlock`. */
   constructor(match: P.AnyMatch, props: ASTMethodDefinitionProps) {
     super(match, props)
