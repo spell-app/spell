@@ -262,3 +262,12 @@
     outline-offset: 0;
   }
 }
+
+/*
+ * Not the find box's options alone (Aa, ab, .*):  Monaco shows them for 2 seconds in the corner after
+ * Change All Occurrences (⌘F2) or Select All Occurrences, which read as a find box cut off (epic `editor` I146).
+ * - What those commands give is a caret at each match, which shows where it is;  ⌘F shows the whole box.
+ */
+.MonacoEditor .monaco-editor .findOptionsWidget {
+  display: none !important;
+}
