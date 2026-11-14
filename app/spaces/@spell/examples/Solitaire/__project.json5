@@ -8,11 +8,11 @@
       "active": true
     },
     {
-      "path": "/Deck.spell",
+      "path": "/Pile.spell",
       "active": true
     },
     {
-      "path": "/Pile.spell",
+      "path": "/Deck.spell",
       "active": true
     },
     {
