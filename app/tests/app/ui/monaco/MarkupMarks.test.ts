@@ -95,4 +95,17 @@ describe("MarkupMarks", () => {
     )
     expect(lineSpacers.map(({ range }) => range.startLineNumber)).toEqual([2])
   })
+
+  test("a block's start and end tags a spacer in from its band's end, in an HTML file and a Spell drawing alike", () => {
+    const html = `<div>\n  <p>words</p>\n</div>\n`
+    const spell = `to draw it\n\t<grid>\n\t\t<text>hi</text>\n\t</>\n`
+    const spacers = (marks: MarkupMarks, kind: string) =>
+      marks.marks
+        .filter((mark) => mark.options.before?.inlineClassName?.includes(`bubbly-${kind}-spacer`))
+        .map(({ range }) => range.startLineNumber)
+    const inHtml = MarkupMarks.of(html)
+    const inSpell = MarkupMarks.within(spell, spell.indexOf("<grid>"), spell.length, [])
+    expect([spacers(inHtml, "tag-head"), spacers(inHtml, "tag-foot")]).toEqual([[1], [3]])
+    expect([spacers(inSpell, "tag-head"), spacers(inSpell, "tag-foot")]).toEqual([[2], [4]])
+  })
 })
