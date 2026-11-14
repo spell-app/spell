@@ -1,0 +1,1 @@
+584:11 TS2339 Property 'espaciador' does not exist on type 'JSX.IntrinsicElements'.

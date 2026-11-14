@@ -4,14 +4,14 @@ export const words = {
   types: {
     Carta: {
       rango: "rango",
-      valor: "valor",
-      esUnaFigura: "es una figura",
-      esUnaCartaNumérica: "es una carta numérica",
       palo: "palo",
       color: "color",
-      símbolo: "símbolo",
-      nombre: "nombre",
+      esUnaFigura: "es una figura",
+      esUnaCartaNumérica: "es una carta numérica",
       esElRangoDePalo: "es el (rango) de (palo)",
+      nombre: "nombre",
+      valor: "valor",
+      símbolo: "símbolo",
       nombreCorto: "nombre corto",
       imagen: "imagen",
       levantada: "levantada",
@@ -34,15 +34,7 @@ export const words = {
     },
     Solitario: {
       mazo: "mazo",
-      rehacerLaReserva: "rehacer la reserva",
-      robarDeLaReserva: "robar de la reserva",
-      repartirLasCartas: "repartir las cartas",
-      reiniciarElJuego: "reiniciar el juego",
-      jugarSolo: "jugar solo",
-      hacerTrampa: "hacer trampa",
-      movimientos: "movimientos",
       puntuación: "puntuación",
-      pista: "pista",
       reserva: "reserva",
       descartes: "descartes",
       tréboles: "tréboles",
@@ -55,7 +47,13 @@ export const words = {
       C4: "C4",
       C5: "C5",
       C6: "C6",
-      C7: "C7"
+      C7: "C7",
+      reiniciarElJuego: "reiniciar el juego",
+      repartirLasCartas: "repartir las cartas",
+      robarDeLaReserva: "robar de la reserva",
+      rehacerLaReserva: "rehacer la reserva",
+      jugarSolo: "jugar solo",
+      hacerTrampa: "hacer trampa"
     }
   },
   messages: {
@@ -148,16 +146,16 @@ export const words = {
   },
   groups: {
     Carta: [
-      { name: "Rango", description: "El as es bajo:  as = 1 ... rey = 13", members: ["rango", "valor", "esUnaFigura", "esUnaCartaNumérica"] },
-      { name: "Palo", members: ["palo", "color", "símbolo"] },
-      { name: "Nombres", description: "Cómo la llama una persona, una prueba o la consola", members: ["nombre", "esElRangoDePalo", "nombreCorto"] },
+      { name: "Rango y Palo", description: "El as es bajo:  as = 1 ... rey = 13", members: ["rango", "palo", "color"] },
+      { name: "Alias", description: "Spell para identificar cartas", members: ["esUnaFigura", "esUnaCartaNumérica", "esElRangoDePalo"] },
+      { name: "Nombres", description: "identificar una carta", members: ["nombre", "valor", "símbolo", "nombreCorto"] },
       { name: "Dibujo", description: "Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css", members: ["imagen", "levantada"] },
-      { name: "Jugar una carta", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
+      { name: "Juego", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
       { name: "Una pila de cartas", members: ["pila"] }
     ],
     Solitario: [
-      { name: "Repartir", description: "Cada uno se detiene un momento, así el reparto se anima", members: ["rehacerLaReserva", "robarDeLaReserva", "repartirLasCartas"] },
-      { name: "Juego", description: "Sus movimientos:  los botones de la barra, sus teclas, y el clic derecho en la mesa;  cada uno dice su título una vez, para los tres", members: ["reiniciarElJuego", "jugarSolo", "hacerTrampa"] }
+      { name: "Repartir", members: ["reiniciarElJuego", "repartirLasCartas", "robarDeLaReserva", "rehacerLaReserva"] },
+      { name: "Juego", members: ["jugarSolo", "hacerTrampa"] }
     ]
   }
 }

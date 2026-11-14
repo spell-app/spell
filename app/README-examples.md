@@ -808,13 +808,13 @@ Spell reads Spanish too, a file at a time, by its name:  `Solitario.es.spell` is
 its own `Carta`, `Mazo` and `Pila`, as Solitaire has its `Card`, `Deck` and `Pile`, so all of it reads in Spanish.
 
 ```spell
-una "columna" es una pila
-	// una columna:  se arma hacia abajo, del rey al as, rojo y negro alternados
-	puede soltar una carta si: la carta está boca arriba
-	puede tomar una carta si
-		si la columna está vacía
-			devolver la carta es un rey
-		devolver su color no es el color de la carta y su valor es el valor de la carta + 1
+una "columna" es una pila con disposición "vertical"			-- Una columna, armada hacia abajo del rey al as, rojo y negro alternados
+	sus cartas son arrastrables cuando la carta está boca arriba
+	es soltable cuando
+		está vacía y la carta es un rey
+		o
+		su color no es el color de la carta y
+		  su valor es el valor de la carta + 1
 ```
 
 _The tableau's rule, in Spanish:  a column, `columna`._

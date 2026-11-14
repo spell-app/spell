@@ -1,31 +1,27 @@
-# Una carta de la baraja
-// Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el juego solo los leen.
-// Es una vista reversible:  boca arriba muestra su imagen, boca abajo el dorso que comparten todas las cartas.
-// En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
-
-una "carta" es una vista reversible arrastrable
-	grupo "Rango"
-		// El as es bajo:  as = 1 ... rey = 13
+una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
+	-- Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el juego solo los leen.
+	-- Es una vista reversible:  boca arriba muestra su imagen, boca abajo el dorso que comparten todas las cartas.
+	-- En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
+	grupo "Rango y Palo" -- El as es bajo:  as = 1 ... rey = 13
 	su "rango" es uno de as, 2 ... 10, jota, dama, rey
-	su "valor" es la posición de su rango
-	"es una figura" si su rango es jota, dama o rey
-	"es una carta numérica" si no es una figura
-
-	grupo "Palo"
 	su "palo" es uno de tréboles, diamantes, corazones o espadas
 	su "color" es uno de rojo, negro
 		rojo si es un diamante o es un corazón
 		negro de lo contrario
+
+	grupo "Alias" 								-- Spell para identificar cartas
+	"es una figura" si su rango es jota, dama o rey
+	"es una carta numérica" si no es una figura
+	"es el (rango) de (palo)"  -- p. ej. la carta es el dos de espadas
+
+	grupo "Nombres" 								-- identificar una carta
+	su "nombre" es su rango && "de" && su palo
+	su "valor" es la posición de su rango
 	su "símbolo" es
 		"♣" si es un trébol
 		"♦" si es un diamante
 		"♥" si es un corazón
 		"♠" de lo contrario
-
-	grupo "Nombres"
-		// Cómo la llama una persona, una prueba o la consola
-	su "nombre" es su rango && "de" && su palo
-	"es el (rango) de (palo)"
 	su "nombre corto" es
 		// Su nombre corto:  D♠↓ es la dama de espadas, boca abajo
 		letra es 10 si su valor es 10 de lo contrario la primera letra de su rango como mayúsculas
@@ -44,15 +40,16 @@ una "carta" es una vista reversible arrastrable
 		si es un corazón
 			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
+
+	// Por encima de las cartas y pilas de su alrededor mientras la trampa la mueve -- styles.css
 	su "levantada" es sí o no
-		// Por encima de las cartas y pilas de su alrededor mientras la trampa la mueve -- styles.css
 	para dibujar su frente
 		<texto color={su color}>{su imagen}</texto>
 	para dibujar su dorso
 		<texto color="azul">🂠</texto>
 
 	para probar la preparación de la carta
-		obtener una nueva carta cuyo rango es dama y palo es espadas
+		obtener una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
 		su nombre debería ser "dama de espadas"
 		su color debería ser negro
 		su valor debería ser 12
