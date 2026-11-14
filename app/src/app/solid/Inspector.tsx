@@ -2691,7 +2691,7 @@ const SMALLEST_CARD_BODY = 32
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
  * - Its code is the Code card's, under it (`<CodeCard>`, epic `editor` I109).
  * - A thing's property whose value is a thing is a link to it (`<ThingLink>`);  a list's items are links too.
- *   Following one, the title is the TRAIL from what was selected (`Solitaire › DiscardPile · discards`),
+ *   Following one, the title is the TRAIL from what was selected (`Solitaire › Discard Pile "discards"`),
  *   each step a pill that goes back to it (`Inspector.inspected`).
  ****************/
 function PropertiesCard(): JSX.Element {

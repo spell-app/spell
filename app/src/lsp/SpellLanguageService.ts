@@ -1909,6 +1909,21 @@ export class SpellLanguageService {
       sortText: String(order + 1).padStart(3, "0"),
       textEdit: { range, newText: value }
     }))
+    if (!picker) return words
+    // first, whatever is typed:  it writes nothing itself, and opens the picker (epic `editor` T61)
+    const texts = LSP.LspTexts.of(scope)
+    const pick: CompletionItem = {
+      label: texts.text(picker.kind === "color" ? "pickColor" : "pickIcon"),
+      kind: picker.kind === "color" ? CompletionItemKind.Color : CompletionItemKind.Event,
+      sortText: "000",
+      filterText: word,
+      preselect: true,
+      // writes back what's typed:  Monaco writes `insertText` (else the label), an LSP client the `textEdit`
+      insertText: word,
+      textEdit: { range, newText: word },
+      command: { title: "", command: PICK_VALUE_COMMAND, arguments: [picker, spec.values] }
+    }
+    return [pick, ...words]
   }
 
   /**
@@ -1993,21 +2008,6 @@ export class SpellLanguageService {
     if (!input || !scope.parser) return list
 
     const items = new Map<string, CompletionItem>()
-    if (!picker) return words
-    // first, whatever is typed:  it writes nothing itself, and opens the picker (epic `editor` T61)
-    const texts = LSP.LspTexts.of(scope)
-    const pick: CompletionItem = {
-      label: texts.text(picker.kind === "color" ? "pickColor" : "pickIcon"),
-      kind: picker.kind === "color" ? CompletionItemKind.Color : CompletionItemKind.Event,
-      sortText: "000",
-      filterText: word,
-      preselect: true,
-      // writes back what's typed:  Monaco writes `insertText` (else the label), an LSP client the `textEdit`
-      insertText: word,
-      textEdit: { range, newText: word },
-      command: { title: "", command: PICK_VALUE_COMMAND, arguments: [picker, spec.values] }
-    }
-    return [pick, ...words]
     const startsWithTyped = (item: CompletionItem) => [item.label, item.filterText].some((it) => it?.startsWith(typed))
     for (const expectation of scope.parser.expectedAfter(input, "statement", scope)) {
       // partway through something, not what's next -- see `signatureHelp()`
@@ -3030,6 +3030,12 @@ const JSX_TAG_TYPED = /(?:(?:^|[\s>({])<\p{Ll}[\p{L}\p{M}\d_-]*|(?:^\s*|[>({])<)
 const ATTRIBUTE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*?)?\s+[\p{L}-]*$/u
 
 /** An attribute's quoted value being typed at the end of a line:  its tag, its attribute, then what's typed, `<button color="pr`. */
+/**
+ * The command a value's Pick row runs (epic `editor` T61):  the app's Monaco opens the picker at the caret
+ * (`ValuePicker`), handed the attribute's `SP.ComponentValuePicker` and its words.
+ */
+export const PICK_VALUE_COMMAND = "spell.pickValue"
+
 const ATTRIBUTE_VALUE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)\s(?:[^<>]*\s)?([\p{L}\p{M}\d-]+)="([^"]*)$/u
 
 /** How far back `openTagBefore()` looks for its tag's `<`. */
@@ -3112,11 +3118,6 @@ type TestDefinition = {
 
 /** The heading level a file's `group "..."` is, as `## ...` is:  see `SpellLanguageService.headingsOf()`. */
 const GROUP_HEADING_LEVEL = 2
-/**
- * The command a value's Pick row runs (epic `editor` T61):  the app's Monaco opens the picker at the caret
- * (`ValuePicker`), handed the attribute's `SP.ComponentValuePicker` and its words.
- */
-export const PICK_VALUE_COMMAND = "spell.pickValue"
 
 /** The rule of `<action "...">`, a button or menu row naming one of the program's actions:  what an action's rename finds. */
 const ACTION_BUTTON_RULE = "action_button"
