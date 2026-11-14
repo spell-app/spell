@@ -40,7 +40,7 @@ describe("SpellLanguageService, action and menu tags (epic `language` P53)", () 
   test("an action's quoted word offers the program's actions:  the game's first, then undo and redo", async () => {
     const items = await solitaire.typed('<action "')
     const words = labels(items)
-    expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "deal the cards"]))
+    expect(words).toEqual(expect.arrayContaining(["auto play", "cheat", "restart the game", "turn over the next card"]))
     // in its order:  the game's own, then the app's, then the other types' (a card's `play`)
     const sorted = [...items].sort((a, b) => a.sortText!.localeCompare(b.sortText!)).map(({ label }) => label)
     expect(sorted.indexOf("auto play")).toBeLessThan(sorted.indexOf("undo"))

@@ -717,7 +717,7 @@ describe("compiled spell draws with Solid", () => {
     const first = await mount(solitaire)
     await waitFor(() => first.querySelectorAll("test-project-card").length === 52)
     // its deal done first:  this file's runners share one core, and two deals at once would share its flags for what's
-    // running (`deal the cards`, `play from the stock`), so one game's play would block the other's (debut I52)
+    // running (`restart the game`, `turn over the next card`), so one game's play would block the other's (debut I52)
     await waitFor(() => dealtAndPlayed(first), 10_000)
     const defined = customElements.get("test-project-foundation")
     // what an empty foundation shows, edited:  a placeholder of another kind
@@ -795,7 +795,7 @@ describe("compiled spell draws with Solid", () => {
     const columns = () => [...host.querySelectorAll<Element>("test-project-column")]
     const stock = () => host.querySelector<Element>("test-project-stock-pile")!
     const discards = () => host.querySelector<Element>("test-project-discard-pile")!
-    // dealt, and the deal's own play from the stock done:  a click while it runs would wait its turn
+    // dealt, and the deal's own turn of the next card done:  a click while it runs would wait its turn
     await waitFor(() => columns()[6]?.children.length === 7 && discards().children.length === 1, 10_000)
     await ElementFixture.settle(host)
     ;(stock().lastElementChild as HTMLElement).shadowRoot!.querySelector<HTMLElement>("[part=back]")!.click()
