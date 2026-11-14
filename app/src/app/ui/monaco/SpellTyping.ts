@@ -1,3 +1,4 @@
+import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import type { monaco } from "./monaco"
@@ -330,10 +331,21 @@ export class SpellTyping {
     if (this.languages.quotes.includes(languageId) && change.text === " ") {
       const lang = SP.Language.langOfFile(model.uri.path) ?? "en"
       const tag = SpellTyping.tagBeforeSpace(lines, line - 1, typedAt)
-      const rest = tag && LSP.CompletionShapes.spaceAfterTag(SP.Language.for(lang).rootScope, tag)
+      const rest = tag && LSP.CompletionShapes.spaceAfterTag(this.scopeOf(model, lang), tag)
       if (rest) return this.help(() => this.finishTag(rest), caret)
       if (SpellTyping.opensQuotes(lines, line - 1, lang)) this.help(() => this.openQuotes(), caret)
     }
+  }
+
+  /**
+   * The scope a tag typed in `model` is read in:  its file's, from its last parse, so the program's own views are known
+   * (`<column ` => `<column "|" />`, epic `editor` I149);  else its language's, for a model that isn't a project's file.
+   * - The last parse, not one of the text as it is now:  a type declared since isn't known till the next.
+   */
+  private scopeOf(model: monaco.editor.ITextModel, lang: string): P.Scope {
+    // the app's address for a file, `spell:/<path>` (`AppAddresses`, which loads Monaco's own code:  not here)
+    const file = model.uri.scheme === APP_SCHEME ? SP.SpellFile.registry.get(model.uri.path.slice(1)) : undefined
+    return file?.scope ?? file?.project.scope ?? SP.Language.for(lang).rootScope
   }
 
   /**
@@ -762,6 +774,9 @@ type TokenizedModel = monaco.editor.ITextModel & { tokenization?: { forceTokeniz
 const SUGGESTIONS_SHOWING = ".suggest-widget.visible"
 
 const SPELL_TYPING = "spell-typing"
+
+/** The app's scheme for its files' addresses:  `AppAddresses.SCHEME`. */
+const APP_SCHEME = "spell"
 
 /** What moves the caret onto a line it snaps on:  a click or a key, never code (`"api"`) nor its own edits. */
 const MOVED_BY = ["mouse", "keyboard"]
