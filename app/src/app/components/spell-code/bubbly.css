@@ -103,8 +103,8 @@
    * - an HTML file's and a Spell drawing's alike
    * - its row only as tall as the pill and the paper round it, so nested ones stack close
    */
-  --bubbly-foot-tiny-height: 13px;
-  --bubbly-foot-tiny-font: 10px;
+  --bubbly-foot-tiny-height: 10px;
+  --bubbly-foot-tiny-font: 9px;
   /* its corners cut, but its top-left, square:  the rail runs into it */
   --bubbly-foot-tiny-cut: 4px;
   /* its words this far in from its ends */
