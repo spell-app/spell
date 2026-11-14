@@ -14,6 +14,7 @@ import {
   SPELL_JSX_MEANINGS,
   SPELL_TAG_WORDS,
   webWordFor,
+  type DrawnDeclaration,
   type JSXMatchData
 } from "./JSX.shared"
 import { ActionButton } from "./ActionButton"
@@ -155,6 +156,14 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
       if (match.data.loopItem) return match
     }
+    // a value declared where it's drawn (epic `language` P55, Q52):  `<number "score"/>` ~== `"score" is a number`
+    if (takesShortcuts && element.quotedWord && !element.children?.length && !element.attributes?.length) {
+      const value = SpellJSX.valueDeclaredBy(scope, element)
+      if (value) {
+        match.data.declares = value
+        return match
+      }
+    }
     if (takesShortcuts && match.data.tagName === element.tagName) {
       // a quoted word names a thing, so a type declared further down wins over a pack's component of that name:
       // `<columna "C1"/>` is Solitario's column, `<columna/>` the grid's
@@ -184,6 +193,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
       scope.parser?.parse(attr, "jsxAttribute", scope)
     )
+    // a view declared where it's drawn (Q52):  `<column "C1"/>` ~== `"C1" is a new column`
+    const view = SpellJSX.viewDeclaredBy(scope, match, element)
+    if (view) match.data.declares = view
     SpellJSX.warnAboutListedValues(scope, match, element)
     SpellJSX.refuseFormOfReadOnlyPlace(scope, match)
     // a dotted tag, `<UI.Form>`:  the writer writes the error where the element would be, this reports it
@@ -216,6 +228,53 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const { start, value, raw } = quotedWord.record
     const id = new P.JSXAttributeToken({ name: VIEW_ID_ATTRIBUTE, start, value, raw })
     return [...(element.attributes ?? []), id]
+  }
+
+  ////////////////
+  // ## Members declared where they're drawn (epic `language` P55, Q52)
+  ////////////////
+
+  /**
+   * The member a view's tag with a quoted word declares, in a thing's own drawing (`to draw it`), when the thing has
+   * none by that name:  `<column "C1"/>` ~== `"C1" is a new column` -- `undefined` for any other tag.
+   * - Its attributes are the new view's starting values:  `<foundation "clubs" suit=clubs/>`.
+   * - A member said on a line of its own wins:  the tag draws it, as before (I79, I80).
+   * - A lookup:  call it WHILE PARSING;  `DrawnMarkup` declares what it found.
+   */
+  private static viewDeclaredBy(
+    scope: P.Scope,
+    match: P.MatchFor<SpellJSX>,
+    element: P.JSXElementToken
+  ): DrawnDeclaration | undefined {
+    const view = match.data.view ?? match.data.laterView?.type
+    const owner = SpellJSX.drawingThingOf(scope)
+    if (!view || !owner || !element.quotedWord) return undefined
+    const name = textOf(element.quotedWord.value)
+    if (!name || owner.getMember(name)) return undefined
+    return { owner: owner.name, name, view: view.name }
+  }
+
+  /**
+   * The value a tag naming a datatype declares, in a thing's own drawing:  `<number "score"/>` ~== `"score" is a number`,
+   * drawn where it is, as `{the score}`;  Spanish's `<número "puntuación"/>` -- `undefined` for any other tag.
+   * - Text or a number:  the language's words for them (`SP.Language.typeWords`).
+   * - A member said on a line of its own is drawn the same, and declares nothing.
+   */
+  private static valueDeclaredBy(scope: P.Scope, element: P.JSXElementToken): DrawnDeclaration | undefined {
+    const datatype = SP.Language.of(scope).typeWords[element.tagName] ?? element.tagName
+    if (!DRAWN_VALUE_TYPES.includes(datatype)) return undefined
+    const owner = SpellJSX.drawingThingOf(scope)
+    const name = element.quotedWord && textOf(element.quotedWord.value)
+    if (!owner || !name) return undefined
+    // said on a line of its own:  only drawn
+    if (owner.getMember(name)) return { owner: owner.name, name, datatype, drawnOnly: true }
+    return { owner: owner.name, name, datatype }
+  }
+
+  /** The thing whose own drawing (`to draw it`) `scope` is in, if it's in one -- `undefined` elsewhere. */
+  private static drawingThingOf(scope: P.Scope): P.TypeScope | undefined {
+    if (DrawIt.drawingIn(scope)?.drawing !== "draw") return undefined
+    return P.MethodScope.thingTypeOf(scope)
   }
 
   /**
@@ -335,6 +394,12 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST)).filter(Boolean) ?? []
       return new P.ASTJSXElement(match, { tagName: MENU_ROW_TAG, attrs: [kind, ...attrs], children: [] })
     }
+    // a value declared where it's drawn, `<number "score"/>`:  drawn as `{the score}` is
+    const { declares } = match.data
+    if (declares?.datatype) {
+      const read = new P.ASTPropertyExpression(match, { object: new P.ASTSelfLiteral(match), property: declares.name })
+      return new P.ASTJSXExpression(match, { expression: read }) as unknown as P.ASTJSXElement
+    }
     // a chain branch alone, in no element (an error), or an `<html>` block:  its children, drawn as they are
     if (match.data.chain || match.data.htmlBlock)
       return new P.ASTJSXFragment(match, { children: this.childASTs(match) })
@@ -345,6 +410,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     let attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
     // a later type that's no view after all:  its quoted word, last, is no id (`noteUnreadable()` says so)
     if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
+    // a view this tag declares (Q52):  its attributes are the new thing's starting values, so the element has its id alone
+    if (match.data.declares?.view) attrs = attrs?.filter((attr) => attr?.name === VIEW_ID_ATTRIBUTE)
     const children = this.childASTs(match)
     return new P.ASTJSXElement(match, {
       tagName,
@@ -789,6 +856,9 @@ const UNTIL_FOUND = "until-found"
 /** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */
 // written as Solid's compiler writes it into a TypeScript drawing, so every target draws the same
 const CLICKABLE_STYLE = "cursor:var(--ui-control-cursor,pointer);user-select:none"
+
+/** The datatypes a tag may declare a value of, where it's drawn:  `<number "score"/>`, `<text "hint"/>` (Q52). */
+const DRAWN_VALUE_TYPES = ["number", "text"]
 
 /** Spell UI's element that shows one measure:  `<ui-dimension value={its height}>`. */
 const MEASURE_TAG = "ui-dimension"

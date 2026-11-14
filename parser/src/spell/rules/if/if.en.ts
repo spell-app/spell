@@ -96,7 +96,7 @@ _if_.addRule(If, {
 })
 
 _if_.addRule(ElseIf, {
-  syntax: "(else|otherwise) if {condition:expression} (then|:)? {statement_body}?",
+  syntax: "(otherwise|else) if {condition:expression} (then|:)? {statement_body}?",
   tests: [
     {
       title: "correctly matches single-line else_if statements",
@@ -105,6 +105,7 @@ _if_.addRule(ElseIf, {
         ;(scope as P.BlockScope).variables.add("a")
       },
       tests: [
+        ["otherwise if a", "else if (a) {}"],
         ["else if a", "else if (a) {}"],
         ["else if a:", "else if (a) {}"],
         ["else if a then", "else if (a) {}"],
@@ -162,14 +163,15 @@ _if_.addRule(ElseIf, {
 })
 
 _if_.addRule(Else, {
-  syntax: "(else|otherwise) :? {statement_body}?",
+  syntax: "(otherwise|else) :? {statement_body}?",
   tests: [
     {
       title: "correctly matches single-line else statements",
       compileAs: "block",
       tests: [
-        ["else", "else {}"],
+        // `otherwise` is the one word Spell writes;  `else` reads too (epic `language` P55, Q57)
         ["otherwise", "else {}"],
+        ["else", "else {}"],
         ["else: b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
         ["otherwise: b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
         ["else b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],

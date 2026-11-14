@@ -829,6 +829,8 @@ export const reviewsPage = new ReviewsPage()
 core.heading("The dialogs:  the settings, and a review of a film")
 //# The dialogs:  the settings, and a review of a film
 
+core.describeAction(ReviewDialog, "saveTheReview", { title: "Save The Review", undoneAs: "Save The Review" })
+
 core.heading("The site:  where each page is, its dialogs and sidebars, and the theme it wears")
 //# The site:  where each page is, its dialogs and sidebars, and the theme it wears
 

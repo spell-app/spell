@@ -2,10 +2,10 @@
 
 exports[`ScopeExplorer > a node lists the rules its statement made 1`] = `
 {
-  "is a (suit)": [
+  "is a face card": [
     {
-      "name": "is_a_$suit",
-      "syntax": "{operator:is_or_is_not_a} (expression:clubs|club|diamonds|diamond|hearts|heart|spades|spade)",
+      "name": "is_a_face_card",
+      "syntax": "{operator:is_or_is_not_a} face card",
     },
   ],
   "play a card": [
@@ -25,7 +25,6 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "constant jack",
   "constant queen",
   "constant king",
-  "method is a (rank)",
   "property value",
   "method is a face card",
   "method is a number card",
@@ -35,7 +34,6 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "constant diamonds",
   "constant hearts",
   "constant spades",
-  "method is a (suit)",
   "property color",
   "enumeration Colors",
   "constant red",
@@ -43,7 +41,7 @@ exports[`ScopeExplorer > a type's members:  in document order, by file then line
   "property symbol",
   "property name",
   "method is the (rank) of (suit)",
-  "property state",
+  "property short name",
   "property picture",
   "property lifted",
   "property pile",

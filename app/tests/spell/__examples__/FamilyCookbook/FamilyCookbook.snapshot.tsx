@@ -182,6 +182,7 @@ export class CookbookElement extends SpellElement<Cookbook> {
 }
 core.useElement(Cookbook, CookbookElement)
 export const cookbook = new Cookbook()
+core.describeAction(Cookbook, "addTheNewRecipe", { title: "Add The New Recipe", undoneAs: "Add The New Recipe" })
 // - its "box menu" is a menu of "undo"
 core.describeMenu(Cookbook, "boxMenu", { items: ["undo"] })
 // -----------

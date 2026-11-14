@@ -174,6 +174,8 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     const isOurs =
       member instanceof P.ScopeVariable && !!member.autoDeclared && P.TypeScope.sameStatement(member.declaredBy, match)
     if (member && !isOurs) return
+    // declared further down, a drawing's tag too (`<number "score"/>`, epic `language` P55):  that line declares it
+    if (!member && type.knowsPropertyAhead(`${property.value}`)) return
     // `nothing` says nothing about what it'll hold
     const datatype = value.datatype === "nothing" ? undefined : value.datatype
     const name = `${property.value}`

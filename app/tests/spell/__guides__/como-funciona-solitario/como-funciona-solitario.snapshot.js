@@ -73,7 +73,6 @@ export class Carta extends View {
   }
 }
 
-core.heading("Una pila, y una columna")
 /** Una pila, y una columna */
 export class Pila extends ViewableList {
   static instanceType = Carta
@@ -81,7 +80,6 @@ export class Pila extends ViewableList {
 
   static exclusive = true
 }
-/** una carta está en una sola pila a la vez:  ponerla en otra la quita de esta */
 
 /**
  * La regla que lo hace Solitario:  una columna toma una carta uno menos que su última, del otro color.
@@ -96,6 +94,11 @@ export class Columna extends Pila {
     return this.lastItem.color !== carta.color && this.lastItem.valor === carta.valor + 1
   }
 }
+
+core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })
+
+core.heading("Una pila, y una columna")
+/** una carta está en una sola pila a la vez:  ponerla en otra la quita de esta */
 
 core.heading("La mesa:  una columna, y una mano de cartas para probar en ella")
 /** La mesa:  una columna, y una mano de cartas para probar en ella */

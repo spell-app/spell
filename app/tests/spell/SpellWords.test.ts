@@ -16,10 +16,7 @@ describe("SpellWords", () => {
       "Card",
       "Deck",
       "Pile",
-      "StockPile",
-      "DiscardPile",
       "Foundation",
-      "Column",
       "Solitaire"
     ])
     expect(words.types.Solitaire).toMatchObject({
@@ -30,8 +27,8 @@ describe("SpellWords", () => {
     })
     // its card, as Card.spell writes it, and as Solitaire.spell teaches it to play
     expect(words.types.Card).toMatchObject({ name: "name", play: "play a card" })
-    // a kind of pile:  the layout it gives every stock pile (its placeholder's drawing and its click handler are no members)
-    expect(words.types.StockPile).toEqual({ layout: "layout" })
+    // a kind of pile that only gives a pile's layout a value, on its line (`with layout "stacked"`):  no members of its own
+    expect(words.types.StockPile).toBeUndefined()
   })
 
   test("the counter library's (`counter`):  its own, as written", () => {
@@ -42,8 +39,6 @@ describe("SpellWords", () => {
   test("Solitaire's card:  its own, as written", () => {
     const words = SP.SpellWords.read(fixtureWords("@spell/examples/Solitaire"))!
     expect(words.types.Card).toMatchObject({
-      isARank: "is a (rank)",
-      isASuit: "is a (suit)",
       isTheRankOfSuit: "is the (rank) of (suit)",
       symbol: "symbol"
     })

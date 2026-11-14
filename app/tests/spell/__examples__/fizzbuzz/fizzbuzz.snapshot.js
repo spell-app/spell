@@ -155,6 +155,7 @@ export class FizzbuzzExplainer extends Page {
   }
 }
 export const fizzbuzzExplainer = new FizzbuzzExplainer()
+core.describeAction(FizzbuzzExplainer, "showWordForNumber", { title: "Show Word As Text For Number As A Number", undoneAs: "Show Word As Text For Number As A Number" })
 
 core.heading("Listening")
 ///////////////

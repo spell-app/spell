@@ -7,6 +7,7 @@ import { SpellType } from "spell/parser/spell/rules/types"
  * `changed_property` rule:  the property a change event names, `score` in `- when its score changes:`
  * (epic `debut` P30).
  * - Only one its template declares, or a type it comes from does:  `direction` for a card, a two sided view's.
+ *   - Or declares further down:  a scan found it (`P.TypeScope.propertiesAhead`), a drawing's `<number "score"/>` too.
  *   - The longest such name at the start of the words, `high score` before `high`.
  *   - Anything else isn't one:  the line reads as the event it always did.
  * - Only in a template's outline:  the thing whose property changes is the template's thing (`it`).
@@ -32,6 +33,11 @@ export class ChangedProperty extends P.Pattern {
       for (const variable of type.variables.get()) {
         const words = `${variable.name}`.split("_").join(" ").toLowerCase()
         if (!names.has(words)) names.set(words, variable.name)
+      }
+      // declared further down, a drawing's tag too (`<number "score"/>`, epic `language` P55)
+      for (const key of type.propertiesAhead ?? []) {
+        const words = key.split("_").join(" ").toLowerCase()
+        if (!names.has(words)) names.set(words, key)
       }
     }
     const count = longestNameIn(SpellType.lowerWords(tokens, tokens.length), [...names.keys()])

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
+import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
 import { MarkupMarks, type MarkupShape } from "spell/app/app/ui/monaco/MarkupMarks"
 
 /** A page, as the drawn-bubbly page's examples are. */
@@ -34,12 +35,14 @@ function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
       const text = lines[range.startLineNumber - 1]!.slice(range.startColumn - 1).trim()
       const what =
         shape.kind === "markup-block"
-          ? `block ${shape.partOfSpeech}${shape.foot === undefined ? "" : shape.isThinFoot ? " +thin foot" : " +foot"}`
+          ? `block ${shape.partOfSpeech}${shape.foot === undefined ? "" : " +foot"}`
           : shape.kind === "tag"
             ? `${shape.isAlone ? "band" : "pill"} ${shape.side} ${shape.room?.join("+") ?? ""}`.trim()
             : shape.kind === "tag-link"
-              ? `link ${shape.room.join("+")}`.trim()
-              : "input"
+              ? `link ${shape.start.side} to ${shape.end.side}`
+              : shape.expressionIn
+                ? `expression ${shape.expressionIn}`
+                : "input"
       out.push(`${"  ".repeat(depth)}${what}:  ${text.slice(0, 24)}`)
       if (shape.kind === "markup-block") walk(shape.inside, depth + 1)
     }
@@ -52,25 +55,54 @@ describe("MarkupMarks", () => {
   test("blocks for elements on lines of their own, bands for tags alone, pills for tags in a line", () => {
     expect(shapesOf(MarkupMarks.of(PAGE))).toEqual([
       "band start:  <!doctype html>",
-      'block thing +foot:  <html lang="en">',
+      'block structure +foot:  <html lang="en">',
       '  input:  en">',
       "  block plain +foot:  <head>",
       '    band start:  <meta charset="UTF-8" />',
       '    input:  UTF-8" />',
-      "    link:  <title>A demo</title>",
+      "    link start to end:  <title>A demo</title>",
       "    pill start:  <title>A demo</title>",
       "    pill end tag:  </title>",
-      "  block thing +foot:  <body>",
-      "    link:  <h2>Two <code>x</code></",
+      "  block structure +foot:  <body>",
+      "    link start to end:  <h2>Two <code>x</code></",
       "    pill start:  <h2>Two <code>x</code></",
-      "    link tag:  <code>x</code></h2>",
+      "    link start to end:  <code>x</code></h2>",
       "    pill start tag:  <code>x</code></h2>",
       "    pill end tag:  </code></h2>",
       "    pill end tag+tag:  </h2>",
       '    pill start:  <spell-viewer id="a"></s',
-      '    input:  a"></spell-viewer>',
-      "    pill end touch+touch:  </spell-viewer>"
+      '    input:  a"></spell-viewer>'
     ])
+  })
+
+  test("a one-line element's link runs between its two pills:  from its start tag's to its end tag's (Owen)", () => {
+    const text = "<text>{its picture}</text>"
+    const marks = MarkupMarks.of(text)
+    const link = marks.shapes[0]!
+    if (link.kind !== "tag-link") throw new TypeError("expected a link first, under the pills")
+    const textOf = (place: number) => {
+      const { range } = marks.marks[place]!
+      return text.slice(range.startColumn - 1, range.endColumn - 1)
+    }
+    expect([textOf(link.start.place), textOf(link.end.place)]).toEqual(["<text>", "</text>"])
+  })
+
+  test("a `{…}` value:  an inverted pill in its tag's colour, its braces darker;  its words Spell's to mark (Owen)", () => {
+    const spell = `to draw it\n\t<text color={its color}>{its picture}</text>`
+    const marks = MarkupMarks.within(spell, spell.indexOf("<text"), spell.length, [])
+    expect(shapesOf(marks, spell)).toEqual([
+      "link start to end:  <text color={its color}>",
+      "pill start:  <text color={its color}>",
+      "expression property:  its color}>{its picture}",
+      "pill end tag:  </text>"
+    ])
+    const braces = marks.marks.filter((mark) => /bubbly-brace/.test(mark.options.inlineClassName ?? ""))
+    expect(braces.map(({ range }) => spell.split("\n")[1]!.slice(range.startColumn - 1, range.endColumn - 1))).toEqual([
+      "{",
+      "}"
+    ])
+    // the tag's marks stop at the value:  Spell marks what's in it
+    expect(marks.tags.map(({ start, end }) => spell.slice(start, end))).toEqual(["<text color=", ">", "</text>"])
   })
 
   test("a tag's brackets, names and values marked as the page draws them", () => {
@@ -128,9 +160,9 @@ describe("MarkupMarks", () => {
       const { range } = marks.marks[place]!
       return `${range.startLineNumber}-${range.endLineNumber}`
     })
-    // its start tag lines 1-4, its end tag a pill on line 4;  `<meta` lines 5-6, a band alone
-    expect(lineSpan).toEqual(["1-4", "4-4", "5-6"])
-    expect(tags.map((shape) => shape.kind === "tag" && !!shape.isShortTail)).toEqual([true, false, false])
+    // its start tag lines 1-4, on over its end tag, drawn self-closed (Q62);  `<meta` lines 5-6, a band alone
+    expect(lineSpan).toEqual(["1-4", "5-6"])
+    expect(tags.map((shape) => shape.kind === "tag" && !!shape.isShortTail)).toEqual([true, false])
     // an attribute that starts its line has no room before it:  its indent is its room, as on the page
     const spaced = marks.marks.filter((mark) =>
       mark.options.before?.inlineClassName?.includes("bubbly-attribute-spacer")
@@ -138,7 +170,42 @@ describe("MarkupMarks", () => {
     expect(spaced).toEqual([])
   })
 
-  test("a nameless end tag on its own line ends its block in a thin foot;  a named one in a band (Q58)", () => {
+  test("an element with nothing between its tags is ONE pill, drawn as if self-closed:  its end tag's `<` and name hidden (Q62)", () => {
+    const text = `<div class="x"></div> <b> </b>`
+    const marks = MarkupMarks.of(text)
+    expect(shapesOf(marks, text)).toEqual([
+      'pill start:  <div class="x"></div> <b',
+      'input:  x"></div> <b> </b>',
+      "pill start tag:  <b> </b>",
+      "pill end touch:  </b>"
+    ])
+    // the one pill runs from its `<` to its end tag's `>`
+    const { range } = marks.marks[marks.shapes[0]!.place]!
+    expect(text.slice(range.startColumn - 1, range.endColumn - 1)).toBe(`<div class="x"></div>`)
+    // its start tag's `>` and its end tag's `<` and name hidden;  its end tag's `/` and `>` drawn as `/⟩`, room before
+    const piecesOf = (classes: string) =>
+      marks.marks
+        .filter((mark) => mark.options.inlineClassName?.split(" ").includes(classes))
+        .map(({ range }) => text.slice(range.startColumn - 1, range.endColumn - 1))
+    expect(piecesOf("bubbly-tag-hidden")).toEqual([">", "<", "div"])
+    expect(piecesOf("bubbly-slash")).toEqual(["/", "/"])
+    const slash = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-slash"))!
+    expect(slash.options.before?.inlineClassName).toContain("bubbly-attribute-spacer")
+    // something between them, a space even:  two pills, as before
+    expect(BubblyMarkup.write(text)).toContain("bubbly-tag-self-closed")
+    expect(BubblyMarkup.write(text).match(/bubbly-tag-self-closed/g)).toHaveLength(1)
+  })
+
+  test("on the page, an empty element's start tag ends in `/⟩` and its end tag is left out (Q62)", () => {
+    const html = BubblyMarkup.write(`<spell-viewer id="a"></spell-viewer>\n<x-tall\n  a="1"\n></x-tall>`)
+    expect(html).not.toContain(">spell-viewer</span><span")
+    expect(html.match(/bubbly-self-close"/g)).toHaveLength(2)
+    expect(html).toContain("bubbly-tag-tall-inline bubbly-tag-self-closed")
+    // neither end tag drawn
+    expect(html).not.toMatch(/bubbly-tag-end/)
+  })
+
+  test("a block's end tag on its own line, named or `</>`, is its foot:  every piece tiny (Q61)", () => {
     const text = `<context-menu>
   <action "cheat"/>
 </>
@@ -147,8 +214,43 @@ describe("MarkupMarks", () => {
 </grid>
 `
     expect(shapesOf(MarkupMarks.of(text), text).filter((line) => line.startsWith("block"))).toEqual([
-      "block thing +thin foot:  <context-menu>",
-      "block plain +foot:  <grid>"
+      "block structure +foot:  <context-menu>",
+      "block structure +foot:  <grid>"
+    ])
+    const marks = MarkupMarks.of(text)
+    const lines = text.split("\n")
+    const tiny = marks.marks
+      .filter((mark) => mark.options.inlineClassName?.split(" ").includes("bubbly-foot-tiny"))
+      .map(({ range }) => lines[range.startLineNumber - 1]!.slice(range.startColumn - 1, range.endColumn - 1))
+    expect(tiny.join("")).toBe("</></grid>")
+  })
+
+  test("a tag's part of speech:  structure blue, actions and a menu's items green (Owen, 2026-11-14)", () => {
+    const partsOf = (tags: string) => tags.split(" ").map((tag) => `${tag} ${BubblyMarkup.partOfSpeechOf(tag)}`)
+    expect(partsOf("container segment toolbar menu context-menu div ui-grid")).toEqual([
+      "container structure",
+      "segment structure",
+      "toolbar structure",
+      "menu structure",
+      "context-menu structure",
+      "div structure",
+      "ui-grid structure"
+    ])
+    expect(partsOf("button buttons action ui-action item")).toEqual([
+      "button action",
+      "buttons action",
+      "action action",
+      "ui-action action",
+      "item action"
+    ])
+    // text stays a property;  a custom element a thing;  the head plain;  HTML's header a box, Spell UI's a heading
+    expect(partsOf("text spell-editor head title header ui-header")).toEqual([
+      "text property",
+      "spell-editor thing",
+      "head plain",
+      "title plain",
+      "header structure",
+      "ui-header property"
     ])
   })
 })

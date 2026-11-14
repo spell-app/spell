@@ -1,2 +1,2 @@
-106:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
-112:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
+107:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.
+113:5 TS2322 Type 'undefined' is not assignable to type 'Receta'.

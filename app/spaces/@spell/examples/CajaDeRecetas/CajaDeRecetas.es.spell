@@ -10,7 +10,7 @@
 ## Una receta:  una tarjeta que puedes leer y cambiar
 
 una receta
-	para editarla
+	para editarla, no se puede deshacer
 		// Su pantalla de edición:  nada cambia hasta Guardar
 		fijar el editando de la caja de recetas a eso
 
@@ -41,12 +41,12 @@ un "editor de receta" es una vista
 	su "borrador" es un borrador de su receta
 		// Una copia para cambiar:  la receta sigue igual hasta Guardar
 
-	para aceptar los cambios
+	para aceptar los cambios, no se puede deshacer
 		// Todos los campos cambiados, enviados juntos
 		guardar su borrador
 		fijar el editando de la caja de recetas a nada
 
-	para olvidar los cambios
+	para olvidar los cambios, no se puede deshacer
 		// Olvida la copia:  la receta no cambió
 		descartar su borrador
 		fijar el editando de la caja de recetas a nada

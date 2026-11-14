@@ -586,6 +586,8 @@ export class User extends Thing {
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
+core.describeAction(User, "lookAtUser", { title: "Look At It", undoneAs: "Look At It" })
+core.describeAction(User, "lookAwayFromUser", { title: "Look Away From It", undoneAs: "Look Away From It" })
 
 export class IssueUser extends Thing {
   // - its "login" is text
@@ -1870,6 +1872,7 @@ export class GithubPage extends Thing {
     }
   }
 }
+core.describeAction(GithubPage, "tryWords", { title: "Try Words As Text", undoneAs: "Try Words As Text" })
 
 core.heading("Someone on GitHub")
 ///////////////////////
@@ -2112,6 +2115,8 @@ export class Book extends Thing {
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
+core.describeAction(Book, "open", { title: "Open It", undoneAs: "Open It" })
+core.describeAction(Book, "close", { title: "Close It", undoneAs: "Close It" })
 
 export class Author extends Thing {
   // - its "links" is a list of links
@@ -2978,6 +2983,7 @@ export class JsonplaceholderPage extends Thing {
     ), failedSay: () => "JSONPlaceholder can't be reached just now." })
   }
 }
+core.describeAction(JsonplaceholderPage, "addTheNewTodo", { title: "Add The New Todo", undoneAs: "Add The New Todo" })
 
 core.heading("A todo")
 ////////////
@@ -3250,6 +3256,7 @@ export class City extends Thing {
     }, () => this.name)
   }
 }
+core.describeAction(City, "pick", { title: "Pick It", undoneAs: "Pick It" })
 
 core.heading("Its hours")
 ///////////////
@@ -3810,6 +3817,7 @@ export class MetMuseumPage extends Thing {
     )
   }
 }
+core.describeAction(MetMuseumPage, "tryWords", { title: "Try Words As Text", undoneAs: "Try Words As Text" })
 
 core.heading("An artwork")
 ////////////////
@@ -4244,6 +4252,7 @@ export class RestCountriesPage extends Thing {
     })
   }
 }
+core.describeAction(RestCountriesPage, "pickRegionRegion", { title: "Pick Region Region As Text", undoneAs: "Pick Region Region As Text" })
 
 core.heading("Its money")
 ///////////////
