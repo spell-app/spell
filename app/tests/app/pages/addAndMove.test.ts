@@ -16,6 +16,9 @@ import { EDITOR, SERVING } from "./runningEditor"
 /** The file a blank program is answered for:  the example's text never read. */
 const FILE = "TaskList.spell"
 
+/** The address of that file, loaded or saved, and of no other. */
+const PROGRAM_URL = /\/TaskList\.spell(\?.*)?$/
+
 /** A program with nothing in it, in plain Spell (the tag form is gone:  epic `language` P47;  I62). */
 const BLANK = `# A new app
 
@@ -106,11 +109,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       const request = route.request()
       // Show in Code puts the file's name in the page's address:  a reload is the page, not the file
       if (request.isNavigationRequest()) return route.continue()
+      // the program's own file alone:  its compiled `TaskList.spell.js` is saved too, on a compile not cached yet
+      const isProgram = PROGRAM_URL.test(request.url())
       if (request.method() !== "GET") {
-        saved = request.postData() ?? ""
+        if (isProgram) saved = request.postData() ?? ""
         return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
       }
-      return request.url().includes(FILE)
+      return isProgram
         ? route.fulfill({ contentType: "text/plain", body: saved ?? BLANK })
         : route.continue()
     })
@@ -182,7 +187,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(1000)
     expect(saved).toContain("\t\t\t<ui-button>Click me</ui-button>")
     expect(saved).toContain('<ui-card heading="A card" description="What it says"></ui-card>')
-    expect(saved).toContain("start the blank")
+    expect(saved).toContain("blank is an app")
   })
 
   test("what's selected is duplicated and deleted by its keys, each one step", async () => {
@@ -421,7 +426,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.mouse.move(box.x + 30, box.y + 30, { steps: 4 })
     await other.mouse.up()
     await other.waitForTimeout(500)
-    expect(await notice()).toMatch(/one place in the code/)
+    expect(await notice()).toMatch(/one line of your program/)
     expect(await source()).toBe(before)
 
     // its right click:  what would act on it alone is greyed, saying why;  the rest isn't
@@ -430,7 +435,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const rows = await menuRows(other)
     const cut = rows.find((row) => row.title === "Cut")!
     expect(cut.grey).toBe(true)
-    expect(cut.why).toMatch(/one place in the code/)
+    expect(cut.why).toMatch(/one line of your program/)
     expect(rows.find((row) => row.title === "Show in Code")!.grey).toBe(false)
     expect(rows.find((row) => row.title === "Inspect")!.grey).toBe(false)
     await other.keyboard.press("Escape")
@@ -487,7 +492,10 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const grid = await other.evaluate(() => {
       const walk = (root: Document | ShadowRoot): Element | undefined => {
         for (const element of root.querySelectorAll("*")) {
-          if (element.getAttribute("context-menu")) return element
+          // a menu written in a drawing is a hidden `<spell-context-menu>` in the element it's for
+          if (element.localName === "spell-context-menu") {
+            return element.parentElement ?? (element.getRootNode() as ShadowRoot).host
+          }
           const inside = element.shadowRoot && walk(element.shadowRoot)
           if (inside) return inside
         }
@@ -542,7 +550,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         selector
       )
     // Solitaire's `<context-menu>`, then ours
-    const program = ["Auto Play", "Cheat", "Restart", "-"]
+    const program = ["Auto Play", "Cheat", "Restart The Game", "-"]
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(600)
     const shown = await rows(".PartMenu")
@@ -569,7 +577,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         (one) => getComputedStyle(one).borderTopWidth
       )
     })
-    expect(thickness).toEqual(["3px", "1px"])
+    expect(thickness).toEqual(["2px", "1px"])
     // one of the program's items runs through its core, and the menu goes:  Cheat turns a card face up
     const faceDown = () =>
       other.evaluate(() => {
@@ -766,7 +774,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           return element.matches(":state(disabled)") ? `${title} (off)` : title
         })
       )
-    const game = ["Auto Play", "Cheat", "Restart", "---"]
+    const game = ["Auto Play", "Cheat", "Restart The Game", "---"]
 
     for (const at of [pile, card]) {
       await other.mouse.click(at.x, at.y, { button: "right" })
@@ -798,7 +806,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         (divider) => getComputedStyle(divider.shadowRoot!.querySelector("[part~=item]")!).borderTopWidth
       )
     )
-    expect(lines[0]).toBe("3px")
+    expect(lines[0]).toBe("2px")
     expect(lines.slice(1).every((width) => width === "1px")).toBe(true)
 
     // Cheat runs in the program, as in Run:  the menu closes, and its Undo says so

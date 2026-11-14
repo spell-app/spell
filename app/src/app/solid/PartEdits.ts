@@ -215,13 +215,17 @@ export class PartEdits {
   }
 
   /**
-   * The end of the app's drawing:  of a file with a `<draw>`, the app's first.
+   * The end of the app's drawing.
    * - The open file's page that draws its body, a notebook, first:  the end of its body (epic `notebook` P5).
+   * - Then what the app draws (`placeInDrawn()`), however it's written.
+   * - Else, for an app that draws nothing yet:  the text's `<draw>`, of the old tag form, the app's file first.
    */
   private static placeInDrawing(): FilePlace | undefined {
     const open = editor.file
     const page = open && NotebookPageCells.drawnPageIn(open.contents ?? "", open.path)
     if (open && page !== undefined) return { file: open, opening: page, where: "inside" }
+    const drawn = PartEdits.placeInDrawn()
+    if (drawn) return drawn
     const files = editor.project?.spellFiles ?? []
     const ordered = [...files].sort((one, other) => rankOf(other) - rankOf(one))
     for (const file of ordered) {
@@ -239,6 +243,35 @@ export class PartEdits {
       return { file, opening, where: "inside" }
     }
     return undefined
+  }
+
+  /**
+   * The end of what the app draws, found from its drawn parts, so plain Spell's `to draw` works as the tag form did
+   * (epic `editor` I126):
+   * - its outermost parts with a tag of their own, in the first one's file
+   * - just one, which holds things (a blank app's `<container>`):  inside it, at its end
+   * - else after the last of them
+   * - `undefined` when nothing written is drawn
+   */
+  private static placeInDrawn(): FilePlace | undefined {
+    const area = Inspector.area
+    if (!area) return undefined
+    const outermost: WrittenPart[] = []
+    const elements: Element[] = []
+    let depth = Infinity
+    for (const row of Inspector.partsIn(area)) {
+      if (row.depth > depth) continue
+      const written = PartEdits.writtenOf(row.element)
+      if ("reason" in written || !("tag" in written.element)) continue
+      if (outermost[0] && written.file !== outermost[0].file) continue
+      depth = row.depth
+      outermost.push(written)
+      elements.push(row.element)
+    }
+    const last = outermost.at(-1)
+    if (!last) return undefined
+    const isOnlyHolder = outermost.length === 1 && holdsThings(last.element, elements[0]!)
+    return { file: last.file, ...placeBy(last, isOnlyHolder ? "inside" : "after") }
   }
 
   ////////////////
