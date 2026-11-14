@@ -45511,7 +45511,7 @@
             },
             {
               "name": "center",
-              "description": "After the title, taking the room left:  e.g. a row of links."
+              "description": "After the title, taking the room left, what's in it centred there:  e.g. a row of links."
             },
             {
               "name": "right",

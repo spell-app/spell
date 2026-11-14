@@ -54580,7 +54580,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
        *   - `icon`:  First, at the start:  an icon or an icon button (a menu button).
        *   - `title`:  After the icon:  the title, never squeezed.
-       *   - `center`:  After the title, taking the room left:  e.g. a row of links.
+       *   - `center`:  After the title, taking the room left, what's in it centred there:  e.g. a row of links.
        *   - `right`:  Last, pushed to the end:  e.g. search and settings.
        * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`
        */
