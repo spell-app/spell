@@ -1016,6 +1016,7 @@ function ActionSignature(props: { thing: object; action: InspectorAction }): JSX
  * - Esc leaves it as it was.
  * - A name refused (empty, another member's, not words) keeps the field open, saying why under it:
  *   nothing is renamed.
+ *   - Under that, `Restore "cheat"`:  its link puts the old name back and closes the field, as Esc does (I139).
  * - Only an action of the program's own that takes nothing:  its words are its name alone.
  * - Its clicks never fold its row.
  */
@@ -1036,7 +1037,6 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
   const cancel = () => {
     isLeaving = true
     setRefusal(undefined)
- *   - Under that, `Restore "cheat"`:  its link puts the old name back and closes the field, as Esc does (I139).
     setEditing(false)
   }
   // a Tab on its way out of the field:  set by its key, read by the `focusout` it causes
@@ -1092,6 +1092,7 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
           onKeyDown={(event: KeyboardEvent) => {
             // the row's own keys never see them:  Space and Enter would fold it
             event.stopPropagation()
+            isTabbing = event.key === "Tab"
             if (event.key === "Enter") void rename(event.currentTarget as HTMLElement, "enter")
             else if (event.key === "Escape") cancel()
           }}
@@ -1112,6 +1113,7 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
           {(message) => (
             <span class="InspectorActionNameError" role="alert">
               {message()}
+              <RestoreName oldName={wordsAtStart} onRestore={cancel} />
             </span>
           )}
         </Show>
@@ -1120,28 +1122,6 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
   )
 }
 
-/** Focus `field`, a `<ui-input>`, its words chosen to type over. */
-function focusField(field: HTMLElement): void {
-  field.focus()
-            isTabbing = event.key === "Tab"
-  field.shadowRoot?.querySelector("input")?.select()
-}
-
-/**
- * An action that takes nothing else's run button, for the thing selected:  a circled ▶ at the far right of its row
- * (its section's `actions`;  epic `editor` I116), its words right after the row's chevron.
- */
-function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX.Element {
-  const [isRunning, setRunning] = createSignal(false)
-              <RestoreName oldName={wordsAtStart} onRestore={cancel} />
-  const isEnabled = () => runtimeCore()?.isActionEnabled(props.thing, props.action.name) ?? false
-  const why = () => {
-    if (isEnabled()) return appTexts.text("inspectorActionRun", { action: props.action.words })
-    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
-    const condition = enabledWhenInSource(props.action.words, sources)
-    if (!condition) return appTexts.text("inspectorActionNotNow")
-    const key = condition.when === "disabled" ? "inspectorActionNotWhen" : "inspectorActionOnlyWhen"
-    return appTexts.text(key, { condition: condition.words })
 /** Where `renameActionRestore`'s link goes in its words:  a mark no language's words hold. */
 const RESTORE_LINK = "\u0000"
 
@@ -1177,6 +1157,26 @@ function RestoreName(props: { oldName: string; onRestore: () => void }): JSX.Ele
   )
 }
 
+/** Focus `field`, a `<ui-input>`, its words chosen to type over. */
+function focusField(field: HTMLElement): void {
+  field.focus()
+  field.shadowRoot?.querySelector("input")?.select()
+}
+
+/**
+ * An action that takes nothing else's run button, for the thing selected:  a circled ▶ at the far right of its row
+ * (its section's `actions`;  epic `editor` I116), its words right after the row's chevron.
+ */
+function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX.Element {
+  const [isRunning, setRunning] = createSignal(false)
+  const isEnabled = () => runtimeCore()?.isActionEnabled(props.thing, props.action.name) ?? false
+  const why = () => {
+    if (isEnabled()) return appTexts.text("inspectorActionRun", { action: props.action.words })
+    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
+    const condition = enabledWhenInSource(props.action.words, sources)
+    if (!condition) return appTexts.text("inspectorActionNotNow")
+    const key = condition.when === "disabled" ? "inspectorActionNotWhen" : "inspectorActionOnlyWhen"
+    return appTexts.text(key, { condition: condition.words })
   }
   const press = () => {
     const core = runtimeCore()
