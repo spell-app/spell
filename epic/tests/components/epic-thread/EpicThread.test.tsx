@@ -102,6 +102,24 @@ describe("<epic-thread>", () => {
     })
   })
 
+  // epic `epic-engine` I267
+  test('a picture pasted in Owen\'s words:  its thumbnail in the paragraph, "(picture)" in the header', async () => {
+    const host = await thread(
+      comment({ text: "Look:\n![picture](/guides/pictures/x-20261114-0102.png)\nsee?" }),
+      "open"
+    )
+    const image = host.shadowRoot!.querySelector<HTMLImageElement>("epic-thread-message img.picture")
+    expect({
+      src: image?.getAttribute("src"),
+      headline: part(host, "headline").textContent,
+      words: messages(host)[0]!.words
+    }).toEqual({
+      src: "/guides/pictures/x-20261114-0102.png",
+      headline: "“Look: (picture) see?”",
+      words: "Look:see?"
+    })
+  })
+
   test("Owen's turn, orange:  the review pills (That's good, Reply, Skip it), Claude's latest stronger", async () => {
     const answered = comment({
       status: "answered",

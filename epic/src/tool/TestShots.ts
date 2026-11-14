@@ -41,7 +41,19 @@ export class TestShots {
   static async saveShot(file: string, id: string, bytes: Buffer, now = new Date()): Promise<string> {
     const key = id.toLowerCase()
     if (!SHOT_ID.test(key)) throw new InboxError(`only a test or an option set's holder takes a screenshot:  ${id}`)
-    const stem = `${TEST_SHOTS}/${key}-${compactTime(now)}`
+    return TestShots.savePicture(file, `${TEST_SHOTS}/${key}`, bytes, now)
+  }
+
+  /**
+   * Save picture `bytes` beside page `file`, as `<name>-<time>.png`;  resolves to its path from the page's folder
+   * (`pictures/guide-20261114-0102.png`), `-2` ... when one is there.
+   * - `name`:  a path from the page's folder, without the time:  `tests/m3`, `pictures/guide`
+   * - every picture Owen gives a page:  a test's or an option's (`saveShot()`), a comment's (epic `epic-engine` I267,
+   *   the comments route's `POST picture`)
+   * - SIDE EFFECT:  writes the file (and its folder), never over one
+   */
+  static async savePicture(file: string, name: string, bytes: Buffer, now = new Date()): Promise<string> {
+    const stem = `${name}-${compactTime(now)}`
     for (let n = 1; ; n++) {
       const shot = n === 1 ? `${stem}.png` : `${stem}-${n}.png`
       try {
