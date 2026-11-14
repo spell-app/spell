@@ -163,7 +163,9 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   - each item it hides is marked `data-epic-filtered` (page state, never in the file:  the live patch keeps it),
  *     which the page sheet hides (`EpicSection.runs.css`;  a `::slotted(#id)` rule per item before epic `epic-engine`
  *     P45)
- *   - remembered per page, under the old runtime's key (`FILTER_KEY`);  `epic-filter-changed` says it changed
+ *   - remembered per page (`FILTER_KEY`):  the states the reader turned OFF, never the ones showing
+ *     (epic `epic-engine` I265;  Owen, 2026-11-13:  checked-off issues vanished, as blue had no items when he last
+ *     clicked a chip):  a state with no items then shows as soon as some appear;  `epic-filter-changed` says it changed
  *   - the page's toolbar filters every section at once, through its DOM element (`DOMEpicSectionElement`)
  * - The Phases section's STATE FILTER (epic `epic-engine` I157;  Owen, 2026-10-29:  "badges for
  *   'undone|updated|complete' -- e.g. 49 phases in this plan are a lot to scroll past"):  the same chips, rule, note,
@@ -237,10 +239,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   ////////////////
 
   /**
-   * The states the reader chose to show, as last left on this page;  `undefined`:  every state.
+   * The states the reader turned OFF, as last left on this page;  `undefined`:  none, so every state shows.
+   * - Every other state shows, one that had no items when the reader clicked too (epic `epic-engine` I265).
+   * - A state turned off stays off while it has no items, and when more come.
    * - by the DOM element's own `id`, read plainly:  a starting value, never followed
    */
-  @E.state accessor chosen: readonly string[] | undefined = EpicSection.savedFilters()[this.domElement.id]
+  @E.state accessor turnedOff: readonly string[] | undefined = EpicSection.savedFilters()[this.domElement.id]
 
   /**
    * Its view of the review inbox:
@@ -374,7 +378,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   })
 
   /**
-   * The states showing:  the reader's choice, of the states there are now;  none chosen, every state.
+   * The states showing:  every state there is now but those the reader turned off (`turnedOff`).
    * - NOTE: a choice can leave none of them now (the page's toolbar showed only red, and this section has none):
    *   then every item is hidden, and `3 hidden · show all` says so
    *   (Owen, 2026-10-10:  filter "everything on the page").
@@ -382,7 +386,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    */
   readonly showing = createMemo((): ReadonlySet<string> => {
     const present = this.present().map((it) => it.state as string)
-    return new Set(this.chosen ? this.chosen.filter((state) => present.includes(state)) : present)
+    const off = this.turnedOff ?? []
+    return new Set(present.filter((state) => !off.includes(state)))
   })
 
   /**
@@ -922,7 +927,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         <span class={FILTER} part={this.partForName("filter")}>
           <epic-state-filter
             counts={[...this.stateCounts()].map(([state, count]) => `${state}:${count}`).join(" ")}
-            shown={this.chosen ? [...this.showing()].join(" ") : undefined}
+            shown={this.turnedOff ? [...this.showing()].join(" ") : undefined}
             marked={this.marked().size || undefined}
             phases={this.kind === "phases" ? "" : undefined}
           />
@@ -975,7 +980,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return (
       <Show when={this.news}>
         <span class={FILTER} part={this.partForName("filter")}>
-          <epic-state-filter counts={this.news} shown={this.chosen ? [...this.showing()].join(" ") : undefined} />
+          <epic-state-filter counts={this.news} shown={this.turnedOff ? [...this.showing()].join(" ") : undefined} />
         </span>
       </Show>
     )
@@ -1151,7 +1156,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   private pickState(state: string, how: ChipPick = "click") {
     const present = this.present().map((it) => it.state as string)
     const next = StateFilter.nextShown(present, [...this.showing()], state, how)
-    this.showStates(next.length === present.length ? undefined : next)
+    this.showStates(next)
   }
 
   /** "Show all", under a filtered list (`<epic-hidden-note>`'s `epic-all-showing`). */
@@ -1163,7 +1168,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /** The states "0. While you were out" hides, for `EpicFold.css`:  its lines may not be loaded yet, so a rule hides them. */
   get awayHides(): string {
-    if (this.kind !== AWAY || !this.chosen) return ""
+    if (this.kind !== AWAY || !this.turnedOff) return ""
     const showing = this.showing()
     return this.present()
       .map((it) => it.state as string)
@@ -1181,19 +1186,28 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /**
    * Show its items in `states` only;  none:  every state, now and as new ones come.
+   * - Remembers what that turns OFF (`turnedOff`):  the states there are now and not in `states`, and those turned
+   *   off before that have no items now;  a state it doesn't name and has no items shows once it has some.
    * - Remembered for this page;  `epic-filter-changed` tells the page (its toolbar's chips follow).
    * - Its DOM element's `showStates()`:  the page's toolbar filters every section through it.
    */
   @E.untracked
   showStates(states: readonly string[] | undefined) {
-    this.chosen = states ? [...states] : undefined
+    const present = this.present().map((it) => it.state as string)
+    // a colour `states` turns on is on, a state of it with no items now too
+    const colorsOn = new Set((states ?? []).map((state) => StateFilter.colorOf(state)))
+    const absentOff = (this.turnedOff ?? []).filter(
+      (state) => !present.includes(state) && !colorsOn.has(StateFilter.colorOf(state))
+    )
+    const off = states ? [...absentOff, ...present.filter((state) => !states.includes(state))] : []
+    this.turnedOff = off.length ? off : undefined
     // the reader filtered again:  a linked item here no longer stays in sight
     if (this.linkedHere) this.pageLinked?.set(null)
     this.send("epic-filter-changed", { states: states ? [...states] : undefined })
     const id = this.id
     if (!id) return
     const saved: Record<string, readonly string[]> = { ...EpicSection.savedFilters() }
-    if (states) saved[id] = [...states]
+    if (off.length) saved[id] = off
     else delete saved[id]
     EpicSection.save(FILTER_KEY, saved)
   }
@@ -1330,7 +1344,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     })
   }
 
-  /** The state filters as last left on this page, by section id;  none without storage. */
+  /** The states turned off as last left on this page, by section id;  none without storage. */
   private static savedFilters(): Record<string, readonly string[]> {
     const saved = EpicSection.saved(FILTER_KEY)
     const filters: Record<string, readonly string[]> = {}

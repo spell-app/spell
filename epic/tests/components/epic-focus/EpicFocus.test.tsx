@@ -312,7 +312,7 @@ describe("<epic-focus>", () => {
       .dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
     await ElementFixture.tick()
     expect(shows(host)).toMatchObject({ head: "Q1 First question", where: "3 of 6 · Questions 1 of 1" })
-    expect(FocusPlace.read(location.pathname).shown).toEqual({ questions: ["attention"] })
+    expect(FocusPlace.read(location.pathname).off).toEqual({ questions: ["open"] })
     // Claude decides Q1 while it shows:  it stays
     host.querySelector("#q1")!.setAttribute("status", "decided")
     host.querySelector("#q1")!.setAttribute("state", "recent")
@@ -362,6 +362,6 @@ describe("FocusList", () => {
       { stateOf: (element) => element.getAttribute("state") ?? "", isMarked: () => false },
       "t2"
     )
-    expect(FocusList.visible(pinned, { todos: ["attention"] }, "t2").map((entry) => entry.id)).toEqual(["t2", "j1"])
+    expect(FocusList.visible(pinned, { todos: ["open"] }, "t2").map((entry) => entry.id)).toEqual(["t2", "j1"])
   })
 })

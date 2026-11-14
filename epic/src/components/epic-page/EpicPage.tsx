@@ -1630,7 +1630,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         own.filter((it) => it.on).map((it) => it.state),
         colors
       )
-      section.showStates?.(shown.length === states.length ? undefined : shown)
+      // always the list:  `undefined` would forget states turned off that the section has no items in now
+      section.showStates?.(shown)
     }
   }
 

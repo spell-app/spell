@@ -385,7 +385,7 @@ describe("<epic-section kind=log> the change log", () => {
 
 describe("<epic-section> counts and state filter", () => {
   afterEach(() => {
-    localStorage.removeItem(`spell-item-state:${location.pathname}`)
+    localStorage.removeItem(`spell-filter-off:${location.pathname}`)
   })
 
   // an item section shows no badge:  its chips say the numbers (Owen, 2026-10-10);  the count still follows, for the toolbar
@@ -484,8 +484,8 @@ describe("<epic-section> counts and state filter", () => {
     await click("open")
     expect(chips(host)).toEqual({ attention: true, open: true, recent: true })
     expect(shownIds(host)).toEqual(["q1", "q2", "q3", "q4"])
-    // everything showing is remembered as no choice:  a state that comes later shows too
-    expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({})
+    // nothing turned off is remembered as no choice:  a state that comes later shows too
+    expect(JSON.parse(localStorage.getItem(`spell-filter-off:${location.pathname}`)!)).toEqual({})
   })
 
   // epic `epic-engine` I166 (Owen, 2026-10-29:  "if I option-click on one of those badges, turn just that one on")
@@ -506,8 +506,9 @@ describe("<epic-section> counts and state filter", () => {
     await ElementFixture.tick()
     expect(chips(host)).toEqual({ attention: false, open: false, recent: true })
     expect(shownIds(host)).toEqual(["q3"])
-    expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({
-      decisions: ["recent"]
+    // what's remembered is what's OFF (epic `epic-engine` I265)
+    expect(JSON.parse(localStorage.getItem(`spell-filter-off:${location.pathname}`)!)).toEqual({
+      decisions: ["attention", "open"]
     })
     hiddenNote(host).click()
     await ElementFixture.tick()
@@ -545,18 +546,23 @@ describe("<epic-section> counts and state filter", () => {
     await ElementFixture.tick()
   })
 
-  test("remembered per page;  a choice its states have left hides the list, and says so", async () => {
+  test("remembered per page:  what's turned OFF;  a state with no items then shows once it has some", async () => {
     const host = await render(questions(["open:attention", "open:open"]))
     altClick(chip(host, "attention"))
     await ElementFixture.tick()
-    expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({
-      decisions: ["attention"]
+    expect(JSON.parse(localStorage.getItem(`spell-filter-off:${location.pathname}`)!)).toEqual({
+      decisions: ["open"]
     })
     host.remove()
     const again = await render(questions(["open:attention", "open:open"]))
     expect(shownIds(again)).toEqual(["q1"])
-    // the red one answered:  nothing left to show, and the line says how to get it back
+    // the red one answered:  green had no items when the chip was clicked, so it shows (epic `epic-engine` I265)
     again.querySelector("#q1")!.setAttribute("state", "recent")
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownIds(again)).toEqual(["q1"])
+    // more of the colour turned off:  still off
+    again.querySelector("#q1")!.setAttribute("state", "open")
     await ElementFixture.tick()
     await ElementFixture.tick()
     expect(shownIds(again)).toEqual([])
@@ -565,6 +571,42 @@ describe("<epic-section> counts and state filter", () => {
     note.click()
     await ElementFixture.tick()
     expect(shownIds(again)).toEqual(["q1", "q2"])
+  })
+
+  // epic `epic-engine` I265 (Owen, 2026-11-13:  "there were no `blue` items before, and you are automatically making
+  // blue items hidden.  I did not explicitly turn blue off")
+  test("Owen's case:  a saved filter, then a blue and a red item appear:  both show;  a colour turned off with no items stays off", async () => {
+    const host = await render(questions(["open:open", "decided:recent"]))
+    chip(host, "recent").click()
+    await ElementFixture.tick()
+    expect(shownIds(host)).toEqual(["q1"])
+    host.remove()
+    const again = await render(questions(["open:open", "decided:recent"]))
+    expect(shownIds(again)).toEqual(["q1"])
+    // q1 checked off:  Claude's on it (blue);  q2 needs Owen (red)
+    again.querySelector("#q1")!.setAttribute("state", "progress")
+    again.querySelector("#q2")!.setAttribute("state", "attention")
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownIds(again)).toEqual(["q1", "q2"])
+    // green, turned off while it had items, has none now:  a new green item still hides
+    again.querySelector("#q2")!.setAttribute("state", "recent")
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownIds(again)).toEqual(["q1"])
+    hiddenNote(again).click()
+    await ElementFixture.tick()
+  })
+
+  test("an ⌥-click, then a colour that wasn't there appears:  it shows", async () => {
+    const host = await render(questions(["open:attention", "open:open"]))
+    altClick(chip(host, "attention"))
+    await ElementFixture.tick()
+    expect(shownIds(host)).toEqual(["q1"])
+    host.querySelector("#q2")!.setAttribute("state", "replied")
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownIds(host)).toEqual(["q1", "q2"])
   })
 
   test("`replied` (orange, Owen's turn to pick):  its own chip", async () => {
@@ -728,7 +770,7 @@ describe("<epic-section kind=phases> state chips", () => {
   }
 
   afterEach(() => {
-    localStorage.removeItem(`spell-item-state:${location.pathname}`)
+    localStorage.removeItem(`spell-filter-off:${location.pathname}`)
   })
 
   /** Phases `p1`, `p2` ... by `specs`:  each its attributes (`status="done"`, `plan="waiting"` ...). */
@@ -828,8 +870,8 @@ describe("<epic-section kind=phases> state chips", () => {
     expect(shownPhases(host)).toEqual(["p3"])
     expect(hiddenNote(host).textContent).toBe("3 hidden · show all")
     expect(Array.from(host.querySelectorAll("[data-epic-filtered]"), (phase) => phase.id)).toEqual(["p1", "p2", "p4"])
-    expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({
-      phases: ["scheduled"]
+    expect(JSON.parse(localStorage.getItem(`spell-filter-off:${location.pathname}`)!)).toEqual({
+      phases: ["updated", "old"]
     })
     // a phase finished:  it leaves the filter's view as it changes state
     host.querySelector("#p3")!.setAttribute("status", "done")
@@ -877,7 +919,7 @@ describe("<epic-section kind=phases> state chips", () => {
 
 describe("<epic-section> runs of item lines, rounded at their ends", () => {
   afterEach(() => {
-    localStorage.removeItem(`spell-item-state:${location.pathname}`)
+    localStorage.removeItem(`spell-filter-off:${location.pathname}`)
   })
 
   /** Owen's 7 questions, each with details;  `open` ones unfolded. */
