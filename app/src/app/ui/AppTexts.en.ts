@@ -387,7 +387,6 @@ export const APP_TEXTS = {
   homeProjectsLine: "What you've made, and where to start the next one.",
   editorPieceBroken:
     "The editor's {piece} doesn't compile, so the editor runs the last one that did.\nFix it and publish again:\n{problem}",
-  draftEditorTitle: "The editor, from your drafts of its pieces",
   editorZonesWaiting: "Each of the editor's parts shows here, in a zone of its own, once its Spell runs.",
   editorZonesShow: "Show",
   editorZonesStandIn: "The editor's own:  {part}",

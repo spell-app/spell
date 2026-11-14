@@ -9,6 +9,7 @@ import {
   AppMenu,
   AppRoot,
   ConsoleRoot,
+  EditorZones,
   InputRoot,
   Inspector,
   InspectorData,
@@ -42,8 +43,6 @@ import {
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import {
-  EDITOR_PIECES,
-  isDraftEditor,
   loadEditorSpell,
   type DrawnByTheEditor,
   type EditorSpell,
@@ -301,8 +300,8 @@ function drawnView(
  *   - Its cells move, are added and deleted as any app's parts are (epic `notebook` P5):  a click picks one for
  *     the Inspector (`Inspector.pagePartAt`, the page's `cellAt()`), then the editor's drag and drop, palette and Edit
  *     menu.
- * - The editor's own project (the group `@spell/editor`, epic `editor` P22, P29) shows the editor ITSELF, built from your
- *   drafts of its Spell, in a frame of its own (`<DraftEditorFrame>`):  the editor you're using never runs a draft.
+ * - The editor's own project (the group `@spell/editor`, epic `editor` P22, P29) shows each view of its Spell in a zone
+ *   of its own, drawn as it's typed (`<EditorZones>`, T63):  the editor you're using runs the published Spell.
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -312,8 +311,8 @@ export function AppPane() {
   // a site of notebook pages wears the docs site's look in Run (epic `notebook` P10)
   const isNotebookSite = tracked(() => !!editor.project && editor.isNotebookSite(editor.project))
   const [notebookPage, setNotebookPage] = createSignal<NotebookController>()
-  // the editor's own project, outside the draft editor:  its app is the editor itself, from your drafts
-  const isEditorPiece = tracked(() => !isDraftEditor && !!editor.project?.path.startsWith(`${EDITOR_PIECES}/`))
+  // the editor's own project:  a zone per view of its Spell, not its app (T63)
+  const isEditorPiece = tracked(() => editor.isEditorPiece(editor.project))
   // the app area, once drawn:  the notebook's frame watches the program's drawing in it
   let program: HTMLDivElement | undefined
   // the body, watched while it's drawn:  `onSettled()`, as a ref callback has no owner to clean up with
@@ -327,7 +326,7 @@ export function AppPane() {
       <SampleBar />
       <div class="AppPaneBody ui-content-size" ref={(area: HTMLDivElement) => (body = area)}>
         <Show when={isEditorPiece()}>
-          <DraftEditorFrame />
+          <EditorZones />
         </Show>
         <div
           class={[
@@ -404,19 +403,6 @@ function SampleBar(): JSX.Element {
       </div>
     </Show>
   )
-}
-
-/****************
- * ### `<DraftEditorFrame>`
- * The editor built from your drafts of its own Spell, in a frame:  a second editor, beside the one you're using (epic `editor` P22).
- * - A frame of its own, as the theme editor's pages are, so the two editors share nothing:  not `editor`, not Solid, not the page.
- * - It opens on Counter, the smallest app there is, and loads again after each compile of the piece you're editing,
- *   so a saved draft shows here first;  Publish makes it the editor you're using.
- * - Its Spell compiles in its own page, from your drafts (`isDraftEditor`, `loadEditorSpell()`).
- ****************/
-function DraftEditorFrame(): JSX.Element {
-  const source = tracked(() => `/edit/@spell/examples/Counter?pieces=draft&compile=${editor.edits}`)
-  return <iframe class="DraftEditorFrame" title={appTexts.text("draftEditorTitle")} src={source()} />
 }
 
 /****************

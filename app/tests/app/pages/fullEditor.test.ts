@@ -12,7 +12,7 @@ import { EDITOR, KIT, SERVING } from "./runningEditor"
  * - It opens in the editor like any project.
  * - A published change to it shows in the running editor.
  * - Spell that stops compiling can't lock you out:  the editor runs its last good compile, and says why.
- * - Its project shows the editor built from your drafts, in a frame:  the editor you're using never runs a draft.
+ * - Its project shows a zone per view of its Spell, from your drafts (T63):  the editor you're using never runs a draft.
  * - Writes the editor's file and a draft of it, and ALWAYS puts them back (`afterAll`, and on exit).
  * - Needs this checkout's editor running:  `spell server start all`.
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
@@ -64,7 +64,7 @@ describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
     ).toBe(true)
   })
 
-  test("its project shows the editor from your drafts, in a frame:  a draft of the bar shows there, never outside", async () => {
+  test("its project shows a zone per view, from your drafts:  a draft of the bar shows in its zone, never outside (T63)", async () => {
     const now = new Date()
     const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()]
       .map((it) => String(it).padStart(2, "0"))
@@ -75,12 +75,12 @@ describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
       original.replace(`class="AppMenu tight EditorBar"`, `class="AppMenu tight EditorBar DraftProbe"`)
     )
     await page.goto(`${EDITOR}edit/@spell/editor/spell-editor`, { timeout: 60_000 })
-    const frame = page.frameLocator("iframe.DraftEditorFrame")
-    await frame.locator(".EditorBar.DraftProbe").first().waitFor({ timeout: 90_000 })
-    // the project's own program runs out of sight in the outer page:  only its own bar counts
+    await page.locator(".EditorZones .EditorZone .EditorBar.DraftProbe").first().waitFor({ timeout: 90_000 })
+    // a zone each, headed by its view's name;  the bar the editor itself runs never takes the draft
+    expect(await page.locator(".EditorZones .EditorZoneTitle").allTextContents()).toContain("editor bar")
     expect(
       await page.evaluate(
-        () => [...document.querySelectorAll(".DraftProbe")].filter((it) => !it.closest(".AppPaneProgram")).length
+        () => [...document.querySelectorAll(".DraftProbe")].filter((it) => !it.closest(".EditorZones")).length
       )
     ).toBe(0)
     rmSync(BAR_DRAFTS, { recursive: true, force: true })

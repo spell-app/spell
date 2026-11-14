@@ -1,7 +1,6 @@
 import { editor, runtimeUrl } from "spell/app/app/editor"
 import { loadRuntime, type SpellRuntime } from "spell/app/app/runner/loadRuntime"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { SP } from "spell/parser/spell"
 import spellEditorSpell from "spell/app/spaces/@spell/editor/spell-editor/SpellEditor.spell"
 
 /**
@@ -34,24 +33,11 @@ function layoutRuntime(): Promise<{ runtime: SpellRuntime; coreUrl: string }> {
 }
 let loading: ReturnType<typeof layoutRuntime> | undefined
 
-/** The group the editor's own Spell is a project of (epic `editor` P22). */
-export const EDITOR_PIECES = "@spell/editor"
-
-/** The editor's own Spell's project in `EDITOR_PIECES`, its one file `SpellEditor.spell` (epic `editor` P29). */
-const EDITOR_PROJECT = "spell-editor"
-
-/**
- * Is this page the editor built from your DRAFTS of its Spell?  `?pieces=draft` in its address (epic `editor` P22):
- * what the editor's own project shows in its app pane, a second editor in a frame, so the editor you're using never
- * runs a draft.
- */
-export const isDraftEditor = new URLSearchParams(globalThis.location?.search ?? "").get("pieces") === "draft"
-
 /**
  * The editor's own Spell, `SpellEditor.spell`, loaded ONCE for the page (epic `editor` P29):
  * the app `spell editor`, whose views the bar, the panes, the file tabs and the menus each draw.
- * - In the draft editor (`isDraftEditor`), its project is compiled here, from your drafts;
- *   one that doesn't compile keeps the last good compile, and says why.
+ * - The PUBLISHED Spell, always:  an edit to it shows in the app pane's zones as it's typed (`<EditorZones>`, T63),
+ *   and in the editor you're using once it's published;  one that doesn't compile keeps the last good compile, and says why.
  * - Its app is the layout copy's running app (`importCompiled()` resets the copy's runtime first):
  *   so an `<action "save"/>` in any of its views finds the app's action up its chain.
  * - throws if the runtime or the Spell can't load
@@ -64,12 +50,11 @@ let loadingEditor: Promise<EditorSpell> | undefined
 
 /** `loadEditorSpell()`'s work, once. */
 async function loadEditor(): Promise<EditorSpell> {
-  const compiled = (isDraftEditor && (await draftOf(EDITOR_PROJECT))) || spellEditorSpell
   const { runtime, coreUrl } = await layoutRuntime()
   // The editor draws each view where it belongs:  an app in it must not start itself, as a program's does
   runtime.core.appLayout = true
   // its app the copy's running app:  `importCompiled()` resets the copy's runtime first
-  const exports = await runtime.importCompiled(compiled, coreUrl)
+  const exports = await runtime.importCompiled(spellEditorSpell, coreUrl)
   return {
     editor: exports.spellEditor as SpellEditorApp,
     exports,
@@ -78,23 +63,6 @@ async function loadEditor(): Promise<EditorSpell> {
     parts: (parts) => editorParts(exports.EditorPart as new () => object, parts),
     useTitles: (titles) => runtime.core.useTitles(titles)
   }
-}
-
-/**
- * Project `project` of `EDITOR_PIECES` compiled from your drafts, in the page;  `undefined` if it doesn't compile
- * (said, as `layoutPieceBroken()` says it).
- * - NEVER throws.
- */
-async function draftOf(project: string): Promise<string | undefined> {
-  try {
-    const drafted = new SP.SpellProject(`${EDITOR_PIECES}/${project}`)
-    await drafted.compile()
-    if (drafted.compiled) return drafted.compiled
-    layoutPieceBroken(project, drafted.parseError ?? "")
-  } catch (problem) {
-    layoutPieceBroken(project, problem instanceof Error ? problem.message : String(problem))
-  }
-  return undefined
 }
 
 /**
