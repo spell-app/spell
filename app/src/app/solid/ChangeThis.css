@@ -2,13 +2,17 @@
  * Look of the box on what's selected (`ChangeThis.tsx`):  a menu's popup, with words in it.
  */
 ui-popup.ChangeThisPopup::part(popup) {
-  padding: 8px;
+  padding: 12px;
 }
 .ChangeThisBox {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 320px;
+  width: 420px;
+}
+/* "Tell your buddy Claude:" over the words (epic `editor` I103) */
+.ChangeThisHeader {
+  font-weight: 600;
 }
 .ChangeThisBox p {
   margin: 0;

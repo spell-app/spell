@@ -188,9 +188,11 @@ export function ChangeThisBox(): JSX.Element {
           on-ui-closing={() => setBoxAt(undefined)}
         >
           <div class="ChangeThisBox">
+            <label class="ChangeThisHeader">{appTexts.text("changeThisHeader")}</label>
             <ui-textarea
               grow=""
               fluid=""
+              rows="3"
               max-rows="6"
               autofocus=""
               readonly={!!request()}
