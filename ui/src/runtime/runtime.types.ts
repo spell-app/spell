@@ -482,6 +482,8 @@ export type ModalOptions = {
   okText?: string
   /** deny button text;  default `I18n` `cancel` */
   cancelText?: string
+  /** approve button's `color`;  default `primary`, e.g. `negative` for a step that throws something away */
+  okColor?: string
   /** `prompt()` only:  initial input value */
   value?: string
 }

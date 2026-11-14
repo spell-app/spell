@@ -68,7 +68,7 @@ export class ModalDialogs implements E.ModalProvider {
     const actions = this.document.createElement(ModalDialogs.tagFor(ACTIONS))
     if (canDeny) actions.append(this.button(options.cancelText ?? UI.i18n.t(CANCEL), CANCEL))
     const approve = this.button(options.okText ?? UI.i18n.t(OK), APPROVE_CLASS)
-    approve.setAttribute(COLOR, PRIMARY)
+    approve.setAttribute(COLOR, options.okColor ?? PRIMARY)
     actions.append(approve)
     modal.append(content, actions)
     field?.addEventListener("keydown", (event) => {

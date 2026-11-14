@@ -16,7 +16,7 @@ import { openChooser } from "./Chooser"
  *   component to mount.  Several at once stack in the top layer, newest on top.
  * - Each waits for `uiReady` first:  `UI.modals` throws until `<ui-modal>` has registered its provider.
  * - `editor` reaches these through a DYNAMIC `import()`, so `editor.ts` stays free of Solid and `spell-ui`.
- * - Props map onto `UI.modals`' options:  `header` => `title`, `ok` / `cancel` => `okText` / `cancelText`,
+ * - Props map onto `UI.modals`' options:  `header` => `title`, `ok` / `cancel` => `okText` / `cancelText`, `danger` => `okColor: "negative"`,
  *   `defaultValue` => `value`.
  */
 
@@ -79,8 +79,8 @@ function asProps<P extends AlertModalProps>(props: string | P): P {
 
 /** Our props as `UI.modals`' options. */
 function modalOptions(props: string | ConfirmModalProps): ModalOptions {
-  const { message, header, ok, cancel } = asProps<ConfirmModalProps>(props)
-  return { message, title: header, okText: ok, cancelText: cancel }
+  const { message, header, ok, cancel, danger } = asProps<ConfirmModalProps>(props)
+  return { message, title: header, okText: ok, cancelText: cancel, okColor: danger ? "negative" : undefined }
 }
 
 /**

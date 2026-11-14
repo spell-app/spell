@@ -147,8 +147,9 @@ const APP_TEXTS_ES: AppTextPack = {
   discardChanges: "Descartar los cambios",
   versions: "Versiones",
   deleteDraft: "Borrar el borrador",
-  deleteDraftConfirm:
-    "¿Tirar tu borrador?\nCada archivo vuelve a lo que ven todos ahora.\nDeshacer trae tus cambios de vuelta.",
+  deleteDraftHeading: "¿Tirar tu borrador?",
+  deleteDraftConfirm: "Cada archivo vuelve a lo que ven todos ahora.\nDeshacer trae tus cambios de vuelta.",
+  deleteDraftOk: "Tirarlo",
   draftDeleted: "Borrado tu borrador de {count} archivo(s).",
   saveCurrentChanges: "Guardar los cambios actuales",
   keptDraftAt: "{time}:  tu borrador, sin publicar",

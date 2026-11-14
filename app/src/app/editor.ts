@@ -1350,8 +1350,13 @@ export class EditorStore extends Observable {
   async deleteDraft(): Promise<void> {
     const { project } = editor
     if (!project || !editor.canDeleteDraft) return
-    const message = appTexts.text("deleteDraftConfirm")
-    if (!(await editor.confirm({ message, ok: appTexts.text("deleteDraft") }))) return
+    const confirmed = await editor.confirm({
+      header: appTexts.text("deleteDraftHeading"),
+      message: appTexts.text("deleteDraftConfirm"),
+      ok: appTexts.text("deleteDraftOk"),
+      danger: true
+    })
+    if (!confirmed) return
     try {
       const files = new SPACES.ProjectFiles(project)
       const drafted = (editor.draftedFiles ?? []).map((path) => path.slice(project.path.length))

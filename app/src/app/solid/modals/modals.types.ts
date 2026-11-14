@@ -19,6 +19,8 @@ export type AlertModalProps = {
   header?: string
   /** OK button text.  Default:  `UI.i18n`'s `ok` ("OK"). */
   ok?: string
+  /** OK throws something away:  its button is red (`negative`), not the primary colour. */
+  danger?: boolean
 }
 
 /** Props for `editor.confirm()`:  as `alert()`'s, plus a Cancel button. */

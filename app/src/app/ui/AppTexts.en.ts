@@ -141,8 +141,9 @@ export const APP_TEXTS = {
   discardChanges: "Discard changes",
   versions: "Versions",
   deleteDraft: "Delete Draft",
-  deleteDraftConfirm:
-    "Throw away your draft?\nEvery file goes back to what everyone sees now.\nUndo brings your changes back.",
+  deleteDraftHeading: "Throw away your draft?",
+  deleteDraftConfirm: "Every file goes back to what everyone sees now.\nUndo brings your changes back.",
+  deleteDraftOk: "Throw It Away",
   draftDeleted: "Deleted your draft of {count} file(s).",
   saveCurrentChanges: "Save Current Changes",
   keptDraftAt: "{time}:  your draft, not published",
