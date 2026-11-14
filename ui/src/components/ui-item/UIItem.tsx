@@ -341,8 +341,8 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   }
 
   /**
-   * The box's accessible name:  the element's `aria-label`;  else, for an item with no words of its own (an icon
-   * button), its `label`.
+   * The box's accessible name:  the element's `aria-label`;
+   * else, for an item with no words of its own (an icon button), its `label`.
    */
   private get boxLabel(): string | undefined {
     return this.attributes["aria-label"] ?? (this.slots.hasContent("") ? undefined : this.label?.trim() || undefined)
@@ -397,8 +397,8 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
 
   /**
    * The owned item box, around its content (`boxContent()`).
-   * - The DOM element's `aria-label` names it (an icon-only item);  its `aria-expanded` goes to a `<button>` box
-   *   (`boxExpanded`).
+   * - The DOM element's `aria-label` names it (an icon-only item).
+   * - Its `aria-expanded` goes to a `<button>` box (`boxExpanded`).
    */
   protected box(): JSX.Element {
     const isDisabledButton = () => this.rootTag === "button" && this.isDisabled

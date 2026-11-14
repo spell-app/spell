@@ -626,3 +626,25 @@ test("writes need the token, our origin and our host", async () => {
   expect((await post(body, { origin: "http://evil.example" })).status).toBe(403)
   expect((await post(body, { host: "evil.example" })).status).toBe(403)
 })
+
+// epic `epic-engine` I267:  a picture pasted in a comment's field
+test("a PICTURE pasted in a comment is saved beside its page, its URL path answered;  only a PNG, only a page taking comments", async () => {
+  const png = `data:image/png;base64,${Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]).toString("base64")}`
+  const picture = async (body: object) => {
+    const got = await ask(port, "POST", "/api/docs/comments/picture", {
+      body: JSON.stringify(body),
+      headers: headers()
+    })
+    return { status: got.status, answer: JSON.parse(got.text || "{}") }
+  }
+  const saved = await picture({ page: "/guides/solid/solid-2.html", png })
+  expect(saved.status).toBe(200)
+  expect(saved.answer.picture).toMatch(/^\/guides\/solid\/pictures\/solid-2-\d{8}-\d{4}\.png$/)
+  const file = join(root, saved.answer.picture.slice(1))
+  expect(readFileSync(file).subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]))
+  // a second one in the same minute:  never over the first
+  expect((await picture({ page: "/guides/solid/solid-2.html", png })).answer.picture).toMatch(/-2\.png$/)
+  expect((await picture({ page: "/guides/solid/solid-2.html", png: "data:image/jpeg;base64,AAAA" })).status).toBe(400)
+  expect((await picture({ page: "/templates/x.html", png })).status).toBe(403)
+  rmSync(dirname(file), { recursive: true, force: true })
+})

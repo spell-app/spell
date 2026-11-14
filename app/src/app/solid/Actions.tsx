@@ -22,8 +22,8 @@ import {
  * - `title` is the text, `icon` an icon name (Fomantic's, see `loadUI.ts`).
  * - `menu`:  an item of the top bar's menus (`MenuBar.tsx`), a `<ui-action>`:  its title and its key
  *   (`shortcut`, from `EDITOR_HOTKEYS`), no icon, ticked while `active`.
- *   - `active={false}` is written `selected="false"`:  a row on or off says so while off too, so a sub-menu's
- *     fly-out ticks it in a menu without `ticks` (`<ui-submenu>`, the ☰ menu's View ›).
+ *   - `active={false}` is written `selected="false"`:  a row on or off says so while off too,
+ *     so a sub-menu's fly-out ticks it in a menu without `ticks` (`<ui-submenu>`, the ☰ menu's View ›).
  * - `iconOnly`:  just its icon, a plain `<ui-icon link>`, with `title` as its tooltip, below it, after a pause
  *   (the browser's own `title`, which no parent frame can cut off).
  *   - A `<ui-icon>`, not an item:  an item's box is `display: contents`, which draws no tooltip.

@@ -399,12 +399,15 @@ the table is [api.ts](src/spaces/server/node/routes/api.ts), and
 | `GET /spaces/<address>` | one file, as it is on disk;  a compiled one from `build/`, compiled first if it's missing |
 | `GET /api/projects/list/<group>` | a group's projects:  each address, and its title if it has one |
 | `GET /api/projects/index/<project>` | a project's files and imports;  adds new files to its project file, drops gone ones |
-| `POST /api/projects/file/<address>` | save a file |
+| `GET /api/projects/files/<project>` | every file of a project, pictures and its project file too:  what Export zips |
+| `POST /api/projects/file/<address>` | save a file:  your draft;  in a checkout, a built-in example's file itself |
 | `POST /api/projects/create/project` | make a project |
 | `POST /api/projects/rename/project`, `.../duplicate/project` | rename or copy one |
 | `DELETE /api/projects/remove/project` | delete one |
 | `POST /api/projects/settings/project` | save a project's settings, into its project file |
-| `POST /api/projects/create/file`, `.../rename/file` | make or rename a file |
+| `POST /api/projects/create/file`, `.../rename/file` | make or rename a file;  a picture's bytes come as base64 |
+| `POST /api/projects/reorder/files` | put a project's files in a new order, its tabs dragged, into its project file |
+| `POST /api/projects/keep-draft` | keep your draft as a version of its own, never published (Versions' Save Current Changes) |
 | `DELETE /api/projects/remove/file` | delete a file |
 | `GET`, `POST /api/compile/file` | compile a file that's in no project |
 | `GET /api/people/me`, `POST /api/people/me` | this machine's person, their orgs and roles;  their changes |
@@ -429,6 +432,7 @@ the table is [api.ts](src/spaces/server/node/routes/api.ts), and
 | `SPELL_SPACES_DIR` | the spaces folder;  the page server's `--spaces <dir>` sets it too | `spell.spaces`, beside the main checkout |
 | `SPELL_BUILTINS_DIR` | the built-in projects' folder, the frozen test projects' too | spell-app's `spaces/` |
 | `SPELL_BUILD_DIR` | where compiled output goes | spell-app's `build/` |
+| `SPELL_EDITS_BUILTINS` | `1`:  saving a built-in project's file writes the file itself, not your draft;  `0`:  never | on in a checkout whose built-ins are its own source |
 | `SPELL_EDITOR_PORT` | the editor's port;  `spell app serve --port` sets it | 3000, else any free one |
 | `SPELL_NO_EDITOR` | `1`:  the page server doesn't start the editor | |
 | `PORT` | the API alone's port, `yarn start:server` | 3001 |

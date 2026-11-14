@@ -104,7 +104,8 @@ export class DiskCache {
   /**
    * Its HTTP routes, to mount under a prefix, e.g. `/api/compiles`:
    * - `GET /version`:  `{ version }`, the current one
-   * - `GET /<version>/<key>`:  the entry, as text;  404 if there's none
+   * - `GET /<version>/<key>`:  the entry, as text;  204 with no body if there's none
+   *   - not 404:  a miss is an answer, so the browser's console doesn't show it as a failed request
    * - `PUT /<version>/<key>`:  keep the body (text);  204, or 409 if `<version>` isn't current
    * - a version or key that isn't a hash's letters:  400
    */
@@ -114,7 +115,7 @@ export class DiskCache {
     router.get("/version", (_request, reply) => reply.json({ version: this.version() }))
     router.get("/:version/:key", (request, reply) => {
       const text = this.read(...versionAndKey(request.params))
-      if (text === undefined) throw new HttpError(404, "no such entry")
+      if (text === undefined) return void reply.status(204).end()
       reply.type("text/plain").send(text)
     })
     router.put("/:version/:key", (request, reply) => {

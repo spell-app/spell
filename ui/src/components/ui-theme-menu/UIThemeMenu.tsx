@@ -238,6 +238,16 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   }
 
   /**
+   * The list's entries (`ThemeMenu.entries`), the SAME objects while what they say is the same.
+   * - So `<For>` keeps its rows:  each read of `ThemeMenu.entries` makes new ones,
+   *   and every row was drawn again as the vocabulary or My themes were read again (epic `editor` I66).
+   */
+  @E.derived({ equals: isSameEntries })
+  private get entries(): E.MenuEntry[] {
+    return this.themeMenu.entries
+  }
+
+  /**
    * Which controls show:  `show`, else `both`.
    * - Not `this.show` alone:  an empty or unknown `show` converts to `undefined`, which shows `both`.
    */
@@ -362,7 +372,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
           aria-labelledby={IDS.heading}
           onKeyDown={(event) => this.onMenuKey(event)}
         >
-          <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
+          <For each={this.entries}>{(entry) => this.entry(entry)}</For>
         </div>
         <Show when={ThemePreference.tintsFor(this.chosenTheme).length}>
           <div class={DIVIDER_CLASS} role="separator" />
@@ -528,7 +538,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
             <ui-icon name={PALETTE_ICON} aria-hidden="true"></ui-icon>
           </Show>
         </span>
-        <For each={this.themeMenu.entries}>
+        <For each={this.entries}>
           {(entry) =>
             "type" in entry ? (
               <ui-item kind={entry.type}>{entry.text}</ui-item>
@@ -779,3 +789,8 @@ const OPTION_CLASS = "option"
 
 /** Class word of a theme row's check mark. */
 const CHECK_CLASS = "check"
+
+/** Do `a` and `b` list the same entries, each saying the same?  Entries are plain data. */
+function isSameEntries(a: readonly E.MenuEntry[], b: readonly E.MenuEntry[]): boolean {
+  return a.length === b.length && a.every((entry, index) => JSON.stringify(entry) === JSON.stringify(b[index]))
+}

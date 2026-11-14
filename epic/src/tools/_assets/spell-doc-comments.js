@@ -40,7 +40,7 @@ import { nextFrame } from "spell/util/dom"
 import { toolbarTools } from "./spell-doc-toolbar.js"
 import { ThreadFacts } from "spell/epic/comments"
 import { DraftSaver } from "spell/epic/answers"
-import { ServerLink } from "spell/epic/review"
+import { Pictures, ServerLink } from "spell/epic/review"
 import {
   addBlockAction,
   BLOCK_ROW,
@@ -61,6 +61,15 @@ import {
 
 /** The page server's comments routes (`src/tools/commentsRoutes.ts`). */
 const COMMENTS_API = "/api/docs/comments"
+
+/** Where a picture pasted in a comment's field is saved (epic `epic-engine` I267). */
+const PICTURE_API = "/api/docs/comments/picture"
+
+/** What a picture that can't be taken says, by `Pictures.problemOf()`'s key. */
+const PICTURE_PROBLEMS = {
+  notImage: "That isn't a picture this page can take",
+  tooBig: "That picture is over 8 MB"
+}
 
 /** The page's comments, once the page server says it takes them (`wireComments()`):  Cmd / Ctrl + K reads them. */
 let pageComments = null
@@ -1258,6 +1267,7 @@ class PageComments {
       "aria-label": how === "edit" ? "Your comment" : "Your reply"
     })
     const replying = { id, how, box: field, field, floppy: null }
+    takesPictures(field)
     this.wireReply(replying, saved)
     return replying
   }
@@ -1582,6 +1592,7 @@ class PageComments {
       field
     ))
     pane.near = near ? { left: near.left, top: near.top, bottom: near.bottom } : undefined
+    takesPictures(field)
     this.wirePane(pane, field, open)
     this.main.append(pane)
     void drawn(pane).then(() => {
@@ -1925,6 +1936,27 @@ async function drawn(element) {
 }
 
 /** The floppy's tooltip once saved:  `Saved 14:02 · waiting for Claude`. */
+/**
+ * SIDE EFFECT:  a picture pasted or dropped in comment field `field` is saved beside the page (`POST picture`), and
+ * `![picture](<path>)` goes into its words (`Pictures.intoWords()`;  epic `epic-engine` I267):  the field's own saver
+ * saves them, and the thread draws the picture.
+ */
+function takesPictures(field) {
+  Pictures.intoWords(field, {
+    save: async (png) => {
+      try {
+        const answer = await ServerLink.forPage().post(PICTURE_API, { page: location.pathname, png })
+        if (typeof answer?.picture === "string") return answer.picture
+        noteToast("The page server kept no picture", "error")
+      } catch (failure) {
+        noteToast(`Couldn't save the picture:  ${failure?.message ?? failure}`, "error")
+      }
+      return undefined
+    },
+    notify: (problem) => noteToast(PICTURE_PROBLEMS[problem], "error")
+  })
+}
+
 function savedTip() {
   return `Saved ${ThreadFacts.localStamp(new Date().toISOString()).slice(11)} · waiting for Claude`
 }

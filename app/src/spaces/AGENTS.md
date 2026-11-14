@@ -28,7 +28,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [SpellProjectRoot.ts](models/SpellProjectRoot.ts):  a group's list of projects,
       and its projects' create, copy, rename and delete
     - [ProjectFiles.ts](models/ProjectFiles.ts):  a project's FILE create, copy, rename and delete
-    - [projectArchive.ts](models/projectArchive.ts):  a project as a zip, for File > Export and Import
+    - [projectArchive.ts](models/projectArchive.ts):  a project as a zip, for the project menu's Export and Import
       (every file, pictures and its project file too, listed by `GET /api/projects/files/<project>`);
       an old `.spell.json` export still imports
     - [spaceNames.ts](models/spaceNames.ts):  spaces' own `__` names, `SPACE_NAMES`
@@ -132,6 +132,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [ProjectDrafts.ts](server/node/projects/ProjectDrafts.ts):  a person's DRAFTS, Publish and a project's versions
     (epic `editor` P24, in atmosphere's shapes;  the wire's are `SPACES.DraftJSON` ..., in [drafts.ts](models/drafts.ts))
     - A save of a project's own file is your draft, `__draft/<name>.<person>-<day><extensions>`;  its URL reads it.
+      - Except a built-in's, in a checkout (`environment.editsBuiltins`, epic `mockup` P20):  written in place, so git
+        sees it, your old draft of it dropped;  through the house-network site it stays a draft (`savesInPlace()`).
+      - While you have drafts, what the editor compiles is YOUR build, `__draft/__build.<you>/`, served to you alone.
+    - `POST /api/projects/keep-draft`:  your draft kept as a version of its own, never published (`keepDraft()`).
     - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.
     - PUBLISH BY ROLE (epic `atmosphere` P26, T47):
       - a DESIGNER drafts:  a manager of the project's space, or anyone its org lets design it (`canDesign`, T47,
@@ -180,7 +184,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - It writes through the page server's file operations.
     - It keeps each folder's list, and one recursive watcher drops a folder's when anyone changes it.
   - Zip files are laid out in ONE place, the browser-safe [zip.ts](models/zip.ts) (`zipLayout()`, `zipEntries()`):
-    - in a browser it packs with the platform's `CompressionStream`:  File > Export and Import (`zipOf()`, `filesInZip()`)
+    - in a browser it packs with the platform's `CompressionStream`:
+      the project menu's Export and Import (`zipOf()`, `filesInZip()`)
     - on node, [its twin](server/node/storage/zip.ts) packs with `zlib`:  a project's versions, a space's export
   - JSON5 is read and written in ONE place, [json5.ts](server/node/storage/json5.ts), on json5-writer:
     an edit writes the whole value back, every comment where it was;  double quotes, no trailing commas.

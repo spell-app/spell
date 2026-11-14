@@ -4,9 +4,10 @@ import { SP } from "spell/parser/spell"
 import { filesInZip, zipOf } from "./zip"
 
 /**
- * A project as a zip, to keep or to move:  File > Export writes one, File > Import reads it back.
+ * A project as a zip, to keep or to move:  the project menu's Export writes one, its Import reads it back.
  * - The zip holds the project as its folder on disk would, in a folder of its name:
- *   `Solitaire/Solitaire.spell`, `Solitaire/Button/Usage.spell`, `Solitaire/__thumbnail.png`, `Solitaire/__project.json5`.
+ *   - `Solitaire/Solitaire.spell`, `Solitaire/Button/Usage.spell`
+ *   - `Solitaire/__thumbnail.png`, `Solitaire/__project.json5`
  *   - So any unzip opens it, and the folder it unpacks is a Spell project anywhere.
  * - Import reads the old one-file JSON export too (`.spell.json`, text files only):  some people have them.
  * - `SpellProjectRoot.exportApp()` gathers a project's files, `importApp()` makes one from them.

@@ -18,8 +18,8 @@ import { E } from "spell/ui/core"
  * - Tracks from `start()`, when a sub-menu opens, until `stop()`, when it closes, or the pointer reaches it.
  * - Plain DOM, no Solid, no element of its own:  any menu that opens sub-menus beside rows can use it
  *   (the editor's bar menus, `<BarMenu>`).
- * - SEE:  React Aria's method, https://react-aria.adobe.com/blog/creating-a-pointer-friendly-submenu-experience
- *   -- a geometry check, as they chose, not an invisible overlay or a clip-path over the gap.
+ * - A geometry check, as React Aria chose, not an invisible overlay or a clip-path over the gap.
+ *   SEE:  https://react-aria.adobe.com/blog/creating-a-pointer-friendly-submenu-experience
  ****************/
 export class SubMenuAim {
   /** the open sub-menu's row, its sub-menu, and who hears it give up */
@@ -86,8 +86,8 @@ export class SubMenuAim {
 
   /**
    * Is a move from `from` by `delta` heading for the sub-menu `target`?
-   * - `true` when its direction is between the directions to the target's two near corners, `slack` degrees wider
-   *   each way.
+   * - `true` when its direction is between the directions to the target's two near corners,
+   *   `slack` degrees wider each way.
    * - `false` at once for a move away from the target's side (right:  `delta.x < 0`;  left:  `delta.x > 0`).
    * - Pure:  no DOM.
    */

@@ -31,6 +31,15 @@
   },
   "onEnterRules": [
     {
+      "beforeText": { "pattern": "<(?!(?:area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)(?![\\p{L}\\p{M}\\d.:-]))\\p{L}[\\p{L}\\p{M}\\d.:-]*(?:\\s(?:[^<>\"'/]|\"[^\"]*\"|'[^']*'|\\/(?!>))*)?>\\s*$", "flags": "u" },
+      "afterText": { "pattern": "^\\s*<\\/[\\p{L}\\p{M}\\d.:-]*>", "flags": "u" },
+      "action": { "indent": "indentOutdent" }
+    },
+    {
+      "beforeText": { "pattern": "<(?!(?:area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)(?![\\p{L}\\p{M}\\d.:-]))\\p{L}[\\p{L}\\p{M}\\d.:-]*(?:\\s(?:[^<>\"'/]|\"[^\"]*\"|'[^']*'|\\/(?!>))*)?>\\s*$", "flags": "u" },
+      "action": { "indent": "indent" }
+    },
+    {
       "beforeText": ":\\s*$",
       "action": { "indent": "indent" }
     },

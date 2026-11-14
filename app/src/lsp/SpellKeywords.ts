@@ -265,6 +265,21 @@ export class SpellKeywords {
    */
   static CONTINUES_LINE = /(?<![\p{L}\p{M}\d_-])(?:and|or|y|e|o|u)\s*$/u
 
+  /**
+   * The text before the caret ending in an opening tag, so Enter goes in a level (epic `editor` I65):
+   * `<content>`, `<toolbar class="x">`, `<pile "stock">`.
+   * - Not a tag that closes itself (`<action "x"/>`), one HTML never closes (`<br>`), nor a closing tag (`</x>`).
+   * - Monaco's (`SpellMonaco`) and VS Code's (`language-configuration.json`, by hand):  a test checks they match.
+   */
+  static OPENS_TAG =
+    /<(?!(?:area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)(?![\p{L}\p{M}\d.:-]))\p{L}[\p{L}\p{M}\d.:-]*(?:\s(?:[^<>"'/]|"[^"]*"|'[^']*'|\/(?!>))*)?>\s*$/u
+
+  /**
+   * The text after the caret starting with a closing tag:  Enter between `<x>` and `</x>` (or `</>`) puts the caret
+   * a level in, the closing tag on its own line at the tag's indent (epic `editor` I65).
+   */
+  static CLOSES_TAG = /^\s*<\/[\p{L}\p{M}\d.:-]*>/u
+
   ////////////////
   // ## Helpers
   ////////////////

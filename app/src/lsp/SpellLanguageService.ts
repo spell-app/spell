@@ -745,7 +745,8 @@ export class SpellLanguageService {
    * What the component tag or attribute at `position` is, in a drawing (epic `editor` I55):
    * `<button>` => "a component that ...";  `color` inside it => the attribute, what it is, the words it takes.
    * - Spell UI's, in the file's language (`SP.ComponentPacks.help()`).
-   * - A tag's attributes are read on its own line:  `null` for one on a line of its own, or anything else.
+   * - An attribute on a line of its own, under its tag's, too (epic `editor` I64):  see `openTagBefore()`.
+   * - `null` for anything else.
    */
   private componentHover(file: SP.SpellFile, position: Position): Hover | null {
     const text = file.parseText
@@ -766,7 +767,8 @@ export class SpellLanguageService {
       start: { line: position.line, character: start },
       end: { line: position.line, character: end }
     }
-    const before = line.slice(0, start)
+    // a tag's attributes on lines of their own:  the tag's lines as one (epic `editor` I64)
+    const before = openTagBefore(text, lineStart + start) ?? line.slice(0, start)
     let value: string | undefined
     if (/<\/?$/.test(before)) {
       const tag = !SpellLanguageService.isOwnView(scope, word) && help.tags.find((it) => it.tag === word)
@@ -1616,11 +1618,13 @@ export class SpellLanguageService {
     // a drawing's markup as it's typed:  the file's text now, which a parse may not have caught up with yet
     // (`<` alone parses as an error;  the editor asks the moment it's typed)
     const typedLine = file.contents?.split("\n")[position.line]?.slice(0, position.character) ?? lineText
+    // inside a tag split over lines:  the tag's lines as one, so its attributes help on every line (epic `editor` I64)
+    const typedTag = SpellLanguageService.openTagTyped(file, position) ?? typedLine
     const tagItems =
       this.tagItems(file, offset, typedLine) ??
       this.actionItems(file, offset, position, typedLine) ??
-      this.attributeValueItems(file, offset, position, typedLine) ??
-      this.attributeItems(file, offset, typedLine)
+      this.attributeValueItems(file, offset, position, typedTag) ??
+      this.attributeItems(file, offset, typedTag)
     if (tagItems) return { isIncomplete: false, items: tagItems }
     const atStatementStart = /^\s*[\p{L}\p{M}\d_-]*$/u.test(lineText)
     if (!atStatementStart) {
@@ -1747,6 +1751,17 @@ export class SpellLanguageService {
       sortText: String(order).padStart(3, "0"),
       textEdit: { range, newText: value }
     }))
+  }
+
+  /**
+   * What's typed of the tag open at `position`, its lines as one:  `<button` then `\tcol` => `<button \tcol`.
+   * - The file's text now, as `completion()` reads a typed line:  a parse may not have caught up with it.
+   * - `undefined` when no tag is open there -- see `openTagBefore()`.
+   */
+  private static openTagTyped(file: SP.SpellFile, position: Position): string | undefined {
+    const lines = (file.contents ?? file.parseText).split("\n")
+    const offset = lines.slice(0, position.line).reduce((sum, line) => sum + line.length + 1, 0) + position.character
+    return openTagBefore(lines.join("\n"), offset)
   }
 
   /** Does `tag` name one of the program's own types (`<card>` in Solitaire), not a pack's component? */
@@ -2843,6 +2858,40 @@ const ATTRIBUTE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*?)?\s+[\p{L}-]*$/u
 
 /** An attribute's quoted value being typed at the end of a line:  its tag, its attribute, then what's typed, `<button color="pr`. */
 const ATTRIBUTE_VALUE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)\s(?:[^<>]*\s)?([\p{L}\p{M}\d-]+)="([^"]*)$/u
+
+/** How far back `openTagBefore()` looks for its tag's `<`. */
+const OPEN_TAG_REACH = 4000
+
+/**
+ * What's written of the tag open at `offset` in `text`, from its `<`, its lines joined by spaces:
+ * `<button fluid col`, for `<button fluid` then `\tcol` on the next line (epic `editor` I64).
+ * - The nearest `<` before `offset`, if it starts a tag (`<name`, at a line's start or after a space, `>`, `(` or `{`)
+ *   and no `>` closes it before `offset`, quoted values and `{...}` aside.
+ * - Its lines after the first each indented further than the tag's:  as a tag is split, so code after a stray `<`
+ *   (`x <y`, in a comment) isn't read as one.
+ * - `undefined` otherwise:  outside a tag, after a closing tag, or `x < y`.
+ */
+function openTagBefore(text: string, offset: number): string | undefined {
+  const start = text.lastIndexOf("<", offset - 1)
+  if (start < 0 || offset - start > OPEN_TAG_REACH || !/^<\p{L}/u.test(text.slice(start, start + 2))) return undefined
+  if (start > 0 && !/[\s>({]/.test(text[start - 1]!)) return undefined
+  const written = text.slice(start, offset)
+  const [, ...under] = written.split("\n")
+  if (under.length) {
+    const tagLine = text.slice(text.lastIndexOf("\n", start - 1) + 1, start)
+    const indent = /^[ \t]*/.exec(tagLine)![0].length
+    if (under.some((line) => line.trim() && /^[ \t]*/.exec(line)![0].length <= indent)) return undefined
+  }
+  let quotes = 0
+  let braces = 0
+  for (const char of written) {
+    if (char === '"' && !braces) quotes ^= 1
+    else if (!quotes && char === "{") braces++
+    else if (!quotes && char === "}") braces = Math.max(0, braces - 1)
+    else if (!quotes && !braces && char === ">") return undefined
+  }
+  return written.replace(/\r?\n/g, " ")
+}
 
 /** Is the end of `text`, what's written inside a tag, inside a quoted value or a `{...}`? */
 function isInQuotesOrBraces(text: string): boolean {

@@ -54,8 +54,10 @@ export class ProjectDrafts {
   readonly person: string
   /** the project's folder on disk */
   private readonly projectFolder: string
-  /** the folder its private folders, `__draft/` and `versions/`, are in:  the project's own, or its place in its
-   *  space's private one */
+  /**
+   * the folder its private folders, `__draft/` and `versions/`, are in:
+   * the project's own, or its place in its space's private one
+   */
   private readonly privateFolder: string
   /** its org, when it's in one of an org's paired spaces:  whose policy caps its versions */
   private readonly org: string | undefined
@@ -160,8 +162,8 @@ export class ProjectDrafts {
   }
 
   /**
-   * Save `contents` straight to `filePath`'s public file, and drop your draft of it:  no draft at all
-   * (a built-in project's file in a checkout, epic `mockup` P20, r3:  so the edit shows in git).
+   * Save `contents` straight to `filePath`'s public file, and drop your draft of it:
+   * no draft at all (a built-in project's file in a checkout, epic `mockup` P20, r3:  so the edit shows in git).
    * - Your draft goes too:  you were looking at its text when you saved, so nothing's lost,
    *   and the old draft can't be served over the save.
    * - throws 403 when you may not design its space (`mayDesign()`)
@@ -318,8 +320,8 @@ export class ProjectDrafts {
   }
 
   /**
-   * SIDE EFFECT:  keep your draft as a version of its own, never published:  the Versions dialog's
-   * "Save Current Changes" (see the file).
+   * SIDE EFFECT:  keep your draft as a version of its own, never published:
+   * the Versions dialog's "Save Current Changes" (see the file).
    * - Every public file, each you have a draft of as your draft has it.
    * - throws 409 when you have no draft;  403 when you may not design the project (`mayDesign()`)
    */

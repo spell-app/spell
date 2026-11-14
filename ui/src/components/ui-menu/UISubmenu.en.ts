@@ -3,10 +3,12 @@
  * The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A row of a menu, as `<ui-item>` is (the same noun, `item`, so its menu owns it as one of its items),
  *   that opens a FLY-OUT, a menu beside it.
- * - Its names are `<ui-item>`'s where they mean the same:  `label` (its words), `icon`, `disabled`, the `icon` slot,
- *   the `item`, `icon` and `title` parts.
- * - Its own:  `menu`, the id of a menu elsewhere on the page to show as its fly-out;  the `chevron` and `flyout`
- *   parts;  the `open` state.
+ * - Its names are `<ui-item>`'s where they mean the same:
+ *   `label` (its words), `icon`, `disabled`, the `icon` slot, the `item`, `icon` and `title` parts.
+ * - Its own:
+ *   - `menu`, the id of a menu elsewhere on the page to show as its fly-out
+ *   - the `chevron` and `flyout` parts
+ *   - the `open` state
  */
 
 import type { E } from "spell/ui/core"

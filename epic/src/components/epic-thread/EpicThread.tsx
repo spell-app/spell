@@ -2,8 +2,11 @@ import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
+import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 
 import { ThreadFacts, type ThreadComment } from "spell/epic/comments"
+// Import directly:  the review barrel would bring its client and inbox into the pack's threads
+import { Pictures } from "spell/epic/review/Pictures"
 
 import { epicThreadVocabulary } from "./EpicThread.en"
 import {
@@ -446,21 +449,47 @@ const CLAUDE_AGENT = "claude"
 /** What, in its header, acts by itself:  a click there doesn't fold. */
 const BUTTONS = "ui-button, epic-review"
 
-/** Owen's words split into paragraphs at blank lines;  a single newline a line break;  `backticked` runs code. */
+/**
+ * Owen's words split into paragraphs at blank lines;  a single newline a line break;  `backticked` runs code;
+ * a picture pasted in (`![picture](<path>)`, `Pictures.intoWords()`;  epic `epic-engine` I267) its thumbnail,
+ * a click opening it full size.
+ */
 function paragraphsOf(words: string): JSX.Element {
   const blocks = words.trim().split(/\n[ \t]*\n\s*/)
   return (
     <For each={blocks}>
       {(block) => (
         <p>
-          <For each={block.trim().split(/(`[^`]+`|\n)/)}>
-            {(piece) => (piece === "\n" ? <br /> : CODE_RUN.test(piece) ? <code>{piece.slice(1, -1)}</code> : piece)}
+          <For each={Pictures.piecesOf(block.trim())}>
+            {(part) =>
+              typeof part === "string" ? (
+                <For each={part.split(/(`[^`]+`|\n)/)}>
+                  {(piece) =>
+                    piece === "\n" ? <br /> : CODE_RUN.test(piece) ? <code>{piece.slice(1, -1)}</code> : piece
+                  }
+                </For>
+              ) : (
+                <img class={PICTURE} src={part.picture} alt="picture" title={part.picture} onClick={zoom} />
+              )
+            }
           </For>
         </p>
       )}
     </For>
   )
 }
+
+/** A click on a comment's picture:  full size, in the page's `<ui-zoom>`. */
+function zoom(event: MouseEvent) {
+  const image = event.currentTarget as HTMLImageElement | null
+  if (!image || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  event.preventDefault()
+  event.stopPropagation()
+  ImageZoom.show(image)
+}
+
+/** A picture in Owen's words. */
+const PICTURE = "picture"
 
 /** A `backticked` run in Owen's words. */
 const CODE_RUN = /^`[^`]+`$/

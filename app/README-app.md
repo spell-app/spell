@@ -693,10 +693,15 @@ a puzzle piece for libraries, a flask for tests ([projectGroups.ts](src/spaces/m
 The code column:
 - every file of the project as a tab, none closing, a dot on one not saved;
   too many, ‹ › scroll them;  too narrow for two tabs, a file dropdown instead
+  - drag a tab along the row to move its file:  the new order is saved in the project file
 - Save, Revert Changes and New Spell File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
   - Save saves every file with changes not saved, not just the one showing.
-- Saving never changes the public file:  it's your draft, in the project's private `__draft/` folder
-  (`ProjectDrafts`, in spaces).
+  - AutoSave, on unless you turn it off:  each file is kept once typing pauses for 0.8s, and as you leave the page.
+- Saving keeps your draft, not the public file:
+  it goes in the project's private `__draft/` folder (`ProjectDrafts`, in spaces).
+  - Under the tabs, "Your draft" says when the file showing is one, with Discard beside it.
+  - The exception:  in a checkout, a built-in example's file (`@spell/examples/...`, `@spell/library/...`) is
+    written in place, so git sees the edit;  through the house-network site it's still a draft.
   - The project menu's Publish makes your drafts public, and keeps the whole project as a version, a zip in
     `versions/`;  if someone published since your draft began, it shows both side by side first.
   - Its Versions restores one as your draft;  its Save Current Changes, on the dialog's left, keeps your draft in the
@@ -748,7 +753,7 @@ The editor speaks the page's language:  the document's `lang`, else the browser'
 A Spanish browser gets "Guardar" where an English one gets "Save":
 
 ```tsx
-<Action title={appTexts.text("save")} icon="cloud upload" onClick={() => editor.saveFile()} {...props} />
+<Action title={appTexts.text("save")} icon="cloud upload" onClick={() => editor.saveAll()} {...props} />
 ```
 
 - Every word the app shows people is a key in [AppTexts.en.ts](src/app/ui/AppTexts.en.ts):  menus, panes, notices.
@@ -866,7 +871,8 @@ How a page with no server reads and saves files:
   - a visitor's own projects, in the group `you@spell`:  their list, files and order in that same database,
     so New, Duplicate, Rename, Delete and every file action work with no server
     - a copy of an example is theirs to change;  the example itself can't be renamed, deleted or given files
-    - Export and Import move a project out and back as one file (`.spell.json`, text files only)
+    - Export and Import move a project out and back as a zip, its text files only;
+      an old `.spell.json` export imports too
     - the first thing they make says once that it lives in this browser, and that clearing the site's data loses it
 - ONE flag hides what needs a server:  `isStaticBuild` in code, `:root.spell-static` in CSS
   ([staticBuild.ts](src/app/static/staticBuild.ts)).
@@ -877,7 +883,7 @@ How a page with no server reads and saves files:
 
 **Not yet:**  it's built, not deployed anywhere.
 And it must be served at a domain's root:  the editor's routes and files are absolute paths.
-Home is still in the top bar, and Save and Reload on the code's toolbar:
+Save (in File) and Home (in the project's menu and Spell's) are still there:
 they read oddly when nothing goes to a server.
 
 ### Just the app:  `<spell-viewer>` on your own site

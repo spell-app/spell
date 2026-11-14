@@ -31,9 +31,11 @@
   }
 
   /*
-   * A bar's slots around the items:  the icon and title at their own width,
-   * the center taking the room left, what's in it centred there,
-   * the right pushed to the end;  with no items, the menu's box takes no room
+   * A bar's slots around the items:
+   * - the icon and title at their own width
+   * - the center taking the room left, what's in it centred there
+   * - the right pushed to the end
+   * - with no items, the menu's box takes no room
    */
   .ui.toolbar > :is(.icon, .title, .center, .right) {
     display: flex;

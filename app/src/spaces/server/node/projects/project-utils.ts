@@ -986,7 +986,7 @@ export const createFile = async (projectId: string, filePath: string, contents: 
 /**
  * `POST /api/projects/create/file` -- create a new file within an existing project.
  * - Client sends body: `{ projectId, filePath, contents, encoding? }`.
- *   - `encoding`:  `"base64"` (`SPACES.BASE64_ENCODING`) when `contents` is a file's bytes, as base64:  a picture
+ *   - `encoding`:  `"base64"` (`SPACES.BASE64_ENCODING`) when `contents` is base64:  a file's bytes, a picture
  * - Returns: updated `ProjectIndexJSON` -- `getIndex()` will pick up new file and `import` it at the end.
  * - Failure: 500 if `projectId`/`filePath` invalid, or on write error.
  * - NOTE: no check that file doesn't already exist:  this silently overwrites.
@@ -1124,7 +1124,8 @@ export const renameFile = async (projectId: string, filePath: string, newFilePat
 }
 
 /**
- * Put project `projectId`'s files in the order `filePaths` gives (`/Card.spell` ...):  its file's `imports`, so its tabs.
+ * Put project `projectId`'s files in the order `filePaths` gives (`/Card.spell` ...):
+ * its file's `imports`, so its tabs.
  * - Those named come first, in that order;  every other import after them, in the order it had.
  * - A path that isn't one of its imports is skipped.
  */

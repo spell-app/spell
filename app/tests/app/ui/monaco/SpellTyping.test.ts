@@ -124,6 +124,16 @@ describe("SpellTyping.pastedLines()", () => {
     ])
   })
 
+  test("a paste ending its line leaves what was after the caret at the caret's indent, in its body (I53)", () => {
+    // `restart the game\n` pasted before `for each card in the deck`, two tabs in
+    expect(SpellTyping.pastedLines(["restart the game", ""], "\t\t", TABS)).toEqual(["restart the game", "\t\t"])
+    expect(SpellTyping.pastedLines(["\tits rank", "\t\tit is high", ""], "\t", TABS)).toEqual([
+      "its rank",
+      "\t\tit is high",
+      "\t"
+    ])
+  })
+
   test("spaces, in a file of spaces", () => {
     expect(SpellTyping.pastedLines(["its rank", "  it is high"], "    ", SPACES)).toEqual([
       "its rank",

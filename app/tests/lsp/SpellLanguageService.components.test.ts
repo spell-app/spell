@@ -65,6 +65,18 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
     expect(textOf(color)).toMatch(/\*\*color\*\* · attribute of <button>[\s\S]*`primary`/)
   })
 
+  test("a tag split over lines:  its attributes, and their words, on each line under it (epic `editor` I64)", async () => {
+    expect(labels(await game.typed("<button fluid\n\tcol"))).toEqual(expect.arrayContaining(["color", "size"]))
+    expect(labels(await game.typed('<button\n\tfluid\n\tcolor="'))).toEqual(expect.arrayContaining(["primary"]))
+    const color = await game.hovered('<button fluid\n\tcolor="primary">New</button>', "color")
+    expect(textOf(color)).toMatch(/\*\*color\*\* · attribute of <button>/)
+  })
+
+  test("...but not once the tag is closed, nor on a line no further in than its tag", async () => {
+    expect(labels(await game.typed("<button fluid>\n\tcol"))).not.toContain("color")
+    expect(labels(await game.typed("<button fluid\ncol"))).not.toContain("color")
+  })
+
   test("nothing in a quoted value, or for a project's own view", async () => {
     expect(labels(await game.typed('<button label="a col'))).not.toContain("color")
     expect(await game.hovered("<square></square>", "square")).toBeNull()
@@ -83,9 +95,10 @@ function textOf(hover: Hover | null): string {
 
 /**
  * A temp copy of example `project`:
- * - `typed(line)`:  completions at the end of `line`, typed into `file` on a new line after the first holding `after`
+ * - `typed(line)`:  completions at the end of `line`, typed into `file` on a new line after the first holding `after`;
+ *   a `line` of several (`\n`) ends on its last
  * - `typedInAction(line)`:  the same, after the first line that sets a property (`set its turn to "X"`)
- * - `hovered(line, word)`:  the hover over `word` in `line`, typed there
+ * - `hovered(line, word)`:  the hover over `word` in `line`'s last line, typed there
  */
 function projectIn(project: string, file: string, after: string) {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-components-"))
@@ -102,23 +115,28 @@ function projectIn(project: string, file: string, after: string) {
     const at = lines.findIndex((it) => it.includes(anchor))
     if (at < 0) throw new TypeError(`projectIn():  no line in ${file} says \`${anchor}\``)
     const indent = /^\s*/.exec(lines[at]!)![0] + (anchor === after ? "\t" : "")
-    lines.splice(at + 1, 0, `${indent}${line}`)
+    const written = line.split("\n")
+    lines.splice(at + 1, 0, ...written.map((it) => `${indent}${it}`))
     await workspace.update(uri, lines.join("\n"))
-    return { file: workspace.fileFor(uri)!, line: at + 1, indent: indent.length }
+    // its last line, where it ends
+    const last = written.at(-1)!
+    return { file: workspace.fileFor(uri)!, line: at + written.length, indent: indent.length, last }
   }
 
   return {
     async typed(line: string): Promise<CompletionItem[]> {
       const written = await write(line)
-      return service.completion(written.file, { line: written.line, character: written.indent + line.length }).items
+      const character = written.indent + written.last.length
+      return service.completion(written.file, { line: written.line, character }).items
     },
     async typedInAction(line: string): Promise<CompletionItem[]> {
       const written = await write(line, "set its turn to")
-      return service.completion(written.file, { line: written.line, character: written.indent + line.length }).items
+      const character = written.indent + written.last.length
+      return service.completion(written.file, { line: written.line, character }).items
     },
     async hovered(line: string, word: string): Promise<Hover | null> {
       const written = await write(line)
-      const character = written.indent + line.indexOf(word) + 1
+      const character = written.indent + written.last.indexOf(word) + 1
       return service.hover(written.file, { line: written.line, character }, "plain")
     }
   }

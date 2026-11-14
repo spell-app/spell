@@ -1101,6 +1101,8 @@ want you to just do it").
        answer on their threads", with "their revisit note on P3, made a comment"
      - answer it on its thread, as 3b says;  a note `wait` never took (`/airplane land`) becomes one, answered, at
        `inbox clear`
+   - A comment's words holding `![picture](<path>)`:  a picture they pasted in it (epic `epic-engine` I267), its path
+     the page's URL path;  look at it (`Read` on `$(epic config contentFolder)<path>`) before answering.
    - Then each "to talk over" left (a pick "B, but ...", a picture, their comments in its text), one at a time:
      - `status ... underway "<reading>"` as you take it up.
      - Answer their note INTO the item, as a reply:  `details --append`, with the reply markup of "revisit now" above.

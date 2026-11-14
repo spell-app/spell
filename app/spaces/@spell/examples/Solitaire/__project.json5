@@ -8,10 +8,6 @@
       "active": true
     },
     {
-      "path": "/Card.editor.spell",
-      "active": true
-    },
-    {
       "path": "/Deck.spell",
       "active": true
     },
@@ -25,6 +21,10 @@
     },
     {
       "path": "/styles.css",
+      "active": true
+    },
+    {
+      "path": "/Card.editor.spell",
       "active": true
     }
   ]

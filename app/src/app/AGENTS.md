@@ -149,14 +149,19 @@ and in the app's build folder, `app/` at the app folder's root.
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
     - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;  one undo takes them back
-    - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59)
+    - a paste takes the indent where it lands, a drawing's markup laid out as a tree (epic `editor` I53, I59);
+      Cmd+V and the right-click menu's Paste alike (I63)
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
       and closing tag, a body;  one undo
+  - Enter after an opening tag (`<content>`, `<toolbar class="x">`) goes in a level;  between `<x>` and `</x>`,
+    the caret a level in and the closing tag on its own line (epic `editor` I65):  Spell's Enter rules,
+    `SpellMonaco.CONFIGURATION`, with VS Code's `language-configuration.json` kept the same by a test
   - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,
     a property after `its` / `'s` / `of`, ONE list, `SUGGEST_WHERE_IT_HELPS` in `codePopups.ts`;
     "Settings…" › "Suggest as you type" makes it everywhere, or never.
     - Spell UI's tags and attributes say what each is, as listed and on hover:  the language service reads them
       through the component pack (`SP.ComponentPacks.help()`), from Spell UI's help table, `help.generated.ts`.
+      On every line of a tag split over several, too (I64).
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:

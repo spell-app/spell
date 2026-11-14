@@ -45,6 +45,7 @@ import {
   EDITOR_PIECES,
   isDraftEditor,
   loadEditorSpell,
+  type DrawnByTheEditor,
   type EditorSpell,
   type SpellEditorApp
 } from "spell/app/app/layout/layoutSpell"
@@ -118,11 +119,6 @@ export function SpellEditor(props: { mode: Mode }) {
   }))
   // the compiled code beside the code, while there's room:  a narrow column keeps the code
   const [codeWidth, setCodeWidth] = createSignal(0)
-  const watchCodeWidth = (column: Element) => {
-    const watcher = new ResizeObserver(([entry]) => setCodeWidth(entry!.contentRect.width))
-    watcher.observe(column)
-    onCleanup(() => watcher.disconnect())
-  }
   const outputTarget = () => (codeWidth() >= OUTPUT_ROOM ? CodeOutputShown.target : undefined)
   const codeColumns = rememberedSizes(() => ({
     id: "spellEditor-code-output",
@@ -131,7 +127,7 @@ export function SpellEditor(props: { mode: Mode }) {
   const parts = {
     code: {
       draw: () => (
-        <div class="SplitPane" ref={watchCodeWidth}>
+        <WidthWatchedPane onWidth={setCodeWidth}>
           <Show when={!hidesCode()}>
             <ui-split-panel class="EditorCodeOutput" columns={codeColumns.sizes()} resizable>
               <div class="SplitPane">
@@ -146,7 +142,7 @@ export function SpellEditor(props: { mode: Mode }) {
               </Show>
             </ui-split-panel>
           </Show>
-        </div>
+        </WidthWatchedPane>
       )
     },
     programPanel: {
@@ -179,10 +175,7 @@ export function SpellEditor(props: { mode: Mode }) {
     grows: appGrows(hidesCode()),
     mode: hidesCode() ? "run" : "edit"
   })
-  const layout = drawnView(
-    (app) => app.editorLayout,
-    () => ({ ...parts, ...settings() })
-  )
+  const layout = drawnView((app) => app.editorLayout, parts, settings)
   createEffect(
     () => [layout.thing(), settings()] as const,
     ([thing, changed]) => {
@@ -224,14 +217,38 @@ export function SpellEditor(props: { mode: Mode }) {
 }
 
 /**
+ * A pane, `<div class="SplitPane">`, that tells `onWidth` its width, as it draws and each time it changes.
+ * - Watched from when it's drawn till it goes:  `onSettled()`, as a ref callback has no owner to clean up with.
+ */
+function WidthWatchedPane(props: { onWidth: (width: number) => void; children: JSX.Element }) {
+  let pane: HTMLDivElement | undefined
+  onSettled(() => {
+    const watcher = new ResizeObserver(([entry]) => props.onWidth(entry!.contentRect.width))
+    watcher.observe(pane!)
+    return () => watcher.disconnect()
+  })
+  return (
+    <div class="SplitPane" ref={(element: HTMLDivElement) => (pane = element)}>
+      {props.children}
+    </div>
+  )
+}
+
+/**
  * The view `viewOf()` picks of the editor's own Spell (`SpellEditor.spell`), once it's loaded, and its drawing.
- * - `values()`:  what it's given before it first draws:  the things it draws, and its settings.
+ * - What it's given before it first draws:
+ *   - `parts`:  what the editor draws in its places, each made one of its editor parts (`EditorSpell.parts()`)
+ *   - `settings()`:  its settings, read then
  * - Drawn in place, with no element of its own (`EditorSpell.drawInPlace()`):  the editor's sheets reach it.
  * - The page's hero stays up while it loads (`PageLoading`).
  * - Call in a component body.
  * - NEVER throws:  Spell that won't load says so on the console, and `isBroken()`, for a plain stand-in.
  */
-function drawnView(viewOf: (app: SpellEditorApp) => Record<string, unknown>, values: () => object) {
+function drawnView(
+  viewOf: (app: SpellEditorApp) => Record<string, unknown>,
+  parts: Record<string, DrawnByTheEditor>,
+  settings?: () => object
+) {
   const [spell, setSpell] = createSignal<EditorSpell>()
   const [isBroken, setBroken] = createSignal(false)
   let isGone = false
@@ -244,7 +261,7 @@ function drawnView(viewOf: (app: SpellEditorApp) => Record<string, unknown>, val
     .then(
       (loaded) => {
         if (isGone) return
-        Object.assign(viewOf(loaded.editor), values())
+        Object.assign(viewOf(loaded.editor), loaded.parts(parts), settings?.())
         setSpell(() => loaded)
       },
       (problem: unknown) => {
@@ -298,13 +315,16 @@ export function AppPane() {
   const isEditorPiece = tracked(() => !isDraftEditor && !!editor.project?.path.startsWith(`${EDITOR_PIECES}/`))
   // the app area, once drawn:  the notebook's frame watches the program's drawing in it
   let program: HTMLDivElement | undefined
+  // the body, watched while it's drawn:  `onSettled()`, as a ref callback has no owner to clean up with
+  let body: HTMLDivElement | undefined
+  onSettled(() => Inspector.watch(body!))
   return (
     <div class="AppPane">
       <Show when={notebookPage()} keyed>
         {(page) => <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />}
       </Show>
       <SampleBar />
-      <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
+      <div class="AppPaneBody ui-content-size" ref={(area: HTMLDivElement) => (body = area)}>
         <Show when={isEditorPiece()}>
           <DraftEditorFrame />
         </Show>
@@ -583,10 +603,7 @@ export function EditorToolbar(props: { mode: Mode }) {
     },
     you: { draw: () => <Actions.you /> }
   }
-  const bar = drawnView(
-    (app) => app.editorBar,
-    () => parts
-  )
+  const bar = drawnView((app) => app.editorBar, parts)
   return (
     <div class="EditorBarPlace">
       {bar.drawing()}
