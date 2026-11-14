@@ -355,7 +355,8 @@ export class MarkupMarks extends TextMarks {
       before: spacer("input", "before"),
       after: spacer("input", "after")
     })
-    if (place >= 0) into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
+    if (place >= 0)
+      into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
   }
 
   ////////////////

@@ -710,7 +710,12 @@ export class SpellBubbly {
     const right = this.xOf(line, range.endColumn) + measures.inputSpacer
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
     // a tag's value in its tag's hue:  the layer draws it beside its tag's pill, not in it, so it can't inherit it
-    const classes = ["bubbly-input", isChoice && "bubbly-choice", isExpression && "bubbly-expression", inTag && `bubbly-${inTag}`]
+    const classes = [
+      "bubbly-input",
+      isChoice && "bubbly-choice",
+      isExpression && "bubbly-expression",
+      inTag && `bubbly-${inTag}`
+    ]
     const pill = element(classes.filter(Boolean).join(" "))
     return place(pill, { left, top, width: right - left }, measures.scale)
   }
