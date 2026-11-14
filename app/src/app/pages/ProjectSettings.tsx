@@ -53,7 +53,7 @@ export function ProjectSettings(props: ProjectSettingsProps) {
             editor.addEventListener("ui-cancelled", () => hide())
           }}
         >
-          <ui-property name="title" width="1/2" hint={appTexts.text("titleHint")}></ui-property>
+          <ui-property name="title" width="1/2"></ui-property>
           <ui-property name="version" width="1/2" apply="on leave"></ui-property>
           <ui-property name="listsStartAt" width="1/2" as="buttons"></ui-property>
           <ui-property name="targets" width="1/2" as={CHOICES}></ui-property>

@@ -50,9 +50,9 @@ export const APP_TEXTS = {
   partStepDuplicate: "Duplicate",
   partStepDelete: "Delete",
   partFromLoop:
-    "These all come from one place in the code, so one can't change on its own.  Select what holds them, or change the code.",
+    "These all come from one line of your program, so you can't change just one of them.  Pick the part that holds them all, or change that line.",
   partNotWritten:
-    "This isn't written as its own tag in your program, so it can't be moved or removed here.  Change the code instead.",
+    "This isn't a part of its own in your program, so you can't move or remove it here.  Change your program instead.",
   menuChangeThis: "Change This...",
   changeThisPrompt: "What should change?",
   changeThisNobody:
@@ -126,9 +126,9 @@ export const APP_TEXTS = {
   discardChanges: "Discard Changes",
   publish: "Publish",
   draft: "Draft",
-  draftTip: "You have changes not published yet:  only you see them.  Publish makes them everyone's.",
+  draftTip: "Only you can see these changes so far.  Click Publish to show them to everyone.",
   yourDraft: "Your draft",
-  yourDraftTip: "Only you see this until you publish.",
+  yourDraftTip: "Only you can see this until you click Publish.",
   discard: "Discard",
   versions: "Versions",
   published: "Published {count} file(s):  kept as version {version}.",
@@ -226,7 +226,7 @@ export const APP_TEXTS = {
   siteNewStory: "As a …, I want …, so that …\n\n\nIts description, after two blank lines",
   siteStoryDone: "Done",
   siteStoryMove: "Drag to move this story, or use the arrow keys",
-  siteStoryRemove: "Delete this story:  hold Option to skip asking",
+  siteStoryRemove: "Delete this story.  Hold Option to delete it without being asked first.",
   siteStoryConfirmRemove: "Delete this story?",
   siteChangeStories: "Change {name}'s stories",
   // the site's data, in the site editor's Data tab (epic `mockup` P11):  a NERD, its boxes turning over to their ERD
@@ -235,43 +235,45 @@ export const APP_TEXTS = {
   siteDataLoading: "Reading the site's places…",
   siteDataNone:
     "This site reads no place described by spell place ingest:  its project file lists none under development.apis.",
-  siteDataHint: "Click a box to turn it over to every field, and to edit its sample rows.  Drag boxes to move them.",
+  siteDataHint:
+    "Click a box to turn it over and see everything it holds, and to change its sample rows.  Drag a box to move it.",
   siteDataColumns: "Columns",
   siteDataErdTitle: "{box}:  every field",
   siteDataTurnBack: "Turn back",
   siteDataId: "id",
   siteDataSamples: "{box}:  sample rows",
   siteDataStartAgain: "Start again",
-  inspectorNotSavedCode: "This comes from code, so this change won't be saved.",
+  inspectorNotSavedCode: "Your program works this out for itself, so a change here won't be kept.",
   inspectorNotSavedRunning: "The app sets this as it runs, so this change won't be saved.",
   inspectorShowCode: "Show the code",
-  inspectorNotSavedNoStart: "The code gives this no starting value, so this change won't be saved.",
-  inspectorNotSavedTypeSets: "All {types} start with this, so change it on All {types}.",
-  inspectorUnsavedAuto: "You can't save this because it is created automatically.",
+  inspectorNotSavedNoStart: "Your program doesn't give this a starting value, so a change here won't be kept.",
+  inspectorNotSavedTypeSets: "Every one of the {types} starts with this.  To change it, pick All {types} first.",
+  inspectorUnsavedAuto: "Spell makes this for you, so a change here can't be kept.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
   inspectorScopeThis: "This",
   inspectorScopeThese: "These {count} {Types}",
-  inspectorUnsavedSomeAuto: "Some can't be changed because they are created automatically.",
+  inspectorUnsavedSomeAuto: "Spell makes some of these for you, so those can't be changed.",
   inspectorSelectedMany: "{count} {kind}",
   inspectorSelectedParts: "{count} parts",
   inspectorNothingShared: "These have no fields in common.",
   inspectorScopeAll: "All {Types}",
   inspectorScopeLabel: "What a change applies to",
   inspectorOriginHere: "Set here",
-  inspectorOriginNotSet: "Nothing in the code sets this",
-  inspectorOriginDefaults: "From ui-defaults, in {file}",
+  inspectorOriginNotSet: "Nothing in your program sets this",
+  inspectorOriginDefaults: "The usual value for this kind of part, set in {file}",
   inspectorOriginType: "From {type}",
   inspectorOriginAll: "The starting value of every {type}",
   inspectorOriginLine: "Comes from the line that makes it",
-  inspectorOriginCode: "Worked out in the code",
+  inspectorOriginCode: "Your program works this out",
   inspectorOriginNoStart: "The code gives this no starting value",
   inspectorDataReal: "Real data · {place}",
   inspectorDataSample: "Sample · {place}",
   inspectorDataReadOnly: "Read only · {place}",
   inspectorDataWorkedOut: "From {places}",
-  inspectorDataFrom: "The real data:  kept in {place}, among its {collection}.  A change here is saved there.",
+  inspectorDataFrom:
+    "This is real data, kept in {place} with its other {collection}.  A change here is saved there too.",
   inspectorDataFromSample:
-    "A sample stands in for {place}:  a change here stays in this browser, and never reaches it.",
+    "This is made-up sample data standing in for {place}.  A change here stays on this computer and never reaches it.",
   inspectorDataWhyNotPlace: "Read only:  {place} takes no changes.",
   inspectorDataWhyNotOwner: "Read only:  this isn't yours to change in {place}.",
   inspectorDataWhyNotField: "Read only:  {place} doesn't let this field change.",
@@ -282,7 +284,8 @@ export const APP_TEXTS = {
   inspectorDataWhyNotUsedUp: "Used up:  you've asked {place} for every invitation you have.",
   inspectorDataWorkedOutFrom: "Worked out from what it reads in {places}:  change those instead.",
   inspectorDataSourceReal: "Real data, kept in {place}:  what you change here is saved there.",
-  inspectorDataSourceReadOnly: "Kept in {place}, which takes no changes here.  Try a sample to change it.",
+  inspectorDataSourceReadOnly:
+    "This is kept in {place}, which doesn't let you change it from here.  Use a sample to try changes.",
   inspectorDataSourceSample: "Sample data for {place}:  nothing you change here reaches it.",
   inspectorDataUseSample: "Use a sample",
   inspectorDataChanges: "Change Data",
@@ -296,7 +299,7 @@ export const APP_TEXTS = {
   inspectApp: "Inspect App",
   stopInspecting: "Stop Inspecting",
   inspectHelp:
-    "Click a part of the app to inspect it.  Alt-click for a part inside it.  Shift or ⌘ for several, or drag across the background.  Esc stops.",
+    "Click a part of your app to see what it is.  Alt-click picks a part inside it.  Hold Shift or ⌘ to pick several, or drag across an empty spot.  Press Esc when you're done.",
   inspectHelpClose: "Close",
   notSaved: "Not saved",
 
@@ -308,7 +311,7 @@ export const APP_TEXTS = {
   javascriptOutput: "Javascript Output",
   programOutput: "Output",
   spellTree: "Spell Tree",
-  spellTreeHint: "Put the cursor on a line to see its spell tree.",
+  spellTreeHint: "Click a line of your program to see how Spell reads it.",
   loadingEditor: "Loading editor…",
   errorContext: "Context:",
   errorParams: "Params:",
@@ -391,7 +394,7 @@ export const APP_TEXTS = {
   "Type.guide": "Guide",
   "theType.guide": "the guide",
   "title.guide": "Guides",
-  "description.guide": "Usage guides",
+  "description.guide": "Step-by-step guides to Spell",
   "type.site": "site",
   "Type.site": "Site",
   "theType.site": "the site",
@@ -401,7 +404,8 @@ export const APP_TEXTS = {
   "Type.library": "Library",
   "theType.library": "the library",
   "title.library": "Libraries",
-  "description.library": "Libraries other apps import, e.g. `@spell/library/people` in an app's `__project.json5`",
+  "description.library":
+    "Parts other apps can use, like a list of people.  An app names the ones it uses in its project file.",
   "type.piece": "piece",
   "Type.piece": "Piece",
   "theType.piece": "the piece",
@@ -452,7 +456,7 @@ export const APP_TEXTS = {
   loading: "Loading…",
   members: "Members",
   spell: "Spell",
-  showWhereDefined: "Show where it's defined",
+  showWhereDefined: "Show the line that makes this",
   rules: "Rules",
   compiledOutput: "Compiled Output",
   clickToEdit: "Click to edit",
@@ -492,9 +496,9 @@ export const APP_TEXTS = {
   // a .spell file's code spell, the text it reads as (epic `elemental-spell` P8)
   inspector: "Inspector",
   inspectorInspect: "Inspect app",
-  inspectorTip: "Select a part of the app with the crosshairs, to see what it is and change it.",
+  inspectorTip: "Click the crosshairs, then click a part of your app to see what it is and change it.",
   inspectorInspecting:
-    "Click a part of the app;  Alt-click for any part inside it.  Hold Shift or ⌘ for several, or drag across the background.  Esc stops.",
+    "Click a part of your app to pick it.  Alt-click picks a part inside it.  Hold Shift or ⌘ to pick several, or drag across an empty spot.  Press Esc when you're done.",
   inspectorText: "Text",
   inspectorBuiltIn: "Built in",
   inspectorItems: "Its {count} items",
@@ -577,7 +581,8 @@ export const APP_TEXTS = {
   thisApp: "This app",
   thisPage: "This page",
   paletteNewView: "View",
-  paletteNewViewTip: "A view of this page's own:  drawn later in it by its name",
+  paletteNewViewTip:
+    "A new piece of this page, with a name of its own.  Write that name further down the page to show it there.",
   javascriptTab: "JavaScript",
   treeTab: "Sentence",
 
@@ -630,13 +635,15 @@ export const APP_TEXTS = {
 
   projectSettings: "{title} settings",
   projectSettingsHeading: "Project Settings",
-  titleHint: "Its folder's name, as words, when left empty.",
-  titleTip: "The app's name for people, in the app list and the editor's title bar.",
-  versionTip: "Its version, as `1.2.0`:  stamped on what it declares, for apps that import it.",
+  titleTip: "Your app's name, as people see it:  in your list of apps, and at the top of the editor.",
+  versionTip:
+    "Which version of your app this is:  three numbers with dots, like 1.2.0.  Raise it when you change the app, so other apps that use yours can tell which one they have.",
   targetsLabel: "Also compiles to",
-  targetsTip: "Languages it compiles to as well as JavaScript, which it always does.",
+  targetsTip:
+    "Spell turns your app into JavaScript, the language web browsers run, every time.  Pick a language here to get a copy of your app in it too.",
   listsStartAtLabel: "Lists start at",
-  listsStartAtTip: "Where its lists start counting:  1 as spell does, or 0 as JavaScript and Python do."
+  listsStartAtTip:
+    "How your lists number their items.  At 1, the first item is number 1, the way people count.  At 0, it's number 0, the way JavaScript and Python count."
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

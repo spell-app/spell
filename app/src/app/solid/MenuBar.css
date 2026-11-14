@@ -57,6 +57,8 @@ ui-item.ProjectBarMenu::part(item) {
  */
 ui-popup.BarMenuPopup {
   --ui-popup-background: color-mix(in oklab, var(--ui-surface) 25%, var(--ui-background));
+  /* no space round its menus:  the popup pads them (a menu followed by hidden sub-menus took its bottom margin) */
+  --ui-menu-margin: 0;
 }
 ui-popup.BarMenuPopup::part(popup) {
   padding: 4px;

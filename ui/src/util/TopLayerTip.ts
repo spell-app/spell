@@ -17,6 +17,7 @@ export class TopLayerTip {
    * - `trigger`:  a selector inside the same shadow root.
    * - `showOnClick`:  a click on a trigger shows it at once, for as long as it keeps focus:  an info icon's, whose click does nothing else.
    *   Not for a trigger whose click does something, e.g. a section's title:  there, only keyboard focus shows it.
+   *   A click anywhere else hides it again, even where the browser keeps the focus on it (a dialog's empty space).
    * - Escape hides it, until the pointer or the focus comes back.
    * - NEVER throws.
    */
@@ -41,12 +42,17 @@ export class TopLayerTip {
       isHovering = false
       update()
     })
+    let stopWatchingClicks: (() => void) | undefined
     container.addEventListener("focusin", (event) => {
-      isFocused = isOnTrigger(event) && (showOnClick || (event.composedPath()[0] as Element).matches(":focus-visible"))
+      const focused = event.composedPath()[0] as HTMLElement
+      isFocused = isOnTrigger(event) && (showOnClick || focused.matches(":focus-visible"))
+      if (isFocused && showOnClick) stopWatchingClicks ??= TopLayerTip.blurOnClickElsewhere(focused, isOnTrigger)
       update()
     })
     container.addEventListener("focusout", () => {
       isFocused = false
+      stopWatchingClicks?.()
+      stopWatchingClicks = undefined
       update()
     })
     container.addEventListener("keydown", (event) => {
@@ -54,6 +60,20 @@ export class TopLayerTip {
       isHovering = isFocused = false
       update()
     })
+  }
+
+  /**
+   * Take the focus off `trigger` when the pointer goes down anywhere but a trigger;  returns `stop()`.
+   * - Why:  a click on a dialog's empty space leaves the focus where it was, so a tip shown by a click stayed up.
+   * - Blurring hides the sheet's `:focus` look too, and its `focusout` stops this.
+   */
+  private static blurOnClickElsewhere(trigger: HTMLElement, isOnTrigger: (event: Event) => boolean): () => void {
+    const onPointerDown = (event: PointerEvent) => {
+      if (!isOnTrigger(event)) trigger.blur()
+    }
+    const page = trigger.ownerDocument
+    page.addEventListener("pointerdown", onPointerDown, { capture: true })
+    return () => page.removeEventListener("pointerdown", onPointerDown, { capture: true })
   }
 
   /** Put `tip` in the top layer, or take it out.  NEVER throws:  one the browser can't show stays in its frame. */

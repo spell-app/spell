@@ -186,6 +186,11 @@
     border-end-start-radius: var(--_ui-modal-radius);
     border-end-end-radius: var(--_ui-modal-radius);
   }
+  /* Under the `heading` shorthand, the first slotted part isn't the box's top:  no rounded corners of its own
+     (the dialog clips its outer ones). */
+  .ui.modal > .header ~ slot::slotted(:first-child) {
+    --_ui-modal-radius: 0px;
+  }
 }
 
 /*******************************
