@@ -140,10 +140,10 @@ function Divider(): JSX.Element {
  * (Owen, 2026-11-06:  "Change the Spell menu in the editor to show the Examples menu").
  * - Opens the project's group's projects (`<ProjectsMenu>`):
  *   the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more.
- * - At its very top, About Spell (`SpellEditor.spell`'s `about menu`), which shows its `about box` (epic `editor` I94).
- * - Then Home (`Actions.showProjectChooser`), where the hat linked to before;
- *   then New Example (`Actions.createApp`:  New Guide among the guides), above the projects it adds to
- *   (Owen, 2026-11-14:  "Home and New Example should be at the top rather than the bottom").
+ * - At its top, one row, `SpellEditor.spell`'s `home row`:  Home, where the hat linked to before,
+ *   and About Spell, which shows its `about box` (epic `editor` I94, I114).
+ * - New Example (`Actions.createApp`:  New Guide among the guides) is the last of the projects it adds to
+ *   (Owen, 2026-11-14:  "Put <pen> New Example at the end of the list of examples").
  * - `useRunner`:  the one chosen opens in Run.
  * - The Spell UI site's:  "Spell Notebooks".
  * - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`).
@@ -161,20 +161,9 @@ export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
       })}
       label={<AppMarkLabel />}
       panel={() => (
-        <div class="SpellMenuPanel">
-          <SpellMenu spell={spell()} view={(app) => app.aboutMenu} />
-          {/* ticks:  room for one, as the projects have, so the icons line up with theirs */}
-          <ui-menu
-            direction="vertical"
-            size="small"
-            ticks=""
-            class={["SpellMenuHome", { wide: root().projects.length > PROJECTS_PER_COLUMN }]}
-            aria-label={appTexts.text("home")}
-          >
-            <Actions.showProjectChooser menu />
-            <Actions.createApp menu />
-            <Divider />
-          </ui-menu>
+        <div class={["SpellMenuPanel", { wide: rowCount(root().projects.length) > PROJECTS_PER_COLUMN }]}>
+          {/* `SpellEditor.spell`'s `home row`, its ticks room for one, as the projects have, so the icons line up */}
+          <SpellMenu spell={spell()} view={(app) => app.homeRow} />
           <ProjectsMenu useRunner={props.useRunner} label={root().words.title} />
         </div>
       )}
@@ -188,6 +177,7 @@ export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
  * - Each with its group's icon;  the one shown ticked.
  * - In columns of 10 when there are more (Owen:  "More examples should be in columns if there are more than 10");
  *   past 6 columns, longer ones, so the notebooks' 94 still fit across the window.
+ * - Last, New Example (`Actions.createApp`), in the columns as one more row (Owen, 2026-11-14, I114).
  * - `useRunner`:  the one chosen opens in Run.
  * - `label`:  its name for screen readers.
  ****************/
@@ -199,8 +189,8 @@ function ProjectsMenu(props: { useRunner?: boolean; label: string }): JSX.Elemen
       direction="vertical"
       size="small"
       ticks=""
-      class={["ProjectsSubMenu", { many: root().projects.length > PROJECTS_PER_COLUMN }]}
-      style={{ "--ProjectsSubMenu-rows": rowsFor(root().projects.length) }}
+      class={["ProjectsSubMenu", { many: rowCount(root().projects.length) > PROJECTS_PER_COLUMN }]}
+      style={{ "--ProjectsSubMenu-rows": rowsFor(rowCount(root().projects.length)) }}
       aria-label={props.label}
     >
       <For each={root().projects}>
@@ -211,6 +201,7 @@ function ProjectsMenu(props: { useRunner?: boolean; label: string }): JSX.Elemen
           </ui-action>
         )}
       </For>
+      <Actions.createApp menu />
     </ui-menu>
   )
 }
@@ -220,6 +211,11 @@ const PROJECTS_PER_COLUMN = 10
 
 /** The most columns `<ProjectsMenu>` makes:  more projects than they hold make each column longer. */
 const MOST_PROJECT_COLUMNS = 6
+
+/** How many rows `<ProjectsMenu>` holds for `projects` projects:  one more, New Example's. */
+function rowCount(projects: number): number {
+  return projects + 1
+}
 
 /** How many rows `<ProjectsMenu>` lists `count` projects in:  10, or more, so they take at most 6 columns. */
 function rowsFor(count: number): number {
@@ -535,6 +531,7 @@ function followEditor(spell: () => EditorSpell | undefined, values: () => Record
 function handOverActions(spell: EditorSpell) {
   const app = spell.editor
   const actions: Record<string, () => unknown> = {
+    home: () => editor.showProjectChooser(),
     aboutSpell: () => showAboutSpell(spell),
     renameProject: () => editor.renameApp(),
     deleteProject: () => editor.deleteApp(),

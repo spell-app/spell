@@ -13,7 +13,7 @@ spell editor is an app
 	"edit menu" is a new edit menu
 	"view menu" is a new view menu
 	"run menu" is a new run menu
-	"about menu" is a new about menu
+	"home row" is a new home row
 	"about box" is a new about box
 
 	group "What the Menus Follow"
@@ -72,6 +72,7 @@ spell editor is an app
 		// Duplicate the project
 
 	group "Spell"
+	to "home" with icon "home"
 	to "about spell" with title "About Spell…", icon "info circle"
 
 	group "The Project"
@@ -307,10 +308,11 @@ a "file tab bar" is a view
 			</toolbar>
 		</panel>
 
-an "about menu" is a view
-	// The top of Spell's menu, above Home and New Example:  About Spell
+a "home row" is a view
+	// The top of Spell's menu, over its projects:  Home, then About Spell (epic `editor` I114)
 	to draw it
-		<menu direction="vertical" size="small" class="SpellMenuAbout" ticks>
+		<menu direction="vertical" size="small" class="SpellMenuHome" ticks>
+			<action "home"/>
 			<action "about spell"/>
 			<divider/>
 		</menu>

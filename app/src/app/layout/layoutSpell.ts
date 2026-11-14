@@ -166,8 +166,8 @@ export type SpellEditorApp = Record<string, unknown> & {
   editMenu: BarMenuView
   viewMenu: BarMenuView
   runMenu: BarMenuView
-  /** The top of Spell's menu:  About Spell. */
-  aboutMenu: Record<string, unknown>
+  /** The top of Spell's menu:  Home and About Spell. */
+  homeRow: Record<string, unknown>
   /** What About Spell shows;  its `version` the editor's. */
   aboutBox: Record<string, unknown> & { version: string }
 }
