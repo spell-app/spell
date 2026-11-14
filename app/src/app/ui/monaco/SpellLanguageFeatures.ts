@@ -1,3 +1,5 @@
+import type { Position } from "vscode-languageserver"
+
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { codeHover } from "spell/app/app/ui/codePopups"
@@ -190,7 +192,22 @@ export class SpellLanguageFeatures {
     const at = LspToMonaco.lspPosition(position)
     const locations =
       method === "references" ? this.service.references(file, at, includeDeclaration) : this.service[method](file, at)
+    if (!locations.length && method === "definition") return this.helpLocation(file, at)
     return locations.map((location) => LspToMonaco.location(location))
+  }
+
+  /**
+   * Go to Definition on a Spell UI tag or attribute (`spacing="xs"`), which no file declares:
+   * its help, where it's written, rather than "No definition found" (epic `editor` I148).
+   * - A location in no file (`HELP_SCHEME`), at the word:  Monaco goes there, and `openAt()` shows the hover instead.
+   *   So F12, the right-click menu and ⌘-click all do it, and ⌘-hover underlines the word as a link.
+   * - `[]` where there's no help either.
+   */
+  private helpLocation(file: SP.SpellFile, position: Position): monaco.languages.Location[] {
+    const help = this.service.componentHover(file, position)
+    if (!help?.range) return []
+    const uri = monaco.Uri.from({ scheme: HELP_SCHEME, path: `/${file.path}` })
+    return [{ uri, range: LspToMonaco.range(help.range) }]
   }
 
   /** Other uses of the thing at `position` in `model`, as reads or writes. */
@@ -301,6 +318,11 @@ export class SpellLanguageFeatures {
     selectionOrPosition?: monaco.IRange | monaco.IPosition,
     source: monaco.editor.ICodeEditor | undefined = focusedEditor()
   ): boolean {
+    if (resource.scheme === HELP_SCHEME) {
+      // Go to Definition on a Spell UI tag or attribute:  its help, at the caret -- see `helpLocation()`
+      source?.trigger("spell", "editor.action.showHover", { focus: false })
+      return !!source
+    }
     const path = AppAddresses.pathOf(resource)
     if (path === undefined) return false
     if (!selectionOrPosition) return this.open(path, undefined, source)
@@ -327,6 +349,9 @@ export class SpellLanguageFeatures {
     return this.openAt(resource.with({ fragment: "" }), { lineNumber: line, column: 1 })
   }
 }
+
+/** Where Go to Definition goes for a Spell UI tag or attribute:  its help, shown in place -- see `helpLocation()`. */
+const HELP_SCHEME = "spell-help"
 
 /** Constructor props for `SpellLanguageFeatures`. */
 export type SpellLanguageFeaturesProps = {

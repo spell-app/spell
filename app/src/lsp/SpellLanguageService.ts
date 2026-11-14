@@ -758,9 +758,39 @@ export class SpellLanguageService {
    * `<button>` => "a component that ...";  `color` inside it => the attribute, what it is, the words it takes.
    * - Spell UI's, in the file's language (`SP.ComponentPacks.help()`).
    * - An attribute on a line of its own, under its tag's, too (epic `editor` I64):  see `openTagBefore()`.
-   * - `null` for anything else.
+   * - Public for the app's Go to Definition, which shows it where there's nothing to go to (epic `editor` I148).
+   * - `null` for anything else, the program's own views among them.
    */
-  private componentHover(file: SP.SpellFile, position: Position): Hover | null {
+  componentHover(file: SP.SpellFile, position: Position): Hover | null {
+    const at = this.markupWordAt(file, position)
+    if (!at) return null
+    const { word, scope, range } = at
+    const help = SpellLanguageService.componentHelpAt(scope)
+    if (!help) return null
+    const texts = LSP.LspTexts.of(scope)
+    let value: string | undefined
+    if (at.kind === "tag") {
+      const tag = !SpellLanguageService.ownViewOf(scope, word) && help.tags.find((it) => it.tag === word)
+      if (tag) value = [`**\\<${word}>** · ${texts.text("componentTag")}`, tag.description].filter(Boolean).join("\n\n")
+    } else if (!SpellLanguageService.ownViewOf(scope, at.tag)) {
+      const attribute = help.attributesOf(at.tag)?.find((it) => it.name === word)
+      if (attribute) {
+        const takes = attribute.values.map((it) => `\`${it}\``).join(" · ")
+        // `\<`:  a bare `<container>` reads as HTML, and shows nothing
+        const of = texts.text("attributeOf", { tag: at.tag }).replace(/</g, "\\<")
+        value = [`**${word}** · ${of}`, attribute.description, takes].filter(Boolean).join("\n\n")
+      }
+    }
+    return value ? { contents: { kind: MarkupKind.Markdown, value }, range } : null
+  }
+
+  /**
+   * The tag name or attribute name at `position`, in a drawing:  `stock-pile` in `<stock-pile "stock" />`,
+   * `suit` in `<foundation "clubs" suit=clubs />`.
+   * - An attribute on a line of its own, under its tag's, too (epic `editor` I64):  see `openTagBefore()`.
+   * - `undefined` anywhere else:  a quoted value, a `{...}`, text between tags, code.
+   */
+  private markupWordAt(file: SP.SpellFile, position: Position): MarkupWord | undefined {
     const text = file.parseText
     const offset = this.offsetAt(file, position)
     const lineStart = text.lastIndexOf("\n", offset - 1) + 1
@@ -770,33 +800,18 @@ export class SpellLanguageService {
     const start = at - /[\p{L}\p{M}\d-]*$/u.exec(line.slice(0, at))![0].length
     const end = at + /^[\p{L}\p{M}\d-]*/u.exec(line.slice(at))![0].length
     const word = line.slice(start, end)
-    if (!word || !/\p{L}/u.test(word)) return null
+    if (!word || !/\p{L}/u.test(word)) return undefined
     const scope = this.scopeAt(file, offset)
-    const help = SpellLanguageService.componentHelpAt(scope)
-    if (!help) return null
-    const texts = LSP.LspTexts.of(scope)
     const range = {
       start: { line: position.line, character: start },
       end: { line: position.line, character: end }
     }
     // a tag's attributes on lines of their own:  the tag's lines as one (epic `editor` I64)
     const before = openTagBefore(text, lineStart + start) ?? line.slice(0, start)
-    let value: string | undefined
-    if (/<\/?$/.test(before)) {
-      const tag = !SpellLanguageService.isOwnView(scope, word) && help.tags.find((it) => it.tag === word)
-      if (tag) value = [`**<${word}>** · ${texts.text("componentTag")}`, tag.description].filter(Boolean).join("\n\n")
-    } else {
-      const open = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*)?\s$/u.exec(before)
-      if (!open || isInQuotesOrBraces(open[2] ?? "") || SpellLanguageService.isOwnView(scope, open[1]!)) return null
-      const attribute = help.attributesOf(open[1]!)?.find((it) => it.name === word)
-      if (attribute) {
-        const takes = attribute.values.map((it) => `\`${it}\``).join(" · ")
-        value = [`**${word}** · ${texts.text("attributeOf", { tag: open[1]! })}`, attribute.description, takes]
-          .filter(Boolean)
-          .join("\n\n")
-      }
-    }
-    return value ? { contents: { kind: MarkupKind.Markdown, value }, range } : null
+    if (/<\/?$/.test(before)) return { kind: "tag", word, scope, range }
+    const open = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*)?\s$/u.exec(before)
+    if (!open || isInQuotesOrBraces(open[2] ?? "")) return undefined
+    return { kind: "attribute", word, tag: open[1]!, scope, range }
   }
 
   /**
@@ -1195,10 +1210,18 @@ export class SpellLanguageService {
   /**
    * Where the thing at `position` was declared -- several places for a property declared on several types.
    * - An imported one's, where its declarations say:  see `importedDeclaration()`.
+   * - In a drawing, a view's tag and its attributes too (epic `editor` I148):  see `drawnSubjectAt()`.
+   * - `[]` on Spell UI's tags and attributes:  the app shows their help instead (`componentHover()`).
    */
   definition(file: SP.SpellFile, position: Position): Location[] {
+    const drawn = this.drawnSubjectAt(file, position)
+    if (drawn) return this.definitionOf(drawn)
     const subject = this.subjectAt(file, position)
-    if (!subject) return []
+    return subject ? this.definitionOf(subject) : []
+  }
+
+  /** Where `subject` was declared:  in the workspace, else where an imported one's declarations say. */
+  private definitionOf(subject: LSP.SpellSubject): Location[] {
     const declared = this.declarationsOf(subject).map((it) => this.locationOf(it))
     const imported = declared.length ? undefined : this.importedDeclarationOf(subject)
     return imported ? [imported] : declared
@@ -1252,6 +1275,24 @@ export class SpellLanguageService {
   /** Where `subject` was declared, if it was imported:  see `importedDeclaration()`. */
   private importedDeclarationOf(subject: LSP.SpellSubject): Location | undefined {
     return subject.record ? this.importedDeclaration(subject.record) : undefined
+  }
+
+  /**
+   * The program's own type or property a drawing names at `position` (epic `editor` I148):
+   * - a view's tag:  `<stock-pile "stock" />` => the type `stock pile`
+   * - one of its attributes that's a property of that type:  `suit` in `<foundation "clubs" suit=clubs />`
+   * - `undefined` for anything else, Spell UI's tags and attributes among them:  their help is `componentHover()`.
+   */
+  private drawnSubjectAt(file: SP.SpellFile, position: Position): LSP.SpellSubject | undefined {
+    const at = this.markupWordAt(file, position)
+    if (!at) return undefined
+    const type = SpellLanguageService.ownViewOf(at.scope, at.kind === "tag" ? at.word : at.tag)
+    if (!type) return undefined
+    const nameMatch = this.matchesAt(file, position).at(-1) ?? file.match!
+    if (at.kind === "tag") return { kind: "type", record: type, nameMatch }
+    const name = at.word.replace(/-/g, " ")
+    const record = SP.MemberReadExpression.propertyOf(type, name)
+    return record ? { kind: "property", name, nameMatch, owner: type, record } : undefined
   }
 
   /**
@@ -1597,7 +1638,9 @@ export class SpellLanguageService {
     const file = declaredBy && this.fileOf(declaredBy)
     if (!declaredBy || !file) return []
     const declaration = declaredBy.rule.getDeclaration(declaredBy)
-    if (declaration && (subject.kind === "method" || SpellLanguageService.sameName(declaration.name, name))) {
+    // a type's record is named as it compiles, `StockPile`, its declaration as it's written, `stock pile`
+    const isType = subject.kind === "type" && declaration?.kind === "type"
+    if (declaration && (subject.kind === "method" || isType || SpellLanguageService.sameName(declaration.name, name))) {
       return [{ file, match: subject.kind === "method" ? declaration.nameMatch : this.nameLeaf(declaration) }]
     }
     // e.g. an argument, declared inside its method's signature
@@ -1960,7 +2003,12 @@ export class SpellLanguageService {
 
   /** Does `tag` name one of the program's own types (`<card>` in Solitaire), not a pack's component? */
   private static isOwnView(scope: P.Scope, tag: string): boolean {
-    return !!scope.getType(SP.typeName(tag))
+    return !!SpellLanguageService.ownViewOf(scope, tag)
+  }
+
+  /** The program's own type `tag` draws (`<stock-pile>` => `stock pile`), if it names one, not a pack's component. */
+  private static ownViewOf(scope: P.Scope, tag: string): P.TypeScope | undefined {
+    return scope.getType(SP.typeName(tag))
   }
 
   /** What the components a drawing in `scope` names are, in its language;  `undefined` while none can say. */
@@ -3092,6 +3140,16 @@ function openTagBefore(text: string, offset: number): string | undefined {
   }
   return written.replace(/\r?\n/g, " ")
 }
+
+/** A tag's or an attribute's name in a drawing, where it is -- see `SpellLanguageService.markupWordAt()`. */
+type MarkupWord = {
+  /** the name itself, `stock-pile` or `suit` */
+  word: string
+  /** scope it's drawn in */
+  scope: P.Scope
+  /** where it's written */
+  range: Range
+} & ({ kind: "tag" } | { kind: "attribute"; /** the tag it's an attribute of */ tag: string })
 
 /** Is the end of `text`, what's written inside a tag, inside a quoted value or a `{...}`? */
 function isInQuotesOrBraces(text: string): boolean {

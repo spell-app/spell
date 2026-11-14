@@ -93,16 +93,16 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
 
   test("hovering a tag or an attribute says what it is", async () => {
     const tag = await game.hovered('<button color="primary">New</button>', "button")
-    expect(textOf(tag)).toMatch(/\*\*<button>\*\* · a component/)
+    expect(textOf(tag)).toMatch(/\*\*\\<button>\*\* · a component/)
     const color = await game.hovered('<button color="primary">New</button>', "color")
-    expect(textOf(color)).toMatch(/\*\*color\*\* · attribute of <button>[\s\S]*`primary`/)
+    expect(textOf(color)).toMatch(/\*\*color\*\* · attribute of \\<button>[\s\S]*`primary`/)
   })
 
   test("a tag split over lines:  its attributes, and their words, on each line under it (epic `editor` I64)", async () => {
     expect(labels(await game.typed("<button fluid\n\tcol"))).toEqual(expect.arrayContaining(["color", "size"]))
     expect(labels(await game.typed('<button\n\tfluid\n\tcolor="'))).toEqual(expect.arrayContaining(["primary"]))
     const color = await game.hovered('<button fluid\n\tcolor="primary">New</button>', "color")
-    expect(textOf(color)).toMatch(/\*\*color\*\* · attribute of <button>/)
+    expect(textOf(color)).toMatch(/\*\*color\*\* · attribute of \\<button>/)
   })
 
   test("...but not once the tag is closed, nor on a line no further in than its tag", async () => {
