@@ -4,6 +4,7 @@ import { SP } from "spell/parser/spell"
 // Through the folder:  read only when called, once the folder has loaded
 import { DrawIt, DrawnLines } from "spell/parser/spell/rules/classes"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
+import { QuotedMember } from "spell/parser/spell/rules/properties"
 import { ParseError } from "spell/parser/spell/rules/ParseError"
 import { refuseWriteIfReadOnly } from "spell/parser/spell/rules/places/places.shared"
 import {
@@ -251,7 +252,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const owner = SpellJSX.drawingThingOf(scope)
     if (!view || !owner || !element.quotedWord) return undefined
     const name = textOf(element.quotedWord.value)
-    if (!name || owner.getMember(name)) return undefined
+    if (!name || owner.getMember(QuotedMember.nameOf(name))) return undefined
     return { owner: owner.name, name, view: view.name }
   }
 
@@ -268,7 +269,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const name = element.quotedWord && textOf(element.quotedWord.value)
     if (!owner || !name) return undefined
     // said on a line of its own:  only drawn
-    if (owner.getMember(name)) return { owner: owner.name, name, datatype, drawnOnly: true }
+    if (owner.getMember(QuotedMember.nameOf(name))) return { owner: owner.name, name, datatype, drawnOnly: true }
     return { owner: owner.name, name, datatype }
   }
 
@@ -410,7 +411,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     // a value declared where it's drawn, `<number "score"/>`:  drawn as `{the score}` is
     const { declares } = match.data
     if (declares?.datatype) {
-      const read = new P.ASTPropertyExpression(match, { object: new P.ASTSelfLiteral(match), property: declares.name })
+      const read = new P.ASTPropertyExpression(match, {
+        object: new P.ASTSelfLiteral(match),
+        property: QuotedMember.nameOf(declares.name)
+      })
       return new P.ASTJSXExpression(match, { expression: read }) as unknown as P.ASTJSXElement
     }
     // a chain branch alone, in no element (an error), or an `<html>` block:  its children, drawn as they are

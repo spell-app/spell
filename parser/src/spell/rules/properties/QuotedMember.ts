@@ -27,7 +27,7 @@ export class QuotedMember extends P.Rule {
       rule: this,
       matched: [token],
       raw: words.join(" "),
-      value: words.map((word) => word.replace(/-/g, "_")).join("_"),
+      value: QuotedMember.nameOf(words.join(" ")),
       tokens: [token],
       scope
     })
@@ -39,6 +39,19 @@ export class QuotedMember extends P.Rule {
 
   getAST(match: P.MatchFor<this>) {
     return new P.ASTPropertyLiteral(match)
+  }
+
+  /**
+   * A member's name as code names it, from its words as written:  `short rank` => `short_rank`, `face-up` => `face_up`.
+   * - Every member named in quotes goes through it:  `its "short rank"`, and a drawing's tag, `<discard-pile "discard pile"/>`
+   *   (epic `language` I86).
+   */
+  static nameOf(written: string): string {
+    return written
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.replace(/-/g, "_"))
+      .join("_")
   }
 
   /** A declaration names the member without its quotes, e.g. `short rank`. */

@@ -268,7 +268,10 @@ export const STORIES_TAG = "stories"
 export type DrawnDeclaration = {
   /** The thing's type, whose member it is, e.g. `Solitaire`. */
   owner: string
-  /** The member's name, the tag's quoted word:  `C1`, `score`. */
+  /**
+   * The member's name as written, the tag's quoted word:  `C1`, `discard pile`.
+   * - As code names it:  `QuotedMember.nameOf()`, `discard_pile`.
+   */
   name: string
   /** A view:  its type's name, `Column`;  made new, its id the member's name, its attributes its starting values. */
   view?: string
