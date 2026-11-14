@@ -108,8 +108,8 @@
   /* its corners cut, but its top-left, square:  the rail runs into it */
   --bubbly-foot-tiny-cut: 4px;
   /* its words this far in from its ends */
-  --bubbly-foot-tiny-pad-left: 9px;
-  --bubbly-foot-tiny-pad-right: 9px;
+  --bubbly-foot-tiny-pad-left: 14px;
+  --bubbly-foot-tiny-pad-right: 14px;
   /* its `</>` this dark:  readable, still lighter than a start tag's words (Owen:  "don't dim the text so much") */
   /* an end tag's name, in a line:  lighter than its start tag's */
   --bubbly-end-name-ink: color-mix(in srgb, var(--bubbly-ink) 45%, var(--bubbly-paper));
