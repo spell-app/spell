@@ -654,6 +654,46 @@ describe("File > Export and Import", () => {
     expect(Buffer.from(await read.arrayBuffer())).toEqual(PICTURE)
   })
 
+  it("Import's way in keeps everything as drafts:  a project of its project file alone, each source then your draft, in the file's order", async () => {
+    const json = (body: object) => JSON.stringify(body)
+    const projectId = "owen@spell/Imported"
+    const projectFile =
+      '{\n  // as the archive wrote it\n  imports: [{ path: "/B.spell", active: true }, { path: "/A.spell", active: true }]\n}\n'
+    // `SPACES.SpellProjectRoot.importApp()`:  the project made of its project file, then every other file
+    const made = await request(
+      "POST",
+      "/api/projects/create/project",
+      json({ projectId, filePath: "/__project.json5", contents: projectFile }),
+      "application/json"
+    )
+    expect(made.status).toBe(200)
+    for (const name of ["A", "B"]) {
+      const reply = await request(
+        "POST",
+        "/api/projects/create/file",
+        json({ projectId, filePath: `/${name}.spell`, contents: `# ${name}\n` }),
+        "application/json"
+      )
+      expect(reply.status).toBe(200)
+    }
+    const index = (await request("GET", `/api/projects/index/${projectId}`)).json()
+    expect(index.imports.map(({ path, contents }: { path: string; contents: string }) => [path, contents])).toEqual([
+      ["/B.spell", "# B\n"],
+      ["/A.spell", "# A\n"]
+    ])
+    // nothing public but the project file, as written:  no file made up for a project with none listed
+    expect(
+      fs
+        .readdirSync(fixturePath("user/Imported"))
+        .filter((name) => !name.startsWith("__draft"))
+        .sort()
+    ).toEqual(["__project.json5"])
+    expect(readFixture("user/Imported/__project.json5")).toBe(projectFile)
+    expect(fs.readdirSync(fixturePath("user/Imported/__draft")).filter((name) => name.endsWith(".spell"))).toHaveLength(
+      2
+    )
+  })
+
   it("GET /api/projects/files/<project> lists every file:  pictures and the project file, never what's built or drafted", async () => {
     writeFixture("user/Proj/notes.txt", "a note\n")
     writeFixture("user/Proj/Proj.declarations.json5", "{}\n")

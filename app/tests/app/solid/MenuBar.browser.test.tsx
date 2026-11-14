@@ -28,13 +28,26 @@ describe("<AppBarMenus>", () => {
     await waitForCondition(() => names().length === 5)
     expect(names()).toEqual(["File", "Edit", "View", "Run", "Help"])
     // on a tablet's width they fold into one ☰ menu, each a sub-menu, from the same Spell (epic `editor` I46)
-    const folded = [...host.querySelectorAll("ui-popup[for=FoldedBarMenu] ui-menu.BarMenuItems > ui-action")]
-    expect(folded.map((row) => [row.textContent?.trim(), row.getAttribute("data-sub")])).toEqual([
-      ["File", "fileMenu"],
-      ["Edit", "editMenu"],
-      ["View", "viewMenu"],
-      ["Run", "runMenu"],
-      ["Help", "helpMenu"]
+    // each a `<ui-submenu>` row, its fly-out a menu of the panel's own, by id
+    const folded = [...host.querySelectorAll("ui-popup[for=FoldedBarMenu] ui-menu.BarMenuItems > ui-submenu")]
+    expect(folded.map((row) => [row.getAttribute("label"), row.getAttribute("menu")])).toEqual([
+      ["File", "FoldedFileBarMenu"],
+      ["Edit", "FoldedEditBarMenu"],
+      ["View", "FoldedViewBarMenu"],
+      ["Run", "FoldedRunBarMenu"],
+      ["Help", "FoldedHelpBarMenu"]
+    ])
+    // File and View tick what's on, as the bar's own do
+    const ticked = [...host.querySelectorAll("ui-popup[for=FoldedBarMenu] ui-menu.BarFlyout")].map((menu) => [
+      menu.id,
+      menu.hasAttribute("ticks")
+    ])
+    expect(ticked).toEqual([
+      ["FoldedFileBarMenu", true],
+      ["FoldedEditBarMenu", false],
+      ["FoldedViewBarMenu", true],
+      ["FoldedRunBarMenu", false],
+      ["FoldedHelpBarMenu", false]
     ])
 
     const file = host.querySelector("ui-popup[for=FileBarMenu] ui-menu.BarMenuItems")!
@@ -80,8 +93,9 @@ describe("<ProjectBarMenu>", () => {
     const host = await mount(() => <ProjectBarMenu />)
     const menu = host.querySelector("ui-popup[for=ProjectBarMenu] ui-menu.BarMenuItems")!
     await waitForCondition(() => menu.children.length > 0)
+    // a `<ui-submenu>`'s words are its `label`
     const items = [...menu.children].map((item) =>
-      item.getAttribute("kind") === "divider" ? "─" : (item.textContent?.trim() ?? "")
+      item.getAttribute("kind") === "divider" ? "─" : (item.getAttribute("label") ?? item.textContent?.trim() ?? "")
     )
     expect(items).toEqual([
       expect.stringMatching(/^Rename/),
@@ -102,20 +116,56 @@ describe("<ProjectBarMenu>", () => {
       "─",
       "Home"
     ])
+    // Theme ›:  Spell UI's theme menu in its menu mode, then Edit Theme…, in the fly-out its row names
+    const theme = menu.querySelector("ui-submenu")!
+    const flyout = host.querySelector(`ui-popup[for=ProjectBarMenu] ui-menu#${theme.getAttribute("menu")}`)!
+    expect(flyout.querySelector("ui-theme-menu")?.getAttribute("show")).toBe("menu")
+    expect(flyout.lastElementChild?.textContent?.trim()).toMatch(/^Edit theme/)
   })
 })
 
 describe("<BarMenu>", () => {
-  test("a sub-menu's panel shows while its row is chosen;  a divider left first hides itself", async () => {
+  test("a <ui-submenu> row opens its fly-out, and stays;  choosing an action in it closes the menu", async () => {
+    const chosen = vi.fn()
     const host = await mount(() => (
-      <BarMenu id="TestBarMenu" label="Test" name="Test" subMenus={{ more: () => <p class="MorePanel">more</p> }}>
+      <BarMenu
+        id="TestBarMenu"
+        label="Test"
+        name="Test"
+        flyouts={() => (
+          <ui-menu id="TestFlyout" popover="manual" direction="vertical" class="BarFlyout" aria-label="More">
+            <ui-action onClick={chosen}>Deeper</ui-action>
+          </ui-menu>
+        )}
+      >
         <ui-action kind="divider" />
         <ui-action>One</ui-action>
+        <ui-submenu label="More" menu="TestFlyout" />
       </BarMenu>
     ))
-    const panel = host.querySelector<HTMLElement>(".BarSubMenu[data-sub=more]")!
-    expect(panel.hidden).toBe(true)
+    // a divider left first hides itself
     expect(getComputedStyle(host.querySelector("ui-menu.BarMenuItems > ui-action[kind=divider]")!).display).toBe("none")
+
+    const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=TestBarMenu]")!
+    popup.visible = true
+    flush()
+    await ElementFixture.settle(host)
+    const flyout = host.querySelector<HTMLElement>("#TestFlyout")!
+    expect(flyout.matches(":popover-open")).toBe(false)
+
+    // its row clicked:  the fly-out opens beside it, and the menu stays open
+    host.querySelector("ui-submenu")!.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
+    flush()
+    await ElementFixture.settle(host)
+    expect(flyout.matches(":popover-open")).toBe(true)
+    expect(popup.visible).toBe(true)
+
+    // an action in the fly-out:  it runs, and the whole menu closes
+    flyout.querySelector<HTMLElement>("ui-action")!.click()
+    flush()
+    await ElementFixture.settle(host)
+    expect(chosen).toHaveBeenCalledTimes(1)
+    expect(popup.visible).toBe(false)
   })
 })
 

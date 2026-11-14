@@ -668,6 +668,9 @@ The top bar, left to right ([MenuBar.tsx](src/app/solid/MenuBar.tsx)):
 - the project's menu:  the project's name, bold
   - Rename, Delete, Duplicate, Reset to Saved, ─, Publish, Versions, Delete Draft, ─, Project Settings, ─,
     Export…, Import…, ─, Theme ›, ─, Home
+  - Import…:  a new project from a zip, each page and its source your draft until you Publish;
+    its project file, and pictures (a draft holds text alone), written as they are
+  - Theme › and the ☰ menu's File ›, Edit › ...:  Spell UI's `<ui-submenu>`, opening on hover, a click, Enter or →
 - File · Edit · View · Run · Help, each item showing its key
   - File:  New Spell File (⌥⌘N:  ⌘N is the browser's New Window), New CSS File, ─, Save, AutoSave, ─,
     Duplicate File, Revert Changes to the file

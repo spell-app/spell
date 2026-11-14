@@ -22,14 +22,22 @@ class PretendServer {
   /** every file, by its address */
   readonly files = new Map<string, string | Uint8Array>()
 
+  /** what was asked, in order:  each route, and the file it names, if any */
+  readonly asked: string[] = []
+
   /** `LoadableFile.fetch`'s stand-in. */
   fetch = async ($params: $FetchParams): Promise<any> => {
     const { url } = $params
     const body = $params.contents as Record<string, any>
+    this.asked.push(body?.filePath ? `${url} ${body.filePath}` : url)
     if (url.startsWith(SP.SpellUrls.LIST)) return this.list()
     if (url === "/api/projects/create/project") {
       this.write(`${body.projectId}/${body.filePath.replace(/^\//, "")}`, body.contents)
-      if (body.title) this.write(`${body.projectId}/${SP.PROJECT_FILE}`, JSON.stringify({ title: body.title }))
+      // the title into its project file, unless it says it already (the server's `setProjectTitle()`)
+      const projectFile = this.files.get(`${body.projectId}/${SP.PROJECT_FILE}`)
+      if (body.title && !(typeof projectFile === "string" && projectFile.includes(body.title))) {
+        this.write(`${body.projectId}/${SP.PROJECT_FILE}`, JSON.stringify({ title: body.title }))
+      }
       return this.list()
     }
     if (url === "/api/projects/create/file") {
@@ -123,6 +131,22 @@ describe("SpellProjectRoot:  File > Export, then Import", () => {
     expect([...(copy("/pictures/logo.png") as Uint8Array)]).toEqual([...PICTURE])
     // its project file as it was, comments and all, so its title and its files' order are the original's
     expect(copy(`/${SP.PROJECT_FILE}`)).toBe(projectFile)
+    // made of its project file alone, then every other file, the first one too, so each page and its source is
+    // your draft until you Publish (epic `mockup` T33:  which are drafts is the server's, `isDraftable()`);
+    // its index not read till they're all written:  read with no file listed, the server would make one up
+    const asked = server.asked.slice(server.asked.indexOf(`/api/projects/create/project /${SP.PROJECT_FILE}`))
+    expect(asked.filter((each) => each.includes("/create/"))).toEqual(
+      expect.arrayContaining([
+        `/api/projects/create/project /${SP.PROJECT_FILE}`,
+        "/api/projects/create/file /First.spell",
+        "/api/projects/create/file /Second.spell",
+        "/api/projects/create/file /Button/Usage.spell",
+        "/api/projects/create/file /pictures/logo.png"
+      ])
+    )
+    expect(asked.filter((each) => each.includes("/create/"))).toHaveLength(5)
+    const written = asked.findLastIndex((each) => each.includes("/create/file"))
+    expect(asked.slice(0, written).filter((each) => each.startsWith(SP.SpellUrls.INDEX))).toEqual([])
   })
 
   test('keep: "text" (the static build) leaves pictures and the project file out, but keeps the title', async () => {
