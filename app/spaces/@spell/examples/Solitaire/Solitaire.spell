@@ -5,13 +5,12 @@
 // Each pile is declared where it's drawn, `<column "C1"/>`, and so is the score, `<number "score"/>`.
 
 solitaire is an app
-	"deck" is a new deck
-
 	when creating solitaire
 		add each card in the deck to the stock
 		restart the game
 
 	to draw it
+		<deck "deck"hidden />
 		<segment inverted attach="top" >
 			<toolbar class="GameBar" appearance="pills" inverted size="small" shrinkable>
 				<text slot="title" size="large" heavy>Spell Solitaire</>
