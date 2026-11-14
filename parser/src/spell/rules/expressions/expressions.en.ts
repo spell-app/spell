@@ -30,6 +30,7 @@ import { IsEqual } from "./IsEqual"
 import { IsListedValue } from "./IsListedValue"
 import { IsExactly } from "./IsExactly"
 import { IsIn } from "./IsIn"
+import { IsInAType } from "./IsInAType"
 import { IsSameTypeAs } from "./IsSameTypeAs"
 import { Synonyms } from "./Synonyms"
 import { Wording } from "./Wording"
@@ -228,6 +229,43 @@ expressions.addRule(Or, {
   ]
 })
 
+// two values equal, said in full (epic `language` P55, Q51):  `if column is the same as row`
+expressions.addRule(IsEqual, {
+  syntax: "{operator:is_or_is_not} the same as {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("thing")
+        scope.variables?.add("other")
+      },
+      tests: [
+        ["thing is the same as other", "(thing === other)"],
+        ["thing is not the same as other", "(thing !== other)"]
+      ]
+    }
+  ]
+})
+
+// ... or both said first:  `if row and column are the same`, an `and` of its own (`are_or_are_not`:  the places module's)
+expressions.addRule(IsEqual, {
+  syntax: "and {expression:operand} {operator:are_or_are_not} the same",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("thing")
+        scope.variables?.add("other")
+      },
+      tests: [
+        ["thing and other are the same", "(thing === other)"],
+        ["thing and other are not the same", "(thing !== other)"],
+        ["thing and other are the same and other", "(thing === other && other)"]
+      ]
+    }
+  ]
+})
+
 expressions.addRule(IsEqual, {
   syntax: "{operator:is_or_is_not} {expression:operand}",
   tests: [
@@ -320,6 +358,24 @@ expressions.addRule(IsSameTypeAs, {
       tests: [
         ["thing is the same type as other", "core.matchesType(thing, other)"],
         ["thing is not the same type as other", "!core.matchesType(thing, other)"]
+      ]
+    }
+  ]
+})
+
+// in any list of a type (epic `language` P55):  `the card is in a column`
+expressions.addRule(IsInAType, {
+  syntax: "{operator:is_or_is_not} in (a|an) (expression:{known_type})",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile("a column is a list", "block")
+        scope.variables?.add("thing")
+      },
+      tests: [
+        ["thing is in a column", "core.isInA(thing, Column)"],
+        ["thing is not in a column", "!core.isInA(thing, Column)"]
       ]
     }
   ]

@@ -31,6 +31,7 @@ import { IsEqual } from "./IsEqual"
 import { IsListedValue } from "./IsListedValue"
 import { IsExactly } from "./IsExactly"
 import { IsIn } from "./IsIn"
+import { IsInAType } from "./IsInAType"
 import { IsSameTypeAs } from "./IsSameTypeAs"
 import { Synonyms } from "./Synonyms"
 import { Wording } from "./Wording"
@@ -235,6 +236,42 @@ expressionsEs.addRule(Or, {
   ]
 })
 
+// two values equal, said in full (epic `language` P55, Q51):  `if column is the same as row`
+expressionsEs.addRule(IsEqual, {
+  syntax: "{operator:is_or_is_not} igual (a|que) {expression:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("thing")
+        scope.variables?.add("other")
+      },
+      tests: [
+        ["thing es igual a other", "(thing === other)"],
+        ["thing no es igual a other", "(thing !== other)"]
+      ]
+    }
+  ]
+})
+
+// ... or both said first:  `if row and column are the same`, an `and` of its own
+expressionsEs.addRule(IsEqual, {
+  syntax: "(y|e) {expression:operand} {operator:is_or_is_not} iguales",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("thing")
+        scope.variables?.add("other")
+      },
+      tests: [
+        ["thing y other son iguales", "(thing === other)"],
+        ["thing y other no son iguales", "(thing !== other)"]
+      ]
+    }
+  ]
+})
+
 expressionsEs.addRule(IsEqual, {
   syntax: "{operator:is_or_is_not} {expression:operand}",
   tests: [
@@ -329,6 +366,24 @@ expressionsEs.addRule(IsSameTypeAs, {
       tests: [
         ["thing es del mismo tipo que other", "core.matchesType(thing, other)"],
         ["thing no es del mismo tipo que other", "!core.matchesType(thing, other)"]
+      ]
+    }
+  ]
+})
+
+// in any list of a type (epic `language` P55):  `the card is in a column`
+expressionsEs.addRule(IsInAType, {
+  syntax: "{operator:is_or_is_not} en (un|una) (expression:{known_type})",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile("una columna es una lista", "block")
+        scope.variables?.add("thing")
+      },
+      tests: [
+        ["thing está en una columna", "core.isInA(thing, Columna)"],
+        ["thing no está en una columna", "!core.isInA(thing, Columna)"]
       ]
     }
   ]

@@ -235,7 +235,7 @@ classesEs.addRule(WithNestedStatements, {
 })
 
 classesEs.addRule(CreateType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -298,10 +298,59 @@ classesEs.addRule(CreateType, {
 })
 
 classesEs.addRule(CreateType, {
-  syntax: `${A} {type:quoted_type} es ${A} {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?`,
+  syntax: `${A} {type:quoted_type} es ${A} {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     { compileAs: "statement", tests: [['una "card" es una cosa', "export class Card extends Thing {}"]] },
-    { compileAs: "block", tests: [['una "card" es una cosa donde:', "export class Card extends Thing {}"]] }
+    { compileAs: "block", tests: [['una "card" es una cosa donde:', "export class Card extends Thing {}"]] },
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "el valor propio de un tipo para una propiedad de su clase",
+          input: [
+            'una "pila" es una cosa',
+            '\tsu "disposición" es una de apilada o vertical',
+            'una "columna" es una pila con disposición "vertical"'
+          ],
+          js: [
+            "export class Pila extends Thing {",
+            '  // su "disposición" es una de apilada o vertical',
+            '  static Disposiciones = ["apilada", "vertical"]',
+            '  static { this.declareProp("disposición", { oneOf: Pila.Disposiciones }) }',
+            '  get disposición() { return this.getProp("disposición") }',
+            '  set disposición(value) { this.setProp("disposición", value) }',
+            "}",
+            "export class Columna extends Pila {",
+            "  get disposición() {",
+            '    return "vertical"',
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export type Disposición = (typeof Pila.Disposiciones)[number]",
+            "",
+            "export class Pila extends Thing {",
+            '  // su "disposición" es una de apilada o vertical',
+            '  static Disposiciones = ["apilada", "vertical"] as const',
+            "  @prop({ oneOf: () => Pila.Disposiciones })",
+            "  accessor disposición!: Disposición",
+            "}",
+            "export class Columna extends Pila {",
+            "  get disposición(): Disposición {",
+            '    return "vertical"',
+            "  }",
+            "}"
+          ]
+        },
+        {
+          input: ['una "pila" es una cosa', 'una "columna" es una pila con ancho = 3'],
+          js: [
+            "export class Pila extends Thing {}",
+            "/* PARSE ERROR: Una pila no tiene ancho:  la línea de un tipo solo da valores a lo que tiene su clase */"
+          ]
+        }
+      ]
+    }
   ]
 })
 
@@ -1997,7 +2046,116 @@ classesEs.addRule(DrawIt, {
 
 // unquoted:  a method's body, which returns it -- `- para dibujar cada elemento:` + `devolver <div>...</div>`
 classesEs.addRule(DrawIt, {
-  syntax: "para {phrase:draw_method} :? {statement_body}?"
+  syntax: "para {phrase:draw_method} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: 'a placeholder\'s markup carries its part by itself, `part="placeholder"` (epic `language` P55)',
+          input: ['una "pila" es una lista visible de cosas', "\tpara dibujar su marcador", "\t\t<texto>🂠</texto>"],
+          js: [
+            "export class Pila extends ViewableList {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  drawItsPlaceholder() {",
+            '    return h("texto", { part: "placeholder" }, "🂠")',
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Pila extends ViewableList<Thing> {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  drawItsPlaceholder() {",
+            '    return <texto part="placeholder">🂠</texto>',
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pila>`:  a pila, drawn in its own element, e.g. by `draw the pila`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pila's properties;  its methods call its pila's.",
+            " * - What every view's element does, e.g. drawing its pila, is `SpellElement`'s.",
+            " */",
+            "export class PilaElement extends SpellElement<Pila> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pila", "pila", [])',
+            "",
+            "  drawItsPlaceholder() {",
+            "    return this.currentThing?.drawItsPlaceholder()",
+            "  }",
+            "}",
+            "core.useElement(Pila, PilaElement)"
+          ]
+        },
+        {
+          title:
+            "a `--` at its line's end is its description, a re-opened type's a plain comment (epic `language` P55, Q55)",
+          input: [
+            'una "pila" es una lista visible de cosas',
+            "\tpara dibujar su marcador  -- un as gris",
+            "\t\t<texto>🂠</texto>",
+            "una pila  -- la pila otra vez",
+            "\tal clic",
+            "\t\timprimir 1"
+          ],
+          js: [
+            "export class Pila extends ViewableList {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  /** un as gris */",
+            "  drawItsPlaceholder() {",
+            '    return h("texto", { part: "placeholder" }, "🂠")',
+            "  }",
+            "",
+            "  onClic(event) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "// la pila otra vez"
+          ],
+          ts: [
+            "export class Pila extends ViewableList<Thing> {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  /** un as gris */",
+            "  drawItsPlaceholder() {",
+            '    return <texto part="placeholder">🂠</texto>',
+            "  }",
+            "",
+            "  onClic(event: any /* spell: type unknown */) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pila>`:  a pila, drawn in its own element, e.g. by `draw the pila`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pila's properties;  its methods call its pila's.",
+            " * - What every view's element does, e.g. drawing its pila, is `SpellElement`'s.",
+            " */",
+            "export class PilaElement extends SpellElement<Pila> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pila", "pila", [])',
+            "",
+            "  drawItsPlaceholder() {",
+            "    return this.currentThing?.drawItsPlaceholder()",
+            "  }",
+            "",
+            "  onClic(event: any /* spell: type unknown */) {",
+            "    return this.currentThing?.onClic(event)",
+            "  }",
+            "}",
+            "core.useElement(Pila, PilaElement)",
+            "// la pila otra vez"
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 // el dibujo propio de una ranura (épica `elemental-spell` P5):  `- para dibujar su frente:`, sus líneas lo dibujan
@@ -2071,6 +2229,21 @@ classesEs.addRule(DefineGroup, {
             "}",
             "core.useElement(Carta, CartaElement)"
           ]
+        }
+      ]
+    }
+  ]
+})
+
+classesEs.addRule(DefineGroup, {
+  syntax: "grupo {group:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ['grupo "Las pilas"', "", "una pila es una cosa"],
+          js: "export class Pila extends Thing {}"
         }
       ]
     }
@@ -2247,6 +2420,15 @@ classesEs.addRule(DrawnMarkup, {
 
 classesEs.addRule(DrawnMarkup, {
   syntax: "{markup:markdown_block}"
+})
+
+// el botón de una acción, o un menú contextual, en una línea propia:  los suyos, no los de un elemento cualquiera (I78)
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:action_button}"
+})
+
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:context_menu_block}"
 })
 
 classesEs.addRule(DrawnMarkup, {

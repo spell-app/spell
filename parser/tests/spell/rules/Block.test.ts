@@ -242,6 +242,7 @@ describe("class members go in their class's body", () => {
       "export class Pile extends List {",
       "  static instanceType = Card",
       "}",
+      'core.describeAction(Card, "flip", { title: "Flip (a Card)", undoneAs: "Flip (a Card)" })',
       "core.console.log(3)"
     ])
     expect(cardAST.compile()).toBe(cardBefore)

@@ -87,6 +87,8 @@
   /* an HTML block's start tag's `⟨` this far into its band, clear of its cut top-left corner;  its end tag's */
   --bubbly-tag-pad-left: 6px;
   --bubbly-tag-end-pad-left: 7px;
+  /* a one-line element's start and end tags linked by a line this thick along their pills' top and bottom (Q58) */
+  --bubbly-tag-link-width: 2px;
 
   /****** a body:  the gutter down its left, its white, the foot under it ******/
   --bubbly-gutter: 3px;
@@ -197,6 +199,8 @@
   .bubbly-block,
   .bubbly-pill,
   .bubbly-tag-pill,
+  .bubbly-tag-link,
+  .bubbly-tag-tall,
   .bubbly-taghead {
     /* how much of its hue a band takes over the paper, light then dark */
     --bubbly-pill: light-dark(
@@ -730,6 +734,8 @@
     --bubbly-tag-corner: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope))
       calc(var(--bubbly-pill-height) / 2);
     --bubbly-pill-pad-right: var(--bubbly-bracket-pad);
+    /* a `</>` foot's corners:  the body's over it, and the rail's turn into it, a gutter's width out */
+    --bubbly-tag-foot-corner: 6px;
     /* a block's end tag:  a shorter band than its start tag's */
     --bubbly-foot-pill-height: calc(var(--bubbly-pill-height) - 2px);
     /* a row:  the editor's line, 15px times `--bubbly-monaco-line-height` (1.65), rounded */
@@ -871,6 +877,157 @@
       border-top-right-radius: var(--bubbly-tag-corner);
       border-bottom-right-radius: var(--bubbly-tag-corner);
       border-bottom-left-radius: var(--bubbly-block-outer-cut);
+    }
+
+    /****** a start tag on lines of its own (T118):  ONE tall band, a row a line, its point at its `⟩` (Owen) ******/
+    /*
+     * - its rows above the last one a box of the band's colour, the last one's piece a band to its `⟩`, ending in the
+     *   point;  where the box overhangs that piece (a `>` alone on its line), its bottom-right corner is cut too
+     * - a block's:  its outer corner top-left, the rail dropping from its bottom-left;  else cut both corners there
+     */
+    .bubbly-tag-tall {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      /* where a band in its first row would start */
+      margin-top: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+    }
+    .bubbly-tag-rows,
+    .bubbly-tag-tail {
+      background: var(--bubbly-pill);
+      padding-inline: var(--bubbly-bracket-pad);
+      corner-shape: bevel;
+      white-space: pre;
+    }
+    .bubbly-tag-rows {
+      border-top-left-radius: var(--bubbly-tag-corner);
+      border-top-right-radius: var(--bubbly-tag-corner);
+    }
+    .bubbly-tag-tall-short-tail .bubbly-tag-rows {
+      border-bottom-right-radius: var(--bubbly-tag-corner);
+    }
+    /* each row a line tall, its words where a band's are:  a pixel up from the middle */
+    .bubbly-tag-row {
+      height: var(--bubbly-html-row);
+      line-height: var(--bubbly-pill-text-line);
+    }
+    /* the last row:  its band in the row, as a band's;  the rest of the line after it */
+    .bubbly-tag-row-last {
+      height: var(--bubbly-pill-height);
+      margin-bottom: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+      white-space: nowrap;
+    }
+    .bubbly-tag-tail {
+      display: inline-block;
+      box-sizing: border-box;
+      vertical-align: top;
+      height: var(--bubbly-pill-height);
+      /* wide enough for its point whole, and the cut corner left of it */
+      min-width: calc(var(--bubbly-pill-height) * var(--bubbly-tag-slope));
+      border-top-right-radius: var(--bubbly-tag-corner);
+      border-bottom-right-radius: var(--bubbly-tag-corner);
+      border-bottom-left-radius: var(--bubbly-tag-corner);
+    }
+    /* the indent past its `<` is the file's:  its spaces */
+    .bubbly-tag-indent {
+      white-space: pre;
+    }
+    .bubbly-tag-row .bubbly-tag-indent + .bubbly-attribute-name {
+      margin-left: 0;
+    }
+    /* a block's:  its `⟨` as far in as a block's band's, its outer corner, the rail from its bottom-left */
+    .bubbly-block > .bubbly-tag-tall-head {
+      grid-row: 1;
+      grid-column: 1 / -1;
+      justify-self: start;
+      .bubbly-tag-row:first-child {
+        padding-left: calc(var(--bubbly-tag-pad-left) - var(--bubbly-bracket-pad));
+      }
+      .bubbly-tag-rows {
+        border-top-left-radius: var(--bubbly-block-outer-cut);
+      }
+      .bubbly-tag-tail {
+        border-bottom-left-radius: 0;
+      }
+    }
+    /* by itself or a line's start:  where a band starts, left of the body's lines */
+    :is(&, .bubbly-body) > .bubbly-tag-tall:not(.bubbly-tag-tall-head) {
+      margin-left: calc(-1 * var(--bubbly-line-inset));
+    }
+    /* a one-line element's end tag after its `⟩`:  room before it, or their points touch */
+    .bubbly-tag-tail + .bubbly-tag-pill {
+      translate: none;
+    }
+    .bubbly-tag-tail + .bubbly-tags-touch {
+      margin-left: 0;
+    }
+
+    /****** a block's nameless end tag, `</>`:  its foot, a thin band from the rail to past its `⟩` (Owen, Q58) ******/
+    /*
+     * - the `</>` on the body's paper, where a band's words would be;  the band only the bottom of a band, a foot's
+     *   height, the rail turning into it at a cut corner, as a declaration's foot
+     */
+    .bubbly-thin-foot {
+      /* the body's corner over the foot:  small, so the `⟨` above it stays on the paper */
+      --bubbly-block-inner-corner: var(--bubbly-tag-foot-corner);
+      --bubbly-gutter-corner: calc(var(--bubbly-gutter) + var(--bubbly-tag-foot-corner));
+    }
+    .bubbly-block.bubbly-thin-foot {
+      > .bubbly-gutter {
+        grid-row: 2 / span 2;
+        border-bottom-left-radius: calc(var(--bubbly-gutter-corner) * var(--bubbly-tag-slope))
+          var(--bubbly-gutter-corner);
+      }
+      /* down to the foot's top:  the `</>`'s row, but the foot under it */
+      > .bubbly-body {
+        padding-bottom: calc((var(--bubbly-html-row) + var(--bubbly-pill-height)) / 2 - var(--bubbly-foot-height));
+      }
+    }
+    .bubbly-block > .bubbly-foot-thin {
+      grid-row: 3;
+      grid-column: 1 / -1;
+      justify-self: start;
+      box-sizing: border-box;
+      width: auto;
+      height: calc((var(--bubbly-html-row) + var(--bubbly-pill-height)) / 2);
+      margin: calc(var(--bubbly-foot-height) - (var(--bubbly-html-row) + var(--bubbly-pill-height)) / 2) 0
+        calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2) 0;
+      padding: calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2) var(--bubbly-bracket-pad) 0
+        var(--bubbly-tag-end-pad-left);
+      line-height: var(--bubbly-pill-text-line);
+      border-radius: 0;
+      white-space: nowrap;
+      /* the band:  its bottom, past the rail's corner */
+      background: linear-gradient(var(--bubbly-pill) 0 0) right bottom / calc(100% - var(--bubbly-gutter-corner))
+        var(--bubbly-foot-height) no-repeat;
+    }
+
+    /****** a one-line element's two tags linked:  a line along their pills' top and bottom (Owen, Q58) ******/
+    .bubbly-tag-link {
+      display: inline-block;
+      vertical-align: top;
+      height: var(--bubbly-pill-height);
+      line-height: var(--bubbly-pill-text-line);
+      margin: 0 var(--bubbly-input-gap);
+      background:
+        linear-gradient(var(--bubbly-pill) 0 0) top / 100% var(--bubbly-tag-link-width) no-repeat,
+        linear-gradient(var(--bubbly-pill) 0 0) bottom / 100% var(--bubbly-tag-link-width) no-repeat;
+      white-space: nowrap;
+      > .bubbly-tag-pill {
+        translate: none;
+      }
+      > .bubbly-tag-pill:first-child {
+        margin-left: 0;
+      }
+      > .bubbly-tag-pill:last-child {
+        margin-right: 0;
+      }
+    }
+    .bubbly-tag-line > .bubbly-tag-link {
+      translate: 0 calc((var(--bubbly-html-row) - var(--bubbly-pill-height)) / 2);
+    }
+    .bubbly-line > .bubbly-tag-link:first-child {
+      margin-left: calc(-1 * var(--bubbly-line-inset));
     }
   } /* END bubbly-html */
 
@@ -1206,6 +1363,31 @@
     /* an HTML block's rail stops at its end tag's band:  none beside it */
     :is(&.bubbly-html .bubbly-layer, .bubbly-html-shapes) .bubbly-block > .bubbly-gutter {
       padding-bottom: 0;
+    }
+    /* ... but a `</>`'s thin foot:  it runs on beside it, as a declaration's */
+    :is(&.bubbly-html .bubbly-layer, .bubbly-html-shapes) .bubbly-thin-foot > .bubbly-gutter {
+      padding-bottom: var(--bubbly-foot-height);
+    }
+    /* a tall start tag's pieces, a `</>`'s foot, a one-line element's link:  placed by the code, as the bands are */
+    .bubbly-layer .bubbly-tag-tall {
+      position: absolute;
+      inset: 0 auto auto 0;
+      display: block;
+      width: 0;
+      height: 0;
+      margin: 0;
+    }
+    .bubbly-layer :is(.bubbly-tag-rows, .bubbly-tag-tail, .bubbly-tag-link, .bubbly-block > .bubbly-foot-thin) {
+      position: absolute;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .bubbly-layer .bubbly-block > .bubbly-foot-thin {
+      height: var(--bubbly-foot-height);
+    }
+    .bubbly-layer .bubbly-tag-link {
+      translate: 0 -50%;
     }
   }
 

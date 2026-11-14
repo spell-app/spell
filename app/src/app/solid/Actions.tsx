@@ -22,6 +22,8 @@ import {
  * - `title` is the text, `icon` an icon name (Fomantic's, see `loadUI.ts`).
  * - `menu`:  an item of the top bar's menus (`MenuBar.tsx`), a `<ui-action>`:  its title and its key
  *   (`shortcut`, from `EDITOR_HOTKEYS`), no icon, ticked while `active`.
+ *   - `active={false}` is written `selected="false"`:  a row on or off says so while off too, so a sub-menu's
+ *     fly-out ticks it in a menu without `ticks` (`<ui-submenu>`, the ☰ menu's View ›).
  * - `iconOnly`:  just its icon, a plain `<ui-icon link>`, with `title` as its tooltip, below it, after a pause
  *   (the browser's own `title`, which no parent frame can cut off).
  *   - A `<ui-icon>`, not an item:  an item's box is `display: contents`, which draws no tooltip.
@@ -47,7 +49,7 @@ export function Action(props: ActionProps) {
         <ui-action
           icon={props.icon}
           shortcut={props.shortcut}
-          selected={props.active}
+          selected={onOrOff(props.active)}
           title={props.tip}
           {...omit(rest, "color")}
         >
@@ -73,6 +75,17 @@ export function Action(props: ActionProps) {
     </Switch>
   )
 }
+
+/**
+ * A menu row's `selected`:  on, `"false"` while off, none when it's no row that's on or off.
+ * - `"false"` is off to every Spell UI flag;  the JSX types take it only on a flag that's on by default, hence the cast.
+ */
+function onOrOff(active: boolean | undefined): boolean | undefined {
+  return active === undefined ? undefined : active || (OFF as unknown as boolean)
+}
+
+/** The text of a flag written off:  a boolean `false` would drop the attribute. */
+const OFF = "false"
 
 /** An icon-only action's tooltip and label:  its `title`, when that's text. */
 function tipFor(title: JSX.Element): string | undefined {

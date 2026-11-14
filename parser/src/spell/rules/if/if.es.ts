@@ -17,6 +17,7 @@ import { ElseIf } from "./ElseIf"
 import { If } from "./If"
 import { ValueIf } from "./ValueIf"
 import { ValueOtherwise } from "./ValueOtherwise"
+import { StatementIf } from "./StatementIf"
 
 /**
  * Spanish's `if` rules.
@@ -320,6 +321,25 @@ ifEs.addRule(ValueOtherwise, {
           ["para elegir un color:", "\tblack de lo contrario"],
           ["export function elegirUnColor() {", '  return "black"', "}"]
         ]
+      ]
+    }
+  ]
+})
+
+// a statement, then when it runs (epic `language` P55):  `return yes if the card is a king`
+ifEs.addRule(StatementIf, {
+  syntax: "{statement} si {condition:expression}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        const { variables } = scope as P.BlockScope
+        variables.add("bar")
+        variables.add("foo")
+      },
+      tests: [
+        { input: "devolver sí si bar", js: "if (bar) return true" },
+        { input: 'imprimir "ganaste" si bar es 52', js: 'if (bar === 52) core.console.log("ganaste")' }
       ]
     }
   ]

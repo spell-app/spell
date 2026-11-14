@@ -178,4 +178,24 @@ describe("an action's button, <action>", () => {
     expect(file.errors).toEqual([])
     expect(file.compiled).toContain('core.drawContextMenu(this, ["jugarSolo", "-", "undo"])')
   })
+
+  test("a drawing that is only an action's button, or only a menu:  each its own, not a plain tag (I78)", () => {
+    /** A game with one action, drawing `drawing`:  the lines of its drawing, no element around them. */
+    const drawn = (...drawing: string[]) =>
+      parsed(["a game is an app", "\tto deal", "\t\tprint 1", "\tto draw it", ...drawing.map((line) => `\t\t${line}`)])
+    for (const button of ['<action "deal"/>', '<action "deal"></action>']) {
+      const file = drawn(button)
+      expect(file.errors, button).toEqual([])
+      expect(file.compiled, button).toContain('return core.drawAction(this, "deal")')
+    }
+    const menu = drawn("<context-menu>", '\t<action "deal"/>', "</>")
+    expect(menu.errors).toEqual([])
+    expect(menu.compiled).toContain('return core.drawContextMenu(this, ["deal"])')
+    const spanish = parsed(
+      ["un juego es una app", "\tpara repartir", "\t\timprimir 1", "\tpara dibujarlo", '\t\t<acción "repartir"/>'],
+      "/Juego.es.spell"
+    )
+    expect(spanish.errors).toEqual([])
+    expect(spanish.compiled).toContain('return core.drawAction(this, "repartir")')
+  })
 })

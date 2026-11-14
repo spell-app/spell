@@ -172,12 +172,18 @@ methods.addRule(ToDoSomething, {
         {
           title: "paren-free type args in signature ~== parenthesized",
           input: "to give a card to a pile: set its pile to the pile",
-          js: ["Card.prototype.giveToPile = function (pile) {", "  this.pile = pile", "}"],
+          js: [
+            "Card.prototype.giveToPile = function (pile) {",
+            "  this.pile = pile",
+            "}",
+            'core.describeAction(Card, "giveToPile", { title: "Give A Card To A Pile", undoneAs: "Give A Card To A Pile" })'
+          ],
           ts: [
             "export interface Card { giveToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.giveToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
-            "}"
+            "}",
+            'core.describeAction(Card, "giveToPile", { title: "Give A Card To A Pile", undoneAs: "Give A Card To A Pile" })'
           ]
         },
         {
@@ -279,78 +285,120 @@ methods.addRule(ToDoSomething, {
         {
           title: "multiple type args in signature - thisVar",
           input: "to add (a card) to (a pile): set the pile of the card to the pile",
-          js: ["Card.prototype.addToPile = function (pile) {", "  this.pile = pile", "}"],
+          js: [
+            "Card.prototype.addToPile = function (pile) {",
+            "  this.pile = pile",
+            "}",
+            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+          ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
-            "}"
+            "}",
+            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
           ]
         },
         {
           title: "multiple type args in signature - it",
           input: "to add (a card) to (a pile): set the pile of it to the pile",
-          js: ["Card.prototype.addToPile = function (pile) {", "  this.pile = pile", "}"],
+          js: [
+            "Card.prototype.addToPile = function (pile) {",
+            "  this.pile = pile",
+            "}",
+            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+          ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
-            "}"
+            "}",
+            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
           ]
         },
         {
           title: "multiple type args in signature - its",
           input: "to add (a card) to (a pile): set its pile to the pile",
-          js: ["Card.prototype.addToPile = function (pile) {", "  this.pile = pile", "}"],
+          js: [
+            "Card.prototype.addToPile = function (pile) {",
+            "  this.pile = pile",
+            "}",
+            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
+          ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
-            "}"
+            "}",
+            'core.describeAction(Card, "addToPile", { title: "Add (a Card) To (a Pile)", undoneAs: "Add (a Card) To (a Pile)" })'
           ]
         },
         {
           title: "typed arg in signature -- arg name",
           input: "to show (thing as a card): print the thing",
-          js: [`Card.prototype.show = function () {`, `  return core.console.log(this)`, `}`],
+          js: [
+            "Card.prototype.show = function () {",
+            "  return core.console.log(this)",
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+          ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
-            "}"
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
           ]
         },
         {
           title: "typed arg in signature -- thisVar",
           input: "to show (thing as a card): print the card",
-          js: [`Card.prototype.show = function () {`, `  return core.console.log(this)`, `}`],
+          js: [
+            "Card.prototype.show = function () {",
+            "  return core.console.log(this)",
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+          ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
-            "}"
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
           ]
         },
         {
           title: "typed arg in signature -- it",
           input: "to show (thing as a card): print it",
-          js: [`Card.prototype.show = function () {`, `  return core.console.log(this)`, `}`],
+          js: [
+            "Card.prototype.show = function () {",
+            "  return core.console.log(this)",
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+          ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
-            "}"
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
           ]
         },
         {
           title: "typed arg in signature -- its",
           input: "to show (thing as a card): print its name",
-          js: [`Card.prototype.show = function () {`, `  return core.console.log(this.name)`, `}`],
+          js: [
+            "Card.prototype.show = function () {",
+            "  return core.console.log(this.name)",
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
+          ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this.name)",
-            "}"
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
           ]
         },
         {
@@ -361,7 +409,8 @@ methods.addRule(ToDoSomething, {
             "  core.console.log(this)",
             "  const it = this.name",
             "  core.console.log(it)",
-            "}"
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
@@ -369,7 +418,8 @@ methods.addRule(ToDoSomething, {
             "  core.console.log(this)",
             "  const it = this.name",
             "  core.console.log(it)",
-            "}"
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (thing As A Card)", undoneAs: "Show (thing As A Card)" })'
           ]
         },
         {
@@ -450,6 +500,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.showOnPile = function (pile) {",
             "  return core.console.log(1)",
             "}",
+            'core.describeAction(Card, "showOnPile", { title: "Show (a Card) On (a Pile)", undoneAs: "Show (a Card) On (a Pile)" })',
             ";(new Joker()).showOnPile(new Pile())",
             '/* PARSE ERROR: Don\'t understand "show a new card on a new card" */'
           ],
@@ -459,6 +510,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.showOnPile = function (this: Card, pile: Pile) {",
             "  return core.console.log(1)",
             "}",
+            'core.describeAction(Card, "showOnPile", { title: "Show (a Card) On (a Pile)", undoneAs: "Show (a Card) On (a Pile)" })',
             ";(new Joker()).showOnPile(new Pile())",
             '/* PARSE ERROR: Don\'t understand "show a new card on a new card" */'
           ]
@@ -466,12 +518,19 @@ methods.addRule(ToDoSomething, {
         {
           title: "type arg in signature",
           input: ["to show (a card): print the card", "show a new card"],
-          js: ["Card.prototype.show = function () {", "  return core.console.log(this)", "}", ";(new Card()).show()"],
+          js: [
+            "Card.prototype.show = function () {",
+            "  return core.console.log(this)",
+            "}",
+            'core.describeAction(Card, "show", { title: "Show (a Card)", undoneAs: "Show (a Card)" })',
+            ";(new Card()).show()"
+          ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
+            'core.describeAction(Card, "show", { title: "Show (a Card)", undoneAs: "Show (a Card)" })',
             ";(new Card()).show()"
           ]
         },
@@ -482,6 +541,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (pile) {",
             "  this.pile = pile",
             "}",
+            'core.describeAction(Card, "playOnPile", { title: "Play (a Card) On (a Pile)", undoneAs: "Play (a Card) On (a Pile)" })',
             ";(new Card()).playOnPile(new Pile())"
           ],
           ts: [
@@ -489,6 +549,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
+            'core.describeAction(Card, "playOnPile", { title: "Play (a Card) On (a Pile)", undoneAs: "Play (a Card) On (a Pile)" })',
             ";(new Card()).playOnPile(new Pile())"
           ]
         },
@@ -499,6 +560,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (pile) {",
             "  this.pile = pile",
             "}",
+            'core.describeAction(Card, "playOnPile", { title: "Play A Card On A Pile", undoneAs: "Play A Card On A Pile" })',
             ";(new Card()).playOnPile(new Pile())"
           ],
           ts: [
@@ -506,6 +568,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
+            'core.describeAction(Card, "playOnPile", { title: "Play A Card On A Pile", undoneAs: "Play A Card On A Pile" })',
             ";(new Card()).playOnPile(new Pile())"
           ]
         }
@@ -1107,7 +1170,86 @@ methods.addRule(CreateHook, {
           ["a task is a thing where:", "\t- when creating it:", "\t\tprint 1"],
           ["export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
           ["@thing", "export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
-        ]
+        ],
+        {
+          title: "a one of a kind's names itself, `the` or not (Owen, 2026-11-13)",
+          input: ["solitaire is an app", "\twhen creating solitaire", "\t\tprint 1"],
+          js: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitaire = new Solitaire()"
+          ],
+          ts: [
+            "@thing",
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitaire, drawn in its own element, e.g. by `draw the solitaire`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitaire's properties;  its methods call its solitaire's.",
+            " * - What every view's element does, e.g. drawing its solitaire, is `SpellElement`'s.",
+            " */",
+            "export class SolitaireElement extends SpellElement<Solitaire> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitaire", [])',
+            "",
+            "  create() {",
+            "    return this.currentThing?.create()",
+            "  }",
+            "}",
+            "core.useElement(Solitaire, SolitaireElement)",
+            "export const solitaire = new Solitaire()"
+          ]
+        },
+        {
+          input: ["solitaire is an app", "\twhen creating the solitaire", "\t\tprint 1"],
+          js: [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "export const solitaire = new Solitaire()"
+          ],
+          ts: [
+            "@thing",
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_methods", "App")',
+            "",
+            "  create() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-methods-app>`:  a solitaire, drawn in its own element, e.g. by `draw the solitaire`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitaire's properties;  its methods call its solitaire's.",
+            " * - What every view's element does, e.g. drawing its solitaire, is `SpellElement`'s.",
+            " */",
+            "export class SolitaireElement extends SpellElement<Solitaire> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-methods-app", "solitaire", [])',
+            "",
+            "  create() {",
+            "    return this.currentThing?.create()",
+            "  }",
+            "}",
+            "core.useElement(Solitaire, SolitaireElement)",
+            "export const solitaire = new Solitaire()"
+          ]
+        }
       ]
     }
   ]
@@ -1118,6 +1260,7 @@ methods.addRule(ActionModifier, { syntax: "title {title:text}" })
 methods.addRule(ActionModifier, { syntax: "icon {icon:text}" })
 methods.addRule(ActionModifier, { syntax: "shortcut {keys:text}" })
 methods.addRule(ActionModifier, { syntax: "(undoable:undoable)" })
+methods.addRule(ActionModifier, { syntax: "(cantBeUndone:can't be undone|cannot be undone|can not be undone)" })
 methods.addRule(ActionModifier, { syntax: "undoable as {undoneAs:text}" })
 methods.addRule(ActionModifiers, { syntax: "with [{action_modifier} (,|and)]" })
 // ... or after a comma, its name quoted or not (Owen):  `to put a card on a pile, undoable as "Move Card"`
@@ -1158,11 +1301,9 @@ methods.addRule(ActionDetail, {
             "  turnOver() {",
             '    this.direction = "up"',
             "  }",
-            "",
             "  get turnOverIsEnabled() {",
             '    return this.direction === "down"',
             "  }",
-            "",
             "  get turnOverIsSelected() {",
             '    return this.direction === "up"',
             "  }",
@@ -1181,11 +1322,9 @@ methods.addRule(ActionDetail, {
             "  turnOver() {",
             '    this.direction = "up"',
             "  }",
-            "",
             "  get turnOverIsEnabled() {",
             '    return this.direction === "down"',
             "  }",
-            "",
             "  get turnOverIsSelected() {",
             '    return this.direction === "up"',
             "  }",
@@ -1205,6 +1344,52 @@ methods.addRule(ActionDetail, {
 methods.addRule(ActionDetail, { syntax: "enabled when {enabled:expression}" })
 methods.addRule(ActionDetail, { syntax: "selected when {selected:expression}" })
 methods.addRule(ActionDetail, { syntax: "(undoable:undoable)" })
+methods.addRule(ActionDetail, {
+  syntax: "(cantBeUndone:can't be undone|cannot be undone|can not be undone)",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title:
+            "every action is one undo step by itself, named by its title;  `can't be undone` says it isn't (epic `language` P55, Q60)",
+          input: [
+            "a card is a thing where:",
+            "\t- to turn it over:",
+            "\t\tprint 1",
+            "\t- to peek:",
+            "\t\t- can't be undone",
+            "\t\tprint 2"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            "  turnOver() {",
+            "    core.console.log(1)",
+            "  }",
+            "",
+            "  peek() {",
+            "    core.console.log(2)",
+            "  }",
+            "}",
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", undoneAs: "Turn It Over" })',
+            'core.describeAction(Card, "peek", { title: "Peek", cantBeUndone: "keeps history" })'
+          ]
+        },
+        {
+          input: ["a card is a thing where:", "\t- to peek, can't be undone:", "\t\tprint 2"],
+          js: [
+            "export class Card extends Thing {",
+            "  peek() {",
+            "    core.console.log(2)",
+            "  }",
+            "}",
+            'core.describeAction(Card, "peek", { title: "Peek", cantBeUndone: "keeps history" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
 methods.addRule(ActionDetail, { syntax: "undoable as {undoneAs:text}" })
 methods.addRule(ActionDetail, { syntax: "icon {icon:text}" })
 methods.addRule(ActionDetail, { syntax: "(replacesLast:a new one replaces the last one)" })
@@ -1228,7 +1413,7 @@ methods.addRule(ActionDetail, {
             "    core.console.log(1)",
             "  }",
             "}",
-            'core.describeAction(Game, "compileAndRun", { title: "Compile and Run" })'
+            'core.describeAction(Game, "compileAndRun", { title: "Compile and Run", undoneAs: "Compile and Run" })'
           ]
         },
         {
@@ -1250,12 +1435,11 @@ methods.addRule(ActionDetail, {
             "  duplicate() {",
             "    core.console.log(1)",
             "  }",
-            "",
             "  get duplicateTitle() {",
             "    return `Duplicate ${this.name}…`",
             "  }",
             "}",
-            'core.describeAction(Game, "duplicate", { title: "Duplicate It", titleFrom: "duplicateTitle" })'
+            'core.describeAction(Game, "duplicate", { title: "Duplicate It", titleFrom: "duplicateTitle", undoneAs: "Duplicate It" })'
           ],
           ts: [
             "export class Game extends Thing {",
@@ -1266,12 +1450,11 @@ methods.addRule(ActionDetail, {
             "  duplicate() {",
             "    core.console.log(1)",
             "  }",
-            "",
             "  get duplicateTitle() {",
             "    return `Duplicate ${this.name}…`",
             "  }",
             "}",
-            'core.describeAction(Game, "duplicate", { title: "Duplicate It", titleFrom: "duplicateTitle" })'
+            'core.describeAction(Game, "duplicate", { title: "Duplicate It", titleFrom: "duplicateTitle", undoneAs: "Duplicate It" })'
           ]
         }
       ]

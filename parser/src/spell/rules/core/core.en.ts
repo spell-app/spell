@@ -192,7 +192,7 @@ core.addRule(CommentLine, {
       tests: [
         ["//", "//"],
         ["// foo", "// foo"],
-        ["-- foo", "//-- foo"],
+        ["-- foo", "// foo"],
         ["## foo", "//## foo"],
         ["//    foo bar baz", "//    foo bar baz"]
       ]

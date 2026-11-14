@@ -24,6 +24,13 @@
  *   So a value set on `:root`, an ancestor, the element, `::part(container)` or in the app's style sheet
  *   reaches the box (`notes/theming.md`, "Component tokens").
  *
+ * - `columns` adds a grid box inside, `<div class="ui very compact seven column grid" part="grid">`,
+ *   styled by the grid's own sheet (`UIGrid.css`), which the component adopts BEFORE this one.
+ *   - So the container's layers win on the DOM element (`:host`), where both sheets style it.
+ *   - So `grid`'s class word is `gridded` on the element:  `.ui.grid` would be the grid sheet's.
+ * - `padding`, `size` and `inverted` are a segment's, on the box (`UISegment.css`):
+ *   a sized one resets `--ui-scale` for its content, an inverted one hands its content the dark scheme.
+ *
  * - No `:state()`s:  this sheet keys on the box's classes.
  *
  * - Left out, on purpose:
@@ -62,6 +69,14 @@
     --_ui-container-scrolling-height-tablet: var(--ui-container-scrolling-height-tablet, 18em);
     --_ui-container-scrolling-height-computer: var(--ui-container-scrolling-height-computer, 24em);
     --_ui-container-scrolling-height-widescreen: var(--ui-container-scrolling-height-widescreen, 30em);
+    /* The padding steps are a segment's ems:  of Spell UI's font size (`--ui-font-size`, scaled by `size`),
+       not of the text the container inherits, so a padded container lines up with a segment. */
+    --_container-em: calc(var(--ui-font-size) * var(--ui-scale, 1));
+    --_ui-container-lightly-padded: var(--ui-container-lightly-padded, var(--_container-em));
+    --_ui-container-padded: var(--ui-container-padded, calc(var(--_container-em) * 1.5));
+    --_ui-container-very-padded: var(--ui-container-very-padded, calc(var(--_container-em) * 3));
+    --_ui-container-inverted-background: var(--ui-container-inverted-background, var(--ui-surface));
+    --_ui-container-inverted-color: var(--ui-container-inverted-color, var(--ui-text-color));
   }
 
   /* Container:  mobile first -- the page width, less a gutter. */
@@ -114,14 +129,14 @@
     width: 100%;
   }
 
-  /* Grid:  make room for a grid's negative gutters. */
-  .ui.grid.container {
+  /* Grid:  make room for a grid's negative gutters (`gridded` on the element, Fomantic's `grid` in static markup). */
+  .ui:is(.grid, .gridded).container {
     --_container-grid-gutter: var(--_ui-container-grid-gutter);
   }
-  .ui.relaxed.grid.container {
+  .ui.relaxed:is(.grid, .gridded).container {
     --_container-grid-gutter: var(--_ui-container-relaxed-grid-gutter);
   }
-  .ui.very.relaxed.grid.container {
+  .ui.very.relaxed:is(.grid, .gridded).container {
     --_container-grid-gutter: var(--_ui-container-very-relaxed-grid-gutter);
   }
 }
@@ -135,6 +150,46 @@
   .ui.set-width.container {
     width: var(--_container-set-width);
     margin-inline: auto;
+  }
+
+  /* Padded:  room inside its edges, a segment's steps (`small` is a segment's own padding). */
+  .ui.fitted.container {
+    padding: 0;
+  }
+  .ui.padded.container {
+    padding: var(--_ui-container-padded);
+  }
+  .ui.lightly.padded.container {
+    padding: var(--_ui-container-lightly-padded);
+  }
+  .ui[class*="very padded"].container {
+    padding: var(--_ui-container-very-padded);
+  }
+
+  /*
+   * Sized:  its text, a segment's way.
+   * - The box's `<slot>` resets `--ui-scale`, so the components inside keep their own sizes, as in a segment.
+   * - Only a sized container:  a plain one leaves its font alone, as it always has.
+   */
+  .ui:is(.mini, .tiny, .small, .large, .big, .huge, .massive).container {
+    font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+  }
+  .ui:is(.mini, .tiny, .small, .large, .big, .huge, .massive).container slot {
+    --ui-scale: initial;
+  }
+
+  /*
+   * Inverted:  the dark scheme, a segment's way.
+   * - `--ui-inverted`, `color-scheme` and `--ui-scheme` inherit into everything slotted,
+   *   so content re-resolves its `light-dark()` tokens.
+   * - It paints the dark surface, so the dark text inside has a dark box to sit on.
+   */
+  .ui.inverted.container {
+    --ui-inverted: 1;
+    --ui-scheme: dark;
+    color-scheme: dark;
+    background: var(--_ui-container-inverted-background);
+    color: var(--_ui-container-inverted-color);
   }
 
   /* Aligned */

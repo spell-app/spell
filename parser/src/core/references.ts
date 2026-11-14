@@ -147,6 +147,18 @@ export const referencesMethods = defineCoreModule({
   },
 
   /**
+   * Is `item` in any list of class `Class`, or of a sub-class, the program has made?
+   * - `the card is in a column` in spell compiles to it, `isInA(card, Column)` (epic `language` P55).
+   * - Only the program's lists, as `everyThing()`:  NOT a list a test made.
+   * - Tracked, as `everyThing()` is.
+   */
+  isInA(item: unknown, Class: abstract new (...args: never[]) => unknown): boolean {
+    return thingsSearched()
+      .all()
+      .some((thing) => thing instanceof Class && thing instanceof List && thing.includes(item))
+  },
+
+  /**
    * The reference that finds `thing` again, e.g. `Tableau#T1` -- `undefined` if no reference does.
    * - Its class's name, then its name:  `Tableau#T1`, `Card#queen-of-spades`.
    *   A thing with no name goes by the id the program chose for it, `Tableau#T1` for `new Tableau({ id: "T1" })`.

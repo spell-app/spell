@@ -1043,6 +1043,12 @@ a line of the built-in types table, a built-in template, or a project's own `one
     - Its title, said nowhere, is its words in Initial Caps (P48):  `to auto play` is `Auto Play`, written into
       `core.describeAction()`;  the core's own fallback, for an action or menu described with nothing, is the same
       (`wordsOf()`, `initialCaps()` from `spell/util`).
+    - Every action is ONE undo step by itself, named by its title (epic `language` P55, Q60):
+      `to_do_something`'s methods on a type (`undoableByDefault`) are described `undoneAs` with nothing said.
+      - `can't be undone` (`no se puede deshacer`), on its head line or under it:  `cantBeUndone: "keeps history"`.
+      - Not a question (`?`, or it gives back yes or no), a hook (`draw()`, `create()`), a drawing or a test.
+      - Written outside its class (`to play a card` in an app's outline), the method still moves into it,
+        its description after the class (`SP.hoistClassMembers()`).
     - Each is an [`action_detail`](rules/methods/ActionDetail.ts) line, taken only in a template's action's body:
       its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
     - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,
@@ -1301,6 +1307,9 @@ plain Spell.
 - A DRAWN LINE (Q14):  in a drawing, a line of markup, or a slot placed, IS the drawing.
   - [`drawn_markup`](rules/classes/DrawnMarkup.ts):  `{markup:jsxElement}`, `{markup:jsxFragment}` or
     `{markup:draw_slot}` => `return ...`, at `Priority.specific`.
+    - An action's button and a right-click menu have their own (`{markup:action_button}`,
+      `{markup:context_menu_block}`), registered before `jsxElement`:  else a drawing that is only one of them
+      draws a plain tag (epic `language` I78).
   - Only in a drawing:  `DrawIt.drawingIn()` finds the nearest method, a `draw_it`'s, or one named `draw`.
     A loop's body counts as the drawing around it (`SpellStatement.loops`:  `for each`, `repeat`).
   - SEVERAL drawn lines (C28):  [`DrawnLines.gather()`](rules/classes/DrawnLines.ts),

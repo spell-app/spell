@@ -7,8 +7,8 @@
       detail: "base type",
       description: "What your own types are made from -- `a card is a thing` makes a card.\n- Give it properties with `has`, e.g. `a card has a suit as one of clubs, diamonds, hearts, spades`.\n- Make one with `a new card` or `create a card`, optionally `with suit = hearts`.\n- Reactive:  change a property and whatever was drawn from it redraws.\n- Setting a property to the wrong sort of value warns in the console -- but it's set anyway.\n\n```spell\na task is a thing\na task has a name as text\nto draw (a task)\n  return <div>{its name}</div>\n\nit = a new task with name = \"Test Drawing\"\ndraw it\n```",
       rules: [
-        { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?" },
-        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?" },
+        { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?" },
+        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?" },
         { name: "new_thing", syntax: "a new {type:known_type} ((with|where|whose) {props:object_literal_properties})?" },
         { name: "create_thing", syntax: "create (a|an) new? {type:known_type} ((with|where|whose) {props:object_literal_properties})?" }
       ]
@@ -247,8 +247,8 @@
       super: "type:View",
       description: "A view which is a whole program -- `a game is an app` makes a game.\n- Everything a view has, plus `start`.\n- Its element is named for its project:  `<solitaire-app>` in a solitaire app.\n- Write its `to draw (a game)` to lay out the page, then `start the game` to show it.\n\n```spell\na game is an app\nto draw (a game)\n  return <div>Hello</div>\n\nset the game to a new game\nstart the game\n```",
       rules: [
-        { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?" },
-        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?" }
+        { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?" },
+        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?" }
       ]
     },
     {
@@ -263,8 +263,8 @@
       super: "type:Thing",
       description: "A thing drawn as its own custom element -- `a card is a view` makes a card that is one.\n- Everything a thing has.\n- Its tag starts with the project's or library's name, made singular:  `<solitaire-card>` in a solitaire app.\n- ONE drawing, its `to draw it`:  a card face down checks its own direction there.\n\n```spell\na card is a view where:\n  - its rank is a number\n  - to \"draw it\": <div>{its rank}</div>\n```",
       rules: [
-        { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?" },
-        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?" },
+        { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?" },
+        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?" },
         { name: "draw_it", syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?" },
         { name: "draw_it", syntax: "to {phrase:draw_method} :? {statement_body}?" },
         { name: "draw_it", syntax: "to draw its {slot:member_words} :? {statement_body}?" }
@@ -280,8 +280,8 @@
       super: "type:View",
       description: "A view people reach by its own address -- `a home is a page` makes one.\n- Everything a view has.\n- Its address, and moving between pages, aren't built yet:  for now it draws as any view does.\n\n```spell\na home is a page where:\n  - to \"draw it\": <h1>Welcome</h1>\n```",
       rules: [
-        { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?" },
-        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?" },
+        { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?" },
+        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?" },
         { name: "draw_it", syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?" },
         { name: "draw_it", syntax: "to {phrase:draw_method} :? {statement_body}?" },
         { name: "draw_it", syntax: "to draw its {slot:member_words} :? {statement_body}?" }

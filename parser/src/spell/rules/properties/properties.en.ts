@@ -165,7 +165,77 @@ properties.addRule(PropertyExpression, {
 
 // its tests:  the table of what a name means inside an action, `NameMeanings.test.ts`
 properties.addRule(TheOwnProperty, {
-  syntax: "{definite_article} {property:member_words}"
+  syntax: "{definite_article} {property:member_words}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "an action in an app's outline for another type reads the app's members (epic `language` P55)",
+          input: [
+            'a "card" is a thing',
+            'a "pile" is a list of cards',
+            "solitaire is an app",
+            '\t"stock" is a new pile',
+            "\tto play a card",
+            "\t\tprint the stock"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            "  play() {",
+            "    core.console.log(solitaire.stock)",
+            "  }",
+            "}",
+            "export class Pile extends List {",
+            "  static instanceType = Card",
+            "}",
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_properties", "App")',
+            "",
+            '  // "stock" is a new pile',
+            '  static { this.declareProp("stock", { init: () => new Pile({ id: "stock" }), early: true }) }',
+            '  get stock() { return this.getProp("stock") }',
+            '  set stock(value) { this.setProp("stock", value) }',
+            "}",
+            "export const solitaire = new Solitaire()",
+            'core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play A Card" })'
+          ],
+          ts: [
+            "export class Card extends Thing {",
+            "  play() {",
+            "    core.console.log(solitaire.stock)",
+            "  }",
+            "}",
+            "export class Pile extends List<Card> {",
+            "  static instanceType = Card",
+            "}",
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_properties", "App")',
+            "",
+            '  // "stock" is a new pile',
+            '  @prop({ init: () => new Pile({ id: "stock" }), early: true })',
+            "  accessor stock!: Pile",
+            "}",
+            "",
+            "/**",
+            " * `<test-properties-app>`:  a solitaire, drawn in its own element, e.g. by `draw the solitaire`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitaire's properties;  its methods call its solitaire's.",
+            " * - What every view's element does, e.g. drawing its solitaire, is `SpellElement`'s.",
+            " */",
+            "export class SolitaireElement extends SpellElement<Solitaire> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-properties-app", "solitaire", [',
+            '    { name: "stock", kind: "json", description: "Its stock." }',
+            "  ])",
+            "}",
+            "core.useElement(Solitaire, SolitaireElement)",
+            "export const solitaire = new Solitaire()",
+            'core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play A Card" })'
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 properties.addRule(PossessiveMark)

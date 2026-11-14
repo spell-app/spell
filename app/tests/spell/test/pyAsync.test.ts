@@ -36,8 +36,10 @@ describe("Python on asyncio", () => {
     )
   })
 
+  // (Solitaire's top level is empty since it deals in `when creating it`:  the frozen test project that tells a story waits)
   test("the top level runs what waits with asyncio.run()", () => {
-    expect(cards).toMatch(/^from __future__ import annotations\n\nimport asyncio\n/)
-    expect(cards).toContain("asyncio.run(solitaire.deal_the_cards())")
+    const story = compiledFixture("@spell/test/sending-events", PY.PyWriter.instance)
+    expect(story).toMatch(/^from __future__ import annotations\n\nimport asyncio\n/)
+    expect(story).toContain("asyncio.run(play_the_story())")
   })
 })

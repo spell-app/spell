@@ -177,7 +177,77 @@ propertiesEs.addRule(PropertyExpression, {
 })
 
 propertiesEs.addRule(TheOwnProperty, {
-  syntax: "{definite_article} {property:member_words}"
+  syntax: "{definite_article} {property:member_words}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "an action in an app's outline for another type reads the app's members (epic `language` P55)",
+          input: [
+            'una "carta" es una cosa',
+            'una "pila" es una lista de cartas',
+            "solitario es una aplicación",
+            '\t"reserva" es una nueva pila',
+            "\tpara jugar una carta",
+            "\t\timprimir la reserva"
+          ],
+          js: [
+            "export class Carta extends Thing {",
+            "  jugar() {",
+            "    core.console.log(solitario.reserva)",
+            "  }",
+            "}",
+            "export class Pila extends List {",
+            "  static instanceType = Carta",
+            "}",
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_properties", "App")',
+            "",
+            '  // "reserva" es una nueva pila',
+            '  static { this.declareProp("reserva", { init: () => new Pila({ id: "reserva" }), early: true }) }',
+            '  get reserva() { return this.getProp("reserva") }',
+            '  set reserva(value) { this.setProp("reserva", value) }',
+            "}",
+            "export const solitario = new Solitario()",
+            'core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })'
+          ],
+          ts: [
+            "export class Carta extends Thing {",
+            "  jugar() {",
+            "    core.console.log(solitario.reserva)",
+            "  }",
+            "}",
+            "export class Pila extends List<Carta> {",
+            "  static instanceType = Carta",
+            "}",
+            "export class Solitario extends App {",
+            '  static elementTag = core.defineElement(this, "test_properties", "App")',
+            "",
+            '  // "reserva" es una nueva pila',
+            '  @prop({ init: () => new Pila({ id: "reserva" }), early: true })',
+            "  accessor reserva!: Pila",
+            "}",
+            "",
+            "/**",
+            " * `<test-properties-app>`:  a solitario, drawn in its own element, e.g. by `draw the solitario`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitario's properties;  its methods call its solitario's.",
+            " * - What every view's element does, e.g. drawing its solitario, is `SpellElement`'s.",
+            " */",
+            "export class SolitarioElement extends SpellElement<Solitario> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-properties-app", "solitario", [',
+            '    { name: "reserva", kind: "json", description: "Its reserva." }',
+            "  ])",
+            "}",
+            "core.useElement(Solitario, SolitarioElement)",
+            "export const solitario = new Solitario()",
+            'core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })'
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 // NOTE:  no possessive:  English's `the character's name` is `el nombre del personaje`, which `property_expression` reads

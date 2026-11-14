@@ -38,6 +38,7 @@ class DescribedMethods:
         - What compiled spell writes after the class, for an action with any of its description's lines.
         - Again for the same name, e.g. a sub-class's:  the new description, whole.
         - `"undone_as"`:  ONE undo step, through the run's history (`undoing.declare_action()`).
+        - `"cant_be_undone"`:  `"keeps history"`, nothing it changes is recorded.
         """
         describe_action(cls, name, description)
 
@@ -66,8 +67,9 @@ def describe_action(cls: type, name: str, description: dict[str, Any]) -> None:
     """`core.describe_action()`, which needs no core:  so a built-in class describes its own, e.g. `App`'s `undo`."""
     _ACTIONS.setdefault(cls, {})[name] = description
     undone_as = description.get("undone_as")
-    if undone_as is not None and callable(getattr(cls, name, None)):
-        declare_action(cls, name, undone_as)
+    cant_be_undone = description.get("cant_be_undone")
+    if (undone_as is not None or cant_be_undone is not None) and callable(getattr(cls, name, None)):
+        declare_action(cls, name, undone_as, cant_be_undone)
 
 
 def _described_by(store: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]", cls: type) -> dict[str, dict[str, Any]]:

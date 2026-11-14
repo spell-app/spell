@@ -187,6 +187,7 @@ describe("names with grammar words", () => {
             this.sideOfPlay = 2
           }
         }
+        core.describeAction(Card, "flip", { title: "Flip It", undoneAs: "Flip It" })
         export const c = new Card()
         core.console.log(c.sideOfPlay + 1)
         core.console.log(c.whatIf)"
@@ -252,6 +253,7 @@ describe("names with grammar words", () => {
             return core.console.log(this.fechaDeNacimiento)
           }
         }
+        core.describeAction(Persona, "saludar", { title: "Saludar", undoneAs: "Saludar" })
         export const p = new Persona()
         core.console.log(p.fechaDeNacimiento)
         core.console.log(p.fechaDeNacimiento)"
@@ -348,6 +350,7 @@ describe("names with grammar words", () => {
             return this.side === "up"
           }
         }
+        core.describeAction(Card, "putInPlay", { title: "Put (a Card) In Play", undoneAs: "Put (a Card) In Play" })
         export function openThePointOfSale() {
           return core.console.log(2)
         }
@@ -384,6 +387,7 @@ describe("names with grammar words", () => {
             return this.lado === "x"
           }
         }
+        core.describeAction(Carta, "ponerEnJuego", { title: "Poner (una Carta) En Juego", undoneAs: "Poner (una Carta) En Juego" })
         export function abrirLaCuentaDeAhorro() {
           return core.console.log(2)
         }

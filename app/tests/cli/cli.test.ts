@@ -288,7 +288,7 @@ describe("spell compile", () => {
     const wrote = [SP.COMPILED_JS_SUFFIX, SP.DECLARATIONS_JSON_SUFFIX, SP.WORDS_JS_SUFFIX, SP.SCOPES_JS_SUFFIX]
     expect(stderr).toContain(`wrote ${wrote.map((suffix) => `Solitaire${suffix}`).join(", ")}`)
     const pack = readFileSync(resolve(copy, `Solitaire${SP.SCOPES_JS_SUFFIX}`), "utf8")
-    expect(pack).toContain("type:Tableau")
+    expect(pack).toContain("type:Column")
     expect(pack).not.toContain("file://")
     const words = readFileSync(resolve(copy, `Solitaire${SP.WORDS_JS_SUFFIX}`), "utf8")
     expect(words).toContain('dealTheCards: "deal the cards"')
@@ -656,8 +656,8 @@ describe("spell run", () => {
     await until(() => /http:\/\/localhost:\d+\/\n/.test(out), 120_000)
     const url = /http:\/\/localhost:\d+\//.exec(out)![0]
     expect(await (await fetch(url)).text()).toContain('<spell-viewer src="app/Solitaire.spell.js" toolbar>')
-    expect(await (await fetch(new URL("app/Solitaire.spell.js", url))).text()).toContain("class Tableau")
-    expect(await (await fetch(new URL("app/Solitaire.scopes.js", url))).text()).toContain("type:Tableau")
+    expect(await (await fetch(new URL("app/Solitaire.spell.js", url))).text()).toContain("class Column")
+    expect(await (await fetch(new URL("app/Solitaire.scopes.js", url))).text()).toContain("type:Column")
     expect((await fetch(new URL("element/spell-viewer.js", url))).status).toBe(200)
     expect((await fetch(new URL("element/../../package.json", url))).status).toBe(404)
 
@@ -1074,9 +1074,9 @@ describe("spell explain", () => {
   })
 
   test("--in a project:  what it declares, as the editor's hover shows it", () => {
-    const { status, stdout } = spell(["explain", "tableau", "--in", "@spell/examples/Solitaire"])
+    const { status, stdout } = spell(["explain", "column", "--in", "@spell/examples/Solitaire"])
     expect(status).toBe(0)
-    expect(stdout).toMatch(/Solitaire\.spell:\d+\ntemplate Tableau is a Pile\n/)
+    expect(stdout).toMatch(/Solitaire\.spell:\d+\ntemplate Column is a Pile\n/)
   })
 
   test("--in a project:  what the projects it imports declare, too", () => {

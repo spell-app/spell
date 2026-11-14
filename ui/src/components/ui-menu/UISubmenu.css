@@ -9,8 +9,12 @@
  *   the end:  it sets the menu's own switches on its box
  *   (`--_ui-menu-item-display`, `--_ui-menu-icon-float`), which the menu's later layers read, rather than
  *   out-ranking them.
- * - The fly-out's frame and place are inline, set while it's open (`FLYOUT_STYLE`, `UISubmenu.tsx`):
- *   a named menu elsewhere on the page is the page's element, which this sheet can't reach.
+ * - The fly-out's frame and place:  `FLYOUT_STYLE` (`UISubmenu.tsx`), a sheet of its own for the box drawn round the
+ *   items inside (so a page's `::part(flyout)` wins over it), inline while open for a named menu elsewhere on the
+ *   page, the page's element, which this sheet can't reach.
+ * - The menu drawn round the items inside is as wide as its widest item:  never a vertical menu's fixed 15em
+ *   (Theme's "Light | Dark | Auto" showed "Li…"), never under its box's width (a page's `::part(flyout)`
+ *   `min-width`), never over it (the window's width, less a margin).
  */
 
 @layer ui.components.submenu.types;
@@ -48,5 +52,11 @@
   }
   :host(:state(open)) > .item > .chevron {
     opacity: 1;
+  }
+  .flyout > ui-menu::part(menu) {
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+    max-width: 100%;
   }
 }

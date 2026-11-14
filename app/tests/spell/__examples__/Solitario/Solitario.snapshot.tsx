@@ -432,7 +432,7 @@ export class PilaDeReserva extends Pila {
 
   drawItsPlaceholder() {
     // Una carta gris claro, boca abajo
-    return <es-texto part="marcador">🂠</es-texto>
+    return <es-texto part="marcador placeholder">🂠</es-texto>
   }
 
   /** Vacía:  un clic vuelve a voltear los descartes;  un clic en una de sus cartas es de la carta */
@@ -524,7 +524,7 @@ export class Fundación extends Pila {
 
   drawItsPlaceholder() {
     // Un as gris claro de su palo, boca arriba
-    return <es-texto part="marcador">{(new Carta({ rango: "as", palo: this.palo })).imagen}</es-texto>
+    return <es-texto part="marcador placeholder">{(new Carta({ rango: "as", palo: this.palo })).imagen}</es-texto>
   }
 
   canTake(carta: Carta) {

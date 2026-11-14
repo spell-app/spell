@@ -180,6 +180,62 @@ describe("core.drawAction():  an action's button", () => {
     expect(menu.isConnected).toBe(false)
     expect(game.undoTitle).toBe("Undo Deal")
   })
+
+  describe("<context-menu> at the drawing's own level (I81)", () => {
+    /** A card of the table's:  a view of its own, drawn in its own element's shadow root, with no menu of its own. */
+    class Card extends View {
+      static elementTag = core.defineElement(this, "Patience")
+      draw(): ReturnType<View["draw"]> {
+        return (h("button", { class: "Card" }, "A") as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+
+    /**
+     * The table, as spell compiles a drawing whose `<context-menu>` is its last line, beside its toolbar and board:
+     *
+     *       to draw it
+     *         <div class="Bar">Patience</div>
+     *         <div class="Board"><card .../></div>
+     *         <context-menu>
+     *           <action "deal"/>
+     *         </>
+     */
+    class Patience extends App {
+      static elementTag = core.defineElement(this, "Patience", "App")
+      card = new Card()
+      deal(): void {}
+      draw(): ReturnType<View["draw"]> {
+        return [
+          h("div", { class: "Bar" }, "Patience"),
+          h("div", { class: "Board" }, () => core.drawThing(this.card)),
+          core.drawContextMenu(this, ["deal"])
+        ] as unknown as ReturnType<View["draw"]>
+      }
+    }
+    core.describeAction(Patience, "deal", { title: "Deal" })
+
+    test("is the right-click menu of the app's own element, wherever in its drawing the click lands", async () => {
+      await Promise.resolve()
+      core.mountApp(new Patience({}), root)
+      flush()
+      const app = root.querySelector("patience-app") as HTMLElement & { ready: Promise<void> }
+      const card = app.querySelector("patience-card") as HTMLElement & { ready: Promise<void> }
+      await Promise.all([app.ready, card.ready])
+      flush()
+      // the app's own child:  nothing draws it in an element
+      expect(app.querySelector(":scope > spell-context-menu")).not.toBeNull()
+      const spots = { bar: app.querySelector(".Bar")!, card: card.shadowRoot!.querySelector(".Card")!, app }
+      const shown: Record<string, boolean> = {}
+      for (const [name, spot] of Object.entries(spots)) {
+        ActionMenus.closeContextMenu()
+        // as the page hears a right click:  each element's own handler, the card's first, then the app's
+        const click = new MouseEvent("contextmenu", { bubbles: true, composed: true, cancelable: true })
+        spot.dispatchEvent(click)
+        shown[name] = click.defaultPrevented && !!document.querySelector("ui-menu[data-spell-action-menu]")
+      }
+      expect(shown).toEqual({ bar: true, card: true, app: true })
+    })
+  })
 })
 
 /**
@@ -187,7 +243,7 @@ describe("core.drawAction():  an action's button", () => {
  * own menus are drawn.
  * - The class is what spell compiles this to:
  *
- *       a patience is an app
+ *       a freecell is an app
  *         its "face up" is yes or no
  *         to deal
  *           shortcut meta+D
@@ -205,8 +261,8 @@ describe("core.drawAction() in a menu:  an action's row", () => {
   installSpellElements(core)
 
   /** A game whose deal turns its one card face down, drawing a menu of its deal and undo. */
-  class Patience extends App {
-    static elementTag = core.defineElement(this, "Patience", "App")
+  class Freecell extends App {
+    static elementTag = core.defineElement(this, "Freecell", "App")
     static {
       this.declareProp("faceUp", { type: "choice" })
     }
@@ -237,7 +293,7 @@ describe("core.drawAction() in a menu:  an action's row", () => {
       )()
     }
   }
-  core.describeAction(Patience, "deal", {
+  core.describeAction(Freecell, "deal", {
     title: "Deal",
     icon: "play",
     shortcuts: ["meta+D"],
@@ -258,10 +314,10 @@ describe("core.drawAction() in a menu:  an action's row", () => {
 
   test("a <ui-action> of the action, live:  its title, icon and key;  greyed and ticked;  a click runs it, one undo step", async () => {
     await Promise.resolve()
-    const game = new Patience({ faceUp: true })
+    const game = new Freecell({ faceUp: true })
     core.mountApp(game, root)
     flush()
-    const app = root.querySelector("patience-app") as HTMLElement & { ready: Promise<void> }
+    const app = root.querySelector("freecell-app") as HTMLElement & { ready: Promise<void> }
     await app.ready
     const rows = [...app.querySelectorAll("ui-menu > ui-action")] as Array<HTMLElement & { ready: Promise<void> }>
     await Promise.all(rows.map((row) => row.ready))

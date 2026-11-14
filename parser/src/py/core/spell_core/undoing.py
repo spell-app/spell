@@ -97,6 +97,8 @@ class UndoHistory:
         self._lists: dict[int, ItemsRecord] = {}
         # True while `undo()` or `redo()` runs records
         self._applying = False
+        # how many actions that can't be undone are running:  nothing they change is recorded
+        self._unrecorded = 0
 
     ################
     # ## The history
@@ -134,8 +136,8 @@ class UndoHistory:
 
     @property
     def is_recording(self) -> bool:
-        """Is a change made now recorded:  an undoable action running, and nothing being undone?"""
-        return self._open is not None and not self._applying
+        """Is a change made now recorded:  an undoable action running, nothing being undone, no `cant_be_undone` one?"""
+        return self._open is not None and not self._applying and not self._unrecorded
 
     def shown(self) -> dict[str, object]:
         """What the Edit menu shows of it, as a page is sent it:  `{"can_undo": True, "undo_title": ...}`."""
@@ -179,6 +181,30 @@ class UndoHistory:
         if inspect.iscoroutine(result):
             return self._run_async(title, result)  # type: ignore[return-value]
         return result
+
+    def run_unrecorded[Result](self, act: Callable[[], Result]) -> Result:
+        """Run `act`, an action described `cant_be_undone`, recording nothing it changes:  what it returns.
+
+        - `"keeps history"`:  the steps before it can still be undone, e.g. showing a hint.
+        - A step open around it (an undoable action that calls it) records nothing of it either.
+        """
+        self._unrecorded += 1
+        try:
+            result = act()
+        except BaseException:
+            self._unrecorded -= 1
+            raise
+        if inspect.iscoroutine(result):
+            return self._unrecorded_async(result)  # type: ignore[return-value]
+        self._unrecorded -= 1
+        return result
+
+    async def _unrecorded_async(self, running: Coroutine[Any, Any, Any]) -> Any:
+        """`running`, a `cant_be_undone` action's coroutine, awaited recording nothing -- see `run_unrecorded()`."""
+        try:
+            return await running
+        finally:
+            self._unrecorded -= 1
 
     async def _run_async(self, title: str, running: Coroutine[Any, Any, Any]) -> Any:
         """`running`, an action's coroutine, awaited as ONE step -- see `run()`."""
@@ -286,10 +312,12 @@ class UndoHistory:
 ################
 
 
-def declare_action(cls: type, name: str, undone_as: str) -> None:
+def declare_action(cls: type, name: str, undone_as: str | None, cant_be_undone: str | None = None) -> None:
     """Make `cls`'s method `name` an action that's ONE undo step, titled `undone_as`:  see `UndoHistory.run()`.
 
     - What `core.describe_action()` does for a description with `"undone_as"`.
+    - Or, with no `undone_as`, one that can't be undone (`cant_be_undone`, `"keeps history"`):  nothing it changes is
+      recorded (`UndoHistory.run_unrecorded()`).
     - SIDE EFFECT:  replaces the method on `cls` with one that runs it through the running program's history.
       - Only once:  a sub-class describing it again doesn't wrap it twice.
     - throws `TypeError` if `name` isn't a method of `cls`
@@ -304,9 +332,12 @@ def declare_action(cls: type, name: str, undone_as: str) -> None:
     def action(self: object, *args: object, **kwargs: object) -> object:
         from spell_core.things import program_core
 
-        return program_core().RUNTIME.history.run(undone_as, lambda: method(self, *args, **kwargs))
+        history = program_core().RUNTIME.history
+        if undone_as is None:
+            return history.run_unrecorded(lambda: method(self, *args, **kwargs))
+        return history.run(undone_as, lambda: method(self, *args, **kwargs))
 
-    setattr(action, UNDONE_AS_KEY, undone_as)
+    setattr(action, UNDONE_AS_KEY, undone_as if undone_as is not None else cant_be_undone)
     setattr(cls, name, action)
 
 

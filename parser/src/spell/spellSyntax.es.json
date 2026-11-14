@@ -954,6 +954,36 @@
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
+              "syntax": "{operator:is_or_is_not} igual (a|que) {expression:operand}",
+              "example": "thing es igual a other",
+              "outputs": {
+                "js": {
+                  "code": "(thing === other)"
+                },
+                "ts": {
+                  "code": "(thing === other)"
+                },
+                "py": {
+                  "code": "(thing == other)"
+                }
+              }
+            },
+            {
+              "syntax": "(y|e) {expression:operand} {operator:is_or_is_not} iguales",
+              "example": "thing y other son iguales",
+              "outputs": {
+                "js": {
+                  "code": "(thing === other)"
+                },
+                "ts": {
+                  "code": "(thing === other)"
+                },
+                "py": {
+                  "code": "(thing == other)"
+                }
+              }
+            },
+            {
               "syntax": "{operator:is_or_is_not} {expression:operand}",
               "example": "thing es other",
               "outputs": {
@@ -1043,6 +1073,32 @@
                 },
                 "py": {
                   "code": "core.matches_type(thing, other)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "IsInAType",
+          "ruleNames": ["is_in_a_type"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/IsInAType.ts",
+          "line": 14,
+          "purpose": "`{lhs} is [not] in a {list type}` -- is it in any list of that type?",
+          "syntaxes": [
+            {
+              "syntax": "{operator:is_or_is_not} en (un|una) (expression:{known_type})",
+              "example": "thing está en una columna",
+              "outputs": {
+                "js": {
+                  "code": "core.isInA(thing, Columna)"
+                },
+                "ts": {
+                  "code": "core.isInA(thing, Columna)"
+                },
+                "py": {
+                  "code": "core.is_in_a(thing, Columna)"
                 }
               }
             }
@@ -2162,11 +2218,23 @@
           "ruleNames": ["the_own_property"],
           "internal": false,
           "file": "src/spell/rules/properties/TheOwnProperty.ts",
-          "line": 20,
+          "line": 24,
           "purpose": "`the {member words}` inside an action, reading a property of the thing the action runs on, e.g. `shuffle the stock` => `this.stock.shuffle()` (epic `language`, P2).",
           "syntaxes": [
             {
-              "syntax": "{definite_article} {property:member_words}"
+              "syntax": "{definite_article} {property:member_words}",
+              "example": "una \"carta\" es una cosa\nuna \"pila\" es una lista de cartas\nsolitario es una aplicación\n\t\"reserva\" es una nueva pila\n\tpara jugar una carta\n\t\timprimir la reserva",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends Thing {\n  jugar() {\n    core.console.log(solitario.reserva)\n  }\n}\nexport class Pila extends List {\n  static instanceType = Carta\n}\nexport class Solitario extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static { this.declareProp(\"reserva\", { init: () => new Pila({ id: \"reserva\" }), early: true }) }\n  get reserva() { return this.getProp(\"reserva\") }\n  set reserva(value) { this.setProp(\"reserva\", value) }\n}\nexport const solitario = new Solitario()\ncore.describeAction(Carta, \"jugar\", { title: \"Jugar Una Carta\", undoneAs: \"Jugar Una Carta\" })"
+                },
+                "ts": {
+                  "code": "export class Carta extends Thing {\n  jugar() {\n    core.console.log(solitario.reserva)\n  }\n}\nexport class Pila extends List<Carta> {\n  static instanceType = Carta\n}\nexport class Solitario extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  @prop({ init: () => new Pila({ id: \"reserva\" }), early: true })\n  accessor reserva!: Pila\n}\n\nexport class SolitarioElement extends SpellElement<Solitario> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"solitario\", [\n    { name: \"reserva\", kind: \"json\", description: \"Its reserva.\" }\n  ])\n}\ncore.useElement(Solitario, SolitarioElement)\nexport const solitario = new Solitario()\ncore.describeAction(Carta, \"jugar\", { title: \"Jugar Una Carta\", undoneAs: \"Jugar Una Carta\" })"
+                },
+                "py": {
+                  "code": "class Carta(Thing):\n    def jugar(self) -> None:\n        core.console.log(solitario.reserva)\n\nclass Pila(List):\n    item_type = Carta\n\nclass Solitario(App):\n    element_tag = \"syntax-block-app\"\n\n    reserva = prop(init=lambda: Pila(id=\"reserva\"), early=True)\n\nsolitario = Solitario()\ncore.describe_action(Carta, \"jugar\", {\"title\": \"Jugar Una Carta\", \"undone_as\": \"Jugar Una Carta\"})"
+                }
+              }
             }
           ],
           "aliases": ["expression"]
@@ -4209,6 +4277,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "EachInStatement",
+          "ruleNames": ["each_in_statement"],
+          "internal": false,
+          "file": "src/spell/rules/lists/EachInStatement.ts",
+          "line": 24,
+          "purpose": "A statement run once for each item of a list, the list said in it -- `add each card in the deck to the stock` (epic `language` P55, Q59).",
+          "syntaxes": [
+            {
+              "syntax": "{statement} cada {item:singular_identifier} (en|de|del) {list:expression}",
+              "example": "agregar cada carta en mazo a reserva",
+              "outputs": {
+                "js": {
+                  "code": "core.map(mazo, (carta) => core.append(reserva, carta))"
+                },
+                "ts": {
+                  "code": "core.map(mazo, (carta) => core.append(reserva, carta))"
+                },
+                "py": {
+                  "code": "for carta in mazo:\n    core.append(reserva, carta)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ListRangeIteration",
           "ruleNames": ["list_range_iteration"],
           "internal": false,
@@ -4745,11 +4839,11 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 17,
+          "line": 26,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?",
               "example": "una card es una cosa",
               "outputs": {
                 "js": {
@@ -4764,7 +4858,7 @@
               }
             },
             {
-              "syntax": "(un|una) {type:quoted_type} es (un|una) {superType:type} {ability:draggable_or_droppable}* (, alias {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "(un|una) {type:quoted_type} es (un|una) {superType:type} {ability:draggable_or_droppable}* (con {defaults:object_literal_properties})? (, alias {aka:quoted_type})? {with_nested_statements}?",
               "example": "una \"card\" es una cosa",
               "outputs": {
                 "js": {
@@ -5836,11 +5930,43 @@
           "aliases": ["statement"]
         },
         {
+          "className": "DrawIt",
+          "ruleNames": ["draw_it"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DrawIt.ts",
+          "line": 54,
+          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
+          "syntaxes": [
+            {
+              "syntax": "para {phrase:draw_method} :? {statement_body}?",
+              "example": "una \"pila\" es una lista visible de cosas\n\tpara dibujar su marcador\n\t\t<texto>🂠</texto>",
+              "outputs": {
+                "js": {
+                  "code": "export class Pila extends ViewableList {\n  static instanceType = Thing\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  drawItsPlaceholder() {\n    return h(\"texto\", { part: \"placeholder\" }, \"🂠\")\n  }\n}"
+                },
+                "ts": {
+                  "code": "export class Pila extends ViewableList<Thing> {\n  static instanceType = Thing\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  drawItsPlaceholder() {\n    return <texto part=\"placeholder\">🂠</texto>\n  }\n}\n\nexport class PilaElement extends SpellElement<Pila> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-pila\", \"pila\", [])\n\n  drawItsPlaceholder() {\n    return this.currentThing?.drawItsPlaceholder()\n  }\n}\ncore.useElement(Pila, PilaElement)"
+                },
+                "py": {
+                  "code": "class Pila(ViewableList):\n    item_type = Thing\n    element_tag = \"syntax-block-pila\"\n\n    def draw_its_placeholder(self) -> Element:\n        return h(\"texto\", {\"part\": \"placeholder\"}, \"🂠\")"
+                }
+              }
+            },
+            {
+              "syntax": "para {alias:text} :? ({inline_expression}|{nested_expression})?"
+            },
+            {
+              "syntax": "para dibujar su {slot:member_words} :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "DefineGroup",
           "ruleNames": ["define_group"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineGroup.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "A GROUP of a template's members, a heading in its outline (epic `elemental-spell` P16).",
           "syntaxes": [
             {
@@ -5855,6 +5981,21 @@
                 },
                 "py": {
                   "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)"
+                }
+              }
+            },
+            {
+              "syntax": "grupo {group:text}",
+              "example": "grupo \"Las pilas\"\n\nuna pila es una cosa",
+              "outputs": {
+                "js": {
+                  "code": "export class Pila extends Thing {}"
+                },
+                "ts": {
+                  "code": "export class Pila extends Thing {}"
+                },
+                "py": {
+                  "code": "class Pila(Thing):\n    pass"
                 }
               }
             },
@@ -6350,26 +6491,6 @@
           "aliases": ["statement"]
         },
         {
-          "className": "DrawIt",
-          "ruleNames": ["draw_it"],
-          "internal": false,
-          "file": "src/spell/rules/classes/DrawIt.ts",
-          "line": 52,
-          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
-          "syntaxes": [
-            {
-              "syntax": "para {alias:text} :? ({inline_expression}|{nested_expression})?"
-            },
-            {
-              "syntax": "para {phrase:draw_method} :? {statement_body}?"
-            },
-            {
-              "syntax": "para dibujar su {slot:member_words} :? {statement_body}?"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
           "className": "HasSlots",
           "ruleNames": ["has_slots"],
           "internal": false,
@@ -6394,7 +6515,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 28,
+          "line": 29,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {
@@ -6402,6 +6523,12 @@
             },
             {
               "syntax": "{markup:markdown_block}"
+            },
+            {
+              "syntax": "{markup:action_button}"
+            },
+            {
+              "syntax": "{markup:context_menu_block}"
             },
             {
               "syntax": "{markup:jsxElement}"
@@ -9404,6 +9531,32 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "StatementIf",
+          "ruleNames": ["statement_if"],
+          "internal": false,
+          "file": "src/spell/rules/if/StatementIf.ts",
+          "line": 19,
+          "purpose": "A statement, then when it runs -- `return yes if the card is a king`.",
+          "syntaxes": [
+            {
+              "syntax": "{statement} si {condition:expression}",
+              "example": "devolver sí si bar",
+              "outputs": {
+                "js": {
+                  "code": "if (bar) return true"
+                },
+                "ts": {
+                  "code": "if (bar) return true"
+                },
+                "py": {
+                  "code": "if bar:\n    return True"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },
@@ -9909,7 +10062,7 @@
           "ruleNames": ["create_hook"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateHook.ts",
-          "line": 28,
+          "line": 30,
           "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when creating a task (with title as text):`.",
           "syntaxes": [
             {
@@ -9935,7 +10088,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 31,
+          "line": 33,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -9943,13 +10096,28 @@
               "example": "una carta es una cosa donde:\n\t- su dirección es una de arriba o abajo\n\t- para voltearla:\n\t\t- atajo meta+T\n\t\t- activa cuando su dirección es abajo\n\t\t- deshacible como \"Voltear carta\"\n\t\tponer su dirección en arriba",
               "outputs": {
                 "js": {
-                  "code": "export class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"]\n  static { this.declareProp(\"dirección\", { oneOf: Carta.Direcciones }) }\n  get dirección() { return this.getProp(\"dirección\") }\n  set dirección(value) { this.setProp(\"dirección\", value) }\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n\n  get voltearIsEnabled() {\n    return this.dirección === \"abajo\"\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"Voltearla\", shortcuts: [\"meta+T\"], enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltear carta\" })"
+                  "code": "export class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"]\n  static { this.declareProp(\"dirección\", { oneOf: Carta.Direcciones }) }\n  get dirección() { return this.getProp(\"dirección\") }\n  set dirección(value) { this.setProp(\"dirección\", value) }\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n  get voltearIsEnabled() {\n    return this.dirección === \"abajo\"\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"Voltearla\", shortcuts: [\"meta+T\"], enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltear carta\" })"
                 },
                 "ts": {
-                  "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n\n  get voltearIsEnabled() {\n    return this.dirección === \"abajo\"\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"Voltearla\", shortcuts: [\"meta+T\"], enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltear carta\" })"
+                  "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n  get voltearIsEnabled() {\n    return this.dirección === \"abajo\"\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"Voltearla\", shortcuts: [\"meta+T\"], enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltear carta\" })"
                 },
                 "py": {
                   "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return self.dirección == \"abajo\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"Voltearla\", \"shortcuts\": [\"meta+T\"], \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltear carta\"})"
+                }
+              }
+            },
+            {
+              "syntax": "(cantBeUndone:no se puede deshacer|no deshacible)",
+              "example": "una carta es una cosa donde:\n\t- para voltearla:\n\t\timprimir 1\n\t- para mirar:\n\t\t- no se puede deshacer\n\t\timprimir 2",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends Thing {\n  voltear() {\n    core.console.log(1)\n  }\n\n  mirar() {\n    core.console.log(2)\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"Voltearla\", undoneAs: \"Voltearla\" })\ncore.describeAction(Carta, \"mirar\", { title: \"Mirar\", cantBeUndone: \"keeps history\" })"
+                },
+                "ts": {
+                  "code": "export class Carta extends Thing {\n  voltear() {\n    core.console.log(1)\n  }\n\n  mirar() {\n    core.console.log(2)\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"Voltearla\", undoneAs: \"Voltearla\" })\ncore.describeAction(Carta, \"mirar\", { title: \"Mirar\", cantBeUndone: \"keeps history\" })"
+                },
+                "py": {
+                  "code": "class Carta(Thing):\n    def voltear(self) -> None:\n        print(1)\n\n    def mirar(self) -> None:\n        print(2)\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"Voltearla\", \"undone_as\": \"Voltearla\"})\ncore.describe_action(Carta, \"mirar\", {\"title\": \"Mirar\", \"cant_be_undone\": \"keeps history\"})"
                 }
               }
             },
@@ -9958,13 +10126,13 @@
               "example": "un juego es una cosa donde:\n\t- para compilar:\n\t\t- titulada \"Código\"\n\t\timprimir 1",
               "outputs": {
                 "js": {
-                  "code": "export class Juego extends Thing {\n  compilar() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Juego, \"compilar\", { title: \"Código\" })"
+                  "code": "export class Juego extends Thing {\n  compilar() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Juego, \"compilar\", { title: \"Código\", undoneAs: \"Código\" })"
                 },
                 "ts": {
-                  "code": "export class Juego extends Thing {\n  compilar() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Juego, \"compilar\", { title: \"Código\" })"
+                  "code": "export class Juego extends Thing {\n  compilar() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Juego, \"compilar\", { title: \"Código\", undoneAs: \"Código\" })"
                 },
                 "py": {
-                  "code": "class Juego(Thing):\n    def compilar(self) -> None:\n        print(1)\n\ncore.describe_action(Juego, \"compilar\", {\"title\": \"Código\"})"
+                  "code": "class Juego(Thing):\n    def compilar(self) -> None:\n        print(1)\n\ncore.describe_action(Juego, \"compilar\", {\"title\": \"Código\", \"undone_as\": \"Código\"})"
                 }
               }
             },
@@ -10136,6 +10304,9 @@
             },
             {
               "syntax": "(undoable:deshacible)"
+            },
+            {
+              "syntax": "(cantBeUndone:no se puede deshacer|no deshacible)"
             },
             {
               "syntax": "deshacible como {undoneAs:text}"

@@ -102,10 +102,50 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     return [MARKED_SHOWS_AS, ...BLUE_BADGE].some((state) => this.showing.has(state))
   }
 
-  /** The chips drawn:  every state present but the blues (`BLUE_BADGE`), which count in the blue badge. */
+  /**
+   * The chips drawn:  ONE per colour of the states present, but the blues (`BLUE_BADGE`), which count in the blue badge.
+   * - a colour's first state leads its chip;  the rest of that colour count in it (`sameColor()`)
+   * - the Phases section's orange is a plan waiting for his Accept AND a plan updated, its grey a phase paused AND one
+   *   done long ago:  one chip each (epic `epic-engine` I263;  Owen, 2026-11-13:  "This is confusing -- two orange
+   *   pills on top";  2026-10-26, of the items' grey:  "why are there two grey pills?")
+   */
   get chips(): readonly ChipState[] {
     const chips = StateFilter.chipStatesOf(this.present.map((it) => it.state))
-    return this.present.filter((it) => chips.includes(it.state))
+    const colors = new Set<string>()
+    return this.present.filter((it) => {
+      if (!chips.includes(it.state) || colors.has(it.color)) return false
+      colors.add(it.color)
+      return true
+    })
+  }
+
+  /**
+   * The states present of `state`'s chip colour, `state` first:  shown, hidden and counted together.
+   * - a blue:  every blue present (`BLUE_BADGE`), the blue badge's
+   */
+  private sameColor(state: string): string[] {
+    const isBlue = StateFilter.inBlueBadge(state)
+    const color = this.present.find((it) => it.state === state)?.color
+    const others = this.present
+      .filter((it) => it.state !== state && (isBlue ? StateFilter.inBlueBadge(it.state) : it.color === color))
+      .map((it) => it.state as string)
+    return [state, ...others]
+  }
+
+  /** How many are in `state`'s chip:  it and the states of its colour (`sameColor()`). */
+  private chipCount(state: string): number {
+    return this.sameColor(state).reduce((count, each) => count + (this.stateCounts.get(each) ?? 0), 0)
+  }
+
+  /** The states a chip stands for, by its lead state:  the blue badge's for `MARKED_SHOWS_AS`, else its chip's. */
+  private get leads(): string[] {
+    const chips = this.chips.map((it) => it.state as string)
+    return this.markedCount ? [MARKED_SHOWS_AS, ...chips.filter((state) => state !== MARKED_SHOWS_AS)] : chips
+  }
+
+  /** The chips' lead states showing:  a chip shows while any state of its colour does. */
+  private get leadsShowing(): string[] {
+    return this.leads.filter((lead) => this.sameColor(lead).some((state) => this.showing.has(state)))
   }
 
   ////////////////
@@ -155,7 +195,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   title={words()}
                   onClick={(event: MouseEvent) => this.pick(state.state, event.altKey ? "only" : "click")}
                 >
-                  {this.stateCounts.get(state.state) ?? 0}
+                  {this.chipCount(state.state)}
                 </button>
               )
             }}
@@ -167,7 +207,15 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   /** A chip's name and tooltip:  how many, which state, and what its click does (`StateFilter.clickDoes()`). */
   private chipWords(state: ChipState): string {
-    return this.wordsFor(state.state, this.stateCounts.get(state.state) ?? 0, this.translationForKey(state.words))
+    const words = this.sameColor(state.state)
+      .filter((each) => this.stateCounts.has(each))
+      .map((each) => this.present.find((it) => it.state === each)!.words)
+      .map((key) => this.translationForKey(key))
+    return this.wordsFor(
+      state.state,
+      this.chipCount(state.state),
+      words.join(";  ") || this.translationForKey(state.words)
+    )
   }
 
   /** The blue badge's name and tooltip, as a chip's:  `count` with Claude. */
@@ -187,24 +235,31 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   /** A chip's `aria-pressed`:  `mixed` while some of its sections show it, else whether it shows. */
   private pressedOf(state: string): "true" | "false" | "mixed" {
-    if (this.mixedStates.has(state)) return "mixed"
-    return this.showing.has(state) ? "true" : "false"
+    if (this.sameColor(state).some((each) => this.mixedStates.has(each))) return "mixed"
+    return this.sameColor(state).some((each) => this.showing.has(each)) ? "true" : "false"
   }
 
-  /** How many are in `state` (`words`), and what a click and an ⌥-click on its chip do. */
+  /**
+   * How many are in `state` (`words`), and what a click and an ⌥-click on its chip do.
+   * - by the chips' lead states (`leads`):  the rule sees one state per chip, as the person does
+   */
   private wordsFor(state: string, count: number, words: string): string {
-    const present = this.present.map((it) => it.state as string)
-    const does = this.mixedStates.has(state)
+    const does = this.sameColor(state).some((each) => this.mixedStates.has(each))
       ? this.translationForKey("chipMixed")
-      : this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing], state)])
+      : this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(this.leads, this.leadsShowing, state)])
     return this.translationForKey("chipWords", { count, words, does, only: this.translationForKey("chipAltOnly") })
   }
 
-  /** A chip, clicked (`how`:  ⌥-clicked, `only`):  the owner is told what was picked, and what should show next. */
+  /**
+   * A chip, clicked (`how`:  ⌥-clicked, `only`):  the owner is told what was picked, and what should show next.
+   * - the rule runs on the chips' lead states (`leads`), then each lead brings the states of its colour (`sameColor()`)
+   */
   @E.untracked
   private pick(state: string, how: ChipPick) {
     const present = this.present.map((it) => it.state as string)
-    const next = StateFilter.nextShown(present, [...this.showing], state, how)
+    const next = StateFilter.nextShown(this.leads, this.leadsShowing, state, how)
+      .flatMap((lead) => this.sameColor(lead))
+      .filter((each) => present.includes(each))
     // the grey chip is `old`, `handled` and `quiet`:  shown or hidden together
     const shown = next.includes(SETTLED) ? [...next, ...SETTLED_TOO] : next
     this.send(STATE_PICK, { state, shown, how } satisfies StatePickDetail)

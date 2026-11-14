@@ -10,7 +10,7 @@ import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import { EpicBodies } from "spell/epic/components/epic-item/EpicBodies"
 import { DrawnState, buttonsForItem } from "spell/epic/components/epic-item/EpicItem.types"
 import { PhaseState } from "spell/epic/components/epic-section/PhaseState"
-import { MARKED_SHOWS_AS } from "spell/epic/components/epic-section/StateFilter"
+import { MARKED_SHOWS_AS, StateFilter } from "spell/epic/components/epic-section/StateFilter"
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
 
 import { epicFocusVocabulary } from "./EpicFocus.en"
@@ -102,8 +102,8 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
   /** The item showing, by id:  pinned, so it stays while Claude closes it. */
   @E.state accessor current: string | undefined = this.kept.item
 
-  /** Each tab's chips:  the states showing;  a tab without, every one. */
-  @E.state accessor shown: Partial<Record<FocusKind, string[]>> = this.kept.shown ?? {}
+  /** Each tab's chips:  the states turned off;  a tab without, none (epic `epic-engine` I265). */
+  @E.state accessor off: Partial<Record<FocusKind, string[]>> = this.kept.off ?? {}
 
   /** Bumped when the page's items change while open:  the lists read them again. */
   @E.state accessor pageTick = 0
@@ -162,7 +162,7 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
   readonly tabs = createMemo((): FocusKindLook[] => FocusList.tabsOf(this.entries()))
 
   /** What shows, by the chips:  the order Back and Next walk. */
-  readonly walk = createMemo((): FocusEntry[] => FocusList.visible(this.entries(), this.shown, this.current))
+  readonly walk = createMemo((): FocusEntry[] => FocusList.visible(this.entries(), this.off, this.current))
 
   /** The item showing:  the current one, else the asked tab's first, else the first. */
   readonly item = createMemo((): FocusEntry | undefined => {
@@ -280,7 +280,7 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
   @E.untracked
   pickTab(kind: FocusKind) {
     this.askedTab = kind
-    this.current = FocusList.visible(this.entries(), this.shown).find((entry) => entry.kind === kind)?.id
+    this.current = FocusList.visible(this.entries(), this.off).find((entry) => entry.kind === kind)?.id
   }
 
   /** ← and →:  Back and Next;  not while typing, nor with a modifier. */
@@ -308,14 +308,20 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
         .filter((entry) => entry.kind === tab)
         .map((it) => (it.marked ? MARKED_SHOWS_AS : it.state))
     )
-    const everything = [...present].every((state) => event.detail.shown.includes(state))
-    const shown = { ...this.shown }
-    if (everything) delete shown[tab]
-    else shown[tab] = event.detail.shown
-    this.shown = shown
-    this.keepPlace({ shown })
+    // what's off:  the states here not shown, and those turned off before with no entries now, unless their colour's on
+    const shown = event.detail.shown
+    const colorsOn = new Set(shown.map((state) => StateFilter.colorOf(state)))
+    const absentOff = (this.off[tab] ?? []).filter(
+      (state) => !present.has(state) && !colorsOn.has(StateFilter.colorOf(state))
+    )
+    const tabOff = [...absentOff, ...[...present].filter((state) => !shown.includes(state))]
+    const off = { ...this.off }
+    if (tabOff.length) off[tab] = tabOff
+    else delete off[tab]
+    this.off = off
+    this.keepPlace({ off })
     const item = this.item()
-    const stillShows = item && FocusList.visible([item], shown).length > 0
+    const stillShows = item && FocusList.visible([item], off).length > 0
     if (!stillShows) this.pickTab(tab)
   }
 
@@ -324,11 +330,12 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
     const entries = this.entries().filter((entry) => entry.kind === kind)
     const counts = new Map<string, number>()
     for (const { state } of entries.filter((entry) => !entry.marked)) counts.set(state, (counts.get(state) ?? 0) + 1)
-    const shown = this.shown[kind]
+    const off = this.off[kind]
+    const present = new Set(entries.map((entry) => (entry.marked ? MARKED_SHOWS_AS : entry.state)))
     return {
       counts: [...counts].map(([state, count]) => `${state}:${count}`).join(" "),
       marked: entries.filter((entry) => entry.marked).length,
-      shown: shown ? shown.join(" ") : undefined
+      shown: off ? [...present].filter((state) => !off.includes(state)).join(" ") : undefined
     }
   }
 

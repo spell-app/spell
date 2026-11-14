@@ -38,37 +38,33 @@ solitaire is an app
 					<action "undo" icon-only/>
 					<action "redo" icon-only/>
 				</buttons>
-				<text slot="right">Score: {the score}</text>
+				<text slot="right">Score: {the score}</>
 			</toolbar>
 		</segment>
-		<container>
-			<segment appearance="basic">
-				<grid columns="7" spacing="xs">
-					<context-menu>
-						<action "auto play"/>
-						<action "cheat"/>
-						<action "restart the game"/>
-						<divider/>
-						<action "undo"/>
-						<action "redo"/>
-					</>
-					<stock-pile "stock"/>
-					<discard-pile "discards"/>
-					<spacer/>
-					<foundation "clubs"/>
-					<foundation "diamonds"/>
-					<foundation "hearts"/>
-					<foundation "spades"/>
-					<column "C1"/>
-					<column "C2"/>
-					<column "C3"/>
-					<column "C4"/>
-					<column "C5"/>
-					<column "C6"/>
-					<column "C7"/>
-				</grid>
-			</segment>
+		<container padding="small" columns="7" spacing="xs">
+			<stock-pile "stock"/>
+			<discard-pile "discards"/>
+			<spacer/>
+			<foundation "clubs"/>
+			<foundation "diamonds"/>
+			<foundation "hearts"/>
+			<foundation "spades"/>
+			<column "C1"/>
+			<column "C2"/>
+			<column "C3"/>
+			<column "C4"/>
+			<column "C5"/>
+			<column "C6"/>
+			<column "C7"/>
 		</container>
+		<context-menu>
+			<action "auto play"/>
+			<action "cheat"/>
+			<action "restart the game"/>
+			<divider/>
+			<action "undo"/>
+			<action "redo"/>
+		</>
 
 	group "Dealing"
 	to "restart the game" with title "Restart", shortcut "R"

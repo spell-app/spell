@@ -14,7 +14,7 @@ const manifest = JSON.parse(readFileSync(join(VscodeThemes.EXTENSION, "package.j
 const COLOR = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
 
 describe("VscodeThemes", () => {
-  it("lists a VS Code theme for each Spell theme, light and dark:  18", () => {
+  it("lists a VS Code theme for each Spell theme, light and dark:  16, Merlot left out", () => {
     const themes = manifest.contributes.themes
     expect(themes).toHaveLength(VscodeThemes.themeNames().length * 2)
     expect(themes.map((theme) => theme.label)).toContain("Spell Matrix Dark")

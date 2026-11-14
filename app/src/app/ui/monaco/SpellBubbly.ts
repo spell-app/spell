@@ -3,7 +3,13 @@ import { codeLook } from "spell/app/app/ui/codePopups"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
 import { BubblyMarks, indentColumns, type BubblyBlockShape, type BubblyShape } from "./BubblyMarks"
-import { MarkupMarks, type MarkupBlockShape, type MarkupShape, type MarkupTagShape } from "./MarkupMarks"
+import {
+  MarkupMarks,
+  type MarkupBlockShape,
+  type MarkupLinkShape,
+  type MarkupShape,
+  type MarkupTagShape
+} from "./MarkupMarks"
 
 import "spell/app/app/components/spell-code/bubbly.css"
 
@@ -334,8 +340,10 @@ export class SpellBubbly {
       } else if (shape.kind === "markup-block") {
         const block = this.drawMarkupBlock(shape, range, view)
         if (block) elements.push(this.asHtml(block))
-      } else if (range.startLineNumber < view.first || range.startLineNumber > view.last) continue
+      } else if (range.endLineNumber < view.first || range.startLineNumber > view.last) continue
       else if (shape.kind === "tag") elements.push(this.asHtml(this.drawTag(shape, range, view)))
+      else if (shape.kind === "tag-link") elements.push(this.asHtml(this.drawLink(shape, range, view)))
+      else if (range.startLineNumber < view.first) continue
       else {
         const element = this.drawInput(shape.isChoice, range, view)
         if (element) elements.push(element)
@@ -396,6 +404,8 @@ export class SpellBubbly {
    * end tag's band (when that starts its line), then what's inside it;  `undefined` when none of it is in view.
    * - Its band starts a bracket's room left of its `<`, at its line's indent:  its words clear of the cut corner by
    *   the spacer before the `<` (`bubbly-tag-head-spacer`);  its end tag's band likewise (`bubbly-tag-foot-spacer`).
+   * - A start tag on lines of its own:  one tall band (`drawTall()`), its body from under its last line.
+   * - A nameless end tag, `</>`:  a thin foot under it, the body down to it (`isThinFoot`).
    */
   private drawMarkupBlock(shape: MarkupBlockShape, range: monaco.Range, view: View): HTMLElement | undefined {
     const { editor } = this
@@ -403,11 +413,16 @@ export class SpellBubbly {
     const headLine = range.startLineNumber
     const lastLine = range.endLineNumber
     if (lastLine < view.first - 1 || headLine > view.last) return undefined
-    const block = element(`bubbly-block bubbly-${shape.partOfSpeech}`)
+    const block = element(`bubbly-block bubbly-${shape.partOfSpeech}${shape.isThinFoot ? " bubbly-thin-foot" : ""}`)
     const left = this.wordsX(headLine) - measures.bracketPad
     const headTop = editor.getTopForLineNumber(headLine)
-    if (headLine >= view.first) {
-      const head = view.ranges[shape.head]
+    const head = view.ranges[shape.head]
+    // its start tag's last line:  a tall one's (T118), else its first
+    const headEnd = head && head.endLineNumber > headLine ? head.endLineNumber : headLine
+    if (headEnd > headLine) {
+      const classes = `bubbly-tag-tall bubbly-tag-start bubbly-tag-tall-head${shape.isShortTail ? " bubbly-tag-tall-short-tail" : ""}`
+      block.append(this.drawTall(classes, head!, left, view))
+    } else if (headLine >= view.first) {
       const endColumn =
         head && head.endLineNumber === headLine ? head.endColumn : editor.getModel()!.getLineMaxColumn(headLine)
       const right = this.xOf(headLine, endColumn) + measures.bracketPad
@@ -416,10 +431,13 @@ export class SpellBubbly {
     }
     const foot = shape.foot === undefined ? undefined : view.ranges[shape.foot]
     const lastTop = editor.getTopForLineNumber(lastLine)
-    const bodyTop = headTop + (lineHeight + measures.pillHeight) / 2
-    const bodyBottom = foot
-      ? lastTop + (lineHeight - measures.footPillHeight) / 2
-      : lastTop + (lineHeight + measures.pillHeight) / 2
+    const bodyTop = editor.getTopForLineNumber(headEnd) + (lineHeight + measures.pillHeight) / 2
+    // a `</>` foot:  the body down to its thin band, the bottom of where a band would be (Q58)
+    const bodyBottom = !foot
+      ? lastTop + (lineHeight + measures.pillHeight) / 2
+      : shape.isThinFoot
+        ? lastTop + (lineHeight + measures.pillHeight) / 2 - measures.footHeight
+        : lastTop + (lineHeight - measures.footPillHeight) / 2
     if (bodyBottom > bodyTop) {
       const height = bodyBottom - bodyTop
       block.append(
@@ -433,7 +451,9 @@ export class SpellBubbly {
     }
     if (foot && lastLine >= view.first && lastLine <= view.last) {
       const right = this.xOf(lastLine, foot.endColumn) + measures.bracketPad
-      const band = element("bubbly-foot-pill bubbly-tag-end")
+      const band = element(
+        shape.isThinFoot ? "bubbly-foot bubbly-foot-thin bubbly-tag-end" : "bubbly-foot-pill bubbly-tag-end"
+      )
       block.append(place(band, { left, top: bodyBottom, width: right - left }, measures.scale))
     }
     block.append(...this.drawAll(shape.inside, view))
@@ -453,14 +473,68 @@ export class SpellBubbly {
       0
     )
     const left = this.xOf(line, range.startColumn) + room - measures.bracketPad
+    const kind = `bubbly-${shape.partOfSpeech}`
+    // a start tag on lines of its own:  one tall band (T118)
+    if (range.endLineNumber > line && shape.side === "start") {
+      const where = shape.isAlone ? "bubbly-tag-tall-alone" : "bubbly-tag-tall-inline"
+      const short = shape.isShortTail ? " bubbly-tag-tall-short-tail" : ""
+      return this.drawTall(`bubbly-tag-tall bubbly-tag-start ${where} ${kind}${short}`, range, left, view)
+    }
     const endColumn = range.endLineNumber === line ? range.endColumn : this.editor.getModel()!.getLineMaxColumn(line)
     const right = this.xOf(line, endColumn) + measures.bracketPad
-    const kind = `bubbly-${shape.partOfSpeech}`
     const classes = shape.isAlone
       ? `bubbly-pill bubbly-tag-start ${kind}`
       : `bubbly-tag-pill bubbly-tag-${shape.side} ${kind}`
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
     return place(element(classes), { left, top, width: right - left }, measures.scale)
+  }
+
+  /**
+   * A start tag on lines of its own, in `range`:  ONE tall band from `left` (T118), as the page draws it
+   * (`BubblyMarkup`):  a box of its colour over its lines but the last, to past the longest;  then its last line's
+   * piece, a band from `left` to past its `⟩`, ending in the point.
+   * - `classes`:  the sheet's for it, which cut its corners
+   */
+  private drawTall(classes: string, range: monaco.IRange, left: number, view: View): HTMLElement {
+    const { editor } = this
+    const { measures, lineHeight } = view
+    const model = editor.getModel()!
+    const firstLine = range.startLineNumber
+    const lastLine = range.endLineNumber
+    const top = (line: number) => editor.getTopForLineNumber(line) + (lineHeight - measures.pillHeight) / 2
+    let rowsRight = left
+    for (let line = firstLine; line < lastLine; line++) {
+      const column = model.getLineLastNonWhitespaceColumn(line)
+      // a line ending with a quoted value:  room for its curly mark, injected after it
+      const room = /"\s*$/.test(model.getLineContent(line)) ? measures.quoteSpacer : 0
+      rowsRight = Math.max(rowsRight, this.xOf(line, column) + room + measures.bracketPad)
+    }
+    const tailRight = this.xOf(lastLine, range.endColumn) + measures.bracketPad
+    const tall = element(classes)
+    tall.append(
+      place(
+        element("bubbly-tag-rows"),
+        { left, top: top(firstLine), width: rowsRight - left, height: top(lastLine) - top(firstLine) },
+        measures.scale
+      ),
+      place(element("bubbly-tag-tail"), { left, top: top(lastLine), width: tailRight - left }, measures.scale)
+    )
+    return tall
+  }
+
+  /**
+   * A one-line element's two tags linked:  a line along their pills' top and bottom, from its start tag's pill to its
+   * end tag's (Owen, Q58);  drawn before them, so under them.
+   */
+  private drawLink(shape: MarkupLinkShape, range: monaco.Range, view: View): HTMLElement {
+    const { measures, lineHeight } = view
+    const line = range.startLineNumber
+    const room = shape.room.reduce((sum, kind) => sum + measures[kind === "tag" ? "tagSpacer" : "touchSpacer"], 0)
+    const left = this.xOf(line, range.startColumn) + room - measures.bracketPad
+    const right = this.xOf(line, range.endColumn) + measures.bracketPad
+    const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
+    const link = element(`bubbly-tag-link bubbly-${shape.partOfSpeech}`)
+    return place(link, { left, top, width: right - left }, measures.scale)
   }
 
   /**

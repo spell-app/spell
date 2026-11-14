@@ -171,7 +171,7 @@ classes.addRule(WithNestedStatements, {
 
 classes.addRule(CreateType, {
   syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -280,10 +280,77 @@ classes.addRule(CreateType, {
 
 classes.addRule(CreateType, {
   syntax:
-    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+    "(a|an) {type:quoted_type} is (a|an) {ability:draggable_or_droppable}* {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?",
   tests: [
     { compileAs: "statement", tests: [['a "card" is a thing', "export class Card extends Thing {}"]] },
-    { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] }
+    { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] },
+    {
+      // its own values for its kind's properties, on its line (epic `language` P55):  as its body's lines would be
+      compileAs: "block",
+      tests: [
+        {
+          title: "a type's own value for its kind's property:  `with layout \"vertical\"`, or `layout = vertical`",
+          input: [
+            'a "pile" is a thing',
+            '\tits "layout" is one of stacked or vertical',
+            '\tits "size" is a number',
+            'a "column" is a pile with layout "vertical", size = 3'
+          ],
+          js: [
+            "export class Pile extends Thing {",
+            '  // - its "layout" is one of stacked or vertical',
+            '  static Layouts = ["stacked", "vertical"]',
+            '  static { this.declareProp("layout", { oneOf: Pile.Layouts }) }',
+            '  get layout() { return this.getProp("layout") }',
+            '  set layout(value) { this.setProp("layout", value) }',
+            "",
+            '  // - its "size" is a number',
+            '  static { this.declareProp("size", { type: "number" }) }',
+            '  get size() { return this.getProp("size") }',
+            '  set size(value) { this.setProp("size", value) }',
+            "}",
+            "export class Column extends Pile {",
+            "  get layout() {",
+            '    return "vertical"',
+            "  }",
+            "  get size() {",
+            "    return 3",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export type Layout = (typeof Pile.Layouts)[number]",
+            "",
+            "export class Pile extends Thing {",
+            '  // - its "layout" is one of stacked or vertical',
+            '  static Layouts = ["stacked", "vertical"] as const',
+            "  @prop({ oneOf: () => Pile.Layouts })",
+            "  accessor layout!: Layout",
+            "",
+            '  // - its "size" is a number',
+            '  @prop({ type: "number" })',
+            "  accessor size!: number",
+            "}",
+            "export class Column extends Pile {",
+            "  get layout(): Layout {",
+            '    return "vertical"',
+            "  }",
+            "  get size(): number {",
+            "    return 3",
+            "  }",
+            "}"
+          ]
+        },
+        {
+          title: "a property its kind hasn't:  an error naming it",
+          input: ['a "pile" is a thing', 'a "column" is a pile with width = 3'],
+          js: [
+            "export class Pile extends Thing {}",
+            "/* PARSE ERROR: A pile has no width:  a type's line gives values only to what its kind has */"
+          ]
+        }
+      ]
+    }
   ]
 })
 
@@ -2082,7 +2149,116 @@ classes.addRule(DrawIt, {
 
 // unquoted:  a method's body, which returns it -- `- to draw each item:` + `return <div>{draw the card}</div>`
 classes.addRule(DrawIt, {
-  syntax: "to {phrase:draw_method} :? {statement_body}?"
+  syntax: "to {phrase:draw_method} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: 'a placeholder\'s markup carries its part by itself, `part="placeholder"` (epic `language` P55)',
+          input: ['a "pile" is a viewable list of things', "\tto draw its placeholder", "\t\t<text>🂠</text>"],
+          js: [
+            "export class Pile extends ViewableList {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  drawItsPlaceholder() {",
+            '    return h("text", { part: "placeholder" }, "🂠")',
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Pile extends ViewableList<Thing> {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  drawItsPlaceholder() {",
+            '    return <text part="placeholder">🂠</text>',
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pile>`:  a pile, drawn in its own element, e.g. by `draw the pile`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pile's properties;  its methods call its pile's.",
+            " * - What every view's element does, e.g. drawing its pile, is `SpellElement`'s.",
+            " */",
+            "export class PileElement extends SpellElement<Pile> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pile", "pile", [])',
+            "",
+            "  drawItsPlaceholder() {",
+            "    return this.currentThing?.drawItsPlaceholder()",
+            "  }",
+            "}",
+            "core.useElement(Pile, PileElement)"
+          ]
+        },
+        {
+          title:
+            "a `--` at its line's end is its description, a re-opened type's a plain comment (epic `language` P55, Q55)",
+          input: [
+            'a "pile" is a viewable list of things',
+            "\tto draw its placeholder  -- a grey ace",
+            "\t\t<text>🂠</text>",
+            "a pile  -- the pile again",
+            "\ton click",
+            "\t\tprint 1"
+          ],
+          js: [
+            "export class Pile extends ViewableList {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  /** a grey ace */",
+            "  drawItsPlaceholder() {",
+            '    return h("text", { part: "placeholder" }, "🂠")',
+            "  }",
+            "",
+            "  onClick(event) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "// the pile again"
+          ],
+          ts: [
+            "export class Pile extends ViewableList<Thing> {",
+            "  static instanceType = Thing",
+            '  static elementTag = core.defineElement(this, "test_classes")',
+            "",
+            "  /** a grey ace */",
+            "  drawItsPlaceholder() {",
+            '    return <text part="placeholder">🂠</text>',
+            "  }",
+            "",
+            "  onClick(event: ClickEvent) {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-pile>`:  a pile, drawn in its own element, e.g. by `draw the pile`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its pile's properties;  its methods call its pile's.",
+            " * - What every view's element does, e.g. drawing its pile, is `SpellElement`'s.",
+            " */",
+            "export class PileElement extends SpellElement<Pile> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-pile", "pile", [])',
+            "",
+            "  drawItsPlaceholder() {",
+            "    return this.currentThing?.drawItsPlaceholder()",
+            "  }",
+            "",
+            "  onClick(event: ClickEvent) {",
+            "    return this.currentThing?.onClick(event)",
+            "  }",
+            "}",
+            "core.useElement(Pile, PileElement)",
+            "// the pile again"
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 // a slot's own drawing (epic `elemental-spell` P5):  `- to draw its front:`, its lines drawing it
@@ -2135,7 +2311,8 @@ classes.addRule(DefineGroup, {
             "  turnOver() {",
             '    this.direction = "up"',
             "  }",
-            "}"
+            "}",
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", undoneAs: "Turn It Over" })'
           ],
           ts: [
             "export type Direction = (typeof Card.Directions)[number]",
@@ -2168,8 +2345,26 @@ classes.addRule(DefineGroup, {
             "    return this.currentThing?.turnOver()",
             "  }",
             "}",
-            "core.useElement(Card, CardElement)"
+            "core.useElement(Card, CardElement)",
+            'core.describeAction(Card, "turnOver", { title: "Turn It Over", undoneAs: "Turn It Over" })'
           ]
+        }
+      ]
+    }
+  ]
+})
+
+// ... and at a file's top level, its heading (epic `language` P55, Q54):  `group "The piles"`, as `## The piles`
+classes.addRule(DefineGroup, {
+  syntax: "group {group:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "a file's heading, as `## The piles` is",
+          input: ['group "The piles"', "// Each kind of pile", "", "a pile is a thing"],
+          js: ["// Each kind of pile", "", "export class Pile extends Thing {}"]
         }
       ]
     }
@@ -2197,15 +2392,16 @@ classes.addRule(DefineMenu, {
             "export class Game extends App {",
             '  static elementTag = core.defineElement(this, "test_classes", "App")',
             "",
-            "  turnTheTopCardOver() {",
-            "    core.notify(2)",
-            "  }",
-            "",
             "  deal() {",
             "    core.notify(1)",
             "  }",
+            "",
+            "  turnTheTopCardOver() {",
+            "    core.notify(2)",
+            "  }",
             "}",
             'core.describeAction(Game, "deal", { title: "Deal", undoneAs: "Deal" })',
+            'core.describeAction(Game, "turnTheTopCardOver", { title: "Turn The Top Card Over", undoneAs: "Turn The Top Card Over" })',
             '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
             'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
           ],
@@ -2213,12 +2409,12 @@ classes.addRule(DefineMenu, {
             "export class Game extends App {",
             '  static elementTag = core.defineElement(this, "test_classes", "App")',
             "",
-            "  turnTheTopCardOver() {",
-            "    core.notify(2)",
-            "  }",
-            "",
             "  deal() {",
             "    core.notify(1)",
+            "  }",
+            "",
+            "  turnTheTopCardOver() {",
+            "    core.notify(2)",
             "  }",
             "}",
             "",
@@ -2231,16 +2427,17 @@ classes.addRule(DefineMenu, {
             "export class GameElement extends SpellElement<Game> {",
             '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
             "",
-            "  turnTheTopCardOver() {",
-            "    return this.currentThing?.turnTheTopCardOver()",
-            "  }",
-            "",
             "  deal() {",
             "    return this.currentThing?.deal()",
+            "  }",
+            "",
+            "  turnTheTopCardOver() {",
+            "    return this.currentThing?.turnTheTopCardOver()",
             "  }",
             "}",
             "core.useElement(Game, GameElement)",
             'core.describeAction(Game, "deal", { title: "Deal", undoneAs: "Deal" })',
+            'core.describeAction(Game, "turnTheTopCardOver", { title: "Turn The Top Card Over", undoneAs: "Turn The Top Card Over" })',
             '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
             'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
           ]
@@ -2428,6 +2625,15 @@ classes.addRule(DrawnMarkup, {
 
 classes.addRule(DrawnMarkup, {
   syntax: "{markup:markdown_block}"
+})
+
+// an action's button, or a right-click menu, on a line of its own:  theirs, not a plain element's (epic `language` I78)
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:action_button}"
+})
+
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:context_menu_block}"
 })
 
 classes.addRule(DrawnMarkup, {

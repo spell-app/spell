@@ -31,11 +31,22 @@ export class EditorServer {
   /** the port vite was told to take, once `start()` has picked it */
   port?: number
 
+  /**
+   * Resolves with `port` once `start()` has picked it, or `undefined` when it starts no editor (`SPELL_NO_EDITOR`).
+   * - The house site waits for it before writing Caddy's file (epic `epic-engine` P74):
+   *   picking a steady port can take 3 seconds (`steadyPort()`), and the default meanwhile is the wrong one.
+   */
+  readonly portPicked: Promise<number | undefined>
+
+  /** settles `portPicked` */
+  private pickedPort!: (port: number | undefined) => void
+
   /** the running vite, in its own process group */
   private child?: ChildProcess
 
   constructor(root: string) {
     this.root = root
+    this.portPicked = new Promise((resolve) => (this.pickedPort = resolve))
   }
 
   /** `<root>/.spell-server.editor.json`:  `{ url, pid }` of the running editor */
@@ -52,9 +63,10 @@ export class EditorServer {
    *   (`LocalSiteServer.editorAddress`, epic `atmosphere` P39):  so Caddy, with what it refuses, is the one way in
    */
   async start(pagePort: number, guard: SRV.Guard, { thisMachineOnly = false } = {}): Promise<void> {
-    if (process.env.SPELL_NO_EDITOR || this.child) return
+    if (process.env.SPELL_NO_EDITOR || this.child) return this.pickedPort(this.port)
     const port = await editorPort({ thisMachineOnly })
     this.port = port
+    this.pickedPort(port)
     const log = createWriteStream(join(this.root, ".spell-server.editor.log"), { flags: "a" })
     guard.allowOriginPort(port)
     const env = {

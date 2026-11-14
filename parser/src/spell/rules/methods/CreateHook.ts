@@ -15,6 +15,8 @@ import { ToDoSomething } from "./ToDoSomething"
  * - It names the type it sits in, as `to draw a card` does (Owen, 2026-11-11, epic `language`):
  *   another type there (`when creating a card` in a deck's outline) is refused, saying which to write.
  * - A one of a kind's says `it`, `- when creating it:` (`al crearlo`):  there's only ever one (`isOneOfAKind()`).
+ *   - Or its own name, with or without `the`:  `- when creating solitaire:`, `- al crear el solitario:`
+ *     (Owen, 2026-11-13, epic `language` P55).
  * - The older forms read too:  `- when created:`, `- al crearla:`.
  * - The type's `create()` hook, as `- to create it:` is:  core runs it once, after the thing's props are set,
  *   and hands it those props, so its `(with ...)` names read them (epic `spanish` P28).
@@ -27,6 +29,8 @@ import { ToDoSomething } from "./ToDoSomething"
  */
 export class CreateHook extends ToDoSomething {
   @proto static priority = Priority.specific
+  // a hook, not an action:  never an undo step of its own
+  @proto static undoableByDefault = false
 
   /** Only a `create_hook`'s words, in a type's outline. */
   parse(scope: P.Scope, tokens: P.Token[]) {
@@ -35,7 +39,30 @@ export class CreateHook extends ToDoSomething {
     const signature = (match.groups as { signature?: P.Match }).signature
     const words = signature?.inputText.split("(")[0]!.trim() ?? ""
     if (Wording.reads(scope, "create_hook_words", words, "create")) return match
+    if (CreateHook.isOneOfAKind(scope) && this.namesTheOneOfAKind(words, scope)) return match
     return signature ? this.namingItsType(match, signature, words, scope) : undefined
+  }
+
+  /**
+   * Are `words` the hook's verb, then the one of a kind's own name, `the` or not:  `creating solitaire`,
+   * `crear el solitario`?
+   */
+  private namesTheOneOfAKind(words: string, scope: P.Scope): boolean {
+    const name = CreateOneOfAKind.variableName(P.SubjectScope.of(scope)!.declaredBy!)
+    if (!words.endsWith(` ${name}`)) return false
+    let verb = words.slice(0, -name.length).trim()
+    const article = verb.split(" ").at(-1)!
+    if (article !== verb && Wording.reads(scope, "definite_article", article))
+      verb = verb.slice(0, -article.length).trim()
+    return this.readsHookVerb(verb, scope)
+  }
+
+  /** Is `verb` the hook's verb, alone (`crear`) or as it reads before `it` (`creating it`)? */
+  private readsHookVerb(verb: string, scope: P.Scope): boolean {
+    // no `itWords` is `it` itself
+    const itWords = [...(SP.Language.of(scope).words.itWords ?? [IT])]
+    const readsVerb = (form: string) => Wording.reads(scope, "create_hook_words", form, "create")
+    return !!verb && (readsVerb(verb) || itWords.some((it) => readsVerb(`${verb} ${it}`)))
   }
 
   /**
@@ -50,10 +77,7 @@ export class CreateHook extends ToDoSomething {
     const item = named && argMatches[named.argIndex]?.inputText.trim()
     if (!named || !item || !words.endsWith(item)) return undefined
     const verb = words.slice(0, -item.length).trim()
-    // the verb alone (`crear`), or as it reads before `it` (`creating it`):  no `itWords` is `it` itself
-    const itWords = [...(SP.Language.of(scope).words.itWords ?? [IT])]
-    const readsVerb = (form: string) => Wording.reads(scope, "create_hook_words", form, "create")
-    if (!verb || !(readsVerb(verb) || itWords.some((it) => readsVerb(`${verb} ${it}`)))) return undefined
+    if (!this.readsHookVerb(verb, scope)) return undefined
     const subjectScope = P.SubjectScope.of(scope)!
     const subject = subjectScope.subjectType!
     if (scope.getType(named.name) === subject) return match

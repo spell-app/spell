@@ -65,6 +65,7 @@ export * from "./ListReverse"
 export * from "./ListShuffle"
 export * from "./RepeatNTimes"
 export * from "./ListIteration"
+export * from "./EachInStatement"
 export * from "./ListRangeIteration"
 
 // WORKING FROM OTHER RULES (testme)

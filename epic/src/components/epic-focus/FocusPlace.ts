@@ -15,12 +15,12 @@ export class FocusPlace {
   static read(path: string): FocusPlaceData {
     const kept = PrefStore.getAt(FOCUS_KEY + path)
     if (!kept || typeof kept !== "object") return {}
-    const { open, tab, item, shown } = kept as Record<string, unknown>
+    const { open, tab, item, off } = kept as Record<string, unknown>
     return {
       open: open === true || undefined,
       tab: FocusPlace.isKind(tab) ? tab : undefined,
       item: typeof item === "string" ? item : undefined,
-      shown: shown && typeof shown === "object" ? FocusPlace.shownOf(shown as Record<string, unknown>) : undefined
+      off: off && typeof off === "object" ? FocusPlace.offOf(off as Record<string, unknown>) : undefined
     }
   }
 
@@ -34,12 +34,12 @@ export class FocusPlace {
     return FOCUS_KINDS.some((look) => look.kind === value)
   }
 
-  /** The kept chips, only lists of states under known tabs. */
-  private static shownOf(kept: Record<string, unknown>): FocusPlaceData["shown"] {
-    const shown: Partial<Record<FocusKind, string[]>> = {}
+  /** The kept chips, the states turned off:  only lists of states under known tabs. */
+  private static offOf(kept: Record<string, unknown>): FocusPlaceData["off"] {
+    const off: Partial<Record<FocusKind, string[]>> = {}
     for (const [kind, states] of Object.entries(kept)) {
-      if (FocusPlace.isKind(kind) && Array.isArray(states)) shown[kind] = states.map(String)
+      if (FocusPlace.isKind(kind) && Array.isArray(states)) off[kind] = states.map(String)
     }
-    return shown
+    return off
   }
 }

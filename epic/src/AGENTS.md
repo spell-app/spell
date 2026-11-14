@@ -1505,7 +1505,8 @@ In `tools/`:
       (epic `epic-engine` I166;  2026-10-29:  "if I option-click on one of those badges, turn just that one on").
       - the element sends it as `how: "only"` (`StateFilter.nextShown(..., "only")`);  each chip's tooltip says so
     - A filtered list says "N hidden · show all" under it.
-      Remembered per page.
+      Remembered per page:  the colours TURNED OFF, never the ones showing (epic `epic-engine` I265;  2026-11-13:  "Default
+      to showing blue/red/orange items"), so a colour with no items when the reader clicked shows once it has some.
   - An EPIC PAGE:  `<epic-page>` markup, drawn by the `epics` pack (see "Overview").
     - Its elements draw themselves, in their shadow roots:
       - the page header, three columns (epic `epic-engine` P53):

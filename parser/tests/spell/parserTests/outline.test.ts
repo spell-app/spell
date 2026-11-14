@@ -214,6 +214,31 @@ describe("outline style", () => {
     expect(tableaus.items.length).toBe(1)
   })
 
+  test("`is in a tableau`:  in any of the program's tableaus, sub-types too (epic `language` P55)", () => {
+    const run = runSpell(
+      [
+        "a card is a thing",
+        "a pile is a list of cards",
+        "a tableau is a pile",
+        "set card to a new card",
+        "set other to a new card",
+        "set a to a new pile",
+        "set b to a new tableau",
+        "add card to b",
+        "add other to a",
+        "set found to card is in a tableau",
+        "set missing to other is in a tableau",
+        "set held to other is in a pile"
+      ],
+      { registered: true }
+    )
+    expect(run("found, missing, held")).toEqual({
+      found: true,
+      missing: false,
+      held: true
+    })
+  })
+
   test("`the piles` is `every pile` (P23);  a variable called `piles` keeps its meaning", () => {
     const lines = ["a pile is a thing", "a tableau is a pile", 'set a to a new pile with name = "a"']
     const run = runSpell([...lines, "set found to the piles"], { registered: true })
@@ -627,7 +652,9 @@ describe("outline style", () => {
     test("`- to debug it:` is `to debug a game`;  `- to cheat at it:` keeps the type's name after `at`", () => {
       const sentences = ["a game is an app", "to debug a game:\n\tprint 1", "to cheat at a game:\n\tprint 2"]
       const outline = ["a game is an app where:", "\t- to debug it:\n\t\tprint 1", "\t- to cheat at it:\n\t\tprint 2"]
-      expect(compile(outline)).toBe(compile(sentences))
+      // the same, but for each action's title, its words as written (`Debug It`, `Debug A Game`)
+      const code = (lines: string[]) => compile(lines).replace(/^core\.describeAction\(.*$/gm, "")
+      expect(code(outline)).toBe(code(sentences))
     })
 
     test("with no `it`:  bare inside its own methods, `of` (or after one word) from outside", () => {
