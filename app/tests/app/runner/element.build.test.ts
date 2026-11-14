@@ -314,7 +314,8 @@ describe("runner builds", () => {
 /** Modules of each package a test asks about, as they appear in a sourcemap's `sources`. */
 const PACKAGES = {
   solid: /\/node_modules\/(solid-js|@solidjs\/(web|signals))\//,
-  ui: /\/ui\/src\//,
+  // its generated data aside, plain tables bundled where they're read (`vite.shared.ts`'s `UI_DATA`)
+  ui: /\/ui\/src\/(?!.*\.generated\.ts$)/,
   monaco: /\/node_modules\/monaco-editor\//
 }
 
