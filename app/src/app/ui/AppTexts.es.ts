@@ -135,7 +135,7 @@ const APP_TEXTS_ES: AppTextPack = {
   revertChanges: "Revertir los cambios",
   revertChangesTo: "Revertir los cambios de {file}",
   publish: "Publicar",
-  draft: "Borrador",
+  editingDraft: "Editando un borrador",
   draftTip: "Por ahora solo tú ves estos cambios.  Haz clic en Publicar para mostrárselos a todos.",
   yourDraft: "Tu borrador",
   yourDraftTip: "Solo tú lo ves hasta que hagas clic en Publicar.",

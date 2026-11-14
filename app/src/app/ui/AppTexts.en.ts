@@ -129,7 +129,7 @@ export const APP_TEXTS = {
   revertChanges: "Revert Changes",
   revertChangesTo: "Revert Changes to {file}",
   publish: "Publish",
-  draft: "Draft",
+  editingDraft: "Editing a Draft",
   draftTip: "Only you can see these changes so far.  Click Publish to show them to everyone.",
   yourDraft: "Your draft",
   yourDraftTip: "Only you can see this until you click Publish.",
