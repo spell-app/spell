@@ -1087,6 +1087,28 @@ describe("SpellElement", () => {
       expect(moved.getAnimations()).toHaveLength(1)
       done()
     })
+
+    test("the pot a chip leaves keeps its gap:  the chip after it slides over from where it was (editor I100)", async () => {
+      motionOn()
+      const [from, to] = [new Pot(), new Pot()]
+      const chip = new Chip("a")
+      core.append(from, chip, new Chip("stays"))
+      const { root, done } = await drawPots(from, to)
+      const stays = root.querySelector("game-pot")!.lastElementChild as HTMLElement
+      const wasAt = stays.getBoundingClientRect().left
+      core.append(to, chip)
+      core.flush()
+      await ElementFixture.settle(root)
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+      expect(stays.isConnected).toBe(true)
+      const [slide] = stays.getAnimations() as Animation[]
+      // it starts where it was:  a chip's width to the right of where it is now
+      const startsAt = (slide?.effect as KeyframeEffect | undefined)?.getKeyframes()[0]?.translate
+      const shift = wasAt - stays.getBoundingClientRect().left
+      expect(shift).toBeGreaterThan(0)
+      expect(String(startsAt).split(" ")[0]).toBe(`${shift}px`)
+      done()
+    })
   })
 
   describe("a program run again swaps what's behind its tags (P7)", () => {

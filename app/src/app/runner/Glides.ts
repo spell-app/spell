@@ -22,6 +22,10 @@ import { E } from "spell/ui/core"
  *   then turns as it glides, both in one motion (epic `editor` I100).
  *   - Its side is its element's `direction` attribute, a two sided view's (`up`, `down`):
  *     the one thing it reads of what an element draws.
+ * - The list a thing LEAVES keeps its gap until the thing has gone (`closeGap()`):
+ *   the other elements beside it stay where they were while it waits, then slide together as it glides away.
+ *   - Without it, a column's cards below a card taken from its middle jump up under it at once,
+ *     and hide that it rose.
  * - None with reduced motion:  the thing just lands.
  * - STATIC and page-wide on purpose:  every runtime copy on a page shares the page's elements.
  * - Knows nothing of core:  core hands it things, and its elements say what they draw.
@@ -42,7 +46,14 @@ export class Glides {
    * - NEVER throws.
    */
   static noteWhereThingsAre(things: unknown[]): void {
-    for (const thing of Glides.note(things)) {
+    const noted = Glides.note(things)
+    const moving = new Set(noted.map((thing) => Glides.elements.get(thing)))
+    for (const thing of noted) {
+      // where its list's other elements are, to close its gap once it has gone (`closeGap()`)
+      const element = Glides.elements.get(thing)
+      if (element) Glides.gapAround.set(thing, Glides.whereSiblingsAre(element, moving))
+    }
+    for (const thing of noted) {
       // drawn again in the same element (moved within its list):  `drawn()` never hears of it
       E.beforeNextPaint(() => Glides.glide(thing))
     }
@@ -76,6 +87,7 @@ export class Glides {
       const element = Glides.elements.get(thing)
       if (!element?.isConnected) continue
       Glides.startedAt.set(thing, element.getBoundingClientRect())
+      Glides.gapAround.delete(thing)
       const side = element.getAttribute(SIDE_ATTRIBUTE)
       if (side) Glides.sideAt.set(thing, side)
       else Glides.sideAt.delete(thing)
@@ -92,16 +104,22 @@ export class Glides {
   private static glide(thing: object): void {
     const from = Glides.startedAt.get(thing)
     const element = Glides.elements.get(thing)
+    const gap = Glides.gapAround.get(thing) ?? []
     if (!from || !element?.isConnected) return
     const wasSide = Glides.sideAt.get(thing)
     Glides.startedAt.delete(thing)
     Glides.sideAt.delete(thing)
+    Glides.gapAround.delete(thing)
     const to = element.getBoundingClientRect()
     const dx = from.left - to.left
     const dy = from.top - to.top
-    if (!dx && !dy) return
+    if (!dx && !dy) return Glides.closeGap(gap, { waitMs: 0, durationMs: GLIDE_MS, easing: GLIDE_EASING })
     const side = element.getAttribute(SIDE_ATTRIBUTE)
-    if (wasSide && side && side !== wasSide) return Glides.turnAndGlide(element, `${dx}px ${dy}px`, wasSide, side)
+    if (wasSide && side && side !== wasSide) {
+      Glides.closeGap(gap, { waitMs: TURN_BEAT_MS, durationMs: TURN_MS, easing: TURN_EASING })
+      return Glides.turnAndGlide(element, `${dx}px ${dy}px`, wasSide, side)
+    }
+    Glides.closeGap(gap, { waitMs: 0, durationMs: GLIDE_MS, easing: GLIDE_EASING })
     element.animate(
       [
         { translate: `${dx}px ${dy}px`, zIndex: GLIDING_Z_INDEX },
@@ -131,6 +149,39 @@ export class Glides {
     )
   }
 
+  /**
+   * Where each element beside `element` is now, in the list it's about to leave:  its gap, for `closeGap()`.
+   * - Every other child of its parent:  its list's other things' elements, and whatever else the list draws there.
+   * - Not those `moving` too:  each glides on its own.
+   */
+  private static whereSiblingsAre(element: HTMLElement, moving: Set<HTMLElement | undefined>): NotedElement[] {
+    const siblings = element.parentElement ? [...element.parentElement.children] : []
+    return siblings
+      .filter((sibling): sibling is HTMLElement => sibling instanceof HTMLElement && !moving.has(sibling))
+      .map((sibling) => ({ element: sibling, at: sibling.getBoundingClientRect() }))
+  }
+
+  /**
+   * The elements beside a thing that left (`gap`) stay where they were for `waitMs`, then slide to where they are now:
+   * the list closes up once the thing has gone, not the moment it moved.
+   * - One that moved too (taken in the same step, so no longer on the page), or didn't shift, is left alone.
+   */
+  private static closeGap(gap: NotedElement[], how: { waitMs: number; durationMs: number; easing: string }): void {
+    for (const { element, at } of gap) {
+      if (!element.isConnected) continue
+      const now = element.getBoundingClientRect()
+      const dx = at.left - now.left
+      const dy = at.top - now.top
+      if (!dx && !dy) continue
+      element.animate([{ translate: `${dx}px ${dy}px` }, { translate: "0 0" }], {
+        delay: how.waitMs,
+        duration: how.durationMs,
+        easing: how.easing,
+        fill: "backwards"
+      })
+    }
+  }
+
   /** Does the person want no motion?  Then nothing glides. */
   private static get isStill(): boolean {
     return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -142,8 +193,19 @@ export class Glides {
   /** Where each moving thing's element was, noted just before it moved;  gone once it has glided. */
   private static readonly startedAt = new WeakMap<object, DOMRect>()
 
+  /** The elements beside each moving thing where it was, and where they were:  its gap (`closeGap()`). */
+  private static readonly gapAround = new WeakMap<object, NotedElement[]>()
+
   /** The side each moving thing showed where it was (`SIDE_ATTRIBUTE`), if it has sides. */
   private static readonly sideAt = new WeakMap<object, string>()
+}
+
+/** An element, and where it was on screen when noted. */
+interface NotedElement {
+  /** the element */
+  element: HTMLElement
+  /** where it was */
+  at: DOMRect
 }
 
 /** How long a slide takes, in milliseconds. */
