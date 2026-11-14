@@ -43,6 +43,9 @@ export class BubblyMarks extends TextMarks {
   /** How many head lines' descriptions it has marked:  each one's spacer is `bubbly-description-<n>`. */
   private descriptions = 0
 
+  /** Where a head spacer is injected right before a word, a head at the top level:  its first letter's offset. */
+  private readonly headSpacers = new Set<number>()
+
   /**
    * `tabSize`:  how many columns a tab takes, as the editor shows it:  the spacer before a head's last tab is that many
    * characters, so the tab after it still takes its whole width (Monaco counts injected text in a line's columns)
@@ -138,6 +141,7 @@ export class BubblyMarks extends TextMarks {
     // plain spaces:  whitespace, so Home skips it as it skips the indent
     const before = { ...HEAD_SPACER, content: " ".repeat(this.tabSize) }
     this.marks.push({ range, options: { before, showIfCollapsed: true } })
+    if (column === 1) this.headSpacers.add(start)
   }
 
   /**
@@ -208,7 +212,14 @@ export class BubblyMarks extends TextMarks {
       before: spacer("input", "before"),
       after: spacer("input", "after")
     })
-    into.push({ kind: "input", place, isChoice: kind === "choice", isQuoted })
+    const afterHeadSpacer = this.headSpacers.has(start)
+    into.push({
+      kind: "input",
+      place,
+      isChoice: kind === "choice",
+      isQuoted,
+      ...(afterHeadSpacer ? { afterHeadSpacer } : {})
+    })
   }
 
   ////////////////
@@ -276,6 +287,11 @@ export type BubblyInputShape = {
   isChoice: boolean
   /** its words were quoted:  its curly marks are drawn outside it */
   isQuoted: boolean
+  /**
+   * a top-level head's bare name (`solitaire is an app`):  the head spacer is injected at its words too, before its
+   * own, so its pill starts past it (epic `language` I84)
+   */
+  afterHeadSpacer?: boolean
   /** an HTML tag's value:  the tag's part of speech, whose hue its pill's edge takes, as on the page */
   inTag?: MarkupPartOfSpeech
   /** a tag's `{…}` value, worked out as it runs:  its pill inverted, a shade of its tag's colour (Owen) */

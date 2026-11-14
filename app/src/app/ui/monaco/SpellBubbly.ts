@@ -699,18 +699,24 @@ export class SpellBubbly {
    * - a tag's `{…}` value's inverted, in a shade of its tag's colour (`bubbly-expression`, Owen)
    */
   private drawInput(
-    { isChoice, inTag, isExpression }: BubblyInputShape,
+    { isChoice, inTag, isExpression, afterHeadSpacer }: BubblyInputShape,
     range: monaco.Range,
     view: View
   ): HTMLElement | undefined {
     const { measures, lineHeight } = view
     const line = range.startLineNumber
     if (range.endLineNumber !== line) return undefined
-    const left = this.xOf(line, range.startColumn)
+    // the column's x is before everything injected there:  a top-level head's spacer too, outside the pill
+    const left = this.xOf(line, range.startColumn) + (afterHeadSpacer ? measures.headSpacer : 0)
     const right = this.xOf(line, range.endColumn) + measures.inputSpacer
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
     // a tag's value in its tag's hue:  the layer draws it beside its tag's pill, not in it, so it can't inherit it
-    const classes = ["bubbly-input", isChoice && "bubbly-choice", isExpression && "bubbly-expression", inTag && `bubbly-${inTag}`]
+    const classes = [
+      "bubbly-input",
+      isChoice && "bubbly-choice",
+      isExpression && "bubbly-expression",
+      inTag && `bubbly-${inTag}`
+    ]
     const pill = element(classes.filter(Boolean).join(" "))
     return place(pill, { left, top, width: right - left }, measures.scale)
   }
@@ -820,6 +826,7 @@ export class SpellBubbly {
       scale,
       lineHeight: Math.round(fontSize * ratio),
       inputSpacer: spacerWidth("bubbly-input-spacer"),
+      headSpacer: spacerWidth("bubbly-head-spacer"),
       quoteSpacer: spacerWidth("bubbly-quote-spacer"),
       tagSpacer: spacerWidth("bubbly-tag-spacer"),
       touchSpacer: spacerWidth("bubbly-touch-spacer"),
@@ -909,6 +916,8 @@ type Measures = {
   lineHeight: number
   /** the spacer either side of a pill's words */
   inputSpacer: number
+  /** the spacer before a head line's words */
+  headSpacer: number
   /** the spacer outside a quoted input's marks */
   quoteSpacer: number
   /** HTML:  the spacer either side of a tag in a line, and between an empty element's tags */
