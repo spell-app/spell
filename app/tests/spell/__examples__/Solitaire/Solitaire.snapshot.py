@@ -530,7 +530,7 @@ class Solitaire(App):
     # <stock-pile "stock"/>
     stock = prop(init=lambda: StockPile(id="stock"), early=True)
     # <discard-pile "discard pile"/>
-    discard pile = prop(init=lambda: DiscardPile(id="discard pile"), early=True)
+    discard_pile = prop(init=lambda: DiscardPile(id="discard pile"), early=True)
     # <foundation "clubs" suit=clubs/>
     clubs = prop(init=lambda: Foundation(id="clubs", suit="clubs"), early=True)
     # <foundation "diamonds" suit=diamonds/>

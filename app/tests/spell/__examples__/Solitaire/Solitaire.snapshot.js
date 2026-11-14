@@ -439,9 +439,9 @@ export class Solitaire extends App {
   get stock() { return this.getProp("stock") }
   set stock(value) { this.setProp("stock", value) }
   // <discard-pile "discard pile"/>
-  static { this.declareProp("discard pile", { init: () => new DiscardPile({ id: "discard pile" }), early: true }) }
-  get "discard pile"() { return this.getProp("discard pile") }
-  set "discard pile"(value) { this.setProp("discard pile", value) }
+  static { this.declareProp("discardPile", { init: () => new DiscardPile({ id: "discard pile" }), early: true }) }
+  get discardPile() { return this.getProp("discardPile") }
+  set discardPile(value) { this.setProp("discardPile", value) }
   // <foundation "clubs" suit=clubs/>
   static { this.declareProp("clubs", { init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true }) }
   get clubs() { return this.getProp("clubs") }

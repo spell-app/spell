@@ -612,7 +612,7 @@ export class Solitaire extends App {
   accessor stock!: StockPile
   // <discard-pile "discard pile"/>
   @prop({ init: () => new DiscardPile({ id: "discard pile" }), early: true })
-  accessor "discard pile"!: DiscardPile
+  accessor discardPile!: DiscardPile
   // <foundation "clubs" suit=clubs/>
   @prop({ init: () => new Foundation({ id: "clubs", suit: "clubs" }), early: true })
   accessor clubs!: Foundation
@@ -750,7 +750,7 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     { name: "deck", kind: "json", description: "Its deck." },
     { name: "score", kind: "number", description: "Its score." },
     { name: "stock", kind: "json", description: "Its stock." },
-    { name: "\"discard pile\"", kind: "json", description: "Its \"discard pile\"." },
+    { name: "discard-pile", kind: "json", description: "Its discardPile." },
     { name: "clubs", kind: "json", description: "Its clubs." },
     { name: "diamonds", kind: "json", description: "Its diamonds." },
     { name: "hearts", kind: "json", description: "Its hearts." },

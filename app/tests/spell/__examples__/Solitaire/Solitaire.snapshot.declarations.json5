@@ -377,7 +377,8 @@
       "defined": "/Solitaire.spell:676-697"
     },
     {
-      "property": "discard pile",
+      "property": "discard_pile",
+      "asWritten": "discard pile",
       "of": "Solitaire",
       "datatype": "DiscardPile",
       "defined": "/Solitaire.spell:701-731"

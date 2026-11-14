@@ -1,9 +1,2 @@
-116:19 TS2551 Property 'discardPile' does not exist on type 'Solitaire'. Did you mean 'discard pile'?
 578:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
 587:11 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
-677:10 TS2551 Property 'discardPile' does not exist on type 'Solitaire'. Did you mean 'discard pile'?
-682:24 TS2551 Property 'discardPile' does not exist on type 'Solitaire'. Did you mean 'discard pile'?
-684:20 TS7006 Parameter 'card' implicitly has an 'any' type.
-691:15 TS2551 Property 'discardPile' does not exist on type 'Solitaire'. Did you mean 'discard pile'?
-692:29 TS2551 Property 'discardPile' does not exist on type 'Solitaire'. Did you mean 'discard pile'?
-730:10 TS2551 Property 'discardPile' does not exist on type 'Solitaire'. Did you mean 'discard pile'?

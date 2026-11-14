@@ -37,7 +37,7 @@ export const words = {
       deck: "deck",
       score: "score",
       stock: "stock",
-      "discard pile": "discard pile",
+      discardPile: "discard pile",
       clubs: "clubs",
       diamonds: "diamonds",
       hearts: "hearts",
