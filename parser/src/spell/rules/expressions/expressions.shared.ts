@@ -76,3 +76,14 @@ export const SuffixLeft = {
     return !SuffixLeft.current || scope.couldBeA(SuffixLeft.current.datatype, type)
   }
 }
+
+/**
+ * The member of the thing on the left naming which list of `listType`'s family holds it, e.g. `pile` --
+ * `undefined` when we can't tell, so the line searches instead.
+ * - `the card is in a column`, after `a card belongs to one pile`:  the card's own pile says, `card.pile` (epic `language` J148).
+ * - Read in `parse()`, where `SuffixLeft` knows the left side:  see `P.TypeScope.ownerMemberIn()`.
+ */
+export function ownerMemberFor(scope: P.Scope, listType: P.TypeScope | undefined): string | undefined {
+  const itemType = scope.getType(SuffixLeft.current?.datatype)
+  return listType && itemType?.ownerMemberIn(listType)?.name
+}

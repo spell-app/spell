@@ -1220,6 +1220,39 @@ classes.addRule(CreateThing, {
       ]
     },
     {
+      title: "a property named alone takes the variable of its name, as `a new ...` does (epic `language` J159)",
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            'a "card" is a thing',
+            '\tits "rank" is a number',
+            '\tits "suit" is text',
+            '\tits "face up" is yes or no'
+          ].join("\n"),
+          "block"
+        )
+        scope.variables?.add("rank")
+        scope.variables?.add("suit")
+        scope.variables?.add("face up")
+      },
+      tests: [
+        ["create a card with rank and suit", "new Card({ rank: rank, suit: suit })"],
+        [
+          "create a new card with rank, suit and face up",
+          ["new Card({", "  rank: rank,", "  suit: suit,", "  faceUp: true", "})"]
+        ]
+      ]
+    },
+    {
+      title: "... and stays a flag when no variable goes by its name",
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.compile(['a "card" is a thing', '\tits "rank" is a number'].join("\n"), "block")
+      },
+      tests: [["create a card with rank", "new Card({ rank: true })"]]
+    },
+    {
       title: "creates base types",
       compileAs: "expression",
       beforeEach(scope: P.Scope) {

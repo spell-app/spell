@@ -1147,6 +1147,8 @@ export class PlanDocCommands {
     for (const orphan of orphans) this.print(`NOTE:  ${PARTS_DIR}/${orphan}:  nothing loads it`)
     // one question, one choice set (I88, epic `epic-engine` P33):  said, failing nothing
     for (const asks of plan.choiceSetProblems()) this.print(`ASKS:  ${asks}`)
+    // run-together details (T74):  said, failing nothing
+    for (const dense of plan.denseParagraphs()) this.print(`DENSE:  ${dense}`)
     for (const problem of problems) this.warn(`PROBLEM:  ${problem}`)
     if (!problems.length)
       this.print(

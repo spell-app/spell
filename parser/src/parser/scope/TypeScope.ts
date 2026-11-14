@@ -543,6 +543,20 @@ export class TypeScope extends BlockScope {
   }
 
   /**
+   * Our member naming the ONE list of `listType`'s family holding us -- `undefined` if we belong to none of it.
+   * - e.g. `pile` on `Card` for a `Column`, after `a card belongs to one pile` and `a column is a pile`.
+   * - `listType` itself, or any of its super-types, may be the family:  as `declareOwnerMember()` named it.
+   * - Why:  `the card is in a column` asks the card's own pile, not every column (epic `language` J148).
+   */
+  ownerMemberIn(listType: TypeScope): P.ScopeVariable | undefined {
+    for (const family of listType.chain()) {
+      const member = this.getMember(P.instanceCase(family.runtimeName ?? family.name))
+      if (member instanceof P.ScopeVariable && member.exclusive && member.datatype === family.name) return member
+    }
+    return undefined
+  }
+
+  /**
    * Is `old` an earlier parse of the same statement as `match`:  same rule, same line of the same file?
    * - Why:  incremental parsing can REPLAY a record an old match added (`P.ParseJournal` swaps in whole item
    *   lists), so a re-parsed statement finds "its" record already there -- declared by a match that's gone.

@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from spell_core import core
+
+
+@core.as_action({"undone_as": "Play Fizzbuzz"})
 def play_fizzbuzz() -> None:
     """File FizzBuzz.spell"""
     for number in range(1, 101):

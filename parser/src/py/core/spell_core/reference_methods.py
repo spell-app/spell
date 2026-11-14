@@ -89,9 +89,15 @@ class ReferenceMethods:
         return List(item_type=cls.__name__).as_scratch().append(*things)
 
     def is_in_a(self, item: object, cls: type) -> bool:
-        """Is `item` in any list of class `cls`, or a sub-class, the program made:  `the card is in a column`."""
-        from spell_core.lists import List  # imported here, not at the top:  lists imports this module's package
+        """Is `item` in any list of class `cls`, or a sub-class, the program made:  `the card is in a column`.
 
+        - A class of an exclusive family (`a card belongs to one pile`):  the one list holding it says, no search,
+          `Column.owner_of(card)` (epic `language` J148);  any list of the family counts then, a test's too.
+        """
+        from spell_core.lists import List, is_ownable  # imported here, not at the top:  lists imports this package
+
+        if issubclass(cls, List) and cls.exclusive and is_ownable(item):
+            return isinstance(cls.owner_of(item), cls)
         return any(
             isinstance(thing, cls) and isinstance(thing, List) and thing.includes(item) for thing in self.things_made()
         )

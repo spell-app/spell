@@ -145,7 +145,7 @@ export class MarkupMarks extends TextMarks {
       place: this.place(open.start, close.end),
       head: this.place(open.start, open.end),
       partOfSpeech,
-      ...(this.isTall(open) && BubblyMarkup.hasShortTail(this.text, open) ? { isShortTail: true } : {}),
+      ...this.tallness(open),
       inside: []
     }
     into.push(block)
@@ -307,7 +307,9 @@ export class MarkupMarks extends TextMarks {
     }
     this.tags.push({ start: from, end })
     if (tag.selfClosing) this.mark(end - 2, end - 1, `${SLASH} ${CLOSING_SLASH}${declares}`)
-    this.mark(end - 1, end, ends === "self-closed" ? HIDDEN : ANGLE_CLOSE + declares)
+    // a tall one's `⟩` at its band's right end, drawn with its band (Owen, 2026-11-14)
+    const atEnd = ends === "as-written" && this.isFlush(tag) ? ` ${ANGLE_AT_END}` : ""
+    this.mark(end - 1, end, ends === "self-closed" ? HIDDEN : ANGLE_CLOSE + declares + atEnd)
   }
 
   /**
@@ -397,8 +399,18 @@ export class MarkupMarks extends TextMarks {
     return this.slice(tag).includes("\n")
   }
 
-  /** A start tag's shape's `isShortTail`, when it's tall. */
-  private tallness(tag: MarkupStartTag | MarkupEndTag): { isShortTail?: true } {
+  /**
+   * Does `tag` end its band flush (Owen, 2026-11-14:  "make the whole block top extend to the same end point"):
+   * a tall start tag, nothing after its `>` on its line, its rows one width, its `⟩` at their right end?
+   * - not a `/>`:  its `/⟩` stays where it's written
+   */
+  private isFlush(tag: MarkupStartTag | MarkupEndTag): boolean {
+    return tag.kind === "start" && !tag.selfClosing && this.isTall(tag) && this.endsLine(tag.end)
+  }
+
+  /** A start tag's shape's `isFlush`, or `isShortTail`, when it's tall. */
+  private tallness(tag: MarkupStartTag | MarkupEndTag): { isFlush?: true; isShortTail?: true } {
+    if (this.isFlush(tag)) return { isFlush: true }
     return tag.kind === "start" && this.isTall(tag) && BubblyMarkup.hasShortTail(this.text, tag)
       ? { isShortTail: true }
       : {}
@@ -445,6 +457,8 @@ export type MarkupBlockShape = {
   partOfSpeech: MarkupPartOfSpeech
   /** its start tag on lines of its own, its `>` alone on the last:  the rows above overhang it, their corner cut */
   isShortTail?: boolean
+  /** its start tag on lines of its own:  every row one width, its `⟩` at their right end (`isFlush()`) */
+  isFlush?: boolean
   /** the pills on its start tag, and the shapes in its body */
   inside: MarkupShape[]
 }
@@ -462,6 +476,8 @@ export type MarkupTagShape = {
   isAlone: boolean
   /** a start tag on lines of its own, its `>` alone on the last:  its rows above overhang it, their corner cut */
   isShortTail?: boolean
+  /** a start tag on lines of its own, nothing after it:  every row one width, its `⟩` at their right end */
+  isFlush?: boolean
   /**
    * it declares the member it draws, `<number "score"/>` (`SP.BubblyDrawing.declaringTags`):
    * drawn round, `bubbly-tag-declares` (epic `editor` I84)
@@ -506,6 +522,9 @@ export type TagRoom = "tag" | "touch"
 const MARK = "bubbly-mark"
 const ANGLE_OPEN = `${MARK} bubbly-angle bubbly-angle-open`
 const ANGLE_CLOSE = `${MARK} bubbly-angle bubbly-angle-close`
+
+/** A flush tall tag's `⟩`, only room in its line:  its band draws it at its right end (`isFlush()`). */
+const ANGLE_AT_END = "bubbly-angle-at-end"
 
 /** An end tag's `/`, and `<br />`'s. */
 const SLASH = `${MARK} bubbly-slash`

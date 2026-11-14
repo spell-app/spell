@@ -168,3 +168,38 @@ process.exit(3)
     expect(bogus.stderr).toContain("local (default) or all")
   })
 })
+
+// the `PATH`'s `spell` is the main checkout's:  run in a worktree, it served main's `Router` over the worktree's
+// routes, every `/api` request a 500 (epic `epic-engine` I282)
+describe("spell in another checkout of the kit:  that checkout's own bin runs", () => {
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "spell-checkout-")))
+  /** A fake kit checkout, its bin reporting what it got. */
+  const CHECKOUT = join(temp, "worktree")
+  /** A big folder of it, to run from:  its own manifest is skipped. */
+  const INSIDE = join(CHECKOUT, "ui")
+  afterAll(() => rmSync(temp, { recursive: true, force: true }))
+  beforeAll(() => {
+    mkdirSync(join(CHECKOUT, "bin"), { recursive: true })
+    mkdirSync(INSIDE, { recursive: true })
+    writeFileSync(join(CHECKOUT, "package.json"), `{ "name": "spell", "type": "module" }`)
+    writeFileSync(join(INSIDE, "package.json"), `{ "name": "spell-ui" }`)
+    writeFileSync(
+      join(CHECKOUT, "bin", "spell.mjs"),
+      `console.log(JSON.stringify({ bin: import.meta.filename, args: process.argv.slice(2) }))\n`
+    )
+  })
+
+  test("installed:  its bin, the arguments verbatim, from any folder of it", () => {
+    mkdirSync(join(CHECKOUT, "node_modules", "tsx"), { recursive: true })
+    const { status, stdout } = spell(["server", "start", "all"], INSIDE)
+    expect(status).toBe(0)
+    expect(JSON.parse(stdout)).toEqual({ bin: join(CHECKOUT, "bin", "spell.mjs"), args: ["server", "start", "all"] })
+    rmSync(join(CHECKOUT, "node_modules"), { recursive: true })
+  })
+
+  test("not installed yet (a fresh worktree):  this checkout's runs", () => {
+    const { status, stdout } = spell(["pony", "hi"], INSIDE)
+    expect(status).toBe(0)
+    expect(stdout).toContain(" < hi >")
+  })
+})

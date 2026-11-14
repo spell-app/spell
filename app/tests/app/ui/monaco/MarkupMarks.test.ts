@@ -220,6 +220,34 @@ describe("MarkupMarks", () => {
     expect(spaced).toEqual([])
   })
 
+  test("a tall start tag with nothing after it on its line is flush:  its `⟩` drawn at its band's right end (Owen, 2026-11-14)", () => {
+    const text = `<container columns="7"
+  spacing="xs">
+  <spacer/>
+</container>
+<container
+  spacing="xs"
+>
+  <spacer/>
+</container>
+<b
+  a="1">x</b>
+`
+    const marks = MarkupMarks.of(text)
+    const blocks = marks.shapes.filter((shape) => shape.kind === "markup-block")
+    expect(blocks.map((shape) => shape.kind === "markup-block" && [!!shape.isFlush, !!shape.isShortTail])).toEqual([
+      [true, false],
+      [true, false]
+    ])
+    // the flush ones' `>` only room in their lines;  `<b`'s, with its text after it, drawn where it's written
+    const atEnd = marks.marks.filter((mark) => mark.options.inlineClassName?.includes("bubbly-angle-at-end"))
+    expect(atEnd.map(({ range }) => range.startLineNumber)).toEqual([2, 7])
+    // the page's alike
+    const html = BubblyMarkup.write(text)
+    expect(html.match(/bubbly-tag-tall-flush/g)).toHaveLength(2)
+    expect(html).not.toContain("bubbly-tag-tall-short-tail")
+  })
+
   test("an element with nothing between its tags is ONE pill, drawn as if self-closed:  its end tag's `<` and name hidden (Q62)", () => {
     const text = `<div class="x"></div> <b> </b>`
     const marks = MarkupMarks.of(text)

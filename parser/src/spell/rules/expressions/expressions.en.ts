@@ -404,6 +404,22 @@ expressions.addRule(IsInAType, {
         ["thing is in a column", "core.isInA(thing, Column)"],
         ["thing is not in a column", "!core.isInA(thing, Column)"]
       ]
+    },
+    {
+      // a card that belongs to one pile:  its own pile says, no search (epic `language` J148)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          "a card is a thing\na pile is a list of cards\na column is a pile\na card belongs to one pile",
+          "block"
+        )
+        scope.variables?.add({ name: "card", datatype: "Card" })
+      },
+      tests: [
+        ["card is in a column", "card.pile instanceof Column"],
+        ["card is not in a column", "!(card.pile instanceof Column)"],
+        ["card is in a pile", "card.pile instanceof Pile"]
+      ]
     }
   ]
 })
@@ -427,6 +443,22 @@ expressions.addRule(IsIn, {
         ["thing is either red or green", 'core.includes([red, "green"], thing)'],
         ["thing is not either red or green", '!core.includes([red, "green"], thing)'],
         ["thing is not either of red or green", '!core.includes([red, "green"], thing)']
+      ]
+    },
+    {
+      // a card that belongs to one pile:  its own pile says, no search (epic `language` J148)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile("a card is a thing\na pile is a list of cards\na card belongs to one pile", "block")
+        scope.variables?.add({ name: "card", datatype: "Card" })
+        scope.variables?.add({ name: "stock", datatype: "Pile" })
+        scope.variables?.add({ name: "deck", datatype: "list of cards" })
+      },
+      tests: [
+        ["card is in stock", "(card.pile === stock)"],
+        ["card is not in stock", "(card.pile !== stock)"],
+        // a list outside the family:  a card can be in it AND a pile
+        ["card is in deck", "core.includes(deck, card)"]
       ]
     }
   ]

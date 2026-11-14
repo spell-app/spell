@@ -22,9 +22,10 @@ describe("expectedAfter()", () => {
       }
     }
     const average = (performance.now() - start) / calls
-    // ~0.2 msec each when written;  WITHOUT `Expectations.memoized()` it was ~9 msec, and over a second at worst
-    // a shared CI runner is ~2x slower than a laptop, so its limit is looser
-    expect(average).toBeLessThan(process.env.CI ? 5 : 2)
+    // ~0.2 msec each when written, ~0.6 alone today;  WITHOUT `Expectations.memoized()` it was ~9 msec, and over a
+    // second at worst:  5 still catches that, and leaves room for the whole suite's load (2.3 msec under it, epic
+    // `language` J176) and a shared CI runner's
+    expect(average).toBeLessThan(5)
     // the AVERAGE is the guard:  the whole loop takes ~1s here but over 5s on a busy CI runner
   }, 30_000)
 })

@@ -216,6 +216,12 @@ export const PROMISED_CARD = "Promised, not delivered:"
  */
 export const CLOSED = new Set(["done", "decided", "canceled"])
 
+/**
+ * A status change an item's bare UPDATE label names (`markUpdate()`, epic `epic-engine` T75):  `UPDATE : FIXED`.
+ * - `fixed`:  fixed, for Owen's review;  `reopened`:  closed before, live again
+ */
+export type UpdateBecame = "fixed" | "done" | "canceled" | "decided" | "reopened"
+
 /** The status that makes an item moot:  struck through, and its chip `old` (grey:  no longer relevant). */
 export const CANCELED = "canceled"
 

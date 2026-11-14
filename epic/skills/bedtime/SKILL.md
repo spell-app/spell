@@ -146,6 +146,7 @@ Everything else stands:
        an `<epic-choices>` of `<epic-option letter title [recommended]>`
      - the outcome:  an `<epic-net-effect>`
      - code:  an `<epic-code>`
+     - a new `<p>` wherever the context changes (its "Rules")
    - CALM by default:  add `--calm` (last), so a call or an issue shows yellow (a call blue while its work isn't on main), rather than red.
    - An issue filed from the person's own words:  add `--requested` too;  closed, it turns light orange until they've looked.
      - "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"

@@ -757,6 +757,36 @@ describe("PlanDoc phases", () => {
     ])
     expect(problems(plan)).toEqual([])
   })
+
+  test("an UPDATE marker names a status change, `UPDATE : FIXED`, and says `Not in main` until it lands (T75)", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.setPhase(1, "active")
+    plan.addItem("issue", "the help is missing")
+    plan.addItem("todo", "a plain edit")
+    plan.addItem("todo", "closed, then opened")
+    const became = (id: string) => PlanDoc.updateLabelOf(el(plan, id))!.getAttribute("became")
+    // added:  a plain UPDATE
+    expect(became("i1")).toBeNull()
+    plan.fixedForReview("i1", "the help shows")
+    plan.setDetails("t1", "<p>more about it</p>")
+    plan.setItem("t2", "done")
+    plan.setItem("t2", "open")
+    expect([became("i1"), became("t1"), became("t2")]).toEqual(["fixed", null, "reopened"])
+    // a plain edit after a status change keeps it
+    plan.setDetails("i1", "<p>what was wrong</p>")
+    expect(became("i1")).toBe("fixed")
+
+    const unmerged = (id: string) => PlanDoc.updateLabelOf(el(plan, id))!.getAttribute("unmerged")
+    plan.landing = { branch: "epic-engine", ids: new Set(["i1", "t1"]), shas: [] }
+    plan.updateStates()
+    // fixed, not in main:  the pill;  a plain edit's label never has one
+    expect([unmerged("i1"), unmerged("t1")]).toEqual(["epic-engine", null])
+    plan.landing = { branch: "epic-engine", ids: new Set(), shas: [] }
+    plan.updateStates()
+    expect(unmerged("i1")).toBeNull()
+    expect(problems(plan)).toEqual([])
+  })
 })
 
 describe("PlanDoc rename (epic-workflow)", () => {

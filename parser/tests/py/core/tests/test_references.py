@@ -98,3 +98,27 @@ def test_is_in_a_any_list_of_the_type_sub_types_too() -> None:
     tableau.append(held)
     assert core.is_in_a(held, RefTableau) and core.is_in_a(held, RefPile)
     assert not core.is_in_a(loose, RefTableau)
+
+
+class RefExclusivePile(List):
+    exclusive = True
+
+
+class RefColumn(RefExclusivePile):
+    pass
+
+
+def test_is_in_a_asks_the_one_list_holding_it() -> None:
+    """`a card belongs to one pile`:  the pile holding the card says, no search (epic `language` J148)."""
+    from spell_core import core
+
+    card = RefCard(rank="4", suit="hearts")
+    pile = RefExclusivePile()
+    column = RefColumn()
+    pile.append(card)
+    assert core.is_in_a(card, RefExclusivePile) and not core.is_in_a(card, RefColumn)
+    column.append(card)
+    assert core.is_in_a(card, RefColumn) and core.is_in_a(card, RefExclusivePile)
+    # a number is held, never owned:  the search
+    column.append(7)
+    assert core.is_in_a(7, RefColumn)

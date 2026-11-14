@@ -99,22 +99,24 @@ on("picked", () => core.console.log("the program heard picked"))
 on("lonely", () => core.console.log("the program heard lonely"))
 
 export async function playTheStory() {
-  const it = new Pile()
-  const pile = it
-  const it2 = new Card({ name: "ace" })
-  const ace = it2
-  pile.append(it2)
-  const it3 = new Card({ name: "king", locked: true })
-  const king = it3
+  return core.asAction({ undoneAs: "Play The Story" }, async () => {
+    const it = new Pile()
+    const pile = it
+    const it2 = new Card({ name: "ace" })
+    const ace = it2
+    pile.append(it2)
+    const it3 = new Card({ name: "king", locked: true })
+    const king = it3
 
-  await ace.close()
-  await king.close()
-  send(ace, "picked")
-  send(ace, "lonely")
-  send(ace, "nobody-listens")
-  ace.flip()
-  await ace.flipSlowly()
-  core.console.log("the end")
+    await ace.close()
+    await king.close()
+    send(ace, "picked")
+    send(ace, "lonely")
+    send(ace, "nobody-listens")
+    ace.flip()
+    await ace.flipSlowly()
+    core.console.log("the end")
+  })
 }
 
 core.holdWhile(() => playTheStory())

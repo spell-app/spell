@@ -557,7 +557,7 @@ export class SpellBubbly {
     // its start tag's last line:  a tall one's (T118), else its first
     const headEnd = head && head.endLineNumber > headLine ? head.endLineNumber : headLine
     if (headEnd > headLine) {
-      const classes = `bubbly-tag-tall bubbly-tag-start bubbly-tag-tall-head${shape.isShortTail ? " bubbly-tag-tall-short-tail" : ""}`
+      const classes = `bubbly-tag-tall bubbly-tag-start bubbly-tag-tall-head${tallEnd(shape)}`
       block.append(this.drawTall(classes, head!, left, view))
     } else if (headLine >= view.first) {
       const endColumn =
@@ -605,8 +605,7 @@ export class SpellBubbly {
     // a start tag on lines of its own:  one tall band (T118)
     if (range.endLineNumber > line && shape.side === "start") {
       const where = shape.isAlone ? "bubbly-tag-tall-alone" : "bubbly-tag-tall-inline"
-      const short = shape.isShortTail ? " bubbly-tag-tall-short-tail" : ""
-      return this.drawTall(`bubbly-tag-tall bubbly-tag-start ${where} ${kind}${short}`, range, left, view)
+      return this.drawTall(`bubbly-tag-tall bubbly-tag-start ${where} ${kind}${tallEnd(shape)}`, range, left, view)
     }
     const right = this.tagRight(range, view)
     const classes = shape.isAlone
@@ -621,6 +620,8 @@ export class SpellBubbly {
    * (`BubblyMarkup`):  a box of its colour over its lines but the last, to past the longest;  then its last line's
    * piece, a band from `left` to past its `⟩`, ending in the point.
    * - `classes`:  the sheet's for it, which cut its corners
+   * - flush (`bubbly-tag-tall-flush`):  its last line's piece as wide as the rows, its `⟩` drawn at their right end
+   *   (Owen, 2026-11-14:  "make the whole block top extend to the same end point")
    */
   private drawTall(classes: string, range: monaco.IRange, left: number, view: View): HTMLElement {
     const { editor } = this
@@ -636,15 +637,30 @@ export class SpellBubbly {
       const room = /"\s*$/.test(model.getLineContent(line)) ? measures.quoteSpacer : 0
       rowsRight = Math.max(rowsRight, this.xOf(line, column) + room + measures.bracketPad)
     }
-    const tailRight = this.xOf(lastLine, range.endColumn) + measures.bracketPad
+    let tailRight = this.xOf(lastLine, range.endColumn) + measures.bracketPad
+    const isFlush = classes.includes(FLUSH)
+    const tail = element("bubbly-tag-tail")
+    if (isFlush) {
+      // its `⟩` drawn here, at the right end;  in its line it's only room (`MarkupMarks`);
+      // a block's as far in as its `⟨` (`--bubbly-tall-close-inset`), the band wider by that room
+      const room = classes.includes("bubbly-tag-tall-head") ? measures.tagPadLeft - measures.bracketPad : 0
+      tailRight = rowsRight = Math.max(rowsRight, tailRight + room)
+      tail.append(element("bubbly-mark bubbly-angle bubbly-angle-close"))
+    }
     const tall = element(classes)
     tall.append(
       place(
         element("bubbly-tag-rows"),
-        { left, top: top(firstLine), width: rowsRight - left, height: top(lastLine) - top(firstLine) },
+        // a pixel under its last line's piece, so no seam shows between them where they're one width
+        {
+          left,
+          top: top(firstLine),
+          width: rowsRight - left,
+          height: top(lastLine) - top(firstLine) + (isFlush ? 1 : 0)
+        },
         measures.scale
       ),
-      place(element("bubbly-tag-tail"), { left, top: top(lastLine), width: tailRight - left }, measures.scale)
+      place(tail, { left, top: top(lastLine), width: tailRight - left }, measures.scale)
     )
     return tall
   }
@@ -835,6 +851,7 @@ export class SpellBubbly {
       bracketPad: length("--bubbly-bracket-pad", htmlProbe) * scale,
       blockInset: length("--bubbly-tag-block-inset") * scale,
       tagPoint: length("--bubbly-tag-point", htmlProbe) * scale,
+      tagPadLeft: length("--bubbly-tag-pad-left", htmlProbe) * scale,
       footTinyAbove: length("--bubbly-foot-tiny-above", htmlProbe) * scale,
       footTinyPadRight: length("--bubbly-foot-tiny-pad-right", htmlProbe) * scale,
       footTinyRow: length("--bubbly-foot-tiny-row", htmlProbe) * scale,
@@ -935,6 +952,8 @@ type Measures = {
   blockInset: number
   /** HTML:  how wide a tag's pointed end is */
   tagPoint: number
+  /** HTML:  a block's band's room before its `⟨`, and a flush one's after its `⟩` */
+  tagPadLeft: number
   /** HTML:  a block's end tag's tiny pill:  the body's paper above it, its room after its `⟩`, its line's height */
   footTinyAbove: number
   footTinyPadRight: number
@@ -996,6 +1015,14 @@ function isMarkupFile(model: monaco.editor.ITextModel): boolean {
 }
 
 /** A shape's element, its classes `classes`. */
+/** A flush tall tag's class (`drawTall()`). */
+const FLUSH = "bubbly-tag-tall-flush"
+
+/** A tall start tag's end:  flush, its rows one width;  or short, its rows overhanging its `>`;  else neither. */
+function tallEnd(shape: { isFlush?: boolean; isShortTail?: boolean }): string {
+  return shape.isFlush ? ` ${FLUSH}` : shape.isShortTail ? " bubbly-tag-tall-short-tail" : ""
+}
+
 function element(classes: string): HTMLElement {
   return Object.assign(document.createElement("div"), { className: classes })
 }

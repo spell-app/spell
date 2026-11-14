@@ -35,6 +35,26 @@ describe("<epic-update>", () => {
     await expectAccessible(root)
   })
 
+  test("bare, after a status change:  `UPDATE : FIXED`, then `Not in main` while its work isn't merged (T75)", async () => {
+    const root = await ElementFixture.render(
+      `<p>Fixed <epic-update phase="5" became="fixed" unmerged="epic-engine"></epic-update></p>`
+    )
+    const update = root.querySelector("epic-update")!
+    const shadow = update.shadowRoot!
+    const pill = shadow.querySelector('[part~="unmerged"]')!
+    expect({
+      label: shadow.querySelector('[part~="label"]')!.textContent,
+      pill: pill.textContent,
+      tip: pill.getAttribute("title")
+    }).toEqual({ label: "UPDATE : FIXED", pill: "Not in main", tip: "On branch epic-engine, not merged into main yet" })
+    // merged:  the pill goes, the words stay
+    update.removeAttribute("unmerged")
+    await ElementFixture.settle(root)
+    expect(shadow.querySelector('[part~="unmerged"]')).toBeNull()
+    expect(shadow.querySelector('[part~="label"]')!.textContent).toBe("UPDATE : FIXED")
+    await expectAccessible(root)
+  })
+
   test("a block:  `Update: <summary>`, the date at the right of the title row, what changed under it", async () => {
     const update = await ElementFixture.render(
       `<epic-update at="2026-10-11 14:30" summary="Split P7 in two" phase="6"><p>Why it split.</p></epic-update>`

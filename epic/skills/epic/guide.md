@@ -64,6 +64,8 @@ epic pages link <page> --show     # the page's links, to give the person
    - a limit you accept:  `epic add <epic>#T "title" --limit`
    - something only the person can check:  `epic add <epic>#M "title" --step "..." --should "..."`
    - an item you're working on:  `epic inbox working <epic>#I3 on`, `off` when done
+   - every item's details:  a new `<p>` wherever the context changes
+     (`epic pages template epics/plan-doc.md`, "Rules")
 4. Commit the code by path, the message starting `<epic> P3:  ...`, and list it:
    `epic commit <epic>#P3 <sha> "what it did"`.
 5. `epic phase <epic>#P3 done`, and `epic inbox status <epic> --clear`.

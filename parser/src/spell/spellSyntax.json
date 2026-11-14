@@ -1097,7 +1097,7 @@
           "ruleNames": ["is_in_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsInAType.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "`{lhs} is [not] in a {list type}` -- is it in any list of that type?",
           "syntaxes": [
             {
@@ -1123,7 +1123,7 @@
           "ruleNames": ["is_in"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsIn.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "`{lhs} is [not] in`/`one of`/`either`/`neither ... nor {list}`.",
           "syntaxes": [
             {
@@ -6951,13 +6951,13 @@
               "example": "to do something\n\tat the same time:\n\t\tprint 1\n\t\tprint 2",
               "outputs": {
                 "js": {
-                  "code": "export function doSomething() {\n  core.together(() => core.console.log(1), () => core.console.log(2))\n}"
+                  "code": "export function doSomething() {\n  return core.asAction({ undoneAs: \"Do Something\" }, () => {\n    core.together(() => core.console.log(1), () => core.console.log(2))\n  })\n}"
                 },
                 "ts": {
-                  "code": "export function doSomething() {\n  core.together(() => core.console.log(1), () => core.console.log(2))\n}"
+                  "code": "export function doSomething() {\n  return core.asAction({ undoneAs: \"Do Something\" }, () => {\n    core.together(() => core.console.log(1), () => core.console.log(2))\n  })\n}"
                 },
                 "py": {
-                  "code": "def do_something() -> None:\n    core.together(lambda: print(1), lambda: print(2))"
+                  "code": "@core.as_action({\"undone_as\": \"Do Something\"})\ndef do_something() -> None:\n    core.together(lambda: print(1), lambda: print(2))"
                 }
               }
             }
@@ -6977,13 +6977,13 @@
               "example": "to do something\n\tmeanwhile print 1",
               "outputs": {
                 "js": {
-                  "code": "export function doSomething() {\n  core.meanwhile(() => core.console.log(1))\n}"
+                  "code": "export function doSomething() {\n  return core.asAction({ undoneAs: \"Do Something\" }, () => {\n    core.meanwhile(() => core.console.log(1))\n  })\n}"
                 },
                 "ts": {
-                  "code": "export function doSomething() {\n  core.meanwhile(() => core.console.log(1))\n}"
+                  "code": "export function doSomething() {\n  return core.asAction({ undoneAs: \"Do Something\" }, () => {\n    core.meanwhile(() => core.console.log(1))\n  })\n}"
                 },
                 "py": {
-                  "code": "def do_something() -> None:\n    core.meanwhile(lambda: print(1))"
+                  "code": "@core.as_action({\"undone_as\": \"Do Something\"})\ndef do_something() -> None:\n    core.meanwhile(lambda: print(1))"
                 }
               }
             }
@@ -9660,13 +9660,13 @@
               "example": "to pick a color:\n\tred if suit is \"hearts\"",
               "outputs": {
                 "js": {
-                  "code": "export function pickAColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
+                  "code": "export function pickAColor() {\n  return core.asAction({ undoneAs: \"Pick A Color\" }, () => {\n    if (suit === \"hearts\") return \"red\"\n  })\n}"
                 },
                 "ts": {
-                  "code": "export function pickAColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
+                  "code": "export function pickAColor() {\n  return core.asAction({ undoneAs: \"Pick A Color\" }, () => {\n    if (suit === \"hearts\") return \"red\"\n  })\n}"
                 },
                 "py": {
-                  "code": "def pick_a_color() -> Any:\n    if suit == \"hearts\":\n        return \"red\""
+                  "code": "@core.as_action({\"undone_as\": \"Pick A Color\"})\ndef pick_a_color() -> Any:\n    if suit == \"hearts\":\n        return \"red\""
                 }
               }
             }
@@ -9686,13 +9686,13 @@
               "example": "to pick a color:\n\tblack otherwise",
               "outputs": {
                 "js": {
-                  "code": "export function pickAColor() {\n  return \"black\"\n}"
+                  "code": "export function pickAColor() {\n  return core.asAction({ undoneAs: \"Pick A Color\" }, () => {\n    return \"black\"\n  })\n}"
                 },
                 "ts": {
-                  "code": "export function pickAColor() {\n  return \"black\"\n}"
+                  "code": "export function pickAColor() {\n  return core.asAction({ undoneAs: \"Pick A Color\" }, () => {\n    return \"black\"\n  })\n}"
                 },
                 "py": {
-                  "code": "def pick_a_color() -> str:\n    return \"black\""
+                  "code": "@core.as_action({\"undone_as\": \"Pick A Color\"})\ndef pick_a_color() -> str:\n    return \"black\""
                 }
               }
             }

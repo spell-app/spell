@@ -151,8 +151,15 @@ export const referencesMethods = defineCoreModule({
    * - `the card is in a column` in spell compiles to it, `isInA(card, Column)` (epic `language` P55).
    * - Only the program's lists, as `everyThing()`:  NOT a list a test made.
    * - Tracked, as `everyThing()` is.
+   * - A class of an exclusive family (`a card belongs to one pile`, `a column is a pile`):  the one list holding a
+   *   thing says, no search -- `Column.ownerOf(card) instanceof Column` (epic `language` J148).
+   *   - Any list of the family holding it counts then, a test's too.
+   *   - The compiler writes `card.pile instanceof Column` itself, when it knows the family where the line is read.
    */
   isInA(item: unknown, Class: abstract new (...args: never[]) => unknown): boolean {
+    if (Class.prototype instanceof List && (Class as typeof List).exclusive && item && typeof item === "object") {
+      return (Class as typeof List).ownerOf(item) instanceof Class
+    }
     return thingsSearched()
       .all()
       .some((thing) => thing instanceof Class && thing instanceof List && thing.includes(item))
