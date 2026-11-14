@@ -17,7 +17,7 @@ import awayLineCSS from "./EpicAwayLine.css?inline"
  * Owen:  "a tick per section as well, so I can say 'that's good' on part but not on the whole thing").
  * - Its ✓ Read at the line's start, while the page is reviewed:  a Seen on `away:<line>` through the review inbox;
  *   `epic inbox apply` writes when he read it into the page (`<epic-page away-seen>`), and the section is drawn again
- *   without it.  A heading's (`done`, `todo`) takes its whole part.
+ *   without it.  A heading's (`done`, `fixed`, `asks` ...) takes its whole part.
  * - Read:  faded at once (`:state(read)`), as an update block goes quiet;  the page server applies it straight away
  *   (`AwayReads`, epic `epic-engine` I268:  no Send), and the section is drawn again without it.
  *   - a line under a part's heading Read fades with it, at once (`partHeading()`):  the whole part is read
@@ -58,7 +58,7 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
     )
   }
 
-  /** The key of the part it's in (`done`, `todo`):  the nearest heading before it;  none for a heading itself. */
+  /** The key of the part it's in (`done`, `fixed`, `asks` ...):  the nearest heading before it;  none for a heading itself. */
   partHeading(): string | undefined {
     if (this.heading) return undefined
     for (let before = this.domElement.previousElementSibling; before; before = before.previousElementSibling)
@@ -97,7 +97,13 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
 }
 
 /** Its tick's colour:  its badge's, on the section's title. */
-const STATE_TONES: Record<string, string> = { recent: "green", progress: "blue", attention: "red" }
+const STATE_TONES: Record<string, string> = {
+  recent: "green",
+  progress: "blue",
+  replied: "orange",
+  open: "yellow",
+  attention: "red"
+}
 
 /** A phase under way:  the load indicator its row shows, standing still (epic `epic-engine` I226). */
 const WORKING_ICON = "circle notch"

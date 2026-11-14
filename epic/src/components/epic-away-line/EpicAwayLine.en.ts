@@ -19,7 +19,7 @@ export const epicAwayLineVocabulary = {
   ui: false,
   description:
     'One line of "0. While you were out" (a phase done, a call waiting, an issue, a test), or a part\'s heading ' +
-    '(What was done, Under way, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  "a tick ' +
+    '(Waiting on you, Under way, What was done, Fixed, to review, Newly opened issues, New manual tests;  epic `epic-engine` I277), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  "a tick ' +
     "per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, " +
     "and the page server takes it off straight away, no Send (epic `epic-engine` I268);  its phase's or item's new " +
     "update blocks are seen too;  the epic tool writes every one, never a person.",
@@ -28,14 +28,14 @@ export const epicAwayLineVocabulary = {
       name: "line",
       kind: "string",
       description:
-        "What it's about:  a phase's or an item's id (`p-while-you-were-out`, `i205`), or a part's (`done`, `todo`).  " +
+        "What it's about:  a phase's or an item's id (`p-while-you-were-out`, `i205`), or a part's (`done`, `underway`, `fixed`, `issues`, `tests`, `asks`).  " +
         "Its Read mark goes under `away:<line>`."
     },
     {
       name: "state",
       kind: "string",
       description:
-        "Which of the section's badges it counts in (`recent`, `progress`, `attention`):  its tick's colour, and what filters it."
+        "Which of the section's badges it counts in (`recent`, `progress`, `replied`, `open`, `attention`):  its tick's colour, and what filters it."
     },
     {
       name: "working",
@@ -48,7 +48,7 @@ export const epicAwayLineVocabulary = {
       name: "heading",
       kind: "boolean",
       description:
-        "A part's heading (What was done, Under way, Still to do):  read, every line under it fades at once, " +
+        "A part's heading (Waiting on you, Under way, What was done, Fixed, to review, Newly opened issues, New manual tests):  read, every line under it fades at once, " +
         "each line's update blocks are seen, and the whole part leaves the section."
     }
   ],

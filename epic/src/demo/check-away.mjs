@@ -11,7 +11,7 @@
  * - checks:
  *   - the section is FIRST on the page, titled "0. While you were out", open by itself
  *   - the page's toolbar has its button, with a red badge
- *   - its What was done and Still to do lines, and a link landing on its item
+ *   - its Waiting on you part first, What was done, New manual tests (I277), and a link landing on its item
  *   - each line and part heading an `<epic-away-line>` (I206);  a line's Read applied as `epic inbox apply` would (the
  *     tool's `applyMark()` on `away:q1`, the page rewritten):  that line gone, live, the rest still there
  *   - no page errors
@@ -92,7 +92,10 @@ try {
   check(facts.rail, "the toolbar has its button")
   check(facts.badge === "4", `its button's red badge counts what waits (${facts.badge})`)
   check(facts.text.includes("P1 · Build it done: the thing, built"), "What was done names the phase and what it built")
-  check(facts.text.includes("Q1 needs your call: Which colour?") && facts.text.includes("M1 to test"), "Still to do, in order, with each item's title")
+  check(
+    facts.text.includes("New manual tests 1. M1") && facts.text.includes("Waiting on you 1. Q1 Which colour?"),
+    "a part per kind (I277), each line with its item's title"
+  )
   check(facts.overview === "1. Overview", `the Overview keeps its number (${facts.overview})`)
   await page.screenshot({ path: join(outDir, "away.png") })
   await page.locator("#away a[href='#q1']").click()

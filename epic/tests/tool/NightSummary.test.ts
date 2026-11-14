@@ -81,7 +81,7 @@ describe("NightSummary", () => {
     expect(line.textContent).toBe("P1 · Build it dropped:  Moved to P2 · Polish it")
   })
 
-  test("an issue Owen said Do this on leaves Still to do until it's fixed:  it waits on Claude, then on him", () => {
+  test("an issue Owen said Do this on leaves the section until it's fixed:  it waits on Claude, then on him", () => {
     const plan = readPage()
     night(plan)
     expect(plan.applyMark({ id: "i1", action: "todo" } as Parameters<PlanDoc["applyMark"]>[0]).applied).toBe(true)
@@ -116,11 +116,21 @@ describe("PlanDoc.refreshAway() and readAway()", () => {
     ])
     expect(section.getAttribute("waiting")).toBe("3")
     expect(section.textContent).toContain("P1 · Build it done:  the thing, built  (a10023c2a, merged)")
-    // a phase under way in a part of its own, after What was done (I223):  its mark spinning, no "under way" words
-    const headings = Array.from(section.querySelectorAll("epic-away-line[heading]"), (line) =>
-      line.getAttribute("line")
-    )
-    expect(headings).toEqual(["done", "underway", "todo"])
+    // a part per kind (I277):  Waiting on you first, then Under way (I223:  its mark spinning, no "under way" words),
+    // then What was done, then the new issues and tests
+    const headings = Array.from(section.querySelectorAll("epic-away-line[heading]"), (line) => [
+      line.getAttribute("line"),
+      line.getAttribute("state"),
+      line.textContent
+    ])
+    expect(headings).toEqual([
+      ["asks", "attention", "Waiting on you"],
+      ["underway", "progress", "Under way"],
+      ["done", "recent", "What was done"],
+      ["issues", "open", "Newly opened issues"],
+      ["tests", "open", "New manual tests"]
+    ])
+    expect(section.getAttribute("news")).toBe("recent:1 progress:1 open:2 attention:1")
     const running = section.querySelector("epic-away-line[working]")!
     expect(running.previousElementSibling!.getAttribute("line")).toBe("underway")
     expect(running.textContent).toBe("P2 · Polish it")
@@ -160,8 +170,8 @@ describe("a line's Read (I206)", () => {
     night(plan)
     plan.refreshAway()
     const keys = lines(plan)
-    expect(keys[0]).toBe("done")
-    expect(keys).toContain("todo")
+    expect(keys[0]).toBe("asks")
+    expect(keys).toContain("done")
     expect(keys).toContain("q1")
     expect(plan.page.querySelector('epic-section[kind="away"]')!.getAttribute("lines")).toBe(keys.join(" "))
     expect(Markup.validate(plan.document).map((problem) => problem.message)).toEqual([])
@@ -185,7 +195,35 @@ describe("a line's Read (I206)", () => {
     readLine(plan, "done", new Date(2026, 10, 3, 8, 0))
     expect(lines(plan)).not.toContain("done")
     // Under way is a part of its own (I223):  it stays too
-    expect(lines(plan).slice(0, 4)).toEqual(["underway", "p-polish-it", "todo", "q1"])
+    expect(lines(plan).slice(0, 4)).toEqual(["asks", "q1", "underway", "p-polish-it"])
+  })
+
+  // epic `epic-engine` I277:  a fix isn't "still to do";  each kind its own part, its own Read
+  test("a fix Claude made has its own part, Fixed, to review;  its Read leaves the issues and the calls", () => {
+    const plan = readPage()
+    night(plan)
+    plan.addItem("issue", "It jumps")
+    plan.fixedForReview("i2", "Fixed")
+    plan.refreshAway()
+    expect(lines(plan)).toEqual(expect.arrayContaining(["fixed", "i2", "issues", "i1"]))
+    const fixed = plan.page.querySelector('epic-away-line[line="i2"]')!
+    expect([fixed.getAttribute("state"), fixed.textContent]).toEqual(["replied", "1. I2 It jumps"])
+    expect(plan.page.querySelector('epic-section[kind="away"]')!.getAttribute("news")).toContain("replied:1")
+    readLine(plan, "fixed", new Date(2026, 10, 3, 8, 0))
+    expect(lines(plan)).not.toContain("i2")
+    expect(lines(plan)).toEqual(expect.arrayContaining(["asks", "q1", "issues", "i1", "tests", "m1"]))
+  })
+
+  test("a Read of the old one part, Still to do (`todo`, before I277):  every kind of need read", () => {
+    const plan = readPage()
+    night(plan)
+    plan.refreshAway()
+    // a page drawn before I277 sends its heading's mark as `away:todo`
+    readLine(plan, "todo", new Date(2026, 10, 3, 8, 0))
+    expect(lines(plan)).not.toContain("q1")
+    expect(lines(plan)).not.toContain("i1")
+    expect(lines(plan)).not.toContain("m1")
+    expect(lines(plan)).toContain("p-polish-it")
   })
 
   test("a part's Read sees what's under it:  each phase's new update blocks go quiet (I268)", () => {
@@ -249,7 +287,7 @@ describe("NightSummary:  addressed items and aged phases", () => {
     ["Make Todo on a question", "q1", "todo", {}],
     ["a test passed", "m1", "test", { result: "passed" }],
     ["a test put off", "m1", "test", { result: "notnow" }]
-  ])("%s:  it leaves Still to do, though marking it changed it", (_name, id, action, extra) => {
+  ])("%s:  it leaves the section, though marking it changed it", (_name, id, action, extra) => {
     const plan = readPage()
     night(plan)
     expect(needsOf(plan)).toContain(id.toUpperCase())
@@ -281,10 +319,10 @@ describe("NightSummary:  addressed items and aged phases", () => {
     night(plan)
     mark(plan, "i1", "todo")
     plan.fixedForReview("i1", "Fixed")
-    expect(NightSummary.of(plan, READ).needs.map(({ label, why }) => `${label} ${why}`)).toEqual([
-      "I1 fixed, to review",
-      "Q1 needs your call",
-      "M1 to test"
+    expect(NightSummary.of(plan, READ).needs.map(({ label, why, part }) => `${label} ${why} (${part})`)).toEqual([
+      "Q1 needs your call (asks)",
+      "I1 fixed, to review (fixed)",
+      "M1 to test (tests)"
     ])
     mark(plan, "i1", "approve")
     expect(needsOf(plan)).toEqual(["Q1", "M1"])

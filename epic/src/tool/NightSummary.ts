@@ -8,20 +8,23 @@ import { PlanItem } from "./PlanItem"
  * ### `NightSummary`
  * What "0. While you were out" says (epic `epic-engine` P62):  what Claude did on an epic since Owen last pressed
  * "Done reading", and what needs him now, worked out ONE way from the page as it is.
- * - WHAT WAS DONE:  each phase done since then, in the order they finished;  UNDER WAY, a part of its own after it, each
- *   phase started since and still running (epic `epic-engine` I223;  Owen, 2026-11-04:  "P27 should be in an
- *   \"Underway\" section like `What was done`"):  its result in a phrase (its Done list's first
- *   line), its last commit, and whether that's in `main` (`isMerged`)
- * - STILL TO DO, in the order to look at them:  red items (calls and questions waiting on him), open issues, manual tests
- *   to run;  only those changed since he last read it
- *   - NOT a phase under way:  it is listed once, under What was done, its mark spinning (Owen, 2026-11-03:  "listed
- *     twice")
+ * - Its parts, in the order they're drawn (`PlanDoc.awayBody()`;  epic `epic-engine` I277, Owen, 2026-11-14:  "If
+ *   these are fixed, why are they in 'Still to do'?", then "Waiting on you" first, Under way before What was done):
+ *   - WAITING ON YOU:  calls and questions waiting on his answer (red)
+ *   - UNDER WAY:  each phase started since and still running (epic `epic-engine` I223), its mark spinning
+ *   - WHAT WAS DONE:  each phase done since then, in the order they finished:  its result in a phrase (its Done list's
+ *     first line), its last commit, and whether that's in `main` (`isMerged`)
+ *   - FIXED, TO REVIEW:  a fix Claude made, his to look at (orange)
+ *   - NEWLY OPENED ISSUES:  open issues (yellow)
+ *   - NEW MANUAL TESTS:  tests to run (yellow)
+ *   - what needs him (every part but the phases'):  only what changed since he last read it;  a phase under way never
+ *     there:  it's listed once, under Under way (Owen, 2026-11-03:  "listed twice")
  * - the lead:  the bedtime runs that ended since (`Bedtime done:  ...`, the log's own line)
  * - Never kept by hand:  `PlanDoc.refreshAway()` draws the section from this on every edit (Owen's C3:  for all work,
  *   bedtime or not;  J198).
  * - A line Owen ticked Read leaves it (epic `epic-engine` I206):  `seen`, when he read each line (by its phase's or item's
- *   id) or each part (`done`, `todo`);  a change to it after that brings it back.
- * - An item Owen addressed leaves Still to do, however recently it changed (epic `epic-engine` I235):  `isAddressed()`
+ *   id) or each part (`done`, `fixed`, `asks` ...);  a change to it after that brings it back.
+ * - An item Owen addressed leaves the section, however recently it changed (epic `epic-engine` I235):  `isAddressed()`
  *   - review stamps `changed`, so before this addressing an item made it look like news
  *   - a fix Claude made since (orange, `fixed`) is back, his to review
  * - A finished phase ages out after `finishedPhaseDays` (I235), by its `done-at`;  so does the bedtime lead line;
@@ -36,7 +39,7 @@ export class NightSummary {
   /** The phases done or under way since. */
   readonly done: DoneLine[]
 
-  /** What needs Owen, in the order to look at it. */
+  /** What needs Owen, in the order to look at it:  part by part (`NeedLine.part`). */
   readonly needs: NeedLine[]
 
   private constructor(lead: string[], done: DoneLine[], needs: NeedLine[]) {
@@ -106,16 +109,20 @@ export class NightSummary {
         changed >= from &&
         !CLOSED.test(item.getAttribute("status") ?? "") &&
         !NightSummary.isAddressed(item, answered) &&
-        !isRead(item.id, "todo", changed)
+        // the one part they all were before I277:  its Read still counts for each
+        !isRead(item.id, OLD_TODO, changed)
       )
     })
-    const needs = NEED_ORDER.flatMap(([why, wants]) =>
-      items.filter(wants).map((item) => ({
-        id: item.id,
-        label: item.id.toUpperCase(),
-        title: PlanItem.titleOf(item),
-        why
-      }))
+    const needs = NEED_ORDER.flatMap(([part, why, wants]) =>
+      items
+        .filter((item) => wants(item) && !isRead(item.id, part, NightSummary.timeOf(item.getAttribute("changed"))))
+        .map((item) => ({
+          id: item.id,
+          label: item.id.toUpperCase(),
+          title: PlanItem.titleOf(item),
+          why,
+          part
+        }))
     )
     return new NightSummary(lead, done, needs)
   }
@@ -189,6 +196,8 @@ export type NeedLine = {
   title: string
   /** why it waits on him, in a word or two */
   why: string
+  /** the part of the section it's drawn in */
+  part: NeedPart
 }
 
 /** What `NightSummary.of()` takes besides the doc. */
@@ -196,7 +205,7 @@ export type SummaryOptions = {
   /** whether a commit (its sha) is in `main`;  `undefined`:  unknown */
   isMerged?: (sha: string) => boolean | undefined
   /**
-   * when Owen ticked each line Read (by its phase's or item's id) or each part (`done`, `todo`), as the page writes
+   * when Owen ticked each line Read (by its phase's or item's id) or each part (`done`, `fixed`, `asks` ...), as the page writes
    * times;  read before its last change, it shows again (`<epic-page away-seen>`, I206)
    */
   seen?: Readonly<Record<string, string>>
@@ -206,8 +215,18 @@ export type SummaryOptions = {
   finishedPhaseDays?: number
 }
 
-/** A part of the section, as its heading's tick names it. */
-export type AwayPart = "done" | "underway" | "todo"
+/**
+ * A part of the section, as its heading's tick names it.
+ * - `todo`:  the one part every need was in before I277 ("Still to do");  its Read, still in a page's `away-seen` or an
+ *   old page's mark, counts for every need part
+ */
+export type AwayPart = "done" | "underway" | NeedPart | typeof OLD_TODO
+
+/** A part of what needs Owen (epic `epic-engine` I277):  waiting on you (asks);  fixed, to review;  new issues;  new tests. */
+export type NeedPart = "fixed" | "issues" | "tests" | "asks"
+
+/** The one need part before I277, "Still to do":  every need was in it. */
+export const OLD_TODO = "todo"
 
 /** An item's own marks that Owen has dealt with it (`PlanDoc.review()`, `defer()`, `queue()`). */
 const ADDRESSED_ATTRIBUTES = ["reviewed", "deferred", "queued"]
@@ -228,15 +247,15 @@ const BEDTIME_DONE = /^Bedtime done:\s*/
 const CLOSED = /^(done|decided|canceled)$/
 
 /**
- * What needs Owen, in the order to look at it, each with what picks it:
+ * What needs Owen, in the order to look at it, each with its part, its words and what picks it (I277):
+ * - a call or a question waiting on him (drawn red):  Waiting on you, drawn first of all (`PlanDoc.awayBody()`)
  * - a fix Claude made, his to review (orange):  it's why it's back in the list (I235)
- * - a call or a question waiting on him (drawn red)
  * - an open issue
  * - a manual test to run
  */
-const NEED_ORDER: readonly [string, (item: Element) => boolean][] = [
-  ["fixed, to review", (item) => item.hasAttribute("fixed")],
-  ["needs your call", (item) => item.getAttribute("state") === "attention" && !/^[im]\d/.test(item.id)],
-  ["open issue", (item) => /^i\d/.test(item.id) && !item.hasAttribute("fixed")],
-  ["to test", (item) => /^m\d/.test(item.id)]
+const NEED_ORDER: readonly [NeedPart, string, (item: Element) => boolean][] = [
+  ["asks", "needs your call", (item) => item.getAttribute("state") === "attention" && !/^[im]\d/.test(item.id)],
+  ["fixed", "fixed, to review", (item) => item.hasAttribute("fixed")],
+  ["issues", "open issue", (item) => /^i\d/.test(item.id) && !item.hasAttribute("fixed")],
+  ["tests", "to test", (item) => /^m\d/.test(item.id)]
 ]

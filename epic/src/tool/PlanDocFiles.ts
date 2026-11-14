@@ -676,7 +676,8 @@ export class PlanDocFiles {
     const cwd = this.checkoutOf(file)
     const ref = `refs/heads/${epic}`
     if (!SRV.Git.run(["rev-parse", "--verify", "--quiet", BASE_BRANCH], cwd).ok) return undefined
-    if (!SRV.Git.run(["rev-parse", "--verify", "--quiet", ref], cwd).ok) return { branch: epic, ids: new Set(), shas: [] }
+    if (!SRV.Git.run(["rev-parse", "--verify", "--quiet", ref], cwd).ok)
+      return { branch: epic, ids: new Set(), shas: [] }
     const log = SRV.Git.run(["log", "--format=%H%x09%s", `${BASE_BRANCH}..${ref}`], cwd)
     if (!log.ok) return undefined
     const ids = new Set<string>()
