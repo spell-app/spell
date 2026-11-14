@@ -1444,6 +1444,7 @@ would.
 - A tag left half typed stays on its line (epic `language` I92), so the rest of the file still reads:
   - a quoted word left open, `<action "`, is no word:  as an attribute's value, it may not run past a line a tag starts
   - a start tag with no `>`, `<text`, has no children
+  - its own end tag half typed at the end of its line, `</tex`, ends it there (I94;  `isHalfTypedEndTag()`)
 
 ### The tags a page's body draws with
 
@@ -1827,6 +1828,9 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - An edit which changes a type's line, `a "tableau" is a pile`, re-parses the whole project too
     (`parser.changesTypeKinds()`):  a drawing above it decided by it whether `<tableau "T1"/>` is a view.
     With `keepLastGood`, only a type line added or deleted counts.
+  - And after a rewind, what each type IS as parsed (`typeKinds()`):  changed, the whole project re-parses too (I93).
+    A type line the scan still sees may no longer parse as one, taken in by a tag never closed above it,
+    and a line above it kept its reading of that type (`the cards in the foundations`).
   - A PAGE ALONE IN ITS FILE (epic `notebook` P10, Q11):  a file whose only top-level thing is one page's head,
     comments aside (`SP.alonePageName()`, read from its lines, before anything parses).
     - The project knows only its head (`SP.AlonePage`):  its name and its properties, declared in the project's scope.

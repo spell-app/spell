@@ -856,6 +856,9 @@ export class Tokenizer {
       }
       children.push(child)
       nextStart = child.next
+      // its own end tag half typed, `</tex` at the end of its line:  it ends here, its error its own,
+      // else it'd take the lines after it, types and all, as its text
+      if (child instanceof P.JSXUnreadableToken && this.isHalfTypedEndTag(endTagName, `${child.raw}`)) break
 
       // If we got an endTag for endTagName, update nesting and break out of loop if nesting !== 0
       if (child instanceof P.JSXEndTagToken && child.tagName === endTagName) {
@@ -871,6 +874,12 @@ export class Tokenizer {
     }
 
     return children
+  }
+
+  /** Is `raw`, the rest of a line, `<endTagName>`'s end tag half typed:  `</`, `</tex`, `</text`, never its `>`? */
+  private isHalfTypedEndTag(endTagName: string, raw: string): boolean {
+    const typed = /^<\/([\p{L}\p{N}_.-]*)$/u.exec(raw)?.[1]
+    return typed !== undefined && endTagName.startsWith(typed)
   }
 
   /** The tags `matchJSXChildren()` is inside, outermost first:  so a stray end tag can be told from a real one. */

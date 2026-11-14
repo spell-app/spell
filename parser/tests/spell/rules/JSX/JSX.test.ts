@@ -224,7 +224,7 @@ describe("a half-typed tag in a drawing", () => {
       '\t\tprint "cheat"'
     ].join("\n")
 
-  test.each(['<action "', '<action ""', "<text", '<toolbar size="sm'])(
+  test.each(['<action "', '<action ""', "<text", '<toolbar size="sm', "<text>Auto</tex", "<text>Auto</"])(
     "`%s`:  the actions declared after it are still the game's, and its error is its own line's",
     (typed) => {
       const { scope, files } = parseSpellProject([{ path: "/Game.spell", contents: game(typed) }])
