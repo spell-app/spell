@@ -385,7 +385,11 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorActionRename: "Renombrar {action}",
   renameAction: "Renombrar {action} a {newName}",
   renameActionEmpty: "Una acción necesita un nombre:\n{action} se queda con el suyo.",
-  renameActionTaken: "{newName} ya está en uso:\nhay una propiedad o una acción que se llama así.",
+  renameActionTakenByAction: 'Ya hay una acción llamada "{newName}."',
+  renameActionTakenByProperty: 'Ya hay una propiedad llamada "{newName}."',
+  renameActionRestore: '{restore} "{oldName}"',
+  renameActionRestoreLink: "Restaurar",
+  renameActionRestoreTip: "Volver a poner {oldName} en el campo",
   renameActionNotWords: "{newName} no puede ser el nombre de una acción:\nusa letras, números, espacios y guiones.",
   renameActionNotAction:
     "{action} no se puede renombrar aquí:\nsolo una acción del propio programa que no toma nada más.",

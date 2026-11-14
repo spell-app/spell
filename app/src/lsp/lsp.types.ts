@@ -626,7 +626,7 @@ export type HoverDetail = "full" | "plain"
  * - `empty`:  the new name has no words
  * - `not-words`:  the new name isn't words a name can be (letters, digits, spaces and dashes)
  * - `taken`:  another action, or another member of its type (a property, an action that takes something), is called
- *   that already
+ *   that already;  `cause.takenBy` says which, for the editor's words
  * - `calls-differ`:  a call of it is written in other words than its name, so a rename would leave it behind
  */
 export class RenameError extends Error {
@@ -640,4 +640,6 @@ export type RenameErrorCause = {
   kind: "not-an-action" | "empty" | "not-words" | "taken" | "calls-differ"
   /** the action's name as it's written now */
   words?: string
+  /** for `taken`:  what's called that already, another action or a property */
+  takenBy?: "action" | "property"
 }

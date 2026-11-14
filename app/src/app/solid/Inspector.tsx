@@ -915,7 +915,10 @@ export class Inspector {
         editor.showError(error as Error)
         return false
       }
-      const key = RENAME_REFUSED[error.cause?.kind ?? "not-an-action"]
+      const key =
+        error.cause?.takenBy === "property"
+          ? "renameActionTakenByProperty"
+          : RENAME_REFUSED[error.cause?.kind ?? "not-an-action"]
       throw new UIError(appTexts.text(key, { action: action.words, newName: newWords.trim() }))
     }
   }
@@ -1858,12 +1861,15 @@ function declarationPlaces(): SP.SpellDeclarationPlace[] {
   }
   return readPlaces.places
 }
-/** What the error banner says when an action can't take a new name, by why (`RenameError`). */
+/**
+ * What an action's name field says under it when it can't take a new name, by why (`RenameError`).
+ * - `taken` by a property says so instead:  `renameActionTakenByProperty` (I139)
+ */
 const RENAME_REFUSED: Record<RenameErrorCause["kind"], AppTextKey> = {
   "not-an-action": "renameActionNotAction",
   empty: "renameActionEmpty",
   "not-words": "renameActionNotWords",
-  taken: "renameActionTaken",
+  taken: "renameActionTakenByAction",
   "calls-differ": "renameActionCallsDiffer"
 }
 

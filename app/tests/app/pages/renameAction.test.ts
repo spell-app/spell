@@ -109,25 +109,50 @@ describe.skipIf(!SERVING)("Renaming an action in the Inspector", { timeout: 180_
   test("a name another member has is refused at the field, in words, and nothing is renamed", async () => {
     const before = await allFiles()
     const field = await openField("cheat")
+    const row = page.locator("ui-section.InspectorEvent.action").filter({ has: field })
     // a property of the app's
     await page.keyboard.type("score")
     await page.keyboard.press("Enter")
     const error = page.locator(".InspectorActionNameError")
     await expect.poll(() => error.count()).toBe(1)
-    expect(await error.innerText()).toMatch(/score is taken/)
+    // what has the name, then the link back (I139)
+    expect(await error.innerText()).toBe('There is already a property named "score."\nRestore "cheat"')
     expect(await field.getAttribute("state")).toBe("error")
     expect(await allFiles()).toBe(before)
     // another action's, and leaving by Tab
     await page.keyboard.press("ControlOrMeta+a")
     await page.keyboard.type("auto play")
+    // a Space typed never folds the row around the field
+    expect(await row.getAttribute("open")).not.toBe("false")
     await page.keyboard.press("Tab")
-    await expect.poll(() => error.innerText()).toMatch(/auto play is taken/)
+    await expect.poll(() => error.innerText()).toBe('There is already an action named "auto play."\nRestore "cheat"')
     expect(await allFiles()).toBe(before)
+    // the Tab brings the focus back to the field, never on to the row's run button, ringed
+    expect(await page.evaluate(() => document.activeElement?.className)).toContain("InspectorActionNameField")
     // never the error banner
     expect(await page.evaluate(() => !!(window as unknown as { editor: { error?: unknown } }).editor.error)).toBe(false)
-    await field.click()
     await page.keyboard.press("Escape")
     await expect.poll(() => field.count()).toBe(0)
+  })
+
+  test("Restore puts the old name back and closes the field", async () => {
+    const before = await allFiles()
+    const field = await openField("cheat")
+    await page.keyboard.type("score")
+    await page.keyboard.press("Enter")
+    const restore = page.locator(".InspectorActionNameRestoreLink")
+    await expect.poll(() => restore.count()).toBe(1)
+    await restore.click()
+    await expect.poll(() => field.count()).toBe(0)
+    expect(
+      await page
+        .locator(".InspectorActionName")
+        .filter({ hasText: /^cheat$/ })
+        .count()
+    ).toBe(1)
+    await page.waitForTimeout(500)
+    expect(await allFiles()).toBe(before)
+    expect(await page.evaluate(() => !!(window as unknown as { editor: { error?: unknown } }).editor.error)).toBe(false)
   })
 
   test("leaving the field renames it everywhere it's named, as one undo", async () => {

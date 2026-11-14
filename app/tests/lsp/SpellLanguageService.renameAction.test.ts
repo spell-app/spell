@@ -58,6 +58,9 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     const cheat = positionOf(text, 'to "cheat"', "cheat")
     expect(kindOf(() => service.renameActionAt(file, cheat, "  "))).toBe("empty")
     expect(kindOf(() => service.renameActionAt(file, cheat, "Auto Play"))).toBe("taken")
+    // which kind of member has it, for the editor's words (I139)
+    expect(takenByOf(() => service.renameActionAt(file, cheat, "Auto Play"))).toBe("action")
+    expect(takenByOf(() => service.renameActionAt(file, cheat, "score"))).toBe("property")
     // any other member of its type:  a property, an action that takes something
     expect(kindOf(() => service.renameActionAt(file, cheat, "score"))).toBe("taken")
     expect(kindOf(() => service.renameActionAt(file, cheat, "Cheat"))).toBeUndefined()
@@ -92,6 +95,17 @@ function applied(text: string, edits: TextEdit[]): string {
       (out, { range, newText }) => out.slice(0, offset(range.start)) + newText + out.slice(offset(range.end)),
       text
     )
+}
+
+/** What `rename` says has the name already, when it throws `taken`;  `undefined` when it doesn't. */
+function takenByOf(rename: () => unknown): string | undefined {
+  try {
+    rename()
+  } catch (error) {
+    if (error instanceof LSP.RenameError) return error.cause?.takenBy
+    throw error
+  }
+  return undefined
 }
 
 /** The `RenameError` kind `rename` throws, or `undefined` if it doesn't. */

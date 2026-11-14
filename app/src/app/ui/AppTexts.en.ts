@@ -581,7 +581,13 @@ export const APP_TEXTS = {
   inspectorActionRename: "Rename {action}",
   renameAction: "Rename {action} to {newName}",
   renameActionEmpty: "An action needs a name:\n{action} keeps its own.",
-  renameActionTaken: "{newName} is taken:\nthere's a property or action called that already.",
+  // a name another member has, the field's line under it (I139:  Owen's punctuation, the period inside the quotes)
+  renameActionTakenByAction: 'There is already an action named "{newName}."',
+  renameActionTakenByProperty: 'There is already a property named "{newName}."',
+  // the line under a refused name:  `{restore}` is the link, `renameActionRestoreLink`, which puts `{oldName}` back
+  renameActionRestore: '{restore} "{oldName}"',
+  renameActionRestoreLink: "Restore",
+  renameActionRestoreTip: "Put {oldName} back in the field",
   renameActionNotWords: "{newName} can't be an action's name:\nuse letters, numbers, spaces and dashes.",
   renameActionNotAction:
     "{action} can't be renamed here:\nonly an action of the program's own that takes nothing else.",

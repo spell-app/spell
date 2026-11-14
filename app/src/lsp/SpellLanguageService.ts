@@ -1352,20 +1352,20 @@ export class SpellLanguageService {
       })
     const words = newWords.trim().replace(/\s+/g, " ")
     const { project } = file
-    const fail = (kind: LSP.RenameErrorCause["kind"]) =>
+    const fail = (kind: LSP.RenameErrorCause["kind"], takenBy?: LSP.RenameErrorCause["takenBy"]) =>
       new LSP.RenameError(`renameActionAt():  can't rename "${action.words}" to "${words}" (${kind})`, {
-        cause: { kind, words: action.words }
+        cause: { kind, words: action.words, ...(takenBy && { takenBy }) }
       })
     if (!words) throw fail("empty")
     if (!SpellLanguageService.ACTION_WORDS.test(words)) throw fail("not-words")
     // another action a button may name, or any other member of its type:  a property, an action that takes something
     const member = SpellLanguageService.typeOf(action.scope)?.getMember(words)
-    const taken =
-      (!!member && member !== subject!.record && !sameWords(words, action.words)) ||
-      SP.ActionButton.actionsIn(action.scope).some(
-        (other) => sameWords(other.words, words) && !sameWords(other.words, action.words)
-      )
-    if (taken) throw fail("taken")
+    if (member && member !== subject!.record && !sameWords(words, action.words))
+      throw fail("taken", member instanceof P.ScopeVariable ? "property" : "action")
+    const otherAction = SP.ActionButton.actionsIn(action.scope).some(
+      (other) => sameWords(other.words, words) && !sameWords(other.words, action.words)
+    )
+    if (otherAction) throw fail("taken", "action")
     const changes: Record<string, TextEdit[]> = {}
     const change = (at: SP.SpellFile, range: Range | undefined, newText: string) => {
       if (range) (changes[this.addresses.uriFor(at)] ??= []).push({ range, newText })

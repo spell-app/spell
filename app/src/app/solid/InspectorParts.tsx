@@ -1016,10 +1016,16 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
   const cancel = () => {
     isLeaving = true
     setRefusal(undefined)
+ *   - Under that, `Restore "cheat"`:  its link puts the old name back and closes the field, as Esc does (I139).
     setEditing(false)
   }
-  // `by`:  Enter keeps the focus in the field when the name's refused;  leaving it lets the focus go where it went
-  const rename = async (field: HTMLElement & { value?: string }, by: "enter" | "leaving") => {
+  // a Tab on its way out of the field:  set by its key, read by the `focusout` it causes
+  let isTabbing = false
+  // `by`, when the name's refused:
+  // - Enter keeps the focus in the field
+  // - Tab brings it back, unless it went to the Restore link:  never the row's run button, ringed (I139)
+  // - a click away lets the focus go where it went
+  const rename = async (field: HTMLElement & { value?: string }, by: "enter" | "tab" | "leaving") => {
     if (isLeaving) return
     const words = `${field.value ?? ""}`
     if (words.trim().replace(/\s+/g, " ") === wordsAtStart) return cancel()
@@ -1032,7 +1038,7 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
       // refused:  the field stays, saying why
       isLeaving = false
       setRefusal((error as Error).message)
-      if (by === "enter") focusField(field)
+      if (by === "enter" || by === "tab") focusField(field)
     }
   }
   return (
@@ -1069,7 +1075,18 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
             if (event.key === "Enter") void rename(event.currentTarget as HTMLElement, "enter")
             else if (event.key === "Escape") cancel()
           }}
-          onFocusOut={(event: FocusEvent) => void rename(event.currentTarget as HTMLElement, "leaving")}
+          // a Space let go in it would press the row's fold button around it, folding the row
+          onKeyUp={(event: KeyboardEvent) => {
+            event.stopPropagation()
+            if (event.key === " ") event.preventDefault()
+          }}
+          onFocusOut={(event: FocusEvent) => {
+            // a Tab to the Restore link leaves it there
+            const toRestore = (event.relatedTarget as Element | null)?.matches(".InspectorActionNameRestoreLink")
+            const by = isTabbing && !toRestore ? "tab" : "leaving"
+            isTabbing = false
+            void rename(event.currentTarget as HTMLElement, by)
+          }}
         />
         <Show when={refusal()}>
           {(message) => (
@@ -1086,6 +1103,7 @@ function ActionName(props: { thing: object; action: InspectorAction }): JSX.Elem
 /** Focus `field`, a `<ui-input>`, its words chosen to type over. */
 function focusField(field: HTMLElement): void {
   field.focus()
+            isTabbing = event.key === "Tab"
   field.shadowRoot?.querySelector("input")?.select()
 }
 
@@ -1095,6 +1113,7 @@ function focusField(field: HTMLElement): void {
  */
 function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX.Element {
   const [isRunning, setRunning] = createSignal(false)
+              <RestoreName oldName={wordsAtStart} onRestore={cancel} />
   const isEnabled = () => runtimeCore()?.isActionEnabled(props.thing, props.action.name) ?? false
   const why = () => {
     if (isEnabled()) return appTexts.text("inspectorActionRun", { action: props.action.words })
@@ -1103,6 +1122,41 @@ function ActionRunButton(props: { thing: object; action: InspectorAction }): JSX
     if (!condition) return appTexts.text("inspectorActionNotNow")
     const key = condition.when === "disabled" ? "inspectorActionNotWhen" : "inspectorActionOnlyWhen"
     return appTexts.text(key, { condition: condition.words })
+/** Where `renameActionRestore`'s link goes in its words:  a mark no language's words hold. */
+const RESTORE_LINK = "\u0000"
+
+/**
+ * The line under a refused name, `Restore "cheat"`:  its link, `Restore`, puts the old name back (epic `editor` I139).
+ * - A link as the drafted tab's tip draws its "Discard changes":  a tertiary button.
+ * - A press never takes the focus from the field:  so the field isn't left, and the refused name not tried again.
+ */
+function RestoreName(props: { oldName: string; onRestore: () => void }): JSX.Element {
+  // the words around the link, as each language orders them
+  const pieces = () => appTexts.text("renameActionRestore", { restore: RESTORE_LINK, oldName: props.oldName })
+  const before = () => pieces().split(RESTORE_LINK)[0]
+  const after = () => pieces().split(RESTORE_LINK)[1] ?? ""
+  return (
+    <span class="InspectorActionNameRestore">
+      {before()}
+      <ui-button
+        appearance="tertiary"
+        color="primary"
+        class="InspectorActionNameRestoreLink"
+        title={appTexts.text("renameActionRestoreTip", { oldName: props.oldName })}
+        onMouseDown={(event: MouseEvent) => event.preventDefault()}
+        onClick={(event: MouseEvent) => {
+          event.stopPropagation()
+          props.onRestore()
+        }}
+        onKeyDown={(event: KeyboardEvent) => event.stopPropagation()}
+      >
+        {appTexts.text("renameActionRestoreLink")}
+      </ui-button>
+      {after()}
+    </span>
+  )
+}
+
   }
   const press = () => {
     const core = runtimeCore()
