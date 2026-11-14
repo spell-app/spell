@@ -66,5 +66,12 @@ export const LSP_TEXTS_ES: LspTextPack = {
 
   imported: "importado",
   notParsed: "sin analizar",
-  typeIsA: "subplantilla de {superType}"
+  typeIsA: "subplantilla de {superType}",
+
+  ////////////////
+  // ## Picking a value (epic `editor` T61)
+  ////////////////
+
+  pickColor: "Elegir un color…",
+  pickIcon: "Elegir un icono…"
 }

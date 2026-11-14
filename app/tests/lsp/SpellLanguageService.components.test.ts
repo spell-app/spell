@@ -52,6 +52,39 @@ describe("SpellLanguageService, a drawing's components (epic `editor` I55)", () 
     expect(labels(await solitario.typed('<texto color="'))).toContain("rojo")
   })
 
+  describe("an attribute picked, not typed:  its list's first row opens a picker (epic `editor` T61)", () => {
+    test("a colour's:  Pick a color…, writing what's typed, its command handed the palette's colours", async () => {
+      game.service.picksValues = true
+      const [pick, first] = await game.typed('<button color="pr')
+      expect(pick?.label).toBe("Pick a color…")
+      expect(pick?.insertText).toBe("pr")
+      expect(pick?.command?.command).toBe(LSP.PICK_VALUE_COMMAND)
+      const [picker, values] = pick!.command!.arguments as [SP.ComponentValuePicker, string[]]
+      expect(picker.kind).toBe("color")
+      expect(picker.kind === "color" && picker.colors[values.indexOf("red")]).toBe("var(--ui-red, gray)")
+      expect(first?.label).toBe("primary")
+    })
+
+    test("an icon's, though it takes no words:  Pick an icon…, alone", async () => {
+      game.service.picksValues = true
+      expect(labels(await game.typed('<button icon="'))).toEqual(["Pick an icon…"])
+    })
+
+    test("in Spanish:  `icono`, Elegir un icono…;  a colour's words Spanish", async () => {
+      solitario.service.picksValues = true
+      expect(labels(await solitario.typed('<botón icono="'))).toEqual(["Elegir un icono…"])
+      const colours = labels(await solitario.typed('<texto color="'))
+      expect(colours[0]).toBe("Elegir un color…")
+      expect(colours).toContain("rojo")
+    })
+
+    test("not for an editor that can't pick (VS Code):  no Pick row", async () => {
+      solitario.service.picksValues = false
+      expect(labels(await solitario.typed('<texto color="'))).not.toContain("Elegir un color…")
+      expect(labels(await solitario.typed('<botón icono="'))).not.toContain("Elegir un icono…")
+    })
+  })
+
   test("a thing's property says what it is in the list:  `set its tu` => `turn`, `Whose turn it is`", async () => {
     const items = await game.typedInAction("set its tu")
     const turn = items.find(({ label }) => label === "turn")
@@ -188,6 +221,7 @@ function projectIn(project: string, file: string, after: string) {
   }
 
   return {
+    service,
     async typed(line: string): Promise<CompletionItem[]> {
       // a `|` is the caret, what follows it written after it (epic `editor` I70);  else the line's end
       const caret = line.lastIndexOf(CARET)

@@ -64,13 +64,15 @@ export class CompletionShapes {
    * The completion fields that write attribute `help.name` whole:  `color="|"`, its words listed at once if it has
    * any;  one that takes no value (`bare`) by its name alone.
    * - Only the name when an `=` already follows it.
+   * - `picksValues`:  the editor can pick its value (a colour, an icon;  epic `editor` T61),
+   *   so a picked one with no words lists too, for its Pick row.
    */
-  static attribute(help: SP.ComponentAttributeHelp, after: string): Partial<CompletionItem> {
+  static attribute(help: SP.ComponentAttributeHelp, after: string, picksValues = false): Partial<CompletionItem> {
     if (help.bare || /^[\p{L}\p{M}\d_-]*\s*=/u.test(after)) return {}
     return {
       insertText: `${help.name}="$1"`,
       insertTextFormat: InsertTextFormat.Snippet,
-      ...(help.values.length && { command: SHOW_SUGGESTIONS })
+      ...((help.values.length || (picksValues && help.picker)) && { command: SHOW_SUGGESTIONS })
     }
   }
 

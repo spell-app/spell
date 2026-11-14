@@ -193,7 +193,22 @@ export type ComponentAttributeHelp = {
   values: readonly string[]
   /** it takes no value:  written by its name alone, `fluid`, `disabled` (epic `editor` I70) */
   bare?: boolean
+  /** its value can be picked rather than typed, in an editor (epic `editor` T61) */
+  picker?: ComponentValuePicker
 }
+
+/**
+ * How an attribute's value is picked, in an editor:  `ComponentAttributeHelp.picker`.
+ * - `color`:  a palette of its `values`, each drawn in `colors`' colour (the same order)
+ * - `icon`:  an icon picker, its value an icon's name
+ */
+export type ComponentValuePicker =
+  | {
+      kind: "color"
+      /** each of the attribute's `values`' colour, as CSS:  `var(--ui-red)` */
+      colors: readonly string[]
+    }
+  | { kind: "icon" }
 
 /** An attribute in a pack's own names, as `ComponentPacks.readAttribute()` reads it:  `size="large"`, `basic`. */
 export type AttributeReading = {

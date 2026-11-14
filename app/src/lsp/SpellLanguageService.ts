@@ -52,6 +52,12 @@ export class SpellLanguageService {
   #lineStartsCache = new WeakMap<SP.SpellFile, { text: string; lineStarts: number[] }>()
   /** Whole-file semantic tokens builder per file, remembering what it built last -- see `semanticTokensDelta()`. */
   #tokenBuilders = new WeakMap<SP.SpellFile, SemanticTokensBuilder>()
+  /**
+   * Can the editor asking pick an attribute's value (a colour, an icon) as well as list its words?
+   * - The app's Monaco says so (`SpellLanguageFeatures`):  it runs `PICK_VALUE_COMMAND`.  VS Code doesn't, so its list has
+   *   no Pick row (epic `editor` T61).
+   */
+  picksValues = false
   /** Docstrings of each file's declarations, by statement -- keyed by the file's `match`, so one per parse. */
   #docsCache = new WeakMap<P.Match, Map<P.Match, SP.DocComment>>()
   /** The `<css>` blocks in each file, answered as CSS -- see `LSP.SpellCSS`. */
@@ -1759,7 +1765,7 @@ export class SpellLanguageService {
         detail: texts.text("attributeOf", { tag: typing[1]! }),
         ...(description && { labelDetails: { description } }),
         ...(docs && { documentation: this.markdown(docs) }),
-        ...LSP.CompletionShapes.attribute(help, afterCaret)
+        ...LSP.CompletionShapes.attribute(help, afterCaret, this.picksValues)
       }
     })
   }
@@ -1782,14 +1788,16 @@ export class SpellLanguageService {
     const spec = SpellLanguageService.componentHelpAt(scope)
       ?.attributesOf(tag)
       ?.find((it) => it.name === attribute)
-    if (!spec?.values.length) return undefined
+    if (!spec) return undefined
+    const picker = this.picksValues ? spec.picker : undefined
+    if (!spec.values.length && !picker) return undefined
     const word = /[^\s"]*$/.exec(typed)![0]
     const range = { start: { line: position.line, character: position.character - word.length }, end: position }
-    return spec.values.map((value, order) => ({
+    const words: CompletionItem[] = spec.values.map((value, order) => ({
       label: value,
       kind: CompletionItemKind.EnumMember,
       detail: attribute,
-      sortText: String(order).padStart(3, "0"),
+      sortText: String(order + 1).padStart(3, "0"),
       textEdit: { range, newText: value }
     }))
   }
@@ -1876,6 +1884,21 @@ export class SpellLanguageService {
     if (!input || !scope.parser) return list
 
     const items = new Map<string, CompletionItem>()
+    if (!picker) return words
+    // first, whatever is typed:  it writes nothing itself, and opens the picker (epic `editor` T61)
+    const texts = LSP.LspTexts.of(scope)
+    const pick: CompletionItem = {
+      label: texts.text(picker.kind === "color" ? "pickColor" : "pickIcon"),
+      kind: picker.kind === "color" ? CompletionItemKind.Color : CompletionItemKind.Event,
+      sortText: "000",
+      filterText: word,
+      preselect: true,
+      // writes back what's typed:  Monaco writes `insertText` (else the label), an LSP client the `textEdit`
+      insertText: word,
+      textEdit: { range, newText: word },
+      command: { title: "", command: PICK_VALUE_COMMAND, arguments: [picker, spec.values] }
+    }
+    return [pick, ...words]
     const startsWithTyped = (item: CompletionItem) => [item.label, item.filterText].some((it) => it?.startsWith(typed))
     for (const expectation of scope.parser.expectedAfter(input, "statement", scope)) {
       // partway through something, not what's next -- see `signatureHelp()`
@@ -2980,3 +3003,9 @@ type TestDefinition = {
 
 /** The heading level a file's `group "..."` is, as `## ...` is:  see `SpellLanguageService.headingsOf()`. */
 const GROUP_HEADING_LEVEL = 2
+/**
+ * The command a value's Pick row runs (epic `editor` T61):  the app's Monaco opens the picker at the caret
+ * (`ValuePicker`), handed the attribute's `SP.ComponentValuePicker` and its words.
+ */
+export const PICK_VALUE_COMMAND = "spell.pickValue"
+

@@ -66,7 +66,14 @@ export const LSP_TEXTS = {
 
   imported: "imported",
   notParsed: "not parsed",
-  typeIsA: "is a {superType}"
+  typeIsA: "is a {superType}",
+
+  ////////////////
+  // ## Picking a value (epic `editor` T61)
+  ////////////////
+
+  pickColor: "Pick a color…",
+  pickIcon: "Pick an icon…"
 } as const
 
 /** Key of one of the language server's texts, e.g. `"declaredIn"`. */

@@ -791,6 +791,12 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
     the caret never lands in it, and copying leaves it out
   - or ⌘-click (Ctrl-click off a Mac) on the address, as in VS Code, in every hover setting:
     ⌘ held over it underlines it, and a plain hover says so
+- A colour or an icon attribute's value can be picked, not typed ([ValuePicker](src/app/ui/monaco/ValuePicker.ts)):
+  - in its quotes, its words list starts with "Pick a color…" (`color="|"`) or "Pick an icon…" (`icon="|"`)
+  - that opens the colour palette, or Spell UI's icon picker, at the caret;  a pick writes the value as one undo step
+  - which attribute takes which picker is Spell UI's to say, through the help the language service reads:
+    no tag is named, and a Spanish file's `icono` works the same
+  - VS Code has no picker, so its list has no Pick row
 - Long lines don't wrap:  they scroll sideways, in the code pane and the Inspector's code alike, unless Settings…
   › Wrap long lines is on (`CodeSettings`, epic `editor` I110).  A notebook's cells always wrap.
 - Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spell`,

@@ -8,6 +8,7 @@ import { AppAddresses } from "./AppAddresses"
 import { SpellHeadings } from "./SpellHeadings"
 import { SpellBubbly } from "./SpellBubbly"
 import { SpellTyping } from "./SpellTyping"
+import { ValuePicker } from "./ValuePicker"
 import { ErrorHover } from "./ErrorHover"
 import { LinkClick } from "./LinkClick"
 import { SpellTokensProvider } from "./SpellTokensProvider"
@@ -29,6 +30,7 @@ import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
  * - Heading comments -- `#`, `##` ... -- are bold by decoration:  see `SpellHeadings`.
  * - Spell is drawn in the bubbly look as it's typed, unless the page's setting says not:  see `SpellBubbly`.
  * - Typing on a blank line takes its block's indent, and `group ` opens a name's quotes:  see `SpellTyping`.
+ * - A colour or an icon attribute's value can be picked at the caret, from its words list's first row:  see `ValuePicker`.
  * - An error shows its message on a plain hover over its squiggle, though the hover info waits for ⌥:  see `ErrorHover`.
  * - A web address in the code opens on a click on the icon after it, or on ⌘-click as in VS Code:  see `LinkClick`.
  */
@@ -201,6 +203,12 @@ export class SpellMonaco {
 
     const addresses = new AppAddresses()
     const service = new LSP.SpellLanguageService(addresses)
+    // its value's words list a Pick row first, which opens the picker at the caret (epic `editor` T61)
+    service.picksValues = true
+    monaco.editor.registerCommand(LSP.PICK_VALUE_COMMAND, (_accessor, picker: SP.ComponentValuePicker, values: string[]) => {
+      const editor = monaco.editor.getEditors().find((it) => it.hasTextFocus()) ?? monaco.editor.getEditors()[0]
+      if (editor) ValuePicker.open(editor, picker, values)
+    })
     const models = new SpellModels(service, (file) => SpellMonaco.#editListeners.forEach((listener) => listener(file)))
     const features = new SpellLanguageFeatures({
       service,

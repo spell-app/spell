@@ -108,7 +108,8 @@ export class SpellUIDefaults {
         const name = localized.names.attributes.get(spec.name) ?? spec.name
         const description = describe(canonical, spec.name)
         const bare = BARE_KINDS.includes(spec.kind)
-        return { name, values, ...(description && { description }), ...(bare && { bare }) }
+        const picker = pickerFor(spec.kind, set)
+        return { name, values, ...(description && { description }), ...(bare && { bare }), ...(picker && { picker }) }
       })
   }
 
@@ -183,3 +184,18 @@ export class SpellUIDefaults {
   /** The Spanish tags, once made. */
   private static localTagsMade: Map<string, string> | undefined
 }
+
+/**
+ * How an attribute's value is picked in an editor (epic `editor` T61), by what Spell UI says it takes:
+ * - its values the hues (`color`):  a palette, each hue drawn in its theme colour, in `ValueSets.hues`' order
+ * - kind `icon` (`icon`, `icono`):  the icon picker
+ * - anything else:  none, its words typed or listed
+ */
+function pickerFor(kind: string, set: ReturnType<typeof ValueSets.setFor>): SP.ComponentValuePicker | undefined {
+  if (kind === "icon") return { kind: "icon" }
+  if (set !== HUES) return undefined
+  return { kind: "color", colors: ValueSets.get(HUES).map((hue) => `var(--ui-${hue}, gray)`) }
+}
+
+/** The value set of colours, which a palette picks from. */
+const HUES = "hues"
