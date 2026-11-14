@@ -550,7 +550,6 @@ export const APP_TEXTS = {
   inspectorProperties: "Properties",
   inspectorClose: "Close the Inspector",
   inspectorHide: "Hide this card",
-  inspectorLetGo: "Let go of {part} (Esc)",
   inspectorExpandAll: "Expand all",
   inspectorCollapseAll: "Collapse all",
   inspectorPanels: "Show or hide panels",

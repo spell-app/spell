@@ -2542,9 +2542,6 @@ function PropertiesCard(): JSX.Element {
                         }}
                       >
                         <span class="InspectorPartTagText">{crumb.label}</span>
-                        <Show when={!crumb.depth}>
-                          <LetGo label={crumb.label} />
-                        </Show>
                       </span>
                     </>
                   )}
@@ -2696,12 +2693,6 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
         onClick={() => Inspector.setScope(props.part, "this")}
       >
         {these()}
-        {/* the pill's ✕ inside its pill, as a lone pill has it:  a toolbar draws its own children, and set beside them it rode high (I74) */}
-        <Show when={isWhole()}>
-          <span class="InspectorScopeLetGo">
-            <LetGo label={props.part.crumbs[0]!.label} />
-          </span>
-        </Show>
       </ui-item>
       <ui-item
         selected={scope() === "all"}
@@ -2879,29 +2870,6 @@ function OwnEditor(props: { markup: string }): JSX.Element {
 
 /** An element's tag closing itself, `<ui-property name="rank" />`:  its name, then its attributes. */
 const SELF_CLOSING_TAG = /<([a-z][\w-]*-[\w-]*)((?:\s[^<>]*?)?)\s*\/>/gi
-
-/****************
- * ### `<LetGo>`
- * The ✕ in the selected part's title pill:  lets go of it (`Inspector.letGo()`), as Esc does.
- * - Owen:  "It's unclear how to turn the inspector off for selected thing".
- * - Apart from the card's own hide button, which hides the card, not the selection.
- ****************/
-function LetGo(props: { label: string }): JSX.Element {
-  const tip = () => appTexts.text("inspectorLetGo", { part: props.label })
-  return (
-    <ui-icon
-      name="close"
-      link=""
-      class="InspectorLetGo"
-      label={tip()}
-      title={tip()}
-      onClick={(event: MouseEvent) => {
-        event.stopPropagation()
-        Inspector.letGo()
-      }}
-    />
-  )
-}
 
 /**
  * A Spell UI element's fields in the Inspector's sections, one per group, in the groups' order

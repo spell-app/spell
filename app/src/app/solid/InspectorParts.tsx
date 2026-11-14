@@ -75,7 +75,7 @@ export function InspectorCard(props: {
         {props.bar}
         {props.actions}
         {/* a ✕ at the right:  the top card's closes the whole Inspector, another card's hides that card (Owen, 2026-11-14,
-            I74);  it never lets go of what's selected, the pill's own ✕ does (`<LetGo>`);  a type's cards go with the switch */}
+            I74);  it never lets go of what's selected:  Esc does (Owen, 2026-11-14:  the pill's own ✕ dropped, I79);  a type's cards go with the switch */}
         <Show when={isPanel(props.panel)}>
           <ui-icon
             slot="right"

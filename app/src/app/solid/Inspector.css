@@ -401,34 +401,11 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  /* the selected part's let-go ✕, inside its pill (I92) */
-  & .InspectorLetGo {
-    flex: none;
-    margin-right: -4px;
-    font-size: 0.85em;
-    opacity: 0.7;
-    cursor: var(--ui-control-cursor);
-  }
-  & .InspectorLetGo:hover {
-    opacity: 1;
-  }
   & > .InspectorPartTag.back {
     cursor: var(--ui-control-cursor);
     opacity: 0.75;
   }
   & > .InspectorPartTag.back:hover {
-    opacity: 1;
-  }
-}
-
-/* the pill's ✕ inside This of the This | All switch (`<ScopeSwitch>`), as a lone pill's (I74) */
-ui-item.InspectorScope > .InspectorScopeLetGo {
-  display: inline-flex;
-  align-items: center;
-  padding-inline-start: 6px;
-  font-size: 0.85em;
-  opacity: 0.7;
-  &:hover {
     opacity: 1;
   }
 }
