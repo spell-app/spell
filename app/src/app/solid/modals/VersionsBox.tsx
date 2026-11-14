@@ -4,6 +4,7 @@ import { UI as SpellUI } from "spell/ui"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import { editorSpellWithActions } from "spell/app/app/solid/MenuBar"
+import type { EditorThing } from "spell/app/app/layout/editorNames"
 import type { VersionRow, VersionsBoxProps } from "spell/app/app/solid/modals"
 
 /****************
@@ -78,25 +79,31 @@ export async function openVersions(props: VersionsBoxProps): Promise<void> {
   )
 }
 
-/** The Spell's `versions box`, as the editor fills it. */
-type VersionsBoxThing = {
-  versions: { items: VersionThing[]; getValues(): VersionThing[] }
-  heading: string
-  message: string
-  emptyWords: string
-  keepWords: string
-  cancelWords: string
-  restoreWords: string
-  listing: "listed" | "empty"
-  keeping: "offered" | "busy" | "kept" | "hidden"
-  restore: () => void
-  keepTheChanges: () => Promise<void>
-}
+/** The Spell's `versions box`, as the editor fills it:  its names `EDITOR_NAMES`' `VersionsBox`. */
+type VersionsBoxThing = EditorThing<
+  "VersionsBox",
+  {
+    versions: { items: VersionThing[]; getValues(): VersionThing[] }
+    heading: string
+    message: string
+    emptyWords: string
+    keepWords: string
+    cancelWords: string
+    restoreWords: string
+    listing: "listed" | "empty"
+    keeping: "offered" | "busy" | "kept" | "hidden"
+    restore: () => void
+    keepTheChanges: () => Promise<void>
+  }
+>
 
-/** The Spell's `version`, one row. */
-type VersionThing = {
-  name: string
-  when: string
-  place: "chosen" | "other"
-  choose: () => void
-}
+/** The Spell's `version`, one row:  its names `EDITOR_NAMES`' `Version`. */
+type VersionThing = EditorThing<
+  "Version",
+  {
+    name: string
+    when: string
+    place: "chosen" | "other"
+    choose: () => void
+  }
+>

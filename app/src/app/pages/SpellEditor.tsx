@@ -48,6 +48,7 @@ import {
   type EditorSpell,
   type SpellEditorApp
 } from "spell/app/app/layout/layoutSpell"
+import type { EditorMemberName, EditorPartName } from "spell/app/app/layout/editorNames"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
@@ -168,8 +169,8 @@ export function SpellEditor(props: { mode: Mode }) {
         </Show>
       )
     }
-  }
-  const settings = () => ({
+  } satisfies EditorParts
+  const settings = (): Partial<Record<EditorMemberName<"EditorLayout", "value">, unknown>> => ({
     columns: columns.sizes(),
     codeRows: codeRows.sizes(),
     grows: appGrows(hidesCode()),
@@ -234,6 +235,9 @@ function WidthWatchedPane(props: { onWidth: (width: number) => void; children: J
   )
 }
 
+/** What the editor draws in its Spell's places for it, each by its name in `EDITOR_NAMES`. */
+type EditorParts = Partial<Record<EditorPartName, DrawnByTheEditor>>
+
 /**
  * The view `viewOf()` picks of the editor's own Spell (`SpellEditor.spell`), once it's loaded, and its drawing.
  * - What it's given before it first draws:
@@ -242,11 +246,13 @@ function WidthWatchedPane(props: { onWidth: (width: number) => void; children: J
  * - Drawn in place, with no element of its own (`EditorSpell.drawInPlace()`):  the editor's sheets reach it.
  * - The page's hero stays up while it loads (`PageLoading`).
  * - Call in a component body.
- * - NEVER throws:  Spell that won't load says so on the console, and `isBroken()`, for a plain stand-in.
+ * - NEVER throws:  Spell that won't load says so on the console, and `isBroken()`, for a plain stand-in;
+ *   so does a Spell without the view (renamed:  the load's notice names it, epic `editor` I123).
+ * - `parts` and `settings()` by their names in `EDITOR_NAMES`:  one not there doesn't compile.
  */
 function drawnView(
   viewOf: (app: SpellEditorApp) => Record<string, unknown>,
-  parts: Record<string, DrawnByTheEditor>,
+  parts: EditorParts,
   settings?: () => object
 ) {
   const [spell, setSpell] = createSignal<EditorSpell>()
@@ -261,7 +267,13 @@ function drawnView(
     .then(
       (loaded) => {
         if (isGone) return
-        Object.assign(viewOf(loaded.editor), loaded.parts(parts), settings?.())
+        const view = viewOf(loaded.editor) as Record<string, unknown> | undefined
+        if (!view) {
+          console.error("the editor's Spell has no such view:  drawn without it")
+          setBroken(true)
+          return
+        }
+        Object.assign(view, loaded.parts(parts as Record<EditorPartName, DrawnByTheEditor>), settings?.())
         setSpell(() => loaded)
       },
       (problem: unknown) => {
@@ -589,7 +601,7 @@ export function EditorToolbar(props: { mode: Mode }) {
       )
     },
     you: { draw: () => <Actions.you /> }
-  }
+  } satisfies EditorParts
   const bar = drawnView((app) => app.editorBar, parts)
   return (
     <div class="EditorBarPlace">

@@ -5,6 +5,7 @@
  * - `SpellLanguageService` answers questions about a parsed file, in LSP shapes.
  * - `CompletionShapes`:  how a tag or an attribute chosen from the suggestion list is written whole.
  * - `SpellCSS`:  the `<css>` blocks in a file, edited as CSS.
+ * - `HostNameCheck`:  the names a host fills by name in a project, an error when the code drops one.
  * - `SpellKeywords`:  a language pack's keywords, for accent fixes and colouring.
  * - `LspTexts`:  the labels it shows people, in the language of the file they're about (its name says it).
  * - `SpellLanguageServer` wires both to an LSP connection.
@@ -21,6 +22,7 @@ export * from "./LspTexts"
 export * from "./SpellKeywords"
 export * from "./SpellLanguageService"
 export * from "./SpellCSS"
+export * from "./HostNames"
 export * from "./CompletionShapes"
 export * from "./ScopeExplorer"
 export * from "./SpellLanguageServer"

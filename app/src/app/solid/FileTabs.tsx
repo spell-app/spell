@@ -5,6 +5,7 @@ import { Dragging } from "spell/util/Dragging"
 
 import { editor } from "spell/app/app/editor"
 import type { EditorSpell } from "spell/app/app/layout/layoutSpell"
+import type { EditorThing } from "spell/app/app/layout/editorNames"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { CodeMoreMenu } from "./CodeOutput"
 import { editorSpellWithActions } from "./MenuBar"
@@ -43,8 +44,10 @@ export function FileTabs() {
   void editorSpellWithActions().then(
     (loaded) => {
       if (isGone) return
+      const made = loaded.editor.fileTabBar as unknown as FileTabBar | undefined
+      // the Spell without its file tab bar (renamed):  no tabs, and the load's notice says why
+      if (!made) return
       setSpell(() => loaded)
-      const made = loaded.editor.fileTabBar as unknown as FileTabBar
       Object.assign(made, loaded.parts({ more: { draw: () => <CodeMoreMenu /> } }))
       setBar(() => made)
     },
@@ -173,30 +176,36 @@ export function FileTabs() {
   )
 }
 
-/** A `file` of `SpellEditor.spell`, as its compiled class has it. */
-type TabFile = {
-  path: string
-  name: string
-  icon: string
-  status: "saved" | "changed" | "drafted"
-  place: "chosen" | "other"
-  /** What its pen's tip says:  "Updated in your draft.", in the page's language. */
-  draftNote: string
-  /** Its tip's link:  "Discard changes", in the page's language. */
-  discardWords: string
-  /** Spell's `show it`, which the editor fills in. */
-  show: () => void
-  /** Spell's `discard it`, its tip's link:  your draft of it goes (`editor.discardDraftOf()`). */
-  discard: () => void
-}
+/** A `file` of `SpellEditor.spell`, as its compiled class has it:  its names `EDITOR_NAMES`' `File`. */
+type TabFile = EditorThing<
+  "File",
+  {
+    path: string
+    name: string
+    icon: string
+    status: "saved" | "changed" | "drafted"
+    place: "chosen" | "other"
+    /** What its pen's tip says:  "Updated in your draft.", in the page's language. */
+    draftNote: string
+    /** Its tip's link:  "Discard changes", in the page's language. */
+    discardWords: string
+    /** Spell's `show it`, which the editor fills in. */
+    show: () => void
+    /** Spell's `discard it`, its tip's link:  your draft of it goes (`editor.discardDraftOf()`). */
+    discard: () => void
+  }
+>
 
-/** The `file tab bar` of `SpellEditor.spell`, as its compiled class has it. */
-type FileTabBar = {
-  files: { items: TabFile[]; getValues: () => TabFile[] }
-  /** The code pane's ⋯, an editor part (`EditorSpell.parts()`). */
-  more: object
-  rememberAs: string
-}
+/** The `file tab bar` of `SpellEditor.spell`, as its compiled class has it:  its names `EDITOR_NAMES`' `FileTabBar`. */
+type FileTabBar = EditorThing<
+  "FileTabBar",
+  {
+    files: { items: TabFile[]; getValues: () => TabFile[] }
+    /** The code pane's ⋯, an editor part (`EditorSpell.parts()`). */
+    more: object
+    rememberAs: string
+  }
+>
 
 /** Is `event` in a tab's tip, the `<ui-popup>` by its pen? */
 function isInTip(event: Event): boolean {

@@ -498,6 +498,11 @@ app/src/app/solid/FileTabs.tsx                              the tabs:  which fil
   - The editor you're using runs the Spell as it's saved.
     At the house site (`test.spell.app`) a save is your draft, so it changes only once you Publish;
     on this Mac's own address it's written in place, and the editor takes it at once.
+- The names the editor fills or reads in it by name (`code is showing`, `file tab bar`, `save` ...) are ONE list,
+  [editorNames.ts](src/app/layout/editorNames.ts), each saying what it's for (epic `editor` I123).
+  - Renamed in the Spell, one is an error under its type as you type, saying the editor needs it.
+  - Loaded without one, the editor shows ONE notice naming every name missing, and draws what it can.
+  - A rename on purpose:  change it in the list too, and the TypeScript points at each use.
 - It loads once for the page (`loadEditorSpell()`), and each view draws where it belongs.
   The bar, the panes and the menus are drawn in place, with no element of their own, so the editor's sheets reach them;
   the file tabs as their view's own element, with its own sheet.

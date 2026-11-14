@@ -494,6 +494,12 @@ const APP_TEXTS_ES: AppTextPack = {
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
   editorPieceBroken:
     "La pieza {piece} del editor no compila, así que el editor usa la última que sí compiló.\nArréglala y publícala de nuevo:\n{problem}",
+  editorNameNeeded:
+    "El editor rellena `{name}` él mismo.\nSi le cambias el nombre, el editor deja de funcionar.\nDeja este nombre, o pide a Claude que lo cambie también en el código del editor.",
+  editorNamesMissing:
+    "Al Encanto del editor le faltan nombres que el editor rellena él mismo:\n{names}\nLo que los necesita no se mostrará ni funcionará.\nVuelve a ponerlos en SpellEditor.spell, o pide a Claude que los cambie también en el código del editor.",
+  editorNameOfType: "`{name}`, de `{type}`",
+  editorTypeName: "`{type}`, el tipo entero",
   editorZonesWaiting: "Cada parte del editor se muestra aquí, en una zona propia, en cuanto su Encanto se ejecuta.",
   editorZonesShow: "Mostrar",
   editorZonesStandIn: "Del propio editor:  {part}",

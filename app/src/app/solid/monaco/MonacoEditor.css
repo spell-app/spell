@@ -66,9 +66,13 @@
   font-weight: bold;
 }
 
-/* An error's message on a plain hover over its squiggle (`ErrorHover`):  Monaco's hover look, a row per error. */
+/* An error's message on a plain hover over its squiggle (`ErrorHover`):  Monaco's hover look, a row per error;
+   a message in short lines keeps them (epic `editor` I123) */
 .monaco-editor .ErrorHover {
   max-width: min(480px, 90vw);
+  & .ErrorHoverRow {
+    white-space: pre-line;
+  }
   & .ErrorHoverRow + .ErrorHoverRow {
     border-top: 1px solid var(--vscode-editorHoverWidget-border);
   }
