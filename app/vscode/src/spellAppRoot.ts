@@ -14,6 +14,13 @@ import { checkoutOf } from "spell/server/checkout"
 const SPELL_APP = "spell-app"
 
 /**
+ * Where a kit keeps its app folder, the one named `SPELL_APP`, first match wins:
+ * - `app`:  the kit's folder since it became one repo (epic `repo-split` P20)
+ * - `spell-app`:  a child repo, as kits laid it out before
+ */
+const APP_FOLDERS = ["app", SPELL_APP]
+
+/**
  * The spell-app checkout to run, and why it was picked;  `undefined` when none of `places` leads to one.
  * - In this order:
  *   1. `configured`, the `spell.parserRoot` setting:  if it's set, it's the only place looked at
@@ -61,11 +68,12 @@ export function spellAppAbove(folder: string): string | undefined {
 /**
  * The spell-app checkout `folder` is or holds:
  * - `folder` itself, if its `package.json` is spell-app's
- * - else `folder/spell-app`, if that's spell-app's:  the kit's folder, main checkout or an epic's worktree
+ * - else `folder/app`, then `folder/spell-app` (`APP_FOLDERS`), if that's spell-app's:
+ *   the kit's app folder, main checkout or an epic's worktree
  * - else `undefined`
  */
 export function spellAppAt(folder: string): string | undefined {
-  for (const candidate of [folder, join(folder, SPELL_APP)]) {
+  for (const candidate of [folder, ...APP_FOLDERS.map((name) => join(folder, name))]) {
     if (packageNameOf(candidate) === SPELL_APP) return candidate
   }
   return undefined

@@ -9,51 +9,56 @@ import { findSpellApp } from "spell/app/vscode/src/spellAppRoot.ts"
 
 /**
  * Which spell-app checkout the VS Code extension runs (`findSpellApp()`), on made-up checkouts laid out like Owen's:
- * - `MAIN`, a kit's main checkout:  its spell-app's `.git` a folder
+ * - `MAIN`, a kit's main checkout:  its `.git` a folder, its app folder `app/`
  * - `CONTENT`, the epic repo every window shows, INSIDE the main checkout's kit
- * - `WORKTREE`, an epic's worktree of the kit:  its spell-app's `.git` a file, leading back to MAIN's, as git writes it
- * - `SUBMODULE`, a kit holding spell-app as a git submodule:  its `.git` a file too, but no worktree's
+ * - `WORKTREE`, an epic's worktree of the kit:  its `.git` a file, leading back to MAIN's, as git writes it
+ * - `SUBMODULE`, a kit from before the one repo, holding spell-app as a git submodule in `spell-app/`:
+ *   its `.git` a file too, but no worktree's
  */
 describe("findSpellApp():  the window's checkout", () => {
   test("a worktree's window runs the worktree's, whatever order it lists its folders in (epic repo-split I71)", () => {
     // the worktree first, as since epic `epic-engine` P12
     expect(findSpellApp(places(WORKTREE, MAIN, CONTENT))).toEqual({
-      root: join(WORKTREE, "spell-app"),
+      root: join(WORKTREE, "app"),
       reason: `window folder ${WORKTREE}, a worktree`
     })
     // the main checkout first, as before
-    expect(findSpellApp(places(MAIN, WORKTREE, CONTENT))?.root).toBe(join(WORKTREE, "spell-app"))
+    expect(findSpellApp(places(MAIN, WORKTREE, CONTENT))?.root).toBe(join(WORKTREE, "app"))
   })
 
   test("a worktree's window without the main checkout runs the worktree's, not the one above the epic repo", () => {
-    expect(findSpellApp(places(WORKTREE, CONTENT))?.root).toBe(join(WORKTREE, "spell-app"))
+    expect(findSpellApp(places(WORKTREE, CONTENT))?.root).toBe(join(WORKTREE, "app"))
   })
 
   test("the main window runs the main checkout's", () => {
     expect(findSpellApp(places(MAIN, CONTENT))).toEqual({
-      root: join(MAIN, "spell-app"),
+      root: join(MAIN, "app"),
       reason: `window folder ${MAIN}`
     })
   })
 
   test("a submodule's `.git` file makes no worktree:  the first folder's checkout runs", () => {
-    expect(findSpellApp(places(MAIN, SUBMODULE))?.root).toBe(join(MAIN, "spell-app"))
+    expect(findSpellApp(places(MAIN, SUBMODULE))?.root).toBe(join(MAIN, "app"))
+  })
+
+  test("a kit from before the one repo still runs its `spell-app/`", () => {
+    expect(findSpellApp(places(SUBMODULE))?.root).toBe(join(SUBMODULE, "spell-app"))
   })
 
   test("a folder inside a checkout leads to it, when no folder is or holds one", () => {
-    expect(findSpellApp({ workspaceFolders: [join(MAIN, "spell-parser")], builtIn: "/nowhere" })?.root).toBe(
-      join(MAIN, "spell-app")
+    expect(findSpellApp({ workspaceFolders: [join(MAIN, "parser")], builtIn: "/nowhere" })?.root).toBe(
+      join(MAIN, "app")
     )
   })
 
   test("the setting wins over the window's folders", () => {
     const choice = findSpellApp({ ...places(WORKTREE, MAIN), configured: MAIN })
-    expect(choice).toEqual({ root: join(MAIN, "spell-app"), reason: `setting \`spell.parserRoot\` (${MAIN})` })
+    expect(choice).toEqual({ root: join(MAIN, "app"), reason: `setting \`spell.parserRoot\` (${MAIN})` })
   })
 
   test("no checkout in the window:  the one the extension was built in", () => {
     expect(findSpellApp(places(ELSEWHERE))).toEqual({
-      root: join(MAIN, "spell-app"),
+      root: join(MAIN, "app"),
       reason: "the checkout the extension was built in"
     })
   })
@@ -84,18 +89,19 @@ const ELSEWHERE = join(TEMP, "elsewhere")
 mkdirSync(ELSEWHERE)
 
 /**
- * A made-up kit at `path` (under `TEMP`), its spell-app and spell-parser inside it;  returns the kit's folder.
- * - its spell-app is git's checkout `kind`:  a main checkout, a worktree of `MAIN`'s, or a submodule of the kit
+ * A made-up kit at `path` (under `TEMP`), its app and parser folders inside it;  returns the kit's folder.
+ * - a main checkout or a worktree of `MAIN`'s:  laid out as the kit is today, one repo, its app folder `app/`
+ * - a submodule:  laid out as before, spell-app a repo of its own in `spell-app/`, a git submodule of the kit
  */
 function checkout(path: string, kind: "main" | "worktree" | "submodule"): string {
   const kit = join(TEMP, path)
-  const spellApp = join(kit, "spell-app")
+  const spellApp = join(kit, kind === "submodule" ? "spell-app" : "app")
   mkdirSync(spellApp, { recursive: true })
-  mkdirSync(join(kit, "spell-parser"))
+  mkdirSync(join(kit, "parser"))
   writeFileSync(join(spellApp, "package.json"), `{ "name": "spell-app" }`)
-  writeFileSync(join(kit, "spell-parser", "package.json"), `{ "name": "spell-parser" }`)
-  if (kind === "main") fakeMainCheckout(spellApp)
-  else if (kind === "worktree") fakeWorktree(join(MAIN, "spell-app"), spellApp)
+  writeFileSync(join(kit, "parser", "package.json"), `{ "name": "spell-parser" }`)
+  if (kind === "main") fakeMainCheckout(kit)
+  else if (kind === "worktree") fakeWorktree(MAIN, kit)
   else /* if (kind === "submodule") */ {
     // as `git submodule add` leaves one:  its git folder in the kit's `.git/modules/`, with no common dir
     mkdirSync(join(kit, ".git", "modules", "spell-app"), { recursive: true })
@@ -106,5 +112,5 @@ function checkout(path: string, kind: "main" | "worktree" | "submodule"): string
 
 /** Where `findSpellApp()` looks:  the window's `folders`, in order;  built in the main checkout. */
 function places(...folders: string[]) {
-  return { workspaceFolders: folders, builtIn: join(MAIN, "spell-app") }
+  return { workspaceFolders: folders, builtIn: join(MAIN, "app") }
 }
