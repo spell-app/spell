@@ -581,7 +581,7 @@ export class Solitaire extends App {
             <ui-text slot="right">Score: {this.score}</ui-text>
           </ui-toolbar>
         </ui-segment>
-        <ui-container padding="small" columns="7" spacing="xs">
+        <ui-container columns="7" padding="small" spacing="xs">
           <test-project-stock-pile id="stock" />
           <test-project-discard-pile id="discard pile" />
           <spacer />
@@ -649,7 +649,6 @@ export class Solitaire extends App {
 
   async restartTheGame() {
     this.score = 0
-    // Gather every card into the stock, shuffle it, and deal the columns
     this.deck.forEach((card) => core.meanwhile(() => card.turnFaceDown()))
     for (const card of this.deck) {
       if (!this.stock.includes(card)) {

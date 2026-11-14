@@ -501,7 +501,7 @@ class Solitaire(App):
             ),
             h(
                 "ui-container",
-                {"padding": "small", "columns": "7", "spacing": "xs"},
+                {"columns": "7", "padding": "small", "spacing": "xs"},
                 h("test-project-stock-pile", {"id": "stock"}),
                 h("test-project-discard-pile", {"id": "discard pile"}),
                 h("spacer"),
@@ -556,7 +556,6 @@ class Solitaire(App):
 
     async def restart_the_game(self) -> None:
         self.score = 0
-        # Gather every card into the stock, shuffle it, and deal the columns
         for card in self.deck:
             core.meanwhile(lambda: card.turn_face_down())
         for card in self.deck:

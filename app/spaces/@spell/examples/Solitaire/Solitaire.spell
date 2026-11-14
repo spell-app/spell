@@ -18,7 +18,7 @@ solitaire is an app
 				<text slot="right">Score: <number "score" /></>
 			</>
 		</>
-		<container padding="small" columns="7" spacing="xs">
+		<container columns="7" padding="small" spacing="xs">
 			<stock-pile "stock"/>
 			<discard-pile "discard pile"/>
 			<spacer/>
@@ -46,7 +46,6 @@ solitaire is an app
 	group "Dealing & the Stock Pile"
 	to "restart the game" with shortcut "R", icon "sync alternate"
 		clear the score
-		// Gather every card into the stock, shuffle it, and deal the columns
 		for each card in the deck
 			turn the card face down without waiting
 		for each card in the deck
