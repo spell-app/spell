@@ -185,7 +185,9 @@ describe("<ui-toolbar> bar slots", () => {
     const listButton = (host: Element) => host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=all-items]")
 
     /** The list's rows. */
-    const rows = (host: Element) => [...host.shadowRoot!.querySelectorAll<HTMLButtonElement>("[part~=overflow-menu] .row")]
+    const rows = (host: Element) => [
+      ...host.shadowRoot!.querySelectorAll<HTMLButtonElement>("[part~=overflow-menu] .row")
+    ]
 
     it("no more items than that:  all of them, and no button", async () => {
       const { host } = await toolbar(900, items(3), `${LOOK} max-visible="3"`)
