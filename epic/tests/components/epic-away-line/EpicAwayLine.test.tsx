@@ -86,6 +86,29 @@ describe("<epic-away-line>", () => {
     await vi.waitFor(() => expect(line.matches(":state(read)")).toBe(true))
   })
 
+  test("a part's heading read:  every line under it fades at once, and stays faded once the server applied it (I268)", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const box = await ElementFixture.render(
+      `<div><epic-away-line line="done" heading><b>What was done</b></epic-away-line>` +
+        `<epic-away-line line="p-go"><a href="#p-go">P1</a> done</epic-away-line>` +
+        `<epic-away-line line="todo" heading><b>Still to do</b></epic-away-line>` +
+        `<epic-away-line line="q1"><a href="#q1">Q1</a> open</epic-away-line></div>`
+    )
+    await ElementFixture.settle()
+    const [heading, line, , other] = Array.from(box.querySelectorAll("epic-away-line"))
+    await vi.waitFor(() => expect(readButton(heading!)).not.toBeNull())
+    readButton(heading!)!.click()
+    await vi.waitFor(() => expect(line!.matches(":state(read)")).toBe(true))
+    expect(other!.matches(":state(read)")).toBe(false)
+    // the page server applied it and cleared the mark:  the line stays faded until the page's patch takes it away
+    delete routes.inbox.marks["away:done"]
+    await client.refresh()
+    await ElementFixture.settle()
+    expect(routes.inbox.marks["away:done"]).toBeUndefined()
+    expect(line!.matches(":state(read)")).toBe(true)
+  })
+
   test("a part's heading:  `:state(heading)`", async () => {
     const heading = await ElementFixture.render(
       `<epic-away-line line="done" heading><b>What was done</b></epic-away-line>`

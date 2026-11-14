@@ -49,8 +49,10 @@
         <article class="site-article">
           <p class="lede">
             One line of an epic page's "0. While you were out" (a phase done, a call waiting, an issue, a test), or the
-            heading of one of its parts, with a ✓ Read at its start while the page is reviewed. Read, it fades at once;
-            the next <code>epic inbox apply</code> takes it off the section, and the rest stays.
+            heading of one of its parts, with a ✓ Read at its start while the page is reviewed. Read, it fades at once, and
+            the page server takes it off the section straight away, with no Send;  the rest stays.  What it's about is
+            seen too:  its phase's or item's new update blocks go quiet.  A heading's Read does all of that for every
+            line of its part.
           </p>
           <p class="meta">
             For anyone reading or writing an epic page's markup, or changing this element.<br />
@@ -84,7 +86,10 @@
                 <code>line</code>:  what it's about, a phase's or an item's id (<code>p-x</code>, <code>i205</code>), or a
                 part's (<code>done</code>, <code>todo</code>).  Its Read is a Seen on <code>away:&lt;line&gt;</code>.
               </li>
-              <li><code>heading</code>:  a part's heading;  read, its whole part leaves.</li>
+              <li>
+                <code>heading</code>:  a part's heading;  read, every line of its part fades at once, and the whole part
+                leaves.
+              </li>
               <li>
                 The section lists its lines' keys in its <code>lines</code>, and the page remembers when each was read in
                 its <code>away-seen</code>:  a line read before its last change shows again.
@@ -96,8 +101,10 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <p>
               The epic tool, every time it writes the page (<code>PlanDoc.refreshAway()</code>), from
-              <code>NightSummary</code>;  never by hand.  <code>epic inbox apply</code> applies a Read
-              (<code>PlanDoc.readAwayLine()</code>);  Done reading on the section forgets every line's.
+              <code>NightSummary</code>;  never by hand.  The page server applies a Read the moment it's ticked
+              (<code>AwayReads.applyNow()</code>, epic <code>epic-engine</code> I268:  no Send), as
+              <code>epic inbox apply</code> would:  <code>PlanDoc.readAwayLine()</code>, and
+              <code>PlanDoc.seeUpdatesFor()</code> for the update blocks;  Done reading on the section forgets every line's.
             </p>
           </ui-section>
 

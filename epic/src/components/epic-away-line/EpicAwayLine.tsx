@@ -18,7 +18,10 @@ import awayLineCSS from "./EpicAwayLine.css?inline"
  * - Its ✓ Read at the line's start, while the page is reviewed:  a Seen on `away:<line>` through the review inbox;
  *   `epic inbox apply` writes when he read it into the page (`<epic-page away-seen>`), and the section is drawn again
  *   without it.  A heading's (`done`, `todo`) takes its whole part.
- * - Read and not applied yet:  faded at once (`:state(read)`), as an update block goes quiet.
+ * - Read:  faded at once (`:state(read)`), as an update block goes quiet;  the page server applies it straight away
+ *   (`AwayReads`, epic `epic-engine` I268:  no Send), and the section is drawn again without it.
+ *   - a line under a part's heading Read fades with it, at once (`partHeading()`):  the whole part is read
+ *   - what the line is about is Seen too:  its new update blocks go quiet (`PlanDoc.seeUpdatesFor()`)
  *   - and the same the moment Owen marks the item the line is about (Do this, Approve ...):  it leaves the section
  *     when that's applied (`NightSummary.isAddressed()`, epic `epic-engine` I235)
  * - The epic tool writes every one (`PlanDoc.refreshAway()`);  no one writes it by hand.
@@ -41,10 +44,27 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
     return this.review.connect()
   }
 
-  /** Its Read mark is in the inbox, or a mark on the item it's about:  faded until it's applied. */
+  /**
+   * Its Read mark is in the inbox, or its part's (its heading's), or a mark on the item it's about:  faded until
+   * it's applied.
+   */
   @E.cssState("read")
   get isRead(): boolean {
-    return this.review.mark()?.action === "seen" || (!!this.line && this.review.isMarked(this.line))
+    const part = this.partHeading()
+    return (
+      (!!this.line && this.review.wasRead(`${AWAY_ID}:${this.line}`)) ||
+      (!!part && this.review.wasRead(`${AWAY_ID}:${part}`)) ||
+      (!!this.line && this.review.isMarked(this.line))
+    )
+  }
+
+  /** The key of the part it's in (`done`, `todo`):  the nearest heading before it;  none for a heading itself. */
+  partHeading(): string | undefined {
+    if (this.heading) return undefined
+    for (let before = this.domElement.previousElementSibling; before; before = before.previousElementSibling)
+      if (before.localName === "epic-away-line" && before.hasAttribute("heading"))
+        return before.getAttribute("line") ?? undefined
+    return undefined
   }
 
   /** Read shows:  a line to key it by, the page reviewed, and not still under way. */
