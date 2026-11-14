@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process"
-import { accessSync, closeSync, constants, mkdirSync, openSync, readFileSync, statSync } from "node:fs"
+import { accessSync, closeSync, constants, mkdirSync, openSync, statSync } from "node:fs"
 import { homedir } from "node:os"
 import { delimiter, dirname, join } from "node:path"
 
@@ -7,6 +7,7 @@ import { SRV } from "spell/server"
 import type { SPACES } from "spell/app/spaces"
 import environment from "spell/app/spaces/server/node/environment"
 import { ChangeRequests } from "./ChangeRequests"
+import { SessionLog } from "./SessionLog"
 
 /****************
  * ### `ClaudeStarter`
@@ -21,8 +22,14 @@ import { ChangeRequests } from "./ChangeRequests"
  *   - read files, and run those two `spell app changes` commands
  *   - anything else would ask, and nobody answers (`--permission-prompts none`):  it's refused
  *   - never `--dangerously-skip-permissions`
- * - It writes the session into the request (`ChangeRequests.startedFor()`), its output into a log beside the inbox.
- * - A session that ends without saying `done` fails the request (`settle()`), with its last line as the reason.
+ * - Without this machine's hooks and MCP servers (epic `editor` I138):
+ *   - the epic plugin's hooks kept a finished session running for good, and woke it with epic work
+ *   - so a request sat "waiting" while its session never took it, nor ended
+ * - It writes the session into the request (`ChangeRequests.startedFor()`).
+ * - Its events stream into a log beside the inbox, as they happen:
+ *   the box shows what it's doing from them (`SessionLog`).
+ * - A session that ends without saying `done` fails the request (`settle()`), its last word the reason.
+ * - One that hasn't taken it within `TAKE_WITHIN_MS` is stopped, and fails it as `stalled`.
  * - Node only;  NEVER knows about epics, as `ChangeRequests` doesn't.
  ****************/
 export class ClaudeStarter {
@@ -77,6 +84,14 @@ export class ClaudeStarter {
       "none",
       "--tools",
       TOOLS.join(","),
+      // its events, one JSON object a line, as they happen:  print mode alone writes only at the end
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      // none of this machine's hooks or MCP servers:  see the class's docs
+      "--settings",
+      JSON.stringify({ disableAllHooks: true }),
+      "--strict-mcp-config",
       // last:  it takes every argument after it
       "--allowedTools",
       ...READ_TOOLS,
@@ -110,30 +125,57 @@ export class ClaudeStarter {
       })
       if (!child.pid) throw new Error(`ClaudeStarter.start():  ${claude} didn't start`)
       // when it ends here, while this server runs;  after a restart, `settle()` finds it gone
-      child.once("exit", () => {
-        try {
-          this.settle(this.inbox.of(request.id))
-        } catch (ignored) {
-          console.error("ClaudeStarter:  can't settle", request.id, ignored)
-        }
-      })
+      child.once("exit", () => this.settleQuietly(request.id))
       child.unref()
-      return this.inbox.startedFor(request.id, { pid: child.pid, at: new Date().toISOString(), log })
+      // stopped if it hasn't taken the request in time, whether or not the box still looks
+      setTimeout(() => this.settleQuietly(request.id), TAKE_WITHIN_MS + SETTLE_LATE_MS).unref()
+      return this.inbox.startedFor(request.id, { pid: child.pid, at: new Date(this.now()).toISOString(), log })
     } finally {
       closeSync(output)
     }
   }
 
   /**
-   * `request`, settled:  if the session started for it has ended without finishing it, it has failed,
-   * the last line the session wrote its summary.
+   * `request`, settled:
+   * - its session has ended without finishing it:  failed, the session's last word its summary (`SessionLog`)
+   * - its session hasn't taken it within `TAKE_WITHIN_MS`:  the session is stopped, and the request fails, `stalled`
    * - Anything else comes back as it is.
+   * - SIDE EFFECT:  ends a stalled session's process
    */
   settle<R extends SPACES.ChangeRequest | undefined>(request: R): R {
     const session = request?.session
     if (!request || !session || !UNFINISHED.includes(request.status)) return request
-    if (SRV.Heartbeat.isLive({ pid: session.pid })) return request
-    return this.inbox.finish(request.id, "failed", lastLineOf(session.log)) as R
+    if (!SRV.Heartbeat.isLive({ pid: session.pid })) {
+      return this.inbox.finish(request.id, "failed", SessionLog.of(session.log).summary) as R
+    }
+    const isStalled = request.status === "waiting" && this.now() - Date.parse(session.at) > TAKE_WITHIN_MS
+    if (!isStalled) return request
+    ;(this.options.end ?? endQuietly)(session.pid)
+    return this.inbox.fail(request.id, "stalled", STALLED_SUMMARY) as R
+  }
+
+  /**
+   * What `request`'s session is doing now, from its log:  `undefined` when it has none, or has finished.
+   * - Taken, but its log doesn't show it yet:  reading the request.
+   */
+  progressOf(request: SPACES.ChangeRequest): SPACES.ChangeProgress | undefined {
+    if (!request.session || !UNFINISHED.includes(request.status)) return undefined
+    const progress = SessionLog.of(request.session.log).progress
+    return request.status === "taken" && progress.step === "starting" ? { step: "reading request" } : progress
+  }
+
+  /** Settle request `id` (`settle()`), as it is now.  NEVER throws:  a failure goes to the server's log. */
+  private settleQuietly(id: string): void {
+    try {
+      this.settle(this.inbox.of(id))
+    } catch (ignored) {
+      console.error("ClaudeStarter:  can't settle", id, ignored)
+    }
+  }
+
+  /** Now, in msec:  a test's clock, else the machine's. */
+  private now(): number {
+    return this.options.now?.() ?? Date.now()
   }
 
   /** The `spell` command, as the session runs it:  full paths, so its permissions name exactly that. */
@@ -151,6 +193,10 @@ export type StarterOptions = {
   spellBin?: string
   /** starts the process:  node's `spawn()` */
   spawn?: typeof spawn
+  /** ends a stalled session's process:  `SRV.endProcess()` */
+  end?: (pid: number) => void
+  /** now, in msec:  `Date.now()` */
+  now?: () => number
 }
 
 /** What `ClaudeStarter.find()` looks with:  a test's stand-ins. */
@@ -191,14 +237,11 @@ function sessionEnv(spell: string): NodeJS.ProcessEnv {
   return env
 }
 
-/** The last line `log` has, trimmed:  `undefined` when it has none, or can't be read. */
-function lastLineOf(log: string): string | undefined {
-  try {
-    const line = readFileSync(log, "utf8").trim().split("\n").at(-1)?.trim()
-    return line ? line.slice(0, MOST_SUMMARY_CHARS) : undefined
-  } catch (ignored) {
-    return undefined
-  }
+/** End process `pid`, in the background.  NEVER throws:  a failure goes to the server's log. */
+function endQuietly(pid: number): void {
+  void SRV.endProcess(pid, END_WAIT_MS).catch((error: unknown) =>
+    console.error("ClaudeStarter:  can't end", pid, error)
+  )
 }
 
 /** Is `file` a program this process may run? */
@@ -241,5 +284,17 @@ const UNFINISHED: SPACES.ChangeStatus[] = ["waiting", "taken"]
 /** Where the sessions' logs go, beside the inbox:  `__` keeps it out of the project lists. */
 const SESSIONS_FOLDER = "__change-sessions"
 
-/** The longest summary taken from a log, in characters. */
-const MOST_SUMMARY_CHARS = 300
+/**
+ * How long a session has to take its request, in msec, before it's stopped as stalled.
+ * - One with nothing in its way takes it in about 5s (epic `editor` I138, measured).
+ */
+const TAKE_WITHIN_MS = 60_000
+
+/** How long after `TAKE_WITHIN_MS` the starter looks by itself, in msec:  the box usually looks first. */
+const SETTLE_LATE_MS = 1000
+
+/** How long a stalled session has to end before it's killed, in msec. */
+const END_WAIT_MS = 3000
+
+/** A stalled request's summary, for the log and `spell app changes list`:  the box says it in its own words. */
+const STALLED_SUMMARY = "The Claude session didn't take the request within a minute, so it was stopped."

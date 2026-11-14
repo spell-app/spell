@@ -48,6 +48,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [changes/](server/node/changes/):  the inbox of changes people ask for in the editor, for a Claude session
       (`ChangeRequests`, `/api/changes`, `spell app changes`;  epic `editor` P18);  with nobody listening, the page
       server starts a headless Claude Code session for a request itself (`ClaudeStarter`, epic `editor` T66)
+      - without this machine's hooks or MCP servers;  its events stream into a log the box reads for what it's
+        doing (`SessionLog`), and one that hasn't taken its request within a minute is stopped (epic `editor` I138)
     - [routes/](server/node/routes/):  the editor's server (below)
   - [the Python side](server/py/pyproject.toml):  `spell_quart`, Python's web server, a uv project (below)
 - Tests live in the app folder's `tests/spaces/`, at the same paths as the code they test:

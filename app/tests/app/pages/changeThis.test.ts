@@ -97,13 +97,37 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
 
   test("with Claude Code here, the page server starts a session:  the box says so (epic `editor` T66)", async () => {
     request = { ...request, hasClaude: true, session: { pid: 1, at: new Date().toISOString(), log: "/x.log" } }
-    await page.waitForSelector(".ChangeThisStarting", { timeout: 5000 })
-    expect(await page.locator(".ChangeThisStarting").innerText()).toContain("Starting Claude")
+    await expect
+      .poll(() => page.locator(".ChangeThisStatus").innerText(), { timeout: 5000 })
+      .toBe("Starting Claude session…")
+  })
+
+  test("it counts the seconds since it was sent, beside a spinner that shows (epic `editor` I138)", async () => {
+    request = { ...request, at: new Date(Date.now() - 12_000).toISOString() }
+    await expect.poll(() => page.locator(".ChangeThisElapsed").innerText(), { timeout: 5000 }).toMatch(/^1[2-9]s$/)
+    // the loader's host draws no box of its own:  the spinner is in its shadow root
+    const spinnerWidth = await page.evaluate(
+      () => document.querySelector(".ChangeThisWorking ui-loader")?.shadowRoot?.querySelector(".loader")?.clientWidth
+    )
+    expect(spinnerWidth).toBeGreaterThanOrEqual(16)
+  })
+
+  test("it says what the session is doing, from its log (I138)", async () => {
+    request = { ...request, status: "taken", progress: { step: "reading request" } }
+    await expect
+      .poll(() => page.locator(".ChangeThisStatus").innerText(), { timeout: 5000 })
+      .toBe("Reading your request…")
+    request = { ...request, progress: { step: "editing", file: "Counter.spell" } }
+    await expect
+      .poll(() => page.locator(".ChangeThisStatus").innerText(), { timeout: 5000 })
+      .toBe("Editing Counter.spell…")
   })
 
   test("a session taking it says so", async () => {
-    request = { ...request, status: "taken", listening: true }
-    await page.waitForSelector(".ChangeThisWorking", { timeout: 5000 })
+    request = { ...request, status: "taken", listening: true, session: undefined, progress: undefined }
+    await expect
+      .poll(() => page.locator(".ChangeThisStatus").innerText(), { timeout: 5000 })
+      .toBe("Claude is working on it…")
     expect(await page.locator(".ChangeThisBox ui-code").count()).toBe(0)
   })
 
@@ -114,7 +138,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     onDisk = before.replace(OLD_WORD, NEW_WORD)
     request = { ...request, status: "done", summary: "the button says Pressed" }
     await expect.poll(() => button().innerText(), { timeout: 15_000 }).toBe("Pressed 3 times")
-    expect(await page.locator(".ChangeThisBox").count()).toBe(0)
+    await expect.poll(() => page.locator(".ChangeThisBox").count(), { timeout: 5000 }).toBe(0)
     const seen = await page.evaluate(() => {
       const { Inspector, editor } = window as unknown as {
         Inspector: { allSelected: { element: HTMLElement }[] }
@@ -137,6 +161,27 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     await page.keyboard.press("Meta+k")
     await page.waitForSelector(".ChangeThisBox")
     expect(await page.locator(".ChangeThisSend").getAttribute("disabled")).toBe("")
+    // Send, right of the words, at their foot;  the header's first letter over the words' (I133, I138)
+    await page.keyboard.type("x")
+    // the popup's opening animation over:  it scales the box
+    await page.waitForTimeout(500)
+    const place = await page.evaluate(() => {
+      const box = document.querySelector(".ChangeThisBox")!
+      const field = box.querySelector("ui-textarea")!.getBoundingClientRect()
+      const send = box.querySelector(".ChangeThisSend")!.getBoundingClientRect()
+      const textarea = box.querySelector("ui-textarea")!.shadowRoot?.querySelector("textarea")
+      const words = textarea ? field.left + parseFloat(getComputedStyle(textarea).paddingLeft) + 1 : field.left
+      const header = document.createRange()
+      header.selectNodeContents(box.querySelector(".ChangeThisHeader")!)
+      return {
+        right: send.left - field.right,
+        foot: send.bottom - field.bottom,
+        letter: header.getBoundingClientRect().left - words
+      }
+    })
+    expect(place.right).toBeGreaterThan(0)
+    expect(Math.abs(place.foot)).toBeLessThanOrEqual(1)
+    expect(Math.abs(place.letter)).toBeLessThanOrEqual(1)
     await page.locator(".ChangeThisClose").click()
     await page.waitForFunction(() => !document.querySelector(".ChangeThisBox"))
   })

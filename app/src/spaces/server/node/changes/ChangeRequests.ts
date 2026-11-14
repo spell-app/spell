@@ -94,6 +94,19 @@ export class ChangeRequests {
   }
 
   /**
+   * Request `id` has failed for a reason the page server knows itself (`failure`), said in `summary` too
+   * (`ClaudeStarter.settle()`, epic `editor` I138).
+   * - throws `TypeError` if there's no such request
+   */
+  fail(id: string, failure: NonNullable<SPACES.ChangeRequest["failure"]>, summary: string): SPACES.ChangeRequest {
+    return this.changeRequest(id, "fail", (request) => {
+      request.status = "failed"
+      request.failure = failure
+      request.summary = summary
+    })
+  }
+
+  /**
    * Take request `id` by its id:  what the session the page server started for it does first
    * (`spell app changes take`, epic `editor` T66).
    * - throws `TypeError` if there's no such request, or it isn't waiting any more

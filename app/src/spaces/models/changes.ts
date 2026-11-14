@@ -66,6 +66,11 @@ export type ChangeRequest = Omit<ChangeAsked, "pictures"> & {
   summary?: string
   /** the Claude session the page server started for it, when none was listening (epic `editor` T66) */
   session?: ChangeSession
+  /**
+   * why it failed, when the page server can say so itself (epic `editor` I138):
+   * - `stalled`:  the session it started hadn't taken it within a minute, so it was stopped
+   */
+  failure?: "stalled"
 }
 
 /**
@@ -81,8 +86,27 @@ export type ChangeSession = {
   log: string
 }
 
+/**
+ * What a session the page server started is doing now, as its log says (`SessionLog`, epic `editor` I138):
+ * the box shows it in a short line.
+ */
+export type ChangeProgress = {
+  /**
+   * - `starting`:  it hasn't taken the request yet
+   * - `reading request`:  it has, and reads what was asked
+   * - `reading`:  it reads `file`
+   * - `editing`:  it changes `file`
+   * - `finishing`:  it says it's done
+   */
+  step: "starting" | "reading request" | "reading" | "editing" | "finishing"
+  /** the file it reads or changes, by its name:  `Solitaire.spell` */
+  file?: string
+}
+
 /** `POST` and `GET /api/changes`' answer. */
 export type ChangeAnswer = ChangeRequest & {
+  /** what the session the page server started is doing, while it's under way */
+  progress?: ChangeProgress
   /** is a session on this machine listening? */
   listening: boolean
   /** is Claude Code installed on this machine, so the page server can start a session itself (epic `editor` T66)? */

@@ -86,6 +86,7 @@ export class ChangeThis {
         contents: asked,
         requestFormat: KnownFormat.json
       })
+      setNow(Date.now())
       setRequest(answer)
       void ChangeThis.followUntilDone(project, answer.id)
     } catch (error) {
@@ -124,6 +125,7 @@ export class ChangeThis {
       while (editor.project === project) {
         await after(LOOK_EVERY_MS / 1000)
         const answer = await ChangeThis.fetchAnswer({ url: `${CHANGES_URL}?id=${id}` })
+        setNow(Date.now())
         setRequest(answer)
         if (answer.status === "done") {
           await ChangeThis.showResult(project, answer)
@@ -132,7 +134,11 @@ export class ChangeThis {
         if (answer.status === "failed") {
           const { summary } = answer
           editor.showError(
-            summary ? appTexts.text("changeThisFailed", { summary }) : appTexts.text("changeThisStopped")
+            answer.failure === "stalled"
+              ? appTexts.text("changeThisStalled")
+              : summary
+                ? appTexts.text("changeThisFailed", { summary })
+                : appTexts.text("changeThisStopped")
           )
           break
         }
@@ -220,7 +226,8 @@ export class ChangeThis {
  * - Its ✕, top right, closes it;  so does Esc.  A request under way goes on without it.
  * - Send, a small paper plane right of the words, at their foot, sends them;  so does Enter.  Shift+Enter starts a new line.
  * - A picture pasted or dropped into it goes with the words, a thumbnail under them, its ✕ taking it out (epic `editor` T62).
- * - Under way, in short lines (epic `editor` T66):  "Starting Claude…", then "Claude is working on it…";
+ * - Under way, a spinner, a short line of what Claude is doing, and the seconds since it was sent (epic `editor` I138):
+ *   "Starting Claude session…", "Reading your request…", "Editing Solitaire.spell…" (`statusOf()`);
  *   no Claude Code on this machine:  a link to install it, and the command to run by hand.
  * - `ChangeThis.open()` opens it.
  ****************/
@@ -309,16 +316,13 @@ export function ChangeThisBox(): JSX.Element {
               </div>
             </Show>
             <Switch>
-              <Match when={stageOf(request()) === "starting"}>
-                <p class="ChangeThisWorking ChangeThisStarting">
-                  <ui-loader visible="" inline="" size="tiny" />
-                  {appTexts.text("changeThisStarting")}
-                </p>
-              </Match>
-              <Match when={stageOf(request()) === "working"}>
+              <Match when={isUnderWay(request())}>
                 <p class="ChangeThisWorking">
-                  <ui-loader visible="" inline="" size="tiny" />
-                  {appTexts.text("changeThisWorking")}
+                  <ui-loader visible="" inline="" size="small" />
+                  <span class="ChangeThisStatus">{statusOf(request())}</span>
+                  <span class="ChangeThisElapsed">
+                    {appTexts.text("changeThisSeconds", { seconds: secondsSince(request()?.at) })}
+                  </span>
                 </p>
               </Match>
               <Match when={stageOf(request()) === "no claude"}>
@@ -364,6 +368,33 @@ function stageOf(
   if (request.status === "waiting" && request.session) return "starting"
   if (request.status !== "waiting" || request.listening) return "working"
   return request.hasClaude ? "nobody" : "no claude"
+}
+
+/** Is `request` under way:  a session started for it, or one on it? */
+function isUnderWay(request: SPACES.ChangeAnswer | undefined): boolean {
+  const stage = stageOf(request)
+  return stage === "starting" || stage === "working"
+}
+
+/**
+ * What Claude is doing with `request`, as the box says it, in one short line:
+ * - a session the page server started:  what its log says (`progress`), "Editing Solitaire.spell…"
+ * - else "Starting Claude session…" while none has taken it, then "Claude is working on it…"
+ */
+function statusOf(request: SPACES.ChangeAnswer | undefined): string {
+  const progress = request?.progress
+  const file = progress?.file ?? ""
+  if (progress?.step === "reading request") return appTexts.text("changeThisReadingRequest")
+  if (progress?.step === "reading" && file) return appTexts.text("changeThisReadingFile", { file })
+  if (progress?.step === "editing" && file) return appTexts.text("changeThisEditing", { file })
+  if (progress?.step === "finishing") return appTexts.text("changeThisFinishing")
+  return appTexts.text(stageOf(request) === "starting" ? "changeThisStarting" : "changeThisWorking")
+}
+
+/** Whole seconds from `at` (ISO) to `now()`:  the box's count, so it's visibly alive. */
+function secondsSince(at: string | undefined): number {
+  const since = at ? Date.parse(at) : NaN
+  return Number.isNaN(since) ? 0 : Math.max(0, Math.round((now() - since) / 1000))
 }
 
 /**
@@ -481,6 +512,9 @@ let placeAsked: SPACES.ChangePlace | undefined
 
 /** The request under way, as last heard. */
 const [request, setRequest] = createSignal<SPACES.ChangeAnswer>()
+
+/** When the request was last heard, in msec:  the box's seconds count from it. */
+const [now, setNow] = createSignal(Date.now())
 
 /** A picture in the box:  what's sent, and a URL of it for its thumbnail. */
 type BoxPicture = SPACES.ChangePicture & {

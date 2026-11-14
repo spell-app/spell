@@ -11,8 +11,9 @@ import { ClaudeStarter } from "./ClaudeStarter"
  *   and whether Claude Code is on this machine
  *   - nobody listening, and Claude Code here:  a session is started for it at once (`ClaudeStarter`, epic `editor` T66)
  * - `POST /api/changes/start?id=c3`:  start a session for a request still waiting, the box's Start Claude button
- * - `GET /api/changes?id=c3`:  where it's got to, the same;  404 for none
- *   - a session started for it that has ended without finishing:  failed (`ClaudeStarter.settle()`)
+ * - `GET /api/changes?id=c3`:  where it's got to, the same, and what its session is doing (`progress`);  404 for none
+ *   - a session started for it that has ended without finishing, or hasn't taken it within a minute:
+ *     failed (`ClaudeStarter.settle()`)
  * - A request with no words, or no file:  400;  a picture that isn't a PNG, JPEG, GIF or WebP too (epic `editor` T62).
  */
 
@@ -68,9 +69,15 @@ function startOrLeave(starter: ClaudeStarter, request: SPACES.ChangeRequest): SP
   }
 }
 
-/** The answer about `request`. */
+/** The answer about `request`:  with what its session is doing, while it's under way (epic `editor` I138). */
 function answerFor(starter: ClaudeStarter, request: SPACES.ChangeRequest): SPACES.ChangeAnswer {
-  return { ...request, listening: starter.inbox.isListening(), hasClaude: starter.hasClaude }
+  const progress = starter.progressOf(request)
+  return {
+    ...request,
+    listening: starter.inbox.isListening(),
+    hasClaude: starter.hasClaude,
+    ...(progress ? { progress } : {})
+  }
 }
 
 /** The folder of `request`'s project, on this machine:  where its session starts, and may edit. */

@@ -100,6 +100,17 @@ describe("ClaudeStarter.argsFor()", () => {
     ])
   })
 
+  it("streams its events as they happen, without this machine's hooks or MCP servers (I138)", () => {
+    expect(args.slice(args.indexOf("--output-format"), args.indexOf("--allowedTools"))).toEqual([
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--settings",
+      '{"disableAllHooks":true}',
+      "--strict-mcp-config"
+    ])
+  })
+
   it("never skips its permissions", () => {
     expect(args.join(" ")).not.toMatch(/dangerously|bypassPermissions/)
   })
@@ -121,14 +132,26 @@ describe("ClaudeStarter.start()", () => {
     return child
   }) as unknown as typeof import("node:child_process").spawn
 
+  /** The pids a stand-in ended, and the stand-in clock's now. */
+  let ended: number[]
+  let now: number
+
   /** A starter on the stand-ins;  `none`:  Claude Code isn't installed. */
   const starter = (claude: "/bin/claude" | "none" = "/bin/claude") =>
-    new ClaudeStarter(inbox, { claude: claude === "none" ? undefined : claude, spellBin: SPELL_BIN, spawn })
+    new ClaudeStarter(inbox, {
+      claude: claude === "none" ? undefined : claude,
+      spellBin: SPELL_BIN,
+      spawn,
+      end: (pid) => ended.push(pid),
+      now: () => now
+    })
 
   beforeEach(() => {
     folder = mkdtempSync(path.join(os.tmpdir(), "claude-starter-"))
     inbox = new ChangeRequests(path.join(folder, "inbox.json"))
     spawned = undefined
+    ended = []
+    now = Date.parse("2026-11-14T22:34:05.000Z")
     child = Object.assign(new EventEmitter(), { pid: GONE_PID, unref: vi.fn() })
   })
   afterEach(() => rmSync(folder, { recursive: true, force: true }))
@@ -178,4 +201,53 @@ describe("ClaudeStarter.start()", () => {
     inbox.startedFor("c2", { pid: process.pid, at: "", log: "/nowhere.log" })
     expect(starter().settle(inbox.of("c2"))?.status).toBe("waiting")
   })
+
+  it("stops a session that hasn't taken its request within a minute, and fails it as stalled (I138)", () => {
+    const request = inbox.add(ASKED, "/disk/Proj.spell")
+    starter().start(request, "/disk/Proj")
+    // still running:  this process's pid
+    inbox.startedFor("c1", { ...inbox.of("c1")!.session!, pid: process.pid })
+    now += 59_000
+    expect(starter().settle(inbox.of("c1"))?.status).toBe("waiting")
+    expect(ended).toEqual([])
+    now += 2000
+    expect(starter().settle(inbox.of("c1"))).toMatchObject({ status: "failed", failure: "stalled" })
+    expect(inbox.of("c1")?.summary).toMatch(/didn't take the request within a minute/)
+    expect(ended).toEqual([process.pid])
+  })
+
+  it("never stops one that took its request, however long it works", () => {
+    inbox.add(ASKED, "/disk/Proj.spell")
+    inbox.startedFor("c1", { pid: process.pid, at: new Date(now).toISOString(), log: "/nowhere.log" })
+    inbox.take("c1")
+    now += 10 * 60_000
+    expect(starter().settle(inbox.of("c1"))?.status).toBe("taken")
+    expect(ended).toEqual([])
+  })
+
+  it("says what its session is doing, from its log (I138)", () => {
+    const request = inbox.add(ASKED, "/disk/Proj.spell")
+    const { session } = starter().start(request, "/disk/Proj")
+    expect(starter().progressOf(inbox.of("c1")!)).toEqual({ step: "starting" })
+    // taken, before its log shows it
+    inbox.take("c1")
+    expect(starter().progressOf(inbox.of("c1")!)).toEqual({ step: "reading request" })
+    writeFileSync(session!.log, toolLine("Edit", { file_path: "/disk/Proj/Proj.spell" }))
+    expect(starter().progressOf(inbox.of("c1")!)).toEqual({ step: "editing", file: "Proj.spell" })
+    inbox.finish("c1", "done", "it says Stop")
+    expect(starter().progressOf(inbox.of("c1")!)).toBeUndefined()
+  })
+
+  it("fails the request with the session's result, from its streamed log", () => {
+    const request = inbox.add(ASKED, "/disk/Proj.spell")
+    const { session } = starter().start(request, "/disk/Proj")
+    writeFileSync(session!.log, JSON.stringify({ type: "result", is_error: true, result: "Not logged in" }) + "\n")
+    child.emit("exit", 1)
+    expect(inbox.of("c1")).toMatchObject({ status: "failed", summary: "Not logged in" })
+  })
 })
+
+/** A log line of the session asking for `tool`, as Claude Code streams it. */
+function toolLine(tool: string, input: Record<string, unknown>): string {
+  return JSON.stringify({ type: "assistant", message: { content: [{ type: "tool_use", name: tool, input }] } }) + "\n"
+}

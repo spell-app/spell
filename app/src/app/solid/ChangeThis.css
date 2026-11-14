@@ -51,10 +51,19 @@ ui-popup.ChangeThisPopup::part(popup) {
 .ChangeThisBox p {
   margin: 0;
 }
+/* under way (epic `editor` I138):  the spinner, what Claude is doing, and the seconds since it was sent, at the right */
 .ChangeThisWorking {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.ChangeThisStatus {
+  flex: 1;
+  min-width: 0;
+}
+.ChangeThisElapsed {
+  color: var(--ui-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 /* the pictures sent with it (epic `editor` T62):  thumbnails in a row under the words, each with its ✕ */
 .ChangeThisPictures {
