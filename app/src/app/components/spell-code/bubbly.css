@@ -772,9 +772,9 @@
   .bubbly-angle-open:has(+ .bubbly-slash)::before {
     margin-right: 0.5px;
   }
-  /* a self-closed tag's `/` over its `⟩`, so `/⟩` reads as one glyph (Owen) */
+  /* a self-closed tag's `/` snug against its `⟩`, never over it, so `/⟩` reads as one glyph (Owen) */
   .bubbly-slash:has(+ .bubbly-angle-close) {
-    margin-right: -0.25em;
+    margin-right: -0.12em;
   }
 
   /* an attribute's `=` a pixel clear of its name */
@@ -1397,9 +1397,9 @@
       right: 0;
     }
     /* a nameless end tag, `</>`, in a line:  its brackets narrowed to the `/` between them, so it reads as one glyph (Owen) */
-    /* a self-closed tag's `/`:  its `⟩` drawn under it, so `/⟩` reads as one glyph (Owen) */
+    /* a self-closed tag's `/`:  snug against its `⟩`, never over it, so `/⟩` reads as one glyph (Owen) */
     .view-line .bubbly-closing-slash {
-      letter-spacing: -0.3em;
+      letter-spacing: -0.14em;
     }
     .view-line .bubbly-end-bare.bubbly-angle:not(.bubbly-foot-tiny) {
       letter-spacing: -0.2em;

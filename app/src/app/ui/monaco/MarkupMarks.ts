@@ -453,7 +453,7 @@ const ANGLE_CLOSE = `${MARK} bubbly-angle bubbly-angle-close`
 /** An end tag's `/`, and `<br />`'s. */
 const SLASH = `${MARK} bubbly-slash`
 
-/** A self-closed tag's `/`, over its `>`:  `/⟩` one glyph (Owen, 2026-11-14). */
+/** A self-closed tag's `/`, snug against its `>`:  `/⟩` one glyph (Owen, 2026-11-14). */
 const CLOSING_SLASH = "bubbly-closing-slash"
 
 /** A tag's name, and its attributes' names. */
