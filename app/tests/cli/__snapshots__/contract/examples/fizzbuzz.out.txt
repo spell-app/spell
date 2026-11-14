@@ -1,5 +1,105 @@
+1
+2
+3 fizz
+4
+5 buzz
+6 fizz
+7
+8
+9 fizz
+10 buzz
+11
+12 fizz
+13
+14
+15 fizzbuzz
+16
+17
+18 fizz
+19
+20 buzz
+21 fizz
+22
+23
+24 fizz
+25 buzz
+26
+27 fizz
+28
+29
+30 fizzbuzz
+31
+32
+33 fizz
+34
+35 buzz
+36 fizz
+37
+38
+39 fizz
+40 buzz
+41
+42 fizz
+43
+44
+45 fizzbuzz
+46
+47
+48 fizz
+49
+50 buzz
+51 fizz
+52
+53
+54 fizz
+55 buzz
+56
+57 fizz
+58
+59
+60 fizzbuzz
+61
+62
+63 fizz
+64
+65 buzz
+66 fizz
+67
+68
+69 fizz
+70 buzz
+71
+72 fizz
+73
+74
+75 fizzbuzz
+76
+77
+78 fizz
+79
+80 buzz
+81 fizz
+82
+83
+84 fizz
+85 buzz
+86
+87 fizz
+88
+89
+90 fizzbuzz
+91
+92
+93 fizz
+94
+95 buzz
+96 fizz
+97
+98
+99 fizz
+100 buzz
 
-<div id="spell-app-root"><test-project-fizzbuzz-explainer><ui-container text=""><ui-stack><ui-header level="1">FizzBuzz</ui-header><ui-section label="The results"><ui-statistics size="mini" widths="4"><ui-statistic color="blue" label="fizz" value="0"></ui-statistic><ui-statistic color="green" label="buzz" value="0"></ui-statistic><ui-statistic color="purple" label="fizzbuzz" value="0"></ui-statistic><ui-statistic label="plain numbers" value="0"></ui-statistic></ui-statistics></ui-section><ui-section label="How it works"><ui-markdown>Count from 1 to 100, and say a word in place of some of the numbers:
+<div id="spell-app-root"><test-project-fizzbuzz-explainer><ui-container text=""><ui-stack><ui-header level="1">FizzBuzz</ui-header><ui-section label="The results"><ui-statistics size="mini" widths="4"><ui-statistic color="blue" label="fizz" value="27"></ui-statistic><ui-statistic color="green" label="buzz" value="14"></ui-statistic><ui-statistic color="purple" label="fizzbuzz" value="6"></ui-statistic><ui-statistic label="plain numbers" value="53"></ui-statistic></ui-statistics><ui-stack direction="horizontal" spacing="xs" wrap=""><ui-label appearance="basic" color="grey">1</ui-label><ui-label appearance="basic" color="grey">2</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">4</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">7</ui-label><ui-label appearance="basic" color="grey">8</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="grey">11</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">13</ui-label><ui-label appearance="basic" color="grey">14</ui-label><ui-label appearance="basic" color="purple">fizzbuzz</ui-label><ui-label appearance="basic" color="grey">16</ui-label><ui-label appearance="basic" color="grey">17</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">19</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">22</ui-label><ui-label appearance="basic" color="grey">23</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="grey">26</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">28</ui-label><ui-label appearance="basic" color="grey">29</ui-label><ui-label appearance="basic" color="purple">fizzbuzz</ui-label><ui-label appearance="basic" color="grey">31</ui-label><ui-label appearance="basic" color="grey">32</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">34</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">37</ui-label><ui-label appearance="basic" color="grey">38</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="grey">41</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">43</ui-label><ui-label appearance="basic" color="grey">44</ui-label><ui-label appearance="basic" color="purple">fizzbuzz</ui-label><ui-label appearance="basic" color="grey">46</ui-label><ui-label appearance="basic" color="grey">47</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">49</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">52</ui-label><ui-label appearance="basic" color="grey">53</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="grey">56</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">58</ui-label><ui-label appearance="basic" color="grey">59</ui-label><ui-label appearance="basic" color="purple">fizzbuzz</ui-label><ui-label appearance="basic" color="grey">61</ui-label><ui-label appearance="basic" color="grey">62</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">64</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">67</ui-label><ui-label appearance="basic" color="grey">68</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="grey">71</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">73</ui-label><ui-label appearance="basic" color="grey">74</ui-label><ui-label appearance="basic" color="purple">fizzbuzz</ui-label><ui-label appearance="basic" color="grey">76</ui-label><ui-label appearance="basic" color="grey">77</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">79</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">82</ui-label><ui-label appearance="basic" color="grey">83</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="grey">86</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">88</ui-label><ui-label appearance="basic" color="grey">89</ui-label><ui-label appearance="basic" color="purple">fizzbuzz</ui-label><ui-label appearance="basic" color="grey">91</ui-label><ui-label appearance="basic" color="grey">92</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">94</ui-label><ui-label appearance="basic" color="green">buzz</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="grey">97</ui-label><ui-label appearance="basic" color="grey">98</ui-label><ui-label appearance="basic" color="blue">fizz</ui-label><ui-label appearance="basic" color="green">buzz</ui-label></ui-stack></ui-section><ui-section label="How it works"><ui-markdown>Count from 1 to 100, and say a word in place of some of the numbers:
 
 - a number 3 goes into exactly:  **fizz**
 - a number 5 goes into exactly:  **buzz**

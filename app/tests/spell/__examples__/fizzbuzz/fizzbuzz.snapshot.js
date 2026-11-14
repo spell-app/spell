@@ -19,7 +19,6 @@ export function playFizzbuzz() {
   })
 }
 
-playFizzbuzz()
 // -----------
 core.heading("The explainer")
 ///////////////////
@@ -184,5 +183,8 @@ on("plain-number", (event) => {
   const { number } = event
   core.console.log(number)
 })
+// -----------
+core.heading("FizzBuzz")
+playFizzbuzz()
 // -----------
 if (!core.isCarryingOver) fizzbuzzExplainer.start()

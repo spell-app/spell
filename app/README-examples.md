@@ -702,25 +702,45 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
 
 ```spell
 solitaire is an app
-	its "score" is a number
-	its "hint" is text
-		// Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win
 	"deck" is a new deck
 
-	group "Piles"
-		// One of each, made with the solitaire
-	"stock" is a new stock pile
-	"discards" is a new discard pile
-	"clubs" is a new foundation with suit = clubs
+	when creating solitaire
+		add each card in the deck to the stock
+		restart the game
+
+	to draw it
+		<segment inverted attach="top" color="">
+			<toolbar class="GameBar" aria-label="Game" appearance="pills" inverted size="small" shrinkable>
+				<text slot="title" size="large" heavy>Solitaire</text>
+				<action "auto play"/>
+				<action "cheat"/>
+				<action "restart the game"/>
+				<divider/>
+				<action "undo"/>
+				<action "redo"/>
+				<text slot="right">Score: <number "score"/></>
+			</toolbar>
+		</segment>
+		<container padding="small" columns="7" spacing="xs">
+			<stock-pile "stock"/>
+			<discard-pile "discards"/>
+			<spacer/>
+			<foundation "clubs" suit=clubs/>
 ```
+
+_The solitaire's first lines, and the top of its drawing, shortened._
 
 - The same sentences as the Calculator's, under the solitaire's line, without "a solitaire" at the start of every line
   ([the language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md)).
-- `"deck" is a new deck` makes its deck as the solitaire is made:  each pile too, its name its `id`.
-  The board draws each by it, `<stock-pile "stock"/>`, `<tableau "T1"/>`.
+- `"deck" is a new deck` makes its deck as the solitaire is made, its name its `id`.
+- Each pile is declared where it's drawn:  `<stock-pile "stock"/>` is the solitaire's stock,
+  `<column "C1"/>` its first column, and `<number "score"/>` its score.
+  So `the stock`, `the discards`, `the clubs` and `the columns` read them, with no line making them.
+- The game bar is a toolbar of pills:  each `<action "cheat"/>` is a button,
+  its title, icon and key the action's own, from its head line, `to "cheat" with shortcut "C", icon "eye"`.
 - `group` lines and `##` lines are headings:  for a person to read, which the editor shows in bold.
 - [Card.spell](spaces/@spell/examples/Solitaire/Card.spell) says what its suits, ranks and colors are:
-  `suit = clubs` reads one, and a foundation draws its suit's ace, by the card's `picture`.
+  `suit=clubs` reads one, and a foundation draws its suit's ace, by the card's `picture`.
 - The card is a `two sided view` ([Card.spell](spaces/@spell/examples/Solitaire/Card.spell)):
   its direction, face up or down, and `turn it over` come from that built-in template,
   and it says what its `to draw its front` and its `to draw its back` look like.
@@ -732,30 +752,31 @@ solitaire is an app
   - A card drawn already turned shows that side at once:  only a change turns it.
 - The game pauses as long as that flip after turning the stock's card, `pause for 300 msec`,
   so the card turns over, then goes to the discards.
-- A click on a card is its own handler, `on click`:  `play it`, and the game says where it goes.
+- A click on a card is its own handler, `on click`:  `play the card`, and the game says where it goes.
 
 The deal is a loop with a pause in it, so you watch it happen:
 
 ```spell
 to deal the cards
-	for card in its deck
-		set start pile to the pile of the card
+	// Gather every card into the stock, shuffle it, and deal the columns
+	for card in the deck
+		set start pile to card's pile
 		turn the card face down
-		if start pile is not the stock of the solitaire
-			add the card to the stock of the solitaire
+		if start pile is not the stock
+			add the card to the stock
 			pause for 50 msec
-	shuffle its stock
+	shuffle the stock
 	// each row's first card lands face down, then turns up where it lies
 	for row from 1 to 7
 		for column from row to 7
-			add the last card of its stock to item column of the tableaus
-			if column is row
-				turn the last card of (item column of the tableaus) face up
+			add the last card of the stock to item column of the columns
+			if column is the same as row
+				turn the last card of (item column of the columns) face up
 			pause for 50 msec
 	play from the stock
 ```
 
-_From a `<spell>` block in Solitaire.spell:  plain Spell, in the outline style._
+_From Solitaire.spell:  plain Spell, in the outline style._
 
 - `pause for 50 msec` lets the page draw before the next line runs:  28 cards dealt, 50 ms apart.
 - What a person starts runs one at a time:
@@ -766,16 +787,17 @@ _From a `<spell>` block in Solitaire.spell:  plain Spell, in the outline style._
 What you see:
 - Each card is one character, from Unicode's playing cards:  the queen of spades is 🂭, and the card's test checks it.
 - Each card is its own element, `<solitaire-card>`;
-  each pile is a viewable list, its own element (`<solitaire-tableau>` and the rest), holding its cards' elements.
+  each pile is a viewable list, its own element (`<solitaire-column>` and the rest), holding its cards' elements.
 - Each kind of pile lays its cards out by its `layout`, which [styles.css](spaces/@spell/examples/Solitaire/styles.css) draws:
-  a tableau shows the top of each card below the one before;  a stacked pile, the stock, the discards and the
-  foundations, shows its last card, over a dashed place for its first.
-- Auto play, Cheat and Restart run across the top, and the board's right click shows them as a menu,
-  each with its key (A, C, N);  a card onto a foundation scores 10, one from the discards 5.
+  a column shows the top of each card below the one before;  a stacked pile, the stock, the discards and the
+  foundations, shows its last card, over its placeholder while it's empty.
+- Auto Play, Cheat, Restart The Game, Undo and Redo run across the top, as pills, the score on the right;
+  the board's right click shows the same actions as a menu, each with its key (A, C, R).
+  A card onto a foundation scores 10, one from the discards 5.
   Cheat turns up a random face-down card:  `set the pile to a random pile in remaining piles`.
 
-Its tests are written in Spell, a `<test>` inside what each one tests, and run from the command line:
-the tests of its card, deck and piles, then the tableau's own, of what each pile may take.
+Its tests are written in Spell, a `to test ...` inside what each one tests, and run from the command line:
+the tests of its card, deck and piles, then the columns' and foundations' own, of what each pile may take.
 
 ```sh
 spell test @spell/examples/Solitaire
@@ -796,9 +818,9 @@ spell test @spell/examples/Solitaire
 
 </details>
 
-<img src="docs/images/examples/Solitaire.png" width="640" alt="Solitaire open in the Spell editor:  its Spell on the left;  on the right the game, dealt, the stock, the discards and four foundations across the top, seven tableaus below">
+<img src="docs/images/examples/Solitaire.png" width="640" alt="Solitaire open in an older Spell editor:  Card.spell on the left;  on the right the game, dealt, the stock, the discards and four foundations across the top, seven columns below">
 
-_Solitaire in the editor, dealt:  its Spell on the left, the game on the right._
+_Solitaire in the editor, dealt:  its Spell on the left, the game on the right, in an older look:  its bar of pills is newer than this picture._
 
 ### Solitario:  the same game, in Spanish
 
