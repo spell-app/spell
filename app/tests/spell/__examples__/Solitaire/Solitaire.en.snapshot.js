@@ -28,8 +28,18 @@ export const words = {
     Deck: {
       shortName: "short name"
     },
+    StockPile: {
+      layout: "layout"
+    },
+    DiscardPile: {
+      layout: "layout"
+    },
     Foundation: {
+      layout: "layout",
       suit: "suit"
+    },
+    Column: {
+      layout: "layout"
     },
     Solitaire: {
       draw: "draw solitaire",

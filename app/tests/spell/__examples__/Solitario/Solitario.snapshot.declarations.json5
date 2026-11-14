@@ -320,16 +320,34 @@
       "defined": "/Solitario.es.spell:6964-7277"
     },
     {
+      "property": "disposición",
+      "of": "PilaDeReserva",
+      "datatype": "text",
+      "defined": "/Solitario.es.spell:7002-7023"
+    },
+    {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
       "defined": "/Solitario.es.spell:7279-7486"
     },
     {
+      "property": "disposición",
+      "of": "PilaDeDescartes",
+      "datatype": "text",
+      "defined": "/Solitario.es.spell:7319-7340"
+    },
+    {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
       "defined": "/Solitario.es.spell:7488-7994"
+    },
+    {
+      "property": "disposición",
+      "of": "Fundación",
+      "datatype": "text",
+      "defined": "/Solitario.es.spell:7520-7541"
     },
     {
       "property": "palo",
@@ -342,6 +360,12 @@
       "superType": "Pila",
       "gender": "feminine",
       "defined": "/Solitario.es.spell:7996-8325"
+    },
+    {
+      "property": "disposición",
+      "of": "Columna",
+      "datatype": "text",
+      "defined": "/Solitario.es.spell:8026-8048"
     },
     {
       "type": "Solitario",
@@ -568,10 +592,14 @@
     242,
     257,
     299,
+    301,
     323,
+    325,
     341,
+    343,
     347,
     370,
+    372,
     389,
     392,
     442,
