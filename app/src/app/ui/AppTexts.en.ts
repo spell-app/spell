@@ -134,6 +134,7 @@ export const APP_TEXTS = {
   deleteFile: "Delete File",
   save: "Save",
   revertChanges: "Discard Changes",
+  discardDraft: "Discard Draft",
   publishDraft: "Publish Draft",
   editingDraft: "Editing a Draft",
   draftTip: "Only you can see these changes so far.\nClick Publish Draft to show them to everyone.",

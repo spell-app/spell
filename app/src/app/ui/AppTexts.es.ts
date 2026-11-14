@@ -140,6 +140,7 @@ const APP_TEXTS_ES: AppTextPack = {
   deleteFile: "Borrar archivo",
   save: "Guardar",
   revertChanges: "Descartar los cambios",
+  discardDraft: "Descartar borrador",
   publishDraft: "Publicar borrador",
   editingDraft: "Editando un borrador",
   draftTip: "Por ahora solo tú ves estos cambios.\nHaz clic en Publicar borrador para mostrárselos a todos.",

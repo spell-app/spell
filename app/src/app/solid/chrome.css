@@ -310,6 +310,8 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
  * (Owen, 2026-11-14, I93:  "one unified thing with a slight inset border")
  * - its track tinted a soft yellow, a yellow hairline sunk inside it:  "draft" at a glance, no loud yellow block
  * - "Editing a Draft" plain words in deep amber;  "Publish Draft" the primary button, a round thumb 2px inside its end
+ * - "Discard Draft" between them, the same round thumb in a neutral grey, 4px from Publish
+ *   (Owen, 2026-11-14, T67:  "a Grey 'Discard Draft' button to the left of Publish Draft")
  */
 .ModeButtons > .PublishDraft {
   --spell-draft-height: 28px;
@@ -347,6 +349,15 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   & > ui-button::part(button) {
     block-size: calc(var(--spell-draft-height) - 2 * var(--spell-draft-inset));
     margin: 0;
+  }
+  & > ui-button.DiscardDraft {
+    --ui-button-background: light-dark(oklch(0.9 0 0), oklch(0.4 0 0));
+    --ui-button-background-hover: light-dark(oklch(0.86 0 0), oklch(0.45 0 0));
+    --ui-button-background-down: light-dark(oklch(0.82 0 0), oklch(0.5 0 0));
+    --ui-button-color: var(--ui-text-color);
+  }
+  & > ui-button.DiscardDraft + ui-button {
+    margin-inline-start: -4px;
   }
 }
 
