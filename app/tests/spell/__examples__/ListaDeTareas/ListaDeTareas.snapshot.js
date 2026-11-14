@@ -512,7 +512,7 @@ export class ListaDeTareas extends App {
     this.tareas.mostrando = "todas"
     this.almacén = "navegador"
     this.guardián = new GuardiánDelNavegador()
-    this.llenarLaAgenda()
+    core.holdWhile(() => this.llenarLaAgenda())
   }
 
   agregarLaTareaInicialTítuloConPrioridadNivel(título, nivel) {

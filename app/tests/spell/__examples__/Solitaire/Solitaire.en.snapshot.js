@@ -65,6 +65,7 @@ export const words = {
       playFromTheStock: "play from the stock",
       resetTheStock: "reset the stock",
       restartTheGame: "restart the game",
+      turnAStockCard: "turn a stock card",
       autoPlay: "auto play",
       cheat: "cheat"
     }
@@ -79,7 +80,7 @@ export const words = {
       { name: "A pile of cards", members: ["pile"] }
     ],
     Solitaire: [
-      { name: "Dealing", members: ["dealTheCards", "playFromTheStock", "resetTheStock", "restartTheGame"] },
+      { name: "Dealing", members: ["dealTheCards", "playFromTheStock", "resetTheStock", "restartTheGame", "turnAStockCard"] },
       { name: "Game Play", members: ["autoPlay", "cheat"] }
     ]
   }
