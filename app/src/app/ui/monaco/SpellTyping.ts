@@ -48,6 +48,10 @@ import type { monaco } from "./monaco"
  * - Enter between a tag's attributes lines the rest up under its first attribute (epic `editor` I142):
  *   `<container columns="7" |spacing="xs">` puts `spacing` under `columns`, tabs then spaces, as it's drawn.
  * - One per editor, made as each editor is (`SpellMonaco.register()`).
+ *   - Several editors can show one file (the Code card's slices show the code editor's):  each hears every edit,
+ *     so only the one typed in helps, at its own caret (epic `editor` I150).
+ *   - Every help writes only on the lines it's working on:  an edit anywhere else is dropped, with an error saying so,
+ *     so a help gone wrong never breaks a file silently (`write()`).
  * - Only Monaco's TYPE (`import type`):  its rules are plain functions of the lines, tested without an editor.
  ****************/
 export class SpellTyping {
@@ -101,8 +105,10 @@ export class SpellTyping {
     const before = model.getLineContent(selection.startLineNumber).slice(0, selection.startColumn - 1)
     const lines = SpellTyping.pastedLines(pasted, before, indentSettingsOf(model))
     if (lines.join("\n") === pasted.join("\n")) return false
+    const pastedOn = { from: selection.startLineNumber, to: selection.endLineNumber }
     editor.pushUndoStop()
-    editor.executeEdits(SPELL_TYPING, [{ range: selection, text: lines.join(model.getEOL()), forceMoveMarkers: true }])
+    const edit = { range: selection, text: lines.join(model.getEOL()), forceMoveMarkers: true }
+    if (!this.write([edit], pastedOn)) return false
     editor.pushUndoStop()
     editor.revealPosition(editor.getPosition()!)
     return true
@@ -174,7 +180,7 @@ export class SpellTyping {
     event.preventDefault()
     event.stopPropagation()
     editor.pushUndoStop()
-    editor.executeEdits(SPELL_TYPING, edits)
+    this.write(edits, { from: line, to: line + under })
     // Tab:  the caret stays where typing goes, at the end of the line's new indent
     if (isTab) editor.setPosition({ lineNumber: line, column: indentOf(model.getLineContent(line)).length + 1 })
     editor.pushUndoStop()
@@ -227,7 +233,7 @@ export class SpellTyping {
     event.preventDefault()
     event.stopPropagation()
     editor.pushUndoStop()
-    editor.executeEdits(SPELL_TYPING, [{ range, text: model.getEOL() + indent }])
+    this.write([{ range, text: model.getEOL() + indent }], { from: line, to: line })
     editor.setPosition({ lineNumber: line + 1, column: indent.length + 1 })
     editor.pushUndoStop()
     editor.revealPosition(editor.getPosition()!)
@@ -276,7 +282,7 @@ export class SpellTyping {
     }
     // HACK: `isAutoWhitespaceEdit` isn't in Monaco's typed API:  it marks the edit as auto-indent, which it trims
     const edit = { range, text: indent, isAutoWhitespaceEdit: true } as monaco.editor.IIdentifiedSingleEditOperation
-    editor.executeEdits(SPELL_TYPING, [edit], [caret as monaco.Selection])
+    if (!this.write([edit], { from: line, to: line }, [caret as monaco.Selection])) return
     this.snapped = { line, before: text }
   }
 
@@ -287,7 +293,7 @@ export class SpellTyping {
     const text = model.getLineContent(line)
     if (text === before || text.trim()) return
     const range = { startLineNumber: line, startColumn: 1, endLineNumber: line, endColumn: text.length + 1 }
-    this.editor.executeEdits(SPELL_TYPING, [{ range, text: before }])
+    this.write([{ range, text: before }], { from: line, to: line })
   }
 
   /** The line the caret was last on. */
@@ -306,6 +312,8 @@ export class SpellTyping {
     // something typed on the line the caret snapped on:  it's the person's now (Backspace alone leaves it ours)
     if (this.snapped && this.editor.getModel()?.getLineContent(this.snapped.line).trim()) this.snapped = undefined
     if (event.isUndoing || event.isRedoing || event.isFlush || event.changes.length !== 1) return
+    // every editor showing the file hears the edit:  only the one typed in helps, at its own caret (I150)
+    if (!this.editor.hasTextFocus()) return
     const change = event.changes[0]!
     const model = this.editor.getModel()
     if (!model || change.rangeLength !== 0 || !/^.$/su.test(change.text)) return
@@ -313,25 +321,36 @@ export class SpellTyping {
     const line = change.range.startLineNumber
     const lines = model.getLinesContent()
     const typedAt = change.range.startColumn - 1
+    // where the caret is once the keystroke is in:  after what was typed
+    const caret = { lineNumber: line, column: typedAt + 2 }
     if (this.languages.indents.includes(languageId)) {
       const indent = SpellTyping.indentToAdd(lines, line - 1, typedAt)
-      if (indent) return this.help(() => this.indent(line, typedAt, indent))
+      if (indent) return this.help(() => this.indent(line, typedAt, indent), caret)
     }
     if (this.languages.quotes.includes(languageId) && change.text === " ") {
       const lang = SP.Language.langOfFile(model.uri.path) ?? "en"
       const tag = SpellTyping.tagBeforeSpace(lines, line - 1, typedAt)
       const rest = tag && LSP.CompletionShapes.spaceAfterTag(SP.Language.for(lang).rootScope, tag)
-      if (rest) return this.help(() => this.finishTag(rest))
-      if (SpellTyping.opensQuotes(lines, line - 1, lang)) this.help(() => this.openQuotes())
+      if (rest) return this.help(() => this.finishTag(rest), caret)
+      if (SpellTyping.opensQuotes(lines, line - 1, lang)) this.help(() => this.openQuotes(), caret)
     }
   }
 
   /**
    * Run `edit` once the keystroke's own edit is done, marked as ours so it isn't taken for typing.
+   * - `caret`:  where the caret must still be, just after what was typed, for the help to write.
+   *   Its snippet and its quotes are written at the caret, so a caret anywhere else would put them there:
+   *   then nothing is written, and it logs why (epic `editor` I150).
    * - NEVER throws:  a help that fails leaves what was typed, and logs why.
    */
-  private help(edit: () => void) {
+  private help(edit: () => void, caret?: monaco.IPosition) {
     queueMicrotask(() => {
+      if (caret && !this.isCaretAt(caret)) {
+        console.error(
+          `SpellTyping:  the caret left line ${caret.lineNumber}, column ${caret.column}, where it typed;  its help isn't written`
+        )
+        return
+      }
       this.isHelping = true
       try {
         edit()
@@ -343,13 +362,44 @@ export class SpellTyping {
     })
   }
 
+  /** Is the editor's one caret at `caret`, nothing selected? */
+  private isCaretAt(caret: monaco.IPosition): boolean {
+    const selections = this.editor.getSelections() ?? []
+    const [selection] = selections
+    if (selections.length !== 1 || !selection?.isEmpty()) return false
+    return selection.positionLineNumber === caret.lineNumber && selection.positionColumn === caret.column
+  }
+
+  /**
+   * Write `edits` as a help, each inside the lines it's working on, `from` to `to` (1-based);
+   * returns whether it did (epic `editor` I150).
+   * - An edit outside them is a help gone wrong:  nothing is written, and it logs which, so a file is never broken
+   *   silently.  The `></column>` written four times at the top of Solitaire's file was one.
+   */
+  private write(
+    edits: monaco.editor.IIdentifiedSingleEditOperation[],
+    { from, to }: { from: number; to: number },
+    caret?: monaco.Selection[]
+  ): boolean {
+    const outside = edits.find(({ range }) => range.startLineNumber < from || range.endLineNumber > to)
+    if (outside) {
+      console.error(
+        `SpellTyping:  a help's edit at line ${outside.range.startLineNumber} is outside lines ${from}-${to}, the ones it's working on;  not written`,
+        outside
+      )
+      return false
+    }
+    this.editor.executeEdits(SPELL_TYPING, edits, caret)
+    return true
+  }
+
   /**
    * Write `indent` on `line` before what was typed at `column` (0-based):
    * the same undo step as the letter, so one undo takes back both.
    */
   private indent(line: number, column: number, indent: string) {
     const range = { startLineNumber: line, startColumn: column + 1, endLineNumber: line, endColumn: column + 1 }
-    this.editor.executeEdits(SPELL_TYPING, [{ range, text: indent }])
+    this.write([{ range, text: indent }], { from: line, to: line })
   }
 
   /**
@@ -370,7 +420,7 @@ export class SpellTyping {
     const caret = editor.getPosition()!
     if (model.getLineContent(line).slice(caret.column - 1) !== '"') {
       const range = { startLineNumber: line, startColumn: caret.column, endLineNumber: line, endColumn: caret.column }
-      editor.executeEdits(SPELL_TYPING, [{ range, text: '"' }])
+      this.write([{ range, text: '"' }], { from: line, to: line })
       editor.setPosition(caret)
     }
     editor.pushUndoStop()

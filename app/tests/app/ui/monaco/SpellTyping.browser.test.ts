@@ -31,6 +31,8 @@ describe("typing Spell in a real Monaco editor", () => {
     model.updateOptions({ insertSpaces: false, tabSize: 4 })
     editor = monaco.editor.create(host, { model, autoIndent: "full" })
     editor.setPosition({ lineNumber: line, column })
+    // typed in:  only the editor that has the keyboard helps (I150)
+    editor.focus()
     return editor
   }
 
@@ -237,6 +239,7 @@ describe("typing Spell in a real Monaco editor", () => {
       const model = monaco.editor.createModel(`<acción`, SpellMonaco.LANGUAGE, uri)
       editor = monaco.editor.create(host, { model })
       editor.setPosition({ lineNumber: 1, column: 8 })
+      editor.focus()
       space()
       await Promise.resolve()
       expect(withCaret()).toBe(`<acción "|" />`)
@@ -270,6 +273,62 @@ describe("typing Spell in a real Monaco editor", () => {
         await Promise.resolve()
         expect(withCaret()).toBe(after)
         editor!.dispose()
+      }
+    })
+  })
+
+  describe("two editors on one file (I150)", () => {
+    /** The other editor, on the same model:  as the Code card's slices are, kept or showing. */
+    let other: monaco.editor.IStandaloneCodeEditor | undefined
+
+    afterEach(() => {
+      other?.dispose()
+      other = undefined
+    })
+
+    /** `editorOf()`'s editor, typed in, and another on its model, its caret at the file's start. */
+    function twoEditorsOf(lines: string[], line: number, column: number) {
+      const code = editorOf(lines, line, column)
+      const host = document.createElement("div")
+      host.style.cssText = "width: 600px; height: 300px"
+      document.body.append(host)
+      other = monaco.editor.create(host, { model: code.getModel() })
+      other.setPosition({ lineNumber: 1, column: 1 })
+      code.focus()
+      return code
+    }
+
+    test("a tag's rest is written once, at the caret typed at;  never at the other editor's caret", async () => {
+      const code = twoEditorsOf([`a "game" is an app`, `\tto draw it`, `\t\t<segment`], 3, 11)
+      code.trigger("keyboard", "type", { text: " " })
+      await Promise.resolve()
+      expect(code.getValue()).toBe([`a "game" is an app`, `\tto draw it`, `\t\t<segment ></segment>`].join("\n"))
+    })
+
+    test("a name's quotes, and a blank line's indent, once each", async () => {
+      const code = twoEditorsOf([`a "card" is a view`, ``, `\tits "rank" is 1`], 2, 1)
+      code.trigger("keyboard", "type", { text: "g" })
+      await Promise.resolve()
+      code.trigger("keyboard", "type", { text: "roup" })
+      code.trigger("keyboard", "type", { text: " " })
+      await Promise.resolve()
+      expect(code.getValue()).toBe([`a "card" is a view`, `\tgroup ""`, `\tits "rank" is 1`].join("\n"))
+    })
+
+    test("a help whose caret has moved on by the time it writes is dropped, and says so", async () => {
+      const errors: unknown[] = []
+      const consoleError = console.error
+      console.error = (...args: unknown[]) => errors.push(args[0])
+      try {
+        const code = editorOf([`a "game" is an app`, `\tto draw it`, `\t\t<segment`], 3, 11)
+        code.trigger("keyboard", "type", { text: " " })
+        // before the help runs:  the caret goes to the file's start, where its snippet would have landed
+        code.setPosition({ lineNumber: 1, column: 1 })
+        await Promise.resolve()
+        expect(code.getValue()).toBe([`a "game" is an app`, `\tto draw it`, `\t\t<segment `].join("\n"))
+        expect(String(errors[0])).toMatch(/SpellTyping:  the caret left line 3, column 12/)
+      } finally {
+        console.error = consoleError
       }
     })
   })
