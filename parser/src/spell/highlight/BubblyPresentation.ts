@@ -65,7 +65,8 @@ export class BubblyPresentation {
       typedAfterLead: true,
       params: METHOD_PARAMS
     },
-    draw_it: { head: "action", inputs: ["member_words", "draw_method"], typedAfterLead: true },
+    // a drawing's:  its verb and the part it draws bold, `to <draw> its <placeholder>` (epic `language` I99)
+    draw_it: { head: "action", namesWhatItDraws: true },
     on: { head: "action" },
     drag_handler: { head: "action" },
     // what runs as a thing is made:  `when creating` Spell's words, its type a reference, `when creating a deck`

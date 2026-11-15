@@ -103,7 +103,6 @@ describe("SP.BubblyLayout", () => {
       '"is a face card"',
       '"Drawing"',
       '"picture"',
-      "draw its front",
       '"blue"'
     ])
     expect(piecesOf(drawing, "choice")).toEqual(["ace", "2 ... 10", "jack", "queen", "king"])
@@ -127,7 +126,7 @@ describe("SP.BubblyLayout", () => {
     ].join("\n")
     expect(heads(deck)).toEqual([
       ["words:to ", "input:test a new deck"],
-      ["words:to ", "input:draw it"],
+      ["words:to ", "reference:draw", "words: it"],
       [
         "words:to ",
         "input:move",
@@ -238,6 +237,54 @@ describe("SP.BubblyLayout", () => {
       references: ["fundación", "una nueva fundación", "palo"],
       underlines: ["value:la fundación", "value:una nueva fundación con palo = corazones"]
     })
+  })
+
+  it("draws a drawing's head with its verb and the part it draws bold, its pronoun plain, no pill (epic `language` I99)", () => {
+    const heads = (text: string, parser?: SP.SpellParser) =>
+      blocksOf(SP.BubblyLayout.of(text, parser).nodes)
+        .filter((block) => block.partOfSpeech === "action")
+        .map((block) =>
+          block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`).join(" | ")
+        )
+    const english = [
+      'a "card" is a two sided view',
+      "\tto draw it",
+      "\t\t<text>x</text>",
+      "\tto draw its front",
+      "\t\t<text>x</text>",
+      '\tto "draw its back"',
+      "\t\t<text>x</text>",
+      'a "pile" is a viewable list of cards',
+      "\tto draw its placeholder",
+      "\t\t<text>x</text>",
+      "\tto draw each item",
+      "\t\t<text>x</text>"
+    ].join("\n")
+    expect(heads(english)).toEqual([
+      "words:to  | reference:draw | words: it",
+      "words:to  | reference:draw | words: its  | reference:front",
+      'words:to  | input:"draw its back"',
+      "words:to  | reference:draw | words: its  | reference:placeholder",
+      "words:to  | reference:draw | words: each  | reference:item"
+    ])
+    const spanish = [
+      'una "carta" es una vista de dos caras',
+      "\tpara dibujarla",
+      "\t\t<texto>x</texto>",
+      "\tpara dibujar su frente",
+      "\t\t<texto>x</texto>",
+      'una "pila" es una lista visible de cartas',
+      "\tpara dibujar su marcador",
+      "\t\t<texto>x</texto>",
+      "\tpara dibujar cada elemento",
+      "\t\t<texto>x</texto>"
+    ].join("\n")
+    expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
+      "words:para  | reference:dibujarla",
+      "words:para  | reference:dibujar | words: su  | reference:frente",
+      "words:para  | reference:dibujar | words: su  | reference:marcador",
+      "words:para  | reference:dibujar | words: cada  | reference:elemento"
+    ])
   })
 
   it("draws a type's creation hook as an action:  `when creating` Spell's words, its type bold", () => {

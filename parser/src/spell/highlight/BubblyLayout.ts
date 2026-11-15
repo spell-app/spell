@@ -472,10 +472,44 @@ export class BubblyLayout {
           this.abilityWord.test(this.text.slice(span.start, span.end))
         )
           this.paintRange(span.start, span.end, "reference")
+    // a drawing's head, `to draw its placeholder`:  what it draws a name, no pill (epic `language` I99)
+    if (this.paintDrawing(head)) return
     for (const input of descendantsNamed(statement, row.inputs)) this.paintRange(input.start!, input.end!, "input")
     if (row.typedAfterLead) this.paintTyped(head)
     for (const list of descendantsNamed(statement, row.choices))
       for (const item of childrenOf(list)) this.paintChoice(item.start!, item.end!)
+  }
+
+  /**
+   * A drawing's head (`namesWhatItDraws`), its words Spell's own, so names, not a pill:
+   * its verb and the part it draws bold, a pronoun or a word between them plain;  `true` if it was one.
+   * - `to <draw> it`, `to <draw> its <front>`, `to <draw> its <placeholder>`, `to <draw> each <item>`;
+   *   `para <dibujarla>`, `para <dibujar> su <marcador>`
+   * - `to draw it` too, though English leaves it to `to_do_something`:  its method is the drawing's, `draw()`
+   * - Quoted (`to "draw its back"`), it stays one quoted pill, as any quoted name with no blanks.
+   */
+  private paintDrawing({ statement, row }: Head): boolean {
+    const groups = statement.groups as { phrase?: P.Match; slot?: P.Match; signature?: P.Match }
+    const signature = groups.signature?.data as { methodName?: string; args?: unknown[] } | undefined
+    const drawsIt =
+      signature?.methodName === DRAW_METHOD && !signature.args?.length && this.text[groups.signature!.start!] !== '"'
+    if (!row.namesWhatItDraws && !drawsIt) return false
+    const words = groups.phrase ?? groups.slot ?? (drawsIt ? groups.signature : undefined)
+    if (words?.start === undefined || words.end === undefined) return !!row.namesWhatItDraws
+    const lead = /^\S+\s*/.exec(this.text.slice(statement.start!, words.end))?.[0].length ?? 0
+    const from = groups.slot ? statement.start! + lead : words.start
+    const found = [...this.text.slice(from, words.end).matchAll(/\S+/g)].map((word) => ({
+      start: from + word.index,
+      end: from + word.index + word[0].length,
+      word: word[0]
+    }))
+    const [verb] = found
+    const last = found.at(-1)
+    if (verb) this.paintRange(verb.start, verb.end, "reference")
+    if (groups.slot) this.paintRange(groups.slot.start!, groups.slot.end!, "reference")
+    else if (last && last !== verb && !this.pronouns.has(last.word.toLowerCase()))
+      this.paintRange(last.start, last.end, "reference")
+    return true
   }
 
   /**
@@ -689,6 +723,9 @@ const KEYWORD = "keyword"
 
 /** The rule of a number written in, `300` in `pause for 300 msec`. */
 const NUMBER_RULE = "number"
+
+/** The method a drawing's head makes, `to draw it` => `draw()`, in every language. */
+const DRAW_METHOD = "draw"
 
 /** Operators drawn faint. */
 const MARKS = new Set([",", ":"])

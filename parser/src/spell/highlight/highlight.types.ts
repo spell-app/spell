@@ -165,6 +165,8 @@ export type BubblyRulePresentation = {
    */
   typedAfterLead?: boolean
   /** its child rules that are the parameters it introduces, `(a card)`, with the brackets round them */
+  /** a drawing's head:  its verb and the part it draws bold, Spell's words, no pill (`to <draw> its <front>`) */
+  namesWhatItDraws?: boolean
   params?: readonly string[]
   /** its child rules whose items are each a pill of their own, bold (`identifier_list`:  `is one of ace, jack`) */
   choices?: readonly string[]
