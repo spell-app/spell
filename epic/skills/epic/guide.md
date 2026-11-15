@@ -65,7 +65,8 @@ An agent that can start background agents keeps its own session free to answer t
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
      (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
      taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited
-     on them -- the epic skill's "The session answers;  agents build")
+     on them -- the epic skill's "The session answers;  agents build";  a request from another session:  its words
+     and its Context both, so it never sits at "What it says on the tin")
    - a choice made without the person:  `epic add <epic>#J "title" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`

@@ -511,6 +511,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       T78;  Owen, 2026-11-15:  "you should start the issue and show it appropriately"):
       `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>`, after `epic agents add`
       - their words become its body, quoted;  an Underway card names the agent;  the spinner goes on
+      - a request from another session (`/send`, "12. Request"):  `--start` gets its words AND its Context, so the
+        item never sits at "What it says on the tin" (epic `epic-engine` I292:  I287, filed from r70 with no body)
       - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
   - passes their redirects on to the agent doing that work (`SendMessage`)
   - relays what an agent found, its first line bold, by itself:  `**Agent <full name> came back with:**`
@@ -527,6 +529,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
     - another agent has one:  `epic agents set <name> --status "blocked on <other>"`, and work on something else
       meanwhile, or come back with that
   - commit only its own files, by path, never `git add -A`
+  - never mark ITSELF done (`epic agents done`):  the session does, when its notice arrives;  done early, `epic agents
+    wait` stopped while it still worked (epic `epic-engine` I288)
   - merge with `epic worktree merge-main --as <name>`:  it never moves aside a file another running agent claims
   - run a FULL test run in its turn, one at a time on the machine:
     `epic turns run test -- yarn test` (and `yarn review`, `yarn kit:review`);  a single test file needs no turn

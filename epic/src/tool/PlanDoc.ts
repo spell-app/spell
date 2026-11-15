@@ -1598,14 +1598,35 @@ export class PlanDoc extends PlanReader {
    * - closed:  reopened;  `calm` and an earlier `fixed` go, so pressing it again on a fix he doesn't like turns it red
    * - his note and picture kept on it, his words;  a Noted card says go ahead
    * - `did`:  what the agent does next (`doThisSteps()`)
+   * - EXCEPT one fixed AFTER he marked it (`fixedSince()`;  epic `epic-engine` I292):  he pressed Do this while it was
+   *   red, and the fix landed before the session took the mark;  it stays fixed, its Fixed card on top, nothing to do
+   *   - Owen, 2026-11-15, on I287 showing only "Noted · Go ahead:  fix this here" after its fix merged:
+   *     "It's not clear if you are working on this or not"
    */
   private doThis(item: Element, { note, at, shot }: Pick<PlanMark, "note" | "at" | "shot">): MarkResult {
+    if (this.fixedSince(item, at)) {
+      if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "do this", at, shot })
+      return { applied: true, did: `already fixed since you marked it:  nothing to do, still waiting for your review` }
+    }
     if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
     if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "do this", at, shot })
     Markup.set<"epic-item">(item, { urgent: true, calm: undefined, fixed: undefined })
     this.review(item.id)
     this.noteStatus(item.id, PlanMarkup.text("Go ahead:  fix this here"))
     return { applied: true, did: this.doThisSteps(item) }
+  }
+
+  /**
+   * Whether `item` was fixed or closed AFTER Owen's mark made at `at` (epic `epic-engine` I292):  its Do this then
+   * asked for what's done already.
+   * - fixed for his review (`fixed`) or closed, and its change stamp (`changed`, set by the fix) later than the mark
+   * - a mark with no time, or a fix from before it (he's sending a fix back):  `false`
+   */
+  private fixedSince(item: Element, at: string | undefined): boolean {
+    const finished = item.hasAttribute("fixed") || CLOSED.has(item.getAttribute("status") ?? "")
+    const changed = Date.parse(item.getAttribute("changed") ?? "")
+    const marked = Date.parse(at ?? "")
+    return finished && Number.isFinite(changed) && Number.isFinite(marked) && changed > marked
   }
 
   /** Owen's accept of the fix on `item` (orange):  closed, reviewed;  returns `inbox apply`'s line. */
