@@ -124,6 +124,15 @@ describe("MarkupMarks", () => {
     expect(marked).toEqual(["2:<", "2:/", "2:>", "4:<", "4:/", "4:>"])
   })
 
+  test("an attribute's room is the text's own space:  none drawn before its name, so a missing one shows and one typed isn't doubled (Owen)", () => {
+    for (const tag of ['<toolbar class="GameBar" appearance="pills">', '<toolbar class="GameBar"appearance="pills">']) {
+      const marks = MarkupMarks.within(tag, 0, tag.length, [])
+      const names = marks.marks.filter((mark) => mark.options.inlineClassName?.includes("bubbly-attribute-name"))
+      expect(names).toHaveLength(2)
+      for (const name of names) expect(name.options.before).toBeUndefined()
+    }
+  })
+
   test('no space after a tag\'s quoted word:  `<deck "deck"hidden />` marked as `<deck "deck" hidden/>` is (epic `language` T125)', () => {
     const markedIn = (tag: string) => {
       const spell = `to draw it\n\t${tag}`
@@ -268,7 +277,7 @@ describe("MarkupMarks", () => {
     expect(piecesOf("bubbly-tag-hidden")).toEqual([">", "<", "div"])
     expect(piecesOf("bubbly-slash")).toEqual(["/", "/"])
     const slash = marks.marks.find((mark) => mark.options.inlineClassName?.includes("bubbly-slash"))!
-    expect(slash.options.before?.inlineClassName).toContain("bubbly-attribute-spacer")
+    expect(slash.options.before?.inlineClassName).toContain("bubbly-closing-slash-spacer")
     // something between them, a space even:  two pills, as before
     expect(BubblyMarkup.write(text)).toContain("bubbly-tag-self-closed")
     expect(BubblyMarkup.write(text).match(/bubbly-tag-self-closed/g)).toHaveLength(1)

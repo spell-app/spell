@@ -282,9 +282,9 @@ export class MarkupMarks extends TextMarks {
     for (const attribute of tag.attributes) {
       if (attribute.name) {
         const nameEnd = attribute.nameStart + attribute.name.length
-        // one that starts its line (a tall start tag's):  its indent is its room, as on the page
-        const spacers: Spacers = this.startsLine(attribute.nameStart) ? {} : { before: spacer("attribute", "before") }
-        this.mark(attribute.nameStart, nameEnd, ATTRIBUTE_NAME, spacers)
+        // its room is the text's own space (or a tall start tag's indent):  none drawn, so a missing space shows,
+        // and one typed isn't doubled (Owen)
+        this.mark(attribute.nameStart, nameEnd, ATTRIBUTE_NAME)
       }
       if (attribute.equalsAt !== undefined && attribute.equalsAt >= 0)
         this.mark(attribute.equalsAt, attribute.equalsAt + 1, EQUALS, { before: spacer("equals", "before") })
@@ -323,8 +323,9 @@ export class MarkupMarks extends TextMarks {
     this.tags.push({ start, end })
     const declares = isDeclaring ? ` ${DECLARES}` : ""
     this.mark(start, start + 1, HIDDEN)
-    // an attribute's room before its `/`, as on the page;  none where its start tag's `>` starts its line
-    const spacers: Spacers = this.startsLine(start - 1) ? {} : { before: spacer("attribute", "before") }
+    // room before its `/`, as on the page:  `<div class="x"></div>` has no space there to give it;
+    // none where its start tag's `>` starts its line
+    const spacers: Spacers = this.startsLine(start - 1) ? {} : { before: spacer("closing-slash", "before") }
     this.mark(start + 1, start + 2, `${SLASH} ${CLOSING_SLASH}${declares}`, spacers)
     this.mark(start + 2, end - 1, HIDDEN)
     this.mark(end - 1, end, ANGLE_CLOSE + declares)
