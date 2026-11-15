@@ -433,9 +433,14 @@ expressionsEs.addRule(IsInAType, {
   ]
 })
 
+// `está en` toma UNA lista, nunca una dicha en línea:  `está en mi-lista y es 1` son dos condiciones (epic `language` J185)
+expressionsEs.addRule(IsIn, {
+  syntax: "{operator:is_or_is_not} en (expression:{operand})"
+})
+
 expressionsEs.addRule(IsIn, {
   syntax:
-    "{operator:is_or_is_not} (en|uno de|una de|o bien uno de|o bien una de|o bien) (expression:{operand}|{identifier_list})",
+    "{operator:is_or_is_not} (uno de|una de|o bien uno de|o bien una de|o bien) (expression:{operand}|{identifier_list})",
   tests: [
     {
       compileAs: "expression",
@@ -456,7 +461,9 @@ expressionsEs.addRule(IsIn, {
         ["thing es o bien red o green", 'core.includes([red, "green"], thing)'],
         ["thing es o bien uno de red o green", 'core.includes([red, "green"], thing)'],
         ["thing no es o bien red o green", '!core.includes([red, "green"], thing)'],
-        ["thing no es o bien uno de red o green", '!core.includes([red, "green"], thing)']
+        ["thing no es o bien uno de red o green", '!core.includes([red, "green"], thing)'],
+        // `está en` toma una lista:  la `y` empieza otra condición (epic `language` J185)
+        ["thing está en theList y thing es red", "(core.includes(theList, thing) && thing === red)"]
       ]
     }
   ]
