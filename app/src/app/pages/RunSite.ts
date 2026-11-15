@@ -1,15 +1,18 @@
 import { waitUntil } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { SiteHost } from "spell/parser/core/core.types"
-import { editor } from "spell/app/app/editor"
+import { editor, type RunningSitePage } from "spell/app/app/editor"
 import { navigate } from "./navigation"
 import { SiteWrites } from "./SiteWrites"
 
 /****************
  * ### `RunSite`
  * Where a running SITE's address lives in the editor's Run (epic `mockup` P2):  the editor's own URL.
- * - `/run/@spell/examples/StarWarsSite/films/4` shows the site's `/films/4`:  the part after the project, which
- *   the editor's addresses keep for a page of the running app (`SP.SpellUrls.withoutPage()`).
+ * - A page alone in its own file is named by that FILE (epic `mockup` I15):
+ *   `/run/owen@spell/harbor-new/home.spell` shows harbor-new's Home, at the site's `/`.
+ * - Any other page by its ADDRESS, the part after the project:  `/run/@spell/examples/StarWarsSite/films/4` shows the
+ *   site's `/films/4` (a page with a value to fill, or one declared in the site file;  `SP.SpellUrls.withoutPage()`).
+ *   - An address whose page has a file of its own still works:  the URL turns to the file's, in place (`followUrl()`).
  * - A page going to another changes the URL (`go()`), so the browser's back and forward work;
  *   the route hears every change of the URL, and tells the site (`heard()`, from `followRoute()`).
  * - While designing, a site's not found page offers to make the page:
@@ -21,11 +24,23 @@ export class RunSite implements SiteHost {
   /** The site's address the URL names now:  `/` for none. */
   private here = "/"
 
+  /** A file the URL named before any site of its project ran:  its page's address is looked up when one does. */
+  private hereFile?: string
+
   /** What the running site does when the URL changes by itself:  the last run's, replaced by each run. */
   private showAddress?: (address: string) => void
 
-  /** The address to show now, from the site's root:  `/films/4`. */
+  /**
+   * The address to show now, from the site's root:  `/films/4`.
+   * - A site starting asks it:  a file the URL named is looked up now, and the URL names the page its own way
+   *   (`followUrl()`).
+   */
   address(): string {
+    if (this.hereFile && editor.isRunningSite) {
+      this.here = this.addressOfFile(this.hereFile) ?? this.here
+      this.hereFile = undefined
+    }
+    this.followUrl()
     return this.here
   }
 
@@ -33,9 +48,71 @@ export class RunSite implements SiteHost {
   go(address: string): void {
     if (address === this.here) return
     this.here = address
+    this.hereFile = undefined
+    const url = this.urlFor(address)
+    if (url) navigate(url)
+  }
+
+  /**
+   * The editor's Run URL of the running site's `address`:  its page's file when it's alone in one, else the address.
+   * - `/` => `/run/owen@spell/harbor-new/home.spell`;  `/films/4` => `/run/@spell/examples/StarWarsSite/films/4`.
+   * - `undefined` with no project.
+   */
+  urlFor(address: string): string | undefined {
     const { project } = editor
-    if (!project) return
-    navigate(RunSite.runUrlFor(project.path, address))
+    if (!project) return undefined
+    const file = this.fileAt(address)
+    return file ? new SP.SpellLocation(file.path).runnerUrl : RunSite.runUrlFor(project.path, address)
+  }
+
+  /**
+   * The file a Run URL names the running site's page at `address` by:  the one file holding that page by itself.
+   * - `undefined` for a page with a value to fill (`/films/:film`), one declared in the site file, or one sharing its
+   *   file with another page:  those keep their address.
+   */
+  fileAt(address: string): SP.AnySpellFile | undefined {
+    const page = editor.sitePageAt(address)
+    if (!page || page.params?.length) return undefined
+    const file = RunSite.fileHolding(page)
+    return file && this.addressOfFile(file.path) === page.address ? file : undefined
+  }
+
+  /**
+   * The running site's address of the page file `path` holds:  the first page it declares, with no value to fill.
+   * - `undefined` for a file holding none, e.g. the site file, or when no site of the project runs.
+   */
+  addressOfFile(path: string): string | undefined {
+    const file = editor.project?.getFile(path)
+    if (!file) return undefined
+    return editor.sitePages().find((page) => !page.params?.length && RunSite.fileHolding(page) === file)?.address
+  }
+
+  /**
+   * The file of `project` (default:  the editor's) declaring the site's `page`, other than the site file:
+   * - a page alone in its file (`"Home" is a page`), by its class
+   * - else the file declaring it by its name (`Systems is a page`, whose class is `System`)
+   * - The ONE lookup of a site page's file:  Run's URL (`fileAt()`), Run's Edit and the notebook
+   *   (`editor.pageFileAt()`;  epic `mockup` I16).
+   */
+  static fileHolding(page: RunningSitePage, project = editor.project): SP.AnySpellFile | undefined {
+    const file = project?.fileForPage(page.page) ?? SiteWrites.declaringFile(page.name, project)
+    return file && file !== SiteWrites.siteFile(project) ? file : undefined
+  }
+
+  /**
+   * Make the URL name the page shown the way `urlFor()` does, replacing it in the history:
+   * an address whose page has a file of its own, or a file that isn't the page shown (the site file, by Run).
+   * - Once the route is done with the URL it heard, so a change of URL isn't made inside it.
+   * - Only in Run, with the project's site running.
+   */
+  private followUrl(): void {
+    queueMicrotask(() => {
+      if (editor.projectPage !== "runner" || !editor.isRunningSite || this.hereFile) return
+      const url = this.urlFor(this.here)
+      const { pathname, search, hash } = globalThis.location
+      if (!url || url === pathname || url === safelyDecoded(pathname)) return
+      navigate(`${url}${search}${hash}`, { replace: true })
+    })
   }
 
   /**
@@ -69,12 +146,24 @@ export class RunSite implements SiteHost {
 
   /**
    * The URL now names `address` (back, forward, typed in):  the running site shows it.
-   * - The same address as now does nothing:  it's the URL following the site's own `go()`.
+   * - `file`:  the file the URL names instead, `/run/owen@spell/harbor-new/home.spell`:  the address of the page it
+   *   holds;  a file holding none (the site file) leaves the page shown as it is.
+   *   - Before the project's site runs, it's looked up when the site asks (`address()`).
+   * - The same address as now shows nothing new:  it's the URL following the site's own `go()`.
    */
-  heard(address: string): void {
-    if (address === this.here) return
-    this.here = address
-    this.showAddress?.(address)
+  heard(address: string, file?: string): void {
+    // a file of a project whose site isn't running yet, e.g. one just picked
+    if (file && !(editor.isRunningSite && editor.project?.getFile(file))) {
+      this.hereFile = file
+      this.here = "/"
+      return
+    }
+    this.hereFile = undefined
+    const next = file ? (this.addressOfFile(file) ?? this.here) : address
+    this.followUrl()
+    if (next === this.here) return
+    this.here = next
+    this.showAddress?.(next)
   }
 
   /**
