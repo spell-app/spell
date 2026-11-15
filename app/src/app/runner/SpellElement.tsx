@@ -1195,7 +1195,15 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const key = E.camelCase(property.spec.name)
     if (this.agreeing.has(key)) return
     this.agreeing.set(key, property)
-    // the thing this property last agreed with:  a new one may take the page's attributes first
+    // a new thing takes the attribute the page gave the tag, e.g. `<card-image direction=down />`'s:
+    // an effect of its own, which hears only a new thing, so the value it writes can't run it again (epic `language` I103)
+    createEffect(
+      () => this.currentThing,
+      (thing) => {
+        if (thing && this.pageWrote(property)) this.writeThing(property, thing, this.elementValueOf(property))
+      }
+    )
+    // the thing this property last agreed with:  a new one the page wrote an attribute for took it, above
     let agreedWith: object | undefined
     createEffect(
       () => {
@@ -1206,8 +1214,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
         if (!thing) return
         const isNew = thing !== agreedWith
         agreedWith = thing
-        if (isNew && this.pageWrote(property)) this.writeThing(property, thing, this.elementValueOf(property))
-        else this.writeElement(property, thing)
+        if (!(isNew && this.pageWrote(property))) this.writeElement(property, thing)
       }
     )
   }
