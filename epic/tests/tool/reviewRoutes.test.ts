@@ -564,9 +564,10 @@ describe("start, and waking the epic", () => {
       const got = await post("now", { page: PLAN_URL, id: "q8", action: "details" })
       expect(got.body.wake).toMatchObject({
         state: "opened",
-        message: "Opened a new session in big's window, /epic review big typed in:  press Enter there."
+        message: "Opened a new session in big's window:  it takes your Send by itself, nothing to press."
       })
-      expect(asked).toEqual([["open-session", { prompt: "/epic review big" }]])
+      // nothing typed:  its start's poller wakes it, and it's titled 🚧 big as it starts (I286)
+      expect(asked).toEqual([["open-session", {}]])
     } finally {
       rmSync(worktree, { recursive: true, force: true })
     }

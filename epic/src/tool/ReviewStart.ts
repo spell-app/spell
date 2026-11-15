@@ -25,11 +25,14 @@
  *      - its inbox poller runs:  nothing to do, the poller hears the Send and wakes it (`told`;  I144)
  *      - mid-turn, no poller yet:  the same (`told`), the poller its turn's end starts hears it (I219)
  *      - else the command typed into its tab, as `start()` does;  its tab open already, nothing (`tab-open`)
- *   2. the epic's worktree (`.claude/worktrees/<epic>`) has a window open:  a NEW session there, the command typed in,
- *      through that window's bridge
+ *   - "titled for the epic":  or working in its worktree, not titled for another (`sessionsOf()`, I286);  ANY of
+ *     them that will hear (its poller runs, or mid-turn) is told, so a busy session never gets a second one beside it
+ *   2. the epic's worktree (`.claude/worktrees/<epic>`) has a window open:  a NEW session there, through that
+ *      window's bridge, NOTHING typed (I286):  its start's poller hears the Send and wakes it, and the session-start
+ *      hook titles it `🚧 <epic>` (`WakeMarks`)
  *      - straight to the bridge, not through `window launch`:  launch rewrote an open window's file and colours
  *        before epic `epic-eject` P10 (J48);  now it leaves an open window alone, so either way would do
- *   3. a worktree, its window closed:  `epic window launch <epic> --prompt ...`, as `/send` opens one (P4)
+ *   3. a worktree, its window closed:  `epic window launch <epic>`, as `/send` opens one (P4), nothing typed, as 2
  *   4. no worktree (an epic run in the main checkout, a future epic, a goal):  a new session in a main window
  *   5. no VS Code window at all:  nothing;  the page gives the command to type
  * - Never:  a new worktree;  two wakes for one epic (the inbox's `woken`, `ReviewInbox.claimWake()`);
@@ -51,8 +54,9 @@ import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { AirplaneMode } from "spell/epic/tools/AirplaneMode"
 
-import { RunningEpics, sessionsTitledFor, type TitledSession } from "spell/epic/list/RunningEpics"
+import { RunningEpics, titleNames, type TitledSession } from "spell/epic/list/RunningEpics"
 import { listenerOf } from "./InboxPoller.mjs"
+import { WakeMarks } from "./WakeMarks"
 import { ReviewInbox, type InboxWoken, type PageInbox, type WakeClaim, type WokenState } from "./ReviewInbox"
 
 /** The window script beside this code, spell-epic's `src/window.mjs`:  `epic window launch` (`launch()`). */
@@ -60,6 +64,9 @@ const WINDOW_SCRIPT = fileURLToPath(new URL("../window.mjs", import.meta.url))
 
 /** When a mid-turn session's poller wakes it (`willHear()`, I219):  the end of a sentence. */
 const WHEN_TURN_ENDS = "once its turn ends, nothing typed."
+
+/** A title of the epic tool's own, its icon first (`🚧 seo`, `✅ seo`):  a title some epic's. */
+const TITLE_ICON = /^[^\p{L}\p{N}\s]+\s*\S/u
 
 /** How long a window's bridge gets to answer, in ms. */
 const BRIDGE_TIMEOUT = 5000
@@ -126,6 +133,8 @@ export type ReviewStartOptions = {
   airplane?: () => boolean
   /** the inbox poller running for session process `pid`, else `undefined`;  default `listenerOf()` */
   pollerOf?: (pid: number) => number | undefined
+  /** mark a session being started for epic `name` (`WakeMarks.mark()`);  default the real mark */
+  markWake?: (name: string) => void
 }
 
 /** A window bridge's answer to `open-session`:  `typed` false when the session's tab was open (an older bridge:  none). */
@@ -161,7 +170,7 @@ export class ReviewStart {
    */
   async start(epic: string, planDoc?: string): Promise<StartResult> {
     const command = ReviewStart.commandFor(epic)
-    const found = sessionsTitledFor(epic, this.sessions())
+    const found = this.sessionsOf(epic)
     const titles = found.map((session) => session.title)
     if (!found.length) {
       return {
@@ -259,7 +268,14 @@ export class ReviewStart {
       message
     })
     try {
-      const found = sessionsTitledFor(epic, this.sessions())
+      const found = this.sessionsOf(epic)
+      // ANY of the epic's sessions that will hear it takes the work:  never a second one beside it (I286)
+      const hearing = found.find((session) => this.willHear(session))
+      if (hearing) {
+        const did = `told ${hearing.title} through its inbox poller`
+        const when = this.pollerOf(hearing.pid) ? "in a few seconds, nothing typed." : WHEN_TURN_ENDS
+        return result("told", did, `${sentence(did)}:  it wakes ${when}`, [hearing.title])
+      }
       if (found.length > 1)
         return {
           ...ReviewStart.several(
@@ -270,11 +286,6 @@ export class ReviewStart {
         }
       const session = found[0]
       if (session) {
-        if (this.willHear(session)) {
-          const did = `told ${session.title} through its inbox poller`
-          const when = this.pollerOf(session.pid) ? "in a few seconds, nothing typed." : WHEN_TURN_ENDS
-          return result("told", did, `${sentence(did)}:  it wakes ${when}`, [session.title])
-        }
         const window = this.windowOf(session.pid)
         if (!window) return { ...ReviewStart.noWindow(session, command), did: "" }
         const reply = await ReviewStart.request(window, "open-session", {
@@ -289,14 +300,17 @@ export class ReviewStart {
       }
       if (existsSync(this.worktreeOf(epic))) {
         const window = this.worktreeWindowOf(epic)
+        // nothing typed (I286):  its inbox poller, which the session's start runs, hears the Send and wakes it;
+        // the mark titles it `🚧 <epic>` as it starts (`WakeMarks`, the `woken` hook)
+        this.markWake(epic)
         if (window) {
-          await ReviewStart.request(window, "open-session", { prompt: command })
-          const did = `opened a new session in ${epic}'s window, ${command} typed in`
-          return result("opened", did, `${sentence(did)}:  press Enter there.`)
+          await ReviewStart.request(window, "open-session", {})
+          const did = `opened a new session in ${epic}'s window`
+          return result("opened", did, `${sentence(did)}:  it takes your Send by itself, nothing to press.`)
         }
-        this.launch(["launch", epic, "--prompt", command])
+        this.launch(["launch", epic])
         const did = `opened ${epic}'s window`
-        return result("launched", did, `${sentence(did)}:  press Enter on ${command} there.`)
+        return result("launched", did, `${sentence(did)}:  its new session takes your Send by itself.`)
       }
       const main = this.mainWindow()
       if (!main) {
@@ -354,6 +368,34 @@ export class ReviewStart {
   /** The live Claude sessions (`RunningEpics.liveSessions()`). */
   sessions(): TitledSession[] {
     return new RunningEpics(this.mainRoot).liveSessions()
+  }
+
+  /**
+   * The live sessions of epic `epic`:  titled for it (`sessionsTitledFor()`), or working in its worktree
+   * (epic `epic-engine` I286), as `epic window launch` counts them (`Window.epicSessions()`).
+   * - why the worktree too:  a session Owen never titled shows Claude Code's own name (`language-74`), which names
+   *   no epic;  counted by title alone, a Send while it worked opened a SECOND session beside it
+   * - NOT a session in the worktree titled for another epic (`🚧 editor`)
+   */
+  sessionsOf(epic: string): TitledSession[] {
+    const worktree = this.worktreeOf(epic)
+    return this.sessions().filter(
+      (session) =>
+        titleNames(session.title, epic) || (RealPath.isIn(session.cwd, worktree) && !TITLE_ICON.test(session.title))
+    )
+  }
+
+  /**
+   * Mark that a session is being started for epic `epic`:  the session-start hook titles the first one that starts
+   * in its worktree `🚧 <epic>` (`WakeMarks`).
+   * - NEVER throws:  an unwritten mark only leaves the new session untitled
+   */
+  private markWake(epic: string): void {
+    try {
+      ;(this.options.markWake ?? ((name: string) => WakeMarks.mark(name)))(epic)
+    } catch (error) {
+      console.error("ReviewStart:  wake mark not written", error)
+    }
   }
 
   /**
@@ -551,7 +593,8 @@ export class ReviewStart {
       sessions: [],
       did,
       at: woken.at,
-      message: `Already ${did} at ${clockTime(new Date(woken.at))}:  press Enter there.`
+      // a session opened with nothing typed takes the Send by itself (I286):  nothing to press
+      message: `Already ${did} at ${clockTime(new Date(woken.at))}${/typed/.test(did) ? ":  press Enter there." : "."}`
     }
   }
 }

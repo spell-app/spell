@@ -81,6 +81,10 @@ Nothing reaches you until you look:
   - Without it, the page says to ask you to run it.
 
 Then, for what it printed:
+0. Busy with other work when it came:  apply the quick marks now (`epic inbox apply <epic>`), put a Noted card on each
+   heavy one (`epic update <epic>#I3 noted "Queued:  after <what you're on>"`), so they see it was heard, then finish
+   what you were on first.  An agent that can run a command in the background keeps `epic inbox wait <epic>` running
+   the whole time it works, armed again as it exits:  a Send then reaches it mid-work (epic `epic-engine` I286).
 1. `epic inbox status <epic> "Responding" --items <ids>`.
 2. Requests for now (Add Details, revisit now):  per item,
    `epic update <epic>#J3 underway "<what you take it to be>"`, write the answer

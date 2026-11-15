@@ -111,7 +111,9 @@ export class InboxMonitor {
       watch: [epic.inbox, ...epic.guides.files],
       waiting,
       ...(waiting && {
-        notice: hasWork ? InboxMonitor.notice(epic.name) : InboxMonitor.askNotice(epic.name),
+        notice: hasWork
+          ? InboxMonitor.notice(epic.name, InboxMonitor.summaryOf(inbox, Boolean(guideSends)))
+          : InboxMonitor.askNotice(epic.name),
         batch: InboxMonitor.batchOf(inbox, guideSends)
       }),
       recheckMs: RECHECK_MS
@@ -177,12 +179,38 @@ export class InboxMonitor {
   // ## The line
   ////////////////
 
-  /** The one line that tells the session work is waiting on epic `name`'s page, and how to take it. */
-  static notice(name: string): string {
+  /**
+   * The one line that tells the session work is waiting on epic `name`'s page, what it is (`summary`), and how to take
+   * it;  it's the first thing Owen sees of a session a Send woke (epic `epic-engine` I286).
+   * - and to keep a `wait` running in the background from then on:  the next Send reaches the session mid-work, not
+   *   once its turn ends (Owen, 2026-11-15:  "keep a listener open so it responds to my marks quickly")
+   */
+  static notice(name: string, summary = "marks, comments or Do Now"): string {
     return (
-      `📬 ${name}:  the person sent work from the epic page (marks, comments or Do Now).  ` +
-      `Take it:  \`epic inbox wait ${name} --timeout 5\`, then the /epic skill's "7.3 Woken".`
+      `📬 ${name}:  taking your Send from the epic page (${summary}).  ` +
+      `Take it:  \`epic inbox wait ${name} --timeout 5\`, then the /epic skill's "7.3 Woken";  ` +
+      `and keep \`epic inbox wait ${name}\` running in the background while you work.`
     )
+  }
+
+  /**
+   * What's waiting in `inbox`, in words, for the notice:  `3 marks:  J149 approve, I91 approve, I83 do this`;
+   * then the requests for now, the calls-off, and comments on the epic's other pages (`guides`).
+   * - at most `SUMMARY_IDS` items named:  the rest counted (`+4 more`)
+   */
+  static summaryOf(inbox: ReviewInbox, guides = false): string {
+    const marks = inbox.hasNewSend ? inbox.sentMarks.map((mark) => `${mark.id} ${actionWords(mark.action)}`) : []
+    const now = inbox.now.map((request) => `${request.id} ${actionWords(request.action)} now`)
+    const canceled = Object.entries(inbox.canceled)
+      .filter(([, each]) => !each.told)
+      .map(([id]) => `${id} called off`)
+    const parts = [
+      marks.length && `${plural(marks.length, "mark")}:  ${named(marks)}`,
+      now.length && named(now),
+      canceled.length && named(canceled),
+      guides && "comments on its other pages"
+    ].filter(Boolean)
+    return parts.join(";  ") || "marks, comments or Do Now"
   }
 
   /** The one line that tells the session the person asked for a review from epic `name`'s page (I144). */
@@ -242,6 +270,34 @@ const UNFOUND_RECHECK_MS = 30_000
 
 /** Past a heartbeat listener's going stale, ms, before looking again:  so it IS stale by then. */
 const STALE_MARGIN_MS = 1_000
+
+/** How many items `summaryOf()` names before counting the rest. */
+const SUMMARY_IDS = 6
+
+/** A mark's or request's action, as the page's button says it. */
+const ACTION_WORDS: Record<string, string> = {
+  todo: "do this",
+  details: "add details",
+  next: "next phase",
+  seen: "seen",
+  accept: "accepted"
+}
+
+/** `action` in the page's words (`todo` -> `do this`). */
+function actionWords(action: string): string {
+  return ACTION_WORDS[action] ?? action
+}
+
+/** `words` joined, at most `SUMMARY_IDS` of them, the rest counted. */
+function named(words: string[]): string {
+  const more = words.length - SUMMARY_IDS
+  return words.slice(0, SUMMARY_IDS).join(", ") + (more > 0 ? `, +${more} more` : "")
+}
+
+/** `1 mark`, `3 marks`. */
+function plural(count: number, word: string): string {
+  return `${count} ${word}${count === 1 ? "" : "s"}`
+}
 
 /** An epic's name:  lower-kebab-case, as its folder. */
 const EPIC_NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/
