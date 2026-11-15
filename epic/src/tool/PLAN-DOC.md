@@ -561,8 +561,8 @@ As `plan-doc.md`, "Ids":
     - Send counts them meanwhile, so Auto Send runs for them;  a Send with only these sends nothing.
   - Undone:
     - while it's still in view:  the same button again, however long since
-    - after it has folded away:  Cmd-Z (Ctrl-Z) outside a text field, newest first, up to 20 this visit
-    - both put the item back exactly as it was (`InstantUndo`, `POST /api/epics/review/undo`);  refused once it has
+      (no Cmd-Z:  T80 had one, T81 took it out;  the item stays in view until Send)
+    - it puts the item back exactly as it was (`InstantUndo`, `POST /api/epics/review/undo`);  refused once it has
       changed since
     - else Revisit reopens it
     - Its own box's x is `drop`.

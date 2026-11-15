@@ -29,7 +29,7 @@
  *       takes the mark back;  the page sees the item change by its live update
  *     - a timer lost to a restart:  the page's next `GET inbox` applies what's due
  *     - applied, it can be undone:  `POST /api/epics/review/undo` `{ page, id }` puts the item back as it was
- *       (`InstantUndo`, epic `epic-engine` T80:  Owen's Cmd-Z, or a second click on the still-grey item);
+ *       (`InstantUndo`, epic `epic-engine` T80:  a second click on the still-grey item);
  *       answers the inbox, with `did`;  404 nothing to undo, 409 the item changed since (or an answered question)
  *   - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item only:
  *     `{ action: "test", result: "passed" | "failed" | "skip" | "notnow", note?, shot? }`
@@ -139,7 +139,7 @@ const reviewRoutes: RouteModule = {
         reply.json(inbox)
       }
     })
-    // Owen's Cmd-Z, or a second click on a still-grey item, after the server applied its ✓ or x (epic `epic-engine`
+    // a second click on a still-grey item, after the server applied its ✓ or x (epic `epic-engine`
     // T80):  the item put back as it was;  404 nothing to undo, 409 changed since
     api.post("/undo", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown }

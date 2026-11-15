@@ -930,15 +930,15 @@ describe("ReviewClient.isClosing() (an instant ✓ or x, drawn closed at once)",
   })
 })
 
-// epic `epic-engine` T80:  "Cmd-z to undo the mark on the hidden thing?" -- "mark as grey & collapse, then keep it
-// visible/gray until send or auto-send"
-describe("ReviewClient:  an instant ✓ or x held in view till Send, and Cmd-Z", () => {
+// epic `epic-engine` T80:  "mark as grey & collapse, then keep it visible/gray until send or auto-send";
+// its Cmd-Z went again in T81, the second click on the held item being enough
+describe("ReviewClient:  an instant ✓ or x held in view till Send", () => {
   test("held in view and counted for Send;  a Send with only these posts nothing and wakes nobody", async () => {
     const { client, server } = await started()
     const notices: string[] = []
     client.onNotice((message) => notices.push(message))
     client.press("q1", "drop")
-    expect([client.isHeldInView("q1"), client.unsentMarkCount, client.canUndo]).toEqual([true, 1, true])
+    expect([client.isHeldInView("q1"), client.unsentMarkCount]).toEqual([true, 1])
     await vi.waitFor(() => expect(client.markOf("q1")).toBeDefined())
     const posts = server.posts.length
     expect(await client.send()).toBe(true)
@@ -958,37 +958,26 @@ describe("ReviewClient:  an instant ✓ or x held in view till Send, and Cmd-Z",
     expect(client.isHeldInView("j2")).toBe(false)
   })
 
-  test("Cmd-Z inside the grace takes the mark off, as a second click does", async () => {
+  test("a second click inside the grace takes the mark off", async () => {
     const { client } = await started()
-    const notices: string[] = []
-    client.onNotice((message) => notices.push(message))
     client.press("j2", "approve")
     await vi.waitFor(() => expect(client.markOf("j2")).toBeDefined())
-    expect(client.undoLast()).toBe(true)
+    client.press("j2", "approve")
     await vi.waitFor(() => expect(client.markOf("j2")).toBeUndefined())
-    expect([client.isHeldInView("j2"), client.isClosing("j2"), client.canUndo]).toEqual([false, false, false])
-    await vi.waitFor(() => expect(notices.at(-1)).toBe("Undid:  accepted J2"))
-    expect(client.undoLast()).toBe(false)
+    expect([client.isHeldInView("j2"), client.isClosing("j2")]).toEqual([false, false])
   })
 
-  test("applied already:  Cmd-Z, or a second click on the held item, asks the server to put it back", async () => {
+  test("applied already:  a second click on the held item asks the server to put it back", async () => {
     const { client, server } = await started()
     client.press("q1", "drop")
-    client.press("j2", "approve")
-    await vi.waitFor(() => expect(Object.keys(server.inbox.forPage().marks).sort()).toEqual(["j2", "q1"]))
+    await vi.waitFor(() => expect(Object.keys(server.inbox.forPage().marks)).toEqual(["q1"]))
     server.inbox.setMark("q1", null)
-    server.inbox.setMark("j2", null)
     await vi.waitFor(async () => {
       await client.refresh()
-      expect([client.markOf("q1"), client.markOf("j2")]).toEqual([undefined, undefined])
+      expect(client.markOf("q1")).toBeUndefined()
     })
-    // the newest first:  J2
-    expect(client.undoLast()).toBe(true)
-    await vi.waitFor(() => expect(server.posts.at(-1)).toEqual(["undo", { page: PAGE, id: "j2" }]))
-    expect(client.isHeldInView("j2")).toBe(false)
-    // a second click on Q1's x, held in view, applied:  the same
     client.press("q1", "drop")
     await vi.waitFor(() => expect(server.posts.at(-1)).toEqual(["undo", { page: PAGE, id: "q1" }]))
-    expect([client.isHeldInView("q1"), client.canUndo]).toEqual([false, false])
+    expect(client.isHeldInView("q1")).toBe(false)
   })
 })

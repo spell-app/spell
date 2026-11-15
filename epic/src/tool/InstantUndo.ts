@@ -8,9 +8,9 @@ import { PlanItem } from "./PlanItem"
 
 /****************
  * ### `InstantUndo`
- * What each instant mark the page server applied changed on its item (`InstantMarks`), so Owen's Cmd-Z, or a second
- * click on the still-grey item, puts it back exactly as it was (epic `epic-engine` T80;  Owen, 2026-11-15:
- * "Cmd-z to undo the mark on the hidden thing?").
+ * What each instant mark the page server applied changed on its item (`InstantMarks`), so a second click on the
+ * still-grey item puts it back exactly as it was (epic `epic-engine` T80;  T81 took Cmd-Z out again:  the item stays
+ * in view until Send, so the button is always there to click).
  * - an instant ✓ or x changes only its item's attributes (status, fixed, wanted, reviewed ...) and its UPDATE label
  *   (`PlanDoc.applyAction()`, `reviewedAs()`):  so what's kept is those, before and after
  * - kept in a file beside the page's inbox, `<epic>.instant-undo.json5` (`DataFile`), the last `KEPT` of them, newest last

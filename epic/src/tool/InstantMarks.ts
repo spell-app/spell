@@ -25,7 +25,8 @@ import type { MarkResult, PlanMark } from "./planDoc.types"
  * - A dry run first:  the page is written only when a mark applies, so a mark that can't (left) never rewrites it.
  * - The review routes call it after a mark is set and on an inbox read (`reviewRoutes.ts`), loading it lazily:
  *   it brings `PlanDoc` with it, which the routes otherwise never load.
- * - each applied mark on an item is kept for undo (`InstantUndo`, epic `epic-engine` T80):  Cmd-Z puts it back
+ * - each applied mark on an item is kept for undo (`InstantUndo`, epic `epic-engine` T80):
+ *   a second click on the still-grey item puts it back
  ****************/
 export class InstantMarks {
   /**
@@ -57,7 +58,7 @@ export class InstantMarks {
     const results = planned.some((each) => each.applied) ? await files.edit(file, applyAll) : planned
     const cleared = results.filter((each) => each.applied || each.gone).map((each) => each.mark)
     if (cleared.length) ReviewInbox.update(path, (box) => box.clearApplied(cleared))
-    // kept, so Owen's Cmd-Z (or a second click on the still-grey item) can put each back (epic `epic-engine` T80)
+    // kept, so a second click on the still-grey item can put each back (epic `epic-engine` T80)
     for (const each of results)
       if (each.applied && each.undo)
         InstantUndo.keep(file, {

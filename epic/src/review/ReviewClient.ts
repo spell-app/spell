@@ -161,12 +161,6 @@ export class ReviewClient extends PageStore {
    */
   private readonly heldInView = new Map<string, string>()
 
-  /**
-   * His instant marks this visit, oldest first, at most `UNDO_KEPT`:  what Cmd-Z walks back through (`undoLast()`,
-   * T80), even once its item has folded away.
-   */
-  private readonly undoStack: Array<{ id: string; action: string }> = []
-
   /** Timers for `trackInstant()`, by `fail:<id>` and `hold:<id>`. */
   private readonly instantTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
@@ -261,25 +255,8 @@ export class ReviewClient extends PageStore {
     const inboxFiles = ServerLink.dataFileNames(inboxFile)
     const isOurs = (path: string) =>
       inboxFiles.includes(path) || (path.startsWith(base) && /^[^/.]+\.json5$/.test(path.slice(base.length)))
-    const unwatch = ServerLink.watch(window, isOurs, () => void this.refresh())
-    this.view = window
-    // Cmd-Z (Ctrl-Z) outside a text field takes back his last instant ✓ or x (epic `epic-engine` T80);  in a field
-    // it stays the field's own undo, and with nothing to undo it passes on (to VS Code, through the live client)
-    const onKey = (event: KeyboardEvent) => {
-      if (!isUndoKey(event) || isTyping(event) || !this.canUndo) return
-      event.preventDefault()
-      this.undoLast()
-    }
-    window.addEventListener("keydown", onKey)
-    return () => {
-      unwatch()
-      window.removeEventListener("keydown", onKey)
-      this.view = undefined
-    }
+    return ServerLink.watch(window, isOurs, () => void this.refresh())
   }
-
-  /** The window `watch()` follows, while it does:  Cmd-Z's listener, and where an undone item is scrolled to. */
-  private view: Window | undefined
 
   ////////////////
   // ## Listening
@@ -328,11 +305,6 @@ export class ReviewClient extends PageStore {
    */
   isHeldInView(id: string): boolean {
     return this.heldInView.has(id)
-  }
-
-  /** Is there an instant mark of his this visit for Cmd-Z to take back (`undoLast()`)? */
-  get canUndo(): boolean {
-    return this.undoStack.length > 0
   }
 
   /** Is `id` (`away:<line>`) read:  its Seen in the inbox, or applied and cleared since the page loaded? */
@@ -561,7 +533,7 @@ export class ReviewClient extends PageStore {
       // a ✓ or x taken back inside its grace:  shown again at once, never held closed (I306)
       if (isInstant(id, mark)) {
         this.undoneInstant.add(id)
-        this.forgetInstant(id)
+        this.heldInView.delete(id)
       }
       // an Approve that kept his comments goes back to the revisit they made (I163):  never lost by a click
       if (action === "approve" && mark.comments?.length)
@@ -606,63 +578,26 @@ export class ReviewClient extends PageStore {
   }
 
   /**
-   * Cmd-Z (Ctrl-Z):  take back his last instant ✓ or x this visit (epic `epic-engine` T80;  Owen:  "Cmd-z to undo
-   * the mark on the hidden thing?"):  its item back as it was, unfolding into view;  false with nothing to undo.
-   * - not applied yet (inside its grace):  the mark taken off, as a second click does
-   * - applied:  the page server puts the item back (`POST undo`, `InstantUndo`);  refused (changed since), a notice
-   *   says why
-   * - a notice says what was undone:  "Undid:  closed I57"
+   * Take back his instant mark on item `id`, held in view (a second click on its button, epic `epic-engine` T80):
+   * off the inbox if the server hasn't applied it, else put back by the server (`POST undo`, `InstantUndo`;
+   * refused once the item changed since, a notice says why).
    */
-  undoLast(): boolean {
-    const last = this.undoStack.pop()
-    if (!last) return false
-    void this.undo(last.id, last.action)
-    return true
-  }
-
-  /**
-   * Take back his instant mark on item `id` (`action`:  which;  the held one's, else the inbox's):  off the inbox if
-   * the server hasn't applied it, else put back by the server (`POST undo`);  says what was undone.
-   */
-  private async undo(id: string, action = this.heldInView.get(id) ?? this.inbox.marks[id]?.action ?? "") {
-    this.forgetInstant(id)
+  private async undo(id: string) {
+    this.heldInView.delete(id)
     const mark = this.inbox.marks[id]
-    const what = `${UNDONE_WORDS[action] ?? "marked"} ${id.toUpperCase()}`
     if (mark && isInstant(id, mark)) {
       this.undoneInstant.add(id)
-      if (await this.save(id, null)) {
-        this.notify(`Undid:  ${what}`)
-        this.showAgain(id)
-      }
+      await this.save(id, null)
       return
     }
     this.closedHere.delete(id)
     this.changed()
-    if (await this.post("undo", { id })) {
-      this.notify(`Undid:  ${what}`)
-      this.showAgain(id)
-    }
+    await this.post("undo", { id })
   }
 
-  /** Item `id`, back after an undo:  scrolled into sight once it has unfolded, never jumping more than it must. */
-  private showAgain(id: string) {
-    const view = this.view
-    view?.setTimeout(() => view.document.getElementById(id)?.scrollIntoView({ block: "nearest" }), UNFOLD_WAIT_MS)
-  }
-
-  /** His instant `action` on `id`, just made:  kept in view till Send, and on Cmd-Z's list (T80). */
+  /** His instant `action` on `id`, just made:  kept in view till Send (T80). */
   private keepInstant(id: string, action: string) {
     this.heldInView.set(id, action)
-    this.undoStack.splice(0, this.undoStack.length, ...this.undoStack.filter((each) => each.id !== id))
-    this.undoStack.push({ id, action })
-    if (this.undoStack.length > UNDO_KEPT) this.undoStack.shift()
-  }
-
-  /** Item `id`'s instant mark taken back:  no longer held in view, nor on Cmd-Z's list. */
-  private forgetInstant(id: string) {
-    this.heldInView.delete(id)
-    const at = this.undoStack.findIndex((each) => each.id === id)
-    if (at >= 0) this.undoStack.splice(at, 1)
   }
 
   /**
@@ -1466,31 +1401,5 @@ function newNumber(id: string): number {
   return Number(id.replace(/^\D+/, "")) || 0
 }
 
-/** How many of his instant marks Cmd-Z can walk back through (`undoLast()`, epic `epic-engine` T80). */
-const UNDO_KEPT = 20
-
 /** How long items let go at his Send stay drawn closing, so their section folds them away as they hide (ms). */
 const RELEASE_FOLD_MS = 2000
-
-/** What an instant mark did, for Cmd-Z's notice:  "Undid:  closed I57". */
-const UNDONE_WORDS: Record<string, string> = {
-  approve: "accepted",
-  drop: "closed",
-  skip: "closed",
-  seen: "saw"
-}
-
-/** How long `showAgain()` waits for an undone item to unfold before scrolling to it (ms):  a fold's 200ms, and a frame. */
-const UNFOLD_WAIT_MS = 260
-
-/** Is `event` Cmd-Z (Ctrl-Z off a Mac):  undo, not redo (no Shift), no Alt? */
-function isUndoKey(event: KeyboardEvent): boolean {
-  return (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "z"
-}
-
-/** Is `event` typed into a text field (an input, a textarea, editable text), through shadow roots? */
-function isTyping(event: KeyboardEvent): boolean {
-  const target = event.composedPath()[0]
-  if (!(target instanceof HTMLElement)) return false
-  return target.isContentEditable || target.localName === "textarea" || target.localName === "input"
-}
