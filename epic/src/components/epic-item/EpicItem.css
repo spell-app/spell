@@ -359,6 +359,19 @@
     font-size: 0.9em;
     line-height: 1.45;
   }
+  /* the body's row:  its light details, the clarify icon at their right, top-aligned with the first line (T76) */
+  .body {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .body > .flow {
+    flex: 1;
+  }
+  .body > [part~="clarify"] {
+    flex: none;
+    margin-block-start: -1px;
+  }
   .flow {
     min-width: 0;
   }

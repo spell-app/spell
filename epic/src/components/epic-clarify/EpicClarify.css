@@ -28,3 +28,56 @@
     border-radius: 2px;
   }
 }
+
+/*
+ * With `icon` (T76):  a small circle-question button at the right of an item's body, muted until hovered
+ * - while Claude works on it (`:state(turning)`):  its glyph turns as a coin spun on a table, about its upright axis,
+ *   then rests a second (Owen, 2026-11-15:  "spin with coin animation while you are thinking";  the review buttons'
+ *   turn of I203 / I213, before I279 gave them a ring)
+ * - with reduced motion:  it stands still, in the accent colour
+ */
+@layer ui.components.epic-clarify.types {
+  :host([icon]) {
+    display: inline-flex;
+  }
+  button[part~="base"] {
+    --_epic-clarify-muted: var(--epic-clarify-muted, var(--epic-muted, light-dark(#8a8794, #8f8c99)));
+    display: inline-grid;
+    place-items: center;
+    margin: 0;
+    padding: 2px;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--_epic-clarify-muted);
+    font: inherit;
+    line-height: 1;
+    text-decoration: none;
+  }
+  button[part~="base"]:hover,
+  :host(:state(turning)) button[part~="base"] {
+    color: var(--_epic-clarify-color);
+  }
+  [part~="icon"]::part(icon) {
+    margin: 0;
+  }
+  :host(:state(turning)) [part~="icon"]::part(icon) {
+    animation: epic-clarify-turn 3.4s ease-in-out infinite;
+  }
+  @keyframes epic-clarify-turn {
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
+      rotate: y 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :host(:state(turning)) [part~="icon"]::part(icon) {
+      animation: none;
+    }
+  }
+}

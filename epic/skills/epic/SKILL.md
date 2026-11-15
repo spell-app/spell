@@ -1001,7 +1001,9 @@ want you to just do it").
      - and "Prose":  the blocks are ELEMENTS
        - `<epic-code>`, `<epic-aside>`, `<epic-net-effect>`, `<epic-choices>`, `<epic-field label>`
      - never `ui-accordion.spell-code`, or a `<p><b>Net effect:</b></p>` by hand
-   - Add Details:  read the item, the code and docs it names, then write what its text leaves out, as MORE details.
+   - Add Details (the item's circle-question icon, or a given body's Clarify;  epic `epic-engine` T76):  CLARIFY its
+     text.  Read the item, the code and docs it names, then say plainly what its text means and what it leaves out, as
+     MORE details:  a new paragraph wherever the context changes (`plan-doc.md`, "Rules").
      - `epic details <name>#<id> --more --file <html>`.
      - The item's text stays on top ("Original Reply").
      - Yours goes under it, in a white "More Details" card (P3 of `windows-and-review`).
