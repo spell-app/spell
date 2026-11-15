@@ -217,13 +217,15 @@ export class BubblyLayout {
   private layout(lines: SourceLine[], { depth, level, inSteps = false }: LayoutPlace): BubblyNode[] {
     const nodes: BubblyNode[] = []
     for (let index = 0; index < lines.length; index++) {
-      const line = lines[index]!
+      let line = lines[index]!
       if (line.isBlank) {
         nodes.push({ kind: "gap", start: line.start })
         continue
       }
       const statement = this.isMarkup(line) ? undefined : this.statements.get(line.index)
       const row = statement && BubblyPresentation.for(statement.rule)
+      // a head going on onto the lines under it (`if its rank > 1` then `and its rank < 5`):  one head
+      if (statement && (row?.head || row?.isControl)) line = this.continued(line, statement)
       if (statement && row?.head && !inSteps) {
         // a group holds the declarations after it, up to the next group;  the blank lines before that stay outside
         let members: SourceLine[] = []
@@ -245,6 +247,27 @@ export class BubblyLayout {
       nodes.push(...this.layout(line.children, { depth: depth + 1, level, inSteps }))
     }
     return nodes
+  }
+
+  /**
+   * `line`, a head or a control line, with the lines its statement goes on onto (`SP.JoinedLines`) part of it:
+   * `if its rank > 1 and`, then `its rank < 5` under it, is ONE head, not a step in its body.
+   * - Its end is the last of those lines' end;  what's under them is its body.
+   * - Those lines:  the ones under it that start before its body does (or, with no body, before it ends).
+   * - `line` itself when it goes on onto none.
+   */
+  private continued(line: SourceLine, statement: P.Match): SourceLine {
+    const body = (statement.data as { body?: P.Match }).body
+    const headEnd = body?.start ?? statement.end
+    if (headEnd === undefined || headEnd <= line.end) return line
+    const continuation = flattened(line.children).filter((each) => !each.isBlank && each.start < headEnd)
+    if (!continuation.length) return line
+    const isContinuation = (each: SourceLine) => continuation.includes(each)
+    return {
+      ...line,
+      end: continuation.at(-1)!.end,
+      children: [line, ...continuation].flatMap((each) => each.children.filter((child) => !isContinuation(child)))
+    }
   }
 
   /** A declaration:  its head, then what's under it, in a scope of its own. */
@@ -571,6 +594,11 @@ const MARKS = new Set([",", ":"])
 
 /** Kinds whose words, a space apart, are one name. */
 const JOINED = new Set<Paint>(["reference", "input", "first-mention", "variable"])
+
+/** `lines` and every line under them, in order. */
+function flattened(lines: SourceLine[]): SourceLine[] {
+  return lines.flatMap((line) => [line, ...flattened(line.children)])
+}
 
 /** `match`'s child matches:  in `matched`, and in `data` (where some rules keep theirs), errors left out. */
 function childrenOf(match: P.Match): P.Match[] {

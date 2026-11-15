@@ -12,9 +12,19 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  *
  *   - Indented by spaces past the tab stop, as the editor puts it (under the line's first word), the same:
  *     the steps under it are its body.
- *   - Each continued line may end in one too, and go on again.
+ *   - Each continued line may end in one too, and go on again:  onto the line after it, at its indent,
+ *     or onto a line indented under it (epic `language` T135).
  *   - What's indented under the last of them is the statement's body, as it would be under the first:
  *     `if it is empty and`, then `the card is a king`, then its steps under that.
+ * - Lines indented under a line, STARTING with `and` or `or`, go on from it, any number of them (Owen's T135):
+ *
+ *   ```spell
+ *   the foundation's suit is the suit of the card
+ *   	and the foundation's value is the card's value - 1
+ *   	and the card is the last item of the card's pile
+ *   ```
+ *
+ *   - What's indented under the last of them is the statement's body:  `if a`, `and b`, then its steps under that.
  * - A line of just `and` or `or` joins the lines on either side, each in parentheses:
  *
  *   ```spell
@@ -39,22 +49,25 @@ export class JoinedLines {
    * - Returns `items` itself when nothing joins, so a block with none pays one scan.
    */
   static of(scope: P.Scope, items: (P.LineToken | P.BlockToken)[]): (P.LineToken | P.BlockToken)[] {
-    if (!items.some((item) => item instanceof P.LineToken && JoinedLines.lastWordJoins(scope, item))) return items
+    if (!items.some((item, at) => JoinedLines.mayJoin(scope, item, items[at - 1]))) return items
     const continued = JoinedLines.continued(scope, items)
     return JoinedLines.lonesJoined(scope, continued)
   }
 
   ////////////////
-  // ## A line ending in `and` / `or`
+  // ## A line going on onto the lines indented under it
   ////////////////
 
-  /** `items` with each line ending in `and` / `or`, and the block under it, one line (then the body, if any). */
+  /**
+   * `items` with each line that goes on onto the block under it (ending in `and` / `or`, or the block's lines starting
+   * with one) one line, then the body, if any.
+   */
   private static continued(scope: P.Scope, items: (P.LineToken | P.BlockToken)[]): (P.LineToken | P.BlockToken)[] {
     const out: (P.LineToken | P.BlockToken)[] = []
     for (let index = 0; index < items.length; index++) {
       const item = items[index]!
       const next = items[index + 1]
-      if (item instanceof P.LineToken && next instanceof P.BlockToken && JoinedLines.endsWithJoin(scope, item)) {
+      if (item instanceof P.LineToken && next instanceof P.BlockToken) {
         const joined = JoinedLines.joinBelow(scope, item, next)
         if (joined) {
           out.push(...joined)
@@ -68,48 +81,57 @@ export class JoinedLines {
   }
 
   /**
-   * `line`, ending in `and` / `or`, joined with the line indented under it in `below` -- then what's under that, its
-   * body;  `undefined` unless `below` has that shape.
-   * - The continued line may be deeper than the body (spaces past the tab stop, as the editor indents it):
-   *   then it's a block of its own, first in `below`, and `below`'s other lines are the body.
-   * - That line may end in one too:  it goes on onto the block under it, the same way.
+   * `line` joined with the lines indented under it in `below` that go on from it -- then what's under those, its
+   * body;  `undefined` unless `below` starts with such a line.
+   * - A line goes on from the one above when that one ends in `and` / `or`, or when it STARTS with one:
+   *   `the card is the last item of the card's pile`, then `and its suit is the suit of the card` under it.
+   *   - Any number of them, at the same indent:  each goes on from the one before.
+   * - A continued line may be deeper than the body (spaces past the tab stop, as the editor indents it):
+   *   then it's a block of its own in `below`, and `below`'s lines after it are the body.
+   * - The last may end in one too:  it goes on onto the block under it, the same way.
    */
   private static joinBelow(
     scope: P.Scope,
     line: P.LineToken,
     below: P.BlockToken
   ): (P.LineToken | P.BlockToken)[] | undefined {
-    const [first, ...rest] = below.tokens
-    let continued: P.LineToken
-    let body: P.BlockToken | undefined
-    if (first instanceof P.LineToken) {
-      continued = first
-      if (rest.length > 1 || (rest[0] && !(rest[0] instanceof P.BlockToken))) return undefined
-      body = rest[0] as P.BlockToken | undefined
-    } else {
-      // deeper than the body:  a block of one line (a block per tab stop it's past), the body's lines after it
-      const only = first && JoinedLines.soleLineOf(first)
-      if (!only) return undefined
-      continued = only
-      if (rest.length) body = JoinedLines.blockOf(below, rest)
+    const items = below.tokens
+    const lines: P.LineToken[] = [line]
+    let taken = 0
+    let deeper = false
+    for (; taken < items.length; taken++) {
+      const item = items[taken]!
+      const more = item instanceof P.LineToken ? [item] : JoinedLines.linesOf(item)
+      if (!more || !more.every((each, at) => JoinedLines.goesOn(scope, at ? more[at - 1]! : lines.at(-1)!, each))) break
+      lines.push(...more)
+      deeper = item instanceof P.BlockToken
     }
-    const joined = JoinedLines.lineOf(
-      line,
-      [...JoinedLines.spaced(JoinedLines.codeOf(line)), ...continued.tokens],
-      continued
-    )
-    if (body && JoinedLines.endsWithJoin(scope, continued)) return JoinedLines.joinBelow(scope, joined, body)
-    return body ? [joined, body] : [joined]
+    if (!taken) return undefined
+    const rest = items.slice(taken)
+    let body: P.BlockToken | undefined
+    if (rest.length === 1 && rest[0] instanceof P.BlockToken) body = rest[0]
+    else if (rest.length && deeper) body = JoinedLines.blockOf(below, rest)
+    else if (rest.length) return undefined
+
+    const last = lines.at(-1)!
+    // each line's code, a space after it;  the last line whole, with its comment
+    const tokens = lines.flatMap((each) => (each === last ? each.tokens : JoinedLines.spaced(JoinedLines.codeOf(each))))
+    const joined = JoinedLines.lineOf(line, tokens, last)
+    if (!body) return [joined]
+    return JoinedLines.joinBelow(scope, joined, body) ?? [joined, body]
   }
 
-  /** The one line `block` holds, however many blocks deep (one per tab stop it's past) -- `undefined` if not one. */
-  private static soleLineOf(block: P.BlockToken): P.LineToken | undefined {
-    let current: P.LineToken | P.BlockToken = block
-    while (current instanceof P.BlockToken) {
-      if (current.tokens.length !== 1) return undefined
-      current = current.tokens[0]!
-    }
-    return current
+  /** Does `next`, a line under `line`, go on from it:  `line` ends in `and` / `or`, or `next` starts with one? */
+  private static goesOn(scope: P.Scope, line: P.LineToken, next: P.LineToken): boolean {
+    return JoinedLines.endsWithJoin(scope, line) || JoinedLines.startsWithJoin(scope, next)
+  }
+
+  /** Every line `block` holds, however many blocks deep (one per tab stop it's past) -- `undefined` if none. */
+  private static linesOf(block: P.BlockToken): P.LineToken[] | undefined {
+    const lines = block.tokens.flatMap((item) =>
+      item instanceof P.LineToken ? [item] : (JoinedLines.linesOf(item) ?? [])
+    )
+    return lines.length ? lines : undefined
   }
 
   /**
@@ -193,10 +215,27 @@ export class JoinedLines {
   // ## Helpers
   ////////////////
 
-  /** Does any line of `items` end in, or consist of, a joining word?  Cheap:  the last token only. */
-  private static lastWordJoins(scope: P.Scope, line: P.LineToken): boolean {
-    const last = JoinedLines.codeOf(line).at(-1)
-    return !!last && JoinedLines.joins(scope, last)
+  /**
+   * May `item` join:  a line ending in, or of just, a joining word, or a block under a line whose first line starts with
+   * one?  Cheap:  one token a line.
+   */
+  private static mayJoin(
+    scope: P.Scope,
+    item: P.LineToken | P.BlockToken,
+    before: P.LineToken | P.BlockToken | undefined
+  ): boolean {
+    if (item instanceof P.LineToken) {
+      const last = JoinedLines.codeOf(item).at(-1)
+      return !!last && JoinedLines.joins(scope, last)
+    }
+    const first = before instanceof P.LineToken && JoinedLines.linesOf(item)?.[0]
+    return !!first && JoinedLines.startsWithJoin(scope, first)
+  }
+
+  /** Does `line` start with `and` / `or`, then words of its own (not a lone one)? */
+  private static startsWithJoin(scope: P.Scope, line: P.LineToken): boolean {
+    const code = JoinedLines.codeOf(line)
+    return code.length > 1 && JoinedLines.joins(scope, code[0]!)
   }
 
   /** Does `line` end in `and` / `or`, after a word of its own (not a lone one)? */
