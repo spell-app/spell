@@ -44,6 +44,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   Its tooltip names the phase:  `Changed during P3`.
  *   - A status change says which (`became`;  Owen, 2026-11-14, epic `epic-engine` T75):  `UPDATE : FIXED`.
  *   - Then a blue `Not in main` pill while that work is on its epic's branch alone (`unmerged`).
+ *   - Gone once Owen checks its item (his ✓;  I285):  at once on the page, and from the file as it's applied.
  * - Its own family, so its look changes in one place (Owen:  "so we can restyle easily").
  ****************/
 export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
@@ -94,6 +95,17 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
     return !this.isQuiet && !!this.id && this.review.reviewing()
   }
 
+  /**
+   * A bare label whose item Owen has checked:  his ✓ (an approve) on it in the review inbox, sent or not, so the label
+   * goes at once (epic `epic-engine` I285);  applying it takes the label out of the page (`PlanDoc.reviewedAs()`).
+   */
+  @E.cssState("checked")
+  get isChecked(): boolean {
+    if (this.isBlock) return false
+    const itemId = this.domElement.closest("epic-item")?.id
+    return !!itemId && this.review.liveOf(itemId).approved
+  }
+
   /** Drawn as a block:  it has a summary, a date or what changed (not a bare label). */
   @E.cssState("block")
   get isBlock(): boolean {
@@ -126,7 +138,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
 
   render(): JSX.Element {
     return (
-      <Show when={this.isBlock} fallback={this.renderLabel()}>
+      <Show when={this.isBlock} fallback={<Show when={!this.isChecked}>{this.renderLabel()}</Show>}>
         {this.renderBlock()}
       </Show>
     )

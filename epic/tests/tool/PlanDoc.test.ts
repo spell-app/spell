@@ -765,7 +765,7 @@ describe("PlanDoc phases", () => {
     plan.addItem("issue", "the help is missing")
     plan.addItem("todo", "a plain edit")
     plan.addItem("todo", "closed, then opened")
-    const became = (id: string) => PlanDoc.updateLabelOf(el(plan, id))!.getAttribute("became")
+    const became = (id: string) => PlanItem.updateLabelOf(el(plan, id))!.getAttribute("became")
     // added:  a plain UPDATE
     expect(became("i1")).toBeNull()
     plan.fixedForReview("i1", "the help shows")
@@ -777,7 +777,7 @@ describe("PlanDoc phases", () => {
     plan.setDetails("i1", "<p>what was wrong</p>")
     expect(became("i1")).toBe("fixed")
 
-    const unmerged = (id: string) => PlanDoc.updateLabelOf(el(plan, id))!.getAttribute("unmerged")
+    const unmerged = (id: string) => PlanItem.updateLabelOf(el(plan, id))!.getAttribute("unmerged")
     plan.landing = { branch: "epic-engine", ids: new Set(["i1", "t1"]), shas: [] }
     plan.updateStates()
     // fixed, not in main:  the pill;  a plain edit's label never has one
@@ -785,6 +785,25 @@ describe("PlanDoc phases", () => {
     plan.landing = { branch: "epic-engine", ids: new Set(), shas: [] }
     plan.updateStates()
     expect(unmerged("i1")).toBeNull()
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("Owen's check takes an UPDATE label off;  a later change puts it back (I285)", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.setPhase(1, "active")
+    plan.addItem("issue", "the help is missing")
+    plan.fixedForReview("i1", "the help shows")
+    expect(PlanItem.updateLabelOf(el(plan, "i1"))!.getAttribute("became")).toBe("fixed")
+    plan.applyMark({ id: "i1", action: "approve" } as PlanMark)
+    expect(el(plan, "i1").getAttribute("status")).toBe("done")
+    expect(PlanItem.updateLabelOf(el(plan, "i1"))).toBeNull()
+    expect(
+      el(plan, "i1").querySelector(':scope > [slot="title"]')?.innerHTML ?? el(plan, "i1").getAttribute("title")
+    ).toBe("the help is missing")
+    // a later change:  back again
+    plan.setDetails("i1", "<p>what was wrong</p>")
+    expect(PlanItem.updateLabelOf(el(plan, "i1"))).not.toBeNull()
     expect(problems(plan)).toEqual([])
   })
 })
