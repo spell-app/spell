@@ -63,6 +63,28 @@ export function handlerPlacesInSource(
   return places
 }
 
+/**
+ * What to take out of its file to remove `element`'s handler for DOM event `event` (`click`;  epic `editor` T73):
+ * its attribute, ` onClick={...}`, with the space before it;  `undefined` if it wasn't written with one.
+ */
+export function handlerSpanInSource(
+  element: Element,
+  sources: ReadonlyMap<string, string>,
+  event: string
+): { path: string; start: number; end: number } | undefined {
+  const place = SourceMarks.placeOfDrawn(element)
+  const source = place && sources.get(place.path)
+  if (!place || source === undefined) return undefined
+  const opening = SourceEdits.offsetAt(source, { line: place.line, character: place.column })
+  const attribute = SourceEdits.tagAt(source, opening)?.attributes.find(
+    ({ name, quote }) => quote === "{" && HANDLER.test(name) && name.slice(2).toLowerCase() === event
+  )
+  if (!attribute) return undefined
+  const { start, end } = attribute.span
+  const spaced = /\s*$/.exec(source.slice(0, start))![0].length
+  return { path: place.path, start: start - spaced, end }
+}
+
 /** An event handler's attribute:  `onClick`. */
 const HANDLER = /^on[A-Z]/
 
@@ -130,14 +152,45 @@ export function placeOfDeclaredEvent(
   places: readonly SP.SpellDeclarationPlace[],
   files: readonly SourceFile[]
 ): CodePlace | undefined {
+  const found = declaredEventOf(row, classNames, places, files)
+  return found && codePlaceOf(found.place, found.lines)
+}
+
+/**
+ * What to take out of its file to remove a thing's event `row` (epic `editor` T73):
+ * its whole lines, its head and its body, as `placeOfDeclaredEvent()` finds it;  `undefined` if not found.
+ * - A new handler's empty body line goes with it (`newEventIn()`).
+ * - Its last line's line break too, or the one before it when it's the file's last line.
+ */
+export function declaredEventSpan(
+  row: Pick<WrittenEvent, "words">,
+  classNames: readonly string[],
+  places: readonly SP.SpellDeclarationPlace[],
+  files: readonly SourceFile[]
+): { path: string; start: number; end: number } | undefined {
+  const found = declaredEventOf(row, classNames, places, files)
+  if (!found) return undefined
+  const { place, lines } = found
+  const last = place.endLine === place.line && hasEmptyBody(place, lines) ? place.line + 1 : place.endLine
+  const offsetOfLine = (line: number) => lines.slice(0, line).reduce((sum, each) => sum + each.length + 1, 0)
+  const length = offsetOfLine(lines.length) - 1
+  if (last + 1 < lines.length) return { path: place.path, start: offsetOfLine(place.line), end: offsetOfLine(last + 1) }
+  return { path: place.path, start: Math.max(0, offsetOfLine(place.line) - 1), end: length }
+}
+
+/** Where a thing's event `row` is declared, and its file's lines:  the first of `classNames` with it, by its words. */
+function declaredEventOf(
+  row: Pick<WrittenEvent, "words">,
+  classNames: readonly string[],
+  places: readonly SP.SpellDeclarationPlace[],
+  files: readonly SourceFile[]
+): { place: SP.SpellDeclarationPlace; lines: string[] } | undefined {
   for (const name of classNames) {
     for (const place of places) {
       if (place.of !== name || !isEventLike(place)) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
       // an ability that's its type tag's bare attribute (`<view "card" draggable>`) has no code to edit
-      if (lines && hasCode(place, lines) && sameWords(wordsAt(place, lines), row.words)) {
-        return codePlaceOf(place, lines)
-      }
+      if (lines && hasCode(place, lines) && sameWords(wordsAt(place, lines), row.words)) return { place, lines }
     }
   }
   return undefined
@@ -425,6 +478,7 @@ function colonOutsideQuotes(line: string, from: number): number {
  * Where a declaration's code is, as `CodePlace` says (1-based lines):
  * - its code after its words on its line (`- on click play it`):  from there, with `column`
  * - else its body's lines, under its line, and above a closing tag (`</on>`)
+ * - else its empty body's line, a new handler's (`newEventIn()`)
  * - else its own line
  */
 function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]): CodePlace {
@@ -436,9 +490,16 @@ function codePlaceOf(place: SP.SpellDeclarationPlace, lines: readonly string[]):
   if (last > place.line && /^\s*<\//.test(lines[last] ?? "")) last--
   // its body's first line, a comment, is its description, not its code (epic `language` P48)
   const first = place.line + 1 < last && /^\s*\/\//.test(lines[place.line + 1] ?? "") ? place.line + 1 : place.line
-  return last > place.line
-    ? { path: place.path, from: first + 2, to: last + 1 }
-    : { path: place.path, from: place.line + 1, to: place.line + 1 }
+  if (last > place.line) return { path: place.path, from: first + 2, to: last + 1 }
+  // no code yet, its empty body under it (`newEventIn()`):  that line, to type it in (epic `editor` I159)
+  if (hasEmptyBody(place, lines)) return { path: place.path, from: place.line + 2, to: place.line + 2 }
+  return { path: place.path, from: place.line + 1, to: place.line + 1 }
+}
+
+/** Is the line under `place`'s head blank, but indented deeper:  the empty body a new handler is written with? */
+function hasEmptyBody(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
+  const under = lines[place.line + 1]
+  return under !== undefined && !under.trim() && under.length > indentOf(lines[place.line] ?? "")
 }
 
 /**
@@ -559,6 +620,9 @@ export type SourceFile = { path: string; text: string }
  * Where a new event `words` (`on double click`) goes in the first type of `typeNames` written in `files`, and its code:
  * - under a plain line for it (`a "card" is a view`, `a card -- play it on click`):  `on double click` after its last
  *   line, at its rows' indent, bare as plain Spell writes a member (epic `language` P46)
+ *   - with an empty body under it, a level in (`\t\t`):  where its code is typed (epic `editor` I159)
+ *   - written at the start of the line after the type's, so the code editor showing the last handler's lines
+ *     doesn't grow over it
  *   - with a colon only under a header in the older form, that has one (`a card:`;  epic `editor` I62)
  * - `at`:  its offset in the file's text, where `code` is inserted;
  *   `undefined` when the type isn't written in `files`.
@@ -586,7 +650,12 @@ export function newEventIn(
     while (end > first && !lines[end]!.trim()) end--
     // a colon only where the header has one:  the older form (`a card:`), not the one written today (`a card`)
     const colon = /:\s*(?:(?:--|\/\/).*)?$/.test(lines[first]!) ? ":" : ""
-    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${indent}${words}${colon}` }
+    // its empty body, a level in:  the line its row's code editor shows, the cursor in it (I159)
+    const handler = `${indent}${words}${colon}\n${indent}\t`
+    // at the start of the line after the type's last, never at that line's end:
+    // the code editor of the handler written there would take in what's added at its edge
+    if (end + 1 < lines.length) return { path: file.path, at: offsetOfLine(end + 1), code: `${handler}\n` }
+    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${handler}` }
   }
   return undefined
 }

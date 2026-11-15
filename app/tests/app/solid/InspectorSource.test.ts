@@ -3,9 +3,11 @@ import { describe, expect, test } from "vite-plus/test"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 import {
+  declaredEventSpan,
   enabledWhenInSource,
   eventsDeclared,
   newEventIn,
+  placeOfDeclaredEvent,
   propertyEditorInSource,
   startingValues,
   withClassNames
@@ -250,18 +252,68 @@ describe("startingValues()", () => {
 describe("newEventIn()", () => {
   const files = [{ path: "/Solitaire.spell", text: solitaire }]
 
-  test("under Solitaire's `a card -- ...` header, as written today:  no colon, no description in the way", () => {
+  /** `text` with `written`'s code put in. */
+  const withWritten = (text: string, written: { at: number; code: string }) =>
+    text.slice(0, written.at) + written.code + text.slice(written.at)
+
+  test("under Solitaire's `a card -- ...` header, as written today:  no colon, its empty body under it", () => {
     const written = newEventIn(["card"], files, "on double click")!
-    expect(written.code).toBe("\n\ton double click")
-    expect(solitaire.slice(0, written.at)).toMatch(/\na card\t+-- play the card on click[^\n]*\n\ton click\n[\s\S]*play the card$/)
+    expect(written.code).toBe("\ton double click\n\t\t\n")
+    expect(solitaire.slice(0, written.at)).toMatch(
+      /\na card\t+-- play the card on click[^\n]*\n\ton click\n[\s\S]*play the card\n$/
+    )
   })
 
   test("under a header in the older form, the colon comes too", () => {
     const text = "a card:\n\t- on click:\n\t\tplay it\n"
     expect(newEventIn(["card"], [{ path: "/x.spell", text }], "on double click")).toEqual({
       path: "/x.spell",
-      at: text.length - 1,
-      code: "\n\ton double click:"
+      at: text.length,
+      code: "\ton double click:\n\t\t\n"
     })
+  })
+
+  test("a type at the file's very end:  after its last line", () => {
+    const text = "a card\n\ton click\n\t\tplay it"
+    const written = newEventIn(["card"], [{ path: "/x.spell", text }], "on double click")!
+    expect(withWritten(text, written)).toBe("a card\n\ton click\n\t\tplay it\n\ton double click\n\t\t")
+  })
+
+  /**
+   * Solitaire's app, an event added from the Code card's + (I159):  the handler above it keeps its own lines,
+   * the new one's code is its empty body, and removing it (T73) takes back exactly what was written.
+   */
+  test("Solitaire's app, `on mouse down` added, then removed (I159, T73)", () => {
+    const written = newEventIn(["solitaire"], [{ path: "File2.spell", text: solitaire }], "on mouse down")!
+    const text = withWritten(solitaire, written)
+    const sources = [card, pile, text].map((contents, index) => ({ path: `File${index}.spell`, contents }))
+    const { files: parsed } = parseSpellProject(sources)
+    const places = SP.SpellDeclarationPlaces.of(
+      parsed.map((file, index) => ({ match: file.match, parseText: sources[index]!.contents }))
+    )
+    const read = sources.map((file) => ({ path: file.path, text: file.contents }))
+    const lines = text.split("\n")
+    const shown = (words: string) => {
+      const place = placeOfDeclaredEvent({ words }, ["Solitaire"], places, read)!
+      return lines.slice(place.from - 1, place.to)
+    }
+    expect(shown("when the score changes").at(-1)).toBe("\t\t\trestart the game")
+    expect(shown("on mouse down")).toEqual(["\t\t"])
+    expect(eventsDeclared(["Solitaire"], places, read).at(-1)).toEqual({
+      kind: "event",
+      words: "on mouse down",
+      code: ""
+    })
+    const span = declaredEventSpan({ words: "on mouse down" }, ["Solitaire"], places, read)!
+    expect(span.path).toBe("File2.spell")
+    expect(text.slice(0, span.start) + text.slice(span.end)).toBe(solitaire)
+  })
+
+  test("removing a handler with code (T73):  its head and its body, whole lines", () => {
+    const text = "game is an app\n\ton click\n\t\tprint 1\n\t\tprint 2\n\ton key down\n\t\tprint 3\n"
+    const { files: parsed } = parseSpellProject([{ path: "Game.spell", contents: text }])
+    const places = SP.SpellDeclarationPlaces.of([{ match: parsed[0]!.match, parseText: text }])
+    const span = declaredEventSpan({ words: "on click" }, ["Game"], places, [{ path: "Game.spell", text }])!
+    expect(text.slice(0, span.start) + text.slice(span.end)).toBe("game is an app\n\ton key down\n\t\tprint 3\n")
   })
 })
