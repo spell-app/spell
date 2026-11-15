@@ -61,42 +61,52 @@ una "imagen de carta" es una vista			-- El dibujo de una carta:  el único lugar
 	-- Está boca arriba, salvo con `dirección=abajo`:  entonces es el dorso que comparten todas las cartas.
 	-- Hoy es una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
 	-- Dibujos de verdad de las cartas pueden ocupar su lugar:  solo cambian su dibujo y `para dibujar eso`.
-	su "carta" es una carta
+	su "carta" es una carta			-- la carta que dibuja
 	su "rango" es un rango de carta
 	su "palo" es un palo de carta
 	su "dirección" es arriba o abajo
 	"está boca (dirección)"
-	su "cara" es			-- la carta que dibuja:  su carta, si no una de su rango y su palo
-		su carta si su carta existe
-		una nueva carta cuyo rango es su rango y palo es su palo de lo contrario
+	al crear una imagen de carta
+		-- con una carta:  su rango y su palo son los de la carta;  con un rango y un palo:  su carta es una nueva de ellos (su dorso no necesita ninguna)
+		si su carta existe
+			poner su rango al rango de su carta
+			poner su palo al palo de su carta
+		de lo contrario si no está boca abajo
+			poner su carta a una nueva carta cuyo rango es su rango y palo es su palo
 	su "color" es
 		azul si está boca abajo
-		el color de su cara de lo contrario
+		el color de su carta de lo contrario
 	su "dibujo" es
-		// Su letra:  https://www.compart.com/en/unicode/block/U+1F0A0
+		-- dibujar la letra unicode de las imágenes de carta
+		-- ver https://www.compart.com/en/unicode/block/U+1F0A0
 		si está boca abajo
 			devolver "🂠"
-		poner lugar al valor de su cara
-		si su cara es un trébol
+		poner lugar al valor de su carta
+		si su carta es un trébol
 			devolver el elemento lugar de ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
-		si su cara es un diamante
+		si su carta es un diamante
 			devolver el elemento lugar de ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"]
-		si su cara es un corazón
+		si su carta es un corazón
 			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
 	para dibujar eso
 		<texto color={su color}>{su dibujo}</texto>
-
+	
 	para probar las imágenes de carta
 		poner dama a una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
-		obtener una nueva imagen de carta cuya carta es dama
+		obtener una nueva imagen de carta cuya carta es la dama
+		su palo debería ser espadas
 		su dibujo debería ser "🂭"
 		su color debería ser negro
+
 		poner siete a una nueva imagen de carta cuyo rango es 7 y palo es corazones
+		el nombre de la carta del siete debería ser "7 de corazones"
 		el dibujo del siete debería ser "🂷"
 		el color del siete debería ser rojo
+
 		el dibujo de una nueva imagen de carta cuyo rango es as y palo es tréboles debería ser "🃑"
 		el dibujo de una nueva imagen de carta cuyo rango es rey y palo es diamantes debería ser "🃎"
+
 		obtener una nueva imagen de carta cuya dirección es abajo
 		su dibujo debería ser "🂠"
 		su color debería ser azul

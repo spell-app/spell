@@ -265,6 +265,30 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
+   * Make the thing a tag on its own draws, with each value the page gave the tag:
+   * `<card-image rank=ace suit=hearts />` is `new CardImage({ rank: "ace", suit: "hearts" })`.
+   * - So its creation hook (`when creating a card image`) sees them, as it does in `a new card image whose rank is ace`
+   *   (epic `language` T139).
+   * - A property holding a thing takes the thing its reference finds;  one that finds nothing is left out.
+   * - The list holding it (a card's `pile`) is left out:  joining one is a move, made once it exists (`writeReference()`).
+   * - STATIC:  an element's own members can't take a name a type's method might have (the TypeScript writer's
+   *   `ELEMENT_MEMBERS`)
+   */
+  private static makeOwnThing(element: SpellElement, entry: SpellElementEntry): object {
+    const values: Record<string, unknown> = {}
+    for (const property of element.typeProperties) {
+      if (property.reference === "owner" || !element.pageWrote(property)) continue
+      const value = element.elementValueOf(property)
+      if (property.reference === "thing") {
+        const target =
+          typeof value === "string" && value.trim() ? entry.core.thingForReference(value.trim()) : undefined
+        if (target) values[property.name] = target
+      } else values[property.name] = SpellElement.valueFor(property, value)
+    }
+    return new (entry.Class as new (values: Record<string, unknown>) => object)(values)
+  }
+
+  /**
    * What our stand-in says, when the program has no thing for us:
    * e.g. `⚠ no Tableau named "T9"`, or `⚠ no Tableau, or more than one:  give it an id`.
    */
@@ -289,7 +313,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
       (isOnItsOwn) => {
         const { entry } = this
         // named by an id, or in a layout, the program's thing is ours:  never one of our own
-        if (isOnItsOwn && !this.ownThing && entry) this.ownThing = new (entry.Class as new () => object)()
+        if (isOnItsOwn && !this.ownThing && entry) this.ownThing = SpellElement.makeOwnThing(this, entry)
       }
     )
     this.nameAfterHandedThing()

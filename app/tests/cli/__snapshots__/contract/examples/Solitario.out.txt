@@ -19,10 +19,12 @@
   ✅ Como se esperaba, `el color del siete` es `rojo`
 ✅ test las imágenes de carta
   ▶️ Ejecutando   `poner dama a una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo`
-  ▶️ Ejecutando   `obtener una nueva imagen de carta cuya carta es dama`
+  ▶️ Ejecutando   `obtener una nueva imagen de carta cuya carta es la dama`
+  ✅ Como se esperaba, `su palo` es `espadas`
   ✅ Como se esperaba, `su dibujo` es `"🂭"`
   ✅ Como se esperaba, `su color` es `negro`
   ▶️ Ejecutando   `poner siete a una nueva imagen de carta cuyo rango es 7 y palo es corazones`
+  ✅ Como se esperaba, `el nombre de la carta del siete` es `"7 de corazones"`
   ✅ Como se esperaba, `el dibujo del siete` es `"🂷"`
   ✅ Como se esperaba, `el color del siete` es `rojo`
   ✅ Como se esperaba, `el dibujo de una nueva imagen de carta cuyo rango es as y palo es tréboles` es `"🃑"`

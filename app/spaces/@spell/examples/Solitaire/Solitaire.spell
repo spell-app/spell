@@ -173,7 +173,7 @@ a "stock pile" is a pile with layout "stacked"
 	it can never take a card
 	it can never let go of a card
 	to draw its placeholder
-		<text>🂠</text>
+		<card-image direction=down />
 	on click
 		turn over the next card
 

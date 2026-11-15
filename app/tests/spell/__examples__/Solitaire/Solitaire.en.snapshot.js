@@ -25,7 +25,6 @@ export const words = {
       suit: "suit",
       direction: "direction",
       isFaceDirection: "is face (direction)",
-      face: "face",
       color: "color",
       picture: "picture",
       draw: "draw it"

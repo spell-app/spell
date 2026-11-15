@@ -133,6 +133,7 @@ export class ImagenDeCarta extends View {
    * Hoy es una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
    * Dibujos de verdad de las cartas pueden ocupar su lugar:  solo cambian su dibujo y `para dibujar eso`.
    */
+  // la carta que dibuja
   // su "carta" es una carta
   static { this.declareProp("carta", { type: "Carta" }) }
   get carta() { return this.getProp("carta") }
@@ -158,24 +159,27 @@ export class ImagenDeCarta extends View {
     return this.dirección === dirección
   }
 
-  /** la carta que dibuja:  su carta, si no una de su rango y su palo */
-  get cara() {
-    if (this.carta !== undefined) return this.carta
-    return new Carta({ rango: this.rango, palo: this.palo })
+  /** con una carta:  su rango y su palo son los de la carta;  con un rango y un palo:  su carta es una nueva de ellos (su dorso no necesita ninguna) */
+  create() {
+    if (this.carta !== undefined) {
+      this.rango = this.carta.rango
+      this.palo = this.carta.palo
+    } else if (!this.estáBocaDirección("abajo")) this.carta = new Carta({ rango: this.rango, palo: this.palo })
   }
 
   get color() {
     if (this.estáBocaDirección("abajo")) return "azul"
-    return this.cara.color
+    return this.carta?.color
   }
 
-  /** Su letra:  https://www.compart.com/en/unicode/block/U+1F0A0 */
+  /** dibujar la letra unicode de las imágenes de carta */
   get dibujo() {
+    // ver https://www.compart.com/en/unicode/block/U+1F0A0
     if (this.estáBocaDirección("abajo")) return "🂠"
-    const lugar = this.cara.valor
-    if (this.cara.palo === "tréboles") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(lugar))
-    if (this.cara.palo === "diamantes") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(lugar))
-    if (this.cara.palo === "corazones") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(lugar))
+    const lugar = this.carta?.valor
+    if (this.carta?.palo === "tréboles") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(lugar))
+    if (this.carta?.palo === "diamantes") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(lugar))
+    if (this.carta?.palo === "corazones") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(lugar))
     return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(lugar))
   }
 
@@ -226,16 +230,21 @@ export function testLasImágenesDeCarta() {
       palo: "espadas",
       direction: "down"
     })
-    core.echoTestAction(`obtener una nueva imagen de carta cuya carta es dama`)
+    core.echoTestAction(`obtener una nueva imagen de carta cuya carta es la dama`)
     const it2 = new ImagenDeCarta({ carta: dama })
+    core.expect(it2.palo, `su palo`, "espadas", `espadas`)
     core.expect(it2.dibujo, `su dibujo`, "🂭", `"🂭"`)
     core.expect(it2.color, `su color`, "negro", `negro`)
+
     core.echoTestAction(`poner siete a una nueva imagen de carta cuyo rango es 7 y palo es corazones`)
     const siete = new ImagenDeCarta({ rango: 7, palo: "corazones" })
+    core.expect(siete.carta?.nombre, `el nombre de la carta del siete`, "7 de corazones", `"7 de corazones"`)
     core.expect(siete.dibujo, `el dibujo del siete`, "🂷", `"🂷"`)
     core.expect(siete.color, `el color del siete`, "rojo", `rojo`)
+
     core.expect((new ImagenDeCarta({ rango: "as", palo: "tréboles" })).dibujo, `el dibujo de una nueva imagen de carta cuyo rango es as y palo es tréboles`, "🃑", `"🃑"`)
     core.expect((new ImagenDeCarta({ rango: "rey", palo: "diamantes" })).dibujo, `el dibujo de una nueva imagen de carta cuyo rango es rey y palo es diamantes`, "🃎", `"🃎"`)
+
     core.echoTestAction(`obtener una nueva imagen de carta cuya dirección es abajo`)
     const it3 = new ImagenDeCarta({ dirección: "abajo" })
     core.expect(it3.dibujo, `su dibujo`, "🂠", `"🂠"`)
@@ -384,7 +393,7 @@ export class PilaDeReserva extends Pila {
   }
 
   drawItsPlaceholder() {
-    return h("es-texto", { part: "placeholder" }, "🂠")
+    return h("test-project-imagen-de-carta", { dirección: () => "abajo", part: "placeholder" })
   }
 
   async onClick(event) {

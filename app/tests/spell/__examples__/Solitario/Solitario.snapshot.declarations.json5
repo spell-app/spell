@@ -229,7 +229,7 @@
       "type": "ImagenDeCarta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:2326-4782"
+      "defined": "/Carta.es.spell:2326-5165"
     },
     {
       "property": "carta",
@@ -241,13 +241,13 @@
       "property": "rango",
       "of": "ImagenDeCarta",
       "datatype": "RangoDeCarta",
-      "defined": "/Carta.es.spell:2950-2981"
+      "defined": "/Carta.es.spell:2975-3006"
     },
     {
       "property": "palo",
       "of": "ImagenDeCarta",
       "datatype": "PaloDeCarta",
-      "defined": "/Carta.es.spell:2983-3012"
+      "defined": "/Carta.es.spell:3008-3037"
     },
     {
       "property": "dirección",
@@ -257,7 +257,7 @@
         "arriba",
         "abajo"
       ],
-      "defined": "/Carta.es.spell:3014-3046"
+      "defined": "/Carta.es.spell:3039-3071"
     },
     {
       "syntax": "{operator:is_or_is_not} boca (expression:arriba|arribas|abajo|abajos)",
@@ -272,30 +272,30 @@
           "abajo"
         ]
       },
-      "defined": "/Carta.es.spell:3048-3071"
+      "defined": "/Carta.es.spell:3073-3096"
     },
     {
-      "property": "cara",
-      "of": "ImagenDeCarta",
-      "datatype": "Carta",
-      "defined": "/Carta.es.spell:3073-3259"
+      "kind": "method",
+      "name": "crear una imagen de carta",
+      "returns": "nothing",
+      "defined": "/Carta.es.spell:3098-3489"
     },
     {
       "property": "color",
       "of": "ImagenDeCarta",
-      "defined": "/Carta.es.spell:3261-3338"
+      "defined": "/Carta.es.spell:3491-3569"
     },
     {
       "constants": [
         "azul"
       ],
-      "defined": "/Carta.es.spell:3277-3300"
+      "defined": "/Carta.es.spell:3507-3530"
     },
     {
       "property": "dibujo",
       "of": "ImagenDeCarta",
       "datatype": "text",
-      "defined": "/Carta.es.spell:3340-4019"
+      "defined": "/Carta.es.spell:3571-4302"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -313,7 +313,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "las imágenes de carta",
-      "defined": "/Carta.es.spell:4086-4782"
+      "defined": "/Carta.es.spell:4370-5165"
     },
     {
       "type": "Mazo",
@@ -392,7 +392,7 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:6986-7299"
+      "defined": "/Solitario.es.spell:6986-7317"
     },
     {
       "property": "disposición",
@@ -404,43 +404,43 @@
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7301-7508"
+      "defined": "/Solitario.es.spell:7319-7526"
     },
     {
       "property": "disposición",
       "of": "PilaDeDescartes",
       "datatype": "text",
-      "defined": "/Solitario.es.spell:7341-7362"
+      "defined": "/Solitario.es.spell:7359-7380"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7510-7979"
+      "defined": "/Solitario.es.spell:7528-7997"
     },
     {
       "property": "disposición",
       "of": "Fundación",
       "datatype": "text",
-      "defined": "/Solitario.es.spell:7542-7563"
+      "defined": "/Solitario.es.spell:7560-7581"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:7626-7655"
+      "defined": "/Solitario.es.spell:7644-7673"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7981-8310"
+      "defined": "/Solitario.es.spell:7999-8328"
     },
     {
       "property": "disposición",
       "of": "Columna",
       "datatype": "text",
-      "defined": "/Solitario.es.spell:8011-8033"
+      "defined": "/Solitario.es.spell:8029-8051"
     },
     {
       "type": "Solitario",
@@ -636,7 +636,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:8312-9868"
+      "defined": "/Solitario.es.spell:8330-9886"
     }
   ],
   "codeLines": [
@@ -657,57 +657,57 @@
     110,
     126,
     135,
-    140,
-    145,
-    150,
-    156,
-    161,
-    166,
-    167,
-    172,
-    186,
-    219,
-    251,
-    255,
+    141,
+    146,
+    151,
+    157,
+    162,
+    169,
+    170,
+    175,
+    190,
+    223,
     260,
-    267,
-    290,
-    295,
-    302,
-    308,
-    314,
-    329,
-    371,
-    373,
-    395,
-    397,
-    413,
-    415,
-    419,
-    442,
-    444,
-    461,
-    464,
-    514,
-    518,
-    522,
-    526,
-    530,
-    534,
-    538,
-    542,
-    546,
-    550,
-    554,
-    558,
-    562,
-    566,
+    264,
+    269,
+    276,
+    299,
+    304,
+    311,
+    317,
+    323,
+    338,
+    380,
+    382,
+    404,
+    406,
+    422,
+    424,
+    428,
+    451,
+    453,
+    470,
+    473,
+    523,
+    527,
+    531,
+    535,
+    539,
+    543,
+    547,
+    551,
+    555,
+    559,
+    563,
+    567,
     571,
-    577,
-    599,
-    610,
-    618,
-    653,
-    689
+    575,
+    580,
+    586,
+    608,
+    619,
+    627,
+    662,
+    698
   ]
 }
