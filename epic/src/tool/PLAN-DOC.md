@@ -552,7 +552,7 @@ As `plan-doc.md`, "Ids":
     - an issue's, a judgement call's, a question's or a todo's ✓ or x (`approve`, `seen`, `drop`, `skip`) with no
       note, comments, picture or pick;  never a test's, a phase's or an Overview part's (their approve can start work)
     - an update block's Seen, and a Read in "0. While you were out" (above)
-  - When:  2 seconds after the click (`INSTANT_GRACE_MS`, J228), so a second click takes it back first;  a Read at once.
+  - When:  2 seconds after the click (`INSTANT_GRACE_MS`, J229), so a second click takes it back first;  a Read at once.
   - Send neither counts nor carries them;  a Send with only these wakes nobody.
   - The log keeps a line each, as `inbox apply`'s;  `inbox apply` still takes any the page server couldn't.
   - Undone after:  Revisit reopens it.

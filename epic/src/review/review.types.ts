@@ -509,7 +509,7 @@ export function isImmediate(mark: { action: string; when?: string }): boolean {
 
 /**
  * How long an instant mark waits before the page server applies it (`isInstant()`):  a second click on the same
- * button inside it takes the mark back, and nothing happens (epic `epic-engine` I304, J228).
+ * button inside it takes the mark back, and nothing happens (epic `epic-engine` I304, J229).
  */
 export const INSTANT_GRACE_MS = 2000
 
