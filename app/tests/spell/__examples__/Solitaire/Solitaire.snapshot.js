@@ -280,13 +280,11 @@ export class Pile extends ViewableList {
   get layout() { return this.getProp("layout") }
   set layout(value) { this.setProp("layout", value) }
 
-  /** Its last card's:  what the next card goes on */
   get color() {
     if (this.isEmpty) return "none"
     return this.lastItem.color
   }
 
-  /** Its last card's */
   get value() {
     if (this.isEmpty) return 0
     return this.lastItem.value

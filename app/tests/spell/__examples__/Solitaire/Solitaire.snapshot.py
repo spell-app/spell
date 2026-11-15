@@ -331,14 +331,12 @@ class Pile(ViewableList):
 
     @property
     def color(self) -> str:
-        """Its last card's:  what the next card goes on"""
         if not self:
             return "none"
         return self.last_item.color
 
     @property
     def value(self) -> float:
-        """Its last card's"""
         if not self:
             return 0
         return self.last_item.value
