@@ -490,7 +490,7 @@ class Solitaire(App):
                     h("spacer"),
                     core.draw_action(self, "undo", {"in-menu": True}),
                     core.draw_action(self, "redo", {"in-menu": True}),
-                    h("ui-text", {"slot": "right"}, "Score: ", self.score),
+                    h("ui-text", {"slot": "right"}, "Score ", self.score),
                 ),
             ),
             h(
