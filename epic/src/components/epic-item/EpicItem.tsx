@@ -465,9 +465,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * Words before the noun:  its state (`attention item`), `canceled`, `limit`, `has-details`, `note-open`, `unfolded`.
    * - NOTE: `unfolded`, not `open`:  `open` is a state (yellow) already.
    * - Of the statuses only `canceled` looks different (struck through), so only it is a word here.
+   *   - struck at his x's click too (`closingAs`, epic `epic-engine` I308), before the server cancels it:  so its
+   *     update lands with nothing left to change on screen
    */
   protected get extraClass(): string | undefined {
-    const canceled = this.status === CANCELED
+    const canceled = this.status === CANCELED || this.reviewState.liveOf().closingAs === "drop"
     return [
       this.itemState(),
       canceled && CANCELED,
@@ -740,13 +742,24 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * a finished one, Revisit and Saw it (`todo-done`, I296).
    */
   get buttonsKind(): ReturnType<typeof buttonsForItem> {
-    return buttonsForItem(this.id, {
+    // held in view after his instant ✓ or x (T80):  the buttons it had when he marked it, so the same button is there
+    // to click again and take it back (T81), though the server has closed it since
+    if (this.reviewState.liveOf().heldInView && this.keptButtons) return this.keptButtons
+    this.keptButtons = buttonsForItem(this.id, {
       limit: this.limit,
       inPhase: !!(this.handled || this.takenIn),
       status: this.status,
       fixed: !!this.fixed
     })
+    return this.keptButtons
   }
+
+  /**
+   * The review buttons it last drew while not held in view (`buttonsKind`).
+   * - `declare`d, so no field initializer runs:  the first render happens inside the base constructor, and an
+   *   initializer after it would wipe what that render kept (epic `epic-engine` I308)
+   */
+  declare private keptButtons: ReturnType<typeof buttonsForItem> | undefined
 
   /** One of its review controls (`<epic-review>`):  what it `shows`, as its `part`. */
   private reviewControl(shows: ReviewShows, part: "review-buttons" | "note-box" | "said"): JSX.Element {
