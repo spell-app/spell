@@ -424,8 +424,13 @@ expressions.addRule(IsInAType, {
   ]
 })
 
+// `is in` takes ONE list, never one said inline:  `it is in my-list and it is 1` is two conditions (epic `language` J185)
 expressions.addRule(IsIn, {
-  syntax: "{operator:is_or_is_not} (in|one of|either of?) (expression:{operand}|{identifier_list})",
+  syntax: "{operator:is_or_is_not} in (expression:{operand})"
+})
+
+expressions.addRule(IsIn, {
+  syntax: "{operator:is_or_is_not} (one of|either of?) (expression:{operand}|{identifier_list})",
   tests: [
     {
       compileAs: "expression",
@@ -442,7 +447,9 @@ expressions.addRule(IsIn, {
         ["thing is not one of theList", "!core.includes(theList, thing)"],
         ["thing is either red or green", 'core.includes([red, "green"], thing)'],
         ["thing is not either red or green", '!core.includes([red, "green"], thing)'],
-        ["thing is not either of red or green", '!core.includes([red, "green"], thing)']
+        ["thing is not either of red or green", '!core.includes([red, "green"], thing)'],
+        // `is in` takes one list:  the `and` after it starts a condition of its own (epic `language` J185)
+        ["thing is in theList and thing is red", "(core.includes(theList, thing) && thing === red)"]
       ]
     },
     {
