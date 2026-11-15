@@ -4534,7 +4534,7 @@
           "ruleNames": ["create_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateThing.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "`create a thing` -- same as `new_thing`, worded with `create` instead of `a new`.",
           "syntaxes": [
             {
@@ -4939,7 +4939,7 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 26,
+          "line": 29,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
