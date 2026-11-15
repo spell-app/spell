@@ -363,7 +363,10 @@ export function declareAction(Class: Function, name: string, info: ActionInfo, a
  * - Neither to do:  `act` just runs, and costs nothing more.
  * - Any other failure goes on to the caller as it was, nothing put back.
  */
-export function runActing(act: () => unknown, { cancels, after }: { cancels?: boolean; after: (() => unknown)[] }): unknown {
+export function runActing(
+  act: () => unknown,
+  { cancels, after }: { cancels?: boolean; after: (() => unknown)[] }
+): unknown {
   if (!cancels && !after.length) return act()
   const changes = recordingChanges()
   const done = (value: unknown) => {

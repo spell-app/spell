@@ -20,6 +20,8 @@ export class ToDoSomething extends MethodDefinition<"asTest?|signature|modifiers
   @proto static inlineInitialType = true
   // each method it makes is an action, one undo step (Q60):  a top-level one too (J149)
   @proto static undoableByDefault = true
+  // its steps may `cancel` (epic `language` P56)
+  @proto static cancelable = true
 
   /** As any method's;  a quoted name (`to "deal the cards" with ...`) by its words, as the same name unquoted. */
   getDeclaration(match: P.MatchFor<this>): P.Declaration | undefined {

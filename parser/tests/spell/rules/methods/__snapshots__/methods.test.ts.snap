@@ -4,7 +4,9 @@ exports[`testing spell module methods > rule group specs > match snapshot -- if 
 {
   "action_detail": "keys?|disabled?|cantBeUndone?|title?|enabled?|selected?|undoable?|undoneAs?|icon?|replacesLast?",
   "action_modifier": "title?|icon?|keys?|undoable?|cantBeUndone?|undoneAs?",
+  "after_hook": "signature|body?",
   "bare_type_arg": "type",
+  "cancel_this_action": "when?|condition?",
   "create_animation": "signature|body?",
   "create_hook": "signature|body?",
   "quoted_type_expression": "type|signature|body?",

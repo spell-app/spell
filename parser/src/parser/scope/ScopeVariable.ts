@@ -72,6 +72,12 @@ export class ScopeVariable {
    */
   declare exclusive: boolean | undefined
   /**
+   * `true` for the member naming the list of that family an item was in before its latest move, e.g. `last pile`
+   * (epic `language` P56):  `exclusive` too, and read-only.
+   * - Made with the owner member, by the same statement:  an import makes it again from that one's declaration.
+   */
+  declare lastOwner: boolean | undefined
+  /**
    * A built-in member's READ template:
    * javascript which reads it, `{it}` standing for the value it's read from.
    * - e.g. `{it}.length`, `{it}.getFullYear()` or `core.itemCountOf({it})`
@@ -163,6 +169,8 @@ export type ScopeVariableProps = {
   isSavedTime?: boolean
   /** See `ScopeVariable.exclusive`. */
   exclusive?: boolean
+  /** See `ScopeVariable.lastOwner`. */
+  lastOwner?: boolean
   /** See `ScopeVariable.readAs`. */
   readAs?: string
   /** See `ScopeVariable.valueOutputs`. */

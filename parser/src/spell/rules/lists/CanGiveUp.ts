@@ -8,6 +8,7 @@ import { type GuardOperands } from "./lists.shared"
  * `can_give_up` rule:  `{list} can give up {thing}` -- would the list give it up, moved elsewhere?
  * - Its guard says:  `a stock-pile can give up a card if: ...`.  Yes, if it has none.
  * - `release` ~== `remove` ~== `give up` ~== `let go of`;  `can't`, `cannot` for the opposite.
+ * - What it gives up may go in the middle (epic `language` P56):  `can give it up`, `can give the card up`, `can let it go`.
  * - Compiles to `core.canGiveUp(stock, card)`.
  */
 export class CanGiveUp extends InfixOperatorSuffix<"operator|expression"> {

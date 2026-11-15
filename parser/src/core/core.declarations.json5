@@ -2728,7 +2728,7 @@
           "name": "name"
         },
         {
-          "name": "hook"
+          "name": "options"
         }
       ],
       "description": "Run `Class`'s member `hook` at the end of its action `name`, inside its undo step:  an after hook (epic `language` P56)."

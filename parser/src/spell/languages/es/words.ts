@@ -96,6 +96,11 @@ export const spanishWords: SP.LanguageWords = {
     "al"
   ]),
 
+  lastListWords: { default: "último", feminine: "última" },
+
+  // `después de poner una carta en una pila`:  the verb as an action says it
+  verbsForDoing: (doing) => [doing],
+
   danglingWords: new Set([
     "de",
     "del",

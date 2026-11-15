@@ -479,7 +479,7 @@ describe("actions that cancel (`cancel`, epic `language` P56)", () => {
     static {
       core.describeAction(this, "putOnPile", { title: "Put", undoneAs: "Move Card", cancels: true })
       core.describeAction(this, "play", { title: "Play", undoneAs: "Play Card" })
-      core.addAfterHook(this, "putOnPile", "afterPutOnPile")
+      core.addAfterHook(this, "putOnPile", { hook: "afterPutOnPile" })
     }
   }
 

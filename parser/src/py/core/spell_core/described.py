@@ -18,7 +18,7 @@ from collections.abc import Callable
 from typing import Any
 from weakref import WeakKeyDictionary
 
-from spell_core.undoing import action_of, declare_action
+from spell_core.undoing import ActionCanceled, action_of, declare_action
 
 # Each class's own action descriptions, by method name
 _ACTIONS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictionary()
@@ -26,12 +26,15 @@ _ACTIONS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictiona
 # Each class's own event descriptions, by name
 _EVENTS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictionary()
 
+# Each class's after hooks, by its action's method name (epic `language` P56):  `add_after_hook()`
+_AFTER_HOOKS: "WeakKeyDictionary[type, dict[str, list[str]]]" = WeakKeyDictionary()
+
 # Each class's own menus, by name (epic elemental-spell P10)
 _MENUS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictionary()
 
 
 class DescribedMethods:
-    """`core.describe_action()`, `as_action()`, `describe_event()`, `actions_of()`, `events_of()`."""
+    """`core.describe_action()`, `as_action()`, `add_after_hook()`, `cancel()`, `describe_event()`, `actions_of()`."""
 
     def describe_action(self, cls: type, name: str, description: dict[str, Any]) -> None:
         """Describe class `cls`'s action `name`, its method's name, e.g. `turn_over` for `to turn it over`.
@@ -59,7 +62,27 @@ class DescribedMethods:
         - As a described action runs:  one it's called by takes it in, its step and all.
         - The JavaScript core's `core.asAction(info, act)`, which runs a function's steps:  a decorator here.
         """
-        return lambda function: action_of(function, info.get("undone_as"), info.get("cant_be_undone"))
+        return lambda function: action_of(
+            function, info.get("undone_as"), info.get("cant_be_undone"), bool(info.get("cancels"))
+        )
+
+    def add_after_hook(self, cls: type, name: str, description: dict[str, str]) -> None:
+        """Run `cls`'s method `description["hook"]` at the end of its action `name`, inside its undo step.
+
+        - What compiled spell writes for `after putting a card on a pile`, in any file (epic `language` P56):
+          `core.add_after_hook(Card, "put_on_pile", {"hook": "after_put_on_pile"})`.
+        - Each runs in the order added;  skipped when the action is called off (`cancel()`).
+        """
+        _after_hooks_of(cls, name).append(description["hook"])
+
+    def cancel(self) -> None:
+        """Call off the action running, compiled from `cancel`:  `if not core.can_take(pile, self): core.cancel()`.
+
+        - Every change it made is put back, it leaves no undo step, its after hooks don't run, and it answers `False`:
+          see `undoing.run_acting()`.
+        - Raises `ActionCanceled`, which the action catches.
+        """
+        raise ActionCanceled("canceled")
 
     def describe_event(self, cls: type, name: str, description: dict[str, Any]) -> None:
         """Describe an event class `cls`'s things send, e.g. `flipped` with its `side`."""
@@ -88,7 +111,14 @@ def describe_action(cls: type, name: str, description: dict[str, Any]) -> None:
     undone_as = description.get("undone_as")
     cant_be_undone = description.get("cant_be_undone")
     if (undone_as is not None or cant_be_undone is not None) and callable(getattr(cls, name, None)):
-        declare_action(cls, name, undone_as, cant_be_undone)
+        declare_action(
+            cls, name, undone_as, cant_be_undone, bool(description.get("cancels")), _after_hooks_of(cls, name)
+        )
+
+
+def _after_hooks_of(cls: type, name: str) -> list[str]:
+    """`cls`'s after hooks of its action `name`:  the live list, made empty the first time."""
+    return _AFTER_HOOKS.setdefault(cls, {}).setdefault(name, [])
 
 
 def _described_by(store: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]", cls: type) -> dict[str, dict[str, Any]]:

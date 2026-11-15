@@ -139,8 +139,8 @@ def test_an_undone_deal_puts_each_card_back_in_its_pile(game: Game) -> None:
 
 def test_a_step_keeps_one_record_for_each_prop_and_each_list_however_often_it_changed(game: Game) -> None:
     asyncio.run(game.deal(3))
-    # three cards' face_up, the moves, the stock and the waste
-    assert len(core.RUNTIME.history.steps[0].records) == 6
+    # three cards' face_up and last pile, the moves, the stock and the waste
+    assert len(core.RUNTIME.history.steps[0].records) == 9
 
 
 def test_nothing_undoes_while_an_undoable_action_still_runs(game: Game) -> None:
@@ -321,3 +321,77 @@ def test_a_top_level_action_that_waits_is_one_step(game: Game) -> None:
 
     asyncio.run(deal_twice())
     assert [step.title for step in core.RUNTIME.history.steps] == ["Deal Twice"]
+
+
+################
+# ## Actions that cancel, after hooks, a thing's last list (epic `language` P56)
+################
+
+
+class Mover(Thing):
+    """`to put a card on a pile`, `cancel if ...`;  its hook, `after putting a card on a pile`, from another file."""
+
+    def put_on_pile(self, card: Card, pile: Pile, refused: str | None = None) -> Any:
+        """Put `card` on `pile`, turned over;  called off `"after"` the move, or `"in a hook"`."""
+        pile.append(card)
+        card.turn_over()
+        if refused == "after":
+            core.cancel()
+
+    def after_put_on_pile(self, card: Card, _pile: Pile, refused: str | None = None) -> None:
+        """Count the move."""
+        game = core.RUNTIME.app
+        game.moves += 1  # type: ignore[union-attr]
+        if refused == "in a hook":
+            core.cancel()
+
+    def play(self, card: Card, pile: Pile) -> Any:
+        """`to play a card`:  it gives back what the move answered."""
+        core.RUNTIME.app.moves += 100  # type: ignore[union-attr]
+        return self.put_on_pile(card, pile, "after")
+
+
+core.describe_action(Mover, "put_on_pile", {"title": "Put", "undone_as": "Move Card", "cancels": True})
+core.describe_action(Mover, "play", {"title": "Play", "undone_as": "Play Card"})
+core.add_after_hook(Mover, "put_on_pile", {"hook": "after_put_on_pile"})
+
+
+def test_done_it_answers_yes_and_its_hook_runs_in_its_step(game: Game) -> None:
+    three = cards_of(game)[2]
+    assert Mover().put_on_pile(three, game.waste) is True
+    assert (list(game.waste), game.moves) == ([three], 1)
+    assert [step.title for step in core.RUNTIME.history.steps] == ["Move Card"]
+    game.undo()
+    assert (len(game.waste), three.face_up, game.moves) == (0, False, 0)
+
+
+def test_called_off_every_change_goes_back_no_step_no_hook_and_it_answers_no(game: Game) -> None:
+    three = cards_of(game)[2]
+    assert Mover().put_on_pile(three, game.waste, "after") is False
+    assert (len(game.waste), three.face_up, game.moves, game.can_undo) == (0, False, 0, False)
+
+
+def test_called_off_in_its_hook_the_actions_changes_go_back_too(game: Game) -> None:
+    three = cards_of(game)[2]
+    assert Mover().put_on_pile(three, game.waste, "in a hook") is False
+    assert (len(game.waste), three.face_up, game.moves, game.can_undo) == (0, False, 0, False)
+
+
+def test_called_off_inside_another_action_only_its_own_changes_go_back(game: Game) -> None:
+    three = cards_of(game)[2]
+    assert Mover().play(three, game.waste) is False
+    assert (len(game.waste), three.face_up, game.moves) == (0, False, 100)
+    assert [step.title for step in core.RUNTIME.history.steps] == ["Play Card"]
+
+
+def test_a_card_remembers_the_pile_it_left_and_undo_puts_that_back(game: Game) -> None:
+    three = cards_of(game)[2]
+    assert Pile.last_owner_of(three) is None
+    Mover().put_on_pile(three, game.waste)
+    assert Pile.last_owner_of(three) is game.stock
+    game.undo()
+    assert (Pile.owner_of(three), Pile.last_owner_of(three)) == (game.stock, None)
+    game.redo()
+    assert (Pile.owner_of(three), Pile.last_owner_of(three)) == (game.waste, game.stock)
+    assert Mover().put_on_pile(three, game.stock, "after") is False
+    assert (Pile.owner_of(three), Pile.last_owner_of(three)) == (game.waste, game.stock)

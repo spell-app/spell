@@ -37,12 +37,13 @@ export const describedMethods = defineCoreModule({
   /**
    * Run `Class`'s member `hook` at the end of its action `name`, inside its undo step:  an after hook (epic `language` P56).
    * - What compiled spell writes for `after putting a card on a pile`, in any file:
-   *   `core.addAfterHook(Card, "putOnPile", "afterPutOnPile")`, the hook a method of `Class` taking the action's blanks.
+   *   `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`, the hook a method of `Class` taking the
+   *   action's blanks.
    * - Each runs in the order added, the program's file order;  skipped when the action is called off (`cancel`).
    * - Before or after the action is described:  the same list either way.
    * - See `runActing()` (`undoing.ts`).
    */
-  addAfterHook(Class: Function, name: string, hook: string): void {
+  addAfterHook(Class: Function, name: string, { hook }: { hook: string }): void {
     afterHooksOf(Class, name).push(hook)
   },
 

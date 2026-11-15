@@ -210,7 +210,13 @@ export function noteItems(list: object, before: readonly unknown[], after: reado
  * - Noted for the undo history, and for every action that may `cancel` (`recordingChanges()`), as a prop's write is.
  * - Not while it's being put back by undo or redo:  the history sets it then, through `put`.
  */
-export function noteKept(target: object, key: string, was: unknown, value: unknown, put: (value: unknown) => void): void {
+export function noteKept(
+  target: object,
+  key: string,
+  was: unknown,
+  value: unknown,
+  put: (value: unknown) => void
+): void {
   if (isReadingIn || was === value) return
   core.RUNTIME?.history.noteKept(target, key, was, value, put)
   for (const changes of changesBeingMade) changes.noteKept(target, key, was, put)
