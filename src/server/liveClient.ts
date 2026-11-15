@@ -354,7 +354,8 @@ export function liveClient(scrollKey: string): void {
     addEventListener("keydown", editKey, true)
     // a same-origin frame of a live page (the brand index's thumbnails) has no VS Code above it
     if (!liveParent()) {
-      addEventListener("keydown", forwardKey)
+      // capture:  a handler that only stops the key's propagation mustn't keep it from VS Code (epic `epic-engine` I297)
+      addEventListener("keydown", forwardKey, true)
       addEventListener("contextmenu", forwardMenu)
     }
     addEventListener("click", followInFrame, true)
@@ -966,6 +967,10 @@ export function liveClient(scrollKey: string): void {
    *   its keys never reach that page, so VS Code never saw them (epic `airplane`, 2026-10-10)
    * - sent once every handler has had the key:  one the page took stays the page's
    *   (`preventDefault()`:  Cmd + K jump, Cmd + I comment, a `UI.keyboard` shortcut)
+   * - heard in the CAPTURE phase, so a handler that only stops the key's propagation (`stopPropagation()`, no
+   *   `preventDefault()`) doesn't eat it:  the page caught a key only if it prevented it
+   *   (epic `epic-engine` I297;  Owen:  "if the epic page catches a key, do that, otherwise pass the key to the main
+   *   VSCode window")
    */
   function forwardKey(event: KeyboardEvent) {
     const apple = /Mac|iPhone|iPad/.test(navigator.userAgent)
