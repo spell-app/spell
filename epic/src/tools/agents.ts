@@ -21,6 +21,13 @@
  *   - 3:  no agents running any more:  nothing to wait for
  *   - 2:  `--max` seconds passed (default 3600);  polls every `--every` (default 2)
  * - `told <name>`:  its redirects were passed on;  the page shows them "told"
+ * - CLAIMS (epic `epic-engine` T77):  the files an agent is changing, so no two change one, and no merge moves one
+ *   aside from under it:
+ *   - `claim <name> <path...>`:  a file, a folder or a glob each, from the checkout's root;  exit 1, naming the other
+ *     agent, if one claims any of them already:  nothing claimed
+ *   - `add ... --files <path,path...>`:  claimed as it starts
+ *   - `claims [--json]`:  every running agent's, one line each
+ *   - they go with the agent (`done`)
  * - `--epic <name>`, any verb:  that epic's list, e.g. from the main checkout;  default:  the worktree's epic, if any
  * - Which checkout:  the one this file is in, which `epic` picks from the current folder (`EpicTools.run()`)
  */
@@ -37,10 +44,14 @@ const { positional, flags } = parseVerbArgs(process.argv.slice(2))
 process.exitCode = await run(positional, flags)
 
 /** Run verb `positional[0]` with its arguments;  returns the exit code. */
-async function run([verb = "list", name, task]: string[], flags: Record<string, string | true>): Promise<number> {
+async function run(
+  [verb = "list", name, task, ...more]: string[],
+  flags: Record<string, string | true>
+): Promise<number> {
   const list = new AgentList(ROOT, { epic: stringFlag(flags.epic) })
   const status = stringFlag(flags.status)
   const taskId = stringFlag(flags.taskId)
+  const files = (stringFlag(flags.files) ?? "").split(",").filter(Boolean)
   try {
     if (verb === "list") {
       const agents = list.agents
@@ -50,9 +61,19 @@ async function run([verb = "list", name, task]: string[], flags: Record<string, 
       return 0
     }
     if (verb === "wait") return await waitForRedirects(list, flags)
+    if (verb === "claims") {
+      const claims = list.claims
+      if (flags.json) console.log(JSON.stringify(claims, null, 2))
+      else if (!claims.length) console.log(`no files claimed (${list.prefix})`)
+      else for (const { name, path } of claims) console.log(`${name}  ${path}`)
+      return 0
+    }
     if (!name || (verb === "add" && !task)) return usage()
-    if (verb === "add") console.log(list.add(name, task!, { status, taskId }).name)
-    else if (verb === "set") list.set(name, { status, taskId })
+    if (verb === "add") console.log(list.add(name, task!, { status, taskId, files }).name)
+    else if (verb === "claim") {
+      if (!task) return usage()
+      console.log(list.claim(name, [task, ...more]).join("\n"))
+    } else if (verb === "set") list.set(name, { status, taskId })
     else if (verb === "done") await recordTook(list, list.done(name))
     else if (verb === "told") list.told(name)
     else return usage()
@@ -132,8 +153,9 @@ function age(ms: number): string {
 /** Print how to call it;  exit code 2, a usage error, as the other `epic` groups' tools. */
 function usage(): number {
   console.error(
-    'usage:  epic agents add <name> "<task>" [--status ...] [--task-id <id>] | set <name> [--status ...] ' +
-      "[--task-id <id>] | done <name> | list [--json] | wait [--every <s>] [--max <s>] [--json] | told <name>   " +
+    'usage:  epic agents add <name> "<task>" [--status ...] [--task-id <id>] [--files <path,...>] | ' +
+      "set <name> [--status ...] [--task-id <id>] | claim <name> <path...> | claims [--json] | done <name> | " +
+      "list [--json] | wait [--every <s>] [--max <s>] [--json] | told <name>   " +
       "(any verb:  [--epic <name>])"
   )
   return 2

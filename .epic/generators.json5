@@ -73,6 +73,29 @@
       "run": ["yarn", "spell:test:fixtures:bless"]
     },
     {
+      // epic's generated files (epic `epic-engine` T77):  listed so a worktree's merge-main moves them aside and
+      // rebuilds them, rather than refusing them as someone's changes;  `epic/.gitattributes` marks the same paths
+      "name": "epics pack",
+      "outputs": ["epic/src/components/__pack/epics.{catalog,entry}.ts", "epic/src/components/__pack/epics.pack.js"],
+      "cwd": "epic",
+      "run": ["yarn", "pack:build"]
+    },
+    {
+      "name": "Epic UI site data",
+      "outputs": ["epic/src/docs/__data/{components,search}.json5"],
+      "cwd": "epic",
+      "run": ["yarn", "site:data"]
+    },
+    {
+      "name": "epic docs bundles",
+      "outputs": [
+        "epic/src/tools/_assets/{spell-ui,spell-comments,commands,core-reference,spell-syntax}.js",
+        "epic/src/tools/_assets/lazy/*.js"
+      ],
+      "cwd": "epic",
+      "run": ["node", "src/tools/bundle-spell-ui.js"]
+    },
+    {
       "name": "App UI data",
       "outputs": ["app/app/docs/__data/{components,search}.json5"],
       "cwd": "app",

@@ -29,7 +29,8 @@ import {
   type PlanFacts,
   type PlanSummary,
   type RepoState,
-  type RunningSession
+  type RunningSession,
+  stringFlag
 } from "./command.types"
 import { CheckoutPatches } from "./CheckoutPatches"
 import { CheckoutServers } from "./CheckoutServers"
@@ -38,6 +39,9 @@ import { LeftoverFolders } from "./LeftoverFolders"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
 import { Shared } from "./Shared"
+import { type ClaimOf } from "./StrayFiles"
+import { Turns } from "./Turns"
+import { AgentList } from "spell/epic/tools/AgentList"
 import { tsxImports } from "spell/epic/tools/packageDir"
 
 /****************
@@ -158,7 +162,12 @@ export class Worktrees {
       }
       case "merge-main": {
         const checkout = EpicCheckout.nearest({ marker: ".git" })
-        const reports = MainMerge.runAll(checkout, flags.continue ? "continue" : "start")
+        // one merge at a time on the machine (`Turns`);  never moving aside a file another running agent claims
+        const as = stringFlag(flags.as)
+        const claimOf = Worktrees.claimsIn(checkout, as)
+        const reports = Turns.take(`merge`, `epic worktree merge-main (${basename(checkout)})`, () =>
+          MainMerge.runAll(checkout, flags.continue ? "continue" : "start", (root) => new MainMerge({ root, claimOf }))
+        )
         // one repo:  its report as before;  a multi-repo top:  one per repo, `repo` in each
         const single = reports.length === 1 && !reports[0]!.repo
         if (flags.json) CLI.out(JSON.stringify(single ? reports[0] : reports, null, 2))
@@ -209,6 +218,19 @@ export class Worktrees {
     return folder
   }
 
+  /**
+   * The running agent claiming a file in `checkout` (its epic's list, `AgentList.claimOf()`), agent `as` left out:
+   * a merge never moves aside a file another agent is changing (epic `epic-engine` T77).
+   * - NEVER throws:  a list that won't read claims nothing
+   */
+  static claimsIn(checkout: string, as?: string): ClaimOf {
+    try {
+      const list = new AgentList(checkout)
+      return (path) => list.claimOf(path, { except: as })
+    } catch {
+      return () => undefined
+    }
+  }
   ////////////////
   // ## Moving worktrees to the new place
   ////////////////

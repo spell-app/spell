@@ -1,0 +1,25 @@
+# Generated files:  each is a function of BOTH branches' source, so a line merge of two versions is never right.
+# - `linguist-generated`:  collapsed in GitHub's PR diffs ("Load diff")
+# - `merge=binary`:  changed on both sides => git keeps ours, marks it conflicted, and never interleaves the two;
+#   `epic worktree merge-main` then regenerates it from the merged source (its table:
+#   `.epic/generators.json5`, read by spell-epic's `MainMerge`)
+# - `-diff`:  minified;  `git diff` says "Binary files differ" instead of printing megabytes of one line
+# NOT `merge=ours`:  it silently drops the other side's changes, flips meaning in a rebase, and GitHub ignores it.
+# - Listed since epic `epic-engine` T77:  before, every merge-main in a worktree refused them as someone's changes.
+
+# The epics pack (`yarn pack:build`)
+src/components/__pack/epics.catalog.ts                         linguist-generated merge=binary
+src/components/__pack/epics.entry.ts                           linguist-generated merge=binary
+src/components/__pack/epics.pack.js                            linguist-generated merge=binary -diff
+
+# Epic UI's site data (`yarn site:data`);  `pages.json5` is hand-kept
+src/docs/__data/components.json5                               linguist-generated merge=binary
+src/docs/__data/search.json5                                   linguist-generated merge=binary
+
+# The docs pages' bundles (`node src/tools/bundle-spell-ui.js`);  the `*.entry.js` beside them are their sources
+src/tools/_assets/spell-ui.js                                  linguist-generated merge=binary -diff
+src/tools/_assets/spell-comments.js                            linguist-generated merge=binary -diff
+src/tools/_assets/commands.js                                  linguist-generated merge=binary -diff
+src/tools/_assets/core-reference.js                            linguist-generated merge=binary -diff
+src/tools/_assets/spell-syntax.js                              linguist-generated merge=binary -diff
+src/tools/_assets/lazy/*.js                                    linguist-generated merge=binary -diff

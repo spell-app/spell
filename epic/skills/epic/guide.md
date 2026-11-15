@@ -52,6 +52,11 @@ epic pages link <page> --show     # the page's links, to give the person
 
 ## build -- Build a phase
 
+An agent that can start background agents keeps its own session free to answer the person, and has them do the work
+(the epic skill's "The session answers;  agents build"):  each one claims its files (`epic agents claim <name>
+<path...>`), merges with `epic worktree merge-main --as <name>`, and runs a full test run in its turn,
+`epic turns run test -- yarn test`.  Else, the steps below, here.
+
 1. `epic phase <epic>#P3 active`, and the page's line:  `epic inbox status <epic> "Building P3"`.
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
@@ -81,6 +86,10 @@ Nothing reaches you until you look:
   - Without it, the page says to ask you to run it.
 
 Then, for what it printed:
+0. Busy with other work when it came:  apply the quick marks now (`epic inbox apply <epic>`), put a Noted card on each
+   heavy one (`epic update <epic>#I3 noted "Queued:  after <what you're on>"`), so they see it was heard, then finish
+   what you were on first.  An agent that can run a command in the background keeps `epic inbox wait <epic>` running
+   the whole time it works, armed again as it exits:  a Send then reaches it mid-work (epic `epic-engine` I286).
 1. `epic inbox status <epic> "Responding" --items <ids>`.
 2. Requests for now (Add Details, revisit now):  per item,
    `epic update <epic>#J3 underway "<what you take it to be>"`, write the answer

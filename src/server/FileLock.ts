@@ -1,4 +1,4 @@
-import { closeSync, openSync, rmSync, statSync } from "node:fs"
+import { closeSync, openSync, readFileSync, rmSync, statSync, writeSync } from "node:fs"
 
 // By their files, with their `.ts`:  plain `node` loads this file (below)
 import { waitUntilSync } from "spell/util/node/timing.ts"
@@ -12,6 +12,8 @@ import { FileLockError } from "./server.types.ts"
  * - waits up to `wait` ms (default 20s), then throws a `FileLockError`
  * - or tries ONCE (`runOnce()`):  answers `"held"` when another holder has it, without waiting
  * - a lock older than `stale` ms (default 60s) is a crashed holder's, and is taken over
+ * - the lock file holds its holder:  `<pid> <label>` (`holder()`);  a holder whose process is gone is stale at once,
+ *   whatever its age, so a long `stale` (a merge, a test run) never waits on a crashed one
  * - writers that don't lock (VS Code, an agent's edit tool) aren't stopped:
  *   the page server's `If-Match` check catches those
  * - From goals' `withLock()` (also copied into the old `plan-doc.js`).
@@ -34,11 +36,33 @@ export class FileLock {
   /** age at which a lock is a dead holder's, ms */
   readonly stale: number
 
-  constructor(file: string, { wait = 20_000, stale = 60_000 }: FileLockProps = {}) {
+  /** what the lock file says about its holder, after its pid:  `epic merge seo` */
+  readonly label: string
+
+  constructor(file: string, { wait = 20_000, stale = 60_000, label = "" }: FileLockProps = {}) {
     this.file = file
     this.lockFile = `${file}.lock`
     this.wait = wait
     this.stale = stale
+    this.label = label
+  }
+
+  /**
+   * Who holds the lock now:  `{ pid, label, since }`;  `undefined` when nobody does.
+   * - `pid` 0:  a holder that wrote nothing (an older writer)
+   */
+  holder(): FileLockHolder | undefined {
+    const since = statSync(this.lockFile, { throwIfNoEntry: false })?.mtimeMs
+    if (since === undefined) return undefined
+    let text = ""
+    try {
+      text = readFileSync(this.lockFile, "utf8")
+    } catch {
+      // gone between the two reads:  nobody holds it
+      return undefined
+    }
+    const [, pid = "0", label = ""] = /^(\d+) ?(.*)$/s.exec(text.trim()) ?? []
+    return { pid: Number(pid), label, since: new Date(since) }
   }
 
   /** Run `fn` holding the lock on `file`, blocking while waiting. */
@@ -101,12 +125,18 @@ export class FileLock {
    */
   tryAcquire(): boolean {
     try {
-      closeSync(openSync(this.lockFile, "wx"))
+      const fd = openSync(this.lockFile, "wx")
+      try {
+        writeSync(fd, `${process.pid} ${this.label}`.trim())
+      } finally {
+        closeSync(fd)
+      }
       return true
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
-      const age = Date.now() - (statSync(this.lockFile, { throwIfNoEntry: false })?.mtimeMs ?? Date.now())
-      if (age > this.stale) rmSync(this.lockFile, { force: true })
+      const holder = this.holder()
+      const age = Date.now() - (holder?.since.getTime() ?? Date.now())
+      if (age > this.stale || (holder?.pid && !isAlive(holder.pid))) rmSync(this.lockFile, { force: true })
       return false
     }
   }
@@ -122,9 +152,31 @@ export class FileLock {
   }
 }
 
+/** Whether process `pid` is still running on this machine. */
+function isAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (error) {
+    // EPERM:  running, someone else's
+    return (error as NodeJS.ErrnoException).code === "EPERM"
+  }
+}
+
 /**
  * `new FileLock()` props.
  * - `wait`:  longest wait, ms
  * - `stale`:  age at which a lock is taken over, ms
+ * - `label`:  what the lock file says about its holder, after its pid (`holder()`)
  */
-export type FileLockProps = { wait?: number; stale?: number }
+export type FileLockProps = { wait?: number; stale?: number; label?: string }
+
+/** Who holds a lock (`FileLock.holder()`). */
+export type FileLockHolder = {
+  /** its process;  0 when it wrote none */
+  pid: number
+  /** what it said it was doing:  `epic merge seo`;  `""` for nothing */
+  label: string
+  /** when it took the lock */
+  since: Date
+}

@@ -77,9 +77,31 @@ export class MethodScope extends BlockScope {
       if (thingName) this.variables.add({ name: thisVar, output: thingName, datatype, declaredBy })
       else this.variables.add({ name: thisVar, output: "this", isAlias: true, datatype, declaredBy })
     }
+    if (thisVar) this.addSuperTypeNames(thisVar, thingName)
     if (mapItTo && !this.variables.get("it", "LOCAL_ONLY")) {
       // TODO: scope:this ??
       this.variables.add({ name: "it", output: mapItTo, isAlias: true, datatype, declaredBy })
+    }
+  }
+
+  /**
+   * `the pile` in a foundation's lines, as `the foundation`:  each kind up its type's chain names the thing too
+   * (epic `language` J188).
+   * - Only when `thisVar` is its type's own name (`foundation` for a `Foundation`), not `it` or another word.
+   * - AFTER every other name:  a blank (`a pile`), an argument, a variable of that name anywhere up the scopes
+   *   (a loop's `pile`, the program's) wins, and a loop inside us shadows it as it would `thisVar`.
+   */
+  private addSuperTypeNames(thisVar: string, thingName: string | undefined) {
+    const datatype = this.itDatatype
+    const type = typeof datatype === "string" ? this.getType(datatype) : undefined
+    // `home-foundation`, a method's, or `homefoundation`, a rule's:  the same name
+    if (!type || type.instanceName !== P.instanceCase(thisVar.replace(/[-_\s]/g, ""))) return
+    const { declaredBy } = this
+    for (const superType of type.chain().slice(1)) {
+      const name = superType.instanceName
+      if (this.variables.get(name)) continue
+      if (thingName) this.variables.add({ name, output: thingName, datatype, declaredBy })
+      else this.variables.add({ name, output: "this", isAlias: true, datatype, declaredBy })
     }
   }
 

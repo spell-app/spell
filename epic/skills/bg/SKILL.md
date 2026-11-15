@@ -109,7 +109,10 @@ The task, word for word:
   "<p>chose X over Y because Z</p>" --calm` (`--calm` unless it would surprise them:  the epic skill's "5. Each
   phase", step 2);  else in your report.  A choice you can't make safely (it would delete or
   overwrite work, publish anything, or change what the task means):  stop there, and make it your report's question.
-- Other running agents:  `epic agents list`.  Don't edit files another one's task names.
+- Other running agents:  `epic agents list`.  Claim the files you'll change first, `epic agents claim <full name>
+  <path...>` (a file, a folder or a glob);  it refuses one another agent has, naming it:  leave that file alone.
+  Merge `main` in with `epic worktree merge-main --as <full name>`;  a FULL test run in its turn,
+  `epic turns run test -- yarn test` (the epic skill's "The session answers;  agents build").
 - Your LAST message is your report, short:  what changed (files), where to look, checks run with numbers, judgement
   calls (ids), and anything that needs the person, a question last.  Don't run `epic agents done` for yourself:  the
   session does.

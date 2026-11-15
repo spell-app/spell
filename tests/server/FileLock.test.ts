@@ -40,6 +40,20 @@ describe("FileLock", () => {
     expect(existsSync(`${file}.lock`)).toBe(false)
   })
 
+  test("holder():  the lock names its holder;  a holder whose process is gone is taken over at once", () => {
+    const file = join(DIR, "holder.json")
+    const seen = SRV.FileLock.run(file, () => new SRV.FileLock(file).holder(), { label: "epic merge seo" })
+    expect(seen).toMatchObject({ pid: process.pid, label: "epic merge seo" })
+    expect(new SRV.FileLock(file).holder()).toBeUndefined()
+    // a pid nobody runs:  stale at once, however long `stale` is
+    writeFileSync(`${file}.lock`, "999999 epic merge gone")
+    expect(SRV.FileLock.runOnce(file, () => "ran", { stale: 3_600_000 })).toBe("ran")
+    // a live holder (this process) with a long `stale`:  held
+    writeFileSync(`${file}.lock`, `${process.pid} busy`)
+    expect(SRV.FileLock.runOnce(file, () => "ran", { stale: 3_600_000 })).toBe(SRV.FileLock.HELD)
+    rmSync(`${file}.lock`)
+  })
+
   test("runOnce():  two takers at once, in two processes:  exactly one wins", async () => {
     const file = join(DIR, "race.json")
     const lock = new URL("../../src/server/FileLock.ts", import.meta.url).pathname

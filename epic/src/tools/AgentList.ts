@@ -16,11 +16,16 @@
  *     as the review inbox's (`ReviewInbox`).
  * - REDIRECTS:  a note Owen sends a running agent from the page waits in its entry, untold,
  *   until a session waiting on the list (`epic agents wait`) passes it on (`SendMessage`) and marks it `told()`
+ * - CLAIMS (epic `epic-engine` T77):  the files an agent is changing, paths from the checkout's root, a folder or a
+ *   glob each (`epic/src/components/__pack/`, `epic/src/tools/_assets/**`):
+ *   - two running agents never claim the same file:  `claim()` refuses one that overlaps another's, naming it
+ *   - a merge never moves aside a file a running agent claims (`claimOf()`, `StrayFiles.checkClaims()`)
+ *   - they go with the agent (`done()`)
  * - an agent leaves the list when it finishes (`done()`):  the list is what's RUNNING;  empty, the file goes
  * - NOT in the record:  the epic page says what agents DID;  this says what they're doing now
  */
 import { existsSync } from "node:fs"
-import { basename, dirname, join, resolve } from "node:path"
+import { basename, dirname, join, matchesGlob, resolve } from "node:path"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
@@ -81,7 +86,11 @@ export class AgentList {
    * Add agent `name`, doing `task`;  returns its entry (its full name).
    * - throws if an agent of that name is running
    */
-  add(name: string, task: string, { status = "active", taskId }: { status?: string; taskId?: string } = {}) {
+  add(
+    name: string,
+    task: string,
+    { status = "active", taskId, files = [] }: { status?: string; taskId?: string; files?: string[] } = {}
+  ) {
     checkStatus(status)
     const entry: RunningAgent = { name: this.fullName(name), task, status, started: new Date().toISOString() }
     if (taskId) entry.taskId = taskId
@@ -89,9 +98,71 @@ export class AgentList {
       if (agents.some((agent) => agent.name === entry.name)) {
         throw new AgentListError(`AgentList.add():  \`${entry.name}\` is running already;  pick another name`)
       }
+      if (files.length) entry.files = AgentList.checkClaims(agents, entry.name, files)
       agents.push(entry)
     })
     return entry
+  }
+
+  ////////////////
+  // ## Claims
+  ////////////////
+
+  /**
+   * Agent `name` claims `paths` (from the checkout's root:  a file, a folder or a glob), beside what it claimed
+   * already;  returns its claims after.
+   * - throws, naming each clash, if another running agent claims any of them:  nothing claimed
+   * - throws if no such agent is running
+   */
+  claim(name: string, paths: string[]): string[] {
+    return this.update((agents) => {
+      const agent = this.find(agents, name)
+      const claimed = AgentList.checkClaims(agents, agent.name, paths)
+      agent.files = [...new Set([...(agent.files ?? []), ...claimed])]
+      return agent.files
+    })
+  }
+
+  /** Every running agent's claims:  `{ name, path }` each, in list order. */
+  get claims(): { name: string; path: string }[] {
+    return this.agents.flatMap(({ name, files = [] }) => files.map((path) => ({ name, path })))
+  }
+
+  /**
+   * The running agent claiming file `path` (from the checkout's root), and its claim;  `undefined` when none does.
+   * - `except`:  an agent whose claims don't count (the one asking:  its own files are its to move)
+   */
+  claimOf(path: string, { except }: { except?: string } = {}): { name: string; claim: string } | undefined {
+    const skip = except ? this.fullName(except) : undefined
+    const found = this.claims.find(({ name, path: claim }) => name !== skip && AgentList.covers(claim, path))
+    return found && { name: found.name, claim: found.path }
+  }
+
+  /** Whether claim `claim` (a file, a folder or a glob) covers `path`. */
+  static covers(claim: string, path: string): boolean {
+    const [cleanClaim, cleanPath] = [tidyPath(claim), tidyPath(path)]
+    return cleanPath === cleanClaim || cleanPath.startsWith(`${cleanClaim}/`) || matchesGlob(cleanPath, cleanClaim)
+  }
+
+  /**
+   * `paths` tidied (no `./`, no trailing `/`), once each;  throws, naming every clash, if another agent than
+   * `name` in `agents` claims one that overlaps.
+   */
+  private static checkClaims(agents: RunningAgent[], name: string, paths: string[]): string[] {
+    const tidy = [...new Set(paths.map(tidyPath).filter(Boolean))]
+    const clashes = agents
+      .filter((agent) => agent.name !== name)
+      .flatMap((agent) =>
+        (agent.files ?? []).flatMap((theirs) =>
+          tidy.filter((mine) => overlaps(mine, theirs)).map((mine) => `  ${mine}:  ${agent.name} has ${theirs}`)
+        )
+      )
+    if (clashes.length)
+      throw new AgentListError(
+        `AgentList:  \`${name}\` can't claim files another agent is changing;  wait for it ` +
+          `(set --status "blocked on <name>"):\n${clashes.join("\n")}`
+      )
+    return tidy
   }
 
   /**
@@ -205,6 +276,16 @@ export class AgentList {
   }
 }
 
+/** `path` as claims compare it:  no leading `./`, no trailing `/`. */
+function tidyPath(path: string): string {
+  return path.trim().replace(/^\.\//, "").replace(/\/+$/, "")
+}
+
+/** Whether claims `a` and `b` (files, folders or globs) could cover the same file. */
+function overlaps(a: string, b: string): boolean {
+  return AgentList.covers(a, b) || AgentList.covers(b, a)
+}
+
 /** Throws unless `status` is one `AgentList` knows:  `active`, or `blocked on <name>`. */
 function checkStatus(status: string) {
   if (!STATUS.test(status)) {
@@ -236,6 +317,8 @@ export type RunningAgent = {
   started: string
   /** Claude Code's id for its background task:  what `/bg stop` stops */
   taskId?: string
+  /** the files it's changing, from the checkout's root:  a file, a folder or a glob each (`claim()`) */
+  files?: string[]
   /** Owen's notes to steer it, from the epic page's Agents box, oldest first */
   redirects?: Redirect[]
 }

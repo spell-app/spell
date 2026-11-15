@@ -733,6 +733,8 @@ A kind that says so is saved in a file of its own.
   - In the body:
     - `the card` is the card
     - `it`, `its` and `the tableau` are the list
+    - so is each kind up its chain, `the pile` in a foundation's, unless a blank or variable has that name
+      (`P.MethodScope`, epic `language` J188:  in every type's rules and actions)
 - It compiles to a method of the list's class, overriding `List`'s yes.
   - `canTake(card) {...}` or `canGiveUp(card) {...}`
   - It's hoisted into the class like any member.
