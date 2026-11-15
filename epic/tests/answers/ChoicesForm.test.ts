@@ -9,6 +9,9 @@ import {
   type ChoicesDraft
 } from "spell/epic/answers/answers.types"
 
+/** How long a save waits out a page server that doesn't answer (`ServerLink.post()`), and a moment more. */
+const SERVER_WAIT_MS = 31_000
+
 ////////////////
 // ## Fakes
 ////////////////
@@ -272,7 +275,8 @@ describe("ChoicesForm", () => {
     server.isDown = true
     row.typed = "opened"
     form.edited()
-    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
+    // a save waits out a restart first (`ServerLink.post()`, epic `epic-engine` I294)
+    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS + SERVER_WAIT_MS)
     expect(form.isSaveError).toBe(true)
     // a reload:  the browser's copy is newer than anything the server has
     vi.setSystemTime(Date.parse("2026-10-14T05:00:00.000Z"))
@@ -306,10 +310,13 @@ describe("ChoicesForm", () => {
     row.typed = "open"
     server.isDown = true
     form.edited()
-    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
+    // a save waits out a restart first (`ServerLink.post()`, epic `epic-engine` I294):  "saving…" meanwhile
+    await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS + 5000)
+    expect([form.isSaveError, form.savedText]).toEqual([false, "saving…"])
+    await vi.advanceTimersByTimeAsync(SERVER_WAIT_MS)
     expect([form.isSaveError, form.savedText]).toEqual([
       true,
-      "Kept in this browser only:  couldn't reach the page server (Failed to fetch);  trying again every 3s."
+      "Kept in this browser only:  the page server didn't answer for 30s (Failed to fetch):  is it running?;  trying again every 3s."
     ])
     await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
     expect(form.isSaveError).toBe(true)

@@ -219,6 +219,10 @@ export type ElementReadResult = { ok: boolean; status: number; html?: string; et
  *   field focused;  never in the middle of a review
  * - any other file changed:  says so (`spell-server:changed`, `FileChange`), and does nothing else
  *   - a page that loads it (a body from a file) re-fetches it
+ * - the server going away and coming back (its socket closing, then opening again):  `spell-server:down`, then
+ *   `spell-server:up`, plain events on `window` (epic `epic-engine` I294)
+ *   - a page's polls hold off meanwhile (spell-epic's `ServerLink.watch()`), and look again once it's back,
+ *     so a restart leaves no row of failed requests on the console
  * - keeps its place across a reload:  the scroll position (`sessionStorage`, when it works);
  *   the docs runtime keeps its folds and comment drafts itself (`localStorage`)
  * - in a frame (VS Code's "Epic Docs" and "Review" views, spell-epic's `vscode/src/DocView.ts`):
@@ -449,12 +453,20 @@ export function liveClient(scrollKey: string): void {
    *   - 0.5s after an open socket closes
    *   - `wait` ms after each try that failed, doubling up to 10s
    */
+  /** The socket closed and hasn't opened again:  the server is down (`spell-server:down` / `spell-server:up`). */
+  let serverDown = false
+
   function connect(wait = 1000) {
     const url = new URL(config!.events, location.href)
     url.protocol = url.protocol === "https:" ? "wss:" : "ws:"
     const socket = new WebSocket(url)
     let opened = false
-    socket.addEventListener("open", () => (opened = true))
+    socket.addEventListener("open", () => {
+      opened = true
+      // back after a restart:  the page's polls and requests may go on (`ServerLink.watch()`)
+      if (serverDown) dispatchEvent(new Event("spell-server:up"))
+      serverDown = false
+    })
     socket.addEventListener("message", (message: MessageEvent<string>) => {
       const { event, data } = JSON.parse(message.data) as {
         event: string
@@ -472,6 +484,10 @@ export function liveClient(scrollKey: string): void {
       } else if (event === "hello") rememberVersions()
     })
     socket.addEventListener("close", () => {
+      // the server went away (a restart:  every merge into main does it):  the page's polls wait for it, rather than
+      // failing every few seconds on the console (`ServerLink.watch()`, epic `epic-engine` I294)
+      if (opened && !serverDown) dispatchEvent(new Event("spell-server:down"))
+      if (opened) serverDown = true
       const retry = opened ? 500 : wait
       setTimeout(() => connect(Math.min(retry * 2, 10_000)), retry)
     })

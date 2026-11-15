@@ -70,8 +70,12 @@ export function abortableFetch(url: string, fetchParams: RequestInit = {}, fetch
   fetchParams.signal = abortController.signal
   const promise = fetcher(url, fetchParams)
   // Set `completed` semaphore when fetch completes, before anything else happens.
-  void promise.finally(() => {
+  // `then(done, done)`, never `finally()`:  `finally()` makes a SECOND promise that rejects with the fetch, which
+  // nothing handles, so every failed fetch was an uncaught "Failed to fetch" on the page, the caller's own catch or
+  // not (epic `epic-engine` I294:  10 of them in one page server restart)
+  const done = () => {
     completed = true
-  })
+  }
+  promise.then(done, done)
   return wrapPromise(promise)
 }

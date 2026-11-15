@@ -144,10 +144,21 @@ describe("AgentsClient.redirect()", () => {
     expect(refused).toBeInstanceOf(ServerWriteError)
     expect((refused as Error).message).toBe("AgentList:  no agent `sample-ccc` is running")
     expect(client.agents).toHaveLength(2)
-    server.fetch.mockRejectedValueOnce(new TypeError("Failed to fetch"))
-    await expect(client.redirect("sample-aaa", "Hi")).rejects.toThrow(
-      "couldn't reach the page server (Failed to fetch)"
-    )
+  })
+
+  test("a server that doesn't answer for a moment (restarting) is tried again:  the redirect lands (epic `epic-engine` I294)", async () => {
+    const server = new FakeServer()
+    const client = clientOn(server)
+    await client.start()
+    vi.useFakeTimers()
+    try {
+      server.fetch.mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      const redirecting = client.redirect("sample-aaa", "Hi")
+      await vi.advanceTimersByTimeAsync(2000)
+      await expect(redirecting).resolves.toBeUndefined()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   test("a poll while a redirect is on its way is skipped:  its answer is newer", async () => {
