@@ -394,6 +394,17 @@ describe("<epic-item>", () => {
     expect(BUTTONS_OF["todo-in-phase"].map((spec) => spec.action)).toEqual(["revisit", "drop"])
   })
 
+  test("buttonsForItem():  a finished todo draws Revisit and Saw it, never the x that drops it (I296)", () => {
+    expect(buttonsForItem("t1", { status: "done", inPhase: true })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "canceled" })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "open", inPhase: true })).toBe("todo-in-phase")
+    expect(buttonsForItem("i1", { status: "done" })).toBe("issue")
+    expect(BUTTONS_OF["todo-done"].map((spec) => [spec.action, spec.label])).toEqual([
+      ["revisit", "revisitNote"],
+      ["approve", "sawIt"]
+    ])
+  })
+
   test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P2`, its tooltip saying so;  still green", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`

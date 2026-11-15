@@ -33,6 +33,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
  * - `todo-in-phase`:  a todo already in a phase (its `in P52` pill, epic `epic-engine` I271):  Revisit and the x
  *   (`TODO_IN_PHASE_BUTTONS`);  the pill does what the plane would
+ * - `todo-done`:  a todo that's finished, done or canceled (epic `epic-engine` I296):  Revisit and Saw it, no x
+ *   (`TODO_DONE_BUTTONS`)
  * - `part`:  a part of the plan -- an Overview sub-section, the summary:  no Approve (`PART_BUTTONS`)
  * - `phase`:  a phase, still to do (epic `epic-engine` I181):  Do this, Revisit (`PHASE_BUTTONS`);  its note box a part's
  * - `thread`:  a comment thread's, while it's Owen's turn (`<epic-thread>`, epic `epic-engine` P3):
@@ -60,6 +62,7 @@ export const REVIEW_KINDS = [
   "issue",
   "todo",
   "todo-in-phase",
+  "todo-done",
   "part",
   "phase",
   "thread",
@@ -128,6 +131,7 @@ export type ReviewButtonSpec = {
     | "acceptPlan"
     | "deferPhase"
     | "doThis"
+    | "sawIt"
   /** what it does, for a screen reader */
   tip:
     | "approveTip"
@@ -145,6 +149,7 @@ export type ReviewButtonSpec = {
     | "acceptPlanTip"
     | "doThisTip"
     | "doThisIssueTip"
+    | "sawItTip"
 }
 
 /**
@@ -191,6 +196,18 @@ export const TODO_BUTTONS: readonly ReviewButtonSpec[] = [
  * - the pill is its button instead:  a click goes to the phase, an ⌥-click starts it (`EpicItem`)
  */
 export const TODO_IN_PHASE_BUTTONS: readonly ReviewButtonSpec[] = TODO_BUTTONS.filter((spec) => spec.action !== "next")
+
+/**
+ * A FINISHED todo's review buttons, done or canceled (epic `epic-engine` I296;  Owen, 2026-11-15:  "this should have a
+ * checkmark ... for me to say 'saw it' rather than clicking the `x`"):  Revisit, then Saw it.
+ * - Saw it (`approve`, green):  `inbox apply` marks it reviewed, and its update label goes (`PlanDoc`, I285)
+ * - no x:  on a todo it's Drop, which CANCELS it -- never the way to say "seen"
+ * - no plane:  there's nothing left to queue
+ */
+export const TODO_DONE_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "revisit", color: "blue", icon: "history", label: "revisitNote", tip: "revisitNoteTip" },
+  { action: "approve", color: "green", icon: "check", label: "sawIt", tip: "sawItTip" }
+]
 
 /**
  * A part of the plan's review buttons -- an Overview sub-section's (decision Q14), a phase's, the summary's:
@@ -288,6 +305,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   issue: ISSUE_BUTTONS,
   todo: TODO_BUTTONS,
   "todo-in-phase": TODO_IN_PHASE_BUTTONS,
+  "todo-done": TODO_DONE_BUTTONS,
   part: PART_BUTTONS,
   phase: PHASE_BUTTONS,
   thread: [],
@@ -522,6 +540,7 @@ export const REVIEW_NAME_TEXTS = [
     description: "A todo's review button:  Revisit's name."
   },
   { key: "drop", text: "Drop it", description: "A todo's review button (the x):  its name." },
+  { key: "sawIt", text: "Saw it", description: "A finished todo's review button (the check):  its name (I296)." },
   {
     key: "doThis",
     text: "Do this",
@@ -613,6 +632,11 @@ export const REVIEW_TEXTS = [
     key: "revisitNoteTip",
     text: "Write a note for Claude in the box at its end",
     description: "A todo's review button:  what Revisit does."
+  },
+  {
+    key: "sawItTip",
+    text: "It's done and you've looked:  marked reviewed, its update label gone",
+    description: "A finished todo's review button:  what Saw it does (I296)."
   },
   {
     key: "dropTip",

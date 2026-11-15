@@ -54,7 +54,7 @@ export const epicReviewVocabulary = {
       default: "item",
       description:
         "Whose:  `item` (Make Todo, Revisit, Approve), `issue` (an issue or a judgement call:  Do this, Revisit, Approve), `todo` (the plane, Revisit, the x;  each takes the note " +
-        "box's note along), `todo-in-phase` (a todo already in a phase:  Revisit, the x;  its `in P52` pill goes to the phase, and starts it on an ⌥-click), `part` (an Overview sub-section, the summary:  no Approve), `phase` (a phase still to do:  Do this, " +
+        "box's note along), `todo-in-phase` (a todo already in a phase:  Revisit, the x;  its `in P52` pill goes to the phase, and starts it on an ⌥-click), `todo-done` (a finished todo, done or canceled:  Revisit, Saw it;  no x, which would drop it), `part` (an Overview sub-section, the summary:  no Approve), `phase` (a phase still to do:  Do this, " +
         "Revisit);  a " +
         "comment thread's answer, drawn by `<epic-thread>` with no inbox behind it:  `thread` (That's good, Reply, " +
         "Skip it), `closed` (Reopen);  `proposal` (an open phase while the page's phases are agreed:  Looks good, " +

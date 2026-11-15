@@ -3195,6 +3195,11 @@
           "description": "A todo's review button (the x):  its name."
         },
         {
+          "key": "sawIt",
+          "text": "Saw it",
+          "description": "A finished todo's review button (the check):  its name (I296)."
+        },
+        {
           "key": "doThis",
           "text": "Do this",
           "description": "A to-do phase's first review button, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."

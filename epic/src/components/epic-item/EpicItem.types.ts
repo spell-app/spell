@@ -339,18 +339,26 @@ export function isTodo(id: string | undefined, limit: boolean | undefined): bool
   return TODO_ID.test(id ?? "") && !limit
 }
 
+/** A todo's statuses once it's finished:  nothing left to queue or drop (I296). */
+const FINISHED_TODO = /^(done|canceled)$/
+
 /**
  * Which review buttons item `id` draws (`<epic-review buttons>`):
  * a todo's;  an issue's or a call's, whose first is Do this (I232);  else an item's, Make Todo first.
  * - `limit`:  its `limit` (a todo that's a limit draws an item's)
  * - `inPhase`:  it's already in a phase (`handled` or `taken-in`, its `in P52` pill):  a todo draws no plane
  *   (`todo-in-phase`, epic `epic-engine` I271)
+ * - `status`:  its status;  a todo that's `done` or `canceled` draws Revisit and Saw it, never the x, which would
+ *   drop it (`todo-done`, epic `epic-engine` I296)
  */
 export function buttonsForItem(
   id: string | undefined,
-  { limit, inPhase }: { limit?: boolean; inPhase?: boolean } = {}
-): "todo" | "todo-in-phase" | "issue" | "item" {
-  if (isTodo(id, limit)) return inPhase ? "todo-in-phase" : "todo"
+  { limit, inPhase, status }: { limit?: boolean; inPhase?: boolean; status?: string | null } = {}
+): "todo" | "todo-in-phase" | "todo-done" | "issue" | "item" {
+  if (isTodo(id, limit)) {
+    if (status && FINISHED_TODO.test(status)) return "todo-done"
+    return inPhase ? "todo-in-phase" : "todo"
+  }
   return CALM_ID.test(id ?? "") ? "issue" : "item"
 }
 

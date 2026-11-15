@@ -736,9 +736,16 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return this.reviewControl("note", "note-box")
   }
 
-  /** Which review buttons it draws:  a todo already in a phase draws no plane (`todo-in-phase`, I271). */
+  /**
+   * Which review buttons it draws:  a todo already in a phase draws no plane (`todo-in-phase`, I271);
+   * a finished one, Revisit and Saw it (`todo-done`, I296).
+   */
   get buttonsKind(): ReturnType<typeof buttonsForItem> {
-    return buttonsForItem(this.id, { limit: this.limit, inPhase: !!(this.handled || this.takenIn) })
+    return buttonsForItem(this.id, {
+      limit: this.limit,
+      inPhase: !!(this.handled || this.takenIn),
+      status: this.status
+    })
   }
 
   /** One of its review controls (`<epic-review>`):  what it `shows`, as its `part`. */
