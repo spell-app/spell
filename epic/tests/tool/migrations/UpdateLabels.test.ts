@@ -91,4 +91,28 @@ describe("update-labels", () => {
     // IDEMPOTENT
     expect(STEP.run(document, NOW)).toBe(false)
   })
+  test("an item fixed for review with no label gets FIXED (editor's I133, I298);  closed, open or checked ones don't", () => {
+    const document = page(
+      `<epic-item id="i133" status="open" fixed changed="2026-11-14T17:08:57-05:00" title="I133 words"></epic-item>` +
+        `<epic-item id="i134" status="open" changed="2026-11-14T17:08:57-05:00" title="I134 words"></epic-item>` +
+        `<epic-item id="i135" status="done" changed="2026-11-14T17:08:57-05:00" title="I135 words"></epic-item>` +
+        `<epic-item id="i136" status="open" fixed review-as="approve" changed="2026-11-14T17:08:57-05:00">` +
+        `<span slot="title">I136 words</span></epic-item>`,
+      `<epic-event at="2026-11-14T18:00-05:00">I136 approved:  reviewed</epic-event>`
+    )
+    const notes: string[] = []
+    expect(STEP.run(document, { ...NOW, notes })).toBe(true)
+    expect(["i133", "i134", "i135", "i136"].map((id) => labelOf(document, id))).toEqual([
+      "fixed",
+      "gone",
+      "gone",
+      "gone"
+    ])
+    const i133 = document.getElementById("i133")!
+    expect(i133.hasAttribute("title")).toBe(false)
+    expect(i133.querySelector('[slot="title"]')!.textContent).toBe("I133 words ")
+    expect(notes).toEqual(["update-labels:  fixed for review, label added:  I133"])
+    // idempotent
+    expect(STEP.run(document, { ...NOW, notes: [] })).toBe(false)
+  })
 })
