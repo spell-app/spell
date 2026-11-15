@@ -112,6 +112,23 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toMatch(/whenCartaDroppedOn\(carta\)/)
     })
 
+    test('`cuando una carta se suelta`, `... se arrastra fuera`:  "sobre ella" understood, as English\'s `when a card is dropped` (I100)', () => {
+      const { code, errors } = compiled("drag-handler-short", [
+        "una carta es una vista",
+        "una pila es una lista visible de cartas:",
+        "\t- cuando una carta se suelta:",
+        "\t\timprimir la carta",
+        "\t- cuando una carta se arrastra fuera:",
+        "\t\timprimir 2",
+        "\t- cuando algo se suelta:",
+        "\t\timprimir la cosa"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/whenCartaDroppedOn\(carta\) \{\s+core\.console\.log\(carta\)/)
+      expect(code).toMatch(/whenCartaDraggedOutOf\(carta\)/)
+      expect(code).toMatch(/whenThingDroppedOn\(cosa\)/)
+    })
+
     test("`mientras una carta se arrastra sobre ella`, `cuando algo se suelta sobre ella`:  English's `while ...`, `something` (outline-spell P28)", () => {
       const { code, errors } = compiled("drag-while", [
         "una carta es una vista",
