@@ -14,7 +14,7 @@ import type { monaco, EditWay } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
-import { RunSite, runSite } from "spell/app/app/pages/RunSite"
+import { runSite } from "spell/app/app/pages/RunSite"
 import { THEME_PAGE, siteEditorUrlFor } from "spell/app/app/pages/pages.types"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
@@ -242,7 +242,8 @@ export class EditorStore extends Observable {
     // but not in Run showing a site's page:  its URL names that page (`RunSite`, epic `mockup` P2)
     // the site editor's URL names the project, whichever file is shown (epic `mockup` P4)
     const showsSitePage =
-      (editor.projectPage === "runner" && runSite.address() !== "/") || editor.projectPage === "site"
+      (editor.projectPage === "runner" && (runSite.address() !== "/" || (sameProject && editor.isRunningSite))) ||
+      editor.projectPage === "site"
     if (path !== file.path && !showsSitePage) {
       // console.warn({ path, file: file.path })
       const url = file.location[editor.projectPage === "editor" ? "editorUrl" : "runnerUrl"]
@@ -620,16 +621,31 @@ export class EditorStore extends Observable {
     return entry && project.fileForPage(entry.page)
   }
 
-  /** Run's URL showing file `path` in the running site, when it holds one of the site's pages. */
+  /**
+   * Run's URL showing file `path` in the running site (`RunSite.urlFor()`, epic `mockup` I15):
+   * - the file's own, when it holds one of the site's pages:  `/run/owen@spell/harbor-new/home.spell`
+   * - else the page the site shows now, e.g. for the site file:  Run shows the site, never a file of it
+   * - `undefined` when it's not the current file, or no site of the project runs
+   */
   siteRunUrlFor(path: string): string | undefined {
     const { project, file } = editor
-    const page = project && (project.getFile(path) as SP.AnySpellFile | undefined)
-    if (!project || !(page instanceof SP.SpellFile)) return undefined
-    const head = project.headFor(page)
-    const site = editor.runningSite
-    if (!(head instanceof SP.AlonePage) || !site || file !== page) return undefined
-    const entry = site.allPages().find((each) => each.page === head.className && !each.params?.length)
-    return entry && RunSite.runUrlFor(project.path, entry.address)
+    if (!project || !editor.isRunningSite || file?.path !== path) return undefined
+    return runSite.urlFor(runSite.addressOfFile(path) ?? runSite.address())
+  }
+
+  /** Does the current `project`'s site run, so its pages have addresses? */
+  get isRunningSite(): boolean {
+    return !!editor.runningSite && !!editor.project && editor.lastExecutedPath === editor.project.path
+  }
+
+  /** The running site's pages, in its order:  none when no site of the current `project` runs. */
+  sitePages(): RunningSitePage[] {
+    return editor.isRunningSite ? (editor.runningSite?.allPages() ?? []) : []
+  }
+
+  /** The running site's page at `address`:  `undefined` for none, or when no site of the current `project` runs. */
+  sitePageAt(address: string): RunningSitePage | undefined {
+    return editor.isRunningSite ? editor.runningSite?.pageFor(address)?.entry : undefined
   }
 
   /** The compiled program run last:  `isRunningLatest` compares it. */
@@ -1971,8 +1987,20 @@ let appRuntime: SpellRuntime | undefined
 
 /** What the editor asks the running site:  `SiteBase`, which it never imports. */
 type RunningSite = {
-  pageFor(address: string): { entry: { page: string } } | undefined
-  allPages(): { page: string; address: string; params?: string[] }[]
+  pageFor(address: string): { entry: RunningSitePage } | undefined
+  allPages(): RunningSitePage[]
+}
+
+/** A page of the running site, as its site file lists it (the core's `SitePageEntry`). */
+export type RunningSitePage = {
+  /** Its name in the site file:  `Systems`. */
+  name: string
+  /** Its page's class:  `System`. */
+  page: string
+  /** Its address:  `/hardware/systems`, `/films/:film`. */
+  address: string
+  /** The values its address fills:  `["film"]`. */
+  params?: string[]
 }
 /** Loading `appRuntime`, once asked for. */
 let loadingRuntime: Promise<SpellRuntime> | undefined

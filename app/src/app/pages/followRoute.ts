@@ -15,6 +15,7 @@ import { RunSite, runSite } from "./RunSite"
  * - A bad address shows as `editor.showError()`, never a throw:  an effect that throws halts Solid for the whole page.
  * - A page of a running app, `/run/owen@spell/solitaire/rules`, runs its app, and a SITE shows its page `/rules`
  *   (`RunSite.heard()`, epic `mockup` P2;  `SP.SpellUrls.withoutPage()`).
+ *   - A file of a site, `/run/owen@spell/harbor-new/home.spell`, shows the page it holds (epic `mockup` I15).
  */
 export function followRoute(params: () => Partial<SpellRouteParams>, page: () => EditorPage): void {
   createEffect(
@@ -28,9 +29,19 @@ export function followRoute(params: () => Partial<SpellRouteParams>, page: () =>
         return
       }
       editor.projectPage = page
-      // in Run, the part after the project is a running site's page:  `/run/<project>/films/4` (epic `mockup` P2)
-      if (page === "runner") runSite.heard(RunSite.siteAddressIn(tail, location.pathname))
+      // in Run, the part after the project is a running site's page:  `/run/<project>/films/4` (epic `mockup` P2),
+      // or the file that holds it, `/run/<project>/home.spell` (I15)
+      if (page === "runner") runSite.heard(RunSite.siteAddressIn(tail, location.pathname), fileIn(path))
       editor.selectPath(path).catch((error: unknown) => editor.showError(error))
     }
   )
+}
+
+/** The file `path` names, if it names one:  `undefined` for a project, or a path that names nothing. */
+function fileIn(path: string): string | undefined {
+  try {
+    return new SP.SpellLocation(path).isFilePath ? path : undefined
+  } catch {
+    return undefined
+  }
 }
