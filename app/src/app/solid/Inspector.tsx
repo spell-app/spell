@@ -297,7 +297,7 @@ export class Inspector {
     Inspector.selectAll(next)
     clicks.pivot = pivot
     const place = Inspector.writtenPlaceOf(element)?.place
-    if (place) editor.followed = { path: place.path, line: place.line, from: "parts" }
+    if (place) editor.followed = { path: place.path, line: place.line, column: place.column, from: "parts" }
   }
 
   /**
@@ -1577,6 +1577,8 @@ const UI_PREFIX = "ui-"
 /** Spell UI's controls:  what a plain click selects, beside a drawn thing (Alt-click:  any Spell UI element). */
 const CONTROL_TAGS = new Set([
   "ui-button",
+  // an action's button, `<action "cheat" />`:  it runs its action, with no handler of its own to find it by (I158)
+  "ui-action",
   "ui-input",
   "ui-textarea",
   "ui-checkbox",
@@ -2340,7 +2342,8 @@ class PartSelector {
 
   /**
    * The part under the event's pointer:  the innermost on its path, inside `area`, that's
-   * - a drawn thing (its type's element, a card), or a Spell UI CONTROL (`CONTROL_TAGS`:  an input, a button ...)
+   * - a drawn thing (its type's element, a card), or a Spell UI CONTROL (`CONTROL_TAGS`:  an input, a button,
+   *   an action's button ...)
    * - or a Spell UI element with a handler of its own:  a menu item that acts as a button
    *   (Owen:  "I can't e.g. inspect buttons in the solitaire app header (e.g. cheat button)")
    * - with Alt held, any Spell UI element:  the text or label inside a card too

@@ -237,6 +237,8 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
  * - By statement, as the source map is (Owen:  "This is fine").
  * - Quiet:  it never takes the keyboard's focus, scrolls only what's out of view, and leaves the code alone while
  *   someone's typing in it.
+ * - A part clicked (inspected in the app, a row of the tree) puts the code's caret where it's written too,
+ *   on its tag (epic `editor` I158;  Owen:  "I'd expect it to select `<action "cheat" />` and put the cursor there").
  * - A line that draws or makes something selects it:  every card, for the line that makes them all;  a line inside
  *   a tag, what that tag draws.
  * - A line of the code that draws nothing lets go of what's selected;  one of compiled code leaves it as it was,
@@ -268,7 +270,7 @@ export function FollowAlong() {
       const file = InspectorWrites.fileNamed(followed.path)
       if (!file) return
       // the file showing read, not followed:  opening another one here would run this again (I98)
-      if (file.path === untrack(() => editor.file?.path)) return follower.show(codeEditor, [followed.line])
+      if (file.path === untrack(() => editor.file?.path)) return follower.show(codeEditor, [followed.line], followed)
       if (followed === openedFor) return
       openedFor = followed
       void editor
@@ -276,7 +278,8 @@ export function FollowAlong() {
         .then(() => {
           const shown = editor.shownCodeEditor
           // still the place in focus, and nobody typing:  mark its line in the file now showing
-          if (editor.followed === followed && shown && !shown.hasTextFocus()) follower.show(shown, [followed.line])
+          if (editor.followed === followed && shown && !shown.hasTextFocus())
+            follower.show(shown, [followed.line], followed)
         })
         .catch((error: unknown) => editor.showError(error as Error))
     }
@@ -345,9 +348,16 @@ function lineFollower() {
   onCleanup(clear)
   return {
     clear,
-    /** Mark `lines`, from 0, in `codeEditor`, and bring the first into view;  none:  no mark. */
-    show(codeEditor: monaco.editor.IStandaloneCodeEditor, lines: readonly number[]): void {
+    /**
+     * Mark `lines`, from 0, in `codeEditor`, and bring the first into view;  none:  no mark.
+     * - `caretAt`, a part's place with its column:  the caret goes there, without the keyboard's focus.
+     *   Moved by code, not the mouse or keys, so it isn't followed back (`isCursorMovedToFollow()`).
+     */
+    show(codeEditor: monaco.editor.IStandaloneCodeEditor, lines: readonly number[], caretAt?: FollowedPlace): void {
       if (markedIn !== codeEditor) clear()
+      if (caretAt?.column !== undefined) {
+        codeEditor.setPosition({ lineNumber: caretAt.line + 1, column: caretAt.column + 1 })
+      }
       if (!lines.length) return clear()
       markedIn = codeEditor
       marks ??= codeEditor.createDecorationsCollection()

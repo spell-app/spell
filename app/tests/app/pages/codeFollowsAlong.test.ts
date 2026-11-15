@@ -53,12 +53,14 @@ type DebugGlobals = {
     project: { spellFiles: { path: string }[] }
     showEditor(path: string): void
   }
-  Inspector: { allSelected: { element: Element }[] }
+  Inspector: { allSelected: { element: Element }[]; dismissHelp(): void }
 }
 
 /** What's used of a code editor. */
 type CodeEditorLike = {
   hasTextFocus(): boolean
+  getPosition(): { lineNumber: number; column: number } | null
+  getModel(): { getLineContent(line: number): string } | null
   getScrollTop(): number
   revealLine(line: number): void
   getScrolledVisiblePosition(position: { lineNumber: number; column: number }): { top: number; left: number } | null
@@ -222,6 +224,46 @@ describe.skipIf(!SERVING)("code follows along", () => {
         .click({ force: true })
       await page.waitForTimeout(1000)
       expect((await following(page)).codeHasFocus).toBe(false)
+    }
+  )
+
+  test(
+    "inspect, then a click on an action's button:  its tag is selected, the code's caret on it",
+    { timeout: 150_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire")
+      await showFile(page, "Solitaire.spell")
+      await page.waitForTimeout(1500)
+      // opening the Inspector inspects already;  else Inspect app
+      if (!(await page.locator(".InspectAppButton.inspecting").count())) {
+        await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
+        await page.waitForTimeout(1000)
+      }
+      // Inspect app's help covers the header at this width
+      await page.evaluate(() => (window as unknown as DebugGlobals).Inspector.dismissHelp())
+      await page.waitForTimeout(300)
+      // `<action "cheat" />` is drawn as its shadow root's button:  the host itself is `display: contents`
+      const cheat = await page.evaluate(() => {
+        const action = [...document.querySelectorAll(".AppPaneBody ui-toolbar > ui-action")].find(
+          (each) => each.shadowRoot?.textContent?.trim() === "Cheat"
+        )!
+        const box = action.shadowRoot!.querySelector("button")!.getBoundingClientRect()
+        const [, line, column] = /:(\d+):(\d+)$/.exec(action.getAttribute("data-spell-at")!)!
+        return { x: box.x + box.width / 2, y: box.y + box.height / 2, line: Number(line), column: Number(column) }
+      })
+      await page.mouse.click(cheat.x, cheat.y)
+      await page.waitForTimeout(1500)
+      const state = await following(page)
+      expect(state.selected, "the action's button, not the header around it (I158)").toEqual(["ui-action"])
+      expect(state.followed).toMatchObject({ line: cheat.line, from: "parts" })
+      const caret = await page.evaluate(() => {
+        const code = (window as unknown as DebugGlobals).editor.shownCodeEditor!
+        const { lineNumber, column } = code.getPosition()!
+        return { line: lineNumber - 1, column: column - 1, text: code.getModel()!.getLineContent(lineNumber).trim() }
+      })
+      expect(caret).toEqual({ line: cheat.line, column: cheat.column, text: '<action "cheat"/>' })
+      expect(state.codeHasFocus, "following never takes the keyboard").toBe(false)
     }
   )
 

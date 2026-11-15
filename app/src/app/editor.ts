@@ -2150,6 +2150,8 @@ export type FollowedPlace = {
   path: string
   /** Its line, from 0 */
   line: number
+  /** Its column, from 0, when it's a part's written place:  the code's caret goes there (epic `editor` I158) */
+  column?: number
   /**
    * Where the click was:  that one needn't follow itself.
    * - `edit`:  the code's cursor, where it rests once an edit typed there is drawn (`followOnceDrawn()`)
