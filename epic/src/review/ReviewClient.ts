@@ -307,6 +307,20 @@ export class ReviewClient extends PageStore {
     return this.heldInView.has(id)
   }
 
+  /**
+   * Which of his instant ✓ or x (`approve`, `drop`) is closing item `id`, from the click till his Send lets it go
+   * (epic `epic-engine` I308);  `undefined` when none is (`isClosing()` false, or the hold after a Send).
+   * - his mark while it's in the inbox, else the one held in view after the server applied it (T80)
+   * - the item draws as the server will leave it, its button pressed (`ReviewState.fillOf()`), so the page's own update
+   *   changes nothing on screen (Owen:  "it looks correct, then flashes ... when the update comes in")
+   */
+  closingAs(id: string): string | undefined {
+    if (!this.isClosing(id)) return undefined
+    const mark = this.inbox.marks[id]
+    if (mark && isInstant(id, mark)) return mark.action
+    return this.heldInView.get(id)
+  }
+
   /** Is `id` (`away:<line>`) read:  its Seen in the inbox, or applied and cleared since the page loaded? */
   wasRead(id: string): boolean {
     return this.inbox.marks[id]?.action === "seen" || this.readAway.has(id)

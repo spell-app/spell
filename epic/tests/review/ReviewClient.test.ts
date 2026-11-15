@@ -967,6 +967,32 @@ describe("ReviewClient:  an instant ✓ or x held in view till Send", () => {
     expect([client.isHeldInView("j2"), client.isClosing("j2")]).toEqual([false, false])
   })
 
+  // epic `epic-engine` I308:  "it looks correct, then flashes ... when the update comes in.  Shouldn't flash"
+  test("closingAs():  the same action from the click, through the server applying it, till Send lets it go", async () => {
+    const { client, server } = await started()
+    expect(client.closingAs("q1")).toBeUndefined()
+    client.press("q1", "drop")
+    expect(client.closingAs("q1")).toBe("drop")
+    await vi.waitFor(() => expect(Object.keys(server.inbox.forPage().marks)).toEqual(["q1"]))
+    server.inbox.setMark("q1", null)
+    await vi.waitFor(async () => {
+      await client.refresh()
+      expect(client.markOf("q1")).toBeUndefined()
+    })
+    // the mark is off the inbox, but nothing on screen may change:  still closing as his x
+    expect(client.closingAs("q1")).toBe("drop")
+    expect(await client.send()).toBe(true)
+    expect(client.closingAs("q1")).toBeUndefined()
+  })
+
+  test("closingAs():  none once a second click takes the mark back", async () => {
+    const { client } = await started()
+    client.press("j2", "approve")
+    expect(client.closingAs("j2")).toBe("approve")
+    client.press("j2", "approve")
+    expect(client.closingAs("j2")).toBeUndefined()
+  })
+
   test("applied already:  a second click on the held item asks the server to put it back", async () => {
     const { client, server } = await started()
     client.press("q1", "drop")

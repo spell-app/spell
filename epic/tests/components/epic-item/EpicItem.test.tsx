@@ -386,6 +386,48 @@ describe("<epic-item>", () => {
     }
   })
 
+  test("held in view after his x (T80, T81):  the open issue's buttons stay, though the server closed it", async () => {
+    const held = vi.spyOn(ReviewClient.prototype, "isHeldInView").mockReturnValue(false)
+    try {
+      const { host } = await item(`<epic-item id="i7" title="Gone soon" status="open"></epic-item>`)
+      const buttonsOf = () => (host as unknown as { component: { buttonsKind: string } }).component.buttonsKind
+      expect(buttonsOf()).toBe("issue-open")
+      held.mockReturnValue(true)
+      host.setAttribute("status", "canceled")
+      await Promise.resolve()
+      expect(buttonsOf()).toBe("issue-open")
+      // let go at his Send:  its own buttons again
+      held.mockReturnValue(false)
+      expect(buttonsOf()).toBe("issue")
+    } finally {
+      held.mockRestore()
+    }
+  })
+
+  // epic `epic-engine` I308:  "it looks correct, then flashes ... when the update comes in.  Shouldn't flash"
+  test("closing at his x:  struck and grey from the click, as the server will leave it, so its update changes nothing", async () => {
+    const closing = vi.spyOn(ReviewClient.prototype, "isClosing").mockReturnValue(true)
+    const closingAs = vi.spyOn(ReviewClient.prototype, "closingAs").mockReturnValue("drop")
+    const held = vi.spyOn(ReviewClient.prototype, "isHeldInView").mockReturnValue(true)
+    try {
+      const { host, chip } = await item(`<epic-item id="i8" title="Gone soon" status="open"></epic-item>`)
+      const base = () => host.shadowRoot!.querySelector("[part~='base']")!.className
+      expect(base()).toBe("old canceled item")
+      // its x still pressed, though the server took the mark off the inbox
+      expect(chip.dataset.fill).toBe("dashed")
+      // the server's update lands:  the same look
+      host.setAttribute("status", "canceled")
+      host.setAttribute("state", "old")
+      await Promise.resolve()
+      expect(base()).toBe("old canceled item")
+      expect(host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!.dataset.fill).toBe("dashed")
+    } finally {
+      closing.mockRestore()
+      closingAs.mockRestore()
+      held.mockRestore()
+    }
+  })
+
   test("buttonsForItem():  a todo in a phase draws no plane;  anything else as before", () => {
     expect(buttonsForItem("t1", { inPhase: true })).toBe("todo-in-phase")
     expect(buttonsForItem("t1")).toBe("todo")

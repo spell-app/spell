@@ -141,6 +141,7 @@ export class ReviewState {
         approved: client.markOf(id)?.action === "approve",
         closing: client.isClosing(id),
         heldInView: client.isHeldInView(id),
+        closingAs: client.closingAs(id),
         commentsReplied: client.hasRepliedComments(id)
       }
     }) ?? NO_LIVE_REVIEW
@@ -203,11 +204,15 @@ export class ReviewState {
    * - once Claude has handled a mark, it's gone from the inbox, and every button CLEARS (`none`):
    *   the buttons are Owen's INPUT (Owen, 2026-10-08), and the id chip shows the result
    * - the element's `review-as` stays as the record, never drawn here
+   * - EXCEPT his instant ✓ or x (epic `epic-engine` I308):  the page server takes it off the inbox ~2s after the click,
+   *   but the item is held in view till his Send (T80), so its button stays pressed (`dashed`) as at the click;  the
+   *   page's update of the item then changes nothing on screen (Owen:  "it looks correct, then flashes ... when the
+   *   update comes in.  Shouldn't flash")
    */
   readonly fillOf = (action: ReviewAction): ReviewFill => {
     const mark = this.mark()
-    if (mark?.action !== action || isImmediate(mark)) return "none"
-    return this.isSent() ? "outline" : "dashed"
+    if (mark?.action === action && !isImmediate(mark)) return this.isSent() ? "outline" : "dashed"
+    return !mark && this.liveOf().closingAs === action ? "dashed" : "none"
   }
 
   /** Its id, as the inbox keys it. */
