@@ -1665,10 +1665,11 @@
     .bubbly-tag-foot-spacer {
       width: calc((var(--bubbly-foot-tiny-pad-left) - var(--bubbly-tag-block-inset)) * var(--bubbly-monaco-scale));
     }
-    /* before an attribute's name, and its `=`:  the page's margins */
-    .bubbly-attribute-spacer {
+    /* before a hidden end tag's `/`, drawn as a self-closed tag's (`<div></div>`):  the page's margin, no space in the text */
+    .bubbly-closing-slash-spacer {
       width: 0.33em;
     }
+    /* before an attribute's `=`:  the page's margin;  before its name, the text's own space (Owen) */
     .bubbly-equals-spacer {
       width: calc(2px * var(--bubbly-monaco-scale));
     }
