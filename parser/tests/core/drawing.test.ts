@@ -192,6 +192,25 @@ describe("@drawn", () => {
     expect(element.querySelector("ui-action")?.hasAttribute("icon-only")).toBe(true)
   })
 
+  test('<context-menu><action "undo" icon-only/></context-menu>:  its item keeps its attributes (I102)', () => {
+    class Game extends Thing {
+      restartTheGame(): void {}
+    }
+    core.describeAction(Game, "restartTheGame", { title: "Restart The Game", icon: "refresh" })
+    const game = new Game()
+    const [plain, given] = core.menuItemsOf(game, [
+      "restartTheGame",
+      ["restartTheGame", { "icon-only": true, title: "Restart" }]
+    ])
+    expect(plain?.kind === "action" && plain.attributes).toBeUndefined()
+    expect(given?.kind === "action" && [given.title, given.attributes, given.icon, given.isEnabled]).toEqual([
+      "Restart",
+      { "icon-only": true },
+      "refresh",
+      true
+    ])
+  })
+
   test("a part that throws shows its stand-in, in its own place;  the parts beside it stay (epic `notebook` I5)", () => {
     const card = new Card({ rank: 2 })
     const parts = () => [

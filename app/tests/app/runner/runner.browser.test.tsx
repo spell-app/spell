@@ -1241,9 +1241,9 @@ function dealtAndPlayed(host: HTMLElement): boolean {
 }
 
 /** What an empty foundation shows, in Solitaire's compiled javascript, and an edit of it. */
-const PLACEHOLDER = 'return h("ui-text", { part: "placeholder" }, () => (new Card('
+const PLACEHOLDER = '"prop:suit": () => this.suit, part: "placeholder" })'
 /** `PLACEHOLDER`, edited:  another part name. */
-const EDITED_PLACEHOLDER = 'return h("ui-text", { part: "edited" }, () => (new Card('
+const EDITED_PLACEHOLDER = '"prop:suit": () => this.suit, part: "edited" })'
 
 /** What to run:  `program`, in memory. */
 function source(program: string, name = "Counter"): SpellAppSource {

@@ -39,6 +39,8 @@ import actionCSS from "./UIAction.css?inline"
  * - `icon-only`:  its icon alone, at every width (`:state(icon-only)`), its title its tooltip and its name:
  *   - its title box is still drawn, but hidden, so a `shrinkable` menu still folds it into its `…` button
  *     with the rest, where its row shows its title
+ *   - in a vertical menu, side by side with the icon-only actions next to it, in one row (`UIMenu.css`):
+ *     a context menu's Undo and Redo
  *   - an action with no icon shows its title as before:  there's nothing else to show
  ****************/
 export class UIAction extends UIItem {
