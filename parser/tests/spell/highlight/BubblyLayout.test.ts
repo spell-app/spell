@@ -162,6 +162,42 @@ describe("SP.BubblyLayout", () => {
     ])
   })
 
+  it("draws a new thing's `a new` bold with its kind, and what a step sets underlined whole (epic `language` I98)", () => {
+    const pieces = (text: string, parser?: SP.SpellParser) => {
+      const laidOut = SP.BubblyLayout.of(text, parser)
+      const step = blocksOf(laidOut.nodes).find((block) => block.partOfSpeech === "action")!.body[0]!
+      const line = step.kind === "line" ? step : undefined
+      return {
+        references: line!.pieces
+          .filter((piece) => piece.kind === "reference")
+          .map((piece) => text.slice(piece.start, piece.end)),
+        underlines: line!.underlines.map(({ start, end, kind }) => `${kind}:${text.slice(start, end)}`)
+      }
+    }
+    const english = [
+      'a "foundation" is a thing',
+      '\tits "suit" is one of hearts, spades',
+      "solitaire is an app",
+      "\tto start",
+      "\t\tset the foundation to a new foundation with suit = hearts"
+    ].join("\n")
+    expect(pieces(english)).toEqual({
+      references: ["foundation", "a new foundation", "suit"],
+      underlines: ["value:the foundation", "value:a new foundation with suit = hearts"]
+    })
+    const spanish = [
+      'una "fundación" es una cosa',
+      '\tsu "palo" es uno de corazones, picas',
+      "solitario es una aplicación",
+      "\tpara empezar",
+      "\t\tla fundación es una nueva fundación con palo = corazones"
+    ].join("\n")
+    expect(pieces(spanish, SP.Language.for("es").parser)).toEqual({
+      references: ["fundación", "una nueva fundación", "palo"],
+      underlines: ["value:la fundación", "value:una nueva fundación con palo = corazones"]
+    })
+  })
+
   it("draws a type's creation hook as an action:  `when creating` Spell's words, its type bold", () => {
     const deck = ['a "card" is a thing', 'a "deck" is a list of cards', "\twhen creating a deck", "\t\tprint 1"].join(
       "\n"
@@ -185,6 +221,7 @@ describe("SP.BubblyLayout", () => {
   it("underlines each value and each question with the thing it asks of, outermost only;  its own words plain", () => {
     expect(underlinesOf(drawing)).toEqual([
       "value:its rank",
+      "value:column",
       "value:its value",
       "question:it is a face card",
       "value:column"
@@ -368,8 +405,8 @@ a "foundation" is a pile
     ])
     expect(lines("\t\tif test card's pile")).toEqual(["question:test card's pile is a foundation"])
     expect(lines("\t\tpause for")).toEqual(["quantity:300 msec"])
-    // what a step sets isn't read:  bold, never underlined
-    expect(lines("\t\tset test card")).toEqual(["value:its last card"])
+    // what a step sets:  bold, and underlined whole, a value of its own (epic `language` I98)
+    expect(lines("\t\tset test card")).toEqual(["value:test card", "value:its last card"])
     // `droppable` a name, bold;  `pile's` whole with its `'s`;  `club` and `1` values, italic
     expect(piecesOf(laidOut, "reference")).toEqual(expect.arrayContaining(["droppable", "pile's suit", "card's value"]))
     expect(piecesOf(laidOut, "value")).toEqual(expect.arrayContaining(["club", "1", "300"]))

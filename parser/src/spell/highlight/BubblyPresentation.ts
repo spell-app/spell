@@ -141,6 +141,8 @@ export class BubblyPresentation {
     unicode_literal: { isValue: true },
     // `'s` in `pile's`:  part of the name, bold with it
     possessive_mark: { isNamePart: true },
+    // `a new` in `a new foundation with suit = hearts` (`una nueva fundación`):  bold with its kind, a name (epic `language` I98)
+    new_thing: { namesThrough: "type" },
     // `item` in `item column of [...]`:  Spell's word, though the highlighter marks it a variable
     position_expression: { plain: ["singular_identifier"] }
   }

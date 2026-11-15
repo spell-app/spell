@@ -154,6 +154,9 @@ export class BubblyLayout {
     // yes and no:  Spell's words, but a value written in
     if (row.isValue) this.overlays.push({ start, end, kind: "value", order: 0, overWordsOnly: true })
     if (row.isNamePart) this.overlays.push({ start, end, kind: "reference", order: 1 })
+    // `a new foundation`:  its words to the end of its kind one name, bold (epic `language` I98)
+    const [kind] = row.namesThrough ? [match.groups[row.namesThrough]].flat() : []
+    if (kind?.end !== undefined) this.overlays.push({ start, end: kind.end, kind: "reference", order: 1 })
     for (const plain of descendantsNamed(match, row.plain))
       this.overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 2 })
   }
@@ -192,9 +195,12 @@ export class BubblyLayout {
       if (isCombination(match)) return this.underlineCombination(match)
       if (!row?.isCombination && isExpression(match.rule)) return this.underline(start, end, "value")
     }
-    // what a step sets (`set <the score> to`) isn't read:  a name, never underlined
+    // what a step sets (`set <the score> to`):  ONE underline of its own, whole, its name bold in it (epic `language` I98)
     const sets = new Set((row?.sets ?? []).flatMap((group) => [match.groups[group]].flat()))
-    for (const child of childrenOf(match)) if (!sets.has(child)) this.underlineIn(child)
+    for (const child of childrenOf(match)) {
+      if (!sets.has(child)) this.underlineIn(child)
+      else if (child.start !== undefined && child.end !== undefined) this.underline(child.start, child.end, "value")
+    }
   }
 
   /**
