@@ -112,7 +112,7 @@ export class TaskKeeper extends Thing {
     return new Task({ title: title })
   }
 }
-core.describeAction(TaskKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled Title As Text", undoneAs: "Keep A New Task Titled Title As Text" })
+core.describeAction(TaskKeeper, "keepANewTaskTitledTitle", { title: "Keep a New Task Titled Title", undoneAs: "Keep a New Task Titled Title" })
 // -----------
 //////////////////////////
 // ## Kept in this browser
@@ -164,7 +164,7 @@ export let browserStorage
 
 core.describeAction(BrowserTask, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
 
-core.describeAction(BrowserKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled Title As Text", undoneAs: "Keep A New Task Titled Title As Text" })
+core.describeAction(BrowserKeeper, "keepANewTaskTitledTitle", { title: "Keep a New Task Titled Title", undoneAs: "Keep a New Task Titled Title" })
 // -----------
 ///////////////////////////////////////
 // ## Kept in a JSON file on the server
@@ -217,7 +217,7 @@ export let taskFiles
 
 core.describeAction(ServerTask, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
 
-core.describeAction(ServerKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled Title As Text", undoneAs: "Keep A New Task Titled Title As Text" })
+core.describeAction(ServerKeeper, "keepANewTaskTitledTitle", { title: "Keep a New Task Titled Title", undoneAs: "Keep a New Task Titled Title" })
 // -----------
 //////////////////////////////////////
 // ## Kept in a CSV file on the server
@@ -271,7 +271,7 @@ export let taskSheet
 
 core.describeAction(SheetTask, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
 
-core.describeAction(SheetKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled Title As Text", undoneAs: "Keep A New Task Titled Title As Text" })
+core.describeAction(SheetKeeper, "keepANewTaskTitledTitle", { title: "Keep a New Task Titled Title", undoneAs: "Keep a New Task Titled Title" })
 // -----------
 /////////////////////////////////////
 // ## Kept in your atmosphere account
@@ -331,7 +331,7 @@ export let taskSky
 
 core.describeAction(SkyTask, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
 
-core.describeAction(SkyKeeper, "keepANewTaskTitledTitle", { title: "Keep A New Task Titled Title As Text", undoneAs: "Keep A New Task Titled Title As Text" })
+core.describeAction(SkyKeeper, "keepANewTaskTitledTitle", { title: "Keep a New Task Titled Title", undoneAs: "Keep a New Task Titled Title" })
 // -----------
 ///////////////
 // ## Task List
@@ -390,7 +390,7 @@ export class Checklist extends ViewableList {
 
   static exclusive = true
 }
-core.describeAction(Checklist, "keepTheOrder", { title: "Keep The Order", undoneAs: "Keep The Order" })
+core.describeAction(Checklist, "keepTheOrder", { title: "Keep the Order", undoneAs: "Keep the Order" })
 
 // on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 
@@ -560,13 +560,13 @@ export class TaskList extends App {
   }
 }
 export let taskList
-core.describeAction(TaskList, "fillTheChecklist", { title: "Fill The Checklist", undoneAs: "Fill The Checklist" })
-core.describeAction(TaskList, "addTheStartingTaskTitleWithPriorityLevel", { title: "Add The Starting Task Title As Text With Priority Level As Text", undoneAs: "Add The Starting Task Title As Text With Priority Level As Text" })
-core.describeAction(TaskList, "addTheDraft", { title: "Add The Draft", undoneAs: "Add The Draft" })
+core.describeAction(TaskList, "fillTheChecklist", { title: "Fill the Checklist", undoneAs: "Fill the Checklist" })
+core.describeAction(TaskList, "addTheStartingTaskTitleWithPriorityLevel", { title: "Add the Starting Task Title with Priority Level", undoneAs: "Add the Starting Task Title with Priority Level" })
+core.describeAction(TaskList, "addTheDraft", { title: "Add the Draft", undoneAs: "Add the Draft" })
 core.describeAction(TaskList, "showAll", { title: "All", icon: "list", selectedWhen: "showAllIsSelected", undoneAs: "All" })
 core.describeAction(TaskList, "showToDo", { title: "To do", icon: "square outline", selectedWhen: "showToDoIsSelected", undoneAs: "To do" })
 core.describeAction(TaskList, "showDone", { title: "Done", icon: "check square outline", selectedWhen: "showDoneIsSelected", undoneAs: "Done" })
-core.describeAction(TaskList, "removeTheDoneTasks", { title: "Remove The Done Tasks", icon: "trash alternate outline", undoneAs: "Remove The Done Tasks" })
+core.describeAction(TaskList, "removeTheDoneTasks", { title: "Remove the Done Tasks", icon: "trash alternate outline", undoneAs: "Remove the Done Tasks" })
 
 // Where the tasks are kept:  the person picks, and the app asks that keeper
 

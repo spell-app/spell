@@ -122,7 +122,7 @@ app.filter = "all"
 app.newTaskName = ""
 
 export function createANewTask(props = {}) {
-  return core.asAction({ undoneAs: "Create A New Task With Title As Text, Completed As A Choice" }, () => {
+  return core.asAction({ undoneAs: "Create a New Task" }, () => {
     let { title, completed } = props
     if (title === undefined) {
       if (app.newTaskName === "") return

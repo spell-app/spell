@@ -400,6 +400,11 @@ export type LanguageWords = {
   memberLeadingWords: Set<string>
   /** Little words after which a method's name keeps its receiver's type, e.g. `of` in `update_the_total_of_calculator`. */
   danglingWords: Set<string>
+  /**
+   * Little words an action's title writes in lower case, unless first:  `Put Card on Pile` (epic `language` J156).
+   * - Its articles, conjunctions and short prepositions:  English's `a`, `the`, `and`, `on`;  Spanish's `la`, `y`, `en`.
+   */
+  titleSmallWords: Set<string>
   /** Words which end a type's name of several words, e.g. `aka`. */
   typeNameStopWords: Set<string>
   /** How a file's raw text declares things, found before it's parsed. */

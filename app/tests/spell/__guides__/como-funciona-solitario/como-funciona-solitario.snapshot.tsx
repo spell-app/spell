@@ -141,7 +141,7 @@ export class ColumnaElement extends SpellElement<Columna> {
 }
 core.useElement(Columna, ColumnaElement)
 
-core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })
+core.describeAction(Carta, "jugar", { title: "Jugar Carta", undoneAs: "Jugar Carta" })
 
 core.heading("Una pila, y una columna")
 

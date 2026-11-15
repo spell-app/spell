@@ -1669,7 +1669,7 @@ export class PokedexElement extends SpellElement<Pokedex> {
 }
 core.useElement(Pokedex, PokedexElement)
 export const pokedex = new Pokedex()
-core.describeAction(Pokedex, "goToWhere", { title: "Go To Where As Text", undoneAs: "Go To Where As Text" })
+core.describeAction(Pokedex, "goToWhere", { title: "Go to Where", undoneAs: "Go to Where" })
 core.describeAction(Pokedex, "goBack", { title: "Go Back", undoneAs: "Go Back" })
 core.describeAction(Pokedex, "surpriseMe", { title: "Surprise Me", undoneAs: "Surprise Me" })
 

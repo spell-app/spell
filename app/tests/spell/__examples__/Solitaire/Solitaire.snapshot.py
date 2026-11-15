@@ -149,9 +149,9 @@ class Card(TwoSidedView):
         return Pile.owner_of(self)
 
 
-core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
-core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "undone_as": "Move Card"})
-core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count The Points For A Card On A Pile", "undone_as": "Count The Points For A Card On A Pile"})
+core.describe_action(Card, "play", {"title": "Play Card", "undone_as": "Play Card"})
+core.describe_action(Card, "put_on_pile", {"title": "Put Card on Pile", "undone_as": "Move Card"})
+core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count the Points for Card on Pile", "undone_as": "Count the Points for Card on Pile"})
 # It's a two sided view:  face up it shows its picture, face down the back every card shares.
 # On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 # Ace is low:  ace = 1 ... king = 13
@@ -639,9 +639,9 @@ class Solitaire(App):
 
 
 solitaire = Solitaire()
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart The Game"})
-core.describe_action(Solitaire, "turn_over_the_next_card", {"title": "Turn Over The Next Card", "undone_as": "Turn Card"})
-core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset The Stock", "undone_as": "Reset The Stock"})
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart the Game", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart the Game"})
+core.describe_action(Solitaire, "turn_over_the_next_card", {"title": "Turn Over the Next Card", "undone_as": "Turn Card"})
+core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset the Stock", "undone_as": "Reset the Stock"})
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "icon": "play", "undone_as": "Auto Play"})
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})
 

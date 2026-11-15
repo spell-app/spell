@@ -82,7 +82,7 @@ export class CajaEnVivo extends App {
   }
 }
 export const cajaEnVivo = new CajaEnVivo()
-core.describeAction(CajaEnVivo, "agregarUna", { title: "Agregar Una", undoneAs: "Agregar Una" })
+core.describeAction(CajaEnVivo, "agregarUna", { title: "Agregar una", undoneAs: "Agregar una" })
 
 on("a-receta-change", (event) => {
   const { receta } = event

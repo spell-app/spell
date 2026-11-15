@@ -86,6 +86,26 @@ export const englishWords: SP.LanguageWords = {
    * - Prepositions only:  a verb's own little words (`up`, `over`, `out`) read fine without the type:
    *   `to pick up (a card)` => `pick_up`.
    */
+  /** Little words an action's title writes in lower case, unless first:  `Put Card on Pile`, `Compile and Run`. */
+  titleSmallWords: new Set([
+    "a",
+    "an",
+    "the",
+    "and",
+    "or",
+    "on",
+    "in",
+    "to",
+    "of",
+    "with",
+    "for",
+    "at",
+    "by",
+    "from",
+    "into",
+    "onto"
+  ]),
+
   danglingWords: new Set([
     "of",
     "to",

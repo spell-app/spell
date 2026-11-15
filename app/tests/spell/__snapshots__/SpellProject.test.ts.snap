@@ -791,9 +791,9 @@ export class Solitaire extends App {
   }
 }
 export const solitaire = new Solitaire()
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart The Game" })
-core.describeAction(Solitaire, "turnOverTheNextCard", { title: "Turn Over The Next Card", undoneAs: "Turn Card" })
-core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart the Game", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart the Game" })
+core.describeAction(Solitaire, "turnOverTheNextCard", { title: "Turn Over the Next Card", undoneAs: "Turn Card" })
+core.describeAction(Solitaire, "resetTheStock", { title: "Reset the Stock", undoneAs: "Reset the Stock" })
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], icon: "play", undoneAs: "Auto Play" })
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon: "eye", undoneAs: "Cheat" })
 
@@ -811,7 +811,7 @@ Card.prototype.play = async function () {
     return await this.putOnPile(endPile)
   }
 }
-core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
+core.describeAction(Card, "play", { title: "Play Card", undoneAs: "Play Card" })
 
 /** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
 /*! SPELL: DECLARES {
@@ -835,7 +835,7 @@ Card.prototype.putOnPile = async function (pile) {
   solitaire.score = solitaire.score + points
   return true
 }
-core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
+core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Move Card" })
 
 /** what the move scores:  10 on a foundation, 5 from the discard pile, else nothing */
 /*! SPELL: DECLARES {
@@ -851,7 +851,7 @@ Card.prototype.countThePointsForCardOnPile = function (pile) {
   if (solitaire.discardPile.includes(this)) return 5
   return 0
 }
-core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count The Points For A Card On A Pile", undoneAs: "Count The Points For A Card On A Pile" })
+core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Points for Card on Pile", undoneAs: "Count the Points for Card on Pile" })
 
 // play the card on click if it is a legal move
 Card.prototype.onClick = async function (event) {

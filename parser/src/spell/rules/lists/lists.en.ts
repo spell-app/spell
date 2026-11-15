@@ -849,7 +849,7 @@ lists.addRule(ListEmpty, {
             "  this.count = 0",
             "  this.lit = false",
             "}",
-            'core.describeAction(Sign, "reset", { title: "Reset A Sign", undoneAs: "Reset A Sign" })'
+            'core.describeAction(Sign, "reset", { title: "Reset Sign", undoneAs: "Reset Sign" })'
           ],
           [
             "export interface Sign { reset(): any /* spell: type unknown */ }",
@@ -858,7 +858,7 @@ lists.addRule(ListEmpty, {
             "  this.count = 0",
             "  this.lit = false",
             "}",
-            'core.describeAction(Sign, "reset", { title: "Reset A Sign", undoneAs: "Reset A Sign" })'
+            'core.describeAction(Sign, "reset", { title: "Reset Sign", undoneAs: "Reset Sign" })'
           ]
         ]
       ]

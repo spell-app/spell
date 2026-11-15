@@ -6,12 +6,12 @@ import { Wording } from "spell/parser/spell/rules/expressions"
 import { CreateOneOfAKind, DrawnLines, DrawnMarkup } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
-import { SubjectRule } from "spell/parser/spell/rules/types"
+import { SpellType, SubjectRule } from "spell/parser/spell/rules/types"
 import { ActionDetail, type ActionDetails } from "./ActionDetail"
 import { DynamicMethodRule } from "./DynamicMethodRule"
 import { MethodInfixRule } from "./MethodInfixRule"
 import { MethodPostfixRule } from "./MethodPostfixRule"
-import type { MethodSignatureData } from "./methods.shared"
+import type { MethodArgData, MethodSignatureData } from "./methods.shared"
 
 /**
  * Base for method-DEFINITION rules built on `method_signature`:
@@ -723,7 +723,7 @@ export class MethodDefinition<
    * - e.g. `- enabled when it is face down` => `get turnOverIsEnabled() { return this.isFaceDown }`
    *   - `- disabled when it is face up` => the same getter, `return !this.isFaceUp`
    * - then `core.describeAction(Card, "turnOver", { title: "turn it over", enabledWhen: "turnOverIsEnabled" })`
-   * - Its title is its words as written in Initial Caps, `Turn It Over` (epic `language` P48), unless it says one:
+   * - Its title is its words as written in title case, `Turn It Over` (`titleOf()`), unless it says one:
    *   `titled "Turn Over"`, or on its head line, `to "turn it over" with title "Turn Over"`
    *   (a fill-in:  a getter, `turnOverTitle`, and `titleFrom`, so it follows the program).
    * - Pure:  reads only matches.
@@ -829,17 +829,48 @@ export class MethodDefinition<
   }
 
   /**
-   * Its words as written, in Initial Caps:  an action's title said nowhere (epic `language` P48).
-   * - e.g. `Auto Play` for `to auto play`
-   * - its blanks' parentheses left out:  `to put (a card) on (a pile)` is `Put A Card On A Pile` (epic `language` P55)
+   * Its words as written, in title case:  an action's title said nowhere (epic `language` P48).
+   * - e.g. `Auto Play` for `to auto play`, `Compile and Run` for `to "compile and run"`
+   * - each blank as the kind of thing it takes, with no article:
+   *   `to put (a card) on (a pile)` is `Put Card on Pile` (epic `language` J156;  Owen:  "Undo label should be `Put Card on Pile`")
+   *   - a blank of a built-in kind says its own name instead:  `to append (digit as text) to (a calculator)` is
+   *     `Append Digit to Calculator`, not `Append Text to Calculator`
+   *   - never its kind or default as written (J179):  `to notify (message = "Really?")` is `Notify Message`
+   *   - a `(with ...)` clause, its call's optional extras, says nothing:  `to notify (with reply = "yep")` is `Notify`
+   * - the language's little words in lower case, unless first (`SP.LanguageWords.titleSmallWords`):
+   *   `on`, `the`, `and`;  Spanish's `en`, `la`, `y`
    */
   private titleOf(match: P.MatchFor<this>): string {
     const signature = (match.groups as { signature?: P.Match }).signature
-    const words = `${signature?.inputText ?? ""}`
-      .trim()
-      .replace(/^"(.*)"$/, "$1")
-      .replace(/[()]/g, "")
-    return initialCaps(words)
+    const items = (signature?.data as Partial<MethodSignatureData> | undefined)?.items
+    const words = items
+      ? items.map(MethodDefinition.titleWordsOf).filter(Boolean).join(" ")
+      : `${signature?.inputText ?? ""}`
+          .trim()
+          .replace(/^"(.*)"$/, "$1")
+          .replace(/[()]/g, "")
+    const { titleSmallWords } = SP.Language.of(match.scope).words
+    return words
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word, index) =>
+        index > 0 && titleSmallWords.has(word.toLowerCase()) ? word.toLowerCase() : initialCaps(word)
+      )
+      .join(" ")
+  }
+
+  /**
+   * One signature item's words in its action's title:  a keyword as written, a blank by its kind or its name.
+   * - `(a card)`, `a card`:  `card`;  `(another as a card)`:  `card`
+   * - `(digit as text)`, `(x)`:  `digit`, `x`:  a built-in kind (or none) says less than the blank's name
+   * - `(with reply = "yep")`:  nothing, as its call may leave it out
+   */
+  private static titleWordsOf(item: MethodArgData): string {
+    const { keyword, type, arg, props } = item
+    if (keyword) return `${keyword.inputText}`.trim()
+    if (props) return ""
+    if (type && !SpellType.isSimpleType(type.raw!)) return `${type.raw}`.trim()
+    return `${arg?.name ?? ""}`.replace(/_/g, " ")
   }
 
   /**
