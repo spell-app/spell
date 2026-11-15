@@ -140,7 +140,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop.
     - `ensure` restarts a server that started before its code last changed.
       So after a merge, the next opener gets the new routes.
-      - its code:  the `sources` folders, by `newestChange()`
+      - its code:  the files it LOADED (`LoadedCode`, epic `epic-engine` I309), each checked against its time when
+        loaded;  a component's browser code, a docs script or the epics pack changing restarts nothing
+        - the page server's own record, `.spell-server.code.json`, written by `loadedCodeHook.ts`, which
+          `PageServer.ensure()` loads first (`--import`)
+        - why:  the folders rule restarted main's server after 24 of 26 merges into main in a day, and each left
+          the side bar's views a few seconds with no server
+      - no record (an older server, one started by hand, the epic server):  the `sources` folders, by `newestChange()`
       - Nothing restarts it by itself:  the next `spell server start` (an opener, `/airplane`),
         or the side bar's "Restart Page Server".  Its open pages reconnect (`hello`), and reload only for code of
         theirs that changed (epic `epic-engine` I293).

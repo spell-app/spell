@@ -303,6 +303,8 @@ export class PageServer {
         process.execPath,
         "--import",
         "tsx",
+        // notes the code it loads, so only a change to THAT restarts it (epic `epic-engine` I309)
+        ...(code.hook ? ["--import", code.hook] : []),
         code.cli,
         "serve",
         "--root",
@@ -320,16 +322,21 @@ export class PageServer {
    * (`node_modules/tsx`), else this code's (epic `epic-engine` I287).
    * - so a worktree's tools starting or restarting main's server run main's code, and main's a worktree's
    * - `cli`:  the command line;  `source`:  its `src/server/`, whose changes restart it;  `tsconfig`:  its node settings
+   * - `hook`:  its `LoadedCode` hook, loaded first (I309);  none in a kit from before it, which then restarts by
+   *   the folders rule
    * - this code's:  a kit not installed yet, or one with no page server of its own (an npm install's)
    */
-  static codeFor(root: string): { cli: string; source: string; tsconfig: string } {
+  static codeFor(root: string): { cli: string; source: string; tsconfig: string; hook?: string } {
     const own = {
       cli: join(root, "src/server/page/cli.ts"),
       source: join(root, "src/server"),
+      hook: existsSync(join(root, "src/server/loadedCodeHook.ts"))
+        ? join(root, "src/server/loadedCodeHook.ts")
+        : undefined,
       tsconfig: join(root, "tsconfig.node.json")
     }
     if (existsSync(own.cli) && existsSync(join(root, "node_modules/tsx"))) return own
-    return { cli: CLI, source: SOURCE, tsconfig: TSCONFIG }
+    return { cli: CLI, source: SOURCE, tsconfig: TSCONFIG, hook: HOOK }
   }
 
   /**
@@ -650,6 +657,9 @@ const CLI = fileURLToPath(new URL("./cli.ts", import.meta.url))
 
 /** The server's folder, `src/server/`:  the code a page server runs. */
 const SOURCE = fileURLToPath(new URL("..", import.meta.url))
+
+/** `LoadedCode`'s hook, loaded first in a background server (epic `epic-engine` I309). */
+const HOOK = fileURLToPath(new URL("../loadedCodeHook.ts", import.meta.url))
 
 /** The kit's node settings (`tsconfig.node.json`), which `tsx` runs a background server under. */
 const TSCONFIG = fileURLToPath(new URL("../../../tsconfig.node.json", import.meta.url))

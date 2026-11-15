@@ -394,8 +394,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.slots.hasContent(this.slotForName("actions")) ||
       !!this.overnight ||
       this.failed !== undefined ||
-      !!this.handled ||
-      !!this.takenIn ||
+      !!this.phasePill ||
       this.hasCommits() ||
       !!this.review() ||
       this.reviewState.reviewing()
@@ -431,6 +430,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       parts.push(this.translationForKey(mark.fill === "dashed" ? "tipMarkUnsent" : "tipMarkSent", { chosen }))
     }
     if (queued) parts.push(this.translationForKey("tipTodo", { work: work || queued }))
+    // finished, its `taken-in` draws no pill (I307):  the chip still says where it was done
+    if (this.takenIn && !this.phasePill)
+      parts.push(this.translationForKey("takenTip", { phase: this.phaseNamed(this.takenIn).full }))
     if (reviewed) parts.push(this.translationForKey("tipReviewed", { date: PlanDates.format(reviewed) }))
     else if (deferred) parts.push(this.translationForKey("tipDeferred", { date: PlanDates.format(deferred) }))
     else if (status === "open") parts.push(this.translationForKey("tipNotReviewed"))
@@ -465,9 +467,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * Words before the noun:  its state (`attention item`), `canceled`, `limit`, `has-details`, `note-open`, `unfolded`.
    * - NOTE: `unfolded`, not `open`:  `open` is a state (yellow) already.
    * - Of the statuses only `canceled` looks different (struck through), so only it is a word here.
+   *   - struck at his x's click too (`closingAs`, epic `epic-engine` I308), before the server cancels it:  so its
+   *     update lands with nothing left to change on screen
    */
   protected get extraClass(): string | undefined {
-    const canceled = this.status === CANCELED
+    const canceled = this.status === CANCELED || this.reviewState.liveOf().closingAs === "drop"
     return [
       this.itemState(),
       canceled && CANCELED,
@@ -613,7 +617,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             </span>
           </Show>
           <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
-          <Show when={this.handled || this.takenIn}>{this.handledMark()}</Show>
+          <Show when={this.phasePill}>{this.handledMark()}</Show>
           <Show when={this.hasCommits()}>{this.gitButton()}</Show>
           <Show when={!this.reviewState.reviewing() && this.review()}>
             {(review) => (
@@ -650,6 +654,20 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /**
+   * The phase its `in P4` pill names, or `""` for none:  `handled`, else `taken-in` while it's still to finish.
+   * - a FINISHED item (done, canceled, decided) draws no pill for `taken-in` (epic `epic-engine` I307;  Owen,
+   *   2026-11-15, on mockup's J100, done by his ✓:  "Why is this showing 'in P20' when it is done?  Wasn't showing
+   *   that before I checked it"):  since I271 the pill is the item's button for work still in its phase (a click goes
+   *   there, an ⌥-click starts it), and on a finished item it read as work queued there
+   *   - the attribute stays, and the id chip's tooltip still names the phase (`chipTip`):  only the pill goes
+   * - `handled` keeps its pill finished too:  a decided question's answer LIVES in that phase's text (P31)
+   */
+  get phasePill(): string {
+    if (this.handled) return this.handled
+    return this.takenIn && !FINISHED.test(this.status ?? "") ? this.takenIn : ""
+  }
+
+  /**
    * Handled in a phase (`handled="p-retry-logic"`, epic `epic-engine` P31):  a quiet grey `in P4` on its line,
    * linking the phase;  its tooltip names it (`P4 · Retry Logic`).
    * - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same chip, its tooltip saying it was fixed or
@@ -657,16 +675,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - the phase read from the page when drawn:  a phase moved since shows its old number until the next redraw
    * - it's the item's button for its phase (epic `epic-engine` I271;  Owen, 2026-11-14:  "merge it into the pill"):
    *   a click goes to the phase, an ⌥-click starts it (`startPhase()`);  a todo draws no plane beside it
+   * - drawn for `phasePill`'s phase only:  a finished item's `taken-in` draws none (I307)
    */
   private handledMark(): JSX.Element {
-    const phaseId = () => this.handled || this.takenIn || ""
-    const phase = () => {
-      const element = isServer ? null : document.getElementById(phaseId())
-      if (element?.localName !== "epic-phase") return { short: "P?", full: phaseId() }
-      const short = `P${PhaseIds.numberOf(element)}`
-      const title = element.getAttribute("title")
-      return { short, full: title ? `${short} · ${title}` : short }
-    }
+    const phaseId = () => this.phasePill
+    const phase = () => this.phaseNamed(phaseId())
     return (
       <ui-label
         class={HANDLED}
@@ -685,6 +698,18 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         {this.translationForKey("handledIn", { phase: phase().short })}
       </ui-label>
     )
+  }
+
+  /**
+   * Phase `phaseId` as people name it, read from the page when drawn:  `{ short: "P4", full: "P4 · Retry Logic" }`;
+   * `P?` and the id when the page has no such phase.
+   */
+  private phaseNamed(phaseId: string): { short: string; full: string } {
+    const element = isServer ? null : document.getElementById(phaseId)
+    if (element?.localName !== "epic-phase") return { short: "P?", full: phaseId }
+    const short = `P${PhaseIds.numberOf(element)}`
+    const title = element.getAttribute("title")
+    return { short, full: title ? `${short} · ${title}` : short }
   }
 
   /**
@@ -740,13 +765,24 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * a finished one, Revisit and Saw it (`todo-done`, I296).
    */
   get buttonsKind(): ReturnType<typeof buttonsForItem> {
-    return buttonsForItem(this.id, {
+    // held in view after his instant ✓ or x (T80):  the buttons it had when he marked it, so the same button is there
+    // to click again and take it back (T81), though the server has closed it since
+    if (this.reviewState.liveOf().heldInView && this.keptButtons) return this.keptButtons
+    this.keptButtons = buttonsForItem(this.id, {
       limit: this.limit,
       inPhase: !!(this.handled || this.takenIn),
       status: this.status,
       fixed: !!this.fixed
     })
+    return this.keptButtons
   }
+
+  /**
+   * The review buttons it last drew while not held in view (`buttonsKind`).
+   * - `declare`d, so no field initializer runs:  the first render happens inside the base constructor, and an
+   *   initializer after it would wipe what that render kept (epic `epic-engine` I308)
+   */
+  declare private keptButtons: ReturnType<typeof buttonsForItem> | undefined
 
   /** One of its review controls (`<epic-review>`):  what it `shows`, as its `part`. */
   private reviewControl(shows: ReviewShows, part: "review-buttons" | "note-box" | "said"): JSX.Element {
@@ -1024,6 +1060,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     }
   }
 }
+
+/** The statuses of a finished item:  its `taken-in` draws no pill (`phasePill`, I307). */
+const FINISHED = /^(done|canceled|decided)$/
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicItem extends E.AttributeValues<EpicItemVocabulary> {}

@@ -220,7 +220,6 @@ const APP_TEXTS_ES: AppTextPack = {
   siteView: "Sitio",
   siteEditorTitle: "{project}:  mapa del sitio",
   siteNotASite: "{project} no es un sitio:\nel archivo de un sitio dice, p. ej., `guía galáctica es un sitio:`",
-  sitePages: "Páginas",
   siteAddPage: "Agregar una página",
   siteNewPageTitle: "Página nueva",
   siteRemovePart: "Borrar {name}",

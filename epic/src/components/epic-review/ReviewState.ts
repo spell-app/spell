@@ -81,11 +81,17 @@ export class ReviewState {
    * - NOT a set change that picks nothing (the pick-one / pick-any switch, an option added or edited):  no answer
    *   yet, so the item keeps its colour and its count (Owen, 2026-10-29:  "Switched 'pick many' and Q4 thinks it was
    *   decided, even though I didn't pick one")
+   * - his instant ✓ or x stays a mark after the server applied it, while held in view till his Send
+   *   (`ReviewClient.closingAs()`, epic `epic-engine` I308)
    */
   readonly isMarked = (itemId: string): boolean =>
     this.readPage((client) => {
-      const mark = itemId ? client.markOf(itemId.toLowerCase()) : undefined
-      return !!mark && !(mark.action === "pick" && !hasPick(mark))
+      const id = itemId?.toLowerCase()
+      const mark = id ? client.markOf(id) : undefined
+      // his instant ✓ or x the server applied already, held in view till his Send (I308):  still marked, as at the
+      // click, so its chip's ring and its section's counts don't change as the page's update lands
+      if (!mark) return !!id && client.closingAs(id) !== undefined
+      return !(mark.action === "pick" && !hasPick(mark))
     }) ?? false
 
   /**
@@ -141,6 +147,7 @@ export class ReviewState {
         approved: client.markOf(id)?.action === "approve",
         closing: client.isClosing(id),
         heldInView: client.isHeldInView(id),
+        closingAs: client.closingAs(id),
         commentsReplied: client.hasRepliedComments(id)
       }
     }) ?? NO_LIVE_REVIEW
@@ -203,11 +210,15 @@ export class ReviewState {
    * - once Claude has handled a mark, it's gone from the inbox, and every button CLEARS (`none`):
    *   the buttons are Owen's INPUT (Owen, 2026-10-08), and the id chip shows the result
    * - the element's `review-as` stays as the record, never drawn here
+   * - EXCEPT his instant ✓ or x (epic `epic-engine` I308):  the page server takes it off the inbox ~2s after the click,
+   *   but the item is held in view till his Send (T80), so its button stays pressed (`dashed`) as at the click;  the
+   *   page's update of the item then changes nothing on screen (Owen:  "it looks correct, then flashes ... when the
+   *   update comes in.  Shouldn't flash")
    */
   readonly fillOf = (action: ReviewAction): ReviewFill => {
     const mark = this.mark()
-    if (mark?.action !== action || isImmediate(mark)) return "none"
-    return this.isSent() ? "outline" : "dashed"
+    if (mark?.action === action && !isImmediate(mark)) return this.isSent() ? "outline" : "dashed"
+    return !mark && this.liveOf().closingAs === action ? "dashed" : "none"
   }
 
   /** Its id, as the inbox keys it. */

@@ -131,6 +131,12 @@ export type LiveReview = {
    */
   heldInView?: boolean
   /**
+   * which of his ✓ or x is closing it (`approve`, `drop`;  `ReviewClient.closingAs()`, epic `epic-engine` I308), from the
+   * click until his Send lets it go:  it draws as the server will leave it (an x struck through), so the page's own
+   * update changes nothing on screen;  missing:  not closing
+   */
+  closingAs?: string
+  /**
    * his turn on a comment in it:  Claude spoke last on its thread (`ReviewClient.hasRepliedComments()`, epic
    * `epic-engine` I284);  missing:  none
    */

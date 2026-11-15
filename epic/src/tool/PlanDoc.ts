@@ -1526,11 +1526,13 @@ export class PlanDoc extends PlanReader {
    *   the record, never drawn on the buttons, which clear;  the id chip shows the result (the fill rule, Q20)
    * - a pick counts as approve;  `now`:  an immediate request (Do Now) done
    * - any other action:  nothing to record
-   * - an approve (his ✓) takes the item's UPDATE label off (`dropUpdateLabel()`, I285)
+   * - an approve (his ✓) takes the item's UPDATE label off (`dropUpdateLabel()`, I285);  so does a drop (his x):
+   *   the item changed by his own hand, nothing new for him to see (epic `epic-engine` I308:  his x on an issue drew
+   *   a `CANCELED` label as the page server applied it, a flash after the page had already drawn it closed)
    */
   reviewedAs(item: Element, action: string): void {
     if ((REVIEW_AS as readonly string[]).includes(action)) Markup.set(item, { reviewAs: action as ReviewAs })
-    if (action === "approve") PlanItem.dropUpdateLabel(item)
+    if (action === "approve" || action === "drop") PlanItem.dropUpdateLabel(item)
   }
 
   /** `applyMark()`'s work on `item`, the log line aside. */

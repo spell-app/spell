@@ -77,10 +77,16 @@ export class PropertySchemas {
     }
   }
 
-  /** An attribute's label, for people:  its own, else made from its name (`listsStartAt` => `Lists start at`). */
+  /**
+   * An attribute's label, for people:  its own, else made from its name (`listsStartAt` => `Lists start at`).
+   * - A name that's words already keeps them, its first capital too (`Live page`):
+   *   its capitals once came out as a leading space, so the label read ` live page`.
+   */
   static labelOf(spec: V.AttributeSpec): string {
     if (spec.label) return spec.label
-    const words = kebabCase(spec.name).replaceAll("-", " ")
+    const words = kebabCase(spec.name)
+      .replace(/[-\s]+/g, " ")
+      .trim()
     return words.charAt(0).toUpperCase() + words.slice(1)
   }
 

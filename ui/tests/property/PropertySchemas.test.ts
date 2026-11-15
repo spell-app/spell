@@ -96,6 +96,9 @@ describe("PropertySchemas.typeOf() and .labelOf()", () => {
     expect(label("listsStartAt")).toBe("Lists start at")
     expect(label("text-align")).toBe("Text align")
     expect(label("x", "Own label")).toBe("Own label")
+    // a name that's words already, e.g. a form's field named in the page's language
+    expect(label("Live page")).toBe("Live page")
+    expect(label("Name")).toBe("Name")
   })
 })
 

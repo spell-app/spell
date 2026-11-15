@@ -104,7 +104,9 @@ export const epicItemVocabulary = {
       description:
         "TAKEN UP IN A PHASE (epic `epic-engine` I128):  the phase that fixed or did it (`p-fix-open-issues`), set " +
         "when an issue or todo is closed while that phase is active, or when a done phase's text links it " +
-        "(`PhaseTakes`);  its line links the phase, `in P1`, as `handled` does, but it stays green:  not a state."
+        "(`PhaseTakes`);  its line links the phase, `in P1`, as `handled` does, but it stays green:  not a state.  " +
+        "A FINISHED item (done, canceled, decided) draws no pill for it, its id chip's tooltip naming the phase " +
+        "instead (epic `epic-engine` I307)."
     },
     {
       name: "changed",
@@ -335,7 +337,7 @@ export const epicItemVocabulary = {
       description:
         "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic " +
         "`epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that " +
-        "fixed or did it."
+        "has it, while the item is still to finish (I307)."
     },
     {
       name: "git",

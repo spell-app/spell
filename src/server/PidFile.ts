@@ -5,6 +5,7 @@ import { join, resolve } from "node:path"
 import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
 import { endProcess, isProcessAlive } from "./Heartbeat"
+import { LoadedCode } from "./LoadedCode"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { HttpError } from "./server.types"
 import { SERVER_API } from "./WebServer"
@@ -17,7 +18,8 @@ export { endProcess, isProcessAlive } from "./Heartbeat"
  * `<root>/<name>` (default `.spell-server.json`).
  * - running means:  the file's server answers `/api/server` (`SERVER_API`) for THIS root
  *   - a pid file left by a crash, or by a server on another checkout's root, is not running
- * - `ensure()` starts one detached if none runs, or restarts one older than its `sources`
+ * - `ensure()` starts one detached if none runs, or restarts one older than its code (`isOlderThanCode()`):
+ *   the files it loaded (`LoadedCode`), else its `sources`
  * - `stop()` sends it `SIGTERM`, and waits for its process to end (`SIGKILL` after 10s)
  * - From the goals tools' `launch.js` (`ensureServer`, `serverStatus`, `stopServer`).
  */
@@ -108,7 +110,7 @@ export class PidFile {
     timeout = 15_000
   }: EnsureOptions): Promise<RunningServer & { launched: boolean }> {
     const running = await this.status()
-    if (running && newestChange(sources) <= Date.parse(running.started)) return { ...running, launched: false }
+    if (running && !this.isOlderThanCode(running, sources)) return { ...running, launched: false }
     // older than its code (a merge changed it since):  a fresh one, so pages get the new routes (I5 of `skillz`)
     if (running) await this.stop()
     else await this.stopUnanswering()
@@ -124,6 +126,17 @@ export class PidFile {
     const status = await waitUntil(() => this.status(), { timeout: timeout / 1000 })
     if (status) return { ...status, launched: true }
     throw new HttpError(503, `the server for ${this.root} didn't start in ${timeout / 1000}s:  see its log`)
+  }
+
+  /**
+   * Is `running` older than the code it runs, so `ensure()` restarts it?
+   * - by the files it LOADED, when it keeps a record of them (`LoadedCode`, epic `epic-engine` I309):
+   *   one of them changed or gone since it loaded it
+   * - else (an older server, one started by hand, another kind of server):  any code file under `sources` newer
+   *   than its start (`newestChange()`)
+   */
+  isOlderThanCode(running: RunningServer, sources: string[]): boolean {
+    return LoadedCode.isChanged(this.root, running.pid) ?? newestChange(sources) > Date.parse(running.started)
   }
 
   /**

@@ -21,6 +21,8 @@ import {
   planDocsOf,
   samePage,
   serverBaseIn,
+  SILENT_FRAME_RELOADS,
+  silentFrameStep,
   stamped,
   tabShows,
   windowEpic,
@@ -200,4 +202,14 @@ test("serverBaseIn():  the base in what `epic server ensure` printed;  nothing, 
     "http://127.0.0.1:4747"
   )
   equal(serverBaseIn("zsh: command not found: node"), undefined)
+})
+
+test("silentFrameStep():  a frame whose page never said where it is (epic `epic-engine` I309)", () => {
+  // its server down (restarting):  wait for it
+  equal(silentFrameStep({ serverUp: false, reloads: 0 }), "wait")
+  equal(silentFrameStep({ serverUp: false, reloads: SILENT_FRAME_RELOADS }), "wait")
+  // up:  load it again, a few times in a row, then say so
+  equal(silentFrameStep({ serverUp: true, reloads: 0 }), "reload")
+  equal(silentFrameStep({ serverUp: true, reloads: SILENT_FRAME_RELOADS - 1 }), "reload")
+  equal(silentFrameStep({ serverUp: true, reloads: SILENT_FRAME_RELOADS }), "say")
 })
