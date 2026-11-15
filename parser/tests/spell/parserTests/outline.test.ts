@@ -1309,6 +1309,26 @@ describe("outline style", () => {
       expect(js).toMatch(/whenCardDroppedOn\(card\) \{\s+this\.append\(card\)/)
     })
 
+    test("`when a card is dropped`, `... dragged over`, `... dragged out of`:  `on it` understood, the same methods (I100)", () => {
+      // Owen's draft Solitaire:  `a pile` reopened, its handler with no `on it`
+      const js = compile([
+        "a card is a view",
+        'a "pile" is a viewable list of cards',
+        "\tit is droppable",
+        '\tits "hint" is text',
+        "a pile",
+        "\twhen a card is dropped",
+        "\t\tadd the card to it",
+        "\twhen a card is dragged over",
+        '\t\tset its hint to "drop here"',
+        "\twhen a card is dragged out of",
+        '\t\tset its hint to ""'
+      ])
+      expect(js).toMatch(/whenCardDroppedOn\(card\) \{\s+this\.append\(card\)/)
+      expect(js).toMatch(/whenCardDraggedOver\(card\) \{\s+this\.hint = "drop here"/)
+      expect(js).toMatch(/whenCardDraggedOutOf\(card\) \{\s+this\.hint = ""/)
+    })
+
     test("`- while a card is dragged over it`, `- when something is dropped on it`:  `the thing` is any thing (outline-spell P28)", () => {
       const js = compile([
         "a card is a view",
