@@ -2896,7 +2896,7 @@
         },
         {
           "name": "label",
-          "description": "`Original question` / `Original reply` over its own text."
+          "description": "`Original question` over an answered question's own text."
         },
         {
           "name": "error",
@@ -2958,11 +2958,6 @@
           "key": "originalQuestion",
           "text": "Original question",
           "description": "Over an answered question's own text."
-        },
-        {
-          "key": "originalReply",
-          "text": "Original reply",
-          "description": "Over an item's own text, above More Details."
         },
         {
           "key": "reviewTodo",
@@ -3531,13 +3526,13 @@
         "follow-up",
         "addendum"
       ],
-      "description": "More Details (Add Details Now):  a white, open, foldable card under an item's text and answer;  the item's own text above it is labelled Original Reply.  A second Add Details replaces it.",
+      "description": "More Details:  what Clarify (Add Details) wrote IN PLACE of an item's unclear text, a plain card headed More Details that never folds.  A second Add Details replaces it.",
       "noun": "more",
       "attributes": [],
       "slots": [
         {
           "name": "",
-          "description": "What the item's text left out."
+          "description": "The item's text, made clear."
         }
       ],
       "events": [],
@@ -3547,31 +3542,16 @@
           "description": "The card."
         },
         {
-          "name": "toggle",
-          "description": "Its `More Details` `<button>`, which folds it."
+          "name": "heading",
+          "description": "Its `More Details` heading."
         },
         {
           "name": "body",
-          "description": "What the item's text left out;  hidden while folded."
+          "description": "The item's text, made clear."
         }
       ],
-      "states": [
-        {
-          "name": "open",
-          "description": "Unfolded:  it starts so."
-        }
-      ],
+      "states": [],
       "texts": [
-        {
-          "key": "foldTip",
-          "text": "Fold More Details",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Unfold More Details",
-          "description": "Tooltip of its fold button while folded."
-        },
         {
           "key": "more",
           "text": "More Details",
