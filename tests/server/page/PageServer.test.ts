@@ -106,6 +106,40 @@ describe("portFor()", () => {
   })
 })
 
+describe("PageServer.codeFor()", () => {
+  const scratch = mkdtempSync(join(tmpdir(), "page-code-"))
+  afterAll(() => rmSync(scratch, { recursive: true, force: true }))
+
+  /** A kit at `root` with its own page server code, installed or not. */
+  function kitWithCode(root: string, installed: boolean) {
+    mkdirSync(join(root, "src/server/page"), { recursive: true })
+    writeFileSync(join(root, "src/server/page/cli.ts"), "")
+    if (installed) mkdirSync(join(root, "node_modules/tsx"), { recursive: true })
+    return root
+  }
+
+  it("runs an installed kit's OWN code, never the caller's (epic-engine I287)", () => {
+    const root = kitWithCode(join(scratch, "main"), true)
+    expect(PageServer.codeFor(root)).toEqual({
+      cli: join(root, "src/server/page/cli.ts"),
+      source: join(root, "src/server"),
+      tsconfig: join(root, "tsconfig.node.json")
+    })
+    expect(PageServer.foreignCodeFor(root)).toBe(join(root, "src/server/page/cli.ts"))
+  })
+
+  it("runs this code for a kit not installed yet, or one with no page server of its own", () => {
+    const fresh = kitWithCode(join(scratch, "fresh"), false)
+    const bare = join(scratch, "bare")
+    mkdirSync(bare)
+    for (const root of [fresh, bare]) {
+      expect(PageServer.codeFor(root).cli).toMatch(/src\/server\/page\/cli\.ts$/)
+      expect(PageServer.codeFor(root).cli.startsWith(root)).toBe(false)
+      expect(PageServer.foreignCodeFor(root)).toBeUndefined()
+    }
+  })
+})
+
 describe("replaceById()", () => {
   it("replaces one element, keeping every other byte", () => {
     const next = replaceById(PAGE, "one", `<section id="one">NEW</section>`)

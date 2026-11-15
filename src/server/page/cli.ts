@@ -25,6 +25,7 @@
  *   A background server is started the same way (`TSX_TSCONFIG_PATH`), whatever folder it's started from.
  */
 import { relative, resolve, sep } from "node:path"
+import { fileURLToPath } from "node:url"
 
 import { SRV } from "spell/server"
 import {
@@ -60,6 +61,17 @@ async function main(args: string[]): Promise<void> {
   switch (command) {
     case "local":
     case "serve": {
+      // a kit's server runs ITS code (epic `epic-engine` I287):  another kit's Router over its route modules answered
+      // every `/api` with a 500
+      const foreign = PageServer.foreignCodeFor(root)
+      if (foreign) {
+        console.error(
+          `page server:  ${root} has its own page server code, ${foreign};  this is ${fileURLToPath(import.meta.url)}.\n` +
+            `Start it from that kit:  node ${root}/bin/spell.mjs server start`
+        )
+        process.exitCode = 2
+        return
+      }
       const server = await new PageServer({ root }).start({ port })
       console.log(`page server:  ${server.web.url}/  (root ${root})`)
       await SRV.untilInterrupted(server.web.server, () => server.stop())
