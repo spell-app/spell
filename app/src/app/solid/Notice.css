@@ -1,0 +1,22 @@
+/*
+ * Look of `<Notice>` (`Notice.tsx`):  each line of the notice on ONE line, never wrapped
+ *   (Owen, 2026-11-15, epic `editor` I163:  "Published message shouldn't line wrap").
+ * - The box is as wide as its longest line (`NOTICE_STYLE`), up to the window's width;  past that, a line ends in "…".
+ * - Its text's own line breaks stay:  a heading, then each line under it.
+ * - `<ui-message>`'s host is `display: contents`:  rules reach its boxes through `::part()`.
+ */
+.Notice {
+  white-space: nowrap;
+
+  & p {
+    white-space-collapse: preserve-breaks;
+  }
+  & ui-message::part(content) {
+    min-width: 0;
+  }
+  & ui-message::part(header),
+  & p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

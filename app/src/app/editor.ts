@@ -1353,7 +1353,12 @@ export class EditorStore extends Observable {
       }
       const { published, version } = await files.publish({ anyway: clashes.length > 0 })
       if (taken.length) await editor.reloadFiles(taken)
-      editor.showNotice(appTexts.text("published", { count: published.length, version: version ?? "" }))
+      editor.showNotice(
+        appTexts.text(published.length === 1 ? "publishedFile" : "publishedFiles", {
+          count: published.length,
+          version: version ?? ""
+        })
+      )
     } catch (error) {
       editor.showError(error)
     } finally {
@@ -1419,7 +1424,9 @@ export class EditorStore extends Observable {
       editor.history.transaction(title, () => {
         for (const [file, text] of published) editor.putBack(file, text, title)
       })
-      editor.showNotice(appTexts.text("draftDeleted", { count: drafted.length }))
+      editor.showNotice(
+        appTexts.text(drafted.length === 1 ? "draftDeletedFile" : "draftDeletedFiles", { count: drafted.length })
+      )
     } catch (error) {
       editor.showError(error)
     } finally {
@@ -1457,7 +1464,12 @@ export class EditorStore extends Observable {
           try {
             const drafted = await files.restore(version)
             await editor.reloadFiles(drafted)
-            editor.showNotice(appTexts.text("versionRestored", { count: drafted.length, version }))
+            editor.showNotice(
+              appTexts.text(drafted.length === 1 ? "versionRestoredFile" : "versionRestoredFiles", {
+                count: drafted.length,
+                version
+              })
+            )
           } catch (error) {
             editor.showError(error)
           } finally {

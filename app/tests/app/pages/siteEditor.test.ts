@@ -194,7 +194,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
   test("a page with pages under it:  asked first, then all of them go, as one step ⌘Z takes back", async () => {
     await cardWith("/planets").first().click()
     await page.locator(".SiteEditorPage .form ui-button", { hasText: "Delete" }).click()
-    const ask = page.getByText("Delete planets page and its 1 page(s) under it (Planet)?")
+    const ask = page.getByText("Delete planets page and the page under it (Planet)?")
     await ask.waitFor({ timeout: 10_000 })
     await page.getByRole("button", { name: "Delete them all" }).click()
     await page.waitForTimeout(SETTLE_MS)

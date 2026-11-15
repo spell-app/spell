@@ -101,7 +101,11 @@ export class SiteWrites {
     }
     if (under.length) {
       const pages = under.map((part) => part.title ?? part.name).join(", ")
-      const message = appTexts.text("siteRemoveWithPages", { name, count: under.length, pages })
+      const message = appTexts.text(under.length === 1 ? "siteRemoveWithPage" : "siteRemoveWithPages", {
+        name,
+        count: under.length,
+        pages
+      })
       if (!(await editor.confirm({ message, ok: appTexts.text("siteRemoveAll") }))) return false
     }
     return SiteWrites.change(appTexts.text("siteRemovePart", { name }), undefined, (text) =>
