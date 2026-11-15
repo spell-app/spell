@@ -599,7 +599,8 @@ export async function waitForAnswer(page, { since = Date.now(), timeout, poll = 
 
 /**
  * `answer` to `page` as plain text, for Claude:  how many questions are decided, each question's title, the options
- * picked (with their titles), Other, the sections' comments, then the notes.
+ * picked (with their titles), Other, the sections' comments, then the notes, kept text and the page's bullhorn comments
+ * sent with it (epic `epic-engine` T79).
  * - a question with nothing picked:  "(not decided yet)":  Owen sends partial answers, and decides the rest later
  * - sent again:  what's new since the send before is marked "(new)" (`answer.changed`, the route's)
  */
@@ -642,6 +643,15 @@ export function formatAnswer(page, answer) {
   // text typed for questions, options or sections a rewrite took off the page (epic `epic-workflow` P18)
   if (answer.kept?.length) lines.push(`  Kept from before the page changed:${isNew("kept")}`)
   for (const { id, label, text } of answer.kept ?? []) lines.push(`    ${label} (${id}):  ${text}`)
+  // the page's bullhorn comments, sent with this answer (epic `epic-engine` T79, r71):  answered on their threads
+  const pageComments = answer.pageComments ?? []
+  // the page as `epic comments` names it:  its path in the epic folder, as served
+  const named = (answer.page ?? "").replace(/^\/(?:worktrees\/[^/]+\/)?/, "")
+  if (pageComments.length)
+    lines.push(
+      `  Bullhorn comments, sent with it (answer each:  epic comments answer ${named}#<id> --file <reply.html>):`
+    )
+  for (const { id, on, text } of pageComments) lines.push(`    ${id} on "${on}":  ${text}`)
   return lines.join("\n")
 }
 

@@ -39,7 +39,7 @@ import {
 import { nextFrame } from "spell/util/dom"
 import { toolbarTools } from "./spell-doc-toolbar.js"
 import { ThreadFacts } from "spell/epic/comments"
-import { DraftSaver } from "spell/epic/answers"
+import { DraftSaver, PAGE_COMMENTS_ATTRIBUTE, PAGE_COMMENTS_EVENT } from "spell/epic/answers"
 import { Pictures, ServerLink } from "spell/epic/review"
 import {
   addBlockAction,
@@ -511,12 +511,20 @@ class PageComments {
    * - a press, or the countdown running out (`epic-send-saving`), sends (`POST /api/docs/comments/send`), and a toast
    *   says what went where
    * - drawn again with the comments;  none on an epic page, or from a server without it
+   * - none on a details page with its own Send, `<epic-send>` (`send.byPage`, epic `epic-engine` T79):  its comments
+   *   go with its answer, so it's told how many wait (`PAGE_COMMENTS_EVENT`), and its Send says so
    */
   drawSend() {
     const sticky = pageHeadIn(this.main)
     const head = sticky?.matches(".spell-page-head") ? sticky : (sticky?.querySelector(".spell-page-head") ?? sticky)
     head?.querySelector(":scope > .spell-send, :scope > .spell-head-tools > .spell-send")?.remove()
     const send = this.send
+    if (send?.byPage) {
+      // kept on the page too, for a Send that connects after this draw (the epics pack loads after the comments)
+      document.documentElement.setAttribute(PAGE_COMMENTS_ATTRIBUTE, String(send.unsent.length))
+      document.dispatchEvent(new CustomEvent(PAGE_COMMENTS_EVENT, { detail: { unsent: send.unsent.length } }))
+      return
+    }
     if (!head || !send) return
     const unsent = send.unsent.length
     const state = unsent ? "unsent" : send.waiting.length ? "sent" : "idle"
