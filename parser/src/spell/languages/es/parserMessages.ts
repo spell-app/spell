@@ -41,6 +41,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '{AType} no es una lista, así que no tiene nada que vaciar:  di cuál, como en "si sus libros está vacío"',
   "untyped-list-property-is": 'Di qué contiene "{name}", p. ej. "{line} una lista de {items}"',
   "untyped-list-variable": 'Di qué contiene "{name}", p. ej. "poner {name} a una nueva lista de {items}"',
+  "sets-instead-of-asking":
+    'Esto pone "{thing}", no pregunta:  para preguntar, termina la línea con "y";  para ponerlo, escribe "poner {thing} a {value}"',
   "untyped-set-property": 'Di qué es "{name}":  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
   "undeclared-member": '{AType} nunca dice que tiene {aName}:  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
   "reads-after-wait":

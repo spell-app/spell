@@ -139,6 +139,33 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     } else {
       this.declareProperty(match)
     }
+    AssignmentStatement.warnIfSetsInsteadOfAsking(match)
+  }
+
+  /**
+   * A line `the card is ...` that SETS the card, in a body answering yes or no:  a warning (epic `language` T137),
+   * e.g. `This sets "the card" to "the last item of the card's pile", it doesn't ask ...`.
+   * - The body:  `it is droppable when`, `it "is fine" if` ... (`answersYesOrNo()`), its own lines, not an `if`'s
+   *   inside it.
+   * - Its LAST line asks already (`readsAsQuestion`):  this is for the lines above it, where `card = ...` changes
+   *   the card the question is about.
+   * - Only the `is` form, setting a variable that's already there or a property:
+   *   `set x to ...` and `x = ...` say so plainly, and `x is 1` naming a new `x` asks nothing.
+   */
+  private static warnIfSetsInsteadOfAsking(match: P.MatchFor<AssignmentStatement>): void {
+    const { scope, tokens } = match
+    const { thing, value } = match.groups
+    const asking = scope instanceof P.MethodScope ? scope.declaredBy : undefined
+    if (!(asking?.rule instanceof SpellStatement) || !asking.rule.answersYesOrNo(asking)) return
+    // `set x to` / `let x =` start with a word of their own;  `x = 1` has its `=`
+    const after = tokens[tokens.indexOf(thing.tokens.at(-1)!) + 1]
+    if (tokens[0] !== thing.tokens[0] || after?.value === "=") return
+    if (match.data.isNewVariable) return
+    const message = SP.Language.of(scope).parserMessage("sets-instead-of-asking", {
+      thing: thing.inputText.trim(),
+      value: value.inputText.trim()
+    })
+    SP.SpellWarnings.note(match, message)
   }
 
   /**
