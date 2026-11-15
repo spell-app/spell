@@ -14,6 +14,8 @@ import type {
  * underline (`underline`), over the stretches it runs under.
  * - What an editor needs that the drawing leaves to the drawer:
  *   - a quoted input split in three:  its own `"`, its words, its closing `"` (`quote-open`, `input`, `quote-close`)
+ *   - a head's lone `"` marks (a quoted action name with parameters, its words pills between them):
+ *     `quote-open` and `quote-close` too
  *   - the name a head defines, `isName`:  its first quoted input (`"card"` in `a "card" is a view`),
  *     or a thing's bare one (`solitaire` in `solitaire is an app`)
  *   - a heading's `#`s apart from its words (`heading-mark`, then `heading`)
@@ -60,9 +62,15 @@ export class BubblyStretches {
       if (end > start) stretches.push({ start, end, kind, ...(band ? { partOfSpeech: band } : {}), ...more })
     }
     let isFirstQuoted = !!band
+    let isInQuotes = false
     for (const piece of line.pieces) {
       const { start, end, kind } = piece
-      if (kind === "input" || kind === "choice") {
+      if (band && kind === "mark" && text.slice(start, end) === '"') {
+        // a quoted name's own `"`, apart from its words:  `to "count the points for a card on a pile"`
+        add(start, end, isInQuotes ? "quote-close" : "quote-open")
+        isInQuotes = !isInQuotes
+        isFirstQuoted = false
+      } else if (kind === "input" || kind === "choice") {
         const isQuoted = BubblyStretches.isQuoted(text, piece)
         if (!isQuoted) {
           // a thing's head defines its name bare too:  `solitaire is an app` (epic `language` T131)

@@ -421,7 +421,7 @@
           "ruleNames": ["variable"],
           "internal": false,
           "file": "src/spell/rules/variables/Variable.ts",
-          "line": 15,
+          "line": 20,
           "purpose": "",
           "syntaxes": [
             {
@@ -10190,7 +10190,19 @@
               }
             },
             {
-              "syntax": "to {signature:quoted_method_signature} {modifiers:action_modifiers}? :? {statement_body}?"
+              "syntax": "to {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?",
+              "example": "to \"count the points for a card on a pile\"",
+              "outputs": {
+                "js": {
+                  "code": "Card.prototype.countThePointsForCardOnPile = function (pile) {}\ncore.describeAction(Card, \"countThePointsForCardOnPile\", { title: \"Count the Points for Card on Pile\", undoneAs: \"Count the Points for Card on Pile\" })"
+                },
+                "ts": {
+                  "code": "export interface Card { countThePointsForCardOnPile(pile: Pile): any }\nCard.prototype.countThePointsForCardOnPile = function (this: Card, pile: Pile) {}\ncore.describeAction(Card, \"countThePointsForCardOnPile\", { title: \"Count the Points for Card on Pile\", undoneAs: \"Count the Points for Card on Pile\" })"
+                },
+                "py": {
+                  "code": "@Card.add_method(\"count_the_points_for_card_on_pile\")\ndef _card_count_the_points_for_card_on_pile(self, pile: Pile) -> None:\n    pass\n\ncore.describe_action(Card, \"count_the_points_for_card_on_pile\", {\"title\": \"Count the Points for Card on Pile\", \"undone_as\": \"Count the Points for Card on Pile\"})"
+                }
+              }
             }
           ],
           "aliases": ["statement"]
@@ -10491,8 +10503,18 @@
           "ruleNames": ["quoted_method_signature"],
           "internal": false,
           "file": "src/spell/rules/methods/QuotedMethodSignature.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Method signature surrounded by quotes.",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "QuotedActionSignature",
+          "ruleNames": ["quoted_action_signature"],
+          "internal": false,
+          "file": "src/spell/rules/methods/QuotedActionSignature.ts",
+          "line": 15,
+          "purpose": "An action's QUOTED name, its blanks read as the unquoted name's are (epic `language` I97).",
           "syntaxes": [],
           "aliases": []
         },
