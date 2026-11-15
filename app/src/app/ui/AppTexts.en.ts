@@ -228,6 +228,7 @@ export const APP_TEXTS = {
   siteMovePart: "Move {name}",
   siteOpenPage: "Open in Edit",
   siteOpenInNewTab: "Open the live page in a new tab",
+  siteRunInNewTab: "Open this page of the site in a new tab",
   siteBackToSite: "Back to the site",
   siteGroupBack: "All sites",
   siteGroupTitle: "Sites",

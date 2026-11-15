@@ -10,6 +10,7 @@ import { SpellPage, on, rememberedSizes } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
+import { RunSite } from "./RunSite"
 
 import { SiteBoardView } from "./SiteBoardView"
 import { SiteData } from "./SiteData"
@@ -166,8 +167,7 @@ export function SiteEditorPage() {
                   titleOf={SiteEditorPage.cardTitleOf}
                   lineOf={SiteEditorPage.lineOf}
                   thumbnailOf={SiteEditorPage.thumbnailOf}
-                  newTabUrlOf={SiteEditorPage.newTabUrlOf}
-                  newTabLabel={appTexts.text("siteOpenInNewTab")}
+                  newTabOf={SiteEditorPage.newTabOf}
                   onPick={setPicked}
                   onOpen={SiteEditorPage.openInEdit}
                 />
@@ -250,9 +250,20 @@ SiteEditorPage.thumbnailOf = (part: SitePart): string | undefined => {
   return thumbnail && SP.SpellUrls.fileUrl(`${editor.project?.path}/${thumbnail}`)
 }
 
-/** The real page a card stands for, on the live site, for a new tab;  none when the site doesn't say. */
-SiteEditorPage.newTabUrlOf = (part: SitePart): string | undefined =>
-  part.live && SiteEdits.isLiveLink(part.live) ? part.live : undefined
+/**
+ * What a card's corner link opens in a new tab:
+ * - its real page on the live site, when its line names one (`live`)
+ * - else, once a page has been made for it, that page of the site in Run, at its address (epic `mockup` I12)
+ * - none for a dialog, a sidebar, a group, a page with nothing made for it yet,
+ *   or an address that needs a value filled in (`/films/:film`)
+ */
+SiteEditorPage.newTabOf = (part: SitePart): { url: string; label: string } | undefined => {
+  if (part.live && SiteEdits.isLiveLink(part.live)) return { url: part.live, label: appTexts.text("siteOpenInNewTab") }
+  const project = editor.project
+  if (part.kind !== "page" || !part.address || part.address.includes(":") || !project) return undefined
+  if (!SiteWrites.declaringFile(part.name) && !project.hasPageOrView(part.name)) return undefined
+  return { url: RunSite.runUrlFor(project.path, part.address), label: appTexts.text("siteRunInNewTab") }
+}
 
 /** An address no page has yet, for a new page:  `/new-page`, then `/new-page-2` ... */
 SiteEditorPage.freeAddress = (parts: readonly SitePart[]): string => {

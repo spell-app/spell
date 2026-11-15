@@ -14,7 +14,7 @@ import "./SiteBoardView.css"
  * - A card takes its section's colour (`<ui-card background>`);  a page's is rounded, a dialog's square,
  *   a section's bold and bigger;  its thumbnail on top, when it has one.
  * - A click picks a card, a double click opens it:  `onPick`, `onOpen`.
- * - A page's card has a link in its corner, to that page of the running site in a new tab:  `newTabUrlOf`.
+ * - A page's card has a link in its corner, opening it in a new tab:  `newTabOf`.
  * - Moving, with the kit's `Dragging`, each ONE step of the editor's history (`SiteWrites`):
  *   - a section's card:  up or down, the whole section before or after another, a line showing where;
  *     or onto a spot of another section, which it joins, its pages with it
@@ -71,14 +71,14 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
       onDblClick={() => props.onOpen(part().name)}
       onPointerDown={(event: PointerEvent) => startMove(event, props.card, props.section)}
     >
-      <Show when={props.newTabUrlOf(part())}>
-        {(url) => (
+      <Show when={props.newTabOf(part())}>
+        {(link) => (
           <a
             class="new-tab"
-            href={url()}
+            href={link().url}
             target="_blank"
-            title={props.newTabLabel}
-            aria-label={props.newTabLabel}
+            title={link().label}
+            aria-label={link().label}
             onClick={(event: MouseEvent) => event.stopPropagation()}
             onDblClick={(event: MouseEvent) => event.stopPropagation()}
             onPointerDown={(event: PointerEvent) => event.stopPropagation()}
@@ -103,10 +103,8 @@ export type SiteBoardViewProps = {
   lineOf: (part: SitePart) => string
   /** The address of its thumbnail, if it has one. */
   thumbnailOf: (part: SitePart) => string | undefined
-  /** The address that opens a part in a new tab:  none for what has no page of its own. */
-  newTabUrlOf: (part: SitePart) => string | undefined
-  /** What that link says, to a tooltip and a screen reader. */
-  newTabLabel: string
+  /** The link in a part's corner, opening it in a new tab, and what it says:  none for what has no page to open. */
+  newTabOf: (part: SitePart) => { url: string; label: string } | undefined
   /** A click on part `name`'s card. */
   onPick: (name: string) => void
   /** A double click on it. */

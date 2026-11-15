@@ -231,6 +231,7 @@ const APP_TEXTS_ES: AppTextPack = {
   siteMovePart: "Mover {name}",
   siteOpenPage: "Abrir en Editar",
   siteOpenInNewTab: "Abrir la página real en una pestaña nueva",
+  siteRunInNewTab: "Abrir esta página del sitio en una pestaña nueva",
   siteGroupBack: "Todos los sitios",
   siteGroupTitle: "Sitios",
   siteGroupLine: "Cada sitio de este grupo:\nabre uno para cambiar sus páginas.",
