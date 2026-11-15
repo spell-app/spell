@@ -144,6 +144,29 @@ describe("SpellKeywords", () => {
     })
   })
 
+  describe("Enter before a comment after code (epic `editor` I155)", () => {
+    const { CODE_BEFORE, COMMENT_AFTER } = LSP.SpellKeywords
+
+    test("puts the comment on its own line, a level in;  VS Code's rule the same", () => {
+      expect(CODE_BEFORE.test(`a "discard pile" is a pile with layout "stacked"\t\t`)).toBe(true)
+      expect(COMMENT_AFTER.test(`-- Where the stock's cards go`)).toBe(true)
+      expect(COMMENT_AFTER.test(` // a note`)).toBe(true)
+      const rules = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).onEnterRules as unknown[]
+      expect(rules).toContainEqual({
+        beforeText: CODE_BEFORE.source,
+        afterText: COMMENT_AFTER.source,
+        action: { indent: "indent" }
+      })
+    })
+
+    test("not inside a comment, nor before code", () => {
+      expect(CODE_BEFORE.test(`\t-- a note -- `)).toBe(false)
+      expect(CODE_BEFORE.test(`// a note`)).toBe(false)
+      expect(CODE_BEFORE.test(`\t`)).toBe(false)
+      expect(COMMENT_AFTER.test(`it can never take a card`)).toBe(false)
+    })
+  })
+
   describe("Enter after an opening tag (epic `editor` I65)", () => {
     const { OPENS_TAG, CLOSES_TAG } = LSP.SpellKeywords
 
