@@ -274,6 +274,8 @@ export class SpellBubbly {
     const { contentLeft } = editor.getLayoutInfo()
     this.layer.style.setProperty("--bubbly-monaco-x", `${contentLeft - editor.getScrollLeft()}px`)
     this.layer.style.setProperty("--bubbly-monaco-y", `${-editor.getScrollTop()}px`)
+    // scrolled sideways:  the shapes stop where the text does, never over the gutter (epic `language` r19)
+    this.layer.style.setProperty("--bubbly-monaco-clip", `${editor.getScrollLeft() > 0 ? contentLeft : 0}px`)
   }
 
   /**

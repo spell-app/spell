@@ -1430,6 +1430,8 @@
       inset: 0;
       overflow: hidden;
       pointer-events: none;
+      /* scrolled sideways, cut where the text is cut:  the gutter shows no shapes (SpellBubbly's follow()) */
+      clip-path: inset(0 0 0 var(--bubbly-monaco-clip, 0px));
     }
     .bubbly-shapes {
       position: absolute;
