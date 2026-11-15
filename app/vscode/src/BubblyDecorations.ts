@@ -9,8 +9,8 @@ import { RunnerPanel } from "./RunnerPanel"
  * ### `BubblyDecorations`
  * Spell in VS Code's own editor drawn in as much of the BUBBLY LOOK as VS Code allows (epic `language` P51),
  * its text still ordinary text to edit, find and select.
- * - Each stretch's weight, slant and ink:  references semibold, a name's first mention bold, marks and comments faint,
- *   a comment italic, a phrase or a quantity dotted under.
+ * - Each stretch's weight, slant and ink:  a name bold, a value written in italic, marks and comments faint,
+ *   a comment italic;  ONE dotted line under each value and each question (an `underline` stretch over the others).
  * - A pill round what a person typed:  a background in its band's colour, rounded corners, an edge in its hue;
  *   a little room beside it, a space of its own before and after it (a decoration's attachment), NEVER padding on
  *   the text, which would move the caret off its letters.
@@ -148,12 +148,14 @@ export function optionsFor({ kind, partOfSpeech = "plain", isName }: BubblyRange
     light: { color: setting(INK_SETTINGS[ink], "light") },
     dark: { color: setting(INK_SETTINGS[ink], "dark") },
     ...(WEIGHTS[kind] ? { fontWeight: WEIGHTS[kind] } : {}),
-    ...(kind === "comment" ? { fontStyle: "italic" } : {})
+    ...(kind === "comment" || kind === "value" ? { fontStyle: "italic" } : {})
   }
-  if (kind === "phrase" || kind === "quantity") {
-    look.light!.textDecoration = `underline dotted ${setting("--bubbly-faint", "light")}`
-    look.dark!.textDecoration = `underline dotted ${setting("--bubbly-faint", "dark")}`
-  }
+  // one value or one question:  its line only, over the stretches it runs under, whose inks stay theirs
+  if (kind === "underline")
+    return {
+      light: { textDecoration: `underline dotted ${setting("--bubbly-underline-ink", "light")}` },
+      dark: { textDecoration: `underline dotted ${setting("--bubbly-underline-ink", "dark")}` }
+    }
   if (!PILLS.has(kind)) return look
 
   // what a person typed:  a pill in its band's colour, an edge in its hue, room either side
@@ -191,9 +193,7 @@ const INK: Record<string, keyof typeof INK_SETTINGS> = {
   "quote-close": "faint",
   comment: "faint",
   heading: "bold",
-  reference: "bold",
-  "first-mention": "bold",
-  constant: "bold"
+  reference: "bold"
 }
 
 /** Each ink's setting in the sheet. */
@@ -202,9 +202,7 @@ const INK_SETTINGS = { ink: "--bubbly-ink", bold: "--bubbly-bold-ink", faint: "-
 /** Each stretch's weight, as the sheet's rules give it:  a heading's is the sheet's own 700. */
 const WEIGHTS: Record<string, string> = {
   heading: "700",
-  reference: setting("--bubbly-semibold", "light"),
-  constant: setting("--bubbly-semibold", "light"),
-  "first-mention": setting("--bubbly-bold", "light")
+  reference: setting("--bubbly-bold", "light")
 }
 
 /**

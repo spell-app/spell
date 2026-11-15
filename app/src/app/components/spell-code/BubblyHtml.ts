@@ -6,6 +6,8 @@ import type { SP } from "spell/parser/spell"
  * - `<div class="bubbly">`:  each declaration a `bubbly-block` (its head on a band, a gutter, its body, a foot),
  *   or a `bubbly-pill` when it has no body;  each line a `<p class="bubbly-line">`;  a control line with steps
  *   under it is a block too, `bubbly-control`.
+ * - Each underlined stretch, one value or one question, ONE `<span class="bubbly-underline">` round its pieces:
+ *   one box, so its dotted line runs on, its dots even, under bold and plain words alike.
  * - Every character of the code is in it, but the indents:  a copied line copies its words, quote marks too
  *   (drawn outside their pill, the file's own `"` kept transparent).
  * - `sections`:  each declaration wrapped in a `<ui-section class="bubbly-section" id="...">`, a block a docs
@@ -21,12 +23,15 @@ export class BubblyHtml {
   }
 
   /**
-   * A piece's classes in the sheet, e.g. `bubbly-reference bubbly-use` for a `reference`;  `""` for plain `words`.
+   * A piece's classes in the sheet, e.g. `bubbly-reference` for a `reference`;  `""` for plain `words`.
    * - Monaco draws its pieces in the same classes (`BubblyMonaco`, epic `language` P50).
    */
   static classesFor(kind: SP.BubblyPieceKind): string {
     return PIECE_CLASSES[kind]
   }
+
+  /** Round one value or one question (`SP.BubblyUnderline`):  ONE dotted line under all of it. */
+  static readonly UNDERLINE = "bubbly-underline"
 
   /** A Spell expression's `{` and `}`:  a step darker than the other marks, so a `{…}` reads as one (Owen). */
   static readonly BRACE = "bubbly-brace"
@@ -127,13 +132,19 @@ class BubblyWriter {
   private head(line: SP.BubblyLine): string {
     const last = line.pieces.at(-1)
     if (last?.kind !== "comment") return this.pieces(line)
-    const words = line.pieces.slice(0, -1).map((piece) => this.piece(piece))
-    return `${words.join("")}<span class="${BubblyHtml.DESCRIPTION}">${this.piece(last)}</span>`
+    const words = this.pieces({ ...line, pieces: line.pieces.slice(0, -1) })
+    return `${words}<span class="${BubblyHtml.DESCRIPTION}">${this.piece(last)}</span>`
   }
 
-  /** A line's pieces as HTML. */
+  /** A line's pieces as HTML, each underlined stretch round the pieces it runs under. */
   private pieces(line: SP.BubblyLine): string {
-    return line.pieces.map((piece) => this.piece(piece)).join("")
+    return line.pieces
+      .map((piece) => {
+        const opens = line.underlines.some((each) => each.start === piece.start)
+        const closes = line.underlines.some((each) => each.end === piece.end)
+        return `${opens ? `<span class="${BubblyHtml.UNDERLINE}">` : ""}${this.piece(piece)}${closes ? "</span>" : ""}`
+      })
+      .join("")
   }
 
   /** One piece as HTML. */
@@ -200,13 +211,9 @@ const PIECE_CLASSES: Record<SP.BubblyPieceKind, string> = {
   mark: "bubbly-mark",
   comment: "bubbly-comment",
   "heading-mark": "bubbly-mark",
-  reference: "bubbly-reference bubbly-use",
-  "first-mention": "bubbly-reference bubbly-first-mention",
-  constant: "bubbly-reference bubbly-use bubbly-constant",
+  reference: "bubbly-reference",
   value: "bubbly-value",
   choice: "bubbly-input bubbly-choice",
-  phrase: "bubbly-phrase",
-  quantity: "bubbly-quantity",
   tag: "bubbly-tag"
 }
 
