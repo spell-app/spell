@@ -103,7 +103,8 @@ export class BubblyMarks extends TextMarks {
     const lines = nodes.slice(first, last + 1).filter((node): node is SP.BubblyLine => node.kind === "line")
     const tags = MarkupMarks.within(this.drawing.text, lines[0]!.start, lines.at(-1)!.end, this.marks, {
       isView: this.isView,
-      declaringTags: this.drawing.declaringTags
+      declaringTags: this.drawing.declaringTags,
+      codes: lines.flatMap((line) => line.codes ?? [])
     })
     this.tags.push(...tags.tags)
     into.push(...tags.shapes)

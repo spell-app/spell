@@ -1,6 +1,6 @@
 import type { PartOfSpeech as MarkupPartOfSpeech } from "spell/element/vocabulary.types"
 import { PARTS_OF_SPEECH } from "spell/ui/vocabulary/partsOfSpeech.generated"
-import { BubblyHtml } from "./BubblyHtml"
+import { BubblyHtml, braceHtml } from "./BubblyHtml"
 
 /****************
  * ### `BubblyMarkup`
@@ -142,7 +142,7 @@ export type MarkupAttribute = {
   name: string
   value?: string
   isQuoted: boolean
-  /** a Spell expression, `{its color}`:  an inverted pill, its braces outside it */
+  /** a Spell expression, `{its color}`:  an inverted pill, its braces part of it */
   isExpression?: boolean
   /** where its name starts */
   nameStart: number
@@ -239,9 +239,13 @@ function tokensOf(source: string, from: number, to: number): Token[] {
 /**
  * One attribute, or a start tag's end:  `/>` or `>` (1), a tag's quoted word (2), a name (3),
  * a value in `"` (4), `'` (5), a Spell `{…}` (6) or neither (7), which stops before a `/>`:  `suit=clubs/>`.
+ * - A `{…}` ends at its own `}`, past a `{…}` or `"…"` inside it, on its line:  one with no `}` there
+ *   (`padding={small" spacing="xs">`, typed half way) is a plain value, so the attributes after it still read as
+ *   written (epic `editor` I144);  as the layout reads it (`SP.BubblyLayout`)
  */
 const ATTRIBUTE_PATTERN =
-  /\s*(?:(\/?>)|"([^"]*)"|([^\s=/>"]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|(\{[^}]*\})|((?:[^\s>/]|\/(?!>))+)))?|\/)/.source
+  /\s*(?:(\/?>)|"([^"]*)"|([^\s=/>"]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|(\{(?:"[^"\n]*"|\{[^{}\n]*\}|[^{}"\n])*\})|((?:[^\s>/]|\/(?!>))+)))?|\/)/
+    .source
 
 /** A start tag's attributes, from `at` just past its name, to its `>`. */
 function attributesFrom(
@@ -571,9 +575,7 @@ function valueOf(value: string, isQuoted: boolean): string {
  * from a value typed in;  its braces outside it, darker than the tag's other marks (Owen).
  */
 function expressionOf(value: string): string {
-  const brace = (mark: string) => `<span class="bubbly-mark">${BubblyHtml.marksHtml(mark)}</span>`
-  const words = value.slice(1, -1)
-  return `${brace("{")}${words ? `<span class="bubbly-input bubbly-expression">${escape(words)}</span>` : ""}${brace("}")}`
+  return `<span class="${BubblyHtml.CODE}">${braceHtml("{")}${escape(value.slice(1, -1))}${braceHtml("}")}</span>`
 }
 
 /**

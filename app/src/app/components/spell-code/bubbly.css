@@ -148,6 +148,8 @@
   --bubbly-bracket-pad: 3px;
   /* an input's white either side of its words, and over them */
   --bubbly-input-pad: 8px;
+  /* ... a code pill's, its braces inside it (I144 C1) */
+  --bubbly-code-pad: 5px;
   --bubbly-input-pad-top: 1px;
   /* where a band ends with an input:  the input as far from that round end as from the band's top and bottom */
   --bubbly-end-inset: 2px;
@@ -267,6 +269,8 @@
       color-mix(in srgb, var(--bubbly-hue) 45%, white)
     );
     --bubbly-expression-ink: var(--bubbly-paper);
+    /* ... and its braces, part of it:  its ink, faded toward the pill (I144 C1) */
+    --bubbly-code-brace-ink: color-mix(in srgb, var(--bubbly-expression-ink) 62%, var(--bubbly-expression-pill));
   }
 
   /* a group:  its parent's hue, 10% darker (Owen) */
@@ -508,11 +512,26 @@
     white-space: nowrap;
   }
 
-  /* a tag's `{…}` value, worked out as it runs:  inverted, a deep shade of its band's hue, its words light (Owen) */
+  /*
+   * code, a `{…}` in a drawing's markup, worked out as it runs:  inverted, a deep shade of its band's hue, its words
+   * light, a name in it bold and light too (Owen);  its braces inside it, part of its pill (I144 C1)
+   */
   .bubbly-input.bubbly-expression:where(:not(.view-line *)) {
+    --bubbly-ink: var(--bubbly-expression-ink);
+    --bubbly-bold-ink: var(--bubbly-expression-ink);
+    padding-inline: var(--bubbly-code-pad);
     color: var(--bubbly-expression-ink);
     background: var(--bubbly-expression-pill);
     box-shadow: none;
+  }
+
+  /*
+   * a code pill's own `{` and `}`:  part of its pill, as a quoted value's curly marks are of its white --
+   * its words' light ink, faded toward the pill (Owen, epic `editor` I144 C1)
+   */
+  .bubbly-code-brace {
+    color: var(--bubbly-code-brace-ink);
+    font-weight: var(--bubbly-bold);
   }
 
   /* ... in the editor, its pill spans the room either side of its words:  clear of its braces by a gap, as on the page */
@@ -1614,6 +1633,10 @@
     /* a `{…}`'s braces darker, as on the page */
     .view-line .bubbly-mark.bubbly-brace {
       color: var(--bubbly-brace-ink);
+    }
+    /* ... but a code pill's own, part of its pill, as on the page (I144 C1) */
+    .view-line .bubbly-mark.bubbly-brace.bubbly-code-brace {
+      color: var(--bubbly-code-brace-ink);
     }
     /* a `{…}` value's words, on its inverted pill:  light, a reference in them too */
     .view-line .bubbly-expression {
