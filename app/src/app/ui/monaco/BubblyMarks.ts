@@ -64,8 +64,14 @@ export class BubblyMarks extends TextMarks {
   // ## The drawing's nodes
   ////////////////
 
-  /** Mark `nodes`, adding their shapes to `into`. */
-  private nodes(nodes: SP.BubblyNode[], into: Array<BubblyShape | MarkupShape>) {
+  /**
+   * Mark `nodes`, adding their shapes to `into`.
+   * - In a body of declarations (a thing's, a group's:  one holding a head that isn't a control line's), a line of its
+   *   own (a `//` note, a step) gets a head's spacer too, so its words sit in the body, level with the heads' beside it,
+   *   not on its rail (epic `language` I95)
+   */
+  private nodes(nodes: SP.BubblyNode[], into: Array<BubblyShape | MarkupShape>, { inBody = false } = {}) {
+    const isDeclarations = inBody && nodes.some((node) => node.kind === "block" && node.partOfSpeech !== "control")
     for (let index = 0; index < nodes.length; index++) {
       const node = nodes[index]!
       if (node.kind === "line" && this.drawing.text[node.start] === "<") {
@@ -76,6 +82,7 @@ export class BubblyMarks extends TextMarks {
         case "gap":
           break
         case "line":
+          if (isDeclarations && node.depth === 0) this.headSpacer(node.start)
           this.line(node, into)
           break
         case "block":
@@ -120,7 +127,7 @@ export class BubblyMarks extends TextMarks {
     this.headSpacer(block.head.start)
     const description = this.line(block.head, shape.inside, { band: block.partOfSpeech })
     if (description) shape.description = description
-    this.nodes(block.body, shape.inside)
+    this.nodes(block.body, shape.inside, { inBody: true })
   }
 
   /**

@@ -106,6 +106,24 @@ describe("BubblyMarks.of()", () => {
     ])
   })
 
+  test("a line of its own in a body of declarations:  a head's room before it too, so it sits in the body, not on its rail (epic `language` I95)", () => {
+    const text = [
+      'group "The piles"',
+      "// Each kind of pile",
+      'a "pile" is a list of cards',
+      "\t// The cards not played yet",
+      "\tit can never take a card",
+      "\tto deal",
+      "\t\t// a step's note:  an action's body is steps, no room"
+    ].join("\n")
+    const lines = text.split("\n")
+    const roomBefore = marked(text)
+      .marks.filter((mark) => mark.options.before?.inlineClassName === "bubbly-spacer bubbly-head-spacer")
+      .map(({ range }) => lines[range.startLineNumber - 1]!.trim())
+    expect(roomBefore).toEqual(expect.arrayContaining(["// Each kind of pile", "// The cards not played yet"]))
+    expect(roomBefore).not.toContain("// a step's note:  an action's body is steps, no room")
+  })
+
   test("a top-level head's bare name:  its pill starts past the head's room, as even either side as any pill (epic `language` I84)", () => {
     const text = `solitaire is an app\n\t"deck" is a new deck\na deck is a list of cards\n`
     const marks = marked(text)
