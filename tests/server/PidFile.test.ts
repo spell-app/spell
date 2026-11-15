@@ -208,3 +208,38 @@ const ON_TERM: Record<TermBehaviour, string> = {
   "close, then exit after 800ms": "s.close(); s.closeAllConnections(); setTimeout(() => process.exit(0), 800)",
   ignore: ""
 }
+
+describe("PidFile.isOlderThanCode():  restart only for code the server LOADED (epic `epic-engine` I309)", () => {
+  let root: string
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), "pid-code-"))
+  })
+  afterEach(() => rmSync(root, { recursive: true, force: true }))
+
+  it("with a record:  its files decide, a newer file it never loaded doesn't count;  without:  the folders", () => {
+    const loaded = join(root, "route.ts")
+    const browserOnly = join(root, "component.ts")
+    writeFileSync(loaded, "export {}\n")
+    writeFileSync(browserOnly, "export {}\n")
+    const started = "2026-11-15T10:00:00.000Z"
+    const before = Date.parse(started) / 1000 - 60
+    const after = Date.parse(started) / 1000 + 60
+    utimesSync(loaded, before, before)
+    utimesSync(browserOnly, after, after)
+    const running = { pid: 4242, port: 1, root, started, base: "http://127.0.0.1:1" }
+    const pidFile = new SRV.PidFile(root)
+
+    // no record:  the folders' newest file is newer than the start
+    expect(pidFile.isOlderThanCode(running, [root])).toBe(true)
+
+    // its record:  only route.ts, unchanged since it loaded it
+    writeFileSync(
+      join(root, ".spell-server.code.json"),
+      JSON.stringify({ pid: 4242, files: { [loaded]: statSync(loaded).mtimeMs } })
+    )
+    expect(pidFile.isOlderThanCode(running, [root])).toBe(false)
+
+    utimesSync(loaded, after, after)
+    expect(pidFile.isOlderThanCode(running, [root])).toBe(true)
+  })
+})

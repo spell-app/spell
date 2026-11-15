@@ -348,6 +348,9 @@ export function liveClient(scrollKey: string): void {
       const data = event.data as { spell?: string; go?: number; command?: string; text?: string; image?: string } | null
       if (event.source !== window.parent) return
       if (data?.spell === "history" && (data.go === -1 || data.go === 1)) history.go(data.go)
+      // the frame's parent asking whether a page is here, once the frame has loaded (spell-epic's side bar views,
+      // epic `epic-engine` I309):  a page that doesn't answer is the browser's error page
+      if (data?.spell === "where") reportPlace()
       if (data?.spell === "edit" && typeof data.command === "string" && !isRepeat(data.command))
         edit(data.command, data.text, data.image)
     })
@@ -638,8 +641,23 @@ export function liveClient(scrollKey: string): void {
    *   - to the address without its `#id`, else it would only scroll there;  the new page puts it back
    * - no view transitions (another browser):  `location.reload()`, as before
    * - storage blocked:  reload at the top, with no hold
+   * - the server down (its socket closed, `serverDown`):  waits for it to come back (`spell-server:up`) first
+   *   - why (epic `epic-engine` I309;  Owen:  "This is happening a lot, several times an hour"):  a page that
+   *     reloaded while main's server restarted drew the browser's error page, which has no live client, so nothing
+   *     ever brought it back:  VS Code's side bar sat grey
    */
   function reload() {
+    if (!serverDown) return reloadSelf()
+    if (reloadWaiting) return
+    reloadWaiting = true
+    addEventListener("spell-server:up", () => reloadSelf(), { once: true })
+  }
+
+  /** A reload is waiting for the server to come back:  one, however many are asked for meanwhile. */
+  let reloadWaiting = false
+
+  /** `reload()`'s navigation, the server up or not. */
+  function reloadSelf() {
     try {
       sessionStorage.setItem(
         scrollKey,
