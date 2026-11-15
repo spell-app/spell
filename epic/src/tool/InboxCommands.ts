@@ -539,6 +539,13 @@ export class InboxCommands {
           "not), then `epic comments answer <page>#<M id> --file <answer.html> [--commit <sha>]`"
       )
     }
+    // keep listening while the work goes on (epic `epic-engine` I286;  Owen, 2026-11-15:  "keep a listener open so it
+    // responds to my marks quickly even if it is not going to act on them right away")
+    lines.push(
+      `FIRST, keep listening:  \`epic inbox wait ${name}\` again, in the background, before any of this;  ` +
+        `busy with other work:  apply the quick marks and put a Noted card on each heavy one now ` +
+        `(\`epic update ${name}#<id> noted "Queued:  after <what you're on>"\`), then go back to it`
+    )
     this.owner.print(lines.join("\n"))
 
     /**

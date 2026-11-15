@@ -833,9 +833,16 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
       - Claude Code starts plugin MONITORS only in a terminal session, never in VS Code's panel
     - `/epic review`'s `epic inbox watch` takes the inbox over;  once that session's `wait` stops for good, the
       monitor takes it back within about 90s
-  - it prints NOTHING until the person sends;  then ONE line, `📬 <epic>:  the person sent work ...`, which wakes the session
+  - it prints NOTHING until the person sends;  then ONE line, `📬 <epic>:  taking your Send ... (3 marks:  J149
+    approve, ...)`, which wakes the session
   - that line:  take the work with `epic inbox wait <epic> --timeout 5`, then go on at 7.3, as if your own `wait` had
     finished
+  - the poller ENDS once it has woken the session, and the next starts only at the turn's end:  so from then on keep
+    `epic inbox wait <epic>` running in the background (`run_in_background`) the whole time you work, armed again
+    each time it exits (epic `epic-engine` I286;  Owen, 2026-11-15:  "keep a listener open so it responds to my
+    marks quickly even if it is not going to act on them right away")
+    - a Send then reaches you mid-work, within seconds, at your next tool call:  not when the turn ends
+    - In Codex:  no background commands:  look with `epic inbox <epic>` between steps instead
   - `📬 <epic>:  the person pressed "start review" ...`:  they asked for a review from the page;  start one, `/epic review
     <epic>` (this section), as if they'd typed it
   - a `wait` already running in the session takes the work first:  the monitor then says nothing
@@ -863,12 +870,18 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
   - None, or several:  nothing is sent, and the page says which sessions it found.
 - And WOKEN by the page (epic `epic-workflow` P16):  Send with NO session listening.
   - The page server, the first of these that applies:
-    - types `/epic review <name>` into the epic's running session (`🚧 <name>`)
-    - else opens a new session in the epic's worktree window (opening the window if it's closed)
-    - else, with no worktree, a new session in a main window
-    - The person presses Enter.
+    - tells the epic's running session through its inbox (its poller runs, or it's mid-turn);  else types
+      `/epic review <name>` into it (`🚧 <name>`), and the person presses Enter
+    - else opens a new session in the epic's worktree window (opening the window if it's closed):  nothing typed,
+      nothing to press;  it wakes by itself
+    - else, with no worktree, a new session in a main window, `/epic review <name>` typed in:  the person presses Enter
   - Once per epic per 10 minutes, or until a session listens.
   - Never with several sessions titled for it, in airplane mode, or for a Send with nothing new.
+  - NEVER a second session while one of the epic's runs (epic `epic-engine` I286):  a session titled for it OR
+    working in its worktree counts;  one mid-turn is told through its inbox, and hears it at its next `wait` or turn's
+    end.
+  - A session it opens is titled `🚧 <name>` as it starts, nothing typed into it:  its first line is the `📬` line,
+    saying what it's taking.
   - So marks no longer wait for the person to remember `/epic review`:  a session typed into mid-turn reads it after.
 - Every `epic` command edits the epic's ONE shared doc, from any checkout.
 - The page's controls need a PAGE SERVER with the review routes (`epic server ensure`).
@@ -976,7 +989,14 @@ A revisit note that says just `do it` (now or soon) means:  DO it, no question b
 as asked.  Revisit puts it in a judgement call's or todo's empty note box for them (2026-10-19:  "I generally
 want you to just do it").
 
-0. The toolbar's line (epic `epic-engine` P35), FIRST:  `epic inbox status <name> "Responding" --items <the ids
+0. Keep listening, FIRST of all:  `epic inbox wait <name>` again, `run_in_background`, before any of the work
+   (epic `epic-engine` I286).  Busy with something else when woken:
+   - apply the quick marks at once (`epic inbox apply`:  approve, close, pick, todo)
+   - put a Noted card on each heavy one at once, `epic update <name>#<id> noted "Queued:  after <what you're on>"`,
+     so the person sees it was heard
+   - go back to what you were doing, and take the queued ones after it
+   - In Codex:  no background `wait`:  just the three steps above.
+0b. The toolbar's line (epic `epic-engine` P35):  `epic inbox status <name> "Responding" --items <the ids
    taken>`, so the person sees what you're answering;  `epic inbox status <name> --clear` as you arm `wait` again (step 4).
 1. Exit 2 (timeout, nothing happened):  arm `wait` again, and end the turn with one line ("still listening").
 

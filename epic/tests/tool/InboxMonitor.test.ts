@@ -60,6 +60,22 @@ test("check:  listens for the session at once, held by its monitor;  watches the
   expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1", pid: process.pid })
 })
 
+// epic `epic-engine` I286:  the line is the first thing Owen sees of a session a Send woke:  it says what it takes,
+// and to keep a `wait` running while it works
+test("check:  the line names what's waiting, in the page's words, and asks to keep listening", () => {
+  const each = monitor()
+  each.check(MONITOR)
+  ReviewInbox.update(inboxFile, (box) => {
+    box.setMark("j149", { action: "approve" }, "2026-11-15T17:50:00.000Z")
+    box.setMark("i83", { action: "todo" }, "2026-11-15T17:50:01.000Z")
+    box.markSent("2026-11-15T17:50:02.000Z")
+  })
+  const { notice } = each.check(MONITOR)
+  expect(notice).toBe(InboxMonitor.notice("x", "2 marks:  j149 approve, i83 do this"))
+  expect(notice).toContain("📬 x:  taking your Send from the epic page (2 marks:  j149 approve, i83 do this)")
+  expect(notice).toContain("keep `epic inbox wait x` running in the background")
+})
+
 test("check:  run by hand (no monitor), it listens as inbox watch does:  a heartbeat, no process", () => {
   expect(monitor().check()).toMatchObject({ epic: "x" })
   expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1" })

@@ -30,6 +30,8 @@ let bridgeSays: object = {}
 const pollers = new Map<number, number>()
 /** what `launch` was asked:  `[args, cwd]` */
 const launched: [string[], string][] = []
+/** the epics a new session was marked for (`WakeMarks`, I286) */
+const marked: string[] = []
 
 beforeAll(async () => {
   home = realpathSync(mkdtempSync(join(tmpdir(), "review-wake-")))
@@ -67,6 +69,7 @@ afterAll(() => {
 beforeEach(() => {
   asked.splice(0)
   launched.splice(0)
+  marked.splice(0)
   refuse = false
   bridgeSays = {}
   pollers.clear()
@@ -79,7 +82,8 @@ function starter(at = root) {
   return new ReviewStart(at, {
     launch: (args, cwd) => void launched.push([args, cwd]),
     airplane: () => false,
-    pollerOf: (pid) => pollers.get(pid)
+    pollerOf: (pid) => pollers.get(pid),
+    markWake: (name) => void marked.push(name)
   })
 }
 
@@ -94,17 +98,19 @@ function worktree(name: string): string {
   return fakeWorktree(root, join(root, ".claude", "worktrees", name))
 }
 
-test("a worktree, its window closed:  `epic window launch <epic>`, from the main checkout, the command as its prompt", async () => {
+test("a worktree, its window closed:  `epic window launch <epic>`, from the main checkout, nothing typed (I286)", async () => {
   worktree("big")
   window([root])
   const wake = await starter().wake("big")
   expect(wake).toMatchObject({
     state: "launched",
     did: "opened big's window",
-    message: "Opened big's window:  press Enter on /epic review big there."
+    message: "Opened big's window:  its new session takes your Send by itself."
   })
-  expect(launched).toEqual([[["launch", "big", "--prompt", "/epic review big"], root]])
+  expect(launched).toEqual([[["launch", "big"], root]])
   expect(asked).toEqual([])
+  // its session titled `🚧 big` as it starts
+  expect(marked).toEqual(["big"])
 })
 
 test("the worktree's window found by its window file, too (`<windowsFolder>/ongoing/<epic>.code-workspace`)", async () => {
@@ -118,8 +124,31 @@ test("the worktree's window found by its window file, too (`<windowsFolder>/ongo
   writeFileSync(file, "{}")
   window([root], file)
   expect((await starter().wake("big")).state).toBe("opened")
-  expect(asked).toEqual([["open-session", { prompt: "/epic review big" }]])
+  // nothing typed:  its start's poller wakes it (I286)
+  expect(asked).toEqual([["open-session", {}]])
   expect(launched).toEqual([])
+  expect(marked).toEqual(["big"])
+})
+
+// epic `epic-engine` I286:  language's session, never titled (Claude Code's own name, `language-74`), was mid-turn when
+// Owen sent;  counted by title alone, the wake opened a SECOND session in language's window
+test("a session working in the epic's worktree is the epic's, titled or not:  mid-turn, it's told, never a second one", async () => {
+  const big = worktree("big")
+  window([big])
+  const record = { pid: process.pid, sessionId: "0e0e0e0e-1111-2222-3333-444444444444", cwd: big }
+  const sessionFile = join(home, "sessions", `${process.pid}.json`)
+  try {
+    writeFileSync(sessionFile, JSON.stringify({ ...record, status: "busy", name: "big-74", nameSource: "derived" }))
+    const wake = await starter().wake("big")
+    expect(wake).toMatchObject({ state: "told", did: "told big-74 through its inbox poller" })
+    expect(asked).toEqual([])
+    expect(marked).toEqual([])
+    // titled for ANOTHER epic, in big's worktree:  not big's
+    writeFileSync(sessionFile, JSON.stringify({ ...record, status: "busy", name: "🚧 other", nameSource: "hook" }))
+    expect((await starter().wake("big")).state).toBe("opened")
+  } finally {
+    rmSync(sessionFile, { force: true })
+  }
 })
 
 test("from a worktree's page server:  the main checkout's worktrees and windows", async () => {
