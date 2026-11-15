@@ -460,6 +460,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       listener: this.listenerWords(client.inbox.listening, "listening"),
       idle: client.listening ? "" : this.listenerWords(client.inbox.lastListener, "idle"),
       woken: client.inbox.woken?.message ?? "",
+      heard: client.inbox.woken?.state === "told",
       answering: (client.doing?.items ?? []).map((item) => item.id.toUpperCase()).join(", ")
     }
   })
@@ -487,6 +488,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    *   Owen pressed a button, and everything under it jumped down (Owen, 2026-10-25:  "Screen seems to be jumping a
    *   lot when I click Accept Phase");  Send itself wakes the epic when nobody listens
    * - in airplane mode, unsent ones too:  the pill says how they're taken after the flight
+   * - NOT once the wake told a session of the epic through its inbox poller (`heard`, epic `epic-engine` I289):  it takes
+   *   the work by itself, nothing for Owen to do;  the pill appearing at the page's top as he clicked Clarify on an item
+   *   far below read as the page jumping there (Owen, 2026-11-15:  "jumps to the top of the window, maybe to say?
+   *   Don't do that!");  the item's own icon turning is the feedback
    */
   readonly hasPill = createMemo((): boolean => {
     const marks = this.marks()
@@ -494,7 +499,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (isAirplane()) return !!(marks.unsent || marks.comments || marks.waiting || marks.asked || marks.woken)
     // an agent that listens by itself, gone:  how to wake it, whenever anything waits (Send never wakes it, Q14)
     if (marks.idle) return !!(marks.unsent || marks.comments || marks.waiting || marks.asked)
-    if (marks.listening) return false
+    if (marks.listening || marks.heard) return false
     return marks.waiting - marks.unsent > 0 || !!(marks.asked || marks.woken)
   })
 

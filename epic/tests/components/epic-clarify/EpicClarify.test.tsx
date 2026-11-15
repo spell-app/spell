@@ -99,6 +99,28 @@ describe("<epic-clarify>", () => {
     await vi.waitFor(() => expect(linkOf(clarify)).toBeNull())
   })
 
+  test("I289:  the link is a button, never a hash link, and its click leaves the page where it is", async () => {
+    const routes = new FakeRoutes()
+    await adoptClient(routes)
+    const spacer = document.createElement("div")
+    spacer.style.height = "3000px"
+    document.body.prepend(spacer)
+    try {
+      const clarify = await render()
+      await vi.waitFor(() => expect(linkOf(clarify)).not.toBeNull())
+      const link = linkOf(clarify)!
+      expect([link.localName, link.getAttribute("href")]).toEqual(["button", null])
+      window.scrollTo({ top: 1200, behavior: "instant" })
+      const before = { y: window.scrollY, hash: location.hash }
+      link.click()
+      await vi.waitFor(() => expect(routes.posted.map((post) => post.route)).toContain("now"))
+      await ElementFixture.settle()
+      expect({ y: window.scrollY, hash: location.hash }).toEqual(before)
+    } finally {
+      spacer.remove()
+    }
+  })
+
   /** The icon's button, in its shadow root;  `null` when not drawn. */
   function buttonOf(clarify: Element): HTMLButtonElement | null {
     return clarify.shadowRoot!.querySelector<HTMLButtonElement>('button[part~="base"]')
