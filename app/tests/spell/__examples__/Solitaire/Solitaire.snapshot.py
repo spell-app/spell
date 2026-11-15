@@ -102,6 +102,12 @@ class Card(TwoSidedView):
     def draw_back(self) -> Element:
         return h("ui-text", {"color": "blue", "part": "back"}, "🂠")
 
+    @property
+    def is_on_top(self) -> bool:
+        """the card the next one goes on"""
+        assert self.pile is not None
+        return self == self.pile.last_item
+
     async def play(self) -> Any:
         if self.pile == solitaire.stock:
             await solitaire.turn_over_the_next_card()

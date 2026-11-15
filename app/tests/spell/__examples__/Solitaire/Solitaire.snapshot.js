@@ -78,6 +78,11 @@ export class Card extends TwoSidedView {
     return h("ui-text", { color: "blue", part: "back" }, "🂠")
   }
 
+  /** the card the next one goes on */
+  get isOnTop() {
+    return this === this.pile.lastItem
+  }
+
   async play() {
     if (this.pile === solitaire.stock) await solitaire.turnOverTheNextCard()
     else {

@@ -1509,7 +1509,9 @@ export class SpellLanguageService {
     const generated = this.generatedRules(file.project)
     for (let index = stack.length - 1; index >= 0; index--) {
       const match = stack[index]!
-      const record = match.rule.highlightAs ? this.recordOf(match) : undefined
+      const record = match.rule.highlightAs
+        ? (this.recordOf(match) ?? SpellLanguageService.variableNamedBy(match, stack.slice(0, index)))
+        : undefined
       if (record instanceof P.ScopeVariable) return { kind: "variable", record, nameMatch: match }
       if (record instanceof P.TypeScope) return { kind: "type", record, nameMatch: match }
       if (record instanceof P.ScopeConstant) return { kind: "constant", record, nameMatch: match }
@@ -1526,6 +1528,24 @@ export class SpellLanguageService {
       if (offset < nameMatch.start || offset > nameMatch.end!) continue
       const subject = this.subjectDeclaredBy(match, declaration, generated)
       if (subject) return subject
+    }
+    return undefined
+  }
+
+  /**
+   * The variable the word `match` MAKES for the body of a statement around it, if any:
+   * `card` in `for card in the deck` (epic `language` I83).
+   * - The loop looks its word up before it makes the variable, so the word's own lookup found nothing:
+   *   the variable is in the scope the loop opens for its body, `declaredBy` the word.
+   * - `ancestors`:  the matches around `match`, outermost first.
+   */
+  private static variableNamedBy(match: P.Match, ancestors: P.Match[]): P.ScopeVariable | undefined {
+    for (let index = ancestors.length - 1; index >= 0; index--) {
+      const statement = ancestors[index]!
+      const scope = statement.nestedScope
+      if (scope === statement.scope) continue
+      const found = scope.variables?.get().find((it) => it.declaredBy === match)
+      if (found) return found
     }
     return undefined
   }
