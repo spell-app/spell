@@ -124,7 +124,7 @@ export class ReviewState {
 
   /**
    * What the inbox says of item `itemId` (its own id when none) for its drawn state (`DrawnState.of()`):
-   * worked on, Owen's urgency, his check pressed.
+   * worked on, Owen's urgency, his check pressed, his turn on a comment in it.
    * - the page's inbox, so any element reads it for any item:  a section counts its items by it, as their chips draw
    */
   readonly liveOf = (itemId?: string): LiveReview =>
@@ -135,7 +135,8 @@ export class ReviewState {
       return {
         workedOn: client.isWorkedOn(id),
         urgency: urgency && { calm: urgency.calm },
-        approved: client.markOf(id)?.action === "approve"
+        approved: client.markOf(id)?.action === "approve",
+        commentsReplied: client.hasRepliedComments(id)
       }
     }) ?? NO_LIVE_REVIEW
 

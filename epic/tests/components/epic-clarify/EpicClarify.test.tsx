@@ -26,6 +26,7 @@ class FakeRoutes {
     lastListener: null,
     unsentComments: [],
     waitingComments: [],
+    repliedComments: [],
     woken: null,
     doing: null
   }

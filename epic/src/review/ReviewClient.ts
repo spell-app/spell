@@ -502,6 +502,14 @@ export class ReviewClient extends PageStore {
   }
 
   /**
+   * Is it Owen's turn on a comment in `id`'s text:  Claude spoke last on its thread, and he hasn't ticked, replied or
+   * cleared it (`inbox.repliedComments`, the server's rule)?  Its item draws orange (epic `epic-engine` I284).
+   */
+  hasRepliedComments(id: string): boolean {
+    return this.inbox.repliedComments.some((each) => isAnchoredIn(each.anchor, id))
+  }
+
+  /**
    * Pick option `letter` of card set `choices` on `id` (`null`:  drop the pick):  a "Choose" pill (P10).
    * - `choices`:  which of the item's `<epic-choices>` the option is in, by position
    *   (I8:  its text's, a reply's ...);  none, its own

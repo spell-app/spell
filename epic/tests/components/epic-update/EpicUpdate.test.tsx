@@ -213,6 +213,7 @@ class FakeRoutes {
     lastListener: null,
     unsentComments: [],
     waitingComments: [],
+    repliedComments: [],
     woken: null,
     doing: null
   }
@@ -309,5 +310,25 @@ describe("<epic-update> new, seen, quiet", () => {
     const alone = await ElementFixture.render(BLOCK)
     await ElementFixture.settle()
     expect(seenButton(alone)).toBeNull()
+  })
+})
+
+describe("<epic-update> bare, its item checked (I285)", () => {
+  // Owen, 2026-11-15:  "After checking something, the `updated` should go away since I've already accepted it"
+  test("its item's ✓ in the review inbox:  the label goes at once;  the ✓ taken back, it's there again", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const root = await ElementFixture.render(
+      `<epic-item id="i91"><span slot="title">Fixed <epic-update phase="52" became="fixed"></epic-update></span></epic-item>`
+    )
+    const update = root.querySelector("epic-update")!
+    await ElementFixture.settle()
+    const label = () => update.shadowRoot!.querySelector('[part~="label"]')
+    expect(label()?.textContent).toBe("UPDATE : FIXED")
+    await client.save("i91", { action: "approve" })
+    await vi.waitFor(() => expect(label()).toBeNull())
+    expect(update.matches(":state(checked)")).toBe(true)
+    await client.save("i91", null)
+    await vi.waitFor(() => expect(label()?.textContent).toBe("UPDATE : FIXED"))
   })
 })

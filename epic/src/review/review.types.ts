@@ -247,6 +247,8 @@ export const AGENTS_FILE = "agents.json5"
  *   (`ReviewInbox.forPage()`);  `[]` from a server started before Send took comments
  * - `waitingComments`:  every comment waiting for Claude, with where it is (its anchor), so Revisit on a part with
  *   Owen's comments in its text marks them at once (epic `epic-engine` I140);  `[]` from an older server
+ * - `repliedComments`:  every comment whose turn is Owen's (Claude spoke last), with its anchor:  its item draws
+ *   orange (epic `epic-engine` I284);  `[]` from an older server
  * - `woken`:  the page server's wake of the epic (epic `epic-workflow` P16), while it counts and nobody listens;
  *   `null` otherwise, or from a server started before it woke epics
  * - `doing`:  what the listening session is doing now (epic `epic-engine` P35), the toolbar's line;  `null` for
@@ -267,6 +269,7 @@ export type Inbox = Pick<
   | "lastListener"
   | "unsentComments"
   | "waitingComments"
+  | "repliedComments"
   | "woken"
   | "doing"
 >
@@ -426,14 +429,8 @@ export function inboxOf(reply: unknown): Inbox {
     unsentComments: Array.isArray(record.unsentComments)
       ? record.unsentComments.filter((id): id is string => typeof id === "string")
       : [],
-    waitingComments: Array.isArray(record.waitingComments)
-      ? record.waitingComments.filter(
-          (each): each is WaitingComment =>
-            isObject(each) &&
-            typeof (each as WaitingComment).id === "string" &&
-            typeof (each as WaitingComment).anchor === "string"
-        )
-      : [],
+    waitingComments: anchoredComments(record.waitingComments),
+    repliedComments: anchoredComments(record.repliedComments),
     woken:
       isObject(record.woken) && typeof (record.woken as InboxWoken).message === "string"
         ? (record.woken as InboxWoken)
@@ -760,6 +757,17 @@ export function sentence(message: string): string {
 /** A plain object (not null, not an array)? */
 function isObject(value: unknown): boolean {
   return !!value && typeof value === "object" && !Array.isArray(value)
+}
+
+/** A route's list of comments with their anchors (`waitingComments`, `repliedComments`), the well-formed ones;  else `[]`. */
+function anchoredComments(value: unknown): WaitingComment[] {
+  if (!Array.isArray(value)) return []
+  return value.filter(
+    (each): each is WaitingComment =>
+      isObject(each) &&
+      typeof (each as WaitingComment).id === "string" &&
+      typeof (each as WaitingComment).anchor === "string"
+  )
 }
 
 /**
