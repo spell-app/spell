@@ -821,6 +821,9 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    * - Through the program's core, `core.send()`:  our thing's handler takes it (`- on mouse down:` is
    *   `onMouseDown()`), or hands it up with `pass event` -- the list holding it, then the app.
    * - Sent once, by the INNERMOST thing's element:  an element around us doesn't send it again.
+   *   - Except a view drawn as PART of another's drawing, with no handler of its own for it, e.g. a card's
+   *     `<card-image>`:  the view whose drawing it's in sends it (`drawnIn`), so a click on a card's picture
+   *     clicks the card (epic `language` I105).
    * - Not a press in a control inside us:  that's the control's.
    * - Spell never reads the browser's event:  the mouse and keys are `core.input` (`noteInput()`).
    * - A program running elsewhere (Python, `core.remote`) hears only its own handler, as before.
@@ -829,6 +832,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const spellEvent = THING_EVENTS[event.type]
     const thing = this.currentThing as Record<string, unknown> | undefined
     if (!spellEvent || !thing || HANDLED_EVENTS.has(event) || this.isInAControl(event)) return
+    // part of another view's drawing, and not ours to take:  that view's
+    if (this.drawnIn && !SpellElement.handles(thing, spellEvent)) return
     HANDLED_EVENTS.add(event)
     this.noteInput(event)
     const { core } = this.entry!
@@ -1016,6 +1021,17 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /** The `SpellElement` behind `element`, if it's a view's element. */
+  /**
+   * The view whose own drawing we're part of, e.g. the card a `<card-image>` is drawn in -- `undefined` if none.
+   * - Its drawing is its shadow root:  we're in it.
+   * - NOT a list's items, e.g. a pile's cards:  they're its children, shown in its `<slot>`, each its own thing.
+   */
+  private get drawnIn(): SpellElement | undefined {
+    const root = this.domElement.getRootNode()
+    const view = root instanceof ShadowRoot ? SpellElement.componentOf(root.host) : undefined
+    return view?.currentThing ? view : undefined
+  }
+
   static componentOf(element: Element): SpellElement | undefined {
     const { component } = element as Partial<E.DOMElement>
     return component instanceof SpellElement ? component : undefined

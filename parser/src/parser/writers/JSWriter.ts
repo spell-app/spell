@@ -1745,9 +1745,22 @@ export class JSWriter extends ProgramWriter {
     return `${head},\n${jsText.indented(children.join(",\n"))}\n)`
   }
 
-  /** A context menu's items, by the names this target gives them:  `["autoPlay", "-", "undo"]`. */
-  protected menuItemNames(items: readonly string[]): string {
-    return `[${items.map((item) => this.quoted(item === "-" ? item : this.nameOf(item, "method"))).join(", ")}]`
+  /**
+   * A context menu's items, by the names this target gives them:  `["autoPlay", "-", "undo"]`.
+   * - An item with attributes is its name and them:  `["undo", { "icon-only": true }]`.
+   * - On one line when it fits, else one a line.
+   */
+  protected menuItemNames(items: readonly P.ASTContextMenuItem[]): string {
+    const written = items.map((item) => {
+      if (typeof item === "string") return this.quoted(item === "-" ? item : this.nameOf(item, "method"))
+      const props = Object.entries(item.props).map(
+        ([key, value]) => `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${JSON.stringify(value)}`
+      )
+      return `[${this.quoted(this.nameOf(item.action, "method"))}, { ${props.join(", ")} }]`
+    })
+    const inline = `[${written.join(", ")}]`
+    if (P.SourceMarks.widthOf(inline) < JSWriter.DRAWING_LINE) return inline
+    return `[\n${jsText.indented(written.join(",\n"))}\n]`
   }
 
   /**

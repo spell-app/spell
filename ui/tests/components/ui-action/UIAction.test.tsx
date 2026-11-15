@@ -86,6 +86,40 @@ describe("<ui-action>", () => {
     expect(state.runs).toBe(1)
   })
 
+  it("icon-only:  its icon alone, its title and keys its tooltip, its title its name;  side by side in a menu", async () => {
+    const { actions, boxOf } = await menuOf(
+      '<ui-action icon="undo" icon-only shortcut="mod+Z">Undo</ui-action>' +
+        '<ui-action icon="redo" icon-only>Redo</ui-action>' +
+        "<ui-action icon-only>Restart</ui-action>"
+    )
+    const [undo, redo, restart] = actions.map((action) => ({ action, box: boxOf(action) }))
+    expect(undo!.action.matches(":state(icon-only)")).toBe(true)
+    expect(undo!.box.classList.contains("icon")).toBe(true)
+    expect(undo!.box.querySelector<HTMLElement>("[part~=title]")!.offsetWidth).toBe(0)
+    expect(undo!.box.querySelector("[part~=shortcut]")).toBeNull()
+    expect(undo!.box.title).toBe(`Undo (${UI.browser.isApple ? "⌘Z" : "Ctrl+Z"})`)
+    expect(undo!.box.getAttribute("aria-label")).toBe("Undo")
+    expect(redo!.box.title).toBe("Redo")
+    // in one row:  Redo beside Undo, at its top
+    const [undoBox, redoBox] = [undo!.box.getBoundingClientRect(), redo!.box.getBoundingClientRect()]
+    expect(redoBox.left).toBeGreaterThanOrEqual(undoBox.right - 1)
+    expect(Math.abs(redoBox.top - undoBox.top)).toBeLessThan(2)
+    // no icon:  its title shows, as without `icon-only`
+    expect(restart!.action.matches(":state(icon-only)")).toBe(false)
+    expect(restart!.box.querySelector<HTMLElement>("[part~=title]")!.offsetWidth).toBeGreaterThan(0)
+    await expectAccessible(undo!.action.closest("ui-menu")!)
+  })
+
+  it("an action's title, under icon-only:  its tooltip and its name", async () => {
+    const { actions, boxOf } = await menuOf("<ui-action icon-only></ui-action>")
+    const element = actions[0]!
+    element.action = { ...testAction("Undo Turn Card").action, shortcut: undefined }
+    await ElementFixture.settle()
+    expect(boxOf(element).querySelector<HTMLElement>("[part~=title]")!.offsetWidth).toBe(0)
+    expect(boxOf(element).getAttribute("aria-label")).toBe("Undo Turn Card")
+    expect(boxOf(element).title).toBe("Undo Turn Card")
+  })
+
   it("key caps, as <ui-keys> draws them:  mod is command on a Mac, control elsewhere;  meta the Meta key", async () => {
     const { actions } = await menuOf("<ui-action>Go</ui-action>")
     const component = actions[0]!.component

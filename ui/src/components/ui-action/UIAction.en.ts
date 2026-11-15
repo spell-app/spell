@@ -51,7 +51,9 @@ export const actionVocabulary = {
       kind: "keyOnly",
       description:
         "Only its icon, at every width:  its title is its tooltip and its name for a screen reader, and its row in " +
-        "a `shrinkable` menu's `…` menu.  No icon:  its title shows."
+        "a `shrinkable` menu's `…` menu.  " +
+        "In a vertical menu, icon-only actions side by side share one row (Undo and Redo).  " +
+        "No icon:  its title shows."
     }
   ],
   parts: [

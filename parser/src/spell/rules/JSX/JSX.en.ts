@@ -183,6 +183,10 @@ JSX.addRule(ContextMenuBlock, {
           'core.drawContextMenu(this, ["autoPlay", "-", "undo"])'
         ],
         [
+          ["<context-menu>", '\t<action "undo" icon-only/>', '\t<action "restart the game" title="Restart"/>', "</>"],
+          'core.drawContextMenu(this, [["undo", { "icon-only": true }], ["restartTheGame", { title: "Restart" }]])'
+        ],
+        [
           ["<grid>", '\t<context-menu><action "undo"/></context-menu>', "</grid>"],
           'h("grid", core.drawContextMenu(this, ["undo"]))',
           '<grid>{core.drawContextMenu(this, ["undo"])}</grid>'

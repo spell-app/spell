@@ -261,11 +261,13 @@ class DrawingMethods:
         text = children if icon_only or children else (title,)
         return h(BUTTON_TAG, {**own, **given}, *text)
 
-    def draw_context_menu(self, thing: object, names: list[str]) -> Element:
+    def draw_context_menu(self, thing: object, names: list[object]) -> Element:
         """The right-click menu of the element around it, `<context-menu>`:  a hidden `<spell-context-menu>`.
 
         - The twin of the JavaScript core's `drawContextMenu()`:  the page draws the menu with its drawing half,
           each action run here;  printed, it's the hidden element alone, as the JavaScript run's page prints it.
+        - `names`:  each an action's method, `-` a line, or an action and its tag's attributes,
+          `["undo", {"icon-only": True}]`.
         """
         return h(CONTEXT_MENU_TAG, {"hidden": True})
 

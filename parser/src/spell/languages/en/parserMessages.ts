@@ -310,6 +310,9 @@ export const PARSER_MESSAGES = {
   /** Something in a `<context-menu>` that isn't one of its items (epic `language`). */
   "context-menu-item":
     '<{tag}> holds only its items:  <action "name"/> for an action, <divider/> for a line between groups',
+  /** An item of a `<context-menu>` given an attribute as code, `{...}`:  a menu's row takes only words. */
+  "context-menu-code":
+    '<{tag}> in a menu takes words, not code:  write its attribute as words, e.g. title="Restart", or leave it bare, e.g. icon-only',
   /** A `{...}` in a `<markdown>` block that isn't spell. */
   "markdown-hole":
     'Don\'t understand "{{hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace',
