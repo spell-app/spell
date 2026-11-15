@@ -20,7 +20,7 @@
     {
       "type": "Card",
       "superType": "TwoSidedView",
-      "defined": "/Card.spell:0-2161"
+      "defined": "/Card.spell:0-2163"
     },
     {
       "property": "rank",
@@ -234,25 +234,25 @@
     {
       "type": "CardImage",
       "superType": "View",
-      "defined": "/Card.spell:2163-4400"
+      "defined": "/Card.spell:2165-4404"
     },
     {
       "property": "card",
       "of": "CardImage",
       "datatype": "Card",
-      "defined": "/Card.spell:2684-2704"
+      "defined": "/Card.spell:2688-2708"
     },
     {
       "property": "rank",
       "of": "CardImage",
       "datatype": "CardRank",
-      "defined": "/Card.spell:2706-2731"
+      "defined": "/Card.spell:2710-2735"
     },
     {
       "property": "suit",
       "of": "CardImage",
       "datatype": "CardSuit",
-      "defined": "/Card.spell:2733-2758"
+      "defined": "/Card.spell:2737-2762"
     },
     {
       "property": "direction",
@@ -262,7 +262,7 @@
         "up",
         "down"
       ],
-      "defined": "/Card.spell:2760-2789"
+      "defined": "/Card.spell:2764-2793"
     },
     {
       "syntax": "{operator:is_or_is_not} face (expression:up|ups|down|downs)",
@@ -277,30 +277,30 @@
           "down"
         ]
       },
-      "defined": "/Card.spell:2791-2815"
+      "defined": "/Card.spell:2795-2819"
     },
     {
       "property": "face",
       "of": "CardImage",
       "datatype": "Card",
-      "defined": "/Card.spell:2817-2992"
+      "defined": "/Card.spell:2821-2996"
     },
     {
       "property": "color",
       "of": "CardImage",
-      "defined": "/Card.spell:2994-3068"
+      "defined": "/Card.spell:2998-3072"
     },
     {
       "constants": [
         "blue"
       ],
-      "defined": "/Card.spell:3011-3034"
+      "defined": "/Card.spell:3015-3038"
     },
     {
       "property": "picture",
       "of": "CardImage",
       "datatype": "text",
-      "defined": "/Card.spell:3070-3718"
+      "defined": "/Card.spell:3074-3722"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -313,7 +313,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Card.spell:3720-3777"
+      "defined": "/Card.spell:3724-3781"
     },
     {
       "syntax": "test card setup",
@@ -322,7 +322,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "card setup",
-      "defined": "/Card.spell:1499-2161"
+      "defined": "/Card.spell:1501-2163"
     },
     {
       "syntax": "test card images",
@@ -331,7 +331,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "card images",
-      "defined": "/Card.spell:3780-4400"
+      "defined": "/Card.spell:3784-4404"
     },
     {
       "type": "Pile",
@@ -429,7 +429,7 @@
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6489-6944"
+      "defined": "/Solitaire.spell:6489-6945"
     },
     {
       "property": "layout",
@@ -446,13 +446,13 @@
     {
       "type": "Column",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6946-7257"
+      "defined": "/Solitaire.spell:6947-7258"
     },
     {
       "property": "layout",
       "of": "Column",
       "datatype": "text",
-      "defined": "/Solitaire.spell:6972-6989"
+      "defined": "/Solitaire.spell:6973-6990"
     },
     {
       "type": "Solitaire",
@@ -647,7 +647,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spell:7259-8714"
+      "defined": "/Solitaire.spell:7260-8715"
     }
   ],
   "codeLines": [

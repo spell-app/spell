@@ -30,9 +30,9 @@ una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
 
 	grupo "Dibujo"
 	para dibujar su frente
-		<imagen-de-carta carta={eso}/>
+		<imagen-de-carta carta={eso} />
 	para dibujar su dorso
-		<imagen-de-carta dirección=abajo/>
+		<imagen-de-carta dirección=abajo />
 
 	para probar la preparación de la carta
 		obtener una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
@@ -57,7 +57,7 @@ una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
 		el color del siete debería ser rojo
 
 una "imagen de carta" es una vista			-- El dibujo de una carta:  el único lugar donde vive el aspecto de una carta
-	-- Dale una carta que dibujar, o un rango y un palo:  `<imagen-de-carta carta={la carta}/>`, `<imagen-de-carta rango=as palo={su palo}/>`.
+	-- Dale una carta que dibujar, o un rango y un palo:  `<imagen-de-carta carta={la carta} />`, `<imagen-de-carta rango=as palo={su palo} />`.
 	-- Está boca arriba, salvo con `dirección=abajo`:  entonces es el dorso que comparten todas las cartas.
 	-- Hoy es una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
 	-- Dibujos de verdad de las cartas pueden ocupar su lugar:  solo cambian su dibujo y `para dibujar eso`.

@@ -128,7 +128,7 @@ core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Poi
 
 // identifying a card
 
-/** Give it a card to draw, or a rank and a suit:  `<card-image card={the card}/>`, `<card-image rank=ace suit={its suit}/>`. */
+/** Give it a card to draw, or a rank and a suit:  `<card-image card={the card} />`, `<card-image rank=ace suit={its suit} />`. */
 // A card's picture:  the one place a card's look lives
 export class CardImage extends View {
   static elementTag = core.defineElement(this, "test-project")

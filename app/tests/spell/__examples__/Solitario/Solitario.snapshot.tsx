@@ -167,7 +167,7 @@ core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar los 
 
 // identificar una carta
 
-/** Dale una carta que dibujar, o un rango y un palo:  `<imagen-de-carta carta={la carta}/>`, `<imagen-de-carta rango=as palo={su palo}/>`. */
+/** Dale una carta que dibujar, o un rango y un palo:  `<imagen-de-carta carta={la carta} />`, `<imagen-de-carta rango=as palo={su palo} />`. */
 // El dibujo de una carta:  el único lugar donde vive el aspecto de una carta
 export type Dirección = (typeof ImagenDeCarta.Direcciones)[number]
 

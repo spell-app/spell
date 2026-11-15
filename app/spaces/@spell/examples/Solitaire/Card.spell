@@ -30,9 +30,9 @@ a "card" is a draggable two sided view 			-- A playing card
 
 	group "Drawing"
 	to draw its front
-		<card-image card={it}/>
+		<card-image card={it} />
 	to draw its back
-		<card-image direction=down/>
+		<card-image direction=down />
 
 	to test card setup
 		get a new card whose rank is queen, suit is spades and direction is down
@@ -57,7 +57,7 @@ a "card" is a draggable two sided view 			-- A playing card
 		the color of seven should be red
 
 a "card image" is a view			-- A card's picture:  the one place a card's look lives
-	-- Give it a card to draw, or a rank and a suit:  `<card-image card={the card}/>`, `<card-image rank=ace suit={its suit}/>`.
+	-- Give it a card to draw, or a rank and a suit:  `<card-image card={the card} />`, `<card-image rank=ace suit={its suit} />`.
 	-- It's face up, unless it's `direction=down`:  then it's the back every card shares.
 	-- Today it's one letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 	-- Real pictures of the cards can take its place:  only its picture and `to draw it` change.

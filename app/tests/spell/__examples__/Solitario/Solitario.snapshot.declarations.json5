@@ -24,7 +24,7 @@
       "type": "Carta",
       "superType": "TwoSidedView",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:0-2322"
+      "defined": "/Carta.es.spell:0-2324"
     },
     {
       "property": "rango",
@@ -229,25 +229,25 @@
       "type": "ImagenDeCarta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:2324-4778"
+      "defined": "/Carta.es.spell:2326-4782"
     },
     {
       "property": "carta",
       "of": "ImagenDeCarta",
       "datatype": "Carta",
-      "defined": "/Carta.es.spell:2921-2944"
+      "defined": "/Carta.es.spell:2925-2948"
     },
     {
       "property": "rango",
       "of": "ImagenDeCarta",
       "datatype": "RangoDeCarta",
-      "defined": "/Carta.es.spell:2946-2977"
+      "defined": "/Carta.es.spell:2950-2981"
     },
     {
       "property": "palo",
       "of": "ImagenDeCarta",
       "datatype": "PaloDeCarta",
-      "defined": "/Carta.es.spell:2979-3008"
+      "defined": "/Carta.es.spell:2983-3012"
     },
     {
       "property": "dirección",
@@ -257,7 +257,7 @@
         "arriba",
         "abajo"
       ],
-      "defined": "/Carta.es.spell:3010-3042"
+      "defined": "/Carta.es.spell:3014-3046"
     },
     {
       "syntax": "{operator:is_or_is_not} boca (expression:arriba|arribas|abajo|abajos)",
@@ -272,30 +272,30 @@
           "abajo"
         ]
       },
-      "defined": "/Carta.es.spell:3044-3067"
+      "defined": "/Carta.es.spell:3048-3071"
     },
     {
       "property": "cara",
       "of": "ImagenDeCarta",
       "datatype": "Carta",
-      "defined": "/Carta.es.spell:3069-3255"
+      "defined": "/Carta.es.spell:3073-3259"
     },
     {
       "property": "color",
       "of": "ImagenDeCarta",
-      "defined": "/Carta.es.spell:3257-3334"
+      "defined": "/Carta.es.spell:3261-3338"
     },
     {
       "constants": [
         "azul"
       ],
-      "defined": "/Carta.es.spell:3273-3296"
+      "defined": "/Carta.es.spell:3277-3300"
     },
     {
       "property": "dibujo",
       "of": "ImagenDeCarta",
       "datatype": "text",
-      "defined": "/Carta.es.spell:3336-4015"
+      "defined": "/Carta.es.spell:3340-4019"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -304,7 +304,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "la preparación de la carta",
-      "defined": "/Carta.es.spell:1606-2322"
+      "defined": "/Carta.es.spell:1608-2324"
     },
     {
       "syntax": "probar las imágenes de carta",
@@ -313,7 +313,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "las imágenes de carta",
-      "defined": "/Carta.es.spell:4082-4778"
+      "defined": "/Carta.es.spell:4086-4782"
     },
     {
       "type": "Mazo",
@@ -416,7 +416,7 @@
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7488-7956"
+      "defined": "/Solitario.es.spell:7488-7957"
     },
     {
       "property": "disposición",
@@ -434,13 +434,13 @@
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7958-8287"
+      "defined": "/Solitario.es.spell:7959-8288"
     },
     {
       "property": "disposición",
       "of": "Columna",
       "datatype": "text",
-      "defined": "/Solitario.es.spell:7988-8010"
+      "defined": "/Solitario.es.spell:7989-8011"
     },
     {
       "type": "Solitario",
@@ -636,7 +636,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:8289-9845"
+      "defined": "/Solitario.es.spell:8290-9846"
     }
   ],
   "codeLines": [
