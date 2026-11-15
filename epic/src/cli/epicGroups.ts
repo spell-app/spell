@@ -271,12 +271,34 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "add",
-      usage: '<name> "<task>" [--status "blocked on <name>"] [--task-id <id>]',
+      usage: '<name> "<task>" [--status "blocked on <name>"] [--task-id <id>] [--files <path,...>]',
       description: "an agent starting:  prints its full name, <epic>-<name>;  exit 1 if it's running already",
       example: 'epic agents add docstrings "docstrings in string.ts"',
       flags: {
         "--status <status>": 'active, or "blocked on <name>"',
         "--task-id <id>": "the id of the background task it runs as",
+        "--files <paths>": "the files it will change, comma-separated:  claimed as it starts (claim)",
+        "--epic <epic>": "that epic's list (default this checkout's)"
+      }
+    },
+    {
+      name: "claim",
+      usage: "<name> <path...>",
+      description:
+        "the files an agent is changing (a file, a folder or a glob, from the checkout's root):  no other agent " +
+        "claims them, and no merge moves them aside;  exit 1, naming the agent, if another has one already",
+      example: "epic agents claim docstrings src/util/string.ts epic/src/components/__pack/",
+      flags: {
+        "--epic <epic>": "that epic's list (default this checkout's)"
+      }
+    },
+    {
+      name: "claims",
+      usage: "[--json]",
+      description: "every running agent's claimed files, one line each",
+      example: "epic agents claims",
+      flags: {
+        "--json": "print them as JSON",
         "--epic <epic>": "that epic's list (default this checkout's)"
       }
     },
@@ -453,13 +475,15 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "merge-main",
-      usage: "[--continue] [--json]",
+      usage: "[--continue] [--as <agent>] [--json]",
       description:
         "merge main into this checkout's branch, regenerating the generated files both sides changed;  exit 1 " +
-        "on other conflicts:  resolve, git add, then --continue",
-      example: "epic worktree merge-main",
+        "on other conflicts:  resolve, git add, then --continue;  one merge at a time on the machine (epic turns), " +
+        "and never moving aside a file another running agent claims (epic agents claim)",
+      example: "epic worktree merge-main --as docstrings",
       flags: {
         "--continue": "go on, once the conflicts are resolved and added",
+        "--as <agent>": "the agent merging:  its own claimed files may be moved aside",
         "--json": "print what it did as JSON"
       }
     },
@@ -972,6 +996,24 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {}
     }
   ],
+  turns: [
+    {
+      name: "run",
+      usage: "<kind> -- <command> [args...]",
+      description:
+        "run a command in its turn:  one of each kind at a time on this machine (a full test run:  test);  " +
+        "waits, saying who has the turn;  epic merge and merge-main take the merge turn by themselves",
+      example: "epic turns run test -- yarn test",
+      flags: {}
+    },
+    {
+      name: "list",
+      usage: "",
+      description: "the turns taken now:  each kind's holder, and since when (the default verb)",
+      example: "epic turns list",
+      flags: {}
+    }
+  ],
   turn: [
     {
       name: "end",
@@ -1157,7 +1199,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  * - a docs tool or script passed through:
  *   `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`, `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
- *   `hub` (`Hub`), `repo` (`Repos`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
+ *   `hub` (`Hub`), `repo` (`Repos`), `turns` (`Turns`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
  *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  */
@@ -1176,6 +1218,7 @@ export type GroupName =
   | "server"
   | "hub"
   | "repos"
+  | "turns"
   | "turn"
   | "skills"
   | "plugin"
@@ -1244,7 +1287,13 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
   summary: { "--json": "print it as JSON" },
-  stale: { "--json": "print them as JSON" },
+  stale: {
+    "--json": "print them as JSON",
+    "--underway": "the open items whose Underway card went stale, and whether their work is on main (T78)",
+    "--apply": "with --underway:  on main => fixed for review;  else a Stale card, once;  never closes anything",
+    "--hours <n>": "with --underway:  how old an Underway card must be (default 3)",
+    "--quiet": "with --apply:  say nothing when nothing changed"
+  },
   summaries: {},
   items: {
     "--section <section>": "only that section:  questions, judgements, todos, issues or tests",
@@ -1320,6 +1369,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--requested":
       "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--limit": "a todo:  a limit to know about, not work",
+    "--start <words>":
+      "taken up at once:  the person's words its body, an Underway card, the spinner on:  blue, not red (T78)",
+    "--agent <name>": "with --start:  the agent on it, named on its Underway card",
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",

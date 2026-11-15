@@ -36,12 +36,12 @@ import actionCSS from "./UIAction.css?inline"
  *   Plain caps, as a menu shows them, where `<ui-keys>` draws boxes.
  * - Where its caps don't show (a toolbar's own row, unless `show-keys`;  icons only), its tooltip names its keys:
  *   `Undo (⌘Z)`.
- * - `icon-only`:  its icon alone, as an icon-only button is (`showsOnlyItsIcon`):
- *   - its title box hidden (still drawn, so a `shrinkable` menu measures it as before), its keys not drawn
- *   - its title, and its keys, its tooltip:  `Undo (⌘Z)`;  its title its accessible name (`aria-label`)
+ * - `icon-only`:  its icon alone, at every width (`:state(icon-only)`), its title its tooltip and its name:
+ *   - its title box is still drawn, but hidden, so a `shrinkable` menu still folds it into its `…` button
+ *     with the rest, where its row shows its title
  *   - in a vertical menu, side by side with the icon-only actions next to it, in one row (`UIMenu.css`):
  *     a context menu's Undo and Redo
- *   - no icon:  its title shows, as without `icon-only`
+ *   - an action with no icon shows its title as before:  there's nothing else to show
  ****************/
 export class UIAction extends UIItem {
   // the item's names under the action's tag, and its own:  TypeScript only knows the item's literals
@@ -94,20 +94,6 @@ export class UIAction extends UIItem {
     return super.isSelected || !!this.actionToDraw?.isSelected
   }
 
-  /**
-   * It shows its icon alone:  `icon-only`, and it has an icon (`:state(icon-only)`).
-   * - With no icon its title shows:  a row with nothing in it would be no use to anyone.
-   */
-  @E.cssState("icon-only")
-  get showsOnlyItsIcon(): boolean {
-    return !!this.iconOnly && this.kind === UIT.ITEM && this.hasIcon
-  }
-
-  /** It draws its icon alone:  `icon-only` (`showsOnlyItsIcon`), else as any item does (nothing beside its icon). */
-  get isIconOnly(): boolean {
-    return this.showsOnlyItsIcon || super.isIconOnly
-  }
-
   /** Always a button (a link with `link`):  something to press, in any owner. */
   get rootTag(): "a" | "button" | "div" {
     if (this.kind !== UIT.ITEM) return "div"
@@ -122,6 +108,33 @@ export class UIAction extends UIItem {
       return
     }
     void Promise.resolve(this.actionToDraw?.run("click")).catch((error) => console.error(error))
+  }
+
+  ////////////////
+  // ## Icon only
+  ////////////////
+
+  /**
+   * It shows its icon alone (`icon-only`), and has one:  `:state(icon-only)`, which hides its title box
+   * (`UIAction.css`).
+   */
+  @E.cssState("icon-only")
+  get showsIconOnly(): boolean {
+    return this.kind === UIT.ITEM && this.hasIcon && E.Converters.boolean(this.attributes[ICON_ONLY], ICON_ONLY)
+  }
+
+  /**
+   * Fomantic's `icon item` (its icon centred, no gap after it) while it shows its icon alone too,
+   * but not in a menu with ticks or an icon column, where every row keeps its icon in the column.
+   */
+  get isIconOnly(): boolean {
+    if (!this.showsIconOnly) return super.isIconOnly
+    return !this.isInTicks && !this.isInIconColumn && !this.hasBadge && !this.imageUrl
+  }
+
+  /** The box's name:  the page's (`aria-label`), else its title while it shows its icon alone. */
+  protected get boxLabel(): string | undefined {
+    return super.boxLabel ?? (this.showsIconOnly ? this.titleText || undefined : undefined)
   }
 
   ////////////////
@@ -140,33 +153,25 @@ export class UIAction extends UIItem {
 
   /**
    * Its key caps show beside its title:  not in a toolbar's own row (unless `show-keys`), nor while its menu shows
-   * icons only, nor while it does (`icon-only`).
+   * icons only, nor while it shows its icon alone (`icon-only`).
    */
   get drawsShortcut(): boolean {
     const context = this.itemContext
-    return !context?.hidesShortcuts && !context?.iconsOnly && !this.showsOnlyItsIcon
+    return !context?.hidesShortcuts && !context?.iconsOnly && !this.showsIconOnly
   }
 
   /**
    * The box's tooltip:  where its key caps don't show, its title and its keys, `Auto Play (A)`, `Undo (⌘Z)` on a Mac,
-   * `Undo (Ctrl+Z)` elsewhere;  its title alone, showing only its icon with no keys.
+   * `Undo (Ctrl+Z)` elsewhere.
+   * - Its title alone while it shows its icon alone (`icon-only`) and has no keys.
    * - The page's own `title` still wins (`UIItem`'s).
    */
   protected get boxTooltip(): string | undefined {
     const tooltip = super.boxTooltip
-    if (this.attributes.title !== null) return tooltip
-    // its icon alone:  its title, at least
-    const titled = tooltip ?? (this.showsOnlyItsIcon ? this.titleText || undefined : undefined)
-    if (this.drawsShortcut || !this.shortcut) return titled
-    const caps = this.keyCapsFor(this.shortcut)
-    if (!caps.length) return titled
-    const keys = caps.join(UI.browser.isApple ? "" : KEY_JOIN)
-    return `${this.titleText} (${keys})`
-  }
-
-  /** The box's accessible name:  the item's (its `aria-label` ...), else its title while it shows its icon alone. */
-  protected get boxLabel(): string | undefined {
-    return super.boxLabel ?? (this.showsOnlyItsIcon ? this.titleText || undefined : undefined)
+    if (this.attributes.title !== null || this.drawsShortcut) return tooltip
+    const caps = this.shortcut ? this.keyCapsFor(this.shortcut) : []
+    if (caps.length) return `${this.titleText} (${caps.join(UI.browser.isApple ? "" : KEY_JOIN)})`
+    return this.showsIconOnly ? this.titleText || tooltip : tooltip
   }
 
   /** The item's title box and badge (`UIItem.boxContent()`), then its shortcut's key caps, while they show. */
@@ -211,7 +216,7 @@ export class UIAction extends UIItem {
   }
 }
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
-export interface UIAction extends E.AttributeValues<typeof actionVocabulary> {}
+export interface UIAction extends E.AttributeValues<typeof itemVocabulary> {}
 
 /**
  * What `<ui-action>` draws and runs:  an action of a program, read live.
@@ -235,6 +240,9 @@ export type ActionToDraw = {
 ////////////////
 // ## Constants
 ////////////////
+
+/** Its attribute that shows its icon alone. */
+const ICON_ONLY = "icon-only"
 
 /** Class word and part of the key caps' box. */
 const SHORTCUT = "shortcut"

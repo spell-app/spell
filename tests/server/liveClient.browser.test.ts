@@ -229,3 +229,64 @@ describe("liveClient's paste of a picture the extension read off the clipboard (
     await host.close()
   })
 })
+
+// epic `epic-engine` I293 (Owen:  "many merges into main -- can we avoid reloading the epic pages when that happens?"):
+// a server restart alone doesn't reload a page;  a script it runs that changed waits until the reader is away
+describe("liveClient after a server restart", () => {
+  /** a page that runs a script of its own */
+  const RUNS = PAGE.replace("</head>", `<script src="/docs/app.js"></script></head>`)
+
+  /** stop the page server, and start a new run on the same port */
+  async function restart() {
+    const port = server.info.port
+    await server.stop()
+    server = await new PageServer({ root }).start({ port, routes: false, pidFile: false })
+  }
+
+  /** the page, open, with a marker a reload would lose, once it has noted what its scripts hold */
+  async function marked(): Promise<Page> {
+    writeFileSync(join(root, "docs", "runs.html"), RUNS)
+    const page = await browser.newPage()
+    await page.goto(`http://127.0.0.1:${server.info.port}/docs/runs.html`)
+    await page.waitForFunction(() => !!(window as { SPELL_SERVER?: { reloadNow?: unknown } }).SPELL_SERVER?.reloadNow)
+    await page.evaluate(() => Object.assign(window, { marker: 1 }))
+    // `rememberVersions()` waits 2s for the page's fetches to go quiet
+    await page.waitForTimeout(2600)
+    return page
+  }
+
+  const markerOf = (page: Page) => page.evaluate(() => (window as unknown as { marker?: number }).marker)
+  const tokenOf = (page: Page) =>
+    page.evaluate(() => (window as unknown as { SPELL_SERVER: { token: string } }).SPELL_SERVER.token)
+
+  it("takes the new run's token and doesn't reload when its scripts are the same", async () => {
+    writeFileSync(join(root, "docs", "app.js"), "window.app = 1\n")
+    const page = await marked()
+    const before = await tokenOf(page)
+    await restart()
+    await page.waitForFunction(
+      (old) => (window as unknown as { SPELL_SERVER: { token: string } }).SPELL_SERVER.token !== old,
+      before,
+      {
+        timeout: 15_000
+      }
+    )
+    expect(await tokenOf(page)).toBe(server.web.guard.token)
+    await page.waitForTimeout(1500)
+    expect(await markerOf(page)).toBe(1)
+    await page.close()
+  }, 30_000)
+
+  it("a script it runs changed:  waits for the reader to be away, not reloading at once", async () => {
+    writeFileSync(join(root, "docs", "app.js"), "window.app = 1\n")
+    const page = await marked()
+    await page.mouse.move(10, 10)
+    await page.mouse.down()
+    await page.mouse.up()
+    await restart()
+    writeFileSync(join(root, "docs", "app.js"), "window.app = 2\n")
+    await page.waitForTimeout(4000)
+    expect(await markerOf(page)).toBe(1)
+    await page.close()
+  }, 30_000)
+})

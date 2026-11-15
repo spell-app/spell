@@ -3,8 +3,8 @@
  * The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Built ON the item's:  the same attributes, slots and states, so a menu or toolbar draws it as one of its items
  *   (the same noun, `item`).
- * - Its own:  the `action` it draws (a property), its `shortcut` and the key caps that show it, `icon-only`,
- *   and the words of the caps with no symbol:  `<ui-keys>`' (`keyCapTexts`), as it draws its caps through `<ui-keys>`' table.
+ * - Its own:  the `action` it draws (a property), its `shortcut` and the key caps that show it, and the words of
+ *   the caps with no symbol:  `<ui-keys>`' (`keyCapTexts`), as it draws its caps through `<ui-keys>`' table.
  */
 
 import type { E } from "spell/ui/core"
@@ -48,11 +48,12 @@ export const actionVocabulary = {
     {
       name: "icon-only",
       group: "appearance",
-      kind: "boolean",
+      kind: "keyOnly",
       description:
-        "Shows its icon alone:  its title (and keys) its tooltip and its name for a screen reader.  " +
+        "Only its icon, at every width:  its title is its tooltip and its name for a screen reader, and its row in " +
+        "a `shrinkable` menu's `…` menu.  " +
         "In a vertical menu, icon-only actions side by side share one row (Undo and Redo).  " +
-        "Needs an icon:  without one it shows its title as usual."
+        "No icon:  its title shows."
     }
   ],
   parts: [
@@ -61,7 +62,7 @@ export const actionVocabulary = {
   ],
   states: [
     ...itemVocabulary.states,
-    { name: "icon-only", description: "Shows its icon alone (`icon-only`, with an icon)." }
+    { name: "icon-only", description: "`icon-only`, with an icon:  its icon alone, its title hidden." }
   ],
   texts: [...keyCapTexts]
 } as const satisfies E.ComponentVocabulary

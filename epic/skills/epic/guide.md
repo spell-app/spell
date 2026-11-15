@@ -52,13 +52,21 @@ epic pages link <page> --show     # the page's links, to give the person
 
 ## build -- Build a phase
 
+An agent that can start background agents keeps its own session free to answer the person, and has them do the work
+(the epic skill's "The session answers;  agents build"):  each one claims its files (`epic agents claim <name>
+<path...>`), merges with `epic worktree merge-main --as <name>`, and runs a full test run in its turn,
+`epic turns run test -- yarn test`.  Else, the steps below, here.
+
 1. `epic phase <epic>#P3 active`, and the page's line:  `epic inbox status <epic> "Building P3"`.
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
 3. Do the work.  Record as you go:
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
-     (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked)
+     (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
+     taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited
+     on them -- the epic skill's "The session answers;  agents build";  a request from another session:  its words
+     and its Context both, so it never sits at "What it says on the tin")
    - a choice made without the person:  `epic add <epic>#J "title" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`
@@ -88,8 +96,8 @@ Then, for what it printed:
 1. `epic inbox status <epic> "Responding" --items <ids>`.
 2. Requests for now (Add Details, revisit now):  per item,
    `epic update <epic>#J3 underway "<what you take it to be>"`, write the answer
-   (`epic details <epic>#J3 --append --file answer.html`;  `--more` for Add Details:  clarify what its text means and
-   leaves out, a new paragraph wherever the context changes),
+   (`epic details <epic>#J3 --append --file answer.html`;  `--more` for Add Details:  it REPLACES the unclear text, so
+   write what it means whole, a new paragraph wherever the context changes),
    `epic update <epic>#J3 noted "<what was written>"`, then `epic inbox done <epic>#J3`.
 3. Sent marks:  `epic inbox apply <epic>` lands approvals, picks and todos.
    Do this, on an issue or a judgement call:  NO todo;  it stays in the item, red, and `apply` prints your steps.
@@ -131,6 +139,9 @@ epic turn end
 ## tidy -- Close what other work made obsolete
 
 Only when the person asks (the skill's word:  `$epic tidy`).
+Its mechanical half runs by itself at every turn's end (`epic turn end`):  `epic stale <epic> --underway --apply`,
+stale Underway items whose work is on main turned orange for review, the rest given a `Stale:` card (the epic skill's
+"14. Tidy").
 
 ```sh
 epic stale <epic> --json     # the facts per open call, issue and todo;  it decides nothing

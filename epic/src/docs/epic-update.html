@@ -53,7 +53,7 @@
           <p class="lede">
             An update: a block titled <b>Update</b>: &lt;summary&gt;, its date at the right, what changed under it. A
             phase's plan change sits at the end of its phase's description; an update to prose, right after what it
-            changed. Empty, it's the small orange UPDATE label on an item changed while a phase is active.
+            changed. Empty, it's the small orange UPDATE label on an item that changed.
           </p>
           <!-- no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
                epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components) -->
@@ -89,6 +89,7 @@
               An issue fixed in P6, its fix still on the epic's branch:
               <epic-update phase="6" became="fixed" unmerged="epic-engine"></epic-update>
             </p>
+            <p>An issue Claude has taken up: <epic-update phase="6" became="underway"></epic-update></p>
             <epic-update at="2026-10-11 14:30" summary="No Plan changes box" phase="6"
               ><p>
                 2026-10-11: lose the surround. Each change is its own block at the end of its phase's description.
@@ -349,9 +350,9 @@
                   </tr>
                   <tr>
                     <td><code>became</code></td>
-                    <td><code>fixed</code>, <code>done</code>, <code>canceled</code>, <code>decided</code>, <code>reopened</code></td>
+                    <td><code>fixed</code>, <code>done</code>, <code>canceled</code>, <code>decided</code>, <code>reopened</code>, <code>underway</code></td>
                     <td>
-                      A label's status change (T75): drawn <code>UPDATE : FIXED</code>. Written by the epic tool; a later
+                      A label's status change (T75): drawn as the word alone, <code>FIXED</code> (I295). <code>underway</code> while its item's latest status card is Underway. Written by the epic tool; a later
                       status change replaces it, a plain edit keeps it. None: a plain <code>UPDATE</code>.
                     </td>
                     <td>no</td>
@@ -575,8 +576,9 @@
               </li>
               <li>An update to prose: Claude writes it by hand, right after the block it changed.</li>
               <li>
-                A bare label: the tool adds one to an item's title when a command changes the item while a phase is
-                active, once per item (<code>PlanDoc.markUpdate()</code>).
+                A bare label: the tool adds one to an item's title when a command changes the item, once per item
+                (<code>PlanDoc.markUpdate()</code>). On any epic, a phase under way or not (I290); a new item gets one
+                only while a phase is under way.
               </li>
               <li>
                 A bare label goes once Owen checks its item (his ✓, I285): at once on the page, and from the

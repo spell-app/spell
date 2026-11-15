@@ -135,7 +135,9 @@ describe("PlanDocFiles", () => {
     await FILES.edit(file, (plan) => plan.setItem("t2", "done"))
     const last = stamps()
     expect(Object.keys(last).filter((name) => last[name] !== after[name])).toEqual([])
-    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="t2"\s+title="bare line"\s+status="done"/)
+    // closed in the skeleton, its `DONE` label in its title (no phase under way:  epic `epic-engine` I290)
+    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="t2"\s+status="done"/)
+    expect(FILES.read(file).item("t2").querySelector("epic-update")?.getAttribute("became")).toBe("done")
     expect(FILES.read(file).item("t1").textContent).toContain("rewritten")
   })
 

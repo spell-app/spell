@@ -699,16 +699,25 @@ export class ReviewInbox {
   /**
    * Claude's agent started (`action`) or finished (`null`) work on item `id`:  the page's spinner follows.
    * - started:  its mark is TAKEN too (`takeMark()`)
+   * - `asked`:  the work answers Owen's own immediate ask (Add Details, a revisit now;  epic `epic-engine` I295),
+   *   not just an agent at work on the item:  only then does the item's clarify icon turn
    * - returns the entry set, or `null`
    */
-  setWorking(id: unknown, action: NowAction | null, at = isoTime()): WorkingEntry | null {
+  setWorking(
+    id: unknown,
+    action: NowAction | null,
+    at = isoTime(),
+    { asked = false }: { asked?: boolean } = {}
+  ): WorkingEntry | null {
     const key = ReviewInbox.toItemId(id)
     if (action === null) {
       delete this.working[key]
       return null
     }
+    // asked once, asked until it's off:  an agent's own `working ... on` later keeps it
+    const wasAsked = this.working[key]?.asked
     this.takeMark(key)
-    this.working[key] = { action, since: at }
+    this.working[key] = { action, since: at, ...((asked || wasAsked) && { asked: true }) }
     return this.working[key]
   }
 
@@ -951,7 +960,7 @@ export class ReviewInbox {
    */
   takeWork(at = isoTime(), asComment?: NotePlacer): TakenWork | null {
     const now = this.takeNow()
-    for (const each of now) this.setWorking(each.id, each.action, at)
+    for (const each of now) this.setWorking(each.id, each.action, at, { asked: true })
     let sent: TakenWork["sent"] = null
     if (this.hasNewSend) {
       const before = this.handedOver ? Date.parse(this.handedOver) : -Infinity
@@ -1542,8 +1551,11 @@ export type ListedUrgency = { id: string } & InboxUrgency
 /** An immediate request, queued on `now`. */
 export type NowRequest = { id: string; action: NowAction; at: string; note?: string } & PickFields
 
-/** An agent at work on an item. */
-export type WorkingEntry = { action: NowAction; since: string }
+/**
+ * An agent at work on an item.
+ * - `asked`:  answering Owen's own immediate ask (`setWorking()`, I295);  none:  an agent at work on the item
+ */
+export type WorkingEntry = { action: NowAction; since: string; asked?: true }
 
 /** A request Owen called off;  `told` once a waiting session heard of it. */
 export type InboxCancel = { action: NowAction; at: string; told: boolean }

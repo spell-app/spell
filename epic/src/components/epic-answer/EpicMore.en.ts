@@ -8,7 +8,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-more>`
- * The More Details card on an item.
+ * The More Details card on an item:  its text, made clear (epic `epic-engine` I301).
  ****************/
 export const epicMoreVocabulary = {
   tag: "epic-more",
@@ -17,21 +17,17 @@ export const epicMoreVocabulary = {
   noun: "more",
   ui: false,
   description:
-    "More Details (Add Details Now):  a white, open, foldable card under an item's text and answer;  the item's " +
-    "own text above it is labelled Original Reply.  A second Add Details replaces it.",
+    "More Details:  what Clarify (Add Details) wrote IN PLACE of an item's unclear text, a plain card headed More " +
+    "Details that never folds.  A second Add Details replaces it.",
   attributes: [],
   events: [],
-  slots: [{ name: "", description: "What the item's text left out." }],
+  slots: [{ name: "", description: "The item's text, made clear." }],
   parts: [
     { name: "base", description: "The card." },
-    { name: "toggle", description: "Its `More Details` `<button>`, which folds it." },
-    { name: "body", description: "What the item's text left out;  hidden while folded." }
+    { name: "heading", description: "Its `More Details` heading." },
+    { name: "body", description: "The item's text, made clear." }
   ],
-  states: [{ name: "open", description: "Unfolded:  it starts so." }],
-  texts: [
-    { key: "foldTip", text: "Fold More Details", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Unfold More Details", description: "Tooltip of its fold button while folded." },
-    { key: "more", text: "More Details", description: "The card's heading." }
-  ],
-  children: [{ tag: "flow", description: "What the item's text left out." }]
+  states: [],
+  texts: [{ key: "more", text: "More Details", description: "The card's heading." }],
+  children: [{ tag: "flow", description: "The item's text, made clear." }]
 } as const satisfies EpicVocabulary

@@ -364,6 +364,21 @@ export class ReviewClient extends PageStore {
     return !!this.inbox.working[id]
   }
 
+  /**
+   * Is Owen's own ask for item `id`'s details (Add Details, Clarify, its ? icon) on its way or being answered?
+   * (epic `epic-engine` I295):  posted from here, queued, or taken as his ask (`working.asked`).
+   * - NOT an agent merely at work on the item (`epic inbox working <id> on`, an issue taken up):  that's no ask of his
+   *   - Owen, 2026-11-15, on language's I98, its ? icon turning while its agent worked:  "That should only spin when
+   *     I've asked for clarification."
+   */
+  isClarifying(id: string): boolean {
+    if (this.calling.has(id)) return false
+    if (this.asking.has(id)) return true
+    if (this.inbox.now.some((each) => each.id === id && each.action === "details")) return true
+    const work = this.inbox.working[id]
+    return !!work?.asked && work.action === "details"
+  }
+
   /** Is `id`'s note box open by itself (an item without details), or being written in? */
   isBoxOpen(id: string): boolean {
     return this.boxes.has(id)

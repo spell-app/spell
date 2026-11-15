@@ -174,7 +174,10 @@ export class InboxCommands {
       if (CommentList.isCommentId(key)) box.commentList.setWorking(key, on)
       else {
         if (took) box.takeMark(key)
-        box.setWorking(key, on ? workOf(box.marks[key]) : null)
+        const mark = box.marks[key]
+        // his own immediate ask (Add Details ...) being answered, or just an agent on the item (I295)
+        const asked = !!mark && ReviewInbox.isImmediate(mark)
+        box.setWorking(key, on ? workOf(mark) : null, undefined, { asked })
       }
       box.touchListening()
     })
@@ -446,7 +449,8 @@ export class InboxCommands {
         lines.push(`  - ${line(each)}`)
         if (each.action === "details")
           lines.push(
-            "      Add Details:  clarify its text, as More Details (`--more`), a paragraph per change of context"
+            "      Add Details:  clarify its text, as More Details (`--more`):  it REPLACES the unclear text (cards and " +
+              "Owen's quoted words stay), so write it whole, a paragraph per change of context"
           )
         // the Manual tests section's Start testing (epic `epic-engine` P51):  the epic skill's "Start testing"
         else if (each.action === "prepare")

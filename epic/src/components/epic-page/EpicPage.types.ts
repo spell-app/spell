@@ -226,6 +226,11 @@ export type HeaderMarks = {
   /** what the page server's wake did, while nobody listens (epic `epic-workflow` P16);  `""` for none */
   woken: string
   /**
+   * the wake TOLD a session of the epic through its inbox poller (`told`):  it takes the work by itself, so there's
+   * nothing for Owen to do, and no pill (epic `epic-engine` I289)
+   */
+  heard: boolean
+  /**
    * the session is answering what was sent (epic `epic-engine` P55):  the ids it's on, `J201, J202`;  `""` while it
    * isn't (idle, or other work:  "Building P35")
    * - Send's turning ring and its tooltip

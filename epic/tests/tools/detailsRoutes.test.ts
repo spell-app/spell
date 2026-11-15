@@ -10,6 +10,7 @@ import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
 import { AskListeners } from "spell/epic/tools/AskListeners"
 import detailsRoutes, { type DetailsAnswer, type DetailsDraft } from "spell/epic/tools/detailsRoutes"
 
@@ -26,7 +27,8 @@ const PAGES = [
   ".claude/worktrees/w/pages/details/far.html",
   "guides/other.html",
   "epics/big/details/comments.html",
-  "pages/details/drafted.html"
+  "pages/details/drafted.html",
+  "pages/details/bullhorn.html"
 ]
 
 beforeAll(async () => {
@@ -230,4 +232,21 @@ test("a page on its next round (`epic ask round`):  no answer served yet, and a 
   expect(served.answer.rounds).toBeUndefined()
   await answer("/pages/details/drafted.html")
   expect(written(PAGES[5]!)).toMatchObject({ changes: 1, rounds })
+})
+
+// epic `epic-engine` T79 (request r71):  a details page's bullhorn comments go with its answer, by its own Send
+test("the page's bullhorn comments go WITH its answer:  marked sent, kept in it once, for `epic ask wait`", async () => {
+  const file = join(root, "pages/details/bullhorn.html")
+  await GuideInbox.updateAsync(GuideInbox.fileFor(file), (comments) => {
+    comments.add({ anchor: "q1", kind: "section", label: "1. Bold", excerpt: "What bold means" }, "Bold is louder?")
+  })
+  const sent = await answer("/pages/details/bullhorn.html")
+  expect(sent.status).toBe(200)
+  const kept = written("pages/details/bullhorn.html")
+  expect(kept.pageComments).toEqual([{ id: "C1", on: "1. Bold", text: "Bold is louder?" }])
+  expect(kept.changed).toContain("pageComments")
+  expect(GuideInbox.read(GuideInbox.fileFor(file)).unsentComments).toEqual([])
+  // sent again with nothing new:  none handed over twice
+  await answer("/pages/details/bullhorn.html", { q1: { picked: ["A"] } })
+  expect(written("pages/details/bullhorn.html").pageComments).toBeUndefined()
 })

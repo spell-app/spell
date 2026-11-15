@@ -257,7 +257,7 @@ describe("<epic-item>", () => {
     expect(host.open).toBe(false)
   })
 
-  test("labels its own text `Original question` once answered, `Original reply` above More Details;  never over a part", async () => {
+  test("labels its own text `Original question` once answered;  never `Original reply` above More Details (I301), nor over a part", async () => {
     const answered = await item(
       `<epic-item id="q5" title="A" status="decided" answered><p>Asked</p><epic-answer title="B"></epic-answer></epic-item>`
     )
@@ -267,7 +267,7 @@ describe("<epic-item>", () => {
     const bare = await item(
       `<epic-item id="q6" title="A" status="decided" answered><epic-answer title="B"></epic-answer></epic-item>`
     )
-    expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", "Original reply", null])
+    expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", null, null])
   })
 
   test("a link to it, or to an element inside it, unfolds it (`ui-opening` after the fact)", async () => {
@@ -390,8 +390,48 @@ describe("<epic-item>", () => {
     expect(buttonsForItem("t1", { inPhase: true })).toBe("todo-in-phase")
     expect(buttonsForItem("t1")).toBe("todo")
     expect(buttonsForItem("t1", { limit: true, inPhase: true })).toBe("item")
-    expect(buttonsForItem("i1", { inPhase: true })).toBe("issue")
+    expect(buttonsForItem("i1", { inPhase: true })).toBe("issue-open")
     expect(BUTTONS_OF["todo-in-phase"].map((spec) => spec.action)).toEqual(["revisit", "drop"])
+  })
+
+  test("buttonsForItem():  one icon per meaning on an issue -- the plane sends, the x closes, the check accepts (I299)", () => {
+    const icons = (kind: keyof typeof BUTTONS_OF) => BUTTONS_OF[kind].map((spec) => [spec.action, spec.icon])
+    // an open issue:  Do this (the plane), Revisit, the x that closes it unfixed;  no thumbs up beside a check
+    expect(buttonsForItem("i1", { status: "open" })).toBe("issue-open")
+    expect(icons("issue-open")).toEqual([
+      ["todo", "paper plane"],
+      ["revisit", "history"],
+      ["drop", "xmark"]
+    ])
+    // fixed, waiting for Owen:  Send back (the plane), Revisit, Accept the fix (the check)
+    expect(buttonsForItem("i1", { status: "open", fixed: true })).toBe("issue-fixed")
+    expect(buttonsForItem("j1", { status: "open", fixed: true })).toBe("issue-fixed")
+    expect(BUTTONS_OF["issue-fixed"].map((spec) => [spec.action, spec.icon, spec.label])).toEqual([
+      ["todo", "paper plane", "sendBack"],
+      ["revisit", "history", "revisit"],
+      ["approve", "check", "acceptFix"]
+    ])
+    // a judgement call keeps its check:  agreeing with the call, not a cancel
+    expect(buttonsForItem("j1", { status: "open" })).toBe("issue")
+    expect(icons("issue")).toEqual([
+      ["todo", "paper plane"],
+      ["revisit", "history"],
+      ["approve", "check"]
+    ])
+    // a phase's Do this is the plane too;  only "accept this" keeps the thumbs up
+    expect(BUTTONS_OF.phase[0].icon).toBe("paper plane")
+    expect(BUTTONS_OF.plan[0].icon).toBe("thumbs up")
+  })
+
+  test("buttonsForItem():  a finished todo draws Revisit and Saw it, never the x that drops it (I296)", () => {
+    expect(buttonsForItem("t1", { status: "done", inPhase: true })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "canceled" })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "open", inPhase: true })).toBe("todo-in-phase")
+    expect(buttonsForItem("i1", { status: "done" })).toBe("issue")
+    expect(BUTTONS_OF["todo-done"].map((spec) => [spec.action, spec.label])).toEqual([
+      ["revisit", "revisitNote"],
+      ["approve", "sawIt"]
+    ])
   })
 
   test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P2`, its tooltip saying so;  still green", async () => {

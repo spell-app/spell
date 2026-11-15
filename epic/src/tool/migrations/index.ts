@@ -3,6 +3,7 @@
  */
 export { AgentsMarked } from "./AgentsMarked"
 export { ChangesAfterGoal } from "./ChangesAfterGoal"
+export { ClarifiedBodies } from "./ClarifiedBodies"
 export { DoneCardsClose } from "./DoneCardsClose"
 export { ContentRelink, type RelinkCount } from "./ContentRelink"
 export { ItemBodies } from "./ItemBodies"

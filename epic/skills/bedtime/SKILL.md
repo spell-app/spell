@@ -162,6 +162,7 @@ Everything else stands:
    - The phase's "To review" line lists it by itself:  the tool writes it on every edit.
      Never hand-write a "Judgement calls:" line.
    - Agents you start record theirs the same way:  put the command in their prompt.
+     Their claims, merges and test runs:  the epic skill's "The session answers;  agents build".
 4. Checks fail, and you can't fix them:
    - commit what's there as `WIP P<n>:  <name>`
    - `add <name>#I "P<n> WIP:  <what fails>" ...`:  red in the doc until the person reviews it

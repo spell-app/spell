@@ -719,7 +719,7 @@ export interface UIActionAttributes {
    */
   "prop:shortcut"?: string
   /**
-   * Shows its icon alone:  its title (and keys) its tooltip and its name for a screen reader.  In a vertical menu, icon-only actions side by side share one row (Undo and Redo).  Needs an icon:  without one it shows its title as usual.
+   * Only its icon, at every width:  its title is its tooltip and its name for a screen reader, and its row in a `shrinkable` menu's `…` menu.  In a vertical menu, icon-only actions side by side share one row (Undo and Redo).  No icon:  its title shows.
    * - takes:  flag (present / absent)
    */
   "icon-only"?: boolean | ""

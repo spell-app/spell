@@ -233,4 +233,8 @@ describe("liveClientScript()", () => {
     // compiled, never run:  it reaches for `window`
     expect(() => new Script(script)).not.toThrow()
   })
+
+  test("hears VS Code's keys in the capture phase:  a handler's stopPropagation() alone doesn't eat one (I297)", () => {
+    expect(SRV.liveClientScript()).toMatch(/addEventListener\(\s*"keydown",\s*forwardKey,\s*true\s*\)/)
+  })
 })

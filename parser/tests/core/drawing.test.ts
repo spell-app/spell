@@ -182,14 +182,22 @@ describe("@drawn", () => {
     expect(core.actionOf(game, "restartTheGame")?.title).toBe("Restart The Game")
   })
 
-  test('<action "undo" icon-only/> in a menu, or a <context-menu>:  its row\'s own, the row shows its icon alone (I102)', () => {
+  test("<toolbar><action \"...\" icon-only/></toolbar>:  the menu's row is Spell UI's `<ui-action icon-only>` (mockup J107)", () => {
+    class Game extends Thing {
+      restartTheGame(): void {}
+    }
+    core.describeAction(Game, "restartTheGame", { title: "Restart The Game" })
+    const game = new Game()
+    draw(() => core.drawAction(game, "restartTheGame", { "icon-only": true, "in-menu": true }))
+    expect(element.querySelector("ui-action")?.hasAttribute("icon-only")).toBe(true)
+  })
+
+  test('<context-menu><action "undo" icon-only/></context-menu>:  its item keeps its attributes (I102)', () => {
     class Game extends Thing {
       restartTheGame(): void {}
     }
     core.describeAction(Game, "restartTheGame", { title: "Restart The Game", icon: "refresh" })
     const game = new Game()
-    draw(() => core.drawAction(game, "restartTheGame", { "icon-only": true, "in-menu": true }))
-    expect(element.querySelector("ui-action")?.hasAttribute("icon-only")).toBe(true)
     const [plain, given] = core.menuItemsOf(game, [
       "restartTheGame",
       ["restartTheGame", { "icon-only": true, title: "Restart" }]

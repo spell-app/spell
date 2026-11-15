@@ -697,7 +697,7 @@ holding its id (Q7).  Its colour says where the item stands."
                     </tr>
                     <tr>
                       <td><code>label</code></td>
-                      <td><code>Original question</code> / <code>Original reply</code> over its own text.</td>
+                      <td><code>Original question</code> over an answered question's own text.</td>
                     </tr>
                     <tr>
                       <td><code>error</code></td>
@@ -895,8 +895,9 @@ holding its id (Q7).  Its colour says where the item stands."
               </p>
               <p>
                 Then the line ends with three buttons in one group: Make Todo (green), Revisit (blue), Approve
-                (green); on an issue or a judgement call the first is Do this, a thumbs up, worked in the item itself
-                with no todo made. No Do Now (the wand) since 2026-10-25: "In practice, I'm never using the wand." Each
+                (green); on an issue or a judgement call the first is Do this, the plane, worked in the item itself
+                with no todo made. An open issue ends in the x instead (close it: not needed), and a fixed one waiting
+                for you shows Send back, Revisit, Accept the fix (epic <code>epic-engine</code> I299: one icon per meaning). No Do Now (the wand) since 2026-10-25: "In practice, I'm never using the wand." Each
                 wears the fill rule, which says how far a mark has got:
               </p>
               <ul>
@@ -953,8 +954,8 @@ holding its id (Q7).  Its colour says where the item stands."
                 <li>
                   Its details: a question's text under a small <code>Question</code> label, then its text, option cards,
                   the answer, More Details, replies, earlier versions and commits. An answered question's own text is
-                  labelled <code>Original question</code>; an item with More Details labels its text
-                  <code>Original reply</code>.
+                  labelled <code>Original question</code>. More Details replaces the text it clarifies, so there's no
+                  <code>Original reply</code> label any more (I301).
                 </li>
                 <li>
                   The talk after its question (epic <code>epic-engine</code> P27, your layout A):

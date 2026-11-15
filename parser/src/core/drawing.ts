@@ -175,7 +175,8 @@ export const drawingMethods = defineCoreModule({
    * - A `<ui-action>`, handed the action itself (its `action`), which it reads LIVE:  its title, icon and key,
    *   greyed while not enabled, ticked while selected;  a click runs it (`run("click")`), through the core.
    * - Its key in Spell UI's words, `mod+S` for spell's `meta+S`:  ⌘ on a Mac, Ctrl elsewhere (`menuKeysOf()`).
-   * - `icon-only`:  the row's own, its icon alone (Spell UI's `<ui-action icon-only>`).
+   * - `icon-only` goes on to it, Spell UI's own:  its icon alone at every width, its title its tooltip and name,
+   *   still folded into a `shrinkable` toolbar's `…` menu with the rest.
    */
   drawAction(thing: unknown, name: string, props: Record<string, unknown> = {}, ...children: unknown[]): Drawing {
     const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, title, ...given } = props
@@ -195,7 +196,6 @@ export const drawingMethods = defineCoreModule({
     if (inMenu) {
       const row: Record<string, unknown> = { "prop:action": action }
       if (action.shortcut) row.shortcut = menuKeysOf(action.shortcut)
-      // its icon alone, its title its tooltip and name:  the row's own (`<ui-action icon-only>`)
       if (iconOnly) row[ICON_ONLY] = true
       return h(MENU_ROW_TAG, { ...row, ...given }, ...children) as unknown as Drawing
     }

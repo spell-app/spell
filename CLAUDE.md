@@ -27,6 +27,8 @@ Delegated work (epic `skillz`, Owen, 2026-10-07):  every agent you start is NAME
 - Relaying what it found:  your reply's first line, bold, by itself:  `**Agent <full name> came back with:**`.
 - Epic-page work (filling, updating, marking a phase done) goes to a background agent,
   as if Owen had typed `/bg "epic-page" ...`:  the panel stays free.
+- In an epic's session, the building too:  the session answers, agents build, claim their files and take turns
+  (epic `epic-engine` T77;  [the epic skill](epic/skills/epic/SKILL.md), "The session answers;  agents build").
 
 Tooling requests (epic `epic-workflow`, Owen, 2026-10-11):  when Owen asks for a change to how he WORKS,
 not to what this session builds, SEND it, don't do it.

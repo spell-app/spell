@@ -835,7 +835,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
 
   /** `revisit soon · sent 10:42`. */
   private what(mark: InboxMark): string {
-    const doesThis = mark.action === "todo" && (this.buttons === "issue" || this.buttons === "phase")
+    const doesThis = mark.action === "todo" && (this.buttons?.startsWith("issue") || this.buttons === "phase")
     const how = this.translationForKey(
       doesThis ? "howDoThis" : (HOW_KEYS[mark.action] ?? (mark.when === "now" ? "howNow" : "howSoon"))
     )

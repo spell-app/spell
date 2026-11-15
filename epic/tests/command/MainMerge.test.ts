@@ -165,6 +165,21 @@ describe("MainMerge.run()", () => {
     delete process.env.SPELL_EPIC_HOME
   })
 
+  test("a generated file a running agent claims is never moved aside:  refused, naming it;  nothing changed (T77)", () => {
+    process.env.SPELL_EPIC_HOME = join(TEMP, "home")
+    const repo = makeRepo("claimed")
+    change(repo, "main", { "src/a.txt": "A2\n" })
+    put(repo, { "gen/out.txt": "rebuilt by an agent" })
+    const claimOf = (path: string) => (path.startsWith("gen/") ? { name: "seo-pack", claim: "gen/" } : undefined)
+
+    expect(() => new MainMerge({ root: repo, ...OPTIONS, claimOf }).run()).toThrow(
+      /another agent is changing would be moved aside.*\n  gen\/out.txt:  seo-pack is changing it \(gen\/\)/s
+    )
+    expect(read(repo, "gen/out.txt")).toBe("rebuilt by an agent")
+    expect(read(repo, "src/a.txt")).not.toBe("A2\n")
+    delete process.env.SPELL_EPIC_HOME
+  })
+
   test("a merge or fast-forward that changed the lockfile installs the packages;  a failed install is reported", () => {
     const repo = makeRepo("lockfile")
     const marker = join(TEMP, "lockfile-installed")

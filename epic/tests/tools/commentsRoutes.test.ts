@@ -47,6 +47,8 @@ const PAGES: Record<string, string> = {
   "epics/old/old.html": PAGE,
   "pages/details/asks.html": PAGE.replace("<p>Body.</p>", "<epic-ask><epic-choices></epic-choices></epic-ask>"),
   "pages/details/plain.html": PAGE,
+  // a page answered on the page OUTSIDE a `details/` folder:  still no comments (epic `epic-engine` T79)
+  "guides/asks.html": PAGE.replace("<p>Body.</p>", "<epic-ask><epic-choices></epic-choices></epic-ask>"),
   // a details page of comment boxes and notes alone, sent by its `<epic-send>` (epic `epic-engine` r6)
   "epics/big/details/layout.html": PAGE.replace("</h1>", "</h1><epic-send></epic-send>").replace(
     "<p>Body.</p>",
@@ -192,6 +194,7 @@ test("a docs page's SEND:  its epic, who is listening, what waits;  Send marks t
   expect((await get(page)).send).toEqual({
     epic: "py",
     owned: true,
+    byPage: false,
     wakes: true,
     listening: null,
     sent: null,
@@ -472,13 +475,21 @@ test("App UI's and Brand's pages, at their addresses:  their inboxes in the sets
   expect(layout.takesComments).toBe(false)
 })
 
-// epic `epic-engine` r6:  the runtime drew the comments' Send over a details page's own, "nobody is listening"
-test("a details page with only comment boxes is answered on the page (its <epic-send>):  no comments, no 2nd Send", async () => {
-  const read = JSON.parse((await ask(port, "GET", "/api/docs/comments?page=/epics/big/details/layout.html")).text)
-  expect(read).toEqual({ page: "/epics/big/details/layout.html", takesComments: false, comments: [] })
-  // Epic UI's own page of the element, which shows one live, still takes comments
+// epic `epic-engine` T79 (request r71, Owen:  "I want to put bullhorn comments in that doc"):  a details page takes
+// them, its questions and `<epic-send>` too;  they go with its answer (`byPage`), never a 2nd Send in its header (r6)
+test("a details page takes bullhorn comments, questions and <epic-send> and all;  its own Send carries them", async () => {
+  const page = "/epics/big/details/layout.html"
+  const { status } = await post({ page, action: "add", ...ON_TABLE, text: "what's a box here?" })
+  expect(status).toBe(200)
+  const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${page}`)).text)
+  expect(read).toMatchObject({ takesComments: true, comments: [{ id: "c1" }], send: { byPage: true, unsent: ["c1"] } })
+  expect((await post({ page: "/pages/details/asks.html", action: "add", ...ON_TABLE, text: "x" })).status).toBe(200)
+  // a guide's Send stays its own:  not sent by a page
+  const guide = JSON.parse((await ask(port, "GET", "/api/docs/comments?page=/guides/py.html")).text)
+  expect(guide.send.byPage).toBe(false)
+  // Epic UI's own page of the element, which shows one live, takes comments with its own Send
   const epicUi = JSON.parse((await ask(port, "GET", "/api/docs/comments?page=/components/epics/epic-send.html")).text)
-  expect(epicUi.takesComments).toBe(true)
+  expect([epicUi.takesComments, epicUi.send.byPage]).toEqual([true, false])
 })
 
 test("an epic page's comments go in the epic's REVIEW INBOX, beside its marks;  a quote rides along", async () => {
@@ -575,13 +586,12 @@ test("a saga page's comments go in its own REVIEW INBOX beside it;  its Send is 
   expect(send.status).toBe(400)
 })
 
-test("no comments on an epic page's parts, details pages with questions, templates, goals, or pages not there", async () => {
+test("no comments on an epic page's parts, pages answered on the page outside details/, templates, goals, or pages not there", async () => {
   const add = (page: string) => post({ page, action: "add", ...ON_TABLE, text: "x" })
   for (const page of [
     "/epics/big/parts/p3.html",
     "/epics/old/old.html",
-    "/pages/details/asks.html",
-    "/epics/big/details/layout.html",
+    "/guides/asks.html",
     "/templates/durable.html",
     "/goals/spell/index.html",
     "/guides/../templates/durable.html"

@@ -1,4 +1,5 @@
 import { $fetch } from "spell/util/spell/$fetch"
+import { backoffFor } from "spell/util/retrying"
 import { MissingResourceError, ResponseError } from "spell/util/spell/ResponseErrors"
 
 import {
@@ -227,10 +228,15 @@ export class ServerLink {
   /**
    * POST `body` as JSON to route `url`, with the write token;  returns the reply.
    * - a 403 on the token:  takes the server's new token (`refreshToken()`) and tries once more
+   * - no answer at all (the server restarting):  tries again, quietly, waiting longer each time, for up to
+   *   `RESTART_WAIT_MS`;  not with `keepalive` (the page is going away)
    * - throws a `ServerWriteError` saying why, for people:  the route's `error`, a stale token, no server
    */
   async post(url: string, body: object, { keepalive = false }: { keepalive?: boolean } = {}): Promise<unknown> {
-    for (let attempt = 0; ; attempt++) {
+    const startedAt = Date.now()
+    let unreached = 0
+    let refreshed = false
+    for (;;) {
       let response: Response
       try {
         response = await this.options.fetch(url, {
@@ -240,12 +246,28 @@ export class ServerLink {
           keepalive
         })
       } catch (failure) {
-        throw new ServerWriteError(`couldn't reach the page server (${(failure as Error).message})`)
+        // the server down for a moment (restarting:  every merge into main does it):  tried again, quietly, until it's
+        // back, so a click or a Send made meanwhile still lands (epic `epic-engine` I294);  never for a page going away
+        const left = RESTART_WAIT_MS - (Date.now() - startedAt)
+        if (!keepalive && left > 0) {
+          const wait = Math.min(backoffFor(++unreached, { mostMs: RETRY_MOST_MS }), left)
+          await new Promise((waited) => setTimeout(waited, wait))
+          continue
+        }
+        throw new ServerWriteError(
+          keepalive
+            ? `couldn't reach the page server (${(failure as Error).message})`
+            : `the page server didn't answer for ${RESTART_WAIT_MS / 1000}s (${(failure as Error).message}):  ` +
+                "is it running?"
+        )
       }
       const reply = (await response.json().catch(() => ({}))) as { error?: string }
       if (response.ok) return reply
       const stale = response.status === 403 && /token/i.test(reply.error ?? "")
-      if (stale && attempt === 0 && (await this.refreshToken())) continue
+      if (stale && !refreshed && (await this.refreshToken())) {
+        refreshed = true
+        continue
+      }
       throw new ServerWriteError(
         stale
           ? "the page server restarted since this page loaded:  reload the page"
@@ -263,6 +285,9 @@ export class ServerLink {
    * - a data file named (`<name>.json5`) by its old name too, `<name>.json` (`dataFileNames()`):  a checkout on older
    *   code writes that (epic `epic-workflow` P21)
    * - `every`:  `0` for no poll;  `polls`:  poll only while it answers true (a docs page's Send, while it shows)
+   * - the server down (`spell-server:down`, the live client's word):  no poll and no look on the page coming into view
+   *   until it's back (`spell-server:up`), then one look at once;  so a restart leaves no failed requests on the
+   *   console (epic `epic-engine` I294)
    * - the one poll of every page (epic `coherence` C9):  a page that polls writes none of its own
    */
   static watch(
@@ -273,12 +298,20 @@ export class ServerLink {
   ): () => void {
     const { document } = window
     const cares = typeof files === "function" ? files : namedFiles(files)
+    // the server down (restarting:  every merge into main does it), as the page's live client hears it:  no poll asks
+    // until it's back, then one does at once (epic `epic-engine` I294)
+    let down = false
     const timer = every
       ? window.setInterval(() => {
-          if (document.visibilityState === "visible" && (polls?.() ?? true)) refresh()
+          if (!down && document.visibilityState === "visible" && (polls?.() ?? true)) refresh()
         }, every)
       : undefined
     const onVisible = () => {
+      if (!down && document.visibilityState === "visible") refresh()
+    }
+    const onDown = () => (down = true)
+    const onUp = () => {
+      down = false
       if (document.visibilityState === "visible") refresh()
     }
     const onFile = (event: Event) => {
@@ -287,10 +320,14 @@ export class ServerLink {
     }
     document.addEventListener("visibilitychange", onVisible)
     window.addEventListener("spell-server:changed", onFile)
+    window.addEventListener("spell-server:down", onDown)
+    window.addEventListener("spell-server:up", onUp)
     return () => {
       if (timer !== undefined) window.clearInterval(timer)
       document.removeEventListener("visibilitychange", onVisible)
       window.removeEventListener("spell-server:changed", onFile)
+      window.removeEventListener("spell-server:down", onDown)
+      window.removeEventListener("spell-server:up", onUp)
     }
   }
 
@@ -315,6 +352,12 @@ export class ServerLink {
     }
   }
 }
+
+/** How long `post()` keeps trying a server that doesn't answer (restarting), in ms. */
+const RESTART_WAIT_MS = 30_000
+
+/** The longest `post()` waits between two tries, in ms. */
+const RETRY_MOST_MS = 4000
 
 /** How long `readInFrame()` waits for the page to load, in ms. */
 const FRAME_TIMEOUT_MS = 10_000

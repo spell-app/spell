@@ -355,7 +355,7 @@ export const epicItemVocabulary = {
       description:
         "While reviewed:  the `<epic-clarify icon>` at its body's right, which asks Claude to clarify it now (T76)."
     },
-    { name: "label", description: "`Original question` / `Original reply` over its own text." },
+    { name: "label", description: "`Original question` over an answered question's own text." },
     { name: "error", description: "With `source`:  the line saying the part couldn't be loaded." },
     ...REVIEW_PARTS
   ],
@@ -375,7 +375,6 @@ export const epicItemVocabulary = {
     },
     { key: "hideCommits", text: "Hide this item's commits", description: "The git icon's tooltip, its commits shown." },
     { key: "originalQuestion", text: "Original question", description: "Over an answered question's own text." },
-    { key: "originalReply", text: "Original reply", description: "Over an item's own text, above More Details." },
     { key: "reviewTodo", text: "to do", description: "Review label:  a review decided on work (`queued`)." },
     { key: "reviewDeferred", text: "deferred", description: "Review label:  put off (`deferred`)." },
     { key: "reviewed", text: "reviewed {date}", description: "Review label:  `reviewed 10/6/26`." },

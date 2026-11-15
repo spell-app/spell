@@ -364,7 +364,7 @@ As `plan-doc.md`, "Ids":
     <epic-option letter="B" title="Chrome" recommended><ul><li>...</li></ul></epic-option>
   </epic-choices>
   <epic-answer title="Chrome"><p>why ...</p></epic-answer>
-  <epic-more><p>More Details:  what the text left out</p></epic-more>
+  <epic-more><p>More Details:  Clarify's text, IN PLACE of the unclear text (I301)</p></epic-more>
   <epic-reply from="Claude" at="2026-10-04 17:20" re="why not reuse the details route?"><p>...</p></epic-reply>
   <epic-original><epic-version><p>as first written</p></epic-version>
     <epic-version as-of="2026-10-04 20:49"><p>...</p></epic-version></epic-original>
@@ -384,7 +384,7 @@ As `plan-doc.md`, "Ids":
     - The tool never writes one;  the docs runtime puts each block's bullhorn there, never in the file.
   - The element draws:
     - the chip (`Q3`, in its state's colour) and the review label
-    - `Question` over the question as asked, "Original reply" over the text
+    - `Question` over the question as asked, "Original question" over an answered question's text
     - every card's heading
 - A question's text as first asked is its `<epic-question>`, found by its tag, not its place:
   - `add <name>#Q`, and a rewrite of a question's text (`details --file`), put the lead of the HTML they're given
@@ -606,7 +606,11 @@ As `plan-doc.md`, "Ids":
     - a Net effect worded otherwise
     - a code accordion holding a `<ui-code>`, or two blocks
     - a note headed `DEFERRED`
-- A rewrite never drops text:  `details --file`, `decide` again, `details --more` again, `summarize`.
+- A rewrite never drops text:  `details --file`, `decide` again, `details --more`, `summarize`.
+  - `details --more` (Add Details, Clarify;  epic `epic-engine` I301):  the HTML REPLACES the item's unclear text, in
+    an `<epic-more>` headed "More Details" that never folds;  the given "_What it says on the tin._" body goes for good,
+    the item's own prose moves into its Original Discussion;  Owen's quoted words (`PlanItem.isOwenQuote()`) and every
+    `<epic-*>` card stay
   - `summarize --file` (epic `repo-split` J141) condenses the item after a lot of back and forth:
     its text, replies, More Details and unpicked Choices all move, as one version;
     the question as asked, the answer, picked Choices (copied out of a moved reply too), status cards and commits stay.
@@ -628,7 +632,7 @@ As `plan-doc.md`, "Ids":
   - Make Todo makes a todo linking `#o3`
   - a kept note is a paragraph at its end
 - So do a phase and the summary (epic `airplane` P2):  Make Todo and Revisit on the page;  no Approve.
-  - A phase's first button is Do this, a thumbs up (epic `epic-engine` I181;  2026-10-29:  "it's already a phase,
+  - A phase's first button is Do this, the plane (a thumbs up until I299;  epic `epic-engine` I181;  2026-10-29:  "it's already a phase,
     you wouldn't make it a todo"):  the same `todo` mark, applied as a go-ahead (below)
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
     - Do this (its `todo` mark) makes NO todo:  a Noted status card on the phase, "Go ahead:
@@ -640,7 +644,9 @@ As `plan-doc.md`, "Ids":
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
     - a kept note is `<epic-reply slot="notes">` in `<epic-summary>`
 - Do this on an issue or a judgement call (epic `epic-engine` I232;  2026-11-08):  its first button, the phase's
-  word and thumbs up;  the same stored `todo` mark.  NO todo is made.
+  word and plane (a thumbs up until I299);  the same stored `todo` mark.
+  - an OPEN issue's last button is the x (I299):  a `drop` mark, closed as canceled;  a FIXED one's (orange) is Accept the
+    fix (the check), its first Send back (the same plane, the same `todo` mark)  NO todo is made.
   - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
     their note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
@@ -886,9 +892,10 @@ easily"), `components/epic-update/`:
       sub-section;  an update to a whole Overview sub-section goes last inside it
     - Before 2026-10-11 a prose update was a NOTE placed BEFORE the block (`<epic-update phase>` with children, no
       `at`):  migrated (below).
-- A bare LABEL:  no summary, no date, no children.  An orange `UPDATE` inline:  an item changed while a phase is active
-  (the tool puts it in the item's title), or a changed line of prose.
-- `phase`:  the phase active when it was written.
+- A bare LABEL:  no summary, no date, no children.  An orange `UPDATE` inline:  an item changed (the tool puts it in the
+  item's title), or a changed line of prose.
+  - on any epic, a phase under way or not (epic `epic-engine` I290):  a NEW item only while a phase is under way
+- `phase`:  the phase active when it was written;  none, none (only Owen's ✓ takes that label off, I285).
   - `phase N done` removes phase N's bare labels and its updates OUTSIDE a phase (prose updates):  once the phase is
     finished, those changes are just the plan.
   - A phase's own plan changes (`epic-phase > epic-update`) stay for good:  the record of how the plan moved.

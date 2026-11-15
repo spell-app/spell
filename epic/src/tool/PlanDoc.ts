@@ -1003,7 +1003,8 @@ export class PlanDoc extends PlanReader {
     section.append(item)
     if (spec.prefix === KINDS.question.prefix) this.placeQuestion(item)
     this.stamp(item)
-    this.markUpdate(item)
+    // a new item is new, not an update:  labelled only while a phase is active, as it always was
+    if (this.activePhase) this.markUpdate(item)
     return id
   }
 
@@ -1185,17 +1186,21 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * While a phase is active, flag `item` as changed in it (once):  an `<epic-update phase="N">` in its title, which
-   * becomes a `slot="title"` child to hold it (as the converter writes one).
-   * - `became`:  the change was a status change (epic `epic-engine` T75):  the label says which, `UPDATE : FIXED`;
+   * Flag `item` as changed (once):  an `<epic-update>` in its title, which becomes a `slot="title"` child to hold it
+   * (as the converter writes one).
+   * - a phase active:  `<epic-update phase="N">`, which `phase N done` takes off with the phase's other labels
+   * - none (a standing epic, between phases;  epic `epic-engine` I290):  a label with no phase, which only Owen's ✓
+   *   takes off (`dropUpdateLabel()`, I285)
+   *   - Owen, 2026-11-15, on epic-engine's I172, fixed by the end-of-turn tidy with no label:
+   *     "Shouldn't this have the `updated: fixed` marker?"
+   * - `became`:  the change was a status change (epic `epic-engine` T75):  the label says which, `FIXED`;
    *   a later one replaces it, a plain edit (none) keeps it
    */
   markUpdate(item: Element, became?: UpdateBecame): void {
     const n = this.activePhase
-    if (!n) return
     let label = PlanItem.updateLabelOf(item)
     if (!label) {
-      label = this.make("epic-update", { phase: n })
+      label = this.make("epic-update", n ? { phase: n } : {})
       this.titleSlot(item).append(this.document.createTextNode(" "), label)
     }
     if (became) Markup.set<"epic-update">(label, { became })
@@ -1593,14 +1598,35 @@ export class PlanDoc extends PlanReader {
    * - closed:  reopened;  `calm` and an earlier `fixed` go, so pressing it again on a fix he doesn't like turns it red
    * - his note and picture kept on it, his words;  a Noted card says go ahead
    * - `did`:  what the agent does next (`doThisSteps()`)
+   * - EXCEPT one fixed AFTER he marked it (`fixedSince()`;  epic `epic-engine` I292):  he pressed Do this while it was
+   *   red, and the fix landed before the session took the mark;  it stays fixed, its Fixed card on top, nothing to do
+   *   - Owen, 2026-11-15, on I287 showing only "Noted · Go ahead:  fix this here" after its fix merged:
+   *     "It's not clear if you are working on this or not"
    */
   private doThis(item: Element, { note, at, shot }: Pick<PlanMark, "note" | "at" | "shot">): MarkResult {
+    if (this.fixedSince(item, at)) {
+      if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "do this", at, shot })
+      return { applied: true, did: `already fixed since you marked it:  nothing to do, still waiting for your review` }
+    }
     if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
     if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "do this", at, shot })
     Markup.set<"epic-item">(item, { urgent: true, calm: undefined, fixed: undefined })
     this.review(item.id)
     this.noteStatus(item.id, PlanMarkup.text("Go ahead:  fix this here"))
     return { applied: true, did: this.doThisSteps(item) }
+  }
+
+  /**
+   * Whether `item` was fixed or closed AFTER Owen's mark made at `at` (epic `epic-engine` I292):  its Do this then
+   * asked for what's done already.
+   * - fixed for his review (`fixed`) or closed, and its change stamp (`changed`, set by the fix) later than the mark
+   * - a mark with no time, or a fix from before it (he's sending a fix back):  `false`
+   */
+  private fixedSince(item: Element, at: string | undefined): boolean {
+    const finished = item.hasAttribute("fixed") || CLOSED.has(item.getAttribute("status") ?? "")
+    const changed = Date.parse(item.getAttribute("changed") ?? "")
+    const marked = Date.parse(at ?? "")
+    return finished && Number.isFinite(changed) && Number.isFinite(marked) && changed > marked
   }
 
   /** Owen's accept of the fix on `item` (orange):  closed, reviewed;  returns `inbox apply`'s line. */
@@ -1861,19 +1887,26 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Add Details (`details --more`):  item `id`'s text stays on top (the element labels it "Original reply"), and
-   * `html` goes under it in an `<epic-more>` card;  returns its title.
-   * - a second Add Details replaces the card:  the old card's text moves into the Original Discussion
-   *   (`keepOriginal()`), as a rewrite's does
+   * Add Details, or Clarify (`details --more`):  `html` REPLACES item `id`'s unclear text, in an `<epic-more>` card
+   * headed "More Details";  returns its title.
+   * - Owen, 2026-11-15 (epic `epic-engine` I301):  "When you `clarify` you can remove 'What it says on the tin' or the
+   *   original unclear text.  Change title to 'More Details', not collapsable"
+   * - the given body ("_What it says on the tin._  Clarify", `PlanItem.giveBody()`) goes for good:  nobody wrote it
+   * - the item's own prose moves into its Original Discussion (`keepOriginal()`), as a rewrite's does:  out of
+   *   sight, never lost
+   *   - EXCEPT Owen's own words, quoted (`isOwenQuote()`):  they stay on top
+   * - its cards stay:  status, Choices, Net effect, code, replies, its answer and commits (every `<epic-*>`)
+   * - a second Add Details replaces the card:  the old card's text moves into the Original Discussion too
    * - stamped (`changed`) and flagged UPDATE
    */
   addMore(id: string, html: string): string {
     const item = this.item(id)
+    PlanItem.dropTitleBody(item)
     const old = item.querySelector(":scope > epic-more")
-    if (old) {
-      old.remove()
-      this.keepOriginal(item, Array.from(old.childNodes))
-    }
+    const unclear = Array.from(item.childNodes).filter((node) => PlanItem.isUnclearProse(node))
+    for (const node of unclear) node.remove()
+    if (old) old.remove()
+    this.keepOriginal(item, [...unclear, ...Array.from(old?.childNodes ?? [])])
     Markup.place(item, this.make("epic-more", {}, this.incoming(html)))
     this.stamp(item)
     this.markUpdate(item)
@@ -2093,6 +2126,9 @@ export class PlanDoc extends PlanReader {
     card.setAttribute("slot", STATUS_SLOT)
     Markup.place(host, card)
     if (host.localName === "epic-item" && !quiet) this.stamp(host)
+    // its UPDATE label, if it has one, says so (epic `epic-engine` I295):  `UNDERWAY`, not a bare UPDATE
+    const label = state === "underway" && host.localName === "epic-item" && PlanItem.updateLabelOf(host)
+    if (label) Markup.set<"epic-update">(label, { became: "underway" })
     return PlanItem.titleOf(host)
   }
 
@@ -2393,7 +2429,7 @@ export class PlanDoc extends PlanReader {
    *   - an item they name (`editor I55:`), the phase its `work` names, or one listed under it;  a judgement call also
    *     by the phase it was made in (`phase`):  its state reads it (`itemState()`:  a calm call stays blue)
    *   - a done or fixed item's last finished status card, whose line then says `not on main yet`
-   *   - that item's UPDATE label, when it names a status change (`UPDATE : FIXED`, T75):  its `Not in main` pill
+   *   - that item's UPDATE label, when it names a status change (`FIXED`, T75):  its `Not in main` pill
    * - gone again once the work lands;  no `landing` (no git, a test):  nothing changes
    */
   updateLanded(): number {
@@ -2430,7 +2466,7 @@ export class PlanDoc extends PlanReader {
       const cards = Array.from(item.querySelectorAll(":scope > epic-status"))
       const last = cards.findLast((card) => card.getAttribute("state") === "done")
       for (const card of cards) mark(card, offMain && finished && card === last)
-      // its UPDATE label's `Not in main` pill (`UPDATE : FIXED`, T75), on a status change's label only
+      // its UPDATE label's `Not in main` pill (`FIXED`, T75), on a status change's label only
       const label = PlanItem.updateLabelOf(item)
       if (label) mark(label, offMain && finished && label.hasAttribute("became"))
     }
@@ -3650,8 +3686,12 @@ const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 /** How many sentences make an item's paragraph run on (`PlanDoc.denseParagraphs()`). */
 const DENSE_SENTENCES = 5
 
-/** A sentence's end, followed by the next's start (a capital, a digit, a quote or a bracket);  as `epic pages fuss`. */
-const SENTENCE_END = /[.?!]["'”)\]]*\s+(?=[A-Z0-9"“'(])/g
+/**
+ * A sentence's end, followed by the next's start (a capital, a digit, a quote or a bracket);  as `epic pages fuss`.
+ * - NOT a list's number written inline (`1. Example, 2. Markup`):  a period right after a word of 1-3 digits
+ *   (epic `epic-engine` I283:  M12's list counted as five sentences)
+ */
+const SENTENCE_END = /(?<!(?:^|[\s(])\d{1,3})[.?!]["'”)\]]*\s+(?=[A-Z0-9"“'(])/g
 
 /** How many sentences `text` holds, as `SENTENCE_END` splits them. */
 function sentenceCount(text: string): number {

@@ -2896,7 +2896,7 @@
         },
         {
           "name": "label",
-          "description": "`Original question` / `Original reply` over its own text."
+          "description": "`Original question` over an answered question's own text."
         },
         {
           "name": "error",
@@ -2958,11 +2958,6 @@
           "key": "originalQuestion",
           "text": "Original question",
           "description": "Over an answered question's own text."
-        },
-        {
-          "key": "originalReply",
-          "text": "Original reply",
-          "description": "Over an item's own text, above More Details."
         },
         {
           "key": "reviewTodo",
@@ -3195,9 +3190,29 @@
           "description": "A todo's review button (the x):  its name."
         },
         {
+          "key": "sawIt",
+          "text": "Saw it",
+          "description": "A finished todo's review button (the check):  its name (I296)."
+        },
+        {
+          "key": "closeIssue",
+          "text": "Close it:  not needed",
+          "description": "An open issue's review button (the x):  its name (I299)."
+        },
+        {
+          "key": "sendBack",
+          "text": "Send it back",
+          "description": "A fixed issue's or call's review button (the plane):  its name (I299)."
+        },
+        {
+          "key": "acceptFix",
+          "text": "Accept the fix",
+          "description": "A fixed issue's or call's review button (the check):  its name (I299)."
+        },
+        {
           "key": "doThis",
           "text": "Do this",
-          "description": "A to-do phase's first review button, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
+          "description": "A to-do phase's or an issue's first review button, the plane (a thumbs up before I299;  epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
         },
         {
           "key": "looksGood",
@@ -3511,13 +3526,13 @@
         "follow-up",
         "addendum"
       ],
-      "description": "More Details (Add Details Now):  a white, open, foldable card under an item's text and answer;  the item's own text above it is labelled Original Reply.  A second Add Details replaces it.",
+      "description": "More Details:  what Clarify (Add Details) wrote IN PLACE of an item's unclear text, a plain card headed More Details that never folds.  A second Add Details replaces it.",
       "noun": "more",
       "attributes": [],
       "slots": [
         {
           "name": "",
-          "description": "What the item's text left out."
+          "description": "The item's text, made clear."
         }
       ],
       "events": [],
@@ -3527,31 +3542,16 @@
           "description": "The card."
         },
         {
-          "name": "toggle",
-          "description": "Its `More Details` `<button>`, which folds it."
+          "name": "heading",
+          "description": "Its `More Details` heading."
         },
         {
           "name": "body",
-          "description": "What the item's text left out;  hidden while folded."
+          "description": "The item's text, made clear."
         }
       ],
-      "states": [
-        {
-          "name": "open",
-          "description": "Unfolded:  it starts so."
-        }
-      ],
+      "states": [],
       "texts": [
-        {
-          "key": "foldTip",
-          "text": "Fold More Details",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Unfold More Details",
-          "description": "Tooltip of its fold button while folded."
-        },
         {
           "key": "more",
           "text": "More Details",
@@ -5070,7 +5070,7 @@
         "step",
         "stage"
       ],
-      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (a thumbs up:  build it), Revisit.",
+      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (the plane:  build it), Revisit.",
       "noun": "phase",
       "attributes": [
         {
@@ -7712,7 +7712,7 @@
         "revision",
         "flag"
       ],
-      "description": "An UPDATE (Owen, 2026-10-11):  a block titled `Update: <summary>`, its date at the right, what changed under it.  A phase's plan change sits at the end of its phase's description (after Goal);  an update to prose right after the block it changed.  Empty, with no `summary` or `at`:  the orange UPDATE label on an item changed while a phase is active.",
+      "description": "An UPDATE (Owen, 2026-10-11):  a block titled `Update: <summary>`, its date at the right, what changed under it.  A phase's plan change sits at the end of its phase's description (after Goal);  an update to prose right after the block it changed.  Empty, with no `summary` or `at`:  the orange UPDATE label on an item changed (on any epic, a phase under way or not).",
       "noun": "update",
       "attributes": [
         {
@@ -7739,7 +7739,7 @@
         {
           "name": "became",
           "kind": "string",
-          "description": "A bare label's status change, when the change was one (epic `epic-engine` T75):  `fixed`, `done`, `canceled`, `decided` or `reopened`, drawn `UPDATE : FIXED`.  Written by the epic tool;  a later status change replaces it, a plain edit keeps it.  None:  a plain `UPDATE`."
+          "description": "A bare label's status change, when the change was one (epic `epic-engine` T75):  `fixed`, `done`, `canceled`, `decided`, `reopened` or `underway` (its latest status card is Underway, I295), drawn as the word alone, `FIXED`.  Written by the epic tool;  a later status change replaces it, a plain edit keeps it.  None:  a plain `UPDATE`."
         },
         {
           "name": "unmerged",
@@ -7798,7 +7798,7 @@
         },
         {
           "name": "label",
-          "description": "The bare orange `UPDATE` label (`UPDATE : FIXED` with `became`)."
+          "description": "The bare orange `UPDATE` label (just `FIXED`, `UNDERWAY` ... with `became`)."
         },
         {
           "name": "unmerged",
@@ -7862,8 +7862,8 @@
         },
         {
           "key": "became",
-          "text": "UPDATE : {status}",
-          "description": "The bare label after a status change (`became`)."
+          "text": "{status}",
+          "description": "The bare label after a status change (`became`):  just the status word, `FIXED` (Owen, 2026-11-15, I295:  \"Update: Fixed could just be `Fixed`\")"
         },
         {
           "key": "fixed",
@@ -7889,6 +7889,11 @@
           "key": "reopened",
           "text": "REOPENED",
           "description": "`became` reopened."
+        },
+        {
+          "key": "underway",
+          "text": "UNDERWAY",
+          "description": "`became` underway:  Claude took it up (its card is Underway)."
         },
         {
           "key": "unmerged",

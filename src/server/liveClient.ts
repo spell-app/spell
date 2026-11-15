@@ -13,7 +13,8 @@ import type { SiteTab } from "spell/server/site/site.types"
  * - `token`:  this run's write token (see `Guard`)
  * - `events`:  URL path of the live-reload websocket (`LiveReload.events`)
  * - `run`:  the server run that served the page (`LiveReload.run`):
- *   a socket that says `hello` from another run means the server restarted, and the page reloads
+ *   a socket that says `hello` from another run means the server restarted;  the page takes the new run's token,
+ *   and reloads only when code it runs changed (epic `epic-engine` I293)
  * - `file`:  URL path of the FILE served, e.g. `/guides/solid/index.html` for `/guides/solid/`
  * - `etag`:  the file's `ETag` when served, for `If-Match` on edits
  * - `source`:  the served file's absolute path on disk, e.g. `/Users/x/spell-app.epics/guides/solid/index.html`
@@ -147,7 +148,7 @@ export type FileChange = { path: string }
  * - `paths`:  their URL paths, as `FileChange`'s
  * - a page that runs the new code of EVERY one itself calls `preventDefault()`:  no reload
  *   - e.g. a rebuilt component pack, swapped in place (Spell UI's `PackHotSwap`, epic `epic-engine` I116)
- * - not fired when the server restarted:  that always reloads
+ * - after the server restarted, its scripts whose contents changed are offered the same way (`LIVE_VERSIONS`)
  */
 export type ScriptsChange = { paths: string[] }
 
@@ -207,10 +208,21 @@ export type ElementReadResult = { ok: boolean; status: number; html?: string; et
  *       or the page goes out of sight
  *     - it replaced I116's "Updated:  reload" pill, which held new code back until the page was out of sight
  *   - any other `.js` (a repo tool) is none of the page's business
- * - the server restarted (its socket says `hello` from another `run`):
- *   reloads the same way, quietly, for the new `/api/server/live.js` and write token
+ * - the server restarted (its socket says `hello` from another `run`;  every merge into main does it):
+ *   NO reload by itself (epic `epic-engine` I293;  Owen:  "can we avoid reloading the epic pages when that happens?")
+ *   - the page takes the new run's write token and `run` (`LIVE_VERSIONS` answers them)
+ *   - and asks what each script it runs holds now (`LIVE_VERSIONS`), against what they held when it loaded them:
+ *     the ones that changed go the way of a changed script (above);  none:  nothing happens
+ *   - the live client's own code changed, or the page can't tell:  it reloads for new code (below)
+ * - a reload for NEW CODE (a changed script nobody swapped in, the server's new live client) waits until the reader is
+ *   away (`reloadForCode()`, I293):  the page out of sight, or a minute with no key, click, scroll or typing, and no
+ *   field focused;  never in the middle of a review
  * - any other file changed:  says so (`spell-server:changed`, `FileChange`), and does nothing else
  *   - a page that loads it (a body from a file) re-fetches it
+ * - the server going away and coming back (its socket closing, then opening again):  `spell-server:down`, then
+ *   `spell-server:up`, plain events on `window` (epic `epic-engine` I294)
+ *   - a page's polls hold off meanwhile (spell-epic's `ServerLink.watch()`), and look again once it's back,
+ *     so a restart leaves no row of failed requests on the console
  * - keeps its place across a reload:  the scroll position (`sessionStorage`, when it works);
  *   the docs runtime keeps its folds and comment drafts itself (`localStorage`)
  * - in a frame (VS Code's "Epic Docs" and "Review" views, spell-epic's `vscode/src/DocView.ts`):
@@ -265,12 +277,31 @@ export function liveClient(scrollKey: string): void {
   const RELOAD_QUIET_MS = 500
   // every script the page fetched, as served paths (`servedPath()`):  `performance` drops entries past its buffer
   const fetched = new Set<string>()
+  // the same scripts, as the URL paths they were fetched at:  what `LIVE_VERSIONS` is asked of
+  const fetchedUrls = new Set<string>()
   // the scripts changed since the last hot reload, as served paths:  offered to the page first (`hotReload()`)
   const changedScripts = new Set<string>()
   // the `ETag`s the page's own saves got back, of versions it shows already (`shown`):  their changes are `own`
   const ownEtags = new Set<string>()
-  // the server restarted since:  the page reloads whatever it takes, for the new client and write token
-  let restarted = false
+  // what each script the page runs held, by its URL path, as the server last said (`LIVE_VERSIONS`;  I293):
+  // after a restart, the page reloads only when one of them changed
+  const codeVersions = new Map<string, string>()
+  // a `rememberVersions()` call waiting for the page's fetches to go quiet
+  let versionsTimer: ReturnType<typeof setTimeout> | undefined
+  // how long the page's fetches must be quiet before it asks what its scripts hold, in ms
+  const VERSIONS_QUIET_MS = 2000
+  // how many paths one `LIVE_VERSIONS` call asks about:  its address must stay short
+  const VERSIONS_BATCH = 40
+  // a restart being taken (`adoptRestart()`):  the next waits for it
+  let adopting = Promise.resolve()
+  // new code is waiting to be reloaded for, once the reader is away (`reloadForCode()`)
+  let codeStale = false
+  // the last time the reader did anything (a key, a click, a scroll, typing), for `reloadForCode()`
+  let lastActivity = Date.now()
+  // when `reloadForCode()` looks again
+  let idleTimer: ReturnType<typeof setTimeout> | undefined
+  // how long the reader must be idle before a reload for new code, in ms
+  const IDLE_MS = 60_000
   // a reload waits for the reader to leave the field they type in (`reloadQuietly()`)
   let stale = false
   // the reader typed or changed something in the focused field since it got the focus (`typing()`)
@@ -295,8 +326,10 @@ export function liveClient(scrollKey: string): void {
     true
   )
   document.addEventListener("visibilitychange", () => {
-    if (stale && document.visibilityState === "hidden") reload()
+    if ((stale || codeStale) && document.visibilityState === "hidden") reload()
   })
+  for (const type of ["keydown", "pointerdown", "wheel", "input", "scroll"])
+    addEventListener(type, () => (lastActivity = Date.now()), { capture: true, passive: true })
   config.takeScroll = () => {
     const y = savedScroll
     savedScroll = undefined
@@ -321,7 +354,8 @@ export function liveClient(scrollKey: string): void {
     addEventListener("keydown", editKey, true)
     // a same-origin frame of a live page (the brand index's thumbnails) has no VS Code above it
     if (!liveParent()) {
-      addEventListener("keydown", forwardKey)
+      // capture:  a handler that only stops the key's propagation mustn't keep it from VS Code (epic `epic-engine` I297)
+      addEventListener("keydown", forwardKey, true)
       addEventListener("contextmenu", forwardMenu)
     }
     addEventListener("click", followInFrame, true)
@@ -420,12 +454,20 @@ export function liveClient(scrollKey: string): void {
    *   - 0.5s after an open socket closes
    *   - `wait` ms after each try that failed, doubling up to 10s
    */
+  /** The socket closed and hasn't opened again:  the server is down (`spell-server:down` / `spell-server:up`). */
+  let serverDown = false
+
   function connect(wait = 1000) {
     const url = new URL(config!.events, location.href)
     url.protocol = url.protocol === "https:" ? "wss:" : "ws:"
     const socket = new WebSocket(url)
     let opened = false
-    socket.addEventListener("open", () => (opened = true))
+    socket.addEventListener("open", () => {
+      opened = true
+      // back after a restart:  the page's polls and requests may go on (`ServerLink.watch()`)
+      if (serverDown) dispatchEvent(new Event("spell-server:up"))
+      serverDown = false
+    })
     socket.addEventListener("message", (message: MessageEvent<string>) => {
       const { event, data } = JSON.parse(message.data) as {
         event: string
@@ -435,13 +477,18 @@ export function liveClient(scrollKey: string): void {
         onChange(data.path, typeof data.html === "string" ? { html: data.html, etag: data.etag } : undefined)
       // a person's pref saved (`PREF_SAVED_EVENT`, spell/util's persist types):  the page's own code follows it
       if (event === "pref-saved") dispatchEvent(new CustomEvent("spell-server:pref-saved", { detail: data }))
-      // a server run other than the one that served the page:  it restarted, maybe on new code
+      // the server's run, as it opens:  the first time, the page notes what its scripts hold (`rememberVersions()`);
+      // another run than the one that served the page:  it restarted, maybe on new code (`adoptRestart()`)
       if (event === "hello" && config!.run && data.run && data.run !== config!.run) {
-        restarted = true
-        gate.request()
-      }
+        const run = data.run
+        adopting = adopting.then(() => adoptRestart(run)).catch(() => reloadForCode())
+      } else if (event === "hello") rememberVersions()
     })
     socket.addEventListener("close", () => {
+      // the server went away (a restart:  every merge into main does it):  the page's polls wait for it, rather than
+      // failing every few seconds on the console (`ServerLink.watch()`, epic `epic-engine` I294)
+      if (opened && !serverDown) dispatchEvent(new Event("spell-server:down"))
+      if (opened) serverDown = true
       const retry = opened ? 500 : wait
       setTimeout(() => connect(Math.min(retry * 2, 10_000)), retry)
     })
@@ -462,21 +509,114 @@ export function liveClient(scrollKey: string): void {
     }
   }
   /**
-   * The scripts changed (or the server restarted):  offer the changed scripts to the page first
-   * (`spell-server:scripts-reloading`, `ScriptsChange`);  a page that takes them ALL (`preventDefault()`) runs the new code
-   * itself, else it reloads.
-   * - a server restart always reloads:  the page needs the new client and write token
+   * The scripts changed:  offer them to the page first (`spell-server:scripts-reloading`, `ScriptsChange`);
+   * a page that takes them ALL (`preventDefault()`) runs the new code itself, else it reloads for it once the reader
+   * is away (`reloadForCode()`).
+   * - either way, what they hold now is asked again (`rememberVersions()`)
    */
   function hotReload() {
     const paths = [...changedScripts]
     changedScripts.clear()
+    if (!paths.length) return
+    for (const path of codeVersions.keys()) if (paths.includes(servedFrom(path))) codeVersions.delete(path)
+    rememberVersions()
     const offer = new CustomEvent("spell-server:scripts-reloading", {
       cancelable: true,
       detail: { paths } satisfies ScriptsChange
     })
-    if (!restarted && paths.length && !dispatchEvent(offer)) return
-    restarted = false
-    reloadQuietly()
+    if (dispatchEvent(offer)) reloadForCode()
+  }
+
+  /**
+   * The server restarted (a socket's `hello` from run `run`):  take the new run, and reload only for code that changed
+   * (epic `epic-engine` I293;  Owen:  "can we avoid reloading the epic pages when that happens?").
+   * - the new write token and run:  from the same answer (`LIVE_VERSIONS`)
+   * - each script the page runs:  what it holds now (`LIVE_VERSIONS`), against what it held (`codeVersions`)
+   *   - changed:  a changed script (`hotReload()`:  swapped in, or a reload for new code)
+   *   - the live client itself changed, or nothing to compare against:  a reload for new code (`reloadForCode()`)
+   * - throws when the page or the server can't be read:  the caller reloads for new code
+   */
+  async function adoptRestart(run: string) {
+    const server = config as ServerConfig
+    const known = [...codeVersions.keys()]
+    const now = await askVersions(known)
+    if (!now?.token) return reloadForCode()
+    server.token = now.token
+    server.run = now.run ?? run
+    if (!known.length) return reloadForCode()
+    const changed = known.filter((path) => now.versions[path] !== codeVersions.get(path))
+    if (!changed.length) return
+    if (changed.includes(liveScriptPath())) return reloadForCode()
+    for (const path of changed) changedScripts.add(servedFrom(path))
+    gate.request()
+  }
+
+  /**
+   * Note what each script the page runs holds now (`codeVersions`), once its fetches have gone quiet:
+   * the ones not noted yet, and the live client itself.
+   * - NEVER throws:  a failed ask notes nothing (a restart then reloads for new code, as before I293)
+   */
+  function rememberVersions() {
+    clearTimeout(versionsTimer)
+    versionsTimer = setTimeout(() => {
+      // the server down:  not asked now;  its next `hello` asks again (I294)
+      if (serverDown) return
+      const fresh = [liveScriptPath(), ...scriptUrls()].filter((path) => !codeVersions.has(path))
+      void askVersions(fresh).then((now) => {
+        for (const [path, version] of Object.entries(now?.versions ?? {})) if (version) codeVersions.set(path, version)
+      })
+    }, VERSIONS_QUIET_MS)
+  }
+
+  /**
+   * What each of `paths` (URL paths) holds now, as the server says (`LIVE_VERSIONS`):  a hash, or `null` for none;
+   * and the server's run and write token now.
+   * - asked a few at a time, so no address grows too long;  once at least, for the run and token
+   * - `undefined`:  the server couldn't be asked
+   * - NEVER throws
+   */
+  async function askVersions(paths: string[]): Promise<LiveVersions | undefined> {
+    const all: LiveVersions = { versions: {} }
+    const at = new URL("versions", new URL(config!.events, location.href))
+    try {
+      for (let start = 0; start === 0 || start < paths.length; start += VERSIONS_BATCH) {
+        const url = new URL(at)
+        for (const path of paths.slice(start, start + VERSIONS_BATCH)) url.searchParams.append("path", path)
+        const answer = await fetch(url, { cache: "no-store" })
+        if (!answer.ok) return undefined
+        const { versions, run, token } = (await answer.json()) as LiveVersions
+        Object.assign(all.versions, versions)
+        all.run ??= run
+        all.token ??= token
+      }
+    } catch {
+      return undefined
+    }
+    return all
+  }
+
+  /** where the live client itself is served:  beside its websocket (`LIVE_SCRIPT`) */
+  function liveScriptPath(): string {
+    return new URL("live.js", new URL(config!.events, location.href)).pathname
+  }
+
+  /** URL path `path`, as the server reports its changes (`servedPath()`) */
+  function servedFrom(path: string): string {
+    return servedPath(path, location.href, config!.worktreesPath) ?? path
+  }
+
+  /**
+   * Reload for new code once the reader is away (epic `epic-engine` I293):  the page out of sight, or `IDLE_MS` with
+   * no key, click, scroll or typing (`lastActivity`) and no field focused;  never in the middle of a review.
+   * - then `reload()`:  quietly, held and cross-faded (I164, I172), the box being typed in brought back (I291)
+   */
+  function reloadForCode() {
+    codeStale = true
+    clearTimeout(idleTimer)
+    if (document.visibilityState === "hidden") return reload()
+    const quiet = Date.now() - lastActivity
+    if (quiet >= IDLE_MS && !inField()) return reload()
+    idleTimer = setTimeout(reloadForCode, Math.max(1000, IDLE_MS - quiet))
   }
 
   /**
@@ -585,6 +725,20 @@ export function liveClient(scrollKey: string): void {
   }
 
   /**
+   * The scripts this page runs from this server, as the URL paths it fetched them at (`LIVE_VERSIONS` takes these):
+   * as `scriptsLoaded()`, before `servedPath()`;  never the server's own (`/api/`).
+   */
+  function scriptUrls(): string[] {
+    const found = new Set(fetchedUrls)
+    const tags = 'script[src], link[rel="modulepreload"][href]'
+    for (const tag of document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>(tags)) {
+      const url = new URL(tag instanceof HTMLScriptElement ? tag.src : tag.href, location.href)
+      if (url.origin === location.origin) found.add(url.pathname)
+    }
+    return [...found].filter((path) => !path.startsWith("/api/"))
+  }
+
+  /**
    * Keep every script the page fetches, as served paths, in `fetched`:
    * `performance`'s resource entries, the ones already there and each one after (a lazy chunk, an imported pack).
    * - a bigger entry buffer first:  an epic page fetches hundreds of files,
@@ -592,12 +746,20 @@ export function liveClient(scrollKey: string): void {
    */
   function watchFetches() {
     const keep = (entries: PerformanceEntryList) => {
+      let isNew = false
       for (const entry of entries) {
         const path = /\.m?js([?#]|$)/.test(entry.name)
           ? servedPath(entry.name, location.href, config!.worktreesPath)
           : undefined
-        if (path) fetched.add(path)
+        if (!path) continue
+        fetched.add(path)
+        const url = new URL(entry.name, location.href).pathname
+        if (fetchedUrls.has(url)) continue
+        fetchedUrls.add(url)
+        isNew = true
       }
+      // a script fetched since the page last noted what its scripts hold:  note it too
+      if (isNew && codeVersions.size) rememberVersions()
     }
     try {
       performance.setResourceTimingBufferSize(5000)
@@ -616,6 +778,18 @@ export function liveClient(scrollKey: string): void {
    */
   function typing(): boolean {
     if (!edited) return false
+    const focused = focusedElement()
+    if (!(focused instanceof HTMLElement)) return false
+    if (focused.isContentEditable || focused instanceof HTMLTextAreaElement) return true
+    const notText = /^(button|checkbox|radio|range|reset|submit|color|file|image|hidden)$/
+    return focused instanceof HTMLInputElement && !notText.test(focused.type)
+  }
+
+  /**
+   * Is a field focused, typed in or not?  Then a reload for new code waits (`reloadForCode()`).
+   * - the focused element, through shadow roots:  a text input, a textarea, rich text (contenteditable)
+   */
+  function inField(): boolean {
     const focused = focusedElement()
     if (!(focused instanceof HTMLElement)) return false
     if (focused.isContentEditable || focused instanceof HTMLTextAreaElement) return true
@@ -793,6 +967,10 @@ export function liveClient(scrollKey: string): void {
    *   its keys never reach that page, so VS Code never saw them (epic `airplane`, 2026-10-10)
    * - sent once every handler has had the key:  one the page took stays the page's
    *   (`preventDefault()`:  Cmd + K jump, Cmd + I comment, a `UI.keyboard` shortcut)
+   * - heard in the CAPTURE phase, so a handler that only stops the key's propagation (`stopPropagation()`, no
+   *   `preventDefault()`) doesn't eat it:  the page caught a key only if it prevented it
+   *   (epic `epic-engine` I297;  Owen:  "if the epic page catches a key, do that, otherwise pass the key to the main
+   *   VSCode window")
    */
   function forwardKey(event: KeyboardEvent) {
     const apple = /Mac|iPhone|iPad/.test(navigator.userAgent)
@@ -1195,6 +1373,12 @@ export function worktreeHref(href: string, pagePath: string): string {
   if (/^\/(?:api\/|_|worktrees\/)/.test(href)) return href
   return `${worktree}${href}`
 }
+
+/**
+ * What `LIVE_VERSIONS` answers:  what each script asked of holds now, a hash, or `null` for none;
+ * and the server's run (`LiveReload.run`) and write token, for a page from an earlier run (epic `epic-engine` I293).
+ */
+export type LiveVersions = { versions: Record<string, string | null>; run?: string; token?: string }
 
 /**
  * One hot reload for many changes:  `request()` reloads `wait` ms after the LAST request.

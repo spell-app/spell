@@ -1065,6 +1065,8 @@ test("run-together details (T74):  a paragraph of 5+ sentences is said by denseP
   const dense = plan.addItem("todo", "Dense", { details: `<p>One. Two. Three. Four. Five.</p>` })
   plan.addItem("todo", "Split", { details: `<p>One. Two. Three.</p><p>Four. Five.</p>` })
   plan.addItem("todo", "Code", { details: `<epic-code title="x"><pre>a. B. C. D. E.</pre></epic-code>` })
+  // a list written inline (I283):  its numbers aren't sentence ends
+  plan.addItem("todo", "List", { details: `<p>Three parts. 1. Example, 2. Markup, 3. Done. 4. More. Last.</p>` })
   expect(plan.denseParagraphs()).toEqual([
     `${dense.toUpperCase()} has a paragraph of 5 sentences:  a new paragraph wherever the context changes`
   ])

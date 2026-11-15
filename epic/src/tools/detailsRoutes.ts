@@ -16,6 +16,9 @@
  *   - `kept`:  text typed for a question, option or section an agent's rewrite took off the page
  *     (epic `epic-workflow` P18), `[{ id, label, text }]`;  none:  left out
  *   - it deletes the page's draft:  sent, it's done with
+ *   - the page's BULLHORN comments go with it (epic `epic-engine` T79, r71):  those waiting for a Send are marked sent
+ *     and kept in the answer as `pageComments` (`handOverComments()`, `commentsRoutes.ts`), so `epic ask wait` prints
+ *     them;  nobody waiting, the owning epic is woken, as the comments' own Send would
  * - `GET /api/docs/details/answer?page=<path>` -- the answer sent, or `{ answer: null }`:  the page shows it on load
  *   - a plain fetch of the missing `.answer.json5` would log a 404 in every fresh page's console
  *   - and who is waiting for it, `listening` (below)
@@ -37,6 +40,7 @@
  */
 import { DataFile } from "spell/epic/data/DataFile"
 import { AskListeners } from "./AskListeners"
+import { handOverComments, type PageComment } from "./commentsRoutes"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
@@ -56,7 +60,7 @@ const DETAILS_PAGE =
 
 const detailsRoutes: RouteModule = {
   name: "details",
-  setup({ router, guard, web }) {
+  setup({ root, router, guard, web }) {
     const api = new SRV.Router()
     api.get("/answer", (request, reply) => {
       const file = detailsPage(web.files, request.query.page)
@@ -77,10 +81,13 @@ const detailsRoutes: RouteModule = {
       const file = detailsPage(web.files, body.page)
       const notes = typeof body.notes === "string" ? body.notes : ""
       const answers = toAnswers(body.answers)
+      const listening = listeningOn(file)
+      const pageComments = await handOverComments(root, body.page as string, file, { listening: !!listening })
       const answer = await saveAnswer(file, body.page as string, answers, notes, toComments(body.comments), {
-        kept: toKept(body.kept)
+        kept: toKept(body.kept),
+        pageComments
       })
-      reply.json({ ok: true, answer, listening: listeningOn(file) })
+      reply.json({ ok: true, answer, listening })
     })
     api.post("/draft", async (request, reply) => {
       const body = request.body as PostBody & { labels?: unknown }
@@ -148,7 +155,7 @@ export async function saveAnswer(
   answers: DetailsAnswers,
   notes: string,
   comments: DetailsComments = {},
-  { kept = [] }: { kept?: KeptText[] } = {}
+  { kept = [], pageComments = [] }: { kept?: KeptText[]; pageComments?: PageComment[] } = {}
 ): Promise<DetailsAnswer> {
   let answer!: DetailsAnswer
   await saveData<Partial<DetailsAnswer>>(answerFile(file), (file) => {
@@ -164,6 +171,7 @@ export async function saveAnswer(
       notes: notes.trim()
     }
     if (kept.length) answer.kept = kept
+    if (pageComments.length) answer.pageComments = pageComments
     answer.changed = changedSince(before, answer)
     return withRounds(answer, file)
   })
@@ -235,6 +243,8 @@ export function changedSince(before: Partial<DetailsAnswer> | undefined, now: De
     if (!same(before?.comments?.[id], now.comments?.[id])) changed.push(`comment:${id}`)
   if ((before?.notes ?? "") !== now.notes) changed.push("notes")
   if (!same(before?.kept ?? [], now.kept ?? [])) changed.push("kept")
+  // handed over by this send alone (T79):  each send carries only the comments new since the last
+  if (now.pageComments?.length) changed.push("pageComments")
   return changed
 }
 
@@ -322,6 +332,11 @@ export type DetailsAnswer = {
   comments?: DetailsComments
   notes: string
   kept?: KeptText[]
+  /**
+   * the page's bullhorn comments this send handed over (epic `epic-engine` T79):  `C3`, what it's on, the person's
+   * latest words;  absent for none
+   */
+  pageComments?: PageComment[]
   rounds?: unknown[]
 }
 

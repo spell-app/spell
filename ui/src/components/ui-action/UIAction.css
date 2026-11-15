@@ -26,7 +26,8 @@
     font: inherit;
   }
 
-  /* `icon-only`:  its icon alone;  its title box stays drawn, for a `shrinkable` menu to measure, but hidden */
+  /* `icon-only`:  its icon alone.  Its title box stays drawn, hidden:  a shrinkable menu still folds it into its
+     overflow button with the rest (`.item:has(> .title)`), and its name is the box's `aria-label` */
   :host(:state(icon-only)) > .item > .title {
     display: none;
   }

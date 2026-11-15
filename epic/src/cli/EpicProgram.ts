@@ -22,6 +22,7 @@ import { Sessions } from "spell/epic/command/Sessions"
 import { Shared } from "spell/epic/command/Shared"
 import { Stock } from "spell/epic/command/Stock"
 import { TurnEnd } from "spell/epic/command/TurnEnd"
+import { Turns } from "spell/epic/command/Turns"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
@@ -54,6 +55,7 @@ import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicG
  *     `--codex`:  for Codex, its hooks, skills and custom agents (epic `epic-friend` P11, P12)
  *   - `guide`, `turn end`:  the workflow for ANY agent, and the step that ends its turn (`EpicGuide`, `TurnEnd`;  epic
  *     `epic-friend` P11)
+ *   - `turns`:  work that takes turns on the machine, a full test run (`Turns`, epic `epic-engine` T77)
  *   - `skills check`:  the plugin's skills hold for Claude Code and Codex alike (`SkillsCheck`, epic `epic-friend` P12)
  *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Help and mistakes:
@@ -162,7 +164,8 @@ export class EpicProgram {
     requests(epic.command("merge"))
       .description(
         "a standing epic's phase onto main at once, fast-forward only;  run in the main checkout;  a stray snapshot " +
-          "or generated file there is moved aside first, and --ditch moves up to 3 others too, once you say so"
+          "or generated file there is moved aside first, and --ditch moves up to 3 others too, once you say so;  " +
+          "one merge at a time on the machine (epic turns)"
       )
       .usage("<epic> [--ditch]")
       .addHelpText("after", example("epic merge epic-workflow"))
@@ -540,6 +543,11 @@ export class EpicProgram {
       )
       .usage("[<topic>] [--list] [--path] [--root]")
       .addHelpText("after", example("epic guide build"))
+    this.group(
+      epic.command("turns"),
+      "work that takes turns on this machine:  merges take theirs by themselves;  run a full test run in its turn",
+      (args) => new Turns().run(args)
+    )
     this.group(
       epic.command("turn"),
       "an agent's turn:  end, the shared plans committed and synced, what the end-of-turn hooks run",

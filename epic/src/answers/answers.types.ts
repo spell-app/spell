@@ -65,6 +65,16 @@ export const NOTES_KEY = "notes"
  */
 export const DETAILS_PAGE = /\/details\/[^/]+\.html$/
 
+/**
+ * The docs runtime's word to a details page's answer (epic `epic-engine` T79):  how many of the page's bullhorn
+ * comments wait for a Send, `detail.unsent`.  Fired on the `document` each time the comments draw;  `<epic-send>`
+ * sends them with the answer, so the comments draw no Send of their own there (`PageSend.byPage`).
+ */
+export const PAGE_COMMENTS_EVENT = "epic-page-comments"
+
+/** The same count, kept on the page's `<html>` for an answer form that starts after the comments drew (T79). */
+export const PAGE_COMMENTS_ATTRIBUTE = "data-epic-page-comments"
+
 /** A choice page's routes (`choicesRoutes.ts`):  `<api>/draft` and `<api>/answer`, `POST` and `GET ?page=`. */
 export const CHOICES_API = "/api/docs/choices"
 

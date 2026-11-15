@@ -39,7 +39,7 @@ import {
 import { nextFrame } from "spell/util/dom"
 import { toolbarTools } from "./spell-doc-toolbar.js"
 import { ThreadFacts } from "spell/epic/comments"
-import { DraftSaver } from "spell/epic/answers"
+import { DraftSaver, PAGE_COMMENTS_ATTRIBUTE, PAGE_COMMENTS_EVENT } from "spell/epic/answers"
 import { Pictures, ServerLink } from "spell/epic/review"
 import {
   addBlockAction,
@@ -511,12 +511,20 @@ class PageComments {
    * - a press, or the countdown running out (`epic-send-saving`), sends (`POST /api/docs/comments/send`), and a toast
    *   says what went where
    * - drawn again with the comments;  none on an epic page, or from a server without it
+   * - none on a details page with its own Send, `<epic-send>` (`send.byPage`, epic `epic-engine` T79):  its comments
+   *   go with its answer, so it's told how many wait (`PAGE_COMMENTS_EVENT`), and its Send says so
    */
   drawSend() {
     const sticky = pageHeadIn(this.main)
     const head = sticky?.matches(".spell-page-head") ? sticky : (sticky?.querySelector(".spell-page-head") ?? sticky)
     head?.querySelector(":scope > .spell-send, :scope > .spell-head-tools > .spell-send")?.remove()
     const send = this.send
+    if (send?.byPage) {
+      // kept on the page too, for a Send that connects after this draw (the epics pack loads after the comments)
+      document.documentElement.setAttribute(PAGE_COMMENTS_ATTRIBUTE, String(send.unsent.length))
+      document.dispatchEvent(new CustomEvent(PAGE_COMMENTS_EVENT, { detail: { unsent: send.unsent.length } }))
+      return
+    }
     if (!head || !send) return
     const unsent = send.unsent.length
     const state = unsent ? "unsent" : send.waiting.length ? "sent" : "idle"
@@ -1610,6 +1618,49 @@ class PageComments {
     if (!field) return
     field.focus({ preventScroll: true })
     field.setSelectionRange(field.value.length, field.value.length)
+  }
+
+  ////////////////
+  // ## Kept across a reload
+  ////////////////
+
+  /**
+   * What brings `field` back after a live reload, when it's one of the comments' (epic `epic-engine` I291), else
+   * `undefined`:  the pane's (`{ kind: "pane", key, place, id, near }`), a thread's reply box or the pen's
+   * (`{ kind: "reply" | "edit", id }`).
+   * - the runtime keeps it with the text and caret as the page goes (`keepFieldForReload()`), and hands it back to
+   *   `restoreField()` on the page that follows
+   */
+  keptField(field) {
+    if (this.pane && this.open && this.pane.contains(field)) {
+      const { key, place, id } = this.open
+      return { kind: "pane", key, place, id, near: this.pane.near }
+    }
+    const box = this.fields().find((each) => each.field === field)
+    return box ? { kind: box.how, id: box.id } : undefined
+  }
+
+  /**
+   * Bring back the field `keptField()` described, after a live reload:  the pane opened again where it was, for the
+   * same comment (its id once its first save made it, so it's edited, never added twice), or the thread's box;
+   * resolves to its `<textarea>`, `undefined` when it can't come back (the comment's gone).
+   * - the runtime puts the text, the caret and the focus back on it
+   */
+  async restoreField(kept) {
+    if (kept.kind === "pane") {
+      const comment = kept.id ? this.list.find((each) => each.id === kept.id) : undefined
+      if (kept.id && !comment) return undefined
+      this.openBox({ key: kept.key, place: kept.place, id: kept.id, text: comment?.text }, kept.near)
+      const pane = this.pane
+      await drawn(pane)
+      return this.pane === pane ? (pane.querySelector(":scope > textarea") ?? undefined) : undefined
+    }
+    if (!this.list.some((each) => each.id === kept.id)) return undefined
+    // the pen's box first (`startEdit()`), then into it as into a reply box
+    if (kept.kind === "edit") this.startEdit(kept.id)
+    await this.focusReply(kept.id)
+    const box = kept.kind === "edit" ? this.editing : this.replyBoxes.get(kept.id)
+    return box?.field?.isConnected ? box.field : undefined
   }
 
   /**

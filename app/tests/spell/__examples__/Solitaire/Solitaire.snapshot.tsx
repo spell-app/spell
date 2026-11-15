@@ -665,8 +665,8 @@ export class Solitaire extends App {
             {core.drawAction(this, "cheat", { "in-menu": true })}
             {core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true })}
             <spacer />
-            {core.drawAction(this, "undo", { "in-menu": true })}
-            {core.drawAction(this, "redo", { "in-menu": true })}
+            {core.drawAction(this, "undo", { "icon-only": true, "in-menu": true })}
+            {core.drawAction(this, "redo", { "icon-only": true, "in-menu": true })}
             <ui-text slot="right">Score {this.score}</ui-text>
           </ui-toolbar>
         </ui-segment>

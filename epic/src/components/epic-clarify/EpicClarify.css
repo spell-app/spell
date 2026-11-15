@@ -15,7 +15,16 @@
   }
   [part~="base"] {
     --_epic-clarify-color: var(--epic-clarify-color, var(--epic-accent, var(--ui-link, LinkText)));
+  }
+  /* the link:  a `<button>` (never `<a href="#">`, I289) that reads as a word of the sentence */
+  button.link[part~="base"] {
+    display: inline;
+    margin: 0;
     margin-inline-start: 0.4em;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
     color: var(--_epic-clarify-color);
     font-style: normal;
     text-decoration: underline;

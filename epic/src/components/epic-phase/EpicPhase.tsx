@@ -66,7 +66,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - REVIEWED as an Overview sub-section is, only while the page is reviewed
  *   (epic `airplane` P2;  `<epic-review buttons="phase">`):
  *   - Do this, Revisit at its title's end (no Approve:  notes on the plan, not sign-off)
- *     - Do this, a thumbs up, was Make Todo until epic `epic-engine` I181 (Owen, 2026-10-29:  "it's already a phase,
+ *     - Do this, the plane (a thumbs up until I299), was Make Todo until epic `epic-engine` I181 (Owen, 2026-10-29:  "it's already a phase,
  *       you wouldn't make it a todo"):  the same `todo` mark, which `inbox apply` takes as a go-ahead on a phase
  *   - a marked note at the top of its body
  *   - its note box at the end, Claude's status cards (`slot="status"`) just above it

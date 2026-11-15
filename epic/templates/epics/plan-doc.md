@@ -431,16 +431,22 @@ so the pick stays in sight.
 On an item's line, ONE group, in this order:
 
 1. Make Todo (list check), green:  a new todo, work to follow it up
-   - on an issue or a judgement call:  Do this (thumbs up), green:  fix it right there, no todo;  blue outlined until handled,
-     orange once fixed, for you to review (I232)
+   - on an issue or a judgement call:  Do this (paper plane), green:  fix it right there, no todo;  blue outlined until
+     handled, orange once fixed, for you to review (I232)
 2. Revisit (history), blue
 3. Approve (check), green
+   - on an OPEN issue, nothing fixed yet:  the x, grey, "Close it:  not needed" (canceled, as a todo's x;  I299)
+   - on a FIXED issue or call (orange):  Accept the fix (check), and its first button is Send back (paper plane)
+
+One icon per meaning (epic `epic-engine` I299;  2026-11-15:  "Thumbs up and checkmark in the same row are
+ambiguous"):  the plane sends something to be worked, the x drops or closes it, the check accepts it or says you saw
+it, the history revisits.
 
 (2026-10-25:  "`todo` is first, then `revisit`, then `check`".)  No Do Now (the wand) since that day:  "In
 practice, I'm never using the wand";  the inbox still takes an older page's request for now. An item Claude has
 answered or done keeps the three-button group, so the person can still approve it.
 
-A phase still to do has Do this (thumbs up), green, then Revisit:  "yes, build this phase", the same `todo` mark,
+A phase still to do has Do this (paper plane since I299), green, then Revisit:  "yes, build this phase", the same `todo` mark,
 which `inbox apply` takes as a go-ahead, never a new todo (epic `epic-engine` I181;  2026-10-29:  "it's already a
 phase, you wouldn't make it a todo").  Every button that means "accept this" is a thumbs up:  Accept plan, a plan
 accepted's state, Accept Overview / Accept Phases, Looks good.
@@ -550,11 +556,11 @@ pages.js` `findPages()`, `spell ssr`): the docs' home page, `docs update` and li
 
 ## UPDATE markers
 
-ONE element for every update, `<epic-update>` (2026-10-11;  `PLAN-DOC.md`, "Updates"). While a phase is
-active, flag what changed so the user can spot it:
+ONE element for every update, `<epic-update>` (2026-10-11;  `PLAN-DOC.md`, "Updates"). Flag what changed so the user
+can spot it, on any epic, a phase under way or not (I290):
 
-- a new or changed item gets a bare UPDATE label in its title (the tool adds it: `PLAN-DOC.md`, "Items")
-  - a status change says which (`became`, T75):  `UPDATE : FIXED`, `DONE`, `CANCELED`, `DECIDED`, `REOPENED`
+- a changed item gets a bare UPDATE label in its title (a NEW one, only while a phase is under way) (the tool adds it: `PLAN-DOC.md`, "Items")
+  - a status change says which (`became`, T75), as the word alone (I295):  `FIXED`, `UNDERWAY`, `DONE`, `CANCELED`, `DECIDED`, `REOPENED`;  in the orange of an item's orange id pill
   - then a blue `Not in main` pill while that work is on the epic's branch alone (`unmerged`, from git on every edit)
   - gone once the user checks the item (their ✓, I285):  at once on the page, and from the file as the mark is applied;
     the next real change (a status change, new details) puts it back

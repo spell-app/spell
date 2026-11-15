@@ -583,7 +583,7 @@
             },
             {
               "name": "icon-only",
-              "description": "Shows its icon alone:  its title (and keys) its tooltip and its name for a screen reader.  In a vertical menu, icon-only actions side by side share one row (Undo and Redo).  Needs an icon:  without one it shows its title as usual.",
+              "description": "Only its icon, at every width:  its title is its tooltip and its name for a screen reader, and its row in a `shrinkable` menu's `…` menu.  In a vertical menu, icon-only actions side by side share one row (Undo and Redo).  No icon:  its title shows.",
               "type": {
                 "text": "boolean"
               },
@@ -744,7 +744,7 @@
             },
             {
               "name": "icon-only",
-              "description": "Shows its icon alone (`icon-only`, with an icon)."
+              "description": "`icon-only`, with an icon:  its icon alone, its title hidden."
             },
             {
               "name": "loading",

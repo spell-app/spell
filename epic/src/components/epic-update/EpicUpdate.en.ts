@@ -22,7 +22,7 @@ export const epicUpdateVocabulary = {
     "An UPDATE (Owen, 2026-10-11):  a block titled `Update: <summary>`, its date at the right, what changed " +
     "under it.  A phase's plan change sits at the end of its phase's description (after Goal);  an update to " +
     "prose right after the block it changed.  Empty, with no `summary` or `at`:  the orange UPDATE label on an " +
-    "item changed while a phase is active.",
+    "item changed (on any epic, a phase under way or not).",
   attributes: [
     {
       name: "id",
@@ -57,7 +57,7 @@ export const epicUpdateVocabulary = {
       kind: "string",
       description:
         "A bare label's status change, when the change was one (epic `epic-engine` T75):  `fixed`, `done`, `canceled`, " +
-        "`decided` or `reopened`, drawn `UPDATE : FIXED`.  Written by the epic tool;  a later status change replaces " +
+        "`decided`, `reopened` or `underway` (its latest status card is Underway, I295), drawn as the word alone, `FIXED`.  Written by the epic tool;  a later status change replaces " +
         "it, a plain edit keeps it.  None:  a plain `UPDATE`."
     },
     {
@@ -92,7 +92,7 @@ export const epicUpdateVocabulary = {
         'A new block\'s ✓ Seen, before its date, while the page is reviewed:  an `<epic-review buttons="update">`.'
     },
     { name: "body", description: "What changed, under the title row;  hidden (`until-found`) while folded." },
-    { name: "label", description: "The bare orange `UPDATE` label (`UPDATE : FIXED` with `became`)." },
+    { name: "label", description: "The bare orange `UPDATE` label (just `FIXED`, `UNDERWAY` ... with `became`)." },
     {
       name: "unmerged",
       description: "A bare label's `Not in main` pill, after it, while its item's work is on its branch alone."
@@ -121,12 +121,19 @@ export const epicUpdateVocabulary = {
     { key: "during", text: "Written during P{phase}", description: "The date's tooltip, after the full date." },
     { key: "label", text: "UPDATE", description: "The bare label." },
     { key: "tip", text: "Changed during P{phase}", description: "The bare label's tooltip." },
-    { key: "became", text: "UPDATE : {status}", description: "The bare label after a status change (`became`)." },
+    {
+      key: "became",
+      text: "{status}",
+      description:
+        "The bare label after a status change (`became`):  just the status word, `FIXED` (Owen, 2026-11-15, I295:  " +
+        '"Update: Fixed could just be `Fixed`")'
+    },
     { key: "fixed", text: "FIXED", description: "`became` fixed:  fixed, for your review." },
     { key: "done", text: "DONE", description: "`became` done." },
     { key: "canceled", text: "CANCELED", description: "`became` canceled." },
     { key: "decided", text: "DECIDED", description: "`became` decided:  a question answered." },
     { key: "reopened", text: "REOPENED", description: "`became` reopened." },
+    { key: "underway", text: "UNDERWAY", description: "`became` underway:  Claude took it up (its card is Underway)." },
     { key: "unmerged", text: "Not in main", description: "The pill after the label while its work isn't merged." },
     {
       key: "unmergedTip",

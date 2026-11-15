@@ -499,6 +499,48 @@ than just being able to move on").
 
 
 
+## The session answers;  agents build
+
+An epic's session ANSWERS the person, and named background agents do the work (epic `epic-engine` T77;
+Owen, 2026-11-15:  "the main session should just respond to me rather than doing work, so responses are quick").
+- In Codex:  no background agents:  the session does the work itself, a step at a time, looking at `epic inbox <epic>`
+  between steps;  the claims and turns below still hold when Codex sub-agents share the worktree.
+- The session itself, within seconds:
+  - answers them, files their requests as items, decides, and relays
+    - a request it takes up at once is filed STARTED, blue, never red as if it waited on them (epic `epic-engine`
+      T78;  Owen, 2026-11-15:  "you should start the issue and show it appropriately"):
+      `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>`, after `epic agents add`
+      - their words become its body, quoted;  an Underway card names the agent;  the spinner goes on
+      - a request from another session (`/send`, "12. Request"):  `--start` gets its words AND its Context, so the
+        item never sits at "What it says on the tin" (epic `epic-engine` I292:  I287, filed from r70 with no body)
+      - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
+  - passes their redirects on to the agent doing that work (`SendMessage`)
+  - relays what an agent found, its first line bold, by itself:  `**Agent <full name> came back with:**`
+  - keeps the inbox listener open the whole time (7, "This session LISTENS")
+  - does by itself only quick reads, and fixes under about a minute:  one file, one command
+- Everything longer goes to a NAMED background agent, as the root `CLAUDE.md`'s "Delegated work" says:
+  a phase, an item's fix, a check run, Add Details, a revisit now.
+  - `epic agents add <name> "<task>" --files <path,...>`, then the `Agent` call, its full name first in its
+    description;  `epic agents done <name>` when it's back
+  - In Codex:  no background agents:  do it here, one item at a time, and check `epic inbox <epic>` between steps.
+- Several agents share ONE worktree, so its brief tells each one to:
+  - claim the files it will change, as it starts (`--files`) or as it finds them
+    (`epic agents claim <name> <path...>`):  a file, a folder or a glob
+    - another agent has one:  `epic agents set <name> --status "blocked on <other>"`, and work on something else
+      meanwhile, or come back with that
+  - commit only its own files, by path, never `git add -A`
+  - never mark ITSELF done (`epic agents done`):  the session does, when its notice arrives;  done early, `epic agents
+    wait` stopped while it still worked (epic `epic-engine` I288)
+  - merge with `epic worktree merge-main --as <name>`:  it never moves aside a file another running agent claims
+  - run a FULL test run in its turn, one at a time on the machine:
+    `epic turns run test -- yarn test` (and `yarn review`, `yarn kit:review`);  a single test file needs no turn
+    - why:  three full runs at once drove the load to about 50, and failed tests on their 5-second timeouts
+  - record its choices as items (`epic add <epic>#J ... --calm`), and come back with any question for the person,
+    rather than ask it:  an agent has no question modal
+    - In Codex:  the same:  a sub-agent's question comes back to the session, which asks it in the chat
+- `epic merge` and `epic worktree merge-main` take their own turn (`epic turns`):  one merge at a time on the machine,
+  each saying who has it while it waits.
+
 ## 5. Each phase
 
 1. `epic phase <name>#P<N> active`, then CHECK its accepted build plan ("4b. Build plans") against what's there now.
@@ -628,7 +670,8 @@ than just being able to move on").
      - The script marks items itself (a bare label in the title);  `phase <name>#P<N> done` drops both.
      - Its plan changes (`updated`) stay.
      - A note that should stay:  `<epic-note state="update" title="...">` (`plan-doc.md`, "UPDATE markers").
-3. Subagents:  named and listed, as the root `CLAUDE.md`'s "Delegated work" says.
+3. Subagents:  named and listed, as the root `CLAUDE.md`'s "Delegated work" says;  the work itself is theirs
+   ("The session answers;  agents build", above).
    - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record todos, issues and decisions in the epic page as you find them".
@@ -847,7 +890,7 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
     <epic>` (this section), as if they'd typed it
   - a `wait` already running in the session takes the work first:  the monitor then says nothing
 - Mechanical marks:  at once.
-- Add Details and "revisit now":  by background agents.
+- Add Details and "revisit now":  by background agents ("The session answers;  agents build").
   - In Codex:  a Codex sub-agent each, waited for;  or answered here, one at a time.
 - "Revisit soon":  answered one at a time.
 - EVERY answer goes INTO its item, on the page;  the chat only links them (Q3 of `windows-and-review`).
@@ -906,7 +949,7 @@ epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
 epic update <name>#<id> done ["<summary>"]     the item FINISHED:  that card green (Done);  an open issue / todo closes
 epic update <name>#<id> noted "<what>"         a STEP done (choice recorded, answer written):  an outlined Noted card
-epic details <name>#<id> --file f --more | --append   a More Details card (Add Details) / a reply appended
+epic details <name>#<id> --file f --more | --append   More Details in place of the unclear text (Add Details) / a reply
 epic summarize <name>#<id> --file f        condense an item:  f replaces what it shows, the rest folded away (13.)
 epic inbox done <name>#<id>  /  clear      an item's request finished  /  marks dropped after a talk
 epic inbox <name> [--json]                 what's waiting, sent or not
@@ -948,7 +991,8 @@ epic inbox <name> [--json]                 what's waiting, sent or not
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
    a todo's plane queues it for the next phase, its x drops it;
-   a phase's thumbs up (Do this) says go ahead and build it;
+   a phase's or an issue's plane (Do this) says go ahead and build it;
+   an open issue's x closes it (not needed);  a fixed one's check accepts the fix;
    a note box's x skips it (nothing to do);
    the header's paper plane sends the rest.  I'm listening."
    - Then the doc's link pair.
@@ -1022,12 +1066,15 @@ want you to just do it").
        - `<epic-code>`, `<epic-aside>`, `<epic-net-effect>`, `<epic-choices>`, `<epic-field label>`
      - never `ui-accordion.spell-code`, or a `<p><b>Net effect:</b></p>` by hand
    - Add Details (the item's circle-question icon, or a given body's Clarify;  epic `epic-engine` T76):  CLARIFY its
-     text.  Read the item, the code and docs it names, then say plainly what its text means and what it leaves out, as
-     MORE details:  a new paragraph wherever the context changes (`plan-doc.md`, "Rules").
+     text.  Read the item, the code and docs it names, then say plainly what it means, whole:  a new paragraph
+     wherever the context changes (`plan-doc.md`, "Rules").
      - `epic details <name>#<id> --more --file <html>`.
-     - The item's text stays on top ("Original Reply").
-     - Yours goes under it, in a white "More Details" card (P3 of `windows-and-review`).
-       So don't repeat the text:  build on it.
+     - Yours REPLACES the unclear text (epic `epic-engine` I301;  2026-11-15:  "When you `clarify` you can remove
+       'What it says on the tin' or the original unclear text.  Change title to 'More Details', not collapsable"):
+       a card headed "More Details" that never folds.
+       - The old text moves into its Original Discussion;  "_What it says on the tin._" goes for good.
+       - The person's own quoted words and every card (Choices, Net effect, code, replies, commits) stay.
+       - So write it WHOLE:  every fact the old text had, said clearly, not only what it left out.
    - Revisit now:  answer the person's note (quote it), in an `<epic-reply from="Claude" at re>`
      (`plan-doc.md`, "Review inbox", its example).
      - What they asked, then the answer with evidence:
@@ -1558,6 +1605,19 @@ Close the open judgement calls, issues and todos that other work has made obsole
 No `<epic>`:  this session's epic.
 Only when the person (or that epic's session) asks:  it never starts by itself.
 
+Its mechanical half runs BY ITSELF at the end of every turn (epic `epic-engine` T78;  Owen, 2026-11-15:  "we need an
+'end of turn' action to go through the open/underway issues and clean things up"):
+- `epic stale <epic> --underway --apply`, from `epic turn end` (`TurnEnd.tidy()`), in an epic's worktree, at most once
+  an hour per epic
+- it looks at open items whose latest card is still Underway, older than 3 hours, nobody working on them
+  (`StaleUnderway`):
+  - their work on `main` (a commit naming the item, or a sha its commit cards list):  an issue or call fixed for
+    review, orange, the commit its evidence;  another kind, a Noted card with the evidence
+  - not:  a `Stale:` card, once, so it's back on the person's list instead of spinning blue for weeks
+  - it closes nothing
+- by hand:  `epic stale <epic> --underway` reports, `--apply` acts;  then pick up each `Stale:` item, or close it
+  with a reason (below)
+
 1. Get the facts:  `epic stale <epic> --json` (scratchpad file).
    - One entry per open call, issue, todo and limit:  age from when it was written, its phase and whether that's done,
      the files and code names it mentions and whether they still exist (in its worktree or on `main`;  only what
@@ -1664,6 +1724,8 @@ phase <name>#P<N> dropped --why "<p>Moved to P38</p>"   never built:  struck thr
 phase <name>#P<N> planning [off]                    Claude writing its plan:  a blue spinner on its page, till --plan
 inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--requested]   prints the id (T3)
+add <name>#I "title" --requested --start "<their words>" [--agent <name>]   filed and taken up at once:  blue (T78)
+stale <name> --underway [--apply]                   stale Underway items:  on main => fixed for review;  else a Stale card
 add <name>#T "title" [--limit]                      a todo:  work still to do;  --limit:  a limit to know about
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)

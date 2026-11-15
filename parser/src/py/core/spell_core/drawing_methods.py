@@ -225,7 +225,7 @@ class DrawingMethods:
         - An action nobody up the chain has:  a disabled button of its name.
         - `in-menu`, the core's own:  a Spell UI menu or toolbar holds it, so it's the menu's ROW, `<ui-action>`,
           its key in Spell UI's words (`meta+Z` => `mod+Z`);  the page's drawing half hands it the action, live;
-          `icon-only` the row's own, its icon alone.
+          `icon-only` goes on to it, Spell UI's own (its icon alone).
         """
         given = dict(props or {})
         icon_only = given.pop(ICON_ONLY, False)

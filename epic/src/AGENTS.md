@@ -1592,6 +1592,15 @@ In `tools/`:
       - every fold open before it, items and a link's unfolds too:
         this runtime keeps them as the page goes (`keepFoldsForReload()`, `sessionStorage`)
       - a half-written note (the review inbox's drafts) and comment drafts (`localStorage`)
+      - the field being typed in, as the page went (epic `epic-engine` I291;  Owen:  "the reload should focus in the
+        field and scroll so it is visible"):  the bullhorn's pane opened again for the same comment, a thread's box,
+        or any other box by its place through shadow roots (an item's note box);  its text, caret and focus back,
+        scrolled into sight (`keepFieldForReload()`, `restoreKeptField()`)
+        - Auto Send waits for it meanwhile (`<html data-spell-restoring-field>`, `SendCountdown.isTypingIn()`):
+          the comment it held was saved as the page went, and must not be sent as if finished
+        - a reload still waits while the reader types (I172);  this is for the ones that don't:  the field only
+          given the focus back, the page out of sight, a patch that couldn't be applied
+        - [check-live-epics.mjs](demo/check-live-epics.mjs) checks the pane and the note box
     - with no flash (epic `epic-engine` I164):  the new page waits behind the old one (the kit's `holdReveal()`, a
       cross-document view transition) until this runtime has landed and the page wears its theme
       (`SpellUI.themed`), then cross-fades in:  `SPELL_SERVER.reveal()`
@@ -2231,8 +2240,15 @@ the epic page shown in both tabs).
   - "nobody is waiting yet":  Send still works.  The answer is saved beside the page, and an orange line under Send
     says so:  "Saved:  nobody is waiting yet;  Claude reads it when it next looks" (the next `ask wait` / `answer`).
     - It wakes no session (a docs page's Send does).
-  - A details page takes no bullhorn comments, questions or not (`commentsRoutes.ts`, its `<epic-send>`):
-    so no second Send in its header.
+  - A details page takes BULLHORN COMMENTS too, as a guide does, questions and all (epic `epic-engine` T79, request
+    r71:  "I want to put bullhorn comments in that doc";  none before, so no second Send in its header, r6):
+    - its own Send carries them:  the comments draw no Send of theirs there (`PageSend.byPage`), and tell the page how
+      many wait (`PAGE_COMMENTS_EVENT`), which makes it pending:  "Sent · 2 comments to send"
+    - the answer route marks them sent and keeps them in the answer, `pageComments` (`handOverComments()`), so
+      `epic ask wait` prints them, with how to answer each (`epic comments answer <page>#C2 --file ...`)
+    - nobody waiting on the page:  the epic that owns it is woken, as a guide's Send wakes it;  a scratch page
+      (`pages/details/`) wakes nobody, and its next `ask wait` / `ask answer` reads them
+    - still none on a choice page, nor on a page answered on the page outside a `details/` folder
 - What they typed and hasn't sent is a DRAFT (epic `epic-workflow` P18).
   - Why:  agents rewrote a page under them twice, and everything they hadn't sent was lost (request r4).
   - `<slug>.draft.json5` beside the page, through the same route module (`POST /api/docs/details/draft`)

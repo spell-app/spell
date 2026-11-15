@@ -375,7 +375,9 @@ export type WriteOptions = {
  * - `redirects`:  `[]` for none
  * - not `taskId`:  the page has no use for it
  */
-export type RunningAgent = Required<Omit<ListedAgent, "taskId" | "redirects">> & { redirects: AgentRedirect[] }
+export type RunningAgent = Required<Omit<ListedAgent, "taskId" | "redirects" | "files">> & {
+  redirects: AgentRedirect[]
+}
 
 /** A note Owen sent a running agent from the page:  the list's `Redirect`, `told` filled in (`""`:  not yet). */
 export type AgentRedirect = Required<Redirect>

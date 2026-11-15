@@ -41,7 +41,7 @@
           <ui-header level="1" class="site-title">
             &lt;epic-more&gt;
             <ui-header
-              >More Details: a plain card under an item's text and answer, with what the text left out.</ui-header
+              >More Details: a plain card holding an item's text, made clear, in place of the unclear text.</ui-header
             >
           </ui-header>
         </ui-container>
@@ -50,8 +50,9 @@
       <ui-container class="site-body">
         <article class="site-article">
           <p class="lede">
-            More Details: a plain white card under an item's text and answer, holding what the text left out. The item's
-            own text above it gets the label <code>Original reply</code>.
+            More Details: a plain white card headed <b>More Details</b>, holding what Clarify (Add Details) wrote IN PLACE of
+            the item's unclear text. It never folds, and there's no <code>Original reply</code> label any more (epic
+            <code>epic-engine</code> I301).
           </p>
           <!-- no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
                <epic-item> can, and the live items draw unstyled (issue I9 of epic-components) -->
@@ -77,7 +78,7 @@
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>Live: the real element, drawn by the epics pack this page loads.</p>
             <ul>
-              <li>Click a line to unfold it.</li>
+              <li>Click the item's line to unfold it; the More Details card itself never folds.</li>
               <li>The review buttons don't show here: they show only on an epic page being reviewed.</li>
             </ul>
             <p>Cut down from judgement call J24 of the <code>epic-components</code> epic.</p>
@@ -88,10 +89,6 @@
               state="recent"
               open
             >
-              <p>
-                Chose to make elements only of what the script writes, and keep everything hand-written as the prose it
-                is, over converting every look-alike.
-              </p>
               <epic-more
                 ><p>
                   Across the 26 converted plan docs, 20 option grids are left as plain grids. You see them as
@@ -205,38 +202,19 @@
                       <td>The card.</td>
                     </tr>
                     <tr>
-                      <td><code>toggle</code></td>
-                      <td>Its <code>More Details</code> <code>&lt;button&gt;</code>, which folds it.</td>
+                      <td><code>heading</code></td>
+                      <td>Its <code>More Details</code> heading.</td>
                     </tr>
                     <tr>
                       <td><code>body</code></td>
-                      <td>What the item's text left out; hidden while folded.</td>
+                      <td>The item's text, made clear.</td>
                     </tr>
                   </tbody>
                 </table>
               </ui-table>
             </ui-section>
             <ui-section id="epic-more-states" label="States" sticky="stack" collapsible dividing open="false">
-              <p>
-                A state is a word the element sets on itself while something is true, for styling:
-                <code>epic-more:state(open)</code>. Never written in the file.
-              </p>
-              <ui-table celled padding="compact" appearance="striped" unstackable>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>State</th>
-                      <th>When</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><code>open</code></td>
-                      <td>Unfolded: it starts so.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </ui-table>
+              <p>None: it never folds, so it has no <code>open</code> state any more (I301).</p>
             </ui-section>
           </ui-section>
 
@@ -244,13 +222,8 @@
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>A plain card (the page's own surface, a thin rule round it): no colour meaning.</li>
-              <li>
-                Its heading is a small grey eyebrow, <code>MORE DETAILS</code>, the chevron first; a click on it folds
-                the card. It starts open.
-              </li>
-              <li>
-                Its item labels the text above it <code>Original reply</code>, so the reader can tell the two apart.
-              </li>
+              <li>Its heading, <b>More Details</b>, is in the text's own size and ink, bold, as a Net effect's label.</li>
+              <li>It never folds: it IS the item's text now, so hiding it would hide what the item says.</li>
             </ul>
           </ui-section>
 
@@ -258,9 +231,11 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code>plan-doc details &lt;name&gt; &lt;id&gt; --file html --more</code> (Add Details): the item's text
-                stays on top, the file's HTML goes in the card. An agent writes it when you ask for more on an item
-                (Add Details:  a request for now on an item with no note).
+                <code>epic details &lt;name&gt;#&lt;id&gt; --more --file html</code> (Add Details, Clarify): the file's
+                HTML goes in the card, REPLACING the item's unclear text. The given "What it says on the tin" body goes
+                for good; the item's own prose moves into its Original Discussion; your quoted words and every card
+                (Choices, Net effect, code, replies, commits) stay. An agent writes it when you click the item's ? icon or
+                Clarify.
               </li>
               <li>
                 A second <code>--more</code> replaces the card; the old card's text moves into the Original Discussion,

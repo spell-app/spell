@@ -225,17 +225,18 @@ describe("<epic-reply>'s voices (epic `epic-friend` T11)", () => {
 })
 
 describe("<epic-more>", () => {
-  test("a card headed More Details, open to start with;  its heading folds it;  passes axe", async () => {
+  test("a card headed More Details that never folds (epic `epic-engine` I301);  passes axe", async () => {
     const host = await ElementFixture.render(`<epic-more><p>More</p></epic-more>`)
-    const toggle = part(host, "toggle")!
-    expect([toggle.textContent, host.matches(":state(open)"), part(host, "body")!.hasAttribute("hidden")]).toEqual([
+    const heading = part(host, "heading")!
+    expect([heading.localName, heading.textContent, part(host, "body")!.hasAttribute("hidden")]).toEqual([
+      "div",
       "More Details",
-      true,
       false
     ])
+    expect(part(host, "toggle")).toBeFalsy()
     await expectAccessible(host)
-    toggle.click()
+    heading.click()
     await ElementFixture.tick()
-    expect([host.matches(":state(open)"), part(host, "body")!.getAttribute("hidden")]).toEqual([false, "until-found"])
+    expect(part(host, "body")!.hasAttribute("hidden")).toBe(false)
   })
 })
