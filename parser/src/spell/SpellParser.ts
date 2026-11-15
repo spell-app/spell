@@ -491,6 +491,36 @@ export class SpellParser extends P.Parser {
   }
 
   /**
+   * What each type `text` declares is a kind of, by a scan of its lines -- see `P.Parser.declaredSuperTypes()`:
+   * `pile` for `stock-pile`, in `a "stock pile" is a pile with layout "stacked"` (epic `language` J177).
+   * - Its type's name, as `P.typeName()` reads its words:  `TwoSidedView` for `a "card" is a draggable two sided view`,
+   *   its abilities left out (`abilityWord`);  `Thing` for Spanish's `cosa`.
+   * - Only a line with an article, as `create_type` reads it:  `klondike is a card game` declares a one-of-a-kind.
+   * - None for a list type, `a "deck" is a list of cards`, nor a value's, `a "score" is a number`:
+   *   their lines say what they are when they parse.
+   * - A comment after it, `-- A playing card`, isn't part of its kind.
+   */
+  declaredSuperTypes(text: string): Map<string, string> {
+    if (this.form === "page") text = SP.PageTwin.skeletonOf(text, this)
+    const language = this.language ?? SP.Language.default
+    const { kindDeclaration, abilityWord } = this.declarations
+    const dashed = (words: string[]) => words.join("-")
+    const found = new Map<string, string>()
+    const uncommented = text.replace(TRAILING_COMMENT, "")
+    for (const [, article, name, kind] of uncommented.matchAll(kindDeclaration)) {
+      if (!article) continue
+      const words = kind!
+        .trim()
+        .split(/[ \t]+/)
+        .filter((word) => !abilityWord.test(word))
+      if (!words.length || words.some((word) => P.typeName(word, language.typeWords) === "list")) continue
+      const datatype = P.typeName(words.join(" "), language.typeWords, language.words.listOfWord)
+      if (!P.isValueType(datatype)) found.set(dashed(name!.trim().split(/[ \t]+/)), P.classCase(datatype))
+    }
+    return found
+  }
+
+  /**
    * Make each one-of-a-kind's variable `texts` declare known ahead, for the whole project (epic `data` I44):
    * `pokedex` for `pokedex is an app`, `klondike` for `klondike is a card game`
    * -- see `P.Parser.stubDeclaredVariables()`.
@@ -956,6 +986,9 @@ type CallsAhead = { callAhead?: (match: P.Match) => void }
 
 /** Most words a kind's name may have, as `create_one_of_a_kind` reads it:  as many as a type's (drawable-thing J7). */
 const MAX_KIND_WORDS = 4
+
+/** A comment ending a line, `  -- A playing card`:  `SpellParser.declaredSuperTypes()` reads the line without it. */
+const TRAILING_COMMENT = /[ \t]+--(?:[ \t].*)?$/gm
 
 /**
  * Add the fixed words `rule` may start with to `words`, lower case -- see `P.leadingRules()`.

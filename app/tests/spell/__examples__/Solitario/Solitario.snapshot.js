@@ -79,7 +79,7 @@ export class Carta extends TwoSidedView {
   }
 
   async jugar() {
-    if (solitario.reserva.includes(this)) await solitario.robarDeLaReserva()
+    if (this.pila === solitario.reserva) await solitario.robarDeLaReserva()
     else {
       const pilaFinal = core.filter(core.everyThing(Pila), (pila) => core.canTake(pila, this)).firstItem
       if (pilaFinal === undefined) return false
@@ -106,7 +106,7 @@ export class Carta extends TwoSidedView {
   /** lo que suma el movimiento:  10 en una fundación, 5 desde los descartes, si no nada */
   contarLosPuntosDeCartaEnPila(pila) {
     if (pila instanceof Fundación) return 10
-    if (solitario.descartes.includes(this)) return 5
+    if (this.pila === solitario.descartes) return 5
     return 0
   }
 
@@ -586,7 +586,7 @@ export class Solitario extends App {
     const carta = pila?.filter((carta) => carta.isFaceDirection("down"))?.randomItem()
     // volteada mientras se mueve:  se alza boca abajo sobre su columna, luego se voltea mientras pasa a los descartes
     this.descartes.append(carta)
-    return carta?.turnFaceUp()
+    carta?.turnFaceUp()
   }
 
   async onPuntuaciónChange(event) {

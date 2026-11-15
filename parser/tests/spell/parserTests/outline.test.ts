@@ -239,6 +239,41 @@ describe("outline style", () => {
     })
   })
 
+  describe("a kind declared BELOW a line is in its family there (epic `language` J177)", () => {
+    test("the scan says what each type is a kind of:  its abilities and its comment left out", () => {
+      const lines = [
+        'a "stock pile" is a pile with layout "stacked"  -- where the cards wait',
+        'a "card" is a draggable two sided view  -- A playing card',
+        "a deck is a list of cards",
+        'a "score" is a number',
+        "klondike is a card game"
+      ]
+      expect(Object.fromEntries(SP.spellParser.declaredSuperTypes(lines.join("\n")))).toEqual({
+        "stock-pile": "Pile",
+        card: "TwoSidedView"
+      })
+      const spanish = SP.Language.for("es").parser
+      const es = ['una "pila de descartes" es una pila con disposición "apilada"', "una carta es una cosa arrastrable"]
+      expect(Object.fromEntries(spanish.declaredSuperTypes(es.join("\n")))).toEqual({
+        "pila-de-descartes": "Pila",
+        carta: "Thing"
+      })
+    })
+
+    test('`the card is in the stock` above `a "stock pile" is a pile`:  the card\'s own pile says, no search', () => {
+      const compiled = compile([
+        "a card is a thing",
+        "a pile is a list of cards",
+        "a card belongs to one pile",
+        "set card to a new card",
+        "set stock to a new stock pile",
+        "set found to card is in stock",
+        'a "stock pile" is a pile'
+      ])
+      expect(compiled).toContain("found = card.pile === stock")
+    })
+  })
+
   test("`the piles` is `every pile` (P23);  a variable called `piles` keeps its meaning", () => {
     const lines = ["a pile is a thing", "a tableau is a pile", 'set a to a new pile with name = "a"']
     const run = runSpell([...lines, "set found to the piles"], { registered: true })

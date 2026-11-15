@@ -271,6 +271,8 @@ export const englishWords: SP.LanguageWords = {
      */
     kindDeclaration:
       /^[ \t]*(?:-[ \t]+)?(an?[ \t]+)?(?!(?:its?|the|an?)[ \t])["']?((?:(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+)["']?(?:[ \t]+aka[ \t]+["']?[\p{L}\p{M}\d_-]+["']?)?[ \t]+is[ \t]+an?[ \t]+((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)(?=[ \t]*(?:where\b|with\b|:|,|$))/gimu,
+    /** An ability's word beside a type's kind, e.g. `draggable`:  as `draggable_or_droppable` reads it. */
+    abilityWord: /^(?:draggable|droppable|selectable|clickable)$/iu,
     /** A line declaring a value kind, its PLURAL name captured, e.g. `suits` in `- "suits" as one of ...`. */
     valueKindDeclaration: /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+as[ \t]+(?:one[ \t]+of|either)\b/gimu,
     /**
