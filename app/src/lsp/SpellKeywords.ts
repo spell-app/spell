@@ -266,6 +266,17 @@ export class SpellKeywords {
   static CONTINUES_LINE = /(?<![\p{L}\p{M}\d_-])(?:and|or|y|e|o|u)\s*$/u
 
   /**
+   * Text before the caret that holds code, not only a comment:  with `COMMENT_AFTER` after the caret,
+   * Enter puts the comment on its own line, a level in (epic `editor` I155):
+   * `a "discard pile" is a pile |-- Where the stock's cards go` => its description, the first line inside it.
+   * - Monaco's (`SpellMonaco`) and VS Code's (`language-configuration.json`, by hand):  a test checks they match.
+   */
+  static CODE_BEFORE = /^\s*(?!--|\/\/)\S/
+
+  /** Text after the caret that starts with a comment, `--` or `//` (`CODE_BEFORE`). */
+  static COMMENT_AFTER = /^\s*(?:--|\/\/)/
+
+  /**
    * The text before the caret ending in an opening tag, so Enter goes in a level (epic `editor` I65):
    * `<content>`, `<toolbar class="x">`, `<pile "stock">`.
    * - Not a tag that closes itself (`<action "x"/>`), one HTML never closes (`<br>`), nor a closing tag (`</x>`).

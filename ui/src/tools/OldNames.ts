@@ -6,8 +6,8 @@ import { SharedVocabulary } from "spell/ui/vocabulary"
 
 /****************
  * ### `OldNames`
- * Rewrites the OLD attribute names Spell UI's tags still read (`AttributeSpec.replaces`) into their new ones, in a
- * page's text:  `<ui-button primary basic>` => `<ui-button color="primary" appearance="basic">` (epic `ui-gaps` P6).
+ * Rewrites the OLD attribute names Spell UI's vocabularies record (`AttributeSpec.replaces`) into their new ones,
+ * in a page's text -- the tags no longer read them (epic `ui-gaps` P13):  `<ui-button primary basic>` => `<ui-button color="primary" appearance="basic">` (epic `ui-gaps` P6).
  * - What `spell ui rename` runs, over HTML pages, Markdown, and the JSX and template strings in code.
  * - The old names come from the vocabularies themselves (`load()`), so it keeps no list of its own:
  *   a vocabulary that declares one more `replaces` teaches it one more rename.

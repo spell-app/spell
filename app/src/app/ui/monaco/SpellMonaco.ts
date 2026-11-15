@@ -11,6 +11,7 @@ import { SpellTyping } from "./SpellTyping"
 import { ValuePicker } from "./ValuePicker"
 import { ValueChoices } from "./ValueChoices"
 import { ErrorHover } from "./ErrorHover"
+import { FoldArrows } from "./FoldArrows"
 import { LinkClick } from "./LinkClick"
 import { SpellTokensProvider } from "./SpellTokensProvider"
 import { SpellModels } from "./SpellModels"
@@ -65,6 +66,9 @@ export class SpellMonaco {
     fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
     fontSize: 15,
     lineNumbers: "off",
+    // no room before the code beyond the fold arrows' own 16px, which Monaco adds (Owen, epic `editor` I154:
+    // "I don't want to lose the folding but I do want to lose the space");  its default is 10px more
+    lineDecorationsWidth: 0,
     minimap: { enabled: false },
     // no band across the current line, in any theme (Owen:  "Lose the line highlight in monaco in all themes")
     renderLineHighlight: "none",
@@ -118,6 +122,12 @@ export class SpellMonaco {
         action: { indentAction: monaco.languages.IndentAction.IndentOutdent }
       },
       { beforeText: LSP.SpellKeywords.OPENS_TAG, action: { indentAction: monaco.languages.IndentAction.Indent } },
+      // a comment after code goes on its own line, a level in (epic `editor` I155)
+      {
+        beforeText: LSP.SpellKeywords.CODE_BEFORE,
+        afterText: LSP.SpellKeywords.COMMENT_AFTER,
+        action: { indentAction: monaco.languages.IndentAction.Indent }
+      },
       { beforeText: /:\s*$/, action: { indentAction: monaco.languages.IndentAction.Indent } },
       // a condition going on onto the next line (epic `language` P55, Q53)
       { beforeText: LSP.SpellKeywords.CONTINUES_LINE, action: { indentAction: monaco.languages.IndentAction.Indent } }
@@ -182,6 +192,8 @@ export class SpellMonaco {
       if (features) new ValueChoices(editor, features.attributeValuesAt)
       new ErrorHover(editor)
       new LinkClick(editor)
+      // a fold arrow drawn over the code still folds (epic `editor` I154)
+      new FoldArrows(editor)
     })
     // ⌘F finds with its replace row showing, as VS Code's ⌥⌘F:  ⌘R reloads the page here (epic `editor` I105);
     // the same command as `EDITOR_HOTKEYS.find`'s, which this file can't import (Monaco loads lazily)
