@@ -21,6 +21,7 @@ import {
   isAnchoredIn,
   isHeld,
   isImmediate,
+  isInstant,
   isSent,
   isWorkOnMark,
   pickFieldsOf,
@@ -1053,10 +1054,16 @@ export class ReviewClient extends PageStore {
   // ## Helpers
   ////////////////
 
-  /** The marks not sent yet, and not held for their time (a stage accept counting down:  `isHeld()`, I181). */
+  /**
+   * The marks not sent yet, and not held for their time (a stage accept counting down:  `isHeld()`, I181).
+   * - never an instant one (a ✓ or x with nothing for Claude:  `isInstant()`, epic `epic-engine` I304):  the page
+   *   server applies it by itself, so Send neither counts nor carries it
+   */
   private unsentMarks(): InboxMark[] {
     const now = Date.now()
-    return Object.values(this.inbox.marks).filter((mark) => !this.isSent(mark) && !isHeld(mark, now))
+    return Object.entries(this.inbox.marks)
+      .filter(([id, mark]) => !this.isSent(mark) && !isHeld(mark, now) && !isInstant(id, mark))
+      .map(([, mark]) => mark)
   }
 
   /** The urgencies not sent yet:  set after the last send. */

@@ -16,6 +16,7 @@ import { hasPick, hasSetChange, pickFieldsOf, pickOf, setPicksOf } from "spell/e
 import {
   STAGE_COUNTDOWN_MS,
   isHeld,
+  isInstant,
   isLiveWork,
   isSent,
   partOf,
@@ -600,12 +601,15 @@ export class ReviewInbox {
    * Marks waiting for Owen's "send to Claude":  `[{ id, ...mark }]`, oldest first.
    * - newer than `sent` (all of them before the first send)
    * - NOT immediate ones (`details`, `revisit` `now`):  `requestNow()` already handed them over
+   * - NOT instant ones (a ✓ or x with nothing for Claude, a Read:  `isInstant()`):  the page server applies them
+   *   itself (`InstantMarks`, epic `epic-engine` I304), so they never make a Send worth waking anyone for
    */
   get unsentMarks(): ListedMark[] {
     const sent = this.sent ? Date.parse(this.sent) : -Infinity
     const now = Date.now()
     return this.markList.filter(
-      (mark) => !ReviewInbox.isImmediate(mark) && Date.parse(mark.at) > sent && !isHeld(mark, now)
+      (mark) =>
+        !ReviewInbox.isImmediate(mark) && !isInstant(mark.id, mark) && Date.parse(mark.at) > sent && !isHeld(mark, now)
     )
   }
 

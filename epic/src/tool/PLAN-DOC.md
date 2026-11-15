@@ -102,7 +102,7 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `readAway()`.
     - A line's or a part's Read is a Seen on `away:<line>`:  `readAwayLine()`, and every new update block of what it's
       about (each line of a part) stamped seen (`seeUpdatesFor()`, epic `epic-engine` I268).
-    - Every Read is applied by the page server the moment it's ticked (`AwayReads.applyNow()`):  no Send, no session;
+    - Every Read is applied by the page server the moment it's ticked (`InstantMarks.applyNow()`):  no Send, no session;
       `epic inbox apply` still takes one a failure left.
     - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
@@ -546,6 +546,16 @@ As `plan-doc.md`, "Ids":
     - A note is kept first, as the person's `<epic-reply re="skip">`.
     - The log:  `J9 skipped:  nothing to do, reviewed`.
   - On a todo that's work, skipping it IS dropping it.
+- INSTANT marks need no Send (epic `epic-engine` I304;  Owen, 2026-11-15:  "Seems like the check mark shouldn't
+  require a send"):  the page server applies them itself, as `inbox apply` would (`InstantMarks`).
+  - Which:  `isInstant()` (`spell/epic/review/review.types`), the one rule:
+    - an issue's, a judgement call's, a question's or a todo's ✓ or x (`approve`, `seen`, `drop`, `skip`) with no
+      note, comments, picture or pick;  never a test's, a phase's or an Overview part's (their approve can start work)
+    - an update block's Seen, and a Read in "0. While you were out" (above)
+  - When:  2 seconds after the click (`INSTANT_GRACE_MS`, J228), so a second click takes it back first;  a Read at once.
+  - Send neither counts nor carries them;  a Send with only these wakes nobody.
+  - The log keeps a line each, as `inbox apply`'s;  `inbox apply` still takes any the page server couldn't.
+  - Undone after:  Revisit reopens it.
     - Its own box's x is `drop`.
     - A `skip` from a page drawn before is applied as `drop`.
   - On an Overview sub-section, a phase, or the summary:

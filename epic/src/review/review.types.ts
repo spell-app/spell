@@ -8,6 +8,8 @@
  */
 
 import { clockTime } from "spell/util/time"
+
+import { AWAY_ID } from "spell/epic/definitions/definitions.types"
 import type {
   InboxDoing,
   InboxDraft,
@@ -504,6 +506,55 @@ export function isHeld(mark: { at: string }, now = Date.now()): boolean {
 export function isImmediate(mark: { action: string; when?: string }): boolean {
   return mark.action === "details" || mark.action === "prepare" || (mark.action === "revisit" && mark.when === "now")
 }
+
+/**
+ * How long an instant mark waits before the page server applies it (`isInstant()`):  a second click on the same
+ * button inside it takes the mark back, and nothing happens (epic `epic-engine` I304, J228).
+ */
+export const INSTANT_GRACE_MS = 2000
+
+/** An item's id, as an instant mark takes one:  an issue, a judgement call, a question or a todo (`i3`, `j3` ...). */
+const INSTANT_ITEM = /^[ijqt]\d+$/
+
+/** An update block's id (`up3`):  its Seen is instant too.  As `ReviewInbox`'s `UPDATE_ID`. */
+const INSTANT_UPDATE = /^up\d+$/
+
+/** The actions an item's instant mark may be:  the ✓ (approve, Saw it) and the x (drop, skip). */
+const INSTANT_ACTIONS: ReadonlySet<string> = new Set(["approve", "seen", "drop", "skip"])
+
+/**
+ * Is `mark`, on inbox key `id`, an INSTANT mark:  a plain page update the page server applies by itself, with no
+ * Send and no session (epic `epic-engine` I304;  Owen, 2026-11-15:  "Seems like the check mark shouldn't require a
+ * send")?
+ * - a Read in "0. While you were out" (`away`, `away:<line>`, a Seen:  I268), applied at once
+ * - an update block's Seen (`up3`)
+ * - an ITEM's ✓ or x (`approve`, `seen`, `drop`, `skip`) with nothing for Claude in it:  no note, no comments, no
+ *   picture, no pick or option change;  an issue's, a call's, a question's or a todo's, never a test's (`m3`), a phase's
+ *   or an Overview part's (their approve can start work)
+ * - the ONE rule:  the page's Send count leaves them out (`ReviewClient`), the inbox's unsent list too
+ *   (`ReviewInbox.unsentMarks`), and the page server applies them (`InstantMarks`) once `INSTANT_GRACE_MS` has passed
+ *   (a Read at once)
+ */
+export function isInstant(id: string, mark: InstantCandidate | null | undefined): boolean {
+  if (!mark) return false
+  const key = id.toLowerCase()
+  if (key === AWAY_ID || key.startsWith(`${AWAY_ID}:`)) return mark.action === "seen"
+  if (INSTANT_UPDATE.test(key)) return mark.action === "seen"
+  if (!INSTANT_ITEM.test(key) || !INSTANT_ACTIONS.has(mark.action)) return false
+  if (mark.note?.trim() || mark.comments?.length || mark.shot) return false
+  return !hasPick(mark) && !hasSetChange(mark)
+}
+
+/** Is instant mark `mark` on `id` due:  a Read at once, any other once `INSTANT_GRACE_MS` has passed since it was made? */
+export function isInstantDue(id: string, mark: InstantCandidate & { at: string }, now = Date.now()): boolean {
+  if (!isInstant(id, mark)) return false
+  const key = id.toLowerCase()
+  if (key === AWAY_ID || key.startsWith(`${AWAY_ID}:`)) return true
+  return now - Date.parse(mark.at) >= INSTANT_GRACE_MS
+}
+
+/** What `isInstant()` reads of a mark. */
+export type InstantCandidate = PickFields & { action: string; note?: string; comments?: string[]; shot?: string }
 
 /**
  * Open tests in the order Owen goes through them (epic `epic-engine` P51), the ONE rule the page's Manual tests

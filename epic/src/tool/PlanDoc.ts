@@ -3338,7 +3338,7 @@ export class PlanDoc extends PlanReader {
    *   update block still new in its phase or item (each line of a part, for a part's) stamped `seen`, as its own
    *   Seen does (`seeUpdatesFor()`)
    *   - nothing else about the item changes:  a call or a question still waiting stays red, his to answer
-   * - the page server applies it the moment he ticks it (`AwayReads.applyNow()`):  no Send
+   * - the page server applies it the moment he ticks it (`InstantMarks.applyNow()`):  no Send
    * - the section gone already (read whole):  dropped
    */
   private applyReadLine({ id, action }: PlanMark): MarkResult {
