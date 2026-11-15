@@ -80,6 +80,16 @@ class RuntimeMethods:
         self.RUNTIME = SpellRuntime(UndoHistory(title_for=self._undo_title, on_change=self._history_changed))
         self.before_pause: list[Callable[[], Awaitable[None] | None]] = []
 
+    def run_opening[Result](self, open_program: Callable[[], Result]) -> Result:
+        """Run `open_program`, the program's whole opening (its top level), as can't be undone:  what it returns.
+
+        - So nothing it does as it starts is an undo step, and Undo isn't lit the moment it opens
+          (epic `language` J180):  not an action it calls at its top level, nor one that action calls.
+        - `run_program()` runs every program through it;  what a person does afterwards is a step as before.
+        - The JavaScript core's `core.runOpening()`, around a runner's import of the program.
+        """
+        return self.RUNTIME.history.run_unrecorded(open_program)
+
     def _undo_title(self, action: UndoAction, step: str | None) -> str:
         """The Edit menu's title for undoing or redoing `step`, in the program's language:  `Undo Turn Card`."""
         return self.message(f"{action}-step", step=step) if step else self.message(action)

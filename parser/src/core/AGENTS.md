@@ -510,6 +510,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       step, as `core.holdWhile()`'s opening steps aren't (`runCreate()`, epic `language` I88):
       Undo at once does nothing.
     - What another action calls joins that one's step, as above.
+    - The program's whole opening can't be undone (epic `language` J180):  every runner imports it through
+      `core.runOpening()` (`runCompiled()`, `runProject.ts`;  Python's `run_program()`, `core.run_opening()`),
+      so an action its top level calls, not waiting, is no step either, and Undo isn't lit as it starts.
+      - A step that waits outlives the opening:  `core.holdWhile()` still keeps it out.
   - A top-level action (`to deal the cards` outside any type) has no class to declare it on (epic `language` J149):
     its function runs its body through the core, `return core.asAction({ undoneAs: "Deal the Cards" }, () => ...)`.
     - The same exceptions;  and a function with no steps stays a plain one.

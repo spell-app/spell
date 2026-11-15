@@ -174,6 +174,15 @@ describe("SP.BubblyLayout", () => {
     expect(piecesOf(drawing, "mark")).toEqual(expect.arrayContaining(["<", "=", ">{", "}</", ">"]))
   })
 
+  it("draws a control line going on onto the lines under it (`and ...`) as ONE head, its body after them", () => {
+    const text = CARD.replace("\t\tif it is a face card\n", "\t\tif it is a face card\n\t\t\tand its rank is king\n\t")
+    const control = blocksOf(SP.BubblyLayout.of(text).nodes).find((block) => block.partOfSpeech === "control")!
+    expect(text.slice(control.head.start, control.head.end)).toBe("if it is a face card\n\t\t\tand its rank is king")
+    expect(control.body.map((node) => node.kind === "line" && text.slice(node.start, node.end))).toEqual([
+      'return "face"'
+    ])
+  })
+
   it("makes a control line with steps a block of its own, its line plain on its band", () => {
     const picture = blocksOf(drawing.nodes).find((block) => words(block) === 'its "picture" is')!
     const control = picture.body.find((node) => node.kind === "block")

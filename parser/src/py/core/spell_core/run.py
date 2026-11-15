@@ -72,7 +72,8 @@ def run_program(path: str | Path, seed: int | None = None, pauses: bool = True) 
         sys.modules.pop(beside.stem, None)
     # a database on this device is a file beside it (`place_kinds.py`)
     core.program_file = program
-    names = runpy.run_path(str(program), run_name="__main__")
+    # its whole opening can't be undone:  Undo isn't lit the moment it starts (epic `language` J180)
+    names = core.run_opening(lambda: runpy.run_path(str(program), run_name="__main__"))
     core.send_waiting_changes()
     return names
 

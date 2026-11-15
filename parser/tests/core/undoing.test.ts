@@ -404,6 +404,35 @@ describe("top-level actions (`core.asAction()`, epic `language` J149)", () => {
   })
 })
 
+describe("the program's opening (`core.runOpening()`, epic `language` J180)", () => {
+  test("an action its top level calls, not waiting, is no step;  once it's open, one is", async () => {
+    const opened = core.runOpening(async () => {
+      turnEveryCardOverAtTheTop()
+      await Promise.resolve()
+      cards[1].turnOver()
+      return "opened"
+    })
+    await expect(opened).resolves.toBe("opened")
+    expect(game.canUndo).toBe(false)
+    // every card turned face up, then the second turned back over, after a wait:  all of it the opening's
+    expect(cards.map((card) => card.faceUp)).toEqual([true, false, true])
+    cards[0].turnOver()
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Turn Card"])
+  })
+
+  test("no program running:  it just runs", () => {
+    core.clearRuntime()
+    expect(core.runOpening(() => 2)).toBe(2)
+  })
+
+  /** `to turn every card over` outside any type, called at the program's top level. */
+  function turnEveryCardOverAtTheTop(): void {
+    return core.asAction({ undoneAs: "Turn Every Card Over" }, () => {
+      for (const card of cards) card.faceUp = true
+    })
+  }
+})
+
 describe("the history's life", () => {
   test("a new run starts with none", () => {
     cards[0].turnOver()

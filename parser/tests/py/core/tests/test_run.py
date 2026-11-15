@@ -29,6 +29,25 @@ def test_each_run_imports_its_projects_afresh(tmp_path: Path) -> None:
     assert first["Card"].game is first["game"]
 
 
+def test_its_opening_is_no_undo_step_but_a_move_after_it_is(tmp_path: Path) -> None:
+    """An action its top level calls, not waiting, is no step;  called once it's open, one is (epic `language` J180)."""
+    program = tmp_path / "Turned.spell.py"
+    program.write_text(
+        "from spell_core import Thing, core, prop\n"
+        "class Card(Thing):\n    face_up = prop(type='choice')\n"
+        "@core.as_action({'undone_as': 'Turn Card'})\n"
+        "def turn_the_card_over():\n    card.face_up = not card.face_up\n"
+        "card = Card()\n"
+        "turn_the_card_over()\n"
+    )
+    core.reset_runtime()
+    names = run_program(program)
+    assert names["card"].face_up is True
+    assert not core.RUNTIME.history.can_undo
+    names["turn_the_card_over"]()
+    assert [step.title for step in core.RUNTIME.history.steps] == ["Turn Card"]
+
+
 def test_a_seed_deals_the_same_every_run(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     program = tmp_path / "Dice.spell.py"
     program.write_text("from spell_core import core\nprint(core.random_number(1, 6), core.random_number(1, 6))\n")

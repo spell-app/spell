@@ -104,6 +104,11 @@ export class ListGuard extends SpellStatement<"type|verb?|item?|when?|body?|neve
     }
   }
 
+  /** Its body answers yes or no:  a last line `the card is ...` asks (epic `language` T135). */
+  answersYesOrNo(_match: P.Match): boolean {
+    return true
+  }
+
   /** Nested scope for the body:  the item as its own word, e.g. `the card`, and `it` / `its` as the list. */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
     const listType = getKnownType(match.groups.type)

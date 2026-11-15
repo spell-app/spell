@@ -65,6 +65,14 @@ export class SpellStatement<
    */
   declare givesValue: boolean
   @proto static givesValue = false
+  /**
+   * `true`:  as the last line of a body answering yes or no (`answersYesOrNo()`), a line of ours that reads whole as
+   * a yes or no asks it instead (epic `language` T135):
+   * `it is droppable when` then `the card is the last item of the card's pile` asks, it doesn't set the card.
+   * - `assignment`'s:  `x is 1` sets `x` anywhere else.
+   */
+  declare readsAsQuestion: boolean
+  @proto static readsAsQuestion = false
   /** TYPE-ONLY: props `parser.addRule()` accepts for this rule -- see `P.Rule`'s `Props`. */
   declare readonly Props: SpellStatementProps
 
@@ -466,6 +474,15 @@ export class SpellStatement<
   }
 
   /**
+   * Does our body answer yes or no, so its last line asks (`readsAsQuestion`)?
+   * - e.g. `it is droppable when` (`ListGuard`), `it "is face up" if` (`QuotedTypeExpression`).
+   * - Default:  no.
+   */
+  answersYesOrNo(_statement: P.Match): boolean {
+    return false
+  }
+
+  /**
    * `block`, our indented body, giving back its last line's value -- see `returnsLastLine()`:
    * - its last line a value already (a call, `givesValue`):  `block`, noting that line as `returnsLast`
    * - its last line one no statement reads, but an expression does, e.g. `its n * x`:
@@ -482,21 +499,29 @@ export class SpellStatement<
     const line = [...block.matched].reverse().find((item) => item instanceof P.Match && Block.isCodeLine(item))
     if (!(line instanceof P.Match)) return undefined
     const lineStatement = (line.data as { statement?: P.Match }).statement
-    if (lineStatement) {
+    // a statement that asks, in a body answering yes or no (`the card is ...`):  read again, as a question
+    const asks =
+      lineStatement?.rule instanceof SpellStatement &&
+      lineStatement.rule.readsAsQuestion &&
+      this.answersYesOrNo(statement)
+    if (lineStatement && !asks) {
       if (!(lineStatement.rule instanceof SpellStatement) || !lineStatement.rule.givesValue) return undefined
       block.data.returnsLast = lineStatement
       return block
     }
     // a line nothing read:  read as an expression, the whole of it
     const lineToken = line.tokens[0]
-    if (!(lineToken instanceof P.LineToken) || !Block.getParseErrors(line)?.length) return undefined
+    if (!(lineToken instanceof P.LineToken) || (!asks && !Block.getParseErrors(line)?.length)) return undefined
     const { nestedScope } = statement
     const tokens = lineToken.tokens.filter((token) => !(token instanceof P.CommentToken))
     const value = nestedScope.parser?.parse(tokens, "expression", nestedScope)
     if (value?.length !== tokens.length || value.is(ParseError)) return undefined
+    if (asks && value.datatype !== "choice") return undefined
     // markup draws, only in a drawing:  anywhere else it stays an error (epic `elemental-spell` Q14)
     if (value.AST instanceof P.ASTJSXElement) return undefined
-    const kept = line.matched.filter((item) => !(item instanceof P.Match && item.is(ParseError)))
+    const kept = line.matched.filter(
+      (item) => !(item instanceof P.Match && (item.is(ParseError) || item === lineStatement))
+    )
     const valueLine = new P.Match({
       rule: line.rule,
       matched: [...kept, value],
