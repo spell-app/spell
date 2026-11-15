@@ -73,7 +73,7 @@ class Card(TwoSidedView):
         return f"{letter}{self.symbol}{arrow}"
 
     def draw_front(self) -> Element:
-        return h("test-project-card-image", {"card": self, "part": "front"})
+        return h("test-project-card-image", {"prop:card": self, "part": "front"})
 
     def draw_back(self) -> Element:
         return h("test-project-card-image", {"direction": "down", "part": "back"})

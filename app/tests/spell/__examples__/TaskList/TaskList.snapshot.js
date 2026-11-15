@@ -56,7 +56,7 @@ export class Task extends View {
 
   /** A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal */
   draw() {
-    return h("ui-form", { value: this },
+    return h("ui-form", { "prop:value": this },
       h("ui-stack", { direction: "horizontal", spacing: "sm" },
         h("ui-icon", { name: "grip vertical", color: "grey", "aria-label": "Drag" }),
         h("ui-checkbox", { name: "done", "aria-label": "Done" }),
@@ -583,7 +583,7 @@ export class TaskList extends App {
             )
           )
         ),
-        h("ui-form", { value: this },
+        h("ui-form", { "prop:value": this },
           h("ui-stack",
             h("ui-field", { label: "Keep them in", inline: true },
               h("ui-select", { name: "storage" },

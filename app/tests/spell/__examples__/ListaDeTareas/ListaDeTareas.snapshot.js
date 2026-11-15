@@ -56,7 +56,7 @@ export class Tarea extends View {
 
   draw() {
     // Un formulario propio, unido a ella:  marcar la casilla, o escribir un título, cambia la tarea;  su prioridad se muestra solo cuando no es normal
-    return h("es-formulario", { value: this },
+    return h("es-formulario", { "prop:value": this },
       h("es-pila", { direccion: "horizontal", separacion: "sm" },
         h("es-icono", { name: "grip vertical", color: "grey", "aria-label": "Arrastrar" }),
         h("es-casilla", { name: "hecha", "aria-label": "Hecha" }),
@@ -589,7 +589,7 @@ export class ListaDeTareas extends App {
             )
           )
         ),
-        h("es-formulario", { value: this },
+        h("es-formulario", { "prop:value": this },
           h("es-pila",
             h("es-campo", { etiqueta: "Guardarlas en", "en-linea": true },
               h("es-selector", { name: "almacén" },

@@ -1538,7 +1538,7 @@ export class Pokedex extends App {
         <ui-button appearance="tertiary" color="red" padding="none" size="poster" font="heavy" shadow="yellow" onClick={core.pressed(this, async () => await this.goToWhere("everyone"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           PokéSpell
         </ui-button>
-        <ui-form value={this} fluid={true} min-width="16em" max-width="26em">
+        <ui-form prop:value={this} fluid={true} min-width="16em" max-width="26em">
           <ui-field label="Find a Pokémon">
             <ui-input name="search" icon="search" size="large" placeholder="Pikachu" />
           </ui-field>

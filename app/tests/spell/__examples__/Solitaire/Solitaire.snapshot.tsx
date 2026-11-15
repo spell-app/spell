@@ -64,7 +64,7 @@ export class Card extends TwoSidedView {
   }
 
   drawFront() {
-    return <test-project-card-image card={this} part="front" />
+    return <test-project-card-image prop:card={this} part="front" />
   }
 
   drawBack() {

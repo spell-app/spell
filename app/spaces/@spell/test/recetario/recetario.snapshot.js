@@ -14,7 +14,7 @@ export class Receta extends View {
   set porciones(value) { this.setProp("porciones", value) }
 
   draw() {
-    return h("ui-form", { class: "recipe", value: this },
+    return h("ui-form", { class: "recipe", "prop:value": this },
       h("ui-input", { name: "título", "aria-label": "Receta" }),
       h("ui-text", { class: "servings" }, "para ", () => this.porciones),
       h("ui-button", {
@@ -82,7 +82,7 @@ export class CajaDeRecetas extends App {
 
   draw() {
     return [
-      h("ui-form", { class: "box", value: this },
+      h("ui-form", { class: "box", "prop:value": this },
         h("ui-input", { class: "search", name: "búsqueda", "aria-label": "Búsqueda" }),
         h("ui-input", { class: "draft", name: "borrador", "aria-label": "Receta nueva" }),
         h("ui-button", {

@@ -192,7 +192,7 @@ export class SettingsDialog extends View {
     return (
       <>
         <ui-header size="medium">Settings</ui-header>
-        <ui-form value={this}>
+        <ui-form prop:value={this}>
           <ui-field label="Lengths and weights in">
             <ui-select name="units">
               <ui-item value="metric">Metres and kilos</ui-item>

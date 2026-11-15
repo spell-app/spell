@@ -1457,7 +1457,7 @@ export class Guide extends App {
           onClick: core.pressed(this, () => this.goToWhere("films")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Star Wars"),
-        h("ui-form", { class: "find", value: this },
+        h("ui-form", { class: "find", "prop:value": this },
           h("ui-field", { label: "Search the galaxy" },
             h("ui-input", { name: "search", icon: "search", placeholder: "Luke, Hoth, Falcon" })
           )

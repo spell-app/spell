@@ -63,7 +63,7 @@ export class Diner extends View {
 
   /** Their name, their amount, what they owe, and a button to take them off */
   draw() {
-    return h("ui-form", { value: this },
+    return h("ui-form", { "prop:value": this },
       h("ui-stack", { direction: "horizontal", spacing: "sm" },
         h("ui-input", { name: "name", placeholder: "Name", "aria-label": "Name", fluid: true }),
         h("ui-input", {
@@ -166,7 +166,7 @@ export class BillSplitter extends App {
     return h("ui-container", { text: true },
       h("ui-stack",
         h("ui-header", { level: "2" }, "Bill Splitter"),
-        h("ui-form", { value: this },
+        h("ui-form", { "prop:value": this },
           h("ui-stack", { direction: "horizontal", spacing: "sm", wrap: true },
             h("ui-text", { bold: true }, "Tip"),
             h("ui-input", { name: "percent", type: "percent", min: "0", step: "1", "aria-label": "Tip percent" }),

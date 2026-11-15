@@ -1779,7 +1779,7 @@ export class GithubPage extends Thing {
 
   draw() {
     return h("ui-stack", { spacing: "xl" },
-      h("ui-form", { value: this },
+      h("ui-form", { "prop:value": this },
         h("ui-stack", { spacing: "sm" },
           h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between", spacing: "sm" },
             h("ui-header", { size: "large" }, "People and code, on GitHub"),
@@ -2548,7 +2548,7 @@ export class OpenLibraryPage extends Thing {
 
   draw() {
     return h("ui-stack", { spacing: "xl" },
-      h("ui-form", { value: this },
+      h("ui-form", { "prop:value": this },
         h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between", spacing: "sm" },
           h("ui-header", { size: "large" }, "Books, from Open Library"),
           h("ui-search", {
@@ -2785,7 +2785,7 @@ export class Todo extends Thing {
   set completed(value) { this.setProp("completed", value) }
 
   draw() {
-    return h("ui-form", { value: this },
+    return h("ui-form", { "prop:value": this },
       h("ui-stack", { direction: "horizontal", align: "center", justify: "between", spacing: "sm" },
         h("ui-checkbox", { name: "completed", label: () => this.title }),
         h("ui-button", {
@@ -3761,7 +3761,7 @@ export class MetMuseumPage extends Thing {
 
   draw() {
     return h("ui-stack", { spacing: "xl" },
-      h("ui-form", { class: "find", value: this },
+      h("ui-form", { class: "find", "prop:value": this },
         h("ui-stack", { spacing: "sm" },
           h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between", spacing: "sm" },
             h("ui-header", { size: "large" }, "Artworks, from the Met"),
@@ -4169,7 +4169,7 @@ export class RestCountriesPage extends Thing {
   draw() {
     return h("ui-stack", { spacing: "xl" },
       h("ui-stack", { spacing: "sm" },
-        h("ui-form", { value: this },
+        h("ui-form", { "prop:value": this },
           h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "between", spacing: "sm" },
             h("ui-header", { size: "large" }, "The world's countries, from REST Countries"),
             h("ui-select", { name: "language", "aria-label": "Names in" },
@@ -4315,7 +4315,7 @@ export class PublicServer extends App {
   draw() {
     return h("ui-container",
       h("ui-stack", { spacing: "lg" },
-        h("ui-form", { value: this },
+        h("ui-form", { "prop:value": this },
           h("ui-tabs", { name: "tab", parameter: "server", appearance: "secondary pointing basic", "aria-label": "Servers" },
             h("ui-tab", { label: "GitHub", value: "github" }),
             h("ui-tab", { label: "Open Library", value: "library" }),

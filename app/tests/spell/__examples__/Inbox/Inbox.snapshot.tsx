@@ -85,7 +85,7 @@ export class MailChoice extends Thing {
 
   @drawn draw() {
     return (
-      <ui-form class="mail-choice" value={this}>
+      <ui-form class="mail-choice" prop:value={this}>
         <ui-field label="Mail me" inline={true}>
           <ui-select name="how">
             <ui-item value="each">One mail per message</ui-item>

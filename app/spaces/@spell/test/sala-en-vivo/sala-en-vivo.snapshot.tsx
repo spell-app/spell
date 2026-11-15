@@ -14,7 +14,7 @@ export class Receta extends View {
 
   @drawn draw() {
     return (
-      <ui-form class="recipe" value={this}>
+      <ui-form class="recipe" prop:value={this}>
         <ui-input name="título" aria-label="Receta" />
       </ui-form>
     )

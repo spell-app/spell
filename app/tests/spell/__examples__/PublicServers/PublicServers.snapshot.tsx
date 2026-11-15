@@ -1497,7 +1497,7 @@ export class GithubPage extends Thing {
   @drawn draw() {
     return (
       <ui-stack spacing="xl">
-        <ui-form value={this}>
+        <ui-form prop:value={this}>
           <ui-stack spacing="sm">
             <ui-stack direction="horizontal" wrap={true} align="center" justify="between" spacing="sm">
               <ui-header size="large">People and code, on GitHub</ui-header>
@@ -2162,7 +2162,7 @@ export class OpenLibraryPage extends Thing {
   @drawn draw() {
     return (
       <ui-stack spacing="xl">
-        <ui-form value={this}>
+        <ui-form prop:value={this}>
           <ui-stack direction="horizontal" wrap={true} align="center" justify="between" spacing="sm">
             <ui-header size="large">Books, from Open Library</ui-header>
             <ui-search name="search" parameter="book" icon="search" placeholder="A book, by its title" aria-label="Search Open Library" />
@@ -2373,7 +2373,7 @@ export class Todo extends Thing {
 
   @drawn draw() {
     return (
-      <ui-form value={this}>
+      <ui-form prop:value={this}>
         <ui-stack direction="horizontal" align="center" justify="between" spacing="sm">
           <ui-checkbox name="completed" label={this.title} />
           <ui-button icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
@@ -3225,7 +3225,7 @@ export class MetMuseumPage extends Thing {
   @drawn draw() {
     return (
       <ui-stack spacing="xl">
-        <ui-form class="find" value={this}>
+        <ui-form class="find" prop:value={this}>
           <ui-stack spacing="sm">
             <ui-stack direction="horizontal" wrap={true} align="center" justify="between" spacing="sm">
               <ui-header size="large">Artworks, from the Met</ui-header>
@@ -3576,7 +3576,7 @@ export class RestCountriesPage extends Thing {
     return (
       <ui-stack spacing="xl">
         <ui-stack spacing="sm">
-          <ui-form value={this}>
+          <ui-form prop:value={this}>
             <ui-stack direction="horizontal" wrap={true} align="center" justify="between" spacing="sm">
               <ui-header size="large">The world's countries, from REST Countries</ui-header>
               <ui-select name="language" aria-label="Names in">
@@ -3703,7 +3703,7 @@ export class PublicServer extends App {
     return (
       <ui-container>
         <ui-stack spacing="lg">
-          <ui-form value={this}>
+          <ui-form prop:value={this}>
             <ui-tabs name="tab" parameter="server" appearance="secondary pointing basic" aria-label="Servers">
               <ui-tab label="GitHub" value="github" />
               <ui-tab label="Open Library" value="library" />
