@@ -37,9 +37,10 @@ import { type MethodBody } from "./classes.shared"
  * - Compiles to a method of the list's class, named for the item's type and the moment, which the page calls:
  *   `whenCardDraggedOver(card) {...}`, `whenCardDraggedOutOf(card)`, `whenCardDroppedOn(card)`,
  *   `whileCardDraggedOver(card)`;  `whenThingDroppedOn(thing)` for `something`.
- * - Its syntaxes have no `moment` for `while`:  it's only ever `dragged over`.
+ * - Its syntaxes for `while` have no `moment`, but `over`:  the same words (`drag_moment`), only ever `dragged over`.
+ * - `when a card is dropped`, with no `on it`, is `dropped on it` (Spanish `cuando una carta se suelta`;  epic `language` I100).
  */
-export class DragHandler extends SpellStatement<"item?|moment?|body?"> {
+export class DragHandler extends SpellStatement<"item?|moment?|body?|over?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
   /** What happens as a thing is dragged over or dropped:  the editor lists it with its type's events (`SP.SpellDeclarationPlaces`). */
@@ -50,6 +51,9 @@ export class DragHandler extends SpellStatement<"item?|moment?|body?"> {
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match || !P.SubjectScope.of(scope)?.subjectType) return undefined
+    // `while` is only ever `dragged over`
+    const { over } = match.groups
+    if (over && Wording.meaningOf(over) !== "dragged_over") return undefined
     return match
   }
 
@@ -59,7 +63,7 @@ export class DragHandler extends SpellStatement<"item?|moment?|body?"> {
     return {
       kind: "method",
       name: match.inputText.replace(/:.*$/s, "").trim(),
-      nameMatch: match.groups.moment ?? match.groups.item ?? match,
+      nameMatch: match.groups.moment ?? match.groups.over ?? match.groups.item ?? match,
       of: list.name,
       detail: `${DragHandler.methodName(match)}()`
     }
