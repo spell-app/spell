@@ -61,42 +61,52 @@ a "card image" is a view			-- A card's picture:  the one place a card's look liv
 	-- It's face up, unless it's `direction=down`:  then it's the back every card shares.
 	-- Today it's one letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 	-- Real pictures of the cards can take its place:  only its picture and `to draw it` change.
-	its "card" is a card
+	its "card" is a card			-- the card it draws
 	its "rank" is a card rank
 	its "suit" is a card suit
 	its "direction" is up or down
 	it "is face (direction)"
-	its "face" is			-- the card it draws:  its card, else one of its rank and suit
-		its card if its card exists
-		a new card whose rank is its rank and suit is its suit otherwise
+	when creating a card image
+		-- given a card:  its rank and suit are the card's;  given a rank and a suit:  its card is a new one of them (its back needs none)
+		if its card exists
+			set its rank to the rank of its card
+			set its suit to the suit of its card
+		otherwise if it is not face down
+			set its card to a new card whose rank is its rank and suit is its suit
 	its "color" is
 		blue if it is face down
-		the color of its face otherwise
+		the color of its card otherwise
 	its "picture" is
-		// Its letter:  https://www.compart.com/en/unicode/block/U+1F0A0
+		-- draw the unicode character for card images
+		-- see https://www.compart.com/en/unicode/block/U+1F0A0
 		if it is face down
 			return "🂠"
-		set column to the value of its face
-		if its face is a club
+		set column to the value of its card
+		if its card is a club
 			return item column of ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
-		if its face is a diamond
+		if its card is a diamond
 			return item column of ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"]
-		if its face is a heart
+		if its card is a heart
 			return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
 		return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
 	to draw it
 		<text color={its color}>{its picture}</text>
-
+	
 	to test card images
 		set queen to a new card whose rank is queen, suit is spades and direction is down
-		get a new card image whose card is queen
+		get a new card image whose card is the queen
+		its suit should be spades
 		its picture should be "🂭"
 		its color should be black
+
 		set seven to a new card image whose rank is 7 and suit is hearts
+		the name of seven's card should be "7 of hearts"
 		the picture of seven should be "🂷"
 		the color of seven should be red
+
 		the picture of a new card image whose rank is ace and suit is clubs should be "🃑"
 		the picture of a new card image whose rank is king and suit is diamonds should be "🃎"
+
 		get a new card image whose direction is down
 		its picture should be "🂠"
 		its color should be blue

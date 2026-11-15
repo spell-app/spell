@@ -176,6 +176,7 @@ core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Poi
 // A card's picture:  the one place a card's look lives
 export type Direction = (typeof CardImage.Directions)[number]
 
+@thing
 export class CardImage extends View {
   static elementTag = core.defineElement(this, "test-project")
 
@@ -184,6 +185,7 @@ export class CardImage extends View {
    * Today it's one letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
    * Real pictures of the cards can take its place:  only its picture and `to draw it` change.
    */
+  // the card it draws
   // - its "card" is a card
   @prop({ type: "Card" })
   accessor card!: Card
@@ -205,25 +207,28 @@ export class CardImage extends View {
     return this.direction === direction
   }
 
-  /** the card it draws:  its card, else one of its rank and suit */
-  get face() {
-    if (this.card !== undefined) return this.card
-    return new Card({ rank: this.rank, suit: this.suit })
+  /** given a card:  its rank and suit are the card's;  given a rank and a suit:  its card is a new one of them (its back needs none) */
+  create() {
+    if (this.card !== undefined) {
+      this.rank = this.card.rank
+      this.suit = this.card.suit
+    } else if (!this.isFaceDirection("down")) this.card = new Card({ rank: this.rank, suit: this.suit })
   }
 
   get color() {
     if (this.isFaceDirection("down")) return "blue"
-    return this.face.color
+    return this.card?.color
   }
 
-  /** Its letter:  https://www.compart.com/en/unicode/block/U+1F0A0 */
+  /** draw the unicode character for card images */
   get picture() {
+    // see https://www.compart.com/en/unicode/block/U+1F0A0
     if (this.isFaceDirection("down")) return "🂠"
-    let column = this.face.value
-    if (this.face.suit === "clubs") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column)) ?? "🂠"
-    if (this.face.suit === "diamonds") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column)) ?? "🂠"
-    if (this.face.suit === "hearts") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column)) ?? "🂠"
-    return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(column)) ?? "🂠"
+    let column = this.card?.value
+    if (this.card?.suit === "clubs") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column))
+    if (this.card?.suit === "diamonds") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column))
+    if (this.card?.suit === "hearts") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column))
+    return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(column))
   }
 
   @drawn draw() {
@@ -247,6 +252,10 @@ export class CardImageElement extends SpellElement<CardImage> {
 
   isFaceDirection(direction: Direction) {
     return this.currentThing?.isFaceDirection(direction)
+  }
+
+  create() {
+    return this.currentThing?.create()
   }
 }
 core.useElement(CardImage, CardImageElement)
@@ -293,16 +302,21 @@ export function testCardImages() {
       suit: "spades",
       direction: "down"
     })
-    core.echoTestAction(`get a new card image whose card is queen`)
+    core.echoTestAction(`get a new card image whose card is the queen`)
     const it2 = new CardImage({ card: queen })
+    core.expect(it2.suit, `its suit`, "spades", `spades`)
     core.expect(it2.picture, `its picture`, "🂭", `"🂭"`)
     core.expect(it2.color, `its color`, "black", `black`)
+
     core.echoTestAction(`set seven to a new card image whose rank is 7 and suit is hearts`)
     const seven = new CardImage({ rank: 7, suit: "hearts" })
+    core.expect(seven.card?.name!, `the name of seven's card`, "7 of hearts", `"7 of hearts"`)
     core.expect(seven.picture, `the picture of seven`, "🂷", `"🂷"`)
     core.expect(seven.color, `the color of seven`, "red", `red`)
+
     core.expect((new CardImage({ rank: "ace", suit: "clubs" })).picture, `the picture of a new card image whose rank is ace and suit is clubs`, "🃑", `"🃑"`)
     core.expect((new CardImage({ rank: "king", suit: "diamonds" })).picture, `the picture of a new card image whose rank is king and suit is diamonds`, "🃎", `"🃎"`)
+
     core.echoTestAction(`get a new card image whose direction is down`)
     const it3 = new CardImage({ direction: "down" })
     core.expect(it3.picture, `its picture`, "🂠", `"🂠"`)
@@ -481,7 +495,7 @@ export class StockPile extends Pile {
   }
 
   drawItsPlaceholder() {
-    return <ui-text part="placeholder">🂠</ui-text>
+    return <test-project-card-image direction={"down"} part="placeholder" />
   }
 
   async onClick(event: ClickEvent) {

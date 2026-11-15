@@ -234,7 +234,7 @@
     {
       "type": "CardImage",
       "superType": "View",
-      "defined": "/Card.spell:2165-4404"
+      "defined": "/Card.spell:2165-4747"
     },
     {
       "property": "card",
@@ -246,13 +246,13 @@
       "property": "rank",
       "of": "CardImage",
       "datatype": "CardRank",
-      "defined": "/Card.spell:2710-2735"
+      "defined": "/Card.spell:2733-2758"
     },
     {
       "property": "suit",
       "of": "CardImage",
       "datatype": "CardSuit",
-      "defined": "/Card.spell:2737-2762"
+      "defined": "/Card.spell:2760-2785"
     },
     {
       "property": "direction",
@@ -262,7 +262,7 @@
         "up",
         "down"
       ],
-      "defined": "/Card.spell:2764-2793"
+      "defined": "/Card.spell:2787-2816"
     },
     {
       "syntax": "{operator:is_or_is_not} face (expression:up|ups|down|downs)",
@@ -277,30 +277,30 @@
           "down"
         ]
       },
-      "defined": "/Card.spell:2795-2819"
+      "defined": "/Card.spell:2818-2842"
     },
     {
-      "property": "face",
-      "of": "CardImage",
-      "datatype": "Card",
-      "defined": "/Card.spell:2821-2996"
+      "kind": "method",
+      "name": "creating a card image",
+      "returns": "nothing",
+      "defined": "/Card.spell:2844-3213"
     },
     {
       "property": "color",
       "of": "CardImage",
-      "defined": "/Card.spell:2998-3072"
+      "defined": "/Card.spell:3215-3289"
     },
     {
       "constants": [
         "blue"
       ],
-      "defined": "/Card.spell:3015-3038"
+      "defined": "/Card.spell:3232-3255"
     },
     {
       "property": "picture",
       "of": "CardImage",
       "datatype": "text",
-      "defined": "/Card.spell:3074-3722"
+      "defined": "/Card.spell:3291-3978"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -313,7 +313,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Card.spell:3724-3781"
+      "defined": "/Card.spell:3980-4037"
     },
     {
       "syntax": "test card setup",
@@ -331,7 +331,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "card images",
-      "defined": "/Card.spell:3784-4404"
+      "defined": "/Card.spell:4041-4747"
     },
     {
       "type": "Pile",
@@ -407,7 +407,7 @@
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6035-6321"
+      "defined": "/Solitaire.spell:6035-6335"
     },
     {
       "property": "layout",
@@ -418,41 +418,41 @@
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6323-6507"
+      "defined": "/Solitaire.spell:6337-6521"
     },
     {
       "property": "layout",
       "of": "DiscardPile",
       "datatype": "text",
-      "defined": "/Solitaire.spell:6355-6371"
+      "defined": "/Solitaire.spell:6369-6385"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6509-6965"
+      "defined": "/Solitaire.spell:6523-6979"
     },
     {
       "property": "layout",
       "of": "Foundation",
       "datatype": "text",
-      "defined": "/Solitaire.spell:6539-6555"
+      "defined": "/Solitaire.spell:6553-6569"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spell:6619-6644"
+      "defined": "/Solitaire.spell:6633-6658"
     },
     {
       "type": "Column",
       "superType": "Pile",
-      "defined": "/Solitaire.spell:6967-7278"
+      "defined": "/Solitaire.spell:6981-7292"
     },
     {
       "property": "layout",
       "of": "Column",
       "datatype": "text",
-      "defined": "/Solitaire.spell:6993-7010"
+      "defined": "/Solitaire.spell:7007-7024"
     },
     {
       "type": "Solitaire",
@@ -647,7 +647,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spell:7280-8735"
+      "defined": "/Solitaire.spell:7294-8749"
     }
   ],
   "codeLines": [
@@ -669,58 +669,58 @@
     115,
     131,
     140,
-    145,
-    150,
-    155,
-    161,
-    166,
-    171,
-    172,
-    177,
-    186,
-    191,
-    224,
-    258,
-    263,
-    270,
-    276,
-    282,
-    297,
-    334,
-    339,
-    344,
-    351,
-    367,
-    369,
-    391,
-    393,
-    409,
-    411,
-    415,
-    438,
-    440,
-    458,
-    466,
-    499,
-    503,
-    507,
-    511,
-    515,
-    519,
-    523,
-    527,
-    531,
-    535,
-    539,
-    543,
-    547,
-    551,
-    555,
+    146,
+    151,
+    156,
+    162,
+    167,
+    174,
+    175,
+    180,
+    190,
+    195,
+    228,
+    267,
+    272,
+    279,
+    285,
+    291,
+    306,
+    343,
+    348,
+    353,
+    360,
+    376,
+    378,
+    400,
+    402,
+    418,
+    420,
+    424,
+    447,
+    449,
+    467,
+    475,
+    508,
+    512,
+    516,
+    520,
+    524,
+    528,
+    532,
+    536,
+    540,
+    544,
+    548,
+    552,
+    556,
     560,
-    582,
-    593,
-    601,
-    636,
-    671
+    564,
+    569,
+    591,
+    602,
+    610,
+    645,
+    680
   ]
 }

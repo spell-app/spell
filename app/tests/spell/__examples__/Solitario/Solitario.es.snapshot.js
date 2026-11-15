@@ -24,7 +24,6 @@ export const words = {
       palo: "palo",
       dirección: "dirección",
       estáBocaDirección: "está boca (dirección)",
-      cara: "cara",
       color: "color",
       dibujo: "dibujo"
     },

@@ -19,10 +19,12 @@
   ✅ As expected `the color of seven` is `red`
 ✅ test card images
   ▶️ Executing   `set queen to a new card whose rank is queen, suit is spades and direction is down`
-  ▶️ Executing   `get a new card image whose card is queen`
+  ▶️ Executing   `get a new card image whose card is the queen`
+  ✅ As expected `its suit` is `spades`
   ✅ As expected `its picture` is `"🂭"`
   ✅ As expected `its color` is `black`
   ▶️ Executing   `set seven to a new card image whose rank is 7 and suit is hearts`
+  ✅ As expected `the name of seven's card` is `"7 of hearts"`
   ✅ As expected `the picture of seven` is `"🂷"`
   ✅ As expected `the color of seven` is `red`
   ✅ As expected `the picture of a new card image whose rank is ace and suit is clubs` is `"🃑"`

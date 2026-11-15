@@ -155,6 +155,7 @@ class CardImage(View):
     # It's face up, unless it's `direction=down`:  then it's the back every card shares.
     # Today it's one letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
     # Real pictures of the cards can take its place:  only its picture and `to draw it` change.
+    # the card it draws
     # - its "card" is a card
     card = prop(type="Card")
 
@@ -171,36 +172,38 @@ class CardImage(View):
     def is_face_direction(self, direction: Direction) -> bool:
         return self.direction == direction
 
-    @property
-    def face(self) -> Card:
-        """the card it draws:  its card, else one of its rank and suit"""
+    async def create(self) -> None:
+        """given a card:  its rank and suit are the card's;  given a rank and a suit:  its card is a new one of them (its back needs none)"""
         if self.card is not None:
-            return self.card
-        return Card(rank=self.rank, suit=self.suit)
+            self.rank = self.card.rank
+            self.suit = self.card.suit
+        elif not self.is_face_direction("down"):
+            self.card = Card(rank=self.rank, suit=self.suit)
 
     @property
-    def color(self) -> str:
+    def color(self) -> str | None:
         if self.is_face_direction("down"):
             return "blue"
-        return self.face.color
+        return getattr(self.card, "color", None)
 
     @property
     def picture(self) -> str | None:
-        """Its letter:  https://www.compart.com/en/unicode/block/U+1F0A0"""
+        """draw the unicode character for card images"""
+        # see https://www.compart.com/en/unicode/block/U+1F0A0
         if self.is_face_direction("down"):
             return "🂠"
-        column = self.face.value
-        if self.face.suit == "clubs":
+        column = getattr(self.card, "value", None)
+        if getattr(self.card, "suit", None) == "clubs":
             return core.get_item_at(
                 ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"],
                 position(column),
             )
-        if self.face.suit == "diamonds":
+        if getattr(self.card, "suit", None) == "diamonds":
             return core.get_item_at(
                 ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"],
                 position(column),
             )
-        if self.face.suit == "hearts":
+        if getattr(self.card, "suit", None) == "hearts":
             return core.get_item_at(
                 ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"],
                 position(column),
@@ -261,16 +264,25 @@ def test_card_images() -> None:
             "set queen to a new card whose rank is queen, suit is spades and direction is down",
         )
         queen = Card(rank="queen", suit="spades", direction="down")
-        core.echo_test_action("get a new card image whose card is queen")
+        core.echo_test_action("get a new card image whose card is the queen")
         it_2 = CardImage(card=queen)
+        core.expect(it_2.suit, "its suit", "spades", "spades")
         core.expect(it_2.picture, "its picture", "🂭", "\"🂭\"")
         core.expect(it_2.color, "its color", "black", "black")
+
         core.echo_test_action(
             "set seven to a new card image whose rank is 7 and suit is hearts",
         )
         seven = CardImage(rank=7, suit="hearts")
+        core.expect(
+            getattr(seven.card, "name", None),
+            "the name of seven's card",
+            "7 of hearts",
+            "\"7 of hearts\"",
+        )
         core.expect(seven.picture, "the picture of seven", "🂷", "\"🂷\"")
         core.expect(seven.color, "the color of seven", "red", "red")
+
         core.expect(
             CardImage(rank="ace", suit="clubs").picture,
             "the picture of a new card image whose rank is ace and suit is clubs",
@@ -283,6 +295,7 @@ def test_card_images() -> None:
             "🃎",
             "\"🃎\"",
         )
+
         core.echo_test_action("get a new card image whose direction is down")
         it_3 = CardImage(direction="down")
         core.expect(it_3.picture, "its picture", "🂠", "\"🂠\"")
@@ -459,7 +472,7 @@ class StockPile(Pile):
         return False
 
     def draw_its_placeholder(self) -> Element:
-        return h("ui-text", {"part": "placeholder"}, "🂠")
+        return h("test-project-card-image", {"direction": "down", "part": "placeholder"})
 
     async def on_click(self, event: ClickEvent) -> None:
         await solitaire.turn_over_the_next_card()

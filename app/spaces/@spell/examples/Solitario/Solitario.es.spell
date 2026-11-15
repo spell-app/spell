@@ -183,7 +183,7 @@ una "pila de reserva" es una pila con disposición "apilada"
 	nunca puede tomar una carta
 	nunca puede soltar una carta
 	para dibujar su marcador
-		<texto>🂠</texto>
+		<imagen-de-carta dirección=abajo />
 	cuando se pulsa
 		robar de la reserva
 
