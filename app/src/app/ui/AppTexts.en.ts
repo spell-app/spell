@@ -614,6 +614,10 @@ export const APP_TEXTS = {
   inspectorSheetHandle: "Drag to make it taller or shorter;  down, to put it away",
   inspectorSheetClose: "Put the Inspector away",
   inspectorAddEvent: "Add event",
+  // a Code card row's ✕ (`<RemoveEventButton>`, epic `editor` T73):  its tooltip and undo step, then what it asks
+  inspectorRemoveEvent: "Remove {event}",
+  inspectorRemoveEventConfirm: 'Remove "{event}"?\nIts code goes with it.\n⌥-click the ✕ to remove without asking.',
+  inspectorRemoveEventOk: "Remove",
   inspectorParts: "Views",
   inspectorDivider: "Divider",
   inspectorFilter: "Filter",
