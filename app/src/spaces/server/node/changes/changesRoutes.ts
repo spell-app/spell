@@ -1,6 +1,7 @@
 import { SP } from "spell/parser/spell"
 import { SRV } from "spell/server"
 import type { SPACES } from "spell/app/spaces"
+import { shownPathFor } from "spell/app/spaces/server/node/projects/project-utils"
 import { queryText, respondWithJSON } from "spell/app/spaces/server/node/projects/response-utils"
 import { ChangeRequests } from "./ChangeRequests"
 import { ClaudeStarter } from "./ClaudeStarter"
@@ -14,6 +15,8 @@ import { ClaudeStarter } from "./ClaudeStarter"
  * - `GET /api/changes?id=c3`:  where it's got to, the same, and what its session is doing (`progress`);  404 for none
  *   - a session started for it that has ended without finishing, or hasn't taken it within a minute:
  *     failed (`ClaudeStarter.settle()`)
+ * - The file a request names is the one the asker sees:  their draft of it, when they have one (`shownPathFor()`;
+ *   epic `editor` I152, where Claude edited the public file under Owen's draft, and nothing showed)
  * - A request with no words, or no file:  400;  a picture that isn't a PNG, JPEG, GIF or WebP too (epic `editor` T62).
  */
 
@@ -23,11 +26,12 @@ export const request_askForChange = respondWithJSON(async (request): Promise<SPA
   if (!asked?.text?.trim() || !asked.projectId || !asked.filePath) {
     throw new SRV.HttpError(400, "POST /api/changes:  it needs `text`, `projectId` and `filePath`")
   }
-  const { serverPath } = SP.SpellLocation.getFileLocation(asked.projectId, asked.filePath)
+  // the file as they see it:  their draft, when they have one
+  const diskPath = await shownPathFor(request, SP.SpellLocation.getFileLocation(asked.projectId, asked.filePath))
   const inbox = ChangeRequests.here
   let added: SPACES.ChangeRequest
   try {
-    added = inbox.add(asked, serverPath)
+    added = inbox.add(asked, diskPath)
   } catch (error) {
     // a picture of a type it doesn't take:  the caller's mistake
     if (error instanceof TypeError) throw new SRV.HttpError(400, `POST /api/changes:  ${error.message}`)

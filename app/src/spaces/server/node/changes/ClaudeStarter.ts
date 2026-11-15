@@ -18,7 +18,8 @@ import { SessionLog } from "./SessionLog"
  *   - it runs `spell app changes take <id>`, which prints the request, as `wait` would;
  *   - changes the project's files, and says `spell app changes done <id>`
  * - What it may do (`argsFor()`), and NEVER more:
- *   - edit files inside the project's folder (Claude Code's `acceptEdits` mode, started there)
+ *   - edit files inside the project's folder (Claude Code's `acceptEdits` mode, started there),
+ *     and in the folder of the file the request names (`--add-dir`):  the person's draft may be elsewhere
  *   - read files, and run those two `spell app changes` commands
  *   - anything else would ask, and nobody answers (`--permission-prompts none`):  it's refused
  *   - never `--dangerously-skip-permissions`
@@ -92,6 +93,9 @@ export class ClaudeStarter {
       "--settings",
       JSON.stringify({ disableAllHooks: true }),
       "--strict-mcp-config",
+      // the file it names may be a draft kept outside the project folder (an org space's private one)
+      "--add-dir",
+      dirname(request.diskPath),
       // last:  it takes every argument after it
       "--allowedTools",
       ...READ_TOOLS,
@@ -216,6 +220,7 @@ function promptFor(request: SPACES.ChangeRequest, spell: string): string {
     `Run \`${spell} app changes take ${request.id}\`:  it prints what they asked for, where, and how to finish.`,
     "Then do what it says.",
     "Change only what they asked for, in this project's files.",
+    "The file it names is the one they see:  their draft, when they have one.  Edit that file, never another copy.",
     "Don't commit anything, and don't wait for another request afterwards."
   ].join("\n")
 }

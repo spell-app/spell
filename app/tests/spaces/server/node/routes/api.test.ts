@@ -933,6 +933,15 @@ describe("/api/changes:  a change asked for on what's selected, for a Claude ses
     expect(JSON.parse(get.text)).toMatchObject({ id: made.id, status: "waiting" })
   })
 
+  it("a file you have a draft of:  the request names your draft, what the editor shows you (I152)", async () => {
+    await request("POST", `${SAVE}Drafted.spell`, "Score: 0", "text/plain")
+    expect(readDraft("Drafted.spell")).toBe("Score: 0")
+    const asked = { ...ASKED, filePath: "/Drafted.spell" }
+    const made = JSON.parse((await request("POST", "/api/changes", JSON.stringify(asked), "application/json")).text)
+    expect(made.diskPath).toMatch(/\/__draft\/Drafted\.owen-\d{4}-\d{2}-\d{2}\.spell$/)
+    expect(fs.readFileSync(made.diskPath, "utf8")).toBe("Score: 0")
+  })
+
   it("no words, no request:  400;  no such request:  404", async () => {
     const noWords = await request("POST", "/api/changes", JSON.stringify({ ...ASKED, text: "  " }), "application/json")
     expect(noWords.status).toBe(400)

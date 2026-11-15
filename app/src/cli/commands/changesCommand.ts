@@ -73,6 +73,7 @@ function describeRequest(request: SPACES.ChangeRequest, how: "wait" | "take"): s
     "",
     `Project:  ${request.projectId}`,
     `Selected:  <${request.kind}>, written at ${request.diskPath}:${request.line + 1}`,
+    "  (the file as they see it:  their draft, when they have one;  edit it there, never another copy)",
     "The code there:",
     ...request.excerpt.split("\n").map((line) => `  ${line}`),
     "",

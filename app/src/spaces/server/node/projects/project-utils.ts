@@ -1037,6 +1037,18 @@ async function draftsFor(request: Request, projectId: string): Promise<ProjectDr
   return await draftsOf(projectId, personOf(request))
 }
 
+/**
+ * Where on disk file `location` is, as whoever's asking sees it in the editor:
+ * their draft of it, when they have one (`ProjectDrafts`), else the file itself.
+ * - What a change asked for on it edits (`POST /api/changes`):
+ *   an edit to the public file under a draft changes nothing they see (epic `editor` I152)
+ */
+export async function shownPathFor(request: Request, location: SP.SpellLocation): Promise<string> {
+  if (!isDraftable(location)) return location.serverPath
+  const draft = await (await draftsFor(request, location.projectId)).draftPathOf(location.filePath!)
+  return draft ?? location.serverPath
+}
+
 /** - throws `SRV.HttpError(403)` unless whoever's asking may `change` project `projectId`'s own files (`ProjectRoles`) */
 async function mayChangeOrDie(request: Request, projectId: string, change: ProjectFileChange): Promise<void> {
   await projectRolesFor(request, projectId).mayOrDie(change)
