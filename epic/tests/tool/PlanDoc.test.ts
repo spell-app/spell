@@ -2094,6 +2094,23 @@ describe("PlanDoc review inbox", () => {
       expect(el(plan, "i1").hasAttribute("fixed")).toBe(false)
     })
 
+    test("Do this marked BEFORE the fix landed (I292):  it stays fixed, its card on top;  marked after:  sent back", () => {
+      const plan = freshPlan(NOW, PERSON)
+      plan.addItem("issue", "needs a file", { details: "<p>Broken.</p>" })
+      plan.addStatus("i1", "Fixing")
+      plan.fixedForReview("i1", "Writes it now")
+      const before = new Date(NOW.getTime() - 60_000).toISOString()
+      const early = plan.applyMark({ id: "i1", action: "todo", at: before }) as { did: string }
+      expect(early.did).toContain("already fixed since you marked it")
+      expect(stateOf(plan, "i1")).toBe("replied")
+      expect(el(plan, "i1").hasAttribute("fixed")).toBe(true)
+      expect(el(plan, "i1").textContent).not.toContain("Go ahead")
+      const after = new Date(NOW.getTime() + 60_000).toISOString()
+      plan.applyMark({ id: "i1", action: "todo", at: after })
+      expect(stateOf(plan, "i1")).toBe("handed")
+      expect(el(plan, "i1").hasAttribute("fixed")).toBe(false)
+    })
+
     test("an agent's `done` on a wanted one turns it orange, never closes it;  a plain issue's still closes", () => {
       const plan = freshPlan(NOW, PERSON)
       plan.addItem("issue", "wanted")

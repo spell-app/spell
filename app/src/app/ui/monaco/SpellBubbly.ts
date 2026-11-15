@@ -478,6 +478,7 @@ export class SpellBubbly {
       else if (shape.kind === "tag") elements.push(this.asHtml(this.drawTag(shape, range, view)))
       else if (shape.kind === "tag-link") elements.push(this.asHtml(this.drawLink(shape, range, view)))
       else if (range.startLineNumber < view.first) continue
+      else if (shape.kind === "underline") elements.push(this.drawUnderline(range, view))
       else {
         const element = this.drawInput(shape, range, view)
         if (element) elements.push(element)
@@ -741,6 +742,19 @@ export class SpellBubbly {
     return place(pill, { left, top, width: right - left }, measures.scale)
   }
 
+  /**
+   * ONE dotted line under the words in `range`, a value or a question (`bubbly-underline`):  from its first letter
+   * to its last, its dots evenly spaced under bold and plain words alike;  how far below the line's middle, the sheet's
+   * (`--bubbly-underline-drop`).
+   */
+  private drawUnderline(range: monaco.Range, view: View): HTMLElement {
+    const line = range.startLineNumber
+    const left = this.xOf(line, range.startColumn)
+    const right = this.xOf(line, range.endColumn)
+    const top = this.editor.getTopForLineNumber(line) + view.lineHeight / 2
+    return place(element(UNDERLINE), { left, top, width: right - left }, view.measures.scale)
+  }
+
   ////////////////
   // ## Room under each declaration
   ////////////////
@@ -1001,6 +1015,9 @@ const RELAYOUT_MSEC = 300
 
 /** How many times it lays out again, `RELAYOUT_MSEC` apart, waiting for its project to parse what was typed. */
 const PARSE_WAITS = 20
+
+/** A value's or a question's dotted line (`SP.BubblyUnderline`). */
+const UNDERLINE = "bubbly-underline"
 
 /** The classes that make an editor's box a drawing. */
 const BOX_CLASSES = ["bubbly", "bubbly-monaco"]

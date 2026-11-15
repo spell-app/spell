@@ -28,6 +28,9 @@ export class ChangesAfterGoal implements Migration {
     for (const field of Array.from(document.querySelectorAll(CHANGES))) {
       const phase = field.parentElement!
       const before = field.previousElementSibling
+      // A field in its place already (every page, every edit) is left before its anchors are read:
+      // reading them walks the whole page per field (`blocksIn()`), 33s of a 40s edit on epic-engine's (I283)
+      if (ChangesAfterGoal.isPlaced(phase, field)) continue
       const anchors = ChangesAfterGoal.fieldAnchors(phase)
       field.remove()
       Markup.place(phase, field)
@@ -40,6 +43,20 @@ export class ChangesAfterGoal implements Migration {
       changed = true
     }
     return changed
+  }
+
+  /**
+   * Is `field` where `Markup.place()` would put it in `phase`?  Tried and put back, so `phase` is as it was.
+   * - SIDE EFFECT, undone:  the field is taken out and placed, then returned after the sibling it had
+   */
+  private static isPlaced(phase: Element, field: Element): boolean {
+    const before = field.previousElementSibling
+    const after = field.nextSibling
+    field.remove()
+    Markup.place(phase, field)
+    const placed = field.previousElementSibling === before
+    if (!placed) phase.insertBefore(field, after)
+    return placed
   }
 
   /** Each field of `phase` and its anchor now (`p3#field-2`), before a move. */

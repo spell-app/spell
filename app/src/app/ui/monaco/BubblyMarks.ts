@@ -10,7 +10,7 @@ import { TextMarks, spacer, type Spacers } from "./TextMarks"
  * What Monaco draws of the bubbly look (epic `language` P50), worked out from a `SP.BubblyDrawing`:
  * the MARKS on the text, and the SHAPES drawn under it.
  * - Marks are Monaco decorations, in the classes of the look's one sheet, `bubbly.css`:
- *   - each piece's weight, slant and ink (`bubbly-reference bubbly-use` ...), as `<spell-code>` draws them
+ *   - each piece's weight, slant and ink (`bubbly-reference`, `bubbly-value` ...), as `<spell-code>` draws them
  *     (`BubblyHtml.classesFor()`)
  *   - a quoted input's own `"`, see-through, its curly mark drawn over it
  *   - SPACERS either side of what a person typed, so its white pill has space round its words:
@@ -19,13 +19,14 @@ import { TextMarks, spacer, type Spacers } from "./TextMarks"
  *   - one mark spanning each shape, holding nothing but its place:  Monaco moves it as the text is edited,
  *     so the shapes follow typing before the look is laid out again (`SpellBubbly`)
  * - Shapes are a block's band, gutter, body and foot (a declaration's, a control line's), a pill under what a person
- *   typed:  `SpellBubbly` places them from where Monaco draws each line and letter.
+ *   typed, ONE dotted line under each value and each question (`bubbly-underline`):  `SpellBubbly` places them from
+ *   where Monaco draws each line and letter.
+ *   - The dotted line's a shape, not a mark on the text:  a mark is cut at each piece, and its dots restarted there.
  * - Which rule presents which way is `SP.BubblyPresentation`'s, read by the layout:  nothing here decides it.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
  * - Its marks are made as every drawing's are:  `TextMarks`.
  ****************/
 export class BubblyMarks extends TextMarks {
-  /** `drawing`'s marks and shapes. */
   /**
    * `drawing`'s marks and shapes.
    * - `isView`:  is a tag in a drawing one of the project's own views?  Its pill is a thing's (`MarkupMarks.within()`).
@@ -63,8 +64,14 @@ export class BubblyMarks extends TextMarks {
   // ## The drawing's nodes
   ////////////////
 
-  /** Mark `nodes`, adding their shapes to `into`. */
-  private nodes(nodes: SP.BubblyNode[], into: Array<BubblyShape | MarkupShape>) {
+  /**
+   * Mark `nodes`, adding their shapes to `into`.
+   * - In a body of declarations (a thing's, a group's:  one holding a head that isn't a control line's), a line of its
+   *   own (a `//` note, a step) gets a head's spacer too, so its words sit in the body, level with the heads' beside it,
+   *   not on its rail (epic `language` I95)
+   */
+  private nodes(nodes: SP.BubblyNode[], into: Array<BubblyShape | MarkupShape>, { inBody = false } = {}) {
+    const isDeclarations = inBody && nodes.some((node) => node.kind === "block" && node.partOfSpeech !== "control")
     for (let index = 0; index < nodes.length; index++) {
       const node = nodes[index]!
       if (node.kind === "line" && this.drawing.text[node.start] === "<") {
@@ -75,6 +82,7 @@ export class BubblyMarks extends TextMarks {
         case "gap":
           break
         case "line":
+          if (isDeclarations && node.depth === 0) this.headSpacer(node.start)
           this.line(node, into)
           break
         case "block":
@@ -119,7 +127,7 @@ export class BubblyMarks extends TextMarks {
     this.headSpacer(block.head.start)
     const description = this.line(block.head, shape.inside, { band: block.partOfSpeech })
     if (description) shape.description = description
-    this.nodes(block.body, shape.inside)
+    this.nodes(block.body, shape.inside, { inBody: true })
   }
 
   /**
@@ -163,6 +171,7 @@ export class BubblyMarks extends TextMarks {
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-open`, { before: spacer("quote", "before") })
       else if (kind === "quote-close")
         this.mark(start, end, `${QUOTE_MARK} bubbly-quote-close`, { after: spacer("quote", "after") })
+      else if (kind === "underline") into.push({ kind: "underline", place: this.place(start, end) })
       else if (kind === "input" || kind === "choice") this.input(stretch, into)
       else if (kind === "comment" && head.band) description = this.description(start, end)
       else if (kind === "comment") this.comment(start, end, BubblyHtml.classesFor(kind))
@@ -244,7 +253,14 @@ export class BubblyMarks extends TextMarks {
 ////////////////
 
 /** A shape `SpellBubbly` draws under the text. */
-export type BubblyShape = BubblyBlockShape | BubblyInputShape
+export type BubblyShape = BubblyBlockShape | BubblyInputShape | BubblyUnderlineShape
+
+/** ONE dotted line under a value or a question (`SP.BubblyUnderline`), from its first letter to its last. */
+export type BubblyUnderlineShape = {
+  kind: "underline"
+  /** the mark from its first letter to its last */
+  place: number
+}
 
 /**
  * A declaration, or a control line with steps under it:  its band, and when it has a body, its gutter, its body's

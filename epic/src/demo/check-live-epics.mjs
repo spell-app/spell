@@ -35,12 +35,16 @@
  *     leaves it (epic `epic-engine` I172)
  *   - after it:  the scroll (2px), every block and item open before (the one a link opened too), the note's text
  *     (from the inbox's drafts, which the faked routes keep)
+ * - then, typing as the page reloads anyway (epic `epic-engine` I291;  `SPELL_SERVER.reloadNow()`):
+ *   - a comment in the bullhorn's pane:  kept open through an edit of the doc and of the part, then back after the
+ *     reload, its text, focus and caret too, on screen;  one comment in the inbox, never two (`paneTyping()`)
+ *   - the note box:  its text and focus back (`noteReload()`)
  * - `--bundle`:  serve this file in place of the checkout's `spell-ui.js` (a runtime not yet built into it)
  * - prints a JSON summary on stdout, problems on stderr;  exit 1 on any problem, 2 without the epic page
  * - re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
-import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { cpSync, existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -66,12 +70,19 @@ const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
 const { bundleRoutes } = await import("./demoPages.mjs")
 const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
+const { default: JSON5 } = await import("json5")
 
 /** What the reader types into the note box. */
 const NOTE = "half-typed note"
 
 /** What the reader types on with, once the focus is back in the note box (`openByHand()`). */
 const TYPED_ON = " and more"
+
+/** What the reader types into the bullhorn's pane (`paneTyping()`). */
+const PANE_TEXT = "a comment being typed"
+
+/** Where the reader leaves the pane's caret:  mid-text. */
+const PANE_CARET = 9
 
 /** How long an edit may take to show on the page. */
 const EDIT_TIMEOUT_MS = 10_000
@@ -171,7 +182,103 @@ try {
     return () => !!document.querySelector("epic-overview epic-summary")?.textContent.includes("check-live summary")
   })
   await codeReload()
+  await paneTyping()
+  await noteReload()
   if (errors.length) problems.push(`page errors:  ${errors.join(" | ")}`)
+
+  /**
+   * 5. A comment being typed in the bullhorn's pane (epic `epic-engine` I291;  Owen, on I254:  "You seem to be
+   *    reloading the epic pages frequently, often when I am typing in a field ... that seems to submit the comment"):
+   * - the item's bullhorn opens the pane, and the reader types in it
+   * - the doc and the item's part change:  the pane stays open, its text and focus kept (the page holds a change
+   *   until the reader leaves the field)
+   * - the page reloads all the same (`SPELL_SERVER.reloadNow()`, as a page out of sight does):  the pane comes back,
+   *   its text, the focus and the caret where they were, on screen;  ONE comment in the inbox, never two
+   */
+  async function paneTyping() {
+    const label = "typing in the bullhorn's pane"
+    const opened = await page.evaluate((id) => {
+      const button = document.querySelector(`#${id} > .spell-comment-mark ui-button`)
+      button?.click()
+      return !!button
+    }, itemId)
+    if (!opened) return problems.push(`${label}:  #${itemId} has no bullhorn`)
+    try {
+      await page.waitForFunction(() => document.activeElement?.matches("epic-comment-pane > textarea"), null, {
+        timeout: EDIT_TIMEOUT_MS
+      })
+    } catch {
+      return problems.push(`${label}:  the pane never took the focus`)
+    }
+    await page.keyboard.type(PANE_TEXT)
+    // the caret mid-text, as a reader who went back to fix a word
+    await page.evaluate((at) => document.activeElement.setSelectionRange(at, at), PANE_CARET)
+    await page.evaluate(() => (window.__checkPane = true))
+    const doc = readFileSync(docFile, "utf8")
+    writeFileSync(docFile, doc.replace(new RegExp(`(id="${itemId}"\\s+title=")([^"]*)"`), `$1$2 (pane)"`))
+    await page.evaluate(announce, { file: "doc", id: itemId })
+    writeFileSync(partFile, `${readFileSync(partFile, "utf8")}\n<p id="check-pane-part">check-pane</p>\n`)
+    await page.evaluate(announce, { file: "part", id: itemId })
+    await page.waitForTimeout(RELOAD_WAIT_MS)
+    const during = await page.evaluate(paneNow)
+    summary.pane = { during }
+    if (!during.marker) problems.push(`${label}:  the page reloaded on an edit`)
+    if (!during.open) problems.push(`${label}:  the pane closed on an edit`)
+    else {
+      if (during.text !== PANE_TEXT) problems.push(`${label}:  its text changed on an edit:  "${during.text}"`)
+      if (!during.focused) problems.push(`${label}:  it lost the focus on an edit`)
+    }
+    const reloaded = page.waitForEvent("load", { timeout: EDIT_TIMEOUT_MS })
+    await page.evaluate(() => window.SPELL_SERVER.reloadNow())
+    await reloaded
+    await page.waitForFunction(() => customElements.get("epic-item") && window.SPELL_SERVER?.readPage, null, {
+      timeout: 20_000
+    })
+    await page.waitForTimeout(LANDED_MS)
+    const after = await page.evaluate(paneNow)
+    summary.pane.after = after
+    if (!after.open) problems.push(`${label}:  the pane didn't come back after a reload`)
+    else {
+      if (after.text !== PANE_TEXT) problems.push(`${label}:  its text after a reload:  "${after.text}"`)
+      if (!after.focused) problems.push(`${label}:  no focus in it after a reload`)
+      if (after.caret !== PANE_CARET) problems.push(`${label}:  the caret after a reload:  ${after.caret}`)
+      if (!after.onScreen) problems.push(`${label}:  off screen after a reload`)
+    }
+    const comments = commentsIn(copy).filter((each) => each.text === PANE_TEXT)
+    summary.pane.comments = comments.length
+    if (comments.length > 1) problems.push(`${label}:  ${comments.length} comments of its text in the inbox`)
+    // the reader leaves it:  saved, closed
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(500)
+  }
+
+  /**
+   * 6. The note box being typed in when the page reloads anyway (`SPELL_SERVER.reloadNow()`):  the note's text, its
+   *    focus and the caret come back, the box on screen (I291).
+   */
+  async function noteReload() {
+    const label = "typing in the note box as the page reloads"
+    const note = page.locator(`#${itemId} textarea`).first()
+    try {
+      await note.click()
+    } catch {
+      return problems.push(`${label}:  no note box`)
+    }
+    await page.keyboard.press("End")
+    await page.keyboard.type(" typed on")
+    const before = await page.evaluate(stateNow, itemId)
+    const reloaded = page.waitForEvent("load", { timeout: EDIT_TIMEOUT_MS })
+    await page.evaluate(() => window.SPELL_SERVER.reloadNow())
+    await reloaded
+    await page.waitForFunction(() => customElements.get("epic-item") && window.SPELL_SERVER?.readPage, null, {
+      timeout: 20_000
+    })
+    await page.waitForTimeout(LANDED_MS)
+    const after = await page.evaluate(stateNow, itemId)
+    summary.noteReload = { before: before.note, after: after.note, focused: after.focused }
+    if (after.note !== before.note) problems.push(`${label}:  its text:  "${before.note}" -> "${after.note}"`)
+    if (!after.focused) problems.push(`${label}:  no focus in it after the reload`)
+  }
 
   /**
    * 4. The page's CODE changes (`spell-ui.js` rebuilt, announced as the watcher would):  ONE reload, which keeps the
@@ -349,6 +456,23 @@ function placeNow() {
   return { marker: window.__checkLive === true, y: Math.round(scrollY), hash: location.hash.slice(1), open }
 }
 
+/**
+ * In the page:  the bullhorn's pane:  open, its text, focus and caret, on screen;
+ * `marker`:  the window from before a reload (`paneTyping()`'s)
+ */
+function paneNow() {
+  const field = document.querySelector("epic-comment-pane > textarea")
+  const box = field?.getBoundingClientRect()
+  return {
+    marker: window.__checkPane === true,
+    open: !!field,
+    text: field?.value ?? null,
+    focused: !!field && document.activeElement === field,
+    caret: field?.selectionStart ?? null,
+    onScreen: !!box && box.width > 0 && box.top >= 0 && box.bottom <= innerHeight
+  }
+}
+
 /** In the page:  take the focus away from item `id`'s note box, as a click elsewhere would. */
 function blurNote(id) {
   const box = document.getElementById(id).shadowRoot.querySelector("[part~='note-box']")
@@ -479,6 +603,17 @@ async function clickOn(page, id, selector) {
     { id, selector }
   )
   await page.mouse.click(point.x, point.y)
+}
+
+/** Every comment in folder `folder`'s comments files (`<name>.comments.<person>.json5`, `CommentList`'s). */
+function commentsIn(folder) {
+  return readdirSync(folder)
+    .filter((file) => /\.comments\.[\w-]+\.json5$/.test(file))
+    .flatMap((file) => {
+      // a list, or by id
+      const comments = JSON5.parse(readFileSync(join(folder, file), "utf8")).comments ?? []
+      return Array.isArray(comments) ? comments : Object.values(comments)
+    })
 }
 
 /** The value after flag `flag`, if given. */

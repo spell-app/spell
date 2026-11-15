@@ -54,6 +54,19 @@ describe("FileLock", () => {
     rmSync(`${file}.lock`)
   })
 
+  test("a timeout names the holder;  `tell` hears who holds it, once (I283)", () => {
+    const file = join(DIR, "live.json")
+    writeFileSync(`${file}.lock`, `${process.pid} epic add seo#I ...`)
+    const told: (number | undefined)[] = []
+    expect(() =>
+      SRV.FileLock.run(file, () => 1, { wait: 400, tellAfter: 100, tell: (holder) => told.push(holder?.pid) })
+    ).toThrow(
+      new RegExp(`held for 0.4s by pid ${process.pid} \\(epic add seo#I \\.\\.\\.\\), since \\d\\d:\\d\\d:\\d\\d`)
+    )
+    expect(told).toEqual([process.pid])
+    rmSync(`${file}.lock`)
+  })
+
   test("runOnce():  two takers at once, in two processes:  exactly one wins", async () => {
     const file = join(DIR, "race.json")
     const lock = new URL("../../src/server/FileLock.ts", import.meta.url).pathname

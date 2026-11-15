@@ -61,6 +61,19 @@ describe("StaleUnderway", () => {
     expect(items.map((each) => each.id)).toEqual(["i1", "i2", "i3"])
   })
 
+  test("a Do this's Go ahead card, nobody on it for 30 minutes, counts too;  a newer one doesn't (I292)", () => {
+    const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"))
+    plan.now = new Date(Date.now() - 2 * HOUR)
+    const old = plan.addItem("issue", "Wanted long ago")
+    plan.applyMark({ id: old, action: "todo" })
+    plan.now = new Date(Date.now() - 5 * 60_000)
+    const fresh = plan.addItem("issue", "Wanted just now")
+    plan.applyMark({ id: fresh, action: "todo" })
+    plan.now = new Date()
+    const items = new StaleUnderway({ plan, epic: "x", main: root }).report()
+    expect(items.map((each) => each.id)).toEqual([old])
+  })
+
   test("on main:  a commit naming it, this epic's only, or a sha its cards list", () => {
     const items = new StaleUnderway({ plan: samplePlan(), epic: "x", main: root, working }).report()
     const onMain = Object.fromEntries(items.map((each) => [each.id, each.onMain.map((commit) => commit.subject)]))

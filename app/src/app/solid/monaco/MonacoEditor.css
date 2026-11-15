@@ -286,7 +286,12 @@
  * - the margin above the code, so the arrows show and take their clicks
  */
 .bubbly-monaco > .monaco-editor {
+  /* a margin, not a `translate`:  that would hold the editor's `position: fixed` menus inside it */
   margin-inline-start: calc(-1 * var(--spell-fold-overlap));
+}
+/* the shapes behind the code move with it, so each line's text keeps its room in its bubble */
+.bubbly-monaco .bubbly-layer {
+  translate: calc(-1 * var(--spell-fold-overlap)) 0;
 }
 .bubbly-monaco {
   --spell-fold-overlap: 8px;

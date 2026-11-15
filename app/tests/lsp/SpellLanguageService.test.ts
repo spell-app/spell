@@ -367,10 +367,13 @@ describe("SpellLanguageService", () => {
       // its quote marks apart, faint
       const marks = stretches.filter((stretch) => stretch.range.start.line === name.range.start.line)
       expect(marks.map((stretch) => stretch.kind)).toEqual(expect.arrayContaining(["quote-open", "quote-close"]))
-      // every stretch on one line, in order, never overlapping
-      for (const [index, stretch] of stretches.entries()) {
+      // every stretch on one line, in order, never overlapping;  an underline's over the stretches it runs under
+      const underlines = stretches.filter((stretch) => stretch.kind === "underline")
+      expect(underlines.map(words)).toEqual(expect.arrayContaining(["its rank"]))
+      const pieces = stretches.filter((stretch) => stretch.kind !== "underline")
+      for (const [index, stretch] of pieces.entries()) {
         expect(stretch.range.start.line).toBe(stretch.range.end.line)
-        const before = stretches[index - 1]
+        const before = pieces[index - 1]
         if (before?.range.end.line === stretch.range.start.line)
           expect(before.range.end.character).toBeLessThanOrEqual(stretch.range.start.character)
       }

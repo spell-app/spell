@@ -10,15 +10,16 @@ import type {
   BubblyPartOfSpeech,
   BubblyPiece,
   BubblyPieceKind,
-  BubblyRulePresentation
+  BubblyRulePresentation,
+  BubblyUnderline
 } from "./highlight.types"
 import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
 
 /****************
  * ### `BubblyLayout`
  * Some Spell laid out in the BUBBLY LOOK, as data:  which lines are declarations (a head on a band, a body under it),
- * which are control lines (a light grey block holding their steps), and what each stretch of a line is to a reader
- * (what a person typed, a reference, a value ...).
+ * which are control lines (a light grey block holding their steps), what each stretch of a line is to a reader
+ * (what a person typed, a name, a value ...), and which stretches are underlined (one value, one question).
  * - `BubblyLayout.of(text, parser)`:  a `BubblyDrawing`, offsets into `text`.
  * - From the parser's own reading of the code, alone, or its project's (`within`):
  *   - its coloured spans (`SP.SpellHighlighter.spans()`):  references, values, marks, comments
@@ -66,11 +67,11 @@ export class BubblyLayout {
   /** Where each line starts. */
   private readonly lineStarts: number[] = []
 
-  /** Stretches every line takes from the parse, whatever it is:  phrases, quantities, `the color`, `item`;  `order` low first. */
+  /** Stretches every line takes from the parse, whatever it is:  yes and no, `'s`, `item`;  `order` low first. */
   private readonly overlays: Overlay[] = []
 
-  /** The names each enclosing declaration has introduced:  a name's first mention is bold, a later use semibold. */
-  private readonly scopes: Array<Set<string>> = [new Set()]
+  /** Every statement's underlines, from the parse:  each line takes those inside it. */
+  private readonly underlines: BubblyUnderline[] = []
 
   /** Where each tag that declares a member starts:  `BubblyDrawing.declaringTags`. */
   private readonly declaringTags = new Set<number>()
@@ -78,12 +79,16 @@ export class BubblyLayout {
   /** Words that point back (`it`, `its`):  drawn plain. */
   private readonly pronouns: Set<string>
 
+  /** The words that say an ability (`draggable`):  a name, in a head whose row `namesAbility`. */
+  private readonly abilityWord: RegExp
+
   private constructor(
     private readonly text: string,
     parser: SP.SpellParser,
     parsed?: P.Match
   ) {
     this.pronouns = (parser.language ?? SP.Language.default).words.pronouns
+    this.abilityWord = parser.declarations.abilityWord
     this.paint = Array.from({ length: text.length })
     this.spans = SP.SpellHighlighter.spans(text, parser, parsed)
     let at = 0
@@ -124,7 +129,10 @@ export class BubblyLayout {
         const statement = childrenOf(each).find((child) => child.rule.name !== COMMENT_RULE)
         if (statement?.start !== undefined) {
           const index = this.lineIndexOf(statement.start)
-          if (!this.statements.has(index)) this.statements.set(index, statement)
+          if (!this.statements.has(index)) {
+            this.statements.set(index, statement)
+            this.underlineStatement(statement)
+          }
         }
       }
       this.overlaysOf(each)
@@ -135,6 +143,7 @@ export class BubblyLayout {
     }
     walk(match)
     this.overlays.sort((a, b) => a.order - b.order)
+    this.underlines.sort((a, b) => a.start - b.start)
   }
 
   /** The overlays `match`'s row asks for, if it has one. */
@@ -142,31 +151,104 @@ export class BubblyLayout {
     const row = BubblyPresentation.for(match.rule)
     if (!row || match.start === undefined || match.end === undefined) return
     const { start, end } = match
-    if (row.takesArticle) {
-      const reference = this.spans.find(
-        (span) => span.start >= start && span.end <= end && REFERENCE_KINDS.has(span.kind)
-      )
-      if (reference && this.isSpellsOwnWords(start, reference.start))
-        this.overlays.push({ start, end: reference.end, kind: "reference", order: 0 })
-    }
-    if (row.isValue) this.overlays.push({ start, end, kind: "value", order: 1 })
-    if (row.isQuantity) {
-      const number = this.spans.find((span) => span.start >= start && span.end <= end && span.kind === NUMBER)
-      if (number) this.overlays.push({ start: number.start, end, kind: "quantity", order: 2 })
-    }
-    if (row.isPhrase) this.overlays.push({ start, end, kind: "phrase", order: 3 })
+    // yes and no:  Spell's words, but a value written in
+    if (row.isValue) this.overlays.push({ start, end, kind: "value", order: 0, overWordsOnly: true })
+    if (row.isNamePart) this.overlays.push({ start, end, kind: "reference", order: 1 })
     for (const plain of descendantsNamed(match, row.plain))
-      this.overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 4 })
+      this.overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 2 })
   }
 
-  /** Is `text` from `start` to `end` only Spell's own words (keywords) and spaces? */
-  private isSpellsOwnWords(start: number, end: number): boolean {
-    for (let at = start; at < end; at++) {
-      if (/\s/.test(this.text[at]!)) continue
-      const span = this.spans.find((each) => each.start <= at && each.end > at)
-      if (span?.kind !== KEYWORD) return false
+  ////////////////
+  // ## Underlines:  one value, one question
+  ////////////////
+
+  /**
+   * Underline `statement`'s values and questions, outermost only (`BubblyUnderline`);  a head's only in what it draws
+   * as a step (its row's `steps`), a drawing's markup none.
+   */
+  private underlineStatement(statement: P.Match) {
+    if (this.text[statement.start!] === "<") return
+    const row = BubblyPresentation.for(statement.rule)
+    if (!row?.head) return this.underlineIn(statement)
+    for (const step of descendantsNamed(statement, row.steps)) this.underlineIn(step)
+  }
+
+  /**
+   * Underline `match`:  whole, when it's a value or a question;  else each value and question in it.
+   * - A value:  an expression (`its pile`, `a new deck`), but not a statement, nor one written in (`10`, `king`).
+   * - An expression holding others (`a is b`, `(x and y)`) underlines its parts:  `underlineCombination()`.
+   */
+  private underlineIn(match: P.Match) {
+    if (match.rule.name === BLOCK_RULE) return
+    const row = BubblyPresentation.for(match.rule)
+    const { start, end } = match
+    if (row?.isValue) return
+    if (start !== undefined && end !== undefined) {
+      if (row?.isQuantity) {
+        const [number] = descendantsNamed(match, [NUMBER_RULE])
+        if (number) return this.underline(number.start!, end, "quantity")
+      }
+      if (row?.isQuestion) return this.underline(start, end, "question")
+      if (isCombination(match)) return this.underlineCombination(match)
+      if (!row?.isCombination && isExpression(match.rule)) return this.underline(start, end, "value")
     }
-    return true
+    // what a step sets (`set <the score> to`) isn't read:  a name, never underlined
+    const sets = new Set((row?.sets ?? []).flatMap((group) => [match.groups[group]].flat()))
+    for (const child of childrenOf(match)) if (!sets.has(child)) this.underlineIn(child)
+  }
+
+  /**
+   * An expression of operands and operators, `the pile's suit is the card's suit and the card is on top of its pile`:
+   * each operand its own value, but a question (`is on top of its pile`) one with the thing it asks of;
+   * the operators that combine them (`is`, `and`, `- 1`) plain between.
+   * - The thing a question asks of:  what's before it back to the last `and` or `or` (`isJoin`), as the compiler
+   *   binds it (`CompoundExpression`'s precedence):  every question binds tighter than those, and no tighter than
+   *   arithmetic.
+   */
+  private underlineCombination(match: P.Match) {
+    const { lhs, rhsChain } = match.groups as { lhs?: P.Match; rhsChain?: P.Match }
+    // each part:  a match to underline in, or an underline worked out here;  `operand`, an operator's right side
+    const parts: Array<{ match: P.Match; operand?: P.Match } | BubblyUnderline> = lhs ? [{ match: lhs }] : []
+    let segment = 0
+    let segmentStart = lhs?.start ?? match.start
+    for (const suffix of rhsChain?.matched ?? []) {
+      if (!(suffix instanceof P.Match) || suffix.start === undefined || suffix.end === undefined) continue
+      const row = BubblyPresentation.for(suffix.rule)
+      const operand = suffix.groups.expression as P.Match | undefined
+      const last = parts.at(-1)
+      if (row?.isQuestion && segmentStart !== undefined) {
+        parts.splice(segment, parts.length - segment, { start: segmentStart, end: suffix.end, kind: "question" })
+      } else if (row?.continuesValue && last && parts.length > segment) {
+        const from =
+          "kind" in last ? last.start : (last.operand ?? (last.match === lhs ? last.match : undefined))?.start
+        if (from !== undefined) parts.splice(-1, 1, { start: from, end: suffix.end, kind: "value" })
+      } else {
+        if (row?.isJoin) {
+          segment = parts.length
+          segmentStart = operand?.start
+        }
+        parts.push({ match: suffix, operand })
+      }
+    }
+    for (const part of parts) {
+      if ("kind" in part) this.underline(part.start, part.end, part.kind)
+      else if (part.match === lhs) this.underlineIn(part.match)
+      // an operator:  its words plain, what's in it (its right side) underlined
+      else for (const child of childrenOf(part.match)) this.underlineIn(child)
+    }
+  }
+
+  /** Underline `start` to `end`, as `kind`:  one on each line it's on, its spaces at either end left out. */
+  private underline(start: number, end: number, kind: BubblyUnderline["kind"]) {
+    let from = start
+    for (const piece of this.text.slice(start, end).split("\n")) {
+      const trimmed = piece.trim()
+      if (trimmed) {
+        const at = from + piece.indexOf(trimmed)
+        this.underlines.push({ start: at, end: at + trimmed.length, kind })
+      }
+      from += piece.length + 1
+    }
   }
 
   ////////////////
@@ -270,7 +352,7 @@ export class BubblyLayout {
     }
   }
 
-  /** A declaration:  its head, then what's under it, in a scope of its own. */
+  /** A declaration:  its head, then what's under it. */
   private block(
     line: SourceLine,
     statement: P.Match,
@@ -278,20 +360,15 @@ export class BubblyLayout {
     under: SourceLine[],
     level: number
   ): BubblyBlock {
-    this.scopes.push(new Set())
-    try {
-      const partOfSpeech: BubblyPartOfSpeech = row.head!
-      return {
-        kind: "block",
-        rule: statement.rule.name ?? "",
-        partOfSpeech,
-        isGroup: !!row.isGroup,
-        level,
-        head: this.lineOf(line, { depth: 0, head: { statement, row, partOfSpeech } }),
-        body: this.layout(under, { depth: 0, level: level + 1, inSteps: partOfSpeech === "action" })
-      }
-    } finally {
-      this.scopes.pop()
+    const partOfSpeech: BubblyPartOfSpeech = row.head!
+    return {
+      kind: "block",
+      rule: statement.rule.name ?? "",
+      partOfSpeech,
+      isGroup: !!row.isGroup,
+      level,
+      head: this.lineOf(line, { depth: 0, head: { statement, row, partOfSpeech } }),
+      body: this.layout(under, { depth: 0, level: level + 1, inSteps: partOfSpeech === "action" })
     }
   }
 
@@ -331,11 +408,11 @@ export class BubblyLayout {
   private lineOf(line: SourceLine, { depth, head }: { depth: number; head?: Head }): BubblyLine {
     const { start, end } = line
     this.paintSpans(start, end, head)
-    for (const overlay of this.overlays)
-      if (overlay.start >= start && overlay.end <= end) this.paintRange(overlay.start, overlay.end, overlay.kind)
+    for (const overlay of this.overlays) if (overlay.start >= start && overlay.end <= end) this.paintOverlay(overlay)
     if (head) this.paintHead(head)
     if (this.isMarkup(line)) this.paintMarkup(start, end)
-    return { kind: "line", start, end, depth, pieces: this.piecesOf(start, end, head) }
+    const underlines = this.underlines.filter((each) => each.start >= start && each.end <= end)
+    return { kind: "line", start, end, depth, pieces: this.piecesOf(start, end, underlines), underlines }
   }
 
   /** Paint each span from `start` to `end` as what it is:  in a head, what was typed is an input. */
@@ -351,7 +428,7 @@ export class BubblyLayout {
   }
 
   /** What a span of `kind` is to a reader. */
-  private kindOfSpan(kind: string, word: string, { inHead, head }: { inHead: boolean; head?: Head }): Paint {
+  private kindOfSpan(kind: string, word: string, { inHead }: { inHead: boolean; head?: Head }): Paint {
     switch (kind) {
       case "comment":
         return "comment"
@@ -363,7 +440,7 @@ export class BubblyLayout {
       case "number":
         return inHead ? "input" : "value"
       case "literal":
-        return inHead ? "input" : "constant"
+        return inHead ? "input" : "value"
       case "variable":
       case "params":
       case "property":
@@ -371,17 +448,24 @@ export class BubblyLayout {
       case "title.function":
         if (this.pronouns.has(word.toLowerCase())) return "words"
         if (word.startsWith('"')) return inHead ? "input" : "value"
-        // an action's parameters:  what its head introduces (`to play a card`)
-        if (inHead && head?.partOfSpeech === "action" && (kind === "type" || kind === "params")) return "first-mention"
-        return kind === "variable" || kind === "params" ? "variable" : "reference"
+        return "reference"
       default:
         return "words"
     }
   }
 
-  /** A head's inputs and choices, over what its spans said. */
+  /** A head's inputs and choices, over what its spans said;  the words that say an ability, names. */
   private paintHead(head: Head) {
     const { statement, row } = head
+    if (row.namesAbility)
+      for (const span of this.spans)
+        if (
+          span.kind === KEYWORD &&
+          span.start >= statement.start! &&
+          span.end <= statement.end! &&
+          this.abilityWord.test(this.text.slice(span.start, span.end))
+        )
+          this.paintRange(span.start, span.end, "reference")
     for (const input of descendantsNamed(statement, row.inputs)) this.paintRange(input.start!, input.end!, "input")
     if (row.typedAfterLead) this.paintTyped(head)
     for (const list of descendantsNamed(statement, row.choices))
@@ -480,6 +564,11 @@ export class BubblyLayout {
     }
   }
 
+  /** Paint an overlay:  only over Spell's own words, when it says so (`overWordsOnly`). */
+  private paintOverlay({ start, end, kind, overWordsOnly }: Overlay) {
+    for (let at = start; at < end; at++) if (!overWordsOnly || this.paint[at] === "words") this.paint[at] = kind
+  }
+
   /** Paint `start` to `end` as `paint`. */
   private paintRange(start: number, end: number, paint: Paint) {
     for (let at = start; at < end; at++) this.paint[at] = paint
@@ -488,42 +577,33 @@ export class BubblyLayout {
   /**
    * The painted stretch from `start` to `end`, cut into pieces:
    * - words of one name join, a space between (`two sided view`, `card setup`)
-   * - a variable becomes a name's first mention, or a later use
+   * - cut where each of `underlines` starts and ends, so it starts and ends with a piece
    */
-  private piecesOf(start: number, end: number, head: Head | undefined): BubblyPiece[] {
-    const runs: Array<{ start: number; end: number; paint: Paint }> = []
+  private piecesOf(start: number, end: number, underlines: BubblyUnderline[]): BubblyPiece[] {
+    const cuts = new Set(underlines.flatMap((each) => [each.start, each.end]))
+    const runs: BubblyPiece[] = []
     for (let at = start; at < end; at++) {
       const paint = this.paint[at] ?? "words"
       const last = runs.at(-1)
-      if (last && last.paint === paint) last.end = at + 1
-      else runs.push({ start: at, end: at + 1, paint })
+      if (last && last.kind === paint && !cuts.has(at)) last.end = at + 1
+      else runs.push({ start: at, end: at + 1, kind: paint })
     }
-    // a single space between two stretches of one name:  one stretch
+    // a single space between two stretches of one name:  one stretch, unless an underline starts or ends there
     for (let index = runs.length - 2; index > 0; index--) {
       const [before, gap, after] = [runs[index - 1]!, runs[index]!, runs[index + 1]!]
       if (
-        JOINED.has(before.paint) &&
-        before.paint === after.paint &&
-        gap.paint === "words" &&
-        this.text.slice(gap.start, gap.end) === " "
+        JOINED.has(before.kind) &&
+        before.kind === after.kind &&
+        gap.kind === "words" &&
+        this.text.slice(gap.start, gap.end) === " " &&
+        !cuts.has(gap.start) &&
+        !cuts.has(after.start)
       ) {
         before.end = after.end
         runs.splice(index, 2)
       }
     }
-    return runs.map(({ start: from, end: to, paint }) => ({
-      start: from,
-      end: to,
-      kind: paint === "variable" ? this.mentionOf(this.text.slice(from, to), !!head) : paint
-    }))
-  }
-
-  /** A variable's name:  its first mention in its scope, or a use. */
-  private mentionOf(name: string, isHead: boolean): BubblyPieceKind {
-    const key = name.toLowerCase()
-    if (isHead || this.scopes.some((scope) => scope.has(key))) return "reference"
-    this.scopes.at(-1)!.add(key)
-    return "first-mention"
+    return runs
   }
 
   /** The line `offset` is on. */
@@ -543,11 +623,11 @@ export class BubblyLayout {
 // ## Types and helpers
 ////////////////
 
-/** A piece's kind, or a variable not yet told first mention from use. */
-type Paint = BubblyPieceKind | "variable"
+/** What a character is painted. */
+type Paint = BubblyPieceKind
 
-/** A stretch the parse paints over the spans, `order` low first. */
-type Overlay = { start: number; end: number; kind: BubblyPieceKind; order: number }
+/** A stretch the parse paints over the spans, `order` low first;  `overWordsOnly`:  only over Spell's own words. */
+type Overlay = { start: number; end: number; kind: BubblyPieceKind; order: number; overWordsOnly?: boolean }
 
 /** Where `BubblyLayout.layout()` lays lines out. */
 type LayoutPlace = { depth: number; level: number; inSteps?: boolean }
@@ -580,20 +660,23 @@ const COMMENT_RULE = "comment"
 /** The rule of a statement's body:  never walked into for a head's inputs. */
 const BLOCK_RULE = "block"
 
-/** Span kinds that name something:  bold. */
-const REFERENCE_KINDS = new Set(["variable", "params", "property", "type", "title.function"])
-
 /** A keyword span. */
 const KEYWORD = "keyword"
 
-/** A number span. */
-const NUMBER = "number"
+/** The rule of a number written in, `300` in `pause for 300 msec`. */
+const NUMBER_RULE = "number"
 
 /** Operators drawn faint. */
 const MARKS = new Set([",", ":"])
 
 /** Kinds whose words, a space apart, are one name. */
-const JOINED = new Set<Paint>(["reference", "input", "first-mention", "variable"])
+const JOINED = new Set<Paint>(["reference", "input"])
+
+/** The alias of every expression rule:  a value, unless it's a statement too or written in. */
+const EXPRESSION = "expression"
+
+/** ... and of every statement. */
+const STATEMENT = "statement"
 
 /** `lines` and every line under them, in order. */
 function flattened(lines: SourceLine[]): SourceLine[] {
@@ -625,4 +708,15 @@ function descendantsNamed(match: P.Match, names: readonly string[] | undefined):
   }
   walk(match)
   return found
+}
+
+/** Is `rule` an expression, a value, and not a statement (its twin, `play the card`, is a statement too)? */
+function isExpression(rule: P.Rule): boolean {
+  const aliases = [rule.alias ?? []].flat()
+  return aliases.includes(EXPRESSION) && !aliases.includes(STATEMENT)
+}
+
+/** Is `match` operands and the operators between them (`CompoundExpression`'s shape:  its `lhs` and `rhsChain`)? */
+function isCombination(match: P.Match): boolean {
+  return !!BubblyPresentation.for(match.rule)?.isCombination && "rhsChain" in (match.groups ?? {})
 }

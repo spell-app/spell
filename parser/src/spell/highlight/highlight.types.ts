@@ -21,19 +21,16 @@ import type { SP } from "spell/parser/spell"
 export type BubblyPartOfSpeech = "thing" | "action" | "property" | "plain" | "control"
 
 /**
- * What a stretch of a line is, to a reader:
- * - `words`:  Spell's own words, and the spaces between, drawn plain
+ * What a stretch of a line is, to a reader:  bold is a name, italic a value written in, plain Spell's own words
+ * (Owen, 2026-11-15, epic `language` Q64).
+ * - `words`:  Spell's own words, and the spaces between, drawn plain;  a question's own words too (`is on top of`)
  * - `mark`:  `,` `:` and a drawing's `<` `>` `{` `}` `=`, faint
  * - `comment`:  a `//` note, faint and italic;  `heading`:  a `#` heading's words, bold;  `heading-mark`:  its `#`
- * - `reference`:  what a step reads or changes (`its rank`, `the deck`), semibold
- * - `first-mention`:  a name's first mention (a loop's variable, a local set the first time, an action's
- *   parameter), bold
- * - `constant`:  one of a list's values in a step (`queen`, `spades`), semibold
- * - `value`:  a text, a number, yes or no, in a step
+ * - `reference`:  a NAME, bold, one weight:  a thing, a kind, a property, a variable, an action's parameter, the word a
+ *   head declares (`droppable`);  whole with its `'s` (`pile's`), never its `the`, `its` or `a`
+ * - `value`:  a value written in a step, italic:  a list's value (`king`, `clubs`), a number, yes or no, a text
  * - `input`:  what a person typed in a head, in a white pill;  a quoted one keeps its `"` (`"card"`)
  * - `choice`:  each value a list declares (`is one of ace, 2 ... 10, jack`), a pill of its own, bold
- * - `phrase`:  a phrase called whole (`is a diamond`, `is a face card`), dotted under
- * - `quantity`:  a number and its unit (`300 msec`), dotted under
  * - `tag`:  a tag's name in a drawing (`<text ...>`)
  */
 export type BubblyPieceKind =
@@ -43,13 +40,9 @@ export type BubblyPieceKind =
   | "heading"
   | "heading-mark"
   | "reference"
-  | "first-mention"
-  | "constant"
   | "value"
   | "input"
   | "choice"
-  | "phrase"
-  | "quantity"
   | "tag"
 
 /** One stretch of a line:  offsets into the drawing's `text`, never overlapping, covering the line's words. */
@@ -76,6 +69,26 @@ export type BubblyLine = {
   depth: number
   /** its pieces, in order */
   pieces: BubblyPiece[]
+  /** the stretches drawn underlined, in order, never overlapping:  each starts and ends where a piece does */
+  underlines: BubblyUnderline[]
+}
+
+/**
+ * A stretch of a line drawn with ONE dotted line under it, from the parse:  where one value or one question starts
+ * and ends, so the plain words between two show how they combine (`is` that compares, `and`, `- 1`).
+ * - `value`:  a value read, `the pile's suit`, `its pile`, `a new deck`, `the first card of the pile`
+ * - `question`:  a yes-or-no asked of a thing, with the thing, `the card is on top of its pile`, `pile is a foundation`
+ * - `quantity`:  a number and its unit, `300 msec`
+ * - Outermost only:  a value inside a value or a question gets no line of its own.
+ * - Never a line's break:  a stretch going on onto the next line is one underline on each.
+ */
+export type BubblyUnderline = {
+  /** first character */
+  start: number
+  /** one past the last */
+  end: number
+  /** what it groups */
+  kind: "value" | "question" | "quantity"
 }
 
 /**
@@ -161,14 +174,31 @@ export type BubblyRulePresentation = {
   plain?: readonly string[]
   /** a CONTROL line:  its steps in a bracket */
   isControl?: boolean
-  /** a phrase called whole:  dotted under (`is a diamond`) */
-  isPhrase?: boolean
-  /** its number and the rest of it are one quantity:  dotted under (`pause for <300 msec>`) */
+  /**
+   * the words of its head that say an ability it gives are names, bold (`draggable` in `a "card" is a draggable view`,
+   * `droppable` in `it is droppable when`):  the words its parser reads as one (`SP.DeclarationPatterns.abilityWord`)
+   */
+  namesAbility?: boolean
+  /** a part of the name before it, bold with it:  `'s` in `pile's` */
+  isNamePart?: boolean
+  /**
+   * a YES-OR-NO asked of the thing before it (`is on top of its pile`, `is a king`, `is empty`):  ONE underline from
+   * that thing to its end, its own words plain
+   * - the thing:  what comes before it, back to the last `and` or `or`, as the compiler binds it
+   */
+  isQuestion?: boolean
+  /** more of the value before it (`as lower case`, `in feet`):  ONE underline from that value to its end */
+  continuesValue?: boolean
+  /** joins two yes-or-nos (`and`, `or`):  a question after it is asked of what follows it */
+  isJoin?: boolean
+  /** holds other expressions, each underlined on its own (`(it is empty and the card is a king)`), never itself */
+  isCombination?: boolean
+  /** its groups that hold what it SETS (`set <the score> to 0`):  being set, not read, so never underlined */
+  sets?: readonly string[]
+  /** its number and the rest of it are one quantity:  underlined (`pause for <300 msec>`) */
   isQuantity?: boolean
-  /** a value:  yes or no */
+  /** a value written in:  italic, never underlined (a number, a text, yes or no, a list's value) */
   isValue?: boolean
-  /** a reference that takes the words before it:  `the color` of seven, `a new card` */
-  takesArticle?: boolean
 }
 
 /** How `SP.BubblyLayout.of()` reads its text. */

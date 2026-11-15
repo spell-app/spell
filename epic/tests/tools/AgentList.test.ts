@@ -147,3 +147,18 @@ describe("claims (epic-engine T77)", () => {
     expect(list.claimOf("epic/src/tools/_assets/x.js")).toBeUndefined()
   })
 })
+
+describe("done already (epic `epic-engine` I288)", () => {
+  test("doneSaid():  the epic log's line for an agent that marked itself done;  none for one it never finished", () => {
+    const root = checkout("said", { epic: true })
+    const list = new AgentList(root)
+    mkdirSync(join(root, "epics", "said", "parts"), { recursive: true })
+    writeFileSync(
+      join(root, "epics", "said", "parts", "log.html"),
+      "<epic-event>Agent said-aaa done:  took\n 4m</epic-event><epic-event>Agent said-aaa done:  took 5m</epic-event>"
+    )
+    expect(list.doneSaid("aaa")).toBe("Agent said-aaa done: took 5m")
+    expect(list.doneSaid("said-bbb")).toBeUndefined()
+    expect(new AgentList(checkout("plain")).doneSaid("aaa")).toBeUndefined()
+  })
+})

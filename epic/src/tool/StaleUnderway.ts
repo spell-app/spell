@@ -10,7 +10,8 @@ import { CLOSED, UNDERWAY_CARD } from "./planDoc.types"
  * The open items whose Underway card has gone STALE, and whether their work is on `main` (epic `epic-engine` T78).
  * - Owen, 2026-11-15, on I172 (Underway since 10/29) and I209 (since 11/3):  "I believe these have been fixed";
  *   then "Seems like we need an 'end of turn' action to go through the open/underway issues and clean things up?"
- * - stale:  an open item whose LATEST status card is still Underway, older than `hours`, with no live working flag
+ * - stale:  an open item whose LATEST status card is still Underway, older than `hours`, with no live working flag;
+ *   or still Owen's Do this "Go ahead" card, older than `GO_AHEAD_MINUTES`, nobody on it (I292)
  *   (`working`:  the inbox's, younger than `WORKING_HOURS`, as the page counts them, I280)
  * - its work on `main`:  a commit on `main` naming it (`<epic> I172:  ...`, this epic's only), or one of its own
  *   `<epic-commit>` cards' shas, found in ONE `git log` of `main` since the oldest such card
@@ -164,9 +165,12 @@ export class StaleUnderway {
       if (element.hasAttribute("fixed")) continue
       const cards = Array.from(element.querySelectorAll(":scope > epic-status"))
       const last = cards.at(-1)
-      if (!last || !last.matches(UNDERWAY_CARD.replace(":scope > ", ""))) continue
+      if (!last) continue
+      const underway = last.matches(UNDERWAY_CARD.replace(":scope > ", ""))
+      if (!underway && !StaleUnderway.isGoAhead(last)) continue
       const since = StaleUnderway.timeOf(last.getAttribute("at"))
-      if (!Number.isFinite(since) || now - since < this.hours * HOUR) continue
+      const wait = underway ? this.hours * HOUR : GO_AHEAD_MINUTES * MINUTE
+      if (!Number.isFinite(since) || now - since < wait) continue
       if (this.isWorkedOn(element.id, now)) continue
       found.push({ element, since })
     }
@@ -192,6 +196,14 @@ export class StaleUnderway {
   }
 
   /** Has a tidy already left its Stale card on `item`, after its Underway card? */
+  /**
+   * Is `card` the Noted "Go ahead" card Owen's Do this leaves (`PlanDoc.doThis()`), nobody's Underway card after it
+   * (epic `epic-engine` I292:  I287 sat at "Go ahead:  fix this here", its fix merged, nobody on it)
+   */
+  private static isGoAhead(card: Element): boolean {
+    return card.getAttribute("state") === "noted" && (card.textContent ?? "").trim().startsWith(GO_AHEAD_CARD)
+  }
+
   private static isNoted(item: Element): boolean {
     return Array.from(item.querySelectorAll(":scope > epic-status")).some((card) =>
       (card.textContent ?? "").trim().startsWith(STALE_CARD)
@@ -241,5 +253,14 @@ const WORKING_HOURS = 12
 const STALE_CARD = "Stale:"
 
 const HOUR = 3_600_000
+
+/** A minute, in ms. */
+const MINUTE = 60_000
+
+/** How long a Do this's "Go ahead" card may wait with nobody's Underway card after it (I292). */
+const GO_AHEAD_MINUTES = 30
+
+/** The start of the Noted card Owen's Do this leaves (`PlanDoc.doThis()`). */
+const GO_AHEAD_CARD = "Go ahead:"
 const DAY = 24 * HOUR
 const GIT_TIMEOUT = 30_000

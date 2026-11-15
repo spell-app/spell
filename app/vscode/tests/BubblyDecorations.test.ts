@@ -25,17 +25,20 @@ describe("BubblyDecorations", () => {
   test("weights, ink and slant from the sheet's values", () => {
     const { settings } = values
     expect(optionsFor(stretch("reference"))).toMatchObject({
-      fontWeight: settings["--bubbly-semibold"].light,
+      fontWeight: settings["--bubbly-bold"].light,
       light: { color: settings["--bubbly-bold-ink"].light },
       dark: { color: settings["--bubbly-bold-ink"].dark }
     })
-    expect(optionsFor(stretch("first-mention")).fontWeight).toBe(settings["--bubbly-bold"].light)
+    expect(optionsFor(stretch("value"))).toMatchObject({ fontStyle: "italic" })
     expect(optionsFor(stretch("comment"))).toMatchObject({
       fontStyle: "italic",
       light: { color: settings["--bubbly-faint"].light }
     })
     expect(optionsFor(stretch("words"))).toMatchObject({ light: { color: settings["--bubbly-ink"].light } })
-    expect(optionsFor(stretch("phrase")).light?.textDecoration).toMatch(/^underline dotted #/)
+    // one value or one question:  its dotted line alone, over the stretches it runs under
+    const underline = optionsFor(stretch("underline"))
+    expect(underline.light?.textDecoration).toMatch(/^underline dotted #/)
+    expect(underline.light?.color).toBeUndefined()
   })
 
   test("a pill:  its band's colour, rounded, an edge, room either side as attachments, never padding", () => {

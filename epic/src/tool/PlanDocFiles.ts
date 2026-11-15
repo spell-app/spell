@@ -333,7 +333,7 @@ export class PlanDocFiles {
    * - `split`:  how to store it:  `true` a skeleton and parts, `false` one file;  default as it was
    */
   edit<T>(file: string, change: (plan: PlanDoc) => T, { split }: { split?: boolean } = {}): Promise<T> {
-    return SRV.FileLock.runAsync(file, async () => {
+    return lockedPage(file, async () => {
       const plan = this.read(file, { recentSince: this.recentSince(file) })
       plan.earlierVersions = PlanDocFiles.earlierVersions(file)
       plan.landing = this.landing(file)
@@ -393,7 +393,7 @@ export class PlanDocFiles {
     { only, dryRun = false, now = new Date() }: { only?: readonly string[]; dryRun?: boolean; now?: Date } = {}
   ): Promise<MigrateResult> {
     const inboxFile = ReviewInbox.pathFor(file)
-    const result = await SRV.FileLock.runAsync(file, async (): Promise<MigrateResult> => {
+    const result = await lockedPage(file, async (): Promise<MigrateResult> => {
       const plan = this.read(file, { recentSince: this.recentSince(file) })
       const context: MigrationContext = {
         now,
@@ -443,8 +443,7 @@ export class PlanDocFiles {
       written = true
     }
     // last, each under its new name's lock, the one its writers take:  an inbox the step above rewrote is renamed by it
-    for (const move of result.files)
-      if (await SRV.FileLock.runAsync(move.to, async () => DataFile.rename(move))) written = true
+    for (const move of result.files) if (await lockedPage(move.to, async () => DataFile.rename(move))) written = true
     return { ...result, written }
   }
 
@@ -955,6 +954,28 @@ export const EPIC_STATUSES = ["in progress", "future", "done"] as const
 export type EpicStatus = (typeof EPIC_STATUSES)[number]
 
 /** The engine's folder (`EngineFiles.root`):  the default root. */
+/**
+ * Run `fn` holding epic page `file`'s lock (epic `epic-engine` I283):  this command named as its holder, a wait of two
+ * minutes, and a line on stderr naming whoever holds it once five seconds have gone by.
+ * - Why:  edits queued behind a slow one failed at 20s ("held for 20s:  stuck?") while it was still working, the lock
+ *   gone a moment later;  each edit took up to 40s then (a migration walking the whole page per field)
+ * - a running edit is never taken over while others may still wait for it;  a crashed one's (its pid gone) at once
+ */
+function lockedPage<T>(file: string, fn: () => Promise<T>): Promise<T> {
+  return SRV.FileLock.runAsync(file, fn, {
+    wait: PAGE_LOCK_WAIT,
+    stale: PAGE_LOCK_WAIT,
+    label: `epic ${process.argv.slice(2).join(" ")}`.slice(0, LABEL_LENGTH),
+    tell: (holder) => console.error(`epic:  waiting for the page${SRV.FileLock.byWhom(holder)} ...`)
+  })
+}
+
+/** Longest wait for an epic page's lock, ms. */
+const PAGE_LOCK_WAIT = 120_000
+
+/** Longest holder label written in a lock file:  the command, cut short. */
+const LABEL_LENGTH = 100
+
 const CHECKOUT = EngineFiles.root
 
 /** The docs tools beside this code:  `src/tools`. */

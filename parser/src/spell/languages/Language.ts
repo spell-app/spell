@@ -701,6 +701,8 @@ export type DeclarationPatterns = {
    * An ability's word, which a type's line may put beside its kind:  `iu`, the whole word,
    * e.g. `draggable` in `a "card" is a draggable two sided view` (`draggable_or_droppable`).
    * - Read by `SpellParser.declaredSuperTypes()`:  the kind is the words left, `two sided view`.
+   * - And by `SP.BubblyLayout`, which draws it bold as a name, there and in a list's short forms
+   *   (`it is droppable when`, `its cards are draggable when`:  Spanish's plural, `arrastrables`, too).
    */
   abilityWord: RegExp
   /** A line declaring a value kind:  `gim`, its plural name captured, e.g. `suits`. */

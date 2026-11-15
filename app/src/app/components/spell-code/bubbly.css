@@ -19,7 +19,7 @@
  * - `bubbly-name`, the name a head defines (`"card"`), is Monaco's mark for what the page finds by its place
  * - Classes the drawing writes that no rule here styles, kept as hooks to tune:
  *   - `bubbly-level-<n>` on a block or pill:  how deep it sits, 0 at the top of a file;  a group counts as a level
- *   - `bubbly-group`, `bubbly-first-mention`, `bubbly-constant`, `bubbly-value`, `bubbly-starts-input`
+ *   - `bubbly-group`, `bubbly-starts-input`
  */
 
 .bubbly {
@@ -38,10 +38,15 @@
   --bubbly-brace-ink: color-mix(in srgb, var(--bubbly-ink) 70%, var(--bubbly-paper));
   /* how much of the editor theme's selection colour the look shows:  less, so faint words read through it (Owen) */
   --bubbly-selection-strength: 55%;
-  /* a name's first mention, a name a head defines, a list's value */
+  /* a name:  a thing, a kind, a property, a variable, the word a head declares;  a list's value it declares */
   --bubbly-bold: 650;
-  /* every later use of a name, and what's declared elsewhere:  lighter than a first mention */
-  --bubbly-semibold: 650;
+  /*
+   * the dotted line under one value or one question (`the pile's suit`, `the card is on top`), and a quantity's
+   * (`300 msec`):  quiet, but a bit darker than a faint mark (Owen, 2026-11-15)
+   */
+  --bubbly-underline-ink: color-mix(in srgb, var(--bubbly-ink) 58%, transparent);
+  /* its dots:  one every this far, each a pixel square */
+  --bubbly-underline-dots: 4px;
 
   /****** parts of speech:  one hue each ******/
   /* the rest:  groups, tests, settings, notes */
@@ -191,6 +196,8 @@
     --bubbly-monaco-line-height: 1.65;
     /* the editor's font size over the drawing's (`--bubbly-font-size`):  set by the code, the shapes drawn at it */
     --bubbly-monaco-scale: 1;
+    /* how far a value's or a question's dotted line sits below its line's middle:  just under its words */
+    --bubbly-underline-drop: 9px;
     /*
      * how far every shape sits below where the code puts it:  the words sit that much higher in their bands and pills
      * - the editor's alone:  on the page the words are IN their bands and pills, so they can't sit off their middle
@@ -282,9 +289,10 @@
   /****** text ******/
 
   /*
-   * bold:  a reference (what a step reads or changes, `its rank`, `the deck`), the name a head defines
-   * (`a "card"`, `group "Rank"`;  a thing's bare one, `solitaire is an app`),
-   * and each value a list declares (`is one of ace, 2 ... 10, jack`)
+   * bold:  a NAME, one weight (what a step reads or changes, `its rank`, `pile's`, `the deck`, the word a head
+   * declares, `droppable`), the name a head defines (`a "card"`, `group "Rank"`;  a thing's bare one,
+   * `solitaire is an app`), and each value a list declares (`is one of ace, 2 ... 10, jack`)
+   * - never its `the`, `its` or `a`;  no lighter weight for a later use (Owen, 2026-11-15, epic `language` Q64)
    */
   .bubbly-reference,
   :is(.bubbly-head-pill, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input,
@@ -295,25 +303,21 @@
     color: var(--bubbly-bold-ink);
   }
 
-  /*
-   * a name's FIRST mention (a loop's variable, a local set the first time, an action's parameter) is bold;  every
-   * later use, what's declared elsewhere (a property, a type, `the deck`), and a list's value as a constant (`ace`,
-   * `clubs`):  semibold
-   */
-  .bubbly-reference.bubbly-use {
-    font-weight: var(--bubbly-semibold);
+  /* italic:  a value written in a step, a list's value (`king`), a number, yes or no, a text */
+  .bubbly-value {
+    font-style: italic;
   }
 
   /*
-   * a number and its unit, one quantity (`300 msec`, `30 ticks`);  and a phrase called whole (`is a diamond`,
-   * `is face up`), at the plain weight:  a very light dotted underline under all of it
-   * - drawn as a background, not an underline or a border:  one row of dots under the whole box, so they don't restart
-   *   (and double up) at each word, and spaced as we like (a border's dots can't be)
+   * ONE dotted line under one value or one question (`the pile's suit`, `the card is on top`), and a quantity
+   * (`300 msec`), bold and plain words alike
+   * - drawn as a background, not an underline or a border:  one row of dots under the whole stretch, so they don't
+   *   restart (and bunch up) at each word, and spaced as we like (a border's dots can't be)
+   * - on the page a span round the stretch's pieces;  in the editor a shape of its own, in the layer behind the text
    */
-  .bubbly-quantity,
-  .bubbly-phrase {
-    --bubbly-dot-color: color-mix(in srgb, var(--bubbly-ink) 40%, transparent);
-    background: linear-gradient(to right, var(--bubbly-dot-color) 1px, transparent 1px) left bottom / 4px 1px repeat-x;
+  .bubbly-underline {
+    background: linear-gradient(to right, var(--bubbly-underline-ink) 1px, transparent 1px) left bottom /
+      var(--bubbly-underline-dots) 1px repeat-x;
     padding-bottom: 1px;
   }
 
@@ -1468,6 +1472,13 @@
     /* a band sits on its line's middle;  an input's own rule places it */
     .bubbly-layer :is(.bubbly-head-pill, .bubbly-pill, .bubbly-tag-pill) {
       translate: 0 -50%;
+    }
+    /* a value's or a question's dotted line:  one row of dots, under its words' baseline */
+    .bubbly-layer .bubbly-underline {
+      position: absolute;
+      height: 1px;
+      padding: 0;
+      translate: 0 var(--bubbly-underline-drop);
     }
 
     /* the code's own layers over the shapes:  the editor sits above the layer, see-through */

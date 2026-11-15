@@ -15,6 +15,12 @@ import {
 } from "./review.types"
 import { PageStore } from "./PageStore"
 
+/**
+ * On `<html>` while a text box typed in before a live reload is still to come back (the docs runtime's
+ * `takeKeptField()`):  it holds the countdown as the box itself would (`isTypingIn()`).
+ */
+const RESTORING_FIELD = "data-spell-restoring-field"
+
 /****************
  * ### `SendCountdown`
  * A page's COUNTDOWN to Send:  with Auto Send on and something waiting to be sent,
@@ -75,8 +81,11 @@ export class SendCountdown extends PageStore {
    * Does `document`'s focus sit in a text box with words in it (a note box, a comment, a field)?
    * Through shadow roots, to the box itself.  NEVER throws.
    * - STATIC:  it reads the page, not a countdown
+   * - and while such a box is still to come back after a live reload (`<html data-spell-restoring-field>`, the docs
+   *   runtime's;  epic `epic-engine` I291):  the comment it held is saved, but the reader is still writing it
    */
   static isTypingIn(document: Document): boolean {
+    if (document.documentElement?.hasAttribute(RESTORING_FIELD)) return true
     let active: Element | null = document.activeElement
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
     if (!active) return false

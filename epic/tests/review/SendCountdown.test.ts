@@ -240,6 +240,20 @@ describe("SendCountdown (epic-engine P20, P53)", () => {
     page.activeElement.shadowRoot.activeElement = { localName: "button", value: "x" } as never
     expect(typing()).toBe(false)
   })
+
+  test("isTypingIn():  a box still to come back after a live reload holds it too (I291)", () => {
+    const marks = new Set<string>()
+    const page = {
+      activeElement: null,
+      documentElement: { hasAttribute: (name: string) => marks.has(name) }
+    }
+    const typing = () => SendCountdown.isTypingIn(page as unknown as Document)
+    expect(typing()).toBe(false)
+    marks.add("data-spell-restoring-field")
+    expect(typing()).toBe(true)
+    marks.clear()
+    expect(typing()).toBe(false)
+  })
 })
 
 /** A window with a document holding `frames`, enough for `watch()`. */
