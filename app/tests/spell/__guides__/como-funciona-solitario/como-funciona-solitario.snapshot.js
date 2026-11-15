@@ -96,7 +96,7 @@ export class Columna extends Pila {
   }
 }
 
-core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar Una Carta" })
+core.describeAction(Carta, "jugar", { title: "Jugar Carta", undoneAs: "Jugar Carta" })
 
 core.heading("Una pila, y una columna")
 

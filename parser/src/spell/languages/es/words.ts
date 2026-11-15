@@ -76,6 +76,26 @@ export const spanishWords: SP.LanguageWords = {
   memberLeadingWords: new Set(["con", "para", "desde", "en", "por", "sobre", "al"]),
 
   /** Little words after which a method's name keeps its receiver's type:  `actualizar_el_total_de_calculadora`. */
+  /** Little words an action's title writes in lower case, unless first:  `Poner Carta en Pila`. */
+  titleSmallWords: new Set([
+    "en",
+    "de",
+    "a",
+    "la",
+    "el",
+    "los",
+    "las",
+    "un",
+    "una",
+    "y",
+    "o",
+    "con",
+    "para",
+    "por",
+    "del",
+    "al"
+  ]),
+
   danglingWords: new Set([
     "de",
     "del",
@@ -325,6 +345,8 @@ export const spanishWords: SP.LanguageWords = {
      */
     kindDeclaration:
       /^[ \t]*(?:-[ \t]+)?(un[oa]?[ \t]+)?(?!(?:sus?|el|la|los|las|un[oa]?)[ \t])["']?((?:(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+)["']?(?:[ \t]+alias[ \t]+["']?[\p{L}\p{M}\d_-]+["']?)?[ \t]+es[ \t]+un[oa]?[ \t]+((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)(?=[ \t]*(?:donde\b|con\b|:|,|$))/gimu,
+    /** An ability's word beside a type's kind, e.g. `arrastrable`:  as `draggable_or_droppable` reads it. */
+    abilityWord: /^(?:arrastrable|soltable|seleccionable|pulsable)$/iu,
     /** A line declaring a value kind, its PLURAL name captured:  `- "palos" como uno de ...`. */
     valueKindDeclaration:
       /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+como[ \t]+(?:uno[ \t]+de|o[ \t]+bien)\b/gimu,

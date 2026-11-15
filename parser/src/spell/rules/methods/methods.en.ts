@@ -176,14 +176,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.giveToPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "giveToPile", { title: "Give A Card To A Pile", undoneAs: "Give A Card To A Pile" })'
+            'core.describeAction(Card, "giveToPile", { title: "Give Card to Pile", undoneAs: "Give Card to Pile" })'
           ],
           ts: [
             "export interface Card { giveToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.giveToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "giveToPile", { title: "Give A Card To A Pile", undoneAs: "Give A Card To A Pile" })'
+            'core.describeAction(Card, "giveToPile", { title: "Give Card to Pile", undoneAs: "Give Card to Pile" })'
           ]
         },
         {
@@ -224,12 +224,12 @@ methods.addRule(ToDoSomething, {
           input: "to notify (message as text): print the message",
           js: [
             "export function notifyMessage(message) {",
-            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}"
           ],
           ts: [
             "export function notifyMessage(message: string) {",
-            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}"
           ]
         },
@@ -244,12 +244,12 @@ methods.addRule(ToDoSomething, {
           input: 'to notify (message = "Really?"): print the message',
           js: [
             'export function notifyMessage(message = "Really?") {',
-            '  return core.asAction({ undoneAs: "Notify Message = \\"Really?\\"" }, () => core.console.log(message))',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}"
           ],
           ts: [
             'export function notifyMessage(message: string = "Really?") {',
-            '  return core.asAction({ undoneAs: "Notify Message = \\"Really?\\"" }, () => core.console.log(message))',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}"
           ]
         },
@@ -305,14 +305,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.addToPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
+            'core.describeAction(Card, "addToPile", { title: "Add Card to Pile", undoneAs: "Add Card to Pile" })'
           ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
+            'core.describeAction(Card, "addToPile", { title: "Add Card to Pile", undoneAs: "Add Card to Pile" })'
           ]
         },
         {
@@ -322,14 +322,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.addToPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
+            'core.describeAction(Card, "addToPile", { title: "Add Card to Pile", undoneAs: "Add Card to Pile" })'
           ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
+            'core.describeAction(Card, "addToPile", { title: "Add Card to Pile", undoneAs: "Add Card to Pile" })'
           ]
         },
         {
@@ -339,14 +339,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.addToPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
+            'core.describeAction(Card, "addToPile", { title: "Add Card to Pile", undoneAs: "Add Card to Pile" })'
           ],
           ts: [
             "export interface Card { addToPile(pile: Pile): any /* spell: type unknown */ }",
             "Card.prototype.addToPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })'
+            'core.describeAction(Card, "addToPile", { title: "Add Card to Pile", undoneAs: "Add Card to Pile" })'
           ]
         },
         {
@@ -356,14 +356,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ]
         },
         {
@@ -373,14 +373,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ]
         },
         {
@@ -390,14 +390,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ]
         },
         {
@@ -407,14 +407,14 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this.name)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this.name)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ]
         },
         {
@@ -426,7 +426,7 @@ methods.addRule(ToDoSomething, {
             "  const it = this.name",
             "  core.console.log(it)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ],
           ts: [
             "export interface Card { show(): any /* spell: type unknown */ }",
@@ -435,7 +435,7 @@ methods.addRule(ToDoSomething, {
             "  const it = this.name",
             "  core.console.log(it)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show Thing As A Card", undoneAs: "Show Thing As A Card" })'
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })'
           ]
         },
         {
@@ -459,7 +459,7 @@ methods.addRule(ToDoSomething, {
           input: ["to start the game", "\tprint 1", "start the game"],
           js: [
             "export function startTheGame() {",
-            '  return core.asAction({ undoneAs: "Start The Game" }, () => {',
+            '  return core.asAction({ undoneAs: "Start the Game" }, () => {',
             "    core.console.log(1)",
             "  })",
             "}",
@@ -487,13 +487,13 @@ methods.addRule(ToDoSomething, {
           input: ["to notify (message as text): print the message", 'notify "hi"'],
           js: [
             "export function notifyMessage(message) {",
-            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}",
             'notifyMessage("hi")'
           ],
           ts: [
             "export function notifyMessage(message: string) {",
-            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}",
             'notifyMessage("hi")'
           ]
@@ -504,13 +504,13 @@ methods.addRule(ToDoSomething, {
           input: ["to notify (message as text): print the message", "notify 1"],
           js: [
             "export function notifyMessage(message) {",
-            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}",
             "core.notify(1)"
           ],
           ts: [
             "export function notifyMessage(message: string) {",
-            '  return core.asAction({ undoneAs: "Notify Message As Text" }, () => core.console.log(message))',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => core.console.log(message))',
             "}",
             "core.notify(1)"
           ]
@@ -528,7 +528,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.showOnPile = function (pile) {",
             "  return core.console.log(1)",
             "}",
-            'core.describeAction(Card, "showOnPile", { title: "Show A Card On A Pile", undoneAs: "Show A Card On A Pile" })',
+            'core.describeAction(Card, "showOnPile", { title: "Show Card on Pile", undoneAs: "Show Card on Pile" })',
             ";(new Joker()).showOnPile(new Pile())",
             '/* PARSE ERROR: Don\'t understand "show a new card on a new card" */'
           ],
@@ -538,7 +538,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.showOnPile = function (this: Card, pile: Pile) {",
             "  return core.console.log(1)",
             "}",
-            'core.describeAction(Card, "showOnPile", { title: "Show A Card On A Pile", undoneAs: "Show A Card On A Pile" })',
+            'core.describeAction(Card, "showOnPile", { title: "Show Card on Pile", undoneAs: "Show Card on Pile" })',
             ";(new Joker()).showOnPile(new Pile())",
             '/* PARSE ERROR: Don\'t understand "show a new card on a new card" */'
           ]
@@ -550,7 +550,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function () {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show A Card", undoneAs: "Show A Card" })',
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })',
             ";(new Card()).show()"
           ],
           ts: [
@@ -558,7 +558,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.show = function (this: Card) {",
             "  return core.console.log(this)",
             "}",
-            'core.describeAction(Card, "show", { title: "Show A Card", undoneAs: "Show A Card" })',
+            'core.describeAction(Card, "show", { title: "Show Card", undoneAs: "Show Card" })',
             ";(new Card()).show()"
           ]
         },
@@ -569,7 +569,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "playOnPile", { title: "Play A Card On A Pile", undoneAs: "Play A Card On A Pile" })',
+            'core.describeAction(Card, "playOnPile", { title: "Play Card on Pile", undoneAs: "Play Card on Pile" })',
             ";(new Card()).playOnPile(new Pile())"
           ],
           ts: [
@@ -577,7 +577,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "playOnPile", { title: "Play A Card On A Pile", undoneAs: "Play A Card On A Pile" })',
+            'core.describeAction(Card, "playOnPile", { title: "Play Card on Pile", undoneAs: "Play Card on Pile" })',
             ";(new Card()).playOnPile(new Pile())"
           ]
         },
@@ -588,7 +588,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "playOnPile", { title: "Play A Card On A Pile", undoneAs: "Play A Card On A Pile" })',
+            'core.describeAction(Card, "playOnPile", { title: "Play Card on Pile", undoneAs: "Play Card on Pile" })',
             ";(new Card()).playOnPile(new Pile())"
           ],
           ts: [
@@ -596,7 +596,7 @@ methods.addRule(ToDoSomething, {
             "Card.prototype.playOnPile = function (this: Card, pile: Pile) {",
             "  this.pile = pile",
             "}",
-            'core.describeAction(Card, "playOnPile", { title: "Play A Card On A Pile", undoneAs: "Play A Card On A Pile" })',
+            'core.describeAction(Card, "playOnPile", { title: "Play Card on Pile", undoneAs: "Play Card on Pile" })',
             ";(new Card()).playOnPile(new Pile())"
           ]
         }
@@ -620,7 +620,7 @@ methods.addRule(ToDoSomething, {
           input: ["to notify (with message):", "\tprint the message", "notify"],
           js: [
             "export function notify(props = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             "    const { message } = props",
             "    core.console.log(message)",
             "  })",
@@ -629,7 +629,7 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             "    const { message } = props",
             "    core.console.log(message)",
             "  })",
@@ -643,7 +643,7 @@ methods.addRule(ToDoSomething, {
           input: ["to notify (with message):", "\tprint the message", 'notify with message = "It worked!"'],
           js: [
             "export function notify(props = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             "    const { message } = props",
             "    core.console.log(message)",
             "  })",
@@ -652,7 +652,7 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             "    const { message } = props",
             "    core.console.log(message)",
             "  })",
@@ -670,7 +670,7 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function play(props = {}) {",
-            '  return core.asAction({ undoneAs: "Play With A Card" }, () => {',
+            '  return core.asAction({ undoneAs: "Play" }, () => {',
             "    const { card } = props",
             "    core.console.log(card)",
             "  })",
@@ -680,7 +680,7 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function play(props: { card?: Card } = {}) {",
-            '  return core.asAction({ undoneAs: "Play With A Card" }, () => {',
+            '  return core.asAction({ undoneAs: "Play" }, () => {',
             "    const { card } = props",
             "    core.console.log(card)",
             "  })",
@@ -694,7 +694,7 @@ methods.addRule(ToDoSomething, {
           input: ['to notify (with message = "nope"):', "\tprint the message", 'notify with message = "Ship it!!"'],
           js: [
             "export function notify(props = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message = \\"nope\\"" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             '    const { message = "nope" } = props',
             "    core.console.log(message)",
             "  })",
@@ -703,7 +703,7 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message = \\"nope\\"" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             '    const { message = "nope" } = props',
             "    core.console.log(message)",
             "  })",
@@ -721,7 +721,7 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function notify(props = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message = \\"nope\\" And Reply = \\"yep\\"" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             '    const { message = "nope", reply = "yep" } = props',
             "    core.console.log(message + reply)",
             "  })",
@@ -731,7 +731,7 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message = \\"nope\\" And Reply = \\"yep\\"" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             '    const { message = "nope", reply = "yep" } = props',
             "    core.console.log(message + reply)",
             "  })",
@@ -749,7 +749,7 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function notify(props = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Name, Message As Text And Reply = \\"yep\\"" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             '    const { name, message, reply = "yep" } = props',
             "    core.console.log(name + message + reply)",
             "  })",
@@ -762,7 +762,7 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function notify(props: { name?: any /* spell?: type unknown */; message?: string; reply?: any /* spell?: type unknown */ } = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Name, Message As Text And Reply = \\"yep\\"" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             '    const { name, message, reply = "yep" } = props',
             "    core.console.log(name + message + reply)",
             "  })",
@@ -784,7 +784,7 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function notifyMessage(message, props = {}) {",
-            '  return core.asAction({ undoneAs: "Notify Message With Reply = \\"yep\\"" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => {',
             '    const { reply = "yep" } = props',
             "    core.console.log(message)",
             "    core.console.log(reply)",
@@ -794,7 +794,7 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function notifyMessage(message: any /* spell: type unknown */, props: Object = {}) {",
-            '  return core.asAction({ undoneAs: "Notify Message With Reply = \\"yep\\"" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify Message" }, () => {',
             '    const { reply = "yep" } = props',
             "    core.console.log(message)",
             "    core.console.log(reply)",
@@ -812,7 +812,7 @@ methods.addRule(ToDoSomething, {
           ],
           js: [
             "export function notify(props = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             "    const { message } = props",
             "    core.console.log(message)",
             "  })",
@@ -821,7 +821,7 @@ methods.addRule(ToDoSomething, {
           ],
           ts: [
             "export function notify(props: Object = {}) {",
-            '  return core.asAction({ undoneAs: "Notify With Message" }, () => {',
+            '  return core.asAction({ undoneAs: "Notify" }, () => {',
             "    const { message } = props",
             "    core.console.log(message)",
             "  })",
@@ -958,7 +958,7 @@ methods.addRule(ToDoSomething, {
             "    core.console.log(1)",
             "  }",
             "}",
-            'core.describeAction(Deck, "shuffleTheDeck", { title: "Shuffle The Deck", undoneAs: "Shuffle The Deck" })'
+            'core.describeAction(Deck, "shuffleTheDeck", { title: "Shuffle the Deck", undoneAs: "Shuffle the Deck" })'
           ]
         }
       ]

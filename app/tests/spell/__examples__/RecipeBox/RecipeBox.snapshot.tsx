@@ -322,7 +322,7 @@ export class RecipeBoxElement extends SpellElement<RecipeBox> {
 }
 core.useElement(RecipeBox, RecipeBoxElement)
 export const recipeBox = new RecipeBox()
-core.describeAction(RecipeBox, "addTheNewRecipe", { title: "Add The New Recipe", undoneAs: "Add The New Recipe" })
+core.describeAction(RecipeBox, "addTheNewRecipe", { title: "Add the New Recipe", undoneAs: "Add the New Recipe" })
 // - its "box menu" is a menu of "undo"
 core.describeMenu(RecipeBox, "boxMenu", { items: ["undo"] })
 // -----------

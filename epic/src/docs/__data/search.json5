@@ -524,7 +524,7 @@
     {
       "path": "epic-clarify.html",
       "title": "<epic-clarify>",
-      "summary": "The <epic-clarify> element: Clarify, after an item with no details, asking Claude for them at once.",
+      "summary": "The <epic-clarify> element: Clarify, and the circle-question beside an item's body, asking Claude to clarify it at once.",
       "tag": "epic-clarify",
       "sections": [
         {
@@ -538,6 +538,11 @@
         {
           "id": "3-markup",
           "title": "3. Markup"
+        },
+        {
+          "id": "epic-clarify-attributes",
+          "title": "Attributes",
+          "parent": 2
         },
         {
           "id": "epic-clarify-parts",

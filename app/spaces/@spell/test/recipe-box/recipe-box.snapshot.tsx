@@ -131,7 +131,7 @@ export class RecipeBoxElement extends SpellElement<RecipeBox> {
 }
 core.useElement(RecipeBox, RecipeBoxElement)
 export const recipeBox = new RecipeBox()
-core.describeAction(RecipeBox, "addTheDraft", { title: "Add The Draft", undoneAs: "Add The Draft" })
+core.describeAction(RecipeBox, "addTheDraft", { title: "Add the Draft", undoneAs: "Add the Draft" })
 
 if (!core.isCarryingOver) recipeBox.start()
 

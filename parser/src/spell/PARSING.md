@@ -245,6 +245,13 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - `SpellStatement.withWhichSubject()` reads the condition with its subject put back, before it parses:
     English's `it` (the language's `whichClause`), on no text just after `which`, and a first plural verb made singular
     (`are` => `is`);  Spanish leaves the subject out after `donde` too, so `que` reads as it is (`implied_it`).
+  - Each later clause too (J173):  a plural verb just after `and` / `or` (`whichClause.joins`) is made singular,
+    its own `it` put back before it:  `which are face up and are in the stock` ~== `where it is face up and it is in
+    the stock`.
+  - With an apostrophe:  Spell's words split `aren't` into `aren`, `'`, `t`, so `aren` becomes `isn`
+    (`SpellStatement.singularVerbAt()`);  `don't` => `doesn't`, `haven't` => `hasn't`.
+  - The changed words are added to the line's words the quick test keeps (`Sequence.addLineWords()`):
+    it keeps them by the line's last token, which the changed tokens share.
   - The loop's own:  `for each card in the deck which is not in the stock` (`list_iteration_where`), its item, list and
     condition one `each_item_where`, a `list_filter` of one item's word, never an expression alone.
 - A number word is a name where it can't be a number (J96):
@@ -720,6 +727,9 @@ A kind that says so is saved in a file of its own.
     `- droppable when ...` (`droppable`, the card the list's own item)
   - `a foundation can never (release|remove|give up|let go of) a card`:  always no
   - Its body answers yes or no, inline or indented.
+    - Its last line asks, even one that reads as a statement:
+      `the card is the last item of the card's pile` is `card === ...`, not `card = ...` (`answersYesOrNo()`,
+      `readsAsQuestion`;  epic `language` T135).
   - In the body:
     - `the card` is the card
     - `it`, `its` and `the tableau` are the list
@@ -752,6 +762,9 @@ A kind that says so is saved in a file of its own.
   ([`JoinedLines`](rules/JoinedLines.ts), epic `language` P55, Q53):
   - a line ending in `and` / `or` (the `and_or` word rule) takes the line indented under it, however deep;
     what's under THAT is the joined line's body
+    - and the lines after that one at its indent, while each line before ends in `and` / `or` (epic `language` T135)
+  - so does a line with lines indented under it STARTING with `and` / `or` (`and its value is ...`), any number of
+    them (T135, Owen's form);  the bubbly look draws them in the head line (`SP.BubblyLayout`), not its body
   - a line of just `and` / `or` joins the lines either side, each in parentheses of no width
   - the tokens stay the lines' own:  every rule reads the joined line as one written whole
   - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)
@@ -1061,9 +1074,12 @@ a line of the built-in types table, a built-in template, or a project's own `one
         Not `with` after a name unquoted:  its words would read `with` as one of its own.
       `ActionDetail.detailsOf()` reads them first, then the body's lines.
       Its declaration names it without its quotes (`ToDoSomething.getDeclaration()`).
-    - Its title, said nowhere, is its words in Initial Caps (P48):  `to auto play` is `Auto Play`, written into
-      `core.describeAction()`;  the core's own fallback, for an action or menu described with nothing, is the same
-      (`wordsOf()`, `initialCaps()` from `spell/util`).
+    - Its title, said nowhere, is its words in title case (P48, J156):  `to auto play` is `Auto Play`,
+      `to put (a card) on (a pile)` is `Put Card on Pile`, written into `core.describeAction()`.
+      - Each blank is its kind with no article, or its own name when its kind is built in (`Append Digit to Calculator`);
+        never its default (J179);  the language's little words in lower case (`titleSmallWords`).
+      - The core's own fallback, for an action or menu described with nothing, is its method's name in Initial Caps
+        (`wordsOf()`, `initialCaps()` from `spell/util`).
     - Every action is ONE undo step by itself, named by its title (epic `language` P55, Q60):
       `to_do_something`'s methods on a type (`undoableByDefault`) are described `undoneAs` with nothing said.
       - A top-level one, outside any type, too (epic `language` J149):  no class to describe it on,
@@ -1785,6 +1801,15 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
       - a name of several words too:  `a stock pile is a pile` (P15)
         - only before `is a/an` or `aka`
       - a one-of-a-kind app, with no article:  `solitaire is an app` (P21)
+    - Each stub knows what it's a kind of, when the scan can tell (`SpellParser.declaredSuperTypes()`;
+      epic `language` J177):  `Pile` for `a "stock pile" is a pile with layout "stacked"`.
+      - So a line above it knows its family:  Solitaire's `if the card is in the stock` asks the card's own pile,
+        `this.pile === solitaire.stock`, not a search of the stock.
+      - Its abilities and a comment after it are left out:  `TwoSidedView` for `a "card" is a draggable two sided view`.
+      - None for a list type (`a deck is a list of cards`) or a value's (`a "score" is a number`):
+        its line says what it is when it parses.
+      - Its real line still `claim()`s it, with the super-type it parsed;  an edit to that line re-parses everything
+        (`changesTypeKinds()`).
     - `P.IncrementalProject` and `parseSpellProject()` both do it.
     - An edit which changes WHICH types a file declares re-parses the whole project.
     - Each file's parser stubs its own, in play (`inPlay()`):  a name is made singular by its own language,

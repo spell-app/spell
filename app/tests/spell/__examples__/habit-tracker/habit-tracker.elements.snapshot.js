@@ -220,7 +220,7 @@ export class HabitTracker extends App {
   }
 }
 export let habitTracker
-core.describeAction(HabitTracker, "addTheDraft", { title: "Add The Draft", undoneAs: "Add The Draft" })
+core.describeAction(HabitTracker, "addTheDraft", { title: "Add the Draft", undoneAs: "Add the Draft" })
 // -----------
 
 // -----------

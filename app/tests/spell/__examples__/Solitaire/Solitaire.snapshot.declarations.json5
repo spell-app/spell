@@ -313,14 +313,32 @@
       "defined": "/Solitaire.spell:6016-6302"
     },
     {
+      "property": "layout",
+      "of": "StockPile",
+      "datatype": "text",
+      "defined": "/Solitaire.spell:6046-6062"
+    },
+    {
       "type": "DiscardPile",
       "superType": "Pile",
       "defined": "/Solitaire.spell:6304-6488"
     },
     {
+      "property": "layout",
+      "of": "DiscardPile",
+      "datatype": "text",
+      "defined": "/Solitaire.spell:6336-6352"
+    },
+    {
       "type": "Foundation",
       "superType": "Pile",
       "defined": "/Solitaire.spell:6490-6986"
+    },
+    {
+      "property": "layout",
+      "of": "Foundation",
+      "datatype": "text",
+      "defined": "/Solitaire.spell:6520-6536"
     },
     {
       "property": "suit",
@@ -332,6 +350,12 @@
       "type": "Column",
       "superType": "Pile",
       "defined": "/Solitaire.spell:6988-7299"
+    },
+    {
+      "property": "layout",
+      "of": "Column",
+      "datatype": "text",
+      "defined": "/Solitaire.spell:7014-7031"
     },
     {
       "type": "Solitaire",
@@ -516,6 +540,7 @@
       "group": "Game Play",
       "kind": "method",
       "name": "cheat",
+      "returns": "nothing",
       "defined": "/Solitaire.spell:4707-5270"
     },
     {
@@ -557,10 +582,14 @@
     267,
     274,
     290,
+    292,
     314,
+    316,
     332,
+    334,
     338,
     361,
+    363,
     381,
     389,
     422,

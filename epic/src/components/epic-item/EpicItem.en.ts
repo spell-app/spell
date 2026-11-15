@@ -350,6 +350,11 @@ export const epicItemVocabulary = {
         "icon, the review label and the review buttons."
     },
     { name: "details", description: "Its details:  hidden while folded." },
+    {
+      name: "clarify",
+      description:
+        "While reviewed:  the `<epic-clarify icon>` at its body's right, which asks Claude to clarify it now (T76)."
+    },
     { name: "label", description: "`Original question` / `Original reply` over its own text." },
     { name: "error", description: "With `source`:  the line saying the part couldn't be loaded." },
     ...REVIEW_PARTS

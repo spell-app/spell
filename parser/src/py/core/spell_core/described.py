@@ -49,7 +49,7 @@ class DescribedMethods:
         """Make the function below an ACTION:  ONE undo step titled `info["undone_as"]`, or none (`"cant_be_undone"`).
 
         ```python
-        @core.as_action({"undone_as": "Deal The Cards"})
+        @core.as_action({"undone_as": "Deal the Cards"})
         def deal_the_cards() -> Any:
             solitaire.deal()
         ```

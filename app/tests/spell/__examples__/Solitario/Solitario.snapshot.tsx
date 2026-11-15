@@ -81,7 +81,7 @@ export class Carta extends TwoSidedView {
   }
 
   async jugar() {
-    if (solitario.reserva.includes(this)) await solitario.robarDeLaReserva()
+    if (this.pila === solitario.reserva) await solitario.robarDeLaReserva()
     else {
       const pilaFinal = core.filter(core.everyThing(Pila), (pila: Pila) => core.canTake(pila, this)).firstItem
       if (pilaFinal === undefined) return false
@@ -108,7 +108,7 @@ export class Carta extends TwoSidedView {
   /** lo que suma el movimiento:  10 en una fundación, 5 desde los descartes, si no nada */
   contarLosPuntosDeCartaEnPila(pila: Pila) {
     if (pila instanceof Fundación) return 10
-    if (solitario.descartes.includes(this)) return 5
+    if (this.pila === solitario.descartes) return 5
     return 0
   }
 
@@ -165,9 +165,9 @@ export class CartaElement extends SpellElement<Carta> {
   }
 }
 core.useElement(Carta, CartaElement)
-core.describeAction(Carta, "jugar", { title: "Jugar Una Carta", undoneAs: "Jugar carta" })
-core.describeAction(Carta, "ponerEnPila", { title: "Poner Una Carta En Una Pila", undoneAs: "Mover carta" })
-core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar Los Puntos De Una Carta En Una Pila", undoneAs: "Contar Los Puntos De Una Carta En Una Pila" })
+core.describeAction(Carta, "jugar", { title: "Jugar Carta", undoneAs: "Jugar carta" })
+core.describeAction(Carta, "ponerEnPila", { title: "Poner Carta en Pila", undoneAs: "Mover carta" })
+core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar los Puntos de Carta en Pila", undoneAs: "Contar los Puntos de Carta en Pila" })
 // Es una vista reversible:  boca arriba muestra su imagen, boca abajo el dorso que comparten todas las cartas.
 // En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
 // El as es bajo:  as = 1 ... rey = 13
@@ -724,7 +724,7 @@ export class Solitario extends App {
     const carta = pila?.filter((carta) => carta.isFaceDirection("down"))?.randomItem()
     // volteada mientras se mueve:  se alza boca abajo sobre su columna, luego se voltea mientras pasa a los descartes
     this.descartes.append(carta!)
-    return carta?.turnFaceUp()
+    carta?.turnFaceUp()
   }
 
   async onPuntuaciónChange(event: PuntuaciónChangeEvent) {
@@ -794,10 +794,10 @@ export class SolitarioElement extends SpellElement<Solitario> {
 }
 core.useElement(Solitario, SolitarioElement)
 export const solitario = new Solitario()
-core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar El Juego", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Reiniciar El Juego" })
-core.describeAction(Solitario, "repartirLasCartas", { title: "Repartir Las Cartas", undoneAs: "Repartir Las Cartas" })
-core.describeAction(Solitario, "robarDeLaReserva", { title: "Robar De La Reserva", undoneAs: "Voltear carta" })
-core.describeAction(Solitario, "rehacerLaReserva", { title: "Rehacer La Reserva", undoneAs: "Rehacer La Reserva" })
+core.describeAction(Solitario, "reiniciarElJuego", { title: "Reiniciar el Juego", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Reiniciar el Juego" })
+core.describeAction(Solitario, "repartirLasCartas", { title: "Repartir las Cartas", undoneAs: "Repartir las Cartas" })
+core.describeAction(Solitario, "robarDeLaReserva", { title: "Robar de la Reserva", undoneAs: "Voltear carta" })
+core.describeAction(Solitario, "rehacerLaReserva", { title: "Rehacer la Reserva", undoneAs: "Rehacer la Reserva" })
 core.describeAction(Solitario, "jugarSolo", { title: "Jugar Solo", shortcuts: ["A"], icon: "play", undoneAs: "Jugar Solo" })
 core.describeAction(Solitario, "hacerTrampa", { title: "Hacer Trampa", shortcuts: ["C"], icon: "eye", undoneAs: "Hacer Trampa" })
 

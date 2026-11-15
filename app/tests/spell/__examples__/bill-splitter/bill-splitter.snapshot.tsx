@@ -8,7 +8,7 @@ core.heading("Money")
 // An amount as dollars and cents:  12.5 is "$12.50".
 
 export function writeAmountAsMoney(amount: number) {
-  return core.asAction({ undoneAs: "Write Amount As A Number As Money" }, () => {
+  return core.asAction({ undoneAs: "Write Amount As Money" }, () => {
     const cents = Math.round(amount * 100)
     const dollars = parseInt(cents / 100)
     const leftOver = cents - dollars * 100

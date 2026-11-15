@@ -101,7 +101,7 @@ on("picked", () => core.console.log("the program heard picked"))
 on("lonely", () => core.console.log("the program heard lonely"))
 
 export async function playTheStory() {
-  return core.asAction({ undoneAs: "Play The Story" }, async () => {
+  return core.asAction({ undoneAs: "Play the Story" }, async () => {
     const it = new Pile()
     const pile = it
     const it2 = new Card({ name: "ace" })

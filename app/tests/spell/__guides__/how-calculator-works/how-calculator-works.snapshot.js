@@ -124,7 +124,7 @@ export class AddingMachine extends App {
   }
 }
 export const addingMachine = new AddingMachine()
-core.describeAction(AddingMachine, "pressDigit", { title: "Press Digit As Text", undoneAs: "Press Digit As Text" })
+core.describeAction(AddingMachine, "pressDigit", { title: "Press Digit", undoneAs: "Press Digit" })
 core.describeAction(AddingMachine, "addUp", { title: "Add It Up", undoneAs: "Add It Up" })
 core.describeAction(AddingMachine, "clear", { title: "Clear It", undoneAs: "Clear It" })
 

@@ -176,8 +176,8 @@ export class Quiz extends App {
   }
 }
 export const quiz = new Quiz()
-core.describeAction(Quiz, "dealACard", { title: "Deal A Card", undoneAs: "Deal A Card" })
-core.describeAction(Quiz, "showTheAnswer", { title: "Show The Answer", shortcuts: ["space"], undoneAs: "Show The Answer" })
+core.describeAction(Quiz, "dealACard", { title: "Deal a Card", undoneAs: "Deal a Card" })
+core.describeAction(Quiz, "showTheAnswer", { title: "Show the Answer", shortcuts: ["space"], undoneAs: "Show the Answer" })
 core.describeAction(Quiz, "sayIKnew", { title: "I knew it", shortcuts: ["Y"], icon: "check", undoneAs: "I knew it" })
 core.describeAction(Quiz, "sayIMissed", { title: "I missed it", shortcuts: ["N"], icon: "close", undoneAs: "I missed it" })
 core.describeAction(Quiz, "startOver", { title: "Start Over", icon: "redo", undoneAs: "Start Over" })
@@ -189,7 +189,7 @@ core.heading("The deck:  twelve Spanish words -- add your own")
 //## The deck:  twelve Spanish words -- add your own
 
 export function addWordMeaningMeaning(word, meaning) {
-  return core.asAction({ undoneAs: "Add Word As Text Meaning Meaning As Text" }, () => {
+  return core.asAction({ undoneAs: "Add Word Meaning Meaning" }, () => {
     quiz.deck.append(new FlashCard({ word: word, meaning: meaning }))
   })
 }

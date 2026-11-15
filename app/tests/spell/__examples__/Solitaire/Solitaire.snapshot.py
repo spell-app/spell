@@ -103,7 +103,7 @@ class Card(TwoSidedView):
         return h("ui-text", {"color": "blue", "part": "back"}, "🂠")
 
     async def play(self) -> Any:
-        if self in solitaire.stock:
+        if self.pile == solitaire.stock:
             await solitaire.turn_over_the_next_card()
         else:
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
@@ -133,7 +133,7 @@ class Card(TwoSidedView):
         """what the move scores:  10 on a foundation, 5 from the discard pile, else nothing"""
         if isinstance(pile, Foundation):
             return 10
-        if self in solitaire.discard_pile:
+        if self.pile == solitaire.discard_pile:
             return 5
         return 0
 
@@ -149,9 +149,9 @@ class Card(TwoSidedView):
         return Pile.owner_of(self)
 
 
-core.describe_action(Card, "play", {"title": "Play A Card", "undone_as": "Play Card"})
-core.describe_action(Card, "put_on_pile", {"title": "Put A Card On A Pile", "undone_as": "Move Card"})
-core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count The Points For A Card On A Pile", "undone_as": "Count The Points For A Card On A Pile"})
+core.describe_action(Card, "play", {"title": "Play Card", "undone_as": "Play Card"})
+core.describe_action(Card, "put_on_pile", {"title": "Put Card on Pile", "undone_as": "Move Card"})
+core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count the Points for Card on Pile", "undone_as": "Count the Points for Card on Pile"})
 # It's a two sided view:  face up it shows its picture, face down the back every card shares.
 # On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 # Ace is low:  ace = 1 ... king = 13
@@ -553,7 +553,7 @@ class Solitaire(App):
         for card in self.deck:
             core.meanwhile(lambda: card.turn_face_down())
         for card in self.deck:
-            if not card in self.stock:
+            if card.pile != self.stock:
                 core.meanwhile(lambda: self.stock.append(card))
                 await core.pause_for(10, "msec")
         self.stock.randomize()
@@ -618,7 +618,7 @@ class Solitaire(App):
         if anything_changed:
             await self.auto_play()
 
-    def cheat(self) -> Any:
+    def cheat(self) -> None:
         """Turn up a face-down card from a column, at random, onto the discard pile"""
         remaining_piles = core.filter(
             core.every_thing(Column),
@@ -630,7 +630,7 @@ class Solitaire(App):
         card = pile.filter(lambda card: card.is_face_direction("down")).random_item()
         # turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile
         self.discard_pile.append(card)
-        return card.turn_face_up()
+        card.turn_face_up()
 
     async def on_score_change(self, event: ScoreChangeEvent) -> None:
         if core.item_count_of(core.merge_lists(core.every_thing(Foundation))) == 52:
@@ -639,9 +639,9 @@ class Solitaire(App):
 
 
 solitaire = Solitaire()
-core.describe_action(Solitaire, "restart_the_game", {"title": "Restart The Game", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart The Game"})
-core.describe_action(Solitaire, "turn_over_the_next_card", {"title": "Turn Over The Next Card", "undone_as": "Turn Card"})
-core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset The Stock", "undone_as": "Reset The Stock"})
+core.describe_action(Solitaire, "restart_the_game", {"title": "Restart the Game", "shortcuts": ["R"], "icon": "sync alternate", "undone_as": "Restart the Game"})
+core.describe_action(Solitaire, "turn_over_the_next_card", {"title": "Turn Over the Next Card", "undone_as": "Turn Card"})
+core.describe_action(Solitaire, "reset_the_stock", {"title": "Reset the Stock", "undone_as": "Reset the Stock"})
 core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts": ["A"], "icon": "play", "undone_as": "Auto Play"})
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})
 

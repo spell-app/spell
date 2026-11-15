@@ -192,8 +192,8 @@ core.heading("Una receta:  una tarjeta que puedes leer y cambiar")
 core.heading("Su pantalla de edición:  un formulario sobre un borrador, así que nada cambia hasta Guardar")
 //## Su pantalla de edición:  un formulario sobre un borrador, así que nada cambia hasta Guardar
 
-core.describeAction(EditorDeReceta, "aceptarLosCambios", { title: "Aceptar Los Cambios", cantBeUndone: "keeps history" })
-core.describeAction(EditorDeReceta, "olvidarLosCambios", { title: "Olvidar Los Cambios", cantBeUndone: "keeps history" })
+core.describeAction(EditorDeReceta, "aceptarLosCambios", { title: "Aceptar los Cambios", cantBeUndone: "keeps history" })
+core.describeAction(EditorDeReceta, "olvidarLosCambios", { title: "Olvidar los Cambios", cantBeUndone: "keeps history" })
 
 core.heading("La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta")
 //## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
@@ -322,7 +322,7 @@ export class CajaDeRecetas extends App {
   }
 }
 export const cajaDeRecetas = new CajaDeRecetas()
-core.describeAction(CajaDeRecetas, "agregarLaRecetaNueva", { title: "Agregar La Receta Nueva", undoneAs: "Agregar La Receta Nueva" })
+core.describeAction(CajaDeRecetas, "agregarLaRecetaNueva", { title: "Agregar la Receta Nueva", undoneAs: "Agregar la Receta Nueva" })
 // su "menú de la caja" es un menú de "deshacer"
 core.describeMenu(CajaDeRecetas, "menúDeLaCaja", { items: ["undo"] })
 // -----------

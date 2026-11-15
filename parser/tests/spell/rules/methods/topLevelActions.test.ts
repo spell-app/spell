@@ -34,7 +34,7 @@ describe("a top-level action", () => {
     expect(compiled(lines)).toContain(
       [
         "export function turnTheCardOver() {",
-        '  return core.asAction({ undoneAs: "Turn The Card Over" }, () => {',
+        '  return core.asAction({ undoneAs: "Turn the Card Over" }, () => {',
         '    c.side = "up"',
         "  })",
         "}"
@@ -48,7 +48,7 @@ describe("a top-level action", () => {
     core.resetRuntime()
     const app = new App()
     turnTheCardOver()
-    expect([c.side, app.undoTitle]).toEqual(["up", "Undo Turn The Card Over"])
+    expect([c.side, app.undoTitle]).toEqual(["up", "Undo Turn the Card Over"])
     app.undo()
     expect(c.side).toBe("")
   })
@@ -66,7 +66,7 @@ describe("a top-level action", () => {
     const { turn_and_count: turnAndCount } = runSpell(lines)("turn_and_count") as { turn_and_count: () => number }
     core.resetRuntime()
     expect(turnAndCount()).toBe(1)
-    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Turn And Count"])
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Turn and Count"])
   })
 
   test("`can't be undone`:  none", () => {
@@ -84,7 +84,7 @@ describe("a top-level action", () => {
   test("in Python:  `@core.as_action(...)` above its `def`", () => {
     const lines = [...CARD, "to turn the card over:", '\tset the side of c to "up"']
     expect(compiled(lines, PY.PyWriter.instance)).toContain(
-      ['@core.as_action({"undone_as": "Turn The Card Over"})', "def turn_the_card_over() -> None:"].join("\n")
+      ['@core.as_action({"undone_as": "Turn the Card Over"})', "def turn_the_card_over() -> None:"].join("\n")
     )
   })
 })

@@ -187,7 +187,7 @@ export class FizzbuzzExplainerElement extends SpellElement<FizzbuzzExplainer> {
 }
 core.useElement(FizzbuzzExplainer, FizzbuzzExplainerElement)
 export const fizzbuzzExplainer = new FizzbuzzExplainer()
-core.describeAction(FizzbuzzExplainer, "showWordForNumber", { title: "Show Word As Text For Number As A Number", undoneAs: "Show Word As Text For Number As A Number" })
+core.describeAction(FizzbuzzExplainer, "showWordForNumber", { title: "Show Word for Number", undoneAs: "Show Word for Number" })
 
 core.heading("Listening")
 ///////////////

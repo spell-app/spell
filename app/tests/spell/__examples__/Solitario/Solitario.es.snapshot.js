@@ -28,8 +28,18 @@ export const words = {
       valor: "valor",
       nombreCorto: "nombre corto"
     },
+    PilaDeReserva: {
+      disposición: "disposición"
+    },
+    PilaDeDescartes: {
+      disposición: "disposición"
+    },
     Fundación: {
+      disposición: "disposición",
       palo: "palo"
+    },
+    Columna: {
+      disposición: "disposición"
     },
     Solitario: {
       mazo: "mazo",

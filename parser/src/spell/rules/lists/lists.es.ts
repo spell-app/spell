@@ -653,7 +653,13 @@ listsEs.addRule(ListFilter, {
           input: "los items en my-list que no son 1",
           js: "core.filter(myList, (item) => item !== 1)"
         },
-        ["los items en my-list que están en my-list", "core.filter(myList, (item) => core.includes(myList, item))"]
+        ["los items en my-list que están en my-list", "core.filter(myList, (item) => core.includes(myList, item))"],
+        {
+          title: "cada verbo en plural, tras `y` / `o` también (epic `language` J173)",
+          input: "los items en my-list que no son 1 y están en my-list",
+          js: "core.filter(myList, (item) => item !== 1 && core.includes(myList, item))"
+        },
+        ["los items en my-list que son 1 o son 2", "core.filter(myList, (item) => item === 1 || item === 2)"]
       ]
     }
   ]

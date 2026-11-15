@@ -37,6 +37,8 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
   static ruleName = "assignment"
   @proto static alias = "statement"
   @proto static declares: P.DeclaresSpec = { kind: "variable", name: "thing" }
+  /** `the card is the last item of its pile`, as the last line of a body answering yes or no, asks it. */
+  @proto static readsAsQuestion = true
 
   /**
    * Refused when `thing` reads a built-in type's member, e.g. `the length of the name`:  spell works those out.

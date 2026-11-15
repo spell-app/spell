@@ -151,8 +151,8 @@ export class NoteKeeper extends App {
   }
 }
 export const noteKeeper = new NoteKeeper()
-core.describeAction(NoteKeeper, "keepTheDraft", { title: "Keep The Draft", undoneAs: "Keep The Draft" })
-core.describeAction(NoteKeeper, "countTheNotes", { title: "Count The Notes", undoneAs: "Count The Notes" })
+core.describeAction(NoteKeeper, "keepTheDraft", { title: "Keep the Draft", undoneAs: "Keep the Draft" })
+core.describeAction(NoteKeeper, "countTheNotes", { title: "Count the Notes", undoneAs: "Count the Notes" })
 
 core.heading("Start")
 ///////////

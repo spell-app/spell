@@ -79,7 +79,8 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     core.isCarryingOver = !!previous
     let program: Record<string, unknown>
     try {
-      program = (await import(/* @vite-ignore */ url)) as Record<string, unknown>
+      // its whole opening can't be undone:  Undo isn't lit the moment it starts (epic `language` J180)
+      program = (await core.runOpening(() => import(/* @vite-ignore */ url))) as Record<string, unknown>
     } finally {
       core.isCarryingOver = false
     }

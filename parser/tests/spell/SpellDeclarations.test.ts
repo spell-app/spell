@@ -246,6 +246,36 @@ describe("SpellDeclarations of a property's list of values", () => {
   })
 })
 
+/**
+ * A type's own value on its line, `a "column" is a pile with layout "vertical"`, is its own member (epic `language` J157):
+ * declared as its body's `its layout is "vertical"` declares it, so the words file and the Inspector list it.
+ */
+describe("SpellDeclarations of a type's own value on its line", () => {
+  const pile = 'a card is a thing\na pile is a list of cards\n\tits "layout" is one of stacked or vertical\n'
+  const layoutOf = (column: string) => {
+    const { declarations } = compiledSpellProject([{ path: "/Pile.spell", contents: pile + column }])
+    const { defined, ...declared } = declarations.statements.find(({ of }) => of === "Column")!
+    return declared
+  }
+
+  test("`with layout \"vertical\"` declares Column's `layout`, as its body's line does", () => {
+    const onItsLine = layoutOf('a "column" is a pile with layout "vertical"')
+    expect(onItsLine).toEqual({ property: "layout", of: "Column", datatype: "text" })
+    expect(onItsLine).toEqual(layoutOf('a "column" is a pile\n\tits layout is "vertical"'))
+  })
+
+  test("several, joined by commas:  each its own member", () => {
+    const { declarations } = compiledSpellProject([
+      {
+        path: "/Pile.spell",
+        contents: pile + '\tits "size" is a number\na "column" is a pile with layout "vertical", size = 3'
+      }
+    ])
+    const members = declarations.statements.filter(({ of }) => of === "Column").map(({ property }) => property)
+    expect(members).toEqual(["layout", "size"])
+  })
+})
+
 /** A type's short name, `a bank account aka account` (epic `drawable-thing`, P1), in another project. */
 describe("SpellDeclarations, a type's short name", () => {
   test("goes into its declarations, and finds the type in a project that imports it", () => {

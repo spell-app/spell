@@ -350,9 +350,9 @@ describe("names with grammar words", () => {
             return this.side === "up"
           }
         }
-        core.describeAction(Card, "putInPlay", { title: "Put A Card In Play", undoneAs: "Put A Card In Play" })
+        core.describeAction(Card, "putInPlay", { title: "Put Card in Play", undoneAs: "Put Card in Play" })
         export function openThePointOfSale() {
-          return core.asAction({ undoneAs: "Open The Point Of Sale" }, () => core.console.log(2))
+          return core.asAction({ undoneAs: "Open the Point of Sale" }, () => core.console.log(2))
         }
         export const c = new Card()
         c.putInPlay()
@@ -387,9 +387,9 @@ describe("names with grammar words", () => {
             return this.lado === "x"
           }
         }
-        core.describeAction(Carta, "ponerEnJuego", { title: "Poner Una Carta En Juego", undoneAs: "Poner Una Carta En Juego" })
+        core.describeAction(Carta, "ponerEnJuego", { title: "Poner Carta en Juego", undoneAs: "Poner Carta en Juego" })
         export function abrirLaCuentaDeAhorro() {
-          return core.asAction({ undoneAs: "Abrir La Cuenta De Ahorro" }, () => core.console.log(2))
+          return core.asAction({ undoneAs: "Abrir la Cuenta de Ahorro" }, () => core.console.log(2))
         }
         export const c = new Carta()
         c.ponerEnJuego()

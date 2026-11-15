@@ -517,13 +517,13 @@ export class SignUpPage extends App {
   }
 }
 export const signUpPage = new SignUpPage()
-core.describeAction(SignUpPage, "takeTheShift", { title: "Take The Shift", undoneAs: "Take The Shift" })
+core.describeAction(SignUpPage, "takeTheShift", { title: "Take the Shift", undoneAs: "Take the Shift" })
 core.describeAction(SignUpPage, "takeSetup", { title: "Take Setup", undoneAs: "Take Setup" })
 core.describeAction(SignUpPage, "takeServing", { title: "Take Serving", undoneAs: "Take Serving" })
 core.describeAction(SignUpPage, "takeCleanup", { title: "Take Cleanup", undoneAs: "Take Cleanup" })
-core.describeAction(SignUpPage, "askForTheTicket", { title: "Ask For The Ticket", undoneAs: "Ask For The Ticket" })
-core.describeAction(SignUpPage, "workOutTheInvitations", { title: "Work Out The Invitations", undoneAs: "Work Out The Invitations" })
-core.describeAction(SignUpPage, "sendTheLetter", { title: "Send The Letter", undoneAs: "Send The Letter" })
-core.describeAction(SignUpPage, "addTheNewAttendee", { title: "Add The New Attendee", undoneAs: "Add The New Attendee" })
+core.describeAction(SignUpPage, "askForTheTicket", { title: "Ask for the Ticket", undoneAs: "Ask for the Ticket" })
+core.describeAction(SignUpPage, "workOutTheInvitations", { title: "Work Out the Invitations", undoneAs: "Work Out the Invitations" })
+core.describeAction(SignUpPage, "sendTheLetter", { title: "Send the Letter", undoneAs: "Send the Letter" })
+core.describeAction(SignUpPage, "addTheNewAttendee", { title: "Add the New Attendee", undoneAs: "Add the New Attendee" })
 // -----------
 if (!core.isCarryingOver) signUpPage.start()

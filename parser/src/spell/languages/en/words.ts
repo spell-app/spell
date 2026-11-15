@@ -86,6 +86,26 @@ export const englishWords: SP.LanguageWords = {
    * - Prepositions only:  a verb's own little words (`up`, `over`, `out`) read fine without the type:
    *   `to pick up (a card)` => `pick_up`.
    */
+  /** Little words an action's title writes in lower case, unless first:  `Put Card on Pile`, `Compile and Run`. */
+  titleSmallWords: new Set([
+    "a",
+    "an",
+    "the",
+    "and",
+    "or",
+    "on",
+    "in",
+    "to",
+    "of",
+    "with",
+    "for",
+    "at",
+    "by",
+    "from",
+    "into",
+    "onto"
+  ]),
+
   danglingWords: new Set([
     "of",
     "to",
@@ -251,6 +271,8 @@ export const englishWords: SP.LanguageWords = {
      */
     kindDeclaration:
       /^[ \t]*(?:-[ \t]+)?(an?[ \t]+)?(?!(?:its?|the|an?)[ \t])["']?((?:(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+)["']?(?:[ \t]+aka[ \t]+["']?[\p{L}\p{M}\d_-]+["']?)?[ \t]+is[ \t]+an?[ \t]+((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)(?=[ \t]*(?:where\b|with\b|:|,|$))/gimu,
+    /** An ability's word beside a type's kind, e.g. `draggable`:  as `draggable_or_droppable` reads it. */
+    abilityWord: /^(?:draggable|droppable|selectable|clickable)$/iu,
     /** A line declaring a value kind, its PLURAL name captured, e.g. `suits` in `- "suits" as one of ...`. */
     valueKindDeclaration: /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+as[ \t]+(?:one[ \t]+of|either)\b/gimu,
     /**
@@ -279,10 +301,25 @@ export const englishWords: SP.LanguageWords = {
   },
 
   /**
-   * `which are face up` reads as `it is face up`, after a list (`where_or_which`).
-   * - One word each:  `aren't` isn't one (spell's words split it at its `'`), so `which aren't` doesn't read.
+   * `which are face up` reads as `it is face up`, after a list (`where_or_which`):
+   * each clause's plural verb made singular, the first and the first after `and` / `or`.
+   * - `aren't` and its kind with their `'`, as spell's words split them (`SpellStatement.singularVerbAt()`).
    */
-  whichClause: { subject: "it", singularVerbs: { are: "is", arent: "isnt", have: "has", do: "does", dont: "doesnt" } },
+  whichClause: {
+    subject: "it",
+    joins: new Set(["and", "or"]),
+    singularVerbs: {
+      are: "is",
+      arent: "isnt",
+      "aren't": "isn't",
+      have: "has",
+      havent: "hasnt",
+      "haven't": "hasn't",
+      do: "does",
+      dont: "doesnt",
+      "don't": "doesn't"
+    }
+  },
 
   /** `it`, `its`, `them`:  drawn plain in the bubbly look, never bold (`SP.BubblyLayout`). */
   pronouns: new Set(["it", "its", "them", "they", "their"])

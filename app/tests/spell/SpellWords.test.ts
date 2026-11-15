@@ -12,7 +12,16 @@ import { fixtureWords } from "spell/app/spaces/test"
 describe("SpellWords", () => {
   test("Solitaire's:  every member of its types, its own cards, deck and piles too, by javascript's names", () => {
     const words = SP.SpellWords.read(fixtureWords("@spell/examples/Solitaire"))!
-    expect(Object.keys(words.types)).toEqual(["Card", "Deck", "Pile", "Foundation", "Solitaire"])
+    expect(Object.keys(words.types)).toEqual([
+      "Card",
+      "Pile",
+      "Deck",
+      "StockPile",
+      "DiscardPile",
+      "Foundation",
+      "Column",
+      "Solitaire"
+    ])
     expect(words.types.Solitaire).toMatchObject({
       turnOverTheNextCard: "turn over the next card",
       restartTheGame: "restart the game",
@@ -21,8 +30,9 @@ describe("SpellWords", () => {
     })
     // its card, as Card.spell writes it, and as Solitaire.spell teaches it to play
     expect(words.types.Card).toMatchObject({ name: "name", play: "play a card" })
-    // a kind of pile that only gives a pile's layout a value, on its line (`with layout "stacked"`):  no members of its own
-    expect(words.types.StockPile).toBeUndefined()
+    // a kind of pile that only gives a pile's layout a value, on its line (`with layout "stacked"`):
+    // that value is its own member (J157)
+    expect(words.types.StockPile).toMatchObject({ layout: "layout" })
   })
 
   test("the counter library's (`counter`):  its own, as written", () => {

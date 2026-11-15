@@ -58,7 +58,7 @@ describe("grammar probes", () => {
       "Card.prototype.removeOfPile = function (pile) {
         return core.console.log(1)
       }
-      core.describeAction(Card, "removeOfPile", { title: "Remove A Card Of A Pile", undoneAs: "Remove A Card Of A Pile" })
+      core.describeAction(Card, "removeOfPile", { title: "Remove Card of Pile", undoneAs: "Remove Card of Pile" })
       card.removeOfPile(pile)"
     `)
   })
@@ -120,11 +120,11 @@ describe("grammar probes", () => {
       "Card.prototype.putOnPile = function (pile) {
         return core.console.log(1)
       }
-      core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Put A Card On A Pile" })
+      core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Put Card on Pile" })
       Chip.prototype.putOnPot = function (pot) {
         return core.console.log(2)
       }
-      core.describeAction(Chip, "putOnPot", { title: "Put A Chip On A Pot", undoneAs: "Put A Chip On A Pot" })
+      core.describeAction(Chip, "putOnPot", { title: "Put Chip on Pot", undoneAs: "Put Chip on Pot" })
       chip.putOnPot(pot)"
     `)
   })
@@ -138,7 +138,7 @@ describe("grammar probes", () => {
       "Card.prototype.addToPile = function (pile) {
         return core.console.log(1)
       }
-      core.describeAction(Card, "addToPile", { title: "Add A Card To A Pile", undoneAs: "Add A Card To A Pile" })
+      core.describeAction(Card, "addToPile", { title: "Add Card to Pile", undoneAs: "Add Card to Pile" })
       deck.append(card)"
     `)
   })
@@ -152,14 +152,14 @@ describe("grammar probes", () => {
       "Card.prototype.giveToPile = function (pile) {
         return core.console.log(1)
       }
-      core.describeAction(Card, "giveToPile", { title: "Give A Card To A Pile", undoneAs: "Give A Card To A Pile" })"
+      core.describeAction(Card, "giveToPile", { title: "Give Card to Pile", undoneAs: "Give Card to Pile" })"
     `)
   })
 
   test("P5b  a/an before a word that is NOT a type", () => {
     expect(probe("to make a mess: print 1", "make a mess")).toMatchInlineSnapshot(`
       "export function makeAMess() {
-        return core.console.log(1)
+        return core.asAction({ undoneAs: "Make a Mess" }, () => core.console.log(1))
       }
       makeAMess()"
     `)
@@ -282,7 +282,7 @@ describe("grammar probes", () => {
       "Card.prototype.giveToPile = function (pile) {
         return core.console.log(1)
       }
-      core.describeAction(Card, "giveToPile", { title: "Give A Card To A Pile", undoneAs: "Give A Card To A Pile" })
+      core.describeAction(Card, "giveToPile", { title: "Give Card to Pile", undoneAs: "Give Card to Pile" })
       card.giveToPile(pile)"
     `)
   })
@@ -297,11 +297,11 @@ describe("grammar probes", () => {
       )
     ).toMatchInlineSnapshot(`
       "export function doubleN(n) {
-        return n * 2
+        return core.asAction({ undoneAs: "Double N" }, () => n * 2)
       }
       if (doubleN(x) === 4) core.console.log(1)
       export function announceMessage(message) {
-        return core.console.log(1)
+        return core.asAction({ undoneAs: "Announce Message" }, () => core.console.log(1))
       }
       announceMessage(x + y)"
     `)
@@ -310,10 +310,12 @@ describe("grammar probes", () => {
   test("T6  the retired `wait for`:  a statement waits for everything, an expression for an operand, each an error", () => {
     expect(probe("to check: wait for x is 1", "to check again: if wait for x is 1: print 1")).toMatchInlineSnapshot(`
       "export async function check() {
-        return await (x === 1)
+        return core.asAction({ undoneAs: "Check" }, async () => await (x === 1))
       }
       export async function checkAgain() {
-        if (await x === 1) core.console.log(1)
+        return core.asAction({ undoneAs: "Check Again" }, async () => {
+          if (await x === 1) core.console.log(1)
+        })
       }
       ERROR 8:10 "wait for" isn't needed any more, as spell waits by itself:  take it out, or run \`spell lint --fix\`
       ERROR 9:19 "wait for" isn't needed any more, as spell waits by itself:  take it out, or run \`spell lint --fix\`"
@@ -555,7 +557,7 @@ describe("grammar probes", () => {
       Card.prototype.stashInPile = function (pile) {
         this.pile = pile
       }
-      core.describeAction(Card, "stashInPile", { title: "Stash A Card In A Pile", undoneAs: "Stash A Card In A Pile" })
+      core.describeAction(Card, "stashInPile", { title: "Stash Card in Pile", undoneAs: "Stash Card in Pile" })
       Object.defineProperty(Card.prototype, "pile", {
         get() {
           return Pile.ownerOf(this)

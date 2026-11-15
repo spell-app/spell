@@ -586,8 +586,8 @@ export class User extends Thing {
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
-core.describeAction(User, "lookAtUser", { title: "Look At It", undoneAs: "Look At It" })
-core.describeAction(User, "lookAwayFromUser", { title: "Look Away From It", undoneAs: "Look Away From It" })
+core.describeAction(User, "lookAtUser", { title: "Look at It", undoneAs: "Look at It" })
+core.describeAction(User, "lookAwayFromUser", { title: "Look Away from It", undoneAs: "Look Away from It" })
 
 export class IssueUser extends Thing {
   // - its "login" is text
@@ -1872,7 +1872,7 @@ export class GithubPage extends Thing {
     }
   }
 }
-core.describeAction(GithubPage, "tryWords", { title: "Try Words As Text", undoneAs: "Try Words As Text" })
+core.describeAction(GithubPage, "tryWords", { title: "Try Words", undoneAs: "Try Words" })
 
 core.heading("Someone on GitHub")
 ///////////////////////
@@ -2983,7 +2983,7 @@ export class JsonplaceholderPage extends Thing {
     ), failedSay: () => "JSONPlaceholder can't be reached just now." })
   }
 }
-core.describeAction(JsonplaceholderPage, "addTheNewTodo", { title: "Add The New Todo", undoneAs: "Add The New Todo" })
+core.describeAction(JsonplaceholderPage, "addTheNewTodo", { title: "Add the New Todo", undoneAs: "Add the New Todo" })
 
 core.heading("A todo")
 ////////////
@@ -3817,7 +3817,7 @@ export class MetMuseumPage extends Thing {
     )
   }
 }
-core.describeAction(MetMuseumPage, "tryWords", { title: "Try Words As Text", undoneAs: "Try Words As Text" })
+core.describeAction(MetMuseumPage, "tryWords", { title: "Try Words", undoneAs: "Try Words" })
 
 core.heading("An artwork")
 ////////////////
@@ -4252,7 +4252,7 @@ export class RestCountriesPage extends Thing {
     })
   }
 }
-core.describeAction(RestCountriesPage, "pickRegionRegion", { title: "Pick Region Region As Text", undoneAs: "Pick Region Region As Text" })
+core.describeAction(RestCountriesPage, "pickRegionRegion", { title: "Pick Region Region", undoneAs: "Pick Region Region" })
 
 core.heading("Its money")
 ///////////////

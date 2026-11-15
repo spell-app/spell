@@ -65,6 +65,14 @@ export class SpellStatement<
    */
   declare givesValue: boolean
   @proto static givesValue = false
+  /**
+   * `true`:  as the last line of a body answering yes or no (`answersYesOrNo()`), a line of ours that reads whole as
+   * a yes or no asks it instead (epic `language` T135):
+   * `it is droppable when` then `the card is the last item of the card's pile` asks, it doesn't set the card.
+   * - `assignment`'s:  `x is 1` sets `x` anywhere else.
+   */
+  declare readsAsQuestion: boolean
+  @proto static readsAsQuestion = false
   /** TYPE-ONLY: props `parser.addRule()` accepts for this rule -- see `P.Rule`'s `Props`. */
   declare readonly Props: SpellStatementProps
 
@@ -311,8 +319,11 @@ export class SpellStatement<
     const inlineStatement = nestedScope.parser?.parse(tokens, parseAs, nestedScope)
     if (inlineStatement) {
       statement.addMatch(inlineStatement, "body")
-      // the subject `withWhichSubject()` put back isn't on the line:  we're as long as the words we read
-      if (tokens !== unparsed) statement.tokens.splice(statement.tokens.indexOf(tokens[0]!), 1)
+      // the subjects `withWhichSubject()` put back aren't on the line:  we're as long as the words we read
+      if (tokens !== unparsed) {
+        const asWritten = new Set(unparsed)
+        statement.tokens = statement.tokens.filter((token) => token.raw !== "" || asWritten.has(token))
+      }
       statement.data.body = inlineStatement
     }
     return inlineStatement
@@ -322,8 +333,11 @@ export class SpellStatement<
    * `unparsed`, a condition after a list, with its subject put back when it starts `which` (epic `language` T133):
    * `the cards in the deck which are face up` reads its condition as `it is face up`, as `where` would.
    * - Only after a `where` group whose word means `which` (the `where_or_which` word rule):  `which`, `that`, `who`.
-   * - The subject, and the first word made the item's own (`are` => `is`), from the language's `whichClause`;
-   *   none (Spanish's `que`):  `unparsed` as it is, its subject left out as after `donde` (`implied_it`).
+   * - The subject, from the language's `whichClause`;  none (Spanish's `que`):  `unparsed` as it is,
+   *   its subject left out as after `donde` (`implied_it`).
+   * - Each plural verb starting a clause made the item's own (`are` => `is`):  the first word,
+   *   and the first after each of the clause's joining words (`and`, `or`;  epic `language` J173):
+   *   `which are face up and are in the stock` ~== `where it is face up and is in the stock`.
    * - The subject takes no room on the line, just after `which`:  editors colour `which` and the words after as they are.
    */
   static withWhichSubject(statement: P.Match, unparsed: P.Token[]): P.Token[] {
@@ -331,11 +345,42 @@ export class SpellStatement<
     if (!(where instanceof P.Match)) return unparsed
     if (!Wording.reads(statement.scope, "where_or_which", where.inputText.trim(), "which")) return unparsed
     const clause = SP.Language.of(statement.scope).words.whichClause
-    const [first, ...rest] = unparsed
+    const first = unparsed[0]
     if (!clause || !(first instanceof P.WordToken)) return unparsed
-    const subject = new P.WordToken({ value: clause.subject, raw: "", whitespace: "", start: where.end ?? first.start })
-    const verb = clause.singularVerbs[first.value]
-    return [subject, verb ? new P.WordToken({ ...first.record, value: verb }) : first, ...rest]
+    const subjectAt = (start: number) => new P.WordToken({ value: clause.subject, raw: "", whitespace: "", start })
+    const tokens = [subjectAt(where.end ?? first.start ?? 0), ...unparsed]
+    SpellStatement.singularVerbAt(tokens, 1, clause.singularVerbs)
+    // each later clause starting with a plural verb:  its subject put back too, `... and it is in the stock`
+    for (let index = 2; index < tokens.length; index++) {
+      if (!clause.joins.has(String(tokens[index - 1]!.value))) continue
+      if (!SpellStatement.singularVerbAt(tokens, index, clause.singularVerbs)) continue
+      tokens.splice(index, 0, subjectAt(tokens[index]!.start ?? 0))
+      index++
+    }
+    // the words we changed, known to every rule's quick test of the line's words
+    P.Sequence.addLineWords(tokens, unparsed)
+    return tokens
+  }
+
+  /**
+   * SIDE EFFECT:  the plural verb at `tokens[index]`, if it is one, made singular in place (`are` => `is`),
+   * for `withWhichSubject()`;  `true` if it was.
+   * - One with an apostrophe too:  spell's words split `aren't` into `aren`, `'`, `t`, so `aren` => `isn`
+   *   when its `'t` follows straight on (`singularVerbs` names it `aren't`).
+   */
+  static singularVerbAt(tokens: P.Token[], index: number, singularVerbs: Readonly<Record<string, string>>): boolean {
+    const word = tokens[index]
+    if (!(word instanceof P.WordToken)) return false
+    const apostrophe = tokens[index + 1]
+    const t = tokens[index + 2]
+    const contracted =
+      !word.whitespace && apostrophe?.value === "'" && !apostrophe.whitespace && t?.value === "t"
+        ? singularVerbs[`${word.value}'t`]
+        : undefined
+    const verb = contracted?.slice(0, -2) ?? singularVerbs[String(word.value)]
+    if (!verb) return false
+    tokens[index] = new P.WordToken({ ...word.record, value: verb })
+    return true
   }
 
   /**
@@ -429,6 +474,15 @@ export class SpellStatement<
   }
 
   /**
+   * Does our body answer yes or no, so its last line asks (`readsAsQuestion`)?
+   * - e.g. `it is droppable when` (`ListGuard`), `it "is face up" if` (`QuotedTypeExpression`).
+   * - Default:  no.
+   */
+  answersYesOrNo(_statement: P.Match): boolean {
+    return false
+  }
+
+  /**
    * `block`, our indented body, giving back its last line's value -- see `returnsLastLine()`:
    * - its last line a value already (a call, `givesValue`):  `block`, noting that line as `returnsLast`
    * - its last line one no statement reads, but an expression does, e.g. `its n * x`:
@@ -445,21 +499,29 @@ export class SpellStatement<
     const line = [...block.matched].reverse().find((item) => item instanceof P.Match && Block.isCodeLine(item))
     if (!(line instanceof P.Match)) return undefined
     const lineStatement = (line.data as { statement?: P.Match }).statement
-    if (lineStatement) {
+    // a statement that asks, in a body answering yes or no (`the card is ...`):  read again, as a question
+    const asks =
+      lineStatement?.rule instanceof SpellStatement &&
+      lineStatement.rule.readsAsQuestion &&
+      this.answersYesOrNo(statement)
+    if (lineStatement && !asks) {
       if (!(lineStatement.rule instanceof SpellStatement) || !lineStatement.rule.givesValue) return undefined
       block.data.returnsLast = lineStatement
       return block
     }
     // a line nothing read:  read as an expression, the whole of it
     const lineToken = line.tokens[0]
-    if (!(lineToken instanceof P.LineToken) || !Block.getParseErrors(line)?.length) return undefined
+    if (!(lineToken instanceof P.LineToken) || (!asks && !Block.getParseErrors(line)?.length)) return undefined
     const { nestedScope } = statement
     const tokens = lineToken.tokens.filter((token) => !(token instanceof P.CommentToken))
     const value = nestedScope.parser?.parse(tokens, "expression", nestedScope)
     if (value?.length !== tokens.length || value.is(ParseError)) return undefined
+    if (asks && value.datatype !== "choice") return undefined
     // markup draws, only in a drawing:  anywhere else it stays an error (epic `elemental-spell` Q14)
     if (value.AST instanceof P.ASTJSXElement) return undefined
-    const kept = line.matched.filter((item) => !(item instanceof P.Match && item.is(ParseError)))
+    const kept = line.matched.filter(
+      (item) => !(item instanceof P.Match && (item.is(ParseError) || item === lineStatement))
+    )
     const valueLine = new P.Match({
       rule: line.rule,
       matched: [...kept, value],

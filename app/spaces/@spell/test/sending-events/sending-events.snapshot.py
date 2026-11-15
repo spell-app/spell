@@ -96,7 +96,7 @@ def on_lonely(event: Any) -> None:
     print("the program heard lonely")
 
 
-@core.as_action({"undone_as": "Play The Story"})
+@core.as_action({"undone_as": "Play the Story"})
 async def play_the_story() -> None:
     it = Pile()
     pile = it
