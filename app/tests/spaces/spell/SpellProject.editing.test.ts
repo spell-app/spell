@@ -30,11 +30,11 @@ describe("SpellProject editing", () => {
   })
 
   test("`spellFiles` are its active spell imports, in order -- and each `isActive`", () => {
-    // its cards, deck and piles, then its game
+    // its cards, piles and deck, then its game:  its project file's order (Owen's tabs)
     expect(project.spellFiles.map((file) => file.filePath)).toEqual([
       "/Card.spell",
-      "/Deck.spell",
       "/Pile.spell",
+      "/Deck.spell",
       "/Solitaire.spell"
     ])
     expect(project.spellFiles.every((file) => file.isActive)).toBe(true)

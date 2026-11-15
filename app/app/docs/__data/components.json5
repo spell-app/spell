@@ -1832,6 +1832,10 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
         {
+          "name": "EditorZone",
+          "file": "src/app/solid/EditorZones.tsx"
+        },
+        {
           "name": "InputEditor",
           "file": "src/app/solid/InputEditor.tsx"
         },

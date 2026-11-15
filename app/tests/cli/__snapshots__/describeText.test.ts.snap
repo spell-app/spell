@@ -4,7 +4,7 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
 "Card.spell
   template Card  is a TwoSidedView
     A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-    Properties  rank, suit, color, name, value, symbol, short name, picture, lifted, pile
+    Properties  rank, suit, color, name, value, symbol, short name, picture, pile
     Actions     is a face card, is a number card, is the (rank) of (suit), play a card,
                 put a card on a pile, count the points for a card on a pile
     Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
@@ -41,7 +41,7 @@ Card.spell:1
 
 A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
 
-Properties  rank, suit, color, name, value, symbol, short name, picture, lifted, pile
+Properties  rank, suit, color, name, value, symbol, short name, picture, pile
 Actions     is a face card, is a number card, is the (rank) of (suit), play a card,
             put a card on a pile, count the points for a card on a pile
 Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spades),
@@ -91,8 +91,6 @@ Spell
         return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
       return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
   
-    // Over every card and pile around it while the cheat moves it -- styles.css
-    its "lifted" is yes or no
     to draw its front
       <text color={its color}>{its picture}</text>
     to draw its back

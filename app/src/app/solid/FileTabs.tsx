@@ -103,7 +103,7 @@ export function FileTabs() {
     if (isInTip(event)) return undefined
     const tab = event.composedPath().find((at) => (at as Element).localName === "ui-item") as HTMLElement | undefined
     if (!tab?.parentElement) return undefined
-    // by its place among the TABS:  the bar's ⋯ (a `<ui-dropdown>`) sits among them too (epic `editor` T50)
+    // by its place among the TABS:  the bar's ⋯ (a `<ui-icon>` and its `<ui-popup>`) sits among them too (epic `editor` T50)
     const tabs = [...tab.parentElement.children].filter((each) => each.localName === "ui-item") as HTMLElement[]
     const files = bar()?.files.getValues() ?? []
     const file = files[tabs.indexOf(tab)]

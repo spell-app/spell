@@ -73,12 +73,12 @@ describe("choosing a tag or an attribute in a real Monaco editor (I70)", () => {
     return text.slice(0, offset) + "|" + text.slice(offset)
   }
 
-  test('`<act` + Tab => `<action "|"/>`, and the list is asked for again, in its quotes', async () => {
+  test('`<act` + Tab => `<action "|" />`, and the list is asked for again, in its quotes', async () => {
     offer = (typed, after) =>
       /<act$/.test(typed) ? [{ label: "action", ...LSP.CompletionShapes.spellTag("action", "action", after) }] : []
     const code = editorOf([`\t<act`])
     await chooseFirst(code)
-    expect(withCaret(code)).toBe(`\t<action "|"/>`)
+    expect(withCaret(code)).toBe(`\t<action "|" />`)
     // the program's actions, listed at once
     await vi.waitUntil(() => asked.includes("1:11"), { timeout: 5_000 })
   })
