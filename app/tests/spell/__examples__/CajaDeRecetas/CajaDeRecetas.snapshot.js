@@ -29,7 +29,7 @@ export class Receta extends Thing {
   draw() {
     return h("es-tarjeta",
       h("es-contenido",
-        h("es-formulario", { class: "recipe", value: this },
+        h("es-formulario", { class: "recipe", "prop:value": this },
           h("es-campo", { etiqueta: "Nombre de la receta" },
             h("es-boton", {
               class: "edit",
@@ -257,7 +257,7 @@ export class CajaDeRecetas extends App {
           h("es-texto", { color: "gris" }, "Todo lo que escribes se guarda al instante.")
         ),
         h("es-barra-herramientas", { class: "undo", menu: "menú de la caja", "aria-label": "Recetas" }),
-        h("es-formulario", { class: "find", value: this, fluido: true },
+        h("es-formulario", { class: "find", "prop:value": this, fluido: true },
           h("es-campo", { etiqueta: "Buscar" },
             h("es-entrada", { class: "search", name: "búsqueda", icono: "search" })
           )

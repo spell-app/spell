@@ -1396,6 +1396,22 @@ describe("outline style", () => {
       // a part, `drawFront()` -- see `codeSpellGrows.test.ts`
       expect(errorsOf(["a card is a view where:", '\t- to "draw its front": <b/>'])).toHaveLength(0)
     })
+
+    test("a view handed a thing, `<card-image card={it} />`, takes it as a property, never an attribute (epic `language` I104)", () => {
+      const js = compile([
+        "a card is a view where:",
+        "\t- its rank is a number",
+        "\t- to draw it:",
+        "\t\t<card-image card={it} rank=2 />",
+        "a card image is a view where:",
+        "\t- its card is a card",
+        "\t- its rank is a number",
+        "\t- to draw it:",
+        "\t\t<b/>"
+      ])
+      // an attribute would be `card="[object Object]"`;  a number stays an attribute
+      expect(js).toMatch(/h\("[\w-]*card-image", \{ "prop:card": this, rank: 2 \}\)/)
+    })
   })
 
   test("`[rank]` fills in, in text and markup:  inside a card, a bare property is its own (P4)", () => {

@@ -1299,7 +1299,7 @@ export class Guide extends App {
         <ui-button class="logo" appearance="transparent" font="all-caps" onClick={core.pressed(this, () => this.goToWhere("films"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Star Wars
         </ui-button>
-        <ui-form class="find" value={this}>
+        <ui-form class="find" prop:value={this}>
           <ui-field label="Search the galaxy">
             <ui-input name="search" icon="search" placeholder="Luke, Hoth, Falcon" />
           </ui-field>

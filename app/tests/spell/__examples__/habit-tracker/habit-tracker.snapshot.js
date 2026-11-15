@@ -83,7 +83,7 @@ export class Habit extends View {
   /** A form of its own, bound to it:  ticking a day, or typing a name, changes the habit */
   draw() {
     return h("ui-segment",
-      h("ui-form", { value: this },
+      h("ui-form", { "prop:value": this },
         h("ui-stack", { spacing: "sm" },
           h("ui-stack", { direction: "horizontal", justify: "between" },
             h("ui-input", { name: "name", "aria-label": "Habit", appearance: "transparent" }),
@@ -215,7 +215,7 @@ export class HabitTracker extends App {
     return h("ui-container", { text: true },
       h("ui-stack",
         h("ui-header", { level: "2" }, "This week"),
-        h("ui-form", { value: this },
+        h("ui-form", { "prop:value": this },
           h("ui-input", {
             name: "draft",
             placeholder: "A habit to keep, e.g. Read",

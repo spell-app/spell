@@ -78,7 +78,7 @@ export class Bill extends App {
   draw() {
     return h("ui-container", { text: true },
       h("ui-segment",
-        h("ui-form", { value: this },
+        h("ui-form", { "prop:value": this },
           h("ui-stack",
             h("ui-input", { name: "amount", type: "number", min: "0", step: "0.01", label: "Bill $", fluid: true }),
             h("ui-input", { name: "percent", type: "percent", min: "0", label: "Tip %", fluid: true }),

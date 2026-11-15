@@ -101,7 +101,7 @@ export class MailChoice extends Thing {
   set how(value) { this.setProp("how", value) }
 
   draw() {
-    return h("ui-form", { class: "mail-choice", value: this },
+    return h("ui-form", { class: "mail-choice", "prop:value": this },
       h("ui-field", { label: "Mail me", inline: true },
         h("ui-select", { name: "how" },
           h("ui-item", { value: "each" }, "One mail per message"),

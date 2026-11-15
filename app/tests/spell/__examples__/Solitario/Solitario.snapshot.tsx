@@ -64,7 +64,7 @@ export class Carta extends TwoSidedView {
   }
 
   drawFront() {
-    return <test-project-imagen-de-carta carta={this} part="front" />
+    return <test-project-imagen-de-carta prop:carta={this} part="front" />
   }
 
   drawBack() {

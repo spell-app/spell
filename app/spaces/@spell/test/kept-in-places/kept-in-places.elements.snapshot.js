@@ -119,7 +119,7 @@ export class NoteKeeper extends App {
 
   draw() {
     return h("ui-stack",
-      h("ui-form", { value: this },
+      h("ui-form", { "prop:value": this },
         h("ui-input", { name: "draft", "aria-label": "Note" }),
         h("ui-button", {
           class: "keep",

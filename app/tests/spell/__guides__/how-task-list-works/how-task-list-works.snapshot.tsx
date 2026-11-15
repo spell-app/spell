@@ -40,7 +40,7 @@ export class Task extends View {
   /** a form of its own, bound to the task:  ticking the box changes its "done" */
   @drawn draw() {
     return (
-      <ui-form value={this}>
+      <ui-form prop:value={this}>
         <ui-stack direction="horizontal" spacing="sm">
           <ui-checkbox name="done" aria-label="Done" />
           <ui-text>{this.title}</ui-text>

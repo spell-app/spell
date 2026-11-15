@@ -77,7 +77,7 @@ export class Habit extends View {
   @drawn draw() {
     return (
       <ui-segment>
-        <ui-form value={this}>
+        <ui-form prop:value={this}>
           <ui-stack spacing="sm">
             <ui-stack direction="horizontal" justify="between">
               <ui-input name="name" aria-label="Habit" appearance="transparent" />
@@ -241,7 +241,7 @@ export class HabitTracker extends App {
       <ui-container text={true}>
         <ui-stack>
           <ui-header level="2">This week</ui-header>
-          <ui-form value={this}>
+          <ui-form prop:value={this}>
             <ui-input name="draft" placeholder="A habit to keep, e.g. Read" aria-label="New habit" fluid={true} action={true}>
               <ui-button slot="action" color="primary" disabled={this.draft === ""} onClick={core.pressed(this, () => this.addTheDraft())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                 Add

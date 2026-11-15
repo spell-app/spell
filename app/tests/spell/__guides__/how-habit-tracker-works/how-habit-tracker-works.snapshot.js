@@ -89,7 +89,7 @@ export class Habit extends App {
       h("ui-segment",
         h("ui-stack",
           h("ui-header", { size: "small" }, () => this.name),
-          h("ui-form", { value: this },
+          h("ui-form", { "prop:value": this },
             h("ui-stack", { direction: "horizontal", justify: "between", wrap: true },
               h("ui-checkbox", { name: "monday", label: "Mon" }),
               h("ui-checkbox", { name: "tuesday", label: "Tue" }),

@@ -41,7 +41,7 @@ export class Tarea extends View {
 
   draw() {
     // un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"
-    return h("es-formulario", { value: this },
+    return h("es-formulario", { "prop:value": this },
       h("es-pila", { direccion: "horizontal", separacion: "sm" },
         h("es-casilla", { name: "hecha", "aria-label": "Hecha" }),
         h("es-texto", () => this.título)
