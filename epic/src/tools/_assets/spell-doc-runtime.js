@@ -83,7 +83,7 @@ import { clamp } from "spell/util/number"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { slug } from "spell/util/string"
 import { PagePatch } from "spell/server/site"
-import { wireComments } from "./spell-doc-comments.js"
+import { commentsOnPage, wireComments } from "./spell-doc-comments.js"
 import {
   FIELDS,
   addBlockAction,
@@ -234,6 +234,21 @@ const FOLD_KEY_PREFIX = "spell-folds:"
 /** `sessionStorage` key prefix of the folds a live reload puts back (`{ [id]: open }`, `keepFoldsForReload()`). */
 const KEPT_FOLDS_KEY_PREFIX = "spell-doc:kept-folds:"
 
+/** `sessionStorage` key prefix of the field a live reload brings back (`keepFieldForReload()`, epic `epic-engine` I291). */
+const KEPT_FIELD_KEY_PREFIX = "spell-doc:kept-field:"
+
+/**
+ * On `<html>` while a field typed in before a live reload is still to come back (`takeKeptField()`):
+ * `SendCountdown.isTypingIn()` holds Auto Send for it, as for the field itself.
+ */
+const RESTORING_FIELD = "data-spell-restoring-field"
+
+/** How long a kept field gets to be drawn again after a live reload (its block opening, its part loading), in ms. */
+const KEPT_FIELD_WAIT_MS = 4000
+
+/** `<input>` types that aren't text (`isTextField()`):  the live client's `typing()` reads them alike. */
+const NOT_TEXT_INPUTS = /^(button|checkbox|radio|range|reset|submit|color|file|image|hidden)$/
+
 /**
  * `localStorage` key prefix of a page's item filters (`{ [section id]: [states shown] }`), per page.
  * - `<epic-section>`'s own key too (its `FILTER_KEY`), the same shape
@@ -289,6 +304,9 @@ async function start() {
   // a LIVE reload (the page's code changed) comes back as the reader left it:  every fold, and the scroll
   const kept = takeKeptFolds(landing.scroll !== undefined)
   keepFoldsForReload(main)
+  // and the field they were typing in (I291):  held from Auto Send until it's back
+  const keptField = takeKeptField(landing.scroll !== undefined)
+  keepFieldForReload()
   if (landing.scroll !== undefined) {
     // never the section the address names:  `<epic-*>` blocks follow the address's `#hash` by themselves as they
     // first connect, and landed on its top (I23 of `epic-engine`);  the address follows the scroll again once landed
@@ -346,7 +364,8 @@ async function start() {
   void Promise.resolve(window.SpellUI?.themed).then(() => window.SPELL_SERVER?.reveal?.())
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
   wireNotes(main)
-  void wireComments(main, { go, pageFolds: folds })
+  const comments = wireComments(main, { go, pageFolds: folds })
+  if (keptField) void restoreKeptField(keptField, comments)
   stackWrappedSteps(main)
   wireNewEpic(main)
   wireEpicSort(main)
@@ -2473,6 +2492,138 @@ function takeKeptFolds(live) {
   const kept = live ? PrefStore.getAt(key, "session") : undefined
   PrefStore.setAt(key, undefined, "session")
   return kept && typeof kept === "object" ? kept : undefined
+}
+
+/**
+ * Keep the text field the reader is in as the page goes (`pagehide`), for a LIVE reload to bring back
+ * (`restoreKeptField()`;  epic `epic-engine` I291).
+ * - Owen, on I254:  "You seem to be reloading the epic pages frequently, often when I am typing in a field ... that
+ *   seems to submit the comment.  Before reloading, you should note if i'm typing in a field or a bullhorn and the
+ *   reload should focus in the field and scroll so it is visible"
+ *   - a reload waits while the reader TYPES (`typing()`, the live client's, I172), but not in a field only given the
+ *     focus back, nor once the page is out of sight:  the bullhorn's pane went, and the comment it had saved showed
+ *     as sent, for Auto Send to send
+ * - `{ value, caret, ... }`:  a comment's field as the comments describe it (`PageComments.keptField()`:  the pane,
+ *   a thread's box), any other by its address through shadow roots (`fieldAddress()`:  an item's note box)
+ * - in `sessionStorage`, by page;  read only after a live reload, as the folds are
+ */
+function keepFieldForReload() {
+  addEventListener("pagehide", () => {
+    const field = deepActiveElement()
+    const kept = isTextField(field)
+      ? {
+          ...(commentsOnPage()?.keptField(field) ?? { kind: "field", address: fieldAddress(field) }),
+          value: field.value,
+          caret: [field.selectionStart, field.selectionEnd]
+        }
+      : undefined
+    PrefStore.setAt(`${KEPT_FIELD_KEY_PREFIX}${location.pathname}`, kept, "session")
+  })
+}
+
+/**
+ * The field `keepFieldForReload()` kept as the page last went, when this load is a LIVE reload (`live`);
+ * else `undefined`.  Forgets it either way.
+ * - SIDE EFFECT:  while one is to come back, `<html data-spell-restoring-field>` holds Auto Send
+ *   (`SendCountdown.isTypingIn()`), as the field itself would, until `restoreKeptField()` is done
+ */
+function takeKeptField(live) {
+  const key = `${KEPT_FIELD_KEY_PREFIX}${location.pathname}`
+  const kept = live ? PrefStore.getAt(key, "session") : undefined
+  PrefStore.setAt(key, undefined, "session")
+  if (!kept || typeof kept !== "object" || typeof kept.value !== "string") return undefined
+  document.documentElement.setAttribute(RESTORING_FIELD, "")
+  return kept
+}
+
+/**
+ * Bring back the field the reader was typing in before a live reload (`keepFieldForReload()`):  found again (the
+ * comments open the pane or thread box again;  any other by its address, as its block draws), its text, caret and
+ * focus put back, scrolled into sight below the stuck titles if it's off screen.
+ * - `comments`:  `wireComments()`'s promise:  the comments' own fields wait for them
+ * - text only put back when it differs (an item's note comes back from the review inbox by itself), with an `input`
+ *   event, so what saves drafts sees it
+ * - gives up after `KEPT_FIELD_WAIT_MS`:  a field that's gone stays gone
+ * - NEVER throws;  lets Auto Send go again when done
+ */
+async function restoreKeptField(kept, comments) {
+  try {
+    let field
+    if (kept.kind === "field") {
+      const until = Date.now() + KEPT_FIELD_WAIT_MS
+      while (!(field = fieldAt(kept.address)) && Date.now() < until) await nextFrame(1)
+    } else {
+      await comments
+      field = await commentsOnPage()?.restoreField(kept)
+    }
+    if (!isTextField(field)) return
+    if (field.value !== kept.value) {
+      field.value = kept.value
+      field.dispatchEvent(new Event("input", { bubbles: true, composed: true }))
+    }
+    // the box draws a frame later (an item's note box in its shadow roots):  hidden, it can't take the focus
+    await nextFrame(1)
+    field.focus({ preventScroll: true })
+    const [start, end] = kept.caret ?? [field.value.length, field.value.length]
+    if (typeof start === "number") field.setSelectionRange(start, end ?? start)
+    const box = field.getBoundingClientRect()
+    const top = stuckBottom(document.querySelector("main.spell-doc-main") ?? document.querySelector("main"))
+    if (box.top < top || box.bottom > innerHeight) field.scrollIntoView({ block: "center", behavior: "instant" })
+  } catch (error) {
+    console.warn("spell-doc:  the field typed in before the reload didn't come back", error)
+  } finally {
+    document.documentElement.removeAttribute(RESTORING_FIELD)
+  }
+}
+
+/** Is `element` a text field the reader types in:  a `<textarea>`, or an `<input>` of text? */
+function isTextField(element) {
+  if (element instanceof HTMLTextAreaElement) return true
+  return element instanceof HTMLInputElement && !NOT_TEXT_INPUTS.test(element.type)
+}
+
+/**
+ * Where `field` is, through shadow roots:  a selector per root, outermost first, which `fieldAt()` follows.
+ * - in each root:  from the nearest element with an `id` (else the root), each step its tag with its `part`, else
+ *   its place among its kind (`:nth-of-type()`)
+ */
+function fieldAddress(field) {
+  const address = []
+  for (let node = field; node;) {
+    const root = node.getRootNode()
+    address.unshift(selectorIn(node, root))
+    node = root instanceof ShadowRoot ? root.host : null
+  }
+  return address
+}
+
+/** `element`'s selector in `root` (`fieldAddress()`'s step). */
+function selectorIn(element, root) {
+  const steps = []
+  for (let at = element; at && at !== root; at = at.parentElement) {
+    if (at.id) {
+      steps.unshift(`#${CSS.escape(at.id)}`)
+      break
+    }
+    const part = at.getAttribute("part")
+    const siblings = [...(at.parentElement ?? root).children].filter((each) => each.localName === at.localName)
+    steps.unshift(
+      part ? `${at.localName}[part="${CSS.escape(part)}"]` : `${at.localName}:nth-of-type(${siblings.indexOf(at) + 1})`
+    )
+  }
+  return steps.join(" > ")
+}
+
+/** The field at `address` (`fieldAddress()`'s), else `null`:  not drawn (yet). */
+function fieldAt(address) {
+  let root = document
+  let found = null
+  for (const [at, selector] of address.entries()) {
+    found = root?.querySelector(selector) ?? null
+    if (!found) return null
+    if (at < address.length - 1) root = found.shadowRoot
+  }
+  return found
 }
 
 /**

@@ -1592,6 +1592,15 @@ In `tools/`:
       - every fold open before it, items and a link's unfolds too:
         this runtime keeps them as the page goes (`keepFoldsForReload()`, `sessionStorage`)
       - a half-written note (the review inbox's drafts) and comment drafts (`localStorage`)
+      - the field being typed in, as the page went (epic `epic-engine` I291;  Owen:  "the reload should focus in the
+        field and scroll so it is visible"):  the bullhorn's pane opened again for the same comment, a thread's box,
+        or any other box by its place through shadow roots (an item's note box);  its text, caret and focus back,
+        scrolled into sight (`keepFieldForReload()`, `restoreKeptField()`)
+        - Auto Send waits for it meanwhile (`<html data-spell-restoring-field>`, `SendCountdown.isTypingIn()`):
+          the comment it held was saved as the page went, and must not be sent as if finished
+        - a reload still waits while the reader types (I172);  this is for the ones that don't:  the field only
+          given the focus back, the page out of sight, a patch that couldn't be applied
+        - [check-live-epics.mjs](demo/check-live-epics.mjs) checks the pane and the note box
     - with no flash (epic `epic-engine` I164):  the new page waits behind the old one (the kit's `holdReveal()`, a
       cross-document view transition) until this runtime has landed and the page wears its theme
       (`SpellUI.themed`), then cross-fades in:  `SPELL_SERVER.reveal()`
