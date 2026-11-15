@@ -121,6 +121,11 @@ export type LiveReview = {
   /** his check pressed (an `approve` mark), not applied yet */
   approved: boolean
   /**
+   * his ✓ or x with nothing for Claude, which the page server applies by itself (`ReviewClient.isClosing()`, epic
+   * `epic-engine` I306):  drawn closed at once;  missing:  not closing
+   */
+  closing?: boolean
+  /**
    * his turn on a comment in it:  Claude spoke last on its thread (`ReviewClient.hasRepliedComments()`, epic
    * `epic-engine` I284);  missing:  none
    */
@@ -141,11 +146,14 @@ export const NO_LIVE_REVIEW: LiveReview = { workedOn: false, approved: false }
  *   blue already (Owen, 2026-11-15:  "I had several comments in this thread that are still open -- the pill should be
  *   orange")
  * - his check pressed, not applied yet:  a green one grey at once
+ * - his ✓ or x the page server applies by itself (`closing`, epic `epic-engine` I306):  grey (`old`) at once,
+ *   whatever it was, so its section folds it away with the greys
  * - NEVER reads the page:  the caller hands it the fields and the live review, tracked or not
  */
 export class DrawnState {
   /** `fields`'s state as drawn, with the inbox saying `live`. */
   static of(fields: StateFields, live: LiveReview, now = Date.now()): ItemState {
+    if (live.closing) return "old"
     if (live.workedOn) return "progress"
     if (live.urgency && DrawnState.canCalm(fields)) return live.urgency.calm ? DrawnState.calmState() : "attention"
     const state = fields.state

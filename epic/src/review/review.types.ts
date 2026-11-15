@@ -513,6 +513,20 @@ export function isImmediate(mark: { action: string; when?: string }): boolean {
  */
 export const INSTANT_GRACE_MS = 2000
 
+/**
+ * How long past its grace an instant mark may still stand before the page gives up on it
+ * (`ReviewClient.isClosing()`, epic `epic-engine` I306):  its item shows again, and a notice says the server didn't
+ * apply it.
+ * - long enough for a page server restart (`ServerLink.post()` tries for 30s) and its first look at the inbox
+ */
+export const INSTANT_FAIL_MS = 40_000
+
+/**
+ * How long an item stays drawn closed after the page server applied its instant mark (`ReviewClient.isClosing()`):
+ * the page's own update of the item lands meanwhile, so it never shows open for a moment.
+ */
+export const CLOSED_HOLD_MS = 15_000
+
 /** An item's id, as an instant mark takes one:  an issue, a judgement call, a question or a todo (`i3`, `j3` ...). */
 const INSTANT_ITEM = /^[ijqt]\d+$/
 

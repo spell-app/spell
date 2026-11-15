@@ -3,7 +3,14 @@ import { describe, expect, test, vi } from "vite-plus/test"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
 import { ReviewClient } from "spell/epic/review/ReviewClient"
-import { NOBODY_LISTENING, REVISIT_KEY_PREFIX, type ReviewClientOptions } from "spell/epic/review/review.types"
+import {
+  CLOSED_HOLD_MS,
+  INSTANT_FAIL_MS,
+  INSTANT_GRACE_MS,
+  NOBODY_LISTENING,
+  REVISIT_KEY_PREFIX,
+  type ReviewClientOptions
+} from "spell/epic/review/review.types"
 
 ////////////////
 // ## Fakes
@@ -859,5 +866,61 @@ describe("ReviewClient:  a note Claude TOOK", () => {
       "",
       "float them"
     ])
+  })
+})
+
+// epic `epic-engine` I306:  "it should show as grey and hide with an animate up immediately (optimistic update)"
+describe("ReviewClient.isClosing() (an instant ✓ or x, drawn closed at once)", () => {
+  test("closing from the click;  a second click takes it back at once, never held", async () => {
+    const { client } = await started()
+    expect(client.isClosing("j2")).toBe(false)
+    client.press("j2", "approve")
+    expect(client.isClosing("j2")).toBe(true)
+    client.press("j2", "approve")
+    expect(client.isClosing("j2")).toBe(false)
+    await vi.waitFor(() => expect(client.markOf("j2")).toBeUndefined())
+    expect(client.isClosing("j2")).toBe(false)
+  })
+
+  test("a mark with a note isn't closing:  it waits for Send, and Claude", async () => {
+    const { client } = await started()
+    client.type("q1", "why not")
+    client.press("q1", "drop")
+    await vi.waitFor(() => expect(client.markOf("q1")?.note).toBe("why not"))
+    expect(client.isClosing("q1")).toBe(false)
+  })
+
+  test("applied by the server (the mark gone):  held closed a while, then as the page says", async () => {
+    vi.useFakeTimers()
+    try {
+      const { client, server } = await started()
+      client.press("q1", "drop")
+      await vi.waitFor(() => expect(server.inbox.forPage().marks.q1).toBeDefined())
+      server.inbox.setMark("q1", null)
+      await vi.waitFor(async () => expect(await client.refresh()).toBe(true))
+      expect(client.markOf("q1")).toBeUndefined()
+      expect(client.isClosing("q1")).toBe(true)
+      vi.advanceTimersByTime(CLOSED_HOLD_MS + 1)
+      expect(client.isClosing("q1")).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  test("never applied:  given up on after its grace and INSTANT_FAIL_MS, the item back and a notice", async () => {
+    vi.useFakeTimers()
+    try {
+      const { client } = await started()
+      const notices: string[] = []
+      client.onNotice((message) => notices.push(message))
+      client.press("q1", "drop")
+      await vi.waitFor(() => expect(client.markOf("q1")).toBeDefined())
+      expect(client.isClosing("q1")).toBe(true)
+      vi.advanceTimersByTime(INSTANT_GRACE_MS + INSTANT_FAIL_MS + 10)
+      expect(client.isClosing("q1")).toBe(false)
+      expect(notices.at(-1)).toMatch(/Q1 isn't closed/)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
