@@ -209,6 +209,45 @@ assignmentEs.addRule(ReturnStatement, {
   syntax: "(devolver|salir con?) {expression}? {nested_expression}?",
   tests: [
     {
+      title: "A ladder of values indented under it, the lines a property's value takes (epic `language` I96)",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        ;(scope as P.BlockScope).variables.add("bar")
+      },
+      tests: [
+        [
+          [
+            "para contar los puntos:",
+            "\tdevolver",
+            "\t\t- 10 si bar",
+            "\t\t- 5 si bar es 2",
+            "\t\t- 0 de lo contrario"
+          ],
+          [
+            "export function contarLosPuntos() {",
+            '  return core.asAction({ undoneAs: "Contar los Puntos" }, () => {',
+            "    if (bar) return 10",
+            "    if (bar === 2) return 5",
+            "    return 0",
+            "  })",
+            "}"
+          ]
+        ],
+        {
+          title: "with no `- ` too",
+          input: ["para contar los puntos:", "\tdevolver", "\t\t10 si bar", "\t\t0 de lo contrario"],
+          js: [
+            "export function contarLosPuntos() {",
+            '  return core.asAction({ undoneAs: "Contar los Puntos" }, () => {',
+            "    if (bar) return 10",
+            "    return 0",
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    },
+    {
       title: "Simple return with inline expression",
       compileAs: "statement",
       beforeEach(scope: P.Scope) {

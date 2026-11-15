@@ -63,6 +63,11 @@ export type MenuItem =
       readonly isEnabled: boolean
       readonly isSelected: boolean
       run(way?: ActionWay): boolean
+      /**
+       * The attributes its row takes from the tag that wrote it, `<action "undo" icon-only />` in a `<context-menu>`:
+       * `{ "icon-only": true }`;  none for a template's menu
+       */
+      readonly attributes?: Readonly<Record<string, string | boolean>>
     }
   | { kind: "separator" }
   | {
@@ -376,16 +381,24 @@ export const actingMethods = defineCoreModule({
 
   /**
    * The items of a menu written in a drawing, `<context-menu>` (epic `language`), ready to draw:
-   * each of `names` an action found from `thing` up its chain (`actionOf()`), `-` a line between groups.
+   * each of `items` an action found from `thing` up its chain (`actionOf()`), `-` a line between groups.
    * - What a right click on the element around it shows (`core.drawContextMenu()`).
+   * - An item with its tag's attributes, `["undo", { "icon-only": true }]`:  they go to its row (`attributes`);
+   *   its `title` is its text, over the action's own (`title="Restart"`), as on a button.
    * - An action nothing up the chain has is left out, with a warning:  the compiler said so already.
    */
-  menuItemsOf(thing: object | undefined, names: readonly string[]): MenuItem[] {
-    return names.flatMap((name): MenuItem[] => {
+  menuItemsOf(thing: object | undefined, items: readonly ContextMenuItem[]): MenuItem[] {
+    return items.flatMap((entry): MenuItem[] => {
+      const [name, given] = typeof entry === "string" ? [entry, undefined] : entry
       if (name === "-") return [{ kind: "separator" }]
       const item = actingMethods.actionOf(thing, name)
       if (!item) console.warn(`<context-menu>:  nothing here has an action \`${name}\``)
-      return item ? [item] : []
+      if (!item || !given) return item ? [item] : []
+      const { title, ...attributes } = given
+      // the action's own, read live, under what the tag gave
+      const own: PropertyDescriptorMap = { attributes: { value: attributes } }
+      if (typeof title === "string") own.title = { value: title }
+      return [Object.create(item, own) as typeof item]
     })
   },
 
@@ -399,6 +412,13 @@ export const actingMethods = defineCoreModule({
   }
 })
 Object.assign(core, actingMethods)
+
+/**
+ * One item of a menu written in a drawing, as compiled spell writes it (`core.drawContextMenu()`):
+ * an action's method (`autoPlay`), `-` a line between groups, or an action with its tag's attributes,
+ * `["undo", { "icon-only": true }]`.
+ */
+export type ContextMenuItem = string | readonly [name: string, attributes: Readonly<Record<string, string | boolean>>]
 
 /** A pressed key, as a keyboard event has it:  its name and the modifiers down with it. */
 export type ShortcutKey = {

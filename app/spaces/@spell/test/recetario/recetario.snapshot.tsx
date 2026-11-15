@@ -14,7 +14,7 @@ export class Receta extends View {
 
   @drawn draw() {
     return (
-      <ui-form class="recipe" value={this}>
+      <ui-form class="recipe" prop:value={this}>
         <ui-input name="título" aria-label="Receta" />
         <ui-text class="servings">para {this.porciones}</ui-text>
         <ui-button class="remove" onClick={core.pressed(this, () => this.quitarEso())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
@@ -97,7 +97,7 @@ export class CajaDeRecetas extends App {
 
   @drawn draw() {
     return [
-      <ui-form class="box" value={this}>
+      <ui-form class="box" prop:value={this}>
         <ui-input class="search" name="búsqueda" aria-label="Búsqueda" />
         <ui-input class="draft" name="borrador" aria-label="Receta nueva" />
         <ui-button class="add" onClick={core.pressed(this, () => this.agregarElBorrador())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">

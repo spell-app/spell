@@ -35,7 +35,16 @@ describe("<epic-update>", () => {
     await expectAccessible(root)
   })
 
-  test("bare, after a status change:  `UPDATE : FIXED`, then `Not in main` while its work isn't merged (T75)", async () => {
+  test("bare, under way (I295):  `UNDERWAY`, in the item pill's orange (`--epic-state-replied`)", async () => {
+    const root = await ElementFixture.render(
+      `<p style="--epic-state-replied: rgb(1, 2, 3)">Taken up <epic-update phase="5" became="underway"></epic-update></p>`
+    )
+    const label = root.querySelector("epic-update")!.shadowRoot!.querySelector<HTMLElement>('[part~="label"]')!
+    expect(label.textContent).toBe("UNDERWAY")
+    expect(getComputedStyle(label).backgroundColor).toBe("rgb(1, 2, 3)")
+  })
+
+  test("bare, after a status change:  the word alone, `FIXED`, then `Not in main` while its work isn't merged (T75, I295)", async () => {
     const root = await ElementFixture.render(
       `<p>Fixed <epic-update phase="5" became="fixed" unmerged="epic-engine"></epic-update></p>`
     )
@@ -46,12 +55,12 @@ describe("<epic-update>", () => {
       label: shadow.querySelector('[part~="label"]')!.textContent,
       pill: pill.textContent,
       tip: pill.getAttribute("title")
-    }).toEqual({ label: "UPDATE : FIXED", pill: "Not in main", tip: "On branch epic-engine, not merged into main yet" })
+    }).toEqual({ label: "FIXED", pill: "Not in main", tip: "On branch epic-engine, not merged into main yet" })
     // merged:  the pill goes, the words stay
     update.removeAttribute("unmerged")
     await ElementFixture.settle(root)
     expect(shadow.querySelector('[part~="unmerged"]')).toBeNull()
-    expect(shadow.querySelector('[part~="label"]')!.textContent).toBe("UPDATE : FIXED")
+    expect(shadow.querySelector('[part~="label"]')!.textContent).toBe("FIXED")
     await expectAccessible(root)
   })
 
@@ -324,11 +333,26 @@ describe("<epic-update> bare, its item checked (I285)", () => {
     const update = root.querySelector("epic-update")!
     await ElementFixture.settle()
     const label = () => update.shadowRoot!.querySelector('[part~="label"]')
-    expect(label()?.textContent).toBe("UPDATE : FIXED")
+    expect(label()?.textContent).toBe("FIXED")
     await client.save("i91", { action: "approve" })
     await vi.waitFor(() => expect(label()).toBeNull())
     expect(update.matches(":state(checked)")).toBe(true)
     await client.save("i91", null)
-    await vi.waitFor(() => expect(label()?.textContent).toBe("UPDATE : FIXED"))
+    await vi.waitFor(() => expect(label()?.textContent).toBe("FIXED"))
+  })
+
+  // epic `epic-engine` I302:  the copy on a line of "0. While you were out" follows the line's item
+  test("a copy on a While you were out line:  its line's item's ✓ takes it off too", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const root = await ElementFixture.render(
+      `<epic-away-line line="i91" state="replied">1. I91 It jumps <epic-update phase="52" became="fixed"></epic-update></epic-away-line>`
+    )
+    const update = root.querySelector("epic-update")!
+    await ElementFixture.settle()
+    const label = () => update.shadowRoot!.querySelector('[part~="label"]')
+    expect(label()?.textContent).toBe("FIXED")
+    await client.save("i91", { action: "approve" })
+    await vi.waitFor(() => expect(label()).toBeNull())
   })
 })

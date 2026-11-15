@@ -4,6 +4,9 @@ import { StoragePlace } from "spell/util/persist/StoragePlace"
 
 import { AWAY_ID } from "spell/epic/definitions/definitions.types"
 import {
+  CLOSED_HOLD_MS,
+  INSTANT_FAIL_MS,
+  INSTANT_GRACE_MS,
   REVIEW_ACTIONS,
   REVIEW_API,
   REVISIT_KEY_PREFIX,
@@ -21,6 +24,7 @@ import {
   isAnchoredIn,
   isHeld,
   isImmediate,
+  isInstant,
   isSent,
   isWorkOnMark,
   pickFieldsOf,
@@ -131,6 +135,27 @@ export class ReviewClient extends PageStore {
    * loaded (epic `epic-engine` I268):  their lines stay faded (`wasRead()`) until the page's patch takes them away.
    */
   private readonly readAway = new Set<string>()
+
+  /**
+   * The instant marks (`isInstant()`:  a ✓ or x with nothing for Claude) in the inbox, id -> the mark's `at`
+   * (`trackInstant()`, epic `epic-engine` I306):  what `isClosing()` follows from the click to the page's update.
+   */
+  private readonly instantMarks = new Map<string, string>()
+
+  /** Ids whose instant mark Owen took back with a second click:  shown again at once, never held closed. */
+  private readonly undoneInstant = new Set<string>()
+
+  /**
+   * Items whose instant mark the page server applied and took off the inbox, id -> until when (ms) they stay drawn
+   * closed:  the page's own update of the item lands meanwhile, so it never shows open for a moment.
+   */
+  private readonly closedHere = new Map<string, number>()
+
+  /** Instant marks the page server never applied (`id@at`):  the item shows again, and a notice says so. */
+  private readonly failedInstant = new Set<string>()
+
+  /** Timers for `trackInstant()`, by `fail:<id>` and `hold:<id>`. */
+  private readonly instantTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
   /** Notes of sent marks the last inbox read no longer has, id -> words:  `changed()` lets their boxes go of them. */
   private readonly goneNotes = new Map<string, string>()
@@ -250,6 +275,22 @@ export class ReviewClient extends PageStore {
     return this.inbox.marks[id]
   }
 
+  /**
+   * Is item `id` closing:  Owen's ✓ or x on it with nothing for Claude (`isInstant()`), which the page server applies
+   * by itself (epic `epic-engine` I306;  Owen:  "it should show as grey and hide with an animate up immediately")?
+   * - true from the click:  the item draws grey at once (`DrawnState`), and its section folds it away when grey items
+   *   are hidden
+   * - and for a while after the server applied it (`CLOSED_HOLD_MS`):  the page's own update lands meanwhile
+   * - false once taken back (a second click), or when the server never applied it (`INSTANT_FAIL_MS`):
+   *   the item shows again, and a notice says so
+   */
+  isClosing(id: string): boolean {
+    const mark = this.inbox.marks[id]
+    if (mark && isInstant(id, mark)) return !this.failedInstant.has(`${id}@${mark.at}`)
+    const until = this.closedHere.get(id)
+    return until !== undefined && until > Date.now()
+  }
+
   /** Is `id` (`away:<line>`) read:  its Seen in the inbox, or applied and cleared since the page loaded? */
   wasRead(id: string): boolean {
     return this.inbox.marks[id]?.action === "seen" || this.readAway.has(id)
@@ -364,6 +405,21 @@ export class ReviewClient extends PageStore {
     return !!this.inbox.working[id]
   }
 
+  /**
+   * Is Owen's own ask for item `id`'s details (Add Details, Clarify, its ? icon) on its way or being answered?
+   * (epic `epic-engine` I295):  posted from here, queued, or taken as his ask (`working.asked`).
+   * - NOT an agent merely at work on the item (`epic inbox working <id> on`, an issue taken up):  that's no ask of his
+   *   - Owen, 2026-11-15, on language's I98, its ? icon turning while its agent worked:  "That should only spin when
+   *     I've asked for clarification."
+   */
+  isClarifying(id: string): boolean {
+    if (this.calling.has(id)) return false
+    if (this.asking.has(id)) return true
+    if (this.inbox.now.some((each) => each.id === id && each.action === "details")) return true
+    const work = this.inbox.working[id]
+    return !!work?.asked && work.action === "details"
+  }
+
   /** Is `id`'s note box open by itself (an item without details), or being written in? */
   isBoxOpen(id: string): boolean {
     return this.boxes.has(id)
@@ -452,6 +508,8 @@ export class ReviewClient extends PageStore {
       return "chosen"
     }
     if (mark?.action === action && !isImmediate(mark)) {
+      // a ✓ or x taken back inside its grace:  shown again at once, never held closed (I306)
+      if (isInstant(id, mark)) this.undoneInstant.add(id)
       // an Approve that kept his comments goes back to the revisit they made (I163):  never lost by a click
       if (action === "approve" && mark.comments?.length)
         return void this.save(id, {
@@ -954,7 +1012,65 @@ export class ReviewClient extends PageStore {
       if (words) this.letGo(id, text, words)
     }
     this.goneNotes.clear()
+    this.trackInstant()
     super.changed()
+  }
+
+  /**
+   * Follow the instant marks from the inbox (`isClosing()`, epic `epic-engine` I306):
+   * - a new one:  a timer that, should the mark still stand `INSTANT_FAIL_MS` after its grace, gives up on it
+   *   (`failedInstant`) and says so
+   * - one gone, not taken back:  the server applied it;  its item stays closed `CLOSED_HOLD_MS` (`closedHere`)
+   * - SIDE EFFECT:  timers, which call `changed()` when they fire
+   */
+  private trackInstant() {
+    const now = Date.now()
+    for (const [id, mark] of Object.entries(this.inbox.marks)) {
+      if (!isInstant(id, mark) || this.instantMarks.get(id) === mark.at) continue
+      this.instantMarks.set(id, mark.at)
+      this.closedHere.delete(id)
+      const key = `${id}@${mark.at}`
+      const wait = Date.parse(mark.at) + INSTANT_GRACE_MS + INSTANT_FAIL_MS - now
+      this.later(`fail:${id}`, wait, () => {
+        if (this.inbox.marks[id]?.at !== mark.at || this.failedInstant.has(key)) return
+        this.failedInstant.add(key)
+        this.notify(`${id.toUpperCase()} isn't closed:  the page server didn't apply it.\nIt's back;  try again.`)
+        this.changed()
+      })
+    }
+    for (const [id, at] of this.instantMarks) {
+      if (this.inbox.marks[id]?.at === at) continue
+      this.instantMarks.delete(id)
+      this.stopTimer(`fail:${id}`)
+      if (this.undoneInstant.delete(id) || this.inbox.marks[id]) continue
+      this.closedHere.set(id, now + CLOSED_HOLD_MS)
+      this.later(`hold:${id}`, CLOSED_HOLD_MS, () => {
+        this.closedHere.delete(id)
+        this.changed()
+      })
+    }
+  }
+
+  /** Run `act` in `wait` ms, under `key`:  one timer per key, the last one set winning. */
+  private later(key: string, wait: number, act: () => void) {
+    this.stopTimer(key)
+    this.instantTimers.set(
+      key,
+      setTimeout(
+        () => {
+          this.instantTimers.delete(key)
+          act()
+        },
+        Math.max(0, wait)
+      )
+    )
+  }
+
+  /** Stop `later()`'s timer under `key`, if any. */
+  private stopTimer(key: string) {
+    const timer = this.instantTimers.get(key)
+    if (timer !== undefined) clearTimeout(timer)
+    this.instantTimers.delete(key)
   }
 
   /**
@@ -1038,10 +1154,16 @@ export class ReviewClient extends PageStore {
   // ## Helpers
   ////////////////
 
-  /** The marks not sent yet, and not held for their time (a stage accept counting down:  `isHeld()`, I181). */
+  /**
+   * The marks not sent yet, and not held for their time (a stage accept counting down:  `isHeld()`, I181).
+   * - never an instant one (a ✓ or x with nothing for Claude:  `isInstant()`, epic `epic-engine` I304):  the page
+   *   server applies it by itself, so Send neither counts nor carries it
+   */
   private unsentMarks(): InboxMark[] {
     const now = Date.now()
-    return Object.values(this.inbox.marks).filter((mark) => !this.isSent(mark) && !isHeld(mark, now))
+    return Object.entries(this.inbox.marks)
+      .filter(([id, mark]) => !this.isSent(mark) && !isHeld(mark, now) && !isInstant(id, mark))
+      .map(([, mark]) => mark)
   }
 
   /** The urgencies not sent yet:  set after the last send. */

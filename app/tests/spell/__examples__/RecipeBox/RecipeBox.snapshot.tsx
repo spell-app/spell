@@ -28,7 +28,7 @@ export class Recipe extends Thing {
     return (
       <ui-card>
         <ui-content>
-          <ui-form class="recipe" value={this}>
+          <ui-form class="recipe" prop:value={this}>
             <ui-field label="Recipe name">
               <ui-button class="edit" slot="actions" icon="pencil" size="mini" appearance="transparent" aria-label="Edit" title="Edit" onClick={core.pressed(this, () => this.edit())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
               <ui-button class="remove" slot="actions" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
@@ -239,7 +239,7 @@ export class RecipeBox extends App {
             <ui-text color="grey">Everything you type is saved as you go.</ui-text>
           </ui-stack>
           <ui-toolbar class="undo" menu="box menu" aria-label="Recipes" />
-          <ui-form class="find" value={this} fluid={true}>
+          <ui-form class="find" prop:value={this} fluid={true}>
             <ui-field label="Search">
               <ui-input class="search" name="search" icon="search" />
             </ui-field>

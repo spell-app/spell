@@ -119,12 +119,15 @@ export class ReviewState {
   /** The review button whose work is on its way or under way (it spins), if any. */
   readonly busyButton = (): ReviewAction | null => this.read((client, id) => client.busyButtonOf(id)) ?? null
 
+  /** Is Owen's own ask for its details on its way or being answered (`ReviewClient.isClarifying()`, I295)? */
+  readonly clarifying = (): boolean => this.read((client, id) => client.isClarifying(id)) ?? false
+
   /** Has Claude taken its request (an agent at work on it), rather than it waiting to be taken? */
   readonly workedOn = (): boolean => this.read((client, id) => client.isWorkedOn(id)) ?? false
 
   /**
    * What the inbox says of item `itemId` (its own id when none) for its drawn state (`DrawnState.of()`):
-   * worked on, Owen's urgency, his check pressed, his turn on a comment in it.
+   * worked on, Owen's urgency, his check pressed, closing at his ✓ or x (I306), his turn on a comment in it.
    * - the page's inbox, so any element reads it for any item:  a section counts its items by it, as their chips draw
    */
   readonly liveOf = (itemId?: string): LiveReview =>
@@ -136,6 +139,7 @@ export class ReviewState {
         workedOn: client.isWorkedOn(id),
         urgency: urgency && { calm: urgency.calm },
         approved: client.markOf(id)?.action === "approve",
+        closing: client.isClosing(id),
         commentsReplied: client.hasRepliedComments(id)
       }
     }) ?? NO_LIVE_REVIEW
@@ -221,6 +225,22 @@ export class ReviewState {
   @E.untracked
   press(action: ReviewAction): "open-box" | "chosen" | undefined {
     return this.client?.press(this.id(), action)
+  }
+
+  /**
+   * Its details asked for now (Clarify, the ? icon;  `ReviewClient.askNow()`), or that ask called off while it's on
+   * its way or being answered (`cancel()`).
+   * - NOT the Add Details button's `press()`:  that calls off whatever work spins on the item, an agent's at work on
+   *   it included (epic `epic-engine` I295);  this calls off only Owen's own ask
+   * - NEVER throws:  a failed post is the client's notice
+   */
+  clarify(): void {
+    const client = this.client
+    const id = this.id()
+    if (!client || !id) return
+    void (client.isClarifying(id) ? client.cancel(id) : client.askNow(id, "details")).catch((error) =>
+      console.error(error)
+    )
   }
 
   /**

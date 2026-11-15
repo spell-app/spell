@@ -13,7 +13,7 @@ export class Recipe extends View {
   }
 
   draw() {
-    return h("ui-form", { class: "recipe", value: this },
+    return h("ui-form", { class: "recipe", "prop:value": this },
       h("ui-input", { name: "title", "aria-label": "Recipe" })
     )
   }

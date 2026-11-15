@@ -77,7 +77,7 @@ export class Bill extends App {
     return (
       <ui-container text={true}>
         <ui-segment>
-          <ui-form value={this}>
+          <ui-form prop:value={this}>
             <ui-stack>
               <ui-input name="amount" type="number" min="0" step="0.01" label="Bill $" fluid={true} />
               <ui-input name="percent" type="percent" min="0" label="Tip %" fluid={true} />

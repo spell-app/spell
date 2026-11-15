@@ -55,7 +55,7 @@ class Task(View):
         """A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal"""
         return h(
             "ui-form",
-            {"value": self},
+            {"prop:value": self},
             h(
                 "ui-stack",
                 {"direction": "horizontal", "spacing": "sm"},
@@ -622,7 +622,7 @@ class TaskList(App):
                 ),
                 h(
                     "ui-form",
-                    {"value": self},
+                    {"prop:value": self},
                     h(
                         "ui-stack",
                         h(

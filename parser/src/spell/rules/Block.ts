@@ -73,8 +73,16 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const errors = matched.flatMap((match) => Block.getParseErrors(match) ?? [])
     if (errors.length) result.data.errors = errors
     // what catches the line above it needs one:  `if that fails:`, as the errors are gathered
+    // and what reads the statement above it, comment lines aside:  `return 0 otherwise` (epic `language` I96)
+    // -- a function, so what walks a match's `data` (its warnings) never reaches the line above
+    let statementAbove: P.Match | undefined
     matched.forEach((item, index) => {
-      if (index > 0 && item.data.statement instanceof P.Match) item.data.statement.data.lineAbove = true
+      const { statement } = item.data
+      if (!(statement instanceof P.Match)) return
+      if (index > 0) statement.data.lineAbove = true
+      const above = statementAbove
+      statement.data.statementAbove = () => above
+      statementAbove = statement
     })
     return result
   }

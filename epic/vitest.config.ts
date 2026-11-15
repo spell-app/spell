@@ -44,7 +44,9 @@ const UI_SETUP = fileURLToPath(import.meta.resolve("spell/ui/test-helpers/setup.
  */
 const MOTION_TESTS = [
   // its details fold by height
-  "components/epic-item/EpicItem.test.tsx"
+  "components/epic-item/EpicItem.test.tsx",
+  // an item folds away as Owen's ✓ or x closes it (epic `epic-engine` I306)
+  "components/epic-section/ItemFold.test.ts"
 ]
 
 export function epicsProjects({

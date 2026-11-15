@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto"
+import { readFileSync } from "node:fs"
 import { createServer, type IncomingMessage, type Server } from "node:http"
 import { relative, sep } from "node:path"
 import type { Duplex } from "node:stream"
@@ -6,7 +8,7 @@ import type { FileTransform, HtmlTransform, Mount, ServedFile } from "spell/serv
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Guard } from "./Guard"
 import { toListener } from "./listener"
-import { holdRevealScript, liveClientScript, type ServerConfig } from "./liveClient"
+import { holdRevealScript, liveClientScript, type LiveVersions, type ServerConfig } from "./liveClient"
 import { LiveReload } from "./LiveReload"
 import { type ListenOptions, listenPreferred } from "./ports"
 import { underPrefix } from "./proxy"
@@ -21,7 +23,7 @@ import { APPLE_TOUCH_ICON_PNG, FAVICON_PNG_32, FAVICON_SVG } from "spell/server/
 /**
  * A local web server:  `node:http` + `Guard` + `Router` + `StaticHandler` (+ `LiveReload`), in that order.
  * - requests go:
- *   host check -> `/api/server/live.js` (when `live`) -> `router`
+ *   host check -> `/api/server/live.js` and `/api/server/versions` (when `live`) -> `router`
  *   -> static files -> Spell's favicon (`FAVICONS`, `/favicon.ico`) -> `fallback` (e.g. an SPA's `index.html`) -> 404
  * - websocket upgrades go:  host check -> `/api/server/live` (when `live`:  live reload) -> `upgrade()`'s, in order
  * - `live`:  watches nothing by itself -- call `live.watch(dir)`
@@ -88,6 +90,11 @@ export class WebServer {
       top.get(LIVE_SCRIPT, (_request, reply) =>
         reply.type("text/javascript; charset=utf-8").set("Cache-Control", "no-store").send(liveClientScript())
       )
+      top.get(LIVE_VERSIONS, (request, reply) => {
+        const paths = new URL(request.originalUrl, "http://host").searchParams.getAll("path")
+        const answer: LiveVersions = { versions: this.versionsOf(paths), run: this.live?.run, token: this.guard.token }
+        reply.set("Cache-Control", "no-store").json(answer)
+      })
     }
     const favicons = new Router()
     for (const [path, icon] of Object.entries(FAVICONS)) favicons.get(path, (_request, reply) => sendIcon(reply, icon))
@@ -122,6 +129,33 @@ export class WebServer {
     } catch {
       socket.destroy()
     }
+  }
+
+  /**
+   * What each of `paths` (URL paths) holds now, as served:  a hash of its file, by path (`LIVE_VERSIONS`).
+   * - `null`:  no file there (gone, a folder, a route's answer), or too big to read (`LiveReload.HASH_LIMIT`)
+   * - the live client itself (`LIVE_SCRIPT`):  a hash of its text
+   * - why:  after a restart, a page asks again, and reloads only when code IT runs changed (epic `epic-engine` I293)
+   * - NEVER throws
+   */
+  versionsOf(paths: string[]): Record<string, string | null> {
+    const versions: Record<string, string | null> = {}
+    for (const path of paths.slice(0, MAX_VERSIONS)) {
+      try {
+        if (path === LIVE_SCRIPT) {
+          versions[path] = createHash("sha1").update(liveClientScript()).digest("hex")
+          continue
+        }
+        const found = this.files.resolve(decodeURIComponent(path))
+        versions[path] =
+          found && "file" in found && found.stat.isFile() && found.stat.size <= LiveReload.HASH_LIMIT
+            ? createHash("sha1").update(readFileSync(found.file)).digest("hex")
+            : null
+      } catch {
+        versions[path] = null
+      }
+    }
+    return versions
   }
 
   /** base URL once listening, e.g. `http://127.0.0.1:4747` */
@@ -209,6 +243,7 @@ export type UpgradeHandler = (raw: IncomingMessage, socket: Duplex, head: Buffer
  *   - what the openers ask
  *   - `PageServer` answers it;  a plain `WebServer` doesn't
  * - `/api/server/live` (`LIVE_EVENTS`) and `/api/server/live.js` (`LIVE_SCRIPT`):  live reload, on any live `WebServer`
+ * - `/api/server/versions` (`LIVE_VERSIONS`):  what a page's scripts hold now, on any live `WebServer`
  */
 export const SERVER_API = "/api/server"
 
@@ -217,6 +252,20 @@ export const LIVE_EVENTS = `${SERVER_API}/live`
 
 /** Where a live page loads its live client from (`liveClientScript()`). */
 export const LIVE_SCRIPT = `${SERVER_API}/live.js`
+
+/**
+ * Where a live page asks what its scripts hold now (`WebServer.versionsOf()`), and the server's run and write token
+ * (`LiveVersions`):  `GET /api/server/versions?path=/a.js&path=/b.js` =>
+ * `{ versions: { "/a.js": "<sha1>", "/b.js": null }, run, token }`.
+ * - after the server restarts, a page takes the new token, and reloads only when one of ITS scripts changed
+ *   (epic `epic-engine` I293)
+ * - the token as every page it serves carries it:  a page of another origin can't read the answer, and the host check
+ *   turns away every other host
+ */
+export const LIVE_VERSIONS = `${SERVER_API}/versions`
+
+/** the most paths one `LIVE_VERSIONS` call hashes:  an epic page loads a few hundred files */
+const MAX_VERSIONS = 1000
 
 /** Where the 32px PNG favicon is;  `/favicon.ico` answers with it too. */
 export const FAVICON_PNG = "/favicon-32.png"

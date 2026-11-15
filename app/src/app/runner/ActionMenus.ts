@@ -129,6 +129,8 @@ export class ActionMenus {
    * A menu's items as elements:  a `<ui-action>` drawing each action, a divider for each line between groups,
    * and an item holding a `<ui-menu>` for each menu inside it, Spell UI's sub-menu (epic `language` P19).
    * - An action's shortcut goes on as its `shortcut` attribute, in Spell UI's words (`shortcutForUI()`).
+   * - So do the attributes its tag gave it in a `<context-menu>` (`item.attributes`):
+   *   `<action "undo" icon-only />` is `<ui-action icon-only>`, its icon alone.
    * - A sub-menu's title and items are read as it's drawn:  a menu filled from a list shows the list as it was.
    */
   static itemsFor(items: readonly MenuItem[]): HTMLElement[] {
@@ -140,6 +142,10 @@ export class ActionMenus {
       else {
         Object.assign(element, { action: item })
         if (item.shortcut) element.setAttribute(SHORTCUT, ActionMenus.shortcutForUI(item.shortcut))
+        // what its tag in a `<context-menu>` gave it, `icon-only` ...:  a bare one `true`
+        for (const [name, value] of Object.entries((item.kind === "action" && item.attributes) || {})) {
+          if (value !== false) element.setAttribute(name, value === true ? "" : value)
+        }
       }
       return element
     })

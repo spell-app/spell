@@ -16,6 +16,7 @@ import { hasPick, hasSetChange, pickFieldsOf, pickOf, setPicksOf } from "spell/e
 import {
   STAGE_COUNTDOWN_MS,
   isHeld,
+  isInstant,
   isLiveWork,
   isSent,
   partOf,
@@ -600,12 +601,15 @@ export class ReviewInbox {
    * Marks waiting for Owen's "send to Claude":  `[{ id, ...mark }]`, oldest first.
    * - newer than `sent` (all of them before the first send)
    * - NOT immediate ones (`details`, `revisit` `now`):  `requestNow()` already handed them over
+   * - NOT instant ones (a ✓ or x with nothing for Claude, a Read:  `isInstant()`):  the page server applies them
+   *   itself (`InstantMarks`, epic `epic-engine` I304), so they never make a Send worth waking anyone for
    */
   get unsentMarks(): ListedMark[] {
     const sent = this.sent ? Date.parse(this.sent) : -Infinity
     const now = Date.now()
     return this.markList.filter(
-      (mark) => !ReviewInbox.isImmediate(mark) && Date.parse(mark.at) > sent && !isHeld(mark, now)
+      (mark) =>
+        !ReviewInbox.isImmediate(mark) && !isInstant(mark.id, mark) && Date.parse(mark.at) > sent && !isHeld(mark, now)
     )
   }
 
@@ -699,16 +703,25 @@ export class ReviewInbox {
   /**
    * Claude's agent started (`action`) or finished (`null`) work on item `id`:  the page's spinner follows.
    * - started:  its mark is TAKEN too (`takeMark()`)
+   * - `asked`:  the work answers Owen's own immediate ask (Add Details, a revisit now;  epic `epic-engine` I295),
+   *   not just an agent at work on the item:  only then does the item's clarify icon turn
    * - returns the entry set, or `null`
    */
-  setWorking(id: unknown, action: NowAction | null, at = isoTime()): WorkingEntry | null {
+  setWorking(
+    id: unknown,
+    action: NowAction | null,
+    at = isoTime(),
+    { asked = false }: { asked?: boolean } = {}
+  ): WorkingEntry | null {
     const key = ReviewInbox.toItemId(id)
     if (action === null) {
       delete this.working[key]
       return null
     }
+    // asked once, asked until it's off:  an agent's own `working ... on` later keeps it
+    const wasAsked = this.working[key]?.asked
     this.takeMark(key)
-    this.working[key] = { action, since: at }
+    this.working[key] = { action, since: at, ...((asked || wasAsked) && { asked: true }) }
     return this.working[key]
   }
 
@@ -951,7 +964,7 @@ export class ReviewInbox {
    */
   takeWork(at = isoTime(), asComment?: NotePlacer): TakenWork | null {
     const now = this.takeNow()
-    for (const each of now) this.setWorking(each.id, each.action, at)
+    for (const each of now) this.setWorking(each.id, each.action, at, { asked: true })
     let sent: TakenWork["sent"] = null
     if (this.hasNewSend) {
       const before = this.handedOver ? Date.parse(this.handedOver) : -Infinity
@@ -1542,8 +1555,11 @@ export type ListedUrgency = { id: string } & InboxUrgency
 /** An immediate request, queued on `now`. */
 export type NowRequest = { id: string; action: NowAction; at: string; note?: string } & PickFields
 
-/** An agent at work on an item. */
-export type WorkingEntry = { action: NowAction; since: string }
+/**
+ * An agent at work on an item.
+ * - `asked`:  answering Owen's own immediate ask (`setWorking()`, I295);  none:  an agent at work on the item
+ */
+export type WorkingEntry = { action: NowAction; since: string; asked?: true }
 
 /** A request Owen called off;  `told` once a waiting session heard of it. */
 export type InboxCancel = { action: NowAction; at: string; told: boolean }

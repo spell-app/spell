@@ -1193,7 +1193,7 @@ export class PlanDoc extends PlanReader {
    *   takes off (`dropUpdateLabel()`, I285)
    *   - Owen, 2026-11-15, on epic-engine's I172, fixed by the end-of-turn tidy with no label:
    *     "Shouldn't this have the `updated: fixed` marker?"
-   * - `became`:  the change was a status change (epic `epic-engine` T75):  the label says which, `UPDATE : FIXED`;
+   * - `became`:  the change was a status change (epic `epic-engine` T75):  the label says which, `FIXED`;
    *   a later one replaces it, a plain edit (none) keeps it
    */
   markUpdate(item: Element, became?: UpdateBecame): void {
@@ -1887,19 +1887,26 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Add Details (`details --more`):  item `id`'s text stays on top (the element labels it "Original reply"), and
-   * `html` goes under it in an `<epic-more>` card;  returns its title.
-   * - a second Add Details replaces the card:  the old card's text moves into the Original Discussion
-   *   (`keepOriginal()`), as a rewrite's does
+   * Add Details, or Clarify (`details --more`):  `html` REPLACES item `id`'s unclear text, in an `<epic-more>` card
+   * headed "More Details";  returns its title.
+   * - Owen, 2026-11-15 (epic `epic-engine` I301):  "When you `clarify` you can remove 'What it says on the tin' or the
+   *   original unclear text.  Change title to 'More Details', not collapsable"
+   * - the given body ("_What it says on the tin._  Clarify", `PlanItem.giveBody()`) goes for good:  nobody wrote it
+   * - the item's own prose moves into its Original Discussion (`keepOriginal()`), as a rewrite's does:  out of
+   *   sight, never lost
+   *   - EXCEPT Owen's own words, quoted (`isOwenQuote()`):  they stay on top
+   * - its cards stay:  status, Choices, Net effect, code, replies, its answer and commits (every `<epic-*>`)
+   * - a second Add Details replaces the card:  the old card's text moves into the Original Discussion too
    * - stamped (`changed`) and flagged UPDATE
    */
   addMore(id: string, html: string): string {
     const item = this.item(id)
+    PlanItem.dropTitleBody(item)
     const old = item.querySelector(":scope > epic-more")
-    if (old) {
-      old.remove()
-      this.keepOriginal(item, Array.from(old.childNodes))
-    }
+    const unclear = Array.from(item.childNodes).filter((node) => PlanItem.isUnclearProse(node))
+    for (const node of unclear) node.remove()
+    if (old) old.remove()
+    this.keepOriginal(item, [...unclear, ...Array.from(old?.childNodes ?? [])])
     Markup.place(item, this.make("epic-more", {}, this.incoming(html)))
     this.stamp(item)
     this.markUpdate(item)
@@ -2119,7 +2126,42 @@ export class PlanDoc extends PlanReader {
     card.setAttribute("slot", STATUS_SLOT)
     Markup.place(host, card)
     if (host.localName === "epic-item" && !quiet) this.stamp(host)
+    // work taken up again on a fix Owen sent back, or a closed item (epic `epic-engine` I303):  REOPENED
+    const reopened = host.localName === "epic-item" && this.reopenTakenUp(host, state)
+    // its UPDATE label, if it has one, says so (epic `epic-engine` I295):  `UNDERWAY`, not a bare UPDATE
+    const label = !reopened && state === "underway" && host.localName === "epic-item" && PlanItem.updateLabelOf(host)
+    if (label) Markup.set<"epic-update">(label, { became: "underway" })
     return PlanItem.titleOf(host)
+  }
+
+  /**
+   * Claude took up work on `item` again with a status card in `state` (`addStatus()`):  a fix waiting for Owen's
+   * review (open, `fixed`), sent back with his Revisit or Send it back, and taken up with an Underway or a Noted card,
+   * is REOPENED (`reopenFix()`;  epic `epic-engine` I303);  did it?
+   * - Owen, 2026-11-15, on editor's I139 (fixed, then his revisit, then "Noted · Queued:  agent editor-restore ...",
+   *   its pill still orange with `FIXED`):  "This pill should be blue, remove `FIXED` and replace with `REOPENED`"
+   * - a Done card never reopens:  it's the fix itself (`fixedForReview()` with no underway card)
+   * - a CLOSED item keeps its status under a new card (I148's rule):  sending a done todo or an accepted call back is
+   *   Do this, which opens it (`doThis()`)
+   * - the migration `reopened-fixes` reopens the fixes taken up before
+   */
+  private reopenTakenUp(item: Element, state: string): boolean {
+    if (state === "done" || item.getAttribute("status") !== "open") return false
+    if (!item.hasAttribute("fixed") || !CALM_ID.test(item.id)) return false
+    this.reopenFix(item)
+    return true
+  }
+
+  /**
+   * Fix `item` was sent back, and Claude is on it again:  not `fixed` (orange) any more but wanted (`urgent`:  blue,
+   * `handed` until an underway card makes it `progress`), `calm` off, its label `REOPENED`;  logged.
+   * - fixed again, `finishWork()` turns it orange and `FIXED` once more (`markFixed()`)
+   * - the migration `reopened-fixes` writes the same (`ReopenedFixes.reopen()`)
+   */
+  private reopenFix(item: Element): void {
+    Markup.set<"epic-item">(item, { fixed: undefined, calm: undefined, urgent: true })
+    this.markUpdate(item, "reopened")
+    this.log(`${item.id.toUpperCase()} reopened:  sent back, taken up again`)
   }
 
   /**
@@ -2419,7 +2461,7 @@ export class PlanDoc extends PlanReader {
    *   - an item they name (`editor I55:`), the phase its `work` names, or one listed under it;  a judgement call also
    *     by the phase it was made in (`phase`):  its state reads it (`itemState()`:  a calm call stays blue)
    *   - a done or fixed item's last finished status card, whose line then says `not on main yet`
-   *   - that item's UPDATE label, when it names a status change (`UPDATE : FIXED`, T75):  its `Not in main` pill
+   *   - that item's UPDATE label, when it names a status change (`FIXED`, T75):  its `Not in main` pill
    * - gone again once the work lands;  no `landing` (no git, a test):  nothing changes
    */
   updateLanded(): number {
@@ -2456,7 +2498,7 @@ export class PlanDoc extends PlanReader {
       const cards = Array.from(item.querySelectorAll(":scope > epic-status"))
       const last = cards.findLast((card) => card.getAttribute("state") === "done")
       for (const card of cards) mark(card, offMain && finished && card === last)
-      // its UPDATE label's `Not in main` pill (`UPDATE : FIXED`, T75), on a status change's label only
+      // its UPDATE label's `Not in main` pill (`FIXED`, T75), on a status change's label only
       const label = PlanItem.updateLabelOf(item)
       if (label) mark(label, offMain && finished && label.hasAttribute("became"))
     }
@@ -2906,9 +2948,14 @@ export class PlanDoc extends PlanReader {
       anchor.setAttribute("href", `#${id}`)
       return anchor
     }
+    // a line about an item ends with a copy of the item's label (`FIXED`, `UNDERWAY` ...), as its title shows it:
+    // drawn again on every edit, so it follows the item;  its ✓ hides both at once (`EpicUpdate.isChecked`, I302)
     const line = (key: string, state: AwayState, ...children: (Node | string)[]) => {
       const element = this.make("epic-away-line", { line: key, state })
       element.append(...children)
+      const item = this.findItem(key)
+      const label = item && PlanItem.updateLabelOf(item)
+      if (label) element.append(" ", label.cloneNode(true))
       return element
     }
     const heading = (key: AwayPart, state: AwayState, text: string) => {
@@ -3291,7 +3338,7 @@ export class PlanDoc extends PlanReader {
    *   update block still new in its phase or item (each line of a part, for a part's) stamped `seen`, as its own
    *   Seen does (`seeUpdatesFor()`)
    *   - nothing else about the item changes:  a call or a question still waiting stays red, his to answer
-   * - the page server applies it the moment he ticks it (`AwayReads.applyNow()`):  no Send
+   * - the page server applies it the moment he ticks it (`InstantMarks.applyNow()`):  no Send
    * - the section gone already (read whole):  dropped
    */
   private applyReadLine({ id, action }: PlanMark): MarkResult {

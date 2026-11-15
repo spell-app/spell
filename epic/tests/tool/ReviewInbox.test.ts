@@ -11,7 +11,14 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 import { SRV } from "spell/server"
 import { InboxError, ReviewInbox, WAKE_COOLDOWN_MS, isoTime } from "spell/epic/tool/ReviewInbox"
 import { STAGE_COUNTDOWN_MS } from "spell/epic/review"
-import { WORK_STALE_MS, isLiveWork, isWorkOnMark } from "spell/epic/review/review.types"
+import {
+  INSTANT_GRACE_MS,
+  WORK_STALE_MS,
+  isInstant,
+  isInstantDue,
+  isLiveWork,
+  isWorkOnMark
+} from "spell/epic/review/review.types"
 
 const M1 = "2026-10-04T15:00:00-04:00"
 const M2 = "2026-10-04T15:01:00-04:00"
@@ -197,7 +204,7 @@ describe("ReviewInbox marks", () => {
 
   test("unsent:  newer than the send, never an immediate request", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setMark("j1", { action: "todo" }, M1)
     inbox.requestNow("i2", "details", "", M1)
     expect(inbox.unsentMarks.map((mark) => mark.id)).toEqual(["j1"])
     inbox.markSent(M2)
@@ -208,7 +215,7 @@ describe("ReviewInbox marks", () => {
 
   test("clearMarks drops the marks and their requests;  returns the ids that had one", () => {
     const inbox = new ReviewInbox()
-    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setMark("j1", { action: "todo" }, M1)
     inbox.requestNow("i2", "details", "", M1)
     expect(inbox.clearMarks(["J1", "i2", "m9"])).toEqual(["j1", "i2"])
     expect(inbox.marks).toEqual({})
@@ -416,6 +423,18 @@ describe("ReviewInbox, Claude's side", () => {
     expect(inbox.setListening(null)).toBeNull()
   })
 
+  test("working `asked` (I295):  his ask taken stays asked through an agent's own `working on`;  a bare flag isn't", () => {
+    const inbox = new ReviewInbox()
+    inbox.setWorking("i98", "details", M1)
+    expect(inbox.working.i98).toEqual({ action: "details", since: M1 })
+    inbox.requestNow("j9", "details", "", M1)
+    inbox.takeWork(M2)
+    expect(inbox.working.j9).toEqual({ action: "details", since: M2, asked: true })
+    // the agent turns its flag on itself:  still his ask
+    inbox.setWorking("j9", "details", M3)
+    expect(inbox.working.j9).toEqual({ action: "details", since: M3, asked: true })
+  })
+
   test("heartbeat:  touch stamps seen;  nobody listening, nothing starts", () => {
     const inbox = new ReviewInbox()
     expect(inbox.touchListening(M2)).toBeNull()
@@ -564,7 +583,7 @@ describe("ReviewInbox.takeWork()", () => {
     const mark = inbox.setMark("stage", { action: "accept", stage: "phases", countdown: true }, isoTime(pressed))!
     expect(Date.parse(mark.at) - pressed.getTime()).toBe(STAGE_COUNTDOWN_MS)
     expect(mark).toMatchObject({ action: "accept", stage: "phases", countdown: true })
-    inbox.setMark("j1", { action: "approve" }, isoTime(pressed))
+    inbox.setMark("j1", { action: "todo" }, isoTime(pressed))
     expect(inbox.heldMarks.map((each) => each.id)).toEqual(["stage"])
     expect(inbox.unsentMarks.map((each) => each.id)).toEqual(["j1"])
     // a Send (a press, Auto Send, Review Now) a minute in:  the approve goes, the accept waits
@@ -605,7 +624,7 @@ describe("ReviewInbox.takeWork()", () => {
     inbox.requestNow("i2", "details", "", M1)
     expect(inbox.hasWork).toBe(true)
     expect(inbox.takeWork(M2)).toEqual({ now: [{ id: "i2", action: "details", at: M1 }], sent: null, canceled: [] })
-    expect(inbox.working).toEqual({ i2: { action: "details", since: M2 } })
+    expect(inbox.working).toEqual({ i2: { action: "details", since: M2, asked: true } })
     expect(inbox.marks.i2).toBeDefined()
     expect(inbox.hasWork).toBe(false)
     expect(inbox.takeWork()).toBeNull()
@@ -1005,7 +1024,7 @@ test("isoTime:  local time with its offset, to the millisecond", () => {
 test("a mark in the same second as the send, after it, is unsent", () => {
   const inbox = new ReviewInbox()
   inbox.markSent(isoTime(new Date(1_700_000_000_100)))
-  inbox.setMark("j1", { action: "approve" }, isoTime(new Date(1_700_000_000_900)))
+  inbox.setMark("j1", { action: "todo" }, isoTime(new Date(1_700_000_000_900)))
   expect(inbox.unsentMarks.map((mark) => mark.id)).toEqual(["j1"])
 })
 
@@ -1067,7 +1086,7 @@ describe("ReviewInbox waking the epic", () => {
   test("hasUnsent:  a mark, an urgency or a comment newer than the last send;  nothing once sent", () => {
     const inbox = new ReviewInbox()
     expect(inbox.hasUnsent).toBe(false)
-    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setMark("j1", { action: "todo" }, M1)
     expect(inbox.hasUnsent).toBe(true)
     inbox.markSent(M2)
     expect(inbox.hasUnsent).toBe(false)
@@ -1151,5 +1170,37 @@ describe("working flags (I280)", () => {
     expect(isWorkOnMark(work, { at: "2026-11-14T01:00:00.000-05:00" })).toBe(true)
     expect(isWorkOnMark(work, { at: "2026-11-14T03:00:00.000-05:00" })).toBe(false)
     expect(isWorkOnMark(work, undefined)).toBe(true)
+  })
+})
+
+// epic `epic-engine` I304:  the page server applies these itself;  Send and the unsent list leave them out
+describe("isInstant()", () => {
+  test("an item's plain ✓ or x;  never with a note, comments, a picture or a pick, nor a test's, phase's or part's", () => {
+    expect(["i3", "j3", "q3", "t3"].map((id) => isInstant(id, { action: "approve" }))).toEqual([true, true, true, true])
+    expect(isInstant("t3", { action: "drop" })).toBe(true)
+    expect(isInstant("j3", { action: "skip" })).toBe(true)
+    expect(isInstant("j3", { action: "todo" })).toBe(false)
+    expect(isInstant("j3", { action: "revisit" })).toBe(false)
+    expect(isInstant("j3", { action: "skip", note: "why" })).toBe(false)
+    expect(isInstant("j3", { action: "approve", comments: ["c1"] })).toBe(false)
+    expect(isInstant("j3", { action: "skip", shot: "tests/j3.png" })).toBe(false)
+    expect(isInstant("q3", { action: "approve", pick: "B" })).toBe(false)
+    expect(["m1", "p2", "p-go", "o1", "summary"].some((id) => isInstant(id, { action: "approve" }))).toBe(false)
+    expect([isInstant("up3", { action: "seen" }), isInstant("away:done", { action: "seen" })]).toEqual([true, true])
+  })
+
+  test("due:  a Read at once, any other after the grace", () => {
+    const now = Date.parse("2026-11-15T12:00:00Z")
+    const at = (ms: number) => new Date(now - ms).toISOString()
+    expect(isInstantDue("away", { action: "seen", at: at(0) }, now)).toBe(true)
+    expect(isInstantDue("j3", { action: "approve", at: at(INSTANT_GRACE_MS - 1) }, now)).toBe(false)
+    expect(isInstantDue("j3", { action: "approve", at: at(INSTANT_GRACE_MS) }, now)).toBe(true)
+  })
+
+  test("the inbox's unsent marks leave them out", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("j3", { action: "approve" })
+    inbox.setMark("i2", { action: "todo" })
+    expect(inbox.unsentMarks.map((mark) => mark.id)).toEqual(["i2"])
   })
 })

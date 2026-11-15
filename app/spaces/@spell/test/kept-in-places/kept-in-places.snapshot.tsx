@@ -122,7 +122,7 @@ export class NoteKeeper extends App {
   @drawn draw() {
     return (
       <ui-stack>
-        <ui-form value={this}>
+        <ui-form prop:value={this}>
           <ui-input name="draft" aria-label="Note" />
           <ui-button class="keep" onClick={core.pressed(this, () => this.keepTheDraft())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Keep

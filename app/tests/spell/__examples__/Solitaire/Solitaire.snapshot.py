@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
+from spell_core import core, List, App, View, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
 
 
 # A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
@@ -72,35 +72,11 @@ class Card(TwoSidedView):
         arrow = "↑" if self.is_face_direction("up") else "↓"
         return f"{letter}{self.symbol}{arrow}"
 
-    @property
-    def picture(self) -> str | None:
-        """Its face:  https://www.compart.com/en/unicode/block/U+1F0A0"""
-        column = self.value
-        if self.suit == "clubs":
-            return core.get_item_at(
-                ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"],
-                position(column),
-            )
-        if self.suit == "diamonds":
-            return core.get_item_at(
-                ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"],
-                position(column),
-            )
-        if self.suit == "hearts":
-            return core.get_item_at(
-                ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"],
-                position(column),
-            )
-        return core.get_item_at(
-            ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"],
-            position(column),
-        )
-
     def draw_front(self) -> Element:
-        return h("ui-text", {"color": self.color, "part": "front"}, self.picture)
+        return h("test-project-card-image", {"prop:card": self, "part": "front"})
 
     def draw_back(self) -> Element:
-        return h("ui-text", {"color": "blue", "part": "back"}, "🂠")
+        return h("test-project-card-image", {"direction": "down", "part": "back"})
 
     @property
     def is_on_top(self) -> bool:
@@ -158,7 +134,7 @@ class Card(TwoSidedView):
 core.describe_action(Card, "play", {"title": "Play Card", "undone_as": "Play Card"})
 core.describe_action(Card, "put_on_pile", {"title": "Put Card on Pile", "undone_as": "Move Card"})
 core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count the Points for Card on Pile", "undone_as": "Count the Points for Card on Pile"})
-# It's a two sided view:  face up it shows its picture, face down the back every card shares.
+# It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
 # On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 # Ace is low:  ace = 1 ... king = 13
 
@@ -166,7 +142,76 @@ core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count
 
 # identifying a card
 
-# One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+# Give it a card to draw, or a rank and a suit:  `<card-image card={the card} />`, `<card-image rank=ace suit={its suit} />`.
+# A card's picture:  the one place a card's look lives
+
+
+Direction = Literal["up", "down"]
+
+
+class CardImage(View):
+    element_tag = "test-project-card-image"
+
+    # It's face up, unless it's `direction=down`:  then it's the back every card shares.
+    # Today it's one letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+    # Real pictures of the cards can take its place:  only its picture and `to draw it` change.
+    # - its "card" is a card
+    card = prop(type="Card")
+
+    # - its "rank" is a card rank
+    rank = prop(one_of=lambda: Card.RANKS)
+
+    # - its "suit" is a card suit
+    suit = prop(one_of=lambda: Card.SUITS)
+
+    # - its "direction" is up or down
+    DIRECTIONS = ("up", "down")
+    direction = prop(one_of=DIRECTIONS)
+
+    def is_face_direction(self, direction: Direction) -> bool:
+        return self.direction == direction
+
+    @property
+    def face(self) -> Card:
+        """the card it draws:  its card, else one of its rank and suit"""
+        if self.card is not None:
+            return self.card
+        return Card(rank=self.rank, suit=self.suit)
+
+    @property
+    def color(self) -> str:
+        if self.is_face_direction("down"):
+            return "blue"
+        return self.face.color
+
+    @property
+    def picture(self) -> str | None:
+        """Its letter:  https://www.compart.com/en/unicode/block/U+1F0A0"""
+        if self.is_face_direction("down"):
+            return "🂠"
+        column = self.face.value
+        if self.face.suit == "clubs":
+            return core.get_item_at(
+                ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"],
+                position(column),
+            )
+        if self.face.suit == "diamonds":
+            return core.get_item_at(
+                ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"],
+                position(column),
+            )
+        if self.face.suit == "hearts":
+            return core.get_item_at(
+                ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"],
+                position(column),
+            )
+        return core.get_item_at(
+            ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"],
+            position(column),
+        )
+
+    def draw(self) -> Element:
+        return h("ui-text", {"color": self.color}, self.picture)
 
 
 def test_card_setup() -> None:
@@ -197,7 +242,6 @@ def test_card_setup() -> None:
             False,
             "no",
         )
-        core.expect(it_2.picture, "its picture", "🂭", "\"🂭\"")
 
         core.echo_test_action("turn it over")
         it_2.turn_over()
@@ -208,19 +252,41 @@ def test_card_setup() -> None:
         seven = Card(rank=7, suit="hearts")
         core.expect(seven.is_a_number_card, "seven is a number card", True, "yes")
         core.expect(seven.color, "the color of seven", "red", "red")
+
+
+def test_card_images() -> None:
+    with core.test("test card images"):
+        it = CardImage()
+        core.echo_test_action(
+            "set queen to a new card whose rank is queen, suit is spades and direction is down",
+        )
+        queen = Card(rank="queen", suit="spades", direction="down")
+        core.echo_test_action("get a new card image whose card is queen")
+        it_2 = CardImage(card=queen)
+        core.expect(it_2.picture, "its picture", "🂭", "\"🂭\"")
+        core.expect(it_2.color, "its color", "black", "black")
+        core.echo_test_action(
+            "set seven to a new card image whose rank is 7 and suit is hearts",
+        )
+        seven = CardImage(rank=7, suit="hearts")
         core.expect(seven.picture, "the picture of seven", "🂷", "\"🂷\"")
+        core.expect(seven.color, "the color of seven", "red", "red")
         core.expect(
-            Card(rank="ace", suit="clubs").picture,
-            "the picture of a new card whose rank is ace and suit is clubs",
+            CardImage(rank="ace", suit="clubs").picture,
+            "the picture of a new card image whose rank is ace and suit is clubs",
             "🃑",
             "\"🃑\"",
         )
         core.expect(
-            Card(rank="king", suit="diamonds").picture,
-            "the picture of a new card whose rank is king and suit is diamonds",
+            CardImage(rank="king", suit="diamonds").picture,
+            "the picture of a new card image whose rank is king and suit is diamonds",
             "🃎",
             "\"🃎\"",
         )
+        core.echo_test_action("get a new card image whose direction is down")
+        it_3 = CardImage(direction="down")
+        core.expect(it_3.picture, "its picture", "🂠", "\"🂠\"")
+        core.expect(it_3.color, "its color", "blue", "blue")
 
 
 # -----------
@@ -434,7 +500,10 @@ class Foundation(Pile):
 
     def draw_its_placeholder(self) -> Element:
         """a light grey ace of its suit, face up"""
-        return h("ui-text", {"part": "placeholder"}, Card(rank="ace", suit=self.suit).picture)
+        return h(
+            "test-project-card-image",
+            {"rank": "ace", "prop:suit": self.suit, "part": "placeholder"},
+        )
 
     def can_take(self, card: Card) -> bool:
         assert card.pile is not None
@@ -868,9 +937,12 @@ solitaire-card::part(back) {
   }
 }
 
-/* An empty pile's placeholder:  a faint pale card on the felt */
+/* An empty pile's placeholder:  a faint pale card on the felt, whatever the card image's own ink */
 [layout]::part(placeholder) {
   color: #d8f0e0;
+  --ui-red-text: currentColor;
+  --ui-black-text: currentColor;
+  --ui-blue-text: currentColor;
   opacity: 0.4;
 }
 [layout]::part(placeholder):hover {
@@ -908,6 +980,7 @@ solitaire.start()
 
 
 test_card_setup()
+test_card_images()
 test_piles()
 test_a_new_deck()
 test_the_moves()

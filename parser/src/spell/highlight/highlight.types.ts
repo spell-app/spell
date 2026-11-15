@@ -165,6 +165,8 @@ export type BubblyRulePresentation = {
    */
   typedAfterLead?: boolean
   /** its child rules that are the parameters it introduces, `(a card)`, with the brackets round them */
+  /** a drawing's head:  its verb and the part it draws bold, Spell's words, no pill (`to <draw> its <front>`) */
+  namesWhatItDraws?: boolean
   params?: readonly string[]
   /** its child rules whose items are each a pill of their own, bold (`identifier_list`:  `is one of ace, jack`) */
   choices?: readonly string[]
@@ -172,6 +174,8 @@ export type BubblyRulePresentation = {
   steps?: readonly string[]
   /** its child rules drawn plain, never bold (`item` in `item column of the list`) */
   plain?: readonly string[]
+  /** its groups drawn bold, names, though they're Spell's words (`moment`:  `dropped` in `when a card is dropped`) */
+  names?: readonly string[]
   /** a CONTROL line:  its steps in a bracket */
   isControl?: boolean
   /**
@@ -181,6 +185,8 @@ export type BubblyRulePresentation = {
   namesAbility?: boolean
   /** a part of the name before it, bold with it:  `'s` in `pile's` */
   isNamePart?: boolean
+  /** its group whose end ends a name it starts, bold through it:  `type` in `a new foundation with suit = hearts` */
+  namesThrough?: string
   /**
    * a YES-OR-NO asked of the thing before it (`is on top of its pile`, `is a king`, `is empty`):  ONE underline from
    * that thing to its end, its own words plain
@@ -193,7 +199,7 @@ export type BubblyRulePresentation = {
   isJoin?: boolean
   /** holds other expressions, each underlined on its own (`(it is empty and the card is a king)`), never itself */
   isCombination?: boolean
-  /** its groups that hold what it SETS (`set <the score> to 0`):  being set, not read, so never underlined */
+  /** its groups that hold what it SETS (`set <the score> to 0`):  each underlined whole, one value of its own */
   sets?: readonly string[]
   /** its number and the rest of it are one quantity:  underlined (`pause for <300 msec>`) */
   isQuantity?: boolean

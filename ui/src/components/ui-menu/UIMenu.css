@@ -581,6 +581,14 @@
       width: -moz-available;
       width: stretch;
     }
+    /*
+     * An action showing its icon alone (`<ui-action icon-only>`):  side by side with the icon-only actions next to
+     * it, in one row, as many menus put Undo and Redo
+     */
+    :host(:state(in-menu):state(icon-only)) > .item {
+      display: inline-flex;
+      width: auto;
+    }
     :host(:state(in-menu)) > .item::before,
     .ui.menu .item::before {
       top: 0;

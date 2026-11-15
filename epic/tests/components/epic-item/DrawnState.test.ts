@@ -36,3 +36,13 @@ describe("DrawnState.of():  Owen's turn on a comment in it", () => {
     )
   })
 })
+
+// epic `epic-engine` I306:  "it should show as grey and hide with an animate up immediately"
+describe("DrawnState.of():  closing at his ✓ or x", () => {
+  const closing = { ...NO_LIVE_REVIEW, closing: true }
+
+  test("grey (`old`) at once, whatever it was:  red, orange, open", () => {
+    for (const state of ["attention", "replied", "open", "requested"])
+      expect(DrawnState.of({ id: "i57", state, status: "open", changed: TODAY }, closing, NOW)).toBe("old")
+  })
+})

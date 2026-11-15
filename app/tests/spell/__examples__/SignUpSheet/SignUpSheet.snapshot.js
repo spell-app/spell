@@ -22,7 +22,7 @@ export class Volunteer extends Thing {
   set note(value) { this.setProp("note", value) }
 
   draw() {
-    return h("ui-form", { class: "master-row", value: this },
+    return h("ui-form", { class: "master-row", "prop:value": this },
       h("ui-stack", { direction: "horizontal", spacing: "md", align: "center", wrap: true },
         h("ui-label", () => this.shift),
         h("ui-text", () => this.person),

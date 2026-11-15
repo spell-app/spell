@@ -2,8 +2,6 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { Fold } from "spell/epic/components/epic-item/Fold"
-
 import { epicMoreVocabulary } from "./EpicMore.en"
 import { BODY } from "./EpicAnswer.types"
 
@@ -12,9 +10,11 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicMore`
- * The component behind `<epic-more>`:  More Details (Add Details Now) on an item --
- * a plain card under its text and answer, open to start with, folded by its `More Details` heading.
- * The item labels its own text above it `Original reply` (`<epic-item>`).
+ * The component behind `<epic-more>`:  More Details on an item, what Clarify / Add Details wrote IN PLACE of its
+ * unclear text (`PlanDoc.addMore()`) -- a plain card headed "More Details".
+ * - never folds (epic `epic-engine` I301;  Owen, 2026-11-15:  "Change title to 'More Details', not collapsable"):
+ *   it IS the item's text now, so hiding it hid what the item says
+ * - its heading in the text's own size, bold, as a Net effect's label (`<epic-net-effect>`)
  ****************/
 export class EpicMore extends E.UIComponent<typeof epicMoreVocabulary> {
   @E.proto static vocabulary = epicMoreVocabulary
@@ -23,33 +23,13 @@ export class EpicMore extends E.UIComponent<typeof epicMoreVocabulary> {
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
-  /** Open to start with:  it's what was just added. */
-  readonly fold = new Fold(() => true)
-
-  /** Unfolded. */
-  @E.cssState("open")
-  get isOpen(): boolean {
-    return this.fold.isOpen()
-  }
-
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
-        {this.fold.button({
-          className: TOGGLE,
-          part: this.partForName("toggle"),
-          controls: BODY_ID,
-          tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") },
-          label: this.translationForKey("more"),
-          clicks: true
-        })}
-        <div
-          ref={this.fold.watch}
-          id={BODY_ID}
-          class={BODY}
-          part={this.partForName("body")}
-          hidden={this.fold.hidden()}
-        >
+        <div class={HEADING} part={this.partForName("heading")}>
+          {this.translationForKey("more")}
+        </div>
+        <div class={BODY} part={this.partForName("body")}>
           <slot />
         </div>
       </div>
@@ -57,8 +37,5 @@ export class EpicMore extends E.UIComponent<typeof epicMoreVocabulary> {
   }
 }
 
-/** Class of its heading, the `<button>` that folds it. */
-const TOGGLE = "toggle"
-
-/** `id` of its body, which its toggle controls. */
-const BODY_ID = "body"
+/** Class of its heading, "More Details". */
+const HEADING = "more-heading"

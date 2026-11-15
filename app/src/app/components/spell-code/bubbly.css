@@ -565,6 +565,16 @@
     left: 100%;
     bottom: -10px;
   }
+  /* a quoted action name's marks, alone outside its pills:  `to "count the points for a card on a pile"` */
+  .bubbly-quote-alone:where(:not(.view-line *)) {
+    position: relative;
+  }
+  .bubbly-quote-open.bubbly-quote-alone:where(:not(.view-line *)) {
+    margin-left: var(--bubbly-quote-margin);
+  }
+  .bubbly-quote-close.bubbly-quote-alone:where(:not(.view-line *)) {
+    margin-right: var(--bubbly-quote-margin);
+  }
 
   /* in the editor:  the file's `"` keeps its width, its curly mark drawn over it */
   &.bubbly-monaco {

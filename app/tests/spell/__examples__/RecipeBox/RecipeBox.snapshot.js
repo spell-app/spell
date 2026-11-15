@@ -29,7 +29,7 @@ export class Recipe extends Thing {
   draw() {
     return h("ui-card",
       h("ui-content",
-        h("ui-form", { class: "recipe", value: this },
+        h("ui-form", { class: "recipe", "prop:value": this },
           h("ui-field", { label: "Recipe name" },
             h("ui-button", {
               class: "edit",
@@ -244,7 +244,7 @@ export class RecipeBox extends App {
           h("ui-text", { color: "grey" }, "Everything you type is saved as you go.")
         ),
         h("ui-toolbar", { class: "undo", menu: "box menu", "aria-label": "Recipes" }),
-        h("ui-form", { class: "find", value: this, fluid: true },
+        h("ui-form", { class: "find", "prop:value": this, fluid: true },
           h("ui-field", { label: "Search" }, h("ui-input", { class: "search", name: "search", icon: "search" }))
         )
       ),

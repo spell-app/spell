@@ -28,7 +28,7 @@ export class Receta extends Thing {
     return (
       <es-tarjeta>
         <es-contenido>
-          <es-formulario class="recipe" value={this}>
+          <es-formulario class="recipe" prop:value={this}>
             <es-campo etiqueta="Nombre de la receta">
               <es-boton class="edit" slot="acciones" icono="pencil" tamano="mini" apariencia="transparent" aria-label="Editar" title="Editar" onClick={core.pressed(this, () => this.editar())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
               <es-boton class="remove" slot="acciones" icono="close" tamano="mini" apariencia="transparent" aria-label="Quitar" title="Quitar" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
@@ -238,7 +238,7 @@ export class CajaDeRecetas extends App {
             <es-texto color="gris">Todo lo que escribes se guarda al instante.</es-texto>
           </es-pila>
           <es-barra-herramientas class="undo" menu="menú de la caja" aria-label="Recetas" />
-          <es-formulario class="find" value={this} fluido={true}>
+          <es-formulario class="find" prop:value={this} fluido={true}>
             <es-campo etiqueta="Buscar">
               <es-entrada class="search" name="búsqueda" icono="search" />
             </es-campo>

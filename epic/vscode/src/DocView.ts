@@ -28,6 +28,11 @@
  *   the page updates itself on file changes.
  *   - A `hash` asks it to scroll there instead (`{ spell: "go", hash }`).
  *   - The reload button and a server restart do reload.
+ *   - "In view" is what the page's live client SAID it shows (`current`):  a page that never loaded is asked for again.
+ * - A page asked for while its page server is down (restarting:  every merge into main does it) waits for it
+ *   (`navigate()`, epic `epic-engine` I294):  a line over the view says so, and the page loads by itself once the
+ *   server answers;  the last page asked for meanwhile wins, so a title-bar click is never lost.
+ *   - finding the server for a file takes a moment more:  "Finding the page server..." (`DocPreview.show()`)
  * - A window reload keeps each view's page:  the page last in view is remembered per window (the workspace's state),
  *   and shown again when VS Code re-makes the view, if its page server still answers (`remembered()`).
  * - Opened by hand, before anything was shown:
@@ -179,6 +184,17 @@ const MENU = ["cut", "copy", "paste", "selectAll", "back", "forward", "reload", 
 
 /** How long `remembered()` waits for a page server that doesn't answer, looking once a second:  in seconds. */
 const REMEMBER_WAIT = { timeout: 10, every: 1 }
+
+/** How long a view waits for a page server that's down before it gives up (`waitForServer()`), and how often it looks. */
+const SERVER_WAIT = { timeout: 180, every: 1 }
+
+/** What a view says while its page server is down (`waitForServer()`). */
+const SERVER_DOWN = "The page server is restarting.  The page will show here by itself once it's back."
+
+/** What a view says when its page server didn't come back (`waitForServer()`). */
+const SERVER_GONE =
+  "The page server didn't come back in 3 minutes.  Start it with Restart Page Server (this view's title bar), " +
+  "or `spell server start`;  then ask for the page again."
 
 /****************
  * ### `DocView`
@@ -452,20 +468,22 @@ export class DocView implements vscode.WebviewViewProvider {
    * - else:  the view's iframe navigates to `url` (`{ spell: "navigate", url }`), never rebuilt
    */
   async show(url: string, { reload = false }: { reload?: boolean } = {}): Promise<void> {
-    const here = this.here
     this.isListing = false
     if (!this.view) {
       this.url = url
       this.current = undefined
       return void (await vscode.commands.executeCommand(`${this.id}.focus`))
     }
-    if (!reload && here && samePage(here, url)) {
+    // the page in view only when it SAID so (`current`, its live client's report):  a page that never loaded (its
+    // server down as it was asked for) is no page, so asking again loads it (epic `epic-engine` I294)
+    if (!reload && this.waiting === undefined && this.current && samePage(this.current, url)) {
       const hash = new URL(url).hash.slice(1)
       if (hash) void this.view.webview.postMessage({ spell: "go", hash })
+      this.say(undefined)
     } else {
       this.url = url
       this.current = undefined
-      void this.view.webview.postMessage({ spell: "navigate", url })
+      void this.navigate(url)
     }
     this.view.show(true)
   }
@@ -604,7 +622,52 @@ export class DocView implements vscode.WebviewViewProvider {
     if (!page || !this.view || (shown && samePage(shown, page))) return
     this.url = page
     this.current = undefined
-    void this.view.webview.postMessage({ spell: "navigate", url: stamped(page) })
+    void this.navigate(stamped(page))
+  }
+
+  /**
+   * Point the view's frame at `url`, once its page server answers (`serverAt()`).
+   * - down (restarting:  every merge into main does it):  the view says so over the page in view, waits for it
+   *   (`waitForServer()`), and then loads `url`;  what's asked meanwhile replaces `url`, so a click is never lost
+   * - why (epic `epic-engine` I294;  Owen:  "'Show the epic page' button doesn't do anything -- this sidebar seems to be
+   *   wedged"):  a frame pointed at a server that's down shows an error page that has no live client, so nothing
+   *   brought it back, and the same page asked for again was taken as already in view
+   */
+  private async navigate(url: string): Promise<void> {
+    if (this.waiting !== undefined || !(await serverAt(new URL(url).origin))) return this.waitForServer(url)
+    this.say(undefined)
+    void this.view?.webview.postMessage({ spell: "navigate", url })
+  }
+
+  /** The page asked for while its server was down (`navigate()`);  `undefined` when not waiting. */
+  private waiting: string | undefined
+
+  /**
+   * Wait for `url`'s page server to answer, saying so in the view, then load the page asked for LAST (`waiting`).
+   * - one wait at a time:  a second ask only replaces the page waited for
+   * - gives up after `SERVER_WAIT`, saying how to start it;  the next ask tries again
+   */
+  private async waitForServer(url: string): Promise<void> {
+    const isWaiting = this.waiting !== undefined
+    this.waiting = url
+    this.say(SERVER_DOWN)
+    if (isWaiting) return
+    const back = await waitUntil(() => serverAt(new URL(this.waiting ?? url).origin), SERVER_WAIT)
+    const to = this.waiting ?? url
+    this.waiting = undefined
+    if (!back) return this.say(SERVER_GONE)
+    this.say(undefined)
+    this.url = to
+    this.current = undefined
+    void this.view?.webview.postMessage({ spell: "navigate", url: stamped(to) })
+  }
+
+  /**
+   * A line over the page in view (`text`), or none (`undefined`):  the page server down, or being looked for.
+   * - drawn by the view's script (`notice`), so the page under it stays as it was
+   */
+  say(text: string | undefined): void {
+    void this.view?.webview.postMessage({ spell: "notice", text: text ?? null })
   }
 
   /**
@@ -638,6 +701,14 @@ export class DocView implements vscode.WebviewViewProvider {
       iframe { display: block; border: 0; width: 100%; height: 100%; background: var(--background); }
       p { padding: 0 1em; }
       .empty { height: 100%; overflow: auto; }
+      .notice {
+        position: fixed; inset: 8px 8px auto 8px; padding: 8px 10px; border-radius: 6px;
+        font: var(--vscode-font-size, 13px) / 1.4 var(--vscode-font-family, sans-serif);
+        color: var(--vscode-notifications-foreground, inherit);
+        background: var(--vscode-notifications-background, var(--background));
+        border: 1px solid var(--vscode-notifications-border, var(--vscode-focusBorder, #888));
+        box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+      }
       ${LIST_CSS}
     </style>
   </head>
@@ -663,6 +734,7 @@ export class DocView implements vscode.WebviewViewProvider {
         }
         const data = event.data
         if (data?.spell === "navigate") return navigate(data.url)
+        if (data?.spell === "notice") return notice(data.text)
         if (frame && ["history", "go", "edit"].includes(data?.spell)) frame.contentWindow.postMessage(data, "*")
       })
       // the list's picks (the Details tab):  a page, or another epic
@@ -675,6 +747,19 @@ export class DocView implements vscode.WebviewViewProvider {
       })
       // (re)loaded:  the extension points the frame at the page this view should show, if it isn't (restore())
       vscode.postMessage({ spell: "ready", url: frame ? frame.src : null })
+
+      /** A line over the page (the page server down), or none:  null. */
+      function notice(text) {
+        let line = document.querySelector(".notice")
+        if (!text) return void line?.remove()
+        if (!line) {
+          line = document.createElement("div")
+          line.className = "notice"
+          line.setAttribute("role", "status")
+          document.body.append(line)
+        }
+        line.textContent = text
+      }
 
       /** Point the frame at url:  the same frame, so the old page stays until the new one paints. */
       function navigate(url) {

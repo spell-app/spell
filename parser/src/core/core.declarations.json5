@@ -1734,7 +1734,7 @@
           "name": "thing"
         },
         {
-          "name": "names"
+          "name": "items"
         }
       ],
       "section": "Drawing things",
@@ -3129,10 +3129,10 @@
           "name": "thing"
         },
         {
-          "name": "names"
+          "name": "items"
         }
       ],
-      "description": "The items of a menu written in a drawing, `<context-menu>` (epic `language`), ready to draw: each of `names` an action found from `thing` up its chain (`actionOf()`), `-` a line between groups."
+      "description": "The items of a menu written in a drawing, `<context-menu>` (epic `language`), ready to draw: each of `items` an action found from `thing` up its chain (`actionOf()`), `-` a line between groups."
     },
     {
       "kind": "method",

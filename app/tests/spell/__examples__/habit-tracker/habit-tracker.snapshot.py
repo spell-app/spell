@@ -81,7 +81,7 @@ class Habit(View):
             "ui-segment",
             h(
                 "ui-form",
-                {"value": self},
+                {"prop:value": self},
                 h(
                     "ui-stack",
                     {"spacing": "sm"},
@@ -202,7 +202,7 @@ class HabitTracker(App):
                 h("ui-header", {"level": "2"}, "This week"),
                 h(
                     "ui-form",
-                    {"value": self},
+                    {"prop:value": self},
                     h(
                         "ui-input",
                         {

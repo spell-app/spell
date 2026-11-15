@@ -1809,7 +1809,7 @@ export class Pokedex extends App {
           onClick: core.pressed(this, async () => await this.goToWhere("everyone")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "PokéSpell"),
-        h("ui-form", { value: this, fluid: true, "min-width": "16em", "max-width": "26em" },
+        h("ui-form", { "prop:value": this, fluid: true, "min-width": "16em", "max-width": "26em" },
           h("ui-field", { label: "Find a Pokémon" },
             h("ui-input", { name: "search", icon: "search", size: "large", placeholder: "Pikachu" })
           )

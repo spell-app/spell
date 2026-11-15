@@ -1309,6 +1309,26 @@ describe("outline style", () => {
       expect(js).toMatch(/whenCardDroppedOn\(card\) \{\s+this\.append\(card\)/)
     })
 
+    test("`when a card is dropped`, `... dragged over`, `... dragged out of`:  `on it` understood, the same methods (I100)", () => {
+      // Owen's draft Solitaire:  `a pile` reopened, its handler with no `on it`
+      const js = compile([
+        "a card is a view",
+        'a "pile" is a viewable list of cards',
+        "\tit is droppable",
+        '\tits "hint" is text',
+        "a pile",
+        "\twhen a card is dropped",
+        "\t\tadd the card to it",
+        "\twhen a card is dragged over",
+        '\t\tset its hint to "drop here"',
+        "\twhen a card is dragged out of",
+        '\t\tset its hint to ""'
+      ])
+      expect(js).toMatch(/whenCardDroppedOn\(card\) \{\s+this\.append\(card\)/)
+      expect(js).toMatch(/whenCardDraggedOver\(card\) \{\s+this\.hint = "drop here"/)
+      expect(js).toMatch(/whenCardDraggedOutOf\(card\) \{\s+this\.hint = ""/)
+    })
+
     test("`- while a card is dragged over it`, `- when something is dropped on it`:  `the thing` is any thing (outline-spell P28)", () => {
       const js = compile([
         "a card is a view",
@@ -1375,6 +1395,22 @@ describe("outline style", () => {
       expect(errorsOf(["a card is a view where:", '\t- to "draw its placeholder": <b/>'])).toHaveLength(1)
       // a part, `drawFront()` -- see `codeSpellGrows.test.ts`
       expect(errorsOf(["a card is a view where:", '\t- to "draw its front": <b/>'])).toHaveLength(0)
+    })
+
+    test("a view handed a thing, `<card-image card={it} />`, takes it as a property, never an attribute (epic `language` I104)", () => {
+      const js = compile([
+        "a card is a view where:",
+        "\t- its rank is a number",
+        "\t- to draw it:",
+        "\t\t<card-image card={it} rank=2 />",
+        "a card image is a view where:",
+        "\t- its card is a card",
+        "\t- its rank is a number",
+        "\t- to draw it:",
+        "\t\t<b/>"
+      ])
+      // an attribute would be `card="[object Object]"`;  a number stays an attribute
+      expect(js).toMatch(/h\("[\w-]*card-image", \{ "prop:card": this, rank: 2 \}\)/)
     })
   })
 

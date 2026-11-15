@@ -159,10 +159,14 @@ classesEs.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dra
   syntax: "((dragged:arrastrar)|(dropped_on:soltar encima)|(selected:seleccionar))"
 })
 
-// When a list's drag handler runs, for `drag_handler`:  `cuando una carta se suelta sobre ella`
+// When a list's drag handler runs, for `drag_handler`:  `cuando una carta se suelta sobre ella`;
+// "sobre ella" understood, as English's "on it":  `cuando una carta se suelta` (epic `language` I100)
 classesEs.addRule(
   Wording.specialize({ ruleName: "drag_moment", meanings: ["dragged_over", "dragged_out_of", "dropped_on"] }),
-  { syntax: "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de)|(dropped_on:suelta sobre))" }
+  {
+    syntax:
+      "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de|arrastra fuera)|(dropped_on:suelta sobre|suelta))"
+  }
 )
 
 // Sin esperar, for `items_reordered`:  `- sus elementos se pueden reordenar de inmediato`
@@ -742,20 +746,20 @@ classesEs.addRule(DragAndDrop, {
 
 // in a list type's outline body:  `- cuando una carta se suelta sobre ella:`
 classesEs.addRule(DragHandler, {
-  syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
+  syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
 })
 // sin artículo, un tipo que conoce (épica `debut` P27, Q47):  `- al carta se suelta:`, "sobre ella" se entiende
 classesEs.addRule(DragHandler, {
   syntax: "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
 })
-classesEs.addRule(DragHandler, { syntax: "cuando algo se {moment:drag_moment} (él|ella|ello) :? {statement_body}?" })
+classesEs.addRule(DragHandler, { syntax: "cuando algo se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?" })
 classesEs.addRule(DragHandler, {
-  syntax: "mientras (un|una) {item:type} se arrastra sobre (él|ella|ello) :? {statement_body}?"
+  syntax: "mientras (un|una) {item:type} se {over:drag_moment} (él|ella|ello) :? {statement_body}?"
 })
 classesEs.addRule(DragHandler, {
-  syntax: "mientras {item:known_type} se? arrastra sobre (él|ella|ello)? :? {statement_body}?"
+  syntax: "mientras {item:known_type} se? {over:drag_moment} (él|ella|ello)? :? {statement_body}?"
 })
-classesEs.addRule(DragHandler, { syntax: "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?" })
+classesEs.addRule(DragHandler, { syntax: "mientras algo se {over:drag_moment} (él|ella|ello) :? {statement_body}?" })
 // `- sus elementos se pueden reordenar`:  English's `- its items can be reordered`
 classesEs.addRule(ItemsReordered, {
   syntax:
@@ -1154,7 +1158,8 @@ classesEs.addRule(CreateThing, {
       ]
     },
     {
-      title: "una propiedad nombrada sola toma la variable de su nombre, como con `una nueva ...` (épica `language` J159)",
+      title:
+        "una propiedad nombrada sola toma la variable de su nombre, como con `una nueva ...` (épica `language` J159)",
       compileAs: "statement",
       beforeEach(scope: P.Scope) {
         scope.compile(

@@ -1,5 +1,6 @@
 /*
- * `<epic-send-buttons>` (`EpicSendButtons.tsx`):  Send, the paper plane, ONE round pill;  its countdown's ring round it.
+ * `<epic-send-buttons>` (`EpicSendButtons.tsx`):  Send, the paper plane and its words "Send to Claude" (I305), ONE
+ *   pill, the plane in its round end;  its countdown's ring round the plane.
  * - The pill's outline:  `transparent` while inactive, nothing new to send, idle or sent (Owen, 2026-10-25:  "I wanted
  *   no border when this is inactive, use `transparent`"), a grey hairline with something not sent (`state`);  never
  *   dashed (Owen, 2026-10-22:  "Lose the dotted outline around both").
@@ -67,22 +68,22 @@
   .group[data-asks="taken"] {
     border-style: dotted;
   }
+  /* the pill:  the plane in its round end, then its words (I305) */
   button {
     position: relative;
-    display: inline-grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     box-sizing: border-box;
-    width: calc(var(--_size) - 2px);
     height: calc(var(--_size) - 2px);
     margin: 0;
-    padding: 0;
+    padding: 0 10px 0 0;
     border: none;
-    border-radius: 50%;
+    border-radius: 999px;
     background: none;
     color: var(--_muted);
     font: inherit;
-    /* the plane a little small for its round end */
-    font-size: 13px;
+    white-space: nowrap;
     cursor: pointer;
   }
   button:hover {
@@ -99,14 +100,17 @@
   /* something not sent:  a light blue disc, the plane white (Owen, 2026-10-29:  "make bg of send button light blue,
      white plane when changes present") */
   .send[data-state="unsent"] {
+    color: var(--_tint);
+  }
+  .send[data-state="unsent"] .glyph {
     background: var(--_light);
     color: #fff;
   }
-  .send[data-state="unsent"]:hover {
+  .send[data-state="unsent"]:hover .glyph {
     background: color-mix(in oklab, var(--_tint) 75%, white);
   }
   /* inside the ring while it counts:  the disc 1px in from it, so it fills the ring's middle and no more */
-  :host(:is(:state(counting), :state(working))) .send {
+  :host(:is(:state(counting), :state(working))) .glyph {
     padding: calc((var(--_size) - 2px - var(--_disc)) / 2);
     background-clip: content-box;
     font-size: 10px;
@@ -115,6 +119,9 @@
   :host(:state(waiting)) .send {
     background: var(--_tint);
     color: var(--ui-blue-on, #fff);
+  }
+  :host(:state(waiting)) .send .glyph {
+    background: none;
   }
   :host(:state(waiting)) .send:hover {
     background: color-mix(in oklab, var(--_tint) 85%, black);
@@ -150,6 +157,17 @@
     position: relative;
     display: inline-grid;
     place-items: center;
+    flex: none;
+    box-sizing: border-box;
+    width: calc(var(--_size) - 2px);
+    height: calc(var(--_size) - 2px);
+    border-radius: 50%;
+    /* the plane a little small for its round end */
+    font-size: 13px;
+  }
+  /* the words:  a step smaller than the page's text, on one line */
+  .words {
+    font: 600 12px/1 var(--ui-font-family, system-ui, sans-serif);
   }
   :host {
     /* the ring:  exactly the element's height, never over its edge (Owen, 2026-10-29:  "ring should still be smaller,

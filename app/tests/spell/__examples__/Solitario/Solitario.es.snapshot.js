@@ -13,11 +13,20 @@ export const words = {
       valor: "valor",
       símbolo: "símbolo",
       nombreCorto: "nombre corto",
-      imagen: "imagen",
       jugar: "jugar una carta",
       ponerEnPila: "poner una carta en una pila",
       contarLosPuntosDeCartaEnPila: "contar los puntos de una carta en una pila",
       pila: "pila"
+    },
+    ImagenDeCarta: {
+      carta: "carta",
+      rango: "rango",
+      palo: "palo",
+      dirección: "dirección",
+      estáBocaDirección: "está boca (dirección)",
+      cara: "cara",
+      color: "color",
+      dibujo: "dibujo"
     },
     Mazo: {
       nombreCorto: "nombre corto"
@@ -158,7 +167,6 @@ export const words = {
       { name: "Rango y Palo", description: "El as es bajo:  as = 1 ... rey = 13", members: ["rango", "palo", "color"] },
       { name: "Alias", description: "Spell para identificar cartas", members: ["esUnaFigura", "esUnaCartaNumérica", "esElRangoDePalo"] },
       { name: "Nombres", description: "identificar una carta", members: ["nombre", "valor", "símbolo", "nombreCorto"] },
-      { name: "Dibujo", description: "Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css", members: ["imagen"] },
       { name: "Juego", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
       { name: "Una pila de cartas", members: ["pila"] }
     ],

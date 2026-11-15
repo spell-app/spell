@@ -5,6 +5,7 @@
   ],
   "provides": [
     "Carta",
+    "ImagenDeCarta",
     "Mazo",
     "Pila",
     "Solitario",
@@ -13,6 +14,7 @@
     "Fundación",
     "Columna",
     "test_la_preparación_de_la_carta",
+    "test_las_imágenes_de_carta",
     "test_la_creación_del_mazo",
     "test_las_pilas",
     "test_los_movimientos"
@@ -22,7 +24,7 @@
       "type": "Carta",
       "superType": "TwoSidedView",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:0-3270"
+      "defined": "/Carta.es.spell:0-2324"
     },
     {
       "property": "rango",
@@ -45,7 +47,7 @@
         "dama",
         "rey"
       ],
-      "defined": "/Carta.es.spell:493-543"
+      "defined": "/Carta.es.spell:526-576"
     },
     {
       "property": "palo",
@@ -58,7 +60,7 @@
         "corazones",
         "espadas"
       ],
-      "defined": "/Carta.es.spell:545-605"
+      "defined": "/Carta.es.spell:578-638"
     },
     {
       "property": "color",
@@ -69,7 +71,7 @@
         "rojo",
         "negro"
       ],
-      "defined": "/Carta.es.spell:607-704"
+      "defined": "/Carta.es.spell:640-737"
     },
     {
       "syntax": "{operator:is_or_is_not_a} figura",
@@ -81,7 +83,7 @@
       "kind": "method",
       "name": "\"es una figura\"",
       "returns": "choice",
-      "defined": "/Carta.es.spell:763-810"
+      "defined": "/Carta.es.spell:796-843"
     },
     {
       "syntax": "{operator:is_or_is_not_a} carta numérica",
@@ -92,7 +94,7 @@
       "kind": "method",
       "name": "\"es una carta numérica\"",
       "returns": "choice",
-      "defined": "/Carta.es.spell:812-855"
+      "defined": "/Carta.es.spell:845-888"
     },
     {
       "syntax": "{operator:is_or_is_not} {definite_article} (expression:as|ases|2|3|4|5|6|7|8|9|10|jota|jotas|dama|damas|rey|reyes) de (expression:tréboles|trébol|diamantes|diamante|corazones|corazón|espadas|espada)",
@@ -125,7 +127,7 @@
           "espadas"
         ]
       },
-      "defined": "/Carta.es.spell:857-882"
+      "defined": "/Carta.es.spell:890-915"
     },
     {
       "property": "nombre",
@@ -133,21 +135,21 @@
       "group": "Nombres",
       "groupDescription": "identificar una carta",
       "datatype": "text",
-      "defined": "/Carta.es.spell:976-1018"
+      "defined": "/Carta.es.spell:1009-1051"
     },
     {
       "property": "valor",
       "of": "Carta",
       "group": "Nombres",
       "datatype": "number",
-      "defined": "/Carta.es.spell:1020-1057"
+      "defined": "/Carta.es.spell:1053-1090"
     },
     {
       "property": "símbolo",
       "of": "Carta",
       "group": "Nombres",
       "datatype": "text",
-      "defined": "/Carta.es.spell:1059-1165"
+      "defined": "/Carta.es.spell:1092-1198"
     },
     {
       "property": "nombre_corto",
@@ -155,15 +157,7 @@
       "of": "Carta",
       "group": "Nombres",
       "datatype": "text",
-      "defined": "/Carta.es.spell:1167-1436"
-    },
-    {
-      "property": "imagen",
-      "of": "Carta",
-      "group": "Dibujo",
-      "groupDescription": "Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css",
-      "datatype": "text",
-      "defined": "/Carta.es.spell:1579-2186"
+      "defined": "/Carta.es.spell:1200-1469"
     },
     {
       "syntax": "jugar {thisArg:expression}",
@@ -232,13 +226,94 @@
       "defined": "/Pila.es.spell:1863-1893"
     },
     {
+      "type": "ImagenDeCarta",
+      "superType": "View",
+      "gender": "feminine",
+      "defined": "/Carta.es.spell:2326-4782"
+    },
+    {
+      "property": "carta",
+      "of": "ImagenDeCarta",
+      "datatype": "Carta",
+      "defined": "/Carta.es.spell:2925-2948"
+    },
+    {
+      "property": "rango",
+      "of": "ImagenDeCarta",
+      "datatype": "RangoDeCarta",
+      "defined": "/Carta.es.spell:2950-2981"
+    },
+    {
+      "property": "palo",
+      "of": "ImagenDeCarta",
+      "datatype": "PaloDeCarta",
+      "defined": "/Carta.es.spell:2983-3012"
+    },
+    {
+      "property": "dirección",
+      "classVariable": "Direcciones",
+      "of": "ImagenDeCarta",
+      "enumeration": [
+        "arriba",
+        "abajo"
+      ],
+      "defined": "/Carta.es.spell:3014-3046"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} boca (expression:arriba|arribas|abajo|abajos)",
+      "output": "está_boca_$dirección",
+      "rule": "quoted_property",
+      "of": "ImagenDeCarta",
+      "kind": "method",
+      "name": "\"está boca (dirección)\"",
+      "values": {
+        "dirección": [
+          "arriba",
+          "abajo"
+        ]
+      },
+      "defined": "/Carta.es.spell:3048-3071"
+    },
+    {
+      "property": "cara",
+      "of": "ImagenDeCarta",
+      "datatype": "Carta",
+      "defined": "/Carta.es.spell:3073-3259"
+    },
+    {
+      "property": "color",
+      "of": "ImagenDeCarta",
+      "defined": "/Carta.es.spell:3261-3338"
+    },
+    {
+      "constants": [
+        "azul"
+      ],
+      "defined": "/Carta.es.spell:3277-3300"
+    },
+    {
+      "property": "dibujo",
+      "of": "ImagenDeCarta",
+      "datatype": "text",
+      "defined": "/Carta.es.spell:3340-4019"
+    },
+    {
       "syntax": "probar la preparación de la carta",
       "output": "test_la_preparación_de_la_carta",
       "rule": "method_call",
       "alias": "statement",
       "kind": "function",
       "name": "la preparación de la carta",
-      "defined": "/Carta.es.spell:2316-3270"
+      "defined": "/Carta.es.spell:1608-2324"
+    },
+    {
+      "syntax": "probar las imágenes de carta",
+      "output": "test_las_imágenes_de_carta",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "las imágenes de carta",
+      "defined": "/Carta.es.spell:4086-4782"
     },
     {
       "type": "Mazo",
@@ -341,7 +416,7 @@
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:7510-8016"
+      "defined": "/Solitario.es.spell:7510-7979"
     },
     {
       "property": "disposición",
@@ -359,13 +434,13 @@
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:8018-8347"
+      "defined": "/Solitario.es.spell:7981-8310"
     },
     {
       "property": "disposición",
       "of": "Columna",
       "datatype": "text",
-      "defined": "/Solitario.es.spell:8048-8070"
+      "defined": "/Solitario.es.spell:8011-8033"
     },
     {
       "type": "Solitario",
@@ -561,7 +636,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:8349-9905"
+      "defined": "/Solitario.es.spell:8312-9868"
     }
   ],
   "codeLines": [
@@ -576,53 +651,63 @@
     45,
     49,
     57,
-    64,
-    80,
-    90,
-    106,
-    119,
-    136,
-    179,
-    183,
-    188,
-    195,
-    218,
-    223,
-    230,
-    236,
-    242,
-    257,
-    299,
-    301,
-    323,
-    325,
-    341,
-    343,
-    347,
-    370,
-    372,
-    389,
-    392,
+    71,
+    81,
+    97,
+    110,
+    126,
+    135,
+    140,
+    145,
+    150,
+    156,
+    161,
+    166,
+    167,
+    172,
+    186,
+    219,
+    251,
+    255,
+    260,
+    267,
+    290,
+    295,
+    302,
+    308,
+    314,
+    329,
+    371,
+    373,
+    395,
+    397,
+    413,
+    415,
+    419,
     442,
-    446,
-    450,
-    454,
-    458,
-    462,
-    466,
-    470,
-    474,
-    478,
-    482,
-    486,
-    490,
-    494,
-    499,
-    505,
-    527,
+    444,
+    461,
+    464,
+    514,
+    518,
+    522,
+    526,
+    530,
+    534,
     538,
+    542,
     546,
-    581,
-    617
+    550,
+    554,
+    558,
+    562,
+    566,
+    571,
+    577,
+    599,
+    610,
+    618,
+    653,
+    689
   ]
 }

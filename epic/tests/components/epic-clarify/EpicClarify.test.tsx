@@ -146,6 +146,38 @@ describe("<epic-clarify>", () => {
     expect((clarify as unknown as { matches(s: string): boolean }).matches(":state(turning)")).toBe(true)
   })
 
+  test("icon (I295):  an agent merely at work on the item leaves it still;  clicked, it asks, never calls the agent off", async () => {
+    const routes = new FakeRoutes()
+    // an issue taken up (`epic inbox working i98 on`, no ask of Owen's):  a working flag, not `asked`
+    routes.inbox.working = { i98: { action: "details", since: new Date().toISOString() } }
+    await adoptClient(routes)
+    const clarify = await ElementFixture.render(`<epic-clarify of="I98" icon></epic-clarify>`)
+    await vi.waitFor(() => expect(buttonOf(clarify)).not.toBeNull())
+    const turning = () => (clarify as unknown as { matches(s: string): boolean }).matches(":state(turning)")
+    expect(turning()).toBe(false)
+    expect(buttonOf(clarify)!.title).toMatch(/clarify this now/)
+    buttonOf(clarify)!.click()
+    await vi.waitFor(() =>
+      expect(routes.posted).toContainEqual({
+        route: "now",
+        body: expect.objectContaining({ id: "i98", action: "details" })
+      })
+    )
+    expect(routes.posted.map((each) => each.route)).not.toContain("cancel")
+    await vi.waitFor(() => expect(turning()).toBe(true))
+  })
+
+  test("icon (I295):  his ask taken by the session (`working.asked`) keeps it turning", async () => {
+    const routes = new FakeRoutes()
+    routes.inbox.working = { j9: { action: "details", since: new Date().toISOString(), asked: true } }
+    await adoptClient(routes)
+    const clarify = await ElementFixture.render(`<epic-clarify of="J9" icon></epic-clarify>`)
+    await vi.waitFor(() => expect(buttonOf(clarify)).not.toBeNull())
+    await vi.waitFor(() =>
+      expect((clarify as unknown as { matches(s: string): boolean }).matches(":state(turning)")).toBe(true)
+    )
+  })
+
   test("icon in an item:  `<epic-item>` draws it at its body's right while reviewed, a given body's too", async () => {
     await adoptClient(new FakeRoutes())
     const item = await ElementFixture.render(ITEM)

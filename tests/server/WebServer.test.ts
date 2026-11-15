@@ -86,3 +86,43 @@ describe("WebServer's favicon", () => {
     expect((await ask(plain.port, "GET", "/page.html")).text).not.toContain(`href="/favicon.svg"`)
   })
 })
+
+// epic `epic-engine` I293:  after a restart, a page reloads only when a script it runs changed
+describe("WebServer's /api/server/versions", () => {
+  const root = mkdtempSync(join(tmpdir(), "srv-versions-"))
+  let live: SRV.WebServer
+
+  beforeAll(async () => {
+    writeFileSync(join(root, "app.js"), "console.log(1)\n")
+    live = new SRV.WebServer({ live: true, mounts: [{ prefix: "/", dir: root }] })
+    await live.listen()
+  })
+
+  afterAll(async () => {
+    await live.close()
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  /** what the server says each of `paths` holds */
+  async function versions(...paths: string[]): Promise<Record<string, string | null>> {
+    const query = paths.map((path) => `path=${encodeURIComponent(path)}`).join("&")
+    const answer = await ask(live.port, "GET", `${SRV.LIVE_VERSIONS}?${query}`)
+    expect(answer.status).toBe(200)
+    const body = JSON.parse(answer.text) as SRV.LiveVersions
+    expect(body.token).toBe(live.guard.token)
+    expect(body.run).toBe(live.live?.run)
+    return body.versions
+  }
+
+  it("hashes each served file;  none for a missing one;  the live client's own text", async () => {
+    const first = await versions("/app.js", "/gone.js", SRV.LIVE_SCRIPT)
+    expect(first["/app.js"]).toMatch(/^[0-9a-f]{40}$/)
+    expect(first["/gone.js"]).toBeNull()
+    expect(first[SRV.LIVE_SCRIPT]).toMatch(/^[0-9a-f]{40}$/)
+    // rewritten with the same text:  the same;  changed:  another
+    writeFileSync(join(root, "app.js"), "console.log(1)\n")
+    expect((await versions("/app.js"))["/app.js"]).toBe(first["/app.js"])
+    writeFileSync(join(root, "app.js"), "console.log(2)\n")
+    expect((await versions("/app.js"))["/app.js"]).not.toBe(first["/app.js"])
+  })
+})

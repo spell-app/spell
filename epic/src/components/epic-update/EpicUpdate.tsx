@@ -43,9 +43,10 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   An orange `UPDATE` inline, on an item changed (`phase 3 done` removes a
  *   phase's labels;  Owen's ✓ any label, I285;  on any epic, a phase under way or not, I290).
  *   Its tooltip names the phase:  `Changed during P3`.
- *   - A status change says which (`became`;  Owen, 2026-11-14, epic `epic-engine` T75):  `UPDATE : FIXED`.
+ *   - A status change says which (`became`;  Owen, 2026-11-14, epic `epic-engine` T75):  `FIXED`.
  *   - Then a blue `Not in main` pill while that work is on its epic's branch alone (`unmerged`).
  *   - Gone once Owen checks its item (his ✓;  I285):  at once on the page, and from the file as it's applied.
+ *   - A copy of it ends each line of "0. While you were out" about that item (`PlanDoc.awayBody()`, I302).
  * - Its own family, so its look changes in one place (Owen:  "so we can restyle easily").
  ****************/
 export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
@@ -99,11 +100,14 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
   /**
    * A bare label whose item Owen has checked:  his ✓ (an approve) on it in the review inbox, sent or not, so the label
    * goes at once (epic `epic-engine` I285);  applying it takes the label out of the page (`PlanDoc.reviewedAs()`).
+   * - its item:  the one it's in, or, as a copy on a line of "0. While you were out", the one that line is about
+   *   (`<epic-away-line line>`, epic `epic-engine` I302)
    */
   @E.cssState("checked")
   get isChecked(): boolean {
     if (this.isBlock) return false
-    const itemId = this.domElement.closest("epic-item")?.id
+    const itemId =
+      this.domElement.closest("epic-item")?.id ?? this.domElement.closest("epic-away-line")?.getAttribute("line")
     return !!itemId && this.review.liveOf(itemId).approved
   }
 
@@ -200,7 +204,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
     )
   }
 
-  /** The bare label's words:  `UPDATE`, or `UPDATE : FIXED` after a status change (`became`). */
+  /** The bare label's words:  `UPDATE`, or `FIXED` after a status change (`became`). */
   get labelText(): string {
     const became = this.became as BecameStatus | undefined
     return became && BECAME.includes(became)
@@ -209,7 +213,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
   }
 
   /**
-   * The bare label:  an orange `UPDATE` (`UPDATE : FIXED` after a status change), its phase in its tooltip;
+   * The bare label:  an orange `UPDATE` (`FIXED` after a status change), its phase in its tooltip;
    * after it, a blue `Not in main` pill while that change's work isn't merged (`unmerged`, epic `epic-engine` T75).
    */
   private renderLabel(): JSX.Element {
@@ -264,7 +268,7 @@ const LABEL = "label"
 const UNMERGED = "unmerged"
 
 /** The status changes a bare label names (`became`), each its own word in the vocabulary. */
-const BECAME = ["fixed", "done", "canceled", "decided", "reopened"] as const
+const BECAME = ["fixed", "done", "canceled", "decided", "reopened", "underway"] as const
 type BecameStatus = (typeof BECAME)[number]
 
 /** Ids of the shadow markup:  the title (the fold button's name), the box it folds. */

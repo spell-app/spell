@@ -515,8 +515,13 @@ export class SpellStatement<
     const { nestedScope } = statement
     const tokens = lineToken.tokens.filter((token) => !(token instanceof P.CommentToken))
     const value = nestedScope.parser?.parse(tokens, "expression", nestedScope)
-    if (value?.length !== tokens.length || value.is(ParseError)) return undefined
+    if (!value || value.is(ParseError)) return undefined
+    // in a body answering yes or no, a question that reads up to a point:  the error is what's after it, as on one
+    // line (`the card is on top` + "Don't understand `of its pile`"), not the whole line (epic `language` I101)
+    const rest = tokens.slice(value.length)
+    if (rest.length && !(this.answersYesOrNo(statement) && value.datatype === "choice")) return undefined
     if (asks && value.datatype !== "choice") return undefined
+    const restError = rest.length ? nestedScope.parser?.parse(rest, "parse_error", nestedScope) : undefined
     // markup draws, only in a drawing:  anywhere else it stays an error (epic `elemental-spell` Q14)
     if (value.AST instanceof P.ASTJSXElement) return undefined
     const kept = line.matched.filter(
@@ -524,10 +529,11 @@ export class SpellStatement<
     )
     const valueLine = new P.Match({
       rule: line.rule,
-      matched: [...kept, value],
+      matched: restError ? [...kept, value, restError] : [...kept, value],
       tokens: line.tokens,
       scope: line.scope
     })
+    if (restError) valueLine.data.errors = [restError]
     const matched = block.matched.map((item) => (item === line ? valueLine : item)) as P.Match[]
     const result = (block.rule as Block).assembleBlock(nestedScope, nestedBlock, matched)
     if (result) result.data.returnsLast = value
@@ -678,8 +684,10 @@ export class SpellStatement<
       if (!(statement?.rule instanceof SpellStatement)) return
       const result = statement.rule.getReturnValue(statement)
       if (result) returned.add(result.value ? result.value.datatype : "nothing")
-      // a callback's `return`s are its own
-      else if (!(statement.nestedScope instanceof P.MethodScope)) visit(statement.rule.getBody(statement))
+      // a callback's `return`s are its own:  a body with a method scope of its OWN, not one it's in (`return`'s ladder)
+      else if (statement.nestedScope === statement.scope || !(statement.nestedScope instanceof P.MethodScope)) {
+        visit(statement.rule.getBody(statement))
+      }
     }
   }
 

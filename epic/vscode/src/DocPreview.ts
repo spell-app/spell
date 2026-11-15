@@ -111,7 +111,11 @@ export class DocPreview {
       void vscode.window.showErrorMessage(`Spell Epic:  no file '${file}'.`)
       return view
     }
-    const url = new URL(await DocPreview.urlOf(file))
+    // finding its server can take a while (one restarting, or started now):  the view says so meanwhile, so a click
+    // always shows it was heard (epic `epic-engine` I294)
+    const docView = view === "docs" ? undefined : DocView.of(view)
+    const saying = setTimeout(() => docView?.say(FINDING_SERVER), 800)
+    const url = new URL(await DocPreview.urlOf(file).finally(() => clearTimeout(saying)))
     if (query) url.search = query
     if (hash) url.hash = hash
     await DocPreview.showUrl(url.href, view, file)
@@ -197,6 +201,9 @@ export class DocPreview {
     })
   }
 }
+
+/** What a side-bar view says while the page server for a page asked for is being found or started. */
+const FINDING_SERVER = "Finding the page server..."
 
 /** What the status bar says while a page server starts. */
 const STARTING_SERVER = "Starting the page server"

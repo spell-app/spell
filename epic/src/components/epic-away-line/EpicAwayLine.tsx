@@ -19,7 +19,7 @@ import awayLineCSS from "./EpicAwayLine.css?inline"
  *   `epic inbox apply` writes when he read it into the page (`<epic-page away-seen>`), and the section is drawn again
  *   without it.  A heading's (`done`, `fixed`, `asks` ...) takes its whole part.
  * - Read:  faded at once (`:state(read)`), as an update block goes quiet;  the page server applies it straight away
- *   (`AwayReads`, epic `epic-engine` I268:  no Send), and the section is drawn again without it.
+ *   (`InstantMarks`, epic `epic-engine` I268, I304:  no Send), and the section is drawn again without it.
  *   - a line under a part's heading Read fades with it, at once (`partHeading()`):  the whole part is read
  *   - what the line is about is Seen too:  its new update blocks go quiet (`PlanDoc.seeUpdatesFor()`)
  *   - and the same the moment Owen marks the item the line is about (Do this, Approve ...):  it leaves the section

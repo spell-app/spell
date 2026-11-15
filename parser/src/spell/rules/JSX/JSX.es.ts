@@ -181,6 +181,10 @@ JSXEs.addRule(ContextMenuBlock, {
           'core.drawContextMenu(this, ["jugarSolo", "-", "undo"])'
         ],
         [
+          ["<menú-contextual>", '\t<acción "deshacer" solo-icono/>', "</>"],
+          'core.drawContextMenu(this, [["undo", { "icon-only": true }]])'
+        ],
+        [
           ["<grid>", '\t<menú-contextual><acción "deshacer"/></menú-contextual>', "</grid>"],
           'h("grid", core.drawContextMenu(this, ["undo"]))',
           '<grid>{core.drawContextMenu(this, ["undo"])}</grid>'

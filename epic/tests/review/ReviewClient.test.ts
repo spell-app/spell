@@ -3,7 +3,14 @@ import { describe, expect, test, vi } from "vite-plus/test"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
 import { ReviewClient } from "spell/epic/review/ReviewClient"
-import { NOBODY_LISTENING, REVISIT_KEY_PREFIX, type ReviewClientOptions } from "spell/epic/review/review.types"
+import {
+  CLOSED_HOLD_MS,
+  INSTANT_FAIL_MS,
+  INSTANT_GRACE_MS,
+  NOBODY_LISTENING,
+  REVISIT_KEY_PREFIX,
+  type ReviewClientOptions
+} from "spell/epic/review/review.types"
 
 ////////////////
 // ## Fakes
@@ -461,13 +468,23 @@ describe("ReviewClient writes", () => {
     const { client, server } = await started()
     const notices: string[] = []
     client.onNotice((message) => notices.push(message))
-    await client.save("q1", { action: "approve" })
+    await client.save("q1", { action: "todo" })
     expect(client.unsentCount).toBe(1)
     expect(await client.send()).toBe(true)
     expect(server.inbox.sent).not.toBeNull()
     expect(client.unsentCount).toBe(0)
     expect(await client.send()).toBe(false)
     expect(notices).toEqual([`Saved.  ${NOBODY_LISTENING}`, "Sent already:  waiting for Claude"])
+  })
+
+  // epic `epic-engine` I304:  "Seems like the check mark shouldn't require a send"
+  test("an instant mark (a plain ✓ or x on an item) isn't Send's:  not counted, not carried;  one with a note is", async () => {
+    const { client } = await started()
+    await client.save("j2", { action: "approve" })
+    await client.save("q1", { action: "skip" })
+    expect(client.unsentCount).toBe(0)
+    await client.save("q1", { action: "skip", note: "not now" })
+    expect(client.unsentCount).toBe(1)
   })
 
   // Owen, 2026-10-10:  "send button at top of page doesn't appear to be hooked up" -- comments only, Send said
@@ -480,7 +497,7 @@ describe("ReviewClient writes", () => {
     const id = server.inbox.commentList.add({ anchor: "q1", kind: "item" }, "is this hooked up?")
     await client.refresh()
     expect([client.unsentMarkCount, client.unsentCommentCount, client.unsentCount]).toEqual([0, 1, 1])
-    await client.save("q1", { action: "approve" })
+    await client.save("q1", { action: "todo" })
     expect(client.unsentCount).toBe(2)
     expect(await client.send()).toBe(true)
     expect(server.posts.at(-1)).toEqual(["send", { page: PAGE }])
@@ -664,11 +681,11 @@ describe("ReviewClient and the page server's wake", () => {
     const { client, server } = await started()
     const notices: string[] = []
     client.onNotice((message) => notices.push(message))
-    await client.save("q1", { action: "approve" })
+    await client.save("q1", { action: "todo" })
     await client.send()
     // a mark in the same millisecond as the send would pass for sent
     await new Promise((resolve) => setTimeout(resolve, 5))
-    await client.save("j2", { action: "approve" })
+    await client.save("j2", { action: "todo" })
     server.wake = typed
     await client.send()
     expect(notices).toEqual([`Saved.  ${NOBODY_LISTENING}`, `Saved.  ${typed.message}`])
@@ -849,5 +866,61 @@ describe("ReviewClient:  a note Claude TOOK", () => {
       "",
       "float them"
     ])
+  })
+})
+
+// epic `epic-engine` I306:  "it should show as grey and hide with an animate up immediately (optimistic update)"
+describe("ReviewClient.isClosing() (an instant ✓ or x, drawn closed at once)", () => {
+  test("closing from the click;  a second click takes it back at once, never held", async () => {
+    const { client } = await started()
+    expect(client.isClosing("j2")).toBe(false)
+    client.press("j2", "approve")
+    expect(client.isClosing("j2")).toBe(true)
+    client.press("j2", "approve")
+    expect(client.isClosing("j2")).toBe(false)
+    await vi.waitFor(() => expect(client.markOf("j2")).toBeUndefined())
+    expect(client.isClosing("j2")).toBe(false)
+  })
+
+  test("a mark with a note isn't closing:  it waits for Send, and Claude", async () => {
+    const { client } = await started()
+    client.type("q1", "why not")
+    client.press("q1", "drop")
+    await vi.waitFor(() => expect(client.markOf("q1")?.note).toBe("why not"))
+    expect(client.isClosing("q1")).toBe(false)
+  })
+
+  test("applied by the server (the mark gone):  held closed a while, then as the page says", async () => {
+    vi.useFakeTimers()
+    try {
+      const { client, server } = await started()
+      client.press("q1", "drop")
+      await vi.waitFor(() => expect(server.inbox.forPage().marks.q1).toBeDefined())
+      server.inbox.setMark("q1", null)
+      await vi.waitFor(async () => expect(await client.refresh()).toBe(true))
+      expect(client.markOf("q1")).toBeUndefined()
+      expect(client.isClosing("q1")).toBe(true)
+      vi.advanceTimersByTime(CLOSED_HOLD_MS + 1)
+      expect(client.isClosing("q1")).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  test("never applied:  given up on after its grace and INSTANT_FAIL_MS, the item back and a notice", async () => {
+    vi.useFakeTimers()
+    try {
+      const { client } = await started()
+      const notices: string[] = []
+      client.onNotice((message) => notices.push(message))
+      client.press("q1", "drop")
+      await vi.waitFor(() => expect(client.markOf("q1")).toBeDefined())
+      expect(client.isClosing("q1")).toBe(true)
+      vi.advanceTimersByTime(INSTANT_GRACE_MS + INSTANT_FAIL_MS + 10)
+      expect(client.isClosing("q1")).toBe(false)
+      expect(notices.at(-1)).toMatch(/Q1 isn't closed/)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

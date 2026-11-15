@@ -31,7 +31,7 @@ import { untrackCells } from "spell/util/reactive"
 
 import { core } from "./core"
 import { defineCoreModule, type PartEdit } from "./core.types"
-import type { MenuItem } from "./acting"
+import type { ContextMenuItem, MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
@@ -215,14 +215,15 @@ export const drawingMethods = defineCoreModule({
   /**
    * The right-click menu of the element around it, written in a drawing (`<context-menu>`, epic `language`):
    * a hidden `<spell-context-menu>`, which draws nothing.
-   * - `names`:  its items, each an action's method (`autoPlay`), `-` a line between groups.
+   * - `items`:  its items, each an action's method (`autoPlay`), `-` a line between groups;
+   *   or an action and the attributes its tag gave, `["undo", { "icon-only": true }]`, which go to its row.
    * - The page's right click on the element around it finds it, and shows its items (the app's `ActionMenus`):
    *   its `menuItems()` gives them, each found from `thing` up its chain as the menu shows (`core.menuItemsOf()`),
    *   so they read their titles and enabled live, and run through the core.
    */
-  drawContextMenu(thing: unknown, names: readonly string[]): Drawing {
+  drawContextMenu(thing: unknown, items: readonly ContextMenuItem[]): Drawing {
     const remember = (element: HTMLElement & ContextMenuElement) => {
-      element.menuItems = () => core.menuItemsOf(thing as object | undefined, names)
+      element.menuItems = () => core.menuItemsOf(thing as object | undefined, items)
     }
     return h(CONTEXT_MENU_TAG, { hidden: true, ref: remember }) as unknown as Drawing
   },

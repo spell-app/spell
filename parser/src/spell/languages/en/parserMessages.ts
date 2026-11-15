@@ -146,6 +146,9 @@ export const PARSER_MESSAGES = {
     "A sort can't wait for its key:  it would sort in no order.  Sort by a field of its own, or work the key out first",
   /** `if that fails:` in an action with nothing above it. */
   "rider-needs-a-line-above": "This goes under the line it's about, as a read of a place",
+  /** `return 0 otherwise` with no `return ... if ...` line above it (epic `language` I96). */
+  "otherwise-needs-return-if":
+    'This goes under a "return ... if ..." line, as its last:  e.g. "return 10 if it is a king", then "return 0 otherwise"',
   /** A rider outside a drawing:  won't compile. */
   "rider-only-in-a-drawing":
     "This shows something while a read has nothing to show, so it only goes in a drawing, under the read:  an action just waits",
@@ -307,6 +310,9 @@ export const PARSER_MESSAGES = {
   /** Something in a `<context-menu>` that isn't one of its items (epic `language`). */
   "context-menu-item":
     '<{tag}> holds only its items:  <action "name"/> for an action, <divider/> for a line between groups',
+  /** An item of a `<context-menu>` given an attribute as code, `{...}`:  a menu's row takes only words. */
+  "context-menu-code":
+    '<{tag}> in a menu takes words, not code:  write its attribute as words, e.g. title="Restart", or leave it bare, e.g. icon-only',
   /** A `{...}` in a `<markdown>` block that isn't spell. */
   "markdown-hole":
     'Don\'t understand "{{hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace',

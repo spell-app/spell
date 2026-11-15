@@ -15,6 +15,7 @@ import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
 import { MethodSignature } from "./MethodSignature"
+import { QuotedActionSignature } from "./QuotedActionSignature"
 import { QuotedMethodSignature } from "./QuotedMethodSignature"
 import { QuotedSignatureWords } from "./QuotedSignatureWords"
 import { QuotedTypeExpression } from "./QuotedTypeExpression"
@@ -75,6 +76,9 @@ methods.addRule(QuotedSignatureWords, {
 })
 
 methods.addRule(QuotedMethodSignature)
+
+// an action's quoted name, its `a <kind>` words its blanks (epic `language` I97)
+methods.addRule(QuotedActionSignature)
 
 methods.addRule(ToDoSomething, {
   syntax: `to (asTest:test)? {signature:method_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
@@ -969,7 +973,43 @@ methods.addRule(ToDoSomething, {
 // its name quoted, and what it says about itself on its line (epic `language` P48, Q6):
 // `to "deal the cards" with title "Deal", icon "card", shortcut "meta+N"`
 methods.addRule(ToDoSomething, {
-  syntax: `to {signature:quoted_method_signature} {modifiers:action_modifiers}? :? {statement_body}?`
+  syntax: `to {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
+  tests: [
+    {
+      title: "its blanks as the unquoted name's:  `a / an <kind>` a blank, other words its name (epic `language` I97)",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.types?.add("card")
+        scope.types?.add("pile")
+      },
+      tests: [
+        {
+          input: 'to "count the points for a card on a pile"',
+          js: [
+            "Card.prototype.countThePointsForCardOnPile = function (pile) {}",
+            'core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Points for Card on Pile", undoneAs: "Count the Points for Card on Pile" })'
+          ],
+          ts: [
+            "export interface Card { countThePointsForCardOnPile(pile: Pile): any /* spell: type unknown */ }",
+            "Card.prototype.countThePointsForCardOnPile = function (this: Card, pile: Pile) {}",
+            'core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Points for Card on Pile", undoneAs: "Count the Points for Card on Pile" })'
+          ]
+        },
+        {
+          input: 'to "deal the stock to (a pile)"',
+          js: [
+            "Pile.prototype.dealTheStockToPile = function () {}",
+            'core.describeAction(Pile, "dealTheStockToPile", { title: "Deal the Stock to Pile", undoneAs: "Deal the Stock to Pile" })'
+          ],
+          ts: [
+            "export interface Pile { dealTheStockToPile(): any /* spell: type unknown */ }",
+            "Pile.prototype.dealTheStockToPile = function (this: Pile) {}",
+            'core.describeAction(Pile, "dealTheStockToPile", { title: "Deal the Stock to Pile", undoneAs: "Deal the Stock to Pile" })'
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 methods.addRule(CreateAnimation, {
