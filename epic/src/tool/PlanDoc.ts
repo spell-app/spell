@@ -2126,10 +2126,42 @@ export class PlanDoc extends PlanReader {
     card.setAttribute("slot", STATUS_SLOT)
     Markup.place(host, card)
     if (host.localName === "epic-item" && !quiet) this.stamp(host)
+    // work taken up again on a fix Owen sent back, or a closed item (epic `epic-engine` I303):  REOPENED
+    const reopened = host.localName === "epic-item" && this.reopenTakenUp(host, state)
     // its UPDATE label, if it has one, says so (epic `epic-engine` I295):  `UNDERWAY`, not a bare UPDATE
-    const label = state === "underway" && host.localName === "epic-item" && PlanItem.updateLabelOf(host)
+    const label = !reopened && state === "underway" && host.localName === "epic-item" && PlanItem.updateLabelOf(host)
     if (label) Markup.set<"epic-update">(label, { became: "underway" })
     return PlanItem.titleOf(host)
+  }
+
+  /**
+   * Claude took up work on `item` again with a status card in `state` (`addStatus()`):  a fix waiting for Owen's
+   * review (open, `fixed`), sent back with his Revisit or Send it back, and taken up with an Underway or a Noted card,
+   * is REOPENED (`reopenFix()`;  epic `epic-engine` I303);  did it?
+   * - Owen, 2026-11-15, on editor's I139 (fixed, then his revisit, then "Noted · Queued:  agent editor-restore ...",
+   *   its pill still orange with `FIXED`):  "This pill should be blue, remove `FIXED` and replace with `REOPENED`"
+   * - a Done card never reopens:  it's the fix itself (`fixedForReview()` with no underway card)
+   * - a CLOSED item keeps its status under a new card (I148's rule):  sending a done todo or an accepted call back is
+   *   Do this, which opens it (`doThis()`)
+   * - the migration `reopened-fixes` reopens the fixes taken up before
+   */
+  private reopenTakenUp(item: Element, state: string): boolean {
+    if (state === "done" || item.getAttribute("status") !== "open") return false
+    if (!item.hasAttribute("fixed") || !CALM_ID.test(item.id)) return false
+    this.reopenFix(item)
+    return true
+  }
+
+  /**
+   * Fix `item` was sent back, and Claude is on it again:  not `fixed` (orange) any more but wanted (`urgent`:  blue,
+   * `handed` until an underway card makes it `progress`), `calm` off, its label `REOPENED`;  logged.
+   * - fixed again, `finishWork()` turns it orange and `FIXED` once more (`markFixed()`)
+   * - the migration `reopened-fixes` writes the same (`ReopenedFixes.reopen()`)
+   */
+  private reopenFix(item: Element): void {
+    Markup.set<"epic-item">(item, { fixed: undefined, calm: undefined, urgent: true })
+    this.markUpdate(item, "reopened")
+    this.log(`${item.id.toUpperCase()} reopened:  sent back, taken up again`)
   }
 
   /**

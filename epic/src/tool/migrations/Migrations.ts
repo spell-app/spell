@@ -13,6 +13,7 @@ import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
 import { ToReviewMarks } from "./ToReviewMarks"
 import { TookAsMinutes } from "./TookAsMinutes"
+import { ReopenedFixes } from "./ReopenedFixes"
 import { UpdateLabels } from "./UpdateLabels"
 import { UpdatesSaidByMarks } from "./UpdatesSaidByMarks"
 import { WholePhaseNumbers } from "./WholePhaseNumbers"
@@ -58,7 +59,8 @@ export class Migrations {
     new AgentsMarked(),
     new ItemBodies(),
     new UpdateLabels(),
-    new ClarifiedBodies()
+    new ClarifiedBodies(),
+    new ReopenedFixes()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

@@ -17,6 +17,7 @@ export { AREAS, RootLinks, type RootLinksCensus, type RootLinksRun } from "./Roo
 export { TakenInPhase } from "./TakenInPhase"
 export { ToReviewMarks } from "./ToReviewMarks"
 export { TookAsMinutes } from "./TookAsMinutes"
+export { ReopenedFixes } from "./ReopenedFixes"
 export { UpdateLabels } from "./UpdateLabels"
 export { UpdatesSaidByMarks } from "./UpdatesSaidByMarks"
 export { WholePhaseNumbers } from "./WholePhaseNumbers"
