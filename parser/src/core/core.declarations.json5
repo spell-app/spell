@@ -2910,6 +2910,18 @@
     },
     {
       "kind": "method",
+      "name": "runOpening",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "open"
+        }
+      ],
+      "description": "Run `open`, the program's whole opening -- importing it, which runs its top level -- as can't be undone: `program = await core.runOpening(() => import(url))`."
+    },
+    {
+      "kind": "method",
       "name": "asAction",
       "of": "core",
       "module": "acting",

@@ -599,6 +599,36 @@ describe("compiled spell draws with Solid", () => {
     await waitFor(() => titles()[3] === "Ship it")
   })
 
+  test("an action the program's top level calls, not waiting, is no undo step:  its whole opening can't be undone (epic `language` J180)", async () => {
+    const program = `
+import { core, Thing } from "@spell/core"
+export class Card extends Thing {
+  static {
+    this.declareProp("faceUp", { type: "choice" })
+  }
+  get faceUp() { return this.getProp("faceUp") }
+  set faceUp(faceUp) { this.setProp("faceUp", faceUp) }
+  turnOver() { this.faceUp = !this.faceUp }
+  static {
+    this.declareAction("turnOver", { undoneAs: "Turn Card" })
+  }
+}
+export const card = new Card()
+card.turnOver()
+`
+    await mount(source(program, "Turned"))
+    await waitFor(() => topLevelNames().includes("card"))
+    const card = testCore!.things.topLevel().find(({ name }) => name === "card")!.thing as unknown as {
+      faceUp: boolean
+      turnOver(): void
+    }
+    const steps = () => testCore!.RUNTIME.history.steps.map((step) => step.title)
+    expect([card.faceUp, steps()]).toEqual([true, []])
+    // once it's open, a move is a step as before
+    card.turnOver()
+    expect([card.faceUp, steps()]).toEqual([false, ["Turn Card"]])
+  })
+
   test("the `Solitaire` example:  each pile and card its own element, laid out by its styles.css;  a click still plays", async () => {
     const host = await mount(await solitaireSource())
     type Element = HTMLElement & { ready: Promise<void> }

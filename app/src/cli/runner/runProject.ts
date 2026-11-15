@@ -123,7 +123,8 @@ async function load(): Promise<Record<string, unknown> | undefined> {
   // a stack names the spell lines, through the source map beside the compiled file (epic `elemental-spell` P14)
   process.setSourceMapsEnabled(true)
   try {
-    return (await import(spec.entry)) as Record<string, unknown>
+    // its whole opening can't be undone, as in every runner (`core.runOpening()`, epic `language` J180)
+    return (await core.runOpening(() => import(spec.entry))) as Record<string, unknown>
   } catch (error) {
     process.stderr.write(chalk.red(`${spec.name} threw:  ${error instanceof Error ? error.stack : String(error)}\n`))
     return undefined
