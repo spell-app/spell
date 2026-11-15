@@ -3200,6 +3200,11 @@
           "description": "An open issue's review button (the x):  its name (I299)."
         },
         {
+          "key": "sendToClaude",
+          "text": "Send to Claude",
+          "description": "The plane's words, beside its icon:  an issue's, a call's or a phase's Do this, a fix sent back (I305;  Owen, 2026-11-15:  \"Change this to `<plane> Send to Claude`\")."
+        },
+        {
           "key": "sendBack",
           "text": "Send it back",
           "description": "A fixed issue's or call's review button (the plane):  its name (I299)."
