@@ -636,7 +636,23 @@ lists.addRule(ListFilter, {
         },
         ["the items in my-list which is not 1", "core.filter(myList, (item) => item !== 1)"],
         ["the items in my-list that are in my-list", "core.filter(myList, (item) => core.includes(myList, item))"],
-        ["the items in my-list who are not 1", "core.filter(myList, (item) => item !== 1)"]
+        ["the items in my-list who are not 1", "core.filter(myList, (item) => item !== 1)"],
+        {
+          title: "each clause's plural verb, after `and` / `or` too (epic `language` J173)",
+          input: "the items in my-list which are not 1 and are in my-list",
+          js: "core.filter(myList, (item) => item !== 1 && core.includes(myList, item))"
+        },
+        ["the items in my-list which are 1 or are 2", "core.filter(myList, (item) => item === 1 || item === 2)"],
+        {
+          title: "`aren't` and `don't`, with their `'` (epic `language` J173)",
+          input: "the items in my-list which aren't 1",
+          js: "core.filter(myList, (item) => item !== 1)"
+        },
+        ["the items in my-list which don't start with 1", "core.filter(myList, (item) => !core.startsWith(item, 1))"],
+        [
+          "the items in my-list which don't start with 1 and are in my-list",
+          "core.filter(myList, (item) => !core.startsWith(item, 1) && core.includes(myList, item))"
+        ]
       ]
     },
     {
@@ -1286,6 +1302,10 @@ lists.addRule(PluralCallStatement, {
         [
           "turn the cards in the deck which are not in the stock face down",
           "deck.filter((card) => !stock.includes(card)).forEach((card) => card.turnFaceDown())"
+        ],
+        [
+          "turn the cards in the deck which are a card and aren't in the stock face down",
+          "deck.filter((card) => card instanceof Card && !stock.includes(card)).forEach((card) => card.turnFaceDown())"
         ],
         {
           title: "the list's own action of the same words wins",

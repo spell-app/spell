@@ -299,10 +299,25 @@ export const englishWords: SP.LanguageWords = {
   },
 
   /**
-   * `which are face up` reads as `it is face up`, after a list (`where_or_which`).
-   * - One word each:  `aren't` isn't one (spell's words split it at its `'`), so `which aren't` doesn't read.
+   * `which are face up` reads as `it is face up`, after a list (`where_or_which`):
+   * each clause's plural verb made singular, the first and the first after `and` / `or`.
+   * - `aren't` and its kind with their `'`, as spell's words split them (`SpellStatement.singularVerbAt()`).
    */
-  whichClause: { subject: "it", singularVerbs: { are: "is", arent: "isnt", have: "has", do: "does", dont: "doesnt" } },
+  whichClause: {
+    subject: "it",
+    joins: new Set(["and", "or"]),
+    singularVerbs: {
+      are: "is",
+      arent: "isnt",
+      "aren't": "isn't",
+      have: "has",
+      havent: "hasnt",
+      "haven't": "hasn't",
+      do: "does",
+      dont: "doesnt",
+      "don't": "doesn't"
+    }
+  },
 
   /** `it`, `its`, `them`:  drawn plain in the bubbly look, never bold (`SP.BubblyLayout`). */
   pronouns: new Set(["it", "its", "them", "they", "their"])

@@ -235,6 +235,18 @@ export class Sequence<
   ////////////////
 
   /**
+   * SIDE EFFECT:  `tokens`, a line's words a rule CHANGED before it parses them, known to `requiredWords`' quick test,
+   * and the line's own words `also`.
+   * - The test keeps a line's words by its last token, which `tokens` shares with the line as written:
+   *   without this, the words a rule gave it (`SpellStatement.withWhichSubject()`'s `is` for `are`) would be missing.
+   * - Only ever adds:  a set holding MORE words never misses one, at worst tries a rule it needn't.
+   */
+  static addLineWords(tokens: P.Token[], also: P.Token[] = []): void {
+    const words = lineWordsOf(tokens, 0)
+    if (words) for (const token of [...tokens, ...also]) addWord(words, token.value)
+  }
+
+  /**
    * Could we match at `start` of `tokens`?  Checks our own words / symbols BEFORE `parse()` tries any subrule,
    * e.g. `{expression}`, which is what's expensive.
    * - Word, symbol, pattern or token type => checked where it must be.
@@ -332,24 +344,31 @@ const LINE_WORDS = new WeakMap<P.Token, { from: number; words: Set<unknown> }>()
 
 /** Does `tokens`, from `start`, have one of each of `required`'s alternatives?  See `Sequence.requiredWords`. */
 function hasEveryWord(required: ReadonlyArray<readonly string[]>, tokens: P.Token[], start: number): boolean {
+  const words = lineWordsOf(tokens, start)
+  if (!words) return false
+  return required.every((alternatives) => alternatives.some((word) => words.has(word)))
+}
+
+/** The words of `tokens` from `start`, from `LINE_WORDS` or made now;  none, given no tokens. */
+function lineWordsOf(tokens: P.Token[], start: number): Set<unknown> | undefined {
   const last = tokens[tokens.length - 1]
-  if (!last) return false
+  if (!last) return undefined
   const size = tokens.length - start
   let entry = LINE_WORDS.get(last)
   if (!entry || entry.from < size) {
     const words = new Set<unknown>()
-    for (let index = start; index < tokens.length; index++) {
-      // as written, as text (a number token's `2` matches a literal `"2"`), and in lower case
-      const { value } = tokens[index]!
-      words.add(value)
-      words.add(`${value}`)
-      words.add(`${value}`.toLowerCase())
-    }
+    for (let index = start; index < tokens.length; index++) addWord(words, tokens[index]!.value)
     entry = { from: size, words }
     LINE_WORDS.set(last, entry)
   }
-  const { words } = entry
-  return required.every((alternatives) => alternatives.some((word) => words.has(word)))
+  return entry.words
+}
+
+/** `value`, as `LINE_WORDS` keeps a word:  as written, as text (a number token's `2` matches `"2"`), in lower case. */
+function addWord(words: Set<unknown>, value: unknown) {
+  words.add(value)
+  words.add(`${value}`)
+  words.add(`${value}`.toLowerCase())
 }
 
 /** Places we could be after testing `rules`, in order, starting from any of `places`.  Empty => no match. */

@@ -245,6 +245,13 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - `SpellStatement.withWhichSubject()` reads the condition with its subject put back, before it parses:
     English's `it` (the language's `whichClause`), on no text just after `which`, and a first plural verb made singular
     (`are` => `is`);  Spanish leaves the subject out after `donde` too, so `que` reads as it is (`implied_it`).
+  - Each later clause too (J173):  a plural verb just after `and` / `or` (`whichClause.joins`) is made singular,
+    its own `it` put back before it:  `which are face up and are in the stock` ~== `where it is face up and it is in
+    the stock`.
+  - With an apostrophe:  Spell's words split `aren't` into `aren`, `'`, `t`, so `aren` becomes `isn`
+    (`SpellStatement.singularVerbAt()`);  `don't` => `doesn't`, `haven't` => `hasn't`.
+  - The changed words are added to the line's words the quick test keeps (`Sequence.addLineWords()`):
+    it keeps them by the line's last token, which the changed tokens share.
   - The loop's own:  `for each card in the deck which is not in the stock` (`list_iteration_where`), its item, list and
     condition one `each_item_where`, a `list_filter` of one item's word, never an expression alone.
 - A number word is a name where it can't be a number (J96):
