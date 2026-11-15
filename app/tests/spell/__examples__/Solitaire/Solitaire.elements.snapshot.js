@@ -69,8 +69,16 @@ export class Card extends TwoSidedView {
     return h("test-project-card-image", { direction: () => "down", part: "back" })
   }
 
+  /** The card, and every card on it, onto the pile, if the piles' rules let it go and take it */
+  putOnPile(pile) {
+    // - refused, nothing moves, and there's nothing to undo
+    // - a game adds its own steps after it:  `after putting a card on a pile`
+    if (!core.canGiveUp(this.pile, this) || !core.canTake(pile, this)) core.cancel()
+    this.pile.startingWith(this).forEach((card) => core.move(card, pile))
+  }
+
   /** the card the next one goes on */
-  get isOnTop() {
+  get isOnTopOfItsPile() {
     return this === this.pile.lastItem
   }
 
@@ -79,30 +87,21 @@ export class Card extends TwoSidedView {
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
-      return await this.putOnPile(endPile)
+      return this.putOnPile(endPile)
     }
   }
 
-  /** the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved */
-  async putOnPile(pile) {
-    /** - the pile it left turns its new last card up;  the move counts, and scores */
-    const startPile = this.pile
-    if (!core.canGiveUp(startPile, this)) return false
-    if (!core.canTake(pile, this)) return false
-    const points = this.countThePointsForCardOnPile(pile)
-    startPile.startingWith(this).forEach((card) => core.move(card, pile))
-    if (startPile instanceof Column && !startPile.isEmpty) {
-      await core.pauseFor(200, "msec")
-      startPile.lastItem?.turnFaceUp()
-    }
-    solitaire.score = solitaire.score + points
-    return true
+  /** The move scores;  the column it left turns its new last card face up */
+  afterPutOnPile(pile) {
+    solitaire.score = solitaire.score + this.thePointsForCardOnPile(pile)
+    const it2 = this.lastPile
+    if (it2 instanceof Column && !it2.isEmpty) it2.lastItem?.turnFaceUp()
   }
 
-  /** what the move scores:  10 on a foundation, 5 from the discard pile, else nothing */
-  countThePointsForCardOnPile(pile) {
+  /** What a move scores:  10 onto a foundation, 5 from the discard pile, else nothing */
+  thePointsForCardOnPile(pile) {
     if (pile instanceof Foundation) return 10
-    if (this.pile === solitaire.discardPile) return 5
+    if (this.lastPile === solitaire.discardPile) return 5
     return 0
   }
 
@@ -116,10 +115,15 @@ export class Card extends TwoSidedView {
   get pile() {
     return Pile.ownerOf(this)
   }
+
+  get lastPile() {
+    return Pile.lastOwnerOf(this)
+  }
 }
+core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Move Card", cancels: true })
 core.describeAction(Card, "play", { title: "Play Card", undoneAs: "Play Card" })
-core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Move Card" })
-core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Points for Card on Pile", undoneAs: "Count the Points for Card on Pile" })
+core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })
+core.describeAction(Card, "thePointsForCardOnPile", { title: "The Points for Card on Pile", undoneAs: "The Points for Card on Pile" })
 // It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
 // On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 // Ace is low:  ace = 1 ... king = 13
@@ -238,8 +242,9 @@ export class Pile extends ViewableList {
     return summary
   }
 
-  async whenCardDroppedOn(card) {
-    await card.putOnPile(this)
+  /** put the card on the pile, if it is a legal move */
+  whenCardDroppedOn(card) {
+    card.putOnPile(this)
   }
 
   static droppable = true
@@ -332,14 +337,13 @@ export class Foundation extends Pile {
     return false
   }
 
-  /** a light grey ace of its suit, face up */
   drawItsPlaceholder() {
+    // a light grey ace of its suit, face up
     return h("test-project-card-image", { rank: () => "ace", "prop:suit": () => this.suit, part: "placeholder" })
   }
 
   canTake(card) {
-    if (card !== card.pile.lastItem) return false
-    return this.suit === card.suit && this.value + 1 === card.value
+    return this.suit === card.suit && this.value === card.value - 1 && card.isOnTopOfItsPile
   }
 
   static droppable = true
@@ -383,9 +387,9 @@ export class Solitaire extends App {
           core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true }),
           h("spacer"),
-          core.drawAction(this, "undo", { "icon-only": true, "in-menu": true }),
-          core.drawAction(this, "redo", { "icon-only": true, "in-menu": true }),
-          h("ui-text", { slot: "right" }, "Score ", () => this.score)
+          core.drawAction(this, "undo", { "in-menu": true }),
+          core.drawAction(this, "redo", { "in-menu": true }),
+          h("ui-text", { slot: "right" }, "Score: ", () => this.score)
         )
       ),
       h("ui-container", { columns: "7", padding: "small", spacing: "xs" },
@@ -404,7 +408,14 @@ export class Solitaire extends App {
         h("test-project-column", { id: "C6" }),
         h("test-project-column", { id: "C7" })
       ),
-      core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])
+      core.drawContextMenu(this, [
+        "autoPlay",
+        "cheat",
+        "restartTheGame",
+        "-",
+        ["undo", { "icon-only": true }],
+        ["redo", { "icon-only": true }]
+      ])
     ]
   }
   // <deck "deck"hidden />
@@ -569,8 +580,6 @@ core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon: "eye", undoneAs: "Cheat" })
 
 // play the card on click if it is a legal move
-
-// drop the card on the pile if it is a legal move
 
 ///////////////
 // ## The piles

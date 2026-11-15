@@ -76,6 +76,10 @@ export class Tarea extends View {
   get agenda() {
     return Agenda.ownerOf(this)!
   }
+
+  get últimaAgenda() {
+    return Agenda.lastOwnerOf(this)
+  }
 }
 
 /**

@@ -78,6 +78,10 @@ export class Task extends View {
   get checklist() {
     return Checklist.ownerOf(this)
   }
+
+  get lastChecklist() {
+    return Checklist.lastOwnerOf(this)
+  }
 }
 core.describeAction(Task, "throwAway", { title: "Throw It Away", undoneAs: "Throw It Away" })
 

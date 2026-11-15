@@ -72,6 +72,10 @@ export class Card extends Thing {
   get pile() {
     return Pile.ownerOf(this)
   }
+
+  get lastPile() {
+    return Pile.lastOwnerOf(this)
+  }
 }
 
 export class Pile extends List {

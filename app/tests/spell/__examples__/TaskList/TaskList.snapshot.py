@@ -92,6 +92,10 @@ class Task(View):
         """a task is in one checklist at a time"""
         return Checklist.owner_of(self)
 
+    @property
+    def last_checklist(self) -> Any:
+        return Checklist.last_owner_of(self)
+
 
 core.describe_action(Task, "throw_away", {"title": "Throw It Away", "undone_as": "Throw It Away"})
 

@@ -42,6 +42,10 @@ export class Square extends Thing {
   get board() {
     return Board.ownerOf(this)
   }
+
+  get lastBoard() {
+    return Board.lastOwnerOf(this)
+  }
 }
 core.describeAction(Square, "play", { title: "Play It", undoneAs: "Play It" })
 // -----------

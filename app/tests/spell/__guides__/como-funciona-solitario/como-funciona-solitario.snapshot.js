@@ -72,6 +72,10 @@ export class Carta extends View {
   get pila() {
     return Pila.ownerOf(this)
   }
+
+  get últimaPila() {
+    return Pila.lastOwnerOf(this)
+  }
 }
 
 /** Una pila, y una columna */

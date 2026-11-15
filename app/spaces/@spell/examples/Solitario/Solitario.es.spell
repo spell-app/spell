@@ -101,20 +101,11 @@ solitario es una aplicación
 			si no hay una pila final devolver no
 			devolver poner la carta en pila final
 
-	para poner una carta en una pila, deshacible como "Mover carta"
-		// la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
-		// - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
-		poner pila inicial a la pila de la carta
-		si pila inicial no puede soltar la carta devolver no
-		si pila no puede tomar la carta devolver no
-		poner puntos a contar los puntos de la carta en pila
-		para carta en (las cartas en pila inicial empezando con la carta)
-			mover eso a pila
-		si pila inicial es una columna y pila inicial no está vacía
-			pausar 200 mseg
-			voltear la última carta de pila inicial boca arriba
-		poner la puntuación del solitario a la puntuación del solitario + puntos
-		devolver sí
+	después de poner una carta en una pila
+		// El movimiento suma puntos;  la columna que dejó voltea su nueva última carta
+		agregar (los puntos por la carta en la pila) a la puntuación del solitario
+		si la última pila de la carta es una columna y no está vacía
+			voltear su última carta boca arriba
 
 	para "jugar solo" con atajo "A", icono "play"
 		// Juega cada carta que puede ir a algún lado, hasta que ninguna pueda
@@ -154,10 +145,10 @@ solitario es una aplicación
 		agregar la carta a los descartes
 		voltear la carta boca arriba
 
-	para contar los puntos de una carta en una pila
-		// lo que suma el movimiento:  10 en una fundación, 5 desde los descartes, si no nada
+	para "los puntos por (una carta) en (una pila)"
+		// Lo que suma un movimiento:  10 a una fundación, 5 desde los descartes, si no nada
 		si pila es una fundación devolver 10
-		si la carta está en los descartes devolver 5
+		si la última pila de la carta es los descartes devolver 5
 		devolver 0
 
 	cuando su puntuación cambia
@@ -170,9 +161,6 @@ una carta		-- jugar la carta al pulsarla, si es un movimiento válido
 		si está boca arriba o su pila es la reserva del solitario
 			jugar la carta
 
-una pila  -- soltar la carta sobre la pila, si es un movimiento válido
-	cuando una carta se suelta sobre ella
-		poner la carta en la pila
 
 grupo "Las pilas"
 // Cada tipo de pila, qué puede tomar o soltar, y cómo están sus cartas.
