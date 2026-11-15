@@ -38,7 +38,6 @@ import {
   HAS_DETAILS,
   LABEL,
   LINE,
-  MORE_TAG,
   NOTE,
   NOTE_OPEN,
   OVERNIGHT,
@@ -96,7 +95,8 @@ import tooltipCSS from "./Tooltip.css?inline"
  * - Its DETAILS:  its light-DOM children, through the default slot,
  *   so find-in-page, `#d7` links and the live update see them (Q12).
  *   - hidden `until-found` while folded
- *   - over its own text:  `Original question` (answered), or `Original reply` (with a More Details card)
+ *   - over its own text:  `Original question` (answered);  never "Original reply" since a More Details card
+ *     REPLACES the unclear text (epic `epic-engine` I301)
  *   - under them:  Claude's status cards (`<epic-status slot="status">`, P13), then the note box
  * - REVIEW (P9), three `<epic-review>`s:  its buttons, its note box, a marked note.
  *   - only while the page is reviewed (served with a token, its inbox answering:  `ReviewState`)
@@ -442,12 +442,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return parts.join(" · ")
   })
 
-  /** `Original question` / `Original reply` over its own text, or none. */
+  /** `Original question` over an answered question's own text, or none. */
   readonly textLabel = createMemo((): string | undefined => {
-    const { startsWithProse, hasMore } = this.childScan
+    const { startsWithProse } = this.childScan
     if (!startsWithProse) return undefined
-    if (this.answered) return this.translationForKey("originalQuestion")
-    return hasMore ? this.translationForKey("originalReply") : undefined
+    return this.answered ? this.translationForKey("originalQuestion") : undefined
   })
 
   /** The note when the `source` part failed;  else `undefined`. */
@@ -1007,7 +1006,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   // ## Helpers
   ////////////////
 
-  /** Its light children, read now:  does the default slot start with prose?  Is there a More Details card? */
+  /** Its light children, read now:  does the default slot start with prose?  Has it commits? */
   private scanChildren(): ChildScan {
     let first: "prose" | "part" | undefined
     for (const node of this.domElement.childNodes) {
@@ -1021,7 +1020,6 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     }
     return {
       startsWithProse: first === "prose",
-      hasMore: !!this.domElement.querySelector(`:scope > ${MORE_TAG}`),
       hasCommits: !!this.domElement.querySelector(`:scope > ${COMMIT_TAG}`)
     }
   }
@@ -1042,8 +1040,6 @@ const THREAD_HIDDEN = "thread-hidden"
 type ChildScan = {
   /** the default slot's first content is prose (its text), not one of its parts */
   startsWithProse: boolean
-  /** a More Details card is among its children */
-  hasMore: boolean
   /** a commit is among its children */
   hasCommits: boolean
 }

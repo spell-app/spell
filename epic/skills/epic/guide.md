@@ -96,8 +96,8 @@ Then, for what it printed:
 1. `epic inbox status <epic> "Responding" --items <ids>`.
 2. Requests for now (Add Details, revisit now):  per item,
    `epic update <epic>#J3 underway "<what you take it to be>"`, write the answer
-   (`epic details <epic>#J3 --append --file answer.html`;  `--more` for Add Details:  clarify what its text means and
-   leaves out, a new paragraph wherever the context changes),
+   (`epic details <epic>#J3 --append --file answer.html`;  `--more` for Add Details:  it REPLACES the unclear text, so
+   write what it means whole, a new paragraph wherever the context changes),
    `epic update <epic>#J3 noted "<what was written>"`, then `epic inbox done <epic>#J3`.
 3. Sent marks:  `epic inbox apply <epic>` lands approvals, picks and todos.
    Do this, on an issue or a judgement call:  NO todo;  it stays in the item, red, and `apply` prints your steps.

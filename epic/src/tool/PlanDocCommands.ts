@@ -1655,8 +1655,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    replace an item's details with the file's HTML, or (--append)
                                                    add it, e.g. a reply:  between the answer card and commits;
                                                    replacing moves the old text into its Original Discussion;
-                                                   --more (Add Details):  the text stays on top as "Original
-                                                   Reply", the file's HTML in a "More Details" card under it
+                                                   --more (Add Details, Clarify):  the file's HTML REPLACES the
+                                                   unclear text, in a "More Details" card that never folds;  the
+                                                   old text into its Original Discussion, Owen's quoted words and
+                                                   every card kept
   summarize <name> <id> --file <html>              condense an item after a lot of back and forth:  the file's
                                                    HTML replaces what it shows;  its text, replies, More Details
                                                    and unpicked Choices move into its Original Discussion

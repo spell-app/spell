@@ -949,7 +949,7 @@ epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
 epic update <name>#<id> done ["<summary>"]     the item FINISHED:  that card green (Done);  an open issue / todo closes
 epic update <name>#<id> noted "<what>"         a STEP done (choice recorded, answer written):  an outlined Noted card
-epic details <name>#<id> --file f --more | --append   a More Details card (Add Details) / a reply appended
+epic details <name>#<id> --file f --more | --append   More Details in place of the unclear text (Add Details) / a reply
 epic summarize <name>#<id> --file f        condense an item:  f replaces what it shows, the rest folded away (13.)
 epic inbox done <name>#<id>  /  clear      an item's request finished  /  marks dropped after a talk
 epic inbox <name> [--json]                 what's waiting, sent or not
@@ -1066,12 +1066,15 @@ want you to just do it").
        - `<epic-code>`, `<epic-aside>`, `<epic-net-effect>`, `<epic-choices>`, `<epic-field label>`
      - never `ui-accordion.spell-code`, or a `<p><b>Net effect:</b></p>` by hand
    - Add Details (the item's circle-question icon, or a given body's Clarify;  epic `epic-engine` T76):  CLARIFY its
-     text.  Read the item, the code and docs it names, then say plainly what its text means and what it leaves out, as
-     MORE details:  a new paragraph wherever the context changes (`plan-doc.md`, "Rules").
+     text.  Read the item, the code and docs it names, then say plainly what it means, whole:  a new paragraph
+     wherever the context changes (`plan-doc.md`, "Rules").
      - `epic details <name>#<id> --more --file <html>`.
-     - The item's text stays on top ("Original Reply").
-     - Yours goes under it, in a white "More Details" card (P3 of `windows-and-review`).
-       So don't repeat the text:  build on it.
+     - Yours REPLACES the unclear text (epic `epic-engine` I301;  2026-11-15:  "When you `clarify` you can remove
+       'What it says on the tin' or the original unclear text.  Change title to 'More Details', not collapsable"):
+       a card headed "More Details" that never folds.
+       - The old text moves into its Original Discussion;  "_What it says on the tin._" goes for good.
+       - The person's own quoted words and every card (Choices, Net effect, code, replies, commits) stay.
+       - So write it WHOLE:  every fact the old text had, said clearly, not only what it left out.
    - Revisit now:  answer the person's note (quote it), in an `<epic-reply from="Claude" at re>`
      (`plan-doc.md`, "Review inbox", its example).
      - What they asked, then the answer with evidence:

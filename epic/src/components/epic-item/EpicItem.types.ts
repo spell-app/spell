@@ -285,9 +285,6 @@ export const EPIC_TAG = /^epic-/
 /** `<epic-*>` tags that are prose (`flow`), not parts:  the UPDATE marker, a Net effect list. */
 export const FLOW_TAGS: readonly string[] = ["epic-update", "epic-net-effect"]
 
-/** The More Details card's tag:  an item with one labels its own text "Original reply". */
-export const MORE_TAG = "epic-more"
-
 /** The icon of an item made overnight (`overnight`):  `<epic-page bedtime>`'s too (J28). */
 export const BED_ICON = "bed"
 

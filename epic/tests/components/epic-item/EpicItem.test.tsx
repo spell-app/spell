@@ -257,7 +257,7 @@ describe("<epic-item>", () => {
     expect(host.open).toBe(false)
   })
 
-  test("labels its own text `Original question` once answered, `Original reply` above More Details;  never over a part", async () => {
+  test("labels its own text `Original question` once answered;  never `Original reply` above More Details (I301), nor over a part", async () => {
     const answered = await item(
       `<epic-item id="q5" title="A" status="decided" answered><p>Asked</p><epic-answer title="B"></epic-answer></epic-item>`
     )
@@ -267,7 +267,7 @@ describe("<epic-item>", () => {
     const bare = await item(
       `<epic-item id="q6" title="A" status="decided" answered><epic-answer title="B"></epic-answer></epic-item>`
     )
-    expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", "Original reply", null])
+    expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", null, null])
   })
 
   test("a link to it, or to an element inside it, unfolds it (`ui-opening` after the fact)", async () => {

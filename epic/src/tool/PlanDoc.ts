@@ -1887,19 +1887,26 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Add Details (`details --more`):  item `id`'s text stays on top (the element labels it "Original reply"), and
-   * `html` goes under it in an `<epic-more>` card;  returns its title.
-   * - a second Add Details replaces the card:  the old card's text moves into the Original Discussion
-   *   (`keepOriginal()`), as a rewrite's does
+   * Add Details, or Clarify (`details --more`):  `html` REPLACES item `id`'s unclear text, in an `<epic-more>` card
+   * headed "More Details";  returns its title.
+   * - Owen, 2026-11-15 (epic `epic-engine` I301):  "When you `clarify` you can remove 'What it says on the tin' or the
+   *   original unclear text.  Change title to 'More Details', not collapsable"
+   * - the given body ("_What it says on the tin._  Clarify", `PlanItem.giveBody()`) goes for good:  nobody wrote it
+   * - the item's own prose moves into its Original Discussion (`keepOriginal()`), as a rewrite's does:  out of
+   *   sight, never lost
+   *   - EXCEPT Owen's own words, quoted (`isOwenQuote()`):  they stay on top
+   * - its cards stay:  status, Choices, Net effect, code, replies, its answer and commits (every `<epic-*>`)
+   * - a second Add Details replaces the card:  the old card's text moves into the Original Discussion too
    * - stamped (`changed`) and flagged UPDATE
    */
   addMore(id: string, html: string): string {
     const item = this.item(id)
+    PlanItem.dropTitleBody(item)
     const old = item.querySelector(":scope > epic-more")
-    if (old) {
-      old.remove()
-      this.keepOriginal(item, Array.from(old.childNodes))
-    }
+    const unclear = Array.from(item.childNodes).filter((node) => PlanItem.isUnclearProse(node))
+    for (const node of unclear) node.remove()
+    if (old) old.remove()
+    this.keepOriginal(item, [...unclear, ...Array.from(old?.childNodes ?? [])])
     Markup.place(item, this.make("epic-more", {}, this.incoming(html)))
     this.stamp(item)
     this.markUpdate(item)

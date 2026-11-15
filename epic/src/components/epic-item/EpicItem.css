@@ -451,7 +451,7 @@
   ::slotted(:last-child) {
     margin-bottom: 0;
   }
-  /* "Original question" / "Original reply":  a small eyebrow over the item's own text */
+  /* "Original question":  a small eyebrow over an answered question's own text */
   .label {
     margin-bottom: 2px;
     color: var(--_epic-item-muted);

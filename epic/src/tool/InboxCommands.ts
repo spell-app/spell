@@ -449,7 +449,8 @@ export class InboxCommands {
         lines.push(`  - ${line(each)}`)
         if (each.action === "details")
           lines.push(
-            "      Add Details:  clarify its text, as More Details (`--more`), a paragraph per change of context"
+            "      Add Details:  clarify its text, as More Details (`--more`):  it REPLACES the unclear text (cards and " +
+              "Owen's quoted words stay), so write it whole, a paragraph per change of context"
           )
         // the Manual tests section's Start testing (epic `epic-engine` P51):  the epic skill's "Start testing"
         else if (each.action === "prepare")

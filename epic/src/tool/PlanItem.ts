@@ -164,6 +164,29 @@ export class PlanItem {
     )
   }
 
+  /**
+   * Is `node` part of an item's own prose that a Clarify answer replaces (`PlanDoc.addMore()`, epic `epic-engine`
+   * I301):  text, or an element that isn't one of the item's cards?
+   * - NOT its title or status cards (`slot`), any `<epic-*>` card (answer, Choices, Net effect, code, replies,
+   *   commits ...), nor Owen's own words quoted (`isOwenQuote()`)
+   */
+  static isUnclearProse(node: Node): boolean {
+    if (node.nodeType === TEXT_NODE) return !!node.textContent?.trim()
+    if (!PlanMarkup.isElement(node)) return false
+    if (node.hasAttribute("slot") || node.localName.startsWith("epic-")) return false
+    return !PlanItem.isOwenQuote(node)
+  }
+
+  /**
+   * Is `element` Owen's own words, quoted:  a paragraph starting "Owen, 2026-11-14:  “...”" or "owenoak:  “...”"
+   * (how an item filed from his words begins), or a `<blockquote>`?
+   * - kept when a Clarify answer replaces the rest:  his words are what the item is ABOUT
+   */
+  static isOwenQuote(element: Element): boolean {
+    if (element.localName === "blockquote") return true
+    return OWEN_QUOTE.test(element.textContent ?? "")
+  }
+
   /** Take the body `giveBody()` gave `item` off it:  real details are coming. */
   static dropTitleBody(item: Element): void {
     for (const child of [...item.children]) if (PlanItem.isTitleBody(child)) child.remove()
@@ -414,6 +437,9 @@ const TIN = "What it says on the tin."
 
 /** A text node's `nodeType` (`Node.TEXT_NODE`:  node has no `Node` global). */
 const TEXT_NODE = 3
+
+/** How an item filed from Owen's words begins (`PlanItem.isOwenQuote()`):  "Owen, 2026-11-14:  “", "owenoak:  “". */
+const OWEN_QUOTE = /^\s*(Owen|owenoak)\b[^:“"]{0,80}:\s*[“"]/
 
 /**
  * The prose elements' headings as prose (`PlanItem.asProse({ plain })`, P14):  what each draws over its children.

@@ -364,7 +364,7 @@ As `plan-doc.md`, "Ids":
     <epic-option letter="B" title="Chrome" recommended><ul><li>...</li></ul></epic-option>
   </epic-choices>
   <epic-answer title="Chrome"><p>why ...</p></epic-answer>
-  <epic-more><p>More Details:  what the text left out</p></epic-more>
+  <epic-more><p>More Details:  Clarify's text, IN PLACE of the unclear text (I301)</p></epic-more>
   <epic-reply from="Claude" at="2026-10-04 17:20" re="why not reuse the details route?"><p>...</p></epic-reply>
   <epic-original><epic-version><p>as first written</p></epic-version>
     <epic-version as-of="2026-10-04 20:49"><p>...</p></epic-version></epic-original>
@@ -384,7 +384,7 @@ As `plan-doc.md`, "Ids":
     - The tool never writes one;  the docs runtime puts each block's bullhorn there, never in the file.
   - The element draws:
     - the chip (`Q3`, in its state's colour) and the review label
-    - `Question` over the question as asked, "Original reply" over the text
+    - `Question` over the question as asked, "Original question" over an answered question's text
     - every card's heading
 - A question's text as first asked is its `<epic-question>`, found by its tag, not its place:
   - `add <name>#Q`, and a rewrite of a question's text (`details --file`), put the lead of the HTML they're given
@@ -606,7 +606,11 @@ As `plan-doc.md`, "Ids":
     - a Net effect worded otherwise
     - a code accordion holding a `<ui-code>`, or two blocks
     - a note headed `DEFERRED`
-- A rewrite never drops text:  `details --file`, `decide` again, `details --more` again, `summarize`.
+- A rewrite never drops text:  `details --file`, `decide` again, `details --more`, `summarize`.
+  - `details --more` (Add Details, Clarify;  epic `epic-engine` I301):  the HTML REPLACES the item's unclear text, in
+    an `<epic-more>` headed "More Details" that never folds;  the given "_What it says on the tin._" body goes for good,
+    the item's own prose moves into its Original Discussion;  Owen's quoted words (`PlanItem.isOwenQuote()`) and every
+    `<epic-*>` card stay
   - `summarize --file` (epic `repo-split` J141) condenses the item after a lot of back and forth:
     its text, replies, More Details and unpicked Choices all move, as one version;
     the question as asked, the answer, picked Choices (copied out of a moved reply too), status cards and commits stay.
