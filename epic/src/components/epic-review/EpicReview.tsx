@@ -315,6 +315,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         data-tone={this.tone ? "" : undefined}
         data-fill={this.fillOf(spec)}
         data-busy={isWorkedOn() ? "" : undefined}
+        data-caption={spec.caption ? "" : undefined}
+        label={spec.caption ? this.translationForKey(spec.caption) : undefined}
         title={
           busy() ? this.translationForKey("callOff", { label: this.translationForKey(spec.label) }) : this.tipOf(spec)
         }

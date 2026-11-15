@@ -89,6 +89,17 @@
   .review-controls ui-button::part(icon) {
     margin: 0;
   }
+  /*
+   * The plane with its words, "Send to Claude" (epic `epic-engine` I305):  as tall as the squares, as wide as its words;
+   * icon, then text, on one line
+   */
+  .review-controls ui-button[data-caption]::part(button) {
+    grid-auto-flow: column;
+    gap: 4px;
+    width: auto;
+    padding: 0 8px 0 7px;
+    white-space: nowrap;
+  }
   .review-controls ui-button:hover::part(button) {
     color: var(--_epic-act-ink);
   }
