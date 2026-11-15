@@ -976,13 +976,17 @@ export class SpellDeclarations {
  * - Why:  its `defined` is where its statement is now.
  *   A body's AST is memoized (an outline's type body, e.g. `- its "jokers" is yes or no`),
  *   and kept when an edit above it only moves it:  lines worked out once would keep the old offsets.
+ * - NOT enumerable, so a walk over the tree never works them out (`P.forEachNode()` ...):
+ *   only a writer reading them does.
+ *   Working them out reads where the statement ends, and every compile walks the tree several times:
+ *   enumerable, they were about 60% of Solitaire's whole-project write (epic `language` P57).
  */
 class DeclaresComment extends P.ASTPreservedComment {
   constructor(statement: P.Match, props: { lines: string[]; group?: SP.MemberGroup }) {
     super(statement, { lines: props.lines })
     Object.defineProperty(this, "lines", {
       get: () => SpellDeclarations.commentLines(this.match as P.Match, props.group) ?? props.lines,
-      enumerable: true,
+      enumerable: false,
       configurable: true
     })
   }
