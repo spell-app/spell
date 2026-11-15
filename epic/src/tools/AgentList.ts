@@ -24,7 +24,7 @@
  * - an agent leaves the list when it finishes (`done()`):  the list is what's RUNNING;  empty, the file goes
  * - NOT in the record:  the epic page says what agents DID;  this says what they're doing now
  */
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { basename, dirname, join, matchesGlob, resolve } from "node:path"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -186,6 +186,31 @@ export class AgentList {
       agents.splice(agents.indexOf(agent), 1)
       return agent
     })
+  }
+
+  /**
+   * The epic page's log line saying agent `name` finished (`Agent skillz-aaa done:  took 21m`), when the list is an
+   * epic's and its log has one;  else `undefined`.
+   * - why (epic `epic-engine` I288):  an agent often marks ITSELF done as it finishes (it reads the same rules as the
+   *   session that started it), so the session's own `done` found nothing running, and failed;  and `wait` exited
+   *   while the agent was still writing its report.  NOT a lost write:  the list's writes are locked and atomic.
+   * - read from the log's part file (`parts/log.html`), else the page itself
+   */
+  doneSaid(name: string): string | undefined {
+    const epic = this.epic
+    if (!epic) return undefined
+    const said = `Agent ${this.fullName(name)} done`
+    for (const file of [join(dirname(this.file), "parts", "log.html"), join(dirname(this.file), `${epic}.plan.html`)]) {
+      const text = existsSync(file) ? readFileSync(file, "utf8") : ""
+      const at = text.lastIndexOf(said)
+      if (at < 0) continue
+      const end = text.indexOf("<", at)
+      return text
+        .slice(at, end < 0 ? undefined : end)
+        .replace(/\s+/g, " ")
+        .trim()
+    }
+    return undefined
   }
 
   ////////////////

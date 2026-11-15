@@ -10,6 +10,7 @@
  *
  * - `add <name> "<task>"`:  prints the full name (`skillz-aaa`);  exits 1 if it's running already
  * - `set <name> [--status active | "blocked on <name>"] [--task-id <id>]`, `done <name>`:  exit 1 if it isn't running
+ *   - `done` of one its epic's log says finished already (the agent marked ITSELF done):  says so, exit 0 (I288)
  * - `done <name>` also says how long the agent WORKED, from its transcript (`WorkTime.ofAgent()`, epic `epic-engine`
  *   P41):  `skillz-aaa done:  took 21m`, and an epic's list logs it on the epic page;  best effort:  nothing found,
  *   nothing said
@@ -74,8 +75,12 @@ async function run(
       if (!task) return usage()
       console.log(list.claim(name, [task, ...more]).join("\n"))
     } else if (verb === "set") list.set(name, { status, taskId })
-    else if (verb === "done") await recordTook(list, list.done(name))
-    else if (verb === "told") list.told(name)
+    else if (verb === "done") {
+      // Done already, by the agent itself (I288):  said, not an error
+      const already = list.agents.some((agent) => agent.name === list.fullName(name)) ? undefined : list.doneSaid(name)
+      if (already) console.log(`${list.fullName(name)} was marked done already:  ${already}`)
+      else await recordTook(list, list.done(name))
+    } else if (verb === "told") list.told(name)
     else return usage()
     return 0
   } catch (error) {
