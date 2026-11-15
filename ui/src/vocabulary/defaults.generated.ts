@@ -37,7 +37,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
     { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
     { name: "action", kind: "json", group: "behaviour" },
-    { name: "shortcut", kind: "string", group: "content" }
+    { name: "shortcut", kind: "string", group: "content" },
+    { name: "icon-only", kind: "boolean", group: "appearance" }
   ],
   "ui-actions": [],
   "ui-ad": [

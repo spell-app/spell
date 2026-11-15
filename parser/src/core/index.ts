@@ -98,7 +98,7 @@ export {
 } from "./lexicon"
 export type { ThingsToSearch } from "./references"
 // A program's actions on a page (epic `elemental-spell` P10):  a menu's items, a key pressed -- see `acting.ts`.
-export type { MenuItem, ActionRun, ActionWay, ShortcutKey } from "./acting"
+export type { MenuItem, ContextMenuItem, ActionRun, ActionWay, ShortcutKey } from "./acting"
 export type { ContextMenuElement } from "./drawing"
 // What `notify` takes after its message:  its toast's title, kind, colour, place, time ... -- see `ui.ts`.
 export type { NotifyOptions } from "./ui"

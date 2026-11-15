@@ -12385,7 +12385,7 @@
       "name": ":state(icon-only)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-link>`:  It holds only an icon:  it never wraps alone onto a line of its own, and, in a header, keeps a small gap from the word before it."
+        "value": "Custom state of:\n\n- `<ui-action>`:  Shows its icon alone (`icon-only`, with an icon).\n- `<ui-link>`:  It holds only an icon:  it never wraps alone onto a line of its own, and, in a header, keeps a small gap from the word before it."
       }
     },
     {

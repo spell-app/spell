@@ -31,7 +31,7 @@ import { untrackCells } from "spell/util/reactive"
 
 import { core } from "./core"
 import { defineCoreModule, type PartEdit } from "./core.types"
-import type { MenuItem } from "./acting"
+import type { ContextMenuItem, MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
@@ -175,6 +175,7 @@ export const drawingMethods = defineCoreModule({
    * - A `<ui-action>`, handed the action itself (its `action`), which it reads LIVE:  its title, icon and key,
    *   greyed while not enabled, ticked while selected;  a click runs it (`run("click")`), through the core.
    * - Its key in Spell UI's words, `mod+S` for spell's `meta+S`:  ⌘ on a Mac, Ctrl elsewhere (`menuKeysOf()`).
+   * - `icon-only`:  the row's own, its icon alone (Spell UI's `<ui-action icon-only>`).
    */
   drawAction(thing: unknown, name: string, props: Record<string, unknown> = {}, ...children: unknown[]): Drawing {
     const { [ICON_ONLY]: iconOnly, [IN_MENU]: inMenu, title, ...given } = props
@@ -194,6 +195,8 @@ export const drawingMethods = defineCoreModule({
     if (inMenu) {
       const row: Record<string, unknown> = { "prop:action": action }
       if (action.shortcut) row.shortcut = menuKeysOf(action.shortcut)
+      // its icon alone, its title its tooltip and name:  the row's own (`<ui-action icon-only>`)
+      if (iconOnly) row[ICON_ONLY] = true
       return h(MENU_ROW_TAG, { ...row, ...given }, ...children) as unknown as Drawing
     }
     const tip = () =>
@@ -212,14 +215,15 @@ export const drawingMethods = defineCoreModule({
   /**
    * The right-click menu of the element around it, written in a drawing (`<context-menu>`, epic `language`):
    * a hidden `<spell-context-menu>`, which draws nothing.
-   * - `names`:  its items, each an action's method (`autoPlay`), `-` a line between groups.
+   * - `items`:  its items, each an action's method (`autoPlay`), `-` a line between groups;
+   *   or an action and the attributes its tag gave, `["undo", { "icon-only": true }]`, which go to its row.
    * - The page's right click on the element around it finds it, and shows its items (the app's `ActionMenus`):
    *   its `menuItems()` gives them, each found from `thing` up its chain as the menu shows (`core.menuItemsOf()`),
    *   so they read their titles and enabled live, and run through the core.
    */
-  drawContextMenu(thing: unknown, names: readonly string[]): Drawing {
+  drawContextMenu(thing: unknown, items: readonly ContextMenuItem[]): Drawing {
     const remember = (element: HTMLElement & ContextMenuElement) => {
-      element.menuItems = () => core.menuItemsOf(thing as object | undefined, names)
+      element.menuItems = () => core.menuItemsOf(thing as object | undefined, items)
     }
     return h(CONTEXT_MENU_TAG, { hidden: true, ref: remember }) as unknown as Drawing
   },

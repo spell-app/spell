@@ -46,7 +46,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "padding",
       "kind",
       "action",
-      "shortcut"
+      "shortcut",
+      "icon-only"
     ]
   },
   "ui-actions": { folder: "ui-parts", attributes: [] },

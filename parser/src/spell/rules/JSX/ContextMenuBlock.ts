@@ -29,9 +29,13 @@ import {
  * - Inside it, ONLY:
  *   - `<action "name"/>`:  an item for that action, named as an action's button names it (`action_button`):
  *     its title, icon, key and enabled read live, run through the core
+ *     - its attributes go to its row, as a button's go to it:  `<action "undo" icon-only />` shows only its icon,
+ *       `title="Restart"` is its text, `icon="refresh"` its icon (Spanish's `solo-icono` ... read as English's);
+ *       each a literal, as an item is made when the menu shows:  a `{...}` value is refused (`context-menu-code`)
  *   - `<divider/>`:  a line between groups
  *   - Anything else is an error saying so (`context-menu-item`).  Sub-menus:  not yet.
- * - Draws nothing where it is:  `core.drawContextMenu(this, ["autoPlay", "-", "undo"])` is a hidden
+ * - Draws nothing where it is:  `core.drawContextMenu(this, ["autoPlay", "-", ["undo", { "icon-only": true }]])`
+ *   is a hidden
  *   `<spell-context-menu>`, which a right click on the element around it finds (the app's `ActionMenus`),
  *   as it finds a `context-menu="game menu"` naming a template's menu.
  *   - Each action found from the drawing's thing up its chain, when the menu shows (`core.menuItemsOf()`).
@@ -52,7 +56,7 @@ export class ContextMenuBlock extends P.TokenType<never, ContextMenuData> {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const { parser } = scope
-    const items: string[] = []
+    const items: P.ASTContextMenuItem[] = []
     const children: P.Match[] = []
     for (const child of (element.children ?? []) as P.Token[]) {
       if (ContextMenuBlock.isNothing(child)) continue
@@ -65,12 +69,15 @@ export class ContextMenuBlock extends P.TokenType<never, ContextMenuData> {
       // an action's item:  read as its button is, so it's named, looked up and refused the same way
       const parsed = parser?.parse(child, "jsxChild", scope)
       const action = (parsed?.data as { action?: string } | undefined)?.action
-      if (parsed && action) {
-        items.push(action)
+      const props = parsed && action ? ContextMenuBlock.propsOf(parsed) : undefined
+      if (parsed && action && props) {
+        items.push(Object.keys(props).length ? { action, props } : action)
         children.push(parsed)
         continue
       }
-      const message = SP.Language.of(scope).parserMessage("context-menu-item", { tag: element.tagName })
+      const key = parsed && action ? "context-menu-code" : "context-menu-item"
+      const tag = parsed && action && child instanceof P.JSXElementToken ? child.tagName : element.tagName
+      const message = SP.Language.of(scope).parserMessage(key, { tag })
       children.push(SP.spellParser.createParseError(scope, [child], message))
     }
     match.data.items = items
@@ -83,6 +90,23 @@ export class ContextMenuBlock extends P.TokenType<never, ContextMenuData> {
     return new P.ASTJSXElement(match, { tagName: CONTEXT_MENU_ELEMENT, children: [], contextMenu: match.data.items })
   }
 
+  /**
+   * The attributes an action's tag gives its row, by Spell UI's English names, as its button would take them
+   * (`action_button`'s AST):  a bare one `true`, a quoted one its text.
+   * - `undefined` if one is code (`{...}`), which a menu's row can't take:  it's made when the menu shows.
+   */
+  private static propsOf(parsed: P.Match): Record<string, string | boolean> | undefined {
+    const props: Record<string, string | boolean> = {}
+    for (const attribute of (parsed.AST as P.ASTJSXElement | undefined)?.attrs ?? []) {
+      const { value } = attribute
+      if (value === undefined) props[attribute.name] = true
+      else if (value instanceof P.ASTStringLiteral || value instanceof P.ASTBooleanLiteral) {
+        props[attribute.name] = value.value
+      } else return undefined
+    }
+    return props
+  }
+
   /** Is `token` nothing to a menu:  blank text, a comment, its closer? */
   private static isNothing(token: P.Token): boolean {
     if (token instanceof P.JSXEndTagToken || token instanceof P.JSXCommentToken) return true
@@ -92,8 +116,11 @@ export class ContextMenuBlock extends P.TokenType<never, ContextMenuData> {
 
 /** What `context_menu_block` keeps on its match:  its items, and its children's matches (their errors too). */
 type ContextMenuData = JSXMatchData & {
-  /** Its items, each an action's method as spell names it (`auto_play`), or `-` for a divider. */
-  items?: string[]
+  /**
+   * Its items, each an action's method as spell names it (`auto_play`), or `-` for a divider;
+   * an action whose tag gave attributes, with them (`P.ASTContextMenuItem`).
+   */
+  items?: P.ASTContextMenuItem[]
 }
 
 /** A divider among a menu's items, as a template's menu writes one:  see `define_menu`. */

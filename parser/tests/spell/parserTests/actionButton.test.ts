@@ -194,6 +194,27 @@ describe("an action's button, <action>", () => {
     expect(python).toContain('core.draw_context_menu(self, ["auto_play", "-", "undo"])')
   })
 
+  test("<context-menu>'s actions take their tags' attributes:  `icon-only`, `title`, in every target (I102)", () => {
+    const file = parsed(
+      game(
+        "<context-menu>",
+        '\t<action "auto play" title="Play"/>',
+        "\t<divider/>",
+        '\t<action "undo" icon-only/>',
+        "</context-menu>"
+      )
+    )
+    expect(file.errors).toEqual([])
+    const menu = '[["autoPlay", { title: "Play" }], "-", ["undo", { "icon-only": true }]]'
+    expect(file.compiled).toContain(`core.drawContextMenu(this, ${menu})`)
+    expect(String(P.TSWriter.instance.writeMatch(file.match!))).toContain(`{core.drawContextMenu(this, ${menu})}`)
+    expect(String(PY.PyWriter.instance.writeMatch(file.match!))).toContain(
+      '[["auto_play", {"title": "Play"}], "-", ["undo", {"icon-only": True}]]'
+    )
+    const code = parsed(game("<context-menu>", '\t<action "undo" title={1 + 1}/>', "</context-menu>"))
+    expect(code.errors.join("\n")).toContain("<action> in a menu takes words, not code")
+  })
+
   test("<context-menu> holds only its items:  anything else, or an action named nowhere, is an error", () => {
     const other = parsed(game("<context-menu>", "\t<text>Hi</text>", "</context-menu>"))
     expect(other.errors.join("\n")).toContain("<context-menu> holds only its items")

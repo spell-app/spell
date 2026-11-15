@@ -224,7 +224,8 @@ class DrawingMethods:
         - The app's own `undo` and `redo` too:  their titles and whether they're enabled follow its history (`apps.py`).
         - An action nobody up the chain has:  a disabled button of its name.
         - `in-menu`, the core's own:  a Spell UI menu or toolbar holds it, so it's the menu's ROW, `<ui-action>`,
-          its key in Spell UI's words (`meta+Z` => `mod+Z`);  the page's drawing half hands it the action, live.
+          its key in Spell UI's words (`meta+Z` => `mod+Z`);  the page's drawing half hands it the action, live;
+          `icon-only` the row's own, its icon alone.
         """
         given = dict(props or {})
         icon_only = given.pop(ICON_ONLY, False)
@@ -247,6 +248,8 @@ class DrawingMethods:
         shortcut = (description.get("shortcuts") or [None])[0]
         if in_menu:
             row: dict[str, object] = {"shortcut": _menu_keys_of(shortcut)} if shortcut else {}
+            if icon_only:
+                row[ICON_ONLY] = True
             return h(MENU_ROW_TAG, {**row, **given}, *children)
         own: dict[str, object] = {
             "icon": description.get("icon"),
@@ -258,11 +261,13 @@ class DrawingMethods:
         text = children if icon_only or children else (title,)
         return h(BUTTON_TAG, {**own, **given}, *text)
 
-    def draw_context_menu(self, thing: object, names: list[str]) -> Element:
+    def draw_context_menu(self, thing: object, names: list[object]) -> Element:
         """The right-click menu of the element around it, `<context-menu>`:  a hidden `<spell-context-menu>`.
 
         - The twin of the JavaScript core's `drawContextMenu()`:  the page draws the menu with its drawing half,
           each action run here;  printed, it's the hidden element alone, as the JavaScript run's page prints it.
+        - `names`:  each an action's method, `-` a line, or an action and its tag's attributes,
+          `["undo", {"icon-only": True}]`.
         """
         return h(CONTEXT_MENU_TAG, {"hidden": True})
 

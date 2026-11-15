@@ -582,6 +582,14 @@
               "fieldName": "shortcut"
             },
             {
+              "name": "icon-only",
+              "description": "Shows its icon alone:  its title (and keys) its tooltip and its name for a screen reader.  In a vertical menu, icon-only actions side by side share one row (Undo and Redo).  Needs an icon:  without one it shows its title as usual.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "iconOnly"
+            },
+            {
               "name": "loading",
               "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
               "type": {
@@ -733,6 +741,10 @@
             {
               "name": "disabled",
               "description": "Can't be chosen."
+            },
+            {
+              "name": "icon-only",
+              "description": "Shows its icon alone (`icon-only`, with an icon)."
             },
             {
               "name": "loading",

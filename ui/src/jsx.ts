@@ -719,6 +719,16 @@ export interface UIActionAttributes {
    */
   "prop:shortcut"?: string
   /**
+   * Shows its icon alone:  its title (and keys) its tooltip and its name for a screen reader.  In a vertical menu, icon-only actions side by side share one row (Undo and Redo).  Needs an icon:  without one it shows its title as usual.
+   * - takes:  flag (present / absent)
+   */
+  "icon-only"?: boolean | ""
+  /**
+   * `icon-only`, as the DOM element's property.
+   * @deprecated write `icon-only` -- `prop:` stays only for compiled spell
+   */
+  "prop:iconOnly"?: boolean | ""
+  /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */

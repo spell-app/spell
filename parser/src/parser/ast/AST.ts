@@ -2074,9 +2074,17 @@ export type ASTJSXElementProps = Prettify<{
    * The right-click menu it marks, its items as spell names them (`auto_play`, `-` a divider):
    * `<context-menu>` inside an element, javascript's `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`
    * -- see spell's `context_menu_block`.
+   * - An item whose tag gave attributes carries them:  `<action "undo" icon-only />` is
+   *   `{ action: "undo", props: { "icon-only": true } }`, javascript's `["undo", { "icon-only": true }]`.
    */
-  contextMenu?: string[]
+  contextMenu?: ASTContextMenuItem[]
 }>
+
+/**
+ * One item of a right-click menu (`ASTJSXElement.contextMenu`):  an action's name as spell names it, `-` a divider;
+ * or an action whose tag gave attributes, each a literal (`icon-only`, `title="Restart"`, `icon="refresh"`).
+ */
+export type ASTContextMenuItem = string | { action: string; props: Record<string, string | boolean> }
 
 export class ASTJSXElement extends ASTExpression {
   declare tagName: string
@@ -2084,7 +2092,7 @@ export class ASTJSXElement extends ASTExpression {
   declare children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
   declare drawnApart: boolean | undefined
   declare action: string | undefined
-  declare contextMenu: string[] | undefined
+  declare contextMenu: ASTContextMenuItem[] | undefined
   constructor(match: P.AnyMatch, props: ASTJSXElementProps) {
     super(match, props)
     this.assertType("tagName", "string")

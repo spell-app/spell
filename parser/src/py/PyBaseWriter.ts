@@ -1135,7 +1135,19 @@ export class PyBaseWriter extends P.ProgramWriter {
     const children = node.childValues.map((child) => this.bare(child))
     // a right-click menu, `<context-menu>`:  the core's hidden element, as javascript's
     if (node.contextMenu) {
-      const items = node.contextMenu.map((item) => this.quoted(item === "-" ? item : this.nameOf(item, "method")))
+      const items = node.contextMenu.map((item) => {
+        if (typeof item === "string") return this.quoted(item === "-" ? item : this.nameOf(item, "method"))
+        // an item with attributes:  its name and them, `["undo", {"icon-only": True}]`
+        const props = Object.entries(item.props).map(
+          ([key, value]) =>
+            `${this.quoted(key)}: ${typeof value === "boolean" ? (value ? "True" : "False") : this.quoted(value)}`
+        )
+        return pyText.call(
+          "",
+          [this.quoted(this.nameOf(item.action, "method")), pyText.call("", props, ["{", "}"])],
+          ["[", "]"]
+        )
+      })
       return pyText.call("core.draw_context_menu", ["self", pyText.call("", items, ["[", "]"])])
     }
     // a button for one of the program's actions, `<action "auto play"/>`:  the core draws it, from the action
