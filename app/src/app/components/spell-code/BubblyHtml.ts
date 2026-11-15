@@ -163,6 +163,8 @@ class BubblyWriter {
           ? `<span class="bubbly-quoted"><span class="bubbly-input">${QUOTE_OPEN}${escape(words.slice(1, -1))}${QUOTE_CLOSE}</span></span>`
           : `<span class="bubbly-input">${escape(words)}</span>`
       case "mark":
+        // a quoted action name's own `"`, alone at either end:  `to "count the points for a card on a pile"`
+        if (words === '"') return /\s/.test(this.text[piece.start - 1] ?? " ") ? QUOTE_OPEN_ALONE : QUOTE_CLOSE_ALONE
         return `<span class="${BubblyHtml.classesFor(piece.kind)}">${BubblyHtml.marksHtml(words)}</span>`
       case "comment":
         return `<span class="${BubblyHtml.classesFor(piece.kind)}">${BubblyHtml.commentHtml(words)}</span>`
@@ -202,6 +204,9 @@ const MAX_INDENT = 4
 /** A quoted input's marks:  the file's own `"`, kept for copying, its curly mark drawn by the sheet. */
 const QUOTE_OPEN = `<span class="bubbly-quote-mark bubbly-quote-open">"</span>`
 const QUOTE_CLOSE = `<span class="bubbly-quote-mark bubbly-quote-close">"</span>`
+/** ... and a quoted action name's, alone outside its pills:  `to "count the points for a card on a pile"`. */
+const QUOTE_OPEN_ALONE = `<span class="bubbly-quote-mark bubbly-quote-open bubbly-quote-alone">"</span>`
+const QUOTE_CLOSE_ALONE = `<span class="bubbly-quote-mark bubbly-quote-close bubbly-quote-alone">"</span>`
 
 /** Each piece's classes:  `words` has none;  `heading` and `input` are drawn their own way, around these. */
 const PIECE_CLASSES: Record<SP.BubblyPieceKind, string> = {

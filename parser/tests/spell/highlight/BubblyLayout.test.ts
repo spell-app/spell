@@ -160,6 +160,48 @@ describe("SP.BubblyLayout", () => {
       ],
       ["words:to ", 'input:"deal the cards"', "words: with title ", 'input:"Deal"', "mark:,", "words: undoable"]
     ])
+    // a quoted name with blanks, drawn as the unquoted one is:  its `"` marks faint at either end (epic `language` I97)
+    const quoted = [
+      'a "card" is a thing',
+      'a "pile" is a list of cards',
+      "solitaire is an app",
+      '\tto "count the points for a card on a pile"',
+      "\t\treturn 1",
+      "\tto count the points for a card on a pile",
+      "\t\treturn 1",
+      '\tto "move (a card) to (a pile)"',
+      "\t\treturn 1"
+    ].join("\n")
+    const [, , fromQuoted, unquoted, bracketed] = heads(quoted)
+    expect(unquoted).toEqual([
+      "words:to ",
+      "input:count the points for",
+      "words: a ",
+      "reference:card",
+      "words: ",
+      "input:on",
+      "words: a ",
+      "reference:pile"
+    ])
+    expect(fromQuoted).toEqual(["words:to ", 'mark:"', ...unquoted!.slice(1), 'mark:"'])
+    expect(bracketed).toEqual([
+      "words:to ",
+      'mark:"',
+      "input:move",
+      "words: (a ",
+      "reference:card",
+      "words:) ",
+      "input:to",
+      "words: (a ",
+      "reference:pile",
+      "words:)",
+      'mark:"'
+    ])
+    // the editors draw those marks as a quoted input's own:  curly, either side of its words
+    const laidOut = SP.BubblyLayout.of(quoted)
+    const head = blocksOf(laidOut.nodes)[3]!
+    const kinds = SP.BubblyStretches.ofLine(quoted, head.head, { band: head.partOfSpeech }).map((each) => each.kind)
+    expect([kinds[1], kinds.at(-1)]).toEqual(["quote-open", "quote-close"])
   })
 
   it("draws a new thing's `a new` bold with its kind, and what a step sets underlined whole (epic `language` I98)", () => {

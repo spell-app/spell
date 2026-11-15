@@ -20,6 +20,7 @@ import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
 import { MethodSignature } from "./MethodSignature"
+import { QuotedActionSignature } from "./QuotedActionSignature"
 import { QuotedMethodSignature } from "./QuotedMethodSignature"
 import { QuotedSignatureWords } from "./QuotedSignatureWords"
 import { QuotedTypeExpression } from "./QuotedTypeExpression"
@@ -86,6 +87,9 @@ methodsEs.addRule(QuotedSignatureWords, {
 })
 
 methodsEs.addRule(QuotedMethodSignature)
+
+// an action's quoted name, its `a <kind>` words its blanks (epic `language` I97)
+methodsEs.addRule(QuotedActionSignature)
 
 methodsEs.addRule(ToDoSomething, {
   syntax: `para (asTest:probar)? {signature:method_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
@@ -914,7 +918,44 @@ methodsEs.addRule(ToDoSomething, {
 // its name quoted, and what it says about itself on its line (epic `language` P48, Q6):
 // `para "repartir las cartas" con título "Repartir", icono "carta", atajo "meta+N"`
 methodsEs.addRule(ToDoSomething, {
-  syntax: `para {signature:quoted_method_signature} {modifiers:action_modifiers}? :? {statement_body}?`
+  syntax: `para {signature:quoted_action_signature} {modifiers:action_modifiers}? :? {statement_body}?`,
+  tests: [
+    {
+      title:
+        "its blanks as the unquoted name's:  `un / una <kind>` a blank, other words its name (epic `language` I97)",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.types?.add("card")
+        scope.types?.add("pile")
+      },
+      tests: [
+        {
+          input: 'para "contar los puntos de una card en una pile"',
+          js: [
+            "Card.prototype.contarLosPuntosDeCardEnPile = function (pile) {}",
+            'core.describeAction(Card, "contarLosPuntosDeCardEnPile", { title: "Contar los Puntos de Card en Pile", undoneAs: "Contar los Puntos de Card en Pile" })'
+          ],
+          ts: [
+            "export interface Card { contarLosPuntosDeCardEnPile(pile: Pile): any /* spell: type unknown */ }",
+            "Card.prototype.contarLosPuntosDeCardEnPile = function (this: Card, pile: Pile) {}",
+            'core.describeAction(Card, "contarLosPuntosDeCardEnPile", { title: "Contar los Puntos de Card en Pile", undoneAs: "Contar los Puntos de Card en Pile" })'
+          ]
+        },
+        {
+          input: 'para "repartir el mazo en (una pile)"',
+          js: [
+            "Pile.prototype.repartirElMazoEnPile = function () {}",
+            'core.describeAction(Pile, "repartirElMazoEnPile", { title: "Repartir el Mazo en Pile", undoneAs: "Repartir el Mazo en Pile" })'
+          ],
+          ts: [
+            "export interface Pile { repartirElMazoEnPile(): any /* spell: type unknown */ }",
+            "Pile.prototype.repartirElMazoEnPile = function (this: Pile) {}",
+            'core.describeAction(Pile, "repartirElMazoEnPile", { title: "Repartir el Mazo en Pile", undoneAs: "Repartir el Mazo en Pile" })'
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 methodsEs.addRule(CreateAnimation, {

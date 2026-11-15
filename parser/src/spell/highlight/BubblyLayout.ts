@@ -490,8 +490,18 @@ export class BubblyLayout {
     // a test's words are all its name:  nothing in it is a parameter
     const params =
       partOfSpeech === "action" ? descendantsNamed(statement, row.params).map((param) => this.bracketed(param)) : []
-    const end = Math.max(...[...inputs, ...params].map((each) => each.end!), 0)
+    let end = Math.max(...[...inputs, ...params].map((each) => each.end!), 0)
     let from = statement.start! + lead[0].length
+    // a quoted name with parameters, `to "count the points for a card on a pile"`:  drawn as the unquoted one is,
+    // its `"` marks faint at either end;  one with none stays one quoted pill
+    const quoted = params.length ? this.quotedName(statement, from) : undefined
+    if (quoted) {
+      for (let at = quoted.start; at < quoted.end; at++) if (this.paint[at] === "input") this.paint[at] = "words"
+      this.paintRange(quoted.start, quoted.start + 1, "mark")
+      this.paintRange(quoted.end - 1, quoted.end, "mark")
+      from = quoted.start + 1
+      end = quoted.end - 1
+    }
     for (const param of [...params.filter((each) => each.start < end), { start: end, end }].sort(
       (a, b) => a.start - b.start
     )) {
@@ -503,6 +513,14 @@ export class BubblyLayout {
       }
       from = Math.max(from, param.end)
     }
+  }
+
+  /** The stretch of `statement`'s quoted name, its `"` marks included, when it starts at `from`;  else `undefined`. */
+  private quotedName(statement: P.Match, from: number): { start: number; end: number } | undefined {
+    const signature = (statement.groups as { signature?: P.Match }).signature
+    if (!signature || signature.start !== from || this.text[from] !== '"') return undefined
+    const end = signature.end!
+    return this.text[end - 1] === '"' && end - from > 1 ? { start: from, end } : undefined
   }
 
   /** `param`'s stretch, with the brackets round it if it has them:  `(a card)`. */
