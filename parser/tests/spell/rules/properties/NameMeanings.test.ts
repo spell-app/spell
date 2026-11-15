@@ -12,7 +12,7 @@ import { parseSpellProject } from "spell/parser/spell/test"
  * - A bare `X` never reads a property.
  * - `the X's Y` reads as `the Y of the X` (P16);  after an `of`, the types say which name the `'s` is (Q16).
  * - A local that hides a property warns where it's made and where `the X` reads it;
- *   an argument or loop variable warns only on that read.
+ *   a loop variable warns only on that read;  an action's blank (argument) never warns.
  *
  * A row marked `notYet` isn't true yet, and names the phase that makes it true:
  * it runs as `test.fails`, so the phase that makes it true MUST remove the mark.
@@ -246,11 +246,10 @@ const ENGLISH: NameRow[] = [
   },
 
   {
-    title: "argument hiding a property:  [the X] in a text warns, about the text",
+    title: "argument named like a property:  [the X] in a text reads the argument, no warning",
     action: "to play (a game) on (a pile):",
     spell: 'set v to "x [the pile]"',
-    js: "${pile}",
-    warns: HIDES
+    js: "${pile}"
   },
 
   // a text's fill-in, and markup's
@@ -281,35 +280,31 @@ const ENGLISH: NameRow[] = [
     js: ERROR
   },
   {
-    title: "argument hiding a property:  [the X] in markup text warns",
+    title: "argument named like a property:  [the X] in markup text reads it, no warning",
     action: "to play (a game) on (a pile):",
     spell: "return <span>[the pile]</span>",
-    js: "${pile}",
-    warns: HIDES
+    js: "${pile}"
   },
   {
-    title: "argument hiding a property:  [the X] in a markup attribute warns",
+    title: "argument named like a property:  [the X] in a markup attribute reads it, no warning",
     action: "to play (a game) on (a pile):",
     spell: 'return <span title="[the pile]"></span>',
-    js: "${pile}",
-    warns: HIDES
+    js: "${pile}"
   },
 
   {
-    title: "argument hiding a property:  {the X} in a markdown hole warns",
+    title: "argument named like a property:  {the X} in a markdown hole reads it, no warning",
     action: "to play (a game) on (a pile):",
     spell: "return <markdown>x {the pile}</markdown>",
-    js: "${pile}",
-    warns: HIDES
+    js: "${pile}"
   },
 
   // an argument
   {
-    title: "argument hiding a property:  the X reads the argument, and warns",
+    title: "argument named like a property:  the X reads the argument, no warning",
     action: "to play (a game) on (a pile):",
     spell: "set v to the pile",
-    js: "v = pile",
-    warns: HIDES
+    js: "v = pile"
   },
   {
     title: "argument hiding a property:  its X reads the property",
