@@ -139,11 +139,6 @@ export type ReviewButtonSpec = {
     | "closeIssue"
     | "sendBack"
     | "acceptFix"
-  /**
-   * words drawn BESIDE its icon, when the icon alone isn't enough (epic `epic-engine` I305;  Owen, 2026-11-15, on the
-   * bare plane:  "Change this to `<plane> Send to Claude`");  none:  the icon alone, its name the tooltip
-   */
-  caption?: "sendToClaude"
   /** what it does, for a screen reader */
   tip:
     | "approveTip"
@@ -196,7 +191,6 @@ const DO_THIS: ReviewButtonSpec = {
   color: "green",
   icon: "paper plane",
   label: "doThis",
-  caption: "sendToClaude",
   tip: "doThisIssueTip"
 }
 
@@ -279,7 +273,7 @@ export const PART_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.filter((
  * - its plan's Accept and the accepted state keep the thumbs up:  "accept this" (Owen, 2026-10-29)
  */
 export const PHASE_BUTTONS: readonly ReviewButtonSpec[] = [
-  { action: "todo", color: "green", icon: "paper plane", label: "doThis", caption: "sendToClaude", tip: "doThisTip" },
+  { action: "todo", color: "green", icon: "paper plane", label: "doThis", tip: "doThisTip" },
   { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" }
 ]
 
@@ -603,12 +597,6 @@ export const REVIEW_NAME_TEXTS = [
     key: "closeIssue",
     text: "Close it:  not needed",
     description: "An open issue's review button (the x):  its name (I299)."
-  },
-  {
-    key: "sendToClaude",
-    text: "Send to Claude",
-    description:
-      "The plane's words, beside its icon:  an issue's, a call's or a phase's Do this, a fix sent back (I305;  Owen, 2026-11-15:  \"Change this to `<plane> Send to Claude`\")."
   },
   {
     key: "sendBack",

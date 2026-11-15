@@ -16,6 +16,8 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
 /****************
  * ### `<epic-send-buttons>`
  * Send:  the paper plane, and its COUNTDOWN when asked for (`countdown`;  epic `epic-engine` P20, P53).
+ * - its WORDS beside the plane, "Send to Claude" (epic `epic-engine` I305;  Owen, 2026-11-15:  "The round plane icon
+ *   at the top is what should say `send to claude`");  an item's own plane stays the icon alone
  * - Owen, 2026-10-29:  "Send works on a 2-minute no interaction timer.  This is integrated into the single send button
  *   ... with the countdown ring.  Pressing it sends immediately."
  * - the PLANE asks its owner to send (`epic-send-saving`, `auto` false)
@@ -163,6 +165,9 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
             <Show when={this.isCounting}>{CountdownRing.draw(() => this.fractionLeft, this.partForName("ring"))}</Show>
             <Show when={this.isWorking}>{CountdownRing.turning(this.partForName("working"))}</Show>
           </span>
+          <span class={WORDS} part={this.partForName("words")}>
+            {this.translationForKey("words")}
+          </span>
           <Show when={(this.count ?? 0) > 0}>
             <span class={COUNT} part={this.partForName("count")}>
               {this.count}
@@ -212,3 +217,4 @@ const GROUP = "group"
 const SEND = "send"
 const COUNT = "count"
 const GLYPH = "glyph"
+const WORDS = "words"

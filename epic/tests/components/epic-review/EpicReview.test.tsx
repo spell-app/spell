@@ -238,8 +238,6 @@ describe("<epic-item> review controls", () => {
       ["history", "blue", "Revisit:  I'm adding a note for you:  Write a note for Claude in the box at its end"],
       ["xmark", "grey", "Drop it:  Canceled, struck through, once Claude applies it"]
     ])
-    // a todo's plane queues it into a phase, Claude isn't sent it now:  the icon alone (I305)
-    expect(button(host, "next").hasAttribute("label")).toBe(false)
     // the plane marks it, dashed green, and so does its chip;  again, cleared
     button(host, "next").click()
     await settle()
@@ -882,10 +880,9 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     const host = await render(`<epic-phase id="p2" title="Plan-Doc Notes" status="todo" open></epic-phase>`)
     expect(actions(host)).toEqual(["todo", "revisit"])
     expect(button(host, "todo").getAttribute("icon")).toBe("paper plane")
-    // its words beside the icon (I305;  Owen, 2026-11-15:  "Change this to `<plane> Send to Claude`");  Revisit, the icon alone
-    expect(button(host, "todo").getAttribute("label")).toBe("Send to Claude")
-    expect(button(host, "todo").hasAttribute("data-caption")).toBe(true)
-    expect(button(host, "revisit").hasAttribute("label")).toBe(false)
+    // the icon alone, its name the tooltip:  the words are the page's Send's, at the top (I305;  Owen, 2026-11-15:
+    // "The item plane should be just the plane")
+    expect(button(host, "todo").hasAttribute("label")).toBe(false)
     expect(button(host, "todo").title).toBe("Do this:  Yes:  build this phase")
     expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["note-pick"])

@@ -3200,11 +3200,6 @@
           "description": "An open issue's review button (the x):  its name (I299)."
         },
         {
-          "key": "sendToClaude",
-          "text": "Send to Claude",
-          "description": "The plane's words, beside its icon:  an issue's, a call's or a phase's Do this, a fix sent back (I305;  Owen, 2026-11-15:  \"Change this to `<plane> Send to Claude`\")."
-        },
-        {
           "key": "sendBack",
           "text": "Send it back",
           "description": "A fixed issue's or call's review button (the plane):  its name (I299)."
@@ -6619,7 +6614,7 @@
         "paper plane",
         "ring"
       ],
-      "description": "Send, the paper plane.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  While the session works through what was sent (`working`, epic `epic-engine` P55), a blue arc turns round the plane in the same frame, unless the countdown runs.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
+      "description": "Send, the paper plane, its words \"Send to Claude\" beside it.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  While the session works through what was sent (`working`, epic `epic-engine` P55), a blue arc turns round the plane in the same frame, unless the countdown runs.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
       "noun": "send-buttons",
       "attributes": [
         {
@@ -6694,6 +6689,10 @@
           "description": "The badge on the plane:  how many things a press sends."
         },
         {
+          "name": "words",
+          "description": "The words beside the plane, \"Send to Claude\" (I305)."
+        },
+        {
           "name": "working",
           "description": "The turning ring round the plane:  a blue arc going round, only while the session works on a Send."
         },
@@ -6730,6 +6729,11 @@
           "key": "send",
           "text": "Send",
           "description": "The plane's tooltip and name, when the owner gives none (`send-tip`)."
+        },
+        {
+          "key": "words",
+          "text": "Send to Claude",
+          "description": "The words beside the plane (I305;  Owen, 2026-11-15:  \"The round plane icon at the top is what should say `send to claude`\")."
         },
         {
           "key": "counting",

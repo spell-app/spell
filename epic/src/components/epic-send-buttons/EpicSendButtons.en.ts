@@ -20,7 +20,7 @@ export const epicSendButtonsVocabulary = {
   noun: "send-buttons",
   ui: false,
   description:
-    "Send, the paper plane.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with " +
+    'Send, the paper plane, its words "Send to Claude" beside it.  With `countdown` (an epic page\'s header;  epic `epic-engine` P53), Auto Send too:  with ' +
     "something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait " +
     "the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the " +
     "page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  " +
@@ -106,6 +106,7 @@ export const epicSendButtonsVocabulary = {
       name: "count",
       description: "The badge on the plane:  how many things a press sends."
     },
+    { name: "words", description: 'The words beside the plane, "Send to Claude" (I305).' },
     {
       name: "working",
       description: "The turning ring round the plane:  a blue arc going round, only while the session works on a Send."
@@ -127,6 +128,12 @@ export const epicSendButtonsVocabulary = {
   texts: [
     { key: "group", text: "Send", description: "The group's name, for a screen reader." },
     { key: "send", text: "Send", description: "The plane's tooltip and name, when the owner gives none (`send-tip`)." },
+    {
+      key: "words",
+      text: "Send to Claude",
+      description:
+        'The words beside the plane (I305;  Owen, 2026-11-15:  "The round plane icon at the top is what should say `send to claude`").'
+    },
     {
       key: "counting",
       text: "sends by itself in {time};  click to send now",

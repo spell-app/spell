@@ -1737,9 +1737,9 @@ describe("<epic-page> stages", () => {
     const host = await render(stagedPage("overview"))
     const accept = () => stageButtonOf(host.querySelector("epic-overview")!)
     await vi.waitFor(() => expect(accept()?.textContent).toContain("Accept Overview"))
-    // the header:  the plane, no green words;  the step label says the stage
+    // the header:  the plane and its own words (I305), no stage's green words;  the step label says the stage
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
-    expect(plane(host).textContent!.trim()).toBe("")
+    expect(plane(host).textContent!.trim()).toBe("Send to Claude")
     expect(step(host)?.words).toBe("OVERVIEW")
     // none on the Phases section:  the page isn't agreeing its phases yet
     expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()
