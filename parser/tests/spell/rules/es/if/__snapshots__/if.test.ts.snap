@@ -6,6 +6,7 @@ exports[`testing spell module if, in Spanish > rule group specs > match snapshot
   "else": "body?",
   "else_if": "condition|body?",
   "if": "condition|body?",
+  "return_otherwise": "value",
   "statement_if": "statement|condition",
   "value_if": "value|condition|otherValue?",
   "value_otherwise": "value",

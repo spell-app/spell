@@ -14,6 +14,7 @@ import { If } from "./If"
 import { ValueIf } from "./ValueIf"
 import { ValueOtherwise } from "./ValueOtherwise"
 import { StatementIf } from "./StatementIf"
+import { ReturnOtherwise } from "./ReturnOtherwise"
 
 _if_.addRule(If, {
   syntax: "if {condition:expression} (then|:)? {statement_body}?",
@@ -333,6 +334,46 @@ _if_.addRule(StatementIf, {
           title: "a statement with a body keeps its own:  the inline body is ours",
           input: "if foo then print 1 if bar",
           js: "if (foo) { if (bar) core.console.log(1) }"
+        }
+      ]
+    }
+  ]
+})
+
+// the last of a run of `return ... if ...` lines (epic `language` I96):  `return 0 otherwise`
+_if_.addRule(ReturnOtherwise, {
+  syntax: "(return|exit with?) {value:expression} (otherwise|else)",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        ;(scope as P.BlockScope).variables.add("bar")
+      },
+      tests: [
+        [
+          ["to count the points:", "\treturn 10 if bar", "\treturn 5 if bar is 2", "\treturn 0 otherwise"],
+          [
+            "export function countThePoints() {",
+            '  return core.asAction({ undoneAs: "Count the Points" }, () => {',
+            "    if (bar) return 10",
+            "    if (bar === 2) return 5",
+            "    return 0",
+            "  })",
+            "}"
+          ]
+        ],
+        {
+          title: "a comment between them is fine",
+          input: ["to count the points:", "\treturn 10 if bar", "\t// else nothing", "\treturn 0 otherwise"],
+          js: [
+            "export function countThePoints() {",
+            '  return core.asAction({ undoneAs: "Count the Points" }, () => {',
+            "    if (bar) return 10",
+            "    // else nothing",
+            "    return 0",
+            "  })",
+            "}"
+          ]
         }
       ]
     }

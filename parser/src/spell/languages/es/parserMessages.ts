@@ -100,6 +100,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "sort-key-waits":
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
   "rider-needs-a-line-above": "Esto va debajo de la línea a la que se refiere, como una lectura de un lugar",
+  "otherwise-needs-return-if":
+    'Esto va debajo de una línea "devolver ... si ...", como la última:  p. ej. "devolver 10 si es un rey", y luego "devolver 0 de lo contrario"',
   "rider-only-in-a-drawing":
     "Esto muestra algo mientras una lectura no tiene nada que mostrar, así que solo va en un dibujo, debajo de la lectura:  una acción simplemente espera",
   "in-one-go-not-atomic":

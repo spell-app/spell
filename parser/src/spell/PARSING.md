@@ -1148,6 +1148,18 @@ a line of the built-in types table, a built-in template, or a project's own `one
     - inside an expression too, `"↑" if it is face up otherwise it is "↓"` (`backwards_if`):
       `it is` there is never a comparison (epic `spanish` I8;  Spanish's `de lo contrario es`)
   - `value_otherwise`:  `black otherwise` => `return 'black'`
+  - The same ladder under a `return`, in any action or method (epic `language` I96):
+    `return` + indented `- 10 if ...` / `- 0 otherwise` => `if (...) return 10` ... `return 0`.
+    - Its lines are these same two rules, with or without a `- `:  `return_statement`'s `parseNestedBlock()`
+      takes the indented block as its body when every line is one of them.
+    - A property's ladder takes no `- `:  its bulleted lines are its members, `- it "is (color)"`.
+  - `return_otherwise`, [ReturnOtherwise.ts](rules/if/ReturnOtherwise.ts):  `return 0 otherwise` => `return 0`,
+    the last of a run of `return ... if ...` lines (`statement_if`s);  Spanish's `devolver 0 de lo contrario`.
+    - Anywhere else it's refused, when the errors are gathered (`SP.SpellWarnings.refuseIf()`).
+    - It reads the line above with `data.statementAbove()`:  `Block.assembleBlock()` sets it on each line's
+      statement, the nearest statement above it in its block, comment lines aside.
+      A function, so what walks a match's `data` (its warnings) never reaches the line above.
+    - Only `return`:  any other statement would need an `else`.
   - Only in a getter's or method's body:  anywhere else, an error saying where it belongs (epic page I9).
     Outside a function, its `return` would make a program that won't load.
   - `property_value_either` is a getter whose inline body is ONE line like these (T6).
