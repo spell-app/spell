@@ -93,8 +93,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A route module may send its own events to every page (`LiveReload.send()`):  the app's sends `pref-saved`
       when a person's pref is saved (their theme, epic `debut` P21), which the live client hands on as
       `spell-server:pref-saved` on `window` (the kit's `PREF_SAVED_EVENT` / `PREF_SAVED_PAGE_EVENT`).
-    - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`):
-      a page from an earlier run (the server restarted) reloads, for the new `/api/server/live.js` and token.
+    - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`).
+      A page from an earlier run (the server restarted:  every merge into main does it) does NOT reload by itself
+      (epic `epic-engine` I293;  Owen:  "can we avoid reloading the epic pages when that happens?"):
+      - it asks `/api/server/versions` (`LIVE_VERSIONS`) what each script it runs holds now, and takes the new run's
+        write token from the same answer
+      - it compares them with what they held when it loaded them (asked once its fetches went quiet):
+        a script that changed goes the way of any changed script (above);  none changed:  nothing happens
+      - the live client itself changed, or the page can't tell:  a reload for new code (below)
+    - A reload for NEW CODE (a changed script nobody swapped in) waits until the reader is away (I293):
+      the page out of sight, or a minute with no key, click, scroll or typing and no field focused;
+      never in the middle of a review (`reloadForCode()`)
     - Reloads go through `reloadGate()`:  one, 500ms after the last change.
       - QUIET (epic `epic-engine` I172;  Owen, 2026-10-29, of the pill before it:  "why do we have this?"):
         a page in view reloads by itself, held behind its old frame and cross-faded in (below), its scroll and folds
@@ -133,7 +142,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       So after a merge, the next opener gets the new routes.
       - its code:  the `sources` folders, by `newestChange()`
       - Nothing restarts it by itself:  the next `spell server start` (an opener, `/airplane`),
-        or the side bar's "Restart Page Server".  Its open pages then reload (`hello`).
+        or the side bar's "Restart Page Server".  Its open pages reconnect (`hello`), and reload only for code of
+        theirs that changed (epic `epic-engine` I293).
     - `stop` waits for the old PROCESS to end (`SIGTERM`, then `SIGKILL` after 10s), not just for it to stop answering.
       - Why:  it stops answering before it lets go of its port.
         `ensure` started the new one while the old one held the port, so the new one took another port,
