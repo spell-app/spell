@@ -245,6 +245,7 @@ try {
       if (!after.onScreen) problems.push(`${label}:  off screen after a reload`)
     }
     const comments = commentsIn(copy).filter((each) => each.text === PANE_TEXT)
+    summary.pane.comments = comments.length
     if (comments.length > 1) problems.push(`${label}:  ${comments.length} comments of its text in the inbox`)
     // the reader leaves it:  saved, closed
     await page.keyboard.press("Escape")
@@ -608,7 +609,11 @@ async function clickOn(page, id, selector) {
 function commentsIn(folder) {
   return readdirSync(folder)
     .filter((file) => /\.comments\.[\w-]+\.json5$/.test(file))
-    .flatMap((file) => JSON5.parse(readFileSync(join(folder, file), "utf8")).comments ?? [])
+    .flatMap((file) => {
+      // a list, or by id
+      const comments = JSON5.parse(readFileSync(join(folder, file), "utf8")).comments ?? []
+      return Array.isArray(comments) ? comments : Object.values(comments)
+    })
 }
 
 /** The value after flag `flag`, if given. */
