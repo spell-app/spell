@@ -443,3 +443,83 @@ describe("the core contract:  a page's Undo and Redo follow a Python game's hist
     )
   }
 })
+
+/**
+ * A game's whole opening is no undo step, as `spell run` runs it in javascript (epic `language` J180):
+ * Undo isn't lit the moment it starts, its deal done;  a move after it is a step.
+ * - The game is a project the page imports, so the page reads the core it runs on, then plays one move.
+ * - `spell run` imports the page through `core.runOpening()` (`runProject.ts`), as `runCompiled()` imports a program.
+ */
+describe("the core contract:  a javascript game's opening is no undo step (epic `language` J180)", () => {
+  for (const name of GAMES) {
+    test(
+      name,
+      async () => {
+        const folder = mkdtempSync(join(tmpdir(), "spell-opening-"))
+        try {
+          const projects = await importedProjects(name, "js/solid", folder)
+          const file = join(folder, `${moduleNameOf(name)}.spell.mjs`)
+          writeFileSync(file, compiledFixture(name, "js/solid"))
+          projects[fixtureProjectId(name)] = pathToFileURL(file).href
+          const page = [
+            'import { core } from "@spell/core"',
+            `import { solitaire } from ${JSON.stringify(`${SP.SPELL_PROJECT_MODULE}${fixtureProjectId(name)}`)}`,
+            // after the page's own opening, which a top level that waits would keep going:  so not awaited there
+            "void (async () => {",
+            // its opening deal, held:  done once people's actions aren't held back any more
+            "  while (core.RUNTIME.actions.isBusy) await new Promise((resolve) => setTimeout(resolve, 10))",
+            "  const seen = [solitaire.canUndo]",
+            "  await solitaire.turnOverTheNextCard()",
+            "  seen.push(solitaire.canUndo, solitaire.undoTitle)",
+            "  console.log(JSON.stringify(seen))",
+            "})()"
+          ].join("\n")
+          const { exitCode, output, stdout } = await CLI.runCode("run", `${bareNameOf(name)}Opening`, page, {
+            projects,
+            capture: true,
+            dom: true,
+            seed: CONTRACT_SEED
+          })
+          expect(exitCode, `${name}'s opening:\n${output}`).toBe(CLI.EXIT.OK)
+          const seen = stdout.split("\n").find((line) => line.startsWith("["))
+          expect(JSON.parse(seen!)).toEqual([false, true, "Undo Turn Card"])
+        } finally {
+          rmSync(folder, { recursive: true, force: true })
+        }
+      },
+      60_000
+    )
+  }
+})
+
+/** A program that turns its card over at its top level, an action no one waits for:  then once more, after its opening. */
+const TURNED_AT_THE_TOP = `
+import { core, Thing } from "@spell/core"
+export class Card extends Thing {
+  static {
+    this.declareProp("faceUp", { type: "choice" })
+  }
+  get faceUp() { return this.getProp("faceUp") }
+  set faceUp(faceUp) { this.setProp("faceUp", faceUp) }
+}
+export const card = new Card()
+export function turnTheCardOver() {
+  return core.asAction({ undoneAs: "Turn Card" }, () => { card.faceUp = !card.faceUp })
+}
+turnTheCardOver()
+setTimeout(() => {
+  const steps = () => core.RUNTIME.history.steps.map((step) => step.title)
+  const seen = [steps()]
+  turnTheCardOver()
+  seen.push(steps())
+  console.log(JSON.stringify(seen))
+})
+`
+
+describe("a top-level action the opening calls, not waiting:  no undo step (epic `language` J180)", () => {
+  test("its call at the top level is none;  its call after the opening is one", async () => {
+    const { exitCode, output, stdout } = await CLI.runCode("run", "Turned", TURNED_AT_THE_TOP, { capture: true })
+    expect(exitCode, output).toBe(CLI.EXIT.OK)
+    expect(JSON.parse(stdout.trim())).toEqual([[], ["Turn Card"]])
+  }, 60_000)
+})

@@ -727,6 +727,9 @@ A kind that says so is saved in a file of its own.
     `- droppable when ...` (`droppable`, the card the list's own item)
   - `a foundation can never (release|remove|give up|let go of) a card`:  always no
   - Its body answers yes or no, inline or indented.
+    - Its last line asks, even one that reads as a statement:
+      `the card is the last item of the card's pile` is `card === ...`, not `card = ...` (`answersYesOrNo()`,
+      `readsAsQuestion`;  epic `language` T135).
   - In the body:
     - `the card` is the card
     - `it`, `its` and `the tableau` are the list
@@ -759,6 +762,9 @@ A kind that says so is saved in a file of its own.
   ([`JoinedLines`](rules/JoinedLines.ts), epic `language` P55, Q53):
   - a line ending in `and` / `or` (the `and_or` word rule) takes the line indented under it, however deep;
     what's under THAT is the joined line's body
+    - and the lines after that one at its indent, while each line before ends in `and` / `or` (epic `language` T135)
+  - so does a line with lines indented under it STARTING with `and` / `or` (`and its value is ...`), any number of
+    them (T135, Owen's form);  the bubbly look draws them in the head line (`SP.BubblyLayout`), not its body
   - a line of just `and` / `or` joins the lines either side, each in parentheses of no width
   - the tokens stay the lines' own:  every rule reads the joined line as one written whole
   - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)

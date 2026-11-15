@@ -202,6 +202,25 @@ export const actingMethods = defineCoreModule({
   },
 
   /**
+   * Run `open`, the program's whole opening -- importing it, which runs its top level -- as can't be undone:
+   * `program = await core.runOpening(() => import(url))`.
+   * - So nothing it does as it starts is an undo step, and Undo isn't lit the moment it opens (epic `language` J180):
+   *   not an action it calls at its top level, nor one that action calls.
+   * - Its top-level tests run inside it too:  what they change is no step either.
+   * - Ends when `open`'s promise settles;  what a person does afterwards is an undo step as before.
+   *   - An action it started that waits, not held (`holdWhile()`), keeps its step open past the opening:
+   *     what it changes once the opening's over is recorded.
+   * - Every runner runs a program through it:  the app's, VS Code's and `<spell-viewer>`'s (`runCompiled()`),
+   *   and `spell run` / `spell test`'s (`runProject.ts`).
+   *   Python's is `core.run_opening()`, around its `run_program()`.
+   * - No program running:  `open` just runs.
+   */
+  runOpening<T>(open: () => T): T {
+    const history = core.RUNTIME?.history
+    return history ? history.run({ cantBeUndone: "keeps history" }, open) : open()
+  },
+
+  /**
    * Run `act`, a top-level action's steps, as an action:  ONE undo step titled `undoneAs`, or none (`cantBeUndone`).
    * Returns what `act` returns.
    *

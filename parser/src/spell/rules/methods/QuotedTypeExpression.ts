@@ -72,6 +72,11 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
     return match
   }
 
+  /** A question (`is`, `has`, `can` ...):  its body answers yes or no, so a last line `x is 1` asks (epic `language` T135). */
+  answersYesOrNo(_match: P.Match): boolean {
+    return true
+  }
+
   /**
    * Is `match` the quoted phrase and NOTHING more:  no `if` / `is` / `:`, no body?
    * - e.g. `- it "can move"` (epic page `outline-spell` I6)
