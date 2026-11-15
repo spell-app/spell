@@ -9,6 +9,9 @@ import { type IdentifierMatchData } from "./variables.shared"
  * - `match.data.scopeVar` is set to the scope `ScopeVariable` if known, `NONE` if not.
  * - Inside an action, `the X` naming only its thing's property is not ours -- see `namesOwnProperty()`.
  */
+/** The rules whose body is a loop's:  its variable is an argument of the loop's own scope. */
+const LOOP_RULES = new Set(["list_iteration", "list_range_iteration", "list_iteration_named_for_list", "repeat_n_times"])
+
 export class Variable extends P.Sequence<"identifier", VariableMatchData> {
   parse(scope: P.Scope, tokens: P.Token[]) {
     // `super.parse()` is typed for any rule -- we know it's ours.
@@ -32,12 +35,23 @@ export class Variable extends P.Sequence<"identifier", VariableMatchData> {
     if (match.data.scopeVar !== NONE || match.length === identifier.length) return false
     return !!P.MethodScope.thingTypeOf(scope)?.hasProperty(`${identifier.raw}`)
   }
-  /** `the X` naming a real variable (not an alias, `it` or the action's thing) may be hiding a property. */
+  /**
+   * `the X` naming a real variable (not an alias, `it` or the action's thing) may be hiding a property.
+   * - Never an action's blank:  its head names it on purpose, `to count the points for a card on a pile`,
+   *   so `the pile` is the pile passed in, quietly;  the card's own is `its pile` (Owen, 2026-11-15).
+   */
   private static warnIfHidesProperty(match: P.MatchFor<Variable>): void {
     const { identifier } = match.groups
     const { scopeVar } = match.data
     if (scopeVar === NONE || !scopeVar || scopeVar.isAlias || match.length === identifier.length) return
+    if (scopeVar.kind === "argument" && !Variable.isLoopVariable(scopeVar)) return
     MemberReadExpression.warnIfHidesProperty(match, identifier)
+  }
+
+  /** Is `scopeVar` a loop's variable (`for each pile in the piles`), not an action's blank? */
+  private static isLoopVariable(scopeVar: P.ScopeVariable): boolean {
+    const declaredBy = (scopeVar.scope as P.MethodScope).declaredBy
+    return LOOP_RULES.has(`${declaredBy?.rule.name}`)
   }
 
   /** What the variable it named holds, if known -- see `P.ScopeVariable.datatype`. */
