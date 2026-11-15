@@ -49,8 +49,11 @@ export class ClaudeStarter {
    * `undefined` when it isn't installed.
    * - The usual places matter:  a page server started from the Dock, or by another tool, may have a short `PATH`.
    * - NEVER throws
+   * - Never under Vitest, unless a test hands it `env`:  a test of the routes would start a real Claude session (I152).
    */
-  static find({ env = process.env, home = homedir(), canRun = isRunnable }: FindOptions = {}): string | undefined {
+  static find({ env, home = homedir(), canRun = isRunnable }: FindOptions = {}): string | undefined {
+    if (!env && process.env.VITEST) return undefined
+    env ??= process.env
     const onPath = (env.PATH ?? "")
       .split(delimiter)
       .filter(Boolean)
