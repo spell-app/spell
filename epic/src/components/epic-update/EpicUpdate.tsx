@@ -40,7 +40,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     a phase's plan change at the end of its description, an update to prose right after the block it changed.
  *   - Owen comments on it with its own bullhorn (`BlockAnchors.js`, kind `update`).
  * - A bare LABEL:  no summary, no date, no children.
- *   An orange `UPDATE` inline, on an item changed while a phase is active (`phase 3 done` removes it).
+ *   An orange `UPDATE` inline, on an item changed (`phase 3 done` removes a
+ *   phase's labels;  Owen's ✓ any label, I285;  on any epic, a phase under way or not, I290).
  *   Its tooltip names the phase:  `Changed during P3`.
  *   - A status change says which (`became`;  Owen, 2026-11-14, epic `epic-engine` T75):  `UPDATE : FIXED`.
  *   - Then a blue `Not in main` pill while that work is on its epic's branch alone (`unmerged`).

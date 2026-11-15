@@ -94,4 +94,24 @@ describe("StaleUnderway", () => {
     // the next tidy finds nothing new to do:  the fixed ones are no longer Underway, the stale one has its card
     expect(tidy()).toEqual([])
   })
+
+  test("found on main:  `UPDATE : FIXED` with no phase active, a short card, the commit under Commits (I290)", () => {
+    const plan = samplePlan()
+    new StaleUnderway({ plan, epic: "x", main: root, working }).apply()
+    const item = plan.item("i1")
+    // the sample page has no phase under way:  the label still comes, with no phase on it
+    const label = item.querySelector(':scope > [slot="title"] > epic-update')!
+    expect(label.getAttribute("became")).toBe("fixed")
+    expect(label.hasAttribute("phase")).toBe(false)
+    // the card (its Underway reading, then the tidy's word) says where it is in short paragraphs, never the subject
+    const card = Array.from(item.querySelectorAll(":scope > epic-status")).at(-1)!
+    const paragraphs = Array.from(card.querySelectorAll("p")).map((p) => p.textContent ?? "")
+    expect(paragraphs.slice(-2)).toEqual([
+      expect.stringMatching(/^Found on main by the end-of-turn tidy, in commit \w{9}\.$/),
+      "The commit is under this item's Commits (its git icon)."
+    ])
+    expect(card.textContent).not.toContain("the fix for I1")
+    // the commit itself under its Commits, its subject without the `x I1:  ` head
+    expect(item.querySelector(":scope > epic-commit")?.textContent?.trim()).toBe("the fix for I1")
+  })
 })

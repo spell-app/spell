@@ -3,7 +3,6 @@ import { SRV } from "spell/server"
 import { PlanCommits } from "./PlanCommits"
 import type { PlanDoc } from "./PlanDoc"
 import { PlanItem } from "./PlanItem"
-import { PlanMarkup } from "./PlanMarkup"
 import { CLOSED, UNDERWAY_CARD } from "./planDoc.types"
 
 /****************
@@ -76,7 +75,7 @@ export class StaleUnderway {
         title: PlanItem.titleOf(element),
         since: new Date(since).toISOString(),
         ageDays: Math.floor((now - since) / DAY),
-        onMain: onMain.map(({ sha, subject }) => ({ sha: sha.slice(0, 9), subject })),
+        onMain: onMain.map(({ sha, subject }) => ({ sha: sha.slice(0, 9), full: sha, subject })),
         noted: StaleUnderway.isNoted(element)
       }
     })
@@ -93,23 +92,48 @@ export class StaleUnderway {
       const label = item.id.toUpperCase()
       if (item.onMain.length) {
         const first = item.onMain[0]!
-        const evidence =
-          `Found on main by the end-of-turn tidy:  <code>${first.sha}</code> ${PlanMarkup.text(first.subject)}` +
-          (item.onMain.length > 1 ? ` (and ${item.onMain.length - 1} more)` : "")
         const reviewable = /^[ij]\d/.test(item.id)
-        if (reviewable) this.plan.fixedForReview(item.id, evidence)
-        else this.plan.noteStatus(item.id, `${evidence}.  Still open:  close it once it's checked.`)
+        if (reviewable) this.plan.fixedForReview(item.id, StaleUnderway.evidence(item))
+        else
+          this.plan.noteStatus(
+            item.id,
+            `${StaleUnderway.evidence(item)}<p>Still open:  close it once it's checked.</p>`
+          )
+        // the commits themselves under its Commits (the git icon), each subject clamped there to two lines
+        for (const commit of item.onMain)
+          if (!this.plan.hasCommit({ item: item.id }, commit.full))
+            this.plan.addCommit({ item: item.id }, commit.full, StaleUnderway.sentenceOf(commit.subject))
         lines.push(`${label} ${reviewable ? "fixed, for review" : "noted"}:  on main as ${first.sha}`)
       } else if (!item.noted) {
         this.plan.noteStatus(
           item.id,
-          `${STALE_CARD}  Underway since ${item.since.slice(0, 10)}, nobody working on it, and no commit on main ` +
-            `names it.  Claude will pick it up, or close it with a reason.`
+          `<p>${STALE_CARD}  Underway since ${item.since.slice(0, 10)}, nobody working on it, and no commit on main ` +
+            `names it.</p><p>Claude will pick it up, or close it with a reason.</p>`
         )
         lines.push(`${label} stale:  underway ${item.ageDays}d, nothing on main`)
       }
     }
     return lines
+  }
+
+  /**
+   * The card a tidy writes on an item whose work it found on `main`:  SHORT, a paragraph per fact (epic `epic-engine`
+   * I290).
+   * - the commit's sha only:  the commit itself goes under the item's Commits, its subject clamped to two lines there
+   * - Owen, 2026-11-15, on I172's card, which pasted the whole subject:  "that `done` text is waaaay to dense"
+   */
+  static evidence(item: StaleUnderwayItem): string {
+    const [first, ...rest] = item.onMain
+    const more = rest.length ? ` and ${rest.length} more` : ""
+    return (
+      `<p>Found on main by the end-of-turn tidy, in commit <code>${first!.sha}</code>${more}.</p>` +
+      `<p>The commit is under this item's Commits (its git icon).</p>`
+    )
+  }
+
+  /** A commit's line under Commits:  its subject without the `<epic> I172:  ` head, as `addCommits()` lists one. */
+  static sentenceOf(subject: string): string {
+    return PlanCommits.parseCommitSubject(subject)?.sentence || subject
   }
 
   /** `report()` as lines to read. */
@@ -198,8 +222,8 @@ export type StaleUnderwayItem = {
   /** when its Underway card was written (ISO) */
   since: string
   ageDays: number
-  /** the commits on `main` naming it or listed on it, newest first */
-  onMain: { sha: string; subject: string }[]
+  /** the commits on `main` naming it or listed on it, newest first:  `sha` short, `full` whole */
+  onMain: { sha: string; full: string; subject: string }[]
   /** a tidy's Stale card is on it already */
   noted: boolean
 }
