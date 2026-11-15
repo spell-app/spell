@@ -189,8 +189,8 @@ describe("undoable actions", () => {
 
   test("a step keeps one record for each prop and each list it changed, however often it changed them", async () => {
     await game.deal(3)
-    // three cards' faceUp, the moves, the stock and the waste
-    expect(core.RUNTIME.history.steps[0].records).toHaveLength(6)
+    // three cards' faceUp and last pile, the moves, the stock and the waste
+    expect(core.RUNTIME.history.steps[0].records).toHaveLength(9)
   })
 
   test("only an action declared undoable is recorded:  a plain write is no step", () => {
@@ -451,6 +451,162 @@ describe("the history's life", () => {
     const card = new Card({ rank: "ace" })
     card.turnOver()
     expect(card.faceUp).toBe(true)
+  })
+})
+
+describe("actions that cancel (`cancel`, epic `language` P56)", () => {
+  /**
+   * `to put a card on a pile`, as compiled spell writes it:  `cancel if ...`, then the move;
+   * a hook counting the move, `after putting a card on a pile`, in another file.
+   */
+  class Move extends Thing {
+    putOnPile(card: Card, pile: Pile, refused?: "before" | "after" | "in a hook") {
+      if (refused === "before") core.cancel()
+      pile.add(card)
+      card.turnOver()
+      if (refused === "after") core.cancel()
+    }
+    afterPutOnPile(card: Card, _pile: Pile, refused?: string) {
+      game.moves++
+      if (refused === "in a hook") core.cancel()
+      card.picked = true
+    }
+    /** `to play a card`:  it gives back what the move answered */
+    play(card: Card): unknown {
+      game.moves += 100
+      return this.putOnPile(card, game.waste)
+    }
+    static {
+      core.describeAction(this, "putOnPile", { title: "Put", undoneAs: "Move Card", cancels: true })
+      core.describeAction(this, "play", { title: "Play", undoneAs: "Play Card" })
+      core.addAfterHook(this, "putOnPile", "afterPutOnPile")
+    }
+  }
+
+  test("done:  it answers yes, its hook runs after it, and it's ONE step with its hook's changes", () => {
+    const move = new Move()
+    expect(move.putOnPile(cards[2]!, game.waste)).toBe(true)
+    expect(game.waste.items).toEqual([cards[2]])
+    expect(game.moves).toBe(1)
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Move Card"])
+    game.undo()
+    expect([game.waste.items.length, cards[2]!.faceUp, game.moves]).toEqual([0, false, 0])
+  })
+
+  test("called off after its changes:  every one put back, no step, no hook, and it answers no", () => {
+    const move = new Move()
+    expect(move.putOnPile(cards[2]!, game.waste, "after")).toBe(false)
+    expect(game.stock.items).toEqual(cards)
+    expect([game.waste.items.length, cards[2]!.faceUp, game.moves]).toEqual([0, false, 0])
+    expect(game.canUndo).toBe(false)
+  })
+
+  test("called off in its hook:  the action's changes are put back too", () => {
+    const move = new Move()
+    expect(move.putOnPile(cards[2]!, game.waste, "in a hook")).toBe(false)
+    expect([game.waste.items.length, cards[2]!.faceUp, game.moves, cards[2]!.picked]).toEqual([0, false, 0, false])
+    expect(game.canUndo).toBe(false)
+  })
+
+  test("called off inside another action:  only its own changes go back, and the caller goes on with no", () => {
+    const move = new Move()
+    class Refusing extends Move {
+      override putOnPile(card: Card, pile: Pile) {
+        return super.putOnPile(card, pile, "after")
+      }
+    }
+    expect(new Refusing().play(cards[2]!)).toBe(false)
+    expect([game.waste.items.length, cards[2]!.faceUp, game.moves]).toEqual([0, false, 100])
+    expect(core.RUNTIME.history.steps.map((step) => step.title)).toEqual(["Play Card"])
+    game.undo()
+    expect(game.moves).toBe(0)
+    expect(move.play(cards[1]!)).toBe(true)
+  })
+
+  test("one that waits:  called off after a wait, its changes before the wait go back too", async () => {
+    class Dealer extends Thing {
+      async deal() {
+        game.waste.add(cards[2]!)
+        await Promise.resolve()
+        cards[2]!.turnOver()
+        core.cancel()
+      }
+      static {
+        core.describeAction(this, "deal", { title: "Deal", undoneAs: "Deal", cancels: true })
+      }
+    }
+    expect(await new Dealer().deal()).toBe(false)
+    expect([game.waste.items.length, cards[2]!.faceUp, game.canUndo]).toEqual([0, false, false])
+  })
+
+  test("a top-level one (`core.asAction()`):  the same", () => {
+    const refused = core.asAction({ undoneAs: "Turn All", cancels: true }, () => {
+      for (const card of cards) card.turnOver()
+      core.cancel()
+    })
+    expect([refused, cards.map((card) => card.faceUp), game.canUndo]).toEqual([false, [false, false, false], false])
+  })
+
+  test("no program running:  called off, its changes go back all the same", () => {
+    core.clearRuntime()
+    const card = new Card({ rank: "ace" })
+    class Turner extends Thing {
+      turn() {
+        card.turnOver()
+        core.cancel()
+      }
+      static {
+        core.describeAction(this, "turn", { title: "Turn", undoneAs: "Turn", cancels: true })
+      }
+    }
+    expect(new Turner().turn()).toBe(false)
+    expect(card.faceUp).toBe(false)
+  })
+})
+
+describe("a thing's last list (`List.lastOwnerOf()`, epic `language` P56)", () => {
+  test("nothing before its first move;  then the list it left, kept until its next", () => {
+    const fresh = new Card({ rank: "king" })
+    const pile = new Pile()
+    pile.add(fresh)
+    expect(Pile.lastOwnerOf(fresh)).toBeUndefined()
+    game.waste.add(fresh)
+    expect(Pile.lastOwnerOf(fresh)).toBe(pile)
+    expect(Pile.lastOwnerOf(cards[0])).toBeUndefined()
+  })
+
+  test("part of the move's undo step:  undo and redo put it back", () => {
+    class Mover extends Thing {
+      move(card: Card) {
+        game.waste.add(card)
+      }
+      static {
+        core.describeAction(this, "move", { title: "Move", undoneAs: "Move" })
+      }
+    }
+    const fresh = new Card({ rank: "king" })
+    const pile = new Pile()
+    pile.add(fresh)
+    new Mover().move(fresh)
+    expect(Pile.lastOwnerOf(fresh)).toBe(pile)
+    game.undo()
+    expect([Pile.ownerOf(fresh), Pile.lastOwnerOf(fresh)]).toEqual([pile, undefined])
+    game.redo()
+    expect([Pile.ownerOf(fresh), Pile.lastOwnerOf(fresh)]).toEqual([game.waste, pile])
+  })
+
+  test("a move called off puts it back too", () => {
+    class Mover extends Thing {
+      move(card: Card) {
+        game.waste.add(card)
+        core.cancel()
+      }
+      static {
+        core.describeAction(this, "move", { title: "Move", undoneAs: "Move", cancels: true })
+      }
+    }
+    new Mover().move(cards[0])
+    expect([Pile.ownerOf(cards[0]), Pile.lastOwnerOf(cards[0]), game.canUndo]).toEqual([game.stock, undefined, false])
   })
 })
 

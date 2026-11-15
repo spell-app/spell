@@ -25,12 +25,25 @@ export const describedMethods = defineCoreModule({
     ownDescriptions(ACTIONS, Class).set(name, description)
     // `undoable as "Turn Card"`:  ONE undo step, through the run's history (C11);  `can't be undone`:  none
     const method = (Class.prototype as Record<string, unknown>)[name]
-    const { undoneAs, cantBeUndone } = description
+    const { undoneAs, cantBeUndone, cancels } = description
     const declares = undoneAs !== undefined || cantBeUndone !== undefined
     if (declares && typeof method === "function" && !UNDOABLE.has(method)) {
-      declareAction(Class, name, undoneAs !== undefined ? { undoneAs } : { cantBeUndone })
+      const info = undoneAs !== undefined ? { undoneAs } : { cantBeUndone }
+      declareAction(Class, name, cancels ? { ...info, cancels } : info, afterHooksOf(Class, name))
       UNDOABLE.add((Class.prototype as Record<string, unknown>)[name] as Function)
     }
+  },
+
+  /**
+   * Run `Class`'s member `hook` at the end of its action `name`, inside its undo step:  an after hook (epic `language` P56).
+   * - What compiled spell writes for `after putting a card on a pile`, in any file:
+   *   `core.addAfterHook(Card, "putOnPile", "afterPutOnPile")`, the hook a method of `Class` taking the action's blanks.
+   * - Each runs in the order added, the program's file order;  skipped when the action is called off (`cancel`).
+   * - Before or after the action is described:  the same list either way.
+   * - See `runActing()` (`undoing.ts`).
+   */
+  addAfterHook(Class: Function, name: string, hook: string): void {
+    afterHooksOf(Class, name).push(hook)
   },
 
   /**
@@ -69,6 +82,7 @@ Object.assign(core, describedMethods)
  * - `titleFrom`:  the name of the class's getter whose text is its title NOW, e.g. the app's `undoTitle`
  * - `replacesLast`:  the newest wins (`- a new one replaces the last one`), where a repeat is otherwise ignored
  * - `refusedWhileBusy`:  never waits its turn:  does nothing while an action runs, e.g. the app's `undo` (J2)
+ * - `cancels`:  it may `cancel`, and so answers yes or no (epic `language` P56) -- see `ActionInfo.cancels`
  */
 export type ActionDescription = {
   title: string
@@ -81,6 +95,7 @@ export type ActionDescription = {
   titleFrom?: string
   replacesLast?: boolean
   refusedWhileBusy?: boolean
+  cancels?: boolean
 }
 
 /**
@@ -93,6 +108,17 @@ export type EventDescription = {
 
 /** The methods `describeAction()` made undoable already:  a sub-class describing one again doesn't wrap it twice. */
 const UNDOABLE = new WeakSet<Function>()
+
+/** Each class's after hooks, by its action's method name:  `addAfterHook()`. */
+const AFTER_HOOKS = new WeakMap<Function, Map<string, string[]>>()
+
+/** `Class`'s after hooks of its action `name`:  the live list, made empty the first time. */
+function afterHooksOf(Class: Function, name: string): string[] {
+  const own = ownDescriptions(AFTER_HOOKS, Class)
+  let hooks = own.get(name)
+  if (!hooks) own.set(name, (hooks = []))
+  return hooks
+}
 
 /** Each class's own action descriptions, by method name. */
 const ACTIONS = new WeakMap<Function, Map<string, ActionDescription>>()

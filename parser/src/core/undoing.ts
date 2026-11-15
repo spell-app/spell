@@ -38,9 +38,9 @@
  *   - A top-level action, which has no class, runs its body through `core.asAction()` (`acting.ts`, epic `language` J149).
  * - Python's core has the same history, `undoing.py`:  both play `undoing.expected.json5` (epic `language` P54).
  */
-import { schemaOf, UndoStack, type UndoRecord } from "spell/util"
+import { CanceledError, schemaOf, UndoStack, type UndoRecord } from "spell/util"
 
-import { core } from "./core"
+import { core, recordingChanges } from "./core"
 
 /** What an action that can't be undone does to the history:  `ActionInfo.cantBeUndone`. */
 export const CantBeUndoneModes = ["keeps history", "clears history"] as const
@@ -57,7 +57,19 @@ export type ActionInfo = {
    * - `"clears history"`:  every step is forgotten once it's done, e.g. a new game
    */
   cantBeUndone?: CantBeUndone
+  /**
+   * It may `cancel` (epic `language` P56):  called off, every change it made is put back, it leaves no undo step,
+   * its after hooks don't run, and it answers no;  done, it answers yes, unless it gives back something else.
+   * - See `runActing()`.
+   */
+  cancels?: boolean
 }
+
+/**
+ * What `cancel` throws, in an action (epic `language` P56):  the action stops, and is called off -- see `runActing()`.
+ * - A `CanceledError`, so if one ever escapes an action nothing reports it.
+ */
+export class ActionCanceled extends CanceledError {}
 
 /**
  * What the Edit menu shows of an undo history:  what `App`'s `canUndo`, `undoTitle` ... read.
@@ -148,7 +160,7 @@ export class UndoHistory extends UndoStack {
    */
   override transaction<T>(title: string, run: () => T, target?: unknown): T {
     if (this.isInTransaction || this.isApplying) return super.transaction(title, run, target)
-    const notes: StepNotes = { settings: new Map(), lists: new Map() }
+    const notes: StepNotes = { settings: new Map(), lists: new Map(), kept: new Map() }
     this.notes = notes
     const done = () => {
       if (this.notes === notes) this.notes = undefined
@@ -239,6 +251,40 @@ export class UndoHistory extends UndoStack {
     change.after = after
   }
 
+  /**
+   * A value the core keeps for `target` itself (`key`) is changing from `was` to `value`, e.g. a card's last pile:
+   * recorded into the open step, unless it's left out -- as `noteSetting()`, but put back through `put`.
+   * - `noteKept()` (`core.ts`) calls it.
+   */
+  noteKept(target: object, key: string, was: unknown, value: unknown, put: (value: unknown) => void): void {
+    const { notes } = this
+    if (!notes || !this.isRecording) return
+    let byKey = notes.kept.get(target)
+    if (!byKey) notes.kept.set(target, (byKey = new Map()))
+    let kept = byKey.get(key)
+    if (!kept) {
+      byKey.set(key, (kept = new KeptRecord(put, was)))
+      this.record(kept, { title: "" })
+    }
+    kept.value = value
+  }
+
+  /**
+   * Drop the open step's records whose changes were all put back, e.g. by an action that canceled (`runActing()`):
+   * so a step that's left with none is no step, and Undo isn't lit for nothing.
+   * - Its notes forget them too:  a later change in the step is a record of its own again.
+   */
+  dropUnchangedRecords(): void {
+    const { notes } = this
+    this.dropUnchanged((record) => {
+      if (!isUnchanged(record)) return false
+      if (record instanceof SettingRecord) notes?.settings.get(record.target)?.delete(record.property)
+      else if (record instanceof ItemsRecord) notes?.lists.delete(record.list)
+      else if (record instanceof KeptRecord) for (const byKey of notes?.kept.values() ?? []) forgetRecord(byKey, record)
+      return true
+    })
+  }
+
   /** What the open step has changed so far:  `undefined` between steps. */
   private notes: StepNotes | undefined
 
@@ -263,10 +309,12 @@ export class UndoHistory extends UndoStack {
  * - SIDE EFFECT:  replaces the method on `Class.prototype`
  *   with one that runs it through the history (`UndoHistory.run()`).
  *   - A subclass that overrides it declares it again;  its `super.turnOver()` joins its step.
+ * - `info.cancels`:  it may `cancel`;  `after`:  the members of `Class` that run after it, its after hooks, in order --
+ *   a live list, so a hook added later runs too (`core.addAfterHook()`).  See `runActing()`.
  * - No program running:  the method just runs.
  * - throws `TypeError` if `name` isn't a method of `Class`, or `info` says neither kind, or both
  */
-export function declareAction(Class: Function, name: string, info: ActionInfo): void {
+export function declareAction(Class: Function, name: string, info: ActionInfo, after: readonly string[] = []): void {
   const method = (Class.prototype as Record<string, unknown>)[name]
   if (typeof method !== "function") {
     throw new TypeError(
@@ -289,14 +337,64 @@ export function declareAction(Class: Function, name: string, info: ActionInfo): 
   // named for the method, so a stack trace still says `turnOver`
   const action = {
     [name](this: object, ...args: unknown[]): unknown {
+      const hooks = after.map((member) => () => (this as Record<string, Function>)[member]!(...args))
+      const act = () => runActing(() => method.apply(this, args), { cancels: info.cancels, after: hooks })
       const history = core.RUNTIME?.history
-      return history ? history.run(info, () => method.apply(this, args)) : method.apply(this, args)
+      return history ? history.run(info, act) : act()
     }
   }[name]!
   // and as many arguments as the method's:  what reads it (the editor's Code card) knows `put it on a pile` takes one
   // (epic `editor` I62)
   Object.defineProperty(action, "length", { value: method.length })
   Object.defineProperty(Class.prototype, name, { value: action, writable: true, configurable: true })
+}
+
+/**
+ * Run `act`, an action's steps, then its after hooks (`after`), in order, as ONE action that may be called off
+ * (epic `language` P56).  Returns what `act` gives back.
+ * - `cancel` in its steps or a hook (`ActionCanceled`) calls it off:
+ *   - every change it made so far is put back as it was:  props, lists, kept values (`recordingChanges()`)
+ *   - so it leaves no undo step:  what it recorded is dropped from the open one (`dropUnchangedRecords()`)
+ *   - its after hooks don't run, or stop where they are
+ *   - it answers no:  `if put the card on the pile` reads false
+ * - Done, an action that may cancel (`cancels`) answers yes, unless it gave back something else.
+ * - Run inside its undo step (`UndoHistory.run()`):  what its hooks change is the same step.
+ * - Waits:  a hook runs once the steps before it have ended;  the action ends when the last hook has.
+ * - Neither to do:  `act` just runs, and costs nothing more.
+ * - Any other failure goes on to the caller as it was, nothing put back.
+ */
+export function runActing(act: () => unknown, { cancels, after }: { cancels?: boolean; after: (() => unknown)[] }): unknown {
+  if (!cancels && !after.length) return act()
+  const changes = recordingChanges()
+  const done = (value: unknown) => {
+    changes.close()
+    return cancels && value === undefined ? true : value
+  }
+  const calledOff = (error: unknown) => {
+    if (!(error instanceof ActionCanceled)) {
+      changes.close()
+      throw error
+    }
+    changes.putBack()
+    core.RUNTIME?.history.dropUnchangedRecords()
+    return false
+  }
+  try {
+    const result = thenEach(act(), after)
+    return isPromise(result) ? result.then(done, calledOff) : done(result)
+  } catch (error) {
+    return calledOff(error)
+  }
+}
+
+/** `value`, once each of `next` has run in turn, each waited on if it waits:  a promise if any of it waits. */
+function thenEach(value: unknown, next: readonly (() => unknown)[]): unknown {
+  if (isPromise(value)) return value.then((settled) => thenEach(settled, next))
+  for (let at = 0; at < next.length; at++) {
+    const ran = next[at]!()
+    if (isPromise(ran)) return ran.then(() => thenEach(value, next.slice(at + 1)))
+  }
+  return value
 }
 
 /**
@@ -330,6 +428,8 @@ type StepNotes = {
   settings: Map<object, Map<string, SettingRecord>>
   /** Each changed list's record. */
   lists: Map<object, ItemsRecord>
+  /** Each thing's changed kept values' records (`noteKept()`), by key. */
+  kept: Map<object, Map<string, KeptRecord>>
 }
 
 /** One prop of one thing, changed in a step:  its value before, and after. */
@@ -377,6 +477,44 @@ class ItemsRecord implements UndoRecord {
   redo(): void {
     Reflect.set(this.list, "items", [...this.after])
   }
+}
+
+/**
+ * One value the core keeps for a thing itself, changed in a step (`noteKept()`):  its value before, and after,
+ * put back through `put`, e.g. a card's last pile.
+ */
+class KeptRecord implements UndoRecord {
+  /** Its value after the step's last change. */
+  value: unknown
+
+  constructor(
+    readonly put: (value: unknown) => void,
+    /** Its value before the step's first change. */
+    readonly was: unknown
+  ) {}
+
+  undo(): void {
+    this.put(this.was)
+  }
+
+  redo(): void {
+    this.put(this.value)
+  }
+}
+
+/** Does `record`, one of this history's, change nothing in the end:  its value, or its items, as they were? */
+function isUnchanged(record: UndoRecord): boolean {
+  if (record instanceof SettingRecord || record instanceof KeptRecord) return record.value === record.was
+  if (record instanceof ItemsRecord) {
+    const { before, after } = record
+    return before.length === after.length && before.every((item, at) => item === after[at])
+  }
+  return false
+}
+
+/** SIDE EFFECT:  `byKey` forgets `record`, if it holds it. */
+function forgetRecord(byKey: Map<string, KeptRecord>, record: KeptRecord): void {
+  for (const [key, kept] of byKey) if (kept === record) byKey.delete(key)
 }
 
 /** Is `value` a promise (anything with a `then()`)? */

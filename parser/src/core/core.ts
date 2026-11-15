@@ -104,7 +104,10 @@ export function noteSetting(target: object, property: string, value: unknown): v
     const isNoted = recording?.some((change) => change.target === target && change.property === property)
     if (recording && !isNoted) recording.push({ target, property, was })
     // a thing's starting values are nothing to undo:  taking it away is, and put back blank it would stay on the page
-    if (madeThings.has(target)) core.RUNTIME?.history.noteSetting(target, property, was, value)
+    if (madeThings.has(target)) {
+      core.RUNTIME?.history.noteSetting(target, property, was, value)
+      for (const changes of changesBeingMade) changes.noteSetting(target, property, was)
+    }
     ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
     placeWrites?.setting(target, property, was, value)
   }
@@ -196,7 +199,84 @@ let changeListener: PropertyChangeListener | undefined
 export function noteItems(list: object, before: readonly unknown[], after: readonly unknown[]): void {
   if (isReadingIn) return
   core.RUNTIME?.history.noteItems(list, before, after)
+  for (const changes of changesBeingMade) changes.noteItems(list, before)
   placeWrites?.items(list, before, after)
+}
+
+/**
+ * SIDE EFFECT:  a value the core keeps for a thing itself, not one of its props, is changing from `was` to `value`:
+ * e.g. the list it was in before its latest move, `the card's last pile` (`List.lastOwnerOf()`).
+ * - `put` sets it, as undo and a cancel's put-back do:  NEVER through a prop, so no place or program elsewhere hears.
+ * - Noted for the undo history, and for every action that may `cancel` (`recordingChanges()`), as a prop's write is.
+ * - Not while it's being put back by undo or redo:  the history sets it then, through `put`.
+ */
+export function noteKept(target: object, key: string, was: unknown, value: unknown, put: (value: unknown) => void): void {
+  if (isReadingIn || was === value) return
+  core.RUNTIME?.history.noteKept(target, key, was, value, put)
+  for (const changes of changesBeingMade) changes.noteKept(target, key, was, put)
+}
+
+/**
+ * Note every change made from now on, to put back if the action that started it cancels (`cancel`, `undoing.ts`):
+ * what returns says how.
+ * - Each prop's value, each list's items and each kept value (`noteKept()`) before its first change:  only made things'.
+ * - Async:  open until `close()` or `putBack()`, so what the action does after a wait is noted too,
+ *   and what runs beside it meanwhile, as an undo step takes it in.
+ * - Nested:  each canceling action open notes the changes for itself.
+ */
+export function recordingChanges(): ChangesMade {
+  const changes = new ChangesMade()
+  changesBeingMade.push(changes)
+  return changes
+}
+
+/** The changes canceling actions have made so far, each its own:  `recordingChanges()`. */
+const changesBeingMade: ChangesMade[] = []
+
+/** What a canceling action has changed:  each prop, list and kept value as it was before its first change. */
+export class ChangesMade {
+  /** Stop noting changes.  Nothing is put back. */
+  close(): void {
+    const at = changesBeingMade.indexOf(this)
+    if (at >= 0) changesBeingMade.splice(at, 1)
+  }
+
+  /** Stop noting, and put every change back as it was:  the newest first, through the setters, so pages follow. */
+  putBack(): void {
+    this.close()
+    for (const undo of [...this.undos].reverse()) undo()
+  }
+
+  /** `target`'s `property` is changing:  its value before, if it's the first change. */
+  noteSetting(target: object, property: string, was: unknown): void {
+    this.note(target, `prop:${property}`, () => Reflect.set(target, property, was))
+  }
+
+  /** `list`'s items are changing:  its items before, if it's the first change. */
+  noteItems(list: object, before: readonly unknown[]): void {
+    const items = [...before]
+    this.note(list, "items", () => Reflect.set(list, "items", [...items]))
+  }
+
+  /** A value kept for `target` is changing (`noteKept()`):  its value before, if it's the first change. */
+  noteKept(target: object, key: string, was: unknown, put: (value: unknown) => void): void {
+    this.note(target, `kept:${key}`, () => put(was))
+  }
+
+  /** Keep `undo` for `target`'s `key`, unless one's kept already:  the first change's is the one to put back. */
+  private note(target: object, key: string, undo: () => void): void {
+    let byKey = this.keys.get(target)
+    if (!byKey) this.keys.set(target, (byKey = new Set()))
+    if (byKey.has(key)) return
+    byKey.add(key)
+    this.undos.push(undo)
+  }
+
+  /** Which of each target's values are noted already. */
+  private keys = new Map<object, Set<string>>()
+
+  /** How to put each back, in the order they were first changed. */
+  private undos: Array<() => void> = []
 }
 
 /**

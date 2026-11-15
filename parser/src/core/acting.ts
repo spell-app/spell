@@ -29,7 +29,7 @@ import { ActionQueue } from "./ActionQueue"
 import { defineCoreModule } from "./core.types"
 import { describedMethods, type ActionDescription } from "./described"
 import { chainOf, waitOf } from "./sending"
-import type { ActionInfo } from "./undoing"
+import { ActionCanceled, runActing, type ActionInfo } from "./undoing"
 
 /** The ways an action is run, for whoever listens:  a key, a click on a button or menu item, or code. */
 export type ActionWay = "key" | "click" | "menu" | "code"
@@ -240,11 +240,23 @@ export const actingMethods = defineCoreModule({
    * - What compiled spell writes for an action outside any type (`to deal the cards`, epic `language` J149):
    *   a type's is declared on its class instead (`describeAction()`), which a function has none of.
    * - As a declared action runs (`UndoHistory.run()`):  one it's called by takes it in, its step and all.
+   * - `cancels`:  it may `cancel` -- see `cancel()`.
    * - No program running:  `act` just runs.
    */
   asAction<T>(info: ActionInfo, act: () => T): T {
+    const acting = () => runActing(act, { cancels: info.cancels, after: [] }) as T
     const history = core.RUNTIME?.history
-    return history ? history.run(info, act) : act()
+    return history ? history.run(info, acting) : acting()
+  },
+
+  /**
+   * Call off the action running, compiled from `cancel` (epic `language` P56):  `if (!core.canTake(pile, this)) core.cancel()`.
+   * - Every change it made is put back, it leaves no undo step, its after hooks don't run, and it answers no:
+   *   see `runActing()` (`undoing.ts`).
+   * - Throws `ActionCanceled`, which the action catches:  NEVER returns.
+   */
+  cancel(): never {
+    throw new ActionCanceled("canceled")
   },
 
   /**
