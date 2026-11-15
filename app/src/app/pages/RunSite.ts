@@ -88,13 +88,15 @@ export class RunSite implements SiteHost {
   }
 
   /**
-   * The project's file declaring the site's `page`, other than the site file:
+   * The file of `project` (default:  the editor's) declaring the site's `page`, other than the site file:
    * - a page alone in its file (`"Home" is a page`), by its class
    * - else the file declaring it by its name (`Systems is a page`, whose class is `System`)
+   * - The ONE lookup of a site page's file:  Run's URL (`fileAt()`), Run's Edit and the notebook
+   *   (`editor.pageFileAt()`;  epic `mockup` I16).
    */
-  private static fileHolding(page: RunningSitePage): SP.AnySpellFile | undefined {
-    const file = editor.project?.fileForPage(page.page) ?? SiteWrites.declaringFile(page.name)
-    return file && file !== SiteWrites.siteFile() ? file : undefined
+  static fileHolding(page: RunningSitePage, project = editor.project): SP.AnySpellFile | undefined {
+    const file = project?.fileForPage(page.page) ?? SiteWrites.declaringFile(page.name, project)
+    return file && file !== SiteWrites.siteFile(project) ? file : undefined
   }
 
   /**

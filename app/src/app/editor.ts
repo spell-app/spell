@@ -14,7 +14,7 @@ import type { monaco, EditWay } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
-import { runSite } from "spell/app/app/pages/RunSite"
+import { RunSite, runSite } from "spell/app/app/pages/RunSite"
 import { THEME_PAGE, siteEditorUrlFor } from "spell/app/app/pages/pages.types"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
@@ -610,15 +610,19 @@ export class EditorStore extends Observable {
     return (appRuntime as unknown as { core: { RUNTIME?: { site?: RunningSite } } } | undefined)?.core.RUNTIME?.site
   }
 
-  /** The file of the page the running site is showing, when it's alone in its file. */
-  pageShownInSite(): SP.SpellFile | undefined {
+  /** The file of the page the running site is showing:  `editor.pageFileAt()`. */
+  pageShownInSite(): SP.AnySpellFile | undefined {
     return editor.project && editor.pageFileAt(editor.project, runSite.address())
   }
 
-  /** The file of the page at site address `address` of `project`, when it's alone in its file. */
-  pageFileAt(project: SP.SpellProject, address: string): SP.SpellFile | undefined {
+  /**
+   * The file of `project` holding the running site's page at `address`, for Run's Edit and the notebook:
+   * - by its class, else by its name in the site file (`Systems is a page`, class `System`;  epic `mockup` I16)
+   * - the same lookup as Run's URL (`RunSite.fileHolding()`);  none for a page declared in the site file
+   */
+  pageFileAt(project: SP.SpellProject, address: string): SP.AnySpellFile | undefined {
     const entry = editor.runningSite?.pageFor(address)?.entry
-    return entry && project.fileForPage(entry.page)
+    return entry && RunSite.fileHolding(entry, project)
   }
 
   /**

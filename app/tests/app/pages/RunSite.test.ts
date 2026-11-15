@@ -42,6 +42,7 @@ describe("RunSite, a page in its own file", () => {
   const files = {
     home: { path: "owen@spell/harbor-new/home.spell" },
     systems: { path: "owen@spell/harbor-new/systems.spell" },
+    film: { path: "owen@spell/harbor-new/film.spell" },
     site: { path: "owen@spell/harbor-new/HarborNew.site.spell" }
   }
   /** harbor-new's site:  Home alone in `home.spell`;  Systems, class `System`, declared in `systems.spell`. */
@@ -54,7 +55,7 @@ describe("RunSite, a page in its own file", () => {
   const project = {
     path: "owen@spell/harbor-new",
     getFile: (path: string) => Object.values(files).find((file) => file.path === path),
-    fileForPage: (className: string) => (className === "Home" ? files.home : undefined)
+    fileForPage: (className: string) => ({ Home: files.home, Film: files.film })[className]
   }
 
   /** A Run of harbor-new's site, as the editor and the site file tell it. */
@@ -102,5 +103,20 @@ describe("RunSite, a page in its own file", () => {
     run.heard("/", files.systems.path)
     running.mockReturnValue(true)
     expect(run.address()).toBe("/hardware/systems")
+  })
+
+  test("Edit in Run and the notebook open the same file as its Run URL, a page named apart from its class too", () => {
+    runningHarbor()
+    vi.spyOn(editor as never as { runningSite: unknown }, "runningSite", "get").mockReturnValue({
+      pageFor: (address: string) => {
+        const entry = editor.sitePageAt(address)
+        return entry && { entry }
+      },
+      allPages: () => pages
+    })
+    expect(editor.pageFileAt(project as never, "/")).toBe(files.home)
+    expect(editor.pageFileAt(project as never, "/hardware/systems")).toBe(files.systems)
+    expect(editor.pageFileAt(project as never, "/films/4")).toBe(files.film)
+    expect(editor.pageFileAt(project as never, "/settings")).toBeUndefined()
   })
 })
