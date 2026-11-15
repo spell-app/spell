@@ -1,5 +1,6 @@
 import { isInstantDue } from "spell/epic/review/review.types"
 
+import type { PlanDoc } from "./PlanDoc"
 import { PlanDocFiles } from "./PlanDocFiles"
 import { PlanItem } from "./PlanItem"
 import { ReviewInbox } from "./ReviewInbox"
@@ -19,7 +20,8 @@ import type { MarkResult, PlanMark } from "./planDoc.types"
  *   from the inbox, each only while it's still the mark applied (`clearApplied()`)
  *   - so the item, the section and the page every viewer has change at once:  the page server's live update carries
  *     the edit;  the log keeps a line per mark, as `apply`'s
- * - A test's mark is never applied here, nor an item gone from the page (cleared, as `apply` clears it).
+ * - A test's mark is never applied here;  an item gone from the page clears its mark, as `apply` does.
+ * - A dry run first:  the page is written only when a mark applies, so a mark that can't (left) never rewrites it.
  * - The review routes call it after a mark is set and on an inbox read (`reviewRoutes.ts`), loading it lazily:
  *   it brings `PlanDoc` with it, which the routes otherwise never load.
  ****************/
@@ -36,14 +38,16 @@ export class InstantMarks {
     const due = InstantMarks.dueIn(ReviewInbox.read(path), now)
     if (!due.length) return []
     const files = new PlanDocFiles({ root })
-    const results = await files.edit(file, (plan) =>
+    const applyAll = (plan: PlanDoc) =>
       due.flatMap((mark): AppliedInstant[] => {
         const item = plan.findItem(mark.id)
         // a test's ✓ is its own (a test run's answer):  left for the session
         if (item && PlanItem.kindOfItem(item) === "test") return []
         return [{ mark, ...plan.applyMark(mark as PlanMark) }]
       })
-    )
+    // a dry run on a parsed copy first, as `inbox apply`'s:  the page is written only when something applies
+    const planned = applyAll(files.read(file))
+    const results = planned.some((each) => each.applied) ? await files.edit(file, applyAll) : planned
     const cleared = results.filter((each) => each.applied || each.gone).map((each) => each.mark)
     if (cleared.length) ReviewInbox.update(path, (box) => box.clearApplied(cleared))
     return results
