@@ -167,9 +167,11 @@ export const APP_TEXTS = {
   nothingToPublish: "Nothing to publish:  no file has a draft.",
   publishClashHeading: "Published since your draft began",
   publishClashMessage:
-    "Someone published these files after you started your draft.\nTheirs is on the left, yours on the right.",
+    "Someone published these files after you started your draft.\nTo take one of their changes, click its arrow;  ⌘Z puts yours back.\nPublish sends out Your Changes as they are then.",
+  publishClashTheirs: "Current Published Version",
+  publishClashMine: "Your Changes",
   publishStartAgain: "Start Again from Theirs",
-  publishAnyway: "Publish Mine Anyway",
+  publishMerged: "Publish",
   noVersions: "No versions yet:  each Publish keeps one.",
   versionsMessage:
     "Each time you publish, Spell keeps a copy of your whole project.\nPick one to bring it back as your draft:\nit replaces changes you haven't published yet.\nWhat everyone sees stays the same until you click Publish, and it stays in this list.\nTo keep your changes first, click Save Current Changes:\nthey're added to the list as your draft, and only you see them.",

@@ -2,5 +2,26 @@
 .PublishClash .DiffView {
   height: 40vh;
   border: 1px solid var(--ui-border-color, #8884);
-  border-radius: 6px;
+  border-radius: 0 0 6px 6px;
+}
+
+/* the two sides' headers, each over its half of the diff (Monaco splits it in half) */
+.PublishClash .PublishClashSides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--ui-border-color, #8884);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+
+.PublishClash .PublishClashSides h5 {
+  margin: 0;
+  padding: 0.4em 0.75em;
+  font-weight: 600;
+}
+
+/* the right side's the one you publish:  its header says so in the primary colour */
+.PublishClash .PublishClashSides h5 + h5 {
+  border-left: 1px solid var(--ui-border-color, #8884);
+  color: var(--ui-primary-color, currentColor);
 }

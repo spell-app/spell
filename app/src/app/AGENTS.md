@@ -142,7 +142,8 @@ and in the app's build folder, `app/` at the app folder's root.
     - The text stays ordinary text:  its pieces are decorations in the sheet's classes, room round a pill is injected
       text, the shapes a layer behind the editor, the room under a declaration a view zone.
     - On by default;  the code pane's "..." menu, "Settings…", "Bubbly look" turns it off (`codeLook`, `codePopups.ts`).
-    - Not in a diff, or a page file.
+    - Not in a page file.
+    - Both sides of a diff too (Publish's `<DiffView>`, epic `editor` T75):  Monaco lines them up round its view zones.
     - A `<CodeSlice>` (the Inspector's Code card) is drawn too (`SpellBubbly.showSlice()`, epic `editor` T72):
       only what's wholly in its lines, so the action whose body it shows draws no band or rail cut off at its edges.
     - An HTML file (a property editor page, `Card.editor.html`) is drawn as the drawn-bubbly page draws HTML:

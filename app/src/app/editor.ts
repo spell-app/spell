@@ -1328,7 +1328,7 @@ export class EditorStore extends Observable {
    * Publish:  your drafts of current `project` become its public files, and the project is kept as a new version.
    * - Your latest edits are saved first, so they're in your draft:  never a locked page's (`saveAll()`, `isLocked()`).
    * - A published file changed since your draft began (Q25):  both side by side first, `<PublishClash>`,
-   *   to publish yours anyway or start again from theirs.
+   *   to publish yours, with what you took from theirs block by block (T75), or start again from theirs.
    * - NEVER throws:  a failure is shown.
    */
   async publish(): Promise<void> {
@@ -1340,22 +1340,42 @@ export class EditorStore extends Observable {
       const { drafts } = await files.drafts()
       if (!drafts.length) return editor.showNotice(appTexts.text("nothingToPublish"))
       const clashes = drafts.filter((draft) => draft.clashes)
+      let taken: string[] = []
       if (clashes.length) {
         const { openPublishClash } = await dialogs()
         const answer = await openPublishClash(clashes)
         if (!answer) return
-        if (answer === "theirs") {
+        if (answer.choice === "theirs") {
           for (const { filePath } of clashes) await files.discard(filePath)
           return await editor.reloadFiles(clashes.map(({ filePath }) => filePath))
         }
+        taken = await editor.saveMerged(project, answer.merged)
       }
       const { published, version } = await files.publish({ anyway: clashes.length > 0 })
+      if (taken.length) await editor.reloadFiles(taken)
       editor.showNotice(appTexts.text("published", { count: published.length, version: version ?? "" }))
     } catch (error) {
       editor.showError(error)
     } finally {
       await editor.refreshDrafts()
     }
+  }
+
+  /**
+   * Save each file of `merged` (by file path) whose text isn't your draft's:  what `<PublishClash>` took from theirs.
+   * - Returns those files' paths, to read again once they're published (`reloadFiles()`).
+   * - throws if a save does
+   */
+  private async saveMerged(project: SP.SpellProject, merged: Map<string, string>): Promise<string[]> {
+    const taken: string[] = []
+    for (const [filePath, text] of merged) {
+      const file = project.getFile(filePath)
+      if (!file || file.contents === text) continue
+      editor.forgetWaitingKeep(file)
+      await file.save({ contents: text })
+      taken.push(filePath)
+    }
+    return taken
   }
 
   /**

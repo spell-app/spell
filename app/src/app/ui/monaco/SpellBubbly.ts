@@ -42,7 +42,8 @@ import "spell/app/app/components/spell-code/bubbly.css"
  *   - its model is Spell, not a page file (`SP.formOfText()`);  a notebook example's code is drawn, as it's Spell
  *   - or it's an HTML file (`.html`):  drawn as the drawn-bubbly page draws HTML (`MarkupMarks`), the box a
  *     `.bubbly-html` too, so the sheet's HTML settings reach it
- *   - it isn't one side of a diff, whose lines must line up
+ *   - either side of a diff too (`<DiffView>`, epic `editor` T75):  Monaco's diff editor lines its two sides up
+ *     round each side's own view zones, and the taller lines are the same on both
  * - A `<CodeSlice>`'s editor, a few lines of a file alone, is drawn too (`showSlice()`, epic `editor` T72):
  *   only what's wholly in its lines;  the declaration whose body it shows draws nothing of its own.
  * - NEVER throws:  a layout that fails leaves the code as Monaco colours it, and logs why.
@@ -159,7 +160,7 @@ export class SpellBubbly {
   private shouldDraw(): boolean {
     const { editor } = this
     const model = editor.getModel()
-    if (!codeLook.isBubbly || !model || editor.getOption(monaco.editor.EditorOption.inDiffEditor)) return false
+    if (!codeLook.isBubbly || !model) return false
     if (isMarkupFile(model)) return true
     return this.languages.includes(model.getLanguageId()) && SP.formOfText(model.getValue()) !== "page"
   }

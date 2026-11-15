@@ -173,9 +173,11 @@ const APP_TEXTS_ES: AppTextPack = {
   nothingToPublish: "Nada que publicar:  ningún archivo tiene borrador.",
   publishClashHeading: "Publicado después de empezar tu borrador",
   publishClashMessage:
-    "Alguien publicó estos archivos después de que empezaras tu borrador.\nLo suyo a la izquierda, lo tuyo a la derecha.",
+    "Alguien publicó estos archivos después de que empezaras tu borrador.\nPara quedarte con uno de sus cambios, haz clic en su flecha;  ⌘Z devuelve el tuyo.\nPublicar envía Tus cambios tal como estén.",
+  publishClashTheirs: "Versión publicada ahora",
+  publishClashMine: "Tus cambios",
   publishStartAgain: "Empezar de nuevo desde lo suyo",
-  publishAnyway: "Publicar lo mío de todos modos",
+  publishMerged: "Publicar",
   noVersions: "Aún no hay versiones:  cada Publicar guarda una.",
   versionsMessage:
     "Cada vez que publicas, Encanto guarda una copia de todo tu proyecto.\nElige una para traerla de vuelta como tu borrador:\nreemplaza los cambios que aún no has publicado.\nLo que ven todos no cambia hasta que hagas clic en Publicar, y sigue en esta lista.\nPara guardar tus cambios antes, haz clic en Guardar los cambios actuales:\nse añaden a la lista como tu borrador, y solo tú los ves.",
