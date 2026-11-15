@@ -99,8 +99,8 @@ export type SpacerKind =
   | "tag-head"
   | "tag-foot"
   | "tag-foot-bare"
-  | "attribute"
   | "equals"
+  | "closing-slash"
   | "description"
 
 /** The class on every piece of text the look draws:  its ink, under any token's colour. */

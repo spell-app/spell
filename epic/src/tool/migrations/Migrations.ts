@@ -12,6 +12,7 @@ import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
 import { ToReviewMarks } from "./ToReviewMarks"
 import { TookAsMinutes } from "./TookAsMinutes"
+import { UpdateLabels } from "./UpdateLabels"
 import { UpdatesSaidByMarks } from "./UpdatesSaidByMarks"
 import { WholePhaseNumbers } from "./WholePhaseNumbers"
 import type { Migration, MigrationContext } from "./migrations.types"
@@ -54,7 +55,8 @@ export class Migrations {
     new LogCommits(),
     new OwensAnswersSeen(),
     new AgentsMarked(),
-    new ItemBodies()
+    new ItemBodies(),
+    new UpdateLabels()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

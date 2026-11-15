@@ -387,6 +387,11 @@ export const epicItemVocabulary = {
     },
     { key: "stateFixed", text: "Claude fixed it:  your turn to review", description: "Id chip tooltip, `fixed`." },
     {
+      key: "stateCommentReplied",
+      text: "Claude answered your comment:  your turn (✓ closes it)",
+      description: "Id chip tooltip, orange for a comment in it Claude answered last (epic `epic-engine` I284)."
+    },
+    {
       key: "stateRequested",
       text: "Claude finished what you asked:  your turn to see it",
       description: "Id chip tooltip, `state=requested` (light orange)."

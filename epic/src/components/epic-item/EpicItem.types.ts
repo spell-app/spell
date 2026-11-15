@@ -120,6 +120,11 @@ export type LiveReview = {
   urgency?: { calm: boolean }
   /** his check pressed (an `approve` mark), not applied yet */
   approved: boolean
+  /**
+   * his turn on a comment in it:  Claude spoke last on its thread (`ReviewClient.hasRepliedComments()`, epic
+   * `epic-engine` I284);  missing:  none
+   */
+  commentsReplied?: boolean
 }
 
 /** No live review:  outside a review, or a server render. */
@@ -132,6 +137,9 @@ export const NO_LIVE_REVIEW: LiveReview = { workedOn: false, approved: false }
  * - Claude's agent at work on it (the inbox's `working`):  `progress` (blue), at once, before the tool rewrites `state`
  * - Owen's urgency, not applied yet:  `calmState()` when not urgent, `attention` (red) when urgent, at once
  * - else `state` as the tool wrote it, else by its status (`STATUS_STATES`), greyed with age (`ItemAge`)
+ * - his turn on a comment in it (`commentsReplied`, epic `epic-engine` I284):  `replied`, orange, unless it's red or
+ *   blue already (Owen, 2026-11-15:  "I had several comments in this thread that are still open -- the pill should be
+ *   orange")
  * - his check pressed, not applied yet:  a green one grey at once
  * - NEVER reads the page:  the caller hands it the fields and the live review, tracked or not
  */
@@ -148,6 +156,8 @@ export class DrawnState {
       fields.reviewed,
       now
     )
+    // his turn on a comment in it:  orange, whatever it is, but red (needs him anyway) or blue (Claude at it)
+    if (live.commentsReplied && shown !== "attention" && shown !== "progress") return "replied"
     return (shown === "recent" || shown === "requested") && live.approved ? "old" : shown
   }
 

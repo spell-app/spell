@@ -245,6 +245,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return MANUAL_TEST.test(this.domElement.id) && this.itemState() === "replied"
   }
 
+  /** Orange for Owen's turn on a comment in it (`LiveReview.commentsReplied`, I284):  its tooltip says so. */
+  private get isCommentTurn(): boolean {
+    return this.itemState() === "replied" && !!this.reviewState.liveOf().commentsReplied
+  }
+
   /** Its attributes its drawn state reads (`DrawnState.of()`), tracked. */
   private stateFields(): StateFields {
     const { id, state, status, changed, reviewed, queued, working, urgent, fixed } = this
@@ -410,7 +415,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           ? "stateFixed"
           : this.isWaitingTest
             ? "stateTestWaiting"
-            : STATE_TIP_KEYS[aged ? "recent" : this.itemState()]
+            : this.isCommentTurn
+              ? "stateCommentReplied"
+              : STATE_TIP_KEYS[aged ? "recent" : this.itemState()]
       )
     ]
     const mark = this.chipMark()
