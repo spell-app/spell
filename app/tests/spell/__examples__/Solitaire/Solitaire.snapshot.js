@@ -1,4 +1,4 @@
-import { core, List, App, TwoSidedView, ViewableList, h, positionOf, spellPosition, position } from "@spell/core"
+import { core, List, App, View, TwoSidedView, ViewableList, h, positionOf, spellPosition, position } from "@spell/core"
 
 /** A card says what its rank, suit and color are:  a deck, a pile or the game only reads them. */
 // A playing card
@@ -61,21 +61,12 @@ export class Card extends TwoSidedView {
     return letter + this.symbol + arrow
   }
 
-  /** Its face:  https://www.compart.com/en/unicode/block/U+1F0A0 */
-  get picture() {
-    let column = this.value
-    if (this.suit === "clubs") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column))
-    if (this.suit === "diamonds") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column))
-    if (this.suit === "hearts") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column))
-    return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(column))
-  }
-
   drawFront() {
-    return h("ui-text", { color: () => this.color, part: "front" }, () => this.picture)
+    return h("test-project-card-image", { card: this, part: "front" })
   }
 
   drawBack() {
-    return h("ui-text", { color: "blue", part: "back" }, "🂠")
+    return h("test-project-card-image", { direction: () => "down", part: "back" })
   }
 
   /** the card the next one goes on */
@@ -129,7 +120,7 @@ export class Card extends TwoSidedView {
 core.describeAction(Card, "play", { title: "Play Card", undoneAs: "Play Card" })
 core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Move Card" })
 core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Points for Card on Pile", undoneAs: "Count the Points for Card on Pile" })
-// It's a two sided view:  face up it shows its picture, face down the back every card shares.
+// It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
 // On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 // Ace is low:  ace = 1 ... king = 13
 
@@ -137,7 +128,66 @@ core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Poi
 
 // identifying a card
 
-// One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+/** Give it a card to draw, or a rank and a suit:  `<card-image card={the card} />`, `<card-image rank=ace suit={its suit} />`. */
+// A card's picture:  the one place a card's look lives
+export class CardImage extends View {
+  static elementTag = core.defineElement(this, "test-project")
+
+  /**
+   * It's face up, unless it's `direction=down`:  then it's the back every card shares.
+   * Today it's one letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+   * Real pictures of the cards can take its place:  only its picture and `to draw it` change.
+   */
+  // - its "card" is a card
+  static { this.declareProp("card", { type: "Card" }) }
+  get card() { return this.getProp("card") }
+  set card(value) { this.setProp("card", value) }
+
+  // - its "rank" is a card rank
+  static { this.declareProp("rank", { oneOf: () => Card.Ranks }) }
+  get rank() { return this.getProp("rank") }
+  set rank(value) { this.setProp("rank", value) }
+
+  // - its "suit" is a card suit
+  static { this.declareProp("suit", { oneOf: () => Card.Suits }) }
+  get suit() { return this.getProp("suit") }
+  set suit(value) { this.setProp("suit", value) }
+
+  // - its "direction" is up or down
+  static Directions = ["up", "down"]
+  static { this.declareProp("direction", { oneOf: CardImage.Directions }) }
+  get direction() { return this.getProp("direction") }
+  set direction(value) { this.setProp("direction", value) }
+
+  isFaceDirection(direction) {
+    return this.direction === direction
+  }
+
+  /** the card it draws:  its card, else one of its rank and suit */
+  get face() {
+    if (this.card !== undefined) return this.card
+    return new Card({ rank: this.rank, suit: this.suit })
+  }
+
+  get color() {
+    if (this.isFaceDirection("down")) return "blue"
+    return this.face.color
+  }
+
+  /** Its letter:  https://www.compart.com/en/unicode/block/U+1F0A0 */
+  get picture() {
+    if (this.isFaceDirection("down")) return "🂠"
+    let column = this.face.value
+    if (this.face.suit === "clubs") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(column))
+    if (this.face.suit === "diamonds") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(column))
+    if (this.face.suit === "hearts") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(column))
+    return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(column))
+  }
+
+  draw() {
+    return h("ui-text", { color: () => this.color }, () => this.picture)
+  }
+}
 
 export function testCardSetup() {
   return core.test("test card setup", function testCardSetup() {
@@ -159,7 +209,6 @@ export function testCardSetup() {
     core.expect(it2.rank === 2, `it is a 2`, false, `no`)
     core.expect(it2.isTheRankOfSuit("queen", "spades"), `it is the queen of spades`, true, `yes`)
     core.expect(it2.isTheRankOfSuit("queen", "clubs"), `it is the queen of clubs`, false, `no`)
-    core.expect(it2.picture, `its picture`, "🂭", `"🂭"`)
 
     core.echoTestAction(`turn it over`)
     it2.turnOver()
@@ -170,9 +219,32 @@ export function testCardSetup() {
     const seven = new Card({ rank: 7, suit: "hearts" })
     core.expect(seven.isANumberCard, `seven is a number card`, true, `yes`)
     core.expect(seven.color, `the color of seven`, "red", `red`)
+  })
+}
+
+export function testCardImages() {
+  return core.test("test card images", function testCardImages() {
+    const it = new CardImage()
+    core.echoTestAction(`set queen to a new card whose rank is queen, suit is spades and direction is down`)
+    const queen = new Card({
+      rank: "queen",
+      suit: "spades",
+      direction: "down"
+    })
+    core.echoTestAction(`get a new card image whose card is queen`)
+    const it2 = new CardImage({ card: queen })
+    core.expect(it2.picture, `its picture`, "🂭", `"🂭"`)
+    core.expect(it2.color, `its color`, "black", `black`)
+    core.echoTestAction(`set seven to a new card image whose rank is 7 and suit is hearts`)
+    const seven = new CardImage({ rank: 7, suit: "hearts" })
     core.expect(seven.picture, `the picture of seven`, "🂷", `"🂷"`)
-    core.expect((new Card({ rank: "ace", suit: "clubs" })).picture, `the picture of a new card whose rank is ace and suit is clubs`, "🃑", `"🃑"`)
-    core.expect((new Card({ rank: "king", suit: "diamonds" })).picture, `the picture of a new card whose rank is king and suit is diamonds`, "🃎", `"🃎"`)
+    core.expect(seven.color, `the color of seven`, "red", `red`)
+    core.expect((new CardImage({ rank: "ace", suit: "clubs" })).picture, `the picture of a new card image whose rank is ace and suit is clubs`, "🃑", `"🃑"`)
+    core.expect((new CardImage({ rank: "king", suit: "diamonds" })).picture, `the picture of a new card image whose rank is king and suit is diamonds`, "🃎", `"🃎"`)
+    core.echoTestAction(`get a new card image whose direction is down`)
+    const it3 = new CardImage({ direction: "down" })
+    core.expect(it3.picture, `its picture`, "🂠", `"🂠"`)
+    core.expect(it3.color, `its color`, "blue", `blue`)
   })
 }
 // -----------
@@ -352,7 +424,7 @@ export class Foundation extends Pile {
 
   /** a light grey ace of its suit, face up */
   drawItsPlaceholder() {
-    return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
+    return h("test-project-card-image", { rank: () => "ace", "prop:suit": () => this.suit, part: "placeholder" })
   }
 
   canTake(card) {
@@ -666,11 +738,12 @@ export function testTheMoves() {
   })
 }
 // -----------
-core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitaire.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its layout (<solitaire-column layout="vertical">), each card in it by its place:¬     --index from 0, of --count;  an empty pile's placeholder by its part, ::part(placeholder). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitaire-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[layout] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[layout]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[layout] > *,¬[layout]::part(placeholder) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitaire-card:not([layout] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[layout] > *,¬solitaire-card,¬[layout]::part(placeholder) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Card.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[layout] > *,¬solitaire-card {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[layout] > *::part(front),¬[layout] > *::part(back),¬solitaire-card::part(front),¬solitaire-card::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Turning over and moving ease, as a card is turned and slid */¬[layout] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬@media (prefers-reduced-motion: reduce) {¬  [layout] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[layout]::part(placeholder) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[layout]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[layout]:state(accepting-drop) > :last-child,¬[layout]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The layouts:  stacked puts every card on top of the one before;  vertical, each a step below it */¬[layout="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[layout="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitaire.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its layout (<solitaire-column layout="vertical">), each card in it by its place:¬     --index from 0, of --count;  an empty pile's placeholder by its part, ::part(placeholder). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitaire-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[layout] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[layout]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[layout] > *,¬[layout]::part(placeholder) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitaire-card:not([layout] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[layout] > *,¬solitaire-card,¬[layout]::part(placeholder) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Card.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[layout] > *,¬solitaire-card {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[layout] > *::part(front),¬[layout] > *::part(back),¬solitaire-card::part(front),¬solitaire-card::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Turning over and moving ease, as a card is turned and slid */¬[layout] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬@media (prefers-reduced-motion: reduce) {¬  [layout] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt, whatever the card image's own ink */¬[layout]::part(placeholder) {¬  color: #d8f0e0;¬  --ui-red-text: currentColor;¬  --ui-black-text: currentColor;¬  --ui-blue-text: currentColor;¬  opacity: 0.4;¬}¬[layout]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[layout]:state(accepting-drop) > :last-child,¬[layout]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The layouts:  stacked puts every card on top of the one before;  vertical, each a step below it */¬[layout="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[layout="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
 // -----------
 if (!core.isCarryingOver) solitaire.start()
 // -----------
 if (!core.isCarryingOver) testCardSetup()
+if (!core.isCarryingOver) testCardImages()
 if (!core.isCarryingOver) testPiles()
 if (!core.isCarryingOver) testANewDeck()
 if (!core.isCarryingOver) testTheMoves()

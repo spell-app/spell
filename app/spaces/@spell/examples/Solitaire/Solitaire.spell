@@ -189,7 +189,7 @@ a "foundation" is a pile with layout "stacked"		-- Where a suit is built up, ace
 		return its suit is the suit of the card and
 		  its value + 1 is the value of the card
 	to draw its placeholder			-- a light grey ace of its suit, face up
-		<text>{the picture of a new card whose rank is ace and suit is its suit}</text>
+		<card-image rank=ace suit={its suit} />
 
 a "column" is a pile with layout "vertical"			-- A column, built down from king to ace, red and black in turn
 	its cards are draggable when the card is face up
