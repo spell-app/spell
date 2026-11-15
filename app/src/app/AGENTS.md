@@ -168,6 +168,11 @@ and in the app's build folder, `app/` at the app folder's root.
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step
+  - A drawing's attribute value switches between text and code as it's typed ([CodeOrTextTyping](ui/monaco/CodeOrTextTyping.ts),
+    epic `editor` T74):  a `{` typed in `color="blue"` makes it `color={blue}`;  a `"` typed right after a code value's
+    `{` makes it text again;  one undo leaves the character typed
+    - the right-click menu's Refactor… and the light bulb do it too, "Make it code" / "Make it text"
+      (`LSP.CodeOrText`, which both ask, so VS Code has them as well)
   - An error shows its message on a plain hover over its squiggle, though the hover info waits for ⌥
     ([ErrorHover](ui/monaco/ErrorHover.ts), epic `editor` I97)
   - Rename Symbol (F2) renames an action as the Inspector's Code card does, its calls and buttons too, one undo,

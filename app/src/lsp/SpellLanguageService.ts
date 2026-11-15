@@ -2293,6 +2293,7 @@ export class SpellLanguageService {
    * - NOT for a line that's just unfinished, e.g. `set x to` -- see `isUnfinished()`.
    * - Goes just above the top-level statement the line is in, as a method is only visible to lines AFTER it.
    * - See `methodSignatureFor()` for how the words become a signature.
+   * - And "Make it code" / "Make it text" on the attribute value the caret is in (`codeOrText()`, epic `editor` T74).
    */
   codeActions(file: SP.SpellFile, range: Range): CodeAction[] {
     if (!file.match) return []
@@ -2327,7 +2328,27 @@ export class SpellLanguageService {
         edit: { changes: { [this.addresses.uriFor(file)]: [{ range: { start: position, end: position }, newText }] } }
       })
     }
+    const switched = this.codeOrText(file, from)
+    if (switched) actions.push(switched)
     return actions
+  }
+
+  /**
+   * "Make it code" on a drawing's attribute value the caret is in, `color="blue"` => `color={blue}`;
+   * "Make it text" on code, back (epic `editor` T74):  in the right-click menu's Refactor and the light bulb.
+   * - `undefined` outside a value, or for one whose words can't switch (`LSP.CodeOrText.switched()`).
+   */
+  private codeOrText(file: SP.SpellFile, offset: number): CodeAction | undefined {
+    const text = file.parseText
+    const value = LSP.CodeOrText.valueAt(text, offset)
+    const newText = value && LSP.CodeOrText.switched(text, value)
+    if (!value || newText === undefined) return undefined
+    const range = { start: this.positionAt(file, value.start), end: this.positionAt(file, value.end) }
+    return {
+      title: LSP.LspTexts.of(this.scopeAt(file, offset)).text(value.kind === "text" ? "makeItCode" : "makeItText"),
+      kind: CodeActionKind.RefactorRewrite,
+      edit: { changes: { [this.addresses.uriFor(file)]: [{ range, newText }] } }
+    }
   }
 
   /**
