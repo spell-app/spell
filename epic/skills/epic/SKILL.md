@@ -507,6 +507,11 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
   between steps;  the claims and turns below still hold when Codex sub-agents share the worktree.
 - The session itself, within seconds:
   - answers them, files their requests as items, decides, and relays
+    - a request it takes up at once is filed STARTED, blue, never red as if it waited on them (epic `epic-engine`
+      T78;  Owen, 2026-11-15:  "you should start the issue and show it appropriately"):
+      `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>`, after `epic agents add`
+      - their words become its body, quoted;  an Underway card names the agent;  the spinner goes on
+      - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
   - passes their redirects on to the agent doing that work (`SendMessage`)
   - relays what an agent found, its first line bold, by itself:  `**Agent <full name> came back with:**`
   - keeps the inbox listener open the whole time (7, "This session LISTENS")
@@ -1592,6 +1597,19 @@ Close the open judgement calls, issues and todos that other work has made obsole
 No `<epic>`:  this session's epic.
 Only when the person (or that epic's session) asks:  it never starts by itself.
 
+Its mechanical half runs BY ITSELF at the end of every turn (epic `epic-engine` T78;  Owen, 2026-11-15:  "we need an
+'end of turn' action to go through the open/underway issues and clean things up"):
+- `epic stale <epic> --underway --apply`, from `epic turn end` (`TurnEnd.tidy()`), in an epic's worktree, at most once
+  an hour per epic
+- it looks at open items whose latest card is still Underway, older than 3 hours, nobody working on them
+  (`StaleUnderway`):
+  - their work on `main` (a commit naming the item, or a sha its commit cards list):  an issue or call fixed for
+    review, orange, the commit its evidence;  another kind, a Noted card with the evidence
+  - not:  a `Stale:` card, once, so it's back on the person's list instead of spinning blue for weeks
+  - it closes nothing
+- by hand:  `epic stale <epic> --underway` reports, `--apply` acts;  then pick up each `Stale:` item, or close it
+  with a reason (below)
+
 1. Get the facts:  `epic stale <epic> --json` (scratchpad file).
    - One entry per open call, issue, todo and limit:  age from when it was written, its phase and whether that's done,
      the files and code names it mentions and whether they still exist (in its worktree or on `main`;  only what
@@ -1698,6 +1716,8 @@ phase <name>#P<N> dropped --why "<p>Moved to P38</p>"   never built:  struck thr
 phase <name>#P<N> planning [off]                    Claude writing its plan:  a blue spinner on its page, till --plan
 inbox working <name>#P<N> on|off                    Claude at work on a phase (or an item, a comment):  the spinner
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--requested]   prints the id (T3)
+add <name>#I "title" --requested --start "<their words>" [--agent <name>]   filed and taken up at once:  blue (T78)
+stale <name> --underway [--apply]                   stale Underway items:  on main => fixed for review;  else a Stale card
 add <name>#T "title" [--limit]                      a todo:  work still to do;  --limit:  a limit to know about
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)

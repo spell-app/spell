@@ -171,3 +171,28 @@ describe("the end-of-turn hook (shared-commit.mjs)", () => {
     expect(await hook({})).toEqual({ status: 0, stdout: "" })
   }, 40_000)
 })
+
+// epic `epic-engine` T78:  the end-of-turn tidy runs only in an epic's worktree, at most once an hour
+describe("TurnEnd tidy", () => {
+  test("the main checkout:  no epic, nothing run, no stamp", () => {
+    const { main, dir } = person("tidy-main")
+    expect(new TurnEnd({ checkout: main }).tidy(dir)).toEqual([])
+    expect(existsSync(join(dir, ".git", "spell-tidy"))).toBe(false)
+  })
+
+  test("an epic's worktree:  its stamp written, and a second turn within the hour runs nothing", () => {
+    const { main, dir } = person("tidy-worktree")
+    const worktree = join(main, ".claude", "worktrees", "seo")
+    mkdirSync(worktree, { recursive: true })
+    mkdirSync(join(dir, "epics", "seo"), { recursive: true })
+    writeFileSync(join(dir, "epics", "seo", "seo.plan.html"), "<html></html>")
+    const turn = new TurnEnd({ checkout: worktree })
+    const now = Date.now()
+    turn.tidy(dir, now)
+    const stamp = join(dir, ".git", "spell-tidy", "seo")
+    expect(existsSync(stamp)).toBe(true)
+    const written = readFileSync(stamp, "utf8")
+    expect(turn.tidy(dir, now + 60_000)).toEqual([])
+    expect(readFileSync(stamp, "utf8")).toBe(written)
+  })
+})

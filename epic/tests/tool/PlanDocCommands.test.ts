@@ -720,3 +720,25 @@ describe("PlanDocCommands close --why", () => {
     )
   })
 })
+
+// epic `epic-engine` T78:  an issue filed from the person's words and taken up at once is blue, never red
+describe("PlanDocCommands add --start", () => {
+  test("the person's words its body, an Underway card, the spinner on;  in progress, not attention", async () => {
+    const words = `Clicking <Clarify> jumps to the top. Don't do that!`
+    const args = ["add", "x", "issue", "Clarify jumps to the top", "--requested", "--start", words]
+    expect(await commands().run([...args, "--agent", "epic-engine-clarify-scroll"])).toBe(0)
+    const id = printed.at(-1)!.toLowerCase()
+    const plan = FILES.read(file)
+    const item = plan.item(id)
+    expect(item.textContent).toContain(`“${words}”`)
+    const card = item.querySelector(':scope > epic-status[state="underway"]')!
+    expect(card.textContent).toContain("epic-engine-clarify-scroll")
+    expect(plan.itemState(item)).toBe("progress")
+    expect(ReviewInbox.read(ReviewInbox.pathFor(file)).working[id]).toBeDefined()
+  })
+
+  test("--start needs the words", async () => {
+    expect(await commands().run(["add", "x", "issue", "No words", "--start"])).toBe(1)
+    expect(warned.join("\n")).toMatch(/--start needs the person's words/)
+  })
+})
