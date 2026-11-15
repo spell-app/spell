@@ -1,4 +1,4 @@
-import { core, List, App, TwoSidedView, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, type SentEvent } from "@spell/core"
+import { core, List, App, View, TwoSidedView, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, type SentEvent } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 /** Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el juego solo los leen. */
@@ -63,21 +63,12 @@ export class Carta extends TwoSidedView {
     return letra + this.símbolo + flecha
   }
 
-  /** Su cara:  https://www.compart.com/en/unicode/block/U+1F0A0 */
-  get imagen() {
-    const lugar = this.valor
-    if (this.palo === "tréboles") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(lugar))
-    if (this.palo === "diamantes") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(lugar))
-    if (this.palo === "corazones") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(lugar))
-    return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(lugar))
-  }
-
   drawFront() {
-    return <es-texto color={this.color} part="front">{this.imagen}</es-texto>
+    return <test-project-imagen-de-carta carta={this} part="front" />
   }
 
   drawBack() {
-    return <es-texto color="azul" part="back">🂠</es-texto>
+    return <test-project-imagen-de-carta dirección={"abajo"} part="back" />
   }
 
   async jugar() {
@@ -168,7 +159,7 @@ core.useElement(Carta, CartaElement)
 core.describeAction(Carta, "jugar", { title: "Jugar Carta", undoneAs: "Jugar carta" })
 core.describeAction(Carta, "ponerEnPila", { title: "Poner Carta en Pila", undoneAs: "Mover carta" })
 core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar los Puntos de Carta en Pila", undoneAs: "Contar los Puntos de Carta en Pila" })
-// Es una vista reversible:  boca arriba muestra su imagen, boca abajo el dorso que comparten todas las cartas.
+// Es una vista reversible:  cada lado es una imagen de carta (abajo):  boca arriba la suya, boca abajo el dorso que comparten todas las cartas.
 // En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
 // El as es bajo:  as = 1 ... rey = 13
 
@@ -176,7 +167,84 @@ core.describeAction(Carta, "contarLosPuntosDeCartaEnPila", { title: "Contar los 
 
 // identificar una carta
 
-// Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
+/** Dale una carta que dibujar, o un rango y un palo:  `<imagen-de-carta carta={la carta}/>`, `<imagen-de-carta rango=as palo={su palo}/>`. */
+// El dibujo de una carta:  el único lugar donde vive el aspecto de una carta
+export type Dirección = (typeof ImagenDeCarta.Direcciones)[number]
+
+export class ImagenDeCarta extends View {
+  static elementTag = core.defineElement(this, "test-project")
+
+  /**
+   * Está boca arriba, salvo con `dirección=abajo`:  entonces es el dorso que comparten todas las cartas.
+   * Hoy es una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
+   * Dibujos de verdad de las cartas pueden ocupar su lugar:  solo cambian su dibujo y `para dibujar eso`.
+   */
+  // su "carta" es una carta
+  @prop({ type: "Carta" })
+  accessor carta!: Carta
+
+  // su "rango" es un rango de carta
+  @prop({ oneOf: () => Carta.Rangos })
+  accessor rango!: Rango
+
+  // su "palo" es un palo de carta
+  @prop({ oneOf: () => Carta.Palos })
+  accessor palo!: Palo
+
+  // su "dirección" es arriba o abajo
+  static Direcciones = ["arriba", "abajo"] as const
+  @prop({ oneOf: () => ImagenDeCarta.Direcciones })
+  accessor dirección!: Dirección
+
+  estáBocaDirección(dirección: Dirección) {
+    return this.dirección === dirección
+  }
+
+  /** la carta que dibuja:  su carta, si no una de su rango y su palo */
+  get cara() {
+    if (this.carta !== undefined) return this.carta
+    return new Carta({ rango: this.rango, palo: this.palo })
+  }
+
+  get color() {
+    if (this.estáBocaDirección("abajo")) return "azul"
+    return this.cara.color
+  }
+
+  /** Su letra:  https://www.compart.com/en/unicode/block/U+1F0A0 */
+  get dibujo() {
+    if (this.estáBocaDirección("abajo")) return "🂠"
+    const lugar = this.cara.valor
+    if (this.cara.palo === "tréboles") return core.getItemAt(["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"], position(lugar)) ?? "🂠"
+    if (this.cara.palo === "diamantes") return core.getItemAt(["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"], position(lugar)) ?? "🂠"
+    if (this.cara.palo === "corazones") return core.getItemAt(["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"], position(lugar)) ?? "🂠"
+    return core.getItemAt(["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"], position(lugar)) ?? "🂠"
+  }
+
+  @drawn draw() {
+    return <es-texto color={this.color}>{this.dibujo}</es-texto>
+  }
+}
+
+/**
+ * `<test-project-imagen-de-carta>`:  an imagen de carta, drawn in its own element, e.g. by `draw the imagen de carta`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its imagen de carta's properties;  its methods call its imagen de carta's.
+ * - What every view's element does, e.g. drawing its imagen de carta, is `SpellElement`'s.
+ */
+export class ImagenDeCartaElement extends SpellElement<ImagenDeCarta> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-imagen-de-carta", "imagen de carta", [
+    { name: "carta", kind: "string", description: "Its carta." },
+    { name: "rango", kind: "string", description: "Its rango." },
+    { name: "palo", kind: "string", description: "Its palo." },
+    { name: "dirección", kind: "string", description: "Its dirección." }
+  ])
+
+  estáBocaDirección(dirección: Dirección) {
+    return this.currentThing?.estáBocaDirección(dirección)
+  }
+}
+core.useElement(ImagenDeCarta, ImagenDeCartaElement)
 
 export function testLaPreparaciónDeLaCarta() {
   return core.test("test la preparación de la carta", function testLaPreparaciónDeLaCarta() {
@@ -198,7 +266,6 @@ export function testLaPreparaciónDeLaCarta() {
     core.expect(it2.rango === 2, `es un 2`, false, `no`)
     core.expect(it2.esElRangoDePalo("dama", "espadas"), `es la dama de espadas`, true, `sí`)
     core.expect(it2.esElRangoDePalo("dama", "tréboles"), `es la dama de tréboles`, false, `no`)
-    core.expect(it2.imagen, `su imagen`, "🂭", `"🂭"`)
 
     core.echoTestAction(`voltear eso`)
     it2.turnOver()
@@ -209,9 +276,32 @@ export function testLaPreparaciónDeLaCarta() {
     const siete = new Carta({ rango: 7, palo: "corazones" })
     core.expect(siete.esUnaCartaNumérica, `siete es una carta numérica`, true, `sí`)
     core.expect(siete.color, `el color del siete`, "rojo", `rojo`)
-    core.expect(siete.imagen, `la imagen del siete`, "🂷", `"🂷"`)
-    core.expect((new Carta({ rango: "as", palo: "tréboles" })).imagen, `la imagen de una nueva carta cuyo rango es as y palo es tréboles`, "🃑", `"🃑"`)
-    core.expect((new Carta({ rango: "rey", palo: "diamantes" })).imagen, `la imagen de una nueva carta cuyo rango es rey y palo es diamantes`, "🃎", `"🃎"`)
+  })
+}
+
+export function testLasImágenesDeCarta() {
+  return core.test("test las imágenes de carta", function testLasImágenesDeCarta() {
+    const it = new ImagenDeCarta()
+    core.echoTestAction(`poner dama a una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo`)
+    const dama = new Carta({
+      rango: "dama",
+      palo: "espadas",
+      direction: "down"
+    })
+    core.echoTestAction(`obtener una nueva imagen de carta cuya carta es dama`)
+    const it2 = new ImagenDeCarta({ carta: dama })
+    core.expect(it2.dibujo, `su dibujo`, "🂭", `"🂭"`)
+    core.expect(it2.color, `su color`, "negro", `negro`)
+    core.echoTestAction(`poner siete a una nueva imagen de carta cuyo rango es 7 y palo es corazones`)
+    const siete = new ImagenDeCarta({ rango: 7, palo: "corazones" })
+    core.expect(siete.dibujo, `el dibujo del siete`, "🂷", `"🂷"`)
+    core.expect(siete.color, `el color del siete`, "rojo", `rojo`)
+    core.expect((new ImagenDeCarta({ rango: "as", palo: "tréboles" })).dibujo, `el dibujo de una nueva imagen de carta cuyo rango es as y palo es tréboles`, "🃑", `"🃑"`)
+    core.expect((new ImagenDeCarta({ rango: "rey", palo: "diamantes" })).dibujo, `el dibujo de una nueva imagen de carta cuyo rango es rey y palo es diamantes`, "🃎", `"🃎"`)
+    core.echoTestAction(`obtener una nueva imagen de carta cuya dirección es abajo`)
+    const it3 = new ImagenDeCarta({ dirección: "abajo" })
+    core.expect(it3.dibujo, `su dibujo`, "🂠", `"🂠"`)
+    core.expect(it3.color, `su color`, "azul", `azul`)
   })
 }
 // -----------
@@ -469,7 +559,7 @@ export class Fundación extends Pila {
 
   /** un as gris claro de su palo, boca arriba */
   drawItsPlaceholder() {
-    return <es-texto part="placeholder">{(new Carta({ rango: "as", palo: this.palo })).imagen}</es-texto>
+    return <test-project-imagen-de-carta rango={"as"} prop:palo={this.palo} part="placeholder" />
   }
 
   canTake(carta: Carta) {
@@ -881,11 +971,12 @@ export function testLosMovimientos() {
   })
 }
 // -----------
-core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitario.es.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its disposición, its layout (<solitario-columna disposición="vertical">),¬     each card in it by its place:  --index from 0, of --count;¬     an empty pile's placeholder, its marcador, by its part:  ::part(placeholder). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitario-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[disposición] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[disposición]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[disposición] > *,¬[disposición]::part(placeholder) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitario-carta:not([disposición] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[disposición] > *,¬solitario-carta,¬[disposición]::part(placeholder) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Carta.es.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[disposición] > *,¬solitario-carta {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[disposición] > *::part(front),¬[disposición] > *::part(back),¬solitario-carta::part(front),¬solitario-carta::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Turning over and moving ease, as a card is turned and slid */¬[disposición] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬@media (prefers-reduced-motion: reduce) {¬  [disposición] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt */¬[disposición]::part(placeholder) {¬  color: #d8f0e0;¬  opacity: 0.4;¬}¬[disposición]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[disposición]:state(accepting-drop) > :last-child,¬[disposición]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The disposiciones:  apilada puts every card on top of the one before;  vertical, each a step below it */¬[disposición="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[disposición="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  what no attribute draws -- the felt, the toolbar's middle, and the cards and piles.¬   - The toolbar's bar, the board's grid and its spacing are their components' attributes (Solitario.es.spell).¬   - A card is one letter of unicode's Playing Cards, as wide as its pile:  no <ui-*> tag draws one.¬   - A pile is styled by its disposición, its layout (<solitario-columna disposición="vertical">),¬     each card in it by its place:  --index from 0, of --count;¬     an empty pile's placeholder, its marcador, by its part:  ::part(placeholder). */¬¬/* A card's letter, in ems (measured in Chrome on a Mac):  0.604em wide, 0.805em tall, its left edge 0.049em in,¬   with 0.008em to spare above and below */¬:root,¬:host {¬  --card-width: 0.604;¬  /* its height, in widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  its rank and suit */¬  --card-step-down: 0.2;¬}¬¬/* The table:  green felt, as on a casino's card table */¬solitario-app {¬  display: block;¬  min-height: 100%;¬  border-radius: 12px;¬  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"), #12683f;¬}¬¬/* A pile:  as wide as its cell of the board, as tall as its cards */¬[disposición] {¬  display: flow-root;¬  position: relative;¬  container-type: inline-size;¬  /* its top card glows when a dragged card would land on it (below), not the whole pile */¬  --spell-drop-glow: none;¬}¬/* its height, a floated sizer:  a padding's percentage is one of its width */¬[disposición]::before {¬  content: "";¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card in a pile, and its placeholder:  a letter as wide as the pile, cut to the card it draws */¬[disposición] > *,¬[disposición]::part(placeholder) {¬  position: absolute;¬  display: block;¬  font-size: calc(100cqi / var(--card-width));¬}¬/* a card in no pile (one added to the table in the editor):  a column's usual width */¬solitario-carta:not([disposición] > *) {¬  position: relative;¬  display: inline-block;¬  font-size: calc(6rem / var(--card-width));¬}¬[disposición] > *,¬solitario-carta,¬[disposición]::part(placeholder) {¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* the font that draws the cards, so a theme's font never moves them */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the face hugs the ink:  Apple Symbols' ink starts 0.917em down a line */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/* A card:  a two sided view (Carta.es.spell), its sides turning in 3D, so it cuts nothing itself;¬   a real deck's inks in every theme and scheme */¬[disposición] > *,¬solitario-carta {¬  overflow: visible;¬  --spell-turn-perspective: 3em;¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬/* each side:  its letter cut to the card, on a white face with the letter's rounded corners */¬[disposición] > *::part(front),¬[disposición] > *::part(back),¬solitario-carta::part(front),¬solitario-carta::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬}¬¬/* Turning over and moving ease, as a card is turned and slid */¬[disposición] > * {¬  transition:¬    transform 0.3s ease-in-out,¬    translate 0.3s ease-out;¬}¬@media (prefers-reduced-motion: reduce) {¬  [disposición] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint pale card on the felt, whatever the card image's own ink */¬[disposición]::part(placeholder) {¬  color: #d8f0e0;¬  --ui-red-text: currentColor;¬  --ui-black-text: currentColor;¬  --ui-blue-text: currentColor;¬  opacity: 0.4;¬}¬[disposición]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/* Dropping:  where a dragged card would land glows -- the pile's top card, or its placeholder¬   (:state(accepting-drop), set by the pile's rules) */¬[disposición]:state(accepting-drop) > :last-child,¬[disposición]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬¬/* The disposiciones:  apilada puts every card on top of the one before;  vertical, each a step below it */¬[disposición="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[disposición="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬`)
 // -----------
 if (!core.isCarryingOver) solitario.start()
 // -----------
 if (!core.isCarryingOver) testLaPreparaciónDeLaCarta()
+if (!core.isCarryingOver) testLasImágenesDeCarta()
 if (!core.isCarryingOver) testLaCreaciónDelMazo()
 if (!core.isCarryingOver) testLasPilas()
 if (!core.isCarryingOver) testLosMovimientos()
@@ -900,6 +991,8 @@ declare module "@solidjs/web/types/jsx.js" {
     interface IntrinsicElements {
       /** `CartaElement` */
       "test-project-carta": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+      /** `ImagenDeCartaElement` */
+      "test-project-imagen-de-carta": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `PilaElement` */
       "test-project-pila": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `PilaDeReservaElement` */
