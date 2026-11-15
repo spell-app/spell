@@ -41,3 +41,6 @@ a "pile" is a droppable viewable list of cards
 
 a card belongs to one pile
 	// a card is in one pile at a time:  putting it on another pile takes it off this one
+
+a card
+	it "is on top" if it is the top card of its pile		-- the card the next one goes on

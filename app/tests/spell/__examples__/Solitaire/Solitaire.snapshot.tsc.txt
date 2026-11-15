@@ -1,2 +1,2 @@
-572:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
-581:11 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+577:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+586:11 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.

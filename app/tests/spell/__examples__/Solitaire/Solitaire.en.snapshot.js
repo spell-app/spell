@@ -14,6 +14,7 @@ export const words = {
       symbol: "symbol",
       shortName: "short name",
       picture: "picture",
+      isOnTop: "is on top",
       play: "play a card",
       putOnPile: "put a card on a pile",
       countThePointsForCardOnPile: "count the points for a card on a pile",
