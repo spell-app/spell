@@ -112,6 +112,38 @@ describe("a condition over several lines", () => {
     )
   })
 
+  /** Owen's draft foundation (I101):  `the pile's suit is the card's suit`, then `and` lines, the card `is on top ...`. */
+  function foundation(onTop: string) {
+    return compiled([
+      'a "card" is a thing',
+      '\tits "value" is a number',
+      '\tits "suit" is text',
+      '\tits "pile" is a pile',
+      `\tit "${onTop}" if it is the last item of its pile`,
+      'a "pile" is a droppable list of cards',
+      '\tits "suit" is text',
+      '\tits "value" is a number',
+      'a "foundation" is a pile',
+      "\tit is droppable when",
+      "\t\tthe pile's suit is the card's suit",
+      "\t\t\tand the pile's value is the card's value - 1",
+      "\t\t\tand the card is on top of its pile"
+    ])
+  }
+
+  test("Owen's draft foundation, `the card is on top of its pile` its last line, compiles (I101)", () => {
+    const { errors, code } = foundation("is on top of its pile")
+    expect(errors).toEqual([])
+    expect(code).toContain("return this.suit === card.suit && this.value === card.value - 1 && card.isOnTopOfItsPile")
+  })
+
+  test("a yes-or-no body's last line read up to a point:  the error is the words after it, not the whole line (I101)", () => {
+    // the card's question is `is on top`, so `of its pile` is what's not understood
+    const { errors, code } = foundation("is on top")
+    expect(errors).toEqual(['13:26 Don\'t understand "of its pile"'])
+    expect(code).toContain("return this.suit === card.suit && this.value === card.value - 1 && card.isOnTop")
+  })
+
   test("in a question's body, a last line `x is 1` asks;  anywhere else it sets `x`", () => {
     const { errors, code } = compiled([
       ...card,
