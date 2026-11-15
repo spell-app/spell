@@ -535,6 +535,21 @@ describe("SpellLanguageService", () => {
       })
     })
 
+    test("rename a `for` loop's variable from where it's declared, as from a use of it", () => {
+      const declared = "for card in the deck"
+      const used = "add the state of the card to card names"
+      const fromDeclaration = at(deck, declared, "card")
+      expect(service.prepareRename(deck, fromDeclaration)).toMatchObject({ placeholder: "card" })
+      const lines = (position: Position) =>
+        service
+          .rename(deck, position, "c")!
+          .changes![deckUri]!.map(({ range }) => range.start.line + 1)
+          .toSorted((a, b) => a - b)
+      const expected = [lineOf(deck.parseText, declared), lineOf(deck.parseText, used)]
+      expect(lines(fromDeclaration)).toEqual(expected)
+      expect(lines(at(deck, used, "card"))).toEqual(expected)
+    })
+
     test("won't rename `it`, or a type written in more than one way", () => {
       expect(service.prepareRename(solitaire, at(solitaire, IT_CALL, "it"))).toBeNull()
       expect(service.prepareRename(card, at(card, CARD_TYPE, "card"))).toBeNull()
