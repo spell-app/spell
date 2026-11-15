@@ -3676,8 +3676,12 @@ const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 /** How many sentences make an item's paragraph run on (`PlanDoc.denseParagraphs()`). */
 const DENSE_SENTENCES = 5
 
-/** A sentence's end, followed by the next's start (a capital, a digit, a quote or a bracket);  as `epic pages fuss`. */
-const SENTENCE_END = /[.?!]["'”)\]]*\s+(?=[A-Z0-9"“'(])/g
+/**
+ * A sentence's end, followed by the next's start (a capital, a digit, a quote or a bracket);  as `epic pages fuss`.
+ * - NOT a list's number written inline (`1. Example, 2. Markup`):  a period right after a word of 1-3 digits
+ *   (epic `epic-engine` I283:  M12's list counted as five sentences)
+ */
+const SENTENCE_END = /(?<!(?:^|[\s(])\d{1,3})[.?!]["'”)\]]*\s+(?=[A-Z0-9"“'(])/g
 
 /** How many sentences `text` holds, as `SENTENCE_END` splits them. */
 function sentenceCount(text: string): number {
