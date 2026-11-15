@@ -136,6 +136,12 @@
     outline: var(--ui-focus-width, 2px) solid var(--ui-primary-color, var(--ui-focus-color));
     outline-offset: 1px;
   }
+  /* the page a dragged card would go into, as its first page:  lit up, as a spot is */
+  &[data-drop="into"]::part(card) {
+    background: color-mix(in oklab, var(--ui-primary-color, var(--ui-focus-color)) 28%, var(--ui-card-background));
+    outline: 2px solid var(--ui-primary-color, var(--ui-focus-color));
+    outline-offset: 1px;
+  }
   &[data-being-moved]::part(card) {
     opacity: 0.45;
   }

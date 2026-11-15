@@ -217,7 +217,6 @@ export const APP_TEXTS = {
   siteView: "Site",
   siteEditorTitle: "{project}:  sitemap",
   siteNotASite: "{project} isn't a site:\na site's file says, e.g., `galaxy guide is a site:`",
-  sitePages: "Pages",
   siteAddPage: "Add a page",
   siteNewPageTitle: "New page",
   siteRemovePart: "Delete {name}",

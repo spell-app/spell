@@ -19,6 +19,8 @@ import "./SiteBoardView.css"
  *   - a section's card:  up or down, the whole section before or after another, a line showing where;
  *     or onto a spot of another section, which it joins, its pages with it
  *   - any other card:  to a spot of its own section or another, the spot lit up
+ *   - any card onto the middle of a page's card:  into that page, as its first page, the page's card lit up
+ *     (the move the pages' tree beside the board had, until epic `mockup` I13);  its edges still mean its spot
  *   - Escape, or a drop anywhere else, moves nothing;  and a press that doesn't move is still a click.
  * - Each spot is an element behind the cards, in the same grid:  so what's under the pointer says where it would land.
  * - NOT `<TileCard>`:  that's the home page's, which keeps its letter tiles.
@@ -61,6 +63,7 @@ function SiteCard(props: SiteBoardViewProps & { card: BoardCard; section: BoardS
         { section: props.card.isSectionCard, selected: props.picked === part().name }
       ]}
       data-part={part().name}
+      data-can-nest={SiteEdits.canNest(part()) ? "" : undefined}
       background={props.card.color as UICardJSXAttributes["background"]}
       image={props.thumbnailOf(part())}
       heading={props.titleOf(part())}
@@ -120,7 +123,10 @@ const OPENED = "data-open"
 /** The attribute on the card being moved. */
 const BEING_MOVED = "data-being-moved"
 
-/** The attribute saying where a dragged card would land:  `spot` on a spot;  `before` or `after` on a section. */
+/**
+ * The attribute saying where a dragged card would land:
+ * `spot` on a spot;  `before` or `after` on a section;  `into` on the page's card it would go in.
+ */
 const DROP_MARK = "data-drop"
 
 /** A press on `card`:  if it's dragged, it moves, its section with it if it heads one. */
@@ -160,6 +166,11 @@ function startMove(event: PointerEvent, card: BoardCard, section: BoardSection):
           | HTMLElement
           | undefined
       )
+      const page = pageInto(x, y, card)
+      if (page) {
+        mark(page, "into")
+        return
+      }
       const spot = spotAt(x, y, card, section)
       if (spot || !card.isSectionCard) {
         mark(spot, "spot")
@@ -173,7 +184,8 @@ function startMove(event: PointerEvent, card: BoardCard, section: BoardSection):
       const where = landed?.getAttribute(DROP_MARK)
       stop()
       if (!landed) return
-      if (where !== "spot")
+      if (where === "into") SiteWrites.movePart(card.part.name, { where, part: landed.dataset.part! })
+      else if (where !== "spot")
         SiteWrites.movePart(card.part.name, { where: where as "before" | "after", part: landed.dataset.section! })
       else
         SiteWrites.dropCard(card.part.name, {
@@ -185,6 +197,31 @@ function startMove(event: PointerEvent, card: BoardCard, section: BoardSection):
     onCancel: stop
   })
 }
+
+/**
+ * The page card `card` would go INTO, as its first page, with the pointer at `x`, `y`:  only on that card's middle.
+ * - Its edges, the outer `INTO_EDGE` of each side, still mean its spot:  the card there moves along to make room.
+ * - None for a card that can't hold it (`SiteEdits.canNest()`, `canGoUnder()`), itself, or one of its own pages.
+ */
+function pageInto(x: number, y: number, card: BoardCard): HTMLElement | undefined {
+  if (!SiteEdits.canGoUnder(card.part)) return undefined
+  const host = document
+    .elementsFromPoint(x, y)
+    .find((each) => each.classList.contains("SiteCard") && each.hasAttribute("data-can-nest")) as
+    | HTMLElement
+    | undefined
+  const name = host?.dataset.part
+  if (!host || !name || SiteEdits.allParts([card.part]).some((part) => part.name === name)) return undefined
+  // the host draws no box of its own (`display: contents`):  its card part does
+  const box = (host.shadowRoot?.querySelector('[part~="card"]') ?? host).getBoundingClientRect()
+  const across = (x - box.left) / box.width
+  const down = (y - box.top) / box.height
+  const isMiddle = (along: number) => along > INTO_EDGE && along < 1 - INTO_EDGE
+  return isMiddle(across) && isMiddle(down) ? host : undefined
+}
+
+/** How much of a card, from each side, still means its spot rather than into it. */
+const INTO_EDGE = 0.2
 
 /**
  * The spot `card` would land on with the pointer at `x`, `y`:  none off the board, on its own spot,
