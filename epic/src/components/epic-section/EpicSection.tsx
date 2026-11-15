@@ -393,7 +393,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /**
    * The items the filter hides (`StateFilter.hides()`):  a marked one goes with the blues (`MARKED_SHOWS_AS`);
-   * never the one a link just landed on, or in (`linkedHere`).
+   * never the one a link just landed on, or in (`linkedHere`), nor one Owen closed this visit and hasn't sent yet
+   * (`LiveReview.heldInView`, epic `epic-engine` T80:  it folds away at his Send).
    */
   readonly hidden = createMemo(() => {
     const linked = this.linkedHere
@@ -401,7 +402,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return this.itemStates().filter(
       (it) =>
         StateFilter.hides(marked.has(it.item) ? MARKED_SHOWS_AS : it.state, this.showing()) &&
-        !(linked && it.item.contains(linked))
+        !(linked && it.item.contains(linked)) &&
+        // closed at his ✓ or x this visit:  kept in view, grey, until his Send (T80)
+        !(it.item.id && this.reviewState.liveOf(it.item.id).heldInView)
     )
   })
 

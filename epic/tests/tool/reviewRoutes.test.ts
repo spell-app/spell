@@ -748,4 +748,30 @@ describe("an instant mark", () => {
         .sort()
     ).toEqual(["i1", "m1"])
   })
+
+  // epic `epic-engine` T80:  "Cmd-z to undo the mark on the hidden thing?"
+  test("applied, it's undone by POST undo:  the item as it was before, once;  nothing to undo is a 404", async () => {
+    rmSync(join(root, "epics/inst/inst.instant-undo.json5"), { force: true })
+    await post("mark", { page: `/${INSTANT}`, id: "t1", mark: { action: "drop" } })
+    await new Promise((done) => setTimeout(done, PAST_GRACE))
+    expect(tagOf("t1")).toMatch(/status="canceled"/)
+    const undone = await post("undo", { page: `/${INSTANT}`, id: "t1" })
+    expect(undone.status).toBe(200)
+    expect(undone.body.did).toMatch(/taken back/)
+    // as before:  open, never reviewed (the tool's own `state` drawn on every edit aside)
+    expect(tagOf("t1")).toMatch(/status="open"/)
+    expect(tagOf("t1")).not.toMatch(/review-as=|reviewed=/)
+    expect(readFileSync(join(root, INSTANT), "utf8")).toMatch(/T1 undone:/)
+    expect((await post("undo", { page: `/${INSTANT}`, id: "t1" })).status).toBe(404)
+  })
+
+  test("changed since it was applied (reopened), the undo is refused:  409", async () => {
+    rmSync(join(root, "epics/inst/inst.instant-undo.json5"), { force: true })
+    await post("mark", { page: `/${INSTANT}`, id: "i1", mark: { action: "skip" } })
+    await new Promise((done) => setTimeout(done, PAST_GRACE))
+    const file = join(root, INSTANT)
+    writeFileSync(file, readFileSync(file, "utf8").replace(/(<epic-item[^>]* id="i1")/, '$1 urgent=""'))
+    const refused = await post("undo", { page: `/${INSTANT}`, id: "i1" })
+    expect(refused.status).toBe(409)
+  })
 })

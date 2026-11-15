@@ -553,9 +553,18 @@ As `plan-doc.md`, "Ids":
       note, comments, picture or pick;  never a test's, a phase's or an Overview part's (their approve can start work)
     - an update block's Seen, and a Read in "0. While you were out" (above)
   - When:  2 seconds after the click (`INSTANT_GRACE_MS`, J229), so a second click takes it back first;  a Read at once.
-  - Send neither counts nor carries them;  a Send with only these wakes nobody.
+  - Send carries none of them;  a Send with only these wakes nobody.
   - The log keeps a line each, as `inbox apply`'s;  `inbox apply` still takes any the page server couldn't.
-  - Undone after:  Revisit reopens it.
+  - On the page (epic `epic-engine` T80;  Owen:  "mark as grey & collapse, then keep it visible/gray until send or
+    auto-send"):  the item turns grey and folds to its title at once, but stays in view, grey, until his next Send or
+    Auto Send;  only then does it fold away.
+    - Send counts them meanwhile, so Auto Send runs for them;  a Send with only these sends nothing.
+  - Undone:
+    - while it's still in view:  the same button again, however long since
+    - after it has folded away:  Cmd-Z (Ctrl-Z) outside a text field, newest first, up to 20 this visit
+    - both put the item back exactly as it was (`InstantUndo`, `POST /api/epics/review/undo`);  refused once it has
+      changed since
+    - else Revisit reopens it
     - Its own box's x is `drop`.
     - A `skip` from a page drawn before is applied as `drop`.
   - On an Overview sub-section, a phase, or the summary:

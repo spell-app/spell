@@ -126,6 +126,11 @@ export type LiveReview = {
    */
   closing?: boolean
   /**
+   * closed at his ✓ or x this visit, and kept in view, grey, until his next Send or Auto Send
+   * (`ReviewClient.isHeldInView()`, epic `epic-engine` T80):  its section doesn't hide it yet;  missing:  not held
+   */
+  heldInView?: boolean
+  /**
    * his turn on a comment in it:  Claude spoke last on its thread (`ReviewClient.hasRepliedComments()`, epic
    * `epic-engine` I284);  missing:  none
    */
