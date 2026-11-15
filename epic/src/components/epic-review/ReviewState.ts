@@ -81,11 +81,17 @@ export class ReviewState {
    * - NOT a set change that picks nothing (the pick-one / pick-any switch, an option added or edited):  no answer
    *   yet, so the item keeps its colour and its count (Owen, 2026-10-29:  "Switched 'pick many' and Q4 thinks it was
    *   decided, even though I didn't pick one")
+   * - his instant ✓ or x stays a mark after the server applied it, while held in view till his Send
+   *   (`ReviewClient.closingAs()`, epic `epic-engine` I308)
    */
   readonly isMarked = (itemId: string): boolean =>
     this.readPage((client) => {
-      const mark = itemId ? client.markOf(itemId.toLowerCase()) : undefined
-      return !!mark && !(mark.action === "pick" && !hasPick(mark))
+      const id = itemId?.toLowerCase()
+      const mark = id ? client.markOf(id) : undefined
+      // his instant ✓ or x the server applied already, held in view till his Send (I308):  still marked, as at the
+      // click, so its chip's ring and its section's counts don't change as the page's update lands
+      if (!mark) return !!id && client.closingAs(id) !== undefined
+      return !(mark.action === "pick" && !hasPick(mark))
     }) ?? false
 
   /**

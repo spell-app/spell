@@ -420,7 +420,8 @@ describe("<epic-item>", () => {
       host.setAttribute("state", "old")
       await Promise.resolve()
       expect(base()).toBe("old canceled item")
-      expect(host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!.dataset.fill).toBe("dashed")
+      const chipNow = host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
+      expect([chipNow.dataset.fill, chipNow.hasAttribute("data-marked")]).toEqual(["dashed", true])
     } finally {
       closing.mockRestore()
       closingAs.mockRestore()
