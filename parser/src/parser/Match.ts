@@ -124,14 +124,12 @@ export class Match<
    * - Use `next` for "where does the next token start", e.g. `matchForOffset()`.
    * - Works from the last of every token in `tokens`, nested ones included,
    *   so a `LineToken` / `BlockToken` gives its last real token's end, not its newline.
+   * - Found from the END:  tokens are in text order, so it's in the last real one, never a walk of them all
+   *   (a type's statement holds its whole body, and every compile asks each declaration where it ends:
+   *   epic `language` P57).
    */
   get end(): number | undefined {
-    let end: number | undefined
-    P.Tokenizer.forEachToken(this.tokens, (token) => {
-      if (token instanceof P.LineToken || token instanceof P.BlockToken || token instanceof P.WhitespaceToken) return
-      if (end === undefined || token.end > end) end = token.end
-    })
-    return end
+    return lastEndIn(this.tokens)
   }
 
   /** Character offset where whatever follows us starts:  `end` plus trailing whitespace. */
@@ -429,4 +427,29 @@ export type MatchProps = {
   choiceRule?: string
   /** Priority this match competes with in a `Choice`, when not its rule's -- see `Match.priority`. */
   priority?: number
+}
+
+/**
+ * Where the last real token of `tokens` ends -- see `Match.end`:  `undefined` if they hold none.
+ * - A line's or a block's own tokens count, not the line or block:  a block ends where its last line's text does.
+ * - Whitespace never counts.
+ * - Any other token counts, and whatever is nested in it (`P.Tokenizer.forEachToken()`), e.g. a tag's children.
+ */
+function lastEndIn(tokens: readonly unknown[]): number | undefined {
+  for (let index = tokens.length - 1; index >= 0; index--) {
+    const token = tokens[index]
+    if (!(token instanceof P.Token) || token instanceof P.WhitespaceToken) continue
+    if (token instanceof P.LineToken || token instanceof P.BlockToken) {
+      const end = lastEndIn(token.tokens)
+      if (end !== undefined) return end
+      continue
+    }
+    let end: number | undefined
+    P.Tokenizer.forEachToken([token], (each) => {
+      if (each instanceof P.LineToken || each instanceof P.BlockToken || each instanceof P.WhitespaceToken) return
+      if (end === undefined || each.end > end) end = each.end
+    })
+    return end
+  }
+  return undefined
 }

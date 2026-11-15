@@ -2521,6 +2521,9 @@ sidebars any of them opens.
   - A project lists the others it wants in its project file, e.g. `"targets": ["ts/solid", "py"]`.
   - What every program's writer shares is `P.ProgramWriter`, which the javascript and Python writers extend.
     - `forProject()` reads the whole project first, so it knows what each value is.
+  - A project's files are written TOGETHER, once a target (`SP.SpellProject.combineCompiled()`).
+    - A file's code on its own (`SP.SpellFile.compiled`, the editor's output pane) is written only when it's read,
+      never by every compile (epic `language` P57).
   - `ASTNode.compile()` is `P.JSWriter.instance.write(node)`.
   - Each writer has one method per AST class, named for it:  `ASTIfStatement(node)`.
   - NEVER write output in an AST class.
