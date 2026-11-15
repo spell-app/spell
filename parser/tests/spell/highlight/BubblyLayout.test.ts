@@ -39,6 +39,21 @@ function piecesOf(drawing: SP.BubblyDrawing, kind: SP.BubblyPieceKind): string[]
   return found
 }
 
+/** `drawing`'s underlined stretches, as written, each `kind:words`. */
+function underlinesOf(drawing: SP.BubblyDrawing): string[] {
+  const found: string[] = []
+  const walk = (nodes: SP.BubblyNode[]) => {
+    for (const node of nodes) {
+      if (node.kind === "gap") continue
+      const line = node.kind === "line" ? node : node.head
+      for (const { start, end, kind } of line.underlines) found.push(`${kind}:${drawing.text.slice(start, end)}`)
+      if (node.kind !== "line") walk(node.body)
+    }
+  }
+  walk(drawing.nodes)
+  return found
+}
+
 /** Every block in `nodes`, depth first. */
 function blocksOf(nodes: SP.BubblyNode[]): SP.BubblyBlock[] {
   return nodes.flatMap((node) => (node.kind === "block" ? [node, ...blocksOf(node.body)] : []))
@@ -117,11 +132,11 @@ describe("SP.BubblyLayout", () => {
         "words:to ",
         "input:move",
         "words: (a ",
-        "first-mention:card",
+        "reference:card",
         "words:) ",
         "input:to",
         "words: (a ",
-        "first-mention:pile",
+        "reference:pile",
         "words:)"
       ]
     ])
@@ -138,7 +153,7 @@ describe("SP.BubblyLayout", () => {
         "words:to ",
         "input:put a card on",
         "words: a ",
-        "first-mention:pile",
+        "reference:pile",
         "mark:,",
         "words: undoable as ",
         'input:"Move Card"'
@@ -155,21 +170,29 @@ describe("SP.BubblyLayout", () => {
     expect(hook.partOfSpeech).toBe("action")
     expect(hook.head.pieces.map((piece) => `${piece.kind}:${deck.slice(piece.start, piece.end)}`)).toEqual([
       "words:when creating a ",
-      "first-mention:deck"
+      "reference:deck"
     ])
   })
 
-  it("draws references bold, a name's first mention apart from its later uses, and pronouns plain", () => {
+  it("draws every name bold, one weight, the word a head declares too;  pronouns plain;  a list's values italic", () => {
     expect(piecesOf(drawing, "reference")).toEqual(
-      expect.arrayContaining(["two sided view", "rank", "value", "column"])
+      expect.arrayContaining(["draggable two sided view", "rank", "value", "column"])
     )
-    expect(piecesOf(drawing, "first-mention")).toEqual(["column"])
     expect(piecesOf(drawing, "reference")).not.toContain("its")
-    expect(piecesOf(drawing, "constant")).toEqual(["jack", "queen", "king"])
+    expect(piecesOf(drawing, "value")).toEqual(expect.arrayContaining(["jack", "queen", "king", '"face"']))
   })
 
-  it("draws a phrase called whole, and a drawing's markup", () => {
-    expect(piecesOf(drawing, "phrase")).toEqual(["is a face card"])
+  it("underlines each value and each question with the thing it asks of, outermost only;  its own words plain", () => {
+    expect(underlinesOf(drawing)).toEqual([
+      "value:its rank",
+      "value:its value",
+      "question:it is a face card",
+      "value:column"
+    ])
+    expect(piecesOf(drawing, "words")).toEqual(expect.arrayContaining(["it is a face card"]))
+  })
+
+  it("draws a drawing's markup", () => {
     expect(piecesOf(drawing, "tag")).toEqual(["text", "text"])
     expect(piecesOf(drawing, "mark")).toEqual(expect.arrayContaining(["<", "=", ">{", "}</", ">"]))
   })
@@ -260,8 +283,8 @@ describe("SP.BubblyLayout", () => {
     const deck = project.files[1]!
     const within = { match: deck.match, inputLines: DECK_FILE.split("\n") } as unknown as SP.SpellFile
     const inProject = SP.BubblyLayout.of(DECK_FILE, SP.spellParser, { within })
-    expect(piecesOf(SP.BubblyLayout.of(DECK_FILE), "phrase")).toEqual([])
-    expect(piecesOf(inProject, "phrase")).toEqual(["card ranks"])
+    expect(underlinesOf(SP.BubblyLayout.of(DECK_FILE))).not.toContain("value:card ranks")
+    expect(underlinesOf(inProject)).toContain("value:card ranks")
     expect(blocksOf(inProject.nodes).map((block) => DECK_FILE.slice(block.head.start, block.head.end))).toEqual([
       'a "deck" is a list of cards',
       "when creating a deck",
@@ -270,7 +293,7 @@ describe("SP.BubblyLayout", () => {
     // a parse of other text (an edit it hasn't caught up with):  read alone
     const edited = `${DECK_FILE}\n`
     expect(SP.BubblyLayout.isParseOf(within, edited)).toBe(false)
-    expect(piecesOf(SP.BubblyLayout.of(edited, SP.spellParser, { within }), "phrase")).toEqual([])
+    expect(underlinesOf(SP.BubblyLayout.of(edited, SP.spellParser, { within }))).not.toContain("value:card ranks")
   })
 
   it("colours a handler's steps from its project's parse:  a member declared further down is a reference", () => {
@@ -285,10 +308,97 @@ solitaire is an app
 `
     const file = parseSpellProject([{ path: "/Game.spell", contents: GAME }]).files[0]!
     const within = { match: file.match, inputLines: GAME.split("\n") } as unknown as SP.SpellFile
-    const reads = (drawing: SP.BubblyDrawing) => piecesOf(drawing, "reference").filter((words) => words === "the clubs")
+    const reads = (drawing: SP.BubblyDrawing) => piecesOf(drawing, "reference").filter((words) => words === "clubs")
     expect(reads(SP.BubblyLayout.of(GAME))).toEqual([])
-    expect(reads(SP.BubblyLayout.of(GAME, SP.spellParser, { within }))).toEqual(["the clubs"])
-    expect(piecesOf(SP.BubblyLayout.of(GAME, SP.spellParser, { within }), "first-mention")).toContain("home")
+    expect(reads(SP.BubblyLayout.of(GAME, SP.spellParser, { within }))).toEqual(["clubs"])
+    expect(piecesOf(SP.BubblyLayout.of(GAME, SP.spellParser, { within }), "reference")).toContain("home")
+  })
+
+  it("draws a rule's lines as they compile (Solitaire's foundation):  values and questions underlined, `is`, `and`, `- 1` plain between", () => {
+    const PILES = `a "card" is a view
+	its "suit" is one of clubs or hearts
+	its "value" is a number
+	it "is face up" if its value > 0
+a "pile" is a droppable list of cards
+	its "suit" is a card suit
+	its "value" is a number
+a card belongs to one pile
+a card
+	it "is on top" if it is the last card of its pile
+a "foundation" is a pile
+	it is droppable when
+		the pile's suit is the card's suit
+			and the pile's value is the card's value - 1
+			and the card is on top
+	to test it
+		set test card to its last card
+		if test card is a club and test card is its first card return
+		if test card is face up or its value is test card's value return
+		if test card's pile is a foundation return
+		pause for 300 msec
+`
+    const file = parseSpellProject([{ path: "/Piles.spell", contents: PILES }]).files[0]!
+    const within = { match: file.match, inputLines: PILES.split("\n") } as unknown as SP.SpellFile
+    const laidOut = SP.BubblyLayout.of(PILES, SP.spellParser, { within })
+    const walk = (nodes: SP.BubblyNode[]): SP.BubblyLine[] =>
+      nodes.flatMap((node) =>
+        node.kind === "gap" ? [] : node.kind === "line" ? [node] : [node.head, ...walk(node.body)]
+      )
+    // the underlines on the source line starting `from`
+    const lines = (from: string) => {
+      const start = PILES.indexOf(from)
+      const end = PILES.indexOf("\n", start)
+      return walk(laidOut.nodes)
+        .flatMap((line) => line.underlines)
+        .filter((each) => each.start >= start && each.end <= end)
+        .map(({ start: at, end: to, kind }) => `${kind}:${PILES.slice(at, to)}`)
+    }
+    expect(lines("\t\tthe pile's suit")).toEqual(["value:the pile's suit", "value:the card's suit"])
+    expect(lines("\t\t\tand the pile's value")).toEqual(["value:the pile's value", "value:the card's value"])
+    expect(lines("\t\t\tand the card is on top")).toEqual(["question:the card is on top"])
+    expect(lines("\t\tif test card is a club")).toEqual([
+      "question:test card is a club",
+      "value:test card",
+      "value:its first card"
+    ])
+    expect(lines("\t\tif test card is face up")).toEqual([
+      "question:test card is face up",
+      "value:its value",
+      "value:test card's value"
+    ])
+    expect(lines("\t\tif test card's pile")).toEqual(["question:test card's pile is a foundation"])
+    expect(lines("\t\tpause for")).toEqual(["quantity:300 msec"])
+    // what a step sets isn't read:  bold, never underlined
+    expect(lines("\t\tset test card")).toEqual(["value:its last card"])
+    // `droppable` a name, bold;  `pile's` whole with its `'s`;  `club` and `1` values, italic
+    expect(piecesOf(laidOut, "reference")).toEqual(expect.arrayContaining(["droppable", "pile's suit", "card's value"]))
+    expect(piecesOf(laidOut, "value")).toEqual(expect.arrayContaining(["club", "1", "300"]))
+    // each underline starts and ends with a piece
+    for (const line of walk(laidOut.nodes))
+      for (const underline of line.underlines) {
+        expect(line.pieces.some((piece) => piece.start === underline.start)).toBe(true)
+        expect(line.pieces.some((piece) => piece.end === underline.end)).toBe(true)
+      }
+  })
+
+  it("underlines Spanish the same, by its rules, not its words:  `está vacía` with no subject a question still", () => {
+    const PILAS = `una "carta" es una vista
+	su "palo" es uno de tréboles o corazones
+una "pila" es una lista soltable de cartas
+	sus cartas son arrastrables cuando la carta es su última carta
+	es soltable cuando
+		está vacía y la carta es un trébol
+`
+    const file = parseSpellProject([{ path: "/Pilas.es.spell", contents: PILAS }]).files[0]!
+    const within = { match: file.match, inputLines: PILAS.split("\n") } as unknown as SP.SpellFile
+    const laidOut = SP.BubblyLayout.of(PILAS, SP.Language.for("es").parser, { within })
+    expect(underlinesOf(laidOut)).toEqual([
+      "value:la carta",
+      "value:su última carta",
+      "question:está vacía",
+      "question:la carta es un trébol"
+    ])
+    expect(piecesOf(laidOut, "reference")).toEqual(expect.arrayContaining(["soltable", "arrastrables"]))
   })
 
   it("notes each drawing tag that declares a member, as the parse decides:  not one said on a line of its own, nor any other tag (epic `editor` I84)", () => {

@@ -345,8 +345,11 @@ export const spanishWords: SP.LanguageWords = {
      */
     kindDeclaration:
       /^[ \t]*(?:-[ \t]+)?(un[oa]?[ \t]+)?(?!(?:sus?|el|la|los|las|un[oa]?)[ \t])["']?((?:(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!(?:es|alias)\b)[\p{L}\p{M}\d_-]+)["']?(?:[ \t]+alias[ \t]+["']?[\p{L}\p{M}\d_-]+["']?)?[ \t]+es[ \t]+un[oa]?[ \t]+((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)(?=[ \t]*(?:donde\b|con\b|:|,|$))/gimu,
-    /** An ability's word beside a type's kind, e.g. `arrastrable`:  as `draggable_or_droppable` reads it. */
-    abilityWord: /^(?:arrastrable|soltable|seleccionable|pulsable)$/iu,
+    /**
+     * An ability's word beside a type's kind, e.g. `arrastrable`:  as `draggable_or_droppable` reads it;
+     * plural in a list's short form, `sus cartas son arrastrables cuando`.
+     */
+    abilityWord: /^(?:arrastrable|soltable|seleccionable|pulsable)s?$/iu,
     /** A line declaring a value kind, its PLURAL name captured:  `- "palos" como uno de ...`. */
     valueKindDeclaration:
       /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+como[ \t]+(?:uno[ \t]+de|o[ \t]+bien)\b/gimu,

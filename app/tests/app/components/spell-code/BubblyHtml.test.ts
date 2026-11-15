@@ -21,7 +21,7 @@ describe("BubblyHtml.write()", () => {
     expect(drawn).toContain('<div class="bubbly-block bubbly-plain bubbly-group bubbly-level-1">')
     expect(drawn).toContain('<p class="bubbly-pill bubbly-property bubbly-level-2 bubbly-ends-input">')
     expect(drawn).toContain('<span class="bubbly-input bubbly-choice">queen</span>')
-    expect(drawn).toContain('<span class="bubbly-reference bubbly-use">two sided view</span>')
+    expect(drawn).toContain('<span class="bubbly-reference">draggable two sided view</span>')
     expect(drawn).toContain('<span class="bubbly-tag">text</span>')
   })
 

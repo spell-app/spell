@@ -47,7 +47,7 @@ function shapesOf(marks: BubblyMarks, text = CARD): string[] {
 describe("BubblyMarks.of()", () => {
   test("marks each piece in the page's classes, every one a bubbly-piece", () => {
     const marks = marked()
-    expect(wordsMarked(marks, "bubbly-reference")).toEqual(["two sided view", "rank"])
+    expect(wordsMarked(marks, "bubbly-reference")).toEqual(["draggable two sided view", "rank"])
     expect(wordsMarked(marks, "bubbly-choice")).toEqual(["ace", "jack", "queen", "king"])
     expect(wordsMarked(marks, "bubbly-name")).toEqual(["card", "Rank", "rank"])
     // a drawing's tags marked as HTML's are (`MarkupMarks`)
@@ -125,7 +125,7 @@ describe("BubblyMarks.of()", () => {
     expect(pills).toEqual(["solitaire (after the head's room)", "deck", "deck"])
   })
 
-  test("its shapes:  a band per declaration and per control line with steps, pills on what was typed", () => {
+  test("its shapes:  a band per declaration and per control line with steps, pills on what was typed, a line under each question", () => {
     expect(shapesOf(marked())).toEqual([
       'thing:  a "card" is a draggable two sided view',
       '  input:  card" is a draggable two sided view',
@@ -140,6 +140,8 @@ describe("BubblyMarks.of()", () => {
       "    action:  to draw its front",
       "      input:  draw its front",
       "      control:  if it is face up",
+      // ONE shape under the whole question, not a mark per piece:  its dots run on (epic `language` T136)
+      "        underline:  it is face up",
       '        tag-link:  <text color="blue">{its rank}</text>',
       '        tag:  <text color="blue">{its rank}</text>',
       '        input:  blue">{its rank}</text>',
