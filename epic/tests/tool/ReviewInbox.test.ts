@@ -416,6 +416,18 @@ describe("ReviewInbox, Claude's side", () => {
     expect(inbox.setListening(null)).toBeNull()
   })
 
+  test("working `asked` (I295):  his ask taken stays asked through an agent's own `working on`;  a bare flag isn't", () => {
+    const inbox = new ReviewInbox()
+    inbox.setWorking("i98", "details", M1)
+    expect(inbox.working.i98).toEqual({ action: "details", since: M1 })
+    inbox.requestNow("j9", "details", "", M1)
+    inbox.takeWork(M2)
+    expect(inbox.working.j9).toEqual({ action: "details", since: M2, asked: true })
+    // the agent turns its flag on itself:  still his ask
+    inbox.setWorking("j9", "details", M3)
+    expect(inbox.working.j9).toEqual({ action: "details", since: M3, asked: true })
+  })
+
   test("heartbeat:  touch stamps seen;  nobody listening, nothing starts", () => {
     const inbox = new ReviewInbox()
     expect(inbox.touchListening(M2)).toBeNull()
@@ -605,7 +617,7 @@ describe("ReviewInbox.takeWork()", () => {
     inbox.requestNow("i2", "details", "", M1)
     expect(inbox.hasWork).toBe(true)
     expect(inbox.takeWork(M2)).toEqual({ now: [{ id: "i2", action: "details", at: M1 }], sent: null, canceled: [] })
-    expect(inbox.working).toEqual({ i2: { action: "details", since: M2 } })
+    expect(inbox.working).toEqual({ i2: { action: "details", since: M2, asked: true } })
     expect(inbox.marks.i2).toBeDefined()
     expect(inbox.hasWork).toBe(false)
     expect(inbox.takeWork()).toBeNull()

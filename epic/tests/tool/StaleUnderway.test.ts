@@ -108,7 +108,7 @@ describe("StaleUnderway", () => {
     expect(tidy()).toEqual([])
   })
 
-  test("found on main:  `UPDATE : FIXED` with no phase active, a short card, the commit under Commits (I290)", () => {
+  test("found on main:  `FIXED` with no phase active, a short card, the commit under Commits (I290)", () => {
     const plan = samplePlan()
     new StaleUnderway({ plan, epic: "x", main: root, working }).apply()
     const item = plan.item("i1")

@@ -13,10 +13,13 @@ import type { Migration, MigrationContext } from "./migrations.types"
  *   - Owen, 2026-11-15, on language's I84 (approved at 18:34, its label left on):  "I think that I checked it
  *     before, in which case the `update` marker should go away"
  *   - since I285 his ✓ takes it off as it's applied (`PlanDoc.reviewedAs()`);  this is for the ones before
- * - A label with no status word gets the one its item's status says (`became`):  `UPDATE : FIXED` for an open item
+ * - A label with no status word gets the one its item's status says (`became`):  `FIXED` for an open item
  *   fixed for review, `DONE`, `CANCELED`, `DECIDED` for a closed one;  an open item's stays a plain `UPDATE`.
  *   - Owen, same day, on I84:  "This shuld say `update:fixed` or whatnot"
  *   - T75 names the change as it happens;  this is for the labels written before it
+ * - An open item whose latest status card is Underway says so, `UNDERWAY` (epic `epic-engine` I295);
+ *   once that card is finished, the word goes back to what the status says (or a plain `UPDATE`)
+ *   - Owen, 2026-11-15, on language's I98, filed under way:  "`Update` should say `Underway`"
  * - cheap markup, so every edit runs it too (`everyEdit`)
  * - IDEMPOTENT:  a label with its word, or gone, is left as it is
  ****************/
@@ -26,7 +29,7 @@ export class UpdateLabels implements Migration {
   readonly date = "2026-11-15"
   readonly everyEdit = true
   readonly description =
-    "an UPDATE label Owen has checked since goes;  one with no status word gets its item's (UPDATE : FIXED)"
+    "an UPDATE label Owen has checked since goes;  one with no status word gets its item's (FIXED, UNDERWAY)"
 
   /** Bring every bare label of `document` up to date, IN PLACE;  did it change the page? */
   run(document: Document, context: MigrationContext): boolean {
@@ -41,10 +44,13 @@ export class UpdateLabels implements Migration {
         dropped.push(item.id.toUpperCase())
         continue
       }
-      if (label.hasAttribute("became")) continue
+      const was = label.getAttribute("became")
+      // a word other than UNDERWAY was set as it happened:  kept;  UNDERWAY follows the item's latest card (I295)
+      if (was && was !== "underway") continue
       const became = UpdateLabels.becameOf(item)
-      if (!became) continue
-      label.setAttribute("became", became)
+      if ((became ?? null) === was) continue
+      if (became) label.setAttribute("became", became)
+      else label.removeAttribute("became")
       named++
     }
     if (dropped.length) context.notes?.push(`update-labels:  checked, label off:  ${dropped.join(", ")}`)
@@ -73,10 +79,17 @@ export class UpdateLabels implements Migration {
     return checks
   }
 
-  /** The status word `item`'s status says, if any:  `fixed` while open and fixed, else its closed status. */
+  /**
+   * The status word `item`'s status says, if any:  `underway` while open and its latest status card is Underway
+   * (I295), `fixed` while open and fixed (first), else its closed status.
+   */
   private static becameOf(item: Element): UpdateBecame | undefined {
     const status = item.getAttribute("status")
-    if (status === "open" || !status) return item.hasAttribute("fixed") ? "fixed" : undefined
+    if (status === "open" || !status) {
+      if (item.hasAttribute("fixed")) return "fixed"
+      const latest = Array.from(item.querySelectorAll(":scope > epic-status")).at(-1)
+      return latest?.getAttribute("state") === "underway" ? "underway" : undefined
+    }
     return (BECAME_OF_STATUS as Record<string, UpdateBecame>)[status]
   }
 }

@@ -1193,7 +1193,7 @@ export class PlanDoc extends PlanReader {
    *   takes off (`dropUpdateLabel()`, I285)
    *   - Owen, 2026-11-15, on epic-engine's I172, fixed by the end-of-turn tidy with no label:
    *     "Shouldn't this have the `updated: fixed` marker?"
-   * - `became`:  the change was a status change (epic `epic-engine` T75):  the label says which, `UPDATE : FIXED`;
+   * - `became`:  the change was a status change (epic `epic-engine` T75):  the label says which, `FIXED`;
    *   a later one replaces it, a plain edit (none) keeps it
    */
   markUpdate(item: Element, became?: UpdateBecame): void {
@@ -2119,6 +2119,9 @@ export class PlanDoc extends PlanReader {
     card.setAttribute("slot", STATUS_SLOT)
     Markup.place(host, card)
     if (host.localName === "epic-item" && !quiet) this.stamp(host)
+    // its UPDATE label, if it has one, says so (epic `epic-engine` I295):  `UNDERWAY`, not a bare UPDATE
+    const label = state === "underway" && host.localName === "epic-item" && PlanItem.updateLabelOf(host)
+    if (label) Markup.set<"epic-update">(label, { became: "underway" })
     return PlanItem.titleOf(host)
   }
 
@@ -2419,7 +2422,7 @@ export class PlanDoc extends PlanReader {
    *   - an item they name (`editor I55:`), the phase its `work` names, or one listed under it;  a judgement call also
    *     by the phase it was made in (`phase`):  its state reads it (`itemState()`:  a calm call stays blue)
    *   - a done or fixed item's last finished status card, whose line then says `not on main yet`
-   *   - that item's UPDATE label, when it names a status change (`UPDATE : FIXED`, T75):  its `Not in main` pill
+   *   - that item's UPDATE label, when it names a status change (`FIXED`, T75):  its `Not in main` pill
    * - gone again once the work lands;  no `landing` (no git, a test):  nothing changes
    */
   updateLanded(): number {
@@ -2456,7 +2459,7 @@ export class PlanDoc extends PlanReader {
       const cards = Array.from(item.querySelectorAll(":scope > epic-status"))
       const last = cards.findLast((card) => card.getAttribute("state") === "done")
       for (const card of cards) mark(card, offMain && finished && card === last)
-      // its UPDATE label's `Not in main` pill (`UPDATE : FIXED`, T75), on a status change's label only
+      // its UPDATE label's `Not in main` pill (`FIXED`, T75), on a status change's label only
       const label = PlanItem.updateLabelOf(item)
       if (label) mark(label, offMain && finished && label.hasAttribute("became"))
     }

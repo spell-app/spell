@@ -74,4 +74,21 @@ describe("update-labels", () => {
     // IDEMPOTENT
     expect(STEP.run(document, NOW)).toBe(false)
   })
+
+  test("an open item under way says UNDERWAY (language's I98, I295);  its card finished, the word moves on", () => {
+    const card = (state: string) => `<epic-status slot="status" state="${state}" at="15:04"><p>on it</p></epic-status>`
+    const withCard = (markup: string, state: string) => markup.replace("</epic-item>", `${card(state)}</epic-item>`)
+    const document = page(
+      withCard(item("i98", 'status="open"'), "underway") +
+        withCard(item("i99", 'status="open"'), "done").replace("<epic-update ", '<epic-update became="underway" ') +
+        withCard(item("i100", 'status="open" fixed'), "done").replace(
+          "<epic-update ",
+          '<epic-update became="underway" '
+        )
+    )
+    expect(STEP.run(document, NOW)).toBe(true)
+    expect(["i98", "i99", "i100"].map((id) => labelOf(document, id))).toEqual(["underway", "plain", "fixed"])
+    // IDEMPOTENT
+    expect(STEP.run(document, NOW)).toBe(false)
+  })
 })

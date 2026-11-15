@@ -554,7 +554,7 @@ ONE element for every update, `<epic-update>` (2026-10-11;  `PLAN-DOC.md`, "Upda
 can spot it, on any epic, a phase under way or not (I290):
 
 - a changed item gets a bare UPDATE label in its title (a NEW one, only while a phase is under way) (the tool adds it: `PLAN-DOC.md`, "Items")
-  - a status change says which (`became`, T75):  `UPDATE : FIXED`, `DONE`, `CANCELED`, `DECIDED`, `REOPENED`
+  - a status change says which (`became`, T75), as the word alone (I295):  `FIXED`, `UNDERWAY`, `DONE`, `CANCELED`, `DECIDED`, `REOPENED`;  in the orange of an item's orange id pill
   - then a blue `Not in main` pill while that work is on the epic's branch alone (`unmerged`, from git on every edit)
   - gone once the user checks the item (their ✓, I285):  at once on the page, and from the file as the mark is applied;
     the next real change (a status change, new details) puts it back

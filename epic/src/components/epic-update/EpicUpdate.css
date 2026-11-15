@@ -12,9 +12,13 @@
  * - QUIET (`:state(quiet)`:  seen, or more than 3 days old;  epic `epic-engine` I168):  grey, the page's muted ink on a
  *   faint grey ground, a grey outline;  folded to its title row by the element.
  * - A bare label:  an inline orange `UPDATE`, its text centred, sitting on the text's middle;
- *   `UPDATE : FIXED` after a status change, then a blue `Not in main` pill while its work isn't merged (T75).
+ *   just the status word after a status change (`FIXED`, `UNDERWAY`;  T75, I295), then a blue `Not in main` pill
+ *   while its work isn't merged.
  * - Public tokens (`--epic-update-*`) are never declared here:  read through private aliases.
- *   - `--epic-update-accent`:  the orange of the box, its outline and the label (default `--ui-orange`)
+ *   - `--epic-update-accent`:  the orange of the box, its outline and the label:  by default the pages' own amber orange,
+ *     the one an item's orange id pill wears (`--epic-state-replied`), else `--ui-orange`
+ *     (Owen, 2026-11-15, epic `epic-engine` I295:  "The `update` pill should be the same orange as the 'updated' pill
+ *     rather than red")
  *   - `--epic-update-background`:  the box's ground (default the accent, 8% into the page's)
  */
 
@@ -22,7 +26,7 @@
 
 @layer ui.components.epic-update.types {
   :host {
-    --_epic-update-accent: var(--epic-update-accent, var(--ui-orange));
+    --_epic-update-accent: var(--epic-update-accent, var(--epic-state-replied, var(--ui-orange)));
     --_epic-update-background: var(
       --epic-update-background,
       color-mix(in srgb, var(--_epic-update-accent) 8%, var(--epic-bg, var(--ui-background)))
@@ -113,7 +117,7 @@
     padding: 0 6px;
     border-radius: 4px;
     background: var(--_epic-update-accent);
-    color: var(--ui-orange-on);
+    color: var(--epic-state-replied-on, var(--ui-orange-on));
     font: 700 10px/1 var(--epic-sans, var(--ui-font-family));
     letter-spacing: 0.06em;
   }

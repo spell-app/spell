@@ -758,7 +758,7 @@ describe("PlanDoc phases", () => {
     expect(problems(plan)).toEqual([])
   })
 
-  test("an UPDATE marker names a status change, `UPDATE : FIXED`, and says `Not in main` until it lands (T75)", () => {
+  test("an UPDATE marker names a status change, `FIXED`, and says `Not in main` until it lands (T75)", () => {
     const plan = freshPlan()
     plan.addPhase("One")
     plan.setPhase(1, "active")
@@ -785,6 +785,19 @@ describe("PlanDoc phases", () => {
     plan.landing = { branch: "epic-engine", ids: new Set(), shas: [] }
     plan.updateStates()
     expect(unmerged("i1")).toBeNull()
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("an item taken up says UNDERWAY on its label, then FIXED (I295, language's I98)", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.setPhase(1, "active")
+    plan.addItem("issue", "a step's target is underlined too")
+    const became = () => PlanItem.updateLabelOf(el(plan, "i1"))!.getAttribute("became")
+    plan.addStatus("i1", "Taken up at once:  agent language-quoted-head is on it.")
+    expect(became()).toBe("underway")
+    plan.fixedForReview("i1", "underlined whole")
+    expect(became()).toBe("fixed")
     expect(problems(plan)).toEqual([])
   })
 
@@ -1007,7 +1020,7 @@ describe("PlanDoc questions and decisions", () => {
     expect(order(plan)).toEqual(["q2:open", "q1:decided", "q3:decided"])
     const question = el(plan, "q1")
     expect([PlanItem.titleOf(question), question.hasAttribute("answered")]).toEqual(["which browser?", true])
-    // no phase under way, and still `UPDATE : DECIDED` (epic `epic-engine` I290):  the title moves into its slot
+    // no phase under way, and still `DECIDED` (epic `epic-engine` I290):  the title moves into its slot
     expect(question.innerHTML).toBe(
       '<span slot="title">which browser? <epic-update became="decided"></epic-update></span>' +
         '<epic-question><p>the options</p></epic-question><epic-answer title="Chrome first"><p>most readers</p></epic-answer>'

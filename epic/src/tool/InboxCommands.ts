@@ -174,7 +174,10 @@ export class InboxCommands {
       if (CommentList.isCommentId(key)) box.commentList.setWorking(key, on)
       else {
         if (took) box.takeMark(key)
-        box.setWorking(key, on ? workOf(box.marks[key]) : null)
+        const mark = box.marks[key]
+        // his own immediate ask (Add Details ...) being answered, or just an agent on the item (I295)
+        const asked = !!mark && ReviewInbox.isImmediate(mark)
+        box.setWorking(key, on ? workOf(mark) : null, undefined, { asked })
       }
       box.touchListening()
     })
