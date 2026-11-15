@@ -23,8 +23,8 @@ import "./CodeSlice.css"
  *   sits past the field's left edge, and a wrapped line starts under its own first word (`showWithoutIndent()`).
  * - `focus`:  puts the cursor at the end of its lines, once made, e.g. for a handler just added.
  * - The one place a part of a file is shown alone:  the notebook's cells could use it too.
- * - Never drawn bubbly (`SpellBubbly.leaveOut()`):  its few lines are laid out as a whole file's would be,
- *   so a declaration would be cut off at its edges.
+ * - Drawn bubbly as the code pane is, while the page's setting says so (`SpellBubbly.showSlice()`, epic `editor` T72):
+ *   only what's wholly in its lines, so the action whose body it shows draws no band or rail cut off at its edges.
  * - HACK:  hides the other lines with Monaco's `setHiddenAreas()`, which its folding uses, but its typings leave out.
  * - Its code editor is kept once it goes, for the next slice of the same file (`SlicePool`):
  *   making one measures every line of the file, ~60ms each time the Inspector's card was drawn again (epic `editor` I69).
@@ -76,8 +76,18 @@ function showOnly(
   hide()
   const undo: monaco.IDisposable[] = [{ dispose: () => lines.clear() }, editor.onDidChangeModelContent(hide)]
   if (!props.column) undo.push(showWithoutIndent(editor, element, () => lines.getRange(0)))
-  if (props.column && props.column > 1) undo.push(...hideWordsBefore(editor, props.from, props.column))
-  if (props.endColumn) undo.push(...hideWordsAfter(editor, props.to, props.endColumn))
+  const before = props.column && props.column > 1 ? hideWordsBefore(editor, props.from, props.column) : undefined
+  const after = props.endColumn ? hideWordsAfter(editor, props.to, props.endColumn) : undefined
+  undo.push(...[before, after].filter((words) => !!words))
+  // drawn bubbly:  what's between the words hidden at either end
+  SpellBubbly.showSlice(editor, () => {
+    const shown = lines.getRange(0)
+    if (!shown) return null
+    const start = before?.range()?.getEndPosition() ?? shown.getStartPosition()
+    const end = after?.range()?.getStartPosition() ?? shown.getEndPosition()
+    return monaco.Range.fromPositions(start, end)
+  })
+  undo.push({ dispose: () => SpellBubbly.showSlice(editor, undefined) })
   const fit = () => (element.style.height = `${heightOf(editor, lines.getRange(0))}px`)
   undo.push(editor.onDidContentSizeChange(fit), editor.onDidLayoutChange(fit))
   fit()
@@ -162,7 +172,6 @@ class SlicePool {
     element.append(box)
     SpellMonaco.register()
     const editor = monaco.editor.create(box, { ...SpellMonaco.OPTIONS, ...SLICE_OPTIONS, model })
-    SpellBubbly.leaveOut(editor)
     editor.onDidDispose(keepMouseMovesInShadowRoot(editor))
     if (!SlicePool.kept.has(model)) {
       SlicePool.kept.set(model, [])
@@ -231,11 +240,7 @@ const KEPT_PER_FILE = 8
  * - HACK:  Monaco hides only whole lines, so the words are a decoration drawn with `display: none`;
  *   its measuring then gives them no width, and a cursor moved into them is moved back out.
  */
-function hideWordsBefore(
-  editor: monaco.editor.IStandaloneCodeEditor,
-  line: number,
-  column: number
-): monaco.IDisposable[] {
+function hideWordsBefore(editor: monaco.editor.IStandaloneCodeEditor, line: number, column: number): HiddenWords {
   const words = editor.createDecorationsCollection([
     {
       range: new monaco.Range(line, 1, line, column),
@@ -250,7 +255,7 @@ function hideWordsBefore(
     if (!hidden || position.lineNumber !== hidden.startLineNumber || position.column >= hidden.endColumn) return
     editor.setPosition({ lineNumber: hidden.startLineNumber, column: hidden.endColumn })
   })
-  return [keepOut, { dispose: () => words.clear() }]
+  return { range: () => words.getRange(0), dispose: () => (keepOut.dispose(), words.clear()) }
 }
 
 /**
@@ -283,11 +288,7 @@ function showWithoutIndent(
 }
 
 /** Hide the words from `column` to the end of line `line`, e.g. a tag's `</>`, and keep the cursor before them. */
-function hideWordsAfter(
-  editor: monaco.editor.IStandaloneCodeEditor,
-  line: number,
-  column: number
-): monaco.IDisposable[] {
+function hideWordsAfter(editor: monaco.editor.IStandaloneCodeEditor, line: number, column: number): HiddenWords {
   const model = editor.getModel()!
   const words = editor.createDecorationsCollection([
     {
@@ -303,8 +304,11 @@ function hideWordsAfter(
     if (!hidden || position.lineNumber !== hidden.startLineNumber || position.column <= hidden.startColumn) return
     editor.setPosition({ lineNumber: hidden.startLineNumber, column: hidden.startColumn })
   })
-  return [keepOut, { dispose: () => words.clear() }]
+  return { range: () => words.getRange(0), dispose: () => (keepOut.dispose(), words.clear()) }
 }
+
+/** Words hidden at a slice's start or end (`hideWordsBefore()`, `hideWordsAfter()`):  where they are now, and what shows them again. */
+type HiddenWords = monaco.IDisposable & { range(): monaco.Range | null }
 
 /**
  * How tall a slice is:  its lines, and the sideways scrollbar under them while one runs past its edge
