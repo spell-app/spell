@@ -421,8 +421,8 @@
           "ruleNames": ["variable"],
           "internal": false,
           "file": "src/spell/rules/variables/Variable.ts",
-          "line": 12,
-          "purpose": "`SpellIdentifier` which may or may not be known, with optional `the` prefix, e.g. `the thing`.",
+          "line": 15,
+          "purpose": "",
           "syntaxes": [
             {
               "syntax": "the? {identifier}",
@@ -9479,21 +9479,21 @@
           "ruleNames": ["return_statement"],
           "internal": false,
           "file": "src/spell/rules/assignment/ReturnStatement.ts",
-          "line": 12,
+          "line": 26,
           "purpose": "`(return|exit with?) {expression}? {nested_expression}?` -- return a value.",
           "syntaxes": [
             {
               "syntax": "(return|exit with?) {expression}? {nested_expression}?",
-              "example": "return",
+              "example": "to count the points:\n\treturn\n\t\t- 10 if bar\n\t\t- 5 if bar is 2\n\t\t- 0 otherwise",
               "outputs": {
                 "js": {
-                  "code": "return"
+                  "code": "export function countThePoints() {\n  return core.asAction({ undoneAs: \"Count the Points\" }, () => {\n    if (bar) return 10\n    if (bar === 2) return 5\n    return 0\n  })\n}"
                 },
                 "ts": {
-                  "code": "return"
+                  "code": "export function countThePoints() {\n  return core.asAction({ undoneAs: \"Count the Points\" }, () => {\n    if (bar) return 10\n    if (bar === 2) return 5\n    return 0\n  })\n}"
                 },
                 "py": {
-                  "code": "return"
+                  "code": "@core.as_action({\"undone_as\": \"Count the Points\"})\ndef count_the_points() -> Any:\n    if bar:\n        return 10\n    if bar == 2:\n        return 5\n    return 0"
                 }
               }
             }
@@ -9722,6 +9722,32 @@
                 },
                 "py": {
                   "code": "if bar:\n    return True"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ReturnOtherwise",
+          "ruleNames": ["return_otherwise"],
+          "internal": false,
+          "file": "src/spell/rules/if/ReturnOtherwise.ts",
+          "line": 28,
+          "purpose": "`return 0 otherwise` -- the last of a run of `return ... if ...` lines (epic `language` I96): ```spell to count the points for a card on a pile return 10 if the pile is a foundation return 5 if the card is in the discard pile return 0 otherwise ```",
+          "syntaxes": [
+            {
+              "syntax": "(return|exit with?) {value:expression} (otherwise|else)",
+              "example": "to count the points:\n\treturn 10 if bar\n\treturn 5 if bar is 2\n\treturn 0 otherwise",
+              "outputs": {
+                "js": {
+                  "code": "export function countThePoints() {\n  return core.asAction({ undoneAs: \"Count the Points\" }, () => {\n    if (bar) return 10\n    if (bar === 2) return 5\n    return 0\n  })\n}"
+                },
+                "ts": {
+                  "code": "export function countThePoints() {\n  return core.asAction({ undoneAs: \"Count the Points\" }, () => {\n    if (bar) return 10\n    if (bar === 2) return 5\n    return 0\n  })\n}"
+                },
+                "py": {
+                  "code": "@core.as_action({\"undone_as\": \"Count the Points\"})\ndef count_the_points() -> float:\n    if bar:\n        return 10\n    if bar == 2:\n        return 5\n    return 0"
                 }
               }
             }

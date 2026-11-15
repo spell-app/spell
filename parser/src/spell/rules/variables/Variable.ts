@@ -10,7 +10,12 @@ import { type IdentifierMatchData } from "./variables.shared"
  * - Inside an action, `the X` naming only its thing's property is not ours -- see `namesOwnProperty()`.
  */
 /** The rules whose body is a loop's:  its variable is an argument of the loop's own scope. */
-const LOOP_RULES = new Set(["list_iteration", "list_range_iteration", "list_iteration_named_for_list", "repeat_n_times"])
+const LOOP_RULES = new Set([
+  "list_iteration",
+  "list_range_iteration",
+  "list_iteration_named_for_list",
+  "repeat_n_times"
+])
 
 export class Variable extends P.Sequence<"identifier", VariableMatchData> {
   parse(scope: P.Scope, tokens: P.Token[]) {

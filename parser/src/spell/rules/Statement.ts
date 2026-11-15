@@ -678,8 +678,10 @@ export class SpellStatement<
       if (!(statement?.rule instanceof SpellStatement)) return
       const result = statement.rule.getReturnValue(statement)
       if (result) returned.add(result.value ? result.value.datatype : "nothing")
-      // a callback's `return`s are its own
-      else if (!(statement.nestedScope instanceof P.MethodScope)) visit(statement.rule.getBody(statement))
+      // a callback's `return`s are its own:  a body with a method scope of its OWN, not one it's in (`return`'s ladder)
+      else if (statement.nestedScope === statement.scope || !(statement.nestedScope instanceof P.MethodScope)) {
+        visit(statement.rule.getBody(statement))
+      }
     }
   }
 

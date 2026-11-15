@@ -18,6 +18,7 @@ import { If } from "./If"
 import { ValueIf } from "./ValueIf"
 import { ValueOtherwise } from "./ValueOtherwise"
 import { StatementIf } from "./StatementIf"
+import { ReturnOtherwise } from "./ReturnOtherwise"
 
 /**
  * Spanish's `if` rules.
@@ -352,6 +353,38 @@ ifEs.addRule(StatementIf, {
       tests: [
         { input: "devolver sí si bar", js: "if (bar) return true" },
         { input: 'imprimir "ganaste" si bar es 52', js: 'if (bar === 52) core.console.log("ganaste")' }
+      ]
+    }
+  ]
+})
+
+ifEs.addRule(ReturnOtherwise, {
+  // Not `si no`, as for `value_otherwise`:  `devolver 0 si no` would be `devolver 0` if `no`
+  syntax: "(devolver|salir con?) {value:expression} (de lo contrario|sino)",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        ;(scope as P.BlockScope).variables.add("bar")
+      },
+      tests: [
+        [
+          [
+            "para contar los puntos:",
+            "\tdevolver 10 si bar",
+            "\tdevolver 5 si bar es 2",
+            "\tdevolver 0 de lo contrario"
+          ],
+          [
+            "export function contarLosPuntos() {",
+            '  return core.asAction({ undoneAs: "Contar los Puntos" }, () => {',
+            "    if (bar) return 10",
+            "    if (bar === 2) return 5",
+            "    return 0",
+            "  })",
+            "}"
+          ]
+        ]
       ]
     }
   ]
