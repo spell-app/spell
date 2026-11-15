@@ -79,7 +79,7 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (solitaire.stock.includes(this)) await solitaire.turnOverTheNextCard()
+    if (this.pile === solitaire.stock) await solitaire.turnOverTheNextCard()
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
@@ -106,7 +106,7 @@ export class Card extends TwoSidedView {
   /** what the move scores:  10 on a foundation, 5 from the discard pile, else nothing */
   countThePointsForCardOnPile(pile) {
     if (pile instanceof Foundation) return 10
-    if (solitaire.discardPile.includes(this)) return 5
+    if (this.pile === solitaire.discardPile) return 5
     return 0
   }
 
@@ -409,7 +409,7 @@ export class Solitaire extends App {
     this.score = 0
     this.deck.forEach((card) => core.meanwhile(() => card.turnFaceDown()))
     for (const card of this.deck) {
-      if (!this.stock.includes(card)) {
+      if (card.pile !== this.stock) {
         core.meanwhile(() => this.stock.append(card))
         await core.pauseFor(10, "msec")
       }
@@ -488,7 +488,7 @@ export class Solitaire extends App {
     const card = pile?.filter((card) => card.isFaceDirection("down"))?.randomItem()
     // turned up as it moves:  it rises over its column face down, then turns as it glides onto the discard pile
     this.discardPile.append(card)
-    return card?.turnFaceUp()
+    card?.turnFaceUp()
   }
 
   async onScoreChange(event) {

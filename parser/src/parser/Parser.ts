@@ -188,9 +188,22 @@ export class Parser extends Derivative {
   }
 
   /**
+   * What each type `text` declares is a kind of, found WITHOUT parsing it, by its name as `declaredTypes()` gives it:
+   * e.g. `pile` for `stock-pile`, in `a "stock pile" is a pile`.
+   * - Why:  so a line above the declaration knows the type's family too -- see `stubDeclaredTypes()`.
+   * - Only a kind the scan is sure of:  a type it can't tell gets none, until its line parses.
+   * - Default:  none.  Languages override, e.g. `SpellParser`.
+   */
+  declaredSuperTypes(_text: string): Map<string, string> {
+    return new Map()
+  }
+
+  /**
    * Stub each type `texts` declare (`declaredTypes()`) which `scope` doesn't know yet.
    * - Run BEFORE a project's files parse, so a line above a type's declaration knows the type too,
    *   e.g. `if the pile is a foundation`.
+   * - With its super-type, when the scan finds it (`declaredSuperTypes()`), so that line knows its family too:
+   *   `if the card is in the stock` asks the card's own pile (epic `language` J177).
    * - Its declaration then `claim()`s the stub -- see `P.TypeScope.getOrStub()`.
    * - Through `scope.types.add()`:  journaled, if there's a journal.
    * - Returns the names found, in order:  `P.IncrementalProject` re-parses everything when an edit changes them.
@@ -199,8 +212,13 @@ export class Parser extends Derivative {
     // our language in play:  a name is made singular by its own language's inflector (`pila de descartes`)
     return this.inPlay(() => {
       const names = texts.flatMap((text) => this.declaredTypes(text, scope))
+      const superTypes = new Map(texts.flatMap((text) => [...this.declaredSuperTypes(text)]))
       const lang = this.inflector?.lang
-      for (const name of names) if (!scope.types?.get(name)) scope.types?.add({ name, stub: true, lang })
+      for (const name of names) {
+        if (scope.types?.get(name)) continue
+        const superType = superTypes.get(name)
+        scope.types?.add({ name, stub: true, lang, ...(superType && { superType }) })
+      }
       return names
     })
   }

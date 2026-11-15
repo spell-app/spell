@@ -540,6 +540,7 @@
       "group": "Game Play",
       "kind": "method",
       "name": "cheat",
+      "returns": "nothing",
       "defined": "/Solitaire.spell:4707-5270"
     },
     {

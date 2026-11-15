@@ -697,6 +697,12 @@ export type DeclarationPatterns = {
    *   an app or a page, or a kind of one.
    */
   kindDeclaration: RegExp
+  /**
+   * An ability's word, which a type's line may put beside its kind:  `iu`, the whole word,
+   * e.g. `draggable` in `a "card" is a draggable two sided view` (`draggable_or_droppable`).
+   * - Read by `SpellParser.declaredSuperTypes()`:  the kind is the words left, `two sided view`.
+   */
+  abilityWord: RegExp
   /** A line declaring a value kind:  `gim`, its plural name captured, e.g. `suits`. */
   valueKindDeclaration: RegExp
   /**

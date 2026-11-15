@@ -551,6 +551,7 @@
       "group": "Juego",
       "kind": "method",
       "name": "hacer trampa",
+      "returns": "nothing",
       "defined": "/Solitario.es.spell:5524-6128"
     },
     {

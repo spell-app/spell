@@ -1795,6 +1795,15 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
       - a name of several words too:  `a stock pile is a pile` (P15)
         - only before `is a/an` or `aka`
       - a one-of-a-kind app, with no article:  `solitaire is an app` (P21)
+    - Each stub knows what it's a kind of, when the scan can tell (`SpellParser.declaredSuperTypes()`;
+      epic `language` J177):  `Pile` for `a "stock pile" is a pile with layout "stacked"`.
+      - So a line above it knows its family:  Solitaire's `if the card is in the stock` asks the card's own pile,
+        `this.pile === solitaire.stock`, not a search of the stock.
+      - Its abilities and a comment after it are left out:  `TwoSidedView` for `a "card" is a draggable two sided view`.
+      - None for a list type (`a deck is a list of cards`) or a value's (`a "score" is a number`):
+        its line says what it is when it parses.
+      - Its real line still `claim()`s it, with the super-type it parsed;  an edit to that line re-parses everything
+        (`changesTypeKinds()`).
     - `P.IncrementalProject` and `parseSpellProject()` both do it.
     - An edit which changes WHICH types a file declares re-parses the whole project.
     - Each file's parser stubs its own, in play (`inPlay()`):  a name is made singular by its own language,
