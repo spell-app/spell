@@ -12,7 +12,7 @@ export const actionEs = {
   tag: "ui-action",
   name: "accion",
   aka: ["acción", "orden", "elemento de menú", "botón de barra", "atajo de teclado"],
-  attributes: { flag: "bandera", action: "accion", shortcut: "atajo" },
+  attributes: { flag: "bandera", action: "accion", shortcut: "atajo", "icon-only": "solo-icono" },
   parts: { title: "titulo", shortcut: "atajo" },
   texts: { ...keyCapTextsEs }
 } as const satisfies E.TagDictionary

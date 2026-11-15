@@ -582,6 +582,14 @@
               "fieldName": "shortcut"
             },
             {
+              "name": "icon-only",
+              "description": "Only its icon, at every width:  its title is its tooltip and its name for a screen reader, and its row in a `shrinkable` menu's `…` menu.  No icon:  its title shows.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "iconOnly"
+            },
+            {
               "name": "loading",
               "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
               "type": {
@@ -733,6 +741,10 @@
             {
               "name": "disabled",
               "description": "Can't be chosen."
+            },
+            {
+              "name": "icon-only",
+              "description": "`icon-only`, with an icon:  its icon alone, its title hidden."
             },
             {
               "name": "loading",

@@ -13,8 +13,8 @@ solitaire is an app
 				<action "cheat"/>
 				<action "restart the game" title="Restart"/>
 				<spacer/>
-				<action "undo"/>
-				<action "redo"/>
+				<action "undo" icon-only/>
+				<action "redo" icon-only/>
 				<text slot="right">Score <number "score" /></>
 			</>
 		</>

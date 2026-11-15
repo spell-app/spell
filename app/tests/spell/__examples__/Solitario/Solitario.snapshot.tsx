@@ -567,8 +567,8 @@ export class Solitario extends App {
             {core.drawAction(this, "hacerTrampa", { "in-menu": true })}
             {core.drawAction(this, "reiniciarElJuego", { "in-menu": true })}
             <ui-action kind="divider" />
-            {core.drawAction(this, "undo", { "in-menu": true })}
-            {core.drawAction(this, "redo", { "in-menu": true })}
+            {core.drawAction(this, "undo", { "icon-only": true, "in-menu": true })}
+            {core.drawAction(this, "redo", { "icon-only": true, "in-menu": true })}
             <es-texto slot="derecha">Puntos: {this.puntuación}</es-texto>
           </es-barra-herramientas>
         </es-segmento>

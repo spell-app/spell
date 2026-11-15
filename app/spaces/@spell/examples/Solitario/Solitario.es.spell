@@ -19,8 +19,8 @@ solitario es una aplicación
 				<acción "hacer trampa"/>
 				<acción "reiniciar el juego"/>
 				<divisor/>
-				<acción "deshacer"/>
-				<acción "rehacer"/>
+				<acción "deshacer" solo-icono/>
+				<acción "rehacer" solo-icono/>
 				<texto slot="derecha">Puntos: <número "puntuación"/></>
 			</barra-herramientas>
 		</segmento>
