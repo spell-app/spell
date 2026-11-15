@@ -991,7 +991,8 @@ epic inbox <name> [--json]                 what's waiting, sent or not
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
    a todo's plane queues it for the next phase, its x drops it;
-   a phase's thumbs up (Do this) says go ahead and build it;
+   a phase's or an issue's plane (Do this) says go ahead and build it;
+   an open issue's x closes it (not needed);  a fixed one's check accepts the fix;
    a note box's x skips it (nothing to do);
    the header's paper plane sends the rest.  I'm listening."
    - Then the doc's link pair.

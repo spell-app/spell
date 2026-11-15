@@ -29,7 +29,9 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
 /**
  * Whose controls (`buttons`), which picks the buttons:
  * - `item`:  an item's four (`REVIEW_BUTTONS`), the note box's two (`NOTE_BUTTONS`)
- * - `issue`:  an issue's or a judgement call's (epic `epic-engine` I232):  Do this, Revisit, Approve (`ISSUE_BUTTONS`)
+ * - `issue`:  a judgement call's, a closed issue's (epic `epic-engine` I232):  Do this, Revisit, Approve (`ISSUE_BUTTONS`)
+ * - `issue-open`:  an open issue, nothing fixed (epic `epic-engine` I299):  Do this, Revisit, the x (`ISSUE_OPEN_BUTTONS`)
+ * - `issue-fixed`:  an issue or call fixed, waiting for Owen (I299):  Send back, Revisit, Accept (`ISSUE_FIXED_BUTTONS`)
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
  * - `todo-in-phase`:  a todo already in a phase (its `in P52` pill, epic `epic-engine` I271):  Revisit and the x
  *   (`TODO_IN_PHASE_BUTTONS`);  the pill does what the plane would
@@ -60,6 +62,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
 export const REVIEW_KINDS = [
   "item",
   "issue",
+  "issue-open",
+  "issue-fixed",
   "todo",
   "todo-in-phase",
   "todo-done",
@@ -132,6 +136,9 @@ export type ReviewButtonSpec = {
     | "deferPhase"
     | "doThis"
     | "sawIt"
+    | "closeIssue"
+    | "sendBack"
+    | "acceptFix"
   /** what it does, for a screen reader */
   tip:
     | "approveTip"
@@ -150,6 +157,9 @@ export type ReviewButtonSpec = {
     | "doThisTip"
     | "doThisIssueTip"
     | "sawItTip"
+    | "closeIssueTip"
+    | "sendBackTip"
+    | "acceptFixTip"
 }
 
 /**
@@ -167,14 +177,54 @@ export const REVIEW_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
- * An issue's or a judgement call's review buttons (epic `epic-engine` I232;  Owen, 2026-11-08):  Do this, Revisit, Approve.
- * - Do this, a thumbs up (a `todo` mark, as a phase's):  fix it, in the item itself;
- *   no todo made, it stays red until handled (`PlanDoc.doThis()`)
- * - Approve:  on a fix waiting for him (orange), closes it
+ * ONE icon per meaning on every review button (epic `epic-engine` I299;  Owen, 2026-11-15, on an open issue's thumbs up
+ * and check:  "Thumbs up and checkmark in the same row are ambiguous"):
+ * - the plane:  send it to be worked (a todo's next phase, an issue's or a phase's Do this, a fix sent back)
+ * - the x:  drop it, close it unfixed
+ * - the check:  accept it, saw it
+ * - the history:  revisit
+ * - the thumbs up stays only where it means "accept this" (Owen, 2026-10-29, I181):  a plan's Accept, Looks good, the
+ *   stage buttons, an accepted plan's state
+ */
+const DO_THIS: ReviewButtonSpec = {
+  action: "todo",
+  color: "green",
+  icon: "paper plane",
+  label: "doThis",
+  tip: "doThisIssueTip"
+}
+
+/**
+ * A judgement call's review buttons, and a closed issue's (epic `epic-engine` I232):  Do this, Revisit, Approve.
+ * - Do this, the plane (a `todo` mark, as a phase's):  act on it, in the item itself;
+ *   no todo made, it stays where it is until handled (`PlanDoc.doThis()`)
+ * - Approve, the check:  an open call agreed with (closed, accepted);  a closed item, reviewed
  */
 export const ISSUE_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.map((spec) =>
-  spec.action === "todo" ? { ...spec, icon: "thumbs up", label: "doThis", tip: "doThisIssueTip" } : spec
+  spec.action === "todo" ? DO_THIS : spec
 )
+
+/**
+ * An OPEN issue's, nothing fixed yet (epic `epic-engine` I299):  Do this, Revisit, the x.
+ * - the x (`drop`, grey):  not needed;  `inbox apply` closes it, canceled, as a todo's x
+ * - no check:  on an open issue it only said "reviewed", which read as "fine, closed" beside the Do this
+ */
+export const ISSUE_OPEN_BUTTONS: readonly ReviewButtonSpec[] = [
+  DO_THIS,
+  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
+  { action: "drop", color: "grey", icon: "xmark", label: "closeIssue", tip: "closeIssueTip" }
+]
+
+/**
+ * An issue or a call FIXED, waiting for Owen's review (orange;  epic `epic-engine` I299):  Send back, Revisit, Accept.
+ * - Send back, the plane (the same `todo` mark, I292's way to send a fix back):  not fixed, fix it again here
+ * - Accept, the check:  the fix is good;  `inbox apply` closes it (`PlanDoc.acceptFix()`)
+ */
+export const ISSUE_FIXED_BUTTONS: readonly ReviewButtonSpec[] = [
+  { ...DO_THIS, label: "sendBack", tip: "sendBackTip" },
+  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
+  { action: "approve", color: "green", icon: "check", label: "acceptFix", tip: "acceptFixTip" }
+]
 
 /**
  * A TODO's review buttons (Owen, 2026-10-09), one group, in this order:
@@ -217,13 +267,13 @@ export const PART_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.filter((
 
 /**
  * A phase's review buttons, still to do (epic `epic-engine` I181):  Do this, Revisit.
- * - Do this (`todo`, green:  decided), the thumbs up:  "yes, I want you to do this" (Owen, 2026-10-29:  "it's
- *   already a phase, you wouldn't make it a todo");  the same `todo` mark, which `inbox apply` takes on a phase as
- *   a go-ahead, never a new todo
- * - the thumbs up wherever a button means "accept this" rather than "make this a todo" (Owen, 2026-10-29)
+ * - Do this (`todo`, green:  decided), the plane since I299 (a thumbs up before):  "yes, I want you to do this"
+ *   (Owen, 2026-10-29:  "it's already a phase, you wouldn't make it a todo");  the same `todo` mark, which
+ *   `inbox apply` takes on a phase as a go-ahead, never a new todo
+ * - its plan's Accept and the accepted state keep the thumbs up:  "accept this" (Owen, 2026-10-29)
  */
 export const PHASE_BUTTONS: readonly ReviewButtonSpec[] = [
-  { action: "todo", color: "green", icon: "thumbs up", label: "doThis", tip: "doThisTip" },
+  { action: "todo", color: "green", icon: "paper plane", label: "doThis", tip: "doThisTip" },
   { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" }
 ]
 
@@ -303,6 +353,8 @@ export const AWAY_LINE_BUTTONS: readonly ReviewButtonSpec[] = [
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
   issue: ISSUE_BUTTONS,
+  "issue-open": ISSUE_OPEN_BUTTONS,
+  "issue-fixed": ISSUE_FIXED_BUTTONS,
   todo: TODO_BUTTONS,
   "todo-in-phase": TODO_IN_PHASE_BUTTONS,
   "todo-done": TODO_DONE_BUTTONS,
@@ -542,10 +594,25 @@ export const REVIEW_NAME_TEXTS = [
   { key: "drop", text: "Drop it", description: "A todo's review button (the x):  its name." },
   { key: "sawIt", text: "Saw it", description: "A finished todo's review button (the check):  its name (I296)." },
   {
+    key: "closeIssue",
+    text: "Close it:  not needed",
+    description: "An open issue's review button (the x):  its name (I299)."
+  },
+  {
+    key: "sendBack",
+    text: "Send it back",
+    description: "A fixed issue's or call's review button (the plane):  its name (I299)."
+  },
+  {
+    key: "acceptFix",
+    text: "Accept the fix",
+    description: "A fixed issue's or call's review button (the check):  its name (I299)."
+  },
+  {
     key: "doThis",
     text: "Do this",
     description:
-      "A to-do phase's first review button, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
+      "A to-do phase's or an issue's first review button, the plane (a thumbs up before I299;  epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
   },
   { key: "looksGood", text: "Looks good", description: "A phase's review button while the phases are agreed." },
   {
@@ -637,6 +704,21 @@ export const REVIEW_TEXTS = [
     key: "sawItTip",
     text: "It's done and you've looked:  marked reviewed, its update label gone",
     description: "A finished todo's review button:  what Saw it does (I296)."
+  },
+  {
+    key: "closeIssueTip",
+    text: "Not needed:  closed, canceled, once Claude applies it",
+    description: "An open issue's review button:  what the x does (I299)."
+  },
+  {
+    key: "sendBackTip",
+    text: "Not fixed:  back to Claude, to fix it again here",
+    description: "A fixed issue's or call's review button:  what the plane does (I299)."
+  },
+  {
+    key: "acceptFixTip",
+    text: "The fix is good:  closed",
+    description: "A fixed issue's or call's review button:  what the check does (I299)."
   },
   {
     key: "dropTip",

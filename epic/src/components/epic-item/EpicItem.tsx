@@ -744,7 +744,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return buttonsForItem(this.id, {
       limit: this.limit,
       inPhase: !!(this.handled || this.takenIn),
-      status: this.status
+      status: this.status,
+      fixed: !!this.fixed
     })
   }
 

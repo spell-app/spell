@@ -628,7 +628,7 @@ As `plan-doc.md`, "Ids":
   - Make Todo makes a todo linking `#o3`
   - a kept note is a paragraph at its end
 - So do a phase and the summary (epic `airplane` P2):  Make Todo and Revisit on the page;  no Approve.
-  - A phase's first button is Do this, a thumbs up (epic `epic-engine` I181;  2026-10-29:  "it's already a phase,
+  - A phase's first button is Do this, the plane (a thumbs up until I299;  epic `epic-engine` I181;  2026-10-29:  "it's already a phase,
     you wouldn't make it a todo"):  the same `todo` mark, applied as a go-ahead (below)
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
     - Do this (its `todo` mark) makes NO todo:  a Noted status card on the phase, "Go ahead:
@@ -640,7 +640,9 @@ As `plan-doc.md`, "Ids":
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
     - a kept note is `<epic-reply slot="notes">` in `<epic-summary>`
 - Do this on an issue or a judgement call (epic `epic-engine` I232;  2026-11-08):  its first button, the phase's
-  word and thumbs up;  the same stored `todo` mark.  NO todo is made.
+  word and plane (a thumbs up until I299);  the same stored `todo` mark.
+  - an OPEN issue's last button is the x (I299):  a `drop` mark, closed as canceled;  a FIXED one's (orange) is Accept the
+    fix (the check), its first Send back (the same plane, the same `todo` mark)  NO todo is made.
   - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
     their note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.

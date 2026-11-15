@@ -390,8 +390,37 @@ describe("<epic-item>", () => {
     expect(buttonsForItem("t1", { inPhase: true })).toBe("todo-in-phase")
     expect(buttonsForItem("t1")).toBe("todo")
     expect(buttonsForItem("t1", { limit: true, inPhase: true })).toBe("item")
-    expect(buttonsForItem("i1", { inPhase: true })).toBe("issue")
+    expect(buttonsForItem("i1", { inPhase: true })).toBe("issue-open")
     expect(BUTTONS_OF["todo-in-phase"].map((spec) => spec.action)).toEqual(["revisit", "drop"])
+  })
+
+  test("buttonsForItem():  one icon per meaning on an issue -- the plane sends, the x closes, the check accepts (I299)", () => {
+    const icons = (kind: keyof typeof BUTTONS_OF) => BUTTONS_OF[kind].map((spec) => [spec.action, spec.icon])
+    // an open issue:  Do this (the plane), Revisit, the x that closes it unfixed;  no thumbs up beside a check
+    expect(buttonsForItem("i1", { status: "open" })).toBe("issue-open")
+    expect(icons("issue-open")).toEqual([
+      ["todo", "paper plane"],
+      ["revisit", "history"],
+      ["drop", "xmark"]
+    ])
+    // fixed, waiting for Owen:  Send back (the plane), Revisit, Accept the fix (the check)
+    expect(buttonsForItem("i1", { status: "open", fixed: true })).toBe("issue-fixed")
+    expect(buttonsForItem("j1", { status: "open", fixed: true })).toBe("issue-fixed")
+    expect(BUTTONS_OF["issue-fixed"].map((spec) => [spec.action, spec.icon, spec.label])).toEqual([
+      ["todo", "paper plane", "sendBack"],
+      ["revisit", "history", "revisit"],
+      ["approve", "check", "acceptFix"]
+    ])
+    // a judgement call keeps its check:  agreeing with the call, not a cancel
+    expect(buttonsForItem("j1", { status: "open" })).toBe("issue")
+    expect(icons("issue")).toEqual([
+      ["todo", "paper plane"],
+      ["revisit", "history"],
+      ["approve", "check"]
+    ])
+    // a phase's Do this is the plane too;  only "accept this" keeps the thumbs up
+    expect(BUTTONS_OF.phase[0].icon).toBe("paper plane")
+    expect(BUTTONS_OF.plan[0].icon).toBe("thumbs up")
   })
 
   test("buttonsForItem():  a finished todo draws Revisit and Saw it, never the x that drops it (I296)", () => {

@@ -342,6 +342,9 @@ export function isTodo(id: string | undefined, limit: boolean | undefined): bool
 /** A todo's statuses once it's finished:  nothing left to queue or drop (I296). */
 const FINISHED_TODO = /^(done|canceled)$/
 
+/** An issue's id (`I3`):  of the calm ids (`CALM_ID`), the one whose open state draws the x (I299). */
+const ISSUE_ID = /^i\d+$/
+
 /**
  * Which review buttons item `id` draws (`<epic-review buttons>`):
  * a todo's;  an issue's or a call's, whose first is Do this (I232);  else an item's, Make Todo first.
@@ -350,16 +353,27 @@ const FINISHED_TODO = /^(done|canceled)$/
  *   (`todo-in-phase`, epic `epic-engine` I271)
  * - `status`:  its status;  a todo that's `done` or `canceled` draws Revisit and Saw it, never the x, which would
  *   drop it (`todo-done`, epic `epic-engine` I296)
+ * - `fixed`:  an open issue or call Claude fixed, waiting for Owen:  Send back, Revisit, Accept the fix
+ *   (`issue-fixed`, epic `epic-engine` I299);  an open issue not fixed:  Do this, Revisit, the x (`issue-open`);
+ *   a judgement call, or a closed issue:  Do this, Revisit, Approve (`issue`)
  */
 export function buttonsForItem(
   id: string | undefined,
-  { limit, inPhase, status }: { limit?: boolean; inPhase?: boolean; status?: string | null } = {}
-): "todo" | "todo-in-phase" | "todo-done" | "issue" | "item" {
+  {
+    limit,
+    inPhase,
+    status,
+    fixed
+  }: { limit?: boolean; inPhase?: boolean; status?: string | null; fixed?: boolean } = {}
+): "todo" | "todo-in-phase" | "todo-done" | "issue" | "issue-open" | "issue-fixed" | "item" {
   if (isTodo(id, limit)) {
     if (status && FINISHED_TODO.test(status)) return "todo-done"
     return inPhase ? "todo-in-phase" : "todo"
   }
-  return CALM_ID.test(id ?? "") ? "issue" : "item"
+  if (!CALM_ID.test(id ?? "")) return "item"
+  const open = !status || status === "open"
+  if (open && fixed) return "issue-fixed"
+  return open && ISSUE_ID.test(id ?? "") ? "issue-open" : "issue"
 }
 
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */
