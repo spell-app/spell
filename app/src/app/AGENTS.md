@@ -171,6 +171,9 @@ and in the app's build folder, `app/` at the app folder's root.
   - A web address in the code opens on a click on the icon after it, or on ⌘-click as in VS Code,
     whatever key the hover takes
     ([LinkClick](ui/monaco/LinkClick.ts), epic `editor` I101)
+  - Drawn bubbly, the code starts 8px from the pane's edge, the fold arrows half over it (`MonacoEditor.css`);
+    a press on one folds through [FoldArrows](ui/monaco/FoldArrows.ts), as Monaco would take it as one on the code
+    (epic `editor` I154)
   - A colour or an icon attribute's value is picked from its words list's first row, "Pick a color…":
     the palette or the icon picker at the caret ([ValuePicker](ui/monaco/ValuePicker.ts), epic `editor` T61)
   - An attribute's words show quietly under its value once the caret rests in it for a second, the value ticked

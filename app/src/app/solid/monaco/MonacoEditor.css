@@ -276,3 +276,27 @@
 .MonacoEditor .monaco-editor-overlaymessage .message {
   white-space: pre-line;
 }
+
+/*
+ * Drawn bubbly, the code starts 8px from the pane's edge, its fold arrows laid over the pills' padding
+ * (Owen, epic `editor` I154:  "We have enough space in the pills/etc so the vscode fold icons can overlap the pills")
+ * - Monaco always keeps 16px before the code for its fold arrows (`lineDecorationsWidth: 0`, `SpellMonaco.OPTIONS`):
+ *   the editor is moved 8px left, half that column under the pane's edge, and each arrow 4px right:
+ *   its chevron then ends just before the code's first word (`FoldArrows` takes a press on it over the code)
+ * - the margin above the code, so the arrows show and take their clicks
+ */
+.bubbly-monaco > .monaco-editor {
+  margin-inline-start: calc(-1 * var(--spell-fold-overlap));
+}
+.bubbly-monaco {
+  --spell-fold-overlap: 8px;
+  & .monaco-editor .margin {
+    z-index: 6;
+    overflow: visible;
+    /* Monaco's `contain: strict`, written on the element, would cut the arrows at the margin's edge */
+    contain: none !important;
+  }
+  & .monaco-editor .margin .cldr[class*="codicon-folding"] {
+    translate: calc(var(--spell-fold-overlap) / 2);
+  }
+}
