@@ -40,6 +40,7 @@ import { PlanTime } from "./PlanTime"
 import { ReviewBackfill } from "./ReviewBackfill"
 import { ReviewInbox } from "./ReviewInbox"
 import { StaleFacts } from "./StaleFacts"
+import { StaleUnderway } from "./StaleUnderway"
 import { SagaCommands } from "./SagaCommands"
 import { SagaPage } from "./SagaPage"
 import { Sagas } from "./Sagas"
@@ -302,8 +303,17 @@ export class PlanDocCommands {
         const [kind, title] = [need(rest[0], "a kind"), need(rest[1], "a title")]
         // a standing option set, in the Choices section (epic `epic-engine` P50)
         if (kind === "choices") return this.options.addStanding(file, title, flags)
-        const { id, example } = await this.edit(file, (plan) => this.tests.addItem(plan, kind, title, flags))
+        const words = stringFlag(flags.start)
+        if (flags.start === true) throw new PlanDocError(`--start needs the person's words:  --start "<his words>"`)
+        const { id, example } = await this.edit(file, (plan) => {
+          const given = words === undefined ? flags : { ...flags, details: flags.details ?? startedBody(words, plan) }
+          const added = this.tests.addItem(plan, kind, title, given)
+          if (words !== undefined) plan.addStatus(added.id, startedReading(flags))
+          return added
+        })
         this.tests.saveExample(file, example)
+        // taken up at once:  blue on the page now, never red as if it waited on him (epic `epic-engine` T78)
+        if (words !== undefined) this.inbox.setWorking(file, id, true, { took: true })
         return this.print(id.toUpperCase())
       }
       case "calm": {
@@ -356,6 +366,7 @@ export class PlanDocCommands {
           plan.log(`${rest[0].toUpperCase()} reopened:  ${title}`)
         })
       case "stale":
+        if (flags.underway) return this.staleUnderway(name, file, flags)
         return this.printStale(name, file, Boolean(flags.json))
       case "cancel": {
         await this.edit(file, (plan) => {
@@ -987,6 +998,29 @@ export class PlanDocCommands {
   }
 
   /**
+   * `stale <name> --underway [--apply] [--hours <n>] [--json]`:  the open items whose Underway card went stale, and
+   * whether their work is on `main` (`StaleUnderway`, epic `epic-engine` T78).
+   * - no `--apply`:  the report only
+   * - `--apply`:  on `main` => fixed for review (an issue or call;  another kind a Noted card), else a Stale card,
+   *   once;  one write of the page;  NEVER closes anything
+   * - the end of every turn runs it with `--apply --quiet` (`TurnEnd`)
+   */
+  private async staleUnderway(name: string, file: string, flags: Flags): Promise<void> {
+    const main = this.files.mainRoot()
+    const hours = flags.hours === undefined ? undefined : Number(flags.hours)
+    if (hours !== undefined && !(hours >= 0)) throw new PlanDocError(`--hours takes a number, not '${flags.hours}'`)
+    const working = ReviewInbox.read(ReviewInbox.pathFor(file)).working
+    const base = EpicConfig.of(main).baseBranch
+    const tidy = (plan: PlanDoc) => new StaleUnderway({ plan, epic: name, main, base, working, hours })
+    if (!flags.apply) {
+      const items = tidy(this.read(file)).report()
+      return this.print(flags.json ? JSON.stringify(items, null, 2) : StaleUnderway.lines(name, items).join("\n"))
+    }
+    const lines = await this.edit(file, (plan) => tidy(plan).apply())
+    if (lines.length || !flags.quiet) this.print(lines.length ? lines.join("\n") : `${name}:  nothing stale`)
+  }
+
+  /**
    * `original <name> <id> --file <html> [--as-of "YYYY-MM-DD HH:MM"]`:
    * earlier text into an item's Original Discussion.
    */
@@ -1488,6 +1522,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
                                                    wouldn't surprise you, grey (a call) or yellow (an issue) rather than red
+  add <name> issue "title" --requested --start "<his words>" [--agent <name>]
+                                                   an issue filed from the person's words and taken up at
+                                                   once:  his words its body, an Underway card, the spinner
+                                                   on:  blue, never red as if it waited on him (T78)
   add <name> test "title" --step html --should html [--example <png> | "text"] [--if-not html]
                                                    a test your test run steps you through:  what to do (a
                                                    Step may hold <a class="epic-test-action" href> links,
@@ -1532,6 +1570,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   reopen <name> <id>                               open an item again
   stale <name> [--json]                            the facts for judging which open calls, issues and todos have gone
                                                    stale;  decides nothing (for /epic tidy)
+  stale <name> --underway [--apply] [--hours n] [--json]
+                                                   open items whose Underway card is older than n hours (3),
+                                                   nobody working them:  on main => fixed for review;  else a
+                                                   Stale card, once (--apply);  every turn's end runs it (T78)
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it
   commit <name> <sha> --phase N | --item <id> "sentence"
@@ -1688,6 +1730,22 @@ function refuseCanceled(name: string, file: string, id: string): void {
     `${id.toUpperCase()}:  the person called this request off on the page ("nevermind"):  nothing written.  ` +
       `\`epic inbox done ${name}#${id}\` and stop.`
   )
+}
+
+/**
+ * `add ... --start "<his words>"`'s body:  the person's words, quoted, as plain text (epic `epic-engine` T78).
+ * - Owen, 2026-11-15, on an issue filed from his words and drawn red with "What it says on the tin":  "you should
+ *   start the issue and show it appropriately ... makes it look like I need to take action on it"
+ */
+function startedBody(words: string, plan: PlanDoc): string {
+  const person = plan.person && plan.person !== "someone" ? plan.person : "Owen"
+  return `<p>${PlanMarkup.text(person)}:  “${PlanMarkup.text(words.trim())}”</p>`
+}
+
+/** `add ... --start`'s underway card:  who took it up (`--agent <name>`), else that it was taken up at once. */
+function startedReading(flags: Flags): string {
+  const agent = stringFlag(flags.agent)
+  return agent ? `Taken up at once:  agent <code>${PlanMarkup.text(agent)}</code> is on it.` : "Taken up at once."
 }
 
 /**

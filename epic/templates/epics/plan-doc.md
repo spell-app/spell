@@ -550,10 +550,10 @@ pages.js` `findPages()`, `spell ssr`): the docs' home page, `docs update` and li
 
 ## UPDATE markers
 
-ONE element for every update, `<epic-update>` (2026-10-11;  `PLAN-DOC.md`, "Updates"). While a phase is
-active, flag what changed so the user can spot it:
+ONE element for every update, `<epic-update>` (2026-10-11;  `PLAN-DOC.md`, "Updates"). Flag what changed so the user
+can spot it, on any epic, a phase under way or not (I290):
 
-- a new or changed item gets a bare UPDATE label in its title (the tool adds it: `PLAN-DOC.md`, "Items")
+- a changed item gets a bare UPDATE label in its title (a NEW one, only while a phase is under way) (the tool adds it: `PLAN-DOC.md`, "Items")
   - a status change says which (`became`, T75):  `UPDATE : FIXED`, `DONE`, `CANCELED`, `DECIDED`, `REOPENED`
   - then a blue `Not in main` pill while that work is on the epic's branch alone (`unmerged`, from git on every edit)
   - gone once the user checks the item (their ✓, I285):  at once on the page, and from the file as the mark is applied;

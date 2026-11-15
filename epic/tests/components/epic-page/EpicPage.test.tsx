@@ -708,6 +708,26 @@ describe("<epic-page> Send and its countdown", () => {
     expect(pill()).toBeNull()
   })
 
+  // epic `epic-engine` I289:  Clarify on an item far down told a session through its inbox poller;  the pill appearing at
+  // the page's top read as the page jumping there
+  test("woken by TELLING a session (its inbox poller):  no pill, nothing for Owen to do", async () => {
+    const routes = new FakeRoutes()
+    const at = new Date().toISOString()
+    routes.inbox.marks = { q1: { action: "details", at } }
+    routes.inbox.now = [{ id: "q1", action: "details", at }]
+    routes.inbox.woken = {
+      at,
+      state: "told",
+      did: "told 🚧 demo through its inbox poller",
+      message: "Told 🚧 demo through its inbox poller:  it wakes once its turn ends, nothing typed."
+    }
+    await adoptClient(routes)
+    const host = await render(page("", ["todo"]))
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector('[part~="review-line"]')).not.toBeNull())
+    await ElementFixture.tick()
+    expect(host.shadowRoot!.querySelector('[part~="pill"]')).toBeNull()
+  })
+
   test("the pill copies the review line's command", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
     const routes = new FakeRoutes()

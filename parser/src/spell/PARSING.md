@@ -730,6 +730,8 @@ A kind that says so is saved in a file of its own.
     - Its last line asks, even one that reads as a statement:
       `the card is the last item of the card's pile` is `card === ...`, not `card = ...` (`answersYesOrNo()`,
       `readsAsQuestion`;  epic `language` T135).
+    - A line ABOVE it of that shape still sets:  a warning says so, and how to ask, end it with `and`
+      (`AssignmentStatement`'s `warnIfSetsInsteadOfAsking()`, `sets-instead-of-asking`;  epic `language` T137).
   - In the body:
     - `the card` is the card
     - `it`, `its` and `the tableau` are the list

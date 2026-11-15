@@ -63,7 +63,9 @@ An agent that can start background agents keeps its own session free to answer t
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
 3. Do the work.  Record as you go:
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
-     (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked)
+     (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
+     taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited
+     on them -- the epic skill's "The session answers;  agents build")
    - a choice made without the person:  `epic add <epic>#J "title" --calm --details "<p>...</p>"`
      (red, without `--calm`, only when it goes against what they said, or needs their answer)
    - a limit you accept:  `epic add <epic>#T "title" --limit`
@@ -136,6 +138,9 @@ epic turn end
 ## tidy -- Close what other work made obsolete
 
 Only when the person asks (the skill's word:  `$epic tidy`).
+Its mechanical half runs by itself at every turn's end (`epic turn end`):  `epic stale <epic> --underway --apply`,
+stale Underway items whose work is on main turned orange for review, the rest given a `Stale:` card (the epic skill's
+"14. Tidy").
 
 ```sh
 epic stale <epic> --json     # the facts per open call, issue and todo;  it decides nothing

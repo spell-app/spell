@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from "node:fs"
+import { existsSync, readdirSync, realpathSync, statSync } from "node:fs"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
@@ -295,11 +295,52 @@ export class PageServer {
     // beyond its own folder, and a merge that changed only `epic/src/tool/ReviewInbox.ts` left the server refusing
     // the new `hold` mark
     const routes = (pageServerSettings(root).routes ?? []).map((path) => codeFolderOf(join(root, path)))
+    // the kit's OWN code, never the caller's (epic `epic-engine` I287):  a worktree's code restarting main's server
+    // ran its Router over main's route modules, and every `/api` answered 500 "handler is not a function"
+    const code = PageServer.codeFor(root)
     return new SRV.PidFile(root).ensure({
-      command: [process.execPath, "--import", "tsx", CLI, "serve", "--root", resolve(root), "--port", String(port)],
-      env: { TSX_TSCONFIG_PATH: TSCONFIG },
-      sources: [SOURCE, ...new Set(routes)]
+      command: [
+        process.execPath,
+        "--import",
+        "tsx",
+        code.cli,
+        "serve",
+        "--root",
+        resolve(root),
+        "--port",
+        String(port)
+      ],
+      env: { TSX_TSCONFIG_PATH: code.tsconfig },
+      sources: [code.source, ...new Set(routes)]
     })
+  }
+
+  /**
+   * The page server code the kit at `root` runs:  its OWN `src/server/page/cli.ts`, once it's installed
+   * (`node_modules/tsx`), else this code's (epic `epic-engine` I287).
+   * - so a worktree's tools starting or restarting main's server run main's code, and main's a worktree's
+   * - `cli`:  the command line;  `source`:  its `src/server/`, whose changes restart it;  `tsconfig`:  its node settings
+   * - this code's:  a kit not installed yet, or one with no page server of its own (an npm install's)
+   */
+  static codeFor(root: string): { cli: string; source: string; tsconfig: string } {
+    const own = {
+      cli: join(root, "src/server/page/cli.ts"),
+      source: join(root, "src/server"),
+      tsconfig: join(root, "tsconfig.node.json")
+    }
+    if (existsSync(own.cli) && existsSync(join(root, "node_modules/tsx"))) return own
+    return { cli: CLI, source: SOURCE, tsconfig: TSCONFIG }
+  }
+
+  /**
+   * The other kit's page server that should serve `root`, when it isn't this code:  `root`'s own `cli.ts`, else
+   * `undefined` (epic `epic-engine` I287).
+   * - `page/cli.ts serve` refuses to run with one, naming both
+   */
+  static foreignCodeFor(root: string): string | undefined {
+    const { cli } = PageServer.codeFor(root)
+    const real = (path: string) => (existsSync(path) ? realpathSync(path) : path)
+    return real(cli) === real(CLI) ? undefined : cli
   }
 
   /**

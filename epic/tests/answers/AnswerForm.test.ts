@@ -253,6 +253,21 @@ describe("AnswerForm", () => {
     expect(form.notice).toBe("")
   })
 
+  // epic `epic-engine` T79:  the page's bullhorn comments go with its Send
+  test("bullhorn comments waiting make the page pending and sendable with nothing else on it;  sent, they're done", async () => {
+    const server = new FakeServer()
+    const form = formOn(server)
+    form.add(new FakeAsk(at("a"), "q1"))
+    form.keepPageComments({ unsent: 2 })
+    expect([form.isPending, form.stateLine]).toEqual([true, { text: "Not sent · 2 comments to send", color: "blue" }])
+    await form.send()
+    expect([form.error, server.posts.length, form.pageComments]).toEqual(["", 1, 0])
+    form.keepPageComments({ unsent: "1" })
+    expect(form.stateLine.text).toBe("Sent · 1 comment to send")
+    form.keepPageComments(null)
+    expect(form.isPending).toBe(false)
+  })
+
   test("refuses to send an empty page never sent, or a page off the page server;  a route's error said, editable still", async () => {
     const server = new FakeServer()
     const form = formOn(server)

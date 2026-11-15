@@ -1006,14 +1006,17 @@ describe("PlanDoc questions and decisions", () => {
     expect(plan.decide("Q1", "Chrome first", { details: "<p>most readers</p>" })).toBe("q1")
     expect(order(plan)).toEqual(["q2:open", "q1:decided", "q3:decided"])
     const question = el(plan, "q1")
-    expect([question.getAttribute("title"), question.hasAttribute("answered")]).toEqual(["which browser?", true])
+    expect([PlanItem.titleOf(question), question.hasAttribute("answered")]).toEqual(["which browser?", true])
+    // no phase under way, and still `UPDATE : DECIDED` (epic `epic-engine` I290):  the title moves into its slot
     expect(question.innerHTML).toBe(
-      '<epic-question><p>the options</p></epic-question><epic-answer title="Chrome first"><p>most readers</p></epic-answer>'
+      '<span slot="title">which browser? <epic-update became="decided"></epic-update></span>' +
+        '<epic-question><p>the options</p></epic-question><epic-answer title="Chrome first"><p>most readers</p></epic-answer>'
     )
     plan.decide("q2", "not now")
     // a question made with no details has its title's words as its text (I209):  the answer goes after them
     expect(el(plan, "q2").innerHTML).toBe(
-      '<epic-question><p data-title-body=""><em>What it says on the tin.</em><epic-clarify></epic-clarify></p></epic-question><epic-answer title="not now"></epic-answer>'
+      '<span slot="title">later? <epic-update became="decided"></epic-update></span>' +
+        '<epic-question><p data-title-body=""><em>What it says on the tin.</em><epic-clarify></epic-clarify></p></epic-question><epic-answer title="not now"></epic-answer>'
     )
     // answering again replaces the answer;  the old one goes into the Original Discussion (I7), as prose
     plan.decide("q2", "maybe later")
@@ -2476,7 +2479,8 @@ describe("PlanDoc review inbox", () => {
       re: '"why?"'
     })
     plan.setDetails("t1", "<p>more</p>")
-    expect(el(plan, "t1").innerHTML).toBe("<p>more</p>")
+    // a change with no phase under way is labelled too (epic `epic-engine` I290)
+    expect(el(plan, "t1").innerHTML).toBe('<span slot="title">slow <epic-update></epic-update></span><p>more</p>')
     expect(el(plan, "t1").getAttribute("changed")).toMatch(/^2026-10-01T09:05/)
     expect(problems(plan)).toEqual([])
   })

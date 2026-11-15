@@ -1287,7 +1287,13 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
   summary: { "--json": "print it as JSON" },
-  stale: { "--json": "print them as JSON" },
+  stale: {
+    "--json": "print them as JSON",
+    "--underway": "the open items whose Underway card went stale, and whether their work is on main (T78)",
+    "--apply": "with --underway:  on main => fixed for review;  else a Stale card, once;  never closes anything",
+    "--hours <n>": "with --underway:  how old an Underway card must be (default 3)",
+    "--quiet": "with --apply:  say nothing when nothing changed"
+  },
   summaries: {},
   items: {
     "--section <section>": "only that section:  questions, judgements, todos, issues or tests",
@@ -1363,6 +1369,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--requested":
       "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--limit": "a todo:  a limit to know about, not work",
+    "--start <words>":
+      "taken up at once:  the person's words its body, an Underway card, the spinner on:  blue, not red (T78)",
+    "--agent <name>": "with --start:  the agent on it, named on its Underway card",
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",

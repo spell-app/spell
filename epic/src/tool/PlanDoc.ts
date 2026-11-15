@@ -1003,7 +1003,8 @@ export class PlanDoc extends PlanReader {
     section.append(item)
     if (spec.prefix === KINDS.question.prefix) this.placeQuestion(item)
     this.stamp(item)
-    this.markUpdate(item)
+    // a new item is new, not an update:  labelled only while a phase is active, as it always was
+    if (this.activePhase) this.markUpdate(item)
     return id
   }
 
@@ -1185,17 +1186,21 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * While a phase is active, flag `item` as changed in it (once):  an `<epic-update phase="N">` in its title, which
-   * becomes a `slot="title"` child to hold it (as the converter writes one).
+   * Flag `item` as changed (once):  an `<epic-update>` in its title, which becomes a `slot="title"` child to hold it
+   * (as the converter writes one).
+   * - a phase active:  `<epic-update phase="N">`, which `phase N done` takes off with the phase's other labels
+   * - none (a standing epic, between phases;  epic `epic-engine` I290):  a label with no phase, which only Owen's ✓
+   *   takes off (`dropUpdateLabel()`, I285)
+   *   - Owen, 2026-11-15, on epic-engine's I172, fixed by the end-of-turn tidy with no label:
+   *     "Shouldn't this have the `updated: fixed` marker?"
    * - `became`:  the change was a status change (epic `epic-engine` T75):  the label says which, `UPDATE : FIXED`;
    *   a later one replaces it, a plain edit (none) keeps it
    */
   markUpdate(item: Element, became?: UpdateBecame): void {
     const n = this.activePhase
-    if (!n) return
     let label = PlanItem.updateLabelOf(item)
     if (!label) {
-      label = this.make("epic-update", { phase: n })
+      label = this.make("epic-update", n ? { phase: n } : {})
       this.titleSlot(item).append(this.document.createTextNode(" "), label)
     }
     if (became) Markup.set<"epic-update">(label, { became })

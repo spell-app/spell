@@ -193,6 +193,23 @@ test("formats a page with no questions:  its comments and notes, no count of wha
   ])
 })
 
+// epic `epic-engine` T79 (request r71):  the page's bullhorn comments, sent with its answer
+test("formats the page's bullhorn comments sent with it, and how to answer each", () => {
+  const page = join(docs, "pages/details/pick-layout.html")
+  const answer = {
+    page: "/epics/language/details/bold.html",
+    answered: "2026-11-15T19:00:00.000Z",
+    changes: 0,
+    answers: {},
+    notes: "",
+    pageComments: [{ id: "C2", on: "1. Bold", text: "Is bold louder?" }]
+  }
+  expect(formatAnswer(page, answer).split("\n").slice(-2)).toEqual([
+    "  Bullhorn comments, sent with it (answer each:  epic comments answer epics/language/details/bold.html#<id> --file <reply.html>):",
+    '    C2 on "1. Bold":  Is bold louder?'
+  ])
+})
+
 test("formats kept text:  questions gone from the page, under their old titles", () => {
   const page = join(docs, "pages/details/pick-layout.html")
   const answer = {

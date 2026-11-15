@@ -58,6 +58,12 @@ export const PARSER_MESSAGES = {
   "untyped-list-property-is": 'Say what "{name}" holds, e.g. "{line} a list of {items}"',
   /** A new variable set to a list of nothing said, `set state to []`. */
   "untyped-list-variable": 'Say what "{name}" holds, e.g. "set {name} to a new list of {items}"',
+  /**
+   * `the card is ...` in a body answering yes or no (`it is droppable when`), above its last line:
+   * it sets the card, it doesn't ask (epic `language` T137).
+   */
+  "sets-instead-of-asking":
+    'This sets "{thing}", it doesn\'t ask:  to ask, end the line with "and";  to set it, write "set {thing} to {value}"',
   /** A property a `set` declares, from a value that doesn't say what it is. */
   "untyped-set-property": 'Say what "{name}" is:  declare it, e.g. "{aType} has a {name} as {type}"',
   /** A read of a member its type never declares, `the name of the pile`. */

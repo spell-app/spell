@@ -886,9 +886,10 @@ easily"), `components/epic-update/`:
       sub-section;  an update to a whole Overview sub-section goes last inside it
     - Before 2026-10-11 a prose update was a NOTE placed BEFORE the block (`<epic-update phase>` with children, no
       `at`):  migrated (below).
-- A bare LABEL:  no summary, no date, no children.  An orange `UPDATE` inline:  an item changed while a phase is active
-  (the tool puts it in the item's title), or a changed line of prose.
-- `phase`:  the phase active when it was written.
+- A bare LABEL:  no summary, no date, no children.  An orange `UPDATE` inline:  an item changed (the tool puts it in the
+  item's title), or a changed line of prose.
+  - on any epic, a phase under way or not (epic `epic-engine` I290):  a NEW item only while a phase is under way
+- `phase`:  the phase active when it was written;  none, none (only Owen's ✓ takes that label off, I285).
   - `phase N done` removes phase N's bare labels and its updates OUTSIDE a phase (prose updates):  once the phase is
     finished, those changes are just the plan.
   - A phase's own plan changes (`epic-phase > epic-update`) stay for good:  the record of how the plan moved.

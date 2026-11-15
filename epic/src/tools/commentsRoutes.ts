@@ -75,8 +75,10 @@
  *     - kept in `<page>.inbox.json5` beside each, in the set's tracked `docs/` folder,
  *       git-ignored there (the repo's `.gitignore`)
  *   - NOT a split epic page's `parts/` (they're shown inside their doc), nor an epic page's pre-2026-10-04 name
- *   - NOT a details page (questions, or only comment boxes and notes:  its `<epic-send>`), or a choice page:  they're
- *     answered on the page
+ *   - a details page TOO, questions and `<epic-send>` and all (epic `epic-engine` T79, request r71:  "I want to put
+ *     bullhorn comments in that doc"):  its comments go with its answer, by its own Send (`PageSend.byPage`), never a
+ *     second Send in its header (r6)
+ *   - NOT a choice page, nor another page answered on the page (`<epic-ask>` outside a `details/` folder)
  *   - NOT `templates/`, the parked goal sets in `goals/` (they have thoughts), or the brand pages (`brand/`)
  *   - anything else:  `takesComments: false` to a GET, 403 to a POST;  no such page:  404;  bad input:  400
  * - every write:  under the inbox file's lock (`SRV.FileLock`), atomic;
@@ -159,12 +161,11 @@ const PLAN_DOC = /\.(?:plan|saga)\.html$/
 const ANSWERED_ON_PAGE = /<epic-ask\b|class="spell-question\b/
 
 /**
- * A details page answered on the page with no questions:  only its sections' comment boxes and the notes, sent by
- * its `<epic-send>` (`DETAILS_FILE`:  in a `details/` folder;  Epic UI's `<epic-send>` page shows one, and takes
- * comments).
- * - why (epic `epic-engine` r6):  such a page took comments, so the runtime drew the comments' Send in its header
- *   beside `<epic-send>`, over it:  grey with no bullhorn comments, "nobody is listening" with no `epic inbox wait`;
- *   Owen took it for the page's Send
+ * A details page's own Send, `<epic-send>` (`DETAILS_FILE`:  in a `details/` folder;  Epic UI's `<epic-send>` page
+ * shows one, and isn't a details page):  its bullhorn comments go with its answer (`PageSend.byPage`).
+ * - why (epic `epic-engine` r6):  the comments' Send drawn in the header beside `<epic-send>`, over it, grey with no
+ *   bullhorn comments, "nobody is listening" with no `epic inbox wait`:  Owen took it for the page's Send;  so such a
+ *   page took no comments, until T79 (r71) sent them with the page's own Send instead
  */
 const DETAILS_SEND = /<epic-send\b/
 
@@ -261,6 +262,7 @@ export function sendOf(root: string, page: string, file: string): { send?: PageS
     send: {
       epic,
       owned,
+      byPage: isSentByPage(file),
       wakes: owned || existsSync(planDocOf(root, epic)),
       listening: review.liveListener()?.session ?? null,
       sent: inbox.sent,
@@ -275,6 +277,8 @@ export function sendOf(root: string, page: string, file: string): { send?: PageS
  * - `epic`:  the epic its comments go to:  the one it belongs to (`SeeAlso.ownerOf()`), else the standing `feedback`
  *   (`SeeAlso.epicFor()`, epic `epic-engine` T9)
  * - `owned`:  an epic owns it (`false`:  `feedback`'s, the inbox for every page no epic owns)
+ * - `byPage`:  a details page with its own Send, `<epic-send>` (epic `epic-engine` T79):  its comments go with its
+ *   answer (`detailsRoutes.ts`), so the runtime draws no Send of theirs, and tells the page's answer how many wait
  * - `wakes`:  a Send while nobody listens wakes `epic`'s session (`ReviewStart.wakeFor()`):  an owned page's always;
  *   `feedback`'s once its epic page is there (else its comments wait for `/airplane land`'s sweep, which makes it)
  * - `listening`:  the session listening to that epic's review inbox, else `null`
@@ -285,12 +289,59 @@ export function sendOf(root: string, page: string, file: string): { send?: PageS
 export type PageSend = {
   epic: string
   owned: boolean
+  byPage: boolean
   wakes: boolean
   listening: string | null
   sent: string | null
   unsent: string[]
   waiting: string[]
 }
+
+/** Is the page at `file` a details page sent by its own `<epic-send>`, its comments with its answer (T79)? */
+export function isSentByPage(file: string): boolean {
+  return DETAILS_FILE.test(file) && DETAILS_SEND.test(readFileSync(file, "utf8"))
+}
+
+/**
+ * Hand a details page's bullhorn comments over WITH its answer (epic `epic-engine` T79, r71):  the comments waiting
+ * for a Send are marked sent, as the comments' own Send does, and returned for the answer's file (`detailsRoutes.ts`),
+ * so the session reading the answer (`epic ask wait`) reads them too.
+ * - nobody waiting on the page (`listening`, its `epic ask wait`), and an epic owns it:  that epic is woken, as the
+ *   comments' Send wakes it (`ReviewStart.wakeFor()`), its `epic inbox wait` handing them over;  a scratch details
+ *   page (`pages/details/`, no epic) wakes nobody:  its next `ask wait` or `ask answer` reads them
+ * - none waiting:  `[]`, nothing written
+ * - SIDE EFFECT:  writes the page's comments file (`<page>.inbox.json5`);  may wake the owning epic
+ */
+export async function handOverComments(
+  root: string,
+  page: string,
+  file: string,
+  { listening }: { listening: boolean }
+): Promise<PageComment[]> {
+  let handed: PageComment[] = []
+  await GuideInbox.updateAsync(GuideInbox.fileFor(file), (_comments, inbox) => {
+    handed = inbox.unsentComments.map(pageCommentOf)
+    if (handed.length) inbox.markSent()
+  })
+  if (!handed.length || listening) return handed
+  const { send } = sendOf(root, page, file)
+  if (send?.owned && !send.listening)
+    await new ReviewStart(root).wakeFor(planDocOf(root, send.epic), send.epic, { fresh: true })
+  return handed
+}
+
+/** `comment` as a details page's answer keeps it:  its id as people see it, what it's on, the person's latest words. */
+function pageCommentOf(comment: IdentifiedComment): PageComment {
+  const words = ThreadFacts.lastPersonReply(comment)?.text ?? comment.text
+  const on = comment.quote || comment.label || comment.excerpt || ThreadFacts.kindName(comment.kind)
+  return { id: ThreadFacts.label(comment.id), on: on.replace(/\s+/g, " ").trim().slice(0, 80), text: words ?? "" }
+}
+
+/**
+ * A bullhorn comment sent with a details page's answer (T79):  `C3`, what it's on (the quoted words, else its section's
+ * title, else its block's first words), and the person's latest words on its thread.
+ */
+export type PageComment = { id: string; on: string; text: string }
 
 /** Epic `epic`'s epic page, in checkout `root`'s repo's epic folder (there or not). */
 function planDocOf(root: string, epic: string): string {
@@ -317,9 +368,10 @@ export function commentsPage(files: SRV.StaticHandler, page: unknown): string {
   // an epic or saga page is never answered on the page, whatever its prose names:  `epic-workflow`'s item titles name
   // `<epic-ask>`, and it took no comments (epic `epic-workflow` P25)
   if (PLAN_DOC.test(resolved.file)) return resolved.file
-  const html = readFileSync(resolved.file, "utf8")
-  const isDetailsSend = DETAILS_FILE.test(resolved.file) && DETAILS_SEND.test(html)
-  if (ANSWERED_ON_PAGE.test(html) || isDetailsSend || DataFile.exists(rowsFile(resolved.file)))
+  // a details page takes them, its questions and `<epic-send>` too (T79):  they go with its answer
+  if (DataFile.exists(rowsFile(resolved.file)))
+    throw new SRV.HttpError(403, `${page} is a choice page, answered on the page, not with comments`)
+  if (!DETAILS_FILE.test(resolved.file) && ANSWERED_ON_PAGE.test(readFileSync(resolved.file, "utf8")))
     throw new SRV.HttpError(403, `${page} is answered on the page, not with comments`)
   return resolved.file
 }

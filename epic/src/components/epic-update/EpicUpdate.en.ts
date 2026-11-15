@@ -22,7 +22,7 @@ export const epicUpdateVocabulary = {
     "An UPDATE (Owen, 2026-10-11):  a block titled `Update: <summary>`, its date at the right, what changed " +
     "under it.  A phase's plan change sits at the end of its phase's description (after Goal);  an update to " +
     "prose right after the block it changed.  Empty, with no `summary` or `at`:  the orange UPDATE label on an " +
-    "item changed while a phase is active.",
+    "item changed (on any epic, a phase under way or not).",
   attributes: [
     {
       name: "id",

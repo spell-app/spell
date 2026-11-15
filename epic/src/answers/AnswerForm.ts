@@ -12,6 +12,8 @@ import {
   DETAILS_SAVE_MS,
   DETAILS_SETTLE_MS,
   DRAFT_KEY_PREFIX,
+  PAGE_COMMENTS_ATTRIBUTE,
+  PAGE_COMMENTS_EVENT,
   type AnswerListener,
   type AnswerPart,
   type AskPart,
@@ -108,6 +110,13 @@ export class AnswerForm extends PageStore {
 
   /** What the last send did, when nobody was waiting for it:  saved for the next look;  `""` otherwise. */
   notice = ""
+
+  /**
+   * How many of the page's BULLHORN comments wait for a Send (epic `epic-engine` T79):  they go with the answer, so
+   * they make it pending, and Send works with nothing else on the page;  the docs runtime says it
+   * (`PAGE_COMMENTS_EVENT`)
+   */
+  pageComments = 0
 
   /** The page as last sent (`snapshot()`), to tell "Changes not sent";  `null` before the first send. */
   private sentSnapshot: string | null = null
@@ -267,8 +276,12 @@ export class AnswerForm extends PageStore {
     return !picked && !notes && !Object.keys(comments).length && !kept?.length
   }
 
-  /** Something not sent:  the page differs from the send (never sent:  anything on it). */
+  /**
+   * Something not sent:  the page differs from the send (never sent:  anything on it), or a bullhorn comment waits
+   * for one (`pageComments`).
+   */
   get isPending(): boolean {
+    if (this.pageComments) return true
     return this.sentSnapshot === null ? !this.isEmpty : this.snapshot() !== this.sentSnapshot
   }
 
@@ -284,13 +297,23 @@ export class AnswerForm extends PageStore {
    * - "Sent 10/8/26 14:34 · 5 of 17 decided" (green)
    */
   get stateLine(): { text: string; color: "grey" | "blue" | "green" } {
-    if (this.isPending) return { text: this.sent ? "Changes not sent" : "Not sent", color: "blue" }
+    if (this.isPending) {
+      const changed = this.sentSnapshot !== null && this.snapshot() !== this.sentSnapshot
+      const words = !this.sent ? "Not sent" : changed || !this.pageComments ? "Changes not sent" : "Sent"
+      return { text: `${words}${this.commentsLine}`, color: "blue" }
+    }
     if (!this.sent) return { text: "Not sent", color: "grey" }
     const { decided, total } = this.decided
     const when = PlanDates.formatDate(new Date(this.sent.answered))
     // a page of comment boxes alone has no question to count
     const count = total ? ` · ${decided} of ${total} decided` : ""
     return { text: `Sent ${when}${count}`, color: "green" }
+  }
+
+  /** `stateLine`'s words for the bullhorn comments a Send would take too (T79):  `" · 2 comments to send"`, else `""`. */
+  private get commentsLine(): string {
+    const count = this.pageComments
+    return count ? ` · ${count} comment${count === 1 ? "" : "s"} to send` : ""
   }
 
   /**
@@ -333,7 +356,7 @@ export class AnswerForm extends PageStore {
    */
   async send(): Promise<void> {
     if (this.isSending) return
-    if (!this.sent && this.isEmpty)
+    if (!this.sent && this.isEmpty && !this.pageComments)
       return this.fail("Pick an option, or write something (Other, a comment, a note) first.")
     if (!this.link.isServed)
       return this.fail("This page isn't on the page server, so it can't send:  answer in chat instead.")
@@ -348,6 +371,8 @@ export class AnswerForm extends PageStore {
         listening?: AnswerListener | null
       }
       this.sent = reply.answer
+      // the page's bullhorn comments went with it (T79):  the runtime's next draw says so too
+      this.pageComments = 0
       this.sentSnapshot = this.snapshot()
       this.draftDone()
       // a page server from before r6 answers no `listening`:  it can't tell
@@ -518,11 +543,24 @@ export class AnswerForm extends PageStore {
     const unpoll = ServerLink.watch(window, undefined, () => void this.refreshListening(), {
       every: DETAILS_LISTEN_POLL_MS
     })
+    const onComments = (event: Event) => this.keepPageComments((event as CustomEvent<{ unsent?: unknown }>).detail)
+    window.document.addEventListener(PAGE_COMMENTS_EVENT, onComments)
+    this.keepPageComments({ unsent: window.document.documentElement.getAttribute(PAGE_COMMENTS_ATTRIBUTE) })
     return () => {
+      window.document.removeEventListener(PAGE_COMMENTS_EVENT, onComments)
       unsave()
       unpoll()
       if (this.settleTimer) clearTimeout(this.settleTimer)
     }
+  }
+
+  /** The docs runtime's count of the page's bullhorn comments waiting for a Send (`PAGE_COMMENTS_EVENT`), kept. */
+  keepPageComments(detail: { unsent?: unknown } | null | undefined) {
+    const unsent = Number(detail?.unsent)
+    const count = Number.isInteger(unsent) && unsent > 0 ? unsent : 0
+    if (count === this.pageComments) return
+    this.pageComments = count
+    this.changed()
   }
 
   /** The page as it is now, with the ids it's under. */
