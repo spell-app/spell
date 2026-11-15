@@ -155,7 +155,8 @@ test("GET:  an empty inbox before any mark, and no file", async () => {
     ...new ReviewInbox().toRecord(),
     lastListener: null,
     unsentComments: [],
-    waitingComments: []
+    waitingComments: [],
+    repliedComments: []
   })
   expect(existsSync(inboxFile(PAGES.plan))).toBe(false)
 })
@@ -175,7 +176,8 @@ test("mark:  set (stamped here), replaced, removed;  every answer is the whole i
     comments: {},
     lastListener: null,
     unsentComments: [],
-    waitingComments: []
+    waitingComments: [],
+    repliedComments: []
   }).toEqual(first.body)
   const picked = await post("mark", { page: PLAN_URL, id: "q8", mark: { action: "pick", pick: "B" } })
   expect(picked.body.marks.q8).toMatchObject({ action: "pick", pick: "B" })

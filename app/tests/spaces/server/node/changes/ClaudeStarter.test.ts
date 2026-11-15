@@ -101,7 +101,7 @@ describe("ClaudeStarter.argsFor()", () => {
   })
 
   it("streams its events as they happen, without this machine's hooks or MCP servers (I138)", () => {
-    expect(args.slice(args.indexOf("--output-format"), args.indexOf("--allowedTools"))).toEqual([
+    expect(args.slice(args.indexOf("--output-format"), args.indexOf("--add-dir"))).toEqual([
       "--output-format",
       "stream-json",
       "--verbose",
@@ -109,6 +109,10 @@ describe("ClaudeStarter.argsFor()", () => {
       '{"disableAllHooks":true}',
       "--strict-mcp-config"
     ])
+  })
+
+  it("may edit in the folder of the file it names too:  a draft can be outside the project (I152)", () => {
+    expect(args.slice(args.indexOf("--add-dir"), args.indexOf("--allowedTools"))).toEqual(["--add-dir", "/disk"])
   })
 
   it("never skips its permissions", () => {

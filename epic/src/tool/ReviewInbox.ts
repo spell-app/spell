@@ -827,7 +827,8 @@ export class ReviewInbox {
       // a wake under way has nothing to say yet
       woken: woken?.state === "waking" ? null : woken,
       unsentComments: this.unsentComments.map((comment) => comment.id),
-      waitingComments: this.commentList.ownWaiting.map(({ id, anchor }) => ({ id, anchor }))
+      waitingComments: this.commentList.ownWaiting.map(({ id, anchor }) => ({ id, anchor })),
+      repliedComments: this.commentList.ownReplied.map(({ id, anchor }) => ({ id, anchor }))
     }
   }
 
@@ -1426,6 +1427,11 @@ export type DoingItem = { id: string; title: string }
 export type PageInbox = InboxRecord & {
   unsentComments: string[]
   waitingComments: WaitingComment[]
+  /**
+   * the person's comments whose turn is theirs, Claude spoke last (`CommentList.ownReplied`):  their items draw
+   * orange (epic `epic-engine` I284)
+   */
+  repliedComments: WaitingComment[]
   /** who listened last, while nobody does now (`forPage()`);  `null` while someone does, or nobody ever did */
   lastListener: InboxListener | null
 }

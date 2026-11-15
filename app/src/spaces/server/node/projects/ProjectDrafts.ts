@@ -487,8 +487,11 @@ export class ProjectDrafts {
     return this.privatePath(DRAFT_FOLDER, ...folder, `${stem}.${this.nameTag}-${dayStamp(new Date())}${extensions}`)
   }
 
-  /** Path on disk of your draft of `filePath`, whichever day it was saved, or `undefined`. */
-  private async draftPathOf(filePath: string): Promise<string | undefined> {
+  /**
+   * Path on disk of your draft of `filePath`, whichever day it was saved, or `undefined`.
+   * - What a change asked for in the editor edits, when you have one (`POST /api/changes`, epic `editor` I152)
+   */
+  async draftPathOf(filePath: string): Promise<string | undefined> {
     const { folder, stem, extensions } = partsOf(filePath)
     const where = this.privatePath(DRAFT_FOLDER, ...folder)
     if (!(await fileUtils.pathExists(where))) return undefined

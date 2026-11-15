@@ -35,7 +35,8 @@ export class ChangeThis {
 
   /**
    * Open the box on what's selected, or on the request under way.
-   * - `at`:  where it was asked from, a right click's point;  else next to the selected part (`boxPlaceFor()`)
+   * - Centred under the selected part, when it shows in the app (`boxPlaceFor()`)
+   * - else `at`, where it was asked from:  a right click's point
    * - It stays inside the window (`<ui-popup at>`).
    * - Nothing selected, or nothing written:  nothing to ask about, so nothing opens.
    */
@@ -43,7 +44,7 @@ export class ChangeThis {
     if (!ChangeThis.isAvailable) return
     const element = selectedElement()
     placeAsked = element && ChangeThis.placeFor(element)
-    if (request() || placeAsked) setBoxAt(at ?? boxPlaceFor(element))
+    if (request() || placeAsked) setBoxAt(boxPlaceFor(element, at))
   }
 
   /** Close the box:  a request under way goes on without it. */
@@ -237,7 +238,7 @@ export function ChangeThisBox(): JSX.Element {
     <Show when={boxAt()}>
       {(where) => (
         <ui-popup
-          at={where()}
+          at={leftEdgeOf(where())}
           open-on="manual"
           visible=""
           class="BarMenuPopup ChangeThisPopup"
@@ -246,6 +247,7 @@ export function ChangeThisBox(): JSX.Element {
         >
           <div
             class="ChangeThisBox"
+            ref={(box: HTMLElement) => requestAnimationFrame(() => measureBox(box))}
             onPaste={(event: ClipboardEvent) => takePictures(event, event.clipboardData)}
             onDragOver={(event: DragEvent) => {
               // a file dragged over:  it may be dropped here
@@ -398,29 +400,44 @@ function secondsSince(at: string | undefined): number {
 }
 
 /**
- * Where the box opens for `element`, the selected part:  next to what it was asked from.
- * - the focus in the Inspector or its Views tree (⌘K there):  beside the row it's on, else under what has it
- * - else under the part in the app, when it has a box on screen
+ * Where the box opens for `element`, the selected part:
+ * - centred under the part in the app, when it has a box on screen, so it covers none of it (Owen, I151)
+ * - else `at`, where it was asked from:  a right click's point
+ * - else the focus in the Inspector or its Views tree (⌘K there):  beside the row it's on, else under what has it
  * - else (a part scrolled away, or drawn by nothing):  beside its row in the Views tree
  * - else a third of the way down the window, in its middle
  * - `<ui-popup at>` keeps it inside the window, turning it to the point's left or top where there's no room
  */
-function boxPlaceFor(element: Element | undefined): BoxPlace {
+function boxPlaceFor(element: Element | undefined, at?: BoxPlace): BoxPlace {
+  const underPart = under(element && shownBoxOf(element))
+  if (underPart) return underPart
+  if (at) return at
   const focused = focusedElement()
   const inInspector = focused && closestAcross(focused, INSPECTOR_COLUMN)
   if (inInspector) {
     const place = besideRow(closestAcross(focused, TREE_ROW)) ?? under(shownBoxOf(focused))
     if (place) return place
   }
-  return (
-    under(element && shownBoxOf(element)) ??
-    besideRow(element && PartEdits.rowOf(element)) ?? { x: innerWidth / 2, y: innerHeight / 3 }
-  )
+  return besideRow(element && PartEdits.rowOf(element)) ?? { x: innerWidth / 2, y: innerHeight / 3, isCentred: true }
 }
 
-/** Under `box`, at its left. */
+/** Centred under `box`. */
 function under(box: DOMRect | undefined): BoxPlace | undefined {
-  return box && { x: box.left, y: box.bottom + BOX_GAP_PX }
+  return box && { x: box.left + box.width / 2, y: box.bottom + BOX_GAP_PX, isCentred: true }
+}
+
+/** Keep the drawn width of the popup round `box`, so a centred box stays centred. */
+function measureBox(box: HTMLElement) {
+  const width = box.parentElement?.getBoundingClientRect().width
+  if (width) setBoxWidth(width)
+}
+
+/**
+ * The point `<ui-popup at>` takes, its box's top left:  a centred place moved left by half the box's width.
+ * - The width is the box's as last drawn (`boxWidth`), else what its sheet sets.
+ */
+function leftEdgeOf(place: BoxPlace): BoxPlace {
+  return place.isCentred ? { x: place.x - boxWidth() / 2, y: place.y } : place
 }
 
 /**
@@ -499,7 +516,17 @@ function selectedElement(): Element | undefined {
 }
 
 /** Where the box is, in the window. */
-type BoxPlace = { x: number; y: number }
+type BoxPlace = {
+  /** across the window, px */
+  x: number
+  /** down the window, px */
+  y: number
+  /** `x` is the box's middle, not its left */
+  isCentred?: boolean
+}
+
+/** The box's width as last drawn, padding and all;  at first, what `ChangeThis.css` sets (420px, 12px padding). */
+const [boxWidth, setBoxWidth] = createSignal(446)
 
 /** Where the box is open:  `undefined` while it's shut. */
 const [boxAt, setBoxAt] = createSignal<BoxPlace>()

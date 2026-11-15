@@ -350,6 +350,11 @@ export const epicItemVocabulary = {
         "icon, the review label and the review buttons."
     },
     { name: "details", description: "Its details:  hidden while folded." },
+    {
+      name: "clarify",
+      description:
+        "While reviewed:  the `<epic-clarify icon>` at its body's right, which asks Claude to clarify it now (T76)."
+    },
     { name: "label", description: "`Original question` / `Original reply` over its own text." },
     { name: "error", description: "With `source`:  the line saying the part couldn't be loaded." },
     ...REVIEW_PARTS
@@ -381,6 +386,11 @@ export const epicItemVocabulary = {
       description: "Id chip tooltip, `state=replied`."
     },
     { key: "stateFixed", text: "Claude fixed it:  your turn to review", description: "Id chip tooltip, `fixed`." },
+    {
+      key: "stateCommentReplied",
+      text: "Claude answered your comment:  your turn (✓ closes it)",
+      description: "Id chip tooltip, orange for a comment in it Claude answered last (epic `epic-engine` I284)."
+    },
     {
       key: "stateRequested",
       text: "Claude finished what you asked:  your turn to see it",

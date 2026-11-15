@@ -93,6 +93,29 @@ export class PlanItem {
   }
 
   /**
+   * `item`'s bare UPDATE label (`PlanDoc.markUpdate()`), if it has one.
+   */
+  static updateLabelOf(item: Element): Element | null {
+    return item.querySelector(':scope > [slot="title"] > epic-update')
+  }
+
+  /**
+   * Take `item`'s bare UPDATE label off, with the space before it;  did it have one?
+   * - Owen checked the item (his ✓, epic `epic-engine` I285;  Owen, 2026-11-15:  "After checking something, the
+   *   `updated` should go away since I've already accepted it.  If you do something else, put the `updated` back")
+   * - the next real change puts one back (`PlanDoc.markUpdate()`)
+   */
+  static dropUpdateLabel(item: Element): boolean {
+    const label = PlanItem.updateLabelOf(item)
+    if (!label) return false
+    const before = label.previousSibling
+    if (before?.nodeType === TEXT_NODE) before.textContent = (before.textContent ?? "").replace(/\s+$/, "")
+    if (before?.nodeType === TEXT_NODE && !before.textContent) before.remove()
+    label.remove()
+    return true
+  }
+
+  /**
    * Give a bodiless `item` (`isBodiless()`) its title's words as its body, so it opens, and takes a comment like any
    * other (epic `epic-engine` I209, J202;  Owen, 2026-11-03, on a title-only todo:  "This has no body ... so I can't
    * comment");  did it change the item?
@@ -388,6 +411,9 @@ const TITLE_BODY = "data-title-body"
 
 /** What the body a bodiless item is given says (`PlanItem.giveBody()`), in italics. */
 const TIN = "What it says on the tin."
+
+/** A text node's `nodeType` (`Node.TEXT_NODE`:  node has no `Node` global). */
+const TEXT_NODE = 3
 
 /**
  * The prose elements' headings as prose (`PlanItem.asProse({ plain })`, P14):  what each draws over its children.

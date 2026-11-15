@@ -444,7 +444,10 @@ export class InboxCommands {
       lines.push(`now (${now.length}):  start a background agent for each;  \`epic inbox done ${name}#<id>\` after`)
       for (const each of now) {
         lines.push(`  - ${line(each)}`)
-        if (each.action === "details") lines.push("      Add Details")
+        if (each.action === "details")
+          lines.push(
+            "      Add Details:  clarify its text, as More Details (`--more`), a paragraph per change of context"
+          )
         // the Manual tests section's Start testing (epic `epic-engine` P51):  the epic skill's "Start testing"
         else if (each.action === "prepare")
           lines.push(

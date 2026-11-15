@@ -281,6 +281,16 @@ export class CommentList {
   }
 
   /**
+   * This list's person's comments whose turn is THEIRS (`ThreadFacts.turnOf()` `person`):  Claude spoke last, and
+   * they haven't ticked, replied or cleared it yet.
+   * - the item it's on draws orange, their turn (`PageInbox.repliedComments`, epic `epic-engine` I284;  Owen,
+   *   2026-11-15:  "I had several comments in this thread that are still open -- the pill should be orange")
+   */
+  get ownReplied(): IdentifiedComment[] {
+    return this.all.filter((comment) => this.isOwn(comment) && ThreadFacts.turnOf(comment) === "person")
+  }
+
+  /**
    * The waiting comments a Send at `sent` (ISO;  `null`:  never sent) has NOT handed over:
    * a person's last words newer than it (`ThreadFacts.lastWordsAt()`), all of them before the first send.
    * - only the list's person's own (`ownWaiting`):  a Send is theirs, for their agent

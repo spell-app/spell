@@ -1,8 +1,9 @@
 /**
  * `epic-item` family barrel:  defines `<epic-item>` (SIDE EFFECT) and exports its class.
- * - Defines the family it draws in its shadow root first:  `<epic-review>`.
+ * - Defines the family it draws in its shadow root first:  `<epic-review>`, `<epic-clarify>` (its body's icon, T76).
  */
 import "spell/epic/components/epic-review"
+import "spell/epic/components/epic-clarify"
 
 import { EpicItem } from "./EpicItem"
 

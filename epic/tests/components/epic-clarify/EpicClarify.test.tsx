@@ -6,6 +6,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ReviewClient, type Inbox } from "spell/epic/review"
 
 import "spell/epic/components/epic-clarify"
+import "spell/epic/components/epic-item"
 
 afterEach(() => {
   ReviewClient.adopt(undefined)
@@ -25,6 +26,7 @@ class FakeRoutes {
     lastListener: null,
     unsentComments: [],
     waitingComments: [],
+    repliedComments: [],
     woken: null,
     doing: null
   }
@@ -95,5 +97,39 @@ describe("<epic-clarify>", () => {
       })
     )
     await vi.waitFor(() => expect(linkOf(clarify)).toBeNull())
+  })
+
+  /** The icon's button, in its shadow root;  `null` when not drawn. */
+  function buttonOf(clarify: Element): HTMLButtonElement | null {
+    return clarify.shadowRoot!.querySelector<HTMLButtonElement>('button[part~="base"]')
+  }
+
+  test("icon (T76):  a circle-question button for `of`;  clicked, the details asked for now, and it stays, turning", async () => {
+    const routes = new FakeRoutes()
+    await adoptClient(routes)
+    const clarify = await ElementFixture.render(`<epic-clarify of="J182" icon></epic-clarify>`)
+    await vi.waitFor(() => expect(buttonOf(clarify)).not.toBeNull())
+    const button = buttonOf(clarify)!
+    expect(button.querySelector("ui-icon")?.getAttribute("name")).toBe("circle question")
+    expect(button.title).toMatch(/clarify this now, without waiting for Send/)
+    await expectAccessible(clarify)
+    button.click()
+    await vi.waitFor(() =>
+      expect(routes.posted).toContainEqual({
+        route: "now",
+        body: expect.objectContaining({ id: "j182", action: "details" })
+      })
+    )
+    await vi.waitFor(() => expect(buttonOf(clarify)?.title).toMatch(/call it off/))
+    expect((clarify as unknown as { matches(s: string): boolean }).matches(":state(turning)")).toBe(true)
+  })
+
+  test("icon in an item:  `<epic-item>` draws it at its body's right while reviewed, a given body's too", async () => {
+    await adoptClient(new FakeRoutes())
+    const item = await ElementFixture.render(ITEM)
+    await vi.waitFor(() => expect(item.shadowRoot!.querySelector('[part~="clarify"]')).not.toBeNull())
+    const icon = item.shadowRoot!.querySelector('[part~="clarify"]')!
+    expect(icon.getAttribute("of")).toBe("t9")
+    await vi.waitFor(() => expect(buttonOf(icon)).not.toBeNull())
   })
 })

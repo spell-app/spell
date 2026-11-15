@@ -1193,17 +1193,12 @@ export class PlanDoc extends PlanReader {
   markUpdate(item: Element, became?: UpdateBecame): void {
     const n = this.activePhase
     if (!n) return
-    let label = PlanDoc.updateLabelOf(item)
+    let label = PlanItem.updateLabelOf(item)
     if (!label) {
       label = this.make("epic-update", { phase: n })
       this.titleSlot(item).append(this.document.createTextNode(" "), label)
     }
     if (became) Markup.set<"epic-update">(label, { became })
-  }
-
-  /** `item`'s bare UPDATE label (`markUpdate()`), if it has one. */
-  static updateLabelOf(item: Element): Element | null {
-    return item.querySelector(':scope > [slot="title"] > epic-update')
   }
 
   ////////////////
@@ -1526,9 +1521,11 @@ export class PlanDoc extends PlanReader {
    *   the record, never drawn on the buttons, which clear;  the id chip shows the result (the fill rule, Q20)
    * - a pick counts as approve;  `now`:  an immediate request (Do Now) done
    * - any other action:  nothing to record
+   * - an approve (his ✓) takes the item's UPDATE label off (`dropUpdateLabel()`, I285)
    */
   reviewedAs(item: Element, action: string): void {
     if ((REVIEW_AS as readonly string[]).includes(action)) Markup.set(item, { reviewAs: action as ReviewAs })
+    if (action === "approve") PlanItem.dropUpdateLabel(item)
   }
 
   /** `applyMark()`'s work on `item`, the log line aside. */
@@ -2434,7 +2431,7 @@ export class PlanDoc extends PlanReader {
       const last = cards.findLast((card) => card.getAttribute("state") === "done")
       for (const card of cards) mark(card, offMain && finished && card === last)
       // its UPDATE label's `Not in main` pill (`UPDATE : FIXED`, T75), on a status change's label only
-      const label = PlanDoc.updateLabelOf(item)
+      const label = PlanItem.updateLabelOf(item)
       if (label) mark(label, offMain && finished && label.hasAttribute("became"))
     }
     return changed
@@ -3729,7 +3726,6 @@ function cardSetWords(choices: number | undefined): string {
 
 /** The update BLOCKS (`updateUpdates()`):  dated or titled;  a bare UPDATE label is none. */
 const UPDATE_BLOCKS = "epic-update[at], epic-update[summary]"
-
 /** The parts of "0. While you were out", by their headings' keys:  a Read on one reads each of its lines. */
 const AWAY_PARTS: readonly AwayPart[] = ["done", "underway", "fixed", "issues", "tests", "asks", OLD_TODO]
 

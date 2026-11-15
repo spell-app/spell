@@ -245,6 +245,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return MANUAL_TEST.test(this.domElement.id) && this.itemState() === "replied"
   }
 
+  /** Orange for Owen's turn on a comment in it (`LiveReview.commentsReplied`, I284):  its tooltip says so. */
+  private get isCommentTurn(): boolean {
+    return this.itemState() === "replied" && !!this.reviewState.liveOf().commentsReplied
+  }
+
   /** Its attributes its drawn state reads (`DrawnState.of()`), tracked. */
   private stateFields(): StateFields {
     const { id, state, status, changed, reviewed, queued, working, urgent, fixed } = this
@@ -410,7 +415,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           ? "stateFixed"
           : this.isWaitingTest
             ? "stateTestWaiting"
-            : STATE_TIP_KEYS[aged ? "recent" : this.itemState()]
+            : this.isCommentTurn
+              ? "stateCommentReplied"
+              : STATE_TIP_KEYS[aged ? "recent" : this.itemState()]
       )
     ]
     const mark = this.chipMark()
@@ -525,8 +532,14 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </Show>
           {/* the light details in a block of their own:  the details are a column, so a drive-by's status line
               can go first (its `order`), and the prose's margins still collapse in here */}
-          <div class={FLOW}>
-            <slot />
+          <div class={BODY}>
+            <div class={FLOW}>
+              <slot />
+            </div>
+            {/* at the body's right, while reviewed:  asks Claude to clarify it now, turning while it does (T76) */}
+            <Show when={this.reviewState.reviewing()}>
+              <epic-clarify of={this.id} icon part={this.partForName("clarify")} />
+            </Show>
           </div>
           {/* last in every item, whatever its state (Owen, 2026-10-07):  what was noted, Claude's status cards under
               it ("under my input", Owen, 2026-10-08, P13), then the box */}
@@ -1011,6 +1024,8 @@ export interface EpicItem extends E.AttributeValues<EpicItemVocabulary> {}
 
 /** Class names inside the shadow root:  the light details' block;  the said note's place in the thread. */
 const FLOW = "flow"
+/** The body's row:  its light details, then the clarify icon at their right (T76). */
+const BODY = "body"
 const IN_THREAD = "in-thread"
 const THREAD_END = "thread-end"
 const THREAD_HIDDEN = "thread-hidden"

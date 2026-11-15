@@ -463,7 +463,8 @@ describe("ReviewInbox, Claude's side", () => {
       listening: null,
       lastListener: inbox.listening,
       unsentComments: [],
-      waitingComments: []
+      waitingComments: [],
+      repliedComments: []
     })
     expect(inbox.listening!.session).toBe("abc")
     expect(inbox.forPage(Date.parse(M1))).toMatchObject({ listening: { session: "abc" }, lastListener: null })
@@ -710,6 +711,21 @@ describe("ReviewInbox comments and Send", () => {
     expect(inbox.unsentComments).toEqual([])
     expect(inbox.sentComments.map((comment) => comment.id)).toEqual([id])
     expect(inbox.forPage().unsentComments).toEqual([])
+  })
+
+  // epic `epic-engine` I284:  a thread Claude answered last is Owen's turn, and its item draws orange
+  test("a comment Claude answered last is Owen's turn (`forPage().repliedComments`) until he ticks or replies", () => {
+    const inbox = new ReviewInbox()
+    const id = inbox.commentList.add({ ...PLACE, anchor: "i83", kind: "item" }, "wtf does this mean?", new Date(M1))
+    expect(inbox.forPage().repliedComments).toEqual([])
+    inbox.commentList.answer(id, "<p>In plain words ...</p>", new Date(M2))
+    expect(inbox.forPage().repliedComments).toEqual([{ id, anchor: "i83" }])
+    inbox.commentList.reply(id, "still unclear", new Date(M3))
+    expect(inbox.forPage().repliedComments).toEqual([])
+    inbox.commentList.answer(id, "<p>Here it is with an example.</p>", new Date(M4))
+    expect(inbox.forPage().repliedComments).toEqual([{ id, anchor: "i83" }])
+    inbox.commentList.resolve(id, "good", new Date(M4))
+    expect(inbox.forPage().repliedComments).toEqual([])
   })
 
   // epic `epic-engine` I140:  Revisit on a part whose text holds Owen's comments makes them its content
