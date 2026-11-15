@@ -148,7 +148,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - An HTML file (a property editor page, `Card.editor.html`) is drawn as the drawn-bubbly page draws HTML:
       [MarkupMarks](ui/monaco/MarkupMarks.ts), from the page's own reading of it (`BubblyMarkup`), the box a
       `.bubbly-html` too;  both kinds of marks are made by [TextMarks](ui/monaco/TextMarks.ts).
-  - Seven helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
+  - Nine helps as Spell is typed, in every Spell editor, the look on or off ([SpellTyping](ui/monaco/SpellTyping.ts)):
     - the caret snaps into the body a blank line is drawn in:  clicked or arrowed onto, the line gets that body's
       indent, which goes again if it's left untyped;  Backspace takes the caret out a level
     - a letter typed on a blank line takes the next line's indent, so it lands in the body it's drawn in
@@ -162,9 +162,12 @@ and in the app's build folder, `app/` at the app folder's root.
       Cmd+V and the right-click menu's Paste alike (I63)
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
       and closing tag, a body;  one undo
-      - a line of a tag's attributes, under its first line, moves alone (I142)
+      - a line of a tag's attributes, under its first line, moves alone (I142);  so does a comment line (I161)
     - Enter between a tag's attributes puts the rest on a new line, lined up under its first attribute (epic `editor` I142):
       measured as it's drawn, tabs then spaces;  one undo
+    - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
+      so the body still reads as its body (epic `editor` I155, I161);  one undo
+    - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step
   - An error shows its message on a plain hover over its squiggle, though the hover info waits for ⌥
     ([ErrorHover](ui/monaco/ErrorHover.ts), epic `editor` I97)
   - Rename Symbol (F2) renames an action as the Inspector's Code card does, its calls and buttons too, one undo,

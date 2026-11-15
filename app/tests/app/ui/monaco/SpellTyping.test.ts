@@ -271,3 +271,37 @@ describe("SpellTyping.tagOpenAt() (I142)", () => {
     expect(SpellTyping.tagOpenAt([`its rank is 3`], 0, 5)).toBeUndefined()
   })
 })
+
+describe("SpellTyping.commentIndent() (I161)", () => {
+  const TABS = { insertSpaces: false, tabSize: 4 }
+  /** Solitaire's card's `face`, its comment after its head. */
+  const FACE = [
+    `\tits "face" is\t\t\t-- the card it draws:  its card, else one of its rank and suit`,
+    `\t\tits card if its card exists`,
+    `\t\ta new card whose rank is its rank and suit is its suit otherwise`,
+    `\tits "color" is`
+  ]
+
+  test("the level of the body under the line:  its first line's", () => {
+    expect(SpellTyping.commentIndent(FACE, 0, TABS)).toBe("\t\t")
+    const deeper = FACE.map((line, at) => (at === 1 || at === 2 ? `\t${line}` : line))
+    expect(SpellTyping.commentIndent(deeper, 0, TABS)).toBe("\t\t\t")
+  })
+
+  test("no body under it:  a level in, in the file's tabs or spaces", () => {
+    expect(SpellTyping.commentIndent([`a "pile" is a list -- of cards`, `a "deck" is a pile`], 0, TABS)).toBe("\t")
+    expect(
+      SpellTyping.commentIndent([`  its "x" is 1 -- one`, `  its "y" is 2`], 0, { insertSpaces: true, tabSize: 2 })
+    ).toBe("    ")
+    expect(SpellTyping.commentIndent([`\tits "x" is 1 -- one`], 0, TABS)).toBe("\t\t")
+  })
+})
+
+describe("SpellTyping.spaceAtEnd() (I160)", () => {
+  test("the tabs and spaces at a line's end, and only those", () => {
+    expect(SpellTyping.spaceAtEnd(`\tits "face" is\t\t\t`)).toBe(3)
+    expect(SpellTyping.spaceAtEnd(`\tits "face" is \t`)).toBe(2)
+    expect(SpellTyping.spaceAtEnd(`\tits "face" is`)).toBe(0)
+    expect(SpellTyping.spaceAtEnd(`\t\t`)).toBe(2)
+  })
+})
