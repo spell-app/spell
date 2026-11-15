@@ -14,7 +14,8 @@
   flex-direction: column;
   gap: 26px;
   width: max-content;
-  padding: 4px;
+  /* room for a card's shadow and its rise on hover (`<ui-card>`'s link look), so the scroll box never cuts them */
+  padding: 12px 14px 20px 14px;
 }
 
 .SiteBoard:has(.SiteCard[image]) .SiteSection {

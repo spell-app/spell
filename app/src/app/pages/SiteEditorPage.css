@@ -61,6 +61,8 @@
     flex: 1 1 0;
     min-height: 0;
     overflow: auto;
+    /* out to the pane's edges, so the board's room for its cards' shadows doesn't move them in from the title */
+    margin: -12px -14px -14px -14px;
   }
 
   /* where a dragged part would land:  a line above the row;  a line below it and its pages;  or the row lit up, inside it */
