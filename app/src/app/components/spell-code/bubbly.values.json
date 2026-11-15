@@ -221,8 +221,8 @@
       "dark": "8px"
     },
     "--bubbly-code-pad": {
-      "light": "5px",
-      "dark": "5px"
+      "light": "2px",
+      "dark": "2px"
     },
     "--bubbly-input-pad-top": {
       "light": "1px",

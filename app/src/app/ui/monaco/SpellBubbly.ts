@@ -14,7 +14,8 @@ import {
   type MarkupBlockShape,
   type MarkupLinkShape,
   type MarkupShape,
-  type MarkupTagShape
+  type MarkupTagShape,
+  type TagRoom
 } from "./MarkupMarks"
 
 import "spell/app/app/components/spell-code/bubbly.css"
@@ -718,11 +719,7 @@ export class SpellBubbly {
    */
   private tagLeft(shape: MarkupTagShape, range: monaco.Range, view: View): number {
     const { measures } = view
-    const room = (shape.room ?? []).reduce(
-      (sum, kind) => sum + measures[kind === "tag" ? "tagSpacer" : "touchSpacer"],
-      0
-    )
-    return this.xOf(range.startLineNumber, range.startColumn) + room - measures.bracketPad
+    return this.xOf(range.startLineNumber, range.startColumn) + roomOf(shape.room, measures) - measures.bracketPad
   }
 
   /** Where a tag's pill on one line ends:  a bracket's room after its `>`, or its line's end. */
@@ -761,10 +758,11 @@ export class SpellBubbly {
 
   /**
    * A pill under the words in `range`:  from the room before them to the end of the room after.
-   * - a tag's `{…}` value's inverted, in a shade of its tag's colour (`bubbly-expression`, Owen)
+   * - code's, a `{…}` in a drawing's markup, inverted, in a shade of its tag's colour (`bubbly-expression`, Owen):
+   *   its own narrower room either side, so its braces sit at its ends (I162);  past a tag's room right before it
    */
   private drawInput(
-    { isChoice, inTag, isExpression, afterHeadSpacer }: BubblyInputShape,
+    { isChoice, inTag, isExpression, afterHeadSpacer, room }: BubblyInputShape,
     range: monaco.Range,
     view: View
   ): HTMLElement | undefined {
@@ -772,8 +770,9 @@ export class SpellBubbly {
     const line = range.startLineNumber
     if (range.endLineNumber !== line) return undefined
     // the column's x is before everything injected there:  a top-level head's spacer too, outside the pill
-    const left = this.xOf(line, range.startColumn) + (afterHeadSpacer ? measures.headSpacer : 0)
-    const right = this.xOf(line, range.endColumn) + measures.inputSpacer
+    const left =
+      this.xOf(line, range.startColumn) + (afterHeadSpacer ? measures.headSpacer : 0) + roomOf(room, measures)
+    const right = this.xOf(line, range.endColumn) + (isExpression ? measures.codeSpacer : measures.inputSpacer)
     const top = this.editor.getTopForLineNumber(line) + lineHeight / 2
     // a tag's value in its tag's hue:  the layer draws it beside its tag's pill, not in it, so it can't inherit it
     const classes = [
@@ -922,6 +921,7 @@ export class SpellBubbly {
       scale,
       lineHeight: Math.round(fontSize * ratio),
       inputSpacer: spacerWidth("bubbly-input-spacer"),
+      codeSpacer: spacerWidth("bubbly-code-spacer"),
       headSpacer: spacerWidth("bubbly-head-spacer"),
       quoteSpacer: spacerWidth("bubbly-quote-spacer"),
       tagSpacer: spacerWidth("bubbly-tag-spacer"),
@@ -1014,6 +1014,8 @@ type Measures = {
   lineHeight: number
   /** the spacer either side of a pill's words */
   inputSpacer: number
+  /** ... of code's, a `{…}` in a drawing's markup:  narrower, its braces at its pill's ends (I162) */
+  codeSpacer: number
   /** the spacer before a head line's words */
   headSpacer: number
   /** the spacer outside a quoted input's marks */
@@ -1098,6 +1100,16 @@ function isMarkupFile(model: monaco.editor.ITextModel): boolean {
 /** A shape's element, its classes `classes`. */
 /** A flush tall tag's class (`drawTall()`). */
 const FLUSH = "bubbly-tag-tall-flush"
+
+/** The room injected before a pill, each spacer's kind (`MarkupTagShape.room`), in the editor's pixels. */
+function roomOf(room: readonly TagRoom[] | undefined, measures: Measures): number {
+  const widths: Record<TagRoom, number> = {
+    tag: measures.tagSpacer,
+    touch: measures.touchSpacer,
+    code: measures.codeSpacer
+  }
+  return (room ?? []).reduce((sum, kind) => sum + widths[kind], 0)
+}
 
 /** A tall start tag's end:  flush, its rows one width;  or short, its rows overhanging its `>`;  else neither. */
 function tallEnd(shape: { isFlush?: boolean; isShortTail?: boolean }): string {

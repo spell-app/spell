@@ -41,7 +41,7 @@ function shapesOf(marks: MarkupMarks, text = PAGE): string[] {
             : shape.kind === "tag-link"
               ? `link ${shape.start.side} to ${shape.end.side}`
               : shape.isExpression
-                ? `expression ${shape.inTag}`
+                ? `expression ${shape.inTag} ${shape.room?.join("+") ?? ""}`.trim()
                 : "input"
       out.push(`${"  ".repeat(depth)}${what}:  ${text.slice(0, 24)}`)
       if (shape.kind === "markup-block") walk(shape.inside, depth + 1)
@@ -106,12 +106,23 @@ describe("MarkupMarks", () => {
     expect(marks.tags.map(({ start, end }) => spell.slice(start, end))).toEqual(["<text color=", ">", "</text>"])
   })
 
-  test("a Spell drawing's code between its tags (its `codes`):  an inverted pill too, in its element's colour (I144 C1)", () => {
+  test("a Spell drawing's code between its tags (its `codes`):  an inverted pill in its element's colour (I144 C1), past the start tag's room, the end tag's past its own, so none touch;  its own narrow room either side, its braces at its ends (I162)", () => {
     const spell = `to draw it\n\t<text>{its picture}</text>`
-    const start = spell.indexOf("{")
-    const codes = [{ start, end: spell.indexOf("}") + 1 }]
+    const codes = [{ start: spell.indexOf("{"), end: spell.indexOf("}") + 1 }]
     const marks = MarkupMarks.within(spell, spell.indexOf("<text"), spell.length, [], { codes })
-    expect(shapesOf(marks, spell)).toContain("expression property:  {its picture}</text>")
+    expect(shapesOf(marks, spell)).toEqual([
+      "link start to end:  <text>{its picture}</tex",
+      "pill start:  <text>{its picture}</tex",
+      "expression property tag:  {its picture}</text>",
+      "pill end code+tag:  </text>"
+    ])
+    const spacers = marks.marks.flatMap(({ options }) =>
+      [options.before, options.after].map((spacer) => spacer?.inlineClassName ?? "").filter((name) => /code/.test(name))
+    )
+    expect(spacers).toEqual([
+      "bubbly-spacer bubbly-code-spacer bubbly-spacer-before",
+      "bubbly-spacer bubbly-code-spacer bubbly-spacer-after"
+    ])
   })
 
   test("a tag that declares the member it draws:  its shape and its brackets and `/` marked to be drawn round;  any other tag's not (epic `editor` I84)", () => {

@@ -68,7 +68,10 @@ export class MarkupMarks extends TextMarks {
   /** Where each tag is:  a Spell drawing leaves them to these marks.  Not a `{…}` value in one:  that's Spell. */
   readonly tags: Array<{ start: number; end: number }> = []
 
-  /** The room injected after each tag in a line, by where it ends:  a tag right after it starts past it too. */
+  /**
+   * The room injected after each tag or code pill in a line, by where it ends:  a tag (or code) right after it starts
+   * past it too.
+   */
   private readonly roomAfter = new Map<number, TagRoom>()
 
   /** Lines of Spell, whose own marks are Spell's:  no spacers before them. */
@@ -395,9 +398,21 @@ export class MarkupMarks extends TextMarks {
     this.mark(start, start + 1, CODE_BRACE)
     this.mark(start + 1, end - 1, EXPRESSION)
     this.mark(end - 1, end, CODE_BRACE)
-    const place = this.mark(start, end, "", { before: spacer("input", "before"), after: spacer("input", "after") })
+    // its own room, narrower than a value's:  its braces at its pill's ends (I162);  a tag's room before it, when it
+    // follows one right on (`<text>{its size}`), and its own before a tag right after it, so their pills don't touch
+    const place = this.mark(start, end, "", { before: spacer("code", "before"), after: spacer("code", "after") })
+    const behind = this.roomAfter.get(start)
+    this.roomAfter.set(end, "code")
     if (place >= 0)
-      into.push({ kind: "input", place, isChoice: false, isQuoted: false, inTag: partOfSpeech, isExpression: true })
+      into.push({
+        kind: "input",
+        place,
+        isChoice: false,
+        isQuoted: false,
+        inTag: partOfSpeech,
+        isExpression: true,
+        ...(behind && { room: [behind] })
+      })
   }
 
   ////////////////
@@ -532,8 +547,11 @@ export type MarkupWithin = {
   codes?: readonly SP.BubblyCode[]
 }
 
-/** A spacer beside a tag in a line:  room for its pill and the gap outside it, or only its pill's where points touch. */
-export type TagRoom = "tag" | "touch"
+/**
+ * A spacer beside a tag in a line:  room for its pill and the gap outside it, or only its pill's where points touch;
+ * or a code pill's, `{its size}</text>`, which a tag right after it starts past (I162).
+ */
+export type TagRoom = "tag" | "touch" | "code"
 
 /** A tag's `<` and `>`, drawn as `⟨` `⟩` over the file's own, faint. */
 const MARK = "bubbly-mark"

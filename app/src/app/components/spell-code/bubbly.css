@@ -148,8 +148,8 @@
   --bubbly-bracket-pad: 3px;
   /* an input's white either side of its words, and over them */
   --bubbly-input-pad: 8px;
-  /* ... a code pill's, its braces inside it (I144 C1) */
-  --bubbly-code-pad: 5px;
+  /* ... a code pill's:  next to none, its braces at its ends, as a quoted value's marks are at its white's (I162) */
+  --bubbly-code-pad: 2px;
   --bubbly-input-pad-top: 1px;
   /* where a band ends with an input:  the input as far from that round end as from the band's top and bottom */
   --bubbly-end-inset: 2px;
@@ -526,15 +526,15 @@
   }
 
   /*
-   * a code pill's own `{` and `}`:  part of its pill, as a quoted value's curly marks are of its white --
-   * its words' light ink, faded toward the pill (Owen, epic `editor` I144 C1)
+   * a code pill's own `{` and `}`:  part of its pill, at its very ends, as a quoted value's curly marks are of its
+   * white -- its words' light ink, faded toward the pill (Owen, epic `editor` I144 C1);  never bold (I162)
    */
   .bubbly-code-brace {
     color: var(--bubbly-code-brace-ink);
-    font-weight: var(--bubbly-bold);
+    font-weight: 400;
   }
 
-  /* ... in the editor, its pill spans the room either side of its words:  clear of its braces by a gap, as on the page */
+  /* ... in the editor, its pill spans the room either side of its words and braces, but the gap outside it */
   &.bubbly-monaco .bubbly-layer .bubbly-input.bubbly-expression {
     clip-path: inset(0 var(--bubbly-input-gap) round var(--bubbly-input-radius));
   }
@@ -1381,6 +1381,11 @@
       margin: 0;
       padding-inline: calc(var(--bubbly-input-gap) + var(--bubbly-input-pad));
     }
+    /* ... but code, a drawing's `{…}`:  its gap outside its pill, its braces at its ends, as the editor's (I162) */
+    .bubbly-input.bubbly-expression {
+      margin: 0 var(--bubbly-input-gap);
+      padding-inline: var(--bubbly-code-pad);
+    }
     .bubbly-quoted,
     :is(.bubbly-head-pill, .bubbly-pill).bubbly-starts-input > .bubbly-quoted:first-child {
       margin: 0 calc(var(--bubbly-quote-margin) / 2) 0 0;
@@ -1418,6 +1423,10 @@
     /* either side of an input's words:  its gap and its white, as on the page */
     .bubbly-input-spacer {
       width: calc((var(--bubbly-input-gap) + var(--bubbly-input-pad)) * var(--bubbly-monaco-scale));
+    }
+    /* ... of code's, its braces at its pill's ends:  its gap and next to no pill (I162) */
+    .bubbly-code-spacer {
+      width: calc((var(--bubbly-input-gap) + var(--bubbly-code-pad)) * var(--bubbly-monaco-scale));
     }
     /*
      * before a head's description, `-- A playing card`:  none, till the code works out how much puts it at the window's
@@ -1633,10 +1642,6 @@
     /* a `{…}`'s braces darker, as on the page */
     .view-line .bubbly-mark.bubbly-brace {
       color: var(--bubbly-brace-ink);
-    }
-    /* ... but a code pill's own, part of its pill, as on the page (I144 C1) */
-    .view-line .bubbly-mark.bubbly-brace.bubbly-code-brace {
-      color: var(--bubbly-code-brace-ink);
     }
     /* a `{…}` value's words, on its inverted pill:  light, a reference in them too */
     .view-line .bubbly-expression {
