@@ -21,3 +21,15 @@
   /* what a pane shows (the code, the console, the tree, the program):  the pane's own, unless a look sees through */
   --spell-view-background: var(--spell-pane-background);
 }
+
+/*
+ * the editor's forms, `<ui-property-editor compact>`:  ONE look, the Inspector's, wherever one is
+ * (the Inspector's cards, the site editor's page form;  epic `mockup` I14)
+ * - fields less round than a theme's pills (Owen)
+ * - a select with nothing chosen reads "none", in italics (Owen)
+ */
+ui-property-editor[compact] {
+  --ui-input-radius: 6px;
+  --ui-select-radius: 6px;
+  --ui-select-placeholder-style: italic;
+}
