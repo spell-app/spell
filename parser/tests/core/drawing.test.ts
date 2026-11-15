@@ -182,6 +182,16 @@ describe("@drawn", () => {
     expect(core.actionOf(game, "restartTheGame")?.title).toBe("Restart The Game")
   })
 
+  test("<toolbar><action \"...\" icon-only/></toolbar>:  the menu's row is Spell UI's `<ui-action icon-only>` (mockup J107)", () => {
+    class Game extends Thing {
+      restartTheGame(): void {}
+    }
+    core.describeAction(Game, "restartTheGame", { title: "Restart The Game" })
+    const game = new Game()
+    draw(() => core.drawAction(game, "restartTheGame", { "icon-only": true, "in-menu": true }))
+    expect(element.querySelector("ui-action")?.hasAttribute("icon-only")).toBe(true)
+  })
+
   test("a part that throws shows its stand-in, in its own place;  the parts beside it stay (epic `notebook` I5)", () => {
     const card = new Card({ rank: 2 })
     const parts = () => [

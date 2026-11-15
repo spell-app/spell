@@ -44,11 +44,23 @@ export const actionVocabulary = {
         "Its keys, drawn as key caps at the end, as `<ui-keys>` draws them:  `mod+T` is ⌘T on a Mac, Ctrl+T " +
         "elsewhere;  `meta` is the Meta key.  " +
         "Defaults to the action's."
+    },
+    {
+      name: "icon-only",
+      group: "appearance",
+      kind: "keyOnly",
+      description:
+        "Only its icon, at every width:  its title is its tooltip and its name for a screen reader, and its row in " +
+        "a `shrinkable` menu's `…` menu.  No icon:  its title shows."
     }
   ],
   parts: [
     ...itemVocabulary.parts,
     { name: "shortcut", description: "The key caps of its shortcut, at the end:  a `<kbd>` each." }
+  ],
+  states: [
+    ...itemVocabulary.states,
+    { name: "icon-only", description: "`icon-only`, with an icon:  its icon alone, its title hidden." }
   ],
   texts: [...keyCapTexts]
 } as const satisfies E.ComponentVocabulary

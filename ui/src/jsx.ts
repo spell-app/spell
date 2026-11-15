@@ -719,6 +719,16 @@ export interface UIActionAttributes {
    */
   "prop:shortcut"?: string
   /**
+   * Only its icon, at every width:  its title is its tooltip and its name for a screen reader, and its row in a `shrinkable` menu's `…` menu.  No icon:  its title shows.
+   * - takes:  flag (present / absent)
+   */
+  "icon-only"?: boolean | ""
+  /**
+   * `icon-only`, as the DOM element's property.
+   * @deprecated write `icon-only` -- `prop:` stays only for compiled spell
+   */
+  "prop:iconOnly"?: boolean | ""
+  /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */

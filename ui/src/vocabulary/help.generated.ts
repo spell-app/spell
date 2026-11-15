@@ -45,7 +45,9 @@ export const HELP_TABLE: Readonly<
       action:
         "PROPERTY: the action it draws and runs: `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.",
       shortcut:
-        "Its keys, drawn as key caps at the end, as `<ui-keys>` draws them: `mod+T` is ⌘T on a Mac, Ctrl+T elsewhere; `meta` is the Meta key."
+        "Its keys, drawn as key caps at the end, as `<ui-keys>` draws them: `mod+T` is ⌘T on a Mac, Ctrl+T elsewhere; `meta` is the Meta key.",
+      "icon-only":
+        "Only its icon, at every width: its title is its tooltip and its name for a screen reader, and its row in a `shrinkable` menu's `…` menu."
     }
   },
   "ui-actions": {

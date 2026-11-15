@@ -622,6 +622,13 @@
           }
         },
         {
+          "name": "icon-only",
+          "description": {
+            "kind": "markdown",
+            "value": "Only its icon, at every width:  its title is its tooltip and its name for a screen reader, and its row in a `shrinkable` menu's `…` menu.  No icon:  its title shows.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "loading",
           "description": {
             "kind": "markdown",

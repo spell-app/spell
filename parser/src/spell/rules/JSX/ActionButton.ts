@@ -44,6 +44,7 @@ import { SpellJSX } from "./SpellJSX"
  *   Spell UI's `<ui-action>`, its title, icon and key the action's,
  *   greyed by its `enabled when` and ticked by its `selected when`, live;
  *   a click runs it through the core, one undo step, as a button's does.
+ *   - `icon-only` there is Spell UI's `<ui-action icon-only>`:  its icon alone, at every width.
  *   - `SpellJSX` marks it as the menu parses (`markMenuRows()`);  it compiles with the core's own `in-menu`,
  *     `core.drawAction(this, "save", { "in-menu": true })`.
  * - Without a quoted word, `<action>` is Spell UI's `<ui-action>`, a menu's item, as before.

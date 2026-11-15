@@ -246,3 +246,58 @@ describe("<ui-toolbar shrinkable> widening", () => {
     }
   })
 })
+
+describe("<ui-action icon-only> in a toolbar (epic `mockup` J107)", () => {
+  /** Solitaire's bar:  three titled actions, then Undo and Redo as icons alone. */
+  const ICON_ONLY_ACTIONS =
+    actions() +
+    `<ui-action icon="undo" shortcut="mod+Z" icon-only>Undo Play From The Stock</ui-action>` +
+    `<ui-action icon="redo" shortcut="mod+shift+Z" icon-only>Redo</ui-action>`
+
+  /** The two `icon-only` actions. */
+  function iconOnly(host: Element): Element[] {
+    return [...host.querySelectorAll("ui-action[icon-only]")]
+  }
+
+  it("wide:  its icon alone, its title its tooltip (with its keys) and its name;  the others keep their titles", async () => {
+    const { host, row } = await toolbar(1200, ICON_ONLY_ACTIONS)
+    expect(stage(row)).toBe("whole")
+    for (const action of iconOnly(host)) {
+      expect(action.matches(":state(icon-only)")).toBe(true)
+      const title = action.shadowRoot!.querySelector<HTMLElement>("[part~=title]")!
+      expect(getComputedStyle(title).display).toBe("none")
+      expect(itemBox(action).classList.contains("icon")).toBe(true)
+      expect(itemBox(action).getAttribute("aria-label")).toBe(action.textContent)
+      expect(itemBox(action).title).toMatch(new RegExp(`^${action.textContent} \\(.+\\)$`))
+    }
+    const restart = host.querySelector("ui-action")!
+    expect(restart.shadowRoot!.querySelector<HTMLElement>("[part~=title]")!.getBoundingClientRect().width).toBeGreaterThan(20)
+  })
+
+  it("narrowest:  it folds into `…` with the rest, its row in the menu titled", async () => {
+    const { host, row } = await toolbar(250, ICON_ONLY_ACTIONS)
+    expect(stage(row)).toBe("overflow")
+    for (const action of iconOnly(host)) expect(getComputedStyle(itemBox(action)).display).toBe("none")
+    const menu = host.shadowRoot!.querySelector<HTMLElement>("[part~=overflow-menu]")!
+    expect(menu.textContent).toContain("Undo Play From The Stock")
+    expect(menu.textContent).toContain("Redo")
+  })
+
+  it("no icon:  its title shows, as there's nothing else to show", async () => {
+    const { host } = await toolbar(1200, `<ui-action icon-only>Deal</ui-action>`)
+    const action = host.querySelector("ui-action")!
+    expect(action.matches(":state(icon-only)")).toBe(false)
+    expect(action.shadowRoot!.querySelector<HTMLElement>("[part~=title]")!.getBoundingClientRect().width).toBeGreaterThan(10)
+  })
+
+  it("in a menu bar:  no key caps beside it, as it has no title for them to follow", async () => {
+    await import("spell/ui/components/ui-menu")
+    const box = await ElementFixture.render(
+      `<ui-menu aria-label="Edit"><ui-action icon="undo" shortcut="mod+Z" icon-only>Undo</ui-action></ui-menu>`
+    )
+    await settled()
+    const action = box.querySelector("ui-action")!
+    expect(shortcutOf(action)).toBeNull()
+    expect(itemBox(action).getAttribute("aria-label")).toBe("Undo")
+  })
+})
