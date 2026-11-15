@@ -322,7 +322,7 @@ export class Solitaire extends App {
           h("spacer"),
           core.drawAction(this, "undo", { "in-menu": true }),
           core.drawAction(this, "redo", { "in-menu": true }),
-          h("ui-text", { slot: "right" }, "Score: ", () => this.score)
+          h("ui-text", { slot: "right" }, "Score ", () => this.score)
         )
       ),
       h("ui-container", { columns: "7", padding: "small", spacing: "xs" },

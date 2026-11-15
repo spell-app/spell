@@ -1143,7 +1143,7 @@
           "purpose": "`{lhs} is [not] in`/`one of`/`either`/`neither ... nor {list}`.",
           "syntaxes": [
             {
-              "syntax": "{operator:is_or_is_not} (en|uno de|una de|o bien uno de|o bien una de|o bien) (expression:{operand}|{identifier_list})",
+              "syntax": "{operator:is_or_is_not} (uno de|una de|o bien uno de|o bien una de|o bien) (expression:{operand}|{identifier_list})",
               "example": "thing está en theList",
               "outputs": {
                 "js": {
@@ -1186,6 +1186,9 @@
                   "code": "thing in [\"green\", \"blue\"]"
                 }
               }
+            },
+            {
+              "syntax": "{operator:is_or_is_not} en (expression:{operand})"
             }
           ],
           "aliases": ["expression_suffix"]

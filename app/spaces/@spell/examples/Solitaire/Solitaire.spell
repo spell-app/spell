@@ -15,7 +15,7 @@ solitaire is an app
 				<spacer/>
 				<action "undo"/>
 				<action "redo"/>
-				<text slot="right">Score: <number "score" /></>
+				<text slot="right">Score <number "score" /></>
 			</>
 		</>
 		<container columns="7" padding="small" spacing="xs">

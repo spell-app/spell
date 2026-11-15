@@ -636,6 +636,15 @@ lists.addRule(ListFilter, {
         },
         ["the items in my-list which is not 1", "core.filter(myList, (item) => item !== 1)"],
         ["the items in my-list that are in my-list", "core.filter(myList, (item) => core.includes(myList, item))"],
+        // `is in` takes one list:  `and` starts the next clause (epic `language` J185)
+        [
+          "the items in my-list where it is in my-list and it is 1",
+          "core.filter(myList, (item) => core.includes(myList, item) && item === 1)"
+        ],
+        [
+          "the items in my-list which are in my-list and are 1",
+          "core.filter(myList, (item) => core.includes(myList, item) && item === 1)"
+        ],
         ["the items in my-list who are not 1", "core.filter(myList, (item) => item !== 1)"],
         {
           title: "each clause's plural verb, after `and` / `or` too (epic `language` J173)",
