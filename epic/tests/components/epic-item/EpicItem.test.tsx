@@ -477,22 +477,40 @@ describe("<epic-item>", () => {
     ])
   })
 
-  test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P2`, its tooltip saying so;  still green", async () => {
+  test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  `in P2` while still to finish, its tooltip saying so", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
     document.body.append(phases)
     try {
-      const { host, chip } = await item(
-        `<epic-item id="i1" title="Old numbers" status="done" state="recent" taken-in="p-fix"></epic-item>`
-      )
+      const { host } = await item(`<epic-item id="i1" title="Old numbers" status="open" taken-in="p-fix"></epic-item>`)
       const mark = host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
       expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
         "in P2",
         "#p-fix",
         "Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.  ⌥-click:  start P2."
       ])
-      expect(chip.title).toMatch(/^Decided or done/)
       await expectAccessible(host)
+    } finally {
+      phases.remove()
+    }
+  })
+
+  test("a FINISHED item's `taken-in` draws no pill (I307):  its id chip names the phase;  `handled` keeps its pill", async () => {
+    const phases = document.createElement("div")
+    phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
+    document.body.append(phases)
+    try {
+      for (const status of ["done", "canceled", "decided"]) {
+        const { host, chip } = await item(
+          `<epic-item id="j100" title="Import's pictures" status="${status}" taken-in="p-fix"></epic-item>`
+        )
+        expect(host.shadowRoot!.querySelector("[part~='handled']")).toBeNull()
+        expect(chip.title).toContain("Taken up in P2 · Fix Open Issues:  fixed or done there")
+      }
+      const handled = await item(
+        `<epic-item id="q4" title="How many?" status="decided" state="handled" handled="p-one" taken-in="p-fix"></epic-item>`
+      )
+      expect(handled.host.shadowRoot!.querySelector("[part~='handled']")!.textContent).toBe("in P1")
     } finally {
       phases.remove()
     }
