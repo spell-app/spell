@@ -149,13 +149,13 @@ export class QuizElement extends SpellElement<Quiz> {
 }
 core.useElement(Quiz, QuizElement)
 export const quiz = new Quiz()
-core.describeAction(Quiz, "dealACard", { title: "Deal A Card", undoneAs: "Deal A Card" })
+core.describeAction(Quiz, "dealACard", { title: "Deal a Card", undoneAs: "Deal a Card" })
 
 core.heading("The deck:  four words to start -- add your own")
 //## The deck:  four words to start -- add your own
 
 export function addWordMeaningMeaning(word: string, meaning: string) {
-  return core.asAction({ undoneAs: "Add Word As Text Meaning Meaning As Text" }, () => {
+  return core.asAction({ undoneAs: "Add Word Meaning Meaning" }, () => {
     quiz.deck.append(new FlashCard({ word: word, meaning: meaning }))
   })
 }

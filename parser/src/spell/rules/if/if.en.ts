@@ -265,7 +265,7 @@ _if_.addRule(ValueIf, {
           ["to pick a color:", `\tred if suit is "hearts"`],
           [
             "export function pickAColor() {",
-            '  return core.asAction({ undoneAs: "Pick A Color" }, () => {',
+            '  return core.asAction({ undoneAs: "Pick a Color" }, () => {',
             '    if (suit === "hearts") return "red"',
             "  })",
             "}"
@@ -299,7 +299,7 @@ _if_.addRule(ValueOtherwise, {
           ["to pick a color:", "\tblack otherwise"],
           [
             "export function pickAColor() {",
-            '  return core.asAction({ undoneAs: "Pick A Color" }, () => {',
+            '  return core.asAction({ undoneAs: "Pick a Color" }, () => {',
             '    return "black"',
             "  })",
             "}"

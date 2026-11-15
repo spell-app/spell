@@ -863,13 +863,13 @@ export class AdministraciónDeLaOrg extends App {
   }
 }
 export const administraciónDeLaOrg = new AdministraciónDeLaOrg()
-core.describeAction(AdministraciónDeLaOrg, "agregarElMiembroNuevo", { title: "Agregar El Miembro Nuevo", undoneAs: "Agregar El Miembro Nuevo" })
-core.describeAction(AdministraciónDeLaOrg, "agregarElEquipoNuevo", { title: "Agregar El Equipo Nuevo", undoneAs: "Agregar El Equipo Nuevo" })
-core.describeAction(AdministraciónDeLaOrg, "agregarElProyectoNuevo", { title: "Agregar El Proyecto Nuevo", undoneAs: "Agregar El Proyecto Nuevo" })
-core.describeAction(AdministraciónDeLaOrg, "darElMandatoNuevo", { title: "Dar El Mandato Nuevo", undoneAs: "Dar El Mandato Nuevo" })
-core.describeAction(AdministraciónDeLaOrg, "aprobarLaAprobaciónNueva", { title: "Aprobar La Aprobación Nueva", undoneAs: "Aprobar La Aprobación Nueva" })
-core.describeAction(AdministraciónDeLaOrg, "agregarElDiseñadorNuevo", { title: "Agregar El Diseñador Nuevo", undoneAs: "Agregar El Diseñador Nuevo" })
-core.describeAction(AdministraciónDeLaOrg, "agregarLaEtapaNueva", { title: "Agregar La Etapa Nueva", undoneAs: "Agregar La Etapa Nueva" })
+core.describeAction(AdministraciónDeLaOrg, "agregarElMiembroNuevo", { title: "Agregar el Miembro Nuevo", undoneAs: "Agregar el Miembro Nuevo" })
+core.describeAction(AdministraciónDeLaOrg, "agregarElEquipoNuevo", { title: "Agregar el Equipo Nuevo", undoneAs: "Agregar el Equipo Nuevo" })
+core.describeAction(AdministraciónDeLaOrg, "agregarElProyectoNuevo", { title: "Agregar el Proyecto Nuevo", undoneAs: "Agregar el Proyecto Nuevo" })
+core.describeAction(AdministraciónDeLaOrg, "darElMandatoNuevo", { title: "Dar el Mandato Nuevo", undoneAs: "Dar el Mandato Nuevo" })
+core.describeAction(AdministraciónDeLaOrg, "aprobarLaAprobaciónNueva", { title: "Aprobar la Aprobación Nueva", undoneAs: "Aprobar la Aprobación Nueva" })
+core.describeAction(AdministraciónDeLaOrg, "agregarElDiseñadorNuevo", { title: "Agregar el Diseñador Nuevo", undoneAs: "Agregar el Diseñador Nuevo" })
+core.describeAction(AdministraciónDeLaOrg, "agregarLaEtapaNueva", { title: "Agregar la Etapa Nueva", undoneAs: "Agregar la Etapa Nueva" })
 // -----------
 core.installStyles(undefined, `/* The page takes the theme's colours and type, light or dark, as its controls do. */¬.org-admin {¬  min-height: 100%;¬  color: CanvasText;¬  background: var(--ui-background);¬  font-family: var(--ui-font-family);¬}¬¬/* The section showing stands a little apart from the list of them. */¬.org-admin ui-tab {¬  margin-inline-start: 1rem;¬}¬¬/* The toolbar:  a rule below it, its title over the sections' labels. */¬.org-admin .top-bar {¬  padding-inline: 15px 0;¬  border-block-end: var(--ui-border-width, 1px) solid var(--ui-border-color);¬  margin-block-end: 0.75rem;¬  --ui-menu-item-padding: 0.5em 0.6em;¬}¬.org-admin .top-bar::part(menu) {¬  margin-block: 0;¬}¬.org-admin .top-bar::part(title) {¬  margin-inline-end: 12px;¬}¬¬/* Tables scroll inside themselves on a narrow page, rather than breaking a date in two. */¬.org-admin es-fila > es-celda {¬  color: CanvasText;¬  white-space: nowrap;¬  min-inline-size: max-content;¬}¬¬/* An add form:  its button keeps its size as the row wraps. */¬.org-admin .add .row > ui-button {¬  flex: none;¬}¬¬/* A row's take-away button stays quiet until the row is pointed at, or the button has the keyboard. */¬.org-admin es-tabla ui-button[icon="close"] {¬  opacity: 0;¬}¬.org-admin es-tabla es-fila:hover ui-button[icon="close"],¬.org-admin es-tabla ui-button[icon="close"]:focus-within {¬  opacity: 1;¬}¬¬/* A phone has nothing to point with. */¬@media (hover: none) {¬  .org-admin es-tabla ui-button[icon="close"] {¬    opacity: 1;¬  }¬}¬¬/* Too narrow for the sections to sit beside what they show:  they go above it. */¬@media (max-width: 640px) {¬  .org-admin ui-tab {¬    min-width: 100%;¬    margin-inline-start: 0;¬    margin-block-start: 0.75rem;¬  }¬}¬`)
 // -----------

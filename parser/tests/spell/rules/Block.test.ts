@@ -237,7 +237,7 @@ describe("class members go in their class's body", () => {
       "    return core.console.log(2)",
       "  }",
       "}",
-      'core.describeAction(Card, "flip", { title: "Flip A Card", undoneAs: "Flip A Card" })',
+      'core.describeAction(Card, "flip", { title: "Flip Card", undoneAs: "Flip Card" })',
       "// -----------",
       "export class Pile extends List {",
       "  static instanceType = Card",

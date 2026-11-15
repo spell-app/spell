@@ -134,9 +134,9 @@ export class TicTacToe extends App {
   }
 }
 export const ticTacToe = new TicTacToe()
-core.describeAction(TicTacToe, "startANewGame", { title: "Start A New Game", undoneAs: "Start A New Game" })
-core.describeAction(TicTacToe, "checkTheLineFromSquareAThroughBToC", { title: "Check The Line From Square A As A Number Through B As A Number To C As A Number", undoneAs: "Check The Line From Square A As A Number Through B As A Number To C As A Number" })
-core.describeAction(TicTacToe, "checkForAWinner", { title: "Check For A Winner", undoneAs: "Check For A Winner" })
+core.describeAction(TicTacToe, "startANewGame", { title: "Start a New Game", undoneAs: "Start a New Game" })
+core.describeAction(TicTacToe, "checkTheLineFromSquareAThroughBToC", { title: "Check the Line from Square a Through B to C", undoneAs: "Check the Line from Square a Through B to C" })
+core.describeAction(TicTacToe, "checkForAWinner", { title: "Check for a Winner", undoneAs: "Check for a Winner" })
 
 core.heading("Playing a square")
 //////////////////////

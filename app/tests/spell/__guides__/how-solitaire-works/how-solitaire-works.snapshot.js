@@ -98,7 +98,7 @@ export class Column extends Pile {
   }
 }
 
-core.describeAction(Card, "try", { title: "Try A Card", undoneAs: "Try A Card" })
+core.describeAction(Card, "try", { title: "Try Card", undoneAs: "Try Card" })
 
 core.heading("A pile, and a column")
 

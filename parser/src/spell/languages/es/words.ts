@@ -76,6 +76,26 @@ export const spanishWords: SP.LanguageWords = {
   memberLeadingWords: new Set(["con", "para", "desde", "en", "por", "sobre", "al"]),
 
   /** Little words after which a method's name keeps its receiver's type:  `actualizar_el_total_de_calculadora`. */
+  /** Little words an action's title writes in lower case, unless first:  `Poner Carta en Pila`. */
+  titleSmallWords: new Set([
+    "en",
+    "de",
+    "a",
+    "la",
+    "el",
+    "los",
+    "las",
+    "un",
+    "una",
+    "y",
+    "o",
+    "con",
+    "para",
+    "por",
+    "del",
+    "al"
+  ]),
+
   danglingWords: new Set([
     "de",
     "del",

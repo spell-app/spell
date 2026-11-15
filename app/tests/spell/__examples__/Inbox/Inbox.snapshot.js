@@ -340,7 +340,7 @@ export class InboxPage extends App {
 }
 export const inboxPage = new InboxPage()
 core.describeAction(InboxPage, "send", { title: "Send It", undoneAs: "Send It" })
-core.describeAction(InboxPage, "replyToWhoInConversation", { title: "Reply To Who As Text In Conversation As Text", undoneAs: "Reply To Who As Text In Conversation As Text" })
+core.describeAction(InboxPage, "replyToWhoInConversation", { title: "Reply to Who in Conversation", undoneAs: "Reply to Who in Conversation" })
 core.describeAction(InboxPage, "chooseHow", { title: "Choose How", undoneAs: "Choose How" })
 core.describeAction(InboxPage, "subscribe", { title: "Subscribe", undoneAs: "Subscribe" })
 // -----------

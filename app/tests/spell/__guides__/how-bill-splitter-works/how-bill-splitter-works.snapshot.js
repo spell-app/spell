@@ -22,7 +22,7 @@ core.heading("Money:  a number written as dollars and cents, e.g. 12.5 => \"$12.
 // - The last two lines add a 0 when the cents are under ten, so 3.07 doesn't show as $3.7.
 
 export function writeAmountAsMoney(amount) {
-  return core.asAction({ undoneAs: "Write Amount As A Number As Money" }, () => {
+  return core.asAction({ undoneAs: "Write Amount As Money" }, () => {
     const cents = Math.round(amount * 100)
     const dollars = parseInt(cents / 100)
     const leftOver = cents - dollars * 100

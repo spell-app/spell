@@ -511,9 +511,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       Undo at once does nothing.
     - What another action calls joins that one's step, as above.
   - A top-level action (`to deal the cards` outside any type) has no class to declare it on (epic `language` J149):
-    its function runs its body through the core, `return core.asAction({ undoneAs: "Deal The Cards" }, () => ...)`.
+    its function runs its body through the core, `return core.asAction({ undoneAs: "Deal the Cards" }, () => ...)`.
     - The same exceptions;  and a function with no steps stays a plain one.
-    - Python's:  `@core.as_action({"undone_as": "Deal The Cards"})` above its `def`.
+    - Python's:  `@core.as_action({"undone_as": "Deal the Cards"})` above its `def`.
 - Python's core has the same history, `undoing.py` (epic `language` P54):
   - its app's `can_undo`, `undo_title` ... go to the page on the app, `"$history"` (`StateWriter`);
     the page's `App` reads them from `core.remote.history` (`page.ts`), so `<action "undo"/>` and the menus follow it

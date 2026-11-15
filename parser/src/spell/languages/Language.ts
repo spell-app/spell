@@ -400,6 +400,11 @@ export type LanguageWords = {
   memberLeadingWords: Set<string>
   /** Little words after which a method's name keeps its receiver's type, e.g. `of` in `update_the_total_of_calculator`. */
   danglingWords: Set<string>
+  /**
+   * Little words an action's title writes in lower case, unless first:  `Put Card on Pile` (epic `language` J156).
+   * - Its articles, conjunctions and short prepositions:  English's `a`, `the`, `and`, `on`;  Spanish's `la`, `y`, `en`.
+   */
+  titleSmallWords: Set<string>
   /** Words which end a type's name of several words, e.g. `aka`. */
   typeNameStopWords: Set<string>
   /** How a file's raw text declares things, found before it's parsed. */
@@ -465,10 +470,12 @@ export type LanguageWords = {
    * How a condition starting `which` names its subject, the item (epic `language` T133):
    * `the cards in the deck which are face up` reads as `... where it is face up`.
    * - `subject`:  the word read before it, English's `it`
-   * - `singularVerbs`:  its first word, a plural verb, as the item's own:  `are` => `is`, `have` => `has`
+   * - `joins`:  the words joining its clauses, English's `and`, `or`:  the word after each starts a clause too
+   * - `singularVerbs`:  a clause's first word, a plural verb, as the item's own:  `are` => `is`, `have` => `has`;
+   *   `aren't` => `isn't`, its `'` and all (`SpellStatement.singularVerbAt()`)
    * - None:  the language leaves the subject out after `where` too, Spanish's `que están boca arriba` (`implied_it`).
    */
-  whichClause?: { subject: string; singularVerbs: Readonly<Record<string, string>> }
+  whichClause?: { subject: string; joins: ReadonlySet<string>; singularVerbs: Readonly<Record<string, string>> }
   /**
    * A verb with `it` fused onto its end, its verb captured, e.g. Spanish's `barajarla` => `barajar` (epic `spanish` J96).
    * - In a type's outline body, `- para barajarla:` is English's `- to shuffle it:`:  the receiver goes where `it` was.

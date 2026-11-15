@@ -142,7 +142,7 @@ export class Garden extends App {
   }
 }
 export const garden = new Garden()
-core.describeAction(Garden, "waitADay", { title: "Wait A Day", undoneAs: "Wait A Day" })
+core.describeAction(Garden, "waitADay", { title: "Wait a Day", undoneAs: "Wait a Day" })
 
 core.heading("Start:  three plants, one of them thirsty")
 //## Start:  three plants, one of them thirsty

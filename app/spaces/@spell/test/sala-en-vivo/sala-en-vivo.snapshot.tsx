@@ -113,7 +113,7 @@ export class CajaEnVivoElement extends SpellElement<CajaEnVivo> {
 }
 core.useElement(CajaEnVivo, CajaEnVivoElement)
 export const cajaEnVivo = new CajaEnVivo()
-core.describeAction(CajaEnVivo, "agregarUna", { title: "Agregar Una", undoneAs: "Agregar Una" })
+core.describeAction(CajaEnVivo, "agregarUna", { title: "Agregar una", undoneAs: "Agregar una" })
 
 on<{ receta: Receta }>("a-receta-change", ({ receta }) => {
   cajaEnVivo.cambios = cajaEnVivo.cambios + 1

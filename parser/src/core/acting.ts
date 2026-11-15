@@ -207,7 +207,7 @@ export const actingMethods = defineCoreModule({
    *
    * ```js
    * export function dealTheCards() {
-   *   return core.asAction({ undoneAs: "Deal The Cards" }, () => {
+   *   return core.asAction({ undoneAs: "Deal the Cards" }, () => {
    *     solitaire.deal()
    *   })
    * }

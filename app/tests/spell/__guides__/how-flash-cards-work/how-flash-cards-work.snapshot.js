@@ -104,13 +104,13 @@ export class Quiz extends App {
   }
 }
 export const quiz = new Quiz()
-core.describeAction(Quiz, "dealACard", { title: "Deal A Card", undoneAs: "Deal A Card" })
+core.describeAction(Quiz, "dealACard", { title: "Deal a Card", undoneAs: "Deal a Card" })
 
 core.heading("The deck:  four words to start -- add your own")
 //## The deck:  four words to start -- add your own
 
 export function addWordMeaningMeaning(word, meaning) {
-  return core.asAction({ undoneAs: "Add Word As Text Meaning Meaning As Text" }, () => {
+  return core.asAction({ undoneAs: "Add Word Meaning Meaning" }, () => {
     quiz.deck.append(new FlashCard({ word: word, meaning: meaning }))
   })
 }

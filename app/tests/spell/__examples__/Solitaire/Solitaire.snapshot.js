@@ -121,9 +121,9 @@ export class Card extends TwoSidedView {
     return Pile.ownerOf(this)
   }
 }
-core.describeAction(Card, "play", { title: "Play A Card", undoneAs: "Play Card" })
-core.describeAction(Card, "putOnPile", { title: "Put A Card On A Pile", undoneAs: "Move Card" })
-core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count The Points For A Card On A Pile", undoneAs: "Count The Points For A Card On A Pile" })
+core.describeAction(Card, "play", { title: "Play Card", undoneAs: "Play Card" })
+core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Move Card" })
+core.describeAction(Card, "countThePointsForCardOnPile", { title: "Count the Points for Card on Pile", undoneAs: "Count the Points for Card on Pile" })
 // It's a two sided view:  face up it shows its picture, face down the back every card shares.
 // On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 // Ace is low:  ace = 1 ... king = 13
@@ -575,9 +575,9 @@ export class Solitaire extends App {
   }
 }
 export const solitaire = new Solitaire()
-core.describeAction(Solitaire, "restartTheGame", { title: "Restart The Game", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart The Game" })
-core.describeAction(Solitaire, "turnOverTheNextCard", { title: "Turn Over The Next Card", undoneAs: "Turn Card" })
-core.describeAction(Solitaire, "resetTheStock", { title: "Reset The Stock", undoneAs: "Reset The Stock" })
+core.describeAction(Solitaire, "restartTheGame", { title: "Restart the Game", shortcuts: ["R"], icon: "sync alternate", undoneAs: "Restart the Game" })
+core.describeAction(Solitaire, "turnOverTheNextCard", { title: "Turn Over the Next Card", undoneAs: "Turn Card" })
+core.describeAction(Solitaire, "resetTheStock", { title: "Reset the Stock", undoneAs: "Reset the Stock" })
 core.describeAction(Solitaire, "autoPlay", { title: "Auto Play", shortcuts: ["A"], icon: "play", undoneAs: "Auto Play" })
 core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon: "eye", undoneAs: "Cheat" })
 

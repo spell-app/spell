@@ -136,7 +136,7 @@ export class CajaDeRecetasElement extends SpellElement<CajaDeRecetas> {
 }
 core.useElement(CajaDeRecetas, CajaDeRecetasElement)
 export const cajaDeRecetas = new CajaDeRecetas()
-core.describeAction(CajaDeRecetas, "agregarElBorrador", { title: "Agregar El Borrador", undoneAs: "Agregar El Borrador" })
+core.describeAction(CajaDeRecetas, "agregarElBorrador", { title: "Agregar el Borrador", undoneAs: "Agregar el Borrador" })
 
 if (!core.isCarryingOver) cajaDeRecetas.start()
 

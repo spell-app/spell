@@ -1452,8 +1452,8 @@ export class GuideElement extends SpellElement<Guide> {
 core.useElement(Guide, GuideElement)
 export const guide = new Guide()
 core.describeAction(Guide, "goBack", { title: "Go Back", undoneAs: "Go Back" })
-core.describeAction(Guide, "goToWhere", { title: "Go To Where As Text", undoneAs: "Go To Where As Text" })
-core.describeAction(Guide, "playTheOpening", { title: "Play The Opening", undoneAs: "Play The Opening" })
+core.describeAction(Guide, "goToWhere", { title: "Go to Where", undoneAs: "Go to Where" })
+core.describeAction(Guide, "playTheOpening", { title: "Play the Opening", undoneAs: "Play the Opening" })
 core.describeAction(Guide, "punch", { title: "Punch It", undoneAs: "Punch It" })
 
 core.heading("What everything here can do")
@@ -1470,11 +1470,11 @@ Thing.prototype.open = function (this: Thing) {
   guide.showing = this
   core.scrollToTop()
 }
-core.describeAction(Thing, "open", { title: "Open A Thing", undoneAs: "Open A Thing" })
+core.describeAction(Thing, "open", { title: "Open Thing", undoneAs: "Open Thing" })
 
 /** A number for people to read:  with none, nothing, so its row doesn't show */
 export function measureAmountInUnit(amount: number, unit: string) {
-  return core.asAction({ undoneAs: "Measure Amount As A Number In Unit As Text" }, () => {
+  return core.asAction({ undoneAs: "Measure Amount in Unit" }, () => {
     if (amount === undefined) return ""
     return `${core.withCommas(amount)} ${unit}`
   })

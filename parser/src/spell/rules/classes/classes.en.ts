@@ -2469,7 +2469,7 @@ classes.addRule(DefineMenu, {
             "  }",
             "}",
             'core.describeAction(Game, "deal", { title: "Deal", undoneAs: "Deal" })',
-            'core.describeAction(Game, "turnTheTopCardOver", { title: "Turn The Top Card Over", undoneAs: "Turn The Top Card Over" })',
+            'core.describeAction(Game, "turnTheTopCardOver", { title: "Turn the Top Card Over", undoneAs: "Turn the Top Card Over" })',
             '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
             'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
           ],
@@ -2505,7 +2505,7 @@ classes.addRule(DefineMenu, {
             "}",
             "core.useElement(Game, GameElement)",
             'core.describeAction(Game, "deal", { title: "Deal", undoneAs: "Deal" })',
-            'core.describeAction(Game, "turnTheTopCardOver", { title: "Turn The Top Card Over", undoneAs: "Turn The Top Card Over" })',
+            'core.describeAction(Game, "turnTheTopCardOver", { title: "Turn the Top Card Over", undoneAs: "Turn the Top Card Over" })',
             '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
             'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
           ]

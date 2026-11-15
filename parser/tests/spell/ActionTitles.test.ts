@@ -112,3 +112,65 @@ describe("an action's title in another language:  the names dictionaries asked f
     expect(project.titleLanguages).toEqual([])
   })
 })
+
+/**
+ * An action's title said nowhere:  its words in title case, each blank by the kind it takes (epic `language` J156, J179).
+ * - `to put (a card) on (a pile)` is `Put Card on Pile`, as its undo step:  `Undo Put Card on Pile`.
+ */
+describe("an action's default title", () => {
+  /** The `title` / `undoneAs` lines `lines` compiles to, in file `path`. */
+  function titlesOf(lines: string[], path = "/Titles.spell") {
+    const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
+    expect(file!.errors).toEqual([])
+    return file!.compiled.split("\n").filter((line) => /title:|undoneAs:/.test(line))
+  }
+
+  test("each blank by its kind, with no article;  the little words in lower case, unless first", () => {
+    const titles = titlesOf([
+      "a card is a thing",
+      "a pile is a list of cards",
+      "to put (a card) on (a pile):",
+      "\tprint 1",
+      "to play a card:",
+      "\tprint 2",
+      "to turn the top card over:",
+      "\tprint 3",
+      'to "compile and run" with icon "play"',
+      "\tprint 4"
+    ])
+    expect(titles).toContain(
+      'core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Put Card on Pile" })'
+    )
+    expect(titles).toContain('core.describeAction(Card, "play", { title: "Play Card", undoneAs: "Play Card" })')
+    expect(titles).toContain('  return core.asAction({ undoneAs: "Turn the Top Card Over" }, () => {')
+    expect(titles).toContain('  return core.asAction({ undoneAs: "Compile and Run" }, () => {')
+  })
+
+  test("a blank of a built-in kind, or with a default, says its own name (J179)", () => {
+    const titles = titlesOf([
+      "a calculator is a thing",
+      "to append (digit as text) to (a calculator):",
+      "\tprint 1",
+      'to notify (message = "Really?"):',
+      "\tprint 2",
+      "to double (n as a number):",
+      "\tprint 3"
+    ])
+    expect(titles.join("\n")).toContain('title: "Append Digit to Calculator"')
+    expect(titles).toContain('  return core.asAction({ undoneAs: "Notify Message" }, () => {')
+    expect(titles).toContain('  return core.asAction({ undoneAs: "Double N" }, () => {')
+  })
+
+  test("Spanish:  its own little words", () => {
+    const titles = titlesOf(
+      [
+        "una carta es una cosa",
+        "una pila es una lista de cartas",
+        "para poner (una carta) en (una pila):",
+        "\timprimir 1"
+      ],
+      "/Titulos.es.spell"
+    )
+    expect(titles.join("\n")).toContain('title: "Poner Carta en Pila"')
+  })
+})

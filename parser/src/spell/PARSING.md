@@ -245,6 +245,13 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - `SpellStatement.withWhichSubject()` reads the condition with its subject put back, before it parses:
     English's `it` (the language's `whichClause`), on no text just after `which`, and a first plural verb made singular
     (`are` => `is`);  Spanish leaves the subject out after `donde` too, so `que` reads as it is (`implied_it`).
+  - Each later clause too (J173):  a plural verb just after `and` / `or` (`whichClause.joins`) is made singular,
+    its own `it` put back before it:  `which are face up and are in the stock` ~== `where it is face up and it is in
+    the stock`.
+  - With an apostrophe:  Spell's words split `aren't` into `aren`, `'`, `t`, so `aren` becomes `isn`
+    (`SpellStatement.singularVerbAt()`);  `don't` => `doesn't`, `haven't` => `hasn't`.
+  - The changed words are added to the line's words the quick test keeps (`Sequence.addLineWords()`):
+    it keeps them by the line's last token, which the changed tokens share.
   - The loop's own:  `for each card in the deck which is not in the stock` (`list_iteration_where`), its item, list and
     condition one `each_item_where`, a `list_filter` of one item's word, never an expression alone.
 - A number word is a name where it can't be a number (J96):
@@ -1061,9 +1068,12 @@ a line of the built-in types table, a built-in template, or a project's own `one
         Not `with` after a name unquoted:  its words would read `with` as one of its own.
       `ActionDetail.detailsOf()` reads them first, then the body's lines.
       Its declaration names it without its quotes (`ToDoSomething.getDeclaration()`).
-    - Its title, said nowhere, is its words in Initial Caps (P48):  `to auto play` is `Auto Play`, written into
-      `core.describeAction()`;  the core's own fallback, for an action or menu described with nothing, is the same
-      (`wordsOf()`, `initialCaps()` from `spell/util`).
+    - Its title, said nowhere, is its words in title case (P48, J156):  `to auto play` is `Auto Play`,
+      `to put (a card) on (a pile)` is `Put Card on Pile`, written into `core.describeAction()`.
+      - Each blank is its kind with no article, or its own name when its kind is built in (`Append Digit to Calculator`);
+        never its default (J179);  the language's little words in lower case (`titleSmallWords`).
+      - The core's own fallback, for an action or menu described with nothing, is its method's name in Initial Caps
+        (`wordsOf()`, `initialCaps()` from `spell/util`).
     - Every action is ONE undo step by itself, named by its title (epic `language` P55, Q60):
       `to_do_something`'s methods on a type (`undoableByDefault`) are described `undoneAs` with nothing said.
       - A top-level one, outside any type, too (epic `language` J149):  no class to describe it on,

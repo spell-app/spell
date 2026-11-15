@@ -1213,7 +1213,7 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /**
    * What makes a top-level ACTION (`to deal the cards` outside any type) one undo step, or none
-   * (epic `language` J149):  `core.as_action({"undone_as": "Deal The Cards"})`, above its `def`.
+   * (epic `language` J149):  `core.as_action({"undone_as": "Deal the Cards"})`, above its `def`.
    * - A type's is described after its class instead, `core.describe_action(...)`.
    */
   protected actionDecorator(action: P.ASTActionUndo): string {
