@@ -32,6 +32,7 @@ import { parseTarget, phaseLabel, phaseOf } from "./epicArgs"
 import { EpicTools } from "./EpicTools"
 import { Sessions } from "./Sessions"
 import { StrayFiles } from "./StrayFiles"
+import { Turns } from "./Turns"
 
 /****************
  * ### `Requests`
@@ -94,7 +95,10 @@ export class Requests {
     if (!verb) throw new EpicCommandError(`which verb?  ${VERBS}`)
     if (verb === "merge") {
       if (!named) throw new EpicCommandError("merge:  which epic?")
-      const merged = Requests.mergeEach(named, undefined, { ditch: Boolean(flags.ditch) })
+      // one merge at a time on the machine (`Turns`, epic `epic-engine` T77)
+      const merged = Turns.take("merge", `epic merge ${named}`, () =>
+        Requests.mergeEach(named, undefined, { ditch: Boolean(flags.ditch) })
+      )
       for (const { repo, ditched, ditchedTo } of merged.filter(({ ditched }) => ditched.length)) {
         CLI.out(`${repo ? `${repo}:  ` : ""}moved ${ditched.length} stray file(s) aside, into ${ditchedTo}:`)
         for (const file of ditched) CLI.out(`  ${file}`)

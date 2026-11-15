@@ -499,6 +499,39 @@ than just being able to move on").
 
 
 
+## The session answers;  agents build
+
+An epic's session ANSWERS the person, and named background agents do the work (epic `epic-engine` T77;
+Owen, 2026-11-15:  "the main session should just respond to me rather than doing work, so responses are quick").
+- In Codex:  no background agents:  the session does the work itself, a step at a time, looking at `epic inbox <epic>`
+  between steps;  the claims and turns below still hold when Codex sub-agents share the worktree.
+- The session itself, within seconds:
+  - answers them, files their requests as items, decides, and relays
+  - passes their redirects on to the agent doing that work (`SendMessage`)
+  - relays what an agent found, its first line bold, by itself:  `**Agent <full name> came back with:**`
+  - keeps the inbox listener open the whole time (7, "This session LISTENS")
+  - does by itself only quick reads, and fixes under about a minute:  one file, one command
+- Everything longer goes to a NAMED background agent, as the root `CLAUDE.md`'s "Delegated work" says:
+  a phase, an item's fix, a check run, Add Details, a revisit now.
+  - `epic agents add <name> "<task>" --files <path,...>`, then the `Agent` call, its full name first in its
+    description;  `epic agents done <name>` when it's back
+  - In Codex:  no background agents:  do it here, one item at a time, and check `epic inbox <epic>` between steps.
+- Several agents share ONE worktree, so its brief tells each one to:
+  - claim the files it will change, as it starts (`--files`) or as it finds them
+    (`epic agents claim <name> <path...>`):  a file, a folder or a glob
+    - another agent has one:  `epic agents set <name> --status "blocked on <other>"`, and work on something else
+      meanwhile, or come back with that
+  - commit only its own files, by path, never `git add -A`
+  - merge with `epic worktree merge-main --as <name>`:  it never moves aside a file another running agent claims
+  - run a FULL test run in its turn, one at a time on the machine:
+    `epic turns run test -- yarn test` (and `yarn review`, `yarn kit:review`);  a single test file needs no turn
+    - why:  three full runs at once drove the load to about 50, and failed tests on their 5-second timeouts
+  - record its choices as items (`epic add <epic>#J ... --calm`), and come back with any question for the person,
+    rather than ask it:  an agent has no question modal
+    - In Codex:  the same:  a sub-agent's question comes back to the session, which asks it in the chat
+- `epic merge` and `epic worktree merge-main` take their own turn (`epic turns`):  one merge at a time on the machine,
+  each saying who has it while it waits.
+
 ## 5. Each phase
 
 1. `epic phase <name>#P<N> active`, then CHECK its accepted build plan ("4b. Build plans") against what's there now.
@@ -628,7 +661,8 @@ than just being able to move on").
      - The script marks items itself (a bare label in the title);  `phase <name>#P<N> done` drops both.
      - Its plan changes (`updated`) stay.
      - A note that should stay:  `<epic-note state="update" title="...">` (`plan-doc.md`, "UPDATE markers").
-3. Subagents:  named and listed, as the root `CLAUDE.md`'s "Delegated work" says.
+3. Subagents:  named and listed, as the root `CLAUDE.md`'s "Delegated work" says;  the work itself is theirs
+   ("The session answers;  agents build", above).
    - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record todos, issues and decisions in the epic page as you find them".
@@ -847,7 +881,7 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
     <epic>` (this section), as if they'd typed it
   - a `wait` already running in the session takes the work first:  the monitor then says nothing
 - Mechanical marks:  at once.
-- Add Details and "revisit now":  by background agents.
+- Add Details and "revisit now":  by background agents ("The session answers;  agents build").
   - In Codex:  a Codex sub-agent each, waited for;  or answered here, one at a time.
 - "Revisit soon":  answered one at a time.
 - EVERY answer goes INTO its item, on the page;  the chat only links them (Q3 of `windows-and-review`).

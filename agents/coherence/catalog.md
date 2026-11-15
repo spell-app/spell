@@ -230,6 +230,10 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Copies:**  `--`
   - spell-epic's three (`withLocks`, `withLock`, and `lock`, which two runs could both take) use it since epic
     `coherence` P7:  plain `node` loads it now.
+- Its lock file names its holder (`holder()`:  pid and label);  a holder whose process is gone is taken over at once
+  (epic `epic-engine` T77).
+- Work that takes TURNS on the machine (a merge, a full test run):  `Turns` (`spell/epic/command/Turns`,
+  `epic turns run <kind> -- <command>`), one `FileLock` per kind in the epic home.
 
 ### A process that's running, or gone
 

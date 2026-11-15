@@ -10,7 +10,7 @@ import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import { BaseBranch } from "./BaseBranch"
 import { EXIT, EpicCommandError, type Generator, type MergeMainReport, type SnapshotReview } from "./command.types"
-import { StrayFiles } from "./StrayFiles"
+import { StrayFiles, type ClaimOf } from "./StrayFiles"
 
 /**
  * A Vitest snapshot file:  its test is `<dir>/../<name>` less `.snap`.
@@ -120,6 +120,9 @@ export class MainMerge {
    */
   readonly carryOnCommand: string[]
 
+  /** the running agent claiming a file:  a file one claims is never moved aside (`StrayFiles.checkClaims()`) */
+  readonly claimOf: ClaimOf
+
   /**
    * - `root`:  the checkout (a worktree, usually)
    * - `generators`:  default the checkout's own list (`generatorsOf()`)
@@ -128,8 +131,18 @@ export class MainMerge {
    * - `rename`:  default `node bin/spell.mjs ui rename --write`
    * - `kitRoot`:  default the nearest folder at or above `root` with `bin/spell.mjs` (`kitRootOf()`):
    *   the merged checkout's own kit, so a worktree's child repo uses its worktree's kit, never main's
+   * - `claimOf`:  the running agent claiming a file (`AgentList.claimOf()`);  default none
    */
-  constructor({ root, generators, snapshotUpdate, install, rename = RENAME, kitRoot, carryOn }: MainMergeProps) {
+  constructor({
+    root,
+    generators,
+    snapshotUpdate,
+    install,
+    rename = RENAME,
+    kitRoot,
+    carryOn,
+    claimOf = () => undefined
+  }: MainMergeProps) {
     this.root = root
     this.generators = generators ?? MainMerge.generatorsOf(root)
     this.snapshotUpdate = snapshotUpdate === undefined ? MainMerge.snapshotUpdateOf(root) : snapshotUpdate
@@ -137,6 +150,7 @@ export class MainMerge {
     this.rename = rename
     this.kitRoot = kitRoot ?? MainMerge.kitRootOf(root)
     this.carryOnCommand = carryOn ?? EpicConfig.of(root).oldLayout.carryOn.split(/\s+/).filter(Boolean)
+    this.claimOf = claimOf
   }
 
   /**
@@ -145,6 +159,7 @@ export class MainMerge {
    *   AUTOMATICALLY"
    * - into `ditched/<time>/<repo>/` in the epic home, never deleted
    * - throws `EpicCommandError`, naming them, when someone's changes are among them:  nothing moved
+   * - and when a running agent claims one (`claimOf`, epic `epic-engine` T77):  it's still working on it
    */
   private ditchStrays(): Pick<MergeMainReport, "ditched" | "ditchedTo"> {
     const stray = new StrayFiles(this.root, this.generators)
@@ -153,6 +168,7 @@ export class MainMerge {
       const list = handMade.map(({ path }) => `\n  ${path}`).join("")
       throw new EpicCommandError(`merge-main:  uncommitted changes;  commit them first${list}`)
     }
+    stray.checkClaims(this.claimOf, { ditch: false })
     const folder = join(StrayFiles.folderFor(), basename(this.root))
     return { ditched: stray.ditch({ folder, ditch: false }), ditchedTo: folder }
   }
@@ -574,6 +590,7 @@ export type MainMergeProps = {
   rename?: string[]
   kitRoot?: string
   carryOn?: string[]
+  claimOf?: ClaimOf
 }
 
 /**

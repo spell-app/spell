@@ -52,6 +52,11 @@ epic pages link <page> --show     # the page's links, to give the person
 
 ## build -- Build a phase
 
+An agent that can start background agents keeps its own session free to answer the person, and has them do the work
+(the epic skill's "The session answers;  agents build"):  each one claims its files (`epic agents claim <name>
+<path...>`), merges with `epic worktree merge-main --as <name>`, and runs a full test run in its turn,
+`epic turns run test -- yarn test`.  Else, the steps below, here.
+
 1. `epic phase <epic>#P3 active`, and the page's line:  `epic inbox status <epic> "Building P3"`.
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.

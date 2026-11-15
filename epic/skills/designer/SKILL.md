@@ -1,7 +1,6 @@
 ---
 name: designer
-description: Review a page's LOOK the way the person would -- screenshot it headlessly (desktop, narrow, phone,
-light and dark, hover and open states), hold each shot up against the designer's rules, and report findings ranked, each with the rule it breaks and the fix;  at the end of a UI phase, fix the obvious ones and ask about bigger ones with before / after pictures.  Use for `/designer <page | URL> [focus]`, or "how does this look?", "review the design of ...", "check the UI of ...".
+description: Review a page's LOOK the way the person would -- screenshot it headlessly (desktop, narrow, phone, light and dark, hover and open states), hold each shot up against the designer's rules, and report findings ranked, each with the rule it breaks and the fix;  at the end of a UI phase, fix the obvious ones and ask about bigger ones with before / after pictures.  Use for `/designer <page | URL> [focus]`, or "how does this look?", "review the design of ...", "check the UI of ...".
 argument-hint: "<page | URL> [focus]"
 ---
 

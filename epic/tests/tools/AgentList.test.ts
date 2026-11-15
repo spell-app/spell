@@ -117,3 +117,33 @@ describe("add, set, done", () => {
     expect(list.agents).toEqual([])
   })
 })
+
+describe("claims (epic-engine T77)", () => {
+  test("an agent claims files, folders and globs;  another overlapping one is refused, naming who has it", () => {
+    const list = new AgentList(checkout("claims"))
+    list.add("one", "the pack", { files: ["./epic/src/components/__pack/", "src/util/string.ts"] })
+    list.add("two", "the docs")
+    expect(list.claims).toEqual([
+      { name: "claims-one", path: "epic/src/components/__pack" },
+      { name: "claims-one", path: "src/util/string.ts" }
+    ])
+    expect(() => list.claim("two", ["epic/src/components/__pack/epics.pack.js"])).toThrow(/claims-one has epic/)
+    expect(() => list.claim("two", ["src/util/*.ts"])).toThrow(AgentListError)
+    expect(list.claim("two", ["epic/src/tools/_assets/**"])).toEqual(["epic/src/tools/_assets/**"])
+    expect(() => list.add("three", "more", { files: ["src/util/string.ts"] })).toThrow(AgentListError)
+    expect(list.agents.map((it) => it.name)).toEqual(["claims-one", "claims-two"])
+  })
+
+  test("claimOf():  who claims a file, the asking agent left out;  claims go with `done()`", () => {
+    const list = new AgentList(checkout("claimed"))
+    list.add("one", "the pack", { files: ["epic/src/tools/_assets/**"] })
+    expect(list.claimOf("epic/src/tools/_assets/lazy/code.js")).toEqual({
+      name: "claimed-one",
+      claim: "epic/src/tools/_assets/**"
+    })
+    expect(list.claimOf("epic/src/tools/_assets/x.js", { except: "one" })).toBeUndefined()
+    expect(list.claimOf("epic/src/tools/details.js")).toBeUndefined()
+    list.done("one")
+    expect(list.claimOf("epic/src/tools/_assets/x.js")).toBeUndefined()
+  })
+})

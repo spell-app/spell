@@ -126,6 +126,24 @@ export class StrayFiles {
   }
 
   /**
+   * Throw, naming each, if a file a merge would move aside is one a running agent claims (`claimOf`:  `AgentList`'s
+   * `claimOf()`, the asking agent left out);  `ditch` as `ditch()` takes it.
+   * - Why (epic `epic-engine` T77):  agents share a worktree, and a merge moving aside another agent's rebuilt pack
+   *   threw its work away
+   */
+  checkClaims(claimOf: ClaimOf, { ditch }: { ditch: boolean }): void {
+    const claimed = (ditch ? this.files : this.generated).flatMap(({ path }) => {
+      const found = claimOf(path)
+      return found ? [`  ${path}:  ${found.name} is changing it (${found.claim})`] : []
+    })
+    if (claimed.length)
+      throw new EpicCommandError(
+        `merge:  files another agent is changing would be moved aside:  wait for it, then again;  nothing merged\n` +
+          claimed.join("\n")
+      )
+  }
+
+  /**
    * Move aside the generated files, and the hand-made ones too when `ditch`:  each copied into `folder`
    * (its path kept), then put back as committed, a new one removed.
    * - returns the paths moved, in `files` order
@@ -179,3 +197,6 @@ export class StrayFiles {
  * - `generated`:  left by a tool, nobody's work (`LEFT_BY_TOOLS`, the repo's generated outputs, `linguist-generated`)
  */
 export type StrayFile = { path: string; tracked: boolean; generated: boolean }
+
+/** The running agent claiming a file, and its claim;  `undefined`:  none (`AgentList.claimOf()`). */
+export type ClaimOf = (path: string) => { name: string; claim: string } | undefined
