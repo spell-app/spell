@@ -1,6 +1,6 @@
 a "card" is a draggable two sided view 			-- A playing card
 	-- A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
-	-- It's a two sided view:  face up it shows its picture, face down the back every card shares.
+	-- It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
 	-- On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 	group "Card Rank & Suit" -- Ace is low:  ace = 1 ... king = 13
 	its "rank" is one of ace, 2 ... 10, jack, queen, king
@@ -29,22 +29,10 @@ a "card" is a draggable two sided view 			-- A playing card
 		return letter + its symbol + arrow
 
 	group "Drawing"
-		// One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
-	its "picture" is
-		// Its face:  https://www.compart.com/en/unicode/block/U+1F0A0
-		set column to its value
-		if it is a club
-			return item column of ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
-		if it is a diamond
-			return item column of ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"]
-		if it is a heart
-			return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
-		return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
-
 	to draw its front
-		<text color={its color}>{its picture}</text>
+		<card-image card={it} />
 	to draw its back
-		<text color="blue">🂠</text>
+		<card-image direction=down />
 
 	to test card setup
 		get a new card whose rank is queen, suit is spades and direction is down
@@ -59,7 +47,6 @@ a "card" is a draggable two sided view 			-- A playing card
 		it is a 2 should be no
 		it is the queen of spades should be yes
 		it is the queen of clubs should be no
-		its picture should be "🂭"
 
 		turn it over
 		it is face up should be yes
@@ -68,6 +55,48 @@ a "card" is a draggable two sided view 			-- A playing card
 		set seven to a new card whose rank is 7 and suit is hearts
 		seven is a number card should be yes
 		the color of seven should be red
+
+a "card image" is a view			-- A card's picture:  the one place a card's look lives
+	-- Give it a card to draw, or a rank and a suit:  `<card-image card={the card} />`, `<card-image rank=ace suit={its suit} />`.
+	-- It's face up, unless it's `direction=down`:  then it's the back every card shares.
+	-- Today it's one letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+	-- Real pictures of the cards can take its place:  only its picture and `to draw it` change.
+	its "card" is a card
+	its "rank" is a card rank
+	its "suit" is a card suit
+	its "direction" is up or down
+	it "is face (direction)"
+	its "face" is			-- the card it draws:  its card, else one of its rank and suit
+		its card if its card exists
+		a new card whose rank is its rank and suit is its suit otherwise
+	its "color" is
+		blue if it is face down
+		the color of its face otherwise
+	its "picture" is
+		// Its letter:  https://www.compart.com/en/unicode/block/U+1F0A0
+		if it is face down
+			return "🂠"
+		set column to the value of its face
+		if its face is a club
+			return item column of ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
+		if its face is a diamond
+			return item column of ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"]
+		if its face is a heart
+			return item column of ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
+		return item column of ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
+	to draw it
+		<text color={its color}>{its picture}</text>
+
+	to test card images
+		set queen to a new card whose rank is queen, suit is spades and direction is down
+		get a new card image whose card is queen
+		its picture should be "🂭"
+		its color should be black
+		set seven to a new card image whose rank is 7 and suit is hearts
 		the picture of seven should be "🂷"
-		the picture of a new card whose rank is ace and suit is clubs should be "🃑"
-		the picture of a new card whose rank is king and suit is diamonds should be "🃎"
+		the color of seven should be red
+		the picture of a new card image whose rank is ace and suit is clubs should be "🃑"
+		the picture of a new card image whose rank is king and suit is diamonds should be "🃎"
+		get a new card image whose direction is down
+		its picture should be "🂠"
+		its color should be blue

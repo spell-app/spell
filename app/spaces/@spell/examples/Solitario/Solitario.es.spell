@@ -199,7 +199,7 @@ una "fundación" es una pila con disposición "apilada"		-- Donde se arma un pal
 		devolver su palo es el palo de la carta y
 		  su valor + 1 es el valor de la carta
 	para dibujar su marcador			-- un as gris claro de su palo, boca arriba
-		<texto>{la imagen de una nueva carta cuyo rango es as y palo es su palo}</texto>
+		<imagen-de-carta rango=as palo={su palo} />
 
 una "columna" es una pila con disposición "vertical"			-- Una columna, armada hacia abajo del rey al as, rojo y negro alternados
 	sus cartas son arrastrables cuando la carta está boca arriba

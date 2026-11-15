@@ -109,9 +109,12 @@ solitario-carta::part(back) {
   }
 }
 
-/* An empty pile's placeholder:  a faint pale card on the felt */
+/* An empty pile's placeholder:  a faint pale card on the felt, whatever the card image's own ink */
 [disposición]::part(placeholder) {
   color: #d8f0e0;
+  --ui-red-text: currentColor;
+  --ui-black-text: currentColor;
+  --ui-blue-text: currentColor;
   opacity: 0.4;
 }
 [disposición]::part(placeholder):hover {
