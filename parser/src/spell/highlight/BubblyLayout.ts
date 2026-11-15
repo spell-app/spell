@@ -154,6 +154,9 @@ export class BubblyLayout {
     // yes and no:  Spell's words, but a value written in
     if (row.isValue) this.overlays.push({ start, end, kind: "value", order: 0, overWordsOnly: true })
     if (row.isNamePart) this.overlays.push({ start, end, kind: "reference", order: 1 })
+    // `a new foundation`:  its words to the end of its kind one name, bold (epic `language` I98)
+    const [kind] = row.namesThrough ? [match.groups[row.namesThrough]].flat() : []
+    if (kind?.end !== undefined) this.overlays.push({ start, end: kind.end, kind: "reference", order: 1 })
     for (const plain of descendantsNamed(match, row.plain))
       this.overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 2 })
   }
@@ -192,9 +195,12 @@ export class BubblyLayout {
       if (isCombination(match)) return this.underlineCombination(match)
       if (!row?.isCombination && isExpression(match.rule)) return this.underline(start, end, "value")
     }
-    // what a step sets (`set <the score> to`) isn't read:  a name, never underlined
+    // what a step sets (`set <the score> to`):  ONE underline of its own, whole, its name bold in it (epic `language` I98)
     const sets = new Set((row?.sets ?? []).flatMap((group) => [match.groups[group]].flat()))
-    for (const child of childrenOf(match)) if (!sets.has(child)) this.underlineIn(child)
+    for (const child of childrenOf(match)) {
+      if (!sets.has(child)) this.underlineIn(child)
+      else if (child.start !== undefined && child.end !== undefined) this.underline(child.start, child.end, "value")
+    }
   }
 
   /**
@@ -466,10 +472,44 @@ export class BubblyLayout {
           this.abilityWord.test(this.text.slice(span.start, span.end))
         )
           this.paintRange(span.start, span.end, "reference")
+    // a drawing's head, `to draw its placeholder`:  what it draws a name, no pill (epic `language` I99)
+    if (this.paintDrawing(head)) return
     for (const input of descendantsNamed(statement, row.inputs)) this.paintRange(input.start!, input.end!, "input")
     if (row.typedAfterLead) this.paintTyped(head)
     for (const list of descendantsNamed(statement, row.choices))
       for (const item of childrenOf(list)) this.paintChoice(item.start!, item.end!)
+  }
+
+  /**
+   * A drawing's head (`namesWhatItDraws`), its words Spell's own, so names, not a pill:
+   * its verb and the part it draws bold, a pronoun or a word between them plain;  `true` if it was one.
+   * - `to <draw> it`, `to <draw> its <front>`, `to <draw> its <placeholder>`, `to <draw> each <item>`;
+   *   `para <dibujarla>`, `para <dibujar> su <marcador>`
+   * - `to draw it` too, though English leaves it to `to_do_something`:  its method is the drawing's, `draw()`
+   * - Quoted (`to "draw its back"`), it stays one quoted pill, as any quoted name with no blanks.
+   */
+  private paintDrawing({ statement, row }: Head): boolean {
+    const groups = statement.groups as { phrase?: P.Match; slot?: P.Match; signature?: P.Match }
+    const signature = groups.signature?.data as { methodName?: string; args?: unknown[] } | undefined
+    const drawsIt =
+      signature?.methodName === DRAW_METHOD && !signature.args?.length && this.text[groups.signature!.start!] !== '"'
+    if (!row.namesWhatItDraws && !drawsIt) return false
+    const words = groups.phrase ?? groups.slot ?? (drawsIt ? groups.signature : undefined)
+    if (words?.start === undefined || words.end === undefined) return !!row.namesWhatItDraws
+    const lead = /^\S+\s*/.exec(this.text.slice(statement.start!, words.end))?.[0].length ?? 0
+    const from = groups.slot ? statement.start! + lead : words.start
+    const found = [...this.text.slice(from, words.end).matchAll(/\S+/g)].map((word) => ({
+      start: from + word.index,
+      end: from + word.index + word[0].length,
+      word: word[0]
+    }))
+    const [verb] = found
+    const last = found.at(-1)
+    if (verb) this.paintRange(verb.start, verb.end, "reference")
+    if (groups.slot) this.paintRange(groups.slot.start!, groups.slot.end!, "reference")
+    else if (last && last !== verb && !this.pronouns.has(last.word.toLowerCase()))
+      this.paintRange(last.start, last.end, "reference")
+    return true
   }
 
   /**
@@ -484,8 +524,18 @@ export class BubblyLayout {
     // a test's words are all its name:  nothing in it is a parameter
     const params =
       partOfSpeech === "action" ? descendantsNamed(statement, row.params).map((param) => this.bracketed(param)) : []
-    const end = Math.max(...[...inputs, ...params].map((each) => each.end!), 0)
+    let end = Math.max(...[...inputs, ...params].map((each) => each.end!), 0)
     let from = statement.start! + lead[0].length
+    // a quoted name with parameters, `to "count the points for a card on a pile"`:  drawn as the unquoted one is,
+    // its `"` marks faint at either end;  one with none stays one quoted pill
+    const quoted = params.length ? this.quotedName(statement, from) : undefined
+    if (quoted) {
+      for (let at = quoted.start; at < quoted.end; at++) if (this.paint[at] === "input") this.paint[at] = "words"
+      this.paintRange(quoted.start, quoted.start + 1, "mark")
+      this.paintRange(quoted.end - 1, quoted.end, "mark")
+      from = quoted.start + 1
+      end = quoted.end - 1
+    }
     for (const param of [...params.filter((each) => each.start < end), { start: end, end }].sort(
       (a, b) => a.start - b.start
     )) {
@@ -497,6 +547,14 @@ export class BubblyLayout {
       }
       from = Math.max(from, param.end)
     }
+  }
+
+  /** The stretch of `statement`'s quoted name, its `"` marks included, when it starts at `from`;  else `undefined`. */
+  private quotedName(statement: P.Match, from: number): { start: number; end: number } | undefined {
+    const signature = (statement.groups as { signature?: P.Match }).signature
+    if (!signature || signature.start !== from || this.text[from] !== '"') return undefined
+    const end = signature.end!
+    return this.text[end - 1] === '"' && end - from > 1 ? { start: from, end } : undefined
   }
 
   /** `param`'s stretch, with the brackets round it if it has them:  `(a card)`. */
@@ -665,6 +723,9 @@ const KEYWORD = "keyword"
 
 /** The rule of a number written in, `300` in `pause for 300 msec`. */
 const NUMBER_RULE = "number"
+
+/** The method a drawing's head makes, `to draw it` => `draw()`, in every language. */
+const DRAW_METHOD = "draw"
 
 /** Operators drawn faint. */
 const MARKS = new Set([",", ":"])
