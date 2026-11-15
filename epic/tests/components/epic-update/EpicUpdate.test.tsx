@@ -340,4 +340,19 @@ describe("<epic-update> bare, its item checked (I285)", () => {
     await client.save("i91", null)
     await vi.waitFor(() => expect(label()?.textContent).toBe("FIXED"))
   })
+
+  // epic `epic-engine` I302:  the copy on a line of "0. While you were out" follows the line's item
+  test("a copy on a While you were out line:  its line's item's ✓ takes it off too", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const root = await ElementFixture.render(
+      `<epic-away-line line="i91" state="replied">1. I91 It jumps <epic-update phase="52" became="fixed"></epic-update></epic-away-line>`
+    )
+    const update = root.querySelector("epic-update")!
+    await ElementFixture.settle()
+    const label = () => update.shadowRoot!.querySelector('[part~="label"]')
+    expect(label()?.textContent).toBe("FIXED")
+    await client.save("i91", { action: "approve" })
+    await vi.waitFor(() => expect(label()).toBeNull())
+  })
 })

@@ -57,7 +57,7 @@ SpellUI.registerPack({
     "epic-summary": "d49e270ca9b91573",
     "epic-text-box": "4b21289cb8287fbe",
     "epic-thread": "548955cfa10b2087",
-    "epic-update": "938873158b90b668"
+    "epic-update": "637a61a1a44e0650"
   },
   define: () =>
     Promise.all([

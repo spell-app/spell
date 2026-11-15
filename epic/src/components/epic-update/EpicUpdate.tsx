@@ -46,6 +46,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - A status change says which (`became`;  Owen, 2026-11-14, epic `epic-engine` T75):  `FIXED`.
  *   - Then a blue `Not in main` pill while that work is on its epic's branch alone (`unmerged`).
  *   - Gone once Owen checks its item (his ✓;  I285):  at once on the page, and from the file as it's applied.
+ *   - A copy of it ends each line of "0. While you were out" about that item (`PlanDoc.awayBody()`, I302).
  * - Its own family, so its look changes in one place (Owen:  "so we can restyle easily").
  ****************/
 export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
@@ -99,11 +100,14 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
   /**
    * A bare label whose item Owen has checked:  his ✓ (an approve) on it in the review inbox, sent or not, so the label
    * goes at once (epic `epic-engine` I285);  applying it takes the label out of the page (`PlanDoc.reviewedAs()`).
+   * - its item:  the one it's in, or, as a copy on a line of "0. While you were out", the one that line is about
+   *   (`<epic-away-line line>`, epic `epic-engine` I302)
    */
   @E.cssState("checked")
   get isChecked(): boolean {
     if (this.isBlock) return false
-    const itemId = this.domElement.closest("epic-item")?.id
+    const itemId =
+      this.domElement.closest("epic-item")?.id ?? this.domElement.closest("epic-away-line")?.getAttribute("line")
     return !!itemId && this.review.liveOf(itemId).approved
   }
 

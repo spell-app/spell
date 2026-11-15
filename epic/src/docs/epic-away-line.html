@@ -77,6 +77,10 @@
             >
             <epic-away-line line="issues" heading state="open"><b>Newly opened issues</b></epic-away-line>
             <epic-away-line line="i9" state="open">1. <a href="#i9">I9</a> it flickers</epic-away-line>
+            <epic-away-line line="fixed" heading state="replied"><b>Fixed, to review</b></epic-away-line>
+            <epic-away-line line="i12" state="replied"
+              >1. <a href="#i12">I12</a> it jumps <epic-update phase="7" became="fixed"></epic-update
+            ></epic-away-line>
           </ui-section>
 
           <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
@@ -90,6 +94,11 @@
               <li>
                 <code>heading</code>:  a part's heading;  read, every line of its part fades at once, and the whole part
                 leaves.
+              </li>
+              <li>
+                A line about an item ends with a copy of the item's own label, the <code>&lt;epic-update&gt;</code> its
+                title shows (<code>FIXED</code>, <code>UNDERWAY</code> ...;  epic <code>epic-engine</code> I302), drawn
+                again on every edit, so it follows the item;  the item's ✓ hides both at once.
               </li>
               <li>
                 The section lists its lines' keys in its <code>lines</code>, and the page remembers when each was read in
@@ -111,7 +120,7 @@
 
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
-            <p class="meta">Last checked 2026-11-03 against branch <code>epic-engine</code>.</p>
+            <p class="meta">Last checked 2026-11-15 against branch <code>epic-engine</code>.</p>
           </footer>
         </article>
       </ui-container>

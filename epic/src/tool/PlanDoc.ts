@@ -2916,9 +2916,14 @@ export class PlanDoc extends PlanReader {
       anchor.setAttribute("href", `#${id}`)
       return anchor
     }
+    // a line about an item ends with a copy of the item's label (`FIXED`, `UNDERWAY` ...), as its title shows it:
+    // drawn again on every edit, so it follows the item;  its ✓ hides both at once (`EpicUpdate.isChecked`, I302)
     const line = (key: string, state: AwayState, ...children: (Node | string)[]) => {
       const element = this.make("epic-away-line", { line: key, state })
       element.append(...children)
+      const item = this.findItem(key)
+      const label = item && PlanItem.updateLabelOf(item)
+      if (label) element.append(" ", label.cloneNode(true))
       return element
     }
     const heading = (key: AwayPart, state: AwayState, text: string) => {
