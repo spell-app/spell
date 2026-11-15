@@ -1129,6 +1129,8 @@ const RESTORE_LINK = "\u0000"
  * The line under a refused name, `Restore "cheat"`:  its link, `Restore`, puts the old name back (epic `editor` I139).
  * - A link as the drafted tab's tip draws its "Discard changes":  a tertiary button.
  * - A press never takes the focus from the field:  so the field isn't left, and the refused name not tried again.
+ * - A press keeps the pointer (`setPointerCapture()`), so its click is the link's wherever it's let go:
+ *   the link is 12px tall, and a press let go a few pixels off it clicked the line around it, doing nothing (I139).
  */
 function RestoreName(props: { oldName: string; onRestore: () => void }): JSX.Element {
   // the words around the link, as each language orders them
@@ -1143,6 +1145,8 @@ function RestoreName(props: { oldName: string; onRestore: () => void }): JSX.Ele
         color="primary"
         class="InspectorActionNameRestoreLink"
         title={appTexts.text("renameActionRestoreTip", { oldName: props.oldName })}
+        // the link's own, its release too:  a press let go a few pixels off a link this small clicked nothing
+        onPointerDown={(event: PointerEvent) => (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)}
         onMouseDown={(event: MouseEvent) => event.preventDefault()}
         onClick={(event: MouseEvent) => {
           event.stopPropagation()

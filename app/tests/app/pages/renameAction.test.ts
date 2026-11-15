@@ -155,6 +155,30 @@ describe.skipIf(!SERVING)("Renaming an action in the Inspector", { timeout: 180_
     expect(await page.evaluate(() => !!(window as unknown as { editor: { error?: unknown } }).editor.error)).toBe(false)
   })
 
+  test("Restore still restores when the press is let go a few pixels off the link", async () => {
+    const before = await allFiles()
+    const field = await openField("restart the game")
+    await page.keyboard.type("cheat")
+    await page.keyboard.press("Enter")
+    const restore = page.locator(".InspectorActionNameRestoreLink")
+    await expect.poll(() => restore.count()).toBe(1)
+    // a person's press:  down on the word, let go just under it (the link is 12px tall)
+    const box = (await restore.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height + 4, { steps: 3 })
+    await page.mouse.up()
+    await expect.poll(() => field.count()).toBe(0)
+    expect(
+      await page
+        .locator(".InspectorActionName")
+        .filter({ hasText: /^restart the game$/ })
+        .count()
+    ).toBe(1)
+    await page.waitForTimeout(500)
+    expect(await allFiles()).toBe(before)
+  })
+
   test("leaving the field renames it everywhere it's named, as one undo", async () => {
     const before = await allFiles()
     const buttons = count(before, '<action "cheat"/>')
