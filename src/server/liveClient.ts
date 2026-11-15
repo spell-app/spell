@@ -558,6 +558,8 @@ export function liveClient(scrollKey: string): void {
   function rememberVersions() {
     clearTimeout(versionsTimer)
     versionsTimer = setTimeout(() => {
+      // the server down:  not asked now;  its next `hello` asks again (I294)
+      if (serverDown) return
       const fresh = [liveScriptPath(), ...scriptUrls()].filter((path) => !codeVersions.has(path))
       void askVersions(fresh).then((now) => {
         for (const [path, version] of Object.entries(now?.versions ?? {})) if (version) codeVersions.set(path, version)
