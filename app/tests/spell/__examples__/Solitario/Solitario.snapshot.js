@@ -70,11 +70,11 @@ export class Carta extends TwoSidedView {
   }
 
   /** La carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y la toman */
-  ponerEnPila(pila) {
+  moverAPila(pila) {
     // - rechazado, nada se mueve, y no hay nada que deshacer
-    // - un juego agrega sus propios pasos después:  `después de poner una carta en una pila`
+    // - un juego agrega sus propios pasos después:  `después de mover una carta a una pila`
     if (!core.canGiveUp(this.pila, this) || !core.canTake(pila, this)) core.cancel()
-    this.pila.startingWith(this).forEach((carta) => core.move(carta, pila))
+    this.pila.startingWith(this).forEach((carta) => pila.append(carta))
   }
 
   async jugar() {
@@ -82,12 +82,12 @@ export class Carta extends TwoSidedView {
     else {
       const pilaFinal = core.filter(core.everyThing(Pila), (pila) => core.canTake(pila, this)).firstItem
       if (pilaFinal === undefined) return false
-      return this.ponerEnPila(pilaFinal)
+      return this.moverAPila(pilaFinal)
     }
   }
 
   /** El movimiento suma puntos;  la columna que dejó voltea su nueva última carta */
-  afterPonerEnPila(pila) {
+  afterMoverAPila(pila) {
     solitario.puntuación = solitario.puntuación + this.losPuntosPorEnPila(pila)
     const it2 = this.últimaPila
     if (it2 instanceof Columna && !it2.isEmpty) it2.lastItem?.turnFaceUp()
@@ -106,7 +106,7 @@ export class Carta extends TwoSidedView {
 
   static draggable = true
 
-  /** una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta */
+  /** una carta está en una sola pila a la vez:  moverla a otra pila la quita de esta */
   get pila() {
     return Pila.ownerOf(this)
   }
@@ -115,9 +115,9 @@ export class Carta extends TwoSidedView {
     return Pila.lastOwnerOf(this)
   }
 }
-core.describeAction(Carta, "ponerEnPila", { title: "Poner Carta en Pila", undoneAs: "Mover carta", cancels: true })
+core.describeAction(Carta, "moverAPila", { title: "Mover Carta a Pila", cancels: true, undoneAs: "Mover Carta a Pila" })
 core.describeAction(Carta, "jugar", { title: "Jugar Carta", undoneAs: "Jugar carta" })
-core.addAfterHook(Carta, "ponerEnPila", { hook: "afterPonerEnPila" })
+core.addAfterHook(Carta, "moverAPila", { hook: "afterMoverAPila" })
 core.describeAction(Carta, "losPuntosPorEnPila", { title: "Los Puntos por Carta en Pila", undoneAs: "Los Puntos por Carta en Pila" })
 // Es una vista reversible:  cada lado es una imagen de carta (abajo):  boca arriba la suya, boca abajo el dorso que comparten todas las cartas.
 // En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
@@ -331,9 +331,9 @@ export class Pila extends ViewableList {
     return resumen
   }
 
-  /** poner la carta en la pila, si es un movimiento válido */
+  /** mover la carta a la pila, si es un movimiento válido */
   whenCartaDroppedOn(carta) {
-    carta.ponerEnPila(this)
+    carta.moverAPila(this)
   }
 
   static droppable = true
@@ -760,7 +760,7 @@ export function testLosMovimientos() {
     core.expect(core.canTake(fundación, dos), `la fundación puede tomar el dos`, false, `no`)
     core.expect(core.canTake(fundación, as), `la fundación puede tomar el as`, true, `sí`)
     core.echoTestAction(`mover el as a la fundación`)
-    core.move(as, fundación)
+    as.moverAPila(fundación)
     core.expect(core.canTake(fundación, dos), `la fundación puede tomar el dos`, true, `sí`)
     core.echoTestAction(`agregar la dama a la columna`)
     columna.append(dama)

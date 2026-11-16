@@ -217,6 +217,18 @@ and in the app's build folder, `app/` at the app folder's root.
     - in `<spell-editor>`, through its `loadMonaco()`
     - NEVER import `spell/app/app/ui/monaco` or `spell/app/app/solid/monaco` statically outside those folders, types aside.
     - Or Monaco (~4.4 MB) lands in the main bundle again.
+- [The CodeMirror plumbing](ui/codemirror/), the editor Monaco is moving to (epic `codemirror`):
+  only the test page, `/demo/codemirror.html`, shows it until the swap (P6, Q4).
+  - One state per file, `FileStates` (P2):  each file keeps its text, undo, folds and selection while another is shown;
+    edits from outside the code go in through `applyEdits()`, one undo step each, marked with their `EditWay`.
+    - Its own copy of `SpellModels`' editor-free half (J4):  a change to one is copied to the other by hand till P6.
+  - Every CodeMirror editor starts from one base setup, `CodeMirrorSetup`:  keys, undo, find, the gutter
+    (no line numbers, fold arrows over the code's padding), and CodeMirror's words, which are `AppTexts` keys (`cm...`),
+    following `appTexts.lang`.
+  - The language service's answers reach it through one converter, `LspToCodeMirror`, the twin of `LspToMonaco`.
+  - Its Solid editors are `CodeMirrorEditor` and `FileEditor`, in [their folder](solid/codemirror/), as Monaco's are.
+  - NEVER import `spell/app/app/ui/codemirror` or `spell/app/app/solid/codemirror` statically outside those folders
+    and the test page, types aside:  it's to load lazily, as Monaco does.
 - Routing (P8):  [the routes](pages/routes.tsx), on `@solidjs/router@next` (`createRouter()`, pinned exactly).
   - The router ships its Solid JSX as SOURCE (`.jsx` files, in its dist folder).
     - [`NOT_SOLID_SOURCE`](../../app/vite.shared.ts) lets the Solid plugin compile it out of `node_modules`.

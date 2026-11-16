@@ -100,8 +100,9 @@ describe("runner builds", () => {
         expect(holds(dir, file, "solid") || holds(dir, file, "ui"), `${dir} ${file}`).toBe(false)
         expect(readFileSync(join(dir, file), "utf8"), `${dir} ${file}`).not.toMatch(/spell-(solid|ui)\.js/)
       }
-      // and hands that `h` on, for compiled spell's `import { h } from "@spell/core"` (epic `output-targets` P20)
-      expect(passesOnShared(dir, "spell-runtime.js", "h"), dir).toBe(true)
+      // and draws with that `h`, for compiled spell's `import { h } from "@spell/core"` (epic `output-targets` P20):
+      // core's own `h()` wraps it, to keep a view's element while an edit draws again (epic `editor` I182)
+      expect(drawsWithShared(dir, "spell-runtime.js", "h"), dir).toBe(true)
     }
   })
 
@@ -341,18 +342,19 @@ const SHARED_SPECIFIERS = /^const specifiers = (.+)$/m
 const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
 
 /**
- * Does chunk `file` export `name` just as it imports it from `spell-solid-shared.js`:  the page's copy, passed on?
- * - Reads the minified output:  `import{...h as T...}from"./spell-solid-shared.js"`, then `export{...T as h...}`.
+ * Does chunk `file` export `name`, and import `name` from `spell-solid-shared.js`:  the page's copy, drawn with?
+ * - Reads the minified output:  `import{...h as T...}from"./spell-solid-shared.js"`, and `export{...x as h...}`.
+ * - Not necessarily the same binding:  core's `h()` wraps the page's (epic `editor` I182).
  */
-function passesOnShared(dir: string, file: string, name: string): boolean {
+function drawsWithShared(dir: string, file: string, name: string): boolean {
   const text = readFileSync(join(dir, file), "utf8")
   const entries = (list = "") => list.split(",").map((entry) => entry.trim().split(/\s+as\s+/))
   const exported = entries([...text.matchAll(/export\{([^}]*)\}/g)].at(-1)?.[1])
-  const local = exported.find((entry) => (entry[1] ?? entry[0]) === name)?.[0]
+  const isExported = exported.some((entry) => (entry[1] ?? entry[0]) === name)
   const imported = [...text.matchAll(/import\{([^}]*)\}from"\.\/spell-solid-shared\.js"/g)].flatMap(([, list]) =>
     entries(list)
   )
-  return !!local && imported.some((entry) => entry[0] === name && (entry[1] ?? entry[0]) === local)
+  return isExported && imported.some((entry) => entry[0] === name)
 }
 
 /**

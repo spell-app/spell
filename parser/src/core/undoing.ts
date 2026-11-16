@@ -346,6 +346,8 @@ export function declareAction(Class: Function, name: string, info: ActionInfo, a
   // and as many arguments as the method's:  what reads it (the editor's Code card) knows `put it on a pile` takes one
   // (epic `editor` I62)
   Object.defineProperty(action, "length", { value: method.length })
+  // and reads as the method's code:  what an edit changed shows on it, not this wrapper (epic `editor` I182)
+  Object.defineProperty(action, "toString", { value: () => method.toString(), configurable: true })
   Object.defineProperty(Class.prototype, name, { value: action, writable: true, configurable: true })
 }
 

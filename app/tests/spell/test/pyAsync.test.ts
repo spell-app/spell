@@ -30,8 +30,8 @@ describe("Python on asyncio", () => {
 
   // (a `create()` that waits was the deck's, which turned each card face down with a pause:  a two sided card
   // starts face down since the showcase, epic `elemental-spell`, so no fixture has one now)
-  // (a card's click plays it, which may turn over the next card;  the pile's drop handler puts a card, which never
-  // waits since `put a card on a pile` is Pile.spell's, epic `language` P56)
+  // (a card's click plays it, which may turn over the next card;  the pile's drop handler moves a card, which never
+  // waits since `move a card to a pile` is Pile.spell's, epic `language` P56)
   test("a handler that calls one that waits is `async def` too", () => {
     expect(cards).toMatch(
       /\n {4}async def on_click\(self, event: ClickEvent\) -> None:\n.*\n {12}await self\.play\(\)\n/

@@ -13,8 +13,8 @@ solitaire is an app
 				<action "cheat"/>
 				<action "restart the game" title="Restart"/>
 				<spacer/>
-				<action "undo"/>
-				<action "redo"/>
+				<action "undo" icon-only />
+				<action "redo" icon-only />
 				<text slot="right">Score: <number "score" /></>
 			</>
 		</>
@@ -39,8 +39,8 @@ solitaire is an app
 			<action "cheat"/>
 			<action "restart the game"/>
 			<divider/>
-			<action "undo" icon-only />
-			<action "redo" icon-only />
+			<action "undo"  />
+			<action "redo"  />
 		</context-menu>
 
 	group "Dealing & the Stock Pile"
@@ -48,8 +48,7 @@ solitaire is an app
 		clear the score
 		for each card in the deck
 			turn the card face down without waiting
-		for each card in the deck
-			if the card is not in the stock
+		for each card in the cards which are not in the stock
 				add the card to the stock without waiting
 				pause for 10 msec
 		shuffle the stock
@@ -67,11 +66,11 @@ solitaire is an app
 		// - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
 		if the stock is empty
 			reset the stock
-		get the top card of the stock
-		turn it face up
+		set the next card to the top card of the stock
+		turn the next card face up
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec
-		add it to the discard pile
+		add the next card to the discard pile
 	
 	to "reset the stock"
 		// The discard pile, turned over, back into the stock
@@ -82,18 +81,17 @@ solitaire is an app
 
 	group "Game Play"
 	
-	to play a card
-		undoable as "Play Card"
+	to "play a card"
 		if the card is in the stock
 			turn over the next card
 		otherwise
 			set end pile to the first pile in every pile where it can take the card
 			if there is not an end pile return no
-			return put the card on end pile
+			return move the card to end pile
 
-	after putting a card on a pile
+	after moving a card to a pile
 		// The move scores;  the column it left turns its new last card face up
-		add (the points for the card on the pile) to solitaire's score
+		add the points for the card on the pile to solitaire's score
 		if the card's last pile is a column and it is not empty
 			turn its last card face up
 
