@@ -13,9 +13,9 @@ solitaire is an app
 				<action "cheat"/>
 				<action "restart the game" title="Restart"/>
 				<spacer/>
-				<action "undo" icon-only/>
-				<action "redo" icon-only/>
-				<text slot="right">Score <number "score" /></>
+				<action "undo"/>
+				<action "redo"/>
+				<text slot="right">Score: <number "score" /></>
 			</>
 		</>
 		<container columns="7" padding="small" spacing="xs">
@@ -39,8 +39,8 @@ solitaire is an app
 			<action "cheat"/>
 			<action "restart the game"/>
 			<divider/>
-			<action "undo"/>
-			<action "redo"/>
+			<action "undo" icon-only />
+			<action "redo" icon-only />
 		</context-menu>
 
 	group "Dealing & the Stock Pile"
@@ -91,20 +91,11 @@ solitaire is an app
 			if there is not an end pile return no
 			return put the card on end pile
 
-	to put a card on a pile, undoable as "Move Card"
-		// the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-		// - the pile it left turns its new last card up;  the move counts, and scores
-		set start pile to card's pile
-		if start pile cannot give up the card return no
-		if pile cannot take the card return no
-		set points to count the points for the card on pile
-		for card in (cards in start pile starting with the card)
-			move it to pile
-		if the start pile is a column and the start pile is not empty
-			pause for 200 msec
-			turn the last card of the start pile face up
-		set solitaire's score to solitaire's score + points
-		return yes
+	after putting a card on a pile
+		// The move scores;  the column it left turns its new last card face up
+		add (the points for the card on the pile) to solitaire's score
+		if the card's last pile is a column and it is not empty
+			turn its last card face up
 
 	to "auto play" with shortcut "A", icon "play"
 		// Play every card that can go somewhere, until none can
@@ -144,10 +135,10 @@ solitaire is an app
 		add the card to the discard pile
 		turn the card face up
 
-	to count the points for a card on a pile
-		// what the move scores:  10 on a foundation, 5 from the discard pile, else nothing
-		if pile is a foundation return 10
-		if the card is in the discard pile return 5
+	to "the points for (a card) on (a pile)"
+		// What a move scores:  10 onto a foundation, 5 from the discard pile, else nothing
+		return 10 if the pile is a foundation 
+		return 5 if the card's last pile is the discard pile
 		return 0
 	
 	when the score changes
@@ -160,10 +151,6 @@ a card		-- play the card on click if it is a legal move
 		if it is face up or its pile is solitaire's stock
 			play the card
 
-a pile  -- drop the card on the pile if it is a legal move
-	on card dropped
-		put the card on the pile
-
 group "The piles"
 // Each kind of pile, what it may take or give up, and how it lies.
 // While one's empty, it shows its placeholder, if it has one.
@@ -173,7 +160,7 @@ a "stock pile" is a pile with layout "stacked"
 	it can never take a card
 	it can never let go of a card
 	to draw its placeholder
-		<text>🂠</text>
+		<card-image direction=down />
 	on click
 		turn over the next card
 
@@ -185,19 +172,21 @@ a "foundation" is a pile with layout "stacked"		-- Where a suit is built up, ace
 	its "suit" is a card suit
 	it can never let go of a card
 	it is droppable when
-		return no if the card is not the last card of the pile of the card
-		return its suit is the suit of the card and
-		  its value + 1 is the value of the card
-	to draw its placeholder			-- a light grey ace of its suit, face up
-		<text>{the picture of a new card whose rank is ace and suit is its suit}</text>
+		the pile's suit is the card's suit
+			and the pile's value is the card's value - 1
+			and the card is on top of its pile
+	to draw its placeholder			
+		-- a light grey ace of its suit, face up
+		<card-image rank=ace suit={its suit} />
 
-a "column" is a pile with layout "vertical"			-- A column, built down from king to ace, red and black in turn
+a "column" is a pile with layout "vertical"			
+	-- A column, built down from king to ace, red and black in turn
 	its cards are draggable when the card is face up
 	it is droppable when
 		it is empty and the card is a king
 		or
-		its color is not the color of the card and
-		  its value is the value of the card + 1
+		its color is not the color of the card 
+		  and its value is the value of the card + 1
 
 to test the moves
 	set the column to a new column with id "T1"

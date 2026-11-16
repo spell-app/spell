@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from spell_core import core, App, View, ViewableList, prop, h, Element
 
 
@@ -81,7 +83,7 @@ class Habit(View):
             "ui-segment",
             h(
                 "ui-form",
-                {"value": self},
+                {"prop:value": self},
                 h(
                     "ui-stack",
                     {"spacing": "sm"},
@@ -114,6 +116,10 @@ class Habit(View):
     def week(self) -> Week | None:
         """a habit is in one week"""
         return Week.owner_of(self)
+
+    @property
+    def last_week(self) -> Any:
+        return Week.last_owner_of(self)
 
 
 # A yes or no for each day of the week
@@ -202,7 +208,7 @@ class HabitTracker(App):
                 h("ui-header", {"level": "2"}, "This week"),
                 h(
                     "ui-form",
-                    {"value": self},
+                    {"prop:value": self},
                     h(
                         "ui-input",
                         {

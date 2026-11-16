@@ -1734,7 +1734,7 @@
           "name": "thing"
         },
         {
-          "name": "names"
+          "name": "items"
         }
       ],
       "section": "Drawing things",
@@ -2717,6 +2717,24 @@
     },
     {
       "kind": "method",
+      "name": "addAfterHook",
+      "of": "core",
+      "module": "described",
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "description": "Run `Class`'s member `hook` at the end of its action `name`, inside its undo step:  an after hook (epic `language` P56)."
+    },
+    {
+      "kind": "method",
       "name": "describeEvent",
       "of": "core",
       "module": "described",
@@ -2937,6 +2955,13 @@
     },
     {
       "kind": "method",
+      "name": "cancel",
+      "of": "core",
+      "module": "acting",
+      "description": "Call off the action running, compiled from `cancel` (epic `language` P56):  `if (!core.canTake(pile, this)) core.cancel()`."
+    },
+    {
+      "kind": "method",
       "name": "cancelActions",
       "of": "core",
       "module": "acting",
@@ -3129,10 +3154,10 @@
           "name": "thing"
         },
         {
-          "name": "names"
+          "name": "items"
         }
       ],
-      "description": "The items of a menu written in a drawing, `<context-menu>` (epic `language`), ready to draw: each of `names` an action found from `thing` up its chain (`actionOf()`), `-` a line between groups."
+      "description": "The items of a menu written in a drawing, `<context-menu>` (epic `language`), ready to draw: each of `items` an action found from `thing` up its chain (`actionOf()`), `-` a line between groups."
     },
     {
       "kind": "method",

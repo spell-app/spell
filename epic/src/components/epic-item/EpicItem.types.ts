@@ -121,6 +121,22 @@ export type LiveReview = {
   /** his check pressed (an `approve` mark), not applied yet */
   approved: boolean
   /**
+   * his ✓ or x with nothing for Claude, which the page server applies by itself (`ReviewClient.isClosing()`, epic
+   * `epic-engine` I306):  drawn closed at once;  missing:  not closing
+   */
+  closing?: boolean
+  /**
+   * closed at his ✓ or x this visit, and kept in view, grey, until his next Send or Auto Send
+   * (`ReviewClient.isHeldInView()`, epic `epic-engine` T80):  its section doesn't hide it yet;  missing:  not held
+   */
+  heldInView?: boolean
+  /**
+   * which of his ✓ or x is closing it (`approve`, `drop`;  `ReviewClient.closingAs()`, epic `epic-engine` I308), from the
+   * click until his Send lets it go:  it draws as the server will leave it (an x struck through), so the page's own
+   * update changes nothing on screen;  missing:  not closing
+   */
+  closingAs?: string
+  /**
    * his turn on a comment in it:  Claude spoke last on its thread (`ReviewClient.hasRepliedComments()`, epic
    * `epic-engine` I284);  missing:  none
    */
@@ -141,11 +157,14 @@ export const NO_LIVE_REVIEW: LiveReview = { workedOn: false, approved: false }
  *   blue already (Owen, 2026-11-15:  "I had several comments in this thread that are still open -- the pill should be
  *   orange")
  * - his check pressed, not applied yet:  a green one grey at once
+ * - his ✓ or x the page server applies by itself (`closing`, epic `epic-engine` I306):  grey (`old`) at once,
+ *   whatever it was, so its section folds it away with the greys
  * - NEVER reads the page:  the caller hands it the fields and the live review, tracked or not
  */
 export class DrawnState {
   /** `fields`'s state as drawn, with the inbox saying `live`. */
   static of(fields: StateFields, live: LiveReview, now = Date.now()): ItemState {
+    if (live.closing) return "old"
     if (live.workedOn) return "progress"
     if (live.urgency && DrawnState.canCalm(fields)) return live.urgency.calm ? DrawnState.calmState() : "attention"
     const state = fields.state
@@ -285,9 +304,6 @@ export const EPIC_TAG = /^epic-/
 /** `<epic-*>` tags that are prose (`flow`), not parts:  the UPDATE marker, a Net effect list. */
 export const FLOW_TAGS: readonly string[] = ["epic-update", "epic-net-effect"]
 
-/** The More Details card's tag:  an item with one labels its own text "Original reply". */
-export const MORE_TAG = "epic-more"
-
 /** The icon of an item made overnight (`overnight`):  `<epic-page bedtime>`'s too (J28). */
 export const BED_ICON = "bed"
 
@@ -342,6 +358,9 @@ export function isTodo(id: string | undefined, limit: boolean | undefined): bool
 /** A todo's statuses once it's finished:  nothing left to queue or drop (I296). */
 const FINISHED_TODO = /^(done|canceled)$/
 
+/** An issue's id (`I3`):  of the calm ids (`CALM_ID`), the one whose open state draws the x (I299). */
+const ISSUE_ID = /^i\d+$/
+
 /**
  * Which review buttons item `id` draws (`<epic-review buttons>`):
  * a todo's;  an issue's or a call's, whose first is Do this (I232);  else an item's, Make Todo first.
@@ -350,16 +369,31 @@ const FINISHED_TODO = /^(done|canceled)$/
  *   (`todo-in-phase`, epic `epic-engine` I271)
  * - `status`:  its status;  a todo that's `done` or `canceled` draws Revisit and Saw it, never the x, which would
  *   drop it (`todo-done`, epic `epic-engine` I296)
+ * - `fixed`:  an open issue or call Claude fixed, waiting for Owen:  Revisit, Accept the fix
+ *   (`issue-fixed`, epic `epic-engine` I299, its plane gone with J231);  an open issue not fixed:  Do this, Revisit,
+ *   the x (`issue-open`);  an open judgement call:  Do this, Revisit, Approve (`issue`)
+ * - a FINISHED issue or call (done, canceled, decided):  Revisit and Saw it, no plane (`issue-done`, epic
+ *   `epic-engine` J231);  its `done in P20` pill stands where the plane was
  */
 export function buttonsForItem(
   id: string | undefined,
-  { limit, inPhase, status }: { limit?: boolean; inPhase?: boolean; status?: string | null } = {}
-): "todo" | "todo-in-phase" | "todo-done" | "issue" | "item" {
+  {
+    limit,
+    inPhase,
+    status,
+    fixed
+  }: { limit?: boolean; inPhase?: boolean; status?: string | null; fixed?: boolean } = {}
+): "todo" | "todo-in-phase" | "todo-done" | "issue" | "issue-open" | "issue-fixed" | "issue-done" | "item" {
   if (isTodo(id, limit)) {
     if (status && FINISHED_TODO.test(status)) return "todo-done"
     return inPhase ? "todo-in-phase" : "todo"
   }
-  return CALM_ID.test(id ?? "") ? "issue" : "item"
+  if (!CALM_ID.test(id ?? "")) return "item"
+  const open = !status || status === "open"
+  // finished:  no plane, nothing left to send (epic `epic-engine` J231)
+  if (!open) return "issue-done"
+  if (fixed) return "issue-fixed"
+  return ISSUE_ID.test(id ?? "") ? "issue-open" : "issue"
 }
 
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */

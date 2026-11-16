@@ -4,7 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vite-pl
 import { EDITOR, SERVING } from "./runningEditor"
 
 /**
- * The site editor, `/site/<project>` (epic `mockup` P4):  its tree and board of the site's parts, a page's form,
+ * The site editor, `/site/<project>` (epic `mockup` P4):  its board of the site's parts, a page's form,
  * adding, moving and undoing, each one step of the editor's history written into the site's file.
  * - Every save is answered here, and goes nowhere:  the editor holds what was changed, and the example on disk stays
  *   as it is.
@@ -82,10 +82,12 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await browser?.close()
   })
 
-  test("shows every part of the site, as a tree and as cards", async () => {
+  test("shows every part of the site as cards, on the editor's own panes", async () => {
     // six collections, a list and a page each, the reviews page, two dialogs, a sidebar, the not found and error pages
     expect(await page.locator(".SiteCard").count()).toBe(18)
-    expect(await page.locator("ui-tree-item").count()).toBe(18)
+    // no tree of the pages beside the board (epic `mockup` I13):  the board and the form, each a pane as Edit's are
+    expect(await page.locator("ui-tree-item").count()).toBe(0)
+    expect(await page.locator(".SiteEditorPage.EditorColumns > .SplitPane").count()).toBe(2)
     // the app isn't run here:  nothing of the site is drawn over the page
     expect(await page.locator(".spell-site").count()).toBe(0)
   })
@@ -106,7 +108,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
   })
 
   test("a page added, then taken back with ⌘Z", async () => {
-    await page.locator(".SiteEditorPage ui-button", { hasText: "Add a page" }).click()
+    await page.locator(".SiteEditorPage .board header ui-button", { hasText: "Add a page" }).click()
     await page.waitForTimeout(SETTLE_MS)
     expect(await text()).toContain('\tit has a new page at "/new-page", named "New page"\n')
     expect(await text()).toContain('a "new page" is a page\n')
@@ -116,81 +118,6 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     expect(await text()).not.toContain('"new page"')
   })
 
-  test("a row dragged before another:  its part moves there", async () => {
-    const from = (await page.locator('ui-tree-item[value="settings dialog"]').boundingBox())!
-    const to = (await page.locator('ui-tree-item[value="films page"]').boundingBox())!
-    await page.mouse.move(from.x + 40, from.y + 8)
-    await page.mouse.down()
-    await page.mouse.move(from.x + 40, from.y - 20, { steps: 5 })
-    await page.mouse.move(to.x + 40, to.y + 3, { steps: 10 })
-    await page.mouse.up()
-    await page.waitForTimeout(SETTLE_MS)
-    const after = await text()
-    expect(after.indexOf("it has a settings dialog")).toBeLessThan(after.indexOf("it has a films page"))
-  })
-
-  /** Press part `name`'s row and drag it to `y` pixels down part `over`'s row:  still held, for its mark to be read. */
-  async function dragOver(name: string, over: string, y: number) {
-    const from = (await page.locator(`ui-tree-item[value="${name}"]`).boundingBox())!
-    const to = (await page.locator(`ui-tree-item[value="${over}"]`).boundingBox())!
-    await page.mouse.move(from.x + 40, from.y + 8)
-    await page.mouse.down()
-    await page.mouse.move(from.x + 40, from.y + 40, { steps: 5 })
-    await page.mouse.move(to.x + 40, to.y + y, { steps: 10 })
-  }
-
-  /** The drop mark on part `name`'s row:  `before`, `after`, `into`;  `null`:  none. */
-  const markOn = (name: string) => page.locator(`ui-tree-item[value="${name}"]`).getAttribute("data-drop")
-
-  /** Let go of a drag with Escape, so nothing moves. */
-  async function cancelDrag() {
-    await page.keyboard.press("Escape")
-    await page.mouse.up()
-  }
-
-  test("a row's top, middle and bottom each have their own mark;  a dialog's row has no middle", async () => {
-    await dragOver("reviews page", "people page", 3)
-    expect(await markOn("people page")).toBe("before")
-    const to = (await page.locator('ui-tree-item[value="people page"]').boundingBox())!
-    await page.mouse.move(to.x + 40, to.y + 11, { steps: 3 })
-    expect(await markOn("people page")).toBe("into")
-    await page.mouse.move(to.x + 40, to.y + 19, { steps: 3 })
-    expect(await markOn("people page")).toBe("after")
-    const dialog = (await page.locator('ui-tree-item[value="settings dialog"]').boundingBox())!
-    await page.mouse.move(dialog.x + 40, dialog.y + dialog.height / 2 - 2, { steps: 3 })
-    expect(await markOn("settings dialog")).toBe("before")
-    await page.mouse.move(dialog.x + 40, dialog.y + dialog.height / 2 + 2, { steps: 3 })
-    expect(await markOn("settings dialog")).toBe("after")
-    await cancelDrag()
-    expect(await markOn("settings dialog")).toBeNull()
-  })
-
-  test("a row can't be dropped on itself or one of its own pages:  no mark, nothing moves", async () => {
-    const before = await text()
-    await dragOver("planets page", "planet page", 11)
-    expect(await markOn("planet page")).toBeNull()
-    await page.mouse.up()
-    await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toBe(before)
-  })
-
-  test("a row dropped on a page's middle:  its first page, and ⌘Z takes it back in one step", async () => {
-    const before = await text()
-    await dragOver("starship page", "reviews page", 11)
-    expect(await markOn("reviews page")).toBe("into")
-    await page.mouse.up()
-    await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toContain(
-      [
-        '\tit has a reviews page at "/reviews", named "Reviews"',
-        '\t\tit has a starship page at "/starships/:starship", named "Starship"'
-      ].join("\n")
-    )
-    await page.locator(".SiteEditorPage h1").click()
-    await page.keyboard.press("Meta+z")
-    await page.waitForTimeout(SETTLE_MS)
-    expect(await text()).toBe(before)
-  })
   test("a page with pages under it:  asked first, then all of them go, as one step ⌘Z takes back", async () => {
     await cardWith("/planets").first().click()
     await page.locator(".SiteEditorPage .form ui-button", { hasText: "Delete" }).click()
@@ -268,14 +195,10 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       await page.waitForTimeout(SETTLE_MS)
       const after = await text()
       expect(after.indexOf("it has a people page")).toBeLessThan(after.indexOf("it has a films page"))
-      // the tree and the board show the one order
-      const inTree = await page
-        .locator("ui-tree > ui-tree-item")
-        .evaluateAll((rows) => rows.map((row) => row.getAttribute("value")))
+      // the board shows the new order
       const onBoard = await page
         .locator(".SiteSection[data-headed]")
         .evaluateAll((blocks) => blocks.map((block) => block.getAttribute("data-section")))
-      expect(inTree.filter((name) => onBoard.includes(name!))).toEqual(onBoard)
       expect(onBoard.indexOf("people page")).toBeLessThan(onBoard.indexOf("films page"))
       await undo()
       expect(await text()).toBe(before)
@@ -293,7 +216,7 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       expect(await text()).toBe(before)
     })
 
-    test("a card into another section goes under it, in the tree too", async () => {
+    test("a card into another section goes under it", async () => {
       const before = await text()
       await dragTo(cardOf("review dialog"), () => spotCentre("reviews page", 1, 2))
       await page.mouse.up()
@@ -301,6 +224,50 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       expect(await text()).toMatch(/it has a reviews page at [^\n]*\n\t+it has a review dialog, in row 1 column 2\n/)
       await undo()
       expect(await text()).toBe(before)
+    })
+
+    test("a card dropped on a page's middle:  its first page, the page lit up;  ⌘Z takes it back in one step", async () => {
+      const before = await text()
+      const reviews = cardOf("reviews page")
+      const middle = async () => {
+        const box = (await reviews.boundingBox())!
+        return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+      }
+      await dragTo(cardOf("starship page"), middle)
+      // the section under the pointer opens a row, so the sections below it move:  aim again once they have
+      const settled = await middle()
+      await page.mouse.move(settled.x, settled.y, { steps: 3 })
+      await page.waitForTimeout(150)
+      expect(await page.locator('.SiteCard[data-part="reviews page"]').getAttribute("data-drop")).toBe("into")
+      // its edge still means its spot:  the card there moves along
+      const box = (await reviews.boundingBox())!
+      await page.mouse.move(box.x + 4, box.y + box.height / 2, { steps: 3 })
+      await page.waitForTimeout(150)
+      expect(await page.locator('.SiteCard[data-drop="into"]').count()).toBe(0)
+      const { x, y } = await middle()
+      await page.mouse.move(x, y, { steps: 3 })
+      await page.waitForTimeout(150)
+      await page.mouse.up()
+      await page.waitForTimeout(SETTLE_MS)
+      expect(await text()).toContain(
+        [
+          '\tit has a reviews page at "/reviews", named "Reviews"',
+          '\t\tit has a starship page at "/starships/:starship", named "Starship"'
+        ].join("\n")
+      )
+      await undo()
+      expect(await text()).toBe(before)
+    })
+
+    test("a card can't go into itself or one of its own pages:  no mark", async () => {
+      const planets = cardOf("planets page")
+      await dragTo(planets, async () => {
+        const box = (await cardOf("planet page").boundingBox())!
+        return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+      })
+      expect(await page.locator('.SiteCard[data-drop="into"]').count()).toBe(0)
+      await page.keyboard.press("Escape")
+      await page.mouse.up()
     })
 
     test("Escape moves nothing", async () => {

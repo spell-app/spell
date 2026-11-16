@@ -21,6 +21,7 @@ import {
 
 import { epicSectionVocabulary } from "./EpicSection.en"
 import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
+import { ItemFold } from "./ItemFold"
 import { PhaseDrag } from "./PhaseDrag"
 import { phaseFields } from "./PhaseFields"
 import { PhaseState } from "./PhaseState"
@@ -392,7 +393,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /**
    * The items the filter hides (`StateFilter.hides()`):  a marked one goes with the blues (`MARKED_SHOWS_AS`);
-   * never the one a link just landed on, or in (`linkedHere`).
+   * never the one a link just landed on, or in (`linkedHere`), nor one Owen closed this visit and hasn't sent yet
+   * (`LiveReview.heldInView`, epic `epic-engine` T80:  it folds away at his Send).
    */
   readonly hidden = createMemo(() => {
     const linked = this.linkedHere
@@ -400,7 +402,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return this.itemStates().filter(
       (it) =>
         StateFilter.hides(marked.has(it.item) ? MARKED_SHOWS_AS : it.state, this.showing()) &&
-        !(linked && it.item.contains(linked))
+        !(linked && it.item.contains(linked)) &&
+        // closed at his ✓ or x this visit:  kept in view, grey, until his Send (T80)
+        !(it.item.id && this.reviewState.liveOf(it.item.id).heldInView)
     )
   })
 
@@ -538,16 +542,37 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * Mark each item its filter hides `data-epic-filtered`, which the page sheet hides and its runs step over (P45);
    * the marks come off again when it shows them, or when the section goes.
+   * - an item newly hidden because Owen's ✓ or x is closing it (`LiveReview.closing`, epic `epic-engine` I306) folds
+   *   away first (`ItemFold`), then hides;  one it folded unfolds if it shows again
    * - SIDE EFFECT:  writes the attribute on its items (light DOM):  page state, never in the file
    */
   @E.onChange("filteredItems")
   protected onFiltered(items: readonly Element[]) {
-    if (isServer || !items.length) return undefined
-    for (const item of items) item.setAttribute(FILTERED, "")
+    if (isServer) return undefined
+    const before = this.hiddenItems
+    const shown = new Set(items)
+    this.hiddenItems = items
+    for (const item of before) if (!shown.has(item)) this.itemFold.show(item, FILTERED)
+    const was = new Set(before)
+    for (const item of items) {
+      if (was.has(item) || this.itemFold.isFolding(item)) {
+        if (!this.itemFold.isFolding(item)) item.setAttribute(FILTERED, "")
+      } else if (item.id && this.reviewState.liveOf(item.id).closing) this.itemFold.fold(item, FILTERED)
+      else item.setAttribute(FILTERED, "")
+    }
+    // the marks come off as the section goes;  a change keeps them, the next call sorting out what shows
     return () => {
-      for (const item of items) item.removeAttribute(FILTERED)
+      if (this.domElement.isConnected) return
+      for (const item of this.hiddenItems) item.removeAttribute(FILTERED)
+      this.hiddenItems = []
     }
   }
+
+  /** The items its filter hid last (`onFiltered()`). */
+  private hiddenItems: readonly Element[] = []
+
+  /** Folds an item away as Owen's ✓ or x closes it (`onFiltered()`, I306). */
+  private readonly itemFold = new ItemFold()
 
   render(): JSX.Element {
     // read once:  a section never changes its kind
@@ -1253,7 +1278,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * Is `it` with Claude (`marked()`)?  An item, or a phase not done, marked in this pass.
    */
   private isWithClaude(it: { item: Element; state: ChipStateName }): boolean {
-    if (it.item.localName !== "epic-phase") return this.reviewState.isMarked(it.item.id)
+    // closing at his ✓ or x (I306):  it filters as it draws, grey, so it folds away with the greys
+    if (it.item.localName !== "epic-phase")
+      return this.reviewState.isMarked(it.item.id) && !this.reviewState.liveOf(it.item.id).closing
     return it.state !== "recent" && it.state !== "old" && this.reviewState.isMarked(it.item.id)
   }
 

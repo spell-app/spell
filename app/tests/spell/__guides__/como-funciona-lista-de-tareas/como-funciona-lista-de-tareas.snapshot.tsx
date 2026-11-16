@@ -41,7 +41,7 @@ export class Tarea extends View {
   @drawn draw() {
     // un formulario propio, unido a la tarea:  marcar la casilla cambia su "hecha"
     return (
-      <es-formulario value={this}>
+      <es-formulario prop:value={this}>
         <es-pila direccion="horizontal" separacion="sm">
           <es-casilla name="hecha" aria-label="Hecha" />
           <es-texto>{this.título}</es-texto>
@@ -52,6 +52,10 @@ export class Tarea extends View {
 
   get agenda() {
     return Agenda.ownerOf(this)!
+  }
+
+  get últimaAgenda() {
+    return Agenda.lastOwnerOf(this)
   }
 }
 

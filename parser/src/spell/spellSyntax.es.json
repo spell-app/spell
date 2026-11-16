@@ -1669,6 +1669,7 @@
             "draw_its_slot",
             "create_method",
             "create_hook_words",
+            "cancel_when",
             "pause_units",
             "place_kind",
             "place_kind_here",
@@ -1749,7 +1750,7 @@
               "syntax": "((dragged:arrastrar)|(dropped_on:soltar encima)|(selected:seleccionar))"
             },
             {
-              "syntax": "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de)|(dropped_on:suelta sobre))"
+              "syntax": "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de|arrastra fuera)|(dropped_on:suelta sobre|suelta))"
             },
             {
               "syntax": "((immediately:de inmediato|inmediatamente|enseguida))"
@@ -1777,6 +1778,9 @@
             },
             {
               "syntax": "(create:crearla|crearlo|crearlas|crearlos|crear (la|lo|las|los)?)"
+            },
+            {
+              "syntax": "((if:si)|(unless:a menos que|salvo que))"
             },
             {
               "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
@@ -3928,7 +3932,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 21,
+          "line": 23,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -4266,7 +4270,7 @@
           "ruleNames": ["can_give_up"],
           "internal": false,
           "file": "src/spell/rules/lists/CanGiveUp.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`{list} can give up {thing}` -- would the list give it up, moved elsewhere?",
           "syntaxes": [
             {
@@ -4281,6 +4285,36 @@
                 },
                 "py": {
                   "code": "core.can_give_up(stock, card)"
+                }
+              }
+            },
+            {
+              "syntax": "{operator:can_or_cannot} dejar ir a {expression:operand}",
+              "example": "stock puede dejar ir a card",
+              "outputs": {
+                "js": {
+                  "code": "core.canGiveUp(stock, card)"
+                },
+                "ts": {
+                  "code": "core.canGiveUp(stock, card)"
+                },
+                "py": {
+                  "code": "core.can_give_up(stock, card)"
+                }
+              }
+            },
+            {
+              "syntax": "{operator:can_or_cannot} dejar {expression:operand} ir",
+              "example": "stock no puede dejar card ir",
+              "outputs": {
+                "js": {
+                  "code": "!core.canGiveUp(stock, card)"
+                },
+                "ts": {
+                  "code": "!core.canGiveUp(stock, card)"
+                },
+                "py": {
+                  "code": "not core.can_give_up(stock, card)"
                 }
               }
             }
@@ -5144,7 +5178,7 @@
           "ruleNames": ["belongs_to_one"],
           "internal": false,
           "file": "src/spell/rules/classes/BelongsToOne.ts",
-          "line": 36,
+          "line": 39,
           "purpose": "`a card belongs to one pile` -- a card is in at most ONE pile at a time (epic page D7, D8, Q22).",
           "syntaxes": [
             {
@@ -5152,13 +5186,13 @@
               "example": "una carta pertenece a una pile",
               "outputs": {
                 "js": {
-                  "code": "Object.defineProperty(Carta.prototype, \"pile\", {\n  get() {\n    return Pile.ownerOf(this)\n  },\n  configurable: true\n})\nPile.exclusive = true"
+                  "code": "Object.defineProperty(Carta.prototype, \"pile\", {\n  get() {\n    return Pile.ownerOf(this)\n  },\n  configurable: true\n})\nObject.defineProperty(Carta.prototype, \"últimaPile\", {\n  get() {\n    return Pile.lastOwnerOf(this)\n  },\n  configurable: true\n})\nPile.exclusive = true"
                 },
                 "ts": {
-                  "code": "export interface Carta { readonly pile: Pile }\nObject.defineProperty(Carta.prototype, \"pile\", {\n  get(this: Carta) {\n    return Pile.ownerOf(this)!\n  },\n  configurable: true\n})\nPile.exclusive = true"
+                  "code": "export interface Carta { readonly pile: Pile }\nObject.defineProperty(Carta.prototype, \"pile\", {\n  get(this: Carta) {\n    return Pile.ownerOf(this)!\n  },\n  configurable: true\n})\nexport interface Carta { readonly últimaPile: any }\nObject.defineProperty(Carta.prototype, \"últimaPile\", {\n  get(this: Carta) {\n    return Pile.lastOwnerOf(this)\n  },\n  configurable: true\n})\nPile.exclusive = true"
                 },
                 "py": {
-                  "code": "@Carta.add_property(\"pile\")\ndef _carta_pile(self) -> Pile | None:\n    return Pile.owner_of(self)\nPile.exclusive = True"
+                  "code": "@Carta.add_property(\"pile\")\ndef _carta_pile(self) -> Pile | None:\n    return Pile.owner_of(self)\n@Carta.add_property(\"última_pile\")\ndef _carta_última_pile(self) -> Any:\n    return Pile.last_owner_of(self)\nPile.exclusive = True"
                 }
               }
             },
@@ -6553,26 +6587,26 @@
           "ruleNames": ["drag_handler"],
           "internal": false,
           "file": "src/spell/rules/classes/DragHandler.ts",
-          "line": 42,
+          "line": 43,
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
-              "syntax": "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
+              "syntax": "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
             },
             {
               "syntax": "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
             },
             {
-              "syntax": "cuando algo se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
+              "syntax": "cuando algo se {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
             },
             {
-              "syntax": "mientras (un|una) {item:type} se arrastra sobre (él|ella|ello) :? {statement_body}?"
+              "syntax": "mientras (un|una) {item:type} se {over:drag_moment} (él|ella|ello) :? {statement_body}?"
             },
             {
-              "syntax": "mientras {item:known_type} se? arrastra sobre (él|ella|ello)? :? {statement_body}?"
+              "syntax": "mientras {item:known_type} se? {over:drag_moment} (él|ella|ello)? :? {statement_body}?"
             },
             {
-              "syntax": "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?"
+              "syntax": "mientras algo se {over:drag_moment} (él|ella|ello) :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -8948,7 +8982,7 @@
           "ruleNames": ["context_menu_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/ContextMenuBlock.ts",
-          "line": 41,
+          "line": 45,
           "purpose": "The right-click menu of the element it's in, written inside it, in a drawing.",
           "syntaxes": [
             {
@@ -9562,7 +9596,7 @@
           "ruleNames": ["if"],
           "internal": false,
           "file": "src/spell/rules/if/If.ts",
-          "line": 16,
+          "line": 25,
           "purpose": "`if {condition} (then|:)?` statement, with an inline statement or an indented nested block as body.",
           "syntaxes": [
             {
@@ -10100,7 +10134,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodDefinition.ts",
-          "line": 30,
+          "line": 32,
           "purpose": "Base for method-DEFINITION rules built on `method_signature`: `to_do_something`, `create_animation` and `quoted_type_expression`.",
           "syntaxes": [],
           "aliases": []
@@ -10335,6 +10369,58 @@
             },
             {
               "syntax": "icono {icon:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CancelThisAction",
+          "ruleNames": ["cancel_this_action"],
+          "internal": false,
+          "file": "src/spell/rules/methods/CancelThisAction.ts",
+          "line": 26,
+          "purpose": "In an action, call it off (epic `language` P56, Owen 2026-11-15).",
+          "syntaxes": [
+            {
+              "syntax": "cancelar ({when:cancel_when} {condition:expression})?",
+              "example": "una carta es una cosa\n\tsu \"rango\" es un número\n\tpara jugarla\n\t\tcancelar si su rango es 0",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends Thing {\n  static { this.declareProp(\"rango\", { type: \"number\" }) }\n  get rango() { return this.getProp(\"rango\") }\n  set rango(value) { this.setProp(\"rango\", value) }\n\n  jugar() {\n    if (this.rango === 0) core.cancel()\n  }\n}\ncore.describeAction(Carta, \"jugar\", { title: \"Jugarla\", cancels: true, undoneAs: \"Jugarla\" })"
+                },
+                "ts": {
+                  "code": "export class Carta extends Thing {\n  @prop({ type: \"number\" })\n  accessor rango!: number\n\n  jugar() {\n    if (this.rango === 0) core.cancel()\n  }\n}\ncore.describeAction(Carta, \"jugar\", { title: \"Jugarla\", cancels: true, undoneAs: \"Jugarla\" })"
+                },
+                "py": {
+                  "code": "class Carta(Thing):\n    rango = prop(type=\"number\")\n\n    def jugar(self) -> None:\n        if self.rango == 0:\n            core.cancel()\n\ncore.describe_action(Carta, \"jugar\", {\"title\": \"Jugarla\", \"cancels\": True, \"undone_as\": \"Jugarla\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AfterHook",
+          "ruleNames": ["after_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/AfterHook.ts",
+          "line": 29,
+          "purpose": "Steps that run at the end of an action, from any file (epic `language` P56, Owen 2026-11-15).",
+          "syntaxes": [
+            {
+              "syntax": "(después|despues) de {signature:method_signature} :? {statement_body}?",
+              "example": "una carta es una cosa\nuna pila es una lista de cartas\npara poner una carta en una pila\n\tagregar la carta a la pila\ndespués de poner una carta en una pila\n\timprimir la carta",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends Thing {\n  ponerEnPila(pila) {\n    pila.append(this)\n  }\n\n  afterPonerEnPila(pila) {\n    core.console.log(this)\n  }\n}\ncore.describeAction(Carta, \"ponerEnPila\", { title: \"Poner Carta en Pila\", undoneAs: \"Poner Carta en Pila\" })\ncore.addAfterHook(Carta, \"ponerEnPila\", { hook: \"afterPonerEnPila\" })\nexport class Pila extends List {\n  static instanceType = Carta\n}"
+                },
+                "ts": {
+                  "code": "export class Carta extends Thing {\n  ponerEnPila(pila: Pila) {\n    pila.append(this)\n  }\n\n  afterPonerEnPila(pila: Pila) {\n    core.console.log(this)\n  }\n}\ncore.describeAction(Carta, \"ponerEnPila\", { title: \"Poner Carta en Pila\", undoneAs: \"Poner Carta en Pila\" })\ncore.addAfterHook(Carta, \"ponerEnPila\", { hook: \"afterPonerEnPila\" })\nexport class Pila extends List<Carta> {\n  static instanceType = Carta\n}"
+                },
+                "py": {
+                  "code": "class Carta(Thing):\n    def poner_en_pila(self, pila: Pila) -> None:\n        pila.append(self)\n\n    def after_poner_en_pila(self, pila: Pila) -> None:\n        core.console.log(self)\n\ncore.describe_action(Carta, \"poner_en_pila\", {\"title\": \"Poner Carta en Pila\", \"undone_as\": \"Poner Carta en Pila\"})\ncore.add_after_hook(Carta, \"poner_en_pila\", {\"hook\": \"after_poner_en_pila\"})\n\nclass Pila(List):\n    item_type = Carta"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

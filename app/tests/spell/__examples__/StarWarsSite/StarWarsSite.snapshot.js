@@ -162,7 +162,7 @@ export class SettingsDialog extends View {
   draw() {
     return [
       h("ui-header", { size: "medium" }, "Settings"),
-      h("ui-form", { value: this },
+      h("ui-form", { "prop:value": this },
         h("ui-field", { label: "Lengths and weights in" },
           h("ui-select", { name: "units" },
             h("ui-item", { value: "metric" }, "Metres and kilos"),

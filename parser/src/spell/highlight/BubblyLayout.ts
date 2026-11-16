@@ -160,6 +160,13 @@ export class BubblyLayout {
     if (kind?.end !== undefined) this.overlays.push({ start, end: kind.end, kind: "reference", order: 1 })
     for (const plain of descendantsNamed(match, row.plain))
       this.overlays.push({ start: plain.start!, end: plain.end!, kind: "words", order: 2 })
+    // `dropped` in `when a card is dropped`:  what the handler is for, a name (epic `language` I100)
+    for (const group of row.names ?? []) {
+      for (const name of [match.groups[group]].flat()) {
+        if (name?.start !== undefined && name.end !== undefined)
+          this.overlays.push({ start: name.start, end: name.end, kind: "reference", order: 1 })
+      }
+    }
   }
 
   ////////////////

@@ -14,7 +14,7 @@ import {
   typedJSON,
   type PropInfo
 } from "spell/util"
-import { registerThing, noteItems, noteMade, noteSetting, core } from "spell/parser/core/core"
+import { registerThing, noteItems, noteKept, noteMade, noteSetting, core } from "spell/parser/core/core"
 import type { CollectionIterationCallback } from "spell/parser/core/collection-other"
 import type { Drawing } from "spell/parser/core/drawing"
 import type { PropCheck } from "spell/parser/core/core.types"
@@ -42,6 +42,7 @@ import { ID_PROP } from "./ids"
  *   - adding an item takes it out of the list of its family holding it;  adding one we hold moves it
  *   - removing it leaves it with no owner
  *   - `Pile.ownerOf(card)` is who holds it, tracked -- what `the pile of a card` compiles to
+ *   - `Pile.lastOwnerOf(card)` is who held it before its latest move, tracked -- `the last pile of a card`
  *   - a collection helper's result, e.g. `filter()`'s, owns nothing:  see `asScratch()`
  *   - every change to `items` goes through `writeItems()`, which keeps the owners
  * - GUARDS:  what a list takes and gives up when something MOVES, e.g. `a tableau can take a card if: ...`
@@ -99,6 +100,18 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
    */
   static ownerOf<L extends List>(this: abstract new (...args: never[]) => L, item: unknown): L | undefined {
     return ListFamily.of(this as unknown as typeof List)?.ownerOf(item) as L | undefined
+  }
+
+  /**
+   * The list of our family that held `item` before its latest move, if any -- tracked (epic `language` P56):
+   * compiled spell's `the card's last pile`, `get lastPile() { return Pile.lastOwnerOf(this) }`.
+   * - Every move sets it, whatever moved it (`add`, `move`, a drag, the deal):  kept until its next move.
+   * - Nothing before its first;  taken out of every list, it's the one it left.
+   * - Part of the undo step that moved it:  undo puts it back as it was, and so does an action that cancels.
+   * - `undefined` if we're not exclusive, or `item` can't be owned.
+   */
+  static lastOwnerOf<L extends List>(this: abstract new (...args: never[]) => L, item: unknown): L | undefined {
+    return ListFamily.of(this as unknown as typeof List)?.lastOwnerOf(item) as L | undefined
   }
 
   /**
@@ -761,6 +774,9 @@ type Callback<T> = CollectionIterationCallback<T>
  */
 const SCRATCH_LISTS = new WeakSet<List>()
 
+/** How many families have been made:  each one's `lastKey`. */
+let familiesMade = 0
+
 /** Each exclusive family's owners, by its root class -- see `ListFamily.of()`. */
 const FAMILIES = new WeakMap<typeof List, ListFamily>()
 
@@ -774,6 +790,12 @@ class ListFamily {
   owners = new WeakMap<object, List>()
   /** Each item's cell, once someone has read its owner. */
   cells = new WeakMap<object, Cell>()
+  /** Each item's list before its latest move:  `List.lastOwnerOf()`. */
+  lastOwners = new WeakMap<object, List>()
+  /** Each item's cell, once someone has read its last owner. */
+  lastCells = new WeakMap<object, Cell>()
+  /** What the undo history and a cancel call this family's last owners (`noteKept()`):  one per family. */
+  readonly lastKey = `last-owner-${++familiesMade}`
 
   /** Family of `listClass`, if it's exclusive:  rooted at the HIGHEST class up its chain that says so. */
   static of(listClass: typeof List): ListFamily | undefined {
@@ -798,7 +820,22 @@ class ListFamily {
     return this.owners.get(item)
   }
 
-  /** SIDE EFFECT:  `owner` holds `item` now -- `undefined`:  nothing does.  Readers re-run if it changed. */
+  /** `item`'s list before its latest move -- tracked.  See `List.lastOwnerOf()`. */
+  lastOwnerOf(item: unknown): List | undefined {
+    if (!isOwnable(item)) return undefined
+    if (isTrackingCells()) {
+      let cell = this.lastCells.get(item)
+      if (!cell) this.lastCells.set(item, (cell = new Cell()))
+      cell.read()
+    }
+    return this.lastOwners.get(item)
+  }
+
+  /**
+   * SIDE EFFECT:  `owner` holds `item` now -- `undefined`:  nothing does.  Readers re-run if it changed.
+   * - The list that held it is its last owner now (`lastOwnerOf()`), noted for undo and a cancel (`noteKept()`).
+   *   Not while undo or redo put items back:  they put its last owner back themselves.
+   */
   setOwner(item: unknown, owner: List | undefined): void {
     if (!isOwnable(item) || this.owners.get(item) === owner) return
     const was = this.owners.get(item)
@@ -807,6 +844,20 @@ class ListFamily {
     this.cells.get(item)?.changed()
     if (owner) HOLDERS.set(item, owner)
     else if (HOLDERS.get(item) === was) HOLDERS.delete(item)
+    if (!core.RUNTIME?.history.isApplying) this.moved(item, was)
+  }
+
+  /**
+   * SIDE EFFECT:  `item`'s last owner is `from` now, noted (`noteKept()`):  it's just moved out of `from`, or
+   * undo or a cancel puts its last owner back.  Readers re-run.
+   */
+  private moved(item: object, from: List | undefined): void {
+    const was = this.lastOwners.get(item)
+    if (was === from) return
+    noteKept(item, this.lastKey, was, from, (value) => this.moved(item, value as List | undefined))
+    if (from) this.lastOwners.set(item, from)
+    else this.lastOwners.delete(item)
+    this.lastCells.get(item)?.changed()
   }
 }
 

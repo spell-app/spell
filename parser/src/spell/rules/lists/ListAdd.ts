@@ -17,6 +17,8 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  * - Compiles to `core.prepend(list, thing)` when `method` means the `start` (`list_end`, e.g. `front`),
  *   else `core.append(list, thing)`;
  *   for things saved in a place, `core.saveThing(thing)`, which needs no list (epic `data` P11).
+ * - Added to a NUMBER, it adds up (epic `language` P56):  `add 10 to solitaire's score` is
+ *   `solitaire.score = solitaire.score + 10`.
  */
 export class ListAdd extends SpellStatement<"thing|method?|list"> {
   @proto static alias = "statement"
@@ -32,7 +34,12 @@ export class ListAdd extends SpellStatement<"thing|method?|list"> {
     return match
   }
 
-  getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
+  getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation | P.ASTAssignmentStatement {
+    if (match.groups.list.datatype === "number" && !match.groups.method) {
+      const total = P.matchAST(match.groups.list)
+      const sum = new P.ASTInfixExpression(match, { lhs: total, operator: "plus", rhs: P.matchAST(match.groups.thing) })
+      return new P.ASTAssignmentStatement(match, { thing: total, value: sum })
+    }
     if (savedPlaceOfMatch(savedTypeMatchOf(match.groups.list))) {
       return new P.ASTCoreMethodInvocation(match, { methodName: "saveThing", args: [P.matchAST(match.groups.thing)] })
     }

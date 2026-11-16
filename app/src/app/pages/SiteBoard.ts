@@ -46,7 +46,7 @@ export class SiteBoard {
   /**
    * `text` with card `name` put at `drop`:  in that section, at that row and column.
    * - Whatever card is on that spot moves one to the right, and those touching it after, for those with a place.
-   * - Its line moves too, to after the card before that spot, so the file, the tree and the board have one order.
+   * - Its line moves too, to after the card before that spot, so the file and the board have one order.
    *   - First in a section:  the section's first part.
    *   - After a card with pages of its own:  that card's first page, so nothing comes between them.
    * - Going into another section it takes that section's colour, by being under it.

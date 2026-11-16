@@ -102,7 +102,7 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `readAway()`.
     - A line's or a part's Read is a Seen on `away:<line>`:  `readAwayLine()`, and every new update block of what it's
       about (each line of a part) stamped seen (`seeUpdatesFor()`, epic `epic-engine` I268).
-    - Every Read is applied by the page server the moment it's ticked (`AwayReads.applyNow()`):  no Send, no session;
+    - Every Read is applied by the page server the moment it's ticked (`InstantMarks.applyNow()`):  no Send, no session;
       `epic inbox apply` still takes one a failure left.
     - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
@@ -364,7 +364,7 @@ As `plan-doc.md`, "Ids":
     <epic-option letter="B" title="Chrome" recommended><ul><li>...</li></ul></epic-option>
   </epic-choices>
   <epic-answer title="Chrome"><p>why ...</p></epic-answer>
-  <epic-more><p>More Details:  what the text left out</p></epic-more>
+  <epic-more><p>More Details:  Clarify's text, IN PLACE of the unclear text (I301)</p></epic-more>
   <epic-reply from="Claude" at="2026-10-04 17:20" re="why not reuse the details route?"><p>...</p></epic-reply>
   <epic-original><epic-version><p>as first written</p></epic-version>
     <epic-version as-of="2026-10-04 20:49"><p>...</p></epic-version></epic-original>
@@ -384,7 +384,7 @@ As `plan-doc.md`, "Ids":
     - The tool never writes one;  the docs runtime puts each block's bullhorn there, never in the file.
   - The element draws:
     - the chip (`Q3`, in its state's colour) and the review label
-    - `Question` over the question as asked, "Original reply" over the text
+    - `Question` over the question as asked, "Original question" over an answered question's text
     - every card's heading
 - A question's text as first asked is its `<epic-question>`, found by its tag, not its place:
   - `add <name>#Q`, and a rewrite of a question's text (`details --file`), put the lead of the HTML they're given
@@ -546,6 +546,25 @@ As `plan-doc.md`, "Ids":
     - A note is kept first, as the person's `<epic-reply re="skip">`.
     - The log:  `J9 skipped:  nothing to do, reviewed`.
   - On a todo that's work, skipping it IS dropping it.
+- INSTANT marks need no Send (epic `epic-engine` I304;  Owen, 2026-11-15:  "Seems like the check mark shouldn't
+  require a send"):  the page server applies them itself, as `inbox apply` would (`InstantMarks`).
+  - Which:  `isInstant()` (`spell/epic/review/review.types`), the one rule:
+    - an issue's, a judgement call's, a question's or a todo's ✓ or x (`approve`, `seen`, `drop`, `skip`) with no
+      note, comments, picture or pick;  never a test's, a phase's or an Overview part's (their approve can start work)
+    - an update block's Seen, and a Read in "0. While you were out" (above)
+  - When:  2 seconds after the click (`INSTANT_GRACE_MS`, J229), so a second click takes it back first;  a Read at once.
+  - Send carries none of them;  a Send with only these wakes nobody.
+  - The log keeps a line each, as `inbox apply`'s;  `inbox apply` still takes any the page server couldn't.
+  - On the page (epic `epic-engine` T80;  Owen:  "mark as grey & collapse, then keep it visible/gray until send or
+    auto-send"):  the item turns grey and folds to its title at once, but stays in view, grey, until his next Send or
+    Auto Send;  only then does it fold away.
+    - Send counts them meanwhile, so Auto Send runs for them;  a Send with only these sends nothing.
+  - Undone:
+    - while it's still in view:  the same button again, however long since
+      (no Cmd-Z:  T80 had one, T81 took it out;  the item stays in view until Send)
+    - it puts the item back exactly as it was (`InstantUndo`, `POST /api/epics/review/undo`);  refused once it has
+      changed since
+    - else Revisit reopens it
     - Its own box's x is `drop`.
     - A `skip` from a page drawn before is applied as `drop`.
   - On an Overview sub-section, a phase, or the summary:
@@ -606,7 +625,11 @@ As `plan-doc.md`, "Ids":
     - a Net effect worded otherwise
     - a code accordion holding a `<ui-code>`, or two blocks
     - a note headed `DEFERRED`
-- A rewrite never drops text:  `details --file`, `decide` again, `details --more` again, `summarize`.
+- A rewrite never drops text:  `details --file`, `decide` again, `details --more`, `summarize`.
+  - `details --more` (Add Details, Clarify;  epic `epic-engine` I301):  the HTML REPLACES the item's unclear text, in
+    an `<epic-more>` headed "More Details" that never folds;  the given "_What it says on the tin._" body goes for good,
+    the item's own prose moves into its Original Discussion;  Owen's quoted words (`PlanItem.isOwenQuote()`) and every
+    `<epic-*>` card stay
   - `summarize --file` (epic `repo-split` J141) condenses the item after a lot of back and forth:
     its text, replies, More Details and unpicked Choices all move, as one version;
     the question as asked, the answer, picked Choices (copied out of a moved reply too), status cards and commits stay.
@@ -628,7 +651,7 @@ As `plan-doc.md`, "Ids":
   - Make Todo makes a todo linking `#o3`
   - a kept note is a paragraph at its end
 - So do a phase and the summary (epic `airplane` P2):  Make Todo and Revisit on the page;  no Approve.
-  - A phase's first button is Do this, a thumbs up (epic `epic-engine` I181;  2026-10-29:  "it's already a phase,
+  - A phase's first button is Do this, the plane (a thumbs up until I299;  epic `epic-engine` I181;  2026-10-29:  "it's already a phase,
     you wouldn't make it a todo"):  the same `todo` mark, applied as a go-ahead (below)
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
     - Do this (its `todo` mark) makes NO todo:  a Noted status card on the phase, "Go ahead:
@@ -640,7 +663,11 @@ As `plan-doc.md`, "Ids":
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
     - a kept note is `<epic-reply slot="notes">` in `<epic-summary>`
 - Do this on an issue or a judgement call (epic `epic-engine` I232;  2026-11-08):  its first button, the phase's
-  word and thumbs up;  the same stored `todo` mark.  NO todo is made.
+  word and plane (a thumbs up until I299);  the same stored `todo` mark.
+  - an OPEN issue's last button is the x (I299):  a `drop` mark, closed as canceled;  a FIXED one's (orange) is Accept the
+    fix (the check), with Revisit before it and no plane (J231:  a fix goes back with Revisit's note);  NO todo is made.
+  - a FINISHED issue or call (done, canceled, decided;  J231):  Revisit and Saw it, no plane;  a phase that took it
+    (`taken-in`) draws `done in P20` where the plane was
   - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
     their note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.

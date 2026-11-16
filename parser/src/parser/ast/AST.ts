@@ -1178,8 +1178,9 @@ export type ASTMethodDefinitionProps = Prettify<{
  * How a top-level action meets undo (epic `language` J149):  one of the two, as the core's `ActionInfo` says it.
  * - `undoneAs`:  ONE undo step, under this title, e.g. `"Deal The Cards"`
  * - `cantBeUndone`:  `"keeps history"`, for `can't be undone`:  nothing it changes is a step
+ * - `cancels`:  it may `cancel`, so it answers yes or no (epic `language` P56)
  */
-export type ASTActionUndo = { undoneAs: string } | { cantBeUndone: "keeps history" }
+export type ASTActionUndo = ({ undoneAs: string } | { cantBeUndone: "keeps history" }) & { cancels?: true }
 
 export class ASTMethodDefinition extends ASTExpression {
   declare args: ASTVariableExpression[] | undefined
@@ -1821,7 +1822,9 @@ export class ASTPropertyRules extends ASTStatement {
  *   `core.describeEvent(Card, "flipped", { params: { side: "direction" } })`
  * - `type` (required) is its class, as a TypeExpression or bare name.
  * - `describes` (required):  `"action"`, `"event"` or `"menu"` (epic `elemental-spell` P10:
- *   `core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"] })`).
+ *   `core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"] })`);
+ *   or `"after"`, an after hook of an action (epic `language` P56):
+ *   `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`.
  * - `name` (required):  an action's METHOD, by spell's name (`turn_over`), which each writer names its own way;
  *   an event's name as text (`flipped`).
  * - `description` (required):  its fields by spell's names (`enabled_when`), each writer naming them its own way:
@@ -1834,7 +1837,7 @@ export class ASTPropertyRules extends ASTStatement {
  */
 export type ASTTypeDescriptionProps = Prettify<{
   type: string | ASTTypeExpression
-  describes: "action" | "event" | "menu"
+  describes: "action" | "event" | "menu" | "after"
   name: string
   description: Record<string, ASTDescriptionValue>
   /** An action's title as written (`- titled "Turn Over"`), fill-ins as typed:  for its declaration, never written. */
@@ -1852,7 +1855,7 @@ export type ASTDescriptionValue =
 
 export class ASTTypeDescription extends ASTStatement {
   declare type: ASTTypeExpression
-  declare describes: "action" | "event" | "menu"
+  declare describes: "action" | "event" | "menu" | "after"
   declare name: string
   declare description: Record<string, ASTDescriptionValue>
   declare title?: string
@@ -1862,7 +1865,7 @@ export class ASTTypeDescription extends ASTStatement {
     this.assertType("type", ASTTypeExpression)
     this.assertType("name", "string")
     this.assert(
-      ["action", "event", "menu"].includes(this.describes),
+      ["action", "event", "menu", "after"].includes(this.describes),
       `ASTTypeDescription: unknown kind '${this.describes}'`
     )
   }
@@ -2074,9 +2077,17 @@ export type ASTJSXElementProps = Prettify<{
    * The right-click menu it marks, its items as spell names them (`auto_play`, `-` a divider):
    * `<context-menu>` inside an element, javascript's `core.drawContextMenu(this, ["autoPlay", "-", "undo"])`
    * -- see spell's `context_menu_block`.
+   * - An item whose tag gave attributes carries them:  `<action "undo" icon-only />` is
+   *   `{ action: "undo", props: { "icon-only": true } }`, javascript's `["undo", { "icon-only": true }]`.
    */
-  contextMenu?: string[]
+  contextMenu?: ASTContextMenuItem[]
 }>
+
+/**
+ * One item of a right-click menu (`ASTJSXElement.contextMenu`):  an action's name as spell names it, `-` a divider;
+ * or an action whose tag gave attributes, each a literal (`icon-only`, `title="Restart"`, `icon="refresh"`).
+ */
+export type ASTContextMenuItem = string | { action: string; props: Record<string, string | boolean> }
 
 export class ASTJSXElement extends ASTExpression {
   declare tagName: string
@@ -2084,7 +2095,7 @@ export class ASTJSXElement extends ASTExpression {
   declare children: Array<ASTJSXElement | ASTJSXEndTag | ASTJSXText | ASTJSXExpression>
   declare drawnApart: boolean | undefined
   declare action: string | undefined
-  declare contextMenu: string[] | undefined
+  declare contextMenu: ASTContextMenuItem[] | undefined
   constructor(match: P.AnyMatch, props: ASTJSXElementProps) {
     super(match, props)
     this.assertType("tagName", "string")

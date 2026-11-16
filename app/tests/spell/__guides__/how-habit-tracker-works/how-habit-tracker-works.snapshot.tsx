@@ -83,7 +83,7 @@ export class Habit extends App {
         <ui-segment>
           <ui-stack>
             <ui-header size="small">{this.name}</ui-header>
-            <ui-form value={this}>
+            <ui-form prop:value={this}>
               <ui-stack direction="horizontal" justify="between" wrap={true}>
                 <ui-checkbox name="monday" label="Mon" />
                 <ui-checkbox name="tuesday" label="Tue" />

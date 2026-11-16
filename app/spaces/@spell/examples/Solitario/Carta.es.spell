@@ -1,6 +1,6 @@
 una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
 	-- Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el juego solo los leen.
-	-- Es una vista reversible:  boca arriba muestra su imagen, boca abajo el dorso que comparten todas las cartas.
+	-- Es una vista reversible:  cada lado es una imagen de carta (abajo):  boca arriba la suya, boca abajo el dorso que comparten todas las cartas.
 	-- En la página cada carta es su propio elemento, `<solitario-carta>`:  se puede arrastrar (`arrastrable`), cuando su pila la deja ir.
 	grupo "Rango y Palo" -- El as es bajo:  as = 1 ... rey = 13
 	su "rango" es uno de as, 2 ... 10, jota, dama, rey
@@ -29,22 +29,10 @@ una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
 		devolver letra + su símbolo + flecha
 
 	grupo "Dibujo"
-		// Una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
-	su "imagen" es
-		// Su cara:  https://www.compart.com/en/unicode/block/U+1F0A0
-		poner lugar a su valor
-		si es un trébol
-			devolver el elemento lugar de ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
-		si es un diamante
-			devolver el elemento lugar de ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"]
-		si es un corazón
-			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
-		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
-
 	para dibujar su frente
-		<texto color={su color}>{su imagen}</texto>
+		<imagen-de-carta carta={eso} />
 	para dibujar su dorso
-		<texto color="azul">🂠</texto>
+		<imagen-de-carta dirección=abajo />
 
 	para probar la preparación de la carta
 		obtener una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
@@ -59,7 +47,6 @@ una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
 		es un 2 debería ser no
 		es la dama de espadas debería ser sí
 		es la dama de tréboles debería ser no
-		su imagen debería ser "🂭"
 
 		voltear eso
 		está boca arriba debería ser sí
@@ -68,6 +55,58 @@ una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
 		poner siete a una nueva carta cuyo rango es 7 y palo es corazones
 		siete es una carta numérica debería ser sí
 		el color del siete debería ser rojo
-		la imagen del siete debería ser "🂷"
-		la imagen de una nueva carta cuyo rango es as y palo es tréboles debería ser "🃑"
-		la imagen de una nueva carta cuyo rango es rey y palo es diamantes debería ser "🃎"
+
+una "imagen de carta" es una vista			-- El dibujo de una carta:  el único lugar donde vive el aspecto de una carta
+	-- Dale una carta que dibujar, o un rango y un palo:  `<imagen-de-carta carta={la carta} />`, `<imagen-de-carta rango=as palo={su palo} />`.
+	-- Está boca arriba, salvo con `dirección=abajo`:  entonces es el dorso que comparten todas las cartas.
+	-- Hoy es una letra de los Naipes de unicode, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
+	-- Dibujos de verdad de las cartas pueden ocupar su lugar:  solo cambian su dibujo y `para dibujar eso`.
+	su "carta" es una carta			-- la carta que dibuja
+	su "rango" es un rango de carta
+	su "palo" es un palo de carta
+	su "dirección" es arriba o abajo
+	"está boca (dirección)"
+	al crear una imagen de carta
+		-- con una carta:  su rango y su palo son los de la carta;  con un rango y un palo:  su carta es una nueva de ellos (su dorso no necesita ninguna)
+		si su carta existe
+			poner su rango al rango de su carta
+			poner su palo al palo de su carta
+		de lo contrario si no está boca abajo
+			poner su carta a una nueva carta cuyo rango es su rango y palo es su palo
+	su "color" es
+		azul si está boca abajo
+		el color de su carta de lo contrario
+	su "dibujo" es
+		-- dibujar la letra unicode de las imágenes de carta
+		-- ver https://www.compart.com/en/unicode/block/U+1F0A0
+		si está boca abajo
+			devolver "🂠"
+		poner lugar al valor de su carta
+		si su carta es un trébol
+			devolver el elemento lugar de ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"]
+		si su carta es un diamante
+			devolver el elemento lugar de ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"]
+		si su carta es un corazón
+			devolver el elemento lugar de ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"]
+		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
+	para dibujar eso
+		<texto color={su color}>{su dibujo}</texto>
+	
+	para probar las imágenes de carta
+		poner dama a una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
+		obtener una nueva imagen de carta cuya carta es la dama
+		su palo debería ser espadas
+		su dibujo debería ser "🂭"
+		su color debería ser negro
+
+		poner siete a una nueva imagen de carta cuyo rango es 7 y palo es corazones
+		el nombre de la carta del siete debería ser "7 de corazones"
+		el dibujo del siete debería ser "🂷"
+		el color del siete debería ser rojo
+
+		el dibujo de una nueva imagen de carta cuyo rango es as y palo es tréboles debería ser "🃑"
+		el dibujo de una nueva imagen de carta cuyo rango es rey y palo es diamantes debería ser "🃎"
+
+		obtener una nueva imagen de carta cuya dirección es abajo
+		su dibujo debería ser "🂠"
+		su color debería ser azul

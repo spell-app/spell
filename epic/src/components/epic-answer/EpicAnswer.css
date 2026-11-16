@@ -241,25 +241,14 @@
     content: "✓ ";
   }
 
-  /* More Details:  a plain card, its heading a small eyebrow with the fold chevron */
-  .toggle {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    padding: 6px 10px;
-    border: none;
-    background: none;
-    color: var(--ui-text-muted, GrayText);
-    font: 600 0.78em / 1.4 inherit;
-    letter-spacing: 0.04em;
-    text-align: start;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-  .toggle:focus-visible {
-    outline: 2px solid var(--ui-focus-color, Highlight);
-    outline-offset: -2px;
+  /*
+   * More Details:  a plain card, its heading in the text's own size, bold, as a Net effect's label;  it never folds
+   * (epic `epic-engine` I301)
+   */
+  .more-heading {
+    padding: 6px 10px 0;
+    color: var(--_epic-card-ink);
+    font-weight: 700;
   }
   .chevron {
     flex: none;
@@ -272,16 +261,8 @@
     stroke-linejoin: round;
     transition: rotate var(--epic-turn-duration, 0.12s);
   }
-  .more:has(> .body:not([hidden])) .chevron {
-    rotate: 90deg;
-  }
   .more > .body {
     padding-top: 0;
-  }
-  .more > .body[hidden] {
-    display: block;
-    content-visibility: hidden;
-    padding: 0;
   }
 }
 

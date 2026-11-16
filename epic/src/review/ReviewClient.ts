@@ -4,6 +4,9 @@ import { StoragePlace } from "spell/util/persist/StoragePlace"
 
 import { AWAY_ID } from "spell/epic/definitions/definitions.types"
 import {
+  CLOSED_HOLD_MS,
+  INSTANT_FAIL_MS,
+  INSTANT_GRACE_MS,
   REVIEW_ACTIONS,
   REVIEW_API,
   REVISIT_KEY_PREFIX,
@@ -21,6 +24,7 @@ import {
   isAnchoredIn,
   isHeld,
   isImmediate,
+  isInstant,
   isSent,
   isWorkOnMark,
   pickFieldsOf,
@@ -131,6 +135,34 @@ export class ReviewClient extends PageStore {
    * loaded (epic `epic-engine` I268):  their lines stay faded (`wasRead()`) until the page's patch takes them away.
    */
   private readonly readAway = new Set<string>()
+
+  /**
+   * The instant marks (`isInstant()`:  a ✓ or x with nothing for Claude) in the inbox, id -> the mark's `at`
+   * (`trackInstant()`, epic `epic-engine` I306):  what `isClosing()` follows from the click to the page's update.
+   */
+  private readonly instantMarks = new Map<string, string>()
+
+  /** Ids whose instant mark Owen took back with a second click:  shown again at once, never held closed. */
+  private readonly undoneInstant = new Set<string>()
+
+  /**
+   * Items whose instant mark the page server applied and took off the inbox, id -> until when (ms) they stay drawn
+   * closed:  the page's own update of the item lands meanwhile, so it never shows open for a moment.
+   */
+  private readonly closedHere = new Map<string, number>()
+
+  /** Instant marks the page server never applied (`id@at`):  the item shows again, and a notice says so. */
+  private readonly failedInstant = new Set<string>()
+
+  /**
+   * Items Owen closed with an instant ✓ or x this visit, id -> the action:  kept in view, grey, until his next Send
+   * or Auto Send (`isHeldInView()`, epic `epic-engine` T80;  Owen:  "mark as grey & collapse, then keep it
+   * visible/gray until send or auto-send");  a click on the same button again takes it back, however long since.
+   */
+  private readonly heldInView = new Map<string, string>()
+
+  /** Timers for `trackInstant()`, by `fail:<id>` and `hold:<id>`. */
+  private readonly instantTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
   /** Notes of sent marks the last inbox read no longer has, id -> words:  `changed()` lets their boxes go of them. */
   private readonly goneNotes = new Map<string, string>()
@@ -248,6 +280,45 @@ export class ReviewClient extends PageStore {
   /** Item `id`'s mark, if any. */
   markOf(id: string): InboxMark | undefined {
     return this.inbox.marks[id]
+  }
+
+  /**
+   * Is item `id` closing:  Owen's ✓ or x on it with nothing for Claude (`isInstant()`), which the page server applies
+   * by itself (epic `epic-engine` I306;  Owen:  "it should show as grey and hide with an animate up immediately")?
+   * - true from the click:  the item draws grey at once (`DrawnState`), and its section folds it away when grey items
+   *   are hidden
+   * - and for a while after the server applied it (`CLOSED_HOLD_MS`):  the page's own update lands meanwhile
+   * - false once taken back (a second click), or when the server never applied it (`INSTANT_FAIL_MS`):
+   *   the item shows again, and a notice says so
+   */
+  isClosing(id: string): boolean {
+    const mark = this.inbox.marks[id]
+    if (mark && isInstant(id, mark)) return !this.failedInstant.has(`${id}@${mark.at}`)
+    if (this.heldInView.has(id)) return true
+    const until = this.closedHere.get(id)
+    return until !== undefined && until > Date.now()
+  }
+
+  /**
+   * Is item `id` closed at Owen's instant ✓ or x this visit, and kept in view, grey, until his next Send or Auto Send
+   * (epic `epic-engine` T80)?  Its section doesn't hide it till then;  a click on its button again takes it back.
+   */
+  isHeldInView(id: string): boolean {
+    return this.heldInView.has(id)
+  }
+
+  /**
+   * Which of his instant ✓ or x (`approve`, `drop`) is closing item `id`, from the click till his Send lets it go
+   * (epic `epic-engine` I308);  `undefined` when none is (`isClosing()` false, or the hold after a Send).
+   * - his mark while it's in the inbox, else the one held in view after the server applied it (T80)
+   * - the item draws as the server will leave it, its button pressed (`ReviewState.fillOf()`), so the page's own update
+   *   changes nothing on screen (Owen:  "it looks correct, then flashes ... when the update comes in")
+   */
+  closingAs(id: string): string | undefined {
+    if (!this.isClosing(id)) return undefined
+    const mark = this.inbox.marks[id]
+    if (mark && isInstant(id, mark)) return mark.action
+    return this.heldInView.get(id)
   }
 
   /** Is `id` (`away:<line>`) read:  its Seen in the inbox, or applied and cleared since the page loaded? */
@@ -411,9 +482,13 @@ export class ReviewClient extends PageStore {
     return this.unsentMarkCount + this.unsentCommentCount
   }
 
-  /** How many marks and urgencies wait for "Send to Claude". */
+  /**
+   * How many marks and urgencies wait for "Send to Claude".
+   * - and the items closed at his ✓ or x this visit, kept in view till his Send (`isHeldInView()`, T80):  Send (or
+   *   Auto Send) folds them away, waking nobody for them
+   */
   get unsentMarkCount(): number {
-    return this.unsentMarks().length + this.unsentUrgency().length
+    return this.unsentMarks().length + this.unsentUrgency().length + this.heldInView.size
   }
 
   /**
@@ -466,7 +541,14 @@ export class ReviewClient extends PageStore {
       void (note ? this.useNote(id, "now", note) : this.askNow(id, "details"))
       return "chosen"
     }
+    // a ✓ or x the server applied already, on an item still held in view (T80):  a second click puts it back
+    if (!mark && this.heldInView.get(id) === action) return void this.undo(id)
     if (mark?.action === action && !isImmediate(mark)) {
+      // a ✓ or x taken back inside its grace:  shown again at once, never held closed (I306)
+      if (isInstant(id, mark)) {
+        this.undoneInstant.add(id)
+        this.heldInView.delete(id)
+      }
       // an Approve that kept his comments goes back to the revisit they made (I163):  never lost by a click
       if (action === "approve" && mark.comments?.length)
         return void this.save(id, {
@@ -503,8 +585,47 @@ export class ReviewClient extends PageStore {
       void this.save(id, { action, ...(mark.note && { note: mark.note }), ...commentsOf(mark), ...pickOf(mark) })
       return "chosen"
     }
-    void this.save(id, { action, ...(CARRIES_PICK.has(action) && pickOf(mark)) })
+    const input = { action, ...(CARRIES_PICK.has(action) && pickOf(mark)) }
+    if (isInstant(id, input)) this.keepInstant(id, action)
+    void this.save(id, input)
     return "chosen"
+  }
+
+  /**
+   * Take back his instant mark on item `id`, held in view (a second click on its button, epic `epic-engine` T80):
+   * off the inbox if the server hasn't applied it, else put back by the server (`POST undo`, `InstantUndo`;
+   * refused once the item changed since, a notice says why).
+   */
+  private async undo(id: string) {
+    this.heldInView.delete(id)
+    const mark = this.inbox.marks[id]
+    if (mark && isInstant(id, mark)) {
+      this.undoneInstant.add(id)
+      await this.save(id, null)
+      return
+    }
+    this.closedHere.delete(id)
+    this.changed()
+    await this.post("undo", { id })
+  }
+
+  /** His instant `action` on `id`, just made:  kept in view till Send (T80). */
+  private keepInstant(id: string, action: string) {
+    this.heldInView.set(id, action)
+  }
+
+  /**
+   * His Send (or Auto Send) came:  the items held in view (`isHeldInView()`) are let go, folding away with the greys
+   * as they hide (still drawn closing a moment, `RELEASE_FOLD_MS`, so their section folds them);  the ids let go.
+   */
+  private releaseHeld(): string[] {
+    const ids = [...this.heldInView.keys()]
+    if (!ids.length) return ids
+    this.heldInView.clear()
+    const until = Date.now() + RELEASE_FOLD_MS
+    for (const id of ids) if (!this.inbox.marks[id]) this.closedHere.set(id, until)
+    this.changed()
+    return ids
   }
 
   /**
@@ -899,11 +1020,18 @@ export class ReviewClient extends PageStore {
     // said "Nothing to send"):  the countdown is for when he doesn't Send;  the server ends it (`releaseHeld()`)
     const marks = Object.values(this.inbox.marks)
     const held = marks.filter((mark) => isHeld(mark))
-    const waiting = [
-      ...(now ? marks.filter((mark) => !isImmediate(mark)) : [...this.unsentMarks(), ...held]),
-      ...this.unsentUrgency()
-    ]
+    // an instant ✓ or x is never Claude's (I304):  Auto Send's run doesn't count it either (T80)
+    const forClaude = Object.entries(this.inbox.marks)
+      .filter(([id, mark]) => !isImmediate(mark) && !isInstant(id, mark))
+      .map(([, mark]) => mark)
+    const waiting = [...(now ? forClaude : [...this.unsentMarks(), ...held]), ...this.unsentUrgency()]
     const comments = this.unsentCommentCount
+    // the items closed at his ✓ or x, held in view till now (T80):  they fold away;  alone, nothing goes to Claude
+    const released = this.releaseHeld()
+    if (!waiting.length && !comments && released.length) {
+      this.notify(`Closed ${released.map((id) => id.toUpperCase()).join(", ")}:  nothing sent to Claude`)
+      return true
+    }
     if (!waiting.length && !comments) {
       this.notify(
         now
@@ -969,7 +1097,65 @@ export class ReviewClient extends PageStore {
       if (words) this.letGo(id, text, words)
     }
     this.goneNotes.clear()
+    this.trackInstant()
     super.changed()
+  }
+
+  /**
+   * Follow the instant marks from the inbox (`isClosing()`, epic `epic-engine` I306):
+   * - a new one:  a timer that, should the mark still stand `INSTANT_FAIL_MS` after its grace, gives up on it
+   *   (`failedInstant`) and says so
+   * - one gone, not taken back:  the server applied it;  its item stays closed `CLOSED_HOLD_MS` (`closedHere`)
+   * - SIDE EFFECT:  timers, which call `changed()` when they fire
+   */
+  private trackInstant() {
+    const now = Date.now()
+    for (const [id, mark] of Object.entries(this.inbox.marks)) {
+      if (!isInstant(id, mark) || this.instantMarks.get(id) === mark.at) continue
+      this.instantMarks.set(id, mark.at)
+      this.closedHere.delete(id)
+      const key = `${id}@${mark.at}`
+      const wait = Date.parse(mark.at) + INSTANT_GRACE_MS + INSTANT_FAIL_MS - now
+      this.later(`fail:${id}`, wait, () => {
+        if (this.inbox.marks[id]?.at !== mark.at || this.failedInstant.has(key)) return
+        this.failedInstant.add(key)
+        this.notify(`${id.toUpperCase()} isn't closed:  the page server didn't apply it.\nIt's back;  try again.`)
+        this.changed()
+      })
+    }
+    for (const [id, at] of this.instantMarks) {
+      if (this.inbox.marks[id]?.at === at) continue
+      this.instantMarks.delete(id)
+      this.stopTimer(`fail:${id}`)
+      if (this.undoneInstant.delete(id) || this.inbox.marks[id]) continue
+      this.closedHere.set(id, now + CLOSED_HOLD_MS)
+      this.later(`hold:${id}`, CLOSED_HOLD_MS, () => {
+        this.closedHere.delete(id)
+        this.changed()
+      })
+    }
+  }
+
+  /** Run `act` in `wait` ms, under `key`:  one timer per key, the last one set winning. */
+  private later(key: string, wait: number, act: () => void) {
+    this.stopTimer(key)
+    this.instantTimers.set(
+      key,
+      setTimeout(
+        () => {
+          this.instantTimers.delete(key)
+          act()
+        },
+        Math.max(0, wait)
+      )
+    )
+  }
+
+  /** Stop `later()`'s timer under `key`, if any. */
+  private stopTimer(key: string) {
+    const timer = this.instantTimers.get(key)
+    if (timer !== undefined) clearTimeout(timer)
+    this.instantTimers.delete(key)
   }
 
   /**
@@ -1053,10 +1239,16 @@ export class ReviewClient extends PageStore {
   // ## Helpers
   ////////////////
 
-  /** The marks not sent yet, and not held for their time (a stage accept counting down:  `isHeld()`, I181). */
+  /**
+   * The marks not sent yet, and not held for their time (a stage accept counting down:  `isHeld()`, I181).
+   * - never an instant one (a ✓ or x with nothing for Claude:  `isInstant()`, epic `epic-engine` I304):  the page
+   *   server applies it by itself, so Send neither counts nor carries it
+   */
   private unsentMarks(): InboxMark[] {
     const now = Date.now()
-    return Object.values(this.inbox.marks).filter((mark) => !this.isSent(mark) && !isHeld(mark, now))
+    return Object.entries(this.inbox.marks)
+      .filter(([id, mark]) => !this.isSent(mark) && !isHeld(mark, now) && !isInstant(id, mark))
+      .map(([, mark]) => mark)
   }
 
   /** The urgencies not sent yet:  set after the last send. */
@@ -1222,3 +1414,6 @@ function countWords(marks: number, comments: number): string {
 function newNumber(id: string): number {
   return Number(id.replace(/^\D+/, "")) || 0
 }
+
+/** How long items let go at his Send stay drawn closing, so their section folds them away as they hide (ms). */
+const RELEASE_FOLD_MS = 2000

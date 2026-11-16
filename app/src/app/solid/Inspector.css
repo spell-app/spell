@@ -34,14 +34,8 @@
   & ui-dropdown.InspectorAddEvent {
     --ui-font-size: 13px;
   }
-  & ui-property-editor {
-    /* less round than the brand's pills (Owen) */
-    --ui-input-radius: 6px;
-    --ui-select-radius: 6px;
-    /* a select with nothing chosen reads "none", in italics (Owen) */
-    --ui-select-placeholder-style: italic;
-  }
-  /* ... their titles the theme editor's bands (a group is a panel band:  `UIPropertyGroup`), out to the card's edges
+  /* their fields' corners and a select with nothing chosen:  every editor form's (`spell.css`) */
+  /* their titles the theme editor's bands (a group is a panel band:  `UIPropertyGroup`), out to the card's edges
      through its padding (`.InspectorSection`) */
   & ui-property-editor {
     --ui-panel-padding: 14px;

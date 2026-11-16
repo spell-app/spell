@@ -518,6 +518,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     its function runs its body through the core, `return core.asAction({ undoneAs: "Deal the Cards" }, () => ...)`.
     - The same exceptions;  and a function with no steps stays a plain one.
     - Python's:  `@core.as_action({"undone_as": "Deal the Cards"})` above its `def`.
+- An action may call itself off, `cancel` / `cancel if ...` (epic `language` P56):  compiled `core.cancel()`,
+  which throws `ActionCanceled` for the action to catch (`runActing()`, [undoing.ts](undoing.ts)).
+  - Every change it made is put back (`recordingChanges()`, `core.ts`), it leaves no undo step
+    (`dropUnchangedRecords()`), its after hooks don't run, and it answers no;  done, it answers yes.
+  - Described `cancels: true` (`core.describeAction()`, `core.asAction()`):  an action that never cancels costs nothing more.
+- After hooks, `after putting a card on a pile`, from any file:  `core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })`.
+  - Each runs at the end of its action, inside its undo step, in the order added;  skipped when it's called off.
+- A thing that belongs to one list remembers the one it was in before its latest move:  `Pile.lastOwnerOf(card)`,
+  compiled spell's `the card's last pile` -- part of the undo step, put back by undo and by a cancel (`noteKept()`).
 - Python's core has the same history, `undoing.py` (epic `language` P54):
   - its app's `can_undo`, `undo_title` ... go to the page on the app, `"$history"` (`StateWriter`);
     the page's `App` reads them from `core.remote.history` (`page.ts`), so `<action "undo"/>` and the menus follow it

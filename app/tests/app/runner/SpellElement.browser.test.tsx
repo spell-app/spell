@@ -1306,6 +1306,50 @@ describe("SpellElement", () => {
       expect(changes).toEqual(["direction=down"])
     })
 
+    test("a thing made for a tag sees the tag's attributes as it's created (epic `language` T139)", async () => {
+      /** A card's picture, which names its card as it's created:  `when creating a picture`. */
+      class Picture extends View {
+        get rank() {
+          return this.getProp("rank")
+        }
+        set rank(value) {
+          this.setProp("rank", value)
+        }
+        get suit() {
+          return this.getProp("suit")
+        }
+        set suit(value) {
+          this.setProp("suit", value)
+        }
+        /** What its creation hook saw:  a property, as compiled classes have no fields. */
+        get seen() {
+          return this.getProp("seen")
+        }
+        set seen(value) {
+          this.setProp("seen", value)
+        }
+        create() {
+          this.seen = `${this.rank} of ${this.suit}`
+        }
+        draw(): ReturnType<View["draw"]> {
+          return (h("span", { class: "face" }, () => `${this.seen}`) as unknown as () => ReturnType<View["draw"]>)()
+        }
+      }
+      Picture.declareProp("rank", { oneOf: ["ace", 2, 3] })
+      Picture.declareProp("suit", { type: "text" })
+      core.defineElement(Picture, "Created")
+      await Promise.resolve()
+
+      const two = await ElementFixture.render<CardElement>('<created-picture rank="2" suit="hearts"></created-picture>')
+      await ElementFixture.settle(two)
+      settle()
+      const thing = two.component!.currentThing as unknown as Picture
+      // made with them, so its creation hook read them:  "2" is the number 2
+      expect(thing.seen).toBe("2 of hearts")
+      expect(thing.rank).toBe(2)
+      expect(two.shadowRoot!.querySelector(".face")!.textContent).toBe("2 of hearts")
+    })
+
     test("setting the attribute still writes the thing and redraws;  a number reads back as the number", async () => {
       const ace = await ElementFixture.render<CardElement>(
         '<agree-deuce rank="ace" suit="spades" direction="up"></agree-deuce>'

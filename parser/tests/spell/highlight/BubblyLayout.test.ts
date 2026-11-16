@@ -302,6 +302,46 @@ describe("SP.BubblyLayout", () => {
     ])
   })
 
+  it("draws a drag handler's head with the moment it's for bold, a name:  `when a <card> is <dropped>` (epic `language` I100)", () => {
+    const heads = (text: string, parser?: SP.SpellParser) =>
+      blocksOf(SP.BubblyLayout.of(text, parser).nodes)
+        .filter((block) => block.partOfSpeech === "action")
+        .map((block) =>
+          block.head.pieces.map((piece) => `${piece.kind}:${text.slice(piece.start, piece.end)}`).join(" | ")
+        )
+    const english = [
+      'a "card" is a view',
+      'a "pile" is a viewable list of cards',
+      "\tit is droppable",
+      "\twhen a card is dropped",
+      "\t\tprint 1",
+      "\twhen a card is dragged over",
+      "\t\tprint 1",
+      "\twhen a card is dragged out of it",
+      "\t\tprint 1",
+      "\twhile a card is dragged over it",
+      "\t\tprint 1"
+    ].join("\n")
+    expect(heads(english)).toEqual([
+      "words:when a  | reference:card | words: is  | reference:dropped",
+      "words:when a  | reference:card | words: is  | reference:dragged over",
+      "words:when a  | reference:card | words: is  | reference:dragged out of | words: it",
+      "words:while a  | reference:card | words: is  | reference:dragged over | words: it"
+    ])
+    const spanish = [
+      'una "carta" es una vista',
+      'una "pila" es una lista visible de cartas',
+      "\tcuando una carta se suelta",
+      "\t\timprimir 1",
+      "\tmientras una carta se arrastra sobre ella",
+      "\t\timprimir 1"
+    ].join("\n")
+    expect(heads(spanish, SP.Language.for("es").parser)).toEqual([
+      "words:cuando una  | reference:carta | words: se  | reference:suelta",
+      "words:mientras una  | reference:carta | words: se  | reference:arrastra sobre | words: ella"
+    ])
+  })
+
   it("draws a type's creation hook as an action:  `when creating` Spell's words, its type bold", () => {
     const deck = ['a "card" is a thing', 'a "deck" is a list of cards', "\twhen creating a deck", "\t\tprint 1"].join(
       "\n"

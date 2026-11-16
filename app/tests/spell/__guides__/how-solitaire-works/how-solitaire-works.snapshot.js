@@ -74,6 +74,10 @@ export class Card extends View {
   get pile() {
     return Pile.ownerOf(this)
   }
+
+  get lastPile() {
+    return Pile.lastOwnerOf(this)
+  }
 }
 
 /** A pile, and a column */

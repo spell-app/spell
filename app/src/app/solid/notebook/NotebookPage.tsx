@@ -418,7 +418,7 @@ const SECTION_TAB_TRIES = 30
 const SECTION_TABS = "ui-toolbar.ui-docs-section-tabs"
 
 /** The project's notebook `link` points at (`/edit/...`, `/run/...`), if it's one of `controller`'s project's. */
-function notebookAt(link: HTMLAnchorElement, controller: NotebookController): SP.SpellFile | undefined {
+function notebookAt(link: HTMLAnchorElement, controller: NotebookController): SP.AnySpellFile | undefined {
   const url = new URL(link.href, location.href)
   if (url.origin !== location.origin) return undefined
   const named = NotebookController.notebooksIn(controller.project).find((file) => {

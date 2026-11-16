@@ -189,6 +189,8 @@ export type BubblyRulePresentation = {
   steps?: readonly string[]
   /** its child rules drawn plain, never bold (`item` in `item column of the list`) */
   plain?: readonly string[]
+  /** its groups drawn bold, names, though they're Spell's words (`moment`:  `dropped` in `when a card is dropped`) */
+  names?: readonly string[]
   /** a CONTROL line:  its steps in a bracket */
   isControl?: boolean
   /**

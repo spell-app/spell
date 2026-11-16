@@ -8,7 +8,7 @@ import { ThreadFacts } from "spell/epic/comments"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
-import { pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
+import { isInstantDue, pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
 
 import {
   CALM_ID,
@@ -449,7 +449,8 @@ export class InboxCommands {
         lines.push(`  - ${line(each)}`)
         if (each.action === "details")
           lines.push(
-            "      Add Details:  clarify its text, as More Details (`--more`), a paragraph per change of context"
+            "      Add Details:  clarify its text, as More Details (`--more`):  it REPLACES the unclear text (cards and " +
+              "Owen's quoted words stay), so write it whole, a paragraph per change of context"
           )
         // the Manual tests section's Start testing (epic `epic-engine` P51):  the epic skill's "Start testing"
         else if (each.action === "prepare")
@@ -607,6 +608,8 @@ export class InboxCommands {
    * - marks cleared under the inbox's lock, only while still the ones applied (`clearApplied()`, `clearUrgency()`);
    *   marks of items gone from the doc are dropped too
    * - `ids` without a sent mark:  named, left alone (unsent marks wait for Owen's send)
+   * - instant marks due (`isInstantDue()`:  a ✓ or x with nothing for Claude past its grace, a Read) are applied sent or
+   *   not:  the page server applies them by itself (`InstantMarks`), and this takes any it couldn't
    * - `--all` (`run()`):  every mark sent first, as Send does, then applied
    *   (epic `airplane`, Q3:  the landing takes what Owen marked on the plane, sent or not)
    */
@@ -614,7 +617,12 @@ export class InboxCommands {
     const path = ReviewInbox.pathFor(file)
     const want = ids.length ? new Set(ids.map(ReviewInbox.toItemId)) : null
     const inbox = ReviewInbox.read(path)
-    const marks = inbox.sentMarks.filter((mark) => !want || want.has(mark.id))
+    // the instant ones too, sent or not:  the page server applies them, unless it wasn't running (epic `epic-engine` I304)
+    const sent = inbox.sentMarks
+    const instant = inbox.markList.filter(
+      (mark) => isInstantDue(mark.id, mark) && !sent.some((each) => each.id === mark.id)
+    )
+    const marks = [...sent, ...instant].filter((mark) => !want || want.has(mark.id))
     const urgency = inbox.sentUrgency.filter((entry) => !want || want.has(entry.id))
     const dry = this.owner.read(file)
     const planned: Applied[] = marks.map((mark) => ({ mark, ...dry.applyMark(mark) }))

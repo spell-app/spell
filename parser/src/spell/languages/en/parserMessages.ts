@@ -34,6 +34,9 @@ export const PARSER_MESSAGES = {
   "untyped-list-property": 'Say what "{name}" holds, e.g. "{line} as a new list of {items}"',
   /** `- to it:`, nothing but its thing. */
   "action-without-a-name": '"{text}" doesn\'t name an action:  say what it does, as in "to shuffle it"',
+  "cancel-outside-an-action": '"{text}" calls off an action:  it goes in one\'s steps, under "to ..." or "after ..."',
+  "after-names-no-action":
+    '"{text}" runs after an action, but no action above it reads that way:  as in "after putting a card on a pile", for "to put a card on a pile"',
   /** Two types whose new things make each other, for good. */
   "made-from-each-other":
     '{circle}:  each makes the next as it\'s made, so none can ever be made.  Hold one with no "new", and make it in an action',
@@ -310,6 +313,9 @@ export const PARSER_MESSAGES = {
   /** Something in a `<context-menu>` that isn't one of its items (epic `language`). */
   "context-menu-item":
     '<{tag}> holds only its items:  <action "name"/> for an action, <divider/> for a line between groups',
+  /** An item of a `<context-menu>` given an attribute as code, `{...}`:  a menu's row takes only words. */
+  "context-menu-code":
+    '<{tag}> in a menu takes words, not code:  write its attribute as words, e.g. title="Restart", or leave it bare, e.g. icon-only',
   /** A `{...}` in a `<markdown>` block that isn't spell. */
   "markdown-hole":
     'Don\'t understand "{{hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace',

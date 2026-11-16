@@ -1,5 +1,6 @@
 import { AgentsMarked } from "./AgentsMarked"
 import { ChangesAfterGoal } from "./ChangesAfterGoal"
+import { ClarifiedBodies } from "./ClarifiedBodies"
 import { DoneCardsClose } from "./DoneCardsClose"
 import { ItemBodies } from "./ItemBodies"
 import { ItemRenames } from "./ItemRenames"
@@ -12,6 +13,7 @@ import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
 import { ToReviewMarks } from "./ToReviewMarks"
 import { TookAsMinutes } from "./TookAsMinutes"
+import { ReopenedFixes } from "./ReopenedFixes"
 import { UpdateLabels } from "./UpdateLabels"
 import { UpdatesSaidByMarks } from "./UpdatesSaidByMarks"
 import { WholePhaseNumbers } from "./WholePhaseNumbers"
@@ -56,7 +58,9 @@ export class Migrations {
     new OwensAnswersSeen(),
     new AgentsMarked(),
     new ItemBodies(),
-    new UpdateLabels()
+    new UpdateLabels(),
+    new ClarifiedBodies(),
+    new ReopenedFixes()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

@@ -583,9 +583,11 @@ describe("<epic-item> review controls", () => {
       `<epic-item id="j10" title="Talked over" status="open" state="open" review-as="revisit"></epic-item>`
     )
     for (const host of [approved, answered]) {
-      expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
+      // a finished call draws two (Revisit, Saw it;  J231), an open one three
+      expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(actions(host).map(() => "none"))
+      // no "· done" on a button:  Saw it's own words say "It's done" (J231), which is its name, not a state
       for (const action of actions(host))
-        expect(button(host, action).getAttribute("aria-label")).not.toMatch(/\bdone\b/)
+        expect(button(host, action).getAttribute("aria-label")).not.toMatch(/·\s*done\b/)
     }
     const look = (host: Element) => {
       const chip = deep(host).querySelector<HTMLElement>("[part~='id']")!
@@ -723,7 +725,7 @@ describe("<epic-item> review controls", () => {
   test("the review label goes:  each review button's tooltip says it (`Approve:  Fine as it is · reviewed 10/7/26`)", async () => {
     await adoptClient()
     const host = await render(
-      `<epic-item id="j5" title="A call" status="done" reviewed="2026-10-07"><p>Text</p></epic-item>`
+      `<epic-item id="j5" title="A call" status="open" reviewed="2026-10-07"><p>Text</p></epic-item>`
     )
     expect(deep(host).querySelector("[part~='review']")).toBeNull()
     expect(button(host, "approve").getAttribute("title")).toBe("Approve:  Fine as it is · reviewed 10/7/26")
@@ -873,13 +875,16 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
 
 // epic `airplane` P2:  notes on the phases and the summary
 describe("<epic-phase> and <epic-overview> review controls", () => {
-  // Do this, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a phase, you wouldn't make it a
+  // Do this, the plane since I299, a thumbs up before (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a phase, you wouldn't make it a
   // todo"):  the same `todo` mark;  an Overview part keeps Make Todo
-  test("a phase:  Do this (a thumbs up), Revisit in its title;  a note box at its body's end;  Do this marks it `todo`", async () => {
+  test("a phase:  Do this (the plane), Revisit in its title;  a note box at its body's end;  Do this marks it `todo`", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Plan-Doc Notes" status="todo" open></epic-phase>`)
     expect(actions(host)).toEqual(["todo", "revisit"])
-    expect(button(host, "todo").getAttribute("icon")).toBe("thumbs up")
+    expect(button(host, "todo").getAttribute("icon")).toBe("paper plane")
+    // the icon alone, its name the tooltip:  the words are the page's Send's, at the top (I305;  Owen, 2026-11-15:
+    // "The item plane should be just the plane")
+    expect(button(host, "todo").hasAttribute("label")).toBe(false)
     expect(button(host, "todo").title).toBe("Do this:  Yes:  build this phase")
     expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["note-pick"])

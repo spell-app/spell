@@ -21,8 +21,16 @@
  *     holder's other sets' changes (epic `epic-engine` I227), checked by `ReviewInbox.toMark()`
  *   - `id` must be an item, phase, Overview sub-section or the summary (`summary`) of that doc
  *     (400 otherwise:  `ReviewInbox.itemIds()`)
- *   - a READ in "0. While you were out" (`away`, `away:<line>`, a Seen) is applied to the page at once
- *     (`AwayReads.applyNow()`, epic `epic-engine` I268):  no Send, no session;  the answer is the inbox after it
+ *   - an INSTANT mark (`isInstant()`:  a Read in "0. While you were out", an update block's Seen, an item's ✓ or x
+ *     with nothing for Claude) is applied by the page server itself (`InstantMarks`, epic `epic-engine` I268, I304):
+ *     no Send, no session
+ *     - a Read at once:  the answer is the inbox after it
+ *     - a ✓ or x once `INSTANT_GRACE_MS` has passed, in the background (`instantLater()`):  a second click inside it
+ *       takes the mark back;  the page sees the item change by its live update
+ *     - a timer lost to a restart:  the page's next `GET inbox` applies what's due
+ *     - applied, it can be undone:  `POST /api/epics/review/undo` `{ page, id }` puts the item back as it was
+ *       (`InstantUndo`, epic `epic-engine` T80:  a second click on the still-grey item);
+ *       answers the inbox, with `did`;  404 nothing to undo, 409 the item changed since (or an answered question)
  *   - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item only:
  *     `{ action: "test", result: "passed" | "failed" | "skip" | "notnow", note?, shot? }`
  * - `POST /api/epics/review/shot` `{ page, id, png }` -- Owen's screenshot of test `id` failing, pasted or dropped in
@@ -62,15 +70,14 @@
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  * - Loaded by the page server under `tsx` (`PageServer.loadRoutes()`), with `packages/server/tsconfig.json`'s aliases.
  *   Imports `ReviewInbox` (and `TestShots`, as light), never `PlanDoc`:  a request reads the doc's TEXT
- *   (`ReviewInbox.itemIds()`);  only a Read loads `AwayReads`, and `PlanDoc` with it, when one comes.
+ *   (`ReviewInbox.itemIds()`);  only an instant mark loads `InstantMarks`, and `PlanDoc` with it, when one comes.
  * - From the docs tools' `reviewRoutes.ts` (epic `epic-components`, P7).
  */
 
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
-import { AWAY_ID } from "spell/epic/definitions/definitions.types"
-import { SAGA_PREFIX } from "spell/epic/review/review.types"
+import { INSTANT_GRACE_MS, SAGA_PREFIX, isInstant, isInstantDue } from "spell/epic/review/review.types"
 
 import { InboxError, ReviewInbox, type PageInbox } from "./ReviewInbox"
 import { ReviewStart } from "./ReviewStart"
@@ -99,7 +106,10 @@ const reviewRoutes: RouteModule = {
   setup({ root, router, guard, web }) {
     const api = new SRV.Router()
     api.get("/inbox", (request, reply) => {
-      const inbox = ReviewInbox.read(ReviewInbox.pathFor(planDoc(web.files, request.query.page)))
+      const file = planDoc(web.files, request.query.page)
+      const inbox = ReviewInbox.read(ReviewInbox.pathFor(file))
+      // an instant mark whose timer was lost (the server restarted) is applied on the page's next look (I304)
+      if (inbox.markList.some((mark) => isInstantDue(mark.id, mark))) instantLater(file, root, 0)
       reply.set("Cache-Control", "no-store").json(inbox.forPage())
     })
     // before the other writes' body limit:  a screenshot is megabytes
@@ -118,8 +128,26 @@ const reviewRoutes: RouteModule = {
       const id = await itemOf(file, body.id)
       if (body.mark === undefined) throw new SRV.HttpError(400, "no mark (null removes one)")
       const inbox = await update(file, (each) => each.setMark(id, body.mark))
-      // a Read in "0. While you were out" takes effect now, with no Send (epic `epic-engine` I268)
-      reply.json(isRead(id, body.mark) ? await readNow(file, root, inbox) : inbox)
+      const mark = inbox.marks[id]
+      // an instant mark takes effect with no Send (epic `epic-engine` I268, I304):  a Read now, a ✓ or x once its
+      // grace has passed, so a second click inside it takes it back
+      if (mark && isInstantDue(id, mark)) {
+        await applyInstant(file, root)
+        reply.json(ReviewInbox.read(ReviewInbox.pathFor(file)).forPage())
+      } else {
+        if (mark && isInstant(id, mark)) instantLater(file, root, INSTANT_GRACE_MS)
+        reply.json(inbox)
+      }
+    })
+    // a second click on a still-grey item, after the server applied its ✓ or x (epic `epic-engine`
+    // T80):  the item put back as it was;  404 nothing to undo, 409 changed since
+    api.post("/undo", async (request, reply) => {
+      const body = request.body as { page?: unknown; id?: unknown }
+      const file = planDoc(web.files, body.page)
+      const id = await itemOf(file, body.id)
+      const { InstantUndo } = await import("./InstantUndo")
+      const did = await InstantUndo.undo(file, root, id)
+      reply.json({ ...ReviewInbox.read(ReviewInbox.pathFor(file)).forPage(), did })
     })
     api.post("/now", async (request, reply) => {
       const body = request.body as { page?: unknown; id?: unknown; action?: unknown; note?: unknown }
@@ -196,25 +224,46 @@ function epicOf(file: string): string {
   return saga ? `${SAGA_PREFIX}${saga}` : PLAN_DOC.exec(file)![1]!
 }
 
-/** Is `mark` on `id` a Read in "0. While you were out":  a Seen on `away` or `away:<line>`? */
-function isRead(id: string, mark: unknown): boolean {
-  return (id === AWAY_ID || id.startsWith(`${AWAY_ID}:`)) && (mark as { action?: unknown } | null)?.action === "seen"
-}
-
 /**
- * The Reads waiting in epic page `file`'s inbox applied to the page now (`AwayReads.applyNow()`);  the inbox after.
- * - a failure is one line in the page server's log, and `inbox` as it was:  the Read waits for `epic inbox apply`
+ * SIDE EFFECT:  the instant marks due in epic page `file`'s inbox applied to the page now (`InstantMarks.applyNow()`).
+ * - NEVER throws:  a failure is one line in the page server's log, and the marks wait for the page's next look
+ *   (`GET inbox`), or `epic inbox apply`
  */
-async function readNow(file: string, root: string, inbox: PageInbox): Promise<PageInbox> {
+async function applyInstant(file: string, root: string): Promise<void> {
   try {
     // loaded only now:  it brings `PlanDoc`, which no other review route needs
-    const { AwayReads } = await import("./AwayReads")
-    await AwayReads.applyNow(file, root)
-    return ReviewInbox.read(ReviewInbox.pathFor(file)).forPage()
+    const { InstantMarks } = await import("./InstantMarks")
+    await InstantMarks.applyNow(file, root)
   } catch (error) {
-    console.error(`review:  a Read on ${file} waits for \`epic inbox apply\`:  ${(error as Error).message}`)
-    return inbox
+    console.error(`review:  an instant mark on ${file} waits:  ${(error as Error).message}`)
   }
+}
+
+/** Pages with an instant run waiting, so a burst of clicks makes one. */
+const instantWaiting = new Set<string>()
+
+/**
+ * Apply page `file`'s due instant marks `wait` ms from now, in the background (`applyInstant()`).
+ * - one waiting run per page:  it applies every mark due by then;  a mark made while it waited, not due yet, gets a
+ *   run of its own after it
+ * - its timer doesn't keep the server up (`unref()`)
+ */
+function instantLater(file: string, root: string, wait: number): void {
+  if (instantWaiting.has(file)) return
+  instantWaiting.add(file)
+  // a little past the grace, so the mark that set it is due
+  const timer = setTimeout(
+    () => {
+      void applyInstant(file, root).finally(() => {
+        instantWaiting.delete(file)
+        const left = ReviewInbox.read(ReviewInbox.pathFor(file)).markList
+        if (left.some((mark) => isInstant(mark.id, mark) && !isInstantDue(mark.id, mark)))
+          instantLater(file, root, INSTANT_GRACE_MS)
+      })
+    },
+    wait + (wait ? 50 : 0)
+  )
+  timer.unref?.()
 }
 
 /** Send:  every mark so far is sent;  whether anything was new to hand over (a Send with nothing new wakes nobody). */

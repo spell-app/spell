@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
+from spell_core import core, List, App, View, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
 
 
 # A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
@@ -72,38 +72,24 @@ class Card(TwoSidedView):
         arrow = "↑" if self.is_face_direction("up") else "↓"
         return f"{letter}{self.symbol}{arrow}"
 
-    @property
-    def picture(self) -> str | None:
-        """Its face:  https://www.compart.com/en/unicode/block/U+1F0A0"""
-        column = self.value
-        if self.suit == "clubs":
-            return core.get_item_at(
-                ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"],
-                position(column),
-            )
-        if self.suit == "diamonds":
-            return core.get_item_at(
-                ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"],
-                position(column),
-            )
-        if self.suit == "hearts":
-            return core.get_item_at(
-                ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"],
-                position(column),
-            )
-        return core.get_item_at(
-            ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"],
-            position(column),
-        )
-
     def draw_front(self) -> Element:
-        return h("ui-text", {"color": self.color, "part": "front"}, self.picture)
+        return h("test-project-card-image", {"prop:card": self, "part": "front"})
 
     def draw_back(self) -> Element:
-        return h("ui-text", {"color": "blue", "part": "back"}, "🂠")
+        return h("test-project-card-image", {"direction": "down", "part": "back"})
+
+    def put_on_pile(self, pile: Pile) -> None:
+        """The card, and every card on it, onto the pile, if the piles' rules let it go and take it"""
+        # - refused, nothing moves, and there's nothing to undo
+        # - a game adds its own steps after it:  `after putting a card on a pile`
+        assert self.pile is not None
+        if (not core.can_give_up(self.pile, self)) or (not core.can_take(pile, self)):
+            core.cancel()
+        for card in self.pile.starting_with(self):
+            core.move(card, pile)
 
     @property
-    def is_on_top(self) -> bool:
+    def is_on_top_of_its_pile(self) -> bool:
         """the card the next one goes on"""
         assert self.pile is not None
         return self == self.pile.last_item
@@ -115,31 +101,20 @@ class Card(TwoSidedView):
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
             if end_pile is None:
                 return False
-            return await self.put_on_pile(end_pile)
+            return self.put_on_pile(end_pile)
 
-    async def put_on_pile(self, pile: Pile) -> bool:
-        """the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved"""
-        # - the pile it left turns its new last card up;  the move counts, and scores
-        start_pile = self.pile
-        assert start_pile is not None
-        if not core.can_give_up(start_pile, self):
-            return False
-        if not core.can_take(pile, self):
-            return False
-        points = self.count_the_points_for_card_on_pile(pile)
-        for card in start_pile.starting_with(self):
-            core.move(card, pile)
-        if isinstance(start_pile, Column) and (start_pile):
-            await core.pause_for(200, "msec")
-            start_pile.last_item.turn_face_up()
-        solitaire.score = solitaire.score + points
-        return True
+    def after_put_on_pile(self, pile: Pile) -> None:
+        """The move scores;  the column it left turns its new last card face up"""
+        solitaire.score = solitaire.score + self.the_points_for_card_on_pile(pile)
+        it_2 = self.last_pile
+        if isinstance(it_2, Column) and (it_2):
+            it_2.last_item.turn_face_up()
 
-    def count_the_points_for_card_on_pile(self, pile: Pile) -> float:
-        """what the move scores:  10 on a foundation, 5 from the discard pile, else nothing"""
+    def the_points_for_card_on_pile(self, pile: Pile) -> float:
+        """What a move scores:  10 onto a foundation, 5 from the discard pile, else nothing"""
         if isinstance(pile, Foundation):
             return 10
-        if self.pile == solitaire.discard_pile:
+        if self.last_pile == solitaire.discard_pile:
             return 5
         return 0
 
@@ -154,11 +129,16 @@ class Card(TwoSidedView):
         """a card is in one pile at a time:  putting it on another pile takes it off this one"""
         return Pile.owner_of(self)
 
+    @property
+    def last_pile(self) -> Any:
+        return Pile.last_owner_of(self)
 
+
+core.describe_action(Card, "put_on_pile", {"title": "Put Card on Pile", "undone_as": "Move Card", "cancels": True})
 core.describe_action(Card, "play", {"title": "Play Card", "undone_as": "Play Card"})
-core.describe_action(Card, "put_on_pile", {"title": "Put Card on Pile", "undone_as": "Move Card"})
-core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count the Points for Card on Pile", "undone_as": "Count the Points for Card on Pile"})
-# It's a two sided view:  face up it shows its picture, face down the back every card shares.
+core.add_after_hook(Card, "put_on_pile", {"hook": "after_put_on_pile"})
+core.describe_action(Card, "the_points_for_card_on_pile", {"title": "The Points for Card on Pile", "undone_as": "The Points for Card on Pile"})
+# It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
 # On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 # Ace is low:  ace = 1 ... king = 13
 
@@ -166,7 +146,79 @@ core.describe_action(Card, "count_the_points_for_card_on_pile", {"title": "Count
 
 # identifying a card
 
-# One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+# Give it a card to draw, or a rank and a suit:  `<card-image card={the card} />`, `<card-image rank=ace suit={its suit} />`.
+# A card's picture:  the one place a card's look lives
+
+
+Direction = Literal["up", "down"]
+
+
+class CardImage(View):
+    element_tag = "test-project-card-image"
+
+    # It's face up, unless it's `direction=down`:  then it's the back every card shares.
+    # Today it's one letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
+    # Real pictures of the cards can take its place:  only its picture and `to draw it` change.
+    # the card it draws
+    # - its "card" is a card
+    card = prop(type="Card")
+
+    # - its "rank" is a card rank
+    rank = prop(one_of=lambda: Card.RANKS)
+
+    # - its "suit" is a card suit
+    suit = prop(one_of=lambda: Card.SUITS)
+
+    # - its "direction" is up or down
+    DIRECTIONS = ("up", "down")
+    direction = prop(one_of=DIRECTIONS)
+
+    def is_face_direction(self, direction: Direction) -> bool:
+        return self.direction == direction
+
+    async def create(self) -> None:
+        """given a card:  its rank and suit are the card's;  given a rank and a suit:  its card is a new one of them (its back needs none)"""
+        if self.card is not None:
+            self.rank = self.card.rank
+            self.suit = self.card.suit
+        elif not self.is_face_direction("down"):
+            self.card = Card(rank=self.rank, suit=self.suit)
+
+    @property
+    def color(self) -> str | None:
+        if self.is_face_direction("down"):
+            return "blue"
+        return getattr(self.card, "color", None)
+
+    @property
+    def picture(self) -> str | None:
+        """draw the unicode character for card images"""
+        # see https://www.compart.com/en/unicode/block/U+1F0A0
+        if self.is_face_direction("down"):
+            return "🂠"
+        column = getattr(self.card, "value", None)
+        if getattr(self.card, "suit", None) == "clubs":
+            return core.get_item_at(
+                ["🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"],
+                position(column),
+            )
+        if getattr(self.card, "suit", None) == "diamonds":
+            return core.get_item_at(
+                ["🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"],
+                position(column),
+            )
+        if getattr(self.card, "suit", None) == "hearts":
+            return core.get_item_at(
+                ["🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"],
+                position(column),
+            )
+        return core.get_item_at(
+            ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"],
+            position(column),
+        )
+
+    def draw(self) -> Element:
+        return h("ui-text", {"color": self.color}, self.picture)
 
 
 def test_card_setup() -> None:
@@ -197,7 +249,6 @@ def test_card_setup() -> None:
             False,
             "no",
         )
-        core.expect(it_2.picture, "its picture", "🂭", "\"🂭\"")
 
         core.echo_test_action("turn it over")
         it_2.turn_over()
@@ -208,19 +259,51 @@ def test_card_setup() -> None:
         seven = Card(rank=7, suit="hearts")
         core.expect(seven.is_a_number_card, "seven is a number card", True, "yes")
         core.expect(seven.color, "the color of seven", "red", "red")
-        core.expect(seven.picture, "the picture of seven", "🂷", "\"🂷\"")
+
+
+def test_card_images() -> None:
+    with core.test("test card images"):
+        it = CardImage()
+        core.echo_test_action(
+            "set queen to a new card whose rank is queen, suit is spades and direction is down",
+        )
+        queen = Card(rank="queen", suit="spades", direction="down")
+        core.echo_test_action("get a new card image whose card is the queen")
+        it_2 = CardImage(card=queen)
+        core.expect(it_2.suit, "its suit", "spades", "spades")
+        core.expect(it_2.picture, "its picture", "🂭", "\"🂭\"")
+        core.expect(it_2.color, "its color", "black", "black")
+
+        core.echo_test_action(
+            "set seven to a new card image whose rank is 7 and suit is hearts",
+        )
+        seven = CardImage(rank=7, suit="hearts")
         core.expect(
-            Card(rank="ace", suit="clubs").picture,
-            "the picture of a new card whose rank is ace and suit is clubs",
+            getattr(seven.card, "name", None),
+            "the name of seven's card",
+            "7 of hearts",
+            "\"7 of hearts\"",
+        )
+        core.expect(seven.picture, "the picture of seven", "🂷", "\"🂷\"")
+        core.expect(seven.color, "the color of seven", "red", "red")
+
+        core.expect(
+            CardImage(rank="ace", suit="clubs").picture,
+            "the picture of a new card image whose rank is ace and suit is clubs",
             "🃑",
             "\"🃑\"",
         )
         core.expect(
-            Card(rank="king", suit="diamonds").picture,
-            "the picture of a new card whose rank is king and suit is diamonds",
+            CardImage(rank="king", suit="diamonds").picture,
+            "the picture of a new card image whose rank is king and suit is diamonds",
             "🃎",
             "\"🃎\"",
         )
+
+        core.echo_test_action("get a new card image whose direction is down")
+        it_3 = CardImage(direction="down")
+        core.expect(it_3.picture, "its picture", "🂠", "\"🂠\"")
+        core.expect(it_3.color, "its color", "blue", "blue")
 
 
 # -----------
@@ -248,14 +331,12 @@ class Pile(ViewableList):
 
     @property
     def color(self) -> str:
-        """Its last card's:  what the next card goes on"""
         if not self:
             return "none"
         return self.last_item.color
 
     @property
     def value(self) -> float:
-        """Its last card's"""
         if not self:
             return 0
         return self.last_item.value
@@ -268,8 +349,9 @@ class Pile(ViewableList):
             summary = f"{summary} {card.short_name}"
         return summary
 
-    async def when_card_dropped_on(self, card: Card) -> None:
-        await card.put_on_pile(self)
+    def when_card_dropped_on(self, card: Card) -> None:
+        """put the card on the pile, if it is a legal move"""
+        card.put_on_pile(self)
 
     droppable = True
 
@@ -393,7 +475,7 @@ class StockPile(Pile):
         return False
 
     def draw_its_placeholder(self) -> Element:
-        return h("ui-text", {"part": "placeholder"}, "🂠")
+        return h("test-project-card-image", {"direction": "down", "part": "placeholder"})
 
     async def on_click(self, event: ClickEvent) -> None:
         await solitaire.turn_over_the_next_card()
@@ -433,14 +515,14 @@ class Foundation(Pile):
         return False
 
     def draw_its_placeholder(self) -> Element:
-        """a light grey ace of its suit, face up"""
-        return h("ui-text", {"part": "placeholder"}, Card(rank="ace", suit=self.suit).picture)
+        # a light grey ace of its suit, face up
+        return h(
+            "test-project-card-image",
+            {"rank": "ace", "prop:suit": self.suit, "part": "placeholder"},
+        )
 
     def can_take(self, card: Card) -> bool:
-        assert card.pile is not None
-        if card != card.pile.last_item:
-            return False
-        return self.suit == card.suit and self.value + 1 == card.value
+        return self.suit == card.suit and self.value == card.value - 1 and card.is_on_top_of_its_pile
 
     droppable = True
 
@@ -494,9 +576,9 @@ class Solitaire(App):
                     core.draw_action(self, "cheat", {"in-menu": True}),
                     core.draw_action(self, "restart_the_game", {"title": "Restart", "in-menu": True}),
                     h("spacer"),
-                    core.draw_action(self, "undo", {"icon-only": True, "in-menu": True}),
-                    core.draw_action(self, "redo", {"icon-only": True, "in-menu": True}),
-                    h("ui-text", {"slot": "right"}, "Score ", self.score),
+                    core.draw_action(self, "undo", {"in-menu": True}),
+                    core.draw_action(self, "redo", {"in-menu": True}),
+                    h("ui-text", {"slot": "right"}, "Score: ", self.score),
                 ),
             ),
             h(
@@ -519,7 +601,14 @@ class Solitaire(App):
             ),
             core.draw_context_menu(
                 self,
-                ["auto_play", "cheat", "restart_the_game", "-", "undo", "redo"],
+                [
+                    "auto_play",
+                    "cheat",
+                    "restart_the_game",
+                    "-",
+                    ["undo", {"icon-only": True}],
+                    ["redo", {"icon-only": True}],
+                ],
             ),
         ]
 
@@ -652,8 +741,6 @@ core.describe_action(Solitaire, "auto_play", {"title": "Auto Play", "shortcuts":
 core.describe_action(Solitaire, "cheat", {"title": "Cheat", "shortcuts": ["C"], "icon": "eye", "undone_as": "Cheat"})
 
 # play the card on click if it is a legal move
-
-# drop the card on the pile if it is a legal move
 
 ##############
 # ## The piles
@@ -868,9 +955,12 @@ solitaire-card::part(back) {
   }
 }
 
-/* An empty pile's placeholder:  a faint pale card on the felt */
+/* An empty pile's placeholder:  a faint pale card on the felt, whatever the card image's own ink */
 [layout]::part(placeholder) {
   color: #d8f0e0;
+  --ui-red-text: currentColor;
+  --ui-black-text: currentColor;
+  --ui-blue-text: currentColor;
   opacity: 0.4;
 }
 [layout]::part(placeholder):hover {
@@ -908,6 +998,7 @@ solitaire.start()
 
 
 test_card_setup()
+test_card_images()
 test_piles()
 test_a_new_deck()
 test_the_moves()

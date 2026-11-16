@@ -1135,7 +1135,19 @@ export class PyBaseWriter extends P.ProgramWriter {
     const children = node.childValues.map((child) => this.bare(child))
     // a right-click menu, `<context-menu>`:  the core's hidden element, as javascript's
     if (node.contextMenu) {
-      const items = node.contextMenu.map((item) => this.quoted(item === "-" ? item : this.nameOf(item, "method")))
+      const items = node.contextMenu.map((item) => {
+        if (typeof item === "string") return this.quoted(item === "-" ? item : this.nameOf(item, "method"))
+        // an item with attributes:  its name and them, `["undo", {"icon-only": True}]`
+        const props = Object.entries(item.props).map(
+          ([key, value]) =>
+            `${this.quoted(key)}: ${typeof value === "boolean" ? (value ? "True" : "False") : this.quoted(value)}`
+        )
+        return pyText.call(
+          "",
+          [this.quoted(this.nameOf(item.action, "method")), pyText.call("", props, ["{", "}"])],
+          ["[", "]"]
+        )
+      })
       return pyText.call("core.draw_context_menu", ["self", pyText.call("", items, ["[", "]"])])
     }
     // a button for one of the program's actions, `<action "auto play"/>`:  the core draws it, from the action
@@ -1218,7 +1230,8 @@ export class PyBaseWriter extends P.ProgramWriter {
    */
   protected actionDecorator(action: P.ASTActionUndo): string {
     const fields = Object.entries(action).map(
-      ([key, value]) => `${this.quoted(this.nameOf(key, "property"))}: ${this.quoted(value)}`
+      ([key, value]) =>
+        `${this.quoted(this.nameOf(key, "property"))}: ${value === true ? "True" : this.quoted(value as string)}`
     )
     return `core.as_action({${fields.join(", ")}})`
   }
@@ -1691,14 +1704,19 @@ export class PyBaseWriter extends P.ProgramWriter {
    * - Fields and members by Python's names:  `"enabled_when": "turn_over_is_enabled"`.
    */
   ASTTypeDescription(node: P.ASTTypeDescription): string {
-    const method = { action: "describe_action", event: "describe_event", menu: "describe_menu" }[node.describes]
+    const method = {
+      action: "describe_action",
+      event: "describe_event",
+      menu: "describe_menu",
+      after: "add_after_hook"
+    }[node.describes]
     const name = this.quoted(node.describes === "event" ? node.name : this.nameOf(node.name))
     const fields = Object.entries(node.description).map(([key, value]) => {
       return `${this.quoted(this.nameOf(key, "property"))}: ${this.descriptionValue(value)}`
     })
     const code = `core.${method}(${this.write(node.type)}, ${name}, {${fields.join(", ")}})`
-    // an event's and a menu's one line says it;  an action's spell is the method just above
-    return node.describes === "action" ? code : this.withSpell(node, code)
+    // an event's and a menu's one line says it;  an action's spell, and an after hook's, is the method just above
+    return node.describes === "action" || node.describes === "after" ? code : this.withSpell(node, code)
   }
 
   /** One field of a type's description as Python -- see `P.ASTDescriptionValue`. */

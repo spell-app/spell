@@ -467,13 +467,19 @@ export abstract class ProgramWriter extends Writer {
 
   /**
    * May JSX value `value` (an attribute's `propValue`) hold an object (a thing, a list, a date)?
-   * - A value that can't change (a literal, an element, a function):  no.
-   * - One that can (`ASTJSXLiveValue`):  yes, unless `kindOf()` says text, a number or yes / no (`PLAIN_KINDS`).
+   * - One that can change (`ASTJSXLiveValue`):  yes, unless `kindOf()` says text, a number or yes / no (`PLAIN_KINDS`).
    *   One it can't tell counts as an object, as every live value did before (epic `solid-17`, J12 B).
+   * - One that can't (a literal, an element, a function):  only when `kindOf()` names an object,
+   *   e.g. `it` in a view's drawing, `<card-image card={it} />` (epic `language` I104):
+   *   written as an attribute, it was `card="[object Object]"`.
    * - What `attributeName()` asks:  on a dashed tag, an object is written `prop:name`, the rest by its plain name.
    */
   mayHoldObject(value: P.ASTExpression | undefined): boolean {
-    if (!(value instanceof P.ASTJSXLiveValue)) return false
+    if (!value) return false
+    if (!(value instanceof P.ASTJSXLiveValue)) {
+      const kind = this.kindOf(value)
+      return kind !== undefined && !PLAIN_KINDS.has(kind)
+    }
     return !PLAIN_KINDS.has(this.kindOf(value.expression) ?? "")
   }
 
@@ -797,6 +803,8 @@ export abstract class ProgramWriter extends Writer {
     const owner = this.kindOf(call.thing)
     const method = this.project.methodOf(owner, call.methodName)
     if (!method || method.inline || this.nothingBeingTold.has(method)) return false
+    // it says what it gives back:  an action that may `cancel` answers yes or no (epic `language` P56)
+    if (method.datatype && method.datatype !== "nothing") return false
     this.nothingBeingTold.add(method)
     try {
       // its own returns:  not one in a function inside it

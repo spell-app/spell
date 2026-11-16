@@ -1652,6 +1652,7 @@
             "draw_its_slot",
             "create_method",
             "create_hook_words",
+            "cancel_when",
             "pause_units",
             "place_kind",
             "place_kind_here",
@@ -1760,6 +1761,9 @@
             },
             {
               "syntax": "(create:created|creating it)"
+            },
+            {
+              "syntax": "((if:if)|(unless:unless))"
             },
             {
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
@@ -3928,7 +3932,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 21,
+          "line": 23,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -4266,12 +4270,42 @@
           "ruleNames": ["can_give_up"],
           "internal": false,
           "file": "src/spell/rules/lists/CanGiveUp.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`{list} can give up {thing}` -- would the list give it up, moved elsewhere?",
           "syntaxes": [
             {
               "syntax": "{operator:can_or_cannot} (release|remove|give up|let go of) {expression:operand}",
               "example": "stock can give up card",
+              "outputs": {
+                "js": {
+                  "code": "core.canGiveUp(stock, card)"
+                },
+                "ts": {
+                  "code": "core.canGiveUp(stock, card)"
+                },
+                "py": {
+                  "code": "core.can_give_up(stock, card)"
+                }
+              }
+            },
+            {
+              "syntax": "{operator:can_or_cannot} give {expression:operand} up",
+              "example": "stock can give card up",
+              "outputs": {
+                "js": {
+                  "code": "core.canGiveUp(stock, card)"
+                },
+                "ts": {
+                  "code": "core.canGiveUp(stock, card)"
+                },
+                "py": {
+                  "code": "core.can_give_up(stock, card)"
+                }
+              }
+            },
+            {
+              "syntax": "{operator:can_or_cannot} let {expression:operand} go",
+              "example": "stock can let card go",
               "outputs": {
                 "js": {
                   "code": "core.canGiveUp(stock, card)"
@@ -5137,7 +5171,7 @@
           "ruleNames": ["belongs_to_one"],
           "internal": false,
           "file": "src/spell/rules/classes/BelongsToOne.ts",
-          "line": 36,
+          "line": 39,
           "purpose": "`a card belongs to one pile` -- a card is in at most ONE pile at a time (epic page D7, D8, Q22).",
           "syntaxes": [
             {
@@ -5145,13 +5179,13 @@
               "example": "a card belongs to one pile",
               "outputs": {
                 "js": {
-                  "code": "Object.defineProperty(Card.prototype, \"pile\", {\n  get() {\n    return Pile.ownerOf(this)\n  },\n  configurable: true\n})\nPile.exclusive = true"
+                  "code": "Object.defineProperty(Card.prototype, \"pile\", {\n  get() {\n    return Pile.ownerOf(this)\n  },\n  configurable: true\n})\nObject.defineProperty(Card.prototype, \"lastPile\", {\n  get() {\n    return Pile.lastOwnerOf(this)\n  },\n  configurable: true\n})\nPile.exclusive = true"
                 },
                 "ts": {
-                  "code": "export interface Card { readonly pile: Pile }\nObject.defineProperty(Card.prototype, \"pile\", {\n  get(this: Card) {\n    return Pile.ownerOf(this)!\n  },\n  configurable: true\n})\nPile.exclusive = true"
+                  "code": "export interface Card { readonly pile: Pile }\nObject.defineProperty(Card.prototype, \"pile\", {\n  get(this: Card) {\n    return Pile.ownerOf(this)!\n  },\n  configurable: true\n})\nexport interface Card { readonly lastPile: any }\nObject.defineProperty(Card.prototype, \"lastPile\", {\n  get(this: Card) {\n    return Pile.lastOwnerOf(this)\n  },\n  configurable: true\n})\nPile.exclusive = true"
                 },
                 "py": {
-                  "code": "@Card.add_property(\"pile\")\ndef _card_pile(self) -> Pile | None:\n    return Pile.owner_of(self)\nPile.exclusive = True"
+                  "code": "@Card.add_property(\"pile\")\ndef _card_pile(self) -> Pile | None:\n    return Pile.owner_of(self)\n@Card.add_property(\"last_pile\")\ndef _card_last_pile(self) -> Any:\n    return Pile.last_owner_of(self)\nPile.exclusive = True"
                 }
               }
             },
@@ -6570,7 +6604,7 @@
           "ruleNames": ["drag_handler"],
           "internal": false,
           "file": "src/spell/rules/classes/DragHandler.ts",
-          "line": 42,
+          "line": 43,
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
@@ -6583,13 +6617,13 @@
               "syntax": "(on|when) something is? {moment:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "while (a|an) {item:type} is? dragged over it? :? {statement_body}?"
+              "syntax": "while (a|an) {item:type} is? {over:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "while {item:known_type} is? dragged over it? :? {statement_body}?"
+              "syntax": "while {item:known_type} is? {over:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "while something is? dragged over it? :? {statement_body}?"
+              "syntax": "while something is? {over:drag_moment} it? :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -8985,7 +9019,7 @@
           "ruleNames": ["context_menu_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/ContextMenuBlock.ts",
-          "line": 41,
+          "line": 45,
           "purpose": "The right-click menu of the element it's in, written inside it, in a drawing.",
           "syntaxes": [
             {
@@ -9551,7 +9585,7 @@
           "ruleNames": ["if"],
           "internal": false,
           "file": "src/spell/rules/if/If.ts",
-          "line": 16,
+          "line": 25,
           "purpose": "`if {condition} (then|:)?` statement, with an inline statement or an indented nested block as body.",
           "syntaxes": [
             {
@@ -10141,7 +10175,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodDefinition.ts",
-          "line": 30,
+          "line": 32,
           "purpose": "Base for method-DEFINITION rules built on `method_signature`: `to_do_something`, `create_animation` and `quoted_type_expression`.",
           "syntaxes": [],
           "aliases": []
@@ -10376,6 +10410,58 @@
             },
             {
               "syntax": "(replacesLast:a new one replaces the last one)"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CancelThisAction",
+          "ruleNames": ["cancel_this_action"],
+          "internal": false,
+          "file": "src/spell/rules/methods/CancelThisAction.ts",
+          "line": 26,
+          "purpose": "In an action, call it off (epic `language` P56, Owen 2026-11-15).",
+          "syntaxes": [
+            {
+              "syntax": "cancel ({when:cancel_when} {condition:expression})?",
+              "example": "a card is a thing\n\tits \"rank\" is a number\n\tto play it\n\t\tcancel if its rank is 0\n\t\tprint its rank",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends Thing {\n  static { this.declareProp(\"rank\", { type: \"number\" }) }\n  get rank() { return this.getProp(\"rank\") }\n  set rank(value) { this.setProp(\"rank\", value) }\n\n  play() {\n    if (this.rank === 0) core.cancel()\n    core.console.log(this.rank)\n  }\n}\ncore.describeAction(Card, \"play\", { title: \"Play It\", cancels: true, undoneAs: \"Play It\" })"
+                },
+                "ts": {
+                  "code": "export class Card extends Thing {\n  @prop({ type: \"number\" })\n  accessor rank!: number\n\n  play() {\n    if (this.rank === 0) core.cancel()\n    core.console.log(this.rank)\n  }\n}\ncore.describeAction(Card, \"play\", { title: \"Play It\", cancels: true, undoneAs: \"Play It\" })"
+                },
+                "py": {
+                  "code": "class Card(Thing):\n    rank = prop(type=\"number\")\n\n    def play(self) -> None:\n        if self.rank == 0:\n            core.cancel()\n        core.console.log(self.rank)\n\ncore.describe_action(Card, \"play\", {\"title\": \"Play It\", \"cancels\": True, \"undone_as\": \"Play It\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AfterHook",
+          "ruleNames": ["after_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/AfterHook.ts",
+          "line": 29,
+          "purpose": "Steps that run at the end of an action, from any file (epic `language` P56, Owen 2026-11-15).",
+          "syntaxes": [
+            {
+              "syntax": "after {signature:method_signature} :? {statement_body}?",
+              "example": "a card is a thing\na pile is a list of cards\nto put a card on a pile\n\tadd the card to the pile\nafter putting a card on a pile\n\tprint the card\nafter putting a card on a pile\n\tprint the pile",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends Thing {\n  putOnPile(pile) {\n    pile.append(this)\n  }\n\n  afterPutOnPile(pile) {\n    core.console.log(this)\n  }\n\n  afterPutOnPile2(pile) {\n    core.console.log(pile)\n  }\n}\ncore.describeAction(Card, \"putOnPile\", { title: \"Put Card on Pile\", undoneAs: \"Put Card on Pile\" })\ncore.addAfterHook(Card, \"putOnPile\", { hook: \"afterPutOnPile\" })\ncore.addAfterHook(Card, \"putOnPile\", { hook: \"afterPutOnPile2\" })\nexport class Pile extends List {\n  static instanceType = Card\n}"
+                },
+                "ts": {
+                  "code": "export class Card extends Thing {\n  putOnPile(pile: Pile) {\n    pile.append(this)\n  }\n\n  afterPutOnPile(pile: Pile) {\n    core.console.log(this)\n  }\n\n  afterPutOnPile2(pile: Pile) {\n    core.console.log(pile)\n  }\n}\ncore.describeAction(Card, \"putOnPile\", { title: \"Put Card on Pile\", undoneAs: \"Put Card on Pile\" })\ncore.addAfterHook(Card, \"putOnPile\", { hook: \"afterPutOnPile\" })\ncore.addAfterHook(Card, \"putOnPile\", { hook: \"afterPutOnPile2\" })\nexport class Pile extends List<Card> {\n  static instanceType = Card\n}"
+                },
+                "py": {
+                  "code": "class Card(Thing):\n    def put_on_pile(self, pile: Pile) -> None:\n        pile.append(self)\n\n    def after_put_on_pile(self, pile: Pile) -> None:\n        core.console.log(self)\n\n    def after_put_on_pile_2(self, pile: Pile) -> None:\n        core.console.log(pile)\n\ncore.describe_action(Card, \"put_on_pile\", {\"title\": \"Put Card on Pile\", \"undone_as\": \"Put Card on Pile\"})\ncore.add_after_hook(Card, \"put_on_pile\", {\"hook\": \"after_put_on_pile\"})\ncore.add_after_hook(Card, \"put_on_pile\", {\"hook\": \"after_put_on_pile_2\"})\n\nclass Pile(List):\n    item_type = Card"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

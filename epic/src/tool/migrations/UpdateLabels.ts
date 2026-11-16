@@ -20,6 +20,14 @@ import type { Migration, MigrationContext } from "./migrations.types"
  * - An open item whose latest status card is Underway says so, `UNDERWAY` (epic `epic-engine` I295);
  *   once that card is finished, the word goes back to what the status says (or a plain `UPDATE`)
  *   - Owen, 2026-11-15, on language's I98, filed under way:  "`Update` should say `Underway`"
+ * - An item fixed for Owen's review (open, `fixed`:  its pill orange) with NO label gets one, `FIXED`
+ *   (epic `epic-engine` I298), unless he has checked it since its change (as above)
+ *   - items fixed before every epic got labels (I290) never had one:  only labels that existed were brought up to date
+ *   - Owen, 2026-11-15, on editor's I133 (fixed 11/14, no label):  "This should show with the `FIXED` marker in the
+ *     item header"
+ *   - only the orange ones:  a closed item is either reviewed or long settled;  labelling every old done item would
+ *     paint hundreds of them (J226)
+ *   - the label has no `phase`:  only his ✓ takes it off (`PlanItem.dropUpdateLabel()`), as on a standing epic
  * - cheap markup, so every edit runs it too (`everyEdit`)
  * - IDEMPOTENT:  a label with its word, or gone, is left as it is
  ****************/
@@ -29,16 +37,24 @@ export class UpdateLabels implements Migration {
   readonly date = "2026-11-15"
   readonly everyEdit = true
   readonly description =
-    "an UPDATE label Owen has checked since goes;  one with no status word gets its item's (FIXED, UNDERWAY)"
+    "an UPDATE label Owen has checked since goes;  one with no status word gets its item's (FIXED, UNDERWAY);  " +
+    "an item fixed for review with none gets FIXED"
 
   /** Bring every bare label of `document` up to date, IN PLACE;  did it change the page? */
   run(document: Document, context: MigrationContext): boolean {
     const dropped: string[] = []
+    const added: string[] = []
     let named = 0
     const checks = UpdateLabels.checksOf(document)
     for (const item of Array.from(document.querySelectorAll("epic-item"))) {
       const label = PlanItem.updateLabelOf(item)
-      if (!label) continue
+      if (!label) {
+        if (UpdateLabels.isAwaitingReview(item) && !UpdateLabels.isChecked(item, checks)) {
+          UpdateLabels.addFixedLabel(item)
+          added.push(item.id.toUpperCase())
+        }
+        continue
+      }
       if (UpdateLabels.isChecked(item, checks)) {
         PlanItem.dropUpdateLabel(item)
         dropped.push(item.id.toUpperCase())
@@ -55,7 +71,33 @@ export class UpdateLabels implements Migration {
     }
     if (dropped.length) context.notes?.push(`update-labels:  checked, label off:  ${dropped.join(", ")}`)
     if (named) context.notes?.push(`update-labels:  ${named} label(s) given their status word`)
-    return dropped.length > 0 || named > 0
+    if (added.length) context.notes?.push(`update-labels:  fixed for review, label added:  ${added.join(", ")}`)
+    return dropped.length > 0 || named > 0 || added.length > 0
+  }
+
+  /** Is `item` fixed and waiting for Owen's review:  open, `fixed` (its pill orange)? */
+  private static isAwaitingReview(item: Element): boolean {
+    const status = item.getAttribute("status")
+    return (status === "open" || !status) && item.hasAttribute("fixed")
+  }
+
+  /**
+   * Give `item` a `FIXED` label at the end of its title, as `PlanDoc.markUpdate()` writes one with no phase:
+   * the title made a `slot="title"` child first when it's still the `title` attribute.
+   */
+  private static addFixedLabel(item: Element): void {
+    const document = item.ownerDocument
+    let slot = item.querySelector(':scope > [slot="title"]')
+    if (!slot) {
+      slot = document.createElement("span")
+      slot.setAttribute("slot", "title")
+      slot.textContent = item.getAttribute("title") ?? ""
+      item.removeAttribute("title")
+      item.prepend(slot)
+    }
+    const label = document.createElement("epic-update")
+    label.setAttribute("became", "fixed")
+    slot.append(document.createTextNode(" "), label)
   }
 
   /** Has Owen checked `item` since its last change:  approved, his ✓ logged at or after its `changed` minute? */

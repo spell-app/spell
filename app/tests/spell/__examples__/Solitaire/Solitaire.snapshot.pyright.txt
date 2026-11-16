@@ -1,2 +1,2 @@
-479 reportReturnType Type "list[Element]" is not assignable to return type "Element"
-636 reportOptionalMemberAccess "filter" is not a known attribute of "None"
+561 reportReturnType Type "list[Element]" is not assignable to return type "Element"
+725 reportOptionalMemberAccess "filter" is not a known attribute of "None"

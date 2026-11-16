@@ -104,6 +104,16 @@ ui-popup[data-spell-action-menu] > ui-menu::part(menu),
   border-radius: var(--ui-radius-s, 6px);
   white-space: nowrap;
 }
+/* an action showing its icon alone (`icon-only`):  side by side with its icon-only neighbours, in one row */
+:is(
+    ui-menu.BarMenuItems,
+    ui-menu.BarMenuItems ui-submenu,
+    .SpellMenuPanel > ui-menu,
+    ui-popup[data-spell-action-menu] > ui-menu
+  )
+  > ui-action[icon-only]::part(item) {
+  display: inline-flex;
+}
 :is(
     ui-menu.BarMenuItems,
     ui-menu.BarMenuItems ui-submenu,

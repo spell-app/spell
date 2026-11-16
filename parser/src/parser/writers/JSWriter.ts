@@ -62,7 +62,12 @@ const PLACE_CALL = "place"
 /** A line's description comment, `-- ...`:  written as a plain `//` (`ASTLineComment()`). */
 const DESCRIPTION_SYMBOL = "--"
 
-const DESCRIBERS = { action: "describeAction", event: "describeEvent", menu: "describeMenu" } as const
+const DESCRIBERS = {
+  action: "describeAction",
+  event: "describeEvent",
+  menu: "describeMenu",
+  after: "addAfterHook"
+} as const
 
 export class JSWriter extends ProgramWriter {
   /** The writer `ASTNode.compile()` uses:  it knows no project -- see `forProject()`. */
@@ -961,7 +966,7 @@ export class JSWriter extends ProgramWriter {
     const params = this.params(node)
     const async = node.isAsync ? "async " : ""
     const act = `${async}() => ${this.actionBody(node)}`
-    const info = Object.entries(action).map(([key, value]) => `${key}: ${this.quoted(value)}`)
+    const info = Object.entries(action).map(([key, value]) => `${key}: ${value === true ? "true" : this.quoted(value)}`)
     const run = `core.asAction({ ${info.join(", ")} }, ${act})`
     const export_ = node.exported ? "export " : ""
     return `${export_}${async}function ${this.methodNameOf(node)}${params} {\n${jsText.indented(`return ${run}`)}\n}`
@@ -1628,8 +1633,8 @@ export class JSWriter extends ProgramWriter {
     })
     const description = fields.length ? `{ ${fields.join(", ")} }` : "{}"
     const code = `core.${method}(${this.write(node.type)}, ${name}, ${description})`
-    // an event's and a menu's one line says it;  an action's spell is the method just above
-    return node.describes === "action" ? code : this.withSpell(node, code)
+    // an event's and a menu's one line says it;  an action's spell, and an after hook's, is the method just above
+    return node.describes === "action" || node.describes === "after" ? code : this.withSpell(node, code)
   }
 
   /** One field of a type's description as javascript -- see `P.ASTDescriptionValue`. */
@@ -1745,9 +1750,22 @@ export class JSWriter extends ProgramWriter {
     return `${head},\n${jsText.indented(children.join(",\n"))}\n)`
   }
 
-  /** A context menu's items, by the names this target gives them:  `["autoPlay", "-", "undo"]`. */
-  protected menuItemNames(items: readonly string[]): string {
-    return `[${items.map((item) => this.quoted(item === "-" ? item : this.nameOf(item, "method"))).join(", ")}]`
+  /**
+   * A context menu's items, by the names this target gives them:  `["autoPlay", "-", "undo"]`.
+   * - An item with attributes is its name and them:  `["undo", { "icon-only": true }]`.
+   * - On one line when it fits, else one a line.
+   */
+  protected menuItemNames(items: readonly P.ASTContextMenuItem[]): string {
+    const written = items.map((item) => {
+      if (typeof item === "string") return this.quoted(item === "-" ? item : this.nameOf(item, "method"))
+      const props = Object.entries(item.props).map(
+        ([key, value]) => `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${JSON.stringify(value)}`
+      )
+      return `[${this.quoted(this.nameOf(item.action, "method"))}, { ${props.join(", ")} }]`
+    })
+    const inline = `[${written.join(", ")}]`
+    if (P.SourceMarks.widthOf(inline) < JSWriter.DRAWING_LINE) return inline
+    return `[\n${jsText.indented(written.join(",\n"))}\n]`
   }
 
   /**

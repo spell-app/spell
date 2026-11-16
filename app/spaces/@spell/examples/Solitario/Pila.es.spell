@@ -21,6 +21,18 @@ una "pila" es una lista visible soltable de cartas
 			poner resumen a resumen + " " + el nombre corto de la carta
 		devolver resumen
 
+	cuando una carta se suelta sobre ella		-- poner la carta en la pila, si es un movimiento válido
+		poner la carta en la pila
+
+	para poner una carta en una pila, deshacible como "Mover carta"
+		// La carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y la toman
+		// - rechazado, nada se mueve, y no hay nada que deshacer
+		// - un juego agrega sus propios pasos después:  `después de poner una carta en una pila`
+		cancelar si la pila de la carta no puede soltar la carta
+			o la pila no puede tomar la carta
+		para carta en (las cartas en la pila de la carta empezando con la carta)
+			mover eso a la pila
+
 	para probar las pilas
 		poner la reserva a una nueva pila con id "reserva"
 		el color de la reserva debería ser "ninguno"

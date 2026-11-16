@@ -524,12 +524,12 @@ describe("start, and waking the epic", () => {
     expect(asked).toHaveLength(1)
     inboxOf((inbox) => inbox.setListening("s1"))
     expect(written(PAGES.plan).woken).toBeNull()
-    await post("mark", { page: PLAN_URL, id: "j3", mark: { action: "approve" } })
+    await post("mark", { page: PLAN_URL, id: "j3", mark: { action: "todo" } })
     const heard = await post("send", { page: PLAN_URL })
     expect(heard.body.wake).toBeNull()
     expect(asked).toHaveLength(1)
     inboxOf((inbox) => inbox.setListening(null))
-    await post("mark", { page: PLAN_URL, id: "i2", mark: { action: "approve" } })
+    await post("mark", { page: PLAN_URL, id: "i2", mark: { action: "todo" } })
     const again = await post("send", { page: PLAN_URL })
     expect(again.body.wake.state).toBe("typed")
     expect(asked).toHaveLength(2)
@@ -576,7 +576,7 @@ describe("start, and waking the epic", () => {
   test("no VS Code window at all:  nothing opened, the command to type;  no record, and a Send with nothing new wakes nobody", async () => {
     sessions()
     window(false)
-    await post("mark", { page: PLAN_URL, id: "j3", mark: { action: "approve" } })
+    await post("mark", { page: PLAN_URL, id: "j3", mark: { action: "todo" } })
     const got = await post("send", { page: PLAN_URL })
     expect(got.body.wake).toMatchObject({
       state: "no-vscode",
@@ -693,5 +693,85 @@ describe("a Read in While you were out", () => {
     const page = readFileSync(join(root, AWAY), "utf8")
     expect(page).toMatch(/away-seen="done=/)
     expect(page).toMatch(/<epic-update[^>]* seen=/)
+  })
+})
+
+// epic `epic-engine` I304:  an item's ✓ or x with nothing for Claude is applied by the page server, with no Send
+describe("an instant mark", () => {
+  /** a page of its own, written fresh for each test:  an open issue, a todo, a test */
+  const INSTANT = "epics/inst/inst.plan.html"
+  const PAGE = `<!doctype html><title>x</title><body class="plan-doc"><epic-page epic="inst" title="Inst">
+<epic-overview id="overview"><epic-summary>Inst.</epic-summary></epic-overview>
+<epic-section id="issues" kind="issues"><epic-item id="i1" title="an issue" status="open"></epic-item></epic-section>
+<epic-section id="todos" kind="todos"><epic-item id="t1" title="a todo" status="open"></epic-item></epic-section>
+<epic-section id="tests" kind="tests"><epic-item id="m1" title="a test" status="open"></epic-item></epic-section>
+</epic-page>`
+  /** a little past the grace, and the run's write */
+  const PAST_GRACE = 2600
+
+  beforeEach(() => {
+    mkdirSync(dirname(join(root, INSTANT)), { recursive: true })
+    writeFileSync(join(root, INSTANT), PAGE)
+    rmSync(inboxFile(INSTANT), { force: true })
+  })
+
+  /** the scratch page's item `id`'s start tag */
+  const tagOf = (id: string) =>
+    readFileSync(join(root, INSTANT), "utf8").match(new RegExp(`<epic-item[^>]* id="${id}"[^>]*>`))![0]
+
+  test("a ✓ on an issue:  not unsent (Send leaves it), then applied once its grace passes, the inbox emptied", async () => {
+    const marked = await post("mark", { page: `/${INSTANT}`, id: "i1", mark: { action: "approve" } })
+    expect(marked.status).toBe(200)
+    expect(marked.body.marks.i1).toMatchObject({ action: "approve" })
+    expect(ReviewInbox.read(inboxFile(INSTANT)).unsentMarks).toEqual([])
+    expect(tagOf("i1")).not.toMatch(/review-as=/)
+    await new Promise((done) => setTimeout(done, PAST_GRACE))
+    expect(tagOf("i1")).toMatch(/review-as="approve"/)
+    expect(ReviewInbox.read(inboxFile(INSTANT)).markList).toEqual([])
+  })
+
+  test("a second click inside the grace takes it back:  nothing applied", async () => {
+    await post("mark", { page: `/${INSTANT}`, id: "t1", mark: { action: "drop" } })
+    await post("mark", { page: `/${INSTANT}`, id: "t1", mark: null })
+    await new Promise((done) => setTimeout(done, PAST_GRACE))
+    expect(tagOf("t1")).toMatch(/status="open"/)
+  })
+
+  test("an x with a note, and a test's ✓, wait for Send", async () => {
+    await post("mark", { page: `/${INSTANT}`, id: "i1", mark: { action: "skip", note: "but check X" } })
+    await post("mark", { page: `/${INSTANT}`, id: "m1", mark: { action: "approve" } })
+    await new Promise((done) => setTimeout(done, PAST_GRACE))
+    expect(Object.keys(written(INSTANT).marks).sort()).toEqual(["i1", "m1"])
+    expect(
+      ReviewInbox.read(inboxFile(INSTANT))
+        .unsentMarks.map((mark) => mark.id)
+        .sort()
+    ).toEqual(["i1", "m1"])
+  })
+
+  // epic `epic-engine` T80:  "Cmd-z to undo the mark on the hidden thing?"
+  test("applied, it's undone by POST undo:  the item as it was before, once;  nothing to undo is a 404", async () => {
+    rmSync(join(root, "epics/inst/inst.instant-undo.json5"), { force: true })
+    await post("mark", { page: `/${INSTANT}`, id: "t1", mark: { action: "drop" } })
+    await new Promise((done) => setTimeout(done, PAST_GRACE))
+    expect(tagOf("t1")).toMatch(/status="canceled"/)
+    const undone = await post("undo", { page: `/${INSTANT}`, id: "t1" })
+    expect(undone.status).toBe(200)
+    expect(undone.body.did).toMatch(/taken back/)
+    // as before:  open, never reviewed (the tool's own `state` drawn on every edit aside)
+    expect(tagOf("t1")).toMatch(/status="open"/)
+    expect(tagOf("t1")).not.toMatch(/review-as=|reviewed=/)
+    expect(readFileSync(join(root, INSTANT), "utf8")).toMatch(/T1 undone:/)
+    expect((await post("undo", { page: `/${INSTANT}`, id: "t1" })).status).toBe(404)
+  })
+
+  test("changed since it was applied (reopened), the undo is refused:  409", async () => {
+    rmSync(join(root, "epics/inst/inst.instant-undo.json5"), { force: true })
+    await post("mark", { page: `/${INSTANT}`, id: "i1", mark: { action: "skip" } })
+    await new Promise((done) => setTimeout(done, PAST_GRACE))
+    const file = join(root, INSTANT)
+    writeFileSync(file, readFileSync(file, "utf8").replace(/(<epic-item[^>]* id="i1")/, '$1 urgent=""'))
+    const refused = await post("undo", { page: `/${INSTANT}`, id: "i1" })
+    expect(refused.status).toBe(409)
   })
 })

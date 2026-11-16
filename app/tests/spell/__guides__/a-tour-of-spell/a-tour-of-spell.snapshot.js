@@ -96,6 +96,10 @@ export class Plant extends View {
   get windowsill() {
     return Windowsill.ownerOf(this)
   }
+
+  get lastWindowsill() {
+    return Windowsill.lastOwnerOf(this)
+  }
 }
 
 /** A list of things can be a view too:  a viewable list draws each one in turn. */

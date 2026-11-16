@@ -106,6 +106,18 @@ export const englishWords: SP.LanguageWords = {
     "onto"
   ]),
 
+  lastListWords: { default: "last" },
+
+  verbsForDoing: (doing) => {
+    if (!/..ing$/i.test(doing)) return []
+    const base = doing.slice(0, -3)
+    const verbs = [base, `${base}e`]
+    // putting => put, dying => die
+    if (/([^aeiou])\1$/i.test(base)) verbs.push(base.slice(0, -1))
+    if (/y$/i.test(base)) verbs.push(`${base.slice(0, -1)}ie`)
+    return verbs
+  },
+
   danglingWords: new Set([
     "of",
     "to",

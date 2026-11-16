@@ -226,8 +226,12 @@ def test_a_card_keeps_its_pile_while_its_in_it_even_once_nothing_else_holds_the_
     assert card.pile is not None
     assert card.pile.name == "stock"
     assert list(card.pile) == [card]
-    # moved out, it lets that pile go
+    # moved out, it keeps that pile as its last one (epic `language` P56);  moved again, it lets it go
     left = weakref.ref(card.pile)
+    core.append(Pile(), card)
+    gc.collect()
+    assert left() is not None
+    assert Pile.last_owner_of(card) is left()
     core.append(Pile(), card)
     gc.collect()
     assert left() is None

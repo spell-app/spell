@@ -257,7 +257,7 @@ describe("<epic-item>", () => {
     expect(host.open).toBe(false)
   })
 
-  test("labels its own text `Original question` once answered, `Original reply` above More Details;  never over a part", async () => {
+  test("labels its own text `Original question` once answered;  never `Original reply` above More Details (I301), nor over a part", async () => {
     const answered = await item(
       `<epic-item id="q5" title="A" status="decided" answered><p>Asked</p><epic-answer title="B"></epic-answer></epic-item>`
     )
@@ -267,7 +267,7 @@ describe("<epic-item>", () => {
     const bare = await item(
       `<epic-item id="q6" title="A" status="decided" answered><epic-answer title="B"></epic-answer></epic-item>`
     )
-    expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", "Original reply", null])
+    expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", null, null])
   })
 
   test("a link to it, or to an element inside it, unfolds it (`ui-opening` after the fact)", async () => {
@@ -386,41 +386,147 @@ describe("<epic-item>", () => {
     }
   })
 
+  test("held in view after his x (T80, T81):  the open issue's buttons stay, though the server closed it", async () => {
+    const held = vi.spyOn(ReviewClient.prototype, "isHeldInView").mockReturnValue(false)
+    try {
+      const { host } = await item(`<epic-item id="i7" title="Gone soon" status="open"></epic-item>`)
+      const buttonsOf = () => (host as unknown as { component: { buttonsKind: string } }).component.buttonsKind
+      expect(buttonsOf()).toBe("issue-open")
+      held.mockReturnValue(true)
+      host.setAttribute("status", "canceled")
+      await Promise.resolve()
+      expect(buttonsOf()).toBe("issue-open")
+      // let go at his Send:  its own buttons again, a finished issue's (J231)
+      held.mockReturnValue(false)
+      expect(buttonsOf()).toBe("issue-done")
+    } finally {
+      held.mockRestore()
+    }
+  })
+
+  // epic `epic-engine` I308:  "it looks correct, then flashes ... when the update comes in.  Shouldn't flash"
+  test("closing at his x:  struck and grey from the click, as the server will leave it, so its update changes nothing", async () => {
+    const closing = vi.spyOn(ReviewClient.prototype, "isClosing").mockReturnValue(true)
+    const closingAs = vi.spyOn(ReviewClient.prototype, "closingAs").mockReturnValue("drop")
+    const held = vi.spyOn(ReviewClient.prototype, "isHeldInView").mockReturnValue(true)
+    try {
+      const { host, chip } = await item(`<epic-item id="i8" title="Gone soon" status="open"></epic-item>`)
+      const base = () => host.shadowRoot!.querySelector("[part~='base']")!.className
+      expect(base()).toBe("old canceled item")
+      // its x still pressed, though the server took the mark off the inbox
+      expect(chip.dataset.fill).toBe("dashed")
+      // the server's update lands:  the same look
+      host.setAttribute("status", "canceled")
+      host.setAttribute("state", "old")
+      await Promise.resolve()
+      expect(base()).toBe("old canceled item")
+      const chipNow = host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
+      expect([chipNow.dataset.fill, chipNow.hasAttribute("data-marked")]).toEqual(["dashed", true])
+    } finally {
+      closing.mockRestore()
+      closingAs.mockRestore()
+      held.mockRestore()
+    }
+  })
+
   test("buttonsForItem():  a todo in a phase draws no plane;  anything else as before", () => {
     expect(buttonsForItem("t1", { inPhase: true })).toBe("todo-in-phase")
     expect(buttonsForItem("t1")).toBe("todo")
     expect(buttonsForItem("t1", { limit: true, inPhase: true })).toBe("item")
-    expect(buttonsForItem("i1", { inPhase: true })).toBe("issue")
+    expect(buttonsForItem("i1", { inPhase: true })).toBe("issue-open")
     expect(BUTTONS_OF["todo-in-phase"].map((spec) => spec.action)).toEqual(["revisit", "drop"])
+  })
+
+  test("buttonsForItem():  one icon per meaning on an issue -- the plane sends, the x closes, the check accepts (I299)", () => {
+    const icons = (kind: keyof typeof BUTTONS_OF) => BUTTONS_OF[kind].map((spec) => [spec.action, spec.icon])
+    // an open issue:  Do this (the plane), Revisit, the x that closes it unfixed;  no thumbs up beside a check
+    expect(buttonsForItem("i1", { status: "open" })).toBe("issue-open")
+    expect(icons("issue-open")).toEqual([
+      ["todo", "paper plane"],
+      ["revisit", "history"],
+      ["drop", "xmark"]
+    ])
+    // fixed, waiting for Owen:  Revisit (sends it back, with a note), Accept the fix (the check);  no plane (J231)
+    expect(buttonsForItem("i1", { status: "open", fixed: true })).toBe("issue-fixed")
+    expect(buttonsForItem("j1", { status: "open", fixed: true })).toBe("issue-fixed")
+    expect(BUTTONS_OF["issue-fixed"].map((spec) => [spec.action, spec.icon, spec.label])).toEqual([
+      ["revisit", "history", "revisit"],
+      ["approve", "check", "acceptFix"]
+    ])
+    // a judgement call keeps its check:  agreeing with the call, not a cancel
+    expect(buttonsForItem("j1", { status: "open" })).toBe("issue")
+    expect(icons("issue")).toEqual([
+      ["todo", "paper plane"],
+      ["revisit", "history"],
+      ["approve", "check"]
+    ])
+    // a phase's Do this is the plane too;  only "accept this" keeps the thumbs up
+    expect(BUTTONS_OF.phase[0].icon).toBe("paper plane")
+    expect(BUTTONS_OF.plan[0].icon).toBe("thumbs up")
   })
 
   test("buttonsForItem():  a finished todo draws Revisit and Saw it, never the x that drops it (I296)", () => {
     expect(buttonsForItem("t1", { status: "done", inPhase: true })).toBe("todo-done")
     expect(buttonsForItem("t1", { status: "canceled" })).toBe("todo-done")
     expect(buttonsForItem("t1", { status: "open", inPhase: true })).toBe("todo-in-phase")
-    expect(buttonsForItem("i1", { status: "done" })).toBe("issue")
     expect(BUTTONS_OF["todo-done"].map((spec) => [spec.action, spec.label])).toEqual([
       ["revisit", "revisitNote"],
       ["approve", "sawIt"]
     ])
   })
 
-  test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P2`, its tooltip saying so;  still green", async () => {
+  test("buttonsForItem():  a finished issue or call draws Revisit and Saw it, no plane (J231)", () => {
+    for (const status of ["done", "canceled", "decided"]) {
+      expect(buttonsForItem("i1", { status })).toBe("issue-done")
+      expect(buttonsForItem("j1", { status, fixed: true })).toBe("issue-done")
+    }
+    expect(BUTTONS_OF["issue-done"].map((spec) => [spec.action, spec.icon])).toEqual([
+      ["revisit", "history"],
+      ["approve", "check"]
+    ])
+  })
+
+  test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  `in P2` while still to finish, its tooltip saying so", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
     document.body.append(phases)
     try {
-      const { host, chip } = await item(
-        `<epic-item id="i1" title="Old numbers" status="done" state="recent" taken-in="p-fix"></epic-item>`
-      )
+      const { host } = await item(`<epic-item id="i1" title="Old numbers" status="open" taken-in="p-fix"></epic-item>`)
       const mark = host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
       expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
         "in P2",
         "#p-fix",
         "Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.  ⌥-click:  start P2."
       ])
-      expect(chip.title).toMatch(/^Decided or done/)
       await expectAccessible(host)
+    } finally {
+      phases.remove()
+    }
+  })
+
+  test("a FINISHED item's `taken-in` draws `done in P2` where the plane was (J231), not `in P2` (I307);  `handled` keeps its pill", async () => {
+    const phases = document.createElement("div")
+    phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
+    document.body.append(phases)
+    try {
+      for (const status of ["done", "canceled", "decided"]) {
+        const { host, chip } = await item(
+          `<epic-item id="j100" title="Import's pictures" status="${status}" taken-in="p-fix"></epic-item>`
+        )
+        expect(host.shadowRoot!.querySelector("[part~='handled']")).toBeNull()
+        const done = host.shadowRoot!.querySelector<HTMLElement>("[part~='done-in']")!
+        expect([done.textContent, done.getAttribute("link")]).toEqual(["done in P2", "#p-fix"])
+        expect(done.title).toBe("Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.")
+        expect(chip.title).toContain("Taken up in P2 · Fix Open Issues:  fixed or done there")
+      }
+      // still to finish:  its `in P2`, no `done in`
+      const open = await item(`<epic-item id="i1" title="Old numbers" status="open" taken-in="p-fix"></epic-item>`)
+      expect(open.host.shadowRoot!.querySelector("[part~='done-in']")).toBeNull()
+      const handled = await item(
+        `<epic-item id="q4" title="How many?" status="decided" state="handled" handled="p-one" taken-in="p-fix"></epic-item>`
+      )
+      expect(handled.host.shadowRoot!.querySelector("[part~='handled']")!.textContent).toBe("in P1")
+      expect(handled.host.shadowRoot!.querySelector("[part~='done-in']")).toBeNull()
     } finally {
       phases.remove()
     }

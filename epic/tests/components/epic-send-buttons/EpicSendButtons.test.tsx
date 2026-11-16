@@ -58,6 +58,9 @@ describe("<epic-send-buttons>", () => {
     ])
     expect(group.matches(":state(countdown)")).toBe(true)
     expect(part(group, "ring")).toBeNull()
+    // its words beside the plane (I305;  Owen, 2026-11-15:  "The round plane icon at the top is what should say
+    // `send to claude`")
+    expect(part(group, "words")!.textContent).toBe("Send to Claude")
     await expectAccessible(group)
   })
 

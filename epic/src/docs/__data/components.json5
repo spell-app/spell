@@ -2656,7 +2656,7 @@
         {
           "name": "taken-in",
           "kind": "string",
-          "description": "TAKEN UP IN A PHASE (epic `epic-engine` I128):  the phase that fixed or did it (`p-fix-open-issues`), set when an issue or todo is closed while that phase is active, or when a done phase's text links it (`PhaseTakes`);  its line links the phase, `in P1`, as `handled` does, but it stays green:  not a state."
+          "description": "TAKEN UP IN A PHASE (epic `epic-engine` I128):  the phase that fixed or did it (`p-fix-open-issues`), set when an issue or todo is closed while that phase is active, or when a done phase's text links it (`PhaseTakes`);  its line links the phase, `in P1`, as `handled` does, but it stays green:  not a state.  A FINISHED item (done, canceled, decided) draws no pill for it, its id chip's tooltip naming the phase instead (epic `epic-engine` I307)."
         },
         {
           "name": "changed",
@@ -2876,7 +2876,11 @@
         },
         {
           "name": "handled",
-          "description": "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic `epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that fixed or did it."
+          "description": "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic `epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that has it, while the item is still to finish (I307)."
+        },
+        {
+          "name": "done-in",
+          "description": "With `taken-in` on a finished item (done, canceled, decided):  a grey `done in P20` at its line's end, where its plane was, linking the phase it was done in (epic `epic-engine` J231)."
         },
         {
           "name": "git",
@@ -2896,7 +2900,7 @@
         },
         {
           "name": "label",
-          "description": "`Original question` / `Original reply` over its own text."
+          "description": "`Original question` over an answered question's own text."
         },
         {
           "name": "error",
@@ -2958,11 +2962,6 @@
           "key": "originalQuestion",
           "text": "Original question",
           "description": "Over an answered question's own text."
-        },
-        {
-          "key": "originalReply",
-          "text": "Original reply",
-          "description": "Over an item's own text, above More Details."
         },
         {
           "key": "reviewTodo",
@@ -3053,6 +3052,16 @@
           "key": "handledIn",
           "text": "in {phase}",
           "description": "Its line's link to the phase that handled it:  `in P4`."
+        },
+        {
+          "key": "doneIn",
+          "text": "done in {phase}",
+          "description": "A finished item's link to the phase it was done in, where its plane was:  `done in P20` (J231)."
+        },
+        {
+          "key": "donePillTip",
+          "text": "Click:  go to {phase}.",
+          "description": "The `done in P20` pill's tooltip's second line (epic `epic-engine` J231)."
         },
         {
           "key": "handledTip",
@@ -3200,9 +3209,24 @@
           "description": "A finished todo's review button (the check):  its name (I296)."
         },
         {
+          "key": "closeIssue",
+          "text": "Close it:  not needed",
+          "description": "An open issue's review button (the x):  its name (I299)."
+        },
+        {
+          "key": "sendBack",
+          "text": "Send it back",
+          "description": "A fixed issue's or call's review button (the plane):  its name (I299)."
+        },
+        {
+          "key": "acceptFix",
+          "text": "Accept the fix",
+          "description": "A fixed issue's or call's review button (the check):  its name (I299)."
+        },
+        {
           "key": "doThis",
           "text": "Do this",
-          "description": "A to-do phase's first review button, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
+          "description": "A to-do phase's or an issue's first review button, the plane (a thumbs up before I299;  epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
         },
         {
           "key": "looksGood",
@@ -3516,13 +3540,13 @@
         "follow-up",
         "addendum"
       ],
-      "description": "More Details (Add Details Now):  a white, open, foldable card under an item's text and answer;  the item's own text above it is labelled Original Reply.  A second Add Details replaces it.",
+      "description": "More Details:  what Clarify (Add Details) wrote IN PLACE of an item's unclear text, a plain card headed More Details that never folds.  A second Add Details replaces it.",
       "noun": "more",
       "attributes": [],
       "slots": [
         {
           "name": "",
-          "description": "What the item's text left out."
+          "description": "The item's text, made clear."
         }
       ],
       "events": [],
@@ -3532,31 +3556,16 @@
           "description": "The card."
         },
         {
-          "name": "toggle",
-          "description": "Its `More Details` `<button>`, which folds it."
+          "name": "heading",
+          "description": "Its `More Details` heading."
         },
         {
           "name": "body",
-          "description": "What the item's text left out;  hidden while folded."
+          "description": "The item's text, made clear."
         }
       ],
-      "states": [
-        {
-          "name": "open",
-          "description": "Unfolded:  it starts so."
-        }
-      ],
+      "states": [],
       "texts": [
-        {
-          "key": "foldTip",
-          "text": "Fold More Details",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Unfold More Details",
-          "description": "Tooltip of its fold button while folded."
-        },
         {
           "key": "more",
           "text": "More Details",
@@ -5075,7 +5084,7 @@
         "step",
         "stage"
       ],
-      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (a thumbs up:  build it), Revisit.",
+      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (the plane:  build it), Revisit.",
       "noun": "phase",
       "attributes": [
         {
@@ -6619,7 +6628,7 @@
         "paper plane",
         "ring"
       ],
-      "description": "Send, the paper plane.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  While the session works through what was sent (`working`, epic `epic-engine` P55), a blue arc turns round the plane in the same frame, unless the countdown runs.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
+      "description": "Send, the paper plane, its words \"Send to Claude\" beside it.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  While the session works through what was sent (`working`, epic `epic-engine` P55), a blue arc turns round the plane in the same frame, unless the countdown runs.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
       "noun": "send-buttons",
       "attributes": [
         {
@@ -6694,6 +6703,10 @@
           "description": "The badge on the plane:  how many things a press sends."
         },
         {
+          "name": "words",
+          "description": "The words beside the plane, \"Send to Claude\" (I305)."
+        },
+        {
           "name": "working",
           "description": "The turning ring round the plane:  a blue arc going round, only while the session works on a Send."
         },
@@ -6730,6 +6743,11 @@
           "key": "send",
           "text": "Send",
           "description": "The plane's tooltip and name, when the owner gives none (`send-tip`)."
+        },
+        {
+          "key": "words",
+          "text": "Send to Claude",
+          "description": "The words beside the plane (I305;  Owen, 2026-11-15:  \"The round plane icon at the top is what should say `send to claude`\")."
         },
         {
           "key": "counting",

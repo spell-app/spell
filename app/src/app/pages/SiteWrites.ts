@@ -18,9 +18,9 @@ import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
  * - Static and instance-free on purpose:  the site file is the editor's project's, found each time.
  ****************/
 export class SiteWrites {
-  /** The current project's file that declares its site:  none for a project that isn't a site. */
-  static siteFile(): SiteFile | undefined {
-    return editor.project?.files.find((file) => SiteEdits.hasSite(file.contents ?? ""))
+  /** The file of `project` (default:  the current one) that declares its site:  none for a project that isn't a site. */
+  static siteFile(project = editor.project): SiteFile | undefined {
+    return project?.files.find((file) => SiteEdits.hasSite(file.contents ?? ""))
   }
 
   /** The current project's site's parts, as its file has them now:  none for a project that isn't a site. */
@@ -193,10 +193,13 @@ export class SiteWrites {
     return undefined
   }
 
-  /** The project's file declaring page `name`:  the site's own, else another of its files;  none for an imported page. */
-  static declaringFile(name: string): SiteFile | undefined {
-    const files = editor.project?.files ?? []
-    const site = SiteWrites.siteFile()
+  /**
+   * The file of `project` (default:  the current one) declaring page `name`:  the site's own, else another of its
+   * files;  none for an imported page.
+   */
+  static declaringFile(name: string, project = editor.project): SiteFile | undefined {
+    const files = project?.files ?? []
+    const site = SiteWrites.siteFile(project)
     return [...(site ? [site] : []), ...files.filter((file) => file !== site)].find(
       (file) => !!SiteWrites.declarationOf(file.contents ?? "", name)
     )

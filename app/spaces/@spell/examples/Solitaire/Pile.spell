@@ -7,11 +7,9 @@ a "pile" is a droppable viewable list of cards
 	its "layout" is one of stacked or vertical
 		// How its cards lie:  on top of each other, or down a column -- styles.css
 	its "color" is
-		// Its last card's:  what the next card goes on
 		"none" if it is empty
 		the color of its last card otherwise
 	its "value" is
-		// Its last card's
 		0 if it is empty
 		the value of its last card otherwise
 	its "short name" is
@@ -20,6 +18,18 @@ a "pile" is a droppable viewable list of cards
 		for card in the pile
 			set summary to summary + " " + the short name of the card
 		return summary
+
+	when a card is dropped		-- put the card on the pile, if it is a legal move
+		put the card on the pile
+
+	to put a card on a pile, undoable as "Move Card"
+		// The card, and every card on it, onto the pile, if the piles' rules let it go and take it
+		// - refused, nothing moves, and there's nothing to undo
+		// - a game adds its own steps after it:  `after putting a card on a pile`
+		cancel if the card's pile cannot give it up
+			or the pile cannot take it
+		for card in cards in the card's pile starting with the card
+			move it to the pile
 
 	to test piles
 		set the stock to a new pile with id "stock"
@@ -39,8 +49,7 @@ a "pile" is a droppable viewable list of cards
 		the number of cards in the stock should be 1
 		the discards' short name should be "discards: 7♥↓"
 
-a card belongs to one pile
-	// a card is in one pile at a time:  putting it on another pile takes it off this one
-
 a card
-	it "is on top" if it is the top card of its pile		-- the card the next one goes on
+	// a card is in one pile at a time:  putting it on another pile takes it off this one
+	belongs to one pile
+	it "is on top of its pile" if it is the top card of its pile		-- the card the next one goes on

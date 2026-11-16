@@ -55,7 +55,7 @@ export class Tarea extends View {
   @drawn draw() {
     // Un formulario propio, unido a ella:  marcar la casilla, o escribir un título, cambia la tarea;  su prioridad se muestra solo cuando no es normal
     return (
-      <es-formulario value={this}>
+      <es-formulario prop:value={this}>
         <es-pila direccion="horizontal" separacion="sm">
           <es-icono name="grip vertical" color="grey" aria-label="Arrastrar" />
           <es-casilla name="hecha" aria-label="Hecha" />
@@ -75,6 +75,10 @@ export class Tarea extends View {
   /** una tarea está en una sola agenda a la vez */
   get agenda() {
     return Agenda.ownerOf(this)!
+  }
+
+  get últimaAgenda() {
+    return Agenda.lastOwnerOf(this)
   }
 }
 
@@ -703,7 +707,7 @@ export class ListaDeTareas extends App {
               </span>
             </es-texto>
           </es-barra-herramientas>
-          <es-formulario value={this}>
+          <es-formulario prop:value={this}>
             <es-pila>
               <es-campo etiqueta="Guardarlas en" en-linea={true}>
                 <es-selector name="almacén">

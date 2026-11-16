@@ -27,6 +27,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "untyped-property": 'Di qué es "{name}", p. ej. "{line} como {type}"',
   "untyped-list-property": 'Di qué contiene "{name}", p. ej. "{line} como una nueva lista de {items}"',
   "action-without-a-name": '"{text}" no nombra una acción:  di qué hace, como en "para barajarlo"',
+  "cancel-outside-an-action": '"{text}" cancela una acción:  va en sus pasos, bajo "para ..." o "después de ..."',
+  "after-names-no-action":
+    '"{text}" se ejecuta después de una acción, pero ninguna acción antes se lee así:  como en "después de poner una carta en una pila", para "para poner una carta en una pila"',
   "made-from-each-other":
     '{circle}:  cada uno hace el siguiente al hacerse, así que ninguno puede hacerse nunca.  Guarda uno sin "nuevo", y hazlo en una acción',
   "not-made-yet":
@@ -209,6 +212,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '<{tag} "{action}"> no nombra ninguna acción de aquí:  escribe el nombre de una acción tal como se declara, p. ej. "para {action}"',
   "context-menu-item":
     '<{tag}> solo tiene sus elementos:  <acción "nombre"/> para una acción, <divisor/> para una línea entre grupos',
+  "context-menu-code":
+    '<{tag}> en un menú toma palabras, no código:  escribe su atributo con palabras, p. ej. title="Reiniciar", o solo, p. ej. solo-icono',
   "markdown-hole":
     'No entiendo "{{hole}}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave',
 

@@ -22,7 +22,7 @@ from reprlib import recursive_repr
 from typing import Any, ClassVar, Self, SupportsIndex, overload
 
 from spell_core.js_text import is_plain_number, js_string
-from spell_core.kinds import OWNERS_KEY, is_same
+from spell_core.kinds import LAST_OWNERS_KEY, OWNERS_KEY, is_same
 from spell_core.positions import zero_index_of
 from spell_core.things import ITEMS_KEY, SpellObject, note_change, program_core, prop, to_json_value
 
@@ -96,6 +96,17 @@ class List(SpellObject, MutableSequence[Any]):
         """
         family = ListFamily.of(cls)
         return family.owner_of(item) if family else None  # type: ignore[return-value]
+
+    @classmethod
+    def last_owner_of(cls, item: object) -> Self | None:
+        """The list of our family that held `item` before its latest move:  `the card's last pile` (P56).
+
+        - Every move sets it, whatever moved it:  kept until its next move;  `None` before its first.
+        - Part of the undo step that moved it:  undo puts it back, and so does an action that cancels.
+        - The JavaScript core's `List.lastOwnerOf()`.
+        """
+        family = ListFamily.of(cls)
+        return family.last_owner_of(item) if family else None  # type: ignore[return-value]
 
     def __init__(self, items: Iterable[object] | None = None, /, **props: object) -> None:
         """A list holding `items`, if any, with keyword `props`, then its `create()`:  `Deck()`, `Deck(cards)`."""
@@ -700,14 +711,41 @@ class ListFamily:
         """SIDE EFFECT:  `owner` holds `item` now;  `None`:  nothing does.
 
         - An item that can't be owned is skipped.
+        - The list that held it is its last owner now (`last_owner_of()`), noted for undo and a cancel.
+          Not while undo or redo put items back:  they put its last owner back themselves.
         """
         if not is_ownable(item):
             return
         owners: dict[ListFamily, List] = vars(item).setdefault(OWNERS_KEY, {})
+        was = owners.get(self)
+        if was is owner:
+            return
         if owner is None:
             owners.pop(self, None)
         else:
             owners[self] = owner
+        if not program_core().RUNTIME.history.is_applying:
+            self._moved(item, was)
+
+    def last_owner_of(self, item: object) -> List | None:
+        """The list that held `item` before its latest move, if any:  see `List.last_owner_of()`."""
+        if not is_ownable(item):
+            return None
+        last: dict[ListFamily, List] | None = vars(item).get(LAST_OWNERS_KEY)
+        return last.get(self) if last else None
+
+    def _moved(self, item: object, from_list: List | None) -> None:
+        """SIDE EFFECT:  `item`'s last owner is `from_list`, noted:  it moved, or undo or a cancel puts it back."""
+        last: dict[ListFamily, List] = vars(item).setdefault(LAST_OWNERS_KEY, {})
+        was = last.get(self)
+        if was is from_list:
+            return
+        put = lambda value: self._moved(item, value)  # noqa: E731
+        program_core().RUNTIME.history.note_kept(item, self, was, from_list, put)  # type: ignore[arg-type]
+        if from_list is None:
+            last.pop(self, None)
+        else:
+            last[self] = from_list
 
 
 def holder_of(item: object) -> List | None:

@@ -11,6 +11,8 @@ import { ActionDetail, type ActionDetails } from "./ActionDetail"
 import { DynamicMethodRule } from "./DynamicMethodRule"
 import { MethodInfixRule } from "./MethodInfixRule"
 import { MethodPostfixRule } from "./MethodPostfixRule"
+// Read only when called, once the folder has loaded
+import { CancelThisAction } from "./CancelThisAction"
 import type { MethodArgData, MethodSignatureData } from "./methods.shared"
 
 /**
@@ -48,6 +50,12 @@ export class MethodDefinition<
    */
   declare undoableByDefault: boolean
   @proto static undoableByDefault = false
+  /**
+   * `true` when its steps may `cancel` (`cancel_this_action`, epic `language` P56):  an action's, `to_do_something`'s,
+   * and an `after` hook's -- but not a test's, a drawing's or a creation hook's (`takesCancel()`).
+   */
+  declare cancelable: boolean
+  @proto static cancelable = false
   /** TYPE-ONLY: props `parser.addRule()` accepts for this rule -- see `P.Rule`'s `Props`. */
   declare readonly Props: MethodDefinitionProps
 
@@ -418,9 +426,34 @@ export class MethodDefinition<
    */
   mutateScopeFromBody(match: P.Match): string | undefined {
     const method = (match.data as MethodDefinitionData).scopeMethod
-    const returns = this.getReturnedDatatype(match)
+    const returns = this.returnedDatatypeOf(match)
     if (method && method.returns !== returns) P.ParseJournal.assign(match.scope.parser?.journal, method, { returns })
     return returns
+  }
+
+  /**
+   * What the method `match` defines gives back:  its body's (`getReturnedDatatype()`) -- yes or no for an action that
+   * may `cancel` and gives back nothing else (epic `language` P56):  `if put the card on the pile` reads it.
+   */
+  private returnedDatatypeOf(match: P.Match): P.Datatype | undefined {
+    const returns = this.getReturnedDatatype(match)
+    if (returns !== undefined && returns !== "nothing") return returns
+    return this.cancels(match as P.MatchFor<this>) ? "choice" : returns
+  }
+
+  /**
+   * Do the steps of the method `definition` defines take `cancel`:  see `cancelable`.
+   * - Not a test (`to test ...`), a drawing (`draw()`) or a creation hook (`create()`).
+   */
+  takesCancel(definition: P.Match): boolean {
+    if (!this.cancelable || (definition.groups as { asTest?: P.Match }).asTest) return false
+    const methodName = (definition.data as MethodDefinitionData).signature?.methodName
+    return !HOOKS.some(({ hook }) => hook === methodName)
+  }
+
+  /** Does the action `match` defines say `cancel` anywhere in its steps?  Pure:  reads only matches. */
+  cancels(match: P.MatchFor<this>): boolean {
+    return this.takesCancel(match as P.Match) && CancelThisAction.isIn(this.getBody(match))
   }
 
   /**
@@ -600,7 +633,9 @@ export class MethodDefinition<
       args,
       // body's `.AST` is generically typed `ASTNode`, but is always a
       // StatementBlock/Statement/Expression by construction of block / inline-statement parsing.
-      body: this.bodyAST(match)
+      body: this.bodyAST(match),
+      // an action that may `cancel` answers yes or no, however it ends (epic `language` P56)
+      ...(this.cancels(match) ? { datatype: "choice" } : {})
     })
 
     if (asTest) {
@@ -759,6 +794,7 @@ export class MethodDefinition<
     }
     if (details.undoneAs) description.undone_as = details.undoneAs
     if (details.replacesLast) description.replaces_last = true
+    if (this.cancels(match)) description.cancels = true
     // its title as written:  plain, it IS the title;  with a fill-in, a getter whose text is its title now
     let title: string | undefined
     if (details.title) {
@@ -812,7 +848,8 @@ export class MethodDefinition<
       details.title && !(details.title.data as { fillIns?: unknown }).fillIns
         ? ActionDetail.textOf(details.title)
         : undefined
-    return MethodDefinition.undoOf(details, isAction, plainTitle ?? this.titleOf(match))
+    const undo = MethodDefinition.undoOf(details, isAction, plainTitle ?? this.titleOf(match))
+    return undo && this.cancels(match) ? { ...undo, cancels: true } : undo
   }
 
   /**
@@ -882,7 +919,8 @@ export class MethodDefinition<
     if (!this.undoableByDefault || HOOKS.some(({ hook }) => hook === methodName)) return false
     const signature = (match.groups as { signature?: P.Match }).signature
     if (`${signature?.inputText ?? ""}`.trim().replace(/"$/, "").endsWith("?")) return false
-    return match.data.scopeMethod?.returns !== "choice"
+    // an action that may `cancel` gives back yes or no, and is still an action
+    return match.data.scopeMethod?.returns !== "choice" || this.cancels(match)
   }
 
   /**

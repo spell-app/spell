@@ -55,7 +55,7 @@ class Task(View):
         """A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal"""
         return h(
             "ui-form",
-            {"value": self},
+            {"prop:value": self},
             h(
                 "ui-stack",
                 {"direction": "horizontal", "spacing": "sm"},
@@ -91,6 +91,10 @@ class Task(View):
     def checklist(self) -> Checklist | None:
         """a task is in one checklist at a time"""
         return Checklist.owner_of(self)
+
+    @property
+    def last_checklist(self) -> Any:
+        return Checklist.last_owner_of(self)
 
 
 core.describe_action(Task, "throw_away", {"title": "Throw It Away", "undone_as": "Throw It Away"})
@@ -622,7 +626,7 @@ class TaskList(App):
                 ),
                 h(
                     "ui-form",
-                    {"value": self},
+                    {"prop:value": self},
                     h(
                         "ui-stack",
                         h(

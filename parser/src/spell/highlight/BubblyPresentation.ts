@@ -68,9 +68,18 @@ export class BubblyPresentation {
     // a drawing's:  its verb and the part it draws bold, `to <draw> its <placeholder>` (epic `language` I99)
     draw_it: { head: "action", namesWhatItDraws: true },
     on: { head: "action" },
-    drag_handler: { head: "action" },
+    // a drag handler's:  the moment it's for bold, a name, `when a <card> is <dropped>`, `while a <card> is <dragged over> it`
+    drag_handler: { head: "action", names: ["moment", "over"] },
     // what runs as a thing is made:  `when creating` Spell's words, its type a reference, `when creating a deck`
     create_hook: { head: "action", plain: ["method_keyword"] },
+    // steps at an action's end, as its own head draws:  `after <putting> a card <on> a pile` (epic `language` P56);
+    // its `cancel`, as any action's, is a plain step (`cancel_this_action` needs no row)
+    after_hook: {
+      head: "action",
+      inputs: ["method_keyword"],
+      typedAfterLead: true,
+      params: METHOD_PARAMS
+    },
 
     // the rest:  groups, settings
     define_group: { head: "plain", isGroup: true, inputs: ["text"] },

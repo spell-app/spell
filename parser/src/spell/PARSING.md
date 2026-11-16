@@ -730,6 +730,9 @@ A kind that says so is saved in a file of its own.
     - Its last line asks, even one that reads as a statement:
       `the card is the last item of the card's pile` is `card === ...`, not `card = ...` (`answersYesOrNo()`,
       `readsAsQuestion`;  epic `language` T135).
+    - A last line that asks only up to a point is that question, and an error for the words after it, as on one line:
+      `the card is on top of its pile`, with only `is on top` defined, says "Don't understand `of its pile`"
+      (`lastLineValue()`;  epic `language` I101).
     - A line ABOVE it of that shape still sets:  a warning says so, and how to ask, end it with `and`
       (`AssignmentStatement`'s `warnIfSetsInsteadOfAsking()`, `sets-instead-of-asking`;  epic `language` T137).
   - In the body:
@@ -2518,6 +2521,9 @@ sidebars any of them opens.
   - A project lists the others it wants in its project file, e.g. `"targets": ["ts/solid", "py"]`.
   - What every program's writer shares is `P.ProgramWriter`, which the javascript and Python writers extend.
     - `forProject()` reads the whole project first, so it knows what each value is.
+  - A project's files are written TOGETHER, once a target (`SP.SpellProject.combineCompiled()`).
+    - A file's code on its own (`SP.SpellFile.compiled`, the editor's output pane) is written only when it's read,
+      never by every compile (epic `language` P57).
   - `ASTNode.compile()` is `P.JSWriter.instance.write(node)`.
   - Each writer has one method per AST class, named for it:  `ASTIfStatement(node)`.
   - NEVER write output in an AST class.

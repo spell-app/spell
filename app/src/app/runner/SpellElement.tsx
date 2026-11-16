@@ -265,6 +265,30 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
+   * Make the thing a tag on its own draws, with each value the page gave the tag:
+   * `<card-image rank=ace suit=hearts />` is `new CardImage({ rank: "ace", suit: "hearts" })`.
+   * - So its creation hook (`when creating a card image`) sees them, as it does in `a new card image whose rank is ace`
+   *   (epic `language` T139).
+   * - A property holding a thing takes the thing its reference finds;  one that finds nothing is left out.
+   * - The list holding it (a card's `pile`) is left out:  joining one is a move, made once it exists (`writeReference()`).
+   * - STATIC:  an element's own members can't take a name a type's method might have (the TypeScript writer's
+   *   `ELEMENT_MEMBERS`)
+   */
+  private static makeOwnThing(element: SpellElement, entry: SpellElementEntry): object {
+    const values: Record<string, unknown> = {}
+    for (const property of element.typeProperties) {
+      if (property.reference === "owner" || !element.pageWrote(property)) continue
+      const value = element.elementValueOf(property)
+      if (property.reference === "thing") {
+        const target =
+          typeof value === "string" && value.trim() ? entry.core.thingForReference(value.trim()) : undefined
+        if (target) values[property.name] = target
+      } else values[property.name] = SpellElement.valueFor(property, value)
+    }
+    return new (entry.Class as new (values: Record<string, unknown>) => object)(values)
+  }
+
+  /**
    * What our stand-in says, when the program has no thing for us:
    * e.g. `⚠ no Tableau named "T9"`, or `⚠ no Tableau, or more than one:  give it an id`.
    */
@@ -289,7 +313,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
       (isOnItsOwn) => {
         const { entry } = this
         // named by an id, or in a layout, the program's thing is ours:  never one of our own
-        if (isOnItsOwn && !this.ownThing && entry) this.ownThing = new (entry.Class as new () => object)()
+        if (isOnItsOwn && !this.ownThing && entry) this.ownThing = SpellElement.makeOwnThing(this, entry)
       }
     )
     this.nameAfterHandedThing()
@@ -821,6 +845,9 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    * - Through the program's core, `core.send()`:  our thing's handler takes it (`- on mouse down:` is
    *   `onMouseDown()`), or hands it up with `pass event` -- the list holding it, then the app.
    * - Sent once, by the INNERMOST thing's element:  an element around us doesn't send it again.
+   *   - Except a view drawn as PART of another's drawing, with no handler of its own for it, e.g. a card's
+   *     `<card-image>`:  the view whose drawing it's in sends it (`viewDrawing()`), so a click on a card's picture
+   *     clicks the card (epic `language` I105).
    * - Not a press in a control inside us:  that's the control's.
    * - Spell never reads the browser's event:  the mouse and keys are `core.input` (`noteInput()`).
    * - A program running elsewhere (Python, `core.remote`) hears only its own handler, as before.
@@ -829,6 +856,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const spellEvent = THING_EVENTS[event.type]
     const thing = this.currentThing as Record<string, unknown> | undefined
     if (!spellEvent || !thing || HANDLED_EVENTS.has(event) || this.isInAControl(event)) return
+    // part of another view's drawing, and not ours to take:  that view's
+    if (viewDrawing(this.domElement) && !SpellElement.handles(thing, spellEvent)) return
     HANDLED_EVENTS.add(event)
     this.noteInput(event)
     const { core } = this.entry!
@@ -1190,7 +1219,15 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const key = E.camelCase(property.spec.name)
     if (this.agreeing.has(key)) return
     this.agreeing.set(key, property)
-    // the thing this property last agreed with:  a new one may take the page's attributes first
+    // a new thing takes the attribute the page gave the tag, e.g. `<card-image direction=down />`'s:
+    // an effect of its own, which hears only a new thing, so the value it writes can't run it again (epic `language` I103)
+    createEffect(
+      () => this.currentThing,
+      (thing) => {
+        if (thing && this.pageWrote(property)) this.writeThing(property, thing, this.elementValueOf(property))
+      }
+    )
+    // the thing this property last agreed with:  a new one the page wrote an attribute for took it, above
     let agreedWith: object | undefined
     createEffect(
       () => {
@@ -1201,8 +1238,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
         if (!thing) return
         const isNew = thing !== agreedWith
         agreedWith = thing
-        if (isNew && this.pageWrote(property)) this.writeThing(property, thing, this.elementValueOf(property))
-        else this.writeElement(property, thing)
+        if (!(isNew && this.pageWrote(property))) this.writeElement(property, thing)
       }
     )
   }
@@ -1889,6 +1925,19 @@ const LISTENING_CORES = new WeakSet<object>()
 
 /** The browser's events a thing's handler has taken already:  a thing around it doesn't run its own too. */
 const HANDLED_EVENTS = new WeakSet<Event>()
+
+/**
+ * The view whose own drawing `element` is part of, e.g. the card a `<card-image>` is drawn in -- `undefined` if none.
+ * - Its drawing is its shadow root:  `element` is in it.
+ * - NOT a list's items, e.g. a pile's cards:  they're its children, shown in its `<slot>`, each its own thing.
+ * - Free rather than a member:  an element's members can't take a name a type's method might have
+ *   (`TSWriter.ELEMENT_MEMBERS`).
+ */
+function viewDrawing(element: HTMLElement): SpellElement | undefined {
+  const root = element.getRootNode()
+  const view = root instanceof ShadowRoot ? SpellElement.componentOf(root.host) : undefined
+  return view?.currentThing ? view : undefined
+}
 
 /** The core's own list classes:  a dropped-on list's details stop at its family's type, below them. */
 const BASE_LIST_NAMES = new Set(["ViewableList", "List", "Observable", "Object"])

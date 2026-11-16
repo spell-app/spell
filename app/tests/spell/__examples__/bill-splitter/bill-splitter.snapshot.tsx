@@ -63,7 +63,7 @@ export class Diner extends View {
   /** Their name, their amount, what they owe, and a button to take them off */
   @drawn draw() {
     return (
-      <ui-form value={this}>
+      <ui-form prop:value={this}>
         <ui-stack direction="horizontal" spacing="sm">
           <ui-input name="name" placeholder="Name" aria-label="Name" fluid={true} />
           <ui-input name="amount" type="number" min="0" step="0.01" placeholder="Amount" aria-label="Amount" fluid={true} />
@@ -77,6 +77,10 @@ export class Diner extends View {
   /** a diner sits at one table */
   get table() {
     return Table.ownerOf(this)!
+  }
+
+  get lastTable() {
+    return Table.lastOwnerOf(this)
   }
 }
 
@@ -186,7 +190,7 @@ export class BillSplitter extends App {
       <ui-container text={true}>
         <ui-stack>
           <ui-header level="2">Bill Splitter</ui-header>
-          <ui-form value={this}>
+          <ui-form prop:value={this}>
             <ui-stack direction="horizontal" spacing="sm" wrap={true}>
               <ui-text bold={true}>Tip</ui-text>
               <ui-input name="percent" type="percent" min="0" step="1" aria-label="Tip percent" />

@@ -10,10 +10,11 @@ import { SpellPage, on, rememberedSizes } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
+import { RunSite } from "./RunSite"
 
 import { SiteBoardView } from "./SiteBoardView"
 import { SiteData } from "./SiteData"
-import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
+import { SiteEdits, type SitePart } from "./SiteEdits"
 import type { ProjectIndex } from "./SitePlaces"
 import { SiteGroupPage, SitesHomePage } from "./SiteGroupPage"
 import { SiteWrites } from "./SiteWrites"
@@ -54,18 +55,18 @@ function SiteProjectRoute(props: { params: RouteSectionProps["params"] }) {
 
 /****************
  * ### `<SiteEditorPage>`
- * A site's editor:  its pages as a tree and a board of cards, and the picked page's form (epic `mockup` P4, Q4 B).
+ * A site's editor:  its pages as a board of cards, and the picked page's form (epic `mockup` P4, Q4 B).
  * - Its own page in the editor app, as the theme editor is:  the editor itself is untouched.
- * - The tree, on the left:  the site's pages as its side navigation nests them;  drag a row to move it, with its
- *   pages, before or after another row, or into a page as its first page (below the last row:  to the end).
- * - The board, in the middle:  a block per section, a card per page, dialog and sidebar (`<SiteBoardView>`);
+ * - The board, on the left:  a block per section, a card per page, dialog and sidebar (`<SiteBoardView>`);
  *   a click picks it, a double click opens it in Edit, at the line that declares it, with "Back to the site" in the
- *   editor's bar;  dragging moves it.
+ *   editor's bar;  dragging moves it, or drops it into another page as its first page.
+ *   - Its bar:  the way back to the group's sites, the Pages / Data switch, "Add a page" and "Run the site".
+ *   - No tree of the pages beside it since epic `mockup` I13:  the board does all it did.
  * - The form, on the right:  the picked part's name, title and address;  its address's parameters, read only.
  *   - A page's STORIES under it (epic `mockup` P6):  what it must let people do, plain lines or Agile stories,
  *     to add, tick off, change, reorder and delete (`<SitePageStories>`);  each card counts them.
- * - The three panels are a `<ui-split-panel>`:  drag between them to resize, the board taking the difference;
- *   their widths are remembered (`rememberedSizes()`).
+ * - The two panels are the editor's own panes (`EditorColumns`, `SplitPane`), so they look as Edit's do in every theme:
+ *   drag between them to resize, the board taking the difference;  their widths are remembered (`rememberedSizes()`).
  * - Every change is ONE step of the editor's history, written into the site's file (`SiteWrites`):
  *   ⌘Z takes it back, ⌘S saves it (the editor's own keys, `editorHotkeys()`).
  * - A project that isn't a site says so, and how to make one.
@@ -85,10 +86,12 @@ export function SiteEditorPage() {
   const addPage = () => {
     const address = SiteEditorPage.freeAddress(all())
     const name = SiteWrites.addPage(address, appTexts.text("siteNewPageTitle"))
-    if (name) setPicked(name)
+    if (!name) return
+    setPicked(name)
+    setTab("pages")
   }
   return (
-    <SpellPage id="SiteEditorPage" fillWindow rows>
+    <SpellPage id="SiteEditorPage" fillWindow dark rows>
       <EditorToolbar mode="site" />
       <Show
         when={SiteWrites.siteFile()}
@@ -101,120 +104,123 @@ export function SiteEditorPage() {
         }
       >
         <ui-split-panel
-          class="SiteEditorPage"
+          class="EditorColumns SiteEditorPage"
           columns={columns.sizes()}
-          grows="2"
+          grows="first"
           min-size={MIN_PANEL_SIZE}
           resizable
           ref={on("ui-changed", columns.keep)}
         >
-          <aside class="pages" aria-label={appTexts.text("sitePages")}>
-            <header>
-              <h2>{appTexts.text("sitePages")}</h2>
-              <ui-button size="small" appearance="basic" icon="plus" onClick={addPage}>
-                {appTexts.text("siteAddPage")}
-              </ui-button>
-            </header>
-            <SitePartTree parts={parts()} picked={picked()} onPick={setPicked} />
-          </aside>
-          <main class="board">
-            <header>
-              <span class="title">
-                <ui-button
-                  size="small"
-                  appearance="basic"
-                  icon="arrow left"
-                  onClick={() => editor.showSiteEditor(editor.projectRoot?.path)}
-                >
-                  {appTexts.text("siteGroupBack")}
-                </ui-button>
-                <h1>{appTexts.text("siteEditorTitle", { project: editor.project?.projectName ?? "" })}</h1>
-              </span>
-              <ui-buttons size="small" class="tabs">
-                <ui-button
-                  appearance={tab() === "pages" ? undefined : "basic"}
-                  icon="sitemap"
-                  aria-pressed={tab() === "pages" ? "true" : "false"}
-                  onClick={() => setTab("pages")}
-                >
-                  {appTexts.text("siteTabPages")}
-                </ui-button>
-                <ui-button
-                  appearance={tab() === "data" ? undefined : "basic"}
-                  icon="database"
-                  aria-pressed={tab() === "data" ? "true" : "false"}
-                  onClick={() => setTab("data")}
-                >
-                  {appTexts.text("siteTabData")}
-                </ui-button>
-              </ui-buttons>
-              <ui-button size="small" appearance="basic" icon="play" onClick={() => void editor.showRunner()}>
-                {appTexts.text("siteRunSite")}
-              </ui-button>
-            </header>
-            <Show when={tab() === "data"}>
-              <SiteData
-                projectId={editor.project?.projectId ?? ""}
-                contents={editor.project?.contents as ProjectIndex | undefined}
-              />
-            </Show>
-            <Show when={tab() === "pages"}>
-              <div class="cards">
-                <SiteBoardView
-                  parts={parts()}
-                  picked={picked()}
-                  titleOf={SiteEditorPage.cardTitleOf}
-                  lineOf={SiteEditorPage.lineOf}
-                  thumbnailOf={SiteEditorPage.thumbnailOf}
-                  newTabUrlOf={SiteEditorPage.newTabUrlOf}
-                  newTabLabel={appTexts.text("siteOpenInNewTab")}
-                  onPick={setPicked}
-                  onOpen={SiteEditorPage.openInEdit}
+          <div class="SplitPane">
+            <main class="board">
+              <header>
+                <span class="title">
+                  <ui-button
+                    size="small"
+                    appearance="basic"
+                    icon="arrow left"
+                    onClick={() => editor.showSiteEditor(editor.projectRoot?.path)}
+                  >
+                    {appTexts.text("siteGroupBack")}
+                  </ui-button>
+                  <h1>{appTexts.text("siteEditorTitle", { project: editor.project?.projectName ?? "" })}</h1>
+                </span>
+                <ui-buttons size="small" class="tabs">
+                  <ui-button
+                    appearance={tab() === "pages" ? undefined : "basic"}
+                    icon="sitemap"
+                    aria-pressed={tab() === "pages" ? "true" : "false"}
+                    onClick={() => setTab("pages")}
+                  >
+                    {appTexts.text("siteTabPages")}
+                  </ui-button>
+                  <ui-button
+                    appearance={tab() === "data" ? undefined : "basic"}
+                    icon="database"
+                    aria-pressed={tab() === "data" ? "true" : "false"}
+                    onClick={() => setTab("data")}
+                  >
+                    {appTexts.text("siteTabData")}
+                  </ui-button>
+                </ui-buttons>
+                <span class="end">
+                  <ui-button size="small" appearance="basic" icon="plus" onClick={addPage}>
+                    {appTexts.text("siteAddPage")}
+                  </ui-button>
+                  <ui-button size="small" appearance="basic" icon="play" onClick={() => void editor.showRunner()}>
+                    {appTexts.text("siteRunSite")}
+                  </ui-button>
+                </span>
+              </header>
+              <Show when={tab() === "data"}>
+                <SiteData
+                  projectId={editor.project?.projectId ?? ""}
+                  contents={editor.project?.contents as ProjectIndex | undefined}
                 />
-              </div>
-            </Show>
-          </main>
-          <aside class="form">
-            <Show when={pickedPart()} fallback={<p class="quiet">{appTexts.text("sitePickOne")}</p>}>
-              {(part) => (
-                <>
-                  <SitePartForm part={part()} onRenamed={setPicked} />
-                  <Show when={part().kind === "page"}>
-                    <SitePageStories name={part().name} />
-                  </Show>
-                  <div class="actions">
-                    <ui-button
-                      size="small"
-                      appearance="basic"
-                      icon="edit"
-                      onClick={() => SiteEditorPage.openInEdit(part().name)}
-                    >
-                      {appTexts.text("siteOpenPage")}
-                    </ui-button>
-                    <ui-button
-                      size="small"
-                      appearance="basic"
-                      color="red"
-                      icon="trash alternate outline"
-                      onClick={() =>
-                        void SiteWrites.removePart(part().name).then((isRemoved) => isRemoved && setPicked(undefined))
-                      }
-                    >
-                      {appTexts.text("siteRemovePart", { name: part().name })}
-                    </ui-button>
-                  </div>
-                </>
-              )}
-            </Show>
-          </aside>
+              </Show>
+              <Show when={tab() === "pages"}>
+                <div class="cards">
+                  <SiteBoardView
+                    parts={parts()}
+                    picked={picked()}
+                    titleOf={SiteEditorPage.cardTitleOf}
+                    lineOf={SiteEditorPage.lineOf}
+                    thumbnailOf={SiteEditorPage.thumbnailOf}
+                    newTabOf={SiteEditorPage.newTabOf}
+                    onPick={setPicked}
+                    onOpen={SiteEditorPage.openInEdit}
+                  />
+                </div>
+              </Show>
+            </main>
+          </div>
+          <div class="SplitPane">
+            <aside class="form">
+              <Show when={pickedPart()} fallback={<p class="quiet">{appTexts.text("sitePickOne")}</p>}>
+                {(part) => (
+                  <>
+                    <SitePartForm part={part()} onRenamed={setPicked} />
+                    <Show when={part().kind === "page"}>
+                      <SitePageStories name={part().name} />
+                    </Show>
+                    <div class="actions">
+                      <ui-button
+                        size="small"
+                        appearance="basic"
+                        icon="edit"
+                        onClick={() => SiteEditorPage.openInEdit(part().name)}
+                      >
+                        {appTexts.text("siteOpenPage")}
+                      </ui-button>
+                      <ui-button
+                        size="small"
+                        appearance="basic"
+                        color="red"
+                        icon="trash alternate outline"
+                        onClick={() =>
+                          void SiteWrites.removePart(part().name).then((isRemoved) => isRemoved && setPicked(undefined))
+                        }
+                      >
+                        {appTexts.text("siteRemovePart", { name: part().name })}
+                      </ui-button>
+                    </div>
+                  </>
+                )}
+              </Show>
+            </aside>
+          </div>
         </ui-split-panel>
       </Show>
     </SpellPage>
   )
 }
 
-/** The editor's preference that remembers the panels' widths, and the widths they start with. */
-const SITE_COLUMNS = { id: "siteEditor-columns", sizes: "280px,*,320px" }
+/**
+ * The editor's preference that remembers the two panels' widths, the board's and the form's, and those they start with.
+ * - An id of its own:  the widths kept for three panels, the pages' tree on the left (until epic `mockup` I13),
+ *   are under `siteEditor-columns`, never read again.
+ */
+const SITE_COLUMNS = { id: "siteEditor-boardAndForm", sizes: "*,320px" }
 
 /** The narrowest a dragged panel may get. */
 const MIN_PANEL_SIZE = "180px"
@@ -230,7 +236,7 @@ SiteEditorPage.lineOf = (part: SitePart): string => {
   return `${where} · ${appTexts.text("siteStoriesCount", { done: PageStories.doneIn(stories), count: stories.length })}`
 }
 
-/** What a part's card and row say:  its title, else its name. */
+/** What a part says:  its title, else its name. */
 SiteEditorPage.titleOf = (part: SitePart): string => part.title ?? part.name
 
 /**
@@ -250,9 +256,20 @@ SiteEditorPage.thumbnailOf = (part: SitePart): string | undefined => {
   return thumbnail && SP.SpellUrls.fileUrl(`${editor.project?.path}/${thumbnail}`)
 }
 
-/** The real page a card stands for, on the live site, for a new tab;  none when the site doesn't say. */
-SiteEditorPage.newTabUrlOf = (part: SitePart): string | undefined =>
-  part.live && SiteEdits.isLiveLink(part.live) ? part.live : undefined
+/**
+ * What a card's corner link opens in a new tab:
+ * - its real page on the live site, when its line names one (`live`)
+ * - else, once a page has been made for it, that page of the site in Run, at its address (epic `mockup` I12)
+ * - none for a dialog, a sidebar, a group, a page with nothing made for it yet,
+ *   or an address that needs a value filled in (`/films/:film`)
+ */
+SiteEditorPage.newTabOf = (part: SitePart): { url: string; label: string } | undefined => {
+  if (part.live && SiteEdits.isLiveLink(part.live)) return { url: part.live, label: appTexts.text("siteOpenInNewTab") }
+  const project = editor.project
+  if (part.kind !== "page" || !part.address || part.address.includes(":") || !project) return undefined
+  if (!SiteWrites.declaringFile(part.name) && !project.hasPageOrView(part.name)) return undefined
+  return { url: RunSite.runUrlFor(project.path, part.address), label: appTexts.text("siteRunInNewTab") }
+}
 
 /** An address no page has yet, for a new page:  `/new-page`, then `/new-page-2` ... */
 SiteEditorPage.freeAddress = (parts: readonly SitePart[]): string => {
@@ -276,136 +293,6 @@ type SiteEditorTab = "pages" | "data"
 
 /** Where a new page goes, before a number makes it free. */
 const NEW_PAGE_ADDRESS = "/new-page"
-
-/****************
- * ### `<SitePartTree>`
- * The site's parts as a `<ui-tree>`, nested as its side navigation nests them;  a row picked picks its part.
- * - A row dragged (the kit's `Dragging`) moves its part, with its pages:
- *   one step of the editor's history (`SiteWrites.movePart()`).
- *   - On a row's top or bottom edge:  before or after it, at its depth;  a line shows where.
- *   - On the middle of a page's row:  inside it, as its first page;  the whole row lights up.
- *     A row that can't hold it (`SiteEdits.canNest()`, `canGoUnder()`) has only its two halves, before and after.
- *   - Below the last row:  to the end of the site, shown as after that row.
- *   - On itself, on one of its own pages, or anywhere else:  no mark, and the drop moves nothing.
- ****************/
-function SitePartTree(props: { parts: readonly SitePart[]; picked?: string; onPick: (name: string) => void }) {
-  return (
-    <ui-tree
-      label={appTexts.text("sitePages")}
-      ref={on("ui-changed", (event: CustomEvent<{ value: string }>) => props.onPick(event.detail.value))}
-    >
-      <SitePartRows parts={props.parts} picked={props.picked} />
-    </ui-tree>
-  )
-}
-
-/** The rows of `parts`, each with its own parts' rows inside it. */
-function SitePartRows(props: { parts: readonly SitePart[]; picked?: string }) {
-  return (
-    <For each={props.parts}>
-      {(part) => (
-        <ui-tree-item
-          label={SiteEditorPage.titleOf(part)}
-          which={part.address ?? ""}
-          value={part.name}
-          icon={PART_ICONS[part.kind]}
-          open=""
-          selected={props.picked === part.name ? "" : undefined}
-          data-can-nest={SiteEdits.canNest(part) ? "" : undefined}
-          data-can-go-under={SiteEdits.canGoUnder(part) ? "" : undefined}
-          onPointerDown={(event: PointerEvent) => startMove(event, part.name)}
-        >
-          <SitePartRows parts={part.parts} picked={props.picked} />
-        </ui-tree-item>
-      )}
-    </For>
-  )
-}
-
-/** Each kind of part's icon, in the tree. */
-const PART_ICONS = {
-  page: "file outline",
-  dialog: "window maximize outline",
-  sidebar: "columns",
-  group: "folder outline"
-} as const
-
-/** The attribute saying where a dragged part would go, on the row it would go by:  its value is `SitePartPlace`'s `where`. */
-const DROP_MARK = "data-drop"
-
-/** The attribute on a row whose part can nest (`SiteEdits.canNest()`). */
-const CAN_NEST = "data-can-nest"
-
-/** The attribute on a row whose part can go under a page (`SiteEdits.canGoUnder()`). */
-const CAN_GO_UNDER = "data-can-go-under"
-
-/** How much of a page's row, from its top and from its bottom, means before and after;  the rest means into it. */
-const DROP_EDGE = 0.25
-
-/**
- * A press on part `name`'s row:  if it's dragged, the part moves to the place the drop mark shows.
- * - Only the row's own press:  a press on a row inside it is that row's.
- */
-function startMove(event: PointerEvent, name: string): void {
-  const row = event.currentTarget as HTMLElement
-  if (event.button !== 0 || (event.target as Element).closest("ui-tree-item") !== row) return
-  let marked: HTMLElement | undefined
-  const mark = (spot?: DropSpot) => {
-    marked?.removeAttribute(DROP_MARK)
-    marked = spot?.row
-    if (spot) marked!.setAttribute(DROP_MARK, spot.where)
-  }
-  new Dragging(row, event, {
-    carried: [row],
-    follows: false,
-    placing: (x, y) => mark(dropSpotAt(row, x, y)),
-    onDrop: () => {
-      const where = marked?.getAttribute(DROP_MARK) as SitePartPlace["where"] | null | undefined
-      const part = marked?.getAttribute("value")
-      mark()
-      if (where && part) SiteWrites.movePart(name, { where, part })
-    },
-    onCancel: () => mark()
-  })
-}
-
-/**
- * Where `dragged`'s part would land with the pointer at `x`, `y`:  none over itself, its own pages, or outside the tree.
- * - NOTE:  a dragged row ignores the pointer, so over it the row around it is what's found:
- *   `whereOnRow()` only answers for a pointer on the row's own line.
- */
-function dropSpotAt(dragged: HTMLElement, x: number, y: number): DropSpot | undefined {
-  const under = document.elementsFromPoint(x, y).find((each) => each.localName === "ui-tree-item") as
-    | HTMLElement
-    | undefined
-  if (under) {
-    if (under === dragged || dragged.contains(under)) return undefined
-    const where = whereOnRow(under, y, dragged.hasAttribute(CAN_GO_UNDER) && under.hasAttribute(CAN_NEST))
-    return where && { row: under, where }
-  }
-  const tree = dragged.closest("ui-tree")
-  const last = tree?.querySelector<HTMLElement>(":scope > ui-tree-item:last-of-type")
-  const pane = tree?.parentElement?.getBoundingClientRect()
-  if (!last || last === dragged || !pane) return undefined
-  const isBelowLast = y > last.getBoundingClientRect().bottom && y <= pane.bottom && x >= pane.left && x <= pane.right
-  return isBelowLast ? { row: last, where: "after" } : undefined
-}
-
-/**
- * What height `y` means on `item`'s own line:  none when it's off that line, e.g. on the rows inside it.
- * - `canGoInside`:  its middle means into it;  else its top half is before, its bottom half after.
- */
-function whereOnRow(item: HTMLElement, y: number, canGoInside: boolean): SitePartPlace["where"] | undefined {
-  const line = (item.shadowRoot?.querySelector('[part~="row"]') ?? item).getBoundingClientRect()
-  if (y < line.top || y > line.bottom) return undefined
-  const along = (y - line.top) / line.height
-  if (!canGoInside) return along < 0.5 ? "before" : "after"
-  if (along < DROP_EDGE) return "before"
-  return along > 1 - DROP_EDGE ? "after" : "into"
-}
-
-/** Where a dragged part would land:  by `row`, or inside it. */
-type DropSpot = { row: HTMLElement; where: SitePartPlace["where"] }
 
 /****************
  * ### `<SitePartForm>`

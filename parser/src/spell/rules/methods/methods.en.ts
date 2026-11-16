@@ -11,6 +11,8 @@ import { methods } from "./methods.parser"
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
 import { ActionDetail } from "./ActionDetail"
+import { AfterHook } from "./AfterHook"
+import { CancelThisAction } from "./CancelThisAction"
 import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
@@ -1789,6 +1791,230 @@ methods.addRule(ActionDetail, {
             "  }",
             "}",
             'core.describeAction(Game, "duplicate", { title: "Duplicate It", titleFrom: "duplicateTitle", undoneAs: "Duplicate It" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// an action called off:  `cancel`, `cancel if ...`, `cancel unless ...` -- its condition's word, then the rule (epic `language` P56)
+methods.addRule(Wording.specialize({ ruleName: "cancel_when", meanings: ["if", "unless"] }), {
+  syntax: "((if:if)|(unless:unless))"
+})
+
+methods.addRule(CancelThisAction, {
+  syntax: "cancel ({when:cancel_when} {condition:expression})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "an action's step:  it calls the action off, and the action answers yes or no",
+          input: [
+            "a card is a thing",
+            '\tits "rank" is a number',
+            "\tto play it",
+            "\t\tcancel if its rank is 0",
+            "\t\tprint its rank"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            '  // - its "rank" is a number',
+            '  static { this.declareProp("rank", { type: "number" }) }',
+            '  get rank() { return this.getProp("rank") }',
+            '  set rank(value) { this.setProp("rank", value) }',
+            "",
+            "  play() {",
+            "    if (this.rank === 0) core.cancel()",
+            "    core.console.log(this.rank)",
+            "  }",
+            "}",
+            'core.describeAction(Card, "play", { title: "Play It", cancels: true, undoneAs: "Play It" })'
+          ],
+          ts: [
+            "export class Card extends Thing {",
+            '  // - its "rank" is a number',
+            '  @prop({ type: "number" })',
+            "  accessor rank!: number",
+            "",
+            "  play() {",
+            "    if (this.rank === 0) core.cancel()",
+            "    core.console.log(this.rank)",
+            "  }",
+            "}",
+            'core.describeAction(Card, "play", { title: "Play It", cancels: true, undoneAs: "Play It" })'
+          ]
+        },
+        {
+          title: "`unless`:  its condition turned round",
+          input: ["a card is a thing", '\tits "rank" is a number', "\tto play it", "\t\tcancel unless its rank is 0"],
+          js: [
+            "export class Card extends Thing {",
+            '  // - its "rank" is a number',
+            '  static { this.declareProp("rank", { type: "number" }) }',
+            '  get rank() { return this.getProp("rank") }',
+            '  set rank(value) { this.setProp("rank", value) }',
+            "",
+            "  play() {",
+            "    if (!(this.rank === 0)) core.cancel()",
+            "  }",
+            "}",
+            'core.describeAction(Card, "play", { title: "Play It", cancels: true, undoneAs: "Play It" })'
+          ],
+          ts: [
+            "export class Card extends Thing {",
+            '  // - its "rank" is a number',
+            '  @prop({ type: "number" })',
+            "  accessor rank!: number",
+            "",
+            "  play() {",
+            "    if (!(this.rank === 0)) core.cancel()",
+            "  }",
+            "}",
+            'core.describeAction(Card, "play", { title: "Play It", cancels: true, undoneAs: "Play It" })'
+          ]
+        },
+        {
+          title: "on its own, in a top-level action",
+          input: ["to deal the cards", "\tcancel"],
+          js: [
+            "export function dealTheCards() {",
+            '  return core.asAction({ undoneAs: "Deal the Cards", cancels: true }, () => {',
+            "    core.cancel()",
+            "  })",
+            "}"
+          ]
+        },
+        {
+          title: "a condition going on over a line starting `or`",
+          input: [
+            "a card is a thing",
+            '\tits "rank" is a number',
+            "\tto play it",
+            "\t\tcancel if its rank is 0",
+            "\t\t\tor its rank is 1"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            '  // - its "rank" is a number',
+            '  static { this.declareProp("rank", { type: "number" }) }',
+            '  get rank() { return this.getProp("rank") }',
+            '  set rank(value) { this.setProp("rank", value) }',
+            "",
+            "  play() {",
+            "    if (this.rank === 0 || this.rank === 1) core.cancel()",
+            "  }",
+            "}",
+            'core.describeAction(Card, "play", { title: "Play It", cancels: true, undoneAs: "Play It" })'
+          ],
+          ts: [
+            "export class Card extends Thing {",
+            '  // - its "rank" is a number',
+            '  @prop({ type: "number" })',
+            "  accessor rank!: number",
+            "",
+            "  play() {",
+            "    if (this.rank === 0 || this.rank === 1) core.cancel()",
+            "  }",
+            "}",
+            'core.describeAction(Card, "play", { title: "Play It", cancels: true, undoneAs: "Play It" })'
+          ]
+        },
+        {
+          title: "refused outside an action's steps",
+          input: ["cancel"],
+          js: '/* PARSE ERROR: "cancel" calls off an action:  it goes in one\'s steps, under "to ..." or "after ..." */'
+        }
+      ]
+    }
+  ]
+})
+
+methods.addRule(AfterHook, {
+  syntax: "after {signature:method_signature} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "steps at the end of an action:  a method, added to the action's hooks",
+          input: [
+            "a card is a thing",
+            "a pile is a list of cards",
+            "to put a card on a pile",
+            "\tadd the card to the pile",
+            "after putting a card on a pile",
+            "\tprint the card",
+            "after putting a card on a pile",
+            "\tprint the pile"
+          ],
+          js: [
+            "export class Card extends Thing {",
+            "  putOnPile(pile) {",
+            "    pile.append(this)",
+            "  }",
+            "",
+            "  afterPutOnPile(pile) {",
+            "    core.console.log(this)",
+            "  }",
+            "",
+            "  afterPutOnPile2(pile) {",
+            "    core.console.log(pile)",
+            "  }",
+            "}",
+            'core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Put Card on Pile" })',
+            'core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })',
+            'core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile2" })',
+            "export class Pile extends List {",
+            "  static instanceType = Card",
+            "}"
+          ],
+          ts: [
+            "export class Card extends Thing {",
+            "  putOnPile(pile: Pile) {",
+            "    pile.append(this)",
+            "  }",
+            "",
+            "  afterPutOnPile(pile: Pile) {",
+            "    core.console.log(this)",
+            "  }",
+            "",
+            "  afterPutOnPile2(pile: Pile) {",
+            "    core.console.log(pile)",
+            "  }",
+            "}",
+            'core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Put Card on Pile" })',
+            'core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })',
+            'core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile2" })',
+            "export class Pile extends List<Card> {",
+            "  static instanceType = Card",
+            "}"
+          ]
+        },
+        {
+          title: "refused when no action above it reads that way",
+          input: [
+            "a card is a thing",
+            "a pile is a list of cards",
+            "after putting a card on a pile",
+            "\tprint the card"
+          ],
+          js: [
+            "export class Card extends Thing {}",
+            "export class Pile extends List {",
+            "  static instanceType = Card",
+            "}",
+            '/* PARSE ERROR: "after putting a card on a pile" runs after an action, but no action above it reads that way:  as in "after putting a card on a pile", for "to put a card on a pile" */',
+            '/* PARSE ERROR: Don\'t understand "print the card" */'
+          ],
+          ts: [
+            "export class Card extends Thing {}",
+            "export class Pile extends List<Card> {",
+            "  static instanceType = Card",
+            "}",
+            '/* PARSE ERROR: "after putting a card on a pile" runs after an action, but no action above it reads that way:  as in "after putting a card on a pile", for "to put a card on a pile" */',
+            '/* PARSE ERROR: Don\'t understand "print the card" */'
           ]
         }
       ]

@@ -1889,14 +1889,16 @@ describe("PlanDoc condense", () => {
     const plan = talkedOver()
     expect(plan.condense("j1", "<p>Two files, short.</p><ul><li>open:  where they live</li></ul>")).toEqual({
       title: "templates",
-      moved: 4
+      moved: 3
     })
     const item = el(plan, "j1")
     expect(kids(item)).toEqual(["p", "ul", "epic-choices", "epic-original"])
     expect(item.querySelector(":scope > epic-choices")!.getAttribute("chosen")).toBe("B")
+    // More Details had already moved the text it replaced into the Original (I301):  the condense is the second version
     const versions = item.querySelectorAll(":scope > epic-original > epic-version")
-    expect(versions.length).toBe(1)
-    expect(versions[0]!.textContent).toMatch(/one file each[\s\S]*more about it[\s\S]*B, but shorter/)
+    expect(versions.length).toBe(2)
+    expect(versions[0]!.textContent).toMatch(/one file each/)
+    expect(versions[1]!.textContent).toMatch(/more about it[\s\S]*B, but shorter/)
     // the status card, slotted, stays
     expect(item.querySelector(':scope > epic-status[slot="status"]')).not.toBeNull()
     expect(problems(plan)).toEqual([])
@@ -2619,14 +2621,15 @@ describe("PlanDoc review inbox", () => {
     expect(replies[0]!.querySelector("p")!.textContent).toBe("why not B?\nreally")
   })
 
-  test("details --more:  an <epic-more> after the text and answer;  again replaces it, the old into the Original", () => {
+  test("details --more:  an <epic-more> IN PLACE of the unclear text (I301), the text into the Original;  again replaces it", () => {
     const plan = freshPlan()
     plan.addItem("issue", "it breaks", { details: "<p>what breaks</p>" })
     plan.keepNote("i1", { note: "why?", action: "revisit", when: "soon" })
     plan.addMore("i1", "<p>more about it</p>")
-    expect(kids(el(plan, "i1"))).toEqual(["p", "epic-more", "epic-reply"])
+    expect(kids(el(plan, "i1"))).toEqual(["epic-more", "epic-reply", "epic-original"])
+    expect(el(plan, "i1").querySelector("epic-original")!.textContent).toContain("what breaks")
     plan.addMore("i1", "<p>even more</p>")
-    expect(kids(el(plan, "i1"))).toEqual(["p", "epic-more", "epic-reply", "epic-original"])
+    expect(kids(el(plan, "i1"))).toEqual(["epic-more", "epic-reply", "epic-original"])
     expect(el(plan, "i1").querySelector("epic-more")!.textContent).toBe("even more")
     expect(el(plan, "i1").querySelector("epic-original")!.textContent).toContain("more about it")
     plan.addItem("question", "which?", { details: `<p>why</p>${OPTIONS}` })
@@ -2636,18 +2639,38 @@ describe("PlanDoc review inbox", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  test("details --more drops the given body for good, keeps Owen's quoted words and the item's cards (I301)", () => {
+    const plan = freshPlan()
+    plan.addItem("issue", "bare")
+    expect(el(plan, "i1").querySelector("[data-title-body]")).toBeTruthy()
+    plan.addMore("i1", "<p>clear now</p>")
+    expect(el(plan, "i1").querySelector("[data-title-body]")).toBeNull()
+    expect(el(plan, "i1").querySelector("epic-original")).toBeNull()
+    expect(el(plan, "i1").textContent).not.toContain("What it says on the tin")
+    plan.addItem("issue", "quoted", {
+      details:
+        "<p>Owen, 2026-11-15:  “the pill is wrong”</p><p>Claude's muddled reading</p>" +
+        "<epic-net-effect><ul><li>it changes</li></ul></epic-net-effect>"
+    })
+    plan.addMore("i2", "<p>what it means</p>")
+    expect(kids(el(plan, "i2"))).toEqual(["p", "epic-net-effect", "epic-more", "epic-original"])
+    expect(el(plan, "i2").querySelector(":scope > p")!.textContent).toContain("the pill is wrong")
+    expect(el(plan, "i2").querySelector("epic-original")!.textContent).toContain("muddled reading")
+    expect(problems(plan)).toEqual([])
+  })
+
   test("Owen's note asking for More Details is kept ABOVE Claude's card, which answers it (epic `epic-engine` P27);  a later revisit after it", () => {
     const plan = freshPlan()
     plan.addItem("judgement", "a call", { details: "<p>the call</p>" })
     plan.addMore("j1", "<p>more about it</p>")
     plan.keepNote("j1", { note: "need more detail", action: "revisit", when: "now", at: "2026-10-01T09:10:00" })
-    expect(kids(el(plan, "j1"))).toEqual(["p", "epic-reply", "epic-more"])
+    expect(kids(el(plan, "j1"))).toEqual(["epic-reply", "epic-more", "epic-original"])
     plan.keepNote("j1", { note: "and why?", action: "revisit", when: "soon", at: "2026-10-01T09:30:00" })
-    expect(kids(el(plan, "j1"))).toEqual(["p", "epic-reply", "epic-more", "epic-reply"])
+    expect(kids(el(plan, "j1"))).toEqual(["epic-reply", "epic-more", "epic-reply", "epic-original"])
     plan.addItem("issue", "it breaks", { details: "<p>what breaks</p>" })
     plan.addMore("i1", "<p>more</p>")
     plan.keepNote("i1", { note: "details please", action: "details", at: "2026-10-01T09:10:00" })
-    expect(kids(el(plan, "i1"))).toEqual(["p", "epic-reply", "epic-more"])
+    expect(kids(el(plan, "i1"))).toEqual(["epic-reply", "epic-more", "epic-original"])
     expect(problems(plan)).toEqual([])
   })
 })

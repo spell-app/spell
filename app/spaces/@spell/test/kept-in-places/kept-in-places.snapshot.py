@@ -124,7 +124,7 @@ class NoteKeeper(App):
             "ui-stack",
             h(
                 "ui-form",
-                {"value": self},
+                {"prop:value": self},
                 h("ui-input", {"name": "draft", "aria-label": "Note"}),
                 h(
                     "ui-button",

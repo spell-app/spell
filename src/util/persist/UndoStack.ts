@@ -180,6 +180,16 @@ export class UndoStack {
     newest.records.push(...step.records)
   }
 
+  /**
+   * Drop the open transaction's records `isUnchanged` says changed nothing in the end:
+   * e.g. once part of an action called off has put its changes back.
+   * - A step left with none is no step when it closes.
+   * - No transaction open:  nothing happens.
+   */
+  protected dropUnchanged(isUnchanged: (record: UndoRecord) => boolean): void {
+    if (this.open) this.open.records = this.open.records.filter((record) => !isUnchanged(record))
+  }
+
   ////////////////
   // ## The stacks
   ////////////////

@@ -16,6 +16,8 @@ import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
 import { ActionDetail } from "./ActionDetail"
+import { AfterHook } from "./AfterHook"
+import { CancelThisAction } from "./CancelThisAction"
 import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
@@ -1673,6 +1675,144 @@ methodsEs.addRule(ActionDetail, {
             "  }",
             "}",
             'core.describeAction(Juego, "duplicar", { title: "Duplicarlo", titleFrom: "duplicarTitle", undoneAs: "Duplicarlo" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// una acción cancelada:  `cancelar`, `cancelar si ...`, `cancelar a menos que ...` (epic `language` P56)
+methodsEs.addRule(Wording.specialize({ ruleName: "cancel_when", meanings: ["if", "unless"] }), {
+  syntax: "((if:si)|(unless:a menos que|salvo que))"
+})
+
+methodsEs.addRule(CancelThisAction, {
+  syntax: "cancelar ({when:cancel_when} {condition:expression})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "un paso de una acción:  la cancela",
+          input: [
+            "una carta es una cosa",
+            '\tsu "rango" es un número',
+            "\tpara jugarla",
+            "\t\tcancelar si su rango es 0"
+          ],
+          js: [
+            "export class Carta extends Thing {",
+            '  // su "rango" es un número',
+            '  static { this.declareProp("rango", { type: "number" }) }',
+            '  get rango() { return this.getProp("rango") }',
+            '  set rango(value) { this.setProp("rango", value) }',
+            "",
+            "  jugar() {",
+            "    if (this.rango === 0) core.cancel()",
+            "  }",
+            "}",
+            'core.describeAction(Carta, "jugar", { title: "Jugarla", cancels: true, undoneAs: "Jugarla" })'
+          ],
+          ts: [
+            "export class Carta extends Thing {",
+            '  // su "rango" es un número',
+            '  @prop({ type: "number" })',
+            "  accessor rango!: number",
+            "",
+            "  jugar() {",
+            "    if (this.rango === 0) core.cancel()",
+            "  }",
+            "}",
+            'core.describeAction(Carta, "jugar", { title: "Jugarla", cancels: true, undoneAs: "Jugarla" })'
+          ]
+        },
+        {
+          title: "`a menos que`:  su condición al revés",
+          input: [
+            "una carta es una cosa",
+            '\tsu "rango" es un número',
+            "\tpara jugarla",
+            "\t\tcancelar a menos que su rango es 0"
+          ],
+          js: [
+            "export class Carta extends Thing {",
+            '  // su "rango" es un número',
+            '  static { this.declareProp("rango", { type: "number" }) }',
+            '  get rango() { return this.getProp("rango") }',
+            '  set rango(value) { this.setProp("rango", value) }',
+            "",
+            "  jugar() {",
+            "    if (!(this.rango === 0)) core.cancel()",
+            "  }",
+            "}",
+            'core.describeAction(Carta, "jugar", { title: "Jugarla", cancels: true, undoneAs: "Jugarla" })'
+          ],
+          ts: [
+            "export class Carta extends Thing {",
+            '  // su "rango" es un número',
+            '  @prop({ type: "number" })',
+            "  accessor rango!: number",
+            "",
+            "  jugar() {",
+            "    if (!(this.rango === 0)) core.cancel()",
+            "  }",
+            "}",
+            'core.describeAction(Carta, "jugar", { title: "Jugarla", cancels: true, undoneAs: "Jugarla" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+methodsEs.addRule(AfterHook, {
+  syntax: "(después|despues) de {signature:method_signature} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "pasos al final de una acción",
+          input: [
+            "una carta es una cosa",
+            "una pila es una lista de cartas",
+            "para poner una carta en una pila",
+            "\tagregar la carta a la pila",
+            "después de poner una carta en una pila",
+            "\timprimir la carta"
+          ],
+          js: [
+            "export class Carta extends Thing {",
+            "  ponerEnPila(pila) {",
+            "    pila.append(this)",
+            "  }",
+            "",
+            "  afterPonerEnPila(pila) {",
+            "    core.console.log(this)",
+            "  }",
+            "}",
+            'core.describeAction(Carta, "ponerEnPila", { title: "Poner Carta en Pila", undoneAs: "Poner Carta en Pila" })',
+            'core.addAfterHook(Carta, "ponerEnPila", { hook: "afterPonerEnPila" })',
+            "export class Pila extends List {",
+            "  static instanceType = Carta",
+            "}"
+          ],
+          ts: [
+            "export class Carta extends Thing {",
+            "  ponerEnPila(pila: Pila) {",
+            "    pila.append(this)",
+            "  }",
+            "",
+            "  afterPonerEnPila(pila: Pila) {",
+            "    core.console.log(this)",
+            "  }",
+            "}",
+            'core.describeAction(Carta, "ponerEnPila", { title: "Poner Carta en Pila", undoneAs: "Poner Carta en Pila" })',
+            'core.addAfterHook(Carta, "ponerEnPila", { hook: "afterPonerEnPila" })',
+            "export class Pila extends List<Carta> {",
+            "  static instanceType = Carta",
+            "}"
           ]
         }
       ]

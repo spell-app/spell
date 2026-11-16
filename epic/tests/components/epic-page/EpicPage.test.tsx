@@ -575,7 +575,7 @@ describe("<epic-page> Send and its countdown", () => {
   test("in the header's middle (P53):  never dashed, a click sends, then outlined;  nobody listening:  the pill under the review line and the tooltips say so", async () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
-    routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "revisit", when: "soon", note: "hm", at } }
+    routes.inbox.marks = { q1: { action: "todo", at }, q2: { action: "revisit", when: "soon", note: "hm", at } }
     const client = await adoptClient(routes)
     const host = await render(page("", ["todo"]))
     await vi.waitFor(() => expect(headerButtons(host).send?.[1]).toBeTruthy())
@@ -645,7 +645,7 @@ describe("<epic-page> Send and its countdown", () => {
       // nobody listening now, Bob's Codex the last, and marks sent:  the pill names it, and copies its command
       routes.inbox.listening = null
       routes.inbox.lastListener = { session: "thread-2", since: at, seen: at, pid: 1, person: "Bob", agent: "codex" }
-      routes.inbox.marks = { q1: { action: "approve", at } }
+      routes.inbox.marks = { q1: { action: "todo", at } }
       routes.inbox.sent = new Date(Date.now() + 1000).toISOString()
       await client.refresh()
       await ElementFixture.tick()
@@ -674,7 +674,7 @@ describe("<epic-page> Send and its countdown", () => {
     const host = await render(page("", ["todo"]))
     await vi.waitFor(() => expect(headerButtons(host).send?.[1]).toBeTruthy())
     expect(headerButtons(host)).toEqual({ send: ["unsent", "Send 1 comment to Claude"] })
-    routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "todo", at } }
+    routes.inbox.marks = { q1: { action: "todo", at }, q2: { action: "todo", at } }
     routes.inbox.unsentComments = ["cm1", "cm2"]
     await ReviewClient.forPage().refresh()
     await ElementFixture.tick()
@@ -731,7 +731,7 @@ describe("<epic-page> Send and its countdown", () => {
   test("the pill copies the review line's command", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
     const routes = new FakeRoutes()
-    routes.inbox.marks = { q1: { action: "approve", at: new Date(Date.now() - 60_000).toISOString() } }
+    routes.inbox.marks = { q1: { action: "todo", at: new Date(Date.now() - 60_000).toISOString() } }
     // sent:  the pill shows only for marks sent with nobody listening (I123)
     routes.inbox.sent = new Date().toISOString()
     await adoptClient(routes)
@@ -1000,7 +1000,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect([markedBadge(host), markedBadge(questions)]).toEqual([null, null])
     // Owen marks two questions and a todo, one sent and two not:  each counts
     const at = new Date().toISOString()
-    routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "todo", at }, t1: { action: "approve", at } }
+    routes.inbox.marks = { q1: { action: "todo", at }, q2: { action: "todo", at }, t1: { action: "todo", at } }
     await client.refresh()
     await ElementFixture.tick()
     await ElementFixture.tick()
@@ -1073,7 +1073,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(counted).toHaveBeenCalled()
     // marked by Owen in this pass:  with Claude too, out of the red the rail reads, as out of the chips
     routes.inbox.working = {}
-    routes.inbox.marks = { q2: { action: "approve", at: new Date().toISOString() } }
+    routes.inbox.marks = { q2: { action: "todo", at: new Date().toISOString() } }
     await client.refresh()
     await ElementFixture.tick()
     await ElementFixture.tick()
@@ -1467,7 +1467,7 @@ describe("<epic-page> the header (P53)", () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
-    routes.inbox.marks = { q1: { action: "approve", at } }
+    routes.inbox.marks = { q1: { action: "todo", at } }
     await adoptClient(routes)
     const countdown = new SendCountdown({ storage: null })
     countdown.choose(choice)
@@ -1737,9 +1737,9 @@ describe("<epic-page> stages", () => {
     const host = await render(stagedPage("overview"))
     const accept = () => stageButtonOf(host.querySelector("epic-overview")!)
     await vi.waitFor(() => expect(accept()?.textContent).toContain("Accept Overview"))
-    // the header:  the plane, no green words;  the step label says the stage
+    // the header:  the plane and its own words (I305), no stage's green words;  the step label says the stage
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
-    expect(plane(host).textContent!.trim()).toBe("")
+    expect(plane(host).textContent!.trim()).toBe("Send to Claude")
     expect(step(host)?.words).toBe("OVERVIEW")
     // none on the Phases section:  the page isn't agreeing its phases yet
     expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()
@@ -1809,7 +1809,7 @@ describe("<epic-page> stages", () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
-    routes.inbox.marks.q1 = { action: "approve", at }
+    routes.inbox.marks.q1 = { action: "todo", at }
     await adoptClient(routes)
     const host = await render(stagedPage("phases"))
     const accept = () => stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)
@@ -1857,7 +1857,7 @@ describe("<epic-page> stages", () => {
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     // one mark not sent yet, so a press has something to send
-    routes.inbox.marks.q1 = { action: "approve", at }
+    routes.inbox.marks.q1 = { action: "todo", at }
     await adoptClient(routes)
     const html = stagedPage("building")
       .replace(

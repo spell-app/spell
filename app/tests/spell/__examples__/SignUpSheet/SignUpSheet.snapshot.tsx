@@ -21,7 +21,7 @@ export class Volunteer extends Thing {
 
   @drawn draw() {
     return (
-      <ui-form class="master-row" value={this}>
+      <ui-form class="master-row" prop:value={this}>
         <ui-stack direction="horizontal" spacing="md" align="center" wrap={true}>
           <ui-label>{this.shift}</ui-label>
           <ui-text>{this.person}</ui-text>
