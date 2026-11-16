@@ -198,7 +198,7 @@ function declaredEventOf(
 
 /**
  * Where a thing's action is written, from where the compiler says it's declared:
- * the method of its type (or one it inherits) whose compiled name is the action's (`putOnPile` for `put_on_$pile`).
+ * the method of its type (or one it inherits) whose compiled name is the action's (`moveToPile` for `move_to_$pile`).
  */
 export function placeOfDeclaredAction(
   action: { name: string },
@@ -425,7 +425,7 @@ function bareAbility(name: string): string {
 
 /**
  * A declaration's words as written on its first line, up to its code, less a tag's attributes:  `on click`.
- * - Less its line's own docstring too:  `when a card is dropped  -- put the card on the pile` => `when a card is dropped`.
+ * - Less its line's own docstring too:  `when a card is dropped  -- move the card to the pile` => `when a card is dropped`.
  */
 function wordsAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): string {
   const line = lines[place.line] ?? ""
@@ -439,7 +439,7 @@ function wordsAt(place: SP.SpellDeclarationPlace, lines: readonly string[]): str
     .trim()
 }
 
-/** A line's own docstring, after its words:  `  -- put the card on the pile`. */
+/** A line's own docstring, after its words:  `  -- move the card to the pile`. */
 const TRAILING_DOCSTRING = /\s+--(?:\s[\s\S]*)?$/
 
 /** A declaration's code as written:  after its words on its line, and the lines of its body, dedented. */

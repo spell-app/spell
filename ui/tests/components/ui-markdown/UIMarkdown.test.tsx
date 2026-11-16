@@ -633,14 +633,14 @@ describe("<ui-markdown editable> formatting", () => {
     const host = await editable("words here\n\n| a |\n| - |\n| b |")
     await open(host, "words here")
     const icons = [...bar(host).querySelectorAll("ui-button")].map((button) => button.getAttribute("icon"))
-    expect(icons).toEqual(["bold", "italic", "strikethrough", "link", "list ul", "list ol", "eraser", "eye"])
+    expect(icons).toEqual(["bold", "italic", "strikethrough", "code", "link", "list ul", "list ol", "eraser", "eye"])
     // Spell UI's own dropdown, never the browser's (Owen's C1 on J196)
     expect(bar(host).querySelector("ui-select")).toBeTruthy()
     expect(bar(host).querySelector("select")).toBeNull()
     await enter(host)
     await open(host, "b")
     expect(bar(host).querySelector("ui-select")).toBeNull()
-    expect(bar(host).querySelectorAll("ui-button").length).toBe(6)
+    expect(bar(host).querySelectorAll("ui-button").length).toBe(7)
   })
 
   it("⌘B bolds the selection, ⌘I italics, ⌘⇧X strikes;  ⌘E is left alone", async () => {
@@ -656,6 +656,35 @@ describe("<ui-markdown editable> formatting", () => {
     expect(await command(host, "KeyE")).toBe(false)
     await enter(host)
     expect(host.content).toBe("~~some~~ **words** here")
+  })
+
+  it("the inline code button puts backticks round the selection, in both views;  no key does (epic-engine T67)", async () => {
+    const host = await editable("call run now")
+    await open(host, "call run now")
+    const codeButton = () =>
+      [...bar(host).querySelectorAll("ui-button")].find((button) => button.getAttribute("icon") === "code")!
+    expect(codeButton().getAttribute("title")).toBe("Inline code")
+    select(host, 5, 8)
+    codeButton().dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    await ElementFixture.settle(host)
+    expect(box(host).textContent).toBe("call `run` now")
+    expect(await command(host, "KeyE")).toBe(false)
+    await enter(host)
+    expect(host.content).toBe("call `run` now")
+    // formatted:  the <code> unwrapped from inside it
+    await open(host, "call run now")
+    const view = [...bar(host).querySelectorAll("ui-button")].at(-1)!
+    view.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    await ElementFixture.settle(host)
+    const code = box(host).querySelector("code")!
+    expect(code.textContent).toBe("run")
+    document.getSelection()!.setBaseAndExtent(code.firstChild!, 1, code.firstChild!, 1)
+    codeButton().dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    await ElementFixture.settle(host)
+    expect(box(host).querySelector("code")).toBeNull()
+    await enter(host)
+    expect(host.content).toBe("call run now")
+    localStorage.removeItem("ui-markdown:edit-view")
   })
 
   it("the shape menu makes a paragraph a heading;  the list button makes it a list", async () => {

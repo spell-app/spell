@@ -70,11 +70,11 @@ export class Card extends TwoSidedView {
   }
 
   /** The card, and every card on it, onto the pile, if the piles' rules let it go and take it */
-  putOnPile(pile) {
+  moveToPile(pile) {
     // - refused, nothing moves, and there's nothing to undo
-    // - a game adds its own steps after it:  `after putting a card on a pile`
+    // - a game adds its own steps after it:  `after moving a card to a pile`
     if (!core.canGiveUp(this.pile, this) || !core.canTake(pile, this)) core.cancel()
-    this.pile.startingWith(this).forEach((card) => core.move(card, pile))
+    this.pile.startingWith(this).forEach((card) => pile.append(card))
   }
 
   /** the card the next one goes on */
@@ -87,12 +87,12 @@ export class Card extends TwoSidedView {
     else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
-      return this.putOnPile(endPile)
+      return this.moveToPile(endPile)
     }
   }
 
   /** The move scores;  the column it left turns its new last card face up */
-  afterPutOnPile(pile) {
+  afterMoveToPile(pile) {
     solitaire.score = solitaire.score + this.thePointsForCardOnPile(pile)
     const it2 = this.lastPile
     if (it2 instanceof Column && !it2.isEmpty) it2.lastItem?.turnFaceUp()
@@ -111,7 +111,7 @@ export class Card extends TwoSidedView {
 
   static draggable = true
 
-  /** a card is in one pile at a time:  putting it on another pile takes it off this one */
+  /** a card is in one pile at a time:  moving it to another pile takes it off this one */
   get pile() {
     return Pile.ownerOf(this)
   }
@@ -120,9 +120,8 @@ export class Card extends TwoSidedView {
     return Pile.lastOwnerOf(this)
   }
 }
-core.describeAction(Card, "putOnPile", { title: "Put Card on Pile", undoneAs: "Move Card", cancels: true })
-core.describeAction(Card, "play", { title: "Play Card", undoneAs: "Play Card" })
-core.addAfterHook(Card, "putOnPile", { hook: "afterPutOnPile" })
+core.describeAction(Card, "moveToPile", { title: "Move Card to Pile", cancels: true, undoneAs: "Move Card to Pile" })
+core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })
 core.describeAction(Card, "thePointsForCardOnPile", { title: "The Points for Card on Pile", undoneAs: "The Points for Card on Pile" })
 // It's a two sided view:  each side is a card image (below):  face up its own, face down the back every card shares.
 // On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
@@ -261,18 +260,12 @@ export function testCardImages() {
   })
 }
 // -----------
-core.heading("A pile of cards")
-/////////////////////
-// ## A pile of cards
-/////////////////////
-// A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
-// Each pile is its own element around its cards' elements, `<solitaire-column>` around `<solitaire-card>`s.
-// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
-
+/** A pile of cards, e.g. in a game like solitaire */
 export class Pile extends ViewableList {
   static instanceType = Card
   static elementTag = core.defineElement(this, "test-project")
 
+  // A card can only be in one pile at a time
   /** How its cards lie:  on top of each other, or down a column -- styles.css */
   // - its "layout" is one of stacked or vertical
   static Layouts = ["stacked", "vertical"]
@@ -297,9 +290,8 @@ export class Pile extends ViewableList {
     return summary
   }
 
-  /** put the card on the pile, if it is a legal move */
   whenCardDroppedOn(card) {
-    card.putOnPile(this)
+    card.moveToPile(this)
   }
 
   static droppable = true
@@ -309,18 +301,17 @@ export class Pile extends ViewableList {
 
 export function testPiles() {
   return core.test("test piles", function testPiles() {
-    const it = new Pile()
     core.echoTestAction(`set the stock to a new pile with id "stock"`)
     const stock = new Pile({ id: "stock" })
     core.expect(stock.color, `stock's color`, "none", `"none"`)
     core.expect(stock.value, `stock's value`, 0, `0`)
-    core.echoTestAction(`add (a new card whose rank is queen, suit is spades and direction is up) to the stock`)
+    core.echoTestAction(`add a new card with rank queen, suit  spades and direction up to the stock`)
     stock.append(new Card({
       rank: "queen",
       suit: "spades",
       direction: "up"
     }))
-    core.echoTestAction(`add (a new card whose rank is 7, suit is hearts and direction is down) to the stock`)
+    core.echoTestAction(`add a new card with rank 7, suit  hearts and direction down to the stock`)
     stock.append(new Card({
       rank: 7,
       suit: "hearts",
@@ -333,15 +324,14 @@ export function testPiles() {
     /** a card is in one pile at a time */
     const discards = new Pile({ id: "discards" })
     core.echoTestAction(`get the top card of the stock`)
-    const it2 = stock.lastItem
+    const it = stock.lastItem
     core.echoTestAction(`add it to the discards`)
-    discards.append(it2)
-    core.expect(it2?.pile === discards, `its pile is the discards`, true, `yes`)
+    discards.append(it)
+    core.expect(it?.pile === discards, `its pile is the discards`, true, `yes`)
     core.expect(stock.length, `the number of cards in the stock`, 1, `1`)
     core.expect(discards.shortName, `the discards' short name`, "discards: 7♥↓", `"discards: 7♥↓"`)
   })
 }
-
 // -----------
 /** a deck of playing cards */
 export class Deck extends ViewableList {
@@ -484,8 +474,8 @@ export class Solitaire extends App {
           core.drawAction(this, "cheat", { "in-menu": true }),
           core.drawAction(this, "restartTheGame", { title: "Restart", "in-menu": true }),
           h("spacer"),
-          core.drawAction(this, "undo", { "in-menu": true }),
-          core.drawAction(this, "redo", { "in-menu": true }),
+          core.drawAction(this, "undo", { "icon-only": true, "in-menu": true }),
+          core.drawAction(this, "redo", { "icon-only": true, "in-menu": true }),
           h("ui-text", { slot: "right" }, "Score: ", () => this.score)
         )
       ),
@@ -505,14 +495,7 @@ export class Solitaire extends App {
         h("test-project-column", { id: "C6" }),
         h("test-project-column", { id: "C7" })
       ),
-      core.drawContextMenu(this, [
-        "autoPlay",
-        "cheat",
-        "restartTheGame",
-        "-",
-        ["undo", { "icon-only": true }],
-        ["redo", { "icon-only": true }]
-      ])
+      core.drawContextMenu(this, ["autoPlay", "cheat", "restartTheGame", "-", "undo", "redo"])
     ]
   }
   // <deck "deck"hidden />
@@ -579,12 +562,10 @@ export class Solitaire extends App {
   async restartTheGame() {
     this.score = 0
     this.deck.forEach((card) => core.meanwhile(() => card.turnFaceDown()))
-    for (const card of this.deck) {
-      if (card.pile !== this.stock) {
-        core.meanwhile(() => this.stock.append(card))
-        await core.pauseFor(10, "msec")
-      }
-    }
+    await core.forEachSequential(core.filter(core.everyThing(Card), (card) => card.pile !== this.stock), async (card) => {
+      core.meanwhile(() => this.stock.append(card))
+      await core.pauseFor(10, "msec")
+    })
     this.stock.randomize()
     // each row's first card lands face down, then turns up where it lies
     for (const row of core.getRange(1, 7)) {
@@ -601,11 +582,11 @@ export class Solitaire extends App {
   async turnOverTheNextCard() {
     // - a click on the stock, one step to undo;  the deal's own turn none, as it starts the game
     if (this.stock.isEmpty) this.resetTheStock()
-    const it = this.stock.lastItem
-    it?.turnFaceUp()
+    const nextCard = this.stock.lastItem
+    nextCard?.turnFaceUp()
     // as long as its flip takes (styles.css), so it turns over before it moves
     await core.pauseFor(300, "msec")
-    this.discardPile.append(it)
+    this.discardPile.append(nextCard)
   }
 
   /** The discard pile, turned over, back into the stock */
@@ -746,7 +727,7 @@ export function testTheMoves() {
     core.expect(core.canTake(foundation, two), `the foundation can take the two`, false, `no`)
     core.expect(core.canTake(foundation, ace), `the foundation can take the ace`, true, `yes`)
     core.echoTestAction(`move the ace to the foundation`)
-    core.move(ace, foundation)
+    ace.moveToPile(foundation)
     core.expect(core.canTake(foundation, two), `the foundation can take the two`, true, `yes`)
     core.echoTestAction(`add the queen to the column`)
     column.append(queen)

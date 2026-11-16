@@ -22375,6 +22375,11 @@
           "description": "`editable`:  the bar's strikethrough button."
         },
         {
+          "key": "code",
+          "text": "Inline code",
+          "description": "`editable`:  the bar's inline code button (no key:  ⌘E is Claude Code's)."
+        },
+        {
           "key": "link",
           "text": "Link (⌘K)",
           "description": "`editable`:  the bar's link button."

@@ -40,4 +40,4 @@ a "pile" is a droppable viewable list of cards
 		the discards' short name should be "discards: 7♥↓"
 
 a card belongs to one pile
-	// a card is in one pile at a time:  putting it on another pile takes it off this one
+	// a card is in one pile at a time:  moving it to another pile takes it off this one

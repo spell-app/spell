@@ -91,10 +91,13 @@ describe("ComponentDefinitions.paletteGroups()", () => {
     expect(tags).toEqual(expect.arrayContaining(["ui-tabs", "ui-table", "ui-modal"]))
     // a tag that stands alone, though not its folder's main one (epic `editor` I180)
     expect(tags).toEqual(expect.arrayContaining(["ui-buttons", "ui-steps", "ui-textarea", "ui-cards"]))
-    // a part only inside another, and what a page holds once, are never offered
-    expect(tags).not.toContain("ui-tree-item")
-    expect(tags).not.toContain("ui-tab")
-    expect(tags).not.toContain("ui-or")
+    // by today's rule, a part only inside another, and what a page holds once, are never offered;
+    // the table (Owen's, on the Palette groups page) may still list one on purpose
+    const byRule = ComponentDefinitions.paletteGroupsByTopic().flatMap(({ parts }) => parts.map((part) => part.tag))
+    expect(byRule).not.toContain("ui-tree-item")
+    expect(byRule).not.toContain("ui-tab")
+    expect(byRule).not.toContain("ui-or")
+    expect(byRule).not.toContain("ui-root")
     expect(tags).not.toContain("ui-root")
     expect(groups.every(({ parts }) => parts.length > 0)).toBe(true)
     // by today's rule, in each topic, the ready-made ones (a snippet of their own) before the rest
