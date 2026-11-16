@@ -78,4 +78,25 @@ describe("<ui-site-nav-button>", () => {
     await ShadowTree.settle(layout)
     expect(layout.getAttribute("drawer")).toBe("compact")
   })
+
+  // epic `mockup` I26 (Owen:  "When menu is hidden like this, replace show sidebar icon with hamburger icon")
+  test("narrow, the drawer hidden until it slides in:  the menu's `bars` icon and words;  wide again, `columns`", async () => {
+    const layout = await ElementFixture.render<DOMPageLayoutElement>(
+      `<ui-page-layout style="width: 400px">
+        <ui-site-nav-button slot="menu"></ui-site-nav-button>
+        <ui-site-nav slot="drawer" pages='[{ "title": "A", "href": "/a" }]'></ui-site-nav>
+      </ui-page-layout>`
+    )
+    await expect.poll(() => layout.matches(":state(narrow)")).toBe(true)
+    const button = layout.querySelector("ui-site-nav-button")!
+    await ShadowTree.settle(button)
+    const inner = () => button.shadowRoot!.querySelector("ui-button")!
+    expect(inner().getAttribute("icon")).toBe("bars")
+    expect(inner().getAttribute("aria-label")).toBe("Show or hide the menu")
+    layout.style.width = "900px"
+    await expect.poll(() => layout.matches(":state(narrow)")).toBe(false)
+    await ShadowTree.settle(button)
+    expect(inner().getAttribute("icon")).toBe("columns")
+    expect(inner().getAttribute("aria-label")).toBe("Show or hide the side bar")
+  })
 })

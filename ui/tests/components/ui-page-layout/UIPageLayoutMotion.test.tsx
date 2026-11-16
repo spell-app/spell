@@ -36,7 +36,6 @@ async function movesAs(layout: DOMPageLayoutElement, change: () => void | Promis
 
 /** Rest the pointer on its compact drawer, and wait for it to open. */
 async function peek(layout: DOMPageLayoutElement) {
-  layout.style.setProperty("--ui-hover-delay", "0ms")
   box(layout, "drawer").dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }))
   await expect.poll(() => layout.matches(":state(open)")).toBe(true)
 }
@@ -47,8 +46,9 @@ describe("<ui-page-layout>:  motion", () => {
     const layout = await compactLayout()
     const column = box(layout, "drawer").getBoundingClientRect().width
     expect((await movesAs(layout, () => peek(layout))).sort()).toEqual(["drawer-box box-shadow", "drawer-box width"])
-    const closing = await movesAs(layout, () => {
+    const closing = await movesAs(layout, async () => {
       box(layout, "drawer").dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" }))
+      await expect.poll(() => layout.matches(":state(open)")).toBe(false)
     })
     expect(closing).toContain("drawer-box width")
     // ... the page beside it not moving
