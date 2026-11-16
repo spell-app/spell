@@ -204,11 +204,14 @@ export class SpellTyping {
   /**
    * Enter between a tag's attributes, `column` (0-based) of `lines[index]`:  the tag laid out as Prettier lays out a
    * long one (epic `language` I133;  Owen:  "indent all of the attributes the same as prettier would format them").
-   * - Its `<` and name stay where they are;  each attribute on a line of its own, a level in from the tag's line;
-   *   its `>` or `/>` on a line of its own, back at the tag's line's indent, with whatever followed it.
-   * - A tag already laid out so, or partly:  laid out again the same way.
+   * - Its `<` and name stay where they are;  each attribute on a line of its own, a level in from the tag's line.
+   * - Its `>` or `/>` at the end of the last attribute's line, with whatever followed it:  `shrinkable>`,
+   *   `"cheat" />` (epic `language` I135;  Owen:  "The `>` should be on the same line as the last tag");
+   *   the bubbly look draws it at the block's right edge.
+   * - A tag already laid out so, or partly:  laid out again the same way;
+   *   a `>` alone on a line under its attributes (as I133 laid it out) comes up onto the last one.
    * - The caret:  where it was in the attribute it was in, or at the start of the next;
-   *   after the last, on a new line of its own, where the next attribute would go.
+   *   after the last, on a new line of its own, where the next attribute would go, the `>` after it.
    * - A tag with no `>` yet:  only its lines up to the caret's.
    * - `undefined`:  not between a tag's attributes, or the tag has none.
    */
@@ -244,8 +247,10 @@ export class SpellTyping {
       laidOut.push(inside)
     }
     if (close) {
+      // `shrinkable>`, `"cheat" />`:  a space before a `/>`, as a tag that closes itself is written (I70 C4)
       const rest = after[lastLine]!.slice(close.at + close.text.length - starts[lastLine]!)
-      laidOut.push(indent + close.text + rest)
+      const space = close.text === "/>" && laidOut.at(-1)!.trim() ? " " : ""
+      laidOut[laidOut.length - 1] += space + close.text + rest
     }
     return {
       from: tag.line,
@@ -259,8 +264,8 @@ export class SpellTyping {
    * Backspace at the start of a tag's attribute line, right after its indent (epic `language` I133;  Owen:
    * "backspace with cursor here should move `appearance` back to the line above, with a space between"):
    * the line joins the one above, its indent gone, a space between;  none before a `>`, as `shrinkable>` is written.
-   * - Its attributes all back on the tag's own line, a `>` or `/>` alone on the line under comes up too:
-   *   the tag one line again.
+   * - The `>` stays at the end of the last attribute's line (I135):  a `>` or `/>` alone on the line under the joined
+   *   one (as I133 laid a tag out) comes up onto it.
    * - `undefined`:  not at the start of a tag's attribute line.
    */
   static tagLineJoined(lines: readonly string[], index: number, column: number): TagLayout | undefined {
@@ -271,7 +276,7 @@ export class SpellTyping {
     const above = lines[index - 1]!.trimEnd()
     const joined = joinedTagLine(above, line)
     const next = lines[index + 1] ?? ""
-    const closesAlone = tag.line === index - 1 && /^\s*\/?>/.test(next)
+    const closesAlone = /^\s*\/?>/.test(next) && isStillOpen(line)
     return {
       from: index - 1,
       to: closesAlone ? index + 1 : index,

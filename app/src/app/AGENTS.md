@@ -223,12 +223,14 @@ and in the app's build folder, `app/` at the app folder's root.
     - Shift+Tab, or Backspace at a line's indent, takes the lines under it out a level with it:  a tag's children
       and closing tag, a body;  one undo
       - a line of a tag's attributes, under its first line, moves alone (I142);  so does a comment line (I161)
-    - Enter between a tag's attributes lays the tag out as Prettier lays out a long one (epic `language` I133):
-      each attribute on its own line, a level in from the tag's, its `>` or `/>` on its own line back at the tag's level;
+    - Enter between a tag's attributes lays the tag out (epic `language` I133, I135):
+      each attribute on its own line, a level in from the tag's, its `>` or `/>` at the end of the last one's line;
       one undo (`LSP.SpellTyping.tagLaidOut()`;  before, epic `editor` I142 lined the rest up under the first attribute)
-      - Backspace at an attribute line's start joins it to the line above, a space between;  with every attribute back
-        on the tag's line, its `>` comes up too (`LSP.SpellTyping.tagLineJoined()`)
+      - Backspace at an attribute line's start joins it to the line above, a space between, its `>` with it;
+        a `>` alone on the line under comes up too (`LSP.SpellTyping.tagLineJoined()`)
       - Format Document keeps such a tag as it is
+      - the bubbly look draws it as ONE block of the tag's colour, its `>` at the block's right edge, past the widest
+        attribute (`CodeMirrorMarkup.tagBlocks`)
     - Enter before a comment after code puts the comment on its own line, at the level of the body under that line,
       so the body still reads as its body (epic `editor` I155, I161);  one undo
     - Enter leaves no tabs or spaces at the end of the line it splits (epic `editor` I160):  the same undo step

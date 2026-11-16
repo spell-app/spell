@@ -136,49 +136,81 @@ describe("a body's rail under the caret", () => {
     }
   })
 
-  /** A drawing's start tag laid out as Enter lays a long one out, Prettier's way (epic `language` I133). */
+  /**
+   * A drawing's start tag laid out as Enter lays a long one out (epic `language` I133):
+   * each attribute on its own line, its `>` at the end of the last (I135).
+   */
   const LAID_OUT = `a "game" is a view
 \tto draw it
 \t\t<segment inverted>
 \t\t\t<toolbar
 \t\t\t\tclass="GameBar"
-\t\t\t\tinverted
-\t\t\t>
+\t\t\t\tappearance="pills"
+\t\t\t\tinverted>
 \t\t\t\t<action "cheat" />
 \t\t\t</>
 \t\t</segment>
 `
 
-  test("a start tag over several lines:  each attribute line's pill round its words alone, hanging on the tag's rail;  its `>` at its band's edge", async () => {
+  /** The `.cm-line` drawing line `number`. */
+  function lineElement(view: EditorView, number: number): HTMLElement {
+    const node = view.domAtPos(view.state.doc.line(number).to).node
+    return (node instanceof HTMLElement ? node : node.parentElement)!.closest<HTMLElement>(".cm-line")!
+  }
+
+  test("a start tag over several lines:  ONE block, every row from its band's left edge to the widest row's right (I135)", async () => {
     const view = await bubblyEditorOf(LAID_OUT)
-    const [head, attribute, bare, close, child] = linesStarting(view, [
-      "<toolbar",
-      "class=",
-      "inverted",
-      ">",
-      "<action"
-    ])
-    const elementOf = (number: number) => {
-      const node = view.domAtPos(view.state.doc.line(number).to).node
-      return (node instanceof HTMLElement ? node : node.parentElement)!.closest<HTMLElement>(".cm-line")!
+    await frames()
+    const [head, wide, last, child] = linesStarting(view, ["<toolbar", "appearance=", "inverted", "<action"])
+    const rows = [head!, head! + 1, wide!, last!].map((number) => {
+      const row = lineElement(view, number).querySelector<HTMLElement>(".cmb-tag-block")!
+      expect(row, String(number)).toBeTruthy()
+      return row.getBoundingClientRect()
+    })
+    const band = rows[0]!
+    for (const [at, row] of rows.entries()) {
+      expect(Math.abs(row.left - band.left), `left of row ${at}`).toBeLessThan(0.1)
+      expect(Math.abs(row.right - band.right), `right of row ${at}`).toBeLessThan(0.1)
     }
-    const band = elementOf(head!).querySelector(".cmb-band-open")!.getBoundingClientRect()
-    // no band reaching left over the line's indent and the rails round it
-    for (const number of [attribute!, bare!, close!]) {
-      const row = elementOf(number).querySelector(".cmb-tag-row")!
-      expect(row.textContent!.replace(/[“”]/g, '"'), String(number)).toBe(view.state.doc.line(number).text.trim())
-      expect(row.getBoundingClientRect().left).toBeGreaterThanOrEqual(band.left - 0.1)
+    // whole:  each row down to the next one's top
+    for (const [at, row] of rows.slice(1).entries()) expect(Math.abs(row.top - rows[at]!.bottom)).toBeLessThan(0.1)
+    // past the widest value's closing quote
+    const quotes = lineElement(view, wide!).querySelectorAll(".cmb-quote-close")
+    expect(quotes[quotes.length - 1]!.getBoundingClientRect().right).toBeLessThan(band.right)
+    // its `>` at the block's right edge, in its last row:  as far in from it as its `⟨` is from the left edge,
+    // a value's room clear of the widest row's closing quote (Owen, I135)
+    const point = lineElement(view, last!).querySelector(".cmb-tag-point")!.getBoundingClientRect()
+    const angle = lineElement(view, head!).querySelector(".bubbly-angle-open")!.getBoundingClientRect()
+    expect(Math.abs(band.right - point.right - (angle.left - band.left))).toBeLessThan(0.1)
+    expect(point.left - quotes[quotes.length - 1]!.getBoundingClientRect().right).toBeGreaterThan(2)
+    // the tag's rail, its children's, the block's left edge
+    const rail = Number.parseFloat(getComputedStyle(view.dom).getPropertyValue("--cmb-rail"))
+    expect(Math.abs(band.left + rail / 2 - railMiddle(view, child!)!)).toBeLessThan(0.1)
+  })
+
+  test("...the caret before its `>` at the last attribute's end, after it past the point;  wider as it's typed", async () => {
+    const view = await bubblyEditorOf(LAID_OUT)
+    const [last, wide] = linesStarting(view, ["inverted", "appearance="])
+    const line = view.state.doc.line(last!)
+    const word = lineElement(view, last!).querySelector(".bubbly-attribute-name")!.getBoundingClientRect()
+    const caretAt = async (at: number) => {
+      view.dispatch({ selection: { anchor: at } })
+      await frames()
+      return view.dom.querySelector(".cm-cursor")!.getBoundingClientRect().left
     }
-    // the attribute lines on the tag's rail, as its children are
-    const rail = railMiddle(view, child!)!
-    expect(Math.abs(railMiddle(view, attribute!)! - rail)).toBeLessThan(0.1)
-    expect(
-      Math.abs(elementOf(attribute!).querySelector(".cmb-tag-row")!.getBoundingClientRect().left - rail)
-    ).toBeLessThan(0.1)
-    // its `>` the end of the tag's band, from the band's left edge
-    expect(
-      Math.abs(elementOf(close!).querySelector(".cmb-tag-row")!.getBoundingClientRect().left - band.left)
-    ).toBeLessThan(0.1)
+    expect(Math.abs((await caretAt(line.to - 1)) - word.right)).toBeLessThan(1)
+    const point = lineElement(view, last!).querySelector(".cmb-tag-point")!.getBoundingClientRect()
+    expect(Math.abs((await caretAt(line.to)) - point.right)).toBeLessThan(1)
+    // an attribute typed wider:  the block's right edge moves with it
+    const before = lineElement(view, wide!).querySelector(".cmb-tag-block")!.getBoundingClientRect().right
+    const value = view.state.doc.line(wide!)
+    view.dispatch({ changes: { from: value.to - 1, insert: " and some more" } })
+    await frames()
+    await frames()
+    const rows = [last!, wide!].map((number) => lineElement(view, number).querySelector(".cmb-tag-block")!)
+    const after = rows[1]!.getBoundingClientRect().right
+    expect(after).toBeGreaterThan(before + 50)
+    expect(Math.abs(rows[0]!.getBoundingClientRect().right - after)).toBeLessThan(0.1)
   })
 
   test("an attribute's opening quote mark a space's room after its `=`, as after a space", async () => {
