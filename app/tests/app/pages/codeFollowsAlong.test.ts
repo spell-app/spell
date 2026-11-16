@@ -267,6 +267,59 @@ describe.skipIf(!SERVING)("code follows along", () => {
     }
   )
 
+  test(
+    "inspect, then a click in the gap a toolbar's spacer makes:  the spacer is selected, the code's caret on it",
+    { timeout: 150_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire")
+      await showFile(page, "Solitaire.spell")
+      await page.waitForTimeout(1500)
+      if (!(await page.locator(".InspectAppButton.inspecting").count())) {
+        await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
+        await page.waitForTimeout(1000)
+      }
+      await page.evaluate(() => (window as unknown as DebugGlobals).Inspector.dismissHelp())
+      await page.waitForTimeout(300)
+      // `<spacer/>` between Restart and Undo is 0px wide:  the gap between their buttons is what it makes (I169)
+      const gap = await page.evaluate(() => {
+        const spacer = document.querySelector(".AppPaneBody ui-toolbar > spacer")!
+        const button = (element: Element | null) =>
+          element!.shadowRoot!.querySelector("button")!.getBoundingClientRect()
+        const [before, after] = [button(spacer.previousElementSibling), button(spacer.nextElementSibling)]
+        const [, line, column] = /:(\d+):(\d+)$/.exec(spacer.getAttribute("data-spell-at")!)!
+        return {
+          x: (before.right + after.left) / 2,
+          y: before.top + before.height / 2,
+          width: after.left - before.right,
+          spacerWidth: spacer.getBoundingClientRect().width,
+          line: Number(line),
+          column: Number(column)
+        }
+      })
+      expect(gap.spacerWidth, "the spacer has no width of its own").toBe(0)
+      expect(gap.width).toBeGreaterThan(4)
+      await page.mouse.move(gap.x, gap.y)
+      await page.waitForTimeout(400)
+      const hover = await page.evaluate(() => {
+        const box = document.querySelector<HTMLElement>(".InspectorHover")
+        return box && !box.hidden ? box.getBoundingClientRect().width : 0
+      })
+      expect(hover, "the hover outline is the gap's").toBeCloseTo(gap.width, -1)
+      await page.mouse.click(gap.x, gap.y)
+      await page.waitForTimeout(1500)
+      const state = await following(page)
+      expect(state.selected).toEqual(["spacer"])
+      expect(state.followed).toMatchObject({ line: gap.line, from: "parts" })
+      const caret = await page.evaluate(() => {
+        const code = (window as unknown as DebugGlobals).editor.shownCodeEditor!
+        const { lineNumber, column } = code.getPosition()!
+        return { line: lineNumber - 1, column: column - 1, text: code.getModel()!.getLineContent(lineNumber).trim() }
+      })
+      expect(caret).toEqual({ line: gap.line, column: gap.column, text: "<spacer/>" })
+    }
+  )
+
   test("someone typing isn't moved", { timeout: 150_000 }, async () => {
     const page = await context.newPage()
     await open(page, "Solitaire")
