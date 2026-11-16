@@ -1,4 +1,5 @@
 "quote examples" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Quote
 		<header>A quote holds someone else's words:  a block of its own, or a few words inside a sentence.</>

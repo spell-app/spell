@@ -329,6 +329,8 @@ export class SiteBase extends App {
    * - A link on the page to one of its addresses goes there without leaving the page (`followLink()`).
    * - A site with a top bar (`topBar`) draws it above the page, and the bar's side bar button replaces the narrow
    *   width's menu button (`drawTopBar()`).
+   * - No tabs of its own:  a page that wants its family as tabs writes `<site-tabs/>`, which follows the navigation
+   *   around it, and its tabs are links this follows (epic `mockup` T38).
    */
   draw(): Drawing {
     return h(
@@ -434,22 +436,7 @@ export class SiteBase extends App {
           this.navigate(event.detail.href)
         }
       }),
-      h(
-        "div",
-        { class: "spell-site-page", style: PAGE_LAYOUT },
-        this.drawTopBar(),
-        // the shown page's family as tabs (`<ui-site-tabs>`), when it has one:  pages write nothing
-        h("ui-site-tabs", {
-          class: "spell-site-tabs",
-          pages: () => JSON.stringify(this.navPages()),
-          current: () => this.tabsCurrent(),
-          "on-ui-navigating": () => (event: CustomEvent<{ href: string }>) => {
-            event.preventDefault()
-            this.navigate(event.detail.href)
-          }
-        }),
-        () => made(this.drawShowing())
-      ),
+      h("div", { class: "spell-site-page", style: PAGE_LAYOUT }, this.drawTopBar(), () => made(this.drawShowing())),
       () => made(this.drawOverlay())
     ) as unknown as Drawing
   }
@@ -608,15 +595,6 @@ export class SiteBase extends App {
       return undefined
     }
     return pathTo(this.siteClass.pages, []) ?? []
-  }
-
-  /**
-   * The page `<ui-site-tabs>` marks as shown:  the page shown;  `""`, no tabs, for one with a parameter
-   * or for the not found and error pages.
-   */
-  tabsCurrent(): string {
-    const showing = this.getState<Showing>("showing")
-    return showing?.kind === "page" && !showing.entry.params?.length ? showing.entry.address : ""
   }
 
   /**

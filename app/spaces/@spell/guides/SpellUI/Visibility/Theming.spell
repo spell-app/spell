@@ -1,4 +1,5 @@
 "visibility theming" is a notebook page
+	<site-tabs/>
 	<header level="1">
 		Visibility
 		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>

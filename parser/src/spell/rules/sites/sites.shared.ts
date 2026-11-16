@@ -18,7 +18,7 @@ export type SitePageEntry = {
   title?: string
   /** the icon before its title in the site's navigation, one of Spell UI's, if the line names it:  `film` */
   icon?: string
-  /** what its tab says in the site's `<ui-site-tabs>`, if the line names it, else its title:  `Usage` */
+  /** what its tab says in a page's `<site-tabs/>`, if the line names it, else its title:  `Usage` */
   tab?: string
   /** what the line files it under, to group and search a site's pages by:  `["Forms", "Inputs"]` */
   tags?: string[]
