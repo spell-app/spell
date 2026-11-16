@@ -9674,12 +9674,12 @@
           "ruleNames": ["value_otherwise"],
           "internal": false,
           "file": "src/spell/rules/if/ValueOtherwise.ts",
-          "line": 14,
+          "line": 21,
           "purpose": "`black otherwise` -- the value when no `value_if` line above was the answer: `return 'black'`.",
           "syntaxes": [
             {
-              "syntax": "(value:{expression}|{constant}) (de lo contrario|sino)",
-              "example": "para elegir un color:\n\tblack de lo contrario",
+              "syntax": "(((de lo contrario|sino) (value:{expression}|{constant}))|((value:{expression}|{constant}) (de lo contrario|sino)))",
+              "example": "para elegir un color:\n\tsino black",
               "outputs": {
                 "js": {
                   "code": "export function elegirUnColor() {\n  return core.asAction({ undoneAs: \"Elegir un Color\" }, () => {\n    return \"black\"\n  })\n}"

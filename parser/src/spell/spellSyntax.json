@@ -9715,12 +9715,12 @@
           "ruleNames": ["value_otherwise"],
           "internal": false,
           "file": "src/spell/rules/if/ValueOtherwise.ts",
-          "line": 14,
+          "line": 21,
           "purpose": "`black otherwise` -- the value when no `value_if` line above was the answer: `return 'black'`.",
           "syntaxes": [
             {
-              "syntax": "(value:{expression}|{constant}) (otherwise|else)",
-              "example": "to pick a color:\n\tblack otherwise",
+              "syntax": "(((otherwise|else) (value:{expression}|{constant}))|((value:{expression}|{constant}) (otherwise|else)))",
+              "example": "to pick a color:\n\totherwise black",
               "outputs": {
                 "js": {
                   "code": "export function pickAColor() {\n  return core.asAction({ undoneAs: \"Pick a Color\" }, () => {\n    return \"black\"\n  })\n}"
