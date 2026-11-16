@@ -64,8 +64,11 @@ describe("SpellLanguageService.renameActionAt() (epic `editor` I111)", () => {
     const renamed = applied(text, edit.changes![uri]!)
     expect(renamed).not.toContain("restart the game")
     expect(renamed.match(/^\s*restart ze game$/gm)?.length).toBe(calls)
-    // and back, from the renamed text
+    // the renamed text parses at once, its call above the definition too:  no reload (an edit, not a fresh parse)
     await workspace.update(uri, renamed)
+    const errors = service.diagnostics(workspace.fileFor(uri)!).filter(({ severity }) => severity === 1)
+    expect(errors.map(({ message }) => message)).toEqual([])
+    // and back, from the renamed text
     const back = service.renameActionAt(
       workspace.fileFor(uri)!,
       positionOf(renamed, 'to "restart ze game"', "restart ze game"),
