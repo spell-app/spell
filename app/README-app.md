@@ -551,7 +551,8 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - Under its properties, its Events:  what it does when people touch it, in the program's own words,
   each with its code under it.
   - A card's `on click` (`play it`);  a tableau's `it can give up a card if` (`the card is face up`).
-  - The band's `+` adds an event, kept with the project.
+  - The Code card's Add Event adds one, kept with the project;  its Add Action writes an empty action,
+    `to "new action"`, to rename in its signature.
 - Then its Actions:  a button for each thing that can be done to it, `play it`, `turn over`.
   - One that takes something has a field after it:  `put it on a pile` a select of the game's piles.
   - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
