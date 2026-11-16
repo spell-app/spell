@@ -1272,7 +1272,10 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--from <who>": "who sent it, with --file"
   },
   home: {},
-  merge: { "--ditch": "move up to 3 hand-made stray files aside too, once you say so" },
+  merge: {
+    "--ditch": "move up to 3 hand-made stray files aside too, once you say so",
+    "--as <agent>": "the agent merging:  its own claimed files never block taking main in"
+  },
 
   // an epic page:  making and reading (the `epic` tool's)
   create: {
