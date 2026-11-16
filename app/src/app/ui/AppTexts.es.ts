@@ -702,7 +702,53 @@ const APP_TEXTS_ES: AppTextPack = {
     "Encanto convierte tu app en JavaScript, el lenguaje que usan los navegadores, siempre.\nElige aquí un lenguaje para tener también una copia de tu app en él.",
   listsStartAtLabel: "Las listas empiezan en",
   listsStartAtTip:
-    "Cómo numeran tus listas sus elementos.\nEn 1, el primero es el número 1, como cuenta la gente.\nEn 0, es el número 0, como cuentan JavaScript y Python."
+    "Cómo numeran tus listas sus elementos.\nEn 1, el primero es el número 1, como cuenta la gente.\nEn 0, es el número 0, como cuentan JavaScript y Python.",
+
+  ////////////////
+  // ## The code editor's own words
+  ////////////////
+
+  // buscar y reemplazar
+  cmFind: "Buscar",
+  cmReplace: "Reemplazar",
+  cmNext: "siguiente",
+  cmPrevious: "anterior",
+  cmAll: "todos",
+  cmMatchCase: "mayúsculas y minúsculas",
+  cmRegexp: "expresión regular",
+  cmByWord: "palabra entera",
+  cmReplaceOne: "reemplazar",
+  cmReplaceAll: "reemplazar todos",
+  cmClose: "cerrar",
+  cmCurrentMatch: "coincidencia actual",
+  cmOnLine: "en la línea",
+  cmReplacedMatchOnLine: "reemplazada la coincidencia en la línea $",
+  cmReplacedMatches: "$ coincidencias reemplazadas",
+  cmGoToLine: "Ir a la línea",
+  cmGo: "ir",
+  // pliegues
+  cmFoldedLines: "Líneas plegadas",
+  cmUnfoldedLines: "Líneas desplegadas",
+  cmFoldLine: "Plegar la línea",
+  cmUnfoldLine: "Desplegar la línea",
+  cmFoldedCode: "código plegado",
+  cmUnfold: "desplegar",
+  cmTo: "a",
+  // sugerencias y problemas
+  cmCompletions: "Sugerencias",
+  cmDiagnostics: "Problemas",
+  cmNoDiagnostics: "Ningún problema",
+  // la vista de cambios
+  cmRevertChunk: "Usar su versión",
+  cmAccept: "Aceptar",
+  cmReject: "Rechazar",
+  cmUnchangedLines: "$ líneas sin cambios",
+  // el editor
+  cmControlCharacter: "Carácter de control",
+  cmSelectionDeleted: "Selección borrada",
+  // su menú
+  cmGoToDefinition: "Ir a la definición",
+  cmFindMenu: "Buscar…"
 }
 
 /** Everything Spanish the app shows:  its own texts, then each web component's. */

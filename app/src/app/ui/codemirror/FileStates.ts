@@ -1,0 +1,492 @@
+import { autocompletion, closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete"
+import { isolateHistory } from "@codemirror/commands"
+import { setDiagnostics } from "@codemirror/lint"
+import {
+  Annotation,
+  Compartment,
+  EditorState,
+  type Extension,
+  type StateEffect,
+  Transaction,
+  type TransactionSpec
+} from "@codemirror/state"
+import { EditorView, keymap } from "@codemirror/view"
+import type { TextEdit } from "vscode-languageserver"
+
+import { observe } from "spell/util"
+import { after, type CancelablePromise } from "spell/util/timing"
+import { SP } from "spell/parser/spell"
+import type { LSP } from "spell/app/lsp"
+import { CodeMirrorBubbly } from "./CodeMirrorBubbly"
+import { CodeMirrorLanguage } from "./CodeMirrorLanguage"
+import { CodeMirrorSetup } from "./CodeMirrorSetup"
+import { CodeMirrorTyping } from "./CodeMirrorTyping"
+import { LspToCodeMirror } from "./LspToCodeMirror"
+
+/****************
+ * ### `FileStates`
+ * One CodeMirror state per file the editor works with:  its text, undo, folds and selection, kept while another file
+ * is shown, so switching back finds it as it was left (epic `codemirror` P2).
+ * - Each state is a VIEW of its file's `contents`:  `SpellFile` / `SpellProject` stay the source of truth.
+ *   This never parses by itself, and keeps nothing about parses.
+ * - State => file:  every edit, typed or from outside, goes into `file.contents` at once, then `onEdit`.
+ *   - Its parse waits till the typing pauses (`PARSE_WAIT`), so no keystroke waits on it:
+ *     `project.takeText()`, then `project.parseWaitingText()`, re-parsing as little as possible.
+ *   - Whatever must see the new parse sooner asks for it, `parseNow()`:  the language features (a hover, a suggestion),
+ *     a click or a focus anywhere on the page (the side bar edits from the parse).
+ * - File => state:  a change from outside the editors (a load, another editor of the file) comes in as the one change
+ *   that makes them the same, kept out of undo, so the caret and the file's own undo stay right.
+ * - Parse => problems:  whenever a spell file's `match` changes, even from an edit to ANOTHER file, its diagnostics
+ *   become its state's problems, and its fold arrows and bubbly look follow (`CodeMirrorSetup.PARSED`).
+ * - Edits from outside the code (the Inspector, the side bar, a rename, the value picker) come in through
+ *   `applyEdits()`:  one undo step each, carrying their `EditWay` (`FileStates.EDIT_WAY`), the one "not typed" mark
+ *   the typing helps read to leave them alone.
+ * - Shown by a view through `show()`:  ONE view per state at a time;  a state shown nowhere still takes edits.
+ * - Covers a project at a time:  a state for every spell file it parses (a rename's edits need them), plus any other
+ *   file once shown.  Showing a file of another project lets go of the last one's states, UNLESS something `use()`s
+ *   it, e.g. a `<spell-editor>`.
+ * - Its own copy of the half of Monaco's `SpellModels` that has nothing to do with Monaco (epic `codemirror` J4):
+ *   its waits, `use()`, `saveAfterEdit()`, `applyEdits()` and `EditWay`.
+ *   - No shared base class:  until the swap (P6) the two are kept in step BY HAND, and P6 checks them before
+ *     `SpellModels` goes.
+ *   - Left out, as nothing here reads them:  `SpellModels.onDidParse` (Monaco's semantic colouring asks it), and a
+ *     language per form of file (`setModelLanguage()`:  CodeMirror reads the form from the parse).
+ * - Follows files with `observe()` (`spell/util`, on spell cells):  a plain function, re-run synchronously as the cells
+ *   it read change, so it's fine wherever `stateFor()` is called from.
+ * - Its position in the import graph:  CodeMirror, the parser, the language service, the CodeMirror folder's other
+ *   files;  never Monaco.
+ ****************/
+export class FileStates {
+  constructor({ service, onEdit = () => {} }: FileStatesProps) {
+    this.service = service
+    this.onEdit = onEdit
+    // a click or a focus elsewhere acts on the parse, e.g. the side bar's edits:  it mustn't be one keystroke behind
+    const parseNow = () => this.parseNow()
+    globalThis.document?.addEventListener("pointerdown", parseNow, { capture: true })
+    globalThis.document?.addEventListener("focusin", parseNow, { capture: true })
+  }
+
+  /** Answers a spell file's problems, suggestions, hovers ... */
+  readonly service: LSP.SpellLanguageService
+
+  /** Called after each edit of a state has gone into its file, e.g. to save soon. */
+  onEdit: (file: SP.AnySpellFile) => void
+
+  ////////////////
+  // ## Parsing
+  ////////////////
+
+  /**
+   * Parse the text typed and not parsed yet, now, in every project with some waiting -- see `project.takeText()`.
+   * - The incremental parse is done when it returns;  a parse from scratch, if that couldn't cope, comes later.
+   * - NEVER throws:  a parse error shows on its line, as ever.
+   */
+  parseNow(): void {
+    this.parseTimer?.cancel()
+    this.parseTimer = undefined
+    const projects = this.waiting
+    this.waiting = new Set()
+    for (const project of projects) {
+      project
+        .parseWaitingText()
+        .catch((error: unknown) => console.error("FileStates.parseNow():  couldn't parse", error))
+    }
+    const waiters = this.parsedWaiters
+    this.parsedWaiters = []
+    waiters.forEach((resolve) => resolve())
+  }
+
+  /**
+   * Resolves once the text typed so far is parsed, when the typing pauses:  at once if none is waiting.
+   * - For what can wait, so it doesn't parse on every keystroke.
+   */
+  parsed(): Promise<void> {
+    if (!this.waiting.size) return Promise.resolve()
+    return new Promise((resolve) => this.parsedWaiters.push(resolve))
+  }
+
+  /** Parse `project`'s waiting text once the typing pauses for `PARSE_WAIT` msec. */
+  private parseSoon(project: SP.SpellProject): void {
+    this.waiting.add(project)
+    this.parseTimer?.cancel()
+    this.parseTimer = after(FileStates.PARSE_WAIT / 1000, () => this.parseNow())
+  }
+
+  /**
+   * How long the typing must pause before what's typed is parsed, in msec:  Monaco's `SpellModels.PARSE_WAIT`.
+   * - Kept equal to it by hand until the swap (a test checks):  this folder never imports Monaco's.
+   */
+  static PARSE_WAIT = 200
+
+  /** Projects with text typed and not parsed yet -- see `parseSoon()`. */
+  private waiting = new Set<SP.SpellProject>()
+
+  /** What `parsed()` resolves, at the next `parseNow()`. */
+  private parsedWaiters: (() => void)[] = []
+
+  /** The wait of a pending `parseSoon()`. */
+  private parseTimer: CancelablePromise<void> | undefined
+
+  ////////////////
+  // ## Each file's state
+  ////////////////
+
+  /**
+   * State of `file` as it is now, made if need be -- along with one for every spell file its project parses.
+   * - SIDE EFFECT:  a file of another project lets go of the last project's states first, unless it's `use()`d.
+   */
+  stateFor(file: SP.AnySpellFile): EditorState {
+    return this.entryFor(file).state
+  }
+
+  /** The language service's features for `file`'s state:  `undefined` for a file that isn't Spell. */
+  languageFor(file: SP.AnySpellFile): CodeMirrorLanguage | undefined {
+    return this.entryFor(file).language
+  }
+
+  /**
+   * Keep `project`'s states while it's in use, e.g. by a `<spell-editor>` -- whatever other project's files are shown.
+   * - Returns what stops using it:  once nobody does, its states go, unless it's the project last shown.
+   */
+  use(project: SP.SpellProject): () => void {
+    this.users.set(project, (this.users.get(project) ?? 0) + 1)
+    let isReleased = false
+    return () => {
+      if (isReleased) return
+      isReleased = true
+      const users = this.users.get(project)! - 1
+      if (users) this.users.set(project, users)
+      else {
+        this.users.delete(project)
+        if (project !== this.project) this.disposeProject(project)
+      }
+    }
+  }
+
+  /**
+   * Save each of `files` once its state takes its next edit, e.g. a rename's.
+   * - Forgets any that haven't had one after `SAVE_WAIT` msec, e.g. a rename that wasn't applied.
+   */
+  saveAfterEdit(files: SP.AnySpellFile[]): void {
+    for (const file of files) this.toSave.add(file.path)
+    void after(FileStates.SAVE_WAIT / 1000, () => files.forEach((file) => this.toSave.delete(file.path)))
+  }
+
+  /**
+   * How long `saveAfterEdit()` waits for an edit, in msec:  Monaco's `SpellModels.SAVE_WAIT`.
+   * - Kept equal to it by hand until the swap, as `PARSE_WAIT` is.
+   */
+  static SAVE_WAIT = 2000
+
+  /**
+   * Make `edits` to `file` through its state, so its caret and its own undo stay right:  `false` with no state of it.
+   * - Edits from outside the code:  the Inspector, the side bar, a rename, the value picker.
+   * - `step`, the default:  an undo step of its own (a move, a lock).
+   * - `typing`:  joins the run of typing before it, as keys typed in the code do (a notebook's example typed in).
+   * - Either way the change carries `EDIT_WAY`, so the typing helps leave it alone.
+   * - Shown in a view:  through the view, which follows it;  shown nowhere:  into the state, kept for later.
+   */
+  applyEdits(file: SP.AnySpellFile, edits: readonly TextEdit[], way: EditWay = "step"): boolean {
+    const entry = this.entries.get(file.path)
+    if (!entry) return false
+    const { doc } = entry.state
+    this.dispatch(entry, {
+      changes: LspToCodeMirror.changes(doc, edits),
+      annotations: [
+        FileStates.EDIT_WAY.of(way),
+        way === "step" ? isolateHistory.of("full") : Transaction.userEvent.of("input.type")
+      ]
+    })
+    return true
+  }
+
+  /**
+   * The "not typed" mark:  an edit the editor didn't take from the keys carries its `EditWay` (epic `codemirror` P2).
+   * - On every `applyEdits()` change, and on the file's text coming in from outside (`contentsChanged()`).
+   * - Read by the typing helps (P4), so they never act on an edit the editor writes itself.
+   * - STATIC:  one mark for every file state on the page.
+   */
+  static readonly EDIT_WAY = Annotation.define<EditWay>()
+
+  /** Let go of every state we have, and stop following their files. */
+  disposeAll(): void {
+    for (const entry of this.entries.values()) entry.dispose()
+    this.entries.clear()
+    this.project = undefined
+  }
+
+  /** Let go of `project`'s states, and stop following their files. */
+  private disposeProject(project: SP.SpellProject): void {
+    for (const [path, entry] of this.entries) {
+      if (entry.file.project !== project) continue
+      entry.dispose()
+      this.entries.delete(path)
+    }
+  }
+
+  /** Project of the file we last made a state for -- see `stateFor()`. */
+  private project: SP.SpellProject | undefined
+
+  /** How many are using each project, so its states stay -- see `use()`. */
+  private users = new Map<SP.SpellProject, number>()
+
+  /** Each file's state and what goes with it, by `file.path`. */
+  private entries = new Map<string, FileEntry>()
+
+  /**
+   * Paths of files to save as soon as their state takes an edit -- see `saveAfterEdit()`.
+   * - By path:  what `saveAfterEdit()` is handed may be a fresh object for the same file.
+   */
+  private toSave = new Set<string>()
+
+  ////////////////
+  // ## Showing a state
+  ////////////////
+
+  /**
+   * Show `file`'s state in `view`, as it was last left:  its text, undo, folds, selection and scroll.
+   * - `host`:  what the view adds for itself, e.g. its right-click menu and go to definition, as it shows this state.
+   * - The state `view` showed before is kept, with where it was scrolled to.
+   * - SIDE EFFECT:  `view` takes the state from any other view showing it, which then follows it no more.
+   */
+  show(view: EditorView, file: SP.AnySpellFile, host: Extension = []): void {
+    this.release(view)
+    const entry = this.entryFor(file)
+    if (entry.view) this.release(entry.view)
+    entry.view = view
+    view.setState(entry.state)
+    view.dispatch({ effects: [FileStates.host.reconfigure(host), ...(entry.scroll ? [entry.scroll] : [])] })
+  }
+
+  /** The file state `view` shows, if any. */
+  fileShownIn(view: EditorView): SP.AnySpellFile | undefined {
+    for (const entry of this.entries.values()) if (entry.view === view) return entry.file
+    return undefined
+  }
+
+  /**
+   * `view` shows its file's state no more, e.g. before it's destroyed:  the state is kept, where it was scrolled to too.
+   * - Nothing to do for a view that shows none.
+   */
+  release(view: EditorView): void {
+    for (const entry of this.entries.values()) {
+      if (entry.view !== view) continue
+      entry.scroll = view.scrollSnapshot()
+      entry.view = undefined
+      entry.state = entry.state.update({ effects: FileStates.host.reconfigure([]) }).state
+    }
+  }
+
+  /**
+   * Each state's place for what the view showing it adds (`show()`'s `host`).
+   * - STATIC:  every file state has one, empty while it's shown nowhere.
+   */
+  private static readonly host = new Compartment()
+
+  ////////////////
+  // ## Following files
+  ////////////////
+
+  /** `file`'s entry, made with those of its project's spell files if need be -- see `stateFor()`. */
+  private entryFor(file: SP.AnySpellFile): FileEntry {
+    const previous = this.project
+    if (file.project !== previous) {
+      this.project = file.project
+      if (previous && !this.users.has(previous)) this.disposeProject(previous)
+    }
+    for (const spellFile of file.project.spellFiles) this.ensureEntry(spellFile)
+    return this.ensureEntry(file)
+  }
+
+  /** `file`'s entry, made and set following its file if we don't have one. */
+  private ensureEntry(file: SP.AnySpellFile): FileEntry {
+    const existing = this.entries.get(file.path)
+    if (existing) return existing
+
+    const language =
+      file instanceof SP.SpellFile
+        ? new CodeMirrorLanguage({ service: this.service, file, parseNow: () => this.parseNow() })
+        : undefined
+    const entry: FileEntry = {
+      file,
+      language,
+      state: EditorState.create({ doc: file.contents ?? "", extensions: this.extensionsFor(file, language) }),
+      dispose: () => {
+        stopContents()
+        stopParse?.()
+      }
+    }
+    this.entries.set(file.path, entry)
+    const stopContents = observe(() => this.whenContentsChange(entry))
+    const stopParse = file instanceof SP.SpellFile ? observe(() => this.whenParsed(entry, file)) : undefined
+    return entry
+  }
+
+  /**
+   * What `file`'s state is made of:  how it follows its view, room for the view's own, Spell's features for a spell
+   * file, and the setup every editor takes.
+   * - Spell's before the setup's, so its keys (Enter) get the first go.
+   */
+  private extensionsFor(file: SP.AnySpellFile, language: CodeMirrorLanguage | undefined): Extension {
+    const spell = language
+      ? [
+          closeBrackets(),
+          keymap.of(closeBracketsKeymap),
+          autocompletion({ override: [language.completions], icons: false }),
+          CodeMirrorTyping.extension(() => language.file, language.file.language.lang),
+          language.extensions(),
+          CodeMirrorBubbly.extension(() => language.file)
+        ]
+      : []
+    return [
+      EditorView.updateListener.of((update) => {
+        const entry = this.entries.get(file.path)
+        // only the view showing it:  another may still hold an old copy of the state
+        if (entry && update.view === entry.view) this.took(entry, update.state, update.docChanged)
+      }),
+      FileStates.host.of([]),
+      spell,
+      CodeMirrorSetup.extensions()
+    ]
+  }
+
+  /** Make `spec`'s change to `entry`'s state:  through the view showing it, else into the state itself. */
+  private dispatch(entry: FileEntry, spec: TransactionSpec): void {
+    if (entry.view) {
+      entry.view.dispatch(spec)
+      return
+    }
+    const transaction = entry.state.update(spec)
+    this.took(entry, transaction.state, transaction.docChanged)
+  }
+
+  /** `entry`'s state is now `state`:  kept, and an edit goes into its file (`stateEdited()`). */
+  private took(entry: FileEntry, state: EditorState, isEdited: boolean): void {
+    entry.state = state
+    if (isEdited) this.stateEdited(entry)
+  }
+
+  /**
+   * `entry`'s state was edited:  its text goes into its file, which re-parses once the typing pauses (`parseSoon()`).
+   * - Ignores `contentsChanged()` putting the file's own text in, which leaves them equal.
+   */
+  private stateEdited(entry: FileEntry): void {
+    const { file } = entry
+    const text = entry.state.doc.toString()
+    if (text === file.contents) return
+    file.isDirty = true
+    if (file instanceof SP.SpellFile) {
+      file.project.takeText(file, text)
+      this.parseSoon(file.project)
+    } else {
+      file.contents = text
+      file.project.updatedContentsFor(file)
+    }
+    this.onEdit(file)
+    if (this.toSave.delete(file.path)) {
+      Promise.resolve(file.save(undefined)).catch((error: unknown) =>
+        console.warn(`FileStates:  couldn't save ${file.path}`, error)
+      )
+    }
+  }
+
+  /**
+   * Follow `entry.file.contents` -- and ONLY that:  when they change, `contentsChanged()` in a microtask.
+   * - NEVER touch CodeMirror inside the reaction:  a dispatch runs the view's listeners there and then, which read
+   *   spell state -- which the reaction would follow too.
+   */
+  private whenContentsChange(entry: FileEntry): void {
+    if (entry.file.contents !== undefined) queueMicrotask(() => this.contentsChanged(entry))
+  }
+
+  /**
+   * `entry`'s file's `contents` changed from outside, e.g. it loaded, or another editor typed in it:
+   * its state takes the one change that makes them the same.
+   * - Kept out of undo:  undoing your own edits still works, around it.
+   */
+  private contentsChanged(entry: FileEntry): void {
+    const { contents } = entry.file
+    if (contents === undefined || this.entries.get(entry.file.path) !== entry) return
+    const now = entry.state.doc.toString()
+    if (contents === now) return
+    this.dispatch(entry, {
+      changes: differenceOf(now, contents),
+      annotations: [FileStates.EDIT_WAY.of("step"), Transaction.addToHistory.of(false)]
+    })
+  }
+
+  /**
+   * Follow `file.match` -- and ONLY that:  when it changes, `parseChanged()` in a microtask.
+   * - Outside this reaction, so nothing `parseChanged()` reads is followed too:  the diagnostics read, and fill
+   *   caches in, observable state, e.g. `project.activeImports`, which would set this off again, for ever.
+   * - A microtask also lets a parse finish setting `scope`, `inputLines` and `match` first.
+   */
+  private whenParsed(entry: FileEntry, file: SP.SpellFile): void {
+    if (file.match) queueMicrotask(() => this.parseChanged(entry, file))
+  }
+
+  /**
+   * `file`'s parse changed:  its diagnostics become its state's problems, and `CodeMirrorSetup.PARSED` tells the rest.
+   * - Only a parse of the text the state holds:  an older one would put its problems in the wrong places.
+   */
+  private parseChanged(entry: FileEntry, file: SP.SpellFile): void {
+    if (!file.match || this.entries.get(file.path) !== entry) return
+    const { state } = entry
+    if (file.contents !== state.doc.toString()) return
+    const problems = this.service
+      .diagnostics(file)
+      .map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic))
+    const { effects } = setDiagnostics(state, problems)
+    this.dispatch(entry, { effects: [...asList(effects), CodeMirrorSetup.PARSED.of(null)] })
+  }
+}
+
+/** How a `FileStates` is made. */
+export type FileStatesProps = {
+  /** the language service, which answers each spell file's problems */
+  service: LSP.SpellLanguageService
+  /** called after each edit of a state has gone into its file.  Default:  nothing. */
+  onEdit?: (file: SP.AnySpellFile) => void
+}
+
+/**
+ * How an edit from outside the code joins its file's undo:  a step of its own, or part of a run of typing
+ * -- see `FileStates.applyEdits()`.  The same words as Monaco's `SpellModels`' `EditWay`.
+ */
+export type EditWay = "step" | "typing"
+
+/** One file's state, and what goes with it. */
+type FileEntry = {
+  /** the file */
+  file: SP.AnySpellFile
+  /** its state now:  what the view showing it holds, or what it was left as */
+  state: EditorState
+  /** the language service's features for it, if it's Spell */
+  language: CodeMirrorLanguage | undefined
+  /** the view showing it, if any */
+  view?: EditorView
+  /** where it was scrolled to when last shown */
+  scroll?: StateEffect<unknown>
+  /** stops following its file */
+  dispose: () => void
+}
+
+/** `effects`, one or many or none, as a list. */
+function asList<T>(effects: T | readonly T[] | undefined): T[] {
+  if (effects === undefined) return []
+  return Array.isArray(effects) ? [...(effects as readonly T[])] : [effects as T]
+}
+
+/** The one change taking `before` to `after`:  what's between their common start and end. */
+function differenceOf(before: string, after: string) {
+  let start = 0
+  while (start < before.length && start < after.length && before[start] === after[start]) start++
+  let end = 0
+  while (
+    end < before.length - start &&
+    end < after.length - start &&
+    before[before.length - 1 - end] === after[after.length - 1 - end]
+  )
+    end++
+  return { from: start, to: before.length - end, insert: after.slice(start, after.length - end) }
+}
