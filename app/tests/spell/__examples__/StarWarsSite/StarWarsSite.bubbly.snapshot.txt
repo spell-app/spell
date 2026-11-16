@@ -505,3 +505,15 @@
 |   it has a **person sidebar**
 |   it has a not found page
 |   it has an **error page**
+
+==== /main.page-layout.spell
+⟦// The frame round every page of the Star Wars site (epic `mockup` T39):  the site's navigation in the drawer;⟧
+⟦// above each page its app menu, the drawer's button and where you are;  under that, the page's family as tabs.⟧
+[thing create_one_of_a_kind L0]
+| «main layout» is a **page layout**
+|   [action draw_it L1]
+|   | to **draw** its **app menu**
+|   |   <⟨app-menu⟩>
+|   |     <⟨site-nav-button⟩ slot=«"start"» />
+|   |     <⟨site-breadcrumbs⟩ slot=«"start"» />
+|   |   </⟨app-menu⟩>
