@@ -87,7 +87,7 @@ describe.skipIf(!SERVING)("drafts, Publish and versions", { timeout: 180_000 }, 
     expect(await page.locator(".Drafted:visible").count()).toBe(1)
     expect(await page.locator(".PublishDraft ui-button.DiscardDraft").count()).toBe(1)
     expect((await page.locator(".PublishDraft .DraftState").textContent())?.trim()).toBe("Draft")
-    expect(await page.locator(".PublishDraft .DraftState").getAttribute("data-tooltip")).toMatch(/only you see them/)
+    expect(await page.locator(".PublishDraft .DraftState").getAttribute("data-tooltip")).toMatch(/only you see them/i)
     await page.locator(".PublishDraft ui-button.Publish").click()
     await page.waitForSelector(".PublishDraft", { state: "detached", timeout: 10_000 })
     expect(await page.locator(".Drafted:visible").count()).toBe(0)
