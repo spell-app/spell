@@ -1,3 +1,4 @@
+import isEqual from "lodash/isEqual"
 import { For, Show, createEffect, createMemo, createSignal, omit } from "solid-js"
 
 import { SP } from "spell/parser/spell"
@@ -145,6 +146,8 @@ export type ProjectRootState = {
  * - SIDE EFFECT:  loads the root once it's known, if it isn't yet.
  *   A failure is a console warning and `failed`, e.g. a root whose folder doesn't exist (the server answers 500).
  * - A memo makes a new `tracked()` per root (disposing the last):  `tracked()`'s read can't follow Solid props.
+ * - Each project keeps its object while nothing about it changes, so a `<For>` over `projects` keeps its rows
+ *   when the root is read again (Solid's `UNSTABLE_LIST_IDENTITY`:  21 of 21 rows redrawn, epic `editor` I178).
  * - Call in a component body:  it's owned by the component.
  */
 export function trackProjectRoot(root: () => SPACES.SpellProjectRoot | undefined): () => ProjectRootState {
@@ -158,9 +161,20 @@ export function trackProjectRoot(root: () => SPACES.SpellProjectRoot | undefined
       setFailed(projectRoot)
     })
   })
+  // each project's last object, by its path:  handed out again while it's the same
+  const kept = new Map<string, ProjectRootState["projects"][number]>()
   const state = createMemo(() => {
     const projectRoot = current()
-    return tracked(() => readProjectRoot(projectRoot))
+    return tracked(() => {
+      const read = readProjectRoot(projectRoot)
+      read.projects = read.projects.map((project) => {
+        const last = kept.get(project.path)
+        if (last && isEqual(last, project)) return last
+        kept.set(project.path, project)
+        return project
+      })
+      return read
+    })
   })
   return () => ({ ...state()(), failed: !!failed() && failed() === current() })
 }

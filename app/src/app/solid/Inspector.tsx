@@ -79,7 +79,7 @@ import "./Inspector.css"
  * - PICKING:  while it's on, pointing at the app outlines the part under the pointer, and a click selects it:
  *   a drawn thing or a Spell UI control (an input, a button);  Alt-click selects any Spell UI element.
  *   - It starts as the Inspector opens, and stops once something's selected:  the app works as ever again.
- *   - The top bar's Inspect app (its crosshairs) starts it again;  Esc stops it.
+ *   - Its crosshairs button starts it again;  Esc stops it.
  *   - The click goes to the Inspector, never to the app:  selecting a button doesn't press it.
  *   - Shift, Command or Control adds to what's selected, and keeps inspecting;
  *     so does dragging across the app's background, a rubber band (`PartSelector`).
@@ -1254,6 +1254,28 @@ export class Inspector {
   }
 
   /**
+   * Add an empty action to `thing`'s type, `to "new action"`, as a step of `editor.history` (epic `editor` T79):
+   * the Code card's Add Action.
+   * - Written as an event is (`newEventIn()`):  after its type's last line, its empty body a level in.
+   * - Named `new action`, else `new action 2` ... one none of `actions` has.
+   * - Its row then shows with the cursor in its code (`Inspector.justAdded`);  it's renamed in its signature.
+   * - Nothing happens where its type can't be found in the program.
+   * - TODO:  a Spanish program's own words (`para "nueva acción"`):  English is written for now, as `addEvent()` does.
+   */
+  static addAction(thing: object, actions: readonly { words: string }[]): void {
+    const words = newActionWords(actions.map((action) => action.words))
+    const written = newEventIn(InspectorActions.typeWordsOf(thing), sourceFiles(), `to "${words}"`)
+    if (!written) return
+    const file = sliceOf({ path: written.path, from: 1, to: 1 })?.file
+    if (!file) return
+    setJustAdded(words)
+    editor.history.change(
+      { file, at: written.at, before: "", after: written.code },
+      { title: appTexts.text("inspectorAddAction") }
+    )
+  }
+
+  /**
    * Remove `element`'s event `row` from the program (epic `editor` T73):  its head and its code, as a step of
    * `editor.history`, so one undo puts it back.
    * - `when`:  `"after asking"` (a click on its ✕) asks first, naming it;  `"at once"` (an ⌥-click) doesn't.
@@ -1868,7 +1890,17 @@ function isSameElements(parts: readonly SelectedPart[], elements: readonly Eleme
   return parts.length === elements.length && parts.every((part, index) => part.element === elements[index])
 }
 
-/** The row added last, by its words (a drawn thing's) or DOM event:  `Inspector.justAdded`. */
+/** A new action's name:  `new action`, else `new action 2` ..., whichever of `taken` doesn't have. */
+function newActionWords(taken: readonly string[]): string {
+  const isTaken = (words: string) => taken.some((each) => each.trim().toLowerCase() === words)
+  let words = NEW_ACTION_WORDS
+  for (let count = 2; isTaken(words); count++) words = `${NEW_ACTION_WORDS} ${count}`
+  return words
+}
+/** What Add Action names the action it writes, before it's renamed. */
+const NEW_ACTION_WORDS = "new action"
+
+/** The row added last, by its words (a drawn thing's or an action's) or DOM event:  `Inspector.justAdded`. */
 const [justAdded, setJustAdded] = createSignal("")
 
 /** Where an event's or action's code is:  its file, and its lines, 1-based (`Inspector.placeOfEvent()`). */
@@ -2912,8 +2944,8 @@ function pinnedAt(height: number): Keyframe {
  * What's selected:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
  * `<ui-property-editor>` of every property it has, those it sets first
  * (Owen:  "lose that [More]. Show all of the properties").
- * - Inspecting again is the top bar's Inspect app (`<InspectAppButton>`):  the card has no button of its own
- *   (Owen, 2026-11-15, T78).
+ * - Inspecting again:  Inspect app, in the card's header as in the top bar (`<InspectAppButton>`;
+ *   Owen, 2026-11-15:  "Put the inspector crosshair back in this header", T78).
  * - Nothing selected:  the card is titled "Inspector", and says how to select.
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
@@ -2966,6 +2998,8 @@ function PropertiesCard(): JSX.Element {
           )}
         </Show>
       }
+      // Inspect app in the card's header, at its right (Owen, 2026-11-13, I60;  kept, 2026-11-15, T78)
+      actions={<InspectAppButton slot="right" />}
     >
       <Show
         when={inspected()}
@@ -3667,14 +3701,15 @@ export function InspectorToggle(): JSX.Element {
 
 /****************
  * ### `<InspectAppButton>`
- * Inspect app, in the top bar's Run | Edit group, after Edit:
+ * Inspect app, in the top bar's Run | Edit group, after Edit (and in the Inspector card's header):
  * select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
  * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
  * - `item`:  a menu item, icon only, for the bar's group (`<ModeButtons inspect>`);  else a bare icon.
+ * - `slot`:  the bare icon's place in a toolbar, `right` in a card's header.
  ****************/
-export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.Element {
+export function InspectAppButton(props: { id?: string; item?: boolean; slot?: string }): JSX.Element {
   const pressed = () => (Inspector.isInspecting ? "true" : "false")
   const title = () => (Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect"))
   const inspect = () => {
@@ -3695,6 +3730,7 @@ export function InspectAppButton(props: { id?: string; item?: boolean }): JSX.El
   ) : (
     <ui-icon
       id={props.id}
+      slot={props.slot}
       name="crosshairs"
       link=""
       class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}

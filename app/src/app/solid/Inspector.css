@@ -286,11 +286,6 @@ ui-panel.InspectorCard > .InspectorSection {
     margin-block-start: 12px;
   }
 }
-/* the Code card's "+", in its header:  a bare icon and its caret, in the header's grey */
-.Inspector ui-dropdown.InspectorAddEvent {
-  color: var(--ui-text-muted);
-  --ui-dropdown-icon-spacing: 2px;
-}
 /* each event, ability and action of the Code card (`<ui-section>`, folding on its own;  epic `editor` I109):
    its chevron, icon and words (or run button), then its code, in the file (`<CodeSlice>`) */
 ui-section.InspectorEvent {
@@ -463,13 +458,60 @@ ui-button.InspectorRowChip {
   align-items: center;
 }
 
-/* Events' "+":  its glyph's own width, level with the header's other icons */
-ui-dropdown.InspectorAddEvent > ui-icon[slot="trigger"] {
-  --ui-icon-width: auto;
-  --ui-icon-distance: 0;
-  /* no room after it:  a dropdown keeps that for the text it shows, and this one shows none */
+/*
+ * The Code card's Add Event and Add Action (T79):  an icon and its words each, in the header's grey and size,
+ * the theme's primary colour under the pointer;  Add Event's caret after its words.
+ * - In a column too narrow for their words (the card under 300px), their icons alone, their words their tooltips:
+ *   the header never wraps.
+ */
+ui-panel.InspectorCard[data-panel="code"] {
+  container: code-card / inline-size;
+}
+.InspectorCard .InspectorAddButton {
+  color: var(--spell-bar-icon-color, var(--ui-text-muted));
+  white-space: nowrap;
+  &:hover {
+    color: var(--ui-primary);
+  }
+}
+ui-dropdown.InspectorAddEvent {
+  --ui-dropdown-icon-spacing: 4px;
+}
+.InspectorAddTrigger {
   display: inline-flex;
-  margin: 0;
+  align-items: center;
+  gap: 4px;
+  /* on its line's top, not its baseline:  no room under it, so the header's no taller than the other cards' */
+  vertical-align: top;
+  & > ui-icon {
+    --ui-icon-distance: 0;
+    margin: 0;
+  }
+}
+ui-button.InspectorAddAction {
+  margin-inline-start: 12px;
+}
+ui-button.InspectorAddAction::part(button) {
+  gap: 4px;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  box-shadow: none;
+}
+ui-button.InspectorAddAction::part(icon) {
+  margin: 0 4px 0 0;
+}
+@container code-card (inline-size < 300px) {
+  .InspectorAddWords {
+    display: none;
+  }
+  ui-button.InspectorAddAction {
+    margin-inline-start: 8px;
+  }
+  ui-button.InspectorAddAction::part(icon) {
+    margin: 0;
+  }
 }
 
 /*
