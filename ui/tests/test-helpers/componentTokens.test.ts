@@ -74,7 +74,11 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-select-padding-inline": "a compact editor's selects are tight, as its inputs",
     "--ui-dropdown-padding-block": "a compact editor's dropdowns (pills) are tight, as its inputs",
     "--ui-dropdown-padding-inline": "a compact editor's dropdowns (pills) are tight, as its inputs",
-    "--ui-menu-segmented-item-padding": "a compact editor's segmented rows (icons) fit half a row"
+    "--ui-menu-segmented-item-padding": "a compact editor's segmented rows (icons) fit half a row",
+    "--ui-select-picker-max-height":
+      "a compact editor's select shows every choice, up to the window's room (epic `editor` I198)",
+    "--ui-select-item-divider-color":
+      "a compact editor's select menus draw no line between choices (epic `editor` I198)"
   },
   "ui-property-editor/UIProperty.css": {
     "--ui-checkbox-label-distance":

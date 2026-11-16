@@ -90,6 +90,8 @@ class BubblyDecorations {
   private readonly tags: Array<{ start: number; end: number }> = []
   /** The feet under each line end, by where it is, innermost first:  as they stack. */
   private readonly feet = new Map<number, FootWidget[]>()
+  /** Where each line with a band starts. */
+  private readonly bandLines = new Set<number>()
 
   constructor(
     private readonly state: EditorState,
@@ -108,6 +110,8 @@ class BubblyDecorations {
   /** The decorations, sorted as CodeMirror wants them. */
   build(): DecorationSet {
     this.nodes(this.drawing.nodes, [])
+    // a band right under a foot:  room between the two blocks (T141)
+    for (const [at, feet] of this.feet) if (this.bandLines.has(at + 1)) feet.at(-1)!.isAboveBand = true
     return this.decorations.build()
   }
 
@@ -178,21 +182,47 @@ class BubblyDecorations {
       // a body opening with a group:  the group's band hangs on the rail right under this one, so no inside corner (I119)
       if (hasBody && opensWithGroup(block)) band.push("cmb-band-opens-group")
       this.decorations.mark(head.start, head.end, band, { style: `--cmb-column: ${indent.tabs}` })
+      this.bandLines.add(this.state.doc.lineAt(head.start).from)
     }
     if (!hasBody) return
     // a block the slice cuts:  its body drawn, its rail not
     const inside = isShown ? [...rails, { ...indent, partOfSpeech }] : rails
     this.nodes(block.body, inside)
     if (!isShown) return
-    // the foot, under its last line
+    this.foot(block, indent, rails)
+  }
+
+  /**
+   * `block`'s foot, under its last line, its rail at `indent` inside `rails`.
+   * - Blocks in it ending on the same line have theirs first, and this one goes under them,
+   *   as far below the one right above it as its rail is left of that one's:  the feet as far apart down as the rails
+   *   across (Owen, 2026-11-11), as Monaco and the drawn-bubbly page stack them (epic `language` I125).
+   * - A group in it ending there too, hung on its rail, ends in the SAME foot, the group's drawn:
+   *   stacked under it, they were one foot twice as thick, in two colours (Owen, 2026-11-13;  I125).
+   */
+  private foot(block: SP.BubblyBlock, indent: Indent, rails: Rail[]) {
     const last = lastLineEnd(block)
     const at = this.state.doc.lineAt(last).to
-    const foot = new FootWidget(indent.tabs, partOfSpeech, rails)
+    const above = this.feet.get(at)?.at(-1)
+    const rail = rails.length
     // its rail stops short in the row above its foot, where the foot's round corner turns:  its last line, or the foot of
     // a block in it that ends there too
-    const above = this.feet.get(at)?.at(-1)
-    if (above) above.stopped.add(rails.length)
-    else this.decorations.stopRail(last, rails.length)
+    if (above && above.column <= indent.tabs) {
+      // the group's foot is this one's:  this rail ends beside it, stopping short where the group's does
+      above.ended.add(rail)
+      if (above.stoppedIn) above.stoppedIn.stopped.add(rail)
+      else this.decorations.stopRail(last, rail)
+      return
+    }
+    // a group's foot turns out of the rail it hangs on, its parent's:  that rail's colour (its own is under it)
+    const hue = block.isGroup ? (rails.at(-1)?.partOfSpeech ?? block.partOfSpeech) : block.partOfSpeech
+    const foot = new FootWidget(indent.tabs, hue, rails)
+    if (above) {
+      above.stopped.add(rail)
+      above.drop = above.column - indent.tabs
+      foot.stoppedIn = above
+      foot.dropsAbove = above.dropsAbove + above.drop
+    } else this.decorations.stopRail(last, rail)
     this.feet.set(at, [...(this.feet.get(at) ?? []), foot])
     this.decorations.add(
       Decoration.widget({
@@ -471,11 +501,19 @@ function sameRows(a: Map<number, number>, b: Map<number, number>): boolean {
  * on a line of its own under its last line.
  * - The rails of the blocks around it run on beside it;
  *   one whose own foot is in the row under it stops short there, for that foot's corner (`stopped`).
+ * - Feet stacked under one line (I125):
+ *   - a row with another foot under it is as tall as their rails are apart across (`drop`), so each foot is that far
+ *     below the one above it
+ *   - the last row takes the rest, so the line under the stack starts on a whole pixel, as under one foot (I114)
+ * - Right above a band, the last row has room under its foot (`--cmb-block-gap`), so the two blocks stand apart
+ *   (Owen:  "add some space between the pill blocks";  T141):  in the foot's row, not the band's line,
+ *   so the band's fold arrow stays centred on it, and a click there lands where a click on the foot does.
+ * - A group's foot is in its parent's hue:  it turns out of the rail the group hangs on, its parent's, drawn over its own.
  ****************/
 class FootWidget extends WidgetType {
   constructor(
     readonly column: number,
-    readonly partOfSpeech: SP.BubblyPartOfSpeech,
+    readonly partOfSpeech: string,
     readonly rails: Rail[]
   ) {
     super()
@@ -484,24 +522,52 @@ class FootWidget extends WidgetType {
   /** The rails beside it, by their place in `rails`, whose feet are in the row under it:  set while it's laid out. */
   readonly stopped = new Set<number>()
 
+  /** The rails beside it that end in it, a group's parent's, whose foot it is:  set while it's laid out. */
+  readonly ended = new Set<number>()
+
+  /** The foot right above it, in whose row its rail stops short;  none when that's its last line. */
+  stoppedIn: FootWidget | undefined
+
+  /** How many tabs further down the foot under it is:  0 when it's the last of its stack. */
+  drop = 0
+
+  /** The tabs the rows above it in its stack take. */
+  dropsAbove = 0
+
+  /** Is the next line a band:  then its row has room under the foot, so the two blocks stand apart (T141). */
+  isAboveBand = false
+
   eq(other: FootWidget): boolean {
     return (
       other.column === this.column &&
       other.partOfSpeech === this.partOfSpeech &&
-      railsStyle(other.rails, other.stopped) === railsStyle(this.rails, this.stopped)
+      other.drop === this.drop &&
+      other.dropsAbove === this.dropsAbove &&
+      other.isAboveBand === this.isAboveBand &&
+      other.style === this.style
     )
   }
 
   toDOM(): HTMLElement {
     const row = document.createElement("div")
     row.className = "cmb-foot-row"
-    if (this.rails.length) row.style.cssText = railsStyle(this.rails, this.stopped)
+    row.style.cssText = this.style
+    if (this.drop) row.classList.add("cmb-foot-over")
+    if (this.isAboveBand) row.classList.add("cmb-foot-above-band")
 
     const foot = document.createElement("div")
     foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}`
     foot.style.setProperty("--cmb-column", String(this.column))
     row.append(foot)
     return row
+  }
+
+  /** Its row's style:  the rails beside it, and how far down the foot under it is. */
+  private get style(): string {
+    const styles = this.rails.length ? [railsStyle(this.rails, this.stopped, this.ended)] : []
+    if (this.drop) styles.push(`--cmb-foot-drop-tabs: ${this.drop}`)
+    if (this.dropsAbove) styles.push(`--cmb-foot-drops-above: ${this.dropsAbove}`)
+    return styles.join("; ")
   }
 
   ignoreEvent(): boolean {

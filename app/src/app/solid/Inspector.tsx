@@ -1294,15 +1294,34 @@ export class Inspector {
   }
 
   /**
+   * The thing whose type Add Action writes into, for `element` selected (epic `editor` I197, J160):
+   * - a drawn thing (`<solitaire-card>`):  its own thing
+   * - a Spell UI element (a `<button>` in a drawing):  the nearest view drawing it, the element whose drawing holds it,
+   *   through its shadow root:  its event handlers can call that view's actions
+   * - `undefined`:  no view draws it
+   */
+  static actionHomeOf(element: Element): object | undefined {
+    for (let at: Element | undefined = element; at; at = at.parentElement ?? shadowHostOf(at)) {
+      const thing = SpellElement.thingOf(at)
+      if (thing) return thing
+    }
+    return undefined
+  }
+
+  /**
    * Add an empty action to `thing`'s type, `to "new action"`, as a step of `editor.history` (epic `editor` T79):
    * the Code card's Add Action.
    * - Written as an event is (`newEventIn()`):  after its type's last line, its empty body a level in.
-   * - Named `new action`, else `new action 2` ... one none of `actions` has.
+   * - Named `new action`, else `new action 2` ... one none of its actions has.
    * - Its row then shows with the cursor in its code (`Inspector.justAdded`);  it's renamed in its signature.
+   * - `from`:  the Spell UI element it was added from, when `thing` is the view drawing it (`actionHomeOf()`, I197):
+   *   that view is selected, so its Code card shows the new action, the cursor in it.
    * - Nothing happens where its type can't be found in the program.
    * - TODO:  a Spanish program's own words (`para "nueva acción"`):  English is written for now, as `addEvent()` does.
    */
-  static addAction(thing: object, actions: readonly { words: string }[]): void {
+  static addAction(thing: object, from?: Element): void {
+    const core = runtimeCore()
+    const actions = core ? InspectorActions.of(thing, core, editor.programWords) : []
     const words = newActionWords(actions.map((action) => action.words))
     const written = newEventIn(InspectorActions.typeWordsOf(thing), sourceFiles(), `to "${words}"`)
     if (!written) return
@@ -1313,6 +1332,7 @@ export class Inspector {
       { file, at: written.at, before: "", after: written.code },
       { title: appTexts.text("inspectorAddAction") }
     )
+    if (from) Inspector.inspectThing(thing)
   }
 
   /**
@@ -2117,11 +2137,16 @@ function turnedBox(element: Element): { width: number; height: number; matrix: D
   return { width, height, matrix: new DOMMatrix([linear.a, linear.b, linear.c, linear.d, left, top]) }
 }
 
+/** The element whose shadow root holds `node`, if one does. */
+function shadowHostOf(node: Element): Element | undefined {
+  return node.parentNode instanceof ShadowRoot ? node.parentNode.host : undefined
+}
+
 /** `node`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host. */
 function flatParentOf(node: Element): Element | undefined {
   if (node.assignedSlot) return node.assignedSlot
   if (node.parentElement) return node.parentElement
-  return node.parentNode instanceof ShadowRoot ? node.parentNode.host : undefined
+  return shadowHostOf(node)
 }
 
 /**

@@ -10,6 +10,7 @@
  *   as custom properties inherit into what's slotted.
  *   - `--ui-property-editor-font-size` (13px), `-row-gap` (8px), `-column-gap` (12px), `-label-distance` (3px)
  *   - its controls tighter, set as the page would (`componentTokens.test.ts` lists each)
+ *   - its selects' menus as tall as their choices (up to the window's room), with no line between them
  */
 
 @layer ui.components.property-editor.content, ui.components.property-editor.variations;
@@ -72,6 +73,9 @@
     --ui-dropdown-padding-block: 0.3em;
     --ui-dropdown-padding-inline: 0.6em;
     --ui-menu-segmented-item-padding: 0.4em 0.6em;
+    /* its selects' menus:  every choice shown (up to the window's room), no line between them (epic `editor` I198) */
+    --ui-select-picker-max-height: 100dvh;
+    --ui-select-item-divider-color: transparent;
     font-size: var(--_ui-property-editor-font-size);
   }
 }
