@@ -17,6 +17,8 @@
  * - `verbatim`:  files shipped exactly as they are, never compiled (`icons/icon-packs/**`:  data the runtime fetches)
  * - `reactJsx`:  files whose JSX is React's (Ink's terminal screens), not Solid's
  * - `files`:  what ships beside `dist/`, from the repo's root (`templates`, `repos.json5`)
+ * - `build`:  the repo's own yarn script, run in its folder before it's staged, for a `files` entry it builds
+ *   (the app's `build`:  the editor, `app/dist/`, which an install serves;  epic `repo-split` P26)
  * - `exports`:  more names the package answers, each to the module under `src/` it means, `*` allowed
  *   (Spell UI's short names, `"./ui-*": "components/ui-*\/index"`, for outside the repos)
  * - `bin`:  each command the package puts on the `PATH`, by the module under `src/` it runs (`cli/main`):
@@ -35,6 +37,7 @@ export type PublishSettings = {
   verbatim?: string[]
   reactJsx?: string[]
   files?: string[]
+  build?: string
   exports?: Record<string, string>
   bin?: Record<string, string>
   sideEffects?: string[]

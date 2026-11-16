@@ -144,7 +144,9 @@
       "cli/**"
     ],
     "files": [
-      "spaces"
-    ]
+      "spaces",
+      "app/dist"
+    ],
+    "build": "build"
   }
 }

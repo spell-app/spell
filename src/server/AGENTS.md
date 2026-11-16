@@ -244,6 +244,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `--root` naming any other folder is an error naming the kit (`kitRootOf()`),
           and so is `PageServer.ensure()` given one
       - I62's `--root spell-app`, added by the kit's `spell server` from outside spell-app, is gone
+      - outside any kit, run from an npm install of `spell`:  the installed package is the kit (`installedKit()`,
+        epic `repo-split` P26), so a project depending on `spell` runs `spell server local --spaces <dir>`
     - page edits:  `PageEditor`, `/api/pages`
     - its info:  `/api/server`
     - THE PAGE SERVER'S SETTINGS (epic `repo-split` P16):  every folder's own PART, merged.

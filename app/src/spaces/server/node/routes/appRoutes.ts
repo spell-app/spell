@@ -13,6 +13,7 @@ import type { RouteModule } from "spell/server/page"
 import { pageServerSettings } from "spell/server/page/settings"
 import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
+import { isSourceCheckout } from "spell/app/spaces/server/node/spellSpacesDir"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
 import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
@@ -74,6 +75,7 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  * - The house-network test site (`LocalSiteServer`, epic `atmosphere` T58):  the cloud and Caddy, from the main
  *   checkout's page server alone, on a Mac set up for it;  it outlives the page server, so a restart leaves it up (T63).
  *   - `SPELL_NO_LOCAL_SITE=1` or a test (`VITEST`):  not started, so a test's server leaves the real ports alone.
+ *   - an npm install of `spell` (not a source checkout):  not started either
  * - Writes refuse a foreign `Origin` (another site posting into our projects).
  *   - The API has no token, since the editor calls it from vite's origin, through vite's proxy.
  * - As it starts:  compiles the built-in projects that are out of date (`@spell/examples`, `@spell/library`),
@@ -109,8 +111,10 @@ const appRoutes: RouteModule = {
     const checkout = checkoutOf(environment.repoDir)
     const isMainCheckout = !!checkout && checkout.root === checkout.main
     const editor = new EditorServer(root)
+    // a checkout's alone:  an npm install of `spell` on a Mac set up for the site would build and swap its cloud
+    // from the install's code (epic `repo-split` P26)
     const site =
-      !process.env.VITEST && !process.env.SPELL_NO_LOCAL_SITE
+      !process.env.VITEST && !process.env.SPELL_NO_LOCAL_SITE && isSourceCheckout
         ? new LocalSiteServer({ isMainCheckout, editorPort: () => editor.portPicked })
         : undefined
     // an editor the house network reaches through Caddy listens on this machine alone (epic `atmosphere` P39)
