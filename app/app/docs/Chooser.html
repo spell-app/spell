@@ -57,10 +57,7 @@
 
           <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="image"></ui-icon>
-            <p>
-              Over the editor, opened from the "choose" button on the console's toolbar, a demo: "Pick one" of A, B and
-              C.
-            </p>
+            <p>Over the editor, asked for by <code>editor.choose()</code>: "Pick one" of A, B and C.</p>
             <ui-image
               src="_images/Chooser.png"
               alt="A dialog headed Pick one: a message, three radio buttons A, B and C, then Cancel and OK"
@@ -76,27 +73,9 @@
           <ui-section id="2-using-it" label="2. Using it" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
-              Nobody draws it in JSX: ask the editor, with <code>editor.choose()</code>, and wait for the answer. The
-              console's toolbar has two demo buttons that do:
+              Nobody draws it in JSX: ask the editor, with <code>editor.choose()</code>, and wait for the answer.
+              <code>Actions.choose</code> is a button that does, though no toolbar shows one today.
             </p>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>ConsoleViewer.tsx · the two demo buttons · 9 lines</ui-title>
-              <ui-content>
-                <ui-code language="typescript"
-                  ><script type="text/plain">
-                    <Actions.choose title="" header="Pick one" message="Message" options={["A", "B", "C"]} />
-                    <Actions.choose
-                      title=""
-                      header="Pick many"
-                      message="Message"
-                      options={{ a: "Option A", b: "Option B", c: "Option C" }}
-                      multiple
-                      defaultValue={["a", "b"]}
-                    />
-                  </script></ui-code
-                >
-              </ui-content>
-            </ui-accordion>
             <ui-accordion class="spell-code" appearance="styled">
               <ui-title>From code · asking the editor · 1 line</ui-title>
               <ui-content>

@@ -55,10 +55,14 @@
 
           <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="image"></ui-icon>
-            <p>The code column, too narrow for its file tabs, with the Solitaire example's files dropped down:</p>
+            <p>
+              The code column, too narrow for its file tabs, with the Solitaire example's files dropped down. The editor
+              draws this list from its tab row now (the button at its end), not from <code>FileDropdown</code>, which
+              nothing draws today.
+            </p>
             <ui-image
               src="_images/FileDropdown.png"
-              alt="The File dropdown open over the editor, listing Card.spell, Deck.spell, Pile.spell, Solitaire.spell and styles.css"
+              alt="The tab row's file list open over the editor:  Card.spell, ticked, then Pile.spell, Deck.spell, Solitaire.spell, styles.css and Card.editor.spell"
               appearance="bordered rounded"
             >
             </ui-image>
