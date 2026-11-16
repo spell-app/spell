@@ -13,7 +13,7 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  *   - `titled "Better?"`:  a bold first line
  *   - `in red`, `in inverted blue`:  its colour (word rule `toast_color`)
  *   - `at the top left`, `in the center` ...:  where on the screen (word rule `toast_position`)
- *   - `for 5 seconds` (any `pause_units`), or `until clicked`
+ *   - `for 5 seconds`, any duration (`pause`'s), or `until clicked`
  *   - `with a progress bar`, `... at the top`, `... filling up`:  a bar counting down (word rule `toast_progress`)
  *   - `side by side`:  toasts there line up in a row
  *   - `without pausing`:  the countdown keeps running under the pointer
@@ -27,22 +27,31 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  *   - One that stays until it's closed, with `and wait`, is an error:  clicks would wait for good.
  *     That's `until clicked`, `with "Got it"` and a time of 0;  `core.notify()` checks a time worked out as it runs.
  */
-export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?"> {
+export class Notify extends SpellStatement<
+  "kind?|message|title?|inverted?|color?|position?|time?|unit?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?",
+  NotifyData
+> {
   @proto static alias = ["statement", "async"]
 
-  /** Refuses `and wait` on a toast that stays. */
+  /** Notes its time's unit, refusing one that isn't a duration;  refuses `and wait` on a toast that stays. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
-    const match = super.parse(scope, tokens)
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return match
-    const { wait, time, untilClicked, okButton } = (match as P.MatchFor<this>).groups
-    const stays = untilClicked || okButton || `${time?.raw}` === "0"
+    const { wait, time, unit, untilClicked, okButton } = match.groups
+    if (time) {
+      const durationUnit = SP.durationUnitOf(time, unit)
+      const said = `${(unit ?? time).raw}`
+      if (!durationUnit)
+        return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("not-a-duration", { said }))
+      match.data.timeUnit = SP.CORE_TIME_UNITS[durationUnit.id] ?? durationUnit.id
+    }
+    const stays = untilClicked || okButton || `${time?.raw}` === "0" || time?.value === 0
     if (!wait || !stays) return match
     return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("cant-wait-for-toast-that-stays"))
   }
 
   getAST(match: P.MatchFor<this>) {
-    const { message, title, time, units, untilClicked, progress, sideBySide, keepRunning, okButton, wait } =
-      match.groups
+    const { message, title, time, untilClicked, progress, sideBySide, keepRunning, okButton, wait } = match.groups
     const options = new P.ASTObjectLiteral(match)
     const expression = (group: P.AnyMatch) => P.asAST<P.ASTExpression>(group.AST)
     const text = (value: string) => new P.ASTStringLiteral(match, { value, quote: '"' })
@@ -54,7 +63,7 @@ export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color
     if (position) options.addProp("position", text(position.replaceAll("_", " ")))
     if (time) {
       options.addProp("time", expression(time))
-      options.addProp("units", text(Wording.meaningOf(units) ?? "seconds"))
+      options.addProp("units", text(match.data.timeUnit ?? "seconds"))
     } else if (untilClicked) options.addProp("time", new P.ASTNumericLiteral(untilClicked, 0))
     const [bar, filling] = (Wording.meaningOf(progress) ?? "").split("_")
     if (bar) options.addProp("showProgress", text(bar))
@@ -116,3 +125,6 @@ export const TOAST_POSITIONS = [
 
 /** Where a toast's progress bar goes, and `_up` when it fills up instead of emptying:  `toast_progress`'s meanings. */
 export const TOAST_PROGRESS = ["bottom", "top", "bottom_up", "top_up"]
+
+/** What `notify` noted:  the core's name for its time's unit, `"seconds"`. */
+export type NotifyData = { timeUnit?: string }

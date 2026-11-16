@@ -105,7 +105,7 @@
 ⟦// Abre una en un editor y cámbiala:  la aplicación lo muestra en su siguiente revisión.⟧
 [thing create_place L0]
 | «archivos de tareas» es una carpeta de datos en «"tareas"»
-|   se revisa cada _30_ segundos
+|   se revisa cada _30_ segundos    ‾quantity(30 segundos)
 
 [thing create_type L0]
 | una «"tarea del servidor"» es una **tarea**
@@ -133,7 +133,7 @@
 [thing create_place L0]
 | «hoja de tareas» es una hoja en «"tareas.csv"»
 |   su identificador está en _"id"_
-|   se revisa cada _30_ segundos
+|   se revisa cada _30_ segundos    ‾quantity(30 segundos)
 
 [thing create_type L0]
 | una «"tarea de la hoja"» es una **tarea**

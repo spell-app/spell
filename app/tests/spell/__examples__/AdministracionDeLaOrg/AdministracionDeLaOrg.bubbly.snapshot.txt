@@ -6,7 +6,7 @@
 ⟦// La página de tu org nombra su propia org en la línea siguiente:  "@rs" es la de la Rock Society.⟧
 [thing create_place L0]
 | «roles de la org» es una carpeta de datos en «"@rs/__admin/roles"»
-|   se revisa cada _30_ segundos
+|   se revisa cada _30_ segundos    ‾quantity(30 segundos)
 |   los **perfiles** están en _"org_profiles"_
 |   las **funciones** están en _"org_roles"_
 |   los **miembros** están en _"members"_

@@ -391,6 +391,91 @@ BUILT_IN_DIMENSIONS: list[dict[str, Any]] = [
         ],
     },
     {
+        "name": "Duration",
+        "units": [
+            {
+                "id": "second",
+                "names": [
+                    "second",
+                    "sec",
+                    "seconds",
+                    "secs",
+                    "segundo",
+                    "seg",
+                    "segundos",
+                ],
+                "factor": 1,
+                "symbol": "sec",
+            },
+            {
+                "id": "millisecond",
+                "names": [
+                    "millisecond",
+                    "ms",
+                    "msec",
+                    "milliseconds",
+                    "msecs",
+                    "milisegundo",
+                    "mseg",
+                    "milisegundos",
+                ],
+                "factor": 0.001,
+                "symbol": "ms",
+            },
+            {
+                "id": "tick",
+                "names": [
+                    "tick",
+                    "ticks",
+                    "tic",
+                    "tics",
+                ],
+                "factor": 0.0166666666667,
+                "symbol": "ticks",
+            },
+            {
+                "id": "minute",
+                "names": [
+                    "minute",
+                    "min",
+                    "minutes",
+                    "mins",
+                    "minuto",
+                    "minutos",
+                ],
+                "factor": 60,
+                "symbol": "min",
+            },
+            {
+                "id": "hour",
+                "names": [
+                    "hour",
+                    "hr",
+                    "hours",
+                    "hrs",
+                    "hora",
+                    "h",
+                    "horas",
+                ],
+                "factor": 3600,
+                "symbol": "hr",
+            },
+            {
+                "id": "day",
+                "names": [
+                    "day",
+                    "days",
+                    "día",
+                    "días",
+                    "dia",
+                    "dias",
+                ],
+                "factor": 86400,
+                "symbol": "days",
+            },
+        ],
+    },
+    {
         "name": "Proportion",
         "units": [
             {

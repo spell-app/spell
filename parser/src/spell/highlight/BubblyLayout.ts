@@ -202,6 +202,8 @@ export class BubblyLayout {
       if (row?.isQuantity) {
         const [number] = descendantsNamed(match, [NUMBER_RULE])
         if (number) return this.underline(number.start!, end, "quantity")
+        // a measure written out, `300 msec`:  one match, no number rule in it
+        if (match.rule.name === MEASURE_RULE) return this.underline(start, end, "quantity")
       }
       if (row?.isCall && BubblyLayout.isOwnCall(match)) return this.underline(start, end, "call")
       if (row?.readsEach) return this.underlineEach(match)
@@ -920,6 +922,9 @@ const KEYWORD = "keyword"
 
 /** The rule of a number written in, `300` in `pause for 300 msec`. */
 const NUMBER_RULE = "number"
+
+/** The rule of a measure written out, `300 msec` in `pause for 300 msec`. */
+const MEASURE_RULE = "measure_literal"
 
 /** The method a drawing's head makes, `to draw it` => `draw()`, in every language. */
 const DRAW_METHOD = "draw"

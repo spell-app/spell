@@ -11,7 +11,7 @@
 | «chat» is a room at «"@rs/__thread"»
 [thing create_place L0]
 | «my threads» is a data folder at «"@rs/__threads"»
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing create_type L0]
 | a «"message"» is a **thing**

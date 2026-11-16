@@ -105,7 +105,7 @@
 ⟦// Open one in an editor and change it:  the app shows it at its next check.⟧
 [thing create_place L0]
 | «task files» is a data folder at «"tasks"»
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing create_type L0]
 | a «"server task"» is a **task**
@@ -133,7 +133,7 @@
 [thing create_place L0]
 | «task sheet» is a sheet at «"tasks.csv"»
 |   its id is its _"id"_
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing create_type L0]
 | a «"sheet task"» is a **task**

@@ -6,7 +6,7 @@
 ⟦// Your org's Admin page names its own org on the next line:  "@rs" is the Rock Society's.⟧
 [thing create_place L0]
 | «admin roles» is a data folder at «"@rs/__admin/roles"»
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 |   **stages** live at _"event_stages"_
 
 [thing create_type L0]

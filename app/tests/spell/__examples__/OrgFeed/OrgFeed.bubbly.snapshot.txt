@@ -6,7 +6,7 @@
 ⟦// Kept on this device:  opening it again, and each check, asks only for what's new since.⟧
 [thing create_place L0]
 | «my feed» is a data folder at «"@rs/__feed"»
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 |   keep a copy on this device
 
 [thing create_type L0]

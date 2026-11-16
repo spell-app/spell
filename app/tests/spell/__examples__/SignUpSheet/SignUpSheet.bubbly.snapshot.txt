@@ -14,7 +14,7 @@
 |   at most _40_ rows for each **event**
 |   each person asks for at most their _"invitations"_ **tickets**
 |   confirmed **tickets** join _"picnic@rs/__attendees"_
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing projection_of L0]
 | the «published sheet» is a projection of the **sign up sheet**
@@ -22,7 +22,7 @@
 |   into _"picnic@rs/sheet"_
 |   showing each **row**'s **person** and **shift**
 |   **published volunteers** live at _"volunteers"_
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing create_type L0]
 | a «"volunteer"» is a **thing**
@@ -62,7 +62,7 @@
 [thing create_place L0]
 | «my inbox» is a data folder at «"@rs/__inbox"»
 |   ⟦// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.⟧
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing create_type L0]
 | a «"message"» is a **thing**

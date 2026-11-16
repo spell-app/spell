@@ -8,7 +8,7 @@
 | «published sheet» is a data folder at «"picnic@rs/sheet"»
 |   ⟦// Who's on which shift, as everyone in the picnic sees it:  the sign-up sheet's projection.⟧
 |   **listings** live at _"volunteers"_
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing create_type L0]
 | a «"listing"» is a **thing**
@@ -21,7 +21,7 @@
 [thing create_place L0]
 | «my inbox» is a data folder at «"@rs/__inbox"»
 |   ⟦// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.⟧
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing create_type L0]
 | a «"message"» is a **thing**

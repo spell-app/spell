@@ -257,3 +257,56 @@ describe("a percent (P34, Owen's C1 on I47):  a proportion, kept as its fraction
     expect(js).toContain(squeezed('core.measureShown(cuenta.propina, "Proportion", "fraction")'))
   })
 })
+
+describe("a duration (T140):  how long, for `pause for` and a place's check", () => {
+  test.each([
+    ["pause for 300 msec", 'core.pauseFor(300, "msec")'],
+    ["pause for 3 ticks", 'core.pauseFor(3, "ticks")'],
+    ["pause for 1 minute 30 seconds", 'core.pauseFor(90, "seconds")'],
+    ["pause for 2 hours", 'core.pauseFor(2, "hours")']
+  ])("%s", (line, js) => {
+    const { js: compiledJs, errors } = compiled(["to wait:", `\t${line}`])
+    expect(errors).toEqual([])
+    expect(compiledJs).toContain(js)
+  })
+
+  test("anything that measures one:  `pause for the delay`", () => {
+    const { js, errors } = compiled([
+      "a timer is a thing:",
+      '\t- its "delay" is a duration in msec',
+      "\t- to wait:",
+      "\t\tpause for its delay"
+    ])
+    expect(errors).toEqual([])
+    expect(js).toContain('core.pauseFor(this.delay, "msec")')
+  })
+
+  test("Spanish:  `pausar su espera`", () => {
+    const [file] = parseSpellProject([
+      {
+        path: "/Prueba.es.spell",
+        contents: [
+          "un reloj es una cosa:",
+          '\t- su "espera" es una duración en mseg',
+          "\t- para esperar:",
+          "\t\tpausar su espera",
+          "\t\tpausar 3 tics"
+        ].join("\n")
+      }
+    ]).files
+    expect(file!.errors).toEqual([])
+    expect(`${file!.compiled}`).toContain('core.pauseFor(this.espera, "msec")')
+    expect(`${file!.compiled}`).toContain('core.pauseFor(3, "ticks")')
+  })
+
+  test("what isn't a duration is refused, saying so", () => {
+    expect(compiled(["to wait:", "\tpause for 2"]).errors.join("\n")).toContain(`"2" isn't a duration`)
+    expect(compiled(["to wait:", "\tpause for 2 cm"]).errors.join("\n")).toContain(`"2 cm" isn't a duration`)
+  })
+
+  test("the core waits as long, a tick 1/60 of a second", () => {
+    expect(core.TIME_UNITS_MAP.ticks).toBeCloseTo(1000 / 60)
+    for (const unit of Object.values(SP.CORE_TIME_UNITS)) expect(core.TIME_UNITS_MAP[unit]).toBeGreaterThan(0)
+    expect(core.TIME_UNITS_MAP.minutes).toBe(60_000)
+  })
+})

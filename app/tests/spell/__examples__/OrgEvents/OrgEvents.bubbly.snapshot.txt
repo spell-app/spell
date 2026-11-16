@@ -6,7 +6,7 @@
 ⟦// Your org's events page names its own org on the next line:  "@rs" is the Rock Society's.⟧
 [thing create_place L0]
 | «org events» is a data folder at «"@rs/__admin/events"»
-|   check it every _30_ seconds
+|   check it every _30_ seconds    ‾quantity(30 seconds)
 
 [thing create_type L0]
 | an «"event"» is a **thing**

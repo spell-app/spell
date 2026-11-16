@@ -417,11 +417,9 @@ placesEs.addRule(KeyGoesInAddress, {
     }
   ]
 })
-placesEs.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
-  syntax: "((second:segundo|segundos)|(minute:minuto|minutos)|(hour:hora|horas)|(day:día|días|dia|dias))"
-})
-placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} {unit:check_unit}?" })
-placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {unit:check_unit}" })
+placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {interval:measure_literal}" })
+placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number}" })
+placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {unit:unit_words}" })
 placesEs.addRule(Wording.specialize({ ruleName: "day_half", meanings: ["am", "pm"] }), {
   syntax: "((am:de la mañana|am|AM)|(pm:de la tarde|de la noche|pm|PM))"
 })
