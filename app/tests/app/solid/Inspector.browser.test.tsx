@@ -4,6 +4,7 @@ import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
+import { PropertyLayouts } from "spell/ui/property"
 import { Inspector, InspectorColumn, InspectorPane, isThing, itemsOf, uiReady } from "spell/app/app/solid"
 
 /**
@@ -126,6 +127,8 @@ describe("inspecting", () => {
     Inspector.stopInspecting()
     const inputs = [...area.querySelectorAll("ui-input")]
     Inspector.selectAll(inputs)
+    // the card waits for the tag's layout file, the first time (T97)
+    await PropertyLayouts.load("ui-input")
     flush()
     await ElementFixture.settle(host)
     expect(Inspector.allSelected.length).toBe(2)
@@ -202,6 +205,8 @@ describe("the properties card", () => {
     const host = await mount(() => <InspectorColumn />)
     Inspector.toggle()
     Inspector.select(area.querySelector("ui-button")!)
+    // the card waits for the tag's layout file, the first time (T97)
+    await PropertyLayouts.load("ui-button")
     flush()
     await ElementFixture.settle(host)
     const sections = [...host.querySelectorAll(".InspectorMain ui-property-group")]
