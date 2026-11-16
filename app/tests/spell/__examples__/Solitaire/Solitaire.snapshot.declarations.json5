@@ -173,7 +173,7 @@
         }
       ],
       "returns": "choice",
-      "defined": "/Pile.spell:683-1096"
+      "defined": "/Pile.spell:684-1097"
     },
     {
       "syntax": "{operator:is_or_is_not} on top of its pile",
@@ -183,7 +183,7 @@
       "kind": "method",
       "name": "\"is on top of its pile\"",
       "returns": "choice",
-      "defined": "/Pile.spell:1213-1273"
+      "defined": "/Pile.spell:1214-1274"
     },
     {
       "syntax": "play {thisArg:expression}",
@@ -239,7 +239,7 @@
       "of": "Card",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/Pile.spell:1192-1211"
+      "defined": "/Pile.spell:1193-1212"
     },
     {
       "type": "CardImage",
@@ -347,7 +347,7 @@
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/Pile.spell:0-1096"
+      "defined": "/Pile.spell:0-1097"
     },
     {
       "property": "layout",
@@ -357,25 +357,25 @@
         "stacked",
         "vertical"
       ],
-      "defined": "/Pile.spell:144-264"
+      "defined": "/Pile.spell:145-265"
     },
     {
       "property": "color",
       "of": "Pile",
-      "defined": "/Pile.spell:266-343"
+      "defined": "/Pile.spell:267-344"
     },
     {
       "property": "value",
       "of": "Pile",
       "datatype": "number",
-      "defined": "/Pile.spell:345-417"
+      "defined": "/Pile.spell:346-418"
     },
     {
       "property": "short_name",
       "asWritten": "short name",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spell:419-627"
+      "defined": "/Pile.spell:420-628"
     },
     {
       "syntax": "test piles",
@@ -384,7 +384,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "piles",
-      "defined": "/Pile.spell:1309-1960"
+      "defined": "/Pile.spell:1310-1961"
     },
     {
       "type": "Deck",
