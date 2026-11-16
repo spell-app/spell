@@ -38,9 +38,11 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *       <div class="body">
  *         <ui-button part="menu-button">                              (narrow, with no `<ui-site-nav-button>`)
  *         <div part="menu"> <slot name="menu"> </div>                   (flush against the drawer)
- *         <div part="page-menu"> <slot name="page-menu"> </div>
- *         <div class="row">  left | page (the default slot) | right  </div>
- *         <div part="footer"> <slot name="footer"> </div>
+ *         <div class="under-menu">                                      (the drawer's line at its start)
+ *           <div part="page-menu"> <slot name="page-menu"> </div>
+ *           <div class="row">  left | page (the default slot) | right  </div>
+ *           <div part="footer"> <slot name="footer"> </div>
+ *         </div>
  *       </div>
  *     </div>
  *
@@ -49,8 +51,9 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *     what's slotted brings its own (the navigation's `<nav>`).
  *   - At least as tall as the box it's in (`min-height: 100%`), the drawer running from top to bottom.
  * - A slot with nothing in it isn't drawn:  no column, no row, no gap.
- * - The page is a font size in from the drawer;  the menu's row is flush against it, the drawer's line their only
- *   edge.
+ * - The page is a font size in from the drawer;  the menu's row is flush against it, on the drawer's fill:
+ *   - so the drawer and the menu read as one surface, the bar beside the drawer's top with no line between them
+ *   - the drawer's line starts under the menu, the menu's own line turning into it (epic `mockup` I25)
  * - `drawer="compact"`:  the drawer shows only its icons, as the layout sets `collapsed` on each `<ui-site-nav>` in it.
  *   - The pointer resting on it (`--ui-hover-delay`), or the keyboard's focus coming into it, opens it over the page,
  *     all of it, without pushing the page:  its column keeps its width.  Leaving it closes it.
@@ -344,15 +347,17 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
             />
           </Show>
           {this.region("menu")}
-          {this.region("page-menu")}
-          <div class={ROW}>
-            {this.region("left")}
-            <div class={PAGE} part={this.partForName("page")}>
-              <slot />
+          <div class={UNDER_MENU}>
+            {this.region("page-menu")}
+            <div class={ROW}>
+              {this.region("left")}
+              <div class={PAGE} part={this.partForName("page")}>
+                <slot />
+              </div>
+              {this.region("right")}
             </div>
-            {this.region("right")}
+            {this.region("footer")}
           </div>
-          {this.region("footer")}
         </div>
       </div>
     )
@@ -423,6 +428,7 @@ const LAYOUT = "layout"
 const DRAWER = "drawer"
 const DRAWER_BOX = "drawer-box"
 const BODY = "body"
+const UNDER_MENU = "under-menu"
 const ROW = "row"
 const PAGE = "page"
 const MENU_BUTTON = "menu-button"

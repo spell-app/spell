@@ -1,13 +1,16 @@
 /*
  * `<ui-page-layout>` (`UIPageLayout.tsx`):  what stays on screen around a site's pages, in its own box.
  * - Shadow markup:  `.layout` (a grid) holding `.drawer` (around `.drawer-box`) and `.body`:  the menu button, the
- *   menu, the page menu, `.row` (left, page, right) and the footer.  An empty region isn't drawn, so takes no room.
+ *   menu, then `.under-menu`:  the page menu, `.row` (left, page, right) and the footer.
+ *   An empty region isn't drawn, so takes no room.
  * - Tokens:
  *   | `--ui-page-layout-gap` | the room between the page and its side bars |
- * - The drawer:  a column the whole height, on a muted fill with a line at its end;  its box a scroller stuck at
- *   the top, so a long navigation scrolls by itself, never the page.
- * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's),
- *   but the menu flush against it, the drawer's line their only edge.
+ * - The drawer:  a column the whole height, on a muted fill;  its box a scroller stuck at the top,
+ *   so a long navigation scrolls by itself, never the page.
+ * - The menu beside the drawer's top, flush against it and on the same fill:  one surface, no line between them
+ *   (epic `mockup` I25).
+ *   - The drawer's line starts under the menu (`.under-menu`'s start), the menu's own bottom line turning into it.
+ * - The page a font size in from the drawer (`--ui-font-size`, in pixels:  a menu's own em is its smaller text's).
  * - `:state(compact)`:  the column as narrow as the navigation's icons;  `:state(open)` too, its box over the page,
  *   all of it, floating, the column keeping its width (`--_page-layout-compact-width`).
  * - Motion (epic `mockup` I25), the theme's `--ui-duration-normal`:
@@ -49,7 +52,6 @@
     min-inline-size: 0;
     transition: inline-size var(--_ui-page-layout-duration) var(--ui-ease, ease);
     background: var(--ui-surface-muted, Canvas);
-    border-inline-end: 1px solid var(--ui-border-color, GrayText);
   }
   .drawer-box {
     /* its own width moves only between lengths:  a keyword (auto) would follow the column as it moves */
@@ -66,7 +68,15 @@
     flex-direction: column;
     min-inline-size: 0;
   }
-  .menu,
+  /* the menu's room below it is inside what's under it:  so the drawer's line runs on from the menu's */
+  .menu + .under-menu {
+    padding-block-start: 1em;
+  }
+  .under-menu {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
   .page-menu {
     margin-block-end: 1em;
   }
@@ -86,9 +96,13 @@
   .right {
     flex: 0 0 auto;
   }
-  /* a font size in from the drawer;  the menu flush against it */
-  .layout:has(> .drawer) > .body > :is(.page-menu, .row, .footer) {
+  /* a font size in from the drawer, after its line;  the menu flush against it, on its fill */
+  .layout:has(> .drawer) > .body > .under-menu {
     padding-inline-start: var(--ui-font-size, 16px);
+    border-inline-start: 1px solid var(--ui-border-color, GrayText);
+  }
+  .layout:has(> .drawer) > .body > .menu {
+    --ui-menu-header-bar-background: var(--ui-surface-muted, Canvas);
   }
   /* its own menu button:  only at a narrow width */
   .menu-button {
@@ -162,8 +176,12 @@
       max-block-size: none;
       overflow: visible;
     }
-    .layout:has(> .drawer) > .body > :is(.page-menu, .row, .footer) {
+    .layout:has(> .drawer) > .body > .under-menu {
       padding-inline-start: 0;
+      border-inline-start: none;
+    }
+    .layout:has(> .drawer) > .body > .menu {
+      --ui-menu-header-bar-background: initial;
     }
     .menu-button {
       display: inline-flex;

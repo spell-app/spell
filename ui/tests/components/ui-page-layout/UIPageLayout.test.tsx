@@ -51,8 +51,19 @@ describe("<ui-page-layout>", () => {
     expect(drawer.width).toBeGreaterThanOrEqual(160)
     expect(drawer.width).toBeLessThanOrEqual(257)
     expect(box(layout, "menu")!.getBoundingClientRect().left).toBeCloseTo(drawer.right, 0)
-    const row = box(layout, "page")!.parentElement!
-    expect(parseFloat(getComputedStyle(row).paddingInlineStart)).toBeGreaterThan(0)
+    const underMenu = box(layout, "page")!.parentElement!.parentElement!
+    expect(parseFloat(getComputedStyle(underMenu).paddingInlineStart)).toBeGreaterThan(0)
+  })
+
+  test("the menu and the drawer read as one surface:  the menu on the drawer's fill, the drawer's line starting under it", async () => {
+    const layout = await pageLayout(`<div slot="menu">Menu</div>${NAV}<p>The page</p>`)
+    const drawer = box(layout, "drawer")!
+    const menu = box(layout, "menu")!
+    const underMenu = box(layout, "page")!.parentElement!.parentElement!
+    expect(getComputedStyle(drawer).borderInlineEndWidth).toBe("0px")
+    expect(getComputedStyle(underMenu).borderInlineStartWidth).toBe("1px")
+    expect(underMenu.getBoundingClientRect().top).toBeCloseTo(menu.getBoundingClientRect().bottom, 0)
+    expect(getComputedStyle(menu).getPropertyValue("--ui-menu-header-bar-background").trim()).not.toBe("")
   })
 
   test('`drawer="compact"` sets `collapsed` on the navigation in it, and takes it off again', async () => {
