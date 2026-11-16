@@ -260,12 +260,12 @@
     --bubbly-code-brace-ink: color-mix(in srgb, var(--bubbly-expression-ink) 62%, var(--bubbly-expression-pill));
   }
 
-  /* a group:  its parent's hue, 10% darker (Owen) */
+  /* a group:  its parent's hue, half as strong in light, fainter in dark, so it stands apart from its parent's band (Owen, I119) */
   .bubbly-group {
     --bubbly-hue: inherit;
     --bubbly-pill: light-dark(
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
-      color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
+      color-mix(in srgb, var(--bubbly-hue) 13%, white),
+      color-mix(in srgb, var(--bubbly-hue) 20%, var(--bubbly-paper-dark))
     );
   }
 
@@ -1755,8 +1755,8 @@
     }
     .bubbly-group.cmb-hue {
       --bubbly-pill: light-dark(
-        color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 20%, white) 95%, black),
-        color-mix(in srgb, color-mix(in srgb, var(--bubbly-hue) 34%, var(--bubbly-paper-dark)) 90%, black)
+        color-mix(in srgb, var(--bubbly-hue) 13%, white),
+        color-mix(in srgb, var(--bubbly-hue) 20%, var(--bubbly-paper-dark))
       );
     }
     .cmb-band {
@@ -1819,6 +1819,10 @@
         transparent calc(var(--cmb-inner-top) - 0.5px),
         var(--bubbly-pill) var(--cmb-inner-top)
       );
+    }
+    /* ... but none over a group right under it:  its band, hung on this rail, would show the curve as a stray bubble (I119) */
+    .cmb-band-opens-group::before {
+      content: none;
     }
 
     /*

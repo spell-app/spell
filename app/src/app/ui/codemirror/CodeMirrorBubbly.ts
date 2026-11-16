@@ -173,6 +173,8 @@ class BubblyDecorations {
       if (isFolded) band.push("cmb-band-folded")
       if (hasDescription) band.push("cmb-band-described")
       if (isHung) band.push("cmb-band-hung")
+      // a body opening with a group:  the group's band hangs on the rail right under this one, so no inside corner (I119)
+      if (hasBody && opensWithGroup(block)) band.push("cmb-band-opens-group")
       this.decorations.mark(head.start, head.end, band, { style: `--cmb-column: ${indent.tabs}` })
     }
     if (!hasBody) return
@@ -307,6 +309,12 @@ function classesOf(kind: SP.BubblyStretchKind): string[] {
 function isViewTag(file: SP.SpellFile | undefined, tag: string): boolean {
   const type = tag && file?.scope?.getType(SP.typeName(tag))
   return !!type && SP.SpellJSX.isDrawnType(type)
+}
+
+/** Does `block`'s body start, on the line under its head, with a group:  its band hung on this block's rail. */
+function opensWithGroup(block: SP.BubblyBlock): boolean {
+  const first = block.body[0]
+  return first?.kind === "block" && first.isGroup
 }
 
 /** `indent`, a tab further out when `isHung`:  where a group's band and rail start. */

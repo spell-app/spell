@@ -53,6 +53,18 @@ describe("CodeMirrorBubbly", () => {
     expect(rails.get('\t\t<card-image rank={its rank} direction="down" />')).toBe(1)
   })
 
+  test("a body opening with a group:  no inside corner under its band, the group's band hung right there (I119)", () => {
+    const text = `calculator is an app
+\tgroup "What It Keeps"
+\tits "input" is text
+\tits "left" is text
+`
+    const marked = marksOf(text)
+    expect(textWith(marked, "cmb-band-opens-group")).toEqual(["calculator is an app"])
+    // a band whose body opens with a line keeps its corner
+    expect(textWith(marked, "cmb-band-opens-group")).not.toContain('group "What It Keeps"')
+  })
+
   /** A Spell block, a drawing in it, and a tag block in the drawing:  each head folds (`CodeMirrorLanguage.folding()`). */
   const DRAWN = `a "card" is a view
 \tits "rank" is a number
