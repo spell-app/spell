@@ -213,23 +213,13 @@ ui-app-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
-ui-menu.ModeTabs ui-item:not([appearance~="circular"], .AddPartButton)::part(item) {
+ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
   gap: 0.4em;
   padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
   padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, 0.9em);
 }
 /* ... its icons alone (the code, the compiled code, Inspect app, Add) are Spell UI's circular items
-   (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs
-   - TODO:  `<AddPartButton>` (`Palette.tsx`) takes `appearance="circular"` too;  till then, the same look here */
-ui-menu.ModeTabs ui-item.AddPartButton::part(item) {
-  box-sizing: border-box;
-  inline-size: 2em;
-  block-size: 2em;
-  padding: 0;
-  gap: 0;
-  justify-content: center;
-  border-radius: 50%;
-}
+   (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs */
 
 /* the palette menu's "Edit theme..." row:  its icon the width of a theme row's check, so their words line up */
 .EditThemeEntry > ui-icon {
