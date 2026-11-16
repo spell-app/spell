@@ -12658,7 +12658,7 @@
       "name": ":state(in-row)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-term>`:  Set while its `<ui-terms>` is `direction=\"horizontal\"`."
+        "value": "Custom state of:\n\n- `<ui-property>`:  One of a row's properties (a `<ui-fields>` around it):  side by side, each the same share.\n- `<ui-term>`:  Set while its `<ui-terms>` is `direction=\"horizontal\"`."
       }
     },
     {

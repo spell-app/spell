@@ -90,8 +90,11 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     return this.placeholder ?? this.translationForKey("noIcon")
   }
 
-  /** The chosen icon's glyph, for the field. */
-  readonly chosenGlyph = new E.IconGlyph({ owner: this, name: () => this.iconName || undefined })
+  /**
+   * The chosen icon's glyph, for the field;  none chosen, the placeholder's, faded, when it names an icon
+   * (a property editor's placeholder for an action's own icon:  epic `editor` I208).
+   */
+  readonly chosenGlyph = new E.IconGlyph({ owner: this, name: () => this.iconName || this.placeholder || undefined })
 
   ////////////////
   // ## Form
@@ -518,8 +521,12 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
           onClick={this.onFieldClick}
           onKeyDown={this.onFieldKeyDown}
         >
-          <Show when={this.iconName}>
-            <span class={GLYPH} part={this.partForName("glyph")} aria-hidden="true">
+          <Show when={this.chosenGlyph.svg}>
+            <span
+              class={[GLYPH, { [PLACEHOLDER]: !this.iconName }]}
+              part={this.partForName("glyph")}
+              aria-hidden="true"
+            >
               {this.chosenGlyph.svg}
             </span>
           </Show>

@@ -5,6 +5,7 @@
  *   `:state(half)`.  `grid-column` is ignored outside a grid, so it needs no state of its own.
  *   - Below about 18em of form, everything takes a whole row (the form root is the `ui-form` container).
  *   - On a grid its width is the cell's (`--_property-editor-field-width`, set by the grid), not its `N wide`.
+ * - `:state(in-row)`, in a layout's row (a `<ui-fields>`, `PropertyLayouts`):  the row's flex shares it out evenly.
  * - `:state(inline-check)`:  a compact editor's yes or no, the box then its label then its tip, on one line;
  *   half a row, as a select (its kind's `width`), its tip's icon at the row's end.
  * - `:state(compact)`:  the tip's icon shows only while the field is hovered or holds the focus.
@@ -33,6 +34,11 @@
   }
   :host(:state(half)) .field {
     grid-column: span 1;
+  }
+  /* a layout's row (`<ui-fields>`):  its properties side by side, each the same share of it */
+  :host(:state(in-row)) .field {
+    flex: 1 1 0;
+    min-width: 0;
   }
   @container ui-form (width < 18em) {
     :host(:state(half)) .field {
