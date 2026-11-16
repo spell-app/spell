@@ -1,7 +1,7 @@
 import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
 import { codeLook } from "spell/app/app/ui/codePopups"
 import { monaco } from "./monaco"
-import { AppAddresses } from "./AppAddresses"
 import {
   BubblyMarks,
   indentColumns,
@@ -255,7 +255,7 @@ export class SpellBubbly {
    */
   private spellMarks(model: monaco.editor.ITextModel): BubblyMarks {
     // its project's parse of it, if it's a project's file:  what the compiler sees, names from other files too
-    const path = AppAddresses.pathOf(model.uri)
+    const path = LSP.AppAddresses.pathOf(model.uri)
     const within = path === undefined ? undefined : SP.SpellFile.registry.get(path)
     const version = model.getVersionId()
     const kept = SpellBubbly.laidOutByModel.get(model)
@@ -1157,16 +1157,13 @@ function place(shape: HTMLElement, at: Partial<Record<"left" | "top" | "width" |
 
 /**
  * Is `tag`, in a drawing in `file`, one of its project's own views (`<tableau>`), so it draws a thing?
- * - As the compiler decides it, by its type:  a view or a viewable list (SpellJSX's `isDrawnType()`).
+ * - As the compiler decides it, by its type:  a view or a viewable list (`SP.SpellJSX.isDrawnType()`).
  * - No project file:  none is.
  */
 function isViewTag(file: SP.SpellFile | undefined, tag: string): boolean {
   const type = file?.scope?.getType(SP.typeName(tag))
-  return !!type && DRAWN_BASE_TYPES.some((base) => type.isA(base))
+  return !!type && SP.SpellJSX.isDrawnType(type)
 }
-
-/** What a project's own view is built on:  SEE SpellJSX's `DRAWN_BASE_TYPES`, which this follows. */
-const DRAWN_BASE_TYPES = ["View", "ViewableList"]
 
 /** The parser that reads `model`'s Spell:  its file's language (`Carta.es.spell`), else English. */
 function parserFor(model: monaco.editor.ITextModel): SP.SpellParser {

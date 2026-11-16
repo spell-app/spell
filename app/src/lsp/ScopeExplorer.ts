@@ -113,14 +113,14 @@ export class ScopeExplorer {
 
   /**
    * `pack` with each `file:` URI of `projects`' files -- files' own, where things are declared, markdown links --
-   * swapped for a portable `spell:/<file.path>`, the scheme the app's editor uses (see `AppAddresses`).
+   * swapped for a portable `spell:/<file.path>`, the app's own address for it (`LSP.AppAddresses.uriOf()`).
    * - Why:  NO absolute local paths in a file we publish -- they'd leak, and mean nothing anywhere else.
    * - Longest URI first, so one that starts another can't clip it.
    */
   private portable(pack: LSP.ScopePack, projects: SP.SpellProject[]): LSP.ScopePack {
     const files = projects.flatMap((project) => [...project.spellFiles, project.outputFile])
     const swaps = files
-      .map((file) => ({ uri: this.service.addresses.uriFor(file), portable: `spell:/${encodeURI(file.path)}` }))
+      .map((file) => ({ uri: this.service.addresses.uriFor(file), portable: LSP.AppAddresses.uriOf(file.path) }))
       .sort((a, b) => b.uri.length - a.uri.length)
     let json = JSON.stringify(pack)
     for (const { uri, portable } of swaps) json = json.replaceAll(uri, portable)

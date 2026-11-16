@@ -364,8 +364,11 @@ function linesOf(source: string | undefined, line: ScopeLine): string | undefine
     .trimEnd()
 }
 
-/** Project id and file path of spell file `uri`, e.g. `spell:/@spell/examples/Solitaire/Solitaire.spell`. */
+/**
+ * Project id and file path of spell file `uri`, e.g. `spell:/@spell/examples/Solitaire/Solitaire.spell`.
+ * - The app's address (`LSP.AppAddresses.uriOf()`), read here by hand:  this file loads without the parser.
+ */
 function splitSpellUri(uri: string): { projectId: string; filePath: string } {
-  const { projectId, rest } = SpellUrls.split(decodeURI(uri.replace(/^spell:\//, "")))
+  const { projectId, rest } = SpellUrls.split(decodeURIComponent(uri.replace(/^spell:\//, "")))
   return { projectId, filePath: rest && `/${rest}` }
 }

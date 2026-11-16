@@ -4,6 +4,7 @@ import { render } from "@solidjs/web"
 import type { CodeAction } from "vscode-languageserver"
 
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import { CodeMirrorTexts } from "./CodeMirrorTexts"
 import type { SpellCodeMirror } from "./SpellCodeMirror"
 
@@ -17,6 +18,8 @@ import "spell/app/app/solid/MenuBar.css"
  * - Cut, Copy and Paste;  Go to Definition;  the language service's code actions for the selection
  *   ("Make it code", "Make it text" ...);  Find.
  * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window, with arrow keys, Enter and Esc.
+ * - Its shortcuts are the editor's one list's (`EDITOR_HOTKEYS`);  Go to Definition's F12 is CodeMirror's own key,
+ *   which the list doesn't hold.
  * - `CodeMirrorMenu.open()` shows one;  it goes once a row is chosen, or the popup closes.
  ****************/
 export class CodeMirrorMenu {
@@ -83,13 +86,23 @@ function MenuPopup(props: MenuPopupProps) {
       >
         <div class="BarMenuPanel">
           <ui-menu direction="vertical" size="small" interactive="" icon-column="" class="BarMenuItems">
-            <ui-action icon="cut" shortcut="⌘X" disabled={!hasSelection()} onClick={choose(cut)}>
+            <ui-action
+              icon="cut"
+              shortcut={EDITOR_HOTKEYS.cutParts.shortcut}
+              disabled={!hasSelection()}
+              onClick={choose(cut)}
+            >
               {appTexts.text("menuCut")}
             </ui-action>
-            <ui-action icon="copy" shortcut="⌘C" disabled={!hasSelection()} onClick={choose(copy)}>
+            <ui-action
+              icon="copy"
+              shortcut={EDITOR_HOTKEYS.copyParts.shortcut}
+              disabled={!hasSelection()}
+              onClick={choose(copy)}
+            >
               {appTexts.text("menuCopy")}
             </ui-action>
-            <ui-action icon="paste" shortcut="⌘V" onClick={choose(paste)}>
+            <ui-action icon="paste" shortcut={EDITOR_HOTKEYS.pasteParts.shortcut} onClick={choose(paste)}>
               {appTexts.text("menuPaste")}
             </ui-action>
             <ui-action kind="divider" />
@@ -111,7 +124,11 @@ function MenuPopup(props: MenuPopupProps) {
               </For>
             </Show>
             <ui-action kind="divider" />
-            <ui-action icon="search" shortcut="⌘F" onClick={choose(() => openSearchPanel(view()))}>
+            <ui-action
+              icon="search"
+              shortcut={EDITOR_HOTKEYS.find.shortcut}
+              onClick={choose(() => openSearchPanel(view()))}
+            >
               {text("find")}
             </ui-action>
           </ui-menu>
