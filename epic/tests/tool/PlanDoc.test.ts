@@ -2424,6 +2424,25 @@ describe("PlanDoc review inbox", () => {
     expect(chosen(other, "j1")).toEqual(["A", null])
   })
 
+  test("a question asking two card sets:  a pick in one never wipes the other's;  the answer names both (I88)", () => {
+    const plan = freshPlan()
+    const second = OPTIONS.replace("Keep folds", "Inline").replace("Unfold it", "Linked")
+    plan.addItem("question", "reorder, and marks?", { details: `<p>reorder</p>${OPTIONS}<p>marks</p>${second}` })
+    plan.applyMark({ id: "q1", action: "pick", pick: "B", choices: 0 })
+    expect(plan.applyMark({ id: "q1", action: "pick", pick: "A", choices: 1 }).did).toBe("Owen picked A:  Inline")
+    expect(chosen(plan, "q1")).toEqual(["B", "A"])
+    const answer = () => el(plan, "q1").querySelector(":scope > epic-answer")!.getAttribute("title")
+    expect(answer()).toBe("Unfold it;  Inline")
+    // picked again in the first set:  the second's pick stays
+    plan.applyMark({ id: "q1", action: "pick", pick: "A", choices: 0 })
+    expect(chosen(plan, "q1")).toEqual(["A", "A"])
+    expect(answer()).toBe("Keep folds;  Inline")
+    // `epic decide --option` too
+    plan.decide("q1", "Linked", { option: "B", choices: 1 })
+    expect(chosen(plan, "q1")).toEqual(["A", "B"])
+    expect(problems(plan)).toEqual([])
+  })
+
   test("a pick names a set or an option the item hasn't:  left, nothing changed;  an Original's cards never count", () => {
     const plan = freshPlan()
     plan.addItem("judgement", "which store?", { details: `<p>weighed</p>${OPTIONS}` })

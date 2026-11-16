@@ -1034,7 +1034,8 @@ export class PlanDoc extends PlanReader {
    * - answering again replaces the answer in place:  the old one goes into the question's Original Discussion
    *   (`keepOriginal()`), never dropped;  an old decision's id (`d7`) stays on the new answer
    * - `option` (`A`):  that option is the chosen one (`chooseOption()`), of the question's own options or (`choices`,
-   *   I8) of the card set at that position, a reply's say;  a question has ONE answer, so no other set stays chosen
+   *   I8) of the card set at that position, a reply's say;  a question has ONE answer, so a set asked instead of it
+   *   (another place's) is chosen no more, but one asked beside it keeps its pick (`dropOtherAnswers()`, I88)
    * - `option` as people see it in a later set (`B2`:  `B` of the 2nd set, epic `epic-engine` I227) names that set,
    *   unless `choices` does
    * - moves among the answered questions, in id order:  open ones stay on top
@@ -1058,8 +1059,7 @@ export class PlanDoc extends PlanReader {
       Markup.set(card, { id })
     } else Markup.place(question, card)
     if (option) {
-      const set = this.chooseOption(question, option, choices)
-      for (const other of PlanItem.choiceSets(question)) if (other !== set) Markup.set(other, { chosen: undefined })
+      this.dropOtherAnswers(question, this.chooseOption(question, option, choices))
     }
     Markup.set<"epic-item">(question, { status: "decided", answered: true })
     this.placeQuestion(question)
@@ -1724,8 +1724,34 @@ export class PlanDoc extends PlanReader {
    * `choices`, by position:  none, the question's own);  reviewed.
    */
   answerWith(item: Element, option: OptionCard, choices?: number): void {
-    this.decide(item.id, option.title, { option: option.letter, choices })
+    const set = PlanItem.choiceSet(item, choices)
+    const answer = set ? this.answerOfSets(item, set, option.title) : option.title
+    this.decide(item.id, answer, { option: option.letter, choices })
     this.review(item.id)
+  }
+
+  /**
+   * Question `item`'s answer once `set` is picked (`picked`, its option's title):  each set asked beside it, in order,
+   * its pick's titles, joined `;  ` (epic `epic-engine` I88:  two sets, two picks, both in the answer).
+   * - a set beside it not picked yet:  left out;  one set alone:  `picked`
+   */
+  answerOfSets(item: Element, set: Element, picked: string): string {
+    const answers = PlanItem.setsBeside(item, set).map((each) => {
+      if (each === set) return picked
+      const letters = (each.getAttribute("chosen") ?? "").split(/\s+/).filter(Boolean)
+      const options = PlanItem.optionsIn(each).filter((option) => letters.includes(option.letter))
+      return options.map((option) => option.title).join(", ")
+    })
+    return answers.filter(Boolean).join(";  ")
+  }
+
+  /**
+   * Question `item` answered from card set `set`:  every set asked INSTEAD of it (in another place:  the question's
+   * own when a reply offers new options) is chosen no more;  a set asked beside it keeps its pick (I88).
+   */
+  dropOtherAnswers(item: Element, set: Element): void {
+    const beside = PlanItem.setsBeside(item, set)
+    for (const other of PlanItem.choiceSets(item)) if (!beside.includes(other)) Markup.set(other, { chosen: undefined })
   }
 
   /**

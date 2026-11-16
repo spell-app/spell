@@ -157,8 +157,9 @@ export class OptionSets {
     const picked = pickedOptions(set, letters)
     let recorded = "recorded"
     if (QUESTION_ID.test(item.id)) {
-      plan.decide(item.id, picked.map((option) => `${option.letter} · ${option.title}`).join(", "))
-      for (const other of PlanItem.choiceSets(item)) if (other !== set) Markup.set(other, { chosen: undefined })
+      const own = picked.map((option) => `${option.letter} · ${option.title}`).join(", ")
+      plan.decide(item.id, plan.answerOfSets(item, set, own))
+      plan.dropOtherAnswers(item, set)
       Markup.set<"epic-choices">(set, { chosen: letters.join(" ") })
       plan.review(item.id)
       recorded = "recorded as the answer"

@@ -587,7 +587,10 @@ As `plan-doc.md`, "Ids":
       (`PlanItem.choiceSets()`).
     - No `choices` (an older mark):  the item's own.
   - `inbox apply` sets THAT set's `chosen`.
-  - A question is answered with the option:  no other set stays chosen.
+  - A question is answered with the option:  a set asked INSTEAD of it (a reply's new options over the question's
+    own) is chosen no more.
+    - Sets asked BESIDE it, in the same place (its text, one reply), each keep their own pick (I88):
+      the answer names each one's, in order, `Unfold it;  Inline` (`PlanItem.setsBeside()`).
   - Any other item is APPROVED with it:  an open judgement call closed, accepted;  reviewed.
   - Either way:
     - the set records the pick, drawn inside its folded Choices (I153):
