@@ -168,6 +168,14 @@
       ]
     },
     {
+      "path": "palette.html",
+      "title": "Palette groups",
+      "summary": "The Spell editor's palette, a column per group:  drag components between groups, reorder, rename, add or remove groups, then save.",
+      "sections": [
+        {"id":"palette-groups","title":"The palette's groups"}
+      ]
+    },
+    {
       "path": "theme-bench.html",
       "title": "Theme bench",
       "summary": "The theme editor, full width:  Spell's real pages side by side in the theme being made, its big choices and every token, live.",
