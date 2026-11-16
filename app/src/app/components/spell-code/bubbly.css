@@ -1830,8 +1830,11 @@
    *   - HTML's tags (`CodeMirrorMarkup`):  their pieces Monaco's, by the rules above, their pills and bands here
    */
   &.cmb-editor {
-    /* a tab stop:  how far a body's lines sit in from its band */
-    --cmb-indent: 24px;
+    /*
+     * a tab stop:  how far a body's lines sit in from its band;  set by the code from the font's own (4 spaces, as
+     * Monaco's), so every rail and foot stands at its band's end (`CodeMirrorMarkup.tabStops`);  a guess till then
+     */
+    --cmb-indent: 17px;
     /* room before a line's words:  a top-level band's round end, half a tab further left, still shows */
     --cmb-line-pad: 22px;
     /* a band starts this far left of its words, and its rail there */
@@ -1866,10 +1869,12 @@
       color-mix(in srgb, var(--bubbly-structure) 20%, white),
       color-mix(in srgb, var(--bubbly-structure) 34%, var(--bubbly-paper-dark))
     );
-    /* a space's width in the drawing's font:  an HTML file's rails start at its lines' indent of spaces */
-    --cmb-space: 0.25em;
+    /* a space's width in the drawing's font:  an HTML file's rails start at its lines' indent of spaces;  set too */
+    --cmb-space: 0.28em;
     /* the editor's font over the drawing's, for the shared rules of HTML's tags in the text (15px over 16px) */
     --bubbly-monaco-scale: 0.9375;
+    /* a band as tall as Monaco draws it:  the page's, at the editor's font (Monaco's shapes are scaled, 21.6px) */
+    --bubbly-pill-height: calc(23px * var(--bubbly-monaco-scale));
     /* a tag's pointed ends, an HTML file's and a Spell file's drawing's alike:  as on the page (`&.bubbly-html`) */
     --bubbly-tag-slope: 0.62;
     --bubbly-tag-point: calc(var(--bubbly-pill-height) / 2 * var(--bubbly-tag-slope));
@@ -1895,6 +1900,7 @@
       line-height: var(--cmb-line-height);
     }
     .cm-content {
+      /* CodeMirror's own `tab-size` (4 spaces) wins:  `--cmb-indent` is set from it (`CodeMirrorMarkup.tabStops`) */
       tab-size: var(--cmb-indent);
       padding: 8px 0;
       caret-color: var(--bubbly-bold-ink);
@@ -2099,8 +2105,18 @@
     .bubbly-tag-quote {
       --bubbly-quote-rotation: 30deg;
     }
-    /* ... but either side of an input, a tag's value:  the pill's own padding is its room here */
-    :is(.bubbly-input-spacer, .bubbly-code-spacer, .bubbly-quote-spacer) {
+    /*
+     * ... but either side of an input, a tag's value, and before a block's tags:  the pill's or band's own padding is
+     * its room here, so a block's start tag, its end tag and its rail all start at one place (measured, P3)
+     */
+    :is(
+      .bubbly-input-spacer,
+      .bubbly-code-spacer,
+      .bubbly-quote-spacer,
+      .bubbly-tag-head-spacer,
+      .bubbly-tag-foot-spacer,
+      .bubbly-tag-foot-bare-spacer
+    ) {
       width: 0;
     }
   }

@@ -1,5 +1,5 @@
 import { type EditorState, type Extension, type Range } from "@codemirror/state"
-import { Decoration, type DecorationSet, EditorView, WidgetType } from "@codemirror/view"
+import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } from "@codemirror/view"
 
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
 import type { MarkMaker, MarkedStretch, Spacer } from "spell/app/app/ui/TextMarks"
@@ -26,9 +26,34 @@ export class CodeMirrorMarkup {
   static extension(): Extension {
     return [
       CodeMirrorRelayout.extension((state) => CodeMirrorMarkup.decorationsOf(state), CodeMirrorMarkup.RELAYOUT_MSEC),
-      EditorView.editorAttributes.of({ class: EDITOR_CLASSES })
+      EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
+      CodeMirrorMarkup.tabStops
     ]
   }
+
+  /**
+   * The editor's tab stop and space, as its font draws them, for the sheet:  `--cmb-indent`, `--cmb-space`.
+   * - A tab is CodeMirror's 4 spaces (its own `tab-size`), as Monaco's is:  the rails and feet, placed by these, stand
+   *   at their bands' ends, at any level (measured:  a guessed 24px left them 7px off a level, epic `codemirror` P3).
+   * - Measured once the editor's drawn, and again whenever its font may have changed (a new theme, a zoom).
+   */
+  static tabStops = ViewPlugin.define((view) => {
+    const measure = () =>
+      view.requestMeasure({
+        read: () => [widthIn(view.scrollDOM, " ".repeat(100)) / 100, widthIn(view.scrollDOM, "\t", view.state.tabSize)],
+        write: ([space, tab]) => {
+          if (!space || !tab) return
+          view.dom.style.setProperty("--cmb-space", `${space}px`)
+          view.dom.style.setProperty("--cmb-indent", `${tab}px`)
+        }
+      })
+    measure()
+    return {
+      update: (update) => {
+        if (update.geometryChanged) measure()
+      }
+    }
+  })
 
   /** How long the typing must pause before the file's laid out again, in msec:  as `CodeMirrorBubbly`'s. */
   static RELAYOUT_MSEC = 150
@@ -76,6 +101,21 @@ export class CodeMirrorMarkup {
     }
     new MarkupShapes(marks.marks, decorations).draw(marks.shapes, rails)
   }
+}
+
+/**
+ * `text`'s width in `element`'s font, as the browser lays it out, in px;  a tab `tabSize` spaces, as CodeMirror's is.
+ * - A hidden probe in the scroller, beside the text, never in it:  CodeMirror reads any change to its content as an edit.
+ * - A tab's measured, not worked out from a space:  the browser rounds a tab stop (16.875px, 4 spaces of 4.234px).
+ */
+function widthIn(element: HTMLElement, text: string, tabSize = 4): number {
+  const probe = document.createElement("span")
+  probe.style.cssText = `position: absolute; visibility: hidden; white-space: pre; tab-size: ${tabSize}`
+  probe.textContent = text
+  element.append(probe)
+  const width = probe.getBoundingClientRect().width
+  probe.remove()
+  return width
 }
 
 /** An HTML file's editor's classes:  a `.bubbly` and a `.bubbly-html`, so `bubbly.css` reaches it, and ours. */

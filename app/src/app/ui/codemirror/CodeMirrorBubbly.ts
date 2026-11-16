@@ -45,7 +45,8 @@ export class CodeMirrorBubbly {
         (state) => CodeMirrorBubbly.decorationsOf(state, fileOf(), sliceOf(state)),
         CodeMirrorBubbly.RELAYOUT_MSEC
       ),
-      EditorView.editorAttributes.of({ class: EDITOR_CLASSES })
+      EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
+      CodeMirrorMarkup.tabStops
     ]
   }
 
