@@ -52,7 +52,7 @@ describe("SpellTyping.indentToAdd()", () => {
 
 describe("SpellTyping.indentToSnap()", () => {
   test("a blank line inside a body:  the next line's indent, as the caret lands on it", () => {
-    expect(SpellTyping.indentToSnap(CARD, 7)).toBe("\t")
+    expect(SpellTyping.indentToSnap(cardWith(8, `\tits "suit" is one of clubs, hearts`), 7)).toBe("\t")
     expect(SpellTyping.indentToSnap(cardWith(5, ""), 5)).toBe("\t\t")
   })
 
@@ -324,5 +324,22 @@ describe("SpellTyping.enterRuleFor() (epic `codemirror` P1)", () => {
     expect(SpellTyping.enterRuleFor(`\tset the band to 3`, ``)).toBeUndefined()
     expect(SpellTyping.enterRuleFor(`\t<divider />`, ``)).toBeUndefined()
     expect(SpellTyping.enterRuleFor(`\t-- a note`, `-- more`)).toBeUndefined()
+  })
+})
+
+describe("SpellTyping.indentToSnap() before a group (epic `language` I121)", () => {
+  test("none on the blank line before a group's line:  it's drawn outside the group above", () => {
+    expect(SpellTyping.indentToSnap(CARD, 7)).toBe("")
+    expect(SpellTyping.indentToSnap([...CARD.slice(0, 7), ``, ``, ...CARD.slice(8)], 8)).toBe("")
+  })
+
+  test("in Spanish too, its group's word", () => {
+    const tarjeta = [`una "carta" es una vista`, `\tsu "palo" es uno de oros, copas`, ``, `\tgrupo "Nombres"`]
+    expect(SpellTyping.indentToSnap(tarjeta, 2, "es")).toBe("")
+    expect(SpellTyping.indentToSnap(tarjeta, 2)).toBe("\t")
+  })
+
+  test("a letter typed there still takes the group's indent", () => {
+    expect(SpellTyping.indentToAdd(cardWith(7, "g"), 7, 0)).toBe("\t")
   })
 })

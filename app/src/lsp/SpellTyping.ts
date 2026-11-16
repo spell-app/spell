@@ -39,10 +39,21 @@ export class SpellTyping {
    * The indent to write on blank line `lines[index]` as the caret lands on it, so it's in the body it's drawn in:
    * the next non-blank line's, less the tabs and spaces it has already.
    * - `""` when the line isn't blank, or is already that far in, or is drawn at the top level.
+   * - `""` before a group's line (`group "Names"`, in language `lang`):  the blank lines there are drawn
+   *   outside the group above, so the caret stays at the margin, not in that group's rail (epic `language` I121).
+   *   - A letter typed there still takes the indent (`indentToAdd()`):  `group "X"` lands at the group's level.
    */
-  static indentToSnap(lines: readonly string[], index: number): string {
+  static indentToSnap(lines: readonly string[], index: number, lang = "en"): string {
     const text = lines[index] ?? ""
-    return /^[ \t]*$/.test(text) ? indentStillToWrite(lines, index, text) : ""
+    if (!/^[ \t]*$/.test(text)) return ""
+    const next = lines.slice(index + 1).find((line) => line.trim())
+    const groupWords = QUOTED_NAME_WORDS[lang]?.groups ?? []
+    const nextWord = next
+      ?.trim()
+      .split(/[\s"“]/u)[0]!
+      .toLowerCase()
+    if (nextWord && groupWords.includes(nextWord)) return ""
+    return indentStillToWrite(lines, index, text)
   }
 
   ////////////////
@@ -325,6 +336,8 @@ export type QuotedNameWords = {
   properties: string[]
   /** start a property's choice, under it:  `it "is a (rank)"` */
   choices: string[]
+  /** start a group of a type's members:  `group "Rank"` */
+  groups: string[]
 }
 
 /**
@@ -336,8 +349,14 @@ export type QuotedNameWords = {
  * - Spanish has no `it` for a choice:  `"es un (palo)"` starts with its quotes.
  */
 export const QUOTED_NAME_WORDS: Record<string, QuotedNameWords> = {
-  en: { types: ["a", "an"], members: ["group", "its", "it"], properties: ["its"], choices: ["it"] },
-  es: { types: ["un", "una"], members: ["grupo", "su", "sus"], properties: ["su", "sus"], choices: [] }
+  en: { types: ["a", "an"], members: ["group", "its", "it"], properties: ["its"], choices: ["it"], groups: ["group"] },
+  es: {
+    types: ["un", "una"],
+    members: ["grupo", "su", "sus"],
+    properties: ["su", "sus"],
+    choices: [],
+    groups: ["grupo"]
+  }
 }
 
 /** How a file indents:  tabs or spaces, and how wide a tab or a level is. */
