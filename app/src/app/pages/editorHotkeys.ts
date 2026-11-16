@@ -20,12 +20,14 @@ export const FIND_AND_REPLACE = "editor.action.startFindReplaceAction"
  * - Find is the code editor's own key:  listed so the menus show it, bound by Monaco itself.
  * - Cut, Copy, Paste, Duplicate and Delete are on what's selected in the app:  never a key in the code or a field,
  *   where the page leaves them alone.
- * - Undo and Redo go by focus (`undoWay()`), decided here and nowhere else:
+ * - Undo and Redo go by focus (`undoWay()`):
  *   - in the code:  the code editor's own undo
- *   - in the running app, in Run:  the program's own, as ever:  not ours, so the key goes on
+ *   - in the running app, or on nothing (the page's body), in Run or Edit:  the program's own first,
+ *     a move in the game;  with none to undo, the key comes on to ours (epic `editor` I167)
+ *     - the program's keys are registered after ours, so they're asked first (core's `listenForUndoKeys()`)
  *   - anywhere else in Edit, the Inspector's fields too:  the editor's history (`editor.history`);
  *     with nothing there, what was typed in the code, so a click on the app doesn't strand it (epic
- *     `elemental-spell` J116);  with nothing there either, the running program's
+ *     `elemental-spell` J116)
  */
 export const EDITOR_HOTKEYS = {
   saveAll: { shortcut: "mod+S", run: () => editor.saveAll() },
@@ -68,6 +70,7 @@ export type Hotkey = {
  * Turn the editor page's shortcuts on while the page is up:  each of `EDITOR_HOTKEYS` that runs something,
  * on Spell UI's keyboard.
  * - Call in `<SpellEditor>`'s body.  `isRunning`:  is it showing Run?  Undo is then the program's.
+ * - A running program's ⌘Z, in the app or on nothing, is asked before ours:  its keys are registered later.
  * - A Mod key works with Command or Control, on every system.
  * - A key typed into a field, or into the code editor, is left alone:  the code editor runs its own.
  * - Its keys are registered once Spell UI has loaded (`uiReady`), and taken off with the page.
@@ -75,13 +78,6 @@ export type Hotkey = {
 export function editorHotkeys(isRunning: () => boolean): void {
   onSettled(() => {
     isRunningNow = isRunning
-    // a program's undo keys come after ours on the keyboard, whenever it runs:  it asks first
-    void editor
-      .loadRuntime()
-      .then(({ core }) => {
-        core.pageUndoKey = (action) => !isRunningNow() && undoInEdit(action)
-      })
-      .catch((error: unknown) => console.error("editorHotkeys():  couldn't reach the program's runtime", error))
     const disposers: (() => void)[] = []
     let isGone = false
     void uiReady

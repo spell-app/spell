@@ -36,11 +36,18 @@ async function open(page: Page, project: string): Promise<void> {
   await page.waitForTimeout(1000)
 }
 
-/** Open the code pane's ⋯, and click the row `words`:  the ticked one hides it again (epic `editor` I73). */
+/** The top bar's compiled-code button (epic `editor` T76). */
+function compiledCodeButton(page: Page) {
+  return page.locator(".ModeTabs .CompiledCodeToggle [part~=item]").first()
+}
+
+/** Show the compiled code with the top bar's button, if it isn't showing, then click its tab `words`. */
 async function chooseOutput(page: Page, words: string): Promise<void> {
-  await page.locator(".CodeMoreMenu span").first().click()
-  await page.waitForTimeout(300)
-  await page.locator("ui-popup[for=CodeMoreMenu] ui-action", { hasText: words }).click()
+  if (!(await page.locator(".CodeOutputPane").count())) {
+    await compiledCodeButton(page).click()
+    await page.waitForTimeout(1500)
+  }
+  await page.locator(".CodeOutputPane ui-item", { hasText: words }).first().click()
   await page.waitForTimeout(1500)
 }
 
@@ -156,9 +163,14 @@ describe.skipIf(!SERVING)("code follows along", () => {
       .poll(() => page.locator(".CodeOutputPane ui-item[selected]").textContent(), { timeout: 8000 })
       .toContain("TypeScript")
 
-    // the ticked row again:  none shows
-    await chooseOutput(page, "TypeScript")
+    // the top bar's button names it, pressed;  a click hides it
+    const button = page.locator(".ModeTabs .CompiledCodeToggle").first()
+    expect(await button.getAttribute("title")).toBe("Compiled TypeScript")
+    expect(await button.getAttribute("aria-pressed")).toBe("true")
+    await compiledCodeButton(page).click()
+    await page.waitForTimeout(1000)
     expect((await following(page)).outputShows).toBe(false)
+    expect(await button.getAttribute("aria-pressed")).toBe("false")
   })
 
   test("a click on a line of code:  compiled code, the screen and the tree follow", { timeout: 150_000 }, async () => {
@@ -267,6 +279,59 @@ describe.skipIf(!SERVING)("code follows along", () => {
     }
   )
 
+  test(
+    "inspect, then a click in the gap a toolbar's spacer makes:  the spacer is selected, the code's caret on it",
+    { timeout: 150_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire")
+      await showFile(page, "Solitaire.spell")
+      await page.waitForTimeout(1500)
+      if (!(await page.locator(".InspectAppButton.inspecting").count())) {
+        await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
+        await page.waitForTimeout(1000)
+      }
+      await page.evaluate(() => (window as unknown as DebugGlobals).Inspector.dismissHelp())
+      await page.waitForTimeout(300)
+      // `<spacer/>` between Restart and Undo is 0px wide:  the gap between their buttons is what it makes (I169)
+      const gap = await page.evaluate(() => {
+        const spacer = document.querySelector(".AppPaneBody ui-toolbar > spacer")!
+        const button = (element: Element | null) =>
+          element!.shadowRoot!.querySelector("button")!.getBoundingClientRect()
+        const [before, after] = [button(spacer.previousElementSibling), button(spacer.nextElementSibling)]
+        const [, line, column] = /:(\d+):(\d+)$/.exec(spacer.getAttribute("data-spell-at")!)!
+        return {
+          x: (before.right + after.left) / 2,
+          y: before.top + before.height / 2,
+          width: after.left - before.right,
+          spacerWidth: spacer.getBoundingClientRect().width,
+          line: Number(line),
+          column: Number(column)
+        }
+      })
+      expect(gap.spacerWidth, "the spacer has no width of its own").toBe(0)
+      expect(gap.width).toBeGreaterThan(4)
+      await page.mouse.move(gap.x, gap.y)
+      await page.waitForTimeout(400)
+      const hover = await page.evaluate(() => {
+        const box = document.querySelector<HTMLElement>(".InspectorHover")
+        return box && !box.hidden ? box.getBoundingClientRect().width : 0
+      })
+      expect(hover, "the hover outline is the gap's").toBeCloseTo(gap.width, -1)
+      await page.mouse.click(gap.x, gap.y)
+      await page.waitForTimeout(1500)
+      const state = await following(page)
+      expect(state.selected).toEqual(["spacer"])
+      expect(state.followed).toMatchObject({ line: gap.line, from: "parts" })
+      const caret = await page.evaluate(() => {
+        const code = (window as unknown as DebugGlobals).editor.shownCodeEditor!
+        const { lineNumber, column } = code.getPosition()!
+        return { line: lineNumber - 1, column: column - 1, text: code.getModel()!.getLineContent(lineNumber).trim() }
+      })
+      expect(caret).toEqual({ line: gap.line, column: gap.column, text: "<spacer/>" })
+    }
+  )
+
   test("someone typing isn't moved", { timeout: 150_000 }, async () => {
     const page = await context.newPage()
     await open(page, "Solitaire")
@@ -338,9 +403,6 @@ describe.skipIf(!SERVING)("code follows along", () => {
       await clickCodeLine(page, place.line)
       await page.waitForTimeout(800)
       await page.screenshot({ path: path.join(SHOTS!, `p17-${theme}-${colorScheme}.png`) })
-      await page.locator(".CodeMoreMenu span").first().click()
-      await page.waitForTimeout(400)
-      await page.screenshot({ path: path.join(SHOTS!, `p17-${theme}-${colorScheme}-menu.png`) })
       expect(seen).toBe(theme)
       await looks.close()
     }

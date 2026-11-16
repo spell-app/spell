@@ -58,7 +58,8 @@ export class BubblyPresentation {
     site_page: { head: "property" },
 
     // actions and handlers:  `to deal the cards`, `to draw its front`, `when its score changes`, `on click`;
-    // an action's head:  everything after `to` is what a person typed, its parameters aside (Owen, 2026-11-11)
+    // an action's head:  everything after `to` is what a person typed, ONE pill (Owen, 2026-11-11), its blanks
+    // underlined in it, plain (epic `language` I109)
     to_do_something: {
       head: "action",
       inputs: ["method_keyword"],
@@ -68,16 +69,18 @@ export class BubblyPresentation {
     // a drawing's:  its verb and the part it draws bold, `to <draw> its <placeholder>` (epic `language` I99)
     draw_it: { head: "action", namesWhatItDraws: true },
     on: { head: "action" },
-    // a drag handler's:  the moment it's for bold, a name, `when a <card> is <dropped>`, `while a <card> is <dragged over> it`
-    drag_handler: { head: "action", names: ["moment", "over"] },
-    // what runs as a thing is made:  `when creating` Spell's words, its type a reference, `when creating a deck`
-    create_hook: { head: "action", plain: ["method_keyword"] },
+    // a drag handler's and a create hook's, as an action's (epic `language` I109):  `when <a card is dropped>`,
+    // `while <a card is dragged over it>`, `when <creating solitaire>`, its thing underlined in its pill
+    drag_handler: { head: "action", typedAfterLead: true, typedToEnd: true, blankThrough: "item" },
+    create_hook: { head: "action", inputs: ["method_signature"], typedAfterLead: true, blankAfterVerb: "signature" },
     // steps at an action's end, as its own head draws:  `after <putting> a card <on> a pile` (epic `language` P56);
     // its `cancel`, as any action's, is a plain step (`cancel_this_action` needs no row)
     after_hook: {
       head: "action",
       inputs: ["method_keyword"],
       typedAfterLead: true,
+      // Spanish leads with two words, `después de`:  the pill starts at the action's words
+      typedFrom: "signature",
       params: METHOD_PARAMS
     },
 
@@ -119,6 +122,13 @@ export class BubblyPresentation {
     can_take: { isQuestion: true },
     can_give_up: { isQuestion: true },
     there_is_a: { isQuestion: true },
+    // a call of an action the project declares, whole:  `turn over the next card`, `put the card on end pile`,
+    // its blanks' values bold inside it;  a built-in template's (`turn the card face up`) a plain step (epic `language` I108)
+    method_call: { isCall: true },
+    // `each <card> in <the deck>`, `the <cards> in <the stock>`:  ONE value, the words that say it and the list
+    // (`add <each card in the cards> to the stock`;  epic `language` I108)
+    each_in_statement: { readsEach: true },
+    plural_call_statement: { readsEach: true },
     // more of the value before it:  `"foo" as lower case`, `its height in feet`
     as_lowercase: { continuesValue: true },
     as_uppercase: { continuesValue: true },

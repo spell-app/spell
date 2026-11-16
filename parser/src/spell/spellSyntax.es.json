@@ -19,7 +19,7 @@
           "ruleNames": ["blank_line"],
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "A blank line, compiling to `P.ASTBlankLine`.",
           "syntaxes": [],
           "aliases": []
@@ -39,7 +39,7 @@
           "ruleNames": ["line"],
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
-          "line": 31,
+          "line": 32,
           "purpose": "Parse a single `LineToken` in a `BlockToken` as.",
           "syntaxes": [],
           "aliases": []
@@ -3548,7 +3548,7 @@
           "ruleNames": ["list_move"],
           "internal": false,
           "file": "src/spell/rules/lists/ListMove.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "`move the card to the tableau` -- moves it, if the pile it belongs to lets it go and the tableau takes it: their guards, e.g. `a tableau can take a card if: ...` (epic page Q25).",
           "syntaxes": [
             {
@@ -3932,7 +3932,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 23,
+          "line": 24,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -3958,7 +3958,7 @@
           "ruleNames": ["list_prepend"],
           "internal": false,
           "file": "src/spell/rules/lists/ListPrepend.ts",
-          "line": 7,
+          "line": 8,
           "purpose": "Prepend to list, e.g. `prepend thing to my-list` => `core.prepend(myList, thing)`.",
           "syntaxes": [
             {
@@ -3984,7 +3984,7 @@
           "ruleNames": ["list_append"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAppend.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`.",
           "syntaxes": [
             {
@@ -4010,7 +4010,7 @@
           "ruleNames": ["list_add_relative"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAddRelative.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "Add to list before/after some other item, e.g. `add thing to my-list before other-thing`.",
           "syntaxes": [
             {

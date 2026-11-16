@@ -285,7 +285,8 @@ export class Parser extends Derivative {
    * - A method whose first line is new, or gone, and parses alone -- see `stubDeclaredMethods()`.
    * - Then `P.IncrementalProject` re-parses everything, so every line sees the change, as a full parse would.
    * - `keepEdited`:  only a method added or deleted counts,
-   *   not a first line being edited (as many methods as before).
+   *   not a first line being edited (as many methods as before, the edit on that one line:
+   *   `P.IncrementalProject` passes it only then, so a rename, its head and every call, re-parses).
    *   The edited one's early call stays until the next full parse,
    *   as a broken line keeps its last working declarations (`keepLastGood`).
    * - Default:  `false`.  Languages override, e.g. `SpellParser`.
@@ -341,6 +342,23 @@ export class Parser extends Derivative {
    * - Default:  never safe.  Languages with bodies override, e.g. `SpellParser`.
    */
   reparseBody(_item: P.Match, _body: P.BlockToken): P.Match | undefined {
+    return undefined
+  }
+
+  /**
+   * Re-parse ONLY the innermost indented body an edit changed INSIDE top-level `item`'s body, now `body`:
+   * e.g. one method's steps in a type's body, keeping the type and its other members.
+   * - Unlike `reparseBody()`, it rewinds and replays the `journal` itself, and moves the tokens it keeps:
+   *   `oldText` and `text` are the file before and after the edit.
+   * - Returns a new match for the whole item, or `undefined` with nothing changed:
+   *   the caller then tries `reparseBody()`.
+   * - Default:  never.  Languages with nested bodies override, e.g. `SpellParser`.
+   */
+  reparseInnerBody(
+    _item: P.Match,
+    _body: P.BlockToken,
+    _texts: { oldText: string; text: string }
+  ): P.Match | undefined {
     return undefined
   }
 

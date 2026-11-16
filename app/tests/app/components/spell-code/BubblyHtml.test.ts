@@ -34,6 +34,27 @@ describe("BubblyHtml.write()", () => {
     )
   })
 
+  test("draws an action's head as ONE pill, its blanks underlined in it, plain;  quoted, its marks at its ends (I109)", () => {
+    const text = [
+      'a "card" is a thing',
+      'a "pile" is a list of cards',
+      "solitaire is an app",
+      "\tto play a card",
+      "\t\tprint 1",
+      '\tto "count the points for (a card) on (a pile)"',
+      "\t\tprint 1"
+    ].join("\n")
+    const drawn = BubblyHtml.write(SP.BubblyLayout.of(text))
+    expect(drawn).toContain(
+      '<p class="bubbly-head-pill bubbly-ends-input">to <span class="bubbly-input bubbly-with-blanks">play <span class="bubbly-underline">a card</span></span></p>'
+    )
+    expect(drawn).toContain(
+      '<span class="bubbly-quoted"><span class="bubbly-input bubbly-with-blanks"><span class="bubbly-quote-mark bubbly-quote-open">"</span>' +
+        'count the points for (<span class="bubbly-underline">a card</span>) on (<span class="bubbly-underline">a pile</span>)' +
+        '<span class="bubbly-quote-mark bubbly-quote-close">"</span></span></span>'
+    )
+  })
+
   test("keeps every word of the code, quote marks too, for copying;  escapes the markup", () => {
     const drawn = html()
     expect(drawn).toContain(

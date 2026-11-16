@@ -7,7 +7,8 @@ import {
   indentColumns,
   type BubblyBlockShape,
   type BubblyInputShape,
-  type BubblyShape
+  type BubblyShape,
+  type BubblyUnderlineShape
 } from "./BubblyMarks"
 import {
   MarkupMarks,
@@ -119,7 +120,11 @@ export class SpellBubbly {
     editor.onDidContentSizeChange(redrawSoon)
     editor.onDidChangeHiddenAreas(redrawSoon)
     editor.onDidChangeConfiguration((event) => {
-      if (event.hasChanged(monaco.editor.EditorOption.fontInfo)) this.measured = undefined
+      if (event.hasChanged(monaco.editor.EditorOption.fontInfo)) {
+        this.measured = undefined
+        // their height is a share of the line's:  marked again
+        this.shortLinesKey = undefined
+      }
       redrawSoon()
     })
     editor.onDidDispose(() => {
@@ -192,6 +197,7 @@ export class SpellBubbly {
     this.isDrawing = false
     clearTimeout(this.relayoutTimer)
     this.marks?.clear()
+    this.clearShortFootLines()
     this.laidOut = undefined
     this.setZones([])
     this.layer?.remove()
@@ -225,19 +231,20 @@ export class SpellBubbly {
     try {
       if (this.isMarkup) {
         this.laidOut = MarkupMarks.of(model.getValue())
-        this.marks!.set(this.withShortFootLines(this.laidOut))
+        this.marks!.set(this.laidOut.marks)
         return this.redraw()
       }
       const laidOut = this.spellMarks(model)
       // the marks it has already, e.g. a slice shown again (`showSlice()`):  only drawn again
       if (laidOut === this.laidOut) return this.redraw()
       this.laidOut = laidOut
-      this.marks!.set(this.withShortFootLines(this.laidOut))
+      this.marks!.set(this.laidOut.marks)
       this.resetDescriptions()
     } catch (error) {
       console.error("SpellBubbly.relayout():  couldn't lay the code out", error)
       this.laidOut = undefined
       this.marks?.clear()
+      this.clearShortFootLines()
     }
     this.redraw()
   }
@@ -273,25 +280,39 @@ export class SpellBubbly {
   /**
    * Each HTML block's end tag on its own line, `</segment>` or `</>`:  its line only its tiny pill's row tall
    * (`--bubbly-foot-tiny-row`, Owen, Q61), so nested ones stack close, as on the page.
-   * - Monaco's own line height for the lines a mark spans (`lineHeight`, a multiple of the editor's):
-   *   on the mark holding the end tag's place.
+   * - Monaco's own line height for a line (`lineHeight`, a multiple of the editor's):
+   *   a mark of its own on each end tag, beside the end tag's mark, so the file's marks stay as they are.
+   * - Only on the lines the editor shows:  Monaco gives a hidden line's height to the next line it shows,
+   *   so an end tag above a slice made the slice's first line short, its band cut off at the top (epic `editor` I164).
+   * - Marked again only when they've moved, so a redraw can call it each time.
    */
-  private withShortFootLines(laidOut: BubblyMarks | MarkupMarks): monaco.editor.IModelDeltaDecoration[] {
+  private markShortFootLines(): void {
+    const { laidOut } = this
+    if (!laidOut || !this.marks) return
     const { footTinyRow, lineHeight } = this.measures()
-    const multiple = footTinyRow / lineHeight
-    // a copy:  the marks are shared by the file's editors (`spellMarks()`), each its own line height
-    const marks = [...laidOut.marks]
-    const shorten = (shapes: Shape[]) => {
+    const ranges = this.marks.getRanges()
+    const short: monaco.editor.IModelDeltaDecoration[] = []
+    const collect = (shapes: Shape[]) => {
       for (const shape of shapes) {
-        if (shape.kind === "markup-block" && shape.foot !== undefined) {
-          const mark = marks[shape.foot]!
-          marks[shape.foot] = { ...mark, options: { ...mark.options, lineHeight: multiple } }
+        const range = shape.kind === "markup-block" && shape.foot !== undefined ? ranges[shape.foot] : undefined
+        if (range && this.isShown(range)) {
+          short.push({ range, options: { lineHeight: footTinyRow / lineHeight } })
         }
-        if ("inside" in shape) shorten(shape.inside)
+        if ("inside" in shape) collect(shape.inside)
       }
     }
-    shorten(laidOut.shapes)
-    return marks
+    collect(laidOut.shapes)
+    const key = short.map(({ range }) => range.startLineNumber).join()
+    if (key === this.shortLinesKey) return
+    this.shortLinesKey = key
+    this.shortLines ??= this.editor.createDecorationsCollection()
+    this.shortLines.set(short)
+  }
+
+  /** No end tag's line short any more (`markShortFootLines()`). */
+  private clearShortFootLines(): void {
+    this.shortLines?.clear()
+    this.shortLinesKey = undefined
   }
 
   ////////////////
@@ -326,6 +347,8 @@ export class SpellBubbly {
   private redraw() {
     const { editor, laidOut, shapes } = this
     if (!laidOut || !shapes) return
+    // first:  a slice's lines may have changed, and with them which end tags' lines are short
+    this.markShortFootLines()
     const ranges = this.marks!.getRanges()
     // across first:  where each band starts, and so how far below its last line each foot goes
     const view: View = {
@@ -524,7 +547,7 @@ export class SpellBubbly {
       else if (shape.kind === "tag") elements.push(this.asHtml(this.drawTag(shape, range, view)))
       else if (shape.kind === "tag-link") elements.push(this.asHtml(this.drawLink(shape, range, view)))
       else if (range.startLineNumber < view.first) continue
-      else if (shape.kind === "underline") elements.push(this.drawUnderline(range, view))
+      else if (shape.kind === "underline") elements.push(this.drawUnderline(shape, range, view))
       else {
         const element = this.drawInput(shape, range, view)
         if (element) elements.push(element)
@@ -563,7 +586,7 @@ export class SpellBubbly {
     }
     if (hasBody) {
       const bodyTop = headTop + (lineHeight + measures.pillHeight) / 2
-      // its last line may be an HTML end tag's, shorter than the rest (`withShortFootLines()`)
+      // its last line may be an HTML end tag's, shorter than the rest (`markShortFootLines()`)
       const lastBottom = lastTop + this.lineHeightOf(lastLine)
       const footTop = lastBottom + measures.footRoom - measures.footHeight + this.footDrop(shape, view)
       const height = footTop - bodyTop
@@ -591,7 +614,7 @@ export class SpellBubbly {
    *   its end tag's band likewise (`bubbly-tag-foot-spacer`).
    * - A start tag on lines of its own:  one tall band (`drawTall()`), its body from under its last line.
    * - Its end tag on its own line, named or `</>`:  a TINY pill at the rail's turn, the body down to it (Q61);
-   *   its line only the pill's row tall (`withShortFootLines()`).
+   *   its line only the pill's row tall (`markShortFootLines()`).
    */
   private drawMarkupBlock(shape: MarkupBlockShape, range: monaco.Range, view: View): HTMLElement | undefined {
     const { editor } = this
@@ -791,9 +814,10 @@ export class SpellBubbly {
    * to its last, its dots evenly spaced under bold and plain words alike;  how far below the line's middle, the sheet's
    * (`--bubbly-underline-drop`).
    */
-  private drawUnderline(range: monaco.Range, view: View): HTMLElement {
+  private drawUnderline({ afterSpacer }: BubblyUnderlineShape, range: monaco.Range, view: View): HTMLElement {
     const line = range.startLineNumber
-    const left = this.xOf(line, range.startColumn)
+    // the column's x is before everything injected there:  a pill's spacer, when it starts one
+    const left = this.xOf(line, range.startColumn) + (afterSpacer ? view.measures.inputSpacer : 0)
     const right = this.xOf(line, range.endColumn)
     const top = this.editor.getTopForLineNumber(line) + view.lineHeight / 2
     return place(element(UNDERLINE), { left, top, width: right - left }, view.measures.scale)
@@ -842,7 +866,7 @@ export class SpellBubbly {
   // ## Where Monaco draws
   ////////////////
 
-  /** How tall `line` is:  the editor's line height, or a shorter one's (`withShortFootLines()`). */
+  /** How tall `line` is:  the editor's line height, or a shorter one's (`markShortFootLines()`). */
   private lineHeightOf(line: number): number {
     return this.editor.getLineHeightForPosition({ lineNumber: line, column: 1 })
   }
@@ -960,6 +984,9 @@ export class SpellBubbly {
 
   /** The editor's decorations:  the marks. */
   private marks: monaco.editor.IEditorDecorationsCollection | undefined
+  /** The end tags' short lines (`markShortFootLines()`), and the lines they were on. */
+  private shortLines: monaco.editor.IEditorDecorationsCollection | undefined
+  private shortLinesKey: string | undefined
 
   /** The layer behind the editor, and the shapes in it, while drawing. */
   private layer: HTMLElement | undefined

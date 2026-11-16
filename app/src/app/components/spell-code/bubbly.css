@@ -14,6 +14,8 @@
  *     (`scripts/bubbly-page.ts`)
  *   - Monaco (epic `language` P50):  these same names;  where the editor draws a piece differently, its rule
  *     (`&.bubbly-monaco`) right after the page's, and what only the editor has in one section at the end
+ *   - the CodeMirror test (epic `editor` P30, `.cmb-editor`):  the page's rules on real elements in its lines, but not
+ *     the page's "laid out as the editor" section, which zooms and re-rows a page's drawing;  its own in `codemirror.css`
  *   - VS Code (P51), which can't load CSS:  its `--bubbly-` values as a table, `bubbly.values.json`
  *     (`scripts/bubbly-values.ts`)
  * - `bubbly-name`, the name a head defines (`"card"`), is Monaco's mark for what the page finds by its place
@@ -297,9 +299,10 @@
    * declares, `droppable`), the name a head defines (`a "card"`, `group "Rank"`;  a thing's bare one,
    * `solitaire is an app`), and each value a list declares (`is one of ace, 2 ... 10, jack`)
    * - never its `the`, `its` or `a`;  no lighter weight for a later use (Owen, 2026-11-15, epic `language` Q64)
+   * - nor an action's pill with blanks in it, `to "play a card"`:  all plain, its blanks underlined (epic `language` I109)
    */
   .bubbly-reference,
-  :is(.bubbly-head-pill, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input,
+  :is(.bubbly-head-pill, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input:not(.bubbly-with-blanks),
   :is(.bubbly-thing > .bubbly-head-pill, .bubbly-pill.bubbly-thing) > .bubbly-input:first-child,
   .bubbly-input.bubbly-name,
   .bubbly-input.bubbly-choice {
@@ -583,16 +586,6 @@
     content: close-quote;
     left: 100%;
     bottom: -10px;
-  }
-  /* a quoted action name's marks, alone outside its pills:  `to "count the points for a card on a pile"` */
-  .bubbly-quote-alone:where(:not(.view-line *)) {
-    position: relative;
-  }
-  .bubbly-quote-open.bubbly-quote-alone:where(:not(.view-line *)) {
-    margin-left: var(--bubbly-quote-margin);
-  }
-  .bubbly-quote-close.bubbly-quote-alone:where(:not(.view-line *)) {
-    margin-right: var(--bubbly-quote-margin);
   }
 
   /* in the editor:  the file's `"` keeps its width, its curly mark drawn over it */
@@ -1227,7 +1220,7 @@
    *   - never past its own place at the band's end, nor left over the head's words:
    *     it sticks inside its `bubbly-description`, the room between the two (`BubblyHtml.DESCRIPTION`)
    */
-  &:not(.bubbly-monaco, .bubbly-html) {
+  &:not(.bubbly-monaco, .bubbly-html, .cmb-editor) {
     .bubbly-block:has(:is(.bubbly-head-pill, .bubbly-pill) > .bubbly-description) {
       width: auto;
       min-width: max-content;
@@ -1262,7 +1255,7 @@
    * - under a declaration with a body:  its body's paper, its foot, then the rest of the gap to the next band
    * - in the drawing's own units:  the editor's pixels over `--bubbly-page-scale`
    */
-  &:not(.bubbly-monaco, .bubbly-html) {
+  &:not(.bubbly-monaco, .bubbly-html, .cmb-editor) {
     /* the editor's font size (`SpellMonaco.OPTIONS`, 15px) over the drawing's (`--bubbly-font-size`) */
     --bubbly-page-scale: 0.9375;
     /* the editor's line:  15px times `--bubbly-monaco-line-height` (1.65), rounded as Monaco rounds it */
@@ -1457,13 +1450,6 @@
     }
     .view-line .bubbly-tag-quote.bubbly-quote-open::after {
       translate: -75% -0.3em;
-    }
-    /*
-     * ... but a tag's quoted word's, `<deck "deck">`:  no `=` to sit over, so upright over its own `"`, which is
-     * room enough from the name (Owen:  "more room left of the opening quote", "less room right of the closing")
-     */
-    .view-line .bubbly-tag-word-quote.bubbly-quote-open::after {
-      translate: -50% 0;
     }
 
     /* the shapes:  a layer behind the editor, moved with its code, drawn at the drawing's size */

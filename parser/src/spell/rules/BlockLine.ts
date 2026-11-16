@@ -5,6 +5,7 @@ import { SpellType, SubjectRule } from "spell/parser/spell/rules/types"
 import { SpellStatement, commitStatement } from "./Statement"
 import { Block, type BlockMatchData } from "./Block"
 import { SpellJSX } from "./JSX"
+import { JoinedLines } from "./JoinedLines"
 import { ParseError } from "./ParseError"
 
 /**
@@ -58,6 +59,7 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const tokensMatched: P.Token[] = [written]
     let lineStatement: P.Match | undefined
     let lineBodyMark: P.JournalMark | undefined
+    let lineBodyEndMark: P.JournalMark | undefined
     let fromBody: string | undefined
     let bodyErrorsAt: number | undefined
     // a rule read what's indented under the line, to say what the line is -- see `SpellStatement.below`
@@ -174,6 +176,7 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
         SP.SpellWarnings.noteArticles(statement)
         const nestedBlockMatch = committed.body
         lineBodyMark = committed.bodyMark
+        lineBodyEndMark = committed.bodyEndMark
         fromBody = committed.fromBody
         if (nestedBlockMatch) {
           // add any errors in the nestedBlock to `errors`
@@ -208,6 +211,7 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     if (lineStatement) result.data.statement = lineStatement
     if (bodyErrorsAt !== undefined) result.data.bodyErrorsAt = bodyErrorsAt
     if (lineBodyMark) result.data.bodyMark = lineBodyMark
+    if (lineBodyEndMark) result.data.bodyEndMark = lineBodyEndMark
     if (fromBody !== undefined) result.data.fromBody = fromBody
     if (readsBelow) result.data.readsBelow = true
     return result
@@ -250,6 +254,7 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
    *   - what the statement records once its body has parsed changed, e.g. the type a method returns:
    *     later lines may read it -- see `SpellStatement.mutateScopeFromBody()`
    * - The new body gets a FRESH nested scope:  we re-parse on a clone of the statement, without its old body.
+   * - SIDE EFFECT:  the old statement's `replacedBy` is the clone, so its scope records read the new body.
    */
   reparseBody(line: P.MatchFor<this>, blockToken: P.BlockToken): P.Match | undefined {
     const { statement, bodyErrorsAt } = line.data
@@ -261,20 +266,165 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     if (statement.nestedScope === statement.scope || P.IncrementalParse.changesGlobalScope(oldBody)) return undefined
 
     // Statement without its old body, re-bodied.
+    const header = BlockLine.headerOf(statement, oldBody)
+    const newBody = statement.rule.parseNestedBlock(header, blockToken)
+    if (!newBody?.is(Block) || P.IncrementalParse.changesGlobalScope(newBody)) return undefined
+    const fromBody = statement.rule.mutateScopeFromBody(header)
+    if (fromBody !== line.data.fromBody) return undefined
+    return BlockLine.rebodied(line, header, oldBody, newBody, blockToken, fromBody)
+  }
+
+  /**
+   * Re-parse ONLY the innermost body an edit changed inside `line`'s body, `blockToken` now:
+   * e.g. one action's steps in a type's outline, keeping the type, its other members and everything after it.
+   * - SEE:  `P.IncrementalParse`, "body";  `reparseBody()` does the body it re-parses.
+   * - Goes down one body at a time while only ONE body under it changed, the rest of the text the same:
+   *   `line`'s body, then the member whose body changed, and so on.
+   *   - A body it goes through must be read as a plain block (`parseNestedBlock()`), record nothing once it's parsed
+   *     (`mutateScopeFromBody()`), and its lines can't depend on what's under them (`readsBelow`), nor join
+   *     (`JoinedLines`):  e.g. a type's outline, an event's steps;  NOT an action's or a property's.
+   *   - The body it re-parses is the deepest that can be (`reparseBody()`):  the steps of `if` share their action's
+   *     scope, so the action's are.
+   * - Never `line`'s own body:  `undefined` then, and the caller re-parses it, as before.
+   * - Rewinds and replays `journal` itself:  re-parsed => it holds the new body, the rest as it was;
+   *   `undefined` => unchanged.
+   * - SIDE EFFECT:  moves the kept tokens after the change to their places in `text`.
+   */
+  reparseInnerBody(
+    line: P.Match,
+    blockToken: P.BlockToken,
+    { oldText, text, journal }: { oldText: string; text: string; journal: P.ParseJournal }
+  ): P.Match | undefined {
+    const moved: P.Token[][] = []
+    const result = BlockLine.rebodyInside(line, blockToken, { oldText, text, journal, moved })
+    if (!result) return undefined
+    const delta = text.length - oldText.length
+    for (const tokens of moved) line.scope.parser!.tokenizer.moveTokens(tokens, delta, text)
+    return result.line
+  }
+
+  /**
+   * `line` with its body re-parsed somewhere inside it, the body token it has now -- see `reparseInnerBody()`.
+   * - `moved`:  each run of kept tokens after the change, for the caller to move once it's settled.
+   */
+  private static rebodyInside(
+    line: P.Match,
+    blockToken: P.BlockToken,
+    context: InnerBodyContext
+  ): { line: P.Match; body: P.BlockToken } | undefined {
+    const { oldText, text } = context
+    const statement = line.data.statement as P.Match | undefined
+    const oldToken = line.tokens[1]
+    if (!statement || !(statement.rule instanceof SpellStatement) || !(oldToken instanceof P.BlockToken))
+      return undefined
+    if (line.data.bodyErrorsAt === undefined || line.data.readsBelow) return undefined
+    const { rule } = statement
+    // a body read as a plain block, recording nothing once it's parsed:  rebuilt here as that read builds it
+    if (rule.parseNestedBlock !== SpellStatement.prototype.parseNestedBlock || rule.bodySpec?.nestedAs !== "block")
+      return undefined
+    if (rule.mutateScopeFromBody !== SpellStatement.prototype.mutateScopeFromBody) return undefined
+    if ((line.scope.parser as SP.SpellParser | undefined)?.form === "page") return undefined
+    const oldBody = rule.getBody(statement)
+    if (!oldBody?.is(Block) || oldBody.tokens[0] !== oldToken) return undefined
+    // lines joined, before or after the edit:  how they're cut may change (`and ...` lines under a line)
+    const joins = (token: P.BlockToken) => JoinedLines.of(oldBody.scope, token.tokens) !== token.tokens
+    if (joins(oldToken) || joins(blockToken)) return undefined
+
+    // the ONE item under it that changed:  a body, with the text around it the same
+    const oldItems = oldToken.tokens
+    const newItems = blockToken.tokens
+    if (oldItems.length !== newItems.length) return undefined
+    const at = oldItems.findIndex((item, index) => itemText(item, oldText) !== itemText(newItems[index]!, text))
+    const [oldItem, newItem] = [oldItems[at], newItems[at]]
+    if (!(oldItem instanceof P.BlockToken && newItem instanceof P.BlockToken)) return undefined
+    const end = (token: P.Token) => token.start + token.length
+    if (oldText.slice(0, oldItem.start) !== text.slice(0, newItem.start)) return undefined
+    if (oldText.slice(end(oldItem)) !== text.slice(end(newItem))) return undefined
+    const lines = oldBody.matched as P.Match[]
+    const child = lines.find((item) => item.tokens[1] === oldItem)
+    if (!child?.is(BlockLine)) return undefined
+    // the last line of a body that gives back its last line's value was read as that value:  not rebuilt here
+    const index = lines.indexOf(child)
+    if (index === lines.length - 1 && rule.returnsLastLine(statement)) return undefined
+
+    const inner = BlockLine.rebodyInside(child, newItem, context) ?? BlockLine.rebodyHere(child, newItem, context)
+    if (!inner) return undefined
+
+    // this body again, the new line in the old one's place, its kept tokens moved by the caller
+    context.moved.push(oldItems.slice(at + 1))
+    const body = new P.BlockToken({
+      ...oldToken.record,
+      tokens: oldItems.map((item, i) => (i === at ? inner.body : item))
+    })
+    const matched = lines.map((item) => (item === child ? inner.line : item))
+    const newBody = (oldBody.rule as Block).assembleBlock(oldBody.scope, body, matched)!
+    const { enclose, describes, returnsLast } = oldBody.data
+    if (enclose) newBody.data.enclose = enclose
+    if (describes) newBody.data.describes = describes
+    if (returnsLast) newBody.data.returnsLast = returnsLast
+    const header = BlockLine.headerOf(statement, oldBody)
+    // its lines were read in the old statement's scope:  the clone keeps it
+    header.derived("nestedScope", () => statement.nestedScope)
+    header.addMatch(newBody, "body")
+    header.data.body = newBody
+    return {
+      line: BlockLine.rebodied(line, header, oldBody, newBody, body, line.data.fromBody as string | undefined),
+      body
+    }
+  }
+
+  /**
+   * `line`'s own body re-parsed for `blockToken`, journaled:  rewound to its `bodyMark`, re-parsed, then the rest
+   * replayed from its `bodyEndMark` -- see `reparseBody()`.
+   * - `undefined` when it can't be, with the journal as it was.
+   */
+  private static rebodyHere(
+    line: P.MatchFor<BlockLine>,
+    blockToken: P.BlockToken,
+    { journal }: InnerBodyContext
+  ): { line: P.Match; body: P.BlockToken } | undefined {
+    const { bodyMark, bodyEndMark } = line.data
+    if (!bodyMark || !bodyEndMark || !journal.has(bodyMark) || !journal.has(bodyEndMark)) return undefined
+    const undone = journal.rewindTo(bodyMark)
+    const result = (line.rule as BlockLine).reparseBody(line, blockToken)
+    if (!result) {
+      journal.rewindTo(bodyMark)
+      journal.replay(undone)
+      return undefined
+    }
+    journal.replay(undone.slice(undone.indexOf(bodyEndMark)))
+    return { line: result, body: blockToken }
+  }
+
+  /** A clone of `statement` without its body `oldBody`, to give a new one. */
+  private static headerOf(statement: P.Match, oldBody: P.Match): P.Match {
     const bodyTokens = new Set(oldBody.tokens)
     const header = statement.clone({
       matched: statement.matched.filter((item) => item !== oldBody),
       tokens: statement.tokens.filter((token) => !bodyTokens.has(token))
     })
     header.data.body = undefined
-    const newBody = statement.rule.parseNestedBlock(header, blockToken)
-    if (!newBody?.is(Block) || P.IncrementalParse.changesGlobalScope(newBody)) return undefined
-    const fromBody = statement.rule.mutateScopeFromBody(header)
-    if (fromBody !== line.data.fromBody) return undefined
+    return header
+  }
 
-    // Swap the old body's errors for the new body's, in place.
-    const errors = [...(line.data.errors ?? [])]
-    errors.splice(bodyErrorsAt, oldBody.data.errors?.length ?? 0, ...(newBody.data.errors ?? []))
+  /**
+   * `line` again, its statement now `header` with `newBody` (on `blockToken`) in place of `oldBody`.
+   * - `fromBody`:  what its statement recorded once the new body parsed.
+   * - Its errors:  the old body's swapped for the new body's, in place.
+   * - SIDE EFFECT:  the old statement's `replacedBy` is `header`:  see `P.Match.current`.
+   */
+  private static rebodied(
+    line: P.Match,
+    header: P.Match,
+    oldBody: P.Match,
+    newBody: P.Match,
+    blockToken: P.BlockToken,
+    fromBody: string | undefined
+  ): P.Match {
+    const { statement, bodyErrorsAt } = line.data as BlockMatchData
+    const errors = [...((line.data as BlockMatchData).errors ?? [])]
+    const { errors: oldErrors } = oldBody.data as BlockMatchData
+    errors.splice(bodyErrorsAt!, oldErrors?.length ?? 0, ...((newBody.data as BlockMatchData).errors ?? []))
     const result = line.clone({
       matched: line.matched.map((item) => (item === statement ? header : item)),
       tokens: [line.tokens[0]!, blockToken]
@@ -282,6 +432,7 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     result.data.statement = header
     result.data.errors = errors.length ? errors : undefined
     result.data.fromBody = fromBody
+    statement!.replacedBy = header
     return result
   }
 
@@ -306,4 +457,12 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
         .map((item) => item.AST) as Array<P.ASTStatement | P.ASTExpression | P.ASTComment | P.ASTBlankLine>
     })
   }
+}
+
+/** What `BlockLine.reparseInnerBody()` hands down as it goes:  the texts, the journal, the tokens to move. */
+type InnerBodyContext = { oldText: string; text: string; journal: P.ParseJournal; moved: P.Token[][] }
+
+/** `token`'s own text in `text`. */
+function itemText(token: P.Token, text: string): string {
+  return text.slice(token.start, token.start + token.length)
 }

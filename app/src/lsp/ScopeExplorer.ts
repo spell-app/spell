@@ -561,7 +561,7 @@ export class ScopeExplorer {
     const file = declaredBy && this.service.fileOf(declaredBy)
     if (!file || declaredBy.start === undefined) return {}
     const text = file.parseText
-    const body = declaredBy.data.body as P.Match | undefined
+    const body = declaredBy.current.data.body as P.Match | undefined
     const start = text.lastIndexOf("\n", declaredBy.start - 1) + 1
     const end = body?.end ?? declaredBy.end ?? declaredBy.start
     const rules = tree.rules

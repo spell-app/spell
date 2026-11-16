@@ -95,6 +95,29 @@
     fill: currentColor;
     pointer-events: none;
   }
+  /* `all-items-icon`:  its icon, an item's size, then the caret, side by side;  the button as wide as they need */
+  .ui.toolbar > .all-items:has(> svg + svg) {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    width: auto;
+    padding: 0 8px;
+  }
+  .ui.toolbar > .all-items > svg:first-child:not(:last-child) {
+    width: 1em;
+    height: 1em;
+  }
+
+  /*
+   * `all-items-at-end`:  at the bar's far end, however few items show (the editor's file tabs);
+   * a right slot after it then sits right beside it
+   */
+  .ui.toolbar > .all-items.at-end {
+    margin-inline-start: auto;
+  }
+  .ui.toolbar > .all-items.at-end ~ .right {
+    margin-inline-start: 0;
+  }
 
   /*
    * the menu's own box scrolls (the scrolling row's sheet):  it takes the room left, its items never shrunk

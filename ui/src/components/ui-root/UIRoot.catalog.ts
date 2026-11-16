@@ -1664,7 +1664,9 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "show-keys",
       "scroll-first",
       "max-visible",
-      "remember"
+      "remember",
+      "all-items-icon",
+      "all-items-at-end"
     ],
     formControl: true
   },

@@ -19,7 +19,7 @@
           "ruleNames": ["blank_line"],
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "A blank line, compiling to `P.ASTBlankLine`.",
           "syntaxes": [],
           "aliases": []
@@ -39,7 +39,7 @@
           "ruleNames": ["line"],
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
-          "line": 31,
+          "line": 32,
           "purpose": "Parse a single `LineToken` in a `BlockToken` as.",
           "syntaxes": [],
           "aliases": []
@@ -3548,7 +3548,7 @@
           "ruleNames": ["list_move"],
           "internal": false,
           "file": "src/spell/rules/lists/ListMove.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "`move the card to the tableau` -- moves it, if the pile it belongs to lets it go and the tableau takes it: their guards, e.g. `a tableau can take a card if: ...` (epic page Q25).",
           "syntaxes": [
             {
@@ -3932,7 +3932,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 23,
+          "line": 24,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -3958,7 +3958,7 @@
           "ruleNames": ["list_prepend"],
           "internal": false,
           "file": "src/spell/rules/lists/ListPrepend.ts",
-          "line": 7,
+          "line": 8,
           "purpose": "Prepend to list, e.g. `prepend thing to my-list` => `core.prepend(myList, thing)`.",
           "syntaxes": [
             {
@@ -3984,7 +3984,7 @@
           "ruleNames": ["list_append"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAppend.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`.",
           "syntaxes": [
             {
@@ -4010,7 +4010,7 @@
           "ruleNames": ["list_add_relative"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAddRelative.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "Add to list before/after some other item, e.g. `add thing to my-list before other-thing`.",
           "syntaxes": [
             {
@@ -6154,7 +6154,7 @@
               }
             },
             {
-              "syntax": "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color}",
+              "syntax": "{type:subject_implied} group {group:text} ((with|,) (color|colour)|, (colored|coloured)) {color:site_card_color} (, icon {icon:text})?",
               "example": "a \"films page\" is a page\ngalaxy guide is a site in the cloud:\n\tgroup \"Films\", color blue\n\tit has a films page at \"/films\"",
               "outputs": {
                 "js": {
@@ -6165,6 +6165,21 @@
                 },
                 "py": {
                   "code": "class FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [{\"name\": \"films page\", \"page\": \"FilmsPage\", \"address\": \"/films\", \"group\": \"Films\"}]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} group {group:text}, icon {icon:text}",
+              "example": "a \"films page\" is a page\ngalaxy guide is a site in the cloud:\n\tgroup \"Films\", icon \"film\"\n\tit has a films page at \"/films\"",
+              "outputs": {
+                "js": {
+                  "code": "export class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    group: \"Films\",\n    groupIcon: \"film\"\n  }]\n  static livesAt = \"cloud\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "ts": {
+                  "code": "export class FilmsPage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class FilmsPageElement extends SpellElement<FilmsPage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-films-page\", \"films page\", [])\n}\ncore.useElement(FilmsPage, FilmsPageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"films page\",\n    page: \"FilmsPage\",\n    address: \"/films\",\n    group: \"Films\",\n    groupIcon: \"film\"\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "py": {
+                  "code": "class FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"group\": \"Films\",\n            \"group_icon\": \"film\",\n        },\n    ]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
                 }
               }
             }
@@ -8845,7 +8860,7 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 24,
+          "line": 25,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {

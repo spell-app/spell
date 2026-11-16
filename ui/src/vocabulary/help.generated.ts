@@ -1770,7 +1770,7 @@ export const HELP_TABLE: Readonly<
       appearance:
         '`nav`: the docs site\'s look, its pages a tree with `appearance="nav"`: taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands.',
       collapsed:
-        "Only the icons: each row's title its tooltip, a page with no icon its title's first letter, and a group's label a thin line.",
+        "Only the icons, in one column: each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.",
       remember: "Keep which pages are open for each person, under this name, across reloads and visits."
     }
   },
@@ -2225,7 +2225,11 @@ export const HELP_TABLE: Readonly<
         "With `shrinkable`: once only its icons are left, they scroll with `‹` / `›`, no overflow button.",
       "max-visible":
         "More items than this (a number; with none, 8): the row shows only the ones chosen lately, up to that many, and a button that's always there lists every item.",
-      remember: "With `max-visible`: a name to keep the row's items under, so they're the same after a reload."
+      remember: "With `max-visible`: a name to keep the row's items under, so they're the same after a reload.",
+      "all-items-icon":
+        "With `max-visible`: an icon before the caret of the button listing every item, saying what they are (a project's files: `file outline`).",
+      "all-items-at-end":
+        "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show."
     }
   },
   "ui-transition": {

@@ -56,6 +56,8 @@ An agent that can start background agents keeps its own session free to answer t
 (the epic skill's "The session answers;  agents build"):  each one claims its files (`epic agents claim <name>
 <path...>`), merges with `epic worktree merge-main --as <name>`, and runs a full test run in its turn,
 `epic turns run test -- yarn test`.  Else, the steps below, here.
+After a restart, agents it started are gone:  start each again from its task, as the epic's running list
+(`epic agents`) names it.
 
 1. `epic phase <epic>#P3 active`, and the page's line:  `epic inbox status <epic> "Building P3"`.
 2. Check the accepted plan still fits.
