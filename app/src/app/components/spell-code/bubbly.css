@@ -18,6 +18,25 @@
  *     the page's "laid out as the editor" section, which zooms and re-rows a page's drawing;  its own in `codemirror.css`
  *   - VS Code (P51), which can't load CSS:  its `--bubbly-` values as a table, `bubbly.values.json`
  *     (`scripts/bubbly-values.ts`)
+ * - ROLES TO LOOK (epic `language` P60):  each grammar rule says what its parts ARE, its roles, beside its syntax
+ *   (`addRule(Rule, { syntax, roles })`, the parser's `SP.BubblyRuleRoles`);  each role draws ONE way, here:
+ *
+ *   | Role          | Put on              | Draws as                                       | Its class           | Spell             |
+ *   | ------------- | ------------------- | ---------------------------------------------- | ------------------- | ----------------- |
+ *   | band          | the rule            | the head's band, its part of speech's colour   | `.bubbly-<part>`    | `to play a card`  |
+ *   | declaration   | a group, a word     | a white pill:  what a person typed             | `.bubbly-input`     | `a "pile" is ...` |
+ *   | blank         | a group             | dotted underline in its pill, its kind bold    | `.bubbly-underline` | `to play a card`  |
+ *   | name          | a group, a word     | bold                                           | `.bubbly-reference` | `it is droppable` |
+ *   | value         | the rule, its groups| one dotted underline, outermost only           | `.bubbly-underline` | `each card in it` |
+ *   | question      | the rule            | one dotted underline, with what it asks of     | `.bubbly-underline` | `it is face up`   |
+ *   | action call   | the rule            | one dotted underline, whole                    | `.bubbly-underline` | `reset the stock` |
+ *   | quantity      | the rule            | one dotted underline                           | `.bubbly-underline` | `300 msec`        |
+ *   | written value | the rule            | italic, never underlined                       | `.bubbly-value`     | `10`, `yes`       |
+ *   | plain         | a group             | no bold, no underline                          | `.bubbly-words`     | `item column of`  |
+ *
+ *   - A rule with no roles draws by the defaults:  names that read or set something bold, Spell's own words plain,
+ *     written values italic.
+ *   - The same table, each example drawn:  the drawn-bubbly page (`scripts/bubbly-page.ts`), "Roles".
  * - `bubbly-name`, the name a head defines (`"card"`), is Monaco's mark for what the page finds by its place
  * - Classes the drawing writes that no rule here styles, kept as hooks to tune:
  *   - `bubbly-level-<n>` on a block or pill:  how deep it sits, 0 at the top of a file;  a group counts as a level

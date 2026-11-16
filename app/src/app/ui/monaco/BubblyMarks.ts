@@ -22,7 +22,8 @@ import { TextMarks, spacer, type Spacers } from "./TextMarks"
  *   typed, ONE dotted line under each value and each question (`bubbly-underline`):  `SpellBubbly` places them from
  *   where Monaco draws each line and letter.
  *   - The dotted line's a shape, not a mark on the text:  a mark is cut at each piece, and its dots restarted there.
- * - Which rule presents which way is `SP.BubblyPresentation`'s, read by the layout:  nothing here decides it.
+ * - Which rule presents which way is its roles' (`SP.BubblyRoles`) and `SP.BubblyPresentation`'s, read by the layout:
+ *   nothing here decides it.
  * - Pure data:  Monaco's TYPES only, so it's tested without an editor.
  * - Its marks are made as every drawing's are:  `TextMarks`.
  ****************/
