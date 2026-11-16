@@ -78,6 +78,43 @@ describe("<ui-site-nav-button>", () => {
     expect(box().getAttribute("aria-expanded")).toBe("true")
   })
 
+  // epic `mockup` I35 (Owen:  "Make the house line up with the siebar-shower-icon")
+  test("the drawer's first page's icon lines up with its icon, on the menu's middle:  wide and icons only", async () => {
+    const layout = await ElementFixture.render<DOMPageLayoutElement>(
+      `<ui-page-layout style="width: 900px; height: 400px">
+        <ui-app-menu slot="menu"><ui-site-nav-button slot="start"></ui-site-nav-button></ui-app-menu>
+        <ui-site-nav slot="drawer" appearance="nav" current="/a"
+          pages='[{ "title": "Home", "href": "/a", "icon": "house" }, { "title": "B", "href": "/b", "icon": "film" }]'
+        ></ui-site-nav>
+        <p>The page</p>
+      </ui-page-layout>`
+    )
+    await ShadowTree.settle(layout)
+    const button = layout.querySelector("ui-site-nav-button")!
+    const nav = layout.querySelector("ui-site-nav")!
+    await ShadowTree.settle(button)
+    await ShadowTree.settle(nav)
+    // the middle of an icon as drawn:  its shapes, not its box
+    const middleOf = (icon: Element) => {
+      const shapes = [...(icon.shadowRoot ?? icon).querySelectorAll("path")].map((path) => path.getBoundingClientRect())
+      if (!shapes.length) return undefined
+      return (Math.min(...shapes.map((box) => box.top)) + Math.max(...shapes.map((box) => box.bottom))) / 2
+    }
+    const buttonMiddle = () => middleOf(button.shadowRoot!.querySelector('[part~="icon"]')!)
+    const homeMiddle = () => {
+      const item = nav.shadowRoot!.querySelector("ui-tree-item")!
+      const icon = item.shadowRoot!.querySelector("ui-icon") ?? item.shadowRoot!.querySelector('[part~="icon"]')
+      return icon ? middleOf(icon) : undefined
+    }
+    // the menu's height reaches the navigation once the layout has measured it
+    const offBy = () => Math.abs((homeMiddle() ?? Infinity) - (buttonMiddle() ?? 0))
+    await expect.poll(offBy).toBeLessThan(0.5)
+    layout.setAttribute("drawer", "compact")
+    await expect.poll(() => nav.hasAttribute("collapsed")).toBe(true)
+    await ShadowTree.settle(nav)
+    expect(offBy()).toBeLessThan(0.5)
+  })
+
   test("with one inside it, the layout draws no menu button of its own", async () => {
     const { layout } = await layoutWithButton()
     expect(layout.shadowRoot!.querySelector('[part~="menu-button"]')).toBeNull()

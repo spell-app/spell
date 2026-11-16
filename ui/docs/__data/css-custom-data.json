@@ -8895,7 +8895,7 @@
       "name": "--ui-site-nav-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-site-nav>`'s token.  Default:  `0.5em 0`"
+        "value": "`<ui-site-nav>`'s token.  Default:  `var(--_site-nav-padding-top) 0 0.5em`"
       }
     },
     {
@@ -8910,6 +8910,13 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-site-nav>`'s token.  Default:  `var(--ui-radius-l)`"
+      }
+    },
+    {
+      "name": "--ui-site-nav-bar-height",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-site-nav>`'s token.  Default:  `calc(var(--_site-nav-row-height) + 1em)`"
       }
     },
     {
