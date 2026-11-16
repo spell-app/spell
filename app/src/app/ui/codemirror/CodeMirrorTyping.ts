@@ -23,7 +23,7 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
  * ### `CodeMirrorTyping`
- * The nine helps as a person types Spell in a CodeMirror editor, as Monaco's `SpellTyping` gives them
+ * The nine helps as a person types Spell in a CodeMirror editor
  * (epic `codemirror` P4), so what they see is what they type.
  * - The caret snaps into the body a blank line is drawn in:
  *   clicked or arrowed onto, a blank line inside a body gets that body's indent, the caret after it.
@@ -52,7 +52,7 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  * - Its own edits, and an edit from outside the code (`FileStates.EDIT_WAY`), are never taken for typing.
  * - Every help writes only on the lines it's working on:  an edit anywhere else is dropped, with an error saying so,
  *   so a help gone wrong never breaks a file silently (`write()`).
- * - What each help decides, from the lines, is the language service's (`LSP.SpellTyping`), as Monaco's is,
+ * - What each help decides, from the lines, is the language service's (`LSP.SpellTyping`),
  *   so both editors decide alike;  this class is only the CodeMirror wiring.
  ****************/
 export class CodeMirrorTyping {

@@ -27,7 +27,7 @@ import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
-import { LazyMonaco } from "./LazyMonaco"
+import { LazyCodeMirror } from "./LazyCodeMirror"
 import {
   CodeCard,
   InspectorCard,
@@ -878,8 +878,8 @@ export class Inspector {
     const at = head.toLowerCase().indexOf(action.words.toLowerCase())
     if (!file || at < 0) throw new UIError(appTexts.text("renameActionNotAction", { action: action.words }))
     try {
-      const { SpellMonaco } = await LazyMonaco.load()
-      const { service, addresses } = SpellMonaco.register()
+      const { service } = (await LazyCodeMirror.load()).SpellCodeMirror
+      const { addresses } = service
       const { changes = {} } = service.renameActionAt(file, { line: place!.line, character: at + 1 }, newWords)
       const wanted = newWords.trim().replace(/\s+/g, " ")
       const title = appTexts.text("renameAction", { action: action.words, newName: wanted })

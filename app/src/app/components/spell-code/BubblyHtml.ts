@@ -24,7 +24,7 @@ export class BubblyHtml {
 
   /**
    * A piece's classes in the sheet, e.g. `bubbly-reference` for a `reference`;  `""` for plain `words`.
-   * - Monaco draws its pieces in the same classes (`BubblyMonaco`, epic `language` P50).
+   * - The code editor draws its pieces in the same classes (`CodeMirrorBubbly`, epic `codemirror` P3).
    */
   static classesFor(kind: SP.BubblyPieceKind): string {
     return PIECE_CLASSES[kind]
@@ -39,7 +39,7 @@ export class BubblyHtml {
   /**
    * Round a drawing's CODE, a `{…}` in its markup (`SP.BubblyLine.codes`):  ONE inverted pill, a deep shade of its
    * band's hue, its words light, so code worked out as the program runs reads apart from what's typed in (Owen, I144 C1)
-   * - the same pill as an HTML file's `{…}` value (`BubblyMarkup`), and Monaco's
+   * - the same pill as an HTML file's `{…}` value (`BubblyMarkup`), and the code editor's
    */
   static readonly CODE = "bubbly-input bubbly-expression"
 

@@ -9,18 +9,17 @@ import { RenameRefusedError } from "spell/app/app/ui/ui.types"
 /****************
  * ### `CodeEditorFeatures`
  * What the app's code editors decide alike about the language service's answers, whichever editor shows them:
- * the app's Monaco (`SpellLanguageFeatures`) and the CodeMirror test page (`CodeMirrorLanguage`;  epic `codemirror` P1).
+ * the app's code editor (`CodeMirrorLanguage`;  epic `codemirror` P1).
  * - Only what's the EDITOR's to decide, not the program's (that's the language service's):
  *   how much a hover says, which code actions a menu offers, what Rename Symbol says, when the hover's info shows,
  *   where a web address or a heading comment is in a line.
  *   - Its words are `AppTexts`':  this only picks which.
  * - Plain functions and values, no editor:  each editor turns them into its own shapes.
- *   - A place in a line is a CHARACTER OFFSET, 0-based:  Monaco adds 1 for its columns, CodeMirror its line's start.
- * - More of each editor's features come here as they're lifted out of Monaco (epic `codemirror` P5):
- *   Monaco's `LinkClick`, `ErrorHover` and `SpellHeadings` are each its wiring of a group below,
- *   CodeMirror's `CodeMirrorLinks`, `CodeMirrorHovers` and `CodeMirrorHeadings` its twins.
+ *   - A place in a line is a CHARACTER OFFSET, 0-based:  the editor adds its line's start.
+ * - Lifted out of the editor's features (epic `codemirror` P5):
+ *   `CodeMirrorLinks`, `CodeMirrorHovers` and `CodeMirrorHeadings` are each the editor's wiring of a group below.
  * - Its position in the import graph:  the app's texts and code settings, the language service (its `RenameError`);
- *   NEVER Monaco or CodeMirror.
+ *   NEVER an editor.
  ****************/
 export class CodeEditorFeatures {
   /**
@@ -93,7 +92,7 @@ export class CodeEditorFeatures {
   }
 
   /**
-   * Does an error's message show by itself on a hover over its squiggle (Monaco's `ErrorHover`), in hover `mode`?
+   * Does an error's message show by itself on a hover over its squiggle (`CodeMirrorHovers`), in hover `mode`?
    * - Not when the full hover shows (`showsHoverInfo()`):  that shows the errors too, with the info.
    * - So in every mode some popup shows the errors on a plain hover.
    */

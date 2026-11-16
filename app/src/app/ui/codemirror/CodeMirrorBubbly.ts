@@ -9,7 +9,7 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 /****************
  * ### `CodeMirrorBubbly`
  * Spell drawn in the bubbly look in a CodeMirror editor (epic `editor` P30, the CodeMirror test;  epic `codemirror`
- * P3), from the parser's `SP.BubblyLayout`, the same data Monaco's `SpellBubbly` and the page's `BubblyHtml` draw from.
+ * P3), from the parser's `SP.BubblyLayout`, the same data the page's `BubblyHtml` draws from.
  * - Everything is a REAL element in the text's own lines, laid out by the browser:
  *   - each declaration's head on a band:  a mark round its words (`cmb-band`), in its part of speech's colour;
  *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen)
@@ -18,16 +18,16 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
  *   - what a person typed in white pills, a quoted one's curly marks, bold names, italic values, faint marks,
  *     one dotted line under each value and question:  marks in the classes of the look's one sheet, `bubbly.css`
  *   - a drawing's tags as HTML is drawn, its ends pointed, from the page's own reading of markup
- *     (`CodeMirrorMarkup`, `BubblyMarkup`):  the same as Monaco's, a `{…}` an inverted pill
+ *     (`CodeMirrorMarkup`, `BubblyMarkup`):  a `{…}` an inverted pill
  * - `slice`:  a range of the file shown alone (`<CodeSlice>`):  only what's wholly in its lines is drawn, so a block it
- *   cuts draws no band or rail cut off at its edges, as Monaco's `SpellBubbly.showSlice()`.
+ *   cuts draws no band or rail cut off at its edges.
  * - No layer behind the text, no injected text for room round Spell's pills:  padding round a pill is the pill's own,
  *   and the caret still lands on its letters, as CodeMirror measures the lines as they're drawn.
  * - Typing never waits for the layout:  CodeMirror moves the marks with the text,
  *   and the layout is worked out again once the typing pauses (`RELAYOUT_MSEC`, `CodeMirrorRelayout`).
  * - The editor's box is a `.bubbly` too (`EDITOR_CLASSES`), so the sheet's settings and rules reach it:
  *   its CodeMirror section draws the bands, rails, feet and tags.
- * - Its position in the import graph:  the parser's types and layout, CodeMirror, the shared marks;  never Monaco.
+ * - Its position in the import graph:  the parser's types and layout, CodeMirror, the shared marks.
  * - NEVER throws:  a layout that fails leaves the code plain, and logs why.
  ****************/
 export class CodeMirrorBubbly {
@@ -50,7 +50,7 @@ export class CodeMirrorBubbly {
     ]
   }
 
-  /** How long the typing must pause before the code's laid out again, in msec:  Monaco's `SpellBubbly` waits 300. */
+  /** How long the typing must pause before the code's laid out again, in msec. */
   static RELAYOUT_MSEC = 150
 
   /**

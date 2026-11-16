@@ -126,7 +126,7 @@ const PACK = { name: "spell", prefix: "spell-" }
  *   `spell-code.js` and `spell-markdown.js` are `vite.code.config.ts`'s):
  *   NOT one script holding them, as `spell pack build` makes,
  *   because the elements need what a classic script can't have --
- *   Monaco and the parser as lazy chunks, `spell-runtime.js` loaded afresh per app.
+ *   CodeMirror and the parser as lazy chunks, `spell-runtime.js` loaded afresh per app.
  * - The modules take Solid and Spell UI's core from the page when it has its own
  *   (a docs page's bundle:  `spell-solid-shared.js`, `vite.solid.config.ts`), else from `spell-solid.js` beside them:
  *   one Solid per page either way (two fail silently).

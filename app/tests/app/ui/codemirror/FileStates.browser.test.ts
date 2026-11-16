@@ -7,7 +7,6 @@ import { declareProp, Observable } from "spell/util"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { FileStates, type EditWay } from "spell/app/app/ui/codemirror/FileStates"
-import { SpellModels } from "spell/app/app/ui/monaco/SpellModels"
 
 /**
  * `FileStates`, one CodeMirror state per file, on a real view in the browser (epic `codemirror` P2):
@@ -152,8 +151,8 @@ describe("FileStates", () => {
     states.releaseSlice(view)
   })
 
-  test("its waits are Monaco's `SpellModels`', kept equal by hand until the swap (epic `codemirror` J4)", () => {
-    expect([FileStates.PARSE_WAIT, FileStates.SAVE_WAIT]).toEqual([SpellModels.PARSE_WAIT, SpellModels.SAVE_WAIT])
+  test("its waits:  a parse once the typing pauses 200 msec, a rename's save within 2 s (epic `codemirror` J4)", () => {
+    expect([FileStates.PARSE_WAIT, FileStates.SAVE_WAIT]).toEqual([200, 2000])
   })
 })
 

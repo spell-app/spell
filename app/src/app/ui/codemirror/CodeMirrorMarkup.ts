@@ -11,7 +11,7 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  * HTML drawn bubbly in a CodeMirror editor (epic `codemirror` P3), as the drawn-bubbly page draws it:
  * an HTML file (a property editor page, `Card.editor.html`), and a Spell file's drawing's tags.
  * - What's marked how is the editors' shared reading, `MarkupMarks`, from the page's own reading of markup
- *   (`BubblyMarkup`):  the same elements, pieces and classes as Monaco's.
+ *   (`BubblyMarkup`):  the same elements, pieces and classes.
  * - Only the last step is CodeMirror's (`draw()`):  each stretch a mark in its classes, each spacer a widget, and each
  *   SHAPE drawn on the text itself, not in a layer behind it:
  *   - a tag in a line:  its mark a small pill, its ends pointed (`cmb-tag-pill`)
@@ -19,7 +19,7 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  *   - a block's body:  a rail on each line (`--cmb-rails`);  its end tag on its own line a tiny pill (`cmb-tag-foot`)
  *   - a one-line element with something between its tags:  a line along the top and bottom between them
  * - The editor's box is a `.bubbly .bubbly-html` (`EDITOR_CLASSES`), so the look's one sheet, `bubbly.css`, reaches it.
- * - Its position in the import graph:  CodeMirror, the shared marks;  never Monaco.
+ * - Its position in the import graph:  CodeMirror, the shared marks.
  * - NEVER throws:  a reading that fails leaves the text plain, and logs why.
  ****************/
 export class CodeMirrorMarkup {
@@ -34,7 +34,7 @@ export class CodeMirrorMarkup {
 
   /**
    * The editor's tab stop and space, as its font draws them, for the sheet:  `--cmb-indent`, `--cmb-space`.
-   * - A tab is CodeMirror's 4 spaces (its own `tab-size`), as Monaco's is:  the rails and feet, placed by these, stand
+   * - A tab is CodeMirror's 4 spaces (its own `tab-size`):  the rails and feet, placed by these, stand
    *   at their bands' ends, at any level (measured:  a guessed 24px left them 7px off a level, epic `codemirror` P3).
    * - Measured once the editor's drawn, and again whenever its font may have changed (a new theme, a zoom).
    */
@@ -275,7 +275,7 @@ export function railsOf(rails: Rail[]): string {
     .join(", ")
 }
 
-/** Room beside a mark, as Monaco's injected text is:  an empty inline box, its width the sheet's. */
+/** Room beside a mark, an empty inline box, its width the sheet's. */
 class SpacerWidget extends WidgetType {
   constructor(readonly classes: string) {
     super()

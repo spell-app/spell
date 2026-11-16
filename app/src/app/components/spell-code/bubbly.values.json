@@ -264,22 +264,6 @@
       "light": "system-ui, -apple-system, \"Segoe UI\", sans-serif",
       "dark": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
     },
-    "--bubbly-monaco-line-height": {
-      "light": "1.65",
-      "dark": "1.65"
-    },
-    "--bubbly-monaco-scale": {
-      "light": "1",
-      "dark": "1"
-    },
-    "--bubbly-underline-drop": {
-      "light": "9px",
-      "dark": "9px"
-    },
-    "--bubbly-monaco-shapes-drop": {
-      "light": "1px",
-      "dark": "1px"
-    },
     "--bubbly-expression-pill": {
       "light": "#61646d",
       "dark": "#cacdd1"
@@ -371,6 +355,10 @@
     "--bubbly-foot-bare-pad-left": {
       "light": "14px",
       "dark": "14px"
+    },
+    "--bubbly-editor-scale": {
+      "light": "0.9375",
+      "dark": "0.9375"
     }
   },
   "parts": {

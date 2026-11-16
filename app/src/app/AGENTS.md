@@ -220,7 +220,6 @@ and in the app's build folder, `app/` at the app folder's root.
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:
     - in the app, through `spell/app/app/solid`'s `LazyMonaco`
-    - in `<spell-editor>`, through its `loadMonaco()`
     - NEVER import `spell/app/app/ui/monaco` or `spell/app/app/solid/monaco` statically outside those folders, types aside.
     - Or Monaco (~4.4 MB) lands in the main bundle again.
 - [The CodeMirror plumbing](ui/codemirror/), the editor Monaco is moving to (epic `codemirror`):
@@ -266,13 +265,17 @@ and in the app's build folder, `app/` at the app folder's root.
     - Settings… drives it from the same table as Monaco, live:  `codeMirrorOptionsFor()`, the twin of
       `monacoOptionsFor()`, in a compartment ([CodeMirrorPopups](ui/codemirror/CodeMirrorPopups.ts)), following
       `codeChoices`, which `CodeSettings` sets
-    - its keys are `EDITOR_HOTKEYS`' (`SpellCodeMirror.keymapFor()`);  its right-click menu ([CodeMirrorMenu](ui/codemirror/CodeMirrorMenu.tsx))
-      is the part menu's popup, `<MenuPopup>`, Cut / Copy / Paste through `cutCopyOrPaste()`;  Find All References
-      lists the uses in the same popup
-    - while it has the focus it's the page's code editor (`codeEditors.focused`):  ⌘Z off the code reaches its
-      history in I167's order (`undoInEdit()`)
+    - its keys are the page's, passed in (`hotkeys`:  the app's `EDITOR_HOTKEYS`;  `SpellCodeMirror.keymapFor()`);
+      its right-click menu ([CodeMirrorMenu](ui/codemirror/CodeMirrorMenu.tsx)) is the part menu's popup,
+      `<MenuPopup>`, Cut / Copy / Paste through `cutCopyOrPaste()`;  Find All References lists the uses in the same popup
+      - NOT in the barrel:  import `CodeMirrorMenu` by its file, where the app is
+    - while it has the focus it's the page's code editor (`codeEditors.focused`, in `ui.types.ts`):  ⌘Z off the code
+      reaches its history in I167's order (`undoInEdit()`)
+    - NEVER imports the editor page (`editorHotkeys.ts`, `editor`, `spell/app/app/solid`), types aside:
+      `<spell-editor>`'s lazy chunk is this barrel, on pages with no app (`element.build.test.ts` pins it)
   - NEVER import `spell/app/app/ui/codemirror` or `spell/app/app/solid/codemirror` statically outside those folders
     and the test page, types aside:  it's to load lazily, as Monaco does.
+    - in `<spell-editor>`, through its `loadCodeMirror()`:  the chunk `spell-editor-codemirror.js`
 - Routing (P8):  [the routes](pages/routes.tsx), on `@solidjs/router@next` (`createRouter()`, pinned exactly).
   - The router ships its Solid JSX as SOURCE (`.jsx` files, in its dist folder).
     - [`NOT_SOLID_SOURCE`](../../app/vite.shared.ts) lets the Solid plugin compile it out of `node_modules`.
@@ -483,18 +486,20 @@ and in the app's build folder, `app/` at the app folder's root.
     1. its entry in `pages.json5`, then `yarn site:data`
     2. a copy of a page like it:  `Notice.html` for a picture, `spell-viewer.html` for a live one
     3. linked from `index.html`
-- `spellEditor/` is `<spell-editor>`'s pane:  the app's Monaco editor, as a web component.
+- `spellEditor/` is `<spell-editor>`'s pane:  the app's CodeMirror editor, as a web component.
   - `yarn build:element` => `spell-editor.js`
   - its demo:  `/demo/spell-editor.html`
   - It edits a server project, and feeds `<spell-viewer>`s what it compiles.
     - That's `SPELL_COMPILED_EVENT`, and `SpellCompiled` in [runner.types.ts](runner/runner.types.ts).
-  - Its OWN build, `vite.editor.config.ts`, so Monaco's CSS stays out of `spell-app.css`.
-    - Monaco is a lazy chunk:  the parser compiles, and apps run, before it loads.
+  - Its OWN build, `vite.editor.config.ts`, so the editor's CSS (the bubbly look's) stays out of `spell-app.css`.
+    - CodeMirror is a lazy chunk, `spell-editor-codemirror.js`:  the parser compiles, and apps run, before it loads.
     - Pinned by `element.build.test.ts`.
   - Several on a page edit several projects.
-    - Each `SpellModels.use()`s its own.
-    - Each listens with `SpellMonaco.onEdit()` / `onOpen()`, NOT through the app's editor.
-    - NEVER import `UI` or `LazyMonaco` there.
+    - Each `SpellCodeMirror.states.use()`s its own.
+    - Each listens with `SpellCodeMirror.onEdit()`, and its `<FileEditor>`'s `onOpen`, NOT through the app's editor.
+    - Its keys are its own copy of the editor page's (`SPELL_EDITOR_HOTKEYS`):  `EDITOR_HOTKEYS` brings the app.
+    - No right-click menu of the app's, no Find All References list:  `CodeMirrorMenu` is the app's.
+    - NEVER import `UI`, `LazyMonaco` / `LazyCodeMirror` or the editor page there.
 - Styles:  WWOD §18 › "Plain `.css` beside its component" (no Less).
   - app-wide sheets:  `spell.css`, `syntax.css`
   - The top bar's SPACING is one rule, in `solid/chrome.css` (Owen, 2026-10-24):

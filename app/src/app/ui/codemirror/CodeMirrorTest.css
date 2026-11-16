@@ -68,7 +68,6 @@ body {
   }
 
   .Editor,
-  .MonacoEditor,
   .DiffView {
     height: 100%;
   }

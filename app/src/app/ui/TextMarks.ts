@@ -1,14 +1,14 @@
 /****************
  * ### `TextMarks`
- * The marks a bubbly drawing puts on a text, by offsets into it:  the base of Monaco's `BubblyMarks` (Spell) and of
+ * The marks a bubbly drawing puts on a text, by offsets into it:  the base of the editors' marks (Spell's) and of
  * `MarkupMarks` (HTML), which every editor reads.
  * - Which stretch of the text gets which classes of the look's one sheet, `bubbly.css`, and which spacers:
  *   worked out here, the same for every editor.
  * - Only the last step is the editor's:  its `MarkMaker` turns each stretch into the editor's own mark
- *   (Monaco's decoration, `MonacoMarks.make`;  CodeMirror's, `CodeMirrorMarkup`'s).
+ *   (CodeMirror's, `CodeMirrorMarkup`'s).
  * - A shape names its place by an index into `marks`:  the editor moves that mark as the text is edited.
  * - Pure data:  no editor in it, so it's tested without one.
- *   NEVER imports Monaco or CodeMirror (epic `codemirror` P3).
+ *   NEVER imports an editor (epic `codemirror` P3).
  ****************/
 export class TextMarks<Mark> {
   /** Where each line starts in `text`. */
@@ -86,7 +86,7 @@ export type Spacers = { before?: Spacer; after?: Spacer }
 
 /**
  * Room injected beside a mark:  `content`, in `inlineClassName`, its width the sheet's.
- * - `cursorStops`:  which side of it the caret stops on, as Monaco's `InjectedTextCursorStops`:
+ * - `cursorStops`:  which side of it the caret stops on:
  *   `1` (right) for a spacer before the text, `2` (left) for one after it;  none:  either side
  */
 export type Spacer = { content: string; inlineClassName: string; cursorStops?: 1 | 2 }

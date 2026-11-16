@@ -12,7 +12,7 @@ import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
 import { RenameRefusedError } from "spell/app/app/ui/ui.types"
 
 /**
- * What the app's code editors decide alike, Monaco-free and CodeMirror-free (epic `codemirror` P5):
+ * What the app's code editors decide, with no editor in it (epic `codemirror` P5):
  * Rename Symbol's edits and words, the hover's ⌥ rule, web addresses in a line, heading comments.
  */
 describe("CodeEditorFeatures", () => {

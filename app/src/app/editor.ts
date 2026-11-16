@@ -1,5 +1,8 @@
+import type { ViewUpdate } from "@codemirror/view"
+
 import { $fetch, UIError, Observable, prop, setDebugGlobal, LoadableFile } from "spell/util"
 import { pollWhileVisible } from "spell/util/polling"
+import { after, type CancelablePromise } from "spell/util/timing"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -10,7 +13,7 @@ import type { SpellRuntime } from "spell/app/app/runner"
 import type { TestRun } from "spell/app/app/runner/spellRuntime"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { EDITOR_PIECES } from "spell/app/app/ui/ui.types"
-import type { monaco, EditWay } from "spell/app/app/ui/monaco"
+import type { EditWay, SpellCodeMirror } from "spell/app/app/ui/codemirror"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
@@ -882,7 +885,7 @@ export class EditorStore extends Observable {
   /**
    * Scope tree of current `project`, for the Reference tab and the add menu's This app -- see `LSP.ScopeExplorer`.
    * - Worked out again after each compile, by `refreshScopes()`.
-   * - `undefined` until the editor's language service has loaded, with Monaco.
+   * - `undefined` until the editor's language service has loaded, with CodeMirror.
    */
   @prop()
   accessor scopeTree: LSP.ScopeNode | undefined
@@ -895,9 +898,9 @@ export class EditorStore extends Observable {
   accessor programWords: SP.SpellWordsData | undefined
 
   /**
-   * Hand over the scope explorer on the editor's in-page language service:  `LazyMonaco` does, once Monaco loads.
+   * Hand over the scope explorer on the editor's in-page language service:  `LazyCodeMirror` does, once it loads.
    * - NOT spell state.
-   * - Handed over, not made here:  `spell/app/lsp` is in Monaco's lazy chunk, and `editor.ts` is in the main one.
+   * - Handed over, not made here:  `spell/app/lsp` is in CodeMirror's lazy chunk, and `editor.ts` is in the main one.
    * - SIDE EFFECT:  works out the current project's tree at once.
    */
   setScopeExplorer(explorer: LSP.ScopeExplorer): void {
@@ -1798,41 +1801,48 @@ export class EditorStore extends Observable {
   ////////////////
 
   /**
-   * Monaco editor of our `<InputEditor>`, if one's mounted.
-   * - NEVER spell state:  nothing should follow Monaco's internals -- see `inputEditorInstance`.
+   * The code editor of our `<InputEditor>`, if one's mounted:  CodeMirror's, its view `.view`.
+   * - NEVER spell state:  nothing should follow CodeMirror's internals -- see `inputEditorInstance`.
    * TODO: generalize this for multiple editors!
    */
-  getInputEditor(): monaco.editor.IStandaloneCodeEditor | undefined {
+  getInputEditor(): SpellCodeMirror | undefined {
     return inputEditorInstance
   }
   /**
    * Remember `inputEditor`, showing `editor.file`, in our `<InputEditor onMount />` event.
-   * - `api` is Monaco itself, handed over as Monaco is loaded lazily -- see `spell/app/app/solid`'s `LazyMonaco`.
-   * - SIDE EFFECT:  follows its cursor + scrolling into `selection`;  Monaco disposes of it with the editor.
-   * - The page's keys (save, revert, compile) are the code editor's `<InputEditor>`'s to add (`addCodeEditorKeys()`).
+   * - SIDE EFFECT:  follows its scrolling into `selection`, till it unmounts;  its caret comes through
+   *   `onInputUpdate()`, which `<InputEditor>` hands it.
+   * - The page's keys (save, revert, compile) are `<InputEditor>`'s to give it (`EDITOR_HOTKEYS`).
    */
-  onInputDidMount(inputEditor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco): void {
+  onInputDidMount(inputEditor: SpellCodeMirror): void {
     inputEditorInstance = inputEditor
-    inputEditorPath = editor.file?.path
-    inputEditor.onDidChangeCursorSelection((event) => {
-      editor.onInputCursor("cursor")
-      if (!isCursorMovedToFollow(event, api)) return
-      // a click at once;  the keys once the cursor rests, so the caret never waits on the Inspector (I69)
-      if (event.source === "mouse") followNow(event.selection.positionLineNumber)
-      else followOnceRested(inputEditor)
-    })
-    // typed or pasted here, not the side bar's edits through it:  the cursor's line is followed once it's drawn (I87)
-    inputEditor.onDidChangeModelContent(() => {
-      if (inputEditor.hasTextFocus()) followWhenRun = true
-    })
+    const scrolled = () => editor.onInputCursor("scroll")
+    inputEditor.view.scrollDOM.addEventListener("scroll", scrolled, { passive: true })
+    stopFollowingScroll = () => inputEditor.view.scrollDOM.removeEventListener("scroll", scrolled)
     editor.shownCodeEditor = inputEditor
-    inputEditor.onDidScrollChange((event) => {
-      if (event.scrollTopChanged) editor.onInputCursor("scroll")
-    })
+  }
+  /**
+   * A change in the input editor:  its text, its caret, the file it shows.
+   * - The caret moved:  remembered (`onInputCursor()`), and what's selected follows it, by `isCaretMovedToFollow()`.
+   * - Typed or pasted here, not the side bar's edits through it:  the caret's line is followed once it's drawn (I87).
+   */
+  onInputUpdate(update: ViewUpdate): void {
+    const inputEditor = inputEditorInstance
+    if (!inputEditor || update.view !== inputEditor.view) return
+    if (update.docChanged && update.view.hasFocus && update.transactions.some((each) => each.isUserEvent("input")))
+      followWhenRun = true
+    if (!update.selectionSet) return
+    editor.onInputCursor("cursor")
+    const move = caretMoveToFollow(update)
+    // a click at once;  the keys once the caret rests, so the caret never waits on the Inspector (I69)
+    if (move === "click") followNow(caretLine(update.view))
+    else if (move === "keys") followOnceRested(inputEditor)
   }
   /** Forget `inputEditor` in our `<InputEditor onUnmount />` event. */
-  onInputWillUnmount(inputEditor: monaco.editor.IStandaloneCodeEditor): void {
+  onInputWillUnmount(inputEditor: SpellCodeMirror): void {
     if (inputEditorInstance === inputEditor) {
+      stopFollowingScroll?.()
+      stopFollowingScroll = undefined
       inputEditorInstance = undefined
       editor.shownCodeEditor = undefined
     }
@@ -1844,7 +1854,7 @@ export class EditorStore extends Observable {
 
   /** The code editor showing `file`, once it's made:  `<FollowAlong>` reads it. */
   @prop()
-  accessor shownCodeEditor: monaco.editor.IStandaloneCodeEditor | undefined
+  accessor shownCodeEditor: SpellCodeMirror | undefined
 
   /**
    * The place in the program in focus:  the line the code's cursor moved to, a line of compiled code clicked, or a part.
@@ -1878,38 +1888,31 @@ export class EditorStore extends Observable {
   onInputEffect(): void {
     const { file } = editor
     const inputEditor = inputEditorInstance
-    const model = inputEditor?.getModel()
     const { initialSelection } = file || {}
-    if (!inputEditor || !model || !file?.isLoaded || !initialSelection) return
-    // still showing the last file:  the new one's editor will do it when it mounts
-    if (inputEditorPath !== file.path) return
+    if (!inputEditor || !file?.isLoaded || !initialSelection) return
+    // still showing the last file:  the new one's state will do it once it's shown
+    if (inputEditor.view.state.doc.toString() !== file.contents || inputEditor.file.path !== file.path) return
     delete file.initialSelection
 
+    const { view } = inputEditor
     const { scroll, anchor, head } = initialSelection
-    if (scroll) inputEditor.setScrollTop(scroll.current)
+    if (scroll) view.scrollDOM.scrollTop = scroll.current
     if (anchor && head) {
-      const start = positionIn(model, anchor)
-      const end = positionIn(model, head)
-      const selection = {
-        selectionStartLineNumber: start.lineNumber,
-        selectionStartColumn: start.column,
-        positionLineNumber: end.lineNumber,
-        positionColumn: end.column
-      }
-      inputEditor.setSelection(selection)
-      inputEditor.revealRangeInCenterIfOutsideViewport(inputEditor.getSelection()!)
+      inputEditor.selectRange(offsetIn(anchor), offsetIn(head))
     }
-    if (!initialSelection.quiet) inputEditor.focus()
+    if (!initialSelection.quiet) view.focus()
 
-    /** Monaco position of `position` in `model`:  by `offset` if it has one, else `line` / `ch`. */
-    function positionIn(textModel: monaco.editor.ITextModel, position: UIT.EditorPosition): monaco.IPosition {
-      if (position.offset !== undefined) return textModel.getPositionAt(position.offset)
-      return textModel.validatePosition({ lineNumber: position.line + 1, column: position.ch + 1 })
+    /** Offset of `position` in the file shown:  by `offset` if it has one, else `line` / `ch`. */
+    function offsetIn(position: UIT.EditorPosition): number {
+      const { doc } = view.state
+      if (position.offset !== undefined) return Math.max(0, Math.min(position.offset, doc.length))
+      const line = doc.line(Math.max(1, Math.min(position.line + 1, doc.lines)))
+      return line.from + Math.max(0, Math.min(position.ch, line.length))
     }
   }
 
   /**
-   * `file` was edited in its Monaco model, and has taken the text -- see `SpellModels`.
+   * `file` was edited in its code editor's state, and has taken the text -- see `FileStates`.
    * - Compiles `EDIT_COMPILE_DELAY` seconds after input settles, if it's in the project we're showing;
    *   Cmd / Ctrl+Enter compiles at once (`EDITOR_HOTKEYS`).
    * - The static build keeps the edit at once (`keepEdit()`).
@@ -1940,9 +1943,9 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * The user edited the file's text to `value` somewhere with no Monaco model:
+   * The user edited the file's text to `value` somewhere with no file state:
    *   `<InputEditor>`'s fallback editor.
-   * - The normal editor's edits go through `SpellModels` instead -- see `onFileEdited()`.
+   * - The normal editor's edits go through `FileStates` instead -- see `onFileEdited()`.
    */
   onInputChanged(value: string): void {
     if (editor.file) editor.takeText(editor.file, value)
@@ -1977,7 +1980,7 @@ export class EditorStore extends Observable {
   /**
    * Type `edits` into `file`, as keys typed in the code editor are:
    * a notebook page's example typed in (epic `notebook` P3, Q5).
-   * - Through the file's code editor model when it has one, joining the run of typing there,
+   * - Through the file's code editor state when it has one, joining the run of typing there,
    *   so ⌘Z in the code undoes the run as one, as ever.
    * - Else straight into the file (`takeText()`).
    * - Then the running app takes it `delay` seconds after the typing stops (`compileAppSoon()`):
@@ -1992,8 +1995,8 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Puts edits through the code editor, once it's loaded:  false for a file it has no model of.  See `LazyMonaco`.
-   * - `way`:  a step of its own (the default), or `typing`, joining the run before it (`SpellModels.applyEdits()`).
+   * Puts edits through the code editor, once it's loaded:  false for a file it has no state of.  See `LazyCodeMirror`.
+   * - `way`:  a step of its own (the default), or `typing`, joining the run before it (`FileStates.applyEdits()`).
    */
   codeEditorEdits:
     | ((file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1], way?: EditWay) => boolean)
@@ -2065,7 +2068,7 @@ export type RunningSitePage = {
 let loadingRuntime: Promise<SpellRuntime> | undefined
 /** Where the running app draws -- NOT spell state either.  See `editor.setAppRoot()`. */
 let appRoot: HTMLElement | undefined
-/** Scope explorer on the in-page language service, once Monaco's loaded -- NOT spell state.  See `editor.setScopeExplorer()`. */
+/** Scope explorer on the in-page language service, once CodeMirror's loaded -- NOT spell state.  See `editor.setScopeExplorer()`. */
 let scopeExplorer: LSP.ScopeExplorer | undefined
 /**
  * Seconds after typing stops before the running app recompiles:  2 (Owen, 2026-11-13, epic `editor` I58).
@@ -2127,10 +2130,10 @@ export function runtimeConsole(): SpellConsole | undefined {
   return runtimeCore()?.console
 }
 
-/** Monaco editor of our `<InputEditor>`, if one's mounted -- NOT spell state, see `editor.getInputEditor()`. */
-let inputEditorInstance: monaco.editor.IStandaloneCodeEditor | undefined
-/** Path of the file `inputEditorInstance` shows. */
-let inputEditorPath: string | undefined
+/** Code editor of our `<InputEditor>`, if one's mounted -- NOT spell state, see `editor.getInputEditor()`. */
+let inputEditorInstance: SpellCodeMirror | undefined
+/** Stops following the input editor's scrolling:  `onInputDidMount()`. */
+let stopFollowingScroll: (() => void) | undefined
 
 /**
  * How long the code's cursor rests on a line, moved by the keys, before what's selected follows it, in milliseconds.
@@ -2140,12 +2143,18 @@ let inputEditorPath: string | undefined
 const CURSOR_REST_MS = 120
 
 /** The follow waiting for the cursor to rest:  `followOnceRested()`. */
-let restingFollow: ReturnType<typeof setTimeout> | undefined
+let restingFollow: CancelablePromise<void> | undefined
 
 /** Follow line `lineNumber`, from 1, of the code at once:  a click.  A follow still waiting on the keys is dropped. */
 function followNow(lineNumber: number): void {
-  clearTimeout(restingFollow)
+  restingFollow?.cancel()
   editor.followCodeLine(lineNumber)
+}
+
+/** The line of `view`'s caret, from 1. */
+function caretLine(view: SpellCodeMirror["view"]): number {
+  const { state } = view
+  return state.doc.lineAt(state.selection.main.head).number
 }
 
 /**
@@ -2153,15 +2162,16 @@ function followNow(lineNumber: number): void {
  * - Nothing follows if the text changed meanwhile (typing never moves the selection), the editor went,
  *   or a range is selected now.
  */
-function followOnceRested(inputEditor: monaco.editor.IStandaloneCodeEditor): void {
-  clearTimeout(restingFollow)
-  const version = inputEditor.getModel()?.getVersionId()
-  restingFollow = setTimeout(() => {
-    const selection = inputEditor.getSelection()
-    if (inputEditorInstance !== inputEditor || !selection?.isEmpty()) return
-    if (inputEditor.getModel()?.getVersionId() !== version) return
-    editor.followCodeLine(selection.positionLineNumber)
-  }, CURSOR_REST_MS)
+function followOnceRested(inputEditor: SpellCodeMirror): void {
+  restingFollow?.cancel()
+  const { doc } = inputEditor.view.state
+  restingFollow = after(CURSOR_REST_MS / 1000, () => {
+    const { state } = inputEditor.view
+    if (inputEditorInstance !== inputEditor || !state.selection.main.empty) return
+    if (state.doc !== doc) return
+    editor.followCodeLine(caretLine(inputEditor.view))
+  })
+  restingFollow.catch(() => {})
 }
 
 /** An edit typed or pasted in the code is waiting for the running app to take it:  `followOnceDrawn()`. */
@@ -2181,9 +2191,9 @@ function followOnceDrawn(): void {
   followWhenRun = false
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
-      const selection = inputEditorInstance?.getSelection()
+      const view = inputEditorInstance?.view
       if (editor.compileAppSoonTimer) followWhenRun = true
-      else if (selection?.isEmpty()) editor.followCodeLine(selection.positionLineNumber, "edit")
+      else if (view?.state.selection.main.empty) editor.followCodeLine(caretLine(view), "edit")
     })
   )
 }
@@ -2251,35 +2261,39 @@ export type FollowedPlace = {
  * - SIDE EFFECT:  saves it as the file's pref too, for `selectPath()` to restore.
  */
 /**
- * Should what's selected follow the code's cursor to its line (epic `editor` I51, taking back J43's clicks only)?
- * - A click:  always, so a second click on one line brings it back into view.
- * - The arrow keys, Page Down, Cmd+End ...:  only to another line.
- * - NEVER while typing (the text changed), nor for the cursor moved by code (the caret snapping into a body).
+ * Should what's selected follow the code's caret to its line (epic `editor` I51, taking back J43's clicks only)?
+ * - `click`:  a click, always, so a second click on one line brings it back into view.
+ * - `keys`:  the arrow keys, Page Down, Cmd+End ...:  only to another line.
+ * - NEVER while typing (the text changed), nor for the caret moved by code (the caret snapping into a body,
+ *   the place in focus putting it on its tag):  their transactions say no user event.
  * - Never with a range selected.
  */
-function isCursorMovedToFollow(event: monaco.editor.ICursorSelectionChangedEvent, api: typeof monaco): boolean {
-  if (!event.selection.isEmpty()) return false
-  if (event.source === "mouse") return true
-  const isMove =
-    event.source === "keyboard" &&
-    event.reason === api.editor.CursorChangeReason.Explicit &&
-    event.modelVersionId === event.oldModelVersionId
-  return isMove && event.oldSelections?.[0]?.positionLineNumber !== event.selection.positionLineNumber
+function caretMoveToFollow(update: ViewUpdate): "click" | "keys" | undefined {
+  if (!update.state.selection.main.empty || update.docChanged) return undefined
+  if (update.transactions.some((each) => each.isUserEvent("select.pointer"))) return "click"
+  if (!update.transactions.some((each) => each.isUserEvent("select"))) return undefined
+  const { doc } = update.state
+  const before = doc.lineAt(update.startState.selection.main.head).number
+  return before !== doc.lineAt(update.state.selection.main.head).number ? "keys" : undefined
 }
 
+/**
+ * `inputEditor`'s caret moved (`event` `"cursor"`) or it scrolled (`"scroll"`):  remember where, in `selection`.
+ * - SIDE EFFECT:  saves it as the file's pref too, for `selectPath()` to restore.
+ */
 function onInputCursor(event: UIT.EditorScrollInfo["event"]): void {
   const { file } = editor
   const inputEditor = inputEditorInstance
-  const model = inputEditor?.getModel()
-  const selection = inputEditor?.getSelection()
-  if (!inputEditor || !model || !selection) return
+  if (!inputEditor || inputEditor.file.path !== file?.path) return
+  const { view } = inputEditor
+  const { scrollDOM, state } = view
 
   const { direction, current: oldCurrent } = editor.selection?.scroll || {}
   // allocate this way to make console debugging easier
   const scroll: UIT.EditorScrollInfo = { event, direction, percent: 0, max: 0, current: 0, total: 0, visible: 0 }
-  scroll.current = Math.floor(inputEditor.getScrollTop())
-  scroll.total = Math.floor(inputEditor.getScrollHeight())
-  scroll.visible = inputEditor.getLayoutInfo().height
+  scroll.current = Math.floor(scrollDOM.scrollTop)
+  scroll.total = Math.floor(scrollDOM.scrollHeight)
+  scroll.visible = scrollDOM.clientHeight
   scroll.max = scroll.total - scroll.visible
   scroll.percent = parseFloat((scroll.current / scroll.max).toPrecision(4))
   // update "direction" if we can
@@ -2287,20 +2301,15 @@ function onInputCursor(event: UIT.EditorScrollInfo["event"]): void {
     scroll.direction = oldCurrent < scroll.current ? "down" : "up"
   }
 
-  const anchor = editorPosition(selection.selectionStartLineNumber, selection.selectionStartColumn)
-  const head = editorPosition(selection.positionLineNumber, selection.positionColumn)
-  editor.selection = { scroll, anchor, head }
+  const { anchor, head } = state.selection.main
+  editor.selection = { scroll, anchor: editorPosition(anchor), head: editorPosition(head) }
   // store selection as file `pref`, we'll reload it in `selectPath()` above.
-  if (file) editor.lastSelectionForFile(file.path, editor.selection)
+  editor.lastSelectionForFile(file.path, editor.selection)
 
-  /** `UIT.EditorPosition` for Monaco's 1-based `lineNumber` + `column`. */
-  function editorPosition(lineNumber: number, column: number): UIT.EditorPosition {
-    return {
-      line: lineNumber - 1,
-      ch: column - 1,
-      top: Math.floor(inputEditor!.getTopForPosition(lineNumber, column)),
-      offset: model!.getOffsetAt({ lineNumber, column })
-    }
+  /** `UIT.EditorPosition` for the offset `pos`. */
+  function editorPosition(pos: number): UIT.EditorPosition {
+    const line = state.doc.lineAt(pos)
+    return { line: line.number - 1, ch: pos - line.from, top: Math.floor(view.lineBlockAt(pos).top), offset: pos }
   }
 }
 

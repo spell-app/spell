@@ -15,7 +15,7 @@ import { TextMarks, spacer, type MarkMaker, type Spacers } from "./TextMarks"
  * What an editor draws of an HTML file in the bubbly look (epic `language`), as the drawn-bubbly page draws it
  * (`BubblyMarkup`):  the MARKS on the text, and the SHAPES drawn under it.
  * - Every editor's (epic `codemirror` P3):  the editor hands in its own step from a stretch to its mark
- *   (`MarkMaker`), Monaco's `MonacoMarks.make` or CodeMirror's in `CodeMirrorMarkup`.
+ *   (`MarkMaker`):  CodeMirror's, in `CodeMirrorMarkup`.
  * - From the same reading as the page's, `BubblyMarkup.treeOf()`, so both see the same elements:
  *   - an element with what's inside it on lines of its own:  a block, its start tag the band, an end tag that starts
  *     its line, named or `</>`, a TINY pill at the rail's turn, its letters tiny, its line only the pill's row tall
@@ -34,7 +34,7 @@ import { TextMarks, spacer, type MarkMaker, type Spacers } from "./TextMarks"
  *     are of its white (Owen, epic `editor` I144 C1);  a Spell drawing's `{…}` between its tags too
  *   - SPACERS (`TextMarks`):  room either side of a tag in a line and of a value, before a block's start and end
  *     tags, and before a line of text, so it sits in from the tags beside it, as on the page
- * - Shapes are drawn by the editor:  Monaco's `SpellBubbly` places them from where it draws each line and letter;
+ * - Shapes are drawn by the editor:  placed from where it draws each line and letter;
  *   CodeMirror's `CodeMirrorMarkup` puts them on the text itself.
  * - Pure data:  no editor in it, so it's tested without one.
  ****************/
@@ -471,7 +471,7 @@ export class MarkupMarks<Mark> extends TextMarks<Mark> {
 // ## Types and helpers
 ////////////////
 
-/** A shape an editor draws under an HTML file's text:  Monaco's `SpellBubbly`, CodeMirror's `CodeMirrorMarkup`. */
+/** A shape an editor draws under an HTML file's text:  `CodeMirrorMarkup`. */
 export type MarkupShape = MarkupBlockShape | MarkupTagShape | MarkupLinkShape | BubblyInputShape
 
 /** An element with what's inside it on lines of its own:  its band, gutter, body, and its end tag's band. */
@@ -519,7 +519,7 @@ export type MarkupTagShape = {
   /**
    * the room injected where it starts, each spacer's kind:  the tag's it follows right on (`<p><b>`), then its own;
    * none at its line's start, less where its point touches its element's other tag
-   * - Monaco places a column before the room injected there:  the pill starts past it
+   * - a column before the room beside it:  the pill starts past it
    */
   room?: TagRoom[]
 }

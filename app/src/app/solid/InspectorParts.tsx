@@ -18,7 +18,7 @@ import {
   type PartRow,
   type SlicePlace
 } from "./Inspector"
-import { LazyMonaco } from "./LazyMonaco"
+import { LazyCodeMirror } from "./LazyCodeMirror"
 import type { TestResult } from "spell/parser/core"
 import { InspectorActions, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, escapeForRegExp, type WrittenEvent } from "./InspectorSource"
@@ -827,7 +827,7 @@ function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Elem
 }
 
 /**
- * Code as written in the program:  the code editor on its lines of the file (`<CodeSlice>`, loaded with Monaco),
+ * Code as written in the program:  the code editor on its lines of the file (`<CodeSlice>`, loaded with CodeMirror),
  * else -- its lines not found -- the text, to read.
  */
 export function WrittenCode(props: { place: SlicePlace | undefined; code: string; focus?: boolean }): JSX.Element {
@@ -835,7 +835,7 @@ export function WrittenCode(props: { place: SlicePlace | undefined; code: string
     <Show when={props.place} fallback={<pre class="InspectorCode">{props.code}</pre>}>
       {(place) => (
         <Loading fallback={<pre class="InspectorCode">{props.code}</pre>}>
-          <LazyMonaco.CodeSlice
+          <LazyCodeMirror.CodeSlice
             file={place().file}
             from={place().from}
             to={place().to}

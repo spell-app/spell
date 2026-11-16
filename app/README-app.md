@@ -16,7 +16,8 @@ inside the element's own shadow root, with a toolbar holding Restart and Debug.
   the element, Solid and Spell UI's core, and the app's own copy of Spell's runtime.
   After that it loads only the Spell UI widgets the calculator draws, each the first time one appears.
 - It never loads the editor.
-  Monaco, the code editor inside VS Code, is a 4.2 MB file of its own, and only a `<spell-editor>` asks for it.
+  CodeMirror, the code editor with Spell's language service in it, is a 681 KB file of its own,
+  and only a `<spell-editor>` asks for it.
 - The JavaScript comes from the page server, which compiles
   [Calculator.spell](spaces/@spell/examples/calculator/Calculator.spell) when it starts, or the first time it's asked.
 
@@ -63,7 +64,7 @@ Inside a framework's page is another matter:  Spell UI's `<ui-dropdown>` has bee
 | Tag | What it does | What you set |
 | --- | --- | --- |
 | `<spell-viewer>` | runs a project, with an optional toolbar and a debug pane below it:  the Type Explorer, the Thing Explorer and the console;  a root of its own, so the page needs nothing around it | `project` or `src`:  what to run;  `editor`:  a `<spell-editor>` to take programs from;  `toolbar`;  `debug`:  the pane's first tab |
-| `<spell-editor>` | Monaco with tabs, editing a project on the page server;  it compiles as it opens, two seconds after typing stops and on Cmd+Enter, and hands what it compiled to its apps | `project`;  `file`:  the one to show first;  `app`:  a selector for the apps it feeds |
+| `<spell-editor>` | CodeMirror with tabs, editing a project on the page server;  it compiles as it opens, two seconds after typing stops and on Cmd+Enter, and hands what it compiled to its apps | `project`;  `file`:  the one to show first;  `app`:  a selector for the apps it feeds |
 | `<spell-code>` | Spell UI's `<ui-code>`, drawing Spell in the bubbly look from Spell's own parser:  each declaration on a band, what was typed in pills;  once it loads, every `<ui-code language="spell">` on the page is drawn so too | `language`:  `spell` unless it says otherwise;  `line-numbers` or `wrap`:  coloured lines instead |
 | `<spell-markdown>` | Spell UI's `<ui-markdown>`, drawn by spell-parser's own markdown engine, its Spell blocks coloured | `editable`:  Write and Preview tabs |
 
@@ -981,7 +982,7 @@ To let visitors change the code too, add `--editor`, and put a `<spell-editor st
 <spell-viewer id="game" project="@spell/examples/Solitaire"></spell-viewer>
 ```
 
-- `--editor` copies `<spell-editor>` and Monaco too (13 files, 6.9 MB, 1.7 MB gzipped),
+- `--editor` copies `<spell-editor>` and CodeMirror too (7 files, 3.9 MB, 1 MB gzipped),
   and writes each project's index into `api/projects/index/`, which the editor opens it from.
 - `static` reads the project from those plain files, through the preview's `StaticFiles`,
   and keeps every edit in the page's memory:  nothing is saved, and a reload starts over.
@@ -1004,9 +1005,10 @@ Five builds, each run from spell-app's folder, each into a folder of [app/](app/
 Two copies of Solid on one page break silently, so however many of these bundles a page loads,
 it gets ONE Solid.
 What each bundle costs is the other half of the design:
-- Monaco loads only when an editor opens:  4.2 MB as `<spell-editor>` builds it, 5.5 MB in the app's own build.
-- `<spell-editor>` has a build of its own, so Monaco's styles stay out of `<spell-viewer>`'s:
-  `spell-app.css` is 8 KB, `spell-editor.css` 188 KB.
+- The code editor loads only when an editor opens:  CodeMirror is 681 KB as `<spell-editor>` builds it;
+  Monaco 5.5 MB in the app's own build.
+- `<spell-editor>` has a build of its own, so the editor's styles stay out of `<spell-viewer>`'s:
+  `spell-app.css` is 7 KB, `spell-editor.css` 48 KB.
 - `spell-language.js` is 611 bytes:  it registers Spell's colours with the page's `<ui-code>`, no element,
   and fetches Spell's parser to colour with the first time a Spell block appears.
   spell-app's part of the page server's settings ([README-page-server.md](README-page-server.md)) adds it to the docs

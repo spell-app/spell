@@ -7,18 +7,18 @@ import {
   SUGGEST_DETAILS_HIDDEN,
   type CodeMirrorPopupOptions
 } from "spell/app/app/ui/codePopups"
+import { CodeMirrorPinned } from "./CodeMirrorPinned"
 
 /****************
  * ### `CodeMirrorPopups`
  * The code editor's settings on a CodeMirror editor:  Settings…' choices (`codeChoices`), as `codeMirrorOptionsFor()`
  * says they're meant, in a compartment of each state's own, changed live (epic `codemirror` P5).
- * - The twin of Monaco's `updateOptions(monacoOptionsFor(...))`, which `CodeSettings` does to each Monaco editor.
  * - Each feature reads the options where it decides, `CodeMirrorPopups.of(state)`:  the hover's ⌥ rule,
  *   where suggestions show by themselves, signature help;  what CodeMirror does itself (wrapping, the suggestions'
  *   details) is in the compartment too.
  * - The view showing a state follows the choices as they change;  a state shown again takes the ones it missed,
  *   as `CodeMirrorLook` does with the look.
- * - Its position in the import graph:  CodeMirror, and the page's code settings;  never Monaco.
+ * - Its position in the import graph:  CodeMirror, and the page's code settings.
  ****************/
 export class CodeMirrorPopups {
   /** The extension following the page's choices. */
@@ -55,12 +55,13 @@ export class CodeMirrorPopups {
 
   /**
    * What `options` make of an editor:  the options themselves, for the features to read;  long lines wrapped;
-   * the suggestions' details hidden, by Monaco's class (`SUGGEST_DETAILS_HIDDEN`, `codemirror.css`).
+   * the suggestions' details hidden, by its class (`SUGGEST_DETAILS_HIDDEN`, `codemirror.css`).
    */
   private static extensionFor(options: CodeMirrorPopupOptions): Extension {
     return [
       OPTIONS.of(options),
       options.lineWrapping ? EditorView.lineWrapping : [],
+      options.pinnedLines ? CodeMirrorPinned.extension() : [],
       options.suggestDetails ? [] : EditorView.editorAttributes.of({ class: SUGGEST_DETAILS_HIDDEN })
     ]
   }

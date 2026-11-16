@@ -29,11 +29,4 @@
   }
 }
 
-/* "Details beside suggestions" off:  no docs pane beside the suggestion list, and no button to open one
-   (`SUGGEST_DETAILS_HIDDEN`, on each editor's container) */
-.suggest-details-hidden {
-  & .suggest-details-container,
-  & .suggest-widget .monaco-list .monaco-list-row .readMore {
-    display: none !important;
-  }
-}
+/* "Details beside suggestions" off:  CodeMirror's editors hide them in `codemirror.css` (`SUGGEST_DETAILS_HIDDEN`) */

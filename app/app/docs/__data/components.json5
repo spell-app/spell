@@ -278,9 +278,9 @@
         "code editor",
         "source editor",
         "ide",
-        "monaco"
+        "codemirror"
       ],
-      "description": "Edits a spell project in any page, in Monaco, saving back to the spell server;  compiles as it opens, after typing stops and on Cmd+Enter, and feeds `<spell-viewer>`s what it compiled.",
+      "description": "Edits a spell project in any page, in CodeMirror, saving back to the spell server;  compiles as it opens, after typing stops and on Cmd+Enter, and feeds `<spell-viewer>`s what it compiled.",
       "noun": "editor",
       "attributes": [
         {
@@ -1460,6 +1460,99 @@
       "href": "Chooser.html"
     },
     {
+      "tag": "CodeMirrorEditor",
+      "name": "CodeMirrorEditor",
+      "folder": "CodeMirrorEditor",
+      "mainTag": "CodeMirrorEditor",
+      "main": true,
+      "page": true,
+      "topics": [
+        "editors"
+      ],
+      "aka": [],
+      "description": "A CodeMirror editor showing `state`, or else `value` with `extensions`, filling its parent.",
+      "noun": "CodeMirrorEditor",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "props": [
+        {
+          "name": "state",
+          "type": "EditorState",
+          "description": "State to show, e.g. a file's from `FileStates`.  Wins over `value` + `extensions`."
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "description": "Text to show, if no `state`.  Omit to leave the editor's text alone."
+        },
+        {
+          "name": "extensions",
+          "type": "Extension",
+          "description": "What the editor's own state takes, if no `state`:  read when it's made.  Default:  `CodeMirrorSetup.extensions()`."
+        },
+        {
+          "name": "language",
+          "type": "CompiledLanguage | \"spell\"",
+          "description": "What its own state's text is, if no `extensions`: - compiled code's language:  read only, coloured, its lines numbered (`SpellCodeMirror.codeExtensions()`) - `spell`:  a snippet of Spell to edit, coloured by its tokens (`SpellCodeMirror.snippetExtensions()`)"
+        },
+        {
+          "name": "onUpdate",
+          "type": "(update: ViewUpdate) => void",
+          "description": "Called with each change to its own state:  its text, its caret."
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string) => void",
+          "description": "Called with the editor's whole text after each edit typed into its own state."
+        },
+        {
+          "name": "onMount",
+          "type": "(view: EditorView) => void",
+          "description": "Called with the view once it's made."
+        },
+        {
+          "name": "onUnmount",
+          "type": "(view: EditorView) => void",
+          "description": "Called with the view just before it's destroyed."
+        }
+      ],
+      "usedIn": [
+        {
+          "name": "CellEditor",
+          "file": "src/app/solid/notebook/ExampleCode.tsx"
+        },
+        {
+          "name": "CodeMirrorCompiled",
+          "file": "src/app/ui/codemirror/CodeMirrorTest.tsx"
+        },
+        {
+          "name": "CodeOutputPane",
+          "file": "src/app/solid/CodeOutput.tsx"
+        },
+        {
+          "name": "CodeSlice",
+          "file": "src/app/solid/codemirror/CodeSlice.tsx"
+        },
+        {
+          "name": "FallbackEditor",
+          "file": "src/app/solid/InputEditor.tsx"
+        },
+        {
+          "name": "FileEditor",
+          "file": "src/app/solid/codemirror/FileEditor.tsx"
+        },
+        {
+          "name": "OutputEditor",
+          "file": "src/app/solid/OutputEditor.tsx"
+        }
+      ],
+      "href": "CodeMirrorEditor.html"
+    },
+    {
       "tag": "ConsoleGroup",
       "name": "ConsoleGroup",
       "folder": "ConsoleLines",
@@ -1997,7 +2090,7 @@
         "editors"
       ],
       "aka": [],
-      "description": "`<MonacoEditor>` showing `file`'s model -- see `SpellModels`, which keeps it and the file in step.",
+      "description": "`<CodeMirrorEditor>` showing `file`'s state, from the page's `FileStates`, which keeps it and the file in step: the app's code pane, and `<spell-editor>`'s.",
       "noun": "FileEditor",
       "attributes": [],
       "slots": [],
@@ -2007,20 +2100,25 @@
       "texts": [],
       "props": [
         {
-          "name": "onMount",
-          "type": "(editor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco) => void",
-          "description": "Called with the editor once it's made -- and Monaco itself, as it's loaded lazily (see `LazyMonaco`)."
-        },
-        {
-          "name": "onUnmount",
-          "type": "(editor: monaco.editor.IStandaloneCodeEditor) => void",
-          "description": "Called with the editor just before it's disposed of."
+          "name": "...Pick< SpellCodeMirrorOptions, \"onOpen\" | \"onContextMenu\" | \"onReferences\" | \"onUpdate\" | \"hotkeys\" | \"highlights\" >",
+          "type": "Pick< SpellCodeMirrorOptions, \"onOpen\" | \"onContextMenu\" | \"onReferences\" | \"onUpdate\" | \"hotkeys\" | \"highlights\" >",
+          "description": "Every prop of this type too."
         },
         {
           "name": "file",
           "type": "SP.AnySpellFile | undefined",
           "required": true,
           "description": "File to edit, if we have one yet."
+        },
+        {
+          "name": "onMount",
+          "type": "(editor: SpellCodeMirror) => void",
+          "description": "Called with the editor once it first shows a file."
+        },
+        {
+          "name": "onUnmount",
+          "type": "(editor: SpellCodeMirror) => void",
+          "description": "Called with the editor just before its view is destroyed."
         }
       ],
       "usedIn": [
@@ -2046,7 +2144,7 @@
         "editors"
       ],
       "aka": [],
-      "description": "The Monaco source editor on `editor.file`, guarded by an `<ErrorBoundary>`.",
+      "description": "The code editor on `editor.file`, guarded by an `<ErrorBoundary>`.",
       "noun": "InputEditor",
       "attributes": [],
       "slots": [],
@@ -2221,86 +2319,6 @@
       "href": "chrome.html#MenuHeader"
     },
     {
-      "tag": "MonacoEditor",
-      "name": "MonacoEditor",
-      "folder": "MonacoEditor",
-      "mainTag": "MonacoEditor",
-      "main": true,
-      "page": true,
-      "topics": [
-        "editors"
-      ],
-      "aka": [],
-      "description": "A Monaco editor showing `model`, or else `value` in `language`, filling its parent.",
-      "noun": "MonacoEditor",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "model",
-          "type": "monaco.editor.ITextModel",
-          "description": "Model to show, e.g. from `SpellMonaco.models`.  Wins over `value` + `language`."
-        },
-        {
-          "name": "value",
-          "type": "string",
-          "description": "Text to show, if no `model`.  Omit to leave the editor's text alone."
-        },
-        {
-          "name": "language",
-          "type": "string",
-          "description": "Monaco language id, if no `model`, e.g. `\"spell\"` -- see `SpellMonaco.languageForPath()`.  Default `\"plaintext\"`."
-        },
-        {
-          "name": "options",
-          "type": "monaco.editor.IStandaloneEditorConstructionOptions",
-          "description": "Editor options, over `SpellMonaco.OPTIONS`.  Only read when the editor's made."
-        },
-        {
-          "name": "onChange",
-          "type": "(value: string) => void",
-          "description": "Called with the editor's whole text after each edit the USER makes."
-        },
-        {
-          "name": "onMount",
-          "type": "(editor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco) => void",
-          "description": "Called with the editor once it's made -- and Monaco itself, as it's loaded lazily (see `LazyMonaco`)."
-        },
-        {
-          "name": "onUnmount",
-          "type": "(editor: monaco.editor.IStandaloneCodeEditor) => void",
-          "description": "Called with the editor just before it's disposed of."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "CellEditor",
-          "file": "src/app/solid/notebook/ExampleCode.tsx"
-        },
-        {
-          "name": "CodeOutputPane",
-          "file": "src/app/solid/CodeOutput.tsx"
-        },
-        {
-          "name": "FallbackEditor",
-          "file": "src/app/solid/InputEditor.tsx"
-        },
-        {
-          "name": "FileEditor",
-          "file": "src/app/solid/monaco/FileEditor.tsx"
-        },
-        {
-          "name": "OutputEditor",
-          "file": "src/app/solid/OutputEditor.tsx"
-        }
-      ],
-      "href": "MonacoEditor.html"
-    },
-    {
       "tag": "MoreMenu",
       "name": "MoreMenu",
       "folder": "chrome",
@@ -2388,7 +2406,7 @@
         "editors"
       ],
       "aka": [],
-      "description": "Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.",
+      "description": "Read-only code editor showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`.",
       "noun": "OutputEditor",
       "attributes": [],
       "slots": [],
@@ -3796,15 +3814,15 @@
       ],
       "tokens": []
     },
-    "MonacoEditor": {
-      "folder": "MonacoEditor",
-      "mainTag": "MonacoEditor",
-      "title": "MonacoEditor",
-      "summary": "A Monaco editor, filling its parent:  what every code editor in the app is.",
+    "CodeMirrorEditor": {
+      "folder": "CodeMirrorEditor",
+      "mainTag": "CodeMirrorEditor",
+      "title": "CodeMirrorEditor",
+      "summary": "A CodeMirror editor, filling its parent:  what every code editor in the app is.",
       "status": "done",
       "docs": false,
       "tags": [
-        "MonacoEditor"
+        "CodeMirrorEditor"
       ],
       "tokens": []
     },
@@ -3812,7 +3830,7 @@
       "folder": "FileEditor",
       "mainTag": "FileEditor",
       "title": "FileEditor",
-      "summary": "A Monaco editor on one spell file, kept in step with it.",
+      "summary": "A CodeMirror editor on the project's files, one at a time, each kept in step with its file.",
       "status": "done",
       "docs": false,
       "tags": [

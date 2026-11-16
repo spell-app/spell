@@ -1,24 +1,23 @@
 import type { LSP } from "spell/app/lsp"
-import type { monaco } from "spell/app/app/ui/monaco"
 
 /**
- * The code editor's popups:  which of Monaco's show by themselves, and when (Owen, epic `debut`:
+ * The code editor's popups:  which show by themselves, and when (Owen, epic `debut`:
  * "vscode popup with details about what you are typing is annoying when I'm trying to look at code");
  * and its look:  Spell drawn bubbly, or not (epic `language` P50).
- * - The choices, their defaults, and what each one means to Monaco:  nothing else.
+ * - The choices, their defaults, and what each one means to the code editor:  nothing else.
  * - By default the suggestions show by themselves only where they help (epic `editor` P28, Owen's choice C):
  *   a tag after `<`, an attribute inside a tag, a property after `its` / `'s` / `of` (`SUGGEST_WHERE_IT_HELPS`).
  *   Everywhere else they wait for Ctrl+Space, as Quiet Code Popups (P4) chose;  hover waits for ⌥.
  * - An error's message shows on a plain hover over its squiggle all the same, unless hover is "Always", when
- *   Monaco's own shows it (`ErrorHover`, epic `editor` I97).
- * - Every Monaco editor starts on the defaults (`SpellMonaco.OPTIONS`), `<spell-editor>`'s too.
- * - The editor app lets people change them, in the code pane's "..." menu, "Settings…" (`CodeSettings`).
- * - Types only from Monaco:  the editor app reads this before Monaco loads, and Monaco is a lazy chunk.
+ *   the hover's own shows it (`CodeMirrorHovers`, epic `editor` I97).
+ * - The editor app lets people change them, in the code pane's "..." menu, "Settings…" (`CodeSettings`);
+ *   every code editor follows them (`codeChoices`), `<spell-editor>`'s too.
+ * - No editor in it:  the editor app reads this before the code editor loads, which is a lazy chunk.
  */
 
 /**
  * When hover info shows, first the default:  only while ⌥ (Alt) is held, always, or never.
- * - Not an error's message:  that shows on a plain hover in every mode (`ErrorHover`).
+ * - Not an error's message:  that shows on a plain hover in every mode (`CodeMirrorHovers`).
  */
 export const HOVER_MODES = ["withAlt", "always", "never"] as const
 /** When hover info shows:  one of `HOVER_MODES`. */
@@ -52,7 +51,7 @@ export type CodePopupChoices = {
   pinnedLines: boolean
   /** Show the compiler's words in the hover:  what it matches, what it compiles to, the compiled code? */
   compilerWords: boolean
-  /** Draw Spell in the bubbly look as it's typed (`SpellBubbly`)?  On unless someone turns it off (Owen, Q50). */
+  /** Draw Spell in the bubbly look as it's typed (`CodeMirrorBubbly`)?  On unless someone turns it off (Owen, Q50). */
   bubbly: boolean
   /**
    * Wrap a long line onto the next, in the code pane and the Inspector's code alike?
@@ -76,49 +75,13 @@ export const CODE_POPUP_DEFAULTS: CodePopupChoices = {
   wrapLines: false
 }
 
-/** Monaco's `hover.enabled` for each hover mode. */
-const HOVER_ENABLED = {
-  withAlt: "onKeyboardModifier",
-  always: "on",
-  never: "off"
-} as const satisfies Record<HoverMode, "on" | "off" | "onKeyboardModifier">
-
 /**
- * The Monaco options `choices` mean, for `editor.updateOptions()` or a new editor's.
- * - Hover with ⌥:  Monaco's `onKeyboardModifier` shows it while the key that ISN'T the multi-cursor key is held.
- *   So the multi-cursor key becomes ⌘ (Ctrl elsewhere), leaving ⌥ for the hover.
- *   - SIDE EFFECT:  ⌘-click then adds a cursor, and ⌥-click goes to a definition, the other way round from Monaco's
- *     own.  The other hover modes keep Monaco's.
- *   - A web address still opens on ⌘-click, or a plain click on its icon, in every mode:  `LinkClick` takes that click before Monaco does
- *     (Monaco's own would want ⌥-click here;  epic `editor` I101).
- * - Ctrl+Space shows the suggestions in every mode:  only showing them as you type is turned off.
- *   - "Where it helps" turns Monaco's own off too:  the editor asks for them itself, at the places
- *     `suggestsByItself()` names (`CodeSettings`).
- * - `wordWrap`:  for the editors that don't choose for themselves (`CodeSettings`);  a notebook's cells always wrap.
- * - The docs pane beside the list has no option of its own:  `CodeSettings` hides it with a class
- *   (`SUGGEST_DETAILS_HIDDEN`) when the details are off.  Monaco starts it folded anyway.
- */
-export function monacoOptionsFor(choices: CodePopupChoices): monaco.editor.IEditorOptions {
-  const asYouType = choices.suggest === "everywhere"
-  return {
-    hover: { enabled: HOVER_ENABLED[choices.hover] },
-    multiCursorModifier: choices.hover === "withAlt" ? "ctrlCmd" : "alt",
-    quickSuggestions: asYouType ? { other: "on", comments: "off", strings: "off" } : false,
-    suggestOnTriggerCharacters: asYouType,
-    suggest: { showInlineDetails: choices.suggestDetails },
-    parameterHints: { enabled: choices.parameterHints },
-    stickyScroll: { enabled: choices.pinnedLines },
-    wordWrap: choices.wrapLines ? "on" : "off"
-  }
-}
-
-/**
- * What `choices` mean to a CodeMirror editor, the twin of `monacoOptionsFor()` (epic `codemirror` P5):
+ * What `choices` mean to a CodeMirror editor (epic `codemirror` P5):
  * what `CodeMirrorPopups` turns into each editor's compartment, changed live as Settings… changes.
  * - Plain values, no CodeMirror in them:  this file is read before any editor loads.
  * - Hover with ⌥ is CodeMirror's as it is:  no multi-cursor key to swap, so ⌘-click stays a web address's and a
- *   definition's (`LinkClick`'s rule), in every mode.
- * - Pinned lines have no CodeMirror twin yet:  CodeMirror has no sticky scroll of its own.
+ *   definition's (`CodeMirrorLinks`' rule), in every mode.
+ * - Pinned lines are the app's own (`CodeMirrorPinned`):  CodeMirror has no sticky scroll of its own.
  */
 export function codeMirrorOptionsFor(choices: CodePopupChoices): CodeMirrorPopupOptions {
   return {
@@ -126,7 +89,8 @@ export function codeMirrorOptionsFor(choices: CodePopupChoices): CodeMirrorPopup
     suggest: choices.suggest,
     suggestDetails: choices.suggestDetails,
     signatureHelp: choices.parameterHints,
-    lineWrapping: choices.wrapLines
+    lineWrapping: choices.wrapLines,
+    pinnedLines: choices.pinnedLines
   }
 }
 
@@ -142,12 +106,14 @@ export type CodeMirrorPopupOptions = {
   signatureHelp: boolean
   /** Long lines wrapped onto the next, rather than scrolled sideways. */
   lineWrapping: boolean
+  /** The lines opening the blocks the top of the code is inside, pinned over it as it scrolls. */
+  pinnedLines: boolean
 }
 
 /**
  * Where the suggestions show by themselves while "Where it helps" is chosen:  ONE list, easy to change.
  * - Each is the text before the caret, right as the list is due:  the moment its first letter can be typed.
- *   Monaco keeps the list open, filtering, as the word is typed after it.
+ *   The list stays open, filtering, as the word is typed after it.
  * - `its`, `of` and the rest only after a word:  a line starting `its ` declares a property, its name quoted
  *   (`LSP.SpellTyping.opensQuotes()`).
  */
@@ -168,12 +134,11 @@ export function suggestsByItself(before: string): boolean {
 
 /**
  * How long the mouse rests on a word before its hover shows, in seconds:  the page's own wait, `--ui-hover-delay`.
- * - The CodeMirror test page's hover waits this long (epic `codemirror` P1);
- *   the app's Monaco keeps its own (`hover.delay`) until it's swapped for CodeMirror.
+ * - Every code editor's hover waits this long (epic `codemirror` P1).
  */
 export const HOVER_DELAY = 0.8
 
-/** How much the hover says for `choices`:  Monaco has no option for it. */
+/** How much the hover says for `choices`. */
 export function hoverDetailFor(choices: CodePopupChoices): LSP.HoverDetail {
   return choices.compilerWords ? "full" : "plain"
 }
@@ -187,8 +152,8 @@ export const codeHover: { detail: LSP.HoverDetail } = { detail: hoverDetailFor(C
 
 /**
  * Is the code drawn in the bubbly look now, one for the page;  and who hears it change.
- * - `SpellBubbly` reads it for each editor, and follows it;  `CodeSettings` changes it (`showBubbly()`).
- * - An object, as `codeHover` is:  Monaco is a lazy chunk, and this file is read before it loads.
+ * - `CodeMirrorLook` reads it for each editor, and follows it;  `CodeSettings` changes it (`showBubbly()`).
+ * - An object, as `codeHover` is:  the code editor is a lazy chunk, and this file is read before it loads.
  */
 export const codeLook: { isBubbly: boolean; followers: Set<() => void> } = {
   isBubbly: CODE_POPUP_DEFAULTS.bubbly,
@@ -197,7 +162,7 @@ export const codeLook: { isBubbly: boolean; followers: Set<() => void> } = {
 
 /**
  * What's chosen for the code editor now, one for the page;  and who hears it change.
- * - Every CodeMirror editor follows it (`CodeMirrorPopups`), as each Monaco editor is told by `CodeSettings`.
+ * - Every code editor follows it (`CodeMirrorPopups`).
  * - An object, as `codeLook` is:  read before any editor loads.
  */
 export const codeChoices: { now: CodePopupChoices; followers: Set<() => void> } = {
@@ -208,7 +173,7 @@ export const codeChoices: { now: CodePopupChoices; followers: Set<() => void> } 
 /**
  * Make `choices` the page's:  how much the hover says (`codeHover`), the look (`showBubbly()`),
  * and `codeChoices`' followers told.
- * - `CodeSettings` calls it as each choice changes, and as Monaco loads.
+ * - `CodeSettings` calls it as each choice changes, and as the page starts.
  */
 export function showCodeChoices(choices: CodePopupChoices): void {
   codeHover.detail = hoverDetailFor(choices)

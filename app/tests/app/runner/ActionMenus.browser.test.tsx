@@ -218,11 +218,11 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
     expect(game.card.faceUp).toBe(true)
   })
 
-  test("a shortcut leaves keys typed into the code pane alone:  Monaco types through an EditContext, not a field", async () => {
+  test("a shortcut leaves keys typed into the code pane alone:  a code editor may type through an EditContext, not a field", async () => {
     const { game, card } = await mountedGame()
     card.dispatchEvent(new MouseEvent("mouseenter"))
     game.card.faceUp = true
-    // the code pane:  a plain <div> with an EditContext, as Monaco's `native-edit-context` is
+    // the code pane:  a plain <div> with an EditContext, as CodeMirror's is where the browser has one
     const codePane = document.createElement("div")
     codePane.tabIndex = 0
     ;(codePane as unknown as { editContext: unknown }).editContext = new (

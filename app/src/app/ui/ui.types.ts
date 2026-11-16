@@ -18,7 +18,7 @@ export type EditorSelection = {
 
 /**
  * Scroll state tracked alongside a cursor/scroll `EditorSelection`.
- * - Every measurement is required: `onInputCursor()` fills them all in from Monaco at once.
+ * - Every measurement is required: `onInputCursor()` fills them all in from the code editor at once.
  */
 export type EditorScrollInfo = {
   /** Whether this update came from a cursor move or a scroll. */
@@ -29,11 +29,11 @@ export type EditorScrollInfo = {
   percent: number
   /** Maximum scroll offset, i.e. `total - visible`. */
   max: number
-  /** Current scroll offset, from Monaco's `getScrollTop()`. */
+  /** Current scroll offset, its scroller's `scrollTop`. */
   current: number
-  /** Total scrollable height, from Monaco's `getScrollHeight()`. */
+  /** Total scrollable height, its scroller's `scrollHeight`. */
   total: number
-  /** Visible height, from Monaco's `getLayoutInfo().height`. */
+  /** Visible height, its scroller's `clientHeight`. */
   visible: number
 }
 
@@ -43,7 +43,7 @@ export type EditorPosition = {
   line: number
   /** Character offset within `line`. */
   ch: number
-  /** Pixel offset from top of the text, from Monaco's `getTopForPosition()`. */
+  /** Pixel offset from top of the text, its line's top (`lineBlockAt()`). */
   top?: number
   /** Character offset into file contents.  Wins over `line` / `ch` when restoring a selection. */
   offset?: number
@@ -123,8 +123,7 @@ RenameRefusedError.prototype.name = "RenameRefusedError"
 /**
  * What the page's keys and menus ask of a code editor, whichever it is:  the neutral names of `EDITOR_HOTKEYS`'
  * code-editor commands (epic `codemirror` P5).
- * - Each editor runs them its own way:  Monaco by its own action ids (`MONACO_COMMANDS`, `editorHotkeys.ts`),
- *   CodeMirror by its commands (`SpellCodeMirror.run()`).
+ * - The code editor runs them by its own commands (`SpellCodeMirror.run()`).
  */
 export type CodeEditorCommand =
   | "undo"
@@ -150,3 +149,12 @@ export type CodeEditorHandle = {
   /** Run `command` in it, focusing it first. */
   run(command: CodeEditorCommand): void
 }
+
+/**
+ * The CodeMirror editor that has (or last had) the focus, if any:  set by it as it's focused, cleared as it goes
+ * (`SpellCodeMirror`);  the page's keys and menus reach it (`codeEditorNow()`, in `editorHotkeys.ts`).
+ * - Here, not in `editorHotkeys.ts`:  CodeMirror's chunk reads it, and `<spell-editor>`'s too, which mustn't bring
+ *   the editor page (`editor`, the app's Solid parts) with it.
+ * - An object, as `editorHotkeys.ts` never imports CodeMirror:  it loads lazily.
+ */
+export const codeEditors: { focused: CodeEditorHandle | undefined } = { focused: undefined }

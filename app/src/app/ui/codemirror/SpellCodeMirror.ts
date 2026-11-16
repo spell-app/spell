@@ -5,15 +5,17 @@ import { syntaxHighlighting } from "@codemirror/language"
 import { MergeView } from "@codemirror/merge"
 import { openSearchPanel } from "@codemirror/search"
 import type { Extension } from "@codemirror/state"
-import { EditorView, type KeyBinding, keymap } from "@codemirror/view"
+import { EditorView, type KeyBinding, keymap, type ViewUpdate } from "@codemirror/view"
 import type { WorkspaceEdit } from "vscode-languageserver"
 
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeRules } from "spell/app/app/ui/CodeRules"
-import type { CodeEditorCommand, CodeEditorHandle } from "spell/app/app/ui/ui.types"
-import { codeEditors, EDITOR_HOTKEYS, type Hotkey } from "spell/app/app/pages/editorHotkeys"
+import { codeEditors, type CodeEditorCommand, type CodeEditorHandle } from "spell/app/app/ui/ui.types"
+// types only:  the editor page's keys bring the app with them, which `<spell-editor>`'s chunk mustn't
+import type { Hotkey } from "spell/app/app/pages/editorHotkeys"
 import { CodeMirrorBubbly } from "./CodeMirrorBubbly"
+import { CodeMirrorFollowed } from "./CodeMirrorFollowed"
 import type { CodeMirrorLanguage } from "./CodeMirrorLanguage"
 import { CodeMirrorLook } from "./CodeMirrorLook"
 import { CodeMirrorRename } from "./CodeMirrorRename"
@@ -37,14 +39,16 @@ import "./codemirror.css"
  * - Every one of them starts from the one base setup, `CodeMirrorSetup`:  keys, undo, find, the gutter,
  *   CodeMirror's words in the app's language.
  * - An editor of project files is a code editor as the page's keys and menus reach one (`UIT.CodeEditorHandle`,
- *   `run()`):  its keys are the editor's one shortcut list's (`EDITOR_HOTKEYS`, `keymapFor()`), and while it has
- *   the focus, the Edit menu's Undo, Cut, Copy and Paste are its own (`codeEditors.focused`;  epic `codemirror` P5).
- * - Still a TEST beside Monaco, which stays the app's editor until the swap (epic `codemirror` Q4):
- *   only the test page reaches this folder.
- * - Its position in the import graph:  CodeMirror, the parser, the language service, `bubbly.css`,
- *   the editor page's shortcut list.
- *   NEVER Monaco:  the typing helps' rules and the files' addresses are the language service's
- *   (`LSP.SpellTyping`, `LSP.AppAddresses`), shared with Monaco.
+ *   `run()`):  its keys are the editor's one shortcut list's (`EDITOR_HOTKEYS`, passed in;  `keymapFor()`),
+ *   and while it has the focus, the Edit menu's Undo, Cut, Copy and Paste are its own
+ *   (`codeEditors.focused`;  epic `codemirror` P5).
+ * - The app's code editor (epic `codemirror` P6):  the code pane, the Inspector's Code
+ *   card, the compiled code, Publish's diff, a notebook's cells and `<spell-editor>`, each loading it lazily.
+ * - Its position in the import graph:  CodeMirror, the parser, the language service, `bubbly.css`.
+ *   NEVER the editor page (`editorHotkeys.ts` but its types, `spell/app/app/solid`, `editor`):  `<spell-editor>`'s
+ *   chunk is this, on a page with no app.
+ *   The typing helps' rules and the files' addresses are the language service's (`LSP.SpellTyping`,
+ *   `LSP.AppAddresses`), shared with VS Code.
  ****************/
 export class SpellCodeMirror implements CodeEditorHandle {
   /** The page's one language service for CodeMirror's editors, made on first use. */
@@ -61,13 +65,31 @@ export class SpellCodeMirror implements CodeEditorHandle {
   /**
    * The page's one set of file states, every CodeMirror editor's, made on first use:  see `FileStates`.
    * - STATIC:  every editor of the page's files shows these, so each file's text is kept once.
-   * - Set its `onEdit` to hear each edit, e.g. to save soon.
+   * - Its edits reach whoever listens, `SpellCodeMirror.onEdit()`.
    */
   static get states(): FileStates {
-    SpellCodeMirror._states ??= new FileStates({ service: SpellCodeMirror.service })
+    SpellCodeMirror._states ??= new FileStates({
+      service: SpellCodeMirror.service,
+      onEdit: (file) => {
+        for (const listener of SpellCodeMirror.editListeners) listener(file)
+      }
+    })
     return SpellCodeMirror._states
   }
   private static _states: FileStates | undefined
+
+  /**
+   * Hear each edit of a file's state, once it's gone into the file, e.g. to compile or save soon.
+   * - Several may listen:  the app's editor, each `<spell-editor>` on the page.
+   * - Returns what stops it.
+   */
+  static onEdit(listener: (file: SP.AnySpellFile) => void): () => void {
+    SpellCodeMirror.editListeners.add(listener)
+    return () => SpellCodeMirror.editListeners.delete(listener)
+  }
+
+  /** Who hears each edit -- see `onEdit()`. */
+  private static editListeners = new Set<(file: SP.AnySpellFile) => void>()
 
   /**
    * An editor of project files in `view`, showing `options.file`'s state.
@@ -148,10 +170,29 @@ export class SpellCodeMirror implements CodeEditorHandle {
     ;(action === "undo" ? undo : redo)(this.view)
   }
 
-  /** Go to where the thing at `pos` is declared, or its type is:  here, selected;  in another file, through `onOpen`. */
+  /**
+   * Go to where the thing at `pos` is declared, or its type is:  here, selected;  in another file, through `onOpen`.
+   * - A Spell UI tag or attribute, which no file declares:  its help, where it's written (epic `editor` I148).
+   */
   async goToDefinition(pos: number, method: "definition" | "typeDefinition" = "definition"): Promise<boolean> {
     const location = await this.language?.definitionAt(this.view, pos, method)
-    return !!location && this.open(location)
+    if (location) return this.open(location)
+    return method === "definition" && !!(await this.language?.showHelp(this.view, pos))
+  }
+
+  /**
+   * Go to Symbol (⇧⌘O, Ctrl+Shift+O off a Mac):  what the file declares, its outline, listed at the caret through
+   * `onReferences`, each row going there.
+   */
+  async goToSymbol(): Promise<void> {
+    const symbols = (await this.language?.symbolsOf(this.view)) ?? []
+    const at = this.view.coordsAtPos(this.view.state.selection.main.head)
+    if (at)
+      this.options.onReferences?.(
+        this,
+        { x: at.left, y: at.bottom },
+        symbols.map((symbol) => symbol.location)
+      )
   }
 
   /** Show `location`:  here, selected;  in another file, through `onOpen`.  `true` if shown. */
@@ -216,6 +257,19 @@ export class SpellCodeMirror implements CodeEditorHandle {
   // ## Showing
   ////////////////
 
+  /**
+   * Select from `anchor` to `head`, offsets in the file shown, bringing `head` into the middle of the view when it's out
+   * of it:  the file's place restored, e.g. where it was last left.
+   * - Never takes the keyboard's focus.
+   */
+  selectRange(anchor: number, head: number): void {
+    const isShown = CodeMirrorFollowed.isInView(this.view, head)
+    this.view.dispatch({
+      selection: { anchor, head },
+      effects: isShown ? [] : EditorView.scrollIntoView(head, { y: "center" })
+    })
+  }
+
   /** Select `location`'s range, in this file, and show it. */
   select(location: CodeMirrorLocation): void {
     const { from, to } = LspToCodeMirror.range(this.view.state.doc, location.range)
@@ -230,17 +284,23 @@ export class SpellCodeMirror implements CodeEditorHandle {
    */
   private host(): Extension {
     return [
-      keymap.of(SpellCodeMirror.keymapFor(this, this.options.hotkeys ?? EDITOR_HOTKEYS)),
+      keymap.of([
+        ...SpellCodeMirror.keymapFor(this, this.options.hotkeys ?? {}),
+        { key: "Mod-Shift-o", run: () => (void this.goToSymbol(), true), preventDefault: true }
+      ]),
       CodeMirrorRename.extension(),
       this.options.highlights && this.language ? this.language.highlights() : [],
+      EditorView.updateListener.of((update) => this.options.onUpdate?.(update)),
       EditorView.focusChangeEffect.of((_state, isFocused) => {
         if (isFocused) codeEditors.focused = this
         return null
       }),
       EditorView.domEventHandlers({
         contextmenu: (event, view) => {
+          // no menu of the page's:  the browser's
+          if (!this.options.onContextMenu) return false
           const pos = view.posAtCoords({ x: event.clientX, y: event.clientY })
-          // a click outside the selection moves the caret there first, as Monaco does
+          // a click outside the selection moves the caret there first, as VS Code does
           if (pos !== null && !view.state.selection.ranges.some((range) => range.from <= pos && pos <= range.to))
             view.dispatch({ selection: { anchor: pos } })
           event.preventDefault()
@@ -261,7 +321,7 @@ export class SpellCodeMirror implements CodeEditorHandle {
   }
 
   /**
-   * The editor page's shortcuts as `editor`'s keys, the twin of Monaco's `addCodeEditorKeys()`:
+   * The editor page's shortcuts as `editor`'s keys:
    * each code-editor command (`codeEditorCommand`) runs in it;  each other key the page runs (`run`) runs, but those
    * the code never takes (`outsideCode`:  Esc, the parts' Cut and Copy).
    * - Its own Undo, Redo and Find too, through `run()`:  the same as CodeMirror's.
@@ -282,7 +342,7 @@ export class SpellCodeMirror implements CodeEditorHandle {
   /**
    * What a view of another language's code takes, read only:  the compiled javascript, TypeScript or Python,
    * its lines numbered.
-   * - Coloured as Monaco colours the same tokens, through the ONE table of code colours (`CodeRules.codeMirrorStyle`):
+   * - Coloured through the ONE table of code colours (`CodeRules.codeMirrorStyle`):
    *   the page theme's `--ui-code-<role>` tokens, light or dark as the page is.
    */
   static codeExtensions(language: CompiledLanguage = "javascript"): Extension {
@@ -291,6 +351,23 @@ export class SpellCodeMirror implements CodeEditorHandle {
       syntaxHighlighting(CodeRules.codeMirrorStyle),
       EditorView.editorAttributes.of({ class: "cmb-code" }),
       CodeMirrorSetup.extensions({ editable: false, lineNumbers: true })
+    ]
+  }
+
+  /**
+   * What a view of a snippet of Spell takes, not a project file:  a notebook's example code (`<CellEditor>`).
+   * - Drawn bubbly while the look's on, as the code pane draws Spell;  coloured by its tokens while it's off
+   *   (`CodeMirrorLook`).
+   * - Its long lines wrapped:  it's as tall as its text.
+   * - Its own undo, a run of typing undone as one.
+   */
+  static snippetExtensions(): Extension {
+    return [
+      CodeMirrorLook.extension((isBubbly) =>
+        isBubbly ? CodeMirrorBubbly.extension(() => undefined) : CodeMirrorTokens.extension(() => undefined)
+      ),
+      EditorView.lineWrapping,
+      CodeMirrorSetup.extensions()
     ]
   }
 
@@ -352,11 +429,17 @@ export type SpellCodeMirrorOptions = {
   onContextMenu?: (editor: SpellCodeMirror, at: { x: number; y: number }) => void
   /** Find All References' answer, every use of the thing at the caret:  the page lists them at `at` */
   onReferences?: (editor: SpellCodeMirror, at: { x: number; y: number }, locations: CodeMirrorLocation[]) => void
-  /** the page's shortcuts, as its keys.  Default:  the editor page's, `EDITOR_HOTKEYS` */
+  /** each change to the view, its text's, its caret's, the file it shows:  e.g. to follow the caret */
+  onUpdate?: (update: ViewUpdate) => void
+  /**
+   * the page's shortcuts, as its keys:  the editor page's, `EDITOR_HOTKEYS`, or a page's own.
+   * - None:  CodeMirror's own keys alone (undo, find ...), no Go to Definition, Rename Symbol ...
+   * - No default:  `EDITOR_HOTKEYS` brings the editor page with it, which `<spell-editor>`'s chunk mustn't
+   */
   hotkeys?: Readonly<Record<string, Hotkey>>
   /**
    * mark the other uses of the word at the caret?
-   * Default:  `false`, as Monaco's are off (`occurrencesHighlight`;  Owen:  "distracting, turn it off")
+   * Default:  `false` (Owen:  "distracting, turn it off")
    */
   highlights?: boolean
 }

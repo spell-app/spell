@@ -1,7 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The editor's columns in Edit:  the app takes every change of size (epic `editor` I32).
@@ -53,7 +53,7 @@ describe.skipIf(!SERVING)("the editor's columns", { timeout: 180_000 }, () => {
     await context.route(/\/api\/prefs\//, (route) => route.fulfill({ status: 200, body: "{}" }))
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(2000)
     await page.locator(".InspectAppButton [part~=item]").first().click()
     await page.waitForFunction(

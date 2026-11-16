@@ -11,7 +11,7 @@ import { SP } from "spell/parser/spell"
  *   what a statement starts with (`if`, `si`), and the little words between (`and`, `the`, `y`, `el`) --
  *   see `statementPhrases`, `operatorPhrases`, and `grammarKeywords()`, which writes them for VS Code.
  * - From the pack's own rules, so a new keyword is picked up with no list to keep in step.
- * - Browser-safe:  the app's Monaco editor uses it too, through `LSP.SpellLanguageService`.
+ * - Browser-safe:  the app's code editor uses it too, through `LSP.SpellLanguageService`.
  ****************/
 export class SpellKeywords {
   /** The pack. */
@@ -250,7 +250,8 @@ export class SpellKeywords {
   /**
    * A line that goes back out a level as it's typed:  `else`, in every language spell reads.
    * - Spanish's `si no` only before `:` or `si`:  on its own it may be `if no ...`, e.g. `si no hay cartas:`.
-   * - Monaco's (`SpellMonaco`) and VS Code's (`language-configuration.json`, by hand):  a test checks they match,
+   * - The code editor's (`LSP.SpellTyping`) and VS Code's (`language-configuration.json`, by hand):
+   *   a test checks they match,
    *   and that it knows every pack's `else`.
    */
   static DECREASE_INDENT =
@@ -260,7 +261,8 @@ export class SpellKeywords {
    * A line that goes on onto the next, as it's typed:  one ending in `and` or `or`, in every language spell reads
    * (`and_or`;  epic `language` P55, Q53).
    * - Enter after one indents the next line, which the parser joins to it (`JoinedLines`).
-   * - Monaco's (`SpellMonaco`) and VS Code's (`language-configuration.json`, by hand):  a test checks they match,
+   * - The code editor's (`LSP.SpellTyping`) and VS Code's (`language-configuration.json`, by hand):
+   *   a test checks they match,
    *   and that it knows every pack's words.
    */
   static CONTINUES_LINE = /(?<![\p{L}\p{M}\d_-])(?:and|or|y|e|o|u)\s*$/u
@@ -269,7 +271,8 @@ export class SpellKeywords {
    * Text before the caret that holds code, not only a comment:  with `COMMENT_AFTER` after the caret,
    * Enter puts the comment on its own line, a level in (epic `editor` I155):
    * `a "discard pile" is a pile |-- Where the stock's cards go` => its description, the first line inside it.
-   * - Monaco's (`SpellMonaco`) and VS Code's (`language-configuration.json`, by hand):  a test checks they match.
+   * - The code editor's (`LSP.SpellTyping`) and VS Code's (`language-configuration.json`, by hand):
+   *   a test checks they match.
    */
   static CODE_BEFORE = /^\s*(?!--|\/\/)\S/
 
@@ -280,7 +283,8 @@ export class SpellKeywords {
    * The text before the caret ending in an opening tag, so Enter goes in a level (epic `editor` I65):
    * `<content>`, `<toolbar class="x">`, `<pile "stock">`.
    * - Not a tag that closes itself (`<action "x"/>`), one HTML never closes (`<br>`), nor a closing tag (`</x>`).
-   * - Monaco's (`SpellMonaco`) and VS Code's (`language-configuration.json`, by hand):  a test checks they match.
+   * - The code editor's (`LSP.SpellTyping`) and VS Code's (`language-configuration.json`, by hand):
+   *   a test checks they match.
    */
   static OPENS_TAG =
     /<(?!(?:area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)(?![\p{L}\p{M}\d.:-]))\p{L}[\p{L}\p{M}\d.:-]*(?:\s(?:[^<>"'/]|"[^"]*"|'[^']*'|\/(?!>))*)?>\s*$/u

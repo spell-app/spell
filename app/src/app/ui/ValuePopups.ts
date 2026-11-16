@@ -7,7 +7,7 @@ import "./ValuePopups.css"
 /****************
  * ### `ValuePopups`
  * An attribute's value chosen rather than typed, in a popup by the caret, for every code editor:
- * Monaco's (`ValueChoices`, `ValuePicker`) and CodeMirror's (`CodeMirrorValues`) are only wiring onto this.
+ * The code editor's (`CodeMirrorValues`) is only wiring onto this.
  * - The choices strip (epic `editor` T70):  an attribute's words, shown quietly under its value once the caret
  *   has rested in it for a second (`REST_DELAY`), the value ticked:  `spacing="x|s"` shows `none  xs  s  m  l  xl`.
  *   - Owen:  "would be cool if there was a way to invoke the menu of options for this attribute when cursor is here

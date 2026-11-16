@@ -31,8 +31,8 @@ import "./EditorTheme.css"
  *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no fill or line.
  * - A theme made with Spell UI's theme editor and saved by name is one of My themes (`SavedTheme`, epic `debut`
  *   P25):  picked in the menu like any theme, its base worn, then its sheet.
- * - The code's colours are the theme's own (epic `debut` P22):  Monaco reads them off the page, light or dark,
- *   and follows each change by itself (`CodeThemes`, `spell/app/app/ui/monaco/themes`).
+ * - The code's colours are the theme's own (epic `debut` P22):  the code editor reads them off the page,
+ *   light or dark, its `--ui-code-<role>` colours (`CodeRules`), and follows each change by itself.
  * - Loads lazily, as `loadUI()` does:  Spell UI's half is its own chunk, off the app's first paint.
  * - The editor app's only:  NEVER from `<spell-viewer>` / `<spell-editor>`, which live on other people's pages.
  ****************/

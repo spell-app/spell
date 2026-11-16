@@ -4,13 +4,12 @@ import type { LSP } from "spell/app/lsp"
 /****************
  * ### `AppAddresses`
  * How the app's code editors address files:  `spell:/<file.path>`, e.g. `spell:/@spell/examples/Solitaire/Solitaire.spell`.
- * - ONE rule for every editor of the app (Monaco's, the CodeMirror test's) and the scope explorer's packs,
+ * - ONE rule for every editor of the app (CodeMirror's) and the scope explorer's packs,
  *   which point back at the files with it.
- * - Every file the app's Monaco shows has a model at this address (`SpellModels`).
  * - Only files we already know:  `fileFor()` looks in `SpellFile.registry`, it never makes one.
  * - Plain string work, no editor's URI class:  the path written as `encodeURI()` writes it, `#` and `?` escaped too,
  *   so it stays one path when parsed.
- *   - `pathOf()` reads it back from any spelling of it, Monaco's too (its `%40` for `@`).
+ *   - `pathOf()` reads it back from any spelling of it, an encoded one too (`%40` for `@`).
  ****************/
 export class AppAddresses implements LSP.FileAddresses {
   /** Address scheme for the app's files. */
@@ -23,7 +22,7 @@ export class AppAddresses implements LSP.FileAddresses {
 
   /**
    * `file.path` an address is for, or `undefined` if it isn't one of ours.
-   * - `uri`:  an address as text, or an editor's parsed one (its `scheme` and `path`, as Monaco's `Uri` has them).
+   * - `uri`:  an address as text, or an editor's parsed one (its `scheme` and `path`).
    * - A line after it (`#L12`) or a query isn't part of the path.
    */
   static pathOf(uri: string | { scheme: string; path: string }): string | undefined {

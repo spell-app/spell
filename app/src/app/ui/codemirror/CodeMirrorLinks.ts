@@ -17,7 +17,7 @@ import { HOVER_DELAY } from "spell/app/app/ui/codePopups"
 /****************
  * ### `CodeMirrorLinks`
  * A web address in the code opens in a new tab, in a CodeMirror editor (epic `codemirror` P5),
- * as Monaco's `LinkClick` does:
+ * as in VS Code:
  * - after each one, a small "open" icon (Font Awesome's `up-right-from-square`):  a plain click on it opens it
  *   - a widget, not in the text:  the caret steps over it, and copying the line leaves it out
  *   - muted, the link's colour when hovered (`codemirror.css`, `.cmb-link-icon`)
@@ -25,9 +25,9 @@ import { HOVER_DELAY } from "spell/app/app/ui/codePopups"
  *   (`SpellCodeMirror`):  this one's handler is `Prec.highest`
  * - with ⌘ held over one, it's underlined and the pointer shows a hand;
  *   a plain hover says how ("⌘-click to open") once it rests `HOVER_DELAY`, as the hover does
- * - Where the addresses are, the key and the tip's words:  `CodeEditorFeatures`, which Monaco's reads too.
+ * - Where the addresses are, the key and the tip's words:  `CodeEditorFeatures`.
  * - Any editor of a project file:  Spell and HTML alike (`FileStates`).
- * - Its position in the import graph:  CodeMirror, the app's code settings and `CodeEditorFeatures`;  never Monaco.
+ * - Its position in the import graph:  CodeMirror, the app's code settings and `CodeEditorFeatures`.
  ****************/
 export class CodeMirrorLinks {
   /** The links, for an editor of a project file. */

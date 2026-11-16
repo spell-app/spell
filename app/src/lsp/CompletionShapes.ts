@@ -4,7 +4,7 @@ import { withoutAccents } from "spell/util/string"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
-/** What the editor runs to show the suggestion list again, the moment a completion is written:  VS Code's and Monaco's. */
+/** What the editor runs to show the suggestion list again, the moment a completion is written:  VS Code's. */
 const SHOW_SUGGESTIONS: Command = { title: "", command: "editor.action.triggerSuggest" }
 
 /**
@@ -23,7 +23,7 @@ const SPELL_TAG_SHAPES: Record<string, TagShape | undefined> = {
 /****************
  * ### `CompletionShapes`
  * How a tag or an attribute chosen from the suggestion list is written WHOLE, the caret where you type next
- * (epic `editor` I70):  the ONE table of shapes, as snippets, so Monaco and VS Code write the same.
+ * (epic `editor` I70):  the ONE table of shapes, as snippets, so the app and VS Code write the same.
  * - `<act` => `<action "|" />`, the program's actions listed at once;  `<divider />|`;  `<content>`, a line in, `</>`.
  * - `<segment col` => `color="|"`, its words listed at once;  `fluid` alone, as it takes no value.
  * - What's already written after the caret is never doubled:  then only the name is (`isWrittenAfter()`).

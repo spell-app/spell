@@ -5,15 +5,20 @@ import { withoutAccents } from "spell/util/string"
 import { E } from "spell/element"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
-import type * as UIT from "spell/app/app/ui/ui.types"
-import type { monaco } from "spell/app/app/ui/monaco"
+// types only:  CodeMirror loads lazily (`loadCodeMirror()`)
+import type { CodeMirrorLocation, SpellCodeMirror } from "spell/app/app/solid/codemirror"
+import type { Hotkey } from "spell/app/app/pages/editorHotkeys"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the `spell/app/app/runner` barrel, which would pull in `runCompiled()`, and so `core`.
 import type { SpellCompiled } from "spell/app/app/runner/runner.types"
 import type { StaticFiles } from "spell/app/app/static/StaticFiles"
 import { adoptShadowStyles } from "spell/app/app/runner/shadowStyles"
 import { wordsOfLanguages } from "spell/app/app/runner/words"
-import { SpellEditorPane, type SpellEditorStatus, type MonacoModule } from "spell/app/app/spellEditor/SpellEditorPane"
+import {
+  SpellEditorPane,
+  type SpellEditorStatus,
+  type CodeMirrorModule
+} from "spell/app/app/spellEditor/SpellEditorPane"
 import { spellEditorVocabulary } from "./SpellEditor.en"
 
 // Spell's project groups (`@spell/examples` ...), so `project` resolves:
@@ -72,7 +77,7 @@ export interface DOMSpellEditorElement extends E.AttributeValues<typeof spellEdi
 
 /****************
  * ### `SpellEditor`
- * The component behind `<spell-editor>`:  edits a spell project in any page, in Monaco,
+ * The component behind `<spell-editor>`:  edits a spell project in any page, in CodeMirror,
  * and feeds `<spell-viewer>`s on the page what it compiles.
  * - `project="@spell/examples/Solitaire"`:
  *   from the spell server's `/api`, as `<spell-viewer project>`.
@@ -83,8 +88,9 @@ export interface DOMSpellEditorElement extends E.AttributeValues<typeof spellEdi
  *   - `compiled` holds what it made, a `SpellCompiled`
  *   - sends `spell-compiled` (`SPELL_COMPILED_EVENT`), bubbling out of the shadow root, with it as `detail`
  *   - hands it to each app `app` names:  `run(compiled)` (`pushToApps()`)
- * - Compiles WITHOUT Monaco, so apps run straight away.  Monaco, most of our code, loads after, for the view.
- * - Several may edit several projects on a page (`SpellModels.use()`).
+ * - Compiles WITHOUT CodeMirror, so apps run straight away.  CodeMirror and its language service load after,
+ *   for the view.
+ * - Several may edit several projects on a page (`FileStates.use()`).
  *   Two of ONE project share its files, so typing in one shows in the other.
  * - Draws `<SpellEditorPane>` (no `<ui-*>`):  plain tabs and status line.
  *   Styled by `spell-editor.css`, adopted from `assets` (default, beside its script).
@@ -95,7 +101,7 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
   @E.proto static vocabulary = spellEditorVocabulary
   @E.protoMerged static elementSetup = {
     DOMElement: DOMSpellEditorElement,
-    // Monaco takes focus where it's clicked
+    // CodeMirror takes focus where it's clicked
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -124,8 +130,8 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
   /** What we're doing, for the status line. */
   @E.state private accessor status: SpellEditorStatus = { state: "loading" }
 
-  /** Monaco and our spell features, once loaded. */
-  @E.state private accessor monacoModule: MonacoModule | undefined = undefined
+  /** CodeMirror and our spell features, once loaded. */
+  @E.state private accessor codeMirrorModule: CodeMirrorModule | undefined = undefined
 
   /** Bumped when the project's files change in ways no member says, e.g. edited since saved:  see `redraw()`. */
   @E.state private accessor version = 0
@@ -258,12 +264,12 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
 
   /**
    * `project`'s scope pack, fresh from its parse:  for an app's Type Explorer, as the server's may be stale.
-   * - Only once Monaco's loaded:  its language service works out docs and locations.
+   * - Only once CodeMirror's loaded:  its language service works out docs and locations.
    *   Till then, `undefined`, and apps show the server's.
    * - Parses the projects it imports compiled first, once each, to show their sources:  see `LSP.ScopeExplorer`.
    */
   private async scopesOf(project: SP.SpellProject): Promise<LSP.ScopePack | undefined> {
-    const service = this.monacoModule?.SpellMonaco.register().service
+    const service = this.codeMirrorModule?.SpellCodeMirror.service
     if (!service) return undefined
     const explorer = new LSP.ScopeExplorer(service)
     for (const imported of LSP.ScopeExplorer.importedProjects(project)) {
@@ -316,7 +322,7 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
 
   /**
    * Open project `attribute` (our `project`) if it's another than we have open, and compile it.
-   * Then load Monaco, to show it.
+   * Then load CodeMirror, to show it.
    */
   private async openProject(attribute: string | undefined) {
     if (attribute === this.projectAttribute) return
@@ -343,7 +349,7 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
     this.openedProject = project
     this.shownFile = this.namedFile(project)
     await this.compile()
-    await this.loadMonaco(project)
+    await this.loadCodeMirror(project)
   }
 
   /** Stop editing our project:  no more compiles, and let go of everything we used for it. */
@@ -373,90 +379,83 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
   }
 
   /** Where to put the cursor when the editor next shows `path`, e.g. "go to definition" from another file. */
-  private pendingSelection?: { path: string; selection: UIT.EditorSelection }
+  private pendingSelection?: CodeMirrorLocation
 
   /**
-   * Show `file`, putting the cursor at `selection` if given.
+   * Show `file`, selecting `selection` (its range, in the language service's lines and characters) if given.
    * - A tab clicked, too:  leaves our `file` attribute as it is.
    */
-  showFile(file: SP.SpellFile | undefined, selection?: UIT.EditorSelection) {
+  showFile(file: SP.SpellFile | undefined, selection?: CodeMirrorLocation) {
     if (!file) return
-    if (selection) this.pendingSelection = { path: file.path, selection }
-    const same = file === this.shownFile
+    if (selection) this.pendingSelection = selection
     this.shownFile = file
-    if (same) this.applyPendingSelection()
+    // the editor shows it as Solid settles
+    E.afterSolidUpdate(() => this.applyPendingSelection())
   }
 
   ////////////////
-  // ## Monaco
+  // ## CodeMirror
   ////////////////
 
-  /** Our Monaco editor, once made. */
-  private monacoEditor?: monaco.editor.IStandaloneCodeEditor
+  /** Our CodeMirror editor, once it shows a file. */
+  private codeMirror?: SpellCodeMirror
+
+  /** Our editor's keys:  its own commands, and our Save and Compile and Run.  See `SPELL_EDITOR_HOTKEYS`. */
+  private readonly hotkeys: Readonly<Record<string, Hotkey>> = {
+    ...SPELL_EDITOR_HOTKEYS,
+    saveAll: { ...SPELL_EDITOR_HOTKEYS.saveAll, run: () => void this.save() },
+    compileApp: { ...SPELL_EDITOR_HOTKEYS.compileApp, run: () => void this.compile() }
+  }
 
   /**
-   * Load Monaco, and follow `project` in it:  keep its models, compile soon after each edit of it, and show the
-   * files "go to definition" asks our editor for.
+   * Load CodeMirror, and follow `project` in it:  keep its files' states while we show it,
+   * and compile soon after each edit of it.
    */
-  private async loadMonaco(project: SP.SpellProject) {
-    const module = await loadMonaco()
+  private async loadCodeMirror(project: SP.SpellProject) {
+    const module = await loadCodeMirror()
     if (project !== this.openedProject) return
-    const { SpellMonaco } = module
+    const { SpellCodeMirror } = module
     this.stops.push(
-      SpellMonaco.models.use(project),
-      SpellMonaco.onEdit((file) => {
+      SpellCodeMirror.states.use(project),
+      SpellCodeMirror.onEdit((file) => {
         if (file.project.path !== project.path) return
         this.compileSoon()
         this.redraw()
-      }),
-      SpellMonaco.onOpen((path, selection, source) => {
-        const file = project.spellFiles.find((it) => it.path === path)
-        if (!source || source !== this.monacoEditor || !file) return false
-        this.showFile(file, selection)
-        return true
       })
     )
-    this.monacoModule = module
+    this.codeMirrorModule = module
   }
 
-  /** Our Monaco editor was made:  add our keys, and put the cursor where asked once it shows a file. */
-  private onEditorMount(editor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco) {
-    this.monacoEditor = editor
-    const { KeyMod, KeyCode } = api
-    // `addAction()`, NOT `addCommand()`:  Monaco keeps commands for the page, so with several editors, the last wins
-    editor.addAction({
-      id: "spell.save",
-      label: appTexts.text("save"),
-      keybindings: [KeyMod.CtrlCmd | KeyCode.KeyS],
-      run: () => void this.save()
-    })
-    editor.addAction({
-      id: "spell.compile",
-      label: appTexts.text("compileAndRun"),
-      keybindings: [KeyMod.CtrlCmd | KeyCode.Enter],
-      run: () => void this.compile()
-    })
-    editor.onDidChangeModel(() => this.applyPendingSelection())
+  /**
+   * Show `location`, which our editor was asked to (Go to Definition, a link ⌘-clicked, a use listed):
+   * in another of our project's files, at once.
+   * - `false` for a file outside our project, e.g. a project it imports:  we edit only our own.
+   */
+  private onOpen(location: CodeMirrorLocation): boolean {
+    const file = this.openedProject?.spellFiles.find((it) => it.path === location.path)
+    if (!file) return false
+    this.showFile(file, location)
+    return true
   }
 
-  /** Our Monaco editor is going. */
-  private onEditorUnmount(editor: monaco.editor.IStandaloneCodeEditor) {
-    if (this.monacoEditor === editor) this.monacoEditor = undefined
+  /** Our editor shows its first file:  put the cursor where asked. */
+  private onEditorMount(editor: SpellCodeMirror) {
+    this.codeMirror = editor
+    this.applyPendingSelection()
   }
 
-  /** Put the cursor where `showFile()` was asked to, if our editor now shows that file. */
+  /** Our editor is going. */
+  private onEditorUnmount(editor: SpellCodeMirror) {
+    if (this.codeMirror === editor) this.codeMirror = undefined
+  }
+
+  /** Select what `showFile()` was asked to, if our editor now shows that file. */
   private applyPendingSelection() {
     const pending = this.pendingSelection
-    const module = this.monacoModule
-    const model = this.monacoEditor?.getModel()
-    if (!pending || !model || !module || LSP.AppAddresses.pathOf(model.uri) !== pending.path) return
+    const editor = this.codeMirror
+    if (!pending || !editor || editor.file.path !== pending.path) return
     this.pendingSelection = undefined
-    const { anchor, head = anchor } = pending.selection
-    if (!anchor || !head) return
-    const selection = new module.monaco.Selection(anchor.line + 1, anchor.ch + 1, head.line + 1, head.ch + 1)
-    this.monacoEditor!.setSelection(selection)
-    this.monacoEditor!.revealRangeInCenterIfOutsideViewport(selection)
-    this.monacoEditor!.focus()
+    editor.select(pending)
   }
 
   ////////////////
@@ -506,11 +505,13 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
         files={this.files}
         file={this.shownFile}
         status={this.status}
-        monaco={this.monacoModule}
+        codeMirror={this.codeMirrorModule}
+        hotkeys={this.hotkeys}
         isDirty={this.isDirty}
         saves={!this.static}
         onSelect={(file) => this.showFile(file)}
-        onMount={(editor, api) => this.onEditorMount(editor, api)}
+        onOpen={(location) => this.onOpen(location)}
+        onMount={(editor) => this.onEditorMount(editor)}
         onUnmount={(editor) => this.onEditorUnmount(editor)}
       />
     )
@@ -526,20 +527,41 @@ export interface SpellEditor extends E.AttributeValues<typeof spellEditorVocabul
  */
 const BUNDLE = import.meta.url.slice(0, import.meta.url.lastIndexOf("/") + 1)
 
-/** CSS files our shadow root adopts, from `assets`:  Monaco's, and ours.  See `vite.editor.config.ts`. */
+/** CSS files our shadow root adopts, from `assets`:  ours, the bubbly look's and CodeMirror's.  See `vite.editor.config.ts`. */
 const EDITOR_CSS = ["spell-editor.css"]
 
 /** The element we feed what we compile. */
 const VIEWER_TAG = "spell-viewer"
 
-/** `spell/app/app/solid/monaco`, loaded once:  Monaco is most of our code, so it waits till there's a project to show. */
-let monacoModule: Promise<MonacoModule> | undefined
+/** `spell/app/app/solid/codemirror`, loaded once:  see `loadCodeMirror()`. */
+let codeMirrorModule: Promise<CodeMirrorModule> | undefined
 
-/** Load `spell/app/app/solid/monaco` (Monaco, its spell plumbing, and the Solid `MonacoEditor`), once. */
-function loadMonaco(): Promise<MonacoModule> {
-  monacoModule ??= import("spell/app/app/solid/monaco")
-  return monacoModule
+/**
+ * Load `spell/app/app/solid/codemirror` (CodeMirror, Spell in it, and its Solid `<FileEditor>`), once:
+ * it's most of our code, so it waits till there's a project to show.
+ */
+function loadCodeMirror(): Promise<CodeMirrorModule> {
+  codeMirrorModule ??= import("spell/app/app/solid/codemirror")
+  return codeMirrorModule
 }
+
+/**
+ * Our editor's keys:  the editor page's (`EDITOR_HOTKEYS`) that a code editor runs by itself -- Undo, Find,
+ * Go to Definition, Rename Symbol ... -- and its Save and Compile and Run, which our component runs as ours.
+ * - A copy of theirs, the same keys:  `editorHotkeys.ts` brings the editor page with it (`editor`, the app's Solid
+ *   parts), which no page with only `<spell-editor>` has.  Its test checks they match.
+ * - NOT the page's other keys (New File, Revert ...):  they work the app's own editor, which isn't on this page.
+ * - NOR Find All References:  its list is the app's right-click menu (`CodeMirrorMenu`), which isn't either.
+ */
+export const SPELL_EDITOR_HOTKEYS = {
+  saveAll: { shortcut: "mod+S" },
+  compileApp: { shortcut: "mod+Enter" },
+  undo: { shortcut: "mod+Z", codeEditorCommand: "undo" },
+  redo: { shortcut: "shift+mod+Z", codeEditorCommand: "redo" },
+  find: { shortcut: "mod+F", codeEditorCommand: "find" },
+  goToDefinition: { shortcut: "F12", codeEditorCommand: "goToDefinition" },
+  rename: { shortcut: "F2", codeEditorCommand: "rename" }
+} as const satisfies Readonly<Record<string, Hotkey>>
 
 /** Spell UI's `RootLoader`, the page's, once `loadSpellUINames()` has registered its names with spell. */
 let rootLoader: Promise<RootLoaderType> | undefined

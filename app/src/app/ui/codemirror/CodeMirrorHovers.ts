@@ -8,19 +8,19 @@ import { CodeMirrorPopups } from "./CodeMirrorPopups"
 /****************
  * ### `CodeMirrorHovers`
  * The hover's ⌥ rule in a CodeMirror editor, and an error's message on a plain hover over its squiggle
- * (epic `codemirror` P5), as Monaco's `ErrorHover` and its `onKeyboardModifier` hover do:
+ * (epic `codemirror` P5):
  * - ⌥ (Alt) followed:  `isAltHeld(view)`, as of the mouse's last move or the last key;  the hover's info shows
  *   by `CodeEditorFeatures.showsHoverInfo()` with it (`CodeMirrorLanguage`)
  * - ⌥ pressed while the mouse rests on a word:  the info hover comes up without moving the mouse
- *   (a mouse move replayed where it rests, as Monaco's `CodeSettings` does);  it waits `HOVER_DELAY` as any hover does
+ *   (a mouse move replayed where it rests);  it waits `HOVER_DELAY` as any hover does
  * - errors, warnings and notes under the mouse:  each its own row, once the mouse rests `HOVER_DELAY`
- *   - in EVERY hover mode:  where Monaco shows them alone (`CodeEditorFeatures.showsErrorsAlone()`) or in its own
+ *   - in EVERY hover mode:  where the hover shows them alone (`CodeEditorFeatures.showsErrorsAlone()`) or in its own
  *     hover with the info, CodeMirror's hovers show together in one popup, the errors a section of it
  *   - so the rule needs no asking here:  the info's section comes and goes by it, the errors' stays
  * - CodeMirror's own problems popup (`@codemirror/lint`'s, which waits 300 ms whatever's asked) is left empty and
  *   hidden (`codemirror.css`):  these rows replace it
  * - The problems themselves are each file's state's, `setDiagnostics()` (`FileStates`).
- * - Its position in the import graph:  CodeMirror, the app's code settings;  never Monaco.
+ * - Its position in the import graph:  CodeMirror, the app's code settings.
  ****************/
 export class CodeMirrorHovers {
   /** ⌥ followed, and the errors' hover, for an editor of a Spell file. */

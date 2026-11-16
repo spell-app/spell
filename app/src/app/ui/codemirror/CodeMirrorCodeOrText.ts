@@ -7,7 +7,7 @@ import { LSP } from "spell/app/lsp"
 /****************
  * ### `CodeMirrorCodeOrText`
  * A drawing's attribute value switched between text and code as a person types, in a CodeMirror editor
- * (epic `codemirror` P4), as Monaco's `CodeOrTextTyping` does:
+ * (epic `codemirror` P4):
  * - `{` typed anywhere inside a quoted value turns its two quotes into braces:  `color="bl{ue"` => `color={blue}`
  * - `"` typed right after a code value's `{` turns its braces back into quotes:  `color={"its color}` =>
  *   `color="its color"`;  further in, a `"` starts a string in the code (`{say "hi"}`), so it's typed as itself

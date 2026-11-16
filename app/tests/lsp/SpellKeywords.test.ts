@@ -134,7 +134,7 @@ describe("SpellKeywords", () => {
       })
     })
 
-    test("VS Code's is the same as Monaco's", () => {
+    test("VS Code's back-out rule is the shared one", () => {
       const { pattern, flags } = JSON.parse(readFileSync(LANGUAGE_CONFIGURATION, "utf8")).indentationRules
         .decreaseIndentPattern
       expect({ pattern, flags }).toEqual({

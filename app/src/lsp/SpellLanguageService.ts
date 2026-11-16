@@ -54,7 +54,7 @@ export class SpellLanguageService {
   #tokenBuilders = new WeakMap<SP.SpellFile, SemanticTokensBuilder>()
   /**
    * Can the editor asking pick an attribute's value (a colour, an icon) as well as list its words?
-   * - The app's Monaco says so (`SpellLanguageFeatures`):  it runs `PICK_VALUE_COMMAND`.  VS Code doesn't, so its list has
+   * - The app's code editor says so:  it runs `PICK_VALUE_COMMAND`.  VS Code doesn't, so its list has
    *   no Pick row (epic `editor` T61).
    */
   picksValues = false
@@ -1365,7 +1365,7 @@ export class SpellLanguageService {
   /**
    * `rename()`, but an action renamed as the Inspector renames it, saying why it can't (epic `editor` I111, I139, I147):
    * its calls and buttons too (`renameActionAt()`).
-   * - What the app's editors ask, Monaco's and CodeMirror's alike, so F2 refuses in the Inspector's words.
+   * - What the app's editors ask, so F2 refuses in the Inspector's words.
    * - `null` where anything else can't be renamed `newName`.
    * - throws `LSP.RenameError` for an action that can't be:  `cause.kind` says why.
    */
@@ -1757,7 +1757,7 @@ export class SpellLanguageService {
 
   /**
    * `spell/bubbly`:  `file` in the BUBBLY LOOK, stretch by stretch, for VS Code's decorations (epic `language` P51).
-   * - Laid out as Monaco lays it out (`SP.BubblyLayout`, in the file's own language, from its project's parse of it),
+   * - Laid out as the code editor lays it out (`SP.BubblyLayout`, in the file's own language, from its project's parse of it),
    *   and cut into the same stretches
    *   (`SP.BubblyStretches`).
    * - `[]` for a page file, which isn't drawn bubbly, and for a blank one.
@@ -2048,7 +2048,7 @@ export class SpellLanguageService {
       sortText: "000",
       filterText: word,
       preselect: true,
-      // writes back what's typed:  Monaco writes `insertText` (else the label), an LSP client the `textEdit`
+      // writes back what's typed:  the app's editor writes `insertText` (else the label), an LSP client the `textEdit`
       insertText: word,
       textEdit: { range, newText: word },
       command: { title: "", command: PICK_VALUE_COMMAND, arguments: [picker, spec.values] }
@@ -3290,7 +3290,7 @@ const ATTRIBUTE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*?)?\s+[\p{L}-]*$/u
 
 /** An attribute's quoted value being typed at the end of a line:  its tag, its attribute, then what's typed, `<button color="pr`. */
 /**
- * The command a value's Pick row runs (epic `editor` T61):  the app's Monaco opens the picker at the caret
+ * The command a value's Pick row runs (epic `editor` T61):  the app's code editor opens the picker at the caret
  * (`ValuePicker`), handed the attribute's `SP.ComponentValuePicker` and its words.
  */
 export const PICK_VALUE_COMMAND = "spell.pickValue"

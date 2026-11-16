@@ -9,17 +9,17 @@ import type { CodeMirrorLanguage } from "./CodeMirrorLanguage"
 
 /****************
  * ### `CodeMirrorRename`
- * Rename Symbol (F2) in a CodeMirror editor, as Monaco's (epic `editor` I147;  epic `codemirror` P5):
+ * Rename Symbol (F2) in a CodeMirror editor (epic `editor` I147;  epic `codemirror` P5):
  * a field over the name, its words selected;  Enter renames it everywhere, Esc or a click away leaves it.
- * - What it renames and what it says are the app's, as Monaco's are:  an action as the Inspector's Code card renames
+ * - What it renames and what it says are the app's:  an action as the Inspector's Code card renames
  *   it, its calls and buttons too, refused in the same words (`CodeEditorFeatures.rename()`).
  * - Where nothing can be renamed, F2 says what can, over the caret (`CodeEditorFeatures.renameNothingHere()`).
- * - A refusal shows over the name once the field has gone, as Monaco's message does;  it goes at the next key,
+ * - A refusal shows over the name once the field has gone;  it goes at the next key,
  *   click or edit.
  * - The edits go in through the editor's `apply`, file by file:  `FileStates.applyEdits()`, so each file's is ONE
  *   undo step, and each file touched saves.
  * - One per editor, in what its view adds (`SpellCodeMirror`'s host).
- * - Its position in the import graph:  CodeMirror, the app's code features;  never Monaco.
+ * - Its position in the import graph:  CodeMirror, the app's code features.
  ****************/
 export class CodeMirrorRename {
   /** The field and the message, for an editor's view. */
@@ -57,7 +57,7 @@ export class CodeMirrorRename {
           console.error("CodeMirrorRename:  the rename failed", error)
           return
         }
-        // once the field has gone, as Monaco shows it
+        // once the field has gone
         void after(0, () => CodeMirrorRename.say(view, range!.from, error.message))
       }
     }

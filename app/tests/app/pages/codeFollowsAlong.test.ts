@@ -3,7 +3,7 @@ import path from "node:path"
 import { chromium, type BrowserContext, type Page } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
+import { builtInProjectsNow, CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Click a line of the code, a line of compiled code, a row of the tree or a thing on the screen, and the others follow
@@ -30,7 +30,7 @@ async function contextWithNoSaving(context: BrowserContext): Promise<void> {
 /** Open `project`, code showing, with the Inspector open. */
 async function open(page: Page, project: string): Promise<void> {
   await page.goto(`${EDITOR}edit/@spell/examples/${project}`, { timeout: 60_000 })
-  await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+  await new CodeEditor(page).shown()
   await page.waitForTimeout(4000)
   await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
   await page.waitForTimeout(1000)
@@ -54,24 +54,12 @@ async function chooseOutput(page: Page, words: string): Promise<void> {
 /** The page's debug globals, what's used of them. */
 type DebugGlobals = {
   editor: {
-    shownCodeEditor?: CodeEditorLike
     followed?: { path: string; line: number; from: string }
     file?: { file: string }
     project: { spellFiles: { path: string }[] }
     showEditor(path: string): void
   }
   Inspector: { allSelected: { element: Element }[]; dismissHelp(): void }
-}
-
-/** What's used of a code editor. */
-type CodeEditorLike = {
-  hasTextFocus(): boolean
-  getPosition(): { lineNumber: number; column: number } | null
-  getModel(): { getLineContent(line: number): string } | null
-  getScrollTop(): number
-  revealLine(line: number): void
-  getScrolledVisiblePosition(position: { lineNumber: number; column: number }): { top: number; left: number } | null
-  getDomNode(): HTMLElement
 }
 
 /** Show the file named `name`. */
@@ -84,16 +72,15 @@ function showFile(page: Page, name: string) {
 
 /** Click line `line`, from 0, of the code editor showing, with a real mouse. */
 async function clickCodeLine(page: Page, line: number): Promise<void> {
-  const at = await page.evaluate((number) => {
-    const code = (window as unknown as DebugGlobals).editor.shownCodeEditor!
-    code.revealLine(number + 1)
-    const place = code.getScrolledVisiblePosition({ lineNumber: number + 1, column: 3 })!
-    const box = code.getDomNode().getBoundingClientRect()
-    return { x: box.x + place.left + 20, y: box.y + place.top + 8 }
-  }, line)
-  await page.waitForTimeout(200)
-  await page.mouse.click(at.x, at.y)
+  await new CodeEditor(page).clickLine(line + 1, 3)
   await page.waitForTimeout(600)
+}
+
+/** Where the code's caret is, its line and column from 0, and its line's text. */
+async function caretAndLine(page: Page): Promise<{ line: number; column: number; text: string }> {
+  const code = new CodeEditor(page)
+  const { lineNumber, column } = await code.caret()
+  return { line: lineNumber - 1, column: column - 1, text: (await code.line(lineNumber)).trim() }
 }
 
 /** Where the first drawn `tag` is written, from its stamp:  its file, and line from 0. */
@@ -111,21 +98,22 @@ function writtenPlace(page: Page, tag: string, words?: string) {
 }
 
 /** What's in focus, and what shows of it. */
-function following(page: Page) {
-  return page.evaluate(() => {
+async function following(page: Page) {
+  const codeHasFocus = await new CodeEditor(page).hasFocus()
+  const shows = await page.evaluate(() => {
     const { editor, Inspector } = window as unknown as DebugGlobals
     const output = document.querySelector(".CodeOutputCode")
     return {
       followed: editor.followed,
       file: editor.file?.file,
       selected: Inspector.allSelected.map(({ element }) => element.localName),
-      codeHasFocus: editor.shownCodeEditor?.hasTextFocus() ?? false,
       codeMarks: document.querySelectorAll(".InputEditor .FollowedLine").length,
       outputMarks: output?.querySelectorAll(".FollowedLine").length ?? 0,
       outputShows: !!output,
       treeSelected: document.querySelectorAll("ui-tree-item[selected]:not([selected='false'])").length
     }
   })
+  return { ...shows, codeHasFocus }
 }
 
 describe.skipIf(!SERVING)("code follows along", () => {
@@ -155,10 +143,10 @@ describe.skipIf(!SERVING)("code follows along", () => {
 
     await chooseOutput(page, "TypeScript")
     expect((await following(page)).outputShows).toBe(true)
-    expect(await page.locator(".CodeOutputCode .view-line").first().textContent()).toBeTruthy()
+    expect(await page.locator(".CodeOutputCode .cm-line").first().textContent()).toBeTruthy()
 
     await page.reload()
-    await page.waitForSelector(".CodeOutputCode .view-line", { timeout: 60_000 })
+    await page.waitForSelector(".CodeOutputCode .cm-line", { timeout: 60_000 })
     await expect
       .poll(() => page.locator(".CodeOutputPane ui-item[selected]").textContent(), { timeout: 8000 })
       .toContain("TypeScript")
@@ -197,7 +185,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
     await open(page, "Solitaire")
     await chooseOutput(page, "JavaScript")
     // a line far enough in to be written by Card:  the code's on another file, or the same
-    const box = await page.locator(".CodeOutputCode .view-line").nth(12).boundingBox()
+    const box = await page.locator(".CodeOutputCode .cm-line").nth(12).boundingBox()
     await page.mouse.click(box!.x + 60, box!.y + 8)
     await page.waitForTimeout(1500)
     const state = await following(page)
@@ -269,11 +257,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
       const state = await following(page)
       expect(state.selected, "the action's button, not the header around it (I158)").toEqual(["ui-action"])
       expect(state.followed).toMatchObject({ line: cheat.line, from: "parts" })
-      const caret = await page.evaluate(() => {
-        const code = (window as unknown as DebugGlobals).editor.shownCodeEditor!
-        const { lineNumber, column } = code.getPosition()!
-        return { line: lineNumber - 1, column: column - 1, text: code.getModel()!.getLineContent(lineNumber).trim() }
-      })
+      const caret = await caretAndLine(page)
       expect(caret).toEqual({ line: cheat.line, column: cheat.column, text: '<action "cheat"/>' })
       expect(state.codeHasFocus, "following never takes the keyboard").toBe(false)
     }
@@ -323,11 +307,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
       const state = await following(page)
       expect(state.selected).toEqual(["spacer"])
       expect(state.followed).toMatchObject({ line: gap.line, from: "parts" })
-      const caret = await page.evaluate(() => {
-        const code = (window as unknown as DebugGlobals).editor.shownCodeEditor!
-        const { lineNumber, column } = code.getPosition()!
-        return { line: lineNumber - 1, column: column - 1, text: code.getModel()!.getLineContent(lineNumber).trim() }
-      })
+      const caret = await caretAndLine(page)
       expect(caret).toEqual({ line: gap.line, column: gap.column, text: "<spacer/>" })
     }
   )
@@ -337,14 +317,18 @@ describe.skipIf(!SERVING)("code follows along", () => {
     await open(page, "Solitaire")
     await clickCodeLine(page, 2)
     await page.keyboard.type("x")
-    const moved = await page.evaluate(async () => {
-      const { editor } = window as unknown as DebugGlobals
-      const code = editor.shownCodeEditor!
-      const before = code.getScrollTop()
-      editor.followed = { path: "Deck.spell", line: 1, from: "parts" }
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      return { before, after: code.getScrollTop(), file: editor.file?.file, focused: code.hasTextFocus() }
+    const code = new CodeEditor(page)
+    const before = await code.scrollTop()
+    await page.evaluate(() => {
+      ;(window as unknown as DebugGlobals).editor.followed = { path: "Deck.spell", line: 1, from: "parts" }
     })
+    await page.waitForTimeout(800)
+    const moved = {
+      before,
+      after: await code.scrollTop(),
+      file: await page.evaluate(() => (window as unknown as DebugGlobals).editor.file?.file),
+      focused: await code.hasFocus()
+    }
     expect(moved.after).toBe(moved.before)
     expect(moved.focused).toBe(true)
     expect(moved.file).not.toBe("Deck.spell")
@@ -391,7 +375,7 @@ describe.skipIf(!SERVING)("code follows along", () => {
       )
       const page = await looks.newPage()
       await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-      await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+      await new CodeEditor(page).shown()
       await page.waitForTimeout(4000)
       await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
       await page.waitForTimeout(800)

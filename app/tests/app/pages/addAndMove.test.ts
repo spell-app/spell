@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Adding, moving and removing parts from the running editor, by a real mouse and keys (epic `editor`, Add And Move).
@@ -312,11 +312,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(500)
     await page.locator('.PartMenu ui-action:has-text("Show in Code")').click()
     await page.waitForTimeout(800)
-    const line = await page.evaluate(() => {
-      const code = (window as unknown as { editor: { shownCodeEditor: { getPosition(): { lineNumber: number } } } })
-        .editor.shownCodeEditor
-      return code.getPosition().lineNumber
-    })
+    const line = (await new CodeEditor(page).caret()).lineNumber
     expect(line).toBeGreaterThan(1)
 
     await page.mouse.click(card!.x, card!.y, { button: "right" })
@@ -384,7 +380,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
   test("in the code editor, ⌘C copies its own text, and nothing happens to the parts", async () => {
     const before = await text()
-    await page.locator(".monaco-editor .view-line").first().click()
+    await new CodeEditor(page).lineLocator().first().click()
     await press("ControlOrMeta+a")
     await press("ControlOrMeta+c")
     await page.mouse.click(5, 400)
@@ -826,13 +822,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   })
 
   test("a project's code closes, and stays closed;  Show in Code opens it", async () => {
-    const code = page.locator(".InputEditor .monaco-editor")
+    const code = page.locator(".InputEditor .cm-editor")
     expect(await code.count()).toBe(1)
     await page.locator(".ModeTabs .CodeToggle [part~=item]").first().click()
     await page.waitForTimeout(800)
     expect(await code.count()).toBe(0)
     await page.locator(".ModeTabs .CodeToggle [part~=item]").first().click()
-    await page.waitForSelector(".InputEditor .monaco-editor", { timeout: 30_000 })
+    await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
   test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80)", async () => {

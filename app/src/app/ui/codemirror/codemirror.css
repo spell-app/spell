@@ -8,7 +8,7 @@
  * - Light and dark from one set, `light-dark()`, as `bubbly.css`:  the page's `color-scheme` picks.
  */
 
-/* with the look off (`CodeMirrorLook`):  Spell in the page's font, coloured by its tokens, as Monaco shows it */
+/* with the look off (`CodeMirrorLook`):  Spell in the page's font, coloured by its tokens */
 .cm-editor.cmb:not(.bubbly, .cmb-code) {
   /* what the popups below read of the look's sheet, which a box that isn't a `.bubbly` doesn't have */
   --bubbly-font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -135,7 +135,7 @@
 }
 
 /*
- * Every CodeMirror editor's gutter (`CodeMirrorSetup`), as Monaco's is drawn (`MonacoEditor.css`, epic `editor` I154):
+ * Every CodeMirror editor's gutter (`CodeMirrorSetup`;  epic `editor` I154):
  * - no line numbers until asked;  then they come first
  * - the fold arrows' column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code:
  *   its chevron ends well before a line's first word
@@ -231,7 +231,7 @@
   white-space: pre-line;
 }
 
-/* the suggestions' details hidden, as Settings… says (`CodeMirrorPopups`, Monaco's class) */
+/* the suggestions' details hidden, as Settings… says (`CodeMirrorPopups`) */
 .cm-editor.suggest-details-hidden .cm-completionInfo {
   display: none;
 }
@@ -276,7 +276,7 @@
 
 /*
  * Web addresses, errors on a plain hover, heading comments (epic `codemirror` P5):
- * `CodeMirrorLinks`, `CodeMirrorHovers`, `CodeMirrorHeadings`, drawn as Monaco's are (`MonacoEditor.css`).
+ * `CodeMirrorLinks`, `CodeMirrorHovers`, `CodeMirrorHeadings`.
  */
 .cm-editor.cmb {
   /* a web address with ⌘ held over it:  underlined, a hand to click it with */
@@ -336,5 +336,26 @@
   /* a heading comment, `#` ... to its line's end, with the look off:  bold;  the bubbly look draws its own */
   &:not(.bubbly) .spell-heading {
     font-weight: bold;
+  }
+}
+
+/*
+ * Pinned lines (`CodeMirrorPinned`, Settings… › Pinned lines):  the lines opening the blocks the top of the code is in,
+ * over the code's top, on the editor's paper, a hairline under them;  a pointer, as a click goes to each
+ */
+.cm-editor .cmb-pinned {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 5;
+  padding: 0;
+  background: var(--bubbly-paper, var(--ui-code-background, light-dark(white, #1c1b22)));
+  border-bottom: 1px solid light-dark(#e6e4ee, #34323f);
+  box-shadow: 0 2px 4px light-dark(#0000000d, #0000004d);
+  white-space: pre;
+  overflow: hidden;
+
+  > .cm-line {
+    cursor: pointer;
   }
 }

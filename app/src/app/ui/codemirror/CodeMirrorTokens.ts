@@ -12,19 +12,19 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
  * keywords, names, types, properties, actions, constants, text, comments and `#` headings, each in its code colour.
  * - The colours come from the parser's own token pass, `SP.SpellHighlighter.spans()`, as `<spell-code>` colours
  *   a snippet:  no grammar of CodeMirror's own to keep in step with the parser.
- * - Each span's kind takes the role Monaco's rule for the same token gives it (`CodeRules.roleForScope()`),
+ * - Each span's kind takes its role in the one table of code colours (`CodeRules.roleForScope()`),
  *   so a token is the same colour in either editor:  `var(--ui-code-<role>)`, light or dark as the page is.
  * - Read by the file's own language's parser (`Spanish.es.spell` by Spanish's),
  *   and with its project's parse when that's of this very text, so a name declared in another file colours as one.
  * - A page file (`SP.formOfText()`) by its page tokens alone (`pageSpans()`), read by a page parser of its language:
  *   - its prose and `<!-- ... -->` comments a comment;  its head's name text, the rest of its head a keyword
  *   - a tag's `<` and closers punctuation, its word a keyword;  text and numbers in it as in Spell
- *   - the words inside a tag, and markup (`<text>red</text>`), stay plain:  Monaco colours those by each tag's
- *     Spell twin (`SpellTokensProvider`), which this doesn't do yet
+ *   - the words inside a tag, and markup (`<text>red</text>`), stay plain:  colouring them by each tag's
+ *     Spell twin isn't done yet
  *   - NOT the highlighter's pass:  it reads a page as plain Spell, and its parse's offsets are the twins', not the
  *     file's, so its colours land on the wrong letters
  * - Typing never waits:  the marks follow the text, and are worked out again once it pauses (`CodeMirrorRelayout`).
- * - Its position in the import graph:  CodeMirror, the parser, the one table of code colours;  never Monaco.
+ * - Its position in the import graph:  CodeMirror, the parser, the one table of code colours.
  * - NEVER throws:  a pass that fails leaves the text plain, and logs why.
  ****************/
 export class CodeMirrorTokens {
@@ -137,7 +137,7 @@ export class CodeMirrorTokens {
 
 /**
  * Each language's page parser, by its plain one, made on first use:  a page file's tags are tokens of their own.
- * - NOT the project's twin (`SP.SpellParser.twinFor()`):  colouring needs no project, as Monaco's `forPages()`.
+ * - NOT the project's twin (`SP.SpellParser.twinFor()`):  colouring needs no project.
  */
 const PAGE_PARSERS = new WeakMap<SP.SpellParser, SP.SpellParser>()
 

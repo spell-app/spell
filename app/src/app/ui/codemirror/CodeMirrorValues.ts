@@ -9,8 +9,7 @@ import { ValuePopups, type CaretValue, type ValuePopupHost } from "spell/app/app
 
 /****************
  * ### `CodeMirrorValues`
- * An attribute's value chosen rather than typed, in a CodeMirror editor, as Monaco's `ValueChoices` and `ValuePicker`
- * give it (epic `editor` T61, T70;  epic `codemirror` P5).
+ * An attribute's value chosen rather than typed, in a CodeMirror editor (epic `editor` T61, T70;  epic `codemirror` P5).
  * - The choices strip:  an attribute's words, quietly under its value once the caret has rested in it for a second,
  *   the value ticked (`extension()`).
  *   - Only with one caret and nothing selected, the editor holding the keys, and CodeMirror's suggestion list
@@ -21,10 +20,9 @@ import { ValuePopups, type CaretValue, type ValuePopupHost } from "spell/app/app
  *   "Pick a color…" row.
  * - Choosing either way writes the word between the quotes as ONE undo step of its own, the caret after
  *   the closing quote.
- * - What both popups show and how their keys work is the editor-neutral `ValuePopups`, Monaco's too:
+ * - What both popups show and how their keys work is the editor-neutral `ValuePopups`:
  *   this class is only CodeMirror's wiring onto it, one per view showing a Spell file's state.
- * - Its position in the import graph:  CodeMirror, the language service's types, the app's `ValuePopups`;
- *   never Monaco.
+ * - Its position in the import graph:  CodeMirror, the language service's types, the app's `ValuePopups`.
  ****************/
 export class CodeMirrorValues {
   /**

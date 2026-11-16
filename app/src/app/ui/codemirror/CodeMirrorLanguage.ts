@@ -20,7 +20,7 @@ import {
   ViewPlugin,
   type ViewUpdate
 } from "@codemirror/view"
-import type { CodeAction, CompletionItem, SignatureHelp, WorkspaceEdit } from "vscode-languageserver"
+import type { CodeAction, CompletionItem, DocumentSymbol, SignatureHelp, WorkspaceEdit } from "vscode-languageserver"
 
 import { after, type CancelablePromise } from "spell/util/timing"
 import type { SP } from "spell/parser/spell"
@@ -36,18 +36,18 @@ import { LspToCodeMirror, type CodeMirrorLocation } from "./LspToCodeMirror"
 /****************
  * ### `CodeMirrorLanguage`
  * Spell's language service for one file's CodeMirror state, answered IN-PROCESS by `LSP.SpellLanguageService`,
- * as Monaco's `SpellLanguageFeatures` and VS Code's language server are.
+ * as VS Code's language server is.
  * - Suggestions, hover, folding, signature help, accent fixes as you type, each a CodeMirror extension;
  *   go to definition and type definition, references, rename, code actions and highlights, each a method
  *   or an extension its editor asks for (`SpellCodeMirror`).
  * - Made by `FileStates`, one per spell file's state, which also follows the file both ways and shows its problems.
  * - Asks nothing of a file whose text isn't the editor's:  `fileReady()` parses what's waiting first.
- * - What a hover says, which code actions show and what a rename says are the app's, as Monaco's are
+ * - What a hover says, which code actions show and what a rename says are the app's
  *   (`CodeEditorFeatures`);  where suggestions show by themselves, when the hover's info shows and whether signature
  *   help shows as you type, Settings…' choices (`CodeMirrorPopups`).
  * - The service's shapes become CodeMirror's through ONE converter, `LspToCodeMirror`.
  * - Its position in the import graph:  the parser, the language service, the app's editor-neutral `ui` files,
- *   CodeMirror;  never Monaco.
+ *   CodeMirror.
  ****************/
 export class CodeMirrorLanguage {
   constructor({ service, file, parseNow }: CodeMirrorLanguageProps) {
@@ -66,11 +66,12 @@ export class CodeMirrorLanguage {
   private readonly parseNow: () => void
 
   /**
-   * Every extension:  hover, folding, signature help and accent fixes
+   * Every extension:  hover, folding, signature help and accent fixes;  a Spell UI tag's help, Format Document and
+   * expand selection
    * (suggestions go through `completions`, problems through `FileStates`).
    */
   extensions(): Extension {
-    return [this.hover(), this.folding(), this.signatureHelp(), this.accentFixes()]
+    return [this.hover(), this.folding(), this.signatureHelp(), this.accentFixes(), this.helpShown(), this.moreKeys()]
   }
 
   /**
@@ -107,7 +108,7 @@ export class CodeMirrorLanguage {
       from: word?.from ?? context.pos,
       options: inServiceOrder(items).map((item, rank) => ({
         ...picking(item, LspToCodeMirror.completion(doc, item)),
-        // the service's order, as Monaco keeps it (`sortText`):  CodeMirror's own is alphabetical where nothing's typed
+        // the service's order (`sortText`):  CodeMirror's own is alphabetical where nothing's typed
         boost: Math.max(-99, 99 - rank)
       })),
       validFor: /^[\p{L}\p{M}\d_-]*$/u
@@ -119,7 +120,7 @@ export class CodeMirrorLanguage {
   ////////////////
 
   /**
-   * What a word is, and its docstring, on a hover that rests `HOVER_DELAY`, saying as much as Monaco's does.
+   * What a word is, and its docstring, on a hover that rests `HOVER_DELAY`, saying as much as the settings ask.
    * - Only when Settings… says:  with ⌥ held (`CodeMirrorHovers.isAltHeld()`), always, or never
    *   (`CodeEditorFeatures.showsHoverInfo()`);  an error's message shows on a plain hover all the same
    *   (`CodeMirrorHovers`).
@@ -209,7 +210,7 @@ export class CodeMirrorLanguage {
   }
 
   /**
-   * Edits renaming the thing at `pos` from `oldName` to `newName`, in every file, as Monaco's F2 makes them
+   * Edits renaming the thing at `pos` from `oldName` to `newName`, in every file
    * (`CodeEditorFeatures.rename()`).
    * - throws `RenameRefusedError`, saying why in the app's words, where it can't
    */
@@ -226,7 +227,7 @@ export class CodeMirrorLanguage {
 
   /**
    * The other uses of the word at the caret, marked as reads or writes, once the caret rests `HIGHLIGHT_WAIT`.
-   * - Not in an editor by default, as Monaco's aren't (`occurrencesHighlight: "off"`;  Owen:  "distracting, turn it
+   * - Not in an editor by default (Owen:  "distracting, turn it
    *   off"):  an editor asks for it (`SpellCodeMirror`'s `highlights`).
    */
   highlights(): Extension {
@@ -262,13 +263,138 @@ export class CodeMirrorLanguage {
     view.dispatch({ effects: SET_HIGHLIGHTS.of(Decoration.set(marks, true)) })
   }
 
+  /**
+   * Show the help of the Spell UI tag or attribute at `pos`, where it's written, as its hover would say it
+   * (epic `editor` I148):  what Go to Definition does on one, which no file declares.
+   * - `false` where there's no help:  nothing shown.
+   * - It goes as the caret moves or the text changes, or at Esc.
+   */
+  async showHelp(view: EditorView, pos: number): Promise<boolean> {
+    const { doc } = view.state
+    const file = await this.fileReady(doc)
+    const help = file && this.service.componentHover(file, LspToCodeMirror.lspPosition(doc, pos))
+    if (!help || view.state.doc !== doc) return false
+    const { from, text } = LspToCodeMirror.hover(doc, help, pos)
+    const tooltip: Tooltip = { pos: from, above: true, create: () => ({ dom: markdownDom(text, HOVER_CLASS) }) }
+    view.dispatch({ effects: SET_HELP.of(tooltip) })
+    return true
+  }
+
+  /** A tag's help, while it shows (`showHelp()`), and Esc to close it. */
+  private helpShown(): Extension {
+    return [
+      helpShown,
+      keymap.of([
+        {
+          key: "Escape",
+          run: (view) => {
+            if (!view.state.field(helpShown)) return false
+            view.dispatch({ effects: SET_HELP.of(null) })
+            return true
+          }
+        }
+      ])
+    ]
+  }
+
+  ////////////////
+  // ## Format Document, expand selection
+  ////////////////
+
+  /**
+   * Keys of VS Code's the editor has, beyond the page's list (`EDITOR_HOTKEYS`):
+   * - ⇧⌥F (Shift+Alt+F):  Format Document (`format()`)
+   * - ⌃⇧⌘→ / ⌃⇧⌘← (Shift+Alt+→ / ← off a Mac):  expand and shrink the selection (`expandSelection()`)
+   */
+  private moreKeys(): Extension {
+    return keymap.of([
+      { key: "Shift-Alt-f", run: (view) => (void this.format(view), true), preventDefault: true },
+      {
+        key: "Shift-Alt-ArrowRight",
+        mac: "Ctrl-Shift-Mod-ArrowRight",
+        run: (view) => (void this.expandSelection(view, "expand"), true)
+      },
+      {
+        key: "Shift-Alt-ArrowLeft",
+        mac: "Ctrl-Shift-Mod-ArrowLeft",
+        run: (view) => (void this.expandSelection(view, "shrink"), true)
+      }
+    ])
+  }
+
+  /**
+   * Format Document:  the file's whitespace as the language service lays it out, tabs for its indent,
+   * as VS Code's Format Document does (`LSP.SpellLanguageService.formatting()`).
+   * - ONE undo step.  Nothing to do, nothing changes.
+   */
+  async format(view: EditorView): Promise<void> {
+    const { doc } = view.state
+    const file = await this.fileReady(doc)
+    if (!file || view.state.doc !== doc) return
+    const edits = this.service.formatting(file, { tabSize: 4, insertSpaces: false })
+    if (!edits.length) return
+    view.dispatch({ changes: LspToCodeMirror.changes(doc, edits), userEvent: "input.format" })
+  }
+
+  /**
+   * Expand the selection to the next bigger piece of Spell round it, or shrink it back, as VS Code's
+   * Expand / Shrink Selection do:  the parse's own pieces (`LSP.SpellLanguageService.selectionRanges()`),
+   * from a word out to the whole file.
+   * - Shrinking goes back through the selections expanding made, while the selection is still one of them.
+   */
+  async expandSelection(view: EditorView, way: "expand" | "shrink"): Promise<void> {
+    const { doc, selection } = view.state
+    const { from, to } = selection.main
+    const kept = this.expanded.get(view)
+    const isOurs = kept?.doc === doc && kept.steps.at(-1)?.from === from && kept.steps.at(-1)?.to === to
+    if (way === "shrink") {
+      if (!isOurs || kept.steps.length < 2) return
+      kept.steps.pop()
+      const back = kept.steps.at(-1)!
+      view.dispatch({ selection: { anchor: back.from, head: back.to }, userEvent: "select" })
+      return
+    }
+    const file = await this.fileReady(doc)
+    if (!file || view.state.doc !== doc) return
+    const [nested] = this.service.selectionRanges(file, [LspToCodeMirror.lspPosition(doc, selection.main.head)])
+    let wider: { from: number; to: number } | undefined
+    for (let range: typeof nested | undefined = nested; range && !wider; range = range.parent) {
+      const each = LspToCodeMirror.range(doc, range.range)
+      if (each.from <= from && each.to >= to && each.to - each.from > to - from) wider = each
+    }
+    if (!wider) return
+    const steps = isOurs ? kept.steps : [{ from, to }]
+    steps.push(wider)
+    this.expanded.set(view, { doc, steps })
+    view.dispatch({ selection: { anchor: wider.from, head: wider.to }, userEvent: "select" })
+  }
+
+  /** Each view's selections expanding made, innermost first, while its text is `doc`:  what shrinking goes back to. */
+  private expanded = new WeakMap<EditorView, { doc: Text; steps: { from: number; to: number }[] }>()
+
+  /** What the file declares, in order, each with how deep it's nested:  the outline, Go to Symbol's list. */
+  async symbolsOf(view: EditorView): Promise<{ name: string; depth: number; location: CodeMirrorLocation }[]> {
+    const { doc } = view.state
+    const file = await this.fileReady(doc)
+    if (!file) return []
+    const found: { name: string; depth: number; location: CodeMirrorLocation }[] = []
+    const walk = (symbols: DocumentSymbol[], depth: number) => {
+      for (const symbol of symbols) {
+        found.push({ name: symbol.name, depth, location: { path: file.path, range: symbol.selectionRange } })
+        walk(symbol.children ?? [], depth + 1)
+      }
+    }
+    walk(this.service.documentSymbols(file), 0)
+    return found
+  }
+
   ////////////////
   // ## Signature help
   ////////////////
 
   /**
    * The words of the call being typed, the argument at the caret in bold, over the line (`<ui-markdown>`):
-   * Monaco's parameter hints.
+   * VS Code's parameter hints.
    * - As a space is typed, while Settings… › "Show parameter hints" is on (`CodeMirrorPopups`);
    *   ⇧⌘Space (Ctrl+Shift+Space off a Mac) shows it in every mode.
    * - Asked again as the text or caret changes while it shows;  it goes where there's no call, or at Esc.
@@ -322,7 +448,7 @@ export class CodeMirrorLanguage {
 
   /**
    * A Spanish keyword typed without its accent gets it back as the space or new line after it is typed,
-   * `numero` => `número`, as Monaco's format-on-type does (`LSP.SpellLanguageService.onTypeFormatting()`).
+   * `numero` => `número`, as VS Code's format-on-type does (`LSP.SpellLanguageService.onTypeFormatting()`).
    * - Only in a language with accent fixes:  no parse to wait for on every English space.
    * - The fix joins the typing's undo step.
    */
@@ -360,7 +486,7 @@ export class CodeMirrorLanguage {
 
   /**
    * The words the attribute whose quoted value is at `pos` takes, as the suggestion list's are:
-   * for `CodeMirrorValues`' choices strip (epic `editor` T70), as Monaco's `ValueChoices` has them.
+   * for `CodeMirrorValues`' choices strip (epic `editor` T70).
    */
   attributeValuesAt = async (state: EditorState, pos: number): Promise<LSP.AttributeValues | undefined> => {
     const file = await this.fileReady(state.doc)
@@ -411,6 +537,19 @@ const highlighted = StateField.define<DecorationSet>({
   provide: (field) => EditorView.decorations.from(field)
 })
 
+/** Show a Spell UI tag's help, or none (`showHelp()`). */
+const SET_HELP = StateEffect.define<Tooltip | null>()
+
+/** A Spell UI tag's help, while it shows:  gone as the caret moves or the text changes. */
+const helpShown = StateField.define<Tooltip | null>({
+  create: () => null,
+  update: (tooltip, transaction) => {
+    for (const effect of transaction.effects) if (effect.is(SET_HELP)) return effect.value
+    return transaction.docChanged || transaction.selection ? null : tooltip
+  },
+  provide: (field) => showTooltip.from(field)
+})
+
 /** Show signature help's tooltip, or none. */
 const SET_SIGNATURE = StateEffect.define<Tooltip | null>()
 
@@ -458,7 +597,7 @@ function picking(item: CompletionItem, completion: Completion): Completion {
   }
 }
 
-/** `items` in the service's order:  by `sortText`, else by label, as Monaco orders them. */
+/** `items` in the service's order:  by `sortText`, else by label. */
 function inServiceOrder(items: CompletionItem[]): CompletionItem[] {
   const key = (item: CompletionItem) => item.sortText ?? item.label
   return [...items].sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0))

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>MonacoEditor</title>
+    <title>CodeMirrorEditor</title>
     <meta name="description" content="A Monaco editor, filling its parent:  what every code editor in the app is." />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -24,19 +24,19 @@
     <script defer src="/_epic/assets/spell-comments.js"></script>
   </head>
   <body class="ui-typography">
-    <main id="main" class="site-main" data-toc-header="MonacoEditor">
+    <main id="main" class="site-main" data-toc-header="CodeMirrorEditor">
       <ui-segment appearance="vertical" class="site-masthead">
         <ui-container>
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
-              link="../../src/app/solid/monaco/MonacoEditor.tsx"
+              link="../../src/app/solid/codemirror/CodeMirrorEditor.tsx"
               icon="code"
-              aria-label="Its code, MonacoEditor.tsx"
-              title="Its code, MonacoEditor.tsx"
+              aria-label="Its code, CodeMirrorEditor.tsx"
+              title="Its code, CodeMirrorEditor.tsx"
             ></ui-item>
           </ui-menu>
           <ui-header level="1" class="site-title">
-            MonacoEditor
+            CodeMirrorEditor
             <ui-header>A Monaco editor, filling its parent: what every code editor in the app is.</ui-header>
           </ui-header>
         </ui-container>
@@ -64,7 +64,7 @@
               Card.spell, compiled.
             </p>
             <ui-image
-              src="_images/MonacoEditor.png"
+              src="_images/CodeMirrorEditor.png"
               alt="A Monaco editor showing compiled javascript, with line numbers"
               appearance="bordered rounded"
             >
@@ -133,7 +133,7 @@
 
           <ui-section id="3-props" label="3. Props, and where it's drawn" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="list check"></ui-icon>
-            <ui-docs-api family="MonacoEditor"></ui-docs-api>
+            <ui-docs-api family="CodeMirrorEditor"></ui-docs-api>
             <p class="meta">
               From its code, by <code>yarn site:data</code> in
               <a href="../../" target="src-spell-app"><code>spell-app</code></a
@@ -146,21 +146,21 @@
             <ul>
               <li>
                 <a
-                  href="../../src/app/solid/monaco/MonacoEditor.tsx"
+                  href="../../src/app/solid/codemirror/CodeMirrorEditor.tsx"
                   target="src-packages-app-src-solid-monaco-monacoeditor-tsx"
-                  ><code title="src/app/solid/monaco/MonacoEditor.tsx">MonacoEditor.tsx</code></a
+                  ><code title="src/app/solid/codemirror/CodeMirrorEditor.tsx">CodeMirrorEditor.tsx</code></a
                 >: the component, and its props
               </li>
               <li>
                 <a
-                  href="../../src/app/solid/monaco/MonacoEditor.css"
+                  href="../../src/app/solid/codemirror/MonacoEditor.css"
                   target="src-packages-app-src-solid-monaco-monacoeditor-css"
-                  ><code title="src/app/solid/monaco/MonacoEditor.css">MonacoEditor.css</code></a
+                  ><code title="src/app/solid/codemirror/MonacoEditor.css">MonacoEditor.css</code></a
                 >: its look
               </li>
               <li>
-                <a href="../../src/app/solid/LazyMonaco.tsx" target="src-packages-app-src-solid-lazymonaco-tsx"
-                  ><code title="src/app/solid/LazyMonaco.tsx">LazyMonaco.tsx</code></a
+                <a href="../../src/app/solid/LazyCodeMirror.tsx" target="src-packages-app-src-solid-lazymonaco-tsx"
+                  ><code title="src/app/solid/LazyCodeMirror.tsx">LazyCodeMirror.tsx</code></a
                 >: how the app loads it, the first time it's drawn
               </li>
               <li>
@@ -180,8 +180,8 @@
               </li>
               <li>
                 Monaco's plumbing under it, spell's language in it:
-                <a href="../../src/app/ui/monaco/" target="src-packages-app-src-ui-monaco"
-                  ><code title="src/app/ui/monaco/">app/app/ui/monaco</code></a
+                <a href="../../src/app/ui/codemirror/" target="src-packages-app-src-ui-monaco"
+                  ><code title="src/app/ui/codemirror/">app/app/ui/monaco</code></a
                 >
               </li>
             </ul>

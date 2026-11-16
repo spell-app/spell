@@ -36,7 +36,7 @@ import { afterAll, beforeAll, describe, test, expect } from "vite-plus/test"
  * - And `spell-runtime.js` draws with the page's one Solid (epic `output-targets` P10):
  *   - it imports Solid and `h` through `spell-solid-shared.js`, bundles none of its own, and never loads `ui`
  *   - it exports that same `h`:  what compiled javascript draws with (P20)
- * - Monaco only in `<spell-editor>`'s lazy chunks:  the parser compiles, and apps run, before it loads.
+ * - CodeMirror only in `<spell-editor>`'s lazy chunk:  the parser compiles, and apps run, before it loads.
  * - Icon packs beside the chunk holding `BuiltInPacks`, where it looks -- complete enough for every Fomantic name.
  * - Every bundle MUST parse:  a build can succeed and still write javascript no browser runs --
  *   e.g. vite's module preloading once moved an `await` into a non-`async` arrow.  See `agents/PAPERCUTS.md`.
@@ -116,7 +116,7 @@ describe("runner builds", () => {
     }
   })
 
-  test("<spell-viewer>:  its files, its CSS without Monaco's, the built-ins' pack and Semantic UI beside it", () => {
+  test("<spell-viewer>:  its files, its CSS without the code editor's, the built-ins' pack and Semantic UI beside it", () => {
     expect(chunks(element)).toEqual(
       expect.arrayContaining([
         "spell-viewer.js",
@@ -126,23 +126,30 @@ describe("runner builds", () => {
         "spell-ui.js"
       ])
     )
-    expect(readFileSync(join(element, "spell-app.css"), "utf8")).not.toContain(".monaco-editor")
+    expect(readFileSync(join(element, "spell-app.css"), "utf8")).not.toMatch(CODE_EDITOR_CSS)
     expect(existsSync(join(element, "core.scopes.js"))).toBe(true)
     expect(existsSync(join(element, "semantic-ui-css", "semantic.min.css"))).toBe(true)
   })
 
-  test("<spell-editor>:  Monaco loaded lazily, in its own chunks;  its own CSS", () => {
-    expect(chunks(element)).toEqual(
-      expect.arrayContaining(["spell-editor.js", "spell-editor-monaco.js", "spell-editor-editor.worker.js"])
-    )
-    // Monaco only through `import()`, NOT a static import:  the parser compiles, and apps run, before it loads
+  test("<spell-editor>:  CodeMirror loaded lazily, in its own chunk, no worker;  its own CSS", () => {
+    const files = chunks(element)
+    expect(files).toEqual(expect.arrayContaining(["spell-editor.js", "spell-editor-codemirror.js"]))
+    expect(files.filter((file) => /worker|monaco/i.test(file))).toEqual([])
+    // CodeMirror only through `import()`, NOT a static import:  the parser compiles, and apps run, before it loads
     const entry = readFileSync(join(element, "spell-editor.js"), "utf8")
-    expect(entry).toMatch(/import\(`\.\/spell-editor-monaco\.js`\)/)
+    expect(entry).toMatch(/import\(`\.\/spell-editor-codemirror\.js`\)/)
     for (const file of staticImports(element, "spell-editor.js"))
-      expect(holds(element, file, "monaco"), file).toBe(false)
-    expect(holds(element, "spell-editor-monaco.js", "monaco")).toBe(true)
-    // Monaco's CSS, in the editor's own file -- NOT `spell-app.css`, which every `<spell-viewer>` adopts
-    expect(readFileSync(join(element, "spell-editor.css"), "utf8")).toContain(".monaco-editor")
+      expect(holds(element, file, "codemirror"), file).toBe(false)
+    expect(holds(element, "spell-editor-codemirror.js", "codemirror")).toBe(true)
+    // never the app's editor page:  no page with only `<spell-editor>` has it
+    for (const file of files.filter((file) => file.startsWith("spell-editor")))
+      expect(
+        sources(element, file).filter((source) => EDITOR_PAGE.test(source)),
+        file
+      ).toEqual([])
+    // the editor's CSS (the bubbly look, CodeMirror's), in its own file -- NOT `spell-app.css`, which every
+    // `<spell-viewer>` adopts.  CodeMirror's own rules it puts in the shadow root itself.
+    expect(readFileSync(join(element, "spell-editor.css"), "utf8")).toMatch(CODE_EDITOR_CSS)
   })
 
   test("<spell-viewer> and <spell-editor> are Spell UI components:  on the core in `spell-solid.js`, the rest of `ui` lazily", () => {
@@ -317,8 +324,14 @@ const PACKAGES = {
   solid: /\/node_modules\/(solid-js|@solidjs\/(web|signals))\//,
   // its generated data aside, plain tables bundled where they're read (`vite.shared.ts`'s `UI_DATA`)
   ui: /\/ui\/src\/(?!.*\.generated\.ts$)/,
-  monaco: /\/node_modules\/monaco-editor\//
+  codemirror: /\/node_modules\/@codemirror\//
 }
+
+/** The code editor's CSS:  the bubbly look's in CodeMirror, `bubbly.css` and `codemirror.css`. */
+const CODE_EDITOR_CSS = /\.cmb-editor/
+
+/** The app's editor page, its controller and its Solid parts:  never in `<spell-editor>`'s chunks. */
+const EDITOR_PAGE = /\/src\/app\/(editor\.ts|pages\/editorHotkeys\.ts|solid\/index\.ts)$/
 
 /** The component base class, every set's:  `spell/element`'s, which Spell UI's core carries. */
 const UI_COMPONENT = /\/src\/element\/UIComponent\.tsx$/

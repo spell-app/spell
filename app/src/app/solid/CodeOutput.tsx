@@ -1,16 +1,17 @@
 import { For, Loading, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
+import type { EditorView, ViewUpdate } from "@codemirror/view"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { editor, type FollowedPlace } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
-import type { monaco } from "spell/app/app/ui/monaco"
+import type { CodeMirrorFollowed, SpellCodeMirror } from "spell/app/app/solid/codemirror"
 import { ErrorBoundary, tracked } from "spell/app/app/solid"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
-import { LazyMonaco } from "./LazyMonaco"
+import { LazyCodeMirror } from "./LazyCodeMirror"
 
 import "./CodeOutput.css"
 
@@ -27,7 +28,7 @@ export const LANGUAGE_LOOKS = {
   python: { icon: "python", text: "pythonTab", tip: "compiledPython" }
 } as const satisfies Record<string, { icon: string; text: AppTextKey; tip: AppTextKey }>
 
-/** The targets the compiled-code pane shows, in its tabs' order, each with its code editor language. */
+/** The targets the compiled-code pane shows, in its tabs' order, each with the language its code is read as. */
 const OUTPUT_TARGETS = {
   "js/solid": { language: "javascript" },
   "ts/solid": { language: "typescript" },
@@ -132,14 +133,13 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
     const { map } = written() as { map?: P.SourceMapV3 }
     return map && new P.SourceMapLines(map)
   })
-  const [output, setOutput] = createSignal<monaco.editor.IStandaloneCodeEditor>()
-  const mounted = (made: monaco.editor.IStandaloneCodeEditor) => {
-    setOutput(() => made)
-    made.onDidChangeCursorSelection((event) => {
-      if (event.source !== "mouse" || !event.selection.isEmpty()) return
-      const place = lines()?.placeOfLine(event.selection.positionLineNumber - 1)
-      if (place) editor.followed = { path: place.path, line: place.line, from: "output" }
-    })
+  const [output, setOutput] = createSignal<EditorView>()
+  /** A click on a line:  where in the program it came from is the place in focus. */
+  const clicked = (update: ViewUpdate) => {
+    const { selection, doc } = update.state
+    if (!selection.main.empty || !update.transactions.some((each) => each.isUserEvent("select.pointer"))) return
+    const place = lines()?.placeOfLine(doc.lineAt(selection.main.head).number - 1)
+    if (place) editor.followed = { path: place.path, line: place.line, from: "output" }
   }
   const follower = lineFollower()
   createEffect(
@@ -175,12 +175,12 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
       </ui-toolbar>
       <div class="CodeOutputCode">
         <ErrorBoundary onError={(error) => editor.showError(error)}>
-          <Loading fallback={<LazyMonaco.Loading />}>
-            <LazyMonaco.MonacoEditor
+          <Loading fallback={<LazyCodeMirror.Loading />}>
+            <LazyCodeMirror.CodeMirrorEditor
               value={written().code}
               language={OUTPUT_TARGETS[props.target].language}
-              options={{ readOnly: true }}
-              onMount={mounted}
+              onMount={(made) => setOutput(() => made)}
+              onUpdate={clicked}
             />
           </Loading>
         </ErrorBoundary>
@@ -226,7 +226,7 @@ export function FollowAlong() {
           untrack(() => Inspector.selectWrittenAt(followed.path, followed.line, { ifNone }))
       }
       if (followed.from === "code" || followed.from === "edit") return follower.clear()
-      if (!codeEditor || codeEditor.hasTextFocus()) return
+      if (!codeEditor || codeEditor.view.hasFocus) return
       const file = InspectorWrites.fileNamed(followed.path)
       if (!file) return
       // the file showing read, not followed:  opening another one here would run this again (I98)
@@ -238,7 +238,7 @@ export function FollowAlong() {
         .then(() => {
           const shown = editor.shownCodeEditor
           // still the place in focus, and nobody typing:  mark its line in the file now showing
-          if (editor.followed === followed && shown && !shown.hasTextFocus())
+          if (editor.followed === followed && shown && !shown.view.hasFocus)
             follower.show(shown, [followed.line], followed)
         })
         .catch((error: unknown) => editor.showError(error as Error))
@@ -258,7 +258,7 @@ export function FollowAlong() {
  */
 async function followCodeCursor(
   followed: FollowedPlace,
-  codeEditor: monaco.editor.IStandaloneCodeEditor | undefined,
+  codeEditor: SpellCodeMirror | undefined,
   ifNone: "keep" | "deselect"
 ): Promise<void> {
   const named = codeEditor && (await thingNamedAtCursor(codeEditor, followed).catch(() => undefined))
@@ -270,64 +270,66 @@ async function followCodeCursor(
 }
 
 /**
- * Where the thing the word at `codeEditor`'s cursor names was declared, by its file's name and line from 0:
- * `undefined` when the cursor isn't on `followed`'s line, a range is selected, or the word names no thing.
+ * Where the thing the word at `codeEditor`'s caret names was declared, by its file's name and line from 0:
+ * `undefined` when the caret isn't on `followed`'s line, a range is selected, or the word names no thing.
  */
 async function thingNamedAtCursor(
-  codeEditor: monaco.editor.IStandaloneCodeEditor,
+  codeEditor: SpellCodeMirror,
   followed: FollowedPlace
 ): Promise<{ path: string; line: number } | undefined> {
-  const selection = codeEditor.getSelection()
-  const model = codeEditor.getModel()
-  if (!model || !selection?.isEmpty() || selection.positionLineNumber !== followed.line + 1) return undefined
-  const { SpellMonaco } = await LazyMonaco.load()
-  const { models, addresses, service } = SpellMonaco.register()
+  const { state } = codeEditor.view
+  const { main } = state.selection
+  const caretLine = state.doc.lineAt(main.head)
+  if (!main.empty || caretLine.number !== followed.line + 1) return undefined
+  const { SpellCodeMirror } = await LazyCodeMirror.load()
   // the language service's own parse of the code showing, as its other features read it
-  models.parseNow()
-  const file = addresses.fileFor(model.uri.toString())
-  if (!(file instanceof SP.SpellFile) || !file.match || file.contents !== model.getValue()) return undefined
-  const declared = service.declaredThingAt(file, {
-    line: selection.positionLineNumber - 1,
-    character: selection.positionColumn - 1
+  SpellCodeMirror.states.parseNow()
+  const { file } = codeEditor
+  if (!(file instanceof SP.SpellFile) || !file.match || file.contents !== codeEditor.view.state.doc.toString())
+    return undefined
+  const declared = SpellCodeMirror.service.declaredThingAt(file, {
+    line: caretLine.number - 1,
+    character: main.head - caretLine.from
   })
   return declared && { path: SP.SpellProject.sourceNameOf(declared.file.path), line: declared.line }
 }
 
 /**
- * A mark in a code editor's margin on the line being followed, scrolling to it only when it's out of view.
+ * A mark at the left of the line being followed, in a code editor, scrolling to it only when it's out of view
+ * (`CodeMirrorFollowed`).
  * - A mark, not a band across the line:  the code stays as it was, and takes no focus.
  * - Call in a component body:  its mark goes with the component.
  */
 function lineFollower() {
-  let marks: monaco.editor.IEditorDecorationsCollection | undefined
-  let markedIn: monaco.editor.IStandaloneCodeEditor | undefined
+  let markedIn: EditorView | undefined
+  /** CodeMirror's marks, once it's loaded:  before then there's no editor to mark. */
+  let marks: typeof CodeMirrorFollowed | undefined
+  void LazyCodeMirror.load().then((module) => (marks = module.CodeMirrorFollowed))
   const clear = () => {
-    marks?.clear()
-    marks = markedIn = undefined
+    if (markedIn && marks) marks.clear(markedIn)
+    markedIn = undefined
   }
   onCleanup(clear)
   return {
     clear,
     /**
-     * Mark `lines`, from 0, in `codeEditor`, and bring the first into view;  none:  no mark.
+     * Mark `lines`, from 0, in `codeEditor` (the code pane's, or a plain view), and bring the first into view;
+     * none:  no mark.
      * - `caretAt`, a part's place with its column:  the caret goes there, without the keyboard's focus.
-     *   Moved by code, not the mouse or keys, so it isn't followed back (`isCursorMovedToFollow()`).
+     *   Moved by code, not the mouse or keys, so it isn't followed back (`caretMoveToFollow()`, in `editor.ts`).
      */
-    show(codeEditor: monaco.editor.IStandaloneCodeEditor, lines: readonly number[], caretAt?: FollowedPlace): void {
-      if (markedIn !== codeEditor) clear()
+    show(codeEditor: SpellCodeMirror | EditorView, lines: readonly number[], caretAt?: FollowedPlace): void {
+      const view = "view" in codeEditor ? codeEditor.view : codeEditor
+      if (markedIn !== view) clear()
       if (caretAt?.column !== undefined) {
-        codeEditor.setPosition({ lineNumber: caretAt.line + 1, column: caretAt.column + 1 })
+        const { doc } = view.state
+        const line = doc.line(Math.max(1, Math.min(caretAt.line + 1, doc.lines)))
+        view.dispatch({ selection: { anchor: line.from + Math.min(caretAt.column, line.length) } })
       }
+      if (!marks) return
       if (!lines.length) return clear()
-      markedIn = codeEditor
-      marks ??= codeEditor.createDecorationsCollection()
-      marks.set(
-        lines.map((line) => ({
-          range: { startLineNumber: line + 1, startColumn: 1, endLineNumber: line + 1, endColumn: 1 },
-          options: { isWholeLine: true, linesDecorationsClassName: "FollowedLine" }
-        }))
-      )
-      codeEditor.revealLineInCenterIfOutsideViewport(lines[0]! + 1)
+      markedIn = view
+      marks.show(view, lines)
     }
   }
 }

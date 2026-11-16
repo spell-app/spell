@@ -6,7 +6,8 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { SP } from "spell/parser/spell"
 import { SPELL_COMPILED_EVENT } from "spell/app/app/runner/runner.types"
 import { SpellEditorPane, type SpellEditorStatus } from "spell/app/app/spellEditor/SpellEditorPane"
-import { SpellEditor } from "spell/app/app/components/spell-editor/SpellEditor"
+import { SPELL_EDITOR_HOTKEYS, SpellEditor } from "spell/app/app/components/spell-editor/SpellEditor"
+import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import "spell/app/spaces/models/projectGroups"
 import type { DOMSpellEditorElement } from "spell/app/app/components/spell-editor"
 
@@ -53,7 +54,7 @@ describe("<SpellEditorPane>", () => {
     expect([...tabs].map((tab) => tab.textContent)).toEqual(["Button/Usage.spell", "Divider/Usage.spell"])
   })
 
-  test("one file:  no tabs;  no Monaco yet:  a placeholder", () => {
+  test("one file:  no tabs;  no CodeMirror yet:  a placeholder", () => {
     const files = [file("Only.spell")]
     const { host } = mountPane({ files, file: files[0] })
     expect(host.querySelector(".SpellEditorTabs")).toBeNull()
@@ -141,6 +142,17 @@ describe("<spell-editor>", () => {
     expect(editor.component!.elementDefinition.event("spell-compiled")).toBe(SPELL_COMPILED_EVENT)
   })
 
+  test("its keys are the editor page's, the same names and shortcuts:  a copy, as it can't import theirs", () => {
+    for (const [name, hotkey] of Object.entries(SPELL_EDITOR_HOTKEYS)) {
+      const theirs = EDITOR_HOTKEYS[name as keyof typeof EDITOR_HOTKEYS]
+      expect(theirs, name).toBeDefined()
+      expect(hotkey.shortcut, name).toBe(theirs.shortcut)
+      expect("codeEditorCommand" in hotkey ? hotkey.codeEditorCommand : undefined, name).toBe(
+        "codeEditorCommand" in theirs ? theirs.codeEditorCommand : undefined
+      )
+    }
+  })
+
   test("`COMPILE_DELAY` is on the class", async () => {
     await import("spell/app/app/components/spell-editor")
     const Class = customElements.get("spell-editor") as unknown as { COMPILE_DELAY: number }
@@ -187,9 +199,11 @@ function mountPane({
         files={files}
         file={current()}
         status={status()}
-        monaco={undefined}
+        codeMirror={undefined}
+        hotkeys={SPELL_EDITOR_HOTKEYS}
         isDirty={isDirty}
         onSelect={onSelect}
+        onOpen={() => false}
         onMount={() => {}}
         onUnmount={() => {}}
       />

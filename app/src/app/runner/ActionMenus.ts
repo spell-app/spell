@@ -220,7 +220,7 @@ export class ActionMenus {
 
   /**
    * Is `target` somewhere people type:  a text field, a text area, a select, editable text?  Its keys are its own.
-   * - An element with an `EditContext` too:  the editor's code pane (Monaco) types through one,
+   * - An element with an `EditContext` too:  a code editor may type through one,
    *   on a plain `<div>` that is neither an input nor contenteditable.
    *   Missed, Solitaire's `A` (auto play) took every `a` typed into the code (epic `debut` I79).
    */
