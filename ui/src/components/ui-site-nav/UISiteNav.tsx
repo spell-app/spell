@@ -64,8 +64,10 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  *   - A click (or Enter) on it opens it and goes to its first page;  on one that's open, and doesn't hold the page shown,
  *     it closes it.
  * - A page with no `icon`, beside pages with one, keeps an icon's room, so its title lines up with theirs.
- * - `collapsed`:  only the icons, each row's title its tooltip (`:state(collapsed)`);  a page with no icon shows its
- *   title's first letter, as `<ui-menu>`'s icons-only look does, and a group's label is a thin line.
+ * - A group's `icon` shows before its label, and its pages are a step in from it (epic `mockup` I20).
+ * - `collapsed`:  only the icons, each row's title its tooltip (`:state(collapsed)`), all in one column, no step in;
+ *   a page with no icon shows its title's first letter, as `<ui-menu>`'s icons-only look does,
+ *   and a group with no icon is a thin line.
  ****************/
 export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   @E.proto static vocabulary = siteNavVocabulary
@@ -282,9 +284,18 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   /** One page's row, and its pages' rows inside it;  `siblings`, the pages beside it, itself among them. */
   private row(page: () => SiteNavPage, siblings: () => readonly SiteNavPage[]): JSX.Element {
     const isMarked = () => this.isMarked(page())
-    /** It has no icon, but a page beside it has:  an icon's room, or (`collapsed`) its first letter, stands in. */
-    const showsLetter = () =>
-      !page().icon && !page().band && (this.collapsed || siblings().some((each) => !!each.icon))
+    /**
+     * It has no icon, but a page beside it has:  an icon's room, or (`collapsed`) its first letter, stands in.
+     * - A group with no icon keeps the room beside groups with one, so the labels line up;
+     *   `collapsed`, it's a thin line instead (epic `mockup` I20).
+     */
+    const showsLetter = () => {
+      const { icon, band } = page()
+      if (icon) return false
+      const besideIcons = siblings().some((each) => !!each.icon)
+      if (band === GROUP) return !this.collapsed && besideIcons
+      return !band && (this.collapsed || besideIcons)
+    }
     return (
       <ui-tree-item
         data-page={UISiteNav.keyOf(page())}

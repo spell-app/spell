@@ -244,6 +244,24 @@ describe("SiteEdits", () => {
       expect(SiteEdits.partsIn(moved)!.map((part) => [part.title, part.color])[0]).toEqual(["Teams", "purple"])
     })
 
+    test("a group's icon (I20):  read after its colour or alone, and a rename keeps it", () => {
+      const withIcons = [
+        "galaxy guide is a site:",
+        '\tgroup "Hardware", color yellow, icon "microchip"',
+        '\tit has a "Boards" at "/boards"',
+        '\tgroup "Software", icon "code"',
+        '\tit has a "Apps" at "/apps"',
+        ""
+      ].join("\n")
+      const parts = SiteEdits.partsIn(withIcons)!
+      expect(parts.map((part) => [part.title, part.color, part.icon])).toEqual([
+        ["Hardware", "yellow", "microchip"],
+        ["Software", undefined, "code"]
+      ])
+      const renamed = SiteEdits.withPartRenamed(withIcons, SiteEdits.groupKey("Software"), "Programs")
+      expect(renamed).toContain('\tgroup "Programs", icon "code"\n')
+    })
+
     test("a page added lists only its line:  it's made when it's first opened", () => {
       const added = SiteEdits.withPageAdded(ROUTING, "Help", "/help", { listOnly: true })
       // a title, so its name is quoted

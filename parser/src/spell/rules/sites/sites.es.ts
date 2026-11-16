@@ -48,8 +48,10 @@ sitesEs.addRule(
 // un grupo de las partes de un sitio, su sección del tablero del editor en un color (epic `language` T112):
 // `grupo "Hardware", color amarillo`, `grupo "Hardware" con color amarillo`, o como la línea de una parte, `, de color amarillo`
 // - no compila a nada, como cualquier grupo
+// - `, icono "microchip"` tras él:  el icono ante el nombre del grupo en la navegación del sitio (epic `mockup` I20)
 sitesEs.addRule(DefineGroup, {
-  syntax: "{type:subject_implied} grupo {group:text} ((con|,) color|, de color) {color:site_card_color}",
+  syntax:
+    "{type:subject_implied} grupo {group:text} ((con|,) color|, de color) {color:site_card_color} (, icono {icon:text})?",
   tests: [
     {
       compileAs: "block",
@@ -226,6 +228,148 @@ sitesEs.addRule(DefineGroup, {
             '    page: "Portada",',
             '    address: "/",',
             '    group: "Inicio"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-guia-galactica>`:  a guía galáctica, drawn in its own element, e.g. by `draw the guía galáctica`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its guía galáctica's properties;  its methods call its guía galáctica's.",
+            " * - What every view's element does, e.g. drawing its guía galáctica, is `SpellElement`'s.",
+            " */",
+            "export class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-guia-galactica", "guía galáctica", [])',
+            "}",
+            "core.useElement(GuíaGaláctica, GuíaGalácticaElement)",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ]
+        },
+        {
+          title: "un icono tras su color:  sus páginas lo llevan, para la línea del grupo en la navegación",
+          input: [
+            'una "portada" es una página',
+            "guía galáctica es un sitio en la nube:",
+            '\tgrupo "Inicio", color rojo, icono "home"',
+            '\ttiene una portada en "/"'
+          ],
+          js: [
+            "export class Portada extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "portada",',
+            '    page: "Portada",',
+            '    address: "/",',
+            '    group: "Inicio",',
+            '    groupIcon: "home"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ],
+          ts: [
+            "export class Portada extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-portada>`:  a portada, drawn in its own element, e.g. by `draw the portada`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its portada's properties;  its methods call its portada's.",
+            " * - What every view's element does, e.g. drawing its portada, is `SpellElement`'s.",
+            " */",
+            "export class PortadaElement extends SpellElement<Portada> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-portada", "portada", [])',
+            "}",
+            "core.useElement(Portada, PortadaElement)",
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "portada",',
+            '    page: "Portada",',
+            '    address: "/",',
+            '    group: "Inicio",',
+            '    groupIcon: "home"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-guia-galactica>`:  a guía galáctica, drawn in its own element, e.g. by `draw the guía galáctica`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its guía galáctica's properties;  its methods call its guía galáctica's.",
+            " * - What every view's element does, e.g. drawing its guía galáctica, is `SpellElement`'s.",
+            " */",
+            "export class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-guia-galactica", "guía galáctica", [])',
+            "}",
+            "core.useElement(GuíaGaláctica, GuíaGalácticaElement)",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// un grupo de un sitio con icono y sin color:  `grupo "Hardware", icono "microchip"` (epic `mockup` I20)
+sitesEs.addRule(DefineGroup, {
+  syntax: "{type:subject_implied} grupo {group:text}, icono {icon:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "un icono solo:  sus páginas lo llevan, para la línea del grupo en la navegación",
+          input: [
+            'una "portada" es una página',
+            "guía galáctica es un sitio en la nube:",
+            '\tgrupo "Inicio", icono "home"',
+            '\ttiene una portada en "/"'
+          ],
+          js: [
+            "export class Portada extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "portada",',
+            '    page: "Portada",',
+            '    address: "/",',
+            '    group: "Inicio",',
+            '    groupIcon: "home"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ],
+          ts: [
+            "export class Portada extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-portada>`:  a portada, drawn in its own element, e.g. by `draw the portada`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its portada's properties;  its methods call its portada's.",
+            " * - What every view's element does, e.g. drawing its portada, is `SpellElement`'s.",
+            " */",
+            "export class PortadaElement extends SpellElement<Portada> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-portada", "portada", [])',
+            "}",
+            "core.useElement(Portada, PortadaElement)",
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "portada",',
+            '    page: "Portada",',
+            '    address: "/",',
+            '    group: "Inicio",',
+            '    groupIcon: "home"',
             "  }]",
             '  static livesAt = "cloud"',
             "}",

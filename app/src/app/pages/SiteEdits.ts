@@ -386,7 +386,7 @@ export type SitePart = {
   address?: string
   /** A page's title, for its link:  `Films`;  none goes by its name.  A group's words, as they're written. */
   title?: string
-  /** A page's icon in the site's navigation, if its line says:  `film` (epic `mockup` T34). */
+  /** A page's or group's icon in the site's navigation, if its line says:  `film` (epic `mockup` T34, I20). */
   icon?: string
   /** A page's state, if its line says:  `old`, `new`, `mocked` or `built` (epic `mockup` P13, T14). */
   state?: string
@@ -457,12 +457,13 @@ function kindOfName(name: string): SitePartKind {
 }
 
 /** A `group` line as a part:  the lines after it, up to the next group, are its `parts`. */
-function groupPart(title: string, line: TextLine, color?: string): SitePart {
+function groupPart(title: string, line: TextLine, color?: string, icon?: string): SitePart {
   return {
     kind: "group",
     name: SiteEdits.groupKey(title),
     title,
     color,
+    ...(icon && { icon }),
     parts: [],
     depth: 0,
     line: { start: line.start, end: line.end },
@@ -482,7 +483,7 @@ function codePartsIn(text: string, start: number): SitePart[] {
     const heading = CODE_GROUP.exec(line.text)
     if (heading) {
       open.length = 0
-      group = groupPart(heading[1]!, line, heading[2] ?? heading[3])
+      group = groupPart(heading[1]!, line, heading[2] ?? heading[3], heading[4])
       top.push(group)
       continue
     }
@@ -655,8 +656,10 @@ function articleOf(name: string): string {
  * A site's group line:  `group "Hardware"`;  bulleted by an older writer, `- group "Hardware"`.
  * - Its section's colour after it, in any of the language's forms (epic `language` T112):
  *   `, color yellow`, `with color yellow`, `, colored yellow`
+ * - Then its icon in the site's navigation, if it names one:  `, icon "microchip"` (epic `mockup` I20)
  */
-const CODE_GROUP = /^[ \t]+(?:- )?group "([^"]+)"(?:(?:,| with) colou?r (\w+)|, colou?red (\w+))?\s*$/
+const CODE_GROUP =
+  /^[ \t]+(?:- )?group "([^"]+)"(?:(?:,| with) colou?r (\w+)|, colou?red (\w+))?(?:, icon "([^"]*)")?\s*$/
 
 /**
  * A site's part line:  `it has a films page at "/films", named "Films"`, `it has a settings dialog`;

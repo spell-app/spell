@@ -398,6 +398,8 @@ export type SitePageEntry = {
   live?: string
   /** the `<group>` it's under, at the site's top level:  its navigation's heading */
   group?: string
+  /** the icon its `<group>`'s line names, before the group's name in its navigation (epic `mockup` I20):  `microchip` */
+  groupIcon?: string
   /** the pages under it, as the lines under its line list them */
   pages?: SitePageEntry[]
 }

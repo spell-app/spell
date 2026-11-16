@@ -423,6 +423,7 @@ export class SiteBase extends App {
    * `entries` as navigation rows:  those under a `<group>` together, under its name, a quiet label with no arrow
    *   (`band: "group"`, epic `mockup` T34):  it opens by itself while the page shown is in it, and a click on it goes
    *   to its first page;  the rest as themselves.
+   * - A group's row shows the icon its line names (`groupIcon`, epic `mockup` I20).
    * - `listed` reads a run of entries that share a group, or none.
    */
   private static underGroups(
@@ -432,13 +433,14 @@ export class SiteBase extends App {
     if (!entries.some((entry) => entry.group)) return SiteBase.navRows(entries, listed)
     const rows: SiteNavPage[] = []
     for (let at = 0; at < entries.length;) {
-      const { group } = entries[at]!
+      const { group, groupIcon } = entries[at]!
       let end = at + 1
       while (end < entries.length && entries[end]!.group === group) end++
       const run = entries.slice(at, end)
       const pages = SiteBase.navRows(run, listed)
-      if (group) rows.push({ title: group, id: `group:${group}`, band: "group", pages })
-      else rows.push(...pages)
+      if (group) {
+        rows.push({ title: group, id: `group:${group}`, band: "group", ...(groupIcon && { icon: groupIcon }), pages })
+      } else rows.push(...pages)
       at = end
     }
     return rows

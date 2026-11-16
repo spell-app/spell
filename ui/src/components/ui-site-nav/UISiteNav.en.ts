@@ -30,7 +30,7 @@ export const siteNavVocabulary = {
         "A page with no `href` only holds pages:  a click opens or closes it.  " +
         "Each may also say `icon`, `band` (`heading` or `subheading`:  a heading band over its pages;  `group`:  a " +
         "group's quiet label over them, with no arrow, open while the page shown is under it, a click going to its first " +
-        "page), `count`, " +
+        "page;  its `icon` before its label, its pages a step in), `count`, " +
         "`badge` (a word after its title), `starred` (`true` or `false`:  a star to mark it a favourite), `open` " +
         "(open or closed, whatever the person did:  the page decides), `slot` (the name of a slot of this element " +
         "whose content shows inside it, after its pages) and `copyOf` (the `id` of the page it's a second copy of:  " +
@@ -63,8 +63,8 @@ export const siteNavVocabulary = {
       group: "appearance",
       kind: "keyOnly",
       description:
-        "Only the icons:  each row's title its tooltip, a page with no icon its title's first letter, and a group's " +
-        "label a thin line.  None:  the titles beside the icons."
+        "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, " +
+        "and a group with no icon a thin line.  None:  the titles beside the icons."
     },
     {
       name: "remember",

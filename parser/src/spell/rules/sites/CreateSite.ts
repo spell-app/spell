@@ -15,7 +15,8 @@ import { overlayViewNamed, type SiteOverlayEntry, type SitePageEntry } from "./s
  * - A site is made from spell's built-in template `site`, an app (`Site`, in the core);
  *   so it's one of a kind, as `solitaire is an app` is.
  * - Gathers what the lines under it say into its class, for whatever shows its pages:
- *   - `static pages`, nested as its lines nest (`site_page`), each under the `<group>` above it, if any
+ *   - `static pages`, nested as its lines nest (`site_page`), each under the `<group>` above it, if any,
+ *     with the icon that group's line names (`groupIcon`, epic `mockup` I20)
  *   - `static dialogs` and `static sidebars` (`site_overlay`)
  *   - `static notFoundPage` and `static errorPage`, when it lists them (`site_overlay`, epic `mockup` P2)
  *   - `static livesAt`, when its line says where it lives:  an address, or `"cloud"`
@@ -73,18 +74,26 @@ export class CreateSite extends CreateOneOfAKind {
       const seen = new Set<P.Match>()
       // the `<group>` the lines from here on are under:  only the site's own, as nothing nests in a group
       let group: string | undefined
+      let groupIcon: string | undefined
       const visit = (each: P.Match) => {
         if (seen.has(each)) return
         seen.add(each)
         if (each.rule instanceof DefineGroup) {
           group = DefineGroup.nameOf(each as never)
+          const { icon } = (each as P.MatchFor<DefineGroup>).groups
+          groupIcon = icon ? textIn(icon) : undefined
           return
         }
         if (each.rule instanceof SitePage) {
           const entry = (each.data as { entry?: SitePageEntry }).entry
           if (!entry) return
           const below = pagesUnder((each.rule as SitePage).getBody(each as never))
-          pages.push({ ...entry, ...(group && { group }), ...(below.length && { pages: below }) })
+          pages.push({
+            ...entry,
+            ...(group && { group }),
+            ...(groupIcon && { groupIcon }),
+            ...(below.length && { pages: below })
+          })
           return
         }
         if (each.rule instanceof SiteOverlay) {

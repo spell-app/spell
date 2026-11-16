@@ -30,6 +30,8 @@ export type SitePageEntry = {
   live?: string
   /** the `<group>` it's under, at the site's top level:  `Hardware` */
   group?: string
+  /** the icon its `<group>`'s line names, before the group's name in the site's navigation:  `microchip` */
+  groupIcon?: string
   /** which row of its section on the site editor's board its card is in, from 1, if the line says */
   row?: number
   /** which column of its section, from 1 */
