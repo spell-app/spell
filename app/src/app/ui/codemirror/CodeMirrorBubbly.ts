@@ -16,6 +16,7 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
  *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen)
  *   - its body's rail:  a line decoration on every line under it, a stripe per enclosing block (`--cmb-rails`)
  *   - its foot:  a block widget after its last line
+ *   - folded:  its head alone, a pill, the fold's `…` in its right end (`CodeMirrorSetup`;  epic `language` I116)
  *   - what a person typed in white pills, a quoted one's curly marks, bold names, italic values, faint marks,
  *     one dotted line under each value and question:  marks in the classes of the look's one sheet, `bubbly.css`
  *   - a drawing's tags as HTML is drawn, its ends pointed, from the page's own reading of markup
@@ -157,7 +158,9 @@ class BubblyDecorations {
   private block(block: SP.BubblyBlock, rails: Rail[]) {
     const { head, partOfSpeech } = block
     const isShown = this.isWhollyShown(block)
-    const hasBody = block.body.some((node) => node.kind !== "gap")
+    // folded:  its head alone, a pill with the fold's `…` in its end;  nothing of its hidden body (I116)
+    const isFolded = isShown && this.decorations.isFoldedAt(head.start)
+    const hasBody = !isFolded && block.body.some((node) => node.kind !== "gap")
     this.decorations.line(head.start, rails, isShown ? ["cmb-head"] : [])
     // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it,
     // as Monaco drew them (I113)
@@ -167,6 +170,7 @@ class BubblyDecorations {
     const hasDescription = this.line(head, partOfSpeech)
     if (isShown) {
       const band = ["cmb-band", hasBody ? "cmb-band-open" : "cmb-band-pill", ...hue]
+      if (isFolded) band.push("cmb-band-folded")
       if (hasDescription) band.push("cmb-band-described")
       if (isHung) band.push("cmb-band-hung")
       this.decorations.mark(head.start, head.end, band, { style: `--cmb-column: ${indent.tabs}` })

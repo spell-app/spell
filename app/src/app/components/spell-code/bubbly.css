@@ -1785,7 +1785,7 @@
       margin-left: calc(-1 * (var(--cmb-band-inset) + var(--cmb-indent)));
       padding-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent));
     }
-    /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line */
+    /* a band with a body:  square bottom-left, its rail dropping straight from it to the next line, round its inside corner */
 
     .cmb-band-open {
       border-bottom-left-radius: 0;
@@ -1798,6 +1798,27 @@
       width: var(--cmb-rail);
       height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
       background: var(--bubbly-pill);
+    }
+    /*
+     * ... and its inside corner, where the band's bottom meets its rail, curving from one into the other:  the page's
+     * body's top corner (`--bubbly-inner-top`) at the editor's size (11.25px), as Monaco drew it (I117);
+     * under the text and the bands below, which it reaches into
+     * - a tag's band has its own, cut at a tag's slant (`.cmb-tag-band.cmb-band-open::after`)
+     */
+    --cmb-inner-top: calc(var(--bubbly-inner-top) * var(--bubbly-editor-scale));
+    .cmb-band-open:not(.cmb-tag-band)::before {
+      content: "";
+      position: absolute;
+      left: var(--cmb-rail);
+      top: 100%;
+      z-index: -1;
+      width: var(--cmb-inner-top);
+      height: var(--cmb-inner-top);
+      background: radial-gradient(
+        circle at 100% 100%,
+        transparent calc(var(--cmb-inner-top) - 0.5px),
+        var(--bubbly-pill) var(--cmb-inner-top)
+      );
     }
 
     /*
@@ -1877,6 +1898,41 @@
       float: right;
     }
 
+    /****** a folded block (I116):  its head alone, a pill, the fold's `…` in its right end, a click there unfolds it ******/
+
+    /* room for the `…` at the band's end, as wide as it is (`--cmb-fold-more`), half the band's own end after it */
+    --cmb-fold-more: 1.1em;
+    --cmb-fold-end: calc(var(--bubbly-pill-pad-right) / 2);
+    .cmb-band-folded {
+      padding-right: calc(var(--cmb-fold-end) + var(--cmb-fold-more));
+    }
+    .cmb-band-described.cmb-band-folded {
+      padding-right: calc(14px + var(--cmb-fold-more));
+    }
+    /* ... the `…` drawn in that room, on the band's line, over it */
+    .cmb-band-folded ~ .cmb-fold-more {
+      position: relative;
+      display: inline-block;
+      box-sizing: border-box;
+      vertical-align: top;
+      width: var(--cmb-fold-more);
+      height: var(--bubbly-pill-height);
+      margin-top: var(--cmb-band-margin);
+      margin-left: calc(-1 * (var(--cmb-fold-more) + var(--cmb-fold-end)));
+      padding: 0 0 calc(2 * var(--cmb-words-lift));
+      line-height: calc(var(--bubbly-pill-height) - 2 * var(--cmb-words-lift));
+      text-align: center;
+    }
+    .cmb-band-described.cmb-band-folded ~ .cmb-fold-more {
+      margin-left: calc(-1 * (var(--cmb-fold-more) + 14px));
+    }
+    /* a tag's band keeps its `⟩` in its point:  the `…` just after it, on its line */
+    .cmb-tag-band.cmb-band-folded ~ .cmb-fold-more {
+      width: auto;
+      margin-left: 0;
+      padding-inline: 4px;
+    }
+
     /****** HTML's tags (`CodeMirrorMarkup`):  pills and bands, their ends pointed, as the page draws them ******/
     /* an HTML file's box:  CodeMirror's own column, its scroller the box's width, not the page's rows' */
     &.bubbly-html {
@@ -1905,7 +1961,12 @@
       margin-top: var(--cmb-band-margin);
       padding-inline: var(--bubbly-bracket-pad);
       background: var(--bubbly-pill);
-      border-radius: var(--bubbly-tag-corner);
+      /*
+       * each end a point at a tag's slant, its tip half way down:  each corner `--bubbly-tag-point` across and half the
+       * pill down (I118);  `--bubbly-tag-corner` itself is a corner's two radii, so as the shorthand's two values it made
+       * the top-right and bottom-left corners 10.78px each way and the others 6.68px:  45° ends, the tip 2px low
+       */
+      border-radius: var(--bubbly-tag-point) / calc(var(--bubbly-pill-height) / 2);
       corner-shape: bevel;
       white-space: pre;
     }
@@ -1990,23 +2051,28 @@
     .cmb-tag-link > :is(.cmb-tag-pill, .cmb-tag-band) {
       margin-top: 0;
     }
+    /*
+     * ... reaching out of its box to each tag's point:  past the room beside that tag, then under its point
+     * - a tag at its end too (`<number "score" />` before `</>`):  that tag's room after it is outside the box as well,
+     *   so the lines reach one room further, to the end tag's point (they stopped 2.34px short of it, a notch;  I118)
+     */
+    --cmb-tag-room: calc((var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-editor-scale));
     .cmb-tag-link::before {
       content: "";
       position: absolute;
-      inset: 0
-        calc(
-          -1 *
-            (
-              (var(--bubbly-input-gap) + var(--bubbly-bracket-pad)) * var(--bubbly-editor-scale) +
-                var(--bubbly-tag-point)
-            )
-        );
+      inset: 0 calc(-1 * (var(--cmb-tag-room) + var(--bubbly-tag-point)));
       z-index: -1;
       background:
         linear-gradient(var(--bubbly-pill) 0 0) top / 100%
           calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat,
         linear-gradient(var(--bubbly-pill) 0 0) bottom / 100%
           calc(var(--bubbly-tag-link-width) * var(--bubbly-editor-scale)) no-repeat;
+    }
+    .cmb-tag-link:has(> .cmb-tag-pill:last-child)::before {
+      right: calc(-1 * (2 * var(--cmb-tag-room) + var(--bubbly-tag-point)));
+    }
+    .cmb-tag-link:has(> .cmb-tag-pill:first-child)::before {
+      left: calc(-1 * (2 * var(--cmb-tag-room) + var(--bubbly-tag-point)));
     }
     /* spacers, injected beside HTML's tags (`CodeMirrorMarkup`):  their widths the shared rules' */
     .bubbly-spacer {
