@@ -110,3 +110,38 @@ describe("the selection in the bubbly look", () => {
     })
   }
 })
+
+/** Code in a drawing's tags, on a real CodeMirror editor in the bubbly look:  its words on its inverted pill. */
+describe("code in a drawing's tags, in the bubbly look", () => {
+  let view: EditorView | undefined
+
+  afterEach(() => {
+    view?.dom.parentElement?.remove()
+    view?.destroy()
+    view = undefined
+  })
+
+  // epic `language` I126:  code alone between its tags lost its pill, its light words on the paper
+  test("`<text>{its picture}</text>`:  the code between the tags on its inverted pill, its words showing", async () => {
+    const host = document.body.appendChild(document.createElement("div"))
+    host.style.cssText = "width: 800px; height: 300px"
+    const doc = "card is a view\n\tto draw it\n\t\t<text color={its color}>{its picture}</text>\n"
+    const state = EditorState.create({
+      doc,
+      extensions: [CodeMirrorSetup.extensions(), CodeMirrorBubbly.extension(() => undefined)]
+    })
+    view = new EditorView({ parent: host, state })
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    const [inTag, between] = [...view.contentDOM.querySelectorAll(".bubbly-input.bubbly-expression")]
+    expect(between!.textContent).toBe("{its picture}")
+    // the same pill as the code in the tag:  its words' colour on its fill
+    expect(getComputedStyle(between!).backgroundColor).toBe(getComputedStyle(inTag!).backgroundColor)
+    expect(getComputedStyle(between!).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+    const wordsOf = (pill: Element) => [...pill.children].find((each) => !each.matches(".bubbly-code-brace"))!
+    const words = wordsOf(between!)
+    expect(words.textContent).toBe("its picture")
+    expect(words.getBoundingClientRect().width).toBeGreaterThan(0)
+    expect(getComputedStyle(words).color).toBe(getComputedStyle(wordsOf(inTag!)).color)
+    expect(getComputedStyle(words).color).not.toBe(getComputedStyle(between!).backgroundColor)
+  })
+})
