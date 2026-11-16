@@ -1,0 +1,148 @@
+==== /FlashCard.spell
+⟪# A flash card⟫
+⟦// A word on its front, what it means on its back.⟧
+⟦// It's a two sided view, as Solitaire's cards are:  face up it shows the word, face down what it means.⟧
+⟦// A click turns it over.⟧
+
+[thing create_type L0]
+| a «"flash card"» is a **clickable two sided view**
+|   [property define_property_has L1]
+|   | its «"word"» is **text**
+|   |   ⟦// The Spanish word, on its front⟧
+|   [property define_property_has L1]
+|   | its «"meaning"» is **text**
+|   |   ⟦// What it means, on its back⟧
+
+|   [action on L1]
+|   | on click
+|   |   ⟦// A click turns it over⟧
+|   |   turn it over    ‾value(it)
+
+|   [action draw_it L1]
+|   | to **draw** its **front**
+|   |   <⟨segment⟩ appearance=«"raised"» color=«"blue"» align=«"center"» padding=«"lg"»>
+|   |     <⟨text⟩ size=«"small"» color=«"grey"» all-caps>Spanish</⟨text⟩>
+|   |     <⟨space⟩/>
+|   |     <⟨text⟩ size=«"huge"» bold>{its **word**}</⟨text⟩>    code({its word})
+|   |   </⟨segment⟩>
+|   [action draw_it L1]
+|   | to **draw** its **back**
+|   |   <⟨segment⟩ appearance=«"raised"» color=«"green"» align=«"center"» padding=«"lg"»>
+|   |     <⟨text⟩ size=«"small"» color=«"grey"» all-caps>What it means</⟨text⟩>
+|   |     <⟨space⟩/>
+|   |     <⟨text⟩ size=«"huge"» bold>{its **meaning**}</⟨text⟩>    code({its meaning})
+|   |   </⟨segment⟩>
+
+|   [action to_do_something L1]
+|   | to «test turning a card over»
+|   |   set the **card** to **a new flash card** with **word** _"el gato"_, **meaning** = _"the cat"_    ‾value(the card) ‾value(a new flash card with word "el gato", meaning = "the cat")
+|   |   turn the **card** face up    ‾value(the card)
+|   |   the **card** is face up should be _yes_    ‾question(the card is face up)
+|   |   turn the **card** over    ‾value(the card)
+|   |   the **card** is face down should be _yes_    ‾question(the card is face down)
+|   |   turn the **card** over    ‾value(the card)
+|   |   the **card** is face up should be _yes_    ‾question(the card is face up)
+
+[thing create_list_type L0]
+| a «"deck"» is a **list of flash cards**
+|   ⟦// The cards to learn⟧
+
+==== /FlashCards.spell
+# Fl**ash C**ards
+⟦// A deck of cards to learn from:  a Spanish word on the front, what it means on the back.⟧
+⟦// Click the card, or Show the answer, to turn it over, then say whether you knew it:⟧
+⟦// the score keeps count, and the next card comes up at random.⟧
+⟦// The card is this project's own, in `FlashCard.spell`;  this file holds the quiz, and its words.⟧
+
+[thing create_one_of_a_kind L0]
+| «quiz» is an **app**
+|   [property define_property_has L1]
+|   | «"deck"» is **a new deck**
+|   [property define_property_has L1]
+|   | its «"card"» is a **flash card**
+|   |   ⟦// The card showing⟧
+|   [property define_property_has L1]
+|   | its «"known"» is a **number**
+|   |   ⟦// How many you knew⟧
+|   [property define_property_has L1]
+|   | its «"tried"» is a **number**
+|   |   ⟦// How many you've tried⟧
+|   [property property_value_getter L1]
+|   | its «"score"» is
+|   |   ⟦// Said in the toolbar⟧
+|   |   _"Nothing tried yet"_ if the **tried** is _0_    ‾value(the tried)
+|   |   _"[known] of [tried] right"_ otherwise
+
+|   [plain group define_group L1]
+|   | group «"Playing"»
+|   |   [action to_do_something L2]
+|   |   | to «deal a card»
+|   |   |   ⟦// A card from the deck at random, word up:  never the one just shown⟧
+|   |   |   set **others** to **cards** in the **deck** where it is not **quiz's card**    ‾value(others) ‾value(cards in the deck where it is not quiz's card)
+|   |   |   set the **card** to a random **card** in **others**    ‾value(the card) ‾value(a random card in others)
+|   |   |   turn the **card** face up    ‾value(the card)
+|   |   [action to_do_something L2]
+|   |   | to «show the answer»
+|   |   |   shortcut _space_
+|   |   |   turn the **card** over    ‾value(the card)
+|   |   [action to_do_something L2]
+|   |   | to «"say i knew it"» with title «"I knew it"», icon «"check"»
+|   |   |   ⟦// Counted, then the next card⟧
+|   |   |   shortcut _Y_
+|   |   |   set the **known** to the **known** + _1_    ‾value(the known) ‾value(the known)
+|   |   |   set the **tried** to the **tried** + _1_    ‾value(the tried) ‾value(the tried)
+|   |   |   deal a card    ‾call(deal a card)
+|   |   [action to_do_something L2]
+|   |   | to «"say i missed it"» with title «"I missed it"», icon «"close"»
+|   |   |   shortcut _N_
+|   |   |   set the **tried** to the **tried** + _1_    ‾value(the tried) ‾value(the tried)
+|   |   |   deal a card    ‾call(deal a card)
+|   |   [action to_do_something L2]
+|   |   | to «"start over"» with icon «"redo"»
+|   |   |   clear the **known**    ‾value(the known)
+|   |   |   clear the **tried**    ‾value(the tried)
+|   |   |   deal a card    ‾call(deal a card)
+|   |   [property define_menu L2]
+|   |   | its «"quiz menu"» is a menu of «"start over"»
+
+|   |   [action to_do_something L2]
+|   |   | to **draw** it
+|   |   |   ⟦// The toolbar with the score, the card, then what you can do:  turn it over, or say how you did⟧
+|   |   |   <⟨container⟩ text>
+|   |   |     <⟨stack⟩>
+|   |   |       <⟨toolbar⟩ menu=«"quiz menu"» aria-label=«"Quiz"» shrinkable>
+|   |   |         <⟨text⟩ slot=«"title"» size=«"large"»>Flash Cards</⟨text⟩>
+|   |   |         <⟨text⟩ slot=«"right"»>{the **score**}</⟨text⟩>    code({the score})
+|   |   |       </⟨toolbar⟩>
+|   |   |       {draw the **card**}
+|   |   |       <⟨stack⟩ direction=«"horizontal"» justify=«"center"»>
+|   |   |         <⟨if⟩ the card is face up>
+|   |   |           <⟨button⟩ color=«"primary"» onClick={show the answer}>Show the answer</⟨button⟩>    code({show the answer})
+|   |   |         <⟨otherwise⟩>
+|   |   |           <⟨button⟩ color=«"positive"» icon=«"check"» onClick={say i knew it}>I knew it</⟨button⟩>    code({say i knew it})
+|   |   |           <⟨button⟩ color=«"negative"» appearance=«"basic"» icon=«"close"» onClick={say i missed it}>I missed it</⟨button⟩>    code({say i missed it})
+|   |   |         </>
+|   |   |       </⟨stack⟩>
+|   |   |     </⟨stack⟩>
+|   |   |   </⟨container⟩>
+
+⟪## The deck:  twelve Spanish words -- add your own⟫
+
+[action to_do_something L0]
+| to «add (word as text) meaning (meaning as text)»    ‾value(word as text) ‾value(meaning as text) bold(word) bold(text) bold(meaning) bold(text)
+|   add (**a new flash card** with **word** = the **word**, **meaning** = the **meaning**) to **quiz's deck**    ‾value(a new flash card with word = the word, meaning = the meaning) ‾value(quiz's deck)
+
+add _"el gato"_ meaning _"the cat"_    ‾call(add "el gato" meaning "the cat")
+add _"el perro"_ meaning _"the dog"_    ‾call(add "el perro" meaning "the dog")
+add _"la casa"_ meaning _"the house"_    ‾call(add "la casa" meaning "the house")
+add _"el libro"_ meaning _"the book"_    ‾call(add "el libro" meaning "the book")
+add _"la manzana"_ meaning _"the apple"_    ‾call(add "la manzana" meaning "the apple")
+add _"el agua"_ meaning _"the water"_    ‾call(add "el agua" meaning "the water")
+add _"la luna"_ meaning _"the moon"_    ‾call(add "la luna" meaning "the moon")
+add _"el sol"_ meaning _"the sun"_    ‾call(add "el sol" meaning "the sun")
+add _"la playa"_ meaning _"the beach"_    ‾call(add "la playa" meaning "the beach")
+add _"el tren"_ meaning _"the train"_    ‾call(add "el tren" meaning "the train")
+add _"la llave"_ meaning _"the key"_    ‾call(add "la llave" meaning "the key")
+add _"la mariposa"_ meaning _"the butterfly"_    ‾call(add "la mariposa" meaning "the butterfly")
+
+start over    ‾call(start over)

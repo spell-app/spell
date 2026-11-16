@@ -1,0 +1,107 @@
+==== /HowHabitTrackerWorks.spell
+⟪## How the Habit Tracker works⟫
+⟦// The Habit Tracker example is a week of checkboxes:  one row per habit, a box per day.⟧
+⟦// Tick a day, and the row counts how many days you did it, and your STREAK:⟧
+⟦// the most days in a row you kept it up.⟧
+⟦//⟧
+⟦// This guide is one habit, with the same lines as the example, so you can see how the streak is worked out.⟧
+⟦// Open Habit Tracker, in the Examples, to add habits of your own.⟧
+
+
+⟪## A habit:  its name, and a yes or no for each day of the week⟫
+[thing create_one_of_a_kind L0]
+| «habit» is an **app**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"monday"» is yes or no
+|   [property define_property_has L1]
+|   | its «"tuesday"» is yes or no
+|   [property define_property_has L1]
+|   | its «"wednesday"» is yes or no
+|   [property define_property_has L1]
+|   | its «"thursday"» is yes or no
+|   [property define_property_has L1]
+|   | its «"friday"» is yes or no
+|   [property define_property_has L1]
+|   | its «"saturday"» is yes or no
+|   [property define_property_has L1]
+|   | its «"sunday"» is yes or no
+
+|   [property property_value_getter L1]
+|   | its «"days"» is [its **monday**, its **tuesday**, its **wednesday**, its **thursday**, its **friday**, its **saturday**, its **sunday**]
+|   |   ⟦// its week as one LIST, Monday first:  [square brackets] put things in a list, in order⟧
+
+|   [property property_value_getter L1]
+|   | its «"count"» is the number of **days** in its **days** where it is _yes_
+|   |   ⟦// how many days this week it was done:  the days in the list that are yes⟧
+
+|   ⟦// the most days in a row it was done⟧
+|   ⟦// - walk through the week, keeping two numbers:  the run so far, and the best run seen⟧
+|   ⟦// - a yes makes the run one longer;  a no starts it again from 0⟧
+|   [property property_value_getter L1]
+|   | its «"streak"» is
+|   |   set **run** to _0_    ‾value(run)
+|   |   set **best** to _0_    ‾value(best)
+|   |   [control list_iteration L2]
+|   |   | for **day** in its **days**    ‾value(its days)
+|   |   |   [control if L3]
+|   |   |   | if **day** is _yes_    ‾value(day)
+|   |   |   |   set **run** to **run** + _1_    ‾value(run) ‾value(run)
+|   |   |   |   if **run** > **best**: set **best** to **run**    ‾value(run) ‾value(best) ‾value(best) ‾value(run)
+|   |   |   [control else L3]
+|   |   |   | otherwise
+|   |   |   |   set **run** to _0_    ‾value(run)
+|   |   return **best**    ‾value(best)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// a checkbox per day, bound to the habit:  ticking one changes that day⟧
+|   |   return <ui-container text>    ‾value(<ui-container text>)
+|   |     <⟨ui-segment⟩>    ‾value(<ui-segment>)
+|   |       <⟨ui-stack⟩>    ‾value(<ui-stack>)
+|   |         <⟨ui-header⟩ size=«"small"»>{its **name**}</⟨ui-header⟩>    ‾value(<ui-header size="small">{its name}</ui-header>) code({its name})
+|   |         <⟨ui-form⟩ value={it}>    ‾value(<ui-form value={it}>) code({it})
+|   |           <⟨ui-stack⟩ direction=«"horizontal"» justify=«"between"» wrap>    ‾value(<ui-stack direction="horizontal" justify="between" wrap>)
+|   |             <⟨ui-checkbox⟩ name=«"monday"» label=«"Mon"»/>    ‾value(<ui-checkbox name="monday" label="Mon"/>)
+|   |             <⟨ui-checkbox⟩ name=«"tuesday"» label=«"Tue"»/>    ‾value(<ui-checkbox name="tuesday" label="Tue"/>)
+|   |             <⟨ui-checkbox⟩ name=«"wednesday"» label=«"Wed"»/>    ‾value(<ui-checkbox name="wednesday" label="Wed"/>)
+|   |             <⟨ui-checkbox⟩ name=«"thursday"» label=«"Thu"»/>    ‾value(<ui-checkbox name="thursday" label="Thu"/>)
+|   |             <⟨ui-checkbox⟩ name=«"friday"» label=«"Fri"»/>    ‾value(<ui-checkbox name="friday" label="Fri"/>)
+|   |             <⟨ui-checkbox⟩ name=«"saturday"» label=«"Sat"»/>    ‾value(<ui-checkbox name="saturday" label="Sat"/>)
+|   |             <⟨ui-checkbox⟩ name=«"sunday"» label=«"Sun"»/>    ‾value(<ui-checkbox name="sunday" label="Sun"/>)
+|   |           </⟨ui-stack⟩>    ‾value(</ui-stack>)
+|   |         </⟨ui-form⟩>    ‾value(</ui-form>)
+|   |         <⟨ui-labels⟩>    ‾value(<ui-labels>)
+|   |           <⟨ui-label⟩>{its **count**} days</⟨ui-label⟩>    ‾value(<ui-label>{its count} days</ui-label>) code({its count})
+|   |           <⟨ui-label⟩ color=«"orange"» icon=«"fire"»>{its **streak**} in a row</⟨ui-label⟩>    ‾value(<ui-label color="orange" icon="fire">{its streak} in a row</ui-label>) code({its streak})
+|   |         </⟨ui-labels⟩>    ‾value(</ui-labels>)
+|   |       </⟨ui-stack⟩>    ‾value(</ui-stack>)
+|   |     </⟨ui-segment⟩>    ‾value(</ui-segment>)
+|   |   </⟨ui-container⟩>    ‾value(</ui-container>)
+
+
+⟪## Start:  read on Monday, Tuesday and Thursday⟫
+set the **name** of **habit** to _"Read"_    ‾value(the name of habit)
+set the **monday** of **habit** to _yes_    ‾value(the monday of habit)
+set the **tuesday** of **habit** to _yes_    ‾value(the tuesday of habit)
+set the **thursday** of **habit** to _yes_    ‾value(the thursday of habit)
+
+
+⟪## A check:  ticking Wednesday joins the two runs into one⟫
+[action to_do_something L0]
+| to «test streaks»
+|   set **walking** to **a new habit** with **name** = _"Walk"_, **monday** = _yes_, **tuesday** = _yes_, **thursday** = _yes_    ‾value(walking) ‾value(a new habit with name = "Walk", monday = yes, tuesday = yes, thursday = yes)
+|   the **count** of **walking** should be _3_    ‾value(the count of walking)
+|   the **streak** of **walking** should be _2_    ‾value(the streak of walking)
+|   set the **wednesday** of **walking** to _yes_    ‾value(the wednesday of walking)
+|   the **streak** of **walking** should be _4_    ‾value(the streak of walking)
+
+
+⟪## Try it⟫
+⟦// - On the right, the streak is 2:  Monday and Tuesday.  Tick Wednesday, and it jumps to 4.⟧
+⟦// - Untick Tuesday:  the streak drops to 2, Wednesday and Thursday.⟧
+⟦// - Count only the weekdays:  in "its days", take out "its saturday" and "its sunday", with their commas.⟧
+⟦//⟧
+⟦// Where next:  Habit Tracker, in the Examples, which keeps a list of habits, one row each,⟧
+⟦// with a box to add new ones.⟧

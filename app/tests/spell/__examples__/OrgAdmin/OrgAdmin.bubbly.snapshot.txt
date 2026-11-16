@@ -1,0 +1,401 @@
+==== /OrgAdmin.api.spell
+⟪## Org Admin:  where an org's roles are kept⟫
+⟦// An org's roles live in its Admin space:  who's in it, its teams and projects, who manages what, and until when.⟧
+⟦// Every change goes through Spell's server, under the org's rules, and is logged:⟧
+⟦// a Project Manager can't remove a Team Manager from this page either.⟧
+⟦// Your org's Admin page names its own org on the next line:  "@rs" is the Rock Society's.⟧
+[thing create_place L0]
+| «admin roles» is a data folder at «"@rs/__admin/roles"»
+|   check it every _30_ seconds
+|   **stages** live at _"event_stages"_
+
+[thing create_type L0]
+| an «"org profile"» is a **thing**
+|   ⟦// The org itself, for the page's title and as a space to design.⟧
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"space"» is **text**
+
+[thing create_type L0]
+| a «"member"» is a **thing**
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"person"» is **text**
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"role"» is **text**
+|   [property define_property_has L1]
+|   | its «"role name"» is **text**
+
+[thing create_type L0]
+| a «"team"» is a **thing**
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"space"» is **text**
+
+[thing create_type L0]
+| a «"project"» is a **thing**
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"team"» is **text**
+|   [property define_property_has L1]
+|   | its «"space"» is **text**
+
+[thing create_type L0]
+| an «"org role"» is a **thing**
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"manages"» is **text**
+
+[thing create_type L0]
+| a «"term"» is a **thing**
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"role"» is **text**
+|   [property define_property_has L1]
+|   | its «"holder"» is **text**
+|   [property define_property_has L1]
+|   | its «"manages"» is **text**
+|   [property define_property_has L1]
+|   | its «"role name"» is **text**
+|   [property define_property_has L1]
+|   | its «"holder name"» is **text**
+|   [property define_property_has L1]
+|   | its «"manages name"» is **text**
+|   [property define_property_has L1]
+|   | its «"starts"» is **text**
+|   [property define_property_has L1]
+|   | its «"ends"» is **text**
+
+[thing create_type L0]
+| an «"approved app"» is a **thing**
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"version"» is **text**
+
+[thing create_type L0]
+| a «"designer"» is a **thing**
+|   ⟦// A designer changes a space's pages and source, whatever their role there:  a Manager publishes them.⟧
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"person"» is **text**
+|   [property define_property_has L1]
+|   | its «"space"» is **text**
+|   [property define_property_has L1]
+|   | its «"person name"» is **text**
+
+[thing create_type L0]
+| a «"stage"» is a **thing**
+|   ⟦// An event's stages, in order (its place calls them event stages):  who moves an event into each is "the team" or "its organizers".⟧
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"moves to"» is **text**
+|   [property define_property_has L1]
+|   | its «"moved by"» is **text**
+
+[thing create_type L0]
+| a «"role change"» is a **thing**
+|   it lives in **admin roles**    ‾value(admin roles)
+|   [property define_property_has L1]
+|   | its «"at"» is **text**
+|   [property define_property_has L1]
+|   | its «"who"» is **text**
+|   [property define_property_has L1]
+|   | its «"did"» is **text**
+|   [property define_property_has L1]
+|   | its «"what"» is **text**
+|   [property define_property_has L1]
+|   | its «"why"» is **text**
+
+==== /OrgAdmin.spell
+⟪# Org Admin⟫
+⟦// An org's Admin page:  who's in it⟧_, its teams and p_⟦rojects, who manages what and until when, who designs which pages,⟧
+⟦// which apps its spaces may install, its event stages, and the log of every change.⟧
+⟦// A toolbar with who's signed in, the sections down the side, and one section at a time beside them.⟧
+⟦// Where they're kept is in OrgAdmin.api.spell, and only its first line knows.⟧
+⟦// Each change goes through Spell's server, under the org's rules:  one you can't make says why, and changes nothing.⟧
+
+⟪## The page:  a toolbar, the sections down the side, and the one picked⟫
+
+[thing create_one_of_a_kind L0]
+| «org admin» is an **app**
+|   [property define_property_has L1]
+|   | «"new member"» is **a new member**
+|   |   ⟦// Who to add, by their address:  ana@rs⟧
+|   [property define_property_has L1]
+|   | «"new team"» is **a new team**
+|   |   ⟦// A new standing team, by its name⟧
+|   [property define_property_has L1]
+|   | «"new project"» is **a new project**
+|   |   ⟦// A new project, under a team or, with none picked, the org itself⟧
+|   [property define_property_has L1]
+|   | «"new term"» is **a new term**
+|   [property define_property_has L1]
+|   | «"new app"» is **a new approved app**
+|   [property define_property_has L1]
+|   | «"new designer"» is **a new designer**
+|   |   ⟦// Who designs which space's pages⟧
+|   [property define_property_has L1]
+|   | «"new stage"» is **a new stage**
+|   |   ⟦// A stage an event goes through:  its name changes the stage of that name, or adds one before the last⟧
+
+|   [action to_do_something L1]
+|   | to «add the new member»
+|   |   add the **new member** to the **members**    ‾value(the new member) ‾value(the members)
+|   |   set its **new member** to **a new member**    ‾value(its new member) ‾value(a new member)
+
+|   [action to_do_something L1]
+|   | to «add the new team»
+|   |   add the **new team** to the **teams**    ‾value(the new team) ‾value(the teams)
+|   |   set its **new team** to **a new team**    ‾value(its new team) ‾value(a new team)
+
+|   [action to_do_something L1]
+|   | to «add the new project»
+|   |   add the **new project** to the **projects**    ‾value(the new project) ‾value(the projects)
+|   |   set its **new project** to **a new project**    ‾value(its new project) ‾value(a new project)
+
+|   [action to_do_something L1]
+|   | to «give the new term»
+|   |   add the **new term** to the **terms**    ‾value(the new term) ‾value(the terms)
+|   |   set its **new term** to **a new term**    ‾value(its new term) ‾value(a new term)
+
+|   [action to_do_something L1]
+|   | to «approve the new app»
+|   |   add the **new app** to the **approved apps**    ‾value(the new app) ‾value(the approved apps)
+|   |   set its **new app** to **a new approved app**    ‾value(its new app) ‾value(a new approved app)
+
+|   [action to_do_something L1]
+|   | to «add the new designer»
+|   |   add the **new designer** to the **designers**    ‾value(the new designer) ‾value(the designers)
+|   |   set its **new designer** to **a new designer**    ‾value(its new designer) ‾value(a new designer)
+
+|   [action to_do_something L1]
+|   | to «add the new stage»
+|   |   add the **new stage** to the **stages**    ‾value(the new stage) ‾value(the stages)
+|   |   set its **new stage** to **a new stage**    ‾value(its new stage) ‾value(a new stage)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// The section picked is in the page's address, so a reload comes back to it⟧
+|   |   <⟨stack⟩ class=«"org-admin"» spacing=«"none"»>
+|   |     <⟨toolbar⟩ class=«"top-bar"» appearance=«"text"» aria-label=«"Org Admin"»>
+|   |       <⟨for⟩ org in every org profile>
+|   |         <⟨text⟩ slot=«"title"» size=«"large"»>{its **name**} Admin</⟨text⟩>    code({its name})
+|   |       </⟨for⟩>
+|   |       <⟨item⟩ link=«"OrgChat"»>Chat</⟨item⟩>
+|   |       <⟨item⟩ link=«"OrgFeed"»>Feed</⟨item⟩>
+|   |       <⟨item⟩ link=«"Inbox"»>Inbox</⟨item⟩>
+|   |       <⟨stack⟩ slot=«"right"» direction=«"horizontal"»>{the sign in menu}</⟨stack⟩>    code({the sign in menu})
+|   |     </⟨toolbar⟩>
+|   |     <⟨tabs⟩ class=«"body"» parameter=«"section"» direction=«"vertical"» appearance=«"secondary"» aria-label=«"Sections"»>
+|   |       <⟨tab⟩ label=«"People"» icon=«"users"» value=«"people"»>{draw the **people section** of it}</⟨tab⟩>    code({draw the people section of it})
+|   |       <⟨tab⟩ label=«"Teams and projects"» icon=«"sitemap"» value=«"teams"»>{draw the **teams section** of it}</⟨tab⟩>    code({draw the teams section of it})
+|   |       <⟨tab⟩ label=«"Who manages what"» icon=«"user tie"» value=«"roles"»>{draw the **roles section** of it}</⟨tab⟩>    code({draw the roles section of it})
+|   |       <⟨tab⟩ label=«"Who designs what"» icon=«"paint brush"» value=«"designers"»>{draw the **designers section** of it}</⟨tab⟩>    code({draw the designers section of it})
+|   |       <⟨tab⟩ label=«"Approved apps"» icon=«"check circle outline"» value=«"apps"»>{draw the **apps section** of it}</⟨tab⟩>    code({draw the apps section of it})
+|   |       <⟨tab⟩ label=«"Event stages"» icon=«"stream"» value=«"stages"»>{draw the **stages section** of it}</⟨tab⟩>    code({draw the stages section of it})
+|   |       <⟨tab⟩ label=«"Log"» icon=«"history"» value=«"log"»>{draw the **log section** of it}</⟨tab⟩>    code({draw the log section of it})
+|   |     </⟨tabs⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **people section**
+|   |   <⟨stack⟩ class=«"people"»>
+|   |     <⟨header⟩ size=«"medium"»>People</⟨header⟩>
+|   |     <⟨form⟩ value={its **new member**} class=«"add"»>    code({its new member})
+|   |       <⟨input⟩ name=«"person"» placeholder=«"Add someone, by their address:  ana@rs"» aria-label=«"Add someone, by their address"» fluid action>
+|   |         <⟨button⟩ slot=«"action"» class=«"add"» color=«"primary"» disabled={the **person** of the **new member** is _""_} title=«"Add them to the org"» onClick={add the new member}>Add</⟨button⟩>    code({the person of the new member is ""}) code({add the new member})
+|   |       </⟨input⟩>
+|   |     </⟨form⟩>
+|   |     <⟨for⟩ member in every member sorted by its name a-z as=«"table"» appearance=«"very-basic"» selectable unstackable loading=«"Finding the org's people"»>
+|   |       <⟨cell⟩ «"Name"»>{its **name**}</⟨cell⟩>    code({its name})
+|   |       <⟨cell⟩ «"Address"»><⟨text⟩ color=«"grey"»>{its **person**}</⟨text⟩></⟨cell⟩>    code({its person})
+|   |       <⟨cell⟩ «"Role"»><⟨label⟩ size=«"small"»>{its **role name**}</⟨label⟩></⟨cell⟩>    code({its role name})
+|   |       <⟨cell⟩ «""»><⟨button⟩ class=«"remove"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Take them out of the org"» title=«"Take them out of the org"» onClick={remove **member** from the **members**}/></⟨cell⟩>    code({remove member from the members})
+|   |       <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>Nobody yet.</⟨text⟩></⟨empty⟩>
+|   |       <⟨failed⟩><⟨text⟩ color=«"red"»>We can't read the org's people right now.</⟨text⟩></⟨failed⟩>
+|   |     </⟨for⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **teams section**
+|   |   <⟨stack⟩ class=«"teams"»>
+|   |     <⟨header⟩ size=«"medium"»>Teams</⟨header⟩>
+|   |     <⟨form⟩ value={its **new team**} class=«"add new-team"»>    code({its new team})
+|   |       <⟨input⟩ name=«"name"» placeholder=«"A new team:  Events Team"» aria-label=«"A new team"» fluid action>
+|   |         <⟨button⟩ slot=«"action"» class=«"add"» color=«"primary"» disabled={the **name** of the **new team** is _""_} title=«"Add this team"» onClick={add the new team}>Add team</⟨button⟩>    code({the name of the new team is ""}) code({add the new team})
+|   |       </⟨input⟩>
+|   |     </⟨form⟩>
+|   |     <⟨for⟩ team in every team sorted by its name a-z as=«"table"» appearance=«"very-basic"» selectable unstackable loading=«"Finding the teams"»>
+|   |       <⟨cell⟩ «"Name"»>{its **name**}</⟨cell⟩>    code({its name})
+|   |       <⟨cell⟩ «"Space"»><⟨text⟩ color=«"grey"»>{its **space**}</⟨text⟩></⟨cell⟩>    code({its space})
+|   |       <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>No teams yet.</⟨text⟩></⟨empty⟩>
+|   |     </⟨for⟩>
+|   |     <⟨header⟩ size=«"medium"»>Projects</⟨header⟩>
+|   |     <⟨form⟩ value={its **new project**} class=«"add new-project"»>    code({its new project})
+|   |       <⟨stack⟩ class=«"row"» direction=«"horizontal"» align=«"center"» wrap>
+|   |         <⟨input⟩ name=«"name"» placeholder=«"A new project:  2026 Q4"» aria-label=«"A new project"» fluid/>
+|   |         <⟨select⟩ name=«"team"» placeholder=«"Under the org itself"» aria-label=«"Under the team"»>
+|   |           <⟨for⟩ team in every team sorted by its name a-z>
+|   |             <⟨item⟩ value={its **id**}>{its **name**}</⟨item⟩>    code({its id}) code({its name})
+|   |           </⟨for⟩>
+|   |         </⟨select⟩>
+|   |         <⟨button⟩ class=«"add-project"» color=«"primary"» title=«"Add this project"» disabled={the **name** of the **new project** is _""_} onClick={add the new project}>Add project</⟨button⟩>    code({the name of the new project is ""}) code({add the new project})
+|   |       </⟨stack⟩>
+|   |     </⟨form⟩>
+|   |     <⟨for⟩ project in every project sorted by its name a-z as=«"table"» appearance=«"very-basic"» selectable unstackable loading=«"Finding the projects"»>
+|   |       <⟨cell⟩ «"Name"»>{its **name**}</⟨cell⟩>    code({its name})
+|   |       <⟨cell⟩ «"Under"»>{its **team**}</⟨cell⟩>    code({its team})
+|   |       <⟨cell⟩ «"Space"»><⟨text⟩ color=«"grey"»>{its **space**}</⟨text⟩></⟨cell⟩>    code({its space})
+|   |       <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>No projects yet.</⟨text⟩></⟨empty⟩>
+|   |     </⟨for⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **roles section**
+|   |   <⟨stack⟩ class=«"roles"»>
+|   |     <⟨header⟩ size=«"medium"»>Who manages what</⟨header⟩>
+|   |     <⟨form⟩ value={its **new term**} class=«"add"»>    code({its new term})
+|   |       <⟨stack⟩ class=«"row"» direction=«"horizontal"» align=«"center"» wrap>
+|   |         <⟨select⟩ name=«"holder"» placeholder=«"Who"» aria-label=«"Who:  a person, or a team"»>
+|   |           <⟨for⟩ member in every member sorted by its name a-z>
+|   |             <⟨item⟩ value={its **person**}>{its **name**}</⟨item⟩>    code({its person}) code({its name})
+|   |           </⟨for⟩>
+|   |           <⟨for⟩ team in every team sorted by its name a-z>
+|   |             <⟨item⟩ value={its **id**}>{its **name**}</⟨item⟩>    code({its id}) code({its name})
+|   |           </⟨for⟩>
+|   |         </⟨select⟩>
+|   |         <⟨select⟩ name=«"role"» placeholder=«"Role"» aria-label=«"Role"»>
+|   |           <⟨for⟩ one in every org role>
+|   |             <⟨item⟩ value={its **id**}>{its **name**}</⟨item⟩>    code({its id}) code({its name})
+|   |           </⟨for⟩>
+|   |         </⟨select⟩>
+|   |         <⟨select⟩ name=«"manages"» placeholder=«"The whole org"» aria-label=«"Of"»>
+|   |           <⟨for⟩ team in every team sorted by its name a-z>
+|   |             <⟨item⟩ value={its **id**}>{its **name**}</⟨item⟩>    code({its id}) code({its name})
+|   |           </⟨for⟩>
+|   |           <⟨for⟩ project in every project sorted by its name a-z>
+|   |             <⟨item⟩ value={its **id**}>{its **name**}</⟨item⟩>    code({its id}) code({its name})
+|   |           </⟨for⟩>
+|   |         </⟨select⟩>
+|   |         <⟨input⟩ name=«"ends"» type=«"date"» aria-label=«"Until"»/>
+|   |         <⟨button⟩ class=«"give"» color=«"primary"» title=«"Give them this role"» disabled={the **holder** of the **new term** is _""_} onClick={give the new term}>Name them</⟨button⟩>    code({the holder of the new term is ""}) code({give the new term})
+|   |       </⟨stack⟩>
+|   |     </⟨form⟩>
+|   |     <⟨for⟩ term in every term as=«"table"» appearance=«"very-basic"» selectable unstackable loading=«"Finding who manages what"»>
+|   |       <⟨cell⟩ «"Who"» class=«"holder"» title={its **holder**}>{its **holder name**}</⟨cell⟩>    code({its holder}) code({its holder name})
+|   |       <⟨cell⟩ «"Role"»><⟨label⟩ size=«"small"»>{its **role name**}</⟨label⟩></⟨cell⟩>    code({its role name})
+|   |       <⟨cell⟩ «"Of"»>{its **manages name**}</⟨cell⟩>    code({its manages name})
+|   |       <⟨cell⟩ «"Since"»>{its **starts**}</⟨cell⟩>    code({its starts})
+|   |       <⟨cell⟩ «"Until"»>{its **ends**}</⟨cell⟩>    code({its ends})
+|   |       <⟨cell⟩ «""»><⟨button⟩ class=«"end"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"End this term"» title=«"End this term:  its record stays in the log"» onClick={remove **term** from the **terms**}/></⟨cell⟩>    code({remove term from the terms})
+|   |       <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>Nobody's been named yet.</⟨text⟩></⟨empty⟩>
+|   |     </⟨for⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **designers section**
+|   |   <⟨stack⟩ class=«"designers"»>
+|   |     <⟨header⟩ size=«"medium"»>Who designs what</⟨header⟩>
+|   |     <⟨text⟩ color=«"grey"»>They change a space's pages, whatever their role there;  its Managers publish them.</⟨text⟩>
+|   |     <⟨form⟩ value={its **new designer**} class=«"add"»>    code({its new designer})
+|   |       <⟨stack⟩ class=«"row"» direction=«"horizontal"» align=«"center"» wrap>
+|   |         <⟨select⟩ name=«"person"» placeholder=«"Who"» aria-label=«"Who"»>
+|   |           <⟨for⟩ member in every member sorted by its name a-z>
+|   |             <⟨item⟩ value={its **person**}>{its **name**}</⟨item⟩>    code({its person}) code({its name})
+|   |           </⟨for⟩>
+|   |         </⟨select⟩>
+|   |         <⟨select⟩ name=«"space"» placeholder=«"Designs"» aria-label=«"Designs"»>
+|   |           <⟨for⟩ org in every org profile>
+|   |             <⟨item⟩ value={its **space**}>{its **name**}</⟨item⟩>    code({its space}) code({its name})
+|   |           </⟨for⟩>
+|   |           <⟨for⟩ team in every team sorted by its name a-z>
+|   |             <⟨item⟩ value={its **space**}>{its **name**}</⟨item⟩>    code({its space}) code({its name})
+|   |           </⟨for⟩>
+|   |           <⟨for⟩ project in every project sorted by its name a-z>
+|   |             <⟨item⟩ value={its **space**}>{its **name**}</⟨item⟩>    code({its space}) code({its name})
+|   |           </⟨for⟩>
+|   |         </⟨select⟩>
+|   |         <⟨button⟩ class=«"design"» color=«"primary"» title=«"Let them change this space's pages"» disabled={the **person** of the **new designer** is _""_} onClick={add the new designer}>Let them design it</⟨button⟩>    code({the person of the new designer is ""}) code({add the new designer})
+|   |       </⟨stack⟩>
+|   |     </⟨form⟩>
+|   |     <⟨for⟩ designer in every designer as=«"table"» appearance=«"very-basic"» selectable unstackable loading=«"Finding who designs what"»>
+|   |       <⟨cell⟩ «"Who"» title={its **person**}>{its **person name**}</⟨cell⟩>    code({its person}) code({its person name})
+|   |       <⟨cell⟩ «"Designs"»><⟨text⟩ color=«"grey"»>{its **space**}</⟨text⟩></⟨cell⟩>    code({its space})
+|   |       <⟨cell⟩ «""»><⟨button⟩ class=«"undesign"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"No longer designs it"» title=«"No longer designs it:  their drafts stay, for a Manager"» onClick={remove **designer** from the **designers**}/></⟨cell⟩>    code({remove designer from the designers})
+|   |       <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>Only each space's Managers, so far.</⟨text⟩></⟨empty⟩>
+|   |     </⟨for⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **apps section**
+|   |   <⟨stack⟩ class=«"apps"»>
+|   |     <⟨header⟩ size=«"medium"»>Approved apps</⟨header⟩>
+|   |     <⟨form⟩ value={its **new app**} class=«"add"»>    code({its new app})
+|   |       <⟨stack⟩ class=«"row"» direction=«"horizontal"» align=«"center"» wrap>
+|   |         <⟨input⟩ name=«"name"» placeholder=«"@spell/sign-up-sheet"» aria-label=«"App"» fluid/>
+|   |         <⟨input⟩ name=«"version"» placeholder=«"1.0.0"» aria-label=«"Version"»/>
+|   |         <⟨button⟩ class=«"approve"» color=«"primary"» title=«"Let this org's spaces install it"» disabled={the **name** of the **new app** is _""_} onClick={approve the new app}>Approve</⟨button⟩>    code({the name of the new app is ""}) code({approve the new app})
+|   |       </⟨stack⟩>
+|   |     </⟨form⟩>
+|   |     <⟨for⟩ app in every approved app as=«"table"» appearance=«"very-basic"» selectable unstackable loading=«"Finding the approved apps"»>
+|   |       <⟨cell⟩ «"App"»>{its **name**}</⟨cell⟩>    code({its name})
+|   |       <⟨cell⟩ «"Version"»>{its **version**}</⟨cell⟩>    code({its version})
+|   |       <⟨cell⟩ «""»><⟨button⟩ class=«"unapprove"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Take it off the list"» title=«"Take it off the list"» onClick={remove **app** from the **approved apps**}/></⟨cell⟩>    code({remove app from the approved apps})
+|   |       <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>No apps approved yet.</⟨text⟩></⟨empty⟩>
+|   |     </⟨for⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **stages section**
+|   |   <⟨stack⟩ class=«"stages"»>
+|   |     <⟨header⟩ size=«"medium"»>Event stages</⟨header⟩>
+|   |     <⟨form⟩ value={its **new stage**} class=«"add"»>    code({its new stage})
+|   |       <⟨stack⟩ class=«"row"» direction=«"horizontal"» align=«"center"» wrap>
+|   |         <⟨input⟩ name=«"name"» placeholder=«"A stage:  Rehearsal"» aria-label=«"Stage"» fluid/>
+|   |         <⟨select⟩ name=«"moves to"» placeholder=«"Moves to"» aria-label=«"Moves to"»>
+|   |           <⟨for⟩ stage in every stage>
+|   |             <⟨item⟩ value={its **id**}>{its **name**}</⟨item⟩>    code({its id}) code({its name})
+|   |           </⟨for⟩>
+|   |         </⟨select⟩>
+|   |         <⟨select⟩ name=«"moved by"» placeholder=«"Moved by"» aria-label=«"Moved by"»>
+|   |           <⟨item⟩ value=«"the team"»>The team</⟨item⟩>
+|   |           <⟨item⟩ value=«"its organizers"»>Its organizers</⟨item⟩>
+|   |         </⟨select⟩>
+|   |         <⟨button⟩ class=«"stage-it"» color=«"primary"» title=«"Add this stage, or change the one of that name"» disabled={the **name** of the **new stage** is _""_} onClick={add the new stage}>Add or change</⟨button⟩>    code({the name of the new stage is ""}) code({add the new stage})
+|   |       </⟨stack⟩>
+|   |     </⟨form⟩>
+|   |     <⟨for⟩ stage in every stage as=«"table"» appearance=«"very-basic"» selectable unstackable loading=«"Finding the event stages"»>
+|   |       <⟨cell⟩ «"Stage"»>{its **name**}</⟨cell⟩>    code({its name})
+|   |       <⟨cell⟩ «"Moves to"»><⟨text⟩ color=«"grey"»>{its **moves to**}</⟨text⟩></⟨cell⟩>    code({its moves to})
+|   |       <⟨cell⟩ «"Moved by"»>{its **moved by**}</⟨cell⟩>    code({its moved by})
+|   |       <⟨cell⟩ «""»><⟨button⟩ class=«"unstage"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Remove this stage"» title=«"Remove this stage:  not while an event is in it, or another moves to it"» onClick={remove **stage** from the **stages**}/></⟨cell⟩>    code({remove stage from the stages})
+|   |     </⟨for⟩>
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **log section**
+|   |   <⟨stack⟩ class=«"log"»>
+|   |     <⟨header⟩ size=«"medium"»>Log</⟨header⟩>
+|   |     <⟨for⟩ change in every role change sorted by its at, newest first as=«"table"» appearance=«"very-basic"» unstackable loading=«"Reading the log"»>
+|   |       <⟨cell⟩ «"When"»><⟨text⟩ color=«"grey"»>{its **at**}</⟨text⟩></⟨cell⟩>    code({its at})
+|   |       <⟨cell⟩ «"Who"»>{its **who**}</⟨cell⟩>    code({its who})
+|   |       <⟨cell⟩ «"Did"»><⟨label⟩ size=«"small"»>{its **did**}</⟨label⟩></⟨cell⟩>    code({its did})
+|   |       <⟨cell⟩ «"What"»>{its **what**}</⟨cell⟩>    code({its what})
+|   |       <⟨cell⟩ «"Why"»>{its **why**}</⟨cell⟩>    code({its why})
+|   |       <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>Nothing's changed yet.</⟨text⟩></⟨empty⟩>
+|   |     </⟨for⟩>
+|   |   </⟨stack⟩>

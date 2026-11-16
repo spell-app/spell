@@ -1,0 +1,123 @@
+==== /ComoFuncionaSolitario.es.spell
+⟪## Cómo funciona Solitario⟫
+⟦// El ejemplo Solitario es el Klondike, el juego de cartas que venía en todas las computadoras:⟧
+⟦// siete columnas de cartas, armadas del rey al as, rojo y negro alternados.⟧
+⟦// Está escrito en español:  cada línea de código también.⟧
+⟦// Es el ejemplo más grande, pero está hecho de piezas pequeñas:⟧
+⟦// - una CARTA, que sabe su rango y su palo, y de ahí su color y su valor⟧
+⟦// - PILAS de cartas, cada tipo con sus propias reglas sobre qué carta toma⟧
+⟦//⟧
+⟦// Esta guía tiene un tipo de carta y una regla:  una columna con un rey, y cuatro cartas para probar.⟧
+⟦// Está escrita en el estilo de esquema, como Solitario mismo.⟧
+⟦// Abre Solitario, en los Ejemplos, para jugar el juego entero.  Solitaire es el mismo juego, en inglés.⟧
+
+
+⟪## Una carta⟫
+⟦// "uno de" enumera cada valor que puede tener una propiedad:  "2 ... 10" son todos los números entre ellos⟧
+[thing create_type L0]
+| una «"carta"» es una **vista**
+|   [property define_property_has L1]
+|   | su «"rango"» es uno de ‹as›, ‹2 ... 10›, ‹jota›, ‹dama›, ‹rey›
+|   [property define_property_has L1]
+|   | su «"palo"» es uno de ‹tréboles›, ‹diamantes›, ‹corazones› o ‹espadas›
+
+|   [property property_value_getter L1]
+|   | su «"valor"» es la posición de su **rango**
+|   |   ⟦// el as es 1, el 2 es 2 ... el rey es 13:  su lugar en la lista de rangos⟧
+|   [property property_value_getter L1]
+|   | su «"color"» es
+|   |   _rojo_ si su **palo** es _diamantes_ o _corazones_    ‾value(su palo)
+|   |   _negro_ de lo contrario
+
+|   [property property_value_getter L1]
+|   | su «"nombre"» es su **rango** + «" de "» + su **palo**
+|   |   ⟦// p. ej. "dama de corazones"⟧
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   ⟦// un clic la juega en la columna⟧
+|   |   devolver <es-boton apariencia=_"básico"_ color={su **color**} onClick={jugar eso}>{su **nombre**}</es-boton>    ‾value(<es-boton apariencia="básico" color={su color} onClick={jugar eso}>{su nombre}</es-boton>)
+
+
+⟪## Una pila, y una columna⟫
+[thing create_viewable_list_type L0]
+| una «"pila"» es una **lista visible de cartas**
+[property belongs_to_one L0]
+| una **carta** pertenece a una **pila**
+|   ⟦// una carta está en una sola pila a la vez:  moverla a otra la quita de esta⟧
+
+⟦// La regla que lo hace Solitario:  una columna toma una carta uno menos que su última, del otro color.⟧
+⟦// - "puede tomar una carta cuando" es una pregunta de sí o no que la pila contesta para cada carta⟧
+⟦// - "devolver" da la respuesta⟧
+[thing create_type L0]
+| una «"columna"» es una **pila**
+|   [property list_guard L1]
+|   | puede tomar una **carta** cuando
+|   |   [control if L2]
+|   |   | si está vacía    ‾question(está vacía)
+|   |   |   devolver el **rango** de la **carta** es _rey_    ‾value(el rango de la carta)
+|   |   devolver el **color** de su última **carta** no es el **color** de la **carta** y el **valor** de su última **carta** es el **valor** de la **carta** + _1_    ‾value(el color de su última carta) ‾value(el color de la carta) ‾value(el valor de su última carta) ‾value(el valor de la carta)
+
+
+⟪## La mesa:  una columna, y una mano de cartas para probar en ella⟫
+[thing create_one_of_a_kind L0]
+| «mesa» es una **aplicación**
+|   [property define_property_has L1]
+|   | su «"columna"» es **una nueva columna**
+|   [property define_property_has L1]
+|   | su «"mano"» es **una nueva pila**
+|   [property define_property_has L1]
+|   | su «"mensaje"» es **texto**
+
+|   [action draw_it L1]
+|   | para **dibujarla**
+|   |   devolver <es-contenedor texto>    ‾value(<es-contenedor texto>)
+|   |     <⟨es-encabezado⟩ tamano=«"pequeño"»>La columna</⟨es-encabezado⟩>    ‾value(<es-encabezado tamano="pequeño">La columna</es-encabezado>)
+|   |     {dibujar su **columna**}    ‾value({dibujar su columna})
+|   |     <⟨es-encabezado⟩ tamano=«"pequeño"»>Tu mano: haz clic en una carta para ponerla en la columna</⟨es-encabezado⟩>    ‾value(<es-encabezado tamano="pequeño">Tu mano: haz clic en una carta para ponerla en la columna</es-encabezado>)
+|   |     {dibujar su **mano**}    ‾value({dibujar su mano})
+|   |     <⟨es-texto⟩ parrafo>{su **mensaje**}</⟨es-texto⟩>    ‾value(<es-texto parrafo>{su mensaje}</es-texto>) code({su mensaje})
+|   |   </⟨es-contenedor⟩>    ‾value(</es-contenedor>)
+
+[action to_do_something L0]
+| para «jugar una carta»    ‾value(una carta) bold(carta)
+|   ⟦// a la columna, si la toma;  el mensaje dice qué pasó⟧
+|   [control if L1]
+|   | si la **columna** de **mesa** puede tomar la **carta**    ‾question(la columna de mesa puede tomar la carta)
+|   |   agregar la **carta** a la **columna** de **mesa**    ‾value(la carta) ‾value(la columna de mesa)
+|   |   poner el **mensaje** de **mesa** a _"La "_ + el **nombre** de la **carta** + _" va encima."_    ‾value(el mensaje de mesa) ‾value(el nombre de la carta)
+|   [control else L1]
+|   | de lo contrario
+|   |   poner el **mensaje** de **mesa** a _"La columna no toma la "_ + el **nombre** de la **carta** + _"."_    ‾value(el mensaje de mesa) ‾value(el nombre de la carta)
+
+
+⟪## Inicio:  un rey de espadas en la columna⟫
+agregar (**una nueva carta** con **rango** = _rey_, **palo** = _espadas_) a la **columna** de **mesa**    ‾value(una nueva carta con rango = rey, palo = espadas) ‾value(la columna de mesa)
+agregar (**una nueva carta** con **rango** = _dama_, **palo** = _espadas_) a la **mano** de **mesa**    ‾value(una nueva carta con rango = dama, palo = espadas) ‾value(la mano de mesa)
+agregar (**una nueva carta** con **rango** = _dama_, **palo** = _corazones_) a la **mano** de **mesa**    ‾value(una nueva carta con rango = dama, palo = corazones) ‾value(la mano de mesa)
+agregar (**una nueva carta** con **rango** = _jota_, **palo** = _tréboles_) a la **mano** de **mesa**    ‾value(una nueva carta con rango = jota, palo = tréboles) ‾value(la mano de mesa)
+agregar (**una nueva carta** con **rango** = _10_, **palo** = _diamantes_) a la **mano** de **mesa**    ‾value(una nueva carta con rango = 10, palo = diamantes) ‾value(la mano de mesa)
+
+
+⟪## Una prueba:  la regla, carta por carta⟫
+[action to_do_something L0]
+| para «probar la columna»
+|   poner la **pila nueva** a **una nueva columna**    ‾value(la pila nueva) ‾value(una nueva columna)
+|   poner la **dama** a **una nueva carta** con **rango** = _dama_, **palo** = _corazones_    ‾value(la dama) ‾value(una nueva carta con rango = dama, palo = corazones)
+|   la **pila nueva** puede tomar la **dama** debería ser _no_    ‾question(la pila nueva puede tomar la dama)
+|   agregar (**una nueva carta** con **rango** = _rey_, **palo** = _espadas_) a la **pila nueva**    ‾value(una nueva carta con rango = rey, palo = espadas) ‾value(la pila nueva)
+|   la **pila nueva** puede tomar la **dama** debería ser _sí_    ‾question(la pila nueva puede tomar la dama)
+
+
+⟪## Pruébalo⟫
+⟦// - Haz clic en la dama de espadas, a la derecha:  la columna no la toma, porque es negra, como el rey.⟧
+⟦// - Haz clic en la dama de corazones, luego la jota de tréboles, luego el 10 de diamantes:⟧
+⟦//   cada una va encima.⟧
+⟦// - Cambia la regla:  en "una columna es una pila donde", quita⟧
+⟦//   "el color de su última carta no es el color de la carta y".⟧
+⟦//   Ahora la dama de espadas también va encima.⟧
+⟦//   (Haz clic en ↻, sobre la mesa, para repartir la mano otra vez.)⟧
+⟦//⟧
+⟦// Y después:  Solitario, en los Ejemplos, donde la reserva, los descartes y las cuatro fundaciones⟧
+⟦// tienen sus propias reglas, escritas igual:  la de una columna es su "soltable cuando" allí.⟧
+⟦// Sus movimientos son acciones con un título, un icono y una tecla, dibujadas como su barra y su menú de clic derecho.⟧

@@ -1,0 +1,198 @@
+==== /CajaDeRecetas.api.es.spell
+⟪## Caja de recetas:  dónde se guardan las recetas⟫
+⟦// Dónde se guardan lo dice la línea siguiente, y solo ella lo sabe.  Cámbiala para guardarlas en otro lugar:⟧
+⟦//   recetario familiar es una carpeta de datos personal en "recetas"⟧
+⟦//   (la caja de cada persona, en su espacio;  "recetas" sola es una caja que comparten todos, "owen@spell/recetas" la de Owen)⟧
+⟦//   recetario familiar es una carpeta de datos en "http://127.0.0.1:4791/api/places/recipes"⟧
+⟦//   recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"⟧
+⟦// (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)⟧
+⟦// Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spell.⟧
+[thing stored_on_this_device L0]
+| «recetario familiar» se guarda en este dispositivo
+
+[thing create_type L0]
+| una «"receta"» es una **cosa**
+|   vive en **recetario familiar**    ‾value(recetario familiar)
+|   [property define_property_has L1]
+|   | su «"título"» es **texto**
+|   [property define_property_has L1]
+|   | sus «"porciones"» es un **número**
+|   [property define_property_has L1]
+|   | sus «"notas"» es **texto**
+
+==== /CajaDeRecetas.es.spell
+⟪# Caja de recetas⟫
+⟦// Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes o en su pantalla de edición, quita una y deshazlo.⟧
+⟦// Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea lo sabe.⟧
+
+⟦// Cada caja de notas crece mientras escribes⟧
+<⟨ui-defaults⟩>
+  <área-texto crece/>
+</⟨ui-defaults⟩>
+
+⟪## Una receta:  una tarjeta que puedes leer y cambiar⟫
+
+[thing reopen_type L0]
+| una **receta**
+|   [action to_do_something L1]
+|   | para «editarla», no se puede deshacer
+|   |   ⟦// Su pantalla de edición:  nada cambia hasta Guardar⟧
+|   |   fijar el **editando** de la **caja de recetas** a eso    ‾value(el editando de la caja de recetas) ‾value(eso)
+
+|   [action draw_it L1]
+|   | para **dibujar** eso
+|   |   <⟨tarjeta⟩>
+|   |     <⟨contenido⟩>
+|   |       <⟨formulario⟩ value={eso} class=«"recipe"»>    code({eso})
+|   |         <⟨campo⟩ etiqueta=«"Nombre de la receta"»>
+|   |           <⟨bot⟩ón slot=«"acciones"» class=«"edit"» icono=«"pencil"» tamano=«"mini"» apariencia=«"transparent"» aria-label=«"Editar"» title=«"Editar"» onClick={editar eso}/>    code({editar eso})
+|   |           <⟨bot⟩ón slot=«"acciones"» class=«"remove"» icono=«"close"» tamano=«"mini"» apariencia=«"transparent"» aria-label=«"Quitar"» title=«"Quitar"» onClick={quitar eso de las **recetas**}/>    code({quitar eso de las recetas})
+|   |           <⟨entrada⟩ name=«"título"» class=«"title"» tamano=«"grande"»/>
+|   |         </⟨campo⟩>
+|   |         <⟨campo⟩ etiqueta=«"Para"» en-linea>
+|   |           <⟨entrada⟩ class=«"serves"» name=«"porciones"» type=«"number"» min=«"1"» etiquetado=«"derecha"» etiqueta=«"personas"»/>
+|   |         </⟨campo⟩>
+|   |         <⟨campo⟩ etiqueta=«"Notas"»>
+|   |           <área-texto name=_"notas"_ rows=_"2"_/>
+|   |         </⟨campo⟩>
+|   |       </⟨formulario⟩>
+|   |     </⟨contenido⟩>
+|   |   </⟨tarjeta⟩>
+
+⟪## Su pantalla de edición:  un formulario sobre un borrador, así que nada cambia hasta Guardar⟫
+
+[thing create_type L0]
+| un «"editor de receta"» es una **vista**
+|   [property define_property_has L1]
+|   | su «"receta"» es una **receta**
+|   |   ⟦// La receta que se está cambiando⟧
+|   [property property_value_getter L1]
+|   | su «"borrador"» es un borrador de su **receta**
+|   |   ⟦// Una copia para cambiar:  la receta sigue igual hasta Guardar⟧
+
+|   [action to_do_something L1]
+|   | para «aceptar los cambios», no se puede deshacer
+|   |   ⟦// Todos los campos cambiados, enviados juntos⟧
+|   |   guardar su **borrador**    ‾value(su borrador)
+|   |   fijar el **editando** de la **caja de recetas** a nada    ‾value(el editando de la caja de recetas) ‾value(nada)
+
+|   [action to_do_something L1]
+|   | para «olvidar los cambios», no se puede deshacer
+|   |   ⟦// Olvida la copia:  la receta no cambió⟧
+|   |   descartar su **borrador**    ‾value(su borrador)
+|   |   fijar el **editando** de la **caja de recetas** a nada    ‾value(el editando de la caja de recetas) ‾value(nada)
+
+|   [action draw_it L1]
+|   | para **dibujar** eso
+|   |   <⟨tarjeta⟩ class=«"editor"»>
+|   |     <⟨contenido⟩>
+|   |       <⟨formulario⟩ value={su **borrador**}>    code({su borrador})
+|   |         <⟨encabezado⟩ tamano=«"pequeño"»>Editar {el **título** de su **receta**}</⟨encabezado⟩>    code({el título de su receta})
+|   |         <⟨campo⟩ etiqueta=«"Nombre de la receta"»>
+|   |           <⟨entrada⟩ name=«"título"» class=«"edit-title"» tamano=«"grande"»/>
+|   |         </⟨campo⟩>
+|   |         <⟨campo⟩ etiqueta=«"Para"» en-linea>
+|   |           <⟨entrada⟩ class=«"serves"» name=«"porciones"» type=«"number"» min=«"1"» etiquetado=«"derecha"» etiqueta=«"personas"»/>
+|   |         </⟨campo⟩>
+|   |         <⟨campo⟩ etiqueta=«"Notas"»>
+|   |           <área-texto name=_"notas"_ rows=_"2"_/>
+|   |         </⟨campo⟩>
+|   |       </⟨formulario⟩>
+|   |     </⟨contenido⟩>
+|   |     <⟨extra⟩>
+|   |       <⟨bot⟩ón class=«"save"» tamano=«"pequeño"» color=«"primario"» desactivado={el **título** de su **borrador** es _""_} onClick={aceptar los cambios}>Guardar</⟨bot⟩ón>    code({el título de su borrador es ""}) code({aceptar los cambios})
+|   |       <⟨bot⟩ón class=«"cancel"» tamano=«"pequeño"» onClick={olvidar los cambios}>Cancelar</⟨bot⟩ón>    code({olvidar los cambios})
+|   |     </⟨extra⟩>
+|   |   </⟨tarjeta⟩>
+
+⟪## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta⟫
+
+[thing create_one_of_a_kind L0]
+| «caja de recetas» es una **aplicación**
+|   [property define_property_has L1]
+|   | su «"búsqueda"» es **texto**
+|   [property define_property_has L1]
+|   | «"receta nueva"» es **una nueva receta** con **porciones** = «4»
+|   [property define_property_has L1]
+|   | su «"editando"» es una **receta**
+|   |   ⟦// La receta en su pantalla de edición, mientras haya una⟧
+|   [property define_menu L1]
+|   | su «"menú de la caja"» es un menú de «"deshacer"»
+
+|   [action create_hook L1]
+|   | al «crearla»
+|   |   ⟦// Si todavía no hay nada guardado, unas cuantas para empezar⟧
+|   |   [control if L2]
+|   |   | si no hay **recetas**    ‾value(no hay recetas)
+|   |   |   agregar (**una nueva receta** con **título** _"Sopa de tomate"_, **porciones** = _4_, **notas** = _"Asa los tomates primero."_) a las **recetas**    ‾value(una nueva receta con título "Sopa de tomate", porciones = 4, notas = "Asa los tomates primero.") ‾value(las recetas)
+|   |   |   agregar (**una nueva receta** con **título** _"Dal"_, **porciones** = _6_, **notas** = _"Agrega las especias al final."_) a las **recetas**    ‾value(una nueva receta con título "Dal", porciones = 6, notas = "Agrega las especias al final.") ‾value(las recetas)
+|   |   |   agregar (**una nueva receta** con **título** _"Pizza Margarita"_, **porciones** = _2_, **notas** = _"El horno bien caliente."_) a las **recetas**    ‾value(una nueva receta con título "Pizza Margarita", porciones = 2, notas = "El horno bien caliente.") ‾value(las recetas)
+
+|   [property property_value_getter L1]
+|   | su «"coincidencias"» es
+|   |   ⟦// Las más nuevas primero, por cuándo se guardó cada una⟧
+|   |   devolver cada **receta** donde su **título** incluye la **búsqueda**, ordenadas por su **creado**, de más reciente a más antiguo    ‾value(cada receta donde su título incluye la búsqueda, ordenadas por su creado, de más reciente a más antiguo)
+
+|   [action to_do_something L1]
+|   | para «agregar la receta nueva»
+|   |   agregar la **receta nueva** a las **recetas**    ‾value(la receta nueva) ‾value(las recetas)
+|   |   fijar su **receta nueva** a **una nueva receta** con **porciones** = _4_    ‾value(su receta nueva) ‾value(una nueva receta con porciones = 4)
+
+|   [action draw_it L1]
+|   | para **dibujar** eso
+|   |   <⟨contenedor⟩>
+|   |     <⟨pila⟩ direccion=«"horizontal"» ajustar alinear=«"fin"» repartir=«"entre"»>
+|   |       <⟨pila⟩ alinear=«"inicio"»>
+|   |         <⟨encabezado⟩ tamano=«"grande"»>Caja de recetas</⟨encabezado⟩>
+|   |         <⟨texto⟩ color=«"gris"»>Todo lo que escribes se guarda al instante.</⟨texto⟩>
+|   |       </⟨pila⟩>
+|   |       <⟨barra-herramientas⟩ class=«"undo"» menu=«"menú de la caja"» aria-label=«"Recetas"»/>
+|   |       <⟨formulario⟩ value={eso} class=«"find"» fluido>    code({eso})
+|   |         <⟨campo⟩ etiqueta=«"Buscar"»>
+|   |           <⟨entrada⟩ name=«"búsqueda"» class=«"search"» icono=«"search"»/>
+|   |         </⟨campo⟩>
+|   |       </⟨formulario⟩>
+|   |     </⟨pila⟩>
+|   |     {dibujar la **pantalla** de eso}
+|   |   </⟨contenedor⟩>
+
+|   [action draw_it L1]
+|   | para **dibujar** su **pantalla**
+|   |   ⟦// Su pantalla de edición, mientras se cambia una receta;  si no, las tarjetas:  su propio dibujo, para que su `si` elija solo una⟧
+|   |   [control if L2]
+|   |   | si su **editando**    ‾value(su editando)
+|   |   |   dibujar (**un nuevo editor de receta** con **receta** = su **editando**)    ‾value(un nuevo editor de receta con receta = su editando)
+|   |   [control else L2]
+|   |   | de lo contrario
+|   |   |   <⟨tarjetas⟩ columnas=«"3"» duplicable apilable>
+|   |   |     <⟨tarjeta⟩ class=«"new"»>
+|   |   |       <⟨contenido⟩>
+|   |   |         <⟨formulario⟩ value={su **receta nueva**}>    code({su receta nueva})
+|   |   |           <⟨encabezado⟩ tamano=«"pequeño"»>Agrega una receta</⟨encabezado⟩>
+|   |   |           <⟨campo⟩ etiqueta=«"Nombre de la receta"»>
+|   |   |             <⟨entrada⟩ name=«"título"» class=«"draft"» tamano=«"grande"»/>
+|   |   |           </⟨campo⟩>
+|   |   |           <⟨campo⟩ etiqueta=«"Para"» en-linea>
+|   |   |             <⟨entrada⟩ class=«"serves"» name=«"porciones"» type=«"number"» min=«"1"» etiquetado=«"derecha"» etiqueta=«"personas"»/>
+|   |   |           </⟨campo⟩>
+|   |   |           <⟨campo⟩ etiqueta=«"Notas"»>
+|   |   |             <área-texto name=_"notas"_ rows=_"2"_/>
+|   |   |           </⟨campo⟩>
+|   |   |         </⟨formulario⟩>
+|   |   |       </⟨contenido⟩>
+|   |   |       <⟨extra⟩>
+|   |   |         <⟨bot⟩ón class=«"add"» tamano=«"pequeño"» color=«"primario"» desactivado={el **título** de su **receta nueva** es _""_} onClick={agregar la receta nueva}>Agregar receta</⟨bot⟩ón>    code({el título de su receta nueva es ""}) code({agregar la receta nueva})
+|   |   |       </⟨extra⟩>
+|   |   |     </⟨tarjeta⟩>
+|   |   |     <⟨para⟩ receta en las coincidencias cargando=«"Buscando tus recetas"»>
+|   |   |       <⟨vac⟩ío>
+|   |   |         <⟨texto⟩ class=«"none"» color=«"gris"»>{_"Todavía no hay recetas. Agrega la primera."_ si la **búsqueda** es _""_ sino _"Ninguna receta coincide con tu búsqueda."_}</⟨texto⟩>    code({"Todavía no hay recetas. Agrega la primera." si la búsqueda es "" sino "Ninguna receta coincide con tu búsqueda."})
+|   |   |       </⟨vac⟩ío>
+|   |   |       <⟨fallo⟩>
+|   |   |         <⟨mensaje⟩ class=«"failed"» color=«"rojo"»>
+|   |   |           No podemos llegar a tus recetas ahora mismo.
+|   |   |           <⟨bot⟩ón class=«"again"» onClick={reintentar}>Reintentar</⟨bot⟩ón>    code({reintentar})
+|   |   |         </⟨mensaje⟩>
+|   |   |       </⟨fallo⟩>
+|   |   |     </⟨para⟩>
+|   |   |   </⟨tarjetas⟩>

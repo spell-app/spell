@@ -1,0 +1,123 @@
+==== /HowSolitaireWorks.spell
+⟪## How Solitaire works⟫
+⟦// The Solitaire example is Klondike, the card game that came with every computer:⟧
+⟦// seven columns of cards, built down from king to ace, red and black in turn.⟧
+⟦// It's the biggest example, but it's made of small pieces:⟧
+⟦// - a CARD, which knows its rank, its suit, and from those its color and its value⟧
+⟦// - PILES of cards, each kind with its own rules for what it will take⟧
+⟦//⟧
+⟦// This guide is one card type and one rule:  a column, with a king on it, and four cards to try.⟧
+⟦// It's written in the outline style, as Solitaire itself is.⟧
+⟦// Open Solitaire, in the Examples, to play the whole game.⟧
+
+
+⟪## A card⟫
+⟦// "one of" lists every value a property can have:  "2 ... 10" means every number in between⟧
+[thing create_type L0]
+| a «"card"» is a **view**
+|   [property define_property_has L1]
+|   | its «"rank"» is one of ‹ace›, ‹2 ... 10›, ‹jack›, ‹queen›, ‹king›
+|   [property define_property_has L1]
+|   | its «"suit"» is one of ‹clubs›, ‹diamonds›, ‹hearts› or ‹spades›
+
+|   [property property_value_getter L1]
+|   | its «"value"» is the position of its **rank**
+|   |   ⟦// ace is 1, 2 is 2 ... king is 13:  its place in the list of ranks⟧
+|   [property property_value_getter L1]
+|   | its «"color"» is
+|   |   _red_ if its **suit** is _diamonds_ or _hearts_    ‾value(its suit)
+|   |   _black_ otherwise
+
+|   [property property_value_getter L1]
+|   | its «"name"» is its **rank** + «" of "» + its **suit**
+|   |   ⟦// e.g. "queen of hearts"⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// a click tries it on the column⟧
+|   |   return <ui-button appearance=_"basic"_ color={its **color**} onClick={try it}>{its **name**}</ui-button>    ‾value(<ui-button appearance="basic" color={its color} onClick={try it}>{its name}</ui-button>)
+
+
+⟪## A pile, and a column⟫
+[thing create_viewable_list_type L0]
+| a «"pile"» is a **viewable list of cards**
+[property belongs_to_one L0]
+| a **card** belongs to one **pile**
+|   ⟦// a card is in one pile at a time:  putting it on another takes it off this one⟧
+
+⟦// The rule that makes it Solitaire:  a column takes a card one lower than its last, in the other color.⟧
+⟦// - "can take a card when" is a yes-or-no question the pile answers for each card⟧
+⟦// - "return" gives the answer:  the first line that returns, wins⟧
+[thing create_type L0]
+| a «"column"» is a **pile**
+|   [property list_guard L1]
+|   | it can take a **card** when
+|   |   [control if L2]
+|   |   | if it is empty    ‾question(it is empty)
+|   |   |   return the **rank** of the **card** is _king_    ‾value(the rank of the card)
+|   |   return the **color** of its last **card** is not the **color** of the **card** and the **value** of its last **card** is the **value** of the **card** + _1_    ‾value(the color of its last card) ‾value(the color of the card) ‾value(the value of its last card) ‾value(the value of the card)
+
+
+⟪## The table:  a column, and a hand of cards to try on it⟫
+[thing create_one_of_a_kind L0]
+| «table» is an **app**
+|   [property define_property_has L1]
+|   | its «"column"» is **a new column**
+|   [property define_property_has L1]
+|   | its «"hand"» is **a new pile**
+|   [property define_property_has L1]
+|   | its «"message"» is **text**
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   return <ui-container text>    ‾value(<ui-container text>)
+|   |     <⟨ui-header⟩ size=«"small"»>The column</⟨ui-header⟩>    ‾value(<ui-header size="small">The column</ui-header>)
+|   |     {draw its **column**}    ‾value({draw its column})
+|   |     <⟨ui-header⟩ size=«"small"»>Your hand: click a card to put it on the column</⟨ui-header⟩>    ‾value(<ui-header size="small">Your hand: click a card to put it on the column</ui-header>)
+|   |     {draw its **hand**}    ‾value({draw its hand})
+|   |     <⟨ui-text⟩ paragraph>{its **message**}</⟨ui-text⟩>    ‾value(<ui-text paragraph>{its message}</ui-text>) code({its message})
+|   |   </⟨ui-container⟩>    ‾value(</ui-container>)
+
+⟦// onto the column, if it takes the card;  the message says what happened⟧
+⟦// - "table's column" is "the column of table":  either reads the table's property⟧
+[action to_do_something L0]
+| to «try (a card)»    ‾value(a card) bold(card)
+|   [control if L1]
+|   | if **table's column** can take the **card**    ‾question(table's column can take the card)
+|   |   add the **card** to **table's column**    ‾value(the card) ‾value(table's column)
+|   |   set **table's message** to _"The "_ + the **card's name** + _" goes on."_    ‾value(table's message) ‾value(the card's name)
+|   [control else L1]
+|   | otherwise
+|   |   set **table's message** to _"The column won't take the "_ + the **card's name** + _"."_    ‾value(table's message) ‾value(the card's name)
+
+
+⟪## Start:  a king of spades on the column⟫
+add (**a new card** with **rank** = _king_, **suit** = _spades_) to **table's column**    ‾value(a new card with rank = king, suit = spades) ‾value(table's column)
+add (**a new card** with **rank** = _queen_, **suit** = _spades_) to **table's hand**    ‾value(a new card with rank = queen, suit = spades) ‾value(table's hand)
+add (**a new card** with **rank** = _queen_, **suit** = _hearts_) to **table's hand**    ‾value(a new card with rank = queen, suit = hearts) ‾value(table's hand)
+add (**a new card** with **rank** = _jack_, **suit** = _clubs_) to **table's hand**    ‾value(a new card with rank = jack, suit = clubs) ‾value(table's hand)
+add (**a new card** with **rank** = _10_, **suit** = _diamonds_) to **table's hand**    ‾value(a new card with rank = 10, suit = diamonds) ‾value(table's hand)
+
+
+⟪## A check:  the rule, card by card⟫
+[action to_do_something L0]
+| to «test the column»
+|   set the **stack** to **a new column**    ‾value(the stack) ‾value(a new column)
+|   set the **red queen** to **a new card** with **rank** = _queen_, **suit** = _hearts_    ‾value(the red queen) ‾value(a new card with rank = queen, suit = hearts)
+|   the **stack** can take the **red queen** should be _no_    ‾question(the stack can take the red queen)
+|   add (**a new card** with **rank** = _king_, **suit** = _spades_) to the **stack**    ‾value(a new card with rank = king, suit = spades) ‾value(the stack)
+|   the **stack** can take the **red queen** should be _yes_    ‾question(the stack can take the red queen)
+|   the **stack** can take (**a new card** with **rank** = _queen_, **suit** = _clubs_) should be _no_    ‾question(the stack can take (a new card with rank = queen, suit = clubs))
+
+
+⟪## Try it⟫
+⟦// - Click the queen of spades on the right:  the column won't take it, because it's black, like the king.⟧
+⟦// - Click the queen of hearts, then the jack of clubs, then the 10 of diamonds:  each one goes on.⟧
+⟦// - Bend the rule:  in "a column is a pile where", take out⟧
+⟦//   "the color of its last card is not the color of the card and".⟧
+⟦//   Then the queen of spades goes on too.  (Click ↻, above the table, to deal the hand again.)⟧
+⟦//⟧
+⟦// Where next:  Solitaire, in the Examples, where the stock, the discards and the four foundations⟧
+⟦// each have rules of their own:  a column's is its "<droppable when>" there.⟧
+⟦// Its moves are actions with a title, an icon and a key, drawn as its toolbar and its right-click menu.⟧
+⟦// Solitario is the same game, in Spanish.⟧

@@ -1,0 +1,91 @@
+==== /HowCalculatorWorks.spell
+⟪# How the Calculator works⟫
+⟦// The Calculator example is a pocket calculator:  press 7, +, 5, and it shows 12.⟧
+⟦// Every key on it does the same two things:⟧
+⟦// - it runs an ACTION, a few lines that change what the calculator keeps⟧
+⟦// - and the display, drawn from what it keeps, changes with it⟧
+
+⟦// This guide builds a smaller one, an adding machine, on the right:  three number keys, a + key and a C key.⟧
+⟦// Open Calculator, in the Examples, to see the whole thing with every key.⟧
+
+⟪## What it keeps⟫
+⟦// Each `its "..." is` line is one thing every adding machine keeps.⟧
+⟦// - `is a number` makes the total a number, starting at 0.⟧
+⟦// - The number being typed is text, so each key can add a digit on the end.⟧
+
+⟪## What its keys do⟫
+⟦// Each `to ...` is an action:  what one key does.⟧
+⟦// - A digit key's action takes the digit:  `press (digit as text)`, so `press "5"` puts a 5 on the end.⟧
+⟦// - "+" between two pieces of text joins them:  "1" + "2" is "12".⟧
+⟦// - `as a number` turns the text "12" into the number 12, so it can be added up.⟧
+⟦// - `clear` empties what it names:  a number goes back to 0, a text to "".⟧
+
+⟪## How it draws⟫
+⟦// The display, then the keys, in a card:  Spell UI's tags, by their short names.⟧
+⟦// - `<button>` is Spell UI's button, `<grid columns="5">` lays the keys out five a row.⟧
+⟦// - `onClick` says what a key does when it's clicked:  one of the actions above.⟧
+⟦// - The display shows the number being typed, or the total when nothing is.⟧
+
+[thing create_one_of_a_kind L0]
+| «adding machine» is an **app**
+|   [property define_property_has L1]
+|   | its «"total"» is a **number**
+|   [property define_property_has L1]
+|   | its «"input"» is **text**
+|   |   ⟦// The number being typed⟧
+
+|   [action to_do_something L1]
+|   | to «press (digit as text)»    ‾value(digit as text) bold(digit) bold(text)
+|   |   ⟦// A digit key:  that digit, on the end of the number being typed⟧
+|   |   set the **input** to the **input** + the **digit**    ‾value(the input) ‾value(the input) ‾value(the digit)
+|   [action to_do_something L1]
+|   | to «add it up»
+|   |   ⟦// The + key:  the number typed, added to the total, then a fresh start for the next one⟧
+|   |   if the **input** is empty return    ‾question(the input is empty)
+|   |   set **typed** to the **input** as a number    ‾value(typed) ‾value(the input as a number)
+|   |   set the **total** to the **total** + **typed**    ‾value(the total) ‾value(the total) ‾value(typed)
+|   |   clear the **input**    ‾value(the input)
+|   [action to_do_something L1]
+|   | to «clear it»
+|   |   ⟦// The C key:  back to nothing⟧
+|   |   clear the **total**    ‾value(the total)
+|   |   clear the **input**    ‾value(the input)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ align=«"center"»>
+|   |     <⟨card⟩>
+|   |       <⟨segment⟩ appearance=«"secondary"» align=«"right"»>
+|   |         <⟨text⟩ size=«"huge"»>{the **total** if the **input** is empty otherwise the **input**}</⟨text⟩>    code({the total if the input is empty otherwise the input})
+|   |       </⟨segment⟩>
+|   |       <⟨content⟩>
+|   |         <⟨grid⟩ columns=«"5"» spacing=«"compact"»>
+|   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"1"_}>1</⟨button⟩></⟨column⟩>    code({press "1"})
+|   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"2"_}>2</⟨button⟩></⟨column⟩>    code({press "2"})
+|   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"5"_}>5</⟨button⟩></⟨column⟩>    code({press "5"})
+|   |           <⟨column⟩><⟨button⟩ fluid color=«"primary"» onClick={add it up}>+</⟨button⟩></⟨column⟩>    code({add it up})
+|   |           <⟨column⟩><⟨button⟩ fluid color=«"negative"» onClick={clear it}>C</⟨button⟩></⟨column⟩>    code({clear it})
+|   |         </⟨grid⟩>
+|   |       </⟨content⟩>
+|   |     </⟨card⟩>
+|   |   </⟨stack⟩>
+
+|   [action to_do_something L1]
+|   | to «test adding up»
+|   |   ⟦// 12 and 5 make 17⟧
+|   |   press _"1"_    ‾call(press "1")
+|   |   press _"2"_    ‾call(press "2")
+|   |   add it up    ‾call(add it up)
+|   |   press _"5"_    ‾call(press "5")
+|   |   add it up    ‾call(add it up)
+|   |   the **total** should be _17_    ‾value(the total)
+
+⟪## Try it⟫
+⟦// - Click 1, 2, +, 5, + on the right:  the display shows 12, then 17.⟧
+⟦// - Add a 9 key:  copy the line with "5" in it, and change both 5s to 9s.⟧
+⟦//   Then make the grid six columns:  `columns="6"`.⟧
+⟦// - Make + into - :  in "add it up", change the + in "the total + typed" to a -,⟧
+⟦//   then change the key's label.  The check above will turn red, because 12 take away 5 isn't 17.⟧
+
+⟦// Where next:  the Calculator example, which keeps a left number, an operator and a right number,⟧
+⟦// so it can do all four sums.⟧

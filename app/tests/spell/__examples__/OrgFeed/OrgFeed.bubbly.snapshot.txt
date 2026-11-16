@@ -1,0 +1,103 @@
+==== /OrgFeed.api.spell
+⟪## Feed:  what's new across your org⟫
+⟦// Everyone in an org has a feed there:  "@rs/__feed" is yours in the Rock Society, whoever you are.⟧
+⟦// It's every post in every space of RS you may read, each read as you;  a quiet event's are left out.⟧
+⟦// Your org's feed page names its own org on the next line.⟧
+⟦// Kept on this device:  opening it again, and each check, asks only for what's new since.⟧
+[thing create_place L0]
+| «my feed» is a data folder at «"@rs/__feed"»
+|   check it every _30_ seconds
+|   keep a copy on this device
+
+[thing create_type L0]
+| a «"post"» is a **thing**
+|   ⟦// A post, as its space has it:  who wrote it, what about, when, and where it's from.⟧
+|   it lives in **my feed**    ‾value(my feed)
+|   [property define_property_has L1]
+|   | its «"text"» is **text**
+|   [property define_property_has L1]
+|   | its «"topic"» is **text**
+|   [property define_property_has L1]
+|   | its «"posted"» is **text**
+|   [property define_property_has L1]
+|   | its «"by"» is **text**
+|   [property define_property_has L1]
+|   | its «"space"» is **text**
+
+==== /OrgFeed.spell
+⟪# Feed⟫
+⟦// What's new across your org:  every post in every space of it you may read.⟧
+⟦// Where it's read from is in OrgFeed.api.spell, and only its first line knows.⟧
+⟦// What you see more of, and none of, is the ranking below:  it's yours to change, in your own copy of this program.⟧
+
+⟪## The ranking:  how much of each post you want⟫
+⟦// 2:  more of it, at the top;  1:  as it comes;  0:  none of it.⟧
+⟦// Bo's own:  more of Ana's art, none of her politics.⟧
+
+[thing reopen_type L0]
+| a **post**
+|   [property property_value_getter L1]
+|   | its «"weight"» is
+|   |   ⟦// How much of it you want:  2 more of it, 1 as it comes, 0 none⟧
+|   |   _2_ if its **by** is _"ana@rs"_ and its **topic** is _"art"_    ‾value(its by) ‾value(its topic)
+|   |   _0_ if its **by** is _"ana@rs"_ and its **topic** is _"politics"_    ‾value(its by) ‾value(its topic)
+|   |   _1_ otherwise
+|   [property quoted_type_expression L1]
+|   | it «"is a favourite"» if its **weight** is _2_    ‾value(its weight)
+|   [property quoted_type_expression L1]
+|   | it «"is ordinary"» if its **weight** is _1_    ‾value(its weight)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨segment⟩ class=«"post"»>
+|   |     <⟨stack⟩ spacing=«"xs"»>
+|   |       <⟨stack⟩ direction=«"horizontal"» spacing=«"md"» align=«"center"» wrap>
+|   |         <⟨text⟩ class=«"by"»>{its **by**}</⟨text⟩>    code({its by})
+|   |         <⟨text⟩ class=«"space"» color=«"grey"»>in {its **space**}</⟨text⟩>    code({its space})
+|   |         <⟨text⟩ class=«"posted"» color=«"grey"»>{its **posted**}</⟨text⟩>    code({its posted})
+|   |       </⟨stack⟩>
+|   |       <⟨text⟩ class=«"text"»>{its **text**}</⟨text⟩>    code({its text})
+|   |     </⟨stack⟩>
+|   |   </⟨segment⟩>
+
+⟪## The page:  your favourites first, then the rest, newest first⟫
+
+[thing create_one_of_a_kind L0]
+| «feed page» is an **app**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"org-page"» spacing=«"none"»>
+|   |     <⟨toolbar⟩ class=«"top-bar"» appearance=«"text"» aria-label=«"Feed"»>
+|   |       <⟨text⟩ slot=«"title"» size=«"large"»>Feed</⟨text⟩>
+|   |       <⟨item⟩ link=«"OrgChat"»>Chat</⟨item⟩>
+|   |       <⟨item⟩ link=«"Inbox"»>Inbox</⟨item⟩>
+|   |       <⟨item⟩ link=«"OrgAdmin"»>Admin</⟨item⟩>
+|   |       <⟨stack⟩ slot=«"right"» direction=«"horizontal"»>{the sign in menu}</⟨stack⟩>    code({the sign in menu})
+|   |     </⟨toolbar⟩>
+|   |     <⟨container⟩ class=«"feed"»>
+|   |       <⟨stack⟩>
+|   |         <⟨header⟩ size=«"large"»>What's new</⟨header⟩>
+
+|   |         <⟨segment⟩ class=«"favourites"»>
+|   |           <⟨header⟩ size=«"medium"»>More of what you like</⟨header⟩>
+|   |           <⟨stack⟩ class=«"favourite-list"» spacing=«"sm"»>
+|   |             <⟨for⟩ post in every post where it is a favourite sorted by its posted newest first loading=«"Reading your feed"»>
+|   |               <⟨post⟩/>
+|   |               <⟨empty⟩><⟨text⟩ color=«"grey"»>Nothing yet.</⟨text⟩></⟨empty⟩>
+|   |             </⟨for⟩>
+|   |           </⟨stack⟩>
+|   |         </⟨segment⟩>
+
+|   |         <⟨segment⟩ class=«"everything"»>
+|   |           <⟨header⟩ size=«"medium"»>Everything else</⟨header⟩>
+|   |           <⟨stack⟩ class=«"post-list"» spacing=«"sm"»>
+|   |             <⟨for⟩ post in every post where it is ordinary sorted by its posted newest first loading=«"Reading your feed"»>
+|   |               <⟨post⟩/>
+|   |               <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>Nothing new.</⟨text⟩></⟨empty⟩>
+|   |               <⟨failed⟩><⟨text⟩ color=«"red"»>We can't read your feed right now.</⟨text⟩></⟨failed⟩>
+|   |             </⟨for⟩>
+|   |           </⟨stack⟩>
+|   |         </⟨segment⟩>
+|   |       </⟨stack⟩>
+|   |     </⟨container⟩>
+|   |   </⟨stack⟩>

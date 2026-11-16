@@ -1,0 +1,298 @@
+==== /SignUpSheet.api.spell
+⟪## Sign-Up Sheet:  where a picnic's sign-ups are kept⟫
+⟦// The master sheet is in the picnic's private space:  only its organizers read it, notes and all.⟧
+⟦// Anyone in the picnic's shared space signs up here all the same, and changes only their own row.⟧
+⟦// Each shift takes two people:  two asking for the last place at once, one gets it, the other is told it's gone.⟧
+⟦// Its tickets are kept here too:  the picnic has 40, each attendee asks for as many as their row says, and a ticket⟧
+⟦// an organizer confirms lets its guest into the attendees' space, where the day's details are.⟧
+⟦// Your event's sheet names its own spaces on the next lines:  "picnic@rs" is the Rock Society's picnic.⟧
+[thing create_place L0]
+| «sign up sheet» is a data folder at «"picnic@rs/__private/signups"»
+|   open to sign-ups from _"picnic@rs/sheet"_
+|   only its **attendees** add rows
+|   at most _2_ rows for each **shift**
+|   at most _40_ rows for each **event**
+|   each person asks for at most their _"invitations"_ **tickets**
+|   confirmed **tickets** join _"picnic@rs/__attendees"_
+|   check it every _30_ seconds
+
+[thing projection_of L0]
+| the «published sheet» is a projection of the **sign up sheet**
+|   ⟦// What everyone in the picnic sees:  who's on which shift, never an organizer's note.⟧
+|   into _"picnic@rs/sheet"_
+|   showing each **row**'s **person** and **shift**
+|   **published volunteers** live at _"volunteers"_
+|   check it every _30_ seconds
+
+[thing create_type L0]
+| a «"volunteer"» is a **thing**
+|   it lives in the **sign up sheet**    ‾value(the sign up sheet)
+|   [property define_property_has L1]
+|   | its «"person"» is **text**
+|   [property define_property_has L1]
+|   | its «"shift"» is **text**
+|   [property define_property_has L1]
+|   | its «"note"» is **text**
+
+⟦// Who may sign up, and how many invitations each may ask for:  the organizers work it out from their standing and⟧
+⟦// their shifts ("work out the invitations", on the page).⟧
+[thing create_type L0]
+| an «"attendee"» is a **thing**
+|   it lives in the **sign up sheet**    ‾value(the sign up sheet)
+|   [property define_property_has L1]
+|   | its «"person"» is **text**
+|   [property define_property_has L1]
+|   | its «"standing"» is **text**
+|   [property define_property_has L1]
+|   | its «"invitations"» is a **number**
+
+[thing create_type L0]
+| a «"ticket"» is a **thing**
+|   ⟦// A ticket someone asked for, for a guest:  an organizer confirms it.⟧
+|   it lives in the **sign up sheet**    ‾value(the sign up sheet)
+|   [property define_property_has L1]
+|   | its «"person"» is **text**
+|   [property define_property_has L1]
+|   | its «"guest"» is **text**
+|   [property define_property_has L1]
+|   | its «"event"» is **text**
+|   [property define_property_has L1]
+|   | its «"status"» is **text**
+
+[thing create_place L0]
+| «my inbox» is a data folder at «"@rs/__inbox"»
+|   ⟦// Your inbox in RS:  Spell writes how many invitations you've used there, as an update.⟧
+|   check it every _30_ seconds
+
+[thing create_type L0]
+| a «"message"» is a **thing**
+|   ⟦// A message in your inbox:  your invitations' count is one, in the conversation "invitations".⟧
+|   it lives in **my inbox**    ‾value(my inbox)
+|   [property define_property_has L1]
+|   | its «"text"» is **text**
+|   [property define_property_has L1]
+|   | its «"recipients"» is **text**
+|   [property define_property_has L1]
+|   | its «"thread"» is **text**
+|   [property define_property_has L1]
+|   | its «"page"» is **text**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"line"» is **text**
+
+[thing create_type L0]
+| a «"published volunteer"» is a **thing**
+|   it lives in the **published sheet**    ‾value(the published sheet)
+|   [property define_property_has L1]
+|   | its «"person"» is **text**
+|   [property define_property_has L1]
+|   | its «"shift"» is **text**
+
+==== /SignUpSheet.spell
+⟪# Sign-Up Sheet⟫
+⟦// A picnic's sign-up sheet:  pick a shift and sign up, then see yourself on the published sheet.⟧
+⟦// Where it's all kept is in SignUpSheet.api.spell, and only its first lines know.⟧
+⟦// Then your invitations:  ask for a ticket for a guest, as many as yours allow.⟧
+⟦// The organizers' part shows only to them:  the master sheet with its notes, the tickets to confirm, and who may sign up.⟧
+
+⟪## A row for each:  who's on which shift⟫
+
+[thing reopen_type L0]
+| a **published volunteer**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"signed-up"» direction=«"horizontal"» spacing=«"md"» align=«"center"» wrap>
+|   |     <⟨label⟩>{its **shift**}</⟨label⟩>    code({its shift})
+|   |     <⟨text⟩>{its **person**}</⟨text⟩>    code({its person})
+|   |   </⟨stack⟩>
+
+[thing reopen_type L0]
+| a **volunteer**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨form⟩ value={it} class=«"master-row"»>    code({it})
+|   |     <⟨stack⟩ direction=«"horizontal"» spacing=«"md"» align=«"center"» wrap>
+|   |       <⟨label⟩>{its **shift**}</⟨label⟩>    code({its shift})
+|   |       <⟨text⟩>{its **person**}</⟨text⟩>    code({its person})
+|   |       <⟨input⟩ name=«"note"» placeholder=«"A note only organizers see"» aria-label=«"Organizers' note"» fluid/>
+|   |     </⟨stack⟩>
+|   |   </⟨form⟩>
+
+[thing reopen_type L0]
+| a **ticket**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"ticket"» direction=«"horizontal"» spacing=«"md"» align=«"center"» wrap>
+|   |     <⟨text⟩>{its **person**}</⟨text⟩>    code({its person})
+|   |     <⟨text⟩ color=«"grey"»>for {its **guest**}</⟨text⟩>    code({its guest})
+|   |     <⟨label⟩ class=«"status"»>{its **status**}</⟨label⟩>    code({its status})
+|   |     <⟨button⟩ class=«"confirm"» size=«"small"» disabled={its **status** is _"confirmed"_} title=«"Confirm it:  its guest gets into the attendees' space"» onClick={set its **status** to _"confirmed"_}>Confirm</⟨button⟩>    code({its status is "confirmed"}) code({set its status to "confirmed"})
+|   |   </⟨stack⟩>
+
+[thing reopen_type L0]
+| a **message**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨text⟩ class=«"count"»>{its **text**}</⟨text⟩>    code({its text})
+
+[thing reopen_type L0]
+| an **attendee**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"attendee"» direction=«"horizontal"» spacing=«"md"» align=«"center"»>
+|   |     <⟨text⟩>{its **person**}</⟨text⟩>    code({its person})
+|   |     <⟨text⟩ color=«"grey"»>{its **standing**}</⟨text⟩>    code({its standing})
+|   |     <⟨text⟩ class=«"invitations"» color=«"grey"»>{its **invitations**} invitations</⟨text⟩>    code({its invitations})
+|   |     <⟨button⟩ class=«"remove"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Take them off the list"» title=«"Take them off the list"» onClick={remove it from the **attendees**}/>    code({remove it from the attendees})
+|   |   </⟨stack⟩>
+
+⟪## The page:  sign up, the published sheet, then the organizers' part⟫
+
+[thing create_one_of_a_kind L0]
+| «sign up page» is an **app**
+|   [property define_property_has L1]
+|   | «"new volunteer"» is **a new volunteer**
+|   [property define_property_has L1]
+|   | «"new attendee"» is **a new attendee**
+|   [property define_property_has L1]
+|   | «"new ticket"» is **a new ticket**
+|   [property property_value_getter L1]
+|   | its «"counts"» is every **message** where its **thread** is «"invitations"»
+|   [property define_property_has L1]
+|   | «"new letter"» is **a new message**
+
+|   [action to_do_something L1]
+|   | to «take the shift»
+|   |   set the **person** of the **new volunteer** to their **id**    ‾value(the person of the new volunteer) ‾value(their id)
+|   |   add the **new volunteer** to the **volunteers**    ‾value(the new volunteer) ‾value(the volunteers)
+|   |   set its **new volunteer** to **a new volunteer**    ‾value(its new volunteer) ‾value(a new volunteer)
+
+|   [action to_do_something L1]
+|   | to «take setup»
+|   |   set the **shift** of the **new volunteer** to _"setup"_    ‾value(the shift of the new volunteer)
+|   |   take the shift    ‾call(take the shift)
+
+|   [action to_do_something L1]
+|   | to «take serving»
+|   |   set the **shift** of the **new volunteer** to _"serving"_    ‾value(the shift of the new volunteer)
+|   |   take the shift    ‾call(take the shift)
+
+|   [action to_do_something L1]
+|   | to «take cleanup»
+|   |   set the **shift** of the **new volunteer** to _"cleanup"_    ‾value(the shift of the new volunteer)
+|   |   take the shift    ‾call(take the shift)
+
+|   [action to_do_something L1]
+|   | to «ask for the ticket»
+|   |   set the **person** of the **new ticket** to their **id**    ‾value(the person of the new ticket) ‾value(their id)
+|   |   set the **event** of the **new ticket** to _"picnic"_    ‾value(the event of the new ticket)
+|   |   add the **new ticket** to the **tickets**    ‾value(the new ticket) ‾value(the tickets)
+|   |   set its **new ticket** to **a new ticket**    ‾value(its new ticket) ‾value(a new ticket)
+
+|   [action to_do_something L1]
+|   | to «work out the invitations»
+|   |   ⟦// Two for a member, one for a guest, and one more for each shift they took⟧
+|   |   [control list_iteration L2]
+|   |   | for each **attendee** in every **attendee**    ‾value(every attendee)
+|   |   |   set **shifts** to the number of **volunteers** where its **person** is the **person** of **attendee**    ‾value(shifts) ‾value(the number of volunteers where its person is the person of attendee)
+|   |   |   set the **invitations** of **attendee** to **shifts** + _1_    ‾value(the invitations of attendee) ‾value(shifts)
+|   |   |   [control if L3]
+|   |   |   | if the **standing** of **attendee** is _"member"_    ‾value(the standing of attendee)
+|   |   |   |   set the **invitations** of **attendee** to **shifts** + _2_    ‾value(the invitations of attendee) ‾value(shifts)
+
+|   [action to_do_something L1]
+|   | to «send the letter»
+|   |   ⟦// The picnic's letter to every attendee:  a pointer to its page in their inboxes, which reads what's theirs as each one opens it⟧
+|   |   set **everyone** to _""_    ‾value(everyone)
+|   |   [control list_iteration L2]
+|   |   | for each **attendee** in every **attendee**    ‾value(every attendee)
+|   |   |   set **everyone** to **everyone** + the **person** of **attendee** + _", "_    ‾value(everyone) ‾value(everyone) ‾value(the person of attendee)
+|   |   set the **recipients** of the **new letter** to **everyone**    ‾value(the recipients of the new letter) ‾value(everyone)
+|   |   set the **text** of the **new letter** to _"Your letter for the picnic"_    ‾value(the text of the new letter)
+|   |   set the **page** of the **new letter** to _"picnic@rs/PicnicLetter"_    ‾value(the page of the new letter)
+|   |   set the **title** of the **new letter** to _"The Picnic:  your letter"_    ‾value(the title of the new letter)
+|   |   set the **line** of the **new letter** to _"The day's details, your shifts, and your invitations"_    ‾value(the line of the new letter)
+|   |   add the **new letter** to the **messages**    ‾value(the new letter) ‾value(the messages)
+|   |   set its **new letter** to **a new message**    ‾value(its new letter) ‾value(a new message)
+
+|   [action to_do_something L1]
+|   | to «add the new attendee»
+|   |   add the **new attendee** to the **attendees**    ‾value(the new attendee) ‾value(the attendees)
+|   |   set its **new attendee** to **a new attendee**    ‾value(its new attendee) ‾value(a new attendee)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩ class=«"sign-up-sheet"»>
+|   |     <⟨stack⟩>
+|   |       <⟨header⟩ size=«"large"»>The Picnic:  sign up for a shift</⟨header⟩>
+|   |       <⟨text⟩ color=«"grey"»>Two people a shift.  Signed up, you're on the sheet below.</⟨text⟩>
+
+|   |       <⟨segment⟩ class=«"sign-up"»>
+|   |         <⟨header⟩ size=«"medium"»>Sign up for</⟨header⟩>
+|   |         <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» wrap>
+|   |           <⟨button⟩ class=«"setup"» color=«"primary"» onClick={take setup}>Setup, 9 to 11</⟨button⟩>    code({take setup})
+|   |           <⟨button⟩ class=«"serving"» color=«"primary"» onClick={take serving}>Serving, 11 to 2</⟨button⟩>    code({take serving})
+|   |           <⟨button⟩ class=«"cleanup"» color=«"primary"» onClick={take cleanup}>Cleanup, 2 to 4</⟨button⟩>    code({take cleanup})
+|   |         </⟨stack⟩>
+|   |       </⟨segment⟩>
+
+|   |       <⟨segment⟩ class=«"published"»>
+|   |         <⟨header⟩ size=«"medium"»>Who's on which shift</⟨header⟩>
+|   |         <⟨stack⟩ class=«"published-rows"» spacing=«"sm"»>
+|   |           <⟨for⟩ volunteer in every published volunteer loading=«"Reading the sheet"»>
+|   |             <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>Nobody yet:  be the first.</⟨text⟩></⟨empty⟩>
+|   |             <⟨failed⟩><⟨text⟩ color=«"red"»>We can't read the sheet right now.</⟨text⟩></⟨failed⟩>
+|   |           </⟨for⟩>
+|   |         </⟨stack⟩>
+|   |       </⟨segment⟩>
+
+|   |       <⟨segment⟩ class=«"invitations"»>
+|   |         <⟨header⟩ size=«"medium"»>Your invitations</⟨header⟩>
+|   |         <⟨stack⟩ class=«"counts"» spacing=«"sm"»>
+|   |           <⟨for⟩ message in its counts>
+|   |             <⟨empty⟩><⟨text⟩ color=«"grey"»>You haven't asked for any yet.</⟨text⟩></⟨empty⟩>
+|   |             <⟨failed⟩><⟨text⟩ color=«"grey"»>Sign in to see your invitations.</⟨text⟩></⟨failed⟩>
+|   |           </⟨for⟩>
+|   |         </⟨stack⟩>
+|   |         <⟨form⟩ value={its **new ticket**}>    code({its new ticket})
+|   |           <⟨input⟩ name=«"guest"» placeholder=«"Who it's for:  their name, or address"» aria-label=«"Who the ticket is for"» fluid action>
+|   |             <⟨button⟩ slot=«"action"» class=«"ask"» color=«"primary"» disabled={the **guest** of the **new ticket** is _""_} onClick={ask for the ticket}>Ask for a ticket</⟨button⟩>    code({the guest of the new ticket is ""}) code({ask for the ticket})
+|   |           </⟨input⟩>
+|   |         </⟨form⟩>
+|   |       </⟨segment⟩>
+
+|   |       <⟨segment⟩ class=«"organizers"»>
+|   |         <⟨header⟩ size=«"medium"»>Organizers</⟨header⟩>
+|   |         <⟨header⟩ size=«"small"»>The master sheet</⟨header⟩>
+|   |         <⟨stack⟩ class=«"master"» spacing=«"sm"»>
+|   |           <⟨for⟩ volunteer in every volunteer loading=«"Reading the master sheet"»>
+|   |             <⟨empty⟩><⟨text⟩ color=«"grey"»>Nobody's signed up yet.</⟨text⟩></⟨empty⟩>
+|   |             <⟨failed⟩><⟨text⟩ class=«"organizers-only"» color=«"grey"»>Only the picnic's organizers see this.</⟨text⟩></⟨failed⟩>
+|   |           </⟨for⟩>
+|   |         </⟨stack⟩>
+|   |         <⟨header⟩ size=«"small"»>Tickets</⟨header⟩>
+|   |         <⟨stack⟩ class=«"tickets"» spacing=«"sm"»>
+|   |           <⟨for⟩ ticket in every ticket loading=«"Reading the tickets"»>
+|   |             <⟨empty⟩><⟨text⟩ color=«"grey"»>Nobody's asked for one yet.</⟨text⟩></⟨empty⟩>
+|   |             <⟨failed⟩><⟨text⟩ color=«"grey"»>Only the picnic's organizers see this.</⟨text⟩></⟨failed⟩>
+|   |           </⟨for⟩>
+|   |         </⟨stack⟩>
+|   |         <⟨header⟩ size=«"small"»>Who may sign up</⟨header⟩>
+|   |         <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» wrap>
+|   |           <⟨button⟩ class=«"work-out"» size=«"small"» onClick={work out the invitations}>Work out the invitations</⟨button⟩>    code({work out the invitations})
+|   |           <⟨button⟩ class=«"send-letter"» size=«"small"» onClick={send the letter}>Send the letter</⟨button⟩>    code({send the letter})
+|   |         </⟨stack⟩>
+|   |         <⟨form⟩ value={its **new attendee**}>    code({its new attendee})
+|   |           <⟨input⟩ name=«"person"» placeholder=«"bo@rs"» aria-label=«"Add an attendee, by their address"» fluid action>
+|   |             <⟨button⟩ slot=«"action"» class=«"add"» color=«"primary"» disabled={the **person** of the **new attendee** is _""_} onClick={add the new attendee}>Add</⟨button⟩>    code({the person of the new attendee is ""}) code({add the new attendee})
+|   |           </⟨input⟩>
+|   |         </⟨form⟩>
+|   |         <⟨stack⟩ class=«"attendees"» spacing=«"sm"»>
+|   |           <⟨for⟩ attendee in every attendee loading=«"Reading the list"»>
+|   |             <⟨failed⟩><⟨text⟩ color=«"grey"»>Only the picnic's organizers see this.</⟨text⟩></⟨failed⟩>
+|   |           </⟨for⟩>
+|   |         </⟨stack⟩>
+|   |       </⟨segment⟩>
+|   |     </⟨stack⟩>
+|   |   </⟨container⟩>
