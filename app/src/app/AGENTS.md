@@ -160,7 +160,8 @@ and in the app's build folder, `app/` at the app folder's root.
     keys, undo, find, the gutter (no line numbers, fold arrows over the code's padding),
     and CodeMirror's words, which are `AppTexts` keys (`cm...`), following `appTexts.lang`.
     - Find and replace is a bar like VS Code's ([CodeMirrorFind](ui/codemirror/CodeMirrorFind.ts), epic `codemirror` I8):
-      the switches inside the find field, a match count, previous / next, the replace row behind a chevron;
+      the switches inside the find field, a match count, previous / next, the replace row showing as it opens
+      (folded by its chevron, it stays folded:  `spellEditor:findShowsReplace`, epic `codemirror` I8 C1);
       on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
     - Selections don't drag (epic `codemirror` I9):  a press inside one starts a new selection,
       as VS Code's `editor.dragAndDrop: false`;  text dragged in from outside still drops.
