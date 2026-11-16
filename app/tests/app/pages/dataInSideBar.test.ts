@@ -129,7 +129,7 @@ describe.skipIf(!SERVING)("data in the side bar", { timeout: 240_000 }, () => {
     const { origins, source, sourceKind } = await seen()
     expect(origins.title).toMatchObject({ kind: "data", mark: "Real data · family cookbook", action: "show code" })
     expect(origins.title!.readonly).toBeUndefined()
-    expect(origins.title!.from).toContain("family cookbook, among its recipes")
+    expect(origins.title!.from).toContain("kept in family cookbook with its other recipes")
     expect(sourceKind).toContain("real")
     expect(source).toContain("Real data, kept in family cookbook")
     // its mark is the link:  the line that declares the field, selected in the code
@@ -143,7 +143,7 @@ describe.skipIf(!SERVING)("data in the side bar", { timeout: 240_000 }, () => {
     const mark = page.locator(".InspectorThingLink .InspectorDataMark").first()
     await expect.poll(() => mark.textContent()).toBe("From family cookbook")
     expect(await mark.getAttribute("title")).toBe(
-      "Worked out from what it reads in family cookbook:  change those instead."
+      "Worked out from what it reads in family cookbook:\nchange those instead."
     )
     await inspectFirstRecipe()
   })
@@ -219,7 +219,7 @@ describe.skipIf(!SERVING)("data in the side bar", { timeout: 240_000 }, () => {
     expect(origins.title).toMatchObject({ kind: "data", readonly: true, mark: "Read only · family cookbook" })
     expect(origins.title!.from).toBe("Read only:  family cookbook takes no changes.")
     expect(sourceKind).toContain("read-only")
-    expect(source).toContain("takes no changes here")
+    expect(source).toContain("doesn't let you change it from here")
     expect(await fieldInput("title").getAttribute("readonly")).not.toBeNull()
     await page.evaluate(async (placeName) => {
       const w = window as unknown as {

@@ -88,7 +88,8 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     // no tree of the pages beside the board (epic `mockup` I13):  the board and the form, each a pane as Edit's are
     expect(await page.locator("ui-tree-item").count()).toBe(0)
     expect(await page.locator(".SiteEditorPage.EditorColumns > .SplitPane").count()).toBe(2)
-    // ... looking as the Inspector's cards do (epic `mockup` I18):  on a panel's own fill, the board's bar the top bar's
+    // ... looking as the Inspector's cards do (epic `mockup` I18):  on the panels' body, the glass under half the code's
+    // paper (epic `editor` I194:  was a panel's own solid fill), the board's bar the top bar's
     const looks = await page.evaluate(() => {
       const fill = (background: string) => {
         const sample = document.createElement("div")
@@ -101,13 +102,16 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
       const panes = [...document.querySelectorAll(".SiteEditorPage > .SplitPane")]
       const bar = getComputedStyle(document.querySelector(".SiteEditorPage .board > header")!)
       return {
-        panel: fill("var(--spell-panel-background)"),
-        panes: panes.map((pane) => getComputedStyle(pane, "::before").backgroundColor),
+        panel: fill("var(--spell-pane-body-background)"),
+        panes: panes.map((pane) => {
+          const { backgroundColor, backgroundImage } = getComputedStyle(pane, "::before")
+          return `${backgroundColor} ${backgroundImage}`
+        }),
         menuBar: fill("var(--spell-menu-bar-background)"),
         bar: `${bar.backgroundColor} ${bar.backgroundImage}`
       }
     })
-    expect(looks.panes.map((color) => `${color} none`)).toEqual([looks.panel, looks.panel])
+    expect(looks.panes).toEqual([looks.panel, looks.panel])
     expect(looks.bar).toBe(looks.menuBar)
     // the app isn't run here:  nothing of the site is drawn over the page
     expect(await page.locator(".spell-site").count()).toBe(0)

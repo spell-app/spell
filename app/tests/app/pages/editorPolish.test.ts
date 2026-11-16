@@ -245,7 +245,7 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
     await open(page, "Solitaire", "Solitaire.spell")
     await clickLine(page, await lineOf(page, `<stock-pile "stock"/>`))
     expect(await selected(page)).toEqual(["solitaire-stock-pile"])
-    await typeAfter(page, await lineOf(page, "// Deal seven columns"), "// a note")
+    await typeAfter(page, await lineOf(page, "// each row's first card lands face down"), "// a note")
     await page.waitForTimeout(4500)
     expect(await selected(page)).toEqual(["solitaire-stock-pile"])
   })
@@ -264,7 +264,7 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       await page.waitForTimeout(1000)
       await clickLine(page, await lineOf(page, `<action "cheat"/>`))
       expect(await selected(page)).toEqual(["ui-action"])
-      await typeAfter(page, await lineOf(page, "// Deal seven columns"), "// a note")
+      await typeAfter(page, await lineOf(page, "// each row's first card lands face down"), "// a note")
       await page.waitForTimeout(4500)
       expect(warnings).toEqual([])
     }

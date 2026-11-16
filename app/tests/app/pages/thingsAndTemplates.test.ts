@@ -76,7 +76,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
 
   test("the Views card sorts by name or type, and remembers it", async () => {
     const inOrder = await boardRows()
-    expect(inOrder.slice(0, 3)).toEqual(["Stock Pile", "Discard Pile", "Foundation"])
+    expect(inOrder.slice(0, 3)).toEqual(["Stock Pile", "Discard Pile", "Spacer"])
     await sortBy("By name")
     expect((await boardRows()).slice(0, 2)).toEqual(["Column", "Column"])
     await sortBy("By type")
@@ -182,7 +182,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
       .locator(".PalettePopup .ThisApp ui-tree-item")
       .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
     // Solitaire as it is now:  a tableau is a column, and its deck is drawn too (I62)
-    expect(own).toEqual(["Card", "Column", "Deck", "Discard pile", "Foundation", "Pile", "Stock pile"])
+    expect(own).toEqual(["Card", "Card image", "Column", "Deck", "Discard pile", "Foundation", "Pile", "Stock pile"])
     const cards = () => page.evaluate(() => document.querySelectorAll("solitaire-card").length)
     const before = await cards()
     await page.locator('.PalettePopup .ThisApp ui-tree-item[label="Card"]').click()
@@ -242,7 +242,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     expect((await page.locator(".InspectorTypeSpell[name=value]").innerText()).replace(/\s+/g, " ")).toContain(
       "the position of its rank"
     )
-    expect(await page.locator('[data-panel="actions"]').innerText()).toContain("count the points for")
+    expect(await page.locator('[data-panel="actions"]').innerText()).toContain("the points for")
     // a pill taken away is taken out of the one-of, as one step
     const rankLine = () =>
       page.evaluate(() =>
