@@ -151,7 +151,9 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
           window.__selectedEarly = true
           window.Inspector.select(button)
         }
-        if (hero) requestAnimationFrame(look)
+        // till the hero has come and gone:  the first frame can come before it's on the page
+        if (hero) window.__heroSeen = true
+        if (hero || !window.__heroSeen) requestAnimationFrame(look)
       }
       requestAnimationFrame(look)
     `)
@@ -276,8 +278,9 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
     async () => {
       const page = await context.newPage()
       await open(page, "Solitaire", "Solitaire.spell")
-      await clickLine(page, await lineOf(page, "{the picture of a new card whose rank is ace"), 10)
-      expect(await selected(page)).toEqual(Array(4).fill("ui-text"))
+      // its placeholder a card image since Solitaire's language T138:  was `{the picture of a new card ...}`, a text
+      await clickLine(page, await lineOf(page, "<card-image rank=ace suit={its suit}"), 10)
+      expect(await selected(page)).toEqual(Array(4).fill("solitaire-card-image"))
     }
   )
 

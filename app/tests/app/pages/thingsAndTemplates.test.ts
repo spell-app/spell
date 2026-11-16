@@ -80,12 +80,12 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     await sortBy("By name")
     expect((await boardRows()).slice(0, 2)).toEqual(["Column", "Column"])
     await sortBy("By type")
-    // by tag:  `solitaire-stock-pile` last of the program's own
-    expect((await boardRows()).at(-1)).toBe("Stock Pile")
+    // by tag:  `solitaire-stock-pile` last of the program's own, then Spell UI's `ui-spacer`
+    expect((await boardRows()).slice(-2)).toEqual(["Stock Pile", "Spacer"])
     await page.reload()
     await page.waitForSelector("#AddPartButton", { state: "attached", timeout: 60_000 })
     await page.waitForTimeout(4000)
-    expect((await boardRows()).at(-1)).toBe("Stock Pile")
+    expect((await boardRows()).slice(-2)).toEqual(["Stock Pile", "Spacer"])
     await sortBy("In document order")
     expect(await boardRows()).toEqual(inOrder)
   })
