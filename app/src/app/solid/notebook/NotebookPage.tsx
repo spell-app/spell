@@ -1,6 +1,6 @@
 import { Show, createSignal, getOwner, onSettled, runWithOwner } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
-import type { monaco } from "spell/app/app/ui/monaco"
+import type { EditorView } from "@codemirror/view"
 
 import { setDebugGlobal } from "spell/util"
 import { after } from "spell/element"
@@ -328,13 +328,13 @@ class ExampleEditors {
 
 /**
  * One example's editor:  its panel, what moves it to its example's new place, what takes it down,
- * and its Monaco editor once made.
+ * and its code editor once made.
  */
 type ExamplePanel = {
   panel: HTMLElement
   moveTo: (place: { line: number; column: number }) => void
   dispose: () => void
-  editor?: monaco.editor.IStandaloneCodeEditor
+  editor?: EditorView
 }
 
 /** What has the focus, through shadow roots. */

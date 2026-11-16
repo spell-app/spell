@@ -94,7 +94,11 @@ describe("how often to check, in the largest whole unit", () => {
     ["check it every 2 hours", 7200],
     ["check it every hour", 3600],
     ["check it every day", 86400],
-    ["check it every 2 days", 172800]
+    ["check it every 2 days", 172800],
+    ["check it every 1 hour 30 minutes", 5400],
+    ["check it every 90 sec", 90],
+    ["check it every 1 min", 60],
+    ["check it every 120 ticks", 2]
   ])("%s", (line, seconds) => {
     const { js, errors } = compiled(['star wars is a web server at "https://x":', `\t- ${line}`])
     expect(errors).toEqual([])
@@ -105,7 +109,9 @@ describe("how often to check, in the largest whole unit", () => {
     ["se revisa cada 30 segundos", 30],
     ["se revisa cada 5 minutos", 300],
     ["se revisa cada hora", 3600],
-    ["se revisa cada día", 86400]
+    ["se revisa cada día", 86400],
+    ["se revisa cada 2 días", 172800],
+    ["se revisa cada 1 hora 30 minutos", 5400]
   ])("in Spanish:  %s", (line, seconds) => {
     const { js, errors } = compiled(
       ['guerra de las galaxias es un servidor web en "https://x":', `\t- ${line}`],
@@ -113,6 +119,11 @@ describe("how often to check, in the largest whole unit", () => {
     )
     expect(errors).toEqual([])
     expect(js).toContain(`checkedEvery: ${seconds}`)
+  })
+
+  it("refuses what isn't a duration (epic `language` T140)", () => {
+    const { errors } = compiled(['star wars is a web server at "https://x":', "\t- check it every 5 cm"])
+    expect(errors.join("\n")).toContain(`"5 cm" isn't a duration`)
   })
 
   it.each([

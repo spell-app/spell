@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * Adding an event to a Spell UI element in the Inspector's Code card, on Solitaire's title (epic `editor` I141):
@@ -39,17 +39,19 @@ describe.skipIf(!SERVING)("Adding an event to a Spell UI element", { timeout: 18
       .locator(".InspectorCodeCard .CodeSlice")
       .first()
       .evaluate((slice) =>
-        [...slice.querySelectorAll(".view-line")]
+        [...slice.querySelectorAll(".cm-line")]
           .filter((line) => line.getBoundingClientRect().height > 0)
-          .map((line) =>
-            [...line.querySelectorAll("span span")]
-              // nor the room the bubbly look adds round a pill (T72):  not the file's text
-              .filter((piece) => !piece.closest(".CodeSliceHidden, .bubbly-spacer"))
-              .map((piece) => piece.textContent)
-              .join("")
-              // Monaco draws a space as a no-break space
-              .replace(/\u00a0/g, " ")
-          )
+          .map((line) => {
+            const words: string[] = []
+            const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT)
+            for (let piece = walker.nextNode(); piece; piece = walker.nextNode()) {
+              // nor what CodeMirror draws in place of text (the room the bubbly look adds round a pill, T72):
+              // not the file's text
+              const hidden = piece.parentElement?.closest(".CodeSliceHidden, [contenteditable=false]")
+              if (!hidden || !line.contains(hidden)) words.push(piece.textContent!)
+            }
+            return words.join("")
+          })
       )
 
   beforeAll(async () => {
@@ -88,7 +90,7 @@ describe.skipIf(!SERVING)("Adding an event to a Spell UI element", { timeout: 18
     page = await context.newPage()
     page.on("console", (message) => printed.push(message.text()))
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(3000)
     if (!(await page.evaluate(() => !!document.querySelector(".InspectAppButton.inspecting")))) {
       await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })

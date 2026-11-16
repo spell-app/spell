@@ -1,5 +1,4 @@
 "nag api" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Nag
 		<header>A nag is a persistent message that stays until dismissed, and can remember the dismissal.</>

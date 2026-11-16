@@ -60,7 +60,7 @@ export class ComponentSource {
 
   /**
    * Every JSX tag starting with a capital it draws, with the top-level declaration it's drawn in;  file order.
-   * - A dotted tag counts as its last name:  `<LazyMonaco.FileEditor>` draws `FileEditor`, once loaded.
+   * - A dotted tag counts as its last name:  `<LazyCodeMirror.FileEditor>` draws `FileEditor`, once loaded.
    * - Drawn outside any declaration (an entry's `render(...)`):  by the file's name, `index`.
    */
   get uses(): SourceUse[] {
@@ -169,7 +169,7 @@ export class ComponentSource {
     return file && this.sourceFor ? this.sourceFor(file).followType(name, seen) : undefined
   }
 
-  /** The module `name` is imported from, as written (`./modals.types`, `spell/app/app/solid/monaco`);  else `undefined`. */
+  /** The module `name` is imported from, as written (`./modals.types`, `spell/app/app/solid/codemirror`);  else `undefined`. */
   private importedFrom(name: string): string | undefined {
     return this.source.imports.find(
       ({ kind, names }) =>

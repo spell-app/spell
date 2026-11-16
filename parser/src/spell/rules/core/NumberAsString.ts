@@ -1,5 +1,6 @@
 import { assert, proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
 
 /**
  * `number_as_string` rule:  `number` spelled out as a string, `zero` to `ten`
@@ -12,6 +13,9 @@ import { P } from "spell/parser/parser"
  */
 export class NumberAsString extends P.Pattern {
   // Its words and what each means (`pattern`, `VALUE_MAP`) are the language's:  see its `.en.ts` registration
+  /** what it is to a reader, in the bubbly look:  each language registers its own class of it, so its roles are this one's */
+  declare roles: SP.BubblyRuleRoles
+  @proto static roles: SP.BubblyRuleRoles = { match: "written value" }
   @proto static alias = ["expression", "number"]
   @proto static datatype = "number"
 

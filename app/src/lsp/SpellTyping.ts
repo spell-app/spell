@@ -6,14 +6,14 @@ import { SpellKeywords } from "./SpellKeywords"
  * ### `SpellTyping`
  * The rules behind the typing helps every editor gives as Spell is typed:  where a letter on a blank line lands,
  * which words open quotes, what a space after a tag writes, where Enter puts the caret ...
- * - Plain functions of the lines and columns, so the app's Monaco and CodeMirror editors decide alike
+ * - Plain functions of the lines and columns, so the app's code editor and its tests decide alike
  *   (epic `codemirror` P1;  the helps themselves:  epic `language` P50, epic `editor` P28).
- *   - Each editor wires them to its own keys and edits:  the app's Monaco `SpellTyping`, the test page's
- *     `CodeMirrorTyping`.
- * - The Enter rules are ONE table (`ENTER_RULES`):  Monaco's language settings are built from it,
+ *   - Each editor wires them to its own keys and edits:
+ *     CodeMirror's `CodeMirrorTyping` (epic `codemirror` P4).
+ * - The Enter rules are ONE table (`ENTER_RULES`):  the app's code editor reads it (`CodeMirrorTyping`),
  *   and a test holds VS Code's `language-configuration.json` to it.
- * - Knows nothing of any editor:  no Monaco, no CodeMirror, no DOM, so the language service stays browser-safe and
- *   editor-free.
+ * - Knows nothing of any editor, no CodeMirror, no DOM:
+ *   so the language service stays browser-safe and editor-free.
  ****************/
 export class SpellTyping {
   ////////////////
@@ -88,6 +88,30 @@ export class SpellTyping {
   }
 
   ////////////////
+  // ## The quoted value at the caret
+  ////////////////
+
+  /**
+   * The attribute value the caret at `column` (0-based) of `line` is in, inside its quotes:
+   * `spacing="x|s"` => `{ from: 9, to: 11 }`, the columns of `xs`.
+   * - What an attribute's words show under (`ValuePopups`'s choices) and what a picker writes over:
+   *   both ask here, so they agree on where a value is.
+   * - On the caret's line only, as an attribute's value is;  a name and `="` right before it,
+   *   so a quoted name (`group "Rank"`) isn't one.
+   * - `end`:
+   *   - `closing-quote` (the default):  only a value whose closing quote is written
+   *   - `closing-quote-or-caret`:  one still being typed, with no closing quote yet, runs to the caret
+   */
+  static quotedValueAt(line: string, column: number, end: QuotedValueEnd = "closing-quote"): QuotedValue | undefined {
+    const open = ATTRIBUTE_VALUE_OPEN.exec(line.slice(0, column))
+    if (!open) return undefined
+    const from = line.indexOf('"', open.index) + 1
+    const close = line.indexOf('"', column)
+    if (close >= 0) return { from, to: close }
+    return end === "closing-quote-or-caret" ? { from, to: column } : undefined
+  }
+
+  ////////////////
   // ## Enter
   ////////////////
 
@@ -95,8 +119,8 @@ export class SpellTyping {
    * What Enter does in Spell, by the text round the caret:  ONE table, first match wins (epic `editor` I65, I155;
    * epic `language` P55).
    * - Every rule keeps the line's own indent, then adds what its `indent` says.
-   * - Monaco's language settings are built from it (`SpellMonaco.CONFIGURATION`);  VS Code's
-   *   `language-configuration.json` is written by hand, and a test checks it's the same.
+   * - The app's code editor reads it (`CodeMirrorTyping`).
+   * - VS Code's `language-configuration.json` is written by hand, and a test checks it's the same.
    */
   static ENTER_RULES: readonly EnterRule[] = [
     // between `<x>` and `</x>`:  the caret a level in, the closing tag on its own line
@@ -331,6 +355,20 @@ export type OpenTag = {
   /** column (0-based) of the first word after its name on that line;  `undefined` when the name ends the line */
   firstAttribute: number | undefined
 }
+
+/** An attribute value `SpellTyping.quotedValueAt()` found:  the columns (0-based) of its text, inside its quotes. */
+export type QuotedValue = {
+  /** column of its first character, just after the opening quote */
+  from: number
+  /** column just after its last:  the closing quote's, or the caret's when it has none yet */
+  to: number
+}
+
+/** Where a quoted value ends, for `SpellTyping.quotedValueAt()`:  at its closing quote only, or at the caret too. */
+export type QuotedValueEnd = "closing-quote" | "closing-quote-or-caret"
+
+/** An attribute's name and its opening quote, then its value up to the caret:  `spacing="x`. */
+const ATTRIBUTE_VALUE_OPEN = /[\p{L}\p{M}\d-]="[^"]*$/u
 
 /** How far back `SpellTyping.tagOpenAt()` looks for the tag's start:  a tag's attributes span a few lines at most. */
 const TAG_LINES_BACK = 20

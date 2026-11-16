@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * A drop, a move and a side-bar edit leave the running app alone (epic `editor`, Edit Without Redraw).
@@ -294,7 +294,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
       if (message.text().includes("draw() failed")) failures.push(message.text())
     })
     await opened.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
-    await opened.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(opened).shown()
     await opened.waitForTimeout(3000)
     await opened.close()
     expect(failures).toEqual([])
@@ -304,7 +304,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     saved.clear()
     const counting = await context.newPage()
     await counting.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
-    await counting.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(counting).shown()
     await counting.waitForTimeout(3000)
     const button = counting.locator(".AppPaneBody ui-button").first()
     for (let click = 0; click < 3; click++) await button.click()
@@ -314,20 +314,10 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
       const view = [...shown.querySelectorAll("*")].find((element) => element.shadowRoot?.querySelector("ui-button"))!
       ;(window as unknown as { view: Element }).view = view
     })
-    const line = counting.locator('.InputEditor .view-line:has-text("Clicked")').first()
-    await line.click()
-    await counting.evaluate(() => {
-      const code = (
-        window as unknown as {
-          editor: {
-            shownCodeEditor: { getValue(): string; setPosition(place: { lineNumber: number; column: number }): void }
-          }
-        }
-      ).editor.shownCodeEditor
-      const lines = code.getValue().split("\n")
-      const at = lines.findIndex((each) => each.includes(" times</button>"))
-      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</button>") + 1 })
-    })
+    const code = new CodeEditor(counting)
+    await code.lineLocator("Clicked").first().click()
+    const at = await code.lineOf(" times</button>")
+    await code.setCaret(at, (await code.line(at)).indexOf("</button>") + 1)
     await counting.keyboard.type(" now")
     // compiled at once, rather than ten seconds after typing stops
     await counting.keyboard.press("ControlOrMeta+Enter")
@@ -349,7 +339,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     saved.clear()
     const counting = await context.newPage()
     await counting.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
-    await counting.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(counting).shown()
     await counting.waitForTimeout(3000)
     if ((await counting.locator(".InspectAppButton").first().getAttribute("aria-pressed")) !== "true") {
       await counting.locator(".InspectAppButton [part~=item]").first().click()
@@ -367,19 +357,10 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
             ?.element.textContent
       )
     expect(await wordsSelected()).toBe("Clicked 0 times")
-    await counting.locator('.InputEditor .view-line:has-text("Clicked")').first().click()
-    await counting.evaluate(() => {
-      const code = (
-        window as unknown as {
-          editor: {
-            shownCodeEditor: { getValue(): string; setPosition(place: { lineNumber: number; column: number }): void }
-          }
-        }
-      ).editor.shownCodeEditor
-      const lines = code.getValue().split("\n")
-      const at = lines.findIndex((each) => each.includes(" times</button>"))
-      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf("</button>") + 1 })
-    })
+    const code = new CodeEditor(counting)
+    await code.lineLocator("Clicked").first().click()
+    const at = await code.lineOf(" times</button>")
+    await code.setCaret(at, (await code.line(at)).indexOf("</button>") + 1)
     await counting.keyboard.type(" now")
     await counting.keyboard.press("ControlOrMeta+Enter")
     await counting.waitForTimeout(SETTLE_MS)
@@ -410,7 +391,7 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     // AutoSave off, so Discard Changes goes back to what was last saved:  every save here is answered, never kept
     await discarding.addInitScript(() => localStorage.setItem("spellEditor:autoSave", "false"))
     await discarding.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
-    await discarding.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(discarding).shown()
     await discarding.waitForTimeout(2500)
     const contents = () =>
       discarding.evaluate(() => {

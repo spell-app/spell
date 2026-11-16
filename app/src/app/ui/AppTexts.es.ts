@@ -750,7 +750,16 @@ const APP_TEXTS_ES: AppTextPack = {
   cmSelectionDeleted: "Selección borrada",
   // su menú
   cmGoToDefinition: "Ir a la definición",
-  cmFindMenu: "Buscar…"
+  cmGoToTypeDefinition: "Ir a la definición del tipo",
+  cmFindReferences: "Buscar todos los usos",
+  cmRenameSymbol: "Renombrar",
+  cmReferenceAt: "{file}:{line}",
+  cmNoReferences: "Ningún uso encontrado",
+  cmReferences: "Usos",
+  cmFindMenu: "Buscar…",
+  // una dirección web en el código
+  codeLinkTipMac: "⌘-clic para abrir",
+  codeLinkTip: "Ctrl-clic para abrir"
 }
 
 /** Everything Spanish the app shows:  its own texts, then each web component's. */

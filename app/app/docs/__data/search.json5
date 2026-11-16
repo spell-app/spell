@@ -72,6 +72,17 @@
       ]
     },
     {
+      "path": "CodeMirrorEditor.html",
+      "title": "CodeMirrorEditor",
+      "summary": "A CodeMirror editor, filling its parent:  what every code editor in the app is.",
+      "sections": [
+        {"id":"1-what-it-looks-like","title":"1. What it looks like"},
+        {"id":"2-using-it","title":"2. Using it"},
+        {"id":"3-props","title":"3. Props, and where it's drawn"},
+        {"id":"4-its-code","title":"4. Its code"}
+      ]
+    },
+    {
       "path": "ConsoleLines.html",
       "title": "ConsoleLines",
       "summary": "Console lines, groups and logged values:  what every console draws its lines with.",
@@ -129,7 +140,7 @@
     {
       "path": "FileEditor.html",
       "title": "FileEditor",
-      "summary": "A Monaco editor on one spell file, kept in step with it.",
+      "summary": "A CodeMirror editor on one Spell file at a time, kept in step with it.",
       "sections": [
         {"id":"1-what-it-looks-like","title":"1. What it looks like"},
         {"id":"2-using-it","title":"2. Using it"},
@@ -154,17 +165,6 @@
       "summary": "Markdown text, such as a docstring, drawn as HTML.",
       "sections": [
         {"id":"1-example","title":"1. Example"},
-        {"id":"2-using-it","title":"2. Using it"},
-        {"id":"3-props","title":"3. Props, and where it's drawn"},
-        {"id":"4-its-code","title":"4. Its code"}
-      ]
-    },
-    {
-      "path": "MonacoEditor.html",
-      "title": "MonacoEditor",
-      "summary": "A Monaco editor, filling its parent:  what every code editor in the app is.",
-      "sections": [
-        {"id":"1-what-it-looks-like","title":"1. What it looks like"},
         {"id":"2-using-it","title":"2. Using it"},
         {"id":"3-props","title":"3. Props, and where it's drawn"},
         {"id":"4-its-code","title":"4. Its code"}

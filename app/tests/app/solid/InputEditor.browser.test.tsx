@@ -2,27 +2,34 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 import { userEvent } from "vite-plus/test/browser"
+import { EditorView } from "@codemirror/view"
 
 import { reactiveObject } from "spell/util"
 import type { SP } from "spell/parser/spell"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { editor, type EditorStore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { CODE_POPUP_DEFAULTS, codeHover, type CodePopupChoices } from "spell/app/app/ui/codePopups"
+import {
+  CODE_POPUP_DEFAULTS,
+  codeHover,
+  codeMirrorOptionsFor,
+  type CodePopupChoices
+} from "spell/app/app/ui/codePopups"
+import { CodeMirrorPopups } from "spell/app/app/ui/codemirror"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { uiReady } from "spell/app/app/solid"
 import { CodeSettings } from "spell/app/app/solid/CodeSettings"
 import { FileDropdown } from "spell/app/app/solid/FileDropdown"
 import { FileTabs } from "spell/app/app/solid/FileTabs"
 import { InputEditor, InputRoot } from "spell/app/app/solid/InputEditor"
-import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
+import { LazyCodeMirror } from "spell/app/app/solid/LazyCodeMirror"
 import { OutputEditor } from "spell/app/app/solid/OutputEditor"
 
 /**
- * The Solid source editors on real Monaco, in the browser:
+ * The Solid source editors on real CodeMirror, in the browser:
  * `<InputEditor>` (lazy `<FileEditor>`, its error fallback), `<OutputEditor>`, `<FileDropdown>`, `<FileTabs>`.
  * - Files are FAKES, as spell cells (`reactiveObject()`):
- *   a `.js` file (no parse) with just what `SpellModels` and `editor` read.
+ *   a `.js` file (no parse) with just what `FileStates` and `editor` read.
  * - Why:  a real `SpellProject` loads from the API server, which tests don't have.
  */
 
@@ -34,25 +41,23 @@ afterEach(() => {
 })
 
 describe("<InputEditor>", () => {
-  test("loads Monaco lazily, shows `editor.file`'s text, and an edit reaches the file", async () => {
+  test("loads CodeMirror lazily, shows `editor.file`'s text, and an edit reaches the file", async () => {
     const onFileEdited = spyOnEditor("onFileEdited")
     const file = fakeFile("test-project/one.js", "let one = 1\n")
     setEditor("file", file)
     const host = await mount(() => <InputEditor />)
-    const inputEditor = await waitForInputEditor(host)
-    expect(host.querySelector(".InputEditor .MonacoEditor .monaco-editor")).not.toBeNull()
-    expect(inputEditor.getValue()).toBe("let one = 1\n")
-    expect(inputEditor.getModel()!.getLanguageId()).toBe("javascript")
+    const { view } = await waitForInputEditor(host)
+    expect(host.querySelector(".InputEditor .CodeMirrorEditor .cm-editor")).not.toBeNull()
+    expect(view.state.doc.toString()).toBe("let one = 1\n")
 
-    // a user edit:  into the file, through `SpellModels`, and on to `editor` (connected by `LazyMonaco`)
-    inputEditor.setPosition({ lineNumber: 2, column: 1 })
-    inputEditor.trigger("keyboard", "type", { text: "two" })
+    // an edit typed:  into the file, through its state (`FileStates`), and on to `editor` (`LazyCodeMirror`)
+    view.dispatch({ changes: { from: view.state.doc.length, insert: "two" }, userEvent: "input.type" })
     expect(file.contents).toBe("let one = 1\ntwo")
     expect(file.isDirty).toBe(true)
     expect(onFileEdited).toHaveBeenLastCalledWith(expect.objectContaining({ path: "test-project/one.js" }))
   })
 
-  test("a new file remakes the editor;  `initialSelection` is selected once it's made", async () => {
+  test("a new file shows in the same view, its own state;  `initialSelection` is selected once it's shown", async () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const host = await mount(() => <InputEditor />)
     const first = await waitForInputEditor(host)
@@ -61,30 +66,23 @@ describe("<InputEditor>", () => {
     two.initialSelection = { anchor: { line: 0, ch: 4, offset: 4 }, head: { line: 0, ch: 7, offset: 7 } }
     editor.file = two
     flush()
-    await expect.poll(() => editor.getInputEditor() !== first && editor.getInputEditor()?.getValue()).toBe("abc def\n")
-    const second = editor.getInputEditor()!
-    expect(host.querySelectorAll(".monaco-editor")).toHaveLength(1)
-    expect(second.getModel()!.getValueInRange(second.getSelection()!)).toBe("def")
+    await expect.poll(() => editor.getInputEditor()?.view.state.doc.toString()).toBe("abc def\n")
+    const { view } = editor.getInputEditor()!
+    expect(editor.getInputEditor()).toBe(first)
+    expect(host.querySelectorAll(".cm-editor")).toHaveLength(1)
+    await expect
+      .poll(() => view.state.sliceDoc(view.state.selection.main.from, view.state.selection.main.to))
+      .toBe("def")
     expect(two.initialSelection).toBeUndefined()
   })
 
-  test("the code starts 9px down, so its first band's top is 12px under the file tabs (I187)", async () => {
-    setEditor("file", fakeFile("test-project/one.js", "let one = 1\n"))
-    const host = await mount(() => <InputEditor />)
-    const inputEditor = await waitForInputEditor(host)
-    const { monaco } = await import("spell/app/app/solid/monaco")
-    expect(inputEditor.getOption(monaco.editor.EditorOption.padding).top).toBe(9)
-    expect(inputEditor.getTopForLineNumber(1)).toBe(9)
-  })
-
-  test("unmounting disposes of the editor;  `editor` forgets it", async () => {
+  test("unmounting destroys the editor;  `editor` forgets it", async () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const dispose = await mountKept(() => <InputEditor />)
-    const inputEditor = await waitForInputEditor(dispose.host)
-    const { monaco } = await import("spell/app/app/solid/monaco")
-    expect(monaco.editor.getEditors()).toContain(inputEditor)
+    const { view } = await waitForInputEditor(dispose.host)
+    expect(view.dom.isConnected).toBe(true)
     dispose()
-    expect(monaco.editor.getEditors()).not.toContain(inputEditor)
+    expect(view.dom.isConnected).toBe(false)
     expect(editor.getInputEditor()).toBeUndefined()
   })
 
@@ -92,7 +90,7 @@ describe("<InputEditor>", () => {
     const showError = vi.fn()
     const onInputChanged = spyOnEditor("onInputChanged")
     const file = fakeFile("test-project/broken.js", "broken text")
-    // `SpellModels.modelFor()` reads it:  the normal editor throws while rendering
+    // the file's state reads it (`FileStates`):  the normal editor throws as it shows the file
     Object.defineProperty(file.project, "spellFiles", {
       get() {
         throw new Error("Broken on purpose")
@@ -100,33 +98,27 @@ describe("<InputEditor>", () => {
     })
     setEditor("file", file)
     const host = await mount(() => <InputEditor showError={showError} />)
-    const fallback = await waitForInputEditor(host)
+    await expect.poll(() => showError.mock.calls.length, { timeout: 20_000 }).toBeGreaterThan(0)
     expect(showError).toHaveBeenCalledWith(expect.objectContaining({ message: "Broken on purpose" }))
-    expect(fallback.getValue()).toBe("broken text")
-    expect(fallback.getModel()!.getLanguageId()).toBe("plaintext")
+    const fallback = await viewIn(host)
+    expect(fallback.state.doc.toString()).toBe("broken text")
 
-    fallback.setPosition({ lineNumber: 1, column: 12 })
-    fallback.trigger("keyboard", "type", { text: "!" })
+    fallback.dispatch({ changes: { from: 11, insert: "!" }, userEvent: "input.type" })
     expect(onInputChanged).toHaveBeenCalledWith("broken text!")
   })
 })
 
 describe("<OutputEditor>", () => {
-  test("shows the compiled javascript, read-only;  its own model goes with it", async () => {
-    const { monaco } = await import("spell/app/app/solid/monaco")
-    const modelsBefore = monaco.editor.getModels().length
+  test("shows the compiled javascript, read-only;  its view goes with it", async () => {
     const file = fakeFile("test-project/one.js", "")
     Object.assign(file, { compiled: "export const one = 1" })
     setEditor("file", file)
     const dispose = await mountKept(() => <OutputEditor />)
-    await expect.poll(() => monaco.editor.getEditors().length).toBe(1)
-    const output = monaco.editor.getEditors()[0]
-    expect(output.getValue()).toBe("export const one = 1")
-    expect(output.getOption(monaco.editor.EditorOption.readOnly)).toBe(true)
-    expect(monaco.editor.getModels().length).toBe(modelsBefore + 1)
+    const output = await viewIn(dispose.host)
+    await expect.poll(() => output.state.doc.toString()).toBe("export const one = 1")
+    expect(output.state.readOnly).toBe(true)
     dispose()
-    expect(monaco.editor.getEditors()).toHaveLength(0)
-    expect(monaco.editor.getModels().length).toBe(modelsBefore)
+    expect(output.dom.isConnected).toBe(false)
   })
 })
 
@@ -218,9 +210,9 @@ describe("<InputRoot>", () => {
     expect(bare.querySelector(".FileTabs")).toBeNull()
   })
 
-  test("`LazyMonaco.Loading` is what shows while Monaco loads", async () => {
-    const host = await mount(() => <LazyMonaco.Loading />)
-    expect(text(host.querySelector(".MonacoEditor")!)).toBe("Loading editor…")
+  test("`LazyCodeMirror.Loading` is what shows while CodeMirror loads", async () => {
+    const host = await mount(() => <LazyCodeMirror.Loading />)
+    expect(text(host.querySelector(".CodeMirrorEditor")!)).toBe("Loading editor…")
   })
 })
 
@@ -365,53 +357,42 @@ describe("<FileTabs>", () => {
 })
 
 describe("CodeSettings", () => {
-  test("a new editor starts on the defaults:  hover only with ⌥, Monaco's own suggestions off, no details", async () => {
+  test("a new editor starts on the defaults:  hover only with ⌥, suggestions only where they help, no details", async () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const host = await mount(() => <InputEditor />)
-    const inputEditor = await waitForInputEditor(host)
-    const { monaco } = await import("spell/app/app/solid/monaco")
-    const option = monaco.editor.EditorOption
+    const { view } = await waitForInputEditor(host)
     expect(CodeSettings.choices).toEqual(CODE_POPUP_DEFAULTS)
-    expect(inputEditor.getOption(option.hover).enabled).toBe("onKeyboardModifier")
-    // ⌘ / Ctrl adds cursors, so ⌥ is the hover's key
-    expect(inputEditor.getOption(option.multiCursorModifier)).not.toBe("altKey")
-    expect(inputEditor.getOption(option.quickSuggestions)).toEqual({ other: "off", comments: "off", strings: "off" })
-    expect(inputEditor.getOption(option.suggestOnTriggerCharacters)).toBe(false)
-    expect(inputEditor.getOption(option.suggest).showInlineDetails).toBe(false)
-    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(false)
-    expect(inputEditor.getOption(option.stickyScroll).enabled).toBe(false)
+    expect(CodeMirrorPopups.of(view.state)).toEqual(codeMirrorOptionsFor(CODE_POPUP_DEFAULTS))
+    expect(CodeMirrorPopups.of(view.state)).toMatchObject({ hoverInfo: "withAlt", suggest: "whereItHelps" })
     expect(codeHover.detail).toBe("plain")
-    expect(inputEditor.getContainerDomNode().classList.contains("suggest-details-hidden")).toBe(true)
+    expect(view.dom.classList.contains("suggest-details-hidden")).toBe(true)
   })
 
   test("a choice applies at once to every editor, and is remembered", async () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const host = await mount(() => <InputEditor />)
-    const inputEditor = await waitForInputEditor(host)
-    const { monaco } = await import("spell/app/app/solid/monaco")
-    const option = monaco.editor.EditorOption
+    const { view } = await waitForInputEditor(host)
     choose("hover", "always")
     choose("suggest", "everywhere")
     choose("suggestDetails", true)
     choose("parameterHints", true)
     choose("pinnedLines", true)
     choose("compilerWords", true)
-    expect(inputEditor.getOption(option.hover).enabled).toBe("on")
-    expect(inputEditor.getOption(option.multiCursorModifier)).toBe("altKey")
-    expect(inputEditor.getOption(option.quickSuggestions)).toEqual({ other: "on", comments: "off", strings: "off" })
-    expect(inputEditor.getOption(option.suggestOnTriggerCharacters)).toBe(true)
-    expect(inputEditor.getOption(option.suggest).showInlineDetails).toBe(true)
-    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(true)
-    expect(inputEditor.getOption(option.stickyScroll).enabled).toBe(true)
+    expect(CodeMirrorPopups.of(view.state)).toMatchObject({
+      hoverInfo: "always",
+      suggest: "everywhere",
+      suggestDetails: true,
+      signatureHelp: true
+    })
     expect(codeHover.detail).toBe("full")
-    expect(inputEditor.getContainerDomNode().classList.contains("suggest-details-hidden")).toBe(false)
+    expect(view.dom.classList.contains("suggest-details-hidden")).toBe(false)
     expect(editorPrefs.get("codeHover")).toBe("always")
     expect(editorPrefs.get("codeSuggestDetails")).toBe(true)
 
     // a new editor takes them too
-    const other = monaco.editor.create(document.createElement("div"))
-    expect(other.getOption(option.hover).enabled).toBe("on")
-    other.dispose()
+    const other = new EditorView({ parent: host, extensions: CodeMirrorPopups.extension() })
+    expect(CodeMirrorPopups.of(other.state).hoverInfo).toBe("always")
+    other.destroy()
   })
 
   test("Edit › Code Editor Settings… shows the settings panel over the code;  its controls choose", async () => {
@@ -530,12 +511,16 @@ async function mountKept(component: () => unknown): Promise<(() => void) & { hos
   return Object.assign(dispose, { host })
 }
 
-/** The input editor in `host`, once Monaco has loaded and made it. */
+/** The input editor in `host`, once CodeMirror has loaded and made it. */
 async function waitForInputEditor(host: HTMLElement) {
-  await expect
-    .poll(() => host.querySelector(".monaco-editor") && editor.getInputEditor(), { timeout: 20_000 })
-    .toBeTruthy()
+  await expect.poll(() => host.querySelector(".cm-editor") && editor.getInputEditor(), { timeout: 20_000 }).toBeTruthy()
   return editor.getInputEditor()!
+}
+
+/** The CodeMirror view in `host`, once CodeMirror has loaded and made it. */
+async function viewIn(host: HTMLElement): Promise<EditorView> {
+  await expect.poll(() => host.querySelector(".cm-editor"), { timeout: 20_000 }).toBeTruthy()
+  return EditorView.findFromDOM(host.querySelector<HTMLElement>(".cm-editor")!)!
 }
 
 /** Text of `element`, trimmed. */

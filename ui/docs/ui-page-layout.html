@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Page layout | Spell UI</title>
+    <meta
+      name="description"
+      content="A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Page layout">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-page-layout%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Page layout
+            <ui-header>A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-a-site-s-frame" label="A site's frame" sticky="stack" collapsible dividing>
+                <ui-example description="A site&#x27;s top bar in `menu`, its side navigation in `drawer`, the page&#x27;s tabs in `page-menu`, a footer, and the page itself.  The drawer runs the whole height;  the top bar meets it with no gap, the page sits a little in from it.  The button in the top bar is a `&lt;ui-site-nav-button&gt;`:  press it to show only the drawer&#x27;s icons.">
+                  <ui-page-layout style="min-height: 18em">
+                    <ui-app-menu slot="menu">
+                      <ui-site-nav-button slot="start"></ui-site-nav-button>
+                      <ui-site-breadcrumbs slot="start"></ui-site-breadcrumbs>
+                      <ui-button slot="end" icon="bell" appearance="tertiary" size="small" title="Notices"></ui-button>
+                    </ui-app-menu>
+                    <ui-site-tabs slot="page-menu"></ui-site-tabs>
+                    <ui-site-nav
+                      slot="drawer"
+                      appearance="nav"
+                      current="#api"
+                      pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Parts", "id": "group:Parts", "band": "group", "icon": "cubes", "pages": [{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }] }]'
+                    ></ui-site-nav>
+                    <p>The page goes here.  Going to another page redraws only this part.</p>
+                    <ui-text slot="footer" color="grey">Made with Spell</ui-text>
+                  </ui-page-layout>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-compact-drawer" label="Compact drawer" sticky="stack" collapsible dividing>
+                <ui-example description="`drawer=&quot;compact&quot;`:  the drawer shows only its icons.  Rest the pointer on it and it opens over the page, all of it, without pushing the page;  move away and it closes.">
+                  <ui-page-layout drawer="compact" style="min-height: 12em">
+                  <ui-site-nav
+                    slot="drawer"
+                    appearance="nav"
+                    current="#api"
+                    pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Parts", "id": "group:Parts", "band": "group", "icon": "cubes", "pages": [{ "title": "Button", "tab": "Usage", "href": "#usage", "icon": "hand pointer outline", "pages": [{ "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }] }]'
+                  ></ui-site-nav>
+                    <p>The page keeps its place while the drawer opens over it.</p>
+                  </ui-page-layout>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-side-bars" label="Side bars" sticky="stack" collapsible dividing>
+                <ui-example description="`left` and `right` are side bars either side of the page, under the menus.  A region with nothing in it takes no room:  here there&#x27;s no drawer and no menu.">
+                  <ui-page-layout>
+                    <ui-segment slot="left">On the left</ui-segment>
+                    <p>The page, between its side bars.</p>
+                    <ui-segment slot="right">On the right</ui-segment>
+                  </ui-page-layout>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-narrow" label="Narrow" sticky="stack" collapsible dividing>
+                <ui-example description="Below 40em of its own box, not the window&#x27;s, it&#x27;s one column:  the drawer slides over the page from the start.  With no `&lt;ui-site-nav-button&gt;` inside, the layout draws its own menu button;  Escape, or going to a page, closes the drawer.">
+                  <ui-page-layout style="max-width: 30em; min-height: 14em">
+                  <ui-site-nav
+                    slot="drawer"
+                    appearance="nav"
+                    current="#api"
+                    pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Parts", "id": "group:Parts", "band": "group", "icon": "cubes", "pages": [{ "title": "Button", "tab": "Usage", "href": "#usage", "icon": "hand pointer outline", "pages": [{ "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }] }]'
+                  ></ui-site-nav>
+                    <p>Press the menu button to slide the drawer in.</p>
+                  </ui-page-layout>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Put the regions around a page in its slots, and the page itself in no slot.  A Spell site draws it once and puts each page in it, so going between pages redraws only the page:  the top bar, the drawer's open folders and the side bars stay as they are.
+                  - `menu`:  the app's top bar, a `<ui-app-menu>`, with a `<ui-site-nav-button>` and `<ui-site-breadcrumbs>` at its start.
+                  - `page-menu`:  a row of its own under it, usually `<ui-site-tabs>`.
+                  - `drawer`:  the side navigation, a `<ui-site-nav>`, a column the whole height at the start.
+                  - `left`, `right`:  side bars either side of the page;  `footer`:  across the bottom.
+                  - A region with nothing in it takes no room at all.
+                  - `drawer="compact"` shows only the drawer's icons:  the layout sets `collapsed` on each `<ui-site-nav>` in it.
+                  - `toggleDrawer()`, what a `<ui-site-nav-button>` calls:  narrow, slides the drawer in or out;  wide, switches `drawer` and sends `ui-toggle`, `{ newState, oldState }`, each `compact` or `full`.  The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  const layout = document.querySelector("ui-page-layout")
+                  layout.addEventListener("ui-toggle", (event) => {
+                    localStorage.setItem("drawer", event.detail.newState)
+                  })
+                  if (localStorage.getItem("drawer") === "compact") layout.setAttribute("drawer", "compact")
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Escape closes the drawer open over the page.  The keyboard's focus coming into a compact drawer opens it at once, and closes it as it leaves.  Inside, the side navigation's own keys walk its pages.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  It adds no landmark of its own, as it's drawn inside another page (Run draws a site inside the editor):  the side navigation is a `nav`, and the page's own content brings the rest.  Its own menu button says `aria-expanded`, and so does a `<ui-site-nav-button>`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-page-layout" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-page-layout" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-page-layout" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-page-layout" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-page-layout" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-page-layout" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-page-layout" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-page-layout style="min-height: 18em">
+                  <ui-app-menu slot="menu">
+                    <ui-site-nav-button slot="start"></ui-site-nav-button>
+                    <ui-site-breadcrumbs slot="start"></ui-site-breadcrumbs>
+                    <ui-button slot="end" icon="bell" appearance="tertiary" size="small" title="Notices"></ui-button>
+                  </ui-app-menu>
+                  <ui-site-tabs slot="page-menu"></ui-site-tabs>
+                  <ui-site-nav
+                    slot="drawer"
+                    appearance="nav"
+                    current="#api"
+                    pages='[{ "title": "Home", "href": "#home", "icon": "home" }, { "title": "Parts", "id": "group:Parts", "band": "group", "icon": "cubes", "pages": [{ "title": "Button", "tab": "Usage", "href": "#usage", "pages": [{ "title": "API", "href": "#api" }, { "title": "Theming", "href": "#theming" }] }] }]'
+                  ></ui-site-nav>
+                  <p>The page goes here.  Going to another page redraws only this part.</p>
+                  <ui-text slot="footer" color="grey">Made with Spell</ui-text>
+                </ui-page-layout>
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

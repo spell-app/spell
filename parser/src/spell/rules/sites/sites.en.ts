@@ -35,6 +35,12 @@ sites.addRule(Synonyms.specialize({ ruleName: "site_sidebar" }), { syntax: "(sid
 // a site's top bar, for `site_overlay`:  `- it has a top bar`, `- it has an app bar` (epic `mockup` T35)
 sites.addRule(Wording.specialize({ ruleName: "site_top_bar", meanings: [] }), { syntax: "(top bar|app bar)" })
 
+// the page layout every page of a site is in, unless its line says otherwise (epic `mockup` T39):
+// `main layout is a page layout`
+sites.addRule(Wording.specialize({ ruleName: "site_main_layout", meanings: [] }), {
+  syntax: "(main layout|main page layout)"
+})
+
 // what state a site's page is in, last on its line:  `- it has a films page at "/films", old` (epic `mockup` P13, T14)
 sites.addRule(Wording.specialize({ ruleName: "site_page_state", meanings: ["old", "new", "mocked", "built"] }), {
   syntax: "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
@@ -419,6 +425,7 @@ sites.addRule(SitePartWords, {
 
 // a site, and where it lives:  `spell ui is a site at "owen@spell/spell-ui":`, `galaxy guide is a site in the cloud`
 sites.addRule(CreateSite, {
+  roles: { band: "thing", type: "declaration" },
   syntax:
     "{type:type_words} is (a|an) {superType:type} (at {address:text}|(cloud:in the cloud))? {with_nested_statements}?",
   tests: [
@@ -606,26 +613,41 @@ sites.addRule(CreateSite, {
           ]
         },
         {
-          title: "a top bar, its buttons a view of its name, over every page but one that says no top bar (T35)",
+          title: "a page picks its layout on its line;  the site's main layout is every other page's (T39)",
           input: [
-            'a "home page" is a page',
-            'a "login page" is a page',
-            'a "top bar" is a view',
+            "main layout is a page layout",
+            "bare layout is a page layout",
+            "home page is a page",
+            "login page is a page, no layout",
+            "print page is a page, in the bare layout",
             "galaxy guide is a site:",
-            "\t- it has a top bar",
             '\t- it has a home page at "/"',
-            '\t- it has a login page at "/login", no top bar'
+            '\t- it has a login page at "/login"',
+            '\t- it has a print page at "/print"'
           ],
           js: [
+            "export class MainLayout extends PageLayout {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export const mainLayout = new MainLayout()",
+            "export class BareLayout extends PageLayout {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export const bareLayout = new BareLayout()",
             "export class HomePage extends Page {",
             '  static elementTag = core.defineElement(this, "test_sites")',
             "}",
+            "export const homePage = new HomePage()",
             "export class LoginPage extends Page {",
             '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static layout = false",
             "}",
-            "export class TopBar extends View {",
+            "export const loginPage = new LoginPage()",
+            "export class PrintPage extends Page {",
             '  static elementTag = core.defineElement(this, "test_sites")',
+            '  static layout = "BareLayout"',
             "}",
+            "export const printPage = new PrintPage()",
             "export class GalaxyGuide extends Site {",
             '  static elementTag = core.defineElement(this, "test_sites")',
             "  static pages = [{",
@@ -635,14 +657,47 @@ sites.addRule(CreateSite, {
             "  }, {",
             '    name: "login page",',
             '    page: "LoginPage",',
-            '    address: "/login",',
-            "    noTopBar: true",
+            '    address: "/login"',
+            "  }, {",
+            '    name: "print page",',
+            '    page: "PrintPage",',
+            '    address: "/print"',
             "  }]",
-            '  static topBar = { name: "top bar", view: "TopBar" }',
+            '  static mainLayout = "MainLayout"',
             "}",
             "export const galaxyGuide = new GalaxyGuide()"
           ],
           ts: [
+            "export class MainLayout extends PageLayout {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-main-layout>`:  a main layout, drawn in its own element, e.g. by `draw the main layout`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its main layout's properties;  its methods call its main layout's.",
+            " * - What every view's element does, e.g. drawing its main layout, is `SpellElement`'s.",
+            " */",
+            "export class MainLayoutElement extends SpellElement<MainLayout> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-main-layout", "main layout", [])',
+            "}",
+            "core.useElement(MainLayout, MainLayoutElement)",
+            "export const mainLayout = new MainLayout()",
+            "export class BareLayout extends PageLayout {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-bare-layout>`:  a bare layout, drawn in its own element, e.g. by `draw the bare layout`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its bare layout's properties;  its methods call its bare layout's.",
+            " * - What every view's element does, e.g. drawing its bare layout, is `SpellElement`'s.",
+            " */",
+            "export class BareLayoutElement extends SpellElement<BareLayout> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-bare-layout", "bare layout", [])',
+            "}",
+            "core.useElement(BareLayout, BareLayoutElement)",
+            "export const bareLayout = new BareLayout()",
             "export class HomePage extends Page {",
             '  static elementTag = core.defineElement(this, "test_sites")',
             "}",
@@ -657,8 +712,10 @@ sites.addRule(CreateSite, {
             '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-home-page", "home page", [])',
             "}",
             "core.useElement(HomePage, HomePageElement)",
+            "export const homePage = new HomePage()",
             "export class LoginPage extends Page {",
             '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static layout = false",
             "}",
             "",
             "/**",
@@ -671,20 +728,23 @@ sites.addRule(CreateSite, {
             '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-login-page", "login page", [])',
             "}",
             "core.useElement(LoginPage, LoginPageElement)",
-            "export class TopBar extends View {",
+            "export const loginPage = new LoginPage()",
+            "export class PrintPage extends Page {",
             '  static elementTag = core.defineElement(this, "test_sites")',
+            '  static layout = "BareLayout"',
             "}",
             "",
             "/**",
-            " * `<test-sites-top-bar>`:  a top bar, drawn in its own element, e.g. by `draw the top bar`.",
+            " * `<test-sites-print-page>`:  a print page, drawn in its own element, e.g. by `draw the print page`.",
             " * - The page defines its tag with this class:  `core.useElement()`, below.",
-            " * - Its attributes are its top bar's properties;  its methods call its top bar's.",
-            " * - What every view's element does, e.g. drawing its top bar, is `SpellElement`'s.",
+            " * - Its attributes are its print page's properties;  its methods call its print page's.",
+            " * - What every view's element does, e.g. drawing its print page, is `SpellElement`'s.",
             " */",
-            "export class TopBarElement extends SpellElement<TopBar> {",
-            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-top-bar", "top bar", [])',
+            "export class PrintPageElement extends SpellElement<PrintPage> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-print-page", "print page", [])',
             "}",
-            "core.useElement(TopBar, TopBarElement)",
+            "core.useElement(PrintPage, PrintPageElement)",
+            "export const printPage = new PrintPage()",
             "export class GalaxyGuide extends Site {",
             '  static elementTag = core.defineElement(this, "test_sites")',
             "  static pages = [{",
@@ -694,10 +754,13 @@ sites.addRule(CreateSite, {
             "  }, {",
             '    name: "login page",',
             '    page: "LoginPage",',
-            '    address: "/login",',
-            "    noTopBar: true",
+            '    address: "/login"',
+            "  }, {",
+            '    name: "print page",',
+            '    page: "PrintPage",',
+            '    address: "/print"',
             "  }]",
-            '  static topBar = { name: "top bar", view: "TopBar" }',
+            '  static mainLayout = "MainLayout"',
             "}",
             "",
             "/**",
@@ -747,6 +810,7 @@ sites.addRule(CreateSite, {
 
 // a page of a site, at its address:  `- it has a film page at "/films/:film", named "Film"`
 sites.addRule(SitePage, {
+  roles: { band: "property" },
   syntax: `{type:subject_it} has (a|an) {part:site_part_words} at {address:text} ${PAGE_DETAILS} ${CARD_DETAILS} {with_nested_statements}?`
 })
 

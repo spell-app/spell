@@ -122,17 +122,6 @@ ui-item.ThemeMenu ui-theme-menu {
   }
 }
 
-/* Monaco's own scrollbar (it draws its own, not the browser's):  the same round thumb */
-#app-root .monaco-scrollable-element > .scrollbar > .slider {
-  border-radius: 999px;
-}
-
-/* Monaco's touch-keyboard button (`.iPadShowKeyboard`), on a phone:  it sat over the code, and a tap on the code
-   brings the keyboard up anyway */
-#app-root .monaco-editor .iPadShowKeyboard {
-  display: none;
-}
-
 /* `Actions.you`:  the person's avatar, a round button */
 .YouAvatar {
   display: inline-flex;

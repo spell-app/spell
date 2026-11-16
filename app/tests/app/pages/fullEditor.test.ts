@@ -4,7 +4,7 @@ import path from "node:path"
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, KIT, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, KIT, SERVING } from "./runningEditor"
 
 /**
  * The editor in itself (epic `editor` P22, P29):  its own Spell is ONE project of the group `@spell/editor`,
@@ -58,9 +58,9 @@ describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
 
   test("the editor's Spell opens as a project:  its code shows", async () => {
     await page.goto(`${EDITOR}edit/@spell/editor/spell-editor`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     expect(
-      await until(() => /spell\seditor/.test(document.querySelector(".InputEditor .view-lines")?.textContent ?? ""))
+      await until(() => /spell\seditor/.test(document.querySelector(".InputEditor .cm-content")?.textContent ?? ""))
     ).toBe(true)
   })
 

@@ -89,12 +89,10 @@
  * - Merlot too:  the code on its wine panel, not a navy block in dark (Owen's pick, epic `debut` P17, Q4)
  * - Spell too (its facelift, epic `debut` P19):  dark, the code on the aubergine panel, not Purple's navy block
  * - every theme since P20:  a navy block sat on Paper's lamplit brown, and in every new theme
- * - the lines stuck at the top while scrolling take the panel, as painted over the page (`CodeThemes`):
- *   the code scrolls under them
  */
-:root[data-spell-theme] .monaco-editor {
-  --vscode-editor-background: transparent;
-  --vscode-editorGutter-background: transparent;
+:root[data-spell-theme] .cm-editor,
+:root[data-spell-theme] .cm-editor .cm-gutters {
+  background-color: transparent;
 }
 
 /* Spell:  white cards with soft shadows on the brand's pale page;  the bar has no fill or line */

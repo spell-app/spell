@@ -95,7 +95,7 @@ const OUTPUT_ROOM = 440
  *   It's a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
- * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
+ * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside the code (`editorHotkeys()`).
  * - SIDE EFFECT:  watches the open file for changes from outside while it's up (`editor.watchOpenFile()`).
  ****************/
 export function SpellEditor(props: { mode: Mode }) {

@@ -1,5 +1,4 @@
 "statistic usage" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Statistic
 		<header>A statistic emphasizes the current value of an attribute.</>

@@ -3,7 +3,7 @@ import { render } from "@solidjs/web"
 
 import { uiReady } from "spell/app/app/solid/loadUI"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
+import { LazyCodeMirror } from "spell/app/app/solid/LazyCodeMirror"
 
 import "./PublishClash.css"
 
@@ -42,8 +42,8 @@ export function PublishClash(props: PublishClashProps) {
                 <h5>{appTexts.text("publishClashTheirs")}</h5>
                 <h5>{appTexts.text("publishClashMine")}</h5>
               </div>
-              <Loading fallback={<LazyMonaco.Loading />}>
-                <LazyMonaco.DiffView
+              <Loading fallback={<LazyCodeMirror.Loading />}>
+                <LazyCodeMirror.DiffView
                   theirs={clash.theirs}
                   mine={clash.mine}
                   onChange={(text) => merged.set(clash.filePath, text)}

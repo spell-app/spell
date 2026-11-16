@@ -33,6 +33,7 @@ core.addRule(Newline)
 core.addRule(InlineWhitespace)
 
 core.addRule(NumberLiteral, {
+  roles: { match: "written value" },
   tests: [
     {
       title: "correctly matches numbers",
@@ -156,6 +157,7 @@ core.addRule(
 )
 
 core.addRule(TextLiteral, {
+  roles: { match: "written value" },
   tests: [
     {
       title: "correctly matches text",

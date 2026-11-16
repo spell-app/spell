@@ -10,7 +10,7 @@
 
 /*
  * a split panel inside another doesn't cut what its panes draw at its edges:  a pane's shadow shows beyond its round corners,
- * or the corners of the panel's square box show dark behind them (Owen:  "Dark background behind corners of e.g. monaco
+ * or the corners of the panel's square box show dark behind them (Owen:  "Dark background behind corners of e.g. code
  * panels, loses rounding");  each pane still cuts its own content
  */
 .SpellPage ui-split-panel ui-split-panel {

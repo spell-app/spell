@@ -154,7 +154,7 @@ UIEs.addRule(Notify, {
   syntax:
     "notificar {kind:notify_kind}? {message:expression} (titulado {title:expression})?" +
     " (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}?" +
-    " ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))?" +
+    " ((durante ({time:measure_literal}|{time:expression} {unit:unit_words}))|(untilClicked:hasta un clic|hasta que se haga clic))?" +
     " {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)?" +
     " (con {okButton:text})? (wait:y esperar)?",
   tests: [

@@ -135,7 +135,7 @@ spell lint Card.spell
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart TB
-  browser["the editor in your browser:  Monaco calls it in the page"] -- "spell:/@spell/…/Card.spell" --> service
+  browser["the editor in your browser:  CodeMirror calls it in the page"] -- "spell:/@spell/…/Card.spell" --> service
   vscode["VS Code:  the server, over stdio"] -- "file:///…/Card.spell" --> service
   cli["the command line:  spell lint, format, describe …"] -- "file:///…/Card.spell" --> service
   service["SpellLanguageService:  one method per request"] --> parse["the parse:  each file's match, and the scope it left"]
@@ -157,7 +157,7 @@ and return the protocol's own shapes (`Hover`, `CompletionItem[]` ...), so any h
 
 ### In the browser:  no server at all
 
-The editor's Monaco calls the service in the page, and converts each answer to Monaco's own shapes
+The editor's CodeMirror calls the service in the page, and converts each answer to CodeMirror's own shapes
 ([spell-app's README-app.md](README-app.md) has the editor).
 - Its files are the page's, loaded from the page server, at addresses like
   `spell:/@spell/examples/Solitaire/Solitaire.spell`.
@@ -346,7 +346,7 @@ The extension's compiled views and its Run Project panel ask the server for more
 | `spell/scopeDetails` `{ uri, path }` | one node's details, fetched when it's shown |
 | `spell/setDescription` `{ uri, line \| file, text }` | an edit making `text` the docstring of what's declared on that line:  sent back for the editor to apply, so it can be undone |
 | `spell/lineTree` `{ uri, line }` | one line's Spell tree, as `<ui-tree-diagram>` draws it |
-| `spell/bubbly` `{ uri }` | the file in the bubbly look, stretch by stretch:  each one's range and what it is (a reference, a mark, what a person typed ...), the part of speech of the band it's on, the name a head defines;  VS Code's decorations draw from it, as the app's Monaco editor draws from the same layout.  `[]` for a page file |
+| `spell/bubbly` `{ uri }` | the file in the bubbly look, stretch by stretch:  each one's range and what it is (a reference, a mark, what a person typed ...), the part of speech of the band it's on, the name a head defines;  VS Code's decorations draw from it, as the app's CodeMirror editor draws from the same layout.  `[]` for a page file |
 | `spell/testDiagnostics` `{ uri, tests }` | how the project's tests went, from the runner's Run Tests, as each of its files' errors:  every failed check under its own line, `it is the queen of spades should be yes`;  the extension shows them in a set of their own, `spell tests` |
 
 - "Cleanly" means no parse errors in any of the project's files:  a line that doesn't parse still compiles,
@@ -472,7 +472,7 @@ yarn vp test run --project lsp                           # its tests:  149, in s
 - `--compile` compiles each project first, in the order given, so a project another imports goes first;
   it stops on parse errors, as the server won't write a pack then either.
 - It runs from source:  no build.  Restart the server to run your change.
-- It MUST stay safe to run in a browser:  the editor's Monaco calls the same service in the page.
+- It MUST stay safe to run in a browser:  the editor's CodeMirror calls the same service in the page.
   The node-only files are left out of its entry, `spell/app/lsp`:
   the disk workspace, the server's process, its stdio guard and the scope pack script.
   [barrel.test.ts](tests/lsp/barrel.test.ts) checks the entry still loads.
@@ -497,7 +497,7 @@ yarn vp test run --project lsp                           # its tests:  149, in s
 
 ## See also
 
-- [The editor and the runners](README-app.md):  the browser editor, whose Monaco calls the service in the page
+- [The editor and the runners](README-app.md):  the browser editor, whose CodeMirror calls the service in the page
 - [The kit's VS Code page](https://github.com/spell-app/spell/blob/main/README-vscode.md):  installing the extension, its commands and settings,
   and which checkout's server a window runs
 - [spell-parser's parser page](https://github.com/spell-app/spell/blob/main/parser/README-parser.md):  the parse every answer here is read from

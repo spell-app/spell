@@ -22,9 +22,9 @@
  *   - `EditorZones`:  the app pane of the editor's own Spell, a zone per view (epic `editor` T63)
  *   - The pages and the router are `spell/app/app/pages`.
  * - The editor's panes (P6):
- *   console, match and AST viewers, type and thing explorers, the Monaco editors, `FileDropdown`, `FileTabs`.
+ *   console, match and AST viewers, type and thing explorers, the code editors, `FileDropdown`, `FileTabs`.
  * - NOTE: deliberately NOT here:
- *   - `./monaco`:  Monaco loads on first use, through `LazyMonaco`;  NEVER import it statically, types aside
+ *   - `./codemirror`:  CodeMirror loads on first use, through `LazyCodeMirror`;  NEVER import it statically, types aside
  *   - `./modals`:  `editor.ts` imports it on first use (`import()`), so the editor never loads Solid up front
  * - NOTE: runner bundles import the files they need DIRECTLY (`spell/app/app/solid/ThingExplorer`, `.../loadUI`):
  *   this barrel pulls in the editor.
@@ -60,7 +60,7 @@ export * from "./ScopeDetailsPane"
 export * from "./SpellReference"
 export * from "./TypeExplorer"
 export * from "./ThingExplorer"
-export * from "./LazyMonaco"
+export * from "./LazyCodeMirror"
 export * from "./InputEditor"
 export * from "./CodeSettings"
 export * from "./OutputEditor"

@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { ShadowTree } from "spell/ui/test-helpers/ShadowTree"
 import { UISiteTabs, type SiteTabsPage } from "spell/ui/components/ui-site-tabs"
 
 /** A site:  Button (its tabs say Usage ...), Divider with no sub-pages, a page with a parameter, a group of pages. */
@@ -42,7 +43,7 @@ async function siteTabs({ current = "/button/api", width = 700 }: { current?: st
     `<ui-site-tabs current="${current}" style="width: ${width}px"></ui-site-tabs>`
   )
   host.setAttribute("pages", JSON.stringify(PAGES))
-  await settleDeep(host)
+  await ShadowTree.settle(host)
   return host
 }
 
@@ -123,7 +124,7 @@ describe("<ui-site-tabs>", () => {
   test("a new `current` moves the selected tab", async () => {
     const host = await siteTabs()
     host.setAttribute("current", "/button/examples")
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     expect(selected(host)).toEqual(["Examples"])
   })
 
@@ -134,22 +135,22 @@ describe("<ui-site-tabs>", () => {
     const nav = site.querySelector("ui-site-nav")!
     nav.setAttribute("pages", JSON.stringify(PAGES))
     const host = site.querySelector("ui-site-tabs")!
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     expect(words(host)).toEqual(["Usage", "Examples", "API", "Theming"])
     expect(selected(host)).toEqual(["API"])
     nav.setAttribute("current", "/films/stars")
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     expect(words(host)).toEqual(["Films", "Stars"])
     expect(selected(host)).toEqual(["Stars"])
     // its own `pages` win
     host.setAttribute("pages", JSON.stringify([{ title: "A", href: "#a", pages: [{ title: "B", href: "#b" }] }]))
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     expect(words(host)).toEqual([])
   })
 
   test("with no site navigation around it and no `pages`, draws nothing", async () => {
     const host = await ElementFixture.render(`<ui-site-tabs current="/button"></ui-site-tabs>`)
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     expect(items(host)).toEqual([])
   })
 
@@ -161,7 +162,7 @@ describe("<ui-site-tabs>", () => {
     host.addEventListener("ui-choosing", choosing)
     const click = new MouseEvent("click", { bubbles: true, composed: true, cancelable: true })
     link(host, "Usage").dispatchEvent(click)
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     expect(navigating).toHaveBeenCalledOnce()
     const { detail } = navigating.mock.calls[0]![0] as CustomEvent<{ href: string; page: SiteTabsPage }>
     expect(detail.href).toBe("/button")
@@ -178,7 +179,7 @@ describe("<ui-site-tabs>", () => {
       "pages",
       JSON.stringify([{ title: "A", href: "#a", pages: [{ title: "B", href: "#b" }] }] satisfies SiteTabsPage[])
     )
-    await settleDeep(host)
+    await ShadowTree.settle(host)
     const navigating = vi.fn()
     host.addEventListener("ui-navigating", navigating)
     const click = new MouseEvent("click", { bubbles: true, composed: true, cancelable: true })
@@ -244,19 +245,3 @@ describe("<ui-site-tabs>", () => {
     expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(8)
   })
 })
-
-/** Wait for every element in `host`'s shadow tree, all the way down. */
-async function settleDeep(host: Element) {
-  for (let round = 0; round < 4; round++) {
-    const hosts: Element[] = []
-    const walk = (root: ShadowRoot | null) => {
-      for (const element of root?.querySelectorAll("*") ?? []) {
-        hosts.push(element)
-        walk(element.shadowRoot)
-      }
-    }
-    walk(host.shadowRoot)
-    await Promise.all(hosts.flatMap((each) => (each as Element & { ready?: Promise<unknown> }).ready ?? []))
-    await ElementFixture.settle()
-  }
-}

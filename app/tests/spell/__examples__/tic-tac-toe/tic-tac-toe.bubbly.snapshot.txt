@@ -1,0 +1,156 @@
+==== /Square.spell
+⟪# A square⟫
+⟦// One of the board's nine:  empty, or holding an X or an O.⟧
+
+[thing create_type L0]
+| a «"square"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"mark"» is **text**
+|   |   ⟦// X or O, or empty while nobody has played it⟧
+|   [property quoted_type_expression L1]
+|   | it «"is empty"» if its **mark** is _""_    ‾value(its mark)
+|   [property property_value_getter L1]
+|   | its «"color"» is
+|   |   ⟦// The mark's color:  X blue, O red⟧
+|   |   _"blue"_ if its **mark** is _"X"_    ‾value(its mark)
+|   |   _"red"_ if its **mark** is _"O"_    ‾value(its mark)
+|   |   _"grey"_ otherwise
+|   [property property_value_getter L1]
+|   | its «"label"» is
+|   |   ⟦// What its button says:  its mark, or a no-break space so an empty square keeps its height⟧
+|   |   _" "_ if it is empty    ‾question(it is empty)
+|   |   its **mark** otherwise    ‾value(its mark)
+
+==== /TicTacToe.spell
+⟪# Tic-Tac-Toe⟫
+⟦// Two players take turns, X then O, putting their mark in an empty square.⟧
+⟦// Three in a row, across, down or corner to corner, wins;  nine marks and no row is a draw.⟧
+⟦// A square is this project's own, in `Square.spell`;⟧
+⟦// this file holds the game, its board, and what a click on a square does.⟧
+
+[thing create_one_of_a_kind L0]
+| «tic tac toe» is an **app**
+|   [property define_property_has L1]
+|   | «"board"» is **a new board**
+|   [property define_property_has L1]
+|   | its «"turn"» is **text**
+|   |   ⟦// Whose turn it is:  X or O⟧
+|   [property define_property_has L1]
+|   | its «"winner"» is **text**
+|   |   ⟦// Who won:  X, O, nobody for a draw, or empty while the game goes on⟧
+|   [property quoted_type_expression L1]
+|   | it «"is over"» if its **winner** is not _""_    ‾value(its winner)
+|   [property property_value_getter L1]
+|   | its «"message"» is
+|   |   ⟦// What the line above the board says⟧
+|   |   its **turn** + _" to play"_ if its **winner** is _""_    ‾value(its turn) ‾value(its winner)
+|   |   _"A draw"_ if its **winner** is _"nobody"_    ‾value(its winner)
+|   |   its **winner** + _" wins!"_ otherwise    ‾value(its winner)
+
+|   [action create_hook L1]
+|   | when «creating it»    ‾value(it)
+|   |   ⟦// Nine squares, made with the game⟧
+|   |   ⟦// inside the loop `it` is the count:  so the board is the game's, by name⟧
+|   |   [control repeat_n_times L2]
+|   |   | repeat _9_ times
+|   |   |   add **a new square** to **tic tac toe's board**    ‾value(a new square) ‾value(tic tac toe's board)
+
+|   [plain group define_group L1]
+|   | group «"Playing"»
+|   |   [action to_do_something L2]
+|   |   | to «start a new game»
+|   |   |   ⟦// An empty board, X to play⟧
+|   |   |   shortcut _N_
+|   |   |   [control list_iteration L3]
+|   |   |   | for **square** in its **board**    ‾value(its board)
+|   |   |   |   clear the **square's mark**    ‾value(the square's mark)
+|   |   |   set its **turn** to _"X"_    ‾value(its turn)
+|   |   |   clear its **winner**    ‾value(its winner)
+|   |   [action to_do_something L2]
+|   |   | to «check the line from square (a as a number) through (b as a number) to (c as a number)»    ‾value(a as a number) ‾value(b as a number) ‾value(c as a number) bold(a) bold(number) bold(b) bold(number) bold(c) bold(number)
+|   |   |   ⟦// the same mark in all three squares wins⟧
+|   |   |   set **mark** to the **mark** of square **a** of its **board**    ‾value(mark) ‾value(the mark of square a of its board)
+|   |   |   if **mark** is _""_ return    ‾value(mark)
+|   |   |   [control if L3]
+|   |   |   | if the **mark** of square **b** of its **board** is **mark** and the **mark** of square **c** of its **board** is **mark**    ‾value(the mark of square b of its board) ‾value(mark) ‾value(the mark of square c of its board) ‾value(mark)
+|   |   |   |   set its **winner** to **mark**    ‾value(its winner) ‾value(mark)
+|   |   [action to_do_something L2]
+|   |   | to «check for a winner»
+|   |   |   ⟦// Three in a row:  each row, each column, and the two diagonals;  a full board with none is a draw⟧
+|   |   |   check the line from square _1_ through _2_ to _3_    ‾call(check the line from square 1 through 2 to 3)
+|   |   |   check the line from square _4_ through _5_ to _6_    ‾call(check the line from square 4 through 5 to 6)
+|   |   |   check the line from square _7_ through _8_ to _9_    ‾call(check the line from square 7 through 8 to 9)
+|   |   |   check the line from square _1_ through _4_ to _7_    ‾call(check the line from square 1 through 4 to 7)
+|   |   |   check the line from square _2_ through _5_ to _8_    ‾call(check the line from square 2 through 5 to 8)
+|   |   |   check the line from square _3_ through _6_ to _9_    ‾call(check the line from square 3 through 6 to 9)
+|   |   |   check the line from square _1_ through _5_ to _9_    ‾call(check the line from square 1 through 5 to 9)
+|   |   |   check the line from square _3_ through _5_ to _7_    ‾call(check the line from square 3 through 5 to 7)
+|   |   |   [control if L3]
+|   |   |   | if its **winner** is _""_ and its **board** has no **squares** where it is empty    ‾value(its winner) ‾value(its board) ‾question(it is empty)
+|   |   |   |   set its **winner** to _"nobody"_    ‾value(its winner)
+
+|   |   [action to_do_something L2]
+|   |   | to **draw** it
+|   |   |   ⟦// The message, the board three squares a row, then a button for a new game⟧
+|   |   |   <⟨container⟩ width=«"22em"»>
+|   |   |     <⟨card⟩ fluid>
+|   |   |       <⟨content⟩>
+|   |   |         <⟨header⟩ level=«"2"» align=«"center"»>{its **message**}</⟨header⟩>    code({its message})
+|   |   |         {draw its **board**}
+|   |   |       </⟨content⟩>
+|   |   |       <⟨content⟩>
+|   |   |         <⟨button⟩ fluid color=«"primary"» onClick={start a new game}>New game</⟨button⟩>    code({start a new game})
+|   |   |       </⟨content⟩>
+|   |   |     </⟨card⟩>
+|   |   |   </⟨container⟩>
+
+⟪## The board⟫
+⟦// Nine squares, three a row:  square 1 top left, square 9 bottom right.⟧
+⟦// It draws each square as a big button, its mark in the mark's color;  a click plays it.⟧
+
+[thing create_list_type L0]
+| a «"board"» is a **list of squares**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   [control list_iteration L2]
+|   |   | for **square** in it    ‾value(it)
+|   |   |   <⟨column⟩>
+|   |   |     <⟨button⟩ fluid size=«"massive"» appearance=«"basic"» color={the **color** of the **square**} onClick={play the **square**}>    code({the color of the square}) code({play the square})
+|   |   |       {the **label** of the **square**}
+|   |   |     </⟨button⟩>
+|   |   |   </⟨column⟩>
+|   |   show them in: <grid columns=_"3"_ spacing=_"compact"_></grid>    ‾value(<grid columns="3" spacing="compact"></grid>)
+
+⟪## Playing a square⟫
+⟦// What a click on a square does, added to this project's square:  `<extend>` adds to a type another file declares.⟧
+
+[thing reopen_type L0]
+| a **square**
+|   [action to_do_something L1]
+|   | to «play it»
+|   |   ⟦// The turn's mark goes in the square, if it's empty and nobody has won;  then it's the other player's turn⟧
+|   |   if **tic tac toe** is over or it is not empty return    ‾question(tic tac toe is over) ‾question(it is not empty)
+|   |   set its **mark** to **tic tac toe's turn**    ‾value(its mark) ‾value(tic tac toe's turn)
+|   |   check for a winner    ‾call(check for a winner)
+|   |   set **tic tac toe's turn** to _"O"_ if **tic tac toe's turn** is _"X"_ otherwise _"X"_    ‾value(tic tac toe's turn) ‾value(tic tac toe's turn)
+
+[property belongs_to_one L0]
+| a **square** belongs to one **board**
+|   ⟦// a square is on one board⟧
+
+⟪## Start, and a test⟫
+
+start a new game    ‾call(start a new game)
+
+[action to_do_something L0]
+| to «test three in a row»
+|   start a new game    ‾call(start a new game)
+|   play square _1_ of **tic tac toe's board**    ‾call(play square 1 of tic tac toe's board)
+|   play square _4_ of **tic tac toe's board**    ‾call(play square 4 of tic tac toe's board)
+|   play square _2_ of **tic tac toe's board**    ‾call(play square 2 of tic tac toe's board)
+|   play square _5_ of **tic tac toe's board**    ‾call(play square 5 of tic tac toe's board)
+|   play square _3_ of **tic tac toe's board**    ‾call(play square 3 of tic tac toe's board)
+|   **tic tac toe's winner** should be _"X"_    ‾value(tic tac toe's winner)
+|   **tic tac toe's message** should be _"X wins!"_    ‾value(tic tac toe's message)
+|   the **color** of square _1_ of **tic tac toe's board** should be _"blue"_    ‾value(the color of square 1 of tic tac toe's board)
+|   start a new game    ‾call(start a new game)

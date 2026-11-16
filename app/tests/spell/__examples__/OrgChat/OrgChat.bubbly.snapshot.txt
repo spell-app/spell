@@ -1,0 +1,163 @@
+==== /OrgChat.api.spell
+⟪## Chat:  every thread you can read, live⟫
+⟦// Every team, project and event has two threads:  an open one in its shared space, which everyone in the org reads⟧
+⟦// and writes, and its organizers' in its private one, which only its Managers reach.  The Board and the Admins start⟧
+⟦// ad-hoc ones in the org's shared space too.⟧
+⟦// A thread is live:  a message shows on everyone's open page at once.  Each is written as the person who sent it,⟧
+⟦// so the space's own rules hold:  everyone deletes their own messages, and its Managers anyone's.⟧
+⟦// Your org is named on the next two lines:  "@rs/__thread" is whichever thread the page shows, picked from the list⟧
+⟦// down its side, and "@rs/__threads" is that list, every thread of RS you can read.⟧
+[thing create_place L0]
+| «chat» is a room at «"@rs/__thread"»
+[thing create_place L0]
+| «my threads» is a data folder at «"@rs/__threads"»
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+
+[thing create_type L0]
+| a «"message"» is a **thing**
+|   ⟦// A message:  what it says, when, and which ad-hoc thread it's in;  who sent it is the space's to say, `by`.⟧
+|   it lives in **chat**    ‾value(chat)
+|   [property define_property_has L1]
+|   | its «"text"» is **text**
+|   [property define_property_has L1]
+|   | its «"by"» is **text**
+|   [property define_property_has L1]
+|   | its «"sent"» is a **date**
+|   [property define_property_has L1]
+|   | its «"thread"» is **text**
+
+[thing create_type L0]
+| a «"thread"» is a **thing**
+|   ⟦// A thread you can read:  whose it is, which side, an ad-hoc one's own id, and the page's address showing it.⟧
+|   it lives in **my threads**    ‾value(my threads)
+|   [property define_property_has L1]
+|   | its «"name"» is **text**
+|   [property define_property_has L1]
+|   | its «"side"» is **text**
+|   [property define_property_has L1]
+|   | its «"topic"» is **text**
+|   [property define_property_has L1]
+|   | its «"link"» is **text**
+|   [property define_property_has L1]
+|   | its «"current"» is yes or no
+
+==== /OrgChat.spell
+⟪# Chat⟫
+⟦// A chat app for your org:  a toolbar with who's signed in, every thread you can read down the side, and the one you picked, live.⟧
+⟦// A message shows on everyone's open page at once.⟧
+⟦// Where they're kept is in OrgChat.api.spell, and only its first two lines know.⟧
+⟦// Everyone in the org reads and writes a team's open thread;  you delete your own messages, and the team's Managers anyone's.⟧
+
+⟪## A row for each message:  who sent it, when, and what it says⟫
+
+[thing reopen_type L0]
+| a **message**
+|   [property property_value_getter L1]
+|   | its «"initials"» is first «2» **letters** in (its **by** as upper case)
+|   |   ⟦// The first two letters of who sent it, for the circle beside their name⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"message"» direction=«"horizontal"» spacing=«"md"» align=«"start"»>
+|   |     <⟨text⟩ class=«"avatar"»>{its **initials**}</⟨text⟩>    code({its initials})
+|   |     <⟨stack⟩ spacing=«"none"»>
+|   |       <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» align=«"center"»>
+|   |         <⟨text⟩ class=«"by"» bold>{its **by**}</⟨text⟩>    code({its by})
+|   |         <⟨text⟩ class=«"sent"» size=«"small"» color=«"grey"»>{its **sent** as a short time}</⟨text⟩>    code({its sent as a short time})
+|   |         <⟨button⟩ class=«"remove"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Delete this message"» title=«"Delete this message:  yours, or anyone's if you manage the space"» onClick={remove it from the **messages**}/>    code({remove it from the messages})
+|   |       </⟨stack⟩>
+|   |       <⟨text⟩ class=«"text"»>{its **text**}</⟨text⟩>    code({its text})
+|   |     </⟨stack⟩>
+|   |   </⟨stack⟩>
+
+⟪## A thread in the list:  a lock on the private ones⟫
+
+[thing reopen_type L0]
+| a **thread**
+|   [property property_value_getter L1]
+|   | its «"mark"» is
+|   |   ⟦// Its icon:  a lock on the private ones⟧
+|   |   _"lock"_ if its **side** is _"private"_    ‾value(its side)
+|   |   _"hashtag"_ otherwise
+
+⟪## The page:  the toolbar, the threads down the side, and the one picked, oldest first, with a box to write in⟫
+
+[thing create_one_of_a_kind L0]
+| «chat page» is an **app**
+|   [property define_property_has L1]
+|   | «"new message"» is **a new message**
+|   [property property_value_getter L1]
+|   | its «"picked"» is the first **thread** in every **thread** where its **current**
+|   [property define_property_has L1]
+|   | its «"drawer open"» is yes or no
+|   |   ⟦// A phone only:  the threads, open in a drawer⟧
+|   [property property_value_getter L1]
+|   | its «"thread name"» is
+|   |   ⟦// The picked thread's name:  nothing until one is picked, as when signed out⟧
+|   |   the **name** of its **picked** if its **picked**    ‾value(the name of its picked) ‾value(its picked)
+|   |   _""_ otherwise
+|   [property property_value_getter L1]
+|   | its «"box words"» is «"Message "» + its **thread name**
+|   |   ⟦// What the box says, until something is typed⟧
+
+|   [action to_do_something L1]
+|   | to «open the drawer»
+|   |   set its **drawer open** to _yes_    ‾value(its drawer open)
+
+|   [action to_do_something L1]
+|   | to «close the drawer»
+|   |   set its **drawer open** to _no_    ‾value(its drawer open)
+
+|   [action to_do_something L1]
+|   | to «send it»
+|   |   set the **sent** of the **new message** to **a new date**    ‾value(the sent of the new message) ‾value(a new date)
+|   |   set the **thread** of the **new message** to the **topic** of its **picked**    ‾value(the thread of the new message) ‾value(the topic of its picked)
+|   |   add the **new message** to the **messages**    ‾value(the new message) ‾value(the messages)
+|   |   set its **new message** to **a new message**    ‾value(its new message) ‾value(a new message)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨stack⟩ class=«"org-chat"» spacing=«"none"»>
+|   |     <⟨toolbar⟩ class=«"top-bar"» appearance=«"text"» aria-label=«"Chat"»>
+|   |       <⟨button⟩ slot=«"icon"» class=«"show-threads"» icon=«"bars"» appearance=«"transparent"» aria-label=«"Show the threads"» title=«"Show the threads"» onClick={open the drawer}/>    code({open the drawer})
+|   |       <⟨text⟩ slot=«"title"» size=«"large"»>Chat</⟨text⟩>
+|   |       <⟨item⟩ link=«"OrgFeed"»>Feed</⟨item⟩>
+|   |       <⟨item⟩ link=«"Inbox"»>Inbox</⟨item⟩>
+|   |       <⟨item⟩ link=«"OrgAdmin"»>Admin</⟨item⟩>
+|   |       <⟨stack⟩ slot=«"right"» direction=«"horizontal"»>{the sign in menu}</⟨stack⟩>    code({the sign in menu})
+|   |     </⟨toolbar⟩>
+|   |     <⟨stack⟩ class=«"workspace"» direction=«"horizontal"» spacing=«"none"»>
+|   |       <⟨stack⟩ class=«"sidebar"» spacing=«"none"»>{draw the **thread list** of it}</⟨stack⟩>    code({draw the thread list of it})
+|   |       <⟨if⟩ its picked>
+|   |         <⟨stack⟩ class=«"main"» spacing=«"none"»>
+|   |           <⟨stack⟩ class=«"thread-name"»><⟨header⟩ size=«"small"»>{its **thread name**}</⟨header⟩></⟨stack⟩>    code({its thread name})
+|   |           <⟨stack⟩ class=«"messages"» spacing=«"none"»>
+|   |             <⟨stack⟩ class=«"message-list"» spacing=«"none"»>
+|   |               <⟨for⟩ message in every message where its thread is the topic of the picked of the chat page sorted by its sent loading=«"Joining the thread"»>
+|   |                 <⟨message⟩/>
+|   |                 <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>Nothing yet:  say hello.</⟨text⟩></⟨empty⟩>
+|   |                 <⟨failed⟩><⟨text⟩ color=«"red"»>We can't join this thread right now.</⟨text⟩></⟨failed⟩>
+|   |               </⟨for⟩>
+|   |             </⟨stack⟩>
+|   |           </⟨stack⟩>
+|   |           <⟨form⟩ class=«"composer"» value={its **new message**}>    code({its new message})
+|   |             <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"» align=«"end"»>
+|   |               <⟨textarea⟩ name=«"text"» fluid grow max-rows=8 send-on-enter placeholder={its **box words**} aria-label=«"Your message"» on-ui-send={send it}/>    code({its box words}) code({send it})
+|   |               <⟨button⟩ class=«"send"» color=«"primary"» disabled={the **text** of the **new message** is _""_} onClick={send it}>Send</⟨button⟩>    code({the text of the new message is ""}) code({send it})
+|   |             </⟨stack⟩>
+|   |           </⟨form⟩>
+|   |         </⟨stack⟩>
+|   |       </⟨if⟩>
+|   |     </⟨stack⟩>
+|   |     <⟨flyout⟩ class=«"threads-drawer"» visible={its **drawer open**} position=«"left"» width=«"thin"» on-ui-closed={close the drawer}>{draw the **thread list** of it}</⟨flyout⟩>    code({its drawer open}) code({close the drawer}) code({draw the thread list of it})
+|   |   </⟨stack⟩>
+
+|   [action draw_it L1]
+|   | to **draw** its **thread list**
+|   |   <⟨menu⟩ class=«"threads"» direction=«"vertical"» appearance=«"secondary"» fluid aria-label=«"Threads"»>
+|   |     <⟨for⟩ thread in every thread sorted by its name a-z loading=«"Finding your threads"»>
+|   |       <⟨item⟩ link={its **link**} selected={its **current**} icon={its **mark**}>{its **name**}</⟨item⟩>    code({its link}) code({its current}) code({its mark}) code({its name})
+|   |       <⟨empty⟩><⟨text⟩ class=«"none"» color=«"grey"»>No threads you can read.</⟨text⟩></⟨empty⟩>
+|   |       <⟨failed⟩><⟨text⟩ color=«"red"»>We can't find your threads right now.</⟨text⟩></⟨failed⟩>
+|   |     </⟨for⟩>
+|   |   </⟨menu⟩>

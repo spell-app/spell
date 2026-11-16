@@ -1,0 +1,401 @@
+==== /Task.spell
+⟪# A task⟫
+⟦// Something to do:  its title, its priority, and whether it's done.⟧
+⟦// Each task is its own element on the page, `<task-list-task>`.⟧
+⟦// A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);⟧
+⟦// a drag moves it, the selected ones with it (`draggable`).⟧
+
+[thing create_type L0]
+| a «"task"» is a **draggable selectable view**
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   |   ⟦// What to do⟧
+|   [property define_property_has L1]
+|   | its «"notes"» is **text**
+|   |   ⟦// Anything else about it⟧
+|   [property define_property_has L1]
+|   | its «"priority"» is one of ‹low›, ‹normal› or ‹high›
+|   [property define_property_has L1]
+|   | its «"done"» is yes or no
+|   [property define_property_has L1]
+|   | its «"order"» is **number**
+|   |   ⟦// Where it sits in its checklist, from 1:  kept with it, so the order people drag the tasks into comes back⟧
+|   [property quoted_type_expression L1]
+|   | it «"is done"» if its **done** is _yes_    ‾value(its done)
+|   [property quoted_type_expression L1]
+|   | it «"is active"» if it is not done    ‾question(it is not done)
+|   [action to_do_something L1]
+|   | to «throw it away»: return
+|   |   ⟦// Gone from where it's kept:  a task kept nowhere has nothing to do;  each kind of kept task says how, in its keeper's file⟧
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal⟧
+|   |   <⟨form⟩ value={it}>    code({it})
+|   |     <⟨stack⟩ direction=«"horizontal"» spacing=«"sm"»>
+|   |       <⟨icon⟩ name=«"grip vertical"» color=«"grey"» aria-label=«"Drag"»/>
+|   |       <⟨checkbox⟩ name=«"done"» aria-label=«"Done"»/>
+|   |       <⟨input⟩ part=«"title"» name=«"title"» aria-label=«"Task"» appearance=«"transparent"» fluid/>
+|   |       <⟨if⟩ the priority is not normal>
+|   |         <⟨label⟩ size=«"tiny"» color={_"red"_ if the **priority** is _high_ otherwise _"grey"_}>{the **priority**}</⟨label⟩>    code({"red" if the priority is high otherwise "grey"}) code({the priority})
+|   |       </>
+|   |     </⟨stack⟩>
+|   |   </⟨form⟩>
+
+|   [action to_do_something L1]
+|   | to «test checking one off»
+|   |   set the **task** to **a new task** with **title** _"Write the tests"_    ‾value(the task) ‾value(a new task with title "Write the tests")
+|   |   the **task** is active should be _yes_    ‾question(the task is active)
+|   |   set the **task's done** to _yes_    ‾value(the task's done)
+|   |   the **task** is done should be _yes_    ‾question(the task is done)
+
+==== /TaskList.api.spell
+⟪## Task List:  where the tasks are kept⟫
+⟦// The app asks a KEEPER for its tasks, and never says where they are:⟧
+⟦// each kind of keeper is in a file of its own, and says it in its own way.⟧
+⟦//   TaskList.browser.api.spell:  in this browser, the one it starts with⟧
+⟦//   TaskList.server.api.spell:  in a JSON file on the server⟧
+⟦//   TaskList.csv.api.spell:  in a CSV file on the server⟧
+⟦//   TaskList.atmosphere.api.spell:  in your own atmosphere account, Bluesky's AT Protocol⟧
+⟦// Every keeper does the same three things:⟧
+⟦// - its kept tasks:  the tasks it has, read when the app picks it⟧
+⟦// - keep a new task titled ...:  a new task, kept from now on⟧
+⟦// - throw away a task:  a task's own action, which its kind of task says⟧
+⟦// A task kept anywhere saves itself as it changes:  ticking it, or typing its title, is kept, with no save step.⟧
+⟦// Its place in the list is kept the same way, as its order:  so the tasks come back in the order people dragged them into.⟧
+
+[thing create_type L0]
+| a «"task keeper"» is a **thing**
+|   [property define_property_has L1]
+|   | its «"kept tasks"» is a list of **tasks**
+|   |   ⟦// the tasks it has, in any order:  the app puts them in their own order⟧
+|   [action to_do_something L1]
+|   | to «keep a new task titled (title as text)»    ‾value(title as text) bold(title) bold(text)
+|   |   ⟦// a new task, kept from now on, which it hands back⟧
+|   |   return **a new task** with **title** = **title**    ‾value(a new task with title = title)
+
+==== /TaskList.browser.api.spell
+⟪## Kept in this browser⟫
+⟦// The tasks stay on this device, in this browser's own storage:  nobody else sees them, and no server is asked.⟧
+⟦// The app starts here, so it runs with no server and no sign-in.⟧
+[thing stored_on_this_device L0]
+| «browser storage» is stored on this device
+
+[thing create_type L0]
+| a «"browser task"» is a **task**
+|   it lives in **browser storage**    ‾value(browser storage)
+|   [action to_do_something L1]
+|   | to «throw it away»
+|   |   remove it from the **browser tasks**    ‾value(it) ‾value(the browser tasks)
+
+[thing create_type L0]
+| a «"browser keeper"» is a **task keeper**
+|   [property property_value_getter L1]
+|   | its «"kept tasks"» is every **browser task**
+|   [action to_do_something L1]
+|   | to «keep a new task titled (title as text)»    ‾value(title as text) bold(title) bold(text)
+|   |   set **task** to **a new browser task** with **title** = **title**    ‾value(task) ‾value(a new browser task with title = title)
+|   |   add **task** to the **browser tasks**    ‾value(task) ‾value(the browser tasks)
+|   |   return **task**    ‾value(task)
+
+==== /TaskList.server.api.spell
+⟪## Kept in a JSON file on the server⟫
+⟦// The tasks are a project data folder on Spell's server:  each task a JSON file, in this project's `__data/tasks`.⟧
+⟦// Everyone who runs the app shares them, and each person changes only the tasks they made.⟧
+⟦// Open one in an editor and change it:  the app shows it at its next check.⟧
+[thing create_place L0]
+| «task files» is a data folder at «"tasks"»
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+
+[thing create_type L0]
+| a «"server task"» is a **task**
+|   it lives in **task files**    ‾value(task files)
+|   [action to_do_something L1]
+|   | to «throw it away»
+|   |   remove it from the **server tasks**    ‾value(it) ‾value(the server tasks)
+
+[thing create_type L0]
+| a «"server keeper"» is a **task keeper**
+|   [property property_value_getter L1]
+|   | its «"kept tasks"» is every **server task**
+|   [action to_do_something L1]
+|   | to «keep a new task titled (title as text)»    ‾value(title as text) bold(title) bold(text)
+|   |   set **task** to **a new server task** with **title** = **title**    ‾value(task) ‾value(a new server task with title = title)
+|   |   add **task** to the **server tasks**    ‾value(task) ‾value(the server tasks)
+|   |   return **task**    ‾value(task)
+
+==== /TaskList.csv.api.spell
+⟪## Kept in a CSV file on the server⟫
+⟦// The tasks are one CSV file on Spell's server, this project's `__data/tasks.csv`:  a row each, under the columns its first line names.⟧
+⟦// Everyone who runs the app shares it, and anyone changes any row:  a CSV file has no column saying whose a row is.⟧
+⟦// Each change rewrites only its own line, so the file reads well in a diff;  open it in a sheet or an editor and change it,⟧
+⟦// and the app shows it at its next check.⟧
+[thing create_place L0]
+| «task sheet» is a sheet at «"tasks.csv"»
+|   its id is its _"id"_
+|   check it every _30_ seconds    ‾quantity(30 seconds)
+
+[thing create_type L0]
+| a «"sheet task"» is a **task**
+|   it lives in **task sheet**    ‾value(task sheet)
+|   [action to_do_something L1]
+|   | to «throw it away»
+|   |   remove it from the **sheet tasks**    ‾value(it) ‾value(the sheet tasks)
+
+[thing create_type L0]
+| a «"sheet keeper"» is a **task keeper**
+|   [property property_value_getter L1]
+|   | its «"kept tasks"» is every **sheet task**
+|   [action to_do_something L1]
+|   | to «keep a new task titled (title as text)»    ‾value(title as text) bold(title) bold(text)
+|   |   set **task** to **a new sheet task** with **title** = **title**    ‾value(task) ‾value(a new sheet task with title = title)
+|   |   add **task** to the **sheet tasks**    ‾value(task) ‾value(the sheet tasks)
+|   |   return **task**    ‾value(task)
+
+==== /TaskList.atmosphere.api.spell
+⟪## Kept in your atmosphere account⟫
+⟦// The tasks are records in your own atmosphere account, Bluesky's AT Protocol, as Statusphere's statuses are:⟧
+⟦// sign in, and they go with you to any app that reads them.⟧
+⟦// Records there are public:  anyone can read them, so keep nothing private in a task.⟧
+[thing create_place L0]
+| «task sky» is a personal atmosphere account
+|   **sky tasks** live at _"spaces.spell.examples.tasklist.task"_
+
+[thing create_type L0]
+| a «"sky task"» is a **task**
+|   it lives in **task sky**    ‾value(task sky)
+|   [action to_do_something L1]
+|   | to «throw it away»
+|   |   remove it from the **sky tasks**    ‾value(it) ‾value(the sky tasks)
+
+[property define_property_has L0]
+| a **sky task** has an **owner** as **text**
+|   ⟦// whose it is:  the account it's in, which a record can't claim⟧
+
+[thing create_type L0]
+| a «"sky keeper"» is a **task keeper**
+|   [property property_value_getter L1]
+|   | its «"kept tasks"» is every **sky task** where its **owner** is their **id**
+|   |   ⟦// only your own:  everyone's tasks are in their own accounts⟧
+|   [action to_do_something L1]
+|   | to «keep a new task titled (title as text)»    ‾value(title as text) bold(title) bold(text)
+|   |   set **task** to **a new sky task** with **title** = **title**    ‾value(task) ‾value(a new sky task with title = title)
+|   |   add **task** to the **sky tasks**    ‾value(task) ‾value(the sky tasks)
+|   |   return **task**    ‾value(task)
+
+==== /TaskList.spell
+⟪# Task List⟫
+⟦// A to-do list:  add a task, check it off, filter the list, and edit the selected tasks together.⟧
+⟦// Its tasks are this project's own `task`, in Task.spell;  this file holds their list, and the app.⟧
+⟦// Where they're kept is the person's pick, "Keep them in":  each place is a keeper in an API file of its own,⟧
+⟦// TaskList.browser.api.spell, TaskList.server.api.spell, TaskList.csv.api.spell and TaskList.atmosphere.api.spell, all doing what TaskList.api.spell says.⟧
+
+⟪## The checklist⟫
+⟦// The tasks, each its own element inside it:  `<task-list-checklist>`, around its `<task-list-task>`s.⟧
+
+[thing create_viewable_list_type L0]
+| a «"checklist"» is a **viewable list of tasks**
+|   [property define_property_has L1]
+|   | its «"showing"» is one of ‹all›, ‹active› or ‹done›
+|   |   ⟦// What it shows:  every task, the ones still to do, or the ones done⟧
+|   |   [property quoted_property_formula L2]
+|   |   | it «"is showing (showing)"»
+
+|   its items can be reordered immediately
+|     ⟦// on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there⟧
+|   [action drag_handler L1]
+|   | when «a task is dropped on it»    ‾value(a task) bold(task)
+|   |   ⟦// a drop has moved its tasks:  each keeps its new place⟧
+|   |   keep the order    ‾call(keep the order)
+|   [action draw_it L1]
+|   | to **draw** each **item**
+|   |   ⟦// each task, unless the filter hides it⟧
+|   |   if it is showing active and the **task** is done return nothing    ‾question(it is showing active) ‾question(the task is done) ‾value(nothing)
+|   |   if it is showing done and the **task** is active return nothing    ‾question(it is showing done) ‾question(the task is active) ‾value(nothing)
+|   |   return draw the **task**    ‾value(the task)
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   ⟦// Its tasks one under the other;  while it's empty, a line saying so⟧
+|   |   <⟨stack⟩ spacing=«"xs"»>
+|   |     <⟨if⟩ it is empty>
+|   |       <⟨text⟩ color=«"grey"»>Nothing to do</⟨text⟩>
+|   |     </⟨if⟩>
+|   |     <⟨children⟩/>
+|   |   </⟨stack⟩>
+|   [action to_do_something L1]
+|   | to «keep the order»
+|   |   ⟦// Each task keeps its place in the list, from 1, where it's kept:  so the order people drag them into comes back next time⟧
+|   |   [control list_iteration L2]
+|   |   | for **task**, **place** in it    ‾value(it)
+|   |   |   set the **order** of **task** to **place**    ‾value(the order of task) ‾value(place)
+
+|   [action to_do_something L1]
+|   | to «test the filter»
+|   |   set the **tasks** to **a new checklist**    ‾value(the tasks) ‾value(a new checklist)
+|   |   add (**a new task** with **title** _"a"_, **done** = _yes_) to the **tasks**    ‾value(a new task with title "a", done = yes) ‾value(the tasks)
+|   |   add (**a new task** with **title** _"b"_) to the **tasks**    ‾value(a new task with title "b") ‾value(the tasks)
+|   |   the **length** of (**tasks** in the **tasks** where it is active) should be _1_    ‾value(the length of (tasks in the tasks where it is active))
+|   [action to_do_something L1]
+|   | to «test a dragged order is kept»
+|   |   set the **tasks** to **a new checklist**    ‾value(the tasks) ‾value(a new checklist)
+|   |   set the **first** to **a new task** with **title** _"first"_    ‾value(the first) ‾value(a new task with title "first")
+|   |   set the **second** to **a new task** with **title** _"second"_    ‾value(the second) ‾value(a new task with title "second")
+|   |   add the **second** to the **tasks**    ‾value(the second) ‾value(the tasks)
+|   |   add the **first** to the **tasks**    ‾value(the first) ‾value(the tasks)
+|   |   keep the order of the **tasks**    ‾call(keep the order of the tasks)
+|   |   the **order** of the **second** should be _1_    ‾value(the order of the second)
+|   |   the **order** of the **first** should be _2_    ‾value(the order of the first)
+|   |   the **title** of the first **task** in (the **tasks** sorted by its **order**) should be _"second"_    ‾value(the title of the first task in (the tasks sorted by its order))
+[property belongs_to_one L0]
+| a **task** belongs to one **checklist**
+|   ⟦// a task is in one checklist at a time⟧
+
+⟪## The app⟫
+⟦// Its toolbar, the new task's field, then the list beside the property editor.⟧
+
+[thing create_one_of_a_kind L0]
+| «task list» is an **app**
+|   [property define_property_has L1]
+|   | «"checklist"» is **a new checklist**
+|   [property define_property_has L1]
+|   | its «"draft"» is **text**
+|   |   ⟦// The next task's title, as the new task's field holds it⟧
+|   [property property_value_getter L1]
+|   | its «"active count"» is the **length** of (**tasks** in the **checklist** where it is active)
+
+|   [plain group define_group L1]
+|   | group «"Keeping"»
+|   |   ⟦// Where the tasks are kept:  the person picks, and the app asks that keeper⟧
+|   |   [property define_property_has L2]
+|   |   | its «"storage"» is one of ‹browser›, ‹server›, ‹csv› or ‹atmosphere›
+|   |   |   ⟦// Where the tasks are kept:  this browser, a JSON file on the server, a CSV file on the server, or your atmosphere account⟧
+|   |   [property define_property_has L2]
+|   |   | its «"keeper"» is a **task keeper**
+|   |   |   ⟦// Who keeps them, for where they're kept:  one of the keepers in the API files⟧
+
+|   |   [action on L2]
+|   |   | when its **storage** changes
+|   |   |   [control if L3]
+|   |   |   | if the **storage** is _server_    ‾value(the storage)
+|   |   |   |   set the **keeper** to **a new server keeper**    ‾value(the keeper) ‾value(a new server keeper)
+|   |   |   [control else_if L3]
+|   |   |   | otherwise if the **storage** is _csv_    ‾value(the storage)
+|   |   |   |   set the **keeper** to **a new sheet keeper**    ‾value(the keeper) ‾value(a new sheet keeper)
+|   |   |   [control else_if L3]
+|   |   |   | otherwise if the **storage** is _atmosphere_    ‾value(the storage)
+|   |   |   |   set the **keeper** to **a new sky keeper**    ‾value(the keeper) ‾value(a new sky keeper)
+|   |   |   [control else L3]
+|   |   |   | otherwise
+|   |   |   |   set the **keeper** to **a new browser keeper**    ‾value(the keeper) ‾value(a new browser keeper)
+|   |   |   fill the checklist    ‾call(fill the checklist)
+
+|   |   [action to_do_something L2]
+|   |   | to «fill the checklist»
+|   |   |   ⟦// The keeper's tasks, in the list;  a keeper with none starts with a few⟧
+|   |   |   clear the **checklist**    ‾value(the checklist)
+|   |   |   [control list_iteration L3]
+|   |   |   | for **task** in (the **kept tasks** of the **keeper**) sorted by its **order**    ‾value((the kept tasks of the keeper) sorted by its order)
+|   |   |   |   add it to the **checklist**    ‾value(it) ‾value(the checklist)
+|   |   |   if the **checklist** is not empty return    ‾question(the checklist is not empty)
+|   |   |   add the starting task _"Write the Task List example"_ with priority _high_    ‾call(add the starting task "Write the Task List example" with priority high)
+|   |   |   add the starting task _"Teach it to draw"_ with priority _normal_    ‾call(add the starting task "Teach it to draw" with priority normal)
+|   |   |   add the starting task _"Select some tasks, then edit them together"_ with priority _normal_    ‾call(add the starting task "Select some tasks, then edit them together" with priority normal)
+|   |   |   add the starting task _"Drag tasks to reorder them"_ with priority _low_    ‾call(add the starting task "Drag tasks to reorder them" with priority low)
+|   |   |   set the **done** of the first **task** in the **checklist** to _yes_    ‾value(the done of the first task in the checklist)
+
+|   |   [action create_hook L2]
+|   |   | when «creating it»    ‾value(it)
+|   |   |   ⟦// A new task list keeps its tasks in this browser, and shows every one⟧
+|   |   |   set the **showing** of the **checklist** to _all_    ‾value(the showing of the checklist)
+|   |   |   set the **storage** to _browser_    ‾value(the storage)
+|   |   |   set the **keeper** to **a new browser keeper**    ‾value(the keeper) ‾value(a new browser keeper)
+|   |   |   fill the checklist    ‾call(fill the checklist)
+
+|   |   [action to_do_something L2]
+|   |   | to «add the starting task (title as text) with priority (level as text)»    ‾value(title as text) ‾value(level as text) bold(title) bold(text) bold(level) bold(text)
+|   |   |   set **task** to keep a new task titled **title** of the **keeper**    ‾value(task) ‾call(keep a new task titled title of the keeper)
+|   |   |   set the **priority** of **task** to **level**    ‾value(the priority of task) ‾value(level)
+|   |   |   add **task** to the **checklist**    ‾value(task) ‾value(the checklist)
+|   |   |   set the **order** of **task** to the **length** of the **checklist**    ‾value(the order of task) ‾value(the length of the checklist)
+
+|   |   [action to_do_something L2]
+|   |   | to «add the draft»
+|   |   |   ⟦// The draft, as a new task at the end of the list;  the field empties⟧
+|   |   |   if the **draft** is _""_ return    ‾value(the draft)
+|   |   |   set **title** to the **draft**    ‾value(title) ‾value(the draft)
+|   |   |   set **task** to keep a new task titled **title** of the **keeper**    ‾value(task) ‾call(keep a new task titled title of the keeper)
+|   |   |   set the **priority** of **task** to _normal_    ‾value(the priority of task)
+|   |   |   add **task** to the **checklist**    ‾value(task) ‾value(the checklist)
+|   |   |   set the **order** of **task** to the **length** of the **checklist**    ‾value(the order of task) ‾value(the length of the checklist)
+|   |   |   clear the **draft**    ‾value(the draft)
+
+|   [plain group define_group L1]
+|   | group «"Filter"»
+|   |   ⟦// Which tasks the list shows:  the toolbar ticks the one it's showing⟧
+|   |   [action to_do_something L2]
+|   |   | to «"show all"» with title «"All"», icon «"list"»
+|   |   |   selected when the **checklist** is showing all    ‾question(the checklist is showing all)
+|   |   |   set the **showing** of the **checklist** to _all_    ‾value(the showing of the checklist)
+|   |   [action to_do_something L2]
+|   |   | to «"show to do"» with title «"To do"», icon «"square outline"»
+|   |   |   selected when the **checklist** is showing active    ‾question(the checklist is showing active)
+|   |   |   set the **showing** of the **checklist** to _active_    ‾value(the showing of the checklist)
+|   |   [action to_do_something L2]
+|   |   | to «"show done"» with title «"Done"», icon «"check square outline"»
+|   |   |   selected when the **checklist** is showing done    ‾question(the checklist is showing done)
+|   |   |   set the **showing** of the **checklist** to _done_    ‾value(the showing of the checklist)
+|   |   [action to_do_something L2]
+|   |   | to «"remove the done tasks"» with icon «"trash alternate outline"»
+|   |   |   [control list_iteration L3]
+|   |   |   | for **task** in (**tasks** in the **checklist** where it is done)    ‾value(tasks in the checklist where it is done)
+|   |   |   |   throw the **task** away    ‾call(throw the task away)
+|   |   |   |   remove the **task** from the **checklist**    ‾value(the task) ‾value(the checklist)
+
+|   [plain group define_group L1]
+|   | group «"Menus"»
+|   |   ⟦// The toolbar's buttons, and the list's right click:  the same actions⟧
+|   |   [property define_menu L2]
+|   |   | its «"tasks menu"» is a menu of «"show all"», «"show to do"», «"show done"», «"-"» and «"remove the done tasks"»
+|   |   [property define_menu L2]
+|   |   | its «"show menu"» is a menu of «"show all"», «"show to do"» and «"show done"» titled «"Show"»
+|   |   [property define_menu L2]
+|   |   | its «"list menu"» is a menu of «"show menu"», «"-"» and «"remove the done tasks"»
+|   |   |   ⟦// A right click on the list:  which tasks it shows, as a menu of its own, then tidying up⟧
+
+|   |   [action to_do_something L2]
+|   |   | to **draw** it
+|   |   |   ⟦// The property editor edits every selected task at once:  a property they disagree on shows Mixed⟧
+|   |   |   <⟨container⟩>
+|   |   |     <⟨stack⟩>
+|   |   |       <⟨toolbar⟩ menu=«"tasks menu"» aria-label=«"Tasks"»>
+|   |   |         <⟨text⟩ slot=«"title"» size=«"large"»>Task List</⟨text⟩>
+|   |   |         <⟨text⟩ slot=«"right"»>
+|   |   |           <⟨if⟩ the active count is 0>All done<⟨otherwise⟩>{the **active count**} to do</>    code({the active count})
+|   |   |         </⟨text⟩>
+|   |   |       </⟨toolbar⟩>
+|   |   |       <⟨form⟩ value={it}>    code({it})
+|   |   |         <⟨stack⟩>
+|   |   |           <⟨field⟩ label=«"Keep them in"» inline>
+|   |   |             <⟨select⟩ name=«"storage"»>
+|   |   |               <⟨item⟩ value=«"browser"» icon=«"desktop"»>This browser</⟨item⟩>
+|   |   |               <⟨item⟩ value=«"server"» icon=«"server"»>A JSON file on the server</⟨item⟩>
+|   |   |               <⟨item⟩ value=«"csv"» icon=«"table"»>A CSV file on the server</⟨item⟩>
+|   |   |               <⟨item⟩ value=«"atmosphere"» icon=«"cloud"»>Your atmosphere account</⟨item⟩>
+|   |   |             </⟨select⟩>
+|   |   |           </⟨field⟩>
+|   |   |           <⟨input⟩ name=«"draft"» placeholder=«"Something to do"» aria-label=«"New task"» fluid action>
+|   |   |             <⟨button⟩ slot=«"action"» color=«"primary"» disabled={the **draft** is _""_} onClick={add the draft}>Add</⟨button⟩>    code({the draft is ""}) code({add the draft})
+|   |   |           </⟨input⟩>
+|   |   |         </⟨stack⟩>
+|   |   |       </⟨form⟩>
+|   |   |       <⟨grid⟩ columns=«"2"» stackable context-menu=«"list menu"»>
+|   |   |         {draw the **checklist**}
+|   |   |         <⟨ui-property-editor⟩ label=«"Selected tasks"» schema=«"task-list-task"» value={the **selection** of the **checklist**}>    code({the selection of the checklist})
+|   |   |           <⟨ui-property⟩ name=«"title"»/>
+|   |   |           <⟨ui-property⟩ name=«"priority"»/>
+|   |   |           <⟨ui-property⟩ name=«"done"»/>
+|   |   |           <⟨ui-property⟩ name=«"notes"»/>
+|   |   |         </⟨ui-property-editor⟩>
+|   |   |       </⟨grid⟩>
+|   |   |     </⟨stack⟩>
+|   |   |   </⟨container⟩>

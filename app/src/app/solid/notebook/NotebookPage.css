@@ -234,13 +234,27 @@
   border: 0;
   border-radius: 0;
   padding: 0;
-  /* Monaco paints its own ground:  the pane's shows through instead */
-  --vscode-editor-background: transparent;
-  --vscode-editorGutter-background: transparent;
 }
 
-.NotebookExampleCode .monaco-editor,
-.NotebookExampleCode .monaco-editor-background,
-.NotebookExampleCode .monaco-editor .margin {
-  background-color: transparent;
+/* the editor as tall as its text, on the pane's own shade:  it paints no ground of its own */
+.NotebookCode {
+  .CodeMirrorEditor,
+  .cm-editor {
+    height: auto;
+    background: transparent;
+  }
+  .cm-editor {
+    font-size: 13px;
+  }
+  .cm-scroller {
+    overflow-y: hidden;
+  }
+  /* no fold arrows or line numbers in a cell */
+  .cm-gutters {
+    display: none;
+  }
+  /* an example's code:  its text starts where its demo's does */
+  &.flush .cm-content {
+    padding-left: 0;
+  }
 }

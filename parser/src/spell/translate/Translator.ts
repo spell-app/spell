@@ -1,9 +1,16 @@
 import { clamp, escapeRegExp, withoutAccents } from "spell/util"
+import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { BODY_KEYWORDS } from "spell/parser/spell/spell.types"
 import { NumberLiteral, TextLiteral } from "spell/parser/spell/rules/core"
-import { CompoundExpression, SpellExpression, Wording } from "spell/parser/spell/rules/expressions"
+import {
+  CompoundExpression,
+  MeasureLiteral,
+  SpellExpression,
+  UnitWords,
+  Wording
+} from "spell/parser/spell/rules/expressions"
 import { SubjectIt, SubjectRule } from "spell/parser/spell/rules/types"
 import {
   CreateHook,
@@ -323,6 +330,9 @@ class FileWriting {
       if (declaration) throw this.cant(match, `call ${match.ruleName}`)
     }
     if (rule instanceof Wording) return this.writeWording(match, twins)
+    if (rule instanceof MeasureLiteral || rule instanceof UnitWords) {
+      return [{ text: unitsTranslated(match.inputText.trim(), this.translator.from.lang, this.translator.to.lang) }]
+    }
     if (!match.matched.some((each) => each instanceof P.Match) || rule instanceof SubjectRule) {
       return this.writeLeaf(match, twins, context)
     }
@@ -1009,6 +1019,28 @@ function indexFor(ours: WordChoice | undefined, count: number): number {
  * - `noun`:  a name, which an article before it agrees with;  `gender`, if known.
  * - `raw`:  written as is, its spacing too (a phrase, JSX).
  */
+/**
+ * A measure or a unit as written (`10 msec`, `5 ft 8 in`, `seconds`), each built-in unit's name the other language's
+ * at the same place in its list (`msec` => `mseg`, `seconds` => `segundos`), else its first `aka`.
+ * - A unit no built-in dimension has (a program's own) stays as it is.
+ */
+function unitsTranslated(written: string, from: string, to: string): string {
+  return written.replace(/[^\d\s/.][^\d/]*?(?=\s*(?:\d|$))/gu, (said) => {
+    const name = said.trim().toLowerCase()
+    for (const { units } of BUILT_IN_DIMENSIONS) {
+      for (const { names } of units) {
+        const ours = names[from] ?? []
+        let at = ours.findIndex((each) => each.toLowerCase() === name)
+        if (at < 0) at = ours.findIndex((each) => `${each}s`.toLowerCase() === name)
+        if (at < 0) continue
+        const theirs = names[to] ?? []
+        return theirs[at] ?? theirs[1] ?? theirs[0] ?? said
+      }
+    }
+    return said
+  })
+}
+
 type Piece = { text: string; agree?: string[]; noun?: boolean; gender?: string; plural?: boolean; raw?: boolean }
 
 /**

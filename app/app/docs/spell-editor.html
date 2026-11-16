@@ -45,7 +45,7 @@
       <ui-container class="site-body">
         <article class="site-article">
           <p class="lede">
-            One tag puts the spell app's code editor in a page: a tab per file, Monaco, and a status line. It compiles
+            One tag puts the spell app's code editor in a page: a tab per file, CodeMirror, and a status line. It compiles
             as you type, and hands what it compiled to the
             <a href="spell-viewer.html" target="src-packages-app-docs-spell-viewer-html"
               ><code>&lt;spell-viewer&gt;</code></a
@@ -139,7 +139,8 @@
                 what it made. An app added later gets its next compile.
               </li>
               <li>
-                It compiles before Monaco loads, so its apps run straight away. Monaco, most of its code, comes after.
+                It compiles before CodeMirror loads, so its apps run straight away. CodeMirror and Spell's language
+                service come after.
               </li>
               <li>
                 Several on a page edit several projects. Two of one project share its files: typing in one shows in the

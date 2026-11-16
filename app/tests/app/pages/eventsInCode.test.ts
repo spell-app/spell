@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page, type Route } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The Inspector's Code band, on Solitaire (epic `editor`, Events In Code):  each event's, ability's and action's code
@@ -71,7 +71,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     await contextWithNoSaving(context)
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(3000)
     if (!(await page.evaluate(() => !!document.querySelector(".InspectAppButton.inspecting")))) {
       await page.locator(".InspectAppButton [part~=item]").first().click({ force: true })
@@ -104,7 +104,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     expect(await page.locator(".InspectorCard[data-panel=code]").getAttribute("label")).toBe("Code")
     await expect
       .poll(async () =>
-        (await row("on click").locator(".CodeSlice .view-line").allInnerTexts()).map((line) =>
+        (await row("on click").locator(".CodeSlice .cm-line").allInnerTexts()).map((line) =>
           line.replace(/\s+/g, " ").trim()
         )
       )
@@ -124,7 +124,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     const putOn = page.locator(".InspectorActionSignature").filter({ hasText: /put/ }).first()
     expect(await putOn.locator("ui-label").allInnerTexts()).toEqual(["a card", "a pile"])
     expect(await putOn.locator("ui-button, ui-select, ui-input").count()).toBe(0)
-    expect((await action.locator(".CodeSlice .view-lines").innerText()).replace(/\s+/g, " ")).toContain(
+    expect((await action.locator(".CodeSlice .cm-content").innerText()).replace(/\s+/g, " ")).toContain(
       "if the card is in the stock"
     )
     // found where the compiler says it's declared, not by its words:  one whose words name another type (J58);
@@ -134,7 +134,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
       .filter({ has: page.locator(".InspectorActionSignature", { hasText: /points/ }) })
       .first()
     await expect
-      .poll(async () => (await points.locator(".CodeSlice .view-lines").innerText()).replace(/\s+/g, " "))
+      .poll(async () => (await points.locator(".CodeSlice .cm-content").innerText()).replace(/\s+/g, " "))
       .toContain("return 10 if the pile is a foundation")
   })
 
@@ -148,7 +148,7 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
       .locator(".InspectorEvent.action")
       .filter({ has: page.locator(".InspectorActionSignature", { hasText: /points/ }) })
       .first()
-      .locator(".CodeSlice .view-line")
+      .locator(".CodeSlice .cm-line")
       .last()
     await line.click()
     await page.keyboard.press("End")
@@ -177,9 +177,9 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     const before = await mainFile()
     const field = row("on click").locator(".CodeSlice")
     await expect
-      .poll(async () => (await field.locator(".view-lines").innerText()).replace(/\s+/g, " ").trim())
+      .poll(async () => (await field.locator(".cm-content").innerText()).replace(/\s+/g, " ").trim())
       .toMatch(/^if it is face up or its pile is solitaire's stock/)
-    await field.locator(".view-line").first().click()
+    await field.locator(".cm-line").first().click()
     await page.keyboard.press("Home")
     await page.keyboard.type("really ")
     await page.waitForTimeout(300)

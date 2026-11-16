@@ -1,7 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The Inspector's Views tree and selection across a reload of Solitaire, while its deal draws the cards
@@ -26,7 +26,7 @@ type DebugGlobals = {
 /** Open Solitaire, its code showing, with the Inspector open. */
 async function open(page: Page): Promise<void> {
   await page.goto(SOLITAIRE, { timeout: 60_000 })
-  await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+  await new CodeEditor(page).shown()
   await page.waitForTimeout(4000)
   if (!(await page.locator(".InspectorTree").count())) {
     await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())

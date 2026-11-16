@@ -141,6 +141,7 @@ places.addRule(Negatable.specialize({ ruleName: "are_or_are_not" }), { syntax: "
 places.addRule(Synonyms.specialize({ ruleName: "each_persons_own" }), { syntax: "personal" })
 
 places.addRule(CreatePlace, {
+  roles: { band: "thing", type: "declaration" },
   syntax:
     "{type:type_words} is (a|an) {kind:place_kind} (at|from) {personal:each_persons_own}? {address:text} {with_nested_statements}?",
   tests: [
@@ -226,6 +227,7 @@ places.addRule(CreatePlace, {
     "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
 })
 places.addRule(StoredOnThisDevice, {
+  roles: { band: "thing", type: "declaration" },
   syntax: "{type:type_words} is stored on this device (each_tab:, for each tab)? {with_nested_statements}?",
   tests: [
     {
@@ -271,6 +273,7 @@ places.addRule(StoredInMemory, {
   ]
 })
 places.addRule(SavedInTheCloud, {
+  roles: { band: "thing", type: "declaration" },
   syntax: "{type:type_words} is saved in the cloud {with_nested_statements}?",
   tests: [
     {
@@ -294,6 +297,7 @@ places.addRule(SavedInTheCloud, {
 })
 places.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (is saved|lives) in the cloud" })
 places.addRule(ProjectionOf, {
+  roles: { band: "thing", type: "declaration" },
   syntax: "the? {type:type_words} is a projection of {source:expression} {with_nested_statements}?",
   tests: [
     {
@@ -451,11 +455,9 @@ places.addRule(KeyGoesInAddress, {
     }
   ]
 })
-places.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
-  syntax: "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
-})
-places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number} {unit:check_unit}?" })
-places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {unit:check_unit}" })
+places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {interval:measure_literal}" })
+places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number}" })
+places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {unit:unit_words}" })
 places.addRule(Wording.specialize({ ruleName: "day_half", meanings: ["am", "pm"] }), {
   syntax: "((am:am|AM)|(pm:pm|PM))"
 })

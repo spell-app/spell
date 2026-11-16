@@ -177,6 +177,7 @@ classes.addRule(WithNestedStatements, {
 })
 
 classes.addRule(CreateType, {
+  roles: { band: "thing", type: "declaration", ability: "name" },
   syntax: `(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) ${ABILITIES} {superType:type} (with {defaults:object_literal_properties})? (, aka {aka:quoted_type})? {with_nested_statements}?`,
   tests: [
     {
@@ -443,8 +444,12 @@ classes.addRule(DimensionUnit, {
   syntax: "one {unit:unit_names} , is {top:number} (/ {bottom:number})? {of:unit_words} (, starting at {start:number})?"
 })
 
+// a page's layout, on its line (epic `mockup` T39):  `systems is a page, in the bare layout`, `login is a page, no layout`
+const PAGE_LAYOUT = "(, in the {layout:type_words}|, (no_layout:no layout))?"
+
 classes.addRule(CreateOneOfAKind, {
-  syntax: `{type:type_words} is (a|an) ${ABILITIES} {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?`,
+  roles: { band: "thing", type: "declaration", ability: "name" },
+  syntax: `{type:type_words} is (a|an) ${ABILITIES} {superType:type} (, aka {aka:quoted_type})? ${PAGE_LAYOUT} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -482,6 +487,7 @@ classes.addRule(CreateOneOfAKind, {
 })
 
 classes.addRule(CreateListType, {
+  roles: { band: "thing", type: "declaration", ability: "name" },
   syntax: "create a type (named|called) {type} as (a|an) list of {instanceType:type}",
   tests: [
     {
@@ -551,10 +557,12 @@ classes.addRule(CreateListType, {
 })
 
 classes.addRule(ReopenType, {
+  roles: { band: "thing" },
   syntax: "(a|an) {type} {with_nested_statements}?"
 })
 
 classes.addRule(CreateViewableListType, {
+  roles: { band: "thing", type: "declaration", ability: "name" },
   syntax: `(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) ${ABILITIES} viewable ${MORE_ABILITIES} list of {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
@@ -839,6 +847,7 @@ classes.addRule(MarkdownDescription, {
 })
 
 classes.addRule(BelongsToOne, {
+  roles: { band: "property" },
   syntax: "(a|an) {type} belongs to one {list:type}",
   tests: [
     {
@@ -944,6 +953,7 @@ classes.addRule(OLD_ABILITY_WORDS, {
 
 // ONE word per ability:  `a card is draggable`, `a pile is not droppable`, `a card is clickable when it is face down`
 classes.addRule(DragAndDrop, {
+  roles: { band: "plain" },
   syntax: `(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}`,
   tests: [
     {
@@ -1027,6 +1037,20 @@ classes.addRule(DragAndDrop, {
 // `- on card dropped:`, `- when a card is dragged out of it:`, `- while card dragged over:`
 // (with no article, only a type it knows:  `something` is any thing)
 classes.addRule(DragHandler, {
+  roles: {
+    band: "action",
+    item: "blank",
+    moment: "declaration",
+    over: "declaration",
+    literal: {
+      something: "declaration",
+      it: "declaration",
+      algo: "declaration",
+      él: "declaration",
+      ella: "declaration",
+      ello: "declaration"
+    }
+  },
   syntax: "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? :? {statement_body}?"
 })
 classes.addRule(DragHandler, {
@@ -1222,6 +1246,10 @@ classes.addRule(UpgradeMethod, {
 })
 
 classes.addRule(ListGuard, {
+  roles: {
+    band: "property",
+    literal: { draggable: "name", droppable: "name", arrastrables: "name", soltable: "name" }
+  },
   syntax: `(a|an) {type:known_type} ${CAN_MOVE}`,
   tests: [
     {
@@ -1337,6 +1365,7 @@ classes.addRule(ListGuard.specialize({ shortFor: "take" }), {
 })
 
 classes.addRule(NewThing, {
+  roles: { type: "name", literal: { a: "name", new: "name", un: "name", una: "name", nuevo: "name", nueva: "name" } },
   syntax: "a new {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
   tests: [
     {
@@ -1570,6 +1599,7 @@ classes.addRule(ClassMember, {
 })
 
 classes.addRule(DefinePropertyHas, {
+  roles: { band: "property" },
   syntax: `(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? ${RULES}`,
   tests: [
     {
@@ -2183,6 +2213,7 @@ classes.addRule(PropertyValueEither, {
 })
 
 classes.addRule(PropertyValueGetter, {
+  roles: { band: "property" },
   syntax: "the {property:member_words} of (a|an) {type:known_type} is :? {expression_body}?",
   tests: [
     {
@@ -2426,6 +2457,7 @@ classes.addRule(PropertyValueGetter, {
 
 // quoted:  its body is markup, which IS the drawing -- `- to "draw it": <div>[rank]</div>`
 classes.addRule(DrawIt, {
+  roles: { band: "action" },
   syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?"
 })
 
@@ -2566,6 +2598,7 @@ classes.addRule(HasSlots, {
 // a template's menu of its actions (epic `elemental-spell` P10):  `- its "game menu" is a menu of "deal" and "undo"`
 // a group of a template's members, a heading in its outline (epic `elemental-spell` P16):  `- group "direction"`
 classes.addRule(DefineGroup, {
+  roles: { band: "plain", group: "declaration", icon: "declaration" },
   syntax: "{type:subject_implied} group {group:text}",
   tests: [
     {
@@ -2654,6 +2687,7 @@ classes.addRule(DefineGroup, {
 })
 
 classes.addRule(DefineMenu, {
+  roles: { band: "property", menu: "declaration" },
   syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?",
   tests: [
     {
@@ -2935,6 +2969,7 @@ classes.addRule(DrawnMarkup, {
 })
 
 classes.addRule(QuotedPropertyFormula, {
+  roles: { band: "property", alias: "declaration" },
   syntax: "(a|an) {type} {alias:text} for [sources:(its {property:member_words}) and]",
   tests: [
     {

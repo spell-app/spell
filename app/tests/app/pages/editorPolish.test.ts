@@ -1,7 +1,7 @@
 import { chromium, type BrowserContext, type Page, type Route } from "playwright"
 import { afterAll, afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { builtInProjectsNow, EDITOR, SERVING } from "./runningEditor"
+import { builtInProjectsNow, CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The code pane's rough edges, smoothed (epic `editor` P28, Editor Polish), in the running editor:
@@ -47,7 +47,7 @@ async function contextWithNoSaving(context: BrowserContext): Promise<void> {
 /** Open example `project`, showing its file `file`. */
 async function open(page: Page, project: string, file: string): Promise<void> {
   await page.goto(`${EDITOR}edit/@spell/examples/${project}`, { timeout: 60_000 })
-  await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+  await new CodeEditor(page).shown()
   await page.waitForTimeout(4000)
   await page.evaluate(`(() => {
     const { editor } = window
@@ -58,23 +58,12 @@ async function open(page: Page, project: string, file: string): Promise<void> {
 
 /** The number, from 1, of the first line of the code showing that holds `words`. */
 function lineOf(page: Page, words: string): Promise<number> {
-  return page.evaluate(
-    `window.editor.shownCodeEditor.getModel().getLinesContent().findIndex((line) => line.includes(${JSON.stringify(words)})) + 1`
-  )
+  return new CodeEditor(page).lineOf(words)
 }
 
 /** Click line `lineNumber`, from 1, at its first word (or at `column`), with a real mouse. */
-async function clickLine(page: Page, lineNumber: number, column = 0): Promise<void> {
-  const at = (await page.evaluate(`(() => {
-    const code = window.editor.shownCodeEditor
-    code.revealLineInCenter(${lineNumber})
-    const text = code.getModel().getLineContent(${lineNumber})
-    const place = code.getScrolledVisiblePosition({ lineNumber: ${lineNumber}, column: ${column} || text.search(/\\S/) + 2 })
-    const box = code.getDomNode().getBoundingClientRect()
-    return { x: box.x + place.left + 2, y: box.y + place.top + 8 }
-  })()`)) as { x: number; y: number }
-  await page.waitForTimeout(300)
-  await page.mouse.click(at.x, at.y)
+async function clickLine(page: Page, lineNumber: number, column?: number): Promise<void> {
+  await new CodeEditor(page).clickLine(lineNumber, column)
   await page.waitForTimeout(800)
 }
 
@@ -90,41 +79,35 @@ function selectedPlaces(page: Page): Promise<string[]> {
 
 /** Lines `lineNumber` (from 1) on, `count` of them, of the code showing. */
 function linesFrom(page: Page, lineNumber: number, count: number): Promise<string[]> {
-  return page.evaluate(
-    `Array.from({ length: ${count} }, (_, at) => window.editor.shownCodeEditor.getModel().getLineContent(${lineNumber} + at))`
-  )
+  return new CodeEditor(page).linesFrom(lineNumber, count)
 }
 
-/** The suggestion list:  is it showing, and its rows' text. */
+/**
+ * The suggestion list:  is it showing, and its rows' text.
+ * - A row's parts (its label, what it is) joined by a space:  CodeMirror draws them as spans side by side.
+ */
 function suggestions(page: Page): Promise<{ isShowing: boolean; rows: string[] }> {
   return page.evaluate(`(() => {
-    const box = document.querySelector(".InputEditor .suggest-widget")
-    const isShowing = !!box && box.classList.contains("visible")
-    const rows = [...(box?.querySelectorAll(".monaco-list-row") ?? [])].map((row) => row.textContent.replace(/\\s+/g, " ").trim())
-    return { isShowing, rows }
+    const box = document.querySelector(".InputEditor .cm-tooltip-autocomplete")
+    const rows = [...(box?.querySelectorAll("li") ?? [])].map((row) =>
+      [...row.children].map((part) => part.textContent.replace(/\\s+/g, " ").trim()).filter(Boolean).join(" ")
+    )
+    return { isShowing: !!box, rows }
   })()`)
 }
 
 /** Type `text`, a key at a time, on a new line after line `lineNumber`. */
 async function typeAfter(page: Page, lineNumber: number, text: string): Promise<void> {
-  await page.evaluate(`(() => {
-    const code = window.editor.shownCodeEditor
-    code.setPosition({ lineNumber: ${lineNumber}, column: code.getModel().getLineMaxColumn(${lineNumber}) })
-    code.focus()
-  })()`)
-  await page.keyboard.press("Enter")
-  await page.keyboard.type(text, { delay: 60 })
+  const code = new CodeEditor(page)
+  await code.setCaret(lineNumber, "end")
+  await code.press("Enter")
+  await code.type(text, 60)
   await page.waitForTimeout(1200)
 }
 
 /** Paste `text` at the caret, as Cmd+V's paste event would bring it. */
 function paste(page: Page, text: string): Promise<void> {
-  return page.evaluate(`(() => {
-    const data = new DataTransfer()
-    data.setData("text/plain", ${JSON.stringify(text)})
-    const area = window.editor.shownCodeEditor.getDomNode().querySelector("textarea")
-    area.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
-  })()`)
+  return new CodeEditor(page).paste(text)
 }
 
 describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
@@ -173,7 +156,7 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       requestAnimationFrame(look)
     `)
     await page.goto(`${EDITOR}edit/@spell/examples/tic-tac-toe`, { timeout: 60_000 })
-    await page.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(2000)
     expect(await page.evaluate(`!!window.__selectedEarly`), "selected while the hero was up").toBe(true)
     expect(await page.evaluate(`window.__antsOverHero`)).toBe(0)
@@ -231,11 +214,9 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       const page = await context.newPage()
       await open(page, "Solitaire", "Solitaire.spell")
       const cheat = await lineOf(page, `<action "cheat"/>`)
-      await page.evaluate(`(() => {
-        const code = window.editor.shownCodeEditor
-        code.focus()
-        code.setPosition({ lineNumber: ${cheat}, column: 7 })
-      })()`)
+      const code = new CodeEditor(page)
+      await code.focus()
+      await code.setCaret(cheat, 7)
       // the real keys:  no range selected, so Cmd+X takes the whole line, and Cmd+V puts it back as a line
       await page.keyboard.press("Meta+x")
       await page.waitForTimeout(3500)
@@ -253,7 +234,7 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       expect(await selected(page)).toEqual([])
       // the compile waits for typing to pause, then runs:  however long that takes here
       await page.waitForFunction(`window.Inspector.allSelected.length > 0`, null, { timeout: 20_000 }).catch(() => {})
-      const cursorLine = (await page.evaluate(`window.editor.shownCodeEditor.getPosition().lineNumber`)) as number
+      const cursorLine = (await code.caret()).lineNumber
       expect(cursorLine).toBe(cheat)
       expect(await selectedPlaces(page)).toEqual([`Solitaire.spell:${cursorLine - 1}:4`])
     }
@@ -325,9 +306,7 @@ describe.skipIf(!SERVING)("editor polish (epic `editor` P28)", () => {
       await page.keyboard.press("Meta+z")
 
       const before = await linesFrom(page, content, 4)
-      await page.evaluate(
-        `window.editor.shownCodeEditor.setPosition({ lineNumber: ${content}, column: ${indent.length + 1} })`
-      )
+      await new CodeEditor(page).setCaret(content, indent.length + 1)
       await page.keyboard.press("Shift+Tab")
       await page.waitForTimeout(300)
       expect(await linesFrom(page, content, 4)).toEqual(before.map((line) => line.slice(1)))

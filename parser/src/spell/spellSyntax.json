@@ -143,7 +143,7 @@
           "ruleNames": ["number_as_string"],
           "internal": false,
           "file": "src/spell/rules/core/NumberAsString.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`number` spelled out as a string, `zero` to `ten` -- the language's `VALUE_MAP` does the word-to-number lookup.",
           "syntaxes": [
             {
@@ -168,7 +168,7 @@
           "ruleNames": ["boolean"],
           "internal": false,
           "file": "src/spell/rules/core/BooleanLiteral.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "Boolean literal -- also accepts common synonyms like `yes`/`no`, `ok`/`cancel`, `always`/`never`.",
           "syntaxes": [
             {
@@ -816,7 +816,7 @@
           "ruleNames": ["measure_literal"],
           "internal": false,
           "file": "src/spell/rules/expressions/MeasureLiteral.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "A number with its unit, written as people write measures (epic `language` P23, Owen's C3): `172 cm`, `77 kg`, `5 ft 8 in`, `2' 3 1/2\"`, `100 °C`, `1/2 cup`, `18%`.",
           "syntaxes": [
             {
@@ -1653,17 +1653,16 @@
             "create_method",
             "create_hook_words",
             "cancel_when",
-            "pause_units",
             "place_kind",
             "place_kind_here",
             "place_kind_each_person",
-            "check_unit",
             "day_half",
             "clock_zone",
             "size_unit",
             "numbers_or_names",
             "there_are_how_many",
             "site_top_bar",
+            "site_main_layout",
             "site_page_state",
             "site_card_color",
             "site_not_found_page",
@@ -1767,9 +1766,6 @@
               "syntax": "((if:if)|(unless:unless))"
             },
             {
-              "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
-            },
-            {
               "syntax": "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(excel_file:excel/i file)|(file:json file)|(plain_file:file)|(room:room)|(sheet:sheet|spreadsheet|csv file)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_space:atmosphere/i space)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
             },
             {
@@ -1777,9 +1773,6 @@
             },
             {
               "syntax": "(personal_atmosphere_account:personal atmosphere/i account|personal atmosphere/i)"
-            },
-            {
-              "syntax": "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
             },
             {
               "syntax": "((am:am|AM)|(pm:pm|PM))"
@@ -1798,6 +1791,9 @@
             },
             {
               "syntax": "(top bar|app bar)"
+            },
+            {
+              "syntax": "(main layout|main page layout)"
             },
             {
               "syntax": "((old:old)|(new:new)|(mocked:mocked)|(built:built))"
@@ -4493,7 +4489,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/classes/QuotedPropertyRule.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Calls a quoted property formula's generated method: `is not? the queen of spades` => `card.is_the_$rank_of_$suits('queen', 'spades')`.",
           "syntaxes": [],
           "aliases": []
@@ -5014,11 +5010,11 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 24,
+          "line": 29,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) ([ability:{draggable_or_droppable} ,?] ,?)? {superType:type} (, aka {aka:quoted_type})? {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) ([ability:{draggable_or_droppable} ,?] ,?)? {superType:type} (, aka {aka:quoted_type})? (, in the {layout:type_words}|, (no_layout:no layout))? {with_nested_statements}?",
               "example": "solitaire is an app",
               "outputs": {
                 "js": {
@@ -6985,12 +6981,12 @@
           "ruleNames": ["pause"],
           "internal": false,
           "file": "src/spell/rules/async/Pause.ts",
-          "line": 14,
-          "purpose": "Delay for a certain amount of time, e.g. `pause for 2 seconds`.",
+          "line": 18,
+          "purpose": "Wait a while, e.g. `pause for 2 seconds`, `pause for 3 ticks`, `pause for the delay`.",
           "syntaxes": [
             {
-              "syntax": "pause for {number:expression} {units:pause_units}",
-              "example": "pause for 2 seconds\"",
+              "syntax": "pause for {duration:expression} {unit:unit_words}?",
+              "example": "pause for 2 seconds",
               "outputs": {
                 "js": {
                   "code": "await core.pauseFor(2, \"seconds\")"
@@ -8345,14 +8341,17 @@
           "ruleNames": ["checked_every"],
           "internal": false,
           "file": "src/spell/rules/places/CheckedEvery.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "How often to ask a place that can't announce what changed.",
           "syntaxes": [
             {
-              "syntax": "check {type:subject_it} every {number} {unit:check_unit}?"
+              "syntax": "check {type:subject_it} every {interval:measure_literal}"
             },
             {
-              "syntax": "check {type:subject_it} every {unit:check_unit}"
+              "syntax": "check {type:subject_it} every {number}"
+            },
+            {
+              "syntax": "check {type:subject_it} every {unit:unit_words}"
             }
           ],
           "aliases": ["statement"]
@@ -8876,7 +8875,7 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -8925,7 +8924,7 @@
           "ruleNames": ["site_overlay"],
           "internal": false,
           "file": "src/spell/rules/sites/SiteOverlay.ts",
-          "line": 43,
+          "line": 41,
           "purpose": "One of a site's dialogs or sidebars (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -10015,7 +10014,7 @@
           "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
           "syntaxes": [
             {
-              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
+              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for ({time:measure_literal}|{time:expression} {unit:unit_words}))|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
               "example": "notify \"Yo!\"",
               "outputs": {
                 "js": {
@@ -10196,7 +10195,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/DynamicMethodRule.ts",
-          "line": 29,
+          "line": 30,
           "purpose": "Rule `constructor` for a plain (non-instance, non-operator) dynamically-defined method's CALL SITE, e.g. matching `notify 1` after `to notify (message): ...` defined it.",
           "syntaxes": [],
           "aliases": []
@@ -10216,7 +10215,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodInfixRule.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "`card nerds out with thing`: calls a quoted method defined as an infix expression: e.g. `card.nerdsOutWithAnother(thing)`.",
           "syntaxes": [],
           "aliases": []
@@ -10226,7 +10225,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodPostfixRule.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "`card is face up` -- reads a quoted method defined as a postfix expression, e.g. `card.isFaceUp`.",
           "syntaxes": [],
           "aliases": []

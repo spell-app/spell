@@ -327,6 +327,7 @@ expressions.addRule(IsExactly, {
 })
 
 expressions.addRule(IsA, {
+  roles: { match: "question" },
   syntax: "{operator:is_or_is_not_a} {expression:known_type}",
   tests: [
     {
@@ -352,7 +353,10 @@ expressions.addRule(IsA, {
 })
 
 // after `is_a`, so a known type wins:  `is a queen` with a type named `queen`
-expressions.addRule(IsListedValue, { syntax: "{operator:is_or_is_not_a} {expression:constant}" })
+expressions.addRule(IsListedValue, {
+  roles: { match: "question" },
+  syntax: "{operator:is_or_is_not_a} {expression:constant}"
+})
 // ... a number of its list too (epic `language` P55):  `it is a 2`
 expressions.addRule(IsListedValue, {
   syntax: "{operator:is_or_is_not_a} {expression:number}",
@@ -392,6 +396,7 @@ expressions.addRule(IsSameTypeAs, {
 
 // in any list of a type (epic `language` P55):  `the card is in a column`
 expressions.addRule(IsInAType, {
+  roles: { match: "question" },
   syntax: "{operator:is_or_is_not} in (a|an) (expression:{known_type})",
   tests: [
     {
@@ -543,6 +548,7 @@ expressions.addRule(DoesNotInclude, {
 })
 
 expressions.addRule(IsDefined, {
+  roles: { match: "question" },
   syntax: "{operator:is_defined_or_not}",
   tests: [
     {
@@ -560,6 +566,7 @@ expressions.addRule(IsDefined, {
 })
 
 expressions.addRule(Exists, {
+  roles: { match: "question" },
   syntax: "{operator:exists_or_not}",
   tests: [
     {
@@ -576,6 +583,7 @@ expressions.addRule(Exists, {
 })
 
 expressions.addRule(ThereIsA, {
+  roles: { match: "question" },
   syntax: "{operator:there_is_or_is_not} {expression:operand}",
   tests: [
     {
@@ -600,6 +608,7 @@ expressions.addRule(ThereIsA, {
 })
 
 expressions.addRule(IsEmpty, {
+  roles: { match: "question" },
   syntax: "{operator:is_or_is_not} empty",
   tests: [
     {
@@ -616,6 +625,7 @@ expressions.addRule(IsEmpty, {
 })
 
 expressions.addRule(AsUppercase, {
+  roles: { match: "value" },
   syntax: "as (upper case|uppercase)",
   tests: [
     {
@@ -687,6 +697,7 @@ expressions.addRule(
   }
 )
 expressions.addRule(AsADate, {
+  roles: { match: "value" },
   syntax: "as (a|an)? {style:date_style}",
   tests: [
     {
@@ -718,10 +729,12 @@ expressions.addRule(Now, {
 })
 
 expressions.addRule(WithCommas, {
+  roles: { match: "value" },
   syntax: "with commas",
   tests: [{ compileAs: "expression", tests: [["1000 with commas", "core.withCommas(1000)"]] }]
 })
 expressions.addRule(AsLowercase, {
+  roles: { match: "value" },
   syntax: "as (lower case|lowercase)",
   tests: [
     {
@@ -734,6 +747,7 @@ expressions.addRule(AsLowercase, {
   ]
 })
 expressions.addRule(AsTitleCase, {
+  roles: { match: "value" },
   syntax: "as (title case|titlecase)",
   tests: [
     {
@@ -747,6 +761,7 @@ expressions.addRule(AsTitleCase, {
 })
 
 expressions.addRule(AsAType, {
+  roles: { match: "value" },
   syntax: "as (a|an) (type:string|number|fraction|integer)",
   tests: [
     {
@@ -776,6 +791,7 @@ expressions.addRule(AsAType, {
 expressions.addRule(HexDigits)
 
 expressions.addRule(HexLiteral, {
+  roles: { match: "written value" },
   syntax: "hex {digits:hex_digits}",
   tests: [
     {
@@ -809,6 +825,7 @@ expressions.addRule(UnicodeOffset, {
 })
 
 expressions.addRule(UnicodeLiteral, {
+  roles: { match: "written value" },
   syntax: "unicode {code:unicode_code}",
   tests: [
     {
@@ -848,10 +865,12 @@ expressions.addRule(UnitWords)
 
 // a measure as people write it:  `172 cm`, `5 ft 8 in`, `2' 3 1/2"`
 expressions.addRule(MeasureLiteral, {
+  roles: { match: "quantity" },
   syntax: "{number} {unit:unit_words}"
 })
 
 // a measure in other units:  `its height in feet`, `its height in feet and inches`
 expressions.addRule(MeasureIn, {
+  roles: { match: "value" },
   syntax: "in [units:{unit:unit_words} (,|and)]"
 })

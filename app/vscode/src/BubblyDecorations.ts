@@ -14,8 +14,8 @@ import { RunnerPanel } from "./RunnerPanel"
  * - A pill round what a person typed:  a background in its band's colour, rounded corners, an edge in its hue;
  *   a little room beside it, a space of its own before and after it (a decoration's attachment), NEVER padding on
  *   the text, which would move the caret off its letters.
- * - The layout is the language server's (`spell/bubbly`):  the same layout and stretches as the app's Monaco editor
- *   (`SP.BubblyLayout`, `SP.BubblyStretches`), so how each rule presents is `SP.BubblyPresentation`'s, not ours.
+ * - The layout is the language server's (`spell/bubbly`):  the same layout and stretches as the app's code editor
+ *   (`SP.BubblyLayout`, `SP.BubblyStretches`), so how each rule presents is its roles' (`SP.BubblyRoles`), not ours.
  * - Its colours, weights and sizes are the look's one sheet's, `bubbly.css`:  VS Code can't load CSS, so they come
  *   from its generated table, `bubbly.values.json`, bundled in when the extension is built.
  *   - Light or dark:  VS Code picks each decoration's `light` or `dark` half by the colour theme's kind.
@@ -179,7 +179,7 @@ export function optionsFor({ kind, partOfSpeech = "plain", isName }: BubblyRange
 /** The setting that turns the look on and off. */
 const SETTING = "spell.bubblyLook"
 
-/** How long after the last edit to lay the code out again, in msec:  as Monaco's (`SpellBubbly`). */
+/** How long after the last edit to lay the code out again, in msec:  as the app's editor's. */
 const RELAYOUT_MSEC = 300
 
 /** The stretches drawn as a pill:  what a person typed, and each value a list declares. */
@@ -214,7 +214,7 @@ const PILL_RADIUS = "5px"
 /** How see-through a pill's edge is, as a hex alpha on its hue. */
 const PILL_EDGE_ALPHA = "66"
 
-/** The room either side of a pill:  a no-break space, as Monaco's (`BubblyMarks`). */
+/** The room either side of a pill:  a no-break space. */
 const ROOM = " "
 
 /** Setting `name` of the sheet in `scheme`. */

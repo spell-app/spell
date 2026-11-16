@@ -1,0 +1,8 @@
+// The frame round every page of Spell UI (epic `mockup` T39):  the site's navigation in the drawer;
+// above each page its app menu, the drawer's button and where you are;  under that, the page's family as tabs.
+main layout is a page layout
+	to draw its app menu
+		<app-menu>
+			<site-nav-button slot="start" />
+			<site-breadcrumbs slot="start" />
+		</app-menu>

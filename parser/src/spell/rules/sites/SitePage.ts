@@ -29,8 +29,8 @@ import {
  *   navigation, one of Spell UI's icons (epic `mockup` T34)
  * - e.g. `- it has a button usage page at "/button", named "Button", tab "Usage"`:  what its tab says, when it has pages
  *   under it and shouldn't read as the navigation does (epic `notebook` P10, Q10)
- * - e.g. `- it has a login page at "/login", no top bar`:  a page drawn without the site's top bar, when the site
- *   has one (`- it has a top bar`, epic `mockup` T35)
+ * - `, no top bar` (epic `mockup` T35) is RETIRED by page layouts (T39):  a page leaves the site's layout on its own
+ *   line, `login is a page, no layout`;  here it does nothing, with a warning saying so
  * - e.g. `- it has a button usage page at "/button", tagged "Forms, Inputs"`:  what it's filed under, to group and search
  *   the site's pages by, the tags split at their commas (epic `mockup` P15)
  * - e.g. `- it has a button usage page at "/button"`:  a page named for a notebook, `button usage`, its last word
@@ -94,7 +94,7 @@ export class SitePage extends SpellStatement<
     const state = Wording.meaningOf(match.groups.state)
     const thumbnail = match.groups.thumbnail ? textIn(match.groups.thumbnail) : undefined
     const live = match.groups.live ? textIn(match.groups.live) : undefined
-    const noTopBar = !!match.groups.no_top_bar
+    if (match.groups.no_top_bar) SP.SpellWarnings.note(match, language.parserMessage("site-no-top-bar-retired"))
     const card = cardDetailsOf(match.groups)
     if (!card) return SpellStatement.refuse(match, cardPlaceMessage(language, match.groups))
     match.data.entry = {
@@ -108,7 +108,6 @@ export class SitePage extends SpellStatement<
       ...(state && { state }),
       ...(thumbnail && { thumbnail }),
       ...(live && { live }),
-      ...(noTopBar && { noTopBar }),
       ...card,
       ...(params.length && { params })
     }

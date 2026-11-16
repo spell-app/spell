@@ -1,0 +1,125 @@
+/*
+ * The popups for an attribute's value, every code editor's (`ValuePopups.ts`):  in `<body>` so no pane clips them.
+ * - The choices strip (epic `editor` T70):  quiet, a row of small words in the popup's look, the current one ticked.
+ * - The picker at the caret (epic `editor` T61):  the palette, or the icon picker, in the theme's look.
+ */
+
+/* The choices strip */
+.ValueChoices {
+  position: fixed;
+  z-index: var(--ui-z-popup, 1000);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  box-sizing: border-box;
+  max-width: 360px;
+  padding: 3px;
+  border: 1px solid var(--ui-popup-border-color, var(--ui-border-color));
+  border-radius: var(--ui-radius-m, 8px);
+  background: var(--ui-popup-background, var(--ui-background));
+  box-shadow: var(--ui-shadow-floating);
+  color: var(--ui-text-color-muted, var(--ui-popup-color, var(--ui-text-color)));
+  font:
+    12px / 1.3 system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  animation: ValueChoicesIn 120ms ease-out;
+}
+
+.ValueChoicesWord {
+  padding: 2px 7px;
+  border: 0;
+  border-radius: var(--ui-radius-s, 4px);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  &:hover {
+    background: var(--ui-surface-muted, rgb(0 0 0 / 6%));
+    color: var(--ui-popup-color, var(--ui-text-color));
+  }
+  &:focus-visible,
+  &:focus {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color, var(--ui-primary));
+    outline-offset: -2px;
+  }
+  /* the value as it is:  ticked */
+  &[aria-selected="true"] {
+    color: var(--ui-popup-color, var(--ui-text-color));
+    font-weight: 600;
+    &::before {
+      content: "✓ ";
+    }
+  }
+}
+
+@keyframes ValueChoicesIn {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The picker */
+.ValuePicker {
+  position: fixed;
+  z-index: var(--ui-z-popup, 1000);
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid var(--ui-popup-border-color, var(--ui-border-color));
+  border-radius: var(--ui-radius-m, 8px);
+  background: var(--ui-popup-background, var(--ui-background));
+  box-shadow: var(--ui-shadow-floating);
+  color: var(--ui-popup-color, var(--ui-text-color));
+  font:
+    13px / 1.3 system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+
+/* The palette:  three chips to a row, each a round swatch and its word */
+.ValuePicker-color {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(96px, 1fr));
+  gap: 2px;
+}
+.ValuePickerChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--ui-radius-s, 4px);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  &:hover {
+    background: var(--ui-surface-muted, rgb(0 0 0 / 6%));
+  }
+  &:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color, var(--ui-primary));
+    outline-offset: -2px;
+  }
+  &[aria-pressed] {
+    font-weight: 600;
+  }
+}
+.ValuePickerSwatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 15%);
+}
+
+/* The icon picker:  its own field at the caret, no card around it;  its panel opens beside it, in the top layer */
+.ValuePicker-icon {
+  width: 220px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}

@@ -1,0 +1,138 @@
+==== /Calculator.spell
+⟪# Calculator⟫
+⟦// A pocket calculator:  a number, an operator, another number, and the total as you type.⟧
+⟦// Its keys are Spell UI's buttons, four a row, and each one runs one of the calculator's actions.⟧
+
+[thing create_one_of_a_kind L0]
+| «calculator» is an **app**
+|   [plain group define_group L1]
+|   | group «"What It Keeps"»
+|   |   ⟦// The sum being typed:  its left number, its operator and its right number⟧
+|   |   [property define_property_has L2]
+|   |   | its «"input"» is **text**
+|   |   |   ⟦// The number being typed, as text, so each key can add a digit on the end⟧
+|   |   [property define_property_has L2]
+|   |   | its «"left"» is **text**
+|   |   [property define_property_has L2]
+|   |   | its «"operator"» is **text**
+|   |   [property define_property_has L2]
+|   |   | its «"right"» is **text**
+|   |   [property property_value_getter L2]
+|   |   | its «"total"» is
+|   |   |   ⟦// The sum so far, worked out each time it's read⟧
+|   |   |   set **left number** to the **left** as a number    ‾value(left number) ‾value(the left as a number)
+|   |   |   set **right number** to the **right** as a number    ‾value(right number) ‾value(the right as a number)
+|   |   |   if the **operator** is _"+"_ return **left number** + **right number**    ‾value(the operator) ‾value(left number) ‾value(right number)
+|   |   |   if the **operator** is _"–"_ return **left number** - **right number**    ‾value(the operator) ‾value(left number) ‾value(right number)
+|   |   |   if the **operator** is _"×"_ return **left number** times **right number**    ‾value(the operator) ‾value(left number) ‾value(right number)
+|   |   |   return **left number** divided by **right number**    ‾value(left number) ‾value(right number)
+|   |   [property property_value_getter L2]
+|   |   | its «"sum"» is
+|   |   |   ⟦// What the display's top line shows:  0 until a key's pressed⟧
+|   |   |   set **shown** to _"0"_ if the **left** is empty otherwise the **left**    ‾value(shown) ‾question(the left is empty) ‾value(the left)
+|   |   |   return **shown** + _" "_ + the **operator** + _" "_ + the **right**    ‾value(shown) ‾value(the operator) ‾value(the right)
+|   |   [property property_value_getter L2]
+|   |   | its «"output"» is
+|   |   |   ⟦// The display's second line:  the total, once there's a right number⟧
+|   |   |   _""_ if the **right** is empty    ‾question(the right is empty)
+|   |   |   _"= "_ + the **total** otherwise    ‾value(the total)
+
+|   [plain group define_group L1]
+|   | group «"What Its Keys Do"»
+|   |   [action to_do_something L2]
+|   |   | to «clear it»
+|   |   |   clear the **input**    ‾value(the input)
+|   |   |   clear the **left**    ‾value(the left)
+|   |   |   clear the **operator**    ‾value(the operator)
+|   |   |   clear the **right**    ‾value(the right)
+|   |   [action to_do_something L2]
+|   |   | to «finish it»
+|   |   |   ⟦// Equals:  the total becomes the left number, ready for the next operator⟧
+|   |   |   if the **right** is empty return    ‾question(the right is empty)
+|   |   |   set the **left** to the **total** as text    ‾value(the left) ‾value(the total as text)
+|   |   |   clear the **operator**    ‾value(the operator)
+|   |   |   clear the **right**    ‾value(the right)
+|   |   |   clear the **input**    ‾value(the input)
+|   |   [action to_do_something L2]
+|   |   | to «press (digit as text)»    ‾value(digit as text) bold(digit) bold(text)
+|   |   |   ⟦// A digit, or the decimal point:  onto the number being typed, the left one until there's an operator⟧
+|   |   |   [control if L3]
+|   |   |   | if the **digit** is _"."_    ‾value(the digit)
+|   |   |   |   [control if L4]
+|   |   |   |   | if the **input** is empty    ‾question(the input is empty)
+|   |   |   |   |   set the **input** to _"0."_    ‾value(the input)
+|   |   |   |   [control else_if L4]
+|   |   |   |   | otherwise if the **input** does not contain _"."_    ‾value(the input)
+|   |   |   |   |   set the **input** to the **input** + _"."_    ‾value(the input) ‾value(the input)
+|   |   |   [control else L3]
+|   |   |   | otherwise
+|   |   |   |   set the **input** to the **input** + the **digit**    ‾value(the input) ‾value(the input) ‾value(the digit)
+|   |   |   [control if L3]
+|   |   |   | if the **operator** is empty    ‾question(the operator is empty)
+|   |   |   |   set the **left** to the **input**    ‾value(the left) ‾value(the input)
+|   |   |   [control else L3]
+|   |   |   | otherwise
+|   |   |   |   set the **right** to the **input**    ‾value(the right) ‾value(the input)
+|   |   [action to_do_something L2]
+|   |   | to «apply (key as text)»    ‾value(key as text) bold(key) bold(text)
+|   |   |   ⟦// An operator:  after a whole sum, the total carries on as the next sum's left number⟧
+|   |   |   [control if L3]
+|   |   |   | if the **right** is not empty    ‾question(the right is not empty)
+|   |   |   |   finish it    ‾call(finish it)
+|   |   |   set the **operator** to the **key**    ‾value(the operator) ‾value(the key)
+|   |   |   clear the **input**    ‾value(the input)
+
+|   [plain group define_group L1]
+|   | group «"Drawing"»
+|   |   [action to_do_something L2]
+|   |   | to **draw** it
+|   |   |   ⟦// The display, then the keypad, four keys a row:  C and 0 are two keys wide⟧
+|   |   |   <⟨container⟩ width=«"20em"»>
+|   |   |     <⟨card⟩ fluid>
+|   |   |       <⟨segment⟩ appearance=«"secondary"» align=«"right"»>
+|   |   |         <⟨text⟩ size=«"huge"»>{the **sum**}</⟨text⟩>    code({the sum})
+|   |   |         <⟨space⟩/>
+|   |   |         <⟨text⟩ size=«"large"» color=«"grey"»>{the **output**}</⟨text⟩>    code({the output})
+|   |   |       </⟨segment⟩>
+|   |   |       <⟨content⟩>
+|   |   |         <⟨grid⟩ columns=«"4"» spacing=«"compact"»>
+|   |   |           <⟨column⟩ width=«"8"»><⟨button⟩ fluid color=«"negative"» onClick={clear it}>C</⟨button⟩></⟨column⟩>    code({clear it})
+|   |   |           <⟨column⟩><⟨button⟩ fluid color=«"secondary"» onClick={finish it}>=</⟨button⟩></⟨column⟩>    code({finish it})
+|   |   |           <⟨column⟩><⟨button⟩ fluid color=«"primary"» onClick={apply _"÷"_}>÷</⟨button⟩></⟨column⟩>    code({apply "÷"})
+
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"7"_}>7</⟨button⟩></⟨column⟩>    code({press "7"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"8"_}>8</⟨button⟩></⟨column⟩>    code({press "8"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"9"_}>9</⟨button⟩></⟨column⟩>    code({press "9"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid color=«"primary"» onClick={apply _"×"_}>×</⟨button⟩></⟨column⟩>    code({apply "×"})
+
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"4"_}>4</⟨button⟩></⟨column⟩>    code({press "4"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"5"_}>5</⟨button⟩></⟨column⟩>    code({press "5"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"6"_}>6</⟨button⟩></⟨column⟩>    code({press "6"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid color=«"primary"» onClick={apply _"–"_}>–</⟨button⟩></⟨column⟩>    code({apply "–"})
+
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"1"_}>1</⟨button⟩></⟨column⟩>    code({press "1"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"2"_}>2</⟨button⟩></⟨column⟩>    code({press "2"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"3"_}>3</⟨button⟩></⟨column⟩>    code({press "3"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid color=«"primary"» onClick={apply _"+"_}>+</⟨button⟩></⟨column⟩>    code({apply "+"})
+
+|   |   |           <⟨column⟩ width=«"8"»><⟨button⟩ fluid onClick={press _"0"_}>0</⟨button⟩></⟨column⟩>    code({press "0"})
+|   |   |           <⟨column⟩><⟨button⟩ fluid onClick={press _"."_}>.</⟨button⟩></⟨column⟩>    code({press "."})
+|   |   |         </⟨grid⟩>
+|   |   |       </⟨content⟩>
+|   |   |     </⟨card⟩>
+|   |   |   </⟨container⟩>
+
+|   |   [action to_do_something L2]
+|   |   | to «test two sums in a row»
+|   |   |   ⟦// 12 + 5, then times 2:  the total carries on as the next sum's left number⟧
+|   |   |   press _"1"_    ‾call(press "1")
+|   |   |   press _"2"_    ‾call(press "2")
+|   |   |   apply _"+"_    ‾call(apply "+")
+|   |   |   press _"5"_    ‾call(press "5")
+|   |   |   the **output** should be _"= 17"_    ‾value(the output)
+|   |   |   apply _"×"_    ‾call(apply "×")
+|   |   |   press _"2"_    ‾call(press "2")
+|   |   |   the **output** should be _"= 34"_    ‾value(the output)
+|   |   |   finish it    ‾call(finish it)
+|   |   |   the **left** should be _"34"_    ‾value(the left)
+|   |   |   the **output** should be _""_    ‾value(the output)

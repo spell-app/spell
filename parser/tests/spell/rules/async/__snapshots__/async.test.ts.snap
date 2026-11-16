@@ -6,7 +6,7 @@ exports[`testing spell module async > rule group specs > match snapshot -- if th
   "await": "expression?",
   "check_process": "name|operator",
   "meanwhile": "body?",
-  "pause": "number|units",
+  "pause": "duration|unit?",
   "start_process": "operator?|name",
   "stop_process": "name",
   "without_waiting": "call",

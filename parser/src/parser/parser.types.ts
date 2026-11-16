@@ -92,7 +92,8 @@ export const BUILT_IN_CLASS_NAMES: Record<Datatype, string> = {
   place: "Place",
   // a built-in template written in spell, compiled into the core (not in `BUILT_IN_TYPES`)
   "two sided view": "TwoSidedView",
-  site: "Site"
+  site: "Site",
+  "page layout": "PageLayout"
 }
 
 /** Built-in types which are classes at runtime -- see `BUILT_IN_CLASS_NAMES`. */

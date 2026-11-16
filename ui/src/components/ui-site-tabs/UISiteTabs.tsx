@@ -2,7 +2,7 @@ import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
-import { SitePages, type SitePage } from "spell/ui/components/ui-site-nav/SitePages"
+import { SitePages, type FollowedSiteNav, type SitePage } from "spell/ui/components/ui-site-nav/SitePages"
 import { siteTabsVocabulary } from "./UISiteTabs.en"
 
 import siteTabsCSS from "./UISiteTabs.css?inline"
@@ -33,7 +33,8 @@ import siteTabsCSS from "./UISiteTabs.css?inline"
  *     (epic `notebook` I11).
  * - Plain data in, no fetching:  `pages` and `current`, set on it by hand.
  * - Without `pages`, it follows the site navigation it's inside (epic `mockup` T38):
- *   - the nearest box around it with a `<ui-site-nav>` of its own, across shadow roots (`siteNavAround()`)
+ *   - the nearest box around it with a `<ui-site-nav>` of its own, across shadow roots
+ *     (`SitePages.followNavAround()`, which `<ui-site-breadcrumbs>` follows it with too)
  *   - its `pages` and `current` are that navigation's, kept up as they change:  so a page of a Spell site writes
  *     a bare `<site-tabs/>`, and its tabs are the shown page's family
  *   - a tab's click is a link's, which the site follows itself, as any link to one of its pages
@@ -67,7 +68,7 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
   ////////////////
 
   /** The site navigation's `pages` and `current`, while it's inside one;  `undefined` outside any. */
-  @E.state accessor followed: FollowedNav | undefined = undefined
+  @E.state accessor followed: FollowedSiteNav | undefined = undefined
 
   /** It has no `pages` of its own, so it shows the site navigation's. */
   get isFollowing(): boolean {
@@ -75,41 +76,15 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
   }
 
   /**
-   * While connected:  read the site navigation around it, and again each time its `pages` or `current` changes.
+   * While connected:  follow the site navigation around it (`SitePages.followNavAround()`).
    * - Nothing around it:  nothing to follow, and it draws only what it's given.
    */
   @E.whileConnected
   protected followSiteNav() {
-    const nav = UISiteTabs.siteNavAround(this.domElement)
-    if (!nav) return
-    const read = () =>
-      (this.followed = {
-        pages: UISiteTabs.parsed(nav.getAttribute(PAGES)),
-        current: nav.getAttribute(CURRENT) ?? undefined
-      })
-    read()
-    // oxlint-disable-next-line spell-ui/no-mutation-observer -- watches the site navigation around it, another element
-    const observer = new MutationObserver(read)
-    observer.observe(nav, { attributes: true, attributeFilter: [PAGES, CURRENT] })
+    const stop = SitePages.followNavAround(this.domElement, (followed) => (this.followed = followed))
     return () => {
-      observer.disconnect()
+      stop?.()
       this.followed = undefined
-    }
-  }
-
-  /** The `<ui-site-nav>` of the nearest box around `element` that has one of its own, across shadow roots. */
-  private static siteNavAround(element: Element): Element | undefined {
-    const box = E.closestAcrossShadow(element, `:has(> ${SITE_NAV})`)
-    return box?.querySelector(`:scope > ${SITE_NAV}`) ?? undefined
-  }
-
-  /** The pages in a navigation's `pages` text;  `undefined` for none, or text that isn't JSON. */
-  private static parsed(text: string | null): unknown {
-    if (!text) return undefined
-    try {
-      return JSON.parse(text)
-    } catch {
-      return undefined
     }
   }
 
@@ -127,7 +102,7 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
     ): readonly SiteTabsPage[] | undefined => {
       for (const page of pages) {
         if (this.isShown(page)) {
-          if (UISiteTabs.hasParameter(page)) return []
+          if (SitePages.hasParameter(page)) return []
           if (page.pages?.length) return [page, ...page.pages]
           return parent?.pages ? [parent, ...parent.pages] : []
         }
@@ -142,7 +117,7 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
   /** The tabs to draw:  the family's pages a link can go to, or none when that's fewer than two. */
   @E.derived
   get tabs(): readonly SiteTabsPage[] {
-    const tabs = this.family.filter((page) => page.href && !UISiteTabs.hasParameter(page))
+    const tabs = this.family.filter((page) => page.href && !SitePages.hasParameter(page))
     return tabs.length >= MINIMUM_TABS ? tabs : []
   }
 
@@ -252,15 +227,6 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
       </ui-item>
     )
   }
-
-  ////////////////
-  // ## Helpers
-  ////////////////
-
-  /** `page`'s address has a parameter in it (`/films/:film`), so a tab can't go there. */
-  private static hasParameter(page: SiteTabsPage): boolean {
-    return !!page.href && PARAMETER.test(page.href)
-  }
 }
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
@@ -273,14 +239,6 @@ export type SiteTabsPage = SitePage & {
   /** the pages under it */
   pages?: readonly SiteTabsPage[]
 }
-
-/** What it follows of the site navigation around it:  its `pages` (parsed, not yet checked) and `current`. */
-type FollowedNav = { pages: unknown; current: string | undefined }
-
-/** The site navigation's tag, and the two attributes of it that it follows. */
-const SITE_NAV = "ui-site-nav"
-const PAGES = "pages"
-const CURRENT = "current"
 
 /** A row of fewer tabs than this draws nothing:  a single tab goes nowhere. */
 const MINIMUM_TABS = 2
@@ -297,6 +255,3 @@ const FLUID = "fluid"
 
 /** The menu's own box, in its shadow root:  the row that scrolls. */
 const MENU_BOX = '[part~="menu"]'
-
-/** A parameter in an address (`/films/:film`), in the kit's ONE address grammar (`spell/util/addressPattern`). */
-const PARAMETER = /\/:|\*/

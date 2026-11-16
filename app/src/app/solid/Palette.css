@@ -250,7 +250,7 @@ ui-popup.PaletteGroupPopup::part(popup) {
   display: none;
 }
 
-/* the part menu (`<PartMenu>`):  at once, as the system's own right-click menu, with no fade in */
-ui-popup.PartMenu {
+/* a right click's menu (`<MenuPopup>`, the part menu's and the code's):  at once, as the system's own right-click menu, with no fade in */
+ui-popup.MenuPopup {
   --ui-popup-duration: 0s;
 }

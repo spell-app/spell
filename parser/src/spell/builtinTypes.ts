@@ -706,6 +706,9 @@ export const TYPE_WORDS: P.TypeWords = {
   "two-sided-view": "two sided view",
   // pages people move between by address, and the dialogs and sidebars they open (epic `mockup` P1)
   site: "site",
+  // what stays on screen around a site's pages (epic `mockup` T39)
+  "page layout": "page layout",
+  "page-layout": "page layout",
   // a kind of measure:  `length is a dimension:` (epic `language` P23)
   dimension: "dimension",
   nothing: "nothing",

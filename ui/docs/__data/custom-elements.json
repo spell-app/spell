@@ -23533,6 +23533,306 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-page-layout/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIPageLayout",
+          "tagName": "ui-page-layout",
+          "customElement": true,
+          "summary": "A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.  An empty one takes no room.  Its own box, not the window:  below 40em of it, the drawer slides over the page.",
+          "description": "A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.  An empty one takes no room.  Its own box, not the window:  below 40em of it, the drawer slides over the page.\n\nAlso known as:  app layout, app shell, site layout, page frame, drawer layout, navigation drawer, holy grail.",
+          "attributes": [
+            {
+              "name": "drawer",
+              "description": "`compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`.",
+              "type": {
+                "text": "\"compact\""
+              },
+              "fieldName": "drawer"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            }
+          ],
+          "members": [],
+          "events": [
+            {
+              "name": "ui-toggle",
+              "description": "The drawer switched between its icons only (`compact`) and all of it (`full`), from `toggleDrawer()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer` again next time.",
+              "type": {
+                "text": "CustomEvent<{ newState: \"compact\" | \"full\", oldState: \"compact\" | \"full\" }>"
+              }
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "The page."
+            },
+            {
+              "name": "menu",
+              "description": "The app's top bar, across the top beside the drawer:  usually a `<ui-app-menu>`."
+            },
+            {
+              "name": "page-menu",
+              "description": "A row of its own under the menu, over the page and its side bars:  usually `<ui-site-tabs>`."
+            },
+            {
+              "name": "drawer",
+              "description": "The side navigation, a column the whole height at the start:  usually a `<ui-site-nav>`."
+            },
+            {
+              "name": "left",
+              "description": "A side bar between the drawer and the page."
+            },
+            {
+              "name": "right",
+              "description": "A side bar at the page's end."
+            },
+            {
+              "name": "footer",
+              "description": "Across the bottom, under the page and its side bars."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "layout",
+              "description": "The grid of regions:  the drawer's column, then the rest."
+            },
+            {
+              "name": "drawer",
+              "description": "The drawer's column, on its own fill with a line at its end."
+            },
+            {
+              "name": "drawer-box",
+              "description": "The drawer's box inside its column:  what scrolls, and what slides out."
+            },
+            {
+              "name": "menu",
+              "description": "The menu's row."
+            },
+            {
+              "name": "page-menu",
+              "description": "The page menu's row."
+            },
+            {
+              "name": "left",
+              "description": "The start side bar's box."
+            },
+            {
+              "name": "page",
+              "description": "The page's box."
+            },
+            {
+              "name": "right",
+              "description": "The end side bar's box."
+            },
+            {
+              "name": "footer",
+              "description": "The footer's row."
+            },
+            {
+              "name": "menu-button",
+              "description": "Its own button to show the drawer, at a narrow width, when nothing inside it is a `<ui-site-nav-button>`."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "compact",
+              "description": "`drawer=\"compact\"`:  the drawer shows only its icons."
+            },
+            {
+              "name": "open",
+              "description": "The drawer is open over the page:  slid in at a narrow width, or opened from its icons while the pointer rests on it."
+            },
+            {
+              "name": "narrow",
+              "description": "Below 40em of its own box:  one column, the drawer slid out of the way."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-page-layout-gap",
+              "default": "var(--ui-font-size, 16px)"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIPageLayout",
+          "declaration": {
+            "name": "UIPageLayout",
+            "module": "src/components/ui-page-layout/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-page-layout",
+          "declaration": {
+            "name": "UIPageLayout",
+            "module": "src/components/ui-page-layout/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-panel/index.ts",
       "declarations": [
         {
@@ -37528,6 +37828,234 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-site-breadcrumbs/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UISiteBreadcrumbs",
+          "tagName": "ui-site-breadcrumbs",
+          "customElement": true,
+          "summary": "Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page (Hardware › Systems), each page above a link.",
+          "description": "Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page (Hardware › Systems), each page above a link.\n\nAlso known as:  breadcrumb trail, you are here, location, page path, where you are, site path.",
+          "attributes": [
+            {
+              "name": "current",
+              "description": "Which page is shown:  its `href` or its `id`.  None:  the page whose `href` is the browser's address.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "current"
+            },
+            {
+              "name": "label",
+              "description": "What a screen reader calls the trail.  None:  \"Where you are\".",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "pages",
+              "description": "The site's pages, nested as the side navigation nests them:  the same `pages` `<ui-site-nav>` takes, each `{ title, href, id?, band?, pages? }`, e.g. `[{ \"title\": \"Hardware\", \"id\": \"group:Hardware\", \"band\": \"group\", \"pages\": [{ \"title\": \"Systems\", \"href\": \"/systems\" }] }]`.  A `band: \"group\"` page is a group's name:  its crumb is plain text.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "events": [],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "breadcrumbs",
+              "description": "The `<ui-breadcrumbs>` trail, which holds the crumbs."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "empty",
+              "description": "The page shown isn't in the site's pages, so nothing is drawn:  it takes no room."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-site-breadcrumbs-padding",
+              "default": "0 1.14286em"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UISiteBreadcrumbs",
+          "declaration": {
+            "name": "UISiteBreadcrumbs",
+            "module": "src/components/ui-site-breadcrumbs/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-site-breadcrumbs",
+          "declaration": {
+            "name": "UISiteBreadcrumbs",
+            "module": "src/components/ui-site-breadcrumbs/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-site-nav/index.ts",
       "declarations": [
         {
@@ -37807,6 +38335,334 @@
           "declaration": {
             "name": "UISiteNav",
             "module": "src/components/ui-site-nav/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ui-site-nav-button/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UISiteNavButton",
+          "tagName": "ui-site-nav-button",
+          "customElement": true,
+          "summary": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.  It's an item, for an app menu.",
+          "description": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.  It's an item, for an app menu.\n\nAlso known as:  side bar button, drawer button, hamburger, menu button, navigation toggle, sidebar toggle.",
+          "attributes": [
+            {
+              "name": "color",
+              "description": "Menu:  hue of the item while selected (`red active item`).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "color"
+            },
+            {
+              "name": "position",
+              "description": "Menu:  `right` pushes the item (and what follows) to the far end.",
+              "type": {
+                "text": "\"left\" | \"right\""
+              },
+              "fieldName": "position"
+            },
+            {
+              "name": "value",
+              "description": "Value;  defaults to `label`.  Ordered list:  shown as the marker.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
+            },
+            {
+              "name": "label",
+              "description": "Dropdown:  its words;  defaults to the text content.  Its old name was `text`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "description",
+              "description": "Dropdown:  secondary text, shown at the end.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "description"
+            },
+            {
+              "name": "icon",
+              "description": "Icon name, shown before the text.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "icon"
+            },
+            {
+              "name": "image",
+              "description": "Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "image"
+            },
+            {
+              "name": "flag",
+              "description": "Dropdown:  country code, shown as a flag before the text.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "flag"
+            },
+            {
+              "name": "link",
+              "description": "List / menu:  where it goes:  renders a link (`<a>`).  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Link target, with `link`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "appearance",
+              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "appearance"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be chosen or followed.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "selected",
+              "description": "Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "selected"
+            },
+            {
+              "name": "padding",
+              "description": "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name was `fitted` (`horizontally`, `vertically`).",
+              "type": {
+                "text": "\"none\" | \"none-x\" | \"none-y\""
+              },
+              "fieldName": "padding"
+            },
+            {
+              "name": "kind",
+              "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`.",
+              "type": {
+                "text": "\"item\" | \"header\" | \"divider\""
+              },
+              "default": "\"item\"",
+              "fieldName": "kind"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            }
+          ],
+          "members": [],
+          "events": [],
+          "slots": [
+            {
+              "name": "",
+              "description": "Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu."
+            },
+            {
+              "name": "icon",
+              "description": "List / menu:  replaces the `icon` shorthand's glyph."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "item",
+              "description": "List / menu:  the item box (`<a>`, `<button>` or `<div>`)."
+            },
+            {
+              "name": "icon",
+              "description": "List / menu:  the icon box of the `icon` shorthand."
+            },
+            {
+              "name": "image",
+              "description": "List / menu:  the `<img>` of the `image` shorthand."
+            },
+            {
+              "name": "title",
+              "description": "A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  the box around the `badge` slot."
+            },
+            {
+              "name": "tick",
+              "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "selected",
+              "description": "Chosen (`selected` or `active`)."
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be chosen."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UISiteNavButton",
+          "declaration": {
+            "name": "UISiteNavButton",
+            "module": "src/components/ui-site-nav-button/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-site-nav-button",
+          "declaration": {
+            "name": "UISiteNavButton",
+            "module": "src/components/ui-site-nav-button/index.ts"
           }
         }
       ]

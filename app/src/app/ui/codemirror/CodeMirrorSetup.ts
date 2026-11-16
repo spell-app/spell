@@ -16,23 +16,24 @@ import {
 
 import { observe } from "spell/util"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+import { CodeMirrorFollowed } from "./CodeMirrorFollowed"
 
 /****************
  * ### `CodeMirrorSetup`
- * What EVERY CodeMirror editor starts with, as `SpellMonaco.OPTIONS` is for Monaco:
+ * What EVERY CodeMirror editor starts with:
  * the keys, undo, find, the gutter, and CodeMirror's own words in the app's language.
  * - `CodeMirrorSetup.extensions()` is the set;  each editor adds its own on top:
  *   a project file's (`FileStates`), the compiled code's, the merge view's (`SpellCodeMirror`).
  *   - "On top" means BEFORE these in the list:  CodeMirror gives an earlier extension's keys the first go,
  *     so a file's own Enter wins over the plain one here.
- * - The gutter is Monaco's:  no line numbers until asked (`showLineNumbers()`), fold arrows over the code's padding,
+ * - The gutter:  no line numbers until asked (`showLineNumbers()`), fold arrows over the code's padding,
  *   shown while the mouse is on the edge, a folded block's always.
  *   No change bar (epic `codemirror` Q1).
  * - CodeMirror's words are the app's texts, `AppTexts` keys (`cm...`;  epic `codemirror` Q3):
  *   - CodeMirror asks for each by its English, through one table (`EditorState.phrases`)
  *   - `PHRASE_KEYS` turns that English into our keys
  *   - the editors follow `appTexts.lang`:  each one's words change when the app's do, a Spanish page's included
- * - Its position in the import graph:  CodeMirror and the app's texts;  never a file, the parser or Monaco.
+ * - Its position in the import graph:  CodeMirror and the app's texts;  never a file or the parser.
  ****************/
 export class CodeMirrorSetup {
   /** The extensions every editor takes, as `options` say. */
@@ -47,7 +48,8 @@ export class CodeMirrorSetup {
       dropCursor(),
       EditorState.allowMultipleSelections.of(true),
       indentUnit.of("\t"),
-      EditorState.tabSize.of(4),
+      // a tab 2 spaces wide, as Monaco drew it:  each level of a body 8px further in, not 17px (epic `language` I113)
+      EditorState.tabSize.of(TAB_SIZE),
       search({ top: true }),
       CodeMirrorSetup.gutter({ lineNumbers }),
       keymap.of([
@@ -60,7 +62,9 @@ export class CodeMirrorSetup {
         ...(editable ? [indentWithTab] : []),
         ...defaultKeymap
       ]),
-      EditorView.editorAttributes.of({ class: EDITOR_CLASS })
+      EditorView.editorAttributes.of({ class: EDITOR_CLASS }),
+      // room for the place in focus's mark (`<FollowAlong>`)
+      CodeMirrorFollowed.extension()
     ]
   }
 
@@ -71,7 +75,7 @@ export class CodeMirrorSetup {
   /**
    * The gutter:  line numbers when asked, then the fold arrows.
    * - The fold column is 16px, pulled 8px over the code's padding, each arrow 4px toward the code (`codemirror.css`):
-   *   as Monaco's arrows are drawn (`MonacoEditor.css`, epic `editor` I154).
+   *   (epic `editor` I154).
    * - A press on an arrow folds or unfolds its block, and never moves the caret:  the gutter is outside the text.
    * - The arrows follow each new parse (`PARSED`), as the blocks that fold are the parse's.
    */
@@ -85,9 +89,25 @@ export class CodeMirrorSetup {
     ]
   }
 
-  /** Line numbers in `view` or not, as View › Line Numbers says:  none at first, as in Monaco. */
+  /** Line numbers in `view` or not, as View › Line Numbers says:  none at first. */
   static showLineNumbers(view: EditorView, show: boolean): void {
     view.dispatch({ effects: CodeMirrorSetup.lineNumbers.reconfigure(show ? lineNumbers() : []) })
+  }
+
+  /**
+   * `text`'s width in `element`'s font, as the browser lays it out, in px;  a tab `tabSize` spaces, as CodeMirror's is.
+   * - A hidden probe in the scroller, beside the text, never in it:  CodeMirror reads any change to its content as an edit.
+   * - A tab's measured, not worked out from a space:  the browser rounds a tab stop (8.44px, 2 spaces of 4.22px).
+   * - SIDE EFFECT:  lays the page out, if it's due;  call it where reading layout is fine.
+   */
+  static widthIn(element: HTMLElement, text: string, tabSize = TAB_SIZE): number {
+    const probe = document.createElement("span")
+    probe.style.cssText = `position: absolute; visibility: hidden; white-space: pre; tab-size: ${tabSize}`
+    probe.textContent = text
+    element.append(probe)
+    const width = probe.getBoundingClientRect().width
+    probe.remove()
+    return width
   }
 
   /**
@@ -161,7 +181,7 @@ export class CodeMirrorSetup {
 export type CodeMirrorSetupOptions = {
   /** `false` for one that shows code only, e.g. the compiled javascript:  no undo, nothing typed.  Default:  `true`. */
   editable?: boolean
-  /** its lines numbered from the start, as the compiled code's are.  Default:  `false`, as in Monaco. */
+  /** its lines numbered from the start, as the compiled code's are.  Default:  `false`. */
   lineNumbers?: boolean
 }
 
@@ -188,6 +208,9 @@ const SPEAKS_NOW = ViewPlugin.fromClass(
 /** The class every CodeMirror editor has, for `codemirror.css`:  its gutter, whatever else it draws. */
 const EDITOR_CLASS = "cmb"
 
+/** How many spaces wide a tab is:  2, as Monaco's was (epic `language` I113);  `codemirror.css`'s `tab-size` too. */
+const TAB_SIZE = 2
+
 /** Whether `update` brought a new parse:  `CodeMirrorSetup.PARSED`. */
 function wasParsed(update: ViewUpdate): boolean {
   return update.transactions.some((transaction) =>
@@ -197,8 +220,8 @@ function wasParsed(update: ViewUpdate): boolean {
 
 /**
  * A fold arrow:  pointing down while its block is open, right while it's folded.
- * - Its own chevron, drawn as Monaco's is:  the font's `⌄` / `›` sit at different heights.
- * - No title:  Monaco's arrows have none, and the words CodeMirror would give it need the editor.
+ * - Its own chevron:  the font's `⌄` / `›` sit at different heights.
+ * - No title:  the words CodeMirror would give it need the editor.
  */
 function foldArrow(isOpen: boolean): HTMLElement {
   const arrow = document.createElement("span")

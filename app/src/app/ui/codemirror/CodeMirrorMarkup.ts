@@ -4,13 +4,14 @@ import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } fr
 import { MarkupMarks, type MarkupShape, type MarkupWithin } from "spell/app/app/ui/MarkupMarks"
 import type { MarkMaker, MarkedStretch, Spacer } from "spell/app/app/ui/TextMarks"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
+import { CodeMirrorSetup } from "./CodeMirrorSetup"
 
 /****************
  * ### `CodeMirrorMarkup`
  * HTML drawn bubbly in a CodeMirror editor (epic `codemirror` P3), as the drawn-bubbly page draws it:
  * an HTML file (a property editor page, `Card.editor.html`), and a Spell file's drawing's tags.
  * - What's marked how is the editors' shared reading, `MarkupMarks`, from the page's own reading of markup
- *   (`BubblyMarkup`):  the same elements, pieces and classes as Monaco's.
+ *   (`BubblyMarkup`):  the same elements, pieces and classes.
  * - Only the last step is CodeMirror's (`draw()`):  each stretch a mark in its classes, each spacer a widget, and each
  *   SHAPE drawn on the text itself, not in a layer behind it:
  *   - a tag in a line:  its mark a small pill, its ends pointed (`cmb-tag-pill`)
@@ -18,7 +19,7 @@ import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
  *   - a block's body:  a rail on each line (`--cmb-rails`);  its end tag on its own line a tiny pill (`cmb-tag-foot`)
  *   - a one-line element with something between its tags:  a line along the top and bottom between them
  * - The editor's box is a `.bubbly .bubbly-html` (`EDITOR_CLASSES`), so the look's one sheet, `bubbly.css`, reaches it.
- * - Its position in the import graph:  CodeMirror, the shared marks;  never Monaco.
+ * - Its position in the import graph:  CodeMirror, the shared marks.
  * - NEVER throws:  a reading that fails leaves the text plain, and logs why.
  ****************/
 export class CodeMirrorMarkup {
@@ -33,14 +34,17 @@ export class CodeMirrorMarkup {
 
   /**
    * The editor's tab stop and space, as its font draws them, for the sheet:  `--cmb-indent`, `--cmb-space`.
-   * - A tab is CodeMirror's 4 spaces (its own `tab-size`), as Monaco's is:  the rails and feet, placed by these, stand
+   * - A tab is CodeMirror's 2 spaces (its own `tab-size`, `TAB_SIZE`):  the rails and feet, placed by these, stand
    *   at their bands' ends, at any level (measured:  a guessed 24px left them 7px off a level, epic `codemirror` P3).
    * - Measured once the editor's drawn, and again whenever its font may have changed (a new theme, a zoom).
    */
   static tabStops = ViewPlugin.define((view) => {
     const measure = () =>
       view.requestMeasure({
-        read: () => [widthIn(view.scrollDOM, " ".repeat(100)) / 100, widthIn(view.scrollDOM, "\t", view.state.tabSize)],
+        read: () => [
+          CodeMirrorSetup.widthIn(view.scrollDOM, " ".repeat(100)) / 100,
+          CodeMirrorSetup.widthIn(view.scrollDOM, "\t", view.state.tabSize)
+        ],
         write: ([space, tab]) => {
           if (!space || !tab) return
           view.dom.style.setProperty("--cmb-space", `${space}px`)
@@ -103,21 +107,6 @@ export class CodeMirrorMarkup {
   }
 }
 
-/**
- * `text`'s width in `element`'s font, as the browser lays it out, in px;  a tab `tabSize` spaces, as CodeMirror's is.
- * - A hidden probe in the scroller, beside the text, never in it:  CodeMirror reads any change to its content as an edit.
- * - A tab's measured, not worked out from a space:  the browser rounds a tab stop (16.875px, 4 spaces of 4.234px).
- */
-function widthIn(element: HTMLElement, text: string, tabSize = 4): number {
-  const probe = document.createElement("span")
-  probe.style.cssText = `position: absolute; visibility: hidden; white-space: pre; tab-size: ${tabSize}`
-  probe.textContent = text
-  element.append(probe)
-  const width = probe.getBoundingClientRect().width
-  probe.remove()
-  return width
-}
-
 /** An HTML file's editor's classes:  a `.bubbly` and a `.bubbly-html`, so `bubbly.css` reaches it, and ours. */
 const EDITOR_CLASSES = "bubbly bubbly-html cmb-editor"
 
@@ -168,7 +157,15 @@ class MarkupShapes {
     const last = doc.lineAt(whole.end).number
     for (let number = first; number <= last; number++) this.decorations.line(doc.line(number).from, inside, hue)
     const foot = block.foot === undefined ? undefined : this.marks[block.foot]
-    if (foot) this.on(block.foot!, ["cmb-tag-foot", ...hue])
+    if (foot) {
+      this.on(block.foot!, ["cmb-tag-foot", ...hue])
+      // alone on its line:  the line only as tall as its tiny pill and the paper round it, as Monaco's (I113)
+      const line = doc.lineAt(foot.start)
+      if (doc.sliceString(line.from, line.to).trim() === doc.sliceString(foot.start, foot.end)) {
+        this.decorations.line(foot.start, inside, ["cmb-foot-line"])
+      }
+    }
+
     this.draw(block.inside, inside)
   }
 
@@ -186,8 +183,8 @@ function hueOf(partOfSpeech: string): string[] {
 
 /****************
  * ### `CodeMirrorDecorations`
- * One drawing's decorations being made, for the look's two kinds of text:  Spell (`CodeMirrorBubbly`) and HTML
- * (`CodeMirrorMarkup`), a Spell file's drawing's tags among its Spell.
+ * One drawing's decorations being made, for the look's two kinds of text:
+ * Spell (`CodeMirrorBubbly`) and HTML (`CodeMirrorMarkup`), a Spell file's drawing's tags among its Spell.
  * - ONE mark per stretch, its classes together:  CodeMirror nests two marks over the same stretch in no set order,
  *   so `bubbly-quoted` round `bubbly-input` came out either way round;  a longer mark always holds a shorter one.
  * - ONE decoration per line, its classes together, the rails of every block round it.
@@ -197,8 +194,11 @@ export class CodeMirrorDecorations {
   private readonly ranges: Array<Range<Decoration>> = []
   /** Each mark's classes and attributes, by its stretch (`start:end`). */
   private readonly marks = new Map<string, { classes: Set<string>; attributes: Record<string, string> }>()
-  /** Each line's classes and rails, by where it starts. */
-  private readonly lines = new Map<number, { classes: Set<string>; rails: Rail[] }>()
+  /**
+   * Each line's classes and rails, by where it starts;
+   * `stopped`, the rails (by their place in `rails`) that stop short above a foot's round corner in the row under it.
+   */
+  private readonly lines = new Map<number, { classes: Set<string>; rails: Rail[]; stopped: Set<number> }>()
 
   constructor(readonly state: EditorState) {
     this.text = state.doc.toString()
@@ -220,10 +220,21 @@ export class CodeMirrorDecorations {
   /** The line `at` is on:  inside the blocks `rails` holds, outermost first, and in `classes`. */
   line(at: number, rails: Rail[], classes: string[] = []): void {
     const from = this.state.doc.lineAt(at).from
-    const line = this.lines.get(from) ?? { classes: new Set(), rails: [] }
+    const line = this.lines.get(from) ?? { classes: new Set(), rails: [], stopped: new Set<number>() }
     for (const each of classes) line.classes.add(each)
     // the most a line's in:  a drawing's tags inside a Spell block hold its rails, and their own
     if (rails.length >= line.rails.length) line.rails = rails
+    this.lines.set(from, line)
+  }
+
+  /**
+   * The rail `rail` (its place among the line's rails, outermost 0) stops short on the line `at` is on:
+   * a foot's round corner, in the row under it, takes its place there.
+   */
+  stopRail(at: number, rail: number): void {
+    const from = this.state.doc.lineAt(at).from
+    const line = this.lines.get(from) ?? { classes: new Set(), rails: [], stopped: new Set<number>() }
+    line.stopped.add(rail)
     this.lines.set(from, line)
   }
 
@@ -255,10 +266,10 @@ export class CodeMirrorDecorations {
       const [start, end] = range.split(":").map(Number) as [number, number]
       ranges.push(Decoration.mark({ class: [...classes].join(" "), attributes }).range(start, end))
     }
-    for (const [from, { classes, rails }] of this.lines) {
+    for (const [from, { classes, rails, stopped }] of this.lines) {
       const innermost = rails.at(-1)
       const lineClasses = [...classes, ...(innermost ? hueOf(innermost.partOfSpeech) : [])]
-      const attributes: Record<string, string> = rails.length ? { style: `--cmb-rails: ${railsOf(rails)}` } : {}
+      const attributes: Record<string, string> = rails.length ? { style: railsStyle(rails, stopped) } : {}
       ranges.push(Decoration.line({ class: lineClasses.join(" "), attributes }).range(from))
     }
     return Decoration.set(ranges, true)
@@ -276,7 +287,7 @@ export type Rail = Indent & { partOfSpeech: string }
  * - `bubbly.css` sizes a tab stop (`--cmb-indent`), a space (`--cmb-space`) and a rail (`--cmb-rail`):
  *   only the columns are written here.
  */
-export function railsOf(rails: Rail[]): string {
+function railsOf(rails: Rail[]): string {
   return rails
     .map(({ tabs, spaces, partOfSpeech }) => {
       const x = `calc(var(--cmb-line-pad) + ${tabs} * var(--cmb-indent) + ${spaces} * var(--cmb-space) - var(--cmb-band-inset))`
@@ -286,7 +297,22 @@ export function railsOf(rails: Rail[]): string {
     .join(", ")
 }
 
-/** Room beside a mark, as Monaco's injected text is:  an empty inline box, its width the sheet's. */
+/**
+ * `rails` as a row's style:  `--cmb-rails`, and `--cmb-rail-sizes` when any of them, by their place in `rails`,
+ * stops short above a foot's round corner in the row under it (`--cmb-foot-lift`, `bubbly.css`).
+ */
+export function railsStyle(rails: Rail[], stopped: ReadonlySet<number> = new Set()): string {
+  const style = `--cmb-rails: ${railsOf(rails)}`
+  if (![...stopped].some((rail) => rail < rails.length)) return style
+  const sizes = rails.map((_, rail) => (stopped.has(rail) ? STOPPED_RAIL : "100% 100%"))
+  return `${style}; --cmb-rail-sizes: ${sizes.join(", ")}`
+}
+
+/** A rail's size in a row it stops short in:  the row's width, its height less the corner's reach into it. */
+const STOPPED_RAIL = "100% max(0px, 100% - var(--cmb-foot-lift))"
+
+/** Room beside a mark, an empty inline box, its width the sheet's. */
+
 class SpacerWidget extends WidgetType {
   constructor(readonly classes: string) {
     super()

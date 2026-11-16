@@ -14,7 +14,8 @@
 //   - the system font, 8px controls and 12px panels
 //   - Apple's system colours for the hues (its palette, `apple`, Glass's too):  classic's fail AA in places
 // - Tokens only, so far:  the families keep classic's shapes.
-// - The code keeps its own colours (Monaco's Purple) under every theme:  not this theme's.
+// - No `code` group:  the code's colours (`--ui-code-<role>`) are worked out from this theme's own colours,
+//   by the recipe every theme without one takes (`codeRoles`);  the app's code editor reads them through `CodeRules`.
 // - NO font files ship:  every face is the platform's own.
 {
   "$schema": "./theme.schema.json",

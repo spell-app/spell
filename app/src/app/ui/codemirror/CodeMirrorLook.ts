@@ -6,11 +6,11 @@ import { codeLook } from "spell/app/app/ui/codePopups"
 /****************
  * ### `CodeMirrorLook`
  * The page's look on a CodeMirror editor:  bubbly, or not, as the code pane's "..." menu, "Settings…",
- * "Bubbly look" says (`codeLook`, one for the page, which Monaco's `SpellBubbly` follows too).
+ * "Bubbly look" says (`codeLook`, one for the page).
  * - Each state holds the look in a compartment of its own:  `drawn(true)` while it's on, `drawn(false)` while it's off,
  *   e.g. a Spell file bubbly (`CodeMirrorBubbly`) or coloured by its tokens (`CodeMirrorTokens`).
  * - The view showing a state follows the setting as it changes;  a state shown again takes the setting it missed.
- * - Its position in the import graph:  CodeMirror, and the page's code settings;  never Monaco.
+ * - Its position in the import graph:  CodeMirror, and the page's code settings.
  ****************/
 export class CodeMirrorLook {
   /**

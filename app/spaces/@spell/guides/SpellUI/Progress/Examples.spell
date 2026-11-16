@@ -1,5 +1,4 @@
 "progress examples" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Progress
 		<header>A progress bar shows the progression of a task.</>

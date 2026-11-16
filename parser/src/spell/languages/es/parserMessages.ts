@@ -53,6 +53,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "cant-go-without-waiting": "Solo una llamada puede ir sin esperar:  esto tiene un valor o un cuerpo que esperar",
   "cant-wait-for-toast-that-stays":
     "No se puede esperar a un aviso que se queda:  los clics esperarían hasta que se cierre",
+  "not-a-duration": '"{said}" no es una duración:  di cuánto tiempo, como en "300 mseg" o "5 minutos"',
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
   "enabled-and-disabled-when": 'Una acción dice "activa cuando" o "inactiva cuando", no las dos:  deja una',
   "place-read-only":
@@ -149,6 +150,13 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "site-card-place-not-whole":
     "La fila y la columna de una tarjeta se cuentan desde 1, en números enteros:  {row} y {column} no lo son",
   "site-part-not-listed": 'El sitio no tiene "{part}":  sus páginas, diálogos y paneles son {parts}',
+  "layout-not-on-a-page":
+    "Solo una página tiene un diseño:  dilo en la línea de una página, p. ej. sistemas es una página, en el diseño sencillo",
+  "layout-not-declared": 'El programa no tiene "{layout}":  declaralo, p. ej. {layout} es un diseño',
+  "site-top-bar-retired":
+    'La barra superior de un sitio es ahora el menú de la aplicación de su diseño principal:  diseño principal es un diseño, luego - para "dibujar su menú de la aplicación", con las líneas de la vista de la barra en una <barra-aplicacion>;  esta línea no hace nada',
+  "site-no-top-bar-retired":
+    "Una página deja el diseño del sitio en su propia línea:  entrar es una página, sin diseño;  esto no hace nada",
   "projection-not-a-folder":
     'Una proyección muestra parte de la carpeta de datos de un espacio:  "{source}" no lo es.  Nombra un lugar escrito así:  recetario familiar es una carpeta de datos en "@familia/recetas"',
   "projection-needs-a-space":

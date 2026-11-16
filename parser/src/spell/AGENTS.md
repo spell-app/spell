@@ -112,16 +112,37 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     into a file in plain Spell, each member bare (since epic `language` P46;  in tags from P40 till then).
   - Everything else is handed in (`IngestSettings`):  `fetch`, `ClaudeRunner`, files, the question, the read through the Spell.
   - Imported by path, never through the barrel:  `spell/parser/spell/ingest/PlaceIngest`.
-- `highlight/`:  `SpellHighlighter`, `BubblyLayout`, `BubblyPresentation`, `BubblyStretches`.
+- `highlight/`:  `SpellHighlighter`, `BubblyLayout`, `BubblyRoles`, `BubblyPresentation`, `BubblyStretches`.
   - `SpellHighlighter` colours a snippet without a project, for `<ui-code language="spell">`.
     Call it as `SP.SpellHighlighter.spans(text)`.
   - `BubblyLayout` lays a snippet out in the bubbly look, as data (epic `language` P49):
     `SP.BubblyLayout.of(text, parser)`, from the highlighter's spans, the parse and the indent.
-    - Each rule's presentation is ONE table, by rule name (or a built rule's `importableAs`):
-      `SP.BubblyPresentation`.  A new declaration or control rule gets a row there.
-    - Read by the app's `BubblyHtml`, and by Monaco's and VS Code's drawings (P50, P51).
+    - What each part of a rule IS to a reader is its ROLES (epic `language` P60, Q68):  beside its syntax where it's
+      registered, keyed by its groups' names, ONE per rule class, every language's (`SP.BubblyRuleRoles`):
+
+      ```ts
+      methods.addRule(AfterHook, {
+        roles: { band: "action", signature: "declaration" },
+        syntax: "after {signature:method_signature} :? {statement_body}?",
+      ```
+
+      - `band` (a declaration's head), `match` (everything it matched:  `question`, `value`, `written value` ...),
+        each group's role, and `literal` for a word of its syntax that's a name (`{ droppable: "name" }`)
+      - Another language's registration says none:  English's are its class's (`SP.BubblyRoles.record()`, through
+        `SP.SpellParser.addRule()`);  [BubblyRoles.test.ts](../../tests/spell/highlight/BubblyRoles.test.ts) checks
+        each names only groups every language's syntax has.
+      - A rule built while parsing, or a language's own `specialize()`d class, says them on its class:
+        `@proto static roles`.
+      - How each role draws:  the roles-to-look table in the app's `bubbly.css`, and the drawn-bubbly page's "Roles".
+      - A new declaration rule says its `band`;  its pill, its `declaration` groups.
+    - A line's SHAPE (a control line's bracket, a group, what a head draws as a step) and the few CHECKS no role says
+      yet are ONE table, by rule name (or a built rule's `importableAs`):  `SP.BubblyPresentation`.
+      A new control rule gets a row there.
+    - Every example's and guide's drawing is a snapshot (the app folder's `tests/spell/test/bubbly.test.ts`):
+      a change to the look shows there;  `spell content check --bless`, then read the diff.
+    - Read by the app's `BubblyHtml`, and by the app's CodeMirror editor's and VS Code's drawings (P50, P51).
     - `BubblyStretches` cuts a drawing's lines into what an editor marks on its text (a quoted input's own `"`
-      apart, the name a head defines):  ONE cut for Monaco's `BubblyMarks` and the language server's `spell/bubbly`,
+      apart, the name a head defines):  ONE cut for the app's `CodeMirrorBubbly` and the language server's `spell/bubbly`,
       which VS Code draws from.
   - The app's `<spell-code>` colours pages with it, from source, in a lazy chunk
     ([SpellLanguage](../../../app/src/app/components/spell-code/SpellLanguage.ts)):

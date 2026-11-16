@@ -1,5 +1,4 @@
 "accordion theming" is a notebook page
-	<site-tabs/>
 	<header level="1">
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>

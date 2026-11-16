@@ -24,7 +24,7 @@ import {
   trackProjectRoot,
   type Mode
 } from "spell/app/app/solid"
-import { EDITOR_HOTKEYS, runCodeEditorAction } from "spell/app/app/pages/editorHotkeys"
+import { EDITOR_HOTKEYS, runCodeEditorCommand } from "spell/app/app/pages/editorHotkeys"
 import { CodeOutputShown } from "spell/app/app/solid/CodeOutput"
 import {
   loadEditorSpell,
@@ -574,7 +574,7 @@ function handOverActions(spell: EditorSpell) {
     renameFile: () => editor.renameFile(),
     deleteFile: () => editor.deleteFile(),
     revertChanges: () => editor.revertChanges(),
-    find: () => runCodeEditorAction(EDITOR_HOTKEYS.find.codeEditorAction),
+    find: () => runCodeEditorCommand(EDITOR_HOTKEYS.find.codeEditorCommand),
     codeSettings: () => showCodeSettings(),
     runMode: () => EditorMode.show("run"),
     editMode: () => EditorMode.show("edit"),
@@ -627,8 +627,8 @@ function started(work: unknown) {
 }
 
 /**
- * A menu of the editor's Spell, drawn in place:  `view(app)`'s drawing, a Spell UI `<ui-menu>` of its rows
- * (`SpellEditor.spell`).
+ * A menu of the editor's Spell, drawn in place:
+ * `view(app)`'s drawing, a Spell UI `<ui-menu>` of its rows (`SpellEditor.spell`).
  * - Its titles in the page's language:  drawn again as that language's texts arrive (`appTexts.titles`).
  * - Nothing while `spell` is still loading, nor for a view it doesn't have.
  */

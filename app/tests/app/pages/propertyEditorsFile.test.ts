@@ -1,7 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * A type's property editor in a file of its own (epic `editor` P25):  Solitaire's `Card.editor.spell`,
@@ -18,11 +18,6 @@ type DebugGlobals = {
   editor: {
     /** Show `path`'s file in the code pane. */
     showEditor(path: string): void
-    shownCodeEditor?: {
-      getValue(): string
-      setPosition(place: { lineNumber: number; column: number }): void
-      focus(): void
-    }
   }
 }
 
@@ -65,7 +60,7 @@ describe.skipIf(!SERVING)("a type's property editor in its own file", () => {
     )
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.editor.spell`, { timeout: 60_000 })
-    await page.waitForSelector(".monaco-editor .view-line", { timeout: 60_000 })
+    await new CodeEditor(page).shown()
     await page.waitForTimeout(4000)
     await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
     await page.waitForTimeout(1000)
@@ -85,18 +80,11 @@ describe.skipIf(!SERVING)("a type's property editor in its own file", () => {
     await page.evaluate(() =>
       (window as unknown as DebugGlobals).editor.showEditor("@spell/examples/Solitaire/Card.editor.spell")
     )
-    await page.waitForFunction(
-      () => (window as unknown as DebugGlobals).editor.shownCodeEditor?.getValue().includes("property editor"),
-      undefined,
-      { timeout: 15_000 }
-    )
-    await page.evaluate(() => {
-      const code = (window as unknown as DebugGlobals).editor.shownCodeEditor!
-      const lines = code.getValue().split("\n")
-      const at = lines.findIndex((each) => each.includes('label="Rank"'))
-      code.focus()
-      code.setPosition({ lineNumber: at + 1, column: lines[at]!.indexOf('label="Rank"') + 'label="Rank'.length + 1 })
-    })
+    const code = new CodeEditor(page)
+    await expect.poll(async () => (await code.text()).includes("property editor"), { timeout: 15_000 }).toBe(true)
+    const at = await code.lineOf('label="Rank"')
+    await code.focus()
+    await code.setCaret(at, (await code.line(at)).indexOf('label="Rank"') + 'label="Rank'.length + 1)
     await page.keyboard.type(" of the card")
     await page.keyboard.press("ControlOrMeta+s")
     await page.waitForTimeout(1500)
