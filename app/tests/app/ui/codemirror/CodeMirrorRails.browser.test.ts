@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
-import { cursorCharRight } from "@codemirror/commands"
+import { cursorCharLeft, cursorCharRight, cursorLineDown } from "@codemirror/commands"
 import { EditorState } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
 
@@ -15,6 +15,7 @@ import "spell/app/app/components/spell-code/bubbly.css"
  * - Spell's bodies and a drawing's tags' alike, at every level.
  * - A body's words under its head's (Owen, I136:  "Fix the gutters so all text and tags are inset as they were
  *   before"), a band's room right of the rail.
+ * - The caret before a line's first word drawn at the word, however it got there (I141).
  */
 describe("a body's rail under the caret", () => {
   let view: EditorView | undefined
@@ -225,6 +226,54 @@ describe("a body's rail under the caret", () => {
     expect(Math.abs(Number.parseFloat(band.marginLeft) + Number.parseFloat(band.paddingLeft) - tab)).toBeLessThan(0.01)
     // ... and the words after it:  its end slid out, its room after them
     expect(Number.parseFloat(band.marginRight)).toBe(-2)
+  })
+
+  /** StarWars' character (Owen's I141 and I142 screenshots):  a plain line among one-line bands, on one level. */
+  const CHARACTER = `a "character" is a thing
+\tit lives in star wars
+\tits "name" is text
+\tits "height" is a length in cm or "unknown"
+`
+
+  /** Where the caret is drawn, its middle, once drawn. */
+  async function caretX(view: EditorView): Promise<number> {
+    await frames()
+    const caret = view.dom.querySelector(".cm-cursor")!.getBoundingClientRect()
+    return caret.left + caret.width / 2
+  }
+
+  test("Left, Left, Right from `its`'s `i`:  before `its`, column 0 on the rail, before `its` again, drawn in ONE place (I141)", async () => {
+    const view = await bubblyEditorOf(CHARACTER)
+    const [name] = linesStarting(view, ['its "name"'])
+    const line = view.state.doc.line(name!)
+    const words = lineElement(view, name!).querySelector<HTMLElement>(".cmb-band")!
+    const wordsLeft =
+      words.getBoundingClientRect().left +
+      Number.parseFloat(getComputedStyle(words).paddingLeft) +
+      Number.parseFloat(getComputedStyle(words).borderLeftWidth)
+    view.dispatch({ selection: { anchor: line.from + 2 } })
+    cursorCharLeft(view)
+    const left = await caretX(view)
+    expect(view.state.selection.main.head).toBe(line.from + 1)
+    cursorCharLeft(view)
+    const columnZero = await caretX(view)
+    expect(view.state.selection.main.head).toBe(line.from)
+    expect(Math.abs(columnZero - railMiddle(view, name!)!)).toBeLessThan(1)
+    cursorCharRight(view)
+    const right = await caretX(view)
+    expect(view.state.selection.main.head).toBe(line.from + 1)
+    // the same place drawn the same way, at `its`, whichever way the caret came (it stood a tab left, at the band's edge)
+    expect(Math.abs(right - left)).toBeLessThan(0.01)
+    expect(Math.abs(left - wordsLeft)).toBeLessThan(1)
+    // ... and coming down from the line above
+    view.dispatch({ selection: { anchor: line.from - 1 } })
+    cursorCharRight(view)
+    cursorCharRight(view)
+    expect(Math.abs((await caretX(view)) - left)).toBeLessThan(0.01)
+    view.dispatch({ selection: { anchor: view.state.doc.line(name! - 1).from + 1 } })
+    cursorLineDown(view)
+    expect(view.state.selection.main.head).toBe(line.from + 1)
+    expect(Math.abs((await caretX(view)) - left)).toBeLessThan(0.01)
   })
 
   /**
