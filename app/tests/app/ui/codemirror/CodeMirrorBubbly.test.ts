@@ -96,7 +96,52 @@ describe("CodeMirrorBubbly", () => {
     // the line under the action's head is in its rail and the card's, as before
     expect(shapes.railedLines).toContain("\t\t<segment inverted>")
   })
+
+  test("bodies ending on one line:  each foot under the one inside it, as far down as their rails are apart across (I125)", () => {
+    const text = `to deal
+\tfor row from 1 to 7
+\t\tif row is 1
+\t\t\tsay row
+\tsay "done"
+`
+    // the `if`'s, then the `for`'s a tab lower;  the action's under its own last line
+    expect(feetOf(text)).toEqual([
+      { line: "\t\t\tsay row", column: 2, partOfSpeech: "control", drop: 1, dropsAbove: 0, ended: [] },
+      { line: "\t\t\tsay row", column: 1, partOfSpeech: "control", drop: 0, dropsAbove: 1, ended: [] },
+      { line: '\tsay "done"', column: 0, partOfSpeech: "action", drop: 0, dropsAbove: 0, ended: [] }
+    ])
+  })
+
+  test("a group ending its type's body:  ONE foot, the group's, its type's rail ending beside it (I125)", () => {
+    const text = `a "card" is a view
+\tgroup "Drawing"
+\tto draw it
+\t\tsay "hi"
+`
+    // the action's foot, then the group's a tab lower, where the card's would be, in the card's rail's hue:
+    // the card's rail (0) ends there
+    expect(feetOf(text)).toEqual([
+      { line: '\t\tsay "hi"', column: 1, partOfSpeech: "action", drop: 1, dropsAbove: 0, ended: [] },
+      { line: '\t\tsay "hi"', column: 0, partOfSpeech: "thing", drop: 0, dropsAbove: 1, ended: [0] }
+    ])
+  })
 })
+
+/** Each foot `text` draws, in order:  the line it's under, its rail's column, and how its stack is laid out. */
+function feetOf(text: string) {
+  const state = EditorState.create({ doc: text })
+  const feet: Array<Record<string, unknown>> = []
+  CodeMirrorBubbly.decorationsOf(state).between(0, text.length, (from, _to, decoration) => {
+    const spec = decoration.spec as { block?: boolean; widget?: Foot }
+    if (!spec.block || !spec.widget) return
+    const { column, partOfSpeech, drop, dropsAbove, ended } = spec.widget
+    feet.push({ line: state.doc.lineAt(from).text, column, partOfSpeech, drop, dropsAbove, ended: [...ended] })
+  })
+  return feet
+}
+
+/** What a foot's widget says of itself. */
+type Foot = { column: number; partOfSpeech: string; drop: number; dropsAbove: number; ended: Set<number> }
 
 /** `text`'s state, the block whose head is on line `line` folded, as a click on its arrow folds it. */
 function folded(text: string, line: number): EditorState {
