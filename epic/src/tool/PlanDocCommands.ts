@@ -15,6 +15,7 @@ import {
   PlanDocError,
   REVIEW_SECTIONS,
   TITLE_PREFIX,
+  TODO_ID,
   type CommitHistory,
   type Phase,
   type PhaseTimer,
@@ -290,7 +291,25 @@ export class PlanDocCommands {
           if (value !== "on" && value !== "off") throw new PlanDocError(`standing:  on or off, not "${value}"`)
           plan.setStanding(value === "on")
         })
-      case "request":
+      case "request": {
+        // into a todo (epic `epic-engine` T88):  its text, its pictures copied in as the person's, marked requested
+        if (TODO_ID.test(need(rest[0], "a phase or a todo").toLowerCase())) {
+          const pictures = ItemPictures.fromFiles(lists.picture ?? [])
+          const html = readFileSync(need(stringFlag(flags.file), "--file (the request as html)"), "utf8")
+          const todo = rest[0]!.toLowerCase()
+          const requestId = need(rest[1], "a request id")
+          const filed = await this.edit(file, (plan) => {
+            const named = pictures.length ? ItemPictures.named(file, todo, pictures) : []
+            const title = plan.addItemRequest(todo, requestId, `${html}${ItemPictures.html(named)}`)
+            return { title, named: title === undefined ? [] : named }
+          })
+          ItemPictures.save(file, filed.named)
+          return this.print(
+            filed.title === undefined
+              ? `${requestId} is in ${todo.toUpperCase()} already`
+              : `${requestId} filed into ${todo.toUpperCase()} · ${filed.title}`
+          )
+        }
         return this.edit(file, (plan) =>
           plan.addPhaseRequest(
             plan.phasePlace(need(rest[0], "a phase")),
@@ -299,6 +318,7 @@ export class PlanDocCommands {
             readFileSync(need(flags.file as string | undefined, "--file (the request as html)"), "utf8")
           )
         )
+      }
       case "rename": {
         const target = need(rest[0], "a phase (P6) or an item id")
         const title = need(rest[1], "the new title")
@@ -1588,6 +1608,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    never done (epic epic-workflow)
   request <name> <N> <rN> --from "..." --file path a request sent from another session, into phase N's Requests
                                                    field (epic file writes it;  epic epic-workflow)
+  request <name> T<n> <rN> --file path [--picture <file>]...
+                                                   into todo T<n> instead:  at the end of its text, the
+                                                   pictures its own, marked requested (epic-engine T88)
   estimate <name> <N> "1-2h"                       set a phase's estimate;  the Overview's total follows
   phase <name> <N> todo|active|done|dropped [--done html] [--why html] [--no-open]
                                                    set a phase's status;  done drops its UPDATE markers
@@ -1632,8 +1655,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    run's order (deferred ones last)
   test --all [--list] [--json]                     every epic with open tests, in your saga order;  the
                                                    first opened in test mode (?test=1&all=1)
-  requested <name> <id>...                         issues filed from the person's own words:  light orange once
-                                                   Claude closes them, until they review them (--requested on add)
+  requested <name> <id>...                         issues or todos filed from the person's own words:  light
+                                                   orange once Claude closes them, until they review them
+                                                   (--requested on add)
   calm <name> <id>... [--loud]                     calls / issues not urgent (yellow), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
   failed <name> <M id> <I id> | off                a manual test failed, filed as that issue:  "failed -> I12"

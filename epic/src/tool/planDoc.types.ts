@@ -198,13 +198,23 @@ export const START_NOW_DID = "start now:  start an agent on it (its Underway car
 /** A note on a todo's plane asking for a phase of its own. */
 export const NEW_PHASE = /\b(new|own|its own|a) phase\b|\bin a phase\b/i
 /** What's left for the session when the note asks for a phase. */
-export const START_IN_PHASE = "a new phase for it, as his note asks:  `epic phase` it in, next, never an unrelated phase"
+export const START_IN_PHASE =
+  "a new phase for it, as his note asks:  `epic phase` it in, next, never an unrelated phase"
 
 /** A judgement call's id:  grey once it's `calm`, where a calm issue stays yellow (epic `epic-engine` P63). */
 export const JUDGEMENT_ID = /^j\d+$/
 
 /** An issue's id. */
 export const ISSUE_ID = /^i\d+$/
+
+/**
+ * An item that may be marked `requested`, filed from the person's own words:  an issue or a todo
+ * (a todo since epic `epic-engine` T88:  a request from another epic becomes a todo or a phase).
+ */
+export const REQUESTED_ID = /^[it]\d+$/
+
+/** A todo's id (a limit's too:  they share the letter). */
+export const TODO_ID = /^t\d+$/
 
 /** A manual test's id. */
 export const MANUAL_TEST_ID = /^m\d+$/
@@ -345,7 +355,10 @@ export type AddItemOptions = {
   calm?: boolean
   /** a todo that asks Owen to act:  red until reviewed (`PlanDoc.followUp()`) */
   urgent?: boolean
-  /** an issue filed from Owen's own words (`--requested`):  closed by Claude, light orange until he reviews it */
+  /**
+   * an issue or todo filed from Owen's own words (`--requested`;  a todo since epic `epic-engine` T88):
+   * closed by Claude, light orange until he reviews it
+   */
   requested?: boolean
 }
 
@@ -424,8 +437,8 @@ export type OptionCard = {
  * - `attention` (red):  needs Owen (an open question;  an open judgement call or issue not reviewed)
  * - `replied` (orange):  Owen's turn:  Claude answered it with options, or fixed it (Owen, 2026-10-09;  I232);
  *   a manual test whose phase isn't done yet (epic `epic-engine` P63)
- * - `requested` (light orange):  an issue filed from Owen's own words, closed by Claude, not reviewed:  his turn to
- *   see it (epic `epic-engine` P63);  the picker's icons have no light orange, so plain orange there
+ * - `requested` (light orange):  an issue or todo filed from Owen's own words, closed by Claude, not reviewed:  his
+ *   turn to see it (epic `epic-engine` P63);  the picker's icons have no light orange, so plain orange there
  * - `progress` (blue):  Claude is working on it (an underway status card, or `working`)
  * - `handed` (blue, outlined):  he pressed Do this, Claude hasn't started (epic `epic-engine` P63)
  * - `open` (yellow):  open, still undecided, not urgent

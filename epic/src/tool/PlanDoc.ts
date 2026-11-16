@@ -25,11 +25,12 @@ import { NightSummary, OLD_TODO, type AwayPart, type NeedPart, type SummaryOptio
 
 import {
   CALM_ID,
-  ISSUE_ID,
   JUDGEMENT_ID,
   CLOSED,
   ITEM_STATUSES,
   KINDS,
+  REQUESTED_ID,
+  TODO_ID,
   OBSOLETE_ID,
   PROMISED_CARD,
   OLD_DECISION,
@@ -796,6 +797,43 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * Request `requestId` (`r3`) filed into todo `id` (`epic file <epic>#T5 r3`, epic `epic-engine` T88):  `html`, the
+   * request as `Requests.html()` writes it, less its screenshots (their words quoted, the context, a link to its
+   * `request.md`), then its pictures, goes at the end of the todo's text, and the todo is marked `requested`;
+   * returns its title.
+   * - the quote `add --start` gave it (`Owen:  “...”`) goes, when the request's words hold it:  said once, in full
+   * - `undefined` when the todo has the request already (its `request.md` linked):  nothing changes
+   * - stamped (`changed`) and flagged UPDATE, as `setDetails()` is;  logged
+   * - throws for an item that isn't a todo (a limit included):  a request becomes a todo or a phase
+   */
+  addItemRequest(id: string, requestId: string, html: string): string | undefined {
+    const item = this.item(id)
+    if (!TODO_ID.test(item.id) || item.hasAttribute("limit"))
+      throw new PlanDocError(`${item.id.toUpperCase()} isn't a todo:  a request is filed into a todo or a phase`)
+    // its link, as given or as the writer roots it (`/epics/<epic>/requests/r3/request.md`)
+    const link = `requests/${requestId}/request.md`
+    if (item.querySelector(`a[href="${link}"], a[href$="/${link}"]`)) return undefined
+    const said = squeeze(
+      this.incoming(html)
+        .map((node) => node.textContent ?? "")
+        .join(" ")
+    )
+    for (const quote of item.querySelectorAll(":scope > p")) {
+      const quoted = STARTED_QUOTE.exec(quote.textContent ?? "")?.[1]
+      if (quoted !== undefined && said.includes(squeeze(quoted))) quote.remove()
+    }
+    const title = this.setDetails(item.id, html, { append: true })
+    Markup.set<"epic-item">(item, { requested: true })
+    this.log(`${requestId} filed into ${item.id.toUpperCase()}`)
+    return title
+
+    /** `text` with its runs of white space one space, trimmed:  for comparing words however they wrapped. */
+    function squeeze(text: string): string {
+      return text.replace(/\s+/g, " ").trim()
+    }
+  }
+
+  /**
    * Bring the UPDATE blocks up to date, as every edit does (`updateStates()`;  epic `epic-engine` I168);  returns how
    * many things changed.
    * - each block (`<epic-update at>` or `summary`;  never a bare label) is given its id, the next free `up<N>`, after
@@ -986,7 +1024,8 @@ export class PlanDoc extends PlanReader {
     const id = this.nextId(kind)
     const spec = KINDS[kind as ItemKind]
     if (calm && !CALM_ID.test(id)) throw new PlanDocError(`--calm is for a judgement call or an issue, not a ${kind}`)
-    if (requested && kind !== "issue") throw new PlanDocError(`--requested is for an issue, not a ${kind}`)
+    if (requested && kind !== "issue" && kind !== "todo")
+      throw new PlanDocError(`--requested is for an issue or a todo, not a ${kind}`)
     const section = this.section(spec.section)
     const heading = titleHTML ? this.titleFromHTML(title) : { title }
     const data: EpicData<"epic-item"> = {
@@ -1233,15 +1272,15 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Issue `id` was filed from Owen's own words (`<epic-item requested>`, epic `epic-engine` P63):  closed by Claude,
-   * it turns light orange until he's seen it, never the grey of a thing Claude tripped over.
+   * Issue or todo `id` was filed from Owen's own words (`<epic-item requested>`, epic `epic-engine` P63;  a todo since
+   * T88):  closed by Claude, it turns light orange until he's seen it, never the grey or green of a thing nobody asked for.
    * - `undefined` when it's marked already
-   * - throws for an item that isn't an issue
+   * - throws for an item that isn't an issue or a todo (a limit is nobody's work:  never requested)
    */
   setRequested(id: string): string | undefined {
     const item = this.item(id)
-    if (!ISSUE_ID.test(item.id))
-      throw new PlanDocError(`${item.id.toUpperCase()} isn't an issue:  only an issue is marked requested`)
+    if (!REQUESTED_ID.test(item.id) || item.hasAttribute("limit"))
+      throw new PlanDocError(`${item.id.toUpperCase()} isn't an issue or a todo:  only those are marked requested`)
     if (item.hasAttribute("requested")) return undefined
     Markup.set<"epic-item">(item, { requested: true })
     return "requested"
@@ -3734,6 +3773,9 @@ const NOTES_SLOT = "notes"
 
 /** A phase by its number:  `p3`, `3`. */
 const OLD_PHASE_REF = /^p?\d+$/
+
+/** The quote `add --start` gives an item, `Owen:  “<their words>”` (`startedBody()`):  the words. */
+const STARTED_QUOTE = /^[^:“]+:\s+“([\s\S]*)”\s*$/
 
 /**
  * What takes review notes as an item does, but isn't one (`PlanDoc.reviewPart()`):

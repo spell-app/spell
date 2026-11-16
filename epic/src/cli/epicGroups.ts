@@ -1338,7 +1338,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--calm": "an item not urgent:  a judgement call grey, an issue yellow",
     "--loud": "an item urgent (red) again",
     "--requested":
-      "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
+      "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
     "--standing [on|off]": "the page:  a standing epic, open for good, never done",
     "--no-standing": "the page:  not a standing epic",
@@ -1370,7 +1370,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--details <html>": "its details",
     "--calm": "not urgent (a judgement call grey, an issue yellow):  it wouldn't surprise you",
     "--requested":
-      "an issue filed from the person's own words:  light orange once Claude closes it, until they review it",
+      "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",
     "--limit": "a todo:  a limit to know about, not work",
     "--start <words>":
       "taken up at once:  the person's words its body, an Underway card, the spinner on:  blue, not red (T78)",

@@ -137,6 +137,52 @@ describe("add with the person's pictures", () => {
   })
 })
 
+// epic `epic-engine` T88:  a request from another epic becomes a todo or a phase
+describe("request x T1 r3:  a request filed into a todo", () => {
+  /** The request's html, as `Requests.html()` writes it for a todo (no screenshots:  they come as pictures). */
+  const REQUEST = [
+    "<blockquote><p>the menu covers the title</p><p>on every page</p></blockquote>",
+    "<p>Looking at:  epic seo's epic page</p>",
+    '<p>Sent 2026-11-16 09:00;  <a href="requests/r3/request.md">request.md</a></p>'
+  ].join("\n")
+
+  test("its words at the end of the todo's text, the --start quote they hold gone, its screenshot a picture", async () => {
+    writeFileSync(join(root, "r3.html"), REQUEST)
+    writeFileSync(join(root, "image-1.png"), png("shot"))
+    const add = ["add", "x", "todo", "Menu over the title", "--requested", "--start", "the menu covers the title"]
+    expect(await commands().run(add)).toBe(0)
+    const argv = ["request", "x", "T1", "r3", "--file", join(root, "r3.html"), "--picture", join(root, "image-1.png")]
+    expect(await commands().run(argv)).toBe(0)
+    expect(printed.at(-1)).toBe("r3 filed into T1 · Menu over the title")
+    const item = FILES.read(file).findItem("t1")!
+    expect(item.hasAttribute("requested")).toBe(true)
+    // said once, in full:  the quote --start gave it went
+    expect(item.textContent!.match(/the menu covers the title/g)).toHaveLength(1)
+    expect(item.querySelector("blockquote")?.textContent?.replace(/\s+/g, " ").trim()).toBe(
+      "the menu covers the title on every page"
+    )
+    expect(item.querySelector('a[href$="requests/r3/request.md"]')).not.toBeNull()
+    const shown = picturesOf("t1")
+    expect(shown).toHaveLength(1)
+    expect(readFileSync(join(folder, shown[0]!))).toEqual(png("shot"))
+
+    // filed again:  nothing changes, no second picture
+    expect(await commands().run(argv)).toBe(0)
+    expect(printed.at(-1)).toBe("r3 is in T1 already")
+    expect(picturesOf("t1")).toEqual(shown)
+  })
+
+  test("refused for an item that isn't a todo, a limit too", async () => {
+    writeFileSync(join(root, "r3.html"), REQUEST)
+    await commands().run(["add", "x", "issue", "An issue"])
+    await commands().run(["add", "x", "todo", "A limit", "--limit"])
+    const run = (id: string) => commands().run(["request", "x", id, "r3", "--file", join(root, "r3.html")])
+    expect(await run("i1")).toBe(1)
+    expect(await run("t1")).toBe(1)
+    expect(printed.join("\n")).toMatch(/T1 isn't a todo:  a request is filed into a todo or a phase/)
+  })
+})
+
 describe("POST delete-picture", () => {
   let server: PageServer
   let port: number

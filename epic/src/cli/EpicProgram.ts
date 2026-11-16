@@ -150,10 +150,10 @@ export class EpicProgram {
 
     requests(epic.command("file"))
       .description(
-        "file a request into a phase:  your words and screenshots into its Requests field;  or, with no phase, " +
-          'mark where it went:  "dropped:  done in P3"'
+        "file a request into a phase or a todo:  your words and screenshots into its Requests field, or the todo's " +
+          'text and pictures;  or, a duplicate, mark which:  "same as T12"'
       )
-      .usage('<epic>#P3 <request id>  |  <epic> <request id> "where it went"')
+      .usage('<epic>#P3 <request id>  |  <epic>#T5 <request id>  |  <epic> <request id> "same as T12"')
       .addHelpText("after", FILE_HELP)
 
     requests(epic.command("home"))
@@ -1260,12 +1260,16 @@ Examples:
 
 /** After `epic file --help`. */
 const FILE_HELP = `
+Every request becomes a todo or a phase (epic-engine T88).
 Into a phase, the request's words, context and screenshots go into its Requests field, and the request is marked
-filed there (P3).  With no phase, it's only marked, saying where it went.
+filed there (P3).  Into a todo, they go at the end of its text, the screenshots as its pictures (deletable on the
+page), the todo marked requested (light orange once done), and the request filed there (T5).
+With neither, it's only marked, saying where it went:  only for a duplicate, naming the todo or phase it duplicates.
 
 Examples:
   epic file seo#P3 r3
-  epic file seo r3 "dropped:  done in P2"`
+  epic file seo#T5 r3
+  epic file seo r3 "same as T12"`
 
 /** After `epic update --help`. */
 const UPDATE_HELP = `

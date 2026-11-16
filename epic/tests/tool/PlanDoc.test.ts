@@ -1273,6 +1273,22 @@ describe("PlanDoc states", () => {
       expect(problems(plan)).toEqual([])
     })
 
+    // epic `epic-engine` T88:  a request from another epic becomes a todo, light orange once done too
+    test("a todo filed from his own words, done:  light orange until he reviews it;  any other todo green;  a limit never", () => {
+      const plan = freshPlan()
+      plan.addItem("todo", "he asked", { requested: true })
+      plan.addItem("todo", "Claude's own")
+      plan.addItem("limit", "a limit")
+      expect(plan.setRequested("t2")).toBe("requested")
+      for (const id of ["t1", "t2"]) plan.setItem(id, "done")
+      expect(stateOf(plan, "t1", "t2")).toEqual(["requested", "requested"])
+      plan.review("t1")
+      expect(stateOf(plan, "t1")).toEqual(["recent"])
+      expect(() => plan.setRequested("t3")).toThrow(PlanDocError)
+      expect(() => plan.addItem("limit", "no", { requested: true })).toThrow(PlanDocError)
+      expect(problems(plan)).toEqual([])
+    })
+
     test("a manual test:  orange until its phase is done, then yellow;  no phase, yellow", () => {
       const plan = freshPlan()
       plan.addItem("test", "no phase")

@@ -29,7 +29,7 @@ import {
   type VerbArgs
 } from "./command.types"
 import { EpicCheckout } from "./EpicCheckout"
-import { parseTarget, phaseLabel, phaseOf } from "./epicArgs"
+import { parseTarget, phaseLabel, phaseOf, TODO_REF } from "./epicArgs"
 import { EpicTools } from "./EpicTools"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
@@ -54,10 +54,15 @@ import { Worktrees } from "./Worktrees"
  *     - no `<epic>`:  the tooling home's
  *   - `requests <epic> [--json]`:  every request sent to `<epic>`, and where each went
  *     - one filed into a phase:  that phase's number TODAY (`shown()`), so a phase inserted ahead of it moves it along
+ *   - EVERY request becomes a todo or a phase (epic `epic-engine` T88;  Owen:  "When an epic gets requests from other
+ *     epics, it should make them a Todo or a phase")
  *   - `file <epic>#P7 <id>`:  file a request into phase P7:
  *     his words and screenshots in its Requests field (the `epic` tool's `request`), the request marked filed,
  *     `P7 · Its Title`, and the phase's stable id kept (`phase:  p-its-title`;  epic `epic-engine` I4)
- *     - `file <epic> <id> "<where>"`, no phase:  only marked filed, saying where it went (`"dropped:  done in P3"`)
+ *   - `file <epic>#T5 <id>`:  file it into todo T5 (T88):  his words, the context and a link to `request.md` at the end
+ *     of its text, his screenshots copied in as its pictures, the todo marked `requested`, the request filed `T5`
+ *     - `file <epic> <id> "<where>"`, no phase or todo:  only for a DUPLICATE of a todo or phase the epic has, which
+ *       `where` names (`"same as T12"`, `"done in P3"`);  only marked filed, saying where it went
  *     - `--from` and `--file` (the request as html):  taken as given rather than read from the epic's `requests/`
  *   - `home [<epic>]`:  the TOOLING HOME, the epic dev-tooling requests go to;  with `<epic>`, set it
  *   - `merge <epic> [--ditch] [--as <agent>]`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in
@@ -188,7 +193,9 @@ export class Requests {
   /**
    * `epic file <epic>#P7 <id>`:  request `id` into the phase's Requests field, by the `epic` tool,
    * then marked filed there.
-   * - `epic file <epic> <id> "<where>"`:  only marked filed, saying where it went
+   * - `epic file <epic>#T5 <id>`:  into todo T5 instead (`fileIntoTodo()`, epic `epic-engine` T88)
+   * - `epic file <epic> <id> "<where>"`:  only marked filed, saying where it went;  `where` MUST name the todo or
+   *   phase it duplicates (`T12`, `P3`):  every request becomes one or the other (T88)
    * - `--from` and `--file`:  the request as given;  marked filed only if `requests/` has it
    * - the old order, the phase a word of its own (`file seo r3 7`):  refused, spelled right
    */
@@ -199,11 +206,17 @@ export class Requests {
       const phase = phaseOf(where)
       if (phase !== undefined)
         throw new EpicCommandError(`file:  epic file ${epic}#${phaseLabel(phase)} ${id}  (the phase goes after a #)`)
+      if (!DUPLICATE_OF.test(where))
+        throw new EpicCommandError(
+          `file:  "${where}"?  a request becomes a todo or a phase:  epic file ${epic}#T<n> ${id}, ` +
+            `epic file ${epic}#P<n> ${id};  "<where>" only for a duplicate, naming its todo or phase ("same as T12")`
+        )
       CLI.out(requestLine(this.file(epic, id, where)))
-      await this.markIssuesRequested(epic, where)
+      await this.markItemsRequested(epic, where)
       return EXIT.OK
     }
     if (!id || where !== undefined) throw new EpicCommandError(`file:  ${FILE_USAGE}`)
+    if (TODO_REF.test(ref)) return this.fileIntoTodo(epic, ref.toUpperCase(), id)
     const request = this.list(epic).find((it) => it.id === id)
     let html = stringFlag(flags.file)
     let from = stringFlag(flags.from)
@@ -222,14 +235,33 @@ export class Requests {
   }
 
   /**
-   * Each issue `where` names (`I234`, `filed as I12 and I13`) marked as filed from the person's own words:
-   * closed by Claude, it turns light orange (`epic requested`, epic `epic-engine` P63).
+   * `epic file <epic>#T5 <id>`:  request `id` into todo `todo` (epic `epic-engine` T88), by the `epic` tool:
+   * their words, the context and a link to `request.md` (`Requests.html()`, no screenshots) at the end of its text,
+   * each screenshot copied in as one of its pictures (`--picture`, deletable on the page), the todo marked
+   * `requested`;  then the request marked filed, `T5`.
+   * - throws for a request the epic doesn't have;  the tool refuses an item that isn't a todo
+   */
+  private async fileIntoTodo(epic: string, todo: string, id: string): Promise<number> {
+    const request = this.list(epic).find((it) => it.id === id)
+    if (!request) throw new EpicCommandError(`no request '${id}' in epic '${epic}'`)
+    const html = join(mkdtempSync(join(tmpdir(), "epic-request-")), `${id}.html`)
+    writeFileSync(html, Requests.html({ ...request, images: [] }))
+    const folder = join(this.epics, epic, "requests", id)
+    const pictures = request.images.flatMap((name) => ["--picture", join(folder, name)])
+    const exitCode = await EpicTools.runPlanDoc(["file", `${epic}#${todo}`, id, "--file", html, ...pictures])
+    if (exitCode !== EXIT.OK) return exitCode
+    CLI.out(requestLine(this.file(epic, id, todo)))
+    return EXIT.OK
+  }
+
+  /**
+   * Each issue or todo `where` names (`I234`, `same as T12`) marked as filed from the person's own words:
+   * closed by Claude, it turns light orange (`epic requested`, epic `epic-engine` P63;  a todo since T88).
    * - best effort:  `where` is free text, so an id the epic doesn't have is ignored
    */
-  private async markIssuesRequested(epic: string, where: string): Promise<void> {
-    const issues = where.match(ISSUE_IN_WHERE) ?? []
-    for (const issue of issues)
-      await EpicTools.runPlanDoc(["requested", epic, issue.toLowerCase()]).catch(() => undefined)
+  private async markItemsRequested(epic: string, where: string): Promise<void> {
+    const items = where.match(REQUESTED_IN_WHERE) ?? []
+    for (const item of items) await EpicTools.runPlanDoc(["requested", epic, item.toLowerCase()]).catch(() => undefined)
   }
 
   /**
@@ -768,11 +800,18 @@ const VERBS = "send, requests, file, home or merge"
 /** What `Requests.takeMainIn()` did:  the base branch taken in, and how the merge went (`merged`, `fast-forward`). */
 type TookMain = { base: string; result: string }
 
-/** How `file` is called, for its errors. */
-/** An issue's id in `epic file`'s "where it went":  `I234`. */
-const ISSUE_IN_WHERE = /\bI\d+\b/g
+/** An issue's or todo's id in `epic file`'s "where it went":  `I234`, `T12`:  marked requested. */
+const REQUESTED_IN_WHERE = /\b[IT]\d+\b/g
 
-const FILE_USAGE = 'epic file <epic>#P3 <request id>  |  epic file <epic> <request id> "where it went"'
+/**
+ * What `epic file <epic> <id> "<where>"` must name:  the todo or phase the request duplicates (`same as T12`,
+ * `done in P3`), so every request is a todo or a phase (epic `epic-engine` T88).
+ */
+const DUPLICATE_OF = /\b[TP]\d+\b/
+
+/** How `file` is called, for its errors. */
+const FILE_USAGE =
+  'epic file <epic>#P3 <request id>  |  epic file <epic>#T5 <request id>  |  epic file <epic> <request id> "same as T12"'
 
 /** A content block of a prompt, as a transcript holds it:  text, an image ... */
 type PromptBlock = {

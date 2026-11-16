@@ -104,8 +104,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `phase` and `start`:  epic `skillz` P4.
   - `tidy`:  `/epic tidy [<epic>]` closes the items other work made obsolete, with a reason on each.
     Go to "14. Tidy" (epic `epic-engine` Q69).
-  - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session.
-    Go to "12. Request" (epic `epic-workflow`).
+  - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session:
+    it becomes a todo or a phase.  Go to "12. Request" (epic `epic-workflow`;  epic `epic-engine` T88).
   - `done`:  `/epic done` is `/isolate done`, word for word.
     - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (2026-10-24):
       the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
@@ -511,8 +511,10 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       T78;  Owen, 2026-11-15:  "you should start the issue and show it appropriately"):
       `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>`, after `epic agents add`
       - their words become its body, quoted;  an Underway card names the agent;  the spinner goes on
-      - a request from another session (`/send`, "12. Request"):  `--start` gets its words AND its Context, so the
-        item never sits at "What it says on the tin" (epic `epic-engine` I292:  I287, filed from r70 with no body)
+      - a request from another session (`/send`, "12. Request") is a TODO, never an issue (epic `epic-engine` T88):
+        `epic add <epic>#T "<title>" --requested --start "<their words>" --agent <full name>`, then
+        `epic file <epic>#T<n> <rN>`:  its words, its Context and its screenshots go into the todo, and the request is
+        marked filed there, so the item never sits at "What it says on the tin" (I292:  I287, filed from r70 with no body)
       - a picture they pasted with it goes in too, never described in words instead (epic `epic-engine` T87):
         `--pasted <n>`, as the guide's "build" says (`epic guide build`)
       - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
@@ -1606,7 +1608,23 @@ A REQUEST is something the person asked for in another session, sent here instea
 1. `epic requests <epic> --json`:  the request(s), status `new`.
    - Read each `request.md`, and look at each screenshot (`Read` on the image).
 2. One line, at once:  "taking r3 (from `🚧 python`):  <their first words>".
-3. The filing goes to a background `<epic>-plan-doc` agent (root `CLAUDE.md`, "Delegated work"), the session free.
+EVERY request becomes a TODO or a PHASE (epic `epic-engine` T88;  Owen, 2026-11-16:  "When an epic gets requests from
+other epics, it should make them a Todo or a phase"):  never only a note on the request ("fixed as I282").
+- SMALL, one agent's work (a fix, a tweak, one file or two):  a todo, taken up at once as "The session answers;
+  agents build" says:
+  `epic agents add <name> ...`, then `epic add <epic>#T "<title>" --requested --start "<their words>" --agent <full name>`,
+  then `epic file <epic>#T<n> <rN>`
+  - the file puts their words, the Context and the screenshots into the todo (its pictures, deletable on the page),
+    marks it `requested` (light orange once done, until they look), and marks the request filed `T<n>`
+  - the agent builds it, and closes it with `epic update <epic>#T<n> fixed "..."`;  one line back:
+    "r3:  T41 · <title>, agent `<epic>-<name>` on it"
+- BIGGER, or about the same thing as a to-do phase:  a phase, steps 3 and 4.
+- A true DUPLICATE of a todo or phase the epic already has:  `epic file <epic> <rN> "same as T12"`, and say so.
+  - `where` MUST name that todo or phase (`T12`, `P7`):  the command refuses anything else.
+  - A todo it names is marked `requested` too.
+
+3. The filing of a phase goes to a background `<epic>-plan-doc` agent (root `CLAUDE.md`, "Delegated work"), the
+   session free.
    Its prompt, per request (Q3 of `epic-workflow`:  join a matching phase, else a new one):
    1. read the request, and every to-do phase (`epic summary <epic> --json`, each one's part file)
    2. a phase still TO DO (never active or done) about the SAME thing:  the request JOINS it
@@ -1631,7 +1649,8 @@ A REQUEST is something the person asked for in another session, sent here instea
      "Start P<N> · <Name>" first
      - In Codex:  in the chat.
    - a phase under way:  no modal;  the new work waits its turn.
-- A request that needs no phase (already done, a duplicate):  `epic file <epic> r3 "<why>"`, and say so.
+- A request with neither todo nor phase:  only a duplicate, `epic file <epic> r3 "same as T12"` (above);
+  one already done by other work is a todo too, closed at once with what did it.
 
 ## 13. Summarize:  condense an item after a lot of back and forth
 
@@ -1773,7 +1792,8 @@ update <name>#P<N> --plan "<ol>..</ol>" --accepted  their Accept carried comment
 updated <name>#P<N> "<p>what changed</p>" [--summary ".."] [--for <ids>]   phase N's plan changed, no item the
                                                     cause:  <epic-update>, after Goal;  nothing when marks say it
 file <name>#P<N> <rN>                               a request into phase N's Requests field, marked filed there
-file <name> <rN> "where it went"                    a request with no phase:  only marked, saying where it went
+file <name>#T<n> <rN>                               a request into todo n:  words, context, pictures;  marked requested (T88)
+file <name> <rN> "same as T12"                      a duplicate:  only marked;  must name the todo or phase (T88)
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab
 phase <name>#P<N> dropped --why "<p>Moved to P38</p>"   never built:  struck through, finished as done;  why in place of Done
@@ -1788,7 +1808,7 @@ add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)
 test <name>[#M3] [--list [--json]]  /  test --all   the page in the Review tab, Start testing pressed (?test=1);  --list:  open manual tests, the person's order
 calm <name>#<id> [<id>...] [--loud]                 calls / issues not urgent (yellow);  --loud:  red again
-update <name>#I3 --requested                        an issue filed from the person's own words:  light orange once closed
+update <name>#I3 --requested                        an issue or todo filed from the person's own words:  light orange once closed
 decide <name>#<Q id> "answer" [--details html]      answer a question, INTO it:  prints its id (Q3)
 choose <name>#<id> <letter> ["outcome"] [--set N]   an option the person settled in words, any item:  as their pick (latest set)
 commit <name>#P<N> | <name>#<id>  <sha> "..."       list a commit under a phase or an item

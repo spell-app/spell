@@ -27,6 +27,11 @@ const OWENS_ROWS: [string[], string[][]][] = [
     ["file", "seo#P7", "r3", "--from", "python", "--file", "r3.html"],
     [["request", "seo", "7", "r3", "--from", "python", "--file", "r3.html"]]
   ],
+  // `epic file seo#t5 r3`, into a todo (epic `epic-engine` T88)
+  [
+    ["file", "seo#t5", "r3", "--file", "r3.html", "--picture", "a.png"],
+    [["request", "seo", "T5", "r3", "--file", "r3.html", "--picture", "a.png"]]
+  ],
   [["commit", "seo#p3", "abc123", "what it did"], [["commit", "seo", "abc123", "what it did", "--phase", "3"]]],
   [["add", "seo#J", "Title", "--details", "<p>d</p>"], [["add", "seo", "judgement", "Title", "--details", "<p>d</p>"]]],
   // epic `epic-engine` P4:  a test's fields;  the test run, at a test or every epic's

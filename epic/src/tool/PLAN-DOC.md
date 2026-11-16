@@ -303,10 +303,20 @@ As `plan-doc.md`, "Ids":
   - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other
     phases, still to do (its number changes, its id never);  its Looks good is an approve, noted.
 - Requests (epic `epic-workflow`):  what the person sent the phase from other sessions, one labelled block per request.
+  - Every request becomes a phase or a todo (epic `epic-engine` T88;  the person:  "When an epic gets requests from
+    other epics, it should make them a Todo or a phase").
   - Written by `epic file <epic>#P<N> <rN>` (the tool's `request <name> <N> <rN> --from "..." --file f`).
   - The block:  their words quoted, what the sender was looking at, when, a link to `requests/<rN>/request.md`, and
     each screenshot.
   - Filing a request again replaces its block.
+  - Into a TODO instead, `epic file <epic>#T<n> <rN>` (the tool's `request <name> T<n> <rN> --file f [--picture p]...`):
+    - the same words, context and link at the end of its text;  the quote `add --start` gave it goes when the
+      request's words hold it, so they're said once
+    - each screenshot copied in as one of its pictures (`<epic-picture>`, deletable on the page:  `ItemPictures`)
+    - the todo marked `requested`:  light orange once done, until the person reviews it
+    - filed again:  nothing changes
+  - `epic file <epic> <rN> "<where>"`, with neither, only for a duplicate:  `where` names the todo or phase it
+    duplicates (`same as T12`), else it's refused;  an issue or todo it names is marked `requested`.
 - Plan changes:  `<epic-update at summary>` blocks, one per change to the phase's plan, oldest first (see "Updates").
   - Written by `updated <name>#<N> "<html>" [--summary "..."] [--for <item ids>]`.
   - Only for a change NO ITEM caused (a plan adjusted while building, a file moved):  an answer's change is its
@@ -413,7 +423,7 @@ As `plan-doc.md`, "Ids":
     | `progress`  | blue   | Claude is working on it:  an underway status card, or `working`                    |
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), in the last day (a phase:  3 days);  older, grey                 |
-    | `requested` | light orange | an issue filed from the person's own words (`requested`), closed done, not reviewed:  their turn to see it (epic `epic-engine` P63) |
+    | `requested` | light orange | an issue or todo filed from the person's own words (`requested`;  a todo since epic `epic-engine` T88), closed done, not reviewed:  their turn to see it (P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
     | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
     | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up) not reviewed, unless `calm`;  a judgement call or issue the person asked for with Do this (`urgent`), reviewed or not |
