@@ -10,6 +10,8 @@ import type { itemVocabulary } from "spell/ui/components/ui-item/UIItem.en"
 import type { DOMPageLayoutElement, UIPageLayout } from "spell/ui/components/ui-page-layout/UIPageLayout"
 import { siteNavButtonVocabulary } from "./UISiteNavButton.en"
 
+import siteNavButtonCSS from "./UISiteNavButton.css?inline"
+
 /****************
  * ### `<ui-site-nav-button>`
  * The component behind `<ui-site-nav-button>`:  the drawer's button (epic `mockup` T39).
@@ -34,7 +36,7 @@ export class UISiteNavButton extends UIItem {
   @E.proto static vocabulary = siteNavButtonVocabulary as unknown as typeof itemVocabulary
   @E.protoMerged static elementSetup = {
     // the item's own, restated:  its setup is typed as its literal
-    styleSheets: { item: UIItem.elementSetup.styleSheets.item },
+    styleSheets: { item: UIItem.elementSetup.styleSheets.item, "site-nav-button": siteNavButtonCSS },
     isAPart: true,
     disabled: "its own"
   } satisfies Partial<E.ElementSetup>

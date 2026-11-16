@@ -1,0 +1,13 @@
+/*
+ * `<ui-site-nav-button>` (`UISiteNavButton.tsx`):  as an item in an app menu, beside what follows it.
+ * - Its icon where an item's is (an item's room before it), but what follows it (the site's breadcrumbs) only an
+ *   icon's gap after it, as a label after its icon:  so the two read as one thing (epic `mockup` I28).
+ *   - Its own box an icon's gap either side, so its hover fill stops short of the next item's words.
+ *   - Its end pulls the next item's room in (`--ui-site-breadcrumbs-padding`'s inline half, 1.14286em).
+ */
+@layer ui.components {
+  :host(:state(in-menu)) > .item {
+    padding-inline: 0.5em;
+    margin-inline: calc(1.14286em - 0.5em) -1.14286em;
+  }
+}
