@@ -34,7 +34,7 @@ describe("BubblyHtml.write()", () => {
     )
   })
 
-  test("draws an action's head as ONE pill, its blanks underlined in it, plain;  quoted, its marks at its ends (I109)", () => {
+  test("draws an action's head as ONE pill, its blanks underlined in it, their kind words bold;  quoted, its marks at its ends (I109)", () => {
     const text = [
       'a "card" is a thing',
       'a "pile" is a list of cards',
@@ -46,11 +46,11 @@ describe("BubblyHtml.write()", () => {
     ].join("\n")
     const drawn = BubblyHtml.write(SP.BubblyLayout.of(text))
     expect(drawn).toContain(
-      '<p class="bubbly-head-pill bubbly-ends-input">to <span class="bubbly-input bubbly-with-blanks">play <span class="bubbly-underline">a card</span></span></p>'
+      '<p class="bubbly-head-pill bubbly-ends-input">to <span class="bubbly-input bubbly-with-blanks">play <span class="bubbly-underline">a <span class="bubbly-reference">card</span></span></span></p>'
     )
     expect(drawn).toContain(
       '<span class="bubbly-quoted"><span class="bubbly-input bubbly-with-blanks"><span class="bubbly-quote-mark bubbly-quote-open">"</span>' +
-        'count the points for (<span class="bubbly-underline">a card</span>) on (<span class="bubbly-underline">a pile</span>)' +
+        'count the points for (<span class="bubbly-underline">a <span class="bubbly-reference">card</span></span>) on (<span class="bubbly-underline">a <span class="bubbly-reference">pile</span></span>)' +
         '<span class="bubbly-quote-mark bubbly-quote-close">"</span></span></span>'
     )
   })

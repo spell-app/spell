@@ -91,7 +91,7 @@ una "imagen de carta" es una vista			-- El dibujo de una carta:  el único lugar
 		devolver el elemento lugar de ["🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"]
 	para dibujar eso
 		<texto color={su color}>{su dibujo}</texto>
-	
+
 	para probar las imágenes de carta
 		poner dama a una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
 		obtener una nueva imagen de carta cuya carta es la dama

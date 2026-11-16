@@ -56,6 +56,14 @@ describe("BubblyMarks.of()", () => {
       if (mark.options.inlineClassName) expect(mark.options.inlineClassName).toMatch(/^bubbly-piece\b/)
   })
 
+  test("an action's head:  ONE pill, its blanks' kind words bold over it (epic `language` I109)", () => {
+    const text = 'a "card" is a thing\nsolitaire is an app\n\tto play a card\n\t\tprint 1\n'
+    const marks = marked(text)
+    expect(wordsMarked(marks, "bubbly-input", text)).toEqual(["card", "solitaire", "play a card"])
+    expect(wordsMarked(marks, "bubbly-reference", text)).toEqual(["thing", "app", "card"])
+    expect(shapesOf(marks, text).filter((line) => line.trim().startsWith("input:"))).toHaveLength(3)
+  })
+
   test("a head's description:  a spacer of its own before it, its `--` an em dash;  a `{…}`'s braces darker (Owen)", () => {
     const text = `a "card" is a view\t\t-- A playing card\n\t-- Its rank and suit\n\tto draw it\n\t\t<text>{its rank}</text>\n`
     const marks = marked(text)

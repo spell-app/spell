@@ -49,8 +49,10 @@ export class DragHandler extends SpellStatement<"item?|moment?|body?|over?"> {
 
   /** Only in a type's outline body:  the type it's in is the list. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    // checked first:  an inline body's scope (`getNestedScopeForMatch()`) needs the list
+    if (!P.SubjectScope.of(scope)?.subjectType) return undefined
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (!match || !P.SubjectScope.of(scope)?.subjectType) return undefined
+    if (!match) return undefined
     // `while` is only ever `dragged over`
     const { over } = match.groups
     if (over && Wording.meaningOf(over) !== "dragged_over") return undefined

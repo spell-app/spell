@@ -65,7 +65,7 @@ describe("eventsDeclared()", () => {
       ["ability", "droppable"],
       ["ability", "its cards are draggable when"],
       ["ability", "it is droppable when"],
-      ["event", "on card dropped"]
+      ["event", "when a card is dropped"]
     ])
     expect(rows[0]!.code).toBe("")
     expect(rows[1]!.code).toBe("the card is face up")

@@ -113,6 +113,9 @@ The task, word for word:
   <path...>` (a file, a folder or a glob);  it refuses one another agent has, naming it:  leave that file alone.
   Merge `main` in with `epic worktree merge-main --as <full name>`;  a FULL test run in its turn,
   `epic turns run test -- yarn test` (the epic skill's "The session answers;  agents build").
+- In an epic, once your work is done and checked, merge it into `main` YOURSELF, at once, when it merges cleanly:
+  commit by path, `epic worktree merge-main --as <full name>`, checks, `epic merge <epic>`, mark the item fixed;  it
+  can't, say why in your report and on the item (the same section;  under `/bedtime` too).
 - Your LAST message is your report, short:  what changed (files), where to look, checks run with numbers, judgement
   calls (ids), and anything that needs the person, a question last.  Don't run `epic agents done` for yourself:  the
   session does.

@@ -5040,7 +5040,7 @@
           "ruleNames": ["create_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateListType.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "`a deck is a list of cards` or `create a type called Deck as a list of cards` -- declares `type` as a new class extending `List`, with its `instanceType` set to `instanceType`.",
           "syntaxes": [
             {

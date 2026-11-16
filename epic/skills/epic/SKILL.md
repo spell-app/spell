@@ -539,6 +539,22 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
   - record its choices as items (`epic add <epic>#J ... --calm`), and come back with any question for the person,
     rather than ask it:  an agent has no question modal
     - In Codex:  the same:  a sub-agent's question comes back to the session, which asks it in the chat
+  - MERGE ITS OWN WORK INTO `main` THE MOMENT IT'S DONE, whenever it merges cleanly, so the person sees it at once
+    (epic `epic-engine` T82;  Owen, 2026-11-15, a standing rule:  "when an agent in an epic finishes, if it can cleanly
+    merge into main, it should do so so I can see the changes.  I'm having to wait 2+ hours to see things"):
+    1. commit its files by path
+    2. `epic worktree merge-main --as <name>`
+    3. its folder's checks again (`epic turns run test -- ...`)
+    4. `epic merge <epic>`
+    5. mark its item fixed or done (`epic update <epic>#<id> fixed "..."`)
+    - NOT held for its phase's end, and NOT batched with other agents' work
+    - "cleanly":  `merge-main` with no conflict, its checks passing (a test that has failed in full runs before called
+      so), no red hard-to-undo judgement call open on it, the person's uncommitted edits in the main checkout carried
+      into the branch first, generated strays ditched
+    - it can't:  it says why in its report AND on its item (`epic update <epic>#<id> noted "Not merged:  <why>"`), and
+      the session tells the person in bold, on a line of its own
+    - `/bedtime` too (2026-11-15);  NOT in a phase whose plan says to hold its work
+    - In Codex:  the same steps, by the session itself, after each item.
 - `epic merge` and `epic worktree merge-main` take their own turn (`epic turns`):  one merge at a time on the machine,
   each saying who has it while it waits.
 
@@ -761,7 +777,7 @@ cut-off agents, "it should have restarted automatically").
        3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/epic done`:  the worktree, the window and the session stay, for the next request.
-     - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
+     - In bedtime mode too:  each finished phase merges when it merges cleanly, as `/bedtime` says.
      - `epic update <name> --standing [on|off]` makes an epic standing, or not;
        the docs' home page, `/epics` and its step label then never call it done (STANDING, when every phase is).
 6. A short note (done, issues, todos, next), the "complete.  Next is" line (see the top), then GO STRAIGHT ON to

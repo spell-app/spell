@@ -70,7 +70,7 @@ describe("describeOverview()", () => {
     const listLines = lines.filter((line) => /^ {4}(Properties|Actions|Constants) |^ {16}\S/.test(line))
     expect(Math.max(...listLines.map((line) => line.length))).toBeLessThanOrEqual(60)
     for (const item of [
-      "count the points for a card on a pile",
+      "the points for (a card) on (a pile)",
       "is the (rank) of (suit)",
       "Suits (clubs, diamonds, hearts, spades)"
     ]) {

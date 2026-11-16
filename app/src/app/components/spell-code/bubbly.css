@@ -299,7 +299,8 @@
    * declares, `droppable`), the name a head defines (`a "card"`, `group "Rank"`;  a thing's bare one,
    * `solitaire is an app`), and each value a list declares (`is one of ace, 2 ... 10, jack`)
    * - never its `the`, `its` or `a`;  no lighter weight for a later use (Owen, 2026-11-15, epic `language` Q64)
-   * - nor an action's pill with blanks in it, `to "play a card"`:  all plain, its blanks underlined (epic `language` I109)
+   * - nor an action's pill with blanks in it, `to "play a card"`:  plain, its blanks underlined, only their kind
+   *   words bold, `card` (`.bubbly-reference` inside it;  epic `language` I109)
    */
   .bubbly-reference,
   :is(.bubbly-head-pill, .bubbly-pill) > .bubbly-quoted:first-of-type > .bubbly-input:not(.bubbly-with-blanks),

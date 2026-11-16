@@ -367,6 +367,7 @@ export class SpellDeclarations {
     // names as the importer knows them
     const names = new Set([...originals].map((name) => renames.get(name) ?? name))
     const saved: SP.SpellDeclaration[] = []
+    const owners: { declaration: SP.SpellDeclaration; declaredAt: P.DeclaredAt | undefined }[] = []
     for (const original of declarations.statements) {
       const declaration = SpellDeclarations.renamed(original, renames)
       const declaredAt = SpellDeclarations.declaredAt(projectId, declaration.defined)
@@ -397,9 +398,34 @@ export class SpellDeclarations {
       SpellDeclarations.loadSlots(scope, names, declaration)
       if (declaration.uiDefaults) SpellDeclarations.loadUIDefaults(scope, projectId, declaration)
       if (declaration.savedIn) saved.push(declaration)
+      if (declaration.exclusive) owners.push({ declaration, declaredAt })
     }
     // after every statement:  a type's line may come before the line declaring its place
     for (const declaration of saved) SpellDeclarations.loadSaved(scope, names, declaration)
+    // and before its list's:  `a card belongs to one pile` in the card's own outline
+    for (const { declaration, declaredAt } of owners)
+      SpellDeclarations.loadLastOwner(scope, names, declaration, declaredAt)
+  }
+
+  /**
+   * SIDE EFFECT:  the member naming the list a thing was in before its latest move, `the card's last pile`
+   * (epic `language` P56), beside `declaration`'s `exclusive` property, `pile`, as `a card belongs to one pile` gives it.
+   * - Named in the words of the file that declared it:  Spanish's `última pila`.
+   * - After every statement:  the card's members may come before the pile's type.
+   */
+  private static loadLastOwner(
+    scope: P.RootScope,
+    names: Set<string>,
+    declaration: SP.SpellDeclaration,
+    declaredAt: P.DeclaredAt | undefined
+  ) {
+    const { property, of, datatype, exclusive } = declaration
+    const typeScope = of && names.has(of) ? scope.types.get(of, "LOCAL_ONLY") : undefined
+    const listType = datatype ? scope.types.get(`${datatype}`) : undefined
+    if (!typeScope || !listType || property !== listType.ownerMemberName) return
+    const language = declaration.defined ? SP.Language.forFile(declaration.defined) : SP.Language.of(scope)
+    const name = language.lastListName(listType)
+    typeScope.variables.add({ name, datatype, exclusive, lastOwner: true, declaredAt })
   }
 
   /**
@@ -537,7 +563,7 @@ export class SpellDeclarations {
    *   as `define_property_has` declares it.
    * - An `exclusive` property is the member `a card belongs to one pile` gave, e.g. `pile` on `Card`:
    *   read-only, as there -- see `P.TypeScope.declareOwnerMember()`.
-   *   - With the one it was in before, `last pile`, as that statement gives it (epic `language` P56).
+   *   - With the one it was in before, `last pile`, as that statement gives it:  `loadLastOwner()`, after every statement.
    * - A value kind's property keeps its `readAs`, its static method's call, e.g. `Suit.color({it})`:
    *   so an importer's `the color of its suit` calls it too (epic `spanish` P11).
    * - A property with its own list of values brings the kind of its values (epic `spanish` P22),
@@ -589,13 +615,6 @@ export class SpellDeclarations {
           declaredAt
         })
       )
-      const listType = exclusive && datatype ? scope.types.get(`${datatype}`) : undefined
-      if (listType && property === listType.ownerMemberName) {
-        // in the words of the file that declared it
-        const language = declaration.defined ? SP.Language.forFile(declaration.defined) : SP.Language.of(scope)
-        const name = language.lastListName(listType)
-        typeScope.variables.add({ name, datatype, exclusive, lastOwner: true, declaredAt })
-      }
     }
     if (classVariable) {
       const kind = property && SpellDeclarations.loadPropertyKind(scope, typeScope, declaration, declaredAt)
