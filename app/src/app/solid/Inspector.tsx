@@ -2489,6 +2489,8 @@ class PartSelector {
  * - Each card folds to its header (`<InspectorCard>`):
  *   a folded card keeps its header's height, the others share the rest.
  * - A card is never taller than what it shows (I140):  the room it leaves goes to the others (`Inspector.css`).
+ *   - except the last open card, which reaches the column's bottom, its body scrolling when it's long (I165):
+ *     the column reads as one, with no empty page under it
  * - As the selection changes or a card folds, the cards glide to their new sizes (`CardGlide`, T69).
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
@@ -2706,7 +2708,8 @@ function hasCodeCard(): boolean {
  *   column (Owen, 2026-11-14, I81).  Its own `id`, so a drag then is kept apart from the split you set while inspecting.
  *   - the top card needs no size of its own for that:  it's as tall as its tip, as any card is as tall as what it shows
  *   - the Code card its bar alone:  folded for good (`<NoCodeCard>`, T69)
- * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140).
+ * - A share is the most a card takes:  one showing less is as tall as what it shows (`Inspector.css`, I140);
+ *   the last open card takes what's left, to the column's bottom (I165).
  * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
  */
 function cardsLayout(shown: readonly InspectorCardId[], isEmpty: boolean): { id: string; sizes: string } {

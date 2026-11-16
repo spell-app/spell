@@ -232,7 +232,7 @@ ui-panel.InspectorCard > .InspectorSection {
  * A card is as tall as what it shows, never more (Owen, 2026-11-14, epic `editor` I140:
  * "Don't have this big gap between sections when not showing"):
  * - its share of the column (`cardsLayout()`) is the most it takes;  the room it leaves goes to the others, by their shares,
- *   and what none of them needs stays under the last card
+ *   and what none of them needs goes to the last open card (below)
  * - a pane is a column its card fills, not a box the card is laid over (`SplitPane.css`), so it has a height of its own to stop at
  * - too much for the column:  each card gets its share, and scrolls inside
  */
@@ -253,6 +253,18 @@ ui-panel.InspectorCard > .InspectorSection {
 /* Events, as tall as its events (`cardsLayout()`), up to this much of the column */
 .SpellPage .InspectorColumn > .InspectorSplit > .SplitPane[data-split-fit] {
   max-height: 45%;
+}
+/*
+ * The last open card reaches the column's bottom, however little it shows, its body scrolling when it's long
+ * (Owen, 2026-11-15, epic `editor` I165:  "Views panels should extend to the bottom even if its content is not enough"):
+ * - so the column ends with a card, not with the page under it
+ * - "open":  a folded card is its bar alone;  with Views folded, the card above it reaches down to Views' bar
+ */
+.SpellPage
+  .InspectorColumn
+  > .InspectorSplit
+  > .SplitPane:not(:has(> .InspectorCard.folded)):not(:has(~ .SplitPane > .InspectorCard:not(.folded))) {
+  max-height: none;
 }
 
 /* a card's body:  scrolling by itself, its content 14px in */
