@@ -154,6 +154,9 @@ and in the app's build folder, `app/` at the app folder's root.
   - Every editor starts from one base setup, [CodeMirrorSetup](ui/codemirror/CodeMirrorSetup.ts):
     keys, undo, find, the gutter (no line numbers, fold arrows over the code's padding),
     and CodeMirror's words, which are `AppTexts` keys (`cm...`), following `appTexts.lang`.
+    - Find and replace is a bar like VS Code's ([CodeMirrorFind](ui/codemirror/CodeMirrorFind.ts), epic `codemirror` I8):
+      the switches inside the find field, a match count, previous / next, the replace row behind a chevron;
+      on CodeMirror's own search, as plain DOM, so `<spell-editor>` has it too.
   - The files' addresses, `spell:/<file.path>`, are the language service's `LSP.AppAddresses`:
     the scope explorer's packs use it too.
   - What a hover says and which code actions show are decided once, editor-free, in

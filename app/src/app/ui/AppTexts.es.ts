@@ -725,6 +725,18 @@ const APP_TEXTS_ES: AppTextPack = {
   cmOnLine: "en la línea",
   cmReplacedMatchOnLine: "reemplazada la coincidencia en la línea $",
   cmReplacedMatches: "$ coincidencias reemplazadas",
+  // la barra de buscar
+  cmFindMatchCase: "Mayúsculas y minúsculas ($)",
+  cmFindWholeWord: "Palabra entera ($)",
+  cmFindRegexp: "Expresión regular ($)",
+  cmFindPrevious: "Coincidencia anterior ($)",
+  cmFindNext: "Coincidencia siguiente ($)",
+  cmFindClose: "Cerrar ($)",
+  cmFindToggleReplace: "Alternar reemplazo",
+  cmFindReplace: "Reemplazar ($)",
+  cmFindReplaceAll: "Reemplazar todos ($)",
+  cmFindNoResults: "Sin resultados",
+  cmFindCount: "$1 de $2",
   cmGoToLine: "Ir a la línea",
   cmGo: "ir",
   // pliegues

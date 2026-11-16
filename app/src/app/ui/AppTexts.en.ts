@@ -745,6 +745,18 @@ export const APP_TEXTS = {
   // `$`:  the number CodeMirror fills in
   cmReplacedMatchOnLine: "replaced match on line $",
   cmReplacedMatches: "replaced $ matches",
+  // the find bar's (`CodeMirrorFind`):  `$` its key;  `$1 of $2`, the match and how many
+  cmFindMatchCase: "Match Case ($)",
+  cmFindWholeWord: "Match Whole Word ($)",
+  cmFindRegexp: "Use Regular Expression ($)",
+  cmFindPrevious: "Previous Match ($)",
+  cmFindNext: "Next Match ($)",
+  cmFindClose: "Close ($)",
+  cmFindToggleReplace: "Toggle Replace",
+  cmFindReplace: "Replace ($)",
+  cmFindReplaceAll: "Replace All ($)",
+  cmFindNoResults: "No results",
+  cmFindCount: "$1 of $2",
   cmGoToLine: "Go to line",
   cmGo: "go",
   // folds

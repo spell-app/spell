@@ -3,7 +3,7 @@
  * - The look itself is `bubbly.css`'s, the look's one sheet, its CodeMirror section:  the editor's box is a `.bubbly`
  *   (`CodeMirrorBubbly`, `CodeMirrorMarkup`), so its settings and its page rules reach the marks in the text, which are
  *   real elements, as on the page.  NOTHING of the look here (epic `codemirror` P3).
- * - Here:  the find panel, suggestions, hover and problems in the page's colours, the gutter, the compiled code's
+ * - Here:  the find bar, suggestions, hover and problems in the page's colours, the gutter, the compiled code's
  *   view and the merge view's own pieces.
  * - Light and dark from one set, `light-dark()`, as `bubbly.css`:  the page's `color-scheme` picks.
  */
@@ -28,54 +28,14 @@
   }
 }
 
-/* every CodeMirror editor's popups, the look on or off */
+/* every CodeMirror editor's popups, the look on or off;  the find bar's below */
 .cm-editor.cmb {
-  /****** popups:  the find panel, suggestions, hover, problems, in the page's colours ******/
+  /****** popups:  go to line, suggestions, hover, problems, in the page's colours ******/
   .cm-panels {
     background: light-dark(#f6f5fa, #26252e);
     color: var(--bubbly-ink);
     border-color: light-dark(#e6e4ee, #34323f);
     font-family: var(--bubbly-font-family);
-  }
-  .cm-search {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 36px 8px 12px;
-    font-size: 13px;
-
-    input[type="text"],
-    .cm-textfield {
-      font: inherit;
-      padding: 4px 8px;
-      border: 1px solid light-dark(#d7d4e2, #45434f);
-      border-radius: 6px;
-      background: var(--bubbly-paper);
-      color: var(--bubbly-ink);
-      min-width: 180px;
-    }
-    .cm-button {
-      font: inherit;
-      padding: 3px 10px;
-      border: 1px solid light-dark(#d7d4e2, #45434f);
-      border-radius: 6px;
-      background: light-dark(white, #302f39);
-      background-image: none;
-      color: var(--bubbly-ink);
-      text-transform: capitalize;
-    }
-    label {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-    }
-    button[name="close"] {
-      top: 8px;
-      right: 10px;
-      font-size: 18px;
-      color: var(--bubbly-comment-ink);
-    }
   }
   .cm-searchMatch {
     background: color-mix(in srgb, #f2c94c 45%, transparent);
@@ -357,5 +317,173 @@
 
   > .cm-line {
     cursor: pointer;
+  }
+}
+
+/*
+ * The find bar (`CodeMirrorFind`, ⌘F;  epic `codemirror` I8):  VS Code's find widget, in Spell UI's colours.
+ * - A card over the code's top right corner, not a strip above it:  its panel box floats, and the code doesn't move.
+ * - Its rows:  a chevron (the replace row on or off) at its left;  the find row, the field holding its three switches,
+ *   the count, previous, next and close;  the replace row under it, the field lined up with the find field.
+ * - Every button and field 24px high, every icon 16px, centred:  the rows line up.
+ */
+.cm-editor .cm-panels.cm-panels-top:has(> .CodeMirrorFind) {
+  /* the panel box, CodeMirror's sticky strip, as a corner to float the card in */
+  position: absolute;
+  inset: 0 16px auto auto;
+  max-width: calc(100% - 32px);
+  border: 0;
+  background: none;
+}
+.CodeMirrorFind {
+  --CodeMirrorFind-height: 24px;
+  --CodeMirrorFind-gap: 4px;
+  --CodeMirrorFind-border: var(--ui-border-color, light-dark(#d7d4e2, #45434f));
+  --CodeMirrorFind-ink: var(--bubbly-ink, var(--ui-text-color, light-dark(#3a3a44, #dedde6)));
+  --CodeMirrorFind-muted: var(--ui-text-muted, light-dark(#6b6a76, #a3a1ae));
+  --CodeMirrorFind-hover: light-dark(rgb(0 0 0 / 7%), rgb(255 255 255 / 10%));
+  --CodeMirrorFind-accent: var(--ui-primary, #6e56cf);
+  --CodeMirrorFind-none: var(--ui-negative, light-dark(#d93f3f, #f07171));
+
+  display: flex;
+  gap: 2px;
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding: 4px 6px 4px 2px;
+  border: 1px solid light-dark(#e6e4ee, #34323f);
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+  background: light-dark(#f6f5fa, #26252e);
+  color: var(--CodeMirrorFind-ink);
+  box-shadow: 0 2px 8px light-dark(rgb(0 0 0 / 16%), rgb(0 0 0 / 50%));
+  font-family: var(--bubbly-font-family, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 13px;
+  line-height: 1;
+
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--CodeMirrorFind-gap);
+    min-width: 0;
+  }
+  .row {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  /* a field and the switches inside it:  the box is the field's, the input fills it */
+  .field {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: 1px;
+    box-sizing: border-box;
+    width: 240px;
+    min-width: 120px;
+    height: var(--CodeMirrorFind-height);
+    margin-inline-end: 4px;
+    padding: 0 2px 0 6px;
+    border: 1px solid var(--CodeMirrorFind-border);
+    border-radius: 4px;
+    background: var(--bubbly-paper, var(--ui-background, light-dark(white, #1c1b22)));
+    &:focus-within {
+      border-color: var(--CodeMirrorFind-accent);
+    }
+  }
+  input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    &::placeholder {
+      color: var(--CodeMirrorFind-muted);
+    }
+  }
+  /* nothing found:  the find field's border, and the count, in the "no" colour */
+  &.none .row:first-child .field {
+    border-color: var(--CodeMirrorFind-none);
+  }
+  &.none .count {
+    color: var(--CodeMirrorFind-none);
+  }
+
+  button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--CodeMirrorFind-height);
+    height: var(--CodeMirrorFind-height);
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    &:hover {
+      background: var(--CodeMirrorFind-hover);
+    }
+    &:focus-visible {
+      outline: 1px solid var(--CodeMirrorFind-accent);
+      outline-offset: -1px;
+    }
+    svg {
+      display: block;
+      flex: 0 0 auto;
+    }
+  }
+  /* the switches inside a field:  smaller, their glyphs as VS Code's;  on, in the accent colour */
+  .toggle {
+    width: 20px;
+    height: 18px;
+    border-radius: 3px;
+    color: var(--CodeMirrorFind-muted);
+    font-size: 12px;
+    font-weight: 600;
+    &[aria-pressed="true"] {
+      border-color: var(--CodeMirrorFind-accent);
+      background: color-mix(in srgb, var(--CodeMirrorFind-accent) 18%, transparent);
+      color: var(--CodeMirrorFind-ink);
+    }
+  }
+  .toggle.wholeWord {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .toggle.regexp {
+    font-family: ui-monospace, Menlo, monospace;
+    letter-spacing: -0.05em;
+  }
+  /* the chevron, the full height of the rows it's beside;  turned down while the replace row shows */
+  .expander {
+    width: 18px;
+    height: auto;
+    align-self: stretch;
+    svg {
+      transition: rotate 0.12s;
+    }
+  }
+  &.replacing .expander svg {
+    rotate: 90deg;
+  }
+
+  /* "3 of 12":  room for "? of 1000+", so the arrows don't move as it changes */
+  .count {
+    min-width: 72px;
+    padding-inline-end: 4px;
+    color: var(--CodeMirrorFind-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 }
